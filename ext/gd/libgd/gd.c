@@ -337,14 +337,14 @@ HWB_Diff (int r1, int g1, int b1, int r2, int g2, int b2)
 
   if ((HWB1.H == HWB_UNDEFINED) || (HWB2.H == HWB_UNDEFINED))
     {
-      diff = 0;			/* Undefined hues always match... */
+      diff = 0.0f;			/* Undefined hues always match... */
     }
   else
     {
       diff = fabsf(HWB1.H - HWB2.H);
-      if (diff > 3)
+      if (diff > 3.0f)
 	{
-	  diff = 6 - diff;	/* Remember, it's a colour circle */
+	  diff = 6.0f - diff;	/* Remember, it's a colour circle */
 	}
     }
 
@@ -2224,16 +2224,16 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 		for (x = dstX; (x < dstX + dstW); x++) {
 			float sy1, sy2, sx1, sx2;
 			float sx, sy;
-			float spixels = 0.0;
-			float red = 0.0, green = 0.0, blue = 0.0, alpha = 0.0;
-			float alpha_factor, alpha_sum = 0.0, contrib_sum = 0.0;
+			float spixels = 0.0f;
+			float red = 0.0f, green = 0.0f, blue = 0.0f, alpha = 0.0f;
+			float alpha_factor, alpha_sum = 0.0f, contrib_sum = 0.0f;
 			sy1 = ((float)(y - dstY)) * (float)srcH / (float)dstH;
 			sy2 = ((float)(y + 1 - dstY)) * (float) srcH / (float) dstH;
 			sy = sy1;
 			do {
 				float yportion;
 				if (floorf(sy) == floorf(sy1)) {
-					yportion = 1.0 - (sy - floorf(sy));
+					yportion = 1.0f - (sy - floorf(sy));
 					if (yportion > sy2 - sy1) {
 						yportion = sy2 - sy1;
 					}
@@ -2241,7 +2241,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				} else if (sy == floorf(sy2)) {
 					yportion = sy2 - floorf(sy2);
 				} else {
-					yportion = 1.0;
+					yportion = 1.0f;
 				}
 				sx1 = ((float)(x - dstX)) * (float) srcW / dstW;
 				sx2 = ((float)(x + 1 - dstX)) * (float) srcW / dstW;
@@ -2251,7 +2251,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 					float pcontribution;
 					int p;
 					if (floorf(sx) == floorf(sx1)) {
-						xportion = 1.0 - (sx - floorf(sx));
+						xportion = 1.0f - (sx - floorf(sx));
 						if (xportion > sx2 - sx1) {
 							xportion = sx2 - sx1;
 						}
@@ -2259,7 +2259,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 					} else if (sx == floorf(sx2)) {
 						xportion = sx2 - floorf(sx2);
 					} else {
-						xportion = 1.0;
+						xportion = 1.0f;
 					}
 					pcontribution = xportion * yportion;
 					p = gdImageGetTrueColorPixel(src, (int) sx + srcX, (int) sy + srcY);
@@ -2272,7 +2272,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 					alpha_sum += alpha_factor;
 					contrib_sum += pcontribution;
 					spixels += xportion * yportion;
-					sx += 1.0;
+					sx += 1.0f;
 				}
 				while (sx < sx2);
 			
@@ -2281,14 +2281,14 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 			
 			while (sy < sy2);
 			
-			if (spixels != 0.0) {
+			if (spixels != 0.0f) {
 				red /= spixels;
 				green /= spixels;
 				blue /= spixels;
 				alpha /= spixels;
 			}
-			if ( alpha_sum != 0.0) {
-				if( contrib_sum != 0.0) {
+			if ( alpha_sum != 0.0f) {
+				if( contrib_sum != 0.0f) {
 					alpha_sum /= contrib_sum;
 				}	
 				red /= alpha_sum;
@@ -2296,14 +2296,14 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				blue /= alpha_sum;
 			}
 			/* Clamping to allow for rounding errors above */
-			if (red > 255.0) {
-				red = 255.0;
+			if (red > 255.0f) {
+				red = 255.0f;
 			}
-			if (green > 255.0) {
-				green = 255.0;
+			if (green > 255.0f) {
+				green = 255.0f;
 			}
 			if (blue > 255.0f) {
-				blue = 255.0;
+				blue = 255.0f;
 			}
 			if (alpha > gdAlphaMax) {
 				alpha = gdAlphaMax;
