@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Updated wddx_deserialize() to take an open stream as an argument. (Andrei)
 - Changed exif extension to consider php.ini option magic_quotes_runtime.
   (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)

@@ -161,6 +161,225 @@
       zend_operators.h:
       C++ compile fixes
 
+2003-05-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix exception memleak
+
+2003-05-19  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      fix __clone
+
+2003-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      One function  call is enough
+
+2003-05-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Inheritance fix
+
+2003-05-07  Edin Kadribasic  <edink@proventum.net>
+
+    * zend_compile.c:
+      Reverting Marcus' incomplete patch which broke the build.
+
+2003-05-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Inheritance fixes
+
+2003-05-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Fix namespace issue: Only CG is needed here
+
+    * zend_API.c
+      zend_API.h:
+      Allow functions in internal namespaces (for example factories)
+
+    * zend_execute.c:
+      Modify the abstract error message so that it shows up to three methods not
+      implemented.
+
+    * zend_execute.c:
+      Fix warnings
+
+    * zend_compile.c:
+      Don't inherit twice what is needed only once
+
+    * zend.c:
+      Fix bug #23162 user_error() crashs if  > 1024 bytes (Marcus, Moriyoshi)
+
+2003-05-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_default_classes.h:
+      semicolon
+
+2003-05-03  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_default_classes.h:
+      proto
+
+    * zend_default_classes.c:
+      add an accessor for the default exception
+
+2003-04-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_multiply.h:
+      Fix the *= operator
+      
+      Slightly modified patch by Wez Furlong
+
+2003-04-25  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_language_scanner.l:
+      Fixed bug #21820 ("$arr[foo]" generates bogus E_NOTICE, should be E_PARSE)
+
+2003-04-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_alloc.c
+      zend_alloc.h
+      zend_multiply.h:
+      add safe_emalloc
+
+2003-04-21  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.c:
+      Change get_class() so that it returns qualified names for namespaced
+      classes.
+      
+      *HEADS UP*: get_class_name() handler interface is changed, now it should
+      allocate the space it returns with emalloc, and the users free it. If
+      anyone has problems with it or has suggestions how to do it without this -
+      please tell.
+      
+      Also: make function_exists() understand namespaces.
+
+    * zend_execute.c:
+      make import * fail if such classes or functions already there
+
+2003-04-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.c:
+      Add check for final properties
+
+2003-04-20  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c:
+      Check name before '::' so that it would be a namespace in
+      zend_lookup_ns_class
+
+    * zend_builtin_functions.c:
+      refine the set_error_handler fix
+
+    * zend_builtin_functions.c:
+      Fix for bug #21094 (set_error_handler can not accept methods),
+      by Timm Friebe
+
+2003-04-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c:
+      Corrected patch by Marcus Börger <helly@php.net>.
+
+2003-04-18  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend.c
+      zend_opcode.c:
+      Patch by Marcus Börger to fix some memleaks
+
+2003-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend.h
+      zend_extensions.c:
+      - Revert my symbol fix patch, and merge in Stas' fixes to Zend Engine 1.
+
+    * zend.h:
+      - MacOSX also prepends the _ before symbols in bundles
+
+2003-04-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c:
+      Patch by Marcus Börger <helly@php.net>.
+
+2003-04-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_compile.c
+      zend_compile.h:
+      Fix warnings.
+
+2003-04-10  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.c:
+      satisfy andi's switch fetish ;-)
+
+2003-04-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_compile.c:
+      Fix ZTS build. Fix warning.
+
+    * ZEND_CHANGES:
+      Document 'const' keyword.
+
+2003-04-10  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      allow expressions within constants, so the following is possible
+      
+      class foo {
+      	const a = 1<<0;
+      	const b = 1<<1;
+      	const c = a | b;
+      }
+      
+      this makes const a compile-time expression.  all other operators are
+      unaffected.
+
+2003-04-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      Revert Harald's commit
+
+2003-04-10  George Schlossnagle  <george@omniti.com>
+
+    * zend_language_parser.y:
+      One line fix so that it will compile
+
+2003-04-09  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      removing the *syntactical sugar* again
+      
+
+2003-04-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c:
+      Switch some functions to use new zend_lookup_ns_class() methods. This
+      means that they will accept both simple and fully qualified class names.
+
+    * zend_API.c
+      zend_API.h:
+      Rename zend_register_internal_class_in_ns() to a better, less filling,
+      but with the same great taste zend_register_internal_ns_class().
+
+    * zend_execute.h
+      zend_execute_API.c:
+      Add zend_lookup_ns_class() function.
+
+    * zend_operators.h:
+      Move memnstr into Zend and make an alias for BC in PHP.
+
 2003-04-07  Jani Taskinen  <sniper@iki.fi>
 
     * zend_language_scanner.l:
