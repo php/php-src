@@ -193,6 +193,7 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'y':		/* year, numeric, 2 digits */
 			case 'm':		/* month, numeric */
+			case 'n':		/* month, numeric, no leading zeroes */
 			case 'd':		/* day of the month, numeric */
 			case 'j':		/* day of the month, numeric, no leading zeros */
 			case 'H':		/* hour, numeric, 24 hour format */
@@ -261,6 +262,10 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'm':		/* month, numeric */
 				sprintf(tmp_buff, "%02d", ta->tm_mon + 1);  /* SAFE */
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'n':      /* month, numeric, no leading zeros */
+				sprintf(tmp_buff, "%d", ta->tm_mon + 1);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			case 'd':		/* day of the month, numeric */
