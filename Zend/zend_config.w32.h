@@ -66,4 +66,6 @@ typedef unsigned int uint;
 #	define ZEND_API __declspec(dllimport)
 #endif
 
+#define ZEND_DLEXPORT		__declspec(dllexport)
+
 #endif /* _ZEND_CONFIG_W32_H */
