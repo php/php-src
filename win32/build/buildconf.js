@@ -1,4 +1,4 @@
-// $Id: buildconf.js,v 1.4 2003-12-04 01:59:46 wez Exp $
+// $Id: buildconf.js,v 1.5 2003-12-04 13:38:47 wez Exp $
 /*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.4 2003-12-04 01:59:46 wez Exp $ */
+/* $Id: buildconf.js,v 1.5 2003-12-04 13:38:47 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -25,6 +25,7 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
 
 var modules = "";
+var seen = new Array();
 
 function file_get_contents(filename)
 {
@@ -42,12 +43,34 @@ function find_config_w32(dirname)
 
 	var f = FSO.GetFolder(dirname);
 	var	fc = new Enumerator(f.SubFolders);
-	var c;
+	var c, i, ok, n;
 	for (; !fc.atEnd(); fc.moveNext())
 	{
+		ok = true;
+		/* check if we already picked up a module with the same dirname;
+		 * if we have, don't include it here */
+		n = FSO.GetFileName(fc.item());
+		
+		if (n == 'CVS' || n == 'tests')
+			continue;
+			
+	//	WScript.StdOut.WriteLine("checking " + dirname + "/" + n);
+		for (i = 0; i < seen.length; i++) {
+			if (seen[i] == n) {
+				ok = false;
+				break;
+			}
+		}
+		if (!ok) {
+			WScript.StdOut.WriteLine("Skipping " + dirname + "/" + n + " -- already have a module with that name");
+			continue;
+		}
+		seen[seen.length] = n;
+			
 		c = FSO.BuildPath(fc.item(), "config.w32");
 		if (FSO.FileExists(c)) {
 			//WScript.StdOut.WriteLine(c);
+			modules += "configure_module_dirname = condense_path(FSO.GetParentFolderName('" + c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
 			modules += file_get_contents(c);
 		}
 	}
@@ -69,6 +92,7 @@ modules = file_get_contents("win32/build/config.w32");
 find_config_w32("sapi");
 find_config_w32("ext");
 find_config_w32("pecl");
+find_config_w32("..\\pecl");
 
 // Look for ARG_ENABLE or ARG_WITH calls
 re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");

@@ -1,7 +1,7 @@
 // vim:ft=javascript
 // $Id$
 
-ARG_ENABLE('isapi', 'Build ISAPI version of PHP', 'yes');
+ARG_ENABLE('isapi', 'Build ISAPI version of PHP', 'no');
 
 if (PHP_ISAPI == "yes") {
 	SAPI('isapi', 'php4isapi.c', 'php' + PHP_VERSION + 'isapi.dll', '/D PHP4ISAPI_EXPORTS');

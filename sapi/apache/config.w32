@@ -1,7 +1,7 @@
 // vim:ft=javascript
 // $Id$
 
-ARG_ENABLE('apache', 'Build Apache 1.3.x version of PHP', 'yes');
+ARG_ENABLE('apache', 'Build Apache 1.3.x version of PHP', 'no');
 
 ARG_WITH('apache-includes', 'Where to find Apache 1.3 headers', null);
 ARG_WITH('apache-libs', 'Where to find Apache 1.3 libraries', null);
