@@ -7,20 +7,20 @@
 CFG=Zend - Win32 Release_inline
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "Zend.mak".
-!MESSAGE
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "Zend.mak" CFG="Zend - Win32 Release_inline"
-!MESSAGE
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
+!MESSAGE 
 !MESSAGE "Zend - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "Zend - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "Zend - Win32 Release_inline" (based on "Win32 (x86) Static Library")
-!MESSAGE
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -95,7 +95,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
@@ -132,10 +132,6 @@ SOURCE=.\zend_constants.c
 # Begin Source File
 
 SOURCE=.\zend_default_classes.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_interfaces.c
 # End Source File
 # Begin Source File
 
@@ -176,6 +172,10 @@ SOURCE=.\zend_ini_parser.c
 # Begin Source File
 
 SOURCE=.\zend_ini_scanner.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_interfaces.c
 # End Source File
 # Begin Source File
 
@@ -243,6 +243,10 @@ SOURCE=.\zend_stream.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_strtod.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_ts_hash.c
 # End Source File
 # Begin Source File
@@ -288,10 +292,6 @@ SOURCE=.\zend_constants.h
 # Begin Source File
 
 SOURCE=.\zend_default_classes.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_interfaces.h
 # End Source File
 # Begin Source File
 
@@ -348,6 +348,10 @@ SOURCE=.\zend_ini_parser.h
 # Begin Source File
 
 SOURCE=.\zend_ini_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_interfaces.h
 # End Source File
 # Begin Source File
 
@@ -415,6 +419,10 @@ SOURCE=.\zend_stream.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_strtod.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_ts_hash.h
 # End Source File
 # Begin Source File
@@ -449,7 +457,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -504,7 +512,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group
@@ -533,7 +541,7 @@ InputPath=.\zend_ini_scanner.l
 
 !ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -570,7 +578,7 @@ InputPath=".\zend_language_scanner.l"
 
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group

@@ -89,6 +89,8 @@
  *	directly -- and assumed always to succeed.
  */
 
+#include <zend_strtod.h>
+
 #if defined(LIBC_SCCS) && !defined(lint)
 static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $";
 #endif /* LIBC_SCCS and not lint */
@@ -116,6 +118,12 @@ static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $"
 
 #ifdef __vax__
 #define VAX
+#endif
+
+#if defined(_MSC_VER)
+#define int32_t __int32
+#define u_int32_t unsigned __int32
+#define IEEE_LITTLE_ENDIAN
 #endif
 
 #define Long	int32_t
@@ -361,10 +369,6 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
 #endif
 
 #define Kmax 15
-
-#ifdef __cplusplus
-extern "C" double zend_strtod(const char *s00, char **se);
-#endif
 
  struct
 Bigint {
@@ -1215,7 +1219,7 @@ static CONST double tinytens[] = { 1e-16, 1e-32 };
 #endif
 #endif
 
- double
+ZEND_API double
 zend_strtod
 #ifdef KR_headers
 	(s00, se) CONST char *s00; char **se;
