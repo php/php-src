@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed Apache build wrt to shared modules on FreeBSD/Linux (Sascha)
 - Added session.extern_referer_chk which checks whether session ids were
   referred to by an external site and eliminates them (Sascha)
 - Improved session id generation (Sascha)
