@@ -34,6 +34,7 @@ extern zend_module_entry simplexml_module_entry;
 #include "TSRM.h"
 #endif
 
+#include "ext/libxml/php_libxml.h"
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -52,17 +53,17 @@ PHP_RSHUTDOWN_FUNCTION(simplexml);
 PHP_MINFO_FUNCTION(simplexml);
 
 typedef struct {
-	void *ptr;
-	int   refcount;
-} simplexml_ref_obj;
+	xmlHashTablePtr nsmap;
+	int refcount;
+} simplexml_nsmap;
 
 typedef struct {
 	zend_object zo;
-	xmlNodePtr node;
-	simplexml_ref_obj *document;
-	xmlHashTablePtr nsmap;
-	xmlXPathContextPtr xpath;
+	php_libxml_node_ptr *node;
+	php_libxml_ref_obj *document;
 	HashTable *properties;
+	simplexml_nsmap *nsmapptr;
+	xmlXPathContextPtr xpath;
 } php_sxe_object;
 
 
