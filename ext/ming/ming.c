@@ -230,7 +230,7 @@ static SWFInput newSWFInput_sock(int socket)
 static SWFInput getInput(zval **zfile TSRMLS_DC)
 {
   FILE *file;
-  void * what;
+  void *what;
   int type;
   SWFInput input;
 
@@ -1604,7 +1604,7 @@ PHP_FUNCTION(swfmovie_save)
 {
   zval **x;
   long retval;
-  php_stream * stream;
+  php_stream *stream;
 
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &x) == FAILURE)
     WRONG_PARAM_COUNT;

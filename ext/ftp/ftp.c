@@ -613,7 +613,7 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream * instream, ftptype_t type)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type)
 {
 	databuf_t		*data = NULL;
 	int			size;

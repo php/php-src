@@ -2868,7 +2868,7 @@ PHP_FUNCTION(hw_new_document_from_file)
 	int issock=0;
 	int socketd=0;
 	FILE *fp;
-	php_stream * stream;
+	php_stream *stream;
 	int ready=0;
 	int bcount=0;
 	int use_include_path=0;

@@ -465,7 +465,7 @@ PHP_FUNCTION(pdf_set_info_keywords)
 PHP_FUNCTION(pdf_open)
 {
 	zval **file;
-	void * what;
+	void *what;
 	int type;
 	FILE *fp = NULL;
 	PDF *pdf;
