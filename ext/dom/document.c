@@ -122,7 +122,7 @@ static void php_dom_ctx_error_level(int level, void *ctx, const char *msg)
 	xmlParserCtxtPtr parser;
 
 	parser = (xmlParserCtxtPtr) ctx;
-	php_error(level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
+	php_error_docref(NULL TSRMLS_CC, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
 
 }
 /* }}} end php_dom_ctx_error */
@@ -1754,7 +1754,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		source_len = xmlStrlen(source);
 		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
 	}
-	ctxt->vctxt.error = php_dom_ctx_warning;
+	ctxt->vctxt.error = php_dom_ctx_error;
 	ctxt->vctxt.warning = php_dom_ctx_warning;
 	if (ctxt->sax != NULL) {
 		ctxt->sax->error = php_dom_ctx_error;
