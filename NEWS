@@ -2,15 +2,17 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.11. (Ilia)
+- Removed support for GDLIB version 1.x.x (php_gd.dll) on Windows. (Edin)
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
   (Sebastian, Edin)
-- Droped support for GDLIB version 1.x.x (php_gd.dll) on Windows. (Edin)
 - Improved dba extension (Marcus)
   . Added support for internal error handling of Berkeley db libraries.
   . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Replaced the old Apache2 module (sapi/apache2filter) with new and improved 
+  version (sapi/apache2handler). (Ian Holsman, Justin Erenkrantz)
 - Added "disable_classes" php.ini option to allow administrators to disable
   certain classes for security reasons. (Harald)
 - Added man page for CLI version of PHP. (Marcus)
