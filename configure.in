@@ -365,6 +365,7 @@ asctime_r \
 chroot \
 ctime_r \
 cuserid \
+crypt \
 flock \
 gai_strerror \
 gcvt \
@@ -617,10 +618,9 @@ if test "$PHP_PHP_STREAMS" = "yes"; then
 fi
 
 AC_CHECK_LIB(crypt, crypt, [
- PHP_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) 
- AC_DEFINE(HAVE_CRYPT,1,[ ]) 
-], [])
+  PHP_ADD_LIBRARY(crypt)
+  AC_DEFINE(HAVE_CRYPT,1,[ ]) 
+])
 
 divert(5)
 
