@@ -15,7 +15,7 @@ if test "$PHP_MIME_MAGIC" != "no"; then
   dnl
   dnl Try to see if we can find the path of the magic file in its default locations.
   dnl
-  if test "$PHP_MIME_MAGIC" = "yes"; then
+  if test "$PHP_MIME_MAGIC" != "yes"; then
     if test -f $PHP_MIME_MAGIC; then
       PHP_MIME_MAGIC_FILE_PATH=$PHP_MIME_MAGIC
     else
