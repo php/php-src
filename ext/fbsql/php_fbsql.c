@@ -2014,7 +2014,7 @@ PHP_FUNCTION(fbsql_list_fields)
 		RETURN_FALSE;
 	}
 
-	sprintf(sql, "EXTRACT TABLE %s;", tableName);
+	sprintf(sql, "SELECT * FROM %s WHERE 1=0;", tableName);
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
 }
@@ -2738,12 +2738,9 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			char* key;
 			FBCPList* value;
 
-			if (result->rowCount == 0 || result->rowIndex >= result->rowCount) {
-				RETURN_FALSE;
-			}
-
 			value = (FBCPList*)fbcplValueAtIndex(result->list, result->rowIndex);
 			key = (char*)fbcplKeyAtIndex(result->list, result->rowIndex);
+
 			if (key && key[0] == 2)
 				key = NULL;
 
