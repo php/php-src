@@ -1096,8 +1096,8 @@ PHP_FUNCTION(mcal_event_set_class)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_add_attribute(int stream_id, string attribute,string value)
-    Add an attribute and value to an event */
+/* {{{ proto string mcal_event_add_attribute(int stream_id, string attribute, string value)
+   Add an attribute and value to an event */
 PHP_FUNCTION(mcal_event_add_attribute)
 {
 	pval *streamind,*attribute,*val;
