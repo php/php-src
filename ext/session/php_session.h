@@ -50,12 +50,12 @@ typedef struct ps_module_struct {
 #define PS_GET_MOD_DATA() *mod_data
 #define PS_SET_MOD_DATA(a) *mod_data = (a)
 
-#define PS_OPEN_FUNC(x) 	int _ps_open_##x(PS_OPEN_ARGS)
-#define PS_CLOSE_FUNC(x) 	int _ps_close_##x(PS_CLOSE_ARGS)
-#define PS_READ_FUNC(x) 	int _ps_read_##x(PS_READ_ARGS)
-#define PS_WRITE_FUNC(x) 	int _ps_write_##x(PS_WRITE_ARGS)
-#define PS_DESTROY_FUNC(x) 	int _ps_delete_##x(PS_DESTROY_ARGS)
-#define PS_GC_FUNC(x) 		int _ps_gc_##x(PS_GC_ARGS)
+#define PS_OPEN_FUNC(x) 	int ps_open_##x(PS_OPEN_ARGS)
+#define PS_CLOSE_FUNC(x) 	int ps_close_##x(PS_CLOSE_ARGS)
+#define PS_READ_FUNC(x) 	int ps_read_##x(PS_READ_ARGS)
+#define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
+#define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
+#define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
 
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
@@ -67,8 +67,8 @@ typedef struct ps_module_struct {
 
 
 #define PS_MOD(x) \
-	#x, _ps_open_##x, _ps_close_##x, _ps_read_##x, _ps_write_##x, \
-	 _ps_delete_##x, _ps_gc_##x 
+	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
+	 ps_delete_##x, ps_gc_##x 
 
 typedef struct {
 	char *save_path;
@@ -142,16 +142,16 @@ typedef struct ps_serializer_struct {
 } ps_serializer;
 
 #define PS_SERIALIZER_ENCODE_FUNC(x) \
-	int _ps_srlzr_encode_##x(PS_SERIALIZER_ENCODE_ARGS)
+	int ps_srlzr_encode_##x(PS_SERIALIZER_ENCODE_ARGS)
 #define PS_SERIALIZER_DECODE_FUNC(x) \
-	int _ps_srlzr_decode_##x(PS_SERIALIZER_DECODE_ARGS)
+	int ps_srlzr_decode_##x(PS_SERIALIZER_DECODE_ARGS)
 
 #define PS_SERIALIZER_FUNCS(x) \
 	PS_SERIALIZER_ENCODE_FUNC(x); \
 	PS_SERIALIZER_DECODE_FUNC(x)
 
 #define PS_SERIALIZER_ENTRY(x) \
-	{ #x, _ps_srlzr_encode_##x, _ps_srlzr_decode_##x }
+	{ #x,ps_srlzr_encode_##x, ps_srlzr_decode_##x }
 
 #ifdef TRANS_SID
 void session_adapt_uris(const char *, uint, char **, uint *);
@@ -159,8 +159,8 @@ void session_adapt_uris(const char *, uint, char **, uint *);
 #define session_adapt_uris(a,b,c,d)
 #endif
 
-void _php_session_auto_start(void *data);
-void _php_session_shutdown(void *data);
+void php_session_auto_start(void *data);
+void php_session_shutdown(void *data);
 
 #if HAVE_WDDX
 #define WDDX_SERIALIZER
