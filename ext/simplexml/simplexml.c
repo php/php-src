@@ -1341,7 +1341,7 @@ SXE_METHOD(current)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-	REPLACE_ZVAL_VALUE(&return_value, sxe->iter.data, 1);
+	RETURN_ZVAL(sxe->iter.data, 1, 0);
 }
 /* }}} */
 
