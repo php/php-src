@@ -502,18 +502,19 @@ static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_
 }
 #endif
 
-static union _zend_function *spl_dual_it_get_method(zval *object, char *method, int method_len TSRMLS_DC)
+static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
 {
 	union _zend_function *function_handler;
 	spl_dual_it_object   *intern;
 
-	intern = (spl_dual_it_object*)zend_object_store_get_object(object TSRMLS_CC);
+	intern = (spl_dual_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
 
-	function_handler = std_object_handlers.get_method(object, method, method_len TSRMLS_CC);
+	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
 	if (!function_handler) {
 		if (zend_hash_find(&intern->inner.ce->function_table, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(intern->inner.zobject)->get_method) {
-				function_handler = Z_OBJ_HT_P(intern->inner.zobject)->get_method(intern->inner.zobject, method, method_len TSRMLS_CC);
+				*object_ptr = intern->inner.zobject;
+				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
 			}
 		}
 	}
