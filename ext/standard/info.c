@@ -211,6 +211,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	char php_api_no[9];
 	char mod_api_no[9];
 	char ext_api_no[9];
+	
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
@@ -277,7 +278,36 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
 
-		php_info_print_table_row(2, "PHP Streams", "enabled");
+		{
+			HashTable *url_stream_wrappers_hash;
+			char *stream_protocol, *stream_protocols_buf = NULL;
+			int stream_protocol_len, stream_protocols_buf_len = 0;
+
+			if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
+				for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
+						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
+						zend_hash_move_forward(url_stream_wrappers_hash)) {
+					if (NULL == (stream_protocols_buf = erealloc(stream_protocols_buf,
+									stream_protocols_buf_len + stream_protocol_len + 1 /* "\n" */ + 1 /* 0 byte at end */))) {
+						break;
+					}
+					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
+					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = '\n';
+					stream_protocols_buf_len += stream_protocol_len + 1;
+				}
+				if (stream_protocols_buf) {
+					stream_protocols_buf[stream_protocols_buf_len] = 0;
+					php_info_print_table_row(2, "Registered PHP Streams", stream_protocols_buf);
+					efree(stream_protocols_buf);
+				} else {
+					// Any chances we will ever hit this?
+					php_info_print_table_row(2, "Registered PHP Streams", "no streams registered");
+				}
+			} else {
+				// Any chances we will ever hit this?
+				php_info_print_table_row(2, "PHP Streams", "disabled"); // ??
+			}
+		}
 		
 		php_info_print_table_end();
 
