@@ -27,7 +27,6 @@
                                 /* upper limit to keep resources in check and   */
                                 /* minimize the possibility of exploits         */
 
-#define SCAN_MAX_FSCANF_BUFSIZE		512  /* Max input buffer allocated for fscanf */
 #define SCAN_SUCCESS			SUCCESS	
 #define SCAN_ERROR_EOF			-1	/* indicates premature termination of scan 	*/
 									/* can be caused by bad parameters or format*/
