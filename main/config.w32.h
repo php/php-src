@@ -5,6 +5,10 @@
 	$Id$
 */
 
+#ifndef ZEND_ENGINE_2
+#error HEAD does not work with ZendEngine1 anymore
+#endif
+
 /* Default PHP / PEAR directories */
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "c:\\php4\\pear"
@@ -34,6 +38,9 @@
 
 /* Enable / Disable RPC extension (default: enabled) */
 #define HAVE_RPC 1
+
+/* Enable / Disable COM extension (default: enabled) */
+#define HAVE_COM 1
 
 /* Enable / Disable CTYPE extension (default: enabled) */
 #define HAVE_CTYPE 1
