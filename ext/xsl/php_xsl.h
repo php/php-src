@@ -56,6 +56,7 @@ typedef struct _xsl_object {
 	zend_object_handle handle;
 	HashTable *parameter;
 	int hasKeys;
+	int registerPhpFunctions;
 } xsl_object;
 
 void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);
