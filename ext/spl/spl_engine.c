@@ -193,23 +193,53 @@ zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRML
 }
 /* }}} */
 
+/* {{{ */
+inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
+{
+	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_class_entry) {
+		return Z_OBJ_HT_P(obj)->get_class_entry(obj TSRMLS_CC);
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
 /* {{{ spl_is_instance_of */
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC)
 {
 	/* Ensure everything needed is available before checking for the type.
-	 * HAS_CLASS_ENTRY is neededto ensure Z_OBJCE_PP will not throw an error.
 	 */
-	if (!obj || !*obj || Z_TYPE_PP(obj) != IS_OBJECT || !HAS_CLASS_ENTRY(**obj)) {
-		return 0;
-	} else {
-		zend_class_entry *instance_ce = Z_OBJCE_PP(obj);
-	
+	zend_class_entry *instance_ce;
+
+	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
 		if (instanceof_function(instance_ce, ce TSRMLS_CC)) {
 			return 1;
-		} else {
-			return 0;
 		}
 	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ spl_implements */
+int spl_implements(zval **obj, zend_class_entry *ce TSRMLS_DC)
+{
+	/* Ensure everything needed is available before checking for the type.
+	 */
+	zend_class_entry *instance_ce;
+
+	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
+		int i;
+
+		while (instance_ce) {
+			for (i = 0; i < instance_ce->num_interfaces; i++) {
+				if (instance_ce->interfaces[i] == ce) {
+					return 1;
+				}
+			}
+			instance_ce = instance_ce->parent;
+		}
+	}
+	return spl_is_instance_of(obj, ce TSRMLS_CC);
 }
 /* }}} */
 

@@ -38,7 +38,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 
 	if (EX(opline)->extended_value) {
 		obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		if (spl_is_instance_of(obj, spl_ce_iterator TSRMLS_CC)) {
+		if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
 			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 			MAKE_STD_ZVAL(retval);
 			spl_begin_method_call_this(obj, "new_iterator", retval TSRMLS_CC);
@@ -49,7 +49,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 			PZVAL_LOCK(retval);
 
 			NEXT_OPCODE();
-		} else if (spl_is_instance_of(obj, spl_ce_forward TSRMLS_CC)) {
+		} else if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
 			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 
 			EX_T(EX(opline)->result.u.var).var.ptr = *obj;
@@ -72,7 +72,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 	zval **obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 	zval more, tmp, *value, *key, *result;
 
-	if (spl_is_instance_of(obj, spl_ce_forward TSRMLS_CC)) {
+	if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
 		zend_uint index = EX(opline)->op2.u.EA.type++;
 		
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
@@ -80,7 +80,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 
 		if (index) {
 			spl_begin_method_call_this(obj, "next", &more TSRMLS_CC);
-		} else if (spl_is_instance_of(obj, spl_ce_sequence TSRMLS_CC)) {
+		} else if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
 			spl_begin_method_call_this(obj, "rewind", &more TSRMLS_CC);
 		}
 
@@ -94,7 +94,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 
 			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
 		
-			if (spl_is_instance_of(obj, spl_ce_assoc TSRMLS_CC)) {
+			if (spl_implements(obj, spl_ce_assoc TSRMLS_CC)) {
 				ALLOC_ZVAL(key);
 				spl_begin_method_call_this(obj, "key", key TSRMLS_CC);
 			} else {
