@@ -228,6 +228,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("track_vars",			(PHP_TRACK_VARS?"1":"0"),			PHP_INI_ALL,		OnUpdateInt,				track_vars,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"1",			PHP_INI_ALL,		OnUpdateInt,			ignore_user_abort,		php_core_globals,	core_globals)
 PHP_INI_END()
 
 
@@ -235,14 +236,16 @@ PHP_INI_END()
 /* True global (no need for thread safety */
 static int module_initialized = 0;
 
-
+#if 0
 #if APACHE
 void php3_apache_puts(const char *s)
 {
 	SLS_FETCH();
 	
 	if (SG(server_context)) {
-		rputs(s, (request_rec *) SG(server_context));
+		if(rputs(s, (request_rec *) SG(server_context))==-1) {
+			PG(connection_status) = PHP_CONNECTION_ABORTED;
+		}
 	} else {
 		fputs(s, stdout);
 	}
@@ -253,11 +256,14 @@ void php3_apache_putc(char c)
 	SLS_FETCH();
 	
 	if (SG(server_context)) {
-		rputc(c, (request_rec *) SG(server_context));
+		if(rputc(c, (request_rec *) SG(server_context))!=c) {
+			PG(connection_status) = PHP_CONNECTION_ABORTED;
+		}
 	} else {
 		fputc(c, stdout);
 	}
 }
+#endif
 #endif
 
 void php3_log_err(char *log_message)
@@ -847,6 +853,7 @@ int php_module_startup(sapi_module_struct *sf)
 	
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
+	PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");

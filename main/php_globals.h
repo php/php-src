@@ -83,6 +83,9 @@ struct _php_core_globals {
 
 	long y2k_compliance;
 
+	short connection_status;
+	short ignore_user_abort;
+
 	unsigned char header_is_being_sent;
 
 	/* for fsock */

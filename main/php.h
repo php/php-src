@@ -324,6 +324,10 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #include "zend_variables.h"
 #include "zend_constants.h"
 
+/* connection status states */
+#define PHP_CONNECTION_NORMAL  0
+#define PHP_CONNECTION_ABORTED 1
+#define PHP_CONNECTION_TIMEOUT 2
 
 
 /* Finding offsets of elements within structures.

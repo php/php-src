@@ -94,12 +94,17 @@ void php_save_umask()
 static int zend_apache_ub_write(const char *str, uint str_length)
 {
 	SLS_FETCH();
-	
+	int ret;
+		
 	if (SG(server_context)) {
-		return rwrite(str, str_length, (request_rec *) SG(server_context));
+		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	} else {
-		return fwrite(str, 1, str_length, stdout);
+		ret = fwrite(str, 1, str_length, stdout);
 	}
+	if(ret != str_length) {
+		PG(connection_status) = PHP_CONNECTION_ABORTED;
+	}
+	return ret;
 }
 
 
@@ -466,7 +471,7 @@ int php_xbithack_handler(request_rec * r)
 	return send_parsed_php(r);
 }
 
-static void apache_php_module_shutdown_wrapper()
+static void apache_php_module_shutdown_wrapper(void)
 {
 	apache_php_initialized = 0;
 	sapi_module.shutdown(&sapi_module);
