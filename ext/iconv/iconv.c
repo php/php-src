@@ -1077,6 +1077,10 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 								goto out;
 
 							case E2BIG:
+								if (prev_in_left == in_left) {
+									err = PHP_ICONV_ERR_TOO_BIG;
+									goto out;
+								}
 								break;
 
 							default:
