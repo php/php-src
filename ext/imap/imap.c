@@ -186,6 +186,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_search,			NULL)
 	PHP_FE(imap_utf7_decode,	NULL)
 	PHP_FE(imap_utf7_encode,	NULL)
+	PHP_FE(imap_utf8,       	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1541,11 +1542,12 @@ PHP_FUNCTION(imap_delete)
 	int myargc=ARG_COUNT(ht);
 
 	if (myargc < 2 || myargc > 3 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	  WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long(streamind);
 	convert_to_string(sequence);
+	if(myargc==3) convert_to_long(flags);
 
 	ind = streamind->value.lval;
 
@@ -2337,7 +2339,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	pval			*arg;
 	const unsigned char	*in, *inp, *endp;
 	unsigned char		*out, *outp;
-	int			inlen, outlen;
+	int			inlen, outlen, slen;
 	enum {	ST_NORMAL,	/* printable text */
 		ST_ENCODE0,	/* encoded text rotation... */
 		ST_ENCODE1,
@@ -2360,32 +2362,26 @@ PHP_FUNCTION(imap_utf7_encode)
 	while (inp < endp) {
 		if (state == ST_NORMAL) {
 			if (SPECIAL(*inp)) {
-				state = ST_ENCODE0;
-				outlen++;
+				state = ST_ENCODE1;
+				slen=1;
 			}
-			else if (*inp++ == '&') {
+			else if (*inp == '&') {
 				outlen++;
 			}
 			outlen++;
 		}
 		else if (!SPECIAL(*inp)) {
 			state = ST_NORMAL;
+			outlen+=2+slen*3-slen/3;
+			slen=0;
 		}
 		else {
-			/* ST_ENCODE0 -> ST_ENCODE1	- two chars
-			 * ST_ENCODE1 -> ST_ENCODE2	- one char
-			 * ST_ENCODE2 -> ST_ENCODE0	- one char
-			 */
-			if (state == ST_ENCODE2) {
-				state = ST_ENCODE0;
-			}
-			else if (state++ == ST_ENCODE0) {
-				outlen++;
-			}
-			outlen++;
-			inp++;
+		        slen++;
 		}
+		inp++;
 	}
+	if(state!=ST_NORMAL)
+	  outlen+=1+slen*3-slen/3;
 
 	/* allocate output buffer */
 	if ((out = emalloc(outlen + 1)) == NULL) {
@@ -2421,22 +2417,41 @@ PHP_FUNCTION(imap_utf7_encode)
 			/* encode input character */
 			switch (state) {
 			case ST_ENCODE0:
-				*outp++ = B64(*inp >> 2);
-				*outp = *inp++ << 4;
+				*outp++ = B64((*inp>>8) >> 2);
+				*outp = (*inp>>8) << 4;
 				state = ST_ENCODE1;
 				break;
 			case ST_ENCODE1:
-				*outp++ = B64(*outp | *inp >> 4);
-				*outp = *inp++ << 2;
+				*outp++ = B64(*outp | (*inp>>8) >> 4);
+				*outp = (*inp>>8) << 2;
 				state = ST_ENCODE2;
 				break;
 			case ST_ENCODE2:
-				*outp++ = B64(*outp | *inp >> 6);
-				*outp++ = B64(*inp++);
+				*outp++ = B64(*outp | (*inp>>8) >> 6);
+				*outp++ = B64((*inp>>8));
 				state = ST_ENCODE0;
 			case ST_NORMAL:
 				break;
 			}
+			switch (state) {
+			case ST_ENCODE0:
+				*outp++ = B64((*inp&0xff) >> 2);
+				*outp = (*inp&0xff) << 4;
+				state = ST_ENCODE1;
+				break;
+			case ST_ENCODE1:
+				*outp++ = B64(*outp | (*inp&0xff) >> 4);
+				*outp = (*inp&0xff) << 2;
+				state = ST_ENCODE2;
+				break;
+			case ST_ENCODE2:
+				*outp++ = B64(*outp | (*inp&0xff) >> 6);
+				*outp++ = B64((*inp&0xff));
+				state = ST_ENCODE0;
+			case ST_NORMAL:
+				break;
+			}
+			inp++;
 		}
 	}
 
@@ -2826,20 +2841,24 @@ PHP_FUNCTION(imap_bodystruct)
    Read an overview of the information in the headers of the given message */ 
 PHP_FUNCTION(imap_fetch_overview)
 {
- 	pval *streamind, *sequence;
+ 	pval *streamind, *sequence, *flags;
  	int ind, ind_type;
 	pils *imap_le_struct;
 	pval *myoverview;
 	char address[MAILTMPLEN];
 	int myargc=ARG_COUNT(ht);
+	long status,flags=0L;
 
- 	if (myargc != 2 || getParameters(ht,myargc,&streamind,&sequence) == FAILURE) {
+ 	if (myargc <2 || myargc >3 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
  		WRONG_PARAM_COUNT;
  	}
  	
  	convert_to_long(streamind);
  	convert_to_string(sequence);
-
+        if(myargc==3) {
+                convert_to_long(pflags);
+                flags = pflags->value.lval;
+        }                                                                                                                
  	ind = streamind->value.lval;
  	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	
@@ -2848,7 +2867,14 @@ PHP_FUNCTION(imap_fetch_overview)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	if (mail_uid_sequence (imap_le_struct->imap_stream,(char *)sequence)) {
+ 
+        status = (flags & FT_UID)
+                ? mail_uid_sequence (imap_le_struct->imap_stream,sequence->value.str.val)
+                : mail_sequence (imap_le_struct->imap_stream,sequence->value.str.val)
+                ;
+ 
+ 
+        if (status) {  
 		MESSAGECACHE *elt;
 		ENVELOPE *env;
 		unsigned long i;
@@ -2858,13 +2884,19 @@ PHP_FUNCTION(imap_fetch_overview)
 				(env = mail_fetch_structure (imap_le_struct->imap_stream,i,NIL,NIL))) {
 				MAKE_STD_ZVAL(myoverview);
 				object_init(myoverview);
-				add_property_string(myoverview,"subject",env->subject,1);
-				env->from->next=NULL;
-				rfc822_write_address(address,env->from);
-				add_property_string(myoverview,"from",address,1);
-				add_property_string(myoverview,"date",env->date,1);
-				add_property_string(myoverview,"message_id",env->message_id,1);
-				add_property_string(myoverview,"references",env->references,1);
+				if(env->subject)
+				        add_property_string(myoverview,"subject",env->subject,1);
+				if(env->from) {
+				        env->from->next=NULL;
+				        rfc822_write_address(address,env->from);
+				        add_property_string(myoverview,"from",address,1);
+				}
+				if(env->date)
+				        add_property_string(myoverview,"date",env->date,1);
+				if(env->message_id)
+				        add_property_string(myoverview,"message_id",env->message_id,1);
+				if(env->references)
+				        add_property_string(myoverview,"references",env->references,1);
 				add_property_long(myoverview,"size",elt->rfc822_size);
 				add_property_long(myoverview,"uid",mail_uid(imap_le_struct->imap_stream,i));
 				add_property_long(myoverview,"msgno",i);
@@ -3144,6 +3176,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	sendmail = popen(INI_STR("sendmail_path"), "w");
 	if (sendmail) {
+		if (rpath && rpath[0]) fprintf(sendmail, "From: %s\n", rpath);
 		fprintf(sendmail, "To: %s\n", to);
 		if (cc && cc[0]) fprintf(sendmail, "Cc: %s\n", cc);
 		if (bcc && bcc[0]) fprintf(sendmail, "Bcc: %s\n", bcc);

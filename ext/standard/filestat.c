@@ -402,6 +402,7 @@ PHP_FUNCTION(clearstatcache)
 static void php_stat(const char *filename, int type, pval *return_value)
 {
 	struct stat *stat_sb;
+	int rmask=S_IROTH,wmask=S_IWOTH,xmask=S_IXOTH; /* access rights defaults to other */
 	BLS_FETCH();
 
 	stat_sb = &BG(sb);
@@ -444,6 +445,35 @@ static void php_stat(const char *filename, int type, pval *return_value)
 	}
 #endif
 
+
+	if(BG(sb).st_uid==getuid()) {
+		rmask=S_IRUSR;
+		wmask=S_IWUSR;
+		xmask=S_IXUSR;
+	} else if(BG(sb).st_gid==getgid()) {
+		rmask=S_IRGRP;
+		wmask=S_IWGRP;
+		xmask=S_IXGRP;
+	} else {
+		int   groups,n,i;
+		gid_t *gids;
+		
+		groups = getgroups(0,NULL);
+		if(groups) {
+			gids=(gid_t *)emalloc(groups*sizeof(gid_t));
+			n=getgroups(groups,gids);
+			for(i=0;i<n;i++){
+				if(BG(sb).st_gid==gids[i]) {
+					rmask=S_IRGRP;
+					wmask=S_IWGRP;
+					xmask=S_IXGRP;
+					break;
+				} 
+			}
+			efree(gids);
+		}
+	}
+
 	switch(type) {
 	case 0: /* fileperms */
 		RETURN_LONG((long)BG(sb).st_mode);
@@ -477,11 +507,14 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		php_error(E_WARNING,"Unknown file type (%d)",BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown",1);
 	case 9: /*is writable*/
-		RETURN_LONG((BG(sb).st_mode&S_IWRITE)!=0);
+		if(getuid()==0) RETURN_LONG(1); /* root */
+		RETURN_LONG((BG(sb).st_mode&wmask)!=0);
 	case 10: /*is readable*/
-		RETURN_LONG((BG(sb).st_mode&S_IREAD)!=0);
+		if(getuid()==0) RETURN_LONG(1); /* root */
+		RETURN_LONG((BG(sb).st_mode&rmask)!=0);
 	case 11: /*is executable*/
-		RETURN_LONG((BG(sb).st_mode&S_IEXEC)!=0 && !S_ISDIR(BG(sb).st_mode));
+		if(getuid()==0) RETURN_LONG(1); /* root */
+		RETURN_LONG((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case 12: /*is file*/
 		RETURN_LONG(S_ISREG(BG(sb).st_mode));
 	case 13: /*is dir*/
