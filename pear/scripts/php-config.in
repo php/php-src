@@ -1,7 +1,7 @@
 #! /bin/sh
 
 prefix="@prefix@"
-version="@VERSION@"
+version="@PHP_VERSION@"
 includedir="@includedir@/php"
 includes="-I$includedir -I$includedir/main -I$includedir/Zend"
 if test '@TSRM_DIR@' != ''; then
