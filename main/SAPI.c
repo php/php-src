@@ -274,6 +274,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
  */
 SAPI_API void sapi_activate(TSRMLS_D)
 {
+	void (*post_reader_func)(TSRMLS_D);
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
@@ -301,9 +302,21 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
-			if (!SG(request_info).content_type && !PG(always_populate_raw_post_data)) {
+			if (!SG(request_info).content_type) {
 				sapi_module.sapi_error(E_WARNING, "No content-type in POST request");
 				SG(request_info).content_type_dup = NULL;
+				if(PG(always_populate_raw_post_data)) {
+					SG(request_info).post_entry = NULL;
+					post_reader_func = sapi_module.default_post_reader;
+
+					if(post_reader_func) {
+						post_reader_func(TSRMLS_C);
+
+						if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
+							sapi_module.default_post_reader(TSRMLS_C);
+						}
+					}
+				}
 			} else {
 				sapi_read_post_data(TSRMLS_C);
 			}
