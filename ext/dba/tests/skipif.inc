@@ -6,7 +6,10 @@
 	$handler = dba_handlers(); 
 	if ($handler[0]=='cdb') {
 		if (count($handler)==1) {
-			die('skip CDB currently supports only reading ');
+			die('skip CDB currently supports only reading');
+		}
+		if ($handler[1]=='cdb_make' && count($handler)==2) {
+			die('skip CDB currently supports only reading and creating');
 		}
 	}
 ?>
