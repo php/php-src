@@ -48,10 +48,16 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
-#elif defined(NETWARE) && !defined(NEW_LIBC)
-/*#include <ws2nlm.h>*/
+#elif defined(NETWARE)
+#include <sys/param.h>
+#include <sys/select.h>
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#else
 #include <sys/socket.h>
-#include "netware/param.h"
+#include <netinet/in.h>
+#include <netdb.h>
+#endif
 #else
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -1535,7 +1541,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+#ifdef NETWARE
 	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime.tv_sec);
 	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime.tv_sec);
 	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime.tv_sec);
