@@ -11,9 +11,9 @@ function test: mysqli_get_server_info
 
 	$sinfo = substr(mysqli_get_server_info($link),0,1);
 
-	var_dump($sinfo);
+	var_dump(strlen($sinfo));
 
 	mysqli_close($link);
 ?>
 --EXPECT--
-string(1) "4"
+int(1)

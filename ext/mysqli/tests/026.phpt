@@ -19,9 +19,9 @@ mysqli bind_param/bind_result with send_long_data
 
 	$c1 = "Hello World";
 
-	mysqli_send_long_data($stmt, 2, "This is the first sentence.");
-	mysqli_send_long_data($stmt, 2, " And this is the second sentence.");
-	mysqli_send_long_data($stmt, 2, " And finally this is the last sentence.");
+	mysqli_send_long_data($stmt, 1, "This is the first sentence.");
+	mysqli_send_long_data($stmt, 1, " And this is the second sentence.");
+	mysqli_send_long_data($stmt, 1, " And finally this is the last sentence.");
 
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
