@@ -447,6 +447,23 @@ static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
 {
+	void *data = NULL;
+	const char *userdata_key = "apache2filter_post_config";
+
+	/* Apache will load, unload and then reload a DSO module. This
+	 * prevents us from starting PHP until the second load. */
+	apr_pool_userdata_get(&data, userdata_key, s->process->pool);
+	if (data == NULL) {
+		apr_pool_userdata_setn((const void *)1, userdata_key,
+							   apr_pool_cleanup_null, s->process->pool);
+		return OK;
+	}
+	else if (data == (const void *)2) {
+		return OK;
+	}
+	apr_pool_userdata_setn((const void *)2, userdata_key,
+						   apr_pool_cleanup_null, s->process->pool);
+
 	/* Set up our overridden path. */
 	if (apache2_php_ini_path_override) {
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
