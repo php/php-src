@@ -1,3 +1,42 @@
+2004-03-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_multiply.h:
+      Readd x86 implementation
+
+2004-03-17  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      zend_multiply.h:
+      - Improved patch for support multiplication on 64bit machines
+
+    * (php_5_0_0RC1RC2)
+      zend_execute.c:
+      - Fix tiny bug (one of the reasons we can't support __toString() for
+      - regular objects).
+
+    * (php_5_0_0RC1RC2)
+      zend.c:
+      - Stop make_printable_zval() from calling __toString()
+
+    * zend_execute.c:
+      - Fixed problem with __toString(). Due to the engine's architecture it is
+      - currently not possible to call __toString() anywhere besides print &
+      eval.
+      - Follow up will be on internals@
+
+2004-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      zend_compile.c:
+      fix typo
+
+2004-03-17  Andi Gutmans  <andi@zend.com>
+
+    * zend_multiply.h
+      zend_operators.c:
+      - Apply Ard's patch to support multiplication & overflow on both 32bit
+        and 64bit machines
+
 2004-03-16  Derick Rethans  <php@derickrethans.nl>
 
     * zend.c
