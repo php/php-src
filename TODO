@@ -78,19 +78,6 @@ ext/standard
 ------------
     * add a version number to data serialized via serialize().
     * array_add(). (Andrei)
-    * implement pathinfo()
-        $a = pathinfo("/some/file.bla");
-
-        => array("dirname" => "/some/",
-                "basename" => "file.bla",
-                "extension" => "bla");
-
-
-        We could also make it return just one part as a sting if used
-        like this:
-
-        $a = pathinfo("/some/file.bla", PATHINFO_BASENAME);
-
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * implement regex-cache for url-functions.
