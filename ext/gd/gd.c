@@ -2761,6 +2761,7 @@ static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) 
 }
 
 
+#ifdef HAVE_GD_JPG
 /* _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	zval **f_org, **f_dest, **height, **width, **threshold;
@@ -2938,6 +2939,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	}
 	WRONG_PARAM_COUNT;
 }
+#endif /* HAVE_GD_JPG */
+
 #endif /* HAVE_GD_WBMP */
 
 
