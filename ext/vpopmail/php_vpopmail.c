@@ -865,7 +865,7 @@ PHP_FUNCTION(vpopmail_alias_get)
 /* }}} */
 
 /* {{{ proto array vpopmail_alias_get_all(string domain)
-   get all lines of an alias for a domain */
+   get all alias lines for all users in a domain */
 PHP_FUNCTION(vpopmail_alias_get_all)
 {
 	zval **domain;
