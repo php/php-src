@@ -59,12 +59,8 @@
 #include <iostream.h>
 #include <math.h>
 
-extern "C" {	/* this should be included in the includes itself !! */
-
 #include "php.h"
 #include "php_ini.h"
-
-}
 
 #include "conversion.h"
 #include "unknwn.h"
@@ -125,7 +121,7 @@ static char *php_string_from_clsid(const CLSID clsid)
 	LPOLESTR ole_clsid;
 	char *clsid_str;
 
-	StringFromCLSID(clsid, &ole_clsid);
+	StringFromCLSID(&clsid, &ole_clsid);
 	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0, codepage);
 	LocalFree(ole_clsid);
 
@@ -135,7 +131,8 @@ static char *php_string_from_clsid(const CLSID clsid)
 static void php_idispatch_destructor(zend_rsrc_list_entry *rsrc)
 {
 	IDispatch *i_dispatch = (IDispatch *)rsrc->ptr;
-	i_dispatch->Release();
+
+	i_dispatch->lpVtbl->Release(i_dispatch);
 }
 
 static PHP_INI_MH(OnTypelibFileChange)
@@ -270,7 +267,7 @@ PHP_FUNCTION(COM_load)
 
 	/* obtain IDispatch */
 	if (!server_name) {
-		hr = CoCreateInstance(clsid, NULL, CLSCTX_SERVER, IID_IDispatch, (LPVOID *) &i_dispatch);
+		hr = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &i_dispatch);
 	} else {
 		COSERVERINFO server_info;
 		MULTI_QI pResults;
@@ -283,7 +280,7 @@ PHP_FUNCTION(COM_load)
 		pResults.pIID = &IID_IDispatch;
 		pResults.pItf = NULL;
 		pResults.hr = S_OK;
-		hr=CoCreateInstanceEx(clsid, NULL, CLSCTX_SERVER, &server_info, 1, &pResults);
+		hr=CoCreateInstanceEx(&clsid, NULL, CLSCTX_SERVER, &server_info, 1, &pResults);
 		if (SUCCEEDED(hr)) {
 			hr = pResults.hr;
 			i_dispatch = (IDispatch *) pResults.pItf;
@@ -318,7 +315,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	funcname = php_char_to_OLECHAR(function_name->value.str.val, function_name->value.str.len, codepage);
 
-	hr = i_dispatch->GetIDsOfNames(IID_NULL, &funcname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &funcname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -340,7 +337,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 	dispparams.cArgs = arg_count;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->Invoke(dispid, IID_NULL,
+	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
 							LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
 							&dispparams, var_result, NULL, NULL);
 
@@ -414,7 +411,7 @@ static int do_COM_offget(VARIANTARG *var_result, VARIANTARG *array, pval *arg_pr
 			function_name.type = IS_STRING;
 			retval = do_COM_invoke(i_dispatch, &function_name, var_result, &arg_property, 1);
 			if (cleanup) {
-				i_dispatch->Release();
+				i_dispatch->lpVtbl->Release(i_dispatch);
 			}
 			return retval;
 		}
@@ -435,7 +432,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
-	hr = i_dispatch->GetIDsOfNames(IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -443,7 +440,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
-			i_dispatch->Release();
+			i_dispatch->lpVtbl->Release(i_dispatch);
 		}
 		return FAILURE;
 	}
@@ -451,7 +448,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->Invoke(dispid, IID_NULL, LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, 0);
+	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL, LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, 0);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -459,14 +456,14 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
-			i_dispatch->Release();
+			i_dispatch->lpVtbl->Release(i_dispatch);
 		}
 		return FAILURE;
 	}
 
 	efree(propname);
 	if (cleanup) {
-		i_dispatch->Release();
+		i_dispatch->lpVtbl->Release(i_dispatch);
 	}
 	return SUCCESS;
 }
@@ -487,7 +484,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
-	hr = i_dispatch->GetIDsOfNames(IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -504,7 +501,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	dispparams.cArgs = 1;
 	dispparams.cNamedArgs = 1;
 
-	hr = i_dispatch->Invoke(dispid, IID_NULL,
+	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
 							LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYPUT,
 							&dispparams, NULL, NULL, 0);
 	if (FAILED(hr)) {
@@ -518,7 +515,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->Invoke(dispid, IID_NULL,
+	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
 									LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET,
 									&dispparams, &var_result, NULL, 0);
 
@@ -802,13 +799,13 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 		return FAILURE;
 	}
 
- 	interfaces = TypeLib->GetTypeInfoCount();
+ 	interfaces = TypeLib->lpVtbl->GetTypeInfoCount(TypeLib);
 
-	TypeLib->GetTypeComp(&TypeComp);
+	TypeLib->lpVtbl->GetTypeComp(TypeLib, &TypeComp);
 	for (i=0; i<interfaces; i++) {
 		TYPEKIND pTKind;
 
-		TypeLib->GetTypeInfoType(i, &pTKind);
+		TypeLib->lpVtbl->GetTypeInfoType(TypeLib, i, &pTKind);
 		if (pTKind==TKIND_ENUM) {
 			ITypeInfo *TypeInfo;
 			VARDESC *pVarDesc;
@@ -824,15 +821,15 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 			efree(EnumId);
 #endif
 
-			TypeLib->GetTypeInfo(i, &TypeInfo);
+			TypeLib->lpVtbl->GetTypeInfo(TypeLib, i, &TypeInfo);
 
 			j=0;
-			while (TypeInfo->GetVarDesc(j, &pVarDesc)==S_OK) {
+			while (TypeInfo->lpVtbl->GetVarDesc(TypeInfo, j, &pVarDesc)==S_OK) {
 				BSTR bstr_ids;
 				char *ids;
 				zend_constant c;
 
-				TypeInfo->GetNames(pVarDesc->memid, &bstr_ids, 1, &NameCount);
+				TypeInfo->lpVtbl->GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
 				if (NameCount!=1) {
 					j++;
 					continue;
@@ -848,12 +845,12 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 				/*printf("%s -> %ld\n", ids, pVarDesc->lpvarValue->lVal);*/
 				j++;
 			}
-			TypeInfo->Release();
+			TypeInfo->lpVtbl->Release(TypeInfo);
 		}
 	}
 
 
-	TypeLib->Release();
+	TypeLib->lpVtbl->Release(TypeLib);
 	efree(p);
 	return SUCCESS;
 }
