@@ -542,7 +542,6 @@ if test "$PHP_DMALLOC" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
 fi
 
-
 PHP_ARG_ENABLE(pear,whether to install PEAR,
 [  --disable-pear          Do not install PEAR],yes)
 
@@ -550,8 +549,11 @@ if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
-
-
+PHP_OUTPUT(pear/pear)
+PHP_OUTPUT(pear/run-tests)
+PHP_OUTPUT(pear/phpize)
+PHP_OUTPUT(pear/php-config)
+PHP_OUTPUT(pear/PEAR.php)
 
 
 divert(5)
@@ -666,6 +668,7 @@ ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/modules.h|s
 EXTENSION_DIR="$prefix/lib/php/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
 
 PEAR_INSTALLDIR="$prefix/lib/php"
+
 INCLUDE_PATH=".:$PEAR_INSTALLDIR"
 
 AC_BUILD_RPATH
@@ -798,7 +801,15 @@ AC_OUTPUT([php4.spec Zend/Makefile
 		   $PHP_OUTPUT_FILES
 		   ], [], [
 
-PHP_GEN_MAKEFILES
+if test "$CONFIG_FILES" = ""; then
+    PHP_GEN_MAKEFILES
+else
+    for file in $PHP_FAST_OUTPUT_FILES; do
+		if test "$file" = "$CONFIG_FILES"; then
+			PHP_GEN_MAKEFILE($file)
+		fi
+    done
+fi
 		   
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"

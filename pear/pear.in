@@ -1,19 +1,19 @@
-#!/usr/local/bin/php -f
+#!@prefix@/bin/php -f
 <?php // -*- C++ -*-
 
-error_reporting(1);
+require_once "PEAR.php";
+require_once "PEAR/Installer.php";
 
-// config section, should be read from php-config
-$debug = true;
-$pear_phpdir = "@PEAR_INSTALLDIR@";
-$pear_extdir = "@EXTENSION_DIR@";
-//$pear_extdir = ini_get("extension_dir");
-$pear_docdir = ""; // empty means don't install docs
+error_reporting(1);
 
 $pkgfile = $argv[0];
 
 if (!$pkgfile) {
     die("Usage: pear <packagefile>\n");
 }
+
+$p = new PEAR_Installer();
+$p->debug = true;
+$p->install($pkgfile);
 
 ?>

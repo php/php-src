@@ -1,6 +1,6 @@
 #! /bin/sh
 
-prefix='@PREFIX@'
+prefix='@prefix@'
 phpdir="$prefix/lib/php/build"
 builddir="`pwd`"
 FILES_BUILD="dynlib.mk fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_pear.mk shtool"

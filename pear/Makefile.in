@@ -1,5 +1,9 @@
 
-install_targets = install-data-local install-headers install-build
+install_targets = \
+	install-data-local \
+	install-headers \
+	install-build \
+	install-programs
 
 include $(top_srcdir)/build/rules.mk
 
@@ -7,7 +11,8 @@ peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
 	DB \
-	File
+	File \
+	PEAR
 
 PEAR_FILES = \
 	DB.php \
@@ -52,32 +57,16 @@ BUILD_FILES = \
 	dynlib.m4 \
 	acinclude.m4
 
+bin_PROGRAMS = phpize php-config pear phpextdist
+
 install-build:
-	-@$(mkinstalldirs) $(builddir) $(bindir) && \
-	(cd $(top_srcdir) && cp $(BUILD_FILES) $(builddir)) && \
-	echo "creating phpize" && \
-	sed \
-		-e 's#@PREFIX@#$(prefix)#' \
-		< $(srcdir)/phpize.in > $(bindir)/phpize.tmp && \
-	chmod +x $(bindir)/phpize.tmp && \
-	mv $(bindir)/phpize.tmp $(bindir)/phpize && \
-	echo "creating php-config" && \
-	sed \
-		-e 's#@PREFIX@#$(prefix)#' \
-		-e 's#@PHPINCLUDEDIR@#$(phpincludedir)#g' \
-		-e 's#@EXTENSION_DIR@#$(EXTENSION_DIR)#g' \
-		< $(srcdir)/php-config.in > $(bindir)/php-config.tmp && \
-	chmod +x $(bindir)/php-config.tmp && \
-	mv $(bindir)/php-config.tmp $(bindir)/php-config && \
-	echo "creating pear" && \
-	sed \
-		-e 's#@PREFIX@#$(prefix)#' \
-		-e 's#@EXTENSION_DIR@#$(EXTENSION_DIR)#g' \
-		-e 's#@PEAR_INSTALLDIR@#$(PEAR_INSTALLDIR)#g' \
-		< $(srcdir)/pear.in > $(bindir)/pear.tmp && \
-	chmod +x $(bindir)/pear.tmp && \
-	mv $(bindir)/pear.tmp $(bindir)/pear && \
-	cp $(srcdir)/phpextdist $(bindir)/phpextdist
+	$(mkinstalldirs) $(builddir) $(bindir) && \
+	(cd $(top_srcdir) && cp $(BUILD_FILES) $(builddir))
+
+install-programs:
+	for prog in $(bin_PROGRAMS); do \
+		$(INSTALL) -m 755 $$prog $(bindir)/$$prog; \
+	done
 
 HEADER_DIRS = \
 	/ \
@@ -100,3 +89,18 @@ install-headers:
 		(cd $(top_srcdir)/$$i && cp -p *.h $(phpincludedir)/$$i; \
 		cd $(top_builddir)/$$i && cp -p *.h $(phpincludedir)/$$i) 2>/dev/null || true; \
 	done
+
+run-tests: run-tests.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/run-tests CONFIG_HEADERS= $(top_builddir)/config.status)
+
+pear: pear.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/pear CONFIG_HEADERS= $(top_builddir)/config.status)
+
+phpize: phpize.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/phpize CONFIG_HEADERS= $(top_builddir)/config.status)
+
+php-config: php-config.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/php-config CONFIG_HEADERS= $(top_builddir)/config.status)
+
+PEAR.php: PEAR.php.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/PEAR.php CONFIG_HEADERS= $(top_builddir)/config.status)
