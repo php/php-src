@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PDO_MYSQL_LIB_CHK, [
+AC_DEFUN([PDO_MYSQL_LIB_CHK], [
   str="$PDO_MYSQL_DIR/$1/libmysqlclient.*"
   for j in `echo $str`; do
     if test -r $j; then
