@@ -491,6 +491,16 @@ ZEND_API inline int add_property_long(zval *arg, char *key, long n)
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API inline int add_property_resource(zval *arg, char *key, long n)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_RESOURCE;
+	tmp->value.lval = n;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 
 ZEND_API inline int add_property_double(zval *arg, char *key, double d)
 {

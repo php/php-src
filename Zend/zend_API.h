@@ -116,6 +116,7 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval
 
 
 ZEND_API int add_property_long(zval *arg, char *key, long l);
+ZEND_API int add_property_resource(zval *arg, char *key, long r);
 ZEND_API int add_property_double(zval *arg, char *key, double d);
 ZEND_API int add_property_string(zval *arg, char *key, char *str, int duplicate);
 ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
