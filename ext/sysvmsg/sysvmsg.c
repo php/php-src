@@ -32,14 +32,18 @@
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
+static unsigned char sixth_arg_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static unsigned char msg_receive_args_force_ref[] = { 8, BYREF_NONE, BYREF_NONE, BYREF_FORCE,
+	BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+
 /* {{{ sysvmsg_functions[]
  *
  * Every user visible function must have an entry in sysvmsg_functions[].
  */
 function_entry sysvmsg_functions[] = {
 	PHP_FE(msg_get_queue,				NULL)
-	PHP_FE(msg_send,					NULL)
-	PHP_FE(msg_receive,					third_arg_force_ref)
+	PHP_FE(msg_send,					sixth_arg_force_ref)
+	PHP_FE(msg_receive,					msg_receive_args_force_ref)
 	PHP_FE(msg_remove_queue,			NULL)
 	PHP_FE(msg_stat_queue,				NULL)
 	PHP_FE(msg_set_queue,				NULL)
@@ -87,7 +91,7 @@ static void sysvmsg_release(zend_rsrc_list_entry *rsrc)
  */
 PHP_MINIT_FUNCTION(sysvmsg)
 {
-	le_sysvmsg = zend_register_list_destructors_ex(sysvmsg_release, NULL, "sysmsgq", module_number);
+	le_sysvmsg = zend_register_list_destructors_ex(sysvmsg_release, NULL, "sysvmsg queue", module_number);
 	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", IPC_NOWAIT, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_NOERROR", MSG_NOERROR, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_EXCEPT", MSG_EXCEPT, CONST_PERSISTENT|CONST_CS);
@@ -127,7 +131,7 @@ PHP_FUNCTION(msg_set_queue)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &queue, &data) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysmsg queue", le_sysvmsg);
+	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
 		zval **item;
@@ -173,7 +177,7 @@ PHP_FUNCTION(msg_stat_queue)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysmsg queue", le_sysvmsg);
+	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_STAT, &stat) == 0) {
 		array_init(return_value);
@@ -232,7 +236,7 @@ PHP_FUNCTION(msg_remove_queue)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysmsg queue", le_sysvmsg);
+	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (msgctl(mq->id, IPC_RMID, NULL) == 0) {
 		RETVAL_TRUE;
@@ -242,11 +246,11 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, long desiredmsgtype, long &msgtype, long maxsize [[, bool unserialize=true][, long flags=0]]
+/* {{{ proto mixed msg_receive(resource queue, long desiredmsgtype, long &msgtype, long maxsize, mixed message [[, bool unserialize=true][, long flags=0[, long errorcode]]]
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
-	zval *out_message, *queue, *out_msgtype;
+	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
 	long desiredmsgtype, maxsize, flags = 0;
 	zend_bool do_unserialize = 1;
 	sysvmsg_queue_t *mq = NULL;
@@ -255,16 +259,26 @@ PHP_FUNCTION(msg_receive)
 	
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzl|bl",
-				&queue, &desiredmsgtype, &out_msgtype, &out_message,
-				&maxsize, &do_unserialize, &flags) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzlz|blz",
+				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
+				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysmsg queue", le_sysvmsg);
+	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	messagebuffer = (struct msgbuf*)emalloc(sizeof(struct msgbuf) + maxsize);
 	
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, flags);
+		
+	zval_dtor(out_msgtype);
+	zval_dtor(out_message);	
+	ZVAL_LONG(out_msgtype, 0);
+	ZVAL_FALSE(out_message);
+	
+	if (zerrcode) {
+		zval_dtor(zerrcode);
+		ZVAL_LONG(zerrcode, 0);
+	}
 	
 	if (result >= 0) {
 		/* got it! */
@@ -272,27 +286,34 @@ PHP_FUNCTION(msg_receive)
 
 		if (do_unserialize)	{
 			php_unserialize_data_t var_hash;
+			zval *tmp = NULL;
 			const char *p = (const char*)messagebuffer->mtext;
 
+			MAKE_STD_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
-			if (!php_var_unserialize(&return_value, &p, p + result, &var_hash TSRMLS_CC)) {
+			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash TSRMLS_CC)) {
 				zend_error(E_WARNING, "%s(): message corrupted", get_active_function_name(TSRMLS_C));
 				RETVAL_FALSE;
 			}
+			REPLACE_ZVAL_VALUE(&out_message, tmp, 0);
+			FREE_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {
-			RETVAL_STRINGL(messagebuffer->mtext, result, 1);
+			ZVAL_STRINGL(out_message, messagebuffer->mtext, result, 1);
 		}
+		RETVAL_TRUE;
+	} else if (zerrcode) {
+		ZVAL_LONG(zerrcode, errno);
 	}
 	efree(messagebuffer);
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(resource queue, long msgtype, mixed message [[, bool serialize=true][, bool blocking=true]]
+/* {{{ proto bool msg_send(resource queue, long msgtype, mixed message [[, bool serialize=true][, bool blocking=true][, long errorcode]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {
-	zval *message, *queue;
+	zval *message, *queue, *zerror=NULL;
 	long msgtype;
 	zend_bool do_serialize = 1, blocking = 1;
 	sysvmsg_queue_t * mq = NULL;
@@ -300,11 +321,13 @@ PHP_FUNCTION(msg_send)
 	int result;
 	int message_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bb",
-				&queue, &msgtype, &message, &do_serialize, &blocking) == FAILURE)
+	RETVAL_FALSE;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz",
+				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t*, &queue, -1, "sysmsg queue", le_sysvmsg);
+	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t*, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	if (do_serialize) {
 		smart_str msg_var = {0};
@@ -337,10 +360,12 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		zend_error(E_WARNING, "%s(): msgsnd failed: %s",
 				get_active_function_name(TSRMLS_C), strerror(errno));
-		RETURN_LONG(errno);
+		if (zerror) {
+			ZVAL_LONG(zerror, errno);
+		}
+	} else {
+		RETVAL_TRUE;
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
