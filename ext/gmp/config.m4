@@ -7,7 +7,7 @@ PHP_ARG_WITH(gmp, for GNU MP support,
 
 if test "$PHP_GMP" != "no"; then
 
-  for i in /usr/local /usr $PHP_GMP; do
+  for i in $PHP_GMP /usr/local /usr; do
     if test -f $i/include/gmp.h; then
       GMP_DIR=$i
     fi

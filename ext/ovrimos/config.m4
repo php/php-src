@@ -7,7 +7,7 @@ PHP_ARG_WITH(ovrimos, for Ovrimos SQL Server support,
                           Ovrimos libsqlcli install directory.])
 
 if test "$PHP_OVRIMOS" != "no"; then
-  for i in /usr/local /usr $PHP_OVRIMOS; do
+  for i in $PHP_OVRIMOS /usr/local /usr; do
     if test -f $i/include/sqlcli.h; then
       OVRIMOS_DIR=$i
     fi
