@@ -118,8 +118,8 @@ typedef struct _sapi_globals_struct {
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	long post_max_size;
-    int options;
-    zend_bool sapi_started;
+	int options;
+	zend_bool sapi_started;
 } sapi_globals_struct;
 
 
@@ -217,20 +217,19 @@ struct _sapi_module_struct {
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
 	void (*log_message)(char *message);
 
-
 	char *php_ini_path_override;
 
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
-	
+
 	void (*default_post_reader)(TSRMLS_D);
 	void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC);
 	char *executable_location;
 
 	int php_ini_ignore;
-	
+
 	int (*get_fd)(int *fd TSRMLS_DC);
-	
+
 	int (*force_http_10)(TSRMLS_D);
 };
 
