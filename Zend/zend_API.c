@@ -430,7 +430,16 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 				}
 			}
 			break;
-
+        case 'Z':
+	        {
+		        zval ***p = va_arg(*va, zval ***);
+		        if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+		               *p = NULL;
+		        } else {
+		               *p = arg;
+		        }
+			}
+			break;
 		default:
 			return "unknown";
 	}
@@ -476,7 +485,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
-			case 'z':
+		        case 'z': case 'Z':
 				max_num_args++;
 				break;
 
