@@ -308,7 +308,6 @@ PHP_FUNCTION(curl_init)
 
 		urlstr = estrndup(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
 		curl_easy_setopt(curl_handle->cp, CURLOPT_URL, urlstr);
-		efree(urlstr);
 	}
 
 	curl_easy_setopt(curl_handle->cp, CURLOPT_NOPROGRESS, 1);
