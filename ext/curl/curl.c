@@ -140,7 +140,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT("CURLOPT_PROXY", CURLOPT_PROXY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_VERBOSE", CURLOPT_VERBOSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_HEADER", CURLOPT_HEADER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CURLOPT_HTTPHEADER", CURLOPT_HEADER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLOPT_HTTPHEADER", CURLOPT_HTTPHEADER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_NOPROGRESS", CURLOPT_NOPROGRESS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_NOBODY", CURLOPT_NOBODY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_FAILONERROR", CURLOPT_FAILONERROR, CONST_CS | CONST_PERSISTENT);
@@ -381,7 +381,9 @@ PHP_FUNCTION(curl_setopt)
 			}
 			break;
 			
-		case CURLOPT_FILE:   case CURLOPT_INFILE: case CURLOPT_WRITEHEADER:
+		case CURLOPT_FILE:   
+		case CURLOPT_INFILE: 
+		case CURLOPT_WRITEHEADER:
 		case CURLOPT_STDERR: 
 
 			{
@@ -412,6 +414,7 @@ PHP_FUNCTION(curl_setopt)
 				
 				zval **current;
 				HashTable *u_post = HASH_OF(*curl_value);
+
 				struct HttpPost *first = NULL, 
 				                *last  = NULL;
 				
@@ -481,11 +484,12 @@ PHP_FUNCTION(curl_setopt)
 				HashTable *headers = HASH_OF(*curl_value);
 				struct curl_slist *header = NULL;
 				
-				header = (struct curl_slist *)emalloc(sizeof(struct curl_slist));
-				if (!header) {
-					php_error(E_WARNING, "Couldn't allocate header list from %s()", get_active_function_name());
+				if (!headers) {
 					RETURN_FALSE;
 				}
+				
+				header = (struct curl_slist *)emalloc(sizeof(struct curl_slist));
+					
 				memset(header, 0, sizeof(struct curl_slist));
 				
 				for (zend_hash_internal_pointer_reset(headers);
@@ -518,6 +522,10 @@ PHP_FUNCTION(curl_setopt)
 				HashTable *php_commands = HASH_OF(*curl_value);
 				struct curl_slist *commands = NULL;
 				
+				if (!php_commands) {
+					RETURN_FALSE;
+				}
+
 				commands = (struct curl_slist *)emalloc(sizeof(struct curl_slist));
 				if (!commands) {
 					php_error(E_WARNING, "Couldn't allocate command list from %s()", get_active_function_name());
