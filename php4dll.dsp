@@ -199,10 +199,6 @@ SOURCE=.\reentrancy.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\request_info.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\rfc1867.c
 # End Source File
 # Begin Source File
@@ -292,10 +288,6 @@ SOURCE=.\php_variables.h
 # Begin Source File
 
 SOURCE=.\ext\standard\quot_print.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\request_info.h
 # End Source File
 # Begin Source File
 

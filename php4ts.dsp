@@ -121,10 +121,18 @@ LINK32=link.exe
 
 SOURCE=.\sapi\cgi\cgi_main.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\sapi\cgi\getopt.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=.\sapi\cgi\php_getopt.h
+# End Source File
 # End Group
 # End Target
 # End Project
