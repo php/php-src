@@ -1136,7 +1136,6 @@ PHP_FUNCTION(mysqli_num_rows)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	ulong		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;
@@ -1302,11 +1301,12 @@ PHP_FUNCTION(mysqli_read_query_result)
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_real_connect)
 {
-	MYSQL 		*mysql;
-	char 		*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int hostname_len, username_len, passwd_len, dbname_len, socket_len;
-	unsigned int port=0, flags=0;
-	zval 		*mysql_link;
+	MYSQL 			*mysql;
+	char 			*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
+	unsigned int 	hostname_len, username_len, passwd_len, dbname_len, socket_len;
+	unsigned int 	port=0, flags=0;
+	zval			*mysql_link;
+	zval  			*object = getThis();
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sssslsl", &mysql_link, mysqli_link_class_entry,
 		&hostname, &hostname_len, &username, &username_len, &passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len,
@@ -1352,6 +1352,10 @@ PHP_FUNCTION(mysqli_real_connect)
 	}
 	php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
 	
+	if (object) {
+		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->valid = 1;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */

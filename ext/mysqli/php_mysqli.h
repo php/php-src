@@ -57,12 +57,13 @@ typedef struct {
 } PROFILER;
 
 typedef struct {
-	void		*ptr;		/* resource: (mysql, result, stmt) */
+	void		*ptr;		/* resource: (mysql, result, stmt)   */
 } MYSQLI_RESOURCE;
 
 typedef struct _mysqli_object {
 	zend_object 	zo;
 	void 			*ptr;
+	char			valid;
 	HashTable 		*prop_handler;
 } mysqli_object; /* extends zend_object */
 
@@ -136,7 +137,8 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 } \
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval, __ce)  \
-	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr;
+	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr; \
+	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->valid = 1;
 
 #define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
 	Z_TYPE_P(return_value) = IS_OBJECT; \
@@ -162,6 +164,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
   		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
   		RETURN_NULL();\
   	}\
+	if (!intern->valid) { \
+		php_error(E_WARNING, "invalid resource %s", intern->zo.ce->name); \
+		RETURN_NULL(); \
+	} \
 	__ptr = (__type)my_res->ptr; \
 	if (!strcmp((char *)__name, "mysqli_stmt")) {\
 		if (!((STMT *)__ptr)->stmt->mysql) {\
