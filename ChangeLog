@@ -1,3 +1,68 @@
+2002-04-02  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/memory_streams.c
+      main/streams.c
+      ext/standard/exec.c
+      ext/standard/exec.h
+      ext/standard/basic_functions.c
+      ext/mailparse/php_mailparse.h
+      ext/mailparse/try.php
+      ext/mailparse/mailparse.c: main/streams.c
+
+    * sapi/cgi/cgi_main.c: fix quoting
+
+2002-04-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/tokenizer/config.m4: - Fix layout
+
+2002-04-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Installer.php:
+    * Added "-s" (soft update) option to install/upgrade.  Will make installs
+      fail silently.
+
+    * pear/PEAR/Common.php: * add Frontend support to PEAR_Common::log()
+
+    * pear/PEAR/Command/Registry.php:
+    * Implemented "shell-test" command for writing shell scripts that check
+      whether a package is installed.  Example of use:
+
+        if ! pear shell-test Net_Socket; then
+            echo "You don't have the Net_Socket package installed!" >&2
+            exit 1
+        fi
+
+    * pear/PEAR/Registry.php: * just renaming some comments
+
+    * pear/PEAR/Frontend/CLI.php:
+    * add type property telling what type of frontend this class implements
+
+    * pear/scripts/pear.in:
+    * remove "exit" at the end, it causes a "false" exit code always
+
+    * pear/Makefile.frag:
+    * comment out the php files that are not necessary for the installer
+
+2002-04-02  Kirill Maximov  <kir@actimind.com>
+
+    * ext/standard/quot_print.c:
+
+2002-04-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/quot_print.c: - Whitespace
+
+2002-04-02  James Cox  <james@wherewithal.com>
+
+    * sapi/cgi/cgi_main.c: just did...
+
+    * sapi/cgi/cgi_main.c:
+    updated the alert sent to the browser. removed the verbosity, and linked to more info.
+
+2002-04-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4: Be a bit more verbose about what was not found.
+
 2002-04-01  Jani Taskinen  <sniper@iki.fi>
 
     * main/rfc1867.c: MFH
