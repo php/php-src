@@ -2664,7 +2664,7 @@ PHP_FUNCTION(imap_fetchheader)
 		RETVAL_STRINGL(tempstring,(hlen+blen+1),1);
 		efree(tempstring);
 	} else {
-		RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, NIL), 1);
+		RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
 	}
 }
 /* }}} */
