@@ -31,10 +31,6 @@
 #include "SAPI.h"
 #include "php_main.h"
 
-#ifndef S_ISDIR
-#define S_ISDIR( m )    (((m) & S_IFMT) == S_IFDIR)
-#endif
-
 typedef struct _php_extension_lists {
 	zend_llist engine;
 	zend_llist functions;
@@ -272,7 +268,7 @@ int php_init_config(char *php_ini_path_override)
 	if (php_ini_path_override && php_ini_path_override[0]) {
 		struct stat statbuf;
 		if (!VCWD_STAT(php_ini_path_override, &statbuf)) {
-			if (!S_ISDIR(statbuf.st_mode)) {
+			if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
 				fh.handle.fp = VCWD_FOPEN(php_ini_path_override, "r");
 			}
 		}
