@@ -32,17 +32,21 @@
 #include "../standard/php3_var.h"
 
 function_entry sysvshm_functions[] = {
-	{"shm_attach",			php3_sysvshm_attach,		NULL},
-	{"shm_detach",			php3_sysvshm_detach,		NULL},
-	{"shm_remove",			php3_sysvshm_remove,		NULL},
-	{"shm_put_var",			php3_sysvshm_put_var,		NULL},
-	{"shm_get_var",			php3_sysvshm_get_var,		NULL},
-	{"shm_remove_var",		php3_sysvshm_remove_var,	NULL},
-	{NULL, NULL, NULL}
+	PHP_FE(shm_attach, NULL)
+	PHP_FE(shm_remove, NULL)
+	PHP_FE(shm_detach, NULL)
+	PHP_FE(shm_put_var, NULL)
+	PHP_FE(shm_get_var, NULL)
+	PHP_FE(shm_remove_var, NULL)
+	{0}
 };
 
-php3_module_entry sysvshm_module_entry = {
-	"System V Shared-Memory", sysvshm_functions, php3_minit_sysvshm, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+zend_module_entry sysvshm_module_entry = {
+	"System V Shared-Memory", sysvshm_functions, 
+	PHP_MINIT(sysvshm), NULL,
+	NULL, NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -59,8 +63,7 @@ static void php3i_release_sysvshm(sysvshm_shm *shm_ptr)
 	efree(shm_ptr);
 }
 
-
-int php3_minit_sysvshm(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(sysvshm)
 {    
 	php3_sysvshm_module.le_shm = register_list_destructors(php3i_release_sysvshm, NULL);
 	if (cfg_get_long("sysvshm.init_mem",
@@ -73,52 +76,35 @@ int php3_minit_sysvshm(INIT_FUNC_ARGS)
 
 /* {{{ proto int shm_attach(int key, int size, int flag)
    Return an id for the shared memory with the given key. */
-PHP_FUNCTION(sysvshm_attach)
+PHP_FUNCTION(shm_attach)
 {
-	pval *arg_key,*arg_size,*arg_flag;
+	pval **arg_key,**arg_size,**arg_flag;
 	long shm_size,shm_flag;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
 	key_t shm_key;
 	long shm_id,list_id;
+	int ac = ARG_COUNT(ht);
 
 	shm_flag = 0666;
 	shm_size = php3_sysvshm_module.init_mem;
 	
-	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht, 1, &arg_key)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_key);
-			shm_key = arg_key->value.lval;
-			break;
-		case 2:
-			if (getParameters(ht, 2, &arg_key, &arg_size)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_key);
-			shm_key = arg_key->value.lval;
-			convert_to_long(arg_size);
-			shm_size=arg_size->value.lval;
-			break;
-		case 3:
-			if (getParameters(ht, 3, &arg_key, &arg_size, &arg_flag)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_key);
-			shm_key = arg_key->value.lval;
-			convert_to_long(arg_size);
-			shm_size=arg_size->value.lval;
-			convert_to_long(arg_flag);
-			shm_flag = arg_flag->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ac < 1 || ac > 3 || getParametersEx(ac, &arg_key, &arg_size, &arg_flag) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
+	switch (ac) {
+		case 3:
+			convert_to_long_ex(arg_flag);
+			shm_flag = (*arg_flag)->value.lval;
+		case 2:
+			convert_to_long_ex(arg_size);
+			shm_size= (*arg_size)->value.lval;
+		case 1:
+			convert_to_long_ex(arg_key);
+			shm_key = (*arg_key)->value.lval;
+	}
 
 	if((shm_list_ptr = (sysvshm_shm *) emalloc(sizeof(sysvshm_shm)))==NULL) {
 		php_error(E_WARNING, "shm_attach() failed for key 0x%x: cannot allocate internal listelement", shm_key);
@@ -153,7 +139,7 @@ PHP_FUNCTION(sysvshm_attach)
 	}
 
 
-	shm_list_ptr->key   = shm_key;
+	shm_list_ptr->key = shm_key;
 	shm_list_ptr->id = shm_id;
 	shm_list_ptr->ptr = chunk_ptr;
 	list_id = php3_list_insert(shm_list_ptr, php3_sysvshm_module.le_shm);
@@ -165,48 +151,39 @@ PHP_FUNCTION(sysvshm_attach)
 
 /* {{{ proto int shm_detach(int id)
    releases the shared memory attachment with the given id. */
-PHP_FUNCTION(sysvshm_detach)
+PHP_FUNCTION(shm_detach)
 {
-	pval *arg_id;
+	pval **arg_id;
 	long id;
 
-	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht, 1, &arg_id)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_id);
-			id = arg_id->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &arg_id) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
+	convert_to_long_ex(arg_id);
+	
+	id = (*arg_id)->value.lval;
+
 	php3_list_delete(id);
+
+	RETURN_TRUE;
 }
 /* }}} */
 /* {{{ proto int shm_remove(int key)
    removes the shared memory with the given key. */
-PHP_FUNCTION(sysvshm_remove)
+PHP_FUNCTION(shm_remove)
 {
-	pval *arg_key;
+	pval **arg_key;
 	long id;
 	key_t key;
 
-
-	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht, 1, &arg_key)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_key);
-			key = arg_key->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &arg_key) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
+
+	convert_to_long_ex(arg_key);
+	
+	key = (*arg_key)->value.lval;
 
 	if((id=shmget(key,0,0))<0) {
 		php_error(E_WARNING, "%d is not a existing SysV shared memory key", key);
@@ -225,29 +202,23 @@ PHP_FUNCTION(sysvshm_remove)
 
 /* {{{ proto int shm_put(int id, int key, object *variable)
    insert a variable into shared memory. */
-PHP_FUNCTION(sysvshm_put_var)
+PHP_FUNCTION(shm_put_var)
 {
-	pval *arg_id, *arg_key, *arg_var;
+	pval **arg_id, **arg_key, **arg_var;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
 	pval shm_var;
 	int ret;	
 
-	switch (ARG_COUNT(ht)) {
-		case 3:
-			if (getParameters(ht, 3, &arg_id, &arg_key,&arg_var)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_id);
-			id = arg_id->value.lval;
-			convert_to_long(arg_key);
-			key = arg_key->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ARG_COUNT(ht) != 3 || getParametersEx(3, &arg_id, &arg_key,&arg_var) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
+			
+	convert_to_long_ex(arg_id);
+	id = (*arg_id)->value.lval;
+	convert_to_long_ex(arg_key);
+	key = (*arg_key)->value.lval;
 
 	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
@@ -260,7 +231,7 @@ PHP_FUNCTION(sysvshm_put_var)
 	shm_var.type=IS_STRING;
 	shm_var.value.str.len=0;
 	shm_var.value.str.val=0;
-	php_var_serialize(&shm_var,&arg_var);
+	php_var_serialize(&shm_var,arg_var);
 	/* insert serialized variable into shared memory */
 	ret=php3int_put_shmdata(shm_list_ptr->ptr,key,shm_var.value.str.val,shm_var.value.str.len);
 
@@ -280,9 +251,9 @@ PHP_FUNCTION(sysvshm_put_var)
 
 /* {{{ proto string/float/int/array shm_get_var(int id, int key)
    returns a variable into shared memory. */
-PHP_FUNCTION(sysvshm_get_var)
+PHP_FUNCTION(shm_get_var)
 {
-	pval *arg_id, *arg_key;
+	pval **arg_id, **arg_key;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
@@ -290,20 +261,14 @@ PHP_FUNCTION(sysvshm_get_var)
 	long shm_varpos;
 	sysvshm_chunk *shm_var;
 	
-	switch (ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &arg_id, &arg_key)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_id);
-			id = arg_id->value.lval;
-			convert_to_long(arg_key);
-			key = arg_key->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &arg_id, &arg_key) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
+
+	convert_to_long_ex(arg_id);
+	id = (*arg_id)->value.lval;
+	convert_to_long_ex(arg_key);
+	key = (*arg_key)->value.lval;
 
 	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
@@ -331,28 +296,22 @@ PHP_FUNCTION(sysvshm_get_var)
 
 /* {{{ proto int shm_remove_var(int id, int key)
    removes variable from shared memory. */
-PHP_FUNCTION(sysvshm_remove_var)
+PHP_FUNCTION(shm_remove_var)
 {
-	pval *arg_id, *arg_key;
+	pval **arg_id, **arg_key;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
 	long shm_varpos;
 	
-	switch (ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &arg_id, &arg_key)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg_id);
-			id = arg_id->value.lval;
-			convert_to_long(arg_key);
-			key = arg_key->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &arg_id, &arg_key) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
+
+	convert_to_long_ex(arg_id);
+	id = (*arg_id)->value.lval;
+	convert_to_long_ex(arg_key);
+	key = (*arg_key)->value.lval;
 
 	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
