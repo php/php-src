@@ -1,3 +1,156 @@
+2004-02-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/statcache-corruption.phpt:
+      test case for statcache corruption of BG
+
+    * ext/standard/basic_functions.h:
+      Ooops, these should not be pointers ;)
+
+2004-02-23  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/string.c:
+      Make today's changes work w/ str_ireplace() as well.
+
+    * ext/standard/string.c:
+      Short circuit str_replaces when we already know that needle does not occur
+      in haystack.
+      
+      Note: Prior bugfix was for #27176 not #27276
+
+    * ext/standard/string.c:
+      Bugfix #27276: When using str_replace to expand a string, count occurances
+      of needle in haystack to avoid massive overallocation
+
+2004-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c:
+      MFH: Fixed bug #27341 (HEAD requests fail to return data).
+
+    * ext/curl/interface.c:
+      Fixed bug #27341 (HEAD requests fail to return data).
+
+2004-02-23  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/strings/bug27276.phpt:
+      - Added testcase for bug #27276
+
+2004-02-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      Fix memleak during shutdown (ZTS), kill compile warning
+
+    * (PHP_4_3)
+      NEWS
+      sapi/isapi/php4isapi.c:
+      MFH: fixed bug #27337 (missing sapi_shutdown())
+
+    * sapi/isapi/php5isapi.c:
+      Fix bug #27337 (missing sapi_shutdown() causing memory leak)
+
+2004-02-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Improve precendence:
+      
+      <?php
+      
+      $obj->foo = "Blah";
+      
+      if (!$obj instanceof StdClass) {
+          print "No";
+      } else {
+          print "Yes";
+      }
+
+2004-02-23  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      fixed prototypes for mysqli_connect_err* functions
+      (thx to Mehdi Achour)
+
+2004-02-23  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/sqlite/sqlite.c
+      ext/standard/streamsfuncs.c:
+      64-bit fixes
+
+2004-02-23  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xml/xml.c
+      ext/xml/tests/bug25666.phpt
+      ext/xml/tests/xml009.phpt
+      ext/xml/tests/xml010.phpt:
+      - omit WARNING instead of ERROR for x_p_c_ns
+      - fix SKIPIF code in tests
+
+    * ext/xml/tests/bug25666.phpt
+      ext/xml/tests/xml009.phpt
+      ext/xml/tests/xml010.phpt:
+      skip tests, if xml_parser_create_ns is not supported.
+
+    * ext/xml/tests/xml010.phpt:
+      test for attributes
+
+    * ext/xml/compat.c:
+      - mixed up name and value... fixed
+
+    * ext/xml/compat.c:
+      fix attribute handling in combination with sax2
+
+2004-02-23  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/config.m4
+      ext/yaz/php_yaz.c:
+      Use ZOOM_resultset_sort for yaz_sort. Require YAZ 2.0.13 or later.
+
+2004-02-23  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_4_3)
+      ext/domxml/tests/bug26384.phpt:
+      skip test, if no XSLT support is compiled in
+
+    * ext/xml/compat.c
+      ext/xml/xml.c:
+      remove compiler warnings
+
+2004-02-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Decrease precedence of instanceof so that the following is true:
+      php -r 'var_export((object)1 instanceof stdClass);';
+      Patch by Jan Lehnardt
+
+2004-02-23  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xml/compat.c
+      ext/xml/xml.c:
+      - make it compile with libxml2 2.5 again
+      - disable xml_parser_create_ns with libxml2 2.5 for the time being
+      - the #if s can be removed, once we insist on libxml2 2.6
+
+2004-02-23  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      fixed report message
+      Disabled reconnect option
+
+2004-02-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4
+      ext/imap/config.m4:
+      - Added PHP_TEST_BUILD macro which can be used to test whether build
+        works / would work with current LIBS (+ additional extra-libs)
+
+2004-02-23  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/sqlite/sqlite.c
+      ext/standard/tests/array/array_sum.phpt:
+      64-bit fix
+
 2004-02-22  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_3)
