@@ -1,0 +1,4 @@
+# $Id$ -*- sh -*-
+
+define_option with-dbase 'dBase support? ' yesno no \
+'    Whether to use the bundled dbase library.'
