@@ -1046,11 +1046,12 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
  */
 int php_enable_output_compression(int buffer_size TSRMLS_DC)
 {
-	zval **a_encoding, **data;
+	zval **a_encoding;
 
-	if (zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data) == FAILURE
-		|| Z_TYPE_PP(data) != IS_ARRAY
-		|| zend_hash_find(Z_ARRVAL_PP(data), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding) == FAILURE
+	zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
+
+	if (!PG(http_globals)[TRACK_VARS_SERVER]
+		|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding) == FAILURE
 	) {
 		return FAILURE;
 	}
