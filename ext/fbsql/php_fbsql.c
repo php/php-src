@@ -1455,7 +1455,7 @@ PHP_FUNCTION(fbsql_set_characterset)
 {
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index, **zcharset, **zin_out;
-	int id;
+	int id = -1;
 	int charset = -1, in_out_both = 3;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1944,7 +1944,6 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link,
 	unsigned int   sR = 1, cR = 0;
 
 	meta = fbcdcExecuteDirectSQL(link->connection, sql);
-
 	if (!mdOk(link, meta, sql))
 	{
 		fbcmdRelease(meta);
@@ -1959,8 +1958,11 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link,
 			md = meta;
 
 		tp = fbcmdStatementType(md);
-
-		if ((tp[0] == 'C') || (tp[0] == 'R'))
+		if (tp == NULL) {
+			fbcmdRelease(meta);
+			ZVAL_BOOL(return_value, 0)
+		}
+		else if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
 			if (sR == 1 && md) fbcmdRelease(md);
 			ZVAL_BOOL(return_value, 1)
@@ -2054,7 +2056,6 @@ PHP_FUNCTION(fbsql_query)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(query);
-
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink, bs);
 }
 /* }}} */
