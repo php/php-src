@@ -802,8 +802,9 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 				esbuf[code] = '\0';
 
 				ebuf = erealloc(ebuf, ebuf_size + code + 1);
-				if (wptr = NULL)
+				if (wptr == NULL) {
 					wptr = ebuf;
+				}	
 
 				/* also copies the NUL */
 				memcpy(wptr, esbuf, code + 1);
