@@ -87,16 +87,54 @@ extern int ap_php_optind;
 
 #define OPTSTRING "aCc:d:ef:g:hilmnqr:sw?vz:"
 
-static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
 	php_printf("%s\n", module->name);
 	return 0;
 }
 
-static int _print_extension_info(zend_extension *module, void *arg TSRMLS_DC)
+static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 {
-	php_printf("%s\n", module->name);
+	Bucket *f = *((Bucket **) a);
+	Bucket *s = *((Bucket **) b);
+
+	return strcmp(((zend_module_entry *)f->pData)->name,
+				  ((zend_module_entry *)s->pData)->name);
+}
+
+static void print_modules(TSRMLS_D)
+{
+	HashTable sorted_registry;
+	zend_module_entry tmp;
+
+	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
+	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
+	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
+	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_destroy(&sorted_registry);
+}
+
+static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
+{
+	php_printf("%s\n", ext->name);
 	return 0;
+}
+
+static int extension_name_cmp(const zend_llist_element **f,
+							  const zend_llist_element **s TSRMLS_DC)
+{
+	return strcmp(((zend_extension *)(*f)->data)->name,
+				  ((zend_extension *)(*s)->data)->name);
+}
+
+static void print_extensions(TSRMLS_D)
+{
+	zend_llist sorted_exts;
+
+	zend_llist_copy(&sorted_exts, &zend_extensions);
+	zend_llist_sort(&sorted_exts, extension_name_cmp TSRMLS_CC);
+	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL TSRMLS_CC);
+	zend_llist_destroy(&sorted_exts);
 }
 
 #ifndef STDOUT_FILENO
@@ -562,9 +600,9 @@ int main(int argc, char *argv[])
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_printf("[PHP Modules]\n");
-				zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _print_module_info, NULL TSRMLS_CC);
+				print_modules(TSRMLS_C);
 				php_printf("\n[Zend Modules]\n");
-				zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) _print_extension_info, NULL TSRMLS_CC);
+				print_extensions(TSRMLS_C);
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
