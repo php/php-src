@@ -1,3 +1,39 @@
+2005-03-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_vm_execute.h:
+      - Second part of removing temp solution
+
+    * ZendEngine2/zend_vm_def.h:
+      - Remove potential bad solution for now
+
+2005-03-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/Makefile.frag:
+      Remove: Has not existed for ages..
+
+2005-03-24  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll RC2
+
+2005-03-24  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c
+      main/main.c:
+      - Fix typos
+
+2005-03-24  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      ext/session/session.c:
+      MFH: fix leak when register_long_arrays is off
+
+    * ext/session/session.c:
+      fix leak when register_long_arrays is off
+
 2005-03-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_4_3)
