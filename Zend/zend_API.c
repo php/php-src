@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andrei Zmievski <andrei@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -182,7 +183,400 @@ ZEND_API void wrong_param_count()
 	zend_error(E_WARNING,"Wrong parameter count for %s()",get_active_function_name());
 }
 
+
+/* Argument parsing API -- andrei */
+
+static char *zend_zval_type_name(zval *arg)
+{
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			return "null";
+
+		case IS_LONG:
+			return "integer";
+
+		case IS_DOUBLE:
+			return "double";
+
+		case IS_STRING:
+			return "string";
+
+		case IS_ARRAY:
+			return "array";
+
+		case IS_OBJECT:
+			return "object";
+
+		case IS_BOOL:
+			return "boolean";
+
+		case IS_RESOURCE:
+			return "resource";
+
+		default:
+			return "unknown";
+	}
+}
+
+static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
+{
+	zend_class_entry *ce;
+
+	if (Z_TYPE_P(obj) != IS_OBJECT) {
+		return 0;
+	}
+
+	for (ce = Z_OBJCE_P(obj); ce != NULL; ce = ce->parent) {
+		if (ce == expected_ce) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
+{
+	char *spec_walk = *spec;
+	char c = *spec_walk++;
+	int return_null = 0;
+
+	while (*spec_walk == '/' || *spec_walk == '!') {
+		if (*spec_walk == '/') {
+			SEPARATE_ZVAL_IF_NOT_REF(arg);
+		} else if (*spec_walk == '!' && Z_TYPE_PP(arg) == IS_NULL) {
+			return_null = 1;
+		}
+		spec_walk++;
+	}
+
+	switch (c) {
+		case 'l':
+			{
+				long *p = va_arg(*va, long *);
+				switch (Z_TYPE_PP(arg)) {
+					case IS_STRING:
+						{
+							double d;
+							int type;
+
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d)) == 0) {
+								return "long";
+							} else if (type == IS_DOUBLE) {
+								*p = (long) d;
+							}
+						}
+						break;
+
+					case IS_NULL:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_long_ex(arg);
+						*p = Z_LVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "long";
+				}
+			}
+			break;
+
+		case 'd':
+			{
+				double *p = va_arg(*va, double *);
+				switch (Z_TYPE_PP(arg)) {
+					case IS_STRING:
+						{
+							long l;
+							int type;
+
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &l, p)) == 0) {
+								return "double";
+							} else if (type == IS_LONG) {
+								*p = (double) l;
+							}
+						}
+						break;
+
+					case IS_NULL:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_double_ex(arg);
+						*p = Z_LVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "double";
+				}
+			}
+			break;
+
+		case 's':
+			{
+				char **p = va_arg(*va, char **);
+				int *pl = va_arg(*va, int *);
+				switch (Z_TYPE_PP(arg)) {
+					case IS_NULL:
+						if (return_null) {
+							*p = NULL;
+							*pl = 0;
+							break;
+						}
+						/* break omitted intentionally */
+
+					case IS_STRING:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_string_ex(arg);
+						*p = Z_STRVAL_PP(arg);
+						*pl = Z_STRLEN_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "string";
+				}
+			}
+			break;
+
+		case 'b':
+			{
+				zend_bool *p = va_arg(*va, zend_bool *);
+				switch (Z_TYPE_PP(arg)) {
+					case IS_NULL:
+					case IS_STRING:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_boolean_ex(arg);
+						*p = Z_BVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "boolean";
+				}
+			}
+			break;
+
+		case 'r':
+			{
+				zval **p = va_arg(*va, zval **);
+				if (Z_TYPE_PP(arg) != IS_RESOURCE) {
+					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+						*p = NULL;
+					} else {
+						return "resource";
+					}
+				} else
+					*p = *arg;
+			}
+			break;
+
+		case 'a':
+			{
+				zval **p = va_arg(*va, zval **);
+				if (Z_TYPE_PP(arg) != IS_ARRAY) {
+					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+						*p = NULL;
+					} else {
+						return "array";
+					}
+				} else
+					*p = *arg;
+			}
+			break;
+
+		case 'o':
+			{
+				zval **p = va_arg(*va, zval **);
+				if (Z_TYPE_PP(arg) != IS_OBJECT) {
+					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+						*p = NULL;
+					} else {
+						return "object";
+					}
+				} else
+					*p = *arg;
+			}
+			break;
+
+		case 'O':
+			{
+				zval **p = va_arg(*va, zval **);
+				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
+				if (Z_TYPE_PP(arg) != IS_OBJECT || !zend_check_class(*arg, ce)) {
+					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+						*p = NULL;
+					} else {
+						return ce->name;
+					}
+				} else
+					*p = *arg;
+			}
+			break;
+
+		case 'z':
+			{
+				zval **p = va_arg(*va, zval **);
+				if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
+					*p = NULL;
+				} else {
+					*p = *arg;
+				}
+			}
+			break;
+
+		default:
+			return "unknown";
+	}
+
+	*spec = spec_walk;
+
+	return NULL;
+}
+
+static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet)
+{
+	char *expected_type = NULL;
+	char buf[1024];
+
+	expected_type = zend_parse_arg_impl(arg, va, spec);
+	if (expected_type) {
+		if (!quiet) {
+			sprintf(buf, "%s() expects argument %d to be %s, %s given",
+					get_active_function_name(), arg_num, expected_type,
+					zend_zval_type_name(*arg));
+			zend_error(E_WARNING, buf);
+		}
+		return FAILURE;
+	}
 	
+	return SUCCESS;
+}
+
+static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags)
+{
+	char *spec_walk;
+	char buf[1024];
+	int c, i;
+	int min_num_args = -1;
+	int max_num_args = 0;
+	zval **arg;
+	void **p;
+	int arg_count;
+	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
+	ELS_FETCH();
+
+	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
+		c = *spec_walk;
+		switch (c) {
+			case 'l': case 'd':
+			case 's': case 'b':
+			case 'r': case 'a':
+			case 'o': case 'O':
+			case 'z':
+				max_num_args++;
+				break;
+
+			case '|':
+				min_num_args = max_num_args;
+				break;
+
+			case '/':
+			case '!':
+				/* Pass */
+				break;
+
+			default:
+				if (!quiet) {
+					zend_error(E_WARNING, "%s(): bad type specifier while parsing arguments", get_active_function_name());
+				}
+				return FAILURE;
+		}
+	}
+
+	if (min_num_args < 0) {
+		min_num_args = max_num_args;
+	}
+
+	if (num_args < min_num_args || num_args > max_num_args) {
+		if (!quiet) {
+			sprintf(buf, "%s() requires %s %d argument%s, %d given",
+					get_active_function_name(),
+					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+					num_args < min_num_args ? min_num_args : max_num_args,
+					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+					num_args);
+			zend_error(E_WARNING, buf);
+		}
+		return FAILURE;
+	}
+
+	p = EG(argument_stack).top_element-2;
+	arg_count = (ulong) *p;
+
+	if (num_args > arg_count) {
+		zend_error(E_WARNING, "%s(): could not obtain arguments for parsing",
+				   get_active_function_name());
+		return FAILURE;
+	}
+
+	i = 0;
+	while (num_args-- > 0) {
+		arg = (zval **) p - (arg_count-i);
+		if (*type_spec == '|') {
+			type_spec++;
+		}
+		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet) == FAILURE) {
+			return FAILURE;
+		}
+		i++;
+	}
+
+	return SUCCESS;
+}
+
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...)
+{
+	va_list va;
+	int retval;
+	
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags);
+	va_end(va);
+
+	return retval;
+}
+
+ZEND_API int zend_parse_parameters(int num_args, char *type_spec, ...)
+{
+	va_list va;
+	int retval;
+	
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, 0);
+	va_end(va);
+
+	return retval;
+}
+
+/* Argument parsing API -- andrei */
+
+
 ZEND_API inline int _array_init(zval *arg ZEND_FILE_LINE_DC)
 {
 	ALLOC_HASHTABLE_REL(arg->value.ht);
