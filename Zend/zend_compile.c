@@ -298,7 +298,6 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 			*result = last_op->result;
 			break;
 		case ZEND_FETCH_DIM_RW:
-#if 1
 			last_op->opcode = op;
 			last_op->extended_value = ZEND_ASSIGN_DIM;
 
@@ -309,7 +308,6 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 			SET_UNUSED(opline->result);
 			*result = last_op->result;
 			break;
-#endif
 		default:
 			opline->opcode = op;
 			opline->op1 = *op1;
