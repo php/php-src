@@ -2863,7 +2863,12 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	if (OCI(error) != OCI_SUCCESS) {
 		oci_error(OCI(pError), "OCISessionBegin", OCI(error));
-		goto CLEANUP;
+		/* OCISessionBegin returns OCI_SUCCESS_WITH_INFO when
+		 * user's password has expired, but is still usable.
+		 * */
+		if (OCI(error) != OCI_SUCCESS_WITH_INFO) {
+			goto CLEANUP;
+		}
 	}
 
 	/* Free Temporary Service Context */
