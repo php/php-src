@@ -575,7 +575,7 @@ static void php_insert_filter(request_rec *r)
 	int content_type_len = strlen("application/x-httpd-php");
 
 	if (r->content_type && !strncmp(r->content_type, "application/x-httpd-php", content_type_len-1)) {
-		if (r->content_type[content_type_len] == '\0' || !strncmp(r->content_type+content_type_len, "-source", strlen("-source"))) { 
+		if (r->content_type[content_type_len] == '\0' || !strncmp(r->content_type+content_type_len, "-source", sizeof("-source"))) { 
 			php_add_filter(r, r->output_filters);
 			php_add_filter(r, r->input_filters);
 		}	
