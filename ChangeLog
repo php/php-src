@@ -1,3 +1,98 @@
+2000-06-15  Andi Gutmans  <andi@php.net>
+
+    * ext/gd/gd.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c
+      ext/odbc/php_odbc.c
+      ext/pdf/pdf.c
+      ext/xml/xml.c
+      sapi/apache/php_apache.c
+      ext/cpdf/cpdf.c
+      ext/db/db.c: - More #if WIN32|WINNT -> #ifdef PHP_WIN32 conversions
+
+    * sapi/cgi/cgi_main.c: - Beautify a bit
+
+    * sapi/cgi/cgi_main.c: - Try and fix crash with CGI.
+    - Please check out the comment I wrote in init_request_info(). There was a
+    - lot of code there which was running for no apparent reason. Should it be
+    - removed or should it actually run?
+
+2000-06-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/datetime.c:
+    Use hardcoded 3600 seconds offset instead of altzone which may not be present
+    on all systems.
+
+2000-06-15  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c: - Unncessary SLS_FETCH();
+
+2000-06-15  brianlmoon  <brianlmoon@va>
+
+    * ext/standard/basic_functions.c:
+    set_file_buffer was not being exported.  This is now fixed.
+
+2000-06-15  Andi Gutmans  <andi@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * main/php_virtual_cwd.c: - virtual_fopen() should fail on empty path
+
+2000-06-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: .
+
+2000-06-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Another entry.
+
+    * configure.in
+      ext/standard/datetime.c
+      ext/standard/parsedate.y:
+    - Updated strtotime() to handle many more formats. It now has complete
+      feature parity with GNU date command. 
+
+2000-06-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/oracle.c: fixed typo
+
+2000-06-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * .cvsignore: Add php_version.h.
+
+2000-06-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testdom:
+    - changes to handle the slightly different access to attributes
+
+    * ext/domxml/php_domxml.c:
+    - fixed problems with missing attributes due to a change
+      in libxml 2.0.0
+
+2000-06-15  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/php_imap.c:
+    patch from jtaskine@hit.fi - add deleted info to imap_mailboxmsginfo() and
+    fix some prototype info.
+
+2000-06-15  Jouni Ahto  <jah@mork.net>
+
+    * README.EXT_SKEL
+      ext/ext_skel
+      ext/skeleton/create_stubs
+      ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c:
+    - Fixed incorrect code generated when all parameters are optional.
+    - Fixed handling of grouped optional parameters.
+    - Added an option to generate xml documentation.
+    - Added an option not to be nice and helpful and create all kinds
+      of comments and testing functions.
+    - Added on option to create function stubs only.
+    - Added options --assing-params and --string-lens that change
+      the generated code.
+    - Updated documentation.
+
 2000-06-14  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/datetime.c:
