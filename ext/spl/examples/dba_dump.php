@@ -5,18 +5,19 @@
  * Usage php dba_dump <file> <handler>
  *
  * Note: configure with --enable-dba 
+ *
+ * (c) Marcus Boerger
  */
 
-class dba_reader implements spl::iterator {
+class dba_reader implements spl_sequence_assoc
+{
 
-	public $db = NULL;
+	private $db = NULL;
+	private $key = false;
+	private $val = false;
 
 	function __construct($file, $handler) {
 		$this->db = dba_open($file, 'r', $handler);
-	}
-	
-	function new_iterator() {
-		return new dba_iter($this);
 	}
 	
 	function __destruct() {
@@ -24,35 +25,28 @@ class dba_reader implements spl::iterator {
 			dba_close($this->db);
 		}
 	}
-}
 
-class dba_iter implements spl::sequence_assoc {
-
-	private $obj;
-	private $key = NULL;
-	private $val = NULL;
-
-	function __construct($obj) {
-		$this->obj = $obj;
-	}
-
-	function reset() {
-		if ($this->obj->db) {
-			$this->key = dba_firstkey($this->obj->db);
+	function rewind() {
+		if ($this->db) {
+			$this->key = dba_firstkey($this->db);
 		}
 	}
 
-	function elem() {
+	function current() {
 		return $this->val;
 	}
 
 	function next() {
-		$this->key = dba_nextkey($this->obj->db);
+		if ($this->db) {
+			$this->key = dba_nextkey($this->db);
+			if ($this->key !== false) {
+				$this->val = dba_fetch($this->key, $this->db);
+			}
+		}
 	}
 
-	function more() {
-		if ($this->obj->db && $this->key !== false) {
-			$this->val = dba_fetch($this->key, $this->obj->db);
+	function has_more() {
+		if ($this->db && $this->key !== false) {
 			return true;
 		} else {
 			return false;
