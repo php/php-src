@@ -643,8 +643,12 @@
 
 #endif
 
+#if defined(ZEND_VM_SPEC) && (ZEND_VM_KIND == ZEND_VM_KIND_CALL)
+ZEND_VM_NULL_HANDLER();
+#else
 ZEND_VM_NULL_HANDLER()
 {
   zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", EX(opline)->opcode, EX(opline)->op1.op_type, EX(opline)->op2.op_type);
   ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
 }
+#endif
