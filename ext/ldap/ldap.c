@@ -207,7 +207,7 @@ PHP_MINIT_FUNCTION(ldap)
 
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
-	le_result_entry = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result entry", module_number);
+	le_result_entry = zend_register_list_destructors_ex(NULL, NULL, "ldap result entry", module_number);
 
 	ldap_module_entry.type = type;
 
