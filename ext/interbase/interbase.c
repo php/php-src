@@ -433,22 +433,11 @@ static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	ibase_result *ib_result = (ibase_result *) rsrc->ptr;
 
 	IBDEBUG("Freeing result by dtor...");
-	if (ib_result) {
+	if (ib_result && ib_result->query == NULL) { /* doesn't belong to a query */
 		_php_ibase_free_xsqlda(ib_result->out_sqlda);
-		if (ib_result->drop_stmt && ib_result->stmt) {
+		if (ib_result->stmt) {
 			IBDEBUG("Dropping statement handle (free_result dtor)...");
 			isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_drop);
-		} else {
-			/* Shouldn't be here unless query was select and had parameter
-			   placeholders, in which case ibase_execute handles this???
-			   (Testing seems to confirm the decision was a right one.)
-			*/
-			IBDEBUG("Closing statement handle...");
-			/*
-			if (isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_close)) {
-				_php_ibase_error();
-			}
-			*/
 		}
 		if (ib_result->out_array) {
 			efree(ib_result->out_array);
@@ -471,6 +460,14 @@ static void _php_ibase_free_query(ibase_query *ib_query TSRMLS_DC)
 	}
 	if (ib_query->stmt) {
 		IBDEBUG("Dropping statement handle (free_query)...");
+		if (ib_query->result) {
+			_php_ibase_free_xsqlda(ib_query->result->out_sqlda);
+	
+			if (ib_query->result->out_array) {
+				efree(ib_query->result->out_array);
+			}
+			efree(ib_query->result);
+		}
 		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop)) {
 			_php_ibase_error(TSRMLS_C);
 		}
@@ -1162,15 +1159,14 @@ static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, ib
 	
 	ib_query->link = link;
 	ib_query->trans = trans;
+	ib_query->result = NULL;
+	ib_query->result_res_id = 0;
 	ib_query->stmt = NULL;
-	ib_query->out_sqlda = NULL;
-	ib_query->in_sqlda = NULL;
 	ib_query->in_array = NULL;
 	ib_query->in_array_cnt = 0;
 	ib_query->out_array = NULL;
 	ib_query->out_array_cnt = 0;
 	ib_query->dialect = dialect;
-	ib_query->statement_type = '\0';
 	ib_query->query = estrdup(query);
 	ib_query->trans_res_id = trans_res_id;
 	
@@ -1616,30 +1612,33 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
 		IBDEBUG("Query wants XSQLDA for output");
-		IB_RESULT = emalloc(sizeof(ibase_result));
-		IB_RESULT->link = ib_query->link;
-		IB_RESULT->trans = ib_query->trans;
-		IB_RESULT->stmt = ib_query->stmt; 
-		IB_RESULT->statement_type = ib_query->statement_type;
-		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
+		if (IB_RESULT == NULL) { 
+			IB_RESULT = emalloc(sizeof(ibase_result));
+			IB_RESULT->link = ib_query->link;
+			IB_RESULT->trans = ib_query->trans;
+			IB_RESULT->stmt = ib_query->stmt; 
+			IB_RESULT->statement_type = ib_query->statement_type;
+			IB_RESULT->out_sqlda = NULL;
 
-		out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
-		memcpy(out_sqlda, ib_query->out_sqlda, XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
-		_php_ibase_alloc_xsqlda(out_sqlda);
+			out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
+			memcpy(out_sqlda, ib_query->out_sqlda, XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
+			_php_ibase_alloc_xsqlda(out_sqlda);
 
-		if (ib_query->out_array) {
-			IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), ib_query->out_array_cnt, 0);
-			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * ib_query->out_array_cnt);
-		} else {
-			IB_RESULT->out_array = NULL;
+			if (ib_query->out_array) {
+				IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), ib_query->out_array_cnt, 0);
+				memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * ib_query->out_array_cnt);
+			} else {
+				IB_RESULT->out_array = NULL;
+			}
 		}
+		IB_RESULT->has_more_rows = 1;
 	}
 
 	if (ib_query->in_sqlda) { /* has placeholders */
 		IBDEBUG("Query wants XSQLDA for input");
 		if (ib_query->in_sqlda->sqld != argc) {
 			_php_ibase_module_error("Placeholders (%d) and variables (%d) mismatch", ib_query->in_sqlda->sqld, argc);
-			goto _php_ibase_exec_error;  /* yes mommy, goto! */
+			goto _php_ibase_exec_error;
 		}
 		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
 		memcpy(in_sqlda, ib_query->in_sqlda, XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
@@ -1660,7 +1659,6 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_exec_error;
 	}
-
 	ib_query->trans->affected_rows = 0;
 	
 	switch (ib_query->statement_type) {
@@ -2028,8 +2026,7 @@ PHP_FUNCTION(ibase_query)
 	int i, bind_n = 0, trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
-	ibase_query ib_query;
-	ibase_result *ib_result = NULL;
+	ibase_query ib_query= { NULL, NULL, NULL, 0 };
 	char *query;
 
 	RESET_ERRMSG;
@@ -2154,7 +2151,7 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, &ib_query, bind_n, bind_args) == FAILURE) {
+	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_query.result, &ib_query, bind_n, bind_args) == FAILURE) {
 		_php_ibase_free_query(&ib_query TSRMLS_CC);
 		free_alloca(args);
 		RETURN_FALSE;
@@ -2162,10 +2159,9 @@ PHP_FUNCTION(ibase_query)
 
 	free_alloca(args);
 	
-	if (ib_result) { /* select statement */
-		ib_result->drop_stmt = 1; /* drop stmt when free result */
-		ib_result->has_more_rows = 1;
-		ZEND_REGISTER_RESOURCE(return_value, ib_result, le_result);
+	if (ib_query.result != NULL) { /* select statement */
+		ib_query.result->query = NULL; /* drop stmt when free result */
+		ZEND_REGISTER_RESOURCE(return_value, ib_query.result, le_result);
 
 		ib_query.stmt = NULL; /* keep stmt when free query */
 	}
@@ -2827,8 +2823,6 @@ PHP_FUNCTION(ibase_prepare)
 		efree(ib_query);
 		RETURN_FALSE;
 	}
-	ib_query->cursor_open = 0;
-
 	ZEND_REGISTER_RESOURCE(return_value, ib_query, le_query);
 }
 /* }}} */
@@ -2839,7 +2833,6 @@ PHP_FUNCTION(ibase_execute)
 {
 	zval ***args, **bind_args = NULL;
 	ibase_query *ib_query;
-	ibase_result *ib_result = NULL;
 
 	RESET_ERRMSG;
 
@@ -2861,14 +2854,14 @@ PHP_FUNCTION(ibase_execute)
 	}
 	
 	/* Have we used this cursor before and it's still open? */
-	if (ib_query->cursor_open) {
+	if (ib_query->result != NULL) {
 		IBDEBUG("Implicitly closing a cursor");
 		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_close)) {
 			_php_ibase_error(TSRMLS_C);
 		}
 	}
-
-	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, ib_query, ZEND_NUM_ARGS() - 1, bind_args) == FAILURE) {
+		
+	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_query->result, ib_query, ZEND_NUM_ARGS() - 1, bind_args) == FAILURE) {
 		free_alloca(args);
 		RETURN_FALSE;
 	}
@@ -2880,12 +2873,19 @@ PHP_FUNCTION(ibase_execute)
 
 	free_alloca(args);
 	
-	if (ib_result) { /* select statement */
-		ib_query->cursor_open = 1;
-		ib_result->has_more_rows = 1;
-		ZEND_REGISTER_RESOURCE(return_value, ib_result, le_result);
-	} else {
-		ib_query->cursor_open = 0;
+	if (ib_query->result != NULL) {
+		int type;
+
+		ib_query->result->query = ib_query;
+		
+		/* return the same resource at every execution if it hasn't been freed */
+		if (ib_query->result_res_id == 0 ||
+			!zend_list_find(ib_query->result_res_id, &type) || 
+			type != le_result) {
+
+			ib_query->result_res_id = zend_list_insert(ib_query->result, le_result);
+		}
+		RETURN_RESOURCE(ib_query->result_res_id);
 	}
 }
 /* }}} */
