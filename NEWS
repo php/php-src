@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed infinite recursion crash bug in ticks (Jason)
 - Added php.ini option "mysql.connect_timeout" to set the timeout limit for 
   mysql_connect() and mysql_pconnect(). (Georg)
 - Added optional parameter "flags" to mysql_connect() and mysql_pconnect() 
