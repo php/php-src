@@ -157,10 +157,13 @@ ZEND_API zend_bool zend_is_executing(void);
 
 void zend_set_timeout(long seconds);
 void zend_unset_timeout(void);
+void zend_timeout(int dummy);
+
 #ifdef ZEND_WIN32
-void zend_register_timeout_wndclass(void);
-void zend_create_timeout_window(ELS_D);
-void zend_destroy_timeout_window(ELS_D);
+void zend_init_timeout_thread();
+void zend_shutdown_timeout_thread();
+#define WM_REGISTER_ZEND_TIMEOUT		(WM_USER+1)
+#define WM_UNREGISTER_ZEND_TIMEOUT		(WM_USER+2)
 #endif
 
 #define zendi_zval_copy_ctor(p) zval_copy_ctor(&(p))

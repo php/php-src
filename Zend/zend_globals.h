@@ -167,6 +167,10 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	zend_bool no_extensions;
 
+#ifdef ZEND_WIN32
+	zend_bool timed_out;
+#endif
+
 	HashTable regular_list;
 	HashTable persistent_list;
 
@@ -182,9 +186,6 @@ struct _zend_executor_globals {
 
 	/* timeout support */
 	int timeout_seconds;
-#ifdef ZEND_WIN32
-	HWND timeout_window;
-#endif
 
 	int lambda_count;
 
