@@ -14,6 +14,9 @@ Zend
       but don't declare those as const. This makes interaction with other
       interfaces difficult which pass const parameters to us. 
     * add try..catch/throw exception handling
+    * Add configure test to determine if dlsym() requires underscore and set
+      DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
+      for example.
 
 global
 ------
