@@ -1,3 +1,95 @@
+2000-07-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mcrypt/mcrypt.c: Read from /dev/u?random until the buffer is filled.
+
+    Submitted by: Derick Rethans <d.rethans@jdimedia.nl>
+
+2000-07-25  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+    Trivial change to add access to CURL version information for
+    user programs in order to have them react appropriately.
+
+2000-07-25  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/php_pspell.h:
+    added several functions for manipulating wordlists:
+     pspell_store_replacement()
+     pspell_add_to_personal()
+     pspell_add_to_session()
+     pspell_clear_session()
+
+    * ext/pspell/pspell.c:
+    - added several functions for manipulating wordlists - pspell_store_replacement(), pspell_add_to_personal(), pspell_add_to_session(), pspell_clear_session().
+    - fixed a few confusing typos in comments
+
+2000-07-25  Joey Smith  <joey@joeysmith.com>
+
+    * EXTENSIONS: There is still something wrong with Sybase DB-Lib,
+    but CT-Lib works great.
+
+2000-07-25  Stanislav Malyshev  <stas@zend.com>
+
+    * main/configuration-parser.y: Make browscap parameter names lowercase
+    Fix . handling in browscap names
+
+    * ext/standard/browscap.c: Fix more bugs in browscap
+
+2000-07-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:    Fixes bugs #5433 and #5603.
+
+2000-07-25  Stig Bakken  <ssb@fast.no>
+
+    * configure.in:
+    Finally fixed so config.status can regenerate single files without
+    doing the whole fastgen and warning message whoopla again.  Whee!
+
+    * acinclude.m4: forgot to commit this one last night
+
+2000-07-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/info.c:
+    Report configuration path that is really used, not that is compiled in
+
+2000-07-25  David Croft  <david@infotrek.co.uk>
+
+    * EXTENSIONS
+      MAINTAINERS
+      MODULES_STATUS:
+    Merged MAINTAINERS and MODULES_STATUS into EXTENSIONS, added version
+    field, added the missing extensions, added comments, filled in some
+    maintainers.
+
+
+2000-07-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/html.c: htmlspecialchars and htmlentities will now
+    encode single quotes to &#39;
+    (due to feature request in BUG ID#5254)
+
+2000-07-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/browscap.c:
+    Default section name should be uppercase, I guess
+
+2000-07-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php
+      pear/run-tests.in
+      pear/tests/PEAR.r
+      pear/tests/PEAR.t
+      pear/tests/php.ini
+      pear/.cvsignore
+      pear/package.dtd: * the beginning of a regression testing framework?
+
+2000-07-25  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/swf/config.m4: remove comments for consistency.
+
+    * NEWS: .
+
 2000-07-24  Stig Bakken  <ssb@fast.no>
 
     * configure.in
