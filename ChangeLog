@@ -1,3 +1,61 @@
+2004-09-08  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix bug #28054 by preventing printing out bogus information in backtrace
+        when in error handler (still doesn't know all information but at least
+        it's not bogus)
+
+2004-09-08  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+      -** empty log message ***
+
+2004-09-08  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm_handlers.h
+      ZendEngine2/zend_vm_spec.h:
+      - Some architectural changes:
+       a) We specialize opcodes according to op_type fields. Each opcode has to
+          be marked with which op_type's it uses.
+       b) We support different execution methods. Function handlers, switch()
+          and goto dispatching. goto seems to be the fastest but it really
+          depends on the compiler and how well it optimizes. I suggest playing
+          around with optimization flags.
+      
+      - Warning: Things might break so keep us posted on how things are going.
+        (Dmitry, Andi)
+
+2004-09-08  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_5_0)
+      main/streams/streams.c:
+      MFH (r.163) Handle maxlen when stream can't be mmaped
+
+    * main/streams/streams.c:
+      Handle maxlen when stream can't be mmaped
+
+2004-09-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      MHF: fix issue with multiple xsl objects using registerPHPfunctions
+       - also fixes threading issue
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      fix issue with multiple xsl objects using registerPHPfunctions
+       - also fixes threading issue
+
 2004-09-07  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/http_fopen_wrapper.c:
