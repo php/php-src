@@ -574,6 +574,7 @@ default_socket_timeout = 60
 ;extension=php_ming.dll
 ;extension=php_mssql.dll
 ;extension=php_msql.dll
+;extension=php_mysql.dll
 ;extension=php_oci8.dll
 ;extension=php_openssl.dll
 ;extension=php_oracle.dll
