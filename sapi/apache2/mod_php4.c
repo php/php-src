@@ -433,11 +433,6 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 		zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
 	}
 
-	/* We don't accept OPTIONS requests, but take everything else */
-	if (r->method_number == M_OPTIONS) {
-		r->allowed |= (1 << METHODS) - 1;
-		return DECLINED;
-	}
 
 	/* Make sure file exists */
 	if (filename == NULL && r->finfo.st_mode == 0) {
@@ -690,39 +685,58 @@ void php_init_handler(server_rec *s, pool *p)
 	}
 }
 
+typedef struct PHP_OUTPUT_FILTER_CTX {
+	ap_bucket_brigade *b;
+} php_output_filter_ctx_t;
 
-#if HAVE_MOD_DAV
+static int php_filter(ap_filter_t *f, ap_bucket_brigade *b) {
+	request_rec *r = f->r;
+	conn_rec *c = f->c;
+	php_output_filter_ctx_t *ctx = f->ctx;
+	apr_status_t rv;
+	const char *str;
+	apr_ssize_t n;
+	long size = 0L;
+	char *content, *p;
 
-extern int phpdav_mkcol_test_handler(request_rec *r);
-extern int phpdav_mkcol_create_handler(request_rec *r);
-
-/* conf is being read twice (both here and in send_php()) */
-int send_parsed_php_dav_script(request_rec *r)
-{
-	php_apache_info_struct *conf;
-
-	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config,
-													&php4_module);
-	return send_php(r, 0, 0, conf->dav_script);
-}
-
-static int php_type_checker(request_rec *r)
-{
-	php_apache_info_struct *conf;
-
-	conf = (php_apache_info_struct *)get_module_config(r->per_dir_config,
-												   &php4_module);
-
-    /* If DAV support is enabled, use mod_dav's type checker. */
-    if (conf->dav_script) {
-		dav_api_set_request_handler(r, send_parsed_php_dav_script);
-		dav_api_set_mkcol_handlers(r, phpdav_mkcol_test_handler,
-								   phpdav_mkcol_create_handler);
-		/* leave the rest of the request to mod_dav */
-		return dav_api_type_checker(r);
+	/* We don't accept OPTIONS requests, but take everything else */
+	if (r->method_number == M_OPTIONS) {
+		r->allowed |= (1 << METHODS) - 1;
+		return ap_pass_brigade(f->next, b);
+	}
+	
+	if (ctx == NULL) {
+		f->ctx = ctx = apr_pcalloc(c->pool, sizeof(php_output_filter_ctx_t));
+		ctx->b = ap_brigade_create(c->pool); /* create an initial empty brigade */
 	}
 
-    return DECLINED;
+	AP_BRIGADE_CONCAT(ctx->b,b);
+	if(AP_BUCKET_IS_EOS(AP_BRIGADE_LAST(b))) {
+		/* Ok, we have all of our brigades, time to munch on the buckets */
+		AP_BRIGADE_FOREACH(e, b) {
+			rv = ap_bucket_read(e, &str, &n, 1);
+		}
+		/* Because some of our buckets may be pipes, we can't actually get the
+		 * total size of our brigade on our first pass, so run through them all
+		 * again to get the total size of the brigade */
+		AP_BRIGADE_FOREACH(e, b) {
+			size += e->length;
+		}
+		/* Now that we have the size we can allocate a big chunk of memory
+		 * where we will memcpy all of the buckets into. */
+		content = p = apr_pcalloc(c->pool, size+1);		
+		/* And now we can copy the buckets into our buffer */
+		AP_BRIGADE_FOREACH(e, b) {
+			memcpy(p, e->data, e->length);
+			p += e->length;
+		}
+		/* We should now have a flat buffer in 'content' that we somehow have
+		 * to get PHP to parse... */
+	}
+}
+
+static void register_php_hooks (void) {
+	ap_register_output_filter("PHP", php_filter, AP_FTYPE_CONTENT);	
 }
 
 static const handler_rec php_handlers[] =
@@ -732,7 +746,6 @@ static const handler_rec php_handlers[] =
 	{"text/html", php_xbithack_handler},
 	{NULL}
 };
-
 
 command_rec php_commands[] =
 {
@@ -752,7 +765,7 @@ module AP_MODULE_DECLARE_DATA php_module =
 	NULL,                    /* merge server config */
 	php_commands,            /* command apr_table_t */
 	php_handlers,            /* handlers */
-	NULL                     /* register hooks */
+	register_php_hooks       /* register hooks */
 };
 
 /*
