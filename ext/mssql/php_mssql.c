@@ -1262,11 +1262,15 @@ PHP_FUNCTION(mssql_num_fields)
 
 /* }}} */
 
-static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args)
 {
 	zval **mssql_result_index, **resulttype = NULL;
 	mssql_result *result;
 	int i;
+
+	if (ZEND_NUM_ARGS() > expected_args) {
+		WRONG_PARAM_COUNT;
+	}
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1357,11 +1361,11 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	result->cur_row++;
 }
 
-/* {{{ proto array mssql_fetch_row(resource result_id [, int result_type])
+/* {{{ proto array mssql_fetch_row(resource result_id)
    Returns an array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_row)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_NUM);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_NUM, 1);
 }
 
 /* }}} */
@@ -1370,7 +1374,7 @@ PHP_FUNCTION(mssql_fetch_row)
    Returns a psuedo-object of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_object)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC, 2);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -1382,16 +1386,16 @@ PHP_FUNCTION(mssql_fetch_object)
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_BOTH);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_BOTH, 2);
 }
 
 /* }}} */
 
-/* {{{ proto array mssql_fetch_assoc(resource result_id [, int result_type])
+/* {{{ proto array mssql_fetch_assoc(resource result_id)
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_assoc)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC, 1);
 }
 
 /* }}} */

@@ -358,9 +358,9 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistent",				"1",		PHP_INI_SYSTEM, OnUpdateInt,    allowPersistent,  zend_fbsql_globals, fbsql_globals)
-	STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings",			"0",		PHP_INI_SYSTEM, OnUpdateInt,    generateWarnings, zend_fbsql_globals, fbsql_globals)
-	STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",					"1",		PHP_INI_SYSTEM, OnUpdateInt,    autoCommit,	      zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistent",				"1",		PHP_INI_SYSTEM, OnUpdateBool,	allowPersistent,  zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings",			"0",		PHP_INI_SYSTEM, OnUpdateBool,	generateWarnings, zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",					"1",		PHP_INI_SYSTEM, OnUpdateBool,	autoCommit,	      zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",				"-1",		PHP_INI_SYSTEM, OnUpdateInt,    maxPersistent,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
@@ -2706,7 +2706,7 @@ PHP_FUNCTION(fbsql_num_fields)
    Fetch a row of data. Returns an indexed array */
 PHP_FUNCTION(fbsql_fetch_row)
 {
-	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM, 1);
 }
 /* }}} */
 
@@ -2714,7 +2714,7 @@ PHP_FUNCTION(fbsql_fetch_row)
    Detch a row of data. Returns an assoc array */
 PHP_FUNCTION(fbsql_fetch_assoc)
 {
-	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC, 1);
 }
 /* }}} */
 
@@ -2722,7 +2722,7 @@ PHP_FUNCTION(fbsql_fetch_assoc)
    Fetch a row of data. Returns an object */
 PHP_FUNCTION(fbsql_fetch_object)
 {
-	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC, 2);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -2733,7 +2733,7 @@ PHP_FUNCTION(fbsql_fetch_object)
    Fetches a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(fbsql_fetch_array)
 {
-	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_BOTH);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_BOTH, 2);
 }
 /* }}} */
 
@@ -2781,7 +2781,7 @@ static void _parse_list(zval** return_value, FBCPList* list)
 	}
 }
 
-static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args)
 {
 
 	PHPFBResult* result = NULL;
@@ -2789,6 +2789,10 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int rowIndex;
 	int i;
 	void **row;
+
+	if (ZEND_NUM_ARGS() > expected_args) {
+		WRONG_PARAM_COUNT;
+	}
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
