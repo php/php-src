@@ -112,7 +112,7 @@ static uint zend_version_info_length;
 
 #define PRINT_ZVAL_INDENT 4
 
-static void print_hash(HashTable *ht, int indent TSRMLS_DC)
+static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 {
 	zval **tmp;
 	char *string_key;
@@ -134,7 +134,21 @@ static void print_hash(HashTable *ht, int indent TSRMLS_DC)
 		ZEND_PUTS("[");
 		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
-				ZEND_PUTS(string_key);
+				if (is_object) {
+					char *prop_name, *class_name;
+
+					unmangle_property_name(string_key, &class_name, &prop_name);
+					ZEND_PUTS(prop_name);
+					if (class_name) {
+						if (class_name[0]=='*') {
+							ZEND_PUTS(":protected");
+						} else {
+							ZEND_PUTS(":private");
+						}
+					}
+				} else {
+					ZEND_PUTS(string_key);
+				}
 				break;
 			case HASH_KEY_IS_LONG:
 				zend_printf("%ld", num_key);
@@ -331,7 +345,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				expr->value.ht->nApplyCount--;
 				return;
 			}
-			print_hash(expr->value.ht, indent TSRMLS_CC);
+			print_hash(expr->value.ht, indent, 0 TSRMLS_CC);
 			expr->value.ht->nApplyCount--;
 			break;
 		case IS_OBJECT:
@@ -356,7 +370,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 						properties->nApplyCount--;
 						return;
 					}
-					print_hash(properties, indent TSRMLS_CC);
+					print_hash(properties, indent, 1 TSRMLS_CC);
 					properties->nApplyCount--;
 				}
 				break;

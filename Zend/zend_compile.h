@@ -455,6 +455,7 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
+void unmangle_property_name(char *mangled_property, char **prop_name, char **class_name);
 void zend_duplicate_property_info(zend_property_info *property_info);
 void zend_destroy_property_info(zend_property_info *property_info);
 
