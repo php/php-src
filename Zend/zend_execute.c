@@ -2475,7 +2475,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-		zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
+		zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
 	}
 
 	if (!is_const) {
@@ -3122,13 +3122,13 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error(E_ERROR, "Call to private __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+				zend_error(E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+				zend_error(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
 			}
 		}
 	}

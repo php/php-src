@@ -16,4 +16,4 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to protected test::__destruct from context '' in %sfactory_and_singleton_005.php on line %d
+Fatal error: Call to protected test::__destruct() from context '' in %sfactory_and_singleton_005.php on line %d

@@ -17,4 +17,4 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to protected __clone from context '' %sfactory_and_singleton_007.php on line %d
+Fatal error: Call to protected test::__clone() from context '' %sfactory_and_singleton_007.php on line %d
