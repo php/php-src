@@ -2849,6 +2849,9 @@ PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
 
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 {
+	if (notifier->dtor) {
+		notifier->dtor(notifier);
+	}
 	efree(notifier);
 }
 
