@@ -1,11 +1,5 @@
 --TEST--
 preg_split() bug #20528
---SKIPIF--
-<?php
-	if (!extension_loaded("pcre")) {
-		die("skip pcre extension is not available");
-	}
-?>
 --FILE--
 <?php
 	$data = '(#11/19/2002#)';

@@ -1,9 +1,5 @@
 --TEST--
 Bug #21732 (preg_replace() segfaults with invalid parameters)
---SKIPIF--
-<?php
-extension_loaded("pcre") or die("skip pcre extension is not available");
-?>
 --INI--
 error_reporting=0
 --FILE--
