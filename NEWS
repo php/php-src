@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . added spl_autoload*() functions
   . converted several 5.0 examples into c code
   . added class File
+- Added optional first parameter to XsltProcessor::registerPHPFunctions to only  
+  allow certain functions to be called from XSLT. (Christian)
 - Added the ability to override the autotools executables used by the buildconf
   script via the PHP_AUTOCONF and PHP_AUTOHEADER environmental variables. (Jon)
 - Added several new functions to support the PostgreSQL v3 protocol introduced 

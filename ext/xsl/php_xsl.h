@@ -57,6 +57,7 @@ typedef struct _xsl_object {
 	HashTable *parameter;
 	int hasKeys;
 	int registerPhpFunctions;
+	HashTable *registered_phpfunctions;
 	HashTable *node_list;
 	php_libxml_node_object *doc;
 } xsl_object;
