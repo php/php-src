@@ -80,7 +80,7 @@ fi
 
 # Export PHP
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$PHPMOD'...$ECHO_C"
-cvs -d $PHPROOT -Q export -d $DIR -r $CVSTAG $PHPMOD || exit 4
+cvs -z 9 -d $PHPROOT -Q export -d $DIR -r $CVSTAG $PHPMOD || exit 4
 echo ""
 
 # Export the other modules inside the PHP directory
@@ -88,12 +88,12 @@ cd $DIR || exit 5
 
 # Export Zend
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$ZENDMOD'...$ECHO_C"
-cvs -d $ZENDROOT -Q export -r $CVSTAG $ZENDMOD || exit 4
+cvs -z 9 -d $ZENDROOT -Q export -r $CVSTAG $ZENDMOD || exit 4
 echo ""
 
 # Export TSRM
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$TSRMMOD'...$ECHO_C"
-cvs -d $ZENDROOT -Q export -r $CVSTAG $TSRMMOD || exit 4
+cvs -z 9 -d $ZENDROOT -Q export -r $CVSTAG $TSRMMOD || exit 4
 echo ""
 
 # remove CVS stuff...
