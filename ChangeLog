@@ -1,3 +1,109 @@
+2001-05-04  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+    Merged and adapted a patch from Sascha Kettler <kettler@gmx.net> that provides
+    some asymmetric RSA encrypt/decrypt functions.
+
+    * EXTENSIONS:
+    I'm now the primary maintainer for OpenSSL extension, as agreed with Stig
+    Venaas.
+
+    * TODO-4.1.txt:
+    Making notes about which extensions need most work for streams.
+
+2001-05-04  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    Add support for in_reply_to header, and fix erealloc usage ("Johan Ekenberg"
+    <johan@ekenberg.se>).
+
+2001-05-04  Jason Greene  <jason@inetgurus.net>
+
+    * ext/mysql/php_mysql.c:
+    Fixed bug in my previous patch, forgot to reset connect error globals
+    on request startup.
+
+2001-05-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/libmysql/mysql_version.h: Fix bugs: #10642, #10612
+
+2001-05-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    - Fixed a bug in preg_split() that would incorrectly limit the number of
+      results when used along with PREG_SPLIT_NO_EMPTY flag. (Andrei)
+    - Also made limit = -1 when limit = 0, to emulate Perl.
+
+2001-05-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h: namespace-protect "open"
+
+2001-05-04  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dll.dsp: added ext/com/ files to the project
+
+2001-05-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Experimental/XML/Xml2obj.php:
+    More in-line docs and examples and some vars renamed
+
+2001-05-04  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c: fixed a memory leak in ext/mbstring.
+
+2001-05-04  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/fastcgi.c:
+    Removed a duplicate php_import_environment_variables() call
+    from fastcgi sapi
+
+2001-05-04  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/CREDITS
+      ext/dbx/dbx.dsp: Forgot the Visual Studio project, added now (Mc)
+    Updated CREDITS (Mc)
+
+    * ext/dbx/Makefile.in
+      ext/dbx/dbx.c
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h:
+    Registered db-module constants for use in dbx_connect (Mc)
+    Added support for Microsoft SQL Server (Mc)
+
+    * ext/dbx/howto_extend_dbx.html:
+    Added docs about creating dbx-support for other databases. (Mc)
+
+2001-05-04  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/db.php:
+    added low/higwater garbage collection to the db-container. dbx should
+    follow soon
+
+2001-05-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/image.c: Nuke unreferenced local variables.
+
+2001-05-04  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+    Make it compile with the latest cURL cvs, heck it even works.
+
+2001-05-04  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/iconv/iconv.c:
+    added status parameter to output handler in ext/iconv.
+
+2001-05-04  Jason Greene  <jason@inetgurus.net>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    This should work correctly without causing compatibility issues with previous
+    scripts. Someone might want to double check this change, just in case.
+
 2001-05-03  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/Experimental/XML/Xml2obj.php:
