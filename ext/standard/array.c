@@ -1993,7 +1993,7 @@ PHP_FUNCTION(array_count_values)
 /* }}} */
 
 
-/* {{{ proto array array_reverse(array input)
+/* {{{ proto array array_reverse(array input [, bool preserve keys])
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
 {
