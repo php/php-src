@@ -219,6 +219,40 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 
 ZEND_DECLARE_MODULE_GLOBALS(pgsql);
 
+/* {{{ _php_pgsql_trim_message */
+static char * _php_pgsql_trim_message(const char *message, int *len)
+{
+	register int i = strlen(message)-1;
+
+	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
+		--i;
+	}
+	while (i && (message[i] == '\r' || message[i] == '\n')) {
+		--i;
+	}
+	++i;
+	if (len) {
+		*len = i;
+	}
+	return estrndup(message, i);
+}
+/* }}} */
+
+/* {{{ _php_pgsql_trim_result */
+static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
+{
+	return *buf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL);
+}
+/* }}} */
+
+#define PQErrorMessageTrim(pgsql, buf) _php_pgsql_trim_result(pgsql, buf)
+
+#define PHP_PQ_ERROR(text, pgsql) { \
+	char *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL);	\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, text, msgbuf);	\
+	efree(msgbuf);	\
+} \
+
 /* {{{ php_pgsql_set_default_link
  */
 static void php_pgsql_set_default_link(int id TSRMLS_DC)
@@ -263,34 +297,6 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	PGG(num_links)--;
 }
 /* }}} */
-
-/* {{{ _php_pgsql_trim_message */
-static char * _php_pgsql_trim_message(const char *message, int *len)
-{
-	register int i = strlen(message)-1;
-
-	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
-		--i;
-	}
-	while (i && (message[i] == '\r' || message[i] == '\n')) {
-		--i;
-	}
-	++i;
-	if (len) {
-		*len = i;
-	}
-	return estrndup(message, i);
-}
-/* }}} */
-
-/* {{{ _php_pgsql_trim_result */
-static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
-{
-	return *buf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL);
-}
-/* }}} */
-
-#define PQErrorMessageTrim(pgsql, buf) _php_pgsql_trim_result(pgsql, buf)
 
 /* {{{ _php_pgsql_notice_handler
  */
@@ -595,9 +601,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				pgsql=PQsetdb(host,port,options,tty,dbname);
 			}
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, 
-								 "Unable to connect to PostgreSQL server: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-				efree(msgbuf);
+				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql)
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
@@ -690,8 +694,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			pgsql = PQsetdb(host,port,options,tty,dbname);
 		}
 		if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to PostgreSQL server: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-			efree(msgbuf);
+			PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
 			goto err;
 		}
 
@@ -1073,8 +1076,7 @@ PHP_FUNCTION(pg_query)
 		case PGRES_BAD_RESPONSE:
 		case PGRES_NONFATAL_ERROR:
 		case PGRES_FATAL_ERROR:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-			efree(msgbuf);
+			PHP_PQ_ERROR("Query failed: %s", pgsql);
 			PQclear(pgsql_result);
 			RETURN_FALSE;
 			break;
@@ -2568,8 +2570,7 @@ PHP_FUNCTION(pg_end_copy)
 	result = PQendcopy(pgsql);
 
 	if (result!=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-		efree(msgbuf);
+		PHP_PQ_ERROR("Query failed: %s", pgsql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2614,8 +2615,7 @@ PHP_FUNCTION(pg_put_line)
 	result = PQputline(pgsql, Z_STRVAL_PP(query));
 
 	if (result==EOF) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-		efree(msgbuf);
+		PHP_PQ_ERROR("Query failed: %s", pgsql);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2681,8 +2681,7 @@ PHP_FUNCTION(pg_copy_to)
 				while (!copydone)
 				{
 					if ((ret = PQgetline(pgsql, copybuf, COPYBUFSIZ))) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "getline failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-						efree(msgbuf);
+						PHP_PQ_ERROR("getline failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 			
@@ -2716,8 +2715,7 @@ PHP_FUNCTION(pg_copy_to)
 					}
 				}
 				if (PQendcopy(pgsql)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "endcopy failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-					efree(msgbuf);
+					PHP_PQ_ERROR("endcopy failed: %s", pgsql);
 					RETURN_FALSE;
 				}
 				while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2730,8 +2728,7 @@ PHP_FUNCTION(pg_copy_to)
 			break;
 		default:
 			PQclear(pgsql_result);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Copy command failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-			efree(msgbuf);
+			PHP_PQ_ERROR("Copy command failed: %s", pgsql);
 			RETURN_FALSE;
 			break;
 	}
@@ -2800,21 +2797,18 @@ PHP_FUNCTION(pg_copy_from)
 						strcat(query, "\n");
 					if (PQputline(pgsql, query)) {
 						efree(query);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "copy failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-						efree(msgbuf);
+						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
 				}
 				if (PQputline(pgsql, "\\.\n") == EOF) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "putline failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-					efree(msgbuf);
+					PHP_PQ_ERROR("putline failed: %s", pgsql);
 					RETURN_FALSE;
 				}
 				if (PQendcopy(pgsql)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "endcopy failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-					efree(msgbuf);
+					PHP_PQ_ERROR("endcopy failed: %s", pgsql);
 					RETURN_FALSE;
 				}
 				while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2828,8 +2822,7 @@ PHP_FUNCTION(pg_copy_from)
 			break;
 		default:
 			PQclear(pgsql_result);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Copy command failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
-			efree(msgbuf);
+			PHP_PQ_ERROR("Copy command failed: %s", pgsql);
 			RETURN_FALSE;
 			break;
 	}
