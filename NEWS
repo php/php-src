@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Improved str_replace() to accept an array for any parameter - similar
+  to preg_replace(). (Andrei)
+- Fixed extract() to properly prefix numeric keys when EXTR_PREFIX_ALL is
+  used. (Andrei)
+- Added EXTR_PREFIX_INVALID flag to extract() to automatically prefix
+  string keys that do not constitute valid variable names. (Andrei)
 - BeOS patch from svanegmond@bang.dhs.org modified somewhat by Rasmus
 - Fixed the Apache module to overwrite PATH_TRANSLATED with SCRIPT_FILENAME,
   only if PATH_TRANSLATED is not previously set (Zeev)
