@@ -717,6 +717,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
+			EG(exit_status) = 255;
 			if (module_initialized) {
 				zend_bailout();
 				efree(buffer);
