@@ -308,6 +308,10 @@ AC_DEFUN(PHP_GEN_CONFIG_VARS,[
   done
 ])
 
+AC_DEFUN(PHP_GEN_MAKEFILE,[
+  $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $1
+])
+
 AC_DEFUN(PHP_GEN_MAKEFILES,[
   $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $PHP_FAST_OUTPUT_FILES
 ])
