@@ -2044,8 +2044,8 @@ PHP_FUNCTION(imap_binary)
 /* }}} */
 
 
-/* {{{ proto array imap_mailboxmsginfo(int stream_id)
-   Returns info about the current mailbox in an associative array */
+/* {{{ proto object imap_mailboxmsginfo(int stream_id)
+   Returns info about the current mailbox */
 PHP_FUNCTION(imap_mailboxmsginfo)
 {
 	zval **streamind;
@@ -2053,7 +2053,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	int ind, ind_type;
 	unsigned int msgno;
 	pils *imap_le_struct;
-	unsigned unreadmsg, msize;
+	unsigned unreadmsg, deletedmsg, msize;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -2070,21 +2070,23 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 		RETURN_FALSE;
 	}
 
-	/* Initialize return array */
+	/* Initialize return object */
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	unreadmsg = 0;
+	deletedmsg = 0;
 	msize = 0;
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
 		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream,msgno);
 		mail_fetchstructure (imap_le_struct->imap_stream,msgno,NIL);
-		unreadmsg = cache->recent ? (cache->seen ? unreadmsg : unreadmsg++) : unreadmsg;
-		unreadmsg = (cache->recent | cache->seen) ? unreadmsg : unreadmsg++;
+                if (!cache->seen || cache->recent) unreadmsg++;
+                if (cache->deleted) deletedmsg++;
 		msize = msize + cache->rfc822_size;
 	}
 	add_property_long(return_value, "Unread", unreadmsg);
+        add_property_long(return_value, "Deleted", deletedmsg);
 	add_property_long(return_value, "Nmsgs", imap_le_struct->imap_stream->nmsgs);
 	add_property_long(return_value, "Size", msize);
 	rfc822_date(date);
