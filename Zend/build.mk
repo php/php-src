@@ -16,7 +16,12 @@ makefile_am_files = Makefile.am
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
 
-all: $(makefile_in_files) $(LT_TARGETS) configure $(config_h_in)
+targets = $(makefile_in_files) $(LT_TARGETS) configure $(config_h_in)
+
+all: $(targets)
+
+clean:
+	rm -f $(targets)
 
 $(LT_TARGETS):
 	rm -f $(LT_TARGETS)
