@@ -222,7 +222,7 @@ PHP_MSHUTDOWN_FUNCTION(cpdf)
 	return SUCCESS;
 }
 
-/* {{{ proto void cpdf_global_set_document_limits(int maxPages, int maxFonts, int maxImages, int maxAnnots, int maxObjects)
+/* {{{ proto bool cpdf_global_set_document_limits(int maxPages, int maxFonts, int maxImages, int maxAnnots, int maxObjects)
    Sets document settings for all documents */
 PHP_FUNCTION(cpdf_global_set_document_limits)
 {
@@ -356,7 +356,7 @@ PHP_FUNCTION(cpdf_set_keywords)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_viewer_preferences(int pdfdoc, array preferences)
+/* {{{ proto bool cpdf_set_viewer_preferences(int pdfdoc, array preferences)
    How to show the document in the viewer */
 PHP_FUNCTION(cpdf_set_viewer_preferences)
 {
@@ -514,7 +514,7 @@ PHP_FUNCTION(cpdf_close)
 /* }}} */
 
 #define BUFFERLEN 40
-/* {{{ proto void cpdf_page_init(int pdfdoc, int pagenr, int orientation, int height, int width [, float unit])
+/* {{{ proto bool cpdf_page_init(int pdfdoc, int pagenr, int orientation, int height, int width [, float unit])
    Starts page */
 PHP_FUNCTION(cpdf_page_init)
 {
@@ -559,7 +559,7 @@ PHP_FUNCTION(cpdf_page_init)
 /* }}} */
 #undef BUFFERLEN
 
-/* {{{ proto void cpdf_finalize_page(int pdfdoc, int pagenr)
+/* {{{ proto bool cpdf_finalize_page(int pdfdoc, int pagenr)
    Ends the page to save memory */
 PHP_FUNCTION(cpdf_finalize_page)
 {
@@ -587,7 +587,7 @@ PHP_FUNCTION(cpdf_finalize_page)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_current_page(int pdfdoc, int pagenr)
+/* {{{ proto bool cpdf_set_current_page(int pdfdoc, int pagenr)
    Sets page for output */
 PHP_FUNCTION(cpdf_set_current_page)
 {
@@ -615,7 +615,7 @@ PHP_FUNCTION(cpdf_set_current_page)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_begin_text(int pdfdoc)
+/* {{{ proto bool cpdf_begin_text(int pdfdoc)
    Starts text section */
 PHP_FUNCTION(cpdf_begin_text)
 {
@@ -641,7 +641,7 @@ PHP_FUNCTION(cpdf_begin_text)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_end_text(int pdfdoc)
+/* {{{ proto bool cpdf_end_text(int pdfdoc)
    Ends text section */
 PHP_FUNCTION(cpdf_end_text)
 {
@@ -667,7 +667,7 @@ PHP_FUNCTION(cpdf_end_text)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_show(int pdfdoc, string text)
+/* {{{ proto bool cpdf_show(int pdfdoc, string text)
    Output text at current position */
 PHP_FUNCTION(cpdf_show)
 {
@@ -694,7 +694,7 @@ PHP_FUNCTION(cpdf_show)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_show_xy(int pdfdoc, string text, float x-koor, float y-koor [, int mode])
+/* {{{ proto bool cpdf_show_xy(int pdfdoc, string text, float x-koor, float y-koor [, int mode])
    Output text at position */
 PHP_FUNCTION(cpdf_show_xy)
 {
@@ -732,7 +732,7 @@ PHP_FUNCTION(cpdf_show_xy)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_continue_text(int pdfdoc, string text)
+/* {{{ proto bool cpdf_continue_text(int pdfdoc, string text)
    Outputs text in next line */
 PHP_FUNCTION(cpdf_continue_text)
 {
@@ -759,7 +759,7 @@ PHP_FUNCTION(cpdf_continue_text)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_text(int pdfdoc, string text [, float x-koor, float y-koor [, int mode [, float orientation [, int alignmode]]]])
+/* {{{ proto bool cpdf_text(int pdfdoc, string text [, float x-koor, float y-koor [, int mode [, float orientation [, int alignmode]]]])
    Outputs text */
 PHP_FUNCTION(cpdf_text)
 {
@@ -849,7 +849,7 @@ PHP_FUNCTION(cpdf_text)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_font(int pdfdoc, string font, float size, string encoding)
+/* {{{ proto bool cpdf_set_font(int pdfdoc, string font, float size, string encoding)
    Selects the current font face, size and encoding */
 PHP_FUNCTION(cpdf_set_font)
 {
@@ -883,7 +883,7 @@ PHP_FUNCTION(cpdf_set_font)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_font_directories(int pdfdoc, string pfmdir, string pfbdir)
+/* {{{ proto bool cpdf_set_font_directories(int pdfdoc, string pfmdir, string pfbdir)
    Sets directories to search when using external fonts */
 PHP_FUNCTION(cpdf_set_font_directories)
 {
@@ -911,7 +911,7 @@ PHP_FUNCTION(cpdf_set_font_directories)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_font_map_file(int pdfdoc, string filename)
+/* {{{ proto bool cpdf_set_font_map_file(int pdfdoc, string filename)
    Sets fontname to filename translation map when using external fonts */
 PHP_FUNCTION(cpdf_set_font_map_file)
 {
@@ -942,7 +942,7 @@ PHP_FUNCTION(cpdf_set_font_map_file)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_leading(int pdfdoc, float distance)
+/* {{{ proto bool cpdf_set_leading(int pdfdoc, float distance)
    Sets distance between text lines */
 PHP_FUNCTION(cpdf_set_leading)
 {
@@ -969,7 +969,7 @@ PHP_FUNCTION(cpdf_set_leading)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_text_rendering(int pdfdoc, int rendermode)
+/* {{{ proto bool cpdf_set_text_rendering(int pdfdoc, int rendermode)
    Determines how text is rendered */
 PHP_FUNCTION(cpdf_set_text_rendering)
 {
@@ -996,7 +996,7 @@ PHP_FUNCTION(cpdf_set_text_rendering)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_horiz_scaling(int pdfdoc, float scale)
+/* {{{ proto bool cpdf_set_horiz_scaling(int pdfdoc, float scale)
    Sets horizontal scaling of text */
 PHP_FUNCTION(cpdf_set_horiz_scaling)
 {
@@ -1023,7 +1023,7 @@ PHP_FUNCTION(cpdf_set_horiz_scaling)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_text_rise(int pdfdoc, float value)
+/* {{{ proto bool cpdf_set_text_rise(int pdfdoc, float value)
    Sets the text rise */
 PHP_FUNCTION(cpdf_set_text_rise)
 {
@@ -1050,7 +1050,7 @@ PHP_FUNCTION(cpdf_set_text_rise)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_text_matrix(int pdfdoc, arry matrix)
+/* {{{ proto bool cpdf_set_text_matrix(int pdfdoc, arry matrix)
    Sets the text matrix */
 PHP_FUNCTION(cpdf_set_text_matrix)
 {
@@ -1103,7 +1103,7 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_text_pos(int pdfdoc, float x, float y [, int mode])
+/* {{{ proto bool cpdf_set_text_pos(int pdfdoc, float x, float y [, int mode])
    Sets the position of text for the next cpdf_show call */
 PHP_FUNCTION(cpdf_set_text_pos)
 {
@@ -1140,7 +1140,7 @@ PHP_FUNCTION(cpdf_set_text_pos)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_rotate_text(int pdfdoc, float angle)
+/* {{{ proto bool cpdf_rotate_text(int pdfdoc, float angle)
    Sets text rotation angle */
 PHP_FUNCTION(cpdf_rotate_text)
 {
@@ -1167,7 +1167,7 @@ PHP_FUNCTION(cpdf_rotate_text)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_char_spacing(int pdfdoc, float space)
+/* {{{ proto bool cpdf_set_char_spacing(int pdfdoc, float space)
    Sets character spacing */
 PHP_FUNCTION(cpdf_set_char_spacing)
 {
@@ -1194,7 +1194,7 @@ PHP_FUNCTION(cpdf_set_char_spacing)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_word_spacing(int pdfdoc, float space)
+/* {{{ proto bool cpdf_set_word_spacing(int pdfdoc, float space)
    Sets spacing between words */
 PHP_FUNCTION(cpdf_set_word_spacing)
 {
@@ -1249,7 +1249,7 @@ PHP_FUNCTION(cpdf_stringwidth)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_save(int pdfdoc)
+/* {{{ proto bool cpdf_save(int pdfdoc)
    Saves current enviroment */
 PHP_FUNCTION(cpdf_save)
 {
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(cpdf_save)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_restore(int pdfdoc)
+/* {{{ proto bool cpdf_restore(int pdfdoc)
    Restores formerly saved enviroment */
 PHP_FUNCTION(cpdf_restore)
 {
@@ -1301,7 +1301,7 @@ PHP_FUNCTION(cpdf_restore)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_translate(int pdfdoc, float x, float y)
+/* {{{ proto bool cpdf_translate(int pdfdoc, float x, float y)
    Sets origin of coordinate system */
 PHP_FUNCTION(cpdf_translate)
 {
@@ -1329,7 +1329,7 @@ PHP_FUNCTION(cpdf_translate)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_scale(int pdfdoc, float x_scale, float y_scale)
+/* {{{ proto bool cpdf_scale(int pdfdoc, float x_scale, float y_scale)
    Sets scaling */
 PHP_FUNCTION(cpdf_scale)
 {
@@ -1357,7 +1357,7 @@ PHP_FUNCTION(cpdf_scale)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_rotate(int pdfdoc, float angle)
+/* {{{ proto bool cpdf_rotate(int pdfdoc, float angle)
    Sets rotation */
 PHP_FUNCTION(cpdf_rotate)
 {
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(cpdf_rotate)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setflat(int pdfdoc, float value)
+/* {{{ proto bool cpdf_setflat(int pdfdoc, float value)
    Sets flatness */
 PHP_FUNCTION(cpdf_setflat)
 {
@@ -1416,7 +1416,7 @@ PHP_FUNCTION(cpdf_setflat)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setlinejoin(int pdfdoc, int value)
+/* {{{ proto bool cpdf_setlinejoin(int pdfdoc, int value)
    Sets linejoin parameter */
 PHP_FUNCTION(cpdf_setlinejoin)
 {
@@ -1448,7 +1448,7 @@ PHP_FUNCTION(cpdf_setlinejoin)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setlinecap(int pdfdoc, int value)
+/* {{{ proto bool cpdf_setlinecap(int pdfdoc, int value)
    Sets linecap parameter */
 PHP_FUNCTION(cpdf_setlinecap)
 {
@@ -1480,7 +1480,7 @@ PHP_FUNCTION(cpdf_setlinecap)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setmiterlimit(int pdfdoc, float value)
+/* {{{ proto bool cpdf_setmiterlimit(int pdfdoc, float value)
    Sets miter limit */
 PHP_FUNCTION(cpdf_setmiterlimit)
 {
@@ -1512,7 +1512,7 @@ PHP_FUNCTION(cpdf_setmiterlimit)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setlinewidth(int pdfdoc, float width)
+/* {{{ proto bool cpdf_setlinewidth(int pdfdoc, float width)
    Sets line width */
 PHP_FUNCTION(cpdf_setlinewidth)
 {
@@ -1540,7 +1540,7 @@ PHP_FUNCTION(cpdf_setlinewidth)
 /* }}} */
 
 #define BUFFERLEN 20
-/* {{{ proto void cpdf_setdash(int pdfdoc, long white, long black)
+/* {{{ proto bool cpdf_setdash(int pdfdoc, long white, long black)
    Sets dash pattern */
 PHP_FUNCTION(cpdf_setdash)
 {
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(cpdf_setdash)
 /* }}} */
 #undef BUFFERLEN
 
-/* {{{ proto void cpdf_moveto(int pdfdoc, float x, float y [, int mode])
+/* {{{ proto bool cpdf_moveto(int pdfdoc, float x, float y [, int mode])
    Sets current point */
 PHP_FUNCTION(cpdf_moveto)
 {
@@ -1608,7 +1608,7 @@ PHP_FUNCTION(cpdf_moveto)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_rmoveto(int pdfdoc, float x, float y [, int mode])
+/* {{{ proto bool cpdf_rmoveto(int pdfdoc, float x, float y [, int mode])
    Sets current point */
 PHP_FUNCTION(cpdf_rmoveto)
 {
@@ -1645,7 +1645,7 @@ PHP_FUNCTION(cpdf_rmoveto)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_curveto(int pdfdoc, float x1, float y1, float x2, float y2, float x3, float y3 [, int mode])
+/* {{{ proto bool cpdf_curveto(int pdfdoc, float x1, float y1, float x2, float y2, float x3, float y3 [, int mode])
    Draws a curve */
 PHP_FUNCTION(cpdf_curveto)
 {
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(cpdf_curveto)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_lineto(int pdfdoc, float x, float y [, int mode])
+/* {{{ proto bool cpdf_lineto(int pdfdoc, float x, float y [, int mode])
    Draws a line */
 PHP_FUNCTION(cpdf_lineto)
 {
@@ -1733,7 +1733,7 @@ PHP_FUNCTION(cpdf_lineto)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_rlineto(int pdfdoc, float x, float y [, int mode])
+/* {{{ proto bool cpdf_rlineto(int pdfdoc, float x, float y [, int mode])
    Draws a line relative to current point */
 PHP_FUNCTION(cpdf_rlineto)
 {
@@ -1770,7 +1770,7 @@ PHP_FUNCTION(cpdf_rlineto)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_circle(int pdfdoc, float x, float y, float radius [, int mode])
+/* {{{ proto bool cpdf_circle(int pdfdoc, float x, float y, float radius [, int mode])
    Draws a circle */
 PHP_FUNCTION(cpdf_circle)
 {
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(cpdf_circle)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_arc(int pdfdoc, float x, float y, float radius, float start, float end [, int mode])
+/* {{{ proto bool cpdf_arc(int pdfdoc, float x, float y, float radius, float start, float end [, int mode])
    Draws an arc */
 PHP_FUNCTION(cpdf_arc)
 {
@@ -1848,7 +1848,7 @@ PHP_FUNCTION(cpdf_arc)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_rect(int pdfdoc, float x, float y, float width, float height [, int mode])
+/* {{{ proto bool cpdf_rect(int pdfdoc, float x, float y, float width, float height [, int mode])
    Draws a rectangle */
 PHP_FUNCTION(cpdf_rect)
 {
@@ -1893,7 +1893,7 @@ PHP_FUNCTION(cpdf_rect)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_newpath(int pdfdoc)
+/* {{{ proto bool cpdf_newpath(int pdfdoc)
    Starts new path */
 PHP_FUNCTION(cpdf_newpath)
 {
@@ -1919,7 +1919,7 @@ PHP_FUNCTION(cpdf_newpath)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_closepath(int pdfdoc)
+/* {{{ proto bool cpdf_closepath(int pdfdoc)
    Close path */
 PHP_FUNCTION(cpdf_closepath)
 {
@@ -1945,7 +1945,7 @@ PHP_FUNCTION(cpdf_closepath)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_closepath_stroke(int pdfdoc)
+/* {{{ proto bool cpdf_closepath_stroke(int pdfdoc)
    Close path and draw line along path */
 PHP_FUNCTION(cpdf_closepath_stroke)
 {
@@ -1972,7 +1972,7 @@ PHP_FUNCTION(cpdf_closepath_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_stroke(int pdfdoc)
+/* {{{ proto bool cpdf_stroke(int pdfdoc)
    Draws line along path path */
 PHP_FUNCTION(cpdf_stroke)
 {
@@ -1998,7 +1998,7 @@ PHP_FUNCTION(cpdf_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_fill(int pdfdoc)
+/* {{{ proto bool cpdf_fill(int pdfdoc)
    Fills current path */
 PHP_FUNCTION(cpdf_fill)
 {
@@ -2024,7 +2024,7 @@ PHP_FUNCTION(cpdf_fill)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_fill_stroke(int pdfdoc)
+/* {{{ proto bool cpdf_fill_stroke(int pdfdoc)
    Fills and stroke current path */
 PHP_FUNCTION(cpdf_fill_stroke)
 {
@@ -2051,7 +2051,7 @@ PHP_FUNCTION(cpdf_fill_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_closepath_fill_stroke(int pdfdoc)
+/* {{{ proto bool cpdf_closepath_fill_stroke(int pdfdoc)
    Close, fill and stroke current path */
 PHP_FUNCTION(cpdf_closepath_fill_stroke)
 {
@@ -2079,7 +2079,7 @@ PHP_FUNCTION(cpdf_closepath_fill_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_clip(int pdfdoc)
+/* {{{ proto bool cpdf_clip(int pdfdoc)
    Clips to current path */
 PHP_FUNCTION(cpdf_clip)
 {
@@ -2105,7 +2105,7 @@ PHP_FUNCTION(cpdf_clip)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setgray_fill(int pdfdoc, float value)
+/* {{{ proto bool cpdf_setgray_fill(int pdfdoc, float value)
    Sets filling color to gray value */
 PHP_FUNCTION(cpdf_setgray_fill)
 {
@@ -2132,7 +2132,7 @@ PHP_FUNCTION(cpdf_setgray_fill)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setgray_stroke(int pdfdoc, float value)
+/* {{{ proto bool cpdf_setgray_stroke(int pdfdoc, float value)
    Sets drawing color to gray value */
 PHP_FUNCTION(cpdf_setgray_stroke)
 {
@@ -2159,7 +2159,7 @@ PHP_FUNCTION(cpdf_setgray_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setgray(int pdfdoc, float value)
+/* {{{ proto bool cpdf_setgray(int pdfdoc, float value)
    Sets drawing and filling color to gray value */
 PHP_FUNCTION(cpdf_setgray)
 {
@@ -2186,7 +2186,7 @@ PHP_FUNCTION(cpdf_setgray)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setrgbcolor_fill(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool cpdf_setrgbcolor_fill(int pdfdoc, float red, float green, float blue)
    Sets filling color to rgb color value */
 PHP_FUNCTION(cpdf_setrgbcolor_fill)
 {
@@ -2215,7 +2215,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setrgbcolor_stroke(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool cpdf_setrgbcolor_stroke(int pdfdoc, float red, float green, float blue)
    Sets drawing color to RGB color value */
 PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 {
@@ -2244,7 +2244,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_setrgbcolor(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool cpdf_setrgbcolor(int pdfdoc, float red, float green, float blue)
    Sets drawing and filling color to RGB color value */
 PHP_FUNCTION(cpdf_setrgbcolor)
 {
@@ -2273,7 +2273,7 @@ PHP_FUNCTION(cpdf_setrgbcolor)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_page_animation(int pdfdoc, int transition, float duration, float direction, int orientation, int inout)
+/* {{{ proto bool cpdf_set_page_animation(int pdfdoc, int transition, float duration, float direction, int orientation, int inout)
    Sets transition between pages */
 PHP_FUNCTION(cpdf_set_page_animation)
 {
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(cpdf_set_page_animation)
 }
 /* }}} */
 
-/* {{{ proto array cpdf_finalize(int pdfdoc)
+/* {{{ proto bool cpdf_finalize(int pdfdoc)
    Creates PDF doc in memory */
 PHP_FUNCTION(cpdf_finalize)
 {
@@ -2331,7 +2331,7 @@ PHP_FUNCTION(cpdf_finalize)
 }
 /* }}} */
 
-/* {{{ proto array cpdf_output_buffer(int pdfdoc)
+/* {{{ proto bool cpdf_output_buffer(int pdfdoc)
    Returns the internal memory stream as string */
 PHP_FUNCTION(cpdf_output_buffer)
 {
@@ -2360,7 +2360,7 @@ PHP_FUNCTION(cpdf_output_buffer)
 }
 /* }}} */
 
-/* {{{ proto array cpdf_save_to_file(int pdfdoc, string filename)
+/* {{{ proto bool cpdf_save_to_file(int pdfdoc, string filename)
    Saves the internal memory stream to a file */
 PHP_FUNCTION(cpdf_save_to_file)
 {
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(cpdf_save_to_file)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_import_jpeg(int pdfdoc, string filename, float x, float y, float angle, float width, float height, float x_scale, float y_scale, int gsave [, int mode])
+/* {{{ proto bool cpdf_import_jpeg(int pdfdoc, string filename, float x, float y, float angle, float width, float height, float x_scale, float y_scale, int gsave [, int mode])
    Includes JPEG image */
 PHP_FUNCTION(cpdf_import_jpeg)
 {
@@ -2469,7 +2469,7 @@ PHP_FUNCTION(cpdf_import_jpeg)
 /* }}} */
 
 #if HAVE_LIBGD13
-/* {{{ proto void cpdf_place_inline_image(int pdfdoc, int gdimage, float x, float y, float angle, fload width, float height, int gsave [, int mode])
+/* {{{ proto bool cpdf_place_inline_image(int pdfdoc, int gdimage, float x, float y, float angle, fload width, float height, int gsave [, int mode])
    Includes image */
 PHP_FUNCTION(cpdf_place_inline_image)
 {
@@ -2561,7 +2561,7 @@ PHP_FUNCTION(cpdf_place_inline_image)
 /* }}} */
 #endif
 
-/* {{{ proto void cpdf_add_annotation(int pdfdoc, float xll, float yll, float xur, float xur, string title, string text [, int mode])
+/* {{{ proto bool cpdf_add_annotation(int pdfdoc, float xll, float yll, float xur, float xur, string title, string text [, int mode])
    Sets annotation */
 PHP_FUNCTION(cpdf_add_annotation)
 {
