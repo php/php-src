@@ -1,3 +1,70 @@
+2000-05-22  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * main.c: fix for bug #2852 : argc inconsistency
+
+    * sapi/cgi/cgi_main.c:
+    -i, -v, -h and -? execution pathes didn't flush the output buffer
+    on exit, resultiong in no output at all when "output-buffering=On"
+    ( BUG id#3420 )
+
+2000-05-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.SELF-CONTAINED-EXTENSIONS:
+    Add section about adding shared module support to an existing module.
+
+2000-05-22  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php_modules.dsw: adding project for swf
+
+    * ext/swf/swf.dsp: oops forgot to save project before commit
+
+    * ext/swf/swf.dsp: adding project for swf
+
+2000-05-22  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c:
+    applied Luca Montecchiani's win32 fixes (open files in binary mode
+    using the "b" fopen flag, and use closesocket rather than close
+    when closing sockets)
+
+2000-05-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/swf.c: -Allow the writing of flash files to stdout.
+
+    * MAINTAINERS: Add SWF.
+
+2000-05-22  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/rand.c: in [mt_]rand(): (see BUG #3353)
+    - additional range checking for (max-min)<=[MT_]RAND_MAX
+    - [mt_]rand(0,[mt_]getrandmax()) will now work without integer overflow
+
+2000-05-22  Jouni Ahto  <jah@mork.net>
+
+    * MAINTAINERS:
+
+2000-05-22  Zeev Suraski  <zeev@php.net>
+
+    * LICENSE: Sigh, that should be the last one :I
+
+2000-05-22  Andi Gutmans  <andi@php.net>
+
+    * LICENSE: - Fix LICENSE (one language error and one URL error)
+
+2000-05-22  Zeev Suraski  <zeev@php.net>
+
+    * ext/calendar/calendar.c: - Make calendar compile as a dll on Windows
+
+2000-05-22  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/config.m4:
+    Fixed check for Zeus under Solaris (/bin/sh doesn't understand '!')
+
+2000-05-22  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: Notify people that .phps is now fixed
+
 2000-05-21  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/dba/dba_cdb.c: fix bug 4533
