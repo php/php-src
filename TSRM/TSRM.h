@@ -18,7 +18,7 @@
 #define _TSRM_H
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include "tsrm_config.h"
 #endif
 
 #if WIN32||WINNT
