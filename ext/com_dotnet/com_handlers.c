@@ -548,6 +548,25 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	return SUCCESS;
 }
 
+static int com_object_count(zval *object, long *count TSRMLS_DC)
+{
+	php_com_dotnet_object *obj;
+	LONG ubound = 0, lbound = 0;
+	
+	obj = CDNO_FETCH(object);
+	
+	if (!V_ISARRAY(&obj->v)) {
+		return FAILURE;
+	}
+
+	SafeArrayGetLBound(V_ARRAY(&obj->v), 1, &lbound);
+	SafeArrayGetUBound(V_ARRAY(&obj->v), 1, &ubound);
+
+	*count = ubound - lbound + 1;
+
+	return SUCCESS;
+}
+
 zend_object_handlers php_com_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	com_property_read,
@@ -568,7 +587,8 @@ zend_object_handlers php_com_object_handlers = {
 	com_class_entry_get,
 	com_class_name_get,
 	com_objects_compare,
-	com_object_cast
+	com_object_cast,
+	com_object_count
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC)
