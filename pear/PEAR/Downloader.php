@@ -613,6 +613,20 @@ class PEAR_Downloader extends PEAR_Common
     }
 
     // }}}
+    // {{{ _prependPath($path, $prepend)
+
+    function _prependPath($path, $prepend)
+    {
+        if (strlen($prepend) > 0) {
+            if (OS_WINDOWS && preg_match('/^[a-z]:/i', $path)) {
+                $path = $prepend . substr($path, 2);
+            } else {
+                $path = $prepend . $path;
+            }
+        }
+        return $path;
+    }
+    // }}}
     // {{{ pushError($errmsg, $code)
     
     /**
