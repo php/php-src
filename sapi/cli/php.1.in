@@ -141,7 +141,7 @@ cannot not be found.
 .SH EXAMPLES
 .TP 5
 \fIphp -r 'echo "Hello World\\n";'\fP
-This command simply writes the text "Hello World" to stabdard out.
+This command simply writes the text "Hello World" to standard out.
 .TP
 \fIphp \-r 'print_r(gd_info());'\fP
 This shows the configuration of your gd extension. You can use this
