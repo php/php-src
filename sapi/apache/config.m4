@@ -58,6 +58,12 @@ AC_ARG_WITH(apxs,
 	AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
 	AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
 	AC_MSG_RESULT(yes)
+	case $host_alias in
+	*aix*)
+		APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
+		LDFLAGS="$LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
+		;;
+	esac
 ],[
 	AC_MSG_RESULT(no)
 ])
