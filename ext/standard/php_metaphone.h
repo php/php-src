@@ -21,7 +21,6 @@
 #ifndef _php_metaphone_h
 #define _php_metaphone_h
 
-char Lookahead(char *word, int how_far);
 extern zend_module_entry metaphone_module_entry;
 #define phpext_metaphone_ptr &metaphone_module_entry
 
