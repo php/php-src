@@ -364,7 +364,8 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 		if(NULL != anchors[i]) {
 			object = anchors[i];
 			docofanchorptr = docofanchorrec[i];
-			reldestptr = reldestrec[i];
+			if(reldestrec) /* FIXME reldestrec may only be NULL if anchormode != 0 */
+				reldestptr = reldestrec[i];
 	
 			/* Determine Position. Doesn't matter if Src or Dest
 			   The Position field should always be there. Though there
@@ -587,7 +588,8 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 		
 				efree(anchors[i]);
 				if(docofanchorrec[i]) efree(docofanchorrec[i]);
-				if(reldestrec[i]) efree(reldestrec[i]);
+				if(reldestrec)
+					if(reldestrec[i]) efree(reldestrec[i]);
 			}
 		}
 	}
@@ -2164,6 +2166,42 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 
 	if(documenttype) efree(documenttype);
 	return(0);
+}
+
+send_insertanchors(char **text, int *count, char **anchors, char **destrec, int ancount, char **urlprefix, char **bodytag) {
+	char **reldestrec = NULL;
+	int mode = 0;
+	hw_objectID objectID = 0;
+#ifdef newlist
+	zend_llist *pAnchorList = NULL;
+#else
+	DLIST *pAnchorList = NULL;
+#endif
+	pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
+
+	/* Free only the array, the objrecs has been freed in fnCreateAnchorList() */
+	if(anchors) efree(anchors);
+	if(destrec) efree(destrec);
+	if(reldestrec) efree(reldestrec);
+
+	if(pAnchorList != NULL) {
+		char *newtext;
+		char *body;
+
+		newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
+
+#ifdef newlist
+		zend_llist_destroy(pAnchorList);
+		efree(pAnchorList);
+#else
+		dlst_kill(pAnchorList, fnDeleteAnchor);
+#endif
+		*bodytag = strdup(body);
+		efree(body);
+		*text = newtext;
+		*count = strlen(newtext);
+	}
+	return 0;
 }
 
 int send_edittext(int sockfd, char *objattr, char *text)

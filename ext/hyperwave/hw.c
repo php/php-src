@@ -641,18 +641,22 @@ static int * make_ints_from_array(HashTable *lht) {
 
 static char **make_strs_from_array(HashTable *arrht) {
 	char **carr = NULL;
+	char **ptr;
 	zval *data, **dataptr;
 
 	zend_hash_internal_pointer_reset(arrht);
 	if(NULL == (carr = emalloc(zend_hash_num_elements(arrht) * sizeof(char *))))
-		return(NULL);
+		return(NULL);	
+	ptr = carr;
 
 	/* Iterate through hash */
 	while(zend_hash_get_current_data(arrht, (void **) &dataptr) == SUCCESS) {
 		data = *dataptr;
 		switch(data->type) {
 			case IS_STRING:
-				*carr++ = estrdup(data->value.str.val);
+				*ptr = estrdup(data->value.str.val);
+fprintf(stderr, "carr[] = %s\n", *ptr);
+				ptr++;
 				break;
 		}
 
@@ -2306,11 +2310,11 @@ PHP_FUNCTION(hw_pipedocument) {
 	{
 	case 2:
 		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-			RETURN_FALSE;
+			WRONG_PARAM_COUNT;
 		break;
 	case 3:
 		if (getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
-			RETURN_FALSE;
+			WRONG_PARAM_COUNT;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -4084,20 +4088,35 @@ PHP_FUNCTION(hw_getrellink) {
 }
 /* }}} */
 	
-/* {{{ proto string hw_insertanchors(int hwdoc, array anchorecs, array dest)
+/* {{{ proto string hw_insertanchors(int hwdoc, array anchorecs, array dest [, array urlprefixes])
    Inserts only anchors into text */
 PHP_FUNCTION(hw_insertanchors) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	hw_document *hwdoc;
-	int type, docid, error;
+	int type, docid, error, argc, count;
 	char *anchorstr;
 	char **anchorrecs;
 	char **dest;
+	char **urlprefix;
+	char *bodytag = NULL;
 	HashTable *arrht;
+	HashTable *prefixarray;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	switch(argc)
+	{
+	case 3:
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_long_ex(arg1);
 	convert_to_array_ex(arg2);
 	convert_to_array_ex(arg3);
@@ -4106,6 +4125,50 @@ PHP_FUNCTION(hw_insertanchors) {
 	if(!hwdoc || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
+	}
+
+	/* check for the array with urlprefixes */
+	if(argc == 4) {
+		int i;
+		convert_to_array_ex(arg4);
+		prefixarray =(*arg4)->value.ht;
+		if((prefixarray == NULL) || (zend_hash_num_elements(prefixarray) != 5)) {
+			php_error(E_WARNING,"You must provide 5 urlprefixes (you have provided %d)", zend_hash_num_elements(prefixarray));
+			RETURN_FALSE;
+		}
+
+		urlprefix = emalloc(5*sizeof(char *));
+		zend_hash_internal_pointer_reset(prefixarray);
+		for(i=0; i<5; i++) {
+			char *key;
+			zval *data, **dataptr;
+			ulong ind;
+			
+			zend_hash_get_current_key(prefixarray, &key, &ind);
+			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
+			data = *dataptr;
+			if (data->type != IS_STRING) {
+				php_error(E_WARNING,"%s must be a String", key);
+				RETURN_FALSE;
+			} else if ( strcmp(key, "HW_DEFAULT_LINK") == 0 ) {
+				urlprefix[HW_DEFAULT_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_IMAGE_LINK") == 0 ) {
+				urlprefix[HW_IMAGE_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_BACKGROUND_LINK") == 0 ) {
+				urlprefix[HW_BACKGROUND_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_INTAG_LINK") == 0 ) {
+				urlprefix[HW_INTAG_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_APPLET_LINK") == 0 ) {
+				urlprefix[HW_APPLET_LINK] = data->value.str.val;
+			} else {
+				php_error(E_WARNING,"%s is not a valid urlprefix", key);
+				RETURN_FALSE;
+			}
+			efree(key);
+			zend_hash_move_forward(prefixarray);
+		}
+	} else {
+		urlprefix = NULL;
 	}
 
 	if(zend_hash_num_elements((*arg2)->value.ht) != zend_hash_num_elements((*arg3)->value.ht)) {
@@ -4118,13 +4181,14 @@ PHP_FUNCTION(hw_insertanchors) {
 	anchorrecs = make_strs_from_array(arrht);
 	arrht = (*arg3)->value.ht;
 	dest = make_strs_from_array(arrht);
-/*
-	if (0 != (error = insertanchors(hwdoc->data, anchorrecs, dest, zend_hash_num_elements(arrht)))) {
+
+	if (0 != (error = send_insertanchors(&(hwdoc->data), &count, anchorrecs, dest, zend_hash_num_elements(arrht), urlprefix, &bodytag))) {
 		php_error(E_WARNING, "command (insertanchors) returned %d\n", error);
 		RETURN_FALSE;
 	}
-*/
-	RETURN_STRING(anchorstr, 0);
+	hwdoc->size = count;
+
+	RETURN_TRUE;
 }
 /* }}} */
 	
