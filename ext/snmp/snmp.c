@@ -74,8 +74,6 @@
 #define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG
 #endif
 
-void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st);
-
 /* constant - can be shared among threads */
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
