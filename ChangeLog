@@ -1,3 +1,189 @@
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.SUBMITTING_PATCH
+      ext/exif/tests/exif005.phpt
+      ext/standard/tests/strings/str_shuffle.phpt
+      ext/standard/tests/strings/strtr.phpt:
+      Typos found by Petras Kudaras.
+
+2003-12-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/config.w32
+      ext/imap/php_imap.def:
+      No need for these trick when linking with a correct cclient.lib
+
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/session/tests/019.phpt:
+      Preserve casing
+
+    * ext/simplexml/tests/016.phpt
+      ext/standard/tests/serialize/001.phpt:
+      Fix test
+
+    * NEWS:
+      Update
+
+    * ZendEngine2/tests/bug26229.phpt
+      ZendEngine2/tests/bug26695.phpt
+      tests/lang/bug23524.phpt
+      tests/strings/bug22592.phpt:
+      Add more tests
+
+    * ZendEngine2/tests/bug24884.phpt
+      ZendEngine2/tests/bug26166.phpt
+      tests/classes/__set__get_001.phpt
+      tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt
+      tests/classes/bug23951.phpt
+      tests/classes/dereferencing_001.phpt
+      tests/classes/interfaces_002.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/lang/bug26182.phpt
+      tests/lang/type_hints_001.phpt
+      tests/run-test/test009.phpt:
+      Fix tests now that class names are shown in correct casing
+
+2003-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/fbsql/config.w32:
+      Allow FrontBase to build against my local version of the headers
+
+    * ext/yaz/config.w32:
+      Proper header check for yaz.
+
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Preserve class name casing.
+
+    * NEWS:
+      BFN
+
+2003-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/gd/config.w32:
+      For GD, build the extension as php_gd2.dll instead of php_gd.dll.
+      Thanks again Frank :-)
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      It seems that making the NewAPIs.h header globally visible causes
+      problems when compiling the com_dotnet extension, so I'm moving
+      it to be visible only to the VCWD code.
+      Thanks Frank :-)
+
+2003-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Fixed memory leak.
+
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fixed bug #26695 (Reflection API does not recognize mixed-case class hints)
+
+2003-12-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/sqlite/php_sqlite.def:
+      Convert to windows line endings
+
+2003-12-22  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_report.c:
+      beautifying :)
+
+    * ext/mysqli/mysqli_report.c:
+      fixed bug #26680
+
+2003-12-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/domxml.dsp:
+      define LIBXML_THREAD_ENABLED
+
+    * ext/xsl/xsltprocessor.c:
+      rollback to previouos version
+      bug #26690 fixed in libxml.c
+
+2003-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/xsl/xsltprocessor.c:
+      Fixed bug #26690 (make xsltProcessor->transformToUri use streams wrappers).
+
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      ZendEngine2/zend_object_handlers.c
+      tests/classes/array_access_007.phpt:
+      Fixed bug #26675 (Segfault on ArrayAccess use)
+      Update NEWS
+
+2003-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      MFH: Define INADDR_NONE for systems that don't have it (apparently solaris)
+
+    * ext/standard/basic_functions.c:
+      Define INADDR_NONE for systems that don't have it (apparently solaris).
+
+    * ext/pgsql/pgsql.c:
+      Missing bit for bug #26625.
+
+2003-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/pi3web/config.w32:
+      Verify that new build system works with Pi3Web 2.0.2
+
+    * TSRM/config.w32
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      Fix bug #26692; Could not find GetLongPathNameA under NT4.
+      This fix relies on you having the Platform SDK headers.
+      Using the new build system, the NewAPIs.h header will be detected
+      automatically, however, for people building using .dsp files,
+      you will need to add /DHAVE_NEWAPIS_H=1 to the TSRM project
+      if you have those newer headers.
+
+    * ext/dom/config.w32
+      ext/exif/config.w32
+      ext/simplexml/config.w32
+      ext/wddx/config.w32
+      ext/xml/config.w32
+      ext/xmlrpc/config.w32
+      ext/xsl/config.w32:
+      Add dependencies for these extensions
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      export these symbols for use by SPL as a shared extension
+
+    * sapi/cli/config.w32
+      sapi/cli/php_cli.c:
+      add win32 configure option for CLI to switch on CRT heap debugging
+
+2003-12-22  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/zlib/config.w32:
+      Correcting the description field.
+
+2003-12-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      - Fix multibyte handling errors in iconv_mime_encode() when
+      quoted-printable
+        encoding scheme is used.
+      - Fix segfault that occurs in iconv_mime_encode() when input_charset or
+        output_charset parameter is not specified in the associative array.
+
 2003-12-21  Derick Rethans  <php@derickrethans.nl>
 
     * configure.in

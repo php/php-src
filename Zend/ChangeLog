@@ -1,3 +1,31 @@
+2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug26229.phpt
+      tests/bug26695.phpt:
+      Add more tests
+
+    * tests/bug24884.phpt
+      tests/bug26166.phpt:
+      Fix tests now that class names are shown in correct casing
+
+    * zend_compile.c:
+      Preserve class name casing.
+
+    * zend_reflection_api.c:
+      Fixed bug #26695 (Reflection API does not recognize mixed-case class hints)
+
+    * zend_object_handlers.c:
+      Fixed bug #26675 (Segfault on ArrayAccess use)
+      Update NEWS
+
+2003-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_API.c
+      zend_API.h
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      export these symbols for use by SPL as a shared extension
+
 2003-12-19  Andi Gutmans  <andi@zend.com>
 
     * (php_5_0_0b3RC2)
