@@ -220,7 +220,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval **rval_ref;
 
-	cursor = *p;
+	limit = cursor = *p;
 	
 	if (var_hash && cursor[0] != 'R') {
 		var_push(var_hash, rval);
