@@ -945,7 +945,7 @@ ZEND_FUNCTION(reflection_method_invoke)
 	METHOD_NOTSTATIC;
 
 	if (argc < 1) {
-		zend_error(E_WARNING, "First parameter is expected to be an instance of %s", mptr->common.scope->name);
+		zend_error(E_WARNING, "%s expects at least one parameter, none given", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
