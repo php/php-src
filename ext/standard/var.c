@@ -300,27 +300,25 @@ void php_var_serialize(pval *buf, pval **struc)
 						continue;
 					}
 
-					if (!(*data)->is_ref) {
-						switch (i) {
-							case HASH_KEY_IS_LONG:
-								MAKE_STD_ZVAL(d);	
-								d->type = IS_LONG;
-								d->value.lval = index;
-								php_var_serialize(buf, &d);
-								FREE_ZVAL(d);
-								break;
-							case HASH_KEY_IS_STRING:
-								MAKE_STD_ZVAL(d);	
-								d->type = IS_STRING;
-								d->value.str.val = key;
-								d->value.str.len = strlen(key);
-								php_var_serialize(buf, &d);
-								efree(key);
-								FREE_ZVAL(d);
-								break;
-						}
-						php_var_serialize(buf, data);
+					switch (i) {
+						case HASH_KEY_IS_LONG:
+							MAKE_STD_ZVAL(d);	
+							d->type = IS_LONG;
+							d->value.lval = index;
+							php_var_serialize(buf, &d);
+							FREE_ZVAL(d);
+							break;
+						case HASH_KEY_IS_STRING:
+							MAKE_STD_ZVAL(d);	
+							d->type = IS_STRING;
+							d->value.str.val = key;
+							d->value.str.len = strlen(key);
+							php_var_serialize(buf, &d);
+							efree(key);
+							FREE_ZVAL(d);
+							break;
 					}
+					php_var_serialize(buf, data);
 				}
 			}
 			STR_CAT(buf, "}", 1);
