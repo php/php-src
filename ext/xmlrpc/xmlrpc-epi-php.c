@@ -613,7 +613,7 @@ static pval* XMLRPC_to_PHP(XMLRPC_VALUE el) {
 }
 
 /* {{{ proto string xmlrpc_encode_request(string method, mixed params)
-   generate xml for a method request */
+   Generates XML for a method request */
 PHP_FUNCTION(xmlrpc_encode_request) {
    XMLRPC_REQUEST xRequest = NULL;
    pval* method, *vals, *out_opts;
@@ -654,7 +654,7 @@ PHP_FUNCTION(xmlrpc_encode_request) {
 }
 
 /* {{{ proto string xmlrpc_encode(mixed value)
-   generate xml for a PHP value */
+   Generates XML for a PHP value */
 PHP_FUNCTION(xmlrpc_encode)
 {
    XMLRPC_VALUE xOut = NULL;
@@ -715,8 +715,8 @@ pval* decode_request_worker(pval* xml_in, pval* encoding_in, pval* method_name_o
    return retval;
 }
 
-/* {{{ proto array xmlrpc_decode_request(string xml, string& method, [string encoding])
-   decode xml into native php types */
+/* {{{ proto array xmlrpc_decode_request(string xml, string& method [, string encoding])
+   Decodes XML into native PHP types */
 PHP_FUNCTION(xmlrpc_decode_request)
 {
    pval* xml, *method, *encoding = NULL;
@@ -747,8 +747,8 @@ PHP_FUNCTION(xmlrpc_decode_request)
 /* }}} */
 
 
-/* {{{ proto array xmlrpc_decode(string xml, [string encoding])
-   decode xml into native php types */
+/* {{{ proto array xmlrpc_decode(string xml [, string encoding])
+   Decodes XML into native PHP types */
 PHP_FUNCTION(xmlrpc_decode)
 {
    pval* arg1, *arg2 = NULL;
@@ -777,8 +777,8 @@ PHP_FUNCTION(xmlrpc_decode)
 * server related methods *
 *************************/
 
-/* {{{ proto handle xmlrpc_server_create()
-   create an xmlrpc server */
+/* {{{ proto handle xmlrpc_server_create(void)
+   Creates an xmlrpc server */
 PHP_FUNCTION(xmlrpc_server_create) {
    if(ARG_COUNT(ht) != 0) {
       WRONG_PARAM_COUNT; /* prints/logs a warning and returns */
@@ -808,7 +808,7 @@ PHP_FUNCTION(xmlrpc_server_create) {
 }
 
 /* {{{ proto void xmlrpc_server_destroy(handle server)
-   destroy server resources */
+   Destroys server resources */
 PHP_FUNCTION(xmlrpc_server_destroy) {
    pval* arg1;
    int bSuccess = FAILURE;
@@ -925,7 +925,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 }
 
 /* {{{ proto boolean xmlrpc_server_register_method(handle server, string method_name, string function)
-   register a php function to handle method matching method_name */
+   Register a PHP function to handle method matching method_name */
 PHP_FUNCTION(xmlrpc_server_register_method) {
 
    pval* method_key, *method_name, *handle, *method_name_save;
@@ -960,7 +960,7 @@ PHP_FUNCTION(xmlrpc_server_register_method) {
 
 
 /* {{{ proto boolean xmlrpc_server_register_introspection_callback(handle server, string function)
-   register a php function to generate documentation */
+   Register a PHP function to generate documentation */
 PHP_FUNCTION(xmlrpc_server_register_introspection_callback) {
 
    pval* method_key, *method_name, *handle, *method_name_save;
@@ -993,8 +993,8 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback) {
 
 /* this function is itchin for a re-write */
 
-/* {{{ proto mixed xmlrpc_server_call_method(handle server, string xml, mixed user_data, [array output_options])
-   parse xml request and call method */
+/* {{{ proto mixed xmlrpc_server_call_method(handle server, string xml, mixed user_data [, array output_options])
+   Parses XML requests and call methods */
 PHP_FUNCTION(xmlrpc_server_call_method) {
    xmlrpc_callback_data data = {0};
    XMLRPC_REQUEST xRequest;
@@ -1125,7 +1125,7 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
 
 
 /* {{{ proto int xmlrpc_server_add_introspection_data(handle server, array desc)
-   add introspection documentation  */
+   Adds introspection documentation  */
 PHP_FUNCTION(xmlrpc_server_add_introspection_data) {
 
    pval *method, *handle, *desc;
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data) {
 
 
 /* {{{ proto array xmlrpc_parse_method_descriptions(string xml)
-   decode xml into a list of method descriptions */
+   Decodes XML into a list of method descriptions */
 PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 {
    pval* arg1, *arg2, *retval;
@@ -1367,7 +1367,7 @@ XMLRPC_VALUE_TYPE get_pval_xmlrpc_type(pval* value, pval** newvalue) {
 
 
 /* {{{ proto bool xmlrpc_set_type(string value, string type)
-   set xmlrpc type, base64 or datetime, for a php string value */
+   Sets xmlrpc type, base64 or datetime, for a PHP string value */
 PHP_FUNCTION(xmlrpc_set_type) {
    pval* arg, *type;
    XMLRPC_VALUE_TYPE vtype;
@@ -1395,7 +1395,7 @@ PHP_FUNCTION(xmlrpc_set_type) {
 }
 
 /* {{{ proto string xmlrpc_get_type(mixed value)
-   get xmlrpc type for a php value. especially useful for base64 and datetime strings */
+   Gets xmlrpc type for a PHP value. Especially useful for base64 and datetime strings */
 PHP_FUNCTION(xmlrpc_get_type) {
    pval* arg;
    XMLRPC_VALUE_TYPE type;
