@@ -38,9 +38,7 @@
 
 #define VIRTUAL_CWD_DEBUG 0
 
-#ifdef ZTS
 #include "TSRM.h"
-#endif
 
 /* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
 #if defined(TSRM_WIN32) && defined(ZTS)
