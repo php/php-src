@@ -1642,7 +1642,7 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int
 	
 	while (num_interfaces--) {
 		interface_entry = va_arg(interface_list, zend_class_entry *);
-		class_entry->interfaces[class_entry->num_interfaces++] = interface_entry;
+		class_entry->interfaces[class_entry->num_interfaces] = interface_entry;
 		zend_do_implement_interface(class_entry, interface_entry TSRMLS_CC);
 	}
 	va_end(interface_list);
