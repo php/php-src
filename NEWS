@@ -1,13 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added optional parameter to openssl_sign() to specify the hashing
-  algorithm to use. (scott@planetscott.ca, Derick)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
-- Fixed bug #22386 (Using browscap causes segfault). This fix
-  also adds an optional bool argument to get_browser() that
-  makes the return value an array instead of an object. (jay)
+- Fixed bug #22386 (Using browscap causes segfault). (Jay)
 - Fixed bug #22895 (PHP cli outputs errors in text AND html). (Marcus)
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
@@ -24,6 +20,9 @@ PHP                                                                        NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added optional parameter to get_browser() to make it return an array. (Jay)
+- Added optional parameter to openssl_sign() to specify the hashing algorithm.
+  (scott@planetscott.ca, Derick)
 - Added file_set_contents() function. (Sterling)
 - Added "mail_force_extra_paramaters" php.ini option which forces the addition 
   of the specified parameters to be passed as extra parameters to the sendmail 
