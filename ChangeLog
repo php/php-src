@@ -2,10 +2,12 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
-- fixed SYSV-SHM interface (Thies).
-- updated hyperwave module, made it thread safe
-- updated pdflib module, version 0.6 of pdflib no longer supported
-- updated fdf module
+- Fixed a problem when sending HTTP/1.x header lines using header() (Zeev)
+- Win32 builds now include the ODBC module built-in (Zeev)
+- Fixed SYSV-SHM interface (Thies).
+- Updated hyperwave module, made it thread safe
+- Updated pdflib module, version 0.6 of pdflib no longer supported
+- Updated fdf module
 - Built-in phpinfo() links are now turned off by default.  They can be turned
   on using the allow_builtin_links INI directive (Zeev)
 - Changed phpinfo() to list modules that have no info function (Zeev)
