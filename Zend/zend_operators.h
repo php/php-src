@@ -120,26 +120,26 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 
 
-#define ZLVAL(zval)		(zval).value.lval
-#define ZDVAL(zval)		(zval).value.dval
-#define ZSTRVAL(zval)	(zval).value.str.val
-#define ZSTRLEN(zval)	(zval).value.str.len
-#define ZARRVAL(zval)	(zval).value.ht
+#define Z_LVAL(zval)		(zval).value.lval
+#define Z_DVAL(zval)		(zval).value.dval
+#define Z_STRVAL(zval)		(zval).value.str.val
+#define Z_STRLEN(zval)		(zval).value.str.len
+#define Z_ARRVAL(zval)		(zval).value.ht
 
-#define ZLVAL_P(zval_p)		ZLVAL(*zval_p)
-#define ZDVAL_P(zval_p)		ZDVAL(*zval_p)
-#define ZSTRVAL_P(zval_p)	ZSTRVAL(*zval_p)
-#define ZSTRLEN_P(zval_p)	ZSTRLEN(*zval_p)
-#define ZARRVA_PL(zval_p)	ZARRVAL(*zval_p)
+#define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
+#define Z_DVAL_P(zval_p)		Z_DVAL(*zval_p)
+#define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
+#define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
+#define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
 
-#define ZLVAL_PP(zval_pp)	ZLVAL(**zval_pp)
-#define ZDVAL_PP(zval_pp)	ZDVAL(**zval_pp)
-#define ZSTRVAL_PP(zval_pp)	ZSTRVAL(**zval_pp)
-#define ZSTRLEN_PP(zval_pp)	ZSTRLEN(**zval_pp)
-#define ZARRVAL_PP(zval_pp)	ZARRVAL(**zval_pp)
+#define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
+#define Z_DVAL_PP(zval_pp)		Z_DVAL(**zval_pp)
+#define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
+#define Z_STRLEN_PP(zval_pp)	Z_STRLEN(**zval_pp)
+#define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
 
-#define ZTYPE(zval)			(zval).type
-#define ZTYPE_P(zval_p)		ZTYPE(*zval_p)
-#define ZTYPE_PP(zval_pp)	ZTYPE(**zval_pp)
+#define Z_TYPE(zval)		(zval).type
+#define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
+#define Z_TYPE_PP(zval_pp)	Z_TYPE(**zval_pp)
 
 #endif
