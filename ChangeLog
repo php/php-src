@@ -1,3 +1,262 @@
+2001-11-13  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c: setup standard CGI variables
+
+2001-11-13  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/hyperwave/hg_comm.c: Fixing compile error
+
+    * ext/hyperwave/hyperwave.dsp: Fixing debug build
+
+2001-11-13  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Minor changes in ldap_connect(): fixed crash with OpenLDAP 2 libs when
+    called without args and also use ldap_init() rather than ldap_open();
+    simplified code a little
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Removed some old cruft (some commented code and non-used globals), fixed
+    a proto typo, and make sure ldap_base_dn and ldap_filter are initialized
+    in php_ldap_do_search()
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/tests/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/zlib/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/satellite/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore:
+    Added missing .cvsignore files and added *.reg into pear/tests/.cvsignore
+
+    * ext/pdf/Makefile.in
+      ext/pdf/config.m4:
+    Fixed some problems in configuring e.g. shared module.
+
+2001-11-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c: Be explicit here and cast it
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt: MFH
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt: Tests failed as the PEAR.php was modified.
+
+2001-11-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/tests/math/pow.phpt: MFH
+
+    * ext/standard/tests/math/pow.phpt:
+    Fix most of these tests - still think there is a bug in the long->float
+    conversion stuff somewhere
+
+    * tests/quicktester.inc:
+    Let's just use the quicktester from HEAD since it seems to work and the
+    one in this branch is quite broken.  Still plenty of failing tests we need
+    to work through here.
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * run-tests.php: Partial MFH.
+
+2001-11-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/tests/file/001.phpt: MFH
+
+    * ext/standard/tests/file/001.phpt:
+    Different operating systems handle the group x bit differently, so
+    simplify this test to test the user x bit instead
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/basic/002.phpt
+      tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt
+      tests/basic/011.phpt: MFH
+
+    * tests/basic/002.phpt
+      tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt:
+    Make these tests work regardless of the register_globals setting.
+
+    * ext/satellite/tests/003.phpt
+      ext/standard/tests/time/001.phpt: MFH
+
+    * ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt:
+    MFH (the use of strings for locale setting is deprecated)
+
+2001-11-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/config.m4: - Check for cURL >= 7.8.1
+
+2001-11-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/curl/curl.c: Fix name
+
+    * ext/curl/curl.c: Improve OpenSSL compatibility
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/crack/config.m4: MFH
+
+    * ext/crack/config.m4: Fixed bug introduced by my last commit.
+
+2001-11-13  James Moore  <James@phpuk.org>
+
+    * ext/standard/math.c: Lets cast this explicitly.
+
+2001-11-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    "Fix" last commit, to compile cURL with SSL support you must also use the
+    OpenSSL extension -- sorry...
+
+    The last commit caused bad things to happen if you were compiling cURL and
+    PHP on Win32 or if you compiled PHP --with-openssl, ie, re-initializing things
+    that were already initialized
+
+2001-11-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xslt/sablot.c:
+    - Fix scheme/sax handlers (patch by Lenar Lõhmus <lenar@vision.ee>)
+
+    * ext/xslt/sablot.c:
+    - Fixed scheme/sax handlers (patch by Lenar Lõhmus <lenar@vision.ee>)
+
+    * sapi/apache/php_apache.c: - MFH
+
+2001-11-13  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: Go with RC2
+
+2001-11-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.bat
+      pear/scripts/pear.in
+      pear/scripts/pearwin.php
+      pear/tests/PEAR.r
+      pear/tests/PEAR.t
+      pear/tests/PEAR_Error.r
+      pear/tests/PEAR_Error.t
+      pear/tests/pear_config.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/system.input
+      pear/tests/user.input
+      pear/XML/tests/001.phpt
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/004.phpt
+      pear/XML/tests/005.phpt
+      pear/PEAR/Packlist.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/WebInstaller.php
+      pear/XML/Parser.php
+      pear/XML/RPC.php
+      pear/Net/Socket.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/Mail/xmail.xsl
+      pear/Math/Fraction.php
+      pear/Math/Util.php
+      pear/Net/Curl.php
+      pear/HTML/Menu.php
+      pear/HTML/Menu_Browser.php
+      pear/HTML/Page.php
+      pear/Log/Observer.php
+      pear/Mail/RFC822.php
+      pear/Mail/mime.php
+      pear/Mail/mimeDecode.php
+      pear/Mail/mimePart.php
+      pear/Mail/smtp.php
+      pear/Mail/xmail.dtd
+      pear/Experimental/System.php
+      pear/File/Find.php
+      pear/HTML/Form.php
+      pear/HTML/ITX.php
+      pear/DB/tests/fetchmode_object.inc
+      pear/DB/tests/limit.inc
+      pear/DB/tests/mysql/13limit.phpt
+      pear/DB/tests/mysql/14fetchmode_object.phpt
+      pear/DB/tests/pgsql/010.phpt
+      pear/DB/tests/pgsql/13limit.phpt
+      pear/DB/tests/pgsql/14fetchmode_object.phpt
+      pear/DB/storage.php
+      pear/DB/sybase.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/common.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/Benchmark/Iterate.php
+      pear/Cache/Container/file.php
+      pear/Cache/DB.php
+      pear/Cache/Graphics.php
+      pear/Console/Getopt.php
+      pear/DB/STATUS
+      pear/CODING_STANDARDS
+      pear/DB.php
+      pear/Log.php
+      pear/Makefile.in
+      pear/PEAR.php
+      pear/README
+      pear/System.php
+      pear/package.dtd: MFH: pear updates
+
+2001-11-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/curl/curl.c: MFH - SSL fixes
+
+2001-11-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in: * command name changes
+
+    * pear/PEAR/Registry.php: * rename files to .reg (not .inf)
+
+    * pear/PEAR/Installer.php: * error message cleanup
+    * store registry object as property
+
+2001-11-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/curl/curl.c: Import patch from bug #14023
+
+2001-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c:
+    Fixed the wrong logic in ini_get_all() function.
+    Now it behaves same as how phpinfo() outputs the ini entries.
+
+    If there is a local value, then the global one is the 'original one' if
+    there is such. Otherwise global value is same as local. :)
+
+2001-11-13  James Moore  <James@phpuk.org>
+
+    * ext/standard/string.c: MFH
+
 2001-11-12  Jani Taskinen  <sniper@iki.fi>
 
     * ext/zlib/zlib.c: MFH
