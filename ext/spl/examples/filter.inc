@@ -51,7 +51,7 @@ class filter implements spl_forward
 	 */
 	protected function fetch() {
 		$this->curr = false;
-		while ($this->it->has_more()) {
+		while ($this->it->hasMore()) {
 			$curr = $this->it->current();
 			if ($this->accept($curr)) {
 				$this->curr = $curr;
@@ -74,7 +74,7 @@ class filter implements spl_forward
 	/**
 	 * @return Whether more elements are available
 	 */
-	function has_more() {
+	function hasMore() {
 		return $this->curr !== false;
 	}
 	

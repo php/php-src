@@ -20,7 +20,7 @@ class c_iter implements spl_forward {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		$more = $this->num < $this->obj->max;
 		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
@@ -31,7 +31,7 @@ class c implements spl_iterator {
 
 	public $max = 4;
 
-	function new_iterator() {
+	function newIterator() {
 		echo __METHOD__ . "\n";
 		return new c_iter($this);
 	}
@@ -64,38 +64,38 @@ foreach($t as $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 continue outer
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 double:1:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 continue inner
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 break inner
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 double:2:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 continue inner
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 break inner
 break outer

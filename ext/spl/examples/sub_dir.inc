@@ -43,7 +43,7 @@ class sub_dir implements spl_sequence
 		$this->adir[1] = $dir;
 		$this->cnt = 1;
 		if ($this->nodots) {
-			while ($dir->has_more()) {
+			while ($dir->hasMore()) {
 				$ent = $dir->current();
 				if ($ent != '.' && $ent != '..') {
 					break;
@@ -62,7 +62,7 @@ class sub_dir implements spl_sequence
 		if ($this->cnt) {
 			$dir = $this->adir[$this->cnt];
 			$ent = $dir->current();
-			$path = $dir->get_path().'/'.$ent;
+			$path = $dir->getPath().'/'.$ent;
 			if ($ent != '.' && $ent != '..' && is_dir($path)) {
 				$new = new spl_dir($path);
 				$new->path = $dir->path.$ent.'/';
@@ -70,7 +70,7 @@ class sub_dir implements spl_sequence
 				$this->adir[$this->cnt] = $new;
 				if ($this->nodots) {
 					$dir->has_more = false;
-					while ($new->has_more()) {
+					while ($new->hasMore()) {
 						$ent = $new->current();
 						if ($ent != '.' && $ent != '..') {
 							$dir->has_more = true;
@@ -79,7 +79,7 @@ class sub_dir implements spl_sequence
 						$new->next();
 					}
 				} else {
-					$dir->has_more = $dir->has_more();
+					$dir->has_more = $dir->hasMore();
 				}
 			}
 			$dir->next();
@@ -89,10 +89,10 @@ class sub_dir implements spl_sequence
 	/**
 	 * @return Whether more dirs or files entries are available.
 	 */
-	function has_more() {
+	function hasMore() {
 		while ($this->cnt) {
 			$dir = $this->adir[$this->cnt];
-			if ($dir->has_more()) {
+			if ($dir->hasMore()) {
 				return true;
 			}
 			unset($this->adir[$this->cnt--]);
@@ -109,11 +109,11 @@ class sub_dir implements spl_sequence
 				$prefix = '';
 				for ($i = 1; $i < $this->cnt; $i++) {
 					$dir = $this->adir[$i];
-					$prefix .= $dir->has_more() ? '| ' : '  ';
+					$prefix .= $dir->hasMore() ? '| ' : '  ';
 				}
 				$dir = $this->adir[$this->cnt];
 				$ent = $dir->current();
-				$prefix .= $dir->has_more() ? '+-' : '\-';
+				$prefix .= $dir->hasMore() ? '+-' : '\-';
 				return $prefix . $ent;
 			} else {
 				$dir = $this->adir[$this->cnt];

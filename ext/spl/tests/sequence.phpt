@@ -8,7 +8,7 @@ class c implements spl_iterator {
 
 	public $max = 3;
 
-	function new_iterator() {
+	function newIterator() {
 		echo __METHOD__ . "\n";
 		return new c_iter($this);
 	}
@@ -34,7 +34,7 @@ class c_iter implements spl_sequence_assoc {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		echo __METHOD__ . "\n";
 		return $this->num < $this->obj->max;
 	}
@@ -50,7 +50,7 @@ class c_iter implements spl_sequence_assoc {
 }
 
 $t = new c();
-$i = $t->new_iterator(); 
+$i = $t->newIterator(); 
 
 $c_info = array(get_class($t) => array('inheits' => class_parents($t), 'implements' => class_implements($t)),
                 get_class($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
@@ -67,7 +67,7 @@ foreach($i as $v => $w) {
 print "Done\n";
 ?>
 --EXPECT--
-c::new_iterator
+c::newiterator
 Array
 (
     [c] => Array
@@ -102,37 +102,37 @@ Array
 
 )
 c_iter::rewind
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 c_iter::rewind
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::has_more
+c_iter::hasmore
 Done

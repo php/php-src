@@ -17,7 +17,7 @@ class c implements spl_forward_assoc {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		echo __METHOD__ . "\n";
 		return $this->num < $this->max;
 	}
@@ -86,51 +86,51 @@ Array
 Array
 (
     [0] => current
-    [1] => has_more
+    [1] => hasmore
     [2] => key
     [3] => next
 )
 Array
 (
     [0] => current
-    [1] => has_more
+    [1] => hasmore
     [2] => key
     [3] => next
 )
 1st try
-c::has_more
+c::hasmore
 c::current
 c::key
 object:0
 c::next
-c::has_more
+c::hasmore
 c::current
 c::key
 object:1
 c::next
-c::has_more
+c::hasmore
 c::current
 c::key
 object:2
 c::next
-c::has_more
+c::hasmore
 2nd try
-c::has_more
+c::hasmore
 3rd try
-c::has_more
+c::hasmore
 c::current
 c::key
 object:1st=>0
 c::next
-c::has_more
+c::hasmore
 c::current
 c::key
 object:2nd=>1
 c::next
-c::has_more
+c::hasmore
 c::current
 c::key
 object:3rd=>2
 c::next
-c::has_more
+c::hasmore
 Done
