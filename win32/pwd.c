@@ -19,8 +19,6 @@
 /* $Id$ */
 
 #include "php.h"				/*php specific */
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <lmaccess.h>
 #include <stdio.h>
 #include <stdlib.h>
