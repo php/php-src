@@ -58,7 +58,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			key_len -= 1;
 		}
 
-		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata) {
+		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array.");
 			return FAILURE;
 		}
@@ -112,7 +112,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*p = '\0';
 			}
 			ht->nApplyCount++;
-			php_url_encode_hash_ex(Z_ARRVAL_PP(zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1 TSRMLS_CC);
+			php_url_encode_hash_ex(HASH_OF(*zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1 TSRMLS_CC);
 			ht->nApplyCount--;
 			efree(newprefix);
 		} else if (Z_TYPE_PP(zdata) == IS_NULL || Z_TYPE_PP(zdata) == IS_RESOURCE) {
@@ -175,7 +175,12 @@ PHP_FUNCTION(http_build_query)
 	int prefix_len = 0;
 	smart_str formstr = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s", &formdata, &prefix, &prefix_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &formdata, &prefix, &prefix_len) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(formdata) != IS_ARRAY && Z_TYPE_P(formdata) != IS_OBJECT) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given.");
 		RETURN_FALSE;
 	}
 
