@@ -33,7 +33,6 @@
 #include "php_wddx.h"
 
 #if HAVE_WDDX
-#include "dlist.h"
 
 #include "php_wddx_api.h"
 
