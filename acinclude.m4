@@ -2003,7 +2003,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
       re2c_vernum=`echo "" | re2c --vernum 2>/dev/null`
-      if test -z "$rec2_vernum" || test "$re2c_vernum" -lt "904"; then
+      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "904"; then
         php_cv_re2c_version=invalid
       else
         php_cv_re2c_version="`echo "" | re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
