@@ -399,8 +399,12 @@ class PEAR_Config extends PEAR
         if (!$fp) {
             return $this->raiseError("PEAR_Config::readConfigFile fopen('$file','r') failed");
         }
+        $old_ini = ini_get("magic_quotes_runtime");
+        ini_set("magic_quotes_runtime", false);
         $size = filesize($file);
         $contents = fread($fp, $size);
+        fclose($fp);
+        ini_set("magic_quotes_runtime", $old_ini);
         $version = '0.1';
         if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, $matches)) {
             $version = $matches[1];
