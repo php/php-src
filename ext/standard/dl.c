@@ -132,14 +132,15 @@ void php_dl(pval *file,int type,pval *return_value)
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
-	if ((module_entry->zend_debug != ZEND_DEBUG) || (module_entry->zts != USING_ZTS)) {
+	if ((module_entry->zend_debug != ZEND_DEBUG) || (module_entry->zts != USING_ZTS)
+		|| (module_entry->zend_api != ZEND_MODULE_API_NO)) {
 		php_error(E_CORE_WARNING,
 					"%s: Unable to initialize module\n"
-					"Module compiled with debug=%d, thread-safety=%d\n"
-					"PHP compiled with debug=%d, thread-safety=%d\n"
+					"Module compiled with debug=%d, thread-safety=%d module API=%d\n"
+					"PHP compiled with debug=%d, thread-safety=%d module API=%d\n"
 					"These options need to match\n",
-					module_entry->name, module_entry->zend_debug, module_entry->zts,
-					ZEND_DEBUG, USING_ZTS);
+					module_entry->name, module_entry->zend_debug, module_entry->zts, module_entry->zend_api,
+					ZEND_DEBUG, USING_ZTS, ZEND_MODULE_API_NO);
 		DL_UNLOAD(handle);
 		RETURN_FALSE;
 	}
