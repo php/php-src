@@ -30,7 +30,7 @@
 #include <dirent.h>
 #endif
 
-#if WIN32||WINNT
+#if PHP_WIN32
 #define NEEDRDH 1
 #include "win32/readdir.h"
 #endif
@@ -56,7 +56,7 @@ ps_module ps_mod_files = {
 	PS_MOD(files)
 };
 
-#if WIN32|WINNT
+#if PHP_WIN32
 #define DIR_DELIMITER '\\'
 #else
 #define DIR_DELIMITER '/'
@@ -69,9 +69,9 @@ static int _ps_files_valid_key(const char *key)
 	char c;
 	int ret = 1;
 
-	for(p = key; (c = *p); p++) {
+	for (p = key; (c = *p); p++) {
 		/* valid characters are a..z,A..Z,0..9 */
-		if(!((c >= 'a' && c <= 'z') ||
+		if (!((c >= 'a' && c <= 'z') ||
 				(c >= 'A' && c <= 'Z') ||
 				(c >= '0' && c <= '9'))) {
 			ret = 0;
@@ -81,9 +81,8 @@ static int _ps_files_valid_key(const char *key)
 
 	len = p - key;
 	
-	if(len == 0) {
+	if (len == 0)
 		ret = 0;
-	}
 	
 	return ret;
 }
@@ -96,12 +95,12 @@ static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, con
 	int n;
 	
 	keylen = strlen(key);
-	if(keylen <= data->dirdepth || buflen < 
+	if (keylen <= data->dirdepth || buflen < 
 			(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
 		return NULL;
 	p = key;
 	n = sprintf(buf, "%s/", data->basedir);
-	for(i = 0; i < data->dirdepth; i++) {
+	for (i = 0; i < data->dirdepth; i++) {
 		buf[n++] = *p++;
 		buf[n++] = DIR_DELIMITER;
 	}
@@ -116,17 +115,17 @@ static void _ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 
-	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
-		if(data->lastkey) {
+	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
+		if (data->lastkey) {
 			efree(data->lastkey);
 			data->lastkey = NULL;
 		}
-		if(data->fd != -1) {
+		if (data->fd != -1) {
 			close(data->fd);
 			data->fd = -1;
 		}
 		
-		if(!_ps_files_valid_key(key) || 
+		if (!_ps_files_valid_key(key) || 
 				!_ps_files_path_create(buf, sizeof(buf), data, key))
 			return;
 		
@@ -143,9 +142,8 @@ static void _ps_files_open(ps_files *data, const char *key)
 		}
 #else
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
-		if(data->fd != -1) {
+		if (data->fd != -1)
 			flock(data->fd, LOCK_EX);
-		}
 #endif
 	}
 }
@@ -159,13 +157,13 @@ static void _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 	time_t now;
 
 	dir = opendir(dirname);
-	if(!dir) return;
+	if (!dir) return;
 
 	time(&now);
 
 	while((entry = readdir(dir))) {
 		/* does the file start with our prefix? */
-		if(!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
+		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
 				/* create full path */
 				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, DIR_DELIMITER,
 					entry->d_name) > 0 &&
@@ -191,7 +189,7 @@ PS_OPEN_FUNC(files)
 	PS_SET_MOD_DATA(data);
 
 	data->fd = -1;
-	if((p = strchr(save_path, ':'))) {
+	if ((p = strchr(save_path, ':'))) {
 		data->dirdepth = strtol(save_path, NULL, 10);
 		save_path = p + 1;
 	}
@@ -204,8 +202,10 @@ PS_CLOSE_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	if(data->fd > -1) close(data->fd);
-	if(data->lastkey) efree(data->lastkey);
+	if (data->fd > -1) 
+		close(data->fd);
+	if (data->lastkey) 
+		efree(data->lastkey);
 	efree(data->basedir);
 	efree(data);
 	*mod_data = NULL;
@@ -220,13 +220,11 @@ PS_READ_FUNC(files)
 	PS_FILES_DATA;
 
 	_ps_files_open(data, key);
-	if(data->fd < 0) {
+	if (data->fd < 0)
 		return FAILURE;
-	}
 	
-	if(fstat(data->fd, &sbuf)) {
+	if (fstat(data->fd, &sbuf))
 		return FAILURE;
-	}
 	
 	lseek(data->fd, 0, SEEK_SET);
 
@@ -234,7 +232,7 @@ PS_READ_FUNC(files)
 	*val = emalloc(sbuf.st_size);
 
 	n = read(data->fd, *val, sbuf.st_size);
-	if(n != sbuf.st_size) {
+	if (n != sbuf.st_size) {
 		efree(*val);
 		return FAILURE;
 	}
@@ -247,9 +245,8 @@ PS_WRITE_FUNC(files)
 	PS_FILES_DATA;
 
 	_ps_files_open(data, key);
-	if(data->fd < 0) {
+	if (data->fd < 0)
 		return FAILURE;
-	}
 
 	ftruncate(data->fd, 0);
 	lseek(data->fd, 0, SEEK_SET);
@@ -263,7 +260,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if(!_ps_files_path_create(buf, sizeof(buf), data, key))
+	if (!_ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
 	
 	unlink(buf);
@@ -279,11 +276,8 @@ PS_GC_FUNC(files)
 	   we return SUCCESS, since all cleanup should be handled by
 	   an external entity (i.e. find -ctime x | xargs rm) */
 	   
-	if(data->dirdepth > 0) {
-		return SUCCESS;
-	}
-
-	_ps_files_cleanup_dir(data->basedir, maxlifetime);
+	if (data->dirdepth == 0)
+		_ps_files_cleanup_dir(data->basedir, maxlifetime);
 	
 	return SUCCESS;
 }

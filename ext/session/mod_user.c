@@ -55,13 +55,13 @@ static zval *ps_call_handler(char *name, int argc, zval **argv)
 	zval *retval = NULL;
 	ELS_FETCH();
 	
-	if(name && name[0] != '\0') {
+	if (name && name[0] != '\0') {
 		zval *func;
 
 		SESS_ZVAL_STRING(name, func);
 		MAKE_STD_ZVAL(retval);
 
-		if(call_user_function(EG(function_table), NULL, func, retval, 
+		if (call_user_function(EG(function_table), NULL, func, retval, 
 					argc, argv) == FAILURE) {
 			zval_dtor(retval);
 			efree(retval);
@@ -71,7 +71,7 @@ static zval *ps_call_handler(char *name, int argc, zval **argv)
 		efree(func);
 	}
 
-	for(i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i++) {
 		zval_dtor(argv[i]);
 		efree(argv[i]);
 	}
@@ -83,12 +83,13 @@ static zval *ps_call_handler(char *name, int argc, zval **argv)
 	zval *retval; 							\
 	int ret = FAILURE; 						\
 	ps_user *mdata = PS_GET_MOD_DATA();		\
-	if(!mdata) return FAILURE
+	if (!mdata) 							\
+		return FAILURE
 
 #define PSF(a) mdata->name.ps_##a
 
 #define FINISH 								\
-	if(retval) {							\
+	if (retval) {							\
 		convert_to_long(retval);			\
 		ret = retval->value.lval;			\
 		zval_dtor(retval);					\
@@ -116,9 +117,8 @@ PS_CLOSE_FUNC(user)
 
 	retval = ps_call_handler(PSF(close), 0, NULL);
 
-	for(i = 0; i < 6; i++) {
+	for (i = 0; i < 6; i++)
 		efree(mdata->names[i]);
-	}
 	efree(mdata);
 
 	PS_SET_MOD_DATA(NULL);
@@ -135,8 +135,8 @@ PS_READ_FUNC(user)
 
 	retval = ps_call_handler(PSF(read), 1, args);
 	
-	if(retval) {
-		if(retval->type == IS_STRING) {
+	if (retval) {
+		if (retval->type == IS_STRING) {
 			*val = estrndup(retval->value.str.val, retval->value.str.len);
 			*vallen = retval->value.str.len;
 			ret = SUCCESS;
