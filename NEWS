@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- IPv6 support in fopen (Stig Venaas)
 - Added the shmop extension. It allows more general ways of shared memory
   access. (thanks to Ilia Alshanestky <iliaa@home.com> and Slava Poliakov
   <slavapl@mailandnews.com> (Derick)
