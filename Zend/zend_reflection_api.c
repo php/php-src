@@ -871,6 +871,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.object_pp = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = argc;
+	fci.params = params;
 	fci.no_separation = 1;
 
 	fcc.initialized = 1;
@@ -1411,6 +1412,7 @@ ZEND_METHOD(reflection_method, getdeclaringclass)
 
 	reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ proto public Reflection_Class::__construct(mixed argument) throws Exception
    Constructor. Takes a string or an instance as an argument */
