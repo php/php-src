@@ -64,7 +64,7 @@ if test "$PHP_SAPI" != "apache"; then
 AC_MSG_CHECKING(for Apache module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache module. DIR is the top-level Apache
-                          build directory, defaults to /usr/local/etc/httpd.],[
+                          build directory, defaults to /usr/local/apache.],[
   if test "$withval" = "yes"; then
     # Apache's default directory
     withval=/usr/local/apache
