@@ -78,6 +78,8 @@ PHP_MINFO_FUNCTION(mbstring);
 
 /* functions in php_unicode.c */
 PHP_FUNCTION(mb_convert_case);
+PHP_FUNCTION(mb_strtoupper);
+PHP_FUNCTION(mb_strtolower);
 
 /* php function registration */
 PHP_FUNCTION(mb_language);

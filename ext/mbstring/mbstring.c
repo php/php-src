@@ -162,6 +162,8 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
+	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
+	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
 #if HAVE_MBREGEX
 	{MB_OVERLOAD_REGEX, "ereg", "mb_ereg", "mb_orig_ereg"},
 	{MB_OVERLOAD_REGEX, "eregi", "mb_eregi", "mb_orig_eregi"},
@@ -189,6 +191,8 @@ const struct def_mbctype_tbl mbctype_tbl[] = {
 
 function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,				NULL)
+	PHP_FE(mb_strtoupper,				NULL)
+	PHP_FE(mb_strtolower,				NULL)
 	PHP_FE(mb_language,					NULL)
 	PHP_FE(mb_internal_encoding,		NULL)
 	PHP_FE(mb_http_input,				NULL)
@@ -2579,6 +2583,55 @@ PHP_FUNCTION(mb_convert_case)
 	
 }
 /* }}} */
+
+/* {{{ proto string mb_strtoupper(string sourcestring, [, string encoding])
+ *  Returns a uppercased version of sourcestring
+ */
+PHP_FUNCTION(mb_strtoupper)
+{
+	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	long str_len, from_encoding_len;
+	long case_mode = 0;
+	char *newstr;
+	size_t ret_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &str, &str_len,
+				&from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+
+	if (newstr)
+		RETURN_STRINGL(newstr, ret_len, 0);
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto string mb_strtolower(string sourcestring, [, string encoding])
+ *  Returns a lowercased version of sourcestring
+ */
+PHP_FUNCTION(mb_strtolower)
+{
+	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	long str_len, from_encoding_len;
+	long case_mode = 0;
+	char *newstr;
+	size_t ret_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &str, &str_len,
+				&from_encoding, &from_encoding_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+
+	if (newstr)
+		RETURN_STRINGL(newstr, ret_len, 0);
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 
 /* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
    Encodings of the given string is returned (as a string) */
