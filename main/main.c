@@ -99,7 +99,6 @@ struct sapi_request_info *sapi_rqst;
 #include "getopt.h"
 #endif
 
-
 #ifdef ZTS
 int compiler_globals_id;
 int executor_globals_id;
@@ -108,6 +107,10 @@ int executor_globals_id;
 #ifndef ZTS
 php_core_globals core_globals;
 #endif
+
+void _php3_build_argv(char * ELS_DC);
+static void php3_timeout(int dummy);
+static void php3_set_timeout(long seconds INLINE_TLS);
 
 void *gLock;					/*mutex variable */
 
@@ -120,11 +123,52 @@ void *gLock;					/*mutex variable */
 HashTable configuration_hash;
 char *php3_ini_path = NULL;
 
-PHP_INI_MH(OnSetPrecision)
+
+static PHP_INI_MH(OnSetPrecision)
 {
 	ELS_FETCH();
 
 	EG(precision) = atoi(new_value);
+	return SUCCESS;
+}
+
+
+static PHP_INI_MH(OnChangeMaxExecutionTime)
+{
+	int new_timeout;
+	
+	if (new_value) {
+		new_timeout = atoi(new_value);
+	} else {
+		new_timeout = 0;
+	}
+	php3_set_timeout(new_timeout);
+	return SUCCESS;
+}
+
+
+static PHP_INI_MH(OnChangeMemoryLimit)
+{
+	int new_limit;
+
+	if (new_value) {
+		new_limit = atoi(new_value);
+	} else {
+		new_limit = 2<<30;		/* effectively, no limit */
+	}
+	return zend_set_memory_limit(new_limit);
+}
+
+
+static PHP_INI_MH(OnUpdateErrorReporting)
+{
+	ELS_FETCH();
+
+	if (!new_value) {
+		EG(error_reporting) = E_ALL & ~E_NOTICE;
+	} else {
+		EG(error_reporting) = atoi(new_value);
+	}
 	return SUCCESS;
 }
 
@@ -136,6 +180,9 @@ PHP_INI_MH(OnSetPrecision)
  * Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
  * PHP_AUTO_APPEND_FILE
+ * PHP_DOCUMENT_ROOT
+ * PHP_USER_DIR
+ * PHP_INCLUDE_PATH
  */
 
 #ifndef SAFE_MODE_EXEC_DIR
@@ -167,17 +214,41 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("safe_mode",				"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, safe_mode))
 	PHP_INI_ENTRY("sql.safe_mode",			"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, sql_safe_mode))
 	PHP_INI_ENTRY("safe_mode_exec_dir",		SAFE_MODE_EXEC_DIR,		PHP_INI_SYSTEM,	OnUpdateString,	(void *) XtOffsetOf(php_core_globals, safe_mode_exec_dir))
+	PHP_INI_ENTRY("enable_dl",				"1",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, enable_dl))
 
 	PHP_INI_ENTRY("SMTP",			"localhost",			PHP_INI_ALL,		NULL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL,		NULL)
 	PHP_INI_ENTRY("sendmail_from",	NULL,					PHP_INI_ALL,		NULL,		NULL)
 
+	PHP_INI_ENTRY("error_reporting",	NULL,				PHP_INI_ALL,		OnUpdateErrorReporting,		NULL)
 	PHP_INI_ENTRY("display_errors",		"1",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, display_errors))
 	PHP_INI_ENTRY("track_errors",		"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, track_errors))
 	PHP_INI_ENTRY("log_errors",			"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, log_errors))
+	PHP_INI_ENTRY("error_log",			NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, error_log))
 
 	PHP_INI_ENTRY("auto_prepend_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_prepend_file))
 	PHP_INI_ENTRY("auto_append_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_append_file))
+
+	PHP_INI_ENTRY("y2k_compliance",		"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, y2k_compliance))
+
+	PHP_INI_ENTRY("doc_root",			NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, doc_root))
+	PHP_INI_ENTRY("user_dir",			NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, user_dir))
+	PHP_INI_ENTRY("include_path",		NULL,				PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, include_path))
+	PHP_INI_ENTRY("open_basedir",		NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, open_basedir))
+	PHP_INI_ENTRY("extension_dir",		NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, extension_dir))
+
+	PHP_INI_ENTRY("upload_tmp_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, upload_tmp_dir))
+	PHP_INI_ENTRY("upload_max_filesize",	"2097152",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, upload_max_filesize))
+
+	PHP_INI_ENTRY("browscap",			NULL,				PHP_INI_SYSTEM,		NULL,			NULL)
+
+	PHP_INI_ENTRY("define_syslog_variables",	"0",		PHP_INI_ALL,		NULL,			NULL)
+
+	PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime,		NULL)
+	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit,			NULL)
+
+	PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, gpc_order))
+	PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, arg_separator))
 PHP_INI_END()
 
 
@@ -205,17 +276,6 @@ request_rec *php3_rqst = NULL;	/* request record pointer for apache module versi
  */
 
 #endif
-
-php3_ini_structure php3_ini;
-php3_ini_structure php3_ini_master;
-
-void _php3_build_argv(char * ELS_DC);
-static void php3_timeout(int dummy);
-static void php3_set_timeout(long seconds INLINE_TLS);
-
-
-
-
 
 #if APACHE
 void php3_apache_puts(const char *s)
@@ -247,14 +307,14 @@ void php3_log_err(char *log_message)
 	TLS_VARS;
 
 	/* Try to use the specified logging location. */
-	if (php3_ini.error_log != NULL) {
+	if (PG(error_log) != NULL) {
 #if HAVE_SYSLOG_H
-		if (strcmp(php3_ini.error_log, "syslog")) {
+		if (strcmp(PG(error_log), "syslog")) {
 			syslog(LOG_NOTICE, log_message);
 			return;
 		} else {
 #endif
-			log_file = fopen(php3_ini.error_log, "a");
+			log_file = fopen(PG(error_log), "a");
 			if (log_file != NULL) {
 				fprintf(log_file, log_message);
 				fprintf(log_file, "\n");
@@ -395,12 +455,15 @@ PHPAPI void php3_error(int type, const char *format,...)
 				php3_log_err(log_buffer);
 			}
 			if (PG(display_errors)) {
-				if(php3_ini.error_prepend_string) {
-					PUTS(php3_ini.error_prepend_string);
+				char *prepend_string = INI_STR("error_prepend_string");
+				char *append_string = INI_STR("error_append_string");
+
+				if (prepend_string) {
+					PUTS(prepend_string);
 				}		
 				php3_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
-				if(php3_ini.error_append_string) {
-					PUTS(php3_ini.error_append_string);
+				if (append_string) {
+					PUTS(append_string);
 				}		
 			}
 		}
@@ -438,7 +501,7 @@ static void php3_timeout(int dummy)
 {
 	TLS_VARS;
 
-	php3_error(E_ERROR, "Maximum execution time of %d seconds exceeded", php3_ini.max_execution_time);
+	php3_error(E_ERROR, "Maximum execution time of %d seconds exceeded", PG(max_execution_time));
 }
 #endif
 
@@ -529,7 +592,7 @@ static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
 		case ZMSG_ENABLE_TRACK_VARS:
-			php3_ini.track_vars = 1;
+			PG(track_vars) = 1;
 			break;
 		case ZMSG_FAILED_INCLUDE_FOPEN:
 			php3_error(E_WARNING, "Failed opening '%s' for inclusion", php3_strip_url_passwd((char *) data));
@@ -578,7 +641,7 @@ int php3_request_startup(CLS_D ELS_DC)
 	}
 #endif
 
-	php3_set_timeout(php3_ini.max_execution_time _INLINE_TLS);
+	php3_set_timeout(PG(max_execution_time) _INLINE_TLS);
 
 	GLOBAL(initialized) = 0;
 
@@ -598,12 +661,10 @@ int php3_request_startup(CLS_D ELS_DC)
 
 	/* initialize global variables */
 	{
-		EG(error_reporting) = php3_ini.errors;
 		GLOBAL(header_is_being_sent) = 0;
-		GLOBAL(php3_track_vars) = php3_ini.track_vars;
 	}
 
-	if (php3_init_request_info((void *) &php3_ini)) {
+	if (php3_init_request_info(NULL)) {
 		php3_printf("Unable to initialize request info.\n");
 		return FAILURE;
 	}
@@ -669,7 +730,7 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 
 	if (GLOBAL(initialized) & INIT_REQUEST_INFO) {
 		SHUTDOWN_DEBUG("Request info");
-		php3_destroy_request_info((void *) &php3_ini);
+		php3_destroy_request_info(NULL);
 		GLOBAL(initialized) &= ~INIT_REQUEST_INFO;
 	}
 	if (GLOBAL(initialized) & INIT_SCANNER) {
@@ -738,113 +799,9 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 
 static int php3_config_ini_startup(ELS_D)
 {
-	/* set the memory limit to a reasonable number so that we can get
-	 * through this startup phase properly
-	 */
-	php3_ini.memory_limit=1<<23; /* 8MB */
-	
 	if (php3_init_config() == FAILURE) {
 		php3_printf("PHP:  Unable to parse configuration file.\n");
 		return FAILURE;
-	}
-#if !(USE_SAPI)
-	GLOBAL(module_initialized) |= INIT_CONFIG;
-#endif
-	/* initialize run-time variables */
-	/* I have remarked out some stuff 
-	   that may or may not be needed */
-	{
-		char *temp;
-
-		if (cfg_get_long("max_execution_time", &php3_ini.max_execution_time) == FAILURE) {
-			php3_ini.max_execution_time = 30;
-		}
-		if (cfg_get_long("memory_limit", &php3_ini.memory_limit) == FAILURE) {
-			php3_ini.memory_limit = 1<<23;  /* 8MB */
-		}
-		if (cfg_get_long("error_reporting", &php3_ini.errors) == FAILURE) {
-			php3_ini.errors = E_ALL & ~E_NOTICE;
-		}
-		EG(error_reporting) = php3_ini.errors;
-		if (cfg_get_string("error_log", &php3_ini.error_log) == FAILURE) {
-			php3_ini.error_log = NULL;
-		}
-		if (cfg_get_long("y2k_compliance", &php3_ini.y2k_compliance) == FAILURE) {
-			php3_ini.y2k_compliance = 0;
-		}
-		if (cfg_get_long("define_syslog_variables", &php3_ini.define_syslog_variables) == FAILURE) {
-			php3_ini.define_syslog_variables = 0;
-		}
-		if (cfg_get_string("doc_root", &php3_ini.doc_root) == FAILURE) {
-			if ((temp = getenv("PHP_DOCUMENT_ROOT"))) {
-				php3_ini.doc_root = temp;
-			} else {
-				php3_ini.doc_root = NULL;
-			}
-		}
-		if (cfg_get_string("user_dir", &php3_ini.user_dir) == FAILURE) {
-			if ((temp = getenv("PHP_USER_DIR"))) {
-				php3_ini.user_dir = temp;
-			} else {
-				php3_ini.user_dir = NULL;
-			}
-		}
-		if (cfg_get_long("track_vars", &php3_ini.track_vars) == FAILURE) {
-			php3_ini.track_vars = PHP_TRACK_VARS;
-		}
-		if (cfg_get_string("include_path", &php3_ini.include_path) == FAILURE) {
-			if ((temp = getenv("PHP_INCLUDE_PATH"))) {
-				php3_ini.include_path = temp;
-			} else {
-				php3_ini.include_path = NULL;
-			}
-		}
-		if (cfg_get_string("upload_tmp_dir", &php3_ini.upload_tmp_dir) == FAILURE) {
-			/* php3_ini.upload_tmp_dir = UPLOAD_TMPDIR; */
-			php3_ini.upload_tmp_dir = NULL;
-		}
-		if (cfg_get_long("upload_max_filesize", &php3_ini.upload_max_filesize) == FAILURE) {
-			php3_ini.upload_max_filesize = 2097152; /* 2 Meg default */
-		}
-		if (cfg_get_string("extension_dir", &php3_ini.extension_dir) == FAILURE) {
-			php3_ini.extension_dir = NULL;
-		}
-		if (cfg_get_long("engine", &php3_ini.engine) == FAILURE) {
-			php3_ini.engine = 1;
-		}
-		if (cfg_get_long("last_modified", &php3_ini.last_modified) == FAILURE) {
-			php3_ini.last_modified = 0;
-		}
-		if (cfg_get_long("xbithack", &php3_ini.xbithack) == FAILURE) {
-			php3_ini.xbithack = 0;
-		}
-		if (cfg_get_string("browscap", &php3_ini.browscap) == FAILURE) {
-			php3_ini.browscap = NULL;
-		}
-		if (cfg_get_string("arg_separator", &php3_ini.arg_separator) == FAILURE) {
-			php3_ini.arg_separator = "&";
-		}
-		if (cfg_get_string("gpc_order", &php3_ini.gpc_order) == FAILURE) {
-			php3_ini.gpc_order = "GPC";
-		}
-		if (cfg_get_string("error_prepend_string", &php3_ini.error_prepend_string) == FAILURE) {
-			php3_ini.error_prepend_string = NULL;
-		}
-		if (cfg_get_string("error_append_string", &php3_ini.error_append_string) == FAILURE) {
-			php3_ini.error_append_string = NULL;
-		}
-		if (cfg_get_string("open_basedir", &php3_ini.open_basedir) == FAILURE) {
-			php3_ini.open_basedir = NULL;
-		}
-		if (cfg_get_long("enable_dl", &php3_ini.enable_dl) == FAILURE) {
-			php3_ini.enable_dl = 1;
-		}
-		/* THREADX  Will have to look into this on windows
-		 * Make a master copy to use as a basis for every per-dir config.
-		 * Without two copies we would have a previous requst's per-dir
-		 * config carry forward to the next one.
-		 */
-		memcpy(&php3_ini_master, &php3_ini, sizeof(php3_ini));
 	}
 	return SUCCESS;
 }
@@ -978,7 +935,7 @@ int _php3_hash_environment(void)
 	pval *tmp;
 	ELS_FETCH();
 	
-	p = php3_ini.gpc_order;
+	p = PG(gpc_order);
 	while(*p) {
 		switch(*p++) {
 			case 'p':

@@ -144,7 +144,6 @@ typedef struct php3_global_struct{
 	long page_inode;
 	long page_mtime;
 	/*post.c*/
-	int php3_track_vars;
 	int le_uploads;
 	/*strings.h*/
 	char *strtok_string;

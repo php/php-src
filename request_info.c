@@ -96,7 +96,6 @@ int php3_init_request_info(void *conf)
 
 int php3_destroy_request_info(void *conf)
 {
-	TLS_VARS;
 	STR_FREE(GLOBAL(request_info).current_user);
 	return SUCCESS;
 }
