@@ -26,7 +26,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i;
 	gdIOCtx *ctx;
-	GDLS_FETCH();
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
 	

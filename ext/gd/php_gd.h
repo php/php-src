@@ -58,15 +58,6 @@ PHPAPI extern const char php_sig_png[3];
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 
-typedef struct {
-	int le_gd;
-	int le_gd_font;
-#if HAVE_LIBT1
-	int le_ps_font;
-	int le_ps_enc;
-#endif
-} php_gd_globals;
-
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
 extern PHP_MINIT_FUNCTION(gd);
@@ -167,16 +158,6 @@ PHP_GD_API int phpi_get_le_gd(void);
 /* This is missing from gd.h */
 #if HAVE_COLORCLOSESTHWB
 int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
-#endif
-
-#ifdef ZTS
-#define GDLS_D php_gd_globals *gd_globals
-#define GDG(v) (gd_globals->v)
-#define GDLS_FETCH() php_gd_globals *gd_globals = ts_resource(gd_globals_id)
-#else
-#define GDLS_D
-#define GDG(v) (gd_globals.v)
-#define GDLS_FETCH()
 #endif
 
 #else
