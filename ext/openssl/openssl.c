@@ -1956,7 +1956,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		bio_out = BIO_new_file(filename, "w");
 
 		if (passphrase && req.priv_key_encrypt) {
-			cipher = EVP_des_ede3_cbc();
+			cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
 		} else {
 			cipher = NULL;
 		}
@@ -2007,7 +2007,7 @@ PHP_FUNCTION(openssl_pkey_export)
 		bio_out = BIO_new(BIO_s_mem());
 
 		if (passphrase && req.priv_key_encrypt) {
-			cipher = EVP_des_ede3_cbc();
+			cipher = (EVP_CIPHER *) EVP_des_ede3_cbc();
 		} else {
 			cipher = NULL;
 		}
@@ -2823,16 +2823,16 @@ PHP_FUNCTION(openssl_sign)
 
 	switch (signature_algo) {
 		case OPENSSL_ALGO_SHA1:
-			mdtype = EVP_sha1();
+			mdtype = (EVP_MD *) EVP_sha1();
 			break;
 		case OPENSSL_ALGO_MD5:
-			mdtype = EVP_md5();
+			mdtype = (EVP_MD *) EVP_md5();
 			break;
 		case OPENSSL_ALGO_MD4:
-			mdtype = EVP_md4();
+			mdtype = (EVP_MD *) EVP_md4();
 			break;
 		case OPENSSL_ALGO_MD2:
-			mdtype = EVP_md2();
+			mdtype = (EVP_MD *) EVP_md2();
 			break;
 	}
 	
