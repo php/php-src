@@ -338,7 +338,7 @@
 
 2001-12-18  Martin Jansen  <mail@martin-jansen.de>
 
-    * pear/System.php: * Change $Version$ to $Revision$.
+    * pear/System.php: * Change CVS Version keyword to Revision.
 
 2001-12-18  Colin Viebrock  <colin@easydns.com>
 
