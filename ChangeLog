@@ -1,3 +1,97 @@
+2004-08-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_topal.c:
+      Fixed memory leak.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      back to dev.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      4.3.9RC1 is a go.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_highlight.c
+      ZendEngine2/zend_highlight.c:
+      MFH: Fixed bug #29607 (highlighting code with HEREDOC produces invalid
+      output).
+
+    * (PHP_5_0)
+      ZendEngine2/zend_highlight.c:
+      Fixed bug #29607 (highlighting code with HEREDOC produces invalid output).
+
+2004-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      TSRM fix
+
+    * ZendEngine2/zend_execute.c:
+      More meaningfull error message
+
+2004-08-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS:
+      - Tix Fypo
+
+    * ext/standard/image.c:
+      - Added a notice to getimagesize in case zlib is not available and a
+      compressed
+        SWF movie has been passed to the function.
+
+    * (PHP_5_0)
+      ext/standard/image.c:
+      - MFH: Added a notice to getimagesize in case zlib is not available and a
+        compressed SWF movie has been passed to the function.
+
+    * (PHP_5_0)
+      NEWS:
+      - Reworded this a bit
+
+2004-08-11  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/dom005.phpt:
+      fix test
+
+2004-08-11  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/SAPI.c:
+      Reset global request_time in sapi_activate.  Reset it in sapi_deactivate
+      too, although I can't see why that would be necessary, but most of the
+      other sapi globals are reset there as well.
+
+2004-08-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_alloc.h:
+      - MFH: Patch to allow the Zend memory allocators to be disabled.
+
+    * ZendEngine2/zend_alloc.h:
+      - Added missing defines.
+
+    * (PHP_4_3)
+      Zend/zend_alloc.h:
+      - Commit my patch to allow the Zend allocation service to be disabled.
+
+2004-08-11  Sara Golemon  <php@alphaweb.net>
+
+    * main/rfc1867.c:
+      Minor format specifier fixes
+
+    * (PHP_5_0)
+      ext/standard/basic_functions.c:
+      MFH: $errmsg should have been forced reference
+
+    * ext/standard/basic_functions.c:
+      Don't require the user to specify  as a reference
+
 2004-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
