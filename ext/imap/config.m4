@@ -92,7 +92,7 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
       void mm_expunged(void){}
       char mail_open();
       int main() {
-        mail_open();
+        mail_open(0,"",0);
         return 0;
       }
     ],,[
