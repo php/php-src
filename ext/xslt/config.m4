@@ -69,7 +69,9 @@ if test "$PHP_XSLT" != "no"; then
       PHP_ADD_LIBRARY(xmltok)
     fi
 
-    PHP_ICONV=yes
+    if test "$PHP_ICONV" = "no"; then
+      PHP_ICONV=yes
+    fi
     PHP_SETUP_ICONV(XSLT_SHARED_LIBADD, [], [
       AC_MSG_ERROR([iconv not found, in order to build sablotron you need the iconv library])
     ])
