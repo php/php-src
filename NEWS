@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2 
+- PHP 3 regression testing framework re-born (Stig)
+- Added php_uname() function (Stig)
 - Made a minor change to allow building with OpenLDAP 2.0 (Stig Venaas)
 - Fixed a bug in preg_replace() that would truncate subject string if the
   first argument was en empty array. (Andrei)
