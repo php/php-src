@@ -51,15 +51,17 @@ class PEAR_Common extends PEAR
     var $pkginfo = array();
 
     /**
-    * Permitted maintainer roles
-    * @var array
-    */
+     * Permitted maintainer roles
+     * @var array
+     */
     var $maintainer_roles = array('lead','developer','contributor','helper');
+
     /**
-    * Permitted release states
-    * @var array
-    */
+     * Permitted release states
+     * @var array
+     */
     var $releases_states  = array('alpha','beta','stable','snapshot');
+
     // }}}
 
     // {{{ constructor
@@ -124,6 +126,7 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ mkTempDir()
 
     function mkTempDir()
     {
@@ -137,6 +140,7 @@ class PEAR_Common extends PEAR
         return $tmpdir;
     }
 
+    // }}}
     // {{{ _element_start()
 
     function _element_start($xp, $name, $attribs)
@@ -376,6 +380,7 @@ class PEAR_Common extends PEAR
         return $this->pkginfo;
     }
     // }}}
+    // {{{ infoFromTgzFile()
 
     /**
     * Returns info from a tgz pear package
@@ -402,5 +407,7 @@ class PEAR_Common extends PEAR
         unlink($xml);
         return $info;
     }
+
+    // }}}
 }
 ?>
