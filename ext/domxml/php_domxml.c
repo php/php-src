@@ -1517,8 +1517,6 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zval *id, **tmp;
 	xmlXPathContextPtr ctx;
 	xmlDocPtr docp;
-	int id_to_find;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -1577,10 +1575,8 @@ PHP_FUNCTION(xptr_new_context) {
 static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 {
 	zval *id, *str, **tmp;
-	int id_to_find;
 	xmlXPathContextPtr ctxp;
 	xmlXPathObjectPtr xpathobjp;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 1) {
