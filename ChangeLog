@@ -1,3 +1,195 @@
+2002-09-26  Colin Viebrock  <colin@easydns.com>
+
+    * NEWS: document changes
+
+2002-09-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * win32/install.txt:
+    - Added Sambar install notes (patch by Steffen <com@sambarserver.info>)
+
+2002-09-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/credits.c
+      ext/standard/info.c
+      ext/standard/info.h: Fix ZTS build.
+
+2002-09-26  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/info.h
+      ext/standard/credits.c
+      ext/standard/info.c:
+    update credits page with proper HTML, fix HTML escaping, and a few tweaks
+
+2002-09-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/string.c: Fix warning.
+
+    * ext/standard/html.c
+      ext/standard/html.h
+      ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c: Fix ZTS build.
+
+2002-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c: Fixed bug #11643
+
+2002-09-26  Colin Viebrock  <colin@easydns.com>
+
+    * sapi/apache/php_apache.c
+      ext/standard/css.c
+      ext/standard/info.c
+      main/php_ini.c
+      sapi/aolserver/aolserver.c: fix phpinfo() output for better browser BC
+
+2002-09-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/session.c:
+    Fix bug: #14991 (changing session.use_trans_sid does not work in scripts)
+
+2002-09-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+    Fix for #19580. (Incorrectly warning about lost data when that is not the
+    case on systems without fopencookie).
+
+    * ext/standard/html.c:
+    Emit a warning when an unsupported charset is requested in htmlentities.
+    Fixed #18521.
+
+2002-09-26  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: style,consistency..
+
+2002-09-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Cleaning up
+
+2002-09-26  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/fribidi.c: - Fixed fatal error
+
+2002-09-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.h
+      main/streams.c
+      main/user_streams.c
+      ext/standard/file.c:
+    Fix segfault in wrapper error log mechanism when errors are logged on
+    second and subsequent events.
+    Implement very simple recursion protection for user streams written
+    like this:
+    class urlEncodeStream {
+        var $fp = NULL;
+
+        function stream_open($path, $mode, $options, &$opened_path)
+        {
+            $this->fp = fopen($path, $mode); // <-- this recurses infinitely
+            return is_resource($this->fp);
+        }
+    }
+
+    file_register_wrapper('urlencode', 'urlEncodeStream');
+    $fp = fopen('urlencode:///tmp/outputfile.txt', 'w');
+
+    Noticed by: Yasuo.
+
+2002-09-26  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/dir.c:
+     - GLOB_NOMATCH and GLOB_NOESCAPE are only defined in win32/glob.h
+     - fixes build on FreeBSD 4.6
+
+2002-09-26  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/README
+      ext/fribidi/fribidi.c:
+    - Reverted back to old param parsing api (and eliminated a segfault by doing that)
+    - Added the CapRTL charset -- should be used for testing on machines without Hebrew/Arabic/Persian
+     fonts
+    - Changed the note about deprecated behaviour from E_WARNING to E_NOTICE
+
+2002-09-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/http_fopen_wrapper.c
+      ext/standard/file.c
+      ext/standard/file.h:
+    Remove an unused variable and a now-unused function.
+
+    * ext/bz2/bz2.c
+      ext/standard/file.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/php_streams.h
+      ext/standard/basic_functions.c
+      ext/standard/file.c: Rename file_get_wrapper_data -> file_get_meta_data.
+    It now always returns useful information for all streams.
+    Unified that data with socket_get_status and made socket_get_status
+    an alias for file_get_meta_data.
+
+    Fix Location header following which was broken in this commit:
+    http://cvs.php.net/diff.php/php4/ext/standard/http_fopen_wrapper.c?r1=1.41&r2=1.42&ty=h
+
+2002-09-26  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/standard/dir.c: Remove dup
+
+2002-09-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * EXTENSIONS: temporarily giving some orphands a new home
+
+2002-09-26  Georg Richter  <georg.richter@phpev.de>
+
+    * EXTENSIONS: maintainers for the famous mysql extension
+
+2002-09-26  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Add missing bug fixes.
+
+
+2002-09-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/dir.c: Fix ZTS build. Fix warning.
+
+2002-09-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/dir.c: fix windows build
+
+2002-09-26  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * php.ini-recommended: - Merge url_rewriter.tags description from Sascha.
+
+2002-09-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/mbstring.dsp
+      win32/php4dll.dsp
+      win32/php4dllts.dsp: Sync MSVC project files.
+
+2002-09-26  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/EXPERIMENTAL: - Initial commit
+
+2002-09-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: Note that the GD functions now also work with remote files.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h
+      ext/mbstring/unicode_data.h:
+    (PHP mb_convert_case) Add function that will convert the case of a string
+                          Respecting it's encoding (or the internal encoding).
+
+2002-09-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/dir.c:
+    glob should now be ZTS/open_basedir/safe_mode aware (finally)
+
+    * ext/standard/file.c: symbolic constants for fnmatch flags added
+
 2002-09-25  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * php.ini-dist: on -> On
