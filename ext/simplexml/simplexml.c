@@ -478,6 +478,9 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 	if (!sxe->xpath) {
 		sxe->xpath = xmlXPathNewContext(sxe->document);
 	}
+	if (!sxe->node) {
+		sxe->node = xmlDocGetRootElement(sxe->document);
+	}
 	sxe->xpath->node = sxe->node;
 
 	result = xmlXPathEval(query, sxe->xpath)->nodesetval;
@@ -505,6 +508,56 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+#define SCHEMA_FILE 0
+#define SCHEMA_BLOB 1
+#define SCHEMA_OBJECT 2
+
+/* {{{ simplexml_ce_schema_validate_file()
+ */
+static void
+simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
+{
+	php_sxe_object         *sxe;
+	zval                   *source;
+	xmlSchemaParserCtxtPtr  parser;
+	xmlSchemaPtr            sptr;
+	xmlSchemaValidCtxtPtr   vptr;
+	int                     is_valid;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &source) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	switch (type) {
+		case SCHEMA_FILE:
+			convert_to_string_ex(&source);
+			parser = xmlSchemaNewParserCtxt(Z_STRVAL_P(source));
+			sptr = xmlSchemaParse(parser);
+			xmlSchemaFreeParserCtxt(parser);
+			break;
+		case SCHEMA_BLOB:
+			convert_to_string_ex(&source);
+			parser = xmlSchemaNewMemParserCtxt(Z_STRVAL_P(source), Z_STRLEN_P(source));
+			sptr = xmlSchemaParse(parser);
+			xmlSchemaFreeParserCtxt(parser);
+			break;
+	}
+
+	vptr = xmlSchemaNewValidCtxt(sptr);
+	is_valid = xmlSchemaValidateDoc(vptr, sxe->document);
+	xmlSchemaFree(sptr);
+	xmlSchemaFreeValidCtxt(vptr);
+
+	if (is_valid) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 /* {{{ sxe_call_method()
  */
@@ -513,6 +566,10 @@ sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (!strcmp(method, "xsearch")) {
 		simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	} else if (!strcmp(method, "validate_schema_file")) {
+		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_FILE);	
+	} else if (!strcmp(method, "validate_schema_buffer")) {
+		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_BLOB);
 	} else {
 		RETVAL_NULL();
 	}
@@ -650,15 +707,7 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 
 	clone = php_sxe_object_new(TSRMLS_C);
 
-	/**
-	 * XXX: Change parts of the code not to rely on sxe->document
-	 * being set.
-	 */
-	if (xmlDocGetRootElement(sxe->document) == sxe->node) {
-		clone->document = xmlCopyDoc(sxe->document, 1);
-	} else {
-		clone->node = xmlCopyNode(sxe->node, 0);
-	}
+	clone->document = xmlCopyDoc(sxe->document, 1);
 
 	*clone_ptr = (void *) clone;
 }

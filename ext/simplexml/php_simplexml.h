@@ -43,6 +43,7 @@ extern zend_module_entry simplexml_module_entry;
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <libxml/xpointer.h>
+#include <libxml/xmlschemas.h>
 
 PHP_MINIT_FUNCTION(simplexml);
 PHP_MSHUTDOWN_FUNCTION(simplexml);
