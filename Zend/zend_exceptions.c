@@ -122,13 +122,17 @@ ZEND_METHOD(exception, gettrace)
 	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
 }
 
+/* All functions that may be used in uncaught exception handlers must be final
+ * and must not throw exceptions. Otherwise we would need a facility to handle
+ * such exceptions in that handler.
+ */
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
-	ZEND_ME(exception, getmessage, NULL, 0)
-	ZEND_ME(exception, getcode, NULL, 0)
-	ZEND_ME(exception, getfile, NULL, 0)
-	ZEND_ME(exception, getline, NULL, 0)
-	ZEND_ME(exception, gettrace, NULL, 0)
+	ZEND_ME(exception, getmessage, NULL, 0) /* non final for now */
+	ZEND_ME(exception, getcode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getfile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getline, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, gettrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
