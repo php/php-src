@@ -1414,7 +1414,7 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 		add_assoc_string(errormessages,"errormessage",buf,1);				
 		input = ctxt->input;
 		if (ctxt->name) {
-			add_assoc_string(errormessages,"nodename",ctxt->name,1); 
+			add_assoc_string(errormessages,"nodename",(char *) ctxt->name,1); 
 		}
 		if (input != NULL) {
 			add_assoc_long(errormessages,"line",input->line);
@@ -1450,7 +1450,7 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 		} 
 		if (ctxt->parser != NULL) {
 			if (ctxt->parser->name) {
-				add_assoc_string(errormessages,"nodename",ctxt->parser->name,1); 
+				add_assoc_string(errormessages,"nodename",(char *)ctxt->parser->name,1); 
 			}
 
 			if (ctxt->parser->input != NULL) {

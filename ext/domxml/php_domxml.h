@@ -24,6 +24,7 @@
 #if HAVE_DOMXML
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
+#include <libxml/Sax.h>
 #include <libxml/tree.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
