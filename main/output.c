@@ -32,8 +32,6 @@
 #define OB_DEFAULT_HANDLER_NAME "default output handler"
 
 /* output functions */
-static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC);
-static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC);
 static int php_b_body_write(const char *str, uint str_length TSRMLS_DC);
 
 static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
@@ -49,7 +47,7 @@ php_output_globals output_globals;
 #endif
 
 /* {{{ php_default_output_func */
-static inline int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
+PHPAPI int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
 	return str_len;
@@ -675,7 +673,7 @@ static int php_b_body_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ php_ub_body_write_no_header
  */
-static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC)
+PHPAPI int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC)
 {
 	int result;
 
@@ -695,7 +693,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_D
 
 /* {{{ php_ub_body_write
  */
-static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
+PHPAPI int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int result = 0;
 
