@@ -791,7 +791,24 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 		  	if (node) {
 			  	zval *val;
 
-					val = master_to_zval(model->u.element->encode, node);
+					if (node && node->children && node->children->content) {
+						if (model->u.element->fixed && strcmp(model->u.element->fixed,node->children->content) != 0) {
+							php_error(E_ERROR,"SOAP-ERROR: Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)",model->u.element->name,model->u.element->fixed,node->children->content);
+						}
+						val = master_to_zval(model->u.element->encode, node);
+					} else if (model->u.element->fixed) {
+						xmlNodePtr dummy = xmlNewNode(NULL, "BOGUS");
+						xmlNodeSetContent(dummy, model->u.element->fixed);
+						val = master_to_zval(model->u.element->encode, dummy);
+						xmlFreeNode(dummy);
+					} else if (model->u.element->def && !model->u.element->nillable) {
+						xmlNodePtr dummy = xmlNewNode(NULL, "BOGUS");
+						xmlNodeSetContent(dummy, model->u.element->def);
+						val = master_to_zval(model->u.element->encode, dummy);
+						xmlFreeNode(dummy);
+					} else {
+						val = master_to_zval(model->u.element->encode, node);
+					}
 					if ((node = get_node(node->next, model->u.element->name)) != NULL) {
 						zval *array;
 
@@ -799,7 +816,24 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 						array_init(array);
 						add_next_index_zval(array, val);
 						do {
-							val = master_to_zval(model->u.element->encode, node);
+							if (node && node->children && node->children->content) {
+								if (model->u.element->fixed && strcmp(model->u.element->fixed,node->children->content) != 0) {
+									php_error(E_ERROR,"SOAP-ERROR: Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)",model->u.element->name,model->u.element->fixed,node->children->content);
+								}
+								val = master_to_zval(model->u.element->encode, node);
+							} else if (model->u.element->fixed) {
+								xmlNodePtr dummy = xmlNewNode(NULL, "BOGUS");
+								xmlNodeSetContent(dummy, model->u.element->fixed);
+								val = master_to_zval(model->u.element->encode, dummy);
+								xmlFreeNode(dummy);
+							} else if (model->u.element->def && !model->u.element->nillable) {
+								xmlNodePtr dummy = xmlNewNode(NULL, "BOGUS");
+								xmlNodeSetContent(dummy, model->u.element->def);
+								val = master_to_zval(model->u.element->encode, dummy);
+								xmlFreeNode(dummy);
+							} else {
+								val = master_to_zval(model->u.element->encode, node);
+							}
 							add_next_index_zval(array, val);
 						} while ((node = get_node(node->next, model->u.element->name)) != NULL);
 						val = array;
@@ -912,6 +946,8 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 						if ((*attr)->fixed && strcmp((*attr)->fixed,str_val) != 0) {
 							php_error(E_ERROR,"SOAP-ERROR: Encoding: Attribute '%s' has fixed value '%s' (value '%s' is not allowed)",(*attr)->name,(*attr)->fixed,str_val);
 						}
+					} else if ((*attr)->fixed) {
+						str_val = (*attr)->fixed;
 					} else if ((*attr)->def) {
 						str_val = (*attr)->def;
 					}
@@ -983,6 +1019,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 							}
 						} else {
 							property = master_to_xml(enc, *val, style, node);
+							if (property->children && property->children->content &&
+							    model->u.element->fixed && strcmp(model->u.element->fixed,property->children->content) != 0) {
+								php_error(E_ERROR,"SOAP-ERROR: Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)",model->u.element->name,model->u.element->fixed,property->children->content);
+							}
 						}
 						xmlNodeSetName(property, model->u.element->name);
 						if (style == SOAP_LITERAL && model->u.element->namens) {
@@ -1003,6 +1043,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 						}
 					} else {
 						property = master_to_xml(enc, *data, style, node);
+						if (property->children && property->children->content &&
+						    model->u.element->fixed && strcmp(model->u.element->fixed,property->children->content) != 0) {
+							php_error(E_ERROR,"SOAP-ERROR: Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)",model->u.element->name,model->u.element->fixed,property->children->content);
+						}
 					}
 					xmlNodeSetName(property, model->u.element->name);
 					if (style == SOAP_LITERAL && model->u.element->namens) {
