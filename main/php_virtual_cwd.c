@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Sascha Schumann <ss@schumann.cx>                            |
+   |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
 */
 

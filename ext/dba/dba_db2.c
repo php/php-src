@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Sascha Schumann <sas@schell.de>                             |
+   | Authors: Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
  */
 
