@@ -78,6 +78,6 @@ for archive in $in_archives; do
     ar r out.a $ext_files
 done )
 
-mv $tmpdir/out.a $out_archive || die "can not create $out_archive"
+cmp $tmpdir/out.a $out_archive >/dev/null 2>&1 || mv $tmpdir/out.a $out_archive || die "can not create $out_archive"
 rm -rf $tmpdir
 
