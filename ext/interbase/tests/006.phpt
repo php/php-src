@@ -82,6 +82,21 @@ InterBase: binding (may take a while)
             echo " in:  $v_integer\n";
             echo " out: $row->V_INTEGER\n";
         }
+        if ($row->V_NUMERIC != $v_numeric){
+            echo " NUMERIC fail\n";
+            echo " in:  $v_numeric\n";
+            echo " out: $row->V_NUMERIC\n";
+        }
+        if ($row->V_SMALLINT != $v_smallint){
+            echo " SMALLINT fail\n";
+            echo " in:  $v_smallint\n";
+            echo " out: $row->V_SMALLINT\n";
+        }
+    	if ($row->V_VARCHAR != $v_varchar){
+        	echo " VARCHAR fail:\n";
+            echo " in:  $v_varchar\n";
+            echo " out: $row->V_VARCHAR\n";
+        }
         ibase_free_result($sel);
     }/* for($iter)*/
 
