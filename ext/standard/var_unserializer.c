@@ -291,7 +291,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	(*p) += 2;
 
 	if(datalen < 0 || (*p) + datalen >= max) {
-		zend_error(E_WARNING, "Unsufficient data for unserializing - %d required, %d present", datalen, max - (*p));
+		zend_error(E_WARNING, "Insufficient data for unserializing - %d required, %d present", datalen, max - (*p));
 		return 0;
 	}
 	
