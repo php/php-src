@@ -1184,7 +1184,7 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 	}
 
 #ifdef PHP_WIN32
-	UpdateIniFromRegistry(primary_file->filename);
+	UpdateIniFromRegistry(file->filename);
 #endif
 
 	EG(main_op_array) = zend_compile_files(ZEND_REQUIRE CLS_CC, 1, file);

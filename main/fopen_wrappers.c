@@ -101,7 +101,8 @@ int php_get_ftp_result(int socketd);
 
 HashTable fopen_url_wrappers_hash;
 
-PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)) {
+PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path))
+{
 #if PHP_URL_FOPEN
 	return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1, &wrapper, sizeof(wrapper), NULL);
 #else
@@ -109,7 +110,8 @@ PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(const char
 #endif
 }
 
-PHPAPI int php_unregister_url_wrapper(char *protocol) {
+PHPAPI int php_unregister_url_wrapper(char *protocol)
+{
 #if PHP_URL_FOPEN
 	return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1);
 #else

@@ -43,7 +43,7 @@
 #endif
 
 /* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) && defined(ZTS)
 MUTEX_T cwd_mutex;
 #endif
 
@@ -177,7 +177,7 @@ CWD_API void virtual_cwd_startup(void)
 	main_cwd_state.cwd_length = strlen(cwd);
 
 	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -197,7 +197,7 @@ CWD_API void virtual_cwd_shutdown(void)
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
 #endif
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
@@ -659,14 +659,18 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 	if (!getcwd_result) {
 		return NULL;
 	}
-	
+
+#ifdef ZTS
 	tsrm_mutex_lock(cwd_mutex);
+#endif
 
 	chdir(CWDG(cwd).cwd);
 	retval = popen(command, type);
 	chdir(prev_cwd);
 
+#ifdef ZTS
 	tsrm_mutex_unlock(cwd_mutex);
+#endif
 
 	return retval;
 }

@@ -333,6 +333,10 @@ SOURCE=..\ext\standard\browscap.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\crc32.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\datetime.c
 # End Source File
 # Begin Source File
@@ -382,6 +386,10 @@ SOURCE=..\ext\standard\html.c
 # Begin Source File
 
 SOURCE=..\ext\standard\image.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\incomplete_class.c
 # End Source File
 # Begin Source File
 
@@ -788,12 +796,12 @@ SOURCE=..\ext\pcre\pcrelib\pcre.h
 # Begin Source File
 
 SOURCE=..\ext\wddx\wddx.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\xml\xml.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 4"
@@ -813,22 +821,22 @@ SOURCE=..\ext\xml\php_xml.h
 # Begin Source File
 
 SOURCE=..\ext\xml\expat\xmlparse\hashtable.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\xml\expat\xmlparse\xmlparse.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\xml\expat\xmltok\xmlrole.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\xml\expat\xmltok\xmltok.c
-# ADD CPP /I "..\Zend" /I ".." /I "..\regex" /I "..\..\bindlib_w32" /I "..\main" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 5"
@@ -920,7 +928,7 @@ SOURCE=..\win32\wfile.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\dl\snmp\winsnmp.c
+SOURCE=..\ext\snmp\winsnmp.c
 # End Source File
 # Begin Source File
 
