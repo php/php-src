@@ -385,21 +385,52 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 {
 	zval **ent;
 	char *key;
+	int is_struct = 0, ent_type;
 	ulong idx;
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
 
 	target_hash = HASH_OF(var);
-	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	/* If variable is an object, always use struct and serialize its classname */
 	if (var->type == IS_OBJECT) {
+		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 		php_wddx_add_chunk(packet, tmp_buf);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 		php_wddx_add_chunk_ex(packet, var->value.obj.ce->name, var->value.obj.ce->name_length);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
+		is_struct = 1;
+	} else {
+		int ind = 0,type;
+
+		for (zend_hash_internal_pointer_reset(target_hash);
+			 zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS;
+		  	 zend_hash_move_forward(target_hash)) {
+
+			type = zend_hash_get_current_key(target_hash, &key, &idx);
+			
+			if (type == HASH_KEY_IS_STRING) {
+				is_struct = 1;
+				efree(key);
+				break;
+			}
+
+			if (idx != ind) {
+				is_struct = 1;
+				break;
+			}
+
+			ind++;
+		}				
+
+		if (is_struct) {
+			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+		} else {
+			sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
+			php_wddx_add_chunk(packet, tmp_buf);
+		}
 	}
 
 	for (zend_hash_internal_pointer_reset(target_hash);
@@ -408,16 +439,25 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 		if (*ent == var)
 			continue;
 
-		if (zend_hash_get_current_key(target_hash, &key, &idx) == HASH_KEY_IS_STRING) {
-			php_wddx_serialize_var(packet, *ent, key);
-			efree(key);
-		} else {
-			sprintf(tmp_buf, "%ld", idx);
-			php_wddx_serialize_var(packet, *ent, tmp_buf);
-		}
+		if (is_struct) {
+			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
+
+			if (ent_type == HASH_KEY_IS_STRING) {
+				php_wddx_serialize_var(packet, *ent, key);
+				efree(key);
+			} else {
+				sprintf(tmp_buf, "%ld", idx);
+				php_wddx_serialize_var(packet, *ent, tmp_buf);
+			}
+		} else
+			php_wddx_serialize_var(packet, *ent, NULL);
 	}
 	
-	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+	if (is_struct) {
+		php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+	} else {
+		php_wddx_add_chunk_static(packet, WDDX_ARRAY_E);
+	}
 }
 /* }}} */
 
