@@ -1,3 +1,197 @@
+2004-03-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c
+      main/streams.c:
+      MFH: Fixed bug #27498 (bogus safe_mode error on nonexistent directories for
+      chdir() and opendir() functions).
+
+    * ext/standard/dir.c
+      main/streams/plain_wrapper.c:
+      Fixed bug #27498 (bogus safe_mode error on nonexistent directories for
+      chdir() and opendir() functions).
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH:
+      	Fixed bug #27580 (pre-initialization errors in ap2 handler are not
+      	being written to vhost error log).
+      	Stop using depreciated and ignored APLOG_NOERRNO directive.
+      	Make file not found & directory as script invocation error messages
+      	more descriptive.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #27580 (pre-initialization errors in ap2 handler are not being
+      written to vhost error log).
+      Stop using depreciated and ignored APLOG_NOERRNO directive.
+      Make file not found & directory as script invocation error messages more
+      descriptive.
+
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      main/main.c:
+      - Replaced the exec_finished hook by the zend_post_deactive hook for
+        extensions. The new hook will be run after the symbol table and
+      destructors
+        are run. (PHP part)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_modules.h:
+      - Replaced the exec_finished hook by the zend_post_deactive hook for
+        extensions. The new hook will be run after the symbol table and
+      destructors
+        are run. (Derick)
+
+    * NEWS:
+      - Update news with fugbix
+
+2004-03-16  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/php_mysqli.h:
+      fixed stmt->stmt->query which was removed in libmysql 4.1.2
+      added query buffer in internal stmt structure to copy string
+      after prepare
+
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/simplexml/simplexml.c:
+      - Fixed compilation on the 'broken' IRIX native compiler.
+
+    * ZendEngine2/zend_modules.h:
+      - Bump API number so that it actually differs from PHP 4. This is needed
+        because we don't want PHP 4 and PHP 5 extensions to be in the same
+      directory
+        when doing "make install" for shared, or phpize'd extensions.
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix SEGV in certain conditions while calling static methods
+
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/exif/exif.c:
+      - Fixed typo
+
+2004-03-16  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c
+      main/php_globals.h
+      main/php_variables.c:
+      Improve the way auto-globals JIT works, and add the ability to turn it off
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      Add ability to disable JIT for a particular auto global
+
+2004-03-16  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      win32/php_registry.h
+      win32/registry.c:
+      MFH registry fixes:
+      fix off-by-one in registry per-dir values
+      add IniFilePath value for setting php.ini path via registry
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/tostring.phpt:
+      Update message
+
+    * ZendEngine2/zend_execute_API.c:
+      TSRM fix
+
+2004-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      typo
+
+    * (PHP_4_3)
+      Zend/zend.h
+      ZendEngine2/zend.h:
+      Enable ptr format check for GCC 3.1 and higher
+
+2004-03-16  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * tests/classes/bug27504.phpt:
+      - initial commit
+        test case for #27504 (http://bugs.php.net/bug.php?id=27504)
+
+2004-03-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      fix typos
+
+2004-03-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend.h:
+      Do not allow 3.0.4 for __attribute__.
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      3.0.4 is borked, so we do not want it either.
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend.h:
+      MFH: Fixed bug #27600 (GCC 3.0.4 does not like __attribute__ directive).
+
+    * ZendEngine2/zend.h:
+      Fixed bug #27600 (GCC 3.0.4 does not like __attribute__ directive)
+
+2004-03-16  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix problem when using old-style constructors it wasn't being inherited
+        correctly.
+
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Spaces to tabs
+
+2004-03-16  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - NEWS
+
+    * ZendEngine2/zend_execute_API.c:
+      - If the called method is static then don't define $this
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c:
+      - Error out if get_method() isn't defined.
+      - Use calling scope of internal function callee when calling a method
+        using static syntax (array("A", "func"));
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      main/main.c:
+      Improve error message
+
+2004-03-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/fopen_wrappers.c:
+      MFH: Fixed bug #27559 (Corrected open_basedir resolving logic).
+
+    * main/fopen_wrappers.c:
+      Fixed bug #27559 (Corrected open_basedir resolving logic).
+
 2004-03-15  Jay Smith  <jsmith@tutorbuddy.com>
 
     * (PHP_4_3)
