@@ -102,6 +102,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	char *default_socket;
 	char *connect_error;
 	long connect_errno;
+	long connect_timeout;
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS
