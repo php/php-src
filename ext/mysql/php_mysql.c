@@ -1146,7 +1146,7 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	if (!strcasecmp(get_active_function_name(), "mysql")) {
+	if (!strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
 		zend_error(E_NOTICE, "%s is deprecated; use mysql_db_query()", get_active_function_name(TSRMLS_C));
 	}
 	
