@@ -233,7 +233,7 @@ SOURCE=.\win95nt.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\functions\apache.c
+SOURCE=.\ext\apache\apache.c
 # End Source File
 # Begin Source File
 
@@ -245,7 +245,7 @@ SOURCE=.\ext\standard\basic_functions.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\bcmath.c
+SOURCE=.\ext\bcmath\bcmath.c
 # End Source File
 # Begin Source File
 
@@ -261,7 +261,7 @@ SOURCE=.\ext\standard\dir.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dl.c
+SOURCE=.\ext\standard\dl.c
 # End Source File
 # Begin Source File
 
@@ -293,7 +293,7 @@ SOURCE=.\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\head.c
+SOURCE=.\ext\standard\head.c
 # End Source File
 # Begin Source File
 
@@ -333,11 +333,11 @@ SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\mime.c
+SOURCE=.\ext\standard\mime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\number.c
+SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
 
@@ -353,7 +353,7 @@ SOURCE=.\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\post.c
+SOURCE=.\ext\standard\post.c
 # End Source File
 # Begin Source File
 
@@ -409,7 +409,7 @@ SOURCE=.\ext\standard\datetime.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dl.h
+SOURCE=.\ext\standard\dl.h
 # End Source File
 # Begin Source File
 
@@ -437,7 +437,7 @@ SOURCE=.\functions\global.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\head.h
+SOURCE=.\ext\standard\head.h
 # End Source File
 # Begin Source File
 
@@ -449,11 +449,11 @@ SOURCE=.\ext\standard\md5.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\mime.h
+SOURCE=.\ext\standard\mime.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\number.h
+SOURCE=.\ext\bcmath\number.h
 # End Source File
 # Begin Source File
 
@@ -461,7 +461,7 @@ SOURCE=.\ext\standard\pageinfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\php3_bcmath.h
+SOURCE=.\ext\bcmath\php3_bcmath.h
 # End Source File
 # Begin Source File
 
@@ -505,7 +505,7 @@ SOURCE=.\functions\phpmath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\post.h
+SOURCE=.\ext\standard\post.h
 # End Source File
 # Begin Source File
 
@@ -553,7 +553,7 @@ SOURCE=.\regex\regfree.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\functions\COM.c
+SOURCE=.\ext\com\COM.c
 # End Source File
 # Begin Source File
 
@@ -602,6 +602,10 @@ SOURCE=.\win32\grp.h
 # Begin Source File
 
 SOURCE=.\win32\param.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\com\php3_COM.h
 # End Source File
 # Begin Source File
 
