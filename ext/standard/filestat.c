@@ -564,6 +564,10 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
+	if (!filename_length) {
+		RETURN_FALSE;
+	}
+
 	if (PG(safe_mode) &&(!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, IS_EXISTS_CHECK(type) ? CHECKUID_NO_ERRORS : 0))) {
 		RETURN_FALSE;
 	}
