@@ -109,6 +109,7 @@ typedef struct {
     /* this is necessary for CLI module */
     int argc;
     char **argv;
+	int proto_num;
 } sapi_request_info;
 
 

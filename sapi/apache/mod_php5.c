@@ -484,6 +484,7 @@ static void init_request_info(TSRMLS_D)
 	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 	SG(sapi_headers).http_response_code = r->status;
+	SG(request_info).proto_num = r->proto_num;
 
 	if (r->headers_in) {
 		authorization = table_get(r->headers_in, "Authorization");

@@ -676,6 +676,7 @@ static void init_request_info(TSRMLS_D)
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
 	SG(request_info).request_method = NULL;
+	SG(request_info).proto_num = 1000;
 	SG(request_info).query_string = NULL;
 	SG(request_info).request_uri = NULL;
 	SG(request_info).content_type = NULL;
@@ -862,6 +863,7 @@ static void init_request_info(TSRMLS_D)
 		}
 #endif
 		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD",0 TSRMLS_CC);
+		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING",0 TSRMLS_CC);
 		/* some server configurations allow '..' to slip through in the
 		   translated path.   We'll just refuse to handle such a path. */

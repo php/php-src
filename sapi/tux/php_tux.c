@@ -336,6 +336,8 @@ static void tux_request_ctor(TSRMLS_D)
 	smart_str_0(&s);
 	SG(request_info).request_uri = s.c;
 	SG(request_info).request_method = CGI_REQUEST_METHOD(TG(req));
+	if(TG(req)->http_version == HTTP_1_1) SG(request_info).proto_num = 1001;
+	else SG(request_info).proto_num = 1000;
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = TG(req)->content_type;
 	SG(request_info).content_length = 0; /* TG(req)->contentlength; */
