@@ -583,10 +583,18 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 			} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 				zend_class_entry **ce;
 				char *lc_class;
-				int found;
+				int found = FAILURE;
 
 				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-				found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+				if(EG(active_op_array) && strcmp(lc_class, "self") == 0) {
+					ce = &(EG(active_op_array)->scope);
+					found = (*ce != NULL?SUCCESS:FAILURE);
+				} else if(strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+					ce = &(EG(active_op_array)->scope->parent);
+					found = (*ce != NULL?SUCCESS:FAILURE);
+				} else {
+					found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+				}
 				efree(lc_class);
 				if (found == FAILURE)
 					return FAILURE;
