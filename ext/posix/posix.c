@@ -130,7 +130,7 @@ zend_module_entry posix_module_entry = {
 };
 
 #ifdef COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &posix__module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &posix_module_entry; }
 #endif
 
 static PHP_MINFO_FUNCTION(posix)
