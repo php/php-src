@@ -2422,7 +2422,10 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 			function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
 		} else {
 			function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-			
+
+			if (Z_TYPE_P(function_name) != IS_STRING) {
+				zend_error(E_ERROR, "Function name must be a string");
+			}
 			function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
 			function_name_strlen = function_name->value.str.len;
 		}

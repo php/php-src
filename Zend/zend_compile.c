@@ -1283,18 +1283,26 @@ void zend_do_begin_class_member_function_call(TSRMLS_D)
 {
 	unsigned char *ptr = NULL;
 	long fetch_const_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = &CG(active_op_array)->opcodes[fetch_const_op_number-1];
+	zend_op *last_op = &CG(active_op_array)->opcodes[fetch_const_op_number-1];
 
-	/* a tmp var is leaked here */
-	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-	if(opline->op2.op_type == IS_CONST &&
-	   (sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(opline->op2.u.constant) &&
-	   memcmp(Z_STRVAL(opline->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
-		zval_dtor(&opline->op2.u.constant);
-		SET_UNUSED(opline->op2);
-	} else {
-		zend_lowercase_znode_if_const(&opline->op2);
+	if (last_op->opcode == ZEND_FETCH_CONSTANT) { /* regular method call */
+		/* a tmp var is leaked here */
+		last_op->opcode = ZEND_INIT_STATIC_METHOD_CALL;
+		if(last_op->op2.op_type == IS_CONST &&
+		   (sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(last_op->op2.u.constant) &&
+		   memcmp(Z_STRVAL(last_op->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
+			zval_dtor(&last_op->op2.u.constant);
+			SET_UNUSED(last_op->op2);
+		} else {
+			zend_lowercase_znode_if_const(&last_op->op2);
+		}
+	} else { /* indirect method call */
+		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
+		opline->op1 = last_op->op2;
+		opline->op2 = last_op->result;
 	}
+
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
