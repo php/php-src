@@ -1,3 +1,45 @@
+2003-08-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_reflection_api.c:
+      Add function 'zend_throw_exception(char *message, int duplicate
+      TSRMLS_DC);'
+      to provide an easy way to throw exceptions for extension developers.
+
+2003-08-21  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS:
+      ftp:// wrapper context option: resume_pos
+
+2003-08-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      If ce not given than any object would do
+
+    * ZendEngine2/zend_API.c:
+      Paramspec 'O' / zend_parse_method_params(): only if given check the class
+      type
+
+    * ext/mysqli/mysqli_api.c:
+      Fix parameter spec
+
+2003-08-21  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in
+      ext/standard/filestat.c:
+      Under FreeBSD, statfs(2) requires both <sys/mount.h> _and_ <sys/param.h>.
+      The autoconf check for <sys/mount.h> was failing because <sys/param.h>
+      wasn't being universally included.
+      
+      This gets disk_total_space() and disk_free_space() working again under
+      FreeBSD.
+
+2003-08-21  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      - Proper place, correct formatting.
+
 2003-08-20  Brian France  <list@firehawksystems.com>
 
     * NEWS:
