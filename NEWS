@@ -1,20 +1,20 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, PHP 5 RC 1
-- Preserve class name casing for userspace classes. (Marcus)
+?? ??? 2004, PHP 5 RC1
+- Fixed class name case preserving of user defined classes. (Marcus)
 - Fixed bug #26743 (getElementsByTagName doesn't work properly). (Rob)
 - Fixed bug #26736 (__autoload not invoked for parent classes). (Marcus)
-- Fixed bug #26723 (domNode::appendChild() changes child node namespace) (Rob)
-- Fixed bug #26697 (calling class_exists on a nonexistent class in __autoload 
+- Fixed bug #26723 (domNode::appendChild() changes child node namespace). (Rob)
+- Fixed bug #26697 (calling class_exists() on a nonexistent class in __autoload
   results in segfault). (Marcus)
 - Fixed bug #26695 (Reflection API does not recognize mixed-case class hints).
   (Marcus)
 - Fixed bug #26690 (make xsltProcessor->transformToUri use streams wrappers).
   (Ilia)
-- Fixed bug #26680 (Added version check in mysqli_report_index) (Georg)
+- Fixed bug #26680 (Added version check in mysqli_report_index). (Georg)
 - Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
 - Fixed bug #26065 (Crash when nesting classes). (Marcus)
-- Fixed bug #25038 (call_user_func issues warning if function throws 
+- Fixed bug #25038 (call_user_func() issues a warning if function throws an
   exception). (Marcus)
 
 21 Dec 2003, PHP 5 Beta 3
