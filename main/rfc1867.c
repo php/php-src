@@ -591,12 +591,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	FILE *fp;
 	zend_llist header;
 
-
-	if (!PG(file_uploads)) {
-		sapi_module.sapi_error(E_WARNING, "File uploads are disabled");
-		return;
-	}
-
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %d bytes exceeds the limit of %d bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
@@ -704,6 +698,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 				efree(param);
 				efree(value);
+				continue;
+			}
+
+			/* If file_uploads=off, skip the file part */
+			if (!PG(file_uploads)) {
+				efree(filename);
+				efree(param);
 				continue;
 			}
 
