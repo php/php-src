@@ -543,7 +543,11 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 	char *ret = NULL;
 
 	IF_SESSION_VARS() {
-		if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
+		if (!PS(serializer)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.save_handler. Failed to encode session object.");
+			ret = NULL;
+		}
+		else if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
 			ret = NULL;
 	} else {
 		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session.");
@@ -554,6 +558,10 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 
 static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 {
+	if (!PS(serializer)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.save_handler. Failed to decode session object.");
+		return;
+	}
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed.");
@@ -1087,6 +1095,21 @@ PHPAPI void php_session_start(TSRMLS_D)
 	PS(define_sid) = 1;
 	PS(send_cookie) = 1;
 	if (PS(session_status) != php_session_none) {
+		
+		if (PS(session_status) == php_session_disabled) {
+			char *value;
+
+			value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
+			
+			if (value) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler %s", value);
+			}
+			else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find unknown save handler");
+			}
+			return;
+		}
+		
 		php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
 		return;
 	}
@@ -1498,9 +1521,15 @@ PHP_FUNCTION(session_register)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (PS(session_status) == php_session_none)
+	if (PS(session_status) == php_session_none || PS(session_status) == php_session_disabled) {
 		php_session_start(TSRMLS_C);
-
+	}
+	
+	if (PS(session_status) == php_session_disabled) {
+		efree(args);
+		RETURN_FALSE;
+	}
+	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_ARRAY)
 			SEPARATE_ZVAL(args[i]);
