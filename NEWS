@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
+- Prevent yaz from logging unless yaz.log_file is set (Adam Dickmeiss)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Added new command line parameters -B, -F, -R and -E which allow to process 
   stdin line by line (See 'php -h' or 'man php' for more). (Marcus)

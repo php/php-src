@@ -1473,6 +1473,7 @@ PHP_INI_BEGIN()
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
+	const char *fname;
 	nmem_init();
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
@@ -1481,9 +1482,10 @@ PHP_MINIT_FUNCTION(yaz)
 
 	REGISTER_INI_ENTRIES();
 
-	if (YAZSG(log_file))
+	fname = YAZSG(log_file);
+	if (fname && *fname)
 	{
-		yaz_log_init_file(YAZSG(log_file));
+		yaz_log_init_file(fname);
 		yaz_log_init_level(LOG_ALL);
 	}
 	else
