@@ -124,6 +124,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
 - Fixed bug #21978, #21036 (win32 mail(), bcc: gets interpreted as cc:). (Sara)
 - Fixed bug #21885 (move_uploaded_file() does not ignore open_basedir). (Wez)
+- Fixed bug #21820 ("$arr['foo']" generates bogus E_NOTICE, should be E_PARSE). (Jani)
 - Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
   (Wez)
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
