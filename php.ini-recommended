@@ -906,7 +906,15 @@ sockets.use_system_read = On
 ; automatic encoding detection order.
 ; auto means 
 ;mbstring.detect_order = auto
+
+; substitute_character used when character cannot be converted
+; one from another
 ;mbstring.substitute_character = none;
+
+; overload(replace) single byte functions by mbstring functions.
+; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
+; etc. 
+;mbstring.func_overload = No
 
 [FrontBase]
 ;fbsql.allow_persistent = On
