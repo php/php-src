@@ -645,13 +645,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					fci->object_pp = EG(This)?&EG(This):NULL;
 				} else {
 					zend_class_entry *scope;
-					scope = EG(active_op_array)->scope; 
+					scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
 
 					found = zend_lookup_class(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
 					if (found == FAILURE) {
 						zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(fci->object_pp));
 					}
-					if (EG(This) && 
+					if (scope && EG(This) && 
 						instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
 						instanceof_function(scope, *ce TSRMLS_CC)) {
 						fci->object_pp = &EG(This);
