@@ -153,6 +153,9 @@ if test -n "$PROG_SENDMAIL"; then
   AC_DEFINE(HAVE_SENDMAIL)
 fi
 
+dnl Check whether the system uses EBCDIC (not ASCII) as its native codeset
+PHP_EBCDIC
+
 dnl
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 dnl and source packages.  This should be harmless on other OSs.
