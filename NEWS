@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed getopt so it accepts arguments in the form -<option><value> not
+  just -<option> <value> (jmoore)
 - Updated the sockets extension to use resources instead of longs for the Socket
   descriptors.
   The socket functions have been renamed to conform with the PHP standard
