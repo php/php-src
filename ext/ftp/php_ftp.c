@@ -139,7 +139,7 @@ PHP_MINFO_FUNCTION(ftp)
 							}
 
 
-/* {{{ proto resource ftp_connect(string host [, int port [, int timeout)]])
+/* {{{ proto resource ftp_connect(string host [, int port [, int timeout]])
    Opens a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
