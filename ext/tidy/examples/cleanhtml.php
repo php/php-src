@@ -12,26 +12,24 @@
      *
      */
     
-    $tidy = tidy_create();
-    
     if(!isset($_SERVER['argv'][1])) {
       $data = file_get_contents("php://stdin");
-      tidy_parse_string($tidy, $data);
+      tidy_parse_string($data);
     } else {
-       tidy_parse_file($tidy, $_SERVER['argv'][1]);
+       tidy_parse_file($_SERVER['argv'][1]);
     }
     
-    tidy_clean_repair($tidy);
+    tidy_clean_repair();
     
-    if(tidy_warning_count($tidy) ||
-       tidy_error_count($tidy)) {
+    if(tidy_warning_count() ||
+       tidy_error_count()) {
         
         echo "\n\nThe following errors or warnings occured:\n";
-        echo tidy_get_error_buffer($tidy);
+        echo tidy_get_error_buffer();
         echo "\n";
     }
     
-    echo tidy_get_output($tidy);
+    echo tidy_get_output();
     
 ?>
     

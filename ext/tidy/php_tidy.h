@@ -95,6 +95,33 @@ extern zend_module_entry tidy_module_entry;
         obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC); \
     }
 
+#define INSTANCIATE_NODE(_zval, _container, _node) \
+	tidy_instanciate(tidy_ce_node, _zval TSRMLS_CC); \
+	_container = (PHPTidyObj *) zend_object_store_get_object(_zval TSRMLS_CC); \
+	_container->node = _node; \
+	_container->attr = NULL; \
+	_container->type = is_node; \
+	tidy_add_default_properities(_container, is_node TSRMLS_CC);
+
+#define INSTANCIATE_ATTR(_zval, _container, _attr) \
+	tidy_instanciate(tidy_ce_attr, _zval TSRMLS_CC); \
+	_container = (PHPTidyObj *) zend_object_store_get_object(_zval TSRMLS_CC); \
+	_container->node = NULL; \
+	_container->attr = _attr; \
+	_container->type = is_attr; \
+	tidy_add_default_properities(_container, is_attr TSRMLS_CC);
+
+#define PHP_NODE_METHOD_IS_TYPE(_type, _const) \
+PHP_NODE_METHOD(is_ ##_type) \
+{ \
+	GET_THIS_CONTAINER(); \
+	if(tidyNodeGetType(obj->node) == _const) {\
+		RETURN_TRUE; \
+	} else { \
+		RETURN_FALSE; \
+	} \
+}
+
 typedef enum {
     is_node,
     is_attr

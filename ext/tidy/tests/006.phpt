@@ -8,11 +8,9 @@ Verbose tidy_get_error_buffer()
 --FILE--
 <?php 
 
-    $tidy = tidy_create();
+    tidy_parse_string("<HTML><asd asdf></HTML>");
     
-    tidy_parse_string($tidy, "<HTML><asd asdf></HTML>");
-    
-    echo tidy_get_error_buffer($tidy, true);
+    echo tidy_get_error_buffer(true);
 
 ?>
 --EXPECT--

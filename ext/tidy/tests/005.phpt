@@ -8,11 +8,9 @@ tidy_parse_file()
 --FILE--
 <?php 
 
-    $tidy = tidy_create();
+    tidy_parse_file("ext/tidy/tests/005.html");
     
-    tidy_parse_file($tidy, "ext/tidy/tests/005.html");
-    
-    echo tidy_get_output($tidy);
+    echo tidy_get_output();
 
 ?>
 --EXPECT--
