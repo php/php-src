@@ -735,7 +735,10 @@ PHP_FUNCTION(domxml_newchild)
 		RETURN_FALSE;
 	}
 
-	child = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
+	if(content->value.str.len)
+		child = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
+	else
+		child = xmlNewChild(nodep, NULL, name->value.str.val, NULL);
 	if (!child) {
 		RETURN_FALSE;
 	}
@@ -743,7 +746,7 @@ PHP_FUNCTION(domxml_newchild)
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmlnode_class_entry_ptr);
-	add_property_long(return_value, "child", ret);
+	add_property_long(return_value, "node", ret);
 	add_property_long(return_value, "type", child->type);
 	add_property_stringl(return_value, "name", (char *) child->name, strlen(child->name), 1);
 	if(content->value.str.val)
@@ -794,6 +797,7 @@ PHP_FUNCTION(domxml_addroot)
 	if (!node) {
 		RETURN_FALSE;
 	}
+	docp->root = node;
 	ret = zend_list_insert(node, le_domxmlnodep);
 
 	/* construct an object with some methods */
