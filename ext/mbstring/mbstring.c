@@ -1429,21 +1429,24 @@ PHP_FUNCTION(mb_parse_str)
    Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
 {
-	pval **arg_string, **arg_status;
+/* 	pval **arg_string, **arg_status; */
+	char *arg_string;
+	size_t arg_string_len;
+	long arg_status;
 	mbfl_string string, result;
 	const char *mimetype, *charset;
 	char *p;
 	enum mbfl_no_encoding encoding;
-	int last_feed, len, arg_strlen;
+	int last_feed, len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &arg_string, &arg_strlen, &arg_status) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &arg_string, &arg_string_len, &arg_status) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	encoding = MBSTRG(current_http_output_encoding);
 
  	/* start phase only */
- 	if ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_START) != 0) {
+ 	if ((arg_status & PHP_OUTPUT_HANDLER_START) != 0) {
  		/* delete the converter just in case. */
  		if (MBSTRG(outconv)) {
  			mbfl_buffer_converter_delete(MBSTRG(outconv));
@@ -1470,13 +1473,13 @@ PHP_FUNCTION(mb_output_handler)
  	/* just return if the converter is not activated. */
  	if (MBSTRG(outconv) == NULL) {
 		zval_dtor(return_value);
-		*return_value = **arg_string;
+		Z_STRVAL_P(return_value) = arg_string;
 		zval_copy_ctor(return_value);
 		return;
 	}
 
  	/* flag */
- 	last_feed = ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_END) != 0);
+ 	last_feed = ((arg_status & PHP_OUTPUT_HANDLER_END) != 0);
  	/* mode */
  	mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
  	mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
@@ -1485,8 +1488,8 @@ PHP_FUNCTION(mb_output_handler)
  	mbfl_string_init(&string);
  	string.no_language = MBSTRG(current_language);
  	string.no_encoding = MBSTRG(current_internal_encoding);
- 	string.val = Z_STRVAL_PP(arg_string);
- 	string.len = arg_strlen;
+ 	string.val = arg_string;
+ 	string.len = arg_string_len;
  	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
  	if (last_feed)
  		mbfl_buffer_converter_flush(MBSTRG(outconv));
