@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("fbsql", "FrontBase support", "no");
+
+if (PHP_FBSQL == "yes") {
+	EXTENSION("fbsql", "php_fbsql.c");
+	AC_DEFINE('HAVE_FBSQL', 1, 'Have FrontBase support');
+}
