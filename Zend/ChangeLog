@@ -1,3 +1,38 @@
+2004-10-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_vm_handlers.h:
+      - Add arginfo ZEND_ARG_SEND_AUTOMATIC which lets the compiler automatically
+        determine whether pass by ref is possible or pass by value is needed.
+
+2004-10-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/unset_cv06.phpt
+      tests/unset_cv07.phpt
+      tests/unset_cv07.phpt:
+      Test files are fixed.
+
+    * zend_execute.c
+      zend_vm_handlers.h
+      tests/unset_cv11.phpt:
+      Fixed unset() bug that was introduced with CV optimization patch
+
+    * zend_execute_API.c
+      zend_vm_handlers.h
+      tests/unset.inc
+      tests/unset_cv01.phpt
+      tests/unset_cv02.phpt
+      tests/unset_cv03.phpt
+      tests/unset_cv04.phpt
+      tests/unset_cv05.phpt
+      tests/unset_cv06.phpt
+      tests/unset_cv07.phpt
+      tests/unset_cv08.phpt
+      tests/unset_cv09.phpt
+      tests/unset_cv10.phpt:
+      Added test cases for CV optimization patch
+
 2004-10-04  Andi Gutmans  <andi@zend.com>
 
     * zend_API.h

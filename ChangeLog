@@ -1,3 +1,78 @@
+2004-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/ftp/ftp.c
+      ext/ftp/ftp.c:
+      MFH: Fixed bug #30027 (Possible crash inside ftp_get()).
+
+    * ext/ftp/ftp.c:
+      Fixed bug #30027 (Possible crash inside ftp_get()).
+      
+
+2004-10-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Add more improvements done so far
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * NEWS:
+      Update
+
+    * ext/standard/basic_functions.c:
+      - Use ZEND_ARG_SEND_AUTOMATIC for several array functions
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_handlers.h:
+      - Add arginfo ZEND_ARG_SEND_AUTOMATIC which lets the compiler automatically
+        determine whether pass by ref is possible or pass by value is needed.
+
+2004-10-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30175 (SOAP results aren't parsed correctly)
+
+    * ZendEngine2/tests/unset_cv06.phpt
+      ZendEngine2/tests/unset_cv07.phpt
+      ZendEngine2/tests/unset_cv07.phpt:
+      Test files are fixed.
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_handlers.h
+      ZendEngine2/tests/unset_cv11.phpt:
+      Fixed unset() bug that was introduced with CV optimization patch
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_handlers.h
+      ZendEngine2/tests/unset.inc
+      ZendEngine2/tests/unset_cv01.phpt
+      ZendEngine2/tests/unset_cv02.phpt
+      ZendEngine2/tests/unset_cv03.phpt
+      ZendEngine2/tests/unset_cv04.phpt
+      ZendEngine2/tests/unset_cv05.phpt
+      ZendEngine2/tests/unset_cv06.phpt
+      ZendEngine2/tests/unset_cv07.phpt
+      ZendEngine2/tests/unset_cv08.phpt
+      ZendEngine2/tests/unset_cv09.phpt
+      ZendEngine2/tests/unset_cv10.phpt:
+      Added test cases for CV optimization patch
+
+2004-10-05  Andi Gutmans  <andi@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      main/SAPI.c
+      main/main.c:
+      - Apply realpath() cache patch. We don't use it if we're in safe_mode and
+      - friends (which are quite slow anyway).
+      - If it proves to be stable I'll remove the #ifdef's in a few weeks.
+
 2004-10-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
