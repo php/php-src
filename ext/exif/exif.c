@@ -98,10 +98,12 @@ PHP_MINFO_FUNCTION(exif);
 /* {{{ exif_module_entry
  */
 zend_module_entry exif_module_entry = {
-	STANDARD_MODULE_HEADER,
+#if ZEND_MODULE_API_NO >= 20010901
+    STANDARD_MODULE_HEADER,
+#endif
 	"exif",
 	exif_functions,
-	NULL, NULL,
+    NULL, NULL,
 	NULL, NULL,
 	PHP_MINFO(exif),
 	EXIF_VERSION,
@@ -447,22 +449,36 @@ static const struct {
 
 /* {{{ exif_get_tagname
     Get headername for tag_num or NULL if not defined */
-static char * exif_get_tagname(int tag_num, char *ret)
+static char * exif_get_tagname(int tag_num, char *ret, int len)
 {
 	int i,t;
+	char tmp[32];
 
 	for (i=0;;i++) {
 		if ( (t=TagTable[i].Tag) == tag_num || !t) {
-			if (ret)  {
-				strcpy(ret,TagTable[i].Desc);
-				if ( !t) sprintf(ret,"UndefinedTag:0x%04X", tag_num);
+			if (ret && len)  {
+				if ( !t) break;
+				strncpy(ret,TagTable[i].Desc,abs(len));
+				if ( len<0) {
+					len = -len;
+					ret[len-1]='\0';
+					for(i=strlen(ret);i<len;i++)ret[i]=' ';
+				}
+				ret[len-1]='\0';
 				return ret;
 			}
 			return TagTable[i].Desc;
 		}
 	}
-	if (ret) {
-		sprintf(ret,"UndefinedTag:0x%04X", tag_num);
+	if (ret && len) {
+		sprintf(tmp,"UndefinedTag:0x%04X", tag_num);
+		strncpy(ret,tmp,abs(len));
+		if ( len<0) {
+			len = -len;
+			ret[len-1]='\0';
+			for(i=strlen(ret);i<len;i++)ret[i]=' ';
+		}
+		ret[len-1]='\0';
 		return ret;
 	}
 	return "";
@@ -588,25 +604,29 @@ typedef struct {
 	unsigned int	den;
 } unsigned_rational;
 
-typedef struct {
-	WORD		tag;
-	WORD		format;
-	DWORD		length;
-	union {
-		char 				*s;
-		unsigned			u;
-		int 				i;
-		float				f;
-		double				d;
-		signed_rational 	sr;
-		unsigned_rational 	ur;
-	} value;
-	char 		*name;
+typedef union _image_info_value {
+	char 				*s;
+	unsigned			u;
+	int 				i;
+	float				f;
+	double				d;
+	signed_rational 	sr;
+	unsigned_rational 	ur;
+	union _image_info_value   *list;
 } image_info_value;
 
 typedef struct {
+	WORD				tag;
+	WORD				format;
+	DWORD				length;
+	DWORD				dummy;  /* value ptr of tiff directory entry */
+	char 				*name;
+	image_info_value	value;
+} image_info_data;
+
+typedef struct {
 	int					count;
-	image_info_value 	*list;
+	image_info_data 	*list;
 } image_info_list;
 /* }}} */
 
@@ -670,6 +690,10 @@ static char *exif_get_sectionlist(int sectionlist)
 
 	for(i=0; i<SECTION_COUNT; i++) len += strlen(exif_get_sectionname(i))+2;
 	sections = emalloc(len+1);
+	if ( !sections) {
+		php_error(E_ERROR,"Cannot allocate memory for all data");
+		return NULL;
+	}
 	sections[0] = '\0';
 	len = 0;
 	for(i=0; i<SECTION_COUNT; i++) {
@@ -734,56 +758,45 @@ typedef struct {
 } image_info_type;
 /* }}} */
 
-/* {{{ exif_add_image_info
- Free memory allocated for image_info
+/* {{{ exif_iif_add_value
+ Add a value to image_info
 */
-void exif_add_image_info( image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value)
+void exif_iif_add_value( image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, int motorola_intel)
 {
-	image_info_value *info_value, *list;
+	int	index;
+	image_info_value *info_value;
+	image_info_data  *info_data;
+	image_info_data  *list;
 
-	list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_value));
+	list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_data));
 	if ( !list) {
-		php_error(E_WARNING,"Cannot allocate memory for all data");
+		php_error(E_ERROR,"Cannot allocate memory for all data");
 		return;
 	}
 	image_info->info_list[section_index].list = list;
-	image_info->sections_found |= 1<<section_index;
 
-    info_value = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+    info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	info_data->tag    = tag;
+	info_data->format = format;
+	info_data->length = length;
+	info_data->name   = emalloc(strlen(name)+1);
+	if ( !info_data->name) {
+		php_error(E_ERROR,"Cannot allocate memory for all data");
+		return;
+	}
+	info_value        = &info_data->value;
+	strcpy(info_data->name, name);
 
-	info_value->name = emalloc(strlen(name)+1);
-	strcpy(info_value->name, name);
-
-	info_value->tag    = tag;
-	info_value->format = format;
-	info_value->length = 1; /* we do not support arrays other than STRING/UNDEFINED */
 	switch (format) {
-		case TAG_FMT_BYTE:
-			info_value->value.u = *(uchar*)value;
-			break;
-
 		case TAG_FMT_STRING:
 			length = php_strnlen(value,length);
-			info_value->value.s = emalloc(length+1);
-			strcpy(info_value->value.s,value);
-			info_value->length = length;
-			break;
-
-		case TAG_FMT_USHORT:
-			info_value->value.u = php_ifd_get16u(value,image_info->motorola_intel);
-			break;
-
-		case TAG_FMT_ULONG:
-			info_value->value.u = php_ifd_get32u(value,image_info->motorola_intel);
-			break;
-
-		case TAG_FMT_URATIONAL:
-			info_value->value.ur.num = php_ifd_get32u(value, image_info->motorola_intel);
-			info_value->value.ur.den = php_ifd_get32u(4+(char *)value, image_info->motorola_intel);
-			break;
-
-		case TAG_FMT_SBYTE:
-			info_value->value.i = *(char*)value;
+			info_data->length = length;
+			info_value->s = emalloc(length+1);
+			if ( !info_value->s) {
+				php_error(E_ERROR,"Cannot allocate memory for all data");
+				return;
+			}
+			strcpy(info_value->s,value);
 			break;
 
 		default:
@@ -792,45 +805,143 @@ void exif_add_image_info( image_info_type *image_info, int section_index, char *
 			 * So not return but use type UNDEFINED
 			 * return;
 			 */
-			info_value->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+			info_data->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+		case TAG_FMT_SBYTE:
+		case TAG_FMT_BYTE:
+		/* in contrast to strings bytes do not need to allocate buffer for NULL if length==0 */
+			if ( length<1)
+				break;
+			if ( format==TAG_FMT_BYTE && length==1)
+			{
+				info_value->u = *(uchar*)value;
+				break;
+			}
+			if ( format==TAG_FMT_SBYTE && length==1)
+			{
+				info_value->i = *(char*)value;
+				break;
+			}
 		case TAG_FMT_UNDEFINED:
-			info_value->value.s = emalloc(length+1);
-			memcpy(info_value->value.s,value,length);
-			info_value->value.s[length] = '\0';
-			info_value->length = length; /* not +1 !!! */
+			info_value->s = emalloc(length+1);
+			if ( !info_value->s) {
+				php_error(E_ERROR,"Cannot allocate memory for all data");
+				return;
+			}
+			memcpy(info_value->s,value,length);
+			info_value->s[length] = '\0';
 			break;
 
+		case TAG_FMT_USHORT:
+		case TAG_FMT_ULONG:
+		case TAG_FMT_URATIONAL:
 		case TAG_FMT_SSHORT:
-			info_value->value.i = php_ifd_get16s(value,image_info->motorola_intel);
-			break;
-
 		case TAG_FMT_SLONG:
-			info_value->value.i = php_ifd_get32s(value,image_info->motorola_intel);
-			break;
-
 		case TAG_FMT_SRATIONAL:
-			info_value->value.sr.num = php_ifd_get32u(value, image_info->motorola_intel);
-			info_value->value.sr.den = php_ifd_get32u(4+(char *)value, image_info->motorola_intel);
-			break;
-
 		case TAG_FMT_SINGLE:
-			php_error(E_WARNING, "Found value of type single");
-			info_value->value.f = (double)*(float *)value;
-
 		case TAG_FMT_DOUBLE:
-			php_error(E_WARNING, "Found value of type double");
-			info_value->value.d = *(double *)value;
-			break;
-	}
+			if ( length==0) {
+				break;
+			} else
+			if ( length>1) {
+				info_data->value.list = emalloc(length*sizeof(image_info_value));
+				if ( !info_data->value.list) {
+					php_error(E_ERROR,"Cannot allocate memory for all data");
+					return;
+				}
+				info_value = &info_data->value.list[0];
+			} else {
+				info_value = &info_data->value;
+			}
+			for (index=0; index<length; index++) {
+				switch (format) {
+					case TAG_FMT_USHORT:
+						info_value->u = php_ifd_get16u(value,motorola_intel);
+						break;
 
+					case TAG_FMT_ULONG:
+						info_value->u = php_ifd_get32u(value,motorola_intel);
+						break;
+
+					case TAG_FMT_URATIONAL:
+						info_value->ur.num = php_ifd_get32u(value, motorola_intel);
+						info_value->ur.den = php_ifd_get32u(4+(char *)value, motorola_intel);
+						break;
+
+					case TAG_FMT_SSHORT:
+						info_value->i = php_ifd_get16s(value,motorola_intel);
+						break;
+
+					case TAG_FMT_SLONG:
+						info_value->i = php_ifd_get32s(value,motorola_intel);
+						break;
+
+					case TAG_FMT_SRATIONAL:
+						info_value->sr.num = php_ifd_get32u(value, motorola_intel);
+						info_value->sr.den = php_ifd_get32u(4+(char *)value, motorola_intel);
+						break;
+
+					case TAG_FMT_SINGLE:
+						php_error(E_WARNING, "Found value of type single");
+						info_value->f = (double)*(float *)value;
+
+					case TAG_FMT_DOUBLE:
+						php_error(E_WARNING, "Found value of type double");
+						info_value->d = *(double *)value;
+						break;
+				}
+				info_value = &info_data->value.list[index];
+			}
+	}
+	image_info->sections_found |= 1<<section_index;
 	image_info->info_list[section_index].count++;
 }
 /* }}} */
 
-/* {{{ exif_free_image_info
+/* {{{ exif_iif_add_tag
+ Add a tag from IFD to image_info
+*/
+void exif_iif_add_tag( image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value)
+{
+	exif_iif_add_value( image_info, section_index, name, tag, format, length, value, image_info->motorola_intel);
+}
+/* }}} */
+
+/* {{{ exif_iif_add_int
+ Add a tag from IFD to image_info
+*/
+void exif_iif_add_int( image_info_type *image_info, int section_index, char *name, int value)
+{
+	int	index;
+	image_info_data  *info_data;
+	image_info_data  *list;
+
+	list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+	if ( !list) {
+		php_error(E_ERROR,"Cannot allocate memory for all data");
+		return;
+	}
+	image_info->info_list[section_index].list = list;
+
+    info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	info_data->tag    = TAG_NONE;
+	info_data->format = TAG_FMT_SLONG;
+	info_data->length = 1;
+	info_data->name   = emalloc(strlen(name)+1);
+	if ( !info_data->name) {
+		php_error(E_ERROR,"Cannot allocate memory for all data");
+		return;
+	}
+	strcpy(info_data->name, name);
+	info_data->value.i = value;
+	image_info->sections_found |= 1<<section_index;
+	image_info->info_list[section_index].count++;
+}
+/* }}} */
+
+/* {{{ exif_iif_free
  Free memory allocated for image_info
 */
-void exif_free_image_info( image_info_type *image_info, int section_index)
+void exif_iif_free( image_info_type *image_info, int section_index)
 {
 	int i;
 
@@ -839,11 +950,29 @@ void exif_free_image_info( image_info_type *image_info, int section_index)
 		for (i=0; i < image_info->info_list[section_index].count; i++)
 		{
 			efree(image_info->info_list[section_index].list[i].name);
-			if ( image_info->info_list[section_index].list[i].format == TAG_FMT_STRING
-			   ||image_info->info_list[section_index].list[i].format == TAG_FMT_UNDEFINED
-			)
+			switch(image_info->info_list[section_index].list[i].format)
 			{
-				efree(image_info->info_list[section_index].list[i].value.s);
+				case TAG_FMT_SBYTE:
+				case TAG_FMT_BYTE:
+					/* in contrast to strings bytes do not need to allocate buffer for NULL if length==0 */
+					if (image_info->info_list[section_index].list[i].length<=1)
+						break;
+				default:
+				case TAG_FMT_UNDEFINED:
+				case TAG_FMT_STRING:
+					efree(image_info->info_list[section_index].list[i].value.s);
+					break;
+
+				case TAG_FMT_USHORT:
+				case TAG_FMT_ULONG:
+				case TAG_FMT_URATIONAL:
+				case TAG_FMT_SSHORT:
+				case TAG_FMT_SLONG:
+				case TAG_FMT_SRATIONAL:
+				case TAG_FMT_SINGLE:
+				case TAG_FMT_DOUBLE:
+					/* nothing to do here */
+					break;
 			}
 		}
 		efree(image_info->info_list[section_index].list);
@@ -859,13 +988,13 @@ void exif_free_image_info( image_info_type *image_info, int section_index)
 void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_info, int section_index)
 {
 	char	buffer[64];
-	int		idx=0;
-	image_info_value	*info_value;
+	int		i, ap, l, b, idx=0, done;
+	image_info_value *info_value;
+	image_info_data  *info_data;
+	pval 			 *tmpi, *array;
 
 	if ( image_info->info_list[section_index].count)
 	{
-		int i;
-		pval *tmpi;
 
 		if ( sub_array) {
 			MAKE_STD_ZVAL(tmpi);
@@ -876,59 +1005,132 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 
 		for(i=0; i<image_info->info_list[section_index].count; i++)
 		{
-			info_value = &image_info->info_list[section_index].list[i];
-			#ifdef EXIF_DEBUG
-			php_error(E_NOTICE,"adding info #%d: '%s:%s'", i, exif_get_sectionname(section_index), info_value->name);
-			#endif
-			switch(info_value->format)
+			done       = 0;
+			info_data  = &image_info->info_list[section_index].list[i];
+			info_value = &info_data->value;
+			if (info_data->length==0)
 			{
-				default:
-					/* Standard says more types possible but skip them...
-					 * but allow users to handle data if they know how to
-					 * So not return but use type UNDEFINED
-					 * return;
-					 */
-				case TAG_FMT_UNDEFINED:
-					add_assoc_stringl(tmpi, info_value->name, info_value->value.s, info_value->length, 1);
-					break;
+				add_assoc_null(tmpi, info_data->name);
+			} else {
+				switch (info_data->format)
+				{
+					default:
+						/* Standard says more types possible but skip them...
+						 * but allow users to handle data if they know how to
+						 * So not return but use type UNDEFINED
+						 * return;
+						 */
+					case TAG_FMT_UNDEFINED:
+						add_assoc_stringl(tmpi, info_data->name, info_value->s, info_data->length, 1);
+						break;
 
-				case TAG_FMT_STRING:
-					if (section_index==SECTION_COMMENT) {
-						add_index_string(tmpi, idx++, info_value->value.s, 1);
-					} else {
-						add_assoc_string(tmpi, info_value->name, info_value->value.s, 1);
-					}
-					break;
+					case TAG_FMT_STRING:
+						if (section_index==SECTION_COMMENT) {
+							add_index_string(tmpi, idx++, info_value->s, 1);
+						} else {
+							add_assoc_string(tmpi, info_data->name, info_value->s, 1);
+						}
+						break;
 
-				case TAG_FMT_BYTE:
-				case TAG_FMT_USHORT:
-				case TAG_FMT_ULONG:
-					add_assoc_long(tmpi, info_value->name, (int)info_value->value.u);
+					case TAG_FMT_URATIONAL:
+					case TAG_FMT_SRATIONAL:
 					break;
+					case TAG_FMT_BYTE:
+					case TAG_FMT_SBYTE:
+					case TAG_FMT_USHORT:
+					case TAG_FMT_SSHORT:
+					case TAG_FMT_SINGLE:
+					case TAG_FMT_DOUBLE:
+					case TAG_FMT_ULONG:
+					case TAG_FMT_SLONG:
+						/* now the rest, first see if it becomes an array */
+						if ( (l = info_data->length) > 1) {
+							array = NULL;
+							MAKE_STD_ZVAL(array);
+							array_init(array);
+							info_value = &info_data->value.list[0];
+						}
+						for(ap=0; ap<l; ap++)
+						{
+							switch (info_data->format)
+							{
+								case TAG_FMT_BYTE:
+									if (l>1) {
+										info_value = &info_data->value;
+										for (b=0;b<l;b++)
+										{
+											add_index_long(array, b, (int)(info_value->s[b]));
+										}
+										break;
+									}
+								case TAG_FMT_USHORT:
+								case TAG_FMT_ULONG:
+									if (l==1) {
+										add_assoc_long(tmpi, info_data->name, (int)info_value->u);
+									} else {
+										add_index_long(array, ap, (int)info_value->u);
+									}
+									break;
 
-				case TAG_FMT_URATIONAL:
-					sprintf(buffer,"%i/%i", info_value->value.ur.num, info_value->value.ur.den);
-					add_assoc_string(tmpi, info_value->name, buffer, 1);
-					break;
+								case TAG_FMT_URATIONAL:
+									sprintf(buffer,"%i/%i", info_value->ur.num, info_value->ur.den);
+									if (l==1) {
+										add_assoc_string(tmpi, info_data->name, buffer, 1);
+									} else {
+										add_index_string(array, ap, buffer, 1);
+									}
+									break;
 
-				case TAG_FMT_SBYTE:
-				case TAG_FMT_SSHORT:
-				case TAG_FMT_SLONG:
-					add_assoc_long(tmpi, info_value->name, info_value->value.i);
-					break;
+								case TAG_FMT_SBYTE:
+									if (l>1) {
+										info_value = &info_data->value;
+										for (b=0;b<l;b++)
+										{
+											add_index_long(array, ap, (int)info_value->s[b]);
+										}
+										break;
+									}
+								case TAG_FMT_SSHORT:
+								case TAG_FMT_SLONG:
+									if (l==1) {
+										add_assoc_long(tmpi, info_data->name, info_value->i);
+									} else {
+										add_index_long(array, ap, info_value->i);
+									}
+									break;
 
-				case TAG_FMT_SRATIONAL:
-					sprintf(buffer,"%i/%i", info_value->value.sr.num, info_value->value.sr.den);
-					add_assoc_string(tmpi, info_value->name, buffer, 1);
-					break;
+								case TAG_FMT_SRATIONAL:
+									sprintf(buffer,"%i/%i", info_value->sr.num, info_value->sr.den);
+									if (l==1) {
+										add_assoc_string(tmpi, info_data->name, buffer, 1);
+									} else {
+										add_index_string(array, ap, buffer, 1);
+									}
+									break;
 
-				case TAG_FMT_SINGLE:
-					add_assoc_double(tmpi, info_value->name, info_value->value.f);
-					break;
+								case TAG_FMT_SINGLE:
+									if (l==1) {
+										add_assoc_double(tmpi, info_data->name, info_value->f);
+									} else {
+										add_index_double(array, ap, info_value->f);
+									}
+									break;
 
-				case TAG_FMT_DOUBLE:
-					add_assoc_double(tmpi, info_value->name, info_value->value.d);
-					break;
+								case TAG_FMT_DOUBLE:
+									if (l==1) {
+										add_assoc_double(tmpi, info_data->name, info_value->d);
+									} else {
+										add_index_double(array, ap, info_value->d);
+									}
+									break;
+							}
+							info_value = &info_data->value.list[ap];
+						}
+						if ( l>1) {
+							add_assoc_zval(tmpi, info_data->name, array);
+						}
+						break;
+				}
 			}
 		}
 		if ( sub_array) {
@@ -998,7 +1200,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 */
 static void exif_process_COM (image_info_type *image_info, uchar *value, int length)
 {
-    exif_add_image_info( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length, value);
+    exif_iif_add_tag( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length, value);
 }
 /* }}} */
 
@@ -1109,7 +1311,7 @@ PHP_FUNCTION(exif_tagname)
 
 	convert_to_long_ex(p_num);
 	tag = Z_LVAL_PP(p_num);
-	szTemp = exif_get_tagname(tag,NULL);
+	szTemp = exif_get_tagname(tag,NULL,0);
 	if ( tag<0 || !szTemp || !szTemp[0]) {
 		RETURN_BOOL(FALSE);
 	} else {
@@ -1132,7 +1334,7 @@ static void exif_extract_thumbnail(image_info_type *ImageInfo, char *offset, uns
 		}
 		ImageInfo->Thumbnail = emalloc(ImageInfo->ThumbnailSize);
 		if (!ImageInfo->Thumbnail) {
-			php_error(E_WARNING, "Could not allocate memory for thumbnail");
+			php_error(E_ERROR, "Could not allocate memory for thumbnail");
 			return;
 		} else {
 			/* Check to make sure we are not going to go past the ExifLength */
@@ -1156,6 +1358,10 @@ static int exif_process_string_raw(char **result,char *value,size_t byte_count) 
 	 */
 	if (byte_count) {
 		(*result) = emalloc(byte_count+1);
+		if ( !*result) {
+			php_error(E_ERROR,"Cannot allocate memory for all data");
+			return 0;
+		}
 		memcpy(*result, value, byte_count);
 		(*result)[byte_count] = '\0';
 		return byte_count+1;
@@ -1175,6 +1381,10 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
 	 */
 	if ((byte_count=php_strnlen(value,byte_count)) > 0) {
 		(*result) = emalloc(byte_count+1);
+		if ( !*result) {
+			php_error(E_ERROR,"Cannot allocate memory for all data");
+			return 0;
+		}
 		memcpy(*result, value, byte_count);
 		(*result)[byte_count] = '\0';
 		return byte_count+1;
@@ -1206,6 +1416,10 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 			}
 			if (l>1) {
 				*pszInfoPtr = emalloc(l+1);
+				if ( !*pszInfoPtr) {
+					php_error(E_ERROR,"Cannot allocate memory for all data");
+					return 0;
+				}
 				wcstombs(*pszInfoPtr, (wchar_t*)(szValuePtr), l+1);
 				(*pszInfoPtr)[l] = '\0';
 				return l+1;
@@ -1290,11 +1504,11 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 			if (value_ptr < dir_entry) {
 				/* we can read this if offset_val > 0 */
 				/* some files have their values in other parts of the file */
-				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag,tagname), offset_val, dir_entry);
+				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag,tagname,-13), offset_val, dir_entry);
 			} else {
 				/* this is for sure not allowed */
 				/* exception are IFD pointers */
-				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag,tagname), offset_val, byte_count, offset_val+byte_count, IFDlength);
+				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag,tagname,-13), offset_val, byte_count, offset_val+byte_count, IFDlength);
 			}
 			return;
 		}
@@ -1305,7 +1519,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+x%04X(=%d)): %s", tag, exif_get_tagname(tag,tagname), value_ptr-offset_base, byte_count, byte_count, format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
+	php_error(E_NOTICE,"process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s", tag, exif_get_tagname(tag,tagname,-13), offset_val, byte_count, byte_count, components&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
 	#endif
 	if (section_index==SECTION_THUMBNAIL) {
 		switch(tag) {
@@ -1330,8 +1544,8 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 				if (byte_count>1 && (l=php_strnlen(value_ptr,byte_count)) > 0) {
 					if ( l<byte_count-1) {
 						/* When there are any characters after the first NUL */
-						exif_add_image_info( ImageInfo, SECTION_COMPUTED, "Copyright.Photographer", TAG_COPYRIGHT, TAG_FMT_STRING, l, value_ptr);
-						exif_add_image_info( ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       TAG_COPYRIGHT, TAG_FMT_STRING, byte_count-l-1, value_ptr+l+1);
+						exif_iif_add_tag( ImageInfo, SECTION_COMPUTED, "Copyright.Photographer", TAG_COPYRIGHT, TAG_FMT_STRING, l, value_ptr);
+						exif_iif_add_tag( ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       TAG_COPYRIGHT, TAG_FMT_STRING, byte_count-l-1, value_ptr+l+1);
 						#ifdef EXIF_DEBUG
 						php_error(E_NOTICE,"added copyrights: %s, %s", value_ptr, value_ptr+l+1);
 						#endif
@@ -1436,8 +1650,6 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 							#endif
 							ImageInfo->sections_found |= FOUND_INTEROP;
 							sub_section_index = SECTION_INTEROP;
-						/* we do not know how to handle that yet */
-						/*	return; */
 							break;
 					}
 					SubdirStart = offset_base + php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
@@ -1457,7 +1669,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 	/* correctly would be to set components as length
 	 * but we are ignoring length for those types where it is not the same as byte_count
 	 */
-	exif_add_image_info( ImageInfo, section_index, exif_get_tagname(tag,tagname), tag, format, byte_count, value_ptr);
+	exif_iif_add_tag( ImageInfo, section_index, exif_get_tagname(tag,tagname,sizeof(tagname)), tag, format, components, value_ptr);
 }
 /* }}} */
 
@@ -1478,7 +1690,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 	NumDirEntries = php_ifd_get16u(DirStart, ImageInfo->motorola_intel);
 
 	if ((DirStart+2+NumDirEntries*12) > (OffsetBase+IFDlength)) {
-		php_error(E_WARNING, "Illegally sized directory x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)DirStart+2-(int)OffsetBase, NumDirEntries, (int)DirStart+2+NumDirEntries*12-(int)OffsetBase, IFDlength);
+		php_error(E_WARNING, "Illegal directory size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)DirStart+2-(int)OffsetBase, NumDirEntries, (int)DirStart+2+NumDirEntries*12-(int)OffsetBase, IFDlength);
 		return;
 	}
 
@@ -1500,7 +1712,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 		#ifdef EXIF_DEBUG
 		php_error(E_NOTICE,"expect next IFD to be thumbnail");
 		#endif
-		exif_process_IFD_in_JPEG(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, IFDlength, SECTION_THUMBNAIL);/**/
+		exif_process_IFD_in_JPEG(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, IFDlength, SECTION_THUMBNAIL);
 	}
 }
 /* }}} */
@@ -1527,6 +1739,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 		return;
 	}
 
+	ImageInfo->sections_found |= FOUND_IFD0;
 	/* First directory starts at offset 8. Offsets starts at 0. */
 	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+8, CharBuf, length/*-14*/, SECTION_IFD0);
 
@@ -1568,10 +1781,10 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigne
 	int l1, l2=0;
 
 	if ( (l1 = php_strnlen(buffer+2,length-2)) > 0) {
-		exif_add_image_info( ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
+		exif_iif_add_tag( ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
 		if ( length > 2+l1+1) {
 			l2 = php_strnlen(buffer+2+l1+1,length-2-l1+1);
-			exif_add_image_info( ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
+			exif_iif_add_tag( ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
 		}
 	}
 	#ifdef EXIF_DEBUG
@@ -1597,7 +1810,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 
 		#ifdef EXIF_DEBUG
 		fpos = ftell(infile);
-		php_error(E_NOTICE,"search section %d at 0x%04X", ImageInfo->sections_count, fpos);
+		php_error(E_NOTICE,"needing section %d @ 0x%04X", ImageInfo->sections_count, fpos);
 		#endif
 
 		for (a=0;a<7;a++) {
@@ -1629,6 +1842,10 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 		ImageInfo->sections[ImageInfo->sections_count].Size = itemlen;
 
 		Data = (uchar *)emalloc(itemlen+1); /* Add 1 to allow sticking a 0 at the end. */
+		if ( !Data) {
+			php_error(E_ERROR,"Cannot allocate memory for all data");
+			return FALSE;
+		}
 		ImageInfo->sections[ImageInfo->sections_count].Data = Data;
 
 		/* Store first two pre-read bytes. */
@@ -1659,7 +1876,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 					size = ep-cp;
 					Data = (uchar *)emalloc(size);
 					if (Data == NULL) {
-						php_error(E_WARNING, "could not allocate data for entire image");
+						php_error(E_ERROR, "could not allocate data for entire image");
 						return FALSE;
 					}
 
@@ -1689,8 +1906,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 				break;
 
 			case M_EXIF:
-				if ( !(ImageInfo->sections_found&FOUND_EXIF)) {
-					ImageInfo->sections_found |= FOUND_EXIF;
+				if ( !(ImageInfo->sections_found&FOUND_IFD0)) {
+					/*ImageInfo->sections_found |= FOUND_EXIF;*/
 					/* Seen files from some 'U-lead' software with Vivitar scanner
 					   that uses marker 31 later in the file (no clue what for!) */
 					exif_process_APP1(ImageInfo, (char *)Data, itemlen);
@@ -1751,6 +1968,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 	if ( ImageInfo->FileSize >= dir_offset+2) {
 		ImageInfo->sections[sn].Size = 2;
 		ImageInfo->sections[sn].Data = emalloc(ImageInfo->sections[sn].Size);
+		if ( !ImageInfo->sections[sn].Data) {
+			php_error(E_ERROR,"Cannot allocate memory for all data");
+			return FALSE;
+		}
 		fseek(infile,dir_offset,SEEK_SET); /* we do not know the order of sections */
 		fread(ImageInfo->sections[sn].Data, 1, 2, infile);
 	    num_entries = php_ifd_get16u(ImageInfo->sections[sn].Data, ImageInfo->motorola_intel);
@@ -1761,6 +1982,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 		if ( ImageInfo->FileSize >= dir_offset+dir_size) {
 			ImageInfo->sections[sn].Size = dir_size;
 			ImageInfo->sections[sn].Data = erealloc(ImageInfo->sections[sn].Data,ImageInfo->sections[sn].Size);
+			if ( !ImageInfo->sections[sn].Data) {
+				php_error(E_ERROR,"Cannot allocate memory for all data");
+				return FALSE;
+			}
 			fread(ImageInfo->sections[sn].Data+2, 1, dir_size-2, infile);
 			next_offset = php_ifd_get32u(ImageInfo->sections[sn].Data + dir_size - 4, ImageInfo->motorola_intel);
 			#ifdef EXIF_DEBUG
@@ -1828,6 +2053,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 			}
 			ImageInfo->sections[sn].Size = ifd_size;
 			ImageInfo->sections[sn].Data = erealloc(ImageInfo->sections[sn].Data,ImageInfo->sections[sn].Size);
+			if ( !ImageInfo->sections[sn].Data) {
+				php_error(E_ERROR,"Cannot allocate memory for all data");
+				return FALSE;
+			}
 			if ( ImageInfo->FileSize >= ImageInfo->sections[sn].Size) {
 				if ( ifd_size > dir_size) {
 					/* read values not stored in directory itself */
@@ -1866,17 +2095,15 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 							case TAG_INTEROP_IFD_POINTER:
 								ImageInfo->sections_found |= FOUND_INTEROP;
 								sub_section_index = SECTION_INTEROP;
-							/* we do not know how to handle that yet */
-							/*	return; */
 								break;
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 						#ifdef EXIF_DEBUG
-						php_error(E_NOTICE,"Found other IFD: %s at x%04X", exif_get_tagname(entry_tag,tagname), entry_offset);
+						php_error(E_NOTICE,"Next IFD %s at x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 						#endif
 						exif_process_IFD_in_TIFF(ImageInfo,infile,entry_offset,sub_section_index);
 						#ifdef EXIF_DEBUG
-						php_error(E_NOTICE,"TIFF subsection %s done", exif_get_sectionname(sub_section_index));
+						php_error(E_NOTICE,"Next IFD %s done", exif_get_sectionname(sub_section_index));
 						#endif
 					} else {
 						exif_process_IFD_TAG(ImageInfo,dir_entry,ImageInfo->sections[sn].Data-dir_offset,ifd_size,section_index,0);
@@ -1895,7 +2122,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 					if (ImageInfo->ThumbnailOffset && ImageInfo->ThumbnailSize) {
 						ImageInfo->Thumbnail = emalloc(ImageInfo->ThumbnailSize);
 						if (!ImageInfo->Thumbnail) {
-							php_error(E_WARNING, "Could not allocate memory for thumbnail");
+							php_error(E_ERROR, "Could not allocate memory for thumbnail");
 						} else {
 							fseek(infile,ImageInfo->ThumbnailOffset,SEEK_SET);
 							fread(ImageInfo->Thumbnail, 1, ImageInfo->ThumbnailSize, infile);
@@ -1995,7 +2222,7 @@ int php_exif_discard_imageinfo(image_info_type *ImageInfo)
 	if (ImageInfo->FileName) 		efree(ImageInfo->FileName);
 	if (ImageInfo->Thumbnail) 		efree(ImageInfo->Thumbnail);
 	for (i=0; i<SECTION_COUNT; i++) {
-		exif_free_image_info( ImageInfo, i);
+		exif_iif_free( ImageInfo, i);
 	}
 	php_exif_discard_sections(ImageInfo);
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
@@ -2018,7 +2245,6 @@ int php_exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thum
 		php_error(E_WARNING, "Unable to open '%s'", FileName);
 		return FALSE;
 	}
-    /* php_error(E_WARNING,"EXIF: Process %s%s: %s", read_thumbnail?"thumbs ":"", read_all?"All ":"", FileName); */
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
@@ -2070,6 +2296,10 @@ PHP_FUNCTION(exif_read_data)
 	if(ac >= 2) {
 		convert_to_string_ex(p_sections_needed);
 		sections_str = emalloc(strlen(Z_STRVAL_PP(p_sections_needed))+3);
+		if ( !sections_str) {
+			php_error(E_ERROR,"Cannot allocate memory for all data");
+			RETURN_FALSE;
+		}
 		sprintf(sections_str,",%s,",Z_STRVAL_PP(p_sections_needed));
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
@@ -2113,7 +2343,7 @@ PHP_FUNCTION(exif_read_data)
    	sections_str = exif_get_sectionlist(ImageInfo.sections_found);
 
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"Sections found: %s", sections_str[0] ? sections_str : "None");
+	php_error(E_NOTICE,"sections found: %s", sections_str[0] ? sections_str : "None");
 	#endif
 
 	ImageInfo.sections_found |= FOUND_COMPUTED;/* do not inform about in debug*/
@@ -2124,40 +2354,37 @@ PHP_FUNCTION(exif_read_data)
 	}
 
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"Returning information");
+	php_error(E_NOTICE,"generate section FILE");
 	#endif
 
-	/*************************************************************************************************/
-	/* generic created information must use motorola/intel organisation from the executing processor */
-	i = 1;
-	ImageInfo.motorola_intel = (*(char*)&i) ? 0 : 1;
-	/* no more external processing from here                                                         */
-	/*************************************************************************************************/
-
 	/* now we can add our information */
-	exif_add_image_info( &ImageInfo, SECTION_FILE, "FileName",      TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.FileName), ImageInfo.FileName);
-	exif_add_image_info( &ImageInfo, SECTION_FILE, "FileDateTime",  TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.FileDateTime);
-	exif_add_image_info( &ImageInfo, SECTION_FILE, "FileSize",      TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.FileSize);
-	exif_add_image_info( &ImageInfo, SECTION_FILE, "SectionsFound", TAG_NONE, TAG_FMT_STRING, strlen(sections_str), sections_str);
+	exif_iif_add_tag( &ImageInfo, SECTION_FILE, "FileName",      TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.FileName), ImageInfo.FileName);
+	exif_iif_add_int( &ImageInfo, SECTION_FILE, "FileDateTime",  ImageInfo.FileDateTime);
+	exif_iif_add_int( &ImageInfo, SECTION_FILE, "FileSize",      ImageInfo.FileSize);
+	exif_iif_add_tag( &ImageInfo, SECTION_FILE, "SectionsFound", TAG_NONE, TAG_FMT_STRING, strlen(sections_str), sections_str);
+
+	#ifdef EXIF_DEBUG
+	php_error(E_NOTICE,"generate section COMPUTED");
+	#endif
 
 	if (ImageInfo.Width>0 &&  ImageInfo.Height>0) {
 		sprintf(tmp, "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "html",   TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "Height", TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.Height);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "Width",  TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.Width);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "html",   TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Height", ImageInfo.Height);
+		exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Width",  ImageInfo.Width);
 	}
-	exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "IsColor", TAG_NONE, TAG_FMT_SLONG, 1, &ImageInfo.IsColor);
+	exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "IsColor", TAG_NONE, TAG_FMT_SLONG, 1, &ImageInfo.IsColor);
 	if (ImageInfo.FocalLength) {
 		sprintf(tmp, "%4.1fmm", ImageInfo.FocalLength);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "FocalLength", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "FocalLength", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 		if(ImageInfo.CCDWidth) {
 			sprintf(tmp, "%dmm", (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));
-			exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "35mmFocalLength", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+			exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "35mmFocalLength", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 		}
 	}
 	if(ImageInfo.CCDWidth) {
 		sprintf(tmp, "%dmm", (int)ImageInfo.CCDWidth);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "CCDWidth", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "CCDWidth", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if(ImageInfo.ExposureTime>0) {
 		if(ImageInfo.ExposureTime <= 0.5) {
@@ -2165,11 +2392,11 @@ PHP_FUNCTION(exif_read_data)
 		} else {
 			sprintf(tmp, "%0.3f s", ImageInfo.ExposureTime);
 		}
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "ExposureTime", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "ExposureTime", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if(ImageInfo.ApertureFNumber) {
 		sprintf(tmp, "f/%.1f", ImageInfo.ApertureFNumber);
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "ApertureFNumber", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "ApertureFNumber", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if(ImageInfo.Distance) {
 		if(ImageInfo.Distance<0) {
@@ -2177,17 +2404,17 @@ PHP_FUNCTION(exif_read_data)
 		} else {
 			sprintf(tmp, "%0.2fm", ImageInfo.Distance);
 		}
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "FocusDistance", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "FocusDistance", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if (ImageInfo.UserComment) {
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.UserComment), ImageInfo.UserComment);
+		exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.UserComment), ImageInfo.UserComment);
 		if ( (len=ImageInfo.UserCommentEncoding[0])) {
-			exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", TAG_NONE, TAG_FMT_STRING, len, ImageInfo.UserCommentEncoding);
+			exif_iif_add_tag( &ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", TAG_NONE, TAG_FMT_STRING, len, ImageInfo.UserCommentEncoding);
 		}
 	}
 
 	if ( read_thumbnail && ImageInfo.ThumbnailSize) {
-		exif_add_image_info( &ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.ThumbnailSize, ImageInfo.Thumbnail);
+		exif_iif_add_tag( &ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.ThumbnailSize, ImageInfo.Thumbnail);
 	}
    	efree(sections_str);
 
@@ -2243,7 +2470,6 @@ PHP_FUNCTION(exif_thumbnail)
 
 	if ( !ImageInfo.Thumbnail || !ImageInfo.ThumbnailSize) {
 		php_exif_discard_imageinfo(&ImageInfo);
-		php_error(E_NOTICE,"No thumbnail data found");
 		RETURN_FALSE;
 	}
 
@@ -2275,3 +2501,4 @@ PHP_FUNCTION(exif_thumbnail)
  * vim600: sw=4 ts=4 tw=78 fdm=marker
  * vim<600: sw=4 ts=4 tw=78
  */
+ 
