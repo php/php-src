@@ -459,6 +459,7 @@ static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 }
 
 static zend_module_entry php_roxen_module = {
+  STANDARD_MODULE_HEADER,
   "Roxen",
   NULL,
   NULL,
@@ -466,6 +467,7 @@ static zend_module_entry php_roxen_module = {
   NULL,
   NULL,
   php_info_roxen,
+  NULL,
   STANDARD_MODULE_PROPERTIES
 };
 

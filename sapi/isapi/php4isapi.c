@@ -188,6 +188,7 @@ static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
 
 
 static zend_module_entry php_isapi_module = {
+    STANDARD_MODULE_HEADER,
 	"ISAPI",
 	NULL,
 	NULL,
@@ -195,6 +196,7 @@ static zend_module_entry php_isapi_module = {
 	NULL,
 	NULL,
 	php_info_isapi,
+    NULL,
 	STANDARD_MODULE_PROPERTIES
 };
 
