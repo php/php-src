@@ -3,7 +3,7 @@ mktime()
 --FILE--
 <?php
 $timezones = array(
-    'GMT',
+    'GMT0',
     'GST-1GDT'
 );
 
