@@ -335,6 +335,15 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		 * Send an email
 		 */
 		
+		/* Ask the user to provide an email address, so that QA team can contact the user */
+		if (!strncasecmp($user_input, 'y', 1)) {
+			echo "Please enter your email address: ";
+			flush();
+			$fp = fopen("php://stdin", "r+");
+			$user_email = trim(fgets($fp, 1024));
+			$user_email = str_replace("@", " at ", str_replace(".", " dot ", $user_email));
+		}
+		
 		$failed_tests_data = '';
 		$sep = "\n" . str_repeat('=', 80) . "\n";
 		
@@ -370,7 +379,9 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Libtool:\n$libtool\n";
 		$failed_tests_data .= "Compiler:\n$compiler\n";
 		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
-		$failed_tests_data .= "\n\n";
+		$failed_tests_data .= "\n";
+		
+		$failed_tests_data .= "User's E-mail: ".$user_email."\n\n";
 		
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
 		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
