@@ -1,3 +1,17 @@
+2002-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/fopen_wrappers.c: Fixed bug #19395
+
+2002-09-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/gd_bundled.dsp: - update project file (no precompiled headers)
+
+    * ext/standard/mail.c: - Unbreak build
+
+2002-09-22  James Cox  <james@blog.at>
+
+    * ext/standard/mail.c: typo
+
 2002-09-21  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c
