@@ -690,7 +690,7 @@ if test "$PHP_DMALLOC" = "yes"; then
 fi
 
 PHP_ARG_ENABLE(ipv6,whether to enable IPv6 support,
-[  --enable-ipv6           Enable IPv6 support],yes)
+[  --disable-ipv6          Disable IPv6 support],yes)
 
 if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6,1,[Whether to enable IPv6 support])
