@@ -101,7 +101,11 @@ const char *zend_mh_bundle_error(void);
 #  define RTLD_GLOBAL 0
 # endif
 
-# define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
+# if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
+#  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
+# else
+#  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
+# endif
 # define DL_UNLOAD					dlclose
 # if defined(DLSYM_NEEDS_UNDERSCORE)
 #  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" s)
