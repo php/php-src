@@ -31,6 +31,8 @@ int lcg_globals_id;
 static php_lcg_globals lcg_globals;
 #endif
 
+static int php_lcg_initialized = 0;
+
 #ifdef PHP_WIN32
 #include <process.h>
 #endif
@@ -71,13 +73,16 @@ static void lcg_init_globals(LCGLS_D)
 #endif
 }
 
-PHP_MINIT_FUNCTION(lcg)
+PHP_RINIT_FUNCTION(lcg)
 {
+	if (!php_lcg_initialized) {
 #ifdef ZTS
-	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
+		lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
 #else
-	lcg_init_globals();
+		lcg_init_globals();
 #endif
+		php_lcg_initialized = 1;
+	}
 	return SUCCESS;
 }
 

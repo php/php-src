@@ -89,6 +89,7 @@ extern char *crypt(char *__key,char *__salt);
 
 #define PHP_CRYPT_RAND php_rand()
 
+static int php_crypt_rand_seeded=0;
 
 PHP_MINIT_FUNCTION(crypt)
 {
@@ -102,10 +103,19 @@ PHP_MINIT_FUNCTION(crypt)
 	REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
 
-	php_srand(time(0) * getpid() * (php_combined_lcg() * 10000.0));
-
 	return SUCCESS;
 }
+
+
+PHP_RINIT_FUNCTION(crypt)
+{
+	if(!php_crypt_rand_seeded) {
+		php_srand(time(0) * getpid() * (php_combined_lcg() * 10000.0));
+		php_crypt_rand_seeded=1;
+	} 
+	return SUCCESS;
+}
+
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 

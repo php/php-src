@@ -28,7 +28,7 @@ typedef struct {
 
 double php_combined_lcg(void);
 PHP_FUNCTION(lcg_value);
-PHP_MINIT_FUNCTION(lcg);
+PHP_RINIT_FUNCTION(lcg);
 
 #ifdef ZTS
 #define LCGLS_D php_lcg_globals *lcg_globals
