@@ -70,8 +70,8 @@ AC_ARG_WITH(gd,
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImagePaletteCopy, [ AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImageColorClosestHWB, [ AC_DEFINE(HAVE_COLORCLOSESTHWB,1,[ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="$LIBS -lz",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="$LIBS -lpng",,)
+		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
+		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
 dnl Some versions of GD support both PNG and GIF. Check for both.
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
@@ -126,8 +126,8 @@ dnl A whole whack of possible places where this might be
         LDFLAGS="$LDFLAGS -L$GD_LIB"
 		old_LIBS=$LIBS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="$LIBS -lz",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="$LIBS -lpng",,)
+		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
+		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
@@ -154,8 +154,8 @@ dnl A whole whack of possible places where this might be
   if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
 		old_LIBS=$LIBS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="$LIBS -lz",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="$LIBS -lpng",,)
+		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
+		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
