@@ -20,6 +20,29 @@ AC_DEFUN(PHP_GD_JPEG,[
 ])
 
 
+AC_DEFUN(PHP_GD_XPM,[
+        AC_MSG_CHECKING([for libXpm (needed by gd-1.8+)])
+        AC_ARG_WITH(xpm-dir,
+        [  --with-xpm-dir[=DIR]    xpm dir for gd-1.8+],[
+          AC_MSG_RESULT(yes)
+          if test "$withval" = "yes"; then
+            withval="/usr/X11R6"
+          fi
+          old_LIBS=$LIBS
+          LIBS="$LIBS -L$withval/lib"
+          AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [LIBS="$LIBS -L$withval/lib -lXpm"],[AC_MSG_RESULT(no)],)
+          LIBS=$old_LIBS
+          AC_ADD_LIBRARY_WITH_PATH(Xpm, $withval/lib)
+          AC_ADD_LIBRARY_WITH_PATH(X11, $withval/lib)
+          LIBS="$LIBS -L$withval/lib -lXpm -lX11"
+        ],[
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN(If configure fails try --with-xpm-dir=<DIR>)
+        ]) 
+        AC_CHECK_LIB(gd, gdImageCreateFromXpm, [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
+])
+
+
 shared=no
 AC_MSG_CHECKING(whether to include GD support)
 AC_ARG_WITH(gd,
@@ -51,6 +74,8 @@ AC_ARG_WITH(gd,
 dnl Some versions of GD support both PNG and GIF. Check for both.
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromXbm, [AC_DEFINE(HAVE_GD_XBM, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageWBMP, [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -60,6 +85,7 @@ dnl Some versions of GD support both PNG and GIF. Check for both.
         fi
 
         PHP_GD_JPEG
+        PHP_GD_XPM
         ac_cv_lib_gd_gdImageLine=yes
       ;;
     *)
@@ -103,6 +129,8 @@ dnl A whole whack of possible places where this might be
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromXbm, [AC_DEFINE(HAVE_GD_XBM, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageWBMP, [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -111,6 +139,7 @@ dnl A whole whack of possible places where this might be
           AC_ADD_LIBRARY(png)
         fi
         PHP_GD_JPEG
+	PHP_GD_XPM
 
         ac_cv_lib_gd_gdImageLine=yes
       else
