@@ -316,7 +316,7 @@ static void php_fbsql_set_default_link(int id TSRMLS_DC)
 	zend_list_addref(id);
 }
 
-static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
+static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (FB_SQL_G(linkIndex)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -627,7 +627,7 @@ PHP_FUNCTION(fbsql_close)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -788,7 +788,7 @@ PHP_FUNCTION(fbsql_commit)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -825,7 +825,7 @@ PHP_FUNCTION(fbsql_rollback)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1033,11 +1033,11 @@ PHP_FUNCTION(fbsql_select_db)
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			name = FB_SQL_G(databaseName);
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &dbname)==FAILURE) {
 				RETURN_FALSE;
@@ -1089,14 +1089,14 @@ PHP_FUNCTION(fbsql_change_user)
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			name = FB_SQL_G(databaseName);
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &user, &password)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 3:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(3, &user, &password, &database)==FAILURE) {
 				RETURN_FALSE;
@@ -1147,7 +1147,7 @@ PHP_FUNCTION(fbsql_create_db)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(fbsql_drop_db)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1288,7 +1288,7 @@ PHP_FUNCTION(fbsql_start_db)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(fbsql_stop_db)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1420,7 +1420,7 @@ PHP_FUNCTION(fbsql_db_status)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1583,7 +1583,7 @@ PHP_FUNCTION(fbsql_query)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -1617,7 +1617,7 @@ PHP_FUNCTION(fbsql_db_query)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &dbname, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -1646,7 +1646,7 @@ PHP_FUNCTION(fbsql_db_query)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_list_dbs([resource link_identifier])
+/* {{{ proto resource fbsql_list_dbs([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_list_dbs)
 {
@@ -1657,7 +1657,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1691,7 +1691,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_list_tables(string database, int [link_identifier]);
+/* {{{ proto resource fbsql_list_tables(string database, int [link_identifier]);
 	*/
 PHP_FUNCTION(fbsql_list_tables)
 {
@@ -1703,7 +1703,7 @@ PHP_FUNCTION(fbsql_list_tables)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(fbsql_list_tables)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_list_fields(string database_name, string table_name [, resource link_identifier])
+/* {{{ proto resource fbsql_list_fields(string database_name, string table_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_list_fields)
 {
@@ -1746,7 +1746,7 @@ PHP_FUNCTION(fbsql_list_fields)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &database_name, &table_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1789,7 +1789,7 @@ PHP_FUNCTION(fbsql_error)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1823,7 +1823,7 @@ PHP_FUNCTION(fbsql_errno)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1870,7 +1870,7 @@ PHP_FUNCTION(fbsql_affected_rows)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1899,7 +1899,7 @@ PHP_FUNCTION(fbsql_insert_id)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(fbsql_get_autostart_info)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:

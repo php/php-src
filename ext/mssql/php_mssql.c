@@ -250,19 +250,6 @@ static void _close_mssql_plink(zend_rsrc_list_entry *rsrc)
 	MS_SQL_G(num_links)--;
 }
 
-static mssql_statement* _mssql_get_statement(zval **stmt)
-{
-	mssql_statement *statement;
-
-	statement = (mssql_statement *) zend_fetch_resource(stmt TSRMLS_CC, -1, "MS SQL-Statement", NULL, 1, le_statement);
-
-	if (statement) {
-		return statement;
-	} else {
-		return (mssql_statement *) NULL;
-	}
-}
-
 static void _mssql_bind_hash_dtor(void *data)
 {
 	mssql_bind *bind= (mssql_bind *) data;
@@ -274,12 +261,12 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 {
 	long compatability_mode;
 
-	MS_SQL_G(num_persistent) = 0;
+	mssql_globals->num_persistent = 0;
 	if (cfg_get_long("mssql.compatability_mode", &compatability_mode) == SUCCESS) {
 		if (compatability_mode) {
-			MS_SQL_G(get_column_content) = php_mssql_get_column_content_without_type;	
+			mssql_globals->get_column_content = php_mssql_get_column_content_without_type;	
 		} else {
-			MS_SQL_G(get_column_content) = php_mssql_get_column_content_with_type;
+			mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 		}
 	}
 }
@@ -646,7 +633,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
+static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (MS_SQL_G(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -683,7 +670,7 @@ PHP_FUNCTION(mssql_close)
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -721,7 +708,7 @@ PHP_FUNCTION(mssql_select_db)
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -983,7 +970,7 @@ PHP_FUNCTION(mssql_query)
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -1688,7 +1675,7 @@ PHP_FUNCTION(mssql_init)
 			if (zend_get_parameters_ex(1, &sp_name)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 
@@ -1815,7 +1802,7 @@ PHP_FUNCTION(mssql_bind)
 	}
 	/* END input validation */
 	
-	statement = _mssql_get_statement(stmt);
+	ZEND_FETCH_RESOURCE(statement, mssql_statement *, stmt, -1, "MS SQL-Statement", le_statement);
 	if (statement==NULL) {
 		RETURN_FALSE;
 	}
@@ -1914,10 +1901,8 @@ PHP_FUNCTION(mssql_execute)
         WRONG_PARAM_COUNT;
     }
 
-	statement = _mssql_get_statement(stmt);
-	if (statement==NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(statement, mssql_statement *, stmt, -1, "MS SQL-Statement", le_statement);
+
 	mssql_ptr=statement->link;
 
 	if (dbrpcexec(mssql_ptr->link)==FAIL || dbsqlok(mssql_ptr->link)==FAIL) {
