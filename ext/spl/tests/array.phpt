@@ -14,7 +14,7 @@ $ar[2] = 2;
 var_dump($ar[2]);
 var_dump($ar["3"] = 3);
 
-var_dump(array_merge($ar, array(4=>4, 5=>5)));
+var_dump(array_merge((array)$ar, array(4=>4, 5=>5)));
 
 var_dump($ar["a"] = "a");
 
