@@ -72,7 +72,9 @@ MAILSTREAM DEFAULTPROTO;
 
 /* type casts left out, put here to remove warnings in msvc */
 void rfc822_date(char *date);
-extern char *cpystr(const char *str);
+extern char *cpystr (const char *str);
+extern char *cpytxt (SIZEDTEXT *dst, char *text, unsigned long size);
+extern long utf8_mime2text (SIZEDTEXT *src, SIZEDTEXT *dst);
 extern unsigned long find_rightmost_bit (unsigned long *valptr);
 void fs_give (void **block);
 void *fs_get (size_t size);
@@ -2088,7 +2090,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	add_property_long(return_value,"Unread",unreadmsg);
 	add_property_long(return_value,"Nmsgs",imap_le_struct->imap_stream->nmsgs);
 	add_property_long(return_value,"Size",msize);
-	rfc822_date (date);
+	rfc822_date(date);
 	add_property_string(return_value,"Date",date,1);
 	add_property_string(return_value,"Driver",imap_le_struct->imap_stream->dtb->name,1);
 	add_property_string(return_value,"Mailbox",imap_le_struct->imap_stream->mailbox,1);
@@ -2166,23 +2168,24 @@ PHP_FUNCTION(imap_utf8)
 {
 	pval *str;
 	int argc;
-	SIZEDTEXT src,dest;
-	src.data=NULL;
-	src.size=0;
-	dest.data=NULL;
-	dest.size=0;
-
-	argc=ARG_COUNT(ht);
-	if ( argc != 1 || getParameters( ht, argc, &str) == FAILURE ) {
+	SIZEDTEXT src, dest;
+	
+	src.data  = NULL;
+	src.size  = 0;
+	dest.data = NULL;
+	dest.size = 0;
+	
+	argc = ARG_COUNT(ht);
+	if (argc != 1 || getParameters(ht, argc, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	
 	convert_to_string(str);
-	cpytxt(&src,str->value.str.val,str->value.str.len);
-	utf8_mime2text(&src,&dest);
-	RETURN_STRINGL(dest.data,strlen(dest.data),1);
+	cpytxt(&src, str->value.str.val, str->value.str.len);
+	utf8_mime2text(&src, &dest);
+	RETURN_STRINGL(dest.data, strlen(dest.data), 1);
 }
 /* }}} */
-
 
 /* macros for the modified utf7 conversion functions */
 /* author: Andrew Skalski <askalski@chek.com> */
@@ -2203,27 +2206,29 @@ PHP_FUNCTION(imap_utf8)
 PHP_FUNCTION(imap_utf7_decode)
 {
 	/* author: Andrew Skalski <askalski@chek.com> */
-	int			argc;
-	pval			*arg;
-	const unsigned char	*in, *inp, *endp;
-	unsigned char		*out, *outp;
-	int			inlen, outlen;
-	enum {	ST_NORMAL,	/* printable text */
+	int	argc;
+	pval *arg;
+	const unsigned char *in, *inp, *endp;
+	unsigned char *out, *outp;
+	int	inlen, outlen;
+	enum {
+		ST_NORMAL,	/* printable text */
 		ST_DECODE0,	/* encoded text rotation... */
 		ST_DECODE1,
 		ST_DECODE2,
 		ST_DECODE3
-	}			state;
-
+	} state;
+	
 	/* collect arguments */
 	argc = ARG_COUNT(ht);
 	if (argc != 1 || getParameters(ht, argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	
 	convert_to_string(arg);
 	in = (const unsigned char*) arg->value.str.val;
 	inlen = arg->value.str.len;
-
+	
 	/* validate and compute length of output string */
 	outlen = 0;
 	state = ST_NORMAL;
