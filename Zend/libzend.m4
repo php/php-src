@@ -166,7 +166,9 @@ else
   AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
 fi
 
-if test "$ZEND_INLINE" != "yes"; then
+if test "$ZEND_INLINE" = "yes"; then
+  AC_DEFINE(inline, inline)
+else
   AC_DEFINE(inline, [])
 fi
 
