@@ -1884,15 +1884,23 @@ PHP_FUNCTION(domxml_node_name)
 {
 	zval *id;
 	xmlNode *n;
+	int fullQName = 0;
 	const char *str = NULL;
 
-	DOMXML_GET_THIS_OBJ(n, id, le_domxmlnodep);
-
-	DOMXML_NO_ARGS();
+	DOMXML_PARAM_ONE(n, id, le_domxmlnodep,"|b",&fullQName);
 
 	switch (Z_TYPE_P(n)) {
 		case XML_ELEMENT_NODE:
-			str = n->name;
+			if (fullQName && n->ns && n->ns->prefix) {
+				/* there is maybe a better way of doing this...*/
+				char *tmpstr;
+				tmpstr = (char*) emalloc((strlen(n->ns->prefix)+strlen(n->name))  * sizeof(char)) ;
+				sprintf(tmpstr,"%s:%s", (char*) n->ns->prefix, (char*) n->name);
+				str = strdup(tmpstr);
+				efree(tmpstr);
+			} else {
+				str = n->name;
+			}
 			break;
 
 		case XML_TEXT_NODE:
