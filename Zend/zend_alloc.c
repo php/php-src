@@ -106,9 +106,9 @@ ZEND_API zend_alloc_globals alloc_globals;
 	}								\
 	p->pLast = (zend_mem_header *) NULL;
 
-#define DECLARE_CACHE_VARS		\
+#define DECLARE_CACHE_VARS()	\
 	unsigned int real_size;		\
-	unsigned int cache_index;
+	unsigned int cache_index
 
 #define REAL_SIZE(size) ((size+7) & ~0x7)
 
@@ -123,7 +123,7 @@ ZEND_API zend_alloc_globals alloc_globals;
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p;
-	DECLARE_CACHE_VARS
+	DECLARE_CACHE_VARS();
 	ALS_FETCH();
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
@@ -196,7 +196,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr - sizeof(zend_mem_header) - PLATFORM_PADDING);
-	DECLARE_CACHE_VARS
+	DECLARE_CACHE_VARS();
 	ALS_FETCH();
 
 #if defined(ZTS) && ZEND_DEBUG
@@ -261,7 +261,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 {
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-PLATFORM_PADDING);
 	zend_mem_header *orig = p;
-	DECLARE_CACHE_VARS
+	DECLARE_CACHE_VARS();
 	ALS_FETCH();
 
 	if (!ptr) {
