@@ -322,6 +322,30 @@ PHP_FUNCTION(dom_import_simplexml)
 }
 /* }}} */
 
+zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
+{
+	zend_object_value retval;
+	void *new_object;
+	dom_object *intern;
+	struct _store_object *obj;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+
+	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
+	
+	if (obj->clone == NULL) {
+		zend_error(E_CORE_ERROR, "Trying to clone uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
+	}		
+
+	obj->clone(obj->object, &new_object TSRMLS_CC);
+
+	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
+	intern = (dom_object *) new_object;
+	intern->handle = retval.handle;
+	retval.handlers = Z_OBJ_HT_P(zobject);
+	
+	return retval;
+}
+
 static zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, NULL)
 	{NULL, NULL, NULL}
@@ -353,7 +377,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = NULL;
-	dom_object_handlers.clone_obj = zend_objects_store_clone_obj;
+	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
