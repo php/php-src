@@ -360,7 +360,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	file_handle->filename = SG(request_info).path_translated;
 	file_handle->free_filename = 0;
 	file_handle->handle.fp = fp;
-	Z_TYPE_P(file_handle) = ZEND_HANDLE_FP;
+	file_handle->type = ZEND_HANDLE_FP;
 
 	return SUCCESS;
 }

@@ -262,7 +262,7 @@ int php_init_config(char *php_ini_path_override)
 	if (!fh.handle.fp) {
 		return SUCCESS;  /* having no configuration file is ok */
 	}
-	Z_TYPE(fh) = ZEND_HANDLE_FP;
+	fh.type = ZEND_HANDLE_FP;
 	fh.filename = php_ini_opened_path;
 
 	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
