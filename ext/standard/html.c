@@ -123,6 +123,19 @@ static const struct {
 	{ NULL }
 };
 
+#define MB_RETURN { \
+	*newpos = pos;       \
+	mbseq[mbpos] = '\0'; \
+	*mbseqlen = mbpos;   \
+	return this_char; } 
+
+#define MB_WRITE(mbchar) { \
+	mbspace--;  \
+	if (mbspace == 0) {      \
+		MB_RETURN;       \
+	}                        \
+	mbseq[mbpos++] = (mbchar); }
+	 
 /* {{{ get_next_char
  */
 inline static unsigned short get_next_char(enum entity_charset charset,
@@ -135,8 +148,9 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	int pos = *newpos;
 	int mbpos = 0;
 	unsigned short this_char = str[pos++];
+	int mbspace = *mbseqlen;
 	
-	mbseq[mbpos++] = (unsigned char)this_char;
+	MB_WRITE((unsigned char)this_char);
 	
 	switch(charset)	{
 		case cs_utf_8:
@@ -217,7 +231,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					if (more)
 					{
 						this_char = str[pos++];
-						mbseq[mbpos++] = (unsigned char)this_char;
+						MB_WRITE((unsigned char)this_char);
 					}
 				} while(more);
 			}
@@ -235,7 +249,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					{
 						/* yes, this a wide char */
 						this_char <<= 8;
-						mbseq[mbpos++] = next_char;
+						MB_WRITE(next_char);
 						this_char |= next_char;
 						pos++;
 					}
@@ -256,7 +270,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					{
 						/* yes, this a wide char */
 						this_char <<= 8;
-						mbseq[mbpos++] = next_char;
+						MB_WRITE(next_char);
 						this_char |= next_char;
 						pos++;
 					}
@@ -274,7 +288,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					{
 						/* yes, this a jis kanji char */
 						this_char <<= 8;
-						mbseq[mbpos++] = next_char;
+						MB_WRITE(next_char);
 						this_char |= next_char;
 						pos++;
 					}
@@ -286,7 +300,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					{
 						/* JIS X 0201 kana */
 						this_char <<= 8;
-						mbseq[mbpos++] = next_char;
+						MB_WRITE(next_char);
 						this_char |= next_char;
 						pos++;
 					}
@@ -300,10 +314,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					{
 						/* JIS X 0212 hojo-kanji */
 						this_char <<= 8;
-						mbseq[mbpos++] = next_char;
+						MB_WRITE(next_char);
 						this_char |= next_char;
 						this_char <<= 8;
-						mbseq[mbpos++] = next2_char;
+						MB_WRITE(next2_char);
 						this_char |= next2_char;
 						pos+=2;
 					}
@@ -316,10 +330,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				break;
 			}
 	}
-	*newpos = pos;
-	mbseq[mbpos] = '\0';
-	*mbseqlen = mbpos;
-	return this_char;
+	MB_RETURN;
 }
 /* }}} */
 
@@ -406,8 +417,8 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 	i = 0;
 	while (i < oldlen) {
-		int mbseqlen;
 		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
+		int mbseqlen=sizeof(mbsequence);
 		unsigned short this_char = get_next_char(charset, old, &i, mbsequence, &mbseqlen);
 			
 		matches_map = 0;
