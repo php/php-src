@@ -129,6 +129,12 @@ EXTENSION:           msql
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           msession
+PRIMARY MAINTAINER   Mark L. Woodward mlwmohawk@mohawksoft.com
+MAINTENANCE:         Maintained
+STATUS:              Working/Experimental
+COMMENT:             Tested on Linux, should work on other UNIX platforms. Backend server code can compile under Windows.
+-------------------------------------------------------------------------------
 EXTENSION:           mssql
 PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
 MAINTENANCE:         Maintained
