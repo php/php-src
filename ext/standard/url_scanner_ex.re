@@ -79,6 +79,13 @@ static inline void smart_str_appendl(smart_str *dest, const char *src, size_t le
 	smart_str_append(dest, &s);
 }
 
+static inline void smart_str_set(smart_str *dest, smart_str *src)
+{
+	dest->len = src->len;
+	dest->a = src->a;
+	dest->c = src->c;
+}
+
 static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
 {
 	dest->len = len;
@@ -102,16 +109,43 @@ static inline void smart_str_sets(smart_str *dest, const char *src)
 
 static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, const char *separator)
 {
-	if (memchr(url->c, ':', url->len)) return;
+	register const char *p, *q;
+	const char *bash = NULL;
+	const char *sep = "?";
+	
+	q = url->c + url->len;
+	
+	for (p = url->c; p < q; p++) {
+		switch(*p) {
+			case ':':
+				return;
+			case '?':
+				sep = separator;
+				break;
+			case '#':
+				bash = p;
+				break;
+		}
+	}
 
-	if (memchr(url->c, '?', url->len))
-		smart_str_appendl(url, separator, 1);
-	else
-		smart_str_appendl(url, "?", 1);
+	if (bash) {
+		smart_str new = {0};
+		
+		smart_str_copyl(&new, url->c, bash - url->c);
+		smart_str_appendl(&new, sep, 1);
+		smart_str_append(&new, name);
+		smart_str_appendl(&new, "=", 1);
+		smart_str_append(&new, val);
+		smart_str_appendl(&new, bash, q - bash);
 
-	smart_str_append(url, name);
-	smart_str_appendl(url, "=", 1);
-	smart_str_append(url, val);
+		smart_str_free(url);
+		smart_str_set(url, &new);
+	} else {
+		smart_str_appendl(url, sep, 1);
+		smart_str_append(url, name);
+		smart_str_appendl(url, "=", 1);
+		smart_str_append(url, val);
+	}
 }
 
 struct php_tag_arg {
@@ -298,7 +332,7 @@ alpha = [a-zA-Z];
 
 		case STATE_VAL:
 /*!re2c
-  ["] (any\[">])+ ["]	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
+  ["] (any\[">])* ["]	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
   (any\[ \n>"])+		{ HANDLE_VAL(0); STATE = STATE_NEXT_ARG; continue; }
   any					{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
 */
