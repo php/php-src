@@ -136,7 +136,7 @@ PHP_FUNCTION(var_dump)
 	
 	argc = ZEND_NUM_ARGS();
 	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -234,7 +234,7 @@ PHP_FUNCTION(debug_zval_dump)
 	
 	argc = ZEND_NUM_ARGS();
 	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
