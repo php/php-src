@@ -1,3 +1,13 @@
+2003-07-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug22836.phpt:
+      Test case for bug #22836.
+
+2003-07-29  Jani Taskinen  <sniper@iki.fi>
+
+    * zend.c:
+      Remove the obfuscation caused by the double "#ifdef ZTS"
+
 2003-07-27  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c:
