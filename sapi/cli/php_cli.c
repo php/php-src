@@ -240,27 +240,27 @@ static void php_cli_usage(char *argv0)
 	} else {
 		prog = "php";
 	}
-
+	
 	php_printf( "Usage: %s [options] [-f] <file> [args...]\n"
 	            "       %s [options] -r <code> [args...]\n"
 	            "       %s [options] [-- args...]\n"
-				"  -s             Display colour syntax highlighted source.\n"
-				"  -w             Display source with stripped comments and whitespace.\n"
-				"  -f <file>      Parse <file>.\n"
-				"  -v             Version number\n"
-				"  -c <path>      Look for php.ini file in this directory\n"
-				"  -a             Run interactively\n"
-				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
-				"  -e             Generate extended information for debugger/profiler\n"
-				"  -z <file>      Load Zend extension <file>.\n"
-				"  -l             Syntax check only (lint)\n"
-				"  -m             Show compiled in modules\n"
-				"  -i             PHP information\n"
-				"  -r <code>      Run PHP <code> without using script tags <?..?>\n"
-				"  -h             This help\n"
+				"  -s               Display colour syntax highlighted source.\n"
+				"  -w               Display source with stripped comments and whitespace.\n"
+				"  -f <file>        Parse <file>.\n"
+				"  -v               Version number\n"
+				"  -c <path>|<file> Look for php.ini file in this directory\n"
+				"  -a               Run interactively\n"
+				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
+				"  -e               Generate extended information for debugger/profiler\n"
+				"  -z <file>        Load Zend extension <file>.\n"
+				"  -l               Syntax check only (lint)\n"
+				"  -m               Show compiled in modules\n"
+				"  -i               PHP information\n"
+				"  -r <code>        Run PHP <code> without using script tags <?..?>\n"
+				"  -h               This help\n"
 				"\n"
-				"  args...        Arguments passed to script. Use -- args when first argument \n"
-				"                 starts with - or script is read from stdin\n"
+				"  args...          Arguments passed to script. Use -- args when first argument \n"
+				"                   starts with - or script is read from stdin\n"
 				, prog, prog, prog);
 }
 /* }}} */
