@@ -86,6 +86,11 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_ELEMENT_NODE:
@@ -170,6 +175,12 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *str = NULL;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
@@ -208,6 +219,11 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 	zval value_copy;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
@@ -255,6 +271,11 @@ int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 
 	/* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
@@ -282,6 +303,11 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int ret;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	nodeparent = nodep->parent;
 	if (!nodeparent) {
@@ -313,6 +339,11 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	
 	if (dom_node_children_valid(nodep) == FAILURE) {
@@ -341,6 +372,11 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int ret;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	if (dom_node_children_valid(nodep) == SUCCESS) {
 		first = nodep->children;
@@ -375,6 +411,11 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	if (dom_node_children_valid(nodep) == SUCCESS) {
 		last = nodep->last;
 	}
@@ -408,6 +449,11 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	prevsib = nodep->prev;
 	if (!prevsib) {
 		return FAILURE;
@@ -437,6 +483,11 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int ret;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	nextsib = nodep->next;
 	if (!nextsib) {
@@ -468,6 +519,11 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 
 	if (nodep->type == XML_ELEMENT_NODE) {
@@ -497,6 +553,11 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int ret;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 		ALLOC_ZVAL(*retval);
@@ -533,6 +594,11 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *str = NULL;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -575,6 +641,11 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
@@ -610,6 +681,11 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 	char *prefix;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -682,6 +758,11 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
@@ -708,6 +789,11 @@ int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlChar *baseuri;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	ALLOC_ZVAL(*retval);
 
@@ -737,6 +823,11 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *str = NULL;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	str = xmlNodeGetContent(nodep);
 

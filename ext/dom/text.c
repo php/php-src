@@ -85,6 +85,11 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	node = dom_object_get_node(obj);
 
+	if (node == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	wholetext = xmlNodeListGetString(node->doc, node, 1);
 	ZVAL_STRING(*retval, wholetext, 1);
