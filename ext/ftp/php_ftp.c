@@ -388,7 +388,7 @@ PHP_FUNCTION(ftp_systype)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_fget(resource stream, int fp, string remote_file, int mode)
+/* {{{ proto bool ftp_fget(resource stream, resource fp, string remote_file, int mode)
    Retrieves a file from the FTP server and writes it to an open file */
 PHP_FUNCTION(ftp_fget)
 {
