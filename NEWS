@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added ob_list_handlers() which returns an array of all active output
+  handlers. (marcus)
 - Added mbstring encoding/decoding "HTML-ENTITIES". (Marcus)
 - Added parameter 'L' for mb_http_input() to retrieve input encoding as a
   comma separated string. (Marcus)
