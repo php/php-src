@@ -54,8 +54,7 @@ void init_executor(CLS_D ELS_DC);
 void shutdown_executor(ELS_D);
 void execute(zend_op_array *op_array ELS_DC);
 ZEND_API int zend_is_true(zval *op);
-ZEND_API inline void safe_free_zval_ptr(zval *p)
-#if defined(C9X_INLINE_SEMANTICS)
+static inline void safe_free_zval_ptr(zval *p)
 {
 	ELS_FETCH();
 
@@ -63,13 +62,9 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 		FREE_ZVAL(p);
 	}
 }
-#else
-;
-#endif
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC ELS_DC);
-ZEND_API inline int i_zend_is_true(zval *op)
-#if defined(C9X_INLINE_SEMANTICS)
+static inline int i_zend_is_true(zval *op)
 {
 	int result;
 
@@ -105,15 +100,11 @@ ZEND_API inline int i_zend_is_true(zval *op)
 	}
 	return result;
 }
-#else
-;
-#endif
 
 ZEND_API int zval_update_constant(zval **pp, void *arg);
 
 /* dedicated Zend executor functions - do not use! */
-ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
-#if defined(C9X_INLINE_SEMANTICS)
+static inline void zend_ptr_stack_clear_multiple(ELS_D)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int delete_count = (ulong) *p;
@@ -124,12 +115,8 @@ ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
 	}
 	EG(argument_stack).top_element = p;
 }
-#else
-;
-#endif
 
-ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
-#if defined(C9X_INLINE_SEMANTICS)
+static inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int arg_count = (ulong) *p;
@@ -140,9 +127,6 @@ ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC
 	*data = (p-arg_count+requested_arg-1);
 	return SUCCESS;
 }
-#else
-;
-#endif
 
 #if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D);
@@ -171,8 +155,7 @@ void zend_shutdown_timeout_thread();
 
 #define active_opline (*EG(opline_ptr))
 
-ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
-#if defined(C9X_INLINE_SEMANTICS)
+static inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
 	zval *value_ptr;
@@ -222,9 +205,6 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 		AI_USE_PTR(Ts[result->u.var].var);
 	}
 }
-#else
-;
-#endif
 
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
