@@ -1,3 +1,27 @@
+2001-09-24  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: fix constant
+
+2001-09-24  Andi Gutmans  <andi@zend.com>
+
+    * main/rfc1867.c: - MFH. File uploads need to be tested thoroughly in RC3!
+
+2001-09-24  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/TODO
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/com/conversion.h
+      ext/com/php_VARIANT.h
+      ext/com/COM.c: removed VARIANT module and put the VARIANT class into
+    the COM module.
+    also fixed a few bugs.
+
+2001-09-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c:
+    - Fix crash bug (patch by <chocolateboy@lunomail.com>)
+
 2001-09-23  Andi Gutmans  <andi@zend.com>
 
     * main/rfc1867.c:
