@@ -176,10 +176,9 @@ static php_uint32 reloadMT(TSRMLS_D)
 }
 
 
-static inline php_uint32 randomMT(void)
+static inline php_uint32 randomMT(TSRMLS_D)
 {
     php_uint32 y;
-	TSRMLS_FETCH();
 
     if(--BG(left) < 0)
         return(reloadMT(TSRMLS_C));
@@ -195,13 +194,15 @@ static inline php_uint32 randomMT(void)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	pval **arg;
+	zval **seed;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || 
+	    zend_get_parameters_ex(1, &seed) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long_ex(arg);
-	php_srand((*arg)->value.lval);
+	convert_to_long_ex(seed);
+
+    php_srand(Z_LVAL_PP(seed));
 }
 /* }}} */
 
@@ -209,75 +210,67 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	pval **arg;
+	zval **seed;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || 
+	    zend_get_parameters_ex(1, &seed) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long_ex(arg);
-	seedMT((*arg)->value.lval TSRMLS_CC);
+	convert_to_long_ex(seed);
+
+	seedMT(Z_LVAL_PP(seed) TSRMLS_CC);
 }
 /* }}} */
+
+
+/*
+ * A bit of tricky math here.  We want to avoid using a modulus because
+ * that simply tosses the high-order bits and might skew the distribution
+ * of random values over the range.  Instead we map the range directly.
+ *
+ * We need to map the range from 0...M evenly to the range a...b
+ * Let n = the random number and n' = the mapped random number
+ *
+ * Then we have: n' = a + n(b-a)/M
+ *
+ * We have a problem here in that only n==M will get mapped to b which
+ # means the chances of getting b is much much less than getting any of
+ # the other values in the range.  We can fix this by increasing our range
+ # artifically and using:
+ #
+ #               n' = a + n(b-a+1)/M
+ *
+ # Now we only have a problem if n==M which would cause us to produce a
+ # number of b+1 which would be bad.  So we bump M up by one to make sure
+ # this will never happen, and the final algorithm looks like this:
+ #
+ #               n' = a + n(b-a+1)/(M+1) 
+ *
+ * -RL
+ */    
+#define RAND_RANGE(__n, __min, __max) \
+	(__min) + (int)((double)(__max) - (__min) + 1.0) * ((__n) / (PHP_RAND_MAX + 1.0))
 
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	pval **p_min=NULL, **p_max=NULL;
-	
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &p_min, &p_max)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(p_min);
-			convert_to_long_ex(p_max);
-			if ((*p_max)->value.lval-(*p_min)->value.lval < 0) {
-				php_error(E_WARNING, "rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
-			} else if ((*p_max)->value.lval-(*p_min)->value.lval > PHP_RAND_MAX){
-				php3_error(E_WARNING, "rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-			
-	return_value->type = IS_LONG;
+	zval **min;
+	zval **max;
+	long   number;
+	int    argc = ZEND_NUM_ARGS();
 
-	return_value->value.lval = php_rand();
+	if (argc != 0 && argc != 2 ||
+	    zend_get_parameters_ex(argc, &min, &max) == FAILURE) {
+		WRONG_PARAM_COUNT;
+    }
 
-    /*
-     * A bit of tricky math here.  We want to avoid using a modulus because
-     * that simply tosses the high-order bits and might skew the distribution
-     * of random values over the range.  Instead we map the range directly.
-     *
-     * We need to map the range from 0...M evenly to the range a...b
-     * Let n = the random number and n' = the mapped random number
-     *
-     * Then we have: n' = a + n(b-a)/M
-     *
-     * We have a problem here in that only n==M will get mapped to b which
-     # means the chances of getting b is much much less than getting any of
-     # the other values in the range.  We can fix this by increasing our range
-     # artifically and using:
-     #
-     #               n' = a + n(b-a+1)/M
-     *
-     # Now we only have a problem if n==M which would cause us to produce a
-     # number of b+1 which would be bad.  So we bump M up by one to make sure
-     # this will never happen, and the final algorithm looks like this:
-     #
-     #               n' = a + n(b-a+1)/(M+1) 
-     *
-     * -RL
-     */
-	if (p_min && p_max) { /* implement range */
-		return_value->value.lval = (*p_min)->value.lval +
-			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1.0) * return_value->value.lval/(PHP_RAND_MAX+1.0));     
+	number = php_rand();
+	if (argc == 2) {
+		number = RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
 	}
+
+	RETURN_LONG(number);
 }
 /* }}} */
 
@@ -285,29 +278,16 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	pval **p_min=NULL, **p_max=NULL;
-	
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &p_min, &p_max)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(p_min);
-			convert_to_long_ex(p_max);
-			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
-				php_error(E_WARNING, "mt_rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
-			}else if ((*p_max)->value.lval-(*p_min)->value.lval > MT_RAND_MAX){
-				php3_error(E_WARNING, "mt_rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	zval **min;
+	zval **max;
+	long   number;
+	int    argc = ZEND_NUM_ARGS();
+
+	if (argc != 0 && argc != 2 ||
+	    zend_get_parameters_ex(argc, &min, &max) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-			
-	return_value->type = IS_LONG;
+
 	/*
 	 * Melo: hmms.. randomMT() returns 32 random bits...
 	 * Yet, the previous php_rand only returns 31 at most.
@@ -316,12 +296,12 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	return_value->value.lval = (long)(randomMT() >> 1);
-
-	if (p_min && p_max) { /* implement range */
-		return_value->value.lval = (*p_min)->value.lval +
-			(long)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1.0) * return_value->value.lval/(MT_RAND_MAX+1.0));
+	number = (long) (randomMT(TSRMLS_C) >> 1);
+	if (argc == 2) {
+		number = RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
 	}
+
+	RETURN_LONG(number);
 }
 /* }}} */
 
@@ -333,8 +313,7 @@ PHP_FUNCTION(getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	return_value->type = IS_LONG;
-	return_value->value.lval = PHP_RAND_MAX;
+	RETURN_LONG(PHP_RAND_MAX);
 }
 /* }}} */
 
@@ -346,12 +325,11 @@ PHP_FUNCTION(mt_getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	return_value->type = IS_LONG;
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	return_value->value.lval = MT_RAND_MAX;	/* 2^^31 */
+  	RETURN_LONG(MT_RAND_MAX);	/* 2^^31 */
 }
 /* }}} */
 
@@ -360,6 +338,6 @@ PHP_FUNCTION(mt_getrandmax)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: noet sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: noet sw=4 ts=4 tw=78
  */
