@@ -990,11 +990,13 @@ _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void 
 _oci_server_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
+#if 0
 	oci_server *server = (oci_server *)rsrc->ptr;
 	if (server->persistent)
 		return;
 
 	_oci_close_server(server);
+#endif
 }
 
 /* }}} */
