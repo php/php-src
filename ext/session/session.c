@@ -262,7 +262,6 @@ static void _php_session_send_cookie(PSLS_D)
 	int   len;
 	char *cookie;
 	char *date_fmt = NULL;
-	PSLS_FETCH();
 
 	len = strlen(PS(session_name)) + strlen(PS(id)) + sizeof(COOKIE_FMT);
 	if (PS(lifetime) > 0) {
