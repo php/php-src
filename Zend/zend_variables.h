@@ -54,6 +54,4 @@ ZEND_API void zval_add_ref(zval **p);
 #define ZVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor_wrapper
 #define ZVAL_COPY_CTOR (void (*)(void *)) zval_copy_ctor_wrapper
 
-ZEND_API void var_uninit(zval *var);
-
 #endif
