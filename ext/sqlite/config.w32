@@ -17,7 +17,7 @@ if (PHP_SQLITE == "yes") {
 		auth.c btree.c build.c delete.c expr.c func.c hash.c insert.c \
 		main.c os.c pager.c printf.c random.c select.c table.c tokenize.c \
 		update.c util.c vdbe.c attach.c btree_rb.c pragma.c vacuum.c \
-		copy.c where.c trigger.c", "sqlite");
+		copy.c where.c trigger.c vdbeaux.c date.c", "sqlite");
 
 	AC_DEFINE("HAVE_SQLITE", 1, "SQLite support");
 	if (!PHP_SQLITE_SHARED) {

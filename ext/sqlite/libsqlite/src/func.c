@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "sqliteInt.h"
+#include "os.h"
 
 /*
 ** Implementation of the non-aggregate min() and max() functions
@@ -121,13 +122,11 @@ static void substrFunc(sqlite_func *context, int argc, const char **argv){
     p2 = len-p1;
   }
 #ifdef SQLITE_UTF8
-  for(i=0; i<p1; i++){
-    assert( z[i] );
+  for(i=0; i<p1 && z[i]; i++){
     if( (z[i]&0xc0)==0x80 ) p1++;
   }
   while( z[i] && (z[i]&0xc0)==0x80 ){ i++; p1++; }
-  for(; i<p1+p2; i++){
-    assert( z[i] );
+  for(; i<p1+p2 && z[i]; i++){
     if( (z[i]&0xc0)==0x80 ) p2++;
   }
   while( z[i] && (z[i]&0xc0)==0x80 ){ i++; p2++; }
@@ -148,7 +147,7 @@ static void roundFunc(sqlite_func *context, int argc, const char **argv){
   n = argc==2 ? atoi(argv[1]) : 0;
   if( n>30 ) n = 30;
   if( n<0 ) n = 0;
-  r = atof(argv[0]);
+  r = sqliteAtoF(argv[0]);
   sprintf(zBuf,"%.*f",n,r);
   sqlite_set_result_string(context, zBuf, -1);
 }
@@ -219,7 +218,9 @@ static void last_insert_rowid(sqlite_func *context, int arg, const char **argv){
 */
 static void likeFunc(sqlite_func *context, int arg, const char **argv){
   if( argv[0]==0 || argv[1]==0 ) return;
-  sqlite_set_result_int(context, sqliteLikeCompare(argv[0], argv[1]));
+  sqlite_set_result_int(context, 
+    sqliteLikeCompare((const unsigned char*)argv[0],
+                      (const unsigned char*)argv[1]));
 }
 
 /*
@@ -233,7 +234,9 @@ static void likeFunc(sqlite_func *context, int arg, const char **argv){
 */
 static void globFunc(sqlite_func *context, int arg, const char **argv){
   if( argv[0]==0 || argv[1]==0 ) return;
-  sqlite_set_result_int(context, sqliteGlobCompare(argv[0], argv[1]));
+  sqlite_set_result_int(context,
+    sqliteGlobCompare((const unsigned char*)argv[0],
+                      (const unsigned char*)argv[1]));
 }
 
 /*
@@ -253,6 +256,43 @@ static void nullifFunc(sqlite_func *context, int argc, const char **argv){
 */
 static void versionFunc(sqlite_func *context, int argc, const char **argv){
   sqlite_set_result_string(context, sqlite_version, -1);
+}
+
+/*
+** EXPERIMENTAL - This is not an official function.  The interface may
+** change.  This function may disappear.  Do not write code that depends
+** on this function.
+**
+** Implementation of the QUOTE() function.  This function takes a single
+** argument.  If the argument is numeric, the return value is the same as
+** the argument.  If the argument is NULL, the return value is the string
+** "NULL".  Otherwise, the argument is enclosed in single quotes with
+** single-quote escapes.
+*/
+static void quoteFunc(sqlite_func *context, int argc, const char **argv){
+  if( argc<1 ) return;
+  if( argv[0]==0 ){
+    sqlite_set_result_string(context, "NULL", 4);
+  }else if( sqliteIsNumber(argv[0]) ){
+    sqlite_set_result_string(context, argv[0], -1);
+  }else{
+    int i,j,n;
+    char *z;
+    for(i=n=0; argv[0][i]; i++){ if( argv[0][i]=='\'' ) n++; }
+    z = sqliteMalloc( i+n+3 );
+    if( z==0 ) return;
+    z[0] = '\'';
+    for(i=0, j=1; argv[0][i]; i++){
+      z[j++] = argv[0][i];
+      if( argv[0][i]=='\'' ){
+        z[j++] = '\'';
+      }
+    }
+    z[j++] = '\'';
+    z[j] = 0;
+    sqlite_set_result_string(context, z, j);
+    sqliteFree(z);
+  }
 }
 
 #ifdef SQLITE_SOUNDEX
@@ -290,7 +330,7 @@ static void soundexFunc(sqlite_func *context, int argc, const char **argv){
     zResult[j] = 0;
     sqlite_set_result_string(context, zResult, 4);
   }else{
-    sqlite_set_result_string(context, zResult, "?000", 4);
+    sqlite_set_result_string(context, "?000", 4);
   }
 }
 #endif
@@ -355,7 +395,7 @@ static void sumStep(sqlite_func *context, int argc, const char **argv){
   if( argc<1 ) return;
   p = sqlite_aggregate_context(context, sizeof(*p));
   if( p && argv[0] ){
-    p->sum += atof(argv[0]);
+    p->sum += sqliteAtoF(argv[0]);
     p->cnt++;
   }
 }
@@ -393,7 +433,7 @@ static void stdDevStep(sqlite_func *context, int argc, const char **argv){
   if( argc<1 ) return;
   p = sqlite_aggregate_context(context, sizeof(*p));
   if( p && argv[0] ){
-    x = atof(argv[0]);
+    x = sqliteAtoF(argv[0]);
     p->sum += x;
     p->sum2 += x*x;
     p->cnt++;
@@ -529,6 +569,7 @@ void sqliteRegisterBuiltinFunctions(sqlite *db){
     { "glob",       2, SQLITE_NUMERIC, globFunc   },
     { "nullif",     2, SQLITE_ARGS,    nullifFunc },
     { "sqlite_version",0,SQLITE_TEXT,  versionFunc},
+    { "quote",      1, SQLITE_ARGS,    quoteFunc  },
 #ifdef SQLITE_SOUNDEX
     { "soundex",    1, SQLITE_TEXT,    soundexFunc},
 #endif
@@ -570,4 +611,5 @@ void sqliteRegisterBuiltinFunctions(sqlite *db){
            aAggs[i].nArg, aAggs[i].xStep, aAggs[i].xFinalize, 0);
     sqlite_function_type(db, aAggs[i].zName, aAggs[i].dataType);
   }
+  sqliteRegisterDateTimeFunctions(db);
 }

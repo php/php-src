@@ -62,6 +62,24 @@
 #endif
 
 /*
+** Macros used to determine whether or not to use threads.  The
+** SQLITE_UNIX_THREADS macro is defined if we are synchronizing for
+** Posix threads and SQLITE_W32_THREADS is defined if we are
+** synchronizing using Win32 threads.
+*/
+#if OS_UNIX && defined(THREADSAFE) && THREADSAFE
+# include <pthread.h>
+# define SQLITE_UNIX_THREADS 1
+#endif
+#if OS_WIN && defined(THREADSAFE) && THREADSAFE
+# define SQLITE_W32_THREADS 1
+#endif
+#if OS_MAC && defined(THREADSAFE) && THREADSAFE
+# include <Multiprocessing.h>
+# define SQLITE_MACOS_MULTITASKING 1
+#endif
+
+/*
 ** Macros for performance tracing.  Normally turned off
 */
 #if 0
@@ -107,7 +125,7 @@ static unsigned int elapse;
 **       int fd1 = open("./file1", O_RDWR|O_CREAT, 0644);
 **       int fd2 = open("./file2", O_RDWR|O_CREAT, 0644);
 **
-** Suppose ./file1 and ./file2 are really be the same file (because
+** Suppose ./file1 and ./file2 are really the same file (because
 ** one is a hard or symbolic link to the other) then if you set
 ** an exclusive lock on fd1, then try to get an exclusive lock
 ** on fd2, it works.  I would have expected the second lock to
@@ -150,11 +168,15 @@ static unsigned int elapse;
 
 /*
 ** An instance of the following structure serves as the key used
-** to locate a particular lockInfo structure given its inode. 
+** to locate a particular lockInfo structure given its inode.  Note
+** that we have to include the process ID as part of the key.  On some
+** threading implementations (ex: linux), each thread has a separate
+** process ID.
 */
-struct inodeKey {
+struct lockKey {
   dev_t dev;   /* Device number */
   ino_t ino;   /* Inode number */
+  pid_t pid;   /* Process ID */
 };
 
 /*
@@ -164,13 +186,13 @@ struct inodeKey {
 ** object keeps a count of the number of OsFiles pointing to it.
 */
 struct lockInfo {
-  struct inodeKey key;  /* The lookup key */
+  struct lockKey key;  /* The lookup key */
   int cnt;              /* 0: unlocked.  -1: write lock.  1...: read lock. */
   int nRef;             /* Number of pointers to this structure */
 };
 
 /* 
-** This hash table maps inodes (in the form of inodeKey structures) into
+** This hash table maps inodes (in the form of lockKey structures) into
 ** pointers to lockInfo structures.
 */
 static Hash lockHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
@@ -182,7 +204,7 @@ static Hash lockHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
 */
 static struct lockInfo *findLockInfo(int fd){
   int rc;
-  struct inodeKey key;
+  struct lockKey key;
   struct stat statbuf;
   struct lockInfo *pInfo;
   rc = fstat(fd, &statbuf);
@@ -190,6 +212,7 @@ static struct lockInfo *findLockInfo(int fd){
   memset(&key, 0, sizeof(key));
   key.dev = statbuf.st_dev;
   key.ino = statbuf.st_ino;
+  key.pid = getpid();
   pInfo = (struct lockInfo*)sqliteHashFind(&lockHash, &key, sizeof(key));
   if( pInfo==0 ){
     struct lockInfo *pOld;
@@ -326,6 +349,7 @@ int sqliteOsOpenReadWrite(
   int *pReadonly
 ){
 #if OS_UNIX
+  id->dirfd = -1;
   id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
   if( id->fd<0 ){
     id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
@@ -450,6 +474,7 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
+  id->dirfd = -1;
   id->fd = open(zFilename,
                 O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY, 0600);
   if( id->fd<0 ){
@@ -536,6 +561,7 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 */
 int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 #if OS_UNIX
+  id->dirfd = -1;
   id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
@@ -598,6 +624,42 @@ int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 }
 
 /*
+** Attempt to open a file descriptor for the directory that contains a
+** file.  This file descriptor can be used to fsync() the directory
+** in order to make sure the creation of a new file is actually written
+** to disk.
+**
+** This routine is only meaningful for Unix.  It is a no-op under
+** windows since windows does not support hard links.
+**
+** On success, a handle for a previously open file is at *id is
+** updated with the new directory file descriptor and SQLITE_OK is
+** returned.
+**
+** On failure, the function returns SQLITE_CANTOPEN and leaves
+** *id unchanged.
+*/
+int sqliteOsOpenDirectory(
+  const char *zDirname,
+  OsFile *id
+){
+#if OS_UNIX
+  if( id->fd<0 ){
+    /* Do not open the directory if the corresponding file is not already
+    ** open. */
+    return SQLITE_CANTOPEN;
+  }
+  assert( id->dirfd<0 );
+  id->dirfd = open(zDirname, O_RDONLY|O_BINARY, 0644);
+  if( id->dirfd<0 ){
+    return SQLITE_CANTOPEN; 
+  }
+  TRACE3("OPENDIR %-3d %s\n", id->dirfd, zDirname);
+#endif
+  return SQLITE_OK;
+}
+
+/*
 ** Create a temporary file name in zBuf.  zBuf must be big enough to
 ** hold at least SQLITE_TEMPNAME_SIZE characters.
 */
@@ -647,7 +709,7 @@ int sqliteOsTempFileName(char *zBuf){
     sprintf(zBuf, "%s\\"TEMP_FILE_PREFIX, zTempPath);
     j = strlen(zBuf);
     for(i=0; i<15; i++){
-      int n = sqliteRandomByte() % sizeof(zChars);
+      int n = sqliteRandomByte() % (sizeof(zChars) - 1);
       zBuf[j++] = zChars[n];
     }
     zBuf[j] = 0;
@@ -706,6 +768,8 @@ int sqliteOsTempFileName(char *zBuf){
 int sqliteOsClose(OsFile *id){
 #if OS_UNIX
   close(id->fd);
+  if( id->dirfd>=0 ) close(id->dirfd);
+  id->dirfd = -1;
   sqliteOsEnterMutex();
   releaseLockInfo(id->pLock);
   sqliteOsLeaveMutex();
@@ -892,6 +956,14 @@ int sqliteOsSeek(OsFile *id, off_t offset){
 
 /*
 ** Make sure all writes to a particular file are committed to disk.
+**
+** Under Unix, also make sure that the directory entry for the file
+** has been created by fsync-ing the directory that contains the file.
+** If we do not do this and we encounter a power failure, the directory
+** entry for the journal might not exist after we reboot.  The next
+** SQLite to access the file will not know that the journal exists (because
+** the directory entry for the journal was never created) and the transaction
+** will not roll back - possibly leading to database corruption.
 */
 int sqliteOsSync(OsFile *id){
 #if OS_UNIX
@@ -900,6 +972,12 @@ int sqliteOsSync(OsFile *id){
   if( fsync(id->fd) ){
     return SQLITE_IOERR;
   }else{
+    if( id->dirfd>=0 ){
+      TRACE2("DIRSYNC %-3d\n", id->dirfd);
+      fsync(id->dirfd);
+      close(id->dirfd);  /* Only need to sync once, so close the directory */
+      id->dirfd = -1;    /* when we are done. */
+    }
     return SQLITE_OK;
   }
 #endif
@@ -1363,26 +1441,37 @@ int sqliteOsUnlock(OsFile *id){
 ** supply a sufficiently large buffer.
 */
 int sqliteOsRandomSeed(char *zBuf){
-#ifdef SQLITE_TEST
-  /* When testing, always use the same random number sequence.
-  ** This makes the tests repeatable.
+  /* We have to initialize zBuf to prevent valgrind from reporting
+  ** errors.  The reports issued by valgrind are incorrect - we would
+  ** prefer that the randomness be increased by making use of the
+  ** uninitialized space in zBuf - but valgrind errors tend to worry
+  ** some users.  Rather than argue, it seems easier just to initialize
+  ** the whole array and silence valgrind, even if that means less randomness
+  ** in the random seed.
+  **
+  ** When testing, initializing zBuf[] to zero is all we do.  That means
+  ** that we always use the same random number sequence.* This makes the
+  ** tests repeatable.
   */
   memset(zBuf, 0, 256);
-#endif
 #if OS_UNIX && !defined(SQLITE_TEST)
-  int pid;
-  time((time_t*)zBuf);
-  pid = getpid();
-  memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
+  {
+    int pid;
+    time((time_t*)zBuf);
+    pid = getpid();
+    memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
+  }
 #endif
 #if OS_WIN && !defined(SQLITE_TEST)
   GetSystemTime((LPSYSTEMTIME)zBuf);
 #endif
 #if OS_MAC
-  int pid;
-  Microseconds((UnsignedWide*)zBuf);
-  pid = getpid();
-  memcpy(&zBuf[sizeof(UnsignedWide)], &pid, sizeof(pid));
+  {
+    int pid;
+    Microseconds((UnsignedWide*)zBuf);
+    pid = getpid();
+    memcpy(&zBuf[sizeof(UnsignedWide)], &pid, sizeof(pid));
+  }
 #endif
   return SQLITE_OK;
 }
@@ -1411,24 +1500,6 @@ int sqliteOsSleep(int ms){
   return (int)((ticks*50)/3);
 #endif
 }
-
-/*
-** Macros used to determine whether or not to use threads.  The
-** SQLITE_UNIX_THREADS macro is defined if we are synchronizing for
-** Posix threads and SQLITE_W32_THREADS is defined if we are
-** synchronizing using Win32 threads.
-*/
-#if OS_UNIX && defined(THREADSAFE) && THREADSAFE
-# include <pthread.h>
-# define SQLITE_UNIX_THREADS 1
-#endif
-#if OS_WIN && defined(THREADSAFE) && THREADSAFE
-# define SQLITE_W32_THREADS 1
-#endif
-#if OS_MAC && defined(THREADSAFE) && THREADSAFE
-# include <Multiprocessing.h>
-# define SQLITE_MACOS_MULTITASKING 1
-#endif
 
 /*
 ** Static variables used for thread synchronization
@@ -1509,10 +1580,11 @@ char *sqliteOsFullPathname(const char *zRelative){
 #if OS_UNIX
   char *zFull = 0;
   if( zRelative[0]=='/' ){
-    sqliteSetString(&zFull, zRelative, 0);
+    sqliteSetString(&zFull, zRelative, (char*)0);
   }else{
     char zBuf[5000];
-    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative, 0);
+    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative,
+                    (char*)0);
   }
   return zFull;
 #endif
@@ -1530,15 +1602,53 @@ char *sqliteOsFullPathname(const char *zRelative){
   char *zFull = 0;
   if( zRelative[0]==':' ){
     char zBuf[_MAX_PATH+1];
-    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), &(zRelative[1]), 0);
+    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), &(zRelative[1]),
+                    (char*)0);
   }else{
     if( strchr(zRelative, ':') ){
-      sqliteSetString(&zFull, zRelative, 0);
+      sqliteSetString(&zFull, zRelative, (char*)0);
     }else{
     char zBuf[_MAX_PATH+1];
-      sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), zRelative, 0);
+      sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), zRelative, (char*)0);
     }
   }
   return zFull;
 #endif
+}
+
+/*
+** The following variable, if set to a now-zero value, become the result
+** returned from sqliteOsCurrentTime().  This is used for testing.
+*/
+#ifdef SQLITE_TEST
+int sqlite_current_time = 0;
+#endif
+
+/*
+** Find the current time (in Universal Coordinated Time).  Write the
+** current time and date as a Julian Day number into *prNow and
+** return 0.  Return 1 if the time and date cannot be found.
+*/
+int sqliteOsCurrentTime(double *prNow){
+#if OS_UNIX
+  time_t t;
+  time(&t);
+  *prNow = t/86400.0 + 2440587.5;
+#endif
+#if OS_WIN
+  FILETIME ft;
+  /* FILETIME structure is a 64-bit value representing the number of 
+     100-nanosecond intervals since January 1, 1601 (= JD 2305813.5). 
+  */
+  double now;
+  GetSystemTimeAsFileTime( &ft );
+  now = ((double)ft.dwHighDateTime) * 4294967296.0; 
+  *prNow = (now + ft.dwLowDateTime)/864000000000.0 + 2305813.5;
+#endif
+#ifdef SQLITE_TEST
+  if( sqlite_current_time ){
+    *prNow = sqlite_current_time/86400.0 + 2440587.5;
+  }
+#endif
+  return 0;
 }

@@ -25,8 +25,6 @@ typedef struct ExprInfo ExprInfo;
 struct ExprInfo {
   Expr *p;                /* Pointer to the subexpression */
   u8 indexable;           /* True if this subexprssion is usable by an index */
-  u8 oracle8join;         /* -1 if left side contains "(+)".  +1 if right side
-                          ** contains "(+)".  0 if neither contains "(+)" */
   short int idxLeft;      /* p->pLeft is a column in this table number. -1 if
                           ** p->pLeft is not the column of any table */
   short int idxRight;     /* p->pRight is a column in this table number. -1 if
@@ -358,7 +356,7 @@ WhereInfo *sqliteWhereBegin(
   int i;                     /* Loop counter */
   WhereInfo *pWInfo;         /* Will become the return value of this function */
   Vdbe *v = pParse->pVdbe;   /* The virtual database engine */
-  int brk, cont;             /* Addresses used during code generation */
+  int brk, cont = 0;         /* Addresses used during code generation */
   int nExpr;           /* Number of subexpressions in the WHERE clause */
   int loopMask;        /* One bit set for each outer loop */
   int haveKey;         /* True if KEY is on the stack */
@@ -385,7 +383,7 @@ WhereInfo *sqliteWhereBegin(
     char zBuf[50];
     sprintf(zBuf, "%d", (int)ARRAYSIZE(aExpr)-1);
     sqliteSetString(&pParse->zErrMsg, "WHERE clause too complex - no more "
-       "than ", zBuf, " terms allowed", 0);
+       "than ", zBuf, " terms allowed", (char*)0);
     pParse->nErr++;
     return 0;
   }
@@ -766,7 +764,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             if( pX->op==TK_EQ ){
               sqliteExprCode(pParse, pX->pRight);
-              aExpr[k].p = 0;
+              /* aExpr[k].p = 0; // See ticket #461 */
               break;
             }
             if( pX->op==TK_IN && nColumn==1 ){
@@ -783,7 +781,7 @@ WhereInfo *sqliteWhereBegin(
                 pLevel->inOp = OP_Next;
                 pLevel->inP1 = pX->iTable;
               }
-              aExpr[k].p = 0;
+              /* aExpr[k].p = 0; // See ticket #461 */
               break;
             }
           }
@@ -793,7 +791,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pLeft);
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
         }
@@ -853,7 +851,7 @@ WhereInfo *sqliteWhereBegin(
         }else{
           sqliteExprCode(pParse, aExpr[k].p->pLeft);
         }
-        sqliteVdbeAddOp(v, OP_MustBeInt, 1, brk);
+        sqliteVdbeAddOp(v, OP_IsNumeric, 1, brk);
         if( aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT ){
           sqliteVdbeAddOp(v, OP_AddImm, 1, 0);
         }
@@ -872,9 +870,9 @@ WhereInfo *sqliteWhereBegin(
         }else{
           sqliteExprCode(pParse, aExpr[k].p->pLeft);
         }
-        sqliteVdbeAddOp(v, OP_MustBeInt, 1, sqliteVdbeCurrentAddr(v)+1);
+        /* sqliteVdbeAddOp(v, OP_MustBeInt, 0, sqliteVdbeCurrentAddr(v)+1); */
         pLevel->iMem = pParse->nMem++;
-        sqliteVdbeAddOp(v, OP_MemStore, pLevel->iMem, 0);
+        sqliteVdbeAddOp(v, OP_MemStore, pLevel->iMem, 1);
         if( aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT ){
           testOp = OP_Ge;
         }else{
@@ -935,7 +933,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pLeft->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pRight);
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -944,7 +942,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pLeft);
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
         }
@@ -981,7 +979,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pRight);
             leFlag = pExpr->op==TK_LE;
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -991,7 +989,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pLeft);
             leFlag = pExpr->op==TK_GE;
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
         }
@@ -1036,7 +1034,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pRight);
             geFlag = pExpr->op==TK_GE;
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -1046,7 +1044,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pLeft);
             geFlag = pExpr->op==TK_LE;
-            aExpr[k].p = 0;
+            /* aExpr[k].p = 0; // See ticket #461 */
             break;
           }
         }
