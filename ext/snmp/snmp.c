@@ -271,6 +271,7 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 			case 3:
 				if (array_init(return_value) == FAILURE) {
 					php_error(E_WARNING, "Cannot prepare result array");
+					snmp_close(ss);
 					RETURN_FALSE;
 				}
 				break;
@@ -287,6 +288,7 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 			name_length = MAX_NAME_LEN;
 			if ( !read_objid(objid, name, &name_length) ) {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
+				snmp_close(ss);
 				RETURN_FALSE;
 			}
 			snmp_add_null_var(pdu, name, name_length);
@@ -294,6 +296,7 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
 			if (snmp_add_var(pdu, name, name_length, type, value)) {
 				php_error(E_WARNING,"Could not add variable: %s\n", name);
+				snmp_close(ss);
 				RETURN_FALSE;
 			}
 		} else if (st >= 2) {
@@ -358,14 +361,17 @@ retry:
 							goto retry;
 						}
 					}
+					snmp_close(ss);
 					RETURN_FALSE;
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
 			php_error(E_WARNING,"No Response from %s\n", Z_STRVAL_PP(a1));
+			snmp_close(ss);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
 			php_error(E_WARNING,"An error occurred, Quitting...\n");
+			snmp_close(ss);
 			RETURN_FALSE;
 		}
 		if (response) {
