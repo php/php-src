@@ -332,11 +332,12 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			short refcount=variable_ptr->refcount;
+			zval garbage;
 	
 			if (type!=IS_TMP_VAR) {
 				value->refcount++;
 			}
-			zendi_zval_dtor(*variable_ptr);
+			garbage = *variable_ptr;
 			*variable_ptr = *value;
 			variable_ptr->refcount = refcount;
 			variable_ptr->is_ref = 1;
@@ -344,6 +345,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				zendi_zval_copy_ctor(*variable_ptr);
 				value->refcount--;
 			}
+			zendi_zval_dtor(garbage);
 		}
 	} else {
 		variable_ptr->refcount--;
