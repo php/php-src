@@ -333,11 +333,13 @@ void php3_log_err(char *log_message)
 	}
 #endif							/*APACHE */
 
+#if 0
 #if CGI_BINARY
 	if (php3_header()) {
 		fprintf(stderr, log_message);
 		fprintf(stderr, "\n");
 	}
+#endif
 #endif
 }
 
