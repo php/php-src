@@ -145,7 +145,7 @@ typedef struct ps_serializer_struct {
 #ifdef TRANS_SID
 void session_adapt_uris(const char *, uint, char **, uint *);
 #else
-#define session_adapt_uris(a,b) do { } while(0)
+#define session_adapt_uris(a,b,c,d) do { } while(0)
 #endif
 	
 #endif
