@@ -21,6 +21,8 @@
 /*
  * TODO:
  * - look for test-specific php.ini files
+ * - implement module skipping for PEAR
+ * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
 ob_implicit_flush();
@@ -29,6 +31,9 @@ define('TEST_PASSED', 0);
 define('TEST_FAILED', -1);
 define('TEST_SKIPPED', -2);
 define('TEST_INTERNAL_ERROR', -3);
+
+define('EXT_DIR_NAME','/php4/ext/');
+define('EXT_DIR_NAME_LEN',strlen(EXT_DIR_NAME));
 
 initialize();
 /*
@@ -67,6 +72,47 @@ function dowriteln($str)
     dowrite("$str\n");
 }
 
+// use this function to consistently work with '/' divided dirs instead of '\' divided ones
+function win_safe_path(&$str)  {
+    $str=str_replace('\\','/',$str);
+}
+
+function create_compiled_in_modules_list()  {
+    global $php,$compiled_in_modules;
+    $ret=`$php -m`;
+    $compiled_in_modules=explode("\n",$ret);
+    foreach ($compiled_in_modules AS $key => $value) {
+        if (!$value
+            || strchr($value,' ') )    unset($compiled_in_modules[$key]);
+    }
+    
+}
+
+function extract_module_name_from_path($path)   {
+    if ($pos1=strpos($path,EXT_DIR_NAME)) {
+           $pos3=strpos($path,'/',$pos1+EXT_DIR_NAME_LEN);
+           return substr($path,$pos2=$pos1+EXT_DIR_NAME_LEN,$pos3-$pos2);
+    }
+}
+
+
+function create_found_tests_4_modules_list() {
+   global $modules_2_test,$testdirs;
+
+   foreach ($testdirs AS $path) {
+       if ($mod_name=extract_module_name_from_path($path))
+           $modules_2_test[$mod_name]=TRUE;
+   }
+}
+
+function create_modules_2_test_list() {
+    global $compiled_in_modules,$modules_2_test,$modules_available;
+    foreach ($compiled_in_modules AS $value)
+        if ($modules_2_test[$value]) $modules_available[]=$value;
+}
+
+
+
 function initialize()
 {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile,
@@ -92,14 +138,18 @@ function initialize()
         } elseif (file_exists('Release_TS/php.exe')) {
             $php = 'Release_TS\php.exe';
         } else {
-            $php = "./php.exe";
+            $php=trim($windows_p ? `cd`:`pwd`).'/php';
+            win_safe_path($php);
         }
     } else {
-        $php = $GLOBALS["TOP_BUILDDIR"]."/php";
+        // $php = $GLOBALS["TOP_BUILDDIR"]."/php"; // where should be the origin of this variable
+        $php=trim($windows_p ? `cd`:`pwd`).'/php';
+        win_safe_path($php);
     }
-
+    create_compiled_in_modules_list();
+   
     if (!is_executable($php)) {
-        dowriteln("PHP CGI binary ($php) not executable.");
+        dowriteln("PHP CGI binary ($php) is not executable.");
         dowriteln("Please compile PHP as a CGI executable and try again.");
         exit;
     }
@@ -139,7 +189,7 @@ function &parse_options(&$argc, &$argv)
 function do_testing($argc, &$argv)
 {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile, $opts,
-        $skipped, $failed, $passed, $total, $term_bold, $term_norm;
+        $skipped, $failed, $passed, $total, $term_bold, $term_norm, $skipped_extensions;
 
     if ($argc > 1) {
         if (is_dir($argv[1])) {
@@ -162,11 +212,15 @@ function do_testing($argc, &$argv)
             }
         }
     } else {
-        $dir = $GLOBALS["TOP_SRCDIR"];
+        // $dir = $GLOBALS["TOP_SRCDIR"]; // XXX ??? where should this variable be set?
+        $dir=str_replace('\\','/',trim(($windows_p ? `cd`:`pwd`)));
     }
-
     if (isset($dir) && $dir) {
         find_testdirs($dir);
+        
+        create_found_tests_4_modules_list();
+        create_modules_2_test_list();
+        
         for ($i = 0; $i < sizeof($testdirs); $i++) {
             run_tests_in_dir($testdirs[$i]);
         }
@@ -194,6 +248,9 @@ function do_testing($argc, &$argv)
     dowriteln(sprintf("Tests skipped:    %4d (%s%%)", $skipped, $skipped_pstr));
     dowriteln(sprintf("Tests failed:     %4d (%s%%)", $failed, $failed_pstr));
     dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
+    dowriteln("=============================");
+    dowriteln("Skipped ".sizeof($skipped_extensions)." extensions.");
+    
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
@@ -210,20 +267,27 @@ function find_testdirs($dir = '.', $first_pass = true)
     }
     while ($ent = readdir($dp)) {
         $path = "$dir/$ent";
-        if ((isset($skip[$ent]) && $skip[$ent]) || substr($ent, 0, 1) == "." || !is_dir($path)) {
+        
+        if ((isset($skip[$ent]) && $skip[$ent])
+            || substr($ent, 0, 1) == "."
+            || !is_dir($path)
+            
+            ) {
             continue;
-        }
+            }
+      
         if (strstr("/$path/", "/tests/")) {
             $testdirs[] = $path;
         }
         find_testdirs($path, false);
     }
     closedir($dp);
+    
 }
 
 function run_tests_in_dir($dir = '.')
 {
-    global $skip, $skipped, $failed, $passed, $total, $opts, $tests_in_dir;
+    global $skip, $skipped, $failed, $passed, $total, $opts, $tests_in_dir,$modules_available,$skipped_extensions;
     $dp = opendir($dir);
     if (!$dp) {
         print "Warning: could not run tests in $dir\n";
@@ -245,29 +309,39 @@ function run_tests_in_dir($dir = '.')
     if (sizeof($testfiles) == 0) {
         return;
     }
-    dowriteln("%bRunning tests in $dir%B");
-    dowriteln("=================".str_repeat("=", strlen($dir)));
-    sort($testfiles);
-    for ($i = 0; $i < sizeof($testfiles); $i++) {
-        switch (run_test($testfiles[$i])) {
-            case TEST_SKIPPED:
-            case TEST_INTERNAL_ERROR:
-                $skipped++;
-                break;
-            case TEST_FAILED:
-                $failed++;
-                break;
-            case TEST_PASSED:
-                $passed++;
-                break;
+    
+    if ($mod_name=extract_module_name_from_path($dir))   {
+        if ($ext_found=in_array($mod_name,$modules_available))
+             dowriteln("Testing extension: $mod_name");
+        else $skipped_extensions[$mod_name]=TRUE;
+    }
+   
+    if ($ext_found!==FALSE) {
+        dowriteln("%bRunning tests in $dir%B");
+        dowriteln("=================".str_repeat("=", strlen($dir)));
+        sort($testfiles);
+        for ($i = 0; $i < sizeof($testfiles); $i++) {
+            switch (run_test($testfiles[$i])) {
+                case TEST_SKIPPED:
+                case TEST_INTERNAL_ERROR:
+                    $skipped++;
+                    break;
+                case TEST_FAILED:
+                    $failed++;
+                    break;
+                case TEST_PASSED:
+                    $passed++;
+                    break;
+            }
+            $total++;
         }
-        $total++;
+        if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
+            $skippednow = $skipped - $oskipped;
+            dowriteln("[all $skippednow test(s) skipped]");
+        }
+       dowriteln("");
     }
-    if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
-        $skippednow = $skipped - $oskipped;
-        dowriteln("[all $skippednow test(s) skipped]");
-    }
-    dowriteln("");
+
     return true;
 }
 
@@ -286,7 +360,7 @@ function delete_tmpfiles()
     reset($tmpfile);
     while (list($k, $v) = each($tmpfile)) {
         if (file_exists($v)) {
-            //print "unlink($v): "; var_dump(unlink($v));
+           //print "unlink($v): "; var_dump(unlink($v));
             unlink($v);
         }
     }
@@ -301,11 +375,12 @@ function delete_tmpfiles()
  * @return bool whether the files were "equal"
  */
 function compare_results($file1, $file2)
-{
+{ 
         $data1 = $data2 = "";
     if (!($fp1 = @fopen($file1, "r")) || !($fp2 = @fopen($file2, "r"))) {
         return false;
     }
+
     while (!(feof($fp1) || feof($fp2))) {
         if (!feof($fp1) && trim($line1 = fgets($fp1, 10240)) != "") {
             //print "adding line1 $line1\n";
@@ -316,11 +391,13 @@ function compare_results($file1, $file2)
             $data2 .= $line2;
         }
     }
+   
     fclose($fp1);
     fclose($fp2);
-    if (trim($data1) != trim($data2)) {
-        //print "data1=";var_dump($data1);
-        //print "data2=";var_dump($data2);
+    if ((trim($data1) != trim($data2))
+        || ($data1=='' && $data2=='')) {
+       //print "data1=";var_dump($data1);
+       //print "data2=";var_dump($data2);
         return false;
     }
     return true;
@@ -337,6 +414,7 @@ function run_test($file)
         return TEST_INTERNAL_ERROR;
     }
     $tmpdir = dirname($file);
+    win_safe_path($tmpdir);
     $tmpfix = "phpt.";
     $tmpfile["FILE"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["SKIPIF"] = tempnam($tmpdir, $tmpfix);
@@ -344,8 +422,10 @@ function run_test($file)
     $tmpfile["EXPECT"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["OUTPUT"] = tempnam($tmpdir, $tmpfix);
     
+    array_walk($tmpfile,'win_safe_path');
+    
     while ($line = fgets($fp, 4096)) {
-        if (preg_match('/^--([A-Z]+)--$/', $line, $matches)) {
+        if (preg_match('/^--([A-Z]+)--/', $line, $matches)) {
             $var = $matches[1];
             if (isset($tmpfile[$var]) && $tmpfile[$var]) {
                 $fps[$var] = @fopen($tmpfile[$var], "w");
