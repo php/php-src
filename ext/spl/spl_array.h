@@ -22,8 +22,6 @@
 #include "php.h"
 #include "php_spl.h"
 
-extern zend_class_entry *spl_ce_ArrayRead;
-extern zend_class_entry *spl_ce_ArrayAccess;
 extern zend_class_entry *spl_ce_ArrayObject;
 extern zend_class_entry *spl_ce_ArrayIterator;
 

@@ -31,29 +31,6 @@
 #include "spl_array.h"
 
 
-static
-ZEND_BEGIN_ARG_INFO(arginfo_one_param, 0)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_two_params, 0)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-
-function_entry spl_funcs_ArrayRead[] = {
-	SPL_ABSTRACT_ME(ArrayRead, get,     arginfo_one_param)
-	SPL_ABSTRACT_ME(ArrayRead, exists,  arginfo_one_param)
-	{NULL, NULL, NULL}
-};
-
-function_entry spl_funcs_ArrayAccess[] = {
-	SPL_ABSTRACT_ME(ArrayAccess, set,  arginfo_two_params)
-	SPL_ABSTRACT_ME(ArrayAccess, del,  arginfo_one_param)
-	{NULL, NULL, NULL}
-};
-
 SPL_METHOD(Array, __construct);
 SPL_METHOD(Array, getIterator);
 SPL_METHOD(Array, rewind);
@@ -83,8 +60,6 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_class_entry *   spl_ce_ArrayRead;
-zend_class_entry *   spl_ce_ArrayAccess;
 
 zend_object_handlers spl_handler_ArrayObject;
 zend_class_entry *   spl_ce_ArrayObject;
@@ -310,13 +285,6 @@ static HashTable *spl_array_get_properties(zval *object TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
-#if MBO_0
-	REGISTER_SPL_INTERFACE(ArrayRead);
-
-	REGISTER_SPL_INTERFACE(ArrayAccess);
-	zend_class_implements(spl_ce_ArrayAccess TSRMLS_CC, 1, spl_ce_ArrayRead);
-#endif
-
 	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, spl_funcs_ArrayObject);
 	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_aggregate);
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
