@@ -144,7 +144,9 @@ static void real_result_dtor(struct php_sqlite_result *res)
 	for (i = 0; i < res->nrows; i++) {
 		base = i * res->ncolumns;
 		for (j = 0; j < res->ncolumns; j++) {
-			efree(res->table[base + j]);
+			if (res->table[base + j] != NULL) {
+				efree(res->table[base + j]);
+			}
 		}
 	}
 	if (res->table) {
@@ -464,7 +466,6 @@ PHP_FUNCTION(sqlite_popen)
 	efree(hashkey);
 }
 /* }}} */
-
 
 /* {{{ proto resource sqlite_open(string filename [, int mode, string &errmessage])
    Opens an SQLite database.  Will create the database if it does not exist */
@@ -891,7 +892,7 @@ PHP_FUNCTION(sqlite_field_name)
 			RETURN_FALSE;
 		}
 
-		RETURN_STRING(res->table[field], 1);
+		RETURN_STRING(res->col_names[field], 1);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field name not available for unbuffered queries");
 		RETURN_FALSE;
