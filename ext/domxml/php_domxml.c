@@ -2274,7 +2274,7 @@ PHP_FUNCTION(domxml_node_parent)
 
 	last = nodep->parent;
 	if (!last) {
-		RETURN_FALSE;
+		return;
 	}
 
 	DOMXML_RET_OBJ(rv, last, &ret);
@@ -2777,7 +2777,7 @@ PHP_FUNCTION(domxml_elem_get_attribute)
 
 	value = xmlGetProp(nodep, name);
 	if (!value) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	} else {
 		RETVAL_STRING(value, 1);
 		xmlFree(value);
