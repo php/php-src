@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Ini settings for encoding/decoding Unicode/JIS user comments (Marcus)
+- Both 'file' and 'path to php.ini' is allowed for "-c" cli/cgi option. (Yasuo)
 - Added version info to the dll and exe files created under Windows. (jtate)
 - Added "log_errors_max_len" php.ini option which controls maximum length for 
   error messages. (Marcus)
