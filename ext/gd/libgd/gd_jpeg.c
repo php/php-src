@@ -21,6 +21,10 @@
  * Christian Aberger 
  */
 
+#if PHP_WIN32 && !defined(ssize_t)
+typedef int ssize_t;
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
