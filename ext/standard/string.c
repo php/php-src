@@ -2099,7 +2099,7 @@ PHP_FUNCTION(setlocale)
 		/* Remember if locale was changed */
 		if (loc) {
 			STR_FREE(BG(locale_string));
-			BG(strtok_string) = estrdup(retval);
+			BG(locale_string) = estrdup(retval);
 		}
 
 		RETVAL_STRING(retval,1);
