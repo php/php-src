@@ -42,6 +42,7 @@ PEAR_FILES = \
 	PEAR/Command/Registry.php \
 	PEAR/Command/Remote.php \
 	PEAR/Frontend/CLI.php \
+	PEAR/Frontend/Gtk.php \
 	PEAR/Common.php \
 	PEAR/Config.php \
 	PEAR/Dependency.php \
