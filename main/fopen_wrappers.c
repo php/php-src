@@ -677,7 +677,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		} else {
 			SOCK_WRITE("anonymous", *socketd);
 		}
-		SOCK_WRITE("\n", *socketd);
+		SOCK_WRITE("\r\n", *socketd);
 
 		/* get the response */
 		result = _php3_getftpresult(*socketd);
@@ -697,7 +697,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 					SOCK_WRITE("anonymous", *socketd);
 				}
 			}
-			SOCK_WRITE("\n", *socketd);
+			SOCK_WRITE("\r\n", *socketd);
 
 			/* read the response */
 			result = _php3_getftpresult(*socketd);
@@ -715,7 +715,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		}
 
 		/* set the connection to be binary */
-		SOCK_WRITE("TYPE I\n", *socketd);
+		SOCK_WRITE("TYPE I\r\n", *socketd);
 		result = _php3_getftpresult(*socketd);
 		if (result > 299 || result < 200) {
 			free_url(resource);
@@ -727,7 +727,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		/* find out the size of the file (verifying it exists) */
 		SOCK_WRITE("SIZE ", *socketd);
 		SOCK_WRITE(resource->path, *socketd);
-		SOCK_WRITE("\n", *socketd);
+		SOCK_WRITE("\r\n", *socketd);
 
 		/* read the response */
 		result = _php3_getftpresult(*socketd);
@@ -754,7 +754,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		}
 
 		/* set up the passive connection */
-		SOCK_WRITE("PASV\n", *socketd);
+		SOCK_WRITE("PASV\r\n", *socketd);
 		while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) &&
 			!(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 			  isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
@@ -833,7 +833,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		}
 
 		/* close control connection */
-		SOCK_WRITE("\nQUIT\n", *socketd);
+		SOCK_WRITE("\r\nQUIT\r\n", *socketd);
 		SOCK_FCLOSE(*socketd);
 
 		/* open the data channel */
