@@ -78,6 +78,8 @@ static void _php3_statpage(void)
 	page_mtime = r->finfo.st_mtime;
 #else
 	if (page_uid == -1) {
+		SLS_FETCH();
+
 		path = SG(request_info).path_translated;
 		if (path != NULL) {
 			if (stat(path, &sb) == -1) {
