@@ -368,7 +368,7 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 	zval                      **data;
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
-	REPLACE_ZVAL_VALUE(&return_value, *data, 1);
+	RETURN_ZVAL(*data, 1, 0);
 }
 
 SPL_METHOD(RecursiveIteratorIterator, next)
@@ -398,7 +398,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 		RETURN_NULL();
 	}
 	zobject = object->iterators[level].zobject;
-	REPLACE_ZVAL_VALUE(&return_value, zobject, 1);
+	RETURN_ZVAL(zobject, 1, 0);
 }
 
 /* {{{ spl_dtor_RecursiveIteratorIterator */

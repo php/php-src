@@ -296,7 +296,7 @@ SPL_METHOD(DirectoryIterator, key)
    Return this (needed for Iterator interface) */
 SPL_METHOD(DirectoryIterator, current)
 {
-	REPLACE_ZVAL_VALUE(&return_value, getThis(), 1);
+	RETURN_ZVAL(getThis(), 1, 0);
 }
 /* }}} */
 
