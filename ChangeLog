@@ -1,3 +1,144 @@
+2000-12-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/DB/STATUS: Updated STATUS.
+
+2000-12-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/mysql.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/mysql/008.phpt
+      pear/tests/pear_error.phpt:
+    * added Sebastian's affectedRows() and numRows() for MySQL
+    * added regression test for DB_mysql::affectedRows
+    * fixed some PEAR_Error based tests that had broken (line number change)
+
+2000-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php.h
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/filestat.c
+      ext/standard/php_dir.h
+      ext/standard/php_filestat.h: MFH LFS-related changes
+
+    * configure.in: MFH --enable-libgcc change
+
+2000-12-07  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Fix for Pike 7.1 (error -> Pike_error). Caudium bug #12486.
+
+2000-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Enable libgcc, if we are building on Solaris with GCC.
+
+2000-12-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/pgsql.php: * removed comment
+
+    * pear/DB/STATUS: * pgsql now supports affectedRows
+
+    * pear/DB/MAINTAINERS: * added Rui Hirokawa as pgsql maintainer
+
+2000-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c: Hardcode the readdir entry as well
+
+2000-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    We don't want any hard errors in PHP scripts unless absolutely necessary.
+
+2000-12-07  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * pear/DB/pgsql.php:
+    Added affectedRows (thanks to Mark Kirkwood <markir@i4free.co.nz>)
+
+2000-12-07  Kristian Köhntopp  <kk@netuse.de>
+
+    * ext/standard/basic_functions.c:
+    Fugbix in call_user_func_array() if second argument is empty.
+
+2000-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c:
+    Axe rest of DAV leftovers and use STD_PHP_INI_ENTRY in the INI section
+
+    * ext/standard/filestat.c
+      ext/standard/php_dir.h
+      ext/standard/php_filestat.h
+      main/php.h
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/file.h:
+    Hardcode all functions which are mentioned in the Large File Support Spec
+
+    http://ewe3.sas.com/standards/large.file/specs/api+.007.html
+
+    * pear/Makefile.in: Fix Makefile template.
+
+2000-12-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/odbc/config.m4: Enable DB2 shared build
+
+2000-12-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/curl/curl.c: Merge changes from HEAD.
+
+    * ext/curl/curl.c: Fixed bug #8145
+
+    * configure.in: merge from HEAD.
+
+    * configure.in: Added note that openssl 0.9.6 is required.
+
+2000-12-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/config.m4: - set propper min version
+
+2000-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ext_skel: Merge from HEAD
+
+    * ext/ext_skel: Fix ext_skel on Solaris
+
+    Submitted by: Sam Liddicott <sam.liddicott@ananova.com>
+
+2000-12-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/STATUS: * we have a test for DB_mysql::errorNative
+
+    * build/rules.mk:
+    * make it possible to override the start directory for "make test"
+
+2000-12-07  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c: Close bug #7013.
+
+2000-12-07  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Log.php
+      pear/Log/composite.php
+      pear/Log/file.php
+      pear/Log/mcal.php
+      pear/Log/observer.php
+      pear/Log/sql.php
+      pear/Log/syslog.php
+      pear/Makefile.in: Contribute Horde's Log:: abstraction class to PEAR.
+
+2000-12-07  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: merge from HEAD.
+
+    * configure.in:
+    The new openssl extension requires OpenSSL version >= 0.9.6
+
 2000-12-06  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/tests/mysql/001.phpt
