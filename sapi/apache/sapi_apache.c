@@ -48,7 +48,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "main.h"
+#include "php_main.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"

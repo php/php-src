@@ -22,7 +22,7 @@
 
 
 #include "php.h"
-#include "main.h"
+#include "php_main.h"
 #include "modules.h"
 #include "internal_functions_registry.h"
 #include "zend_compile.h"

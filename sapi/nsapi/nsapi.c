@@ -27,7 +27,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "main.h"
+#include "php_main.h"
 #include "php_version.h"
 #include "TSRM.h"
 #include "ext/standard/php_standard.h"

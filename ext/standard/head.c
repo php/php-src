@@ -21,7 +21,7 @@
 #include "php.h"
 #include "ext/standard/php_standard.h"
 #include "SAPI.h"
-#include "main.h"
+#include "php_main.h"
 #include "head.h"
 #include "SAPI.h"
 #ifdef TM_IN_SYS_TIME

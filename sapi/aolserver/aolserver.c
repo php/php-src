@@ -43,7 +43,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "main.h"
+#include "php_main.h"
 
 #include "ns.h"
 

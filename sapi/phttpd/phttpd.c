@@ -19,7 +19,7 @@
 
 #include "php.h"
 #include "SAPI.h"
-#include "main.h"
+#include "php_main.h"
 
 #ifdef HAVE_PHTTPD
 
