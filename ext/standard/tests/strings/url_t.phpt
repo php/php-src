@@ -625,11 +625,13 @@ array(2) {
   ["path"]=>
   string(13) "/path/to/file"
 }
-array(2) {
+array(3) {
   ["scheme"]=>
   string(4) "file"
+  ["host"]=>
+  string(4) "path"
   ["path"]=>
-  string(12) "path/to/file"
+  string(8) "/to/file"
 }
 array(2) {
   ["scheme"]=>
