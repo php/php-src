@@ -1650,16 +1650,21 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		zend_hash_update(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), function, sizeof(zend_function), NULL);
 		function_add_ref(function);
 	} else {
-		/* don't inherit the old style constructor if we already have the new style cconstructor */
-		if (!zend_hash_exists(&ce->function_table, ce->name, ce->name_length+1)) {
-			char *lcname = zend_str_tolower_dup(ce->parent->name, ce->parent->name_length);
-			if (zend_hash_find(&ce->parent->function_table, lcname, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
+		/* Don't inherit the old style constructor if we already have the new style constructor */
+		char *lc_class_name;
+		char *lc_parent_class_name;
+
+		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
+		if (!zend_hash_exists(&ce->function_table, lc_class_name, ce->name_length+1)) {
+			lc_parent_class_name = zend_str_tolower_dup(ce->parent->name, ce->parent->name_length);
+			if (zend_hash_find(&ce->parent->function_table, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
 				/* inherit parent's constructor */
-				zend_hash_update(&ce->function_table, ce->name, ce->name_length+1, function, sizeof(zend_function), NULL);
+				zend_hash_update(&ce->function_table, lc_class_name, ce->name_length+1, function, sizeof(zend_function), NULL);
 				function_add_ref(function);
 			}
-			efree(lcname);
+			efree(lc_parent_class_name);
 		}
+		efree(lc_class_name);
 	}
 	ce->constructor = ce->parent->constructor;
 }
