@@ -419,8 +419,6 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 			} else 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler");
-			
-			zval_ptr_dtor(&retval);
 		}
 
 		for (i = 0; i < argc; i++) {
