@@ -444,7 +444,7 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
-/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env] [, array other_options]])
+/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
