@@ -10,6 +10,13 @@ AC_ARG_WITH(java,
   if test "$withval" != "no"; then
     JAVA_SHARED="libphp_java.la"
 
+    # substitute zip for systems which don't have jar in the PATH
+    if JAVA_JAR=`which jar 2>/dev/null`; then
+      JAVA_JAR="$JAVA_JAR cf"
+    else
+      JAVA_JAR='zip -q0'
+    fi
+
     if test "$withval" = "yes"; then
       if test -d /usr/local/lib/kaffe; then
 	JAVA_CFLAGS="-DKAFFE"
@@ -23,6 +30,12 @@ AC_ARG_WITH(java,
 	AC_MSG_RESULT(no)
 	AC_MSG_ERROR(unable to find Java VM libraries)
       fi
+
+      # accomodate old versions of kaffe which don't support jar
+      if kaffe -version 2>&1 | grep 1.0b > /dev/null; then
+        JAVA_JAR='zip -q0'
+      fi
+
     else
       if test -f $withval/lib/libjava.so; then
 	JAVA_INCLUDE="-I$withval/include"
@@ -47,13 +60,6 @@ AC_ARG_WITH(java,
 	  AC_MSG_ERROR(unable to find Java VM libraries)
 	fi
       fi
-    fi
-
-    # substitute zip for systems which don't have jar in the PATH
-    if JAVA_JAR=`which jar 2>/dev/null`; then
-      JAVA_JAR="$JAVA_JAR cf"
-    else
-      JAVA_JAR='zip -q0'
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
