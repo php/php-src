@@ -8,6 +8,8 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 $fp = @fsockopen('pear.php.net', 80);
 if (!$fp) {
     echo 'skip';
+} else {
+    fclose($fp);
 }
 ?>
 --FILE--
