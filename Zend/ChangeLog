@@ -1,3 +1,14 @@
+2004-03-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.c:
+      Force destructors to have empty signatures
+
+2004-03-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Fix build (thanks to Timm)
+
 2004-03-25  Derick Rethans  <php@derickrethans.nl>
 
     * zend_language_scanner.l:
