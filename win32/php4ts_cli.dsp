@@ -148,11 +148,11 @@ LINK32=link.exe
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\sapi\cli\php_cli.c
+SOURCE=..\sapi\cli\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\sapi\cli\getopt.c
+SOURCE=..\sapi\cli\php_cli.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
