@@ -1482,7 +1482,7 @@ PHP_FUNCTION(ldap_delete)
 	ldap_dn = Z_STRVAL_PP(dn);
 
 	if ((rc = ldap_delete_s(ld->link, ldap_dn)) != LDAP_SUCCESS) {
-		php_error(E_WARNING, "%s(): Delete: %s\n", get_active_function_name(TSRMLS_C), ldap_err2string(rc));
+		php_error(E_WARNING, "%s(): Delete: %s", get_active_function_name(TSRMLS_C), ldap_err2string(rc));
 		RETURN_FALSE;
 	}
 
