@@ -321,24 +321,28 @@ static void cli_register_file_handles(TSRMLS_D)
 	
 	ic.value = *zin;
 	zval_copy_ctor(&ic.value);
-	ic.flags = CONST_CS;
+	ic.flags = CONST_CS | CONST_PERSISTENT;
 	ic.name = zend_strndup("STDIN", 6);
 	ic.name_len = 6;
 	zend_register_constant(&ic TSRMLS_CC);
 
 	oc.value = *zout;
 	zval_copy_ctor(&oc.value);
-	oc.flags = CONST_CS;
+	oc.flags = CONST_CS | CONST_PERSISTENT;
 	oc.name = zend_strndup("STDOUT", 7);
 	oc.name_len = 7;
 	zend_register_constant(&oc TSRMLS_CC);
 
 	ec.value = *zerr;
 	zval_copy_ctor(&ec.value);
-	ec.flags = CONST_CS;
+	ec.flags = CONST_CS | CONST_PERSISTENT;
 	ec.name = zend_strndup("STDERR", 7);
 	ec.name_len = 7;
 	zend_register_constant(&ec TSRMLS_CC);
+
+	FREE_ZVAL(zin);
+	FREE_ZVAL(zout);
+	FREE_ZVAL(zerr);
 }
 
 /* {{{ main
