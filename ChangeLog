@@ -1,3 +1,8 @@
+2003-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/CREDITS:
+      Added myself to credits.
+
 2003-11-15  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/ming.dsp:
