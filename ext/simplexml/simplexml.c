@@ -1533,8 +1533,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
 
-	php_libxml_initialize();
-
 	return SUCCESS;
 }
 /* }}} */
@@ -1543,8 +1541,6 @@ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
-	php_libxml_shutdown();
-
 	return SUCCESS;
 }
 /* }}} */
