@@ -1,3 +1,8 @@
+2003-03-27  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      fix fetch_class buglet
+
 2003-03-26  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c
