@@ -557,7 +557,8 @@ PHP_FUNCTION(strftime)
 }
 #endif
 
-/* {{{ proto int strtotime(string time, int now) */
+/* {{{ proto int strtotime(string time, int now)
+   Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
 {
 	pval	*timep, *nowp;
