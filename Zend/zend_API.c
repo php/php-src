@@ -1165,7 +1165,11 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = scope;
 		internal_function->fn_flags = ZEND_ACC_PUBLIC;
-		internal_function->ns = EG(active_namespace);
+		if (!scope) {
+			internal_function->ns = EG(active_namespace);
+		} else {
+			internal_function->ns = NULL;
+		}
 		internal_function->prototype = NULL;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
@@ -1381,6 +1385,54 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	return class_entry;
 }
 
+ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC)
+{
+	zend_class_entry *register_class;
+	zend_namespace *orig_namespace = NULL;
+
+	if (!ns && ns_name) {
+		zend_namespace **pns;
+		size_t ns_name_length = strlen(ns_name);
+		char *lowercase_name = zend_strndup(ns_name, ns_name_length);
+		zend_str_tolower(lowercase_name, ns_name_length);
+		if (zend_hash_find(&CG(global_namespace).class_table, lowercase_name, ns_name_length+1, (void **)&pns) == FAILURE) {
+			free(lowercase_name);
+			return NULL;
+		} else {
+			ns = *pns;
+		}
+		free(lowercase_name);
+	}
+
+	if (EG(active_namespace) != ns) {
+		orig_namespace = EG(active_namespace);
+		EG(active_namespace) = ns;
+		CG(class_table) = &ns->class_table;
+	}
+	register_class = zend_register_internal_class_ex(class_entry, parent_ce, NULL TSRMLS_CC);
+	if (orig_namespace) {
+		EG(active_namespace) = orig_namespace;
+		CG(class_table) = &orig_namespace->class_table;
+	}
+
+	return register_class;
+}
+
+ZEND_API zend_namespace *zend_register_internal_namespace(zend_namespace *orig_ns TSRMLS_DC)
+{
+	zend_namespace *ns = malloc(sizeof(zend_namespace));
+	char *lowercase_name = zend_strndup(orig_ns->name, orig_ns->name_length);
+	*ns = *orig_ns;
+
+	ns->type = ZEND_INTERNAL_NAMESPACE;
+	zend_init_namespace(ns TSRMLS_CC);
+
+	zend_str_tolower(lowercase_name, ns->name_length);
+	zend_hash_update(&CG(global_namespace).class_table, lowercase_name, ns->name_length+1, &ns, sizeof(zend_namespace *), NULL);
+	free(lowercase_name);
+
+	return ns;
+}
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...)
