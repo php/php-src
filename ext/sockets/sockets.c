@@ -779,7 +779,8 @@ PHP_FUNCTION(socket_read)
 	}
 	
 	tmpbuf = erealloc(tmpbuf, retval + 1);
-	tmpbuf[ retval ] = '\0` ;
+	tmpbuf[ retval ] = '\0' ;
+
 	RETURN_STRINGL(tmpbuf, retval, 0);
 }
 /* }}} */
