@@ -1,5 +1,0 @@
-- Decide on function naming for xmlwriter creation
-- Fix up config file for PHP 5 to use libxml extension configuration
-- Add OOP support
-
-
