@@ -869,6 +869,10 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 				if (buf_size > 0) {
 					int len_size = 0;
 
+					if (http_buf_size + buf_size + 1 < 0) {
+						efree(http_buf);
+						return FALSE;
+					}
 					http_buf = erealloc(http_buf, http_buf_size + buf_size + 1);
 
 					while (len_size < buf_size) {
@@ -888,7 +892,9 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 				php_stream_getc(stream);
 			} else {
 				/* Somthing wrong in chunked encoding */
-				efree(http_buf);
+				if (http_buf) {
+					efree(http_buf);
+				}
 				return FALSE;
 			}
 			if (buf_size == 0) {
@@ -901,14 +907,25 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 		}
 
 	} else if (header_length) {
+		if (header_length < 0) {
+			return FALSE;
+		}
 		http_buf = emalloc(header_length + 1);
 		while (http_buf_size < header_length) {
-			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
+			int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
+			if (len_read <= 0) {
+				break;
+			}
+			http_buf_size += len_read;
 		}
 	} else if (header_close) {
 		do {
+			int len_read;
 			http_buf = erealloc(http_buf, http_buf_size + 4096 + 1);
-			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, 4096);
+			len_read = php_stream_read(stream, http_buf + http_buf_size, 4096);
+			if (len_read > 0) {
+				http_buf_size += len_read;
+			}
 		} while(!php_stream_eof(stream));
 	} else {
 		return FALSE;
