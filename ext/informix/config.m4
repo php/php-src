@@ -20,7 +20,7 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
           PHP_ADD_LIBPATH($INFORMIXDIR/lib, INFORMIX_SHARED_LIBADD)
           PHP_ADD_LIBPATH($INFORMIXDIR/lib/esql, INFORMIX_SHARED_LIBADD)
         else
-          IFX_LIBDIR="$IFX_LIBDIR"
+          IFX_LIBDIR=$IFX_LIBDIR
         fi
       else
         IFX_INCDIR=$PHP_INFORMIX/incl/esql
@@ -28,7 +28,7 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
           PHP_ADD_LIBPATH($PHP_INFORMIX/lib, INFORMIX_SHARED_LIBADD)
           PHP_ADD_LIBPATH($PHP_INFORMIX/lib/esql, INFORMIX_SHARED_LIBADD)
         else
-          IFX_LIBDIR="$IFX_LIBDIR"
+          IFX_LIBDIR=$IFX_LIBDIR
         fi
         if test "$PHP_INFORMIX" != "$INFORMIXDIR"; then
           INFORMIX_WARNING="
@@ -52,7 +52,7 @@ WARNING: You specified Informix base install directory that is different
       CPPFLAGS="$CPPFLAGS $IFX_INCLUDE"
       LDFLAGS="$LDFLAGS $IFX_LFLAGS"
 
-      case "$host_alias" in
+      case $host_alias in
 	  *aix*)
         CPPFLAGS="$CPPFLAGS -D__H_LOCALEDEF";;
       esac
@@ -62,16 +62,16 @@ WARNING: You specified Informix base install directory that is different
       IFX_VERSION=[`esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
       if test $IFX_VERSION -ge "900"; then
         AC_DEFINE(HAVE_IFX_IUS,1,[ ])
-        IFX_ESQL_FLAGS="-EDHAVE_IFX_IUS"
+        IFX_ESQL_FLAGS=-EDHAVE_IFX_IUS
       else
-        IFX_ESQL_FLAGS="-EUHAVE_IFX_IUS"
+        IFX_ESQL_FLAGS=-EUHAVE_IFX_IUS
       fi
       PHP_SUBST(IFX_ESQL_FLAGS)
 	  PHP_SUBST(INFORMIX_SHARED_LIBADD)
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
       PHP_EXTENSION(informix, $ext_shared)
       for i in $IFX_LIBS; do
-        case "$i" in
+        case $i in
         *.o)
             PHP_ADD_LIBPATH($abs_builddir/ext/informix, INFORMIX_SHARED_LIBADD)
             PHP_ADD_LIBRARY(php_ifx, 1, INFORMIX_SHARED_LIBADD)

@@ -10,15 +10,15 @@ AC_ARG_WITH(roxen,
 		AC_MSG_ERROR(You did not specify a directory)
 	fi
 	if test -f $withval/bin/roxen; then
-		PIKE="$withval/bin/roxen"
+		PIKE=$withval/bin/roxen
 	elif test -f $withval/bin/pike; then
-		PIKE="$withval/bin/pike"
+		PIKE=$withval/bin/pike
 	else
 		AC_MSG_ERROR(Couldn't find a pike in $withval/bin/)
 	fi
     if $PIKE -e 'float v; catch(v = __VERSION__ + (__BUILD__/10000.0)); if(v < 0.7079) exit(1); exit(0);'; then
-		PIKE_MODULE_DIR="`$PIKE --show-paths 2>&1| grep '^Module' | sed -e 's/.*: //'`"
-	    PIKE_INCLUDE_DIR="`echo $PIKE_MODULE_DIR | sed -e 's,lib/pike/modules,include/pike,' -e 's,lib/modules,include/pike,'`"
+		PIKE_MODULE_DIR=`$PIKE --show-paths 2>&1| grep '^Module' | sed -e 's/.*: //'`
+	    PIKE_INCLUDE_DIR=`echo $PIKE_MODULE_DIR | sed -e 's,lib/pike/modules,include/pike,' -e 's,lib/modules,include/pike,'`
 		if test -z "$PIKE_INCLUDE_DIR" -o -z "$PIKE_MODULE_DIR"; then
 			AC_MSG_ERROR(Failed to figure out Pike module and include directories)
 		fi
@@ -47,7 +47,7 @@ if test "$RESULT" != "no" ; then
  [
  	PHP_BUILD_THREAD_SAFE
 	AC_DEFINE(ROXEN_USE_ZTS,1,[Whether to use Roxen in ZTS mode])
-	RESULT="yes"
+	RESULT=yes
 
  ])
  AC_MSG_RESULT($RESULT)

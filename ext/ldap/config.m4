@@ -42,7 +42,7 @@ if test "$PHP_LDAP" != "no"; then
   dnl Is this really necessary? -Troels Arvin
 
   if test `uname` = "Linux"; then
-    LDAP_PTHREAD="pthread"
+    LDAP_PTHREAD=pthread
   else
     LDAP_PTHREAD=
   fi

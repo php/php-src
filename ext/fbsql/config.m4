@@ -14,7 +14,7 @@ if test "$PHP_FBSQL" != "no"; then
 
     for i in /Local/Library /usr /usr/local /opt /Library; do
       if test -f $i/FrontBase/include/FBCAccess/FBCAccess.h; then
-        FBSQL_INSTALLATION_DIR="$i/FrontBase"
+        FBSQL_INSTALLATION_DIR=$i/FrontBase
         break
       fi
     done

@@ -9,7 +9,7 @@ AC_DEFUN(MYSQL_LIB_CHK,[
   str="$MYSQL_DIR/$1/libmysqlclient.*"
   for j in `echo $str`; do
     if test -r $j; then
-      MYSQL_LIB_DIR="$MYSQL_DIR/$1"
+      MYSQL_LIB_DIR=$MYSQL_DIR/$1
       break 2
     fi
   done
@@ -52,7 +52,7 @@ if test "$PHP_MYSQL" = "yes"; then
   PHP_SUBST(MYSQL_SUBDIRS)
   LIB_BUILD($ext_builddir/libmysql,$ext_shared,yes)
   PHP_ADD_INCLUDE($ext_srcdir/libmysql)
-  MYSQL_MODULE_TYPE="builtin"
+  MYSQL_MODULE_TYPE=builtin
 elif test "$PHP_MYSQL" != "no"; then
   for i in $PHP_MYSQL; do
     if test -r $i/include/mysql/mysql.h; then
@@ -68,7 +68,7 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
   fi
 
-  MYSQL_MODULE_TYPE="external"
+  MYSQL_MODULE_TYPE=external
 
   for i in lib lib/mysql; do
     MYSQL_LIB_CHK($i)
@@ -85,7 +85,7 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "`$MYSQL_DIR/bin/mysql_config --socket`", [Default mysql unix socket])
   else
     MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient"
-    MYSQL_INCLUDE="-I$MYSQL_INC_DIR"
+    MYSQL_INCLUDE=-I$MYSQL_INC_DIR
     PHP_MYSQL_SOCK
   fi
 
@@ -93,7 +93,7 @@ elif test "$PHP_MYSQL" != "no"; then
   PHP_EVAL_INCLINE($MYSQL_INCLUDE)
 
 else
-  MYSQL_MODULE_TYPE="none"
+  MYSQL_MODULE_TYPE=none
 fi
 
 PHP_SUBST(MYSQL_SHARED_LIBADD)

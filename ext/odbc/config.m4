@@ -98,8 +98,8 @@ AC_ARG_WITH(adabas,
   if test "$withval" != "no"; then
     PHP_ADD_INCLUDE($withval/incl)
     PHP_ADD_LIBPATH($withval/lib)
-    ODBC_OBJS="$withval/lib/odbclib.a"
-    ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
+    ODBC_OBJS=$withval/lib/odbclib.a
+    ODBC_LIB=$abs_builddir/ext/odbc/libodbc_adabas.a
     $srcdir/build/shtool mkdir -f -p ext/odbc
     rm -f "$ODBC_LIB"
     cp "$ODBC_OBJS" "$ODBC_LIB"
@@ -194,7 +194,7 @@ AC_ARG_WITH(ibm-db2,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=db2
-    ODBC_LIBS="-ldb2"
+    ODBC_LIBS=-ldb2
     AC_DEFINE(HAVE_IBMDB2,1,[ ])
 
     AC_MSG_RESULT(yes)
@@ -507,12 +507,12 @@ AC_ARG_WITH(dbmaker,
     if test "$shared" = "yes"; then
         AC_MSG_RESULT(yes (shared))
         ODBC_LIBS="-ldmapic -lc -lm"
-        ODBC_SHARED="odbc.la"
+        ODBC_SHARED=odbc.la
     else
         AC_MSG_RESULT(yes (static))
         PHP_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
         PHP_ADD_INCLUDE($ODBC_INCDIR)
-        ODBC_STATIC="libphpext_odbc.la"
+        ODBC_STATIC=libphpext_odbc.la
     fi
 
     AC_MSG_RESULT(yes)

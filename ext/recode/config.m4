@@ -31,8 +31,8 @@ PHP_ARG_WITH(recode,for recode support,
 			AC_MSG_ERROR(I cannot find recode.h anywhere below $RECODE_LIST. Is it installed?)
 		fi
 
-		old_LDFLAGS="$LDFLAGS"
-		old_LIBS="$LIBS"
+		old_LDFLAGS=$LDFLAGS
+		old_LIBS=$LIBS
 		LDFLAGS="$LDFLAGS -L$RECODE_DIR/$RECODE_LIB"
 		LIBS="$LIBS -lrecode"
 		AC_TRY_LINK([
@@ -42,8 +42,8 @@ recode_format_table();
 ],[],[
 				AC_MSG_ERROR(I cannot link librecode (-L$RECODE_DIR/$RECODE_LIB -lrecode). Is it installed?)
 ])
-		LIBS="$old_LIBS"
-		LDFLAGS="$old_LDFLAGS"
+		LIBS=$old_LIBS
+		LDFLAGS=$old_LDFLAGS
 
 		if test "$RECODE_LIB" = ""; then
 			AC_MSG_ERROR(Please reinstall recode - I cannot find librecode.a)

@@ -204,7 +204,7 @@ INCLUDES="$INCLUDES $APACHE_INCLUDE"
 fi
 
 if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-	APXS_EXP="-bE:sapi/apache/mod_php4.exp"
+	APXS_EXP=-bE:sapi/apache/mod_php4.exp
 fi
 
 PHP_SUBST(APXS_EXP)

@@ -17,7 +17,7 @@ dnl if module was requested with default path of fribidi installation then
 dnl $PHP_FRIBIDI will be "yes"
 
   if test "$PHP_FRIBIDI" = "yes"; then
-    PHP_FRIBIDI="/usr/local"
+    PHP_FRIBIDI=/usr/local
   fi
   
 
@@ -26,7 +26,7 @@ dnl $PHP_FRIBIDI will be "yes"
 
   AC_MSG_CHECKING([for header files in "$PHP_FRIBIDI/include/fribidi"])
   if test -f $PHP_FRIBIDI/include/fribidi/fribidi.h && test -f $PHP_FRIBIDI/include/fribidi/fribidi_types.h && test -f $PHP_FRIBIDI/include/fribidi/fribidi_char_sets.h; then
-    FRIBIDI_INCDIR="$PHP_FRIBIDI/include/fribidi/"
+    FRIBIDI_INCDIR=$PHP_FRIBIDI/include/fribidi/
     AC_MSG_RESULT([found all])
   else
     AC_MSG_RESULT([missing])
@@ -38,7 +38,7 @@ dnl $PHP_FRIBIDI will be "yes"
   
   AC_MSG_CHECKING([for libfribidi.so file in "$PHP_FRIBIDI/lib/"])
   if test -f "$PHP_FRIBIDI/lib/libfribidi.so" ; then
-    FRIBIDI_LIBDIR="$PHP_FRIBIDI/lib/"
+    FRIBIDI_LIBDIR=$PHP_FRIBIDI/lib/
     AC_MSG_RESULT([found])
   else
     AC_MSG_RESULT([missing])

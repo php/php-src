@@ -8,13 +8,13 @@ AC_ARG_WITH(java,
                           be built as a shared dl.],
 [
   if test "$withval" != "no"; then
-    JAVA_SHARED="libphp_java.la"
+    JAVA_SHARED=libphp_java.la
 
     pltform=`uname -s 2>/dev/null`
-    java_libext="libjava.so"
-    case "$pltform" in
-      AIX) java_libext="libjava.a" ;;
-      HP-UX) java_libext="libjava.sl" ;;
+    java_libext=libjava.so
+    case $pltform in
+      AIX) java_libext=libjava.a ;;
+      HP-UX) java_libext=libjava.sl ;;
     esac  
     # substitute zip for systems which don't have jar in the PATH
     if JAVA_JAR=`which jar 2>/dev/null`; then
@@ -31,7 +31,7 @@ AC_ARG_WITH(java,
       PHP_ADD_LIBPATH($withval/lib)
       PHP_ADD_LIBPATH($withval/lib/kaffe)
 
-      JAVA_CFLAGS="-DKAFFE"
+      JAVA_CFLAGS=-DKAFFE
       JAVA_INCLUDE=-I$withval/include/kaffe
       JAVA_CLASSPATH=$withval/share/kaffe/Klasses.jar
       JAVA_LIB=kaffevm
@@ -48,11 +48,11 @@ AC_ARG_WITH(java,
     elif test -f $withval/lib/$java_libext; then
       JAVA_LIB=java
       JAVA_LIBPATH=$withval/lib
-      JAVA_INCLUDE="-I$withval/include"
-      test -f $withval/lib/classes.zip && JAVA_CFLAGS="-DJNI_11"
-      test -f $withval/lib/jvm.jar     && JAVA_CFLAGS="-DJNI_12"
-      test -f $withval/lib/classes.zip && JAVA_CLASSPATH="$withval/lib/classes.zip"
-      test -f $withval/lib/jvm.jar     && JAVA_CLASSPATH="$withval/lib/jvm.jar"
+      JAVA_INCLUDE=-I$withval/include
+      test -f $withval/lib/classes.zip && JAVA_CFLAGS=-DJNI_11
+      test -f $withval/lib/jvm.jar     && JAVA_CFLAGS=-DJNI_12
+      test -f $withval/lib/classes.zip && JAVA_CLASSPATH=$withval/lib/classes.zip
+      test -f $withval/lib/jvm.jar     && JAVA_CLASSPATH=$withval/lib/jvm.jar
       for i in $JAVA_INCLUDE/*; do
 	test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
       done
@@ -60,15 +60,15 @@ AC_ARG_WITH(java,
     else
 
       for i in `find $withval/include -type d`; do
-        test -f $i/jni.h && JAVA_INCLUDE="-I$i"
+        test -f $i/jni.h && JAVA_INCLUDE=-I$i
         test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
       done
 
       for i in `find $withval -type d`; do
-        test -f $i/classes.zip && JAVA_CFLAGS="-DJNI_11"
-        test -f $i/rt.jar      && JAVA_CFLAGS="-DJNI_12"
-        test -f $i/classes.zip && JAVA_CLASSPATH="$i/classes.zip"
-        test -f $i/rt.jar      && JAVA_CLASSPATH="$i/rt.jar"
+        test -f $i/classes.zip && JAVA_CFLAGS=-DJNI_11
+        test -f $i/rt.jar      && JAVA_CFLAGS=-DJNI_12
+        test -f $i/classes.zip && JAVA_CLASSPATH=$i/classes.zip
+        test -f $i/rt.jar      && JAVA_CLASSPATH=$i/rt.jar
 
         if test -f $i/$java_libext; then 
           JAVA_LIB=java

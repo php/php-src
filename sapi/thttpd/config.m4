@@ -15,7 +15,7 @@ AC_ARG_WITH(thttpd,
   PHP_BUILD_STATIC
   PHP_SAPI=thttpd
 ],[
-  PHP_THTTPD="no"
+  PHP_THTTPD=no
 ])
 
 AC_MSG_CHECKING(for thttpd)

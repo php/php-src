@@ -43,8 +43,8 @@ if test "$PHP_PCRE_REGEX" != "no"; then
       AC_MSG_ERROR(The PCRE extension requires PCRE library version >= 2.08)
     fi
 
-    test -f $PHP_PCRE_REGEX/libpcre.a && PCRE_LIBDIR="$PHP_PCRE_REGEX"
-    test -f $PHP_PCRE_REGEX/lib/libpcre.a && PCRE_LIBDIR="$PHP_PCRE_REGEX/lib"
+    test -f $PHP_PCRE_REGEX/libpcre.a && PCRE_LIBDIR=$PHP_PCRE_REGEX
+    test -f $PHP_PCRE_REGEX/lib/libpcre.a && PCRE_LIBDIR=$PHP_PCRE_REGEX/lib
 
     if test -z "$PCRE_LIBDIR" ; then
       AC_MSG_ERROR(Could not find libpcre.a in $PHP_PCRE_REGEX)

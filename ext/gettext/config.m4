@@ -20,14 +20,14 @@ if test "$PHP_GETTEXT" != "no"; then
   GETTEXT_LIBDIR=$GETTEXT_DIR/lib
   GETTEXT_INCDIR=$GETTEXT_DIR/include
   
-  O_LDFLAGS="$LDFLAGS"
+  O_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$GETTEXT_LIBDIR"
-  AC_CHECK_LIB(intl, bindtextdomain, GETTEXT_LIBS="intl",[
+  AC_CHECK_LIB(intl, bindtextdomain, GETTEXT_LIBS=intl,[
       AC_CHECK_LIB(c, bindtextdomain, GETTEXT_LIBS= ,[
           AC_MSG_ERROR(Unable to find required gettext library)
       ])
   ])
-  LDFLAGS="$O_LDFLAGS"
+  LDFLAGS=$O_LDFLAGS
 
   AC_DEFINE(HAVE_LIBINTL,1,[ ])
   PHP_EXTENSION(gettext, $ext_shared)

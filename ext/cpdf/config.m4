@@ -6,7 +6,7 @@ AC_ARG_WITH(cpdflib,
                           DIR is the cpdfllib install directory,
                           defaults to /usr.],
 [
-  case "$withval" in
+  case $withval in
     no)
       AC_MSG_RESULT(no) ;;
     yes)
@@ -19,7 +19,7 @@ AC_ARG_WITH(cpdflib,
       PHP_ADD_LIBRARY(jpeg)
       ;;
     *)
-      test -f $withval/include/cpdflib.h && CPDFLIB_INCLUDE="$withval/include"
+      test -f $withval/include/cpdflib.h && CPDFLIB_INCLUDE=$withval/include
       if test -n "$CPDFLIB_INCLUDE" ; then
         AC_MSG_RESULT(yes)
         PHP_EXTENSION(cpdf)
@@ -31,7 +31,7 @@ AC_ARG_WITH(cpdflib,
         [  --with-jpeg-dir[=DIR]   jpeg dir for cpdflib 2.x],[
           AC_MSG_RESULT(yes)
           if test -z $withval; then
-            withval="/usr/local"
+            withval=/usr/local
           fi
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(jpeg,jpeg_read_header, ,[AC_MSG_RESULT(no)],)
@@ -46,7 +46,7 @@ AC_ARG_WITH(cpdflib,
         [  --with-tiff-dir[=DIR]   tiff dir for cpdflib 2.x],[
           AC_MSG_RESULT(yes)
           if test -z $withval; then
-            withval="/usr/local"
+            withval=/usr/local
           fi
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(tiff,TIFFOpen, ,[AC_MSG_RESULT(no)],)

@@ -33,9 +33,9 @@ if test "$PHP_DB" != "no"; then
   if test "$DBM_LIB" = "-lgdbm"; then
     AC_CHECK_HEADER(gdbm.h, [ GDBM_INCLUDE="" ], [ 
       AC_MSG_RESULT("Try /usr/local/include/gdbm.h"); 
-      AC_CHECK_HEADER(/usr/local/include/gdbm.h, [ GDBM_INCLUDE="-I/usr/local/include" ],[
+      AC_CHECK_HEADER(/usr/local/include/gdbm.h, [ GDBM_INCLUDE=-I/usr/local/include ],[
         AC_MSG_RESULT("Try /opt/local/include/gdbm.h");
-        AC_CHECK_HEADER(/opt/local/include/gdbm.h, [ GDBM_INCLUDE="-I/opt/local/include" ],[
+        AC_CHECK_HEADER(/opt/local/include/gdbm.h, [ GDBM_INCLUDE=-I/opt/local/include ],[
           dnl if in /usr/pkg/include, do not add anything.  See above.
           AC_MSG_RESULT("Try /usr/pkg/include/gdbm.h");
           AC_CHECK_HEADER(/usr/pkg/include/gdbm.h, [ GDBM_INCLUDE="" ],[

@@ -8,8 +8,8 @@ AC_ARG_WITH(ccvs,
 [
   if test "$withval" != "no"; then
      CCVS_DIR="$withval"
-	test -f $withval/include/cv_api.h && CCVS_INCLUDE_DIR="$withval/include"
-    test -f $withval/lib/libccvs.a && CCVS_LIB_DIR="$withval/lib"
+	test -f $withval/include/cv_api.h && CCVS_INCLUDE_DIR=$withval/include
+    test -f $withval/lib/libccvs.a && CCVS_LIB_DIR=$withval/lib
 
      	if test -n "$CCVS_DIR"; then
 		AC_MSG_RESULT(yes)
