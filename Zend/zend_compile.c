@@ -1023,7 +1023,7 @@ void do_return(znode *expr, int do_end_vparse CLS_DC)
 }
 
 
-void function_add_ref(zend_function *function)
+ZEND_API void function_add_ref(zend_function *function)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
