@@ -335,8 +335,39 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	string_printf(str, "%s}\n", indent);
 }
 
+static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
+{
+	int i;
+	struct _zend_arg_info *arg_info = fptr->common.arg_info;
+
+	if (!arg_info) return;
+
+	string_printf(str, "%sParameters [%d] {\n", indent, fptr->common.num_args);
+	for (i = 0; i < fptr->common.num_args; i++) {
+		string_printf(str, "%s  - ", indent);
+		if (arg_info->class_name) {
+			string_printf(str, "%s ", arg_info->class_name);
+			if (arg_info->allow_null) {
+				string_printf(str, "or NULL ");
+			}
+		}
+		if (arg_info->pass_by_reference) {
+			string_printf(str, "& ");
+		}
+		if (arg_info->name) {
+			string_printf(str, "$%s\n", arg_info->name);
+		} else {
+			string_printf(str, "$param%d\n", i+1);
+		}
+		arg_info++;
+	}
+	string_printf(str, "%s}\n", indent);
+}
+
 static void _function_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
+	string param_indent;
+
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is 
 	 * swallowed, leading to an unaligned comment.
@@ -382,6 +413,10 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 												  fptr->op_array.line_start,
 												  fptr->op_array.line_end);
 	}
+	string_init(&param_indent);
+	string_printf(&param_indent, "%s  ", indent);
+	_function_parameter_string(str, fptr, param_indent.string TSRMLS_CC);
+	efree(param_indent.string);
 	string_printf(str, "%s}\n", indent);
 }
 
