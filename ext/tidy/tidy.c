@@ -403,6 +403,9 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	tidyBufInit(errbuf);
 	
 	if (tidySetErrorBuffer(doc, errbuf) != 0) {
+		tidyBufFree(errbuf);
+		efree(errbuf);
+		tidyRelease(doc);
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not set Tidy error buffer");
 	}
 	
@@ -524,6 +527,11 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			tidyBufInit(intern->ptdoc->errbuf);
 
 			if (tidySetErrorBuffer(intern->ptdoc->doc, intern->ptdoc->errbuf) != 0) {
+				tidyBufFree(intern->ptdoc->errbuf);
+				efree(intern->ptdoc->errbuf);
+				tidyRelease(intern->ptdoc->doc);
+				efree(intern->ptdoc);
+				efree(intern);
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not set Tidy error buffer");
 			}
 
