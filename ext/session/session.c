@@ -290,7 +290,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			smart_str_appendc(&buf, (unsigned char) key_length);
 			smart_str_appendl(&buf, key, key_length);
 			
-			php_var_serialize(&buf, struc, &var_hash);
+			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
 			smart_str_appendc(&buf, (unsigned char) (key_length & PS_BIN_UNDEF));
@@ -326,7 +326,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		
 		if (has_value) {
 			MAKE_STD_ZVAL(current);
-			if (php_var_unserialize(&current, &p, endptr, &var_hash)) {
+			if (php_var_unserialize(&current, &p, endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
@@ -356,7 +356,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			smart_str_appendl(&buf, key, (unsigned char) key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
 			
-			php_var_serialize(&buf, struc, &var_hash);
+			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
 			if (key_length + 2 > MAX_STR) continue;
 			smart_str_appendc(&buf, PS_UNDEF_MARKER);
@@ -403,7 +403,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		
 		if (has_value) {
 			MAKE_STD_ZVAL(current);
-			if (php_var_unserialize(&current, &q, endptr, &var_hash)) {
+			if (php_var_unserialize(&current, &q, endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
