@@ -226,7 +226,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	char *data=NULL, *arg1;
 	int arg1_len;
 	zend_bool use_include_path = 0;
-	zval *cfg;
+	zval *cfg=NULL;
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zb", &arg1, &arg1_len, &cfg, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
@@ -239,36 +239,37 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	} else {
 		data = arg1;
 	}
+	if (cfg) {
+		if(Z_TYPE_P(cfg) == IS_ARRAY) {
+			char *opt_name = NULL;
+			zval **opt_val;
+			ulong opt_indx;
 
-	if(Z_TYPE_P(cfg) == IS_ARRAY) {
-		char *opt_name = NULL;
-		zval **opt_val;
-		ulong opt_indx;
-
-		for (zend_hash_internal_pointer_reset(HASH_OF(cfg)); 
-				zend_hash_get_current_data(HASH_OF(cfg), (void **)&opt_val) == SUCCESS;
-		 		zend_hash_move_forward(HASH_OF(cfg))) {
+			for (zend_hash_internal_pointer_reset(HASH_OF(cfg)); 
+					zend_hash_get_current_data(HASH_OF(cfg), (void **)&opt_val) == SUCCESS;
+			 		zend_hash_move_forward(HASH_OF(cfg))) {
 		
-			if(zend_hash_get_current_key(HASH_OF(cfg), &opt_name, &opt_indx, FALSE) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
-			}
-        
-			if(opt_name) {
-				if (_php_tidy_set_tidy_opt(opt_name, *opt_val TSRMLS_CC) != FAILURE) {
-					TG(used) = 1;	
+				if(zend_hash_get_current_key(HASH_OF(cfg), &opt_name, &opt_indx, FALSE) == FAILURE) {
+					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
 				}
-				opt_name = NULL;
+        
+				if(opt_name) {
+					if (_php_tidy_set_tidy_opt(opt_name, *opt_val TSRMLS_CC) != FAILURE) {
+						TG(used) = 1;	
+					}
+					opt_name = NULL;
+				}
 			}
-		}
-	} else {
-		convert_to_string_ex(&cfg);
-		if (Z_STRVAL_P(cfg) && Z_STRVAL_P(cfg)[0]) {
-			TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(cfg));
-			if(tidyLoadConfig(TG(tdoc)->doc, Z_STRVAL_P(cfg)) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(cfg));
-				RETVAL_FALSE;
+		} else {
+			convert_to_string_ex(&cfg);
+			if (Z_STRVAL_P(cfg) && Z_STRVAL_P(cfg)[0]) {
+				TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(cfg));
+				if(tidyLoadConfig(TG(tdoc)->doc, Z_STRVAL_P(cfg)) < 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(cfg));
+					RETVAL_FALSE;
+				}
+				TG(used) = 1;
 			}
-			TG(used) = 1;
 		}
 	}
 
