@@ -1162,8 +1162,7 @@ PHP_FUNCTION(pg_fetch_result)
 }
 /* }}} */
 
-/* {{{ void php_pgsql_fetch_hash
- */
+/* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	zval **result, **row, **arg3;
@@ -1175,7 +1174,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1, &result)==FAILURE) {
+			if (zend_get_parameters_ex(1, &result) == FAILURE) {
 				RETURN_FALSE;
 			}
 			if (!result_type) {
@@ -1183,7 +1182,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			break;
 		case 2:
-			if (zend_get_parameters_ex(2, &result, &row)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &row) == FAILURE) {
 				RETURN_FALSE;
 			}
 			if (!result_type) {
@@ -1191,7 +1190,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			break;
 		case 3:
-			if (zend_get_parameters_ex(3, &result, &row, &arg3)==FAILURE) {
+			if (zend_get_parameters_ex(3, &result, &row, &arg3) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg3);
@@ -1213,16 +1212,25 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			RETURN_FALSE;
 		}
 	} else {
-		convert_to_long_ex(row);
-		pgsql_row = Z_LVAL_PP(row);
-		pg_result->row = pgsql_row;
-		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
-			RETURN_FALSE;
+		if (Z_TYPE_PP(row) != IS_NULL) { 
+			convert_to_long_ex(row);
+			pgsql_row = Z_LVAL_PP(row);
+			pg_result->row = pgsql_row;
+			if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+				php_error(E_WARNING, "Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+				RETURN_FALSE;
+			}
+		} else {
+			/* If 2nd param is NULL, ignore it and use the normal way of accessing the next row */
+			pg_result->row++;
+			pgsql_row = pg_result->row;
+			if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+				RETURN_FALSE;
+			}
 		}
 	}
 	array_init(return_value);
-	for (i = 0, num_fields = PQnfields(pgsql_result); i<num_fields; i++) {
+	for (i = 0, num_fields = PQnfields(pgsql_result); i < num_fields; i++) {
 		if (PQgetisnull(pgsql_result, pgsql_row, i)) {
 			if (result_type & PGSQL_NUM) {
 				add_index_null(return_value, i);
@@ -1261,7 +1269,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_row(resource result, [int row])
+/* {{{ proto array pg_fetch_row(resource result [, int row])
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pg_fetch_row)
 {
@@ -1269,8 +1277,7 @@ PHP_FUNCTION(pg_fetch_row)
 }
 /* }}} */
 
-/* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
-/* {{{ proto array pg_fetch_array(resource result, [int row [, int result_type]])
+/* {{{ proto array pg_fetch_array(resource result [, int row [, int result_type]])
    Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
@@ -1278,7 +1285,7 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(resource result, [int row [, int result_type]])
+/* {{{ proto object pg_fetch_object(resource result [, int row [, int result_type]])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
