@@ -15,6 +15,9 @@
 /* set to enable bundled PCRE library */
 #define HAVE_BUNDLED_PCRE	1
 
+/* set to enable bundled expat library */
+#define HAVE_LIBEXPAT 1
+
 /* should be added to runtime config*/
 #define PHP3_URL_FOPEN 1
 

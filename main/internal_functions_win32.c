@@ -54,6 +54,7 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php_odbc.h"
 #include "ext/session/php_session.h"
+#include "ext/xml/php_xml.h"
 
 /* SNMP has to be moved to ext */
 /* #include "dl/snmp/php_snmp.h" */
@@ -87,7 +88,8 @@ zend_module_entry *php_builtin_extensions[] = {
 	phpext_session_ptr,
 	phpext_output_ptr,
 	phpext_array_ptr,
-	phpext_assert_ptr
+	phpext_assert_ptr,
+	phpext_xml_ptr
 };
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
