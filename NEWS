@@ -5,8 +5,9 @@ PHP 4                                                                      NEWS
 - Fixed problem with dbase not returning very large (larger than long)
   integers properly. (Vlad)
 - Fixed several bugs and memleaks in the domxml extension. (Markus)
-- Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
-- Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
+- Fixed bug in gmmktime() which was one hour off during standard time -
+  bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
+- Fixed bug in gmdate() timezone handling on Windows - bug #13885. (jmoore)
 - Fixed several crash bugs in the mcrypt extension. (Derick)
 - Made the mcrypt extension compile with the libmcrypt 2.2 series again.
   (Sterling)
