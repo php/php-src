@@ -1061,7 +1061,7 @@ int php_url_scanner_reset_vars(TSRMLS_D)
 	BG(url_adapt_state_ex).form_app.len = 0;
 	BG(url_adapt_state_ex).url_app.len = 0;
 
-	return FAILURE;
+	return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(url_scanner)
