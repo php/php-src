@@ -655,10 +655,12 @@ static char **make_strs_from_array(HashTable *arrht) {
 		switch(data->type) {
 			case IS_STRING:
 				*ptr = estrdup(data->value.str.val);
-fprintf(stderr, "carr[] = %s\n", *ptr);
-				ptr++;
+/*fprintf(stderr, "carr[] = %s\n", *ptr); */
 				break;
+			default:
+				*ptr = NULL;
 		}
+		ptr++;
 
 		zend_hash_move_forward(arrht);
 	}
@@ -2819,7 +2821,12 @@ PHP_FUNCTION(hw_document_bodytag) {
 		strcpy(temp+strlen(ptr->bodytag)-1+argv[1]->value.str.len, ">\n");
 		RETURN_STRING(temp, 0);
 	} else {
-		RETURN_STRING(ptr->bodytag, 1);
+//fprintf(stderr, "hw_document_bodytag: %s (%s)\n", ptr->bodytag, ptr->attributes);
+		if(ptr->bodytag) {
+			RETURN_STRING(ptr->bodytag, 1);
+		} else {
+			RETURN_EMPTY_STRING();
+		}
 	}
 }
 /* }}} */
@@ -4186,7 +4193,10 @@ PHP_FUNCTION(hw_insertanchors) {
 		php_error(E_WARNING, "command (insertanchors) returned %d\n", error);
 		RETURN_FALSE;
 	}
+/*fprintf(stderr, "in hw_insertanchors: %s\n", hwdoc->attributes); */
 	hwdoc->size = count;
+	if(hwdoc->bodytag) free (hwdoc->bodytag);
+	hwdoc->bodytag = bodytag;
 
 	RETURN_TRUE;
 }

@@ -465,16 +465,16 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 					}
 		
 					if(!cur_ptr->destdocname) {
-					cur_ptr->link = NULL;
-					if(NULL != (str = strstr(object, "Hint=URL:"))) {
-						str += 9;
-						if(sscanf(str, "%s\n", link))
-							cur_ptr->link = estrdup(link);
-					} else if(NULL != (str = strstr(object, "Hint="))) {
-						str += 5;
-						if(sscanf(str, "%s\n", link))
-							cur_ptr->link = estrdup(link);
-					}
+						cur_ptr->link = NULL;
+						if(NULL != (str = strstr(object, "Hint=URL:"))) {
+							str += 9;
+							if(sscanf(str, "%s\n", link))
+								cur_ptr->link = estrdup(link);
+						} else if(NULL != (str = strstr(object, "Hint="))) {
+							str += 5;
+							if(sscanf(str, "%s\n", link))
+								cur_ptr->link = estrdup(link);
+						}
 					}
 		
 					cur_ptr->fragment = NULL;
@@ -687,7 +687,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 				/* The link is only set if the Link points to an external document */
 				switch(cur_ptr->linktype) {
 					case HW_BACKGROUND_LINK:
-						snprintf(bgstr, BUFFERLEN, " background='%s'", cur_ptr->link);
+						snprintf(istr, BUFFERLEN, " background='%s'", cur_ptr->link);
 						break;
 					case HW_INTAG_LINK:
 						snprintf(istr, BUFFERLEN, " %s='%s'", cur_ptr->tagattr, cur_ptr->link);
@@ -715,10 +715,10 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 			} else {
 				switch(cur_ptr->linktype) {
 					case HW_BACKGROUND_LINK:
-						if(NULL != cur_ptr->destdocname)
-							snprintf(bgstr, BUFFERLEN, " background='%s/%s'", scriptname[HW_BACKGROUND_LINK], cur_ptr->destdocname);
-						else
-							bgstr[0] = '\0';
+						if(NULL != cur_ptr->destdocname) {
+							snprintf(istr, BUFFERLEN, " background='%s/%s'", scriptname[HW_BACKGROUND_LINK], cur_ptr->destdocname);
+						} else
+							istr[0] = '\0';
 						break;
 					case HW_INTAG_LINK:
 						if(cur_ptr->fragment)
@@ -2140,7 +2140,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 
 			if(pAnchorList != NULL) {
 				char *newtext;
-				char *body;
+				char *body = NULL;
 				char **prefixarray;
 
 				prefixarray = emalloc(5*sizeof(char *));
@@ -2157,7 +2157,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 #endif
 				*bodytag = strdup(body);
-				efree(body);
+				if(body) efree(body);
 				*text = newtext;
 				*count = strlen(newtext);
 			}
@@ -2186,7 +2186,7 @@ send_insertanchors(char **text, int *count, char **anchors, char **destrec, int 
 
 	if(pAnchorList != NULL) {
 		char *newtext;
-		char *body;
+		char *body = NULL;
 
 		newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 
@@ -2197,7 +2197,8 @@ send_insertanchors(char **text, int *count, char **anchors, char **destrec, int 
 		dlst_kill(pAnchorList, fnDeleteAnchor);
 #endif
 		*bodytag = strdup(body);
-		efree(body);
+		if(body) efree(body);
+fprintf(stderr, "bodytag = %s\n", *bodytag);
 		*text = newtext;
 		*count = strlen(newtext);
 	}
@@ -5094,7 +5095,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 
 			if(pAnchorList != NULL) {
 				char *newtext;
-				char *body;
+				char *body = NULL;
 
 				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 #ifdef newlist
@@ -5104,7 +5105,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 #endif
 				*bodytag = strdup(body);
-				efree(body);
+				if(body) efree(body);
 				*text = newtext;
 				*count = strlen(newtext);
 			}
