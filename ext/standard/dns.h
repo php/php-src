@@ -25,7 +25,7 @@
 PHP_FUNCTION(gethostbyaddr);
 PHP_FUNCTION(gethostbyname);
 PHP_FUNCTION(gethostbynamel);
-#if !defined(PHP_WIN32)||(HAVE_BINDLIB)
+#if !defined(PHP_WIN32)||(HAVE_LIBBIND)
 PHP_FUNCTION(checkdnsrr);
 PHP_FUNCTION(getmxrr);
 #endif
