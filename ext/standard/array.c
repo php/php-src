@@ -51,11 +51,13 @@ int array_globals_id;
 php_array_globals array_globals;
 #endif
 
-#define EXTR_OVERWRITE		0
-#define EXTR_SKIP			1
-#define EXTR_PREFIX_SAME	2
-#define	EXTR_PREFIX_ALL		3
-#define	EXTR_PREFIX_INVALID	4
+#define EXTR_OVERWRITE			0
+#define EXTR_SKIP				1
+#define EXTR_PREFIX_SAME		2
+#define	EXTR_PREFIX_ALL			3
+#define	EXTR_PREFIX_INVALID		4
+#define	EXTR_PREFIX_IF_EXISTS	5
+#define	EXTR_IF_EXISTS			6
 
 #define SORT_REGULAR		0
 #define SORT_NUMERIC		1
@@ -81,6 +83,8 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_ALL", EXTR_PREFIX_ALL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_INVALID", EXTR_PREFIX_INVALID, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_PREFIX_IF_EXISTS", EXTR_PREFIX_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_IF_EXISTS", EXTR_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("SORT_ASC", SORT_ASC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_DESC", SORT_DESC, CONST_CS | CONST_PERSISTENT);
@@ -1151,7 +1155,7 @@ PHP_FUNCTION(extract)
 			}
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
-			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_INVALID) {
+			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS) {
 				php_error(E_WARNING, "%s() expects a prefix to be specified",
 						  get_active_function_name(TSRMLS_C));
 				return;
@@ -1172,7 +1176,7 @@ PHP_FUNCTION(extract)
 			break;
 	}
 	
-	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_PREFIX_INVALID) {
+	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
 		php_error(E_WARNING, "Unknown extract type in call to %s()",
 				  get_active_function_name(TSRMLS_C));
 		return;
@@ -1202,8 +1206,21 @@ PHP_FUNCTION(extract)
 		}
 			
 		switch (extract_type) {
+			case EXTR_IF_EXISTS:
+				if(!var_exists) break;
+				/* break omitted intentionally */
+
 			case EXTR_OVERWRITE:
 				final_name = estrndup(var_name, var_name_len);
+				break;
+
+			case EXTR_PREFIX_IF_EXISTS:
+				if(var_exists) {
+					final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
+					strcpy(final_name, Z_STRVAL_PP(prefix));
+					strcat(final_name, "_");
+					strcat(final_name, var_name);
+				}
 				break;
 
 			case EXTR_PREFIX_SAME:
