@@ -1,3 +1,19 @@
+2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      Bugfix #25335
+
+2003-09-14  Zeev Suraski  <zeev@zend.com>
+
+    * zend_operators.c:
+      Commit 64-bit fixes to the standard operators
+      by Ard Biesheuvel (abies@php.net)
+
+2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h:
+      Bugfix #25528 (by Ard Biesheuvel)
+
 2003-09-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_alloc.c:
