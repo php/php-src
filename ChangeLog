@@ -1,3 +1,82 @@
+2002-06-06  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Add control on Ib version. ibase_add_user(), ibase_modify_user()
+    and ibase_delete_user() available with IB6 or later.
+    fix bug #17184
+
+    * ext/interbase/php_interbase.h:
+    Add control on IB version. ibase_add_user(), ibase_modify_user()
+    and ibase_delete_user() are available with IB6 or later
+
+    * ext/interbase/interbase.c:
+    Add control on the IB version. ibase_add_user(),ibase_modify_user()
+    and ibase_delete_user()  are available with IB6 or later
+
+2002-06-06  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+    * ext/dbx/dbx_sybasect.c: - Remove C++ comments.
+
+    * ext/gd/libgd/gd.c: - Revert Ws thingy.
+
+2002-06-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mbstring/config.m4:
+    Changed the configure option to be --enable/disable
+
+2002-06-06  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Date/Calc.php:
+    Added method Date_Calc::compareDates($day1,$month1,$year1,$day2,$month2,$year2)
+
+    * pear/Date/Calc.php: ws+cs
+
+2002-06-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml: * prepare 0.90
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Installer.php:
+    * add "nobuild" option to installer (-B or --nobuild option to CLI frontend)
+
+    * pear/PEAR/Builder.php: * remove debug output
+
+    * pear/PEAR/Builder.php:
+    * when building, look for "package-version" subdirectory, needed for
+      building stuff straight from tarballs
+
+    * pear/PEAR/Common.php: * add PEAR_COMMON_PACKAGE_NAME_PREG constant
+
+    * pear/PEAR/Frontend/CLI.php: * make displayFatalError work again
+
+2002-06-06  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php: Forgot that one
+
+    * pear/PEAR/Frontend/CLI.php: Wrap table contents
+
+    * pear/PEAR/Command/Registry.php:
+    Implemented "pear info <Installed Package>" command
+
+
+    * pear/PEAR/Command/Package.php:
+    Split the doPackageInfo() in doPackageInfo() and _infoForDisplaying()
+    (this last one can be statically called and is used also from
+    the "info" command)
+
+    * pear/package-Mail.xml: package.xml file for the PEAR Mail package
+
+    * pear/PEAR/Command/Common.php: That will really avoid PHP warnings
+
+    * pear/PEAR/Command/Package.php: Fix package command
+
+2002-06-06  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/php_mnogo.c:
 2002-06-05  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gd/libgd/gd.c: ws and indent fixes
