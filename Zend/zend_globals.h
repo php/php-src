@@ -204,6 +204,10 @@ struct _zend_executor_globals {
 	zend_bool timed_out;
 #endif
 
+#ifdef NETWARE
+       zend_bool nw_stack_limit;
+#endif
+
 	HashTable regular_list;
 	HashTable persistent_list;
 
