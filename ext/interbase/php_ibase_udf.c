@@ -27,18 +27,21 @@
 * Declare the functions like this:
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP1
-*         CSTRING(xx),CSTRING(xx) RETURNS VARCHAR(4096)
+*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx)
+*         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP2
-*         CSTRING(xx),CSTRING(xx),CSTRING(xx) RETURNS VARCHAR(4096)
+*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx),CSTRING(xx) 
+*         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php2' MODULE_NAME 'php_ibase_udf'
 * 
 *     ... and so on.
 * 
-* The first input parameter contains the function you want to call. Subsequent
+* The first input parameter contains the function you want to call. The second
+* argument is the result, and should not be passed as an argument. Subsequent
 * arguments are passed to the called function. The lengths of the input strings can
-* have any value >1. The length of the output is restricted to 4k.
+* have any value >1. The type and length of the output depends on its declaration.
 * 
 * The declared functions can be called from SQL like:
 * 
@@ -59,6 +62,7 @@
 #include "php.h"
 
 #include "stdarg.h"
+#include "ibase.h"
 
 #ifdef ZTS
 #error This functionality is not available in ZTS mode
@@ -66,14 +70,12 @@
 
 #define min(a,b) ((a)<(b)?(a):(b))
 
-/* VARCHAR result ignores first short, but must not be 0 */
-static char result[4099] = { 1, 1 };
-
-static void call_php(char *name, int argc, ...)
+static PARAMDSC *call_php(char *name, PARAMDSC *r, int argc, ...)
 {
 	zval callback, args[4], *argp[4], return_value;
 	va_list va;
 	int i;
+	PARAMVARY *res = (PARAMVARY*)(r->dsc_address);
 
 	INIT_ZVAL(callback);
 	ZVAL_STRING(&callback,name,0);
@@ -93,7 +95,7 @@ static void call_php(char *name, int argc, ...)
 			INIT_ZVAL(args[i]);
 			ZVAL_STRING(argp[i] = &args[i], arg, 0);
 		}
-		
+
 		va_end(va);
 		
 		/* now call the function */
@@ -102,11 +104,48 @@ static void call_php(char *name, int argc, ...)
 			break;
 		}
 	
-		convert_to_string(&return_value);
+		switch (r->dsc_dtype) {
+
+			case dtype_cstring:
+				convert_to_string(&return_value);
+				memcpy(r->dsc_address, Z_STRVAL(return_value), min(r->dsc_length,Z_STRLEN(return_value)));
+				r->dsc_length = min(r->dsc_length,Z_STRLEN(return_value));
+				r->dsc_address[r->dsc_length] = 0;
+				break;
+
+			case dtype_text:
+				convert_to_string(&return_value);
+				memcpy(r->dsc_address, Z_STRVAL(return_value), min(r->dsc_length,Z_STRLEN(return_value)));
+				r->dsc_length = min(r->dsc_length,Z_STRLEN(return_value));
+				break;
+
+			case dtype_varying:
+				convert_to_string(&return_value);
+				memcpy(res->vary_string, Z_STRVAL(return_value), min(r->dsc_length-2,Z_STRLEN(return_value)));
+				res->vary_length = min(r->dsc_length-2,Z_STRLEN(return_value));
+				r->dsc_length = res->vary_length+2;
+				break;
+
+			case dtype_short:
+				convert_to_long(&return_value);
+				*(short*)r->dsc_address = Z_LVAL(return_value);
+				break;
+
+			case dtype_long:
+				convert_to_long(&return_value);
+				*(ISC_LONG*)r->dsc_address = Z_LVAL(return_value);
+				break;
+
+			case dtype_int64:
+				convert_to_long(&return_value);
+				*(ISC_INT64*)r->dsc_address = Z_LVAL(return_value);
+				break;
+
+		}
+				
 	
-		memcpy(&result[2], Z_STRVAL(return_value), min(sizeof(result)-1,Z_STRLEN(return_value)+1));
-		result[sizeof(result)-1] = 0;
-	
+		zval_dtor(&return_value);
+
 		return;
 
 	} while (0);
@@ -118,27 +157,23 @@ static void call_php(char *name, int argc, ...)
 	php_error_docref(NULL, E_WARNING, "Error calling function '%s' from database", name);
 }
 
-char *udf_call_php1(char *name, char *arg1)
+PARAMDSC *udf_call_php1(char *name, PARAMDSC *r, char *arg1)
 {
-	call_php(name, 1, arg1);
-	return result;
+	return call_php(name, r, 1, arg1);
 }
 
-char *udf_call_php2(char *name, char *arg1, char *arg2)
+PARAMDSC *udf_call_php2(char *name, PARAMDSC *r, char *arg1, char *arg2)
 {
-	call_php(name, 2, arg1, arg2);
-	return result;
+	return call_php(name, r, 2, arg1, arg2);
 }
 
-char *udf_call_php3(char *name, char *arg1, char *arg2, char *arg3)
+PARAMDSC *udf_call_php3(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3)
 {
-	call_php(name, 3, arg1, arg2, arg3);
-	return result;
+	return call_php(name, r, 3, arg1, arg2, arg3);
 }
 
-char *udf_call_php4(char *name, char *arg1, char *arg2, char *arg3, char *arg4)
+PARAMDSC *udf_call_php4(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3, char *arg4)
 {
-	call_php(name, 4, arg1, arg2, arg3, arg4);
-	return result;
+	return call_php(name, r, 4, arg1, arg2, arg3, arg4);
 }
 
