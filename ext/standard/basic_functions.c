@@ -2751,7 +2751,7 @@ PHP_FUNCTION(restore_include_path)
 
 /* }}} */
 
-/* {{{ proto bool print_r(mixed var [, bool return])
+/* {{{ proto mixed print_r(mixed var [, bool return])
    Prints out or returns information about the specified variable */
 PHP_FUNCTION(print_r)
 {
