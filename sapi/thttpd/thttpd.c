@@ -65,6 +65,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
 		len = strlen(buf);
 		send(TG(hc)->conn_fd, buf, len, 0);
+		TG(hc)->status = SG(sapi_headers).http_response_code;
 		TG(hc)->bytes += len;
 	}
 	
