@@ -57,7 +57,7 @@ struct _php_core_globals {
 	zend_bool allow_call_time_pass_reference;
 	zend_bool implicit_flush;
 
-	int output_buffering;
+	long output_buffering;
 
 	char *safe_mode_include_dir;
 	zend_bool safe_mode_gid;
