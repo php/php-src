@@ -935,6 +935,8 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 
 	nsapi_php_ini_entries(NSLS_C TSRMLS_CC);
 
+	if (!PG(safe_mode)) php_handle_auth_data(pblock_findval("authorization", rq->headers) TSRMLS_CC);
+
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
