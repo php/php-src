@@ -2612,7 +2612,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EG(This)) {
 		if (EG(exception) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
-			EG(This)->refcount = 1;
+			EG(This)->refcount--;
 			zval_ptr_dtor(&EG(This));
 		} else if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
