@@ -37,8 +37,12 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
 ])
 
 PHP_ARG_WITH(dom, for DOM support,
-[  --with-dom[=DIR]        Include DOM support (requires libxml >= 2.4.14).
+[  --with-dom[=DIR]        Old deprecated DOM support (requires libxml >= 2.4.14).
                           DIR is the libxml install directory.])
+
+if test "$PHP_DOM" != "no" -a "$PHP_DOM5" != "no"; then
+    AC_MSG_ERROR([Either use deprecated dom or new dom5 extension.])
+fi
 
 if test "$PHP_DOM" != "no"; then
 

@@ -23,6 +23,10 @@ PHP_ARG_WITH(dom5, for DOM support,
 [  --with-dom5[=DIR]       Include new DOM support (requires libxml >= 2.4.14).
                           DIR is the libxml install directory.])
 
+if test "$PHP_DOM" != "no" -a "$PHP_DOM5" != "no"; then
+    AC_MSG_ERROR([Either use deprecated dom or new dom5 extension.])
+fi
+
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
   [  --with-zlib-dir[=DIR]     DOM: Set the path to libz install prefix.], no, no)
