@@ -807,7 +807,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			UdmVarListReplaceStr(&Agent->Conf->Vars,"BrowserCharset",val);
 			{
 			    const char * charset=UdmVarListFindStr(&Agent->Conf->Vars,"BrowserCharset","iso-8859-1");
-			    Agent->Conf->lcs=UdmGetCharSet(charset);
+			    Agent->Conf->bcs=UdmGetCharSet(charset);
 			}
 #else
 			Agent->Conf->browser_charset=strdup(val);
