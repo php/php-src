@@ -20,6 +20,7 @@
 // $Id$
 
 require_once 'PEAR/Command/Common.php';
+require_once 'PEAR/Common.php';
 require_once 'PEAR/Remote.php';
 
 class PEAR_Command_Remote extends PEAR_Command_Common
@@ -75,61 +76,47 @@ class PEAR_Command_Remote extends PEAR_Command_Common
         $failmsg = '';
         $remote = &new PEAR_Remote($this->config);
         switch ($command) {
+            // {{{ remote-package-info
+
             case 'remote-package-info': {
                 break;
             }
+
+            // }}}
+            // {{{ list-remote-packages
+
             case 'list-remote-packages': {
                 break;
             }
+
+            // }}}
+            // {{{ download
+
             case 'download': {
                 //$params[0] -> The package to download
                 if (count($params) != 1) {
                     return PEAR::raiseError("download expects one argument: the package to download");
                 }
+                $server = $this->config->get('master_server');
                 if (!ereg('^http://', $params[0])) {
-                    $pkgfile = "http://" . $this->config->get('master_server') .
-                               "/get/" . $params[0];
+                    $pkgfile = "http://$server/get/$params[0]";
                 } else {
                     $pkgfile = $params[0];
                 }
-                if (!extension_loaded("zlib")) {
-                    $pkgfile .= '?uncompress=yes';
+                $this->bytes_downloaded = 0;
+                $saved = PEAR_Common::downloadHttp($pkgfile, $this->ui, $this->config, '.',
+                                                   array(&$this, 'downloadCallback'));
+                if (PEAR::isError($saved)) {
+                    return $this->raiseError($saved);
                 }
-                if (!@include_once 'HTTP.php') {
-                    return $this->raiseError('The "download" command needs HTTP.php to be installed');
-                }
-                $headers = HTTP::head($pkgfile);
-                if (PEAR::isError($headers)) {
-                    $msg = $headers->getMessage();
-                    return $this->raiseError("Could not retrieve remote file information ($msg)");
-                }
-                if (isset($headers['Content-disposition'])) {
-                    preg_match('|filename="(.*)"$|', $headers['Content-disposition'], $matches);
-                    $fname = $matches[1];
-                } else {
-                    $fname = basename($pkgfile);
-                }
-                if (!$wp = @fopen($pkgfile, 'wb')) {
-                    $failmsg = "Could not download $pkgfile"; break;
-                }
-                if (!$fp = @fopen($fname, 'wb')) {
-                    $failmsg = "Could not write the file here"; break;
-                }
-                $bytes = 0;
-                $this->ui->displayLine("Downloading $pkgfile:");
-                while ($data = @fread($wp, 16384)) {
-                    $bytes += strlen($data);
-                    if (!@fwrite($fp, $data)) {
-                        return $this->raiseError("$pkgfile: write failed ($php_errormsg)");
-                    }
-                    $this->ui->display('...');
-                }
-                $this->ui->display(" done!\n");
-                fclose($fp);
-                fclose($wp);
-                $this->ui->displayLine("File $fname downloaded ($bytes bytes)");
+                $fname = basename($saved);
+                $this->ui->displayLine("File $fname downloaded ($this->bytes_downloaded bytes)");
                 break;
             }
+
+            // }}}
+            // {{{ list-upgrades
+
             case 'list-upgrades': {
                 include_once "PEAR/Registry.php";
                 if (empty($params[0])) {
@@ -179,6 +166,8 @@ class PEAR_Command_Remote extends PEAR_Command_Common
                 $this->ui->endTable();
                 break;
             }
+
+            // }}}
             default: {
                 return false;
             }
@@ -191,7 +180,12 @@ class PEAR_Command_Remote extends PEAR_Command_Common
 
     // }}}
 
-
+    function downloadCallback($msg, $params = null)
+    {
+        if ($msg == 'done') {
+            $this->bytes_downloaded = $params;
+        }
+    }
 }
 
 ?>
