@@ -136,10 +136,10 @@ php3_module_entry php3_zlib_module_entry = {
 };
 
 #if defined(COMPILE_DL)
-DLEXPORT php3_module_entry *get_module(void) { return &php3_zlib_module_entry; }
+DLEXPORT php3_module_entry *get_module(void) { return &php_zlib_module_entry; }
 #endif
 
-static void php3i_destructor_gzclose(gzFile *zp) {
+static void phpi_destructor_gzclose(gzFile *zp) {
 	(void)gzclose(zp);
 }
 
@@ -163,7 +163,7 @@ PHP_MINIT_FUNCTION(zlib)
 		return FAILURE;
 	}
 #endif
-	ZLIB_GLOBAL(le_zp) = register_list_destructors(php3i_destructor_gzclose,NULL);
+	ZLIB_GLOBAL(le_zp) = register_list_destructors(phpi_destructor_gzclose,NULL);
 	return SUCCESS;
 }
 
@@ -376,7 +376,6 @@ PHP_FUNCTION(gzopen) {
 	pval *arg1, *arg2, *arg3;
 	gzFile *zp;
 	char *p;
-	int id;
 	int use_include_path = 0;
 	ZLIB_TLS_VARS;
 	
@@ -412,9 +411,8 @@ PHP_FUNCTION(gzopen) {
 		RETURN_FALSE;
 	}
 	ZLIB_GLOBAL(gzgetss_state)=0;
-	id = php3_list_insert(zp,ZLIB_GLOBAL(le_zp));
 	efree(p);
-	RETURN_LONG(id);
+	ZEND_REGISTER_RESOURCE(return_value, zp, ZLIB_GLOBAL(le_zp));
 }	
 /* }}} */
 
@@ -422,21 +420,14 @@ PHP_FUNCTION(gzopen) {
 Close an open .gz-file pointer */
 PHP_FUNCTION(gzclose) {
 	pval *arg1;
-	int id, type;
 	gzFile *zp;
 	ZLIB_TLS_VARS;
-	
+
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
-	php3_list_delete(id);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	zend_list_delete(arg1->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -446,20 +437,13 @@ Test for end-of-file on a .gz-file pointer */
 PHP_FUNCTION(gzeof) {
 	pval *arg1;
 	gzFile *zp;
-	int id, type;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
-	zp = php3_list_find(id,&type);
-	if ((!zp || (type!=ZLIB_GLOBAL(le_zp)))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		/* we're at the eof if the file doesn't exist */
-		RETURN_TRUE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	if ((gzeof(zp))) {
 		RETURN_TRUE;
 	} else {
@@ -473,23 +457,18 @@ Get a line from .gz-file pointer */
 PHP_FUNCTION(gzgets) {
 	pval *arg1, *arg2;
 	gzFile *zp;
-	int id, len, type;
+	int len;
 	char *buf;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id = arg1->value.lval;
 	len = arg2->value.lval;
 
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp)))  {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
@@ -514,21 +493,16 @@ Get a character from .gz-file pointer */
 PHP_FUNCTION(gzgetc) {
 	pval *arg1;
 	gzFile *zp;
-	int id, type, c;
+	int c;
 	char *buf;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
 
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	buf = emalloc(sizeof(char) * 2);
 	if ((c=gzgetc(zp)) == (-1)) {
 		efree(buf);
@@ -551,7 +525,7 @@ PHP_FUNCTION(gzgetss)
 {
 	pval *fd, *bytes;
 	gzFile *zp;
-	int id, len, br, type;
+	int len, br;
 	char *buf, *p, *rbuf, *rp, c, lc;
 	ZLIB_TLS_VARS;
 	
@@ -559,17 +533,11 @@ PHP_FUNCTION(gzgetss)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fd);
 	convert_to_long(bytes);
 
-	id = fd->value.lval;
 	len = bytes->value.lval;
 
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING, "Unable to find gz-file identifier %d", id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, fd, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
@@ -667,7 +635,7 @@ Binary-safe .gz-file write */
 PHP_FUNCTION(gzwrite) {
 	pval *arg1, *arg2, *arg3=NULL;
 	gzFile *zp;
-	int ret,id,type;
+	int ret;
 	int num_bytes;
 	ZLIB_TLS_VARS;
 
@@ -692,14 +660,7 @@ PHP_FUNCTION(gzwrite) {
 			/* NOTREACHED */
 			break;
 	}				
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
-
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
 
 	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
@@ -719,20 +680,15 @@ PHP_FUNCTION(gzwrite) {
 Rewind the position of a .gz-file pointer */
 PHP_FUNCTION(gzrewind) {
 	pval *arg1;
-	int id,type;
 	gzFile *zp;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	gzrewind(zp);
 	RETURN_TRUE;
 }
@@ -742,7 +698,6 @@ PHP_FUNCTION(gzrewind) {
 Get .gz-file pointer's read/write position */
 PHP_FUNCTION(gztell) {
 	pval *arg1;
-	int id, type;
 	long pos;
 	gzFile *zp;
 	ZLIB_TLS_VARS;
@@ -750,13 +705,9 @@ PHP_FUNCTION(gztell) {
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	pos = gztell(zp);
 	RETURN_LONG(pos);
 }
@@ -766,7 +717,7 @@ PHP_FUNCTION(gztell) {
 Seek on a file pointer */
 PHP_FUNCTION(gzseek) {
 	pval *arg1, *arg2;
-	int ret,id,type;
+	int ret;
 	long pos;
 	gzFile *zp;
 	ZLIB_TLS_VARS;
@@ -774,15 +725,11 @@ PHP_FUNCTION(gzseek) {
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
 	convert_to_long(arg2);
 	pos = arg2->value.lval;
-	id = arg1->value.lval;
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
  	ret = gzseek(zp,pos,SEEK_SET);
 	RETURN_LONG(ret);
 }
@@ -848,26 +795,22 @@ PHP_FUNCTION(gzpassthru) {
 	pval *arg1;
 	gzFile *zp;
 	char buf[8192];
-	int id, size, b, type;
+	int size, b;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	size = 0;
 	while((b = gzread(zp, buf, sizeof(buf))) > 0) {
 		PHPWRITE(buf,b);
 		size += b ;
 	}
 /*  gzclose(zp); */
-	php3_list_delete(id);
+	zend_list_delete(arg1->value.lval);
 	RETURN_LONG(size);
 }
 /* }}} */
@@ -878,22 +821,17 @@ PHP_FUNCTION(gzread)
 {
 	pval *arg1, *arg2;
 	gzFile *zp;
-	int id, len, type;
+	int len;
 	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id = arg1->value.lval;
 	len = arg2->value.lval;
 
-	zp = php3_list_find(id,&type);
-	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	
