@@ -1068,7 +1068,7 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len)
+PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
 {
 	char *ret = NULL, *c, *comp, *cend;
 	size_t inc_len, cnt;
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(basename)
 		return;
 	}
 
-	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len);
+	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len TSRMLS_CC);
 	RETURN_STRINGL(ret, (int)ret_len, 0);
 }
 /* }}} */
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME) {
-		php_basename(path, path_len, NULL, 0, &ret, &ret_len);
+		php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		add_assoc_stringl(tmp, "basename", ret, ret_len, 0);
 	}			
 	
@@ -1276,7 +1276,7 @@ PHP_FUNCTION(pathinfo)
 
 		/* Have we alrady looked up the basename? */
 		if (!have_basename) {
-			php_basename(path, path_len, NULL, 0, &ret, &ret_len);
+			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
 
 		p = strrchr(ret, '.');

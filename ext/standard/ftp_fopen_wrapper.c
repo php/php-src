@@ -576,7 +576,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	php_basename(ent->d_name, tmp_len, NULL, 0, &basename, &basename_len);
+	php_basename(ent->d_name, tmp_len, NULL, 0, &basename, &basename_len TSRMLS_CC);
 	if (!basename) {
 		return 0;
 	}
