@@ -1492,7 +1492,17 @@ binary_assign_op_addr: {
 				{
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						zval tmp;
-						zval *class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+						zval *class_name;
+						
+						if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
+							if (!EG(namespace)) {
+								zend_error(E_ERROR, "Cannot fetch self:: when no class scope is active");
+							}
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(namespace);
+							NEXT_OPCODE();
+						}
+
+						class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
 						if (class_name->type != IS_STRING) {
 							tmp = *class_name;
@@ -1570,9 +1580,7 @@ binary_assign_op_addr: {
 							{
 								zend_class_entry *ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 								active_function_table = &ce->function_table;
-								if (ce->is_namespace) {
-									EX(calling_namespace) = ce;
-								}
+								EX(calling_namespace) = ce;
 							}
 						} else { /* used for member function calls */
 							EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
@@ -1614,6 +1622,7 @@ binary_assign_op_addr: {
 								EX(object).ptr = this_ptr;
 							}
 							active_function_table = &Z_OBJCE_P(EX(object).ptr)->function_table;
+							EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
 						}
 						if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
@@ -2058,9 +2067,6 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_NEW:
 				{
-					if (EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->is_namespace) {
-						zend_error(E_ERROR, "Cannot instantiate a namespace");
-					}
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 					ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 					object_init_ex(EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(Ts)[EX(opline)->op1.u.var].EA.class_entry);

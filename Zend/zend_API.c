@@ -1215,7 +1215,6 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 	class_entry->refcount = (int *) malloc(sizeof(int));
 	*class_entry->refcount = 1;
 	class_entry->constants_updated = 0;
-	class_entry->is_namespace = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->static_members, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1);
