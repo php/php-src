@@ -66,9 +66,7 @@
 #define IS_SOCKET		1
 #define BAD_URL			2
 
-#ifndef THREAD_SAFE
-extern int wsa_fp; /* a list for open sockets */
-#endif
+extern int le_socket; /* a list for open sockets */
 
 extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd);
 
