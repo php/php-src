@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 4                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2002 The PHP Group                                |
+  | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_num_fields, NULL)
 	PHP_FE(sqlite_field_name, NULL)
 	PHP_FE(sqlite_seek, NULL)
+	PHP_FE(sqlite_escape_string, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -394,4 +395,26 @@ PHP_FUNCTION(sqlite_seek)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto string sqlite_escape_string(string item)
+   Escapes a string for use as a query parameter */
+PHP_FUNCTION(sqlite_escape_string)
+{
+	char *string;
+	long stringlen;
+	char *ret;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &stringlen)) {
+		return;
+	}
+
+	ret = sqlite_mprintf("%q", string);
+
+	if (ret) {
+		RETVAL_STRING(ret, 1);
+		sqlite_freemem(ret);
+	}
+}
+/* }}} */
+
 
