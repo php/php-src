@@ -59,7 +59,7 @@ static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *n
 	ret = gzseek(self->gz_file, offset, whence);
 	*newoffs = gztell(self->gz_file);
 	
-	return ret;
+	return ret < 0 ? -1 : 0;
 }
 
 static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
