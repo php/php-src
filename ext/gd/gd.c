@@ -237,6 +237,10 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #endif
 
+#ifdef HAVE_LIBT1
+	php_info_print_table_row(2, "T1Lib Support", "enabled");
+#endif         
+
 /* this next part is stupid ... if I knew better, I'd put them all on one row (cmv) */
 
 #ifdef HAVE_GD_GIF
