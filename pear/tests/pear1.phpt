@@ -53,7 +53,7 @@ print "testing inherited destructors\n";
 $q = new Test3;
 
 echo "...\ntesting bug #14744\n";
-$other = new Other;
+$other =& new Other;
 echo "#bug 14744# Other class constructor: other->a == '" . $other->a ."'\n";
 // Modify $a
 $other->a = 'new value';
