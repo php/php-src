@@ -367,15 +367,9 @@ PHP_MINFO_FUNCTION(sockets)
    Allocates a new file descriptor set */
 PHP_FUNCTION(socket_fd_alloc)
 {
-	fd_set *set;
-
-	if ((set = (fd_set*)emalloc(sizeof(fd_set))) == NULL) {
-		php_error(E_WARNING, "cannot allocate file descriptor");
-		RETURN_FALSE;
-	}
-
-	FD_ZERO(set);	
-	ZEND_REGISTER_RESOURCE(return_value, set, le_destroy);
+	fd_set set;
+	FD_ZERO(&set);
+	ZEND_REGISTER_RESOURCE(return_value, &set, le_destroy);
 }
 /* }}} */
 
@@ -482,7 +476,7 @@ PHP_FUNCTION(socket_fd_zero)
 PHP_FUNCTION(socket_select)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
-	php_sock *php_sock;
+	php_socket *php_sock;
 	struct timeval tv;
 	fd_set *rfds, *wfds, *xfds;
 
