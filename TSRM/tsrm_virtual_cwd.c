@@ -37,16 +37,6 @@
 #define MAXPATHLEN 256
 #endif
 
-#ifndef do_alloca
-# if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(TSRM_WIN32))
-#  define do_alloca(p) alloca(p)
-#  define free_alloca(p)
-# else
-#  define do_alloca(p)   malloc(p)
-#  define free_alloca(p) free(p)
-# endif
-#endif
-
 #ifdef TSRM_WIN32
 #include <io.h>
 #endif
@@ -444,14 +434,14 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == COPY_WHEN_ABSOLUTE && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
 		length++;
 	}
-	temp = (char *) do_alloca(length+1);
+	temp = (char *) tsrm_do_alloca(length+1);
 	memcpy(temp, path, length);
 	temp[length] = 0;
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
 	retval = p_chdir(temp);
-	free_alloca(temp);
+	tsrm_free_alloca(temp);
 	return retval;
 }
 
