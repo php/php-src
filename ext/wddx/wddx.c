@@ -463,6 +463,7 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 			ent.varname = NULL;
 		
 		ent.data = (zval *)emalloc(sizeof(zval));
+		ent.data->value.str.val = NULL;
 		ent.data->value.str.len = 0;
 		INIT_PZVAL(ent.data);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
@@ -546,7 +547,7 @@ static void _php_wddx_pop_element(void *user_data, const char *name)
 									 ent1->varname, strlen(ent1->varname)+1,
 									 &ent1->data, sizeof(zval *), NULL);
 					efree(ent1->varname);
-				} else	{		
+				} else	{
 					zend_hash_next_index_insert(ent2->data->value.ht,
 												&ent1->data,
 												sizeof(zval *), NULL);
@@ -555,6 +556,8 @@ static void _php_wddx_pop_element(void *user_data, const char *name)
 			efree(ent1);
 		}
 	}
+	else if (!strcmp(name, EL_VAR) && stack->varname)
+		efree(stack->varname);
 }
 /* }}} */
 
@@ -835,7 +838,11 @@ PHP_FUNCTION(wddx_deserialize)
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &packet) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
+	convert_to_string(packet);
+	if (packet->value.str.len == 0)
+		return;
+		
 	_php_wddx_deserialize(packet, return_value);
 }
 /* }}} */
