@@ -1,3 +1,11 @@
+2005-03-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend.c
+      zend_API.c
+      zend_modules.h:
+      fix shutdown so that dl()'d modules are unloaded after all the dtors have
+      been called.
+
 2005-03-14  Zeev Suraski  <zeev@zend.com>
 
     * zend_ini.c:
