@@ -20,7 +20,7 @@ if test "$PHP_MCRYPT" != "no"; then
   AC_ADD_INCLUDE($MCRYPT_DIR/include)
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
   old_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$ld_runpath_switch$MCRYPT_DIR/lib -L$MCRYPT_DIR/lib"
+  LDFLAGS="$LDFLAGS $ld_runpath_switch$MCRYPT_DIR/lib -L$MCRYPT_DIR/lib"
   AC_CHECK_LIB(mcrypt, init_mcrypt)
   old_LIBS=$LIBS
   LIBS="$LIBS -lltdl"
