@@ -48,21 +48,21 @@ PHP 4.0                                                                    NEWS
 - Fixed memory leak upon re-registering constants. (Sascha, Zend Engine)
 - Upgraded expat to version 1.95.1. (Thies)
 
-?? ??? 200?, Version 4.0.6
-- Fix memory fragmention problem which could lead to web server processes
+23 Jun 2001, Version 4.0.6
+- Fixed memory fragmention problem which could lead to web server processes
   growing much more than they should. (Andi, Zend Engine)
 - Made $HTTP_SESSION_VARS['foo'] and $foo be references to the same value
   when register_globals is on. (Andrei)
-- Fix disk_free_space() and disk_total_space() under FreeBSD. (Jon)
+- Fixed disk_free_space() and disk_total_space() under FreeBSD. (Jon)
 - Fixed readfile/passthru losing resources during connection abort (Sascha)
 - Fixed bug in the mcrypt extension that caused segfaults when using a key
   that is too large for the used algorithm, and a bug that caused
   mcrypt_generic() to segfault PHP (Derick)
 - Fixed getopt so that it accepts command line arguments in the form
   -<opt><arg> and -<opt> <arg>. (Jmoore)
-- Fixed race in writing session files. (Sascha)
+- Fixed race in writing session files (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
-  specified. (Zeev)
+  specified (Zeev)
 - Added is_callable() function that can be used to find out whether
   its argument is a valid callable construct. (Andrei)
 - Fixed a rare possible crash when generating extended information. (Dmitri
@@ -76,7 +76,7 @@ PHP 4.0                                                                    NEWS
 - Improved interactive mode - supports function calls, and works in
   multithreaded builds. (Zeev, Zend Engine)
 - Fixed a crash bug in interactive mode. (Zeev, Zend Engine)
-- Add pg_last_notice() function. (Rasmus from suggestion by Dirk@rackspace.com)
+- Added pg_last_notice() function. (Rasmus from suggestion by Dirk@rackspace.com)
 - Fixed a bug in preg_split() that would incorrectly limit the number of
   results when used along with PREG_SPLIT_NO_EMPTY flag. (Andrei)
 - Added connection error support to mysql_error() and mysql_errno(). (Jason)
