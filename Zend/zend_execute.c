@@ -344,7 +344,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					if (variable_ptr==value) {
 						variable_ptr->refcount++;
 					} else if (PZVAL_IS_REF(value)) {
-						zval tmp = *value;
+						zval tmp;
 
 						tmp = *value;
 						zval_copy_ctor(&tmp);
