@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed a problem with dbmopen() not handing 'c' correctly with dbm/db/ndbm
+  databases. (JimJag)
 - Fixed an initialization problem in the MS-SQL problem that could cause
   a crash in mssql_query() (Zeev)
 - Upgraded PCRE to version 3.2 and fixed a bug when anchored pattern

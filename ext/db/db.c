@@ -90,7 +90,7 @@
 #define DBM_TYPE DBM *
 #define DBM_MODE_TYPE int
 #define DBM_WRITE_MODE O_RDWR
-#define DBM_CREATE_MODE O_RDWR | O_APPEND | O_CREAT
+#define DBM_CREATE_MODE O_RDWR | O_CREAT
 #define DBM_NEW_MODE O_RDWR | O_CREAT | O_TRUNC
 #define DBM_DEFAULT_MODE O_RDONLY
 #define DBM_OPEN(filename, mode) dbm_open(filename, mode, 0666)
