@@ -233,14 +233,14 @@ class PEAR_Error
 	}
 
     // }}}
-    // {{{ toString()
+    // {{{ __string_value()
 
 	/**
 	 * Make a string representation of this object.
 	 *
 	 * @return string a string with an object "summary"
 	 */
-	function toString() {
+	function __string_value() {
 		$modes = array(PEAR_ERROR_RETURN => "return",
 					   PEAR_ERROR_PRINT => "print",
 					   PEAR_ERROR_TRIGGER => "trigger",
@@ -248,9 +248,11 @@ class PEAR_Error
 		$levels = array(E_USER_NOTICE => "notice",
 						E_USER_WARNING => "warning",
 						E_USER_ERROR => "error");
-		return sprintf("[%s: message=%s code=%d mode=%s level=%s prefix=%s prepend=%s append=%s]",
-					   $this->message, $this->code, $modes[$this->mode], $levels[$this->level],
-					   $this->error_message_prefix, $this->error_prepend, $this->error_append);
+		return sprintf("[%s: message=\"%s\" code=%d mode=%s level=%s prefix=\"%s\" prepend=\"%s\" append=\"%s\"]",
+					   get_class($this), $this->message, $this->code,
+					   $modes[$this->mode], $levels[$this->level],
+					   $this->error_message_prefix, $this->error_prepend,
+					   $this->error_append);
 	}
 
     // }}}
