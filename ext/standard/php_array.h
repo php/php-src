@@ -36,7 +36,7 @@ extern zend_module_entry array_module_entry;
 #define array_module_ptr &array_module_entry
 
 PHP_MINIT_FUNCTION(array);
-PHP_RINIT_FUNCTION(array);
+PHP_MSHUTDOWN_FUNCTION(array);
 
 PHP_FUNCTION(ksort);
 PHP_FUNCTION(krsort);
@@ -79,6 +79,28 @@ PHP_FUNCTION(array_flip);
 
 HashTable* _phpi_splice(HashTable *, int, int, zval ***, int, HashTable **);
 int multisort_compare(const void *a, const void *b);
+
+typedef struct {
+	int *multisort_flags;
+} php_array_globals;
+
+#ifdef ZTS
+#define ARRAYLS_D php_array_globals *array_globals
+#define ARRAYLS_DC , ARRAYLS_D
+#define ARRAYLS_C array_globals
+#define ARRAYLS_CC , ARRAYLS_C
+#define ARRAYG(v) (array_globals->v)
+#define ARRAYLS_FETCH() php_array_globals *array_globals = ts_resource(array_globals_id)
+extern int array_globals_id;
+#else
+#define ARRAYLS_D
+#define ARRAYLS_DC
+#define ARRAYLS_C
+#define ARRAYLS_CC
+#define ARRAYG(v) (array_globals.v)
+#define ARRAYLS_FETCH()
+extern php_array_globals array_globals;
+#endif
 
 #define phpext_array_ptr array_module_ptr
 #endif /* _PHP_ARRAY_H */
