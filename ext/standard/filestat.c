@@ -571,7 +571,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 #ifndef PHP_WIN32
 #ifdef VIRTUAL_DIR
-	do {
+	{
 		char *tmpname;
 
 		if (virtual_filepath(filename, &tmpname TSRMLS_CC)) {
@@ -580,7 +580,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		}
 
 		filename = tmpname;
-	} while (0);
+	}
 #endif
 
 	switch (type) {
