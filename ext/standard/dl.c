@@ -88,8 +88,19 @@ void php_dl(pval *file, int type, pval *return_value)
 	zend_module_entry *module_entry,*tmp;
 	zend_module_entry *(*get_module)(void);
 	int error_type;
+	char *extension_dir;
 	PLS_FETCH();
 	ELS_FETCH();
+
+
+	if (type==MODULE_PERSISTENT) {
+		/* Use the configuration hash directly */
+		if (cfg_get_string("extension_dir", &extension_dir)==FAILURE) {
+			extension_dir = NULL;
+		}
+	} else {
+		extension_dir = PG(extension_dir);
+	}
 
 	if (type==MODULE_TEMPORARY) {
 		error_type = E_WARNING;
@@ -97,15 +108,15 @@ void php_dl(pval *file, int type, pval *return_value)
 		error_type = E_CORE_WARNING;
 	}
 
-	if (PG(extension_dir) && PG(extension_dir)[0]){
-		int extension_dir_len = strlen(PG(extension_dir));
+	if (extension_dir && extension_dir[0]){
+		int extension_dir_len = strlen(extension_dir);
 
 		libpath = emalloc(extension_dir_len+file->value.str.len+2);
 
-		if (IS_SLASH(PG(extension_dir)[extension_dir_len-1])) {
-			sprintf(libpath,"%s%s", PG(extension_dir), file->value.str.val); /* SAFE */
+		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+			sprintf(libpath,"%s%s", extension_dir, file->value.str.val); /* SAFE */
 		} else {
-			sprintf(libpath,"%s/%s", PG(extension_dir), file->value.str.val); /* SAFE */
+			sprintf(libpath,"%s/%s", extension_dir, file->value.str.val); /* SAFE */
 		}
 	} else {
 		libpath = estrndup(file->value.str.val, file->value.str.len);
