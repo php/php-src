@@ -26,7 +26,7 @@ install-data-local:
 			$(mkinstalldirs) $(peardir)/$$i; \
 		done; \
 		for i in $(PEAR_FILES); do \
-			dir=`echo $$i|sed 's%[^/][^/]*$%%'`; \
+			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
 			$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir; \
 		done; \
 	else \
