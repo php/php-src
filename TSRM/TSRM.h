@@ -21,6 +21,9 @@
 # undef VERSION
 #endif
 
+/* Only compile multi-threading functions if we're in ZTS mode */
+#ifdef ZTS
+
 #if WIN32||WINNT
 # include <windows.h>
 #elif defined(GNUPTH)
@@ -103,5 +106,7 @@ TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(TH
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* ZTS */
 
 #endif /* TSRM_H */
