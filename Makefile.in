@@ -86,7 +86,8 @@ LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@
 
 all: $(BINNAME)
 
-all-recursive clean-recursive distclean-recursive:
+all-recursive clean-recursive distclean-recursive \
+maintainer-clean-depend-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
 	for subdir in $(SUBDIRS); do \
 		target=`echo $@ | sed s/-recursive//`; \
@@ -139,6 +140,8 @@ distclean: clean distclean-recursive
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
 	-rm -f do-conf test/test.log extra/gd/bdf2gdfont
 	-rm -f doc/Makefile regex/Makefile
+
+maintainer-clean-depend: maintainer-clean-depend-recursive
 
 bench: $(BINNAME)
 	./$(BINNAME) -c. tests/bench.phtml

@@ -4,7 +4,7 @@
 
 makefiles=`echo ext/*/Makefile.am | sed -e 's/\.am//g'`
 sed -e "s#@@EXT_MAKEFILES@@#$makefiles#" configure.in.in > configure.in.new
-if ! cmp configure.in configure.in.new 2>/dev/null; then
+if ! cmp configure.in configure.in.new > /dev/null 2>&1; then
     mv configure.in.new configure.in
 else
     rm -f configure.in.new
@@ -17,7 +17,7 @@ if test "$confighfiles" != "ext/*/config.h.stub"; then
 	cat $file >> acconfig.h.new
     done
 fi
-if ! cmp acconfig.h acconfig.h.new 2>/dev/null; then
+if ! cmp acconfig.h acconfig.h.new > /dev/null 2>&1; then
     mv acconfig.h.new acconfig.h
     autoheader
 else

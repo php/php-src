@@ -4,6 +4,52 @@ dnl ODBC_LIBDIR
 dnl ODBC_LIBS
 dnl ODBC_LFLAGS
 
+dnl
+dnl Figure out which library file to link with for the Solid support.
+dnl
+AC_DEFUN(AC_FIND_SOLID_LIBS,[
+  AC_MSG_CHECKING([Solid library file])
+  ac_solid_uname_s=`uname -s 2>/dev/null`
+  case $ac_solid_uname_s in
+    AIX) ac_solid_os=a3x;;
+    HP-UX) ac_solid_os=h9x;;
+    IRIX) ac_solid_os=irx;;
+    Linux) ac_solid_os=lux;;
+    SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
+    FreeBSD) ac_solid_os=fbx;;
+    # "uname -s" on SCO makes no sense.
+  esac
+  ODBC_LIBS=`echo $1/scl${ac_solid_os}*.so | cut -d' ' -f1`
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/scl${ac_solid_os}*.a | cut -d' ' -f1`
+  fi
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/scl2x${ac_solid_os}*.a | cut -d' ' -f1`
+  fi
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/scl2x${ac_solid_os}*.a | cut -d' ' -f1`
+  fi
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
+  fi
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
+  fi
+  AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
+])
+
+dnl
+dnl Figure out which library file to link with for the Empress support.
+dnl
+AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
+  AC_MSG_CHECKING([Empress library file])
+  ODBC_LIBS=`echo $1/empodbc.so | cut -d' ' -f1`
+  if test ! -f $ODBC_LIBS; then
+    ODBC_LIBS=`echo $1/empodbc.a | cut -d' ' -f1`
+  fi
+  AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
+])
+
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Adabas support)
 AC_ARG_WITH(adabas,
@@ -46,7 +92,7 @@ AC_ARG_WITH(solid,
 	  ODBC_TYPE=solid
 	  AC_DEFINE(HAVE_SOLID)
 	  AC_MSG_RESULT(yes)
-	  AC_FIND_SOLID_LIBS($SOLID_LIBDIR)
+	  AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
   else
 	  AC_MSG_RESULT(no)
   fi

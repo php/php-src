@@ -96,7 +96,7 @@ zend_module_entry *php3_builtin_modules[] =
 	filepro_module_ptr,
 	sybase_module_ptr,
 	sybct_module_ptr,
-	uodbc_module_ptr,
+	odbc_module_ptr,
 	dbase_module_ptr,
 	hw_module_ptr,
 	regexp_module_ptr,
