@@ -17,7 +17,7 @@ for($i=0; $i<$r->numFields(); $i++) {
 	var_dump($r->fieldName($i));
 }
 echo "Unbuffered\n";
-$r = $db->queryUnbuffered("SELECT * from strings");
+$r = $db->unbufferedQuery("SELECT * from strings");
 for($i=0; $i<$r->numFields(); $i++) {
 	var_dump($r->fieldName($i));
 }

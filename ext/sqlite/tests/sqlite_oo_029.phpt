@@ -20,7 +20,7 @@ class sqlite_help
 
 	function getSingle($key)
 	{
-		return $this->db->querySingle('SELECT link_keywords(var) FROM strings WHERE key=\''.$key.'\'', 1);
+		return $this->db->singleQuery('SELECT link_keywords(var) FROM strings WHERE key=\''.$key.'\'', 1);
 	}
 
 	function linkers($str)

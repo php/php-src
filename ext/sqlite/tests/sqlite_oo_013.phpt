@@ -31,7 +31,7 @@ while ($r->valid()) {
 	$r->next();
 }
 echo "====UNBUFFERED====\n";
-$r = $db->queryUnbuffered("SELECT a, b from strings");
+$r = $db->unbufferedQuery("SELECT a, b from strings");
 while ($r->valid()) {
 	var_dump($r->column(0));
 	var_dump($r->column('b'));
