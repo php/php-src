@@ -738,47 +738,28 @@ static int array_data_compare(const void *a, const void *b)
 {
 	Bucket *f;
 	Bucket *s;
+	pval result;
 	pval *first;
 	pval *second;
-	double dfirst, dsecond;
-
+ 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
-
+ 
 	first = *((pval **) f->pData);
 	second = *((pval **) s->pData);
 
-	if ((first->type == IS_LONG || first->type == IS_DOUBLE) &&
-		(second->type == IS_LONG || second->type == IS_DOUBLE)) {
-		if (first->type == IS_LONG) {
-			dfirst = (double) first->value.lval;
-		} else {
-			dfirst = first->value.dval;
-		}
-		if (second->type == IS_LONG) {
-			dsecond = (double) second->value.lval;
-		} else {
-			dsecond = second->value.dval;
-		}
-		if (dfirst < dsecond) {
-			return -1;
-		} else if (dfirst == dsecond) {
-			return 0;
-		} else {
-			return 1;
-		}
-	}
-	if ((first->type == IS_LONG || first->type == IS_DOUBLE) &&
-		second->type == IS_STRING) {
+    if (compare_function(&result, first, second) == FAILURE) {
+        return 0;
+    } 
+
+	convert_to_long(&result);
+	if (result.value.lval < 0) {
 		return -1;
-	} else if ((first->type == IS_STRING) &&
-			   (second->type == IS_LONG || second->type == IS_DOUBLE)) {
+	} else if (result.value.lval > 0) {
 		return 1;
+	} else {
+		return 0;
 	}
-	if (first->type == IS_STRING && second->type == IS_STRING) {
-		return strcmp(first->value.str.val, second->value.str.val);
-	}
-	return 0;					/* Anything else is equal as it can't be compared */
 }
 
 static int array_reverse_data_compare(const void *a, const void *b)
