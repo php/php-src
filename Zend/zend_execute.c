@@ -2056,6 +2056,8 @@ send_by_ref:
 										if (new_op_array) {
 											pass_include_eval(new_op_array);
 										}	
+									} else {
+										fclose(file_handle.handle.fp);
 									}
 									if (opened_path) {
 										free(opened_path);
