@@ -171,7 +171,7 @@ function initialize()
     if ($windows_p) {
 	// modify path to help Windows find DLL files
 	$path = dirname($php) . ";" . getenv("PATH");
-	setenv("PATH={$path}");
+	putenv("PATH={$path}");
     }
 
     create_compiled_in_modules_list();
