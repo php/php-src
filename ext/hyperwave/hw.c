@@ -251,7 +251,7 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	efree(objrecs);
 
 	/* Array for statistics */
-	stat_arr = (zval *) emalloc(sizeof(zval));
+	MAKE_STD_ZVAL(stat_arr);
 	if (array_init(stat_arr) == FAILURE) {
 		return -1;
 	}
@@ -266,7 +266,6 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	/* Add the stat array */
 	zend_hash_next_index_insert((*return_value)->value.ht, &stat_arr, sizeof(zval), NULL);
 
-	/* The title array can now be freed, but I don't know how */
 	return 0;
 }
 
@@ -283,9 +282,9 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	int hasDescription = 0;
 	int hasKeyword = 0;
 
-	title_arr = (zval *) emalloc(sizeof(zval));
-	desc_arr = (zval *) emalloc(sizeof(zval));
-	keyword_arr = (zval *) emalloc(sizeof(zval));
+	MAKE_STD_ZVAL(title_arr);
+	MAKE_STD_ZVAL(desc_arr);
+	MAKE_STD_ZVAL(keyword_arr);
 
 	if (array_init(*return_value) == FAILURE) {
 		(*return_value)->type = IS_STRING;
@@ -348,18 +347,25 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	if(hasTitle) {
 		zend_hash_update((*return_value)->value.ht, "Title", 6, &title_arr, sizeof(zval *), NULL);
 
+	} else {
+		efree(title_arr);
 	}
+
 
 	if(hasDescription) {
 	/* Add the description array, if we have one */
 		zend_hash_update((*return_value)->value.ht, "Description", 12, &desc_arr, sizeof(zval *), NULL);
 
+	} else {
+		efree(desc_arr);
 	}
 
 	if(hasKeyword) {
 	/* Add the keyword array, if we have one */
 		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(zval *), NULL);
 
+	} else {
+		efree(keyword_arr);
 	}
 
 	/* All other attributes. Make a another copy first */
@@ -1664,13 +1670,12 @@ PHP_FUNCTION(hw_modifyobject) {
 /* }}} */
 
 void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
-	pval *arg1, *arg2, *arg3, *arg4, **objvIDs;
-	int link, type, dest=0, from=0;
+	pval *arg1, *arg2, *arg3, *arg4;
+	int link, type, dest=0, from=0, count;
 	HashTable *src_arr;
 	hw_connection *ptr;
 	int collIDcount, docIDcount, i, *docIDs, *collIDs;
 
-fprintf(stderr, "Copy/Move %d\n", mvcp);
 	switch(mvcp) {
 		case MOVE: /* Move also has fromID */
 			if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
@@ -1705,43 +1710,38 @@ fprintf(stderr, "Copy/Move %d\n", mvcp);
 
 	set_swap(ptr->swap_on);
 
-	if(NULL == (objvIDs = emalloc(zend_hash_num_elements(src_arr) * sizeof(pval *)))) {
+	count = zend_hash_num_elements(src_arr);
+	if(NULL == (collIDs = emalloc(count * sizeof(int)))) {
 		RETURN_FALSE;
 		}
 
-	if(getParametersArray(src_arr, zend_hash_num_elements(src_arr), objvIDs) == FAILURE) {
-		RETURN_FALSE;
-		}
-
-	if(NULL == (collIDs = emalloc(zend_hash_num_elements(src_arr) * sizeof(int)))) {
-		efree(objvIDs);
-		RETURN_FALSE;
-		}
-
-	if(NULL == (docIDs = emalloc(zend_hash_num_elements(src_arr) * sizeof(int)))) {
-		efree(objvIDs);
+	if(NULL == (docIDs = emalloc(count * sizeof(int)))) {
 		efree(collIDs);
 		RETURN_FALSE;
 		}
 
 	collIDcount = docIDcount = 0;
-	for(i=0; i<zend_hash_num_elements(src_arr); i++) {
+	zend_hash_internal_pointer_reset(src_arr);
+	for(i=0; i<count; i++) {
 		char *objrec;
-		if(objvIDs[i]->type == IS_LONG) {
-			if(0 != (ptr->lasterror = send_getobject(ptr->socket, objvIDs[i]->value.lval, &objrec))) {
-				efree(objvIDs);
+		zval *keydata, **keydataptr;
+		zend_hash_get_current_data(src_arr, (void **) &keydataptr);
+		keydata = *keydataptr;
+		if(keydata->type == IS_LONG) {
+			if(0 != (ptr->lasterror = send_getobject(ptr->socket, keydata->value.lval, &objrec))) {
 				efree(collIDs);
 				efree(docIDs);
 				RETURN_FALSE;
 			}
 			if(0 == fnAttributeCompare(objrec, "DocumentType", "collection"))
-				collIDs[collIDcount++] = objvIDs[i]->value.lval;
+				collIDs[collIDcount++] = keydata->value.lval;
 			else
-				docIDs[docIDcount++] = objvIDs[i]->value.lval;
+				docIDs[docIDcount++] = keydata->value.lval;
 			efree(objrec);
 		}
+		zend_hash_move_forward(src_arr);
 	}
-	efree(objvIDs);
+
 	if (0 != (ptr->lasterror = send_mvcpdocscoll(ptr->socket, docIDs, docIDcount, from, dest, mvcp))) {
 		efree(collIDs);
 		efree(docIDs);
