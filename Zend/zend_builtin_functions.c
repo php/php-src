@@ -122,9 +122,9 @@ static zend_function_entry builtin_functions[] = {
 };
 
 
-int zend_startup_builtin_functions()
+int zend_startup_builtin_functions(TSRMLS_D)
 {
-	return zend_register_functions(builtin_functions, NULL, MODULE_PERSISTENT);
+	return zend_register_functions(builtin_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 }
 
 
@@ -947,7 +947,7 @@ ZEND_FUNCTION(create_function)
 	eval_code = (char *) emalloc(eval_code_length);
 	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
 
-	eval_name = zend_make_compiled_string_description("runtime-created function");
+	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
 	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);
 	efree(eval_code);
 	efree(eval_name);

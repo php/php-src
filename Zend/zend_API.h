@@ -42,16 +42,12 @@
 #define ZEND_RINIT(module)       zend_rinit_##module
 #define ZEND_RSHUTDOWN(module)   zend_rshutdown_##module
 #define ZEND_MINFO(module)       zend_info_##module
-#define ZEND_GINIT(module)       zend_ginit_##module
-#define ZEND_GSHUTDOWN(module)   zend_gshutdown_##module
 
 #define ZEND_MINIT_FUNCTION(module)      int ZEND_MINIT(module)(INIT_FUNC_ARGS)
 #define ZEND_MSHUTDOWN_FUNCTION(module)  int ZEND_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_RINIT_FUNCTION(module)      int ZEND_RINIT(module)(INIT_FUNC_ARGS)
 #define ZEND_RSHUTDOWN_FUNCTION(module)  int ZEND_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MINFO_FUNCTION(module)      void ZEND_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
-#define ZEND_GINIT_FUNCTION(module)      int ZEND_GINIT(module)(GINIT_FUNC_ARGS)
-#define ZEND_GSHUTDOWN_FUNCTION(module)  int ZEND_GSHUTDOWN(module)(void)
 
 #define ZEND_GET_MODULE(name) \
 	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }
@@ -124,12 +120,12 @@ ZEND_API int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, 
 
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
-int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type);
-void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table);
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
+void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 
-ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry);
-ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name);
+ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
+ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
 
 ZEND_API zend_module_entry *zend_get_module(int module_number);
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length);

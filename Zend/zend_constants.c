@@ -160,7 +160,7 @@ void clean_non_persistent_constants(void)
 {
 	TSRMLS_FETCH();
 
-	zend_hash_apply(EG(zend_constants), (int (*)(void *)) clean_non_persistent_constant);
+	zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant);
 }
 
 

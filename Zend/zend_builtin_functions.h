@@ -21,6 +21,6 @@
 #ifndef ZEND_BUILTIN_FUNCTIONS_H
 #define ZEND_BUILTIN_FUNCTIONS_H
 
-int zend_startup_builtin_functions(void);
+int zend_startup_builtin_functions(TSRMLS_D);
 
 #endif /* ZEND_BUILTIN_FUNCTIONS_H */

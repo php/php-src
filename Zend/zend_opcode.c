@@ -302,7 +302,7 @@ int pass_two(zend_op_array *op_array)
 int print_class(zend_class_entry *class_entry)
 {
 	printf("Class %s:\n", class_entry->name);
-	zend_hash_apply(&class_entry->function_table, (int (*)(void *)) pass_two);
+	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two);
 	printf("End of class %s.\n\n", class_entry->name);
 	return 0;
 }

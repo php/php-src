@@ -205,7 +205,7 @@ extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handl
 void zend_activate(TSRMLS_D);
 void zend_deactivate(TSRMLS_D);
 void zend_activate_modules(void);
-void zend_deactivate_modules(void);
+void zend_deactivate_modules(TSRMLS_D);
 
 
 int lex_scan(zval *zendlval TSRMLS_DC);
@@ -388,7 +388,7 @@ void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
-ZEND_API char *zend_make_compiled_string_description(char *name);
+ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 

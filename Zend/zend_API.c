@@ -1025,7 +1025,7 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 
 
 /* registers all functions in *library_functions in the function hash */
-int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type)
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC)
 {
 	zend_function_entry *ptr = functions;
 	zend_function function;
@@ -1033,7 +1033,6 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	int count=0,unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	TSRMLS_FETCH();
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1052,7 +1051,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 		internal_function->function_name = ptr->fname;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
-			zend_unregister_functions(functions, count, target_function_table);
+			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 			return FAILURE;
 		}
 		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &function, sizeof(zend_function), NULL) == FAILURE) {
@@ -1069,7 +1068,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 			}
 			ptr++;
 		}
-		zend_unregister_functions(functions, count, target_function_table);
+		zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1078,12 +1077,11 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 /* count=-1 means erase all functions, otherwise, 
  * erase the first count functions
  */
-void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table)
+void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC)
 {
 	zend_function_entry *ptr = functions;
 	int i=0;
 	HashTable *target_function_table = function_table;
-	TSRMLS_FETCH();
 
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
@@ -1104,10 +1102,12 @@ void zend_unregister_functions(zend_function_entry *functions, int count, HashTa
 
 ZEND_API int zend_register_module(zend_module_entry *module)
 {
+	TSRMLS_FETCH();
+
 #if 0
 	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
 #endif
-	if (module->functions && zend_register_functions(module->functions, NULL, module->type)==FAILURE) {
+	if (module->functions && zend_register_functions(module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
 		return FAILURE;
 	}
@@ -1118,6 +1118,8 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 
 void module_destructor(zend_module_entry *module)
 {
+	TSRMLS_FETCH();
+
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
@@ -1133,7 +1135,7 @@ void module_destructor(zend_module_entry *module)
 	}
 	module->module_started=0;
 	if (module->functions) {
-		zend_unregister_functions(module->functions, -1, NULL);
+		zend_unregister_functions(module->functions, -1, NULL TSRMLS_CC);
 	}
 
 #if HAVE_LIBDL
@@ -1196,10 +1198,9 @@ int zend_next_free_module(void)
  * If both parent_ce and parent_name are NULL it does a regular class registration
  * If parent_name is specified but not found NULL is returned
  */
-ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name)
+ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC)
 {
 	zend_class_entry *register_class;
-	TSRMLS_FETCH();
 
 	if (!parent_ce && parent_name) {
 			if (zend_hash_find(CG(class_table), parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
@@ -1207,7 +1208,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 			}
 	}
 
-	register_class = zend_register_internal_class(class_entry);
+	register_class = zend_register_internal_class(class_entry TSRMLS_CC);
 
 	if (parent_ce) {
 		zend_do_inheritance(register_class, parent_ce);
@@ -1215,11 +1216,10 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 	return register_class;
 }
 
-ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry)
+ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC)
 {
 	zend_class_entry *register_class;
 	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);
-	TSRMLS_FETCH();
 
 	zend_str_tolower(lowercase_name, class_entry->name_length);
 
@@ -1233,7 +1233,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 
 
 	if (class_entry->builtin_functions) {
-		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT);
+		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
@@ -1298,7 +1298,7 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 		return FAILURE;
 	}
 	disabled_function[0].fname = function_name;
-	return zend_register_functions(disabled_function, CG(function_table), MODULE_PERSISTENT);
+	return zend_register_functions(disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
 }
 
 zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
