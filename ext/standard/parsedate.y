@@ -151,8 +151,8 @@ typedef union _date_ll {
 static int yylex (YYSTYPE *lvalp, void *parm);
 %}
 
-/* This grammar has 24 shift/reduce conflicts. */
-%expect 36
+/* This grammar has 56 shift/reduce conflicts. */
+%expect 56
 %pure_parser
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tWZONE tZZONE
