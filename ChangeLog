@@ -1,3 +1,23 @@
+1999-10-18  Egon Schmid  <eschmid@delos.lf.net>
+
+    * ext/standard/formatted_print.c: More forgotten prototypes.
+
+1999-10-18  Stefan Roehrich  <sr@linux.de>
+
+    * MAINTAINERS:
+    Added zlib module to list of maintained extensions. (Stefan).
+
+1999-10-18  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+    * ext/standard/var.c: (PHP unserialize) - fixed mem-leak.
+
+1999-10-18  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-17  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/gd/Makefile.am
