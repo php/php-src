@@ -81,28 +81,28 @@ typedef void (*zend_object_cast_t)(zval *readobj, zval *writeobj, int type, int 
 
 typedef struct _zend_object_handlers {
 	/* general object functions */
-	zend_object_add_ref_t                    add_ref;
-	zend_object_del_ref_t                    del_ref;
-	zend_object_delete_obj_t                 delete_obj;
-	zend_object_clone_obj_t                  clone_obj;	
+	zend_object_add_ref_t					add_ref;
+	zend_object_del_ref_t					del_ref;
+	zend_object_delete_obj_t				delete_obj;
+	zend_object_clone_obj_t					clone_obj;	
 	/* individual object functions */
-	zend_object_read_property_t              read_property;
-	zend_object_write_property_t             write_property;
-	zend_object_write_dimension_t            write_dimension;
-	zend_object_get_property_ptr_t           get_property_ptr;
-	zend_object_get_property_zval_ptr_t      get_property_zval_ptr;
-	zend_object_get_t                        get;
-	zend_object_set_t                        set;
-	zend_object_has_property_t               has_property;
-	zend_object_unset_property_t             unset_property;
-	zend_object_get_properties_t             get_properties;
-	zend_object_get_method_t                 get_method;
-	zend_object_call_method_t                call_method;
-	zend_object_get_constructor_t            get_constructor;
-	zend_object_get_class_entry_t            get_class_entry;
-	zend_object_get_class_name_t             get_class_name;
-	zend_object_compare_t                    compare_objects;
-	zend_object_cast_t                       cast_object;
+	zend_object_read_property_t				read_property;
+	zend_object_write_property_t			write_property;
+	zend_object_write_dimension_t			write_dimension;
+	zend_object_get_property_ptr_t			get_property_ptr;
+	zend_object_get_property_zval_ptr_t		get_property_zval_ptr;
+	zend_object_get_t						get;
+	zend_object_set_t						set;
+	zend_object_has_property_t				has_property;
+	zend_object_unset_property_t			unset_property;
+	zend_object_get_properties_t			get_properties;
+	zend_object_get_method_t				get_method;
+	zend_object_call_method_t				call_method;
+	zend_object_get_constructor_t			get_constructor;
+	zend_object_get_class_entry_t			get_class_entry;
+	zend_object_get_class_name_t			get_class_name;
+	zend_object_compare_t					compare_objects;
+	zend_object_cast_t						cast_object;
 } zend_object_handlers;
 
 extern zend_object_handlers std_object_handlers;
