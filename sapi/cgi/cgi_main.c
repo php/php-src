@@ -1413,7 +1413,7 @@ consult the installation file that came with this distribution, or visit \n\
 				while (c != 10 && c != 13) {
 					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
 				}
-				CG(zend_lineno) = -2;
+				CG(start_lineno) = 2;
 			} else {
 				rewind(file_handle.handle.fp);
 			}
