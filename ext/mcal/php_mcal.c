@@ -459,7 +459,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	CALEVENT *myevent;
 	int myargcount=ZEND_NUM_ARGS();
 	
-	if (myargcount < 1 || myargcount > 3 || zend_get_parameters_ex(myargcount, &streamind, &eventid, &options) == FAILURE) {
+	if (myargcount < 2 || myargcount > 3 || zend_get_parameters_ex(myargcount, &streamind, &eventid, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(streamind);
