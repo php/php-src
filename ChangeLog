@@ -1,3 +1,121 @@
+2000-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c:
+    Align ZTS handling of globals with common usage
+
+2000-12-10  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php_apache.c: fix win32 apache module
+
+    * sapi/apache/php_apache.c: fix windows build
+
+2000-12-10  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+    - Merge message about assinging new MyClass() expressions by reference.
+
+    * NEWS: - Add NEWS about being able to assign new's by ref
+
+2000-12-10  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c: [whitespace] make this code a bit less dense.
+
+2000-12-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Function_Cache.php
+      pear/Makefile.in: Initial commit of Function_Cache.
+
+2000-12-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/string.c: Added constants for locale categories.
+
+    * ext/gettext/gettext.c
+      ext/gettext/php_gettext.h: Moved the constants into ext/standard
+
+2000-12-10  James Moore  <James@phpuk.org>
+
+    * ext/shmop/shmop.c:
+    Making the shmop phpinfo entry look the same as others.
+
+2000-12-10  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c: For nice looking error output. ;)
+
+    * ext/sablot/sablot.c: Fix crash on error handler.
+    Speed up a bit (only loop through errors when necessary).
+
+2000-12-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/mysql/008.phpt
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/sybase.php:
+    * added setOption/getOption to DB_common.  "optimize" is the first supported
+      option, possible values are "performance" (default) and "portability".
+    * added modifyQuery to DB_common (does nothing) and an implementation
+      in DB_mysql that patches "DELETE FROM table" queries in "optimize
+      portability" mode so affectedRows returns the right value
+
+    * pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/odbc.php: * implemented numCols and transactions for ODBC
+    * added "not capable" versions of affectedRows, errorNative, nextId
+      and createSequence to DB_common.
+
+    * pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php:
+    * make sure all DB backends call the DB_common constructor
+    * removed more duplicated code that can use DB_common defaults
+      (execute/prepare emulation, "not capable" versions of transaction functions
+      and numRows).
+    * implemented numRows for msql and mssql (untested)
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php:
+    * DB::isManip counts "REPLACE" as a manipulation command (MySQL specific)
+    * renamed DB_common::execute_emulate_query to DB_common::executeEmulateQuery
+    * moved "query" DB method to DB_common, there was duplicated logic in query
+      and simpleQuery in all backends.
+
+    * pear/DB/STATUS
+      pear/DB/mysql.php
+      pear/DB/tests/mysql/009.phpt
+      pear/DB/tests/numrows.inc
+      pear/DB/tests/pgsql/009.phpt: * added numRows tests for mysql and pgsql
+
+    * pear/DB/pgsql.php:
+    * removed some logic duplication, "SELECT" (not "SELECT INTO" is now
+      the only command that will return a result object.
+
+2000-12-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/php_gd.h: Kills one compile warning.
+
 2000-12-09  Sascha Schumann  <sascha@schumann.cx>
 
     * ltconfig: Enabled improved shared library handling on HP-UX 11.
