@@ -3584,6 +3584,7 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
 
 	if (iter) {
+		iter->index = 0;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
 		}
@@ -3612,6 +3613,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	ulong int_key;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
+	int key_type;
 
 	PZVAL_LOCK(array);
 
@@ -3629,16 +3631,29 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 				return 0; /* CHECK_ME */
 			}
+			key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
 			break;
 
 		case ZEND_ITER_OBJECT:
 			/* !iter happens from exception */
+			if (iter && iter->index++) {
+				/* This could cause an endless loop if index becomes zero again.
+				 * In case that ever happens we need an additional flag. */
+				iter->funcs->move_forward(iter TSRMLS_CC);
+			}
 			if (!iter || iter->funcs->has_more(iter TSRMLS_CC) == FAILURE) {
 				/* reached end of iteration */
 				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 				return 0; /* CHECK_ME */
 			}	
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			if (iter->funcs->get_current_key) {
+				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+			} else {
+				key_type = HASH_KEY_IS_LONG;
+				int_key = iter->index;
+			}
+
 			break;
 	}
 
@@ -3653,10 +3668,8 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ALLOC_ZVAL(key);
 	INIT_PZVAL(key);
-	
-	switch (iter ?
-			iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC) :
-			zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL)) {
+
+	switch (key_type) {
 		case HASH_KEY_IS_STRING:
 			key->value.str.val = str_key;
 			key->value.str.len = str_key_len-1;
@@ -3670,9 +3683,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 
-	if (iter) {
-		iter->funcs->move_forward(iter TSRMLS_CC);
-	} else {
+	if (!iter) {
 		zend_hash_move_forward(fe_ht);
 	}
 
