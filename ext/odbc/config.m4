@@ -536,11 +536,12 @@ fi
 
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
-    if test "$shared" != "yes"; then
-      PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    fi
+    ext_shared=$shared
+    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
   fi
+
   AC_DEFINE(HAVE_UODBC,1,[ ])
+  PHP_SUBST(ODBC_SHARED_LIBADD)
   PHP_SUBST(ODBC_INCDIR)
   PHP_SUBST(ODBC_LIBDIR)
   PHP_SUBST_OLD(ODBC_INCLUDE)
@@ -548,5 +549,5 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
 
-  PHP_NEW_EXTENSION(odbc, php_odbc.c, $shared,, $ODBC_INCLUDE)
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, $ODBC_INCLUDE)
 fi
