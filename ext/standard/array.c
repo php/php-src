@@ -521,7 +521,7 @@ static int array_user_compare(const void *a, const void *b)
 	Bucket *s;
 	pval **args[2];
 	pval *retval_ptr;
-	CLS_FETCH();
+	ELS_FETCH();
 	BLS_FETCH();
 
 	f = *((Bucket **) a);
@@ -530,7 +530,7 @@ static int array_user_compare(const void *a, const void *b)
 	args[0] = (pval **) f->pData;
 	args[1] = (pval **) s->pData;
 
-	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL)==SUCCESS
+	if (call_user_function_ex(EG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL)==SUCCESS
 		&& retval_ptr) {
 		long retval;
 
@@ -609,7 +609,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	pval *args[2];
 	pval retval;
 	int status;
-	CLS_FETCH();
+	ELS_FETCH();
 	BLS_FETCH();
 
 	args[0] = &key1;
@@ -637,7 +637,7 @@ static int array_user_key_compare(const void *a, const void *b)
 		Z_TYPE(key2) = IS_LONG;
 	}
 
-	status = call_user_function(CG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args);
+	status = call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args);
 	
 	zval_dtor(&key1);
 	zval_dtor(&key2);
@@ -958,7 +958,6 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	ulong  num_key;
 	HashPosition pos;
 	BLS_FETCH();
-	CLS_FETCH();
 	ELS_FETCH();
 
 	/* Allocate space for key */
