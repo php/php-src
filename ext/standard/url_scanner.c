@@ -362,6 +362,8 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 				}
 			}
 			break;
+		default:
+			break;
 		}
 
 		*outp++=*src++;
