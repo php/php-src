@@ -104,7 +104,6 @@ ext/oci8
 ext/pcre
 --------
     * Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time, maybe
-    * Add option to preg_grep() to return entries that _don't_ match
 
 ext/pgsql
 ---------
@@ -136,7 +135,6 @@ ext/sockets
 ext/standard
 ------------
     * Add a version number to data serialized via serialize().
-    * array_add(). (Andrei)
     * Possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * Implement regex-cache for url-functions.
@@ -161,7 +159,6 @@ ext/wddx
     * See if we can support the remaining data types:
         dateTime
         binary
-        recordset
 
         http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
         (Andrei)
