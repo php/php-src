@@ -66,7 +66,8 @@ PHP_FUNCTION(dl)
 
 #ifdef ZTS
 	if ((strcmp(sapi_module.name, "cgi")!=0) && (strcmp(sapi_module.name, "cli")!=0)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Not supported in multithreaded Web servers - use extension statements in your php.ini");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension statements in your php.ini");
+		RETURN_FALSE;
 	}
 #endif
 
@@ -78,9 +79,9 @@ PHP_FUNCTION(dl)
 	convert_to_string_ex(file);
 
 	if (!PG(enable_dl)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Dynamically loaded extentions aren't enabled");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extentions aren't enabled");
 	} else if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Dynamically loaded extensions aren't allowed when running in Safe Mode");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't allowed when running in Safe Mode");
 	} else {
 		php_dl(*file, MODULE_TEMPORARY, return_value TSRMLS_CC);
 		EG(full_tables_cleanup) = 1;
