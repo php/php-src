@@ -1049,7 +1049,7 @@ PHP_FUNCTION(xml_parser_create)
 }
 /* }}} */
 
-/* {{{ proto int xml_parser_create_ns([string encoding][, string sep]) 
+/* {{{ proto int xml_parser_create_ns([string encoding [, string sep]]) 
    Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
 {
