@@ -196,6 +196,7 @@
 				$this->private_functions[$attr['name']] = $function;
 				break;
 			case "public":
+				if(is_string($function->status)) $this->error($function->status." in prototype");
 				$this->functions[$attr['name']] = $function;
 				break;
 			default:
