@@ -268,6 +268,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 			assert(buf != NULL);
 			php_stream_write(stream, buf, length);
 		}
+		ms = stream->abstract;
 		ms->mode = mode;
 	}
 	return stream;
