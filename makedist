@@ -30,7 +30,7 @@
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
 ZENDROOT=:pserver:cvsread@cvs.zend.com:/repository
 PHPMOD=php4
-ZENDMOD=libzend
+ZENDMOD=Zend
 TSRMMOD=TSRM
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
 

@@ -159,7 +159,7 @@ else
   ZEND_SCANNER_TYPE=c
 fi  
 
-ZEND_SCANNER="libzend_${ZEND_SCANNER_TYPE}.la"
+ZEND_SCANNER="libZend_${ZEND_SCANNER_TYPE}.la"
 
 if test "$ZEND_MEMORY_LIMIT" = "yes"; then
   AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])

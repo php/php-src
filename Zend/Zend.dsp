@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="libzend" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="Zend" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libzend - Win32 Debug
+CFG=Zend - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "libzend.mak".
+!MESSAGE NMAKE /f "libZend.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libzend.mak" CFG="libzend - Win32 Debug"
+!MESSAGE NMAKE /f "libZend.mak" CFG="Zend - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libzend - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "libzend - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "Zend - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "Zend - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=libzend - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "Zend - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Output_Dir "Release"
@@ -50,7 +50,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "Zend - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Output_Dir "Debug"
@@ -75,8 +75,8 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "libzend - Win32 Release"
-# Name "libzend - Win32 Debug"
+# Name "Zend - Win32 Release"
+# Name "Zend - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -276,7 +276,7 @@ SOURCE=.\zend_variables.h
 
 SOURCE=".\zend-parser.y"
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "Zend - Win32 Release"
 
 # Begin Custom Build
 InputDir=.
@@ -293,7 +293,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "Zend - Win32 Debug"
 
 # Begin Custom Build
 InputDir=.
@@ -321,7 +321,7 @@ BuildCmds= \
 
 SOURCE=".\zend-scanner.l"
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "Zend - Win32 Release"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"
@@ -331,7 +331,7 @@ InputPath=".\zend-scanner.l"
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "Zend - Win32 Debug"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"

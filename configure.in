@@ -111,8 +111,8 @@ if test "$ac_cv_c_const" = "yes" ; then
 fi
 AC_SUBST(LEX_CFLAGS)
 
-sinclude(libzend/acinclude.m4)
-sinclude(libzend/libzend.m4)
+sinclude(Zend/acinclude.m4)
+sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
 
 dnl check for -R, etc. switch
@@ -156,7 +156,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-INCLUDES="-I\$(top_builddir)/libzend -I\$(top_srcdir) -I\$(top_srcdir)/libzend"
+INCLUDES="-I\$(top_builddir)/Zend -I\$(top_srcdir) -I\$(top_srcdir)/Zend"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
@@ -755,7 +755,7 @@ if test "$PHP_THREAD_SAFETY" = "yes"; then
 fi
 	
 #libphp4.module 
-AC_OUTPUT([Makefile php4.spec libzend/Makefile ext/Makefile sapi/Makefile pear/Makefile
+AC_OUTPUT([Makefile php4.spec Zend/Makefile ext/Makefile sapi/Makefile pear/Makefile
            $PHP_OUTPUT_FILES
            scripts/mkextlib build-defs.h], [], [
 
@@ -767,7 +767,7 @@ if test ! -f $srcdir/ext/bcmath/number.c; then
 fi
 
 test -d TSRM && echo '#include "../php_config.h"' > TSRM/tsrm_config.h
-echo '#include "../php_config.h"' > libzend/zend_config.h
+echo '#include "../php_config.h"' > Zend/zend_config.h
 
 # run this only when generating all the files?
 if true; then

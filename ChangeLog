@@ -245,7 +245,7 @@
 
     * build.mk
       configure.in:
-    Build structure change. Instead of using an external configure for libzend
+    Build structure change. Instead of using an external configure for Zend
     and TSRM, the core code of these configures was separated into extra m4
     files which we can now include into PHP's configure. Advantages:
 
@@ -875,7 +875,7 @@
 
     * ext/standard/config.h.stub
       ext/standard/dl.c
-      ext/standard/dl.h: in libzend).
+      ext/standard/dl.h: in Zend).
 
 1999-12-04  Sascha Schumann  <sascha@schumann.cx>
 
@@ -1292,7 +1292,7 @@
     * sapi/servlet/config.m4: use new PHP_BUILD_THREAD_SAFE macro
 
     * ext/standard/parsedate.y:
-    libzend/zend_compile.h's #define YYSTYPE causes parsedate to barf on Windows
+    Zend/zend_compile.h's #define YYSTYPE causes parsedate to barf on Windows
 
 1999-12-01  Thies C. Arntzen  <thies@digicol.de>
 
@@ -1432,7 +1432,7 @@
 1999-11-29  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/aolserver/aolserver.c:
-    Revert last patch (leak in libzend is fixed now)
+    Revert last patch (leak in Zend is fixed now)
 
 1999-11-29  Stig Bakken  <ssb@fast.no>
 
@@ -2181,7 +2181,7 @@
 
     * NEWS
       ext/standard/array.c:
-    (PHP k[r]sort) now use compare_function from libzend to be consistent with the language-core.
+    (PHP k[r]sort) now use compare_function from Zend to be consistent with the language-core.
 
 1999-11-14  Andi Gutmans  <andi@php.net>
 
@@ -2538,7 +2538,7 @@
     - PHP-specific changes are easier to maintain
     - it removes one dependency for users (i.e. GNU vs. FreeBSD ports)
 
-    I have not removed the libtool check in buildconf, since libzend/TSRM still
+    I have not removed the libtool check in buildconf, since Zend/TSRM still
     depend on a local version of libtool.
 
     * ext/snmp/snmp.c:
@@ -3248,7 +3248,7 @@
     * build.mk: (build.mk) fix suggested by sascha.
 
     * build.mk:
-    (build.mk) make cvsclean now also deletes the libzend & TSRM symlinks.
+    (build.mk) make cvsclean now also deletes the Zend & TSRM symlinks.
 
 1999-10-10  Sascha Schumann  <sascha@schumann.cx>
 
@@ -4156,7 +4156,7 @@
 
     * configure.in.in
       Makefile.in:
-        Now thread safe version builds out of the box. libzend/TSRM
+        Now thread safe version builds out of the box. Zend/TSRM
         contain extra config scripts which pass the necessary libs back
         to our Makefile.
 
@@ -6797,7 +6797,7 @@
       ext/com/COM.c: - Fix the new operator incompatibility.
     - I commented PHP_FUNCTION(strtotime) in datetime.c because it stopped
       win32 from compiling. This needs to be fixed!!!
-    - Check out libzend to compile the tree now.
+    - Check out Zend to compile the tree now.
 
 1999-07-25  Stig Bakken  <ssb@fast.no>
 
@@ -6947,7 +6947,7 @@
 
 1999-07-23  Zeev Suraski  <zeev@php.net>
 
-    * ext/gd/gd.c: Fix bug #1807 (requires libzend update)
+    * ext/gd/gd.c: Fix bug #1807 (requires Zend update)
 
 1999-07-23  Sascha Schumann  <sascha@schumann.cx>
 
@@ -7028,7 +7028,7 @@
 1999-07-22  Stig Bakken  <ssb@fast.no>
 
     * buildconf:
-    add checks for autoconf, automake and whether libzend/TSRM is around
+    add checks for autoconf, automake and whether Zend/TSRM is around
 
 1999-07-22  Sascha Schumann  <sascha@schumann.cx>
 
@@ -8553,13 +8553,13 @@
 
     * Makefile.in
       configure.in.in: - fix APXS VPATH build
-    - libzend/TSRM build in their own directories
+    - Zend/TSRM build in their own directories
     - ext/Makefile was generated twice
 
     ****NOTE******
 
     If you use any kind of VPATH, you need to do a "make distclean" in your
-    libzend/TSRM directory, before running configure again.
+    Zend/TSRM directory, before running configure again.
 
 1999-05-29  Zeev Suraski  <zeev@php.net>
 
@@ -8825,7 +8825,7 @@
 
     * cgi_main.c
       main.c: * Minor fixes
-    * Better handling for multiple repeated memory leaks (libzend updated)
+    * Better handling for multiple repeated memory leaks (Zend updated)
 
     * ext/apache/apache.c
       apMakefile.tmpl
@@ -9279,7 +9279,7 @@
       php_regex.h
       request_info.c
       snprintf.c: * Get Apache to work.  POST doesn't work yet.
-    * There are now -I directives for the absolute path of php4, php4/libzend and the builddir for
+    * There are now -I directives for the absolute path of php4, php4/Zend and the builddir for
       the Apache module, so we can #include any php/Zend header.
     * Rename config.h to php_config.h
 
@@ -9498,7 +9498,7 @@
 
     * acconfig.h.in
       configure.in.in: ZTS fixes
-    Stig - --enable-thread-safety belongs in libzend, since libzend doesn't #include config.h, whereas
+    Stig - --enable-thread-safety belongs in Zend, since Zend doesn't #include config.h, whereas
     PHP does #include zend_config.h
 
 1999-05-03  Zeev Suraski  <zeev@php.net>
@@ -9823,7 +9823,7 @@
       configure.in.in
       ext/ldap/config.m4: Ok, this beast compiles via --with-apxs
     Not sure if it actually works yet though.  I have a feeling there are
-    some -fpic flags missing in the libzend build.  Will test later on
+    some -fpic flags missing in the Zend build.  Will test later on
     today.
 
 1999-04-25  Sascha Schumann  <sascha@schumann.cx>
@@ -10548,7 +10548,7 @@
 
 1999-04-19  Stig Bakken  <ssb@fast.no>
 
-    * buildconf: convert libzend to automake
+    * buildconf: convert Zend to automake
 
 1999-04-19  Andi Gutmans  <andi@php.net>
 
@@ -10603,7 +10603,7 @@
     moved dbase into ext/ along with the bundled library
     dbase programs are no longer included
 
-    * buildconf: run automake and run autoconf in libzend
+    * buildconf: run automake and run autoconf in Zend
 
 1999-04-18  Zeev Suraski  <zeev@php.net>
 
@@ -10759,10 +10759,10 @@
     sub-directories and started to move extension code into ext/<name>.  For now,
     I have moved the "standard" extension (which is quite a mix of everything
     right now) and the GD extension into their own subdirs in ext/.
-    The configure script now also runs configure in the libzend directory
-    automatically and makes sure php4 and libzend use the same config.cache file.
-    To avoid running configure in libzend, use the --no-recursion option.
-    "make" in php4 also builds libzend now.
+    The configure script now also runs configure in the Zend directory
+    automatically and makes sure php4 and Zend use the same config.cache file.
+    To avoid running configure in Zend, use the --no-recursion option.
+    "make" in php4 also builds Zend now.
     The Apache module doesn't compile right now, but a fix for that is
     coming up.
 

@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="libzendts" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="ZendTS" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libzendts - Win32 Debug_TS
+CFG=ZendTS - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "libzendts.mak".
+!MESSAGE NMAKE /f "ZendTS.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libzendts.mak" CFG="libzendts - Win32 Debug_TS"
+!MESSAGE NMAKE /f "ZendTS.mak" CFG="ZendTS - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libzendts - Win32 Release_TS" (based on "Win32 (x86) Static Library")
-!MESSAGE "libzendts - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "ZendTS - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "ZendTS - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=libzendts - Win32 Debug_TS
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
+!IF  "$(CFG)" == "ZendTS - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Output_Dir "Release_TS"
@@ -50,7 +50,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Output_Dir "Debug_TS"
@@ -75,8 +75,8 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "libzendts - Win32 Release_TS"
-# Name "libzendts - Win32 Debug_TS"
+# Name "ZendTS - Win32 Release_TS"
+# Name "ZendTS - Win32 Debug_TS"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -280,7 +280,7 @@ SOURCE=.\zend_variables.h
 
 SOURCE=".\zend-parser.y"
 
-!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
+!IF  "$(CFG)" == "ZendTS - Win32 Release_TS"
 
 # Begin Custom Build
 InputDir=.
@@ -298,7 +298,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Debug_TS"
 
 # Begin Custom Build
 InputDir=.
@@ -327,7 +327,7 @@ BuildCmds= \
 
 SOURCE=".\zend-scanner.l"
 
-!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
+!IF  "$(CFG)" == "ZendTS - Win32 Release_TS"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"
@@ -337,7 +337,7 @@ InputPath=".\zend-scanner.l"
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Debug_TS"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"

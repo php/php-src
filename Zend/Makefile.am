@@ -3,13 +3,13 @@
 #CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
 
 AUTOMAKE_OPTIONS=foreign
-EXTRA_LTLIBRARIES=libzend_cc.la libzend_c.la
-noinst_LTLIBRARIES=$(ZEND_SCANNER) libzend.la
+EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
+noinst_LTLIBRARIES=$(ZEND_SCANNER) libZend.la
 
-libzend_cc_la_SOURCES=zend-scanner-cc.cc
-libzend_c_la_SOURCES=zend-scanner.c
+libZend_cc_la_SOURCES=zend-scanner-cc.cc
+libZend_c_la_SOURCES=zend-scanner.c
 
-libzend_la_SOURCES=\
+libZend_la_SOURCES=\
 	zend-parser.y \
 	zend_alloc.c zend_compile.c zend_constants.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
@@ -17,9 +17,9 @@ libzend_la_SOURCES=\
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
 	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c
 
-libzend_la_LIBADD = $(ZEND_SCANNER)
-libzend_la_LDFLAGS = @EXTRA_LIBS@
-libzend_la_DEPENDENCIES = $(ZEND_SCANNER)
+libZend_la_LIBADD = $(ZEND_SCANNER)
+libZend_la_LDFLAGS = @EXTRA_LIBS@
+libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 # automake isn't too clever about "non-standard" use of lex and yacc
 

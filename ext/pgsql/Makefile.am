@@ -1,7 +1,7 @@
 # $Id$
 
 SRC=pgsql.c
-INCLUDES=@INCLUDES@ @PGSQL_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @PGSQL_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 noinst_LTLIBRARIES=@PGSQL_STATIC@
 EXTRA_LTLIBRARIES=libphpext_pgsql.la pgsql.la
 libphpext_pgsql_la_SOURCES=$(SRC)

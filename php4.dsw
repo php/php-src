@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "libzend"=..\libzend\libzend.dsp - Package Owner=<4>
+Project: "Zend"=..\Zend\Zend.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name libzend
+    Project_Dep_Name Zend
     End Project Dependency
 }}}
 

@@ -1,7 +1,7 @@
 # $Id$
 
 SRC=php_mysql.c
-INCLUDES=@INCLUDES@ @MYSQL_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @MYSQL_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 noinst_LTLIBRARIES=@MYSQL_STATIC@
 EXTRA_LTLIBRARIES=libphpext_mysql.la mysql.la
 libphpext_mysql_la_SOURCES=$(SRC)

@@ -2,6 +2,6 @@
 
 STD='make -f Makefile.am LEX=flex YACC="bison -y" srcdir=.'
 
-(cd libzend && eval "$STD zend-parser.c zend-scanner.c zend-scanner-cc.cc")
+(cd Zend && eval "$STD zend-parser.c zend-scanner.c zend-scanner-cc.cc")
 eval "$STD configuration-parser.c configuration-scanner.c"
 (cd ext/standard && eval "$STD parsedate.c")
