@@ -28,7 +28,7 @@ AC_ARG_WITH(apxs,
 		APACHE_HAS_REGEX=yes
 	fi
 	if `echo $APXS_CFLAGS|grep EAPI>/dev/null`; then
-	   CPPFLAGS="$CPPFLAGS -DUSE_EAPI"
+	   CPPFLAGS="$CPPFLAGS -DEAPI=1"
 	fi
 	PHP_SAPI=apache
 	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
