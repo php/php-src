@@ -174,7 +174,7 @@ PHP_MINFO_FUNCTION(vpopmail)
  */
 
 /* {{{ proto bool vpopmail_add_domain(string domain, string dir, int uid, int gid)
-   Add a new virtual domain */
+   Adds a new virtual domain */
 PHP_FUNCTION(vpopmail_add_domain)
 {
 	zval **domain;
@@ -215,7 +215,7 @@ PHP_FUNCTION(vpopmail_add_domain)
 /* }}} */
 
 /* {{{ proto bool vpopmail_del_domain(string domain)
-   Delete a virtual domain */
+   Deletes a virtual domain */
 PHP_FUNCTION(vpopmail_del_domain)
 {
 	zval **domain;
@@ -242,7 +242,7 @@ PHP_FUNCTION(vpopmail_del_domain)
 /* }}} */
 
 /* {{{ proto bool vpopmail_add_alias_domain(string domain, string aliasdomain)
-   Add an alias for a virtual domain */
+   Adds an alias for a virtual domain */
 PHP_FUNCTION(vpopmail_add_alias_domain)
 {
 	zval **domain;
@@ -285,7 +285,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 		RETURN_FALSE;
 	}
 
-	if (add_domain_assign(Z_STRVAL_PP(aliasdomain), Dir, uid, gid) != 0) {
+	if (add_domain_assign(Z_STRVAL_PP(aliasdomain), Dir, uid, gid) != 1) {
 		php_error(E_WARNING, "vpopmail_addaliasdomain could not add domain to control files");
 		VPOPMAILG(vpopmail_errno) = 1;
 		RETURN_FALSE;
@@ -303,7 +303,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
  */
 
 /* {{{ proto bool vpopmail_add_domain_ex(string domain, string passwd [, string quota [, string bounce [, bool apop]]])
-   Add a new virtual domain */
+   Adds a new virtual domain */
 PHP_FUNCTION(vpopmail_add_domain_ex)
 {
 	zval **domain, **passwd, **quota, **bounce, **apop;
@@ -428,7 +428,7 @@ PHP_FUNCTION(vpopmail_add_domain_ex)
 /* }}} */
 
 /* {{{ proto bool vpopmail_del_domain_ex(string domain)
-   Delete a virtual domain */
+   Deletes a virtual domain */
 PHP_FUNCTION(vpopmail_del_domain_ex)
 {
 	zval **domain;
@@ -471,7 +471,7 @@ PHP_FUNCTION(vpopmail_del_domain_ex)
 /* }}} */
 
 /* {{{ proto bool vpopmail_add_alias_domain_ex(string olddomain, string newdomain)
-   Add alias to an existing virtual domain */
+   Adds an alias to an existing virtual domain */
 PHP_FUNCTION(vpopmail_add_alias_domain_ex)
 {
 	zval **olddomain, **newdomain;
@@ -528,7 +528,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain_ex)
  */
 
 /* {{{ proto bool vpopmail_add_user(string user, string domain, string password[, string gecos[, bool apop]])
-   Add a new user to the specified virtual domain */
+   Adds a new user to the specified virtual domain */
 PHP_FUNCTION(vpopmail_add_user)
 {
 	zval **user;
@@ -581,7 +581,7 @@ PHP_FUNCTION(vpopmail_add_user)
 /* }}} */
 
 /* {{{ proto bool vpopmail_del_user(string user, string domain)
-   Delete a user from a virtual domain */
+   Deletes a user from a virtual domain */
 PHP_FUNCTION(vpopmail_del_user)
 {
 	zval **user;
@@ -612,7 +612,7 @@ PHP_FUNCTION(vpopmail_del_user)
 /* }}} */
 
 /* {{{ proto bool vpopmail_passwd(string user, string domain, string password)
-   Change a virtual user's password */
+   Changes user's password */
 PHP_FUNCTION(vpopmail_passwd)
 {
 	zval **user;
@@ -654,7 +654,7 @@ PHP_FUNCTION(vpopmail_passwd)
 /* }}} */
 
 /* {{{ proto bool vpopmail_set_user_quota(string user, string domain, string quota)
-   Sets a virtual user's quota */
+   Sets user's quota */
 PHP_FUNCTION(vpopmail_set_user_quota)
 {
 	zval **user;
@@ -688,7 +688,7 @@ PHP_FUNCTION(vpopmail_set_user_quota)
 /* }}} */
 
 /* {{{ proto bool vpopmail_auth_user(string user, string domain, string password[, string apop])
-   Attempt to validate a username/domain/password. Returns true/false */
+   Attempts to validate a username/domain/password. Returns true/false */
 PHP_FUNCTION(vpopmail_auth_user)
 {
 	zval **user;
@@ -740,7 +740,7 @@ PHP_FUNCTION(vpopmail_auth_user)
 
 
 /* {{{ proto bool vpopmail_alias_add(string user, string domain, string alias)
-   insert a virtual alias */
+   Inserts a virtual alias */
 PHP_FUNCTION(vpopmail_alias_add)
 {
 	zval **user;
@@ -774,7 +774,7 @@ PHP_FUNCTION(vpopmail_alias_add)
 /* }}} */
 
 /* {{{ proto bool vpopmail_alias_del(string user, string domain)
-   deletes all virtual aliases of a user */
+   Deletes all virtual aliases of a given user */
 PHP_FUNCTION(vpopmail_alias_del)
 {
 	zval **user;
@@ -805,7 +805,7 @@ PHP_FUNCTION(vpopmail_alias_del)
 
 #ifdef VALIAS
 /* {{{ proto bool vpopmail_alias_del_domain(string domain)
-   deletes all virtual aliases of a domain */
+   Deletes all virtual aliases of a given domain */
 PHP_FUNCTION(vpopmail_alias_del_domain)
 {
 	zval **domain;
@@ -834,7 +834,7 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 #endif
 
 /* {{{ proto array vpopmail_alias_get(string alias, string domain)
-   get all lines of an alias for a domain */
+   Returns all lines of an alias for a given domain */
 PHP_FUNCTION(vpopmail_alias_get)
 {
 	zval **alias;
@@ -865,7 +865,7 @@ PHP_FUNCTION(vpopmail_alias_get)
 /* }}} */
 
 /* {{{ proto array vpopmail_alias_get_all(string domain)
-   get all alias lines for all users in a domain */
+   Returns all lines of all aliases for a given domain */
 PHP_FUNCTION(vpopmail_alias_get_all)
 {
 	zval **domain;
@@ -912,7 +912,7 @@ PHP_FUNCTION(vpopmail_alias_get_all)
  */
 
 /* {{{ proto string vpopmail_error(void)
-   Get text message for last vpopmail error. Returns string */
+   Returns text message for last vpopmail error */
 PHP_FUNCTION(vpopmail_error)
 {
 	if (ZEND_NUM_ARGS() != 0)
