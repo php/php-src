@@ -217,10 +217,7 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cli_log_message(char *message)
 {
-	if (php_header()) {
-		fprintf(stderr, "%s", message);
-		fprintf(stderr, "\n");
-	}
+	fprintf(stderr, "%s\n", message);
 }
 
 static int sapi_cli_deactivate(TSRMLS_D)
