@@ -1,7 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-???, Version 4.0 Release Candidate 1
+27 March 2000, Version 4.0 Release Candidate 1
+- Fixed a crash problem in func_num_args(), func_get_arg() and func_get_args()
+  when used as function arguments (Andi)
 - Added get_class_methods(string classname) function. (Andrei)
 - Don't default to iso-8859-1 since this confuses some browsers (Rasmus)
 - stristr() no longer modifies it's arguments. (Thies)
