@@ -934,9 +934,9 @@ PHP_FUNCTION(ibase_pconnect)
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	zval **link_arg;
+	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
-	int link_id;
+	int link_id = -1;
 	
 	RESET_ERRMSG;
 	
@@ -949,7 +949,6 @@ PHP_FUNCTION(ibase_close)
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(link_arg);
-			link_id = Z_LVAL_PP(link_arg);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
