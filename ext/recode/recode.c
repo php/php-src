@@ -25,6 +25,7 @@
 
 #if HAVE_LIBRECODE
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 #include "zend_list.h"
 
@@ -147,15 +148,68 @@ error_exit:
 }
 /* }}} */
 
-/* {{{ proto bool recode_file(string request, int input, int output)
+/* {{{ proto bool recode_file(string request, resource input, resource output)
    Recode file input into file output according to request */
 PHP_FUNCTION(recode_file)
 {
-	php_error(E_WARNING, "This has not been ported, yet");
+	RECODE_REQUEST request = NULL;
+	int success;
+	pval **req;
+	pval **input, **output;
+	FILE  *in_fp,  *out_fp;
+	int    in_type, out_type;
+
+	ReSLS_FETCH();
+	if (ARG_COUNT(ht) != 3
+	 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
+	 	WRONG_PARAM_COUNT;
+	}
+
+	in_fp = zend_fetch_resource(input,-1, "File-Handle", &in_type, 
+		2, php_file_le_fopen(), php_file_le_popen());
+	if (!in_fp) {
+		php_error(E_WARNING,"Unable to find input file identifier");
+		RETURN_FALSE;
+	}
+
+	out_fp = zend_fetch_resource(output,-1, "File-Handle", &out_type,
+		2, php_file_le_fopen(), php_file_le_popen());
+	if (!out_fp) {
+		php_error(E_WARNING,"Unable to find output file identifier");
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(req);
+
+	request = recode_new_request(ReSG(outer));
+	if (request == NULL) {
+		php_error(E_WARNING, "Cannot allocate request structure");
+		RETURN_FALSE;
+	}
+
+	success = recode_scan_request(request, (*req)->value.str.val);
+	if (!success) {
+		php_error(E_WARNING, "Illegal recode request '%s'", (*req)->value.str.val);
+		goto error_exit;
+	}
+	
+	success = recode_file_to_file(request, in_fp, out_fp);
+	if (!success) {
+		php_error(E_WARNING, "Recoding failed.");
+		goto error_exit;
+	}
+
+	if (request)
+		recode_delete_request(request);
+	RETURN_TRUE;
+
+error_exit:
+	if (request)
+		recode_delete_request(request);
+	
 	RETURN_FALSE;
 }
 /* }}} */
-
 
 #endif
 
