@@ -137,7 +137,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 			/* client */
 
 			if (flags & STREAM_XPORT_CONNECT) {
-				if (0 != php_stream_xport_connect(stream, name, namelen,
+				if (-1 == php_stream_xport_connect(stream, name, namelen,
 							flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
 							timeout, &error_text, error_code TSRMLS_CC)) {
 
