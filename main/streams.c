@@ -2462,19 +2462,23 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		/* BC with older php scripts and zlib wrapper */
 		protocol = "compress.zlib";
 		n = 13;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
+		if(options & REPORT_ERRRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
+		}
 	}
 
 	if (protocol)	{
 		if (FAILURE == zend_hash_find(&url_stream_wrappers_hash, (char*)protocol, n, (void**)&wrapper))	{
 			char wrapper_name[32];
 
-			if (n >= sizeof(wrapper_name))
-				n = sizeof(wrapper_name) - 1;
-			PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
+			if(options & REPORT_ERRRORS) {
+				if (n >= sizeof(wrapper_name))
+					n = sizeof(wrapper_name) - 1;
+				PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 			
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
-					wrapper_name);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
+						wrapper_name);
+			}
 
 			wrapper = NULL;
 			protocol = NULL;
