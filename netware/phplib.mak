@@ -82,6 +82,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/exec.c \
         ext/standard/file.c \
         ext/standard/filestat.c \
+        ext/standard/filters.c \
         ext/standard/flock_compat.c \
         ext/standard/formatted_print.c \
         ext/standard/fsock.c \
@@ -116,6 +117,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/strnatcmp.c \
         ext/standard/type.c \
         ext/standard/uniqid.c \
+        ext/standard/user_filters.c \
         ext/standard/url.c \
         ext/standard/url_scanner.c \
         ext/standard/url_scanner_ex.c \
@@ -303,8 +305,6 @@ ifeq '$(BUILD)' 'debug'
 	@echo Debug >> $(basename $@).def
 endif
 	@echo Flag_On 0x00000008 >> $(basename $@).def
-#	@echo Start _NonAppStart >> $(basename $@).def
-#	@echo Exit _NonAppStop >> $(basename $@).def
 	@echo Start _LibCPrelude >> $(basename $@).def
 	@echo Exit _LibCPostlude >> $(basename $@).def
 
