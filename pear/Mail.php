@@ -37,7 +37,7 @@ class Mail extends PEAR {
      *
      * @param string $driver The kind of Mail:: object to instantiate.
      * @param array  $params The parameters to pass to the Mail:: object.
-     @ @return object Mail a instance of the driver class or if fails a PEAR Error
+     * @return object Mail a instance of the driver class or if fails a PEAR Error
      * @access public
      */
     function factory($driver, $params = array())
