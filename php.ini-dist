@@ -117,6 +117,13 @@ implicit_flush = Off
 ; reference).
 allow_call_time_pass_reference = On
 
+; Default random number generator. Specify here which random number generator
+; you want to use for the PHP-rand() function. Usually MT (Mersenne Twister,
+; see http://www.php.net/manual/en/function.mt-rand.php) is the best choice.
+; It is thread-safe, fast, and, quite important, mod and divide-free.
+; Possible values are 'system', 'mt' and 'lcg'
+random_number_generator = mt
+
 
 ;
 ; Safe Mode
