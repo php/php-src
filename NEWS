@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   fails). (Frank)
 - Fixed bug #27997 (SPL: Crash with getInnerIterator()). (Marcus)
 - Fixed bug #27928 (sqlite incorrectly handles invalid filenames). (Ilia)
+- Fixed bug #27974 (COM doesn't pass array parameters). (Wez)
 - Fixed bug #27865 (STDIN, STDOUT, STDERR are dup()d under CLI). (Wez)
 - Fixed bug #27821 (xml_parse() segfaults when xml_set_object() is called from
   class method). (Andi, Rob)
