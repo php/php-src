@@ -18,11 +18,11 @@ $dom = new domDocument();
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
   print $proc->transformToXml($xml);
-  function foobar($id ) {
+  function foobar($id, $secondArg = "" ) {
     if (is_array($id)) {
-        return $id[0]->value;
+        return $id[0]->value . " - " . $secondArg;
     } else {
-        return $id;
+        return $id . " - " . $secondArg;
     }
   }
   function nodeSet($id = null) {
@@ -42,8 +42,8 @@ Test 11: php:function Support
 
 Notice: Object of class foo could not be converted to string in %s on line 15
 <?xml version="1.0"?>
-foobar
-foobar
+foobar - secondArg
+foobar - 
 this is from an external DomDocument
 from the Input Document
 Object

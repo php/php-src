@@ -4,7 +4,7 @@
 		xsl:extension-element-prefixes="php"
                 version='1.0'>
 <xsl:template match="/">
-<xsl:value-of select="php:functionString('foobar', /doc/@id)"/>
+<xsl:value-of select="php:functionString('foobar', /doc/@id, 'secondArg')"/>
 <xsl:text>
 </xsl:text>
 <xsl:value-of select="php:function('foobar', /doc/@id)"/>
