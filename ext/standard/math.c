@@ -103,7 +103,7 @@ PHP_FUNCTION(floor) {
 /* }}} */
 
 
-/* {{{ proto int round(double number [, int precision])
+/* {{{ proto double round(double number [, int precision])
    Returns the number rounded to specified precision. */
 PHP_FUNCTION(round)
 {
