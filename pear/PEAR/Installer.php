@@ -559,7 +559,7 @@ class PEAR_Installer extends PEAR_Common
             $this->popErrorHandling();
             if (PEAR::isError($file)) {
                 if ($this->validPackageName($origpkgfile)) {
-                    include_once 'Remote.php';
+                    include_once 'PEAR/Remote.php';
                     $remote = new PEAR_Remote($config);
                     if (!PEAR::isError($info = $remote->call('package.info',
                           $origpkgfile))) {
