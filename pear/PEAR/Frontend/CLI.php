@@ -347,7 +347,7 @@ class PEAR_Frontend_CLI extends PEAR
             $this->_displayLine($borderline);
         }
     }
-    
+
     // }}}
     // {{{ outputData()
 
@@ -359,7 +359,7 @@ class PEAR_Frontend_CLI extends PEAR
                 $this->_startTable($data);
                 if (isset($data['headline']) && is_array($data['headline']))
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                
+
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
                         $this->_tableRow($pkg, null, array(1 => array('wrap' => 55)));
@@ -371,7 +371,7 @@ class PEAR_Frontend_CLI extends PEAR
                 $this->_startTable($data);
                 if (isset($data['headline']) && is_array($data['headline']))
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                
+
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
                         unset($pkg[3]);
@@ -384,7 +384,7 @@ class PEAR_Frontend_CLI extends PEAR
                 $this->_startTable($data);
                 if (isset($data['headline']) && is_array($data['headline']))
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                
+
                 foreach($data['data'] as $group) {
                     foreach($group as $value) {
                         if ($value === null || $value === '') {
@@ -413,10 +413,17 @@ class PEAR_Frontend_CLI extends PEAR
                 if (is_array($data))
                 {
                     $this->_startTable($data);
-                    if (isset($data['headline']) && is_array($data['headline']))
-                        $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                    foreach($data['data'] as $row)
-                        $this->_tableRow($row);
+                    $opts = array(0 => array('wrap' => 25),
+                                  1 => array('wrap' => 55)
+                    );
+                    if (isset($data['headline']) && is_array($data['headline'])) {
+                        $this->_tableRow($data['headline'],
+                                         array('bold' => true),
+                                         $opts);
+                    }
+                    foreach($data['data'] as $row) {
+                        $this->_tableRow($row, null, $opts);
+                    }
                     $this->_endTable();
                 } else {
                     $this->_displayLine($data);
@@ -427,12 +434,12 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ log(text)
 
-    
+
     function log($text)
     {
         return $this->_displayLine($text);
     }
-    
+
 
     // }}}
     // {{{ bold($text)
