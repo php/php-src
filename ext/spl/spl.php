@@ -1,340 +1,282 @@
 <?php
 
-/* Standard PHP Library
+/** Standard PHP Library
  *
- * (c) M.Boerger 2003
+ * (c) Marcus Boerger, 2003
  */
 
-/*! \brief Interface to foreach() construct
+/** Abstract base interface that cannot be implemented alone. Instead it
+ * must be implemented by either IteratorAggregate or Iterator. 
  *
- * Any class that implements this interface can for example be used as 
- * the input parameter to foreach() calls which would normally be an 
- * array.
- *
- * The class must implement the function new_iterator which must return 
- * an object which implements the interface spl_forward.
- *
- * \see spl_forward, spl_sequence, spl_forward_assoc, spl_sequence_assoc
+ * \note Internal classes that implement this interface can be used in a 
+ * foreach construct and do not need to implement IteratorAggregate or
+ * Iterator.
  */
-interface spl_iterator {
-	
-	/*! \brief Create a new iterator
-	 *
-	 * \return an object that implements the interface spl_forward.
-	 */
-	function new_iterator();
+interface Traversable {
 }
 
-/*! \brief Simple forward iterator
- *
- * Any class that implements this interface can be used as the
- * return of a foreach interface. And hence the class itself
- * can be used as a parameter to be iterated (normally an array).
- *
- * \code
-	class c implements spl_iterator, spl_forward {
-		private $num = 0;
-		function new_iterator() {
-			$this->num = 0;
-			return $this;
-		}
-		function current() {
-			return $this->num;
-		}
-		function next() {
-			$this->num++;
-		}
-		function has_more() {
-			return $this->num < 5;
-		}
-	}
-  
-	$t = new c();
+/** Interface to create an external Iterator.
+ */ 
+interface IteratorAggregate implements Traversable {
+	/** Return an Iterator for the implementing object.
+	 */
+	function getIterator();
+}
 
-	foreach($t as $num) {
-		echo "$num\n";
-	}
-   \endcode
- *
- * A very interesting usage scenario are for example database queries.
- * Without this interface you need to do it without foreach or fetch the
- * whole rowset into an array.
- *
- * In the above code the class implements both the foreach and the
- * forward interface. Doing this you cannot have nested foreach calls.
- * If you need this you must split the two parts.
- *
- * \code
-	class c implements spl_iterator {
-		public $max = 3;
-		function new_iterator() {
-			return new c_iter($this);
-		}
-	}
-	class c_iter implements spl_forward {
-		private $obj;
-		private $num = 0;
-		function __construct($obj) {
-			$this->obj = $obj;
-		}
-		function current() {
-			return $this->num;
-		}
-		function next() {
-			$this->num++;
-		}
-		function has_more() {
-			return $this->num < $this->obj->max;
-		}
-	}
-  
-	$t = new c();
-
-	foreach($t as $outer) {
-		foreach($t as $inner) {
-			echo "$outer,$inner\n";
-		}
-	}
-   \endcode
- *
- * You can also use this interface with the for() construct.
- *
- * \code
-	class c implements spl_iterator {
-		public $max = 3;
-		function new_iterator() {
-			return new c_iter($this);
-		}
-	}
- 	class c_iter implements spl_forward {
- 		private $obj;
-		private $num = 0;
-		function __construct($obj) {
-			$this->obj = $obj;
-		}
-		function current() {
-			return $this->num;
-		}
-		function next() {
-			$this->num++;
-		}
-		function has_more() {
-			return $this->num < $this->obj->max;
-		}
- 	}
-
- 	$t = new c();
-
- 	for ($iter = $t->new_iterator(); $iter->has_more(); $iter->next()) {
- 		echo $iter->current() . "\n";
- 	}
-   \endcode
+/** Interface for external iterators or objects that can be iterated 
+ * themselves internally.
  */
-interface spl_forward {
-	
-	/*! \brief Retrieve the current currentent
-	 *
-	 * \return \c mixed current element or \c false if no more elements
+interface Iterator implements Traversable {
+	/** Rewind the Iterator to the first element.
+	 */
+	function rewind();
+
+	/** Return the current element.
 	 */
 	function current();
 
-	/*! \brief Forward to next element.
+	/** Return the key of the current element.
+	 */
+	function key();
+
+	/** Move forward to next element.
 	 */
 	function next();
 
-	/*! \brief Check if more elements are available.
+	/** Check if there is a current element after calls to rewind() or next().
+	 */
+	function hasMore();
+}
+
+/** Interface for recursive traversal to be used with 
+ * RecursiveIteratorIterator.
+ */
+interface RecursiveIterator implements Iterator {
+	/** \return whether current element can be iterated itself.
+	  */
+	function hasChildren();
+
+	/** \return an object that recursively iterates the current element.
+	 * This object must implement RecursiveIterator.
+	 */
+	function getChildren();
+}
+
+/** Class for recursive traversal. The objects of this class are created by 
+ * instances of RecursiveIterator. Elements of those iterators may be 
+ * traversable themselves. If so these sub elements are recursed into.
+ */
+class RecursiveIteratorIterator implements Iterator {
+	/** Construct an instance form a RecursiveIterator.
 	 *
-	 * This method is meant to be called right after calls to rewind() or
-	 * next(). When you use foreach hooking then this is done automatically
-	 * but you can use it inside a for loop yourself:
-	 * \code
-	   for(; $it->has_more(); $it->next()) { ... }
-	   \endcode
+	 * \param $iterator inner root iterator
+	 * \param $mode one of
+	 *            - RIT_LEAVES_ONLY do not return elements that can be recursed.
+	 *            - RIT_SELF_FIRST  show elements before their sub elements.
+	 *            - RIT_CHILD_FIRST show elements after their sub elements-
 	 *
-	 * \return \c bool whether or not more elements are available
+	 * \note If you want to see only those elements which have sub elements then
+	 *       use a ParentIterator.
 	 */
-	function has_more();
+	function __construct(RecursiveIterator $iterator, $mode);
+
+	/** \return the level of recursion (>=0).
+	 */
+	function getDepth();
+
+	/** \param $level the level of the sub iterator to return.
+	 * \return the current inner sub iterator or the iterator at the 
+	 * specified $level.
+	 */
+	function getSubIterator([$level]);
 }
 
-/*! \brief A restartable iterator.
- *
- * This iterator allows you to implement a restartable iterator. That
- * means the iterator can be rewind to the first element after accessing
- * any number of elements.
- *
- * \note If you use sequence in foreach then rewind() will be called
- *       first.
- */
-interface spl_sequence extends spl_forward {
-
-	/*! Restart the sequence by positioning it to the first element.
-	 */
-	function rewind();
-}
-
-/*! \brief associative interface
- *
- * This interface allows to implement associative iterators
- * and containers.
- */
-interface spl_assoc {
-	
-	/*! \brief Retrieve the current elements key
-	 *
-	 * \return \c mixed current key or \c false if no more elements
-	 */
-	function key();
-}
-
-/*! \brief associative foreach() interface
- *
- * This interface extends the forward interface to support keys.
- * With this interface you can do:
- * \code
- 	$t = new c();
-	foreach($t as $key => $elem).
-   \endcode
- */	
-interface spl_assoc_forward implements spl_forward, spl_assoc {
-}
-
-/*! \brief associative sequence
- */
-interface spl_assoc_sequence implements spl_sequence, spl_assoc {
-}
-
-/*! \brief array read only access for objects
- */
-interface spl_array_read {
-	
-	/*! Check whether or not the given index exists.
-	 * The returned value is interpreted as converted to bool.
-	 */
-	function exists($index);
-
-	/*! Read the value at position $index.
-	 * This function is only beeing called if exists() returns true.
-	 */
-	function get($index);
-}
-
-/*! \brief array read/write access for objects.
- *
- * The following example shows how to use interface array_access:
- * \code 
-	class array_emulation implemets spl_array_access {
-		private $ar = array();
-		function exists($index) {
-			return array_key_exists($index, $this->ar);
-		}
-		function get($index) {
-			return $this->ar[$index];
-		}
-		function set($index, $value) {
-			$this->ar[$index] = $value;
-		}
-		function del($index) {
-			unset($this->ar[$index]);
-		}
-	}
-   \endcode
- */
-interface spl_array_access implements spl_array_read {
-
-	/*! Set the value identified by $index to $value.
-	 */
-	function set($index, $value);
-
-	/*! Delete (unset) the value identified by $index.
-	 */
-	function del($index);
-}
-
-/*! \brief An array wrapper
+/** \brief An Array wrapper
  *
  * This array wrapper allows to recursively iterate over Arrays and Objects.
  *
- * \see spl_array_it
+ * \see ArrayIterator
  */
-class spl_array implements spl_iterator {
+class ArrayObject implements IteratorAggregate {
 
-	/*! Construct a new array iterator from anything that has a hash table.
+	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
 	 * \param $array the array to use.
 	 */
 	function __construct($array);
 
-	/*! \copydoc spl_iterator::new_iterator
+	/** Get the iterator which is a ArrayIterator object connected to this 
+	 * object.
 	 */
-	function new_iterator();
+	function getIterator();
 }
 
-/*! \brief An array iterator
+/** \brief An Array iterator
  *
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
  *
- * To use this class you must instanciate spl_array.
+ * To use this class you must instanciate ArrayObject.
  */
-class spl_array_it implements spl_sequence_assoc {
+class ArrayIterator implements Iterator {
 
-	/*! Construct a new array iterator from anything that has a hash table.
+	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
 	 * \param $array the array to use.
 	 */
 	private function __construct($array);
 
-	/*! \copydoc spl_sequence::rewind
+	/** \copydoc Iterator::rewind
 	 */
 	function rewind();
 
-	/*! \copydoc spl_forward::current
+	/** \copydoc Iterator::current
 	 */
 	function current();
 
-	/*! \copydoc spl_assoc::key
+	/** \copydoc Iterator::key
 	 */
 	function key();
 
-	/*! \copydoc spl_forward::next
+	/** \copydoc Iterator::next
 	 */
 	function next();
 
-	/*! \copydoc spl_forward::has_more
+	/** \copydoc Iterator::hasMore
 	 */
-	function has_more();
+	function hasMore();
 }
 
-/*! \brief Directory iterator
- */
-class spl_dir implements spl_sequence {
+abstract class FilterIterator implements Iterator {
+	/** Construct an instance form a Iterator.
+	 *
+	 * \param $iterator inner iterator
+	 */
+	function __construct(Iterator $iterator);
 
-	/*! Construct a directory iterator from a path-string.
+	/** \return whether the current element of the inner iterator should be
+	 * used as a current element of this iterator or if it should be skipped.
+	 */
+	abstract function accept();
+
+	/** \copydoc Iterator::rewind
+	 */
+	function rewind();
+
+	/** \copydoc Iterator::current
+	 */
+	function current();
+
+	/** \copydoc Iterator::key
+	 */
+	function key();
+
+	/** \copydoc Iterator::next
+	 */
+	function next();
+
+	/** \copydoc Iterator::hasMore
+	 */
+	function hasMore();
+}
+
+class ParentIterator extends FilterIterator implements RecursiveIterator {
+	/** Construct an instance form a RecursiveIterator.
+	 *
+	 * \param $iterator inner iterator
+	 */
+	function __construct(RecursiveIterator $iterator);
+
+	/** \copydoc RecursiveIterator::hasChildren
+	 */
+	function hasChildren();
+
+	/** \copydoc RecursiveIterator::getChildren
+	 */
+	function getChildren();
+
+	/** \copydoc Iterator::rewind
+	 */
+	function rewind();
+
+	/** \copydoc Iterator::current
+	 */
+	function current();
+
+	/** \copydoc Iterator::key
+	 */
+	function key();
+
+	/** \copydoc Iterator::next
+	 */
+	function next();
+
+	/** \copydoc Iterator::hasMore
+	 */
+	function hasMore();
+}
+
+/** \brief Directory iterator
+ */
+class DirectoryIterator implements Iterator {
+
+	/** Construct a directory iterator from a path-string.
 	 *
 	 * \param $path directory to iterate.
 	 */
 	function __construct($path);
 
-	/*! \copydoc spl_sequence::rewind
+	/** \copydoc Iterator::rewind
 	 */
 	function rewind();
 
-	/*! \copydoc spl_forward::current
+	/** \copydoc Iterator::current
 	 */
 	function current();
 
-	/*! \copydoc spl_forward::next
+	/** \copydoc Iterator::next
 	 */
 	function next();
 
-	/*! \copydoc spl_forward::has_more
+	/** \copydoc Iterator::hasMore
 	 */
-	function has_more();
+	function hasMore();
 	
-	/*! \return The opened path.
+	/** \return The opened path.
 	 */
-	function get_path();	
+	function getPath();	
+
+	/** \return The current file name.
+	 */
+	function getFilename();	
+
+	/** \return The current entries path and file name.
+	 */
+	function getPathname();	
+
+	/** \return Whether the current entry is a directory.
+	 */
+	function isDir();	
+
+	/** \return Whether the current entry is either '.' or '..'.
+	 */
+	function isDot();	
 }
+
+/** \brief Directory iterator
+ */
+class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator {
+
+	/** \return whether the current is a directory (not '.' or '..').
+	 */
+	function hasChildren();	
+
+	/** \return a RecursiveDirectoryIterator for the current entry.
+	 */
+	function getChildren();	
+	
+}
+
 ?>

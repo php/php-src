@@ -1,16 +1,28 @@
 <?php
 
-/* dba array utility
+/** dba array utility
  *
- * Usage php dba_dump <file> <handler> <key> [<value>]
+ * Usage php dba_array.php <file> <handler> <key> [<value>]
  *
  * If <value> is specified then <key> is set to <value> in <file>.
  * Else the value of <key> is printed only.
  *
  * Note: configure with --enable-dba 
  *
- * (c) Marcus Boerger
+ * (c) Marcus Boerger, 2003
  */
+
+if ($argc < 4) {
+	echo <<<EOF
+Usage: php ${_SERVER['PHP_SELF']} <file> <handler> <key> [<value>]
+
+If <value> is specified then <key> is set to <value> in <file>.
+Else the value of <key> is printed only.
+
+
+EOF;
+	exit(1);
+}
 
 class DbaArray implements ArrayAccess {
 	private $db;

@@ -1,16 +1,28 @@
 <?php
 
-/* List groups within an ini file
+/** List groups within an ini file
  *
- * Usage: php dba_dump <file> [<regex>]
+ * Usage: php dba_dump.php <file> [<regex>]
  *
  * Show all groups in the ini file specified by <file>.
  * The regular expression <regex> is used to filter the result.
  *
  * Note: configure with --enable-dba 
  *
- * (c) Marcus Boerger
+ * (c) Marcus Boerger, 2003
  */
+
+if ($argc < 2) {
+	echo <<<EOF
+Usage: php dba_dump.php <file> [<regex>]
+
+Show all groups in the ini file specified by <file>.
+The regular expression <regex> is used to filter the result.
+
+
+EOF;
+	exit(1);
+}
 
 require_once("dba_reader.inc");
 require_once("key_filter.inc");
@@ -58,6 +70,7 @@ $it = new ini_groups($argv[1]);
 if ($argc>2) {
 	$it = new key_filter($it, $argv[2]);
 }
+
 foreach($it as $group) {
 	echo "$group\n";
 }
