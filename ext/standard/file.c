@@ -825,7 +825,7 @@ PHP_FUNCTION(popen)
 	zval **arg1, **arg2;
 	FILE *fp;
 	char *p, *tmp = NULL;
-	char *b, buf[1024];
+	char *b, *buf = 0;
 	php_stream *stream;
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -848,10 +848,11 @@ PHP_FUNCTION(popen)
 				b = NULL;
 			}
 		}
+		
 		if (b) {
-			snprintf(buf, sizeof(buf), "%s%s", PG(safe_mode_exec_dir), b);
+			spprintf(&buf, 0, "%s%s", PG(safe_mode_exec_dir), b);
 		} else {
-			snprintf(buf, sizeof(buf), "%s/%s", PG(safe_mode_exec_dir), Z_STRVAL_PP(arg1));
+			spprintf(&buf, 0, "%s/%s", PG(safe_mode_exec_dir), Z_STRVAL_PP(arg1));
 		}
 
 		tmp = php_escape_shell_cmd(buf);
@@ -861,8 +862,12 @@ PHP_FUNCTION(popen)
 		if (!fp) {
 			php_error_docref2(NULL TSRMLS_CC, buf, p, E_WARNING, "%s", strerror(errno));
 			efree(p);
+			efree(buf);
 			RETURN_FALSE;
 		}
+		
+		efree(buf);
+
 	} else {
 		fp = VCWD_POPEN(Z_STRVAL_PP(arg1), p);
 		if (!fp) {
