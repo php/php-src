@@ -317,6 +317,8 @@ int mergesort(void *base, size_t nmemb, register size_t size, int (*cmp) (const 
 /*from basic functions*/
 extern PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
 
+PHPAPI void php_register_post_request_startup(void (*func)(void *), void *userdata);
+
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);
 PHPAPI int cfg_get_string(char *varname, char **result);
