@@ -21,9 +21,9 @@
 #include "php.h"
 #include "php_pdo_driver.h"
 
-#define TEXT 1
-#define BIND 2
-#define EOI 3
+#define PDO_PARSER_TEXT 1
+#define PDO_PARSER_BIND 2
+#define PDO_PARSER_EOI 3
 
 #define RET(i) {s->cur = cursor; return i; }
 
@@ -51,16 +51,16 @@ static int scan(Scanner *s)
 	*/
 
 	/*!re2c
-		(["] (ESC|ANYNOEOF\[\\"])* ["])		{ RET(TEXT); }
-		BINDCHR	{ RET(BIND); }
-		SPECIALS	{ RET(TEXT); }
-		(ANYNOEOF\SPECIALS)+ { RET(TEXT); }
-		EOF		{ RET(EOI); }
+		(["] (ESC|ANYNOEOF\[\\"])* ["])		{ RET(PDO_PARSER_TEXT); }
+		BINDCHR	{ RET(PDO_PARSER_BIND); }
+		SPECIALS	{ RET(PDO_PARSER_TEXT); }
+		(ANYNOEOF\SPECIALS)+ { RET(PDO_PARSER_TEXT); }
+		EOF		{ RET(PDO_PARSER_EOI); }
 	*/	
 }
 
 int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery, 
-                        int *outquery_len)
+		int *outquery_len TSRMLS_DC)
 {
 	Scanner s;
 	char *ptr;
@@ -92,13 +92,13 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 	ptr = *outquery;
 	s.cur = inquery;
 	s.lim = inquery + inquery_len;
-	while((t = scan(&s)) != EOI) {
-		if(t == TEXT) {
+	while((t = scan(&s)) != PDO_PARSER_EOI) {
+		if(t == PDO_PARSER_TEXT) {
 			memcpy(ptr, s.tok, s.cur - s.tok);
 			ptr += (s.cur - s.tok);
 			*outquery_len += (s.cur - s.tok);
 		}
-		else if(t == BIND) {
+		else if(t == PDO_PARSER_BIND) {
 			if(!params) { 
 				/* error */
 				efree(*outquery);
@@ -153,6 +153,6 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: noet sw=4 ts=4 fdm=marker
+ * vim600: noet sw=4 ts=4 fdm=marker ft=c
  * vim<600: noet sw=4 ts=4
  */
