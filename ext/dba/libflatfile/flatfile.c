@@ -71,6 +71,7 @@ PHPAPI int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int
 			return -1;
 	}
 
+	php_stream_flush(dba->fp);
 	return 0;
 }
 /* }}} */
