@@ -216,6 +216,7 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 
 static zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
+	zval tmp;
 	zend_object_value retval;
 	reflection_object *intern;
 
@@ -229,6 +230,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, NULL, reflection_free_objects_storage, reflection_objects_clone TSRMLS_CC);
 	retval.handlers = &reflection_object_handlers;
 	return retval;
@@ -3525,12 +3527,33 @@ static zend_function_entry reflection_extension_functions[] = {
 };
 /* }}} */
 
+static zend_object_handlers *zend_std_obj_handlers;
+
+/* {{{ _reflection_write_property */
+static void _reflection_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+{
+	if (Z_TYPE_P(member) == IS_STRING 
+	&& zend_hash_exists(&Z_OBJCE_P(object)->default_properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1)
+	&& (!strcmp(Z_STRVAL_P(member), "name") || !strcmp(Z_STRVAL_P(member), "class")))
+	{
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+			"Cannot set read-only property %s::$%s", Z_OBJCE_P(object)->name, Z_STRVAL_P(member));
+	}
+	else
+	{
+		zend_std_obj_handlers->write_property(object, member, value TSRMLS_CC);		
+	}
+}
+/* }}} */
+
 /* {{{ zend_register_reflection_api */
 ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	zend_class_entry _reflection_entry;
 
+	zend_std_obj_handlers = zend_get_std_object_handlers();
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	reflection_object_handlers.clone_obj = NULL;
+	reflection_object_handlers.write_property = _reflection_write_property;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
