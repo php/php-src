@@ -297,6 +297,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 {
 	pdo_pgsql_db_handle *H;
 	int ret = 0;
+	char *conn_str;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -304,7 +305,22 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 	
-	H->server = PQconnectdb(dbh->data_source); 
+	/* support both full connection string & connection string + login and/or password */
+	if (!dbh->username || !dbh->password) {
+		conn_str = (char *) dbh->data_source;
+	} else if (dbh->username && dbh->password) {
+		spprintf(&conn_str, 0, "%s;user=%s;password=%s", dbh->data_source, dbh->username, dbh->password);
+	} else if (dbh->username) {
+		spprintf(&conn_str, 0, "%s;user=%s", dbh->data_source, dbh->username);
+	} else {
+		spprintf(&conn_str, 0, "%s;password=%s", dbh->data_source, dbh->password);
+	}
+
+	H->server = PQconnectdb(dbh->data_source);
+	
+	if (conn_str != dbh->data_source) {
+		efree(conn_str);
+	}
 	
 	if (PQstatus(H->server) != CONNECTION_OK) {
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR);
