@@ -85,7 +85,6 @@ void php3_aspell_new(INTERNAL_FUNCTION_PARAMETERS)
 	int argc;
 	aspell *sc;
 	int ind;
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 	if (argc < 1 || argc > 2 || getParameters(ht, argc, &master,&personal) == FAILURE) {
@@ -116,7 +115,6 @@ void php3_aspell_suggest(INTERNAL_FUNCTION_PARAMETERS)
 	aspellSuggestions *sug;
 	size_t i;
 
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 	if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
@@ -150,8 +148,8 @@ void php3_aspell_check(INTERNAL_FUNCTION_PARAMETERS)
    int type;
    pval *scin,*word;
    aspell *sc;
+
    int argc;
-   TLS_VARS;
     argc = ARG_COUNT(ht);
     if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -183,7 +181,6 @@ void php3_aspell_check_raw(INTERNAL_FUNCTION_PARAMETERS)
   int type;
   int argc;
   aspell *sc;
-   TLS_VARS;
 
     argc = ARG_COUNT(ht);
     if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
@@ -208,9 +205,8 @@ void php3_aspell_check_raw(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-void php3_info_aspell(void)
+void php3_info_aspell(ZEND_MODULE_INFO_FUNC_ARGS)
 {
-	TLS_VARS;
 	php3_printf("ASpell support enabled");
 
 }

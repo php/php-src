@@ -8,3 +8,4 @@ DBA					Not yet ported
 mcrypt				Working
 mhash				Working
 dbase				Working
+aspell              Working
