@@ -1,3 +1,47 @@
+2003-07-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h:
+      Rework zend_do_declare_property and related code into one code base
+
+    * zend_API.c:
+      Fix bug
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c:
+      Add get_dim callback
+
+    * zend_execute.c:
+      Fix naming convention
+
+2003-07-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_execute.c:
+      - Help Zeev fixing ghosts :)
+
+2003-07-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.h:
+      whitespace
+
+    * zend_objects_API.c:
+      Fix & whitespace
+
+    * zend_object_handlers.c:
+      fixlet
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Initial support for overloading of array syntax for objects (very initial)
+
 2003-07-06  George Schlossnagle  <george@omniti.com>
 
     * zend_API.c
