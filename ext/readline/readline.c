@@ -69,6 +69,10 @@ zend_module_entry readline_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_READLINE
+ZEND_GET_MODULE(readline)
+#endif
+
 PHP_MINIT_FUNCTION(readline)
 {
     using_history();
