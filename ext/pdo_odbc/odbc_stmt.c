@@ -141,12 +141,25 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 	return 1;
 }
 
-static int odbc_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_fetch(pdo_stmt_t *stmt,
+	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
-
+	SQLSMALLINT odbcori;
+#if 0
 	rc = SQLFetch(S->stmt);
+#else
+	switch (ori) {
+		case PDO_FETCH_ORI_NEXT:	odbcori = SQL_FETCH_NEXT; break;
+		case PDO_FETCH_ORI_PRIOR:	odbcori = SQL_FETCH_PRIOR; break;
+		case PDO_FETCH_ORI_FIRST:	odbcori = SQL_FETCH_FIRST; break;
+		case PDO_FETCH_ORI_LAST:	odbcori = SQL_FETCH_LAST; break;
+		case PDO_FETCH_ORI_ABS:		odbcori = SQL_FETCH_ABSOLUTE; break;
+		case PDO_FETCH_ORI_REL:		odbcori = SQL_FETCH_RELATIVE; break;
+	}
+	rc = SQLFetchScroll(S->stmt, odbcori, offset);
+#endif
 
 	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 		return 1;
