@@ -1,3 +1,44 @@
+2003-07-27  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      fix compare
+
+    * zend_compile.c:
+      use zend_binary_strncasecmp
+
+    * zend_execute_API.c:
+      change shutdown order so that dtors would coexist with object error
+      handlers
+
+    * zend_execute.c:
+      clean the right one
+
+    * zend_execute_API.c:
+      make shutdown more granular so in case some dtor goes ape we still
+      can shut down cleanly
+
+    * zend_compile.c
+      zend_execute.c
+      zend_objects.c:
+      make clone and throw coexist peacefully
+
+    * tests/bug24635.phpt
+      tests/bug24699.phpt:
+      add test
+
+    * zend_execute.c:
+      fix #24635: clean hash before putting into cache
+
+    * zend_language_scanner.l:
+      fix crash #24550
+
+    * zend_compile.c
+      zend_constants.c:
+      fix leaks with class constants (bug #24699)
+
+    * zend_compile.c:
+      make __clone call case insensitive, just as other calls are
+
 2003-07-24  Jani Taskinen  <sniper@iki.fi>
 
     * tests/bug19859.phpt
