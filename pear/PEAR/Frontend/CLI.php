@@ -137,7 +137,8 @@ class PEAR_Frontend_CLI extends PEAR
     {
         $this->omode = 'table';
         $params['table_data'] = array();
-        $params['widest'] = array();
+        $params['widest'] = array();  // indexed by column
+        $params['highest'] = array(); // indexed by row
         $params['ncols'] = 0;
         $this->params = $params;
     }
@@ -147,20 +148,40 @@ class PEAR_Frontend_CLI extends PEAR
 
     function tableRow($columns, $rowparams = array(), $colparams = array())
     {
+        $highest = 1;
         for ($i = 0; $i < sizeof($columns); $i++) {
-            if (!isset($this->params['widest'][$i]) ||
-                strlen($columns[$i]) > $this->params['widest'][$i])
-            {
-                $this->params['widest'][$i] = strlen($columns[$i]);
+            $col = $columns[$i];
+            if (isset($colparams[$i]) && !empty($colparams[$i]['wrap'])) {
+                $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 1);
+            }
+            if (strpos($col, "\n") !== false) {
+                $multiline = explode("\n", $col);
+                $w = 0;
+                foreach ($multiline as $n => $line) {
+                    if (strlen($line) > $w) {
+                        $w = strlen($line);
+                    }
+                }
+                $lines = sizeof($lines);
+            } else {
+                $w = strlen($col);
+            }
+            if ($w > @$this->params['widest'][$i]) {
+                $this->params['widest'][$i] = $w;
+            }
+            $tmp = count_chars($columns[$i], 1);
+            // handle unix, mac and windows formats
+            $lines = (isset($tmp[10]) ? $tmp[10] : @$tmp[13]) + 1;
+            if ($lines > $highest) {
+                $highest = $lines;
             }
         }
-        if (!isset($this->params['ncols']) ||
-            sizeof($columns) > $this->params['ncols'])
-        {
+        if (sizeof($columns) > $this->params['ncols']) {
             $this->params['ncols'] = sizeof($columns);
         }
         $new_row = array(
             'data' => $columns,
+            'height' => $highest,
             'rowparams' => $rowparams,
             'colparams' => $colparams,
             );
@@ -208,32 +229,48 @@ class PEAR_Frontend_CLI extends PEAR
         }
         for ($i = 0; $i < sizeof($table_data); $i++) {
             extract($table_data[$i]);
-            $rowtext = '';
-            for ($c = 0; $c < sizeof($data); $c++) {
-                if (isset($colparams[$c])) {
-                    $attribs = array_merge($rowparams, $colparams);
-                } else {
-                    $attribs = $rowparams;
+            $rowlines = array();
+            if ($height > 1) {
+                for ($c = 0; $c < sizeof($data); $c++) {
+                    $rowlines[$c] = preg_split('/(\r?\n|\r)/', $data[$c]);
+                    if (sizeof($rowlines[$c]) < $height) {
+                        $rowlines[$c] = array_pad($rowlines[$c], $height, '');
+                    }
                 }
-                $w = $width[$c];
-                $l = strlen($data[$c]);
-                $cell = $data[$c];
-                if ($l > $w) {
-                    $cell = substr($cell, 0, $w);
+            } else {
+                for ($c = 0; $c < sizeof($data); $c++) {
+                    $rowlines[$c] = array($data[$c]);
                 }
-                if (isset($attribs['bold'])) {
-                    $cell = $this->bold($cell);
-                }
-                if ($l < $w) {
-                    // not using str_pad here because we may
-                    // add bold escape characters to $cell
-                    $cell .= str_repeat(' ', $w - $l);
-                }
-                
-                $rowtext .= $cellstart . $cell . $cellend;
             }
-            $rowtext .= $rowend;
-            $this->displayLine($rowtext);
+            for ($r = 0; $r < $height; $r++) {
+                $rowtext = '';
+                for ($c = 0; $c < sizeof($data); $c++) {
+                    if (isset($colparams[$c])) {
+                        $attribs = array_merge($rowparams, $colparams);
+                    } else {
+                        $attribs = $rowparams;
+                    }
+                    $w = $width[$c];
+                    //$cell = $data[$c];
+                    $cell = $rowlines[$c][$r];
+                    $l = strlen($cell);
+                    if ($l > $w) {
+                        $cell = substr($cell, 0, $w);
+                    }
+                    if (isset($attribs['bold'])) {
+                        $cell = $this->bold($cell);
+                    }
+                    if ($l < $w) {
+                        // not using str_pad here because we may
+                        // add bold escape characters to $cell
+                        $cell .= str_repeat(' ', $w - $l);
+                    }
+                    
+                    $rowtext .= $cellstart . $cell . $cellend;
+                }
+                $rowtext .= $rowend;
+                $this->displayLine($rowtext);
+            }
         }
         if ($borderline) {
             $this->displayLine($borderline);
