@@ -108,7 +108,7 @@ AC_MSG_CHECKING(for NDBM support)
 AC_DBA_STD_RESULT
 
 AC_ARG_WITH(db2,
-[  --with-db2[=DIR]        Include DB2 support],[
+[  --with-db2[=DIR]        Include Berkeley DB2 support],[
   if test "$withval" != "no"; then
     for i in /usr/local /usr /usr/BerkeleyDB $withval; do
       if test -f "$i/db2/db.h"; then
@@ -149,7 +149,7 @@ AC_ARG_WITH(db2,
     AC_DBA_STD_ATTACH
   fi
 ])
-AC_MSG_CHECKING(for DB2 support)
+AC_MSG_CHECKING(for Berkeley DB2 support)
 AC_DBA_STD_RESULT
 
 AC_ARG_WITH(dbm,
