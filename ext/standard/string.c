@@ -3225,7 +3225,7 @@ PHP_FUNCTION(setlocale)
 		}
 		
 		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
-			zend_hash_move_forward(Z_ARRVAL_PP(args[1]));
+			if (zend_hash_move_forward(Z_ARRVAL_PP(args[1])) == FAILURE) break;
 		} else {
 			if (++i >= n_args) break;
 		}
