@@ -453,7 +453,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 /* }}} */
 
 #if HAVE_GD_BUNDLED
-#define PHP_GD_VERSION_STRING "bundled (2.0.23 compatible)"
+#define PHP_GD_VERSION_STRING "bundled (2.0.28 compatible)"
 #elif HAVE_LIBGD20
 #define PHP_GD_VERSION_STRING "2.0 or higher"
 #elif HAVE_GDIMAGECOLORRESOLVE
