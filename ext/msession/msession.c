@@ -23,8 +23,6 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 
-#define ERR_DEBUG
-
 /* Macros and such */
 #ifndef TRUE
 #define TRUE 1
@@ -52,8 +50,10 @@
 #define IFCONNECT_ENDVAL(V) 	} else { php_error(E_WARNING, s_szNoInit); return V; }
 #define IFCONNECT_END		} else { php_error(E_WARNING, s_szNoInit); RETURN_FALSE; }
 
+#ifdef PHP_SESSION_API
 #if (PHP_SESSION_API >= 20020330)
 #define HAVE_PHP_SESSION_CREATESID
+#endif
 #endif
 	
 /* This sets the PHP API version used in the file. */
