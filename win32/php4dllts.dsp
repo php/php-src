@@ -1839,7 +1839,7 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\ext\com\COM.cpp
+SOURCE=..\ext\com\COM.c
 # End Source File
 # Begin Source File
 
