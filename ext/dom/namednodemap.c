@@ -200,6 +200,8 @@ PHP_FUNCTION(dom_namednodemap_item)
 				itemnode = curnode;
 			}
 		}
+	} else {
+		RETVAL_NULL();
 	}
 
 	if (itemnode) {
