@@ -7,7 +7,7 @@ AC_DEFUN(AC_PDO_OCI_VERSION,[
     test -z "$PDO_OCI_VERSION" && PDO_OCI_VERSION=7.3
   elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     PDO_OCI_VERSION=10.1    
-  elif test -f $OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
+  elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
     PDO_OCI_VERSION=9.0
   elif test -f $PDO_OCI_DIR/lib/libclntsh.$SHLIB_SUFFIX_NAME.8.0; then
     PDO_OCI_VERSION=8.1
@@ -39,7 +39,7 @@ if test "$PHP_PDO_OCI" != "no"; then
 
   if test -d "$PDO_OCI_DIR/rdbms/public"; then
     PHP_ADD_INCLUDE($PDO_OCI_DIR/rdbms/public)
-    PDO_OCI_INCLUDES="$OCI_INCLUDES -I$PDO_OCI_DIR/rdbms/public"
+    PDO_OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/rdbms/public"
   fi
   if test -d "$PDO_OCI_DIR/rdbms/demo"; then
     PHP_ADD_INCLUDE($PDO_OCI_DIR/rdbms/demo)
@@ -47,7 +47,7 @@ if test "$PHP_PDO_OCI" != "no"; then
   fi
   if test -d "$PDO_OCI_DIR/network/public"; then
     PHP_ADD_INCLUDE($PDO_OCI_DIR/network/public)
-    OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/network/public"
+    PDO_OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/network/public"
   fi
   if test -d "$PDO_OCI_DIR/plsql/public"; then
     PHP_ADD_INCLUDE($PDO_OCI_DIR/plsql/public)
@@ -112,7 +112,7 @@ if test "$PHP_PDO_OCI" != "no"; then
   ], [
     PHP_CHECK_LIBRARY(ocijdbc8, OCILobIsTemporary,
     [
-      PHP_ADD_LIBRARY(ocijdbc8, 1, OCI_SHARED_LIBADD)
+      PHP_ADD_LIBRARY(ocijdbc8, 1, PDO_OCI_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCILOBISTEMPORARY,1,[ ])
     ], [], [
       -L$PDO_OCI_DIR/lib $PDO_OCI_SHARED_LIBADD
