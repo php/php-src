@@ -4,7 +4,7 @@ Bug #20539 (PHP CLI Segmentation Fault)
 session.auto_start=1
 --FILE--
 <?php
-	print "good :)";
+	print "good :)\n";
 ?>
 --EXPECT--
 good :)
