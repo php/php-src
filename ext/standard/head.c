@@ -24,6 +24,7 @@
 #include "main.h"
 #include "head.h"
 #include "post.h"
+#include "SAPI.h"
 #ifdef TM_IN_SYS_TIME
 #include <sys/time.h>
 #else
@@ -556,6 +557,16 @@ int php3_headers_unsent(void)
 	}
 }
 
+PHP_FUNCTION(headers_sent)
+{
+	SLS_FETCH();
+	
+	if (SG(headers_sent)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 function_entry php3_header_functions[] = {
 	{NULL, NULL, NULL}
