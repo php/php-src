@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Fixed argument checking for call_user_func* functions and allowed
+  specifying array($obj, 'method') syntax for call_user_func_array. (Andrei)
 - Fixed parent::method() to also work with runtime bindings (Zeev, Zend Engine)
 - Implemented high-performance zlib-based output compression - see
   zlib.output_compression INI directive (Zeev)
