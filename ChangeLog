@@ -1,3 +1,15 @@
+2000-02-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/php_session.h
+      ext/session/session.c: Implemented setting of session cookie parameters.
+
+2000-02-04  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h
+      main.c
+      SAPI.c: Use the new state functions
+
 2000-02-03  Andi Gutmans  <andi@php.net>
 
     * NEWS: - Sounds nicer
