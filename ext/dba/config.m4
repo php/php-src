@@ -106,7 +106,7 @@ AC_DBA_STD_RESULT
 AC_ARG_WITH(db2,
 [  --with-db2[=DIR]        Include Berkeley DB2 support],[
   if test "$withval" != "no"; then
-    for i in /usr/local /usr /usr/BerkeleyDB $withval; do
+    for i in /usr/local /usr /usr/BerkeleyDB $withval/BerkeleyDB $withval; do
       if test -f "$i/db2/db.h"; then
         THIS_PREFIX=$i
         DB2_EXTRA=db2
