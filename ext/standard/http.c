@@ -115,6 +115,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			php_url_encode_hash_ex(Z_ARRVAL_PP(zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1 TSRMLS_CC);
 			ht->nApplyCount--;
 			efree(newprefix);
+		} else if (Z_TYPE_PP(zdata) == IS_NULL || Z_TYPE_PP(zdata) == IS_RESOURCE) {
+			/* Skip these types */
+			continue;
 		} else {
 			if (formstr->len) {
 				smart_str_appendl(formstr, arg_sep, arg_sep_len);
@@ -141,10 +144,15 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
 					break;
 				case IS_LONG:
-					ekey_len = spprintf(&ekey, 12, "%ld", idx);
+				case IS_BOOL:
+					ekey_len = spprintf(&ekey, 12, "%ld", Z_LVAL_PP(zdata));
+					break;
+				case IS_DOUBLE:
+					ekey_len = spprintf(&ekey, 48, "%.*G", (int) EG(precision), Z_DVAL_PP(zdata));
 					break;
 				default:
 					/* fall back on convert to string */
+					MAKE_STD_ZVAL(copyzval);
 					*copyzval = **zdata;
 					zval_copy_ctor(copyzval);
 					convert_to_string_ex(&copyzval);
