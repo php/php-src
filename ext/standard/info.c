@@ -59,6 +59,7 @@ ZEND_EXTERN_MODULE_GLOBALS(iconv)
 						} \
 
 PHPAPI extern char *php_ini_opened_path;
+PHPAPI extern char *php_ini_scanned_files;
 
 /* {{{ _display_module_info
  */
@@ -378,6 +379,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
+
+		if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+			php_info_print_table_row(2, "Scan this dir for additional .ini files", PHP_CONFIG_FILE_SCAN_DIR);
+			if(php_ini_scanned_files) {
+				php_info_print_table_row(2, "additional .ini files parsed", php_ini_scanned_files);
+			}
+		}
 		
 		snprintf(temp_api, sizeof(temp_api), "%d", PHP_API_VERSION);
 		php_info_print_table_row(2, "PHP API", temp_api);
