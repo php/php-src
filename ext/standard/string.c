@@ -1487,6 +1487,7 @@ PHP_FUNCTION(strrchr)
 {
 	zval **haystack, **needle;
 	char *found = NULL;
+	long found_offset;
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
 		FAILURE) {
@@ -1503,7 +1504,8 @@ PHP_FUNCTION(strrchr)
 	}
 
 	if (found) {
-		RETURN_STRING(found, 1);
+		found_offset = found - Z_STRVAL_PP(haystack);
+		RETURN_STRINGL(found, Z_STRLEN_PP(haystack) - found_offset, 1);
 	} else {
 		RETURN_FALSE;
 	}
