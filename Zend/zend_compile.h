@@ -597,6 +597,8 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_MEMBER_FUNC_CALL	1<<0
 #define ZEND_CTOR_CALL			1<<1
 
+#define ZEND_ARG_SEND_BY_REF (1<<0)
+#define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
 
 #define AI_USE_PTR(ai) \
 	if ((ai).ptr_ptr) { \

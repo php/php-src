@@ -916,6 +916,7 @@ void zend_do_pass_param(znode *param, int op, int offset CLS_DC)
 	unsigned char *arg_types;
 	int original_op=op;
 	zend_function **function_ptr_ptr, *function_ptr;
+	int send_by_reference;
 
 						
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
@@ -939,20 +940,13 @@ void zend_do_pass_param(znode *param, int op, int offset CLS_DC)
 		arg_types = NULL;
 	}
 
-	if (op==ZEND_SEND_VAL) {
-		switch (param->op_type) {
-			case IS_CONST:	/* constants behave like variables when passed to functions,
-							 * as far as reference counting is concerned.  Treat them
-							 * as if they were variables here.
-							 */
-				break;
-			case IS_VAR:
-				op = ZEND_SEND_VAR_NO_REF;
-				break;
-		}
+	send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)?ZEND_ARG_SEND_BY_REF:0;
+
+	if (op == ZEND_SEND_VAL && param->op_type == IS_VAR) {
+			op = ZEND_SEND_VAR_NO_REF;
 	}
-	if (op!=ZEND_SEND_VAR_NO_REF
-		&& ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)) {
+
+	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference == ZEND_ARG_SEND_BY_REF) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
@@ -964,9 +958,11 @@ void zend_do_pass_param(znode *param, int op, int offset CLS_DC)
 		}
 	}
 
-	if (original_op==ZEND_SEND_VAR) {
+	if (original_op == ZEND_SEND_VAR) {
 		switch(op) {
 			case ZEND_SEND_VAR_NO_REF:
+				zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+				break;
 			case ZEND_SEND_VAR:
 				if (function_ptr) {
 					zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
@@ -981,10 +977,19 @@ void zend_do_pass_param(znode *param, int op, int offset CLS_DC)
 	}
 
 	opline = get_next_op(CG(active_op_array) CLS_CC);
-	if (function_ptr) {
-		opline->extended_value = ZEND_DO_FCALL;
+
+	if (op == ZEND_SEND_VAR_NO_REF) {
+		if (function_ptr) {
+			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND | send_by_reference;
+		} else {
+			opline->extended_value = 0;
+		}
 	} else {
-		opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+		if (function_ptr) {
+			opline->extended_value = ZEND_DO_FCALL;
+		} else {
+			opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+		}
 	}
 	opline->opcode = op;
 	opline->op1 = *param;
