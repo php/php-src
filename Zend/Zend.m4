@@ -183,6 +183,7 @@ dnl extra check to avoid C++ preprocessor testing if in non-ZTS mode
 		
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
 AC_PROG_CXX		
+AC_PROG_CXXCPP
 AC_LANG_CPLUSPLUS
 AC_CHECK_HEADER(stdiostream.h, [ AC_DEFINE(HAVE_STDIOSTREAM_H, [], Whether you have stdiostream.h) ])
 
