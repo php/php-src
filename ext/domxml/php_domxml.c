@@ -394,18 +394,18 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "Wrapper is not an object");
-        return NULL;
+		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
 		php_error(E_WARNING, "Underlying object missing");
-        return NULL;
+		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
 		php_error(E_WARNING, "Underlying object missing or of invalid type");
-        return NULL;
+		return NULL;
 	}
 
 	return obj;
@@ -497,19 +497,19 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "Wrapper is not an object");
-        return NULL;
+		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==
 		FAILURE) {
 		php_error(E_WARNING, "Underlying object missing");
-        return NULL;
+		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
 		php_error(E_WARNING, "Underlying object missing or of invalid type");
-        return NULL;
+		return NULL;
 	}
 
 	return obj;
@@ -598,12 +598,12 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "Wrapper is not an object");
-        return NULL;
+		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
 		php_error(E_WARNING, "Underlying object missing");
-        return NULL;
+		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
@@ -611,7 +611,7 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 /* The following test should be replaced with search in all parents */
 	if (!obj) {		/* || ((type != rsrc_type1) && (type != rsrc_type2))) { */
 		php_error(E_WARNING, "Underlying object missing or of invalid type");
-        return NULL;
+		return NULL;
 	}
 
 	return obj;
@@ -2791,4 +2791,6 @@ PHP_FUNCTION(domxml_version)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: noet sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: noet sw=4 ts=4 tw=78
  */
