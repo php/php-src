@@ -1029,7 +1029,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 		n++;
 	}
 
-	if ((*p == ':') && (n > 1)) {
+	if ((*p == ':') && (n > 1) && !strncmp("://", p, 3)) {
 		protocol = path;
 	}
 

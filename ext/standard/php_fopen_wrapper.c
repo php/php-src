@@ -34,6 +34,9 @@ php_stream * php_stream_url_wrap_php(char * path, char * mode, int options, char
 {
 	FILE * fp = NULL;
 	php_stream * stream = NULL;
+
+	if (!strncasecmp(path, "php://", 6))
+		path += 6;
 	
 	if (!strcasecmp(path, "stdin")) {
 		fp = fdopen(dup(STDIN_FILENO), mode);
