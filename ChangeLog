@@ -1,3 +1,48 @@
+2004-11-02  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/basic_functions.c
+      main/php.h:
+      make sleep() return it's return value when possible
+
+2004-11-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c:
+      MFH: Fixed bug #30658 (Ensure that temporary files created by GD are
+      removed).
+
+    * ext/gd/gd.c:
+      MFB: Fixed bug #30658 (Ensure that temporary files created by GD are
+      removed).
+
+    * (PHP_5_0)
+      ext/gd/gd.c:
+      Fixed bug #30658 (Ensure that temporary files created by GD are removed).
+
+2004-11-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c:
+      MFH: Patch by Joe Orton <jorton@redhat.com>.
+
+    * ZendEngine2/zend_API.c:
+      Patch by Joe Orton <jorton@redhat.com>.
+
+2004-11-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/link.c
+      ext/standard/link.c:
+      MFH: Fixed open_basedir & safe_mode bypass inside readlink() function.
+
+    * ext/standard/link.c:
+      Fixed open_basedir & safe_mode bypass inside readlink() function.
+
 2004-11-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/array.c:
