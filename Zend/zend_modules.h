@@ -23,10 +23,8 @@
 #define MODULES_H
 
 #include "zend.h"
-
-#ifdef NETWARE
 #include "zend_compile.h"
-#endif
+
 #define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
 #define SHUTDOWN_FUNC_ARGS	int type, int module_number TSRMLS_DC
