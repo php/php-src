@@ -61,16 +61,18 @@ $(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_f
 aclocal.m4: configure.in acinclude.m4 dynlib.m4
 	aclocal
 
+SUPPRESS_WARNINGS = (egrep -v '(warning: AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX)'||true)
+	
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@
-	@autoheader 2>&1 | (grep -v 'warning: AC_TRY_RUN called without default to allow cross compiling'||true)
+	@autoheader 2>&1 | $(SUPPRESS_WARNINGS)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
 
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
-	@autoconf 2>&1 | (grep -v 'warning: AC_TRY_RUN called without default to allow cross compiling'||true)
+	@autoconf 2>&1 | $(SUPPRESS_WARNINGS)
