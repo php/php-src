@@ -1,3 +1,221 @@
+2000-05-18  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c
+      configure.in
+      config.w32.h
+      acconfig.h.in: added new option "--enable-sigchild" (default is off)
+    when using this option php will setup it's own SIGCHLD handler.
+    when using oracle-libraries >= 8.1 on linux you need this option
+    if you are connecting using the BEQ interface - elsewise you will
+    see <defunc> processes whenever a php-script disconnects from oracle.
+
+    * NEWS: 22 May is my birthday!
+
+2000-05-18  Zeev Suraski  <zeev@php.net>
+
+    * configure.in
+      php_version.h
+      NEWS: Package 4.0.0
+
+    * sapi/servlet/servlet.c
+      sapi/thttpd/php_thttpd.h
+      sapi/thttpd/thttpd.c
+      sapi/roxen/roxen.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/php_phttpd.h
+      sapi/phttpd/phttpd.c
+      sapi/fhttpd/fhttpd.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      ext/wddx/php_wddx_api.h
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/yp/yp.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner.h
+      ext/standard/var.c
+      ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/sybase/sybase.c
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/output.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/php_array.h
+      ext/standard/php_assert.h
+      ext/standard/php_crypt.h
+      ext/standard/php_dir.h
+      ext/standard/php_image.h
+      ext/standard/php_lcg.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_output.h
+      ext/standard/php_rand.h
+      ext/standard/quot_print.c
+      ext/standard/rand.c
+      ext/standard/reg.c
+      ext/standard/soundex.c
+      ext/standard/string.c
+      ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/session.c
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/readline/php_readline.h
+      ext/readline/readline.c
+      ext/recode/php_recode.h
+      ext/recode/recode.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pdf/pdf.c
+      ext/pgsql/pgsql.c
+      ext/odbc/php_odbc.c
+      ext/odbc/velocis.c
+      ext/oracle/oracle.c
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/oci8/oci8.c
+      ext/mhash/mhash.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/java/java.c
+      ext/ldap/ldap.c
+      ext/mcrypt/mcrypt.c
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/imap/php_imap.c
+      ext/gd/gd.c
+      ext/gd/gdt1.c
+      ext/gd/gdt1.h
+      ext/gettext/gettext.c
+      ext/domxml/domxml.c
+      ext/fdf/fdf.c
+      ext/filepro/filepro.c
+      ext/dav/dav.c
+      ext/db/db.c
+      ext/dbase/dbase.c
+      ext/aspell/aspell.c
+      ext/bcmath/bcmath.c
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/com/COM.c
+      LICENSE
+      SAPI.c
+      SAPI.h
+      configuration-parser.y
+      configuration-scanner.l
+      fopen-wrappers.c
+      fopen-wrappers.h
+      internal_functions.c.in
+      internal_functions_registry.h
+      internal_functions_win32.c
+      main.c
+      main.h
+      php.h
+      php_globals.h
+      php_ini.c
+      php_ini.h
+      php_realpath.c
+      php_realpath.h
+      php_reentrancy.h
+      php_sprintf.c
+      php_variables.c
+      reentrancy.c
+      rfc1867.c
+      safe_mode.c
+      snprintf.h: Update the license with the new clause 6
+
+2000-05-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/README
+      sapi/aolserver/config.m4:
+    Later AOLserver releases will copy the include to the installation dir.
+
+2000-05-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/math.c: (PHP round) Fix proto.
+
+    * ext/standard/array.c: (PHP array_multisort) Fix the array_size test.
+
+2000-05-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/build2.mk: Cosmetic change
+
+    * configure.in
+      Makefile.in
+      acinclude.m4:
+    Make the shared library suffix dynamic. Improve workaround for libtool's
+    inflexibility WRT -avoid-version to support various numbers of .0
+
+    * Makefile.in
+      configure.in:
+    Fix workaround for systems where libtool cannot handle -avoid-version
+    correctly.
+
+2000-05-18  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - fixed bug #4076
+
+2000-05-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Tough to explain in two lines.
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+    Update for sort functions - user can now specify sort type.
+
+2000-05-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/config.m4
+      ext/swf/swf.c:
+    Make the SWF module compile again + 1 stylistic change.
+
 2000-05-17  Andi Gutmans  <andi@php.net>
 
     * php4dll.dsp: - Make non-threaded project build on Win32
