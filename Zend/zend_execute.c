@@ -264,7 +264,9 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			short refcount=variable_ptr->refcount;
 	
 			previous_lock_count = variable_ptr->EA.locks;
-			value->refcount++;
+			if (type!=IS_TMP_VAR) {
+				value->refcount++;
+			}
 			zendi_zval_dtor(*variable_ptr);
 			*variable_ptr = *value;
 			variable_ptr->refcount = refcount;
