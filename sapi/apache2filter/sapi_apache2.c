@@ -244,7 +244,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		if (php_handle_special_queries(SLS_C PLS_CC)) 
 			goto skip_execution;
 	
-		/* Loop through all buckets and put them into the buffer */	
+		/* Loop over all buckets and put them into the buffer */	
 		AP_BRIGADE_FOREACH(b, ctx->bb) {
 			rv = ap_bucket_read(b, &str, &n, 1);
 			if (rv == APR_SUCCESS && n > 0)
