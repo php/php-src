@@ -497,8 +497,6 @@ static char *php_session_encode(int *newlen PSLS_DC)
 
 static void php_session_decode(const char *val, int vallen PSLS_DC)
 {
-	PLS_FETCH();
-
 	php_session_track_init();
 	if (PS(serializer)->decode(val, vallen PSLS_CC) == FAILURE) {
 		php_session_destroy(PSLS_C);
