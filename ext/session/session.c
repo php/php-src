@@ -67,14 +67,36 @@ function_entry session_functions[] = {
 	{0}
 };
 
+static ps_module *_php_find_ps_module(char *name PSLS_DC);
+static const ps_serializer *_php_find_ps_serializer(char *name PSLS_DC);
+
+static PHP_INI_MH(OnUpdateSaveHandler)
+{
+	PSLS_FETCH();
+	
+	PS(mod) = _php_find_ps_module(new_value PSLS_CC);
+	return SUCCESS;
+}
+
+
+static PHP_INI_MH(OnUpdateSerializer)
+{
+	PSLS_FETCH();
+
+	PS(serializer) = _php_find_ps_serializer(new_value PSLS_CC);
+	return SUCCESS;
+}
+
+
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateString,		save_path,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateString,		session_name,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.save_handler",		"files",		PHP_INI_ALL, OnUpdateString,		save_handler,		php_ps_globals,	ps_globals)
+	PHP_INI_ENTRY("session.save_handler",			"files",		PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",		"0",			PHP_INI_ALL, OnUpdateBool,			auto_start,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",		"1",			PHP_INI_ALL, OnUpdateInt,			gc_probability,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",		"1440",			PHP_INI_ALL, OnUpdateInt,			gc_maxlifetime,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.serialize_handler",	"php",			PHP_INI_ALL, OnUpdateString,		serialize_handler,	php_ps_globals,	ps_globals)
+	PHP_INI_ENTRY("session.serialize_handler",		"php",			PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
@@ -974,9 +996,9 @@ PHP_FUNCTION(session_set_save_handler)
 	if (PS(nr_open_sessions) > 0)
 		RETURN_FALSE;
 	
-	PS(mod) = _php_find_ps_module("user" PSLS_CC);
+	php_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user"), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
-	mdata = emalloc(sizeof *mdata);
+	mdata = emalloc(sizeof(*mdata));
 	
 	for (i = 0; i < 6; i++) {
 		convert_to_string_ex(args[i]);
@@ -1228,10 +1250,7 @@ PHP_FUNCTION(session_unset)
 /* }}} */
 
 static void php_rinit_session_globals(PSLS_D)
-{
-	PS(mod) = _php_find_ps_module(PS(save_handler) PSLS_CC);
-	PS(serializer) = _php_find_ps_serializer(PS(serialize_handler) PSLS_CC);
-		
+{		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(define_sid) = 0;
 	PS(save_path) = estrdup(INI_STR("session.save_path"));
@@ -1275,8 +1294,9 @@ PHP_RINIT_FUNCTION(session)
 		return SUCCESS;
 	}
 
-	if (PS(auto_start))
+	if (PS(auto_start)) {
 		_php_session_start(PSLS_C);
+	}
 
 	return SUCCESS;
 }

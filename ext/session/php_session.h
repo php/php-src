@@ -91,8 +91,6 @@ typedef struct {
 	long cache_expire;
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
-	char *serialize_handler;
-	char *save_handler;
 	zend_bool auto_start;
 	zend_bool define_sid;
 	zend_bool use_cookies;
