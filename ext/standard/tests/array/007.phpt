@@ -310,16 +310,22 @@ var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(3) {
   ["0.1"]=>
   object(cr)#1 (2) {
+    ["priv_member:private"]=>
+    int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#2 (2) {
+    ["priv_member:private"]=>
+    int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#3 (2) {
+    ["priv_member:private"]=>
+    int(23)
     ["public_member"]=>
     int(23)
   }
@@ -382,16 +388,22 @@ var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(3) {
   ["0.1"]=>
   object(cr)#1 (2) {
+    ["priv_member:private"]=>
+    int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#2 (2) {
+    ["priv_member:private"]=>
+    int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#3 (2) {
+    ["priv_member:private"]=>
+    int(23)
     ["public_member"]=>
     int(23)
   }
@@ -454,26 +466,36 @@ var_dump(array_diff_assoc($a, $b));
 array(5) {
   ["0.1"]=>
   object(cr)#1 (2) {
+    ["priv_member:private"]=>
+    int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#2 (2) {
+    ["priv_member:private"]=>
+    int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#3 (2) {
+    ["priv_member:private"]=>
+    int(23)
     ["public_member"]=>
     int(23)
   }
   [1]=>
   object(cr)#4 (2) {
+    ["priv_member:private"]=>
+    int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#5 (2) {
+    ["priv_member:private"]=>
+    int(-15)
     ["public_member"]=>
     int(-15)
   }
@@ -536,11 +558,15 @@ var_dump(array_udiff($a, $b, "comp_func_cr"));
 array(2) {
   ["0.5"]=>
   object(cr)#2 (2) {
+    ["priv_member:private"]=>
+    int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#3 (2) {
+    ["priv_member:private"]=>
+    int(23)
     ["public_member"]=>
     int(23)
   }
@@ -603,16 +629,22 @@ var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
   object(cr)#1 (2) {
+    ["priv_member:private"]=>
+    int(9)
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
   object(cr)#2 (2) {
+    ["priv_member:private"]=>
+    int(12)
     ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#3 (2) {
+    ["priv_member:private"]=>
+    int(23)
     ["public_member"]=>
     int(23)
   }

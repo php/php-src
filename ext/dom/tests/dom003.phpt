@@ -22,6 +22,17 @@ $rootNode->appendChild($rootNode);
 --EXPECTF--
 --- Catch exception with try/catch
 object(DOMException)#%d (6) {
+  ["message:protected"]=>
+  string(23) "Hierarchy Request Error"
+  ["string:private"]=>
+  string(0) ""
+  ["file:protected"]=>
+  string(%d) "%s/ext/dom/tests/dom003.php"
+  ["line:protected"]=>
+  int(8)
+  ["trace:private"]=>
+  array(0) {
+  }
   ["code"]=>
   int(3)
 }

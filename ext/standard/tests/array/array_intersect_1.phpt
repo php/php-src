@@ -205,16 +205,22 @@ var_dump(array_uintersect($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
   object(cr)#1 (2) {
+    ["priv_member:private"]=>
+    int(9)
     ["public_member"]=>
     int(9)
   }
   [1]=>
   object(cr)#4 (2) {
+    ["priv_member:private"]=>
+    int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#5 (2) {
+    ["priv_member:private"]=>
+    int(-15)
     ["public_member"]=>
     int(-15)
   }
@@ -338,11 +344,15 @@ var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
 array(2) {
   [1]=>
   object(cr)#4 (2) {
+    ["priv_member:private"]=>
+    int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#5 (2) {
+    ["priv_member:private"]=>
+    int(-15)
     ["public_member"]=>
     int(-15)
   }
@@ -466,11 +476,15 @@ var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(2) {
   [1]=>
   object(cr)#4 (2) {
+    ["priv_member:private"]=>
+    int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#5 (2) {
+    ["priv_member:private"]=>
+    int(-15)
     ["public_member"]=>
     int(-15)
   }
@@ -535,11 +549,15 @@ var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func
 array(2) {
   [1]=>
   object(cr)#4 (2) {
+    ["priv_member:private"]=>
+    int(4)
     ["public_member"]=>
     int(4)
   }
   [2]=>
   object(cr)#5 (2) {
+    ["priv_member:private"]=>
+    int(-15)
     ["public_member"]=>
     int(-15)
   }
