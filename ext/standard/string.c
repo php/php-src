@@ -3883,14 +3883,14 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
+static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+
 /* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */
 PHP_FUNCTION(str_rot13)
 {
 	zval **arg;
-
-    static char xfrom[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    static char xto[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
 		WRONG_PARAM_COUNT;
@@ -3899,7 +3899,7 @@ PHP_FUNCTION(str_rot13)
 	*return_value = **arg;
 	zval_copy_ctor(return_value);
 
-    php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), xfrom, xto, 52);
+    php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
 }
 /* }}} */
 
@@ -3925,6 +3925,82 @@ PHP_FUNCTION(money_format) {
 
 /* }}} */
 #endif
+
+/* {{{ rot13 stream filter implementation */
+static size_t strfilter_rot13_write(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC)
+{
+	char rotbuf[1024];
+	size_t chunk;
+	size_t wrote = 0;
+
+	while (count > 0) {
+		chunk = count;
+		if (chunk > sizeof(rotbuf))
+			chunk = sizeof(rotbuf);
+
+		PHP_STRLCPY(rotbuf, buf, sizeof(rotbuf), chunk);
+		buf += chunk;
+		count -= chunk;
+
+		php_strtr(rotbuf, chunk, rot13_from, rot13_to, 52);
+		wrote += php_stream_filter_write_next(stream, thisfilter, rotbuf, chunk);
+	}
+
+	return wrote;
+}
+
+static size_t strfilter_rot13_read(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC)
+{
+	size_t read;
+
+	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	php_strtr(buf, read, rot13_from, rot13_to, 52);
+
+	return read;
+}
+
+static int strfilter_rot13_flush(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
+{
+	return php_stream_filter_flush_next(stream, thisfilter);
+}
+
+static int strfilter_rot13_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
+{
+	return php_stream_filter_eof_next(stream, thisfilter);
+}
+
+
+static php_stream_filter_ops strfilter_rot13_ops = {
+	strfilter_rot13_write,
+	strfilter_rot13_read,
+	strfilter_rot13_flush,
+	strfilter_rot13_eof,
+	NULL,
+	"string.rot13"
+};
+
+static php_stream_filter *strfilter_rot13_create(const char *filtername, const char *filterparams,
+		int filterparamslen, int persistent TSRMLS_DC)
+{
+	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
+}
+
+static php_stream_filter_factory strfilter_rot13_factory = {
+	strfilter_rot13_create
+};
+
+PHP_MINIT_FUNCTION(string_filters)
+{
+	return php_stream_filter_register_factory("string.rot13", &strfilter_rot13_factory);
+}
+
+PHP_MSHUTDOWN_FUNCTION(string_filters)
+{
+	return php_stream_filter_unregister_factory("string.rot13");
+}
+/* }}} */
 
 /*
  * Local variables:

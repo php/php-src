@@ -724,7 +724,7 @@ PHP_FUNCTION(stream_context_set_option)
 	zval *options = NULL, *zcontext = NULL, *zvalue = NULL;
 	php_stream_context *context;
 	char *wrappername, *optionname;
-	long wrapperlen, optionlen;
+	int wrapperlen, optionlen;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 				"rssz", &zcontext, &wrappername, &wrapperlen,
@@ -788,6 +788,49 @@ PHP_FUNCTION(stream_context_create)
 		parse_context_options(context, params);
 	
 	ZEND_REGISTER_RESOURCE(return_value, context, le_stream_context);
+}
+/* }}} */
+
+static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *zstream;
+	php_stream *stream;
+	char *filtername, *filterparams = NULL;
+	int filternamelen, filterparamslen = 0;
+	php_stream_filter *filter;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &zstream,
+				&filtername, &filternamelen, &filterparams, &filterparamslen) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(stream, php_stream*, &zstream, -1, "stream", le_stream);
+	
+	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
+	if (filter == NULL)
+		RETURN_FALSE;
+
+	if (append)
+		php_stream_filter_append(stream, filter);
+	else
+		php_stream_filter_prepend(stream, filter);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto bool stream_filter_prepend(resource stream, string filtername[, string filterparams])
+   Prepend a filter to a stream */
+PHP_FUNCTION(stream_filter_prepend)
+{
+	apply_filter_to_stream(0, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto bool stream_filter_append(resource stream, string filtername[, string filterparams])
+   Append a filter to a stream */
+PHP_FUNCTION(stream_filter_append)
+{
+	apply_filter_to_stream(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

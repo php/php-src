@@ -89,6 +89,9 @@ PHP_FUNCTION(strcoll);
 PHP_FUNCTION(money_format);
 #endif
 
+PHP_MINIT_FUNCTION(string_filters);
+PHP_MSHUTDOWN_FUNCTION(string_filters);
+
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
