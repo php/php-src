@@ -1,3 +1,85 @@
+2003-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/oracle/oracle.c:
+      ZTS fix.
+
+2003-01-19  Zeev Suraski  <zeev@zend.com>
+
+    * acinclude.m4
+      configure.in:
+      relabel
+
+2003-01-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/scanf.c:
+      Improved the patched part to prevent further potential bugs
+
+2003-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/oracle/oracle.c:
+      fixed typos
+
+2003-01-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * README.TESTING:
+      - Moved to http://qa.php.net/write-test.php
+
+2003-01-19  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/standard/basic_functions.c
+      main/php_ini.c:
+      ini patch to allow 'entry[] = value' entries
+
+2003-01-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug21744.phpt:
+      Fixed bug #21744(21741)
+      Added test case for the bug
+
+2003-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbase/dbf_rec.c
+      ext/oci8/oci8.c
+      ext/oracle/oracle.c
+      ext/rpc/com/com.c
+      ext/rpc/com/conversion.c
+      ext/rpc/java/java.c
+      ext/w32api/w32api.c:
+      ZTS fixes.
+
+    * ext/mcal/php_mcal.c:
+      Changed php_error to php_error_docref.
+      Make mcal compile with ZE2.
+
+    * ext/dbase/dbf_rec.c
+      ext/dio/dio.c
+      ext/hwapi/hwapi.cpp
+      ext/ingres_ii/ii.c
+      ext/mime_magic/mime_magic.c
+      ext/oci8/oci8.c
+      ext/oracle/oracle.c
+      ext/ovrimos/ovrimos.c
+      ext/pcre/php_pcre.c
+      ext/pdf/pdf.c
+      ext/pfpro/pfpro.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/recode/recode.c
+      ext/rpc/com/com.c
+      ext/rpc/com/com_wrapper.c
+      ext/rpc/com/conversion.c
+      ext/rpc/com/variant.c
+      ext/rpc/dotnet/dotnet.cpp
+      ext/rpc/java/java.c
+      ext/session/session.c
+      ext/snmp/winsnmp.c
+      ext/standard/filters.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/w32api/w32api.c:
+      Changed php_error to php_error_docref.
+
 2003-01-18  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/credits.c:
