@@ -630,7 +630,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					Bucket *p;
 	
 					fci.param_count = 0;
-					fci.params = emalloc(sizeof(zval*) * ht->nNumOfElements);
+					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
 					p = ht->pListHead;
 					while (p != NULL) {
 						fci.params[fci.param_count++] = (zval**)p->pData;

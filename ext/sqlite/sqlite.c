@@ -1942,7 +1942,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 				Bucket *p;
 
 				fci.param_count = 0;
-				fci.params = emalloc(sizeof(zval*) * ht->nNumOfElements);
+				fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
 				p = ht->pListHead;
 				while (p != NULL) {
 					fci.params[fci.param_count++] = (zval**)p->pData;
