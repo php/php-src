@@ -699,7 +699,7 @@ PHP_FUNCTION(mysqli_fetch)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_fetch_field (object result)
+/* {{{ proto object mysqli_fetch_field (object result)
    Get column information from a result and return as an object */
 PHP_FUNCTION(mysqli_fetch_field) 
 {
@@ -731,7 +731,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_fetch_fields (object result)
+/* {{{ proto array mysqli_fetch_fields (object result)
    Return array of objects containing field meta-data */
 PHP_FUNCTION(mysqli_fetch_fields) 
 {
