@@ -110,6 +110,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(gd, gdImageCreateTrueColor,   [AC_DEFINE(HAVE_LIBGD20, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageSetTile,   			[AC_DEFINE(HAVE_GD_IMAGESETTILE, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageSetBrush,   			[AC_DEFINE(HAVE_GD_IMAGESETBRUSH, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageStringFTEx,   			[AC_DEFINE(HAVE_GD_STRINGFTEX, 1, [ ])])
 ])
 
 
@@ -249,7 +250,7 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   ])
 
   AC_MSG_CHECKING(whether to include FreeType 1.x support)
-  if test "$with_freetype_dir" = "no" ; then
+  if test "$with_freetype_dir" = "no" -o "$with_freetype_dir" = ""; then
     if test -n "$CHECK_TTF" ; then
 			for i in /usr /usr/local "$CHECK_TTF" ; do
 				if test -f "$i/include/freetype.h" ; then
