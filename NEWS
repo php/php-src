@@ -27,6 +27,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
+- Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
 - Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
 - Fixed bug #21531 (file_exists() and other filestat functions report errors
   when the requested file/directory does not exists). (Sara)
