@@ -525,7 +525,7 @@ class PEAR
                          $code = null,
                          $userinfo = null)
     {
-        if (isset($this)) {
+        if (isset($this) && is_subclass_of($this, 'PEAR_Error')) {
             return $this->raiseError($message, $code, null, null, $userinfo);
         } else {
             return PEAR::raiseError($message, $code, null, null, $userinfo);
