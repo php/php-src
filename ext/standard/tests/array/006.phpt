@@ -13,6 +13,7 @@ $c = array("a" => "foo", "b" => "bar", "c" => "fubar");
 
 /* simple array */
 echo array_pop($a), "\n";
+array_push($a, "foobar");
 var_dump($a);
 
 /* numerical assoc indices */
@@ -26,11 +27,13 @@ var_dump($c);
 ?>
 --EXPECT--
 fubar
-array(2) {
+array(3) {
   [0]=>
   string(3) "foo"
   [1]=>
   string(3) "bar"
+  [2]=>
+  string(6) "foobar"
 }
 fubar
 array(2) {
