@@ -14,8 +14,16 @@ Status legend
                      should be using that.
 
 --------------------------------------------------------------------------------
+EXTENSION:           dba
+PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           mcrypt
+PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           mhash
