@@ -383,6 +383,7 @@ function_entry basic_functions[] = {
 	PHP_FE(fgetcsv,				NULL)
     PHP_FE(flock,				NULL)
 	PHP_FE(get_meta_tags,		NULL)
+	PHP_FE(set_file_buffer,		NULL)
 	/* set_socket_blocking() is deprecated,
 	   use socket_set_blocking() instead */
 	PHP_FE(set_socket_blocking,	NULL)
