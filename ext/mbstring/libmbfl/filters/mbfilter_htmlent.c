@@ -145,7 +145,7 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
 {
 	filter->status = 0;
-	filter->cache = 0;
+	filter->opaque = NULL;
 	return 0;
 }
 
@@ -158,24 +158,24 @@ static const char html_entity_chars[] = "#0123456789abcdefghijklmnopqrstuvwxyzAB
 void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter)
 {
 	filter->status = 0;
-	filter->cache = (int)mbfl_malloc(html_enc_buffer_size+1);
+	filter->opaque = mbfl_malloc(html_enc_buffer_size+1);
 }
 	
 void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 {
 	filter->status = 0;
-	if (filter->cache)
+	if (filter->opaque)
 	{
-		mbfl_free((void*)filter->cache);
+		mbfl_free((void*)filter->opaque);
 	}
-	filter->cache = 0;
+	filter->opaque = NULL;
 }
 
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
 	int  pos, ent = 0;
 	mbfl_html_entity_entry *entity;
-	char *buffer = (char*)filter->cache;
+	char *buffer = (char*)filter->opaque;
 
 	if (!filter->status) {
 		if (c == '&' ) {
@@ -246,7 +246,7 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 	int status, pos = 0;
 	char *buffer;
 
-	buffer = (char*)filter->cache;
+	buffer = (char*)filter->opaque;
 	status = filter->status;
 	/* flush fragments */
 	while (status--) {
