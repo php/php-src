@@ -154,15 +154,14 @@ PHP_FUNCTION(my_drawtext)
 	int argc;
 	int image_id = -1;
 	int font_id = -1;
-	TSRMLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	if (argc < 5 || argc > 6 || zend_get_parameters_ex(argc, &image, &text, &font, &x, &y, &color) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(???, ???, image, image_id, "???", ???G());
-	ZEND_FETCH_RESOURCE(???, ???, font, font_id, "???", ???G());
+	ZEND_FETCH_RESOURCE(???, ???, image, image_id, "???", ???_rsrc_id);
+	ZEND_FETCH_RESOURCE(???, ???, font, font_id, "???", ???_rsrc_id);
 
 	switch (argc) {
 		case 6:
