@@ -1,8 +1,0 @@
-<?
-
-function foobar()
-{
-	print "foobar\n";
-}
-
-$a = ${"foo"."bar"}();

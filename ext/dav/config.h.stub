@@ -1,2 +1,0 @@
-/* Define to compile with mod_dav support */
-#define HAVE_MOD_DAV 0
