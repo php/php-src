@@ -299,13 +299,10 @@ php_apache_disable_caching(ap_filter_t *f)
 	return OK;
 }
 
-static time_t
-php_apache_sapi_get_request_time(void)
+static time_t php_apache_sapi_get_request_time(TSRMLS_D)
 {
-	TSRMLS_FETCH();
 	php_struct *ctx = SG(server_context);
-
-	return ctx->r->request_time;
+	return apr_time_sec(ctx->r->request_time);
 }
 
 extern zend_module_entry php_apache_module;
