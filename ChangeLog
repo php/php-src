@@ -1,3 +1,94 @@
+2003-12-28  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed prototype for mysqli_bind_result
+
+2003-12-28  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/var.c:
+      - Fix typo
+
+2003-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/gdcache.c
+      ext/gd/gdcache.h
+      ext/gd/gdttf.c:
+      Last bit of CS fixes.
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_arc_f_buggy.c
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_io.h
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_io_ss.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdcache.c
+      ext/gd/libgd/gdcache.h
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/gdkanji.c
+      ext/gd/libgd/gdxpm.c
+      ext/gd/libgd/testac.c
+      ext/gd/libgd/wbmp.c
+      ext/gd/libgd/wbmp.h
+      ext/gd/libgd/webpng.c
+      ext/gd/libgd/xbm.c:
+      CS fixes.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Boundry check.
+
+2003-12-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/factory_and_singleton_009.phpt
+      tests/classes/factory_and_singleton_010.phpt:
+      Add more tests.
+
+    * ext/sqlite/tests/sqlite_oo_030.phpt:
+      Add a test
+
+    * ext/sqlite/sqlite.c:
+      Fix a memleak
+      Improve error messages
+
+    * ZendEngine2/zend_API.c:
+      WS
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c:
+      Fix order of class_entry member initialization (needed for example for DOM)
+
+2003-12-28  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/sqlite/config.m4:
+      revert my previous patch because utf-8 support is still in experimental
+      status.
+
+    * ext/sqlite/config.m4:
+      added warning message.
+
+    * ext/sqlite/config.m4:
+      added a option to select character encoding for sqlite.
+
+2003-12-28  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_prop.c:
+      fixed bug in properties for longlong values
+
+2003-12-28  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/tests/file/userwrapper.phpt:
+      Test additional wrapper methods [unlink, rename, mkdir, rmdir, url_stat]
+
 2003-12-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/iconv/iconv.c:
