@@ -26,6 +26,16 @@
 #include "zend_constants.h"
 #include "zend_ini.h"
 
+/* Class entry pointers */
+zend_class_entry *reflector_ptr;
+zend_class_entry *reflection_exception_ptr;
+zend_class_entry *reflection_ptr;
+zend_class_entry *reflection_function_ptr;
+zend_class_entry *reflection_class_ptr;
+zend_class_entry *reflection_method_ptr;
+zend_class_entry *reflection_property_ptr;
+zend_class_entry *reflection_extension_ptr;
+
 /* Method macros */
 #define METHOD_NOTSTATIC                                                                                    \
 	if (!this_ptr) {                                                                                        \
@@ -47,7 +57,7 @@
 
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
-	zend_throw_exception(msg, 0 TSRMLS_CC);                                                                 \
+	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                                                 \
 	return;                                                                                                 \
 
 /* Smart string macros */
@@ -110,15 +120,6 @@ typedef struct {
 	void *ptr;
 	unsigned int free_ptr:1;
 } reflection_object;
-
-/* Class entry pointers */
-zend_class_entry *reflector_ptr;
-zend_class_entry *reflection_ptr;
-zend_class_entry *reflection_function_ptr;
-zend_class_entry *reflection_class_ptr;
-zend_class_entry *reflection_method_ptr;
-zend_class_entry *reflection_property_ptr;
-zend_class_entry *reflection_extension_ptr;
 
 static zend_object_handlers reflection_object_handlers;
 
@@ -2239,6 +2240,9 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	zend_class_entry _reflection_entry;
 
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_exception", reflection_functions);
+	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection", reflection_functions);
 	reflection_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
