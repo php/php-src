@@ -188,7 +188,7 @@ unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_
 	if(ret_length) {
 		*ret_length = j;
 	}
-	result[k] = '\0';
+	result[j] = '\0';
 	return result;
 }
 /* }}} */
