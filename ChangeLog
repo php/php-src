@@ -1,3 +1,91 @@
+2000-09-08  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      main/SAPI.c: Implement move_uploaded_file() (untested)
+
+    * ext/standard/basic_functions.h: Fix build
+
+2000-09-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    is_uploaded_file() is probably a better name.
+
+2000-09-08  Zeev Suraski  <zeev@zend.com>
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/rfc1867.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: - Implemented is_upload_file()
+
+2000-09-08  Jon Parise  <jon@csh.rit.edu>
+
+    * sapi/apache/mod_php4.c: Fix build after last commit.
+
+2000-09-08  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      main/SAPI.c
+      main/SAPI.h
+      sapi/aolserver/aolserver.c:
+    Restore the headers_only test to the centralized SAPI startup.  If necessary, it can
+    be overriden in the activate() callback.
+
+2000-09-08  Stanislav Malyshev  <stas@zend.com>
+
+    * main/fopen-wrappers.c
+      main/main.c: Never trust snprintf return value
+
+    * main/main.c: Fix crash on very long error messages
+    Manual for snprintf says:
+           If  the output was truncated, the return value is -1, oth-
+           erwise it is the number of characters stored, not  includ-
+           ing the terminating null.
+    And that's a blatant lie - in reality, libc 2.1 always returns number of
+    characters that _would be_ stored. I hate those libc bugs. Now we should go
+    and check every place we trusted snprintf return value.
+
+2000-09-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/pdf.c: Fixed typo. Changed php3_error to php_error.
+
+2000-09-08  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c: Fix syslog call
+
+2000-09-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/pdf.c: Changed // to /* */ comments.
+
+2000-09-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/syslog.c:
+    Since we don't allow parameters for syslog, we shouln't pass the
+    string as format
+
+2000-09-08  Andi Gutmans  <andi@zend.com>
+
+    * sapi/apache/php4apache.dsp: - Add another ..\ to the TSRM search path
+
+    * sapi/apache/php4apache.dsp:
+    - Add TSRM to the apache workspace include path
+
+2000-09-08  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c:
+    - last parameter of pdf_get_parameter(), pdf_get_value() optional
+    - fixes to make it compile with sun cc
+
 2000-09-07  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * EXTENSIONS: - The mcrypt extension also works with 2.4.4 since php 4.0.2
