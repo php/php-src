@@ -3234,7 +3234,7 @@ PHP_FUNCTION(exif_thumbnail)
 }
 /* }}} */
 
-/* {{{ proto long getimagesize(string imagefile)
+/* {{{ proto long exif_imagetype(string imagefile)
    Get the type of an image */
 PHP_FUNCTION(exif_imagetype)
 {
