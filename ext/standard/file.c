@@ -17,6 +17,7 @@
    |          Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    | PHP 4.0 patches by Thies C. Arntzen (thies@thieso.net)               |
+   | PHP 4.1 streams by Wez Furlong (wez@thebrainroom.com)                |
    +----------------------------------------------------------------------+
  */
 
@@ -136,6 +137,11 @@ static void _file_stream_dtor(zend_rsrc_list_entry * rsrc)
 	php_stream_close(stream);
 }
 #endif
+
+PHPAPI int php_file_le_stream(void)
+{
+	return le_stream;
+}
 
 static void _file_fopen_dtor(zend_rsrc_list_entry *rsrc)
 {
@@ -2428,6 +2434,7 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: tw=78 sw=4 ts=4
  */
 
 
