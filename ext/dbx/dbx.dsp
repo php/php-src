@@ -98,6 +98,10 @@ SOURCE=.\dbx.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dbx_mssql.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dbx_mysql.c
 # End Source File
 # Begin Source File
@@ -115,6 +119,10 @@ SOURCE=.\dbx_pgsql.c
 # Begin Source File
 
 SOURCE=.\dbx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbx_mssql.h
 # End Source File
 # Begin Source File
 
