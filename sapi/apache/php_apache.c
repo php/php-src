@@ -41,7 +41,7 @@
 #include "http_request.h"
 #include "build-defs.h"
 
-#define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")
+#define SECTION(name)  PUTS("<H2>" name "</H2>\n")
 
 extern module *top_module;
 
@@ -204,7 +204,6 @@ PHP_MINFO_FUNCTION(apache)
 			*p='\0'; /* Cut off ugly .c extensions on module names */
 		}
 		strcpy(modulenames, name);
-		PUTS(name);
 		if (modp->next) {
 			strcpy(modulenames, ", ");
 		}
