@@ -1,3 +1,68 @@
+1999-12-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * .cvsignore
+      build.mk
+      build2.mk: Update .cvsignore, make build.mk more verbose
+
+    * build2.mk:
+    Enable dependencies for UNIX. Because this only works, if you use
+    GNU make and GCC, you need to enable it manually by running
+
+    $ touch php4/want_dependencies
+
+1999-12-24  Zeev Suraski  <zeev@php.net>
+
+    * Makefile.am
+      php3_realpath.c
+      php4dll.dsp
+      php4dllts.dsp
+      php_realpath.c: php3_realpath.c -> php_realpath.c
+
+    * configuration-parser.y: Fix warnings
+
+1999-12-24  Andi Gutmans  <andi@php.net>
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/odbc/php_odbc.c
+      ext/standard/iptc.c
+      ext/standard/post.c
+      ext/standard/var.c
+      ext/dav/dav.c
+      ext/java/java.c
+      ext/com/COM.c
+      apidoc-zend.txt
+      main.c
+      rfc1867.c:
+    - Move more stuff to ALLOC_ZVAL(). We need to add those FREE_ZVAL()'s now.
+
+1999-12-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+    Add -rdynamic, if supported by gcc and static Apache build is used
+
+    * configure.in: Remove --enable-low-memory, and preserve LIBS from TSRM
+
+1999-12-24  Andi Gutmans  <andi@php.net>
+
+    * sapi/isapi/php4isapi.c
+      ext/standard/array.c
+      ext/wddx/wddx.c
+      ext/session/session.c
+      ext/hyperwave/hw.c
+      ext/pcre/php_pcre.c:
+    - Use ALLOC_ZVAL() in PHP. Finding the places to put FREE_ZVAL(z) is much
+      more tricky and I'm not sure how many places this is. zval allocations
+      were only made directly in 11 places.
+
+1999-12-24  Zeev Suraski  <zeev@php.net>
+
+    * configuration-parser.y
+      configuration-scanner.l
+      php.ini-dist:
+    - Beef up the INI file reader - it now supports PHP constants, as well as
+      bitwise operators on them (no more error_reporting = 7, from now on you
+      can use error_reporting = E_ALL & ~E_NOTICE
+
 1999-12-23  Andi Gutmans  <andi@php.net>
 
     * php4dll.dsp: - Make the project compile again
