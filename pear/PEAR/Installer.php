@@ -27,6 +27,9 @@ require_once 'PEAR/Dependency.php';
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
  *
+ * TODO:
+ *   - Check dependencies break on package uninstall (when no force given)
+ *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
