@@ -161,7 +161,7 @@ class DB {
 	 * error
 	 */
     function &factory($type) {
-		if (!@import("DB/${type}.php")) {
+		if (!@include_once("DB/${type}.php")) {
 			return DB_ERROR_NOT_FOUND;
 		}
 		$classname = 'DB_' . $type;
@@ -190,7 +190,7 @@ class DB {
 
 		$dsninfo = DB::parseDSN($dsn);
 		$type = $dsninfo['phptype'];
-		if (!@import("DB/${type}.php")) {
+		if (!@include_once("DB/${type}.php")) {
 			return DB_ERROR_NOT_FOUND;
 		}
 		$classname = 'DB_' . $type;
