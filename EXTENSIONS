@@ -175,6 +175,7 @@ EXTENSION:           bz2
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           calendar
 MAINTENANCE:         Unknown
@@ -189,7 +190,12 @@ PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           CURL
+EXTENSION:           crack
+MAINTENANCE:         Unknown
+STATUS:              Experimental
+SINCE:               4.0.5
+-------------------------------------------------------------------------------
+EXTENSION:           curl
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
@@ -233,6 +239,11 @@ EXTENSION:           gettext
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           gmp
+MAINTENANCE:         Unknown
+STATUS:              Unknown
+SINCE:               4.0.4
+-------------------------------------------------------------------------------
 EXTENSION:           icap
 MAINTENANCE:         Unknown
 STATUS:              Obsolete
@@ -271,6 +282,7 @@ EXTENSION:           openssl
 PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               4.0.4
 -------------------------------------------------------------------------------
 EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
@@ -293,11 +305,22 @@ PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           printer
+MAINTENANCE:         Unknown
+STATUS:              Experimental
+SINCE:               4.0.4
+COMMENT:             Only for Win32
+-------------------------------------------------------------------------------
 EXTENSION:           pspell
 PRIMARY MAINTAINER:  Vlad Krupin <phpdevel@echospace.com>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 SINCE:               4.0.2
+-------------------------------------------------------------------------------
+EXTENSION:           qtdom
+MAINTENANCE:         Unknown
+STATUS:              Experimental
+SINCE:               4.0.4
 -------------------------------------------------------------------------------
 EXTENSION:           readline
 MAINTENANCE:         Unknown
@@ -307,6 +330,12 @@ EXTENSION:           recode
 PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           sablot
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           satellite
 PRIMARY MAINTAINER:  David Eriksson <eriksson@php.net>
@@ -318,6 +347,12 @@ EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
 STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           shmop
+PRIMARY MAINTAINER:  Unknown
+MAINTENANCE:         Unknown
+STATUS:              Experimental
+SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           snmp
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
@@ -333,7 +368,8 @@ SINCE:               4.0.2
 EXTENSION:           swf
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Unix (won't change)
+STATUS:              Unknown
+COMMENT:             Only for Unix (won't change)
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
 MAINTENANCE:         Unknown
@@ -342,6 +378,11 @@ STATUS:              Unknown
 EXTENSION:           sysvshm
 MAINTENANCE:         Unknown
 STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           vpopmail
+MAINTENANCE:         Unknown
+STATUS:              Experimental
+SINCE:               4.0.5
 -------------------------------------------------------------------------------
 EXTENSION:           wddx
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
@@ -353,25 +394,25 @@ PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           xslt
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
--------------------------------------------------------------------------------
 EXTENSION:           yaz
 PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
 MAINTENANCE:         Maintained
 STATUS:              Unknown
 SINCE:               4.0.1
 -------------------------------------------------------------------------------
+EXTENSION:           yp
+MAINTENANCE:         Unknown
+STATUS:              Unknown
+-------------------------------------------------------------------------------
 EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           ZZiplib
+EXTENSION:           zziplib
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               4.0.5
 -------------------------------------------------------------------------------
 # iptc?
