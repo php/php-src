@@ -1136,7 +1136,7 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
 	}
 
 	if ((ret = VCWD_MKDIR(dir, (mode_t)mode)) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 	}
 
 	return ret;	
@@ -1185,7 +1185,7 @@ PHP_FUNCTION(mkdir)
 				if (*p == '\0' && *(p + 1) != '\0') {
 					*p = DEFAULT_SLASH;
 					if ((ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, strerror(errno));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 						break;
 					}
 				}

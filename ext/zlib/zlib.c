@@ -446,7 +446,7 @@ PHP_FUNCTION(gzcompress)
 		RETURN_STRINGL(s2, l2, 0);
 	} else {
 		efree(s2);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 		RETURN_FALSE;
 	}
 }
@@ -502,7 +502,7 @@ PHP_FUNCTION(gzuncompress)
 		RETURN_STRINGL(s2, length, 0);
 	} else {
 		efree(s2);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 		RETURN_FALSE;
 	}
 }
@@ -572,7 +572,7 @@ PHP_FUNCTION(gzdeflate)
 		RETURN_STRINGL(s2, stream.total_out, 0);
 	} else {
 		efree(s2);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 		RETURN_FALSE;
 	}
 }
@@ -654,7 +654,7 @@ PHP_FUNCTION(gzinflate)
 		RETURN_STRINGL(s2, stream.total_out, 0);
 	} else {
 		efree(s2);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 		RETURN_FALSE;
 	}
 }
@@ -850,14 +850,14 @@ PHP_FUNCTION(gzencode)
 									  -MAX_WBITS, MAX_MEM_LEVEL,
 									   Z_DEFAULT_STRATEGY))
 							!= Z_OK) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 			}
 		
 			break;
 		case CODING_DEFLATE:
 			if ((status = deflateInit(&stream, level)) != Z_OK) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 			}
 			break;		
@@ -895,7 +895,7 @@ PHP_FUNCTION(gzencode)
 		RETURN_STRINGL(s2, stream.total_out+GZIP_HEADER_LENGTH+(coding==CODING_GZIP?GZIP_FOOTER_LENGTH:0), 0);
 	} else {
 		efree(s2);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zError(status));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 		RETURN_FALSE;
 	}
 }

@@ -110,7 +110,7 @@ extern void fatal(char *s, int exit)
 {
 	TSRMLS_FETCH();
 
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, s);
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", s);
 }
 
 /* {{{ proto resource cyrus_connect([ string host [, string port [, int flags]]])

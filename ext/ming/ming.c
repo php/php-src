@@ -2725,7 +2725,7 @@ static void php_ming_error(char *msg, ...)
 	vspprintf(&buffer, 0, msg, args);
 	va_end(args);
 
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, buffer);
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", buffer);
 	efree(buffer);
 }
 
