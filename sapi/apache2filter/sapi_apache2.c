@@ -429,11 +429,17 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	TSRMLS_FETCH();
 
 	if (f->r->proxyreq) {
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return ap_pass_brigade(f->next, bb);
 	}
 	
 	/* handle situations where user turns the engine off */
 	if (*p == '0') {
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return ap_pass_brigade(f->next, bb);
 	}
 
@@ -451,11 +457,17 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	if (ctx == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, f->r,
 					 "php failed to get server context");
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
         return HTTP_INTERNAL_SERVER_ERROR;
 	}
 	ctx->f = f; /* save whatever filters are after us in the chain. */
 
 	if (ctx->request_processed) {
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return ap_pass_brigade(f->next, bb);
 	}
 

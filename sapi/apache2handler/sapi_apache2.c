@@ -464,21 +464,33 @@ static int php_handler(request_rec *r)
 	if (strcmp(r->handler, PHP_MAGIC_TYPE) && strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(r->handler, PHP_SCRIPT)) {
 		/* Check for xbithack in this case. */
 		if (!AP2(xbithack) || strcmp(r->handler, "text/html") || !(r->finfo.protection & APR_UEXECUTE)) {
+			zend_try {
+				zend_ini_deactivate(TSRMLS_C);
+			} zend_end_try();
 			return DECLINED;
 		}
 	}
 
 	/* handle situations where user turns the engine off */
 	if (!AP2(engine)) {
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return DECLINED;
 	}
 
 	if (r->finfo.filetype == 0) {
 		php_apache_sapi_log_message("script not found or unable to stat");
+		zend_try {
+				zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
 		php_apache_sapi_log_message("attempt to invoke directory as script");
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return HTTP_FORBIDDEN;
 	}
 
