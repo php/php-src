@@ -32,7 +32,7 @@ if test "$PHP_NCURSES" != "no"; then
    LIBNAME=ncurses 
    LIBSYMBOL=initscr 
    old_LIBS=$LIBS
-   LIBS="$LIBS -L$NCURSES_DIR/lib -lm -ldl"
+   LIBS="$LIBS -L$NCURSES_DIR/lib -lm"
    AC_CHECK_LIB($LIBNAME, $LIBSYMBOL, [AC_DEFINE(HAVE_NCURSESLIB,1,[ ])],
         [AC_MSG_ERROR(wrong ncurses lib version or lib not found)])
    LIBS=$old_LIBS
