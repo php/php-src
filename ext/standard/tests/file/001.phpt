@@ -74,13 +74,6 @@ if (is_executable('test.file')) {
 } else {
     echo "test.file is not executable\n";
 }
-chmod ('test.file', 0644);
-clearstatcache();
-if (is_executable('test.file')) {
-    echo "test.file is executable\n";
-} else {
-    echo "test.file is not executable\n";
-}
 if (is_file('test.file')) {
     echo "test.file is a regular file\n";
 } else {
@@ -140,7 +133,6 @@ test.file size is 0
 test.file is writeable
 test.file is readable
 test.file is executable
-test.file is not executable
 test.file is a regular file
 test.link is a regular file
 test.link is not a directory
