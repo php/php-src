@@ -1,7 +1,7 @@
 PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-??? ?? 1999, Version 4.0 Beta 2
+August 9 1999, Version 4.0 Beta 2
 - Fixed a problem when sending HTTP/1.x header lines using header() (Zeev)
 - Win32 builds now include the ODBC module built-in (Zeev)
 - Fixed SYSV-SHM interface (Thies).
