@@ -1,3 +1,14 @@
+2004-06-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_mm.h:
+      - Don't use ZEND_MM in Windows
+
+2004-06-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      fix incdec - make value's refcount non-zero when passing to
+      write_property - otherwise __set caller cleanup could kill it.
+
 2004-06-01  Andi Gutmans  <andi@zend.com>
 
     * zend.c:
