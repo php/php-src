@@ -2276,7 +2276,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (EX(fbc)->common.fn_flags & FN_IS_STATIC) {
+	if (EX(fbc)->common.fn_flags & FN_STATIC) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -2346,7 +2346,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX(fbc) = function;
 
-	if (function->common.fn_flags & FN_IS_STATIC) {
+	if (function->common.fn_flags & FN_STATIC) {
 		EX(object) = NULL;
 	} else {
 		if ((EX(object) = EG(This))) {
