@@ -93,7 +93,8 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
 {
 	if (file_handle->handle.stream.interactive) {
-		int c = '*', n; 
+		int c = '*';
+		size_t n; 
 
 		for ( n = 0; n < len && (c = zend_stream_getc( file_handle TSRMLS_CC)) != EOF && c != '\n'; ++n ) 
 			buf[n] = (char) c; 
