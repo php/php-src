@@ -10,6 +10,7 @@ include $(top_srcdir)/build/rules.mk
 peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
+	Benchmark \
 	DB \
 	File \
 	HTML \
@@ -19,6 +20,7 @@ PEAR_SUBDIRS = \
 	XML
 
 PEAR_FILES = \
+	Benchmark/Timer.php \
 	DB.php \
 	DB/common.php \
 	DB/ibase.php \
