@@ -29,9 +29,23 @@ AC_DEFUN([PHP_DEFINE],[
   [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > ]ifelse([$3],,[include],[$3])[/php_]translit($1,A-Z,a-z)[.h]
 ])
 
+dnl PHP_CANONICAL_HOST
+dnl
+AC_DEFUN([PHP_CANONICAL_HOST],[
+  AC_REQUIRE([AC_CANONICAL_HOST])dnl
+  dnl Make sure we do not continue if host_alias is empty.
+  if test -z "$host_alias" && test -n "$host"; then
+    host_alias=$host
+  fi
+  if test -z "$host_alias"; then
+    AC_MSG_ERROR([host_alias is not set!])
+  fi
+])
+
 dnl PHP_INIT_BUILD_SYSTEM
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
+AC_REQUIRE([PHP_CANONICAL_HOST])dnl
 test -d include || mkdir include
 > Makefile.objects
 > Makefile.fragments
@@ -273,6 +287,7 @@ int readdir_r(DIR *, struct dirent *);
 ])
 
 AC_DEFUN([PHP_SHLIB_SUFFIX_NAME],[
+  AC_REQUIRE([PHP_CANONICAL_HOST])dnl
   PHP_SUBST(SHLIB_SUFFIX_NAME)
   SHLIB_SUFFIX_NAME=so
   case $host_alias in
