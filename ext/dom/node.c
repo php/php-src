@@ -64,7 +64,7 @@ static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) {
 		if (nodep->nsDef != NULL && nodep->nsDef->href != NULL) {
 			if((nsptr = xmlSearchNsByHref(doc, nodep->parent, nodep->nsDef->href)) && 
 				(nodep->nsDef->prefix == NULL || xmlStrEqual(nsptr->prefix, nodep->nsDef->prefix))) {
-				dom_set_old_ns(doc, nodep->ns);
+				dom_set_old_ns(doc, nodep->nsDef);
 				nodep->nsDef = NULL;
 			}
 		}
