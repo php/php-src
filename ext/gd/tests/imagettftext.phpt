@@ -12,7 +12,7 @@ imagettftext() function test
 --FILE--
 <?php
 	$cwd = dirname(__FILE__);
-	$fontfile_8859 = "$cwd/test8859.ttf";
+	$fontfile_8859 = "$cwd/zendn___.ttf";
 
 	function testrun($im, $fontfile) {
 		$sx = imagesx($im);
@@ -43,10 +43,11 @@ imagettftext() function test
 	var_dump(testrun($im, $fontfile_8859));
 	imagedestroy($im);
 
+/* considered to be disabled for now as discussed in the QA list.
 	$im = imagecreatetruecolor(256, 256);
 	var_dump(testrun($im, $fontfile_8859));
 	imagedestroy($im);
+*/
 ?>
---EXPECT--
-bool(true)
+--EXPECTF--
 bool(true)
