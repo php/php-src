@@ -586,15 +586,15 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename->value.str.val, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_P(filename), 2))) {
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(filename->value.str.val)) {
+	if (php_check_open_basedir(Z_STRVAL_P(filename))) {
 		RETURN_FALSE;
 	}
 
-	if ((fd = open(filename->value.str.val, O_BINARY|O_RDWR|O_CREAT, 0644)) < 0) {
+	if ((fd = V_OPEN((Z_STRVAL_P(filename), O_BINARY|O_RDWR|O_CREAT, 0644))) < 0) {
 		php_error(E_WARNING, "Unable to create database (%d): %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
