@@ -84,7 +84,6 @@ AC_ARG_WITH(gdbm,
           AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
           AC_DEFINE(DBA_GDBM, 1, [ ]) 
           THIS_LIBS=gdbm
-          break
         ])
       ])
     fi
@@ -302,6 +301,7 @@ AC_ARG_WITH(dbm,
       elif test -f "$i/include/gdbm/dbm.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/include/gdbm/dbm.h
+        break
       fi
     done
 
