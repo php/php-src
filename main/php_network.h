@@ -43,6 +43,12 @@
 #	define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
 
+#ifdef PHP_WIN32
+#define streams_socket_errno WSAGetLastError()
+#else
+#define streams_socket_errno errno
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif

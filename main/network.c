@@ -368,9 +368,12 @@ PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
  */
 int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout)
 {	
-	int n, repeatto, s, err;
+	int n, repeatto, s;
 	struct sockaddr **sal, **psal;
 	struct timeval timeoutval;
+#ifdef PHP_WIN32
+	int err;
+#endif
 	
 	n = php_network_getaddresses(host, &sal);
 
@@ -765,7 +768,7 @@ printf("read_internal read %d/%d bytes\n", nr_bytes, sock->chunk_size);
 		memcpy(WRITEPTR(sock), buf, nr_bytes);
 		sock->writepos += nr_bytes;
 		nr_read = nr_bytes;
-	} else if(nr_bytes == 0 || (nr_bytes < 0 && errno != EWOULDBLOCK)) {
+	} else if(nr_bytes == 0 || (nr_bytes < 0 && streams_socket_errno != EWOULDBLOCK)) {
 		sock->eof = 1;
 	}
 
