@@ -18,7 +18,16 @@ print_node_list($children);
 
 ?>
 --EXPECT--
---------- root
+Node Name: 
+Node Type: 14
+Num Children: 1
+Node Content: 
+
+Node Name: #comment
+Node Type: 8
+Num Children: 0
+Node Content:  lsfj  
+
 Node Name: chapter
 Node Type: 1
 Num Children: 4
