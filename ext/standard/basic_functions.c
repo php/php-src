@@ -1181,6 +1181,7 @@ PHP_FUNCTION(constant)
 PHP_FUNCTION(ip2long)
 {
 	zval **str;
+	unsigned long int ip;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1188,7 +1189,11 @@ PHP_FUNCTION(ip2long)
 
 	convert_to_string_ex(str);
 
-	RETURN_LONG(ntohl(inet_addr(Z_STRVAL_PP(str))));
+	if (Z_STRVAL_PP(str) == "" || (ip = inet_addr(Z_STRVAL_PP(str))) == INADDR_NONE) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(ntohl(ip));
 }
 /* }}} */
 
