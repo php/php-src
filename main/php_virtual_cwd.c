@@ -11,10 +11,9 @@
 
 #ifdef ZTS
 #include "TSRM.h"
-CWD_API int cwd_globals_id;
-#else
-cwd_globals_struct cwd_globals;
 #endif
+
+ZEND_DECLARE_MODULE_GLOBALS(cwd);
 
 cwd_state true_global_cwd_state;
 
@@ -110,7 +109,7 @@ static int php_is_file_ok(const cwd_state *state)
 	return (1);
 }
 
-static void cwd_globals_ctor(cwd_globals_struct *cwd_globals)
+static void cwd_globals_ctor(zend_cwd_globals *cwd_globals)
 {
 	cwd_globals->cwd.cwd = (char *) malloc(true_global_cwd_state.cwd_length+1);
 	memcpy(cwd_globals->cwd.cwd, true_global_cwd_state.cwd, true_global_cwd_state.cwd_length+1);
@@ -128,11 +127,8 @@ void virtual_cwd_startup()
 	}
 	true_global_cwd_state.cwd = strdup(cwd);
 	true_global_cwd_state.cwd_length = strlen(cwd);
-#ifdef ZTS
-        cwd_globals_id = ts_allocate_id(sizeof(cwd_globals_struct), (ts_allocate_ctor) cwd_globals_ctor, NULL);
-#else   
-        cwd_globals_ctor(&cwd_globals);
-#endif  
+
+	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, NULL);
 }
 
 char *virtual_getcwd_ex(int *length)
