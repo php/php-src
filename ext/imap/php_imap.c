@@ -3222,7 +3222,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 	}
 
-	strcat(bufferHeader, headers);
+	if (headers && *headers)
+		strcat(bufferHeader, headers);
 
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
 		if (tsm_errmsg) {
