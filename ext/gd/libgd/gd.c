@@ -1762,7 +1762,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	int lastBorder;
 	/* Seek left */
 	int leftLimit = -1, rightLimit;
-	int i;
+	int i, restoreAlphaBleding=0;
 
 	if (border < 0) {
 		/* Refuse to fill to a non-solid border */
