@@ -32,7 +32,7 @@
 #include <errno.h>
 #include "zend.h"
 #include "zend_globals.h"
-#include "zend_ini_parser.h"
+#include <zend_ini_parser.h>
 #include "zend_ini_scanner.h"
 
 #undef YYSTYPE

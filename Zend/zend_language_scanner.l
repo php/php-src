@@ -50,7 +50,7 @@
 #include <errno.h>
 #include "zend.h"
 #include "zend_alloc.h"
-#include "zend_language_parser.h"
+#include <zend_language_parser.h>
 #include "zend_compile.h"
 #include "zend_language_scanner.h"
 #include "zend_highlight.h"
