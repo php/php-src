@@ -20,10 +20,10 @@ static void rpc_export_functions(char *name, zend_class_entry *ce, function_entr
 static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_DC);
 
 /* object handler */
-static void rpc_add_ref(zval *object);
-static void rpc_del_ref(zval *object);
-static void rpc_delete(zval *object);
-static zend_object_value rpc_clone(zval *object);
+static void rpc_add_ref(zval *object TSRMLS_DC);
+static void rpc_del_ref(zval *object TSRMLS_DC);
+static void rpc_delete(zval *object TSRMLS_DC);
+static zend_object_value rpc_clone(zval *object TSRMLS_DC);
 static zval* rpc_read(zval *object, zval *member, int type TSRMLS_DC);
 static void rpc_write(zval *object, zval *member, zval *value TSRMLS_DC);
 static zval** rpc_get_property(zval *object, zval *member TSRMLS_DC);
@@ -239,13 +239,13 @@ static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_D
 
 /* object handler */
 
-static void rpc_add_ref(zval *object)
+static void rpc_add_ref(zval *object TSRMLS_DC)
 {
 	GET_INTERNAL(intern);
 	RPC_ADDREF(intern);
 }
 
-static void rpc_del_ref(zval *object)
+static void rpc_del_ref(zval *object TSRMLS_DC)
 {
 	GET_INTERNAL(intern);
 
@@ -258,13 +258,13 @@ static void rpc_del_ref(zval *object)
 	}
 }
 
-static void rpc_delete(zval *object)
+static void rpc_delete(zval *object TSRMLS_DC)
 {
 	GET_INTERNAL(intern);
 	rpc_instance_dtor(intern);
 }
 
-static zend_object_value rpc_clone(zval *object)
+static zend_object_value rpc_clone(zval *object TSRMLS_DC)
 {
 //	TSRMLS_FETCH();
 //	GET_INTERNAL(intern);
