@@ -128,6 +128,7 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 {
 	int ret;
 	SLS_FETCH();
+	PLS_FETCH();
 		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
@@ -285,6 +286,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	int fd, retval;
 	HashTable *per_dir_conf;
 	SLS_FETCH();
+	ELS_FETCH();
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
@@ -522,8 +524,11 @@ void php_init_handler(server_rec *s, pool *p)
 		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
-	if (PG(expose_php)) {
-		ap_add_version_component("PHP/" PHP_VERSION);
+	{
+		PLS_FETCH();
+		if (PG(expose_php)) {
+			ap_add_version_component("PHP/" PHP_VERSION);
+		}
 	}
 #endif
 }
