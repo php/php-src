@@ -1190,28 +1190,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
 
-				if (Z_TYPE_P(dim) == IS_STRING) {
-					char *strval;
-					long  lval;
-
-					strval = Z_STRVAL_P(dim);
-					if (is_numeric_string(strval, Z_STRLEN_P(dim), &lval, NULL, 0) == IS_LONG) {
-					  ZVAL_LONG(&tmp, lval);
-						dim = &tmp;
-					} else {
-						if (type != BP_VAR_IS) {
-							zend_error(E_NOTICE, "Trying to get string index from a string");
-						}
-						if (result) {
-							result->var.ptr_ptr = &EG(error_zval_ptr);
-							PZVAL_LOCK(*result->var.ptr_ptr);
-							if (type == BP_VAR_R || type == BP_VAR_IS) {
-								AI_USE_PTR(result->var);
-							}
-						}
-						return;
-					}
-				} else if (dim->type != IS_LONG) {
+				if (dim->type != IS_LONG) {
 					tmp = *dim;
 					zval_copy_ctor(&tmp);
 					convert_to_long(&tmp);
