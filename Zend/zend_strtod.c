@@ -131,6 +131,10 @@ static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $"
 #define u_int32_t uint32_t
 #endif
 
+#ifdef HAVE_SYS_BITYPES_H
+#include <sys/bitypes.h>
+#endif
+
 #define Long	int32_t
 #define ULong	u_int32_t
 
