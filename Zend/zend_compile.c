@@ -1641,7 +1641,7 @@ void do_begin_new_object(znode *new_token, znode *class_name CLS_DC)
 	unsigned char *ptr = NULL;
 	
 	opline->opcode = ZEND_NEW;
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *class_name;
 	SET_UNUSED(opline->op2);
