@@ -89,7 +89,7 @@ PHP_FUNCTION(gethostbyaddr)
 	
 	addr = php_gethostbyaddr(Z_STRVAL_PP(arg));
 
-	if(addr == NULL) {
+	if (addr == NULL) {
 #if HAVE_IPV6 && HAVE_INET_PTON
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
@@ -321,7 +321,8 @@ typedef union {
 } querybuf;
 
 /* {{{ php_parserr */
-static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray) {
+static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
+{
 	u_short type, class, dlen;
 	u_long ttl;
 	long n, i;
@@ -572,7 +573,7 @@ PHP_FUNCTION(dns_get_record)
 	for(type = (type_param==PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0); type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query; type++)
 	{
 		first_query = 0;
-		switch(type) {
+		switch (type) {
 			case 0: 
 				type_to_fetch = type_param&PHP_DNS_A     ? T_A     : 0;
 				break;
@@ -711,7 +712,7 @@ PHP_FUNCTION(dns_get_mx)
 	u_char *cp, *end;
 	int i;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters(ht, 2, &host, &mx_list) == FAILURE) {
 				WRONG_PARAM_COUNT;
