@@ -3406,8 +3406,8 @@ PHP_FUNCTION(imap_mime_header_decode)
 	if((charset=((char *)emalloc((end+1)*2)))) {
 		text=&charset[end+1];
 		while(offset<end) {													// Reached end of the string?
-			if((charset_token=php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
-				charset_token -= (unsigned long)string;
+			if((charset_token=(long) php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
+				charset_token -= (long)string;
 				if(offset!=charset_token) {										// Is there anything before the encoded data?
 					// Retrieve unencoded data that is found at the beginning
 					memcpy(text,&string[offset],charset_token-offset);
@@ -3418,10 +3418,10 @@ PHP_FUNCTION(imap_mime_header_decode)
 					add_property_string(myobject,"text",text,1);
 					zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
 				}
-				if((encoding_token=php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
-					encoding_token-=(unsigned long)string;
-					if((end_token=php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
-						end_token-=(unsigned long)string;
+				if((encoding_token=(long)php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
+					encoding_token-=(long)string;
+					if((end_token=(long)php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
+						end_token-=(long)string;
 						memcpy(charset,&string[charset_token+2],encoding_token-(charset_token+2));	// Extract charset encoding
 						charset[encoding_token-(charset_token+2)]=0x00;
 						encoding=string[encoding_token+1];										// Extract encoding from string
