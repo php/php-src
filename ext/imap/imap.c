@@ -1544,7 +1544,7 @@ PHP_FUNCTION(imap_delete)
 	pils *imap_le_struct;
 	int myargc=ARG_COUNT(ht);
 
-	if ( myargc < 3 || myargc > 4 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
+	if (myargc < 2 || myargc > 3 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1559,7 +1559,7 @@ PHP_FUNCTION(imap_delete)
 		RETURN_FALSE;
 	}
 
-	mail_setflag_full(imap_le_struct->imap_stream,sequence->value.str.val,"\\DELETED",myargc == 4 ? flags->value.lval : NIL);
+	mail_setflag_full(imap_le_struct->imap_stream,sequence->value.str.val, "\\DELETED", myargc == 3 ? flags->value.lval : NIL);
 	RETVAL_TRUE;
 }
 /* }}} */
