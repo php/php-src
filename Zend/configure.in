@@ -159,7 +159,9 @@ if test "$enable_thread_safety" = "yes" ; then
 AC_CHECK_LIB(C, cin)
 AC_CHECK_LIB(g++, cin)
 AC_CHECK_LIB(stdc++, cin)
+dnl Digital Unix 4.0
 AC_CHECK_LIB(cxx, cin)
+AC_CHECK_LIB(cxxstd, __array_delete)
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS

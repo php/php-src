@@ -55,6 +55,9 @@ END_EXTERN_C()
 #include "zend_compile.h"
 #include "zend_execute.h"
 
+/* excpt.h on Digital Unix 4.0 defines function_table */
+#undef function_table
+	
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
 	zend_stack switch_cond_stack;

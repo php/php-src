@@ -151,6 +151,8 @@ typedef struct _zend_overloaded_element {
 	zval element;
 } zend_overloaded_element;
 
+/* excpt.h on Digital Unix 4.0 defines function_table */
+#undef function_table
 
 struct _zend_class_entry {
 	char type;
