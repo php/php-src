@@ -482,7 +482,7 @@ PHP_FUNCTION(bindec)
 }
 
 /* }}} */
-/* {{{ proto int hexdec(string hexadimal_number)
+/* {{{ proto int hexdec(string hexadecimal_number)
    Returns the decimal equivalent of the hexadecimal number */
 
 PHP_FUNCTION(hexdec)
