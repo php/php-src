@@ -1,3 +1,13 @@
+2004-12-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      zend_strtod.c:
+      MFH: - Use correct header files (in c99 compliant way). uint32_t is
+      preferred.
+
+    * zend_strtod.c:
+      - Use correct header files (in c99 compliant way). uint32_t is preferred.
+
 2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * zend_strtod.c:
