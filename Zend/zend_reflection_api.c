@@ -2581,6 +2581,29 @@ ZEND_METHOD(reflection_class, getMethods)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::hasProperty(string name)
+   Returns wether a property exists or not */
+ZEND_METHOD(reflection_class, hasProperty)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	char *name; 
+	int name_len;
+
+	METHOD_NOTSTATIC;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (zend_hash_exists(&ce->properties_info, name, name_len + 1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto public ReflectionProperty ReflectionClass::getProperty(string name) throws ReflectionException
    Returns the class' property specified by it's name */
 ZEND_METHOD(reflection_class, getProperty)
@@ -2648,6 +2671,29 @@ ZEND_METHOD(reflection_class, getProperties)
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(&ce->properties_info, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClass::hasConstant(string name)
+   Returns wether a constant exists or not */
+ZEND_METHOD(reflection_class, hasConstant)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	char *name;
+	int name_len;
+
+	METHOD_NOTSTATIC;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (zend_hash_exists(&ce->constants_table, name, name_len + 1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -3653,8 +3699,10 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, hasMethod, NULL, 0)
 	ZEND_ME(reflection_class, getMethod, NULL, 0)
 	ZEND_ME(reflection_class, getMethods, NULL, 0)
+	ZEND_ME(reflection_class, hasProperty, NULL, 0)
 	ZEND_ME(reflection_class, getProperty, NULL, 0)
 	ZEND_ME(reflection_class, getProperties, NULL, 0)
+	ZEND_ME(reflection_class, hasConstant, NULL, 0)
 	ZEND_ME(reflection_class, getConstants, NULL, 0)
 	ZEND_ME(reflection_class, getConstant, NULL, 0)
 	ZEND_ME(reflection_class, getInterfaces, NULL, 0)
