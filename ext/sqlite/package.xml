@@ -74,6 +74,7 @@
 			<file role="src" name="pager.h"/>
 			<file role="src" name="parse.h"/>
 			<file role="src" name="sqliteInt.h"/>
+			<file role="src" name="sqlite.h.in"/>
 			<file role="src" name="vdbe.h"/>
 		</dir>
 		
