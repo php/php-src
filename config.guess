@@ -331,7 +331,7 @@ EOF
     AViiON:dgux:*:*)
         # DG/UX returns AViiON for all architectures
         UNAME_PROCESSOR=`/usr/bin/uname -p`
-	if [ $UNAME_PROCESSOR = mc88100 ] || [ $UNAME_PROCESSOR = mc88110]
+	if [ $UNAME_PROCESSOR = mc88100 ] || [ $UNAME_PROCESSOR = mc88110 ]
 	then
 	    if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx ] || \
 	       [ ${TARGET_BINARY_INTERFACE}x = x ]
