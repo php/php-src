@@ -28,8 +28,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef PHP_WIN32
 #include <sys/mman.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <errno.h>
 #include "cdb.h"

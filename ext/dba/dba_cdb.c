@@ -29,7 +29,9 @@
 #include "php_cdb.h"
 
 #include <sys/types.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #if DBA_CDB_BUILTIN

@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D DBA_DB3=1 /D DB3_INCLUDE_FILE="db.h" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D DBA_DB3=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=0 /D DBA_DB3=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D DBA_FLATFILE=1 /D DBA_CDB=1 /D DBA_CDB_MAKE=1 /D DBA_CDB_BUILTIN=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D "DBA_DB3" /D DB3_INCLUDE_FILE="db.h" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D "DBA_DB3" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "DBA_DB3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_DBA" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DBA=1 /D DBA_FLATFILE=1 /D DBA_CDB=1 /D DBA_CDB_MAKE=1 /D DBA_CDB_BUILTIN=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -94,6 +94,14 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\libcdb\cdb.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libcdb\cdb_make.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dba.c
 # End Source File
 # Begin Source File
@@ -114,16 +122,40 @@ SOURCE=.\dba_dbm.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dba_flatfile.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dba_gdbm.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\dba_ndbm.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\libflatfile\flatfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libcdb\uint32.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\libcdb\cdb.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libcdb\cdb_make.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libflatfile\flatfile.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\php_cdb.h
@@ -146,11 +178,19 @@ SOURCE=.\php_dbm.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_flatfile.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_gdbm.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\php_ndbm.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libcdb\uint32.h
 # End Source File
 # End Group
 # End Target
