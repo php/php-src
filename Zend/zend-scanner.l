@@ -92,6 +92,7 @@ private:
   stdiobuf _file;
 public:
   istdiostream (FILE* __f) : istream(), _file(__f) { init(&_file); }
+  stdiobuf* rdbuf()/* const */ { return &_file; }
 };
 #endif
 
