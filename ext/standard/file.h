@@ -69,6 +69,7 @@ PHP_FUNCTION(set_file_buffer);
 PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
+PHP_FUNCTION(fd_isset);
 PHP_FUNCTION(select);
 
 PHPAPI int _php3_set_sock_blocking(int socketd, int block);
