@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ???, Version 4.0 Beta 5
 - Prevent from loading dynamic PHP modules which were compiled with different
+  debug and thread safety modes than PHP, which resulted in a crash (Andi)
 - connection_aborted() and friends work again. (Thies)
 - Added include_once() and require_once() functionality (Andi, Zend library)
 - Removed support for pdflib < 3.0 (Uwe)
