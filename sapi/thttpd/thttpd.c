@@ -191,18 +191,12 @@ static sapi_module_struct sapi_module = {
 static void thttpd_module_main(TLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
-	char cwd[4096];
-	char *filename;
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
-	V_GETCWD(cwd, sizeof(cwd));
-	filename = alloca(strlen(cwd) + strlen(TG(hc)->expnfilename) + 2);
-	sprintf(filename, "%s%c%s", cwd, PHP_DIR_SEPARATOR, TG(hc)->expnfilename); /* SAFE */
-	
 	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
+	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
@@ -216,22 +210,26 @@ static void thttpd_module_main(TLS_D SLS_DC)
 
 static void thttpd_request_ctor(TLS_D SLS_DC)
 {
-	char *cp2;
-	int l;
+	char *cp;
+	size_t cp_len;
 	char buf[1024];
 	int offset;
-	size_t pathinfo_len;
+	size_t filename_len;
 	size_t cwd_len;
-	
-	pathinfo_len = strlen(TG(hc)->pathinfo);
-	cwd_len = strlen(TG(hc)->hs->cwd);
 
 	SG(request_info).query_string = TG(hc)->query;
+
+	filename_len = strlen(TG(hc)->expnfilename);
+	cwd_len = strlen(TG(hc)->hs->cwd);
+
+	cp_len = cwd_len + filename_len;
+	cp = (char *) malloc(cp_len + 1);
+	/* cwd always ends in "/", so this is safe */
+	memcpy(cp, TG(hc)->hs->cwd, cwd_len);
+	memcpy(cp + cwd_len, TG(hc)->expnfilename, filename_len);
+	cp[cp_len] = '\0';
 	
-	l = cwd_len + pathinfo_len + 1;
-	cp2 = (char *) malloc(l);
-	sprintf(cp2, "%s%s", TG(hc)->hs->cwd, TG(hc)->pathinfo);
-	SG(request_info).path_translated = cp2;
+	SG(request_info).path_translated = cp;
 	
 	snprintf(buf, 1023, "/%s", TG(hc)->origfilename);
 	SG(request_info).request_uri = strdup(buf);
