@@ -51,6 +51,9 @@
     <date>2003-10-20</date>
     <state>beta</state>
     <notes>
+OS/Guess.php:
+* Bug #25174 Wrong handling of readlink() in OS/Guess.php
+
 PEAR Installer:
 
 * Bug #25413 Add local installed packages to list-all (Christian DickMann)
