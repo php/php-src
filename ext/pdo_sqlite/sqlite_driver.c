@@ -168,6 +168,48 @@ static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquot
 	return 1;
 }
 
+static int sqlite_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	char *errmsg = NULL;
+
+	if (sqlite3_exec(H->db, "BEGIN", NULL, NULL, &errmsg) != SQLITE_OK) {
+		pdo_sqlite_error(dbh);
+		if (errmsg)
+			sqlite3_free(errmsg);
+		return 0;
+	}
+	return 1;
+}
+
+static int sqlite_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	char *errmsg = NULL;
+
+	if (sqlite3_exec(H->db, "COMMIT", NULL, NULL, &errmsg) != SQLITE_OK) {
+		pdo_sqlite_error(dbh);
+		if (errmsg)
+			sqlite3_free(errmsg);
+		return 0;
+	}
+	return 1;
+}
+
+static int sqlite_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	char *errmsg = NULL;
+
+	if (sqlite3_exec(H->db, "ROLLBACK", NULL, NULL, &errmsg) != SQLITE_OK) {
+		pdo_sqlite_error(dbh);
+		if (errmsg)
+			sqlite3_free(errmsg);
+		return 0;
+	}
+	return 1;
+}
+
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -190,20 +232,67 @@ static struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_preparer,
 	sqlite_handle_doer,
 	sqlite_handle_quoter,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	sqlite_handle_begin,
+	sqlite_handle_commit,
+	sqlite_handle_rollback,
+	NULL, /* set_attribute */
 	pdo_sqlite_last_insert_id,
 	pdo_sqlite_fetch_error_func,
 	pdo_sqlite_get_attribute
 };
+
+static char *make_filename_safe(const char *filename TSRMLS_DC)
+{
+	if (strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
+		char *fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+
+		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			efree(fullpath);
+			return NULL;
+		}
+
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			efree(fullpath);
+			return NULL;
+		}
+		return fullpath;
+	}
+	return estrdup(filename);
+}
+
+static int authorizer(void *autharg, int access_type, const char *arg3, const char *arg4,
+		const char *arg5, const char *arg6)
+{
+	char *filename;
+	switch (access_type) {
+		case SQLITE_COPY:
+			filename = make_filename_safe(arg4);
+			if (!filename) {
+				return SQLITE_DENY;
+			}
+			efree(filename);
+			return SQLITE_OK;
+
+		case SQLITE_ATTACH:
+			filename = make_filename_safe(arg3);
+			if (!filename) {
+				return SQLITE_DENY;
+			}
+			efree(filename);
+			return SQLITE_OK;
+
+		default:
+			/* access allowed */
+			return SQLITE_OK;
+	}
+}
 
 static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
 	long timeout = 60;
+	char *filename;
 
 	H = pecalloc(1, sizeof(pdo_sqlite_db_handle), dbh->is_persistent);
 	
@@ -211,12 +300,24 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 	H->einfo.errmsg = NULL;
 	dbh->driver_data = H;
 
-	i = sqlite3_open(dbh->data_source, &H->db);
+	filename = make_filename_safe(dbh->data_source);
+
+	if (!filename) {
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_CANT_MAP TSRMLS_CC,
+			"safe_mode/open_basedir prohibits opening %s",
+			dbh->data_source);
+		goto cleanup;
+	}
+
+	i = sqlite3_open(filename, &H->db);
+	efree(filename);
 
 	if (i != SQLITE_OK) {
 		pdo_sqlite_error(dbh);
 		goto cleanup;
 	}
+
+	sqlite3_set_authorizer(H->db, authorizer, NULL);
 
 	if (driver_options) {
 		timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, timeout TSRMLS_CC);
