@@ -509,9 +509,10 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);
-		ent.data->value.str.val = NULL;
-		ent.data->value.str.len = 0;
 		INIT_PZVAL(ent.data);
+		ent.data->type = IS_STRING;
+		ent.data->value.str.val = empty_string;
+		ent.data->value.str.len = 0;
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_CHAR)) {
 		int i;
@@ -529,6 +530,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		
 		ALLOC_ZVAL(ent.data);
 		INIT_PZVAL(ent.data);
+		ent.data->type = IS_LONG;
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_BOOLEAN)) {
 		int i;
@@ -540,6 +542,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 
 				ALLOC_ZVAL(ent.data);
 				INIT_PZVAL(ent.data);
+				ent.data->type = IS_BOOL;
 				wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 				php_wddx_process_data(user_data, atts[i+1], strlen(atts[i+1]));
 			}
@@ -667,7 +670,6 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 		wddx_stack_top(stack, (void**)&ent);
 		switch (ent->type) {
 			case ST_STRING:
-				ent->data->type = IS_STRING;
 				if (ent->data->value.str.len == 0) {
 					ent->data->value.str.val = estrndup(s, len);
 					ent->data->value.str.len = len;
@@ -688,7 +690,6 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 				break;
 
 			case ST_BOOLEAN:
-				ent->data->type = IS_BOOL;
 				if (!strcmp(s, "true"))
 					ent->data->value.lval = 1;
 				else if (!strcmp(s, "false"))

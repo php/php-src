@@ -1636,12 +1636,17 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free)
 {
 	/* maximum string length, worst case situation */
-	char *new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
+	char *new_str;
 	char *source,*target;
 	char *end;
 	char c;
 	PLS_FETCH();
-
+ 	
+	if (!str) {
+		*new_length = 0;
+		return str;
+	}
+	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
 	for (source=str,end=source+length,target=new_str; (c = *source) || source<end; source++) {
 		switch(c) {
 			case '\0':
