@@ -1,3 +1,12 @@
+2004-11-26  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/sqlite/sqlite.c:
+      'l' is long - int won't work on 64-bit
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      fix amd64 - long != int there
+
 2004-11-25  Zeev Suraski  <zeev@zend.com>
 
     * (PHP_5_0)
