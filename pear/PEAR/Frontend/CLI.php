@@ -223,6 +223,9 @@ class PEAR_Frontend_CLI extends PEAR
         if (!empty($caption)) {
             $this->displayHeading($caption);
         }
+        if (count($table_data) == 0) {
+            return;
+        }
         if (!isset($width)) {
             $width = $widest;
         } else {
