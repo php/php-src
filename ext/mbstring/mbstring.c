@@ -1495,7 +1495,7 @@ char *mbstr_strrchr(const char *s, char c TSRMLS_DC){
 	return last;
 }
 
-int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC){
+PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC){
 	unsigned char *p = (unsigned char *)s;
 	if (MBSTRG(current_language) == mbfl_no_language_japanese 
 		&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))){
@@ -3457,7 +3457,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-PHPAPI int mbstr_encoding_translation(TSRMLS_D) 
+PHPAPI int php_mb_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
 }
