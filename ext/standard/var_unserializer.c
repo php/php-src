@@ -115,7 +115,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 
 
-
 static inline int parse_iv2(const char *p, const char **q)
 {
 	char cursor;
