@@ -3169,8 +3169,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 		efree(tempstring);
 	} else {
-		mystring = emalloc(strlen(tmp) + 1);
-		strcpy(mystring, tmp);
+		mystring = estrdup(tmp);
 	}
 
 	bod = topbod;
@@ -3206,10 +3205,9 @@ PHP_FUNCTION(imap_mail_compose)
 
 			/* output cookie, mini-header, and contents */
 				tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
-				strcpy(tempstring, mystring);
+				sprintf(tempstring, "%s%s", mystring, tmp);
 				efree(mystring);
 				mystring=tempstring;
-				strcat(mystring, tmp);
 
 				bod=&part->body;
 
