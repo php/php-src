@@ -166,16 +166,13 @@ static PHP_FUNCTION(dbh_constructor)
 		return;
 	}
 	
-	dbh = pemalloc(sizeof(*dbh), is_persistent);
+	dbh = (pdo_dbh_t *) zend_object_store_get_object(object TSRMLS_CC);
 
 	if (dbh == NULL) {
 		/* need this check for persistent allocations */
 		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "out of memory!?");
 	}
-	
-	memset(dbh, 0, sizeof(*dbh));
 	dbh->is_persistent = is_persistent;
-
 	dbh->data_source_len = strlen(colon + 1);
 	/* when persistent stuff is done, we should check the return values here
 	 * too */
@@ -190,17 +187,14 @@ static PHP_FUNCTION(dbh_constructor)
 
 		if (is_persistent) {
 			/* register in the persistent list etc. */
+			/* we should also need to replace the object store entry,
+			   since it was created with emalloc */
 			;
 		}
-
-		zend_object_store_set_object(object, dbh TSRMLS_CC);
 		return;	
 	}
 
-	/* the connection failed; tidy things up */
-	pefree((char*)dbh->data_source, is_persistent);
-	pefree(dbh, is_persistent);
-
+	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
 	ZVAL_NULL(object);
 }
@@ -250,6 +244,7 @@ static PHP_METHOD(PDO, prepare)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool PDO::beginTransaction()
    Initiates a transaction */
@@ -501,6 +496,7 @@ static PHP_METHOD(PDO, errorInfo)
 
 
 function_entry pdo_dbh_functions[] = {
+	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
@@ -593,16 +589,23 @@ static int dbh_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	return FAILURE;
 }
 
+
 static union _zend_function *dbh_get_ctor(zval *object TSRMLS_DC)
 {
-	static zend_internal_function ctor = {0};
+	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
 
-	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name = "__construct";
-	ctor.scope = pdo_dbh_ce;
-	ctor.handler = ZEND_FN(dbh_constructor);
+	if(dbh->ce != pdo_dbh_ce) {
+		return dbh->ce->constructor;
+	} else {
+	 	static zend_internal_function ctor = {0};
 
-	return (union _zend_function*)&ctor;
+		ctor.type = ZEND_INTERNAL_FUNCTION;
+		ctor.function_name = "__construct";
+		ctor.scope = pdo_dbh_ce;
+		ctor.handler = ZEND_FN(dbh_constructor);
+
+		return (union _zend_function*)&ctor;
+	}
 }
 
 static zend_class_entry *dbh_get_ce(zval *object TSRMLS_DC)
@@ -677,8 +680,13 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
+	pdo_dbh_t *dbh;
 
-	retval.handle = zend_objects_store_put(NULL, NULL, pdo_dbh_free_storage, NULL TSRMLS_CC);
+	dbh = emalloc(sizeof(*dbh));
+	memset(dbh, 0, sizeof(*dbh));
+	dbh->ce = ce;
+	
+	retval.handle = zend_objects_store_put(dbh, NULL, pdo_dbh_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbh_object_handlers;
 
 	return retval;
