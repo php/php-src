@@ -2422,7 +2422,7 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	/* We are not handling overloaded classes right now */
 	EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	if (!PZVAL_IS_REF(EX(object))) {
+	if (!PZVAL_IS_REF(EX(object)) || !EG(implicit_clone)) {
 		EX(object)->refcount++; /* For $this pointer */
 	} else {
 		zval *this_ptr;
