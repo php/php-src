@@ -228,6 +228,10 @@ SOURCE=.\zend_ptr_stack.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_qsort.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_sprintf.c
 # End Source File
 # Begin Source File
@@ -365,6 +369,10 @@ SOURCE=.\zend_operators.h
 # Begin Source File
 
 SOURCE=.\zend_ptr_stack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_qsort.h
 # End Source File
 # Begin Source File
 
