@@ -28,6 +28,18 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#include <sys/timeval.h>
+#else
+#include "netware/time_nw.h"
+#endif
+/*#include "netware/signal_nw.h"*/
+/*#include "netware/env.h"*/    /* Temporary */
+/*#include <process.h>*/
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#endif
 #else
 #include "build-defs.h"
 #endif
@@ -968,7 +980,7 @@ int php_module_startup(sapi_module_struct *sf)
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
@@ -1034,7 +1046,7 @@ int php_module_startup(sapi_module_struct *sf)
 	setlocale(LC_CTYPE, "");
 #endif
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
@@ -1155,7 +1167,7 @@ void php_module_shutdown(TSRMLS_D)
 		return;
 	}
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/*close winsock */
 	WSACleanup();
 #endif
