@@ -1580,7 +1580,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 exit_success:
 
-	if (stream->writepos && stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+	if ((stream->writepos - stream->readpos) > 0 && stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* the data we have buffered will be lost to the third party library that
 		 * will be accessing the stream.  Emit a warning so that the end-user will
 		 * know that they should try something else */
