@@ -18,6 +18,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #30027 (Possible crash inside ftp_get()).
   (cfield at affinitysolutions dot com)
 - Fixed bug #29805 (HTTP Authentication Issues). (Uwe Schindler)
+- Fixed bug #29418 (double free when openssl_csr_new fails).
+  (Kamesh Jayachandran).
 - Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 
