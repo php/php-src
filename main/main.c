@@ -1106,10 +1106,9 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char old_cwd[4096];
-	char new_path[4096];
 	SLS_FETCH();
 
-	old_cwd[0] = new_path[0] = '\0';
+	old_cwd[0] = '\0';
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
 
 	zend_activate_modules();
@@ -1149,13 +1148,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (primary_file->type == ZEND_HANDLE_FILENAME 
 			&& primary_file->filename) {
 		V_GETCWD(old_cwd, sizeof(old_cwd)-1);
-		
-		if (!IS_ABSOLUTE_PATH(primary_file->filename, strlen(primary_file->filename))) {
-			snprintf(new_path, sizeof(new_path), "%s%c%s", old_cwd, PHP_DIR_SEPARATOR, primary_file->filename);
-			new_path[sizeof(new_path)-1] = '\0';
-			primary_file->filename = new_path;
-		}
-		
 		V_CHDIR_FILE(primary_file->filename);
 	}
 
