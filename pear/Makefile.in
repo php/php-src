@@ -109,11 +109,12 @@ PEAR_FILES = \
 install-data-local:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
-			(set -x;$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i); \
+			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
 		done; \
 		for i in $(PEAR_FILES); do \
+			echo "Installing $$i"; \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
-			(set -x;$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir); \
+			$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir; \
 		done; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
@@ -141,14 +142,17 @@ BUILD_FILES = \
 bin_SCRIPTS = phpize php-config pear pearize phptar
 
 install-build:
-	$(mkinstalldirs) $(INSTALL_ROOT)$(phpbuilddir) $(INSTALL_ROOT)$(bindir) && \
+	@echo "Installing build environment"
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(phpbuilddir) $(INSTALL_ROOT)$(bindir) && \
 	(cd $(top_srcdir) && cp $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
 install-programs:
-	for prog in $(bin_SCRIPTS); do \
+	@for prog in $(bin_SCRIPTS); do \
+		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done; \
 	for prog in phpextdist; do \
+		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done
 
@@ -168,7 +172,7 @@ install-headers:
 		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 	done; \
 	$(mkinstalldirs) $$paths && \
-	echo "creating header file hierarchy" && \
+	echo "Installing header files" && \
 	for i in $(HEADER_DIRS); do \
 		(cd $(top_srcdir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
