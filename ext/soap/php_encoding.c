@@ -1429,6 +1429,7 @@ smart_str *build_soap_action(zval *this_ptr, char *soapaction)
 {
 	zval **uri;
 	smart_str *tmp;
+	TSRMLS_FETCH();
 
 	tmp = emalloc(sizeof(smart_str));
 	memset(tmp, 0, sizeof(smart_str));

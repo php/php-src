@@ -180,7 +180,7 @@ extern zend_class_entry* soap_var_class_entry;
 
 PS_SERIALIZER_FUNCS(soap);
 
-void clear_soap_fault(zval *obj);
+void clear_soap_fault(zval *obj TSRMLS_DC);
 void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
@@ -201,8 +201,8 @@ void delete_mapping(void *data);
 void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 zval soap_get_property_handler(zend_property_reference *property_reference);
 int soap_set_property_handler(zend_property_reference *property_reference, zval *value);
-void soap_destructor(void *jobject);
 #endif
+void soap_destructor(void *jobject);
 
 void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[], int *version TSRMLS_DC);
 xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, int version TSRMLS_DC);

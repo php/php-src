@@ -741,6 +741,7 @@ static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, 
 {
 	xmlNodePtr content;
 	xmlAttrPtr attrs, name, ns;
+	TSRMLS_FETCH();
 
 	attrs = compType->properties;
 	ns = get_attribute(attrs, "targetNamespace");

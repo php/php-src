@@ -108,6 +108,7 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
 				return master_to_zval(type->encode, data);
 			} else {
+				TSRMLS_FETCH();
 				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
 			}
 		}
@@ -146,6 +147,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
 				ret = master_to_xml(type->encode, data, style);
 			} else {
+				TSRMLS_FETCH();
 				ret = master_to_xml(get_conversion(UNKNOWN_TYPE), data, style);
 			}
 		}
@@ -202,6 +204,7 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	sdlTypePtr *t, tmp;
+	TSRMLS_FETCH();
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret, style);
@@ -254,6 +257,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
  			if (dimension == 1) {
 	 			xmlNodePtr xparam;
  				if (enc == NULL) {
+					TSRMLS_FETCH();
  					xparam = master_to_xml(get_conversion((*zdata)->type), (*zdata), style);
  				} else {
  					xparam = master_to_xml(enc, (*zdata), style);
