@@ -214,9 +214,8 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 		consumed = bucket->buflen;
 		
-		php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
+		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
 	
-		bucket->buflen = strlen(bucket->buf); 
 		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
@@ -232,6 +231,8 @@ static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	assert(thisfilter->abstract != NULL);
 
 	php_strip_tags_filter_dtor((php_strip_tags_filter *)thisfilter->abstract);
+
+	pefree(thisfilter->abstract, ((php_strip_tags_filter *)thisfilter->abstract)->persistent);
 }
 
 static php_stream_filter_ops strfilter_strip_tags_ops = {
