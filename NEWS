@@ -42,6 +42,8 @@ PHP 4                                                                      NEWS
   (Uwe)
 - Fixed bug #23661 (mysql_fetch_array() gives no warning when an invalid 
   argument was passed as result_type). (Derick)
+- Fixed bug #23619 (set_error_handler() registered handler not called for
+  object instances). (Jani, waboring@qualys.com)
 - Fixed bug #23606 (Unable to build --with-db4 (db4.1.25)). (Marcus)
 - Fixed bug #23567 (pfsockopen() returns dead connections). (Wez)
 - Fixed bug #23539 (curl_exec() produces strange results). (daniel@haxx.se)
