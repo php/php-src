@@ -158,6 +158,7 @@ if (isset($argc) && $argc > 1) {
 
 	// Run selected tests.
 	if (count($test_files)) {
+		asort($test_files);
 		echo "Running selected tests.\n";
 		foreach($test_files AS $name) {
 			$test_results[$name] = run_test($php,$name);
