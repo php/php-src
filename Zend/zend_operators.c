@@ -1300,6 +1300,7 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 {
 	int len;
+	int c1,c2;
 
 	len = MIN(len1, len2);
 
