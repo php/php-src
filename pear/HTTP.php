@@ -22,6 +22,9 @@
 // HTTP utility functions.
 //
 
+if ($GLOBALS['USED_PACKAGES']['HTTP']) return;
+$GLOBALS['USED_PACKAGES']['HTTP'] = true;
+
 class HTTP {
     /**
      * Format a date according to RFC-XXXX (can't remember the HTTP
