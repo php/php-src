@@ -1,12 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.1.0
-- Fixed a bug in WDDX deserialization that would sometimes corrupp the root
+- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
   element if it was a scalar one. (Andrei)
 - Make ImageColorAt() and ImageColorsForIndex() work with TrueColor images.
   (Rasmus)
-- Fixed a bug preg_match_all() that would return results under improper indices
-  in certain cases. (Andrei)
+- Fixed a bug in preg_match_all() that would return results under improper 
+  indices in certain cases. (Andrei)
 - Fixed a crash in str_replace() that would happen if search parameter was an
   array and one of the replacements resulted in subject string being empty.
   (Andrei)
