@@ -605,7 +605,10 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 
 			return FAILURE;
 		} else {
-			if (!instanceof_function(Z_OBJCE_PP(parameter), ce TSRMLS_CC)) {
+			if (Z_TYPE_PP(parameter) == IS_OBJECT &&
+					instanceof_function(Z_OBJCE_PP(parameter), ce TSRMLS_CC)) {
+				*object = *parameter;
+			} else {
 				if (!quiet) {
 					zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
 						get_active_function_name(TSRMLS_C), ce->name,
@@ -613,8 +616,6 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 				}
 
 				return FAILURE;
-			} else {
-				*object = *parameter;
 			}
 
 			EG(argument_stack).top_element++;
