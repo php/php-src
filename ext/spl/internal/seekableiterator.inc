@@ -25,17 +25,24 @@ interface SeekableIterator implements Iterator
 	 * \param $index position to seek to
 	 * \return void
 	 *
-	 * \note The method should throw an exception if it is not possible to
-	 *       seek to the given position.
-	 */
+	 * The method should throw an exception if it is not possible to seek to 
+	 * the given position. Typically this exception should be of type 
+	 * OutOfBoundsException.
+	 \code
 	function seek($index);
-/*		$this->rewind();
+		$this->rewind();
 		$position = 0;
 		while($position < $index && $this->valid()) {
 			$this->next();
 			$position++;
 		}
-	}*/
+		if (!$this->valid()) {
+			throw new OutOfBoundsException('Invalid seek position');
+		}
+	}
+	 \endcode
+	 */
+	function seek($index);
 }
 
 ?>
