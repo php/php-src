@@ -45,7 +45,8 @@ var_dump($_SESSION);
 
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
+Notice: A session had already been started - ignoring session_start() in %s on line 17
 array(2) {
   ["o1"]=>
   &object(tfoo)(1) {
