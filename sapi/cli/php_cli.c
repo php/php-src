@@ -600,6 +600,8 @@ int main(int argc, char *argv[])
 
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
+		/*zend_alter_ini_entry("<name>", len, "<value>", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);*/
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 
@@ -894,6 +896,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* This actually destructs the elements of the list - ugly hack */
+		zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
 		zend_llist_destroy(&global_vars);
 
