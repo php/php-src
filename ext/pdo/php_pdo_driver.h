@@ -218,6 +218,12 @@ struct pdo_stmt_methods {
 
 /* }}} */
 
+enum pdo_placeholder_support {
+	PDO_PLACEHOLDER_NONE=0,
+	PDO_PLACEHOLDER_NAMED=1,
+	PDO_PLACEHOLDER_POSITIONAL=2
+};
+
 /* represents a connection to a database */
 struct _pdo_dbh_t {
 	/* driver specific methods */
@@ -245,25 +251,19 @@ struct _pdo_dbh_t {
 	unsigned alloc_own_columns:1;
 
 	/* if true, the driver supports placeholders and can implement
-	 * bindParam() for its prepared statements */
-	unsigned supports_placeholders:1;
-
-	/* if true, the driver allows named placeholders */
-	unsigned placeholders_can_be_strings:1;
+	 * bindParam() for its prepared statements, if false, PDO should
+	 * emulate prepare and bind on its behalf */
+	unsigned supports_placeholders:2;
 
 	/* if true, commit or rollBack is allowed to be called */
 	unsigned in_txn:1;
-
-	/* if true, PDO should emulate prepare() and bound input parameters for
-	 * the driver */
-	unsigned emulate_prepare:1;
 
 	/* max length a single character can become after correct quoting */
 	unsigned max_escaped_char_length:3;
 
 	/* the sum of the number of bits here and the bit fields preceeding should
 	 * equal 32 */
-	unsigned _reserved_flags:21;
+	unsigned _reserved_flags:22;
 
 	/* data source string used to open this handle */
 	const char *data_source;

@@ -142,7 +142,7 @@ static int describe_columns(pdo_stmt_t *stmt TSRMLS_DC)
 		}
 
 		/* update the column index on named bound parameters */
-		if (stmt->dbh->placeholders_can_be_strings && stmt->bound_params) {
+		if (stmt->bound_params) {
 			struct pdo_bound_param_data *param;
 
 			if (SUCCESS == zend_hash_find(stmt->bound_params, stmt->columns[col].name,
@@ -284,11 +284,6 @@ static PHP_METHOD(PDOStatement, execute)
 						&param.name, &str_length, &num_index, 0, NULL)) {
 				param.namelen = str_length;
 				param.paramno = -1;
-				
-				if (!stmt->dbh->placeholders_can_be_strings) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support named placeholders");
-					RETURN_FALSE;
-				}
 			} else {
 				/* we're okay to be zero based here */
 				if (num_index < 0) {
@@ -309,7 +304,7 @@ static PHP_METHOD(PDOStatement, execute)
 		}
 	}
 
-	if (stmt->dbh->emulate_prepare) {
+	if (!stmt->dbh->supports_placeholders) {
 		int error_pos;
 		/* handle the emulated parameter binding,
          * stmt->active_query_string holds the query with binds expanded and 
@@ -550,22 +545,18 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
 
-	if (stmt->dbh->placeholders_can_be_strings || !is_param) {
-		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-					ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
-					&param.name, &name_strlen, &param.parameter, &param.param_type,
-					&param.max_value_len,
-					&param.driver_params)) {
-			if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+				ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
+				&param.name, &name_strlen, &param.parameter, &param.param_type,
+				&param.max_value_len,
+				&param.driver_params)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
 					&param.parameter, &param.param_type, &param.max_value_len, &param.driver_params)) {
-				return 0;
-			}	
-		}
+			return 0;
+		}	
+	} else {
 		/* since we're hashing this, we need the null byte too */
 		param.namelen = name_strlen + 1;
-	} else if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
-			&param.parameter, &param.param_type, &param.max_value_len, &param.driver_params)) {
-		return 0;
 	}
 
 	if (param.paramno > 0) {
@@ -583,14 +574,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 static PHP_METHOD(PDOStatement, bindParam)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (!stmt->dbh->supports_placeholders) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support placeholders");
-		RETURN_FALSE;
-	}
-
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
-	
 }
 /* }}} */
 
@@ -673,8 +657,7 @@ static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		MAKE_STD_ZVAL(return_value);
 		ZVAL_STRINGL(return_value, stmt->query_string, stmt->query_stringlen, 1);
-	}
-	else {
+	} else {
 		MAKE_STD_ZVAL(return_value);
 		ZVAL_NULL(return_value);
 	}
