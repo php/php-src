@@ -165,7 +165,7 @@
 #endif
 
 #ifdef PHP_WIN32
-#define PHP_MIME_MAGIC_FILE_PATH PHP_PREFIX "\\mime.magic"
+#define PHP_MIME_MAGIC_FILE_PATH PHP_PREFIX "\\magic.mime"
 #endif
 
 #define MODNAME "mime_magic"
