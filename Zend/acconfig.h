@@ -1,19 +1,5 @@
 #define ZEND_API
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
-
 @TOP@
 
 /* This is the default configuration file to read */
@@ -52,6 +38,20 @@
 #undef ZTS
 
 @BOTTOM@
+
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+
+#ifdef HAVE_STRING_H
+# include <string.h>
+#else
+# include <strings.h>
+#endif
 
 /* Define if you have stdiostream.h */
 #undef HAVE_STDIOSTREAM_H
