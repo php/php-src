@@ -166,6 +166,7 @@ static Yaz_Association yaz_association_mk ()
 	p->zoom_scan = 0;
     p->zoom_package = 0;
 	ZOOM_connection_option_set(p->zoom_conn, "implementationName", "PHP");
+	ZOOM_connection_option_set(p->zoom_conn, "async", "1");
 #else
 	p->host_port = 0;
 	p->num_databaseNames = 0;
@@ -1282,6 +1283,7 @@ PHP_FUNCTION(yaz_connect)
             option_set (as, "otherInfo1", otherInfo[1]);
             option_set (as, "otherInfo2", otherInfo[2]);
             option_set (as, "proxy", proxy_str);
+            option_set (as, "piggyback", piggyback ? "1" : "0");
 			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
 		}
@@ -1336,6 +1338,7 @@ PHP_FUNCTION(yaz_connect)
         option_set (as, "otherInfo1", otherInfo[1]);
         option_set (as, "otherInfo2", otherInfo[2]);
         option_set (as, "proxy", proxy_str);
+        option_set (as, "piggyback", piggyback ? "1" : "0");
         
 		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 #else
@@ -1564,7 +1567,13 @@ PHP_FUNCTION(yaz_wait)
 #if USE_ZOOM
 		Yaz_Association p = shared_associations[i];
 		if (p && p->order == YAZSG(assoc_seq))
+        {
+            char str[20];
+
+            sprintf (str, "%d", timeout);
+            ZOOM_connection_option_set (p->zoom_conn, "timeout", str);
 			conn_ar[no++] = p->zoom_conn;
+        }
 #else
 		Yaz_Association p = shared_associations[i];
 		if (!p || p->order != YAZSG(assoc_seq) || !p->action
