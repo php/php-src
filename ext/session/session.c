@@ -489,7 +489,8 @@ static void _php_session_start(PSLS_D)
 	}
 	
 	if(!PS(id)) {
-		PS(id) = _php_create_id(NULL PSLS_C);
+		PS(id) = _php_create_id(NULL PSLS_CC
+			);
 	}
 
 	if(send_cookie) {
