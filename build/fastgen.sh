@@ -16,13 +16,16 @@
 #  | Authors: Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: fastgen.sh,v 1.8 2000-08-20 05:39:37 sas Exp $ 
+# $Id: fastgen.sh,v 1.9 2000-09-26 11:19:38 sas Exp $ 
 #
 
 srcdir=$1
 shift
 
 mkdir_p=$1
+shift
+
+bsd_makefile=$1
 shift
 
 top_srcdir=`(cd $srcdir; pwd)`
@@ -34,12 +37,32 @@ else
   mkdir_p="$top_srcdir/helpers/mkdir.sh"
 fi
 
-for makefile in $@; do
-  echo "creating $makefile"
-  dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
-  $mkdir_p "$dir/"
+if test "$bsd_makefile" = "yes"; then
+  (cd $top_srcdir; ./build/bsd_makefile)
 
-  cat - $top_srcdir/$makefile.in <<EOF >$makefile
+  for makefile in $@; do
+    echo "creating $makefile"
+    dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
+    $mkdir_p "$dir/"
+
+    cat - $top_srcdir/$makefile.in <<EOF |sed 's/^include \(.*\)/.include "\1"/' >$makefile 
+top_srcdir   = $top_srcdir
+top_builddir = $top_builddir
+srcdir       = $top_srcdir/$dir
+builddir     = $top_builddir/$dir
+VPATH        = $top_srcdir/$dir
+EOF
+
+    test -z "$dir" && dir=.
+    touch $dir/.deps
+  done
+else  
+  for makefile in $@; do
+    echo "creating $makefile"
+    dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
+    $mkdir_p "$dir/"
+
+    cat - $top_srcdir/$makefile.in <<EOF >$makefile
 top_srcdir   = $top_srcdir
 top_builddir = $top_builddir
 srcdir       = $top_srcdir/$dir
@@ -47,5 +70,7 @@ builddir     = $top_builddir/$dir
 VPATH        = $top_srcdir/$dir
 EOF
   
-  test -z "$dir" || touch $dir/.deps
-done
+    test -z "$dir" && dir=.
+    touch $dir/.deps
+  done
+fi

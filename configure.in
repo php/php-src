@@ -91,6 +91,8 @@ fi
 AC_PROG_CC
 AC_AIX
 
+BSD_MAKEFILE=no
+
 case "$host_alias" in
 *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS";;
@@ -98,6 +100,8 @@ case "$host_alias" in
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
 *darwin*|*rhapsody*)
     CPPFLAGS="$CPPFLAGS -traditional-cpp";;
+*bsdi*)
+    BSD_MAKEFILE=yes;;
 esac
 
 AM_PROG_CC_STDC
@@ -814,7 +818,6 @@ changequote([,])
 PHP_CONFIGURE_PART(Generating files)
 
 PHP_GEN_CONFIG_VARS
-touch .deps
 
 ALL_OUTPUT_FILES="php4.spec Zend/Makefile build-defs.h $PHP_OUTPUT_FILES"
 

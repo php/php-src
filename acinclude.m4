@@ -310,7 +310,7 @@ AC_DEFUN(PHP_GEN_CONFIG_VARS,[
 ])
 
 AC_DEFUN(PHP_GEN_MAKEFILES,[
-  $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $1
+  $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $BSD_MAKEFILE $1
 ])
 
 AC_DEFUN(PHP_TM_GMTOFF,[
