@@ -28,7 +28,7 @@
 
 /* getmbi
    ** ------
-   ** Get a multibyte integer from a generic getin function 
+   ** Get a multibyte integer from a generic getin function
    ** 'getin' can be getc, with in = NULL
    ** you can find getin as a function just above the main function
    ** This way you gain a lot of flexibilty about how this package
@@ -224,7 +224,7 @@ readwbmp (int (*getin) (void *in), void *in, Wbmp ** return_wbmp)
    ** Why not just giving a filedescriptor to this function?
    ** Well, the incentive to write this function was the complete
    ** integration in gd library from www.boutell.com. They use
-   ** their own io functions, so the passing of a function seemed to be 
+   ** their own io functions, so the passing of a function seemed to be
    ** a logic(?) decision ...
    **
  */
@@ -319,7 +319,7 @@ putout (int c, void *out)
   return (putc (c, (FILE *) out));
 }
 
-/* getin from file descriptor 
+/* getin from file descriptor
    ** --------------------------
  */
 int

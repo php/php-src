@@ -1,8 +1,8 @@
 
-/* 
+/*
    add ability to load xpm files to gd, requires the xpm
    library.
-   Caolan.McNamara@ul.ie 
+   Caolan.McNamara@ul.ie
    http://www.csn.ul.ie/~caolan
  */
 #include <stdio.h>

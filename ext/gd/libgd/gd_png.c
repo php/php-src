@@ -23,7 +23,7 @@
     out all fprintf() statements to disable that).
 
     GD 2.0 supports RGBA truecolor and will read and write truecolor PNGs.
-    GD 2.0 supports 8 bits of color resolution per channel and 
+    GD 2.0 supports 8 bits of color resolution per channel and
     7 bits of alpha channel resolution. Images with more than 8 bits
     per channel are reduced to 8 bits. Images with an alpha channel are
     only able to resolve down to '1/128th opaque' instead of '1/256th',
@@ -121,7 +121,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	memset (infile, 0, sizeof(infile));
 
 	  /* first do a quick check that the file really is a PNG image; could
-	   * have used slightly more general png_sig_cmp() function instead 
+	   * have used slightly more general png_sig_cmp() function instead
 	   */
 	gdGetBuf(sig, 8, infile);
 	if (!png_check_sig (sig, 8)) { /* bad signature */
@@ -148,7 +148,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 
 	/* we could create a second info struct here (end_info), but it's only
 	 * useful if we want to keep pre- and post-IDAT chunk info separated
-	 * (mainly for PNG-aware image editors and converters) 
+	 * (mainly for PNG-aware image editors and converters)
 	 */
 
 	/* setjmp() must be called in every non-callback function that calls a
@@ -197,7 +197,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 #endif /* DEBUG */
 			if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS)) {
 				/* gd 2.0: we support this rather thoroughly now. Grab the
-				 * first fully transparent entry, if any, as the value of 
+				 * first fully transparent entry, if any, as the value of
 				 * the simple-transparency index, mostly for backwards
 				 * binary compatibility. The alpha channel is where it's
 				 * really at these days.
@@ -251,7 +251,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 				 * custom 16-bit code to handle the case where there are gdFree
 				 * palette entries.  This error will be extremely rare in
 				 * general, though.  (Quite possibly there is only one such
-				 * image in existence.) 
+				 * image in existence.)
 				 */
 			}
 			break;
@@ -260,16 +260,16 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			case PNG_COLOR_TYPE_RGB_ALPHA:
 				/* gd 2.0: we now support truecolor. See the comment above
 				 * for a rare situation in which the transparent pixel may not
-				 * work properly with 16-bit channels. 
+				 * work properly with 16-bit channels.
 				 */
 				if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
 					png_get_tRNS(png_ptr, info_ptr, NULL, NULL, &trans_color_rgb);
 					if (bit_depth == 16) { /* png_set_strip_16() not yet in effect */
-						transparent = gdTrueColor(trans_color_rgb->red >> 8, 
+						transparent = gdTrueColor(trans_color_rgb->red >> 8,
 									trans_color_rgb->green >> 8,
 									trans_color_rgb->blue >> 8);
 					} else {
-						transparent = gdTrueColor(trans_color_rgb->red, 
+						transparent = gdTrueColor(trans_color_rgb->red,
 									trans_color_rgb->green,
 									trans_color_rgb->blue);
 					}
@@ -337,7 +337,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 					register png_byte b = row_pointers[h][boffset++];
 
 					/* gd has only 7 bits of alpha channel resolution, and
-					 * 127 is transparent, 0 opaque. A moment of convenience, 
+					 * 127 is transparent, 0 opaque. A moment of convenience,
 					 *  a lifetime of compatibility.
 					 */
 
@@ -471,14 +471,14 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 	 * gd is intentionally imperfect and doesn't spend a lot of time
 	 * fussing with such things.
 	 */
-	
+
 	/*  png_set_filter(png_ptr, 0, PNG_FILTER_NONE);  */
 
 	/* 2.0.12: this is finally a parameter */
 	png_set_compression_level(png_ptr, level);
 
 	/* can set this to a smaller value without compromising compression if all
-	 * image data is 16K or less; will save some decoder memory [min == 8] 
+	 * image data is 16K or less; will save some decoder memory [min == 8]
 	 */
 
 	/*  png_set_compression_window_bits(png_ptr, 15);  */
@@ -507,13 +507,13 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 			bit_depth = 1;
 		} else if (colors <= 4) {
 			bit_depth = 2;
-		} else if (colors <= 16) { 
+		} else if (colors <= 16) {
 			bit_depth = 4;
 		} else {
 			bit_depth = 8;
 		}
 	}
-	
+
 	interlace_type = im->interlace ? PNG_INTERLACE_ADAM7 : PNG_INTERLACE_NONE;
 
 	if (im->trueColor) {
@@ -540,9 +540,9 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 	if (!im->trueColor) {
 		/* Oy veh. Remap the PNG palette to put the entries with interesting alpha channel
 		 * values first. This minimizes the size of the tRNS chunk and thus the size
-		 * of the PNG file as a whole. 
+		 * of the PNG file as a whole.
 		 */
-		
+
 		int tc = 0;
 		int i;
 		int j;
@@ -573,7 +573,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 			for (i = 0; i < im->colorsTotal; i++) {
 				if (!im->open[i]) {
 					if (im->alpha[i] != gdAlphaOpaque) {
-						/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */ 
+						/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */
 						trans_values[j] = 255 - ((im->alpha[i] << 1) + (im->alpha[i] >> 6));
 						mapping[i] = j++;
 					} else {
@@ -653,7 +653,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 					 * PNG's convention in which 255 is opaque.
 					 */
 					a = gdTrueColorGetAlpha(thisPixel);
-					/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */ 
+					/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */
 					*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
 				}
 			}
@@ -665,7 +665,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 		for (j = 0; j < height; ++j) {
 			gdFree(row_pointers[j]);
 		}
-	
+
 		gdFree(row_pointers);
 	} else {
 		if (remap) {

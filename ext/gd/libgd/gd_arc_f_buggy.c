@@ -1,6 +1,6 @@
 /* This is potentially great stuff, but fails against the test
-   program at the end. This would probably be much more 
-   efficent than the implementation currently in gd.c if the 
+   program at the end. This would probably be much more
+   efficent than the implementation currently in gd.c if the
    errors in the output were corrected. TBB */
 
 #if 0
@@ -698,7 +698,7 @@ gdArcClosest (int width, int height, int angle)
 #define WIDTH	500
 #define HEIGHT	300
 
-int 
+int
 main (int argc, char *argv[])
 {
   gdImagePtr im = gdImageCreate (WIDTH, HEIGHT);

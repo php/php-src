@@ -136,7 +136,7 @@ static long dynamicTell (struct gdIOCtx *ctx)
 	dpIOCtx *dctx;
 
 	dctx = (dpIOCtx *) ctx;
-	
+
 	return (dctx->dp->pos);
 }
 
@@ -284,7 +284,7 @@ static int appendDynamic (dynamicPtr * dp, const void *src, int size)
 	int bytesNeeded;
 	char *tmp;
 
-	if (!dp->dataGood) { 
+	if (!dp->dataGood) {
 		return FALSE;
 	}
 

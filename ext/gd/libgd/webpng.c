@@ -193,7 +193,7 @@ main (int argc, char **argv)
 			maxy = gdImageSY(im);
 
 			printf("alpha channel information:\n");
-		
+
 			if (im->trueColor)	{
 				for (y = 0; y < maxy; y++)	{
 					for (x = 0; x < maxx; x++)	{
@@ -215,9 +215,9 @@ main (int argc, char **argv)
 			}
 			else
 				printf("NOT a true color image\n");
-			no = 0;	
+			no = 0;
 			printf("%d alpha channels\n", nalpha);
-			
+
 		}
       else
 	{
