@@ -239,10 +239,10 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
 	char *script_filename=NULL;
-	// Theses are already in parameters?
-//	ELS_FETCH();
-//	PLS_FETCH();
-
+/*	Theses are already in parameters?
+	ELS_FETCH();
+	PLS_FETCH();
+*/
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
 
@@ -268,11 +268,11 @@ static int
 php_apache_startup(sapi_module_struct *sapi_module)
 {
 #ifdef PHP_WIN32
-	// this is needed because apache reloads this dll twice due
+	/* this is needed because apache reloads this dll twice due
 	// to a colision.  A better way to do this is to define the load
 	// address for the dll, but am not sure what it should be.
 	// this is just a quick hack to get it working.
-
+	*/
 	static int php_apache_started=0;
 	static int apache_startup_success = FAILURE;
 	if (php_apache_started>0) return apache_startup_success;
