@@ -81,6 +81,9 @@ enum pdo_fetch_type {
 	PDO_FETCH__MAX /* must be last */
 };
 
+#define PDO_FETCH_FLAGS     0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
+#define PDO_FETCH_GROUP     0x00010000  /* fetch into groups */
+
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
 	PDO_FETCH_ORI_NEXT,		/* default: fetch the next available row */

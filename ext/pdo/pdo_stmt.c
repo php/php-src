@@ -527,7 +527,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 /* perform a fetch.  If do_bind is true, update any bound columns.
  * If return_value is not null, store values into it according to HOW. */
 static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
-	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
 	enum pdo_fetch_type really_how = how;
 	zend_class_entry * ce;
@@ -642,8 +642,27 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				/* shouldn't happen */
 				return 0;
 		}
+		
+		if (return_all) {
+			zval val, *grp, **pgrp;
+			INIT_PZVAL(&val);
+			fetch_value(stmt, &val, 0 TSRMLS_CC);
+			convert_to_string(&val);
+			if (zend_symtable_find(Z_ARRVAL_P(return_all), Z_STRVAL(val), Z_STRLEN(val)+1, (void**)&pgrp) == FAILURE) {
+				MAKE_STD_ZVAL(grp);
+				array_init(grp);
+				add_assoc_zval(return_all, Z_STRVAL(val), grp);
+			} else {
+				grp = *pgrp;
+			}
+			zval_dtor(&val);
+			add_next_index_zval(grp, return_value);
+			i = 1;
+		} else {
+			i = 0;
+		}
 
-		for (i = 0; i < stmt->column_count; i++) {
+		for (; i < stmt->column_count; i++) {
 			zval *val;
 			MAKE_STD_ZVAL(val);
 			fetch_value(stmt, val, i TSRMLS_CC);
@@ -692,7 +711,7 @@ static PHP_METHOD(PDOStatement, fetch)
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	if (!do_fetch(stmt, TRUE, return_value, how, ori, off TSRMLS_CC)) {
+	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0 TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -749,7 +768,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off TSRMLS_CC)) {
+	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off, 0 TSRMLS_CC)) {
 		error = 1;
 		PDO_HANDLE_STMT_ERR();
 	}
@@ -786,8 +805,8 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 static PHP_METHOD(PDOStatement, fetchAll)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	long how = PDO_FETCH_USE_DEFAULT;
-	zval *data;
+	long how = PDO_FETCH_USE_DEFAULT, flags;
+	zval *data, *return_all;
 	char *class_name;
 	int class_name_len;
 	zend_class_entry *old_ce;
@@ -828,25 +847,40 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 
+	flags = how & PDO_FETCH_FLAGS;
+	how   = how & ~PDO_FETCH_FLAGS;
 	if (!error)
 	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-		if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
+		if (flags & PDO_FETCH_GROUP) {
+			array_init(return_value);
+			return_all = return_value;
+		} else {
+			return_all = 0;
+		}
+		if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC)) {
 			FREE_ZVAL(data);
 			PDO_HANDLE_STMT_ERR();
+			zval_dtor(return_value);
 			error = 1;
 		}
 	}
 	if (!error) {
-		array_init(return_value);
-		do {
-			add_next_index_zval(return_value, data);
-			MAKE_STD_ZVAL(data);
-		} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC));
+		if ((flags & PDO_FETCH_GROUP)) {
+			do {
+				MAKE_STD_ZVAL(data);
+			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
+		} else {
+			array_init(return_value);
+			do {
+				add_next_index_zval(return_value, data);
+				MAKE_STD_ZVAL(data);
+			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC));
+		}
 		FREE_ZVAL(data);
 	}
-
+	
 	stmt->fetch.cls.ce = old_ce;
 	stmt->fetch.cls.ctor_args = old_ctor_args;
 	
@@ -1537,7 +1571,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 	MAKE_STD_ZVAL(I->fetch_ahead);
 
 	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
+			PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC)) {
 		pdo_stmt_t *stmt = I->stmt; /* for PDO_HANDLE_STMT_ERR() */
 
 		PDO_HANDLE_STMT_ERR();
@@ -1573,7 +1607,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object TSRML
 
 	MAKE_STD_ZVAL(I->fetch_ahead);
 	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
+			PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (ulong)-1;
 		FREE_ZVAL(I->fetch_ahead);
