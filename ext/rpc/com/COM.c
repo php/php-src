@@ -38,7 +38,7 @@
 #define _WIN32_DCOM
 
 #include "php.h"
-#include "php3_COM.h"
+#include "php_COM.h"
 #include "zend_compile.h"
 #include "php_ini.h"
 

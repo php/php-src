@@ -729,7 +729,7 @@ SOURCE=.\win32\param.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\com\php3_COM.h
+SOURCE=.\ext\com\php_COM.h
 # End Source File
 # Begin Source File
 
