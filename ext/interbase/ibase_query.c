@@ -1049,7 +1049,6 @@ PHP_FUNCTION(ibase_query)
 
 	switch (ZEND_NUM_ARGS()) {
 		long l;
-		zval *z;
 
 		default:
 		    if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3 TSRMLS_CC, "rrs",
@@ -1076,7 +1075,7 @@ PHP_FUNCTION(ibase_query)
 
 			/* the statement is 'CREATE DATABASE ...' if the link argument is IBASE_CREATE */
 			if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS()
-					TSRMLS_CC, "zs", &z, &query, &query_len) ) {//&& l == PHP_IBASE_CREATE) {
+					TSRMLS_CC, "ls", &l, &query, &query_len) && l == PHP_IBASE_CREATE) {
 				isc_db_handle db = NULL;
 				isc_tr_handle trans = NULL;
 
@@ -1088,8 +1087,8 @@ PHP_FUNCTION(ibase_query)
 					_php_ibase_module_error("CREATE DATABASE is not allowed: maximum link count "
 						"(%ld) reached" TSRMLS_CC, IBG(max_links));
 
-				} else if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, query_len, query,
-						SQL_DIALECT_CURRENT, NULL)) {
+				} else if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, (short)query_len, 
+						query, SQL_DIALECT_CURRENT, NULL)) {
 					_php_ibase_error(TSRMLS_C);
 
 				} else if (!db) {
