@@ -1103,11 +1103,9 @@ consult the installation file that came with this distribution, or visit \n\
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
 		}
-
 	} zend_catch {
 		exit_status = 255;
 	} zend_end_try();
-
 
 	php_module_shutdown(TSRMLS_C);
 
