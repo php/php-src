@@ -883,7 +883,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 	st_entry 			*ent1, *ent2;
 	wddx_stack 			*stack = (wddx_stack *)user_data;
 	HashTable 			*target_hash;
-	zend_class_entry 	*ce;
+	zend_class_entry 	**pce;
 	zval				*obj;
 	zval				*tmp;
 	TSRMLS_FETCH();
@@ -945,15 +945,14 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 						zend_str_tolower(Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data));
 						if (zend_hash_find(EG(class_table), Z_STRVAL_P(ent1->data),
-										   Z_STRLEN_P(ent1->data)+1, (void **) &ce)==FAILURE) {
+										   Z_STRLEN_P(ent1->data)+1, (void **) &pce)==FAILURE) {
 							incomplete_class = 1;
-							ce = PHP_IC_ENTRY;
+							pce = &PHP_IC_ENTRY;
 						}
 
 						/* Initialize target object */
 						MAKE_STD_ZVAL(obj);
-						INIT_PZVAL(obj);
-						object_init_ex(obj, ce);
+						object_init_ex(obj, *pce);
 						
 						/* Merge current hashtable with object's default properties */
 						zend_hash_merge(Z_OBJPROP_P(obj),
