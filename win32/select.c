@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "php.h"
+
 /* $Id$ */
 
 /* Win32 select() will only work with sockets, so we roll our own implementation that will
