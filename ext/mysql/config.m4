@@ -51,6 +51,7 @@ if test "$PHP_MYSQL" = "yes"; then
   PHP_SUBST(MYSQL_SUBDIRS)
   LIB_BUILD($ext_builddir/libmysql,$ext_shared,yes)
   AC_ADD_INCLUDE($ext_srcdir/libmysql)
+  MYSQL_MODULE_TYPE="builtin"
 elif test "$PHP_MYSQL" != "no"; then
   for i in $PHP_MYSQL; do
     if test -r $i/include/mysql/mysql.h; then
@@ -66,6 +67,7 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
   fi
 
+  MYSQL_MODULE_TYPE="external"
   for i in lib lib/mysql; do
     MYSQL_LIB_CHK($i)
   done
@@ -77,5 +79,7 @@ elif test "$PHP_MYSQL" != "no"; then
   AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
 
   AC_ADD_INCLUDE($MYSQL_INC_DIR)
+else
+  MYSQL_MODULE_TYPE="none"
 fi
 PHP_SUBST(MYSQL_SHARED_LIBADD)
