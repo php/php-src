@@ -23,6 +23,7 @@
 
 #include "php_soap.h"
 #include "ext/libxml/php_libxml.h"
+#include <libxml/parserInternals.h>
 #include "zend_strtod.h"
 
 /* zval type decode */
@@ -2579,8 +2580,6 @@ static zval *to_zval_any(encodeTypePtr type, xmlNodePtr data)
 	xmlBufferFree(buf);
 	return ret;
 }
-
-extern const xmlChar xmlStringTextNoenc[];
 
 static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {	
