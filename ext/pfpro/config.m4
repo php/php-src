@@ -25,6 +25,8 @@ if test "$PHP_PFPRO" != "no"; then
     elif test -r $i/lib/$PFPRO_LIB; then
       PFPRO_LIB_DIR=$i/lib
     fi
+
+	test -n "$PFPRO_INC_DIR" && test -n "$PFPRO_LIB_DIR" && break
   done
 
   if test -z "$PFPRO_INC_DIR"; then
