@@ -670,7 +670,7 @@ void zend_do_free(znode *op1 CLS_DC)
 	} else if (op1->op_type==IS_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
-		if (opline->opcode == ZEND_END_SILENCE) {
+		if (opline->opcode == ZEND_END_SILENCE || opline->opcode == ZEND_EXT_FCALL_END) {
 			opline--;
 		}
 		if (opline->result.op_type == op1->op_type
