@@ -24,23 +24,37 @@
 #include "zend_hash.h"
 #include "zend_globals.h"
 
-extern HashTable list_destructors;
 
-typedef struct _list_entry {
+#define ZEND_RESOURCE_LIST_TYPE_STD	1
+#define ZEND_RESOURCE_LIST_TYPE_EX	2
+
+typedef struct _zend_rsrc_list_entry {
 	void *ptr;
 	int type;
 	int refcount;
-} list_entry;
+	zend_bool valid;
+} zend_rsrc_list_entry;
 
-typedef struct _list_destructors_entry {
-	void (*list_destructor)(void *);
-	void (*plist_destructor)(void *);
+typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *le);
+
+typedef struct _zend_rsrc_list_dtors_entry {
+	/* old style destructors */
+	void (*list_dtor)(void *);
+	void (*plist_dtor)(void *);
+
+	/* new style destructors */
+	rsrc_dtor_func_t list_dtor_ex;
+	rsrc_dtor_func_t plist_dtor_ex;
+
 	int module_number;
 	int resource_id;
-} list_destructors_entry;
+	unsigned char type;
+} zend_rsrc_list_dtors_entry;
 
-#define register_list_destructors(ld,pld) _register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
-ZEND_API int _register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
+
+#define register_list_destructors(ld, pld) zend_register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
+ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number);
 
 enum list_entry_type {
 	LE_DB=1000
@@ -49,17 +63,20 @@ enum list_entry_type {
 void list_entry_destructor(void *ptr);
 void plist_entry_destructor(void *ptr);
 
-int clean_module_resource_destructors(list_destructors_entry *ld, int *module_number);
-int init_resource_list(ELS_D);
-int init_resource_plist(ELS_D);
-void destroy_resource_list(ELS_D);
-void destroy_resource_plist(ELS_D);
+void zend_clean_module_rsrc_dtors(int module_number);
+int zend_init_rsrc_list(ELS_D);
+int zend_init_rsrc_plist(ELS_D);
+void zend_destroy_rsrc_list(ELS_D);
+void zend_destroy_rsrc_plist(ELS_D);
+int zend_init_rsrc_list_dtors();
+void zend_destroy_rsrc_list_dtors();
 
 ZEND_API int zend_list_insert(void *ptr, int type);
 ZEND_API int zend_plist_insert(void *ptr, int type);
 ZEND_API int zend_list_addref(int id);
 ZEND_API int zend_list_delete(int id);
 ZEND_API int zend_plist_delete(int id);
+ZEND_API int zend_list_convert_to_number(int id);
 ZEND_API void *zend_list_find(int id, int *type);
 ZEND_API void *zend_plist_find(int id, int *type);
 

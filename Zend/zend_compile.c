@@ -107,7 +107,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(allow_call_time_pass_reference) = ZEND_UV(allow_call_time_pass_reference);
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
-	init_resource_list(ELS_C);
+	zend_init_rsrc_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
 	zend_hash_init(&CG(used_files), 5, NULL, (void (*)(void *)) zend_open_file_dtor_wrapper, 0);

@@ -142,7 +142,7 @@ void shutdown_executor(ELS_D)
 		}
 	}
 
-	destroy_resource_list(ELS_C); /* must be destroyed after the main symbol table is destroyed */
+	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table is destroyed */
 
 	zend_ptr_stack_destroy(&EG(argument_stack));
 	if (EG(main_op_array)) {
