@@ -64,6 +64,9 @@
 # ifdef HAVE_DLFCN_H
 #  include <dlfcn.h>
 # endif
+# if !defined(RTLD_NOW) && defined(DL_NOW)
+#  define RTLD_NOW DL_NOW
+# endif
 # define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
 # define DL_UNLOAD		dlclose
 # define DL_FETCH_SYMBOL	dlsym
