@@ -273,7 +273,11 @@ php_xml_compat_handlers = {
 	_comment_handler, /* comment */
 	NULL, /* warning */
 	NULL, /* error */
-	NULL /* fatalError */
+	NULL,  /* fatalError */
+	NULL,  /* getParameterEntity */
+	_cdata_handler, /* cdataBlock */
+	NULL, /* externalSubset */
+	1
 };
 
 XML_Parser 
