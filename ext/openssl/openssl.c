@@ -106,7 +106,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 }
 
 /* {{{ proto int openssl_get_privatekey(string key [, string passphrase])
-    Get private key */
+   Get private key */
 PHP_FUNCTION(openssl_get_privatekey)
 {
 	zval **key, **passphrase;
@@ -333,8 +333,7 @@ PHP_FUNCTION(openssl_verify)
 }
 /* }}} */
 
-/* {{{ proto int openssl_seal(string data, string sealdata, array ekeys,
-                              array pubkeys)
+/* {{{ proto int openssl_seal(string data, string sealdata, array ekeys, array pubkeys)
    Seal data */
 PHP_FUNCTION(openssl_seal)
 {
@@ -472,8 +471,7 @@ PHP_FUNCTION(openssl_seal)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_open(string data, string opendata, string ekey,
-                               int privkey)
+/* {{{ proto bool openssl_open(string data, string opendata, string ekey, int privkey)
    Open data */
 PHP_FUNCTION(openssl_open)
 {
