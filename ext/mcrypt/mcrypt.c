@@ -244,12 +244,22 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 #endif
 
+static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc)
+{
+	MCRYPT td = (MCRYPT) rsrc->ptr;
+	mcrypt_module_close (td);
+}
+
+    
 static PHP_MINIT_FUNCTION(mcrypt)
 {
 #if defined(ZTS) && defined(HAVE_LIBMCRYPT24)
     ZEND_INIT_MODULE_GLOBALS(mcrypt, NULL, NULL);
     Z_TYPE(mcrypt_module_entry) = type;
 #endif
+	
+	MCG(le_h) = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
+    
 	/* modes for mcrypt_??? routines */
 	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
