@@ -184,22 +184,22 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xmldoc,														NULL)
 	PHP_FE(xmldocfile,													NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FE(html_doc,														NULL)
-	PHP_FE(html_doc_file,													NULL)
+	PHP_FE(html_doc,													NULL)
+	PHP_FE(html_doc_file,												NULL)
 #endif
 	PHP_FE(xmltree,														NULL)
 	PHP_FE(domxml_add_root,												NULL)
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,										NULL)
-	PHP_FE(domxml_dump_node,												NULL)	
+	PHP_FE(domxml_dump_node,											NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FE(domxml_html_dump_mem,												NULL)
+	PHP_FE(domxml_html_dump_mem,										NULL)
 #endif
 	PHP_FE(domxml_node_attributes,										NULL)
 	PHP_FE(domxml_elem_get_attribute,									NULL)
 	PHP_FE(domxml_elem_set_attribute,									NULL)
 	PHP_FE(domxml_node_children,										NULL)
-	PHP_FE(domxml_node_has_attributes,										NULL)
+	PHP_FE(domxml_node_has_attributes,									NULL)
 	PHP_FE(domxml_node_new_child,										NULL)
 	PHP_FE(domxml_node,													NULL)
 	PHP_FE(domxml_node_unlink_node,										NULL)
@@ -219,10 +219,10 @@ static zend_function_entry domxml_functions[] = {
 #endif
 #if HAVE_DOMXSLT
 	PHP_FE(domxml_xslt_version,											NULL)
-	PHP_FE(domxml_xslt_stylesheet,											NULL)
-	PHP_FE(domxml_xslt_stylesheet_doc,											NULL)
-	PHP_FE(domxml_xslt_stylesheet_file,											NULL)
-	PHP_FE(domxml_xslt_process,													NULL)
+	PHP_FE(domxml_xslt_stylesheet,										NULL)
+	PHP_FE(domxml_xslt_stylesheet_doc,									NULL)
+	PHP_FE(domxml_xslt_stylesheet_file,									NULL)
+	PHP_FE(domxml_xslt_process,											NULL)
 #endif
 
 	PHP_FALIAS(domxml_root,				domxml_doc_document_element,	NULL)
@@ -236,7 +236,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FALIAS(domxml_unlink_node,		domxml_node_unlink_node,		NULL)
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
 	PHP_FALIAS(new_xmldoc,				domxml_new_xmldoc,				NULL)
-	PHP_FALIAS(domxml_dumpmem,		 domxml_dump_mem,					NULL)
+	PHP_FALIAS(domxml_dumpmem,			domxml_dump_mem,				NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -265,7 +265,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(dump_mem,				domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem_file,			domxml_dump_mem_file,			NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FALIAS(html_dump_mem,					domxml_html_dump_mem,					NULL)
+	PHP_FALIAS(html_dump_mem,			domxml_html_dump_mem,			NULL)
 #endif
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
@@ -309,10 +309,10 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
 	PHP_FALIAS(new_child,				domxml_node_new_child,			NULL)
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
-	PHP_FALIAS(has_attributes,				domxml_node_has_attributes,			NULL)
+	PHP_FALIAS(has_attributes,			domxml_node_has_attributes,		NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
-	PHP_FALIAS(replace_node,				domxml_node_replace_node,			NULL)
+	PHP_FALIAS(replace_node,			domxml_node_replace_node,		NULL)
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
 	PHP_FALIAS(get_content,				domxml_node_get_content,		NULL)
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
@@ -321,8 +321,8 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(node_type,				domxml_node_type,				NULL)
 	PHP_FALIAS(node_value,				domxml_node_value,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
-	PHP_FALIAS(is_blank_node,				domxml_is_blank_node,				NULL)
-	PHP_FALIAS(dump_node,				domxml_dump_node,				NULL)		
+	PHP_FALIAS(is_blank_node,			domxml_is_blank_node,			NULL)
+	PHP_FALIAS(dump_node,				domxml_dump_node,				NULL)
 	{NULL, NULL, NULL}
 };
 
