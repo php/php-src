@@ -1282,7 +1282,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 		PG(during_request_startup) = 0;
 
-		if (Z_TYPE_P(primary_file) == ZEND_HANDLE_FILENAME 
+		if (primary_file->type == ZEND_HANDLE_FILENAME 
 				&& primary_file->filename) {
 			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
 			VCWD_CHDIR_FILE(primary_file->filename);
@@ -1292,7 +1292,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			prepend_file.filename = PG(auto_prepend_file);
 			prepend_file.opened_path = NULL;
 			prepend_file.free_filename = 0;
-			Z_TYPE(prepend_file) = ZEND_HANDLE_FILENAME;
+			prepend_file.type = ZEND_HANDLE_FILENAME;
 			prepend_file_p = &prepend_file;
 		} else {
 			prepend_file_p = NULL;
@@ -1301,7 +1301,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			append_file.filename = PG(auto_append_file);
 			append_file.opened_path = NULL;
 			append_file.free_filename = 0;
-			Z_TYPE(append_file) = ZEND_HANDLE_FILENAME;
+			append_file.type = ZEND_HANDLE_FILENAME;
 			append_file_p = &append_file;
 		} else {
 			append_file_p = NULL;
