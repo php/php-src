@@ -38,9 +38,6 @@
 #include <sys/utsname.h>
 #endif
 
-<<<<<<< info.c
-#define SECTION(name)  PUTS("<h2 align='center'>" name "</h2>\n")
-=======
 #ifdef PHP_ATOM_INC
 #include "php_have_iconv.h"
 #endif
@@ -49,8 +46,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
-#define SECTION(name)  PUTS("<h2 align=\"center\">" name "</h2>\n")
->>>>>>> 1.188
+#define SECTION(name)  PUTS("<h2 align='center'>" name "</h2>\n")
 
 PHPAPI extern char *php_ini_opened_path;
 
