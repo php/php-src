@@ -182,7 +182,7 @@ typedef struct {
 } putenv_entry;
 #endif
 
-/* Values are coma-delimited
+/* Values are comma-delimited
  */
 #define SAFE_MODE_PROTECTED_ENV_VARS "LD_LIBRARY_PATH"
 
