@@ -120,7 +120,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 		}
 
 		if (stream->wrapperdata) {
-			FREE_ZVAL(stream->wrapperdata);
+			zval_ptr_dtor(&stream->wrapperdata);
 			stream->wrapperdata = NULL;
 		}
 
