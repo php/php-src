@@ -417,7 +417,7 @@ static void _php_session_initialize(PSLS_D)
 	int vallen;
 	
 	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
-		php_error(E_ERROR, "failed to initialize session module");
+		php_error(E_ERROR, "Failed to initialize session module");
 		return;
 	}
 	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
@@ -430,14 +430,20 @@ static void _php_session_save_current_state(PSLS_D)
 {
 	char *val;
 	int vallen;
+	int ret;
 	
 	val = _php_session_encode(&vallen PSLS_CC);
 	if (val) {
-		PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
+		ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
 		efree(val);
-	} else {
-		PS(mod)->write(&PS(mod_data), PS(id), "", 0);
-	}
+	} else
+		ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
+	
+	if (ret == FAILURE)
+		php_error(E_WARNING, "Failed to write session data. Please check that "
+				"the current setting of session.save_path is correct (%s)",
+				PS(save_path));
+	
 	PS(mod)->close(&PS(mod_data));
 }
 
@@ -840,7 +846,7 @@ PHP_FUNCTION(session_name)
 
 	old = estrdup(PS(session_name));
 
-	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -864,7 +870,7 @@ PHP_FUNCTION(session_module_name)
 
 	old = estrdup(PS(mod)->name);
 
-	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -929,7 +935,7 @@ PHP_FUNCTION(session_save_path)
 
 	old = estrdup(PS(save_path));
 
-	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -954,7 +960,7 @@ PHP_FUNCTION(session_id)
 	if (PS(id))
 		old = estrdup(PS(id));
 
-	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
