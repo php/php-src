@@ -44,10 +44,10 @@ class PEAR_Installer extends PEAR {
     var $pkgdir;
 
     /** directory where PHP code files go */
-    var $pear_phpdir = '/usr/local/lib/php';
+    var $pear_phpdir = PEAR_INSTALL_DIR;
 
     /** directory where PHP extension files go */
-    var $pear_extdir = '/usr/local/lib/php/extensions/debug-non-zts-20000609';
+    var $pear_extdir = PEAR_EXTENSION_DIR;
 
     /** directory where documentation goes */
     var $pear_docdir = '';
@@ -259,10 +259,6 @@ class PEAR_Installer extends PEAR {
 
 	xml_parser_free($xp);
 
-	if ($this->pkginfo['pkgtype'] != "binary") {
-	    return new PEAR_Installer_Error("Invalid package: only binary packages supported yet.\n");
-	}
-
 	return true;
     }
 
@@ -274,6 +270,9 @@ class PEAR_Installer extends PEAR {
 	$this->current_element = $name;
 	switch ($name) {
 	    case "Package":
+		if (strtolower($attribs["Type"]) != "binary") {
+		    return new PEAR_Installer_Error("Invalid package: only binary packages supported yet.\n");
+		}
 		$this->pkginfo['pkgtype'] = strtolower($attribs["Type"]);
 		break;
 	}
@@ -291,8 +290,6 @@ class PEAR_Installer extends PEAR {
     // {{{ char_handler()
 
     function char_handler($xp, $data) {
-	global $debug;
-
 	switch ($this->current_element) {
 	    case "DestDir":
 		$this->destdir = trim($data);
@@ -318,7 +315,7 @@ class PEAR_Installer extends PEAR {
 		    print "Error: could not mkdir $d\n";
 		    break;
 		}
-		if ($debug) print "[debug] created directory $d\n";
+		if ($this->debug) print "[debug] created directory $d\n";
 		break;
 	    case "File":
 		if (!$this->pear_phpdir) {
@@ -330,7 +327,8 @@ class PEAR_Installer extends PEAR {
 		    print "Error: failed to copy $this->pkgdir/$file to $d\n";
 		    break;
 		}
-		if ($debug) print "[debug] installed $d/$file\n";
+		$this->cacheUpdateFrom("$d/$file");
+		if ($this->debug) print "[debug] installed $d/$file\n";
 		break;
 	    case "ExtDir":
 		if (!$this->pear_extdir) {
@@ -350,7 +348,7 @@ class PEAR_Installer extends PEAR {
 		    print "Error: could not mkdir $d\n";
 		    break;
 		}
-		if ($debug) print "[debug] created directory $d\n";
+		if ($this->debug) print "[debug] created directory $d\n";
 		break;
 	    case "ExtFile":
 		if (!$this->pear_extdir) {
@@ -362,7 +360,7 @@ class PEAR_Installer extends PEAR {
 		    print "Error: failed to copy $this->pkgdir/$file to $d\n";
 		    break;
 		}
-		if ($debug) print "[debug] installed $d/$file\n";
+		if ($this->debug) print "[debug] installed $d/$file\n";
 		break;
 	    case "DocDir":
 		if (!$this->pear_docdir) {
@@ -382,7 +380,7 @@ class PEAR_Installer extends PEAR {
 		    print "Error: could not mkdir $d\n";
 		    break;
 		}
-		if ($debug) print "[debug] created directory $d\n";
+		if ($this->debug) print "[debug] created directory $d\n";
 		break;
 	    case "DocFile":
 		if (!$this->pear_docdir) {
@@ -394,7 +392,7 @@ class PEAR_Installer extends PEAR {
 		    print "Error: failed to copy $this->pkgdir/$file to $d\n";
 		    break;
 		}
-		if ($debug) {
+		if ($this->debug) {
 		    print "[debug] installed $d/$file\n";
 		}
 		break;
