@@ -412,8 +412,8 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		}
 		fprintf(stderr, "Memory cache statistics\n"
 						"-----------------------\n\n"
-						"[zval, %2d]\t\t%d / %d (%.2f%%)\n"
-						"[hash, %2d]\t\t%d / %d (%.2f%%)\n",
+						"[zval, %2ld]\t\t%d / %d (%.2f%%)\n"
+						"[hash, %2ld]\t\t%d / %d (%.2f%%)\n",
 						sizeof(zval),
 						AG(fast_cache_stats)[ZVAL_CACHE_LIST][1], AG(fast_cache_stats)[ZVAL_CACHE_LIST][0]+AG(fast_cache_stats)[ZVAL_CACHE_LIST][1],
 						((double) AG(fast_cache_stats)[ZVAL_CACHE_LIST][1] / (AG(fast_cache_stats)[ZVAL_CACHE_LIST][0]+AG(fast_cache_stats)[ZVAL_CACHE_LIST][1]))*100,
