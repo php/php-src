@@ -7,7 +7,7 @@ givup() {
 
 usage() {
 echo "$0 --extname=module [--proto=file] [--stubs=file] [--xml[=file]]"
-echo "           [--full-xml] [--no-help] [--assign-params [--string-lens]]"
+echo "           [--full-xml] [--no-help]"
 echo ""
 echo "  --extname=module   module is the name of your extension"
 echo "  --proto=file       file contains prototypes of functions to create"
@@ -17,8 +17,6 @@ echo "  --full-xml         generate xml documentation for a self-contained exten
 echo "                     (not yet implemented)"
 echo "  --no-help          don't try to be nice and create comments in the code"
 echo "                     and helper functions to test if the module compiled"
-echo "  --assign-params"
-echo "  --string-lens"
 exit 1
 }
 
@@ -56,22 +54,12 @@ while test $# -gt 0; do
     --no-help)
 	no_help="yes"
 	;;
-    --assign-params)
-	assign_params="yes"
-	;;
-    --string-lens)
-	string_lens="yes"
-	;;
     *)
 	usage
 	;;
   esac
   shift
 done
-
-if test -z "$assign_params" && test -n "$string_lens"; then
-  usage
-fi
 
 if test -d "$extname" ; then
   givup "Directory $extname already exists."
@@ -96,7 +84,7 @@ if test -z "$stubs"; then
 fi
 
 if test -n "$proto"; then
-  cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -v assign_params=$assign_params -v string_lens=$string_lens -f ./skeleton/create_stubs
+  cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -f ./skeleton/create_stubs
 fi
 
 if test -z "$stubs"; then
