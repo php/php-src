@@ -2176,7 +2176,7 @@ PHP_FUNCTION(pdf_get_buffer) {
 
 	buffer = PDF_get_buffer(pdf, &size);
 
-	RETURN_STRINGL((char *)buffer, size, 0);
+	RETURN_STRINGL((char *)buffer, size, 1);
 }
 
 /* }}} */
