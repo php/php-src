@@ -1438,6 +1438,8 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 {
 	zend_class_entry *disabled_class;
 	disabled_class = (zend_class_entry *) emalloc(sizeof(zend_class_entry));
+	
+	zend_str_tolower(class_name, class_name_length);
 	if (zend_hash_del(CG(class_table), class_name, class_name_length+1)==FAILURE) {
 		return FAILURE;
 	}
