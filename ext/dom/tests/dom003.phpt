@@ -21,12 +21,9 @@ $rootNode->appendChild($rootNode);
 ?>
 --EXPECTF--
 --- Catch exception with try/catch
-object(domexception)#3 (7) {
+object(domexception)#%d (6) {
   ["code"]=>
   int(3)
-  ["trace"]=>
-  array(0) {
-  }
 }
 --- Don't catch exception with try/catch
 
