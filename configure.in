@@ -370,6 +370,8 @@ getlogin \
 gethostbyaddr \
 getprotobyname \
 getprotobynumber \
+getservbyname \
+getservbyport \
 getrusage \
 gettimeofday \
 gmtime_r \
