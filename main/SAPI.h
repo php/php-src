@@ -84,6 +84,7 @@ typedef struct {
 
 	zend_bool headers_only;
 	zend_bool no_headers;
+	zend_bool headers_read;
 
 	sapi_post_entry *post_entry;
 
@@ -117,7 +118,8 @@ typedef struct _sapi_globals_struct {
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	long post_max_size;
-    int options;
+	int options;
+	zend_bool sapi_started;
 } sapi_globals_struct;
 
 
@@ -183,6 +185,10 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC);
+SAPI_API void sapi_activate_headers_only(TSRMLS_D);
+
+SAPI_API int sapi_get_fd(int *fd TSRMLS_DC);
+SAPI_API int sapi_force_http_10(TSRMLS_D);
 
 struct _sapi_module_struct {
 	char *name;
@@ -221,6 +227,10 @@ struct _sapi_module_struct {
 	char *executable_location;
 
 	int php_ini_ignore;
+
+	int (*get_fd)(int *fd TSRMLS_DC);
+
+	int (*force_http_10)(TSRMLS_D);
 };
 
 
@@ -254,7 +264,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL, 0
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL
 
 #endif /* SAPI_H */
 
