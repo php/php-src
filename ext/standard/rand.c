@@ -194,15 +194,12 @@ static php_uint32 randomMT(TSRMLS_D)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	zval **seed;
+	long seed;
 
-	if (ZEND_NUM_ARGS() != 1 || 
-	    zend_get_parameters_ex(1, &seed) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long_ex(seed);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &seed) == FAILURE)
+		return;
 
-	php_srand(Z_LVAL_PP(seed));
+	php_srand(seed);
 }
 /* }}} */
 
@@ -210,15 +207,12 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	zval **seed;
+	long seed;
 
-	if (ZEND_NUM_ARGS() != 1 || 
-	    zend_get_parameters_ex(1, &seed) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long_ex(seed);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &seed) == FAILURE) 
+		return;
 
-	seedMT(Z_LVAL_PP(seed) TSRMLS_CC);
+	seedMT(seed TSRMLS_CC);
 }
 /* }}} */
 
@@ -255,19 +249,17 @@ PHP_FUNCTION(mt_srand)
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	zval **min;
-	zval **max;
-	long   number;
-	int    argc = ZEND_NUM_ARGS();
+	long min;
+	long max;
+	long number;
+	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && argc != 2 ||
-	    zend_get_parameters_ex(argc, &min, &max) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (argc != 0 && zend_parse_parameters(argc, "ll", &min, &max) == FAILURE)
+		return;
 
 	number = php_rand();
 	if (argc == 2) {
-		RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
+		RAND_RANGE(number, min, max);
 	}
 
 	RETURN_LONG(number);
@@ -278,15 +270,13 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	zval **min;
-	zval **max;
-	long   number;
-	int    argc = ZEND_NUM_ARGS();
+	long min;
+	long max;
+	long number;
+	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && argc != 2 ||
-	    zend_get_parameters_ex(argc, &min, &max) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (argc != 0 && zend_parse_parameters(argc, "ll", &min, &max) == FAILURE)
+		return;
 
 	/*
 	 * Melo: hmms.. randomMT() returns 32 random bits...
@@ -298,7 +288,7 @@ PHP_FUNCTION(mt_rand)
 	 */
 	number = (long) (randomMT(TSRMLS_C) >> 1);
 	if (argc == 2) {
-		RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
+		RAND_RANGE(number, min, max);
 	}
 
 	RETURN_LONG(number);
