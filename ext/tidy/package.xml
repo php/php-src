@@ -10,6 +10,12 @@
    <email>john@php.net</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>iliaa</user>
+   <name>Ilia Alshanetsky</name>
+   <email>ilia@php.net</email>
+   <role>lead</role>
+  </maintainer>
  </maintainers>
  <description>
 Tidy is a binding for the Tidy HTML clean and repair utility which
