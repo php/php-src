@@ -2149,7 +2149,7 @@ PHP_FUNCTION(parse_str)
 int php_tag_find(char *tag, int len, char *set) {
 	char c, *n, *t;
 	int i=0, state=0, done=0;
-	char *norm = emalloc(len);
+	char *norm = emalloc(len+1);
 
 	n = norm;
 	t = tag;
@@ -2184,8 +2184,11 @@ int php_tag_find(char *tag, int len, char *set) {
 	}  
 	*(n++) = '>';
 	*n = '\0'; 
-	if(strstr(set,norm)) done=1;
-	else done=0;
+	if(strstr(set,norm)) {
+		done=1;
+	} else {
+		done=0;
+	}
 	efree(norm);
 	return done;
 }
@@ -2265,8 +2268,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 					if(allow) {
 						*(tp++) = '>';
 						*tp='\0';
-						if(php_tag_find(tbuf, tp-tbuf+1, allow)) {
-							memcpy(rp,tbuf,tp-tbuf+1);
+						if(php_tag_find(tbuf, tp-tbuf, allow)) {
+							memcpy(rp,tbuf,tp-tbuf);
 							rp += tp-tbuf;
 						}
 						tp = tbuf;
