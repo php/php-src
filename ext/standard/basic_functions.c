@@ -92,6 +92,7 @@ function_entry basic_functions[] = {
 	PHP_FE(date,									NULL)
 	PHP_FE(gmdate,									NULL)
 	PHP_FE(getdate,									NULL)
+	PHP_FE(localtime,								NULL)
 	PHP_FE(checkdate,								NULL)
 
 	PHP_FE(flush,									NULL)
