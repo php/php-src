@@ -86,9 +86,6 @@ typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int
 
 static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char **);
 
-PHPAPI char *expand_filepath(const char *filepath, char *real_path);
-
-
 HashTable fopen_url_wrappers_hash;
 
 /* {{{ php_register_url_wrapper
@@ -250,7 +247,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 	}
 	fp = VCWD_FOPEN(path, mode);
 	if (fp && opened_path) {
-		*opened_path = expand_filepath(path,NULL);
+		*opened_path = expand_filepath(path, NULL);
 	}
 	return fp;
 }
@@ -288,7 +285,7 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 
 /* {{{ php_fopen_primary_script
  */
-PHPAPI FILE *php_fopen_primary_script(void)
+PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
 	FILE *fp;
 	struct stat st;
@@ -355,7 +352,8 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		   we're not adding it in this case */
 		STR_FREE(SG(request_info).path_translated);
 		SG(request_info).path_translated = NULL;
-		return NULL;
+		file_handle->handle.fp = NULL;
+		return FAILURE;
 	}
 	fp = VCWD_FOPEN(filename, "rb");
 
@@ -367,14 +365,23 @@ PHPAPI FILE *php_fopen_primary_script(void)
 	if (!fp) {
 		php_error(E_ERROR, "Unable to open %s", filename);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		return NULL;
+		file_handle->handle.fp = NULL;
+		return FAILURE;
 	}
+
+	file_handle->opened_path = expand_filepath(filename, NULL);
+
     if (!(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 		VCWD_CHDIR_FILE(filename);
     }
 	SG(request_info).path_translated = filename;
 
-	return fp;
+	file_handle->filename = SG(request_info).path_translated;
+	file_handle->free_filename = 0;
+	file_handle->handle.fp = fp;
+	file_handle->type = ZEND_HANDLE_FP;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -643,7 +650,7 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 
 	if(real_path) {
 		int copy_len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
-		memcpy(real_path,new_state.cwd,copy_len);
+		memcpy(real_path, new_state.cwd, copy_len);
 		real_path[copy_len]='\0';
 	} else {
 		real_path = estrndup(new_state.cwd, new_state.cwd_length);

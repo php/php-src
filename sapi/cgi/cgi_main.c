@@ -368,6 +368,7 @@ int main(int argc, char *argv[])
 	int exit_status = SUCCESS;
 	int cgi = 0, c, i, len;
 	zend_file_handle file_handle;
+	int retval = FAILURE;
 	char *s;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
@@ -676,6 +677,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		file_handle.type = ZEND_HANDLE_FP;
 		file_handle.handle.fp = stdin;
 		file_handle.opened_path = NULL;
+		file_handle.free_filename = 0;
 
 		/* This actually destructs the elements of the list - ugly hack */
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);
@@ -703,11 +705,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 		}
 		if (cgi || SG(request_info).path_translated) {
-			file_handle.handle.fp = php_fopen_primary_script();
-			file_handle.filename = SG(request_info).path_translated;
+			retval = php_fopen_primary_script(&file_handle);
 		}
 
-		if (cgi && !file_handle.handle.fp) {
+		if (cgi && (retval == FAILURE)) {
 			if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
 				PUTS("No input file specified.\n");
 				php_request_shutdown((void *) 0);
@@ -715,7 +716,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				return FAILURE;
 			}
 			file_handle.filename = argv0;
-		} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
+			file_handle.opened_path = expand_filepath(argv0, NULL);
+		} else if (retval == SUCCESS) {
 			/* #!php support */
 			c = fgetc(file_handle.handle.fp);
 			if (c == '#') {
@@ -728,7 +730,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 		}
 
-		file_handle.free_filename = 0;
 		switch (behavior) {
 			case PHP_MODE_STANDARD:
 				exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
