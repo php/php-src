@@ -38,11 +38,11 @@ extern "C" {  /* this should be included in the includes itself !! */
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "../com/conversion.h"
+#include "../com/php_COM.h"
 
 }
 
-#include "../com/conversion.h"
-#include "../com/php_COM.h"
 #include "Mscoree.h"
 #include "mscorlib.h"
 
