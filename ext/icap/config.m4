@@ -13,5 +13,5 @@ if test "$PHP_ICAP" != "no"; then
   PHP_SUBST(ICAP_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(icap, $ICAP_DIR, ICAP_SHARED_LIBADD)
   AC_DEFINE(HAVE_ICAP,1,[ ])
-  PHP_EXTENSION(icap, $ext_shared)
+  PHP_NEW_EXTENSION(icap, php_icap.c, $ext_shared)
 fi

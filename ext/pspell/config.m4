@@ -6,7 +6,7 @@ PHP_ARG_WITH(pspell,for PSPELL support,
 [  --with-pspell[=DIR]     Include PSPELL support.])
 
 if test "$PHP_PSPELL" != "no"; then
-	PHP_EXTENSION(pspell, $ext_shared)
+	PHP_NEW_EXTENSION(pspell, pspell.c, $ext_shared)
 	if test "$PHP_PSPELL" != "yes"; then
 	    PSPELL_SEARCH_DIRS=$PHP_PSPELL
 	else

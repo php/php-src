@@ -57,6 +57,6 @@ if test "$PHP_CURL" != "no"; then
     $CURL_LIBS -L$CURL_DIR/lib
   ])
 
-  PHP_EXTENSION(curl, $ext_shared)
+  PHP_NEW_EXTENSION(curl, curl.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

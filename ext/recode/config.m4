@@ -59,5 +59,5 @@ recode_format_table();
 
 		AC_CHECK_HEADERS(stdbool.h)
 
-		PHP_EXTENSION(recode,$ext_shared)
+		PHP_NEW_EXTENSION(recode, recode.c, $ext_shared)
 	fi

@@ -44,5 +44,5 @@ if test "$PHP_CYBERMUT" != "no"; then
   AC_DEFINE(HAVE_CYBERMUT, 1, [ ])                                                 
 
 
-  PHP_EXTENSION(cybermut, $ext_shared)
+  PHP_NEW_EXTENSION(cybermut, cybermut.c, $ext_shared)
 fi

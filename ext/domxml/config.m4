@@ -69,7 +69,7 @@ if test "$PHP_DOM" != "no"; then
   fi
   
   AC_DEFINE(HAVE_DOMXML,1,[ ])
-  PHP_EXTENSION(domxml, $ext_shared)
+  PHP_NEW_EXTENSION(domxml, php_domxml.c, $ext_shared)
   PHP_SUBST(DOMXML_SHARED_LIBADD)
 fi
 

@@ -19,7 +19,7 @@ if test "$PHP_GMP" != "no"; then
   PHP_ADD_INCLUDE($GMP_DIR/include)
 	
 
-  PHP_EXTENSION(gmp, $ext_shared)
+  PHP_NEW_EXTENSION(gmp, gmp.c, $ext_shared)
   AC_DEFINE(HAVE_GMP, 1, [ ])
   PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/lib)
 fi

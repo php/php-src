@@ -32,5 +32,5 @@ if test "$PHP_FDFTK" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH($FDFLIBRARY, $FDFTK_DIR/lib, FDFTK_SHARED_LIBADD)
 
   PHP_SUBST(FDFTK_SHARED_LIBADD)
-  PHP_EXTENSION(fdf, $ext_shared)
+  PHP_NEW_EXTENSION(fdf, fdf.c, $ext_shared)
 fi

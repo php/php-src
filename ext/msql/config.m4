@@ -37,6 +37,6 @@ PHP_ARG_WITH(msql,for mSQL support,
     PHP_ADD_INCLUDE($MSQL_INCDIR)
     AC_DEFINE(HAVE_MSQL,1,[ ])
     PHP_SUBST(MSQL_SHARED_LIBADD)
-    PHP_EXTENSION(msql,$ext_shared)
+    PHP_NEW_EXTENSION(msql, php_msql.c, $ext_shared)
     PHP_MSQL_VERSION
   fi

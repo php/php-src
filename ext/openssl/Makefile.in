@@ -1,7 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libopenssl.la
-LTLIBRARY_SOURCES     = openssl.c
-LTLIBRARY_SHARED_NAME = openssl.la
-
-include $(top_srcdir)/build/dynlib.mk

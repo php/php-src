@@ -24,5 +24,5 @@ if test "$PHP_OVRIMOS" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(sqlcli, $OVRIMOS_DIR/lib, OVRIMOS_SHARED_LIBADD)
   AC_DEFINE(HAVE_LIBSQLCLI,1,[ ])
 
-  PHP_EXTENSION(ovrimos, $ext_shared)
+  PHP_NEW_EXTENSION(ovrimos, ovrimos.c, $ext_shared)
 fi

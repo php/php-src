@@ -43,5 +43,5 @@ if test "$PHP_DBPLUS" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(Dmacc, $DBPLUS_DIR/lib, DBPLUS_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(Dracc, $DBPLUS_DIR/lib, DBPLUS_SHARED_LIBADD)
 
-  PHP_EXTENSION(dbplus, $ext_shared)
+  PHP_NEW_EXTENSION(dbplus, dbplus.c php_dbplus.c , $ext_shared)
 fi

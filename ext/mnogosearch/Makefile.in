@@ -1,9 +1,0 @@
-# $Source$
-# $Id$
-
-LTLIBRARY_NAME    = libmnogosearch.la
-LTLIBRARY_SOURCES = php_mnogo.c
-LTLIBRARY_SHARED_NAME = mnogosearch.la
-LTLIBRARY_SHARED_LIBADD = $(MNOGOSEARCH_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

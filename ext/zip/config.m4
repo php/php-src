@@ -6,7 +6,7 @@ PHP_ARG_WITH(zip,for ZIP support,
 [  --with-zip[=DIR]        Include ZIP support (requires zziplib >= 0.10.6).])
 
 if test "$PHP_ZIP" != "no"; then
-  PHP_EXTENSION(zip, $ext_shared)
+  PHP_NEW_EXTENSION(zip, zip.c, $ext_shared)
   for i in $PHP_ZIP /usr/local /usr ; do
     if test -f $i/include/zzlib/zziplib.h; then
       ZZIPLIB_DIR=$i

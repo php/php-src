@@ -9,5 +9,5 @@ PHP_ARG_ENABLE(filepro,whether to enable the bundled filePro support,
 
 if test "$PHP_FILEPRO" = "yes"; then
   AC_DEFINE(HAVE_FILEPRO, 1, [ ])
-  PHP_EXTENSION(filepro, $ext_shared)
+  PHP_NEW_EXTENSION(filepro, filepro.c, $ext_shared)
 fi

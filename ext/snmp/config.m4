@@ -65,7 +65,7 @@ PHP_ARG_WITH(snmp,for SNMP support,
     PHP_ADD_INCLUDE($SNMP_INCDIR)
     PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
 
-    PHP_EXTENSION(snmp, $ext_shared)
+    PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
     PHP_SUBST(SNMP_SHARED_LIBADD)
   fi
 

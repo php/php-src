@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libcrack.la
-LTLIBRARY_SOURCES     = crack.c
-LTLIBRARY_SHARED_NAME = crack.la
-LTLIBRARY_SHARED_LIBADD  = $(CRACK_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -8,7 +8,7 @@ PHP_ARG_WITH(sybase-ct, for Sybase-CT support,
 
 if test "$PHP_SYBASE_CT" != "no"; then
   AC_DEFINE(HAVE_SYBASE_CT,1,[ ])
-  PHP_EXTENSION(sybase_ct,$ext_shared)
+  PHP_NEW_EXTENSION(sybase_ct, php_sybase_ct.c, $ext_shared)
   PHP_SUBST(SYBASE_CT_SHARED_LIBADD)
   
   if test "$PHP_SYBASE_CT" = "yes"; then

@@ -45,6 +45,6 @@ if test "$PHP_MCAL" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(mcal, $MCAL_LIBRARY, MCAL_SHARED_LIBADD)
   PHP_SUBST(MCAL_SHARED_LIBADD)
   AC_DEFINE(HAVE_MCAL,1,[ ])
-  PHP_EXTENSION(mcal,$ext_shared)
+  PHP_NEW_EXTENSION(mcal, php_mcal.c, $ext_shared)
 fi
 

@@ -7,5 +7,5 @@ PHP_ARG_ENABLE(exif, whether to enable EXIF support,
 
 if test "$PHP_EXIF" != "no"; then
   AC_DEFINE(HAVE_EXIF, 1, [Whether you want exif support])
-  PHP_EXTENSION(exif, $ext_shared)
+  PHP_NEW_EXTENSION(exif, exif.c, $ext_shared)
 fi

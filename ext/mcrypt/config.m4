@@ -47,5 +47,5 @@ if test "$PHP_MCRYPT" != "no"; then
   AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
-  PHP_EXTENSION(mcrypt, $ext_shared)
+  PHP_NEW_EXTENSION(mcrypt, mcrypt.c, $ext_shared)
 fi

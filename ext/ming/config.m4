@@ -27,6 +27,6 @@ if test "$PHP_MING" != "no"; then
   PHP_ADD_INCLUDE($MING_DIR/include)
   PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/lib, MING_SHARED_LIBADD)
 
-  PHP_EXTENSION(ming, $ext_shared)
+  PHP_NEW_EXTENSION(ming, ming.c, $ext_shared)
   PHP_SUBST(MING_SHARED_LIBADD)
 fi

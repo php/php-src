@@ -62,7 +62,7 @@ if test "$PHP_PGSQL" != "no"; then
 
   PHP_ADD_INCLUDE($PGSQL_INCLUDE)
 
-  PHP_EXTENSION(pgsql,$ext_shared)
+  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared)
 fi
 
 

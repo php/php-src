@@ -58,5 +58,5 @@ if test "$PHP_VPOPMAIL" != "no"; then
 	AC_DEFINE(HAVE_VPOPMAIL,1,[Whether you have vpopmail])
 	AC_DEFINE_UNQUOTED(VPOPMAIL_BIN_DIR,"$VPOPMAIL_BIN_DIR",[vpopmail bin path])
 
-	PHP_EXTENSION(vpopmail, $ext_shared)
+	PHP_NEW_EXTENSION(vpopmail, php_vpopmail.c, $ext_shared)
 fi

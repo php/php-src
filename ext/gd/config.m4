@@ -210,7 +210,7 @@ PHP_ARG_WITH(gd, for GD support,
 
 if test "$PHP_GD" != "no"; then
 
-  PHP_EXTENSION(gd, $ext_shared)
+  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c, $ext_shared)
   PHP_SUBST(GD_SHARED_LIBADD)
 
 dnl Various checks for GD features

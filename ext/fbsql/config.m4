@@ -8,7 +8,7 @@ PHP_ARG_WITH(fbsql, for FrontBase SQL92 (fbsql) support,
 if test "$PHP_FBSQL" != "no"; then
 
   AC_DEFINE(HAVE_FBSQL, 1, [Whether you have FrontBase])
-  PHP_EXTENSION(fbsql,$ext_shared)
+  PHP_NEW_EXTENSION(fbsql, php_fbsql.c, $ext_shared)
 
   FBSQL_INSTALLATION_DIR=""
   if test "$PHP_FBSQL" = "yes"; then

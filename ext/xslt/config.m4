@@ -20,7 +20,7 @@ PHP_ARG_WITH(sablot-js, enable JavaScript for Sablotron,
 
 if test "$PHP_XSLT" != "no"; then
 
-  PHP_EXTENSION(xslt, $ext_shared)
+  PHP_NEW_EXTENSION(xslt, xslt.c sablot.c, $ext_shared)
   PHP_SUBST(XSLT_SHARED_LIBADD)
 
   if test "$PHP_XSLT_SABLOT" != "no"; then

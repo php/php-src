@@ -111,7 +111,7 @@ PHP_ARG_WITH(imap,for IMAP support,
 if test "$PHP_IMAP" != "no"; then  
 
     PHP_SUBST(IMAP_SHARED_LIBADD)
-    PHP_EXTENSION(imap, $ext_shared)
+    PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared)
     AC_DEFINE(HAVE_IMAP,1,[ ])
 
     for i in /usr/local /usr $PHP_IMAP; do
