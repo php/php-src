@@ -12,6 +12,16 @@
 #endif
 /*_OSD_POSIX*/
 
+#ifdef _MSC_VER
+#if _MSC_VER < 1300
+/* following functions are available since MSVC.NET, emulate for earlier versions */
+/* float fabsf(float x); */
+#define fabsf(x) ((float)(abs(x)))
+/* float floorf(float x);*/
+#define floorf(x) ((float)(floor(x)))
+#endif
+#endif
+
 #ifndef CHARSET_EBCDIC
 #define ASC(ch)  ch
 #else /*CHARSET_EBCDIC */
