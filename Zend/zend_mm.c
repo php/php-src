@@ -44,15 +44,6 @@
 
 #define ZEND_MM_BUCKET_INDEX(true_size) (true_size >> ZEND_MM_ALIGNMENT_LOG2)
 
-#define ZEND_MM_GET_FREE_LIST_BUCKET(index, free_list_bucket)	\
-	if (index < ZEND_MM_NUM_BUCKETS) {							\
-		free_list_bucket = &heap->free_buckets[index];			\
-	} else {													\
-		/* This size doesn't exist */							\
-		free_list_bucket = &heap->free_buckets[0];				\
-	}
-	
-
 /* Aligned header size */
 #define ZEND_MM_ALIGNED_SIZE(size) ((size + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 #define ZEND_MM_ALIGNED_HEADER_SIZE	ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_block))
@@ -68,20 +59,101 @@
 #define ZEND_MM_DEBUG(stmt)
 
 
+/* Start Heap Code */
+
+static int left_child[ZEND_HEAP_MAX_BUCKETS];
+static int left_child_of_right_brother[ZEND_HEAP_MAX_BUCKETS];
+
+static inline void zend_heap_init(zend_heap heap)
+{
+	int i;
+
+	for (i=0; i<ZEND_HEAP_MAX_BUCKETS; i++) {
+		left_child[i] = 2*i+1;
+		left_child_of_right_brother[i] = 2*i+3;
+	}
+
+	memset(heap, 0, sizeof(zend_heap));
+}
+
+static inline void zend_heap_activate_leaf(zend_heap heap, int node)
+{
+	int i = node + ZEND_HEAP_MAX_BUCKETS-1;
+
+	heap[i] = node;
+
+	do {
+		i = (i-1)>>1; /* (i-1)/2 */
+		if (heap[i] < node) {
+			heap[i] = node;
+		} else {
+			break;
+		}
+	} while (i > 0);
+}
+
+static inline void zend_heap_deactivate_leaf(zend_heap heap, int node)
+{
+	int i = node + ZEND_HEAP_MAX_BUCKETS-1;
+
+	heap[i] = 0;
+
+	do {
+		i = (i-1)>>1; /* (i-1)/2 */
+		if (heap[i] == node) {
+			heap[i] = MAX(heap[2*i+1], heap[2*i+2]);
+		} else {
+			break;
+		}
+	} while (i > 0);
+}
+
+static inline int zend_heap_search_leaf(zend_heap heap, int value)
+{
+	int i = 1;
+
+	if (heap[0] < value) {
+		return 0;
+	}
+
+
+	while (i < ZEND_HEAP_MAX_BUCKETS) {
+		if (heap[i] >= value) {
+			/* Go to left child */
+			i = left_child[i];
+		} else {
+			/* Go to left child of right brother */
+			i = left_child_of_right_brother[i];
+		}
+	}
+	if (heap[i] >= value) {
+		return heap[i];
+	} else {
+		return heap[i+1];
+	}
+}
+
+/* End Heap Code */
+
 static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	zend_mm_free_block **free_list_bucket;
 	size_t index = ZEND_MM_BUCKET_INDEX(mm_block->size);
 
-	ZEND_MM_GET_FREE_LIST_BUCKET(index, free_list_bucket);
-	
+	if (index < ZEND_MM_NUM_BUCKETS) {
+		free_list_bucket = &heap->free_buckets[index];
+		if (*free_list_bucket == NULL) {
+			zend_heap_activate_leaf(heap->heap, index);
+		}
+	} else {
+		free_list_bucket = &heap->free_buckets[0];			
+	}
 	mm_block->next_free_block = *free_list_bucket;
-	mm_block->prev_free_block = NULL;
-	*free_list_bucket = mm_block;
-
-	if (mm_block->next_free_block) {
+	if (*free_list_bucket != NULL) {
 		mm_block->next_free_block->prev_free_block = mm_block;
 	}
+	*free_list_bucket = mm_block;
+	mm_block->prev_free_block = NULL;
 }
 
 
@@ -93,9 +165,16 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_fre
 		zend_mm_free_block **free_list_bucket;
 		size_t index = ZEND_MM_BUCKET_INDEX(mm_block->size);
 
-		ZEND_MM_GET_FREE_LIST_BUCKET(index, free_list_bucket);
-
-		*free_list_bucket = mm_block->next_free_block;
+		if (index < ZEND_MM_NUM_BUCKETS) {
+			free_list_bucket = &heap->free_buckets[index];
+			*free_list_bucket = mm_block->next_free_block;
+			if (*free_list_bucket == NULL) {
+				zend_heap_deactivate_leaf(heap->heap, index);
+			}
+		} else {
+			free_list_bucket = &heap->free_buckets[0];
+			*free_list_bucket = mm_block->next_free_block;
+		}
 	}
 
 	if (mm_block->next_free_block) {
@@ -129,7 +208,6 @@ static inline void zend_mm_create_new_free_block(zend_mm_heap *heap, zend_mm_blo
 
 	/* add the new free block to the free list */
 	zend_mm_add_to_free_list(heap, new_free_block);
-	return;
 }
 
 zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
@@ -179,6 +257,7 @@ zend_bool zend_mm_startup(zend_mm_heap *heap, size_t block_size)
 	heap->block_size = block_size;
 	heap->segments_list = NULL;
 	memset(heap->free_buckets, 0, sizeof(heap->free_buckets));
+	zend_heap_init(heap->heap);
 	return zend_mm_add_memory_block(heap, block_size);
 }
 
@@ -210,14 +289,18 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 	index = ZEND_MM_BUCKET_INDEX(true_size);
 	
 	if (index < ZEND_MM_NUM_BUCKETS) {
-		ZEND_MM_GET_FREE_LIST_BUCKET(index, free_list_bucket);
+		free_list_bucket = &heap->free_buckets[index];
+		if (*free_list_bucket) {
+			best_fit = *free_list_bucket;
+			goto zend_mm_finished_searching_for_block;
+		} else {
+			int leaf;
 
-		while (free_list_bucket != &heap->free_buckets[ZEND_MM_NUM_BUCKETS]) {
-			if (*free_list_bucket) {
-				best_fit = *free_list_bucket;
+			leaf = zend_heap_search_leaf(heap->heap, index);
+			if (leaf != 0) {
+				best_fit = heap->free_buckets[leaf];
 				goto zend_mm_finished_searching_for_block;	
 			}
-			free_list_bucket++;
 		}
 	}
 

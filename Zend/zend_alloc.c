@@ -38,7 +38,7 @@ ZEND_API zend_alloc_globals alloc_globals;
 
 
 #ifdef ZEND_MM
-#define ZEND_DISABLE_MEMORY_CACHE 1
+#define ZEND_DISABLE_MEMORY_CACHE 0
 #else
 #define ZEND_DISABLE_MEMORY_CACHE 0
 #endif

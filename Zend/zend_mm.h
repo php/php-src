@@ -26,14 +26,8 @@
 
 #include "zend_types.h"
 
-#ifdef ZTS
+/* Define this to enable Zend MM */
 #define ZEND_MM
-#else
-#undef ZEND_MM
-#endif
-
-/* Zend MM is currently broken, so never use it. */
-#undef ZEND_MM
 
 /* mm block type */
 typedef struct _zend_mm_block {
@@ -55,12 +49,17 @@ typedef struct _zend_mm_segment {
 	struct _zend_mm_segment *next_segment;
 } zend_mm_segment;
 
-#define ZEND_MM_NUM_BUCKETS 64
+#define ZEND_MM_NUM_BUCKETS 16
+
+#define ZEND_HEAP_MAX_BUCKETS ZEND_MM_NUM_BUCKETS
+
+typedef int zend_heap[2*ZEND_HEAP_MAX_BUCKETS-1];
 
 typedef struct _zend_mm_heap {
 	zend_mm_segment *segments_list;
 	size_t block_size;
 	zend_mm_free_block *free_buckets[ZEND_MM_NUM_BUCKETS];
+	zend_heap heap;
 } zend_mm_heap;
 
 zend_bool zend_mm_startup(zend_mm_heap *heap, size_t block_size);
