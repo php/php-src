@@ -80,6 +80,45 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+
+    // {{{ _installFile()
+
+    function _installFile($file, $dest_dir, $atts)
+    {
+        $type = strtolower($atts['role']);
+        switch ($type) {
+            case 'test':
+                // don't install test files for now
+                $this->log(2, "+ Test file $file won't be installed yet");
+                return true;
+                break;
+            case 'doc':
+            case 'php':
+            default:
+                $dest_file = $dest_dir . basename($file);
+                break;
+        }
+        if (!@is_dir($dest_dir)) {
+            if (!$this->mkDirHier($dest_dir)) {
+                $this->log(0, "failed to mkdir $dest_dir");
+                return false;
+            }
+            $this->log(2, "+ created dir $dest_dir");
+        }
+        $orig_perms = fileperms($file);
+        if (!@copy($file, $dest_file)) {
+            $this->log(0, "failed to copy $file to $dest_file");
+            return false;
+        }
+        chmod($dest_file, $orig_perms);
+        $this->log(2, "+ copy $file to $dest_file");
+        // FIXME Update Package database here
+        //$this->updatePackageListFrom("$d/$file");
+        $this->log(1, "installed file $dest_file");
+        return true;
+    }
+
+    // }}}
     // {{{ install()
 
     /**
@@ -148,7 +187,7 @@ class PEAR_Installer extends PEAR_Common
         $this->log(2, '+ tmp dir created at ' . $tmpdir);
 
         $tar = new Archive_Tar($pkgfile, true);
-        if (!$tar->extract($tmpdir)) {
+        if (!@$tar->extract($tmpdir)) {
             chdir($oldcwd);
             return $this->raiseError("unable to unpack $pkgfile");
         }
@@ -201,45 +240,7 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-
-    // {{{ _installFile()
-
-    function _installFile($file, $dest_dir, $atts)
-    {
-        $type = strtolower($atts['role']);
-        switch ($type) {
-            case 'test':
-                // don't install test files for now
-                $this->log(2, "+ Test file $file won't be installed yet");
-                return true;
-                break;
-            case 'doc':
-            case 'php':
-            default:
-                $dest_file = $dest_dir . basename($file);
-                break;
-        }
-        if (!@is_dir($dest_dir)) {
-            if (!$this->mkDirHier($dest_dir)) {
-                $this->log(0, "failed to mkdir $dest_dir");
-                return false;
-            }
-            $this->log(2, "+ created dir $dest_dir");
-        }
-        $orig_perms = fileperms($file);
-        if (!@copy($file, $dest_file)) {
-            $this->log(0, "failed to copy $file to $dest_file");
-            return false;
-        }
-        chmod($dest_file, $orig_perms);
-        $this->log(2, "+ copy $file to $dest_file");
-        // FIXME Update Package database here
-        //$this->updatePackageListFrom("$d/$file");
-        $this->log(1, "installed file $dest_file");
-        return true;
-    }
-
-    // }}}
+    // {{{ uninstall()
 
     function uninstall($package)
     {
@@ -263,6 +264,8 @@ class PEAR_Installer extends PEAR_Common
         $this->registry->deletePackage($package);
         return true;
     }
+
+    // }}}
 }
 
 ?>
