@@ -47,9 +47,46 @@ class PEAR_Remote extends PEAR
 
     function call($method)
     {
-        if (!extension_loaded("xmlrpc")) {
-            return $this->raiseError("xmlrpc support not loaded");
+        if (extension_loaded("xmlrpc")) {
+            $args = func_get_args();
+            return call_user_func_array(array(&$this, 'call_epi'), $args);
         }
+        if (!include_once("XML/RPC.php")) {
+            return $this->raiseError("XML_RPC package not installed");
+        }
+        return $this->raiseError("XML_RPC fallback not yet implemented");
+    }
+
+    // }}}
+
+    // {{{ call_epi(method, [args...])
+
+    function call_epi($method)
+    {
+        do {
+            if (extension_loaded("xmlrpc")) {
+                break;
+            }
+            if (OS_WINDOWS) {
+                $ext = 'dll';
+            } elseif (PHP_OS == 'HP-UX') {
+                $ext = 'sl';
+            } elseif (PHP_OS == 'AIX') {
+                $ext = 'a';
+            } else {
+                $ext = 'so';
+            }
+            $ext = OS_WINDOWS ? 'dll' : 'so';
+            @dl("xmlrpc-epi.$ext");
+            if (extension_loaded("xmlrpc")) {
+                break;
+            }
+            @dl("xmlrpc.$ext");
+            if (extension_loaded("xmlrpc")) {
+                break;
+            }
+            return $this->raiseError("xmlrpc extension not loaded");
+        } while (false);
         $params = func_get_args();
         array_shift($params);
         $method = str_replace("_", ".", $method);
