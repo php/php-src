@@ -198,10 +198,12 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(html_doc,													NULL)
 	PHP_FE(html_doc_file,												NULL)
 #endif
-	PHP_FE(domxml_xmltree,														NULL)
-	PHP_FALIAS(xmltree,				domxml_xmltree,	NULL)
-	PHP_FE(domxml_substitute_entities_default,														NULL)
-	PHP_FE(domxml_add_root,												NULL)
+	PHP_FE(domxml_xmltree,												NULL)
+	PHP_FALIAS(xmltree,								domxml_xmltree,		NULL)
+	PHP_FE(domxml_substitute_entities_default,							NULL)
+	PHP_FE(domxml_doc_document_element,									NULL)
+	PHP_FE(domxml_doc_add_root,											NULL)
+	PHP_FE(domxml_doc_set_root,											NULL)
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,										NULL)
 	PHP_FE(domxml_dump_node,											NULL)
@@ -219,7 +221,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node_set_content,										NULL)
 	PHP_FE(domxml_node_get_content,										NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
-	PHP_FALIAS(domxml_new_doc,				domxml_new_xmldoc,	NULL)
+	PHP_FALIAS(domxml_new_doc,						domxml_new_xmldoc,	NULL)
 	PHP_FE(domxml_parser,												NULL)
 	PHP_FE(domxml_parser_add_chunk,										NULL)
 	PHP_FE(domxml_parser_end,											NULL)
@@ -243,6 +245,8 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_xslt_process,											NULL)
 #endif
 
+	PHP_FALIAS(domxml_add_root,			domxml_doc_add_root,			NULL)
+	PHP_FALIAS(domxml_doc_get_root,		domxml_doc_document_element,	NULL)
 	PHP_FALIAS(domxml_root,				domxml_doc_document_element,	NULL)
 	PHP_FALIAS(domxml_attributes,		domxml_node_attributes,			NULL)
 	PHP_FALIAS(domxml_get_attribute,	domxml_elem_get_attribute,		NULL)
@@ -276,15 +280,17 @@ static function_entry php_domxmldoc_class_functions[] = {
 	/* Everything below this comment is none DOM compliant */
 	/* children is deprecated because it is inherited from DomNode */
 /*	PHP_FALIAS(children,				domxml_node_children,			NULL) */
+	PHP_FALIAS(add_root,				domxml_doc_add_root,			NULL)
+	PHP_FALIAS(set_root,				domxml_doc_set_root,			NULL)
+	PHP_FALIAS(get_root,				domxml_doc_document_element,	NULL)
 	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)
-	PHP_FALIAS(add_root,				domxml_add_root,				NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(ids,						domxml_doc_ids,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem,				domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem_file,			domxml_dump_mem_file,			NULL)
-	PHP_FALIAS(dump_file,			domxml_dump_mem_file,			NULL)
+	PHP_FALIAS(dump_file,				domxml_dump_mem_file,			NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FALIAS(html_dump_mem,			domxml_html_dump_mem,			NULL)
 #endif
@@ -455,7 +461,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_RINIT(domxml),
 	NULL,
 	PHP_MINFO(domxml),
-	"20020510", //Extension versionnumber
+	"20020516", //Extension versionnumber
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -2887,38 +2893,23 @@ PHP_FUNCTION(domxml_doc_implementation)
 }
 /* }}} */
 
-/* {{{ proto array domxml_doc_document_element(void)
+/* {{{ proto object domxml_doc_document_element(int domnode)
    Returns root node of document */
 PHP_FUNCTION(domxml_doc_document_element)
 {
-	zval *id;
+	zval *id, *rv;
 	xmlDoc *docp;
-	xmlNode *node;
+	xmlNode *root;
 	int ret;
 
-	id = getThis();
+	DOMXML_PARAM_NONE(docp, id, le_domxmldocp);
 
-	if (!id) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &id) == FAILURE) {
-			return;
-		}
-	}
-
-	DOMXML_GET_OBJ(docp, id, le_domxmldocp);
-
-	node = docp->children;
-	if (!node) {
+	root = xmlDocGetRootElement(docp);
+	if (!root) {
 		RETURN_FALSE;
 	}
 
-	while (node) {
-		if (Z_TYPE_P(node) == XML_ELEMENT_NODE) {
-			zval *rv;
-			DOMXML_RET_OBJ(rv, node, &ret);
-			return;
-		}
-		node = node->next;
-	}
+	DOMXML_RET_OBJ(rv, root, &ret);
 }
 /* }}} */
 
@@ -3514,9 +3505,9 @@ PHP_FUNCTION(domxml_node_text_concat)
 }
 /* }}} */
 
-/* {{{ proto object domxml_add_root(string name)
+/* {{{ proto object domxml_doc_add_root(string name)
    Adds root node to document */
-PHP_FUNCTION(domxml_add_root)
+PHP_FUNCTION(domxml_doc_add_root)
 {
 	zval *id, *rv;
 	xmlDoc *docp;
@@ -3534,6 +3525,27 @@ PHP_FUNCTION(domxml_add_root)
 	xmlDocSetRootElement(docp, nodep);
 
 	DOMXML_RET_OBJ(rv, nodep, &ret);
+}
+/* }}} */
+
+/* {{{ proto bool domxml_set_root(int domnode)
+   Sets root node of document */
+PHP_FUNCTION(domxml_doc_set_root)
+{
+	zval *id, *rv, *node;
+	xmlDoc *docp;
+	xmlNode *root;
+
+	DOMXML_PARAM_TWO(docp, id, le_domxmldocp, "o", &node, &rv);
+	DOMXML_GET_OBJ(root, node, le_domxmlnodep);
+
+	if (!root) {
+		RETURN_FALSE;
+	}
+
+	xmlDocSetRootElement(docp, root);
+
+	RETURN_TRUE;
 }
 /* }}} */
 
