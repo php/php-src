@@ -636,14 +636,6 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 		return tmpbuf;
 	}
 
-	if (dec_point!='.') {
-		for (t=tmpbuf; *t; t++) {
-			if (*t=='.') {
-				*t = dec_point;
-				break;
-			}
-		}
-	}
 	if (dec) {
 		reslen = dec+1 + (tmplen-dec-1) + (tmplen-1-dec-1)/3;
 	} else {
@@ -659,10 +651,11 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 	*t-- = 0;
 	
 	if (dec) {
-		while (*s!=dec_point) {
+		while (isdigit((int)*s)) {
 			*t-- = *s--;
 		}
-		*t-- = *s--;  /* copy that dot */
+		*t-- = dec_point;  /* copy that dot */
+		s--;
 	}
 	
 	while(s>=tmpbuf) {
