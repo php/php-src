@@ -1,3 +1,15 @@
+2004-10-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * README.ZEND_VM
+      zend_vm_gen.php:
+      --without-lines changed to --with-lines
+
+2004-10-28  Andi Gutmans  <andi@zend.com>
+
+    * zend_vm_execute.skl
+      zend_vm_gen.php:
+      - Fix typo
+
 2004-10-27  Andi Gutmans  <andi@zend.com>
 
     * zend_vm_opcodes.h:

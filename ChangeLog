@@ -1,3 +1,38 @@
+2004-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/uniqid.c:
+      Simplify code.
+
+2004-10-28  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/package-PEAR.xml:
+      sync with pear-core
+
+    * (PHP_5_0)
+      pear/go-pear-list.php:
+      PEAR => 1.3.3
+
+2004-10-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/README.ZEND_VM
+      ZendEngine2/zend_vm_gen.php:
+      --without-lines changed to --with-lines
+
+2004-10-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      fix Win32 & Netware build
+
+2004-10-28  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_gen.php:
+      - Fix typo
+
 2004-10-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/microtime.c:
