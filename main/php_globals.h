@@ -42,6 +42,14 @@ extern PHPAPI int core_globals_id;
 extern ZEND_API struct _php_core_globals core_globals;
 #endif
 
+typedef struct _php_http_globals {
+	zval *post;
+	zval *get;
+	zval *cookie;
+	zval *server;
+	zval *environment;
+} php_http_globals;
+
 struct _php_tick_function_entry;
 
 struct _php_core_globals {
@@ -100,6 +108,8 @@ struct _php_core_globals {
 	unsigned char header_is_being_sent;
 
 	zend_llist tick_functions;
+
+	php_http_globals http_globals;
 };
 
 
