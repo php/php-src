@@ -22,7 +22,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.beans.*;
 
-class reflect {
+public class reflect {
 
   static { loadLibrary("reflect"); }
   
@@ -51,7 +51,7 @@ class reflect {
   //
   // Helper routines which encapsulate the native methods
   //
-  static void setResult(long result, Object value) {
+  public static void setResult(long result, Object value) {
     if (value == null) return;
 
     if (value instanceof java.lang.String) {
