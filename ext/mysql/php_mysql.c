@@ -293,7 +293,7 @@ PHP_MINFO_FUNCTION(mysql)
 
 	DISPLAY_INI_ENTRIES();
 
-	php_printf("<table border=5 width=\"600\">");
+	php_info_print_table_start();
 	php_info_print_table_header(2, "Key", "Value");
 	sprintf(buf, "%ld", MySG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
@@ -305,7 +305,7 @@ PHP_MINFO_FUNCTION(mysql)
 	php_info_print_table_row(2, "MYSQL_LFLAGS", PHP_MYSQL_LFLAGS);
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
-	php_printf("</table>\n");
+	php_info_print_table_end();
 }
 
 
