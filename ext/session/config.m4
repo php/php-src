@@ -9,6 +9,9 @@ PHP_ARG_WITH(mm,for mm support,
 [  --with-mm[=DIR]         Include mm support for session storage], no, no)
 
 if test "$PHP_SESSION" != "no"; then
+  AC_CHECK_FUNCS(pread pwrite)
+  PHP_PWRITE_TEST
+  PHP_PREAD_TEST
   PHP_NEW_EXTENSION(session, session.c mod_files.c mod_mm.c mod_user.c, $ext_shared)
   PHP_SUBST(SESSION_SHARED_LIBADD)
   AC_DEFINE(HAVE_PHP_SESSION,1,[ ])

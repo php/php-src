@@ -374,77 +374,73 @@ X
     rm -fr conftest*
 ])
 
-AC_DEFUN(PHP_MISSING_PREAD_DECL,[
-  AC_CACHE_CHECK(whether pread works without custom declaration,ac_cv_pread,[
-  AC_TRY_COMPILE([#include <unistd.h>],[size_t (*func)() = pread],[
-    ac_cv_pread=yes
-  ],[
-    echo test > conftest_in
-    AC_TRY_RUN([
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-      main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
-    ],[
-      ac_cv_pread=yes
-    ],[
-      echo test > conftest_in
-      AC_TRY_RUN([
+AC_DEFUN(PHP_DOES_PWRITE_WORK,[
+  AC_TRY_RUN([
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-        ssize_t pread(int, void *, size_t, off64_t);
-        main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
-      ],[
-        ac_cv_pread=64
-      ],[
-        ac_cv_pread=no
-      ])
-    ],[
-      ac_cv_pread=no
-    ])
-  ])
-  ])
-  case $ac_cv_pread in
-  no) ac_cv_func_pread=no;;
-  64) AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default]);;
-  esac
-])
-
-AC_DEFUN(PHP_MISSING_PWRITE_DECL,[
-  AC_CACHE_CHECK(whether pwrite works without custom declaration,ac_cv_pwrite,[
-  AC_TRY_COMPILE([#include <unistd.h>],[size_t (*func)() = pwrite],[
+$1
+    main() { return !(pwrite(open("conftest_in", O_WRONLY|O_CREAT, 0600), "hi", 2, 0) == 2); }
+  ],[
     ac_cv_pwrite=yes
   ],[
-    AC_TRY_RUN([
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-      main() { return !(pwrite(open("conftest_out", O_WRONLY|O_CREAT, 0600), "Ok", 2, 0) == 2); }
-    ],[
-      ac_cv_pwrite=yes
-    ],[
-      AC_TRY_RUN([
+    ac_cv_pwrite=no
+  ],[
+    ac_cv_pwrite=no
+  ])
+])
+
+AC_DEFUN(PHP_DOES_PREAD_WORK,[
+  echo test > conftest_in
+  AC_TRY_RUN([
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-        ssize_t pwrite(int, void *, size_t, off64_t);
-        main() { return !(pwrite(open("conftest_out", O_WRONLY|O_CREAT, 0600), "Ok", 2, 0) == 2); }
-      ],[
+$1
+    main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
+  ],[
+    ac_cv_pread=yes
+  ],[
+    ac_cv_pread=no
+  ],[
+    ac_cv_pread=no
+  ])
+  rm -f conftest_in
+])
+
+AC_DEFUN(PHP_PWRITE_TEST,[
+  AC_CACHE_CHECK(whether pwrite works,ac_cv_pwrite,[
+    PHP_DOES_PWRITE_WORK
+    if test "$ac_cv_pwrite" = "no"; then
+      PHP_DOES_PWRITE_WORK([ssize_t pwrite(int, void *, size_t, off64_t);])
+      if test "$ac_cv_pwrite" = "yes"; then
         ac_cv_pwrite=64
-      ],[
-        ac_cv_pwrite=no
-      ])
-    ],[
-      ac_cv_pwrite=no
-    ])
+      fi
+    fi
   ])
-  ])
+
   case $ac_cv_pwrite in
   no) ac_cv_func_pwrite=no;;
   64) AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default]);;
+  esac
+])
+
+AC_DEFUN(PHP_PREAD_TEST,[
+  AC_CACHE_CHECK(whether pread works,ac_cv_pread,[
+    PHP_DOES_PREAD_WORK
+    if test "$ac_cv_pread" = "no"; then
+      PHP_DOES_PREAD_WORK([ssize_t pread(int, void *, size_t, off64_t);])
+      if test "$ac_cv_pread" = "yes"; then
+        ac_cv_pread=64
+      fi
+    fi
+  ])
+
+  case $ac_cv_pread in
+  no) ac_cv_func_pread=no;;
+  64) AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default]);;
   esac
 ])
 
