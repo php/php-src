@@ -1,3 +1,14 @@
+2000-05-20  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    patch to explode (bug id #3251) suspended till 4.0.1
+
+2000-05-20  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/swf.c: Proto fixes.
+
+
 2000-05-19  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
 
     * ext/standard/php_string.h
