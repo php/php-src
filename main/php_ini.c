@@ -55,6 +55,9 @@ static int php_remove_ini_entries(php_ini_entry *ini_entry, int *module_number)
 static int php_restore_ini_entry_cb(php_ini_entry *ini_entry)
 {
 	if (ini_entry->modified) {
+		if (ini_entry->on_modify) {
+			ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3);
+		}
 		efree(ini_entry->value);
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->value_length = ini_entry->orig_value_length;
@@ -176,9 +179,7 @@ PHPAPI int php_restore_ini_entry(char *name, uint name_length)
 	}
 
 	if (ini_entry->orig_value) {
-		STR_FREE(ini_entry->value);
-		ini_entry->value = ini_entry->orig_value;
-		ini_entry->value_length = ini_entry->orig_value_length;
+		php_restore_ini_entry_cb(ini_entry);
 	}
 	return SUCCESS;
 }
