@@ -312,14 +312,10 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 	return node;
 }
 
-zval *master_to_zval(encodePtr encode, xmlNodePtr data)
+static zval *master_to_zval_int(encodePtr encode, xmlNodePtr data)
 {
 	zval *ret = NULL;
 
-	if (encode == NULL) {
-		encode = get_conversion(UNKNOWN_TYPE);
-	}
-	data = check_and_resolve_href(data);
 	if (encode->to_zval_before) {
 		data = encode->to_zval_before(&encode->details, data, 0);
 	}
@@ -330,6 +326,40 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 		ret = encode->to_zval_after(&encode->details, ret);
 	}
 	return ret;
+}
+
+zval *master_to_zval(encodePtr encode, xmlNodePtr data)
+{
+	data = check_and_resolve_href(data);
+
+	if (encode == NULL) {
+		encode = get_conversion(UNKNOWN_TYPE);
+	} else {
+	  /* Use xsi:type if it is defined */
+		xmlAttrPtr type_attr = get_attribute_ex(data->properties,"type", XSI_NAMESPACE);
+
+		if (type_attr != NULL) {
+			encodePtr  enc = get_encoder_from_prefix(SOAP_GLOBAL(sdl), data, type_attr->children->content);
+
+			if (enc != NULL && enc != encode) {
+			  encodePtr tmp = enc;
+			  while (tmp &&
+			         tmp->details.sdl_type != NULL &&
+			         tmp->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX) {
+			    if (enc == tmp->details.sdl_type->encode ||
+			        tmp == tmp->details.sdl_type->encode) {
+			    	enc = NULL;
+			    	break;
+			    }
+			    tmp = tmp->details.sdl_type->encode;
+			  }
+			  if (enc != NULL) {
+			    encode = enc;
+			  }
+			}
+		}
+	}
+	master_to_zval_int(encode, data);
 }
 
 #ifdef HAVE_PHP_DOMXML
@@ -945,7 +975,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 				MAKE_STD_ZVAL(ret);
 
 				object_init(ret);
-				base = master_to_zval(enc, data);
+				base = master_to_zval_int(enc, data);
 #ifdef ZEND_ENGINE_2
 				base->refcount--;
 #endif
@@ -962,7 +992,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
-				ret = master_to_zval(sdlType->encode, data);
+				ret = master_to_zval_int(sdlType->encode, data);
 				FIND_XML_NULL(data, ret);
 			} else {
 				zval *base;
@@ -970,7 +1000,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 				MAKE_STD_ZVAL(ret);
 
 				object_init(ret);
-				base = master_to_zval(sdlType->encode, data);
+				base = master_to_zval_int(sdlType->encode, data);
 #ifdef ZEND_ENGINE_2
 				base->refcount--;
 #endif
@@ -1031,13 +1061,32 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 
 		while (trav != NULL) {
 			if (trav->type == XML_ELEMENT_NODE) {
-				zval *tmpVal;
+				zval  *tmpVal;
+				zval **prop;
+				int    key_len;
 
 				tmpVal = master_to_zval(NULL, trav);
+				key_len = strlen(trav->name) + 1;
+
+				if (zend_hash_find(Z_OBJPROP_P(ret), (char*)trav->name, key_len, (void **) &prop) == FAILURE) {
 #ifdef ZEND_ENGINE_2
-				tmpVal->refcount--;
+					tmpVal->refcount--;
 #endif
-				add_property_zval(ret, (char *)trav->name, tmpVal);
+					add_property_zval_ex(ret, (char*)trav->name, key_len, tmpVal);
+				} else {
+				  /* Property already exist - make array */
+				  if (Z_TYPE_PP(prop) != IS_ARRAY) {
+				    /* Convert into array */
+				    zval *arr;
+
+				    MAKE_STD_ZVAL(arr);
+				    array_init(arr);
+					  add_next_index_zval(arr, *prop);
+					  *prop = arr;
+				  }
+				  /* Add array element */
+				  add_next_index_zval(*prop, tmpVal);
+				}
 			}
 			trav = trav->next;
 		}
@@ -2121,7 +2170,8 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 			  while (tmp &&
 			         tmp->details.sdl_type != NULL &&
 			         tmp->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX) {
-			    if (tmp == enc) {
+			    if (enc == tmp->details.sdl_type->encode ||
+			        tmp == tmp->details.sdl_type->encode) {
 			    	enc = NULL;
 			    	break;
 			    }
@@ -2152,7 +2202,7 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 			}
 		}
 	}
-	ret = master_to_zval(enc, data);
+	ret = master_to_zval_int(enc, data);
 	if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
 		zval* soapvar;
 		char *ns, *cptype;
@@ -2432,7 +2482,7 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
 			if (type->encode && enc != &type->encode->details) {
-				return master_to_zval(type->encode, data);
+				return master_to_zval_int(type->encode, data);
 			} else {
 				return guess_zval_convert(enc, data);
 			}
