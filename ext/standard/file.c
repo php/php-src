@@ -966,26 +966,29 @@ PHP_FUNCTION(socket_get_status)
 /* }}} */
 
 
-/* {{{ proto string fgets(resource fp, int length)
+/* {{{ proto string fgets(resource fp[, int length])
    Get a line from file pointer */
 PHP_FUNCTION(fgets)
 {
 	zval **arg1, **arg2;
-	int len, type;
+	int len = 1024, type;
 	char *buf;
 	int issock=0;
 	int socketd=0;
 	void *what;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (argc<1 || argc>2 || zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
-	convert_to_long_ex(arg2);
-	len = Z_LVAL_PP(arg2);
+	if (argc>1) {
+		convert_to_long_ex(arg2);
+		len = Z_LVAL_PP(arg2);
+	}
 
 	if (len < 0) {
 		php_error(E_WARNING, "length parameter to fgets() may not be negative");
