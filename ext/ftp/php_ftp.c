@@ -260,7 +260,7 @@ PHP_FUNCTION(ftp_exec)
 }
 /* }}} */
 
-/* {{{ proto mixed ftp_mkdir(resource stream, string directory)
+/* {{{ proto string ftp_mkdir(resource stream, string directory)
    Creates a directory. Returns the absolute path for the new directory or false on error. */
 PHP_FUNCTION(ftp_mkdir)
 {
@@ -504,7 +504,7 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_fput(resource stream, string remote_file, resource local_file, int mode)
+/* {{{ proto bool ftp_fput(resource stream, string remote_file, resource fp, int mode)
    Stores a file from an open file to the FTP server */
 PHP_FUNCTION(ftp_fput)
 {
