@@ -142,7 +142,6 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
 	HashTable  defEnc;
 	HashTable  defEncIndex;
-	HashTable *sdls;
 	HashTable *overrides;
 	int        cur_uniq_ns;
 	int        soap_version;

@@ -357,9 +357,6 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	int i;
 	long enc;
 
-	soap_globals->sdls = malloc(sizeof(HashTable));
-	zend_hash_init(soap_globals->sdls, 0, NULL, delete_sdl_ptr, 1);
-
 	zend_hash_init(&soap_globals->defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&soap_globals->defEncIndex, 0, NULL, NULL, 1);
 	zend_hash_init(&soap_globals->defEncNs, 0, NULL, NULL, 1);
@@ -407,8 +404,6 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncNs));
-	zend_hash_destroy(SOAP_GLOBAL(sdls));
-	free(SOAP_GLOBAL(sdls));
 	return SUCCESS;
 }
 
@@ -487,11 +482,8 @@ PHP_MINIT_FUNCTION(soap)
 
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, soap_header_functions);
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-#ifdef SDL_CACHE
-	le_sdl = register_list_destructors(NULL, NULL);
-#else
+	
 	le_sdl = register_list_destructors(delete_sdl, NULL);
-#endif
 	le_url = register_list_destructors(delete_url, NULL);
 	le_service = register_list_destructors(delete_service, NULL);
 
@@ -952,7 +944,7 @@ PHP_FUNCTION(SoapServer,map)
 
 		if (!service->mapping) {
 			service->mapping = emalloc(sizeof(HashTable));
-			zend_hash_init(service->mapping, 0, NULL, delete_tmp_encoder, 0);
+			zend_hash_init(service->mapping, 0, NULL, delete_encoder, 0);
 		}
 		zend_hash_update(service->mapping, type, type_len + 1, &new_enc, sizeof(encodePtr), NULL);
 		smart_str_free(&resloved_ns);
@@ -3440,10 +3432,8 @@ static void delete_service(void *data)
 	if (service->uri) {
 		efree(service->uri);
 	}
-#ifndef SDL_CACHE
 	if (service->sdl) {
 		delete_sdl(service->sdl);
 	}
-#endif
 	efree(service);
 }

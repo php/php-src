@@ -52,8 +52,8 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 	encodePtr enc, *enc_ptr;
 
 	if (sdl->encoders == NULL) {
-		sdl->encoders = sdl_malloc(sizeof(HashTable));
-		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, SDL_PERSISTENT);
+		sdl->encoders = emalloc(sizeof(HashTable));
+		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
 	}
 	smart_str_appends(&nscat, ns);
 	smart_str_appendc(&nscat, ':');
@@ -62,19 +62,19 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 	if (zend_hash_find(sdl->encoders, nscat.c, nscat.len + 1, (void**)&enc_ptr) == SUCCESS) {
 		enc = *enc_ptr;
 		if (enc->details.ns) {
-			sdl_free(enc->details.ns);
+			efree(enc->details.ns);
 		}
 		if (enc->details.type_str) {
-			sdl_free(enc->details.type_str);
+			efree(enc->details.type_str);
 		}
 	} else {
 		enc_ptr = NULL;
-		enc = sdl_malloc(sizeof(encode));
+		enc = emalloc(sizeof(encode));
 	}
 	memset(enc, 0, sizeof(encode));
 
-	enc->details.ns = sdl_strdup(ns);
-	enc->details.type_str = sdl_strdup(type);
+	enc->details.ns = estrdup(ns);
+	enc->details.type_str = estrdup(type);
 	enc->details.sdl_type = cur_type;
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
@@ -178,8 +178,8 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 	xmlAttrPtr tns;
 
 	if (!ctx->sdl->types) {
-		ctx->sdl->types = sdl_malloc(sizeof(HashTable));
-		zend_hash_init(ctx->sdl->types, 0, NULL, delete_type, SDL_PERSISTENT);
+		ctx->sdl->types = emalloc(sizeof(HashTable));
+		zend_hash_init(ctx->sdl->types, 0, NULL, delete_type, 0);
 	}
 	if (!ctx->attributes) {
 		ctx->attributes = emalloc(sizeof(HashTable));
@@ -321,27 +321,27 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 		/* Anonymous type inside <element> or <restriction> */
 		sdlTypePtr newType, *ptr;
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_SIMPLE;
 		if (name != NULL) {
-			newType->name = sdl_strdup(name->children->content);
-			newType->namens = sdl_strdup(ns->children->content);
+			newType->name = estrdup(name->children->content);
+			newType->namens = estrdup(ns->children->content);
 		} else {
-			newType->name = sdl_strdup(cur_type->name);
-			newType->namens = sdl_strdup(cur_type->namens);
+			newType->name = estrdup(cur_type->name);
+			newType->namens = estrdup(cur_type->namens);
 		}
 
 		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 
 		if (sdl->encoders == NULL) {
-			sdl->encoders = sdl_malloc(sizeof(HashTable));
-			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, SDL_PERSISTENT);
+			sdl->encoders = emalloc(sizeof(HashTable));
+			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
 		}
-		cur_type->encode = sdl_malloc(sizeof(encode));
+		cur_type->encode = emalloc(sizeof(encode));
 		memset(cur_type->encode, 0, sizeof(encode));
-		cur_type->encode->details.ns = sdl_strdup(newType->namens);
-		cur_type->encode->details.type_str = sdl_strdup(newType->name);
+		cur_type->encode->details.ns = estrdup(newType->namens);
+		cur_type->encode->details.type_str = estrdup(newType->name);
 		cur_type->encode->details.sdl_type = *ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
@@ -352,18 +352,18 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 	} else if (name != NULL) {
 		sdlTypePtr newType, *ptr;
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_SIMPLE;
-		newType->name = sdl_strdup(name->children->content);
-		newType->namens = sdl_strdup(ns->children->content);
+		newType->name = estrdup(name->children->content);
+		newType->namens = estrdup(ns->children->content);
 
 		if (cur_type == NULL) {
 			zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		} else {
 			if (cur_type->elements == NULL) {
-				cur_type->elements = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+				cur_type->elements = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 			}
 			zend_hash_update(cur_type->elements, newType->name, strlen(newType->name)+1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		}
@@ -427,17 +427,17 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 		if (nsptr != NULL) {
 			sdlTypePtr newType, *tmp;
 
-			newType = sdl_malloc(sizeof(sdlType));
+			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
 
-			newType->name = sdl_strdup(type);
-			newType->namens = sdl_strdup(nsptr->href);
+			newType->name = estrdup(type);
+			newType->namens = estrdup(nsptr->href);
 
 			newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
 
 			if (cur_type->elements == NULL) {
-				cur_type->elements = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+				cur_type->elements = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 			}
 			zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 		}
@@ -457,15 +457,15 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'itemType' attribute and subtype");
 		}
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 
-		newType->name = sdl_strdup("anonymous");
-		newType->namens = sdl_strdup(tsn->children->content);
+		newType->name = estrdup("anonymous");
+		newType->namens = estrdup(tsn->children->content);
 
 		if (cur_type->elements == NULL) {
-			cur_type->elements = sdl_malloc(sizeof(HashTable));
-			zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+			cur_type->elements = emalloc(sizeof(HashTable));
+			zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 		}
 		zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
@@ -514,17 +514,17 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 			if (nsptr != NULL) {
 				sdlTypePtr newType, *tmp;
 
-				newType = sdl_malloc(sizeof(sdlType));
+				newType = emalloc(sizeof(sdlType));
 				memset(newType, 0, sizeof(sdlType));
 
-				newType->name = sdl_strdup(type);
-				newType->namens = sdl_strdup(nsptr->href);
+				newType->name = estrdup(type);
+				newType->namens = estrdup(nsptr->href);
 
 				newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
 
 				if (cur_type->elements == NULL) {
-					cur_type->elements = sdl_malloc(sizeof(HashTable));
-					zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+					cur_type->elements = emalloc(sizeof(HashTable));
+					zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 				}
 				zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 			}
@@ -549,15 +549,15 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: union has both 'memberTypes' attribute and subtypes");
 			}
 
-			newType = sdl_malloc(sizeof(sdlType));
+			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
 
-			newType->name = sdl_strdup("anonymous");
-			newType->namens = sdl_strdup(tsn->children->content);
+			newType->name = estrdup("anonymous");
+			newType->namens = estrdup(tsn->children->content);
 
 			if (cur_type->elements == NULL) {
-				cur_type->elements = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+				cur_type->elements = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 			}
 			zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
@@ -648,7 +648,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 	}
 
 	if (cur_type->restrictions == NULL) {
-		cur_type->restrictions = sdl_malloc(sizeof(sdlRestrictions));
+		cur_type->restrictions = emalloc(sizeof(sdlRestrictions));
 		memset(cur_type->restrictions, 0, sizeof(sdlRestrictions));
 	}
 
@@ -689,8 +689,8 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 
 			schema_restriction_var_char(trav, &enumval);
 			if (cur_type->restrictions->enumeration == NULL) {
-				cur_type->restrictions->enumeration = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->restrictions->enumeration, 0, NULL, delete_restriction_var_char, SDL_PERSISTENT);
+				cur_type->restrictions->enumeration = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->restrictions->enumeration, 0, NULL, delete_restriction_var_char, 0);
 			}
 			zend_hash_add(cur_type->restrictions->enumeration, enumval->value, strlen(enumval->value)+1, &enumval, sizeof(sdlRestrictionCharPtr), NULL);
 		} else {
@@ -796,7 +796,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 	xmlAttrPtr fixed, value;
 
 	if ((*valptr) == NULL) {
-		(*valptr) = sdl_malloc(sizeof(sdlRestrictionInt));
+		(*valptr) = emalloc(sizeof(sdlRestrictionInt));
 	}
 	memset((*valptr), 0, sizeof(sdlRestrictionInt));
 
@@ -823,7 +823,7 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 	xmlAttrPtr fixed, value;
 
 	if ((*valptr) == NULL) {
-		(*valptr) = sdl_malloc(sizeof(sdlRestrictionChar));
+		(*valptr) = emalloc(sizeof(sdlRestrictionChar));
 	}
 	memset((*valptr), 0, sizeof(sdlRestrictionChar));
 
@@ -841,7 +841,7 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = sdl_strdup(value->children->content);
+	(*valptr)->value = estrdup(value->children->content);
 	return TRUE;
 }
 
@@ -985,10 +985,10 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
-	newModel = sdl_malloc(sizeof(sdlContentModel));
+	newModel = emalloc(sizeof(sdlContentModel));
 	newModel->kind = XSD_CONTENT_ALL;
-	newModel->u.content = sdl_malloc(sizeof(HashTable));
-	zend_hash_init(newModel->u.content, 0, NULL, delete_model, SDL_PERSISTENT);
+	newModel->u.content = emalloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 0);
 	if (model == NULL) {
 		cur_type->model = newModel;
 	} else {
@@ -1072,17 +1072,17 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 			smart_str_appends(&key, type);
 			smart_str_0(&key);
 
-			newModel = sdl_malloc(sizeof(sdlContentModel));
+			newModel = emalloc(sizeof(sdlContentModel));
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrdup(key.c);
 
 			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 		} else {
-			newModel = sdl_malloc(sizeof(sdlContentModel));
+			newModel = emalloc(sizeof(sdlContentModel));
 			newModel->kind = XSD_CONTENT_SEQUENCE; /* will be redefined */
-			newModel->u.content = sdl_malloc(sizeof(HashTable));
-			zend_hash_init(newModel->u.content, 0, NULL, delete_model, SDL_PERSISTENT);
+			newModel->u.content = emalloc(sizeof(HashTable));
+			zend_hash_init(newModel->u.content, 0, NULL, delete_model, 0);
 
 			smart_str_appends(&key, ns->children->content);
 			smart_str_appendc(&key, ':');
@@ -1093,12 +1093,12 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 		if (cur_type == NULL) {
 			sdlTypePtr newType;
 
-			newType = sdl_malloc(sizeof(sdlType));
+			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
 
 			if (sdl->groups == NULL) {
-				sdl->groups = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(sdl->groups, 0, NULL, delete_type, SDL_PERSISTENT);
+				sdl->groups = emalloc(sizeof(HashTable));
+				zend_hash_init(sdl->groups, 0, NULL, delete_type, 0);
 			}
 			if (zend_hash_add(sdl->groups, key.c, key.len+1, (void**)&newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group '%s' already defined",key.c);
@@ -1185,10 +1185,10 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
-	newModel = sdl_malloc(sizeof(sdlContentModel));
+	newModel = emalloc(sizeof(sdlContentModel));
 	newModel->kind = XSD_CONTENT_CHOICE;
-	newModel->u.content = sdl_malloc(sizeof(HashTable));
-	zend_hash_init(newModel->u.content, 0, NULL, delete_model, SDL_PERSISTENT);
+	newModel->u.content = emalloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 0);
 	if (model == NULL) {
 		cur_type->model = newModel;
 	} else {
@@ -1251,10 +1251,10 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	xmlAttrPtr attr;
 	sdlContentModelPtr newModel;
 
-	newModel = sdl_malloc(sizeof(sdlContentModel));
+	newModel = emalloc(sizeof(sdlContentModel));
 	newModel->kind = XSD_CONTENT_SEQUENCE;
-	newModel->u.content = sdl_malloc(sizeof(HashTable));
-	zend_hash_init(newModel->u.content, 0, NULL, delete_model, SDL_PERSISTENT);
+	newModel->u.content = emalloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 0);
 	if (model == NULL) {
 		cur_type->model = newModel;
 	} else {
@@ -1376,27 +1376,27 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 		/* Anonymous type inside <element> */
 		sdlTypePtr newType, *ptr;
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_COMPLEX;
 		if (name != NULL) {
-			newType->name = sdl_strdup(name->children->content);
-			newType->namens = sdl_strdup(ns->children->content);
+			newType->name = estrdup(name->children->content);
+			newType->namens = estrdup(ns->children->content);
 		} else {
-			newType->name = sdl_strdup(cur_type->name);
-			newType->namens = sdl_strdup(cur_type->namens);
+			newType->name = estrdup(cur_type->name);
+			newType->namens = estrdup(cur_type->namens);
 		}
 
 		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 
 		if (sdl->encoders == NULL) {
-			sdl->encoders = sdl_malloc(sizeof(HashTable));
-			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, SDL_PERSISTENT);
+			sdl->encoders = emalloc(sizeof(HashTable));
+			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 0);
 		}
-		cur_type->encode = sdl_malloc(sizeof(encode));
+		cur_type->encode = emalloc(sizeof(encode));
 		memset(cur_type->encode, 0, sizeof(encode));
-		cur_type->encode->details.ns = sdl_strdup(newType->namens);
-		cur_type->encode->details.type_str = sdl_strdup(newType->name);
+		cur_type->encode->details.ns = estrdup(newType->namens);
+		cur_type->encode->details.type_str = estrdup(newType->name);
 		cur_type->encode->details.sdl_type = *ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
@@ -1407,11 +1407,11 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 	} else if (name) {
 		sdlTypePtr newType, *ptr;
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 		newType->kind = XSD_TYPEKIND_COMPLEX;
-		newType->name = sdl_strdup(name->children->content);
-		newType->namens = sdl_strdup(ns->children->content);
+		newType->name = estrdup(name->children->content);
+		newType->namens = estrdup(ns->children->content);
 
 		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 
@@ -1510,7 +1510,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		sdlTypePtr newType;
 		smart_str key = {0};
 
-		newType = sdl_malloc(sizeof(sdlType));
+		newType = emalloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 
 		if (ref) {
@@ -1523,26 +1523,26 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 			if (nsptr != NULL) {
 				smart_str_appends(&nscat, nsptr->href);
 				smart_str_appendc(&nscat, ':');
-				newType->namens = sdl_strdup(nsptr->href);
+				newType->namens = estrdup(nsptr->href);
 			}
 			smart_str_appends(&nscat, type);
-			newType->name = sdl_strdup(type);
+			newType->name = estrdup(type);
 			smart_str_0(&nscat);
 			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 			newType->ref = estrdup(nscat.c);
 			smart_str_free(&nscat);
 		} else {
-			newType->name = sdl_strdup(name->children->content);
-			newType->namens = sdl_strdup(ns->children->content);
+			newType->name = estrdup(name->children->content);
+			newType->namens = estrdup(ns->children->content);
 		}
 
 		newType->nillable = FALSE;
 
 		if (cur_type == NULL) {
 			if (sdl->elements == NULL) {
-				sdl->elements = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(sdl->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+				sdl->elements = emalloc(sizeof(HashTable));
+				zend_hash_init(sdl->elements, 0, NULL, delete_type, 0);
 			}
 			addHash = sdl->elements;
 			smart_str_appends(&key, newType->namens);
@@ -1550,8 +1550,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 			smart_str_appends(&key, newType->name);
 		} else {
 			if (cur_type->elements == NULL) {
-				cur_type->elements = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->elements, 0, NULL, delete_type, SDL_PERSISTENT);
+				cur_type->elements = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 0);
 			}
 			addHash = cur_type->elements;
 			smart_str_appends(&key, newType->name);
@@ -1568,7 +1568,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		smart_str_free(&key);
 
 		if (model != NULL) {
-			sdlContentModelPtr newModel = sdl_malloc(sizeof(sdlContentModel));
+			sdlContentModelPtr newModel = emalloc(sizeof(sdlContentModel));
 
 			newModel->kind = XSD_CONTENT_ELEMENT;
 			newModel->u.element = newType;
@@ -1618,7 +1618,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		if (ref != NULL) {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' and 'fixed' attributes");
 		}
-		cur_type->fixed = sdl_strdup(attr->children->content);
+		cur_type->fixed = estrdup(attr->children->content);
 	}
 
 	attr = get_attribute(attrs, "default");
@@ -1628,7 +1628,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		} else if (ref != NULL) {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'default' and 'fixed' attributes");
 		}
-		cur_type->def = sdl_strdup(attr->children->content);
+		cur_type->def = estrdup(attr->children->content);
 	}
 
 	/* type = QName */
@@ -1717,7 +1717,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		HashTable *addHash;
 		smart_str key = {0};
 
-		newAttr = sdl_malloc(sizeof(sdlAttribute));
+		newAttr = emalloc(sizeof(sdlAttribute));
 		memset(newAttr, 0, sizeof(sdlAttribute));
 
 		if (ref) {
@@ -1754,8 +1754,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 			addHash = ctx->attributes;
 		} else {
 			if (cur_type->attributes == NULL) {
-				cur_type->attributes = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->attributes, 0, NULL, delete_attribute, SDL_PERSISTENT);
+				cur_type->attributes = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->attributes, 0, NULL, delete_attribute, 0);
 			}
 			addHash = cur_type->attributes;
 		}
@@ -1789,9 +1789,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 	attr = attrType->properties;
 	while (attr != NULL) {
 		if (attr_is_equal_ex(attr, "default", SCHEMA_NAMESPACE)) {
-			newAttr->def = sdl_strdup(attr->children->content);
+			newAttr->def = estrdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "fixed", SCHEMA_NAMESPACE)) {
-			newAttr->fixed = sdl_strdup(attr->children->content);
+			newAttr->fixed = estrdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "form", SCHEMA_NAMESPACE)) {
 			if (strncmp(attr->children->content,"qualified",sizeof("qualified")) == 0) {
 			  newAttr->form = XSD_FORM_QUALIFIED;
@@ -1803,7 +1803,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "id", SCHEMA_NAMESPACE)) {
 			/* skip */
 		} else if (attr_is_equal_ex(attr, "name", SCHEMA_NAMESPACE)) {
-			newAttr->name = sdl_strdup(attr->children->content);
+			newAttr->name = estrdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "ref", SCHEMA_NAMESPACE)) {
 			/* already processed */
 		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
@@ -1827,22 +1827,22 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 				xmlNsPtr nsptr;
 				char *value, *ns;
 
-				ext = sdl_malloc(sizeof(sdlExtraAttribute));
+				ext = emalloc(sizeof(sdlExtraAttribute));
 				memset(ext, 0, sizeof(sdlExtraAttribute));
 				parse_namespace(attr->children->content, &value, &ns);
 				nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
 				if (nsptr) {
-					ext->ns = sdl_strdup(nsptr->href);
-					ext->val = sdl_strdup(value);
+					ext->ns = estrdup(nsptr->href);
+					ext->val = estrdup(value);
 				} else {
-					ext->val = sdl_strdup(attr->children->content);
+					ext->val = estrdup(attr->children->content);
 				}
 				if (ns) {efree(ns);}
 				efree(value);
 
 				if (!newAttr->extraAttributes) {
-					newAttr->extraAttributes = sdl_malloc(sizeof(HashTable));
-					zend_hash_init(newAttr->extraAttributes, 0, NULL, delete_extra_attribute, SDL_PERSISTENT);
+					newAttr->extraAttributes = emalloc(sizeof(HashTable));
+					zend_hash_init(newAttr->extraAttributes, 0, NULL, delete_extra_attribute, 0);
 				}
 
 				smart_str_appends(&key2, nsPtr->href);
@@ -1869,10 +1869,10 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 			} else if (type != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute has both 'type' attribute and subtype");
 			}
-			dummy_type = sdl_malloc(sizeof(sdlType));
+			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
-			dummy_type->name = sdl_strdup("anonymous");
-			dummy_type->namens = sdl_strdup(tsn->children->content);
+			dummy_type->name = estrdup("anonymous");
+			dummy_type->namens = estrdup(tsn->children->content);
 			schema_simpleType(sdl, tsn, trav, dummy_type);
 			newAttr->encode = dummy_type->encode;
 			delete_type(&dummy_type);
@@ -1905,10 +1905,10 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			if (ns == NULL) {
 				ns = tsn;
 			}
-			newType = sdl_malloc(sizeof(sdlType));
+			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
-			newType->name = sdl_strdup(name->children->content);
-			newType->namens = sdl_strdup(ns->children->content);
+			newType->name = estrdup(name->children->content);
+			newType->namens = estrdup(ns->children->content);
 
 			smart_str_appends(&key, newType->namens);
 			smart_str_appendc(&key, ':');
@@ -1927,10 +1927,10 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			xmlNsPtr nsptr;
 
 			if (cur_type->attributes == NULL) {
-				cur_type->attributes = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->attributes, 0, NULL, delete_attribute, SDL_PERSISTENT);
+				cur_type->attributes = emalloc(sizeof(HashTable));
+				zend_hash_init(cur_type->attributes, 0, NULL, delete_attribute, 0);
 			}
-			newAttr = sdl_malloc(sizeof(sdlAttribute));
+			newAttr = emalloc(sizeof(sdlAttribute));
 			memset(newAttr, 0, sizeof(sdlAttribute));
 
 			parse_namespace(ref->children->content, &group_name, &ns);
@@ -1988,14 +1988,14 @@ static void copy_extra_attribute(void *attribute)
 	sdlExtraAttributePtr *attr = (sdlExtraAttributePtr*)attribute;
 	sdlExtraAttributePtr new_attr;
 
-	new_attr = sdl_malloc(sizeof(sdlExtraAttribute));
+	new_attr = emalloc(sizeof(sdlExtraAttribute));
 	memcpy(new_attr, *attr, sizeof(sdlExtraAttribute));
 	*attr = new_attr;
 	if (new_attr->ns) {
-		new_attr->ns = sdl_strdup(new_attr->ns);
+		new_attr->ns = estrdup(new_attr->ns);
 	}
 	if (new_attr->val) {
-		new_attr->val = sdl_strdup(new_attr->val);
+		new_attr->val = estrdup(new_attr->val);
 	}
 }
 
@@ -2008,13 +2008,13 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 			if (zend_hash_find(ctx->attributes, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
 				schema_attribute_fixup(ctx, *tmp);
 				if ((*tmp)->name != NULL && attr->name == NULL) {
-					attr->name = sdl_strdup((*tmp)->name);
+					attr->name = estrdup((*tmp)->name);
 				}
 				if ((*tmp)->def != NULL && attr->def == NULL) {
-					attr->def = sdl_strdup((*tmp)->def);
+					attr->def = estrdup((*tmp)->def);
 				}
 				if ((*tmp)->fixed != NULL && attr->fixed == NULL) {
-					attr->fixed = sdl_strdup((*tmp)->fixed);
+					attr->fixed = estrdup((*tmp)->fixed);
 				}
 				if (attr->form == XSD_FORM_DEFAULT) {
 					attr->form = (*tmp)->form;
@@ -2025,8 +2025,8 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 				if ((*tmp)->extraAttributes != NULL) {
 				  xmlNodePtr node;
 
-					attr->extraAttributes = sdl_malloc(sizeof(HashTable));
-					zend_hash_init(attr->extraAttributes, 0, NULL, delete_extra_attribute, SDL_PERSISTENT);
+					attr->extraAttributes = emalloc(sizeof(HashTable));
+					zend_hash_init(attr->extraAttributes, 0, NULL, delete_extra_attribute, 0);
 					zend_hash_copy(attr->extraAttributes, (*tmp)->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 				}
 				attr->encode = (*tmp)->encode;
@@ -2035,9 +2035,9 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 		if (attr->name == NULL && attr->ref != NULL) {
 			char *name = strrchr(attr->ref, ':');
 			if (*name) {
-				attr->name = sdl_strdup(name+1);
+				attr->name = estrdup(name+1);
 			} else{
-				attr->name = sdl_strdup(attr->ref);
+				attr->name = estrdup(attr->ref);
 			}
 		}
 		efree(attr->ref);
@@ -2063,15 +2063,15 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 
 							schema_attribute_fixup(ctx,*tmp_attr);
 
-							newAttr = sdl_malloc(sizeof(sdlAttribute));
+							newAttr = emalloc(sizeof(sdlAttribute));
 							memcpy(newAttr, *tmp_attr, sizeof(sdlAttribute));
-							if (newAttr->def) {newAttr->def = sdl_strdup(newAttr->def);}
-							if (newAttr->fixed) {newAttr->fixed = sdl_strdup(newAttr->fixed);}
-							if (newAttr->name) {newAttr->name = sdl_strdup(newAttr->name);}
+							if (newAttr->def) {newAttr->def = estrdup(newAttr->def);}
+							if (newAttr->fixed) {newAttr->fixed = estrdup(newAttr->fixed);}
+							if (newAttr->name) {newAttr->name = estrdup(newAttr->name);}
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
-								HashTable *ht = sdl_malloc(sizeof(HashTable));
-								zend_hash_init(ht, 0, NULL, delete_extra_attribute, SDL_PERSISTENT);
+								HashTable *ht = emalloc(sizeof(HashTable));
+								zend_hash_init(ht, 0, NULL, delete_extra_attribute, 0);
 								zend_hash_copy(ht, newAttr->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 								newAttr->extraAttributes = ht;
 							}
@@ -2235,37 +2235,37 @@ void delete_model(void *handle)
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE:
 			zend_hash_destroy(tmp->u.content);
-			sdl_free(tmp->u.content);
+			efree(tmp->u.content);
 			break;
 		case XSD_CONTENT_GROUP_REF:
 			efree(tmp->u.group_ref);
 			break;
 	}
-	sdl_free(tmp);
+	efree(tmp);
 }
 
 void delete_type(void *data)
 {
 	sdlTypePtr type = *((sdlTypePtr*)data);
 	if (type->name) {
-		sdl_free(type->name);
+		efree(type->name);
 	}
 	if (type->namens) {
-		sdl_free(type->namens);
+		efree(type->namens);
 	}
 	if (type->def) {
-		sdl_free(type->def);
+		efree(type->def);
 	}
 	if (type->fixed) {
-		sdl_free(type->fixed);
+		efree(type->fixed);
 	}
 	if (type->elements) {
 		zend_hash_destroy(type->elements);
-		sdl_free(type->elements);
+		efree(type->elements);
 	}
 	if (type->attributes) {
 		zend_hash_destroy(type->attributes);
-		sdl_free(type->attributes);
+		efree(type->attributes);
 	}
 	if (type->model) {
 		delete_model((void**)&type->model);
@@ -2284,11 +2284,11 @@ void delete_type(void *data)
 		delete_restriction_var_char(&type->restrictions->pattern);
 		if (type->restrictions->enumeration) {
 			zend_hash_destroy(type->restrictions->enumeration);
-			sdl_free(type->restrictions->enumeration);
+			efree(type->restrictions->enumeration);
 		}
-		sdl_free(type->restrictions);
+		efree(type->restrictions);
 	}
-	sdl_free(type);
+	efree(type);
 }
 
 void delete_extra_attribute(void *attribute)
@@ -2296,12 +2296,12 @@ void delete_extra_attribute(void *attribute)
 	sdlExtraAttributePtr attr = *((sdlExtraAttributePtr*)attribute);
 
 	if (attr->ns) {
-		sdl_free(attr->ns);
+		efree(attr->ns);
 	}
 	if (attr->val) {
-		sdl_free(attr->val);
+		efree(attr->val);
 	}
-	sdl_free(attr);
+	efree(attr);
 }
 
 void delete_attribute(void *attribute)
@@ -2309,29 +2309,29 @@ void delete_attribute(void *attribute)
 	sdlAttributePtr attr = *((sdlAttributePtr*)attribute);
 
 	if (attr->def) {
-		sdl_free(attr->def);
+		efree(attr->def);
 	}
 	if (attr->fixed) {
-		sdl_free(attr->fixed);
+		efree(attr->fixed);
 	}
 	if (attr->name) {
-		sdl_free(attr->name);
+		efree(attr->name);
 	}
 	if (attr->ref) {
-		sdl_free(attr->ref);
+		efree(attr->ref);
 	}
 	if (attr->extraAttributes) {
 		zend_hash_destroy(attr->extraAttributes);
-		sdl_free(attr->extraAttributes);
+		efree(attr->extraAttributes);
 	}
-	sdl_free(attr);
+	efree(attr);
 }
 
 void delete_restriction_var_int(void *rvi)
 {
 	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
 	if (ptr) {
-		sdl_free(ptr);
+		efree(ptr);
 	}
 }
 
@@ -2340,8 +2340,8 @@ void delete_restriction_var_char(void *srvc)
 	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
 	if (ptr) {
 		if (ptr->value) {
-			sdl_free(ptr->value);
+			efree(ptr->value);
 		}
-		sdl_free(ptr);
+		efree(ptr);
 	}
 }
