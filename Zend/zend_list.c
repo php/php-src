@@ -230,30 +230,7 @@ int zend_init_rsrc_plist(TSRMLS_D)
 
 void zend_destroy_rsrc_list(HashTable *ht TSRMLS_DC)
 {
-	Bucket *p, *q;
-
-	while (1) {
-		p = ht->pListTail;
-		if (!p) {
-			break;
-		}
-		q = p->pListLast;
-		if (q) {
-			q->pListNext = NULL;
-		}
-		ht->pListTail = q;
-
-		if (ht->pDestructor) {
-			zend_try {
-				ht->pDestructor(p->pData);
-			} zend_end_try();
-		}
-		if (!p->pDataPtr && p->pData) {
-			pefree(p->pData, ht->persistent);
-		}
-		pefree(p, ht->persistent);
-	}
-	pefree(ht->arBuckets, ht->persistent);
+	zend_hash_graceful_reverse_destroy(ht);
 }
 
 

@@ -653,6 +653,23 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 	SET_INCONSISTENT(HT_DESTROYED);
 }
 
+ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht)
+{
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+
+	p = ht->pListTail;
+	while (p != NULL) {
+		zend_hash_apply_deleter(ht, p);
+		p = ht->pListTail;
+	}
+
+	pefree(ht->arBuckets, ht->persistent);
+
+	SET_INCONSISTENT(HT_DESTROYED);
+}
+
 /* This is used to selectively delete certain entries from a hashtable.
  * destruct() receives the data and decides if the entry should be deleted 
  * or not
