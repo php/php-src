@@ -287,7 +287,7 @@ unticked_class_declaration_statement:
 
 class_entry_type:
 		T_CLASS			{  $$.u.constant.value.lval = 0; }
-	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_ABSTRACT_CLASS; }
+	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL T_CLASS { $$.u.constant.value.lval = ZEND_ACC_FINAL_CLASS; }
 ;
 

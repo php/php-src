@@ -974,7 +974,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 
 		if (fn_flags & ZEND_ACC_ABSTRACT) {
-			CG(active_class_entry)->ce_flags |= ZEND_ACC_ABSTRACT;
+			CG(active_class_entry)->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 
 		if (!(fn_flags & ZEND_ACC_PPP_MASK)) {
@@ -1749,8 +1749,8 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 	TSRMLS_FETCH();
 
 	if (zend_hash_quick_find(child_function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child)==FAILURE) {
-		if (parent_flags & ZEND_ACC_ABSTRACT) {
-			child_ce->ce_flags |= ZEND_ACC_ABSTRACT;
+		if (parent_flags & (ZEND_ACC_ABSTRACT)) {
+			child_ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
@@ -2537,8 +2537,7 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	if (ce->num_interfaces > 0) {
 		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *)*ce->num_interfaces);
 	}
-	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)
-		&& !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
 		zend_verify_abstract_class(ce TSRMLS_CC);
 		if (ce->parent || ce->num_interfaces) {

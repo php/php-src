@@ -1225,7 +1225,7 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_abstract_info ai;
 
-	if ((ce->ce_flags & ZEND_ACC_ABSTRACT) && !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)) {
+	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		memset(&ai, 0, sizeof(ai));
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);

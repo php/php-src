@@ -3169,7 +3169,7 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EX_T(opline->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_ABSTRACT|ZEND_ACC_ABSTRACT_CLASS)) {
+	if (EX_T(opline->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		char *class_type;
 
 		if (EX_T(opline->op1.u.var).class_entry->ce_flags & ZEND_ACC_INTERFACE) {

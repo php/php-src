@@ -45,7 +45,7 @@ void spl_register_interface(zend_class_entry ** ppce, char * class_name, zend_fu
 	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* entries changed by initialize */
-	(*ppce)->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
+	(*ppce)->ce_flags = ZEND_ACC_INTERFACE;
 }
 /* }}} */
 
