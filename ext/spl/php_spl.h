@@ -83,21 +83,9 @@ extern int spl_globals_id;
 extern zend_spl_globals spl_globals;
 #endif
 
-extern zend_class_entry *spl_ce_iterator;
-extern zend_class_entry *spl_ce_forward;
-extern zend_class_entry *spl_ce_sequence;
-extern zend_class_entry *spl_ce_assoc;
-extern zend_class_entry *spl_ce_forward_assoc;
-extern zend_class_entry *spl_ce_sequence_assoc;
-extern zend_class_entry *spl_ce_array_read;
-extern zend_class_entry *spl_ce_array_access;
-
 PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
-
-PHP_MINIT_FUNCTION(spl_array);
-PHP_MINIT_FUNCTION(spl_directory);
 
 #endif /* PHP_SPL_H */
 
