@@ -25,8 +25,7 @@
 #include "zend.h"
 
 typedef void (*zend_objects_store_dtor_t)(void *object, zend_object_handle handle TSRMLS_DC);
-typedef void (*zend_objects_free_object_storage_t)(zend_object *object TSRMLS_DC);
-
+typedef void (*zend_objects_free_object_storage_t)(void *object TSRMLS_DC);
 typedef void (*zend_objects_store_clone_t)(void *object, void **object_clone TSRMLS_DC);
 
 typedef struct _zend_object_store_bucket {
