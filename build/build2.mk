@@ -21,7 +21,7 @@ include generated_lists
 
 TOUCH_FILES = mkinstalldirs install-sh missing
 
-LT_TARGETS = ltconfig ltmain.sh config.guess config.sub
+LT_TARGETS = ltmain.sh config.guess config.sub
 
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
