@@ -196,6 +196,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	char *strtok_buf = NULL;
 	zval *array_ptr = (zval *) arg;
 
+	if (SG(request_info).post_data==NULL) {
+		return;
+	}	
+
 	var = php_strtok_r(SG(request_info).post_data, "&", &strtok_buf);
 
 	while (var) {
