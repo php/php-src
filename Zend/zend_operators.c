@@ -1230,6 +1230,18 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 	}
 }
 
+ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, int length)
+{
+	int retval;
+	
+	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
+	if (!retval) {
+		return (len1 - len2);
+	} else {
+		return retval;
+	}
+}
+
 
 ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 {
@@ -1256,12 +1268,16 @@ ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2)
 	return zend_binary_strcmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
 }
 
+ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3)
+{
+	return zend_binary_strncmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len, s3->value.lval);
+}
+
 
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2)
 {
 	return zend_binary_strcasecmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
 }
-
 
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
