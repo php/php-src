@@ -740,7 +740,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 			file_handle.filename = argv0;
 			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
-		} else if (retval == SUCCESS) {
+		}
+
+		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 			/* #!php support */
 			c = fgetc(file_handle.handle.fp);
 			if (c == '#') {
