@@ -165,15 +165,20 @@ zval *mysqli_read_property(zval *object, zval *member, zend_bool silent TSRMLS_D
 	zend_object_handlers *std_hnd;
 	int ret;
 
+	ret = FAILURE;
+	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
+
+	if (!obj->valid) {
+		retval = EG(uninitialized_zval_ptr);
+		return(retval);
+	}
+
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
 	}
-
-	ret = FAILURE;
-	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
 		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
@@ -198,7 +203,7 @@ zval *mysqli_read_property(zval *object, zval *member, zend_bool silent TSRMLS_D
 }
 /* }}} */
 
-/* {{{ mysqli_read_property */
+/* {{{ mysqli_write_property */
 void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	zval tmp_member;
@@ -261,6 +266,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
 	intern->ptr = NULL;
+	intern->valid = 0;
 	intern->prop_handler = NULL;
 
 	zend_hash_find(&classes, class_type->name, class_type->name_length + 1, (void **) &intern->prop_handler);
