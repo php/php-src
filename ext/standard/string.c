@@ -825,6 +825,10 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
+	if(numelems == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), 
 										 (void **) &tmp,
@@ -888,6 +892,8 @@ PHP_FUNCTION(implode)
 	zval_ptr_dtor(arg1);
 	if (arg2) {
 		zval_ptr_dtor(arg2);
+	} else {
+		FREE_ZVAL(delim);
 	}
 }
 /* }}} */
