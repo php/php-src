@@ -38,8 +38,6 @@
 #include "php_xml.h"
 # include "ext/standard/head.h"
 
-PHP_XML_API int xml_parser_inited = 0;
-
 /* Short-term TODO list:
  * - Implement XML_ExternalEntityParserCreate()
  * - XML_SetCommentHandler
@@ -231,10 +229,7 @@ PHP_MINIT_FUNCTION(xml)
 	php_xml_mem_hdlrs.free_fcn = php_xml_free_wrapper;
 
 #ifdef LIBXML_EXPAT_COMPAT
-	if (!xml_parser_inited) {
-		xmlInitThreads();
-		xml_parser_inited = 1;
-	}
+	xmlInitParser();
 #endif
 	return SUCCESS;
 }
@@ -249,10 +244,7 @@ PHP_RINIT_FUNCTION(xml)
 PHP_MSHUTDOWN_FUNCTION(xml)
 {
 #ifdef LIBXML_EXPAT_COMPAT
-	if (xml_parser_inited) {
-		xmlCleanupParser();
-		xml_parser_inited = 0;
-	}
+	xmlCleanupParser();
 #endif
 	return SUCCESS;
 }
