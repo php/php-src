@@ -860,7 +860,7 @@ session.save_handler = files
 ;
 ; where MODE is the octal representation of the mode. Note that this
 ; does not overwrite the process's umask.
-session.save_path = "/tmp"
+;session.save_path = "/tmp"
 
 ; Whether to use cookies.
 session.use_cookies = 1
