@@ -730,6 +730,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ABSTRACT;
 }
 
+<ST_IN_SCRIPTING>"final" {
+	return T_FINAL;
+}
+
 <ST_IN_SCRIPTING>"private" {
 	return T_PRIVATE;
 }
@@ -739,7 +743,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"public" {
-	return T_VAR;
+	return T_PUBLIC;
 }
 
 <ST_IN_SCRIPTING>"unset" {

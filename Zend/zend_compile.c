@@ -909,6 +909,16 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
+
+int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
+{
+	if (current_access_type->u.constant.value.lval & ZEND_FN_PPP_MASK) {
+		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
+	}
+	return (current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval);
+}
+
+
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags  TSRMLS_DC)
 {
 	zend_op_array op_array;
@@ -949,6 +959,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			} else {
 				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", name);
 			}
+		}
+		if (fn_flags & ZEND_ACC_ABSTRACT) {
+			CG(active_class_entry)->ce_flags |= ZEND_ACC_ABSTRACT;
 		}
 
 		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len))) {
@@ -1502,7 +1515,6 @@ ZEND_API void function_add_ref(zend_function *function)
 	}
 }
 
-
 static void do_inherit_parent_constructor(zend_class_entry *ce)
 {
 	zend_function *function;
@@ -1529,26 +1541,74 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	ce->__call = ce->parent->__call;
 }
 
-static zend_bool do_inherit_method_check(zend_function *child, zend_function *parent) {
+
+char *zend_visibility_string(zend_uint fn_flags)
+{
+	if (fn_flags & ZEND_ACC_PRIVATE) {
+		return "private";
+	}
+	if (fn_flags & ZEND_ACC_PROTECTED) {
+		return "protected";
+	}
+	if (fn_flags & ZEND_ACC_PUBLIC) {
+		return "public";
+	}
+	return "";
+}
+
+
+static void do_inherit_method(zend_function *function)
+{
+	/* The class entry of the derived function intentionally remains the same
+	 * as that of the parent class.  That allows us to know in which context
+	 * we're running, and handle private method calls properly.
+	 */
+	if (function->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		function->op_array.scope->ce_flags |= ZEND_ACC_ABSTRACT;
+	}
+	function_add_ref(function);
+}
+
+
+static zend_bool do_inherit_method_check(zend_function *child, zend_function *parent)
+{
 	zend_uint child_flags  = child->common.fn_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
 
+	/* we do not inherit private methods */
+/*	assert(!(parent_flags & ZEND_ACC_PRIVATE));	*/
+
 	/* You cannot change from static to non static and vice versa.
 	 */
-	if ((child_flags & FN_STATIC) != (parent_flags & FN_STATIC)) {
-		if (child->common.fn_flags & FN_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+	if ((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC)) {
+		if (child->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		}
 	}
-	/* Disallow makeing an inherited method abstract.
+	/* Disallow making an inherited method abstract.
+	 * Also check the visibility and copy it if needed. This must be done last
+	 * since we may change the child flags here.
+	 * Again first detect more than one error to make normal operation faster.
 	 */
-	if (child_flags & FN_ABSTRACT) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s() abstract in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+	if ((child_flags & (ZEND_FN_PPP_MASK|ZEND_ACC_ABSTRACT)) != (parent_flags & ZEND_FN_PPP_MASK)) {
+		if (child_flags & ZEND_ACC_ABSTRACT) {
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+		}
+		if (!(child_flags & ZEND_FN_PPP_MASK) || (((child_flags|parent_flags) & ZEND_FN_PPP_MASK) == ZEND_ACC_PUBLIC)) {
+			/* this is no error since we copy visibility here */
+			/* child->common.fn_flags &= ~ZEND_FN_PPP_MASK; do not clear added public */
+			child->common.fn_flags |= parent_flags & ZEND_FN_PPP_MASK;
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s %s::%s() as %s %s::%s()", 
+				zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), parent->common.function_name, 
+				zend_visibility_string(child_flags),  ZEND_FN_SCOPE_NAME(child),  child->common.function_name);
+		}
 	}
 	return SUCCESS;
 }
+
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
@@ -1560,14 +1620,17 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	/* STATIC_MEMBERS_FIXME */
 /*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
-	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, sizeof(zend_function), (zend_bool (*)(void *, void *))do_inherit_method_check);
+	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (zend_bool (*)(void *, void *)) do_inherit_method_check);
 	ce->parent = parent_ce;
-	if (!ce->handle_property_get)
-	   ce->handle_property_get	= parent_ce->handle_property_get;
-	if (!ce->handle_property_set)
+	if (!ce->handle_property_get) {
+		ce->handle_property_get	= parent_ce->handle_property_get;
+	}
+	if (!ce->handle_property_set) {
 		ce->handle_property_set = parent_ce->handle_property_set;
-	if (!ce->handle_function_call)
+	}
+	if (!ce->handle_function_call) {
 		ce->handle_function_call = parent_ce->handle_function_call;
+	}
 	do_inherit_parent_constructor(ce);
 }
 
@@ -1582,6 +1645,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->name_length = name_length;
 	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
+	new_class_entry->ce_flags = 0;
 
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 
@@ -2055,6 +2119,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	}
 	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
+	new_class_entry->ce_flags = 0;
 	
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 
@@ -2134,7 +2199,8 @@ void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_le
 	*dest_length = prop_name_length;
 }
 
-void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC)
+
+void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 {
 	zval *property;
 
@@ -2147,8 +2213,8 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 		property->type = IS_NULL;
 	}
 
-	switch (declaration_type) {
-		case T_PRIVATE:
+	switch (CG(access_type)) {
+		case ZEND_ACC_PRIVATE:
 			{
 				char *priv_name;
 				int priv_name_length;
@@ -2162,7 +2228,7 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 				zend_hash_update(&CG(active_class_entry)->private_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 				break;
 			}
-		case T_PROTECTED:
+		case ZEND_ACC_PROTECTED:
 			{
 				char *prot_name;
 				int prot_name_length;
@@ -2188,18 +2254,36 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 				efree(prot_name);
 				break;
 			}
-		case T_VAR:
+		case ZEND_ACC_PUBLIC:
 			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 			break;
-		case T_STATIC:
+		case ZEND_ACC_STATIC:
 			zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-			break;
-		case T_CONST:
-			zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 			break;
 	}
 	FREE_PNODE(var_name);
 }
+
+
+void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
+{
+	zval *property;
+
+	ALLOC_ZVAL(property);
+
+	if (value) {
+		*property = value->u.constant;
+	} else {
+		INIT_PZVAL(property);
+		property->type = IS_NULL;
+	}
+
+	zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+
+	FREE_PNODE(var_name);
+}
+
+
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC)
 {

@@ -1236,6 +1236,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	class_entry->parent = NULL;
 	class_entry->refcount = 1;
 	class_entry->constants_updated = 0;
+	class_entry->ce_flags = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->private_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->protected_properties, 0, NULL, ZVAL_PTR_DTOR, 1);

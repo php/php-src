@@ -2251,6 +2251,55 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
+
+/* Ensures that we're allowed to call a private method.
+ * Will update EX(fbc) with the correct handler as necessary.
+ */
+inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+{
+	if (!ce) {
+		return 0;
+	}
+
+	/* We may call a private function in one of two cases:
+	 * 1.  The scope of the function is the same as the class entry of our object
+	 * 2.  The class of our object is different, but a private function exists
+	 *     in one of the ancestor that corresponds to our object's ce.
+	 */
+	if (EX(fbc)->common.scope == ce) {
+		/* rule #1 checks out ok, allow the function call */
+		return 1;
+	}
+
+	/* Check rule #2 */
+	while (ce) {
+		if (ce == EG(scope)) {
+			if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &EX(fbc))==SUCCESS
+				&& EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE
+				&& EX(fbc)->common.scope == EG(scope)) {
+				return 1;
+			}
+			break;
+		}
+		ce = ce->parent;
+	}
+	return 0;
+}
+
+/* Ensures that we're allowed to call a protected method.
+ */
+inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope, int fn_flags)
+{
+	while (ce) {
+		if (ce==scope) {
+			return 1;
+		}
+		ce = ce->parent;
+	}
+	return 0;
+}
+
+
 int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
@@ -2268,15 +2317,33 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX(object) = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R TSRMLS_CC);
 			
 	if (EX(object) && EX(object)->type == IS_OBJECT) {
+
+		/* First, locate the function. */
 		EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!EX(fbc)) {
-			zend_error(E_ERROR, "Call to undefined function: %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
+			zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
+		}
+
+		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+			/* No further checks necessary, most common case */
+		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (!zend_check_private(execute_data, EX(object)->value.obj.handlers->get_class_entry(EX(object) TSRMLS_CC), EX(fbc)->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC)) {
+				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
+			}
+		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
+			}
 		}
 	} else {
 		zend_error(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (EX(fbc)->common.fn_flags & FN_STATIC) {
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -2305,7 +2372,6 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
-	zend_function *function;
 	zval tmp;
 	zend_class_entry *ce;
 	zend_bool is_const;
@@ -2335,8 +2401,25 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX(calling_scope) = ce;
 
-	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-		zend_error(E_ERROR, "Call to undefined function: %s::%s()", ce->name, function_name_strval);
+	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &EX(fbc))==FAILURE) {
+		zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+	}
+	EX(calling_scope) = EX(fbc)->common.scope;
+
+	if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+		/* No further checks necessary, most common case */
+	} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 */
+		if (!zend_check_private(execute_data, EG(scope), EX(fbc)->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC)) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
+		}
+	} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		/* Ensure that if we're calling a protected function, we're allowed to do so.
+		 */
+		if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
+		}
 	}
 
 	if (!is_const) {
@@ -2344,9 +2427,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
 
-	EX(fbc) = function;
-
-	if (function->common.fn_flags & FN_STATIC) {
+	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
 		if ((EX(object) = EG(This))) {
@@ -2916,6 +2997,9 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
+	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_ABSTRACT) {
+		zend_error(E_ERROR, "Cannot instanciate abstract class %s", EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
+	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 	object_init_ex(EX_T(EX(opline)->result.u.var).var.ptr, EX_T(EX(opline)->op1.u.var).EA.class_entry);

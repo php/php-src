@@ -295,6 +295,8 @@ typedef struct _zend_overloaded_element {
 /* A lot of stuff needs shifiting around in order to include zend_compile.h here */
 union _zend_function;
 
+#define ZEND_CE_ABSTRACT ZEND_ACC_ABSTRACT /* same as ZEND_ACC_ABSTRACT */
+
 struct _zend_class_entry {
 	char type;
 	char *name;
@@ -302,6 +304,7 @@ struct _zend_class_entry {
 	struct _zend_class_entry *parent; 
 	int refcount;
 	zend_bool constants_updated;
+	zend_uint ce_flags;
 
 	HashTable function_table;
 	HashTable default_properties;
