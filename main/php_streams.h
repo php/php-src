@@ -88,8 +88,9 @@ PHPAPI int php_stream_flush(php_stream *stream);
 PHPAPI char *php_stream_gets(php_stream *stream, char *buf, size_t maxlen);
 PHPAPI int php_stream_puts(php_stream *stream, char *buf);
 
-/* copy up to maxlen bytes from src to dest.  If maxlen is 0, copy until eof(src).
+/* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
+#define PHP_STREAM_COPY_ALL		-1
 PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen);
 /* read all data from stream and put into a buffer. Caller must free buffer when done,
  * according to allocopts.
