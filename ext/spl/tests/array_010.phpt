@@ -1,9 +1,5 @@
 --TEST--
 SPL: ArrayIterator implements ArrayAccess
---SKIPIF--
-<?php
-	if (!class_exists('ArrayAccess')) die('skip ArrayAccess not present');
-?>
 --FILE--
 <?php
 
