@@ -1200,11 +1200,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	}
 		
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
-		if (op1->value.str.len == op2->value.str.len) {
-			zendi_smart_strcmp(result, op1, op2);
-		} else {
-			ZVAL_LONG(result, 1);
-		}
+		zendi_smart_strcmp(result, op1, op2);
 		return SUCCESS;
 	}
 	
