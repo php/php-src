@@ -46,6 +46,10 @@
 # include <netinet/in.h>
 #endif
 
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 extern php3_module_entry fsock_module_entry;
 #define phpext_fsock_ptr &fsock_module_entry
 
