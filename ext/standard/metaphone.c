@@ -27,8 +27,6 @@
 
 static int metaphone(char *word, int word_len, int max_phonemes, char **phoned_word, int traditional);
 
-PHP_FUNCTION(metaphone);
-
 /* {{{ proto string metaphone(string text, int phones)
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
