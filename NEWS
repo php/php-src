@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Added Microsoft SQL Server module for Win32 (Frank)
 - Added support for forcing a variable number of internal function arguments
   by reference. (Andi & Zeev, Zend library)
 - Implemented getprotoby{name,number} (Evan)

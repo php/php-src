@@ -59,3 +59,7 @@ EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           mssql
+PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
