@@ -1,3 +1,35 @@
+2001-01-20  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c:
+    Fix the scheme handler support and make it compile on win32 systems.
+
+2001-01-20  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/HTTP/Compress.php: whitespace
+
+2001-01-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Function_Cache.php: Next time without the 'Oops!'.
+
+    * pear/Cache/Function_Cache.php:
+    Fixed two small glitches. Note: The Shared Memory version of Function_Cache does not work correctly at the moment, but I'm on it.
+
+2001-01-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c: Revert last completely broken patch.
+
+2001-01-20  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in: install the various HTML/* files
+
+2001-01-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/config.m4: Check that libbz2.(a|so) is >= 0.95 (has BZ2_bzerror)
+
+2001-01-20  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/iconv/EXPERIMENTAL: added: EXPERIMENTAL
+
 2001-01-19  Jason Greene  <jason@inetgurus.net>
 
     * TODO: Desired functionality can be achieved with array_sum/array_count.
