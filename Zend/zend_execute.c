@@ -3299,9 +3299,17 @@ int zend_cast_handler(ZEND_OPCODE_HANDLER_ARGS)
 		case IS_DOUBLE:
 			convert_to_double(result);
 			break;
-		case IS_STRING:
-			convert_to_string(result);
+		case IS_STRING: {
+			zval var_copy;
+			int use_copy;
+		
+			zend_make_printable_zval(result, &var_copy, &use_copy);
+			if (use_copy) {
+				zval_dtor(result);
+				*result = var_copy;
+			}
 			break;
+		}
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
