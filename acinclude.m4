@@ -28,7 +28,7 @@ AC_DEFUN([PHP_DEFINE],[
 dnl PHP_INIT_BUILD_SYSTEM
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
-$php_shtool mkdir include
+test -d include || $php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the egrep line itself
