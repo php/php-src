@@ -490,6 +490,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				}
 				mimetype = estrdup(ptr);
 				newlen = sapi_apply_default_charset(&mimetype, len TSRMLS_CC);
+				if (!SG(sapi_headers).mimetype){
+					SG(sapi_headers).mimetype = estrdup(mimetype);
+				}
+
 				if (newlen != 0) {
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
@@ -676,6 +680,9 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	
 	if (SG(sapi_headers).http_status_line) {
 		efree(SG(sapi_headers).http_status_line);
+	}
+	if (SG(sapi_headers).mimetype) {
+		efree(SG(sapi_headers).mimetype);
 	}
 	
 	return ret;

@@ -51,6 +51,7 @@ typedef struct {
 	zend_llist headers;
 	int http_response_code;
 	unsigned char send_default_content_type;
+	char *mimetype;
 	char *http_status_line;
 } sapi_headers_struct;
 
