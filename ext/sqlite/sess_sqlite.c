@@ -44,7 +44,8 @@ PS_OPEN_FUNC(sqlite)
 	/* TODO: do we need a safe_mode check here? */
 	db = sqlite_open(save_path, 0666, &errmsg);
 	if (db == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: failed to open/create session database `%s' - %s", save_path, errmsg);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
+				"SQLite: failed to open/create session database `%s' - %s", save_path, errmsg);
 		sqlite_freemem(errmsg);
 		return FAILURE;
 	}
@@ -53,13 +54,15 @@ PS_OPEN_FUNC(sqlite)
 	sqlite_busy_timeout(db, 60000);
 
 	sqlite_exec(db, "PRAGMA default_synchronous = OFF", NULL, NULL, NULL);
-	
+	sqlite_exec(db, "PRAGMA count_changes = OFF", NULL, NULL, NULL);
+
 	/* This will fail if the table already exists, but that's not a big problem. I'm
 	   unclear as to how to check for a table's existence in SQLite -- that would be better here. */
 	sqlite_exec(db, 
 	    "CREATE TABLE session_data ("
-	    "    sess_id TEXT PRIMARY KEY," 
-	    "    value TEXT, updated INTEGER "
+	    "    sess_id PRIMARY KEY," 
+	    "    value TEXT, "
+	    "    updated INTEGER "
 	    ")", NULL, NULL, NULL);
 
 	PS_SET_MOD_DATA(db);
