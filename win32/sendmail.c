@@ -31,7 +31,7 @@
 #include <memory.h>
 #include <winbase.h>
 #include "sendmail.h"
-
+#include "php_ini.h"
 
 /*
    extern int _daylight;
@@ -126,8 +126,8 @@ int TSendMail(char *host, int *error,
 		strcpy(GLOBAL(MailHost), host);
 	}
 
-	if (php3_ini.sendmail_from){
-		RPath = estrdup(php3_ini.sendmail_from);
+	if (INI_STR("sendmail_from")){
+		RPath = estrdup(INI_STR("sendmail_from"));
 		} else {
 			return 19;
 	}
