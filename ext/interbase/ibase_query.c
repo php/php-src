@@ -941,7 +941,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 			return SUCCESS;
 
 		default:
-			RETVAL_TRUE;
+			RETVAL_FALSE;
 	}
 
 	/* allocate sqlda and output buffers */
@@ -1027,7 +1027,11 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 			if (affected_rows > 0) {
 				ib_query->trans->affected_rows = affected_rows;
 				RETVAL_LONG(affected_rows);
+				break;
 			}
+			
+		default:
+			RETVAL_TRUE;
 	}
 
 	rv = SUCCESS;
