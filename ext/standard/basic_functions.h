@@ -180,6 +180,8 @@ typedef struct {
 	void *mmap_file;
 	size_t mmap_len;
 #endif
+
+	HashTable *aggregation_table;
 } php_basic_globals;
 
 #ifdef ZTS
