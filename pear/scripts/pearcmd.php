@@ -50,8 +50,12 @@ $all_commands = PEAR_Command::getCommands();
 $argv = Console_Getopt::readPHPArgv();
 /* $progname = basename($argv[0]); */
 $progname = 'pear';
-array_shift($argv);
-$options = Console_Getopt::getopt2($argv, "c:C:d:D:Gh?sSqu:vV");
+if (in_array('getopt2', get_class_methods('Console_Getopt'))) {
+    array_shift($argv);
+    $options = Console_Getopt::getopt2($argv, "c:C:d:D:Gh?sSqu:vV");
+} else {
+    $options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:vV");
+}
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -158,8 +162,13 @@ if ($fetype == 'Gtk') {
 
     $short_args = $long_args = null;
     PEAR_Command::getGetoptArgs($command, $short_args, $long_args);
-    array_shift($options[1]);
-    if (PEAR::isError($tmp = Console_Getopt::getopt2($options[1], $short_args, $long_args))) {
+    if (in_array('getopt2', get_class_methods('Console_Getopt'))) {
+        array_shift($options[1]);
+        $tmp = Console_Getopt::getopt2($options[1], $short_args, $long_args);
+    } else {
+        $tmp = Console_Getopt::getopt($options[1], $short_args, $long_args);
+    }
+    if (PEAR::isError()) {
         break;
     }
     list($tmpopt, $params) = $tmp;
