@@ -260,10 +260,6 @@ static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
 		}
 		opline++;
 	}
-	opline = get_next_op(op_array CLS_CC);
-	opline->opcode = ZEND_EXT_STMT;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 
 
