@@ -68,35 +68,35 @@ array(6) {
   string(5) "today"
 }
 int(6)
+NULL
+NULL
+NULL
+NULL
 
-Warning: str_word_count(): The specified format parameter, '3' is invalid. in %s on line 9
-bool(false)
+Warning: str_word_count() expects parameter 2 to be long, array given in %s on line 13
 
-Warning: str_word_count(): The specified format parameter, '123' is invalid. in %s on line 10
-bool(false)
+Warning: Wrong parameter count for str_word_count() in %s on line 13
+NULL
 
-Warning: str_word_count(): The specified format parameter, '-1' is invalid. in %s on line 11
-bool(false)
+Warning: str_word_count() expects parameter 2 to be long, string given in %s on line 14
 
-Warning: str_word_count(): The specified format parameter, '1569325056' is invalid. in %s on line 12
-bool(false)
-
-Warning: str_word_count(): The specified format parameter, '0' is invalid. in %s on line 13
-bool(false)
-
-Warning: str_word_count(): The specified format parameter, '0' is invalid. in %s on line 14
-bool(false)
+Warning: Wrong parameter count for str_word_count() in %s on line 14
+NULL
 string(55) "Hello friend, you're  
     looking          good today!"
 int(5)
 int(6)
 int(5)
 
-Notice: Array to string conversion in %s on line 21
-int(7)
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 21
 
-Notice: Object of class stdClass to string conversion in %s on line 22
-int(7)
+Warning: Wrong parameter count for str_word_count() in %s on line 21
+NULL
+
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 22
+
+Warning: Wrong parameter count for str_word_count() in %s on line 22
+NULL
 int(7)
 array(5) {
   [0]=>
@@ -137,41 +137,15 @@ array(5) {
   string(3) "foo"
 }
 
-Notice: Array to string conversion in %s on line 27
-array(7) {
-  [0]=>
-  string(1) "F"
-  [1]=>
-  string(1) "o"
-  [2]=>
-  string(1) "B"
-  [3]=>
-  string(1) "r"
-  [4]=>
-  string(1) "s"
-  [5]=>
-  string(3) "bar"
-  [6]=>
-  string(3) "foo"
-}
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 27
 
-Notice: Object of class stdClass to string conversion in %s on line 28
-array(7) {
-  [0]=>
-  string(1) "F"
-  [1]=>
-  string(1) "o"
-  [2]=>
-  string(1) "B"
-  [3]=>
-  string(1) "r"
-  [4]=>
-  string(1) "s"
-  [5]=>
-  string(3) "bar"
-  [6]=>
-  string(3) "foo"
-}
+Warning: Wrong parameter count for str_word_count() in %s on line 27
+NULL
+
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 28
+
+Warning: Wrong parameter count for str_word_count() in %s on line 28
+NULL
 array(7) {
   [0]=>
   string(1) "F"
@@ -227,41 +201,15 @@ array(5) {
   string(3) "foo"
 }
 
-Notice: Array to string conversion in %s on line 33
-array(7) {
-  [0]=>
-  string(1) "F"
-  [2]=>
-  string(1) "o"
-  [4]=>
-  string(1) "B"
-  [6]=>
-  string(1) "r"
-  [9]=>
-  string(1) "s"
-  [11]=>
-  string(3) "bar"
-  [15]=>
-  string(3) "foo"
-}
+Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 33
 
-Notice: Object of class stdClass to string conversion in %s on line 34
-array(7) {
-  [0]=>
-  string(1) "F"
-  [2]=>
-  string(1) "o"
-  [4]=>
-  string(1) "B"
-  [6]=>
-  string(1) "r"
-  [9]=>
-  string(1) "s"
-  [11]=>
-  string(3) "bar"
-  [15]=>
-  string(3) "foo"
-}
+Warning: Wrong parameter count for str_word_count() in %s on line 33
+NULL
+
+Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 34
+
+Warning: Wrong parameter count for str_word_count() in %s on line 34
+NULL
 array(7) {
   [0]=>
   string(1) "F"
