@@ -24,6 +24,9 @@
 
 #include "ext/libxml/php_libxml.h"
 
+zend_class_entry *dom_node_class_entry;
+
+
 typedef struct _dom_doc_props {
 	int formatoutput;
 	int validateonparse;
@@ -58,6 +61,7 @@ typedef struct _dom_object {
 
 PHP_DOM_EXPORT(dom_object *) php_dom_object_get_data(xmlNodePtr obj);
 PHP_DOM_EXPORT(zval *) php_dom_create_object(xmlNodePtr obj, int *found, zval *in, zval* return_value, dom_object *domobj TSRMLS_DC);
+PHP_DOM_EXPORT(xmlNodePtr) dom_object_get_node(dom_object *obj);
 
 #define DOM_XMLNS_NAMESPACE \
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"

@@ -29,7 +29,6 @@ zend_class_entry *dom_domimplementationsource_class_entry;
 zend_class_entry *dom_domimplementation_class_entry;
 zend_class_entry *dom_documentfragment_class_entry;
 zend_class_entry *dom_document_class_entry;
-zend_class_entry *dom_node_class_entry;
 zend_class_entry *dom_nodelist_class_entry;
 zend_class_entry *dom_namednodemap_class_entry;
 zend_class_entry *dom_characterdata_class_entry;

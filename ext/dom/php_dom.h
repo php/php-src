@@ -66,7 +66,6 @@ extern zend_module_entry dom_module_entry;
 #include "dom_fe.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
-xmlNodePtr dom_object_get_node(dom_object *obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
