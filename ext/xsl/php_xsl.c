@@ -261,7 +261,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
 		} 
 	} else {
-		if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry)) {
+		if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
 			xmlNode *nodep;
 			dom_object *obj;
 			obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
