@@ -92,7 +92,7 @@ typedef unsigned char uchar;
 #define auto_fseek(f,o,w)    php_stream_seek(f,o,w)
 #define auto_fread(b,s,n,f)  php_stream_read(f,b,(s)*(n))
 #define auto_fgetc(f)        php_stream_getc(f)
-#define auto_fclose(f)       php_stream_close(f)
+#define auto_fclose(f)       php_stream_free(f,0)
 #else
 #define auto_ftell(f)        ftell(f)
 #define auto_fseek(f,o,w)    fseek(f,o,w)
@@ -2988,10 +2988,11 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 			mem_stream = php_memory_stream_create();
 			org_stream = ImageInfo->infile;
 			ImageInfo->FileSize = php_stream_copy_to_stream(org_stream, mem_stream, PHP_STREAM_COPY_ALL);
-			//auto_fclose(org_stream);
+			org_stream->wrapper->destroy = NULL;
+			auto_fclose(org_stream);
 			ImageInfo->infile = mem_stream;
 	    	#ifdef EXIF_DEBUG
-	    	php_error(E_NOTICE,"stream is not stdio: copy done");
+	    	php_error(E_NOTICE,"stream is not stdio: copy %d done", ImageInfo->FileSize);
 	    	#endif
 		}
 		#else
