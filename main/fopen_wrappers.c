@@ -987,7 +987,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 	const char *protocol=NULL;
 	int n=0;
 
-	for(p=path;isalnum(*p);p++) 
+	for(p=path;isalnum((int)*p);p++) 
 		n++;
 	if((*p==':')&&(n>1)) {
 		protocol=path;
