@@ -2206,7 +2206,7 @@ PHP_FUNCTION(mysql_free_result)
 }
 /* }}} */
 
-/* {{{ proto resource mysql_ping([int link_identifier])
+/* {{{ proto bool mysql_ping([int link_identifier])
    Ping a server connection. If no connection then reconnect. */
 PHP_FUNCTION(mysql_ping)
 {
