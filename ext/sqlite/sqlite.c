@@ -135,7 +135,13 @@ PHP_FUNCTION(sqlite_open)
 		return;
 	}
 
-	/* TODO: safemode and open_basedir checks on the filename */
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	
 	db = sqlite_open(filename, mode, &errtext);
 
