@@ -2795,7 +2795,7 @@ PHP_FUNCTION(pg_result_status)
 /* }}} */
 
 /* {{{ php_pgsql_metadata
- * TODO: Add metadata cache to better performance
+ * TODO: Add metadata cache for better performance
  */
 PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
 {
