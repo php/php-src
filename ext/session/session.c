@@ -108,14 +108,13 @@ zend_module_entry session_module_entry = {
 #define STD_FMT "%s|"
 #define NOTFOUND_FMT "!%s|"
 
-static char *_php_session_encode(int *newlen)
+static char *_php_session_encode(int *newlen PSLS_DC)
 {
 	pval *buf;
 	pval **struc;
 	char *key;
 	char *ret = NULL;
 	char strbuf[MAX_STR + 1];
-	PSLS_FETCH();
 	ELS_FETCH();
 
 	buf = ecalloc(sizeof(*buf), 1);
@@ -155,7 +154,7 @@ static char *_php_session_encode(int *newlen)
 #define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
 
 	
-static void _php_session_decode(char *val, int vallen)
+static void _php_session_decode(char *val, int vallen PSLS_DC)
 {
 	char *p, *q;
 	char *name;
@@ -163,7 +162,6 @@ static void _php_session_decode(char *val, int vallen)
 	pval *current;
 	int namelen;
 	int has_value;
-	PSLS_FETCH();
 	ELS_FETCH();
 
 	for(p = q = val; (p < endptr) && (q = strchr(p, '|')); p = q) {
@@ -217,29 +215,27 @@ static char *_php_create_id(int *newlen)
 	return estrdup(buf);
 }
 
-static void _php_session_initialize(void)
+static void _php_session_initialize(PSLS_DC)
 {
 	char *val;
 	int vallen;
-	PSLS_FETCH();
 	
 	if(PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		php3_error(E_ERROR, "failed to initialize session module");
 		return;
 	}
 	if(PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
-		_php_session_decode(val, vallen);
+		_php_session_decode(val, vallen PSLS_CC);
 		efree(val);
 	}
 }
 
-static void _php_session_save_current_state(void)
+static void _php_session_save_current_state(PSLS_D)
 {
 	char *val;
 	int vallen;
-	PSLS_FETCH();
 	
-	val = _php_session_encode(&vallen);
+	val = _php_session_encode(&vallen PSLS_CC);
 	if(val) {
 		PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
 		efree(val);
@@ -252,11 +248,10 @@ static void _php_session_save_current_state(void)
 
 #define COOKIE_FMT "Set-cookie: %s=%s"
 
-static void _php_session_send_cookie(void)
+static void _php_session_send_cookie(PSLS_D)
 {
 	int len;
 	char *cookie;
-	PSLS_FETCH();
 
 	len = strlen(PS(session_name)) + strlen(PS(id)) + sizeof(COOKIE_FMT);
 	cookie = emalloc(len + 1);
@@ -265,12 +260,10 @@ static void _php_session_send_cookie(void)
 	sapi_add_header(cookie, len);
 }
 
-static ps_module *_php_find_ps_module(char *name)
+static ps_module *_php_find_ps_module(char *name PSLS_DC)
 {
 	ps_module *ret = NULL;
 	ps_module **mod;
-
-	PSLS_FETCH();
 
 	for(mod = ps_modules; ((*mod && (*mod)->name) || !*mod); mod++) {
 		if(*mod && !strcasecmp(name, (*mod)->name)) {
@@ -282,13 +275,12 @@ static ps_module *_php_find_ps_module(char *name)
 	return ret;
 }
 
-static void _php_session_start(void)
+static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
 	int send_cookie = 1;
 	char *session_data;
 	int datalen;
-	PSLS_FETCH();
 	ELS_FETCH();
 
 	if(!PS(id) &&
@@ -304,11 +296,11 @@ static void _php_session_start(void)
 	}
 
 	if(send_cookie) {
-		_php_session_send_cookie();
+		_php_session_send_cookie(PSLS_C);
 	}
 	PS(nr_open_sessions)++;
 
-	_php_session_initialize();
+	_php_session_initialize(PSLS_C);
 }
 
 /* {{{ proto string session_name([string newname])
@@ -437,7 +429,7 @@ PHP_FUNCTION(session_register)
 
 	convert_to_string(p_name);
 	
-	if(!PS(nr_open_sessions)) _php_session_start();
+	if(!PS(nr_open_sessions)) _php_session_start(PSLS_C);
 	PS_ADD_VAR(p_name->value.str.val);
 }
 /* }}} */
@@ -467,7 +459,7 @@ PHP_FUNCTION(session_encode)
 	int len;
 	char *enc;
 
-	enc = _php_session_encode(&len);
+	enc = _php_session_encode(&len PSLS_CC);
 	RETVAL_STRINGL(enc, len, 0);
 }
 /* }}} */
@@ -482,7 +474,7 @@ PHP_FUNCTION(session_decode)
 		WRONG_PARAM_COUNT;
 	}
 
-	_php_session_decode(str->value.str.val, str->value.str.len);
+	_php_session_decode(str->value.str.val, str->value.str.len PSLS_CC);
 }
 /* }}} */
 
@@ -490,7 +482,9 @@ PHP_FUNCTION(session_decode)
    Begin session - reinitializes freezed variables, registers browsers etc */
 PHP_FUNCTION(session_start)
 {
-	_php_session_start();
+	PSLS_FETCH();
+
+	_php_session_start(PSLS_C);
 }
 /* }}} */
 
