@@ -28,32 +28,24 @@ class DbaReader implements Iterator
 	 * @param handler Handler to use for database access.
 	 */
 	function __construct($file, $handler) {
-		$this->db = dba_open($file, 'r', $handler);
+		if (!$this->db = dba_open($file, 'r', $handler)) {
+		    throw new exception('Could not open file ' . $file);
+		}
 	}
 	
 	/**
 	 * Close database.
 	 */
 	function __destruct() {
-		if ($this->db) {
-			dba_close($this->db);
-		}
+		dba_close($this->db);
 	}
 
 	/**
 	 * Rewind to first element.
 	 */
 	function rewind() {
-		if ($this->db) {
-			$this->key = dba_firstkey($this->db);
-		}
-	}
-
-	/**
-	 * @return Current data.
-	 */
-	function current() {
-		return $this->val;
+		$this->key = dba_firstkey($this->db);
+		fetch_data();
 	}
 
 	/**
@@ -62,12 +54,24 @@ class DbaReader implements Iterator
 	 * @return void
 	 */
 	function next() {
-		if ($this->db) {
-			$this->key = dba_nextkey($this->db);
-			if ($this->key !== false) {
-				$this->val = dba_fetch($this->key, $this->db);
-			}
+		$this->key = dba_nextkey($this->db);
+		fetch_data();
+	}
+
+    /**
+     * Fetches the current data if $key is valid
+     */	
+	private function fetch_data() {
+		if ($this->key !== false) {
+			$this->val = dba_fetch($this->key, $this->db);
 		}
+	}
+
+	/**
+	 * @return Current data.
+	 */
+	function current() {
+		return $this->val;
 	}
 
 	/**
