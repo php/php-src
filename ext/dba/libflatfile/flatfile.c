@@ -91,7 +91,7 @@ datum flatfile_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 	if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
 		if (php_stream_gets(dba->fp, buf, sizeof(buf))) {
 			value_datum.dsize = atoi(buf);
-			value_datum.dptr = emalloc(value_datum.dsize+1);
+			value_datum.dptr = safe_emalloc(value_datum.dsize, 1, 1);
 			value_datum.dsize = php_stream_read(dba->fp, value_datum.dptr, value_datum.dsize);
 		} else {
 			value_datum.dptr = NULL;
