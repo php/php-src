@@ -266,7 +266,12 @@ int php_init_config(char *php_ini_path_override)
 	fh.handle.fp = NULL;
 	/* Check if php_ini_path_override is a file */
 	if (php_ini_path_override && php_ini_path_override[0]) {
-		fh.handle.fp = VCWD_FOPEN(php_ini_path_override, "r");
+		struct stat statbuf;
+		if (!VCWD_STAT(php_ini_path_override, &statbuf)) {
+			if (!S_ISDIR(statbuf.st_mode)) {
+				fh.handle.fp = VCWD_FOPEN(php_ini_path_override, "r");
+			}
+		}
 	}
 	/* Search php.ini file in search path */
 	if (!fh.handle.fp)
