@@ -664,7 +664,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 			}
 
-		/* Normal form variable, safe to read all data into memory */
+			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
 
 				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
@@ -685,7 +685,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				continue;
 			}
 
-		/* Handle file */
+			/* Handle file */
 			fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
 			if (!fp) {
 				sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
@@ -728,7 +728,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
 			}
 
-		/* Initialize variables */
+			/* Initialize variables */
 			add_protected_variable(param TSRMLS_CC);
 
 			magic_quotes_gpc = PG(magic_quotes_gpc);
@@ -774,7 +774,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
 			}
 
-		/* Add $foo[name] */
+			/* Add $foo[name] */
 			if (is_arr_upload) {
 				sprintf(lbuf, "%s[name][%s]", abuf, array_index);
 			} else {
@@ -788,12 +788,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			s = "";
 			efree(filename);
 	
-		/* Possible Content-Type: */
+			/* Possible Content-Type: */
 			if (!(cd = php_mime_get_hdr_value(header, "Content-Type")) || filename == "") {
 				cd = "";
 			}
 
-		/* Add $foo_type */
+			/* Add $foo_type */
 			if (is_arr_upload) {
 				sprintf(lbuf, "%s_type[%s]", abuf, array_index);
 			} else {
@@ -801,7 +801,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 			safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
 
-		/* Add $foo[type] */
+			/* Add $foo[type] */
 			if (is_arr_upload) {
 				sprintf(lbuf, "%s[type][%s]", abuf, array_index);
 			} else {
@@ -810,7 +810,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
 
 	
-		/* Add $foo[tmp_name] */
+			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
 				sprintf(lbuf, "%s[tmp_name][%s]", abuf, array_index);
 			} else {
@@ -826,8 +826,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 				error_type.value.lval = cancel_upload;
 				error_type.type = IS_LONG;
-				
-			/* Add $foo[error] */
+
+				/* Add $foo[error] */
 				if (cancel_upload) {
 					file_size.value.lval = 0;
 					file_size.type = IS_LONG;
@@ -842,8 +842,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					sprintf(lbuf, "%s[error]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
-							
-			/* Add $foo_size */
+
+				/* Add $foo_size */
 				if (is_arr_upload) {
 					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
 				} else {
@@ -851,7 +851,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 				safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
 
-			/* Add $foo[size] */
+				/* Add $foo[size] */
 				if (is_arr_upload) {
 					sprintf(lbuf, "%s[size][%s]", abuf, array_index);
 				} else {
