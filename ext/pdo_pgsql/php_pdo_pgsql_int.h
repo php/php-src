@@ -38,6 +38,7 @@ typedef struct {
 	unsigned 	attached:1;
 	unsigned 	_reserved:31;
 	pdo_pgsql_error_info	einfo;
+	Oid 		pgoid;
 } pdo_pgsql_db_handle;
 
 typedef struct {

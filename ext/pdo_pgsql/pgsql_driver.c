@@ -117,6 +117,7 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 			pdo_pgsql_error(dbh, qs);
 			return 0;
 		}
+		H->pgoid = PQoidValue(res);
 	}
 
 	return 1;
@@ -134,6 +135,16 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+static long pdo_pgsql_last_insert_id(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	
+	if (H->pgoid == InvalidOid) {
+		return -1;
+	}
+
+	return (long) H->pgoid;
+}
 
 static struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
@@ -144,7 +155,7 @@ static struct pdo_dbh_methods pgsql_methods = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	pdo_pgsql_last_insert_id,
 	pdo_pgsql_fetch_error_func
 };
 
@@ -185,6 +196,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	H->attached = 1;
+	H->pgoid = -1;
 
 	dbh->methods = &pgsql_methods;
 	dbh->alloc_own_columns = 1;
