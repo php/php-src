@@ -123,7 +123,7 @@ PEAR Installer:
     <deps>
       <dep type="php" rel="ge" version="4.1"/>
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
-      <dep type="pkg" rel="ge" version="1.0">Console_Getopt</dep>
+      <dep type="pkg" rel="ge" version="2.0">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
       <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
       <dep type="ext" rel="has">xml</dep>

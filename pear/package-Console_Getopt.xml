@@ -23,15 +23,18 @@ short and long options.</description>
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0</version>
-    <date>2002-09-13</date>
-    <notes>Stable release</notes>
+    <version>2.0</version>
+    <date>2003-12-06</date>
+    <notes>Revert of erroneous POSIX compatibility fix (BC break)</notes>
     <state>stable</state>
     <filelist>
      <dir name="Console">
       <file role="php" name="Getopt.php"/>
      </dir>
     </filelist>
+	<deps>
+	 <dep type="pkg" rel="ge" version="1.3b4">PEAR</dep>
+	</deps>
   </release>
   <changelog>
     <release>
