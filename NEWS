@@ -12,9 +12,9 @@ PHP 4                                                                      NEWS
   . Added socket_clear_error() which clears the last error on a socket
   . Removed all code pertaining to fd_sets (socket_fd_*)
   . Modfied/Improved socket_select() to take resource arrays instead of fd_sets
-     ex. <?php $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
-	       $r=socket_select($rfds, $wfds, NULL, 1);
-	       print "Ready to read:\n"; var_dump($rfds); ?>
+    ex. <?php $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
+              $r=socket_select($rfds, $wfds, NULL, 1);
+              print "Ready to read:\n"; var_dump($rfds); ?>
 - Returned iconv support to FreeBSD (kalowsky)
 - Added CLI (command line intrerface) sapi based on a cut-down version
   of the CGI sapi which is more suited for writing shell scripts. Some of
