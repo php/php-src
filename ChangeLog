@@ -1,3 +1,23 @@
+2001-09-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      main/php_version.h: this is not pure rc2 anymore
+
+    * build/library.mk: MFH.. necessary fix
+
+2001-09-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c:
+    more data types supported (and warn if unsupported encountered)
+
+2001-09-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/tests/strings/strtr.phpt
+      ext/standard/string.c:
+    fix strtr() when called with two parameters. this has been broken for some time!
+    guys, when "optimizing" functions you _shoudl_ write a testcase for the
+    working function and make _sure_ that it works afterwards!
+
 2001-09-12  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/dbplus/config.m4: be more flexible in finding a db++ installation
