@@ -854,7 +854,7 @@ PHP_FUNCTION(sybase_query)
 		if (!result->fields[i].column_source) {
 			result->fields[i].column_source = empty_string;
 		}
-		result->Z_TYPE(fields[i]) = column_types[i];
+		Z_TYPE(result->fields[i]) = column_types[i];
 		/* set numeric flag */
 		switch (column_types[i]) {
 			case SYBINT2:
@@ -1194,7 +1194,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	add_property_long(return_value, "max_length",result->fields[field_offset].max_length);
 	add_property_string(return_value, "column_source",result->fields[field_offset].column_source, 1);
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
-	add_property_string(return_value, "type", php_sybase_get_field_name(result->Z_TYPE(fields[field_offset])), 1);
+	add_property_string(return_value, "type", php_sybase_get_field_name(Z_TYPE(result->fields[field_offset])), 1);
 }
 /* }}} */
 
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(sybase_result)
 			break;
 	}
 
-	*return_value = *result->Z_LVAL_P(data[row)][field_offset];
+	*return_value = *Z_LVAL_P(result->data[row)][field_offset];
 	pval_copy_constructor(return_value);
 }
 /* }}} */

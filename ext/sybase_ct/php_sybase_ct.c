@@ -979,9 +979,9 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 			if (indicators[j] == -1) { /* null value */
 				ZVAL_FALSE(&result->data[i][j]);
 			} else {
-				result->Z_STRLEN(data[i][j]) = lengths[j]-1;  /* we don't need the NULL in the length */
-				result->Z_STRVAL(data[i][j]) = estrndup(tmp_buffer[j], lengths[j]);
-				result->Z_TYPE(data[i][j]) = IS_STRING;
+				Z_STRLEN(result->data[i][j]) = lengths[j]-1;  /* we don't need the NULL in the length */
+				Z_STRVAL(result->data[i][j]) = estrndup(tmp_buffer[j], lengths[j]);
+				Z_TYPE(result->data[i][j]) = IS_STRING;
 			}
 		}
 	}
@@ -1009,7 +1009,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 			result->fields[i].column_source = empty_string;
 			result->fields[i].max_length = datafmt[i].maxlength-1;
 			result->fields[i].numeric = numerics[i];
-			result->Z_TYPE(fields[i]) = types[i];
+			Z_TYPE(result->fields[i]) = types[i];
 		}
 	}
 
@@ -1514,7 +1514,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	add_property_long(return_value, "max_length", result->fields[field_offset].max_length);
 	add_property_string(return_value, "column_source", result->fields[field_offset].column_source, 1);
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
-	add_property_string(return_value, "type", php_sybase_get_field_name(result->Z_TYPE(fields[field_offset])), 1);
+	add_property_string(return_value, "type", php_sybase_get_field_name(Z_TYPE(result->fields[field_offset])), 1);
 }
 /* }}} */
 

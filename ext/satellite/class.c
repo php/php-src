@@ -61,7 +61,7 @@ void orbit_class_function_call(
 
 	/* constructor or normal function? */
 	if (zend_llist_count(pPropertyReference->elements_list) == 1
-			&& !strcasecmp(function_name->Z_STRVAL(element), pClass->name))
+			&& !strcasecmp(Z_STRVAL(function_name->element), pClass->name))
 	{
 		/* constructor */
 		if (pConstructor)
@@ -96,7 +96,7 @@ void orbit_class_function_call(
 			}
 			
 			/* pval * return_value is a part of INTERNAL_FUNCTION_PARAMETERS */
-			(*pCallFunction)(p_data, function_name->Z_STRVAL(element),
+			(*pCallFunction)(p_data, Z_STRVAL(function_name->element),
 											 ZEND_NUM_ARGS(), arguments, return_value);
 		}
 		else

@@ -872,9 +872,9 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
    callback_params[0] = pData->caller_params;
 
    /* loop through and call all registered callbacks */
-   zend_hash_internal_pointer_reset(pData->server->Z_ARRVAL_P(introspection_map));
+   zend_hash_internal_pointer_reset(Z_ARRVAL_P(pData->server->introspection_map));
    while(1) {
-      if(zend_hash_get_current_data(pData->server->Z_ARRVAL_P(introspection_map), 
+      if(zend_hash_get_current_data(Z_ARRVAL_P(pData->server->introspection_map), 
                                     (void**)&php_function) == SUCCESS) {
 
          /* php func prototype: function string user_func($user_params) */
@@ -915,11 +915,11 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
          break;
       }
 
-      zend_hash_move_forward(pData->server->Z_ARRVAL_P(introspection_map));
+      zend_hash_move_forward(Z_ARRVAL_P(pData->server->introspection_map));
    }
 
    /* so we don't call the same callbacks ever again */
-   zend_hash_clean(pData->server->Z_ARRVAL_P(introspection_map));
+   zend_hash_clean(Z_ARRVAL_P(pData->server->introspection_map));
 }
 
 /* {{{ proto boolean xmlrpc_server_register_method(handle server, string method_name, string function)
@@ -1051,7 +1051,7 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
             data.server = server;
 
             /* check if the called method has been previous registered */
-            if(zend_hash_find(server->Z_ARRVAL_P(method_map), 
+            if(zend_hash_find(Z_ARRVAL_P(server->method_map), 
                               data.Z_STRVAL_P(xmlrpc_method), 
                               data.Z_STRLEN_P(xmlrpc_method) + 1, 
                               (void**)&php_function) == SUCCESS) {

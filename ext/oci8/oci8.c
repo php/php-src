@@ -688,9 +688,9 @@ _oci_bind_post_exec(void *data TSRMLS_DC)
 		zval *val = bind->zval;
 		zval_dtor(val);
 		ZVAL_NULL(val);
-	} else if (bind->Z_TYPE_P(zval) == IS_STRING && (bind->Z_STRVAL_P(zval) != empty_string)) {
-		bind->Z_STRVAL_P(zval) = erealloc(bind->Z_STRVAL_P(zval), bind->Z_STRLEN_P(zval)+1);
-		bind->Z_STRVAL_P(zval)[ bind->Z_STRLEN_P(zval) ] = '\0';
+	} else if (Z_TYPE_P(bind->zval) == IS_STRING && (Z_STRVAL_P(bind->zval) != empty_string)) {
+		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRLEN_P(bind->zval)+1);
+		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
 	}
 
 
@@ -2056,11 +2056,11 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 		zval_dtor(val);
 		
 		Z_STRLEN_P(val) = OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		Z_STRVAL_P(val) = emalloc(phpbind->Z_STRLEN_P(zval));
+		Z_STRVAL_P(val) = emalloc(Z_STRLEN_P(phpbind->zval));
 		
 		/* XXX we assume that zend-zval len has 4 bytes */
-		*alenpp = (ub4*) &phpbind->Z_STRLEN_P(zval); 
-		*bufpp = phpbind->Z_STRVAL_P(zval);
+		*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval); 
+		*bufpp = Z_STRVAL_P(phpbind->zval);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
 		*indpp = &phpbind->indicator;
