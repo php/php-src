@@ -155,8 +155,8 @@ PHP 4                                                                      NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 27 Feb 2002, Version 4.1.2
-- Fixed start up failure when mm save handler is used and there is multiple
-  SAPIs are working at the same time. (Yasuo)
+- Fixed start up failure when mm save handler is used and there are multiple
+  SAPIs working at the same time. (Yasuo)
 - Fixed the Roxen SAPI (Yasuo)
 - Fixed a buffer overflow in the RFC-1867 file upload code (Stefan)
 - Fixed a crash in the session module (Yasuo)
