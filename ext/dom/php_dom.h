@@ -24,7 +24,7 @@
 #define PHP_DOM_H
 
 extern zend_module_entry dom_module_entry;
-#define dom_module_ptr &dom_module_entry
+#define phpext_dom_ptr &dom_module_entry
 
 #ifdef ZTS
 #include "TSRM.h"
