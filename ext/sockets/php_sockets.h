@@ -70,7 +70,9 @@ PHP_FUNCTION(socket_recv);
 PHP_FUNCTION(socket_send);
 PHP_FUNCTION(socket_recvfrom);
 PHP_FUNCTION(socket_sendto);
+#ifdef HAVE_CMSGHDR
 PHP_FUNCTION(socket_recvmsg);
+#endif
 PHP_FUNCTION(socket_sendmsg);
 PHP_FUNCTION(socket_readv);
 PHP_FUNCTION(socket_writev);
