@@ -481,7 +481,7 @@ static void sapi_isapi_register_server_variables2(char **server_variables, LPEXT
 				recorded_values[p-server_variables] = estrndup(static_variable_buf, variable_len);
 			}
 		} else if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-			variable_buf = (char *) emalloc(variable_len);
+			variable_buf = (char *) emalloc(variable_len+1);
 			if (lpECB->GetServerVariable(lpECB->ConnID, *p, variable_buf, &variable_len)
 				&& variable_buf[0]) {
 				php_register_variable(*p, variable_buf, track_vars_array TSRMLS_CC);
