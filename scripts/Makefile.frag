@@ -10,8 +10,8 @@ BUILD_FILES = \
 	scripts/phpize.m4 \
 	build/mkdep.awk \
 	build/shtool \
+	build/scan_makefile_in.awk \
 	Makefile.global \
-	scan_makefile_in.awk \
 	acinclude.m4
 
 bin_SCRIPTS = phpize php-config
