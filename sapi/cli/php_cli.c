@@ -296,6 +296,51 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 	efree(*arg);
 }
 
+static void cli_register_file_handles(TSRMLS_D)
+{
+	zval *zin, *zout, *zerr;
+	php_stream *s_in, *s_out, *s_err;
+	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
+	zend_constant ic, oc, ec;
+	
+	MAKE_STD_ZVAL(zin);
+	MAKE_STD_ZVAL(zout);
+	MAKE_STD_ZVAL(zerr);
+
+	s_in  = php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, sc_in);
+	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
+	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
+
+	if (s_in==NULL || s_out==NULL || s_err==NULL) {
+		return;
+	}
+
+	php_stream_to_zval(s_in,  zin);
+	php_stream_to_zval(s_out, zout);
+	php_stream_to_zval(s_err, zerr);
+	
+	ic.value = *zin;
+	zval_copy_ctor(&ic.value);
+	ic.flags = CONST_CS;
+	ic.name = zend_strndup("STDIN", 6);
+	ic.name_len = 6;
+	zend_register_constant(&ic TSRMLS_CC);
+
+	oc.value = *zout;
+	zval_copy_ctor(&oc.value);
+	oc.flags = CONST_CS;
+	oc.name = zend_strndup("STDOUT", 7);
+	oc.name_len = 7;
+	zend_register_constant(&oc TSRMLS_CC);
+
+	ec.value = *zerr;
+	zval_copy_ctor(&ec.value);
+	ec.flags = CONST_CS;
+	ec.name = zend_strndup("STDERR", 7);
+	ec.name_len = 7;
+	zend_register_constant(&ec TSRMLS_CC);
+}
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -619,6 +664,9 @@ int main(int argc, char *argv[])
 
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
+			if (strcmp(file_handle.filename, "-")) {
+				cli_register_file_handles(TSRMLS_C);
+			}
 			if (php_execute_script(&file_handle TSRMLS_CC)) {
 				exit_status = EG(exit_status);
 			} else {
@@ -663,9 +711,11 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case PHP_MODE_CLI_DIRECT:
+			cli_register_file_handles(TSRMLS_C);
 			if (zend_eval_string(exec_direct, NULL, "Command line code" TSRMLS_CC) == FAILURE) {
 				exit_status=254;
 			}
+			break;
 		}
 
 		php_request_shutdown((void *) 0);
