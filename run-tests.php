@@ -832,7 +832,7 @@ COMMAND $cmd
 
 	// Test failed so we need to report details.
 	if ($warn) {
-		echo "WARN $tested\n";
+		echo "WARN $tested$info\n";
 	} else {
 		echo "FAIL $tested\n";
 	}
