@@ -32,13 +32,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(xsl)
 */
 
-/* True global resources - no need for thread safety here */
-
-static HashTable classes;
-/* not used right now  
 static zend_object_handlers xsl_object_handlers;
-static HashTable xsl_xsltprocessor_prop_handlers;
-*/
 
 /* {{{ xsl_functions[]
  *
@@ -73,22 +67,13 @@ zend_module_entry xsl_module_entry = {
 ZEND_GET_MODULE(xsl)
 #endif
 
+/* {{{ xsl_objects_clone */
+void xsl_objects_clone(void *object, void **object_clone TSRMLS_DC)
+{
+	/* TODO */
+}
+/* }}} */
 
-/************
-* copied from php_dom .... should be in a common file...
-**********/
-
-
-typedef int (*dom_read_t)(xsl_object *obj, zval **retval TSRMLS_DC);
-typedef int (*dom_write_t)(xsl_object *obj, zval *newval TSRMLS_DC);
-
-typedef struct _dom_prop_handler {
-	dom_read_t read_func;
-	dom_write_t write_func;
-} dom_prop_handler;
-
-/* end copied from php_dom.c */
-	
 /* {{{ xsl_objects_dtor */
 void xsl_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
@@ -119,7 +104,6 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
 	xsl_object *intern;
-	zend_class_entry *base_class;
 	zval *tmp;
 
 	intern = emalloc(sizeof(xsl_object));
@@ -130,22 +114,15 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;
 	intern->document = NULL;
-	
-	base_class = class_type;
-	while(base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
-		base_class = base_class->parent;
-	}
-
-	zend_hash_find(&classes, base_class->name , base_class->name_length + 1, &intern->prop_handler);
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
-	retval.handle = zend_objects_store_put(intern, xsl_objects_dtor, dom_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, xsl_objects_dtor, xsl_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = &dom_object_handlers;
+	retval.handlers = &xsl_object_handlers;
 	return retval;
 }
 /* }}} */
@@ -156,11 +133,8 @@ PHP_MINIT_FUNCTION(xsl)
 {
 	
 	zend_class_entry ce;
-	zend_hash_init(&classes, 0, NULL, NULL, 1);
 	
-	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	dom_object_handlers.read_property = dom_read_property;
-	dom_object_handlers.write_property = dom_write_property;
+	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	
 	REGISTER_XSL_CLASS(ce, "xsltprocessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
 	return SUCCESS;
