@@ -1447,7 +1447,7 @@ consult the installation file that came with this distribution, or visit \n\
 			if we are unable to open path_translated and we are not
 			running from shell (so fp == NULL), then fail.
 		*/
-		if (retval == FAILURE || file_handle.handle.fp == NULL) {
+		if (retval == FAILURE && file_handle.handle.fp == NULL) {
 			SG(sapi_headers).http_response_code = 404;
 			PUTS("No input file specified.\n");
 			php_request_shutdown((void *) 0);
