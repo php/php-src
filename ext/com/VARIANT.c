@@ -98,10 +98,18 @@ PHP_MINIT_FUNCTION(VARIANT)
 	REGISTER_LONG_CONSTANT("CP_ACP", CP_ACP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_MACCP", CP_MACCP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_OEMCP", CP_OEMCP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CP_SYMBOL", CP_SYMBOL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CP_THREAD_ACP", CP_THREAD_ACP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_UTF7", CP_UTF7, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_UTF8", CP_UTF8, CONST_CS | CONST_PERSISTENT);
+#ifdef CP_SYMBOL
+	REGISTER_LONG_CONSTANT("CP_SYMBOL", CP_SYMBOL, CONST_CS | CONST_PERSISTENT);
+#else
+#	error	"CP_SYMBOL undefined"
+#endif
+#ifdef CP_THREAD_ACP
+	REGISTER_LONG_CONSTANT("CP_THREAD_ACP", CP_THREAD_ACP, CONST_CS | CONST_PERSISTENT);
+#else
+#	error	"CP_THREAD_ACP undefined"
+#endif
 
 	php_register_VARIANT_class();
 	return SUCCESS;
@@ -169,8 +177,8 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 		*object_handle = *return_value;
 		pval_copy_constructor(object_handle);
 		INIT_PZVAL(object_handle);
-		zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
-		pval_destructor(&function_name->element);
+		zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
+		zval_dtor(&function_name->element);
 	}
 }
 
@@ -184,7 +192,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 	VARIANT *var_arg;
 
 	/* fetch the VARIANT structure */
-	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
+	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &var_handle);
 	var_arg = zend_list_find(Z_LVAL_PP(var_handle), &type);
 
 	if(!var_arg || (type != IS_VARIANT))
@@ -220,7 +228,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 				php_error(E_WARNING, "Unknown method.");
 				break;
 
-				pval_destructor(&overloaded_property->element);
+				zval_dtor(&overloaded_property->element);
 		}
 	}
 
@@ -236,7 +244,7 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 	VARIANT *var_arg;
 
 	/* fetch the VARIANT structure */
-	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
+	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &var_handle);
 	var_arg = zend_list_find(Z_LVAL_PP(var_handle), &type);
 
 	if(!var_arg || (type != IS_VARIANT))
@@ -244,7 +252,7 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 
 	overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
 	do_VARIANT_propset(var_arg, &overloaded_property->element, value);
-	pval_destructor(&overloaded_property->element);
+	zval_dtor(&overloaded_property->element);
 	return SUCCESS;
 }
 
@@ -423,7 +431,7 @@ static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value)
 
 static void php_variant_destructor(zend_rsrc_list_entry *rsrc)
 {
-	efree(rsrc);
+	FREE_VARIANT(rsrc->ptr);
 }
 
 void php_register_VARIANT_class()
