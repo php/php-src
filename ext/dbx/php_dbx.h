@@ -48,6 +48,7 @@ ZEND_MINFO_FUNCTION(dbx);
 ZEND_FUNCTION(dbx_connect);
 ZEND_FUNCTION(dbx_close);
 ZEND_FUNCTION(dbx_query);
+ZEND_FUNCTION(dbx_fetch_row);
 ZEND_FUNCTION(dbx_error);
 ZEND_FUNCTION(dbx_escape_string);
 

@@ -40,6 +40,7 @@
 #define DBX_COLNAMES_UNCHANGED (1<<3)
 #define DBX_COLNAMES_UPPERCASE (1<<4)
 #define DBX_COLNAMES_LOWERCASE (1<<5)
+#define DBX_RESULT_UNBUFFERED  (1<<6)
 
 #define DBX_CMP_NATIVE         (1<<0)
 #define DBX_CMP_TEXT           (1<<1)
