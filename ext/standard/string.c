@@ -1078,8 +1078,7 @@ PHP_FUNCTION(strtoupper)
 	}
 	convert_to_string_ex(arg);
 
-	*return_value = **arg;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*arg, 1, 0);
 	php_strtoupper(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
 }
 /* }}} */
@@ -1113,8 +1112,7 @@ PHP_FUNCTION(strtolower)
 	}
 	convert_to_string_ex(str);
 
-	*return_value = **str;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*str, 1, 0);
 	ret = php_strtolower(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
 }
 /* }}} */
@@ -1345,19 +1343,17 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
-		*return_value = *tmp;
+		RETVAL_ZVAL(tmp, 1, 0);
 	} else {
 		zval **element;
 		if (zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element) == SUCCESS) {
-			*return_value = **element;
+			RETVAL_ZVAL(*element, 1, 0);
 		} else {
 			ZVAL_EMPTY_STRING(return_value);
 		}
 	}
 
-	zval_copy_ctor(return_value);
-	zval_dtor(tmp);
-	efree(tmp);
+	zval_ptr_dtor(&tmp);
 }
 /* }}} */
 
@@ -4490,8 +4486,7 @@ PHP_FUNCTION(str_pad)
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
 	if (num_pad_chars < 0) {
-		*return_value = **input;
-		zval_copy_ctor(return_value);
+		RETVAL_ZVAL(*input, 1, 0);
 		return;
 	}
 
@@ -4598,9 +4593,7 @@ PHP_FUNCTION(str_rot13)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(arg);
-	*return_value = **arg;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*arg, 1, 0);
 
 	php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
 }
@@ -4644,8 +4637,7 @@ PHP_FUNCTION(str_shuffle)
 	}
 	
 	convert_to_string_ex(arg);
-	*return_value = **arg;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*arg, 1, 0);
 	if (Z_STRLEN_P(return_value) > 1) { 
 		php_string_shuffle(Z_STRVAL_P(return_value), (long) Z_STRLEN_P(return_value) TSRMLS_CC);
 	}
