@@ -51,10 +51,10 @@
 /* {{{ iconv_functions[] 
  */
 function_entry iconv_functions[] = {
-    PHP_FE(iconv,									NULL)
-    PHP_FE(ob_iconv_handler,						NULL)
-    PHP_FE(iconv_get_encoding,						NULL)
-    PHP_FE(iconv_set_encoding,						NULL)
+	PHP_FE(iconv,									NULL)
+	PHP_FE(ob_iconv_handler,						NULL)
+	PHP_FE(iconv_get_encoding,						NULL)
+	PHP_FE(iconv_set_encoding,						NULL)
 	{NULL, NULL, NULL}	
 };
 /* }}} */
@@ -90,8 +90,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-static void 
-php_iconv_init_globals(zend_iconv_globals *iconv_globals)
+static void php_iconv_init_globals(zend_iconv_globals *iconv_globals)
 {
 	iconv_globals->input_encoding = NULL;
 	iconv_globals->output_encoding = NULL;
@@ -164,16 +163,16 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
    Returns str converted to the out_charset character set */
 PHP_FUNCTION(iconv)
 {
-    zval **in_charset, **out_charset, **in_buffer;
+	zval **in_charset, **out_charset, **in_buffer;
 	char *out_buffer;
 	
-    if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &in_charset, &out_charset, &in_buffer) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &in_charset, &out_charset, &in_buffer) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
-    convert_to_string_ex(in_charset);
-    convert_to_string_ex(out_charset);
-    convert_to_string_ex(in_buffer);
+	convert_to_string_ex(in_charset);
+	convert_to_string_ex(out_charset);
+	convert_to_string_ex(in_buffer);
 
 	if (php_iconv_string(Z_STRVAL_PP(in_buffer), &out_buffer, Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset)) == SUCCESS) {
 		RETVAL_STRING(out_buffer, 0);
