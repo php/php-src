@@ -61,7 +61,7 @@ array(3) {
   }
 }
 
-Notice: sqlite_fetch_all(): One or more rowsets were already returned in %ssqlite_014.php on line %d
+Warning: sqlite_fetch_all(): One or more rowsets were already returned; returning NULL this time in %ssqlite_014.php on line %d
 array(0) {
 }
 unbuffered with fetch_array

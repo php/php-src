@@ -1810,7 +1810,7 @@ PHP_FUNCTION(sqlite_fetch_all)
 
 	if (res->curr_row >= res->nrows && res->nrows) {
 		if (!res->buffered) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "One or more rowsets were already returned");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "One or more rowsets were already returned; returning NULL this time");
 		} else {
 			res->curr_row = 0;
 		}
