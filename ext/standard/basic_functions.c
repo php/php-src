@@ -680,7 +680,9 @@ function_entry basic_functions[] = {
 	PHP_FE(chown,															NULL)
 	PHP_FE(chgrp,															NULL)
 	PHP_FE(chmod,															NULL)
+#if HAVE_UTIME
 	PHP_FE(touch,															NULL)
+#endif	
 	PHP_FE(clearstatcache,													NULL)
 	PHP_FE(disk_total_space,												NULL)
 	PHP_FE(disk_free_space,													NULL)

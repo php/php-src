@@ -48,7 +48,9 @@ PHP_FUNCTION(disk_free_space);
 PHP_FUNCTION(chown);
 PHP_FUNCTION(chgrp);
 PHP_FUNCTION(chmod);
+#if HAVE_UTIME
 PHP_FUNCTION(touch);
+#endif
 PHP_FUNCTION(clearstatcache);
 
 #define MAKE_LONG_ZVAL_INCREF(name, val)\
