@@ -2199,8 +2199,8 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 					break;
 			}
 
-			if (CG(active_class_entry) && (opline_ptr->op1.op_type == IS_CONST)) {
-				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+			if (CG(active_class_entry) && (opline_ptr->op2.op_type == IS_CONST)) {
+				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len+1)) {
 					char *priv_name;
 					int priv_name_length;
                                         
