@@ -97,6 +97,7 @@ SAPI_API int sapi_add_header(const char *header_line, uint header_line_len)
 SAPI_API int sapi_send_headers()
 {
 	int retval;
+	sapi_header_struct default_header = { DEFAULT_CONTENT_TYPE, sizeof(DEFAULT_CONTENT_TYPE)-1 };
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
@@ -115,7 +116,13 @@ SAPI_API int sapi_send_headers()
 			return SUCCESS;
 			break;
 		case SAPI_HEADER_DO_SEND:
+			if (SG(sapi_headers).content_type.header) {
+				sapi_module.send_header(&SG(sapi_headers).content_type, SG(server_context));
+			} else {
+				sapi_module.send_header(&default_header, SG(server_context));
+			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
+			sapi_module.send_header(NULL, SG(server_context));
 			SG(headers_sent) = 1;
 			return SUCCESS;
 			break;

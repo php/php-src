@@ -76,6 +76,15 @@ static int zend_cgibin_ub_write(const char *str, uint str_length)
 }
 
 
+static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_context)
+{
+	if (sapi_header) {
+		PHPWRITE_H(sapi_header->header, sapi_header->header_len);
+	}
+	PHPWRITE_H("\r\n", 2);
+}
+
+
 static sapi_module_struct sapi_module = {
 	"PHP Language",					/* name */
 									
@@ -83,6 +92,10 @@ static sapi_module_struct sapi_module = {
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	zend_cgibin_ub_write,			/* unbuffered write */
+
+	NULL,							/* header handler */
+	NULL,							/* send headers handler */
+	sapi_cgi_send_header,			/* send header handler */
 };
 
 
@@ -117,8 +130,15 @@ static void php_cgi_usage(char *argv0)
 
 static void init_request_info(SLS_D)
 {
+	char *request_method = getenv("REQUEST_METHOD");
+
 	SG(request_info).query_string = getenv("QUERY_STRING");
 	SG(request_info).request_uri = getenv("PATH_INFO");
+	if (request_method && !strcmp(request_method, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 0;
+	}
 }
 
 
@@ -215,7 +235,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			switch (c) {
 				case 'f':
 					if (!_cgi_started){ 
-						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
 						}
@@ -228,7 +248,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'v':
 					if (!_cgi_started) {
-						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
 						}
@@ -238,7 +258,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'i':
 					if (!_cgi_started) {
-						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
 						}
@@ -286,7 +306,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 
 	if (!_cgi_started) {
-		if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 			php_module_shutdown();
 			return FAILURE;
 		}
