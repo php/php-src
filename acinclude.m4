@@ -1222,7 +1222,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
 	\$(LIBTOOL) --mode=install cp $3/$1.la \$(phplibdir)
 
 $3/$1.la: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link \$(CC) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) -o \[$]@ -export-dynamic -avoid-version -prefer-non-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --mode=link \$(CC) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) -o \[$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
