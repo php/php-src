@@ -211,6 +211,10 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define RETURN_FALSE  { RETVAL_FALSE; return; }
 #define RETURN_TRUE   { RETVAL_TRUE; return; }
 
+#define RETURN_SQLNULL RETURN_LONG(0)
+#define RETVAL_SQLNULL RETVAL_LONG(0)
+#define IS_SQLNULL(p) ((p)->type==IS_LONG && ((p)->value.lval == 0))
+
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\
 									zval *var;																\
