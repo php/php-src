@@ -755,6 +755,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_search,													NULL)
 	PHP_FE(extract,															NULL)
 	PHP_FE(compact,															NULL)
+	PHP_FE(array_init,														NULL)
 	PHP_FE(range,															NULL)
 	PHP_FE(array_multisort,													NULL)
 	PHP_FE(array_push,				first_arg_force_ref)

@@ -52,6 +52,7 @@ PHP_FUNCTION(in_array);
 PHP_FUNCTION(array_search);
 PHP_FUNCTION(extract);
 PHP_FUNCTION(compact);
+PHP_FUNCTION(array_init);
 PHP_FUNCTION(range);
 PHP_FUNCTION(shuffle);
 PHP_FUNCTION(array_multisort);

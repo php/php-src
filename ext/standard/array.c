@@ -516,7 +516,7 @@ PHP_FUNCTION(rsort)
 	}
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 {
@@ -1322,6 +1322,55 @@ PHP_FUNCTION(compact)
 	}
 	
 	efree(args);
+}
+/* }}} */
+
+/* {{{ proto array array_init(int start_key, int num, mixed val)
+   Create an array containing num elements starting with index start_key each initialized to val */
+PHP_FUNCTION(array_init)
+{
+	zval **start_key, **num, **val, *newval;
+	int i;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &start_key, &num, &val) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+    /* allocate an array for return */
+    if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+    }
+
+	SEPARATE_ZVAL(val);
+
+	switch(Z_TYPE_PP(start_key)) {
+		case IS_STRING:
+		case IS_LONG:
+		case IS_DOUBLE:
+			convert_to_long_ex(start_key);
+			MAKE_STD_ZVAL(newval);
+			*newval = **val;
+			zval_copy_ctor(newval);
+			add_index_zval(return_value, Z_LVAL_PP(start_key), newval);
+			break;
+		default:
+			php_error(E_WARNING, "Wrong datatype for start key in array_init()");
+			RETURN_FALSE;
+			break;
+	}	
+
+	convert_to_long_ex(num);
+	i = Z_LVAL_PP(num) - 1;	
+	if(i<0) {
+		php_error(E_WARNING, "Number of elements must be positive in array_init()");
+		RETURN_FALSE;
+	}
+	while(i--) {
+		MAKE_STD_ZVAL(newval);
+		*newval = **val;
+		zval_copy_ctor(newval);
+		add_next_index_zval(return_value, newval);
+	}
 }
 /* }}} */
 
