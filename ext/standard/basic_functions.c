@@ -296,7 +296,7 @@ function_entry basic_functions[] = {
 	PHP_FE(print_r,					NULL)
 	
 	PHP_FE(setcookie,								NULL)
-	PHP_FE(Header,									NULL)
+	PHP_NAMED_FE(header,		PHP_FN(Header),							NULL)
 	PHP_FE(headers_sent,							NULL)
 	
 	PHP_FE(function_exists,				NULL)
