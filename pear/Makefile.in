@@ -40,6 +40,7 @@ PEAR_FILES = \
 	Cache/Graphics.php \
 	Cache/Output.php \
 	Cache/Container/db.php \
+	Cache/Container/dbx.php \
 	Cache/Container/file.php \
 	Cache/Container/phplib.php \
 	Cache/Container/shm.php \
@@ -62,10 +63,14 @@ PEAR_FILES = \
 	File/Find.php \
 	File/Passwd.php \
 	File/SearchReplace.php \
+	HTML/Common.php \
 	HTML/Form.php \
 	HTML/IT.php \
 	HTML/ITX.php \
+	HTML/Page.php \
 	HTML/Processor.php \
+	HTML/Select.php \
+	HTML/Table.php \
 	HTTP.php \
 	HTTP/Compress.php \
 	Image/Remote.php \
