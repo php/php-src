@@ -97,7 +97,7 @@
 #endif
 
 #if HAVE_BUILD_DEFS_H
-#include "build-defs.h"
+#include <build-defs.h>
 #endif
 
 /*
