@@ -1,3 +1,32 @@
+2002-08-08  sebastian  <sebastian@pb1.pair.com>
+
+    * zend_objects.c: Fix warning.
+
+2002-08-08  stas  <stas@pb1.pair.com>
+
+    * zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h: Add ZEND_API to functions
+
+2002-08-08  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_operators.c
+      zend_operators.h:
+    - Make new 'is' operator work with classes only and return false when
+    - the object isn't of the said class or the value isn't an object.
+
+    * zend_static_allocator.c: - Bad Harald! :)
+
+2002-08-08  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * zend_alloc.c: MFZE1
+
 2002-08-07  phanto  <phanto@pb1.pair.com>
 
     * zend_static_allocator.c
