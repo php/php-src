@@ -1,3 +1,37 @@
+2000-12-19  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/credits.c
+      ext/standard/info.c
+      ext/standard/info.h: Add the QA team to the credits
+
+2000-12-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt:
+     ctype functions now follow the extension naming conventions 
+
+2000-12-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/fsock.c: Fix possible crash
+
+2000-12-19  Ron Chmara  <ron@opus1.com>
+
+    * CODING_STANDARDS: Updated to reflect recent discussions on php-dev.
+
+2000-12-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS
+      configure.in
+      main/php_version.h: Preparing 4.0.4
+
+2000-12-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/config.m4: wb fix.
+
+    * ext/java/config.m4: Fix pr: #7982
+
 2000-12-18  Zak Greant  <zak@nucleus.com>
 
     * ext/standard/tests/general_functions/005.phpt:
