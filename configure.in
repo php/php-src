@@ -807,7 +807,7 @@ program|static)
 shared)
     enable_static=no
     standard_libtool_flag=-prefer-pic
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
 ;;
 esac
 
