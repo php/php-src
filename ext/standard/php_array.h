@@ -49,6 +49,7 @@ PHP_FUNCTION(key);
 PHP_FUNCTION(min);
 PHP_FUNCTION(max);
 PHP_FUNCTION(in_array);
+PHP_FUNCTION(search_array);
 PHP_FUNCTION(extract);
 PHP_FUNCTION(compact);
 PHP_FUNCTION(range);

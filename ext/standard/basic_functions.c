@@ -550,6 +550,7 @@ function_entry basic_functions[] = {
 	PHP_FE(min,										NULL)
 	PHP_FE(max,										NULL)
 	PHP_FE(in_array,								NULL)
+	PHP_FE(search_array,								NULL)
 	PHP_FE(extract,									NULL)
 	PHP_FE(compact,									NULL)
 	PHP_FE(range,									NULL)

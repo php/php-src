@@ -17,6 +17,7 @@
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andrei Zmievski <andrei@ispi.net>                           |
    |          Stig Venaas <venaas@php.net>                                |
+   |          Jason Greene <jason@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -1035,18 +1036,29 @@ PHP_FUNCTION(array_walk) {
 }
 /* }}} */
 
-/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
-   Checks if the given value exists in the array */
-PHP_FUNCTION(in_array)
+/* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+ *      0 = return boolean
+ *      1 = return key
+ */
+static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
-	zval **value,				/* value to check for */
+ 	zval **value,				/* value to check for */
 		 **array,				/* array to check in */
 		 **strict,				/* strict comparison or not */
 		 **entry,				/* pointer to array entry */
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
 	HashPosition pos;			/* hash iterator */
-	int (*compare_func)(zval *, zval *, zval *) = is_equal_function;
+   	ulong num_key;
+   	char *string_key;
+	int (*compare_func)(zval *, zval *, zval *);
+   
+   	if (behavior == 0) {
+		compare_func = is_equal_function;
+	} else {
+		/* Lets not return a key unless the values are exact */
+		compare_func = is_identical_function;
+	}
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
@@ -1054,19 +1066,22 @@ PHP_FUNCTION(in_array)
 	}
 	
 	if (Z_TYPE_PP(value) == IS_ARRAY || Z_TYPE_PP(value) == IS_OBJECT) {
-		php_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
+		php_error(E_WARNING, "Wrong datatype for first argument in call to %s", get_active_function_name());
 		RETURN_FALSE;
 	}
 	
 	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
+		php_error(E_WARNING, "Wrong datatype for second argument in call to %s", get_active_function_name());
 		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() == 3) {
 		convert_to_boolean_ex(strict);
-		if (Z_LVAL_PP(strict) == 1)
+		if (Z_LVAL_PP(strict)) {
 			compare_func = is_identical_function;
+	        } else {
+			compare_func = is_equal_function;
+		}
 	}
 
 	target_hash = HASH_OF(*array);
@@ -1074,13 +1089,46 @@ PHP_FUNCTION(in_array)
 	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
      	compare_func(&res, *value, *entry);
 		if (Z_LVAL(res) == 1) {
-			RETURN_TRUE;
+			if (behavior==0) {	     
+				RETURN_TRUE;
+			} else {
+				/* Return current key */
+				switch (zend_hash_get_current_key_ex(target_hash, &string_key, NULL, &num_key, 1,  &pos)) {
+					case HASH_KEY_IS_STRING:
+						RETVAL_STRING(string_key, 0);
+						break;
+					case HASH_KEY_IS_LONG:
+						RETVAL_LONG(num_key);
+						break;
+				}
+			}
 		}
 		
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
-	
-	RETURN_FALSE;
+   
+	if (behavior == 0) { 
+		RETURN_FALSE;	   
+	} else { 
+		return;
+	}
+       
+}
+
+
+/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
+   Checks if the given value exists in the array */
+PHP_FUNCTION(in_array)
+{
+	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto mixed search_array(mixed needle, array haystack [, bool strict])
+   Searches the array for a given value and returns the corresponding key if successful */
+PHP_FUNCTION(search_array)
+{
+	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
