@@ -163,11 +163,6 @@ static void init_request_info(SLS_D)
 	SG(request_info).query_string = getenv("QUERY_STRING");
 	SG(request_info).request_uri = getenv("PATH_INFO");
 	SG(request_info).path_translated = NULL; /* we have to update it later, when we have that information */
-	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
-	}
 	SG(request_info).content_type = getenv("CONTENT_TYPE");
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 
