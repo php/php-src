@@ -13,13 +13,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Harald Radi <h.radi@nme.at>                                  |
+   |         Alan Brown <abrown@pobox.com>                                |
+   |         Paul Shortis <pshortis@dataworx.com.au>                      |
    +----------------------------------------------------------------------+
  */
+
 /*
  * 03.6.2001
  * Added SafeArray ==> Hash support
  */
 
+/* 
+ * Paul Shortis June 7, 2001 <pshortis@dataworx.com.au> - Added code to support SafeArray passing
+ * to COM objects. Support includes passing arrays of variants as well
+ * as typed arrays.
+ */
+ 
 #ifdef PHP_WIN32
 
 #include "php.h"
