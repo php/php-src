@@ -134,7 +134,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"Release_TS"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"Release_TS"
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib ws2_32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib zlib.lib libxml2_a.lib Urlmon.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /out:"..\Release_TSDbg\php4ts.dll" /libpath:"..\TSRM\Release_TSDbg" /libpath:"..\Zend\Release_TSDbg" /libpath:"Release_TSDbg" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\..\zlib\Release" /libpath:"..\..\libxml\lib\Release"
 
 !ENDIF 
@@ -1708,10 +1708,6 @@ SOURCE=..\ext\mcal\php_mcal.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\mysql\php_mysql.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
@@ -1904,10 +1900,6 @@ SOURCE=..\ext\standard\php_mail.h
 # Begin Source File
 
 SOURCE=..\ext\mcal\php_mcal.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mysql\php_mysql.h
 # End Source File
 # Begin Source File
 
