@@ -31,7 +31,7 @@ Compiling
 1) Static - ./configure --with-fribidi=base-directory-of-FriBidi-installation-path 
              (defaults to /usr/local).
 
-2) dl - same, just add static, to get .... --with-fribidi=static,base....
+2) dl - same, just add shared, to get .... --with-fribidi=shared,base....
   
 Prerequisites
 =============
