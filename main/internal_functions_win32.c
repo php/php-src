@@ -77,10 +77,10 @@
 #if HAVE_SESSION
 #include "ext/session/php_session.h"
 #endif
-#if HAVE_LIBEXPAT
+#if HAVE_XML
 #include "ext/xml/php_xml.h"
 #endif
-#if HAVE_LIBEXPAT && HAVE_WDDX
+#if HAVE_XML && HAVE_WDDX
 #include "ext/wddx/php_wddx.h"
 #endif
 #if HAVE_MYSQL
@@ -137,10 +137,10 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_TOKENIZER
 	,phpext_tokenizer_ptr
 #endif
-#if HAVE_LIBEXPAT
+#if HAVE_XML
 	,phpext_xml_ptr
 #endif
-#if HAVE_LIBEXPAT && HAVE_WDDX
+#if HAVE_XML && HAVE_WDDX
 	,phpext_wddx_ptr
 #endif
 #if HAVE_ZLIB
