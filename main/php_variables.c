@@ -493,6 +493,41 @@ static inline void php_register_server_variables(TSRMLS_D)
 /* }}} */
 
 
+
+/* {{{ php_autoglobal_merge
+ */
+static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
+{
+	zval		**src_entry, **dest_entry;
+	char		 *string_key;
+	uint		  string_key_len;
+	ulong		  num_key;
+	HashPosition 	  pos;
+	int		  key_type;
+
+	zend_hash_internal_pointer_reset_ex(src, &pos);
+	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
+		key_type = zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos);
+		if (Z_TYPE_PP(src_entry) != IS_ARRAY || 
+				(string_key_len && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) != SUCCESS) ||
+				(!string_key_len && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
+				|| Z_TYPE_PP(dest_entry) != IS_ARRAY) {
+			(*src_entry)->refcount++;
+			if (key_type == HASH_KEY_IS_STRING) {
+				zend_hash_update(dest, string_key, strlen(string_key)+1, src_entry, sizeof(zval *), NULL);
+			} else {
+				zend_hash_index_update(dest, num_key, src_entry, sizeof(zval *), NULL);
+			}
+		} else {
+			SEPARATE_ZVAL(dest_entry);
+			php_autoglobal_merge(Z_ARRVAL_PP(dest_entry), Z_ARRVAL_PP(src_entry) TSRMLS_CC);
+		}
+		zend_hash_move_forward_ex(src, &pos);
+	}
+}
+/* }}} */
+
+
 static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC);
 static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC);
 static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC);
@@ -588,6 +623,14 @@ int php_hash_environment(TSRMLS_D)
 		php_register_server_variables(TSRMLS_C);
 	}
 
+	if (PG(register_globals)) {
+		for (i = 0; i < 5; i++) {
+			if (PG(http_globals)[i]) {
+				php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[i]) TSRMLS_CC);
+			}
+		}
+	}
+
 	for (i=0; i<num_track_vars; i++) {
 		if (jit_initialization && auto_global_records[i].jit_initialization) {
 			continue;
@@ -677,15 +720,15 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 		switch (*p) {
 			case 'g':
 			case 'G':
-				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC);
 				break;
 			case 'p':
 			case 'P':
-				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC);
 				break;
 			case 'c':
 			case 'C':
-				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC);
 				break;
 		}
 	}
