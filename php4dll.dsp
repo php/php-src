@@ -653,6 +653,39 @@ SOURCE=.\win32\wfile.h
 # Begin Source File
 
 SOURCE=".\configuration-parser.y"
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# Begin Custom Build
+InputPath=".\configuration-parser.y"
+
+BuildCmds= \
+	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+
+"configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# Begin Custom Build
+InputPath=".\configuration-parser.y"
+
+BuildCmds= \
+	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+
+"configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Scanners"
@@ -661,6 +694,29 @@ SOURCE=".\configuration-parser.y"
 # Begin Source File
 
 SOURCE=".\configuration-scanner.l"
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# Begin Custom Build
+InputPath=".\configuration-scanner.l"
+
+"configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# Begin Custom Build
+InputPath=".\configuration-scanner.l"
+
+"configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Target
