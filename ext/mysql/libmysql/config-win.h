@@ -264,7 +264,7 @@ inline double ulonglong2double(ulonglong value)
 #define PACKAGE		 	"mysql"
 #define DEFAULT_BASEDIR		"C:\\"
 #define SHAREDIR		"share"
-#define DEFAULT_CHARSET_HOME	"C:/mysql/"
+#define DEFAULT_CHARSET_HOME	"C:/mysql"
 #endif
 
 /* File name handling */
