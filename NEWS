@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- UDM_FIELD_ORDER and UDM_FIELD_CRC mnoGoSearch result fields
+  has been added. (gluke)
+- UDM_PARAM_WORDINFO mnoGoSearch result parameter has been added.
+  UDM_PARAM_RATING result field has neen added as alias for
+  UDM_PARAM_SCORE. (gluke)
 - Prefer random() over *rand48() (JimJag)
 - Sped up WDDX serialization 2x. (Andrei)
 - Added a new parameter to mail() which appends aditional command line
