@@ -111,7 +111,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	char buf[BUF_SIZE + 1];
 	TLS_FETCH();
 
-	php_register_variable("PHP_SELF", TG(hc)->decodedurl, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_CC PLS_CC);
 	php_register_variable("REQUEST_METHOD", SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
