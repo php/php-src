@@ -183,8 +183,6 @@ void init_executor(TSRMLS_D)
 	EG(scope) = NULL;
 
 	EG(This) = NULL;
-
-	EG(float_separator)[0] = '.';
 }
 
 void shutdown_destructors(TSRMLS_D) {

@@ -29,6 +29,7 @@
 #include "zend_fast_cache.h"
 #include "zend_API.h"
 #include "zend_multiply.h"
+#include "zend_strtod.h"
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
@@ -384,7 +385,7 @@ ZEND_API void convert_to_double(zval *op)
 		case IS_STRING:
 			strval = op->value.str.val;
 
-			op->value.dval = strtod(strval, NULL);
+			op->value.dval = zend_strtod(strval, NULL);
 			STR_FREE(strval);
 			break;
 		case IS_ARRAY:
@@ -1897,9 +1898,9 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2, 0))) {
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
-				dval1 = strtod(s1->value.str.val, NULL);
+				dval1 = zend_strtod(s1->value.str.val, NULL);
 			} else if (ret2!=IS_DOUBLE) {
-				dval2 = strtod(s2->value.str.val, NULL);
+				dval2 = zend_strtod(s2->value.str.val, NULL);
 			}
 			result->value.dval = dval1 - dval2;
 			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
@@ -1973,13 +1974,6 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC)
 	op->value.str.val = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 	sprintf(op->value.str.val, "%.*G", (int) EG(precision), dval);
 	op->value.str.len = strlen(op->value.str.val);
-
-	if (EG(float_separator)[0] != '.') { 
-		char *p = op->value.str.val;
-		if ((p = strchr(p, '.'))) {
-			*p = EG(float_separator)[0];
-		}	
-	}
 }
 
 /*
