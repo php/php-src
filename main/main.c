@@ -1236,6 +1236,10 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 			}
 		}
 	}
+
+	if (ret == -1)
+		SG(request_info).auth_user = SG(request_info).auth_password = NULL;
+
 	return ret;
 }
 
