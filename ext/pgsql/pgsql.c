@@ -1774,10 +1774,6 @@ PHP_FUNCTION(pg_lo_unlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 1 or 2 arguments.");
 		RETURN_FALSE;
 	}
-
-	if (pgsql_link == NULL) {
-		RETURN_FALSE;
-	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
@@ -1848,10 +1844,6 @@ PHP_FUNCTION(pg_lo_open)
 		RETURN_FALSE;
 	}
 
-	if (pgsql_link == NULL) {
-		RETURN_FALSE;
-	}
-	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	/* r/w/+ is little bit more PHP-like than INV_READ/INV_WRITE and a lot of
@@ -2080,10 +2072,6 @@ PHP_FUNCTION(pg_lo_import)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (pgsql_link == NULL) {
-		RETURN_FALSE;
-	}
-	
 	if (PG(safe_mode) &&(!php_checkuid(file_in, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
@@ -2178,10 +2166,6 @@ PHP_FUNCTION(pg_lo_export)
 		RETURN_FALSE;
 	}
 
-	if (pgsql_link == NULL) {
-		RETURN_FALSE;
-	}
-	
 	if (PG(safe_mode) &&(!php_checkuid(file_out, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
