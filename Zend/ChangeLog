@@ -1,3 +1,29 @@
+2003-09-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      Nuke vars no longer needed
+
+    * zend_builtin_functions.c
+      zend_reflection_api.c:
+      Go with studlyCaps
+
+    * zend_reflection_api.c:
+      Change tostring() into __toString() to match method name used in casting.
+
+    * zend.c
+      zend_operators.c:
+      Fallback to default behaviour for unsupported object type conversions
+
+    * zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.c:
+      - Allow partial type conversion support for objects.
+      - Add support for object to string conversion from userspace by method
+        __toString() and add a test.
+
+    * zend_API.c:
+      Add missing check
+
 2003-09-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c
