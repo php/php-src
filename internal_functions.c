@@ -47,6 +47,7 @@
 #include "ext/gettext/php3_gettext.h"
 
 #include "functions/php3_ifx.h"
+#include "functions/php3_crypt.h"
 #include "functions/php3_ldap.h"
 #include "functions/php3_mysql.h"
 #include "functions/php3_bcmath.h"
