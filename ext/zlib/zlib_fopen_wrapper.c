@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Hartmut Holzgraefe <hartmut@six.de>                          |
+   | Author: Wez Furlong <wez@thebrainroom.com>, based on work by:        |
+   |         Hartmut Holzgraefe <hartmut@six.de>                          |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -57,6 +58,11 @@ static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count 
 static int php_gziop_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
+
+	assert(self != NULL);
+	if (offset == 0 && whence == SEEK_CUR)
+		return gztell(self->gz_file);
+	
 	return gzseek(self->gz_file, offset, whence);
 }
 
@@ -90,14 +96,14 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	if (strncmp("zlib:", path, 5) == 0)
 		path += 5;
 	
-	self->stream = php_stream_open_wrapper(path, mode, options, opened_path);
+	self->stream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK|options, opened_path);
 	
 	if (self->stream) {
 		int fd;
 		if (SUCCESS == php_stream_cast(self->stream, PHP_STREAM_AS_FD, (void**)&fd, REPORT_ERRORS)) {
 			self->gz_file = gzdopen(fd, mode);
 			if (self->gz_file)	{
-				stream = php_stream_alloc(&php_stream_gzio_ops, self, 0, mode);
+				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
 				if (stream)
 					return stream;
 				gzclose(self->gz_file);

@@ -25,8 +25,6 @@
 #include <zlib.h>
 
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
-	int gzgetss_state;
-
 	/* variables for transparent gzip encoding */
     int compression_coding;
     z_stream stream;
@@ -44,17 +42,6 @@ PHP_MSHUTDOWN_FUNCTION(zlib);
 PHP_RINIT_FUNCTION(zlib);
 PHP_MINFO_FUNCTION(zlib);
 PHP_FUNCTION(gzopen);
-PHP_FUNCTION(gzclose);
-PHP_FUNCTION(gzeof);
-PHP_FUNCTION(gzread);
-PHP_FUNCTION(gzgetc);
-PHP_FUNCTION(gzgets);
-PHP_FUNCTION(gzgetss);
-PHP_FUNCTION(gzwrite);
-PHP_FUNCTION(gzrewind);
-PHP_FUNCTION(gztell);
-PHP_FUNCTION(gzseek);
-PHP_FUNCTION(gzpassthru);
 PHP_FUNCTION(readgzfile);
 PHP_FUNCTION(gzfile);
 PHP_FUNCTION(gzcompress);

@@ -1326,55 +1326,6 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */
 
-/* {{{ php_passthru_stream */
-static size_t php_passthru_stream(php_stream *stream TSRMLS_DC)
-{
-	size_t bcount = 0;
-	int ready = 0;
-	char buf[8192];
-#ifdef HAVE_MMAP
-	int fd;
-#endif
-
-#ifdef HAVE_MMAP
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)
-			&& php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0))
-	{
-		struct stat sbuf;
-		off_t off;
-		void *p;
-		size_t len;
-
-		fstat(fd, &sbuf);
-
-		if (sbuf.st_size > sizeof(buf)) {
-			off = php_stream_tell(stream);
-			len = sbuf.st_size - off;
-			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
-			if (p != (void *) MAP_FAILED) {
-				BG(mmap_file) = p;
-				BG(mmap_len) = len;
-				PHPWRITE(p, len);
-				BG(mmap_file) = NULL;
-				munmap(p, len);
-				bcount += len;
-				ready = 1;
-			}
-		}
-	}
-#endif
-	if(!ready) {
-		int b;
-
-		while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			PHPWRITE(buf, b);
-			bcount += b;
-		}
-	}
-	return bcount;
-}
-/* }}} */
-
 /* {{{ proto int readfile(string filename [, int use_include_path])
    Output a file or a URL */
 PHP_FUNCTION(readfile)
@@ -1407,7 +1358,7 @@ PHP_FUNCTION(readfile)
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (stream)	{
-		size = php_passthru_stream(stream TSRMLS_CC);
+		size = php_stream_passthru(stream);
 		php_stream_close(stream);
 		RETURN_LONG(size);
 	}
@@ -1460,7 +1411,7 @@ PHP_FUNCTION(fpassthru)
 	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
-	size = php_passthru_stream((php_stream*)what TSRMLS_CC);
+	size = php_stream_passthru((php_stream*)what);
 	RETURN_LONG(size);
 }
 /* }}} */
