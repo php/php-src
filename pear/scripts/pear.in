@@ -137,6 +137,23 @@ switch ($command) {
     case 'list-packages': {
         include_once 'PEAR/Remote.php';
         $remote = new PEAR_Remote($config);
+        $result = $remote->call('package.listAll');
+        $i = $j = 0;
+        foreach ($result as $package) {
+            if ($i++ % 20 == 0) {
+                if ($j++ > 0) {
+                    print "\n";
+                }
+                printf("%-20s %-10s %-15s %s\n",
+                       "Package", "Stable", "Lead", "Category");
+                print str_repeat("=", 75)."\n";
+            }
+            $stable = $package['stable'];
+            printf("%-20s %-10s %-15s %s\n", $package['name'],
+                   $stable ? $stable : "???",
+                   $package['lead'], $package['category']);
+        }
+        break;
     }
 
     // }}}
