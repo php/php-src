@@ -950,6 +950,7 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
 	opline->opcode = ZEND_SWITCH_FREE;
 	opline->op1 = switch_entry->cond;
 	SET_UNUSED(opline->op2);
+	opline->extended_value = 0;
 	return 0;
 }
 
@@ -963,9 +964,10 @@ static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
 
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	opline->opcode = ZEND_FREE;
+	opline->opcode = ZEND_SWITCH_FREE;
 	opline->op1 = *foreach_copy;
 	SET_UNUSED(opline->op2);
+	opline->extended_value = 1;
 	return 0;
 }
 
@@ -1950,7 +1952,7 @@ void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_t
 
 	/* Preform array reset */
 	opline->opcode = ZEND_FE_RESET;
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *array;
 	SET_UNUSED(opline->op2);
@@ -2036,7 +2038,7 @@ void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC)
 
 	do_end_loop(foreach_token->u.opline_num CLS_CC);
 
-	do_free(open_brackets_token CLS_CC);
+	generate_free_foreach_copy(open_brackets_token CLS_CC);
 
 	zend_stack_del_top(&CG(foreach_copy_stack));
 

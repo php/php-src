@@ -255,6 +255,9 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts ELS_DC)
 				FREE_OP(&opline->op1, EG(free_op1));
 			} else {
 				zval_ptr_dtor(&Ts[opline->op1.u.var].var.ptr);
+				if (opline->extended_value) { /* foreach() free */
+					zval_ptr_dtor(&Ts[opline->op1.u.var].var.ptr);
+				}
 			}
 			break;
 		case IS_TMP_VAR:
@@ -2093,11 +2096,20 @@ send_by_ref:
 			case ZEND_FE_RESET: {
 					zval *array = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
-					Ts[opline->result.u.var].tmp_var = *array;
-					array = &Ts[opline->result.u.var].tmp_var;
-					if (!EG(free_op1)) {
-						zval_copy_ctor(array);
+					if (EG(free_op1)) { /* If TMP_VAR then make it a VAR */
+						zval *tmp;
+
+						ALLOC_ZVAL(tmp);
+						*tmp = *array;
+						INIT_PZVAL(tmp);
+						array = tmp;
+					} else {
+						array->refcount++;
 					}
+					PZVAL_LOCK(array);
+					Ts[opline->result.u.var].var.ptr = array;
+					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;	
+
 					if (array->type == IS_ARRAY) {
 						/* probably redundant */
 						zend_hash_internal_pointer_reset(array->value.ht);
@@ -2112,6 +2124,8 @@ send_by_ref:
 					zval **value, *key;
 					char *str_key;
 					ulong int_key;
+
+					PZVAL_LOCK(array);
 
 					if (array->type != IS_ARRAY) {
 						zend_error(E_WARNING, "Non array argument supplied for foreach()");
