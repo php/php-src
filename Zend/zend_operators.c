@@ -51,42 +51,45 @@
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length)
 {
-	zend_uint i=0;
 	double divisor = 10.0;
 	double result = 0.0;
 	double exponent;
+	const char *end = number+length;
+	const char *digit = number;
 
 	if (!length) {
 		return result;
 	}
 
-	for (i=0; i<length; i++) {
-		if ((number[i] <= '9' && number[i] >= '0')) {
+	while (digit < end) {
+		if ((*digit <= '9' && *digit >= '0')) {
 			result *= 10;
-			result += number[i] - '0';
-		} else if (number[i] == '.') {
-			i++;
+			result += *digit - '0';
+		} else if (*digit == '.') {
+			digit++;
 			break;
-		} else if (toupper(number[i]) == 'E') {
-			exponent = (double) atoi(&number[i+1]);
+		} else if (toupper(*digit) == 'E') {
+			exponent = (double) atoi(digit+1);
 			result *= pow(10.0, exponent);
 			return result;
 		} else {
 			return result;
 		}
+		digit++;
 	}
 
-	for (; i<length; i++) {
-		if ((number[i] <= '9' && number[i] >= '0')) {
-			result += (number[i] - '0') / divisor;
+	while (digit < end) {
+		if ((*digit <= '9' && *digit >= '0')) {
+			result += (*digit - '0') / divisor;
 			divisor *= 10;
-		} else if (toupper(number[i]) == 'E') {
-			exponent = (double) atoi(&number[i+1]);
+		} else if (toupper(*digit) == 'E') {
+			exponent = (double) atoi(digit+1);
 			result *= pow(10.0, exponent);
 			return result;
 		} else {
 			return result;
 		}
+		digit++;
 	}
 	return result;
 }
