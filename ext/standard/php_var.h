@@ -26,8 +26,22 @@ PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 
 void php_var_dump(pval **struc, int level);
-void php_var_serialize(pval *buf, pval **struc);
-int php_var_unserialize(pval **rval, const char **p, const char *max);
+
+/* typdef HashTable php_serialize_data_t; */
+#define php_serialize_data_t HashTable
+
+void php_var_serialize(pval *buf, pval **struc, php_serialize_data_t *var_hash);
+int php_var_unserialize(pval **rval, const char **p, const char *max, php_serialize_data_t *var_hash);
+
+#define PHP_VAR_SERIALIZE_INIT(var_hash) \
+   zend_hash_init(&(var_hash),10,NULL,NULL,0)
+#define PHP_VAR_SERIALIZE_DESTROY(var_hash) \
+   zend_hash_destroy(&(var_hash))
+
+#define PHP_VAR_UNSERIALIZE_INIT(var_hash) \
+   zend_hash_init(&(var_hash),10,NULL,NULL,0)
+#define PHP_VAR_UNSERIALIZE_DESTROY(var_hash) \
+   zend_hash_destroy(&(var_hash))
 
 PHPAPI zend_class_entry *php_create_empty_class(char *class_name,int len);
 

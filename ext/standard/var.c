@@ -95,7 +95,7 @@ head_done:
 				php_printf("%*c", level-1, ' ');
 			}
 			PUTS("}\n");
-			break;	
+			break;
 		case IS_RESOURCE: {
 			char *type_name;
 			type_name = zend_rsrc_list_get_rsrc_type((*struc)->value.lval);
@@ -154,13 +154,35 @@ PHP_FUNCTION(var_dump)
 /* }}} */
 /* {{{ php_var_serialize */
 
-void php_var_serialize(pval *buf, pval **struc)
+inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
+	ulong var_no;
+	char id[sizeof(void *)*2+3];
+
+	snprintf(id,sizeof(id)-1,"%p",var);
+	id[sizeof(id)-1]='\0';
+	if(var_old && zend_hash_find(var_hash,id,sizeof(void *)*2,var_old) == SUCCESS) {
+		return FAILURE;
+	}
+	
+	var_no = zend_hash_num_elements(var_hash)+1; /* +1 because otherwise hash will think we are trying to store NULL pointer */
+	zend_hash_add(var_hash,id,sizeof(void *)*2,&var_no,sizeof(var_no),NULL);
+	return SUCCESS;
+}
+
+void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 {
 	char s[256];
 	ulong slen;
 	int i;
+	ulong *var_already;
 	HashTable *myht;
 	BLS_FETCH();
+
+	if(var_hash != NULL && php_add_var_hash(var_hash,*struc,(void *)&var_already) == FAILURE) {
+		slen = sprintf(s,"R:%ld;",*var_already);
+		STR_CAT(buf, s, slen);
+		return;
+	}
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
@@ -241,10 +263,10 @@ void php_var_serialize(pval *buf, pval **struc)
 									continue;
 								}
 
-								php_var_serialize(buf, name);
+								php_var_serialize(buf, name, NULL);
 								
 								if (zend_hash_find((*struc)->value.obj.properties,(*name)->value.str.val,(*name)->value.str.len+1,(void*)&d) == SUCCESS) {
-									php_var_serialize(buf,d);	
+									php_var_serialize(buf,d,var_hash);	
 								}
 							}
 						}
@@ -294,18 +316,18 @@ void php_var_serialize(pval *buf, pval **struc)
 					if ((i = zend_hash_get_current_key_ex(myht, &key, NULL, &index, &pos)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data || ((*data) == (*struc))) {
+					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data /* || ((*data) == (*struc)) */) {
 						if (i == HASH_KEY_IS_STRING)
 							efree(key);
 						continue;
 					}
 
 					switch (i) {
-						case HASH_KEY_IS_LONG:
+					  case HASH_KEY_IS_LONG:
 							MAKE_STD_ZVAL(d);	
 							d->type = IS_LONG;
 							d->value.lval = index;
-							php_var_serialize(buf, &d);
+							php_var_serialize(buf, &d, NULL);
 							FREE_ZVAL(d);
 							break;
 						case HASH_KEY_IS_STRING:
@@ -313,12 +335,12 @@ void php_var_serialize(pval *buf, pval **struc)
 							d->type = IS_STRING;
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
-							php_var_serialize(buf, &d);
+							php_var_serialize(buf, &d, NULL);
 							efree(key);
 							FREE_ZVAL(d);
 							break;
 					}
-					php_var_serialize(buf, data);
+					php_var_serialize(buf, data, var_hash);
 				}
 			}
 			STR_CAT(buf, "}", 1);
@@ -333,17 +355,50 @@ void php_var_serialize(pval *buf, pval **struc)
 /* }}} */
 /* {{{ php_var_dump */
 
-int php_var_unserialize(pval **rval, const char **p, const char *max)
+int php_var_unserialize(pval **rval, const char **p, const char *max, HashTable *var_hash)
 {
 	const char *q;
 	char *str;
 	int i;
 	char cur;
+	ulong id;
 	HashTable *myht;
+	pval **rval_ref;
+
 	ELS_FETCH();
 	BLS_FETCH();
 
+	if(var_hash) {
+		zend_hash_next_index_insert(var_hash, rval, sizeof(*rval), NULL);
+	}
+
 	switch (cur = **p) {
+	    case 'R':
+			if (*((*p) + 1) != ':') {
+				return 0;
+			}
+			q = *p;
+			while (**p && **p != ';') {
+				(*p)++;
+			}
+			if (**p != ';') {
+				return 0;
+			}
+			(*p)++;
+			id = atol(q + 2)-1; /* count starts with 1 */
+			if(!var_hash) {
+				return 0;
+			}
+			if(zend_hash_index_find(var_hash, id, (void *)&rval_ref) != SUCCESS) {
+				return 0;
+			}
+			zval_dtor(*rval);
+			FREE_ZVAL(*rval);
+			*rval = *rval_ref;
+			(*rval)->refcount++;
+			(*rval)->is_ref = 1;
+			return 1;
+
 		case 'N':
 			if (*((*p) + 1) != ';') {
 				return 0;
@@ -504,13 +559,13 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				ALLOC_INIT_ZVAL(key);
 				ALLOC_INIT_ZVAL(data);
 
-				if (!php_var_unserialize(&key, p, max)) {
+				if (!php_var_unserialize(&key, p, max, NULL)) {
 					zval_dtor(key);
 					FREE_ZVAL(key);
 					FREE_ZVAL(data);
 					return 0;
 				}
-				if (!php_var_unserialize(&data, p, max)) {
+				if (!php_var_unserialize(&data, p, max, var_hash)) {
 					zval_dtor(key);
 					FREE_ZVAL(key);
 					zval_dtor(data);
@@ -558,6 +613,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 PHP_FUNCTION(serialize)
 {
 	pval **struc;
+	php_serialize_data_t var_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -565,7 +621,10 @@ PHP_FUNCTION(serialize)
 	return_value->type = IS_STRING;
 	return_value->value.str.val = NULL;
 	return_value->value.str.len = 0;
-	php_var_serialize(return_value, struc);
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+	php_var_serialize(return_value, struc, &var_hash);
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 }
 
 /* }}} */
@@ -576,6 +635,7 @@ PHP_FUNCTION(serialize)
 PHP_FUNCTION(unserialize)
 {
 	pval **buf;
+	php_serialize_data_t var_hash;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -588,11 +648,14 @@ PHP_FUNCTION(unserialize)
 			RETURN_FALSE;
 		}
 
-		if (!php_var_unserialize(&return_value, &p, p + (*buf)->value.str.len)) {
+		PHP_VAR_UNSERIALIZE_INIT(var_hash);
+		if (!php_var_unserialize(&return_value, &p, p + (*buf)->value.str.len,  &var_hash)) {
+			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
 			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes",p-(*buf)->value.str.val,(*buf)->value.str.len);
 			RETURN_FALSE;
 		}
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	} else {
 		php_error(E_NOTICE, "argument passed to unserialize() is not an string");
 		RETURN_FALSE;
