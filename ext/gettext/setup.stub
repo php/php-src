@@ -1,6 +1,0 @@
-# $Id$
-
-define_option with-gettext 'gettext support?' yesnodir \
-    "yes /usr/local" \
-'    Whether to include gettext support.'
-	
