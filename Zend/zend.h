@@ -191,14 +191,14 @@ typedef void (*del_ref_t)(zend_object_handle handle);
 typedef void (*delete_obj_t)(zend_object_handle handle);
 typedef zend_object_value (*clone_obj_t)(zend_object_handle handle);
 
-typedef struct _zend_object_handlers {
+struct _zend_object_handlers {
 	get_address_t get_address;
 	get_property_address_t get_property_address;
 	add_ref_t add_ref;
 	del_ref_t del_ref;
 	delete_obj_t delete_obj;
 	clone_obj_t clone_obj;
-} zend_object_handlers;
+};
 
 #include "zend_objects.h"
 
