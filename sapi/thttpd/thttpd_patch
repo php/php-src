@@ -1,6 +1,6 @@
-diff -ur thttpd-2.19/Makefile.in thttpd-2.19-t/Makefile.in
---- thttpd-2.19/Makefile.in	Tue Jul  4 18:21:32 2000
-+++ thttpd-2.19-t/Makefile.in	Mon Aug  7 15:34:41 2000
+diff -ur thttpd-2.19-t/Makefile.in thttpd-2.19/Makefile.in
+--- thttpd-2.19-t/Makefile.in	Tue Jul  4 18:21:32 2000
++++ thttpd-2.19/Makefile.in	Mon Aug 21 04:58:29 2000
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -38,9 +38,9 @@ diff -ur thttpd-2.19/Makefile.in thttpd-2.19-t/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -ur thttpd-2.19/libhttpd.c thttpd-2.19-t/libhttpd.c
---- thttpd-2.19/libhttpd.c	Fri Jun 23 05:43:40 2000
-+++ thttpd-2.19-t/libhttpd.c	Mon Aug  7 15:27:25 2000
+diff -ur thttpd-2.19-t/libhttpd.c thttpd-2.19/libhttpd.c
+--- thttpd-2.19-t/libhttpd.c	Fri Jun 23 05:43:40 2000
++++ thttpd-2.19/libhttpd.c	Mon Aug 21 04:59:13 2000
 @@ -75,6 +75,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -75,15 +75,15 @@ diff -ur thttpd-2.19/libhttpd.c thttpd-2.19-t/libhttpd.c
      if ( cgi_pattern == (char*) 0 )
  	hs->cgi_pattern = (char*) 0;
      else
-@@ -379,6 +385,8 @@
-     int listen_fd;
-     int on, flags;
+@@ -362,6 +368,8 @@
+ 	return (httpd_server*) 0;
+ 	}
  
 +    thttpd_php_init();
 +
-     /* Create socket. */
-     listen_fd = socket( saP->sa.sa_family, SOCK_STREAM, 0 );
-     if ( listen_fd < 0 )
+     /* Done initializing. */
+     if ( hs->binding_hostname == (char*) 0 )
+ 	syslog( LOG_INFO, "%s starting on port %d", SERVER_SOFTWARE, hs->port );
 @@ -3302,6 +3310,11 @@
  	 ( hc->sb.st_mode & S_IXOTH ) &&
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
@@ -96,9 +96,9 @@ diff -ur thttpd-2.19/libhttpd.c thttpd-2.19-t/libhttpd.c
  
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
-diff -ur thttpd-2.19/libhttpd.h thttpd-2.19-t/libhttpd.h
---- thttpd-2.19/libhttpd.h	Tue Jun 13 20:48:56 2000
-+++ thttpd-2.19-t/libhttpd.h	Mon Aug  7 15:33:08 2000
+diff -ur thttpd-2.19-t/libhttpd.h thttpd-2.19/libhttpd.h
+--- thttpd-2.19-t/libhttpd.h	Tue Jun 13 20:48:56 2000
++++ thttpd-2.19/libhttpd.h	Mon Aug 21 04:58:29 2000
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
