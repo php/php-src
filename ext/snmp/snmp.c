@@ -25,7 +25,7 @@
 #endif
 #include "php_snmp.h"
 #include <sys/types.h>
-#if MSVC5
+#if PHP_WIN32
 #include <winsock.h>
 #include <errno.h>
 #include <process.h>
