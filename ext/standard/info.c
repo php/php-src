@@ -23,7 +23,7 @@
 #include "ext/standard/head.h"
 #include "info.h"
 #include "SAPI.h"
-#if !PHP_WIN32
+#if !defined(PHP_WIN32)
 #include "build-defs.h"
 #endif
 #include "zend_globals.h"		/* needs ELS */
@@ -108,7 +108,7 @@ PHPAPI void php_print_info(int flag)
 	char **env,*tmp1,*tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	char php_windows_uname[256];
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
@@ -120,7 +120,7 @@ PHPAPI void php_print_info(int flag)
 
 	
 	if (flag & PHP_INFO_GENERAL) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		// Get build numbers for Windows NT or Win95
 		if (dwVersion < 0x80000000){
 			dwBuild = (DWORD)(HIWORD(dwVersion));

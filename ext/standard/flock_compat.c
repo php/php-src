@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <windows.h>
 #include <io.h>
 #endif
@@ -64,7 +64,7 @@ int flock(int fd, int operation)
 
 	return ret;
 }
-#elif PHP_WIN32
+#elif defined(PHP_WIN32)
 /*
  * Program:   Unix compatibility routines
  *
@@ -138,7 +138,7 @@ int flock(int fd, int operation)
 	/* Under Win32 MT library, errno is not a variable but a function call,
 	 * which cannot be assigned to.
 	 */
-#if !(PHP_WIN32)
+#if !defined(PHP_WIN32)
     errno = EINVAL;             /* bad call */
 #endif
     return -1;

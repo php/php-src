@@ -29,7 +29,7 @@
 
 #include "rfc1867.h"
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #define STRCASECMP stricmp
 #else
 #define STRCASECMP strcasecmp

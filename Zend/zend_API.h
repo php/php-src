@@ -84,7 +84,7 @@ ZEND_API void wrong_param_count(void);
 #define BYREF_ALLOW 2
 #define BYREF_FORCE_REST 3
 
-#if !(ZEND_WIN32)
+#ifndef ZEND_WIN32
 #define DLEXPORT
 #endif
 

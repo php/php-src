@@ -27,7 +27,7 @@
 #include "safe_mode.h"
 #include "fopen-wrappers.h"
 #include <string.h>
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <windows.h>
 #else
 #include <sys/param.h>

@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
@@ -51,7 +51,7 @@
 #include "ext/standard/php_standard.h"
 #include "snprintf.h"
 #include "php_variables.h"
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
 #include "win32/syslog.h"
@@ -453,7 +453,7 @@ static void php_timeout(int dummy)
 
 static void php_set_timeout(long seconds)
 {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #else
 #	ifdef HAVE_SETITIMER
 	struct itimerval t_r;		/* timeout requested */
@@ -471,7 +471,7 @@ static void php_set_timeout(long seconds)
 
 static void php_unset_timeout(void)
 {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #else
 #	ifdef HAVE_SETITIMER
 	struct itimerval no_timeout;
@@ -591,7 +591,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
 					}
-#	if PHP_WIN32
+#	if defined(PHP_WIN32)
 					OutputDebugString(memory_leak_buf);
 #	else
 					fprintf(stderr, memory_leak_buf);
@@ -772,11 +772,11 @@ int php_module_startup(sapi_module_struct *sf)
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
-#if (PHP_WIN32) && !(USE_SAPI)
+#ifdef PHP_WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	{
 		DWORD dwVersion = GetVersion();
 
@@ -832,7 +832,7 @@ int php_module_startup(sapi_module_struct *sf)
 	setlocale(LC_CTYPE, "");
 #endif
 
-#if (PHP_WIN32) && !(USE_SAPI)
+#ifdef PHP_WIN32
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
@@ -897,7 +897,7 @@ void php_module_shutdown()
 	/* close down the ini config */
 	php_config_ini_shutdown();
 
-#if (PHP_WIN32)
+#ifdef PHP_WIN32
 	/*close winsock */
 	WSACleanup();
 #endif
@@ -1102,7 +1102,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		return;
 	}
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	UpdateIniFromRegistry(primary_file->filename);
 #endif
 
@@ -1129,7 +1129,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 }
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 /* just so that this symbol gets exported... */
 PHPAPI void dummy_indent()
 {

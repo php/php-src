@@ -33,8 +33,6 @@
 #include "php_version.h"
 #include "zend.h"
 
-#define PHP_WIN32 ZEND_WIN32
-
 /* automake defines PACKAGE and VERSION for Zend too */
 #ifdef PACKAGE
 # undef PACKAGE
@@ -59,7 +57,7 @@ extern unsigned char second_arg_allow_ref[];
 */
 
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "config.w32.h"
 #include "win95nt.h"
 #	ifdef PHP_EXPORTS
@@ -80,7 +78,7 @@ extern unsigned char second_arg_allow_ref[];
 #define DEBUG ZEND_DEBUG
 
 
-#if DEBUG || !(defined(__GNUC__)||PHP_WIN32)
+#if DEBUG || !(defined(__GNUC__)||defined(PHP_WIN32))
 #ifdef inline
 #undef inline
 #endif
@@ -170,7 +168,7 @@ extern char *strerror(int);
 #endif
 
 #if HAVE_PWD_H
-# if PHP_WIN32
+# ifdef PHP_WIN32
 #include "win32/pwd.h"
 #include "win32/param.h"
 # else
@@ -242,7 +240,7 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 
 /* global variables */
 extern pval *data;
-#if !(PHP_WIN32)
+#if !defined(PHP_WIN32)
 extern char **environ;
 #define php_sleep sleep
 #endif

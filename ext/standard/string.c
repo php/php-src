@@ -471,14 +471,14 @@ PHP_FUNCTION(basename)
 	ret = estrdup((*str)->value.str.val);
 	c = ret + (*str)->value.str.len -1;	
 	while (*c == '/'
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		   || *c == '\\'
 #endif
 		)
 		c--;
 	*(c + 1) = '\0';	
 	if ((c = strrchr(ret, '/'))
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		|| (c = strrchr(ret, '\\'))
 #endif
 		) {
@@ -495,14 +495,14 @@ PHPAPI void php_dirname(char *str, int len) {
 
 	c = str + len - 1;
 	while (*c == '/'
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		   || *c == '\\'
 #endif
 		)
 		c--; /* strip trailing slashes */
 	*(c + 1) = '\0';
 	if ((c = strrchr(str, '/'))
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		|| (c = strrchr(str, '\\'))
 #endif
 		)

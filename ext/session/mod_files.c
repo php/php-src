@@ -30,7 +30,7 @@
 #include <dirent.h>
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #define NEEDRDH 1
 #include "win32/readdir.h"
 #endif
@@ -56,7 +56,7 @@ ps_module ps_mod_files = {
 	PS_MOD(files)
 };
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #define DIR_DELIMITER '\\'
 #else
 #define DIR_DELIMITER '/'

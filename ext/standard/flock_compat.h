@@ -9,10 +9,10 @@
 int flock(int fd, int operation);
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #	define fsync _commit
 #	define ftruncate chsize
-#endif /* PHP_WIN32 */
+#endif /* defined(PHP_WIN32) */
 
 #if !HAVE_INET_ATON
 #if HAVE_NETINET_IN_H

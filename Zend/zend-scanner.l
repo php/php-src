@@ -33,7 +33,7 @@
 
 %{
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 #include <winsock.h>
 #include <io.h>
 #endif
@@ -57,7 +57,7 @@
 # ifdef HAVE_STDIOSTREAM_H
 #  include <stdiostream.h>
 # endif
-# if ZEND_WIN32
+# ifdef ZEND_WIN32
 #  include <strstrea.h>
 # else
 #  include <strstream.h>
@@ -668,7 +668,7 @@ int yyFlexLexer::yylex()
 
 
 /* redefine YY_INPUT to handle urls for win32*/
-#if 0 /*ZEND_WIN32*/
+#if 0 /*defined(ZEND_WIN32)*/
 #define YY_INPUT(buf,result,max_size) \
 	if ( yyin->_tmpfname != "url" ){ \
 	if ( yy_current_buffer->yy_is_interactive ) \

@@ -49,7 +49,7 @@ int zend_load_extension(char *path)
 
 	handle = DL_LOAD(path);
 	if (!handle) {
-#if !(ZEND_WIN32)
+#ifndef ZEND_WIN32
 		fprintf(stderr, "Failed loading %s:  %s\n", path, dlerror());
 #else
 		fprintf(stderr, "Failed loading %s\n", path);
