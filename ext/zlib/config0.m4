@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(zlib,for ZLIB support,
-[  --with-zlib[=DIR]       Include ZLIB support (requires zlib >= 1.0.9).])
+[  --with-zlib[=DIR]       Include ZLIB support.])
 
 PHP_ARG_WITH(zlib-dir,if the location of ZLIB install directory is defined,
 [  --with-zlib-dir=<DIR>   Define the location of zlib install directory], no, no)
@@ -37,12 +37,6 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
   fi
 
   PHP_ADD_LIBPATH($ZLIB_DIR/lib, ZLIB_SHARED_LIBADD)
-
-  AC_CHECK_LIB(z, gzgets, [
-    AC_DEFINE(HAVE_ZLIB,1,[ ]) 
-  ],[
-    AC_MSG_ERROR(ZLIB extension requires zlib >= 1.0.9)
-  ])
 
   PHP_ZLIB_DIR=$ZLIB_DIR
   PHP_ADD_LIBRARY(z,, ZLIB_SHARED_LIBADD)
