@@ -5349,7 +5349,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	xmlDocPtr xmldocp;
 	xmlDocPtr docp;
 	char **params = NULL;
-	int ret;
+	int ret, clone = 0;
 	char *filename;
 	int filename_len = 0;
 
@@ -5361,7 +5361,7 @@ PHP_FUNCTION(domxml_xslt_process)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|abs", &idxml, &idparams, &xpath_params, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a!b!s!l", &idxml, &idparams, &xpath_params, &filename, &filename_len, &clone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -5371,6 +5371,10 @@ PHP_FUNCTION(domxml_xslt_process)
 		params = php_domxslt_make_params(idparams, xpath_params TSRMLS_CC);
 	}
 
+	if (clone == 1) {
+		xmldocp = xmlCopyDoc(xmldocp, 1);
+	}
+
 	if (filename_len) {
 		FILE *f;
 		f = fopen (filename,"w");
@@ -5378,6 +5382,10 @@ PHP_FUNCTION(domxml_xslt_process)
 		fclose(f);
 	} else {
 		docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
+	}
+
+	if (clone == 1) {
+		xmlFreeDoc(xmldocp);
 	}
 
 	if (params) {
