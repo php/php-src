@@ -1089,6 +1089,49 @@ PHP_FUNCTION(image_type_to_mime_type)
 }
 /* }}} */
 
+/* {{{ proto string image_type_to_extension(int imagetype [, bool include_dot])
+   Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+PHP_FUNCTION(image_type_to_extension)
+{
+	long image_type;
+	zend_bool inc_dot=1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	switch (image_type) {
+		case IMAGE_FILETYPE_GIF:
+			RETURN_STRING(".gif" + !inc_dot, 1);
+		case IMAGE_FILETYPE_JPEG:
+			RETURN_STRING(".jpeg" + !inc_dot, 1);
+		case IMAGE_FILETYPE_PNG:
+			RETURN_STRING(".png" + !inc_dot, 1);
+		case IMAGE_FILETYPE_SWF:
+		case IMAGE_FILETYPE_SWC:
+			RETURN_STRING(".swf" + !inc_dot, 1);
+		case IMAGE_FILETYPE_PSD:
+			RETURN_STRING(".psd" + !inc_dot, 1);
+		case IMAGE_FILETYPE_BMP:
+		case IMAGE_FILETYPE_WBMP:
+			RETURN_STRING(".bmp" + !inc_dot, 1);
+		case IMAGE_FILETYPE_TIFF_II:
+		case IMAGE_FILETYPE_TIFF_MM:
+			RETURN_STRING(".tiff" + !inc_dot, 1);
+		case IMAGE_FILETYPE_IFF:
+			RETURN_STRING(".iff" + !inc_dot, 1);
+		case IMAGE_FILETYPE_JPC:
+			RETURN_STRING(".jpc" + !inc_dot, 1);
+		case IMAGE_FILETYPE_JP2:
+			RETURN_STRING(".jp2" + !inc_dot, 1);
+		case IMAGE_FILETYPE_XBM:
+			RETURN_STRING(".xbm" + !inc_dot, 1);
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ php_imagetype
    detect filetype from first bytes */
 PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
