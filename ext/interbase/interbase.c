@@ -531,7 +531,6 @@ static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
 	ibase_globals->timestampformat = NULL;
 	ibase_globals->dateformat = NULL;
 	ibase_globals->timeformat = NULL;
-	ibase_globals->errmsg = NULL;
 	ibase_globals->num_persistent = 0;
 }
 
@@ -588,10 +587,7 @@ PHP_RINIT_FUNCTION(ibase)
 	}
 	IBG(timeformat) = DL_STRDUP(IBG(cfg_timeformat));
 
-	if (IBG(errmsg)) {
-		DL_FREE(IBG(errmsg));
-	}
-	IBG(errmsg) = DL_MALLOC(sizeof(char)*MAX_ERRMSG+1);
+	RESET_ERRMSG;
 
 	return SUCCESS;
 }
@@ -618,11 +614,6 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
 		DL_FREE(IBG(timeformat));
 	}
 	IBG(timeformat) = NULL;
-
-	if (IBG(errmsg)) {
-		DL_FREE(IBG(errmsg));
-	}
-	IBG(errmsg) = NULL;
 
 	return SUCCESS;
 } 
