@@ -393,7 +393,7 @@ void zend_do_begin_import(TSRMLS_D);
 void zend_do_import(int type, znode *what TSRMLS_DC);
 void zend_do_end_import(znode *import_from TSRMLS_DC);
 
-void zend_do_abstract_method(TSRMLS_C);
+void zend_do_abstract_method(TSRMLS_D);
 
 ZEND_API void function_add_ref(zend_function *function);
 
