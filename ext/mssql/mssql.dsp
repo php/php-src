@@ -167,5 +167,9 @@ SOURCE=.\php_mssql.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
+# Begin Source File
+
+SOURCE=.\mssql_win32_howto.txt
+# End Source File
 # End Target
 # End Project
