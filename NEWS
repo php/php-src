@@ -24,7 +24,6 @@ PHP 4                                                                      NEWS
   for the specified URL. (Ilia)
 - Added str_split() function. Breaks down a string into an array of elements 
   based on length. (Ilia)
-- Added man page for CLI version of PHP. (marcus)
 - Added array_walk_recursive() function. Applies user function recursively 
   to an array. (Ilia)
 - Added command line parameters -B, -F, -R and -E which allow to process stdin
