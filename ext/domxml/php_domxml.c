@@ -284,6 +284,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FALIAS(new_xmldoc,				domxml_new_xmldoc,				NULL)
 	PHP_FALIAS(domxml_dumpmem,			domxml_dump_mem,				NULL)
 	PHP_FE(domxml_doc_validate,											second_args_force_ref)
+	PHP_FE(domxml_doc_xinclude,											NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -325,6 +326,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(xptr_new_context,		xptr_new_context,				NULL)
 #endif
 	PHP_FALIAS(validate,				domxml_doc_validate,				first_args_force_ref)
+	PHP_FALIAS(xinclude,				domxml_doc_xinclude,				NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -4782,6 +4784,27 @@ PHP_FUNCTION(xptr_eval)
 PHP_FUNCTION(domxml_version)
 {
 	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
+}
+/* }}} */
+
+/* {{{ proto int domxml_doc_xinclude()
+   Substitutues xincludes in a DomDocument */
+PHP_FUNCTION(domxml_doc_xinclude)
+{
+	zval *id;
+	xmlDoc *docp;
+	int err; 
+	
+	DOMXML_PARAM_NONE(docp, id, le_domxmldocp);
+	
+	err = xmlXIncludeProcess (docp);
+	
+	if (err) {
+		RETVAL_LONG(err);
+	} else {
+		RETVAL_FALSE;
+	}
+    
 }
 /* }}} */
 
