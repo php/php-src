@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- FDF Data is handled properly and can be accessed by reading HTTP_RAW_POST_DATA
 - Added new 'O' format modifier that will output the GMT offset as "[+-]HHMM"
   (eg: Pacific time is -0700).  This is useful for things such as Date: mail
   headers.
