@@ -65,7 +65,7 @@ var_dump($a->test);
 
 ?>
 --EXPECTF--
-Strict Standards: Declaration of bar::a() must be compatible with that of foo::a() in %sbug22367.php on line %d
+Strict Standards: Declaration of bar::a() should be compatible with that of foo::a() in %sbug22367.php on line %d
 
 Strict Standards: Implicit cloning object of class 'bar' because of 'zend.ze1_compatibility_mode' in %sbug22367.php on line %d
 int(5)
