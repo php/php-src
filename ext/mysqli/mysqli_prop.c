@@ -59,6 +59,22 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	return SUCCESS;\
 }\
 
+/* {{{ property link_affected_rows_read */
+int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+	MYSQL *mysql = (MYSQL*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+
+	if (mysql->affected_rows < LONG_MAX) {
+		ZVAL_LONG(*retval, (long)mysql->affected_rows);
+	} else {
+		char ret[40];	
+		sprintf(ret, "%llu", mysql->affected_rows);
+		ZVAL_STRING(*retval, ret, 1);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ property link_client_version_read */
 int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 	ALLOC_ZVAL(*retval);
@@ -67,8 +83,38 @@ int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 }
 /* }}} */
 
+/* {{{ property link_connect_errno_read */
+int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+	ALLOC_ZVAL(*retval);
+	ZVAL_LONG(*retval, (long)MyG(error_no));
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ property link_connect_error_read */
+int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+	ALLOC_ZVAL(*retval);
+	ZVAL_STRING(*retval, MyG(error_msg), 1);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ property link_insert_id_read */
+int link_insert_id_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+	MYSQL *mysql = (MYSQL*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+
+	if (mysql->insert_id < LONG_MAX) {
+		ZVAL_LONG(*retval, (long)mysql->last_used_con->insert_id);
+	} else {
+		char ret[40];	
+		sprintf(ret, "%llu", mysql->last_used_con->insert_id);
+		ZVAL_STRING(*retval, ret, 1);
+	}
+	return SUCCESS;
+}
+/* }}} */
 /* link properties */
-MYSQLI_MAP_PROPERTY_LONG(link_affected_rows_read, MYSQL, affected_rows);
 MYSQLI_MAP_PROPERTY_LONG(link_client_flags_read, MYSQL, client_flag);
 MYSQLI_MAP_PROPERTY_LONG(link_errno_read, MYSQL, net.last_errno);
 MYSQLI_MAP_PROPERTY_STRING(link_error_read, MYSQL, net.last_error);
@@ -76,7 +122,6 @@ MYSQLI_MAP_PROPERTY_LONG(link_field_count_read, MYSQL, field_count);
 MYSQLI_MAP_PROPERTY_STRING(link_host_read, MYSQL, host);
 MYSQLI_MAP_PROPERTY_STRING(link_host_info_read, MYSQL, host_info);
 MYSQLI_MAP_PROPERTY_STRING(link_info_read, MYSQL, info);
-MYSQLI_MAP_PROPERTY_LONG(link_insert_id_read, MYSQL, last_used_con->insert_id);
 MYSQLI_MAP_PROPERTY_LONG(link_port_read, MYSQL, port);
 MYSQLI_MAP_PROPERTY_LONG(link_protocol_version_read, MYSQL, protocol_version);
 MYSQLI_MAP_PROPERTY_LONG(link_server_capabilities_read, MYSQL, server_capabilities);
@@ -144,6 +189,8 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
 	{"client_flags", link_client_flags_read, NULL},
 	{"client_version", link_client_version_read, NULL},
+	{"connect_errno", link_connect_errno_read, NULL},
+	{"connect_error", link_connect_error_read, NULL},
 	{"errno", link_errno_read, NULL},
 	{"error", link_error_read, NULL},
 	{"field_count", link_field_count_read, NULL},
