@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #25764 (ldap_get_option() crashes with unbound ldap link). (Jani)
 - Fixed bug #25758 (var_export does not escape ' & \ inside array keys). (Ilia)
 - Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with BSD). (Jani)
+- Fixed bug #25746 (Do not bail out when unable to chdir original dir on 
+  systems with broken getcwd()). (Ilia)
 - Fixed bug #25745 (ctype functions fail with non-ascii characters). (Moriyoshi)
 - Fixed bug #25744 (make ZTS build of ext/sybase compile). (Ilia)
 - Fixed bug #25738 (alloca() related issues on the Darwin platform). (Moriyoshi)
