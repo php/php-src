@@ -1,4 +1,5 @@
 <?
+
 function foo()
 {
 	$i=0;
