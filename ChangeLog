@@ -1,3 +1,96 @@
+2002-08-19  wez  <wez@pb1.pair.com>
+
+    * main/network.c
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      ext/standard/file.c:
+    Remove php_stream_sock_set_blocking and replace with
+    php_stream_set_option which can be used in a similar way as ioctl()
+    to set options for streams.
+
+    Current options include buffering and blocking support.
+
+    o Buffer control is support for stdio based streams.
+    o Blocking/non-blocking is supported for stdio and socket based streams.
+
+2002-08-19  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/standard/microtime.c:
+    Convert the value of tz_minuteswest inside struct timezone on Windows to
+    minutes from seconds.
+
+2002-08-19  sniper  <sniper@pb1.pair.com>
+
+    * ext/java/config.m4:
+    Fix the build when using --with-java without any path
+
+2002-08-19  dickmeiss  <dickmeiss@pb1.pair.com>
+
+    * ext/yaz/php_yaz.c: Make options piggyback and timeout work with ZOOM
+
+2002-08-19  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h: Fix a few warnings
+
+    * ext/standard/reg.c: Fix a warning
+
+2002-08-19  sander  <sander@pb1.pair.com>
+
+    * ext/standard/var_unserializer.c: Sync with var_unserializer.re
+
+    * ext/standard/tests/serialize/003.phpt
+      ext/standard/var_unserializer.re:
+    Made unserialize handle floats with an E notation - bug #18654
+    Patch by Christophe Sollet <csollet@coleebris.com>.
+    (I'll commit a new var_unserializer.c in a second)
+
+    * run-tests.php: Don't know what this line was supposed to DO!?!?
+
+2002-08-19  helly  <helly@pb1.pair.com>
+
+    * main/output.c: -use of php_error_docref
+    -some more information in ob_get_status()
+
+    * main/main.c:
+    -allow changing html_errors any time changing display_errors is already
+    -use sizeof for strftime call
+    -removed unused #define
+    -mention CODING_STANDARDS as documentation
+
+2002-08-19  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * sapi/apache/mod_php4.c: Fix xbithack bug finally (see bug #16515)
+
+2002-08-19  edink  <edink@pb1.pair.com>
+
+    * sapi/cgi/cgi_main.c: MFH
+
+2002-08-19  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c: w3c adjustments :)
+    - has_attributes returns empty string if attribute is not there
+    - parent_node returns null, if no parent
+
+2002-08-19  edink  <edink@pb1.pair.com>
+
+    * sapi/cgi/cgi_main.c: Debug functions should only work in debug mode.
+
+2002-08-19  kalowsky  <kalowsky@pb1.pair.com>
+
+    * sapi/cgi/cgi_main.c: MFH
+
+2002-08-19  stas  <stas@pb1.pair.com>
+
+    * ext/standard/var_unserializer.c: ZE2 compatibility fix
+
+2002-08-19  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    MFH 1.174 (Make domxml_xslt_process() working again.)
+    MDH 1.187 (DOMXML crash on removing previously created attributes)
+
 2002-08-18  holger  <holger@pb1.pair.com>
 
     * sapi/pi3web/pi3web_sapi.c: Some minor changes related to Pi3Web 2.0.1.
