@@ -592,7 +592,7 @@ define_syslog_variables  = Off
 SMTP = localhost
 
 ; For Win32 only.
-sendmail_from = me@localhost.com
+;sendmail_from = me@example.com
 
 ; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
 ;sendmail_path =
