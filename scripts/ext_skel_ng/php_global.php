@@ -47,7 +47,12 @@
 		}
 
 		static function c_code_footer() {
-			return "}\n\n";
+			return "
+}
+
+static void php_{name}_shutdown_globals(zend_{name}_globals *{name}_globals)
+{
+}";
 		}
 
 		static function h_code_header($name) {

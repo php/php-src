@@ -710,7 +710,7 @@ PHP_MINIT_FUNCTION({$this->name})
 ";
 
 		if (count($this->globals)) {
-			$code .= "\tZEND_INIT_MODULE_GLOBALS({$this->name}, php_{$this->name}_init_globals, NULL)\n";
+			$code .= "\tZEND_INIT_MODULE_GLOBALS({$this->name}, php_{$this->name}_init_globals, php_{$this->name}_shutdown_globals)\n";
 			$need_block = true;
 		}
 
@@ -1269,7 +1269,7 @@ you have been warned!
 		ob_start();
 		
 		echo 
-"<?xml version=\"1.0\" encoding=\"utf-8\">
+"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
 <!DOCTYPE package SYSTEM \"../../package.dtd\">
 <package>
   <name>{$this->name}</name>
@@ -1283,6 +1283,16 @@ you have been warned!
 			echo "  <description>\n".rtrim($this->description)."\n  </description>\n";
 		}
 		
+    if (isset($this->release['license'])) {
+      echo "  <license>".$this->release['license']."</license>\n";
+    }
+
+		if (isset($this->with['attr'])) {
+      echo "  <configureoptions>\n";
+      echo "   <configureoption name=\"{$this->name}\" default=\"shared\" prompt=\"{$this->name} installation directory?\" />\n";
+      echo "  </configureoptions>\n";
+    }
+
 		if (@is_array($this->users)) {
 			echo "\n  <maintainers>\n";
 			foreach ($this->users as $user) {
@@ -1292,9 +1302,9 @@ you have been warned!
 						echo "      <$key>{$user[$key]}</$key>\n";
 					}
 				}
-				echo "    <maintainer/>\n";
+				echo "    </maintainer>\n";
 			}
-			echo "  <maintainers/>\n";
+			echo "  </maintainers>\n";
 		}
 		
 		if (is_array($this->release)) {
@@ -1304,7 +1314,7 @@ you have been warned!
 					echo "    <$key>{$this->release[$key]}</$key>\n";
 				}
 			}
-			echo "  <release/>\n";
+			echo "  </release>\n";
 		}
 
 		echo "\n  <filelist>\n";
