@@ -294,8 +294,9 @@ static struct gfxinfo *php_handle_jpeg(FILE *fp,pval *info)
 }
 
 /* main function */
-/* {{{ proto array getimagesize(string imagefile[, array info])
-	 Get the size of an image as 4-element array */
+
+/* {{{ proto array getimagesize(string imagefile [, array info])
+   Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
 	pval **arg1,**info = 0;
