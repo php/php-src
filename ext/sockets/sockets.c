@@ -1033,12 +1033,12 @@ PHP_FUNCTION(socket_create)
 		&& arg1 != AF_INET6
 #endif
 		&& arg1 != AF_INET) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", arg1);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%ld] specified for argument 1, assuming AF_INET", arg1);
 		arg1 = AF_INET;
 	}
 
 	if (arg2 > 10) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", arg2);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%ld] specified for argument 2, assuming SOCK_STREAM", arg2);
 		arg2 = SOCK_STREAM;
 	}
 	
@@ -1651,12 +1651,12 @@ PHP_FUNCTION(socket_create_pair)
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", domain);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%ld] specified for argument 1, assuming AF_INET", domain);
 		domain = AF_INET;
 	}
 	
 	if (type > 10) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", type);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%ld] specified for argument 2, assuming SOCK_STREAM", type);
 		type = SOCK_STREAM;
 	}
 	

@@ -2298,7 +2298,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 			cipher = EVP_des_ede3_cbc();
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid cipher type `%d'", cipherid);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid cipher type `%ld'", cipherid);
 			goto clean_exit;
 	}
 	if (cipher == NULL) {
