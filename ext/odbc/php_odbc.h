@@ -218,7 +218,6 @@ typedef struct odbc_connection {
 /*	int open;*/
 	int id;
 	int persistent;
-	struct odbc_result *one_result; // to enable _close_odbc_conn to call _free_odbc_result
 } odbc_connection;
 
 typedef struct odbc_result_value {

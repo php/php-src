@@ -160,17 +160,9 @@ static void _free_odbc_result(odbc_result *res)
 			 * zend_list_delete(res->conn_ptr->id);
 			 */
 		}
-		if (res->conn_ptr) {
-			if (res->conn_ptr->one_result == res) {
-				res->conn_ptr->one_result = NULL;
-			};
-		};
 		efree(res);
 	}
 }
-
-#define ODBC_REGISTER_RESULT_WITH_CONNECTION(result) if (!((result)->conn_ptr->one_result)) { \
-	(result)->conn_ptr->one_result = (result); };
 
 static void _close_odbc_conn(odbc_connection *conn)
 {
@@ -181,10 +173,6 @@ static void _close_odbc_conn(odbc_connection *conn)
 	 */
 	ODBCLS_FETCH();
 
-	if (conn->one_result) {
-		zend_list_delete(conn->one_result->id);
-		conn->one_result = NULL;
-	};
    	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	SQLFreeEnv(conn->henv);
@@ -196,10 +184,6 @@ static void _close_odbc_pconn(odbc_connection *conn)
 {
 	ODBCLS_FETCH();
 	
-	if (conn->one_result) {
-		zend_list_delete(conn->one_result->id);
-		conn->one_result = NULL;
-	};
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	SQLFreeEnv(conn->henv);
@@ -704,7 +688,6 @@ PHP_FUNCTION(odbc_prepare)
 	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	RETURN_RESOURCE(result->id);
 }
 /* }}} */
@@ -1034,7 +1017,6 @@ PHP_FUNCTION(odbc_exec)
 	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	
 	RETURN_RESOURCE(result->id);
 }
@@ -1601,7 +1583,6 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	
 	*conn = (odbc_connection *)pemalloc(sizeof(odbc_connection), persistent);
 	(*conn)->persistent = persistent;
-	(*conn)->one_result = NULL;
 	SQLAllocEnv(&((*conn)->henv));
 	SQLAllocConnect((*conn)->henv, &((*conn)->hdbc));
 	
@@ -2270,7 +2251,6 @@ PHP_FUNCTION(odbc_tables)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2353,7 +2333,6 @@ PHP_FUNCTION(odbc_columns)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2433,7 +2412,6 @@ PHP_FUNCTION(odbc_columnprivileges)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2534,7 +2512,6 @@ PHP_FUNCTION(odbc_foreignkeys)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2608,7 +2585,6 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2684,7 +2660,6 @@ PHP_FUNCTION(odbc_primarykeys)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2768,7 +2743,6 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2850,7 +2824,6 @@ PHP_FUNCTION(odbc_procedures)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -2940,7 +2913,6 @@ PHP_FUNCTION(odbc_specialcolumns)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -3025,7 +2997,6 @@ PHP_FUNCTION(odbc_statistics)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
@@ -3102,7 +3073,6 @@ PHP_FUNCTION(odbc_tableprivileges)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ODBC_REGISTER_RESULT_WITH_CONNECTION(result);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
