@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed gmmktime(), on certain systems it incorrectly adjusted for the timezone
+  offset and daylight savings time. (Andrei)
 - Moved VC++ Win32 project and workspace files to the win32 directory
   (Zeev)
 - Require the year arg to checkdate to be an integer (Rasmus)
