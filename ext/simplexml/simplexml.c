@@ -97,11 +97,10 @@ static zval *
 sxe_property_read(zval *object, zval *member TSRMLS_DC)
 {
 	zval           *return_value;
-	zval           *value;
+	zval           *value = NULL;
 	php_sxe_object *sxe;
 	char           *name;
 	char           *contents;
-	char           *mapname = NULL;
 	xmlNodePtr      node;
 	xmlAttrPtr      attr;
 	int             counter = 0;
@@ -122,7 +121,6 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_PREV_ELEMENT(counter, value);
 			
 			MAKE_STD_ZVAL(value);
-			value->refcount = 0;
 			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
 			ZVAL_STRING(value, contents, 0);
 			APPEND_CUR_ELEMENT(counter, value);
