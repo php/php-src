@@ -1,3 +1,67 @@
+2005-01-17  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/odbc/php_odbc.c:
+      fix weird DB2 issue:
+      DB2's SQLDataSources() returns _max available_ length of result string
+      instead of
+      _real_ length and that results in strings a-la "\0                  "
+
+2005-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_language_scanner.l:
+      MFZE2: - Fixed bug #31444 (Memory leak in zend_language_scanner.c)
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_language_scanner.l:
+      MFH: - Fixed bug #31444 (Memory leak in zend_language_scanner.c)
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fixed bug #31444 (Memory leak in zend_language_scanner.c)
+
+    * (PHP_4_3)
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      MFH: - Added some sanity checks by changing to the parameter parsing API
+
+    * ext/gd/gd.c:
+      - Added some sanity checks by changing to the parameter parsing API
+
+2005-01-17  Christian Stocker  <chregu@bitflux.ch>
+
+    * (PHP_5_0)
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h:
+      revert these 2 files... shouldn't have been comitted ..
+
+    * ext/xsl/xsltprocessor.c:
+      fix protos (by Mehdi Achour )
+
+2005-01-17  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/odbc/php_odbc.c:
+      fix leak appearing when odbc_errormsg() got invalid resource
+
+2005-01-17  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH - Fixed bug #31519: Set r->status_line to SAPI-provided status-line.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #31519: Set r->status_line to SAPI-provided status-line.
+
+2005-01-17  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      Fix compiler warning.
+
 2005-01-16  Stefan Esser  <sesser@suspekt.org>
 
     * (PHP_5_0)
