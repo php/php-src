@@ -18,3 +18,4 @@ informix            Working
 zlib                Working
 sysvshm				Working
 odbc                Working (except for persistent connections)
+MS SQL				Working (tested on phpts and isapi versions)
