@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ?? ????, Version 4.0 Beta 4
+
+
 November 16 1999, Version 4.0 Beta 3
 - Added substr_replace() function. (Andrei)
 - ucfirst()/ucwords() no longer modify arg1. (Thies)
