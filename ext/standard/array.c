@@ -38,6 +38,12 @@
 #include "php_array.h"
 #include "basic_functions.h"
 
+#ifdef ZTS
+int array_globals_id;
+#else
+php_array_globals array_globals;
+#endif
+
 #define EXTR_OVERWRITE		0
 #define EXTR_SKIP			1
 #define EXTR_PREFIX_SAME	2
@@ -96,7 +102,7 @@ zend_module_entry array_module_entry = {
 	"Array Functions",			/* extension name */
 	array_functions,			/* function list */
 	PHP_MINIT(array),			/* process startup */
-	NULL,						/* process shutdown */
+	PHP_MSHUTDOWN(array),		/* process shutdown */
 	NULL,						/* request startup */
 	NULL,						/* request shutdown */
 	NULL,						/* extension info */
@@ -107,12 +113,25 @@ PHP_MINIT_FUNCTION(array)
 {
 	ELS_FETCH();
 
+#ifdef ZTS
+    array_globals_id = ts_allocate_id(sizeof(php_array_globals), NULL, NULL);
+#endif
+
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_ALL", EXTR_PREFIX_ALL, CONST_CS | CONST_PERSISTENT);
 	
 	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(array)
+{
+#ifdef ZTS
+    ts_free_id(array_globals_id);
+#endif
+
+    return SUCCESS;
 }
 
 static int array_key_compare(const void *a, const void *b)
@@ -1941,6 +1960,7 @@ int multisort_compare(const void *a, const void *b)
 	int			  r;
 	int			  result = 0;
 	zval		  temp;
+	ARRAYLS_FETCH();
 
 	r = 0;
 	do {
@@ -1962,6 +1982,7 @@ PHP_FUNCTION(multisort)
 	int				argc;
 	int				array_size;
 	int				i, k;
+	ARRAYLS_FETCH();
 	
 	/* Get the argument count and check it */
 	argc = ARG_COUNT(ht);
@@ -2012,6 +2033,7 @@ PHP_FUNCTION(multisort)
 	/* Do the actual sort */
 	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
 	
+	/* Restructure the arrays based on sorted indirect */
 	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < argc; i++) {
 		hash = (*args[i])->value.ht;
