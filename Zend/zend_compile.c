@@ -1762,6 +1762,17 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
 			}
 			return 1; /* Inherit from the parent */
+		} else if ((child_info->flags & ZEND_ACC_PUBLIC) && (parent_info->flags & ZEND_ACC_PROTECTED)) {
+			char *prot_name;
+			int prot_name_length;
+
+			mangle_property_name(&prot_name, &prot_name_length, "*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
+			if (child_info->flags & ZEND_ACC_STATIC) {
+				zend_hash_del(ce->static_members, prot_name, prot_name_length+1);
+			} else {
+				zend_hash_del(&ce->default_properties, prot_name, prot_name_length+1);
+			}
+			pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 		}
 		return 0;	/* Don't copy from parent */
 	} else {
