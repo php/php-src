@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(gmp, for GNU MP support,
-[  --with-gmp              Include GNU MP support])
+[  --with-gmp[=DIR]        Include GNU MP support])
 
 if test "$PHP_GMP" != "no"; then
 
@@ -14,6 +14,18 @@ if test "$PHP_GMP" != "no"; then
   if test -z "$GMP_DIR"; then
     AC_MSG_ERROR(Unable to locate gmp.h)
   fi
+ 
+  PHP_CHECK_LIBRARY(gmp, __gmp_randinit_lc_2exp_size,
+  [],[
+    PHP_CHECK_LIBRARY(gmp, gmp_randinit_lc_2exp_size,
+    [],[
+      AC_MSG_ERROR([GNU MP Library version 4.1.2 or greater required.])
+    ],[
+      -L$GMP_DIR/lib
+    ])
+  ],[
+    -L$GMP_DIR/lib
+  ])
 
   PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/lib, GMP_SHARED_LIBADD)
   PHP_ADD_INCLUDE($GMP_DIR/include)
