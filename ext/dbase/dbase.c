@@ -745,7 +745,7 @@ PHP_FUNCTION(dbase_create)
 			cur_f->db_flen = 1;
 			break;
 		case 'M':
-			cur_f->db_flen = 9;
+			cur_f->db_flen = 10;
 			dbh->db_dbt = DBH_TYPE_MEMO;
 			/* should create the memo file here, probably */
 			break;
