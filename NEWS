@@ -83,6 +83,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
+- Fixed bug #21978, #21036 (bcc: gets interpreted as cc: as well - win32 smtp mail only). (Sara)
 - Fixed bug #21885 (move_uploaded_file() does not ignore open_basedir). (Wez)
 - Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
   (Wez)
@@ -96,6 +97,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
 - Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
+- Fixed bug #21534 (typo in gmp_gcdext() causes incorrect results). (Sara)
 - Fixed bug #21531 (file_exists() and other filestat functions report errors
   when the requested file/directory does not exists). (Sara)
 - Fixed bug #21529 (memory corruption by fsockopen()). (Ilia)
@@ -148,6 +150,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
 - Fixed bug #14245 ('make install' fails on AIX when using --with-apxs). (Jani)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
+- Fixed bug #13551 (bcmath functions applying scale incorrectly). (Sara)
 
 17 Feb 2003, Version 4.3.1
 - Fixed serious security vulnerability in CGI SAPI. (Shane)
