@@ -318,7 +318,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, int len, int offset)
+static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name)
 {
 	zval *match_pair;
 
@@ -330,6 +330,10 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset)
 	add_next_index_stringl(match_pair, str, len, 1);
 	add_next_index_long(match_pair, offset);
 	
+	if (name) {
+		zval_add_ref(&match_pair);
+		zend_hash_update(Z_ARRVAL_P(result), name, strlen(name)+1, &match_pair, sizeof(zval *), NULL);
+	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
 }
 /* }}} */
@@ -338,11 +342,15 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset)
  */
 static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
-	zval			**regex,			/* Regular expression */
-					**subject,			/* String to match against */
-					**subpats = NULL,	/* Array for subpatterns */
-					**flags,			/* Match control flags */
-					*result_set,		/* Holds a set of subpatterns after
+	/* parameters */
+	char  		    *regex;				/* Regular expression */
+	char 		    *subject;			/* String to match against */
+	int			     regex_len;
+	int				 subject_len;
+	zval 			*subpats = NULL;	/* Array for subpatterns */
+	int				 flags;				/* Match control flags */
+
+	zval			*result_set,		/* Holds a set of subpatterns after
 										   a global match */
 				   **match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
@@ -354,63 +362,56 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
-	int				 start_offset;		/* Where the new search starts */
+	int				 start_offset = 0;	/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
-	int				 i;
-	int				 subpats_order = 0;	/* Order of subpattern matches */
+	int				 subpats_order = 0; /* Order of subpattern matches */
 	int				 offset_capture = 0;/* Capture match offsets: yes/no */
 	int				 g_notempty = 0;	/* If the match should not be empty */
-	const char	   **stringlist;		/* Used to hold list of subpatterns */
+	const char	   **stringlist;		/* Holds list of subpatterns */
 	char			*match;				/* The current match */
+	char 		   **subpat_names = NULL;/* Array for named subpatterns */
+	int				 i;
 	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zll", &regex, &regex_len,
+							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
+		RETURN_FALSE;
+	}
 	
-	/* Get function parameters and do error-checking. */
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (global || zend_get_parameters_ex(2, &regex, &subject) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-			
-		case 3:
-			if (zend_get_parameters_ex(3, &regex, &subject, &subpats) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			if (global)
-				subpats_order = PREG_PATTERN_ORDER;
-			break;
+	if (global)
+		subpats_order = PREG_PATTERN_ORDER;
 
-		case 4:
-			if (zend_get_parameters_ex(4, &regex, &subject, &subpats, &flags) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-	
-			convert_to_long_ex(flags);
-			offset_capture = Z_LVAL_PP(flags) & PREG_OFFSET_CAPTURE;
-			subpats_order = Z_LVAL_PP(flags) & 0xff;
-			if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
-				(!global && subpats_order != 0)) {
-				zend_error(E_WARNING, "Wrong value for parameter 4 in call to %s()", get_active_function_name(TSRMLS_C));
-				return;
-			}
-			break;
-			
-		default:
-			WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() > 3) {
+		offset_capture = flags & PREG_OFFSET_CAPTURE;
+		/*
+		 * subpats_order is pre-set to pattern mode so we change it only if
+		 * necessary.
+		 */
+		if (flags & 0xff) {
+			subpats_order = flags & 0xff;
+		}
+		if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
+			(!global && subpats_order != 0)) {
+			zend_error(E_WARNING, "Wrong value for parameter 4 in call to %s()", get_active_function_name(TSRMLS_C));
+			return;
+		}
 	}
 
-	/* Make sure we're dealing with strings. */
-	convert_to_string_ex(regex);
-	convert_to_string_ex(subject);
-
-	/* Make sure to clean up the passed array and initialize it. */
+	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
-		zval_dtor(*subpats);
-		array_init(*subpats);
+		zval_dtor(subpats);
+		array_init(subpats);
+	}
+
+	/* Negative offset counts from the end of the string. */
+	if (start_offset < 0) {
+		start_offset = subject_len + start_offset;
+		if (start_offset < 0) {
+			start_offset = 0;
+		}
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -420,7 +421,32 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	size_offsets = num_subpats * 3;
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 
-	/* Allocate match sets array and initialize the values */
+	/*
+	 * Build a mapping from subpattern numbers to their names. We will always
+	 * allocate the table, even though they may be no named subpatterns. This
+	 * avoids somewhat more complicated logic in the inner loops.
+	 */
+	subpat_names = (char **)safe_emalloc(num_subpats, sizeof(char *), 0);
+	memset(subpat_names, 0, sizeof(char *) * num_subpats);
+	{
+		int name_cnt, name_size, ni = 0;
+		char *name_table;
+		unsigned short name_idx;
+
+		pcre_fullinfo(re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
+		if (name_cnt > 0) {
+			pcre_fullinfo(re, extra, PCRE_INFO_NAMETABLE, &name_table);
+			pcre_fullinfo(re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
+
+			while (ni++ < name_cnt) {
+				name_idx = 0xff * name_table[0] + name_table[1];
+				subpat_names[name_idx] = name_table + 2;
+				name_table += name_size;
+			}
+		}
+	}
+
+	/* Allocate match sets array and initialize the values. */
 	if (global && subpats_order == PREG_PATTERN_ORDER) {
 		match_sets = (zval **)safe_emalloc(num_subpats, sizeof(zval *), 0);
 		for (i=0; i<num_subpats; i++) {
@@ -430,15 +456,12 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		}
 	}
 
-	/* Start from the beginning of the string */
-	start_offset = 0;
 	match = NULL;
 	matched = 0;
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, Z_STRVAL_PP(subject),
-						  Z_STRLEN_PP(subject), start_offset,
+		count = pcre_exec(re, extra, subject, subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */	
@@ -450,13 +473,13 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		/* If something has matched */
 		if (count >= 0) {
 			matched++;
-			match = Z_STRVAL_PP(subject) + offsets[0];
+			match = subject + offsets[0];
 
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(Z_STRVAL_PP(subject),
-											offsets, count, &stringlist) < 0) {
+				if (pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+					efree(subpat_names);
 					efree(offsets);
 					efree(re);
 					zend_error(E_WARNING, "Get subpatterns list failed");
@@ -469,7 +492,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						for (i = 0; i < count; i++) {
 							if (offset_capture) {
 								add_offset_pair(match_sets[i], (char *)stringlist[i],
-												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
 							} else {
 								add_next_index_stringl(match_sets[i], (char *)stringlist[i],
 													   offsets[(i<<1)+1] - offsets[i<<1], 1);
@@ -495,24 +518,32 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						for (i = 0; i < count; i++) {
 							if (offset_capture) {
 								add_offset_pair(result_set, (char *)stringlist[i],
-												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], subpat_names[i]);
 							} else {
+								if (subpat_names[i]) {
+									add_assoc_stringl(result_set, subpat_names[i], (char *)stringlist[i],
+														   offsets[(i<<1)+1] - offsets[i<<1], 1);
+								}
 								add_next_index_stringl(result_set, (char *)stringlist[i],
 													   offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 						}
 						/* And add it to the output array */
-						zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &result_set,
-													sizeof(zval *), NULL);
+						zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set, sizeof(zval *), NULL);
 					}
 				} else {			/* single pattern matching */
 					/* For each subpattern, insert it into the subpatterns array. */
 					for (i = 0; i < count; i++) {
 						if (offset_capture) {
-							add_offset_pair(*subpats, (char *)stringlist[i],
-											offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+							add_offset_pair(subpats, (char *)stringlist[i],
+											offsets[(i<<1)+1] - offsets[i<<1],
+											offsets[i<<1], subpat_names[i]);
 						} else {
-							add_next_index_stringl(*subpats, (char *)stringlist[i],
+							if (subpat_names[i]) {
+								add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
+												  offsets[(i<<1)+1] - offsets[i<<1], 1);
+							}
+							add_next_index_stringl(subpats, (char *)stringlist[i],
 												   offsets[(i<<1)+1] - offsets[i<<1], 1);
 						}
 					}
@@ -526,7 +557,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < Z_STRLEN_PP(subject)) {
+			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 			} else
@@ -545,19 +576,24 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 	/* Add the match sets to the output array and clean up */
 	if (global && subpats_order == PREG_PATTERN_ORDER) {
-		for (i=0; i<num_subpats; i++) {
-			zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &match_sets[i], sizeof(zval *), NULL);
+		for (i = 0; i < num_subpats; i++) {
+			if (subpat_names[i]) {
+				zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i],
+								 strlen(subpat_names[i])+1, &match_sets[i], sizeof(zval *), NULL);
+			}
+			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
 		efree(match_sets);
 	}
 	
 	efree(offsets);
+	efree(subpat_names);
 
 	RETVAL_LONG(matched);
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags]])
+/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset ]]])
    Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
@@ -565,7 +601,7 @@ PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags])
+/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
@@ -1215,7 +1251,7 @@ PHP_FUNCTION(preg_split)
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, &Z_STRVAL_PP(subject)[offsets[0]]-last_match, next_offset);
+					add_offset_pair(return_value, last_match, &Z_STRVAL_PP(subject)[offsets[0]]-last_match, next_offset, NULL);
 				} else {
                 	/* Add the piece to the return value */
 					add_next_index_stringl(return_value, last_match,
@@ -1237,7 +1273,7 @@ PHP_FUNCTION(preg_split)
 					/* If we have matched a delimiter */
 					if (!no_empty || match_len > 0) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &Z_STRVAL_PP(subject)[offsets[i<<1]], match_len, offsets[i<<1]);
+							add_offset_pair(return_value, &Z_STRVAL_PP(subject)[offsets[i<<1]], match_len, offsets[i<<1], NULL);
 						} else {
 							add_next_index_stringl(return_value,
 												   &Z_STRVAL_PP(subject)[offsets[i<<1]],
@@ -1273,7 +1309,7 @@ PHP_FUNCTION(preg_split)
 	{
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &Z_STRVAL_PP(subject)[start_offset], Z_STRLEN_PP(subject) - start_offset, start_offset);
+			add_offset_pair(return_value, &Z_STRVAL_PP(subject)[start_offset], Z_STRLEN_PP(subject) - start_offset, start_offset, NULL);
 		} else {
 			/* Add the last piece to the return value */
 			add_next_index_stringl(return_value, last_match, Z_STRVAL_PP(subject) + Z_STRLEN_PP(subject) - last_match, 1);
