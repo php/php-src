@@ -145,6 +145,10 @@ void shutdown_scanner(TSRMLS_D)
 		efree(CG(heredoc));
 		CG(heredoc_len)=0;
 	}
+	if (SCNG(yy_start_stack)) {
+		yy_flex_free(SCNG(yy_start_stack));
+		SCNG(yy_start_stack) = NULL;
+	}
 	RESET_DOC_COMMENT();
 	
 #ifdef ZEND_MULTIBYTE
