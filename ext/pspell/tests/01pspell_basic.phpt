@@ -1,5 +1,5 @@
 --TEST--
-pspell basic tests
+pspell basic tests (warning: may fail with pspell/aspell < GNU Aspell 0.50.3)
 --SKIPIF--
 <?php 
 	if (!extension_loaded("pspell")) print "skip"; 
@@ -96,7 +96,6 @@ Possible spelling: Secrets
 Possible spelling: Regrets
 Possible spelling: Secretes
 Possible spelling: Egrets
-Possible spelling: Serrates
 Possible spelling: Segre's
 Possible spelling: Seagate's
 Possible spelling: Regreets
