@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added the XML Expat library to the standard PHP source distribution thanks
+  to its author James Clark (Andi & Zeev)
+- Added XML to the default Win32 build (Andi & Zeev)
 - Added socket_get_status() function. Renamed:
     set_socket_timeout() -> socket_set_timeout()
     set_socket_blocking() -> socket_set_blocking(). (Andrei)
