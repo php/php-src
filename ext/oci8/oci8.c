@@ -4833,7 +4833,7 @@ PHP_FUNCTION(ocicollappend)
 			CALL_OCI_RETURN(connection->error, OCICollAppend(
 				  connection->session->pEnv, 
 				  connection->pError, 
-				  (dword *)0, 
+				  (dvoid *)0, 
 				  &null_ind, 
 				  coll->coll));
 			if (connection->error) {
@@ -5139,7 +5139,7 @@ PHP_FUNCTION(ocicollassignelem)
 				  connection->session->pEnv, 
 				  connection->pError, 
 				  ndx, 
-				  (dword *)0, 
+				  (dvoid *)0, 
 				  &null_ind, 
 				  coll->coll));
 			if (connection->error) {
@@ -5172,7 +5172,7 @@ PHP_FUNCTION(ocicollassignelem)
 							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
-							(dword *)&dt, 
+							(dvoid *)&dt, 
 							&new_ind, 
 							coll->coll));
 
@@ -5200,7 +5200,7 @@ PHP_FUNCTION(ocicollassignelem)
 							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
-							(dword *)ocistr, 
+							(dvoid *)ocistr, 
 							&new_ind, 
 							coll->coll));
 
@@ -5239,7 +5239,7 @@ PHP_FUNCTION(ocicollassignelem)
 							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
-							(dword *)&num, 
+							(dvoid *)&num, 
 							&new_ind, 
 							coll->coll));
 
