@@ -447,6 +447,7 @@ static int php_ub_body_write(const char *str, uint str_length)
 	OLS_FETCH();
 
 	if (SG(request_info).headers_only) {
+		php_header();
 		zend_bailout();
 	}
 	if (php_header()) {
