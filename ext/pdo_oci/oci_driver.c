@@ -63,6 +63,11 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	
 	einfo = &H->einfo;
 
+	if (einfo->errmsg) {
+		pefree(einfo->errmsg, dbh->is_persistent);
+		einfo->errmsg = NULL;
+	}
+
 	if (stmt) {
 		S = (pdo_oci_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
@@ -184,7 +189,12 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		OCIHandleFree(H->env, OCI_HTYPE_ENV);
 		H->env = NULL;
 	}
-
+	
+	if (H->einfo.errmsg) {
+		pefree(H->einfo.errmsg, dbh->is_persistent);
+		H->einfo.errmsg = NULL;
+	}
+ 
 	pefree(H, dbh->is_persistent);
 
 	return 0;
