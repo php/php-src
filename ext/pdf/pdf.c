@@ -93,6 +93,10 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_end_page, NULL)
 	PHP_FE(pdf_show, NULL)
 	PHP_FE(pdf_show_xy, NULL)
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
+	PHP_FE(pdf_show_boxed, NULL)
+	PHP_FE(pdf_skew, NULL)
+#endif
 	PHP_FE(pdf_set_font, NULL)
 	PHP_FE(pdf_set_leading, NULL)
 	PHP_FE(pdf_set_text_rendering, NULL)
@@ -134,6 +138,7 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_closepath_fill_stroke, NULL)
 	PHP_FE(pdf_endpath, NULL)
 	PHP_FE(pdf_clip, NULL)
+	PHP_FE(pdf_set_parameter, NULL)
 	PHP_FE(pdf_setgray_fill, NULL)
 	PHP_FE(pdf_setgray_stroke, NULL)
 	PHP_FE(pdf_setgray, NULL)
@@ -223,7 +228,7 @@ static void pdf_efree(PDF *p, void *mem) {
 }
 #endif
 
-#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10)
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
 	if(php_header())
 		return(php_write(data, size));
@@ -601,6 +606,40 @@ PHP_FUNCTION(pdf_show_xy) {
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto void pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
+   Output text formated in a boxed */
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
+PHP_FUNCTION(pdf_show_boxed) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 7 || getParameters(ht, 7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	convert_to_double(arg5);
+	convert_to_double(arg6);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_show_boxed(pdf, arg2->value.str.val, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, (float) arg6->value.dval, arg7->value.str.val, NULL);
+
+	RETURN_TRUE;
+}
+#endif
+/* }}} */
+
 
 /* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding [, int embed])
    Select the current font face, size and encoding */
@@ -1198,6 +1237,36 @@ PHP_FUNCTION(pdf_rotate) {
 }
 /* }}} */
 
+/* {{{ proto void pdf_skew(int pdfdoc, double xangle, double yangle)
+   Skew the coordinate system */
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
+PHP_FUNCTION(pdf_skew) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_double(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_skew(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+
+	RETURN_TRUE;
+}
+#endif
+/* }}} */
+
 /* {{{ proto void pdf_setflat(int pdfdoc, double value)
    Sets flatness */
 PHP_FUNCTION(pdf_setflat) {
@@ -1770,6 +1839,34 @@ PHP_FUNCTION(pdf_clip) {
 	}
 
 	PDF_clip(pdf);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_set_parameter(int pdfdoc, string parameter, string value)
+   Sets arbitrary parameters */
+PHP_FUNCTION(pdf_set_parameter) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_string(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_set_parameter(pdf, arg2->value.str.val, arg3->value.str.val);
 
 	RETURN_TRUE;
 }
