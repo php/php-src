@@ -17,6 +17,9 @@
 * -----------------
 *
 * $Log$
+* Revision 1.1  1999/04/21 23:11:20  ssb
+* moved apache, com and hyperwave into ext/
+*
 * Revision 1.1.1.1  1999/04/07 21:03:20  zeev
 * PHP 4.0
 *
@@ -63,45 +66,51 @@
 
 /*---------------------- Macros and type definitions ----------------------*/
 
-typedef struct DLST_BUCKET {
-	struct DLST_BUCKET	*next;
-	struct DLST_BUCKET	*prev;
-	} DLST_BUCKET;
+typedef struct PHP_DLST_BUCKET {
+	struct PHP_DLST_BUCKET	*next;
+	struct PHP_DLST_BUCKET	*prev;
+	} PHP_DLST_BUCKET;
+
+/* necessary for AIX 4.2.x */
+
+#ifdef hz
+#undef hz
+#endif
 
 typedef struct {
 	int			count;			/* Number of elements currently in list	*/
-	DLST_BUCKET	*head;			/* Pointer to head element of list		*/
-	DLST_BUCKET	*z;				/* Pointer to last node of list			*/
-	DLST_BUCKET	hz[2];			/* Space for head and z nodes			*/
+	PHP_DLST_BUCKET	*head;			/* Pointer to head element of list		*/
+	PHP_DLST_BUCKET	*z;				/* Pointer to last node of list			*/
+	PHP_DLST_BUCKET	hz[2];			/* Space for head and z nodes			*/
 	} DLIST;
 
 /* Return a pointer to the user space given the address of the header of
  * a node.
  */
 
-#define	DLST_USERSPACE(h)	((void*)((DLST_BUCKET*)(h) + 1))
+#define	PHP_DLST_USERSPACE(h)	((void*)((PHP_DLST_BUCKET*)(h) + 1))
 
 /* Return a pointer to the header of a node, given the address of the
  * user space.
  */
 
-#define	DLST_HEADER(n)		((DLST_BUCKET*)(n) - 1)
+#define	PHP_DLST_HEADER(n)		((PHP_DLST_BUCKET*)(n) - 1)
 
 /* Return a pointer to the user space of the list's head node. This user
  * space does not actually exist, but it is useful to be able to address
  * it to enable insertion at the start of the list.
  */
 
-#define	DLST_HEAD(l)		DLST_USERSPACE((l)->head)
+#define	PHP_DLST_HEAD(l)		PHP_DLST_USERSPACE((l)->head)
 
 /* Return a pointer to the user space of the last node in list.	*/
 
-#define	DLST_TAIL(l)		DLST_USERSPACE((l)->z->prev)
+#define	PHP_DLST_TAIL(l)		PHP_DLST_USERSPACE((l)->z->prev)
 
 /* Determine if a list is empty
  */
 
-#define	DLST_EMPTY(l)		((l)->count == 0)
+#define	PHP_DLST_EMPTY(l)		((l)->count == 0)
 
 /*-------------------------- Function Prototypes --------------------------*/
 
