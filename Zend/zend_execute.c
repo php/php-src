@@ -2040,6 +2040,9 @@ int zend_fetch_obj_r_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_fetch_obj_w_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
+	if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+	}
 	zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 	NEXT_OPCODE();
 }

@@ -141,6 +141,7 @@ typedef struct _zend_arg_info {
 	zend_bool allow_null;
 	zend_bool pass_by_reference;
 	zend_bool return_reference;
+	int required_num_args;
 } zend_arg_info;
 
 struct _zend_op_array {
