@@ -494,11 +494,11 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
-void php_rinit_globals(php_ps_globals *ps_globals)
+void php_rinit_globals(PSLS_D)
 {
-	ps_globals->mod = _php_find_ps_module(INI_STR("session_module_name"));
+	PS(mod) = _php_find_ps_module(INI_STR("session_module_name"));
 		
-	zend_hash_init(&ps_globals->vars, 0, NULL, NULL, 0);
+	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	ps_globals->save_path = estrdup(INI_STR("session_save_path"));
 	ps_globals->session_name = estrdup(INI_STR("session_name"));
 	ps_globals->id = NULL;
@@ -506,7 +506,7 @@ void php_rinit_globals(php_ps_globals *ps_globals)
 	ps_globals->mod_data = NULL;
 }
 
-void php_rshutdown_globals(php_ps_globals *ps_globals)
+void php_rshutdown_globals(PSLS_D)
 {
 	if(ps_globals->mod_data)
 		ps_globals->mod->close(&ps_globals->mod_data);
@@ -518,7 +518,9 @@ void php_rshutdown_globals(php_ps_globals *ps_globals)
 
 int php_rinit_session(INIT_FUNC_ARGS)
 {
-	php_rinit_globals(&ps_globals);
+	PSLS_FETCH();
+
+	php_rinit_globals(PSLS_C);
 
 	if(INI_INT("session_auto_start")) {
 		_php_session_start();
@@ -531,10 +533,12 @@ int php_rinit_session(INIT_FUNC_ARGS)
 
 int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 {
+	PSLS_FETCH();
+
 	if(PS(nr_open_sessions) > 0) {
 		_php_session_save_current_state();
 	}
-	php_rshutdown_globals(&ps_globals);
+	php_rshutdown_globals(PSLS_C);
 	return SUCCESS;
 }
 
