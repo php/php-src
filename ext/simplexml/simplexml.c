@@ -147,10 +147,10 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	while (node) {
 		SKIP_TEXT(node);
 		
-		if (node->ns) {
+		do if (node->ns) {
 			if (node->parent->ns) {
 				if (!xmlStrcmp(node->ns->href, node->parent->ns->href)) {
-					goto this_iter;
+					break;
 				}
 			}
 			
@@ -160,8 +160,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 				APPEND_CUR_ELEMENT(counter, value);
 				goto next_iter;
 			}
-		}
-this_iter:
+		} while (0);
 
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
