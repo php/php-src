@@ -155,7 +155,8 @@ top_statement_list:
 
 top_statement:
 		statement
-	|	declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
+	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
+	|	class_declaration_statement
 ;
 
 
@@ -167,7 +168,8 @@ inner_statement_list:
 
 inner_statement:
 		statement
-	|	declaration_statement
+	|	function_declaration_statement
+	|	class_declaration_statement
 ;
 
 
@@ -262,17 +264,24 @@ use_filename:
 ;
 
 
-declaration_statement:
-		unticked_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
+function_declaration_statement:
+		unticked_function_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
+;
+
+class_declaration_statement:
+		unticked_class_declaration_statement	{ zend_do_ticks(TSRMLS_C); }
 ;
 
 
-unticked_declaration_statement:
+unticked_function_declaration_statement:
 		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_CLASS declaration_class_name extends_from { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+;
+
+unticked_class_declaration_statement:
+		T_CLASS declaration_class_name extends_from { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
 extends_from:
@@ -289,7 +298,6 @@ foreach_optional_arg:
 		/* empty */				{ $$.op_type = IS_UNUSED; }
 	|	T_DOUBLE_ARROW w_variable	{ $$ = $2; }
 ;
-
 
 for_statement:
 		statement
