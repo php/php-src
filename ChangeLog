@@ -1,3 +1,20 @@
+2004-11-19  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: fix bug #30587 (array_multisort doesn't separate zvals before changing
+      them)
+
+    * ext/standard/array.c:
+      fix bug #30587 (array_multisort doesn't separate zvals before changing
+      them)
+
 2004-11-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
