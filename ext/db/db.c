@@ -497,7 +497,7 @@ PHP_FUNCTION(dbminsert)
 		RETURN_FALSE;
 	}
 	
-	ret = php_dbm_insert(info, Z_STRVAL_P(key), Z_STRVAL_P(value));
+	ret = php_dbm_insert(info, Z_STRVAL_P(key), Z_STRVAL_P(value) TSRMLS_CC);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -505,13 +505,13 @@ PHP_FUNCTION(dbminsert)
 
 /* {{{ php_dbm_insert
  */
-int php_dbm_insert(dbm_info *info, char *key, char *value) {
+int php_dbm_insert(dbm_info *info, char *key, char *value TSRMLS_DC) {
 	datum key_datum, value_datum;
 	int ret;
 	DBM_TYPE dbf;
 
-	php_stripslashes(key,NULL);
-	php_stripslashes(value,NULL);
+	php_stripslashes(key, NULL TSRMLS_CC);
+	php_stripslashes(value, NULL TSRMLS_CC);
 
 	value_datum.dptr = estrdup(value);
 	value_datum.dsize = strlen(value);
@@ -571,8 +571,8 @@ int php_dbm_replace(dbm_info *info, char *key, char *value TSRMLS_DC)
 	datum key_datum, value_datum;
 
 	if (PG(magic_quotes_runtime)) {
-		php_stripslashes(key,NULL);
-		php_stripslashes(value,NULL);
+		php_stripslashes(key, NULL TSRMLS_CC);
+		php_stripslashes(value, NULL TSRMLS_CC);
 	}
 
 	value_datum.dptr = estrdup(value);
@@ -669,7 +669,7 @@ char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC)
 		ret = NULL;
 
 	if (ret && PG(magic_quotes_runtime)) {
-		ret = php_addslashes(ret, value_datum.dsize, NULL, 1);
+		ret = php_addslashes(ret, value_datum.dsize, NULL, 1 TSRMLS_CC);
 	}
 	return(ret);
 }
@@ -903,7 +903,7 @@ char *php_dbm_nextkey(dbm_info *info, char *key TSRMLS_DC)
 	else ret=NULL;
 
 	if (ret && PG(magic_quotes_runtime)) {
-		ret = php_addslashes(ret, ret_datum.dsize, NULL, 1);
+		ret = php_addslashes(ret, ret_datum.dsize, NULL, 1 TSRMLS_CC);
 	}
 	return(ret);
 }

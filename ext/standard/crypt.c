@@ -106,7 +106,7 @@ PHP_MINIT_FUNCTION(crypt)
 PHP_RINIT_FUNCTION(crypt)
 {
 	if(!php_crypt_rand_seeded) {
-		php_srand(time(0) * getpid() * (php_combined_lcg() * 10000.0));
+		php_srand(time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0));
 		php_crypt_rand_seeded=1;
 	} 
 	return SUCCESS;

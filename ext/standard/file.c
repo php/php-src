@@ -370,7 +370,7 @@ PHP_FUNCTION(get_meta_tags)
 				} else if (saw_content) {
 					/* Get the CONTENT attr (Single word attr, non-quoted) */
 					if (PG(magic_quotes_runtime)) {
-						value = php_addslashes(md.token_data,0,&md.token_len,0);
+						value = php_addslashes(md.token_data,0,&md.token_len,0 TSRMLS_CC);
 					} else {
 						value = estrndup(md.token_data,md.token_len);
 					}
@@ -408,7 +408,7 @@ PHP_FUNCTION(get_meta_tags)
 			} else if (saw_content) {
 				/* Get the CONTENT attr (Single word attr, non-quoted) */
 				if (PG(magic_quotes_runtime)) {
-					value = php_addslashes(md.token_data,0,&md.token_len,0);
+					value = php_addslashes(md.token_data,0,&md.token_len,0 TSRMLS_CC);
 				} else {
 					value = estrndup(md.token_data,md.token_len);
 				}
@@ -541,7 +541,7 @@ PHP_FUNCTION(file)
 			}
 		}
 		if (PG(magic_quotes_runtime)) {
-			slashed = php_addslashes(target_buf, target_len, &len, 1); /* 1 = free source string */
+			slashed = php_addslashes(target_buf, target_len, &len, 1 TSRMLS_CC); /* 1 = free source string */
             add_index_stringl(return_value, i++, slashed, len, 0);
 		} else {
 			target_buf = erealloc(target_buf, target_len+1); /* do we really want to do that? */
@@ -1038,7 +1038,7 @@ PHP_FUNCTION(fgets)
 	}
 
 	if (PG(magic_quotes_runtime)) {
-		return_value->value.str.val = php_addslashes(buf,0,&return_value->value.str.len,1);
+		return_value->value.str.val = php_addslashes(buf,0,&return_value->value.str.len,1 TSRMLS_CC);
 	} else {
 		return_value->value.str.val = buf;
 		return_value->value.str.len = strlen(return_value->value.str.val);
@@ -1308,7 +1308,7 @@ PHP_FUNCTION(fwrite)
 
 	if (!arg3 && PG(magic_quotes_runtime)) {
 		zval_copy_ctor(*arg2);
-		php_stripslashes((*arg2)->value.str.val,&num_bytes);
+		php_stripslashes(Z_STRVAL_PP(arg2), &num_bytes TSRMLS_CC);
 	}
 
 #if HAVE_PHP_STREAM
@@ -1570,8 +1570,6 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock TSRMLS_DC)
 			len = sbuf.st_size - off;
 			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
 			if (p != (void *) MAP_FAILED) {
-				TSRMLS_FETCH();
-
 				BG(mmap_file) = p;
 				BG(mmap_len) = len;
 				PHPWRITE(p, len);
@@ -2036,7 +2034,7 @@ PHP_FUNCTION(fread)
 	}
 	return_value->value.str.val[return_value->value.str.len] = 0;
 	if (PG(magic_quotes_runtime)) {
-		return_value->value.str.val = php_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1);
+		return_value->value.str.val = php_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1 TSRMLS_CC);
 	}
 	return_value->type = IS_STRING;
 }

@@ -990,7 +990,7 @@ PHP_FUNCTION(ingres_field_scale)
 
 /* Fetch a row of result
 */
-static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int result_type)
+static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int result_type TSRMLS_DC)
 {
   IIAPI_GETCOLPARM getColParm;
   IIAPI_DATAVALUE *columnData;
@@ -1133,7 +1133,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 	      }
 	      /* use php_addslashes if asked to */
 	      if(PG(magic_quotes_runtime)) {
-		value_char_p = php_addslashes((char *) columnData[k-1].dv_value,columnData[k-1].dv_length,&len,0);
+		value_char_p = php_addslashes((char *) columnData[k-1].dv_value,columnData[k-1].dv_length,&len,0 TSRMLS_CC);
 		should_copy = 0;
 	      } else {
 		value_char_p = (char *) columnData[k-1].dv_value;
@@ -1198,7 +1198,7 @@ PHP_FUNCTION(ingres_fetch_array)
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
   php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link,
-	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)));
+	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)) TSRMLS_CC);
 }
 /* }}} */
 
@@ -1222,7 +1222,7 @@ PHP_FUNCTION(ingres_fetch_row)
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
-  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, II_NUM);
+  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, II_NUM TSRMLS_CC);
 }
 /* }}} */
 
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(ingres_fetch_object)
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
   php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link,
-	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)));
+	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)) TSRMLS_CC);
   if(Z_TYPE_P(return_value)==IS_ARRAY) {
     convert_to_object(return_value);
   }

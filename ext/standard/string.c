@@ -454,15 +454,15 @@ int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 /* {{{ php_trim
        Compatibility function, ports old-API to new one. (DEPRECATED)
 */
-void php_trim(zval *str, zval *return_value, int mode)
+void php_trim(zval *str, zval *return_value, int mode TSRMLS_DC)
 {
-	php_trim2(str, NULL, return_value, mode);
+	php_trim2(str, NULL, return_value, mode TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_trim2
  */
-PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode)
+PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode TSRMLS_DC)
 /* mode 1 : trim left
    mode 2 : trim right
    mode 3 : trim left and right
@@ -470,8 +470,6 @@ PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode)
    what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
 */
 {
-	TSRMLS_FETCH();
-
 	register int i;
 	int len = str->value.str.len;
 	int trimmed = 0;
@@ -528,7 +526,7 @@ PHP_FUNCTION(chop)
 	/* convert_to_string_ex never fails (last line: op->type = IS_STRING),
 	   so, not checking for that. */
 
-	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 2);
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 2 TSRMLS_CC);
 }
 /* }}} */
 
@@ -545,7 +543,7 @@ PHP_FUNCTION(trim)
 	if (ZEND_NUM_ARGS() == 2)
 		convert_to_string_ex(str);
 
-	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 3);
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 3 TSRMLS_CC);
 }
 /* }}} */
 
@@ -562,7 +560,7 @@ PHP_FUNCTION(ltrim)
 	if (ZEND_NUM_ARGS() == 2)
 		convert_to_string_ex(str);
 
-	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 1);
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -2107,12 +2105,11 @@ PHP_FUNCTION(similar_text)
 /* {{{ php_stripslashes
  *
  * be careful, this edits the string in-place */
-PHPAPI void php_stripslashes(char *str, int *len)
+PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 {
 	char *s, *t;
 	int l;
 	char escape_char='\\';
-	TSRMLS_FETCH();
 
 	if (PG(magic_quotes_sybase)) {
 		escape_char='\'';
@@ -2168,15 +2165,17 @@ PHP_FUNCTION(addcslashes)
 	convert_to_string_ex(str);
 	convert_to_string_ex(what);
 
-	if(Z_STRLEN_PP(str) == 0) {
+	if (Z_STRLEN_PP(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if(Z_STRLEN_PP(what) == 0) {
-		RETURN_STRINGL(Z_STRVAL_PP(str),Z_STRLEN_PP(str),1);
+	if (Z_STRLEN_PP(what) == 0) {
+		RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
 	}
 
-	return_value->value.str.val = php_addcslashes((*str)->value.str.val,(*str)->value.str.len,&return_value->value.str.len,0,(*what)->value.str.val,(*what)->value.str.len);
+	Z_STRVAL_P(return_value) = php_addcslashes(Z_STRVAL_PP(str), 
+			Z_STRLEN_PP(str), &Z_STRLEN_P(return_value), 0, Z_STRVAL_PP(what),
+			Z_STRLEN_PP(what) TSRMLS_CC);
 	return_value->type = IS_STRING;
 }
 /* }}} */
@@ -2192,12 +2191,13 @@ PHP_FUNCTION(addslashes)
 	}
 	convert_to_string_ex(str);
 
-	if(Z_STRLEN_PP(str) == 0) {
+	if (Z_STRLEN_PP(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	return_value->value.str.val = php_addslashes((*str)->value.str.val,(*str)->value.str.len,&return_value->value.str.len,0);
-	return_value->type = IS_STRING;
+	Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_PP(str),
+			Z_STRLEN_PP(str), &Z_STRLEN_P(return_value), 0 TSRMLS_CC);
+	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
 
@@ -2231,7 +2231,7 @@ PHP_FUNCTION(stripslashes)
 
 	*return_value = **str;
 	zval_copy_ctor(return_value);
-	php_stripslashes(return_value->value.str.val,&return_value->value.str.len);
+	php_stripslashes(Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC);
 }
 /* }}} */
 
@@ -2314,10 +2314,8 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 			
 /* {{{ php_addcslashes
  */
-PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength)
+PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
 {
-	/* TSRMLS_FETCH(); (causes parse error -> ?) */
-
 	char flags[256];
 	char *new_str = emalloc((length?length:(length=strlen(str)))*4+1); 
 	char *source,*target;
@@ -2372,14 +2370,13 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 
 /* {{{ php_addslashes
  */
-PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free)
+PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
 	char *new_str;
 	char *source,*target;
 	char *end;
 	char c;
-	TSRMLS_FETCH();
  	
 	if (!str) {
 		*new_length = 0;
