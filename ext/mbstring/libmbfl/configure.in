@@ -28,5 +28,11 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([strcasecmp strchr])
 
+AC_CHECK_PROGS([FETCH_VIA_FTP], [wget curl ncftpget])
+
+if test "$FETCH_VIA_FTP" = "curl"; then
+  FETCH_VIA_FTP="curl -O"
+fi
+
 AC_CONFIG_FILES([Makefile mbfl/Makefile filters/Makefile nls/Makefile])
 AC_OUTPUT
