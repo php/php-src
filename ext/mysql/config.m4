@@ -66,6 +66,8 @@ if test "$PHP_MYSQL" = "yes"; then
 
 elif test "$PHP_MYSQL" != "no"; then
 
+  MYSQL_TYPE_CHECKS
+
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
 
   for i in $PHP_MYSQL; do
