@@ -1,7 +1,5 @@
 --TEST--
 array_change_key_case()
---POST--
---GET--
 --FILE--
 <?php
 $arrays = array (

@@ -1,7 +1,5 @@
 --TEST--
 Test natsort and natcasesort
---POST--
---GET--
 --INI--
 precision=14
 --FILE--

@@ -1,7 +1,5 @@
 --TEST--
 array_chunk()
---POST--
---GET--
 --FILE--
 <?php
 $arrays = array (

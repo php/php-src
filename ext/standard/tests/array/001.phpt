@@ -57,7 +57,7 @@ array(11) {
   int(27)
   [3]=>
   string(4) "test"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -113,7 +113,7 @@ string(4) "test"
 int(27)
 int(3)
 string(4) "test"
-string(11) "-2147483647"
+string(5) "-1000"
 array(2) {
   [0]=>
   string(6) "banana"
