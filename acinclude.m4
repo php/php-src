@@ -1603,6 +1603,11 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
     fi
 
+    if test -n "$OPENSSL_LIBS" && test -n "$OPENSSL_INCS"; then
+      PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
+      PHP_EVAL_INCLINE($OPENSSL_INCS)
+    fi
+
   else 
 
     dnl If pkg-config fails for some reason, revert to the old method
@@ -1643,18 +1648,22 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     ])
     CPPFLAGS=$old_CPPFLAGS
 
+    PHP_ADD_INCLUDE($OPENSSL_INCDIR)
+    PHP_ADD_LIBPATH($OPENSSL_LIBDIR, $1)
+  
     PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
-      PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
-        found_openssl=yes
-        OPENSSL_LIBS="-L$OPENSSL_LIBDIR -lssl -lcrypto"
-        OPENSSL_INCS=-I$OPENSSL_INCDIR
-      ], [
-        AC_MSG_ERROR([libssl not found!])
-      ],[
-        -L$OPENSSL_LIBDIR -lssl -lcrypto
-      ])
-    ], [
+      PHP_ADD_LIBRARY(crypto,,$1)
+    ],[
       AC_MSG_ERROR([libcrypto not found!])
+    ],[
+      -L$OPENSSL_LIBDIR
+    ])
+  
+    PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
+      PHP_ADD_LIBRARY(ssl,,$1)
+      found_openssl=yes
+    ],[
+      AC_MSG_ERROR([libssl not found!])
     ],[
       -L$OPENSSL_LIBDIR
     ])
@@ -1665,11 +1674,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   AC_SUBST(OPENSSL_INCDIR_OPT)
 
   if test "$found_openssl" = "yes"; then
-    if test -n "$OPENSSL_LIBS" && test -n "$OPENSSL_INCS"; then
-      PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
-      PHP_EVAL_INCLINE($OPENSSL_INCS)
-    fi
-    $2
+ifelse([$2],[],:,[$2])
 ifelse([$3],[],,[else $3])
   fi
 ])
