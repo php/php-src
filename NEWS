@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2004, Version 4.3.5
+16 Feb 2004, Version 4.3.5RC3
 - Fixed zero bytes memory allocation when no extra ini files are found in the
   --with-config-file-scan-dir specified directory. (Eric Colinet, Derick)
 - Fixed bug #27235 (Interbase NUMERIC x.0 field returns empty string on 0).
@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
   (Ilia, sagawa at sohgoh dot net)
 - Fixed bug #27172 (Possible floating point exception in gmp_powm()). (Ilia)
 - Fixed bug #27171 (crash inside gmp_hamdist()). (Jani)
+- Fixed bug #27157 (Compile Failure on Solaris 8). (Timm)
 - Fixed bug #27149 (broken CLOB support in oci8 extension). (Antony)
 - Fixed bug #27135 (Possible crash inside mb_strlen()). (Moriyoshi)
 - Fixed bug #27104 (CLI/CGI SAPI module variable name conflict). (Marcus)
@@ -24,6 +25,7 @@ PHP 4                                                                      NEWS
   tcarter at noggin dot com dot au)
 - Fixed bug #26653 (open_basedir incorrectly resolved on win32). (Ilia,
   scottmacvicar at ntlworld dot com)
+- Fixed bug #26407 (Result set fetching broken around transactions). (Timm)
 - Fixed bug #24773 (unsetting string as array causes a crash). (Sara)
 - Fixed bug #23467 (date('T') outputs incorrect Time Zone).
   (Jani, scottmacvicar at ntlworld dot com)
