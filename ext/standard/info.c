@@ -326,6 +326,16 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ module_name_cmp */
+static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
+{
+	Bucket *f = *((Bucket **) a);
+	Bucket *s = *((Bucket **) b);
+
+	return strcmp(((zend_module_entry *)f->pData)->name,
+				  ((zend_module_entry *)s->pData)->name);
+}
+/* }}} */
 
 /* {{{ php_print_info
  */
@@ -497,16 +507,24 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (flag & PHP_INFO_MODULES) {
 		int show_info_func;
+		HashTable sorted_registry;
+		zend_module_entry tmp;
+
+		zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
+		zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
+		zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
 
 		show_info_func = 1;
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
+		zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
 		show_info_func = 0;
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
+		zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
 		php_info_print_table_end();
+
+		zend_hash_destroy(&sorted_registry);
 	}
 
 	if (flag & PHP_INFO_ENVIRONMENT) {
