@@ -48,7 +48,10 @@ function bar_static() {
 
 /* Part 3:
  * Storing a reference to the result of a function in a static variable.
- * Same as Part 2 but wow_global() returns a reference.
+ * Same as Part 2 but wow_global() returns a reference so $wow_value
+ * should store a reference to $wow_global. Therefor $wow_value is already
+ * initialised in second call to wow_static() and hence shouldn't call
+ * wow_global() again.
  */
 $wow_global = 0;
 $wow_name = '';
@@ -82,4 +85,4 @@ foo:1
 bar:1
 bar:2
 wow:1
-wow:2
+wow:1
