@@ -137,7 +137,7 @@
 #define DOMXML_LOAD_RECOVERING 2
 #define DOMXML_LOAD_SUBSTITUTE_ENTITIES 4
 #define DOMXML_LOAD_COMPLETE_ATTRS 8
-
+#define DOMXML_LOAD_DONT_KEEP_BLANKS 16
 static int le_domxmldocp;
 static int le_domxmldoctypep;
 static int le_domxmldtdp;
@@ -1573,7 +1573,7 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_RECOVERING",	DOMXML_LOAD_RECOVERING,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_SUBSTITUTE_ENTITIES",	DOMXML_LOAD_SUBSTITUTE_ENTITIES,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_COMPLETE_ATTRS",DOMXML_LOAD_COMPLETE_ATTRS,		CONST_CS | CONST_PERSISTENT);
-
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_DONT_KEEP_BLANKS",DOMXML_LOAD_DONT_KEEP_BLANKS,		CONST_CS | CONST_PERSISTENT);
 	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
 #if HAVE_DOMXSLT
 	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
@@ -3538,6 +3538,7 @@ PHP_FUNCTION(xmldoc)
 	int buffer_len;
 	int mode = 0, prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
+	int oldvalue_keepblanks;
 	zval *errors ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &buffer, &buffer_len, &mode, &errors) == FAILURE) {
@@ -3550,6 +3551,11 @@ PHP_FUNCTION(xmldoc)
 		zval_dtor(errors);
 		array_init(errors);
 	}
+	 
+	if (mode & DOMXML_LOAD_DONT_KEEP_BLANKS) 
+		oldvalue_keepblanks  =  xmlKeepBlanksDefault(0);
+	else 
+		oldvalue_keepblanks  =  xmlKeepBlanksDefault(1);
 
 	if(mode & DOMXML_LOAD_SUBSTITUTE_ENTITIES)
 		prevSubstValue = xmlSubstituteEntitiesDefault (1);
@@ -3587,6 +3593,7 @@ PHP_FUNCTION(xmldoc)
 	}
 	xmlSubstituteEntitiesDefault (prevSubstValue);
 	xmlDoValidityCheckingDefaultValue = oldvalue;
+	xmlKeepBlanksDefault(oldvalue_keepblanks);
 
 	if (!docp)
 		RETURN_FALSE;
@@ -3615,6 +3622,7 @@ PHP_FUNCTION(xmldocfile)
 	char *file;
 	int mode = 0, prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
+	int oldvalue_keepblanks;
 	zval *errors = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &file, &file_len, &mode,  &errors) == FAILURE) {
@@ -3626,6 +3634,11 @@ PHP_FUNCTION(xmldocfile)
 		array_init(errors);
 	}
 	 
+	if (mode & DOMXML_LOAD_DONT_KEEP_BLANKS) 
+		oldvalue_keepblanks  =  xmlKeepBlanksDefault(0);
+	else 
+		oldvalue_keepblanks  =  xmlKeepBlanksDefault(1);
+
 	if(mode & DOMXML_LOAD_SUBSTITUTE_ENTITIES)
 		prevSubstValue = xmlSubstituteEntitiesDefault (1);
 	else
@@ -3662,6 +3675,7 @@ PHP_FUNCTION(xmldocfile)
 	}
 	xmlSubstituteEntitiesDefault (prevSubstValue);
 	xmlDoValidityCheckingDefaultValue = oldvalue;
+	xmlKeepBlanksDefault(oldvalue_keepblanks);
 
 	if (!docp) {
 		RETURN_FALSE;
