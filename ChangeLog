@@ -1,3 +1,27 @@
+2004-09-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in:
+      Fixed minor version #.
+
+2004-09-21  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      - Fix for bug #29707
+
+2004-09-21  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/nsapi/nsapi.c:
+      Fixed bug #29805 (HTTP Authentication Issues)
+
+2004-09-21  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/php_math.h:
+      Fix win32 build
+
 2004-09-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
