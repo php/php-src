@@ -2,6 +2,7 @@
 mb_split() compat test 1
 --SKIPIF--
 extension_loaded('mbstring') or die('skip');
+function_exists('mb_split') or die("SKIP mb_split() is not available in this build");
 --FILE--
 <?php
 /* (counterpart: ext/standard/tests/reg/009.phpt) */
