@@ -203,7 +203,11 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	if (*filename == '/') {
 #endif
 		if (PG(safe_mode)) {
-			snprintf(trypath,MAXPATHLEN,"%s%s",PG(doc_root),filename);
+			if(PG(doc_root)) {
+				snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
+			} else {
+				strncpy(trypath,filename,MAXPATHLEN);
+			}
 			if (!_php3_checkuid(trypath,2)) {
 				return(NULL);
 			}
@@ -478,8 +482,8 @@ PHP_FUNCTION(gzgetss)
 {
 	pval *fd, *bytes;
 	gzFile *zp;
-	int len, br;
-	char *buf, *p, *rbuf, *rp, c, lc;
+	int len;
+	char *buf;
 	ZLIBLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
@@ -500,86 +504,9 @@ PHP_FUNCTION(gzgetss)
 		RETURN_FALSE;
 	}
 
-	rbuf = estrdup(buf);
-	c = *buf;
-	lc = '\0';
-	p = buf;
-	rp = rbuf;
-	br = 0;
-
-	while (c) {
-		switch (c) {
-			case '<':
-				if (ZLIBG(gzgetss_state) == 0) {
-					lc = '<';
-					ZLIBG(gzgetss_state) = 1;
-				}
-				break;
-
-			case '(':
-				if (ZLIBG(gzgetss_state) == 2) {
-					if (lc != '\"') {
-						lc = '(';
-						br++;
-					}
-				} else if (ZLIBG(gzgetss_state) == 0) {
-					*(rp++) = c;
-				}
-				break;	
-
-			case ')':
-				if (ZLIBG(gzgetss_state) == 2) {
-					if (lc != '\"') {
-						lc = ')';
-						br--;
-					}
-				} else if (ZLIBG(gzgetss_state) == 0) {
-					*(rp++) = c;
-				}
-				break;	
-
-			case '>':
-				if (ZLIBG(gzgetss_state) == 1) {
-					lc = '>';
-					ZLIBG(gzgetss_state) = 0;
-				} else if (ZLIBG(gzgetss_state) == 2) {
-					if (!br && lc != '\"') {
-						ZLIBG(gzgetss_state) = 0;
-					}
-				}
-				break;
-
-			case '\"':
-				if (ZLIBG(gzgetss_state) == 2) {
-					if (lc == '\"') {
-						lc = '\0';
-					} else if (lc != '\\') {
-						lc = '\"';
-					}
-				} else if (ZLIBG(gzgetss_state) == 0) {
-					*(rp++) = c;
-				}
-				break;
-
-			case '?':
-				if (ZLIBG(gzgetss_state)==1) {
-					br=0;
-					ZLIBG(gzgetss_state)=2;
-					break;
-				}
-				/* fall-through */
-
-			default:
-				if (ZLIBG(gzgetss_state) == 0) {
-					*(rp++) = c;
-				}	
-		}
-		c = *(++p);
-	}	
-	*rp = '\0';
-	efree(buf);
-	RETVAL_STRING(rbuf,1);
-	efree(rbuf);
+	_php3_strip_tags(buf, ZLIBG(gzgetss_state));
+	RETURN_STRING(buf, 0);
+	
 }
 /* }}} */
 
