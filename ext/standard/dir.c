@@ -88,7 +88,7 @@ static zend_class_entry *dir_class_entry_ptr;
 		WRONG_PARAM_COUNT; \
 	} else { \
 		dirp = (php_stream *) zend_fetch_resource(id TSRMLS_CC, -1, "Directory", NULL, 1, php_file_le_stream()); \
-		if(!dirp) \
+		if (!dirp) \
 			RETURN_FALSE; \
 	} 
 
@@ -130,9 +130,11 @@ PHP_MINIT_FUNCTION(dir)
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
 #endif
+
 	dirsep_str[0] = DEFAULT_SLASH;
 	dirsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", dirsep_str, CONST_CS|CONST_PERSISTENT);
+
 	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
@@ -164,14 +166,13 @@ PHP_MINIT_FUNCTION(dir)
 
 	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
 
-#endif
+#endif /* HAVE_GLOB */
 
 	return SUCCESS;
 }
-
 /* }}} */
-/* {{{ internal functions */
 
+/* {{{ internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	pval **arg;
@@ -199,29 +200,26 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		php_stream_to_zval(dirp, return_value);
 	}
 }
-
 /* }}} */
+
 /* {{{ proto mixed opendir(string path)
    Open a directory and return a dir_handle */
-
 PHP_FUNCTION(opendir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-
 /* }}} */
+
 /* {{{ proto object dir(string directory)
    Directory class with properties, handle and class and methods read, rewind and close */
-
 PHP_FUNCTION(getdir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-
 /* }}} */
+
 /* {{{ proto void closedir([resource dir_handle])
    Close directory connection identified by the dir_handle */
-
 PHP_FUNCTION(closedir)
 {
 	pval **id, **tmp, *myself;
@@ -235,13 +233,11 @@ PHP_FUNCTION(closedir)
 
 	zend_list_delete(dirp->rsrc_id);
 }
-
 /* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 /* {{{ proto bool chroot(string directory)
    Change root directory */
-
 PHP_FUNCTION(chroot)
 {
 	char *str;
@@ -267,13 +263,11 @@ PHP_FUNCTION(chroot)
 
 	RETURN_TRUE;
 }
-
 /* }}} */
 #endif
 
 /* {{{ proto bool chdir(string directory)
    Change the current directory */
-
 PHP_FUNCTION(chdir)
 {
 	char *str;
@@ -295,11 +289,10 @@ PHP_FUNCTION(chdir)
 
 	RETURN_TRUE;
 }
-
 /* }}} */
+
 /* {{{ proto mixed getcwd(void)
    Gets the current directory */
-
 PHP_FUNCTION(getcwd)
 {
 	char path[MAXPATHLEN];
@@ -313,11 +306,6 @@ PHP_FUNCTION(getcwd)
 	ret = VCWD_GETCWD(path, MAXPATHLEN);
 #elif HAVE_GETWD
 	ret = VCWD_GETWD(path);
-/*
- * #warning is not ANSI C
- * #else
- * #warning no proper getcwd support for your site
- */
 #endif
 
 	if (ret) {
@@ -326,11 +314,10 @@ PHP_FUNCTION(getcwd)
 		RETURN_FALSE;
 	}
 }
-
 /* }}} */
+
 /* {{{ proto void rewinddir([resource dir_handle])
    Rewind dir_handle back to the start */
-
 PHP_FUNCTION(rewinddir)
 {
 	pval **id, **tmp, *myself;
@@ -344,7 +331,6 @@ PHP_FUNCTION(rewinddir)
 
 /* {{{ proto string readdir([resource dir_handle])
    Read directory entry from dir_handle */
-
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
 	pval **id, **tmp, *myself;
@@ -358,7 +344,6 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	}
 	RETURN_FALSE;
 }
-
 /* }}} */
 
 #ifdef HAVE_GLOB
@@ -382,7 +367,7 @@ PHP_FUNCTION(glob)
 		return;
 
 #ifdef ZTS 
-	if(!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
+	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
 		result = VCWD_GETCWD(cwd, MAXPATHLEN);	
 		if (!result) {
 			cwd[0] = '\0';
@@ -422,10 +407,9 @@ PHP_FUNCTION(glob)
 	if (PG(safe_mode) && (!php_checkuid(cwd, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
-	if(php_check_open_basedir(cwd TSRMLS_CC)) {
+	if (php_check_open_basedir(cwd TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
@@ -474,7 +458,7 @@ PHP_FUNCTION(scandir)
 	}
 
 #ifdef ZTS
-	if(!IS_ABSOLUTE_PATH(dirn, dirn_len)) {
+	if (!IS_ABSOLUTE_PATH(dirn, dirn_len)) {
 		path = expand_filepath(dirn, NULL TSRMLS_CC);
 	} else 
 #endif
@@ -484,7 +468,7 @@ PHP_FUNCTION(scandir)
 		RETVAL_FALSE;
 		goto err;
 	}
-	if(php_check_open_basedir(path TSRMLS_CC)) {
+	if (php_check_open_basedir(path TSRMLS_CC)) {
 		RETVAL_FALSE;
 		goto err;
 	}
