@@ -153,9 +153,9 @@ PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC)
 void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC);
 
-int php_session_register_module(ps_module *);
+PHPAPI int php_session_register_module(ps_module *);
 
-int php_session_register_serializer(const char *name,
+PHPAPI int php_session_register_serializer(const char *name,
 	        int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
