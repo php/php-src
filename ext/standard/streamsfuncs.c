@@ -267,18 +267,40 @@ PHP_FUNCTION(stream_socket_get_name)
    Reads up to maxlen bytes from source stream and writes them to dest stream. */
 PHP_FUNCTION(stream_copy_to_stream)
 {
-	php_stream *src, *dest;
+	php_stream *src = NULL, *dest = NULL;
 	zval *zsrc, *zdest;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	long maxlen = PHP_STREAM_COPY_ALL, copied;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zsrc, &zdest, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &zsrc, &zdest, &maxlen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_stream_from_zval(src, &zsrc);
-	php_stream_from_zval(dest, &zdest);
+	php_stream_get_from_zval(src, &zsrc, "rb", USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL);
+	if (!src) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access source stream");
+		RETURN_FALSE;
+	}
 
-	RETURN_LONG(php_stream_copy_to_stream(src, dest, maxlen));
+	php_stream_get_from_zval(dest, &zdest, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL);
+	if (!dest) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access destination stream");
+		if (Z_TYPE_P(zsrc) == IS_STRING) {
+			php_stream_close(src);
+		}
+		RETURN_FALSE;
+	}
+
+	copied = php_stream_copy_to_stream(src, dest, maxlen);
+
+	if (Z_TYPE_P(zsrc) == IS_STRING) {
+		php_stream_close(src);
+	}
+
+	if (Z_TYPE_P(zdest) == IS_STRING) {
+		php_stream_close(dest);
+	}
+
+	RETURN_LONG(copied);
 }
 /* }}} */
 
