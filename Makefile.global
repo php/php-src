@@ -50,7 +50,7 @@ test: $(SAPI_CLI_PATH)
 	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 	 TEST_PHP_SRCDIR=$(top_srcdir) \
 	 CC=$(CC) \
-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'safe_mode=0' -d 'output_buffering=Off' -d 'auto_prepend_file=' -d 'auto_append_file=' -d 'output_handler=' -d 'register_argv=1' -d 'disable_functions=' $(top_srcdir)/run-tests.php $(TESTS)
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
