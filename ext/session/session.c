@@ -169,6 +169,7 @@ PS_SERIALIZER_FUNCS(php);
 PS_SERIALIZER_FUNCS(php_binary);
 
 #define MAX_SERIALIZERS 10
+#define PREDEFINED_SERIALIZERS 2
 
 static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 	PS_SERIALIZER_ENTRY(php),
@@ -176,6 +177,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 };
 
 #define MAX_MODULES 10
+#define PREDEFINED_MODULES 2
 
 static ps_module *ps_modules[MAX_MODULES + 1] = {
 	ps_files_ptr,
@@ -1807,6 +1809,9 @@ PHP_MSHUTDOWN_FUNCTION(session)
 #ifdef HAVE_LIBMM
 	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
+
+	ps_serializers[PREDEFINED_SERIALIZERS].name = NULL;
+	ps_modules[PREDEFINED_MODULES] = NULL;
 
 	return SUCCESS;
 }
