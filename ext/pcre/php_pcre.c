@@ -981,16 +981,17 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	SEPARATE_ZVAL(replace);
 	if (Z_TYPE_PP(replace) != IS_ARRAY)
 		convert_to_string_ex(replace);
-	if (is_callable_replace && !zend_is_callable(*replace, 0, &callback_name)) {
-		php_error(E_WARNING, "%s() requires argument 2, '%s', to be a valid callback",
-				  get_active_function_name(), callback_name);
+	if (is_callable_replace) {
+		if (!zend_is_callable(*replace, 0, &callback_name)) {
+			php_error(E_WARNING, "%s() requires argument 2, '%s', to be a valid callback",
+					  get_active_function_name(), callback_name);
+			efree(callback_name);
+			*return_value = **subject;
+			zval_copy_ctor(return_value);
+			return;
+		}
 		efree(callback_name);
-		*return_value = **subject;
-		zval_copy_ctor(return_value);
-		return;
 	}
-	if (callback_name)
-		efree(callback_name);
 
 	SEPARATE_ZVAL(regex);
 	SEPARATE_ZVAL(subject);
