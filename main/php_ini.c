@@ -351,7 +351,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 
 /* Standard message handlers */
 
-PHP_INI_MH(OnUpdateInt)
+PHPAPI PHP_INI_MH(OnUpdateInt)
 {
 	long *p;
 #ifndef ZTS
@@ -369,7 +369,7 @@ PHP_INI_MH(OnUpdateInt)
 }
 
 
-PHP_INI_MH(OnUpdateReal)
+PHPAPI PHP_INI_MH(OnUpdateReal)
 {
 	double *p;
 #ifndef ZTS
@@ -387,7 +387,7 @@ PHP_INI_MH(OnUpdateReal)
 }
 
 
-PHP_INI_MH(OnUpdateString)
+PHPAPI PHP_INI_MH(OnUpdateString)
 {
 	char **p;
 #ifndef ZTS
@@ -405,7 +405,7 @@ PHP_INI_MH(OnUpdateString)
 }
 
 
-PHP_INI_MH(OnUpdateStringUnempty)
+PHPAPI PHP_INI_MH(OnUpdateStringUnempty)
 {
 	char **p;
 #ifndef ZTS

@@ -36,17 +36,14 @@
  */
 
 #if COMPILE_DL
-# if PHP_31
-#  include "../phpdl.h"
-# else
-#  include "dl/phpdl.h"
-# endif
+#include "dl/phpdl.h"
 #endif
 
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/php3_standard.h"
 #include "php3_mysql.h"
+#include "php_globals.h"
 
 
 #if WIN32|WINNT
@@ -151,7 +148,7 @@ php3_module_entry mysql_module_entry = {
 #ifdef ZTS
 int mysql_globals_id;
 #else
-php_mysql_globals mysql_globals;
+PHP_MYSQL_API php_mysql_globals mysql_globals;
 #endif
 
 #ifdef COMPILE_DL
@@ -277,7 +274,7 @@ static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
 int php3_minit_mysql(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
-	mysql_globals_id = tsrm_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
+	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
 #else
 	MySG(num_persistent)=0;
 #endif
@@ -359,6 +356,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	int hashed_details_length,port;
 	MYSQL *mysql;
 	MySLS_FETCH();
+	PLS_FETCH();
 
 	if (PG(sql_safe_mode)) {
 		if (ARG_COUNT(ht)>0) {
@@ -598,6 +596,7 @@ static int php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
 	return MySG(default_link);
 }
 
+
 /* {{{ proto int mysql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
@@ -605,6 +604,7 @@ PHP_FUNCTION(mysql_connect)
 	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
 
 /* {{{ proto int mysql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to a MySQL Server */
@@ -614,6 +614,7 @@ PHP_FUNCTION(mysql_pconnect)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_close([int link_identifier])
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
@@ -621,6 +622,7 @@ PHP_FUNCTION(mysql_close)
 	pval *mysql_link;
 	int id,type;
 	MYSQL *mysql;
+	MySLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
 		case 0:
@@ -649,6 +651,7 @@ PHP_FUNCTION(mysql_close)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_select_db(string database_name [, int link_identifier])
    Select a MySQL database */
 PHP_FUNCTION(mysql_select_db)
@@ -656,7 +659,7 @@ PHP_FUNCTION(mysql_select_db)
 	pval *db,*mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -695,6 +698,7 @@ PHP_FUNCTION(mysql_select_db)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
 PHP_FUNCTION(mysql_create_db)
@@ -702,7 +706,7 @@ PHP_FUNCTION(mysql_create_db)
 	pval *db,*mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -740,6 +744,7 @@ PHP_FUNCTION(mysql_create_db)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_drop_db(string database_name [, int link_identifier])
    Drop (delete) a MySQL database */
 PHP_FUNCTION(mysql_drop_db)
@@ -747,7 +752,7 @@ PHP_FUNCTION(mysql_drop_db)
 	pval *db,*mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -785,6 +790,7 @@ PHP_FUNCTION(mysql_drop_db)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_query(string query [, int link_identifier])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
@@ -793,7 +799,7 @@ PHP_FUNCTION(mysql_query)
 	int id,type;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -842,6 +848,7 @@ PHP_FUNCTION(mysql_query)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
@@ -850,7 +857,7 @@ PHP_FUNCTION(mysql_db_query)
 	int id,type;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -907,6 +914,7 @@ PHP_FUNCTION(mysql_db_query)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_list_dbs([int link_identifier])
    List databases available on a MySQL server */
 PHP_FUNCTION(mysql_list_dbs)
@@ -915,7 +923,7 @@ PHP_FUNCTION(mysql_list_dbs)
 	int id,type;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
@@ -949,6 +957,7 @@ PHP_FUNCTION(mysql_list_dbs)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_list_tables(string database_name [, int link_identifier])
    List tables in a MySQL database */
 PHP_FUNCTION(mysql_list_tables)
@@ -957,7 +966,7 @@ PHP_FUNCTION(mysql_list_tables)
 	int id,type;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -999,6 +1008,7 @@ PHP_FUNCTION(mysql_list_tables)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_list_fields(string database_name, string table_name [, int link_identifier])
    List MySQL result fields */
 PHP_FUNCTION(mysql_list_fields)
@@ -1007,7 +1017,7 @@ PHP_FUNCTION(mysql_list_fields)
 	int id,type;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -1050,6 +1060,7 @@ PHP_FUNCTION(mysql_list_fields)
 }
 /* }}} */
 
+
 /* {{{ proto string mysql_error([int link_identifier])
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysql_error)
@@ -1057,7 +1068,7 @@ PHP_FUNCTION(mysql_error)
 	pval *mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
@@ -1088,6 +1099,7 @@ PHP_FUNCTION(mysql_error)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_errno([int link_identifier])
    Returns the number of the error message from previous MySQL operation */
 #ifdef mysql_errno
@@ -1096,7 +1108,7 @@ PHP_FUNCTION(mysql_errno)
 	pval *mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
@@ -1128,6 +1140,7 @@ PHP_FUNCTION(mysql_errno)
 #endif
 /* }}} */
 
+
 /* {{{ proto int mysql_affected_rows([int link_identifier])
    Get number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysql_affected_rows)
@@ -1135,7 +1148,7 @@ PHP_FUNCTION(mysql_affected_rows)
 	pval *mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
@@ -1165,6 +1178,7 @@ PHP_FUNCTION(mysql_affected_rows)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_insert_id([int link_identifier])
    Get the id generated from the previous INSERT operation */
 PHP_FUNCTION(mysql_insert_id)
@@ -1172,7 +1186,7 @@ PHP_FUNCTION(mysql_insert_id)
 	pval *mysql_link;
 	int id,type;
 	MYSQL *mysql;
-
+	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
@@ -1201,6 +1215,7 @@ PHP_FUNCTION(mysql_insert_id)
 	return_value->type = IS_LONG;
 }
 /* }}} */
+
 
 /* {{{ proto int mysql_result(int result, int row [, mixed field])
    Get result data */
@@ -1314,6 +1329,7 @@ PHP_FUNCTION(mysql_result)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_num_rows(int result)
    Get number of rows in a result */
 PHP_FUNCTION(mysql_num_rows)
@@ -1367,6 +1383,7 @@ PHP_FUNCTION(mysql_num_fields)
 }
 /* }}} */
 
+
 /* {{{ proto array mysql_fetch_row(int result)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
@@ -1418,6 +1435,7 @@ PHP_FUNCTION(mysql_fetch_row)
 	}
 }
 /* }}} */
+
 
 static PHP_FUNCTION(mysql_fetch_hash)
 {
@@ -1474,6 +1492,7 @@ static PHP_FUNCTION(mysql_fetch_hash)
 	}
 }
 
+
 /* {{{ proto object mysql_fetch_object(int result)
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
@@ -1482,10 +1501,11 @@ PHP_FUNCTION(mysql_fetch_object)
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
-		return_value->value.obj.ce = &standard_class;
+		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
 /* }}} */
+
 
 /* {{{ proto array mysql_fetch_array(int result)
    Fetch a result row as an associative array */
@@ -1494,6 +1514,7 @@ PHP_FUNCTION(mysql_fetch_array)
 	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
+
 
 /* {{{ proto int mysql_data_seek(int result, int row_number)
    Move internal result pointer */
@@ -1524,6 +1545,7 @@ PHP_FUNCTION(mysql_data_seek)
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto array mysql_fetch_lengths(int result)
    Get max data size of each column in a result */
@@ -1561,6 +1583,7 @@ PHP_FUNCTION(mysql_fetch_lengths)
 	}
 }
 /* }}} */
+
 
 static char *php3_mysql_get_field_name(int field_type)
 {
@@ -1609,6 +1632,7 @@ static char *php3_mysql_get_field_name(int field_type)
 			break;
 	}
 }
+
 
 /* {{{ proto object mysql_fetch_field(int result [, int field_offset])
    Get column information from a result and return as an object */
@@ -1673,6 +1697,7 @@ PHP_FUNCTION(mysql_fetch_field)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_field_seek(int result, int field_offset)
    Set result pointer to a specific field offset */
 PHP_FUNCTION(mysql_field_seek)
@@ -1703,12 +1728,14 @@ PHP_FUNCTION(mysql_field_seek)
 }
 /* }}} */
 
+
 #define PHP3_MYSQL_FIELD_NAME 1
 #define PHP3_MYSQL_FIELD_TABLE 2
 #define PHP3_MYSQL_FIELD_LEN 3
 #define PHP3_MYSQL_FIELD_TYPE 4
 #define PHP3_MYSQL_FIELD_FLAGS 5
  
+
 static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result, *field;
@@ -1835,6 +1862,7 @@ static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 }
 
+
 /* {{{ proto string mysql_field_name(int result, int field_index)
    Get the name of the specified field in a result */
 PHP_FUNCTION(mysql_field_name)
@@ -1842,6 +1870,7 @@ PHP_FUNCTION(mysql_field_name)
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_NAME);
 }
 /* }}} */
+
 
 /* {{{ proto string mysql_field_table(int result, int field_offset)
    Get name of the table the specified field is in */
@@ -1851,6 +1880,7 @@ PHP_FUNCTION(mysql_field_table)
 }
 /* }}} */
 
+
 /* {{{ proto int mysql_field_len(int result, int field_offet)
    Returns the length of the specified field */
 PHP_FUNCTION(mysql_field_len)
@@ -1858,6 +1888,7 @@ PHP_FUNCTION(mysql_field_len)
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_LEN);
 }
 /* }}} */
+
 
 /* {{{ proto string mysql_field_type(int result, int field_offset)
    Get the type of the specified field in a result */
@@ -1867,6 +1898,7 @@ PHP_FUNCTION(mysql_field_type)
 }
 /* }}} */
 
+
 /* {{{ proto string mysql_field_flags(int result, int field_offset)
    Get the flags associated with the specified field in a result */
 PHP_FUNCTION(mysql_field_flags)
@@ -1874,6 +1906,7 @@ PHP_FUNCTION(mysql_field_flags)
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_FLAGS);
 }
 /* }}} */
+
 
 /* {{{ proto int mysql_free_result(int result)
    Free result memory */
