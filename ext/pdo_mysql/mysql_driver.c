@@ -131,7 +131,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{ "dbname",   "",	0 },
 		{ "host",   "localhost",	0 },
 		{ "port",   "3306",	0 },
+#ifdef PDO_MYSQL_UNIX_ADDR
 		{ "unix_socket",  PDO_MYSQL_UNIX_ADDR,	0 },
+#endif
 	};
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
