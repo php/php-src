@@ -77,15 +77,6 @@
 #include <sys/un.h>
 #endif
 
-/* The following macros are borrowed from virtual_cwd.c and should be put in
- * a joint header file when we move virtual_cwd to TSRM */
-#ifdef ZEND_WIN32
-#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#else
-#define IS_SLASH(c)	((c) == '/')
-#endif
-
-
 typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int *, char **) ;
 
 static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char **);
