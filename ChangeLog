@@ -1,3 +1,87 @@
+2000-12-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/mysql/001.phpt
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/003.phpt
+      pear/DB/tests/mysql/004.phpt
+      pear/DB/tests/mysql/005.phpt
+      pear/DB/tests/mysql/006.phpt
+      pear/DB/tests/mysql/007.phpt
+      pear/DB/tests/numcols.inc
+      pear/DB/tests/prepexe.inc
+      pear/DB/tests/simplequery.inc
+      pear/DB/STATUS:
+    * added more tests for MySQL, including some test files common for all
+      backends
+
+2000-12-06  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed bug with weeksInMonth()
+
+2000-12-06  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * tests/lang/030.phpt: updated with =& new syntax
+
+    * run-tests.php: made run-tests.php windows compatible
+
+    * tests/lang/030.phpt: added $this in constructor test (fails currently)
+
+2000-12-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/bcmath/config.m4
+      ext/ccvs/config.m4
+      ext/domxml/config.m4
+      ext/gd/config.m4
+      ext/ctype/config.m4
+      ext/fribidi/config.m4
+      ext/gmp/config.m4
+      ext/qtdom/config.m4
+      sapi/thttpd/config.m4: Merge HEAD changes
+
+    * ext/bcmath/config.m4
+      ext/ccvs/config.m4
+      ext/domxml/config.m4
+      ext/gd/config.m4
+      ext/ctype/config.m4
+      ext/fribidi/config.m4
+      ext/gmp/config.m4
+      ext/qtdom/config.m4
+      sapi/thttpd/config.m4: Fix indentation of configure output
+
+2000-12-06  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * tests/lang/029.phpt: added OO test (will fail currently)
+
+2000-12-06  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gd/config.m4: Fix T1 static build
+
+    * ext/gmp/README: Update README
+
+    * ext/gmp/gmp.c: Fix prototypes
+    Fix prefect_square return
+
+2000-12-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/MAINTAINERS:
+    * pear/XML/tests/001.phpt
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/004.phpt
+      pear/XML/tests/005.phpt
+      pear/XML/tests/parser3.i
+      pear/XML/tests/test.xml
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/mysql.php
+      pear/DB/tests/odbc/001.phpt
+      pear/DB/tests/odbc/skipif.inc
+      pear/XML/Parser.php
+      pear/DB.php: * cleanup
+
+    * pear/pear.in:
+    * pear/DB/STATUS: * added DB driver feature matrix
+
 2000-12-05  Chuck Hagenbuch  <chuck@horde.org>
 
     * ext/mcal/php_mcal.c: spaces after commas. all whitespace.
