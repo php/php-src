@@ -718,6 +718,9 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(assert)(INIT_FUNC_ARGS_PASSTHRU);
+#ifdef TRANS_SID
+	PHP_MINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
 	if(PG(allow_url_fopen)) {
 		if(FAILURE==php_register_url_wrapper("http",php_fopen_url_wrap_http)) {
@@ -759,7 +762,7 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-
+	PHP_MSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;	
 }

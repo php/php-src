@@ -19,6 +19,8 @@
 #ifndef URL_SCANNER_EX_H
 #define URL_SCANNER_EX_H
 
+PHP_MINIT_FUNCTION(url_scanner_ex);
+PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 
@@ -40,7 +42,11 @@ typedef struct {
 	smart_str q_name;
 	smart_str q_value;
 
+	char *lookup_data;
 	int state;
+	
+	/* Everything above is zeroed in RINIT */
+	HashTable *tags;
 } url_adapt_state_ex_t;
 
 #endif
