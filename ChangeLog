@@ -1,3 +1,37 @@
+2004-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fixed compiler warning.
+
+2004-10-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * NEWS:
+      Style...
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix Bug #30344
+
+2004-10-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/network.c:
+      removed unwanted NEW_LIBC checks
+
+2004-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      sapi/apache/php_apache.c:
+      Possible fix for bug #29764
+
+2004-10-06  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - If we're going to mention the low level stuff then also give credit
+      - to Thies and Sterling
+
 2004-10-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
