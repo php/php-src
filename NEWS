@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
 - Fixed bug #21525 (bind_textdomain_codeset() now available on Windows). (Edin)
 - Fixed bug #21511 (config.status warning). (Jani)
