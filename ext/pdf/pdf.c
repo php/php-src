@@ -83,6 +83,7 @@ static int le_pdf;
 #endif
 
 function_entry pdf_functions[] = {
+	PHP_FE(pdf_set_info, NULL)
 	PHP_FE(pdf_set_info_creator, NULL)
 	PHP_FE(pdf_set_info_title, NULL)
 	PHP_FE(pdf_set_info_subject, NULL)
@@ -265,6 +266,35 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 	return SUCCESS;
 }
 
+/* {{{ proto bool pdf_set_info(int pdfdoc, string fieldname, string value)
+   Fills an info field of the document */
+PHP_FUNCTION(pdf_set_info) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_string(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		RETURN_FALSE;
+	}
+
+	PDF_set_info(pdf, arg2->value.str.val, arg3->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto bool pdf_set_info_creator(int pdfdoc, string creator)
    Fills the creator field of the document */
 PHP_FUNCTION(pdf_set_info_creator) {
@@ -291,7 +321,6 @@ PHP_FUNCTION(pdf_set_info_creator) {
 
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_title(int pdfdoc, string title)
@@ -475,7 +504,7 @@ PHP_FUNCTION(pdf_close) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_begin_page(int pdfdoc, double height, double width)
+/* {{{ proto void pdf_begin_page(int pdfdoc, double width, double height)
    Starts page */
 PHP_FUNCTION(pdf_begin_page) {
 	pval *arg1, *arg2, *arg3;
@@ -492,15 +521,15 @@ PHP_FUNCTION(pdf_begin_page) {
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	id=arg1->value.lval;
-	height = arg2->value.dval;
-	width = arg3->value.dval;
+	width = arg2->value.dval;
+	height = arg3->value.dval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_begin_page(pdf, (float) height, (float) width);
+	PDF_begin_page(pdf, (float) width, (float) height);
 
 	RETURN_TRUE;
 }
@@ -1841,7 +1870,7 @@ PHP_FUNCTION(pdf_get_parameter) {
 		RETURN_FALSE;
 	}
 
-	value = PDF_get_parameter(pdf, arg2->value.str.val, arg3->value.dval);
+	value = PDF_get_parameter(pdf, arg2->value.str.val, (float) (arg3->value.dval));
 
 	RETURN_STRING(value, 1);
 }
