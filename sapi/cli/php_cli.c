@@ -596,9 +596,20 @@ int main(int argc, char *argv[])
 			exit_status=1;
 			goto out_err;
 		}
-	
+
+		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
+		INI_HARDCODED("register_argc_argv", "1");
+		INI_HARDCODED("html_errors", "0");
+		INI_HARDCODED("implicit_flush", "1");
+		INI_HARDCODED("output_buffering", "0");
+		INI_HARDCODED("max_execution_time", "0");
+
 		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
 			switch (c) {
+
+			case 'd': /* define ini entries on command line */
+				define_command_line_ini_entry(optarg);
+				break;
 
 			case 'h': /* help & quit */
 			case '?':
@@ -651,12 +662,6 @@ int main(int argc, char *argv[])
 
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
-		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
-		INI_HARDCODED("register_argc_argv", "1");
-		INI_HARDCODED("html_errors", "0");
-		INI_HARDCODED("implicit_flush", "1");
-		INI_HARDCODED("output_buffering", "0");
-		INI_HARDCODED("max_execution_time", "0");
 
 		optind = orig_optind;
 		optarg = orig_optarg;
@@ -670,9 +675,6 @@ int main(int argc, char *argv[])
 
 			case 'C': /* don't chdir to the script directory */
 				/* This is default so NOP */
-				break;
-			case 'd': /* define ini entries on command line */
-				define_command_line_ini_entry(optarg);
 				break;
 
 			case 'e': /* enable extended info output */
