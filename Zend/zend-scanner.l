@@ -688,47 +688,6 @@ int yyFlexLexer::yylex()
 
 #endif
 
-
-/* redefine YY_INPUT to handle urls for win32*/
-#if 0 /*defined(ZEND_WIN32)*/
-#define YY_INPUT(buf,result,max_size) \
-	if ( yyin->_tmpfname != "url" ){ \
-	if ( yy_current_buffer->yy_is_interactive ) \
-		{ \
-		int c = '*', n; \
-		for ( n = 0; n < max_size && \
-			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
-			buf[n] = (char) c; \
-		if ( c == '\n' ) \
-			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( yyin ) ) \
-			YY_FATAL_ERROR( "input in flex scanner failed" ); \
-		result = n; \
-		} \
-	else if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
-		  && ferror( yyin ) ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" ); \
-	}else{ /* this is a url */ \
-	int recv_char=0,socketd=0; \
-	/*memset(buf,0,max_size);*/ \
-	socketd=yyin->_file; \
-	if ( yy_current_buffer->yy_is_interactive ) \
-		{ \
-		int c = '*', n; \
-		for ( n = 0; n < max_size && \
-			     ( (recv_char=recv( socketd,(char *)&c,1,0 ))) >0 && c != '\n'; ++n ) \
-			buf[n] = (char) c; \
-		if ( c == '\n' ) \
-			buf[n++] = (char) c; \
-		if ( recv_char == SOCKET_ERROR ) \
-			YY_FATAL_ERROR( "input from url in flex scanner failed" ); \
-		result = n; \
-		} \
-	else if ((result = recv( socketd, (char *)buf, max_size, 0)) == SOCKET_ERROR) \
-		  	YY_FATAL_ERROR( "input from url read in flex scanner failed" ); \
-	}
-#endif
-
 %}
 
 LNUM	[0-9]+
