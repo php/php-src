@@ -1002,7 +1002,7 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	char *namespace_name = CG(active_namespace)->name;
 	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
 	char *func_name = CG(active_op_array)->function_name;
-	size_t len = 1;
+	size_t len = 0;
 
 	if (namespace_name) {
 		len += strlen(namespace_name) + 2;
@@ -1014,7 +1014,7 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 		len += strlen(func_name);
 	}
 
-	zendlval->value.str.val = emalloc(len);
+	zendlval->value.str.val = emalloc(len + 1);
 	zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s%s%s", 
 		namespace_name ? namespace_name : "",
 		namespace_name && (class_name || func_name) ? "::" : "",
