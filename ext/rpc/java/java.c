@@ -554,9 +554,10 @@ static pval _java_getset_property
 
 pval java_get_property_handler(zend_property_reference *property_reference)
 {
+  pval presult;
   TSRMLS_FETCH();
 
-  pval presult = _java_getset_property(property_reference, 0 TSRMLS_CC);
+  presult = _java_getset_property(property_reference, 0 TSRMLS_CC);
   checkError(&presult);
   return presult;
 }
