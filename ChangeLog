@@ -1,3 +1,38 @@
+2000-04-23  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/DB/msql.php: Add mSQL DB extension.
+
+    * pear/Makefile.in
+      TODO: TODO:
+      Just did that.
+    PEAR:
+      Fix typo
+
+    * ext/standard/file.c:
+    -Add an optional third argument to fseek to indicate were to seek from. 
+
+2000-04-23  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/imap/imap.dsp
+      ext/ldap/ldap.dsp: Moving output files to common folder
+
+    * ext/mssql/Readme_w32.txt: Removing invalid readme file
+
+    * ext/oci8/oci8.dsp
+      ext/oracle/oracle.dsp
+      ext/mssql/mssql.dsp
+      ext/mssql/php_mssql.h:
+    moving pointers to header and library files to match php_build structure
+
+    * php_modules.dsw
+      ext/mcrypt/mcrypt.dsp: adding project file for mcrypt module
+
+2000-04-23  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/Makefile.in:
+    Add a new directory for File (it was supposed to be there
+    in the first place).
+
 2000-04-22  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/imap/php_imap.c:
