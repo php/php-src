@@ -1086,6 +1086,9 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
 			PHPWRITE(zend_logo, sizeof(zend_logo));
 			return;
+		} else if (!strcmp(SG(request_info).query_string+1, "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000")) {
+			php_print_credits(PHP_CREDITS_ALL);
+			return;
 		}
 	}
 

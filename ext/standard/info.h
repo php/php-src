@@ -43,12 +43,21 @@
 #define PHP_INFO_ENVIRONMENT		(1<<4)
 #define PHP_INFO_VARIABLES			(1<<5)
 #define PHP_INFO_LICENSE			(1<<6)
+#define PHP_INFO_ALL				0xFFFFFFFF
 
-#define PHP_INFO_ALL		0xFFFFFFFF
 
-PHP_FUNCTION(version);
-PHP_FUNCTION(info);
-PHPAPI void _php3_info(int flag);
+#define PHP_CREDITS_GENERAL			(1<<0)
+#define PHP_CREDITS_MODULES			(1<<1)
+#define PHP_CREDITS_DOCS			(1<<2)
+#define PHP_CREDITS_FULLPAGE		(1<<3)
+#define PHP_CREDITS_ALL				0xFFFFFFFF
+
+PHP_FUNCTION(phpversion);
+PHP_FUNCTION(phpinfo);
+PHP_FUNCTION(phpcredits);
+PHPAPI void php_print_info(int flag);
+PHPAPI void php_print_credits(int flag);
+
 
 PHPAPI void php_info_print_table_header(int num_cols, ...);
 PHPAPI void php_info_print_table_row(int num_cols, ...);

@@ -122,8 +122,9 @@ function_entry basic_functions[] = {
 	{"parse_url",	php3_parse_url,				NULL},
 
 	{"parse_str",	php3_parsestr,				NULL},
-	{"phpinfo",		php3_info,					NULL},
-	{"phpversion",	php3_version,				NULL},
+	PHP_FE(phpinfo,		NULL)
+	PHP_FE(phpversion,	NULL)
+	PHP_FE(phpcredits,	NULL)
 	{"strlen",		php3_strlen,				NULL},
 	{"strcmp",		php3_strcmp,				NULL},
 	{"strspn",		php3_strspn,				NULL},
