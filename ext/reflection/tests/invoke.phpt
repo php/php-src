@@ -3,7 +3,7 @@ invoke with non object or null value
 --FILE--
 <?php
 
-include_once dirname(__FILE__).'/exception.php';
+include_once dirname(__FILE__).'/exception.inc';
 
 class a {
 	function a(){
