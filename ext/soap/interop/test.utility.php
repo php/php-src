@@ -12,15 +12,15 @@ function soap_datetime_to_timestamp($t) {
   	  return false;
 	  }
   	$t = gmmktime($r[4],$r[5],$r[6],$r[2],$r[3],$r[1]);
-	  if (!empty($regs[8]) && $regs[8] != 'Z') {
-		  $op = substr($regs[8],0,1);
-  		$h = substr($regs[8],1,2);
-	  	if (strstr($regs[8],':')) {
-	  	  $m = substr($regs[8],4,2);
+	  if (!empty($r[8]) && $r[8] != 'Z') {
+		  $op = substr($r[8],0,1);
+  		$h = substr($r[8],1,2);
+	  	if (strstr($r[8],':')) {
+	  	  $m = substr($r[8],4,2);
 		  } else {
-  		  $m = substr($regs[8],3,2);
+  		  $m = substr($r[8],3,2);
 		  }
-  		$t += (($op == "-"?-1:1) * $h * 60 + $m) * 60;
+  		$t += (($op == "-"?1:-1) * $h * 60 + $m) * 60;
 		}
   }
   return $t;
