@@ -30,6 +30,53 @@ require_once "PEAR.php";
 
 class PEAR_Dependency
 {
+
+    /**
+    * This method maps the xml dependency definition to the
+    * PEAR_dependecy one
+    *
+    * $opts => Array
+    *    (
+    *        [type] => pkg
+    *        [rel] => ge
+    *        [version] => 3.4
+    *        [name] => HTML_Common
+    *    )
+    */
+    function callCheckMethod($opts)
+    {
+        $rel = isset($opts['rel']) ? $opts['rel'] : 'has';
+        if (isset($opts['version'])) {
+            $req = $opts['version'];
+            $rel = 'v.' . $rel;
+        } else {
+            $req = null;
+        }
+        $name = isset($opts['name']) ? $opts['name'] : null;
+        switch ($opts['type']) {
+            case 'pkg':
+                return $this->checkPackage($name, $req, $rel);
+                break;
+            case 'ext':
+                return $this->checkExtension($name, $req, $rel);
+                break;
+            case 'php':
+                return $this->checkPHP($req, $rel);
+                break;
+            case 'prog':
+                return $this->checkProgram($name);
+                break;
+            case 'os':
+                return $this->checkOS($name);
+                break;
+            case 'sapi':
+                return $this->checkSAPI($name);
+                break;
+            default:
+                return "'{$opts['type']}' dependencie type not supported";
+        }
+    }
+
     /**
      * Package dependencies check method
      *
@@ -37,22 +84,26 @@ class PEAR_Dependency
      * @param string $version   The package version required
      * @param string $relation  How to compare versions with eachother
      *
-     * @return bool whether the dependency is satisfied
+     * @return mixed bool false if no error or the error string
      */
-    function checkPackage($name, $req_ver = null, $relation = 'has')
+    function checkPackage($name, $req = null, $relation = 'has')
     {
         if (empty($this->registry)) {
             $this->registry = new PEAR_Registry;
         }
-        $pkg_ver = $this->registry->packageInfo($name, 'version');
-        if ($relation == 'has') {
-            return $this->registry->packageExists($name);
+        if (!$this->registry->packageExists($name)) {
+            return "'$name' PEAR package is not installed";
         }
         if (substr($relation, 0, 2) == 'v.') {
+            $pkg_ver = $this->registry->packageInfo($name, 'version');
             $operator = substr($relation, 2);
-            return version_compare($req_ver, $pkg_ver, $operator);
+            if (!version_compare($pkg_ver, $req, $operator)) {
+                return "'$name' PEAR package version " .
+                        $this->signOperator($operator) . " $req is required";
+            }
+            return false;
         }
-        return false;
+        return "Relation '$relation' with requirement '$req' is not supported";
     }
 
     /**
@@ -62,58 +113,69 @@ class PEAR_Dependency
      * @param string $req_ext_ver Required extension version to compare with
      * @param string $relation    How to compare versions with eachother
      *
-     * @return bool whether the dependency is satisfied
+     * @return mixed bool false if no error or the error string
      */
-    function checkExtension($name, $req_ver = null, $relation = 'has')
+    function checkExtension($name, $req = null, $relation = 'has')
     {
         // XXX (ssb): could we avoid loading the extension here?
         if (!extension_loaded($name)) {
             $dlext = OS_WINDOWS ? '.dll' : '.so';
             if (!@dl($name . $dlext)) {
-                return false;
+                return "'$name' PHP extension is not installed";
             }
         }
-        $ext_ver = phpversion($name);
         if ($relation == 'has') {
-            return true;
+            return false;
         }
         if (substr($relation, 0, 2) == 'v.') {
+            $ext_ver = phpversion($name);
             $operator = substr($relation, 2);
-            return version_compare($req_ver, $ext_ver, $operator);
+            if (!version_compare($ext_ver, $req, $operator)) {
+                return "'$name' PHP extension version " .
+                        $this->signOperator($operator) . " $req is required";
+            }
         }
         return false;
     }
-
 
     /**
      * Operating system  dependencies check method
      *
      * @param string $os  Name of the operating system
      *
-     * @return bool whether we're running on $os
+     * @return mixed bool false if no error or the error string
      */
     function checkOS($os)
     {
+        // XXX Fixme: Implement a more flexible way, like
+        // comma separated values or something similar to PEAR_OS
+
         // only 'has' relation is supported
-        return ($os == PHP_OS);
+        if ($os == PHP_OS) {
+            return false;
+        }
+        return "'$os' operating system not supported";
     }
 
     /**
      * PHP version check method
      *
-     * @param string $req_ver   which version to compare
+     * @param string $req   which version to compare
      * @param string $relation  how to compare the version
      *
-     * @return bool whether the dependency is satisfied
+     * @return mixed bool false if no error or the error string
      */
-    function checkPHP($req_ver, $relation = 'ge')
+    function checkPHP($req, $relation = 'v.ge')
     {
-        $php_ver = phpversion();
         if (substr($relation, 0, 2) == 'v.') {
+            $php_ver = phpversion();
             $operator = substr($relation, 2);
-            return version_compare($req_ver, $php_ver, $operator);
+            if (!version_compare($php_ver, $req, $operator)) {
+                return "PHP version " . $this->signOperator($operator) .
+                       " $req is required";
+            }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -122,21 +184,21 @@ class PEAR_Dependency
      *
      * @param string $program   which program to look for
      *
-     * @return bool whether the dependency is satisfied
+     * @return mixed bool false if no error or the error string
      */
     function checkProgram($program)
     {
         // XXX FIXME honor safe mode
         $path_delim = OS_WINDOWS ? ';' : ':';
         $exe_suffix = OS_WINDOWS ? '.exe' : '';
-        $path_elements = explode($path_delim, $_ENV['PATH']);
+        $path_elements = explode($path_delim, getenv('PATH'));
         foreach ($path_elements as $dir) {
-            $file = "$dir/$program{$exe_suffix}";
-            if (file_exists($file) && is_executable($file)) {
-                return true;
+            $file = $dir . DIRECTORY_SEPARATOR . $program . $exe_suffix;
+            if (@file_exists($file) && @is_executable($file)) {
+                return false;
             }
         }
-        return false;
+        return "'$program' program is not present in the PATH";
     }
 
     /**
@@ -144,16 +206,41 @@ class PEAR_Dependency
      * available here.
      *
      * @param string $name      name of SAPI backend
-     * @param string $req_ver   which version to compare
+     * @param string $req   which version to compare
      * @param string $relation  how to compare versions (currently
      *                          hardcoded to 'has')
+     * @return mixed bool false if no error or the error string
      */
-    function checkSAPI($name, $req_ver = null, $relation = 'has')
+    function checkSAPI($name, $req = null, $relation = 'has')
     {
+        // XXX Fixme: There is no way to know if the user has or
+        // not other SAPI backends installed than the installer one
+
         $sapi_backend = php_sapi_name();
         // Version comparisons not supported, sapi backends don't have
         // version information yet.
-        return ($sapi_backend == $name);
+        if ($sapi_backend == $name) {
+            return false;
+        }
+        return "'$sapi_backend' SAPI backend not supported";
+    }
+
+    /**
+    * Converts text comparing operators to them sign equivalents
+    * ex: 'ge' to '>='
+    */
+    function signOperator($operator)
+    {
+        switch($operator) {
+            case 'lt': return '<';
+            case 'le': return '<=';
+            case 'gt': return '>';
+            case 'ge': return '>=';
+            case 'eq': return '==';
+            case 'ne': return '!=';
+            default:
+                return $operator;
+        }
     }
 }
 
