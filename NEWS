@@ -1,6 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Fixed bug #21229 (missing 3rd argument to php_module_startup). (Ilia)
+- Fixed bug #21267 (opening URLs that result in redirection to a relative
+  path was failing). (Ilia)
+- Fixed bug #21226 (parse_url handling of urls without a path). (Ilia)
+- Fixed bug #21228 (broken check for ob_gzhandler) & made ob_start() return
+  the correct value. (Ilia)
+- Fixed bug #21268 (session_decode() returned FALSE on success). (Ilia)
 - Improved dba extension (Marcus)
   . Made handler parameter of dba_(p)open() optional.
   . Added php.ini option 'dba.default_handler' to specify a default handler.
