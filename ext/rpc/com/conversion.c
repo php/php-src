@@ -37,12 +37,6 @@
 
 /* prototypes */
 
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC);
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC);
-PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage);
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
-
 static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC);
 static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC);
 
@@ -249,20 +243,20 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 
 			case VT_BSTR:
 				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 				V_BSTR(var_arg) = SysAllocString(unicode_str);
 				efree(unicode_str);
 				break;
 
 			case VT_DECIMAL:
 				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, &V_DECIMAL(var_arg));
 				break;
 
 			case VT_DECIMAL|VT_BYREF:
 				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, V_DECIMALREF(var_arg));
 				break;
 
@@ -349,7 +343,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 			case VT_BSTR|VT_BYREF:
 				convert_to_string(pval_arg);
 				V_BSTRREF(var_arg) = (BSTR FAR*) emalloc(sizeof(BSTR FAR*));
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 				*V_BSTRREF(var_arg) = SysAllocString(unicode_str);
 				efree(unicode_str);
 				break;
@@ -465,7 +459,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 	}
 }
 
-PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage)
+PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage TSRMLS_DC)
 {
 	/* Changed the function to return a value for recursive error testing */
 	/* Existing calls will be unaffected by the change - so it */
@@ -543,7 +537,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			/* If SafeArrayGetElement proclaims to allocate */
 			/* memory for a BSTR, so the recursive call frees */
 			/* the string correctly */
-			if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage))
+			if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage TSRMLS_CC))
 			{
 				/* Error occurred setting up array element */
 				/* Error was displayed by the recursive call */
@@ -633,7 +627,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				switch(VarBstrFromDec(&V_DECIMAL(var_arg), LOCALE_SYSTEM_DEFAULT, 0, &unicode_str))
 				{
 					case S_OK:
-						Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(pval_arg), persistent, codepage);
+						Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
 						Z_TYPE_P(pval_arg) = IS_STRING;
 						break;
 
@@ -676,18 +670,18 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			break;
 
 		case VT_VARIANT:
-			php_variant_to_pval(V_VARIANTREF(var_arg), pval_arg, persistent, codepage);
+			php_variant_to_pval(V_VARIANTREF(var_arg), pval_arg, persistent, codepage TSRMLS_CC);
 			break;
 
 		case VT_BSTR:
 			if(V_ISBYREF(var_arg))
 			{
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
+				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
 				efree(V_BSTRREF(var_arg));
 			}
 			else
 			{
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
+				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
 			}
 
 			Z_TYPE_P(pval_arg) = IS_STRING;
@@ -737,7 +731,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				{
 					char *error_message;
 
-					error_message = php_COM_error_message(hr);
+					error_message = php_COM_error_message(hr TSRMLS_CC);
 					php_error(E_WARNING,"Unable to obtain IDispatch interface:  %s", error_message);
 					LocalFree(error_message);
 
@@ -757,7 +751,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				else
 				{
 					ALLOC_COM(obj);
-					php_COM_set(obj, &V_DISPATCH(var_arg), TRUE);
+					php_COM_set(obj, &V_DISPATCH(var_arg), TRUE TSRMLS_CC);
 					
 					ZVAL_COM(pval_arg, obj);
 				}
@@ -828,7 +822,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	return ret;
 }
 
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRMLS_DC)
 {
 	OLECHAR *unicode_str;
 
@@ -860,7 +854,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
 	return unicode_str;
 }
 
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage)
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage TSRMLS_DC)
 {
 	char *C_str;
 	uint length = 0;
