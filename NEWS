@@ -12,7 +12,10 @@ PHP 4                                                                      NEWS
   is used for background color. (Pierre-Alain Joye)
 - Fixed a bug that under certain circumstances could invalidate safe_mode.
   (Ilia)
+- Fixed bug #24710 (Crash when $obj->{0} is used). (Zeev)
+- Fixed bug #24663 (\n. sequences were not being escaped). (Ilia)
 - Fixed bug #24640 (var_export and var_dump can't output large float). (Marcus)
+- Fixed bug #24594 (Rewrite the imagefill function). (Pierre-Alain Joye)
 - Fixed bug #24592 (NULL related crash in session extension). (Sascha)
 - Fixed bug #24573 (debug_backtrace() crashes if $this set to null). (Jani)
 - Fixed bug #24560 (parse_url() incorrectly handling certain file:// based 
@@ -31,6 +34,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #24028 (Reading raw post message by php://input failed). (Jani)
 - Fixed bug #24009 (FastCGI handling of file not found). (Shane)
 - Fixed bug #23808 (broken imagecopymerge()). (Pierre-Alain Joye)
+- Fixed bug #23798 (Spaces were not being stripped from Bcc header). (Ilia)
 - Fixed bug #23792 (imagerotate() problems with limited platte, the function
   will always return true color image from now on). (Pierre-Alain Joye)
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
