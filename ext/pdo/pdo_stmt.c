@@ -216,10 +216,6 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (param->param_type == PDO_PARAM_STR && param->max_value_len <= 0) {
 		convert_to_string(param->parameter);
-		/* XXX: need to provide a way to set this to something sane, or
-		 * investigate a better way to set the length of output parameters in
-		 * the drivers themselves */
-		param->max_value_len = Z_STRLEN_P(param->parameter);
 	}
 
 	param->stmt = stmt;
