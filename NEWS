@@ -1,8 +1,23 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added stream_select() which works like socket_select but only works on
-  streams returned by fopen(), fsockopen() and pfsockopen(). (Wez)
+- Renamed:
+    socket_set_timeout()  -> stream_set_timeout()
+    socket_set_blocking() -> stream_set_blocking()
+	set_file_buffer()     -> stream_set_write_buffer()
+	socket_get_status()   -> stream_get_meta_data()
+  As these functions can (in theory) work on any type of stream. (Wez)
+- Added stream_context_create(), stream_context_set_params() and
+  stream_context_set_option and added an optional fourth parameter to
+  fopen() which accepts a stream context.  Contexts allow sharing of
+  information between streams (a kind of "session") and setting notification
+  callbacks. (Wez)
+- Added stream_filter_prepend() and stream_filter_append() which apply
+  a filter to either the top or the bottom of the filter stack for a stream.
+  Implemented "string.rot13" filter as an example; more filters are expected
+  to follow in later releases and other extensions. (Wez)
+- Added stream_select() which works like socket_select but works on streams
+  returned by fopen(), fsockopen() and pfsockopen() instead. (Wez)
 - Fixed bug #19595 (Missing functions for GD2 format handling). (Edin)
 - Fixed bug #19633 (Wrong directories in ext/ldap/config.m4). (Derick)
 - Fixed bugs #17274 and #19627 (segfault in sem_remove). (Wez)
@@ -278,7 +293,7 @@ PHP 4                                                                      NEWS
   . zlib wrappers/streams can be used even on systems without fopencookie()
   . Added 'compress.bzip2://' stream and wrapper support.
   . Added user-space streams - it is now possible to define a class in PHP
-    code and register it as a URL wrapper.
+    code and register it as a URL wrapper. (stream_register_wrapper)
   . Most extensions now support streams when passing files, which means
     that those extensions will support URL wrappers. (Wez)
   . Added memory stream support. (Marcus)
