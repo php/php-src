@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26635 (fixed look up for fonts in the current directory w/ZTS).
+  (Ilia)
 - Fixed bug #26604 (Apache2 SAPIs implicitly disable Keep-Alive). (Ilia)
 - Fixed bug #26595 (ext/domxml: XSLT_NAMESPACE undeclared). (Christian)
 - Fixed bug #26565 (strtotime("this month") resolving to the wrong month).

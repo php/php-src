@@ -358,7 +358,7 @@ static void *fontFetch (char **error, void *key)
 	int font_found = 0;
 	unsigned short platform, encoding;
 	char *fontsearchpath, *fontlist;
-	char *fullname = NULL;
+	char fullname[MAXPATHLEN], cur_dir[MAXPATHLEN];
 	char *name, *path=NULL, *dir;
 	char *strtok_ptr;
 	FT_Error err;
@@ -384,38 +384,43 @@ static void *fontFetch (char **error, void *key)
 	for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name; name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr)) {
 		/* make a fresh copy each time - strtok corrupts it. */
 		path = gdEstrdup (fontsearchpath);
-	
-		/*
-		* Allocate an oversized buffer that is guaranteed to be
-		* big enough for all paths to be tested.
-		*/
-		fullname = gdRealloc (fullname, strlen (fontsearchpath) + strlen (name) + 6);
-	
+
 		/* if name is an absolute filename then test directly */ 
 		if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\'))) {
-			sprintf(fullname, "%s", name);
+			snprintf(fullname, sizeof(fullname) - 1, "%s", name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;
 				break;
 			}
 		}
 		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
-			sprintf(fullname, "%s/%s", dir, name);
-			if (access (fullname, R_OK) == 0) {
-				font_found++;
-				break;
+			if (!strcmp(dir, ".")) {
+#if HAVE_GETCWD
+				dir = VCWD_GETCWD(cur_dir, MAXPATHLEN);
+#elif HAVE_GETWD
+				dir = VCWD_GETWD(cur_dir);
+#endif
+				if (!dir) {
+					continue;
+				}
 			}
-			sprintf(fullname, "%s/%s.ttf", dir, name);
-			if (access (fullname, R_OK) == 0) {
-				font_found++;
-				break;
-			}
-			sprintf(fullname, "%s/%s.pfa", dir, name);
+
+			snprintf(fullname, sizeof(fullname) - 1, "%s/%s", dir, name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;
 				break;
 			}
-			sprintf (fullname, "%s/%s.pfb", dir, name);
+			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.ttf", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.pfa", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.pfb", dir, name);
 			if (access(fullname, R_OK) == 0) {
 				font_found++;
 				break;
@@ -437,9 +442,6 @@ static void *fontFetch (char **error, void *key)
 	if (!font_found) {
 		gdPFree(a->fontlist);
 		gdPFree(a);
-		if (fullname) {
-			gdFree(fullname);
-		}
 		*error = "Could not find/open font";
 		return NULL;
 	}
@@ -448,13 +450,9 @@ static void *fontFetch (char **error, void *key)
 	if (err) {
 		gdPFree(a->fontlist);
 		gdPFree(a);
-		if (fullname) {
-			gdFree(fullname);
-		}
 		*error = "Could not read font";
 		return NULL;
 	}
-	gdFree(fullname);
 
 	/* FIXME - This mapping stuff is imcomplete - where is the spec? */
 
