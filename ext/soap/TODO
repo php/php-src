@@ -9,9 +9,9 @@ General
 
 SOAP
 ----
-- support for SOAP headers
-  - actor attribute
-  - mustUnderstend attribute
+? support for SOAP headers
+  ? actor attribute
+  ? mustUnderstend attribute
 - root attribute
 - make sure soap 1.1 and 1.2 are supported fully
 
@@ -55,7 +55,7 @@ WSDL
 - support for portType operation parameterOrder attribute
 - support for binding operation input/output name attribute (part of overloading)
 - support for <opperation> <fault>
-? support for style "document" encoding (server part)
+? server part support for "document" style encoding
 - function/method overloading/redeclaration (test(int); test(string))
 - wsdl caching
 - wsdl auto generation

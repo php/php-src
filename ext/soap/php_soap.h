@@ -73,20 +73,6 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_http.h"
 #include "php_packet_soap.h"
 
-struct _soapHeaderHandler {
-	char *ns;
-	int type;
-
-	struct _function_handler {
-		char *functionName;
-		char *type;
-	} function_handler;
-
-	struct _class_handler {
-		zend_class_entry *ce;
-	} class_handler;
-};
-
 struct _soapMapping {
 	char *ns;
 	char *ctype;
@@ -123,8 +109,9 @@ struct _soapService {
 	} soap_class;
 
 	HashTable *mapping;
-	int type;
-	char *uri;
+	int        type;
+	char      *actor;
+	char      *uri;
 };
 
 #define SOAP_CLASS 1

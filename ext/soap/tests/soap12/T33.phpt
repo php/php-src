@@ -1,5 +1,5 @@
 --TEST--
-SOAP 1.2: T33
+SOAP 1.2: T33 nonexistentMethod
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
