@@ -28,4 +28,9 @@ fi
 
 rm -f generated_lists
 
+case "`uname`" in
+*BSD/OS*)
+    ./build/bsd_makefile;;
+esac
+
 ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags"
