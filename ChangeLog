@@ -1,3 +1,166 @@
+2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c
+      main/output.c
+      main/php_output.h:
+      Guard display_startup_errors with checking for default (working) output
+      functions.
+
+2004-03-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      typo
+
+2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ext/standard/type.c:
+      Fix strval to use __toString if necessary
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Make object parameter optional
+
+2004-03-14  Derick Rethans  <php@derickrethans.nl>
+
+    * php.ini-dist:
+      - That change was unintentional, but it would be the right thing to do ;-)
+
+    * php.ini-dist
+      php.ini-recommended:
+      - The extension list is ordered alphabetically, also moved the tidy section
+        to a more suitable place (new things go at the end, not at the start).
+
+    * NEWS:
+      - Reorder
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Typo
+
+    * NEWS:
+      - Add all of the fixes from the past week. Almost ready for RC1 now.
+
+2004-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      MFH: Fixed bug #27590 (crash during shutdown when freeing persistent
+      resources in ZTS mode).
+
+    * ZendEngine2/zend.c:
+      Fixed bug #27590 (crash during shutdown when freeing persistent resources
+      in ZTS mode).
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix windows build
+
+2004-03-14  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/sockets/sockets.c:
+       - improve error message
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix for bug #27504
+
+2004-03-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * cvsclean
+      build/build.mk:
+      Renaming cvsclean target; IRIX make seems to ignore .PHONY
+
+    * (PHP_4_3)
+      cvsclean
+      build/build.mk:
+      Renaming cvsclean target -- IRIX make seems to ignore the .PHONY target.
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fixing bug #27123
+
+    * ZendEngine2/zend_operators.c:
+      - Improve compatibility mode and compare objects according to property
+      - comparison (sucky but this is how PHP 4 behaved).
+
+    * ZendEngine2/zend.c:
+      - Fix flow of logic
+
+    * ZendEngine2/zend_operators.c:
+      - Support old style of converting objects to long/double/bool.
+      - This is only enabled in compatibility mode, else it calls cast_object()
+      - and if that is not available we return 1 (true) so that the following
+      - code would work:
+      if ($obj) {
+      }
+
+2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/020.phpt:
+      Add new test
+
+    * ZendEngine2/zend_operators.c:
+      Fix: Add return type void
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_operators.c:
+      - Support Cast operator in convert_to_* so that we support internal
+      - extensions such as SimpleXML. This is for Sterling.
+
+    * ZendEngine2/zend_operators.c:
+      - Fix memory leak in the following code (Dmitry):
+      <?php
+      $a = array();
+      $a .= "x";
+      ?>
+
+    * ZendEngine2/zend_operators.c:
+      - Initial commit which allows comparing overloaded objects with native
+      - types (only for internal classes and not for user-land classes).
+
+2004-03-14  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/sockets/sockets.c:
+      Fix a typo, dating back from 1.145.
+
+2004-03-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      reorder
+
+2004-03-14  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/tests/bug27582_1.phpt:
+      - add a 2nd test for #27582
+
+2004-03-14  John Coggeshall  <john@coggeshall.org>
+
+    * php.ini-dist
+      php.ini-recommended:
+      
+      Adding extension=php_tidy.dll
+
+2004-03-14  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      - missing restoreAlphaBleding declaration
+
 2004-03-13  Pierre-Alain Joye  <paj@pearfr.org>
 
     * (PHP_4_3)
