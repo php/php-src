@@ -14,9 +14,10 @@
    +----------------------------------------------------------------------+
    | Pi3Web version 2.0                                                   |
    +----------------------------------------------------------------------+
-   | This file is commited by the Pi3 development group. (www.pi3.org)    |
+   | This file is committed by the Pi3 development group.                 |
+   | (pi3web.sourceforge.net)                                             |
    |                                                                      |
-   | Author: Holger Zimmermann (zimpel@t-online.de, zimpel@pi3.org)       |
+   | Author: Holger Zimmermann (zimpel@users.sourceforge.net)             |
    +----------------------------------------------------------------------+
  */
 
