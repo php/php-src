@@ -19,10 +19,9 @@
  </maintainers>
  <release>
   <version>0.1</version>
-  <date>2004-07-12</date>
-  <state>beta</state>
-  <notes>
-  </notes>
+  <date>2004-07-20</date>
+  <state>alpha</state>
+  <notes>Initial Release </notes>
   <configureoptions>
     <configureoption name="with-xmlwriter" default="autodetect" prompt="Include XMLWriter support?"/>
   </configureoptions>
