@@ -66,9 +66,9 @@ if (getenv('PHP_PEAR_HTTP_PROXY')) {
 if (getenv('PHP_PEAR_INSTALL_DIR')) {
     define('PEAR_CONFIG_DEFAULT_PHP_DIR', getenv('PHP_PEAR_INSTALL_DIR'));
 } else {
-    if (@is_dir($PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
+    if (@is_dir($PEAR_INSTALL_DIR)) {
         define('PEAR_CONFIG_DEFAULT_PHP_DIR',
-               $PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
+               $PEAR_INSTALL_DIR);
     } else {
         define('PEAR_CONFIG_DEFAULT_PHP_DIR', $PEAR_INSTALL_DIR);
     }
