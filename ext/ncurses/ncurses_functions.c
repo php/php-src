@@ -1797,6 +1797,24 @@ PHP_FUNCTION(ncurses_wmouse_trafo)
 }
 /* }}} */
 
+/* {{{ proto void ncurses_getyx(resource window, int &y, int &x)
+   Returns the current cursor position for a window */
+PHP_FUNCTION(ncurses_getyx)
+{
+	zval **handle, **x, **y;
+	WINDOW **win;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &handle, &y, &x) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	FETCH_WINRES(win, handle);
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+
+	getyx(*win, Z_LVAL_PP(y), Z_LVAL_PP(x));
+}
+/* }}} */
 
 /* {{{ proto int ncurses_wmove(resource window, int y, int x)
    Moves windows output position */

@@ -175,6 +175,7 @@ function_entry ncurses_functions[] = {
 	PHP_FE(ncurses_wborder,		NULL)
 	PHP_FE(ncurses_whline,		NULL)
 	PHP_FE(ncurses_wvline,		NULL)
+	PHP_FE(ncurses_getyx,		secondandthird_args_force_ref)
 	
 #if HAVE_NCURSES_PANEL
 	PHP_FE(ncurses_update_panels,	NULL)
