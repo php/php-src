@@ -42,6 +42,13 @@
 #define PHP_OCI_API
 #endif                                   
 
+#if defined(min)
+#undef min
+#endif
+#if defined(max)
+#undef max
+#endif
+
 #include <oci.h>
 
 typedef struct {
