@@ -1,3 +1,68 @@
+2002-01-18  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c: reimplement extension listing
+
+2002-01-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/driver/02fetch.phpt
+      pear/DB/tests/driver/03simplequery.phpt
+      pear/DB/tests/driver/04numcols.phpt
+      pear/DB/tests/driver/06prepexec.phpt
+      pear/DB/tests/driver/08affectedrows.phpt
+      pear/DB/tests/driver/15quote.phpt:
+    removed unneeded require_once "DB.php";
+
+    * pear/DB/odbc.php: - Fix fetch row by number (ODBC starts at 1)
+    - New "navision" syntax (this driver doesn't support fetchs by
+      number, so emulate row limit by skipping rows)
+
+2002-01-18  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c: - More WS fixes
+
+2002-01-18  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    shite :) too much WS fixes. leave the licence as it was...
+
+    * ext/domxml/php_domxml.c: - WS fixes (replaced "    " by \t)
+
+2002-01-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS
+      pear/DB/odbc.php:
+    added affectedRows() and test in numRows() if the backend
+    is capable of not to return this info
+
+2002-01-18  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    - added optional parameters format and level for domxml_dump_node()
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - added macro DOMXML_PARAM_ONE
+    - added function domxml_dump_node($doc,$node). Dumps a node plus all
+      children into a string. (chregu)
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - Added function domxml_node_get_content() (chregu)
+
+    * ext/domxml/config.m4
+      ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - added DOMXML_PARAM_THREE macro
+    - renamed domxml_dumpmem to domxml_dump_mem, added alias for
+      domxml_dumpmem
+    - domxml_has_attributes was missing in in zend_function_entry
+    - added function domxml_dump_file($filename,[$compression]). Dumps XML to
+      a file and uses compression, if specified (chregu)
+    - added exslt integration (see http://exslt.org for details). To be
+      configured with --with-dom-exslt[=DIR] (and --with-dom-xslt) (chregu, jaroslaw)
+
+2002-01-18  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * README.CVS-RULES: Fix typo
+
 2002-01-17  Adam Dickmeiss  <adam@indexdata.dk>
 
     * ext/yaz/php_yaz.c
