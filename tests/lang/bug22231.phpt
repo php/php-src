@@ -25,6 +25,7 @@ $foo = &foo();
 var_dump($foo->fubar);
 ?>
 --EXPECTF--
+Strict Standards: Assigning the return value of new by reference is deprecated in %s on line %d
 object(foo)#%d (1) {
   ["fubar"]=>
   string(5) "fubar"
