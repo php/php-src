@@ -1,3 +1,37 @@
+2000-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/shmop/README: typo
+
+    * ext/pfpro/pfpro.c:
+2000-10-03  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h: - Package RC2
+
+    * tests/testdirname:
+    - Add dirname() test. Don't have time to create a real regression test
+
+    * ext/standard/string.c: - Fix dirname()
+
+2000-10-03  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c: Fix some small issues.
+
+2000-10-03  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c:
+    - Fix V_CHDIR_FILE() to only chdir() when a directory part is specified.
+      Use this instead of broken php_dirname() in fopen-wrappers.c
+
+    * main/main.c
+      ext/standard/string.c: - Fix VC++ warning
+
+    * sapi/cgi/cgi_main.c:
+    - Fix request_uri to take it's value from SCRIPT_NAME if PATH_INFO is not
+      defined
+
 2000-10-02  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/imap/config.m4:
