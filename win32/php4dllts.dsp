@@ -2339,5 +2339,56 @@ SOURCE=.\php4dllts.rc
 
 SOURCE=.\php4dllts.rc2
 # End Source File
+# Begin Source File
+
+SOURCE=.\phpts.def
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+# Begin Custom Build - Generating $(InputPath)
+InputPath=.\phpts.def
+
+"phpts.def" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	builddef.bat > phpts.def
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+# Begin Custom Build - Generating $(InputPath)
+InputPath=.\phpts.def
+
+"phpts.def" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	builddef.bat > phpts.def
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+# Begin Custom Build - Generating $(InputPath)
+InputPath=.\phpts.def
+
+"phpts.def" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	builddef.bat > phpts.def
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
+USERDEP__PHPTS="..\ext\sqlite\php_sqlite.def"	
+# Begin Custom Build - Generating $(InputPath)
+InputPath=.\phpts.def
+
+"phpts.def" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	builddef.bat > phpts.def
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # End Target
 # End Project
