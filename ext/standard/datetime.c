@@ -595,14 +595,18 @@ char *php_std_date(time_t t)
 PHP_FUNCTION(checkdate)
 {
 	pval **month, **day, **year;
-	int m, d, y;
+	int m, d, y, res=0;
 	
 	if (ZEND_NUM_ARGS() != 3 ||
 		zend_get_parameters_ex(3, &month, &day, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if((*year)->type != IS_LONG) {
-		RETURN_FALSE;	
+
+	if((*year)->type == IS_STRING) {
+		res = is_numeric_string((*year)->value.str.val, (*year)->value.str.len, NULL, NULL);
+		if(res!=IS_LONG && res !=IS_DOUBLE) {
+			RETURN_FALSE;	
+		}
 	}
 	convert_to_long_ex(day);
 	convert_to_long_ex(month);
