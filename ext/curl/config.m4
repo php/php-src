@@ -18,6 +18,7 @@ if test "$PHP_CURL" != "no"; then
       if test -r $i/include/curl/easy.h; then
         CURL_DIR=$i
         AC_MSG_RESULT(found in $i)
+        break
       fi
     done
   fi
