@@ -112,6 +112,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 {
 #ifdef PHP_WIN32
 	int tsm_err;
+	char *tsm_errmsg = NULL;
 #endif
 	FILE *sendmail;
 	int ret;
@@ -121,8 +122,13 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
-			php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message) == FAILURE) {
+			if (tsm_errmsg) {
+				php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
+				efree(tsm_errmsg);
+			} else {
+				php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+			}
 			return 0;
 		}
 		return 1;
