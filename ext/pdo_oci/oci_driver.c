@@ -195,10 +195,10 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	S->H = H;
 	
 	/* create an OCI statement handle */
-	OCIHandleAlloc(H->env, &S->stmt, OCI_HTYPE_STMT, 0, NULL);
+	OCIHandleAlloc(H->env, (dvoid*)&S->stmt, OCI_HTYPE_STMT, 0, NULL);
 
 	/* and our own private error handle */
-	OCIHandleAlloc(H->env, &S->err, OCI_HTYPE_ERROR, 0, NULL);
+	OCIHandleAlloc(H->env, (dvoid*)&S->err, OCI_HTYPE_ERROR, 0, NULL);
 
 	if (sql_len) {
 		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*)sql, sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
@@ -226,7 +226,7 @@ static int oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_
 	ub4 rowcount;
 	int ret = -1;
 
-	OCIHandleAlloc(H->env, &stmt, OCI_HTYPE_STMT, 0, NULL);
+	OCIHandleAlloc(H->env, (dvoid*)&stmt, OCI_HTYPE_STMT, 0, NULL);
 
 	H->last_err = OCIStmtPrepare(stmt, H->err, (text*)sql, sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
 	if (H->last_err) {
@@ -304,22 +304,26 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
-	if (dbh->in_txn) {
-		/* Assume they want to commit whatever is outstanding */
-		H->last_err = OCITransCommit(H->svc, H->err, 0);
+	if (attr == PDO_ATTR_AUTOCOMMIT) {
+		if (dbh->in_txn) {
+			/* Assume they want to commit whatever is outstanding */
+			H->last_err = OCITransCommit(H->svc, H->err, 0);
 
-		if (H->last_err) {
-			H->last_err = oci_drv_error("OCITransCommit");
-			return 0;
+			if (H->last_err) {
+				H->last_err = oci_drv_error("OCITransCommit");
+				return 0;
+			}
+			dbh->in_txn = 0;
 		}
-		dbh->in_txn = 0;
+
+		convert_to_long(val);
+
+		dbh->auto_commit = Z_LVAL_P(val);
+		return 1;
+	} else {
+		return 0;
 	}
 	
-	convert_to_long(val);
-
-	dbh->auto_commit = Z_LVAL_P(val);
-	
-	return 1;
 }
 
 static struct pdo_dbh_methods oci_methods = {
