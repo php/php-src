@@ -61,13 +61,14 @@ BUILD_FILES = \
 	dynlib.m4 \
 	acinclude.m4
 
-bin_PROGRAMS = phpize php-config pear phpextdist
+bin_PROGRAMS = phpize php-config pear
 
 install-build:
 	$(mkinstalldirs) $(builddir) $(bindir) && \
 	(cd $(top_srcdir) && cp $(BUILD_FILES) $(builddir))
 
 install-programs:
+	$(INSTALL) -m 755 $(srcdir)/phpextdist $(bindir)/phpextdist
 	for prog in $(bin_PROGRAMS); do \
 		$(INSTALL) -m 755 $$prog $(bindir)/$$prog; \
 	done
