@@ -95,6 +95,7 @@ typedef struct _php_shutdown_function_entry {
 typedef struct _user_tick_function_entry {
 	zval **arguments;
 	int arg_count;
+	int calling;
 } user_tick_function_entry;
 
 /* some prototypes for local functions */
@@ -1754,29 +1755,36 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
+	
+	/* Prevent reentrant calls to the same user ticks function */
+	if (! tick_fe->calling) {
+		tick_fe->calling = 1;
 
-	if (call_user_function(	EG(function_table), NULL, 
-							function, 
-							&retval,
-							tick_fe->arg_count - 1,
-							tick_fe->arguments+1
-							TSRMLS_CC) == SUCCESS) {
-		zval_dtor(&retval);
+		if (call_user_function(	EG(function_table), NULL, 
+								function, 
+								&retval,
+								tick_fe->arg_count - 1,
+								tick_fe->arguments+1
+								TSRMLS_CC) == SUCCESS) {
+			zval_dtor(&retval);
 
-	} else {
-		zval **obj, **method;
-
-		if (Z_TYPE_P(function) == IS_STRING) {
-			php_error(E_WARNING, "%s(): Unable to call %s() - function does not exist", get_active_function_name(TSRMLS_C), Z_STRVAL_P(function));
-		} else if (	Z_TYPE_P(function) == IS_ARRAY 
-					&& zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS
-					&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
-					&& Z_TYPE_PP(obj) == IS_OBJECT
-					&& Z_TYPE_PP(method) == IS_STRING ) {
-			php_error(E_WARNING, "%s(): Unable to call %s::%s() - function does not exist", get_active_function_name(TSRMLS_C), Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 		} else {
-			php_error(E_WARNING, "%s(): Unable to call tick function", get_active_function_name(TSRMLS_C));
+			zval **obj, **method;
+
+			if (Z_TYPE_P(function) == IS_STRING) {
+				php_error(E_WARNING, "%s(): Unable to call %s() - function does not exist", get_active_function_name(TSRMLS_C), Z_STRVAL_P(function));
+			} else if (	Z_TYPE_P(function) == IS_ARRAY 
+						&& zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS
+						&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
+						&& Z_TYPE_PP(obj) == IS_OBJECT
+						&& Z_TYPE_PP(method) == IS_STRING ) {
+				php_error(E_WARNING, "%s(): Unable to call %s::%s() - function does not exist", get_active_function_name(TSRMLS_C), Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
+			} else {
+				php_error(E_WARNING, "%s(): Unable to call tick function", get_active_function_name(TSRMLS_C));
+			}
 		}
+	
+		tick_fe->calling = 0;
 	}
 }
 
@@ -2242,6 +2250,7 @@ PHP_FUNCTION(register_tick_function)
 	user_tick_function_entry tick_fe;
 	int i;
 
+	tick_fe.calling = 0;
 	tick_fe.arg_count = ZEND_NUM_ARGS();
 	if (tick_fe.arg_count < 1) {
 		WRONG_PARAM_COUNT;
