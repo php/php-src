@@ -269,6 +269,7 @@ next_iter:
 static zval **
 sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 {
+#if 0
 	zval **property_ptr;
 	zval  *property;
 
@@ -279,6 +280,22 @@ sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 	*property_ptr = property;
 	
 	return property_ptr;
+#else
+	/* necessary voodoo hack */
+	struct compounded_zval_ptr {
+		zval zv;
+		zval *pzv;
+	};
+
+	zval  *property;
+
+	property = sxe_property_read(object, member, 0 TSRMLS_CC);
+	property = erealloc(property, sizeof(struct compounded_zval_ptr));
+
+	((struct compounded_zval_ptr *)property)->pzv = property;
+	
+	return &((struct compounded_zval_ptr *)property)->pzv;
+#endif
 }
 /* }}} */
 
