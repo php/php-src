@@ -241,7 +241,7 @@ PHP_FUNCTION(rand)
 			}
 			convert_to_long_ex(p_min);
 			convert_to_long_ex(p_max);
-			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
+			if ((*p_max)->value.lval-(*p_min)->value.lval < 0) {
 				php_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
 			}else if ((*p_max)->value.lval-(*p_min)->value.lval > RAND_MAX){
 				php3_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
