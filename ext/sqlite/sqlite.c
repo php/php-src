@@ -1735,7 +1735,9 @@ PHP_FUNCTION(sqlite_fetch_object)
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%s()", class_name, ce->constructor->common.function_name);
 		} else {
-			zval_ptr_dtor(&retval_ptr);
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
 		}
 	}
 }
