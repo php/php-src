@@ -247,7 +247,7 @@ PHP_FUNCTION(curl_multi_close)
 }
 /* }}} */
 
-void _php_curl_multi_close(zend_rsrc_list_entry *rsrc)
+void _php_curl_multi_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_curlm *mh = (php_curlm *) rsrc->ptr;
 	curl_multi_cleanup(mh->multi);
