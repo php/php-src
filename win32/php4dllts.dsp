@@ -1,4 +1,4 @@
-# Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
+ Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
@@ -1784,10 +1784,6 @@ SOURCE=..\ext\standard\md5.h
 # Begin Source File
 
 SOURCE=..\ext\session\mod_user.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\number.h
 # End Source File
 # Begin Source File
 
