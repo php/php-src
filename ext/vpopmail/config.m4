@@ -22,17 +22,25 @@ if test "$PHP_VPOPMAIL" != "no"; then
 			VPOPMAIL_LIB_DIR=$i/lib
 		fi
 
-		if test -r $i/vadddomain; then
+		if test -x $i/vadddomain; then
 			VPOPMAIL_BIN_DIR=$i
-		elif test -r $i/bin/vadddomain; then
+		elif test -x $i/bin/vadddomain; then
 			VPOPMAIL_BIN_DIR=$i/bin
 		fi
 	done
 
-	for i in "$VPOPMAIL_INC_DIR/vpopmail.h" "$VPOPMAIL_INC_DIR/vpopmail_config.h" "$VPOPMAIL_LIB_DIR/libvpopmail.a" "$VPOPMAIL_BIN_DIR/vadddomain" "$VPOPMAIL_BIN_DIR/vaddaliasdomain" "$VPOPMAIL_BIN_DIR/vdeldomain" ; do
+	for i in "$VPOPMAIL_INC_DIR/vpopmail.h" "$VPOPMAIL_INC_DIR/vpopmail_config.h" "$VPOPMAIL_LIB_DIR/libvpopmail.a"; do
 		if test ! -r "$i"; then
 			AC_MSG_ERROR(Could not find '$i'. Please make sure you have vpopmail installed. Use
 ./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
+		fi
+	done
+
+	for i in "$VPOPMAIL_BIN_DIR/vadddomain" "$VPOPMAIL_BIN_DIR/vaddaliasdomain" "$VPOPMAIL_BIN_DIR/vdeldomain" ; do
+		if test ! -x "$i"; then
+			AC_MSG_ERROR(Could not find '$i' or binary not executeable under current user.
+Please make sure you have vpopmail properly installed.
+Use ./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
 		fi
 	done
 
@@ -56,6 +64,31 @@ if test "$PHP_VPOPMAIL" != "no"; then
 
 	AC_DEFINE(HAVE_VPOPMAIL,1,[Whether you have vpopmail])
 	AC_DEFINE_UNQUOTED(VPOPMAIL_BIN_DIR,"$VPOPMAIL_BIN_DIR",[vpopmail bin path])
+
+	dnl Detect if we have vpopmail >= 5.2 to accomodate C-API changes
+	dnl
+	dnl The current table is:
+	dnl
+	dnl PHP API   VPOPMAIL VERSION
+	dnl      1     <  5.2
+	dnl      2     >= 5.2
+	vpopmail_internal_api=1
+	version=`grep VERSION $VPOPMAIL_INC_DIR/vpopmail_config.h`
+	if test -n "$version"; then
+		version_major=`echo "$version" | sed 's/^[[^"]]\+"\([[0-9]]\+\)\.[[0-9]]\+"/\1/'`;
+		version_minor=`echo "$version" | sed 's/^[[^"]]\+"[[0-9]]\+\.\([[0-9]]\+\)"/\1/'`
+		if test $version_major -ge 5; then
+			if test $version_major -eq 5; then
+				if test $version_minor -ge 2; then
+					vpopmail_internal_api=2
+				fi
+			fi
+			if test $version_major -gt 5; then
+				vpopmail_internal_api=2
+			fi
+		fi
+	fi
+	AC_DEFINE_UNQUOTED(HAVE_VPOPMAIL_API,$vpopmail_internal_api,[Interal definition for vpopmail API changes])
 
 	PHP_NEW_EXTENSION(vpopmail, php_vpopmail.c, $ext_shared)
 fi
