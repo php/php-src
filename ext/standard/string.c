@@ -1811,7 +1811,7 @@ PHP_FUNCTION(ucfirst)
 	convert_to_string_ex(str);
 
 	if (!Z_STRLEN_PP(str)) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
@@ -1832,7 +1832,7 @@ PHP_FUNCTION(ucwords)
 	convert_to_string_ex(str);
 
 	if (!Z_STRLEN_PP(str)) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
@@ -2118,7 +2118,6 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 {
 	char *s, *t;
 	int l;
-	char escape_char='\\';
 
 	if (len != NULL) {
 		l = *len;
@@ -2137,8 +2136,16 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 						(*len)--;
 					l--;
 				}
-			} 
-			*s++ = *t++;
+				*s++ = *t++;
+			} else if (*t=='\\' && l>0 && t[1]=='0') {
+				*s++='\0';
+				t += 2;
+				if (len != NULL)
+					(*len)--;
+				l--;
+			} else {
+				*s++ = *t++;
+			}
 			l--;
 		}
 		*s = '\0';
@@ -2148,7 +2155,7 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
  
 
 	while (l > 0) {
-		if (*t == escape_char) {
+		if (*t == '\\') {
 			t++;				/* skip the slash */
 			if (len != NULL)
 				(*len)--;

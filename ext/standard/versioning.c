@@ -105,12 +105,21 @@ compare_special_version_forms(const char *form1, const char *form2)
 PHPAPI int
 php_version_compare(const char *orig_ver1, const char *orig_ver2)
 {
-	char *ver1 = php_canonicalize_version(orig_ver1);
-	char *ver2 = php_canonicalize_version(orig_ver2);
+	char *ver1;
+	char *ver2;
 	char *p1, *p2, *n1, *n2;
 	long l1, l2;
 	int compare = 0;
 
+	if (!*orig_ver1 || !*orig_ver2) {
+		if (!*orig_ver1 && !*orig_ver2) {
+			return 0;
+		} else {
+			return *orig_ver1 ? 1 : -1;
+		}
+	}
+	ver1 = php_canonicalize_version(orig_ver1);
+	ver2 = php_canonicalize_version(orig_ver2);
 	p1 = n1 = ver1;
 	p2 = n2 = ver2;
 	while (*p1 && *p2 && n1 && n2) {
@@ -187,22 +196,22 @@ PHP_FUNCTION(version_compare)
 	if (argc == 2) {
 		RETURN_LONG(compare);
 	}
-	if (!strcmp(op, "<") || !strcmp(op, "lt")) {
+	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
 		RETURN_BOOL(compare == -1);
 	}
-	if (!strcmp(op, "<=") || !strcmp(op, "le")) {
+	if (!strncmp(op, "<=", op_len) || !strncmp(op, "le", op_len)) {
 		RETURN_BOOL(compare != 1);
 	}
-	if (!strcmp(op, ">") || !strcmp(op, "gt")) {
+	if (!strncmp(op, ">", op_len) || !strncmp(op, "gt", op_len)) {
 		RETURN_BOOL(compare == 1);
 	}
-	if (!strcmp(op, ">=") || !strcmp(op, "ge")) {
+	if (!strncmp(op, ">=", op_len) || !strncmp(op, "ge", op_len)) {
 		RETURN_BOOL(compare != -1);
 	}
-	if (!strcmp(op, "==") || !strcmp(op, "=") || !strcmp(op, "eq")) {
+	if (!strncmp(op, "==", op_len) || !strncmp(op, "=", op_len) || !strncmp(op, "eq", op_len)) {
 		RETURN_BOOL(compare == 0);
 	}
-	if (!strcmp(op, "!=") || !strcmp(op, "<>") || !strcmp(op, "ne")) {
+	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
 		RETURN_BOOL(compare != 0);
 	}
 	RETURN_NULL();
