@@ -1093,7 +1093,10 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 		char *tmp_oid, *end_ptr, *tmp_name;
 		list_entry new_oid_entry;
 
-		if ((result = PQexec(pgsql,"select oid,typname from pg_type")) == NULL) {
+		if ((result = PQexec(pgsql,"select oid,typname from pg_type")) == NULL || PQresultStatus(result) != PGRES_TUPLES_OK) {
+			if (result) {
+				PQclear(result);
+			}
 			smart_str_free(&str);
 			return empty_string;
 		}
