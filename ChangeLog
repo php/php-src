@@ -1,3 +1,67 @@
+2005-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.3.11RC1
+
+2005-03-13  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      configure.in
+      main/php_version.h:
+      Prepare to roll 5.0.4RC1
+
+2005-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.c:
+      Do not convert ZEND_HANDLE_FP to ZEND_HANDLE_STREAM but allow using
+      reader/closer
+      on it
+
+2005-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/streamsfuncs.c:
+      Fixed compiler warning.
+
+2005-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      - More exact signatures (even though complete correct not possible atm)
+
+2005-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Fix get_extension_funcs() - extension names are now lowercased, so should
+      be function arguments.
+
+2005-03-13  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      credits to Ilia
+
+2005-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * ZendEngine2/zend_execute_API.c:
+      - Actually this is a much better error decription
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/bug32290.phpt:
+      - Bugfix #32290
+
 2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_vm_def.h

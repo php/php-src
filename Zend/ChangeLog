@@ -1,3 +1,33 @@
+2005-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_stream.c
+      zend_stream.c:
+      Do not convert ZEND_HANDLE_FP to ZEND_HANDLE_STREAM but allow using
+      reader/closer
+      on it
+
+2005-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      - More exact signatures (even though complete correct not possible atm)
+
+2005-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c:
+      Fix get_extension_funcs() - extension names are now lowercased, so should
+      be function arguments.
+
+2005-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - Actually this is a much better error decription
+
+    * zend_execute_API.c
+      tests/bug32290.phpt
+      tests/bug32290.phpt:
+      - Bugfix #32290
+
 2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_vm_def.h
