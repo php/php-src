@@ -79,7 +79,7 @@ PHP_FUNCTION(stream_context_set_option);
 PHP_FUNCTION(stream_context_get_options);
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_set_sock_blocking(int socketd, int block);
+PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
 PHPAPI int php_file_le_stream(void);
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 
