@@ -38,6 +38,12 @@ AC_ARG_WITH(apxs2,
     -D*) CPPFLAGS="$CPPFLAGS $flag";;
     esac
   done
+  
+  # Test that we're trying to configure with apache 2.x
+  if test ! -f "$APXS_INCLUDEDIR/ap_mpm.h"; then
+    AC_MSG_ERROR([Use --with-apxs with Apache 1.3.x!])
+  fi
+
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
   INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
   PHP_BUILD_THREAD_SAFE
