@@ -104,7 +104,21 @@ PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len
 
 PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value);
 PHPAPI void php_explode(pval *delim, pval *str, pval *return_value, int limit);
-PHPAPI inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
+
+static inline char *
+php_memnstr(char *haystack, char *needle, int needle_len, char *end)
+{
+	char *p = haystack;
+	char *s = NULL;
+
+	for(; p <= end - needle_len && 
+			(s = memchr(p, *needle, end - p - needle_len + 1)); p = s + 1) {
+		if(memcmp(s, needle, needle_len) == 0)
+			return s;
+	}
+	return NULL;
+}
+
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 
