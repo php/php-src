@@ -3391,7 +3391,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 				OCI_DEFAULT, 
 				OCI_TEMP_CLOB, 
 				OCI_ATTR_NOCACHE, 
-				OCI_DURATION_STATEMENT));
+				OCI_DURATION_SESSION));
 
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobCreateTemporary", connection->error);
