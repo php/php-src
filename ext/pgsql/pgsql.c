@@ -45,8 +45,8 @@
 #define PGSQL_NUM		1<<1
 #define PGSQL_BOTH		(PGSQL_ASSOC|PGSQL_NUM)
 
-#define PGSQL_ESCAPE_STRING   1
-#define PGSQL_ESCAPE_BYTEA    2
+#define PGSQL_STATUS_LONG     1
+#define PGSQL_STATUS_STRING   2
 
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
@@ -364,7 +364,10 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
-	/* For pg_result_status() */
+	/* For pg_result_status() return value type */
+	REGISTER_LONG_CONSTANT("PGSQL_STATUS_LONG", PGSQL_STATUS_LONG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_STATUS_STRING", PGSQL_STATUS_STRING, CONST_CS | CONST_PERSISTENT);
+	/* For pg_result_status() return value */
 	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_CS | CONST_PERSISTENT);
@@ -2657,25 +2660,36 @@ PHP_FUNCTION(pg_get_result)
 }
 /* }}} */
 
-/* {{{ proto int pg_result_status(resource result)
+/* {{{ proto int pg_result_status(resource result[, long result_type])
    Get status of query result */
 PHP_FUNCTION(pg_result_status)
 {
 	zval *result;
+	long result_type = PGSQL_STATUS_LONG;
 	ExecStatusType status;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
-							  &result) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
+							  &result, &result_type) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
 
 	pgsql_result = pg_result->result;
-	status = PQresultStatus(pgsql_result);
-	RETURN_LONG((int)status);
+	if (result_type == PGSQL_STATUS_LONG) {
+		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
+	}
+	else if (result_type == PGSQL_STATUS_STRING) {
+		status = PQresultStatus(pgsql_result);
+		RETURN_LONG((int)status);
+	}
+	else {
+		php_error(E_WARNING, "%s() expects optional 2nd parameter to be PGSQL_STATUS_LONG or PGSQL_STATUS_STRING",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
