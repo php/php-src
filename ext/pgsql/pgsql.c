@@ -1564,8 +1564,10 @@ PHP_FUNCTION(pg_last_oid)
 	zval **result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
+#ifdef HAVE_PQOIDVALUE
 	Oid oid;
-	
+#endif
+
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
