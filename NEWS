@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Fixed safe_mode_protected_env_vars INI directive (Zeev)
 - Fixed getrusage() (Sascha)
 - Fixed OCI8 crash when returning cursors from stored-procedures. (Thies)
 

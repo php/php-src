@@ -341,7 +341,7 @@ static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("safe_mode_sm_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
+	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
 	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",		SAFE_MODE_ALLOWED_ENV_VARS,		PHP_INI_SYSTEM,		OnUpdateSafeModeAllowedEnvVars,			NULL)
 PHP_INI_END()
 
