@@ -25,10 +25,10 @@
 
 #ifdef TSRM_WIN32
 #include <windows.h>
+
 typedef struct {
 	FILE *stream;
 	HANDLE prochnd;
-	int inuse;
 } ProcessPair;
 
 typedef struct {
