@@ -340,8 +340,8 @@ function_entry basic_functions[] = {
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
 	PHP_FE(call_user_func_array,                    NULL)
-	PHP_FE(call_user_method,						NULL)
-	PHP_FE(call_user_method_array,                  NULL)
+	PHP_FE(call_user_method,						second_arg_force_ref)
+	PHP_FE(call_user_method_array,                  second_arg_force_ref)
 
 	PHP_FE(var_dump,								NULL)
 	PHP_FE(serialize,								first_arg_allow_ref)
@@ -1651,8 +1651,8 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_method(string method_name, object object [, mixed parameter] [, mixed ...])
-   Call a user method, on a specific object where the first argument is the method name, the second argument is the object and the subsequent arguments are the parameters */
+/* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
+   Call a user method on a specific object or class */
 PHP_FUNCTION(call_user_method)
 {
 	pval ***params;
@@ -1675,7 +1675,6 @@ PHP_FUNCTION(call_user_method)
 		RETURN_FALSE;
 	}
 	SEPARATE_ZVAL(params[0]);
-	SEPARATE_ZVAL(params[1]);
 	convert_to_string(*params[0]);
 	if (call_user_function_ex(CG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 1, NULL)==SUCCESS
 		&& retval_ptr) {
@@ -1687,8 +1686,8 @@ PHP_FUNCTION(call_user_method)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_method_array(object obj, string methodname, array params)
-   Call a user method using a parameter array */
+/* {{{ proto mixed call_user_method_array(string method_name, mixed object, array params)
+   Call a user method on a specific object or class using a parameter array */
 PHP_FUNCTION(call_user_method_array)
 {
 	zval **method_name,
@@ -1705,9 +1704,15 @@ PHP_FUNCTION(call_user_method_array)
         zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
+
+	if (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING) {
+		php_error(E_WARNING,"2nd argument is not an object or class name\n");
+		RETURN_FALSE;
+	}
+
+	SEPARATE_ZVAL(method_name);
+	SEPARATE_ZVAL(params);
 	convert_to_string_ex(method_name);
-	if (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING)
-		convert_to_object_ex(obj);
 	convert_to_array_ex(params);
 
     params_ar = HASH_OF(*params);
