@@ -9,7 +9,11 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
     AIX) ac_solid_os=a3x;;   # a4x for AIX4
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
     IRIX) ac_solid_os=irx;;
-    Linux) ac_solid_os=lux;; # this is only valid for libc5 systems, use 'l2x' for glibc2 systems
+    Linux) if ldd -v /bin/sh | grep GLIHC > /dev/null; then
+		ac_solid_os=l2x
+	else
+		ac_solid_os=lux
+	fi;; 
     SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
     FreeBSD) if [$ac_solid_uname_r < "3."]; then
         ac_solid_os=fbx
