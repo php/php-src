@@ -21,6 +21,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #21228 (broken check for ob_gzhandler) & made ob_start() return
   the correct value. (Ilia)
 - Fixed bug #21268 (session_decode() returned FALSE on success). (Ilia)
+- Fixed bug #21442 (crash in mail() on Windows when the first parameter
+  is empty). (Edin)
 
 27 Dec 2002, Version 4.3.0
 - If you don't specify building any other SAPI "make install" will install the
