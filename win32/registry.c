@@ -70,7 +70,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 				RegEnumValue(hKey, i, namebuf, &namebuf_len, NULL, &lType, valuebuf, &valuebuf_len);
 
 				if ((lType == REG_SZ) || (lType == REG_EXPAND_SZ)) {
-					zend_alter_ini_entry(namebuf, namebuf_len + 1, valuebuf, valuebuf_len, PHP_INI_PERDIR, PHP_INI_STAGE_ACTIVATE);
+					zend_alter_ini_entry(namebuf, namebuf_len + 1, valuebuf, valuebuf_len, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 				}
 
 				i++;
