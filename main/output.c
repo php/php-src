@@ -337,32 +337,47 @@ static int php_ub_body_write(const char *str, uint str_length)
  */
 
 
+/* {{{ proto void ob_start()
+   Turn on Output Buffering */
 PHP_FUNCTION(ob_start)
 {
 	php_start_ob_buffering();
 }
+/* }}} */
 
 
+/* {{{ proto void ob_end_flush()
+   Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
 	php_end_ob_buffering(1);
 }
+/* }}} */
 
 
+/* {{{ proto void ob_end_clean()
+   Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
 	php_end_ob_buffering(0);
 }
+/* }}} */
 
 
+/* proto string ob_get_contents()
+   Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
 	if (php_ob_get_buffer(return_value)==FAILURE) {
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 
+/* proto void ob_implicit_flush([flag])
+   Turn implicit flush on/off
+   Implicit flush is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
 {
 	zval **zv_flag;
@@ -389,6 +404,7 @@ PHP_FUNCTION(ob_implicit_flush)
 		php_end_implicit_flush();
 	}
 }
+/* }}} */
 
 
 PHPAPI char *php_get_output_start_filename()
