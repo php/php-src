@@ -74,7 +74,7 @@ typedef char ICHAR;
 
 #include "xmltok.h"
 #include "xmlrole.h"
-#include "hashtable.h"
+#include "expat_hashtable.h"
 
 #define INIT_TAG_BUF_SIZE 32  /* must be a multiple of sizeof(XML_Char) */
 #define INIT_DATA_BUF_SIZE 1024
