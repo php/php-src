@@ -304,6 +304,12 @@ class PEAR_Frontend_CLI extends PEAR
         }
         for ($i = 0; $i < sizeof($table_data); $i++) {
             extract($table_data[$i]);
+            if (!is_array($rowparams)) {
+                $rowparams = array();
+            }
+            if (!is_array($colparams)) {
+                $colparams = array();
+            }
             $rowlines = array();
             if ($height > 1) {
                 for ($c = 0; $c < sizeof($data); $c++) {
@@ -357,8 +363,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function outputData($data, $command = '_default')
     {
-        switch ($command)
-        {
+        switch ($command) {
             case 'install':
             case 'upgrade':
             case 'upgrade-all':
@@ -371,13 +376,14 @@ class PEAR_Frontend_CLI extends PEAR
                     $this->_tableRow(array($data['release_warnings']), null, array(1 => array('wrap' => 55)));
                     $this->_endTable();
                     $this->_displayLine('');
-                };
+                }
                 $this->_displayLine($data['data']);
                 break;
             case 'search':
                 $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline']))
+                if (isset($data['headline']) && is_array($data['headline'])) {
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                }
 
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
@@ -388,8 +394,9 @@ class PEAR_Frontend_CLI extends PEAR
                 break;
             case 'list-all':
                 $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline']))
+                if (isset($data['headline']) && is_array($data['headline'])) {
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                }
 
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
@@ -436,8 +443,7 @@ class PEAR_Frontend_CLI extends PEAR
                         ),
                     );
             default: {
-                if (is_array($data))
-                {
+                if (is_array($data)) {
                     $this->_startTable($data);
                     $count = count($data['data'][0]);
                     if ($count == 2) {
@@ -445,7 +451,7 @@ class PEAR_Frontend_CLI extends PEAR
                                       1 => array('wrap' => 48)
                         );
                     } elseif ($count == 3) {
-                        $opts = array(0 => array('wrap' => 20),
+                        $opts = array(0 => array('wrap' => 30),
                                       1 => array('wrap' => 20),
                                       2 => array('wrap' => 35)
                         );
