@@ -118,7 +118,7 @@ struct _zend_op_array {
 	char *function_name;		/* MUST be the third element of this struct! */
 	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
 	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
-	zend_namespace *namespace;
+	zend_namespace *ns;
 
 	zend_uint *refcount;
 
@@ -154,7 +154,7 @@ typedef struct _zend_internal_function {
 	char *function_name;		/* MUST be the third element of this struct! */
 	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
 	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
-	zend_namespace *namespace;
+	zend_namespace *ns;
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
@@ -170,7 +170,7 @@ typedef union _zend_function {
 		char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
-		zend_namespace *namespace;
+		zend_namespace *ns;
 	} common;
 	
 	zend_op_array op_array;

@@ -78,7 +78,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->arg_types = NULL;
 
 	op_array->scope = NULL;
-	op_array->namespace = NULL;
+	op_array->ns = NULL;
 
 	op_array->brk_cont_array = NULL;
 	op_array->last_brk_cont = 0;
