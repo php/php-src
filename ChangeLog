@@ -1,3 +1,33 @@
+2000-08-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/storage.php
+      pear/PEAR.php.in: * renamed toString method to __string_value
+
+2000-08-28  Andi Gutmans  <andi@php.net>
+
+    * sapi/isapi/php4isapi.c: - Change spaces to tab
+
+2000-08-28  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - updated on new zend_api
+
+    * ext/hyperwave/hw.c: - fixed prototyp
+
+2000-08-28  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/php_apache.c
+      sapi/aolserver/aolserver.c: Missed a couple of center attributes
+
+2000-08-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/DB::factory.phpt
+      pear/tests/DB::parseDSN.phpt
+      pear/tests/DB_factory.phpt
+      pear/tests/DB_parseDSN.phpt:
+    I said I had not _tested_ this on windows, didn't I? :-)
+
 2000-08-27  Sterling Hughes  <stirling@bestweb.net>
 
     * ext/curl/curl.c
