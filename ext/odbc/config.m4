@@ -169,6 +169,7 @@ AC_ARG_WITH(ibm-db2,
 [  --with-ibm-db2[=DIR]    Include IBM DB2 support.  DIR is the DB2 base
                           install directory, defaults to /home/db2inst1/sqllib],
 [
+  PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
         ODBC_INCDIR=/home/db2inst1/sqllib/include
