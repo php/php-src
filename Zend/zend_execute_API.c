@@ -181,6 +181,8 @@ void init_executor(TSRMLS_D)
 void shutdown_executor(TSRMLS_D)
 {
 	zend_try {
+		zend_objects_call_destructors(&EG(objects) TSRMLS_CC);
+
 		zend_ptr_stack_destroy(&EG(arg_types_stack));
 				
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {

@@ -27,7 +27,7 @@ void zend_objects_destroy(zend_objects *objects)
 	efree(objects->object_buckets);
 }
 
-static inline void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+static inline void zend_objects_call_destructor(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	if (object->ce->destructor) {
 		zval *obj;
@@ -57,12 +57,32 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 		zval_ptr_dtor(&destructor_func_name);
 		zval_ptr_dtor(&retval_ptr);
 	}
+}
 
+
+static inline void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+{
+	zend_objects_call_destructor(object, handle TSRMLS_CC);
 	/* Nuke the object */
 	zend_hash_destroy(object->properties);
 	efree(object->properties);
 	
 }
+
+
+void zend_objects_call_destructors(zend_objects *objects TSRMLS_DC)
+{
+	int i = 1;
+
+	for (i = 0; i < objects->top ; i++) {
+		if (EG(objects).object_buckets[i].valid) {
+			EG(objects).object_buckets[i].constructor_called = 1;
+			zend_objects_destroy_object(&EG(objects).object_buckets[i].bucket.obj.object, i TSRMLS_CC);
+			EG(objects).object_buckets[i].valid = 0;
+		}
+	}
+}
+
 
 zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
 {
