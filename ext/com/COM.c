@@ -2209,7 +2209,7 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 				SysFreeString(bstr_ids);
 
 				/* Before registering the contsnt, let's see if we can find it */
-				if (zend_get_constant(c.name, c.name_len-1, &exists TSRMLS_CC)) {
+				if (zend_get_constant(c.name, c.name_len - 1, &exists TSRMLS_CC)) {
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
 					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose")) {
@@ -2221,10 +2221,6 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 				}
 
 				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, codepage TSRMLS_CC);
-				if (mode & CONST_PERSISTENT) {
-					zval_persist(&c.value TSRMLS_CC);
-					mode |= CONST_EFREE_PERSISTENT;
-				}
 				c.flags = mode;
 
 				zend_register_constant(&c TSRMLS_CC);
