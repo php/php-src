@@ -108,6 +108,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_secure",		"",				PHP_INI_ALL, OnUpdateBool,		cookie_secure,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",		"1",			PHP_INI_ALL, OnUpdateBool,			use_cookies,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateString,		extern_referer_chk,	php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateString,		entropy_file,		php_ps_globals,	ps_globals)
@@ -717,6 +718,7 @@ static int php_session_cache_limiter(PSLS_D)
 #define COOKIE_EXPIRES	"; expires="
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
+#define COOKIE_SECURE	"; secure"
 
 static void php_session_send_cookie(PSLS_D)
 {
@@ -746,6 +748,10 @@ static void php_session_send_cookie(PSLS_D)
 		len += sizeof(COOKIE_EXPIRES) + strlen(date_fmt);
 	}
 
+	if(PS(cookie_secure)) {
+		len += sizeof(COOKIE_SECURE);
+	}
+
 	pathlen = strlen(PS(cookie_path));
 	if (pathlen > 0)
 		len += pathlen + sizeof(COOKIE_PATH);
@@ -772,6 +778,10 @@ static void php_session_send_cookie(PSLS_D)
 	if (domainlen > 0) {
 		strcat(cookie, COOKIE_DOMAIN);
 		strcat(cookie, PS(cookie_domain));
+	}
+
+	if (PS(cookie_secure)) {
+		strcat(cookie, COOKIE_SECURE);
 	}
 
 	sapi_add_header(cookie, strlen(cookie), 0);
@@ -958,18 +968,18 @@ static zend_bool php_session_destroy(PSLS_D)
 }
 
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain]])
+/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure]]])
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
-    zval **lifetime, **path, **domain;
+    zval **lifetime, **path, **domain, **secure;
 	PSLS_FETCH();
 
 	if (!PS(use_cookies))
 		return;
 
-    if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain) == FAILURE)
+    if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain, &secure) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	convert_to_long_ex(lifetime);
@@ -982,6 +992,10 @@ PHP_FUNCTION(session_set_cookie_params)
 		if (ZEND_NUM_ARGS() > 2) {
 			convert_to_string_ex(domain);
 			php_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), Z_STRVAL_PP(domain), Z_STRLEN_PP(domain), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			if (ZEND_NUM_ARGS() > 3) {
+				convert_to_long_ex(secure);
+				php_alter_ini_entry("session.cookie_secure", sizeof("session.cookie_secure"), Z_BVAL_PP(secure)?"1":"0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			}
 		}
 	}
 }
@@ -1005,6 +1019,7 @@ PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
 	add_assoc_string(return_value, "path", PS(cookie_path), 1);
 	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
+	add_assoc_bool(return_value, "secure", PS(cookie_secure));
 }
 /* }}} */
 

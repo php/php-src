@@ -81,6 +81,7 @@ typedef struct {
 	long cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
+    zend_bool  cookie_secure;
 	ps_module *mod;
 	void *mod_data;
 	HashTable vars;
