@@ -214,8 +214,10 @@ struct _zend_executor_globals {
 	zval *garbage[2];
 	int garbage_ptr;
 
+	int user_error_handler_error_reporting;
 	zval *user_error_handler;
 	zval *user_exception_handler;
+	zend_stack user_error_handlers_error_reporting;
 	zend_ptr_stack user_error_handlers;
 	zend_ptr_stack user_exception_handlers;
 

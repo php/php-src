@@ -934,19 +934,20 @@ ZEND_FUNCTION(trigger_error)
 /* }}} */
 
 
-/* {{{ proto string set_error_handler(string error_handler)
+/* {{{ proto string set_error_handler(string error_handler [, int error_types])
    Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
-	zval **error_handler;
+	zval *error_handler;
 	zend_bool had_orig_error_handler=0;
 	char *error_handler_name = NULL;
+	long error_type = E_ALL;
  
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &error_handler)==FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
+		return;
 	}
 
-	if (!zend_is_callable(*error_handler, 0, &error_handler_name)) {
+	if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
 		zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
 				   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
 		efree(error_handler_name);
@@ -958,17 +959,19 @@ ZEND_FUNCTION(set_error_handler)
 		had_orig_error_handler = 1;
 		*return_value = *EG(user_error_handler);
 		zval_copy_ctor(return_value);
+		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
 		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
 	}
 	ALLOC_ZVAL(EG(user_error_handler));
 
-	if (!zend_is_true(*error_handler)) { /* unset user-defined handler */
+	if (!zend_is_true(error_handler)) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_error_handler));
 		EG(user_error_handler) = NULL;
 		RETURN_TRUE;
 	}
 
-	*EG(user_error_handler) = **error_handler;
+	EG(user_error_handler_error_reporting) = (int)error_type;
+	*EG(user_error_handler) = *error_handler;
 	zval_copy_ctor(EG(user_error_handler));
 
 	if (!had_orig_error_handler) {
@@ -988,6 +991,8 @@ ZEND_FUNCTION(restore_error_handler)
 	if (zend_ptr_stack_num_elements(&EG(user_error_handlers))==0) {
 		EG(user_error_handler) = NULL;
 	} else {
+		EG(user_error_handler_error_reporting) = zend_stack_int_top(&EG(user_error_handlers_error_reporting));
+		zend_stack_del_top(&EG(user_error_handlers_error_reporting));
 		EG(user_error_handler) = zend_ptr_stack_pop(&EG(user_error_handlers));
 	}
 	RETURN_TRUE;
