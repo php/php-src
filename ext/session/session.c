@@ -169,14 +169,9 @@ typedef struct {
 #define STR_CAT(P,S,I) {\
 	pval *__p = (P);\
 	size_t __l = (I);\
-		ulong __i = Z_STRLEN_P(__p);\
-		Z_STRLEN_P(__p) += __l;\
-		if (Z_STRVAL_P(__p)) {\
-			Z_STRVAL_P(__p) = (char *)erealloc(Z_STRVAL_P(__p), Z_STRLEN_P(__p) + 1);\
-		} else {\
-			Z_STRVAL_P(__p) = emalloc(Z_STRLEN_P(__p) + 1);\
-				*Z_STRVAL_P(__p) = 0;\
-		}\
+	ulong __i = Z_STRLEN_P(__p);\
+	Z_STRLEN_P(__p) += __l;\
+	Z_STRVAL_P(__p) = (char *)erealloc(Z_STRVAL_P(__p), Z_STRLEN_P(__p) + 1);\
 	memcpy(Z_STRVAL_P(__p) + __i, (S), __l); \
 	Z_STRVAL_P(__p)[Z_STRLEN_P(__p)] = '\0'; \
 }
