@@ -1,3 +1,18 @@
+2005-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      - Support statuc methods/functions
+
+2005-03-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      zend_language_scanner.l:
+      MFH: - Fixed bug #31672 (</script> not considered closing tag if
+      MFH:   preceded by one-line comment)
+
+    * zend_language_scanner.l:
+      Fix the fix for one line comments with <script..> </script> tags
+
 2005-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:

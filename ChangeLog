@@ -1,3 +1,115 @@
+2005-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      - Support statuc methods/functions
+
+2005-03-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.c:
+      touch
+
+2005-03-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/microtime.c
+      ext/standard/microtime.c:
+      MFH: Fixed bug #31792 (getrusage() does not provide ru_nswap value).
+
+    * ext/standard/microtime.c:
+      Fixed bug #31792 (getrusage() does not provide ru_nswap value).
+
+2005-03-01  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * pear/Console/Getopt.php
+      pear/Console/Getopt.php
+      pear/Console/Getopt.php:
+      Allow = sign in long option argument.
+      Fixes PEAR bug #1831.
+
+2005-03-01  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/string.c
+      ext/standard/string.c:
+      NetWare allows directory seperator as \ and /
+
+2005-03-01  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/image.c:
+      Handle last or broken JP2 boxes correctly.
+
+2005-03-01  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gmp/gmp.c:
+      MFH: checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
+      and gmp_fact() to prevent SIGFPE
+      changed zend_error() to php_error_docref()
+
+    * (PHP_5_0)
+      NEWS
+      ext/gmp/gmp.c:
+      MFH: checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
+      and gmp_fact() to prevent SIGFPE
+
+    * ext/gmp/gmp.c:
+      fix SIGFPE in gmp_powm(), gmp_sqrt() & gmp_sqrtrem() when using negative
+      values
+      do not allow negative value to be passed to gmp_fact()
+
+2005-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      - MFB
+
+    * (PHP_5_0)
+      ext/standard/image.c:
+      - Fix warning
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+2005-03-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      update
+
+    * scripts/Makefile.frag:
+      ws
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_language_scanner.l
+      tests/basic/bug31672.phpt:
+      MFH: - Fixed bug #31672 (</script> not considered closing tag if
+      MFH:   preceded by one-line comment
+
+    * tests/basic/bug31672.phpt
+      tests/basic/bug31672.phpt
+      tests/basic/bug31672.phpt:
+        1.1.4;
+      file bug31672.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_language_scanner.l:
+      MFH: - Fixed bug #31672 (</script> not considered closing tag if
+      MFH:   preceded by one-line comment)
+
+    * ZendEngine2/zend_language_scanner.l:
+      Fix the fix for one line comments with <script..> </script> tags
+
+2005-03-01  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Change comment: Syntax highlighter uses <span> instead of <font>
+
 2005-02-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * php.ini-dist
