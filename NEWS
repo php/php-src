@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Declared <?php_track_vars?> officially dead.  It didn't work in PHP 4.0.0
+  either, but now it's gone for good (Zeev)
 - Make convert_cyr_string() binary safe and stop it from corrupting other
   PHP variables. (Andi)
 - Added functions array_unique, array_intersect and array_diff (Stig Venaas)
