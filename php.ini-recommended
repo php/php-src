@@ -81,7 +81,7 @@
 engine = On
 
 ; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
-short_open_tag = On
+short_open_tag = Off
 
 ; Allow ASP-style <% %> tags.
 asp_tags = Off
