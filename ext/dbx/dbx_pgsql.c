@@ -236,6 +236,7 @@ int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNA
     /* returns array[0..columncount-1] as strings on success or 0 
 	   as long on failure */
     int number_of_arguments=2;
+	int save_error_reporting=0;
     zval ** arguments[2];
     zval * zval_row=NULL;
     zval * returned_zval=NULL;
@@ -250,7 +251,14 @@ int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNA
 		return 0;
 	}
 */
+	if (EG(error_reporting) & E_WARNING){
+		save_error_reporting = EG(error_reporting);
+		EG(error_reporting) &= ~E_WARNING;
+	}
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fetch_array", &returned_zval, number_of_arguments, arguments);
+	if (save_error_reporting) {
+		EG(error_reporting) = save_error_reporting;
+	}
     if (!returned_zval || returned_zval->type!=IS_ARRAY) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         FREE_ZVAL(zval_row);

@@ -533,8 +533,6 @@ PHP_FUNCTION(pg_close)
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	printf("\npg_close %d\n",id);
-
 	if (id==-1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(pgsql_link));
 	}
