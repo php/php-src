@@ -2591,11 +2591,10 @@ PHP_FUNCTION(imagefilledpolygon)
 
 /* {{{ php_find_gd_font
  */
-static gdFontPtr php_find_gd_font(int size)
+static gdFontPtr php_find_gd_font(int size TSRMLS_DC)
 {
 	gdFontPtr font;
 	int ind_type;
-	TSRMLS_FETCH();
 
 	switch (size) {
 		case 1:
@@ -2644,7 +2643,7 @@ static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 
 	convert_to_long_ex(SIZE);
 
-	font = php_find_gd_font(Z_LVAL_PP(SIZE));
+	font = php_find_gd_font(Z_LVAL_PP(SIZE) TSRMLS_CC);
 	RETURN_LONG(arg ? font->h : font->w);
 }
 /* }}} */
@@ -2730,7 +2729,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	x = Z_LVAL_PP(X);
 	size = Z_LVAL_PP(SIZE);
 
-	font = php_find_gd_font(size);
+	font = php_find_gd_font(size TSRMLS_CC);
 
 	switch (mode) {
 		case 0:
