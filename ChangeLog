@@ -1,3 +1,209 @@
+2002-04-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dio/dio.c: allocate space for NUL
+
+2002-04-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/recode/recode.c: - initialize globals properly
+
+2002-04-20  jim winstead  <jimw@apache.org>
+
+    * ext/gd/config.m4:
+    include the checks for various support libraries to --with-gd=php section. the
+    libgd stuff needs some additional checks to handle the presence/absence of
+    things like libpng, but this helps when most things are included.
+
+    * ext/gd/config.m4: s/.o/.c/
+
+2002-04-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dio/dio.c: realloc buffer down
+
+2002-04-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * README.TESTING: Removed for consistency with current build system.
+
+2002-04-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mbstring/config.m4:
+    If I don't want mbstring, I also don't want this transparent encoding
+    thingee which caused an undefined reference in main.o.
+
+2002-04-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mailparse/README:
+    The PECL version probably will not compile with PHP 4.2 unless they
+    check it out on the branch.
+    I have a tarball ready-to-go from my site, so add a not about it.
+
+2002-04-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/large_object.inc
+      ext/pgsql/pgsql.c:
+    Make pg_lo_import()/pg_lo_unlink()/pg_lo_open()/pg_lo_export() work with oid larger than 2^31.
+
+2002-04-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mailparse/.cvsignore
+      ext/mailparse/CREDITS
+      ext/mailparse/EXPERIMENTAL
+      ext/mailparse/README: - Fix mailparse dir for release
+
+    * main/php_version.h
+      configure.in: - Update version numbers
+
+    * configure.in
+      main/php_version.h: Go with 4.2.0
+
+    * ext/mailparse/.cvsignore: MFH: Missing .cvsignore file
+
+    * ext/mailparse/.cvsignore: - Add missing .cvsignore
+
+2002-04-20  Sander Roobol  <phy@wanadoo.nl>
+
+    * .cvsignore: Another .cvsignore update
+
+    * sapi/webjames/.cvsignore
+      sapi/servlet/.cvsignore
+      sapi/thttpd/.cvsignore
+      sapi/tux/.cvsignore
+      sapi/pi3web/.cvsignore
+      sapi/roxen/.cvsignore
+      sapi/isapi/.cvsignore
+      sapi/nsapi/.cvsignore
+      sapi/phttpd/.cvsignore
+      sapi/fastcgi/.cvsignore
+      sapi/fhttpd/.cvsignore
+      sapi/cgi/.cvsignore
+      sapi/cli/.cvsignore
+      sapi/apache/.cvsignore
+      sapi/apache2filter/.cvsignore
+      sapi/caudium/.cvsignore
+      sapi/.cvsignore
+      sapi/aolserver/.cvsignore
+      regex/.cvsignore
+      pear/scripts/.cvsignore
+      ext/yp/.cvsignore
+      ext/zip/.cvsignore
+      ext/zlib/.cvsignore
+      ext/xslt/.cvsignore
+      ext/yaz/.cvsignore
+      ext/xmlrpc/libxmlrpc/.cvsignore
+      ext/xml/expat/.cvsignore
+      ext/xmlrpc/.cvsignore
+      ext/wddx/.cvsignore
+      ext/xml/.cvsignore
+      ext/tokenizer/.cvsignore
+      ext/vpopmail/.cvsignore
+      ext/w32api/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sockets/.cvsignore
+      ext/standard/.cvsignore
+      ext/swf/.cvsignore
+      ext/snmp/.cvsignore
+      ext/session/.cvsignore
+      ext/shmop/.cvsignore
+      ext/skeleton/.cvsignore
+      ext/qtdom/.cvsignore
+      ext/readline/.cvsignore
+      ext/recode/.cvsignore
+      ext/pgsql/.cvsignore
+      ext/posix/.cvsignore
+      ext/pspell/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pfpro/.cvsignore
+      ext/pcntl/.cvsignore
+      ext/pcre/.cvsignore
+      ext/overload/.cvsignore
+      ext/ovrimos/.cvsignore
+      ext/oracle/.cvsignore
+      ext/odbc/.cvsignore
+      ext/openssl/.cvsignore
+      ext/oci8/.cvsignore
+      ext/notes/.cvsignore
+      ext/ncurses/.cvsignore
+      ext/mssql/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mysql/libmysql/.cvsignore
+      ext/msession/.cvsignore
+      ext/msql/.cvsignore
+      ext/mnogosearch/.cvsignore
+      ext/mime_magic/.cvsignore
+      ext/ming/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mhash/.cvsignore
+      ext/ldap/.cvsignore
+      ext/mbstring/.cvsignore
+      ext/mcal/.cvsignore
+      ext/ircg/.cvsignore
+      ext/java/.cvsignore
+      ext/ingres_ii/.cvsignore
+      ext/interbase/.cvsignore
+      ext/imap/.cvsignore
+      ext/informix/.cvsignore
+      ext/icap/.cvsignore
+      ext/iconv/.cvsignore
+      ext/gmp/.cvsignore
+      ext/hyperwave/.cvsignore
+      ext/gettext/.cvsignore
+      ext/fribidi/.cvsignore
+      ext/ftp/.cvsignore
+      ext/gd/.cvsignore
+      ext/fbsql/.cvsignore
+      ext/fdf/.cvsignore
+      ext/filepro/.cvsignore
+      ext/dbx/.cvsignore
+      ext/dio/.cvsignore
+      ext/domxml/.cvsignore
+      ext/exif/.cvsignore
+      ext/dbase/.cvsignore
+      ext/dbplus/.cvsignore
+      ext/db/.cvsignore
+      ext/dba/.cvsignore
+      ext/curl/.cvsignore
+      ext/cybercash/.cvsignore
+      ext/cybermut/.cvsignore
+      ext/cyrus/.cvsignore
+      ext/crack/.cvsignore
+      ext/ctype/.cvsignore
+      ext/com/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/bz2/.cvsignore
+      ext/calendar/.cvsignore
+      ext/ccvs/.cvsignore
+      ext/.cvsignore
+      ext/aspell/.cvsignore
+      ext/bcmath/.cvsignore:
+    Removed makefiles from most .cvsignores and some minor cleanups.
+
+    * ext/gd/libgd/.cvsignore: Added missing .cvsignore
+
+2002-04-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Added comment to fix large OID value handling later.
+    Fixed wrong conversion specifiers.
+
+    * ext/pgsql/pgsql.c: Added missing 'd'.
+
+    * ext/pgsql/pgsql.c: Some cleanup.
+    More OID range related fixes.
+
+    * ext/pgsql/pgsql.c: Fixed OID overflow. If value is larger than MAX_LONG,
+    pg_last_oid() returns string to keep correct value.
+
+    * ext/pgsql/php_pgsql.h: Added API version for C programs
+
+    * ext/pgsql/pgsql.c: Remove warnings.
+    Fixed OID overflow bug.
+    Fixed type convertion bug.
+
+2002-04-20  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: We call them "extension"..and again, missing period. :-p
+
 2002-04-19  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/xslt/sablot.c: throw a warning if encoding support not available...
