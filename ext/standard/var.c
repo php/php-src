@@ -16,7 +16,7 @@
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
- */
+*/
 
 /* $Id$ */
 
@@ -263,9 +263,8 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 									continue;
 								}
 
-								php_var_serialize(buf, name, NULL);
-								
 								if (zend_hash_find((*struc)->value.obj.properties,(*name)->value.str.val,(*name)->value.str.len+1,(void*)&d) == SUCCESS) {
+									php_var_serialize(buf, name, NULL);
 									php_var_serialize(buf,d,var_hash);	
 								}
 							}
