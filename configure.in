@@ -1040,7 +1040,7 @@ cat <<X
 | Notice:                                                            |
 | If you encounter <defunc> processes when using a local Oracle-DB   |
 | please recompile PHP and specify --enable-sigchild when configuring|
-| (This problem has been reported un Linux using Oracle >= 8.1.5)    |
+| (This problem has been reported under Linux using Oracle >= 8.1.5) |
 X
     fi
   fi
