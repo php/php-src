@@ -1,3 +1,30 @@
+2002-02-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix.
+
+2002-02-15  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Fix parse string
+    (Since arg6 is initialized at null this still catches the wrong param condition)
+
+2002-02-15  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    fix for bug 15516, patch submitted by torben@php.net
+
+2002-02-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c: - Make the errorcode 255. (Doing docs right away)
+
+2002-02-15  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/config.m4: Fix problem with sesssion_pgsql module
+
+2002-02-15  Sean Bright  <elixer@erols.com>
+
+    * ext/xslt/config.m4: Fix cosmetic bug. (#15142)
+
 2002-02-14  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * sapi/cgi/cgi_main.c
