@@ -41,6 +41,7 @@ typedef struct {
 	int fd;
 	char *lastkey;
 	char *basedir;
+	int dirdepth;
 } ps_files;
 
 
@@ -54,11 +55,16 @@ ps_module ps_mod_files = {
 PS_OPEN_FUNC(files)
 {
 	ps_files *data;
+	char *p;
 
 	data = ecalloc(sizeof(*data), 1);
 	*mod_data = data;
 
 	data->fd = -1;
+	if((p = strchr(save_path, ':'))) {
+		data->dirdepth = strtol(save_path, NULL, 10);
+		save_path = p + 1;
+	}
 	data->basedir = estrdup(save_path);
 	
 	return SUCCESS;
@@ -77,17 +83,38 @@ PS_CLOSE_FUNC(files)
 	return SUCCESS;
 }
 
+#if WIN32|WINNT
+#define DIR_DELIMITER '\\'
+#else
+#define DIR_DELIMITER '/'
+#endif
+
 static void _ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
-	
+	const char *p;
+	int i;
+	int n;
+	int keylen;
+
 	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if(data->lastkey) efree(data->lastkey);
 		if(data->fd > -1) close(data->fd);
+
+		keylen = strlen(key);
+		if(keylen <= data->dirdepth || MAXPATHLEN < 
+				(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5)) 
+			return;
+		p = key;
+		n = sprintf(buf, "%s/", data->basedir);
+		for(i = 0; i < data->dirdepth; i++) {
+			buf[n++] = *p++;
+			buf[n++] = DIR_DELIMITER;
+		}
+		strcat(buf, p);
 		
 		data->lastkey = estrdup(key);
 		
-		snprintf(buf, MAXPATHLEN, "%s/%s", data->basedir, key);
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
 		if(data->fd > -1) {
 			flock(data->fd, LOCK_EX);
@@ -151,5 +178,6 @@ PS_DELETE_FUNC(files)
 
 PS_GC_FUNC(files) 
 {
+	
 	return SUCCESS;
 }
