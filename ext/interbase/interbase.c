@@ -19,10 +19,6 @@
 
 /* $Id$ */
 
-
-/* TODO: Arrays, roles?
-A lot... */
-
 /*
 	Changes:
 		2003-08-05: Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>
@@ -139,6 +135,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_modify_user, NULL)
 	PHP_FE(ibase_delete_user, NULL)
 #endif
+	PHP_FE(ibase_wait_event, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -3798,6 +3795,117 @@ PHP_FUNCTION(ibase_delete_user)
 }
 /* }}} */
 #endif /* SQL_DIALECT_V6 */
+
+/* {{{ _php_ibase_event_block() */
+static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count, char **events, 
+	unsigned short *l, char **event_buf, char **result_buf)
+{
+	ISC_STATUS dummy_result[20];
+
+	/**
+	 * Unfortunately, there's no clean and portable way in C to pass arguments to 
+	 * a variadic function if you don't know the number of arguments at compile time.
+	 * (And even if there were a way, the Interbase API doesn't provide a version of
+	 * this function that takes a va_list as an argument)
+	 *
+	 * In this case, the number of arguments is limited to 18 by the underlying API,
+	 * so we can work around it.
+	 */
+
+	*l = (unsigned short) isc_event_block(event_buf, result_buf, count, events[0], 
+		events[1], events[2], events[3], events[4], events[5], events[6], events[7], 
+		events[8], events[9], events[10], events[11], events[12], events[13], events[14]);
+
+	/**
+	 * Currently, this is the only way to correctly initialize an event buffer.
+	 * This is clearly something that should be fixed, cause the semantics of
+	 * isc_wait_for_event() indicate that it blocks until an event occurs.
+	 * If the Firebird people ever fix this, these lines should be removed,
+	 * otherwise, events will have to fire twice before ibase_wait_event() returns.
+	 */
+
+	isc_wait_for_event(dummy_result, &ib_link->handle, *l, *event_buf, *result_buf);
+	isc_event_counts(dummy_result, *l, *event_buf, *result_buf);
+}
+/* }}} */
+
+/* {{{	_php_ibase_event_free() */
+static void _php_ibase_event_free(char *event_buf, char *result_buf)
+{
+	isc_free(event_buf);
+	isc_free(result_buf);
+}
+/* }}} */
+
+/* {{{ proto string ibase_wait_event([resource link,] string event [, string event [, ...]])
+   Waits for any one of the passed Interbase events to be posted by the database, and returns its name */
+PHP_FUNCTION(ibase_wait_event)
+{
+	zval ***args;
+	ibase_db_link *ib_link;
+	char *event_buffer, *result_buffer, *events[15];
+	unsigned short i = 0, event_count = 0, buffer_size;
+	ISC_STATUS occurred_event[15];
+	
+	RESET_ERRMSG;
+
+	/* no more than 15 events */
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 16) {
+		WRONG_PARAM_COUNT;
+	}
+
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_PP(args[0]) == IS_RESOURCE) {
+
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink);
+		i = 1;
+
+	} else if (ZEND_NUM_ARGS() > 15) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}				
+
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+		
+	for (; i < ZEND_NUM_ARGS(); ++i) {
+		convert_to_string_ex(args[i]);
+		events[event_count++] = Z_STRVAL_PP(args[i]);
+	}
+
+	/* fills the required data structure with information about the events */
+	_php_ibase_event_block(ib_link, event_count, events, &buffer_size, &event_buffer, &result_buffer);
+
+	/* now block until an event occurs */
+	if (isc_wait_for_event(IB_STATUS, &ib_link->handle, buffer_size, event_buffer, result_buffer)) {
+		_php_ibase_error(TSRMLS_C);
+		_php_ibase_event_free(event_buffer,result_buffer);
+		efree(args);
+		RETURN_FALSE;
+	}
+	
+	/* find out which event occurred */
+	isc_event_counts(occurred_event, buffer_size, event_buffer, result_buffer);
+	for (i = 0; i < event_count; ++i) {
+		if (occurred_event[i]) {
+			char *result = estrdup(events[i]);
+			_php_ibase_event_free(event_buffer,result_buffer);
+			efree(args);
+			RETURN_STRING(result,0);
+		}
+	}
+	
+	/* If we reach this line, isc_wait_for_event() did return, but we don't know
+	   which event fired. */
+	_php_ibase_event_free(event_buffer,result_buffer);
+	efree(args);
+	RETURN_FALSE;
+}
+/* }}} */
 
 #endif /* HAVE_IBASE */
 
