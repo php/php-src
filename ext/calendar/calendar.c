@@ -112,7 +112,7 @@ enum	{ CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 	CAL_MONTH_FRENCH };
 
 /* for heb_number_to_chars */
-char alef_bet[25] = "0אבגדהוזחטיכלמנסעפצקרשת";
+static char alef_bet[25] = "0אבגדהוזחטיכלמנסעפצקרשת";
 	
 PHP_MINIT_FUNCTION(calendar)
 {
