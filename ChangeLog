@@ -1,3 +1,216 @@
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * sapi/cgi/cgi_main.c: Backed out preceding change.
+
+2002-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_ini.c: ws fix
+
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * main/php_open_temporary_file.c:
+    Compute directory for temporary files once and use same directory for all subsequent calls.
+
+2002-05-09  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c: corrected parameter
+
+    * ext/interbase/interbase.c: fix test 5 to pass
+
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * main/php_ini.c:
+    Detect when running under IIS and default force_redirect to zero.  This This means an explicit php.ini setting is no longer required.
+
+    (NO extraneous whitespace changes this time (sigh)).
+
+2002-05-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml
+      pear/package-db.xml
+      pear/package-pear.xml: * remove package-db.xml
+    * rename package-pear.xml to package-PEAR.xml (generic format is
+      package-PKGNAME.xml)
+
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * sapi/cgi/cgi_main.c:
+    Detect when running under IIS and default force_redirect to zero.  This This means an explicit php.ini setting is no longer required.
+
+    (No extraneous whitespace changes this time :).
+
+2002-05-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.c:
+    Allow the MSSQL extension to use NT authentication
+
+2002-05-09  James Cox  <james@blog.at>
+
+    * README.SUBMITTING_PATCH: this is dangerous....
+
+2002-05-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Adding ini setting that allows the MSSQL extension to use NT authentication
+
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * main/php_ini.c:
+    Add check for php.ini in same directory as php.exe (or equivalent executable that loaded php4ts.dll).  Check is done before looking in the Windows directory.  This allows distinct php.ini files when different applications using PHP are installed on the same system.  Should be backwards compatible.
+
+    Note that checking for in CWD php.ini may be a security risk(?), and can now be made compile-time configurable by removing a single #define.
+
+    (This time with tabs for leading indent).
+
+2002-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_open_temporary_file.c
+      sapi/cgi/cgi_main.c
+      ext/session/session.c
+      main/php_ini.c: Revert the last patches.
+
+2002-05-09  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/session/session.c: Revert Preston's patch
+
+2002-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: ws fix
+
+2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * main/php_ini.c:
+    Add check for php.ini in same directory as php.exe (or equivalent executable that loaded php4ts.dll).  Check is done before looks in the Windows directory.
+    This allows distinct php.ini files when different applications using PHP are installed on the same system.  Should be backwards compatible.
+
+    Note that checking for php.ini in CWD may be a security risk(?), and can now be made compile-time configurable by removing a single #define.
+
+    * ext/session/session.c:
+    Change default directory for session data from /tmp (non-portable) to none.
+    Default directory for session data (if not specified) is same (platform-specific) directory used for temporary files.
+    This is backwards compatible and removes the need for explicitly specifying the session.save_path on Win32.
+
+    * main/php_open_temporary_file.c:
+    Compute directory for temporary files once and use same directory for all subsequent calls.
+
+    * sapi/cgi/cgi_main.c:
+    Detect when running under IIS and not require explicit setting of force_redirect.
+    This means an explicit php.ini setting is no longer required.
+
+2002-05-09  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/crack/crack.dsp:
+    No need to link libxm2 in order to build php_crack.lib
+
+2002-05-09  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/Archive/Tar.php:
+    * Better handling of Windows paths (\php\any_thing or c:\php\any_thing)
+    * Remember that inside the archive path are all the time in unix format /php/any_thing
+    * When necessary, '\' are replaced by '/' and 'c:' are removed
+    * Synchro with cvs:pear/Archive_Tar/Tar.php version 1.20
+
+2002-05-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/packages/DB-1.2.tar
+      pear/packages/XML_Parser-1.0.tar
+      pear/packages/XML_RPC-1.0.2.tar: * add some packages to bundle with PHP
+
+    * pear/PEAR/Command/Package.php: * add "pear run-tests" command
+
+    * pear/Makefile.frag:
+    * use PEAR installer to install stuff (won't overwrite if newer versions
+      of packages already are installed)
+
+    * pear/XML/Parser.php
+      pear/XML/Render.php
+      pear/XML/tests/001.phpt
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/004.phpt
+      pear/XML/tests/005.phpt
+      pear/XML/tests/parser1.r
+      pear/XML/tests/parser1.t
+      pear/XML/tests/parser2.i
+      pear/XML/tests/parser2.r
+      pear/XML/tests/parser2.t
+      pear/XML/tests/parser3.r
+      pear/XML/tests/parser3.t
+      pear/XML/tests/parsererror.r
+      pear/XML/tests/parsererror.t
+      pear/XML/tests/test.xml: * moving XML_Parser to /pear
+
+    * pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/sybase.php
+      pear/DB.php
+      pear/DB/IDEAS
+      pear/DB/MAINTAINERS
+      pear/DB/STATUS
+      pear/DB/TESTERS
+      pear/DB/common.php
+      pear/DB/dbase.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php: * permanently moving DB to /pear
+
+2002-05-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/scripts/phpize.in: - Fix phpize
+
+    * pear/scripts/phpize.in: - Dump API NOs
+
+2002-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      pear/scripts/php-config.in: Fix 'php-config --version'
+
+2002-05-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/info.c: - Add PHP_API_VERSION too
+
+    * ext/standard/info.c: - Show both API nos
+
+2002-05-09  Sander Roobol  <phy@wanadoo.nl>
+
+    * win32/install.txt:
+    Added notes that php.exe and not php-cli.exe should be used.
+
+    * sapi/cli/php_cli.c
+      sapi/cgi/cgi_main.c: Added the current SAPI to the output of php -v
+
+2002-05-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Install.php: * show "update ok" after updates
+
+    * run-tests.php:
+    * try the installed cli binary if everything else fails (I'm starting
+      to agree that looking too hard for a php binary is wrong)
+
+    * pear/Makefile.frag:
+    * install the old-fashioned way for just a bit longer
+
+    * pear/scripts/pear.in
+      pear/Makefile.frag
+      pear/PEAR/Command.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/Gtk.php
+      pear/package-pear.xml: * add -G option to "pear" for php-gtk frontend
+    * added Gtk stub (only creates window right now)
+    * added command descriptions
+
 2002-05-08  Jason Greene  <jason@inetgurus.net>
 
     * ext/sockets/sockets.c: Merge overflow fix
