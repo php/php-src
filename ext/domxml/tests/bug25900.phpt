@@ -1,5 +1,5 @@
 --TEST--
-Bug #25900 (DomDocument->get_elements_by_tagname() doen't work with default ns)
+Bug #25900 (DomDocument->get_elements_by_tagname() doesn't work with default ns)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
