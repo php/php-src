@@ -1,21 +1,28 @@
 #ifndef _PI3WEB_SAPI_H_
 #define _PI3WEB_SAPI_H_
 
-//#if WIN32
-//#include <windows.h>
-//#else
-#define far
-#define ERROR_INSUFFICIENT_BUFFER        122L
-typedef int BOOL;
-typedef void far *LPVOID;
-typedef LPVOID HCONN;
-typedef unsigned long DWORD;
-typedef DWORD far *LPDWORD;
-typedef char CHAR;
-typedef CHAR *LPSTR;
-typedef unsigned char BYTE;
-typedef BYTE far *LPBYTE;
-//#endif
+#ifdef PHP_WIN32
+#	include <windows.h>
+#	include <httpext.h>
+#	ifdef SAPI_EXPORTS
+#		define MODULE_API __declspec(dllexport) 
+#	else
+#		define MODULE_API __declspec(dllimport) 
+#	endif
+#else
+#	define far
+#	define MODULE_API
+
+	typedef int BOOL;
+	typedef void far *LPVOID;
+	typedef LPVOID HCONN;
+	typedef unsigned long DWORD;
+	typedef DWORD far *LPDWORD;
+	typedef char CHAR;
+	typedef CHAR *LPSTR;
+	typedef unsigned char BYTE;
+	typedef BYTE far *LPBYTE;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,17 +79,14 @@ typedef struct _CONTROL_BLOCK {
 
 } CONTROL_BLOCK, *LPCONTROL_BLOCK;
 
-#ifndef WIN32
-#define __stdcall
-#endif
+MODULE_API DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB);
+MODULE_API BOOL PHP4_startup();
+MODULE_API BOOL PHP4_shutdown();
 
-DWORD fnWrapperProc(LPCONTROL_BLOCK lpCB);
+// the following type declaration is for the server side
+typedef DWORD ( * PFN_WRAPPERFUNC )( CONTROL_BLOCK *pCB );
 
-// the following type declarations is for the server side
-typedef DWORD ( * PFN_WRAPPERPROC )( CONTROL_BLOCK *pCB );
 
-BOOL PHP4_startup();
-BOOL PHP4_shutdown();
 
 #ifdef __cplusplus
 }
