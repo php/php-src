@@ -186,7 +186,7 @@ dnl as well as res_search resides in libsocket
 AC_CHECK_LIB(m, sin)
 
 AC_CHECK_LIB(bind, inet_aton, [
-  EXTRA_LIBS="$EXTRA_LIBS -lbind"
+  AC_ADD_LIBRARY(bind)
   AC_DEFINE(HAVE_LIBBIND) ], []) 
 
 AC_CHECK_LIB(resolv, inet_aton)
@@ -729,7 +729,7 @@ phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
 AC_SUBST(phplibdir)
 AC_SUBST(phptempdir)
-EXTRA_LIBS="$LIBS $EXTRA_LIBS"
+EXTRA_LIBS="$LIBS"
 LIBS=""
 
 AC_SUBST(CFLAGS)
