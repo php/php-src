@@ -176,7 +176,7 @@ AC_DEFUN([PHP_REMOVE_USR_LIB],[
   unset ac_new_flags
   for i in [$]$1; do
     case [$]i in
-    -L/usr/lib|-L/usr/lib/[)] ;;
+    -L/usr/$PHP_LIBDIR|-L/usr/$PHP_LIBDIR/[)] ;;
     *[)] ac_new_flags="[$]ac_new_flags [$]i" ;;
     esac
   done
@@ -638,7 +638,7 @@ dnl check for -R, etc. switch
 AC_MSG_CHECKING([if compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
 	SAVE_LIBS=$LIBS
-	LIBS="-R /usr/lib $LIBS"
+	LIBS="-R /usr/$PHP_LIBDIR $LIBS"
 	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
 	LIBS=$SAVE_LIBS])
 AC_MSG_RESULT([$php_cv_cc_dashr])
@@ -648,7 +648,7 @@ else
 	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
 	AC_CACHE_VAL(php_cv_cc_rpath,[
 		SAVE_LIBS=$LIBS
-		LIBS="-Wl,-rpath,/usr/lib $LIBS"
+		LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
 		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
 		LIBS=$SAVE_LIBS])
 	AC_MSG_RESULT([$php_cv_cc_rpath])
@@ -832,7 +832,7 @@ dnl
 dnl add a library to linkpath/runpath
 dnl
 AC_DEFUN([PHP_ADD_LIBPATH],[
-  if test "$1" != "/usr/lib"; then
+  if test "$1" != "/usr/$PHP_LIBDIR"; then
     PHP_EXPAND_PATH($1, ai_p)
     ifelse([$2],,[
       _PHP_ADD_LIBPATH_GLOBAL([$ai_p])
@@ -1622,8 +1622,8 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       if test -r $i/include/openssl/evp.h; then
         OPENSSL_INCDIR=$i/include
       fi
-      if test -r $i/lib/libssl.a -o -r $i/lib/libssl.$SHLIB_SUFFIX_NAME; then
-        OPENSSL_LIBDIR=$i/lib
+      if test -r $i/$PHP_LIBDIR/libssl.a -o -r $i/$PHP_LIBDIR/libssl.$SHLIB_SUFFIX_NAME; then
+        OPENSSL_LIBDIR=$i/$PHP_LIBDIR
       fi
       test -n "$OPENSSL_INCDIR" && test -n "$OPENSSL_LIBDIR" && break
     done
@@ -1732,8 +1732,8 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       AC_MSG_ERROR([Please specify the install prefix of iconv with --with-iconv=<DIR>])
     fi
   
-    if test -f $ICONV_DIR/lib/lib$iconv_lib_name.a ||
-       test -f $ICONV_DIR/lib/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME
+    if test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.a ||
+       test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
@@ -1743,10 +1743,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
           found_iconv=yes
           PHP_DEFINE(HAVE_ICONV)
         ], [], [
-          -L$ICONV_DIR/lib
+          -L$ICONV_DIR/$PHP_LIBDIR
         ])
       ], [
-        -L$ICONV_DIR/lib
+        -L$ICONV_DIR/$PHP_LIBDIR
       ])
     fi
   fi
@@ -1754,7 +1754,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   if test "$found_iconv" = "yes"; then
     if test -n "$ICONV_DIR"; then
       AC_DEFINE(HAVE_ICONV, 1, [ ])
-      PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
+      PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
       PHP_ADD_INCLUDE($ICONV_DIR/include)
     fi
     $2
