@@ -34,8 +34,9 @@
 #define	_FTP_H
 
 #include <stdio.h>
+#if HAVE_UINSTD_H
 #include <netinet/in.h>
-
+#endif
 
 /* XXX these should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
