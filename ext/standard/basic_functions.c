@@ -456,7 +456,6 @@ function_entry basic_functions[] = {
 	PHP_FE(cosh,															NULL)
 	PHP_FE(tanh,															NULL)
 
-/*#ifndef PHP_WIN32*/
 #if !defined(PHP_WIN32) && !defined(NETWARE)
 	PHP_FE(asinh,															NULL)
 	PHP_FE(acosh,															NULL)
