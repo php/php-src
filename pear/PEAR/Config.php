@@ -28,6 +28,7 @@ $GLOBALS['_PEAR_Config_instance'] = null;
 
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
        PHP_DATADIR.DIRECTORY_SEPARATOR.'doc'.DIRECTORY_SEPARATOR.'pear');
+define('PEAR_DEFAULT_UMASK', umask());
 
 // in case a --without-pear PHP installation is used
 if (!defined('PEAR_INSTALL_DIR')) {
@@ -135,6 +136,11 @@ when installing packages without a version or state specified',
             'type' => 'string',
             'default' => '',
             'doc' => 'HTTP proxy (host:port) to use when downloading packages',
+            ),
+        'umask' => array(
+            'type' => 'int',
+            'default' => PEAR_DEFAULT_UMASK,
+            'doc' => 'umask used when creating files (Unix-like systems only)',
             ),
 /*
         'testset1' => array(
