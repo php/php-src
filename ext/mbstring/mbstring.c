@@ -150,6 +150,12 @@ static sapi_post_entry mbstr_post_entries[] = {
 	{ NULL, 0, NULL, NULL }
 };
 
+static sapi_post_entry php_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
+};
+
 static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
 	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
@@ -644,6 +650,27 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
+{
+	if (new_value == NULL) {
+	   return FAILURE;
+	}
+
+	MBSTRG(encoding_translation) =  (zend_bool) atoi(new_value);
+
+	if (MBSTRG(encoding_translation)){
+		sapi_unregister_post_entry(php_post_entries);
+		sapi_register_post_entries(mbstr_post_entries);
+		sapi_register_treat_data(mbstr_treat_data);	   			   
+	} else {
+		sapi_unregister_post_entry(mbstr_post_entries);
+		sapi_register_post_entries(php_post_entries);
+		sapi_register_treat_data(php_default_treat_data);	   			   
+	}
+
+	return SUCCESS;
+}
+
 /* php.ini directive registration */
 PHP_INI_BEGIN()
 	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
@@ -657,8 +684,8 @@ PHP_INI_BEGIN()
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM |
 	 PHP_INI_PERDIR, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
-	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
-	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
+	 	 								  
+	 PHP_INI_ENTRY("mbstring.encoding_translation", "0", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation)					 
 PHP_INI_END()
 
 
@@ -765,6 +792,8 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 	}
 
 	if(MBSTRG(encoding_translation)) {
+		sapi_unregister_post_entry(mbstr_post_entries);
+		sapi_register_post_entries(php_post_entries);
 		sapi_register_treat_data(php_default_treat_data);
 	}
 
@@ -842,6 +871,7 @@ PHP_RINIT_FUNCTION(mbstring)
 #if HAVE_MBREGEX
 	MBSTRG(regex_default_options) = 0;
 #endif
+
 	return SUCCESS;
 }
 
