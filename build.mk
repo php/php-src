@@ -15,6 +15,8 @@ LT_TARGETS = ltconfig ltmain.sh config.guess config.sub
 
 SUBDIRS = libzend TSRM
 
+STAMP = buildmk.stamp
+
 makefile_am_files = Makefile.am $(shell find ext sapi regex pecl -name Makefile.am)
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
@@ -36,6 +38,11 @@ all: $(targets)
 		test -d $$i || (test -d ../$$i && ln -s ../$$i $$i); \
 		(cd $$i && $(MAKE) -f build.mk AMFLAGS=$(AMFLAGS)); \
 	done
+
+all: $(STAMP)
+
+$(STAMP): buildcheck.sh
+	@./buildcheck.sh && touch $(STAMP)
 
 dist:
 	@rm -f $(SUBDIRS) 2>/dev/null || true
