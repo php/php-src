@@ -31,6 +31,22 @@ $s = mb_convert_encoding($s, 'JIS', 'EUC-JP');
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 
+// Using Encoding List Array 
+echo "== STRING ENCODING LIST ==\n";
+
+$a = 'JIS,UTF-8,EUC-JP,SJIS';
+$s = $jis;
+$s = mb_convert_encoding($s, 'EUC-JP', $a);
+print("EUC-JP: $s\n"); // EUC-JP
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'SJIS', $a);
+print("SJIS: ".base64_encode($s)."\n");  // SJIS
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'JIS', $a);
+print("JIS: ".base64_encode($s)."\n"); // JIS
+
 
 // Using Encoding List Array 
 echo "== ARRAY ENCODING LIST ==\n";
