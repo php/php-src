@@ -26,7 +26,7 @@
 # include <stdarg.h>
 #endif
 
-#if BROKEN_SPRINTF
+#if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...)
 {
 	va_list args;
