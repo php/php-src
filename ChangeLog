@@ -1,3 +1,48 @@
+2000-03-02  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/README: Now recommend --enable-roxen-zts...
+
+2000-03-02  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c:
+    - using zend llist instead of dlist (not tested)
+
+2000-03-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/config.m4: adjust comment II
+
+    * ext/xml/config.m4: adjust comment
+
+    * ext/xml/config.m4: Enable by default
+
+2000-03-02  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c: - some minor changes, cleanups
+
+    * tests/testdom
+      ext/domxml/domxml.c:
+    - dom class now distinguishes between $dom->root() and $dom->children()
+      $dom->root() returns just the element, $dom->children() all nodes e.g.
+      comments
+
+    * ext/domxml/php_domxml.h
+      tests/testdom
+      ext/domxml/domxml.c:
+    - The root node of a xml doc is now an array since it is possible
+      to have a comment or pi and an element on root level.
+
+2000-03-02  Stig Bakken  <ssb@fast.no>
+
+    * sapi/apache/mod_php4.c:    "none" is now equivalent with "" in Apache config directives.
+
+2000-03-02  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/mysql/libmysql/config-win32.h: Eliminate 62 warnings
+
+2000-03-02  Evan Klinger  <evan715@sirius.com>
+
+    * ext/cybercash/config.m4: Add appropriate check for mckcrypto lib
+
 2000-03-01  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * ext/domxml/domxml.c
