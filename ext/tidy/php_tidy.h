@@ -40,6 +40,7 @@ extern zend_module_entry tidy_module_entry;
 
 #define PHP_TIDY_MODULE_VERSION	"2.0-dev"
 
+
 #define REMOVE_NEWLINE(_z) _z->value.str.val[_z->value.str.len-1] = '\0'; _z->value.str.len--;
 
 #define TIDYDOC_FROM_OBJECT(tdoc, object) \
@@ -47,6 +48,32 @@ extern zend_module_entry tidy_module_entry;
 		PHPTidyObj *obj = (PHPTidyObj*) zend_object_store_get_object(object TSRMLS_CC); \
 		tdoc = obj->ptdoc; \
 	}
+
+#define TIDY_FETCH_OBJECT	\
+	zval *object = getThis();	\
+	PHPTidyObj *obj;	\
+	if (object) {	\
+		if (ZEND_NUM_ARGS()) {	\
+			WRONG_PARAM_COUNT;	\
+		}	\
+	} else {	\
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "O", &object, tidy_ce_doc) == FAILURE) {	\
+			RETURN_FALSE;	\
+		}	\
+	}	\
+	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
+
+#define TIDY_FETCH_ONLY_OBJECT	\
+	zval *object = getThis();	\
+	PHPTidyObj *obj;	\
+	if (ZEND_NUM_ARGS()) {	\
+		WRONG_PARAM_COUNT;	\
+	}	\
+	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
+
+#define TIDY_FETCH_PARSED_OBJECT	\
+	TIDY_FETCH_OBJECT;	\
+	TIDY_PARSED_CHECK(obj);	\
 
 #define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
 
@@ -88,7 +115,7 @@ extern zend_module_entry tidy_module_entry;
 	{ \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
-		if(_string) { \
+		if (_string) { \
 			ZVAL_STRING(tmp, (char *)_string, 1); \
 		} else { \
 			ZVAL_EMPTY_STRING(tmp); \
@@ -113,14 +140,14 @@ extern zend_module_entry tidy_module_entry;
 	}
 
 #define TIDY_PARSED_CHECK(_obj) \
-if(!_obj->ptdoc->parsed) { \
+if (!_obj->ptdoc->parsed) { \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function."); \
 	RETURN_FALSE; \
-} 
+}
 
 #define TIDY_PARSED_REPAIR_CHECK(_obj) \
 TIDY_PARSED_CHECK(_obj); \
-if(!_obj->ptdoc->repaired) { \
+if (!_obj->ptdoc->repaired) { \
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must clean and repair the document before executing this function."); \
     RETURN_FALSE; \
 }
@@ -167,7 +194,7 @@ struct _PHPTidyObj {
     TidyNode            node;
     TidyAttr            attr;
     tidy_obj_type       type;
-    
+
     PHPTidyDoc          *ptdoc;
 };
 
