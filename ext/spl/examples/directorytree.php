@@ -22,7 +22,7 @@ EOF;
 	exit(1);
 }
 
-$length = $argc > 3 ? $argv[3] : NULL;
+$length = $argc > 3 ? $argv[3] : -1;
 
 foreach(new LimitIterator(new DirectoryTreeIterator($argv[1]), @$argv[2], $length) as $file) {
 //foreach(new DirectoryTreeIterator($argv[1]) as $file) {
