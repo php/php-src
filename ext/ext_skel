@@ -50,7 +50,6 @@ $ECHO_N " Makefile.am$ECHO_C"
 cat >Makefile.am <<eof
 # \$Id\$
 
-INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LTLIBRARIES=libphpext_$extname.la
 libphpext_${extname}_la_SOURCES=$extname.c
 
