@@ -328,12 +328,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 #endif
 	if (PG(doc_root) && path_info) {
 		length = strlen(PG(doc_root));
-#ifdef PHP_WIN32
-		/* Check for absolute path. This should really use virtual cwd macros */
-		if (IS_SLASH(*PG(doc_root)) || (length >= 3 && PG(doc_root)[1] == ':' && IS_SLASH(PG(doc_root)[2]))) {
-#else
-		if (IS_SLASH(*PG(doc_root))) {
-#endif
+		if (IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 			filename = emalloc(length + strlen(path_info) + 2);
 			if (filename) {
 				memcpy(filename, PG(doc_root), length);

@@ -58,19 +58,19 @@
 #if !defined(COMPILE_DL)
 #define HAVE_SNMP 0
 # define HAVE_ERRMSG_H 0 /*needed for mysql 3.21.17 and up*/
-#define DBASE 1
+#define DBASE 0
 #define NDBM 0
 #define GDBM 0
 #define BSD2 0
 #define HAVE_CRYPT 0
-#define HAVE_ORACLE 1
+#define HAVE_ORACLE 0
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
 #ifndef COMPILE_DL_MSQL
 #define HAVE_MSQL 0
 #endif
-#define HAVE_SYBASE 1
-#define HAVE_LIBGD 1
+#define HAVE_SYBASE 0
+#define HAVE_LIBGD 0
 #define HAVE_FILEPRO 0
 #endif
 /* ----------------------------------------------------------------
