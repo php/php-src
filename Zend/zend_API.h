@@ -117,6 +117,10 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
 
+#define RETVAL_RESOURCE(l) {			\
+		return_value->type = IS_RESOURCE;\
+		return_value->value.lval = l;	\
+	}
 #define RETVAL_LONG(l) {				\
 		return_value->type = IS_LONG;	\
 		return_value->value.lval = l;	\
@@ -141,6 +145,11 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 #define RETVAL_FALSE  { return_value->value.lval = 0;  return_value->type = IS_BOOL; }
 #define RETVAL_TRUE   { return_value->value.lval = 1;  return_value->type = IS_BOOL; }
 
+#define RETURN_RESOURCE(l) {			\
+		return_value->type = IS_RESOURCE;\
+		return_value->value.lval = l;	\
+		return;							\
+	}
 #define RETURN_LONG(l) {				\
 		return_value->type = IS_LONG;	\
 		return_value->value.lval = l;	\
