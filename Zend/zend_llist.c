@@ -20,6 +20,7 @@
 
 #include "zend.h"
 #include "zend_llist.h"
+#include "zend_qsort.h"
 
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent)
 {
@@ -187,7 +188,7 @@ ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 	}
 }
 
-ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
+ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC)
 {
 	size_t i;
 
@@ -206,7 +207,7 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 		*ptr++ = element;
 	}
 
-	qsort(elements, l->count, sizeof(zend_llist_element *), (int (*)(const void *, const void *)) comp_func);
+	zend_qsort(elements, l->count, sizeof(zend_llist_element *), (compare_func_t) comp_func TSRMLS_CC);
 
 	l->head = elements[0];
 	elements[0]->prev = NULL;

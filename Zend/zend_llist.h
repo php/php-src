@@ -30,7 +30,7 @@ typedef struct _zend_llist_element {
 } zend_llist_element;
 
 typedef void (*llist_dtor_func_t)(void *);
-typedef int (*llist_compare_func_t)(const zend_llist_element *, const zend_llist_element *);
+typedef int (*llist_compare_func_t)(const zend_llist_element *, const zend_llist_element * TSRMLS_DC);
 typedef void (*llist_apply_with_args_func_t)(void *data, int num_args, va_list args TSRMLS_DC);
 typedef void (*llist_apply_with_arg_func_t)(void *data, void *arg TSRMLS_DC);
 typedef void (*llist_apply_func_t)(void * TSRMLS_DC);
@@ -61,7 +61,7 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data));
 ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC);
 ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...);
 ZEND_API int zend_llist_count(zend_llist *l);
-ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func);
+ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC);
 
 /* traversal */
 ZEND_API void *zend_llist_get_first_ex(zend_llist *l, zend_llist_position *pos);
