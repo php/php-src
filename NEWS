@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, Version 4.3.4RC2
+- Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
 
 29 Sep 2003, Version 4.3.4RC1
 - Made MCVE extension available on win32. (Jani)
@@ -10,7 +11,6 @@ PHP 4                                                                      NEWS
 - Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed bug #25671 (str_replace corrupting subarrays). (Sara)
-- Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
 - Fixed Bug #25665 (var_dump() hangs on Nan and INF). (Ilia)
 - Fixed bug #25648 (xslt_set_encoding() being not detected correctly). (Jani)
 - Fixed bug #25636 (SNMP Session not closed on success). (Ilia, 
