@@ -209,6 +209,9 @@ PHP_FUNCTION(pack)
 				break;
 
 			default:
+				efree(argv);
+				efree(formatcodes);
+				efree(formatargs);
 				php_error(E_WARNING, "pack type %c: unknown format code", code);
 				RETURN_FALSE;
 		}
