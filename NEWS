@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
+- Fixed bug #30388 (rename across filesystems loses ownership and 
+  permission info) (Tony)
 - Fixed bug #30387 (stream_socket_client async connect was broken).
   (vnegrier at esds dot com, Wez).
 - Fixed bug #30381 (Strange results with get_class_vars()). (Marcus)
