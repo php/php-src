@@ -459,7 +459,6 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int i;
 	zval **original_return_value;
 	HashTable *calling_symbol_table;
-	zend_function_state function_state;
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
@@ -471,6 +470,13 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
 
+	zend_execute_data execute_data;
+
+	/* Initialize execute_data */
+	EX(fbc) = NULL;
+	EX(object) = NULL;
+	EX(Ts) = NULL;
+	EX(op_array) = NULL;
 	*retval_ptr_ptr = NULL;
 
 	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
@@ -501,6 +507,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			}
 
 			function_table = &Z_OBJCE_PP(object_pp)->function_table;
+			EX(object) = *object_pp;
 			calling_scope = Z_OBJCE_PP(object_pp);
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry **ce;
@@ -530,7 +537,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_str_tolower(function_name_copy.value.str.val, function_name_copy.value.str.len);
 
 	original_function_state_ptr = EG(function_state_ptr);
-	if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &function_state.function)==FAILURE) {
+	if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 		zval_dtor(&function_name_copy);
 		return FAILURE;
 	}
@@ -539,9 +546,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	for (i=0; i<param_count; i++) {
 		zval *param;
 
-		if (function_state.function->common.arg_types
-			&& i<function_state.function->common.arg_types[0]
-			&& function_state.function->common.arg_types[i+1]==BYREF_FORCE
+		if (EX(function_state).function->common.arg_types
+			&& i<EX(function_state).function->common.arg_types[0]
+			&& EX(function_state).function->common.arg_types[i+1]==BYREF_FORCE
 			&& !PZVAL_IS_REF(*params[i])) {
 			if ((*params[i])->refcount>1) {
 				zval *new_zval;
@@ -572,7 +579,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
 
-	EG(function_state_ptr) = &function_state;
+	EG(function_state_ptr) = &EX(function_state);
 
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
@@ -597,8 +604,10 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(This) = NULL;
 	}
 
+	EX(prev_execute_data) = EG(current_execute_data);
+	EG(current_execute_data) = &execute_data;
 
-	if (function_state.function->type == ZEND_USER_FUNCTION) {
+	if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		if (symbol_table) {
 			EG(active_symbol_table) = symbol_table;
@@ -610,7 +619,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
 		EG(return_value_ptr_ptr) = retval_ptr_ptr;
-		EG(active_op_array) = (zend_op_array *) function_state.function;
+		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
 		orig_free_op1 = EG(free_op1);
 		orig_free_op2 = EG(free_op2);
@@ -631,7 +640,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 TSRMLS_CC);
+		((zend_internal_function *) EX(function_state).function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 TSRMLS_CC);
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
@@ -642,7 +651,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	EG(scope) = current_scope;
 	EG(This) = current_this;
-	
+	EG(current_execute_data) = EX(prev_execute_data);                       \
+
 	return SUCCESS;
 }
 
