@@ -1304,21 +1304,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_FILE;
 }
 
-<ST_IN_SCRIPTING>"NULL" {
-	ZVAL_NULL(zendlval);
-	return T_NULL;
-}
-
-<ST_IN_SCRIPTING>"FALSE" {
-	ZVAL_FALSE(zendlval);
-	return T_FALSE;
-}
-
-<ST_IN_SCRIPTING>"TRUE" {
-	ZVAL_TRUE(zendlval);
-	return T_TRUE;
-}
-
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
 #ifdef ZEND_MULTIBYTE
 	if (SCNG(output_filter)) {
