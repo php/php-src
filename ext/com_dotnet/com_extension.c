@@ -112,10 +112,12 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
 	ce.create_object = php_com_object_new;
+	ce.get_iterator = php_com_iter_get;
 	php_com_variant_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(ce, "com", NULL);
 	ce.create_object = php_com_object_new;
+	ce.get_iterator = php_com_iter_get;
 	zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
 
 	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
@@ -123,6 +125,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
+	ce.get_iterator = php_com_iter_get;
 	zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
 #endif
 
