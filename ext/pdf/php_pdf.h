@@ -89,7 +89,7 @@ PHP_FUNCTION(pdf_setrgbcolor_fill);
 PHP_FUNCTION(pdf_setrgbcolor_stroke);
 PHP_FUNCTION(pdf_setrgbcolor);
 PHP_FUNCTION(pdf_open_image_file);  /* new parameters: [char *stringpram, int intparam] */
-PHP_FUNCTION(pdf_open_CCITT);	/* new function */
+PHP_FUNCTION(pdf_open_ccitt);	/* new function */
 PHP_FUNCTION(pdf_open_image);	/* new function: checkit not yet completeted :( */
 PHP_FUNCTION(pdf_close_image);
 PHP_FUNCTION(pdf_place_image);
