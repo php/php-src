@@ -534,28 +534,27 @@ static char * exif_get_tagname(int tag_num, char *ret, int len)
 #ifdef EXIF_DEBUG
 static unsigned char* exif_char_dump( unsigned char * addr, int len, int hex)
 {
-  static unsigned char buf[1024+1];
-  int c, i, p=0, n = hex ? 5 : 3;
+	static unsigned char buf[1024+1];
+	int c, i, p=0, n = hex ? 5 : 3;
 
-  for(i=0; i<len && p+n<=sizeof(buf); i++)
-  {
-    if ( i%64==0) buf[p++] = '\n';
-    c = *addr++;
-    if ( hex)
-    {
-      sprintf(buf+p,"%02X ",c);
-      p += 3;
-    } else {
-      if (c>=32)
-      {
-        buf[p++] = c;
-      } else {
-        buf[p++] = '?';
-      }
-    }
-  }
-  buf[sizeof(buf)-1]=0;
-  return buf;
+	for(i=0; i<len && p+n<=sizeof(buf); i++)
+	{
+		if (i%64==0)
+			buf[p++] = '\n';
+		c = *addr++;
+		if (hex) {
+			sprintf(buf+p,"%02X ",c);
+			p += 3;
+		} else {
+			if (c>=32) {
+				buf[p++] = c;
+			} else {
+				buf[p++] = '?';
+			}
+		}
+	}
+	buf[sizeof(buf)-1]=0;
+	return buf;
 }
 #endif
 /* }}} */
@@ -792,12 +791,12 @@ typedef struct {
 #define SECTION_THUMBNAIL   4
 #define SECTION_COMMENT     5
 #define SECTION_APP0        6
-#define SECTION_EXIF		7
-#define SECTION_FPIX		8
+#define SECTION_EXIF        7
+#define SECTION_FPIX        8
 #define SECTION_GPS         9
 #define SECTION_INTEROP     10
 #define SECTION_APP12       11
-#define SECTION_COUNT		12
+#define SECTION_COUNT       12
 
 #define FOUND_FILE          (1<<SECTION_FILE)
 #define FOUND_COMPUTED      (1<<SECTION_COMPUTED)
@@ -815,18 +814,18 @@ typedef struct {
 static char *exif_get_sectionname(int section)
 {
 	switch(section) {
-        case SECTION_FILE:      return "FILE";
-        case SECTION_COMPUTED:  return "COMPUTED";
-        case SECTION_ANY_TAG:   return "ANY_TAG";
-        case SECTION_IFD0:      return "IFD0";
-        case SECTION_THUMBNAIL: return "THUMBNAIL";
-        case SECTION_COMMENT:   return "COMMENT";
-        case SECTION_APP0:      return "APP0";
-        case SECTION_EXIF:      return "EXIF";
-        case SECTION_FPIX:      return "FPIX";
-        case SECTION_GPS:       return "GPS";
-        case SECTION_INTEROP:   return "INTEROP";
-        case SECTION_APP12:     return "APP12";
+		case SECTION_FILE:      return "FILE";
+		case SECTION_COMPUTED:  return "COMPUTED";
+		case SECTION_ANY_TAG:   return "ANY_TAG";
+		case SECTION_IFD0:      return "IFD0";
+		case SECTION_THUMBNAIL: return "THUMBNAIL";
+		case SECTION_COMMENT:   return "COMMENT";
+		case SECTION_APP0:      return "APP0";
+		case SECTION_EXIF:      return "EXIF";
+		case SECTION_FPIX:      return "FPIX";
+		case SECTION_GPS:       return "GPS";
+		case SECTION_INTEROP:   return "INTEROP";
+		case SECTION_APP12:     return "APP12";
 	}
 	return "";
 }
@@ -840,7 +839,9 @@ static char *exif_get_sectionlist(int sectionlist)
 	int i,len=0;
 	char *sections;
 
-	for(i=0; i<SECTION_COUNT; i++) len += strlen(exif_get_sectionname(i))+2;
+	for(i=0; i<SECTION_COUNT; i++) {
+		len += strlen(exif_get_sectionname(i))+2;
+	}
 	sections = emalloc(len+1);
 	if ( !sections) {
 		EXIF_ERRLOG_EALLOC
@@ -854,7 +855,8 @@ static char *exif_get_sectionlist(int sectionlist)
 			len = strlen(sections);
 		}
 	}
-	if (len>2) sections[len-2] = '\0';
+	if (len>2)
+		sections[len-2] = '\0';
 	return sections;
 }
 /* }}} */
@@ -866,18 +868,18 @@ static char *exif_get_sectionlist(int sectionlist)
 */
 
 typedef struct {
-	int    	type;
-	size_t 	size;
-	uchar	*data;
+	int     type;
+	size_t  size;
+	uchar   *data;
 } file_section;
 
 typedef struct {
-	int				count;
-	file_section 	*list;
+	int             count;
+	file_section    *list;
 } file_section_list;
 
 typedef struct {
-    image_filetype  filetype;
+	image_filetype  filetype;
 	size_t          width, height;
 	size_t          size;
 	size_t          offset;
@@ -891,7 +893,7 @@ typedef struct {
 	char            *FileName;
 	time_t          FileDateTime;
 	size_t          FileSize;
-    image_filetype  FileType;
+	image_filetype  FileType;
 	int             Height, Width;
 	int             IsColor;
 
@@ -927,7 +929,7 @@ typedef struct {
 /* {{{ jpeg_sof_info
  */
 typedef struct {
-	int		bits_per_sample;
+	int     bits_per_sample;
 	size_t  width;
 	size_t  height;
 	int     num_components;
@@ -940,8 +942,8 @@ typedef struct {
 */
 int exif_file_sections_add(image_info_type *ImageInfo, int type, size_t size, uchar *data)
 {
-	file_section	*tmp;
-	int				count = ImageInfo->file.count;
+	file_section    *tmp;
+	int             count = ImageInfo->file.count;
 
 	tmp = erealloc(ImageInfo->file.list,(count+1)*sizeof(file_section));
 	if ( tmp == NULL) return 0;
@@ -1003,7 +1005,7 @@ void exif_iif_add_value( image_info_type *image_info, int section_index, char *n
 	}
 	image_info->info_list[section_index].list = list;
 
-    info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
 	info_data->tag    = tag;
 	info_data->format = format;
 	info_data->length = length;
@@ -1158,7 +1160,7 @@ void exif_iif_add_int( image_info_type *image_info, int section_index, char *nam
 	}
 	image_info->info_list[section_index].list = list;
 
-    info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
 	info_data->tag    = TAG_NONE;
 	info_data->format = TAG_FMT_SLONG;
 	info_data->length = 1;
@@ -1183,20 +1185,18 @@ void exif_iif_add_str( image_info_type *image_info, int section_index, char *nam
 	char             tmp[1024];
 	va_list 		 arglist;
 
-    va_start( arglist, value );
-    if ( value) vsnprintf( tmp, sizeof(tmp), value, arglist);
-    va_end( arglist);
+	va_start( arglist, value );
+	if ( value) vsnprintf( tmp, sizeof(tmp), value, arglist);
+	va_end( arglist);
 
 	if ( value) {
-
-    	list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+		list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_data));
 		if ( !list) {
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
 		image_info->info_list[section_index].list = list;
-
-	    info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
 		info_data->tag    = TAG_NONE;
 		info_data->format = TAG_FMT_STRING;
 		info_data->length = 1;
@@ -1546,7 +1546,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 */
 static void exif_process_COM (image_info_type *image_info, uchar *value, int length)
 {
-    exif_iif_add_tag( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2);
+	exif_iif_add_tag( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2);
 }
 /* }}} */
 
