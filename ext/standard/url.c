@@ -391,6 +391,7 @@ PHP_FUNCTION(rawurldecode)
 {
 	pval **arg;
 	int len;
+	char *str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -400,9 +401,10 @@ PHP_FUNCTION(rawurldecode)
 	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	len = php_raw_url_decode((*arg)->value.str.val, (*arg)->value.str.len);
+	str = estrndup(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+	len = php_raw_url_decode(str, Z_STRLEN_PP(arg));
 
-	RETVAL_STRINGL((*arg)->value.str.val, len, 1);
+	RETVAL_STRINGL(str, len, 0);
 }
 /* }}} */
 

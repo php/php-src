@@ -2,8 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
-- Parse errors in the php.ini files under Windows will no longer mess up the
-  HTTP headers in CGI mode and are now displayed in a message box (Zeev)
+- Fixed a bug in rawurldecode() that would cause in rawurldecode() corrupting
+  its argument (Zeev)
+- Parse errors (or other errors) in the php.ini files under Windows will no
+  longer mess up the HTTP headers in CGI mode and are now displayed in a
+  message box (Zeev)
 - Fixed a crash in OCIFetchStatement() when trying to read after all data
   has already been read. (Thies)
 - fopen_wrappers() are now extensible via modules (Hartmut Holzgraefe)
