@@ -873,7 +873,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
     symbol->is_ref = is_ref;
 
     va_start(symbol_table_list, num_symbol_tables);
-    while(num_symbol_tables-- > 0) {
+    while (num_symbol_tables-- > 0) {
         symbol_table = va_arg(symbol_table_list, HashTable *);
         zend_hash_update(symbol_table, name, name_length + 1, &symbol, sizeof(zval *), NULL);
         zval_add_ref(&symbol);
