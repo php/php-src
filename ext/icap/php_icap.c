@@ -81,7 +81,9 @@ static cal_list_t *g_cal_list_end=NULL;
 
 function_entry icap_functions[] = {
 	PHP_FE(icap_open,				NULL)
+/* for now it's obviously a dummy 
 	PHP_FE(icap_popen,				NULL)
+*/
 	PHP_FE(icap_reopen,				NULL)
 	PHP_FE(icap_fetch_event,		NULL)
 	PHP_FE(icap_list_events,		NULL)
@@ -502,7 +504,7 @@ PHP_FUNCTION(icap_create_calendar)
 /* }}} */
 
 
-/* {{{ proto string icap_rename(int stream_id, string src_calendar, string dest_calendar)
+/* {{{ proto string icap_rename_calendar(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar*/
 PHP_FUNCTION(icap_rename_calendar)
 {
@@ -534,7 +536,7 @@ PHP_FUNCTION(icap_rename_calendar)
 
 
 
-/* {{{ proto int icap_reopen(int stream_id, array date, array time)
+/* {{{ proto int icap_list_alarms(int stream_id, array date, array time)
    List alarms for a given time */
 PHP_FUNCTION(icap_list_alarms)
 {
@@ -688,7 +690,6 @@ icap_delete_calendar(){
 PHP_FUNCTION(icap_popen)
 {
 }
-
 
 /* {{{ proto string icap_store_event(int stream_id, object event)
    Store an event */
