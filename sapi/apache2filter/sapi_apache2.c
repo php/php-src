@@ -88,8 +88,22 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 static int
 php_apache_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
+	long total;
+	long n;
+	long start;
+	php_struct *ctx = SG(server_context);
+	
+	start = ctx->post_index;
+	for (total = 0; total < count_bytes; total += n) {
+		n = ap_get_req_body(ctx->f->r, count_bytes - total, &ctx->post_index);
+		if (n <= 0) break;
+	}
 
-	return 0;
+	if (total > 0) {
+		memcpy(buf, &ctx->f->r->req_body[start], total);
+	}
+
+	return total;
 }
 
 static char *
@@ -220,15 +234,15 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		SLS_FETCH();
 	
 		apply_config(conf);
-		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
 		
 		ctx->state++;
 
 		/* XXX: Lots of startup crap. Should be moved into its own func */
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
+		SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
 		SG(request_info).query_string = f->r->args;
-		SG(request_info).request_method = f->r->method;
+		SG(request_info).request_method = (char *) f->r->method;
 		SG(request_info).request_uri = f->r->uri;
 		f->r->no_cache = f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);
@@ -239,6 +253,8 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		apr_table_unset(f->r->headers_out, "Expires");
 		auth = apr_table_get(f->r->headers_in, "Authorization");
 		php_handle_auth_data(auth SLS_CC);
+		
+		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
 	}
 
 	/* moves all buckets from bb to ctx->bb */
