@@ -1,7 +1,8 @@
 <?php
 
 	class php_logo extends php_element {
-		function php_logo($name, $attr) {
+
+		function __construct($name, $attr) {
 			$this->name = $name;
 			$this->attr = $attr;
 			$this->id = '"'.strtoupper($name).'_LOGO_ID"';
@@ -32,11 +33,11 @@ static unsigned char {$this->name}_logo[] = {
 			$len = strlen($this->data);
 			$code = " ";
 			$i=0;
-			for($n = 0; $n < $len; $n++) {
+			for ($n = 0; $n < $len; $n++) {
 				$code .= sprintf(" %3d",ord($this->data[$n]));
-				if($n == $len - 1) break;
+				if ($n == $len - 1) break;
 				$code .=  ",";
-				if(++$i==8) {
+				if (++$i==8) {
 					$code .= "\n ";
 					$i=0;
 				}
