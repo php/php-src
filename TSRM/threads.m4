@@ -47,12 +47,15 @@ AC_DEFUN(PTHREADS_FLAGS,[
     PTHREAD_FLAGS="-D_POSIX_THREAD_SAFE_FUNCTIONS";;
   *hpux*)
     PTHREAD_FLAGS="-D_REENTRANT";;
+  *sco*)
+    PTHREAD_FLAGS="-D_REENTRANT";;
+dnl Solves sigwait() problem, creates problems with u_long etc.
+dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 -D_XOPEN_SOURCE_EXTENDED=1";;
   esac
 
   if test -n "$PTHREAD_FLAGS"; then
     CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
   fi
-  
 ])dnl
 dnl
 dnl PTHREADS_CHECK_COMPILE
@@ -98,7 +101,7 @@ PTHREADS_CHECK_COMPILE
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=""
 if test "$pthreads_working" != "yes"; then
-  for flag in -pthreads -pthread -mthreads; do 
+  for flag in -pthreads -pthread -mthreads -Kthread; do 
     ac_save="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
     PTHREADS_CHECK_COMPILE
