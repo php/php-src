@@ -451,11 +451,13 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 {
 	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
 		zend_hash_destroy(compiler_globals->function_table);
+		free(compiler_globals->function_table);
 	}
 	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
 		zend_hash_destroy(compiler_globals->class_table);
+		free(compiler_globals->class_table);
 	}
-	if (compiler_globals->auto_globals != global_auto_globals_table) {
+	if (compiler_globals->auto_globals != GLOBAL_AUTO_GLOBALS_TABLE) {
 		zend_hash_destroy(compiler_globals->auto_globals);
 		free(compiler_globals->auto_globals);
 	}
@@ -609,7 +611,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	executor_globals = ts_resource(executor_globals_id);
 	tsrm_ls = ts_resource_ex(0, NULL);
 
-	compiler_globals_dtor(compiler_globals, tsrm_ls);
+	compiler_globals_dtor(compiler_globals TSRMLS_CC);
+	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+
 	*compiler_globals->function_table = *GLOBAL_FUNCTION_TABLE;
 	*compiler_globals->class_table = *GLOBAL_CLASS_TABLE;
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
@@ -669,7 +674,10 @@ void zend_post_startup(TSRMLS_D)
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
+	free(compiler_globals->function_table);
+	free(compiler_globals->class_table);
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
+	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
 }
 #endif
@@ -696,10 +704,14 @@ void zend_shutdown(TSRMLS_D)
 
 	zend_shutdown_constants(TSRMLS_C);
 #ifdef ZTS
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_FUNCTION_TABLE);
 	free(GLOBAL_CLASS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
+	GLOBAL_FUNCTION_TABLE = NULL;
+	GLOBAL_CLASS_TABLE = NULL;
+	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 #endif
 }
 
