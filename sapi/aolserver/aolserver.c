@@ -300,6 +300,7 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 	int i;
 	char buf[NS_BUF_SIZE + 1];
 	zval *pval;
+	char *tmp;
 
 	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
 		char *key = Ns_SetKey(NSG(conn->headers), i);
@@ -352,8 +353,11 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPort(NSG(conn)));
 	ADD_STRING("SERVER_PORT");
 
-	strncpy(buf, Ns_ConnHost(NSG(conn)), NS_BUF_SIZE);
-	ADD_STRING("SERVER_NAME");
+	tmp = Ns_ConnHost(NSG(conn));
+	if (tmp) {
+		strncpy(buf, tmp, NS_BUF_SIZE);
+		ADD_STRING("SERVER_NAME");
+	}	
 
 	strncpy(buf, SG(request_info).path_translated, NS_BUF_SIZE);
 	ADD_STRING("PATH_TRANSLATED");
