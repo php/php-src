@@ -585,7 +585,6 @@ static int php_roxen_module_main(TSRMLS_D)
   zend_file_handle file_handle;
 #ifdef ZTS
   TSRMLS_FETCH();
-  TSRMLS_FETCH();
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif

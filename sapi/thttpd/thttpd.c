@@ -262,7 +262,6 @@ static void thttpd_module_main(TSRMLS_D TSRMLS_DC)
 {
 	zend_file_handle file_handle;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
@@ -446,7 +445,6 @@ static void *worker_thread(void *dummy)
 	int do_work = 50;
 	httpd_conn *hc;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	while (do_work) {
 		hc = dequeue_request();
@@ -518,7 +516,6 @@ off_t thttpd_php_request(httpd_conn *hc)
 #ifdef ZTS
 	queue_request(hc);
 #else
-	TSRMLS_FETCH();
 	TSRMLS_FETCH();
 	return thttpd_real_php_request(hc TSRMLS_CC TSRMLS_CC);
 #endif
