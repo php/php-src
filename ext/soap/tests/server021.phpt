@@ -5,7 +5,7 @@ SOAP Server 21: SoapServer::setClass and __call()
 --FILE--
 <?php
 class Foo {
-  function __call($name) {
+  function __call($name, $args) {
     if ($name == "test") {
       return "Hello World";
     } else {
