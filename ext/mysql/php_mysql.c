@@ -28,7 +28,8 @@
 #include "php_globals.h"
 #include "php_mysql.h"
 #include "php_globals.h"
-
+#include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 
 #if WIN32|WINNT
 #include <winsock.h>
