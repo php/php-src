@@ -137,6 +137,7 @@ install-programs:
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done; \
+	rm -f $(INSTALL_ROOT)$(bindir)/pear-get; \
 	for prog in phpextdist; do \
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
