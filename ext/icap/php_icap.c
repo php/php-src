@@ -187,7 +187,7 @@ void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 		icap_stream = cal_open(NULL, Z_STRVAL_P(calendar), 0);
 	if (!icap_stream) {
-		php_error(E_WARNING, "Couldn't open stream %s\n", Z_STRVAL_P(calendar));
+		php_error(E_WARNING, "%s(): Couldn't open stream %s", get_active_function_name(TSRMLS_C), Z_STRVAL_P(calendar));
 		RETURN_FALSE;
 	}
 
@@ -216,7 +216,7 @@ PHP_FUNCTION(icap_close)
         ind = Z_LVAL_P(streamind);
         icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
         if (!icap_le_struct ) {
-	  php_error(E_WARNING, "Unable to find stream pointer");
+	  php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
                 RETURN_FALSE;
 	}
         if(myargcount==2) {
@@ -261,7 +261,7 @@ PHP_FUNCTION(icap_reopen)
 	ind = Z_LVAL_P(streamind);
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -276,7 +276,7 @@ PHP_FUNCTION(icap_reopen)
 		cal_login(icap_stream, Z_STRVAL_P(calendar));
 	*/
 	if (icap_stream == NULL) {
-		php_error(E_WARNING, "Couldn't re-open stream\n");
+		php_error(E_WARNING, "%s(): Couldn't re-open stream", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -304,7 +304,7 @@ PHP_FUNCTION(icap_expunge)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -332,7 +332,7 @@ PHP_FUNCTION(icap_fetch_event)
 	ind = Z_LVAL_P(streamind);
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
     }
 	if(myargcount==3) {
@@ -410,7 +410,7 @@ PHP_FUNCTION(icap_list_events)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -488,7 +488,7 @@ PHP_FUNCTION(icap_create_calendar)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 /*
@@ -524,7 +524,7 @@ PHP_FUNCTION(icap_rename_calendar)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 /*
@@ -562,7 +562,7 @@ PHP_FUNCTION(icap_list_alarms)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -632,7 +632,7 @@ PHP_FUNCTION(icap_delete_calendar)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -667,7 +667,7 @@ PHP_FUNCTION(icap_delete_event)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	if (cal_remove(icap_le_struct->icap_stream, Z_LVAL_P(uid))) 
@@ -724,7 +724,7 @@ PHP_FUNCTION(icap_store_event)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -869,7 +869,7 @@ PHP_FUNCTION(icap_snooze)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "%s(): Unable to find stream pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
