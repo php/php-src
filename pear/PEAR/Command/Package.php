@@ -125,7 +125,7 @@ Run regression tests with PHP\'s regression testing script (run-tests.php).',
                                         'options' => array(),
                                         'doc' => '
 List all depencies the package has.'
-                                        ),    
+                                        ),
         );
     var $output;
 
@@ -172,23 +172,24 @@ List all depencies the package has.'
             $this->ui->outputData($this->output, $command);
             return;
         }
-        $compress = empty($options['Z']) ? true : false;
+        $compress = empty($options['nocompress']) ? true : false;
         $result = $packager->Package($pkginfofile, $compress);
-        $this->output .= ob_get_contents();
+        $this->output = ob_get_contents();
         ob_end_clean();
         if (PEAR::isError($result)) {
             $this->ui->outputData($this->output, $command);
             return $this->raiseError($result);
         }
         // Don't want output, only the package file name just created
-        if (isset($options['n'])) {
-            $this->output .= $result."\n";
-            return;
+        if (isset($options['showname'])) {
+            $this->output = $result;
         }
-        $lines = explode("\n", $output);
+        /* (cox) What is supposed to do that code?
+        $lines = explode("\n", $this->output);
         foreach ($lines as $line) {
             $this->output .= $line."n";
         }
+        */
         if (PEAR::isError($result)) {
             $this->output .= "Package failed: ".$result->getMessage();
         }
