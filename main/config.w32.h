@@ -30,7 +30,11 @@
 #define HAVE_WDDX 1
 
 /* set to enable the crypt command */
-#define HAVE_CRYPT 0
+#define HAVE_CRYPT 1
+#define PHP_STD_DES_CRYPT 1
+#define PHP_EXT_DES_CRYPT 0
+#define PHP_MD5_CRYPT 0
+#define PHP_BLOWFISH_CRYPT 0
 /* #define HAVE_CRYPT_H 1 */
 
 /* set to enable force cgi redirect */
