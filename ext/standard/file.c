@@ -535,9 +535,9 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 }
 /* }}} */
 
-/* {{{ proto resource fgetwrapperdata(resource fp)
+/* {{{ proto resource file_get_wrapper_data(resource fp)
  */
-PHP_FUNCTION(fgetwrapperdata)
+PHP_FUNCTION(file_get_wrapper_data)
 {
 	zval **arg1;
 	php_stream *stream;
