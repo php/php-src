@@ -60,21 +60,21 @@ PHP_FUNCTION(dl)
 {
 	pval **file;
 
-#ifdef ZTS
-	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 
-		(strcmp(sapi_module.name, "cli")!=0) &&
-		(strncmp(sapi_module.name, "embed", 5)!=0)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension statements in your php.ini");
-		RETURN_FALSE;
-	}
-#endif
-
 	/* obtain arguments */
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(file);
+
+#ifdef ZTS
+	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && 
+		(strcmp(sapi_module.name, "cli")!=0) &&
+		(strncmp(sapi_module.name, "embed", 5)!=0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_PP(file));
+		RETURN_FALSE;
+	}
+#endif
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
