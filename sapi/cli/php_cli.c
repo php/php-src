@@ -726,7 +726,7 @@ int main(int argc, char *argv[])
 		}
 
 	} zend_catch {
-		exit_status = 255;
+		exit_status = EG(exit_status);
 	} zend_end_try();
 
 	php_module_shutdown(TSRMLS_C);
