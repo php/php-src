@@ -63,6 +63,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		case PDO_ERR_MISMATCH:			msg = "Mismatch"; break;
 		case PDO_ERR_TRUNCATED:			msg = "Truncated"; break;
 		case PDO_ERR_DISCONNECTED:		msg = "Disconnected"; break;
+		case PDO_ERR_NO_PERM:			msg = "No permission"; break;
 		default:	msg = "<<Invalid>>";
 	}
 
@@ -126,6 +127,19 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	}
 }
 
+static char *dsn_from_uri(char *uri TSRMLS_DC)
+{
+	php_stream *stream;
+	char *dsn = NULL;
+
+	stream = php_stream_open_wrapper(uri, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	if (stream) {
+		dsn = php_stream_get_line(stream, NULL, 0, NULL);
+		php_stream_close(stream);
+	}
+	return dsn;
+}
+
 /* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array driver_opts])
    */
 static PHP_FUNCTION(dbh_constructor)
@@ -154,6 +168,16 @@ static PHP_FUNCTION(dbh_constructor)
 		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "invalid data source name");
 		ZVAL_NULL(object);
 		return;
+	}
+
+	if (!strncmp(data_source, "uri:", sizeof("uri:")-1)) {
+		/* the specified URI holds connection details */
+		data_source = dsn_from_uri(data_source TSRMLS_CC);
+		if (!data_source) {
+			zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "invalid data source URI");
+			ZVAL_NULL(object);
+			return;
+		}
 	}
 
 	driver = pdo_find_driver(data_source, colon - data_source);

@@ -14,7 +14,6 @@ Low-level:
 - LOB support via Streams API
 - persistent handles
 - iterator support
-- "lazy" fetch support
 
 Not-so-low-level:
 - hash key case folding for portabilitiy, ala sqlite.assoc_case, but not using an ini option.
