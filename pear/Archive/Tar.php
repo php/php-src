@@ -44,6 +44,11 @@ class Archive_Tar extends PEAR
     */
     var $_file=0;
 
+    /**
+    * @var string Local Tar name of a remote Tar (http:// or ftp://)
+    */
+    var $_temp_tarname='';
+
     // {{{ constructor
     /**
     * Archive_Tar Class constructor. This flavour of the constructor only
@@ -81,6 +86,9 @@ class Archive_Tar extends PEAR
     function _Archive_Tar()
     {
         $this->_close();
+        // ----- Look for a local copy to delete
+        if ($this->_temp_tarname != '')
+            @unlink($this->_temp_tarname);
         $this->_PEAR();
     }
     // }}}
@@ -394,13 +402,41 @@ class Archive_Tar extends PEAR
     // {{{ _openRead()
     function _openRead()
     {
+        if (strtolower(substr($this->_tarname, 0, 7)) == 'http://') {
+
+          // ----- Look if a local copy need to be done
+          if ($this->_temp_tarname == '') {
+              $this->_temp_tarname = uniqid('tar').'.tmp';
+              if (!$v_file_from = @fopen($this->_tarname, 'rb')) {
+                $this->_error('Unable to open in read mode \''.$this->_tarname.'\'');
+                $this->_temp_tarname = '';
+                return false;
+              }
+              if (!$v_file_to = @fopen($this->_temp_tarname, 'wb')) {
+                $this->_error('Unable to open in write mode \''.$this->_temp_tarname.'\'');
+                $this->_temp_tarname = '';
+                return false;
+              }
+              while ($v_data = @fread($v_file_from, 1024))
+                  @fwrite($v_file_to, $v_data);
+              @fclose($v_file_from);
+              @fclose($v_file_to);
+          }
+
+          // ----- File to open if the local copy
+          $v_filename = $this->_temp_tarname;
+
+        } else
+          // ----- File to open if the normal Tar file
+          $v_filename = $this->_tarname;
+
         if ($this->_compress)
-            $this->_file = @gzopen($this->_tarname, "rb");
+            $this->_file = @gzopen($v_filename, "rb");
         else
-            $this->_file = @fopen($this->_tarname, "rb");
+            $this->_file = @fopen($v_filename, "rb");
 
         if ($this->_file == 0) {
-            $this->_error('Unable to open in read mode \''.$this->_tarname.'\'');
+            $this->_error('Unable to open in read mode \''.$v_filename.'\'');
             return false;
         }
 
@@ -437,6 +473,13 @@ class Archive_Tar extends PEAR
             $this->_file = 0;
         }
 
+        // ----- Look if a local copy need to be erase
+        // Note that it might be interesting to keep the url for a time : ToDo
+        if ($this->_temp_tarname != '') {
+            @unlink($this->_temp_tarname);
+            $this->_temp_tarname = '';
+        }
+
         return true;
     }
     // }}}
@@ -444,8 +487,18 @@ class Archive_Tar extends PEAR
     // {{{ _cleanFile()
     function _cleanFile()
     {
-        _close();
-        @unlink($this->tarname);
+        $this->_close();
+
+        // ----- Look for a local copy
+        if ($this->_temp_tarname != '') {
+            // ----- Remove the local copy but not the remote tarname
+            @unlink($this->_temp_tarname);
+            $this->_temp_tarname = '';
+        } else {
+            // ----- Remove the local tarname file
+            @unlink($this->_tarname);
+        }
+        $this->_tarname = '';
 
         return true;
     }
@@ -743,7 +796,12 @@ class Archive_Tar extends PEAR
     $v_extract_all = true;
     $v_listing = false;
 
-    if ($p_path == '' || (substr($p_path, 0, 1) != '/' && substr($p_path, 0, 3) != "../" && substr($p_path, 1, 3) != ":\\")) {
+    // ----- Look for removing the WINDOW '\'
+    if (OS_WINDOWS && strpos($p_path, '\\')) {
+        str_replace('\\', '/', $p_path);
+    }
+
+    if ($p_path == '' || (substr($p_path, 0, 1) != '/' && substr($p_path, 0, 3) != "../" && !strpos($p_path, ':'))) {
       $p_path = "./".$p_path;
     }
 
