@@ -30,7 +30,7 @@ static int skeleton_describe(rpc_string, void *, char **, unsigned char **);
 static int skeleton_call(rpc_string, void **, zval *, int, zval ***);
 static int skeleton_get(rpc_string, zval *, void **);
 static int skeleton_set(rpc_string, zval *, void **);
-static int skeleton_skeletonpare(void **, void **);
+static int skeleton_compare(void **, void **);
 static int skeleton_has_property(rpc_string, void **);
 static int skeleton_unset_property(rpc_string, void **);
 static int skeleton_get_properties(HashTable **, void **);
