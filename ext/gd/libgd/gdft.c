@@ -509,12 +509,11 @@ tweenColorFetch (char **error, void *key)
 	     is incorporate our knowledge of the percentage of this
 	     pixel that is really "lit" by pushing the alpha value
 	     up toward transparency in edge regions. */
-	  a->tweencolor = gdAlphaBlend(bg, gdTrueColorAlpha (
+	  a->tweencolor = gdTrueColorAlpha (
 					     gdTrueColorGetRed (fg),
 					     gdTrueColorGetGreen (fg),
 					     gdTrueColorGetBlue (fg),
-					     gdAlphaMax - ((gdAlphaMax - gdTrueColorGetAlpha (fg)) * pixel / NUMCOLORS))
-				       );
+					     gdAlphaMax - ((gdAlphaMax - gdTrueColorGetAlpha (fg)) * pixel / NUMCOLORS))				       );
 	}
       else
 	{
@@ -604,7 +603,7 @@ gdft_draw_bitmap (gdImage * im, int fg, FT_Bitmap bitmap, int pen_x, int pen_y)
 		}
 				else	{
 		  pixel = &im->pixels[y][x];
-	      if (tc_key.pixel == NUMCOLORS && gdTrueColorGetAlpha(fg) ==0)
+	      if (tc_key.pixel == NUMCOLORS)
 		      *pixel = fg;
 					else	{
 		      tc_key.bgcolor = *pixel;
