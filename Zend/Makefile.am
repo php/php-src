@@ -25,14 +25,14 @@ libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 zend-scanner.l: zend-parser.h
 
-zend-scanner.c: zend-scanner.l
+zend-scanner.c: $(srcdir)/zend-scanner.l
 	$(LEX) -Pzend -o$@ -i $(srcdir)/zend-scanner.l
 
-zend-scanner-cc.cc: zend-scanner.l
+zend-scanner-cc.cc: $(srcdir)/zend-scanner.l
 	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ $(srcdir)/zend-scanner.l
 
 zend-parser.h: zend-parser.c
-zend-parser.c: zend-parser.y
+zend-parser.c: $(srcdir)/zend-parser.y
 	$(YACC) -p zend -v -d $(srcdir)/zend-parser.y -o zend-parser.c
 
 depend:
