@@ -43,6 +43,11 @@
 ;     but can be configured in several ways).  Along with setting display_errors to off,
 ;     this setup gives you the ability to fully understand what may have gone wrong,
 ;     without exposing any sensitive information to remote users.
+; - output_buffering = 4096        [Performance]
+;     Set a 4KB output buffer.  Enabling output buffering typically results in less
+;     writes, and sometimes less packets sent on the wire, which can often lead to
+;     better performance.  The gain this directive actually yields greatly depends
+;     on which Web server you're working with, and what kind of scripts you're using.
 ; - register_argc_argv = Off       [Performance]
 ;     Disables registration of the somewhat redundant $argv and $argc global
 ;     variables.
@@ -85,7 +90,7 @@ y2k_compliance = Off
 ; setting this directive to On.  If you wish to limit the size of the buffer
 ; to a certain size - you can use a maximum number of bytes instead of 'On', as
 ; a value for this directive (e.g., output_buffering=4096).
-output_buffering = Off
+output_buffering = 4096
 
 ; You can redirect all of the output of your scripts to a function.  For
 ; example, if you set output_handler to "ob_gzhandler", output will be
