@@ -113,6 +113,7 @@ typedef struct _php_ps_globals {
 	zval *http_session_vars;
 	zend_bool auto_start;
 	zend_bool use_cookies;
+	zend_bool use_only_cookies;
 	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
 } php_ps_globals;
