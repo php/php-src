@@ -64,7 +64,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP], [
     fi
     	
     PHP_MBSTRING_ADD_SOURCES([
-      mbstring.c php_unicode.c mb_gpc.c php_mbfl_allocators.c
+      mbstring.c php_unicode.c mb_gpc.c
     ])
   fi
 ])
@@ -175,6 +175,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/mbfl/mbfl_language.c
      libmbfl/mbfl/mbfl_memory_device.c
      libmbfl/mbfl/mbfl_string.c
+     libmbfl/mbfl/mbfl_allocators.c
      libmbfl/nls/nls_de.c
      libmbfl/nls/nls_en.c
      libmbfl/nls/nls_ja.c

@@ -60,6 +60,8 @@
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 
+#include "mbfl/mbfl_allocators.h"
+
 #include "php_variables.h"
 #include "php_globals.h"
 #include "rfc1867.h"
@@ -226,6 +228,53 @@ ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 #ifdef COMPILE_DL_MBSTRING
 ZEND_GET_MODULE(mbstring)
 #endif
+
+/* {{{ allocators */
+static void *_php_mb_allocators_malloc(unsigned int sz)
+{
+	return emalloc(sz);
+}
+
+static void *_php_mb_allocators_realloc(void *ptr, unsigned int sz)
+{
+	return erealloc(ptr, sz);
+}
+
+static void *_php_mb_allocators_calloc(unsigned int nelems, unsigned int szelem)
+{
+	return ecalloc(nelems, szelem);
+}
+
+static void _php_mb_allocators_free(void *ptr)
+{
+	efree(ptr);
+} 
+
+static void *_php_mb_allocators_pmalloc(unsigned int sz)
+{
+	return pemalloc(sz, 1);
+}
+
+static void *_php_mb_allocators_prealloc(void *ptr, unsigned int sz)
+{
+	return perealloc(ptr, sz, 1);
+}
+
+static void _php_mb_allocators_pfree(void *ptr)
+{
+	pefree(ptr, 1);
+} 
+
+static mbfl_allocators _php_mb_allocators = {
+	_php_mb_allocators_malloc,
+	_php_mb_allocators_realloc,
+	_php_mb_allocators_calloc,
+	_php_mb_allocators_free,
+	_php_mb_allocators_pmalloc,
+	_php_mb_allocators_prealloc,
+	_php_mb_allocators_pfree
+};
+/* }}} */
 
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return 0 if input contains any illegal encoding, otherwise 1.
@@ -663,6 +712,8 @@ static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION(mbstring) */
 PHP_MINIT_FUNCTION(mbstring)
 {
+	__mbfl_allocators = &_php_mb_allocators;
+
 #ifdef ZTS
 	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals),
 		(ts_allocate_ctor) _php_mb_globals_ctor,
