@@ -356,7 +356,9 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			return FAILURE;
 		}
 		function_name = *tmp_real_function_name;
+		SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
 		object = *tmp_object_ptr;
+		object->is_ref = 1;
 	}
 
 	if (object) {
