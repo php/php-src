@@ -17,7 +17,7 @@
  */
 /* $Id$ */
 
-#if defined(__linux__) || defined(sun) || defined(__IRIX__)
+#if 0 && (defined(__linux__) || defined(sun) || defined(__IRIX__))
 # define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
 # define _BSD_COMPAT		/* irix: uint */
 # define _XOPEN_SOURCE 500  /* turn on Unix98 */
@@ -56,7 +56,7 @@
  * */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 
-#if HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
+#if 0 && HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
 # include <sys/ioctl.h>
 # include <termios.h>
 # define PHP_CAN_DO_PTS	1
