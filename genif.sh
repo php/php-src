@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.2 1999-05-08 18:16:29 andrey Exp $
+# $Id: genif.sh,v 1.3 1999-05-08 21:44:12 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -13,24 +13,24 @@ if test "$infile" = "" -o "$srcdir" = ""; then
 	exit 1
 fi
 
-cmd1='echo $data | grep @EXT_INCLUDE_CODE@ > /dev/null 2>&1'
-cmd2='echo $data | grep @EXT_MODULE_PTRS@ > /dev/null 2>&1'
+module_ptrs=""
+includes=""
 
-while read data; do
-	if eval $cmd1 ; then
-		for ext in $* ; do
-			for pre in php3 php php4 zend; do
-				hdrfile="ext/$ext/${pre}_${ext}.h"
-				if test -f $hdrfile ; then
-					echo "#include \"$hdrfile\""
-				fi
-			done
-		done
-	elif eval $cmd2 ; then
-		for ext in $* ; do
-			echo "	phpext_${ext}_ptr,"
-		done
-	else
-		echo "$data"
-	fi
-done < $infile
+# the 'ä' is used as a newline replacement
+# its later tr'd to '\n'
+
+for ext in $* ; do
+	module_ptrs="	phpext_${ext}_ptr,ä$module_ptrs"
+	for pre in php3 php php4 zend; do
+		hdrfile="ext/$ext/${pre}_${ext}.h"
+		if test -f $hdrfile ; then
+			includes="#include \"$hdrfile\"ä$includes"
+		fi
+	done
+done
+
+cat $infile | \
+	sed "s'@EXT_INCLUDE_CODE@'$includes'" | \
+	sed "s'@EXT_MODULE_PTRS@'$module_ptrs'" | \
+	tr ä '\n'
+
