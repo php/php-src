@@ -2682,7 +2682,7 @@ PHP_FUNCTION(ibase_blob_add)
 
 	for (rem_cnt = Z_STRLEN_PP(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
 		
-		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : rem_cnt;
+		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short) rem_cnt;
 
 		if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, chunk_size, &Z_STRVAL_PP(string_arg)[put_cnt] )) {
 			_php_ibase_error(TSRMLS_C);
@@ -2699,9 +2699,9 @@ PHP_FUNCTION(ibase_blob_add)
 PHP_FUNCTION(ibase_blob_get)
 {
 	zval **blob_arg, **len_arg;
-	int stat;
+	ISC_STATUS stat;
 	char *bl_data;
-	unsigned short max_len = 0, cur_len, seg_len;
+	unsigned long max_len, cur_len;
 	ibase_blob_handle *ib_blob;
 
 	RESET_ERRMSG;
@@ -2711,7 +2711,7 @@ PHP_FUNCTION(ibase_blob_get)
 	}
 
 	convert_to_long_ex(len_arg);
-	max_len = (unsigned short) Z_LVAL_PP(len_arg);
+	max_len = Z_LVAL_PP(len_arg);
 
 	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
 
@@ -2719,18 +2719,20 @@ PHP_FUNCTION(ibase_blob_get)
 		
 		bl_data = emalloc(max_len + 1);
 
-		for (cur_len = stat = 0; stat == 0;) {
-			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, (unsigned short) (max_len-cur_len), &bl_data[cur_len]);
+		for (cur_len = stat = 0; stat == 0 || stat == isc_segment;  ) {
+			unsigned short seg_len, chunk_size = (max_len-cur_len) > USHRT_MAX ? USHRT_MAX : (unsigned short)(max_len-cur_len);
+
+			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, chunk_size, &bl_data[cur_len]); 
+
 			cur_len += seg_len;
-			if (cur_len > max_len) { /* never!*/
-				efree(bl_data);
-				_php_ibase_module_error("PHP module internal error");
-				RETURN_FALSE;
+			
+			if (cur_len == max_len) {
+				break;
 			}
 		}
 
 		bl_data[cur_len] = '\0';
-		if (IB_STATUS[0] && (IB_STATUS[1] != isc_segstr_eof && IB_STATUS[1] != isc_segment)) {
+		if (IB_STATUS[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
 			efree(bl_data);
 			_php_ibase_error(TSRMLS_C);
 			RETURN_FALSE;
