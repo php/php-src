@@ -15,6 +15,6 @@ if (PHP_CURL != "no") {
 		// TODO: check for curl_version_info
 		AC_DEFINE('PHP_CURL_URL_WRAPPERS', 0, 'Use curl for URL wrappers [experimental]');
 	} else {
-		WARNING("cpdf not enabled; libraries and headers not found");
+		WARNING("curl not enabled; libraries and headers not found");
 	}
 }
