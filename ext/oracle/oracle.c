@@ -72,7 +72,6 @@ static void ora_del_cursor(HashTable *, int);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
 static int _close_oraconn(oraConnection *conn);
-static int _close_orapconn(oraConnection *conn);
 static int _close_oracur(oraCursor *cur);
 static int _ora_ping(oraConnection *conn);
 int ora_set_param_values(oraCursor *cursor, int isout);
@@ -196,20 +195,15 @@ static int _close_oraconn(oraConnection *conn)
 
 	ologof(&conn->lda);
 	ORA(num_links)--;
-	efree(conn);
 
 	zend_hash_del(ORA(conns),(void*)&conn,sizeof(void*));
 
-	return 1;
-}
-
-static int _close_orapconn(oraConnection *conn)
-{
-	ORALS_FETCH();
-
-	_close_oraconn(conn);
-
-	ORA(num_persistent)--;
+	if (conn->persistent) {
+		ORA(num_persistent)--;
+		free(conn);
+	} else {
+		efree(conn);
+	}
 
 	return 1;
 }
@@ -321,7 +315,7 @@ PHP_MINIT_FUNCTION(oracle)
 
 	le_cursor = register_list_destructors(_close_oracur, NULL);
 	le_conn = register_list_destructors(_close_oraconn, NULL);
-	le_pconn = register_list_destructors(NULL, _close_orapconn);
+	le_pconn = register_list_destructors(NULL, _close_oraconn);
 
 	REGISTER_LONG_CONSTANT("ORA_BIND_INOUT", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);
@@ -454,6 +448,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* create the link */
 			db_conn = (oraConnection *)malloc(sizeof(oraConnection));
 			memset((void *) db_conn,0,sizeof(oraConnection));	
+			db_conn->persistent = 1;
 
 			if (
 #if HAS_OLOG
@@ -545,6 +540,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		db_conn = (oraConnection *) emalloc(sizeof(oraConnection));
 		memset((void *) db_conn,0,sizeof(oraConnection));	
+		db_conn->persistent = 0;
 
 		if (
 #if HAS_OLOG
@@ -596,6 +592,7 @@ PHP_FUNCTION(ora_logoff)
 /* }}} */
 
 /* {{{ proto int ora_open(int connection)
+
    Open an Oracle cursor */
 PHP_FUNCTION(ora_open)
 {								/* conn_index */
@@ -626,6 +623,7 @@ PHP_FUNCTION(ora_open)
 	ZEND_REGISTER_RESOURCE(return_value, cursor, le_cursor);
 	cursor->conn_id = return_value->value.lval;
 }
+
 /* }}} */
 
 /* {{{ proto int ora_close(int cursor)
@@ -1151,8 +1149,8 @@ PHP_FUNCTION(ora_fetch_into)
 			} else {
 				MAKE_STD_ZVAL(tmp);
 				
-				tmp->value.str.val = empty_string;
-				tmp->value.str.len = 0;
+				tmp->type = IS_BOOL; /* return false for NULL columns */
+				tmp->value.lval = 0;
 			}
 		} else if (cursor->columns[i].col_retcode != 0 &&
 				   cursor->columns[i].col_retcode != 1406) {
@@ -1381,6 +1379,7 @@ PHP_FUNCTION(ora_getcolumn)
 	int colno;
 	oraCursor *cursor = NULL;
 	oraColumn *column = NULL;
+	int len;
 	sb2 type;
 
 	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
@@ -1434,63 +1433,63 @@ PHP_FUNCTION(ora_getcolumn)
 		 */
 		RETURN_FALSE;
 	} else {
-		switch(type)
-			{
-			case SQLT_CHR:
-			case SQLT_NUM:
-			case SQLT_INT: 
-			case SQLT_FLT:
-			case SQLT_STR:
-			case SQLT_UIN:
-			case SQLT_AFC:
-			case SQLT_AVC:
-			case SQLT_DAT:
-				RETURN_STRINGL(column->buf, min(column->col_retlen, column->dsize), 1);
-			case SQLT_LNG:
-			case SQLT_LBI:
-				{ 
-					ub4 ret_len;
-					int offset = column->col_retlen;
-					sb2 result;
-					
-					if (column->col_retcode == 1406) { /* truncation -> get the rest! */
-						while (1) {
-							column->buf = erealloc(column->buf,offset + DB_SIZE + 1);
-							
-							if (! column->buf) {
-								offset = 0;
-								break;
-							}
-							
-							result = oflng(&cursor->cda, 
-										   (sword)(colno + 1),
-										   column->buf + offset, 
-										   DB_SIZE, 
-										   1,
-										   &ret_len, 
-										   offset);
-							if (result) {
-								break;
-							}
-							
-							if (ret_len <= 0) {
-								break;
-							}
-							
-							offset += ret_len;
+		switch(type) {
+		case SQLT_CHR:
+		case SQLT_NUM:
+		case SQLT_INT: 
+		case SQLT_FLT:
+		case SQLT_STR:
+		case SQLT_UIN:
+		case SQLT_AFC:
+		case SQLT_AVC:
+		case SQLT_DAT:
+			len = min(column->col_retlen, column->dsize);
+			RETURN_STRINGL(column->buf,len,1);
+
+		case SQLT_LNG:
+		case SQLT_LBI:
+			{ 
+				ub4 ret_len;
+				int offset = column->col_retlen;
+				sb2 result;
+				
+				if (column->col_retcode == 1406) { /* truncation -> get the rest! */
+					while (1) {
+						column->buf = erealloc(column->buf,offset + DB_SIZE + 1);
+						
+						if (! column->buf) {
+							offset = 0;
+							break;
 						}
-					}
-					if (column->buf && offset) {
-						RETURN_STRINGL(column->buf, offset, 1);
-					} else {
-						RETURN_FALSE;
+						
+						result = oflng(&cursor->cda, 
+									   (sword)(colno + 1),
+									   column->buf + offset, 
+									   DB_SIZE, 
+									   1,
+									   &ret_len, 
+									   offset);
+						if (result) {
+							break;
+						}
+						
+						if (ret_len <= 0) {
+							break;
+						}
+						
+						offset += ret_len;
 					}
 				}
-			default:
-				php_error(E_WARNING,
-						   "Ora_GetColumn found invalid type (%d)", type);
-				RETURN_FALSE;
+				if (column->buf && offset) {
+					RETURN_STRINGL(column->buf, offset, 1);
+				} else {
+					RETURN_FALSE;
+				}
 			}
+		default:
+			php_error(E_WARNING,"Ora_GetColumn found invalid type (%d)", type);
+			RETURN_FALSE;
+		}
 	}
 }
 /* }}} */
