@@ -617,6 +617,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 	/* initialize global variables */
 	PG(header_is_being_sent) = 0;
+	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
