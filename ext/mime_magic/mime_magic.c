@@ -342,7 +342,7 @@ static int apprentice(void)
     char *fname;
     magic_server_config_rec *conf = &mime_global;
 
-    fname = conf->magicfile; // todo cwd?
+    fname = conf->magicfile; /* todo cwd? */
     f = fopen(fname, "r");
     if (f == NULL) {
 		php_error(E_WARNING,
