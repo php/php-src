@@ -1268,7 +1268,7 @@ PHP_FUNCTION(sqlite_open)
 PHP_FUNCTION(sqlite_factory)
 {
 	long mode = 0666;
-	char *filename, *fullname = NULL;
+	char *filename, *fullpath = NULL;
 	long filename_len;
 	zval *errmsg = NULL;
 
