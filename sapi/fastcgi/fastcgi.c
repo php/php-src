@@ -140,7 +140,7 @@ static char *sapi_fastcgi_read_cookies(TSRMLS_D)
 }
 
 
-static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
+static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char *self = getenv("REQUEST_URI");
 	char *ptr = strchr( self, '?' );
@@ -192,10 +192,9 @@ static sapi_module_struct fastcgi_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void fastcgi_module_main(TSRMLS_D TSRMLS_DC)
+static void fastcgi_module_main(TSRMLS_D)
 {
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
