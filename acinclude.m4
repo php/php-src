@@ -884,19 +884,26 @@ AC_DEFUN(PHP_ADD_LIBPATH,[
 ])
 
 dnl
-dnl PHP_BUILD_RPATH()
+dnl PHP_UTILIZE_RPATHS()
 dnl
-dnl builds RPATH from PHP_RPATHS
+dnl builds RPATHS/LDFLAGS from PHP_RPATHS
 dnl
-AC_DEFUN(PHP_BUILD_RPATH,[
-  if test "$PHP_RPATH" = "yes" && test -n "$PHP_RPATHS"; then
-    OLD_RPATHS=$PHP_RPATHS
+AC_DEFUN(PHP_UTILIZE_RPATHS,[
+  OLD_RPATHS=$PHP_RPATHS
+  unset PHP_RPATHS
+
+  for i in $OLD_RPATHS; do
+dnl Can be passed to native cc/libtool
+    PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
+dnl Libtool-specific
+    PHP_RPATHS="$PHP_RPATHS -R $i"
+dnl cc-specific
+    NATIVE_RPATHS="$NATIVE_RPATHS $ld_runpath_switch$i"
+  done
+
+  if test "$PHP_RPATH" = "no"; then
     unset PHP_RPATHS
-    for i in $OLD_RPATHS; do
-      PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
-      PHP_RPATHS="$PHP_RPATHS -R $i"
-      NATIVE_RPATHS="$NATIVE_RPATHS $ld_runpath_switch$i"
-    done
+    unset NATIVE_RPATHS
   fi
 ])
 
