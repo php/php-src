@@ -83,11 +83,11 @@ typedef struct {
 extern zend_module_entry xml_module_entry;
 # define xml_module_ptr &xml_module_entry
 
-enum php3_xml_option {
-    PHP3_XML_OPTION_CASE_FOLDING = 1,
-    PHP3_XML_OPTION_TARGET_ENCODING,
-    PHP3_XML_OPTION_SKIP_TAGSTART,
-    PHP3_XML_OPTION_SKIP_WHITE
+enum php_xml_option {
+    PHP_XML_OPTION_CASE_FOLDING = 1,
+    PHP_XML_OPTION_TARGET_ENCODING,
+    PHP_XML_OPTION_SKIP_TAGSTART,
+    PHP_XML_OPTION_SKIP_WHITE
 };
 
 # define RETURN_OUT_OF_MEMORY \
