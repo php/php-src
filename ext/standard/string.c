@@ -103,7 +103,7 @@ PHP_FUNCTION(strspn)
    Find length of initial segment consisting entirely of characters not found in mask */
 PHP_FUNCTION(strcspn)
 {
-	pval **s1,**s2;
+	zval **s1,**s2;
 	
 	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
