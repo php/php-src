@@ -73,6 +73,37 @@ static PHP_FUNCTION(dbstmt_constructor) /* {{{ */
 }
 /* }}} */
 
+static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param TSRMLS_DC)
+{
+	if (stmt->bound_param_map) {
+		/* rewriting :name to ? style.
+		 * We need to fixup the parameter numbers on the parameters.
+		 * If we find that a given named parameter has been used twice,
+		 * we will raise an error, as we can't be sure that it is safe
+		 * to bind multiple parameters onto the same zval in the underlying
+		 * driver */
+		char **name;
+		int position = 0;
+		zend_hash_internal_pointer_reset(stmt->bound_param_map);
+		while (SUCCESS == zend_hash_get_current_data(stmt->bound_param_map, (void**)&name)) {
+			if (strcmp(name, param->name)) {
+				position++;
+				zend_hash_move_forward(stmt->bound_param_map);
+				continue;
+			}
+			if (param->paramno >= 0) {
+				pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO refuses to handle repeating the same :named parameter for multiple positions with this driver, as it might be unsafe to do so.  Consider using a separate name for each parameter instead" TSRMLS_CC);
+				return -1;
+			}
+			param->paramno = position;
+			return 1;
+		}
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
+		return 0;
+	}
+	return 1;	
+}
+
 /* trigger callback hook for parameters */
 static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type TSRMLS_DC)
 {
@@ -83,14 +114,13 @@ static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_typ
 	if (!stmt->methods->param_hook) {
 		return 1;
 	}
-	
+
 	ht = stmt->bound_params;
 
 iterate:
 	if (ht) {
 		zend_hash_internal_pointer_reset(ht);
 		while (SUCCESS == zend_hash_get_current_data(ht, (void**)&param)) {
-
 			if (!stmt->methods->param_hook(stmt, param, event_type TSRMLS_CC)) {
 				ret = 0;
 				break;
@@ -141,6 +171,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt TSRMLS_DC)
 			}
 		}
 
+#if 0
 		/* update the column index on named bound parameters */
 		if (stmt->bound_params) {
 			struct pdo_bound_param_data *param;
@@ -150,6 +181,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt TSRMLS_DC)
 				param->paramno = col;
 			}
 		}
+#endif
 		if (stmt->bound_columns) {
 			struct pdo_bound_param_data *param;
 
@@ -253,6 +285,10 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
 
+	if (!rewrite_name_to_position(stmt, pparam TSRMLS_CC)) {
+		return 0;
+	}
+	
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
 		return stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC TSRMLS_CC);
@@ -1231,6 +1267,10 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
 		FREE_HASHTABLE(stmt->bound_params);
+	}
+	if (stmt->bound_param_map) {
+		zend_hash_destroy(stmt->bound_param_map);
+		FREE_HASHTABLE(stmt->bound_param_map);
 	}
 	if (stmt->bound_columns) {
 		zend_hash_destroy(stmt->bound_columns);
