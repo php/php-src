@@ -2976,38 +2976,110 @@ PHP_FUNCTION(hebrevc)
 }
 /* }}} */
 
+
 /* {{{ proto string nl2br(string str)
    Converts newlines to HTML line breaks */
+
+/* maybe const, but will it break some archaic compiler? */
+static int jumps[3][3]={
+	{0,2,1,},
+	{0,0,1,},
+	{0,2,0,},
+};
+static int acts[3][3]={
+	{0,0,0,},
+	{1,3,1,},
+	{2,2,4,},
+};
+static char *strs[4]={"\n","\r","\n\r","\r\n",};
+
 PHP_FUNCTION(nl2br)
 {
-	zval **str;
-	char* tmp;
-	int new_length;
-	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str)==FAILURE) {
+	/* in brief this inserts <br /> before matched regexp \n\r?|\r\n? */
+	zval **zstr;
+	char  *tmp, *str;
+	int    new_length, length;
+	char  *p, *end, *target;
+	int    repl_cnt = 0;
+
+	int    state = 0;
+	/* 0 - initial; 1 - \r found; 2 - \n found; */
+
+	int action;
+	/* actions:
+	   0 - do nothing;   1 - replace \n;   2 - replace \r 
+	   3 - replace \n\r; 4 - replace \r\n;
+	 */
+
+	int ichar;
+	/* letters read from input scanner:
+	   0 - any char different from \n or \r, even end of stream;
+	   1 - \r;  2 - \n
+	 */
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string_ex(str);
+	convert_to_string_ex(zstr);
 
-	/* bail out if the string is empty */
-	if (Z_STRLEN_PP(str) == 0) {
-		RETURN_EMPTY_STRING();
+	str    = Z_STRVAL_PP(zstr);
+	length = Z_STRLEN_PP(zstr);
+	end    = str + length;
+
+	/* it is really faster to scan twice and allocate mem once insted scanning once
+	   and constantly reallocing */
+	for (p = str; p <= end; p++) {
+		/* when p == end assume any char and take the last pending action */
+		if (p == end)
+			ichar = 0;
+		else
+			ichar = (*p == '\n') ? 2 : ((*p == '\r') ? 1 : 0); 
+
+		action = acts[state][ichar];
+		state  = jumps[state][ichar];
+		if (action)
+			repl_cnt++;
 	}
-	
-	/* Windows style line-endings */
-	tmp = php_str_to_str(Z_STRVAL_PP(str), Z_STRLEN_PP(str), "\r\n", 2, "<br />\r\n", 8, &new_length);
-	if (new_length != Z_STRLEN_PP(str))
-		RETURN_STRINGL (tmp, new_length, 0);
-	efree (tmp);
 
-	/* Mac / Unix style line-endings */	
-	if (php_char_to_str(Z_STRVAL_PP(str),Z_STRLEN_PP(str), '\n',"<br />\n", 7, return_value))
-		return;
-	efree (Z_STRVAL_P(return_value));
-	php_char_to_str(Z_STRVAL_PP(str),Z_STRLEN_PP(str), '\r',"<br />\r", 7, return_value);
+	if (repl_cnt == 0) {
+		RETURN_STRINGL(str, length, 1);
+	}
+
+	new_length = length + repl_cnt * 6;
+	tmp        = target = emalloc(new_length + 1);
+
+	/* reinit state machine */
+	state = 0;
+	for (p = str; p <= end; p++) {
+		/* when p == end assume any char and take the last pending action */
+		if (p == end)
+			ichar = 0;
+		else
+			ichar = (*p == '\n') ? 2 : ((*p == '\r') ? 1 : 0); 
+		action = acts[state][ichar];
+		state  = jumps[state][ichar];
+		if (action) {
+			*target++ = '<';
+			*target++ = 'b';
+			*target++ = 'r';
+			*target++ = ' ';
+			*target++ = '/';
+			*target++ = '>';
+			*target++ = strs[action - 1][0];
+			if (action > 2)
+				*target++ = strs[action - 1][1];
+		}
+		if (!ichar && p < end)
+			*target++ = *p;
+	}
+
+	*target = 0;
+
+	RETURN_STRINGL(tmp, new_length, 0);
 }
 /* }}} */
+
 
 /* {{{ proto string strip_tags(string str [, string allowable_tags])
    Strips HTML and PHP tags from a string */
