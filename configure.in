@@ -698,12 +698,12 @@ phptempdir="`pwd`/libs"
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 case $libdir in
-  */php) ;;
-  *) libdir="$libdir/php";;
+  '${exec_prefix}/lib') libdir="$libdir/php";;
+  *) ;;
 esac
 case $datadir in
-  */php) ;;
-  *) datadir="$datadir/php";;
+  '${prefix}/share') datadir="$datadir/php";;
+  *) ;;
 esac
 
 dnl Build extension directory path
