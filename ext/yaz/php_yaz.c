@@ -100,7 +100,7 @@ struct Yaz_AssociationInfo {
 	char *addinfo;
 	Yaz_ResultSet resultSets;
 	int persistent;
-        int in_use;
+		int in_use;
 	int order;
 	int state;
 	int mask_select;
@@ -773,8 +773,8 @@ static int send_search (Yaz_Association t)
 	Z_SearchRequest *sreq = apdu->u.searchRequest;
 	
 	/* resultSetPrepare (req, t, req->cur_pa); */
-	if (t->resultSetStartPoint == 1 && t->piggyback  &&
-            t->numberOfRecordsRequested &&
+	if (t->resultSetStartPoint == 1 && t->piggyback	 &&
+			t->numberOfRecordsRequested &&
 		(t->sort_criteria == 0 || *t->sort_criteria == 0) )
 	{
 		sreq->largeSetLowerBound = odr_malloc (t->odr_out, sizeof(int));
@@ -820,9 +820,9 @@ static int send_present (Yaz_Association t)
 	Z_PresentRequest *req = apdu->u.presentRequest;
 	int i = 0;
 	
-	if (t->error)                  /* don't continue on error */
+	if (t->error)				   /* don't continue on error */
 		return 0;
-	if (!t->resultSets)	           /* no result set yet? */
+	if (!t->resultSets)			   /* no result set yet? */
 		return 0;
 	while (t->resultSets->recordList)
 	{
@@ -881,52 +881,52 @@ static int send_present (Yaz_Association t)
 
 static int *odr_intdup(ODR o, int v)
 {
-    int *dst = (int*) odr_malloc (o, sizeof(int));
-    *dst = v;
-    return dst;
+	int *dst = (int*) odr_malloc (o, sizeof(int));
+	*dst = v;
+	return dst;
 }
 
 static Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
 {
-    int oid[OID_SIZE];
-    oident bib1;
-    char sort_string_buf[32], sort_flags[32];
-    Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
-        odr_malloc (out, sizeof(*sksl));
-    int off;
-    
-    sksl->num_specs = 0;
-    sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
-    
-    bib1.proto = PROTO_Z3950;
-    bib1.oclass = CLASS_ATTSET;
-    bib1.value = VAL_BIB1;
-    while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
-		    sort_flags, &off)) == 2  && off > 1)
-    {
-        int i;
+	int oid[OID_SIZE];
+	oident bib1;
+	char sort_string_buf[32], sort_flags[32];
+	Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
+		odr_malloc (out, sizeof(*sksl));
+	int off;
+	
+	sksl->num_specs = 0;
+	sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
+	
+	bib1.proto = PROTO_Z3950;
+	bib1.oclass = CLASS_ATTSET;
+	bib1.value = VAL_BIB1;
+	while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
+			sort_flags, &off)) == 2	 && off > 1)
+	{
+		int i;
 		char *sort_string_sep;
 		char *sort_string = sort_string_buf;
-        Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
-        Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
+		Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
+		Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
 	
-        arg += off;
-        sksl->specs[sksl->num_specs++] = sks;
-        sks->sortElement = (Z_SortElement *)
-	    odr_malloc (out, sizeof(*sks->sortElement));
-        sks->sortElement->which = Z_SortElement_generic;
-        sks->sortElement->u.generic = sk;
-        
-        if ((sort_string_sep = strchr (sort_string, '=')))
-        {
+		arg += off;
+		sksl->specs[sksl->num_specs++] = sks;
+		sks->sortElement = (Z_SortElement *)
+		odr_malloc (out, sizeof(*sks->sortElement));
+		sks->sortElement->which = Z_SortElement_generic;
+		sks->sortElement->u.generic = sk;
+		
+		if ((sort_string_sep = strchr (sort_string, '=')))
+		{
 			int i = 0;
 			sk->which = Z_SortKey_sortAttributes;
-            sk->u.sortAttributes = (Z_SortAttributes *)
+			sk->u.sortAttributes = (Z_SortAttributes *)
 				odr_malloc (out, sizeof(*sk->u.sortAttributes));
-            sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
-            sk->u.sortAttributes->list = (Z_AttributeList *)
+			sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
+			sk->u.sortAttributes->list = (Z_AttributeList *)
 				odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
-            sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
+			sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
 				odr_malloc (out, 10 * 
 							sizeof(*sk->u.sortAttributes->list->attributes));
 			while (i < 10 && sort_string && sort_string_sep)
@@ -947,47 +947,47 @@ static Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
 					sort_string_sep = strchr (sort_string, '=');
 				}
 			}
-            sk->u.sortAttributes->list->num_attributes = i;
-        }
-        else
-        {
-            sk->which = Z_SortKey_sortField;
-            sk->u.sortField = odr_strdup (out, sort_string);
-        }
-        sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
-        sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
+			sk->u.sortAttributes->list->num_attributes = i;
+		}
+		else
+		{
+			sk->which = Z_SortKey_sortField;
+			sk->u.sortField = odr_strdup (out, sort_string);
+		}
+		sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
+		sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
 
-        sks->which = Z_SortKeySpec_null;
-        sks->u.null = odr_nullval ();
+		sks->which = Z_SortKeySpec_null;
+		sks->u.null = odr_nullval ();
 	
-        for (i = 0; sort_flags[i]; i++)
-        {
-            switch (sort_flags[i])
-            {
-            case 'd':
-            case 'D':
-            case '>':
-                *sks->sortRelation = Z_SortRelation_descending;
-                break;
-            case 'a':
-            case 'A':
-            case '<':
-                *sks->sortRelation = Z_SortRelation_ascending;
-                break;
-            case 'i':
-            case 'I':
-                *sks->caseSensitivity = Z_SortCase_caseInsensitive;
-                break;
-            case 'S':
-            case 's':
-                *sks->caseSensitivity = Z_SortCase_caseSensitive;
-                break;
-            }
-        }
-    }
-    if (!sksl->num_specs)
+		for (i = 0; sort_flags[i]; i++)
+		{
+			switch (sort_flags[i])
+			{
+			case 'd':
+			case 'D':
+			case '>':
+				*sks->sortRelation = Z_SortRelation_descending;
+				break;
+			case 'a':
+			case 'A':
+			case '<':
+				*sks->sortRelation = Z_SortRelation_ascending;
+				break;
+			case 'i':
+			case 'I':
+				*sks->caseSensitivity = Z_SortCase_caseInsensitive;
+				break;
+			case 'S':
+			case 's':
+				*sks->caseSensitivity = Z_SortCase_caseSensitive;
+				break;
+			}
+		}
+	}
+	if (!sksl->num_specs)
 		return 0;
-    return sksl;
+	return sksl;
 }
 #endif
 
@@ -1290,9 +1290,9 @@ PHP_FUNCTION(yaz_connect)
 #ifdef ZTS
 				tsrm_mutex_unlock (yaz_mutex);
 #endif
-				RETURN_LONG(0);          /* no free slot */
+				RETURN_LONG(0);			 /* no free slot */
 			}
-			else                         /* "best" free slot */
+			else						 /* "best" free slot */
 				yaz_association_destroy(shared_associations[i]);
 		}
 		shared_associations[i] = as = yaz_association_mk ();
@@ -1615,52 +1615,52 @@ PHP_FUNCTION(yaz_hits)
 
 static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 {
-    int entry_p;
-    int record_length;
-    int indicator_length;
-    int identifier_length;
-    int base_address;
-    int length_data_entry;
-    int length_starting;
-    int length_implementation;
-    int max_elements = 256;
-    Z_GenericRecord *r = odr_malloc (o, sizeof(*r));
-    r->elements = odr_malloc (o, sizeof(*r->elements) * max_elements);
-    r->num_elements = 0;
+	int entry_p;
+	int record_length;
+	int indicator_length;
+	int identifier_length;
+	int base_address;
+	int length_data_entry;
+	int length_starting;
+	int length_implementation;
+	int max_elements = 256;
+	Z_GenericRecord *r = odr_malloc (o, sizeof(*r));
+	r->elements = odr_malloc (o, sizeof(*r->elements) * max_elements);
+	r->num_elements = 0;
 	
-    record_length = atoi_n (buf, 5);
-    if (record_length < 25)
-        return 0;
-    indicator_length = atoi_n (buf+10, 1);
-    identifier_length = atoi_n (buf+11, 1);
-    base_address = atoi_n (buf+12, 4);
+	record_length = atoi_n (buf, 5);
+	if (record_length < 25)
+		return 0;
+	indicator_length = atoi_n (buf+10, 1);
+	identifier_length = atoi_n (buf+11, 1);
+	base_address = atoi_n (buf+12, 5);
 	
-    length_data_entry = atoi_n (buf+20, 1);
-    length_starting = atoi_n (buf+21, 1);
-    length_implementation = atoi_n (buf+22, 1);
+	length_data_entry = atoi_n (buf+20, 1);
+	length_starting = atoi_n (buf+21, 1);
+	length_implementation = atoi_n (buf+22, 1);
 	
-    for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
-    {
-        entry_p += 3+length_data_entry+length_starting;
-        if (entry_p >= record_length)
-            return 0;
-    }
-    base_address = entry_p+1;
-    for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
-    {
+	for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+	{
+		entry_p += 3+length_data_entry+length_starting;
+		if (entry_p >= record_length)
+			return 0;
+	}
+	base_address = entry_p+1;
+	for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+	{
 		Z_TaggedElement *tag;
-        int data_length;
+		int data_length;
 		int data_offset;
 		int end_offset;
 		int i;
 		char tag_str[4];
 		int identifier_flag = 1;
 		
-        memcpy (tag_str, buf+entry_p, 3);
+		memcpy (tag_str, buf+entry_p, 3);
 		entry_p += 3;
-        tag_str[3] = '\0';
+		tag_str[3] = '\0';
 		
-        if ((r->num_elements + 1) >= max_elements)
+		if ((r->num_elements + 1) >= max_elements)
 		{
 			Z_TaggedElement **tmp = r->elements;
 			
@@ -1708,7 +1708,7 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		end_offset = i+data_length-1;
 
 		
-		if (indicator_length == 2)
+		if (indicator_length > 0 && indicator_length < 5)
 		{
 			if (buf[i + indicator_length] != ISO2709_IDFS)
 				identifier_flag = 0;
@@ -2090,28 +2090,28 @@ static const char *ill_array_lookup (void *clientData, const char *idx)
 
 static Z_External *encode_ill_request (Yaz_Association t, HashTable *ht)
 {
-    ODR out = t->odr_out;
-    ILL_Request *req;
-    Z_External *r = 0;
-    struct ill_get_ctl ctl;
+	ODR out = t->odr_out;
+	ILL_Request *req;
+	Z_External *r = 0;
+	struct ill_get_ctl ctl;
 	
-    ctl.odr = t->odr_out;
-    ctl.clientData = ht;
-    ctl.f = ill_array_lookup;
+	ctl.odr = t->odr_out;
+	ctl.clientData = ht;
+	ctl.f = ill_array_lookup;
 	
-    req = ill_get_ILLRequest(&ctl, "ill", 0);
+	req = ill_get_ILLRequest(&ctl, "ill", 0);
 	
-    if (!ill_Request (out, &req, 0, 0))
-    {
+	if (!ill_Request (out, &req, 0, 0))
+	{
 		int ill_request_size;
 		char *ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
 		if (ill_request_buf)
 			odr_setbuf (out, ill_request_buf, ill_request_size, 1);
 		php_error(E_WARNING, "yaz_itemorder: Expected array parameter");
 		return 0;
-    }
-    else
-    {
+	}
+	else
+	{
 		oident oid;
 		int illRequest_size = 0;
 		char *illRequest_buf = odr_getbuf (out, &illRequest_size, 0);
@@ -2132,96 +2132,96 @@ static Z_External *encode_ill_request (Yaz_Association t, HashTable *ht)
 		r->u.single_ASN1_type->len = illRequest_size;
 		r->u.single_ASN1_type->size = illRequest_size;
 		memcpy (r->u.single_ASN1_type->buf, illRequest_buf, illRequest_size);
-    }
-    return r;
+	}
+	return r;
 }
 
 static Z_ItemOrder *encode_item_order(Yaz_Association t,
 									  HashTable *ht)
 {
-    Z_ItemOrder *req = odr_malloc (t->odr_out, sizeof(*req));
-    const char *str;
+	Z_ItemOrder *req = odr_malloc (t->odr_out, sizeof(*req));
+	const char *str;
 
 #ifdef ASN_COMPILED
-    req->which=Z_IOItemOrder_esRequest;
+	req->which=Z_IOItemOrder_esRequest;
 #else
-    req->which=Z_ItemOrder_esRequest;
+	req->which=Z_ItemOrder_esRequest;
 #endif
-    req->u.esRequest = (Z_IORequest *) 
+	req->u.esRequest = (Z_IORequest *) 
 	odr_malloc(t->odr_out,sizeof(Z_IORequest));
 
-    /* to keep part ... */
-    req->u.esRequest->toKeep = (Z_IOOriginPartToKeep *)
+	/* to keep part ... */
+	req->u.esRequest->toKeep = (Z_IOOriginPartToKeep *)
 	odr_malloc(t->odr_out,sizeof(Z_IOOriginPartToKeep));
-    req->u.esRequest->toKeep->supplDescription = 0;
-    req->u.esRequest->toKeep->contact =
+	req->u.esRequest->toKeep->supplDescription = 0;
+	req->u.esRequest->toKeep->contact =
 		odr_malloc (t->odr_out, sizeof(*req->u.esRequest->toKeep->contact));
 	
-    str = array_lookup_string (ht, "contact-name");
-    req->u.esRequest->toKeep->contact->name = str ?
+	str = array_lookup_string (ht, "contact-name");
+	req->u.esRequest->toKeep->contact->name = str ?
 		nmem_strdup (t->odr_out->mem, str) : 0;
 	
-    str = array_lookup_string (ht, "contact-phone");
-    req->u.esRequest->toKeep->contact->phone = str ?
+	str = array_lookup_string (ht, "contact-phone");
+	req->u.esRequest->toKeep->contact->phone = str ?
 		nmem_strdup (t->odr_out->mem, str) : 0;
 	
-    str = array_lookup_string (ht, "contact-email");
-    req->u.esRequest->toKeep->contact->email = str ?
+	str = array_lookup_string (ht, "contact-email");
+	req->u.esRequest->toKeep->contact->email = str ?
 		nmem_strdup (t->odr_out->mem, str) : 0;
 	
-    req->u.esRequest->toKeep->addlBilling = 0;
+	req->u.esRequest->toKeep->addlBilling = 0;
 	
-    /* not to keep part ... */
-    req->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
+	/* not to keep part ... */
+	req->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
 		odr_malloc(t->odr_out,sizeof(Z_IOOriginPartNotToKeep));
 	
-    req->u.esRequest->notToKeep->resultSetItem = (Z_IOResultSetItem *)
+	req->u.esRequest->notToKeep->resultSetItem = (Z_IOResultSetItem *)
 		odr_malloc(t->odr_out, sizeof(Z_IOResultSetItem));
-    req->u.esRequest->notToKeep->resultSetItem->resultSetId = "default";
-    req->u.esRequest->notToKeep->resultSetItem->item =
+	req->u.esRequest->notToKeep->resultSetItem->resultSetId = "default";
+	req->u.esRequest->notToKeep->resultSetItem->item =
 		(int *) odr_malloc(t->odr_out, sizeof(int));
 	
-    str = array_lookup_string (ht, "itemorder-item");
+	str = array_lookup_string (ht, "itemorder-item");
 	*req->u.esRequest->notToKeep->resultSetItem->item =
 		(str ? atoi(str) : 1);
 	
-    req->u.esRequest->notToKeep->itemRequest = 
+	req->u.esRequest->notToKeep->itemRequest = 
 		encode_ill_request(t, ht);
-    
-    return req;
+	
+	return req;
 }
 
 static Z_APDU *encode_es_itemorder (Yaz_Association t, HashTable *ht)
 {
-    Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_extendedServicesRequest);
-    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-    const char *str;
-    struct oident oident;
-    int oid[OID_SIZE];
+	Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_extendedServicesRequest);
+	Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+	const char *str;
+	struct oident oident;
+	int oid[OID_SIZE];
 	Z_External *r = odr_malloc (t->odr_out, sizeof(*r));
 
 	*req->function = Z_ExtendedServicesRequest_create;
-    oident.proto = PROTO_Z3950;
-    oident.oclass = CLASS_EXTSERV;
+	oident.proto = PROTO_Z3950;
+	oident.oclass = CLASS_EXTSERV;
 	oident.value = VAL_ITEMORDER;
 	req->taskSpecificParameters = r;
 	r->direct_reference =
-	    odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid)); 
+		odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid)); 
 	r->indirect_reference = 0;
 	r->descriptor = 0;
 	r->which = Z_External_itemOrder;
 	r->u.itemOrder = encode_item_order (t, ht);
-    req->packageType = odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid));
+	req->packageType = odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid));
 
-    str = array_lookup_string(ht, "package-name");
-    if (str && *str)
-        req->packageName = nmem_strdup (t->odr_out->mem, str);
+	str = array_lookup_string(ht, "package-name");
+	if (str && *str)
+		req->packageName = nmem_strdup (t->odr_out->mem, str);
 
-    str = array_lookup_string(ht, "user-id");
-    if (str)
+	str = array_lookup_string(ht, "user-id");
+	if (str)
 		req->userId = nmem_strdup (t->odr_out->mem, str);
 
-    return apdu;
+	return apdu;
 }
 
 
@@ -2271,8 +2271,8 @@ PHP_FUNCTION(yaz_itemorder)
 static Z_APDU *encode_scan (Yaz_Association t, const char *type,
 							const char *query, HashTable *ht)
 {
-    Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_scanRequest);
-    Z_ScanRequest *req = apdu->u.scanRequest;
+	Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_scanRequest);
+	Z_ScanRequest *req = apdu->u.scanRequest;
 	const char *val;
 	if (!strcmp(type, "rpn"))
 	{
@@ -2321,7 +2321,7 @@ PHP_FUNCTION(yaz_scan)
 	HashTable *flags_ht = 0;
 	Yaz_Association p;
 	if (ZEND_NUM_ARGS() == 3)
-	{   
+	{	
 		if (zend_get_parameters_ex(3, &pval_id, &pval_type, &pval_query) ==
 			FAILURE)
 		{
@@ -2424,7 +2424,7 @@ PHP_FUNCTION(yaz_scan_result)
 	pval **pval_id, **pval_opt = 0;
 	Yaz_Association p;
 	if (ZEND_NUM_ARGS() == 2)
-	{   
+	{	
 		if (zend_get_parameters_ex(2, &pval_id, &pval_opt) == FAILURE)
 		{
 			WRONG_PARAM_COUNT;
