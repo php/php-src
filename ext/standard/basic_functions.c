@@ -1120,7 +1120,7 @@ pval test_class_get_property(zend_property_reference *property_reference)
 	zend_llist_element *element;
 
 
-	printf("Reading a property from a TestClass object:\n");
+	printf("Reading a property from a OverloadedTestClass object:\n");
 
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
@@ -1155,7 +1155,7 @@ int test_class_set_property(zend_property_reference *property_reference, pval *v
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 
-	printf("Writing to a property from a TestClass object:\n");
+	printf("Writing to a property from a OverloadedTestClass object:\n");
 	printf("Writing '");
 	zend_print_variable(value);
 	printf("'\n");
@@ -1192,7 +1192,7 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 	zend_llist_element *element;
 
 
-	printf("Reading a property from a TestClass object:\n");
+	printf("Invoking a method on OverloadedTestClass object:\n");
 
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
