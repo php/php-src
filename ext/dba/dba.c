@@ -159,14 +159,14 @@ typedef struct dba_handler {
 
 /* a DBA handler must have specific routines */
 
-#define DBA_NAMED_HND(name, x, flags) \
+#define DBA_NAMED_HND(alias, name, flags) \
 {\
 	#name, flags, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
 	dba_exists_##x, dba_delete_##x, dba_firstkey_##x, dba_nextkey_##x, \
 	dba_optimize_##x, dba_sync_##x \
 },
 
-#define DBA_HND(x, flags) DBA_NAMED_HND(x, x, flags)
+#define DBA_HND(name, flags) DBA_NAMED_HND(name, name, flags)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
@@ -513,6 +513,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		switch (pmode[1]) {
 		case 'd':
 			lock_dbf = 1;
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
+				lock_flag = (hptr->flags & DBA_LOCK_ALL);
+				break;
+			}
 			/* no break */
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
