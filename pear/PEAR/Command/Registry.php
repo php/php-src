@@ -25,7 +25,7 @@ require_once 'PEAR/Config.php';
 
 class PEAR_Command_Registry extends PEAR_Command_Common
 {
-    // {{{ command definitions
+    // {{{ properties
 
     var $commands = array(
         'list' => array(
@@ -76,6 +76,7 @@ installed package.'
     }
 
     // }}}
+
     // {{{ doList()
 
     function _sortinfo($a, $b)

@@ -24,6 +24,8 @@ require_once 'PEAR/Command/Common.php';
 
 class PEAR_Command_Package extends PEAR_Command_Common
 {
+    // {{{ properties
+
     var $commands = array(
         'package' => array(
             'summary' => 'Build Package',
@@ -140,6 +142,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
 
     var $output;
 
+    // }}}
+    // {{{ constructor
+
     /**
      * PEAR_Command_Package constructor.
      *
@@ -149,6 +154,10 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
     {
         parent::PEAR_Command_Common($ui, $config);
     }
+
+    // }}}
+
+    // {{{ _displayValidationResults()
 
     function _displayValidationResults($err, $warn, $strict = false)
     {
@@ -166,6 +175,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         }
         return true;
     }
+
+    // }}}
+    // {{{ doPackage()
 
     function doPackage($command, $options, $params)
     {
@@ -208,6 +220,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         return true;
     }
 
+    // }}}
+    // {{{ doPackageValidate()
+
     function doPackageValidate($command, $options, $params)
     {
         $this->output = '';
@@ -234,6 +249,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $this->ui->outputData($this->output, $command);
         return true;
     }
+
+    // }}}
+    // {{{ doCvsTag()
 
     function doCvsTag($command, $options, $params)
     {
@@ -288,6 +306,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         return true;
     }
 
+    // }}}
+    // {{{ doRunTests()
+
     function doRunTests($command, $options, $params)
     {
         $cwd = getcwd();
@@ -307,6 +328,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         system($cmd);
         return true;
     }
+
+    // }}}
+    // {{{ doPackageDependencies()
 
     function doPackageDependencies($command, $options, $params)
     {
@@ -364,6 +388,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $this->ui->outputData("This package does not have any dependencies.", $command);
     }
 
+    // }}}
+    // {{{ doSign()
+
     function doSign($command, $options, $params)
     {
         // should move most of this code into PEAR_Packager
@@ -404,6 +431,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $tar->addModify("$tmpdir/package.sig", '', $tmpdir);
         return true;
     }
+
+    // }}}
+    // {{{ doMakeRPM()
 
     function doMakeRPM($command, $options, $params)
     {
@@ -497,6 +527,8 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         
         return true;
     }
+
+    // }}}
 }
 
 ?>
