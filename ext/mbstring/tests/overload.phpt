@@ -1,7 +1,12 @@
 --TEST--
 Function overloading test (said to be harmful)
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php 
+	extension_loaded('mbstring') or die('skip mbstring not available'); 
+	if (!function_exists("mail")) {
+		die('skip mail() function is not available.');
+	}
+?>
 --INI--
 output_handler=
 mbstring.func_overload=7
