@@ -52,6 +52,7 @@
 #include <threads.h>
 #include <builtin_functions.h>
 #include <operators.h>
+#include <version.h>
 
 #ifndef ZTS
 /* Need thread safety */
@@ -76,6 +77,7 @@ typedef struct
   struct svalue done_cb;
   struct pike_string *filename;
   int my_fd;
+  int written;
   SLS_D;
 } php_caudium_request;
 
@@ -260,11 +262,11 @@ php_caudium_sapi_ub_write(const char *str, uint str_length)
 	 case EWOULDBLOCK:
 	  continue;
 	}
-
       } else {
 	sent_bytes += written;
       }
     }
+    THIS->written += sent_bytes;
   } else {
     THREAD_SAFE_RUN(sent_bytes = php_caudium_low_ub_write(str, str_length),
 		    "write");
@@ -577,7 +579,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   //  current_thread = th_self();
   mt_lock(&interpreter_lock);
   init_interpreter();
-#if __MAJOR__ == 7 && __MINOR__ < 1
+#if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
   Pike_stack_top=((char *)&state)+ (thread_stack_size-16384) * STACK_DIRECTION;
   recoveries = NULL;
   thread_id = low_clone(thread_id_prog);
@@ -651,7 +653,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename->str;
   file_handle.free_filename = 0;
-
+  THIS->written = 0;
   res = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
 
   if(res == FAILURE) {
@@ -666,14 +668,15 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
     php_request_shutdown(NULL);
     THREAD_SAFE_RUN({
-      apply_svalue(&THIS->done_cb, 0);
+      push_int(THIS->written);
+      apply_svalue(&THIS->done_cb, 1);
       pop_stack();
       free_struct(SLS_C);
     }, "positive run response");
   }
   mt_lock(&interpreter_lock);
   SWAP_IN_CURRENT_THREAD();
-#if __MAJOR__ == 7 && __MINOR__ < 1
+#if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
   OBJ2THREAD(thread_id)->status=THREAD_EXITED;
   co_signal(& OBJ2THREAD(thread_id)->status_change);
   thread_table_delete(thread_id);
