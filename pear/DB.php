@@ -208,7 +208,8 @@ class DB
             $dsninfo = DB::parseDSN($dsn);
         }
         $type = $dsninfo["phptype"];
-
+	
+	@include_once "DB/${type}.php";
         $classname = "DB_${type}";
         @$obj =& new $classname;
 
