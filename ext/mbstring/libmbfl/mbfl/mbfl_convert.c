@@ -89,6 +89,8 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 
+static void mbfl_convert_filter_reset_vtbl(mbfl_convert_filter *filter);
+
 /* hex character table "0123456789ABCDEF" */
 static char mbfl_hexchar_table[] = {
 	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x41,0x42,0x43,0x44,0x45,0x46
@@ -247,7 +249,7 @@ mbfl_convert_filter_new(
 	filter->illegal_substchar = 0x3f;		/* '?' */
 
 	/* setup the function table */
-	mbfl_convert_filter_select_vtbl(filter);
+	mbfl_convert_filter_reset_vtbl(filter);
 
 	/* constructor */
 	(*filter->filter_ctor)(filter);
@@ -277,11 +279,8 @@ mbfl_convert_filter_flush(mbfl_convert_filter *filter)
 	return (filter->flush_function ? (*filter->flush_function)(filter->data) : 0);
 }
 
-void
-mbfl_convert_filter_reset(
-    mbfl_convert_filter *filter,
-    enum mbfl_no_encoding from,
-    enum mbfl_no_encoding to)
+void mbfl_convert_filter_reset(mbfl_convert_filter *filter,
+	    enum mbfl_no_encoding from, enum mbfl_no_encoding to)
 {
 	/* destruct old filter */
 	(*filter->filter_dtor)(filter);
@@ -291,7 +290,7 @@ mbfl_convert_filter_reset(
 	filter->to = mbfl_no2encoding(to);
 
 	/* set the vtbl */
-	mbfl_convert_filter_select_vtbl(filter);
+	mbfl_convert_filter_reset_vtbl(filter);
 
 	/* construct new filter */
 	(*filter->filter_ctor)(filter);
@@ -434,17 +433,6 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	return ret;
 }
 
-void mbfl_convert_filter_set_vtbl(mbfl_convert_filter *filter, const struct mbfl_convert_vtbl *vtbl)
-{
-	if (filter && vtbl) {
-		filter->filter_ctor = vtbl->filter_ctor;
-		filter->filter_dtor = vtbl->filter_dtor;
-		filter->filter_function = vtbl->filter_function;
-		filter->filter_flush = vtbl->filter_flush;
-	}
-}
-
-
 const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding to)
 {
 	const struct mbfl_convert_vtbl *vtbl;
@@ -471,7 +459,7 @@ const struct mbfl_convert_vtbl * mbfl_convert_filter_get_vtbl(enum mbfl_no_encod
 }
 
 
-void mbfl_convert_filter_select_vtbl(mbfl_convert_filter *filter)
+static void mbfl_convert_filter_reset_vtbl(mbfl_convert_filter *filter)
 {
 	const struct mbfl_convert_vtbl *vtbl;
 
@@ -479,7 +467,11 @@ void mbfl_convert_filter_select_vtbl(mbfl_convert_filter *filter)
 	if (vtbl == NULL) {
 		vtbl = &vtbl_pass;
 	}
-	mbfl_convert_filter_set_vtbl(filter, vtbl);
+
+	filter->filter_ctor = vtbl->filter_ctor;
+	filter->filter_dtor = vtbl->filter_dtor;
+	filter->filter_function = vtbl->filter_function;
+	filter->filter_flush = vtbl->filter_flush;
 }
 
 /*

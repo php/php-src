@@ -43,7 +43,15 @@
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"
 
-static const unsigned char mblen_table_html[] = { /* 0x00, 0x80 - 0xFF, only valid for numeric entities */
+static const int htmlentitifieds[256] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -51,15 +59,7 @@ static const unsigned char mblen_table_html[] = { /* 0x00, 0x80 - 0xFF, only val
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 static const char *mbfl_encoding_html_ent_aliases[] = {"HTML", "html", NULL};
@@ -67,9 +67,9 @@ static const char *mbfl_encoding_html_ent_aliases[] = {"HTML", "html", NULL};
 const mbfl_encoding mbfl_encoding_html_ent = {
 	mbfl_no_encoding_html_ent,
 	"HTML-ENTITIES",
-	"US-ASCII",
+	"HTML-ENTITIES",
 	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
-	NULL, /* mblen_table_html, Do not use table instead calulate length based on entities actually used */
+	NULL,
 	MBFL_ENCTYPE_HTML_ENT
 };
 
@@ -98,40 +98,45 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
  */
 int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 {
-	int tmp[10];
-	int i = 0, p = 0, e;
+	int tmp[64];
+	int i;
 	unsigned int uc;
+	const mbfl_html_entity_entry *e;
 
-	if (c<256 && mblen_table_html[c]==1) {
+	if (c < sizeof(htmlentitifieds) / sizeof(htmlentitifieds[0]) &&
+				htmlentitifieds[c] != 1) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbfl_filt_conv_html_enc(0x%08X = %d)", c, c);*/
  		CK((*filter->output_function)('&', filter->data));
-		while (1) {
-		    e = mbfl_html_entity_list[i].code;
-			if (c < e || e == -1) {
-				break;
-			}
-			if (c == e) {
-				while(mbfl_html_entity_list[i].name[p]) {
-					CK((*filter->output_function)((int)mbfl_html_entity_list[i].name[p++], filter->data));
+		for (i = 0; (e = &mbfl_html_entity_list[i])->name != NULL; i++) {
+			if (c == e->code) {
+				char *p;
+				
+				for (p = e->name; *p != '\0'; p++) {
+					CK((*filter->output_function)((int)*p, filter->data));
 				}
-				break;
+				goto last;
 			}
-			i++;
 		}
-		i=0;
-		if (!p) {
+
+		{
+			int *p = tmp + sizeof(tmp);
+
 			CK((*filter->output_function)('#', filter->data));
+
 			uc = (unsigned int)c;
+
+			*(--p) = '\0';
 			do {
-				tmp[i++] = '0'+uc%10;
+				*(--p) = "0123456789"[uc % 10];
 				uc /= 10;
 			} while (uc);
-			do {
-				CK((*filter->output_function)(tmp[--i], filter->data));
-			} while (i);
+
+			for (; *p != '\0'; p++) {
+				CK((*filter->output_function)(*p, filter->data));
+			}
 		}
+	last:
 		CK((*filter->output_function)(';', filter->data));
 	}
 	return c;
@@ -169,7 +174,7 @@ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
 	int  pos, ent = 0;
-	mbfl_html_entity *entity;
+	mbfl_html_entity_entry *entity;
 	char *buffer = (char*)filter->cache;
 
 	if (!filter->status) {
@@ -192,7 +197,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
-			        entity = (mbfl_html_entity *)mbfl_html_entity_list;
+			        entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
 				while (entity->name) {
 					if (!strcmp(buffer+1, entity->name))	{
 						ent = entity->code;
