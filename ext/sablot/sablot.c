@@ -159,7 +159,7 @@ PHP_MINFO_FUNCTION(sablot)
 
 /* {{{ Begin Output Transformation functions */
 
-/* {{{ void xslt_output_begintransform(string file)
+/* {{{ proto void xslt_output_begintransform(string file)
    Begin filtering of all data that is being printed out through the XSL file given by the file parameter. */
 PHP_FUNCTION(xslt_output_begintransform)
 {
@@ -179,7 +179,7 @@ PHP_FUNCTION(xslt_output_begintransform)
 }
 /* }}} */
 
-/* {{{ void xslt_output_endtranform(void)
+/* {{{ proto void xslt_output_endtranform(void)
    End filtering that data through the XSL file set by xslt_output_transform() and output the data */
 PHP_FUNCTION(xslt_output_endtransform)
 {
@@ -225,7 +225,7 @@ PHP_FUNCTION(xslt_output_endtransform)
 /* }}} */
 /* {{{ Begin Simple API */
 
-/* {{{ bool xslt_transform(string xslt_uri, string transform_uri, string result_uri[, array xslt_params[, array xslt_args[, string &result]]])
+/* {{{ proto bool xslt_transform(string xslt_uri, string transform_uri, string result_uri[, array xslt_params[, array xslt_args[, string &result]]])
    Transform an XML document, transform_uri, with an XSL stylesheet, xslt_uri with parameters, xslt_params, into the Result buffer, result_uri, xslt_args defines the variables in xslt_uri, transform_uri and result_uri. */
 PHP_FUNCTION(xslt_transform)
 {
@@ -309,7 +309,7 @@ PHP_FUNCTION(xslt_transform)
 }
 /* }}} */
 
-/* {{{ bool xslt_process(string xslt, string input_str, string &result[, string base])
+/* {{{ proto bool xslt_process(string xslt, string input_str, string &result[, string base])
    Process data given by input_str through xslt and place the results in the string result.  If base is supplied, it will be used as the base URI. */
 PHP_FUNCTION(xslt_process)
 {
