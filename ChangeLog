@@ -1,3 +1,157 @@
+2002-10-15  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c: Sync with head
+
+2002-10-15  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4:
+    - Added PHP_PROG_SED which checks whether the sed in system works with
+      very long strings.
+
+
+2002-10-15  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/php4dllts.dsp:
+    - Define LINK_SIZE=2 needed for newly updated pcrelib; fixes Win32 build.
+
+
+2002-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+    Fixed a bug in the calculation of the POST request length.
+
+2002-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/streams.c:
+    Nope, that last one wasn't a leak in main/streams.c, it was
+    file_get_contents misinterpreting the result...
+
+2002-10-15  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+    Fix a problem relating to these structure symbols being redefined on LFS
+    systems.
+
+    Fix by Sascha Schumann <sascha@apache.org>
+
+2002-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Fix mem leak for zero-byte files.
+
+    * main/streams.c: Some buffer paranoia.
+    Also, make feof() detection safer (ala recent changes to zlib extension).
+
+    * ext/zlib/zlib_fopen_wrapper.c: Fix for 19906.
+    gzeof has different semantics from feof, in that gzeof will return true
+    if the read position is at EOF, even if the most recent read was 100%
+    successful.
+    feof will return true only (usually) if the most recent fread failed.
+
+2002-10-15  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/math.c:
+    hopefully silence compile warnings on Solaris related to HUGEVAL being
+    undefined.. HUGEVAL is defined (well the manual would indicate so) in
+    stdlib.h, not math.h.
+
+    Bug #: 19807
+
+2002-10-15  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.3
+      ext/pcre/pcrelib/doc/pcre.html
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/doc/pcregrep.1
+      ext/pcre/pcrelib/doc/pcregrep.html
+      ext/pcre/pcrelib/doc/pcregrep.txt
+      ext/pcre/pcrelib/doc/pcretest.1
+      ext/pcre/pcrelib/doc/pcretest.html
+      ext/pcre/pcrelib/doc/pcretest.txt
+      ext/pcre/pcrelib/doc/perltest.txt
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/RunTest
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre-config.in
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/perltest
+      ext/pcre/pcrelib/perltest8
+      ext/pcre/pcrelib/study.c
+      ext/pcre/config.m4: Upgrade to version 3.92.
+
+2002-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/tests/002.phpt: Fixed the output_handler ini setting.
+    Code cleanup.
+
+    * NEWS: Bug fixing news.
+
+    * ext/standard/tests/general_functions/001.phpt: Added tests for %e & %E
+
+    * ext/standard/formatted_print.c:
+    Fixed bug #4232. (Added support for %e and %E to printf/sprintf)
+
+2002-10-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: update
+
+2002-10-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/tests/002.phpt: - Staying consistent with other tests
+
+2002-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+    Don't use streams-level buffer on zlib streams.
+
+2002-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/user_streams.c: Fixed possible memory leaks.
+
+2002-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/user_streams.c:
+    Fix leak, and avoid initialization problems where retval is re-used
+    within a function.
+
+2002-10-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Try keep those moved/removed exts entry at top.
+
+2002-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Bug fixing news entries.
+
+2002-10-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/config.m4
+      ext/snmp/snmp.c: Make this thing to compile with net-snmp-5.0.x
+
+2002-10-15  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/002.phpt:
+    remove ob_end_clean() and instead use ini section
+
 2002-10-14  Jani Taskinen  <sniper@iki.fi>
 
     * ext/iconv/tests/translit-failure.phpt:
