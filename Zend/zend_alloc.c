@@ -310,6 +310,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
 	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
 		AG(allocated_memory_peak) = AG(allocated_memory);
+	}
 #endif
 
 	p->size = size;
