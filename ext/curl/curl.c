@@ -193,7 +193,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_SPEED_DOWNLOAD);
 	REGISTER_CURL_CONSTANT(CURLINFO_SPEED_UPLOAD);
 	REGISTER_CURL_CONSTANT(CURLINFO_FILETIME);
-	REGISTER_CURL_CONSTANT(CURLINFO_SSL_VERIFY_RESULT);
+	REGISTER_CURL_CONSTANT(CURLINFO_SSL_VERIFYRESULT);
 	REGISTER_CURL_CONSTANT(CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 	REGISTER_CURL_CONSTANT(CURLINFO_CONTENT_LENGTH_UPLOAD);
 
@@ -920,7 +920,7 @@ PHP_FUNCTION(curl_getinfo)
 		CAAL("request_size", l_code);
 		curl_easy_getinfo(ch->cp, CURLINFO_FILETIME, &l_code);
 		CAAL("filetime", l_code);
-		curl_easy_getinfo(ch->cp, CURLINFO_SSL_VERIFY_RESULT, &l_code);
+		curl_easy_getinfo(ch->cp, CURLINFO_SSL_VERIFYRESULT, &l_code);
 		CAAL("ssl_verify_result", l_code);
 		curl_easy_getinfo(ch->cp, CURLINFO_TOTAL_TIME, &d_code);
 		CAAD("total_time", d_code);
@@ -957,7 +957,7 @@ PHP_FUNCTION(curl_getinfo)
 		case CURLINFO_HEADER_SIZE: 
 		case CURLINFO_REQUEST_SIZE: 
 		case CURLINFO_FILETIME: 
-		case CURLINFO_SSL_VERIFY_RESULT: {
+		case CURLINFO_SSL_VERIFYRESULT: {
 			long code;
 					
 			curl_easy_getinfo(ch->cp, option, &code);
