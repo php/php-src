@@ -36,20 +36,6 @@ extern zend_module_entry ming_module_entry;
 PHP_MINIT_FUNCTION(ming);
 PHP_MINFO_FUNCTION(ming);
 
-static inline SWFMovie getMovie(zval *id);
-static inline SWFFill getFill(zval *id);
-static inline SWFGradient getGradient(zval *id);
-static inline SWFBitmap getBitmap(zval *id);
-static inline SWFShape getShape(zval *id);
-static inline SWFFont getFont(zval *id);
-static inline SWFText getText(zval *id);
-static inline SWFTextField getTextField(zval *id);
-static inline SWFDisplayItem getDisplayItem(zval *id);
-static inline SWFButton getButton(zval *id);
-static inline SWFAction getAction(zval *id);
-static inline SWFMorph getMorph(zval *id);
-static inline SWFMovieClip getSprite(zval *id);
-
 PHP_FUNCTION(swfbitmap_init);
 PHP_FUNCTION(swfbitmap_getWidth);
 PHP_FUNCTION(swfbitmap_getHeight);
