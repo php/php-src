@@ -14,4 +14,4 @@ ldap                Working
 oci8                Working (but no blob-support yet)
 oracle              Working
 iptc                Working
-informix            being ported (compiles but does not work yet)
+informix            Working (php_ini stuff needs rewriting)
