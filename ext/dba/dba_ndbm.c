@@ -153,6 +153,12 @@ DBA_SYNC_FUNC(ndbm)
 {
 	return SUCCESS;
 }
+
+DBA_INFO_FUNC(ndbm)
+{
+	return estrdup("NDBM" );
+}
+
 #endif
 
 /*

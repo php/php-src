@@ -324,6 +324,19 @@ DBA_SYNC_FUNC(cdb)
 	return SUCCESS;
 }
 
+DBA_INFO_FUNC(cdb)
+{
+#if DBA_CDB_BUILTIN
+	if (!strcmp(hnd->name, "cdb")) {
+		return estrdup(cdb_version());
+	} else {
+		return estrdup(cdb_make_version());
+	}
+#else
+	return estrdup("External");
+#endif
+}
+
 #endif
 
 /*

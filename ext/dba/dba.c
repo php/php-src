@@ -147,7 +147,7 @@ ZEND_GET_MODULE(dba)
 {\
 	#alias, flags, dba_open_##name, dba_close_##name, dba_fetch_##name, dba_update_##name, \
 	dba_exists_##name, dba_delete_##name, dba_firstkey_##name, dba_nextkey_##name, \
-	dba_optimize_##name, dba_sync_##name \
+	dba_optimize_##name, dba_sync_##name, dba_info_##name \
 },
 
 #define DBA_HND(name, flags) DBA_NAMED_HND(name, name, flags)
@@ -191,7 +191,7 @@ static dba_handler handler[] = {
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
-	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 static int le_db;
@@ -750,23 +750,26 @@ PHP_FUNCTION(dba_sync)
 }
 /* }}} */
 
-/* {{{ proto array dba_handlers()
+/* {{{ proto array dba_handlers([bool full_info])
    List configured databases */
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
+	zend_bool full_info = 0;
 
-	if (ZEND_NUM_ARGS()!=0) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_info) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
+
 	for(hptr = handler; hptr->name; hptr++) {
-		add_next_index_string(return_value, hptr->name, 1);
+		if (full_info) {
+			add_assoc_string(return_value, hptr->name, hptr->info(hptr, NULL TSRMLS_CC), 0);
+		} else {
+			add_next_index_string(return_value, hptr->name, 1);
+		}
  	}
 }
 /* }}} */
@@ -784,10 +787,8 @@ PHP_FUNCTION(dba_list)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
+
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
 		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {

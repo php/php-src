@@ -193,3 +193,10 @@ int cdb_find(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
 	return cdb_findnext(c, key, len TSRMLS_CC);
 }
 /* }}} */
+
+/* {{{ cdb_version */
+char *cdb_version() 
+{
+	return "0.75, $Revision$";
+}
+/* }}} */

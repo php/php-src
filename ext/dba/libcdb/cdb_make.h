@@ -59,5 +59,6 @@ int cdb_make_addbegin(struct cdb_make *, unsigned int, unsigned int TSRMLS_DC);
 int cdb_make_addend(struct cdb_make *, unsigned int, unsigned int, uint32 TSRMLS_DC);
 int cdb_make_add(struct cdb_make *, char *, unsigned int, char *, unsigned int TSRMLS_DC);
 int cdb_make_finish(struct cdb_make * TSRMLS_DC);
+char *cdb_make_version();
 
 #endif

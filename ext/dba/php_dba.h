@@ -81,6 +81,8 @@ typedef struct dba_handler {
 	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
 	int (*optimize)(dba_info * TSRMLS_DC);
 	int (*sync)(dba_info * TSRMLS_DC);
+	char* (*info)(struct dba_handler *hnd, dba_info * TSRMLS_DC);
+		/* dba_info==NULL: Handler info, dba_info!=NULL: Database info */
 } dba_handler;
 
 /* common prototypes which must be supplied by modules */
@@ -105,6 +107,8 @@ typedef struct dba_handler {
 	int dba_optimize_##x(dba_info *info TSRMLS_DC)
 #define DBA_SYNC_FUNC(x) \
 	int dba_sync_##x(dba_info *info TSRMLS_DC)
+#define DBA_INFO_FUNC(x) \
+	char *dba_info_##x(dba_handler *hnd, dba_info *info TSRMLS_DC)
 
 #define DBA_FUNCS(x) \
 	DBA_OPEN_FUNC(x); \
@@ -116,7 +120,8 @@ typedef struct dba_handler {
 	DBA_FIRSTKEY_FUNC(x); \
 	DBA_NEXTKEY_FUNC(x); \
 	DBA_OPTIMIZE_FUNC(x); \
-	DBA_SYNC_FUNC(x)
+	DBA_SYNC_FUNC(x); \
+	DBA_INFO_FUNC(x)
 
 #define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
 	

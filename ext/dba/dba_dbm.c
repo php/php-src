@@ -177,6 +177,11 @@ DBA_SYNC_FUNC(dbm)
 	return SUCCESS;
 }
 
+DBA_INFO_FUNC(dbm)
+{
+	return estrdup("DBM");
+}
+
 #endif
 
 /*

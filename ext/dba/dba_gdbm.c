@@ -180,6 +180,12 @@ DBA_SYNC_FUNC(gdbm)
 	gdbm_sync(dba->dbf);
 	return SUCCESS;
 }
+
+DBA_INFO_FUNC(gdbm)
+{
+	return estrdup(gdbm_version);
+}
+
 #endif
 
 /*
