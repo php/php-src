@@ -1719,16 +1719,16 @@ PHP_FUNCTION(mb_parse_str)
 	while (var && n < num) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
+			len_list[n] = php_url_decode(var, val-var);
 			str_list[n] = var;
-			len_list[n] = php_url_decode(var, strlen(var));
 			n++;
 
 			*val++ = '\0';
 			str_list[n] = val;
 			len_list[n] = php_url_decode(val, strlen(val));
 		} else {
-			str_list[n] = var;
 			len_list[n] = php_url_decode(var, strlen(var));
+			str_list[n] = var;
 			n++;
 
 			str_list[n] = "";
