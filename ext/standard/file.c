@@ -761,6 +761,7 @@ PHP_FUNCTION(stream_select)
 
 	RETURN_LONG(retval);
 }
+/* }}} */
 
 
 /* {{{ stream_context related functions */
