@@ -1163,7 +1163,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC)
 {
-	Bucket *p1, *p2;
+	Bucket *p1, *p2=NULL;
 	int result;
 	void *pData2;
 
