@@ -1283,9 +1283,15 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		scope->clone = clone;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
+			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Constructor %s::%s cannot be static", ctor->common.scope->name, ctor->common.function_name);
+			}
 		}
 		if (dtor) {
 			dtor->common.fn_flags |= ZEND_ACC_DTOR;
+			if (dtor->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Destructor %s::%s cannot be static", dtor->common.scope->name, dtor->common.function_name);
+			}
 		}
 	}
 	return SUCCESS;
