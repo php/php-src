@@ -149,12 +149,12 @@ static void mailparse_rfc822t_errfunc(const char * msg, int num)
 }
 
 #define UUDEC(c)	(char)(((c)-' ')&077)
-#define UU_NEXT(v)	v = fgetc(infp); if (v == EOF) break; v = UUDEC(v)
-static void mailparse_do_uudecode(FILE * infp, FILE * outfp)
+#define UU_NEXT(v)	v = php_stream_getc(instream); if (v == EOF) break; v = UUDEC(v)
+static void mailparse_do_uudecode(php_stream * instream, php_stream * outstream)
 {
 	int A, B, C, D, n;
 
-	while(!feof(infp))	{
+	while(!php_stream_eof(instream))	{
 		UU_NEXT(n);
 
 		while(n != 0)	{
@@ -164,14 +164,14 @@ static void mailparse_do_uudecode(FILE * infp, FILE * outfp)
 			UU_NEXT(D);
 
 			if (n-- > 0)
-				fputc( (A << 2) | (B >> 4), outfp);
+				php_stream_putc(outstream, (A << 2) | (B >> 4));
 			if (n-- > 0)
-				fputc( (B << 4) | (C >> 2), outfp);
+				php_stream_putc(outstream, (B << 4) | (C >> 2));
 			if (n-- > 0)
-				fputc( (C << 6) | D, outfp);
+				php_stream_putc(outstream, (C << 6) | D);
 		}
 		/* skip newline */
-		fgetc(infp);
+		php_stream_getc(instream);
 	}
 }
 
@@ -181,28 +181,28 @@ static void mailparse_do_uudecode(FILE * infp, FILE * outfp)
 PHP_FUNCTION(mailparse_uudecode_all)
 {
 	zval * file, * item;
-	FILE *infp, *outfp=NULL, *partfp=NULL;
 	int type;
 	char * buffer = NULL;
 	char * outpath = NULL;
 	int nparts = 0;
+	php_stream * instream, *outstream = NULL, *partstream = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &file))
 		return;
 
-	infp = (FILE*)zend_fetch_resource(&file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_fopen());
-	ZEND_VERIFY_RESOURCE(infp);
+	instream = (php_stream*)zend_fetch_resource(&file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+	ZEND_VERIFY_RESOURCE(instream);
 
-	outfp = php_open_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
-	if (outfp == NULL)	{
+	outstream = php_stream_fopen_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
+	if (outstream == NULL)	{
 		zend_error(E_WARNING, "%s(): unable to open temp file", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	rewind(infp);
+	php_stream_rewind(instream);
 	
 	buffer = emalloc(4096);
-	while(fgets(buffer, 4096, infp))	{
+	while(php_stream_gets(instream, buffer, 4096))	{
 		/* Look for the "begin " sequence that identifies a uuencoded file */
 		if (strncmp(buffer, "begin ", 6) == 0)	{
 			char * origfilename;
@@ -232,24 +232,24 @@ PHP_FUNCTION(mailparse_uudecode_all)
 			add_assoc_string(item, "origfilename", origfilename, 1);
 
 			/* create a temp file for the data */
-			partfp = php_open_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
-			if (partfp)	{
+			partstream = php_stream_fopen_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
+			if (partstream)	{
 				nparts++;
 				add_assoc_string(item, "filename", outpath, 0);
 				add_next_index_zval(return_value, item);
 
 				/* decode it */
-				mailparse_do_uudecode(infp, partfp);
-				fclose(partfp);
+				mailparse_do_uudecode(instream, partstream);
+				php_stream_close(partstream);
 			}
 		}
 		else	{
 			/* write to the output file */
-			fputs(buffer, outfp);
+			php_stream_puts(outstream, buffer);
 		}
 	}
-	fclose(outfp);
-	rewind(infp);
+	php_stream_close(outstream);
+	php_stream_rewind(instream);
 	efree(buffer);
 
 	if (nparts == 0)	{
@@ -317,7 +317,6 @@ PHP_FUNCTION(mailparse_rfc822_parse_addresses)
 PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 {
 	zval ** file;
-	FILE * fp;
 	int longline = 0;
 	int linelen = 0;
 	int c;
@@ -330,10 +329,9 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
+	what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 	ZEND_VERIFY_RESOURCE(what);
 
-#if HAVE_PHP_STREAM
 	if (type == php_file_le_stream())	{
 		php_stream * stream = (php_stream*)what;
 
@@ -358,33 +356,6 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 			bestenc = mbfl_no_encoding_qprint;
 		php_stream_rewind(stream);
 	}
-	else	{
-#endif
-		fp = (FILE*)what;
-
-		rewind(fp);
-		while(!feof(fp))	{
-			c = fgetc(fp);
-			if (c == EOF)
-				break;
-			if (c > 0x80)
-				bestenc = mbfl_no_encoding_8bit;
-			else if (c == 0)	{
-				bestenc = mbfl_no_encoding_base64;
-				longline = 0;
-				break;
-			}
-			if (c == '\n')
-				linelen = 0;
-			else if (++linelen > 200)
-				longline = 1;
-		}
-		if (longline)
-			bestenc = mbfl_no_encoding_qprint;
-		rewind(fp);
-#if HAVE_PHP_STREAM
-	}
-#endif
 
 	name = (char *)mbfl_no2preferred_mime_name(bestenc);
 	if (name)
@@ -401,25 +372,28 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 /* {{{ proto boolean mailparse_stream_encode(resource sourcefp, resource destfp, string encoding)
    Streams data from source file pointer, apply encoding and write to destfp */
 
-static int mailparse_fp_output(int c, void * fp)
+static int mailparse_stream_output(int c, void * stream)
 {
-	return fputc(c, (FILE*)fp);
+	char buf = c;
+	return php_stream_write((php_stream*)stream, &buf, 1);
 }
-static int mailparse_fp_flush(void * fp)
+static int mailparse_stream_flush(void * stream)
 {
-	return fflush((FILE*)fp);
+	return php_stream_flush((php_stream*)stream);
 }
 
 PHP_FUNCTION(mailparse_stream_encode)
 {
 	zval ** srcfile, ** destfile, ** encod;
-	FILE * srcfp, * destfp;
+	void * what;
+	int type;
+	php_stream * srcstream, * deststream;
 	char * buf;
 	size_t len;
 	size_t bufsize = 2048;
 	enum mbfl_no_encoding enc;
 	mbfl_convert_filter * conv = NULL;
-	
+
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &srcfile, &destfile, &encod) == FAILURE)	{
 		WRONG_PARAM_COUNT;
 	}
@@ -427,12 +401,18 @@ PHP_FUNCTION(mailparse_stream_encode)
 	if (Z_TYPE_PP(srcfile) == IS_RESOURCE && Z_LVAL_PP(srcfile) == 0)	{
 		RETURN_FALSE;
 	}
-	ZEND_FETCH_RESOURCE(srcfp, FILE *, srcfile, -1, "File-Handle", php_file_le_fopen());
-
 	if (Z_TYPE_PP(destfile) == IS_RESOURCE && Z_LVAL_PP(destfile) == 0)	{
 		RETURN_FALSE;
 	}
-	ZEND_FETCH_RESOURCE(destfp, FILE *, destfile, -1, "File-Handle", php_file_le_fopen());
+
+	what = zend_fetch_resource(srcfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+	ZEND_VERIFY_RESOURCE(what);
+
+	srcstream = (php_stream*)what;
+
+	what = zend_fetch_resource(destfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+	ZEND_VERIFY_RESOURCE(what);
+	deststream = (php_stream*)what;
 
 	convert_to_string_ex(encod);
 	enc = mbfl_name2no_encoding(Z_STRVAL_PP(encod));
@@ -449,12 +429,13 @@ PHP_FUNCTION(mailparse_stream_encode)
 
 	conv = mbfl_convert_filter_new(mbfl_no_encoding_8bit,
 			enc,
-			mailparse_fp_output,
-			mailparse_fp_flush,
-			destfp
+			mailparse_stream_output,
+			mailparse_stream_flush,
+			deststream
 			);
-	while(!feof(srcfp))	{
-		len = fread(buf, sizeof(char), bufsize, srcfp);
+
+	while(!php_stream_eof(srcstream))	{
+		len = php_stream_read(srcstream, buf, bufsize);
 		if (len > 0)
 		{
 			int i;
@@ -462,7 +443,7 @@ PHP_FUNCTION(mailparse_stream_encode)
 				mbfl_convert_filter_feed(buf[i], conv);
 		}
 	}
-	
+
 	mbfl_convert_filter_flush(conv);
 	mbfl_convert_filter_delete(conv);
 	efree(buf);

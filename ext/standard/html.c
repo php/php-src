@@ -23,7 +23,7 @@
 #include "php.h"
 #include "reg.h"
 #include "html.h"
-
+#include "php_string.h"
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -122,6 +122,21 @@ static const struct {
  	{ "EUC-JP",   		cs_eucjp },
 	{ NULL }
 };
+
+static const struct {
+	unsigned short charcode;
+	char * entity;
+	int entitylen;
+	int flags;
+} basic_entities[] = {
+	{ '&',	"&amp;",	5,	0 },
+	{ '"',	"&quot;",	6,	ENT_HTML_QUOTE_DOUBLE },
+	{ '\'',	"&#039;",	6,	ENT_HTML_QUOTE_SINGLE },
+	{ '<',	"&lt;",		4,	0 },
+	{ '>',	"&gt;",		4,	0 },
+	{ 0, NULL, 0, 0 }
+};
+	
 
 /* {{{ get_next_char
  */
@@ -389,19 +404,88 @@ static enum entity_charset determine_charset(char * charset_hint)
 }
 /* }}} */
 
+/* {{{ php_unescape_html_entities
+ */
+PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
+{
+	int i, maxlen, len, retlen;
+	int j, k;
+	char *replaced, *ret;
+	enum entity_charset charset = determine_charset(hint_charset);
+	int matches_map;
+	unsigned char replacement[15];
+	
+	ret = estrdup(old);
+	retlen = oldlen;
+	
+	if (all)	{
+		/* look for a match in the maps for this charset */
+		for (j=0; entity_map[j].charset != cs_terminator; j++)	{
+			if (entity_map[j].charset != charset)
+				continue;
+
+			for (k = entity_map[j].basechar; k <= entity_map[j].endchar; k++)	{
+				unsigned char entity[32];
+				int entity_length = 0;
+
+				if (entity_map[j].table[k - entity_map[j].basechar] == NULL)
+					continue;
+			
+				
+				entity[0] = '&';
+				entity_length = strlen(entity_map[j].table[k - entity_map[j].basechar]);
+				strncpy(&entity[1], entity_map[j].table[k - entity_map[j].basechar], sizeof(entity) - 2);
+				entity[entity_length+1] = ';';
+				entity[entity_length+2] = '\0';
+				entity_length += 2;
+
+				/* When we have MBCS entities in the tables above, this will need to handle it */
+				if (k > 0xff)	
+					zend_error(E_WARNING, "cannot yet handle MBCS in html_entity_decode()!");
+				replacement[0] = k;
+				replacement[1] = '\0';
+
+				replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, 1, &retlen);
+				efree(ret);
+				ret = replaced;
+			}
+		}
+	}
+
+	for (j = 0; basic_entities[j].charcode != 0; j++)	{
+
+		if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
+			continue;
+		
+		replacement[0] = basic_entities[j].charcode;
+		replacement[1] = '\0';
+		
+		replaced = php_str_to_str(ret, retlen, basic_entities[j].entity, basic_entities[j].entitylen, replacement, 1, &retlen);
+		efree(ret);
+		ret = replaced;
+	}
+	
+	*newlen = retlen;
+	return ret;
+}
+/* }}} */
+
+
+
+
 /* {{{ php_escape_html_entities
  */
 PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
 {
-	int i, maxlen, len;
-	char *new;
+	int i, j, maxlen, len;
+	char *replaced;
 	enum entity_charset charset = determine_charset(hint_charset);
 	int matches_map;
 
 	maxlen = 2 * oldlen;
 	if (maxlen < 128)
 		maxlen = 128;
-	new = emalloc (maxlen);
+	replaced = emalloc (maxlen);
 	len = 0;
 
 	i = 0;
@@ -409,17 +493,16 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		int mbseqlen;
 		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
 		unsigned short this_char = get_next_char(charset, old, &i, mbsequence, &mbseqlen);
-			
+
 		matches_map = 0;
-		
+
 		if (len + 9 > maxlen)
-			new = erealloc (new, maxlen += 128);
-		
+			replaced = erealloc (replaced, maxlen += 128);
+
 		if (all)	{
 			/* look for a match in the maps for this charset */
-			int j;
 			unsigned char * rep;
-	
+
 
 			for (j=0; entity_map[j].charset != cs_terminator; j++)	{
 				if (entity_map[j].charset == charset
@@ -432,48 +515,49 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 						 * just output the character itself */
 						break;
 					}
-					
+
 					matches_map = 1;
 					break;
 				}
 			}
 
 			if (matches_map)	{
-				new[len++] = '&';
-				strcpy(new + len, rep);
+				replaced[len++] = '&';
+				strcpy(replaced + len, rep);
 				len += strlen(rep);
-				new[len++] = ';';
+				replaced[len++] = ';';
 			}
 		}
 		if (!matches_map)	{	
-			if (38 == this_char) {
-				memcpy (new + len, "&amp;", 5);
-				len += 5;
-			} else if (34 == this_char && !(quote_style&ENT_NOQUOTES)) {
-				memcpy (new + len, "&quot;", 6);
-				len += 6;
-			} else if (39 == this_char && (quote_style&ENT_QUOTES)) {
-				memcpy (new + len, "&#039;", 6);
-				len += 6;
-			} else if (60 == this_char) {
-				memcpy (new + len, "&lt;", 4);
-				len += 4;
-			} else if (62 == this_char) {
-				memcpy (new + len, "&gt;", 4);
-				len += 4;
-			} else if (this_char > 0xff)	{
-				/* a wide char without a named entity; pass through the original sequence */
-				memcpy(new + len, mbsequence, mbseqlen);
-				len += mbseqlen;
-			} else {
-				new [len++] = (unsigned char)this_char;
+			int is_basic = 0;
+
+			for (j = 0; basic_entities[j].charcode != 0; j++)	{
+				if ((basic_entities[j].charcode != this_char) ||
+					(basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0))
+					continue;
+
+				memcpy(replaced + len, basic_entities[j].entity, basic_entities[j].entitylen);
+				len += basic_entities[j].entitylen;
+				
+				is_basic = 1;
+				break;
+
+			}
+			if (!is_basic)	{
+				if (this_char > 0xff)	{
+					/* a wide char without a named entity; pass through the original sequence */
+					memcpy(replaced + len, mbsequence, mbseqlen);
+					len += mbseqlen;
+
+				} else
+					replaced [len++] = (unsigned char)this_char;
 			}
 		}
 	}
-	new [len] = '\0';
+	replaced [len] = '\0';
 	*newlen = len;
 
-	return new;
+	return replaced;
 
 
 }
@@ -485,15 +569,15 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	char *str, *hint_charset = NULL;
 	int str_len, hint_charset_len, len, quote_style = ENT_COMPAT;
-	char *new;
+	char *replaced;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
 							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
 		return;
 	}
 
-	new = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset);
-	RETVAL_STRINGL(new, len, 0);
+	replaced = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset);
+	RETVAL_STRINGL(replaced, len, 0);
 }
 /* }}} */
 
@@ -519,6 +603,25 @@ PHP_FUNCTION(htmlspecialchars)
 	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
+/* {{{ proto string html_entity_decode(string string [, int quote_style][, string charset])
+   Convert all applicable characters to HTML entities */
+PHP_FUNCTION(html_entity_decode)
+{
+	char *str, *hint_charset = NULL;
+	int str_len, hint_charset_len, len, quote_style = ENT_COMPAT;
+	char *replaced;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
+							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
+		return;
+	}
+
+	replaced = php_unescape_html_entities(str, str_len, &len, 1, quote_style, hint_charset);
+	RETVAL_STRINGL(replaced, len, 0);
+}
+/* }}} */
+
 
 /* {{{ proto string htmlentities(string string [, int quote_style][, string charset])
    Convert all applicable characters to HTML entities */
@@ -566,15 +669,14 @@ PHP_FUNCTION(get_html_translation_table)
 			/* break thru */
 
 		case HTML_SPECIALCHARS:
-			ind[0]=38; add_assoc_string(return_value, ind, "&amp;", 1);
-			if(quote_style&ENT_QUOTES) {
-				ind[0]=39; add_assoc_string(return_value, ind, "&#039;", 1);
+			for (j = 0; basic_entities[j].charcode != 0; j++)	{
+
+				if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
+					continue;
+				
+				ind[0] = basic_entities[j].charcode;
+				add_assoc_string(return_value, ind, basic_entities[j].entity, 1);
 			}
-			if(!(quote_style&ENT_NOQUOTES)) {
-				ind[0]=34; add_assoc_string(return_value, ind, "&quot;", 1); 
-			}
-			ind[0]=60; add_assoc_string(return_value, ind, "&lt;", 1);
-			ind[0]=62; add_assoc_string(return_value, ind, "&gt;", 1);
 			break;
 	}
 }

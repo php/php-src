@@ -69,14 +69,10 @@ PHP_FUNCTION(realpath);
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
 
-/* temporary function for testing streams */
-PHP_FUNCTION(fopenstream);
+PHP_FUNCTION(fgetwrapperdata);
 
 PHPAPI int php_set_sock_blocking(int socketd, int block);
-PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_stream(void);
-PHPAPI int php_file_le_popen(void);
-PHPAPI int php_file_le_socket(void);
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
@@ -94,9 +90,7 @@ typedef enum _php_meta_tags_token {
 } php_meta_tags_token;
 
 typedef struct _php_meta_tags_data {
-  FILE *fp;
-  int socketd;
-  int issock;
+  php_stream * stream;
   int ulc;
   int lc;
   char *input_buffer;
@@ -110,10 +104,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 typedef struct {
   int fgetss_state;
   int pclose_ret;
-  HashTable ht_fsock_keys;
-  HashTable ht_fsock_socks;
-  struct php_sockbuf *phpsockbuf;
-  size_t def_chunk_size;
+  HashTable ht_persistent_socks;
 } php_file_globals;
 
 #ifdef ZTS

@@ -73,6 +73,7 @@
 #include "php_content_types.h"
 #include "php_ticks.h"
 #include "php_logos.h"
+#include "php_streams.h"
 
 #include "SAPI.h"
 /* }}} */
@@ -562,17 +563,24 @@ PHP_FUNCTION(set_time_limit)
  */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
 {
-	int issock=0, socketd=0;
-	int old_chunk_size;
-	FILE *retval;
+	FILE *retval = NULL;
+	php_stream * stream;
 	TSRMLS_FETCH();
-	
-	old_chunk_size = php_sock_set_def_chunk_size(1);
-	retval=php_fopen_wrapper((char *) filename, "rb", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path TSRMLS_CC);
-	php_sock_set_def_chunk_size(old_chunk_size);
-	
-	if (issock) {
-		retval = fdopen(socketd, "rb");
+
+	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, opened_path TSRMLS_CC);
+	if (stream)	{
+		/* no need for us to check the stream type here */
+		php_stream_sock_set_chunk_size(stream, 1);
+
+		if (php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void**)&retval, 1) == SUCCESS)	{
+			ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
+		}
+		else	{
+			php_stream_close(stream);
+			if (opened_path && *opened_path)
+				efree(*opened_path);
+			retval = NULL;
+		}
 	}
 	return retval;
 }
@@ -941,14 +949,14 @@ int php_module_startup(sapi_module_struct *sf)
 
 	REGISTER_INI_ENTRIES();
 
-	/* initialize fopen wrappers registry 
-	   (this uses configuration parameters from php.ini)
+	/* initialize stream wrappers registry
+	 * (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_fopen_wrappers(TSRMLS_C) == FAILURE) {
-		php_printf("PHP:  Unable to initialize fopen url wrappers.\n");
+	if (php_init_stream_wrappers(TSRMLS_C) == FAILURE)	{
+		php_printf("PHP:  Unable to initialize stream url wrappers.\n");
 		return FAILURE;
 	}
-
+	
 	/* initialize registry for images to be used in phpinfo() 
 	   (this uses configuration parameters from php.ini)
 	 */
@@ -1048,7 +1056,9 @@ void php_module_shutdown(TSRMLS_D)
 	sapi_flush(TSRMLS_C);
 
 	zend_shutdown(TSRMLS_C);
-	php_shutdown_fopen_wrappers(TSRMLS_C);
+
+	php_shutdown_stream_wrappers(TSRMLS_C);
+
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();
 

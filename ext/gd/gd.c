@@ -441,8 +441,7 @@ PHP_FUNCTION(imageloadfont)
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int ind, body_size, n=0, b, i, body_size_check;
 	gdFontPtr font;
-	FILE *fp;
-	int issock=0, socketd=0;
+	php_stream * stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -450,13 +449,8 @@ PHP_FUNCTION(imageloadfont)
 
 	convert_to_string_ex(file);
 
-#ifdef PHP_WIN32
-	fp = VCWD_FOPEN(Z_STRVAL_PP(file), "rb");
-#else
-	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL TSRMLS_CC);
-#endif
-	if (fp == NULL) {
-		php_error(E_WARNING, "ImageFontLoad: unable to open file");
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(file), "rb", IGNORE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, NULL TSRMLS_CC);
+	if (stream == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -474,22 +468,22 @@ PHP_FUNCTION(imageloadfont)
 	 */
 	font = (gdFontPtr)emalloc(sizeof(gdFont));
 	b = 0;
-	while (b < hdr_size && (n = fread(&font[b], 1, hdr_size - b, fp)))
+	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)))
 		b += n;
 	if (!n) {
-		fclose(fp);
+		php_stream_close(stream);
 		efree(font);
-		if (feof(fp)) {
+		if (php_stream_eof(stream)) {
 			php_error(E_WARNING, "ImageFontLoad: end of file while reading header");
 		} else {
 			php_error(E_WARNING, "ImageFontLoad: error while reading header");
 		}
 		RETURN_FALSE;
 	}
-	i = ftell(fp);
-	fseek(fp, 0, SEEK_END);
-	body_size_check = ftell(fp) - hdr_size;
-	fseek(fp, i, SEEK_SET);
+	i = php_stream_tell(stream);
+	php_stream_seek(stream, 0, SEEK_END);
+	body_size_check = php_stream_tell(stream) - hdr_size;
+	php_stream_seek(stream, i, SEEK_SET);
 	body_size = font->w * font->h * font->nchars;
 	if (body_size != body_size_check) {
 		font->w = FLIPWORD(font->w);
@@ -505,20 +499,20 @@ PHP_FUNCTION(imageloadfont)
 
 	font->data = emalloc(body_size);
 	b = 0;
-	while (b < body_size && (n = fread(&font->data[b], 1, body_size - b, fp)))
+	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b)))
 		b += n;
 	if (!n) {
-		fclose(fp);
+		php_stream_close(stream);
 		efree(font->data);
 		efree(font);
-		if (feof(fp)) {
+		if (php_stream_eof(stream)) {
 			php_error(E_WARNING, "ImageFontLoad: end of file while reading body");
 		} else {
 			php_error(E_WARNING, "ImageFontLoad: error while reading body");
 		}
 		RETURN_FALSE;
 	}
-	fclose(fp);
+	php_stream_close(stream);
 
 	/* Adding 5 to the font index so we will never have font indices
 	 * that overlap with the old fonts (with indices 1-5).  The first
@@ -1132,17 +1126,15 @@ PHP_FUNCTION(imagecreatefromstring)
 }
 /* }}} */
 
-size_t php_fread_all(char **buf, int socket, FILE *fp, int issock);
-
 /* {{{ _php_image_create_from
  */
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) 
 {
 	zval **file, **srcx, **srcy, **width, **height;
-	gdImagePtr im;
+	gdImagePtr im = NULL;
 	char *fn=NULL;
-	FILE *fp;
-	int issock=0, socketd=0;
+	php_stream * stream;
+	FILE * fp = NULL;
 	int argc=ZEND_NUM_ARGS();
 	
 	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 4) || 
@@ -1158,14 +1150,8 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	
 	fn = Z_STRVAL_PP(file);
 
-#ifdef PHP_WIN32
-	fp = VCWD_FOPEN(fn, "rb");
-#else
-	fp = php_fopen_wrapper(fn, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL TSRMLS_CC);
-#endif
-	if (!fp && !socketd) {
-		php_strip_url_passwd(fn);
-		php_error(E_WARNING, "%s: Unable to open '%s' for reading", get_active_function_name(TSRMLS_C), fn);
+	stream = php_stream_open_wrapper(fn, "rb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL TSRMLS_CC);
+	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
 
@@ -1173,32 +1159,29 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
 #endif
 
-	if(issock && !ioctx_func_p) {
-		php_error(E_WARNING, "%s: Sockets are not supported for image type '%s'", get_active_function_name(TSRMLS_C), tn);
-		RETURN_FALSE;
+	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
+	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
+		php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS);
 	}
-
-	if(issock && socketd) {
+	else if (ioctx_func_p)	{
 #ifdef USE_GD_IOCTX
+		/* we can create an io context */
 		gdIOCtx* io_ctx;
 		size_t buff_size;
-		char *buff, *buff_em;
+		char *buff;
 
-		buff_size = php_fread_all(&buff_em, socketd, fp, issock);
+		/* needs to be malloc (persistent) - GD will free() it later */
+		buff_size = php_stream_read_all(stream, &buff, 1);
 
 		if(!buff_size) {
 			php_error(E_WARNING,"%s: Cannot read image data", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
+			goto out_err;
 		}
 		
-		buff = malloc(buff_size); /* Should be malloc! GD uses free */
-		memcpy(buff, buff_em, buff_size);
-		efree(buff_em);
-
 		io_ctx = gdNewDynamicCtx(buff_size, buff);
 		if(!io_ctx) {
 			php_error(E_WARNING,"%s: Cannot allocate GD IO context", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
+			goto out_err;
 		}
 		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
 			im = (*ioctx_func_p)(io_ctx, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
@@ -1206,8 +1189,15 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			im = (*ioctx_func_p)(io_ctx);
 		}
 		io_ctx->free(io_ctx);
-#endif
-	} else {
+#endif		
+	}
+	else	{
+		/* try and force the stream to be FILE* */
+		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void**)&fp, REPORT_ERRORS))
+			goto out_err;
+	}
+	
+	if (!im && fp)	{
 		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
 			im = (*func_p)(fp, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
 		} else {
@@ -1215,15 +1205,18 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		fflush(fp);
-		fclose(fp);
 	}
 
-	if (!im) {
-		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(TSRMLS_C), fn, tn);
-		RETURN_FALSE;
+	if (im) {
+		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+		return;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+	php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(TSRMLS_C), fn, tn);
+out_err:
+	php_stream_close(stream);
+	RETURN_FALSE;
+
 }
 /* }}} */
 

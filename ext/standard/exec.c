@@ -51,6 +51,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	int overflow_limit, lcmd, ldir;
 	int rsrc_id;
 	char *b, *c, *d=NULL;
+	php_stream * stream = NULL;
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif
@@ -141,7 +142,9 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	 * fd gets pclosed
 	 */
 
-	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_popen());
+	stream = php_stream_fopen_from_pipe(fp, "rb");
+	if (stream)
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
 
 	if (type != 3) {
 		l=0;

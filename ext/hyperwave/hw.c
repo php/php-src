@@ -38,9 +38,6 @@
 #else
 #include "build-defs.h"
 #endif
-#ifdef HAVE_MMAP 
-#include <sys/mman.h>
-#endif
 
 #if HYPERWAVE
 
@@ -2861,7 +2858,6 @@ PHP_FUNCTION(hw_new_document)
 }
 /* }}} */
 
-#define BUFSIZE 8192
 /* {{{ proto hwdoc hw_new_document_from_file(string objrec, string filename)
    Create a new document from a file */
 PHP_FUNCTION(hw_new_document_from_file)
@@ -2872,6 +2868,7 @@ PHP_FUNCTION(hw_new_document_from_file)
 	int issock=0;
 	int socketd=0;
 	FILE *fp;
+	php_stream * stream;
 	int ready=0;
 	int bcount=0;
 	int use_include_path=0;
@@ -2884,14 +2881,10 @@ PHP_FUNCTION(hw_new_document_from_file)
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
 
-	fp = php_fopen_wrapper(Z_STRVAL_PP(arg2), "r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
-	if (!fp && !socketd){
-		if (issock != BAD_URL) {
-			char *tmp = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
-			php_strip_url_passwd(tmp);
-			php_error(E_WARNING, "hw_new_document_from_file(\"%s\") - %s", tmp, strerror(errno));
-			efree(tmp);
-		}
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg2), "r", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS,
+			NULL TSRMLS_CC);
+
+	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
 
@@ -2899,60 +2892,10 @@ PHP_FUNCTION(hw_new_document_from_file)
 	if(NULL == doc)
 		RETURN_FALSE;
 
-#ifdef HAVE_MMAP 
-	if(!issock) {
-		int fd;
-		struct stat sbuf;
-		off_t off;
-		void *p;
-		size_t len;
+	doc->size = php_stream_read_all(stream, &doc->data, 1);
 
-		fd = fileno(fp);
-		fstat(fd, &sbuf);
-
-		if (sbuf.st_size > BUFSIZE) {
-			off = ftell(fp);
-			len = sbuf.st_size - off;
-			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
-			if (p != (void *) MAP_FAILED) {
-				doc->data = malloc(len);
-				if(NULL == doc->data) {
-					munmap(p, len);
-					free(doc);
-					RETURN_FALSE;
-				}
-				memcpy(doc->data, p, len);
-				munmap(p, len);
-				bcount = len;
-				doc->size = len;
-				ready = 1;
-			}
-		}
-	}
-#endif
-
-	if(!ready) {
-		int b;
-
-		doc->data = malloc(BUFSIZE);
-		if(NULL == doc->data) {
-			free(doc);
-			RETURN_FALSE;
-		}
-		ptr = doc->data;
-		while ((b = FP_FREAD(&ptr[bcount], BUFSIZE, socketd, fp, issock)) > 0) {
-			bcount += b;
-			doc->data = realloc(doc->data, bcount+BUFSIZE);
-			ptr = doc->data;
-		}
-	}
-
-	if (issock) {
-		SOCK_FCLOSE(socketd);
-	} else {
-		fclose(fp);
-	}
-
+	php_stream_close(stream);
+	
 	doc->data = realloc(doc->data, bcount+1);
 	ptr = doc->data;
 	ptr[bcount] = '\0';
@@ -2963,7 +2906,6 @@ PHP_FUNCTION(hw_new_document_from_file)
 	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
-#undef BUFSIZE
 
 /* {{{ proto void hw_free_document(hwdoc doc)
    Frees memory of document */

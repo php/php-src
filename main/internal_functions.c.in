@@ -29,6 +29,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if HAVE_OPENSSL_EXT
+/* zlib typedefs free_func which causes problems if the SSL includes happen
+ * after zlib.h is included */
+# include <openssl/ssl.h>
+#endif
+
 @EXT_INCLUDE_CODE@
 
 zend_module_entry *php_builtin_extensions[] = {
