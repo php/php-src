@@ -41,9 +41,8 @@ int php_VARIANT_get_le_variant();
 void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 pval php_VARIANT_get_property_handler(zend_property_reference *property_reference);
 static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value);
-void php_register_VARIANT_class();
+void php_register_VARIANT_class(TSRMLS_D);
 static void php_variant_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-void php_register_VARIANT_class();
 
 static int le_variant;
 static int codepage;
@@ -103,7 +102,7 @@ PHP_MINIT_FUNCTION(VARIANT)
 	REGISTER_LONG_CONSTANT("CP_UTF7", CP_UTF7, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_UTF8", CP_UTF8, CONST_CS | CONST_PERSISTENT);
 
-	php_register_VARIANT_class();
+	php_register_VARIANT_class(TSRMLS_C);
 	return SUCCESS;
 }
 
@@ -179,10 +178,9 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
-	TSRMLS_FETCH();
-
 	pval result, **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
+	TSRMLS_FETCH();
 
 	/* fetch the VARIANT structure */
 	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &var_handle);
@@ -232,10 +230,9 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
-	TSRMLS_FETCH();
-
 	pval **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
+	TSRMLS_FETCH();
 
 	/* fetch the VARIANT structure */
 	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &var_handle);
@@ -428,10 +425,8 @@ static void php_variant_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(rsrc);
 }
 
-void php_register_VARIANT_class(void)
+void php_register_VARIANT_class(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	INIT_OVERLOADED_CLASS_ENTRY(VARIANT_class_entry, "VARIANT", NULL,
 								php_VARIANT_call_function_handler,
 								php_VARIANT_get_property_handler,
