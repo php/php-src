@@ -847,7 +847,6 @@ SXE_METHOD(xpath)
 SXE_METHOD(registerXPathNamespace)
 {
 	php_sxe_object    *sxe;
-	zval *id;
 	int prefix_len, ns_uri_len;
 	char *prefix, *ns_uri;
 
