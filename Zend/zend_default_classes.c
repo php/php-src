@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2003 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -30,7 +30,7 @@ ZEND_FUNCTION(exception)
 	zval  *tmp;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS();
-	
+
 	if (zend_get_parameters_ex(argc, &message, &code) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
@@ -80,28 +80,28 @@ ZEND_FUNCTION(getfile)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "file", sizeof("file"), return_value);
+	_default_exception_get_entry(getThis(), "file", sizeof("file"), return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getline)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "line", sizeof("line"), return_value);
+	_default_exception_get_entry(getThis(), "line", sizeof("line"), return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getmessage)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "message", sizeof("message"), return_value);
+	_default_exception_get_entry(getThis(), "message", sizeof("message"), return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getcode)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "code", sizeof("code"), return_value);
+	_default_exception_get_entry(getThis(), "code", sizeof("code"), return_value TSRMLS_CC);
 }
 
 static zend_function_entry default_exception_functions[] = {
@@ -123,7 +123,7 @@ static void zend_register_default_exception(TSRMLS_C)
 
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
-	zend_register_default_exception(TSRMLS_CC);
+	zend_register_default_exception(TSRMLS_C);
 }
 
 /*
