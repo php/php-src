@@ -324,8 +324,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 			} else {
 				(*rval)->type = IS_LONG;
 			}
-			(*rval)->refcount = 1;
-			(*rval)->EA = 0;
+			INIT_PZVAL(*rval);
 			(*rval)->value.lval = atol(q + 2);
 			return 1;
 
@@ -342,8 +341,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 			}
 			(*p)++;
 			(*rval)->type = IS_DOUBLE;
-			(*rval)->refcount = 1;
-			(*rval)->EA = 0;
+			INIT_PZVAL(*rval);
 			(*rval)->value.dval = atof(q + 2);
 			return 1;
 
@@ -374,15 +372,13 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 			(*rval)->type = IS_STRING;
 			(*rval)->value.str.val = str;
 			(*rval)->value.str.len = i;
- 			(*rval)->refcount = 1;
-			(*rval)->EA = 0;
+			INIT_PZVAL(*rval);
 			return 1;
 
 		case 'a':
 			(*rval)->type = IS_ARRAY;
 
-			(*rval)->refcount = 1;
-			(*rval)->EA = 0;
+			INIT_PZVAL(*rval);
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
@@ -423,8 +419,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 		case 'o':
 			(*rval)->type = IS_OBJECT;
 
-			(*rval)->refcount = 1;
-			(*rval)->EA = 0;
+			INIT_PZVAL(*rval);
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));

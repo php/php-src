@@ -3166,15 +3166,13 @@ PHP_FUNCTION(oci8_fetchinto)
 
 #if PHP_API_VERSION >= 19990421
 		element = emalloc(sizeof(pval));
-		element->EA=0;
-		element->refcount=1;
+		INIT_PZVAL(element);
 #endif
 
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 #if PHP_API_VERSION >= 19990421
-			element->EA = 0;
-			element->refcount = 1;
+			INIT_PZVAL(element);
 			_php3_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
 #else
 			_php3_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
@@ -3257,15 +3255,13 @@ PHP_FUNCTION(oci8_fetchstatement)
 
 #if PHP_API_VERSION >= 19990421
 		tmp = emalloc(sizeof(pval));
-		tmp->EA = 0;
-		tmp->refcount = 1;
+		INIT_PZVAL(tmp);
 #endif
 
 		array_init(tmp);
 
 #if PHP_API_VERSION >= 19990421
-		tmp->EA = 0;
-		tmp->refcount = 1;
+		INIT_PZVAL(tmp);
 #endif
 
 		memcpy(namebuf,columns[ i ]->name, columns[ i ]->name_len);
@@ -3297,8 +3293,7 @@ PHP_FUNCTION(oci8_fetchstatement)
 #if PHP_API_VERSION < 19990421
 			_php3_hash_index_update(outarrs[ i ]->value.ht, rows, (void *)element, sizeof(pval), NULL);
 #else
-			element->refcount = 1;
-			element->EA = 0;
+			INIT_PZVAL(element);
 			_php3_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(pval*), NULL);
 #endif
 		}

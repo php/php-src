@@ -836,8 +836,7 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 		object_handle  = (pval *) emalloc(sizeof(pval));
 		*object_handle = *return_value;
 		pval_copy_constructor(object_handle);
-		object_handle->refcount = 1;
-		object_handle->EA=0;
+		INIT_PZVAL(object_handle);
 		zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
 		pval_destructor(&function_name->element);
 	} else {

@@ -61,8 +61,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 	if (PG(track_vars)) {
 		http_post_vars = (pval *) emalloc(sizeof(pval));
 		array_init(http_post_vars);
-		http_post_vars->refcount=1;
-		http_post_vars->EA=0;
+		INIT_PZVAL(http_post_vars);
 		
 		zend_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &http_post_vars, sizeof(pval *), NULL);
 	}

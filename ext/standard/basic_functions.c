@@ -1082,11 +1082,12 @@ void array_each(INTERNAL_FUNCTION_PARAMETERS)
 	entry = *entry_ptr;
 
 	/* add value elements */
-	if (entry->EA) {
+	if (entry->EA.is_ref) {
 		tmp = (pval *)emalloc(sizeof(pval));
 		*tmp = *entry;
 		pval_copy_constructor(tmp);
-		tmp->EA=0;
+		tmp->EA.is_ref=0;
+		tmp->EA.locks = 0;
 		tmp->refcount=0;
 		entry=tmp;
 	}
@@ -1130,8 +1131,7 @@ void array_reset(INTERNAL_FUNCTION_PARAMETERS)
 		
 	*return_value = **entry;
 	pval_copy_constructor(return_value);
-	return_value->refcount=1;
-	return_value->EA=0;
+	INIT_PZVAL(return_value);
 }
 
 void array_current(INTERNAL_FUNCTION_PARAMETERS)
@@ -2362,8 +2362,7 @@ PHP_FUNCTION(extract)
 					data = (zval *)emalloc(sizeof(zval));
 					*data = *entry;
 					zval_copy_ctor(data);
-					data->EA = 0;
-					data->refcount = 1;
+					INIT_PZVAL(data);
 
 					zend_hash_update(EG(active_symbol_table), finalname,
 									  strlen(finalname)+1, &data, sizeof(zval *), NULL);
@@ -2392,8 +2391,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 			data = (zval *)emalloc(sizeof(zval));
 			*data = *value;
 			zval_copy_ctor(data);
-			data->EA = 0;
-			data->refcount = 1;
+			INIT_PZVAL(data);
 			
 			zend_hash_update(return_value->value.ht, entry->value.str.val,
 							 entry->value.str.len+1, &data, sizeof(zval *), NULL);
@@ -2603,8 +2601,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zend_hash_get_current_data(stack->value.ht, (void **)&val);
 	*return_value = **val;
 	zval_copy_ctor(return_value);
-	return_value->refcount=1;
-	return_value->EA=0;
+	INIT_PZVAL(return_value);
 	
 	/* Delete the first or last value */
 	new_hash = _phpi_splice(stack->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
@@ -2919,8 +2916,7 @@ PHP_FUNCTION(array_keys)
 	zend_hash_internal_pointer_reset(input->value.ht);
 	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
 		new_val = (zval *)emalloc(sizeof(zval));
-		new_val->EA = 0;
-		new_val->refcount = 1;
+		INIT_PZVAL(new_val);
 		
 		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
 			case HASH_KEY_IS_STRING:
