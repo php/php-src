@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- In CGI mode, $HTTP_SERVER_VARS now includes all of the environment variables
+  as well (Zeev)
+- Allow user to use mysql_use_result in mysql queries (Stas)
 - Fixed a memory leak that would occur when restarting Apache often
   (mookid@sigent.ru)
 - Fixed a bug that prevented $argv and $argc from being defined in the command
