@@ -1,5 +1,7 @@
 --TEST--
 Test 1: Transform To XML String
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 1: Transform To XML String";

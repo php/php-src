@@ -1,5 +1,7 @@
 --TEST--
 Test 3: Using Parameters
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 3: Using Parameters";

@@ -1,5 +1,7 @@
 --TEST--
 Test 6: Transform To Doc
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 6: Transform To Doc";

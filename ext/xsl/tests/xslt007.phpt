@@ -1,5 +1,7 @@
 --TEST--
 Test 7: Transform To Uri
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 7: Transform To Uri";
