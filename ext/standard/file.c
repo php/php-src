@@ -1477,7 +1477,7 @@ PHP_FUNCTION(ftruncate)
 	convert_to_long_ex(size);
 
 	ret = ftruncate(fileno((FILE *)what), (*size)->value.lval);
-	RETURN_LONG(ret);
+	RETURN_LONG(ret + 1);
 }
 /* }}} */
 
