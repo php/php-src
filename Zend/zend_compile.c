@@ -487,6 +487,13 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 		SET_UNUSED(opline->result);
 		*result = last_op->result;
 	} else {
+		if (CG(active_class_entry) && (last_op->opcode == ZEND_FETCH_W) && (last_op->op1.op_type == IS_CONST)
+			&& (last_op->op1.u.constant.type == IS_STRING)
+			&& (last_op->op1.u.constant.value.str.len == (sizeof("this")-1))
+			&& !memcmp(last_op->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+		}
+
 		opline->opcode = ZEND_ASSIGN;
 		opline->op1 = *variable;
 		opline->op2 = *value;
