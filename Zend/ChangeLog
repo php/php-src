@@ -1,3 +1,9 @@
+2003-09-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Make it clear whether it is an interface or a class
+      - Fix static properties
+
 2003-09-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
