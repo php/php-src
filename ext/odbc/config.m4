@@ -535,7 +535,6 @@ AC_ARG_WITH(dbmaker,
 fi
 
 if test -n "$ODBC_TYPE"; then
-  INCLUDES="$INCLUDES $ODBC_INCLUDE"
   if test "$ODBC_TYPE" != "dbmaker"; then
     if test "$shared" != "yes"; then
       EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
@@ -548,5 +547,6 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST_OLD(ODBC_LIBS)
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
-  PHP_NEW_EXTENSION(odbc, php_odbc.c, $shared)
+
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $shared,, $ODBC_INCLUDE)
 fi
