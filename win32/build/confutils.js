@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.13 2003-12-04 02:24:23 wez Exp $
+// $Id: confutils.js,v 1.14 2003-12-04 12:34:29 rrichards Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -376,7 +376,7 @@ function CHECK_LIB(libname, target, path_to_check)
 
 //	AC_DEFINE("HAVE_" + header_name.toUpperCase().replace(new RegExp("/\\\\-\.", "g"), "_"), have);
 
-	return p;
+	return have;
 
 }
 
