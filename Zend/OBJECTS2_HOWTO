@@ -135,6 +135,7 @@ typedef struct _zend_object_handlers {
 	zend_object_get_method_t                 get_method;
 	zend_object_call_method_t                call_method;
 	zend_object_get_constructor_t            get_constructor;
+	zend_object_get_class_entry_t            get_class_entry;
 	zend_object_get_class_name_t             get_class_name;
 	zend_object_compare_t                    compare_objects;
 } zend_object_handlers;
@@ -184,6 +185,8 @@ call_method - calls the method (parameters should be put on stack like
 for any other PHP internal function).
 
 get_constructor - get description for the object constructor method
+
+get_class_entry - should return the class entry
 
 get_class_name - get the name of the class the object belongs to
 
