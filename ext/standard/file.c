@@ -434,14 +434,15 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	/* uses mmap if possible */
-	if ((len = php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0)) >= 0) {
-		
+	if ((len = php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0)) > 0) {
 		if (PG(magic_quotes_runtime)) {
 			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
 			len = newlen;
 		}
 
 		RETVAL_STRINGL(contents, len, 0);
+	} else if (len == 0) {
+		RETVAL_EMPTY_STRING();
 	} else {
 		RETVAL_FALSE;
 	}
