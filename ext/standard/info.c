@@ -81,6 +81,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 			php_printf("</td></tr>\n");
 		} else {
 			php_printf(module->name);
+			php_printf("\n");
 		}	
 	}
 	return 0;
@@ -92,7 +93,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
-	char *string_key, *entry;
+	char *string_key;
 	uint string_len;
 	ulong num_key;
 
