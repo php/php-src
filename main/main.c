@@ -607,7 +607,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (PG(output_buffering)) {
-		php_start_ob_buffer();
+		php_start_ob_buffer(NULL);
 	} else if (PG(implicit_flush)) {
 		php_start_implicit_flush();
 	}
