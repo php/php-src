@@ -457,6 +457,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			zval_dtor(&const_value);
 		}
 		zend_hash_apply_with_argument(p->value.ht, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_internal_pointer_reset(p->value.ht);
 	}
 	return 0;
 }
