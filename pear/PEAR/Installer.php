@@ -71,28 +71,29 @@ class PEAR_Installer extends PEAR_Common
                             $extdir = PEAR_EXTENSION_DIR,
                             $docdir = '')
     {
-	$this->PEAR();
+        $this->PEAR();
         $this->phpdir = $phpdir;
         $this->extdir = $extdir;
         $this->docdir = $docdir;
         $this->statedir = "/var/lib/php"; // XXX FIXME Windows
-	$this->loadPackageList("$this->statedir/packages.lst");
+        $this->loadPackageList("$this->statedir/packages.lst");
     }
 
     // }}}
     // {{{ destructor
 
-    function _PEAR_Installer() {
-	if ($this->tmpdir && is_dir($this->tmpdir)) {
-	    system("rm -rf $this->tmpdir"); // XXX FIXME Windows
-	}
-	if ($this->pkglist_fp && is_resource($this->pkglist_fp)) {
-	    flock($this->pkglist_fp, LOCK_UN);
-	    fclose($this->pkglist_fp);
-	}
-	$this->tmpdir = null;
-	$this->pkglist_fp = null;
-	$this->_PEAR_Common();
+    function _PEAR_Installer()
+    {
+        if ($this->tmpdir && is_dir($this->tmpdir)) {
+            system("rm -rf $this->tmpdir"); // XXX FIXME Windows
+        }
+        if ($this->pkglist_fp && is_resource($this->pkglist_fp)) {
+            flock($this->pkglist_fp, LOCK_UN);
+            fclose($this->pkglist_fp);
+        }
+        $this->tmpdir = null;
+        $this->pkglist_fp = null;
+        $this->_PEAR_Common();
     }
 
     // }}}
@@ -129,46 +130,49 @@ class PEAR_Installer extends PEAR_Common
 
     // {{{ lockPackageList()
 
-    function lockPackageList() {
-	$fp = $this->pkglist_fp;
-	if (!is_resource($fp)) {
-	    $this->pkglist_fp = $fp = fopen($this->pkglist_file, "r");
-	}
-	return flock($fp, LOCK_EX);
+    function lockPackageList()
+    {
+        $fp = $this->pkglist_fp;
+        if (!is_resource($fp)) {
+            $this->pkglist_fp = $fp = fopen($this->pkglist_file, "r");
+        }
+        return flock($fp, LOCK_EX);
     }
 
     // }}}
     // {{{ unlockPackageList()
 
-    function unlockPackageList() {
-	$fp = $this->pkglist_fp;
-	if (!is_resource($fp)) {
-	    $this->pkglist_fp = $fp = fopen($this->pkglist_file, "r");
-	    $doclose = true;
-	}
-	$ret = flock($fp, LOCK_EX);
-	if ($doclose) {
-	    fclose($fp);
-	}
-	return $ret;
+    function unlockPackageList()
+    {
+        $fp = $this->pkglist_fp;
+        if (!is_resource($fp)) {
+            $this->pkglist_fp = $fp = fopen($this->pkglist_file, "r");
+            $doclose = true;
+        }
+        $ret = flock($fp, LOCK_EX);
+        if ($doclose) {
+            fclose($fp);
+        }
+        return $ret;
     }
 
     // }}}
     // {{{ loadPackageList()
 
-    function loadPackageList($file) {
-	$this->pkglist_file = $file;
+    function loadPackageList($file)
+    {
+        $this->pkglist_file = $file;
         $this->pkglist = array();
-	if (!file_exists($file)) {
-	    if (!@touch($file)) {
-                return $this->raiseError("touch($file): $php_errormsg");
+        if (!file_exists($file)) {
+            if (!@touch($file)) {
+                    return $this->raiseError("touch($file): $php_errormsg");
             }
-	}
-	$fp = $this->pkglist_fp = @fopen($file, "r");
+        }
+        $fp = $this->pkglist_fp = @fopen($file, "r");
         if (!is_resource($fp)) {
                 return $this->raiseError("fopen($file): $php_errormsg");
         }
-	$this->lockPackageList();
+        $this->lockPackageList();
         $versionline = trim(fgets($fp, 2048));
         if ($versionline == ";1") {
             while ($line = fgets($fp, 2048)) {
@@ -183,37 +187,39 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ savePackageList()
 
-    function savePackageList() {
-	$fp = $this->pkglist_fp;
-	$wfp = @fopen($this->pkglist_file, "w");
-	if (!is_resource($wfp)) {
-	    return $this->raiseError("could not write $this->pkglist_file");
-	}
-	if (is_resource($fp)) {
-	    fclose($fp);
-	}
-	$this->pkglist_fp = $fp = $wfp;
+    function savePackageList()
+    {
+        $fp = $this->pkglist_fp;
+        $wfp = @fopen($this->pkglist_file, "w");
+        if (!is_resource($wfp)) {
+            return $this->raiseError("could not write $this->pkglist_file");
+        }
+        if (is_resource($fp)) {
+            fclose($fp);
+        }
+        $this->pkglist_fp = $fp = $wfp;
         fwrite($fp, ";1\n");
         foreach ($this->pkglist as $name => $entry) {
             $ver = $entry["version"];
             foreach ($entry["files"] as $file) {
-		fwrite($fp, "$name;$ver;$file\n");
-	    }
-	}
-	fclose($fp);
-	$this->pkglist_fp = $fp = null;
+                fwrite($fp, "$name;$ver;$file\n");
+            }
+        }
+        fclose($fp);
+        $this->pkglist_fp = $fp = null;
     }
 
     // }}}
     // {{{ updatePackageListFrom()
 
-    function updatePackageListFrom($file) {
+    function updatePackageListFrom($file)
+    {
         /*
-	$new = $this->classesDeclaredBy($file);
-	reset($new);
-	while (list($i, $name) = each($new)) {
-	    $this->pkglist['class'][$name] = $file;
-	}
+    $new = $this->classesDeclaredBy($file);
+    reset($new);
+    while (list($i, $name) = each($new)) {
+        $this->pkglist['class'][$name] = $file;
+    }
         */
     }
 
@@ -228,12 +234,13 @@ class PEAR_Installer extends PEAR_Common
      *
      * @return bool true if successful, false if not
      */
-    function install($pkgfile) {
+    function install($pkgfile)
+    {
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
         } elseif (!file_exists($pkgfile)) {
-	    return $this->raiseError("$pkgfile: no such file");
-	}
+            return $this->raiseError("$pkgfile: no such file");
+        }
 
         if ($need_download) {
             $file = basename($pkgfile);
@@ -264,115 +271,118 @@ class PEAR_Installer extends PEAR_Common
             $this->log(1, "...done, $bytes bytes");
         }
         // XXX FIXME depends on external gzip+tar
-	$fp = popen("gzip -dc $pkgfile | tar -tf -", "r");
-	if (!$fp) {
-	    return $this->raiseError("Unable to examine $pkgfile (gzip or tar failed)");
-	}
-	while ($line = fgets($fp, 4096)) {
-	    $line = rtrim($line);
-	    if (preg_match('!^[^/]+/package.xml$!', $line)) {
-		if ($descfile) {
-		    return $this->raiseError("Invalid package: multiple package.xml files at depth one!");
-		}
-		$descfile = $line;
-	    }
-	}
-	pclose($fp);
+        $fp = popen("gzip -dc $pkgfile | tar -tf -", "r");
+        if (!$fp) {
+            return $this->raiseError("Unable to examine $pkgfile (gzip or tar failed)");
+        }
+        while ($line = fgets($fp, 4096)) {
+            $line = rtrim($line);
+            if (preg_match('!^[^/]+/package.xml$!', $line)) {
+                if ($descfile) {
+                    return $this->raiseError("Invalid package: multiple package.xml files at depth one!");
+                }
+                $descfile = $line;
+            }
+        }
+        pclose($fp);
 
-	if (!$descfile) {
-	    return $this->raiseError("Invalid package: no package.xml file found!");
-	}
+        if (!$descfile) {
+            return $this->raiseError("Invalid package: no package.xml file found!");
+        }
 
         // XXX FIXME Windows
-	$this->tmpdir = tempnam("/tmp", "pear");
+        $this->tmpdir = tempnam("/tmp", "pear");
         unlink($this->tmpdir);
-	if (!mkdir($this->tmpdir, 0755)) {
-	    return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
-	}
+        if (!mkdir($this->tmpdir, 0755)) {
+            return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
+        }
         $this->addTempFile($this->tmpdir);
-	$pwd = getcwd();
+        $pwd = getcwd();
 
         // XXX FIXME Windows should check for drive
-	if (substr($pkgfile, 0, 1) == DIRECTORY_SEPARATOR) {
-	    $pkgfilepath = $pkgfile;
-	} else {
-	    $pkgfilepath = $pwd.DIRECTORY_SEPARATOR.$pkgfile;
-	}
+        if (substr($pkgfile, 0, 1) == DIRECTORY_SEPARATOR) {
+            $pkgfilepath = $pkgfile;
+        } else {
+            $pkgfilepath = $pwd.DIRECTORY_SEPARATOR.$pkgfile;
+        }
 
-	if (!chdir($this->tmpdir)) {
-	    return $this->raiseError("Unable to chdir to $this->tmpdir.");
-	}
+        if (!chdir($this->tmpdir)) {
+            return $this->raiseError("Unable to chdir to $this->tmpdir.");
+        }
 
-	system("gzip -dc $pkgfilepath | tar -xf -");
+        system("gzip -dc $pkgfilepath | tar -xf -");
 
-	if (!file_exists($descfile)) {
-	    return $this->raiseError("Huh?  No package.xml file after extracting the archive.");
-	}
+        if (!file_exists($descfile)) {
+            return $this->raiseError("Huh?  No package.xml file after extracting the archive.");
+        }
 
-	$this->pkgdir = dirname($descfile);
+        $this->pkgdir = dirname($descfile);
 
-	$fp = fopen($descfile, "r");
-	$xp = xml_parser_create();
-	if (!$xp) {
-	    return $this->raiseError("Unable to create XML parser.");
-	}
-	xml_set_object($xp, &$this);
-	xml_set_element_handler($xp, "startHandler", "endHandler");
-	xml_set_character_data_handler($xp, "charHandler");
-	xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+        $fp = fopen($descfile, "r");
+        $xp = xml_parser_create();
+        if (!$xp) {
+            return $this->raiseError("Unable to create XML parser.");
+        }
+        xml_set_object($xp, &$this);
+        xml_set_element_handler($xp, "startHandler", "endHandler");
+        xml_set_character_data_handler($xp, "charHandler");
+        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
 
-	$this->element_stack = array();
-	$this->pkginfo = array();
-	$this->current_element = false;
-	$this->destdir = '';
+        $this->element_stack = array();
+        $this->pkginfo = array();
+        $this->current_element = false;
+        $this->destdir = '';
 
-	$data = fread($fp, filesize($descfile));
+        $data = fread($fp, filesize($descfile));
         if (!xml_parse($xp, $data, 1)) {
             $msg = sprintf("XML error: %s at line %d",
                            xml_error_string(xml_get_error_code($xp)),
                            xml_get_current_line_number($xp));
             xml_parser_free($xp);
             return $this->raiseError($msg);
-	}
+        }
 
-	xml_parser_free($xp);
+        xml_parser_free($xp);
 
-	return true;
+        return true;
     }
 
     // }}}
     // {{{ startHandler()
 
-    function startHandler($xp, $name, $attribs) {
-	array_push($this->element_stack, $name);
-	$this->current_element = $name;
-	$this->current_attributes = $attribs;
-	switch ($name) {
-	    case "Package":
+    function startHandler($xp, $name, $attribs)
+    {
+        array_push($this->element_stack, $name);
+        $this->current_element = $name;
+        $this->current_attributes = $attribs;
+        switch ($name) {
+            case "Package":
 /*
-		if (strtolower($attribs["Type"]) != "binary") {
-		    return $this->raiseError("Invalid package: only binary packages supported yet.");
-		}
-		$this->pkginfo['pkgtype'] = strtolower($attribs["Type"]);
+                if (strtolower($attribs["Type"]) != "binary") {
+                    return $this->raiseError("Invalid package: only binary packages supported yet.");
+                }
+                $this->pkginfo['pkgtype'] = strtolower($attribs["Type"]);
 */
-		break;
-	}
+        break;
+        }
     }
 
     // }}}
     // {{{ endHandler()
 
-    function endHandler($xp, $name) {
-	array_pop($this->element_stack);
-	$this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
+    function endHandler($xp, $name)
+    {
+        array_pop($this->element_stack);
+        $this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
     }
 
     // }}}
     // {{{ charHandler()
 
-    function charHandler($xp, $data) {
+    function charHandler($xp, $data)
+    {
         $next = $this->element_stack[sizeof($this->element_stack)-1];
-	switch ($this->current_element) {
+        switch ($this->current_element) {
             case "Name":
                 if ($next == "Package") {
                     $this->pkginfo["name"] = $data;
@@ -381,37 +391,37 @@ class PEAR_Installer extends PEAR_Common
             case "Version":
                 $this->pkginfo["version"] = $data;
                 break;
-	    case "Dir":
-		if (!$this->phpdir) {
-		    break;
-		}
-                $type = $this->current_attributes["Type"];
-		$dir = trim($data);
-		$d = "$this->phpdir/$this->destdir/$dir";
-		if (substr($dir, 0, 1) == "/") {
-		    $this->destdir = substr($dir, 1);
-		} else {
-                    $this->destdir = $dir;
+            case "Dir":
+                if (!$this->phpdir) {
+                    break;
                 }
-		break;
-		if (is_file($d)) {
-                    return $this->raiseError("mkdir $d failed: is a file");
-		}
-		if (is_dir($d)) {
-		    break;
-		}
-		if (!mkdir($d, 0755)) {
-                    return $this->raiseError("mkdir $d failed");
-		    break;
-		}
-                $this->log(1, "created dir $d");
-		break;
-	    case "File":
-		if (!$this->phpdir) {
-		    break;
-		}
+                $type = $this->current_attributes["Type"];
+                $dir = trim($data);
+                $d = "$this->phpdir/$this->destdir/$dir";
+                if (substr($dir, 0, 1) == "/") {
+                    $this->destdir = substr($dir, 1);
+                } else {
+                            $this->destdir = $dir;
+                        }
+                break;
+                if (is_file($d)) {
+                            return $this->raiseError("mkdir $d failed: is a file");
+                }
+                if (is_dir($d)) {
+                    break;
+                }
+                if (!mkdir($d, 0755)) {
+                            return $this->raiseError("mkdir $d failed");
+                    break;
+                }
+                        $this->log(1, "created dir $d");
+                break;
+            case "File":
+                if (!$this->phpdir) {
+                    break;
+                }
                 $type = strtolower($this->current_attributes["Role"]);
-		$file = trim($data);
+                $file = trim($data);
                 $updatepkglist = false;
                 switch ($type) {
                     case "test":
@@ -433,16 +443,16 @@ class PEAR_Installer extends PEAR_Common
                     $this->mkDirHier($d);
                 }
                 $bfile = basename($file);
-		if (!copy("$this->pkgdir/$file", "$d/$bfile")) {
-		    $this->log(0, "failed to copy $this->pkgdir/$file to $d");
-		    break;
-		}
+                if (!copy("$this->pkgdir/$file", "$d/$bfile")) {
+                    $this->log(0, "failed to copy $this->pkgdir/$file to $d");
+                    break;
+                }
                 if ($updatepkglist) {
                     $this->updatePackageListFrom("$d/$file");
                 }
                 $this->log(1, "installed $d/$bfile");
-		break;
-	}
+                break;
+        }
     }
 
     // }}}
@@ -456,15 +466,16 @@ class PEAR_Installer extends PEAR_Common
      *
      * @return array classes that were defined
      */
-    function classesDeclaredBy($file) {
-	$before = get_declared_classes();
+    function classesDeclaredBy($file)
+    {
+        $before = get_declared_classes();
         ob_start();
-	include($file);
+        include($file);
         ob_end_clean();
-	$after = get_declared_classes();
-	// using array_slice to renumber array
-	$diff = array_slice(array_diff($after, $before), 0);
-	return $diff;
+        $after = get_declared_classes();
+        // using array_slice to renumber array
+        $diff = array_slice(array_diff($after, $before), 0);
+        return $diff;
     }
 
     // }}}
@@ -478,21 +489,22 @@ class PEAR_Installer extends PEAR_Common
      *
      * @return array classes that were defined
      */
-    function &declaredWhenIncluding($file) {
-	$classes_before = get_declared_classes();
+    function &declaredWhenIncluding($file)
+    {
+        $classes_before = get_declared_classes();
         $funcs_before = get_defined_functions();
-//        $vars_before = $GLOBALS;
+//      $vars_before = $GLOBALS;
         ob_start();
-	include($file);
+        include($file);
         ob_end_clean();
-	$classes_after = get_declared_classes();
+        $classes_after = get_declared_classes();
         $funcs_after = get_defined_functions();
-//        $vars_after = $GLOBALS;
-	// using array_slice to renumber array
+//      $vars_after = $GLOBALS;
+        //using array_slice to renumber array
         return array(
             "classes" => array_slice(array_diff($classes_after, $classes_before), 0),
             "functions" => array_slice(array_diff($funcs_after, $funcs_before), 0),
-//            "globals" => array_slice(array_diff($vars_after, $vars_before), 0)
+//          "globals" => array_slice(array_diff($vars_after, $vars_before), 0)
         );
     }
 
@@ -508,20 +520,21 @@ class PEAR_Installer extends PEAR_Common
      *
      * @return bool true if successful, false if not
      */
-    function lockDir($dir) {
-	$lockfile = "$dir/.lock";
-	if (!file_exists($lockfile)) {
-	    if (!touch($lockfile)) {
-		// could not create lockfile!
-		return false;
-	    }
-	}
-	$fp = fopen($lockfile, "r");
-	if (!flock($fp, LOCK_EX)) {
-	    // could not create lock!
-	    return false;
-	}
-	return true;
+    function lockDir($dir)
+    {
+        $lockfile = "$dir/.lock";
+        if (!file_exists($lockfile)) {
+            if (!touch($lockfile)) {
+            // could not create lockfile!
+            return false;
+            }
+        }
+        $fp = fopen($lockfile, "r");
+        if (!flock($fp, LOCK_EX)) {
+            // could not create lock!
+            return false;
+        }
+        return true;
     }
 
     // }}}
