@@ -2697,7 +2697,7 @@ PHP_FUNCTION(ibase_blob_get)
 /* Close or Cancel created or Close open blob */
 static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 {
-	zval *blob_arg;
+	zval **blob_arg;
 	ibase_blob_handle *ib_blob;
 
 	RESET_ERRMSG;
@@ -2823,7 +2823,7 @@ PHP_FUNCTION(ibase_blob_info)
    Output blob contents to browser */
 PHP_FUNCTION(ibase_blob_echo)
 {
-	zval *blob_arg;
+	zval **blob_arg;
 	char bl_data[IBASE_BLOB_SEG];
 	unsigned short seg_len;
 	ibase_blob_handle *ib_blob_id;
