@@ -97,7 +97,7 @@ static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) {
 	ZVAL_STRING(member, property, 1);
 
 	std_hnd = zend_get_std_object_handlers();
-	format = std_hnd->read_property(id, member TSRMLS_CC);
+	format = std_hnd->read_property(id, member, 0 TSRMLS_CC);
 
 	if (format->type == IS_BOOL) {
 		retformat = Z_BVAL_P(format);
