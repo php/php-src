@@ -1097,7 +1097,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (filter) {
-		RETURN_RESOURCE(ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter()));
+		RETURN_RESOURCE(filter->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter()));
 	} else {
 		RETURN_FALSE;
 	}

@@ -499,6 +499,11 @@ PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, in
 	} else {
 		filter->chain->tail = filter->prev;
 	}
+
+	if (filter->rsrc_id > 0) {
+		zend_list_delete(filter->rsrc_id);
+	}
+
 	if (call_dtor) {
 		php_stream_filter_free(filter TSRMLS_CC);
 		return NULL;

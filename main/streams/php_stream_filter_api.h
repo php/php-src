@@ -117,6 +117,9 @@ struct _php_stream_filter {
 
 	/* buffered buckets */
 	php_stream_bucket_brigade buffer;
+
+	/* filters are auto_registered when they're applied */
+	int rsrc_id;
 };
 
 /* stack filter onto a stream */
