@@ -2385,7 +2385,7 @@ PHP_FUNCTION(sqlite_create_function)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &zdb, &funcname, &funcname_len, &zcall, &num_args)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &funcname, &funcname_len, &zcall, &num_args)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
