@@ -517,7 +517,6 @@ class System
         }
         if (count($patterns)) {
             $patterns = implode('|', $patterns);
-            echo "p: $patterns\n";
             $ret = array();
             for ($i = 0; $i < count($files); $i++) {
                 if (preg_match("#^$patterns\$#", $files[$i])) {
