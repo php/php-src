@@ -719,7 +719,7 @@ PHP_FUNCTION(popen)
 		}
 
 		tmp = php_escape_shell_cmd(buf);
-		fp = V_POPEN(tmp,p);
+		fp = VCWD_POPEN(tmp,p);
 		efree(tmp);
 
 		if (!fp) {
@@ -727,7 +727,7 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	} else {
-		fp = V_POPEN((*arg1)->value.str.val, p);
+		fp = VCWD_POPEN((*arg1)->value.str.val, p);
 		if (!fp) {
 			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",(*arg1)->value.str.val,p,strerror(errno));
 			efree(p);
@@ -1483,7 +1483,7 @@ PHP_FUNCTION(mkdir)
 	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 		RETURN_FALSE;
 	}
-	ret = V_MKDIR((*arg1)->value.str.val, mode);
+	ret = VCWD_MKDIR((*arg1)->value.str.val, mode);
 	if (ret < 0) {
 		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -1508,7 +1508,7 @@ PHP_FUNCTION(rmdir)
 	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
 		RETURN_FALSE;
 	}
-	ret = V_RMDIR((*arg1)->value.str.val);
+	ret = VCWD_RMDIR((*arg1)->value.str.val);
 	if (ret < 0) {
 		php_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -1707,7 +1707,7 @@ PHP_FUNCTION(rename)
 	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
-	ret = V_RENAME(old_name, new_name);
+	ret = VCWD_RENAME(old_name, new_name);
 
 	if (ret == -1) {
 		php_error(E_WARNING,"Rename failed (%s)", strerror(errno));
@@ -1736,7 +1736,7 @@ PHP_FUNCTION(unlink)
 		RETURN_FALSE;
 	}
 
-	ret = V_UNLINK((*filename)->value.str.val);
+	ret = VCWD_UNLINK((*filename)->value.str.val);
 	if (ret == -1) {
 		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -1867,17 +1867,17 @@ PHPAPI int php_copy_file(char *src, char *dest)
 	int ret = FAILURE;
 
 #ifdef PHP_WIN32
-	if ((fd_s=V_OPEN((src,O_RDONLY|_O_BINARY)))==-1) {
+	if ((fd_s=VCWD_OPEN((src,O_RDONLY|_O_BINARY)))==-1) {
 #else
-	if ((fd_s=V_OPEN((src,O_RDONLY)))==-1) {
+	if ((fd_s=VCWD_OPEN((src,O_RDONLY)))==-1) {
 #endif
 		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", src, strerror(errno));
 		return FAILURE;
 	}
 #ifdef PHP_WIN32
-	if ((fd_t=V_OPEN((dest,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1) {
+	if ((fd_t=VCWD_OPEN((dest,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1) {
 #else
-	if ((fd_t=V_CREAT(dest,0777))==-1) {
+	if ((fd_t=VCWD_CREAT(dest,0777))==-1) {
 #endif
 		php_error(E_WARNING,"Unable to create '%s':  %s", dest, strerror(errno));
 		close(fd_s);
@@ -2152,7 +2152,7 @@ PHP_FUNCTION(realpath)
 
 	convert_to_string_ex(path);
 
-	if (V_REALPATH((*path)->value.str.val, resolved_path_buff)) {
+	if (VCWD_REALPATH((*path)->value.str.val, resolved_path_buff)) {
 		RETURN_STRING(resolved_path_buff, 1);
 	} else {
 		RETURN_FALSE;

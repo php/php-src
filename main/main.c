@@ -267,7 +267,7 @@ void php_log_err(char *log_message)
 			return;
 		}
 #endif
-		log_file = V_FOPEN(PG(error_log), "a");
+		log_file = VCWD_FOPEN(PG(error_log), "a");
 		if (log_file != NULL) {
 			time(&error_time);
 			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
@@ -1168,7 +1168,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_D
 
 	if (setjmp(EG(bailout))!=0) {
 		if (old_cwd[0] != '\0')
-			V_CHDIR(old_cwd);
+			VCWD_CHDIR(old_cwd);
 		free_alloca(old_cwd);
 		return EG(exit_status);
 	}
@@ -1181,8 +1181,8 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_D
 
 	if (primary_file->type == ZEND_HANDLE_FILENAME 
 			&& primary_file->filename) {
-		V_GETCWD(old_cwd, OLD_CWD_SIZE-1);
-		V_CHDIR_FILE(primary_file->filename);
+		VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+		VCWD_CHDIR_FILE(primary_file->filename);
 	}
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
@@ -1206,7 +1206,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_D
 	zend_execute_scripts(ZEND_REQUIRE CLS_CC ELS_CC, 3, prepend_file_p, primary_file, append_file_p);
 
 	if (old_cwd[0] != '\0')
-		V_CHDIR(old_cwd);
+		VCWD_CHDIR(old_cwd);
 	free_alloca(old_cwd);
 
 	return EG(exit_status);

@@ -120,7 +120,7 @@ static int php_dbm_key_exists(DBM *dbf, datum key_datum) {
 #define DBM_CREATE_MODE "a+b"
 #define DBM_NEW_MODE "w+b"
 #define DBM_DEFAULT_MODE "r"
-#define DBM_OPEN(filename, mode) V_FOPEN(filename, mode)
+#define DBM_OPEN(filename, mode) VCWD_FOPEN(filename, mode)
 #define DBM_CLOSE(dbf) fclose(dbf)
 #define DBM_STORE(dbf, key, value, mode) flatfile_store(dbf, key, value, mode)
 #define DBM_FETCH(dbf, key) flatfile_fetch(dbf, key)
@@ -322,7 +322,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 		strcat(lockfn, ".lck");
 
 #if NFS_HACK 
-		while((last_try = V_STAT(lockfn,&sb))==0) {
+		while((last_try = VCWD_STAT(lockfn,&sb))==0) {
 			retries++;
 			php_sleep(1);
 			if (retries>30) break;
@@ -336,7 +336,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 		}
 #else /* NFS_HACK */
 
-		lockfd = V_OPEN((lockfn,O_RDWR|O_CREAT,0644));
+		lockfd = VCWD_OPEN((lockfn,O_RDWR|O_CREAT,0644));
 
 		if (lockfd) {
 			flock(lockfd,LOCK_EX);
@@ -396,7 +396,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 
 #if NFS_HACK
 		if (lockfn) {
-			V_UNLINK(lockfn);
+			VCWD_UNLINK(lockfn);
 		}
 #endif
 		if (lockfn) efree(lockfn);
@@ -432,10 +432,10 @@ int php_dbm_close(zend_rsrc_list_entry *rsrc) {
 	dbf = info->dbf;
 
 #if NFS_HACK
-	V_UNLINK(info->lockfn);
+	VCWD_UNLINK(info->lockfn);
 #else
 	if (info->lockfn) {
-		lockfd = V_OPEN((info->lockfn,O_RDWR,0644));
+		lockfd = VCWD_OPEN((info->lockfn,O_RDWR,0644));
 		flock(lockfd,LOCK_UN);
 		close(lockfd);
 	}

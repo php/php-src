@@ -536,7 +536,7 @@ static char *_php_create_id(int *newlen PSLS_DC)
 	if (PS(entropy_length) > 0) {
 		int fd;
 
-		fd = V_OPEN((PS(entropy_file), O_RDONLY));
+		fd = VCWD_OPEN((PS(entropy_file), O_RDONLY));
 		if (fd >= 0) {
 			char *p;
 			int n;
@@ -652,7 +652,7 @@ static void last_modified(void)
 
 	path = SG(request_info).path_translated;
 	if (path) {
-		if (V_STAT(path, &sb) == -1) {
+		if (VCWD_STAT(path, &sb) == -1) {
 			return;
 		}
 

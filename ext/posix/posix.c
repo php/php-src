@@ -632,7 +632,7 @@ PHP_FUNCTION(posix_getcwd)
 	char  buffer[MAXPATHLEN];
 	char *p;
 
-	p = V_GETCWD(buffer, MAXPATHLEN);
+	p = VCWD_GETCWD(buffer, MAXPATHLEN);
 	if (!p) {
 		php_error(E_WARNING, "posix_getcwd() failed with '%s'",
 			strerror(errno));

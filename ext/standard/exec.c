@@ -99,9 +99,9 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 		sig_handler = signal (SIGCHLD, SIG_DFL);
 #endif
 #ifdef PHP_WIN32
-		fp = V_POPEN(d, "rb");
+		fp = VCWD_POPEN(d, "rb");
 #else
-		fp = V_POPEN(d, "r");
+		fp = VCWD_POPEN(d, "r");
 #endif
 		if (!fp) {
 			php_error(E_WARNING, "Unable to fork [%s]", d);
@@ -117,9 +117,9 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 		sig_handler = signal (SIGCHLD, SIG_DFL);
 #endif
 #ifdef PHP_WIN32
-		fp = V_POPEN(cmd, "rb");
+		fp = VCWD_POPEN(cmd, "rb");
 #else
-		fp = V_POPEN(cmd, "r");
+		fp = VCWD_POPEN(cmd, "r");
 #endif
 		if (!fp) {
 			php_error(E_WARNING, "Unable to fork [%s]", cmd);
@@ -451,9 +451,9 @@ PHP_FUNCTION(shell_exec)
 
 	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
-	if ((in=V_POPEN(Z_STRVAL_PP(cmd),"rt"))==NULL) {
+	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd),"rt"))==NULL) {
 #else
-	if ((in=V_POPEN(Z_STRVAL_PP(cmd),"r"))==NULL) {
+	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd),"r"))==NULL) {
 #endif
 		php_error(E_WARNING,"Unable to execute '%s'",Z_STRVAL_PP(cmd));
 	}

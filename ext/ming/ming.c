@@ -245,10 +245,10 @@ PHP_FUNCTION(swfbitmap_init)
     if(maskname != NULL)
     {
       FILE *jpeg, *mask;
-      if((jpeg = V_FOPEN(filename, "rb")) == NULL)
+      if((jpeg = VCWD_FOPEN(filename, "rb")) == NULL)
 	 php_error(E_ERROR, "Couldn't find file %s", filename);
 
-      if((mask = V_FOPEN(maskname, "rb")) == NULL)
+      if((mask = VCWD_FOPEN(maskname, "rb")) == NULL)
 	php_error(E_ERROR, "Couldn't find file %s", maskname);
 
       bitmap = newSWFJpegWithAlpha(jpeg, mask);
@@ -260,7 +260,7 @@ PHP_FUNCTION(swfbitmap_init)
     {
       FILE *jpeg;
 
-      if((jpeg = V_FOPEN(filename, "rb")) == NULL)
+      if((jpeg = VCWD_FOPEN(filename, "rb")) == NULL)
 	 php_error(E_ERROR, "Couldn't find file %s", filename);
 
       bitmap = newSWFJpegBitmap(jpeg);
@@ -272,7 +272,7 @@ PHP_FUNCTION(swfbitmap_init)
   {
     FILE *dbl;
 
-    if((dbl = V_FOPEN(filename, "rb")) == NULL)
+    if((dbl = VCWD_FOPEN(filename, "rb")) == NULL)
       php_error(E_ERROR, "Couldn't find file %s", filename);
 
     bitmap = newSWFDBLBitmap(dbl);
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(swffont_init)
 
   if(strcmp(Z_STRVAL_PP(zfile)+Z_STRLEN_PP(zfile)-4, ".fdb") == 0)
   {
-    file = V_FOPEN(Z_STRVAL_PP(zfile), "rb");
+    file = VCWD_FOPEN(Z_STRVAL_PP(zfile), "rb");
 
     if(!file)
       php_error(E_ERROR, "Couldn't find FDB file %s", Z_STRVAL_PP(zfile));
@@ -1522,7 +1522,7 @@ PHP_FUNCTION(swfmovie_save)
 
   convert_to_string_ex(x);
 
-  file = V_FOPEN(Z_STRVAL_PP(x), "wb");
+  file = VCWD_FOPEN(Z_STRVAL_PP(x), "wb");
 
   if(file == NULL)
     php_error(E_ERROR, "couldn't open file %s for writing", Z_STRVAL_PP(x));
@@ -1624,7 +1624,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
   {
     convert_to_string_ex(zfile);
 
-    file = V_FOPEN(Z_STRVAL_PP(zfile), "rb");
+    file = VCWD_FOPEN(Z_STRVAL_PP(zfile), "rb");
 
     if(!file)
       php_error(E_ERROR, "Couldn't find file %s", Z_STRVAL_PP(zfile));

@@ -61,7 +61,7 @@ DBA_OPEN_FUNC(db2)
 
 	type =  info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
-		V_STAT(info->path, &check_stat) ? DB_BTREE : DB_UNKNOWN;
+		VCWD_STAT(info->path, &check_stat) ? DB_BTREE : DB_UNKNOWN;
 	  
 	gmode = info->mode == DBA_READER ? DB_RDONLY :
 		info->mode == DBA_CREAT  ? DB_CREATE : 

@@ -2502,11 +2502,11 @@ PHP_FUNCTION(move_uploaded_file)
  		RETURN_FALSE;
  	}
 
-	V_UNLINK(Z_STRVAL_PP(new_path));
+	VCWD_UNLINK(Z_STRVAL_PP(new_path));
 	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==0) {
 		successful=1;
 	} else if (php_copy_file(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==SUCCESS) {
-		V_UNLINK(Z_STRVAL_PP(path));
+		VCWD_UNLINK(Z_STRVAL_PP(path));
 		successful=1;
 	}
 
@@ -2604,7 +2604,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	convert_to_string_ex(filename);
-	fh.handle.fp = V_FOPEN(Z_STRVAL_PP(filename), "r");
+	fh.handle.fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
 	if (!fh.handle.fp) {
 		php_error(E_WARNING,"Cannot open '%s' for reading", Z_STRVAL_PP(filename));
 		return;

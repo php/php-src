@@ -214,7 +214,7 @@ PHP_FUNCTION(filepro)
 		RETURN_FALSE;
 	}
 
-	if (!(fp = V_FOPEN(workbuf, "r"))) {
+	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
 		php_error(E_WARNING, "filePro: cannot open map: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
@@ -313,7 +313,7 @@ PHP_FUNCTION(filepro_rowcount)
 		RETURN_FALSE;
 	}
 
-	if (!(fp = V_FOPEN(workbuf, "r"))) {
+	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
 		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
@@ -538,7 +538,7 @@ PHP_FUNCTION(filepro_retrieve)
 		RETURN_FALSE;
 	}
 
-	if (!(fp = V_FOPEN(workbuf, "r"))) {
+	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
 		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
 					errno, strerror(errno));
 	    fclose(fp);

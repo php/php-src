@@ -139,7 +139,7 @@ PHP_MINIT_FUNCTION(browscap)
 			return FAILURE;
 		}
 
-		fh.handle.fp = V_FOPEN(browscap, "r");
+		fh.handle.fp = VCWD_FOPEN(browscap, "r");
 		if (!fh.handle.fp) {
 			php_error(E_CORE_WARNING,"Cannot open '%s' for reading", browscap);
 			return FAILURE;

@@ -190,7 +190,7 @@ PHP_FUNCTION(swf_openfile)
 			free_na = 0;
 			RETURN_FALSE;
 		}
-		V_UNLINK((const char *)na);
+		VCWD_UNLINK((const char *)na);
 		fclose(fp);
 		free_na = 1;
 		SWFG(use_file) = 0;
@@ -236,7 +236,7 @@ PHP_FUNCTION(swf_closefile)
 		char buf[4096];
 		int b;
 		
-		if ((f = V_FOPEN(SWFG(tmpfile_name), "r")) == NULL) {
+		if ((f = VCWD_FOPEN(SWFG(tmpfile_name), "r")) == NULL) {
 			php_error(E_WARNING, "Cannot create temporary file for stdout support with SWF");
 			RETURN_NULL();
 		}
@@ -246,7 +246,7 @@ PHP_FUNCTION(swf_closefile)
 		
 		fclose(f);
 		
-		V_UNLINK((const char *)SWFG(tmpfile_name));
+		VCWD_UNLINK((const char *)SWFG(tmpfile_name));
 	}
 }
 /* }}} */

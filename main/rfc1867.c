@@ -85,7 +85,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 
 static int unlink_filename(char **filename)
 {
-	V_UNLINK(*filename);
+	VCWD_UNLINK(*filename);
 	return 0;
 }
 

@@ -114,7 +114,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 
 #ifdef PHP_WIN32
 	if (GetTempFileName(path, pfx, 0, opened_path)) {
-		fp = V_FOPEN(opened_path, "wb");
+		fp = VCWD_FOPEN(opened_path, "wb");
 	} else {
 		fp = NULL;
 	}
@@ -127,7 +127,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 	}
 #else
 	if (mktemp(opened_path)) {
-		fp = V_FOPEN(opened_path, "wb");
+		fp = VCWD_FOPEN(opened_path, "wb");
 	} else {
 		fp = NULL;
 	}

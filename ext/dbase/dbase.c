@@ -598,7 +598,7 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 
-	if ((fd = V_OPEN((Z_STRVAL_P(filename), O_BINARY|O_RDWR|O_CREAT, 0644))) < 0) {
+	if ((fd = VCWD_OPEN((Z_STRVAL_P(filename), O_BINARY|O_RDWR|O_CREAT, 0644))) < 0) {
 		php_error(E_WARNING, "Unable to create database (%d): %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}

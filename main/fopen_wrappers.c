@@ -232,7 +232,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 		if (php_check_open_basedir((char *)path)) {
 			return NULL;
 		}
-		fp = V_FOPEN(path, mode);
+		fp = VCWD_FOPEN(path, mode);
 		if (fp && opened_path) {
 			*opened_path = expand_filepath(path,NULL);
 		}
@@ -336,7 +336,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		SG(request_info).path_translated = NULL;
 		return NULL;
 	}
-	fp = V_FOPEN(filename, "rb");
+	fp = VCWD_FOPEN(filename, "rb");
 
 	/* refuse to open anything that is not a regular file */
 	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
@@ -349,7 +349,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		return NULL;
 	}
     if (!(SG(options) & SAPI_OPTION_NO_CHDIR)) {
-		V_CHDIR_FILE(filename);
+		VCWD_CHDIR_FILE(filename);
     }
 	SG(request_info).path_translated = filename;
 
@@ -406,7 +406,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 		if (PG(safe_mode)) {
-			if (V_STAT(trypath, &sb) == 0 && (!php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))) {
+			if (VCWD_STAT(trypath, &sb) == 0 && (!php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))) {
 				efree(pathbuf);
 				return NULL;
 			}
@@ -520,7 +520,7 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 	char cwd[MAXPATHLEN];
 	char *result;
 
-	result = V_GETCWD(cwd, MAXPATHLEN);	
+	result = VCWD_GETCWD(cwd, MAXPATHLEN);	
 	if (!result) {
 		cwd[0] = '\0';
 	}

@@ -1384,7 +1384,7 @@
 
 2001-04-03  Daniel Beulshausen  <daniel@php4win.de>
 
-    * ext/exif/exif.c: use V_STAT
+    * ext/exif/exif.c: use VCWD_STAT
 
     * ext/exif/exif.c: resolve realpath if in v-dir mode
 
