@@ -63,8 +63,8 @@ AC_ARG_WITH(gd,
                           Set DIR to "shared" to build as a dl, or 
                           "shared,DIR" to build as a dl and still specify DIR.],
 [
-  old_withval=$withval
   PHP_WITH_SHARED
+  old_withval=$withval
   PHP_GD_JPEG
   PHP_GD_XPM
   withval=$old_withval
