@@ -1,3 +1,83 @@
+2002-06-28  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache/config.m4: Fix for bug #18055
+
+2002-06-28  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ext/pdf/config.m4:
+    remember the value of ext_shared passed into the --with-pdflib, since it
+    gets overwritten by future PHP_ARG_WITH checks in the same m4 fragment
+
+    from wilfried@openbsd.org
+
+2002-06-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/README: Mention Apache 2.0.40.
+
+2002-06-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/db/db.c: - More gotchas...
+
+    * ext/msession/msession.c: - Fix more TSRM gotchas
+
+2002-06-28  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/config.m4: Require 2.0.40
+
+2002-06-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache2filter/sapi_apache2.c: - YAAC: I hope this is the last one!
+
+    * ext/imap/php_imap.c: - Fix TSRM gotcha
+
+2002-06-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: t1lib.h needs to be included here now.
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h: Moved all gd.h related stuff to gd.c
+
+    * ext/gd/php_gd.h: Remove unnecessary #include's
+
+    * ext/gd/gdt1.c
+      ext/gd/gdt1.h
+      ext/gd/config.m4: Remove unused files.
+
+2002-06-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/imap/php_imap.c: Unify error messages
+
+2002-06-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: Fix bug: #14735
+
+    * ext/gd/gd.c: Fix bug: #17528, do not crash with empty string.
+
+    * sapi/apache2filter/config.m4: Fixed bug: #17491 (honor INSTALL_ROOT)
+
+    * ext/mysql/libmysql/mysql_version.h: - Fix annoying redefine warning..
+
+    * ext/gd/config.m4: - Fix bug: #17671
+
+2002-06-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/iconv/iconv.c: - Fix for bug #18039
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/gdt1.c: Unify error messages
+
+2002-06-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/config.m4
+      ext/session/mod_mm.c
+      ext/session/mod_mm.h
+      ext/session/session.c:
+    - Fixed bug: #17977, session build as shared works now with mm handler too.
+    - Added listing of save handlers into phpinfo() output
+
 2002-06-27  Jani Taskinen  <sniper@iki.fi>
 
     * Makefile.global: Fix bug: #18008
