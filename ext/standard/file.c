@@ -703,7 +703,6 @@ PHP_FUNCTION(feof)
 	int id, type;
 	int issock=0;
 	int socketd=0, *sock;
-	unsigned int temp;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -721,7 +720,7 @@ PHP_FUNCTION(feof)
 		/* we're at the eof if the file doesn't exist */
 		RETURN_TRUE;
 	}
-	if ((issock?!(recv(socketd,(char *)&temp,1,MSG_PEEK)):feof(fp))) {
+	if ((issock?(_php3_sock_eof(socketd)):feof(fp))) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
