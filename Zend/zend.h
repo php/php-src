@@ -227,9 +227,9 @@ typedef union _zvalue_value {
 struct _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
+	zend_uint refcount;
 	zend_uchar type;	/* active type */
 	zend_uchar is_ref;
-	zend_ushort refcount;
 };
 
 
