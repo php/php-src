@@ -23,7 +23,8 @@
 
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
-#define PDO_PARSER_EOI 3
+#define PDO_PARSER_BIND_POS 3
+#define PDO_PARSER_EOI 4
 
 #define RET(i) {s->cur = cursor; return i; }
 
@@ -44,7 +45,8 @@ static int scan(Scanner *s)
 		s->tok = cursor;
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
-	SPECIALS	= [:"];
+	QUESTION	= [?];
+	SPECIALS	= [:?"];
 	ESC     	= [\\]["];
 	EOF			= [\000];
 	ANYNOEOF	= [\001-\377];
@@ -53,6 +55,7 @@ static int scan(Scanner *s)
 	/*!re2c
 		(["] (ESC|ANYNOEOF\[\\"])* ["])		{ RET(PDO_PARSER_TEXT); }
 		BINDCHR	{ RET(PDO_PARSER_BIND); }
+		QUESTION	{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS	{ RET(PDO_PARSER_TEXT); }
 		(ANYNOEOF\SPECIALS)+ { RET(PDO_PARSER_TEXT); }
 		EOF		{ RET(PDO_PARSER_EOI); }
@@ -111,7 +114,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			if(!params) { 
 				/* error */
 				efree(*outquery);
-				return 0;
+				return (int) (s.cur - inquery);
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
@@ -144,13 +147,47 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			else {
 				/* error and cleanup */
 				efree(*outquery);
-				return 0;
+				return (int) (s.cur - inquery);
 			}
 			bindno++;
-		}	
+		}
+		else if(t == PDO_PARSER_BIND_POS) {
+			if(!params) { 
+				/* error */
+				efree(*outquery);
+				return (int) (s.cur - inquery);
+			}
+			/* lookup bind by index */
+			if(SUCCESS == zend_hash_index_find(params, bindno, (void **)&param)) 
+			{
+				char *quotedstr;
+				int quotedstrlen;
+				/* currently everything is a string here */
+				
+				/* quote the bind value if necessary */
+				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
+					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
+				{
+					memcpy(ptr, quotedstr, quotedstrlen);
+					ptr += quotedstrlen;
+					*outquery_len += quotedstrlen;
+					efree(quotedstr);
+				} else {
+					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
+					ptr += Z_STRLEN_P(param->parameter);
+					*outquery_len += (Z_STRLEN_P(param->parameter));
+				}
+			}
+			else {
+				/* error and cleanup */
+				efree(*outquery);
+				return (int) (s.cur - inquery);
+			}
+			bindno++;
+		}
 	}	
 	*ptr = '\0';
-	return 1;
+	return 0;
 }
 
 /*
