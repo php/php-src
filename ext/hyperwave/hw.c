@@ -244,7 +244,7 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	}
 
 	hidden = collhead = fullcollhead = total = 0;
-        collheadnr = fullcollheadnr = -1;
+	collheadnr = fullcollheadnr = -1;
 	for(i=0; i<count; i++) {
 		/* Fill the array with entries. No need to free objrecs[i], since
 		 * it is not duplicated in add_next_index_string().
@@ -1326,7 +1326,7 @@ php_printf("%s", object);
 }
 /* }}} */
 
-/* {{{ proto string hw_getobject(int link, int objid [, string linkroot])
+/* {{{ proto string hw_getobject(int link, int objid [, string query])
    Returns object record  */
 PHP_FUNCTION(hw_getobject) {
 	pval **argv[3];
@@ -1370,8 +1370,9 @@ PHP_FUNCTION(hw_getobject) {
 		zval **keydata;
 
 		lht = (*argv[1])->value.ht;
-        	if(0 == (count = zend_hash_num_elements(lht)))
+		if(0 == (count = zend_hash_num_elements(lht))) {
 			RETURN_FALSE;
+		}
 		ids = emalloc(count * sizeof(hw_objectID));
 
 		zend_hash_internal_pointer_reset(lht);
