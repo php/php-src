@@ -115,9 +115,11 @@ Exceptions:
     cvs user foo.  This allows easier tracking of why code was commented out, 
     especially in bundled libraries.  
 
-[10] Do no define that is not available. For instance, if library available is 
-     missing function(s), do not define function nor raise error for missing 
-     function(s).
+[10] Do not define functions that are not available.  For instance, if a
+     library is missing a function, do not define the PHP version of the
+     function, and do not raise a run-time error about the function not
+     existing.  End users should use function_exists() to test for the
+     existence of a function
 
 Naming Conventions
 ------------------
