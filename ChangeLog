@@ -1,3 +1,36 @@
+2005-01-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/exif/exif.c:
+      MFB (bugfix for 28451)
+
+    * (PHP_4_3)
+      NEWS:
+      -** empty log message ***
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      Protect against corrupt EXIF headers that feature unlimited IFD tag
+      nesting.
+
+2005-01-21  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/session/session.c:
+      Correctly initialize ZVAL
+
+2005-01-21  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/imap/php_imap.c:
+      destruct return_value
+
+2005-01-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_execute.c:
+      Fixed bug #28086 (crash inside overload() function).
+
 2005-01-20  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_5_0)
