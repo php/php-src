@@ -1,3 +1,116 @@
+2000-12-04  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Removed a fatal condition to allow for harmless user error plus some other
+    small changes.
+
+2000-12-04  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/PEAR.php.in:
+    have PEAR::isError() not take parameters by reference for now.
+
+2000-12-04  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+    - Fix up the NEWS item. We need to make sure that this release we really
+      do put a link to the NEWS file on the downloads page.
+
+    * NEWS:
+    - Explanation about Zend change. I'll move it to the branch when I'm happy
+      with the way it's explained. It's rather hard to explain it well.
+
+2000-12-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/DB/common.php:
+    Added PHPDoc compliant inline documentation for nextid(). Fixed a bug in nextid().
+
+2000-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: Merge entries manually
+
+    * NEWS:
+    This branch will become 4.0.5. New entries should only be added to the
+    4.0.4 area, if you merge them.
+
+2000-12-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c: Merge changes from head branch.
+
+2000-12-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB.php:
+    Added nextid() method to DB_common. Added lock() and unlock() methods to DB_mysql.
+
+2000-12-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    - Made ldap_get_entries() return an array even if there are no entries
+       in search result. (Jani)
+
+2000-12-04  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c
+      ext/hyperwave/php_hyperwave.h:
+    - new function hw_new_document_from_file()
+
+2000-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sablot/sablot.c: Merged with HEAD, 1.21
+
+    * ext/sablot/php_sablot.h: Merged with HEAD, 1.8
+
+    * sapi/apache/config.m4: Merged with HEAD, 1.35
+
+    * sapi/apache/config.m4:
+    Automatically carry over macro definitions from Apache.
+
+    We don't take everything, because apxs' CFLAGS also includes
+    optimization, debugging, et cetera flags.
+
+    PR: #7211
+
+2000-12-04  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/CREDITS: added name for credits on work for Solid interface..
+
+2000-12-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gd/config.m4:
+    GD shared build fixes - should fix problem with gd.so not being linked
+    with right libraries
+
+2000-12-04  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/curl/curl.c: close the filehandle if it is a tempfile.
+
+2000-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Merge from HEAD
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Move code from macros to inline functions to ease debugging
+
+    * ext/dba/dba.c: Merge changes from HEAD.
+
+    * ext/dba/dba.c:
+    Handle the case of no-handlers properly and make handlers a proper C "string".
+
+2000-12-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/DB.php: No comment.
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/error.php
+      pear/DB/mysql.php
+      pear/DB/result.php
+      pear/DB/warning.php:
+    I couldn't read it in order to understand it in order to extend it :-)
+
 2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/PHPDoc/xmlwriter/PhpdocXMLWriter.php
