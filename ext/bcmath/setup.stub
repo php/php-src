@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option enable-bcmath 'Enable bc style precision math functions' yesno \
-    yes \
-'    Enables bc style arbitrary precision math functions.'
