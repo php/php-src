@@ -1,3 +1,149 @@
+2004-02-15  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      pear/packages/DB-1.6.0RC6.tar:
+      - DB 1.6RC6
+
+    * (PHP_4_3)
+      pear/packages/DB-1.6.0RC1.tar:
+      - remove DB 1.6RC1
+
+2004-02-15  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/tests/002.phpt
+      ext/interbase/tests/003.phpt
+      ext/interbase/tests/004.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/006.phpt:
+      CS/WS
+
+2004-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c:
+      For get_data iterator do not force numeric keys, return keys the user
+      requests.
+
+2004-02-15  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed several binding problems
+
+2004-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c:
+      Fixed a crash inside create_aggregate() method due to incorrect argument
+      parsing.
+
+2004-02-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/attr.c
+      ext/dom/characterdata.c:
+      switch to zend_parse_method_parameters for consistancy
+      insure object parameters are correct class types
+      convert zvals to correct type if needed for property writes
+      fix a few segfaults found while testing
+
+2004-02-15  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/tests/003.phpt:
+      Reintroduce param NULL testing (see bug #26777)
+
+2004-02-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/recode/config9.m4:
+      Prevent bug reports like #27260
+
+2004-02-15  Stig Bakken  <ssb@trd.overture.com>
+
+    * pear/PEAR/Frontend/CLI.php:
+      - don't cut lines when wrapping output
+
+2004-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      MFH: Fixed bug #27258 (moved FPE check to correct location).
+           Fixed several possible FPE.
+
+    * ext/gmp/gmp.c:
+      Fixed bug #27258 (moved FPE check to correct location).
+      Fixed several possible FPE.
+
+2004-02-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/dom_fe.h
+      ext/dom/domimplementation.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c:
+      allow certain methods to be called statically again:
+         domdocument (all load methods)
+         domimplementation (all methods)
+      switch to zend_parse_method_parameters for consistancy
+      insure object parameters are correct class types
+      convert zvals to correct type if needed for property writes
+      fix a few segfaults found while testing
+
+2004-02-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      main/main.c:
+      Fix startup errors
+
+2004-02-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/element.c
+      ext/dom/node.c:
+      switch to zend_parse_method_parameters for consistancy
+      insure object parameters are correct class types
+      convert zvals to correct type if needed for property writes
+
+2004-02-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com_dotnet/com_saproxy.c
+      ext/mysqli/mysqli.c
+      ext/session/session.c:
+      Use zval_ptr_dtor() to free variables as soon as they hit refcount of 0.
+      
+      Note:  You should not be using ZVAL_DELREF() in day to day usage. 
+      Instead,
+             you should use zval_ptr_dtor().  Use ZVAL_DELREF() only if you're
+             messing with the refcount directly and know what you're doing.
+      Note #2:  For clarity, if you want to initialize a new zval with a
+      refcount
+                of 0, it's best to do that directly, instead of using
+      ZVAL_DELREF
+                after allocating the zval...
+
+2004-02-15  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/mono/php_mono.c:
+       - fix build (patch by josh at mediascape dot com)
+       - close #26045
+
+2004-02-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c:
+      start of dom update
+      switch to zend_parse_method_parameters for consistancy
+      insure object parameters are correct class types
+      convert zvals to correct type if needed for property writes
+
+2004-02-15  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed bug #26407 (Result set fetching broken around transactions)
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.c:
+      - Changed initialization of function arguments to message handler
+
 2004-02-14  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_4_3)
