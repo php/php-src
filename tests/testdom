@@ -1,49 +1,4 @@
 <?php
-
-function output_node($node, $level=0) {
-  switch($node->type) {
-    case XML_ELEMENT_NODE:
-      for($i=0; $i<$level; $i++)
-        echo "  ";
-      echo "<".$node->name;
-      $attributes = $node->attributes();
-      if(is_array($attributes)) {
-//var_dump($attributes);
-        foreach($attributes as $attribute)
-          echo " ".$attribute->name."=".$node->getattr($attribute->name);
-      }
-      echo ">\n";
-      $children = $node->children();
-      for($i=0; $i < count($children); $i++)
-        output_node($children[$i], $level+1);
-      for($i=0; $i<$level; $i++)
-        echo "  ";
-      echo "</".$node->name.">\n";
-      break;
-    case XML_TEXT_NODE:
-      for($i=0; $i<$level; $i++)
-        echo "  ";
-      echo $node->content;
-      break;
-    case XML_ENTITY_REF_NODE:
-      echo $node->content;
-      break;
-    case XML_COMMENT_NODE:
-      for($i=0; $i<$level; $i++)
-        echo "  ";
-      echo "<!--".$node->content."-->";
-      echo "\n";
-      break;
-  }
-}
-
-function list_attr($node) {
-  $attr = domxml_attributes($node);
-  for(reset($attr); $key = key($attr); next($attr)) {
-    echo $key."=".$attr[$key]."\n";
-  }
-}
-
 $xmlstr = "<?xml version='1.0' standalone='yes'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
 [ <!ENTITY sp \"spanish\">
@@ -65,69 +20,54 @@ $xmlstr = "<?xml version='1.0' standalone='yes'?>
 </para>
 </chapter> ";
 
-/* The following code traverses the xml tree node by node
-   by using the methods of the xmlnode object
-*/
 echo "Test 1: accessing single nodes from php\n";
-if(!$dom = xmldoc($xmlstr)) {
-  echo "Error while parsing the document\n";
-  exit;
-}
-echo "XML Version: ".$dom->version."\n";
-echo "Standalone: ".$dom->standalone."\n";
-$dtd = $dom->dtd();
-$rootnode = $dom->children();
-foreach($rootnode as $root)
-  output_node($root);
-$rootnode = $dom->root();
-  output_node($rootnode);
-
-/* This one creates a dom tree made of php objects */
-echo "Test 2: creating a tree with php objects\n";
-$dom = xmltree($xmlstr);
-$dom->root->name = "section";
-echo $dom->root->name;
-echo "\n";
-/* xmltree() creates a tree which is readonly. This means that a
-   function like 
-     $dom->root->new_child("TEST", "ljdf");
-   won't work
-*/
-
-/* The following builds a xml document from scratch */
-echo "Test 3: building a xml document from scratch\n";
-$doc = new_xmldoc("1.0");
-$root = $doc->add_root("HTML");
-$head = $root->new_child("HEAD", "");
-$head->new_child("TITLE", "Hier der Titel");
-$body = $root->new_child("BODY", "");
-$table = $body->new_child("TABLE", "");
-$table->setattr("WIDTH", "100%");
-$table->new_child("TR", " ");
-echo $doc->dumpmem();
-
-/* The following does some testing of the xpath support */
-echo "Test 4: See if XPath works\n";
-if(!$dom = xmldoc($xmlstr)) {
+$dom = xmldoc($xmlstr);
+if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
 }
 
-if(false === ($xpathctx = xpath_new_context($dom))) {
-	echo "Error in xpath_new_context()\n";
-	exit;
-}
+$children = $dom->childNodes();
+print_r($children);
 
-/* What you get back is an object of type XPathObject.
-   Depending on the sub type of XPathObject, the property
-   'value' or 'nodeset' contains the result.
-   The sub type is in property 'type'.
-   See docs for libxml for valid types.
-   1 means XPATH_NODESET which is in PHP an array of DomNodes.
-*/
-$xpathobj = xpath_eval($xpathctx, "/child::*");
-echo $xpathobj->type."\n";
-var_dump($xpathobj);
-foreach($xpathobj->nodeset as $node)
-	echo $node->name."\n";
+echo "--------- root\n";
+$rootnode = $dom->documentElement();
+print_r($rootnode);
+
+echo "--------- children of root\n";
+$children = $rootnode->childNodes();
+print_r($children);
+
+// The last node should be identical with the last entry in the children array
+echo "--------- last\n";
+$last = $rootnode->lastChild();
+print_r($last);
+
+// The parent of this last node is the root again
+echo "--------- parent\n";
+$parent = $last->parent();
+print_r($parent);
+
+// The children of this parent are the same children as one above
+echo "--------- children of parent\n";
+$children = $parent->childNodes();
+print_r($children);
+
+echo "--------- creating a new attribute\n";
+$attr = $dom->createAttribute("src", "picture.gif");
+print_r($attr);
+
+$rootnode->setAttributeNode($attr); /* Not implemented */
+$attr = $rootnode->setAttribute("src", "picture.gif");
+$attr = $rootnode->getAttribute("src");
+print_r($attr);
+
+echo "--------- attribute of rootnode\n";
+$attrs = $rootnode->attributes();
+print_r($attrs);
+
+echo "--------- children of an attribute\n";
+$children = $attrs[0]->childNodes();
+print_r($children);
+
 ?>
