@@ -765,13 +765,13 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (object->value.obj.handlers->get_class_entry(object TSRMLS_CC) != EG(scope)) {
-				zend_error(E_ERROR, "Call to private constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+				zend_error(E_ERROR, "Call to private %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : "");
 			}
 		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(constructor->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+				zend_error(E_ERROR, "Call to protected %s::%s() from context '%s'", constructor->common.scope->name, constructor->common.function_name, EG(scope) ? EG(scope)->name : "");
 			}
 		}
 	}

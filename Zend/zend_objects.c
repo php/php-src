@@ -50,7 +50,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to private %s::__destruct from context '%s'%s", 
+						"Call to private %s::__destruct() from context '%s'%s", 
 						ce->name, 
 						EG(scope) ? EG(scope)->name : "", 
 						EG(in_execution) ? "" : " during shutdown ignored");
@@ -64,7 +64,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to protected %s::__destruct from context '%s'%s", 
+						"Call to protected %s::__destruct() from context '%s'%s", 
 						ce->name, 
 						EG(scope) ? EG(scope)->name : "", 
 						EG(in_execution) ? "" : " during shutdown ignored");
