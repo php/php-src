@@ -1,6 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Assigning to a string offset beyond the end of the string now automatically
+  increases the string length by padding it with spaces, and performs the
+  assignment (Zeev, Zend Engine)
+- Added warnings in case an uninitialized string offset is read (Zeev, Zend
+  Engine)
 - Fixed a couple of overflow bugs in case of very large negative integer
   numbers (Zeev, Zend Engine)
 - Added new experimental module pcntl (Process Control) (Jason)
