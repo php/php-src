@@ -137,7 +137,7 @@ void init_executor(TSRMLS_D)
 	EG(class_table) = CG(class_table);
 
 	EG(in_execution) = 0;
-	EG(in_autoload) = 0;
+	EG(in_autoload) = NULL;
 
 	zend_ptr_stack_init(&EG(argument_stack));
 	zend_ptr_stack_push(&EG(argument_stack), (void *) NULL);
@@ -293,6 +293,10 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
 		zend_objects_store_destroy(&EG(objects_store));
+		if (EG(in_autoload)) {
+			zend_hash_destroy(EG(in_autoload));
+			efree(EG(in_autoload));
+		}
 	} zend_end_try();
 }
 
@@ -879,7 +883,8 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	int retval;
 	char *lc_name;
 	zval *exception;
-
+	char dummy = 1;
+	
 	lc_name = do_alloca(name_length + 1);
 	zend_str_tolower_copy(lc_name, name, name_length);
 
@@ -888,11 +893,15 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return SUCCESS;
 	}
 
-	if (EG(in_autoload)) {
+	if (EG(in_autoload) == NULL) {
+		EG(in_autoload) = emalloc(sizeof(HashTable));
+		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);	
+	}
+	
+	if (zend_hash_add(EG(in_autoload), lc_name, name_length+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		free_alloca(lc_name);
 		return FAILURE;
 	}
-	EG(in_autoload) = 1;
 
 	ZVAL_STRINGL(&autoload_function, "__autoload", sizeof("__autoload")-1,  0);
 
@@ -905,7 +914,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	EG(exception) = NULL;
 	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
 
-	EG(in_autoload) = 0;
+	zend_hash_del(EG(in_autoload), lc_name, name_length+1);
 
 	if (retval == FAILURE) {
 		EG(exception) = exception;
@@ -1229,7 +1238,6 @@ void zend_unset_timeout(TSRMLS_D)
 zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
-	zend_bool in_autoload;
 
 check_fetch_type:
 	switch (fetch_type) {
@@ -1255,13 +1263,9 @@ check_fetch_type:
 			break;
 	}
 
-	in_autoload = EG(in_autoload);
-	EG(in_autoload) = 0;
 	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
-		EG(in_autoload) = in_autoload;
 		zend_error(E_ERROR, "Class '%s' not found", class_name);
 	}
-	EG(in_autoload) = in_autoload;
 	return *pce;
 }
 

@@ -467,7 +467,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
 	EG(in_execution) = 0;
-	EG(in_autoload) = 0;
+	EG(in_autoload) = NULL;
 	EG(current_execute_data) = NULL;
 }
 
