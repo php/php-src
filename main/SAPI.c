@@ -128,7 +128,7 @@ static void sapi_read_post_data(TSRMLS_D)
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
-	void (*post_reader_func)(TSRMLS_D);
+	void (*post_reader_func)(TSRMLS_D) = NULL;
 
 
 	/* dedicated implementation for increased performance:
@@ -159,7 +159,6 @@ static void sapi_read_post_data(TSRMLS_D)
 			return;
 		}
 		SG(request_info).post_entry = NULL;
-		post_reader_func = sapi_module.default_post_reader;
 	}
 	if (oldchar) {
 		*(p-1) = oldchar;
@@ -169,10 +168,10 @@ static void sapi_read_post_data(TSRMLS_D)
 
 	if(post_reader_func) {
 		post_reader_func(TSRMLS_C);
+	}
 
-		if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
-			sapi_module.default_post_reader(TSRMLS_C);
-		}
+	if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
+		sapi_module.default_post_reader(TSRMLS_C);
 	}
 }
 
@@ -282,6 +281,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 SAPI_API void sapi_activate(TSRMLS_D)
 {
 	void (*post_reader_func)(TSRMLS_D);
+
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
@@ -306,39 +306,34 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	}
 	SG(rfc1867_uploaded_files) = NULL;
 
+	/* handle request mehtod */
 	if (SG(server_context)) {
-		if ( SG(request_info).request_method 
-			&&  (!strcmp(SG(request_info).request_method, "POST")
-				|| (PG(allow_webdav_methods) 
-					&& (!strcmp(SG(request_info).request_method, "PROPFIND")
-					|| !strcmp(SG(request_info).request_method, "PROPPATCH")				
-					|| !strcmp(SG(request_info).request_method, "MKCOL")
-					|| !strcmp(SG(request_info).request_method, "PUT")
-					|| !strcmp(SG(request_info).request_method, "MOVE")
-					|| !strcmp(SG(request_info).request_method, "COPY")
-					|| !strcmp(SG(request_info).request_method, "LOCK"))))) {
-			if (!SG(request_info).content_type) {
+		if ( SG(request_info).request_method) {
+			if(!strcmp(SG(request_info).request_method, "POST")
+			   && (SG(request_info).content_type)) {
+				/* HTTP POST -> may contain form data to be read into variables
+				   depending on content type given
+				*/
+				sapi_read_post_data(TSRMLS_C);
+			} else {
+				/* any other method with content payload will fill 
+				   $HTTP_RAW_POST_DATA if enabled by always_populate_raw_post_data 
+				   it is up to the webserver to decide whether to allow a method or not
+				*/
 				SG(request_info).content_type_dup = NULL;
 				if(PG(always_populate_raw_post_data)) {
-					SG(request_info).post_entry = NULL;
-					post_reader_func = sapi_module.default_post_reader;
-
-					if(post_reader_func) {
-						post_reader_func(TSRMLS_C);
-
-						if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
-							sapi_module.default_post_reader(TSRMLS_C);
-						}
+					if(sapi_module.default_post_reader) {
+						sapi_module.default_post_reader(TSRMLS_C);
 					}
 				} else {
-					sapi_module.sapi_error(E_WARNING, "No content-type in POST request");
+					sapi_module.sapi_error(E_WARNING, "No content-type in %s request", SG(request_info).request_method);
 				}
-			} else {
-				sapi_read_post_data(TSRMLS_C);
 			}
 		} else {
 			SG(request_info).content_type_dup = NULL;
 		}
+
+		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies(TSRMLS_C);
 		if (sapi_module.activate) {
 			sapi_module.activate(TSRMLS_C);
@@ -360,6 +355,14 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
+	}  else 	if (SG(server_context)) {
+		if(sapi_module.read_post) { 
+			// make sure we've consumed all request input data
+			char dummy[SAPI_POST_BLOCK_SIZE];
+			while(sapi_module.read_post(dummy, sizeof(dummy)-1 TSRMLS_CC) > 0) {
+				/* empty loop body */
+			}
+		}
 	}
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
