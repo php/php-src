@@ -772,7 +772,6 @@ class PEAR_Common extends PEAR
         $this->element_stack = array();
         $this->pkginfo = array();
         $this->current_element = false;
-        $this->destdir = '';
         unset($this->dir_install);
         $this->pkginfo['filelist'] = array();
         $this->filelist =& $this->pkginfo['filelist'];
