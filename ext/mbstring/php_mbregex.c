@@ -25,9 +25,9 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "mbstring.h"
-#include "mbregex.h"
 #include "php_mbregex.h"
+#include "mbregex.h"
+#include "mbstring.h"
 
 #if HAVE_MBREGEX
 

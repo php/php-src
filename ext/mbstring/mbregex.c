@@ -22,7 +22,6 @@
 /* UTF-8 extension added Jan 16 1999 by Yoshida Masato  <yoshidam@tau.bekkoame.ne.jp> */
 
 #include "php.h"
-#include "mbstring.h"
 
 #if HAVE_MBREGEX
 
