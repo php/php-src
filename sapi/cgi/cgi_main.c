@@ -742,7 +742,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.free_filename = 0;
 	switch (behavior) {
 		case PHP_MODE_STANDARD:
-			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
 		case PHP_MODE_LINT:
 			exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
