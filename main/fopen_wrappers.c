@@ -199,8 +199,8 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
  */
 PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC)
 {
-	/* Only check when safe_mode on and safe_mode_include_dir is available */
-	if (PG(safe_mode) && PG(safe_mode_include_dir) &&
+	/* Only check when safe_mode or open_basedir is on and safe_mode_include_dir is available */
+	if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && PG(safe_mode_include_dir) &&
 			*PG(safe_mode_include_dir))
 	{
 		char *pathbuf;
