@@ -3,11 +3,9 @@ PHP 4                                                                      NEWS
 ? ? ??? 200?, Version 5.0.0
 - Added proc_nice() function, which allows changing priority of the current
   process. (Ilia)
-- Added pcntl_getpriority() & pcntl_setpriority(), which can be used to
-  fetch & change priority of any process. (Ilia)
-- new idate() function.
-  new date_sunrise() function.
-  new date_sunset() function.
+- Added pcntl_getpriority() and pcntl_setpriority() functions, which can be 
+  used to fetch and change priority of any process. (Ilia)
+- Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)
 - Added support for long options in CLI & CGI (e.g. --version). (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
