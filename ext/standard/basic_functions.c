@@ -120,6 +120,8 @@ function_entry basic_functions[] = {
 	PHP_FE(php_logo_guid,							NULL)
 	PHP_FE(zend_logo_guid,							NULL)
 	
+	PHP_FE(strnatcmp,								NULL)
+	PHP_FE(strnatcasecmp,							NULL)
 	PHP_FE(strspn,									NULL)
 	PHP_FE(strcspn,									NULL)
 	PHP_FE(strtok,									NULL)
@@ -446,6 +448,8 @@ function_entry basic_functions[] = {
 	/* functions from array.c */
 	PHP_FE(ksort,									first_arg_force_ref)
 	PHP_FE(krsort,									first_arg_force_ref)
+	PHP_FE(natsort,									first_arg_force_ref)
+	PHP_FE(natcasesort,								first_arg_force_ref)
 	PHP_FE(asort,									first_arg_force_ref)
 	PHP_FE(arsort,									first_arg_force_ref)
 	PHP_FE(sort,									first_arg_force_ref)

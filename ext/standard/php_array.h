@@ -29,6 +29,8 @@ PHP_MSHUTDOWN_FUNCTION(array);
 
 PHP_FUNCTION(ksort);
 PHP_FUNCTION(krsort);
+PHP_FUNCTION(natsort);
+PHP_FUNCTION(natcasesort);
 PHP_FUNCTION(asort);
 PHP_FUNCTION(arsort);
 PHP_FUNCTION(sort);
