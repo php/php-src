@@ -440,7 +440,7 @@ PHP_FUNCTION(cpdf_open)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_close(int pdfdoc)
+/* {{{ proto bool cpdf_close(int pdfdoc)
    Closes the pdf document */
 PHP_FUNCTION(cpdf_close)
 {
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(cpdf_add_annotation)
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_action_url(int pdfdoc, float xll, float yll, float xur, float xur, string url [, int mode])
+/* {{{ proto bool cpdf_set_action_url(int pdfdoc, float xll, float yll, float xur, float xur, string url [, int mode])
    Sets hyperlink */
 PHP_FUNCTION(cpdf_set_action_url)
 {
