@@ -111,7 +111,7 @@ class PEAR
      * Destructor (the emulated type of...).  Does nothing right now,
      * but is included for forward compatibility, so subclass
      * destructors should always call it.
-     * 
+     *
      * See the note in the class desciption about output from
      * destructors.
      *
@@ -176,7 +176,7 @@ class PEAR
      * @since PHP 4.0.5
      */
 
-    function setErrorHandling($mode, $options = null)
+    function setErrorHandling($mode = null, $options = null)
     {
         if (isset($this)) {
             $setmode = &$this->_default_error_mode;
@@ -208,7 +208,7 @@ class PEAR
                     trigger_error("invalid error callback", E_USER_WARNING);
                 }
                 break;
-                    
+
             default:
                 trigger_error("invalid error mode", E_USER_WARNING);
                 break;
@@ -310,6 +310,70 @@ class PEAR
     }
 
     // }}}
+
+    /**
+    * Push a new error handler on top of the error handler options stack. With this
+    * you can easely override the actual error handler for some code and restore
+    * it later with popErrorHandling.
+    *
+    * @param $mode mixed (same as setErrorHandling)
+    * @param $options mixed (same as setErrorHandling)
+    *
+    * @return bool Always true
+    *
+    * @see PEAR::setErrorHandling
+    */
+    function pushErrorHandling($mode, $options = null)
+    {
+        $stack = &$GLOBALS['_PEAR_error_handler_stack'];
+        if (!is_array($stack)) {
+            if (isset($this)) {
+                $def_mode = &$this->_default_error_mode;
+                $def_options = &$this->_default_error_options;
+                // XXX Used anywhere?
+                //$def_callback = &$this->_default_error_callback;
+            } else {
+                $def_mode = &$GLOBALS['_PEAR_default_error_mode'];
+                $def_options = &$GLOBALS['_PEAR_default_error_options'];
+                // XXX Used anywhere?
+                //$def_callback = &$GLOBALS['_PEAR_default_error_callback'];
+            }
+            if (!isset($def_mode)) {
+                $def_mode = PEAR_ERROR_RETURN;
+            }
+            $stack = array();
+            $stack[] = array($def_mode, $def_options);
+        }
+
+        if (isset($this)) {
+            $this->setErrorHandling($mode, $options);
+        } else {
+            PEAR::setErrorHandling($mode, $options);
+        }
+        $stack[] = array($mode, $options);
+        return true;
+    }
+
+    /**
+    * Pop the last error handler used
+    *
+    * @return bool Always true
+    *
+    * @see PEAR::pushErrorHandling
+    */
+    function popErrorHandling()
+    {
+        $stack = &$GLOBALS['_PEAR_error_handler_stack'];
+        array_pop($stack);
+        list($mode, $options) = $stack[sizeof($stack) - 1];
+        if (isset($this)) {
+            $this->setErrorHandling($mode, $options);
+        } else {
+            PEAR::setErrorHandling($mode, $options);
+        }
+        return true;
+    }
+
 }
 
 // {{{ _PEAR_call_destructors()
@@ -357,7 +421,7 @@ class PEAR_Error
     // Wait until we have a stack-groping function in PHP.
     //var $file    = '';
     //var $line    = 0;
-    
+
 
     // }}}
     // {{{ constructor
@@ -456,7 +520,7 @@ class PEAR_Error
     // }}}
     // {{{ getMessage()
 
-    
+
     /**
      * Get the error message from an error object.
      *
@@ -468,11 +532,11 @@ class PEAR_Error
         return ($this->error_prepend . $this->error_message_prefix .
                 $this->message       . $this->error_append);
     }
-    
+
 
     // }}}
     // {{{ getCode()
-    
+
     /**
      * Get error code from an error object
      *
