@@ -303,8 +303,8 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			{
 				TSRMLS_FETCH();
 
-				if (op->value.obj.handlers->cast_object) {
-					if (op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
+				if (Z_OBJ_HT_P(op)->cast_object) {
+					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
 				} else {
@@ -371,9 +371,9 @@ ZEND_API void convert_to_double(zval *op)
 			{
 				TSRMLS_FETCH();
 
-				if (op->value.obj.handlers->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object) {
 					TSRMLS_FETCH();
-					if (op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
+					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
 				} else {
@@ -406,9 +406,9 @@ ZEND_API void convert_to_double(zval *op)
 ZEND_API void convert_to_null(zval *op)
 {
 	if (op->type == IS_OBJECT) {
-		if (op->value.obj.handlers->cast_object) {
+		if (Z_OBJ_HT_P(op)->cast_object) {
 			TSRMLS_FETCH();
-			if (op->value.obj.handlers->cast_object(op, op, IS_NULL, 1 TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_NULL, 1 TSRMLS_CC) == SUCCESS) {
 				return;
 			}
 		}
@@ -462,8 +462,8 @@ ZEND_API void convert_to_boolean(zval *op)
 			{
 				TSRMLS_FETCH();
 
-				if (op->value.obj.handlers->cast_object) {
-					if (op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
+				if (Z_OBJ_HT_P(op)->cast_object) {
+					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
 				} else {
@@ -542,8 +542,8 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		case IS_OBJECT: {
 			TSRMLS_FETCH();
-			if (op->value.obj.handlers->cast_object) {
-				if (op->value.obj.handlers->cast_object(op, op, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 				zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name);
