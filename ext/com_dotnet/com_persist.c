@@ -375,7 +375,7 @@ CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
 	char *filename, *fullpath = NULL;
-	long filename_len;
+	int filename_len;
 	zend_bool remember = TRUE;
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
@@ -438,7 +438,7 @@ CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
 	char *filename, *fullpath;
-	long filename_len;
+	int filename_len;
 	long flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();

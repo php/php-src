@@ -36,7 +36,7 @@ typedef struct _php_com_dotnet_object {
 	VARIANT v;
 
 	ITypeInfo *typeinfo;
-	int code_page;
+	long code_page;
 	unsigned int have_default_bind:1;
 
 	zend_class_entry *ce;

@@ -459,7 +459,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	char *command, *cwd=NULL;
-	long command_len, cwd_len;
+	int command_len, cwd_len;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;

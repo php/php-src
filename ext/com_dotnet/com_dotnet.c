@@ -98,7 +98,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
 	char *assembly_name, *datatype_name;
-	long assembly_name_len, datatype_name_len;
+	int assembly_name_len, datatype_name_len;
 	struct dotnet_runtime_stuff *stuff;
 	IObjectHandle *handle;
 	DISPPARAMS params;

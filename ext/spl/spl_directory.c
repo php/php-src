@@ -177,7 +177,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 	zval *object = getThis();
 	spl_ce_dir_object *intern;
 	char *path;
-	long len;
+	int len;
 
 	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 

@@ -260,7 +260,7 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
 PHP_FUNCTION(com_variant_create_instance)
 {
-	VARTYPE vt = VT_EMPTY;
+	/* VARTYPE == unsigned short */ long vt = VT_EMPTY;
 	long codepage = CP_ACP;
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
@@ -290,7 +290,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 	if (ZEND_NUM_ARGS() >= 2) {
 
-		res = VariantChangeType(&obj->v, &obj->v, 0, vt);
+		res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
 
 		if (FAILED(res)) {
 			char *werr, *msg;
@@ -788,7 +788,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
    Returns a variant date representation of a unix timestamp */
 PHP_FUNCTION(variant_date_from_timestamp)
 {
-	int timestamp;
+	long timestamp;
 	SYSTEMTIME systime;
 	struct tm *tmv;
 	VARIANT res;
@@ -841,7 +841,7 @@ PHP_FUNCTION(variant_set_type)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	VARTYPE vt;
+	/* VARTYPE == unsigned short */ long vt;
 	HRESULT res;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -850,7 +850,7 @@ PHP_FUNCTION(variant_set_type)
 	}
 	obj = CDNO_FETCH(zobj);
 
-	res = VariantChangeType(&obj->v, &obj->v, 0, vt);
+	res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
 
 	if (SUCCEEDED(res)) {
 		if (vt != VT_DISPATCH && obj->typeinfo) {
@@ -876,7 +876,7 @@ PHP_FUNCTION(variant_cast)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	VARTYPE vt;
+	/* VARTYPE == unsigned short */ long vt;
 	VARIANT vres;
 	HRESULT res;
 
@@ -887,7 +887,7 @@ PHP_FUNCTION(variant_cast)
 	obj = CDNO_FETCH(zobj);
 
 	VariantInit(&vres);
-	res = VariantChangeType(&vres, &obj->v, 0, vt);
+	res = VariantChangeType(&vres, &obj->v, 0, (VARTYPE)vt);
 
 	if (SUCCEEDED(res)) {
 		php_com_wrap_variant(return_value, &vres, obj->code_page TSRMLS_CC);
