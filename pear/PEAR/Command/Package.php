@@ -108,7 +108,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                                                $this->config->get('doc_dir'));
                 $packager->debug = $this->config->get('verbose');
                 $err = $warn = array();
-                $packager->validateInfo($pkginfofile, $err, $warn);
+                $packager->validatePackageInfo($pkginfofile, $err, $warn);
                 foreach ($err as $e) {
                     $this->ui->displayLine("Error: $e");
                 }
