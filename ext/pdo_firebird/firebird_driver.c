@@ -135,20 +135,20 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 	do {
 		isc_stmt_handle s = NULL;
 		XSQLDA num_sqlda;
+		static char info[] = {isc_info_sql_stmt_type};
+		char result[8];
 
 		num_sqlda.version = PDO_FB_SQLDA_VERSION;
 		num_sqlda.sqln = 1;
 
 		/* allocate */
 		if (isc_dsql_allocate_statement(H->isc_status, &H->db, &s)) {
-			RECORD_ERROR(dbh);
-			return -1;
+			break;
 		}
 
 		/* prepare the statement */
 		if (isc_dsql_prepare(H->isc_status, &H->tr, &s, (short)sql_len, const_cast(sql),
 				PDO_FB_DIALECT, &num_sqlda)) {
-			RECORD_ERROR(dbh);
 			break;
 		}
 		
@@ -156,9 +156,16 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 		S = ecalloc(1, sizeof(*S)-sizeof(XSQLDA) + XSQLDA_LENGTH(num_sqlda.sqld));
 		S->H = H;
 		S->stmt = s;
+		S->fetch_buf = ecalloc(1,sizeof(char*) * num_sqlda.sqld);
 		S->out_sqlda.version = PDO_FB_SQLDA_VERSION;
 		S->out_sqlda.sqln = stmt->column_count = num_sqlda.sqld;
 
+		/* determine the statement type */
+		if (isc_dsql_sql_info(H->isc_status, &s, sizeof(info), info, sizeof(result), result)) {
+			break;
+		}
+		S->statement_type = result[3];	
+		
 		if (isc_dsql_describe(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
 			RECORD_ERROR(dbh);
 			break;
@@ -166,7 +173,6 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 		
 		/* allocate the input descriptors */
 		if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &num_sqlda)) {
-			RECORD_ERROR(dbh);
 			break;
 		}
 		
@@ -176,7 +182,6 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 			S->in_sqlda->sqln = num_sqlda.sqld;
 		
 			if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
-				RECORD_ERROR(dbh);
 				break;
 			}
 		}
@@ -187,6 +192,8 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 		return 1;
 
 	} while (0);
+
+	RECORD_ERROR(dbh);
 	
 	if (S) {
 		if (S->in_sqlda) {
@@ -421,7 +428,6 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		}
 		
 		dbh->methods = &firebird_methods;
-		dbh->alloc_own_columns = 0;
 		dbh->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 		dbh->native_case = PDO_CASE_UPPER;
 		dbh->alloc_own_columns = 1;
