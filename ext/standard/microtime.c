@@ -88,12 +88,22 @@ PHP_FUNCTION(microtime)
 #ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(gettimeofday)
 {
+	zend_bool get_as_float = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
+		return;
+	}
+
 	struct timeval tp;
 	struct timezone tz;
 	
 	memset(&tp, 0, sizeof(tp));
 	memset(&tz, 0, sizeof(tz));
 	if(gettimeofday(&tp, &tz) == 0) {
+		if (get_as_float) {
+			RETURN_DOUBLE((double)(tp.tv_sec + tp.tv_usec / MICRO_IN_SEC));
+		}
+
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
