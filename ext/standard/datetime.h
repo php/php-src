@@ -36,7 +36,7 @@ PHP_FUNCTION(gmstrftime);
 #endif
 PHP_FUNCTION(strtotime);
 
-extern char *php_std_date(time_t t);
+extern char *php_std_date(time_t t TSRMLS_DC);
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #if HAVE_STRFTIME
 void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
