@@ -621,10 +621,6 @@ PHP_FUNCTION(strval)
 	pval_copy_constructor(return_value);
 }
 
-static int array_reverse_key_compare(const void *a, const void *b)
-{ return array_key_compare(a,b)*-1;
-}
-
 static int array_key_compare(const void *a, const void *b)
 {
 	Bucket *first;
@@ -649,6 +645,10 @@ static int array_key_compare(const void *a, const void *b)
 	}
 }
 
+static int array_reverse_key_compare(const void *a, const void *b)
+{
+	return array_key_compare(a,b)*-1;
+}
 
 PHP_FUNCTION(krsort)
 {
