@@ -37,7 +37,6 @@
 
 /* prototypes */
 
-static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC);
 static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC);
 
 /* implementations */
@@ -85,21 +84,17 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 			break;
 	}
 
-	if (pval_arg->is_ref) {	/* deprecated, implemented for downwards compatiblity */
-//		type |= VT_BYREF;
-	}
-
-	pval_to_variant_ex(pval_arg, var_arg, type, codepage TSRMLS_CC);
+	php_pval_to_variant_ex2(pval_arg, var_arg, type, codepage TSRMLS_CC);
 }
 
 
 PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC)
 {
-	pval_to_variant_ex(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage TSRMLS_CC);
+	php_pval_to_variant_ex2(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage TSRMLS_CC);
 }
 
 
-static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
+PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
 {
 	OLECHAR *unicode_str;
 
@@ -143,7 +138,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 						/* Add another value to the safe array */
 						if (SUCCEEDED(SafeArrayPtrOfIndex( safeArray, &i, &v))) {		/* Pointer to output element entry retrieved successfully */
 							if (type) {	/* explicit type */
-							   pval_to_variant_ex(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
+							   php_pval_to_variant_ex2(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
 							} else {
 								php_pval_to_variant(*entry, v, codepage TSRMLS_CC);                    /* Do the required conversion */
 							}
@@ -221,7 +216,9 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 			case VT_BSTR:
 				convert_to_string_ex(&pval_arg);
 				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-				V_BSTR(var_arg) = SysAllocString(unicode_str);
+				V_BSTR(var_arg) = SysAllocStringByteLen((char *) unicode_str, Z_STRLEN_P(pval_arg));
+/*				@todo test
+				V_BSTR(var_arg) = SysAllocString(unicode_str); */
 				efree(unicode_str);
 				break;
 
@@ -456,7 +453,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		/* This call has failed for everything I have tried */
 		/* But best leave it to be on the safe side */
-		if (FAILED(SafeArrayGetVartype(array, &vartype))) {
+		if (FAILED(SafeArrayGetVartype(array, &vartype)) || (vartype == VT_EMPTY)) {
 			/* Fall back to what we do know */
 			/* Mask off the array bit and assume */
 			/* what is left is the type of the array */
