@@ -9,6 +9,8 @@ Zend
 
 global
 ------
+    * make everything on the language-level independent of your locate setings.
+    * allow methods to be called as callbacks. eg: array_walk($myarray,"this->print()");
     * always build the standalone executable as well as the chosen SAPI 
       target.
     * make sure all source files have the "right" copyright.
@@ -59,6 +61,13 @@ ext/pcre
     * have a non-greedy option for preg_replace().
     * have an option for preg_grep() to return keys as well.
     * update the online docs from version 3.1 man page
+
+ext/session
+-----------
+    * implement a call to set a session read-only to overcome 
+      the need to serialize frame-loads.
+	* maybe implement finer-grained session variables that could be 
+      locked individually.
 
 ext/standard
 ------------
