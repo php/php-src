@@ -67,7 +67,9 @@
 #if PHP_DEBUG
 #undef NDEBUG
 #else
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #endif
 #include <assert.h>
 #else /* HAVE_ASSERT_H */
