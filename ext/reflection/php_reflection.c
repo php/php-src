@@ -762,7 +762,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.calling_scope = EG(scope);
 	fcc.object_pp = NULL;
 
-	result = zend_call_function(&fci, NULL TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
 	efree(params);
 
