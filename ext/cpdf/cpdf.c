@@ -238,9 +238,8 @@ PHP_MSHUTDOWN_FUNCTION(cpdf)
 PHP_FUNCTION(cpdf_global_set_document_limits)
 {
 	zval **argv[5];
-	int argc;
 
-	if (ZEND_NUM_ARGS() != 5 || (zend_get_parameters_array_ex(argc, argv) == FAILURE)) {
+	if (ZEND_NUM_ARGS() != 5 || (zend_get_parameters_array_ex(5, argv) == FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -883,6 +882,7 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 
 	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_array_ex(arg2);
+	matrix = Z_ARRVAL_P(arg2);
 	
 	if(zend_hash_num_elements(matrix) != 6) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Text matrix must have 6 elements");
