@@ -82,6 +82,7 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_set_flags,							NULL)
 	PHP_FE(fdf_set_opt,								NULL)
 	PHP_FE(fdf_set_submit_form_action,				NULL)
+	PHP_FE(fdf_set_javascript_action,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -103,6 +104,7 @@ PHP_MINIT_FUNCTION(fdf)
 	FDFErc err;
 	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL);
 
+  /* Constants used by fdf_set_opt() */
 	REGISTER_LONG_CONSTANT("FDFValue", FDFValue, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFStatus", FDFStatus, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFFile", FDFFile, CONST_CS | CONST_PERSISTENT);
@@ -119,6 +121,17 @@ PHP_MINIT_FUNCTION(fdf)
 	REGISTER_LONG_CONSTANT("FDFAA", FDFAA, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFAPRef", FDFAPRef, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFIF", FDFIF, CONST_CS | CONST_PERSISTENT);
+
+	/* Constants used by fdf_set_javascript_action() */
+	REGISTER_LONG_CONSTANT("FDFEnter", FDFEnter, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFExit", FDFExit, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFDown", FDFDown, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFUp", FDFUp, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFFormat", FDFFormat, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFValidate", FDFValidate, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFKeystroke", FDFKeystroke, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFCalculate", FDFCalculate, CONST_CS | CONST_PERSISTENT);
+
 #ifdef PHP_WIN32
 	return SUCCESS;
 #endif
@@ -689,6 +702,36 @@ PHP_FUNCTION(fdf_set_submit_form_action) {
 	err = FDFSetSubmitFormAction(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val,(*arg5)->value.lval);
 	if(err != FDFErcOK)
 		printf("Error setting FDF submit action: %d",err);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto void fdf_set_javascript_action(int fdfdoc, string fieldname, int whichTrigger, string script)
+   sets the javascript action for a field in the fdf*/
+PHP_FUNCTION(fdf_set_javascript_action) {
+	pval **arg1, **arg2, **arg3, **arg4;
+	int id, type;
+	FDFDoc fdf;
+	FDFErc err;	
+	FDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_string_ex(arg4);
+	id=(*arg1)->value.lval;
+	fdf = zend_list_find(id,&type);
+	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	err = FDFSetJavaScriptAction(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val);
+	if(err != FDFErcOK)
+		printf("Error setting FDF JavaScript action: %d",err);
 
 	RETURN_TRUE;
 }
