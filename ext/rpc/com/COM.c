@@ -49,6 +49,8 @@
 
 static int le_idispatch;
 
+static zend_class_entry com_class_entry;
+
 function_entry COM_functions[] = {
 	PHP_FE(COM_load,								NULL)
 	PHP_FE(COM_invoke,								NULL)
@@ -384,12 +386,47 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			}
 			pval_arg->type = IS_STRING;
 			break;
-		case VT_UNKNOWN:
-		case VT_DISPATCH:
-			/* possibly, return IDispatch as a new COM object.  right now - just get rid of it */
-			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
-			var_reset(pval_arg);
+		case VT_DATE:
+			{
+			SYSTEMTIME wintime;
+			struct tm phptime;
+
+			VariantTimeToSystemTime(var_arg->date, &wintime);
+			phptime.tm_year = wintime.wYear-1900;
+			phptime.tm_mon  = wintime.wMonth-1;
+			phptime.tm_mday = wintime.wDay;
+			phptime.tm_hour = wintime.wHour;
+			phptime.tm_min  = wintime.wMinute;
+			phptime.tm_sec  = wintime.wSecond;
+			phptime.tm_isdst= -1;
+
+			tzset();
+			pval_arg->value.lval = mktime(&phptime);
+			pval_arg->type = IS_LONG;
 			break;
+			}
+		case VT_DISPATCH:
+			{
+			pval *handle;
+
+			pval_arg->type=IS_OBJECT;
+			pval_arg->value.obj.ce=&com_class_entry;
+			pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+			pval_arg->is_ref=1;
+			pval_arg->refcount=1;
+			zend_hash_init(pval_arg->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
+
+			handle = (pval *) emalloc(sizeof(pval));
+			handle->type = IS_LONG;
+			handle->value.lval = php3_list_insert(var_arg->pdispVal, le_idispatch);
+			pval_copy_constructor(handle);
+			INIT_PZVAL(handle);
+			zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
+			break;
+			}
+		case VT_UNKNOWN:
+			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
+			/* fallthru */
 		default:
 			php_error(E_WARNING,"Unsupported variant type");
 			var_reset(pval_arg);
@@ -842,7 +879,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 		/*
 		switch (overloaded_property->element.type) {
 			case IS_LONG:
-				printf("%d (numeric)\n", overloaded_property->element.value.lval);
+				printf("%d (numeric)\n", overloaded_property->element.valuepval_arglval);
 				break;
 			case IS_STRING:
 				printf("'%s'\n", overloaded_property->element.value.str.val);
@@ -923,8 +960,6 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 
 void php_register_COM_class()
 {
-	zend_class_entry com_class_entry;
-
 	INIT_OVERLOADED_CLASS_ENTRY(com_class_entry, "COM", NULL,
 								php_COM_call_function_handler,
 								php_COM_get_property_handler,
