@@ -289,25 +289,26 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 {
 	zval **tmp;
 	int len = 0, count = 0, target = 0;
+	HashPosition pos;
 
 	/* convert everything to strings, and calculate length */
-	zend_hash_internal_pointer_reset(arr->value.ht);
-	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(arr->value.ht, &pos);
+	while (zend_hash_get_current_data_ex(arr->value.ht, (void **) &tmp, &pos) == SUCCESS) {
 		convert_to_string_ex(tmp);
 		len += (*tmp)->value.str.len;
 		if (count>0) {
 			len += delim->value.str.len;
 		}
 		count++;
-		zend_hash_move_forward(arr->value.ht);
+		zend_hash_move_forward_ex(arr->value.ht, &pos);
 	}
 
 	/* do it */
 	return_value->value.str.val = (char *) emalloc(len + 1);
 	return_value->value.str.val[0] = '\0';
 	return_value->value.str.val[len] = '\0';
-	zend_hash_internal_pointer_reset(arr->value.ht);
-	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(arr->value.ht, &pos);
+	while (zend_hash_get_current_data_ex(arr->value.ht, (void **) &tmp, &pos) == SUCCESS) {
 		count--;
 		memcpy(return_value->value.str.val + target, (*tmp)->value.str.val,
                (*tmp)->value.str.len);
@@ -317,7 +318,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
                    delim->value.str.len);
 			target += delim->value.str.len;
 		}
-		zend_hash_move_forward(arr->value.ht);
+		zend_hash_move_forward_ex(arr->value.ht, &pos);
 	}
 	return_value->type = IS_STRING;
 	return_value->value.str.len = len;
@@ -1196,10 +1197,11 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 	int minlen = 128*1024;
 	int maxlen = 0, pos, len, newpos, newlen, found;
 	char *newstr, *key;
+	HashPosition hpos;
 	
-	zend_hash_internal_pointer_reset(hash);
-	while (zend_hash_get_current_data(hash, (void **)&entry) == SUCCESS) {
-		switch (zend_hash_get_current_key(hash, &string_key, &num_key)) {
+	zend_hash_internal_pointer_reset_ex(hash, &hpos);
+	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
+		switch (zend_hash_get_current_key_ex(hash, &string_key, NULL, &num_key, &hpos)) {
 		case HASH_KEY_IS_STRING:
 			len = strlen(string_key);
 			if (len > maxlen) maxlen = len;
@@ -1219,7 +1221,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 			if (len < minlen) minlen = len;
 			break;
 		}
-		zend_hash_move_forward(hash);
+		zend_hash_move_forward_ex(hash, &hpos);
 	}
 	
 	key = emalloc(maxlen+1);
