@@ -1,3 +1,33 @@
+2000-07-16  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: Update news
+
+2000-07-16  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/Makefile.in
+      ext/curl/config.m4
+      ext/curl/curl.c
+      ext/curl/php_curl.h: Add CURL support (http://curl.haxx.se).
+
+
+2000-07-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * README.EXT_SKEL
+      ext/ext_skel
+      ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.php: Tiny wording fix
+
+2000-07-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/storage.php: * DB_common:
+      - added getCol() and toString()
+      - added prepare/execute support to getRow()
+      - support for multiple simultaneous emulated prepare/execute
+    * DB_storage:
+      - added setup(), insert(), toString() and dump()
+
 2000-07-15  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/recode/php_recode.h
