@@ -70,6 +70,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.lifetime", "0", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.serialize_handler", "php", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.use_cookies", "1", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.extern_referer_check", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.entropy_file", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.entropy_length", "0", PHP_INI_ALL, NULL)
@@ -508,7 +509,12 @@ static void _php_session_start(PSLS_D)
 	if(!PS(id)) {
 		PS(id) = _php_create_id(NULL PSLS_CC);
 	}
-
+	
+	if(!PS(use_cookies) && send_cookie) {
+		define_sid = 1;
+		send_cookie = 0;
+	}
+	
 	if(send_cookie) {
 		_php_session_send_cookie(PSLS_C);
 	}
@@ -854,6 +860,7 @@ static void php_rinit_session_globals(PSLS_D)
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(define_sid) = 0;
+	PS(use_cookies) = INI_INT("session.use_cookies");
 	PS(save_path) = estrdup(INI_STR("session.save_path"));
 	PS(session_name) = estrdup(INI_STR("session.name"));
 	PS(entropy_file) = estrdup(INI_STR("session.entropy_file"));

@@ -3,7 +3,8 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
-- added getcwd() function. (Thies)
+- Added session.use_cookies option (Sascha)
+- Added getcwd() function. (Thies)
 - XML_Parse_Into_Struct no longer eats data. (Thies)
 - Fixed parse_url('-') crash. (Thies)
 - added === operator support. (Andi & Thies, Zend library)

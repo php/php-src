@@ -273,6 +273,7 @@ session.save_handler = files        ; handler used to store/retrieve data
 session.save_path = /tmp            ; argument passed to save_handler
                                     ; in the case of files, this is the
                                     ; path where data files are stored
+session.use_cookies = 1             ; whether to use cookies
 session.name = PHPSESSID            ; name of the session
                                     ; is used as cookie name
 session.auto_start = 0              ; initialize session on request startup
