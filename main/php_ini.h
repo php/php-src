@@ -117,11 +117,12 @@ PHPAPI PHP_INI_DISP(php_ini_color_displayer_cb);
 #define INI_INT(name) php_ini_long((name), sizeof(name), 0)
 #define INI_FLT(name) php_ini_double((name), sizeof(name), 0)
 #define INI_STR(name) php_ini_string((name), sizeof(name), 0)
-
+#define INI_BOOL(name) ((zend_bool) INI_INT(name))
 
 #define INI_ORIG_INT(name)	php_ini_long((name), sizeof(name), 1)
 #define INI_ORIG_FLT(name)	php_ini_double((name), sizeof(name), 1)
 #define INI_ORIG_STR(name)	php_ini_string((name), sizeof(name), 1)
+#define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
 
 
 #define REGISTER_INI_ENTRIES() php_register_ini_entries(ini_entries, module_number)

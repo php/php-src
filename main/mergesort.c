@@ -62,8 +62,8 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #include <winsock.h> /* Includes definition for u_char */
 #endif
 
-static void setup (u_char *, u_char *, size_t, size_t, int (*)());
-static void insertionsort (u_char *, size_t, size_t, int (*)());
+static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *));
+static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *));
 
 #define ISIZE sizeof(int)
 #define PSIZE sizeof(u_char *)
@@ -98,14 +98,10 @@ static void insertionsort (u_char *, size_t, size_t, int (*)());
 /*
  * Arguments are as for qsort.
  */
-int
-mergesort(base, nmemb, size, cmp)
-	void *base;
-	size_t nmemb;
-	register size_t size;
-	int (*cmp) (const void *, const void *);
+int mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *))
 {
-	register int i, sense;
+	register unsigned int i;
+	register int sense;
 	int big, iflag;
 	register u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
 	u_char *list2, *list1, *p2, *p, *last, **p1;
@@ -261,11 +257,7 @@ COPY:	    			b = t;
  * when THRESHOLD/2 pairs compare with same sense.  (Only used when NATURAL
  * is defined.  Otherwise simple pairwise merging is used.)
  */
-void
-setup(list1, list2, n, size, cmp)
-	size_t n, size;
-	int (*cmp) (const void *, const void *);
-	u_char *list1, *list2;
+static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *))
 {
 	int i, length, size2, tmp, sense;
 	u_char *f1, *f2, *s, *l2, *last, *p2;
@@ -335,11 +327,7 @@ setup(list1, list2, n, size, cmp)
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
-static void
-insertionsort(a, n, size, cmp)
-	u_char *a;
-	size_t n, size;
-	int (*cmp) (const void *, const void *);
+static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *))
 {
 	u_char *ai, *s, *t, *u, tmp;
 	int i;

@@ -3153,7 +3153,7 @@ PHP_FUNCTION(getservbyport)
 	convert_to_long_ex(port);
 	convert_to_string_ex(proto);
 
-	serv = getservbyport(htons((*port)->value.lval),(*proto)->value.str.val);
+	serv = getservbyport(htons((unsigned short) (*port)->value.lval),(*proto)->value.str.val);
 
 	if(serv == NULL)
 		RETURN_FALSE;
