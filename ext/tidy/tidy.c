@@ -344,6 +344,7 @@ PHP_FUNCTION(tidy_create) {
 PHP_FUNCTION(tidy_parse_string) {
     
     char *input;
+    int input_len;
     zval *res;
     PHPTidyDoc *tdoc;
 
@@ -352,7 +353,7 @@ PHP_FUNCTION(tidy_parse_string) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &input) == FAILURE) {
+                             "rs", &res, &input, &input_len) == FAILURE) {
         return;
     }
     
@@ -441,6 +442,7 @@ PHP_FUNCTION(tidy_parse_file) {
 	
     
     char *inputfile;
+    int input_len;
     zval *res;
     PHPTidyDoc *tdoc;
     php_stream *stream;
@@ -451,7 +453,7 @@ PHP_FUNCTION(tidy_parse_file) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &inputfile) == FAILURE) {
+                             "rs", &res, &inputfile, &input_len) == FAILURE) {
         return;
     }
     
@@ -757,6 +759,7 @@ PHP_FUNCTION(tidy_config_count) {
 PHP_FUNCTION(tidy_load_config) {
     zval *res;
     char *filename;
+    int filename_len;
     PHPTidyDoc *tdoc;
   
     if(ZEND_NUM_ARGS() != 2) {
@@ -764,7 +767,7 @@ PHP_FUNCTION(tidy_load_config) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &filename) == FAILURE) {
+                             "rs", &res, &filename, &filename_len) == FAILURE) {
         return;
     }
     
@@ -782,6 +785,7 @@ PHP_FUNCTION(tidy_load_config_enc) {
     zval *res;
     char *filename;
     char *encoding;
+    int enc_len, file_len;
     PHPTidyDoc *tdoc;
   
     if(ZEND_NUM_ARGS() != 2) {
@@ -789,7 +793,7 @@ PHP_FUNCTION(tidy_load_config_enc) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rss", &res, &filename, &encoding) == FAILURE) {
+                             "rss", &res, &filename, &file_len, &encoding, &enc_len) == FAILURE) {
         return;
     }
     
@@ -810,6 +814,7 @@ PHP_FUNCTION(tidy_load_config_enc) {
 PHP_FUNCTION(tidy_set_encoding) {
     zval *res;
     char *encoding;
+    int enc_len;
     PHPTidyDoc *tdoc;
   
     if(ZEND_NUM_ARGS() != 2) {
@@ -817,7 +822,7 @@ PHP_FUNCTION(tidy_set_encoding) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &encoding) == FAILURE) {
+                             "rs", &res, &encoding, &enc_len) == FAILURE) {
         return;
     }
     
@@ -836,6 +841,7 @@ PHP_FUNCTION(tidy_set_encoding) {
 PHP_FUNCTION(tidy_save_config) {
     zval *res;
     char *filename;
+    int file_len;
     PHPTidyDoc *tdoc;
   
     if(ZEND_NUM_ARGS() != 2) {
@@ -843,7 +849,7 @@ PHP_FUNCTION(tidy_save_config) {
     }
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &filename) == FAILURE) {
+                             "rs", &res, &filename, &file_len) == FAILURE) {
         return;
     }
     
