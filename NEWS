@@ -25,6 +25,7 @@ PHP 4                                                                      NEWS
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #22520 (mcrypt_generic_deinit() was not available on Windows). (Edin)
+- Fixed bug #22508 (Added protection against circular HTML redirects). (Ilia)
 - Fixed bug #22402 (opening of ftp for read/write could fail due to invalid
   return code handling). (Ilia)
 - Fixed bug #22384 (FNM_CASEFOLD is not available). (Hartmut)
