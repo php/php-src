@@ -1,3 +1,47 @@
+2003-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Bugfix #24729  = new ; causes crash when  is not set
+
+2003-07-20  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      should nt here
+
+2003-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Fix warnings and whitespace in output
+
+    * zend_reflection_api.c:
+      Add support for instances in Reflection_Class.
+
+2003-07-20  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      removed references to smart_str, replaced with private string management
+      function.  When snprintf is integrated into the engine, string_printf
+      should be altered to use that.
+
+2003-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects_API.c:
+      More informative errors here and these are real core errors
+
+    * zend_execute.c:
+      Fix uncloneable objetcs
+
+2003-07-20  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      more of Timm's implementation.
+
+2003-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c
+      zend_hash.h:
+      Make it a macro
+
 2003-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.c:
