@@ -4,7 +4,7 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.1
 - Cleaned up PCRE extension and made it binary-safe. (Andrei)
 - Added third argument to in_array(). If it's true, then in_array()
-- will use strict comparison instead of the default one. (Andrei)
+  will use strict comparison instead of the default one. (Andrei)
 - Added pg_trace() and pg_untrace (Dominic J. Eidson & Zeev)
 - ignore_user_abort=Off is now default. (Thies)
 - Added array_merge_recursive() that will recursively merge values
