@@ -2390,8 +2390,6 @@ PHP_FUNCTION(get_loaded_extensions)
    Return an array containing the names and values of all defined constants */
 PHP_FUNCTION(get_defined_constants)
 {
-	ELS_FETCH();
-
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
