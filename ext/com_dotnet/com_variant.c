@@ -799,7 +799,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 	}
 
 	VariantInit(&res);
-	tmv = gmtime(&timestamp);
+	tzset();
+	tmv = localtime(&timestamp);
 	memset(&systime, 0, sizeof(systime));
 
 	systime.wDay = tmv->tm_mday;
