@@ -3,7 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 2000, Version 4.0.0 Release
 - Dynamically allocate points for ImagePolygon (Marc Pohl)
-- Added configure time checking for bcmath package
+- Added configure time checking for bcmath package (Joey)
 - Added get_declared_classes(). (Andrei, Zend library)
 - Add initial NSAPI module from Jayakumar Muthukumarasamy. (Rasmus)
 - Added the SWF module which allows you to create Macromedia Flash files via 
