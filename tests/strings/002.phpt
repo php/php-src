@@ -46,16 +46,16 @@ printf test 1:simple string
 printf test 2:42
 printf test 3:3.333333
 printf test 4:3.3333333333
-printf test 5:2.50         
-printf test 6:2.50000000000
-printf test 7:0000000002.50
+printf test 5:2.50      
+printf test 6:2.50000000
+printf test 7:0000002.50
 printf test 8:<                 foo>
 printf test 9:<bar                 >
 printf test 10: 123456789012345
 printf test 10:<høyesterettsjustitiarius>
 printf test 11: 123456789012345678901234567890
 printf test 11:<      høyesterettsjustitiarius>
-printf test 12:  -12.34
+printf test 12:-12.34
 printf test 13:  -12
 printf test 14:@
 printf test 15:10101010
