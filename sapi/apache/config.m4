@@ -3,10 +3,11 @@ dnl $Id$
 dnl
 
 AC_DEFUN(PHP_AP_EXTRACT_VERSION,[
+  ac_output=`$1 -v 2>&1`
   ac_IFS=$IFS
 IFS="- /.
 "
-  set `$1 -v 2>&1`
+  set $ac_output
   IFS=$ac_IFS
 
   APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
