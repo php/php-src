@@ -73,6 +73,7 @@ dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
 dnl Checks for programs.
+AC_PROG_AWK
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the PHP parsers.)
@@ -695,6 +696,7 @@ PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 
+PHP_SUBST(AWK)
 PHP_SUBST(CC)
 PHP_SUBST(CFLAGS)
 PHP_SUBST(CONFIGURE_COMMAND)
