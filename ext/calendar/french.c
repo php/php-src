@@ -86,7 +86,7 @@
 
 #include "sdncal.h"
 
-#define SDN_OFFSET         2375474
+#define FRENCH_SDN_OFFSET         2375474
 #define DAYS_PER_4_YEARS   1461
 #define DAYS_PER_MONTH     30
 #define FIRST_VALID        2375840
@@ -107,7 +107,7 @@ void SdnToFrench(
 		*pDay = 0;
 		return;
 	}
-	temp = (sdn - SDN_OFFSET) * 4 - 1;
+	temp = (sdn - FRENCH_SDN_OFFSET) * 4 - 1;
 	*pYear = temp / DAYS_PER_4_YEARS;
 	dayOfYear = (temp % DAYS_PER_4_YEARS) / 4;
 	*pMonth = dayOfYear / DAYS_PER_MONTH + 1;
@@ -128,7 +128,7 @@ long int FrenchToSdn(
 	return ((year * DAYS_PER_4_YEARS) / 4
 			+ (month - 1) * DAYS_PER_MONTH
 			+ day
-			+ SDN_OFFSET);
+			+ FRENCH_SDN_OFFSET);
 }
 
 char *FrenchMonthName[14] =
