@@ -1,3 +1,43 @@
+2004-05-24  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - MFH: Fix #28506, negative angle returns "random arcs"
+        while (s < 0) s += 360 is used now
+
+    * ext/gd/libgd/gd.c:
+      - Fix #28506, negative angle returns "random arcs"
+        while (angle < 0) angle += 2*M_PI is used now
+
+2004-05-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h:
+      MFH: Fixed bug #28508 (Do not make hypot() available if not supported by
+      libc).
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h:
+      Fixed bug #28508 (Do not make hypot() available if not supported by libc).
+
+2004-05-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS
+      ext/pdf/.cvsignore
+      ext/pdf/CREDITS
+      ext/pdf/config.m4
+      ext/pdf/config.w32
+      ext/pdf/package.xml
+      ext/pdf/pdf.c
+      ext/pdf/pdf.dsp
+      ext/pdf/php_pdf.h:
+      Moved pdflib extension to PECL
+
 2004-05-23  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_objects_API.c:
