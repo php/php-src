@@ -112,7 +112,6 @@ static char *
 	 */
 	if (fi != 0) {
 		p1 = &buf[NDIG];
-//		while (fi != 0) {
 		while (p1 > &buf[0] && fi != 0) {
 			fj = modf(fi / 10, &fi);
 			*--p1 = (int) ((fj + .03) * 10) + '0';
