@@ -962,7 +962,8 @@ PHP_FUNCTION(preg_split)
 /* }}} */
 
 
-/* {{{ proto string preg_quote(string str) */
+/* {{{ proto string preg_quote(string str)
+   Quote regular expression characters */
 PHP_FUNCTION(preg_quote)
 {
 	zval 	*in_str_arg;	/* Input string argument */
