@@ -60,7 +60,7 @@ static void php_free_pcre_cache(void *data)
 	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	pefree(pce->re, 1);
 #if HAVE_SETLOCALE
-	pefree((void*)pce->tables, 1);
+	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
 #endif
 }
 
