@@ -76,19 +76,22 @@
 int resourcecounter = 1;
 #endif
 
-ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult, char **ErrString)
+ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags,
+	DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult, char **ErrString)
 {
 	HRESULT hr;
 	int failed = FALSE;
-	unsigned int ArgErr;
+	unsigned int ArgErr = 0;
 	EXCEPINFO ExceptInfo;
 
 	*ErrString = NULL;
 	/* @todo use DispInvoke here ? */
 	if (C_HASTLIB(obj)) {
-		hr = C_TYPEINFO_VT(obj)->Invoke(C_TYPEINFO(obj), C_DISPATCH(obj), dispIdMember, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
+		hr = C_TYPEINFO_VT(obj)->Invoke(C_TYPEINFO(obj), C_DISPATCH(obj),
+			dispIdMember, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
 		if (FAILED(hr)) {
-			hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
+			hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL,
+				LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
 			if (SUCCEEDED(hr)) {
 				/*
 				 * ITypLib doesn't work
@@ -100,7 +103,8 @@ ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, D
 			}
 		}
 	} else {
-		hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
+		hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL,
+			LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
 	}
 
 	if (FAILED(hr)) {
@@ -137,7 +141,7 @@ ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, D
 				break;
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
-				spprintf(ErrString, 0, "<b>Argument</b>: %d", pDispParams->cArgs-ArgErr+1);
+				spprintf(ErrString, 0, "<b>Argument</b>: %d", pDispParams->cArgs - ArgErr);
 				break;
 		}
 	}
@@ -555,7 +559,7 @@ ZEND_API int php_COM_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name
 
 		ret = 1;
 	} else {
-		zend_error(E_WARNING, "Thats not a dispatchable interface!! type kind = %08x", attr->typekind);
+		zend_error(E_WARNING, "That's not a dispatchable interface!! type kind = %08x", attr->typekind);
 	}
 
 	typeinfo->lpVtbl->ReleaseTypeAttr(typeinfo, attr);
