@@ -197,6 +197,7 @@ class System extends PEAR
                 $mode = $opt[1];
             }
         }
+        $ret = true;
         if (isset($create_parents)) {
             foreach($opts[1] as $dir) {
                 $dirstack = array();
@@ -206,18 +207,18 @@ class System extends PEAR
                 }
                 while ($newdir = array_shift($dirstack)) {
                     if (!mkdir($newdir, $mode)) {
-                        break; // XXX error
+                        $ret = false;
                     }
                 }
             }
         } else {
             foreach($opts[1] as $dir) {
-                if (!mkdir($dir, $mode)) {
-                    continue; // XXX error
+                if (!@is_dir($dir) && !mkdir($dir, $mode)) {
+                    $ret = false;
                 }
             }
         }
-        return true;
+        return $ret;
     }
 
     /**
