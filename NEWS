@@ -1,23 +1,34 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 12 Feb 2004, PHP 5 Beta 4
-- Fixed interfaces to check for function return-by-reference equality when
-  inheriting and implementing interfaces. (Andi, Zeev)
 - Changed exceptions so that they must now inherit from the built-in Exception
   class. This allows for a general catch(Exception $e) statement to catch all
   exceptions. (Andi, Zeev)
+- Added SPL extension. (Marcus, Derick)
 - Added checks for invalid characters in a cookie name and cookie data 
   into set[raw]cookie(). (Brian)
-- Added new pspell functions: (Brian)
-  . pspell_config_dict_dir()
-  . pspell_config_data_dir()
 - Added support for ++ and += (and similar) to SimpleXML. (Andi, Zeev)
 - Added infrastructure for ++ and += (and similar) to object overloading
   modules. (Andi, Zeev)
+- Added error message when trying to re-assign to $this variable. (Zeev, Andi)
+- Added support for an interface to extend another interface. (Zeev)
+- Added new pspell functions: (Brian)
+  . pspell_config_dict_dir()
+  . pspell_config_data_dir()
+- Added new Interbase functions: (Ard)
+  . ibase_service_attach() and ibase_service_detach().
+  . ibase_backup() and ibase_restore().
+  . ibase_maintain_db(), ibase_db_info() and ibase_server_info().
+- Added context option "http"/"request_fulluri" to send entire URI in request
+  which is required format for some proxies. (Sara)
+- Added optional third parameter 'strict' to array_keys(). (Andrey)
+- Added stream_lock() method to userspace streams interface. (Hartmut, Wez)
+- Added xsltprocessor->registerPHPFunctions(). (Christian)
 - Readded support for using classes before they are declared according to
   the behavior in PHP 4. This won't work with classes who are using PHP 5
   features such as interfaces. (Zeev, Andi)
-- Added error message when trying to re-assign to $this variable. (Zeev, Andi)
+- Completely overhauled SimpleXML extension. (Marcus, Rob, Sterling)
+- Upgraded bundled SQLite library to version 2.8.11. (Ilia, Wez)
 - Improved destructor implementation to always call destructors on clean
   shutdown. An order of destruction is not guaranteed. (Zeev, Andi)
 - Redesigned exception support. This fixes many bugs in the previous design
@@ -25,19 +36,8 @@ PHP                                                                        NEWS
 - Redesigned clone by adding a clone keyword (clone $obj) and copying all
   properties before __clone() is called. Also allows calling parent __clone
   function by using parent::__clone(). (Zeev, Andi)
-- Added support for an interface to extend another interface (Zeev)
-- Completely overhauled SimpleXML extension. (Marcus, Rob, Sterling)
-- Added new Interbase functions: (Ard)
-  . ibase_service_attach() and ibase_service_detach().
-  . ibase_backup() and ibase_restore().
-  . ibase_maintain_db(), ibase_db_info() and ibase_server_info().
-- Added context option "http"/"request_fulluri" to send entire URI in request.
-  Required format for some proxies. (Sara)
-- Added optional third parameter 'strict' to array_keys(). (Andrey)
-- Added stream_lock() method to userspace streams interface. (Hartmut, Wez)
-- Added xsltprocessor->registerPHPFunctions(). (Christian)
-- Bundled new SPL extension. (Marcus, Derick)
-- Upgraded SQLite library to version 2.8.11. (Ilia, Wez)
+- Fixed interfaces to check for function return-by-reference equality when
+  inheriting and implementing interfaces. (Andi, Zeev)
 - Fixed foreach() to respect property visibility. (Marcus)
 - Fixed problem with parse error in include() file not stopping PHP's
   execution. (Ilia)
