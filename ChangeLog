@@ -1,3 +1,132 @@
+2004-04-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      configure.in:
+      fix typo
+
+    * (PHP_4_3)
+      ext/yaz/config.m4:
+      PHP_ADD_LIBPATH checks that the path is not /usr/lib..
+
+2004-04-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/go-pear-list.php:
+      oops, PHPUnit2, not PHPUnit
+
+2004-04-08  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_4_3)
+      NEWS:
+      - News
+
+2004-04-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      Bugfix #27519 Reflection_Function constructor crashes with non-existant
+      function's name
+
+2004-04-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/standard/parsedate.y:
+      - Added missing CEST zone
+
+    * ext/standard/parsedate.y:
+      - Add missing "CEST" timezone
+
+2004-04-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.3.6RC3
+
+2004-04-08  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/go-pear-list.php:
+      Include Mail 1.1.3 with PHP 5.
+
+2004-04-08  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      Fix elusive crash: executor_globals_dtor shouldn't destroy resource dtor
+      hash, since this hash is global (GLOBAL - one for all threads) and
+      executor_globals_dtor is called on thread shutdown.
+      Fix destructors_list cleanup call - it can be called last on shutdown
+      since this hash doesn't have dtor
+
+2004-04-08  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Added reworded destructor change
+
+    * ext/standard/tests/time/bug20382.phpt:
+      - Added test and not the diff ;-)
+
+2004-04-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/time/bug20382.diff:
+      remove crap
+
+2004-04-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/go-pear-list.php:
+      Dan wants tabs -> spaces
+
+    * pear/go-pear-list.php:
+      forgot phpunit -> phpunit2 for php5
+
+    * pear/go-pear-list.php:
+      this should update the list
+      
+
+2004-04-08  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/time/bug20382.diff:
+      - Test case for bug #20382
+
+2004-04-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * pear/go-pear-list.php:
+      Add this list here, so that pear-core guys can manipulate the PEAR bundle
+      for the win32 snapshot.
+
+2004-04-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Prepare news file for release.
+
+2004-04-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mbstring/config.w32:
+      Enable mbregex in win32 build
+
+2004-04-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gd/tests/bug22544.phpt
+      ext/gd/tests/bug24155.phpt
+      ext/gd/tests/bug27582_1.phpt:
+      - Fix test file outputs.
+
+    * NEWS:
+      pfft..
+
+2004-04-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4:
+      - Add missing checks. Maybe fixes PR #27680
+
 2004-04-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
