@@ -784,15 +784,15 @@ static union _zend_function *dbstmt_method_get(zval *object, char *method_name, 
 	zend_function *fbc;
 	char *lc_method_name;
 
-	lc_method_name = do_alloca(method_len + 1);
+	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
 	if (zend_hash_find(&pdo_dbstmt_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-		free_alloca(lc_method_name);
+		efree(lc_method_name);
 		return NULL;
 	}
 	
-	free_alloca(lc_method_name);
+	efree(lc_method_name);
 	return fbc;
 }
 
@@ -1004,15 +1004,15 @@ static union _zend_function *row_method_get(zval *object, char *method_name, int
 	zend_function *fbc;
 	char *lc_method_name;
 
-	lc_method_name = do_alloca(method_len + 1);
+	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
 	if (zend_hash_find(&pdo_row_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-		free_alloca(lc_method_name);
+		efree(lc_method_name);
 		return NULL;
 	}
 	
-	free_alloca(lc_method_name);
+	efree(lc_method_name);
 	return fbc;
 }
 
