@@ -2887,6 +2887,82 @@ PHP_FUNCTION(array_reduce)
 	
 	*return_value = *result;
 }
+/* }}} */
+
+
+/* {{{ proto array array_filter(array input [, mixed callback])
+   Filters elements from the array via the callback. */
+PHP_FUNCTION(array_filter)
+{
+	zval **input, **callback = NULL;
+	zval **operand;
+	zval **args[1];
+	zval *retval = NULL;
+	char *callback_name;
+	char *string_key;
+	ulong string_key_len;
+	ulong num_key;
+	HashPosition pos;
+	
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &callback) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
+		php_error(E_WARNING, "%s() expects argument 1 to be an array",
+				  get_active_function_name());
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		if (!zend_is_callable(*callback, 0, &callback_name)) {
+			php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback",
+					  get_active_function_name(), callback_name);
+			efree(callback_name);
+			return;
+		}
+	}
+
+	array_init(return_value);
+	if (zend_hash_num_elements(Z_ARRVAL_PP(input)) == 0)
+		return;
+
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
+		 zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&operand, &pos) == SUCCESS;
+		 zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos)) {
+
+		if (callback) {
+			args[0] = operand;
+			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 1, args, 0, NULL) == SUCCESS && retval) {
+				if (!zend_is_true(retval)) {
+					zval_ptr_dtor(&retval);
+					continue;
+				} else
+					zval_ptr_dtor(&retval);
+			} else {
+				php_error(E_WARNING, "%s() had an error invoking the reduction callback", get_active_function_name());
+				return;
+			}
+		} else if (!zend_is_true(*operand))
+			continue;
+
+		zval_add_ref(operand);
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
+			case HASH_KEY_IS_STRING:
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key,
+								 string_key_len, operand, sizeof(zval *), NULL);
+				break;
+
+			case HASH_KEY_IS_LONG:
+				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
+									   operand, sizeof(zval *), NULL);
+				break;
+		}
+	}
+}
+/* }}} */
+
 
 /*
  * Local variables:
