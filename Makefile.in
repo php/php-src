@@ -11,7 +11,7 @@ LTLIBRARY_NAME = libphp4.la
 	
 LTLIBRARY_SOURCES = \
        main.c internal_functions.c snprintf.c php_sprintf.c \
-       configuration-parser.c configuration-scanner.c request_info.c \
+       configuration-parser.c configuration-scanner.c \
        safe_mode.c fopen-wrappers.c php_realpath.c alloca.c \
        php_ini.c SAPI.c rfc1867.c dlist.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c

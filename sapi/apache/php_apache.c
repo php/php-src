@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "remains.h"
+#include "php_apache_http.h"
 #include "http_request.h"
 #include "build-defs.h"
 
