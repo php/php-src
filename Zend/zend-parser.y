@@ -631,7 +631,7 @@ encaps_var:
 	|	T_VARIABLE '[' { do_begin_variable_parse(CLS_C); } encaps_var_offset ']'	{ do_fetch_globals(&$1 CLS_CC);  fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 	|	T_VARIABLE T_OBJECT_OPERATOR T_STRING { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$2, &$1, 1 CLS_CC); do_fetch_property(&$$, &$2, &$3 CLS_CC); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES expr '}' { do_begin_variable_parse(CLS_C);  fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
-	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING '[' expr ']' '}' { do_begin_variable_parse(CLS_C);  fetch_array_begin(&$$, &$2, &$4 CLS_CC); }
+	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}' { do_begin_variable_parse(CLS_C);  fetch_array_begin(&$$, &$2, &$4 CLS_CC); }
 	|	T_CURLY_OPEN cvar '}' { $$ = $2; }
 ;
 
