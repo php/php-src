@@ -18,54 +18,65 @@ AC_ARG_WITH(java,
     fi
 
     if test "$withval" = "yes"; then
-      if test -d /usr/local/lib/kaffe; then
-	JAVA_CFLAGS="-DKAFFE"
-	JAVA_INCLUDE=-I/usr/local/include/kaffe
-	JAVA_CLASSPATH=/usr/local/share/kaffe/Klasses.jar
-      elif test -d /usr/lib/kaffe; then
-	JAVA_CFLAGS="-DKAFFE"
-	JAVA_INCLUDE=-I/usr/include/kaffe
-	JAVA_CLASSPATH=/usr/share/kaffe/Klasses.jar
-      else
-	AC_MSG_RESULT(no)
-	AC_MSG_ERROR(unable to find Java VM libraries)
-      fi
+      withval=`cd \`which javac\`/../..;pwd`
+    fi
+
+    if test -d $withval/lib/kaffe; then
+      AC_ADD_LIBPATH($withval/lib/kaffe)
+
+      JAVA_CFLAGS="-DKAFFE"
+      JAVA_INCLUDE=-I$withval/include/kaffe
+      JAVA_CLASSPATH=$withval/share/kaffe/Klasses.jar
+
+      test -f $withval/lib/libkaffevm.so && AC_ADD_LIBPATH($withval/lib)
+      AC_ADD_LIBRARY(kaffevm)
 
       # accomodate old versions of kaffe which don't support jar
       if kaffe -version 2>&1 | grep 1.0b > /dev/null; then
-        JAVA_JAR='zip -q0'
+	JAVA_JAR='zip -q0'
       fi
 
+    elif test -f $withval/lib/libjava.so; then
+      AC_ADD_LIBRARY_WITH_PATH(java, $withval/lib)
+      JAVA_INCLUDE="-I$withval/include"
+      test -f $withval/lib/classes.zip && JAVA_CFLAGS="-DJNI_11"
+      test -f $withval/lib/jvm.jar     && JAVA_CFLAGS="-DJNI_12"
+      test -f $withval/lib/classes.zip && JAVA_CLASSPATH="$withval/lib/classes.zip"
+      test -f $withval/lib/jvm.jar     && JAVA_CLASSPATH="$withval/lib/jvm.jar"
+      for i in $JAVA_INCLUDE/*; do
+	test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
+      done
+
     else
-      if test -f $withval/lib/libjava.so; then
-	JAVA_INCLUDE="-I$withval/include"
-	test -f $withval/lib/classes.zip && JAVA_CFLAGS="-DJNI_11"
-	test -f $withval/lib/jvm.jar	 && JAVA_CFLAGS="-DJNI_12"
-	test -f $withval/lib/classes.zip && JAVA_CLASSPATH="$withval/lib/classes.zip"
-	test -f $withval/lib/jvm.jar	 && JAVA_CLASSPATH="$withval/lib/jvm.jar"
-	for i in $JAVA_INCLUDE/*; do
-	  test -f $i/jni_md.h	 && JAVA_INCLUDE="$JAVA_INCLUDE $i"
-	done
-      else
-	for i in `find $withval -type d`; do
-	  test -f $i/jni.h	 && JAVA_INCLUDE="-I$i"
-	  test -f $i/jni_md.h	 && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
-	  test -f $i/classes.zip && JAVA_CFLAGS="-DJNI_11"
-	  test -f $i/jvm.jar	 && JAVA_CFLAGS="-DJNI_12"
-	  test -f $i/classes.zip && JAVA_CLASSPATH="$i/classes.zip"
-	  test -f $i/jvm.jar	 && JAVA_CLASSPATH="$i/jvm.jar"
-	done
-	if test -z "$JAVA_INCLUDE"; then
-	  AC_MSG_RESULT(no)
-	  AC_MSG_ERROR(unable to find Java VM libraries)
+      for i in `find $withval -type d`; do
+	test -f $i/jni.h	&& JAVA_INCLUDE="-I$i"
+	test -f $i/jni_md.h	&& JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
+	test -f $i/classes.zip	&& JAVA_CFLAGS="-DJNI_11"
+	test -f $i/jvm.jar	&& JAVA_CFLAGS="-DJNI_12"
+	test -f $i/rt.jar	&& JAVA_CFLAGS="-DJNI_12"
+	test -f $i/classes.zip	&& JAVA_CLASSPATH="$i/classes.zip"
+	test -f $i/jvm.jar	&& JAVA_CLASSPATH="$i/jvm.jar"
+	test -f $i/rt.jar	&& JAVA_CLASSPATH="$i/rt.jar"
+	if test -f $i/libjava.so; then 
+	  AC_ADD_LIBPATH($i)
+	  test -d $i/classic && AC_ADD_LIBPATH($i/classic)
+	  test -d $i/green_threads && AC_ADD_LIBPATH($i/green_threads)
 	fi
+      done
+      if test -z "$JAVA_INCLUDE"; then
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR(unable to find Java VM libraries)
       fi
+      AC_ADD_LIBRARY(java)
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
     if test "$PHP_SAPI" != "servlet"; then
       PHP_EXTENSION(java, shared)
     fi
+
+    INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(libdir)"
+
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
