@@ -221,25 +221,15 @@ static void php_set_session_var(char *name, size_t namelen,
 
 	if (PG(register_globals)) {
 		zval **old_symbol;
-		if(zend_hash_find(&EG(symbol_table),name,namelen+1,&old_symbol) == SUCCESS) { 
+		if(zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
 			/* 
 			   There where old one, we need to replace it accurately.
 			   hash_update in zend_set_hash_symbol is not good, because
 			   it will leave referenced variables (such as local instances
 			   of a global variable) dangling.
 			 */
-			int is_ref, refcount;
-
-			zval_dtor(*old_symbol);
-
-			/* replace variable contents while saving is_ref and reference 
-			   count */
-			is_ref = (*old_symbol)->is_ref;
-			refcount = (*old_symbol)->refcount;
-			**old_symbol = *state_val_copy;
-			(*old_symbol)->is_ref = is_ref;
-			(*old_symbol)->refcount = refcount;
-
+			
+			REPLACE_ZVAL_VALUE(old_symbol,state_val_copy,0);
 			FREE_ZVAL(state_val_copy);
 
 			zend_set_hash_symbol(*old_symbol, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
