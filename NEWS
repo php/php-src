@@ -8,6 +8,7 @@ PHP 4                                                                      NEWS
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
   (elod at itfais dot com)
+- Fixed bug #31699 (unserialize() float problem on non-English locales). (Ilia)
 - Fixed bug #31623 (OCILogin does not support password grace period).
   (daniel dot beet at accuratesoftware dot com, Tony)
 - Fixed bug #31580 (fgetcsv() problematic with "" escape sequences). (Ilia)
