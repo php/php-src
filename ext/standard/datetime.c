@@ -83,7 +83,8 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	struct tm *ta, tmbuf;
 	time_t t, seconds;
 	int i, gmadjust, arg_count = ZEND_NUM_ARGS();
-	int is_dst = -1, val, chgsecs = 0;
+	int is_dst = -1, chgsecs = 0;
+	long val;
 
 	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;

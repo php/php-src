@@ -856,7 +856,7 @@ void sqlite_progress_handler(
 ** This routine installs a default busy handler that waits for the
 ** specified number of milliseconds before returning 0.
 */
-void sqlite_busy_timeout(sqlite *db, int ms){
+void sqlite_busy_timeout(sqlite *db, long ms){
   if( ms>0 ){
     sqlite_busy_handler(db, sqliteDefaultBusyCallback, (void*)ms);
   }else{

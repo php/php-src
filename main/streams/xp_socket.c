@@ -57,8 +57,8 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 	if (didwrite <= 0) {
 		char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
 
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %d bytes failed with errno=%d %s",
-				count, php_socket_errno(), estr);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%d %s",
+				(long)count, php_socket_errno(), estr);
 		efree(estr);
 	}
 
