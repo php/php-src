@@ -66,6 +66,13 @@ Exceptions:
 
 [8] Use assert(). assert.h is included in php.h if it is available.  Not only
     does good assertion catch bugs, but it also helps with code readability.
+     - Do not use assert for error handling. Use assert only for the 
+       condition that must be always true.
+     - Do not use assignments in assert conditions.  If you assign inside an 
+       assert condition, you risk an elusive bug that would be very difficult 
+       to spot in a debug build, due to the side effect of the assignment.  
+       Function calls in assert conditions may also cause this problem, if 
+       they modify one of their arguments or global variables.
 
 Naming Conventions
 ------------------
