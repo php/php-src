@@ -497,7 +497,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		
 		stream->writepos += justread;
 		
-		if (stream->ops->dont_block)
+		if (stream->flags & PHP_STREAM_FLAG_AVOID_BLOCKING)
 			break;
 	}
 }
