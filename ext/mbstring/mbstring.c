@@ -2691,6 +2691,17 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 	ps = str;
 	icnt = str_len;
 
+	/*
+	 *             C o n t e n t - T y p e :   t e x t / h t m l \r\n
+	 *             ^ ^^^^^^^^^^^^^^^^^^^^^ ^^^ ^^^^^^^^^^^^^^^^^ ^^^^ 
+	 *      state  0            1           2          3          
+	 *
+	 *             C o n t e n t - T y p e :   t e x t / h t m l \r\n
+	 *             ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^ 
+	 * crlf_state -1                       0                     1 -1  
+	 *
+	 */
+
 	while (icnt > 0) {
 		switch (*ps) {
 			case ':':
