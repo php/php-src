@@ -2480,15 +2480,12 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(function_state).function->type == ZEND_USER_FUNCTION
 		|| EX(function_state).function->common.scope) {
 		should_change_scope = 1;
-	} else {
-		should_change_scope = 0;
-	}
-
-	if (should_change_scope) {
 		current_this = EG(This);
 		EG(This) = EX(object);
 		current_scope = EG(scope);
 		EG(scope) = EX(calling_scope);
+	} else {
+		should_change_scope = 0;
 	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
