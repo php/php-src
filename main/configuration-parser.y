@@ -352,11 +352,11 @@ void do_cfg_op(char type, zval *result, zval *op1, zval *op2)
 			i_result = ~i_op1;
 			break;
 		default:
-			result = 0;
+			i_result = 0;
 			break;
 	}
 
-	result->value.str.len = zend_sprintf(str_result, "%ld", i_result);
+	result->value.str.len = zend_sprintf(str_result, "%d", i_result);
 	result->value.str.val = (char *) malloc(result->value.str.len+1);
 	memcpy(result->value.str.val, str_result, result->value.str.len);
 	result->value.str.val[result->value.str.len] = 0;
