@@ -254,6 +254,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
+ZEND_API int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC);
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...);

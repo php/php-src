@@ -522,8 +522,14 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 	return ex_retval;
 }
 
-
 int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC)
+{
+	zend_function *function_pointer = NULL;
+
+	return fast_call_user_function(function_table, object_pp, function_name, retval_ptr_ptr, param_count, params, no_separation, symbol_table, &function_pointer TSRMLS_CC);
+}
+
+int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC)
 {
 	int i;
 	zval **original_return_value;
@@ -549,70 +555,79 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	EX(opline) = NULL;
 	*retval_ptr_ptr = NULL;
 
-	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
-		zval **tmp_object_ptr, **tmp_real_function_name;
+	/**
+	 * Function name lookup code
+	 *
+	 */
+	if (*function_pointer == NULL) {
+		if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
+			zval **tmp_object_ptr, **tmp_real_function_name;
 
-		if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
-			return FAILURE;
-		}
-		if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
-			return FAILURE;
-		}
-		function_name = *tmp_real_function_name;
-		SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
-		object_pp = tmp_object_ptr;
-		(*object_pp)->is_ref = 1;
-	}
-
-	if (object_pp && !*object_pp) {
-		object_pp = NULL;
-	}
-
-	if (object_pp) {
-		/* TBI!! new object handlers */
-		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
-			if (!IS_ZEND_STD_OBJECT(**object_pp)) {
-				zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
+			if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
 				return FAILURE;
 			}
-
-			calling_scope = Z_OBJCE_PP(object_pp);
-			function_table = &calling_scope->function_table;
-			EX(object) =  *object_pp;
-		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
-			zend_class_entry **ce;
-			char *lc_class;
-			int found;
-
-			lc_class = estrndup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-			zend_str_tolower(lc_class, Z_STRLEN_PP(object_pp));
-			found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
-			efree(lc_class);
-			if (found == FAILURE)
+			if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
 				return FAILURE;
+			}
+			function_name = *tmp_real_function_name;
+			SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
+			object_pp = tmp_object_ptr;
+			(*object_pp)->is_ref = 1;
+		}
 
-			function_table = &(*ce)->function_table;
-			calling_scope = *ce;
+		if (object_pp && !*object_pp) {
 			object_pp = NULL;
-		} else
+		}
+
+		if (object_pp) {
+			/* TBI!! new object handlers */
+			if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
+				if (!IS_ZEND_STD_OBJECT(**object_pp)) {
+					zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
+					return FAILURE;
+				}
+
+				calling_scope = Z_OBJCE_PP(object_pp);
+				function_table = &calling_scope->function_table;
+				EX(object) =  *object_pp;
+			} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
+				zend_class_entry **ce;
+				char *lc_class;
+				int found;
+
+				lc_class = estrndup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
+				zend_str_tolower(lc_class, Z_STRLEN_PP(object_pp));
+				found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+				efree(lc_class);
+				if (found == FAILURE)
+					return FAILURE;
+
+				function_table = &(*ce)->function_table;
+				calling_scope = *ce;
+				object_pp = NULL;
+			} else
+				return FAILURE;
+		}
+
+		if (function_name->type!=IS_STRING) {
 			return FAILURE;
-	}
+		}
 
-	if (function_name->type!=IS_STRING) {
-		return FAILURE;
-	}
+		function_name_copy = *function_name;
+		zval_copy_ctor(&function_name_copy);
+		zend_str_tolower(function_name_copy.value.str.val, function_name_copy.value.str.len);
 
-	function_name_copy = *function_name;
-	zval_copy_ctor(&function_name_copy);
-	zend_str_tolower(function_name_copy.value.str.val, function_name_copy.value.str.len);
-
-	original_function_state_ptr = EG(function_state_ptr);
-	if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+		original_function_state_ptr = EG(function_state_ptr);
+		if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+			zval_dtor(&function_name_copy);
+			return FAILURE;
+		}
 		zval_dtor(&function_name_copy);
-		return FAILURE;
+		*function_pointer = EX(function_state).function;
+	} else {
+		EX(function_state).function = *function_pointer;
 	}
-	zval_dtor(&function_name_copy);
-
+	
 	for (i=0; i<param_count; i++) {
 		zval *param;
 
