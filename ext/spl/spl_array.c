@@ -108,12 +108,18 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry spl_funcs_Countable[] = {
+	SPL_ABSTRACT_ME(Countable, count,   NULL)
+	{NULL, NULL, NULL}
+};
 
 zend_object_handlers spl_handler_ArrayObject;
 zend_class_entry *   spl_ce_ArrayObject;
 
 zend_object_handlers spl_handler_ArrayIterator;
 zend_class_entry *   spl_ce_ArrayIterator;
+
+zend_class_entry *spl_ce_Countable;
 
 typedef struct _spl_array_object {
 	zend_object       std;
@@ -895,6 +901,11 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
+
+	REGISTER_SPL_INTERFACE(Countable);
+	
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
 
 	return SUCCESS;
 }
