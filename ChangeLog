@@ -1,3 +1,96 @@
+2004-12-27  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Fix desc
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MFB
+
+    * ext/standard/basic_functions.c:
+      MFB - description fix
+
+    * (PHP_5_0)
+      ext/standard/basic_functions.c:
+      Fix description
+
+2004-12-27  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/047.phpt:
+      fixed possible leak in mysqli_init
+      fixed testcase 047.phpt
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/047.phpt:
+      fixed testcase 047
+      fixed windows compile error
+
+2004-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      - MFH: Need to unmangle the class name here
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Need to unmangle the class name here
+
+2004-12-27  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_exceptions.c:
+      Add descriptions
+
+2004-12-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug22836.phpt
+      ZendEngine2/tests/bug22836.phpt
+      ZendEngine2/tests/unset_cv01.phpt
+      ZendEngine2/tests/unset_cv02.phpt
+      ZendEngine2/tests/unset_cv03.phpt
+      ZendEngine2/tests/unset_cv04.phpt
+      ZendEngine2/tests/unset_cv06.phpt
+      ZendEngine2/tests/unset_cv08.phpt
+      ZendEngine2/tests/unset_cv09.phpt
+      ZendEngine2/tests/unset_cv10.phpt
+      tests/classes/static_this.phpt
+      tests/classes/static_this.phpt:
+      "Undefined variable:  %s" noticies were fixed to use one space
+
+2004-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - More proto/error message fixes
+
+2004-12-27  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS:
+      feature request #31015
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      Fix for feature request #31015: Length for field object/array
+
+    * ext/mysqli/mysqli_api.c:
+      Fix for feature request #31015: added length for field length
+
+2004-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Small fixlet (by Tony)
+
+2004-12-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * php.ini-dist:
+      Fixed spelling.
+
 2004-12-26  Georg Richter  <georg@mysql.com>
 
     * NEWS:

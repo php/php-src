@@ -1,3 +1,53 @@
+2004-12-27  Zeev Suraski  <zeev@zend.com>
+
+    * zend_builtin_functions.c:
+      MFB
+
+    * (PHP_5_0)
+      zend_builtin_functions.c:
+      Fix desc
+
+2004-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      - MFH: Need to unmangle the class name here
+
+    * zend_reflection_api.c:
+      - Need to unmangle the class name here
+
+2004-12-27  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      zend_exceptions.c:
+      Add descriptions
+
+2004-12-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug22836.phpt
+      tests/bug22836.phpt
+      tests/unset_cv01.phpt
+      tests/unset_cv02.phpt
+      tests/unset_cv03.phpt
+      tests/unset_cv04.phpt
+      tests/unset_cv06.phpt
+      tests/unset_cv08.phpt
+      tests/unset_cv09.phpt
+      tests/unset_cv10.phpt:
+      "Undefined variable:  %s" noticies were fixed to use one space
+
+2004-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - More proto/error message fixes
+
+    * zend_reflection_api.c:
+      - Small fixlet (by Tony)
+
 2004-12-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
