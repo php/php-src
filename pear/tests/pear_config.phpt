@@ -4,6 +4,8 @@ PEAR_Config
 <?php
 
 error_reporting(E_ALL);
+system("pwd");
+chdir(dirname(__FILE__));
 include "../PEAR/Config.php";
 copy("system.input", "system.conf");
 copy("user.input", "user.conf");
