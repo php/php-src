@@ -688,9 +688,12 @@ icap_delete_calendar(){
 }
 /* }}} */
 
+/* {{{ proto void icap_open(void)
+   For now this is obviously a dummy */
 PHP_FUNCTION(icap_popen)
 {
 }
+/* }}} */
 
 /* {{{ proto string icap_store_event(int stream_id, object event)
    Store an event */
