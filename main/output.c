@@ -379,15 +379,20 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 
 /* {{{ php_ob_allocate
  */
-static inline void php_ob_allocate(TSRMLS_D)
+static inline void php_ob_allocate(uint text_length TSRMLS_DC)
 {
-	if (OG(active_ob_buffer).size<OG(active_ob_buffer).text_length) {
-		while (OG(active_ob_buffer).size <= OG(active_ob_buffer).text_length) {
-			OG(active_ob_buffer).size+=OG(active_ob_buffer).block_size;
+	uint new_len = OG(active_ob_buffer).text_length + text_length;
+
+	if (OG(active_ob_buffer).size < new_len) {
+		uint buf_size = OG(active_ob_buffer).size;
+		while (buf_size <= new_len) {
+			buf_size += OG(active_ob_buffer).block_size;
 		}
-			
-		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, OG(active_ob_buffer).size+1);
+
+		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, buf_size+1);
+		OG(active_ob_buffer).size = buf_size;
 	}
+	OG(active_ob_buffer).text_length = new_len;
 }
 /* }}} */
 
@@ -592,9 +597,8 @@ static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	int original_ob_text_length;
 
 	original_ob_text_length=OG(active_ob_buffer).text_length;
-	OG(active_ob_buffer).text_length = OG(active_ob_buffer).text_length + text_length;
 
-	php_ob_allocate(TSRMLS_C);
+	php_ob_allocate(text_length TSRMLS_CC);
 	target = OG(active_ob_buffer).buffer+original_ob_text_length;
 	memcpy(target, text, text_length);
 	target[text_length]=0;
@@ -619,8 +623,7 @@ static inline void php_ob_prepend(const char *text, uint text_length)
 	char *p, *start;
 	TSRMLS_FETCH();
 
-	OG(active_ob_buffer).text_length += text_length;
-	php_ob_allocate(TSRMLS_C);
+	php_ob_allocate(text_length TSRMLS_CC);
 
 	/* php_ob_allocate() may change OG(ob_buffer), so we can't initialize p&start earlier */
 	p = OG(ob_buffer)+OG(ob_text_length);
