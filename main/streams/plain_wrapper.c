@@ -88,6 +88,8 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 	int open_flags;
 	int fd;
 	php_stream *ret;
+	int persistent = options & STREAM_OPEN_PERSISTENT;
+	char *persistent_id = NULL;
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
 		if (options & REPORT_ERRORS) {
@@ -98,6 +100,25 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 	
 	realpath = expand_filepath(filename, NULL TSRMLS_CC);
 
+	if (persistent) {
+		spprintf(&persistent_id, 0, "streams_stdio_%d_%s", open_flags, realpath);
+		switch (php_stream_from_persistent_id(persistent_id, &ret TSRMLS_CC)) {
+			case PHP_STREAM_PERSISTENT_SUCCESS:
+				if (opened_path) {
+					*opened_path = realpath;
+					realpath = NULL;
+				}
+				if (realpath) {
+					efree(realpath);
+				}
+				/* fall through */
+
+			case PHP_STREAM_PERSISTENT_FAILURE:
+				efree(persistent_id);;
+				return ret;
+		}
+	}
+	
 	fd = open(realpath, open_flags, 0666);
 
 	if (fd != -1)	{
@@ -111,22 +132,28 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 				goto err;
 		} 
 	
-		ret = php_stream_fopen_from_fd_rel(fd, mode);
+		ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id);
 
 		if (ret)	{
-			if (opened_path)	{
+			if (opened_path) {
 				*opened_path = realpath;
 				realpath = NULL;
 			}
-			if (realpath)
+			if (realpath) {
 				efree(realpath);
-
+			}
+			if (persistent_id) {
+				efree(persistent_id);
+			}
 			return ret;
 		}
 err:
 		close(fd);
 	}
 	efree(realpath);
+	if (persistent_id) {
+		efree(persistent_id);
+	}
 	return NULL;
 }
 /* }}} */
@@ -160,7 +187,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 	int fd = php_open_temporary_fd(dir, pfx, opened_path TSRMLS_CC);
 
 	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b");
+		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b", NULL);
 		if (stream) {
 			return stream;
 		}
@@ -179,7 +206,7 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 	int fd = php_open_temporary_fd(NULL, "php", &opened_path TSRMLS_CC);
 
 	if (fd != -1)	{
-		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b");
+		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
@@ -197,12 +224,12 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 	return NULL;
 }
 
-PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stdio_stream_data *self;
 	php_stream *stream;
 	
-	self = emalloc_rel_orig(sizeof(*self));
+	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
 	memset(self, 0, sizeof(*self));
 	self->file = NULL;
 	self->is_pipe = 0;
@@ -228,7 +255,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode STREAMS_DC
 	}
 #endif
 	
-	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, persistent_id, mode);
 
 	if (stream) {
 		if (self->is_pipe) {
@@ -406,6 +433,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 		if (data->temp_file_name) {
 			unlink(data->temp_file_name);
+			/* temporary streams are never persistent */
 			efree(data->temp_file_name);
 			data->temp_file_name = NULL;
 		}
@@ -415,8 +443,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		data->fd = -1;
 	}
 
-	/* STDIO streams are never persistent! */
-	efree(data);
+	pefree(data, stream->is_persistent);
 
 	return ret;
 }

@@ -218,7 +218,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		return NULL;
 	}
 	
-	stream = php_stream_fopen_from_fd(fd, mode);
+	stream = php_stream_fopen_from_fd(fd, mode, NULL);
 	if (stream == NULL) {
 		close(fd);
 	}
