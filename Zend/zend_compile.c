@@ -912,7 +912,8 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 
 int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 {
-	if (current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK) {
+	if ((new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK)
+		&& ((current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK) != (new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK))) {
 		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
 	return (current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval);
