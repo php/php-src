@@ -82,7 +82,7 @@ ZEND_DECLARE_MODULE_GLOBALS(iconv)
 ZEND_GET_MODULE(iconv)
 #endif
 
-static int php_iconv_string(const char * in_str, unsigned int in_len, char ** out_str, unsigned int * out_len, const char * in_encoding, const char * out_encoding, int *err);
+static int php_iconv_string(const char * in_str, unsigned int in_len, char ** out_str, unsigned int * out_len, const char * in_encoding, const char * out_encoding, int *err TSRMLS_DC);
 
 /* {{{ PHP_INI
  */
@@ -133,7 +133,7 @@ PHP_MINFO_FUNCTION(miconv)
  */
 static int php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
-							const char *in_charset, const char *out_charset, int *err)
+							const char *in_charset, const char *out_charset, int *err TSRMLS_DC)
 {
 #if HAVE_LIBICONV
 	/* No errno for libiconv(?) */
@@ -286,7 +286,7 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 
 	if (php_iconv_string(Z_STRVAL_PP(in_buffer), Z_STRLEN_PP(in_buffer),
 						 &out_buffer,  &out_len,
-						 Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset), &err) == SUCCESS) {
+						 Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset), &err TSRMLS_CC) == SUCCESS) {
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		RETURN_FALSE;
@@ -315,7 +315,7 @@ PHP_FUNCTION(ob_iconv_handler)
 						 &out_buffer, &out_len,
 						 ICONVG(internal_encoding), 
 						 ICONVG(output_encoding),
-						 &err)==SUCCESS) {
+						 &err TSRMLS_CC)==SUCCESS) {
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		zval_dtor(return_value);
