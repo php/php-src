@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_metaphone.h"
 
-static int metaphone(char *word, int max_phonemes, char **phoned_word, int traditional);
+static int metaphone(char *word, int word_len, int max_phonemes, char **phoned_word, int traditional);
 
 PHP_FUNCTION(metaphone);
 
@@ -42,7 +42,7 @@ PHP_FUNCTION(metaphone)
 		return;
 	}
 
-	if (metaphone(str, phones, &result, 1) == 0) {
+	if (metaphone(str, str_len, phones, &result, 1) == 0) {
 		RETVAL_STRING(result, 0);
 	} else {
 		if (result) {
@@ -139,8 +139,19 @@ static char Lookahead(char *word, int how_far)
 }
 
 
-/* phonize one letter */
-#define Phonize(c)	{(*phoned_word)[p_idx++] = c;}
+/* phonize one letter
+ * We don't know the buffers size in advance. On way to solve this is to just
+ * re-allocate the buffer size. We're using an extra of 2 characters (this
+ * could be one though; or more too). */
+#define Phonize(c)	{ \
+						if (p_idx >= max_buffer_len) { \
+							if (NULL == (*phoned_word = erealloc(*phoned_word, max_buffer_len + 2))) { \
+								return -1; \
+							} \
+							max_buffer_len += 2; \
+						} \
+						(*phoned_word)[p_idx++] = c; \
+					}
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{(*phoned_word)[p_idx] = '\0';}
 /* How long is the phoned word? */
@@ -151,10 +162,11 @@ static char Lookahead(char *word, int how_far)
 
 /* {{{ metaphone
  */
-static int metaphone(char *word, int max_phonemes, char **phoned_word, int traditional)
+static int metaphone(char *word, int word_len, int max_phonemes, char **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */
+	int max_buffer_len = 0;		/* maximum length of the destination buffer */
 
 /*-- Parameter checks --*/
 	/* Negative phoneme length is meaningless */
@@ -171,10 +183,12 @@ static int metaphone(char *word, int max_phonemes, char **phoned_word, int tradi
 
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
-		*phoned_word = emalloc(sizeof(char) * strlen(word) + 1);
+		max_buffer_len = word_len;
+		*phoned_word = emalloc(sizeof(char) * word_len + 1);
 		if (!*phoned_word)
 			return -1;
 	} else {
+		max_buffer_len = max_phonemes;
 		*phoned_word = emalloc(sizeof(char) * max_phonemes + 1);
 		if (!*phoned_word)
 			return -1;
