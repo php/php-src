@@ -130,7 +130,7 @@ PHP_FUNCTION(mail)
 	} else {
 		RETVAL_FALSE;
 	}
-	efree (extra_cmd);
+	if (extra_cmd) efree (extra_cmd);
 }
 /* }}} */
 
@@ -140,21 +140,23 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 {
 #ifdef PHP_WIN32
 	int tsm_err;
-#else
+#endif
 	FILE *sendmail;
 	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
-#endif
 
-#ifdef PHP_WIN32
-	if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
-		php_error(E_WARNING, GetSMErrorText(tsm_err));
-		return 0;
-	}
-#else
 	if (!sendmail_path) {
+#ifdef PHP_WIN32
+		/* handle old style win smtp sending */
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
+			php_error(E_WARNING, GetSMErrorText(tsm_err));
+			return 0;
+		}
+		return 1;
+#else
 		return 0;
+#endif
 	}
 	if (extra_cmd != NULL) {
 		sendmail_cmd = emalloc (strlen (sendmail_path) + strlen (extra_cmd) + 2);
@@ -165,7 +167,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		sendmail_cmd = sendmail_path;
 	}
 
+#ifdef PHP_WIN32
+	sendmail = popen(sendmail_cmd, "wb");
+#else
 	sendmail = popen(sendmail_cmd, "w");
+#endif
 	if (extra_cmd != NULL)
 		efree (sendmail_cmd);
 
@@ -177,11 +183,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
-#if defined(EX_TEMPFAIL)
-		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL)) {
+#ifdef PHP_WIN32
+		if (ret == -1)
 #else
-		if (ret != EX_OK) {
+#if defined(EX_TEMPFAIL)
+		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL)) 
+#else
+		if (ret != EX_OK) 
 #endif
+#endif
+		{
 			return 0;
 		} else {
 			return 1;
@@ -190,7 +201,6 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_error(E_WARNING, "Could not execute mail delivery program");
 		return 0;
 	}
-#endif
 	return 1;
 }
 /* }}} */
@@ -200,10 +210,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 PHP_MINFO_FUNCTION(mail)
 {
 #ifdef PHP_WIN32
+	char *sendmail_path = INI_STR("sendmail_path");
+	if (!sendmail_path) 
         php_info_print_table_row(2, "Internal Sendmail Support for Windows 4", "enabled");
-#else
-        php_info_print_table_row(2, "Path to sendmail", INI_STR("sendmail_path") );
+	else
 #endif
+        php_info_print_table_row(2, "Path to sendmail", INI_STR("sendmail_path") );
 }
 /* }}} */
 
