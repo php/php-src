@@ -10,9 +10,7 @@ AC_ARG_WITH(zeus,
 	else
 		ZEUSPATH=$withval
 	fi
-	if ! test -f "$ZEUSPATH/web/include/httpext.h"; then
-		AC_MSG_ERROR(Unable to find httpext.h in $ZEUSPATH/web/include)
-	fi
+	test -f "$ZEUSPATH/web/include/httpext.h" || AC_MSG_ERROR(Unable to find httpext.h in $ZEUSPATH/web/include)
 	PHP_BUILD_THREAD_SAFE
 	AC_DEFINE(WITH_ZEUS)
 	AC_ADD_INCLUDE($ZEUSPATH/web/include)
