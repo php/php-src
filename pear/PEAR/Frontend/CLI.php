@@ -71,6 +71,11 @@ class PEAR_Frontend_CLI extends PEAR
         print "$this->lp$text\n";
     }
 
+    function display($text)
+    {
+        print $text;
+    }
+
     // }}}
     // {{{ displayError(eobj)
 
