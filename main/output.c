@@ -94,7 +94,10 @@ PHPAPI void php_output_activate(TSRMLS_D)
 
 
 /* {{{ php_output_set_status
-   Toggle output status */
+   Toggle output status. Use this function for internal functions uses
+   buffers. If you don't implict flush (both php.ini implicit_flush and ob_impilict_flush())
+   may flush your php_printf() output.
+   status: 0 for disable output, 1 for enable.*/
 PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
 {
 	OG(disable_output) = !status;
