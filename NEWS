@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 20??, Version 4.?.?
+- Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
+  them sort based on the current locale. (Derick)
+
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
