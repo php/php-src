@@ -748,7 +748,6 @@ static int exec_cmd(sybase_link *sybase_ptr, char *cmdbuf)
 	CS_RETCODE retcode;
 	CS_INT restype;
 	int failure=0;
-	TSRMLS_FETCH();
 
 	/* Fail if we already marked this connection dead. */
 
@@ -877,7 +876,6 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 	CS_DATAFMT *datafmt;
 	int i, j, retcode;
 	int blocks_initialized=1;
-	TSRMLS_FETCH();
 
 	/* The following is more or less the equivalent of mysql_store_result().
 	 * fetch all rows from the server into the row buffer, thus:
@@ -1297,7 +1295,6 @@ PHP_FUNCTION(sybase_num_fields)
 {
 	pval *sybase_result_index;
 	sybase_result *result;
-	TSRMLS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1319,7 +1316,6 @@ PHP_FUNCTION(sybase_fetch_row)
 	int i;
 	sybase_result *result;
 	pval *field_content;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1350,8 +1346,6 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	sybase_result *result;
 	int i;
 	pval *tmp;
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1411,7 +1405,6 @@ PHP_FUNCTION(sybase_data_seek)
 {
 	pval *sybase_result_index,*offset;
 	sybase_result *result;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1482,7 +1475,6 @@ PHP_FUNCTION(sybase_fetch_field)
 	pval *sybase_result_index,*offset;
 	int field_offset;
 	sybase_result *result;
-	TSRMLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1536,7 +1528,6 @@ PHP_FUNCTION(sybase_field_seek)
 	pval *sybase_result_index,*offset;
 	int field_offset;
 	sybase_result *result;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1565,7 +1556,6 @@ PHP_FUNCTION(sybase_result)
 	pval *row, *field, *sybase_result_index;
 	int field_offset=0;
 	sybase_result *result;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &sybase_result_index, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1619,7 +1609,6 @@ PHP_FUNCTION(sybase_affected_rows)
 	pval *sybase_link_index;
 	sybase_link *sybase_ptr;
 	int id;
-	TSRMLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:

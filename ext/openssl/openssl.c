@@ -103,7 +103,7 @@ static int le_key;
 static void _php_x509_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static int le_x509;
 
-static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval);
+static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval TSRMLS_DC);
 static X509_STORE 	  * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
@@ -190,7 +190,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	If you supply makeresource, the result will be registered as an x509 resource and
 	it's value returned in makeresource.
 */
-static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval)
+static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC)
 {
 	X509 *cert = NULL;
 
@@ -327,7 +327,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key)	{
-			cert = php_openssl_x509_from_zval(val, 0, &cert_res);
+			cert = php_openssl_x509_from_zval(val, 0, &cert_res TSRMLS_CC);
 			free_cert = (cert_res == -1);
 			/* actual extraction done later */
 		}
@@ -402,7 +402,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 	
 	convert_to_string_ex(data);
 
-	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource);
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 
 	if (pkey == NULL)	{
 		zend_error(E_WARNING, "%s(): key param is not a valid private key", get_active_function_name(TSRMLS_C) TSRMLS_CC);
@@ -473,7 +473,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 
 	RETVAL_FALSE;
 	
-	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource);
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL)	{
 		zend_error(E_WARNING, "%s(): key param is not a valid private key", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -731,7 +731,7 @@ static void add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str)
 	add_assoc_stringl(val, key, str->data, str->length, 1);
 }
 
-static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr)
+static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC)
 {
 /*
 	This is how the time string is formatted:
@@ -822,7 +822,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		if (!Z_LVAL_PP(zshort))
 			useshortnames = 0;
 	}
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL)
 		RETURN_FALSE;
 
@@ -840,8 +840,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
 
-	add_assoc_long(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert)));
-	add_assoc_long(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert)));
+	add_assoc_long(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert) TSRMLS_CC));
+	add_assoc_long(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert) TSRMLS_CC));
 
 	tmpstr = X509_alias_get0(cert, NULL);
 	if (tmpstr)
@@ -996,7 +996,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	if (cainfo == NULL)
 		goto clean_exit;
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL)
 		goto clean_exit;
 
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(openssl_x509_read)
 	}
 
 	return_value->type = IS_RESOURCE;
-	x509 = php_openssl_x509_from_zval(cert, 1, &(return_value->value.lval));
+	x509 = php_openssl_x509_from_zval(cert, 1, &(return_value->value.lval) TSRMLS_CC);
 
 	if (x509 == NULL) {
 		zend_error(E_WARNING, "%s() supplied parameter cannot be coerced into an X509 certificate!", get_active_function_name(TSRMLS_C));
@@ -1223,7 +1223,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	convert_to_long_ex(zflags);
 	flags = Z_LVAL_PP(zflags);
 
-	store = setup_verify(cainfo ? *cainfo : NULL);
+	store = setup_verify(cainfo ? *cainfo : NULL TSRMLS_CC);
 
 	if (!store)
 		goto clean_exit;
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		while(zend_hash_get_current_data_ex(HASH_OF(*zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS)	{
 			long certresource;
 
-			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
+			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource TSRMLS_CC);
 			if (cert == NULL)
 				goto clean_exit;
 
@@ -1348,7 +1348,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		/* a single certificate */
 		long certresource;
 
-		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource);
+		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource TSRMLS_CC);
 		if (cert == NULL)
 			goto clean_exit;
 
@@ -1461,7 +1461,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL)	{
 		zend_error(E_WARNING, "%s(): error getting cert", get_active_function_name(TSRMLS_C));
 		goto clean_exit;
@@ -1539,7 +1539,7 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval);
+	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval TSRMLS_CC);
 	if (cert == NULL)	{
 		zend_error(E_WARNING, "%s(): unable to coerce param 3 to x509 cert", get_active_function_name(TSRMLS_C));
 		goto clean_exit;

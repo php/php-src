@@ -53,7 +53,7 @@ typedef struct {
 } php_yp_globals;
 
 #ifdef ZTS
-#define YG(v) TSRMG(yp_globals_id, php_yp_globals *, v)
+#define YP(v) TSRMG(yp_globals_id, php_yp_globals *, v)
 #else
 #define YP(v) (yp_globals.v)
 #endif

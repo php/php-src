@@ -130,7 +130,7 @@ static ub4 oci_error(OCIError *err_p, char *what, sword status);
 static int oci_ping(oci_server *server);
 static void oci_debug(const char *format, ...);
 
-static void _oci_conn_list_dtor(oci_connection *connection);
+static void _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC);
 static void _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #ifdef WITH_COLLECTIONS
@@ -140,23 +140,23 @@ static void _oci_server_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void _oci_session_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
-static void _oci_column_hash_dtor(void *data);
+static void _oci_column_hash_dtor(void *data TSRMLS_DC);
 static void _oci_define_hash_dtor(void *data);
 static void _oci_bind_hash_dtor(void *data);
 
-static oci_connection *oci_get_conn(zval **);
-static oci_statement *oci_get_stmt(zval **);
-static oci_descriptor *oci_get_desc(int);
+static oci_connection *oci_get_conn(zval ** TSRMLS_DC);
+static oci_statement *oci_get_stmt(zval ** TSRMLS_DC);
+static oci_descriptor *oci_get_desc(int TSRMLS_DC);
 #ifdef WITH_COLLECTIONS
 /* Questionable name.  Very close to oci_get_col */
-static oci_collection *oci_get_coll(int);
+static oci_collection *oci_get_coll(int TSRMLS_DC);
 #endif
 static oci_out_column *oci_get_col(oci_statement *, int, zval **);
 
-static int _oci_make_zval(zval *, oci_statement *, oci_out_column *, char *, int mode);
+static int _oci_make_zval(zval *, oci_statement *, oci_out_column *, char *, int mode TSRMLS_DC);
 static oci_statement *oci_parse(oci_connection *, char *, int);
 static int oci_execute(oci_statement *, char *, ub4 mode);
-static int oci_fetch(oci_statement *, ub4, char *);
+static int oci_fetch(oci_statement *, ub4, char * TSRMLS_DC);
 static int oci_loadlob(oci_connection *, oci_descriptor *, char **, ub4 *length);
 static int oci_setprefetch(oci_statement *statement, int size);
 
@@ -232,26 +232,26 @@ PHP_FUNCTION(ocicolltrim);
 #endif
 
 #define OCI_GET_STMT(statement,value) \
-	statement = oci_get_stmt(value); \
+	statement = oci_get_stmt(value TSRMLS_CC); \
 	if (statement == NULL) { \
 		RETURN_FALSE; \
 	}
 
 #define OCI_GET_CONN(connection,value) \
-	connection = oci_get_conn(value); \
+	connection = oci_get_conn(value TSRMLS_CC); \
 	if (connection == NULL) { \
 		RETURN_FALSE; \
 	}
 
 #define OCI_GET_DESC(descriptor,index) \
-	descriptor = oci_get_desc(index); \
+	descriptor = oci_get_desc(index TSRMLS_CC); \
 	if (descriptor == NULL) { \
 		RETURN_FALSE; \
 	}
 
 #ifdef WITH_COLLECTIONS
 #define OCI_GET_COLL(collection,index) \
-    collection = oci_get_coll(index); \
+    collection = oci_get_coll(index TSRMLS_CC); \
     if (collection == NULL) { \
         RETURN_FALSE; \
     }
@@ -658,7 +658,7 @@ _oci_bind_post_exec(void *data TSRMLS_DC)
 /* {{{ _oci_column_hash_dtor() */
 
 static void
-_oci_column_hash_dtor(void *data)
+_oci_column_hash_dtor(void *data TSRMLS_DC)
 {	
 	oci_out_column *column = (oci_out_column *) data;
 
@@ -732,7 +732,7 @@ _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ _oci_conn_list_dtor() */
 
 static void
-_oci_conn_list_dtor(oci_connection *connection)
+_oci_conn_list_dtor(oci_connection *connection TSRMLS_DC)
 {
 	/* 
 	   as the connection is "only" a in memory service context we do not disconnect from oracle.
@@ -775,7 +775,7 @@ _oci_conn_list_dtor(oci_connection *connection)
 static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	oci_connection *conn = (oci_connection *)rsrc->ptr;
-	_oci_conn_list_dtor(conn);
+	_oci_conn_list_dtor(conn TSRMLS_CC);
 }
 /* }}} */
 
@@ -959,7 +959,7 @@ static void oci_debug(const char *format, ...)
 /* }}} */
 /* {{{ oci_get_conn() */
 
-static oci_connection *oci_get_conn(zval **conn)
+static oci_connection *oci_get_conn(zval **conn TSRMLS_DC)
 {
 	oci_connection *connection;
 
@@ -975,7 +975,7 @@ static oci_connection *oci_get_conn(zval **conn)
 /* }}} */
 /* {{{ oci_get_stmt() */
 
-static oci_statement *oci_get_stmt(zval **stmt)
+static oci_statement *oci_get_stmt(zval **stmt TSRMLS_DC)
 {
 	oci_statement *statement;
 
@@ -991,7 +991,7 @@ static oci_statement *oci_get_stmt(zval **stmt)
 /* }}} */
 /* {{{ oci_get_desc() */
 
-static oci_descriptor *oci_get_desc(int ind)
+static oci_descriptor *oci_get_desc(int ind TSRMLS_DC)
 {
 	oci_descriptor *descriptor;
 	int actual_resource_type;
@@ -1096,7 +1096,7 @@ oci_new_desc(int type,oci_connection *connection)
 /* {{{ _oci_get_ocicoll() */
 
 static int
-_oci_get_ocicoll(zval *id,oci_collection **collection)
+_oci_get_ocicoll(zval *id,oci_collection **collection TSRMLS_DC)
 {
     zval **coll;
     
@@ -1104,7 +1104,7 @@ _oci_get_ocicoll(zval *id,oci_collection **collection)
         php_error(E_WARNING, "cannot find collection");
         return 0;
     }
-    if ((*collection = oci_get_coll((*coll)->value.lval)) == NULL) {
+    if ((*collection = oci_get_coll((*coll)->value.lval TSRMLS_CC)) == NULL) {
         php_error(E_WARNING, "collection not found");
         return 0;
     }
@@ -1120,7 +1120,7 @@ _oci_get_ocicoll(zval *id,oci_collection **collection)
 /* {{{ _oci_get_ocidesc() */
 
 static int
-_oci_get_ocidesc(zval *id,oci_descriptor **descriptor)
+_oci_get_ocidesc(zval *id,oci_descriptor **descriptor TSRMLS_DC)
 {
 	zval **desc;
 	
@@ -1129,7 +1129,7 @@ _oci_get_ocidesc(zval *id,oci_descriptor **descriptor)
 		return 0;
 	}
 
-	if ((*descriptor = oci_get_desc((*desc)->value.lval)) == NULL) {
+	if ((*descriptor = oci_get_desc((*desc)->value.lval TSRMLS_CC)) == NULL) {
 		php_error(E_WARNING, "descriptor not found");
 		return 0;
 	}
@@ -1141,7 +1141,7 @@ _oci_get_ocidesc(zval *id,oci_descriptor **descriptor)
 /* {{{ _oci_make_zval() */
 
 static int 
-_oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char *func, int mode)
+_oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char *func, int mode TSRMLS_DC)
 {
 	oci_descriptor *descr;
 	ub4 loblen;
@@ -1165,7 +1165,7 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
 		if ((column->data_type != SQLT_RDD) && (mode & OCI_RETURN_LOBS)) {
 			/* OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 
-			descr = oci_get_desc(column->descid);
+			descr = oci_get_desc(column->descid TSRMLS_CC);
 	        if (! descr) {
    	        	php_error(E_WARNING, "unable to find my descriptor %d",column->data);
             	return -1;
@@ -1626,7 +1626,7 @@ _oci_column_pre_fetch(void *data TSRMLS_DC)
 
 
 static int
-oci_fetch(oci_statement *statement, ub4 nrows, char *func)
+oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 {
 	int i;
 	oci_out_column *column;
@@ -1706,7 +1706,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 			}
 			
 			zval_dtor(column->define->zval);
-			_oci_make_zval(column->define->zval,statement,column,"OCIFetch",0);
+			_oci_make_zval(column->define->zval,statement,column,"OCIFetch",0 TSRMLS_CC);
 		}
 
 		return 1;
@@ -2531,7 +2531,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 	if (connection->id) {
 		zend_list_delete(connection->id);
 	} else {
-		_oci_conn_list_dtor(connection);
+		_oci_conn_list_dtor(connection TSRMLS_CC);
 	}
 
 	RETURN_FALSE;
@@ -2647,7 +2647,7 @@ PHP_FUNCTION(ocibindbyname)
                 php_error(E_WARNING,"Variable must be allocated using OCINewCollection()");
                 RETURN_FALSE;
 			}
-            if ((inx = _oci_get_ocicoll(*var,&coll)) == 0) {
+            if ((inx = _oci_get_ocicoll(*var,&coll TSRMLS_CC)) == 0) {
                 php_error(E_WARNING,"Variable must be allocated using OCINewCollection()");
                 RETURN_FALSE;
             }
@@ -2669,7 +2669,7 @@ PHP_FUNCTION(ocibindbyname)
 				RETURN_FALSE;
 			}
 
-			if ((inx = _oci_get_ocidesc(*var,&descr)) == 0) {
+			if ((inx = _oci_get_ocidesc(*var,&descr TSRMLS_CC)) == 0) {
 				php_error(E_WARNING,"Variable must be allocated using OCINewDescriptor()");
 				RETURN_FALSE;
 			}
@@ -2791,7 +2791,7 @@ PHP_FUNCTION(ocifreedesc)
 	oci_descriptor *descriptor;
 
 	if ((id = getThis()) != 0) {
-		inx = _oci_get_ocidesc(id,&descriptor);
+		inx = _oci_get_ocidesc(id,&descriptor TSRMLS_CC);
 		if (inx) {
 			oci_debug("OCIfreedesc: descr=%d",inx);
 			zend_list_delete(inx);
@@ -2820,7 +2820,7 @@ PHP_FUNCTION(ocisavelob)
     ub4 offset;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocidesc(id,&descr)) == 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 		
@@ -2912,7 +2912,7 @@ PHP_FUNCTION(ocisavelobfile)
 	ub4 loblen;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocidesc(id,&descr)) == 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(ociloadlob)
 	ub4 loblen;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocidesc(id,&descr)) == 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -3021,7 +3021,7 @@ PHP_FUNCTION(ociwritelobtofile)
 	int coffs;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocidesc(id,&descr)) == 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -3204,7 +3204,7 @@ PHP_FUNCTION(ociwritetemporarylob)
         RETURN_FALSE;
     }
 
-    if (_oci_get_ocidesc(id,&descr) == 0) {
+    if (_oci_get_ocidesc(id,&descr TSRMLS_CC) == 0) {
         RETURN_FALSE;
     }
 
@@ -3295,7 +3295,7 @@ PHP_FUNCTION(ocicloselob)
 	oci_descriptor *descriptor;
 
 	if ((id = getThis()) != 0) {
-		inx = _oci_get_ocidesc(id,&descriptor);
+		inx = _oci_get_ocidesc(id,&descriptor TSRMLS_CC);
 		if (inx) {
 
             mylob = (OCILobLocator *) descriptor->ocidescr;
@@ -3705,7 +3705,7 @@ PHP_FUNCTION(ocicancel)
 
 	OCI_GET_STMT(statement,stmt);
 
-	if (oci_fetch(statement, 0, "OCICancel")) {
+	if (oci_fetch(statement, 0, "OCICancel" TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3729,7 +3729,7 @@ PHP_FUNCTION(ocifetch)
 
 	OCI_GET_STMT(statement,stmt);
 
-	if (oci_fetch(statement, nrows, "OCIFetch")) {
+	if (oci_fetch(statement, nrows, "OCIFetch" TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3764,7 +3764,7 @@ PHP_FUNCTION(ocifetchinto)
 
 	OCI_GET_STMT(statement,stmt);
 
-	if (!oci_fetch(statement, nrows, "OCIFetchInto")) {
+	if (!oci_fetch(statement, nrows, "OCIFetchInto" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	
@@ -3786,7 +3786,7 @@ PHP_FUNCTION(ocifetchinto)
 		
 		used = 0;
 		MAKE_STD_ZVAL(element);
-		_oci_make_zval(element,statement,column,"OCIFetchInto",mode);
+		_oci_make_zval(element,statement,column,"OCIFetchInto",mode TSRMLS_CC);
 		
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) {
 			zend_hash_index_update((*array)->value.ht,i,(void *)&element,sizeof(zval*),NULL);
@@ -3853,11 +3853,11 @@ PHP_FUNCTION(ocifetchstatement)
 		efree(namebuf);
 	}
 
-	while (oci_fetch(statement, nrows, "OCIFetchStatement")) {
+	while (oci_fetch(statement, nrows, "OCIFetchStatement" TSRMLS_CC)) {
 		for (i = 0; i < statement->ncolumns; i++) {
 			MAKE_STD_ZVAL(element);
 
-			_oci_make_zval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS);
+			_oci_make_zval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS TSRMLS_CC);
 
 			zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(zval*), NULL);
 		}
@@ -4137,7 +4137,7 @@ PHP_FUNCTION(ociresult)
 		RETURN_FALSE;
 	}
 
-	_oci_make_zval(return_value,statement,outcol, "OCIResult",0);
+	_oci_make_zval(return_value,statement,outcol, "OCIResult",0 TSRMLS_CC);
 }
 
 /* }}} */
@@ -4276,7 +4276,7 @@ PHP_FUNCTION(ocirowcount)
 #ifdef WITH_COLLECTIONS
 /* {{{ oci_get_coll() */
 
-static oci_collection *oci_get_coll(int ind)
+static oci_collection *oci_get_coll(int ind TSRMLS_DC)
 {
     oci_collection *collection;
     int actual_resource_type;
@@ -4302,7 +4302,7 @@ PHP_FUNCTION(ocifreecollection)
     oci_connection *connection;
 	
     if ((id = getThis()) != 0) {
-        inx = _oci_get_ocicoll(id,&coll);
+        inx = _oci_get_ocicoll(id,&coll TSRMLS_CC);
         if (inx) {
 			/*
 			 * Do we need to free the object?
@@ -4344,7 +4344,7 @@ PHP_FUNCTION(ocicollappend)
 	double ndx;
 
     if ((id = getThis()) != 0) {
-        if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+        if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
             RETURN_FALSE;
         }
 
@@ -4451,7 +4451,7 @@ PHP_FUNCTION(ocicollgetelem)
 	double dnum;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 		if (zend_get_parameters_ex(1, &arg) == FAILURE) {
@@ -4528,7 +4528,7 @@ PHP_FUNCTION(ocicollassign)
 	int inx;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -4536,7 +4536,7 @@ PHP_FUNCTION(ocicollassign)
 			WRONG_PARAM_COUNT;
 		}
 
-		if ((inx = _oci_get_ocicoll(*from,&from_coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(*from,&from_coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -4572,7 +4572,7 @@ PHP_FUNCTION(ocicollassignelem)
 	double  dnum;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 
@@ -4683,7 +4683,7 @@ PHP_FUNCTION(ocicollsize)
 	int inx;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 		connection = coll->conn;
@@ -4710,7 +4710,7 @@ PHP_FUNCTION(ocicollmax)
 	int inx;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 		sz = OCICollMax(OCI(pEnv),coll->coll);
@@ -4730,7 +4730,7 @@ PHP_FUNCTION(ocicolltrim)
 	int inx;
 
 	if ((id = getThis()) != 0) {
-		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
+		if ((inx = _oci_get_ocicoll(id,&coll TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
 		if (zend_get_parameters_ex(1, &arg) == FAILURE) {
