@@ -2297,14 +2297,11 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
    Match filename against pattern */
 PHP_FUNCTION(fnmatch)
 {
-	char *pattern = NULL;
-	char *filename = NULL;
-	int argc = ZEND_NUM_ARGS();
-	int pattern_len;
-	int filename_len;
-	long flags=0;
+	char *pattern, *filename;
+	int pattern_len, filename_len;
+	long flags = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", 
 							  &pattern, &pattern_len, 
 							  &filename, &filename_len, 
 							  &flags) 
