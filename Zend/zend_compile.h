@@ -191,7 +191,6 @@ typedef struct _zend_file_handle {
 } zend_file_handle;
 
 
-#include "zend_globals.h"
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
@@ -200,6 +199,8 @@ typedef struct _zend_file_handle {
 
 
 #define EXT_TYPE_UNUSED		(1<<0)
+
+#include "zend_globals.h"
 
 BEGIN_EXTERN_C()
 

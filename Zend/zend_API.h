@@ -26,6 +26,7 @@
 #include "zend_fast_cache.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
+#include "zend_execute.h"
 
 #define ZEND_FN(name) zend_if_##name
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
