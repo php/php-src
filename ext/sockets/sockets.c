@@ -65,6 +65,9 @@ php_sockets_globals sockets_globals;
 #endif
 #endif
 
+typedef struct {
+	unsigned char info[128];
+} php_sockaddr_storage;
 
 /* Perform convert_to_long_ex on a list of items */
 static void v_convert_to_long_ex(int items,...)
@@ -688,7 +691,7 @@ PHP_FUNCTION(read)
 }
 /* }}} */
 
-/* {{{ proto int getsockname(int fd, string &addr, int &port)
+/* {{{ proto int getsockname(int fd, string &addr[, int &port])
    Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the local side of a socket */
 
 /* A lock to prevent inet_ntoa() from causing problems in threading */
@@ -698,36 +701,61 @@ PHP_FUNCTION(getsockname)
 {
 	zval **fd, **addr, **port;
 	char *tmp;
-	struct sockaddr_in sa;
-	int salen = sizeof(struct sockaddr_in);
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa;
+	struct sockaddr_in *sin;
+	struct sockaddr_un *s_un;
+	int salen = sizeof(php_sockaddr_storage);
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 3 || 
-	    zend_get_parameters_ex(3, &fd, &addr, &port) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 || 
+	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(2, fd, port);
+	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
 	convert_to_string_ex(addr);
 
-	ret = getsockname(Z_LVAL_PP(fd), (struct sockaddr *) &sa, &salen);
+	sa = (struct sockaddr *) &sa_storage;
+
+	ret = getsockname(Z_LVAL_PP(fd), sa, &salen);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	} else {
 		char *addr_string;
 
-		while (inet_ntoa_lock == 1);
-		inet_ntoa_lock = 1;
-		addr_string = inet_ntoa(sa.sin_addr);
-		tmp = emalloc(strlen(addr_string) + 1);
-		memset(tmp, 0, strlen(addr_string) + 1);
-		strncpy(tmp, addr_string, strlen(addr_string));
-		inet_ntoa_lock = 0;
+		switch (sa->sa_family) {
+		case AF_INET: {
+			sin = (struct sockaddr_in *) sa;
+			while (inet_ntoa_lock == 1);
+			inet_ntoa_lock = 1;
+			addr_string = inet_ntoa(sin->sin_addr);
+			tmp = emalloc(strlen(addr_string) + 1);
+			memset(tmp, 0, strlen(addr_string) + 1);
+			strncpy(tmp, addr_string, strlen(addr_string));
+			inet_ntoa_lock = 0;
 		
-		Z_STRVAL_PP(addr) = tmp;
-		Z_STRLEN_PP(addr) = strlen(tmp);
-		Z_LVAL_PP(port)   = htons(sa.sin_port);
+			if (Z_STRLEN_PP(addr) > 0) {
+				efree(Z_STRVAL_PP(addr));
+			}
 
-		RETURN_LONG(ret);
+			Z_STRVAL_PP(addr) = tmp;
+			Z_STRLEN_PP(addr) = strlen(tmp);
+			Z_LVAL_PP(port)   = htons(sin->sin_port);
+
+			RETURN_LONG(ret);
+		}
+		case AF_UNIX: {
+			if (Z_STRLEN_PP(addr) > 0) {
+				efree(Z_STRVAL_PP(addr));
+			}
+			s_un = (struct sockaddr_un *) sa;
+			Z_STRVAL_PP(addr) = estrndup(s_un->sun_path,strlen(s_un->sun_path));
+			Z_STRLEN_PP(addr) = strlen(s_un->sun_path);
+			RETURN_LONG(ret);
+		}
+		default:
+			RETURN_LONG(-EINVAL);
+		}
 	}
 }
 /* }}} */
@@ -787,44 +815,68 @@ PHP_FUNCTION(gethostbyname)
 
 #endif
 
-/* {{{ proto int getpeername(int fd, string &addr, int &port)
+/* {{{ proto int getpeername(int fd, string &addr[, int &port])
    Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket */
 
 PHP_FUNCTION(getpeername)
 {
 	zval **fd, **addr, **port;
 	char *tmp;
-	struct sockaddr_in sa;
-	int salen = sizeof(struct sockaddr_in);
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa;
+	struct sockaddr_in *sin;
+	struct sockaddr_un *s_un;
+	int salen = sizeof(php_sockaddr_storage);
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 3 || 
-	    zend_get_parameters_ex(3, &fd, &addr, &port) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 || 
+	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(2, fd, port);
+	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
 	convert_to_string_ex(addr);
 
-	ret = getpeername(Z_LVAL_PP(fd), (struct sockaddr *) &sa, &salen);
-	
+	sa = (struct sockaddr *) &sa_storage;
+
+	ret = getpeername(Z_LVAL_PP(fd), sa, &salen);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	} else {
 		char *addr_string;
 
-		while (inet_ntoa_lock == 1);
-		inet_ntoa_lock = 1;
-		addr_string = inet_ntoa(sa.sin_addr);
-		tmp = emalloc(strlen(addr_string) + 1);
-		memset(tmp, 0, strlen(addr_string) + 1);
-		strncpy(tmp, addr_string, strlen(addr_string));
-		inet_ntoa_lock = 0;
+		switch (sa->sa_family) {
+		case AF_INET: {
+			sin = (struct sockaddr_in *) sa;
+			while (inet_ntoa_lock == 1);
+			inet_ntoa_lock = 1;
+			addr_string = inet_ntoa(sin->sin_addr);
+			tmp = emalloc(strlen(addr_string) + 1);
+			memset(tmp, 0, strlen(addr_string) + 1);
+			strncpy(tmp, addr_string, strlen(addr_string));
+			inet_ntoa_lock = 0;
 		
-		Z_STRVAL_PP(addr) = tmp;
-		Z_STRLEN_PP(addr) = strlen(tmp);
-		Z_LVAL_PP(addr) = htons(sa.sin_port);
+			if (Z_STRLEN_PP(addr) > 0) {
+				efree(Z_STRVAL_PP(addr));
+			}
 
-		RETURN_LONG(ret);
+			Z_STRVAL_PP(addr) = tmp;
+			Z_STRLEN_PP(addr) = strlen(tmp);
+			Z_LVAL_PP(port)   = htons(sin->sin_port);
+
+			RETURN_LONG(ret);
+		}
+		case AF_UNIX: {
+			if (Z_STRLEN_PP(addr) > 0) {
+				efree(Z_STRVAL_PP(addr));
+			}
+			s_un = (struct sockaddr_un *) sa;
+			Z_STRVAL_PP(addr) = estrndup(s_un->sun_path,strlen(s_un->sun_path));
+			Z_STRLEN_PP(addr) = strlen(s_un->sun_path);
+			RETURN_LONG(ret);
+		}
+		default:
+			RETURN_LONG(-EINVAL);
+		}
 	}
 }
 /* }}} */
@@ -920,10 +972,12 @@ PHP_FUNCTION(socket)
 PHP_FUNCTION(connect)
 {
 	zval **sockfd, **addr, **port;
-	struct sockaddr sa;
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
 	struct sockaddr_in *sin;
-	struct sockaddr_un *sun;
-	int ret, salen = sizeof(sa);
+	struct sockaddr_un *s_un;
+	int ret;
+	socklen_t salen;
 	struct in_addr addr_buf;
 	struct hostent *host_struct;
 	int argc = ZEND_NUM_ARGS();
@@ -939,16 +993,19 @@ PHP_FUNCTION(connect)
 		convert_to_long_ex(port);
 	}
 
-	memset(&sa, 0, sizeof(sa));
+	memset(sa, 0, sizeof(sa_storage));
 
-	ret = getsockname(Z_LVAL_PP(sockfd), &sa, &salen);
+	salen = sizeof(sa_storage);
+
+	ret = getsockname(Z_LVAL_PP(sockfd), sa, &salen);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	}
 
-	switch(sa.sa_family) {
+	switch(sa->sa_family) {
 		case AF_INET: {
-			sin = (struct sockaddr_in *)&sa;
+			sin = (struct sockaddr_in *)sa;
+			salen = sizeof(struct sockaddr_in);
 
 			if (argc != 3) {
 				WRONG_PARAM_COUNT;
@@ -973,9 +1030,9 @@ PHP_FUNCTION(connect)
 			break;
 		}
 	case AF_UNIX: {
-			sun = (struct sockaddr_un *)&sa;
-			snprintf(sun->sun_path, 108, "%s", Z_STRVAL_PP(addr));
-			ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *) sun, SUN_LEN(sun));
+			s_un = (struct sockaddr_un *)sa;
+			snprintf(s_un->sun_path, 108, "%s", Z_STRVAL_PP(addr));
+			ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *) s_un, SUN_LEN(s_un));
 			break;
 	}
 	default:
@@ -1016,8 +1073,9 @@ PHP_FUNCTION(bind)
 {
 	zval **arg0, **arg1, **arg2;
 	long ret;
-	struct sockaddr sock_type;
-	socklen_t length = sizeof(sock_type);
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sock_type = (struct sockaddr *) &sa_storage;
+	socklen_t length = sizeof(sa_storage);
 	
 	switch (ZEND_NUM_ARGS())
 	{
@@ -1037,23 +1095,26 @@ PHP_FUNCTION(bind)
 
 	convert_to_long_ex(arg0);
 
-	ret = getsockname(Z_LVAL_PP(arg0), &sock_type, &length);
+	ret = getsockname(Z_LVAL_PP(arg0), sock_type, &length);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	}
-	if (sock_type.sa_family == AF_UNIX) {
-		struct sockaddr_un sa;
-		snprintf(sa.sun_path, 108, "%s", Z_STRVAL_PP(arg1));
-		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) &sa, SUN_LEN(&sa));
-	} else if (sock_type.sa_family == AF_INET) {
-		struct sockaddr_in sa;
+	if (sock_type->sa_family == AF_UNIX) {
+		struct sockaddr_un *sa = (struct sockaddr_un *) sock_type;
+		memset(sa, 0, sizeof(sa_storage)); /* This is safe -> sock_type = &sa_storage -> sa = sock_type */
+		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg1));
+		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) sa, SUN_LEN(sa));
+	} else if (sock_type->sa_family == AF_INET) {
+		struct sockaddr_in *sa = (struct sockaddr_in *) sock_type;
 		struct in_addr addr_buf;
+
+		memset(sa, 0, sizeof(sa_storage));
 
 		if (ZEND_NUM_ARGS() != 3) {
 			WRONG_PARAM_COUNT;
 		}
 		
-		sa.sin_port = htons(Z_LVAL_PP(arg2));
+		sa->sin_port = htons(Z_LVAL_PP(arg2));
 
 		if (inet_aton(Z_STRVAL_PP(arg1), &addr_buf) < 0) {
 			struct hostent *host_struct;
@@ -1062,12 +1123,12 @@ PHP_FUNCTION(bind)
 				RETURN_LONG(-(h_errno) - 10000);
 			}
 			
-			sa.sin_addr.s_addr = (int) *(host_struct->h_addr_list[0]);
+			sa->sin_addr.s_addr = (int) *(host_struct->h_addr_list[0]);
 		} else {
-			sa.sin_addr.s_addr = addr_buf.s_addr;
+			sa->sin_addr.s_addr = addr_buf.s_addr;
 		}
 
-		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) &sa, sizeof(sa));
+		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) sa, sizeof(sa_storage));
 	} else {
 		RETURN_LONG(-EPROTONOSUPPORT);
 	}
@@ -1375,7 +1436,8 @@ PHP_FUNCTION(recvfrom)
 {
 	zval **fd, **buf, **len, **flags, **name, **port;
 	int ret;
-	struct sockaddr sa;
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
 	socklen_t salen;
 
 	switch (ZEND_NUM_ARGS()) 
@@ -1394,21 +1456,21 @@ PHP_FUNCTION(recvfrom)
 			WRONG_PARAM_COUNT;
 	}
 
-	salen = sizeof(sa);
+	salen = sizeof(sa_storage);
 
-	ret = getsockname(Z_LVAL_PP(fd), &sa, &salen);
+	ret = getsockname(Z_LVAL_PP(fd), sa, &salen);
 	
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	}
 
-	switch (sa.sa_family)
+	switch (sa->sa_family)
 	{
 		case AF_UNIX:
 			{
-				struct sockaddr_un sun;
+				struct sockaddr_un s_un;
 				char *recv_buf = emalloc(Z_LVAL_PP(len) + 2);
-				socklen_t sun_length = sizeof(sun);
+				socklen_t sun_length = sizeof(s_un);
 	
 				if (ZEND_NUM_ARGS() != 5) {
 					WRONG_PARAM_COUNT;
@@ -1416,7 +1478,7 @@ PHP_FUNCTION(recvfrom)
 				memset(recv_buf, 0, Z_LVAL_PP(len) + 2);
 
 				ret = recvfrom(Z_LVAL_PP(fd), recv_buf, Z_LVAL_PP(len), Z_LVAL_PP(flags),
-				               (struct sockaddr *)&sun, (socklen_t *) & sun_length);
+				               (struct sockaddr *)&s_un, (socklen_t *) & sun_length);
 
 				if (ret < 0) {
 					efree(recv_buf);
@@ -1430,12 +1492,12 @@ PHP_FUNCTION(recvfrom)
 				Z_STRVAL_PP(buf) = estrndup(recv_buf, strlen(recv_buf));
 				Z_STRLEN_PP(buf) = strlen(recv_buf);
 
-				if (Z_STRVAL_PP(name) != NULL) {
+				if (Z_STRLEN_PP(name) > 0) {
 					efree(Z_STRVAL_PP(name));
 				}
 				
-				Z_STRVAL_PP(name) = estrdup(sun.sun_path);
-				Z_STRLEN_PP(name) = strlen(sun.sun_path);
+				Z_STRVAL_PP(name) = estrdup(s_un.sun_path);
+				Z_STRLEN_PP(name) = strlen(s_un.sun_path);
 
 				efree(recv_buf);
 
@@ -1462,11 +1524,11 @@ PHP_FUNCTION(recvfrom)
 					RETURN_LONG(-errno);
 				}
 				
-				if (Z_STRVAL_PP(buf) != NULL) {
+				if (Z_STRLEN_PP(buf) > 0) {
 					efree(Z_STRVAL_PP(buf));
 				}
 				
-				if (Z_STRVAL_PP(name) != NULL) {
+				if (Z_STRLEN_PP(name) > 0) {
 					efree(Z_STRVAL_PP(name));
 				}
 				
@@ -1499,8 +1561,9 @@ PHP_FUNCTION(recvfrom)
 PHP_FUNCTION(sendto)
 {
 	zval **fd, **buf, **len, **flags, **addr, **port;
-	struct sockaddr sa;
-	socklen_t salen = sizeof(sa);
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
+	socklen_t salen = sizeof(sa_storage);
 	int ret;
 
 	switch (ZEND_NUM_ARGS())
@@ -1525,26 +1588,26 @@ PHP_FUNCTION(sendto)
 		convert_to_long_ex(port);
 	}
 
-	ret = getsockname(Z_LVAL_PP(fd), &sa, &salen);
+	ret = getsockname(Z_LVAL_PP(fd), sa, &salen);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	}
 
-	switch (sa.sa_family)
+	switch (sa->sa_family)
 	{
 		case AF_UNIX:
 			{
-				struct sockaddr_un sun;
+				struct sockaddr_un s_un;
 	
 				if (ZEND_NUM_ARGS() != 5) {
 					WRONG_PARAM_COUNT;
 				}
-				memset(&sun, 0, sizeof(sun));
-				sun.sun_family = AF_UNIX;
-				snprintf(sun.sun_path, 108, "%s", Z_STRVAL_PP(port));
+				memset(&s_un, 0, sizeof(s_un));
+				s_un.sun_family = AF_UNIX;
+				snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(addr));
 				ret = sendto(Z_LVAL_PP(fd), Z_STRVAL_PP(buf),
 				             (Z_STRLEN_PP(buf) > Z_LVAL_PP(len) ? Z_LVAL_PP(len) : Z_STRLEN_PP(buf)),
-				             Z_LVAL_PP(flags), (struct sockaddr *) &sun, SUN_LEN(&sun));
+				             Z_LVAL_PP(flags), (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 
 				RETURN_LONG(((ret < 0) ? -errno : ret));
 			}
@@ -1594,11 +1657,12 @@ PHP_FUNCTION(recvmsg)
 	zval *control_array = NULL;
 	php_iovec_t *iov;
 	struct msghdr hdr;
-	struct sockaddr sa;
-	struct sockaddr_in *sin = (struct sockaddr_in *) &sa;
-	struct sockaddr_un *sun = (struct sockaddr_un *) &sa;
+	php_sockaddr_storage sa_storage;
+	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
+	struct sockaddr_in *sin = (struct sockaddr_in *) sa;
+	struct sockaddr_un *s_un = (struct sockaddr_un *) sa;
 	struct cmsghdr *ctl_buf;
-	socklen_t salen = sizeof(sa);
+	socklen_t salen = sizeof(sa_storage);
 	int ret;
 	SOCKETSLS_FETCH();
 
@@ -1627,7 +1691,7 @@ PHP_FUNCTION(recvmsg)
 
 	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", SOCKETSG(le_iov));
 
-	ret = getsockname(Z_LVAL_PP(fd), &sa, &salen);
+	ret = getsockname(Z_LVAL_PP(fd), sa, &salen);
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	}
@@ -1638,7 +1702,7 @@ PHP_FUNCTION(recvmsg)
 		ctl_buf = NULL;
 	}
 
-	switch (sa.sa_family)
+	switch (sa->sa_family)
 	{
 		case AF_INET:
 			{
@@ -1646,9 +1710,9 @@ PHP_FUNCTION(recvmsg)
 					efree(ctl_buf);
 					WRONG_PARAM_COUNT;
 				}
-				memset(&sa, 0, sizeof(sa));
+				memset(sa, 0, sizeof(sa_storage));
 				hdr.msg_name = sin;
-				hdr.msg_namelen = sizeof(sa);
+				hdr.msg_namelen = sizeof(sa_storage);
 				hdr.msg_iov = iov->iov_array;
 				hdr.msg_iovlen = iov->count;
 
@@ -1681,7 +1745,7 @@ PHP_FUNCTION(recvmsg)
 					
 					Z_LVAL_PP(controllen) = hdr.msg_controllen;
 					Z_LVAL_PP(flags)      = hdr.msg_flags;
-					if (Z_STRVAL_PP(addr) != NULL) {
+					if (Z_STRLEN_PP(addr) > 0) {
 						efree(Z_STRVAL_PP(addr));
 					} 
 					{
@@ -1705,9 +1769,9 @@ PHP_FUNCTION(recvmsg)
 				efree(ctl_buf);
 				WRONG_PARAM_COUNT;
 			}
-			memset(&sa, 0, sizeof(sa));
-			hdr.msg_name = sun;
-			hdr.msg_namelen = sizeof(sa);
+			memset(sa, 0, sizeof(sa_storage));
+			hdr.msg_name = s_un;
+			hdr.msg_namelen = sizeof(struct sockaddr_un);
 			hdr.msg_iov = iov->iov_array;
 			hdr.msg_iovlen = iov->count;
 
@@ -1727,21 +1791,23 @@ PHP_FUNCTION(recvmsg)
 			} else {
 				struct cmsghdr *mhdr = (struct cmsghdr *) hdr.msg_control;
 
-				/* copy values as appropriate... */
-				if (array_init(control_array) == FAILURE) {
-					php_error(E_WARNING, "Cannot initialize return value from recvmsg()");
-					RETURN_FALSE;
+				if (mhdr != NULL) {
+					/* copy values as appropriate... */
+					if (array_init(control_array) == FAILURE) {
+						php_error(E_WARNING, "Cannot initialize return value from recvmsg()");
+						RETURN_FALSE;
+					}
+					add_assoc_long(control_array, "cmsg_level", mhdr->cmsg_level);
+					add_assoc_long(control_array, "cmsg_type", mhdr->cmsg_type);
+					add_assoc_string(control_array, "cmsg_data", CMSG_DATA(mhdr), 1);
+					*control = control_array;
+					Z_LVAL_PP(controllen) = hdr.msg_controllen;
 				}
-				add_assoc_long(control_array, "cmsg_level", mhdr->cmsg_level);
-				add_assoc_long(control_array, "cmsg_type", mhdr->cmsg_type);
-				add_assoc_string(control_array, "cmsg_data", CMSG_DATA(mhdr), 1);
-				*control = control_array;
-				Z_LVAL_PP(controllen) = hdr.msg_controllen;
 				Z_LVAL_PP(flags)      = hdr.msg_flags;
 				if (Z_STRVAL_PP(addr) != NULL) {
 					efree(Z_STRVAL_PP(addr));
 				}
-				Z_STRVAL_PP(addr) = estrdup(sun->sun_path);
+				Z_STRVAL_PP(addr) = estrdup(s_un->sun_path);
 				RETURN_LONG(ret);
 			}
 		}
@@ -1807,15 +1873,15 @@ PHP_FUNCTION(sendmsg)
 		case AF_UNIX:
 			{
 				struct msghdr hdr;
-				struct sockaddr_un *sun = (struct sockaddr_un *) &sa;
+				struct sockaddr_un *s_un = (struct sockaddr_un *) &sa;
 				errno = 0;
-				hdr.msg_name = sun;
+				hdr.msg_name = s_un;
 				hdr.msg_iov = iov->iov_array;
 				hdr.msg_iovlen = iov->count;
 
-				snprintf(sun->sun_path, 108, "%s", Z_STRVAL_PP(addr));
+				snprintf(s_un->sun_path, 108, "%s", Z_STRVAL_PP(addr));
 
-				hdr.msg_namelen = SUN_LEN(sun);
+				hdr.msg_namelen = SUN_LEN(s_un);
 
 				ret = sendmsg(Z_LVAL_PP(fd), &hdr, Z_LVAL_PP(flags));
 				
