@@ -1,11 +1,11 @@
 ---------------------------------------------------------------------------
-                    The Zend License, version 0.91
-           Copyright (C) 1999    Andi Gutmans & Zeev Suraski
+                    The Zend License, version 0.92
+           Copyright (C) 1999-2000    Zend Technologies Ltd.
 ---------------------------------------------------------------------------
 
-The Zend scripting engine library is a product of Andi Gutmans and
-Zeev Suraski.  It may be used and/or distributed under the terms of the
-Q Public License (QPL) version 1.0, enclosed below.
+The Zend scripting engine library is a product of Zend Technologies Ltd.
+It may be used and/or distributed under the terms of the Q Public
+License (QPL) version 1.0, enclosed below.
 
 For more information about Zend please visit http://www.zend.com/
 For license related questions please mail license@zend.com
