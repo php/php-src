@@ -390,6 +390,12 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 			FREE_ZVAL(IMAPG(quota_return));
 			return;
 		}
+		if (strncmp(qlist->name, "STORAGE", 7) == 0)
+		{
+			/* this is to add backwards compatibility */
+			add_assoc_long_ex(IMAPG(quota_return), "usage", sizeof("usage"), qlist->usage);
+			add_assoc_long_ex(IMAPG(quota_return), "limit", sizeof("limit"), qlist->limit);
+		}
 
 		add_assoc_long_ex(t_map, "usage", sizeof("usage"), qlist->usage);
 		add_assoc_long_ex(t_map, "limit", sizeof("limit"), qlist->limit);
