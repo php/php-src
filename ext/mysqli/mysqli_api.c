@@ -120,18 +120,13 @@ PHP_FUNCTION(mysqli_bind_param)
 	if (zend_hash_num_elements(Z_ARRVAL_P(types)) != argc - start) {
 		/* number of bind variables doesn't match number of elements in array */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type array doesn't match number of bind variables");
-    }   
-	
+    }
+
 	/* prevent leak if variables are already bound */
-#if HHOLZGRA_0
-	/* this would prevent using both bind_param and bind_result on SELECT
-		queries so it is disabled for now */
-	if (stmt->var_cnt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variables already bound");
-		efree(args);
-		RETURN_FALSE;
+	if (stmt->param.var_cnt) {
+		php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	}
-#endif
+
 	args = (zval ***)emalloc(argc * sizeof(zval **));
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
@@ -139,7 +134,7 @@ PHP_FUNCTION(mysqli_bind_param)
 		WRONG_PARAM_COUNT;
 	}
 
-	stmt->is_null = ecalloc(num_vars, sizeof(char));
+	stmt->param.is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *)ecalloc(num_vars, sizeof(MYSQL_BIND));
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(types), &hpos);
@@ -155,13 +150,13 @@ PHP_FUNCTION(mysqli_bind_param)
 			case MYSQLI_BIND_DOUBLE:
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
 				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
-				bind[ofs].is_null = &stmt->is_null[ofs];
+				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
 			case MYSQLI_BIND_INT:
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 				bind[ofs].buffer = (gptr)&Z_LVAL_PP(args[i]);
-				bind[ofs].is_null = &stmt->is_null[ofs];
+				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
 			case MYSQLI_BIND_SEND_DATA:
@@ -174,7 +169,7 @@ PHP_FUNCTION(mysqli_bind_param)
 				bind[ofs].buffer_type = MYSQL_TYPE_VAR_STRING;
 				bind[ofs].buffer = NULL; 
 				bind[ofs].buffer_length = 0;
-				bind[ofs].is_null = &stmt->is_null[ofs];
+				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
 			default:
@@ -198,15 +193,14 @@ PHP_FUNCTION(mysqli_bind_param)
 		RETURN_FALSE;
 	}
 
-	stmt->var_cnt = num_vars;
-	stmt->type = FETCH_SIMPLE;
-	stmt->vars = (zval **)emalloc(num_vars * sizeof(zval));
+	stmt->param.var_cnt = num_vars;
+	stmt->param.vars = (zval **)emalloc(num_vars * sizeof(zval));
 	for (i = 0; i < num_vars; i++) {
 		if (bind[i].buffer_type  != MYSQLI_BIND_SEND_DATA) {
 			ZVAL_ADDREF(*args[i+start]);
-			stmt->vars[i] = *args[i+start];
+			stmt->param.vars[i] = *args[i+start];
 		} else {
-			stmt->vars[i] = NULL;
+			stmt->param.vars[i] = NULL;
 		}
 	}
 	efree(args);
@@ -263,24 +257,17 @@ PHP_FUNCTION(mysqli_bind_result)
 	var_cnt = argc - start;
 
 	/* prevent leak if variables are already bound */
-#if HHOLZGRA_0
-	/* this would prevent using both bind_param and bind_result on SELECT
-		queries so it is disabled for now */
-	if (stmt->var_cnt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variables already bound");
-		efree(args);
-		RETURN_FALSE;
+	if (stmt->result.var_cnt) {
+		php_free_stmt_bind_buffer(stmt->result, FETCH_RESULT);
 	}
-#endif
 
 	bind = (MYSQL_BIND *)ecalloc(var_cnt, sizeof(MYSQL_BIND));
-	stmt->bind = (BIND_BUFFER *)ecalloc(var_cnt,sizeof(BIND_BUFFER));
-	stmt->is_null = (char *)ecalloc(var_cnt, sizeof(char));
-	stmt->type = FETCH_RESULT;
+	stmt->result.buf = (VAR_BUFFER *)ecalloc(var_cnt,sizeof(VAR_BUFFER));
+	stmt->result.is_null = (char *)ecalloc(var_cnt, sizeof(char));
 
 	for (i=start; i < var_cnt + start ; i++) {
 		ofs = i - start;
-		stmt->is_null[ofs] = 0;
+		stmt->result.is_null[ofs] = 0;
 
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
@@ -289,11 +276,11 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_DOUBLE:
 			case MYSQL_TYPE_FLOAT:
 				convert_to_double_ex(args[i]);
-				stmt->bind[ofs].type = IS_DOUBLE;
-				stmt->bind[ofs].buflen = 0;
+				stmt->result.buf[ofs].type = IS_DOUBLE;
+				stmt->result.buf[ofs].buflen = 0;
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
 				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
-				bind[ofs].is_null = &stmt->is_null[ofs];
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				break;
 
 			case MYSQL_TYPE_SHORT:
@@ -302,22 +289,23 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_INT24:
 			case MYSQL_TYPE_YEAR:
 				convert_to_long_ex(args[i]);
-				stmt->bind[ofs].type = IS_LONG;
-				stmt->bind[ofs].buflen = 0;
+				stmt->result.buf[ofs].type = IS_LONG;
+				stmt->result.buf[ofs].buflen = 0;
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 				bind[ofs].buffer = (gptr)&Z_LVAL_PP(args[i]);
-				bind[ofs].is_null = &stmt->is_null[ofs];
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
-				stmt->bind[ofs].type = IS_STRING; 
-				stmt->bind[ofs].buflen = sizeof(my_ulonglong); 
-				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
+				stmt->result.buf[ofs].type = IS_STRING; 
+				stmt->result.buf[ofs].buflen = sizeof(my_ulonglong); 
+				stmt->result.buf[ofs].buffer = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
-				bind[ofs].buffer = stmt->bind[ofs].buffer;
-				bind[ofs].is_null = &stmt->is_null[ofs];
-				bind[ofs].buffer_length = stmt->bind[ofs].buflen;
+				bind[ofs].buffer = stmt->result.buf[ofs].buffer;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				break;
+
 			case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_TIME:
 			case MYSQL_TYPE_DATETIME:
@@ -326,14 +314,14 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_STRING:
 			case MYSQL_TYPE_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
-				stmt->bind[ofs].type = IS_STRING; 
-				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 256;
-				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
+				stmt->result.buf[ofs].type = IS_STRING; 
+				stmt->result.buf[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 256;
+				stmt->result.buf[ofs].buffer = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
-				bind[ofs].buffer = stmt->bind[ofs].buffer;
-				bind[ofs].is_null = &stmt->is_null[ofs];
-				bind[ofs].buffer_length = stmt->bind[ofs].buflen;
-				bind[ofs].length = &stmt->bind[ofs].buflen;
+				bind[ofs].buffer = stmt->result.buf[ofs].buffer;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
+				bind[ofs].length = &stmt->result.buf[ofs].buflen;
 				break;
 		}
 	}
@@ -349,12 +337,12 @@ PHP_FUNCTION(mysqli_bind_result)
 		RETURN_FALSE;
 	}
 
-	stmt->var_cnt = var_cnt;
-	stmt->vars = (zval **)emalloc((var_cnt) * sizeof(zval));
+	stmt->result.var_cnt = var_cnt;
+	stmt->result.vars = (zval **)emalloc((var_cnt) * sizeof(zval));
 	for (i = start; i < var_cnt+start; i++) {
 		ofs = i-start;
 		ZVAL_ADDREF(*args[i]);
-		stmt->vars[ofs] = *args[i];
+		stmt->result.vars[ofs] = *args[i];
 	}
 
 	efree(args);
@@ -667,29 +655,27 @@ PHP_FUNCTION(mysqli_execute)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt"); 
 	
-	if (stmt->type == FETCH_SIMPLE) {
-		for (i = 0; i < stmt->var_cnt; i++) {		
-			if (stmt->vars[i]) {
-				stmt->is_null[i] = (stmt->vars[i]->type == IS_NULL);
+	for (i = 0; i < stmt->param.var_cnt; i++) {		
+		if (stmt->param.vars[i]) {
+			stmt->param.is_null[i] = (stmt->param.vars[i]->type == IS_NULL);
 
-				switch (stmt->stmt->params[i].buffer_type) {
-					case MYSQL_TYPE_VAR_STRING:
-						convert_to_string_ex(&stmt->vars[i]);
-						stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->vars[i]);
-						stmt->stmt->params[i].buffer_length = strlen(Z_STRVAL_PP(&stmt->vars[i]));
-						break;
-					case MYSQL_TYPE_DOUBLE:
-						convert_to_double_ex(&stmt->vars[i]);
-						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->vars[i]);
-						break;
-					case MYSQL_TYPE_LONG:
-						convert_to_long_ex(&stmt->vars[i]);
-						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->vars[i]);
-						break;
-					default:
-						break;
-				}	
-			}
+			switch (stmt->stmt->params[i].buffer_type) {
+				case MYSQL_TYPE_VAR_STRING:
+					convert_to_string_ex(&stmt->param.vars[i]);
+					stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->param.vars[i]);
+					stmt->stmt->params[i].buffer_length = strlen(Z_STRVAL_PP(&stmt->param.vars[i]));
+					break;
+				case MYSQL_TYPE_DOUBLE:
+					convert_to_double_ex(&stmt->param.vars[i]);
+					stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+					break;
+				case MYSQL_TYPE_LONG:
+					convert_to_long_ex(&stmt->param.vars[i]);
+					stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+					break;
+				default:
+					break;
+			}	
 		}
 	}
 
@@ -715,50 +701,50 @@ PHP_FUNCTION(mysqli_fetch)
 	/* reset buffers */
 
 
-	for (i = 0; i < stmt->var_cnt; i++) {
-		if (stmt->bind[i].type == IS_STRING) {
-			memset(stmt->bind[i].buffer, 0, stmt->bind[i].buflen);
+	for (i = 0; i < stmt->result.var_cnt; i++) {
+		if (stmt->result.buf[i].type == IS_STRING) {
+			memset(stmt->result.buf[i].buffer, 0, stmt->result.buf[i].buflen);
 		}
 	}
 	
 	if (!(ret = mysql_fetch(stmt->stmt))) {
 
-		for (i = 0; i < stmt->var_cnt; i++) {
-			if (!stmt->is_null[i]) {
-				switch (stmt->bind[i].type) {
+		for (i = 0; i < stmt->result.var_cnt; i++) {
+			if (!stmt->result.is_null[i]) {
+				switch (stmt->result.buf[i].type) {
 					case IS_LONG:
-						stmt->vars[i]->type = IS_LONG;
+						stmt->result.vars[i]->type = IS_LONG;
 						break;
 					case IS_DOUBLE:
-						stmt->vars[i]->type = IS_DOUBLE;
+						stmt->result.vars[i]->type = IS_DOUBLE;
 						break;
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
 							char tmp[50];
 							my_ulonglong lval;
-							memcpy (&lval, stmt->bind[i].buffer, sizeof(my_ulonglong));
+							memcpy (&lval, stmt->result.buf[i].buffer, sizeof(my_ulonglong));
 							if (lval != (long)lval) {
 								/* even though lval is declared as unsigned, the value
 								 * may be negative. Therefor we cannot use %llu and must
 								 * user %lld.
 								 */
 								sprintf((char *)&tmp, "%lld", lval);
-								ZVAL_STRING(stmt->vars[i], tmp, 1);
+								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
 							} else {
-								ZVAL_LONG(stmt->vars[i], lval);
+								ZVAL_LONG(stmt->result.vars[i], lval);
 							}
 						} else {
-							if (stmt->vars[i]->type == IS_STRING) {
-								efree(stmt->vars[i]->value.str.val);
+							if (stmt->result.vars[i]->type == IS_STRING) {
+								efree(stmt->result.vars[i]->value.str.val);
 							} 
-							ZVAL_STRING(stmt->vars[i], stmt->bind[i].buffer, 1); 
+							ZVAL_STRING(stmt->result.vars[i], stmt->result.buf[i].buffer, 1); 
 						}
 						break;
 					default:
 						break;	
 				}
 			} else {
-				stmt->vars[i]->type = IS_NULL;
+				stmt->result.vars[i]->type = IS_NULL;
 			}
 		}
 	}
@@ -1304,7 +1290,6 @@ PHP_FUNCTION(mysqli_prepare)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
 	stmt = (STMT *)ecalloc(1,sizeof(STMT));
-	stmt->var_cnt = 0;
 
 	/* profiling information */
 	if (MyG(profiler)) {

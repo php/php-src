@@ -36,15 +36,19 @@ typedef struct {
 	ulong		buflen;
 	char		*buffer;
 	ulong		type;
+} VAR_BUFFER;
+
+typedef struct {
+	unsigned int	var_cnt;
+	VAR_BUFFER	*buf;
+	zval		**vars;
+	char		*is_null;
 } BIND_BUFFER;
 
 typedef struct {
 	MYSQL_STMT	*stmt;
-	unsigned int	var_cnt;
-	zval		**vars;
- 	BIND_BUFFER	*bind;
-	char		*is_null;
-	char		type;
+	BIND_BUFFER	param;
+	BIND_BUFFER	result;
 } STMT;
 
 typedef struct {
@@ -88,6 +92,7 @@ extern function_entry mysqli_stmt_methods[];
 extern function_entry mysqli_result_methods[];
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int flag);
 extern void php_clear_stmt_bind(STMT *stmt);
+extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
