@@ -217,7 +217,7 @@ void php_var_serialize(pval *buf, pval **struc)
 					if (retval_ptr && HASH_OF(retval_ptr)) {
 						int count = zend_hash_num_elements(HASH_OF(retval_ptr));
 						
-						PHP_SET_CLASS_ATTRIBUTES();
+						PHP_SET_CLASS_ATTRIBUTES(*struc);
 						slen = sprintf(s, "O:%d:\"%s\":%d:{",name_len,class_name, count);
 						PHP_CLEANUP_CLASS_ATTRIBUTES();
 						
@@ -278,7 +278,7 @@ void php_var_serialize(pval *buf, pval **struc)
 			} else {
 				PHP_CLASS_ATTRIBUTES;
 
-				PHP_SET_CLASS_ATTRIBUTES();
+				PHP_SET_CLASS_ATTRIBUTES(*struc);
 				slen = sprintf(s, "O:%d:\"%s\":%d:{",name_len,class_name,i);
 				PHP_CLEANUP_CLASS_ATTRIBUTES();
 			}
@@ -477,7 +477,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				myht = (*rval)->value.obj.properties;
 
 				if (incomplete_class)
-					php_store_class_name(rval, class_name, name_len);
+					php_store_class_name(*rval, class_name, name_len);
 
 				if (class_name)
 					efree(class_name);

@@ -20,6 +20,8 @@
 #ifndef PHP_INCOMPLETE_CLASS_H
 #define PHP_INCOMPLETE_CLASS_H
 
+#include "ext/standard/basic_functions.h"
+
 #define PHP_IC_ENTRY \
 	BG(incomplete_class)
 
@@ -27,13 +29,13 @@
 	(PHP_IC_ENTRY ? PHP_IC_ENTRY : php_create_incomplete_class(BLS_C))
 
 
-#define PHP_SET_CLASS_ATTRIBUTES() 				\
-	if ((*struc)->value.obj.ce == BG(incomplete_class)) {				\
+#define PHP_SET_CLASS_ATTRIBUTES(struc) 				\
+	if ((struc)->value.obj.ce == BG(incomplete_class)) {				\
 		class_name = php_lookup_class_name(struc, &name_len, 1);		\
 		free_class_name = 1;											\
 	} else {															\
-		class_name = (*struc)->value.obj.ce->name;						\
-		name_len   = (*struc)->value.obj.ce->name_length;				\
+		class_name = (struc)->value.obj.ce->name;						\
+		name_len   = (struc)->value.obj.ce->name_length;				\
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()									\
@@ -52,8 +54,8 @@ extern "C" {
 
 zend_class_entry *php_create_incomplete_class(BLS_D);
 
-char *php_lookup_class_name(zval **object, size_t *nlen, zend_bool del);
-void  php_store_class_name(zval **object, const char *name, size_t len);
+char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del);
+void  php_store_class_name(zval *object, const char *name, size_t len);
 
 #ifdef __cplusplus
 };

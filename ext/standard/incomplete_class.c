@@ -38,7 +38,7 @@ static void incomplete_class_message(zend_property_reference *ref)
 	char buf[1024];
 	char *class_name;
 
-	class_name = php_lookup_class_name(&ref->object, NULL, 0);
+	class_name = php_lookup_class_name(ref->object, NULL, 0);
 	
 	if (!class_name)
 		class_name = estrdup("unknown");
@@ -88,25 +88,25 @@ zend_class_entry *php_create_incomplete_class(BLS_D)
 }
 
 
-char *php_lookup_class_name(zval **object, size_t *nlen, zend_bool del)
+char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 {
 	zval **val;
 	char *retval = NULL;
 
-	if (zend_hash_find((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
+	if (zend_hash_find(object->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
 		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 
 		if (nlen)
 			*nlen = Z_STRLEN_PP(val);
 
 		if (del)
-			zend_hash_del((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER));
+			zend_hash_del(object->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER));
 	}
 
 	return (retval);
 }
 
-void php_store_class_name(zval **object, const char *name, size_t len)
+void php_store_class_name(zval *object, const char *name, size_t len)
 {
 	zval *val;
 
@@ -116,5 +116,5 @@ void php_store_class_name(zval **object, const char *name, size_t len)
 	Z_STRVAL_P(val) = estrndup(name, len);
 	Z_STRLEN_P(val) = len;
 
-	zend_hash_update((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
+	zend_hash_update(object->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }
