@@ -45,7 +45,7 @@ public class reflect {
   private static native void setResultFromObject(long result, Object value);
   private static native void setResultFromArray(long result);
   private static native long nextElement(long array);
-  private static native void setException(long result, String value);
+  private static native void setException(long result, byte value[]);
   public  static native void setEnv();
 
   //
@@ -94,7 +94,7 @@ public class reflect {
       if (t!=null) e=t;
     }
 
-    setException(result, e.toString());
+    setException(result, e.toString().getBytes());
   }
 
   //
@@ -295,6 +295,7 @@ public class reflect {
             Method method;
             if (args!=null && args.length>0) {
               method=props[i].getWriteMethod();
+              args = coerce(method.getParameterTypes(), args);
             } else {
               method=props[i].getReadMethod();
             }
@@ -307,6 +308,7 @@ public class reflect {
         for (int i=0; i<jfields.length; i++) {
           if (jfields[i].getName().equalsIgnoreCase(prop)) {
             if (args!=null && args.length>0) {
+              args = coerce(new Class[] {jfields[i].getType()}, args);
               jfields[i].set(object, args[0]);
             } else {
               setResult(result, jfields[i].get(object));
