@@ -1,0 +1,5 @@
+add ini setting for smfi_settimeout()
+set xxfi_flags via ini, SMFIF_CHGBODY can have a significant performance impact if set
+stdout to syslog
+testing
+documentation
