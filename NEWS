@@ -28,6 +28,7 @@ PHP 4                                                                      NEWS
   y2k_compliance is On). (Ilia)
 - Fixed bug #31055 (apache2filter: per request leak proportional to the full
   path of the request URI). (kameshj at fastmail dot fm)
+- Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
   parameters). (Jani)
