@@ -149,10 +149,9 @@ static void bitmapRelease( void *element );
 /* local prototype */
 char *gdttfchar(gdImage *im, int fg, font_t *font, int x, int y, TT_F26Dot6 x1,  TT_F26Dot6 y1, TT_F26Dot6 *advance, TT_BBox **bbox, char **next);
 
-/* This prototype is missing from gd.h */
-/* FIXME  Since when does GD have this function???  My copy of 1.3 doesnt
+#ifndef HAVE_GDIMAGECOLORRESOLVE
+
 int gdImageColorResolve(gdImagePtr im, int r, int g, int b);
-*/
 
 /********************************************************************/
 /* gdImageColorResolve is a replacement for the old fragment:       */
@@ -203,6 +202,7 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 	im->open [op] = 0;
 	return op;					/* Return newly allocated color */
 }
+#endif
 
 /********************************************************************
  * gdTcl_UtfToUniChar is borrowed from ...
