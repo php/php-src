@@ -344,7 +344,7 @@ PHP_FUNCTION(yaz_connect)
             option_set (as, "otherInfo1", otherInfo[1]);
             option_set (as, "otherInfo2", otherInfo[2]);
             option_set (as, "piggyback", piggyback ? "1" : "0");
-			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
+            ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
 		}
 	}
@@ -936,19 +936,7 @@ PHP_FUNCTION(yaz_record)
 			type = "render";
 		if (r)
 		{
-			if (!strcmp (type, "syntax") ||
-				!strcmp (type, "database") ||
-				!strcmp (type, "render") ||
-				!strcmp (type, "xml"))
-			{
-				const char *info = ZOOM_record_get (r, type, 0);
-
-				return_value->value.str.len = strlen(info);
-				return_value->value.str.val =
-					estrndup(info, return_value->value.str.len);
-				return_value->type = IS_STRING;
-			}
-			else if (!strcmp (type, "array"))
+			if (!strcmp (type, "array"))
 			{
 				Z_External *ext = (Z_External *) ZOOM_record_get (r, "ext", 0);
 				oident *ent = oid_getentbyoid(ext->direct_reference);
@@ -979,6 +967,24 @@ PHP_FUNCTION(yaz_record)
 						retval_grs1 (return_value, rec);
 					odr_destroy (odr);
 				}
+			}
+            else
+			{
+                int rlen;
+				const char *info = ZOOM_record_get (r, type, &rlen);
+
+                if (rlen <= 0)
+                {
+                    return_value->value.str.len = 0;
+                    return_value->value.str.val = "";
+                }
+                else
+                {
+                    return_value->value.str.len = rlen;
+                    return_value->value.str.val =
+                        estrndup(info, return_value->value.str.len);
+                }
+                return_value->type = IS_STRING;
 			}
 		}
 	}
