@@ -73,6 +73,7 @@
 #define UDM_PARAM_BROWSER_CHARSET	18
 #define UDM_PARAM_HLBEG			19
 #define UDM_PARAM_HLEND			20
+#define UDM_PARAM_STOREDADDR		21
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -137,6 +138,9 @@ function_entry mnogosearch_functions[] = {
 
 #if UDM_VERSION_ID >= 30203			
 	PHP_FE(udm_crc32,	NULL)
+	PHP_FE(udm_open_stored,	NULL)
+	PHP_FE(udm_check_stored,NULL)
+	PHP_FE(udm_close_stored,NULL)
 #endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
@@ -266,6 +270,8 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_HLBEG",	UDM_PARAM_HLBEG,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_HLEND",	UDM_PARAM_HLEND,CONST_CS | CONST_PERSISTENT);	
 	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_STOREDADDR",	UDM_PARAM_STOREDADDR,CONST_CS | CONST_PERSISTENT);
+	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_URL",		UDM_LIMIT_URL,CONST_CS | CONST_PERSISTENT);
@@ -360,6 +366,14 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 	php_info_print_table_end();
 }
 
+ssize_t UdmRecvAll(int s, void *buf, size_t len, int flags) {
+  size_t received = 0, r;
+  char *b = buf;
+  while ( (received < len) && ((r = recv(s, &b[received], len - received, flags)) >= 0 ) ) {
+    received += r;
+  }
+  return received;
+}
 
 /* {{{ proto int udm_alloc_agent(string dbaddr [, string dbmode])
    Allocate mnoGoSearch session */
@@ -672,6 +686,14 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
 			
 			break;
+			
+#if UDM_VERSION_ID >= 30203	
+		case UDM_PARAM_STOREDADDR:
+			UdmReplaceStrVar(Agent->Conf->vars,"StoredAddr",val,UDM_VARSRC_GLOBAL);
+			Agent->Conf->stored_addr = strdup(UdmFindStrVar(Agent->Conf->vars, "StoredAddr", "localhost"));
+			
+			break;
+#endif
 			
 #endif
 			
@@ -1093,8 +1115,117 @@ DLEXPORT PHP_FUNCTION(udm_crc32)
 	RETURN_STRING(buf,1);
 }
 /* }}} */
-#endif
 
+/* {{{ proto int udm_open_stored(int agent)
+   Open connection to stored  */
+DLEXPORT PHP_FUNCTION(udm_open_stored)
+{
+	pval ** yyagent;
+	
+	int s;
+	const char *hello = "F\0";
+	
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+
+	s = UdmStoreOpen(Agent->Conf);
+	
+	if (s >= 0) {
+	    send(s, hello, 1, 0);
+	    RETURN_LONG(s);
+	} else RETURN_FALSE;	
+}
+/* }}} */
+
+/* {{{ proto int udm_close_stored(int agent, int link)
+   Open connection to stored  */
+DLEXPORT PHP_FUNCTION(udm_close_stored)
+{
+	pval ** yylink, ** yyagent;
+	
+	int s;
+	unsigned int rec_id = 0;
+	
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent, &yylink)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	
+	convert_to_long_ex(yylink);
+	s = Z_LVAL_PP(yylink);
+
+	
+	send(s, &rec_id, sizeof(rec_id), 0);
+	closesocket(s);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int udm_check_stored(int agent, int link, string doc_id)
+   Open connection to stored  */
+DLEXPORT PHP_FUNCTION(udm_check_stored)
+{
+	pval ** yyid, ** yylink, ** yyagent;
+	
+	int s;
+	unsigned int rec_id = 0;
+	int store_found;
+	
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 3: {
+				if (zend_get_parameters_ex(3, &yyagent, &yylink, &yyid)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	
+	convert_to_long_ex(yylink);
+	s = Z_LVAL_PP(yylink);
+	
+	convert_to_string_ex(yyid);
+	
+	rec_id=strtoul(Z_STRVAL_PP(yyid),NULL,10);
+
+	send(s, &rec_id, sizeof(rec_id), 0);
+	if (UdmRecvAll(s, &store_found, sizeof(store_found), MSG_WAITALL) < 0) {
+	    RETURN_LONG(store_found);
+	} else RETURN_FALSE;
+}
+/* }}} */
+#endif
 
 /* {{{ proto int udm_find(int agent, string query)
    Perform search */

@@ -69,6 +69,9 @@ $de=urldecode($de);
 if ($db=="") $db='01/01/1970';
 if ($de=="") $de='31/12/2020';
 
+$storedaddr="localhost";
+$storedocurl='/cgi-bin/storedoc.cgi';
+
 if (isset($q)) {
 	$q=urldecode($q);
         $have_query_flag=1;
@@ -900,6 +903,12 @@ if(($errno=Udm_Errno($udm_agent))>0){
         print("Search Time: $searchtime<br>Search results: <small>$wordinfo</small><HR>\n");
 	print("Displaying documents $first_doc-$last_doc of total <B>$found</B> found.\n");
 
+        $stored_link=-1;
+	if ((Udm_Api_Version() >= 30203) && ($storedaddr != '')) {
+	    Udm_Set_Agent_Param($udm_agent,UDM_PARAM_STOREDADDR,$storedaddr);
+	    $stored_link=Udm_Open_Stored($udm_agent);
+	}
+                        
         for($i=0;$i<$rows;$i++){
 		$ndoc=Udm_Get_Res_Field($res,$i,UDM_FIELD_ORDER);
 		$rating=Udm_Get_Res_Field($res,$i,UDM_FIELD_RATING);
@@ -937,16 +946,24 @@ if(($errno=Udm_Errno($udm_agent))>0){
                 print ("($contype) $lastmod, $docsize bytes</UL></DL>\n");
 		
 		if (Udm_Api_Version() >= 30203) {
-		    $storedstr="$storedocurl?rec_id=".Udm_CRC32($udm_agent,$url).
-            		    "&DM=".urlencode($lastmod).
-	    		    "&DS=$docsize".
-	    		    "&L=$doclang".
-	    		    "&CS=$doccharset".
-	    		    "&DU=".urlencode($url).
-	    		    "&q=".urlencode($query_orig);
-		    print ("<DD><a href=\"$storedstr\">Cached copy</a>\n");
+		    if ((($stored_link>0) && (Udm_Check_Stored($udm_agent,$stored_link,Udm_CRC32($udm_agent,$url)))) ||
+		        ($stored_link==-1)) {		    
+		        $storedstr="$storedocurl?rec_id=".Udm_CRC32($udm_agent,$url).
+            		    	"&DM=".urlencode($lastmod).
+	    		    	"&DS=$docsize".
+	    		    	"&L=$doclang".
+	    		    	"&CS=$doccharset".
+	    		    	"&DU=".urlencode($url).
+	    		    	"&q=".urlencode($query_orig);
+		    	print ("<DD><a href=\"$storedstr\">Cached copy</a>\n");
+		    }
 		} 		
 	}	
+
+        if ((Udm_Api_Version() >= 30203) &&
+	    ($stored_link>0)) {
+	    Udm_Close_Stored($udm_agent, $stored_link);
+	}
         
         print("<HR><CENTER> $nav </CENTER>\n");    
 	print_bottom();
