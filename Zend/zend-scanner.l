@@ -386,7 +386,7 @@ zend_op_array *compile_filename(int mode, zval *filename CLS_DC ELS_DC)
 	zend_file_handle file_handle;
 	zval tmp;
 	zend_op_array *retval;
-	int error_reporting;
+	int error_reporting=0;
 
 	if (filename->type != IS_STRING) {
 		tmp = *filename;
