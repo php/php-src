@@ -11,17 +11,19 @@ function soap_datetime_to_timestamp($t) {
 	  if (!ereg($iso8601,$t,$r)) {
   	  return false;
 	  }
-  	$t = mktime($r[6],$r[5],$r[4],$r[3],$r[2],$r[1]);
-	  $op = substr($regs[8],0,1);
-  	$h = substr($regs[8],1,2);
-	  if (strstr($regs[8],':')) {
-  	  $m = substr($regs[8],4,2);
-	  } else {
-  	  $m = substr($regs[8],3,2);
-	  }
-  	$t += (($op == "-"?-1:1) * $h * 60 + $m) * 60;
+  	$t = gmmktime($r[4],$r[5],$r[6],$r[2],$r[3],$r[1]);
+	  if (!empty($regs[8]) && $regs[8] != 'Z') {
+		  $op = substr($regs[8],0,1);
+  		$h = substr($regs[8],1,2);
+	  	if (strstr($regs[8],':')) {
+	  	  $m = substr($regs[8],4,2);
+		  } else {
+  		  $m = substr($regs[8],3,2);
+		  }
+  		$t += (($op == "-"?-1:1) * $h * 60 + $m) * 60;
+		}
   }
-  return t;
+  return $t;
 }
 
 function date_compare($f1,$f2)
