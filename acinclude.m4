@@ -1724,7 +1724,7 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
     if test "$LIBXML_VERSION" -ge "2004014"; then
       LIBXML_LIBS=`$XML2_CONFIG --libs`
       LIBXML_INCS=`$XML2_CONFIG --cflags`
-      PHP_EVAL_LIBLINE($LIBXML_LIBS, $shared_lib_add)
+      PHP_EVAL_LIBLINE($LIBXML_LIBS, $1)
       PHP_EVAL_INCLINE($LIBXML_INCS)
       AC_DEFINE(HAVE_LIBXML, 1, [ ])
       $2
