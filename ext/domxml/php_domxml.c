@@ -177,6 +177,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xpath_new_context,											NULL)
 	PHP_FE(xpath_eval,													NULL)
 	PHP_FE(xpath_eval_expression,										NULL)
+	PHP_FE(xpath_register_ns,											NULL)
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
 	PHP_FE(xptr_new_context,											NULL)
@@ -336,6 +337,7 @@ static zend_function_entry php_domxmlpi_class_functions[] = {
 static zend_function_entry php_xpathctx_class_functions[] = {
 	PHP_FALIAS(xpath_eval,				xpath_eval,						NULL)
 	PHP_FALIAS(xpath_eval_expression,	xpath_eval_expression,			NULL)
+	PHP_FALIAS(xpath_register_ns,		xpath_register_ns,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -3028,6 +3030,49 @@ PHP_FUNCTION(xpath_eval)
 PHP_FUNCTION(xpath_eval_expression)
 {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 1);
+}
+/* }}} */
+
+/* {{{ proto bool xpath_register_ns([int xpathctx_handle,] string namespace_prefix, string namespace_uri)
+	Registeres the given namespace in the passed XPath context */
+PHP_FUNCTION(xpath_register_ns)
+{
+	/*
+	TODO:
+	- make the namespace registration persistent - now it dissapears each time xpath_eval is called
+	- automagically register all namespaces when creating a new context
+	*/
+	int prefix_len, uri_len, result;
+	xmlXPathContextPtr ctxp;
+	char *prefix, *uri;
+	zval *id;
+	
+	if (NULL == (id = getThis())) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oss", &id, &prefix, &prefix_len, &uri, &uri_len) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &uri, &uri_len) == FAILURE) {
+			return;
+		}
+	}
+
+	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
+    if (!ctxp) {
+		php_error(E_WARNING, "%s(): cannot fetch XPATH context", get_active_function_name(TSRMLS_C));
+        RETURN_FALSE;
+    }
+
+	/* set the context node to NULL - what is a context node anyway? */
+	ctxp->node = NULL;
+
+	result = xmlXPathRegisterNs(ctxp, prefix, uri);
+
+	if (0 == result) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 #endif	/* defined(LIBXML_XPATH_ENABLED) */
