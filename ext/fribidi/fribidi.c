@@ -260,8 +260,6 @@ PHP_FUNCTION(fribidi_charset_info)
 		return;
 	}
 
-	array_init(return_value);
-
 	switch (charset) {
 		case FRIBIDI_CHARSET_UTF8:
 		case FRIBIDI_CHARSET_ISO8859_6:
@@ -270,26 +268,25 @@ PHP_FUNCTION(fribidi_charset_info)
 		case FRIBIDI_CHARSET_CP1256:
 		case FRIBIDI_CHARSET_ISIRI_3342:
 		case FRIBIDI_CHARSET_CAP_RTL:
+			array_init(return_value);
+			
 			name  = fribidi_char_set_name(charset);
 			title = fribidi_char_set_title(charset);
 			desc  = fribidi_char_set_desc(charset);
 		   	
-			if (name == NULL) {
-				name = "";
+			if (name) {
+				add_assoc_string_ex(return_value, "name", sizeof("name"), name, 1);
 			}
-			if (title == NULL) {
-				title = "";
+			if (title) {
+				add_assoc_string_ex(return_value, "title", sizeof("title"), title, 1);
 			}
-			if (desc == NULL) {
-				desc = "";
+			if (desc) {
+				add_assoc_string_ex(return_value, "desc", sizeof("desc"), desc, 1);
 			}
 
-			add_assoc_string(return_value, "name", name , 1);
-			add_assoc_string(return_value, "title", title, 1);
-			add_assoc_string(return_value, "desc", desc, 1);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset.");
 			RETURN_FALSE;
 	}
 }
