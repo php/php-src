@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "zend.h"
 #include "zend_mm.h"
 
 #if WIN32|WINNT
@@ -34,28 +35,14 @@
 #define MAX(a, b) (((a)>(b))?(a):(b))
 #endif
 
-#if 0
-/* Platform alignment test */
-typedef union _mm_align_test {
-	void *ptr;
-	double dbl;
-	long lng;
-} mm_align_test;
-
-#if (defined (__GNUC__) && __GNUC__ >= 2)
-#define ZEND_MM_ALIGNMENT (__alignof__ (mm_align_test))
-#else
-#define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
-#endif
-
-/* We're going to need some kind of configure test for this */
-#undef ZEND_MM_ALIGNMENT
+#ifndef ZEND_MM_ALIGNMENT
 #define ZEND_MM_ALIGNMENT 8
+#define ZEND_MM_ALIGNMENT_LOG2 3
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
 
-#define ZEND_MM_BUCKET_INDEX(true_size) (true_size >> 3)
+#define ZEND_MM_BUCKET_INDEX(true_size) (true_size >> ZEND_MM_ALIGNMENT_LOG2)
 
 #define ZEND_MM_GET_FREE_LIST_BUCKET(index, free_list_bucket)	\
 	if (index < ZEND_MM_NUM_BUCKETS) {							\
