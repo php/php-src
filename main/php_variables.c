@@ -543,6 +543,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC);
 static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC);
 
+
 /* {{{ php_hash_environment
  */
 int php_hash_environment(TSRMLS_D)
@@ -551,7 +552,7 @@ int php_hash_environment(TSRMLS_D)
 	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
-	zend_bool jit_initialization = (!PG(register_globals) && !PG(register_long_arrays));
+	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays) && !PG(register_argc_argv));
 	struct auto_global_record {
 		char *name;
 		uint name_len;
@@ -609,6 +610,7 @@ int php_hash_environment(TSRMLS_D)
 			case 'e':
 			case 'E':
 				if (!jit_initialization && !_gpc_flags[3]) {
+					zend_auto_global_disable_jit("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 					php_auto_globals_create_env("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 					_gpc_flags[3]=1;
 					if (PG(register_globals)) {
@@ -619,6 +621,7 @@ int php_hash_environment(TSRMLS_D)
 			case 's':
 			case 'S':
 				if (!jit_initialization && !_gpc_flags[4]) {
+					zend_auto_global_disable_jit("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 					php_register_server_variables(TSRMLS_C);
 					_gpc_flags[4]=1;
 					if (PG(register_globals)) {
@@ -660,6 +663,7 @@ int php_hash_environment(TSRMLS_D)
 
 	/* Create _REQUEST */
 	if (!jit_initialization) {
+		zend_auto_global_disable_jit("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
 		php_auto_globals_create_request("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
 	}
 
@@ -746,15 +750,12 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 
 void php_startup_auto_globals(TSRMLS_D)
 {
-	zend_bool cb = (!PG(register_globals) && !PG(register_long_arrays));
-
-	/*cb = 0;*/
 	zend_register_auto_global("_GET", sizeof("_GET")-1, NULL TSRMLS_CC);
 	zend_register_auto_global("_POST", sizeof("_POST")-1, NULL TSRMLS_CC);
 	zend_register_auto_global("_COOKIE", sizeof("_COOKIE")-1, NULL TSRMLS_CC);
-	zend_register_auto_global("_SERVER", sizeof("_SERVER")-1, cb?php_auto_globals_create_server:NULL TSRMLS_CC);
-	zend_register_auto_global("_ENV", sizeof("_ENV")-1, cb?php_auto_globals_create_env:NULL TSRMLS_CC);
-	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1, cb?php_auto_globals_create_request:NULL TSRMLS_CC);
+	zend_register_auto_global("_SERVER", sizeof("_SERVER")-1, php_auto_globals_create_server TSRMLS_CC);
+	zend_register_auto_global("_ENV", sizeof("_ENV")-1, php_auto_globals_create_env TSRMLS_CC);
+	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1, php_auto_globals_create_request TSRMLS_CC);
 	zend_register_auto_global("_FILES", sizeof("_FILES")-1, NULL TSRMLS_CC);
 }
 
