@@ -30,6 +30,7 @@
 #if HAVE_SABLOT_BACKEND
 
 #include <sablot.h>
+#include <sdom.h>
 
 #include <string.h>
 #include <stdarg.h>
@@ -528,7 +529,7 @@ PHP_FUNCTION(xslt_process)
 	int             argc;           /* The number of arguments given */
 	int             error;          /* Our error container */
 	ulong           num_key;        /* Numerical key */
-
+	
 	argc = ZEND_NUM_ARGS();
 
 	if (argc < 3 || argc > 6 ||
@@ -558,6 +559,7 @@ PHP_FUNCTION(xslt_process)
 		RETURN_FALSE;
 	}
 
+
 	SablotAddArgTree(XSLT_CONTEXT(handle),
 					 XSLT_PROCESSOR(handle),
 					 "xml",
@@ -570,8 +572,10 @@ PHP_FUNCTION(xslt_process)
 	/* Well, no result file was given or result buffer, that means (guess what?)
 	 * we're returning the result yipp di doo! 
 	 */
-	if (argc < 4 || Z_TYPE_PP(result_p) == IS_NULL) {
-		result = "arg:/result";
+	if (argc < 4 || 
+		Z_TYPE_PP(result_p) == IS_NULL || 
+		!strcmp(Z_STRVAL_PP(result_p), "arg:/result")) {
+		result = "result";
 		SablotAddArgBuffer(XSLT_CONTEXT(handle), 
 						   XSLT_PROCESSOR(handle), 
 						   result, 
