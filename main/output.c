@@ -147,7 +147,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	char *final_buffer=NULL;
 	unsigned int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
-	char *to_be_destroyed_buffer;
+	char *to_be_destroyed_buffer, *to_be_destoryed_handler_name;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
 	int status;
 	php_ob_buffer *prev_ob_buffer_p=NULL;
@@ -226,6 +226,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	}
 
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
+	to_be_destoryed_handler_name = OG(active_ob_buffer).handler_name;
 	if (OG(active_ob_buffer).internal_output_handler
 		&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)
 		&& (final_buffer != OG(active_ob_buffer).buffer)) {
@@ -268,6 +269,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	}
 
 	if (!just_flush) {
+		efree(to_be_destoryed_handler_name);
 		efree(to_be_destroyed_buffer);
 	} else {
 		OG(active_ob_buffer).text_length = 0;
@@ -363,7 +365,7 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
 	if (output_handler && output_handler->type == IS_STRING) {
-		OG(active_ob_buffer).handler_name = Z_STRVAL_P(output_handler);
+		OG(active_ob_buffer).handler_name = estrndup(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler));
 	}
 	else if (output_handler && output_handler->type == IS_ARRAY) {
 		/* FIXME: Array type is not supported yet.
