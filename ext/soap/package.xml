@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- do not use the "Type" attribute here, that one is only for
+     generated package.xml files -->
+<package>
+  <name>php_soap</name>
+  <summary>Provides SOAP Services</summary>
+  <status>beta</status>
+  <maintainer>
+    <user>rodif_bl</user>
+    <name>Brad Lafountain</name>
+    <email>rodif_bl@yahoo.com</email>
+    <role>lead</role>
+  </maintainer>
+  <maintainer>
+    <user>shane</user>
+    <name>Shane Caraveo</name>
+    <email>shane@caraveo.com</email>
+    <role>lead</role>
+  </maintainer>
+  <release>
+    <version>0.1</version>
+    <date>2002-07-07</date>
+    <notes>
+	- First offical PEAR/PECL release
+    </notes>
+  </release>
+  <filelist>
+    <dir role="source" name="/" baseinstalldir="iisfunc">
+        <file>EXPERIMENTAL</file>
+        <file>TODO</file>
+        <file>config.m4</file>
+        <file>Makefile</file>
+        <file>Makefile.in</file>
+        <file>libs.mk</file>
+        <file>php_encoding.c</file>
+        <file>php_encoding.h</file>
+        <file>php_http.c</file>
+        <file>php_http.h</file>
+        <file>php_packet_soap.c</file>
+        <file>php_packet_soap.h</file>
+        <file>php_schema.c</file>
+        <file>php_schema.h</file>
+        <file>php_sdl.c</file>
+        <file>php_sdl.h</file>
+        <file>php_soap.h</file>
+        <file>php_soap.h</file>
+        <file>php_xml.c</file>
+        <file>php_xml.h</file>
+        <file>soap.c</file>
+        <file>soap.dsp</file>
+    </dir>
+  </filelist>
+</package>
+
