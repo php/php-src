@@ -1419,6 +1419,34 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 	return zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
 }
 
+static zend_object_value display_disabled_class(zend_class_entry *class_type TSRMLS_DC)
+{
+	zend_object_value retval;
+	zend_object *intern;
+	retval = zend_objects_new(&intern, class_type);
+	ALLOC_HASHTABLE(intern->properties);
+	zend_hash_init(intern->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_error(E_WARNING, "%s() has been disabled for security reasons", class_type->name);
+	return retval;
+}
+
+static zend_function_entry disabled_class_new[] =  {
+	{ NULL, NULL, NULL }
+};
+
+ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC)
+{
+	zend_class_entry *disabled_class;
+	disabled_class = (zend_class_entry *) emalloc(sizeof(zend_class_entry));
+	if (zend_hash_del(CG(class_table), class_name, class_name_length+1)==FAILURE) {
+		return FAILURE;
+	}
+	INIT_CLASS_ENTRY((*disabled_class), class_name, disabled_class_new);
+	disabled_class->create_object = display_disabled_class;
+	zend_register_internal_class(disabled_class TSRMLS_CC);
+	return 1;
+}
+
 zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
 {
 	char *lcname;
