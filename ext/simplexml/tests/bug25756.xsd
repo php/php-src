@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="foo" type="foo-type" />
+  <xsd:complexType name="item-type">
+    <xsd:all>
+      <xsd:element name="product-name" type="xsd:string"
+       minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="quantity" type="xsd:decimal"
+       minOccurs="1" maxOccurs="1"/>
+    </xsd:all>
+  </xsd:complexType>
+  <xsd:complexType name="foo-type">
+    <xsd:sequence>
+      <xsd:element name="items" minoccurs="1" maxOccurs="1">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="item" type="item-type"
+             minOccurs="0" maxOccurs="unbounded" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

@@ -538,7 +538,7 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 #define SCHEMA_BLOB 1
 #define SCHEMA_OBJECT 2
 
-#ifdef xmlSchemaParserCtxtPtr
+#ifdef LIBXML_SCHEMAS_ENABLED
 
 /* {{{ simplexml_ce_schema_validate_file()
  */
@@ -562,28 +562,48 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 		case SCHEMA_FILE:
 			convert_to_string_ex(&source);
 			parser = xmlSchemaNewParserCtxt(Z_STRVAL_P(source));
+			if (parser == NULL) {
+				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_P(source), E_WARNING, "Unable to load XML Schema file");
+				RETURN_FALSE;
+			}
 			sptr = xmlSchemaParse(parser);
-			xmlSchemaFreeParserCtxt(parser);
 			break;
 		case SCHEMA_BLOB:
 			convert_to_string_ex(&source);
 			parser = xmlSchemaNewMemParserCtxt(Z_STRVAL_P(source), Z_STRLEN_P(source));
 			sptr = xmlSchemaParse(parser);
-			xmlSchemaFreeParserCtxt(parser);
 			break;
 	}
 
+	if (sptr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Malformed XML Schema");
+		xmlSchemaFreeParserCtxt(parser);
+		RETURN_FALSE;
+	}
+
 	vptr = xmlSchemaNewValidCtxt(sptr);
-	is_valid = xmlSchemaValidateDoc(vptr, (xmlDocPtr) sxe->document->ptr);
+
+	if (vptr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create XML Schema validation context");
+		xmlSchemaFreeParserCtxt(parser);
+		RETURN_FALSE;
+	}
+
+	switch (xmlSchemaValidateDoc(vptr, (xmlDocPtr) sxe->document->ptr)) {
+		case 0: /* validated */
+			RETVAL_TRUE;
+			break;
+		case -1: /* internal error */
+			RETVAL_FALSE;
+			break;
+		default: /* error */
+			RETVAL_TRUE;
+			break;
+	}
+
 	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
 	xmlSchemaFreeParserCtxt(parser);
-
-	if (is_valid) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 
@@ -660,7 +680,7 @@ sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (!strcmp(method, "xsearch")) {
 		simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-#ifdef xmlSchemaParserCtxtPtr
+#ifdef LIBXML_SCHEMAS_ENABLED
 	} else if (!strcmp(method, "validate_schema_file")) {
 		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_FILE);	
 	} else if (!strcmp(method, "validate_schema_buffer")) {
