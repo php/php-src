@@ -611,7 +611,7 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval + (double) op2->value.lval;
 
-		if (dval > (double) LONG_MAX) {
+		if ((dval > (double) LONG_MAX) || (dval < (double) LONG_MIN)) {
 			result->value.dval = dval;
 			result->type = IS_DOUBLE;
 		} else {
@@ -648,7 +648,7 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2)
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval - (double) op2->value.lval;
 
-		if (dval < (double) LONG_MIN) {
+		if ((dval < (double) LONG_MIN) || (dval > (double) LONG_MAX)) {
 			result->value.dval = dval;
 			result->type = IS_DOUBLE;
 		} else {
@@ -685,7 +685,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2)
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval * (double) op2->value.lval;
 
-		if (dval > (double) LONG_MAX) {
+		if ((dval > (double) LONG_MAX) || (dval < (double) LONG_MIN)) {
 			result->value.dval = dval;
 			result->type = IS_DOUBLE;
 		} else {
