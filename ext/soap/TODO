@@ -11,7 +11,7 @@ SOAP
 + SOAP versioning model
 + SOAP message must not contain a Document Type Declaration
 - SOAP message MUST NOT contain Processing Instructions <?xml-stylesheet ... ?> (XML_PI_NODE)
-- SOAP 1.1 fault codes ("client","server"), SOAP 1.1 fault codes ("Sender","Receiver")
++ SOAP 1.1 fault codes ("client","server"), SOAP 1.1 fault codes ("Sender","Receiver")
 + SOAP 1.1 Content-Type - "text/xml", SOAP 1.2 - "application/soap+xml"
 - support for SOAP headers
   - actor attribute

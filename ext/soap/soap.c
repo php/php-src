@@ -529,8 +529,10 @@ PHP_METHOD(soapfault,soapfault)
 	int fault_string_len, fault_code_len, fault_actor_len;
 	zval *thisObj, *details = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", &fault_string, &fault_string_len,
-		&fault_code, &fault_code_len, &details, &fault_actor, &fault_actor_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs",
+		&fault_code, &fault_code_len, 
+		&fault_string, &fault_string_len,
+		&details, &fault_actor, &fault_actor_len) == FAILURE) {
 		php_error(E_ERROR, "Invalid arguments to SoapFault constructor");
 	}
 
@@ -1697,7 +1699,8 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 {
 	zval *fault;
 	MAKE_STD_ZVAL(fault);
-	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail TSRMLS_CC);
+//	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail TSRMLS_CC);
+	set_soap_fault(fault, fault_code, fault_string, fault_actor, fault_detail TSRMLS_CC);
 #ifdef ZEND_ENGINE_2
 	fault->refcount--;
 #endif
@@ -1717,15 +1720,22 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 		int soap_version = SOAP_GLOBAL(soap_version);
 		smart_str code = {0};
 		if (soap_version == SOAP_1_1) {
-			smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
-			smart_str_appendc(&code, ':');
+			if (strcmp(fault_code,"Client") == 0) {
+				smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
+			} else if (strcmp(fault_code,"Server") == 0) {
+				smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
+			}
 			smart_str_appends(&code,fault_code);
 		} else if (soap_version == SOAP_1_2) {
-			smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
-			smart_str_appendc(&code, ':');
 			if (strcmp(fault_code,"Client") == 0) {
+				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
 				smart_str_appendl(&code,"Sencer",sizeof("Sender")-1);
 			} else if (strcmp(fault_code,"Server") == 0) {
+				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
 				smart_str_appendl(&code,"Receiver",sizeof("Receiver")-1);
 			} else {
 				smart_str_appends(&code,fault_code);
