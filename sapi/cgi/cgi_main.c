@@ -702,10 +702,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	if (cgi && !file_handle.handle.fp) {
-		PUTS("No input file specified.\n");
-		php_request_shutdown((void *) 0);
-		php_module_shutdown();
-		return FAILURE;
+		file_handle.handle.fp = V_FOPEN(argv0, "rb");
+		if(!file_handle.handle.fp) {
+			PUTS("No input file specified.\n");
+			php_request_shutdown((void *) 0);
+			php_module_shutdown();
+			return FAILURE;
+		}
+		file_handle.filename = argv0;
 	} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
 		/* #!php support */
 		c = fgetc(file_handle.handle.fp);
