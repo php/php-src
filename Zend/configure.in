@@ -5,6 +5,7 @@ AC_INIT(zend.c)
 AM_INIT_AUTOMAKE(zend, 0.80A)
 AM_CONFIG_HEADER(zend_config.h)
 AM_SANITY_CHECK
+AM_MAINTAINER_MODE
 ZEND_VERSION=$VERSION
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.

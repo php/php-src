@@ -411,7 +411,7 @@ int require_file(zend_file_handle *file_handle CLS_DC)
 		return FAILURE;
 	}
 	if (zendparse(CLS_C)==1) {
-		CG(unclean_shutdown) = 1;
+		zend_bailout();
 	}
 	zend_close_file_handle(file_handle);
 	restore_lexical_state(&original_lex_state CLS_CC);
