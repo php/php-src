@@ -72,6 +72,8 @@ static SWFSound getSound(zval *id TSRMLS_DC);
 #ifdef HAVE_NEW_MING
 static SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC);
 static SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC);
+static SWFVideoStream getVideoStream(zval *id TSRMLS_DC);
+static SWFPrebuiltClip getPrebuiltClip(zval *id TSRMLS_DC);
 #endif
 
 #define PHP_MING_FILE_CHK(file) \
@@ -156,6 +158,8 @@ static int le_swfsoundp;
 #ifdef HAVE_NEW_MING
 static int le_swffontcharp;
 static int le_swfsoundinstancep;
+static int le_swfvideostreamp;
+static int le_swfprebuiltclipp;
 #endif
 
 static zend_class_entry *movie_class_entry_ptr;
@@ -175,6 +179,8 @@ static zend_class_entry *sound_class_entry_ptr;
 #ifdef HAVE_NEW_MING
 static zend_class_entry *fontchar_class_entry_ptr;
 static zend_class_entry *soundinstance_class_entry_ptr;
+static zend_class_entry *videostream_class_entry_ptr;
+static zend_class_entry *prebuiltclip_class_entry_ptr;
 #endif
  
 /* {{{ internal function SWFgetProperty
@@ -1878,7 +1884,187 @@ static zend_function_entry swfsoundinstance_functions[] = {
 	{ NULL, NULL, NULL }
 };
 
+/* {{{ SWFVideoStream */
+
+/* {{{ proto class swfvideostream_init([file])
+   Returns a SWVideoStream object */
+
+PHP_METHOD(swfvideostream, __construct)
+{
+	zval **zfile = NULL;
+	SWFVideoStream stream;
+	SWFInput input;
+	int ret;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if(zend_get_parameters_ex(1, &zfile) == FAILURE)
+				WRONG_PARAM_COUNT;
+	
+			if(Z_TYPE_PP(zfile) != IS_RESOURCE)
+  			{
+			    convert_to_string_ex(zfile);
+			    input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
+			    zend_list_addref(zend_list_insert(input, le_swfinputp));
+  			}
+  			else
+			    input = getInput(zfile TSRMLS_CC);
+		
+			stream = newSWFVideoStream_fromInput(input);
+			break;
+		case 0:
+			stream = newSWFVideoStream();
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	if(stream) {
+		ret = zend_list_insert(stream, le_swfvideostreamp);
+		object_init_ex(getThis(), videostream_class_entry_ptr);
+		add_property_resource(getThis(), "videostream", ret);
+		zend_list_addref(ret);
+	}
+	
+}	
+
+static void destroy_SWFVideoStream_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+	destroySWFVideoStream((SWFVideoStream)resource->ptr);
+}
+/* }}} */
+
+/* {{{ internal function getVideoStream
+   Returns the SWFVideoStream object contained in zval *id */
+                                                                                                                                             
+static SWFVideoStream getVideoStream(zval *id TSRMLS_DC)
+{
+	void *stream = SWFgetProperty(id, "videostream", 11, le_swfvideostreamp TSRMLS_CC);
+	                                                                                                                                         
+	if(!stream)
+		php_error(E_ERROR, "called object is not an SWFVideoStream!");
+	                                                                                                                                         
+	return (SWFVideoStream)stream;
+}
+
+/* }}} */
+
+/* {{{ setDimension */
+
+PHP_METHOD(swfvideostream, setdimension)
+{
+	zval **x, **y;
+	SWFVideoStream stream = getVideoStream(getThis() TSRMLS_CC);
+	if(!stream)
+		 php_error(E_ERROR, "getVideoSTream returned NULL");
+
+	if( ZEND_NUM_ARGS() != 2 
+			|| zend_get_parameters_ex(2, &x, &y) == FAILURE )
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+
+	SWFVideoStream_setDimension(stream, Z_LVAL_PP(x), Z_LVAL_PP(y));
+}
+/* }}} */
+
+/* {{{ getNumFrames */
+PHP_METHOD(swfvideostream, getnumframes) 
+{
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	RETURN_LONG(SWFVideoStream_getNumFrames(getVideoStream(getThis() TSRMLS_CC)));
+}
+/* }}} */
+		
+		
+static zend_function_entry swfvideostream_functions[] = {
+	PHP_ME(swfvideostream, 	__construct,	NULL, 0)
+	PHP_ME(swfvideostream, setdimension, NULL, 0)
+	PHP_ME(swfvideostream, getnumframes, NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
+/* }}} */
+
+/* {{{ SWFPrebuiltClip */
+/* {{{ proto class swfprebuiltclip_init([file])
+    Returns a SWFPrebuiltClip object */
+
+PHP_METHOD(swfprebuiltclip, __construct)
+{
+	zval **zfile = NULL;
+	SWFPrebuiltClip clip;
+	SWFInput input;
+	int ret;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if(zend_get_parameters_ex(1, &zfile) == FAILURE)
+				WRONG_PARAM_COUNT;
+	
+			if(Z_TYPE_PP(zfile) != IS_RESOURCE)
+   			{
+			    convert_to_string_ex(zfile);
+			    input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
+			    zend_list_addref(zend_list_insert(input, le_swfinputp));
+   			}
+   			else
+			    input = getInput(zfile TSRMLS_CC);
+		
+			clip = newSWFPrebuiltClip_fromInput(input);
+			break;
+/* not sure whether this makes sense
+   there would have to be a function to add contents
+		case 0:
+			clip = newSWFPrebuiltClip();
+			break; */
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	if(clip) {
+		ret = zend_list_insert(clip, le_swfprebuiltclipp);
+		object_init_ex(getThis(), prebuiltclip_class_entry_ptr);
+		add_property_resource(getThis(), "prebuiltclip", ret);
+		zend_list_addref(ret);
+	}
+}
+/* }}} */
+
+/* {{{ internal function destroy_SWFPrebuiltClip */
+static void destroy_SWFPrebuiltClip_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+	destroySWFPrebuiltClip((SWFPrebuiltClip)resource->ptr);
+}
+/* }}} */
+
+/* {{{ internal function getPrebuiltClip
+   Returns the SWFPrebuiltClip object contained in zval *id */
+                                                                                                                                             
+static SWFPrebuiltClip getPrebuiltClip(zval *id TSRMLS_DC)
+{
+	void *clip = SWFgetProperty(id, "prebuiltclip", 12, le_swfprebuiltclipp TSRMLS_CC);
+                                                                     
+	if(!clip)
+		php_error(E_ERROR, "called object is not an SWFPrebuiltClip!");
+                                                                                                                                             
+	return (SWFPrebuiltClip)clip;
+}
+
+/* }}} */
+static zend_function_entry swfprebuiltclip_functions[] = {
+	PHP_ME(swfprebuiltclip, __construct, NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
+/* }}} */
 #endif
+
 /* }}} */
 
 /* {{{ SWFMovie
@@ -3800,6 +3986,8 @@ PHP_MINIT_FUNCTION(ming)
 #ifdef HAVE_NEW_MING
 	zend_class_entry fontchar_class_entry;
 	zend_class_entry soundinstance_class_entry;
+	zend_class_entry videostream_class_entry;
+	zend_class_entry prebuiltclip_class_entry;
 #endif
 
 	Ming_setErrorFunction((void *) php_ming_error);
@@ -3873,6 +4061,10 @@ PHP_MINIT_FUNCTION(ming)
 #ifdef HAVE_NEW_MING
 	le_swffontcharp = zend_register_list_destructors_ex(destroy_SWFFontCharacter_resource, NULL, "SWFFontCharacter", module_number);
 	le_swfsoundinstancep = zend_register_list_destructors_ex(NULL, NULL, "SWFSoundInstance", module_number);
+
+	le_swfvideostreamp = zend_register_list_destructors_ex(destroy_SWFVideoStream_resource, NULL, "SWFVideoStream", module_number);
+	le_swfprebuiltclipp = zend_register_list_destructors_ex(destroy_SWFPrebuiltClip_resource, NULL, "SWFPrebuiltClip", module_number);
+
 #endif
 
 	INIT_CLASS_ENTRY(shape_class_entry, "SWFShape", swfshape_functions);
@@ -3892,6 +4084,8 @@ PHP_MINIT_FUNCTION(ming)
 #ifdef HAVE_NEW_MING
 	INIT_CLASS_ENTRY(fontchar_class_entry, "SWFFontChar", swffontchar_functions);
 	INIT_CLASS_ENTRY(soundinstance_class_entry, "SWFSoundInstance", swfsoundinstance_functions);
+	INIT_CLASS_ENTRY(videostream_class_entry, "SWFVideoStream", swfvideostream_functions);
+	INIT_CLASS_ENTRY(prebuiltclip_class_entry, "SWFPrebuiltClip", swfprebuiltclip_functions);
 #endif
 
 	shape_class_entry_ptr = zend_register_internal_class(&shape_class_entry TSRMLS_CC);
@@ -3911,6 +4105,8 @@ PHP_MINIT_FUNCTION(ming)
 #ifdef HAVE_NEW_MING
 	fontchar_class_entry_ptr = zend_register_internal_class(&fontchar_class_entry TSRMLS_CC);
 	soundinstance_class_entry_ptr = zend_register_internal_class(&soundinstance_class_entry TSRMLS_CC);
+	videostream_class_entry_ptr = zend_register_internal_class(&videostream_class_entry TSRMLS_CC);
+	prebuiltclip_class_entry_ptr = zend_register_internal_class(&prebuiltclip_class_entry TSRMLS_CC);
 #endif
 
 	return SUCCESS;
