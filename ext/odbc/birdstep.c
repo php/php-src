@@ -49,47 +49,52 @@
 #include "ext/standard/info.h"
 
 function_entry birdstep_functions[] = {
-	PHP_FE(birdstep_connect,								NULL)
-	PHP_FE(birdstep_close,								NULL)
-	PHP_FE(birdstep_exec,								NULL)
-	PHP_FE(birdstep_fetch,								NULL)
-	PHP_FE(birdstep_result,								NULL)
-	PHP_FE(birdstep_freeresult,							NULL)
-	PHP_FE(birdstep_autocommit,							NULL)
-	PHP_FE(birdstep_off_autocommit,						NULL)
-	PHP_FE(birdstep_commit,								NULL)
-	PHP_FE(birdstep_rollback,							NULL)
-	PHP_FE(birdstep_fieldnum,							NULL)
-	PHP_FE(birdstep_fieldname,							NULL)
+	PHP_FE(birdstep_connect,        NULL)
+	PHP_FE(birdstep_close,          NULL)
+	PHP_FE(birdstep_exec,           NULL)
+	PHP_FE(birdstep_fetch,          NULL)
+	PHP_FE(birdstep_result,         NULL)
+	PHP_FE(birdstep_freeresult,     NULL)
+	PHP_FE(birdstep_autocommit,     NULL)
+	PHP_FE(birdstep_off_autocommit, NULL)
+	PHP_FE(birdstep_commit,         NULL)
+	PHP_FE(birdstep_rollback,       NULL)
+	PHP_FE(birdstep_fieldnum,       NULL)
+	PHP_FE(birdstep_fieldname,      NULL)
 /*
  * Temporary Function aliases until the next major upgrade to PHP.  
  * These should allow users to continue to use their current scripts, 
  * but should in reality warn the user that this functionality is 
  * deprecated.
  */
-	PHP_FALIAS(velocis_connect,	 birdstep_connect,	NULL)
-	PHP_FALIAS(velocis_close,	birdstep_close,	NULL)
-	PHP_FALIAS(velocis_exec,	birdstep_exec,	NULL)
-	PHP_FALIAS(velocis_fetch,	birdstep_fetch,	NULL)
-	PHP_FALIAS(velocis_result,	birdstep_result,	NULL)
-	PHP_FALIAS(velocis_freeresult,	birdstep_freeresult,	NULL)
-	PHP_FALIAS(velocis_autocommit,	birdstep_autocommit,	NULL)
-	PHP_FALIAS(velocis_off_autocommit,	birdstep_off_autocommit,	NULL)
-	PHP_FALIAS(velocis_commit,	birdstep_commit,	NULL)
-	PHP_FALIAS(velocis_rollback,	birdstep_rollback,	NULL)
-	PHP_FALIAS(velocis_fieldnum,	birdstep_fieldnum,	NULL)
-	PHP_FALIAS(velocis_fieldname,	birdstep_fieldname,	NULL)
+	PHP_FALIAS(velocis_connect,        birdstep_connect,        NULL)
+	PHP_FALIAS(velocis_close,          birdstep_close,          NULL)
+	PHP_FALIAS(velocis_exec,           birdstep_exec,           NULL)
+	PHP_FALIAS(velocis_fetch,          birdstep_fetch,          NULL)
+	PHP_FALIAS(velocis_result,         birdstep_result,         NULL)
+	PHP_FALIAS(velocis_freeresult,     birdstep_freeresult,     NULL)
+	PHP_FALIAS(velocis_autocommit,     birdstep_autocommit,     NULL)
+	PHP_FALIAS(velocis_off_autocommit, birdstep_off_autocommit, NULL)
+	PHP_FALIAS(velocis_commit,         birdstep_commit,         NULL)
+	PHP_FALIAS(velocis_rollback,       birdstep_rollback,       NULL)
+	PHP_FALIAS(velocis_fieldnum,       birdstep_fieldnum,       NULL)
+	PHP_FALIAS(velocis_fieldname,      birdstep_fieldname,      NULL)
 /* End temporary aliases */
 	{NULL, NULL, NULL}
 };
 
 zend_module_entry birdstep_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"birdstep", birdstep_functions, PHP_MINIT(birdstep), PHP_MSHUTDOWN(birdstep),
-		PHP_RINIT(birdstep), NULL, PHP_MINFO(birdstep), NO_VERSION_YET,
-        STANDARD_MODULE_PROPERTIES
+	"birdstep",
+	birdstep_functions,
+	PHP_MINIT(birdstep),
+	PHP_MSHUTDOWN(birdstep),
+	PHP_RINIT(birdstep),
+	NULL,
+	PHP_MINFO(birdstep),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
 };
-
 
 #ifdef COMPILE_DL_ODBC
 ZEND_GET_MODULE(birdstep)
@@ -115,7 +120,7 @@ static void _free_birdstep_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		register int i;
 		for ( i=0; i < res->numcols; i++ ) {
 			if ( res->values[i].value )
-			       efree(res->values[i].value);
+				efree(res->values[i].value);
 		}
 		efree(res->values);
 	}
@@ -159,8 +164,7 @@ PHP_MSHUTDOWN_FUNCTION(birdstep)
 
 /* Some internal functions. Connections and result manupulate */
 
-static int
-birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
+static int birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 {
 	int ind;
 
@@ -171,8 +175,7 @@ birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 	return(ind);
 }
 
-static VConn *
-birdstep_find_conn(HashTable *list,int ind)
+static VConn * birdstep_find_conn(HashTable *list,int ind)
 {
 	VConn *conn;
 	int type;
@@ -184,14 +187,12 @@ birdstep_find_conn(HashTable *list,int ind)
 	return(conn);
 }
 
-static void
-birdstep_del_conn(HashTable *list,int ind)
+static void birdstep_del_conn(HashTable *list,int ind)
 {
 	zend_list_delete(ind);
 }
 
-static int
-birdstep_add_result(HashTable *list,Vresult *res,VConn *conn)
+static int birdstep_add_result(HashTable *list,Vresult *res,VConn *conn)
 {
 	int ind;
 
@@ -202,8 +203,7 @@ birdstep_add_result(HashTable *list,Vresult *res,VConn *conn)
 	return(ind);
 }
 
-static Vresult *
-birdstep_find_result(HashTable *list,int ind)
+static Vresult * birdstep_find_result(HashTable *list,int ind)
 {
 	Vresult *res;
 	int type;
@@ -215,8 +215,7 @@ birdstep_find_result(HashTable *list,int ind)
 	return(res);
 }
 
-static void
-birdstep_del_result(HashTable *list,int ind)
+static void birdstep_del_result(HashTable *list,int ind)
 {
 	zend_list_delete(ind);
 }
@@ -240,8 +239,7 @@ PHP_FUNCTION(birdstep_connect)
 		php_error(E_WARNING,"Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;
 	}
-	if ( ZEND_NUM_ARGS() != 3 ||
-	   getParameters(ht,3,&serv,&user,&pass) == FAILURE ) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht,3,&serv,&user,&pass) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(serv);
@@ -280,7 +278,7 @@ PHP_FUNCTION(birdstep_close)
 	pval *id;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -310,7 +308,7 @@ PHP_FUNCTION(birdstep_exec)
 	SWORD cols,i,colnamelen;
 	SDWORD rows,coldesc;
 
-	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&exec_str) == FAILURE ) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&exec_str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
