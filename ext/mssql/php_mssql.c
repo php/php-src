@@ -2017,6 +2017,7 @@ PHP_FUNCTION(mssql_bind)
 
 	memset((void*)&bind,0,sizeof(mssql_bind));
 	zend_hash_add(statement->binds,Z_STRVAL_PP(param_name),Z_STRLEN_PP(param_name),&bind,sizeof(mssql_bind),(void **)&bindp);
+	if( NULL == bindp ) RETURN_FALSE;
 	bindp->zval=*var;
 	zval_add_ref(var);
 
