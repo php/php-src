@@ -33,9 +33,9 @@ PHP 4                                                                      NEWS
 - Fixed a bug in GD's truecolor TTF handling. (Derick)
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22989 (sendmail not found by configure). (igyu@ionsphere.org)
 - Fixed bug #22965 (Crash in gd lib's ImageFillToBorder()). (Ilia)
-- Fixed bug #22844 (when changing bool value via -d or ini_set, On would 
-  become Off). (Ilia)
+- Fixed bug #22844 (Changing bool value via -d or ini_set(), On would be Off). (Ilia)
 - Fixed bug #22775 (Fatal errors exit with status 0 with CGI/CLI). (Jani)
 - Fixed bug #22751 (Compile error in gdcache.c when external libgd is used). (Jani)
 - Fixed bug #22721 (Poor file() performance on systems without mmap). (Wez)
