@@ -387,11 +387,19 @@ void mail_free_messagelist(MESSAGELIST **msglist)
 PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "IMAP Support", "enabled");    
-#ifdef IMAP41
+	php_info_print_table_header(2, "IMAP Support", "enabled" );
+#if HAVE_IMAP2000
+	php_info_print_table_row(2, "IMAP c-Client Version", "2000");               
+#elif IMAP41
 	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");               
 #else
 	php_info_print_table_row(2, "IMAP c-Client Version", "4.0"); 
+#endif
+#if HAVE_IMAP_SSL
+	php_info_print_table_row(2, "SSL Support", "enabled"); 
+#endif
+#if HAVE_IMAP_KRB
+	php_info_print_table_row(2, "Kerberos Support", "enabled"); 
 #endif
 	php_info_print_table_end();
 }
