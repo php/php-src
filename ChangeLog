@@ -1,3 +1,101 @@
+2001-09-04  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php:
+    Added more properties to the output, (mostly taken from the return of
+    imap_fetchstructure), converted tabs to spaces, changed style of headers
+    returned, added notice @ top of file about php extensions and changed
+    private functions to have leading underscore.
+
+2001-09-04  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+    Much better fix for non forte compilers on Solaris.
+    Removed pragma hack.
+    Renamed socket struct to bsd_socket.
+
+2001-09-04  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+    Adding function to set transaction locking and isolation.
+
+2001-09-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/interbase/interbase.dsp: ok, hand-patched this one in
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Interbase extension fixes by Jeremy Bettis
+    (.dsp patch looked funky, but these ones look ok)
+
+2001-09-04  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ctype/ctype.c
+      ext/com/COM.c
+      ext/calendar/calendar.c
+      ext/bz2/bz2.c: Fixed some protos.
+
+2001-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/math.c: MFH
+
+2001-09-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS
+      pear/DB/mssql.php:
+    added tableinfo to the MS SQL Server Pear DB extension (thanks Larry Blische
+    <blische@kravis.org>!)
+
+2001-09-04  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/string.c: Fixed some protos.
+
+2001-09-04  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/string.c: Thanks sebastian
+
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: update php_trim as well...
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: fix crash bug
+
+2001-09-04  Andi Gutmans  <andi@zend.com>
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.h: - Fix namespace collisions.
+
+2001-09-04  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/url.c: fix proto
+
+    * ext/standard/string.c: tabs -> spaces
+
+    * ext/standard/string.c: Begin cleanup, api wise...
+
+    * ext/standard/image.c: pval -> zval
+
+2001-09-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/WebInstaller.php:
+    * hopefully the only changes required for the initials->user rename
+
+    * pear/package.dtd: * rename "initials" to "user" for clarity
+
+2001-09-04  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: update workspaces
+
+    * ext/standard/array.c
+      ext/standard/php_rand.h
+      ext/standard/rand.c
+      ext/standard/rand_mt.c
+      ext/standard/rand_sys.c: fix zts+win32 build
+
 2001-09-04  Jason Greene  <jason@inetgurus.net>
 
     * ext/sockets/php_sockets.h
