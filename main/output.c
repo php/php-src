@@ -409,7 +409,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 {
 	if (OG(ob_nesting_level)>0) {
 #ifdef HAVE_ZLIB
-		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_CC)) {
+		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_C)) {
 			return FAILURE;
 		}
 #endif
