@@ -8,7 +8,7 @@
 #include <fcntl.h>
 
 #include "dbf.h"
-#include "php_virtual_cwd.c"
+#include "php.h"
 
 void free_dbf_head(dbhead_t *dbh);
 int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf);
