@@ -404,13 +404,6 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 
 ZEND_API void start_memory_manager(TSRMLS_D)
 {
-#if 0
-#ifndef ZTS
-	int i, j;
-	void *cached_entries[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
-#endif
-#endif
-
 	AG(head) = NULL;
 	
 #if MEMORY_LIMIT
@@ -431,25 +424,6 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	zend_mm_startup(&AG(mm_heap), 256*1024);
 #elif defined(ZEND_WIN32)
 	AG(memory_heap) = HeapCreate(HEAP_NO_SERIALIZE, 256*1024, 0);
-#endif
-
-#if 0
-#ifndef ZTS
-	/* Initialize cache, to prevent fragmentation */
-	/* We can't do this in ZTS mode, because calling emalloc() from within start_memory_manager()
-	 * will yield an endless recursion calling to alloc_globals_ctor()
-	 */
-	for (i=1; i<MAX_CACHED_MEMORY; i++) {
-		for (j=0; j<PRE_INIT_CACHE_ENTRIES; j++) {
-			cached_entries[i][j] = emalloc(8*i);
-		}
-	}
-	for (i=1; i<MAX_CACHED_MEMORY; i++) {
-		for (j=0; j<PRE_INIT_CACHE_ENTRIES; j++) {
-			efree(cached_entries[i][j]);
-		}
-	}
-#endif
 #endif
 
 #if ZEND_DEBUG
