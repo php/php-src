@@ -43,13 +43,17 @@ ZEND_API int zend_atoi(const char *str, int str_len)
 	retval = strtol(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
+			case 'g':
+			case 'G':
+				retval *= 1024;
+				/* break intentionally missing */
+			case 'm':
+			case 'M':
+				retval *= 1024;
+				/* break intentionally missing */
 			case 'k':
 			case 'K':
 				retval *= 1024;
-				break;
-			case 'm':
-			case 'M':
-				retval *= 1048576;
 				break;
 		}
 	}
