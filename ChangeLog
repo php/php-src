@@ -1,3 +1,86 @@
+2000-07-05  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Still one misssing zend_list_addref() and small fix in pg_close.
+      Fixes #5349 (but not the way reporter wants...).
+
+
+    * ext/pgsql/config.m4:
+    - Test pg_encoding_to_char instead (it's existence in libpq means that
+      PostgreSQL was compiled with multibyte support and client encoding
+      functions do something meaningful). Fixes #5417.
+
+2000-07-05  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/php_mysql.c:
+    That's no bug, it's quite fine the way it is (if id is
+    set to -1, it's ignored, and the passed_id argument is used).
+
+    If you're experiencing trouble with mysql_close(), please give me a
+    reproducing script.  If there's a bug, it's not as simple as that.
+
+2000-07-05  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/mysql/php_mysql.c:
+    - Discoverd possible bug. Could somebody have a look.
+
+    * ext/hyperwave/hw.c: - Link is now of type RESOURCE and not LONG
+
+2000-07-05  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - Increase allowed number of columns from 256 to 384.
+
+2000-07-05  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/sockets/sockets.c: Fixed some protos.
+
+2000-07-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c:
+    When using HTTP auth from PHP, fill in the %u custom log field so the
+    authenticated used id will get logged in the Apache access_log
+
+2000-07-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/wddx/wddx.c: Fix attribution on NEWS.
+
+2000-07-05  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS
+      ext/pdf/pdf.c: - Support for pdflib 3.01
+
+2000-07-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    Fix typo. A shutdown function is of course called, when the server
+    exits.
+
+2000-07-05  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS: - Note about FDF working again
+
+    * main/Makefile.in
+      main/SAPI.c
+      main/fdfdata.c
+      main/fdfdata.h: - fixed handling of fdf data (application/vnd.fdf)
+
+2000-07-05  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    - First try at getting interbase to compile and work in ZTS-mode. Compiles.
+
+2000-07-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/session/session.c:
+    (PHP session_destroy) return the error condition from storage handler's
+    session_destroy method.
+
+    Submitted by: juhl@eisenstein.dk
+
 2000-07-04  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/array.c: Not every argument type is mixed.
