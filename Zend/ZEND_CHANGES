@@ -545,7 +545,7 @@ Changes in the Zend Engine 2.0
 
         <?php
         class Exception {
-          function __construct(string $message=NULL, int $code=0) {
+          function __construct(/*string*/ $message=NULL, /*int*/ $code=0) {
             if (func_num_args()) {
               $this->message = $message;
             }
