@@ -89,183 +89,6 @@
 #define HTTP_HEADER_CONTENT_LENGTH	16
 #define HTTP_HEADER_TYPE			32
 
-/* 8 hexits plus \r\n\0 */
-#define HTTP_CHUNK_SIZE_MAXLEN				11
-#define HTTP_CHUNKED_ENCODING_BUFFER_LEN	(HTTP_CHUNK_SIZE_MAXLEN + 1)
-
-typedef struct _php_http_chunked_encoding_data {
-	int is_persistent;
-	size_t chunk_remaining;
-	char chunksize_buffer[HTTP_CHUNKED_ENCODING_BUFFER_LEN];
-	char *chunksize_buffer_pos;
-} php_http_chunked_encoding_data;
-
-static php_stream_filter_status_t php_http_chunked_encoding_filter(
-    php_stream *stream,
-    php_stream_filter *thisfilter,
-    php_stream_bucket_brigade *buckets_in,
-    php_stream_bucket_brigade *buckets_out,
-    size_t *bytes_consumed,
-    int flags
-    TSRMLS_DC)
-{
-	php_stream_bucket *bucket;
-	php_http_chunked_encoding_data *data = (php_http_chunked_encoding_data*)thisfilter->abstract;
-	size_t consumed = 0;
-	char *buf;
-	size_t buflen;
-
-	while (buckets_in->head) {
-		char *e = NULL;
-		size_t chunk_remaining;
-
-		bucket = buckets_in->head;
-		php_stream_bucket_unlink(bucket TSRMLS_CC);
-
-		buf = bucket->buf;
-		buflen = bucket->buflen;
-
-continue_bucket:
-
-		if (data->chunk_remaining > 0) {
-			if ((data->chunk_remaining > buflen) && (bucket->buf == buf)) {
-				/* This bucket is smaller than our remaining chunksize,
-				   Pass it on unmolested */
-				consumed += buflen;
-				data->chunk_remaining -= buflen;
-				php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
-
-				/* Next bucket please */
-				continue;
-			} else if (data->chunk_remaining > buflen) {
-				php_stream_bucket *newbucket;
-				char *newbuf;
-
-				/* Previously split bucket can be used en toto */
-				consumed += buflen;
-				data->chunk_remaining -= buflen;
-
-				newbuf = estrndup(buf, buflen);
-				newbucket = php_stream_bucket_new(stream, newbuf, buflen, 1, stream->is_persistent TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, newbucket TSRMLS_CC);
-				php_stream_bucket_delref(bucket TSRMLS_CC);
-				/* Next bucket please */
-				continue;
-			} else {
-				php_stream_bucket *newbucket;
-				char *newbuf;
-
-				/* Consume enough of this bucket to satisfy the current chunk */
-				newbuf = pemalloc(data->chunk_remaining, stream->is_persistent);
-				memcpy(newbuf, buf, data->chunk_remaining);
-
-				newbucket = php_stream_bucket_new(stream, newbuf, data->chunk_remaining, 1, stream->is_persistent TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, newbucket TSRMLS_CC);
-				buf += data->chunk_remaining;
-				buflen -= data->chunk_remaining;
-				consumed += data->chunk_remaining;
-				data->chunk_remaining = 0;
-				/* Fall Through */
-			}
-		}
-
-		while (buflen > 0 && (*buf == '\r' || *buf == '\n')) {
-			buf++;
-			buflen--;
-		}
-
-		if (buflen <= 0) {
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-			continue;
-		}
-
-		if ((data->chunksize_buffer_pos - data->chunksize_buffer) < HTTP_CHUNK_SIZE_MAXLEN) {
-			/* Copy buf into chunksize_buffer */
-			if ((HTTP_CHUNKED_ENCODING_BUFFER_LEN - (data->chunksize_buffer_pos - data->chunksize_buffer)) > buflen) {
-				/* Possible split chunklen */
-				memcpy(data->chunksize_buffer_pos, buf, buflen);
-				memset(data->chunksize_buffer_pos + buflen, 0, HTTP_CHUNK_SIZE_MAXLEN - buflen - (data->chunksize_buffer_pos - data->chunksize_buffer));
-				chunk_remaining = strtoul(data->chunksize_buffer, &e, 16);
-				/* Skip whitespace */
-				while ((*e == ' ') && (e < (data->chunksize_buffer + HTTP_CHUNK_SIZE_MAXLEN))) e++;
-				if (*e != '\r') {
-					if (!((*e >= '0' && *e <= '9') ||
-						  (*e >= 'a' && *e <= 'f') ||
-						  (*e >= 'A' && *e <= 'F'))) {
-							/* Unexpected character */
-						return PSFS_ERR_FATAL;
-					}
-
-					/* Not enough data to know the chunksize yet */
-					php_stream_bucket_delref(bucket TSRMLS_CC);
-					continue;
-				}
-			} else {
-				memcpy(data->chunksize_buffer_pos, buf, HTTP_CHUNK_SIZE_MAXLEN - (data->chunksize_buffer_pos - data->chunksize_buffer));
-				chunk_remaining = strtoul(data->chunksize_buffer, &e, 16);
-				/* Skip whitespace */
-				while ((*e == ' ') && (e < (data->chunksize_buffer + HTTP_CHUNK_SIZE_MAXLEN))) e++;
-				if (*e != '\r') {
-					/* Invalid chunksize */
-					return PSFS_ERR_FATAL;
-				}
-			}
-		}
-
-		data->chunk_remaining = chunk_remaining;
-		/* Skip past the chunksize itself */
-		buf += (e - data->chunksize_buffer) + sizeof("\r\n") - 1;
-		buflen -= (e - data->chunksize_buffer) + sizeof("\r\n") - 1;
-		consumed += (e - data->chunksize_buffer) + sizeof("\r\n") - 1;
-		memset(data->chunksize_buffer, 0, sizeof(data->chunksize_buffer));
-		data->chunksize_buffer_pos = data->chunksize_buffer;
-
-		if (buflen > 0) {
-			goto continue_bucket;
-		}
-		php_stream_bucket_delref(bucket TSRMLS_CC);
-	}
-
-	if (bytes_consumed) {
-		*bytes_consumed = consumed;
-	}
-
-	if (consumed > 0) {
-		return PSFS_PASS_ON;
-	}
-
-	return PSFS_FEED_ME;	
-}
-
-static void php_http_chunked_encoding_dtor(php_stream_filter *thisfilter TSRMLS_DC)
-{
-	if (thisfilter && thisfilter->abstract) {
-		php_http_chunked_encoding_data *data = (php_http_chunked_encoding_data*)thisfilter->abstract;
-
-		pefree(data, data->is_persistent);
-		thisfilter->abstract = NULL;
-	}
-}
-
-static php_stream_filter_ops php_http_chunked_encoding_filter_ops = {
-    php_http_chunked_encoding_filter,
-    php_http_chunked_encoding_dtor,
-    "http.chunked.decode"
-};
-
-static php_stream_filter *php_http_chunked_encoding_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
-{
-	php_http_chunked_encoding_data *data;
-
-	data = pemalloc(sizeof(php_http_chunked_encoding_data), persistent);
-	data->chunk_remaining = 0;
-	data->is_persistent = persistent;
-	memset(data->chunksize_buffer, 0, sizeof(data->chunksize_buffer));
-	data->chunksize_buffer_pos = data->chunksize_buffer;
-
-    return php_stream_filter_alloc(&php_http_chunked_encoding_filter_ops, data, persistent);
-}
-
 php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
@@ -288,7 +111,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int transport_len, have_header = 0, request_fulluri = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
-	int autofilter_chunked_encoding = 0;
 
 	if (redirect_max < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
@@ -669,9 +491,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
 				file_size = atoi(http_header_line + 16);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
-			} else if ((strncasecmp(http_header_line, "Transfer-Encoding: ", sizeof("Transfer-Encoding: ") - 1) == 0) &&
-					   (strstr(http_header_line + sizeof("Transfer-Encoding: ") - 1, "chunked") != NULL)) {
-				autofilter_chunked_encoding = 1;
 			}
 
 			if (http_header_line[0] == '\0') {
@@ -792,17 +611,6 @@ out:
 		 * the stream */
 		stream->position = 0;
 
-		if (autofilter_chunked_encoding) {
-			php_stream_filter *filter;
-
-			filter = php_http_chunked_encoding_filter_create("http.chunked.decode", NULL, stream->is_persistent TSRMLS_CC);
-			if (!filter) {
-				/* Never actually happens */
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to apply chunked content decoding");
-			} else {
-				php_stream_filter_append(&stream->readfilters, filter);
-			}
-		}
 	}
 
 	return stream;
