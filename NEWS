@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.1.0
+- Removed the sablotron extension infavor of the new XSLT extension.
+  (Sterling)
 - Fixed a bug in WDDX deserialization that would sometimes corrupt the root
   element if it was a scalar one. (Andrei)
 - Make ImageColorAt() and ImageColorsForIndex() work with TrueColor images.
