@@ -1,4 +1,4 @@
-# Temporarily here -- later may go into some batch file
+# Temporarily here -- later may go into some batch file 
 # which will set this as an environment variable
 PROJECT_ROOT = ..
 
