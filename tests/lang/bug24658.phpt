@@ -21,9 +21,13 @@ no_typehint($v);
 typehint($v);
 no_typehint_ref($v);
 typehint_ref($v);
+echo "===no_typehint===\n";
 array_walk($a, 'no_typehint');
+echo "===no_typehint_ref===\n";
 array_walk($a, 'no_typehint_ref');
+echo "===typehint===\n";
 array_walk($a, 'typehint');
+echo "===typehint_ref===\n";
 array_walk($a, 'typehint_ref');
 ?>
 --EXPECTF--
@@ -35,14 +39,17 @@ object(foo)#%d (0) {
 }
 object(foo)#%d (0) {
 }
+===no_typehint===
 object(foo)#%d (0) {
 }
 int(1)
 int(2)
+===no_typehint_ref===
 object(foo)#%d (0) {
 }
 int(1)
 int(2)
+===typehint===
 object(foo)#%d (0) {
 }
 
