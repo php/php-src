@@ -92,7 +92,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 
 				new_property = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(new_property);
-				new_property->value.str.val = zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
+				new_property->value.str.val = Z_STRLEN_P(arg2)?zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)):"";
 				new_property->value.str.len = Z_STRLEN_P(arg2);
 				new_property->type = IS_STRING;
 				
