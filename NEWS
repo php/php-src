@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added support for UNC style paths (\\server\share\file & //server/share/file) (Daniel, TSRM)
 - Changed C++ style comments to C-style comments (Marc)
 - Added dbx module (database abstraction) to the repository. (Marc)
 - Using ITypeInfo instead of IDispatch if possible. This makes DCOM calls
