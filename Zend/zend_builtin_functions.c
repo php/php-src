@@ -1198,6 +1198,7 @@ ZEND_FUNCTION(debug_backtrace)
 	char *class_name;
 	zend_uint class_name_length;
 	zval *stack_frame;
+	zend_bool first_time = 1;
 
 	ptr = EG(current_execute_data);
 	lineno = ptr->opline->lineno;
@@ -1230,15 +1231,19 @@ ZEND_FUNCTION(debug_backtrace)
 
 		filename = ptr->function_state.function->op_array.filename;
 
-		add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
-		if (class_name) {
-			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+		if (!first_time) { /* Skip the first context which is debug_backtrace() itself */
+			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+			if (class_name) {
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+			}
+			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+			/* add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1); */
+			
+			add_next_index_zval(return_value, stack_frame);
+		} else {
+			first_time = 0;
 		}
-		add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
-		add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
-		/* add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1); */
-		
-		add_next_index_zval(return_value, stack_frame);
 
 		if (ptr->opline) {
 			lineno = ptr->opline->lineno;
