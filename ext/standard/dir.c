@@ -113,9 +113,12 @@ static void _dir_dtor(php_dir *dirp)
 	efree(dirp);
 }
 
-static void php_dir_init_globals(DIRLS_D)
+PHP_RINIT_FUNCTION(dir)
 {
+	DIRLS_FETCH();
+
 	DIRG(default_dir) = -1;
+	return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(dir)
@@ -128,9 +131,7 @@ PHP_MINIT_FUNCTION(dir)
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS
-	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), (ts_allocate_ctor) php_dir_init_globals, NULL);
-#else
-	php_dir_init_globals(DIRLS_C);
+	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), NULL, NULL);
 #endif
 
 	return SUCCESS;
