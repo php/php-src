@@ -40,10 +40,6 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
-	if (S->cols) {
-		efree(S->cols);
-		S->cols = NULL;
-	}
 	efree(S);
 	return 1;
 }
@@ -74,7 +70,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	if (!stmt->executed) { 
 		stmt->column_count = (int) mysql_num_fields(S->result);
-		S->cols = ecalloc(stmt->column_count, sizeof(pdo_mysql_column));
 	}
 	return 1;
 }
