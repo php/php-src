@@ -19,6 +19,9 @@
  */
 /* $Id$ */
 
+#include "zend.h"
+#include "php.h"
+
 #include "httpd.h"
 #include "http_config.h"
 #if MODULE_MAGIC_NUMBER > 19980712
@@ -34,8 +37,6 @@
 #include "http_request.h"
 #include "http_log.h"
 
-#include "zend.h"
-#include "php.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"

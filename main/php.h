@@ -73,6 +73,7 @@ extern unsigned char second_arg_allow_ref[];
 #define THREAD_LS
 #endif
 
+#include "php_regex.h"
 
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef DEBUG
