@@ -49,6 +49,10 @@ PHP_FUNCTION(mysqli_connect)
 		return;
 	}
 
+	if (!socket_len) {
+		socket = NULL;
+	}
+    
 	/* TODO: safe mode handling */
 	if (PG(sql_safe_mode)){
 	} else {
