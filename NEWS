@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed bug #28702 (SOAP does not parse WSDL service address correctly). (Dmitry)
 - Fixed bug #28699 (Reflection api bugs). (Marcus)
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
+- Fixed bug #28512 (Allocate enough space to store MSSQL data). (Frank)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
 
 7 Jun 2004, PHP 5 Release Candidate 3
