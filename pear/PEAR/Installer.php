@@ -167,7 +167,7 @@ class PEAR_Installer extends PEAR_Common
      * @return bool true if successful, false if not
      */
 
-    function install($pkgfile, $options = array())
+    function install($pkgfile, $options = array(), $config = null)
     {
         // recognized options:
         // - register_only : update registry but don't install files
@@ -181,6 +181,16 @@ class PEAR_Installer extends PEAR_Common
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
         } elseif (!@is_file($pkgfile)) {
+            if (preg_match('/^[A-Z][A-Za-z0-9_]+$/', $pkgfile)) {
+                // valid package name
+                if ($config === null) {
+                    $pkgfile = "http://pear.php.net/get/$pkgfile";
+                } else {
+                    $pkgfile = "http://" . $config->get('master_server') .
+                         "/get/$pkgfile";
+                }
+                $need_download = true;
+            }
             return $this->raiseError("could not open the package file: $pkgfile");
         }
 
@@ -328,6 +338,7 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+    // {{{ checkDeps()
 
     function checkDeps(&$pkginfo)
     {
@@ -345,6 +356,8 @@ class PEAR_Installer extends PEAR_Common
         }
         return false;
     }
+
+    // }}}
 }
 
 ?>
