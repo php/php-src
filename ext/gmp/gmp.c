@@ -178,7 +178,7 @@ ZEND_MINFO_FUNCTION(gmp)
 if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 	ZEND_FETCH_RESOURCE(gmpnumber, mpz_t *, zval, -1, GMP_RESOURCE_NAME, le_gmp);\
 } else {\
-	if(convert_to_gmp(&gmpnumber,zval) == FAILURE) {\
+	if(convert_to_gmp(&gmpnumber,zval,0) == FAILURE) {\
 		RETURN_FALSE;\
 	}\
 	ZEND_REGISTER_RESOURCE(NULL, gmpnumber, le_gmp);\
@@ -190,7 +190,7 @@ if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t * *gmpnumber, zval **val) 
+static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base) 
 {
 	int ret = 0;
 
@@ -207,11 +207,14 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val)
 	case IS_STRING:
 		{
 			char *numstr = Z_STRVAL_PP(val);
-			if(numstr[0] == '0' && (numstr[1] == 'x' || numstr[1] == 'X')) {
-				ret = mpz_init_set_str(**gmpnumber, numstr+2, 16);
-			} else {
-				ret = mpz_init_set_str(**gmpnumber, numstr, 10);
+			if (base==0) {
+				if(numstr[0] == '0' && (numstr[1] == 'x' || numstr[1] == 'X')) {
+					base=16;
+				} else {
+					base=10;
+				}
 			}
+			ret = mpz_init_set_str(**gmpnumber, numstr, base);
 		}
 		break;
 	default:
@@ -434,22 +437,30 @@ static inline void _gmp_binary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_opl_
 }
 /* }}} */
 
-/* Remove the following function when you have succesfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* {{{ proto resource gmp_init(mixed number)
+/* {{{ proto resource gmp_init(mixed number [, int base])
    Initializes GMP number */
 ZEND_FUNCTION(gmp_init)
 {
-	zval **number_arg;
+	zval **number_arg, **base_arg;
 	mpz_t * gmpnumber;
+	int argc;
+	int base=0;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &number_arg) == FAILURE){
+	argc = ZEND_NUM_ARGS();
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &number_arg, &base_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 
-	if(convert_to_gmp(&gmpnumber,number_arg) == FAILURE) {
+	if (argc==2) {
+			convert_to_long_ex(base_arg);
+			base = Z_LVAL_PP(base_arg);
+		if(base < 2 || base > 36) {
+			zend_error(E_WARNING, "Bad base for conversion: %d (should be between 2 and 36)", base);
+			RETURN_FALSE;
+		}
+	}
+
+	if(convert_to_gmp(&gmpnumber,number_arg,base) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -516,6 +527,7 @@ ZEND_FUNCTION(gmp_strval)
 		num_len++;
 	}
 	mpz_get_str(out_string, base, *gmpnum);
+	out_string[num_len] = '\0';
 
 	RETVAL_STRINGL(out_string, num_len, 0);
 }
