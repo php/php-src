@@ -55,6 +55,7 @@ php_array_globals array_globals;
 #define EXTR_SKIP			1
 #define EXTR_PREFIX_SAME	2
 #define	EXTR_PREFIX_ALL		3
+#define	EXTR_PREFIX_INVALID	4
 
 #define SORT_REGULAR		0
 #define SORT_NUMERIC		1
@@ -73,6 +74,7 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_ALL", EXTR_PREFIX_ALL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_PREFIX_INVALID", EXTR_PREFIX_INVALID, CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("SORT_ASC", SORT_ASC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_DESC", SORT_DESC, CONST_CS | CONST_PERSISTENT);
@@ -1083,21 +1085,21 @@ PHP_FUNCTION(in_array)
 /* }}} */
 
 
-static int php_valid_var_name(char *varname)
+static int php_valid_var_name(char *var_name)
 {
 	int len, i;
 	
-	if (!varname)
+	if (!var_name)
 		return 0;
 	
-	len = strlen(varname);
+	len = strlen(var_name);
 	
-	if (!isalpha((int)varname[0]) && varname[0] != '_')
+	if (!isalpha((int)var_name[0]) && var_name[0] != '_')
 		return 0;
 	
 	if (len > 1) {
 		for(i=1; i<len; i++) {
-			if (!isalnum((int)varname[i]) && varname[i] != '_') {
+			if (!isalnum((int)var_name[i]) && var_name[i] != '_') {
 				return 0;
 			}
 		}
@@ -1107,41 +1109,43 @@ static int php_valid_var_name(char *varname)
 }
 
 
-/* {{{ proto int extract(array var_array, int extract_type [, string prefix])
+/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval **var_array, **etype, **prefix;
+	zval **var_array, **z_extract_type, **prefix;
 	zval **entry, *data;
-	char *varname, *finalname;
-	ulong lkey, varname_len;
-	int res, extype, count = 0;
+	char *var_name, *final_name;
+	ulong num_key, var_name_len;
+	int var_exists, extract_type, key_type, count = 0;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &var_array) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			extype = EXTR_OVERWRITE;
+			extract_type = EXTR_OVERWRITE;
 			break;
 
 		case 2:
-			if (zend_get_parameters_ex(2, &var_array, &etype) == FAILURE) {
+			if (zend_get_parameters_ex(2, &var_array, &z_extract_type) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long_ex(etype);
-			extype = Z_LVAL_PP(etype);
-			if (extype > EXTR_SKIP && extype <= EXTR_PREFIX_ALL) {
-				WRONG_PARAM_COUNT;
+			convert_to_long_ex(z_extract_type);
+			extract_type = Z_LVAL_PP(z_extract_type);
+			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_INVALID) {
+				php_error(E_WARNING, "%s() expects a prefix to be specified",
+						  get_active_function_name());
+				return;
 			}
 			break;
 			
 		case 3:
-			if (zend_get_parameters_ex(3, &var_array, &etype, &prefix) == FAILURE) {
+			if (zend_get_parameters_ex(3, &var_array, &z_extract_type, &prefix) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long_ex(etype);
-			extype = Z_LVAL_PP(etype);
+			convert_to_long_ex(z_extract_type);
+			extract_type = Z_LVAL_PP(z_extract_type);
 			convert_to_string_ex(prefix);
 			break;
 
@@ -1150,62 +1154,83 @@ PHP_FUNCTION(extract)
 			break;
 	}
 	
-	if (extype < EXTR_OVERWRITE || extype > EXTR_PREFIX_ALL) {
-		php_error(E_WARNING, "Wrong argument in call to extract()");
-		RETURN_FALSE;
+	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_PREFIX_INVALID) {
+		php_error(E_WARNING, "Unknown extract type in call to %s()",
+				  get_active_function_name());
+		return;
 	}
 	
 	if (Z_TYPE_PP(var_array) != IS_ARRAY) {
-		php_error(E_WARNING, "Wrong datatype in call to extract()");
-		RETURN_FALSE;
+		php_error(E_WARNING, "%s() expects first argument to be an array",
+				  get_active_function_name());
+		return;
 	}
 		
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(var_array));
 	while(zend_hash_get_current_data(Z_ARRVAL_PP(var_array), (void **)&entry) == SUCCESS) {
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, NULL);
+		final_name = NULL;
+		var_exists = 0;
 
-		if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &varname, &varname_len, &lkey, 0, NULL) == HASH_KEY_IS_STRING) {
+		if (key_type == HASH_KEY_IS_STRING) {
+			var_name_len--;
+			var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
+		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
+			final_name = emalloc(MAX_LENGTH_OF_LONG + Z_STRLEN_PP(prefix) + 2);
+			zend_sprintf(final_name, "%s_%ld", Z_STRVAL_PP(prefix), num_key);
+		} else {
+			zend_hash_move_forward(Z_ARRVAL_PP(var_array));
+			continue;
+		}
+			
+		switch (extract_type) {
+			case EXTR_OVERWRITE:
+				final_name = estrndup(var_name, var_name_len);
+				break;
 
-			varname_len--;
-			finalname = NULL;
+			case EXTR_PREFIX_SAME:
+				if (!var_exists)
+					final_name = estrndup(var_name, var_name_len);
+				/* break omitted intentionally */
 
-			res = zend_hash_exists(EG(active_symbol_table), varname, varname_len+1);
-			switch (extype) {
-				case EXTR_OVERWRITE:
-					finalname = estrndup(varname, varname_len);
-					break;
-
-				case EXTR_PREFIX_SAME:
-					if (!res)
-						finalname = estrndup(varname, varname_len);
-					/* break omitted intentionally */
-
-				case EXTR_PREFIX_ALL:
-					if (!finalname) {
-						finalname = emalloc(varname_len + Z_STRLEN_PP(prefix) + 2);
-						strcpy(finalname, Z_STRVAL_PP(prefix));
-						strcat(finalname, "_");
-						strcat(finalname, varname);
-					}
-					break;
-
-				default:
-					if (!res)
-						finalname = estrndup(varname, varname_len);
-					break;
-			}
-
-			if (finalname) {
-			   	if (php_valid_var_name(finalname)) {
-					MAKE_STD_ZVAL(data);
-					*data = **entry;
-					zval_copy_ctor(data);
-
-					ZEND_SET_SYMBOL(EG(active_symbol_table), finalname, data);
-
-					count++;
+			case EXTR_PREFIX_ALL:
+				if (!final_name) {
+					final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
+					strcpy(final_name, Z_STRVAL_PP(prefix));
+					strcat(final_name, "_");
+					strcat(final_name, var_name);
 				}
-				efree(finalname);
+				break;
+
+			case EXTR_PREFIX_INVALID:
+				if (!final_name) {
+					if (!php_valid_var_name(var_name)) {
+						final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
+						strcpy(final_name, Z_STRVAL_PP(prefix));
+						strcat(final_name, "_");
+						strcat(final_name, var_name);
+					} else
+						final_name = estrndup(var_name, var_name_len);
+				}
+				break;
+
+			default:
+				if (!var_exists)
+					final_name = estrndup(var_name, var_name_len);
+				break;
+		}
+
+		if (final_name) {
+			if (php_valid_var_name(final_name)) {
+				MAKE_STD_ZVAL(data);
+				*data = **entry;
+				zval_copy_ctor(data);
+
+				ZEND_SET_SYMBOL(EG(active_symbol_table), final_name, data);
+
+				count++;
 			}
+			efree(final_name);
 		}
 
 		zend_hash_move_forward(Z_ARRVAL_PP(var_array));
