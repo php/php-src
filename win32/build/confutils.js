@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.36 2004-01-09 13:17:58 wez Exp $
+// $Id: confutils.js,v 1.37 2004-01-09 15:11:19 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -83,6 +83,20 @@ extension_include_code = "";
 extension_module_ptrs = "";
 
 get_version_numbers();
+
+/* execute a command and return the output as a string */
+function execute(command_line)
+{
+	var e = WshShell.Exec(command_line);
+	var ret = "";
+
+	ret = e.StdOut.ReadAll();
+
+//STDOUT.WriteLine("command " + command_line);
+//STDOUT.WriteLine(ret);
+
+	return ret;
+}
 
 function condense_path(path)
 {
