@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML: adding/removing attributes
+SimpleXML: adding/removing attributes (direct)
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -7,25 +7,24 @@ SimpleXML: adding/removing attributes
 $xml =<<<EOF
 <people>
    <person name="Joe"></person>
-   <person name="Boe"></person>
 </people>
 EOF;
 
 $people = simplexml_load_string($xml);
-var_dump($people->person[0]['name']);
-var_dump($people->person[0]['age']);
-$person = $people->person[0];
+var_dump($people->person['name']);
+var_dump($people->person['age']);
+$person = $people->person;
 $person['name'] = "XXX";
-var_dump($people->person[0]['name']);
-$people->person[0]['age'] = 30;
-var_dump($people->person[0]['age']);
-$people->person[0]['age'] += 5;
-var_dump($people->person[0]['age']);
+var_dump($people->person['name']);
+$people->person['age'] = 30;
+var_dump($people->person['age']);
+$people->person['age'] += 5;
+var_dump($people->person['age']);
 echo "---Unset:---\n";
-unset($people->person[0]['age']);
+unset($people->person['age']);
 echo "---Unset?---\n";
-var_dump($people->person[0]['age']);
-var_dump(isset($people->person[0]['age']));
+var_dump($people->person['age']);
+var_dump(isset($people->person['age']));
 echo "---Done---\n";
 ?>
 --EXPECT--
