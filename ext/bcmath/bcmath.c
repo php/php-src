@@ -111,6 +111,20 @@ PHP_MINFO_FUNCTION(bcmath)
 	php_info_print_table_end();
 }
 
+/* {{{ php_str2num
+   Convert to bc_num detecting scale */
+static void php_str2num(bc_num *num, char *str) {
+	char *p;
+
+	if (!(p = strchr(str, '.'))) {
+		bc_str2num(num, str, 0 TSRMLS_CC);
+		return;
+	}
+
+	bc_str2num(num, str, strlen(p+1) TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -141,9 +155,10 @@ PHP_FUNCTION(bcadd)
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	php_str2num(&first, Z_STRVAL_PP(left));
+	php_str2num(&second, Z_STRVAL_PP(right));
 	bc_add (first, second, &result, scale);
+	result->n_scale = scale;
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -184,9 +199,10 @@ PHP_FUNCTION(bcsub)
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	php_str2num(&first, Z_STRVAL_PP(left));
+	php_str2num(&second, Z_STRVAL_PP(right));
 	bc_sub (first, second, &result, scale);
+	result->n_scale = scale;
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -227,9 +243,10 @@ PHP_FUNCTION(bcmul)
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	php_str2num(&first, Z_STRVAL_PP(left));
+	php_str2num(&second, Z_STRVAL_PP(right));
 	bc_multiply (first, second, &result, scale TSRMLS_CC);
+	result->n_scale = scale;
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -270,10 +287,11 @@ PHP_FUNCTION(bcdiv)
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	php_str2num(&first, Z_STRVAL_PP(left));
+	php_str2num(&second, Z_STRVAL_PP(right));
 	switch (bc_divide (first, second, &result, scale TSRMLS_CC)) {
 		case 0: /* OK */
+			result->n_scale = scale;
 			Z_STRVAL_P(return_value) = bc_num2str(result);
 			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
@@ -347,10 +365,11 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&mod TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, left, scale TSRMLS_CC);
-	bc_str2num(&second, right, scale TSRMLS_CC);
-	bc_str2num(&mod, modulous, scale TSRMLS_CC);
+	php_str2num(&first, left);
+	php_str2num(&second, right);
+	php_str2num(&mod, modulous);
 	bc_raisemod(first, second, mod, &result, scale TSRMLS_CC);
+	result->n_scale = scale;
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -392,9 +411,10 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	php_str2num(&first, Z_STRVAL_PP(left));
+	php_str2num(&second, Z_STRVAL_PP(right));
 	bc_raise (first, second, &result, scale TSRMLS_CC);
+	result->n_scale = scale;
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -432,8 +452,9 @@ PHP_FUNCTION(bcsqrt)
 	}
 	convert_to_string_ex(left);
 	bc_init_num(&result TSRMLS_CC);
-	bc_str2num(&result, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	php_str2num(&result, Z_STRVAL_PP(left));
 	if (bc_sqrt (&result, scale TSRMLS_CC) != 0) {
+		result->n_scale = scale;
 		Z_STRVAL_P(return_value) = bc_num2str(result);
 		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 		Z_TYPE_P(return_value) = IS_STRING;
