@@ -231,9 +231,9 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 	MS_SQL_G(num_persistent) = 0;
 	if (cfg_get_long("mssql.compatability_mode", &compatability_mode) == SUCCESS) {
 		if (compatability_mode) {
-			MS_SQL_G(get_column_content) = php_mssql_get_column_content_with_type;
-		} else {
 			MS_SQL_G(get_column_content) = php_mssql_get_column_content_without_type;	
+		} else {
+			MS_SQL_G(get_column_content) = php_mssql_get_column_content_with_type;
 		}
 	}
 }
