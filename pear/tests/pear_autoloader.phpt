@@ -5,7 +5,7 @@ PEAR_Autoloader
 --FILE--
 <?php
 
-require "../PEAR/Autoloader.php";
+include dirname(__FILE__)."/../PEAR/Autoloader.php";
 
 class test1 extends PEAR_Autoloader {
     function test1() {

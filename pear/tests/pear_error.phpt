@@ -8,7 +8,7 @@ PEAR_Error: basic test
 // Parts tested: - PEAR_Error class
 //               - PEAR::isError static method
 
-require "../PEAR.php";
+include dirname(__FILE__)."/../PEAR.php";
 
 function test_error_handler($errno, $errmsg, $file, $line, $vars) {
 	$errortype = array (

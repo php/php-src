@@ -8,7 +8,7 @@ PEAR_Error: expected errors
 //               - PEAR::expectError
 //               - PEAR::popExpect
 
-require "../PEAR.php";
+include dirname(__FILE__)."/../PEAR.php";
 
 error_reporting(E_ALL);
 

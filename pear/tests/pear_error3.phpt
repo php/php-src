@@ -8,7 +8,7 @@ PEAR_Error: default error handling
 //               - PEAR::setErrorHandling
 //               - PEAR::raiseError method
 
-require "../PEAR.php";
+include dirname(__FILE__)."/../PEAR.php";
 
 error_reporting(E_ALL);
 
