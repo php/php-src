@@ -2863,14 +2863,8 @@ PHP_FUNCTION(hw_new_document)
 PHP_FUNCTION(hw_new_document_from_file)
 {
 	pval **arg1, **arg2;
-	int len, type;
 	char *ptr;
-	int issock=0;
-	int socketd=0;
-	FILE *fp;
 	php_stream *stream;
-	int ready=0;
-	int bcount=0;
 	int use_include_path=0;
 	hw_document *doc;
 
@@ -2895,13 +2889,16 @@ PHP_FUNCTION(hw_new_document_from_file)
 	doc->size = php_stream_copy_to_mem(stream, &doc->data, PHP_STREAM_COPY_ALL, 1);
 
 	php_stream_close(stream);
-	
-	doc->data = realloc(doc->data, bcount+1);
+
+	/* I'm not sure if it is necessary to add a '\0'. It depends on whether
+	 * PHP-Strings has to be null terminated. doc->size doesn't count the
+	 * '\0'.
+	 */
+	doc->data = realloc(doc->data, doc->size+1);
 	ptr = doc->data;
-	ptr[bcount] = '\0';
+	ptr[doc->size] = '\0';
 	doc->attributes = strdup(Z_STRVAL_PP(arg1));
 	doc->bodytag = NULL;
-	doc->size = bcount;
 	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
 	Z_TYPE_P(return_value) = IS_LONG;
 }
