@@ -139,8 +139,7 @@ static int zend_user_has_more(zend_object_iterator *_iter TSRMLS_DC)
 		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_has_more, "hasmore", &more);
 		if (more) {
 			result = i_zend_is_true(more);
-			zval_dtor(more);
-			FREE_ZVAL(more);
+			zval_ptr_dtor(&more);
 			return result ? SUCCESS : FAILURE;
 		}
 	}
