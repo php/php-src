@@ -158,7 +158,7 @@ typedef struct {
 */
 static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 {
-	int bytes_to_read, actual_read = 0;
+	int bytes_to_read, total_read = 0, actual_read = 0;
 
 	/* shift the existing data if necessary */
 	if (self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {
@@ -171,7 +171,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	bytes_to_read = self->bufsize - self->bytes_in_buffer;
 
 	/* read the required number of bytes */
-	if (bytes_to_read > 0) {
+	while (bytes_to_read > 0) {
 
 		char *buf = self->buffer + self->bytes_in_buffer;
 
@@ -181,10 +181,14 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 		if (actual_read > 0) {
 			self->bytes_in_buffer += actual_read;
 			SG(read_post_bytes) += actual_read;
+			total_read += actual_read;
+			bytes_to_read -= actual_read;
+		} else {
+			break;
 		}
 	}
 
-	return actual_read;
+	return total_read;
 }
 
 
@@ -334,7 +338,12 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 		/* add header to table */
 		
 		char *key = line;
-		char *value = strchr(line, ':');
+		char *value = NULL;
+		
+		/* space in the beginning means same header */
+		if (!isspace(line[0])) {
+			value = strchr(line, ':');
+		}
 
 		if (value) {
 			*value = 0;
@@ -343,7 +352,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value = estrdup(value);
 			entry.key = estrdup(key);
 
-		} else if (zend_llist_remove_tail(header)) { /* If no ':' on the line, add to previous line */
+		} else if (header->count) { /* If no ':' on the line, add to previous line */
 
 			prev_len = strlen(prev_entry.value);
 			cur_len = strlen(line);
@@ -354,6 +363,10 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value[cur_len + prev_len] = '\0';
 
 			entry.key = estrdup(prev_entry.key);
+			
+			zend_llist_remove_tail(header);
+		} else {
+			continue;
 		}
 
 		zend_llist_add_element(header, &entry);
@@ -400,7 +413,9 @@ static char *php_ap_getword(char **line, char stop)
 					++pos;
 				}
 			}
-			++pos;
+			if (*pos) {
+				++pos;
+			}
 		} else ++pos;
 		
 	}
@@ -706,15 +721,21 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			/* If file_uploads=off, skip the file part */
 			if (!PG(file_uploads)) {
-				efree(filename);
-				if (param) efree(param);
+				if (filename) {
+					efree(filename);
+				}
+				if (param) {
+					efree(param);
+				}
 				continue;
 			}
 
 			/* Return with an error if the posted data is garbled */
 			if (!param) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
-				efree(filename);
+				if (filename) {
+					efree(filename);
+				}
 				SAFE_RETURN;
 			}
 
@@ -729,7 +750,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			cancel_upload = 0;
 
 			if(strlen(filename) == 0) {
+#ifdef DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
+#endif
 				cancel_upload = UPLOAD_ERROR_D;
 			}
 
@@ -822,7 +845,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			s = NULL;
 	
 			/* Possible Content-Type: */
-			if (!(cd = php_mime_get_hdr_value(header, "Content-Type")) || filename == "") {
+			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
 				cd = "";
 			} else { 
 				/* fix for Opera 6.01 */
