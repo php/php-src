@@ -83,6 +83,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #define SQL_SO_DYNAMIC          0x00000004L
 #define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
 #define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
+#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
