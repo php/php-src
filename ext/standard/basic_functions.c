@@ -1266,6 +1266,9 @@ PHP_FUNCTION(gettype)
 		case IS_LONG:
 			RETVAL_STRING("integer",1);
 			break;
+		case IS_RESOURCE:
+			RETVAL_STRING("resource",1);
+			break;
 		case IS_DOUBLE:
 			RETVAL_STRING("double",1);
 			break;
@@ -1318,6 +1321,11 @@ PHP_FUNCTION(settype)
 		convert_to_array(var);
 	} else if (!strcasecmp(new_type, "object")) {
 		convert_to_object(var);
+	} else if (!strcasecmp(new_type, "boolean")) {
+		convert_to_boolean(var);
+	} else if (!strcasecmp(new_type, "resource")) {
+		php3_error(E_WARNING, "settype: cannot convert to resource type");
+		RETURN_FALSE;
 	} else {
 		php3_error(E_WARNING, "settype: invalid type");
 		RETURN_FALSE;
