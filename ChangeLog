@@ -1,3 +1,29 @@
+2002-02-20  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: "o|a|b" is not valid ZE code. changed to "o|ab"
+
+2002-02-20  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/scripts/pearwin.php:
+    Config variables must be set between "" while using pear.bat windows script
+
+    * pear/Archive/Tar.php:
+    * Correct bug while using windows dir separator. It is now supported
+
+2002-02-20  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/crc32.c
+      ext/standard/crc32.h:
+    Split CRC32 table out into a header file so other code can use it
+
+2002-02-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/iconv/iconv.c: - Fix for bug #15628 (for real now :)
+
+    * sapi/nsapi/nsapi-readme.txt: - Reformatting
+
+    * ext/iconv/iconv.c: - Fix for bug #15638
+
 2002-02-19  David Hedbor  <david@hedbor.org>
 
     * sapi/caudium/caudium.c: Fixed environment hashing again.
