@@ -37,6 +37,7 @@ php_curl_globals curl_globals;
 
 function_entry curl_functions[] = {
 	PHP_FE (curl_init,		NULL)
+	PHP_FE (curl_version,		NULL)
 	PHP_FE (curl_setopt,	NULL)
 	PHP_FE (curl_exec,		NULL)
 	PHP_FE (curl_close,		NULL)
@@ -121,6 +122,14 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT ("CURLOPT_WRITEINFO", CURLOPT_WRITEINFO, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
+
+/* {{{ proto string curl_version ()
+   Return the CURL version string. */
+PHP_FUNCTION (curl_version)
+{
+	RETURN_STRING(curl_version(),1);
+}
+/* }}} */
 
 /* {{{ proto int curl_init ([string url])
    Initialize a CURL session */
