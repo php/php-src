@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2002, Version 4.1.2
+27 Feb 2002, Version 4.1.2
 - Fixed start up failure when mm save handler is used and there is multiple 
   SAPIs are working at the same time. (Yasuo)
 - Fixed the Roxen SAPI (Yasuo)
