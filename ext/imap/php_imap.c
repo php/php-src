@@ -2808,17 +2808,7 @@ PHP_FUNCTION(imap_fetchheader)
 		RETURN_FALSE;
 	}
 
-	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_PREFETCHTEXT)) {
-		header = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &hlen, Z_LVAL_PP(flags));
-		body = mail_fetchtext_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &blen, Z_LVAL_PP(flags));
-		tempstring = emalloc(hlen+blen+1);
-		strcpy(tempstring,header);
-		strcat(tempstring,body);
-		RETVAL_STRINGL(tempstring,(hlen+blen+1),1);
-		efree(tempstring);
-	} else {
-		RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
-	}
+    RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
 }
 /* }}} */
 
