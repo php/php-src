@@ -18,11 +18,16 @@
 
 /* $Id$ */
 
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 /*
  * This module implements Zend OO syntax overloading support for Java
  * components using JNI and reflection.
  */
-
 
 #include "php.h"
 #include "zend_compile.h"
