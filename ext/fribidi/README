@@ -9,9 +9,13 @@ Arabic/Hebrew embedded within English is such a case.
 Usage
 =====
 
- The only function used is fribidi_log2vis (logical to visual).
-     Input: 1) The Logical string.
-            2) Base direction of application - 'L' or 'R'.
+ The only function used is fribidi_log2vis (logical [non-reversed] to visual [reversed]).
+     Input: 
+            1) The Logical string.
+            2) Base direction of application. Possible values:
+                 a) FRIBIDI_RTL  - right to left
+                 b) FRIBIDI_LTR  - left to right
+                 c) FRIBIDI_AUTO - autodetect the base direction
             3) The char code being used, which can be one of the following
                constants:
                  a) FRIBIDI_CHARSET_UTF8
@@ -43,7 +47,7 @@ Note
 
 The function fribidi_log2vis computes three more arrays which are currently not passed back as output.
 These arrays are:
-	1) mapping from the logical to the visual sting.
+	1) mapping from the logical to the visual string.
 	2) mapping from the visual to the logical string.
 	3) embedding level of characters as figured out by the FriBidi algorithm.
 
