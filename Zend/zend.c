@@ -22,6 +22,7 @@
 #include "modules.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_API.h"
 
 #ifdef ZTS
 #	define GLOBAL_FUNCTION_TABLE	global_function_table
@@ -97,38 +98,72 @@ static void print_hash(HashTable *ht, int indent)
 }
 
 
+ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy)
+{
+	if (expr->type==IS_STRING) {
+		*use_copy = 0;
+		return;
+	}
+	switch (expr->type) {
+		case IS_BOOL:
+			if (expr->value.lval) {
+				expr_copy->value.str.len = sizeof("true")-1;
+				expr_copy->value.str.val = estrndup("true", expr_copy->value.str.len);
+			} else {
+				expr_copy->value.str.len = sizeof("false")-1;
+				expr_copy->value.str.val = estrndup("false", expr_copy->value.str.len);
+			}
+			break;
+		case IS_RESOURCE:
+			expr_copy->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
+			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Resource id #%ld", expr->value.lval);
+			break;
+		case IS_ARRAY:
+			expr_copy->value.str.len = sizeof("Array")-1;
+			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
+			break;
+		case IS_OBJECT: {
+				zval function_name;
+
+				function_name.value.str.len = sizeof("__print")-1;
+				function_name.value.str.val = estrndup("__print", function_name.value.str.len);
+				function_name.type = IS_STRING;
+
+				if (call_user_function(NULL, expr, &function_name, expr_copy, 0, NULL)==FAILURE) {
+					expr_copy->value.str.len = sizeof("Object")-1;
+					expr_copy->value.str.val = estrndup("Object", expr_copy->value.str.len);
+				}
+				efree(function_name.value.str.val);
+			}
+			break;
+		default:
+			*expr_copy = *expr;
+			zval_copy_ctor(expr_copy);
+			convert_to_string(expr_copy);
+			break;
+	}
+	expr_copy->type = IS_STRING;
+	*use_copy = 1;
+}
+
+
 ZEND_API int zend_print_zval(zval *expr, int indent)
 {
 	zval expr_copy;
-	int destroy=0;
+	int use_copy;
 
-	if (expr->type != IS_STRING) {
-		if (expr->type == IS_BOOL) {
-			if (expr->value.lval) {
-				expr_copy.value.str.val = estrndup("true",4);
-				expr_copy.value.str.len = 4;
-			} else {
-				expr_copy.value.str.val = estrndup("false",5);
-				expr_copy.value.str.len = 5;
-			}
-			expr_copy.type = IS_STRING;
-		} else if (expr->type == IS_RESOURCE) {
-			expr_copy.value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy.value.str.len = sprintf(expr_copy.value.str.val, "Resource id #%ld", expr->value.lval);
-			expr_copy.type = IS_STRING;
-		} else {
-			expr_copy = *expr;
-			zval_copy_ctor(&expr_copy);
-			convert_to_string(&expr_copy);
-		}
+	zend_make_printable_zval(expr, &expr_copy, &use_copy);
+	if (use_copy) {
 		expr = &expr_copy;
-		destroy=1;
 	}
 	if (expr->value.str.len==0) { /* optimize away empty strings */
+		if (use_copy) {
+			zval_dtor(expr);
+		}
 		return 0;
 	}
 	ZEND_WRITE(expr->value.str.val,expr->value.str.len);
-	if (destroy) {
+	if (use_copy) {
 		zval_dtor(expr);
 	}
 	return expr->value.str.len;

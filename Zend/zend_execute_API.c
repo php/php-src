@@ -276,12 +276,10 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 			return FAILURE;
 		}
 		function_table = &object->value.obj.ce->function_table;
-		/* unimplemented */
 	}
 	original_function_state_ptr = EG(function_state_ptr);
 	zend_str_tolower(function_name->value.str.val, function_name->value.str.len);
 	if (zend_hash_find(function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function_state.function)==FAILURE) {
-		zend_error(E_ERROR, "Unknown function:  %s()\n", function_name->value.str.val);
 		return FAILURE;
 	}
 
