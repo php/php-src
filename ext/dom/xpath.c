@@ -27,6 +27,8 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+#define PHP_DOM_XPATH_QUERY 0
+#define PHP_DOM_XPATH_EVALUATE 1
 
 /*
 * class DOMXPath 
@@ -38,6 +40,7 @@ zend_function_entry php_dom_xpath_class_functions[] = {
 	PHP_ME(domxpath, __construct, NULL, ZEND_ACC_PUBLIC)
 	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, NULL)
 	PHP_FALIAS(query, dom_xpath_query, NULL)
+	PHP_FALIAS(evaluate, dom_xpath_evaluate, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -136,14 +139,12 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern)
 
 }
 
-/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]); */
-PHP_FUNCTION(dom_xpath_query)
-{
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 	zval *id, *retval, *context = NULL;
 	xmlXPathContextPtr ctxp;
 	xmlNodePtr nodep = NULL;
 	xmlXPathObjectPtr xpathobjp;
-	int expr_len, ret, nsnbr = 0;
+	int expr_len, ret, nsnbr = 0, xpath_type;
 	dom_object *intern, *nodeobj;
 	char *expr;
 	xmlDoc *docp = NULL;
@@ -208,53 +209,91 @@ PHP_FUNCTION(dom_xpath_query)
 		RETURN_FALSE;
 	}
 
-
-	MAKE_STD_ZVAL(retval);
-	array_init(retval);
-
-	if (xpathobjp->type ==  XPATH_NODESET) {
-		int i;
-		xmlNodeSetPtr nodesetp;
-
-		if (NULL != (nodesetp = xpathobjp->nodesetval)) {
-
-			for (i = 0; i < nodesetp->nodeNr; i++) {
-				xmlNodePtr node = nodesetp->nodeTab[i];
-				zval *child;
-
-				MAKE_STD_ZVAL(child);
-				
-				if (node->type == XML_NAMESPACE_DECL) {
-					xmlNsPtr curns;
-					xmlNodePtr nsparent;
-
-					nsparent = node->_private;
-					curns = xmlNewNs(NULL, node->name, NULL);
-					if (node->children) {
-						curns->prefix = xmlStrdup((char *) node->children);
-					}
-					if (node->children) {
-						node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
-					} else {
-						node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
-					}
-					node->type = XML_NAMESPACE_DECL;
-					node->parent = nsparent;
-					node->ns = curns;
-				}
-				child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
-				add_next_index_zval(retval, child);
-			}
-		}
+	if (type == PHP_DOM_XPATH_QUERY) {
+		xpath_type = XPATH_NODESET;
+	} else {
+		xpath_type = xpathobjp->type;
 	}
 
-	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
-	intern = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
-	dom_xpath_iter(retval, intern);
+	switch (xpath_type) {
+
+		case  XPATH_NODESET:
+		{
+			int i;
+			xmlNodeSetPtr nodesetp;
+
+			MAKE_STD_ZVAL(retval);
+			array_init(retval);
+
+			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval)) {
+
+				for (i = 0; i < nodesetp->nodeNr; i++) {
+					xmlNodePtr node = nodesetp->nodeTab[i];
+					zval *child;
+
+					MAKE_STD_ZVAL(child);
+					
+					if (node->type == XML_NAMESPACE_DECL) {
+						xmlNsPtr curns;
+						xmlNodePtr nsparent;
+
+						nsparent = node->_private;
+						curns = xmlNewNs(NULL, node->name, NULL);
+						if (node->children) {
+							curns->prefix = xmlStrdup((char *) node->children);
+						}
+						if (node->children) {
+							node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
+						} else {
+							node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
+						}
+						node->type = XML_NAMESPACE_DECL;
+						node->parent = nsparent;
+						node->ns = curns;
+					}
+					child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
+					add_next_index_zval(retval, child);
+				}
+			}
+			php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+			intern = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+			dom_xpath_iter(retval, intern);
+			break;
+		}
+
+		case XPATH_BOOLEAN:
+			RETVAL_BOOL(xpathobjp->boolval);
+			break;
+
+		case XPATH_NUMBER:
+			RETVAL_DOUBLE(xpathobjp->floatval)
+			break;
+
+		case XPATH_STRING:
+			RETVAL_STRING(xpathobjp->stringval, 1);
+			break;
+
+		default:
+			RETVAL_NULL();
+			break;
+	}
 
 	xmlXPathFreeObject(xpathobjp);
 }
+
+/* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]); */
+PHP_FUNCTION(dom_xpath_query)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
+}
 /* }}} end dom_xpath_query */
+
+/* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context]); */
+PHP_FUNCTION(dom_xpath_evaluate)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
+}
+/* }}} end dom_xpath_evaluate */
 
 #endif /* LIBXML_XPATH_ENABLED */
 

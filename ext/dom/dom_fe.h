@@ -259,6 +259,7 @@ PHP_FUNCTION(dom_string_extend_find_offset32);
 PHP_METHOD(domxpath, __construct);
 PHP_FUNCTION(dom_xpath_register_ns);
 PHP_FUNCTION(dom_xpath_query);
+PHP_FUNCTION(dom_xpath_evaluate);
 #endif
 
 #endif /* DOM_FE_H */
