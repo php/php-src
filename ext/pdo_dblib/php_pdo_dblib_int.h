@@ -1,0 +1,124 @@
+/*
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2005 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.0 of the PHP license,       |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_0.txt.                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: Wez Furlong <wez@php.net>                                    |
+  |         Frank M. Kromann <frank@kromann.info>                        |
+  +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
+#ifndef PHP_PDO_DBLIB_INT_H
+#define PHP_PDO_DBLIB_INT_H
+
+#if PHP_DBLIB_IS_MSSQL
+# include <sqlfront.h>
+# include <sqldb.h>
+
+# define DBERRHANDLE(a, b)	dbprocerrhandle(a, b)
+# define DBMSGHANDLE(a, b)	dbprocmsghandle(a, b)
+# define EHANDLEFUNC		DBERRHANDLE_PROC
+# define MHANDLEFUNC		DBMSGHANDLE_PROC
+# define DBSETOPT(a, b, b)	dbsetopt(a, b, c)
+
+#else
+# include <sybfront.h>
+# include <sybdb.h>
+# include <syberror.h>
+
+/* alias some types */
+# define SQLTEXT	SYBTEXT
+# define SQLCHAR	SYBCHAR
+# define SQLVARCHAR	SYBVARCHAR
+# define SQLINT1	SYBINT1
+# define SQLINT2	SYBINT2
+# define SQLINT4	SYBINT4
+# define SQLINTN	SYBINTN
+# define SQLBIT		SYBBIT
+# define SQLFLT4	SYBREAL
+# define SQLFLT8	SYBFLT8
+# define SQLFLTN	SYBFLTN
+# define SQLDECIMAL	SYBDECIMAL
+# define SQLNUMERIC	SYBNUMERIC
+# define SQLDATETIME	SYBDATETIME
+# define SQLDATETIM4	SYBDATETIME4
+# define SQLDATETIMN	SYBDATETIMN
+# define SQLMONEY		SYBMONEY
+# define SQLMONEY4		SYBMONEY4
+# define SQLMONEYN		SYBMONEYN
+# define SQLIMAGE		SYBIMAGE
+# define SQLBINARY		SYBBINARY
+# define SQLVARBINARY	SYBVARBINARY
+# ifdef SYBUNIQUE
+#  define SQLUNIQUE		SYBUNIQUE
+# endif
+
+# define DBERRHANDLE(a, b)	dberrhandle(b)
+# define DBMSGHANDLE(a, b)	dbmsghandle(b)
+# define DBSETOPT(a, b, c)	dbsetopt(a, b, c, -1)
+# define NO_MORE_RPC_RESULTS	3
+# define dbfreelogin		dbloginfree
+# define dbrpcexec			dbrpcsend
+
+typedef short TDS_SHORT;
+# ifndef PHP_WIN32
+typedef unsigned char *LPBYTE;
+# endif
+typedef float			DBFLT4;
+#endif
+
+extern pdo_driver_t pdo_dblib_driver;
+extern struct pdo_stmt_methods dblib_stmt_methods;
+
+typedef struct {
+	int severity;
+	int oserr;
+	int dberr;
+	char *oserrstr;
+	char *dberrstr;
+} pdo_dblib_err;
+
+typedef struct {
+	LOGINREC	*login;
+	DBPROCESS	*link;
+
+	pdo_dblib_err err;
+} pdo_dblib_db_handle;
+
+typedef struct {
+	int coltype;
+	char *name;
+	int maxlen;
+	char *source;
+} pdo_dblib_col;
+
+typedef struct {
+	unsigned long len;
+	char *data;
+} pdo_dblib_colval;
+
+typedef struct {
+	pdo_dblib_db_handle *H;
+
+	int ncols;
+	pdo_dblib_col *cols;
+
+	pdo_dblib_colval *rows;
+	int nrows;
+
+	int current;
+} pdo_dblib_stmt;
+
+#endif
+
