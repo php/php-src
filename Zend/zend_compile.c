@@ -2039,7 +2039,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->handle_function_call = NULL;
 	new_class_entry->handle_property_set = NULL;
 	new_class_entry->handle_property_get = NULL;
-
+	
 	/* code for inheritance from parent class */
 	if (parent_class_name) {
 		zend_class_entry *parent_class, **parent_class_p;
