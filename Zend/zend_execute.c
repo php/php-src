@@ -99,7 +99,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 					case IS_OVERLOADED_OBJECT:
 						Ts[node->u.var].tmp_var = get_overloaded_property(ELS_C);
 						Ts[node->u.var].tmp_var.refcount=1;
-						Ts[node->u.var].tmp_var.EA.is_ref=1;
+						Ts[node->u.var].tmp_var.is_ref=1;
 						return &Ts[node->u.var].tmp_var;
 						break;
 					case IS_STRING_OFFSET: {
@@ -118,7 +118,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 							}
 							zval_ptr_dtor(&str);
 							T->tmp_var.refcount=1;
-							T->tmp_var.EA.is_ref=1;
+							T->tmp_var.is_ref=1;
 							T->tmp_var.type = IS_STRING;
 							return &T->tmp_var;
 						}
@@ -317,7 +317,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			zendi_zval_dtor(*variable_ptr);
 			*variable_ptr = *value;
 			variable_ptr->refcount = refcount;
-			variable_ptr->EA.is_ref = 1;
+			variable_ptr->is_ref = 1;
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
 				zval_ptr_dtor(&value);
@@ -395,7 +395,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					break;
 			}
 		}
-		(*variable_ptr_ptr)->EA.is_ref=0;
+		(*variable_ptr_ptr)->is_ref=0;
 	}
 	if (result) {
 		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
@@ -636,7 +636,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 					container->refcount--;
 					if (container->refcount>0) {
 						container = *container_ptr = (zval *) emalloc(sizeof(zval));
-						container->EA.is_ref=0;
+						container->is_ref=0;
 					}
 					container->refcount=1;
 				}
@@ -804,7 +804,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 					container->refcount--;
 					if (container->refcount>0) {
 						container = *container_ptr = (zval *) emalloc(sizeof(zval));
-						container->EA.is_ref=0;
+						container->is_ref=0;
 					}
 					container->refcount=1;
 				}
@@ -931,7 +931,7 @@ void execute(zend_op_array *op_array ELS_DC)
 		zval *globals = (zval *) emalloc(sizeof(zval));
 
 		globals->refcount=1;
-		globals->EA.is_ref=1;
+		globals->is_ref=1;
 		globals->type = IS_ARRAY;
 		globals->value.ht = &EG(symbol_table);
 		if (zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL)==FAILURE) {
@@ -1489,7 +1489,7 @@ do_fcall_common:
 									*object.ptr_ptr = tmp;
                         		}
                         		object.ptr->refcount = 1;
-                        		object.ptr->EA.is_ref = 1;
+                        		object.ptr->is_ref = 1;
                 			}
 							*this_ptr = object.ptr;
 							object.ptr->refcount++;
@@ -1569,13 +1569,13 @@ do_fcall_common:
 						varptr = (zval *) emalloc(sizeof(zval));
 						var_uninit(varptr);
 						varptr->refcount=0;
-						varptr->EA.is_ref=0;
+						varptr->is_ref=0;
 					} else if (PZVAL_IS_REF(varptr)) {
 						zval *original_var = varptr;
 
 						varptr = (zval *) emalloc(sizeof(zval));
 						*varptr = *original_var;
-						varptr->EA.is_ref = 0;
+						varptr->is_ref = 0;
 						varptr->refcount = 0;
 						zval_copy_ctor(varptr);
 					}
@@ -1599,7 +1599,7 @@ send_by_ref:
 							varptr->refcount = 1;
 							zval_copy_ctor(varptr);
 						}
-						varptr->EA.is_ref = 1;
+						varptr->is_ref = 1;
 						/* at the end of this code refcount is always 1 */
 					}
 					varptr->refcount++;
@@ -1643,7 +1643,7 @@ send_by_ref:
 								*default_value = tmp;
 							}
 							default_value->refcount=0;
-							default_value->EA.is_ref=0;
+							default_value->is_ref=0;
 							param = &default_value;
 							assignment_value = default_value;
 						} else {
@@ -1759,7 +1759,7 @@ send_by_ref:
 					}
 					object_init_ex(&Ts[opline->result.u.var].tmp_var, ce);
 					Ts[opline->result.u.var].tmp_var.refcount=1;
-					Ts[opline->result.u.var].tmp_var.EA.is_ref=1;
+					Ts[opline->result.u.var].tmp_var.is_ref=1;
 					zval_dtor(&class_name);
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
@@ -1803,7 +1803,7 @@ send_by_ref:
 							if (!PZVAL_IS_REF(expr_ptr)) {
 								SEPARATE_ZVAL(expr_ptr_ptr);
 								expr_ptr = *expr_ptr_ptr;
-								expr_ptr->EA.is_ref = 1;
+								expr_ptr->is_ref = 1;
 							}
 							expr_ptr->refcount++;
 						} else if (PZVAL_IS_REF(expr_ptr)) {

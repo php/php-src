@@ -84,10 +84,10 @@ void init_executor(CLS_D ELS_DC)
 	var_uninit(&EG(uninitialized_zval));
 	var_uninit(&EG(error_zval));
 	EG(uninitialized_zval).refcount = 1;
-	EG(uninitialized_zval).EA.is_ref=0;
+	EG(uninitialized_zval).is_ref=0;
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval).refcount = 1;
-	EG(error_zval).EA.is_ref=0;
+	EG(error_zval).is_ref=0;
 	EG(error_zval_ptr)=&EG(error_zval);
 	EG(destroying_function_symbol_table) = 0;
 	zend_ptr_stack_init(&EG(arg_types_stack));
@@ -337,7 +337,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 				*params[i] = new_zval;
 			}
 			(*params[i])->refcount++;
-			(*params[i])->EA.is_ref = 1;
+			(*params[i])->is_ref = 1;
 			param = *params[i];
 		} else if (*params[i] != &EG(uninitialized_zval)) {
 			(*params[i])->refcount++;
@@ -473,7 +473,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 				zendi_zval_copy_ctor(*value_ptr);
 			}
 			value_ptr->refcount = 1;
-			value_ptr->EA.is_ref = 1;
+			value_ptr->is_ref = 1;
 		}
 
 		*variable_ptr_ptr = value_ptr;
