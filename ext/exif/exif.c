@@ -176,6 +176,7 @@ PHP_MINFO_FUNCTION(exif)
 #define M_SOI   0xD8            /* Start Of Image (beginning of datastream) */
 #define M_EOI   0xD9            /* End Of Image (end of datastream)         */
 #define M_SOS   0xDA            /* Start Of Scan (begins compressed data)   */
+#define M_JFIF  0xE0
 #define M_EXIF  0xE1            
 #define M_COM   0xFE            /* COMment                                  */
 
