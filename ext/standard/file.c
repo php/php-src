@@ -463,7 +463,7 @@ PHP_FUNCTION(file)
 	int filename_len;
 	char *slashed, *target_buf;
 	register int i = 0;
-	int target_len, len;
+	int len;
 	char eol_marker = '\n';
 	zend_bool use_include_path = 0;
 	zend_bool reached_eof = 0;
@@ -486,47 +486,19 @@ PHP_FUNCTION(file)
 	array_init(return_value);
 
 	/* Now loop through the file and do the magic quotes thing if needed */
-	target_len = 0;
-	target_buf = NULL;
 	while (1) {
-		if (!target_buf) {
-			target_buf = (char *) emalloc(PHP_FILE_BUF_SIZE+1);
-			target_buf[PHP_FILE_BUF_SIZE] = 0; /* avoid overflows */
-		} else {
-			target_buf = (char *) erealloc(target_buf, target_len+PHP_FILE_BUF_SIZE+1);
-			target_buf[target_len+PHP_FILE_BUF_SIZE] = 0; /* avoid overflows */
-		}
-		if (php_stream_gets(stream, target_buf+target_len, PHP_FILE_BUF_SIZE)==NULL) {
-			if (target_len==0) {
-				efree(target_buf);
-				break;
-			} else {
-				reached_eof = 1;
-			}
-		}
-		
-		/* mini-hack because I don't feel like re-writing this whole function */
-		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC)
-			eol_marker = '\r';
-		
-		if (!reached_eof) {
-			target_len += strlen(target_buf+target_len);
-			if (target_buf[target_len-1] != eol_marker) {
-				continue;
-			}
-		}
-		if (PG(magic_quotes_runtime)) {
-			slashed = php_addslashes(target_buf, target_len, &len, 1 TSRMLS_CC); /* 1 = free source string */
-			add_index_stringl(return_value, i++, slashed, len, 0);
-		} else {
-			target_buf = erealloc(target_buf, target_len+1); /* do we really want to do that? */
-			add_index_stringl(return_value, i++, target_buf, target_len, 0);
-		}
-		if (reached_eof) {
+		target_buf = php_stream_gets(stream, NULL, 0);
+		if (target_buf == NULL) {
 			break;
 		}
-		target_buf = NULL;
-		target_len = 0;
+		
+		if (PG(magic_quotes_runtime)) {
+			/* 1 = free source string */
+			slashed = php_addslashes(target_buf, strlen(target_buf), &len, 1 TSRMLS_CC);
+			add_next_index_stringl(return_value, slashed, len, 0);
+		} else {
+			add_next_index_string(return_value, target_buf, 0);
+		}
 	}
 	php_stream_close(stream);
 }
