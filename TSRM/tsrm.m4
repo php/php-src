@@ -46,19 +46,13 @@ AC_DEFUN(TSRM_CHECK_PTHREADS,[
 old_CFLAGS="$CFLAGS"
 
 if test -n "$GCC"; then
-  dnl FreeBSD/Linux 
-  TSRM_CHECK_GCC_ARG(-pthread, gcc_pthread)
-
-  if test "$gcc_pthread" = "yes"; then
-    CFLAGS="$CFLAGS -pthread"
-  else
-    dnl gcc on Solaris
-    TSRM_CHECK_GCC_ARG(-pthreads, gcc_pthreads)
-    if test "$gcc_pthreads" = "yes"; then
-      CFLAGS="$CFLAGS -pthreads"
+  for i in -pthread -pthreads; do
+    TSRM_CHECK_GCC_ARG($i, gcc_opt)
+    if test "$gcc_opt" = "yes"; then
+      CFLAGS="$CFLAGS $i"
+      break
     fi
-  fi
-
+  done
   AC_CHECK_FUNCS(pthread_kill)
 fi
 
