@@ -99,6 +99,15 @@ static zval *_php_sablot_resource_zval(long);
 
 #define SABLOT_BASIC_HANDLE SABLOTG(processor)
 
+#define SABLOT_SET_ERROR(handle, error)   \
+	if (error != 0) {                     \
+		if (handle) {                     \
+			handle->last_errno = error;   \
+		}                                 \
+		                                  \
+		SABLOTG(last_errno) = error;      \
+	}
+
 /**
  * SAX Handler structure, this defines the different functions to be
  * called when Sablotron's internal expat parser reaches the 
@@ -150,6 +159,7 @@ function_entry sablot_functions[] = {
     PHP_FE(xslt_closelog,                 NULL)
     PHP_FE(xslt_set_sax_handler,          NULL)
     PHP_FE(xslt_set_error_handler,        NULL)
+    PHP_FE(xslt_set_base,                 NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
     PHP_FE(xslt_set_encoding,             NULL)
 #endif
@@ -865,6 +875,50 @@ PHP_FUNCTION(xslt_set_encoding)
 
 #endif
 
+/* {{{ proto bool xslt_set_base(resource xh, string scheme, string base)
+   Overrides the default base for a resource.  If scheme is non-null, it only affects the uri given by scheme */
+PHP_FUNCTION(xslt_set_base)
+{
+	zval       **xh, **scheme, **base;
+	php_sablot  *handle;
+	int          argc = ZEND_NUM_ARGS(),
+	             ret  = 0;
+	SABLOTLS_FETCH();
+
+	if (argc < 2 || argc > 3 ||
+	    zend_get_parameters_ex(argc, &xh, &scheme, &base,) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (argc > 2) {
+		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron handle", le_sablot);
+		
+		if (Z_TYPE_PP(scheme) != IS_STRING) {
+			ret = SablotSetBase(handle->p, Z_STRVAL_PP(base));
+		} else {
+			ret = SablotSetBaseForScheme((void *) handle->p,
+			                             Z_STRVAL_PP(scheme),
+			                             Z_STRVAL_PP(base));
+		}
+	} else {
+		if (Z_TYPE_PP(scheme) != IS_STRING) {
+			ret = SablotSetBase(SABLOTG(processor), Z_STRVAL_PP(base));
+		} else {
+			ret = SablotSetBaseForScheme((void *) SABLOTG(processor),
+			                             Z_STRVAL_PP(scheme),
+			                             Z_STRVAL_PP(base));
+		}
+	}
+	
+	SABLOT_SET_ERROR(handle, ret);
+	
+	if (ret != 0) {
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+/* }}} */
 
 /* }}} */
 
