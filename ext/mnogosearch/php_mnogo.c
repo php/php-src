@@ -468,7 +468,9 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
 				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
 				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
+#if UDM_VERSION_ID <= 30207
 				    Env->errcode=1;
+#endif
 				    php_error(E_WARNING,"%s(): Invalid DBAddr", get_active_function_name(TSRMLS_C));
 				    RETURN_FALSE;
 				}
@@ -519,7 +521,9 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
 				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
 				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
+#if UDM_VERSION_ID <= 30207
 				    Env->errcode=1;
+#endif
 				    php_error(E_WARNING,"%s(): Invalid DBAddr", get_active_function_name(TSRMLS_C));
 				    RETURN_FALSE;
 				}
@@ -999,6 +1003,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		case UDM_PARAM_VARDIR:
 #if UDM_VERSION_ID < 30200
 			udm_snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
+#elif UDM_VERSION_ID >= 30208
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"Vardir",val);
 #elif UDM_VERSION_ID >= 30204
 			UdmVarListReplaceStr(&Agent->Conf->Vars,"Vardir",val);
 			snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
@@ -1717,8 +1723,10 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex)
 		Agent->Conf->WordParam.min_word_len=atoi(val);
 	} else if (!strcasecmp(var,"MaxWordLen")) {
 		Agent->Conf->WordParam.max_word_len=atoi(val);
+#if UDM_VERSION_ID <= 30207
 	} else if (!strcasecmp(var,"VarDir")) {
 		snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
+#endif
 	}
 
 	RETURN_TRUE;
@@ -2171,7 +2179,13 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-#if UDM_VERSION_ID >= 30204
+#if UDM_VERSION_ID >= 30208
+	if (UdmEnvErrMsg(Agent->Conf) && strlen(UdmEnvErrMsg(Agent->Conf))) {
+	    RETURN_LONG(1);
+	} else {
+	    RETURN_LONG(0);
+	}
+#elif UDM_VERSION_ID >= 30204
 	RETURN_LONG(UdmEnvErrCode(Agent->Conf));
 #else
 	RETURN_LONG(UdmDBErrorCode(Agent->db));
