@@ -140,6 +140,8 @@ PHP_FUNCTION(pg_update);
 PHP_FUNCTION(pg_delete);
 PHP_FUNCTION(pg_select);
 
+/* connection options - ToDo: Add async connection option */
+#define PGSQL_CONNECT_FORCE_NEW     (1<<1)
 /* php_pgsql_convert options */
 #define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEAFULT value by removing field from returned array */
 #define PGSQL_CONV_FORCE_NULL       (1<<2)     /* Convert to NULL if string is null string */
