@@ -2162,12 +2162,33 @@ $ifdef HAVE_IFX_IUS;
 $endif;
 		
             case SQLBYTES   :   
-            case SQLTEXT    :        /* NULL has already been dealt with */   
+            case SQLTEXT    :     
                 bid_b=Ifx_Result->res_id[locind];
                 locator_b=php3_intifx_get_blobloc(bid_b,&EG(regular_list)); 
                 ++locind;
 
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
+                
+		if (locator_b->loc_indicator == -1) { // additional check for NULL 
+                  if((IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) 
+                      || (IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
+                    bid_b=Ifx_Result->res_id[locind];
+                    bid=php3_intifx_copy_blob(bid_b, &EG(regular_list));
+                    php3_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list));
+                    add_assoc_long(return_value,fieldname,bid);
+                    break; 
+                  }
+                  if (
+                     (fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
+$ifdef HAVE_IFX_IUS;
+                                          || (fieldtype==SQLUDTFIXED)
+$endif;
+                      ) {
+                    add_assoc_string(return_value, fieldname, nullstr, DUP);
+		    break;
+                  }
+		}
+		
                 if (locator_b->loc_status < 0) {  /* blob too large */   
                        php_error(E_WARNING,"no memory (%d bytes) for blob",
                                   locator_b->loc_bufsize);
@@ -2499,7 +2520,6 @@ $endif;
                     char_data = NULL;
                     break;
                 case SQLTEXT    :
-                                /* NULL has already been dealt with          */
                                 /* treated always as a long VARCHAR here     */
                                 /* if blobinbfile, too bad                   */
                     bid_b=Ifx_Result->res_id[locind];
@@ -2509,6 +2529,17 @@ $endif;
                   
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i 
                                             :*locator_b = DATA;
+                    if (locator_b->loc_indicator == -1) {
+                      if (
+                         (fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
+$ifdef HAVE_IFX_IUS;
+                                              || (fieldtype==SQLUDTFIXED)
+$endif;
+                          ) {
+                        php_printf("<td>%s</td>", nullstr);
+		        break;
+                      }
+		    }
                     if (locator_b->loc_status < 0) {  /* blob too large */   
                         php_error(E_WARNING,"no memory (%d bytes) for blob",
                                    locator_b->loc_bufsize);
