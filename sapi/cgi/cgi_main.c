@@ -15,6 +15,8 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stig Bakken <ssb@fast.no>                                   |
    |          Zeev Suraski <zeev@zend.com>                                |
+   | FastCGI: Ben Mansell <php@slimyhorror.com>                           |
+   |          Shane Caraveo <shane@caraveo.com>                           |
    +----------------------------------------------------------------------+
 */
 
