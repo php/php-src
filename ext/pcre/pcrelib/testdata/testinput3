@@ -1689,4 +1689,22 @@
     <a href=\"abcd xyz pqr\" cats
     <a href       =       \'abcd xyz pqr\' cats
 
+/((Z)+|A)*/
+    ZABCDEFG
+
+/(Z()|A)*/
+    ZABCDEFG
+
+/(Z(())|A)*/
+    ZABCDEFG
+
+/((?>Z)+|A)*/
+    ZABCDEFG
+
+/((?>)+|A)*/
+    ZABCDEFG
+
+/a*/g
+    abbab
+
 / End of test input /       

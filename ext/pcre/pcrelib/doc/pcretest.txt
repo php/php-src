@@ -63,10 +63,11 @@ to the matching process if the pattern begins with a lookbehind assertion
 (including \b or \B).
 
 If any call to pcre_exec() in a /g or /G sequence matches an empty string, the
-next call is done with the PCRE_NOTEMPTY flag set so that it cannot match an
-empty string again at the same point. If however, this second match fails, the
-start offset is advanced by one, and the match is retried. This imitates the
-way Perl handles such cases when using the /g modifier or the split() function.
+next call is done with the PCRE_NOTEMPTY and PCRE_ANCHORED flags set in order
+to search for another, non-empty, match at the same point. If this second match
+fails, the start offset is advanced by one, and the normal match is retried.
+This imitates the way Perl handles such cases when using the /g modifier or the
+split() function.
 
 There are a number of other modifiers for controlling the way pcretest
 operates.

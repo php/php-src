@@ -2,6 +2,45 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 3.2 12-May-00
+---------------------
+
+This is purely a bug fixing release.
+
+1. If the pattern /((Z)+|A)*/ was matched agained ZABCDEFG it matched Z instead
+of ZA. This was just one example of several cases that could provoke this bug,
+which was introduced by change 9 of version 2.00. The code for breaking
+infinite loops after an iteration that matches an empty string was't working
+correctly.
+
+2. The pcretest program was not imitating Perl correctly for the pattern /a*/g
+when matched against abbab (for example). After matching an empty string, it
+wasn't forcing anchoring when setting PCRE_NOTEMPTY for the next attempt; this
+caused it to match further down the string than it should.
+
+3. The code contained an inclusion of sys/types.h. It isn't clear why this
+was there because it doesn't seem to be needed, and it causes trouble on some
+systems, as it is not a Standard C header. It has been removed.
+
+4. Made 4 silly changes to the source to avoid stupid compiler warnings that
+were reported on the Macintosh. The changes were from
+
+  while ((c = *(++ptr)) != 0 && c != '\n');
+to
+  while ((c = *(++ptr)) != 0 && c != '\n') ;
+
+Totally extraordinary, but if that's what it takes...
+
+5. PCRE is being used in one environment where neither memmove() nor bcopy() is
+available. Added HAVE_BCOPY and an autoconf test for it; if neither
+HAVE_MEMMOVE nor HAVE_BCOPY is set, use a built-in emulation function which
+assumes the way PCRE uses memmove() (always moving upwards).
+
+6. PCRE is being used in one environment where strchr() is not available. There
+was only one use in pcre.c, and writing it out to avoid strchr() probably gives
+faster code anyway.
+
+
 Version 3.1 09-Feb-00
 ---------------------
 

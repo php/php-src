@@ -145,6 +145,21 @@ static BOOL
   compile_regex(int, int, int *, uschar **, const uschar **, const char **,
     BOOL, int, int *, int *, compile_data *);
 
+/* Structure for building a chain of data that actually lives on the
+stack, for holding the values of the subject pointer at the start of each
+subpattern, so as to detect when an empty string has been matched by a
+subpattern - to break infinite loops. */
+
+typedef struct eptrblock {
+  struct eptrblock *prev;
+  const uschar *saved_eptr;
+} eptrblock;
+
+/* Flag bits for the match() function */
+
+#define match_condassert   0x01    /* Called to check a condition assertion */
+#define match_isgroup      0x02    /* Set if start of bracketed group */
+
 
 
 /*************************************************
@@ -855,7 +870,9 @@ for (;; ptr++)
     if ((cd->ctypes[c] & ctype_space) != 0) continue;
     if (c == '#')
       {
-      while ((c = *(++ptr)) != 0 && c != '\n');
+      /* The space before the ; is to avoid a warning on a silly compiler
+      on the Macintosh. */
+      while ((c = *(++ptr)) != 0 && c != '\n') ;
       continue;
       }
     }
@@ -1795,7 +1812,9 @@ for (;; ptr++)
         if ((cd->ctypes[c] & ctype_space) != 0) continue;
         if (c == '#')
           {
-          while ((c = *(++ptr)) != 0 && c != '\n');
+          /* The space before the ; is to avoid a warning on a silly compiler
+          on the Macintosh. */
+          while ((c = *(++ptr)) != 0 && c != '\n') ;
           if (c == 0) break;
           continue;
           }
@@ -2313,7 +2332,9 @@ while ((c = *(++ptr)) != 0)
     if ((compile_block.ctypes[c] & ctype_space) != 0) continue;
     if (c == '#')
       {
-      while ((c = *(++ptr)) != 0 && c != '\n');
+      /* The space before the ; is to avoid a warning on a silly compiler
+      on the Macintosh. */
+      while ((c = *(++ptr)) != 0 && c != '\n') ;
       continue;
       }
     }
@@ -2523,8 +2544,8 @@ while ((c = *(++ptr)) != 0)
         else   /* An assertion must follow */
           {
           ptr++;   /* Can treat like ':' as far as spacing is concerned */
-
-          if (ptr[2] != '?' || strchr("=!<", ptr[3]) == NULL)
+          if (ptr[2] != '?' ||
+             (ptr[3] != '=' && ptr[3] != '!' && ptr[3] != '<') )
             {
             ptr += 2;    /* To get right offset in message */
             *errorptr = ERR28;
@@ -2737,7 +2758,9 @@ while ((c = *(++ptr)) != 0)
         if ((compile_block.ctypes[c] & ctype_space) != 0) continue;
         if (c == '#')
           {
-          while ((c = *(++ptr)) != 0 && c != '\n');
+          /* The space before the ; is to avoid a warning on a silly compiler
+          on the Macintosh. */
+          while ((c = *(++ptr)) != 0 && c != '\n') ;
           continue;
           }
         }
@@ -3195,18 +3218,36 @@ Arguments:
    offset_top  current top pointer
    md          pointer to "static" info for the match
    ims         current /i, /m, and /s options
-   condassert  TRUE if called to check a condition assertion
-   eptrb       eptr at start of last bracket
+   eptrb       pointer to chain of blocks containing eptr at start of
+                 brackets - for testing for empty matches
+   flags       can contain
+                 match_condassert - this is an assertion condition
+                 match_isgroup - this is the start of a bracketed group
 
 Returns:       TRUE if matched
 */
 
 static BOOL
 match(register const uschar *eptr, register const uschar *ecode,
-  int offset_top, match_data *md, unsigned long int ims, BOOL condassert,
-  const uschar *eptrb)
+  int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
+  int flags)
 {
 unsigned long int original_ims = ims;   /* Save for resetting on ')' */
+eptrblock newptrb;
+
+/* At the start of a bracketed group, add the current subject pointer to the
+stack of such pointers, to be re-instated at the end of the group when we hit
+the closing ket. When match() is called in other circumstances, we don't add to
+the stack. */
+
+if ((flags & match_isgroup) != 0)
+  {
+  newptrb.prev = eptrb;
+  newptrb.saved_eptr = eptr;
+  eptrb = &newptrb;
+  }
+
+/* Now start processing the operations. */
 
 for (;;)
   {
@@ -3252,7 +3293,8 @@ for (;;)
 
       do
         {
-        if (match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr)) return TRUE;
+        if (match(eptr, ecode+3, offset_top, md, ims, eptrb, match_isgroup))
+          return TRUE;
         ecode += (ecode[1] << 8) + ecode[2];
         }
       while (*ecode == OP_ALT);
@@ -3278,7 +3320,8 @@ for (;;)
     DPRINTF(("start bracket 0\n"));
     do
       {
-      if (match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr)) return TRUE;
+      if (match(eptr, ecode+3, offset_top, md, ims, eptrb, match_isgroup))
+        return TRUE;
       ecode += (ecode[1] << 8) + ecode[2];
       }
     while (*ecode == OP_ALT);
@@ -3297,7 +3340,7 @@ for (;;)
       return match(eptr,
         ecode + ((offset < offset_top && md->offset_vector[offset] >= 0)?
           5 : 3 + (ecode[1] << 8) + ecode[2]),
-        offset_top, md, ims, FALSE, eptr);
+        offset_top, md, ims, eptrb, match_isgroup);
       }
 
     /* The condition is an assertion. Call match() to evaluate it - setting
@@ -3305,13 +3348,14 @@ for (;;)
 
     else
       {
-      if (match(eptr, ecode+3, offset_top, md, ims, TRUE, NULL))
+      if (match(eptr, ecode+3, offset_top, md, ims, NULL,
+          match_condassert | match_isgroup))
         {
         ecode += 3 + (ecode[4] << 8) + ecode[5];
         while (*ecode == OP_ALT) ecode += (ecode[1] << 8) + ecode[2];
         }
       else ecode += (ecode[1] << 8) + ecode[2];
-      return match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr);
+      return match(eptr, ecode+3, offset_top, md, ims, eptrb, match_isgroup);
       }
     /* Control never reaches here */
 
@@ -3348,7 +3392,7 @@ for (;;)
     case OP_ASSERTBACK:
     do
       {
-      if (match(eptr, ecode+3, offset_top, md, ims, FALSE, NULL)) break;
+      if (match(eptr, ecode+3, offset_top, md, ims, NULL, match_isgroup)) break;
       ecode += (ecode[1] << 8) + ecode[2];
       }
     while (*ecode == OP_ALT);
@@ -3356,7 +3400,7 @@ for (;;)
 
     /* If checking an assertion for a condition, return TRUE. */
 
-    if (condassert) return TRUE;
+    if ((flags & match_condassert) != 0) return TRUE;
 
     /* Continue from after the assertion, updating the offsets high water
     mark, since extracts may have been taken during the assertion. */
@@ -3372,12 +3416,14 @@ for (;;)
     case OP_ASSERTBACK_NOT:
     do
       {
-      if (match(eptr, ecode+3, offset_top, md, ims, FALSE, NULL)) return FALSE;
+      if (match(eptr, ecode+3, offset_top, md, ims, NULL, match_isgroup))
+        return FALSE;
       ecode += (ecode[1] << 8) + ecode[2];
       }
     while (*ecode == OP_ALT);
 
-    if (condassert) return TRUE;
+    if ((flags & match_condassert) != 0) return TRUE;
+
     ecode += 3;
     continue;
 
@@ -3423,7 +3469,8 @@ for (;;)
 
       for (i = 1; i <= c; i++)
         save[i] = md->offset_vector[md->offset_end - i];
-      rc = match(eptr, md->start_pattern, offset_top, md, ims, FALSE, eptrb);
+      rc = match(eptr, md->start_pattern, offset_top, md, ims, eptrb,
+        match_isgroup);
       for (i = 1; i <= c; i++)
         md->offset_vector[md->offset_end - i] = save[i];
       if (save != stacksave) (pcre_free)(save);
@@ -3449,10 +3496,12 @@ for (;;)
     case OP_ONCE:
       {
       const uschar *prev = ecode;
+      const uschar *saved_eptr = eptr;
 
       do
         {
-        if (match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr)) break;
+        if (match(eptr, ecode+3, offset_top, md, ims, eptrb, match_isgroup))
+          break;
         ecode += (ecode[1] << 8) + ecode[2];
         }
       while (*ecode == OP_ALT);
@@ -3475,7 +3524,7 @@ for (;;)
       5.005. If there is an options reset, it will get obeyed in the normal
       course of events. */
 
-      if (*ecode == OP_KET || eptr == eptrb)
+      if (*ecode == OP_KET || eptr == saved_eptr)
         {
         ecode += 3;
         break;
@@ -3494,13 +3543,14 @@ for (;;)
 
       if (*ecode == OP_KETRMIN)
         {
-        if (match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr) ||
-            match(eptr, prev, offset_top, md, ims, FALSE, eptr)) return TRUE;
+        if (match(eptr, ecode+3, offset_top, md, ims, eptrb, 0) ||
+            match(eptr, prev, offset_top, md, ims, eptrb, match_isgroup))
+              return TRUE;
         }
       else  /* OP_KETRMAX */
         {
-        if (match(eptr, prev, offset_top, md, ims, FALSE, eptr) ||
-            match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr)) return TRUE;
+        if (match(eptr, prev, offset_top, md, ims, eptrb, match_isgroup) ||
+            match(eptr, ecode+3, offset_top, md, ims, eptrb, 0)) return TRUE;
         }
       }
     return FALSE;
@@ -3521,7 +3571,8 @@ for (;;)
     case OP_BRAZERO:
       {
       const uschar *next = ecode+1;
-      if (match(eptr, next, offset_top, md, ims, FALSE, eptr)) return TRUE;
+      if (match(eptr, next, offset_top, md, ims, eptrb, match_isgroup))
+        return TRUE;
       do next += (next[1] << 8) + next[2]; while (*next == OP_ALT);
       ecode = next + 3;
       }
@@ -3531,7 +3582,8 @@ for (;;)
       {
       const uschar *next = ecode+1;
       do next += (next[1] << 8) + next[2]; while (*next == OP_ALT);
-      if (match(eptr, next+3, offset_top, md, ims, FALSE, eptr)) return TRUE;
+      if (match(eptr, next+3, offset_top, md, ims, eptrb, match_isgroup))
+        return TRUE;
       ecode++;
       }
     break;
@@ -3546,6 +3598,9 @@ for (;;)
     case OP_KETRMAX:
       {
       const uschar *prev = ecode - (ecode[1] << 8) - ecode[2];
+      const uschar *saved_eptr = eptrb->saved_eptr;
+
+      eptrb = eptrb->prev;    /* Back up the stack of bracket start pointers */
 
       if (*prev == OP_ASSERT || *prev == OP_ASSERT_NOT ||
           *prev == OP_ASSERTBACK || *prev == OP_ASSERTBACK_NOT ||
@@ -3565,7 +3620,10 @@ for (;;)
         int number = *prev - OP_BRA;
         int offset = number << 1;
 
-        DPRINTF(("end bracket %d\n", number));
+#ifdef DEBUG
+        printf("end bracket %d", number);
+        printf("\n");
+#endif
 
         if (number > 0)
           {
@@ -3591,7 +3649,7 @@ for (;;)
       5.005. If there is an options reset, it will get obeyed in the normal
       course of events. */
 
-      if (*ecode == OP_KET || eptr == eptrb)
+      if (*ecode == OP_KET || eptr == saved_eptr)
         {
         ecode += 3;
         break;
@@ -3602,13 +3660,14 @@ for (;;)
 
       if (*ecode == OP_KETRMIN)
         {
-        if (match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr) ||
-            match(eptr, prev, offset_top, md, ims, FALSE, eptr)) return TRUE;
+        if (match(eptr, ecode+3, offset_top, md, ims, eptrb, 0) ||
+            match(eptr, prev, offset_top, md, ims, eptrb, match_isgroup))
+              return TRUE;
         }
       else  /* OP_KETRMAX */
         {
-        if (match(eptr, prev, offset_top, md, ims, FALSE, eptr) ||
-            match(eptr, ecode+3, offset_top, md, ims, FALSE, eptr)) return TRUE;
+        if (match(eptr, prev, offset_top, md, ims, eptrb, match_isgroup) ||
+            match(eptr, ecode+3, offset_top, md, ims, eptrb, 0)) return TRUE;
         }
       }
     return FALSE;
@@ -3819,7 +3878,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || !match_ref(offset, eptr, length, md, ims))
             return FALSE;
@@ -3840,7 +3899,7 @@ for (;;)
           }
         while (eptr >= pp)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           eptr -= length;
           }
@@ -3911,7 +3970,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject) return FALSE;
           c = *eptr++;
@@ -3935,7 +3994,7 @@ for (;;)
           }
 
         while (eptr >= pp)
-          if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
         return FALSE;
         }
@@ -4032,7 +4091,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject ||
               c != md->lcc[*eptr++])
@@ -4049,7 +4108,7 @@ for (;;)
           eptr++;
           }
         while (eptr >= pp)
-          if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
         return FALSE;
         }
@@ -4066,7 +4125,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject || c != *eptr++) return FALSE;
           }
@@ -4081,7 +4140,7 @@ for (;;)
           eptr++;
           }
         while (eptr >= pp)
-         if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+         if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
            return TRUE;
         return FALSE;
         }
@@ -4163,7 +4222,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject ||
               c == md->lcc[*eptr++])
@@ -4180,7 +4239,7 @@ for (;;)
           eptr++;
           }
         while (eptr >= pp)
-          if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
         return FALSE;
         }
@@ -4197,7 +4256,7 @@ for (;;)
         {
         for (i = min;; i++)
           {
-          if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb))
+          if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject || c == *eptr++) return FALSE;
           }
@@ -4212,7 +4271,7 @@ for (;;)
           eptr++;
           }
         while (eptr >= pp)
-         if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+         if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
            return TRUE;
         return FALSE;
         }
@@ -4312,7 +4371,7 @@ for (;;)
       {
       for (i = min;; i++)
         {
-        if (match(eptr, ecode, offset_top, md, ims, FALSE, eptrb)) return TRUE;
+        if (match(eptr, ecode, offset_top, md, ims, eptrb, 0)) return TRUE;
         if (i >= max || eptr >= md->end_subject) return FALSE;
 
         c = *eptr++;
@@ -4431,7 +4490,7 @@ for (;;)
         }
 
       while (eptr >= pp)
-        if (match(eptr--, ecode, offset_top, md, ims, FALSE, eptrb))
+        if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
           return TRUE;
       return FALSE;
       }
@@ -4717,7 +4776,7 @@ do
   if certain parts of the pattern were not used. */
 
   match_block.start_match = start_match;
-  if (!match(start_match, re->code, 2, &match_block, ims, FALSE, start_match))
+  if (!match(start_match, re->code, 2, &match_block, ims, NULL, match_isgroup))
     continue;
 
   /* Copy the offset information from temporary store if necessary */
