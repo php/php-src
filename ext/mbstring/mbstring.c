@@ -196,6 +196,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_strimwidth,			NULL)
 	PHP_FE(mb_convert_encoding,		NULL)
 	PHP_FE(mb_detect_encoding,		NULL)
+	PHP_FE(mb_list_encodings,		NULL)
 	PHP_FE(mb_convert_kana,			NULL)
 	PHP_FE(mb_encode_mimeheader,	NULL)
 	PHP_FE(mb_decode_mimeheader,	NULL)
@@ -2234,6 +2235,24 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 }
 /* }}} */
+
+/* {{{ proto array mb_list_encodings()
+   Returns an array of all supported encodings */
+PHP_FUNCTION(mb_list_encodings)
+{
+	const mbfl_encoding **encodings;
+	const mbfl_encoding *encoding;
+	int i;
+
+	array_init(return_value);
+	i = 0;
+	encodings = mbfl_get_supported_encodings();
+	while ((encoding = encodings[i++]) != NULL) {
+		add_next_index_string(return_value, encoding->name, 1);
+	}
+}
+/* }}} */
+
 
 /* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
    Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */

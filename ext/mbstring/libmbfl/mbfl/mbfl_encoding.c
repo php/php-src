@@ -264,6 +264,12 @@ mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 	}
 }
 
+const mbfl_encoding **
+mbfl_get_supported_encodings(void)
+{
+	return mbfl_encoding_ptr_list;
+}
+
 const char *
 mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 {
