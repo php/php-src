@@ -176,7 +176,7 @@ static void php_set_session_var(char *name, size_t namelen,
 	PLS_FETCH();
 	ELS_FETCH();
 
-	state_val_copy = (zval *)emalloc(sizeof(zval));
+	state_val_copy = ALLOC_ZVAL();
 	*state_val_copy = *state_val;
 	zval_copy_ctor(state_val_copy);
 	state_val_copy->refcount = 0;
