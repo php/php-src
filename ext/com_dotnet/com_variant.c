@@ -312,7 +312,7 @@ PHP_FUNCTION(com_variant_create_instance)
 /* }}} */
 
 /* {{{ proto void variant_set(object variant, mixed value)
-   Assigns a new value for a variant object (like "set" in VB) */
+   Assigns a new value for a variant object */
 PHP_FUNCTION(variant_set)
 {
 	zval *zobj, *zvalue = NULL;
@@ -443,6 +443,11 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 
 	if (SUCCEEDED(result)) {
 		php_com_wrap_variant(return_value, &vres, codepage TSRMLS_CC);
+	} else {
+		char *werr;
+		werr = php_win_err(result);
+		php_com_throw_exception(result, werr TSRMLS_CC);
+		LocalFree(werr);
 	}
 
 	VariantClear(&vres);
@@ -468,7 +473,7 @@ PHP_FUNCTION(variant_cat)
 /* }}} */
 
 /* {{{ proto mixed variant_sub(mixed left, mixed right)
-   subjects the value of the right variant from the left variant value and returns the result */
+   subtracts the value of the right variant from the left variant value and returns the result */
 PHP_FUNCTION(variant_sub)
 {
 	variant_binary_operation(VOP_SUB, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -508,7 +513,7 @@ PHP_FUNCTION(variant_eqv)
 /* }}} */
 
 /* {{{ proto mixed variant_idiv(mixed left, mixed right)
-   Converts variants to operands and then returns the result from dividing them */
+   Converts variants to integers and then returns the result from dividing them */
 PHP_FUNCTION(variant_idiv)
 {
 	variant_binary_operation(VOP_IDIV, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -600,6 +605,11 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 
 	if (SUCCEEDED(result)) {
 		php_com_wrap_variant(return_value, &vres, codepage TSRMLS_CC);
+	} else {
+		char *werr;
+		werr = php_win_err(result);
+		php_com_throw_exception(result, werr TSRMLS_CC);
+		LocalFree(werr);
 	}
 
 	VariantClear(&vres);
@@ -616,7 +626,7 @@ PHP_FUNCTION(variant_abs)
 /* }}} */
 
 /* {{{ proto mixed variant_fix(mixed left)
-   Returns the ? of a variant */
+   Returns the integer part ? of a variant */
 PHP_FUNCTION(variant_fix)
 {
 	variant_unary_operation(VOP_FIX, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -902,19 +912,3 @@ PHP_FUNCTION(variant_cast)
 }
 /* }}} */
 
-/* {{{ proto mixed variant_index_get(object variant, mixed index1 [, mixed index2 [, ...]])
-   Get the value of a multi dimensional array property */
-PHP_FUNCTION(variant_index_get)
-{
-	zval *zobj;
-	php_com_dotnet_object *obj;
-
-	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC,
-		"O", &zobj, php_com_variant_class_entry)) {
-		return;
-	}
-	obj = CDNO_FETCH(zobj);
-
-	/* TODO: finish... */
-}
-/* }}} */

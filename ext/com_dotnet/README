@@ -65,9 +65,6 @@ $word->Quit();
 
 TODO:
 
-- Mapping PHP arrays as SafeArray's.  This is currently not done.
-  Probably will implement this into $a = new variant($php_array, VT_ARRAY)
-  or something similar.
 - documentation
 
 * dotnet support requires that you have the mscoree.h header from the .net sdk
