@@ -1,9 +1,22 @@
 <?php
 
+/** @file recursiveiteratoriterator.inc
+ * @ingroup Internal
+ * @brief class RecursiveIteratorIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+define('RIT_LEAVES_ONLY', 0);
+define('RIT_SELF_FIRST',  1);
+define('RIT_CHILD_FIRST', 2);
+
 /**
  * @brief   Iterates through recursive iterators
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  */
 class RecursiveIteratorIterator implements OuterIterator
@@ -11,12 +24,21 @@ class RecursiveIteratorIterator implements OuterIterator
 	protected $ait = array();
 	protected $count = 0;
 
-	function __construct(RecursiveIterator $it)
+	/** Construct from RecursiveIterator
+	 *
+	 * @param it     RecursiveIterator to iterate
+	 * @param flags  Operation mode:
+	 *               - RIT_LEAVES_ONLY only show leaves
+	 *               - RIT_SELF_FIRST  show parents prior to their childs
+	 *               - RIT_CHILD_FIRST show all childs prior to their parent
+	 */
+	function __construct(RecursiveIterator $it, $flags)
 	{
 		$this->ait[0] = $it;
 	}
 
-
+	/** Rewind to top iterator as set in constructor
+	 */
 	function rewind()
 	{
 		while ($this->count) {
@@ -26,6 +48,8 @@ class RecursiveIteratorIterator implements OuterIterator
 		$this->ait[0]->recursed = false;
 	}
 	
+	/** @return whether iterator is valid
+	 */
 	function valid()
 	{
 		$count = $this->count;
@@ -39,18 +63,24 @@ class RecursiveIteratorIterator implements OuterIterator
 		return false;
 	}
 	
+	/** @reutrn current key
+	 */
 	function key()
 	{
 		$it = $this->ait[$this->count];
 		return $it->key();
 	}
 	
+	/** @return current element
+	 */
 	function current()
 	{
 		$it = $this->ait[$this->count];
 		return $it->current();
 	}
 	
+	/** Forward to next element
+	 */
 	function next()
 	{
 		while ($this->count) {
@@ -83,7 +113,10 @@ class RecursiveIteratorIterator implements OuterIterator
 			}
 		}
 	}
-	
+
+	/** @return Sub Iterator at given level or if unspecified the current sub 
+	 *          Iterator
+	 */
 	function getSubIterator($level = NULL)
 	{
 		if (is_null($level)) {
@@ -100,6 +133,8 @@ class RecursiveIteratorIterator implements OuterIterator
 		return $this->it;
 	}
 
+	/** @return Current Depth (Number of parents)
+	 */
 	function getDepth()
 	{
 		return $this->level;

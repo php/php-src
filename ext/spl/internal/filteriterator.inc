@@ -1,9 +1,18 @@
 <?php
 
+/** @file filteriterator.inc
+ * @ingroup Internal
+ * @brief class FilterIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
 /**
  * @brief   Regular expression filter for string iterators
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  * Instances of this class act as a filter around iterators. In other words 
  * you can put an iterator into the constructor and the instance will only 
