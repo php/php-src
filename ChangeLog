@@ -1,3 +1,154 @@
+2003-02-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/standard/streamsfuncs.c
+      main/network.c
+      main/php_network.h
+      main/streams/xp_socket.c
+      win32/select.c:
+      Tidy up stupid signed/unsigned issues with win32 by introducing a
+      php_socket_t typedef.
+
+2003-02-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/php_ini.c:
+      MFB config-file-scan-dir crash fix
+
+    * (PHP_4_3)
+      main/php_ini.c:
+         but there is no top php.ini file, we would get a segfault.  (Rasmus)
+
+2003-02-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.h:
+      Add this file...
+
+    * NEWS
+      configure.in
+      ext/ftp/ftp.c
+      ext/openssl/xp_ssl.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/streamsfuncs.c
+      main/network.c
+      main/php_network.h
+      main/streams/php_stream_transport.h
+      main/streams/transports.c
+      main/streams/xp_socket.c:
+      New user-space functions:
+        . stream_socket_client() - similar to fsockopen(), but more powerful.
+        . stream_socket_server() - Creates a server socket.
+        . stream_socket_accept() - Accept a client connection.
+        . stream_socket_get_name() - Get local or remote name of socket.
+      
+      Tidy up some leaks and debug printfs.
+      Move more streams functions into streamsfuncs.c and streamsfuncs.h.
+
+2003-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c
+      ext/standard/php_fopen_wrapper.c:
+      Fixed compiler warnings.
+
+2003-02-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      Was actually an ucwords() problem...
+
+2003-02-28  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/TODO:
+      callbacks are now supported
+      (although there's still room for improvements)
+
+2003-02-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+2003-02-28  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/yp/yp.c
+      ext/yp/yp.c:
+      MFphp5
+
+    * ext/standard/file.c:
+      it is still to early in the morning for coding :(
+
+    * ext/standard/file.c:
+      make sure that GNU extensions exist for fnmatch()
+
+2003-02-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      - MFH: Fixed bug #22312 (crash on failed connection when curl_getinfo() was
+      called).
+        (Phil Oleson <poleson@verio.net>)
+
+    * ext/curl/interface.c:
+      - Fixed bug #22312 (crash on failed connection when curl_getinfo() was
+      called).
+        (Phil Oleson <poleson@verio.net>)
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      ext/openssl/xp_ssl.c
+      main/php_network.h:
+      - No need to include the ssl headers elsewhere but in ext/openssl
+
+    * ext/yaz/config.m4
+      ext/yaz/php_yaz.c:
+      YAZ 2.0 or later is required now.
+
+2003-02-28  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_function.php:
+      - support for "callback" type
+      - proto syntax errors are now passed back to the top level parser
+
+    * scripts/ext_skel_ng/ext_skel_ng.php:
+      support for passing description file name on command line
+
+2003-02-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+      ws & CS
+
+2003-02-28  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/xml_stream_parser.php:
+      "on line #", not "in line #"
+
+    * scripts/ext_skel_ng/php_element.php:
+      added "callback" type (and fixed a stupid typo)
+
+    * scripts/ext_skel_ng/extension.dtd:
+      some DTD fixes and <code> as a toplevel element for .c and .h code snippets
+
+2003-02-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/plain_wrapper.c:
+      Implement memory mapping for win32.
+      Could do with some rigorous testing; simple readfile() tests here appear
+      to work.
+
+2003-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/network.c:
+      compiler warning fixed.
+
 2003-02-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/dir.c:
