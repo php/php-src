@@ -176,6 +176,8 @@ BOOL WINAPI DllMain(HANDLE hModule,
  * a user is using it!  We cannot lock anything since Web connections don't
  * provide the ability to later unlock what we locked.  Be smart, be safe.
  */
+/* {{{ proto bool filepro(string directory)
+   Read and verify the map file */
 PHP_FUNCTION(filepro)
 {
 	pval *dir;
@@ -263,6 +265,7 @@ PHP_FUNCTION(filepro)
 
 	RETVAL_TRUE;
 }
+/* }}} */
 
 
 /*
@@ -274,6 +277,8 @@ PHP_FUNCTION(filepro)
  * 
  * Errors return false, success returns the row count.
  */
+/* {{{ proto int filepro_rowcount(void)
+   Find out how many rows are in a filePro database */
 PHP_FUNCTION(filepro_rowcount)
 {
 	FILE *fp;
@@ -322,6 +327,7 @@ PHP_FUNCTION(filepro_rowcount)
 	
 	RETVAL_LONG(records);
 }
+/* }}} */
 
 
 /*
@@ -329,6 +335,8 @@ PHP_FUNCTION(filepro_rowcount)
  * 
  * Errors return false, success returns the name of the field.
  */
+/* {{{ proto string filepro_fieldname(int fieldnumber)
+   Gets the name of a field */
 PHP_FUNCTION(filepro_fieldname)
 {
 	pval *fno;
@@ -360,6 +368,7 @@ PHP_FUNCTION(filepro_fieldname)
 
 	RETVAL_FALSE;
 }
+/* }}} */
 
 
 /*
@@ -367,6 +376,8 @@ PHP_FUNCTION(filepro_fieldname)
  * 
  * Errors return false, success returns the type (edit) of the field
  */
+/* {{{ proto string filepro_fieldtype(int field_number)
+   Gets the type of a field */
 PHP_FUNCTION(filepro_fieldtype)
 {
 	pval *fno;
@@ -396,6 +407,7 @@ PHP_FUNCTION(filepro_fieldtype)
 				fno->value.lval);
 	RETVAL_FALSE;
 }
+/* }}} */
 
 
 /*
@@ -403,6 +415,8 @@ PHP_FUNCTION(filepro_fieldtype)
  * 
  * Errors return false, success returns the character width of the field.
  */
+/* {{{ proto int filepro_fieldwidth(int field_number)
+   Gets the width of a field */
 PHP_FUNCTION(filepro_fieldwidth)
 {
 	pval *fno;
@@ -432,6 +446,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 				fno->value.lval);
 	RETVAL_FALSE;
 }
+/* }}} */
 
 
 /*
@@ -439,6 +454,8 @@ PHP_FUNCTION(filepro_fieldwidth)
  * 
  * Errors return false, success returns the field count.
  */
+/* {{{ proto int filepro_fieldcount(void)
+   Find out how many fields are in a filePro database */
 PHP_FUNCTION(filepro_fieldcount)
 {
 	FP_TLS_VARS;
@@ -456,6 +473,7 @@ PHP_FUNCTION(filepro_fieldcount)
 	/* Read in the first line from the map file */
 	RETVAL_LONG(FP_GLOBAL(fp_fcount));
 }
+/* }}} */
 
 
 /*
@@ -463,6 +481,8 @@ PHP_FUNCTION(filepro_fieldcount)
  * 
  * Errors return false, success returns the datum.
  */
+/* {{{ proto string filepro_retrieve(int row_number, int field_number)
+   Retrieves data from a filePro database */
 PHP_FUNCTION(filepro_retrieve)
 {
 	pval *rno, *fno;
@@ -533,6 +553,7 @@ PHP_FUNCTION(filepro_retrieve)
     fclose(fp);
 	RETURN_STRING(readbuf,1);
 }
+/* }}} */
 
 #endif
 
