@@ -1555,7 +1555,7 @@ binary_assign_op_addr_obj:
 				{
 					zval **value_ptr_ptr = get_zval_ptr_ptr(&EX(opline)->op2, EX(Ts), BP_VAR_W);
 
-					if (value_ptr_ptr = &EX(Ts)[EX(opline)->op2.u.var].var.ptr) {
+					if (value_ptr_ptr = EX(Ts)[EX(opline)->op2.u.var].var.ptr_ptr) {
 						if (!(*value_ptr_ptr != &EG(uninitialized_zval) && (PZVAL_IS_REF(*value_ptr_ptr) || (*value_ptr_ptr)->refcount == 1)))
 						{
 							zend_error(E_ERROR, "Can't assign by reference non-referencable value!");
@@ -1850,7 +1850,7 @@ binary_assign_op_addr_obj:
 							class_name_strlen = tmp.value.str.len;
 						}
 					
-						if (zend_hash_find(EG(class_table), class_name_strval, class_name_strlen+1, (void **) &pce) == FAILURE) {
+						if (zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
 						} else {
 							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = *pce;
