@@ -75,12 +75,14 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 #ifdef ZTS
 	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), NULL, NULL);
 #endif
+	reentrancy_startup();
 
 	php_global_startup_internal_extensions();
 }
 
 SAPI_API void sapi_shutdown(void)
 {
+	reentrancy_shutdown();
 	php_global_shutdown_internal_extensions();
 	zend_hash_destroy(&known_post_content_types);
 }
