@@ -135,6 +135,7 @@ function_entry odbc_functions[] = {
 /* {{{ odbc_module_entry
  */
 zend_module_entry odbc_module_entry = {
+	STANDARD_MODULE_HEADER,
     "odbc", 
 	odbc_functions, 
 	PHP_MINIT(odbc), 
@@ -142,6 +143,7 @@ zend_module_entry odbc_module_entry = {
     PHP_RINIT(odbc), 
 	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -48,6 +48,7 @@ function_entry cyrus_functions[] = {
 };
 
 zend_module_entry cyrus_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"cyrus",
 	cyrus_functions,
 	PHP_MINIT(cyrus),
@@ -55,6 +56,7 @@ zend_module_entry cyrus_module_entry = {
 	NULL,	
 	NULL,
 	PHP_MINFO(cyrus),
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

@@ -62,6 +62,7 @@ function_entry php_ftp_functions[] = {
 };
 
 zend_module_entry php_ftp_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"ftp",
 	php_ftp_functions,
 	PHP_MINIT(ftp),
@@ -69,6 +70,7 @@ zend_module_entry php_ftp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ftp),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -854,3 +856,11 @@ PHP_FUNCTION(ftp_quit)
 /* }}} */
 
 #endif /* HAVE_FTP */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

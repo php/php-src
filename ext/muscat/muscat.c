@@ -61,6 +61,7 @@ function_entry muscat_functions[] = {
 };
 
 zend_module_entry muscat_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"muscat",
 	muscat_functions,
 	PHP_MINIT(muscat),
@@ -68,6 +69,7 @@ zend_module_entry muscat_module_entry = {
 	PHP_RINIT(muscat),		/* Replace with NULL if there's nothing to do at request start */
 	PHP_RSHUTDOWN(muscat),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(muscat),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

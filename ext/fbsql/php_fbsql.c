@@ -231,14 +231,16 @@ function_entry fbsql_functions[] = {
 /* }}} */
 
 zend_module_entry fbsql_module_entry = {
-   "fbsql",
-   fbsql_functions,
-   PHP_MINIT(fbsql),
-   PHP_MSHUTDOWN(fbsql),
-   PHP_RINIT(fbsql),
-   PHP_RSHUTDOWN(fbsql),
-   PHP_MINFO(fbsql),
-   STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER,
+	"fbsql",
+	fbsql_functions,
+	PHP_MINIT(fbsql),
+	PHP_MSHUTDOWN(fbsql),
+	PHP_RINIT(fbsql),
+	PHP_RSHUTDOWN(fbsql),
+	PHP_MINFO(fbsql),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
 };
 
 ZEND_DECLARE_MODULE_GLOBALS(fbsql)

@@ -56,6 +56,7 @@ function_entry zip_functions[] = {
 /* {{{ zip_module_entry
  */
 zend_module_entry zip_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"zip",
 	zip_functions,
 	PHP_MINIT(zip),
@@ -63,6 +64,7 @@ zend_module_entry zip_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(zip),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -386,6 +386,7 @@ static zend_function_entry php_oci_coll_class_functions[] = {
 #endif
 
 zend_module_entry oci8_module_entry = {
+	STANDARD_MODULE_HEADER,
     "oci8",        /* extension name */
     php_oci_functions,    /* extension function list */
     PHP_MINIT(oci),       /* extension-wide startup function */
@@ -393,6 +394,7 @@ zend_module_entry oci8_module_entry = {
     PHP_RINIT(oci),       /* per-request startup function */
     PHP_RSHUTDOWN(oci),   /* per-request shutdown function */
     PHP_MINFO(oci),       /* information function */
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 

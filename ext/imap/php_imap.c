@@ -158,12 +158,15 @@ function_entry imap_functions[] = {
 /* {{{ imap_module_entry
  */
 zend_module_entry imap_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"imap",
 	imap_functions,
 	PHP_MINIT(imap),
-	NULL, PHP_RINIT(imap),
+	NULL,
+	PHP_RINIT(imap),
 	PHP_RSHUTDOWN(imap),
 	PHP_MINFO(imap),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -110,6 +110,7 @@ static PHP_MINFO_FUNCTION(posix);
 /* {{{ posix_module_entry
  */
 zend_module_entry posix_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"posix", 
 	posix_functions, 
 	NULL,
@@ -117,6 +118,7 @@ zend_module_entry posix_module_entry = {
 	NULL,
 	NULL, 
 	PHP_MINFO(posix),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

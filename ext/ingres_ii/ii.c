@@ -67,6 +67,7 @@ function_entry ii_functions[] = {
 };
 
 zend_module_entry ingres_ii_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"ingres_ii",
 	ii_functions,
 	PHP_MINIT(ii),
@@ -74,6 +75,7 @@ zend_module_entry ingres_ii_module_entry = {
 	PHP_RINIT(ii),
 	PHP_RSHUTDOWN(ii),
 	PHP_MINFO(ii),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

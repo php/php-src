@@ -46,6 +46,7 @@ static void ncurses_destruct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ ncurses_module_entry
  */
 zend_module_entry ncurses_module_entry = {
+    STANDARD_MODULE_HEADER,
     "ncurses",
     ncurses_functions,
     PHP_MINIT(ncurses),
@@ -53,6 +54,7 @@ zend_module_entry ncurses_module_entry = {
     PHP_RINIT(ncurses),     /* Replace with NULL if there's nothing to do at request start */
     PHP_RSHUTDOWN(ncurses), /* Replace with NULL if there's nothing to do at request end */
     PHP_MINFO(ncurses),
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

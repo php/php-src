@@ -1810,7 +1810,16 @@ PHP_MSHUTDOWN_FUNCTION(COM)
 /* exports for external object creation */
 
 zend_module_entry COM_module_entry = {
-	"com", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+	"com",
+    COM_functions,
+    PHP_MINIT(COM),
+    PHP_MSHUTDOWN(COM),
+    NULL,
+    NULL,
+    PHP_MINFO(COM),
+    NO_VERSION_YET,
+    STANDARD_MODULE_PROPERTIES
 };
 
 PHPAPI int php_COM_get_le_comval()
@@ -1819,3 +1828,11 @@ PHPAPI int php_COM_get_le_comval()
 }
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

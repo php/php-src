@@ -152,6 +152,7 @@ function_entry sockets_functions[] = {
 /* }}} */
 
 zend_module_entry sockets_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"sockets",
 	sockets_functions,
 	PHP_MINIT(sockets),
@@ -159,6 +160,7 @@ zend_module_entry sockets_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(sockets),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

@@ -473,15 +473,26 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string phpversion(void)
+/* {{{ proto string phpversion([string extension])
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
-	}
+    zval **arg;
+    int argc = ZEND_NUM_ARGS();
 
-    RETURN_STRING(PHP_VERSION, 1);
+	if (argc == 0) {
+        RETURN_STRING(PHP_VERSION, 1);
+	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
+        char *version;
+        convert_to_string_ex(arg);
+        version = zend_get_module_version(Z_STRVAL_PP(arg));
+        if (version == NULL) {
+            RETURN_FALSE;
+        }
+        RETURN_STRING(version, 1);
+    } else {
+		WRONG_PARAM_COUNT;
+    }
 }
 /* }}} */
 

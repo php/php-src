@@ -66,6 +66,7 @@ function_entry mailparse_functions[] = {
 };
 
 zend_module_entry mailparse_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"mailparse",
 	mailparse_functions,
 	PHP_MINIT(mailparse),
@@ -73,6 +74,7 @@ zend_module_entry mailparse_module_entry = {
 	PHP_RINIT(mailparse),
 	PHP_RSHUTDOWN(mailparse),
 	PHP_MINFO(mailparse),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
