@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added PHP_EOL constant that contains the OS way of representing newlines.
   (Paul Hudson, Derick)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE on error). (Tony)
 - Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
 - Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path does not
   have trailing slash). (Ilia)
