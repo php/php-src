@@ -66,7 +66,7 @@ bc_raise (num1, num2, result, scale)
    if (exponent == 0)
      {
        bc_free_num (result);
-       *result = bc_copy_num (_one_);
+       *result = bc_copy_num (BCG(_one_));
        return;
      }
 
@@ -111,7 +111,7 @@ bc_raise (num1, num2, result, scale)
    /* Assign the value. */
    if (neg)
      {
-       bc_divide (_one_, temp, result, rscale);
+       bc_divide (BCG(_one_), temp, result, rscale);
        bc_free_num (&temp);
      }
    else

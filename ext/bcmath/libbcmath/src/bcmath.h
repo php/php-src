@@ -80,11 +80,11 @@ typedef struct bc_struct
 #define LONG_MAX 0x7ffffff
 #endif
 
-
+#define BCG(s) s##a
 /* Global numbers. */
-extern bc_num _zero_;
-extern bc_num _one_;
-extern bc_num _two_;
+extern bc_num BCG(_zero_);
+extern bc_num BCG(_one_);
+extern bc_num BCG(_two_);
 
 
 /* Function Prototypes */
