@@ -3749,8 +3749,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 		case XSD_TYPEKIND_SIMPLE:
 		case XSD_TYPEKIND_LIST:
 		case XSD_TYPEKIND_UNION:
-			smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
-			smart_str_appendc(buf, ' ');
+			if (type->encode) {
+				smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+				smart_str_appendc(buf, ' ');
+			} else {
+				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
+			}
 			smart_str_appendl(buf, type->name, strlen(type->name));
 			break;
 		case XSD_TYPEKIND_COMPLEX:
@@ -3775,7 +3779,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 						len = end-(*ext)->val;
 					}
 					if (len == 0) {
-						smart_str_appendl(buf, "anyType", 7);
+						smart_str_appendl(buf, "anyType", sizeof("anyType")-1);
 					} else {
 						smart_str_appendl(buf, (*ext)->val, len);
 					}
