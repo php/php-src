@@ -349,7 +349,9 @@ static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	}
 
 	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
-	send_http_header((request_rec *) SG(server_context));
+    /* check that we haven't sent headers already */
+    if(!((request_rec *) SG(server_context))->sent_bodyct)
+	    send_http_header((request_rec *) SG(server_context));
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 /* }}} */
@@ -707,7 +709,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
         }
 		init_request_info(TSRMLS_C);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
-
+        
 		/* Done, restore umask, turn off timeout, close file and return */
 		php_restore_umask();
 		kill_timeout(r);

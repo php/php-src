@@ -45,6 +45,7 @@ static void apache_table_to_zval(table *, int safe_mode, zval *return_value);
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
 PHP_FUNCTION(apache_response_headers);
+PHP_FUNCTION(apache_send_http_header);
 PHP_FUNCTION(apachelog);
 PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
@@ -57,6 +58,7 @@ PHP_MINFO_FUNCTION(apache);
 function_entry apache_functions[] = {
 	PHP_FE(virtual,									NULL)
 	PHP_FE(apache_request_headers,					NULL)
+	PHP_FE(apache_send_http_header,					NULL)
 	PHP_FE(apache_note,								NULL)
 	PHP_FE(apache_lookup_uri,						NULL)
 	PHP_FE(apache_child_terminate,					NULL)
@@ -1386,6 +1388,10 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
+PHP_FUNCTION(apache_send_http_header)
+{
+    ap_send_http_header((request_rec *)SG(server_context));
+}
 /* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)
