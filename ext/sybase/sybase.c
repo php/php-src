@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
-   | php_sybase_get_column_content_with_type() based on code by:         |
+   | php_sybase_get_column_content_with_type() based on code by:          |
    |                     Muhammad A Muquit <MA_Muquit@fccc.edu>           |
    |                     Rasmus Lerdorf <rasmus@lerdorf.on.ca>            |
    +----------------------------------------------------------------------+
@@ -483,17 +483,24 @@ static int php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
+/* {{{ proto int sybase_connect([string host [, string user [, string password]]])
+   Open Sybase server connection */
 PHP_FUNCTION(sybase_connect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
+/* }}} */
 
+/* {{{ proto int sybase_pconnect([string host [, string user [, string password]]])
+   Open persistent Sybase connection */
 PHP_FUNCTION(sybase_pconnect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
+/* }}} */
 
-
+/* {{{ proto bool sybase_close([int link_id])
+   Close Sybase connection */
 PHP_FUNCTION(sybase_close)
 {
 	pval *sybase_link_index;
@@ -524,8 +531,11 @@ PHP_FUNCTION(sybase_close)
 	zend_list_delete(id);
 	RETURN_TRUE;
 }
+/* }}} */
 	
 
+/* {{{ proto bool sybase_select_db(string database [, int link_id])
+   Select Sybase database */
 PHP_FUNCTION(sybase_select_db)
 {
 	pval *db,*sybase_link_index;
@@ -568,7 +578,8 @@ PHP_FUNCTION(sybase_select_db)
 		RETURN_TRUE;
 	}
 }
-
+/* }}} */
+	
 
 static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pval *result, int column_type)
 {
@@ -651,6 +662,8 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 }
 
 
+/* {{{ proto int sybase_query(string query [, int link_id])
+   Send Sybase query */
 PHP_FUNCTION(sybase_query)
 {
 	pval *query,*sybase_link_index;
@@ -786,8 +799,11 @@ PHP_FUNCTION(sybase_query)
 	return_value->value.lval = zend_list_insert(result,php_sybase_module.le_result);
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
                         
+/* {{{ proto bool sybase_free_result(int result)
+   Free result memory */
 PHP_FUNCTION(sybase_free_result)
 {
 	pval *sybase_result_index;
@@ -811,14 +827,20 @@ PHP_FUNCTION(sybase_free_result)
 	zend_list_delete(sybase_result_index->value.lval);
 	RETURN_TRUE;
 }
+/* }}} */
 
 
+
+/* {{{ proto string sybase_get_last_message(void)
+   Returns the last message from server (over min_message_severity) */
 PHP_FUNCTION(sybase_get_last_message)
 {
 	RETURN_STRING(php_sybase_module.server_message,1);
 }
+/* }}} */
 
-
+/* {{{ proto int sybase_num_rows(int result)
+   Get number of rows in result */
 PHP_FUNCTION(sybase_num_rows)
 {
 	pval *result_index;
@@ -841,8 +863,10 @@ PHP_FUNCTION(sybase_num_rows)
 	return_value->value.lval = result->num_rows;
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
-
+/* {{{ proto int sybase_num_fields(int result)
+   Get number of fields in result */
 PHP_FUNCTION(sybase_num_fields)
 {
 	pval *result_index;
@@ -865,8 +889,10 @@ PHP_FUNCTION(sybase_num_fields)
 	return_value->value.lval = result->num_fields;
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
-
+/* {{{ proto array sybase_fetch_row(int result)
+   Get row as enumerated array */
 PHP_FUNCTION(sybase_fetch_row)
 {
 	pval *sybase_result_index;
@@ -900,6 +926,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	}
 	result->cur_row++;
 }
+/* }}} */
 
 
 static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
@@ -946,6 +973,8 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
+/* {{{ proto object sybase_fetch_object(int result)
+   Fetch row as object */
 PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -955,13 +984,18 @@ PHP_FUNCTION(sybase_fetch_object)
 		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
+/* }}} */
 
-
+/* {{{ proto array sybase_fetch_array(int result)
+   Fetch row as array */
 PHP_FUNCTION(sybase_fetch_array)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
+/* }}} */
 
+/* {{{ proto bool sybase_data_seek(int result, int offset)
+   Move internal row pointer */
 PHP_FUNCTION(sybase_data_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -990,7 +1024,7 @@ PHP_FUNCTION(sybase_data_seek)
 	result->cur_row = offset->value.lval;
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 static char *php_sybase_get_field_name(int type)
 {
@@ -1039,6 +1073,8 @@ static char *php_sybase_get_field_name(int type)
 }
 
 
+/* {{{ proto object sybase_fetch_field(int result [, int offset])
+   Get field information */
 PHP_FUNCTION(sybase_fetch_field)
 {
 	pval *sybase_result_index,*offset;
@@ -1094,7 +1130,10 @@ PHP_FUNCTION(sybase_fetch_field)
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
 	add_property_string(return_value, "type", php_sybase_get_field_name(result->fields[field_offset].type), 1);
 }
+/* }}} */
 
+/* {{{ proto bool sybase_field_seek(int result, int offset)
+   Set field offset */
 PHP_FUNCTION(sybase_field_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -1125,8 +1164,10 @@ PHP_FUNCTION(sybase_field_seek)
 	result->cur_field = field_offset;
 	RETURN_TRUE;
 }
+/* }}} */
 
-
+/* {{{ proto string sybase_result(int result, int row, mixed field)
+   Get result data */
 PHP_FUNCTION(sybase_result)
 {
 	pval *row, *field, *sybase_result_index;
@@ -1182,7 +1223,7 @@ PHP_FUNCTION(sybase_result)
 	*return_value = result->data[row->value.lval][field_offset];
 	pval_copy_constructor(return_value);
 }
-
+/* }}} */
 
 PHP_MINFO_FUNCTION(sybase)
 {
@@ -1214,6 +1255,8 @@ PHP_MINFO_FUNCTION(sybase)
 }
 
 
+/* {{{ proto void sybase_min_error_severity(int severity)
+   Sets the minimum error severity */
 PHP_FUNCTION(sybase_min_error_severity)
 {
 	pval *severity;
@@ -1224,8 +1267,10 @@ PHP_FUNCTION(sybase_min_error_severity)
 	convert_to_long(severity);
 	php_sybase_module.min_error_severity = severity->value.lval;
 }
+/* }}} */
 
-
+/* {{{ proto void sybase_min_message_severity(int severity)
+   Sets the minimum message severity */
 PHP_FUNCTION(sybase_min_message_severity)
 {
 	pval *severity;
@@ -1236,5 +1281,6 @@ PHP_FUNCTION(sybase_min_message_severity)
 	convert_to_long(severity);
 	php_sybase_module.min_message_severity = severity->value.lval;
 }
+/* }}} */
 
 #endif
