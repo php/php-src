@@ -196,6 +196,7 @@ function_entry basic_functions[] = {
     PHP_FE(fscanf,                                  third_and_rest_force_ref)
 #ifdef HAVE_ICONV
     PHP_FE(iconv,									NULL)
+    PHP_FE(ob_iconv_handler,						NULL)
 #endif
 	PHP_FE(parse_url,								NULL)
 	PHP_FE(urlencode,								NULL)
@@ -600,10 +601,38 @@ static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
 	return SUCCESS;
 }
 
+#ifdef HAVE_ICONV
+static PHP_INI_MH(OnUpdateIconvOutputEncoding)
+{
+	BLS_FETCH();
+
+	if (BG(iconv_output_encoding)) {
+		free(BG(iconv_output_encoding));
+	}
+	BG(iconv_output_encoding) = zend_strndup(new_value, new_value_length);
+	return SUCCESS;
+}
+
+static PHP_INI_MH(OnUpdateIconvInternalEncoding)
+{
+	BLS_FETCH();
+
+	if (BG(iconv_internal_encoding)) {
+		free(BG(iconv_internal_encoding));
+	}
+	BG(iconv_internal_encoding) = zend_strndup(new_value, new_value_length);
+	return SUCCESS;
+}
+
+#endif
 
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
 	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",		SAFE_MODE_ALLOWED_ENV_VARS,		PHP_INI_SYSTEM,		OnUpdateSafeModeAllowedEnvVars,			NULL)
+#ifdef HAVE_ICONV
+	PHP_INI_ENTRY_EX("iconv.output_encoding",		ICONV_OUTPUT_ENCODING,		PHP_INI_SYSTEM,		OnUpdateIconvOutputEncoding,			NULL)
+	PHP_INI_ENTRY_EX("iconv.internal_encoding",		ICONV_INTERNAL_ENCODING,		PHP_INI_SYSTEM,		OnUpdateIconvInternalEncoding,			NULL)
+#endif
 	STD_PHP_INI_ENTRY("session.use_trans_sid",          "1",							PHP_INI_ALL,			OnUpdateBool,			use_trans_sid,			php_basic_globals,			basic_globals)
 PHP_INI_END()
 
