@@ -122,7 +122,7 @@ PHP_FUNCTION(dbase_open) {
 	convert_to_string(dbf_name);
 	convert_to_long(options);
 
-	if (PG(safe_mode) && (!php_checkuid(dbf_name->value.str.val, NULL, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(dbf_name->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 	
@@ -590,7 +590,7 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_P(filename), NULL, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_P(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 	
