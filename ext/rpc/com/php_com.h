@@ -14,6 +14,7 @@ extern PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFla
 extern PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId);
 extern PHPAPI HRESULT php_COM_release(comval *obj);
 extern PHPAPI HRESULT php_COM_addref(comval *obj);
+extern PHPAPI HRESULT php_COM_destruct(comval *obj);
 extern PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* pDisp, int cleanup);
 extern PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup);
 

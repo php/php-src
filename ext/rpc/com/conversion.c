@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Harald Radi <h.radi@nme.at>                                  |
-   |         Alan Brown <abrown@pobox.com>                                |
+   | Author: Harald Radi  <h.radi@nme.at>                                 |
+   |         Alan Brown   <abrown@pobox.com>                              |
    |         Paul Shortis <pshortis@dataworx.com.au>                      |
    +----------------------------------------------------------------------+
  */
@@ -44,7 +44,6 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
 PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
 /* implementations */
-
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 {
 	OLECHAR *unicode_str;
@@ -442,7 +441,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			break;
 
 		default:
-			php_error(E_WARNING, "Type not supportet or not yet implemented.");
+			php_error(E_WARNING, "Type not supported or not yet implemented.");
 	}
 }
 
@@ -667,13 +666,10 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			if(V_ISBYREF(var_arg))
 			{
 				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
-				SysFreeString(*V_BSTRREF(var_arg));
-				efree(V_BSTRREF(var_arg));
 			}
 			else
 			{
 				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
-				SysFreeString(V_BSTR(var_arg));
 			}
 
 			Z_TYPE_P(pval_arg) = IS_STRING;
@@ -741,7 +737,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				else
 				{
 					ALLOC_COM(obj);
-					php_COM_set(obj, V_DISPATCH(var_arg), TRUE);
+					php_COM_set(obj, V_DISPATCH(var_arg), FALSE);
 
 					ZVAL_COM(pval_arg, obj);
 				}

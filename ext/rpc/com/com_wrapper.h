@@ -41,7 +41,9 @@ typedef struct comval_ {
 #define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
-#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval))
+#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));					\
+						C_REFCOUNT(z) = 0;
+
 #define IS_COM			php_COM_get_le_comval()
 
 #define C_HASTLIB(x)	((x)->typelib)
