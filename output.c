@@ -185,7 +185,7 @@ static int php_b_body_write(const char *str, uint str_length)
 static int php_ub_body_write_no_header(const char *str, uint str_length)
 {
 	char *newstr = NULL;
-	uint new_length;
+	uint new_length=0;
 	int result;
 
 	session_adapt_uris(str, str_length, &newstr, &new_length);
