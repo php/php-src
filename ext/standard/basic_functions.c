@@ -327,8 +327,6 @@ function_entry basic_functions[] = {
 	PHP_FE(extension_loaded,			NULL)
 	PHP_FE(get_extension_funcs,			NULL)
 
-	PHP_FE(warn_not_available,			NULL)
-
 	PHP_FE(parse_ini_file,				NULL)
 
 	/* functions from reg.c */
