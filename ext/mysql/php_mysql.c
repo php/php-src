@@ -39,6 +39,9 @@
 #ifdef PHP_WIN32
 #include <winsock.h>
 #define signal(a, b) NULL
+#elif defined(NETWARE)
+#include <sys/socket.h>
+#define signal(a, b) NULL
 #else
 #include "build-defs.h"
 #if HAVE_SIGNAL_H
@@ -304,7 +307,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static PHP_INI_MH(OnMySQLPort)
 {
 	if (new_value==NULL) { /* default port */
-#ifndef PHP_WIN32
+#if !defined (PHP_WIN32) && ! defined (NETWARE)
 		struct servent *serv_ptr;
 		char *env;
 		
@@ -439,7 +442,7 @@ PHP_MINFO_FUNCTION(mysql)
 	sprintf(buf, "%ld", MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
-#ifndef PHP_WIN32
+#if !defined (PHP_WIN32) && !defined (NETWARE)
 	php_info_print_table_row(2, "MYSQL_MODULE_TYPE", PHP_MYSQL_TYPE);
 	php_info_print_table_row(2, "MYSQL_SOCKET", MYSQL_UNIX_ADDR);
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
@@ -1114,11 +1117,16 @@ PHP_FUNCTION(mysql_create_db)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
+#ifndef NETWARE
 	if (mysql_create_db(&mysql->conn, Z_STRVAL_PP(db))==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
+#else
+	php_error(E_WARNING, "mysql_create_db is not supported on NetWare");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
@@ -1153,11 +1161,16 @@ PHP_FUNCTION(mysql_drop_db)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
+#ifndef NETWARE
 	if (mysql_drop_db(&mysql->conn, Z_STRVAL_PP(db))==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
+#else
+	php_error(E_WARNING, "mysql_drop_db is not supported on NetWare");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 #endif
