@@ -11,5 +11,7 @@
 
 * clean up "$instance = &new object" syntax (default to the =& behaviour?)
 
-* chaning PHP error messages so that they point to pages or sections in the
+* change PHP error messages so that they point to pages or sections in the
   PHP manual
+
+* Fix Zend shallow copy issues with objects and arrays.
