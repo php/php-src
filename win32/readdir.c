@@ -37,14 +37,17 @@ DIR *opendir(const char *dir)
 	dp = (DIR *) malloc(sizeof(DIR));
 	dp->offset = 0;
 	dp->finished = 0;
-	dp->dir = strdup(dir);
 
 	if ((handle = _findfirst(filespec, &(dp->fileinfo))) < 0) {
-		if (errno == ENOENT)
+		if (errno == ENOENT) {
 			dp->finished = 1;
-		else
+		} else {
+			free(dp);
+			free(filespec);
 			return NULL;
+		}
 	}
+	dp->dir = strdup(dir);
 	dp->handle = handle;
 	free(filespec);
 
