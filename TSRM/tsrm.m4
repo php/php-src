@@ -50,6 +50,23 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 ])
 
+AC_DEFUN(TSRM_CHECK_ST,[
+  if test -r "$1/include/st.h"; then
+    CPPFLAGS="$CPPFLAGS -I$1/include"
+    LDFLAGS="$LDFLAGS -L$1/lib"
+  elif test -r "$1/st.h"; then
+    CPPFLAGS="$CPPFLAGS -I$1"
+    LDFLAGS="$LDFLAGS -L$1"
+  fi
+  AC_CHECK_HEADERS(st.h,[ ],[
+    AC_MSG_ERROR([Sorry[,] I was unable to locate the State Threads header file.  Please specify the prefix using --with-tsrm-st=/prefix])
+  ])
+  LIBS="$LIBS -lst"
+  AC_MSG_CHECKING(for SGI's State Threads)
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(TSRM_ST, 1, [ ])
+])
+
 sinclude(threads.m4)
 sinclude(TSRM/threads.m4)
 
@@ -80,6 +97,13 @@ AC_ARG_WITH(tsrm-pth,
   TSRM_PTH=no
 ])
 
+AC_ARG_WITH(tsrm-st,
+[  --with-tsrm-st],[
+  TSRM_ST=$withval
+],[
+  TSRM_ST=no
+])
+
 AC_ARG_WITH(tsrm-pthreads,
 [  --with-tsrm-pthreads    Use POSIX threads (default)],[
   TSRM_PTHREADS=$withval
@@ -91,6 +115,8 @@ test "$TSRM_PTH" = "yes" && TSRM_PTH=pth-config
 
 if test "$TSRM_PTH" != "no"; then
   TSRM_CHECK_PTH($TSRM_PTH)
+elif test "$TSRM_ST" != "no"; then
+  TSRM_CHECK_ST($TSRM_ST)
 elif test "$TSRM_PTHREADS" != "no"; then
   TSRM_CHECK_PTHREADS
 fi

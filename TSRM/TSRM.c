@@ -75,6 +75,8 @@ static FILE *tsrm_error_file;
 #if defined(PTHREADS)
 /* Thread local storage */
 static pthread_key_t tls_key;
+#elif defined(TSRM_ST)
+static int tls_key;
 #endif
 
 
@@ -85,6 +87,9 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 	pth_init();
 #elif defined(PTHREADS)
 	pthread_key_create( &tls_key, 0 );
+#elif defined(TSRM_ST)
+	st_init();
+	st_key_create(&tls_key, 0);
 #endif
 
 	tsrm_error_file = stderr;
@@ -227,6 +232,8 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 #if defined(PTHREADS)
 	/* Set thread local storage to this new thread resources structure */
 	pthread_setspecific( tls_key, (void *)*thread_resources_ptr );
+#elif defined(TSRM_ST)
+	st_thread_setspecific(tls_key, (void *) *thread_resources_ptr);
 #endif
 
 	if (tsrm_new_thread_begin_handler) {
@@ -262,11 +269,15 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		* and our hashtable lookup.
 		*/
 		thread_resources = pthread_getspecific( tls_key );
+#elif defined(TSRM_ST)
+		thread_resources = st_thread_getspecific(tls_key);
+#else
+		thread_resources = NULL;
+#endif
 		if (thread_resources) {
 			TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources->thread_id );
 			return ts_resource_read( thread_resources, id );
 		}
-#endif
 		thread_id = tsrm_thread_id();
 	} else {
 		thread_id = *th_id;
@@ -391,6 +402,8 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 	return systhread_current();
 #elif defined(PI3WEB)
 	return PIThread_getCurrent();
+#elif defined(TSRM_ST)
+	return st_thread_self();
 #endif
 }
 
@@ -413,6 +426,8 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 	mutexp = crit_init();
 #elif defined(PI3WEB)
 	mutexp = PIPlatform_allocLocalMutex();
+#elif defined(TSRM_ST)
+	mutexp = st_mutex_new();
 #endif
 #ifdef THR_DEBUG
 		printf("Mutex created thread: %d\n",mythreadid());
@@ -435,7 +450,9 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #elif defined(NSAPI)
 		crit_terminate(mutexp);
 #elif defined(PI3WEB)
-		PISync_delete(mutexp) 
+		PISync_delete(mutexp);
+#elif defined(TSRM_ST)
+		st_mutex_destroy(mutexp);
 #endif
     }
 #ifdef THR_DEBUG
@@ -459,6 +476,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 	return crit_enter(mutexp);
 #elif defined(PI3WEB)
 	return PISync_lock(mutexp);
+#elif defined(TSRM_ST)
+	return st_mutex_lock(mutexp);
 #endif
 }
 
@@ -478,6 +497,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 	return crit_exit(mutexp);
 #elif defined(PI3WEB)
 	return PISync_unlock(mutexp);
+#elif defined(TSRM_ST)
+	return st_mutex_unlock(mutexp);
 #endif
 }
 
