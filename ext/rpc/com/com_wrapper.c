@@ -568,7 +568,7 @@ PHP_FUNCTION(com_load)
 		} else {
 			if (!INI_INT("com.allow_dcom")) {
 				php_error(E_WARNING, "DCOM is disabled");
-				RETURN_NULL;
+				RETURN_NULL();
 			} else {
 				flags = CLSCTX_REMOTE_SERVER;
 				convert_to_string_ex(&server_name);
@@ -614,7 +614,7 @@ PHP_FUNCTION(com_load)
 			error_message = php_COM_error_message(hr TSRMLS_CC);  
 			php_error(E_WARNING,"Invalid ProgID, GUID string, or Moniker: %s", error_message);
 			LocalFree(error_message);
-			RETURN_NULL;
+			RETURN_NULL();
 		}
 	} else {
 		efree(ProgID);
@@ -674,7 +674,7 @@ PHP_FUNCTION(com_load)
 			LocalFree(error_message);
 			efree(clsid_str);
 			php_COM_destruct(obj TSRMLS_CC);
-			RETURN_NULL;
+			RETURN_NULL();
 		}
 	}
 
@@ -911,7 +911,7 @@ PHP_FUNCTION(com_invoke)
 	}
 	arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
 	if (zend_get_parameters_array(ht, arg_count, arguments) == FAILURE) {
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	object = arguments[0];
@@ -922,7 +922,7 @@ PHP_FUNCTION(com_invoke)
 	obj = (comval *)zend_list_find(Z_LVAL_P(object), &type);
 	if (!obj || (type != IS_COM)) {
 		php_error(E_WARNING,"%d is not a COM object handler", Z_STRVAL_P(function_name));
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	/* obtain property/method handler */
@@ -934,7 +934,7 @@ PHP_FUNCTION(com_invoke)
 		FREE_VARIANT(var_result);
 		efree(arguments);
 
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	RETVAL_VARIANT(var_result);
@@ -1102,7 +1102,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		FREE_VARIANT(var_result);
 		FREE_VARIANT(new_value);
 
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	php_pval_to_variant(value, new_value, codepage TSRMLS_CC);
@@ -1127,7 +1127,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		FREE_VARIANT(var_result);
 		FREE_VARIANT(new_value);
 
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	dispparams.cArgs = 0;
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(com_propget)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if (!obj || (type != IS_COM)) {
 		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 	convert_to_string_ex(&arg_property);
 
@@ -1179,7 +1179,7 @@ PHP_FUNCTION(com_propget)
 
 	if (do_COM_propget(var_result, obj, arg_property, FALSE TSRMLS_CC) == FAILURE) {
 		FREE_VARIANT(var_result);
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	RETVAL_VARIANT(var_result);
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(com_propput)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if (!obj || (type != IS_COM)) {
 		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 	convert_to_string_ex(&arg_property);
 
