@@ -154,7 +154,7 @@ static void _close_ii_link(II_LINK *link)
 
   IIapi_disconnect(&disconnParm);
 
-  efree(link);
+  free(link);
 
   IIG(num_links)--;
 }
@@ -435,7 +435,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	RETURN_FALSE;
       }
 
-      link = (II_LINK *) emalloc(sizeof(II_LINK));
+      link = (II_LINK *) malloc(sizeof(II_LINK));
       link->connHandle = connParm.co_connHandle;
       link->tranHandle = NULL;
       link->stmtHandle = NULL;
@@ -447,6 +447,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
       new_le.ptr = link;
       if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 	php_error(E_WARNING,"Ingres II:  Unable to hash (%s)", hashed_details);
+	free(link);
 	efree(hashed_details);
 	RETURN_FALSE;
       }
@@ -516,7 +517,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	RETURN_FALSE;
       }
 
-      link = (II_LINK *) emalloc(sizeof(II_LINK));
+      link = (II_LINK *) malloc(sizeof(II_LINK));
       link->connHandle = connParm.co_connHandle;
       link->tranHandle = NULL;
       link->stmtHandle = NULL;
@@ -531,13 +532,14 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
       new_index_ptr.type = le_index_ptr;
       if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 	php_error(E_WARNING,"Ingres II:  Unable to hash (%s)", hashed_details);
+	free(link);
 	efree(hashed_details);
 	RETURN_FALSE;
       }
       IIG(num_links)++;
   }
-  efree(hashed_details);
 
+  efree(hashed_details);
   php_ii_set_default_link(return_value->value.lval);
 }
 
