@@ -1221,8 +1221,8 @@ PHP_FUNCTION(session_set_cookie_params)
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain, &secure) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long_ex(lifetime);
-	PS(cookie_lifetime) = Z_LVAL_PP(lifetime);
+	convert_to_string_ex(lifetime);
+	zend_alter_ini_entry("session.cookie_lifetime", sizeof("session.cookie_lifetime"), Z_STRVAL_PP(lifetime), Z_STRLEN_PP(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 	if (ZEND_NUM_ARGS() > 1) {
 		convert_to_string_ex(path);
