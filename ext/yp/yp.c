@@ -296,12 +296,12 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 	if (!err)
 	{
 		if (inkeylen) {
-			char *key = malloc(inkeylen+1);
+			char *key = emalloc(inkeylen+1);
 			if(key) {
 				strncpy(key, inkey, inkeylen);
 				key[inkeylen] = '\0';
 				add_assoc_stringl_ex((zval *) indata, key, inkeylen+1, inval, invallen, 1);
-				free(key);
+				efree(key);
 			} else {
 				php_error(E_WARNING, "Can't allocate %d bytes for key buffer in yp_cat()");
 			}
