@@ -20,6 +20,8 @@
 #define yyleng SCNG(yy_leng)
 #define yytext SCNG(yy_text)
 #define yytext_ptr SCNG(yy_text)
+#define yyin SCNG(yy_in)
+#define yyout SCNG(yy_out)
 
 #include "zend.h"
 #include "zend_globals.h"

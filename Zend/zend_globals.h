@@ -222,8 +222,8 @@ struct _zend_alloc_globals {
 
 
 struct _zend_scanner_globals {
-	FILE *yyin;
-	FILE *yyout;
+	FILE *yy_in;
+	FILE *yy_out;
 	int yy_leng;
 	char *yy_text;
 	struct yy_buffer_state *current_buffer;
