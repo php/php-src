@@ -1,3 +1,14 @@
+2003-11-21  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      - Added $proc->hasExsltSupport()
+
+2003-11-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_execute.c:
+      Cleaner patch for bug #26281.
+
 2003-11-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * ext/standard/parsedate.y:
