@@ -21,14 +21,19 @@
 #ifndef HTML_H
 #define HTML_H
 
-#define ENT_COMPAT    1
-#define ENT_QUOTES    2
-#define ENT_NOQUOTES  4
+#define ENT_HTML_QUOTE_NONE		0
+#define ENT_HTML_QUOTE_SINGLE	1
+#define ENT_HTML_QUOTE_DOUBLE	2
+
+#define ENT_COMPAT    ENT_HTML_QUOTE_DOUBLE
+#define ENT_QUOTES    (ENT_HTML_QUOTE_DOUBLE | ENT_HTML_QUOTE_SINGLE)
+#define ENT_NOQUOTES  ENT_HTML_QUOTE_NONE
 
 void register_html_constants(INIT_FUNC_ARGS);
 
 PHP_FUNCTION(htmlspecialchars);
 PHP_FUNCTION(htmlentities);
+PHP_FUNCTION(html_entity_decode);
 PHP_FUNCTION(get_html_translation_table);
 
 PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char * hint_charset);

@@ -67,6 +67,9 @@ PHP_FUNCTION(ob_gzhandler);
 FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC);
 int php_enable_output_compression(int buffer_size TSRMLS_DC);
 
+php_stream * php_stream_gzopen(char * path, char * mode, int options, char ** opened_path TSRMLS_DC);
+extern php_stream_ops php_stream_gzio_ops;
+extern php_stream_wrapper php_stream_gzip_wrapper;
 
 #ifdef ZTS
 #define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)

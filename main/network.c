@@ -17,6 +17,9 @@
  */
 /* $Id$ */
 
+#define PHP_SOCK_CHUNK_SIZE	8192
+#define MAX_CHUNKS_PER_READ 10
+
 #include "php.h"
 
 #ifdef PHP_WIN32
@@ -407,6 +410,406 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 	}
 }
 /* }}} */
+
+PHPAPI php_stream * php_stream_sock_open_from_socket(int socket, int persistent)
+{
+	php_stream * stream;
+	php_netstream_data_t * sock;
+
+	sock = pemalloc(sizeof(php_netstream_data_t), persistent);
+	memset(sock, 0, sizeof(php_netstream_data_t));
+
+	sock->is_blocked = 1;
+	sock->chunk_size = PHP_SOCK_CHUNK_SIZE;
+	sock->timeout.tv_sec = -1;
+	sock->socket = socket;
+
+	stream = php_stream_alloc(&php_stream_socket_ops, sock, persistent, "r+");
+
+	if (stream == NULL)	
+		pefree(sock, persistent);
+
+	return stream;
+}
+
+PHPAPI php_stream * php_stream_sock_open_host(const char * host, unsigned short port,
+		int socktype, int timeout, int persistent)
+{
+	int socket;
+
+	socket = php_hostconnect(host, port, socktype, timeout);
+
+	if (socket == -1)
+		return NULL;
+
+	return php_stream_sock_open_from_socket(socket, persistent);
+}
+
+PHPAPI php_stream * php_stream_sock_open_unix(const char * path, int persistent, struct timeval * timeout)
+{
+#if defined(AF_UNIX)
+	int socketd;
+	struct  sockaddr_un unix_addr;
+
+	socketd = socket(PF_UNIX, SOCK_STREAM, 0);
+	if (socketd == SOCK_ERR)
+		return NULL;
+
+	memset(&unix_addr, 0, sizeof(unix_addr));
+	unix_addr.sun_family = AF_UNIX;
+	strlcpy(unix_addr.sun_path, path, sizeof(unix_addr.sun_path));
+
+	if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), timeout) == SOCK_CONN_ERR) 
+		return NULL;
+
+	return php_stream_sock_open_from_socket(socketd, persistent);
+#else
+	return NULL;
+#endif
+}
+
+#if HAVE_OPENSSL_EXT
+PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream * stream, int activate, SSL_METHOD * method)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+	SSL_CTX * ctx = NULL;
+
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
+		return FAILURE;
+	
+	if (activate == sock->ssl_active)
+		return SUCCESS;	/* already in desired mode */
+	
+	if (activate && sock->ssl_handle == NULL)	{
+		ctx = SSL_CTX_new(method);
+		if (ctx == NULL)
+			return FAILURE;
+
+		sock->ssl_handle = SSL_new(ctx);
+		if (sock->ssl_handle == NULL)	{
+			SSL_CTX_free(ctx);
+			return FAILURE;
+		}
+		
+		SSL_set_fd(sock->ssl_handle, sock->socket);
+	}
+
+	if (activate)	{
+		if (SSL_connect(sock->ssl_handle) <= 0)	{
+			SSL_shutdown(sock->ssl_handle);
+			return FAILURE;
+		}
+		sock->ssl_active = activate;
+	}
+	else	{
+		SSL_shutdown(sock->ssl_handle);
+		sock->ssl_active = 0;
+	}
+	return SUCCESS;
+}
+#endif
+
+PHPAPI void php_stream_sock_set_timeout(php_stream * stream, struct timeval *timeout)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
+		return;
+	
+	sock->timeout = *timeout;
+	sock->timeout_event = 0;
+}
+
+PHPAPI int php_stream_sock_set_blocking(php_stream * stream, int mode)
+{
+	int oldmode;
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
+		return 0;
+	
+	oldmode = sock->is_blocked;
+	sock->is_blocked = mode;
+
+	return oldmode;
+}
+
+PHPAPI size_t php_stream_sock_set_chunk_size(php_stream * stream, size_t size)
+{
+	size_t oldsize;
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
+		return 0;
+	
+	oldsize = sock->chunk_size;
+	sock->chunk_size = size;
+
+	return oldsize;
+}
+
+#define TOREAD(sock) ((sock)->writepos - (sock)->readpos)
+#define READPTR(sock) ((sock)->readbuf + (sock)->readpos)
+#define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
+
+static size_t php_sockop_write(php_stream * stream, const char * buf, size_t count)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+#if HAVE_OPENSSL_EXT
+	if (sock->ssl_active)
+		return SSL_write(sock->ssl_handle, buf, count);
+#endif
+	return send(sock->socket, buf, count, 0);
+}
+static void php_sock_stream_wait_for_data(php_stream * stream, php_netstream_data_t * sock)
+{
+	fd_set fdr, tfdr;
+	int retval;
+	struct timeval timeout, *ptimeout;
+
+	FD_ZERO(&fdr);
+	FD_SET(sock->socket, &fdr);
+	sock->timeout_event = 0;
+
+	if (sock->timeout.tv_sec == -1)
+		ptimeout = NULL;
+	else
+		ptimeout = &timeout;
+
+	while(1) {
+		tfdr = fdr;
+		timeout = sock->timeout;
+
+		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
+
+		if (retval == 0)
+			sock->timeout_event = 1;
+
+		if (retval >= 0)
+			break;
+	}
+}
+
+static size_t php_sock_stream_read_internal(php_stream * stream, php_netstream_data_t * sock)
+{
+	char buf[PHP_SOCK_CHUNK_SIZE];
+	int nr_bytes;
+	size_t nr_read = 0;
+
+	/* For blocking sockets, we wait until there is some
+	   data to read (real data or EOF)
+
+	   Otherwise, recv() may time out and return 0 and
+	   therefore sock->eof would be set errornously.
+	 */
+
+
+	if(sock->is_blocked) {
+		php_sock_stream_wait_for_data(stream, sock);
+		if (sock->timeout_event)
+			return 0;
+	}
+
+	/* read at a maximum sock->chunk_size */
+#if HAVE_OPENSSL_EXT
+	if (sock->ssl_active)
+		nr_bytes = SSL_read(sock->ssl_handle, buf, sock->chunk_size);
+	else
+#endif
+	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
+	if(nr_bytes > 0) {
+		if(sock->writepos + nr_bytes > sock->readbuflen) {
+			sock->readbuflen += sock->chunk_size;
+			sock->readbuf = perealloc(sock->readbuf, sock->readbuflen,
+					php_stream_is_persistent(stream));
+		}
+		memcpy(WRITEPTR(sock), buf, nr_bytes);
+		sock->writepos += nr_bytes;
+		nr_read = nr_bytes;
+	} else if(nr_bytes == 0 || (nr_bytes < 0 && errno != EWOULDBLOCK)) {
+		sock->eof = 1;
+	}
+
+	return nr_read;
+
+}
+
+static size_t php_sock_stream_read(php_stream * stream, php_netstream_data_t * sock)
+{
+	size_t nr_bytes;
+	size_t nr_read = 0;
+	int i;
+
+	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
+		nr_bytes = php_sock_stream_read_internal(stream, sock);
+		if(nr_bytes == 0) break;
+		nr_read += nr_bytes;
+	}
+
+	return nr_read;
+}
+
+static size_t php_sockop_read(php_stream * stream, char * buf, size_t count)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+	size_t ret = 0;
+
+	if (sock->is_blocked)	{
+		while(!sock->eof && TOREAD(sock) < count && !sock->timeout_event)
+			php_sock_stream_read_internal(stream, sock);
+	}
+	else	
+		php_sock_stream_read(stream, sock);
+
+	if(count < 0)
+		return ret;
+
+	ret = MIN(TOREAD(sock), count);
+	if (ret) {
+		memcpy(buf, READPTR(sock), ret);
+		sock->readpos += ret;
+	}
+
+	return ret;
+}
+
+static int php_sockop_close(php_stream * stream)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+
+#if HAVE_OPENSSL_EXT
+	if (sock->ssl_active)	{
+		SSL_shutdown(sock->ssl_handle);
+		sock->ssl_active = 0;
+		SSL_free(sock->ssl_handle);
+		sock->ssl_handle = NULL;
+	}
+#endif
+	
+	shutdown(sock->socket, 0);
+	closesocket(sock->socket);
+
+	if (sock->readbuf)
+		pefree(sock->readbuf, php_stream_is_persistent(stream));
+
+	pefree(sock, php_stream_is_persistent(stream));
+	
+	return 0;
+}
+
+static int php_sockop_flush(php_stream * stream)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+	return fsync(sock->socket);
+}
+
+static int php_sockop_cast(php_stream * stream, int castas, void ** ret)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+	TSRMLS_FETCH();
+
+	switch(castas)	{
+		case PHP_STREAM_AS_STDIO:
+#if HAVE_OPENSSL_EXT
+			if (sock->ssl_active)
+				return FAILURE;
+#endif
+			if (ret)	{
+				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
+				if (TOREAD(sock) > 0)
+					zend_error(E_WARNING, "%s(): buffered data lost during conversion to FILE*!", get_active_function_name(TSRMLS_C));
+				*ret = fdopen(sock->socket, stream->mode);
+				if (*ret)
+					return SUCCESS;
+				return FAILURE;
+			}
+			return SUCCESS;
+		case PHP_STREAM_AS_FD:
+		case PHP_STREAM_AS_SOCKETD:
+#if HAVE_OPENSSL_EXT
+			if (sock->ssl_active)
+				return FAILURE;
+#endif
+			if (ret)
+				*ret = (void*)sock->socket;
+			return SUCCESS;
+		default:
+			return FAILURE;
+	}
+}
+
+#define SEARCHCR() do {												\
+	if (TOREAD(sock)) {												\
+		for (p = READPTR(sock), pe = p + MIN(TOREAD(sock), maxlen);	\
+				*p != '\n'; ) 										\
+			if (++p >= pe) { 										\
+				p = NULL; 											\
+				break; 												\
+			}														\
+	} else															\
+		p = NULL;													\
+} while (0)
+
+
+static char * php_sockop_gets(php_stream * stream, char *buf, size_t maxlen)
+{
+	php_netstream_data_t * sock = (php_netstream_data_t*)stream->abstract;
+	char *p = NULL, *pe;
+	char *ret = NULL;
+	size_t amount = 0;
+
+	if (maxlen==0) {
+		buf[0] = 0;
+		return buf;
+	}
+
+	SEARCHCR();
+
+	if(!p) {
+		if(sock->is_blocked) {
+			while(!p && !sock->eof && !sock->timeout_event && TOREAD(sock) < maxlen) {
+				php_sock_stream_read_internal(stream, sock);
+				SEARCHCR();
+			}
+		} else {
+			php_sock_stream_read(stream, sock);
+			SEARCHCR();
+		}
+	}
+
+	if(p) {
+		amount = (ptrdiff_t) p - (ptrdiff_t) READPTR(sock) + 1;
+	} else {
+		amount = TOREAD(sock);
+	}
+
+	amount = MIN(amount, maxlen);
+
+	if(amount > 0) {
+		memcpy(buf, READPTR(sock), amount);
+		sock->readpos += amount;
+	}
+	buf[amount] = '\0';
+
+	/* signal error only, if we don't return data from this call and
+	   if there is no data to read and if the eof flag is set */
+	if(amount || TOREAD(sock) || !sock->eof) {
+		ret = buf;
+	}
+
+	return ret;
+}
+
+php_stream_ops php_stream_socket_ops = {
+	php_sockop_write, php_sockop_read,
+	php_sockop_close, php_sockop_flush,
+	NULL, php_sockop_gets,
+	php_sockop_cast,
+	"socket"
+};
+
+
+
 
 /*
  * Local variables:

@@ -55,12 +55,6 @@
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
-/* define closesocket macro for portability */
-#ifndef PHP_WIN32
-#undef closesocket
-#define closesocket close
-#endif
-
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
@@ -547,7 +541,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type)
 {
 	databuf_t		*data = NULL;
 	char			*ptr;
@@ -585,23 +579,23 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 		if (type == FTPTYPE_ASCII) {
 			for (ptr = data->buf; rcvd; rcvd--, ptr++) {
 				if (lastch == '\r' && *ptr != '\n')
-					putc('\r', outfp);
+					php_stream_putc(outstream, '\r');
 				if (*ptr != '\r')
-					putc(*ptr, outfp);
+					php_stream_putc(outstream, *ptr);
 				lastch = *ptr;
 			}
 		}
 		else {
-			fwrite(data->buf, rcvd, 1, outfp);
+			php_stream_write(outstream, data->buf, rcvd);
 		}
 	}
 
 	if (type == FTPTYPE_ASCII && lastch == '\r')
-		putc('\r', outfp);
+		php_stream_putc(outstream, '\r');
 
 	data = data_close(data);
 
-	if (ferror(outfp)) {
+	if (php_stream_error(outstream)) {
 		goto bail;
 	}
 
@@ -619,7 +613,7 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, ftptype_t type)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream * instream, ftptype_t type)
 {
 	databuf_t		*data = NULL;
 	int			size;
@@ -645,7 +639,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, f
 
 	size = 0;
 	ptr = data->buf;
-	while ((ch = FP_FGETC(insocket, infp, issock))!=EOF && !FP_FEOF(insocket, infp, issock)) {
+	while ((ch = php_stream_getc(instream))!=EOF && !php_stream_eof(instream)) {
 		/* flush if necessary */
 		if (FTP_BUFSIZE - size < 2) {
 			if (my_send(ftp, data->fd, data->buf, size) != size)
@@ -666,7 +660,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, f
 	if (size && my_send(ftp, data->fd, data->buf, size) != size)
 		goto bail;
 
-	if (!issock && ferror(infp))
+	if (php_stream_error(instream))
 		goto bail;
 
 	data = data_close(data);

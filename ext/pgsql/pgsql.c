@@ -1434,9 +1434,8 @@ PHP_FUNCTION(pg_trace)
 	int id = -1;
 	PGconn *pgsql;
 	char *mode = "w";
-	int issock, socketd;
 	FILE *fp;
-
+	php_stream * stream;
 	id = PGG(default_link);
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1469,15 +1468,18 @@ PHP_FUNCTION(pg_trace)
     ZEND_FETCH_RESOURCE2(pgsql, PGconn *, z_pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	convert_to_string_ex(z_filename);
 
-	fp = php_fopen_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL TSRMLS_CC);
 
-	if (!fp) {
-		php_error(E_WARNING, "Unable to open %s for logging", Z_STRVAL_PP(z_filename));
+	if (!stream) {
 		RETURN_FALSE;
 	}
-	
+
+	if (!php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)fp, REPORT_ERRORS))	{
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+	ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
 	PQtrace(pgsql, fp);
-	ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
 	RETURN_TRUE;
 }
 /* }}} */

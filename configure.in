@@ -730,15 +730,6 @@ if test "$PHP_DMALLOC" = "yes"; then
   ])
 fi
 
-# temporary until streams are better integrated
-PHP_ARG_ENABLE(php-streams,whether to enable php streams,
-[  --enable-php-streams    Include experimental php streams.
-                          Do not use unless you are testing the code!])
-
-if test "$PHP_PHP_STREAMS" = "yes"; then
-  AC_DEFINE(HAVE_PHP_STREAM, 1, [Whether to use php streams])
-fi
-
 AC_CHECK_LIB(crypt, crypt, [
   PHP_ADD_LIBRARY(crypt)
   PHP_ADD_LIBRARY(crypt, 1)

@@ -30,26 +30,33 @@
 #include "php_standard.h"
 #include "php_fopen_wrappers.h"
 
-
-/* {{{ php_fopen_url_wrap_php
- */
-FILE *php_fopen_url_wrap_php(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+php_stream * php_stream_url_wrap_php(char * path, char * mode, int options, char ** opened_path TSRMLS_DC)
 {
-	const char *res = path + 6;
-
-	*issock = 0;
+	FILE * fp = NULL;
+	php_stream * stream = NULL;
 	
-	if (!strcasecmp(res, "stdin")) {
-		return fdopen(dup(STDIN_FILENO), mode);
-	} else if (!strcasecmp(res, "stdout")) {
-		return fdopen(dup(STDOUT_FILENO), mode);
-	} else if (!strcasecmp(res, "stderr")) {
-		return fdopen(dup(STDERR_FILENO), mode);
+	if (!strcasecmp(path, "stdin")) {
+		fp = fdopen(dup(STDIN_FILENO), mode);
+	} else if (!strcasecmp(path, "stdout")) {
+		fp = fdopen(dup(STDOUT_FILENO), mode);
+	} else if (!strcasecmp(path, "stderr")) {
+		fp = fdopen(dup(STDERR_FILENO), mode);
 	}
-	
-	return NULL;
+	/* TODO: implement php://output as a stream to write to the current output buffer ? */
+
+	if (fp)	{
+		stream = php_stream_fopen_from_file(fp, mode);
+		if (stream == NULL)
+			fclose(fp);
+	}
+	return stream;
 }
-/* }}} */
+
+php_stream_wrapper php_stream_php_wrapper =	{
+	php_stream_url_wrap_php,
+	NULL
+};
+
 
 /*
  * Local variables:

@@ -23,78 +23,104 @@
 #include "php_zlib.h"
 #include "fopen_wrappers.h"
 
-#if HAVE_FOPENCOOKIE 
-
-
-struct gz_cookie {
+struct php_gz_stream_data_t	{
 	gzFile gz_file;
+	php_stream * stream;
 };
 
-static ssize_t gz_reader(void *cookie, char *buffer, size_t size)
+static size_t php_gziop_read(php_stream * stream, char * buf, size_t count)
 {
-	return gzread(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
+	struct php_gz_stream_data_t * self = (struct php_gz_stream_data_t *)stream->abstract;
+
+	if (buf == NULL && count == 0)	{
+		if (gzeof(self->gz_file))
+			return EOF;
+		return 0;
+	}
+	
+	return gzread(self->gz_file, buf, count); 
 }
 
-static ssize_t gz_writer(void *cookie, const char *buffer, size_t size) {
-	return gzwrite(((struct gz_cookie *)cookie)->gz_file,(char *)buffer,size); 
+static char * php_gziop_gets(php_stream * stream, char * buf, size_t size)
+{
+	struct php_gz_stream_data_t * self = (struct php_gz_stream_data_t *)stream->abstract;
+	return gzgets(self->gz_file, buf, size);
 }
 
-static int gz_seeker(void *cookie,off_t position, int whence) {
-	return gzseek(((struct gz_cookie *)cookie)->gz_file,(z_off_t)position,whence); 
+
+static size_t php_gziop_write(php_stream * stream, const char * buf, size_t count)
+{
+	struct php_gz_stream_data_t * self = (struct php_gz_stream_data_t *)stream->abstract;
+	return gzwrite(self->gz_file, (char*)buf, count); 
 }
 
-static int gz_closer(void *cookie) {
-	int ret=gzclose(((struct gz_cookie *)cookie)->gz_file);
-	free(cookie);
-	cookie=NULL;  
+static int php_gziop_seek(php_stream * stream, off_t offset, int whence)
+{
+	struct php_gz_stream_data_t * self = (struct php_gz_stream_data_t *)stream->abstract;
+	return gzseek(self->gz_file, offset, whence);
+}
+
+static int php_gziop_close(php_stream * stream)
+{
+	struct php_gz_stream_data_t * self = (struct php_gz_stream_data_t *)stream->abstract;
+	int ret;
+	
+	ret = gzclose(self->gz_file);
+	php_stream_close(self->stream);
+	efree(self);
+
 	return ret;
 }
 
-
-
-static COOKIE_IO_FUNCTIONS_T gz_cookie_functions =   
-{ gz_reader 
-, gz_writer
-, gz_seeker
-, gz_closer
+php_stream_ops php_stream_gzio_ops = {
+	php_gziop_write, php_gziop_read,
+	php_gziop_close, NULL,
+	php_gziop_seek, php_gziop_gets,
+	NULL, "ZLIB"
 };
 
-FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+php_stream * php_stream_gzopen(char * path, char * mode, int options, char ** opened_path TSRMLS_DC)
 {
-	struct gz_cookie *gc = NULL;
-	FILE *fp;
-    int fissock=0, fsocketd=0;
-
-	gc = (struct gz_cookie *)malloc(sizeof(struct gz_cookie));
-
-	if(gc) {
-		*issock = 0;
-		
-		while(*path!=':') 
-			path++;
-		
+	struct php_gz_stream_data_t * self;
+	php_stream * stream = NULL;
+	
+	self = emalloc(sizeof(*self));
+	
+	while(*path != ':')
 		path++;
-
-		fp = php_fopen_wrapper((char *) path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL TSRMLS_CC);
-		
-		if (!fp) {
-			free(gc);
-			return NULL;
-		}
-		
-		gc->gz_file = gzdopen(fileno(fp), mode);
-                
-		if(gc->gz_file) {
-			return fopencookie(gc,mode,gz_cookie_functions);		
-		} else {
-		    free(gc);
-			return NULL;
+	path++;
+	
+	self->stream = php_stream_open_wrapper(path, mode, options, opened_path TSRMLS_CC);
+	
+	if (self->stream)	{
+		int fd;
+		if (SUCCESS == php_stream_cast(self->stream, PHP_STREAM_AS_FD, (void**)&fd, REPORT_ERRORS))	{
+			self->gz_file = gzdopen(fd, mode);
+			if (self->gz_file)	{
+				stream = php_stream_alloc(&php_stream_gzio_ops, self, 0, mode);
+				if (stream)
+					return stream;
+				gzclose(self->gz_file);
+			}
 		}
 	}
-	errno = ENOENT;
+	if (stream)
+		php_stream_close(stream);
+	if (self && self->stream)
+		php_stream_close(self->stream);
+	if (self)
+		efree(self);
+
 	return NULL;
 }
-#endif
+
+php_stream_wrapper php_stream_gzip_wrapper =	{
+	php_stream_gzopen,
+	NULL
+};
+
+
+
 
 /*
  * Local variables:

@@ -36,6 +36,7 @@
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "php_streams.h"
 
 #if HAVE_LIBGD13
 #include "ext/gd/php_gd.h"
@@ -464,7 +465,9 @@ PHP_FUNCTION(pdf_set_info_keywords)
 PHP_FUNCTION(pdf_open)
 {
 	zval **file;
-	FILE *fp;
+	void * what;
+	int type;
+	FILE *fp = NULL;
 	PDF *pdf;
 	int argc = ZEND_NUM_ARGS();
 
@@ -473,7 +476,12 @@ PHP_FUNCTION(pdf_open)
 	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		fp = NULL;
 	} else {
-		ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
+		what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+		ZEND_VERIFY_RESOURCE(what);
+		
+		if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&fp, 1) == FAILURE)	{
+			RETURN_FALSE;
+		}
 		/* XXX should do a zend_list_addref for <fp> here! */
 	}
 

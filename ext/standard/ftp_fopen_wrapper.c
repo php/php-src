@@ -66,22 +66,28 @@
 
 #include "php_fopen_wrappers.h"
 
-static int php_get_ftp_result(int socketd)
+static int php_get_ftp_result(php_stream * stream)
 {
 	char tmp_line[513];
 
-	while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, socketd) &&
+	while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
 		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
 
 	return strtol(tmp_line, NULL, 10);
 }
 
+php_stream_wrapper php_stream_ftp_wrapper =	{
+	php_stream_url_wrap_ftp,
+	NULL
+};
+
+
 /* {{{ php_fopen_url_wrap_ftp
  */
-FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+php_stream * php_stream_url_wrap_ftp(char * path, char * mode, int options, char ** opened_path TSRMLS_DC)
 {
-	FILE *fp=NULL;
+	php_stream *stream=NULL;
 	php_url *resource=NULL;
 	char tmp_line[512];
 	unsigned short portno;
@@ -91,126 +97,98 @@ FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *iss
 	char *tpath, *ttpath;
 	
 	resource = php_url_parse((char *) path);
-	if (resource == NULL) {
-		php_error(E_WARNING, "Invalid URL specified, %s", path);
-		*issock = BAD_URL;
+	if (resource == NULL || resource->path == NULL)
 		return NULL;
-	} else if (resource->path == NULL) {
-		php_error(E_WARNING, "No file-path specified");
-		php_url_free(resource);
-		*issock = BAD_URL;
-		return NULL;
-	}
+
 	/* use port 21 if one wasn't specified */
 	if (resource->port == 0)
 		resource->port = 21;
-
-	*socketd = php_hostconnect(resource->host, resource->port, SOCK_STREAM, 0);
-	if (*socketd == -1)
-		goto errexit;
-#if 0
-	if ((fpc = fdopen(*socketd, "r+")) == NULL) {
-		php_url_free(resource);
-		return NULL;
-	}
-#ifdef HAVE_SETVBUF
-	if ((setvbuf(fpc, NULL, _IONBF, 0)) != 0) {
-		php_url_free(resource);
-		fclose(fpc);
-		return NULL;
-	}
-#endif
-#endif
 	
+	stream = php_stream_sock_open_host(resource->host, resource->port, SOCK_STREAM, 0, 0);
+	if (stream == NULL)
+		goto errexit;
+
 	/* Start talking to ftp server */
-	result = php_get_ftp_result(*socketd);
+	result = php_get_ftp_result(stream);
 	if (result > 299 || result < 200)
 		goto errexit;
 
 	/* send the user name */
-	SOCK_WRITE("USER ", *socketd);
+	php_stream_write_string(stream, "USER ");
 	if (resource->user != NULL) {
 		php_raw_url_decode(resource->user, strlen(resource->user));
-		SOCK_WRITE(resource->user, *socketd);
+		php_stream_write_string(stream, resource->user);
 	} else {
-		SOCK_WRITE("anonymous", *socketd);
+		php_stream_write_string(stream, "anonymous");
 	}
-	SOCK_WRITE("\r\n", *socketd);
+	php_stream_write_string(stream, "\r\n");
 	
 	/* get the response */
-	result = php_get_ftp_result(*socketd);
+	result = php_get_ftp_result(stream);
 	
 	/* if a password is required, send it */
 	if (result >= 300 && result <= 399) {
-		SOCK_WRITE("PASS ", *socketd);
+		php_stream_write_string(stream, "PASS ");
 		if (resource->pass != NULL) {
 			php_raw_url_decode(resource->pass, strlen(resource->pass));
-			SOCK_WRITE(resource->pass, *socketd);
+			php_stream_write_string(stream, resource->pass);
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
 			if (cfg_get_string("from", &scratch) == SUCCESS) {
-				SOCK_WRITE(scratch, *socketd);
+				php_stream_write_string(stream, scratch);
 			} else {
-				SOCK_WRITE("anonymous", *socketd);
+				php_stream_write_string(stream, "anonymous");
 			}
 		}
-		SOCK_WRITE("\r\n", *socketd);
+		php_stream_write_string(stream, "\r\n");
 		
 		/* read the response */
-		result = php_get_ftp_result(*socketd);
+		result = php_get_ftp_result(stream);
 	}
 	if (result > 299 || result < 200)
 		goto errexit;
 	
 	/* set the connection to be binary */
-	SOCK_WRITE("TYPE I\r\n", *socketd);
-	result = php_get_ftp_result(*socketd);
+	php_stream_write_string(stream, "TYPE I\r\n");
+	result = php_get_ftp_result(stream);
 	if (result > 299 || result < 200)
 		goto errexit;
 	
 	/* find out the size of the file (verifying it exists) */
-	SOCK_WRITE("SIZE ", *socketd);
-	SOCK_WRITE(resource->path, *socketd);
-	SOCK_WRITE("\r\n", *socketd);
+	php_stream_write_string(stream, "SIZE ");
+	php_stream_write_string(stream, resource->path);
+	php_stream_write_string(stream, "\r\n");
 	
 	/* read the response */
-	result = php_get_ftp_result(*socketd);
+	result = php_get_ftp_result(stream);
 	if (mode[0] == 'r') {
 		/* when reading file, it must exist */
 		if (result > 299 || result < 200) {
-			php_error(E_WARNING, "File not found");
-			php_url_free(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
 			errno = ENOENT;
-			return NULL;
+			goto errexit;
 		}
 	} else {
 		/* when writing file, it must NOT exist */
 		if (result <= 299 && result >= 200) {
-			php_error(E_WARNING, "File already exists");
-			php_url_free(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
 			errno = EEXIST;
-			return NULL;
+			goto errexit;
 		}
 	}
 	
 	/* set up the passive connection */
 
     /* We try EPSV first, needed for IPv6 and works on some IPv4 servers */
-	SOCK_WRITE("EPSV\r\n", *socketd);
-	while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) &&
+	php_stream_write_string(stream, "EPSV\r\n");
+	while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
 		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
 
 	/* check if we got a 229 response */
 	if (strncmp(tmp_line, "229", 3)) {
 		/* EPSV failed, let's try PASV */
-		SOCK_WRITE("PASV\r\n", *socketd);
-		while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) &&
+		php_stream_write_string(stream, "PASV\r\n");
+		while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
 			   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 				 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
 		/* make sure we got a 227 response */
@@ -263,53 +241,33 @@ FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *iss
 	
 	if (mode[0] == 'r') {
 		/* retrieve file */
-		SOCK_WRITE("RETR ", *socketd);
+		php_stream_write_string(stream, "RETR ");
 	} else {
 		/* store file */
-		SOCK_WRITE("STOR ", *socketd);
+		php_stream_write_string(stream, "STOR ");
 	} 
 	if (resource->path != NULL) {
-		SOCK_WRITE(resource->path, *socketd);
+		php_stream_write_string(stream, resource->path);
 	} else {
-		SOCK_WRITE("/", *socketd);
+		php_stream_write_string(stream, "/");
 	}
 	
 	/* close control connection */
-	SOCK_WRITE("\r\nQUIT\r\n", *socketd);
-	SOCK_FCLOSE(*socketd);
+	php_stream_write_string(stream, "\r\nQUIT\r\n");
+	php_stream_close(stream);
 
 	/* open the data channel */
-	*socketd = php_hostconnect(resource->host, portno, SOCK_STREAM, 0);
-	if (*socketd == -1)
+	stream = php_stream_sock_open_host(resource->host, portno, SOCK_STREAM, 0, 0);
+	if (stream == NULL)
 		goto errexit;
-#if 0
-	if (mode[0] == 'r') {
-		if ((fp = fdopen(*socketd, "r+")) == NULL) {
-			php_url_free(resource);
-			return NULL;
-		}
-	} else {
-		if ((fp = fdopen(*socketd, "w+")) == NULL) {
-			php_url_free(resource);
-			return NULL;
-		}
-	}
-#ifdef HAVE_SETVBUF
-	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
-		php_url_free(resource);
-		fclose(fp);
-		return NULL;
-	}
-#endif
-#endif
+
 	php_url_free(resource);
-	*issock = 1;
-	return (fp);
+	return stream;
 
  errexit:
 	php_url_free(resource);
-	SOCK_FCLOSE(*socketd);
-	*socketd = 0;
+	if (stream)
+		php_stream_close(stream);
 	return NULL;
 }
 /* }}} */

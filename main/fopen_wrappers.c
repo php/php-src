@@ -82,55 +82,6 @@
 #endif
 /* }}} */
 
-static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char ** TSRMLS_DC);
-static HashTable fopen_url_wrappers_hash;
-
-/* {{{ php_register_url_wrapper
- */
-PHPAPI int php_register_url_wrapper(const char *protocol, php_fopen_url_wrapper_t wrapper TSRMLS_DC)
-{
-	if(PG(allow_url_fopen)) {
-		return zend_hash_add(&fopen_url_wrappers_hash, (char *) protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
-	} else {
-		return FAILURE;
-	}
-}
-/* }}} */
-
-/* {{{ php_unregister_url_wrapper
- */
-PHPAPI int php_unregister_url_wrapper(char *protocol TSRMLS_DC)
-{
-	if(PG(allow_url_fopen)) {
-		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol));
-	} else {
-		return SUCCESS;
- 	}
-}
-/* }}} */
-
-/* {{{ php_init_fopen_wrappers
- */
-int php_init_fopen_wrappers(TSRMLS_D) 
-{
-	if(PG(allow_url_fopen)) {
-		return zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1);
-	}
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ php_shutdown_fopen_wrappers
- */
-int php_shutdown_fopen_wrappers(TSRMLS_D)
-{
-	if(PG(allow_url_fopen)) {
-		zend_hash_destroy(&fopen_url_wrappers_hash);
-	}
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ php_check_specific_open_basedir
 	When open_basedir is not NULL, check if the given filename is located in
 	open_basedir. Returns -1 if error or not in the open_basedir, else 0
@@ -286,36 +237,6 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 		*opened_path = expand_filepath(path, NULL TSRMLS_CC);
 	}
 	return fp;
-}
-/* }}} */
-
-/* {{{ php_fopen_wrapper
- */
-PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
-{
-	if (opened_path) {
-		*opened_path = NULL;
-	}
-
-    if(!path || !*path) {
-		return NULL;
-	}
-
-
-	if(PG(allow_url_fopen)) {
-		if (!(options & IGNORE_URL)) {
-			return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path TSRMLS_CC);
-		}
-	}
-
-	if (options & USE_PATH && PG(include_path) != NULL) {
-		return php_fopen_with_path(path, mode, PG(include_path), opened_path TSRMLS_CC);
-	} else {
-		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM))) {
-			return NULL;
-		}
-		return php_fopen_and_set_opened_path(path, mode, opened_path TSRMLS_CC);
-	}
 }
 /* }}} */
 
@@ -535,64 +456,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 }
 /* }}} */
  
-/* {{{ php_fopen_url_wrapper
- */
-static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
-{
-	FILE *fp = NULL;
-	const char *p;
-	const char *protocol=NULL;
-	int n=0;
-
-	for (p=path; isalnum((int)*p); p++) {
-		n++;
-	}
-	if ((*p==':')&&(n>1)) {
-		protocol=path;
-	} 
-		
-	if (protocol) {
-		php_fopen_url_wrapper_t *wrapper=NULL;
-
-		if (FAILURE==zend_hash_find(&fopen_url_wrappers_hash, (char *) protocol, n, (void **)&wrapper)) {
-			wrapper=NULL;
-			protocol=NULL;
-		}
-		if (wrapper) {
-			return (*wrapper)(path, mode, options, issock, socketd, opened_path TSRMLS_CC);
-		}
-	} 
-
-	if (!protocol || !strncasecmp(protocol, "file", n)){
-		*issock = 0;
-		
-		if(protocol) {
-			if(path[n+1]=='/') {
-				if(path[n+2]=='/') { 
-					php_error(E_WARNING, "remote host file access not supported, %s", path);
-					return NULL;
-				}
-			}
-			path+= n+1; 			
-		}		
-
-		if (options & USE_PATH) {
-			fp = php_fopen_with_path((char *) path, mode, PG(include_path), opened_path TSRMLS_CC);
-		} else {
-			if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM))) {
-				fp = NULL;
-			} else {
-				fp = php_fopen_and_set_opened_path(path, mode, opened_path TSRMLS_CC);
-			}
-		}
-		return (fp);
-	}
-			
-	php_error(E_WARNING, "Invalid URL specified, %s", path);
-	return NULL;
-}
-/* }}} */
-
 /* {{{ php_strip_url_passwd
  */
 PHPAPI char *php_strip_url_passwd(char *url)

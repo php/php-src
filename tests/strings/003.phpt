@@ -5,9 +5,15 @@ HTML entities
 --FILE--
 <?php 
 setlocale (LC_CTYPE, "C");
-echo htmlspecialchars ("<>\"&åÄ\n");
-echo htmlentities ("<>\"&åÄ\n");
+$sc_encoded = htmlspecialchars ("<>\"&åÄ\n");
+echo $sc_encoded;
+$ent_encoded = htmlentities ("<>\"&åÄ\n");
+echo $ent_encoded;
+echo html_entity_decode($sc_encoded);
+echo html_entity_decode($ent_encoded);
 ?>
 --EXPECT--
 &lt;&gt;&quot;&amp;åÄ
 &lt;&gt;&quot;&amp;&aring;&Auml;
+<>"&åÄ
+<>"&åÄ

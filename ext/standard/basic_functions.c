@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
 #include "php_ini.h"
@@ -274,6 +275,7 @@ function_entry basic_functions[] = {
 	PHP_FE(wordwrap,														NULL)
 	PHP_FE(htmlspecialchars,												NULL)
 	PHP_FE(htmlentities,													NULL)
+	PHP_FE(html_entity_decode,												NULL)
 	PHP_FE(get_html_translation_table,										NULL)
 	PHP_NAMED_FE(md5,php_if_md5,											NULL)
 	PHP_NAMED_FE(md5_file,php_if_md5_file,									NULL)
@@ -621,9 +623,7 @@ function_entry basic_functions[] = {
 	PHP_FE(socket_set_blocking,												NULL)
 
 #if HAVE_PHP_STREAM
-	PHP_FE(fopenstream,														NULL)
-#else
-	PHP_FALIAS(fopenstream, warn_not_available,								NULL)
+	PHP_FE(fgetwrapperdata,													NULL)
 #endif
 
 #if HAVE_SYS_TIME_H
@@ -1004,15 +1004,16 @@ PHP_MINIT_FUNCTION(basic)
 
 
 	if (PG(allow_url_fopen)) {
-		if (FAILURE == php_register_url_wrapper("http", php_fopen_url_wrap_http TSRMLS_CC)) {
+		if (FAILURE == php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC))
 			return FAILURE;
-		}
-		if (FAILURE == php_register_url_wrapper("ftp", php_fopen_url_wrap_ftp TSRMLS_CC)) {
+		if (FAILURE == php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC))
 			return FAILURE;
-		}
-		if (FAILURE == php_register_url_wrapper("php", php_fopen_url_wrap_php TSRMLS_CC)) {
+		if (FAILURE == php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC))
 			return FAILURE;
-		}
+# if HAVE_OPENSSL_EXT
+		if (FAILURE == php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC))
+			return FAILURE;
+# endif
 	}
 
 	return SUCCESS;
@@ -1028,9 +1029,13 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 #endif
 
 	if (PG(allow_url_fopen)) {
-		php_unregister_url_wrapper("http" TSRMLS_CC);
-		php_unregister_url_wrapper("ftp" TSRMLS_CC);
-		php_unregister_url_wrapper("php" TSRMLS_CC);
+		php_unregister_url_stream_wrapper("http" TSRMLS_CC);
+		php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
+		php_unregister_url_stream_wrapper("php" TSRMLS_CC);
+# if HAVE_OPENSSL_EXT
+		php_unregister_url_stream_wrapper("https" TSRMLS_CC);
+# endif
+
 	}
 
 	UNREGISTER_INI_ENTRIES();
@@ -1503,8 +1508,7 @@ PHP_FUNCTION(error_log)
 
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC)
 {
-	FILE *logfile;
-	int issock = 0, socketd = 0;;
+	php_stream * stream = NULL;
 
 	switch (opt_err) {
 
@@ -1528,13 +1532,11 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 			break;
 
 		case 3:		/*save to a file */
-			logfile = php_fopen_wrapper(opt, "a", (IGNORE_URL | ENFORCE_SAFE_MODE), &issock, &socketd, NULL TSRMLS_CC);
-			if (!logfile) {
-				php_error(E_WARNING, "error_log: Unable to write to %s", opt);
+			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL TSRMLS_CC);
+			if (!stream)
 				return FAILURE;
-			}
-			fwrite(message, strlen(message), 1, logfile);
-			fclose(logfile);
+			php_stream_write(stream, message, strlen(message));
+			php_stream_close(stream);
 			break;
 
 		default:

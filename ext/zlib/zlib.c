@@ -187,12 +187,9 @@ PHP_MINIT_FUNCTION(zlib)
 #endif
 	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
 
-#if HAVE_FOPENCOOKIE
-
 	if(PG(allow_url_fopen)) {
-		php_register_url_wrapper("zlib", zlib_fopen_wrapper TSRMLS_CC);
+		php_register_url_stream_wrapper("zlib", &php_stream_gzip_wrapper TSRMLS_CC);
 	}
-#endif
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", CODING_GZIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", CODING_DEFLATE, CONST_CS | CONST_PERSISTENT);
@@ -225,11 +222,8 @@ PHP_RINIT_FUNCTION(zlib)
  */
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
-#if HAVE_FOPENCOOKIE
-	if(PG(allow_url_fopen)) {
-	    php_unregister_url_wrapper("zlib" TSRMLS_CC); 
-    }
-#endif
+	if (PG(allow_url_fopen))
+		php_unregister_url_stream_wrapper("zlib" TSRMLS_CC);
 	
 	UNREGISTER_INI_ENTRIES();
 
@@ -258,15 +252,23 @@ PHP_MINFO_FUNCTION(zlib)
  */
 static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 {
-	FILE *f;
-	int issock=0, socketd=0;
+	php_stream * stream = NULL;
+	int fd;
 
-	f = php_fopen_wrapper(path, mode, options, &issock, &socketd, NULL TSRMLS_CC);
-
-	if (!f) {
-		return NULL;
+	stream = php_stream_open_wrapper(path, mode, options | REPORT_ERRORS, NULL TSRMLS_CC);
+	if (stream)	{
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
+		{
+			gzFile ret = gzdopen(fd, mode);
+			if (ret)	{
+				/* arrange to clean up the actual stream */
+				ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
+				return ret;
+			}
+		}
+		php_stream_close(stream);
 	}
-	return gzdopen(fileno(f), mode);
+	return NULL;
 }
 /* }}} */
 
@@ -275,10 +277,10 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 PHP_FUNCTION(gzfile)
 {
 	pval **filename, **arg2;
-	gzFile zp;
 	char *slashed, buf[8192];
 	register int i=0;
 	int use_include_path = 0;
+	php_stream * stream;
 
 	/* check args */
 	switch (ZEND_NUM_ARGS()) {
@@ -299,8 +301,9 @@ PHP_FUNCTION(gzfile)
 	}
 	convert_to_string_ex(filename);
 
-	zp = php_gzopen_wrapper(Z_STRVAL_PP(filename),"r", use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
-	if (!zp) {
+	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
+	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "r", use_include_path|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+	if (!stream) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",Z_STRVAL_PP(filename),strerror(errno));
 		RETURN_FALSE;
 	}
@@ -311,8 +314,8 @@ PHP_FUNCTION(gzfile)
 	}
 
 	/* Now loop through the file and do the magic quotes thing if needed */
-	memset(buf,0,8191);
-	while(gzgets(zp, buf, 8191) != NULL) {
+	memset(buf,0,sizeof(buf));
+	while(php_stream_gets(stream, buf, sizeof(buf)-1) != NULL) {
 		if (PG(magic_quotes_runtime)) {
 			int len;
 			
@@ -322,7 +325,7 @@ PHP_FUNCTION(gzfile)
 			add_index_string(return_value, i++, buf, 1);
 		}
 	}
-	gzclose(zp);
+	php_stream_close(stream);
 }
 /* }}} */
 

@@ -114,7 +114,6 @@ PHP_MINFO_FUNCTION(ftp)
 								xtype = mode; \
 							}
 
-#define	FILEP(fp, pval)		ZEND_FETCH_RESOURCE(fp, FILE *, &pval, -1, "File-Handle", php_file_le_fopen());
 
 /* {{{ proto resource ftp_connect(string host [, int port [, int timeout)]])
    Opens a FTP stream */
@@ -401,7 +400,7 @@ PHP_FUNCTION(ftp_fget)
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	FILE		*fp;
+	php_stream	*stream;
 	char		*file;
 	int			file_len, mode;
 
@@ -410,15 +409,15 @@ PHP_FUNCTION(ftp_fget)
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
-	FILEP(fp, z_file);
+	ZEND_FETCH_RESOURCE(stream, php_stream*, &z_file, -1, "File-Handle", php_file_le_stream());
 	XTYPE(xtype, mode);
 
-	if (!ftp_get(ftp, fp, file, xtype) || ferror(fp)) {
+	if (!ftp_get(ftp, stream, file, xtype) || php_stream_error(stream)) {
 		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
-	if (ferror(fp)) {
+	if (php_stream_error(stream)) {
 		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), Z_STRVAL_P(z_file));
 		RETURN_FALSE;
 	}
@@ -456,8 +455,7 @@ PHP_FUNCTION(ftp_get)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	FILE		*outfp, *tmpfp;
-	int			ch;
+	php_stream * tmpstream, *outstream;
 	char		*local, *remote;
 	int			local_len, remote_len, mode;
 
@@ -471,42 +469,35 @@ PHP_FUNCTION(ftp_get)
 	/* get to temporary file, so if there is an error, no existing
 	 * file gets clobbered
 	 */
-	if ((tmpfp = tmpfile()) == NULL) {
-		php_error(E_WARNING, "%s(): error opening tmpfile", get_active_function_name(TSRMLS_C));
+	tmpstream = php_stream_fopen_tmpfile();
+	if (tmpstream == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (!ftp_get(ftp, tmpfp, remote, xtype) || ferror(tmpfp)) {
-		fclose(tmpfp);
+	if (!ftp_get(ftp, tmpstream, remote, xtype) || php_stream_error(tmpstream)) {
+		php_stream_close(tmpstream);
 		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
 
-#ifdef PHP_WIN32
-	if ((outfp = VCWD_FOPEN(local, "wb")) == NULL) {
-#else
-	if ((outfp = VCWD_FOPEN(local, "w")) == NULL) {
-#endif
-		fclose(tmpfp);
+	outstream = php_stream_fopen(local, "wb", NULL TSRMLS_C);
+
+	if (outstream == NULL)	{
+		php_stream_close(tmpstream);
 		php_error(E_WARNING, "%s(): error opening %s", get_active_function_name(TSRMLS_C), local);
 		RETURN_FALSE;
 	}
 
-	rewind(tmpfp);
-	while ((ch = getc(tmpfp)) != EOF)
-		putc(ch, outfp);
-
-	if (ferror(tmpfp) || ferror(outfp)) {
-		fclose(tmpfp);
-		fclose(outfp);
+	php_stream_rewind(tmpstream);
+	if (php_stream_copy_to_stream(tmpstream, outstream, 0) == 0)	{	
 		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), local);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	else
+		RETVAL_TRUE;
 
-	fclose(tmpfp);
-	fclose(outfp);
-
-	RETURN_TRUE;
+	php_stream_close(tmpstream);
+	php_stream_close(outstream);
 }
 /* }}} */
 
@@ -517,8 +508,8 @@ PHP_FUNCTION(ftp_fput)
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	int			type, mode, remote_len;
-	void		*rsrc;
+	int			mode, remote_len;
+	php_stream	*stream;
 	char		*remote;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrl", &z_ftp, &remote, &remote_len, &z_file, &mode) == FAILURE) {
@@ -526,11 +517,10 @@ PHP_FUNCTION(ftp_fput)
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
-   	rsrc = zend_fetch_resource(&z_file TSRMLS_CC, -1, "File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
-	ZEND_VERIFY_RESOURCE(rsrc);   
+   	ZEND_FETCH_RESOURCE(stream, php_stream*, &z_file, -1, "File-Handle", php_file_le_stream());
 	XTYPE(xtype, mode);
 
-	if (!ftp_put(ftp, remote, (FILE*)rsrc, *(int*) rsrc, (type==php_file_le_socket()), xtype)) {
+	if (!ftp_put(ftp, remote, stream, xtype)) {
 		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -546,9 +536,9 @@ PHP_FUNCTION(ftp_put)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	FILE		*infp;
 	char		*remote, *local;
 	int			remote_len, local_len, mode;
+	php_stream * instream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl", &z_ftp, &remote, &remote_len, &local, &local_len, &mode) == FAILURE) {
 		return;
@@ -557,20 +547,18 @@ PHP_FUNCTION(ftp_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-#ifdef PHP_WIN32
-	if ((infp = VCWD_FOPEN(local, "rb")) == NULL) {
-#else
-	if ((infp = VCWD_FOPEN(local, "r")) == NULL) {
-#endif
-		php_error(E_WARNING, "%s(): error opening %s", get_active_function_name(TSRMLS_C), local);
+	instream = php_stream_fopen(local, "rb", NULL TSRMLS_C);
+
+	if (instream == NULL)	{
 		RETURN_FALSE;
 	}
-	if (!ftp_put(ftp, remote, infp, 0, 0, xtype) || ferror(infp)) {
-		fclose(infp);
+
+	if (!ftp_put(ftp, remote, instream, xtype) || php_stream_error(instream)) {
+		php_stream_close(instream);
 		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
-	fclose(infp);
+	php_stream_close(instream);
 
 	RETURN_TRUE;
 }

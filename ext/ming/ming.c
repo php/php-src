@@ -28,6 +28,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
+#include "php_streams.h"
 
 #if HAVE_MING
 
@@ -229,18 +230,18 @@ static SWFInput newSWFInput_sock(int socket)
 static SWFInput getInput(zval **zfile TSRMLS_DC)
 {
   FILE *file;
+  void * what;
   int type;
   SWFInput input;
 
-  file = (FILE *) zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
+  what =  zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 
-  if(type == php_file_le_socket())
-    input = newSWFInput_sock(*(int *)file);
-  else
-  {
-    input = newSWFInput_file(file);
-    zend_list_addref(Z_LVAL_PP(zfile));
+  if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO_FILE, (void*)&file, REPORT_ERRORS))	{
+	return NULL;
   }
+  
+  input = newSWFInput_file(file);
+  zend_list_addref(Z_LVAL_PP(zfile));
 
   zend_list_addref(zend_list_insert(input, le_swfinputp));
 
@@ -1577,22 +1578,22 @@ PHP_FUNCTION(swfmovie_output)
 /* }}} */
 /* {{{ swfmovie_saveToFile */
 
-void phpFileOutputMethod(byte b, void *data)
+void phpStreamOutputMethod(byte b, void * data)
 {
-  fwrite(&b, 1, 1, (FILE *)data);
+	php_stream_write((php_stream*)data, &b, 1);
 }
 
 PHP_FUNCTION(swfmovie_saveToFile)
 {
   zval **x;
   SWFMovie movie = getMovie(getThis() TSRMLS_CC);
-  void *what;
+  php_stream *what;
 
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &x) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  ZEND_FETCH_RESOURCE(what, FILE *, x, -1,"File-Handle",php_file_le_fopen());
-  RETURN_LONG(SWFMovie_output(movie, &phpFileOutputMethod, what));
+  ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+  RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
 }
 
 
@@ -1602,29 +1603,29 @@ PHP_FUNCTION(swfmovie_saveToFile)
 PHP_FUNCTION(swfmovie_save)
 {
   zval **x;
-  FILE *file;
   long retval;
+  php_stream * stream;
 
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &x) == FAILURE)
     WRONG_PARAM_COUNT;
 
   if(Z_TYPE_PP(x) == IS_RESOURCE)
   {
-    ZEND_FETCH_RESOURCE(file, FILE *, x, -1,"File-Handle",php_file_le_fopen());
+    ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
 
     RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC),
-				&phpFileOutputMethod, file));
+				&phpStreamOutputMethod, stream));
   }
 
   convert_to_string_ex(x);
 
-  file = VCWD_FOPEN(Z_STRVAL_PP(x), "wb");
+  stream = php_stream_open_wrapper(Z_STRVAL_PP(x), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL, TSRMLS_CC);
 
-  if(file == NULL)
-    php_error(E_ERROR, "couldn't open file %s for writing", Z_STRVAL_PP(x));
+  if (stream == NULL)
+	  RETURN_FALSE;
 
   retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC),
-			      &phpFileOutputMethod, (void *)file);
+			      &phpStreamOutputMethod, (void *)stream);
 
   fclose(file);
 
