@@ -3396,11 +3396,18 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 						}
 						break;
 						
-					case 3: /* JavaScript/CSS/etc... */
+					case 3:
 						state = 0;
 						tp = tbuf;
 						break;
-					
+
+					case 4: /* JavaScript/CSS/etc... */
+						if (p >= buf + 2 && *(p-1) == '-' && *(p-2) == '-') {
+							state = 0;
+							tp = tbuf;
+						}
+						break;
+
 					default:
 						*(rp++) = c;
 						break;
@@ -3437,6 +3444,12 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 							tp = tbuf;
 						}
 					}
+				}
+				break;
+
+			case '-':
+				if (state == 3 && p >= buf + 2 && *(p-1) == '-' && *(p-2) == '!') {
+					state = 4;
 				}
 				break;
 
