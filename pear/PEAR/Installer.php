@@ -243,10 +243,10 @@ class PEAR_Installer extends PEAR_Common
         }
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
-                $mode = 0777 & ~$this->config->get('umask');
+                $mode = 0777 & ~(int)octdec($this->config->get('umask'));
                 $this->log(3, "+ chmod +x $dest_file");
             } else {
-                $mode = 0666 & ~$this->config->get('umask');
+                $mode = 0666 & ~(int)octdec($this->config->get('umask'));
             }
             if (!@chmod($dest_file, $mode)) {
                 $this->log(0, "failed to change mode of $dest_file");

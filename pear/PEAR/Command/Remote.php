@@ -55,6 +55,15 @@ a newer version is available with the same release state (stable etc.).'
 Lists the packages available on the configured server along with the
 latest stable release of each package.',
             ),
+        'search' => array(
+            'summary' => 'Search Packagesdatabase',
+            'function' => 'doSearch',
+            'shortcut' => 'sp',
+            'options' => array(),
+            'doc' => '
+Lists all packages which match the search paramteres (first param 
+is package name, second package info)',
+            ),
         'list-all' => array(
             'summary' => 'List All Packages',
             'function' => 'doListAll',
@@ -100,7 +109,9 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
     function doRemoteInfo($command, $options, $params)
     {
+/*
         return false; // coming soon
+
         var_dump($params[0]);
         $r = new PEAR_Remote($this->config);
         $info = $r->call('package.info', $params[0]);
@@ -109,6 +120,20 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
         }
         
         var_dump($info);
+*/
+        $r = new PEAR_Remote($this->config);
+        $available = $r->call('package.listAll', true);
+        if (PEAR::isError($available)) {
+            return $this->raiseError($available);
+        }
+        $info = $available[$params[0]];
+        $info["name"] = $params[0];
+
+        $reg = new PEAR_Registry($this->config->get('php_dir'));
+        $installed = $reg->packageInfo($info['name']);
+        $info['installed'] = $installed['version'];
+    
+        $this->ui->outputData($info, $command);
         
         return false; // coming soon
     }
@@ -169,6 +194,57 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
                 $desc,
                 );
         }
+        $this->ui->outputData($data, $command);
+        return true;
+    }
+
+    // }}}
+    // {{{ search
+
+    function doSearch($command, $options, $params)
+    {
+        if ((!isset($params[0]) || empty($params[0]))
+            && (!isset($params[1]) || empty($params[1])))
+        {
+            return $this->raiseError('no valid search string suppliedy<');
+        };
+            
+        $r = new PEAR_Remote($this->config);
+        $reg = new PEAR_Registry($this->config->get('php_dir'));
+        $available = $r->call('package.listAll', true);
+        if (PEAR::isError($available)) {
+            return $this->raiseError($available);
+        }
+        $data = array(
+            'caption' => 'Matched packages:',
+            'border' => true,
+            'headline' => array('Package', 'Latest', 'Local'),
+            );
+            
+        foreach ($available as $name => $info) {
+            $found = (!empty($params[0]) && stristr($name, $params[0]) !== false);
+            if (!$found && !(isset($params[1]) && !empty($params[1])
+                && (stristr($info['summary'], $params[1]) !== false
+                    || stristr($info['description'], $params[1]) !== false)))
+            {   
+                continue;
+            };
+                
+            $installed = $reg->packageInfo($name);
+            $desc = $info['summary'];
+            if (isset($params[$name]))
+                $desc .= "\n\n".$info['description'];
+            
+            $data['data'][$info['category']][] = array(
+                $name, 
+                $info['stable'], 
+                $installed['version'],
+                $desc,
+                );
+        }
+        if (!isset($data['data'])) {
+            return $this->raiseError('no packages found');
+        };
         $this->ui->outputData($data, $command);
         return true;
     }

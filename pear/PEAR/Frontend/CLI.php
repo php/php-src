@@ -385,6 +385,9 @@ class PEAR_Frontend_CLI extends PEAR
                 
                 foreach($data['data'] as $group) {
                     foreach($group as $value) {
+                        if ($value === null || $value === '') {
+                            $value = "<not set>";
+                        };
                         $this->_tableRow($value, null, array(1 => array('wrap' => 55)));
                     }
                 };
