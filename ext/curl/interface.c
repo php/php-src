@@ -201,8 +201,26 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_SSLKEYPASSWD);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSLENGINE);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSLENGINE_DEFAULT);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSLCERTTYPE);
 	REGISTER_CURL_CONSTANT(CURLOPT_CRLF);
 	REGISTER_CURL_CONSTANT(CURLOPT_ENCODING);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXYPORT);
+	REGISTER_CURL_CONSTANT(CURLPROXY_HTTP);
+	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5);
+	REGISTER_CURL_CONSTANT(CURLOPT_UNRESTRICTED_AUTH);
+	REGISTER_CURL_CONSTANT(CURLOPT_FTP_USE_EPRT);
+	REGISTER_CURL_CONSTANT(CURLOPT_HTTP200ALIASES);
+
+#ifdef CURLOPT_HTTPAUTH /* only in curl 7.10.6 */
+ 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPAUTH);
+ 	/* http authentication options */
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_BASIC);
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_DIGEST);
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_GSSNEGOTIATE);
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_NTLM);
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_ANY);
+ 	REGISTER_CURL_CONSTANT(CURLHTTP_ANYSAFE);
+#endif
 	
 	/* Constants effecting the way CURLOPT_CLOSEPOLICY works */
 	REGISTER_CURL_CONSTANT(CURLCLOSEPOLICY_LEAST_RECENTLY_USED);
@@ -699,6 +717,9 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+#if defined(ZTS)
+	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
+#endif
 
 	if (argc > 0) {
 		char *urlcopy;
@@ -773,6 +794,13 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_HTTPGET:
 		case CURLOPT_HTTP_VERSION:
 		case CURLOPT_CRLF:
+		case CURLOPT_DNS_CACHE_TIMEOUT:
+		case CURLOPT_PROXYPORT:
+		case CURLOPT_FTP_USE_EPRT:
+#ifdef CURLOPT_HTTPAUTH /* only in curl 7.10.6 */
+		case CURLOPT_HTTPAUTH:
+#endif
+		case CURLOPT_UNRESTRICTED_AUTH:
 		case CURLOPT_PORT:
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
@@ -786,22 +814,19 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_USERAGENT:
 		case CURLOPT_FTPPORT:
 		case CURLOPT_COOKIE:
-		case CURLOPT_COOKIEFILE:
 		case CURLOPT_REFERER:
 		case CURLOPT_INTERFACE:
 		case CURLOPT_KRB4LEVEL: 
-		case CURLOPT_RANDOM_FILE:
 		case CURLOPT_EGDSOCKET:
 		case CURLOPT_CAINFO: 
 		case CURLOPT_CAPATH:
-		case CURLOPT_COOKIEJAR:
 		case CURLOPT_SSL_CIPHER_LIST: 
 		case CURLOPT_SSLKEY:
-		case CURLOPT_SSLCERT:
 		case CURLOPT_SSLKEYTYPE: 
 		case CURLOPT_SSLKEYPASSWD: 
 		case CURLOPT_SSLENGINE: 
 		case CURLOPT_SSLENGINE_DEFAULT:
+		case CURLOPT_SSLCERTTYPE:
 		case CURLOPT_ENCODING: {
 			char *copystr = NULL;
 	
@@ -969,6 +994,7 @@ PHP_FUNCTION(curl_setopt)
 			break;
 		case CURLOPT_HTTPHEADER: 
 		case CURLOPT_QUOTE:
+		case CURLOPT_HTTP200ALIASES:
 		case CURLOPT_POSTQUOTE: {
 			zval              **current;
 			HashTable          *ph;
@@ -976,7 +1002,7 @@ PHP_FUNCTION(curl_setopt)
 
 			ph = HASH_OF(*zvalue);
 			if (!ph) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must pass either an object or an array with the CURLOPT_HTTPHEADER, CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must pass either an object or an array with the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE arguments");
 				RETURN_FALSE;
 			}
 
@@ -1001,6 +1027,28 @@ PHP_FUNCTION(curl_setopt)
 			zend_llist_add_element(&ch->to_free.slist, &slist);
 
 			error = curl_easy_setopt(ch->cp, option, slist);
+
+			break;
+		}
+		/* the following options deal with files, therefor safe_mode & open_basedir checks
+		 * are required.
+		 */
+		case CURLOPT_COOKIEJAR:
+		case CURLOPT_SSLCERT:
+		case CURLOPT_RANDOM_FILE:
+		case CURLOPT_COOKIEFILE: {
+			char *copystr = NULL;
+
+			convert_to_string_ex(zvalue);
+
+			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+				RETURN_FALSE;			
+			}
+
+			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+
+			error = curl_easy_setopt(ch->cp, option, copystr);
+			zend_llist_add_element(&ch->to_free.str, &copystr);
 
 			break;
 		}
