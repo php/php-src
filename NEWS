@@ -102,6 +102,8 @@ PHP                                                                        NEWS
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
 - Fixed bug #28464 (catch() does not catch exceptions by interfaces). (Marcus)
+- Fixed bug #27669 (PHP 5 didn't support all possibilities for calling static
+  methods dynamically). (Dmitry)
 - Fixed ReflectionClass::getMethod() and ReflectionClass::getProperty() to
   raise an ReflectionException instead of returning NULL on failure.
   (Sebastian)
