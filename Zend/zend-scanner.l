@@ -1058,7 +1058,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	printf("Matched whitespace:  '%s'\n", yytext);
 	HANDLE_NEWLINES(yytext,yyleng);
 	return T_WHITESPACE;
 }
