@@ -43,7 +43,6 @@ global
       (DONE ?)
     * Use arg_separator.input to implode args in the CGI sapi extension
       and arg_separator.input to explode in php_build_argv(). (DONE?)
-    * Implement flush feature suitable for nested output buffers.
 
     For PHP 5.0.0
     * bundle and use curl lib for fopen wrapper.
@@ -67,6 +66,7 @@ global
     * find a better way to implement script timeouts. SIGVTALRM is used
       by some POSIX threads implementations (i.e. OpenBSD) and is not
       available in ZTS mode.
+    * Implement flush feature suitable for nested output buffers.
 
 
 documentation
