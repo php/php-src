@@ -84,6 +84,7 @@ function_entry basic_functions[] = {
 #if HAVE_STRFTIME
 	{"strftime",		php3_strftime,				NULL},
 #endif
+	PHP_FE(strtotime, NULL)
 	{"date",		php3_date,					NULL},
 	{"gmdate",		php3_gmdate,				NULL},
 	{"getdate",		php3_getdate,				NULL},
