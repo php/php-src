@@ -108,6 +108,8 @@ function_entry posix_functions[] = {
 	PHP_FE(posix_mkfifo,	NULL)
 #endif
 
+	/* POSIX.1, 5.6 */
+	PHP_FE(posix_access,	NULL)
 	/* POSIX.1, 9.2 */
 	PHP_FE(posix_getgrnam,	NULL)
 	PHP_FE(posix_getgrgid,	NULL)
@@ -146,6 +148,10 @@ static void php_posix_init_globals(zend_posix_globals *posix_globals TSRMLS_DC)
 static PHP_MINIT_FUNCTION(posix)
 {
 	ZEND_INIT_MODULE_GLOBALS(posix, php_posix_init_globals, NULL);
+	REGISTER_LONG_CONSTANT("POSIX_F_OK", F_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POSIX_X_OK", X_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POSIX_W_OK", W_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POSIX_R_OK", R_OK, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -638,15 +644,46 @@ int php_posix_group_to_array(struct group *g, zval *array_group) {
 	POSIX.1, 5.5.1 unlink()
 	POSIX.1, 5.5.2 rmdir()
 	POSIX.1, 5.5.3 rename()
-	POSIX.1, 5.6.x stat(), access(), chmod(), utime()
-		already supported by PHP (access() not supported, because it is
-		braindead and dangerous and gives outdated results).
+	POSIX.1, 5.6.x stat(), chmod(), utime() already supported by PHP.
+*/
 
+/* {{{ proto bool posix_access(string file [, int mode])
+   Determine accessibility of a file (POSIX.1 5.6.3) */
+PHP_FUNCTION(posix_access)
+{
+	long mode = 0;
+	int filename_len, ret;
+	char *filename, *path;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE)
+		return;
+
+	path = expand_filepath(filename, NULL TSRMLS_CC);
+
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+		efree(path);
+		POSIX_G(last_error) = EACCES;
+		RETURN_FALSE;
+	}
+
+	ret = access(path, mode);
+	efree(path);
+
+	if (ret) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/*
 	POSIX.1, 6.x most I/O functions already supported by PHP.
 	POSIX.1, 7.x tty functions, TODO
 	POSIX.1, 8.x interactions with other C language functions
-	POSIX.1, 9.x system database access	
- */
+	POSIX.1, 9.x system database access
+*/
 
 /* {{{ proto array posix_getgrnam(string groupname)
    Group database access (POSIX.1, 9.2.1) */
