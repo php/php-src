@@ -13,10 +13,8 @@ echo "Making dist for $build_dir\n";
 
 $dist_dir = $build_dir . "/php-" . phpversion();
 @mkdir($dist_dir);
-@mkdir("$dist_dir/sapi");
 @mkdir("$dist_dir/ext");
 @mkdir("$dist_dir/dev");
-@mkdir("$dist_dir/dlls");
 @mkdir("$dist_dir/extras");
 
 /* figure out additional DLL's that are required */
@@ -117,7 +115,7 @@ function copy_file_list($source_dir, $dest_dir, $list)
 function copy_text_file($source, $dest)
 {
 	$text = file_get_contents($source);
-	$text = str_replace("\n", "\r\n", $text);
+	$text = preg_replace("/[^\r]\n$/", "\r\n", $text);
 	$fp = fopen($dest, "w");
 	fwrite($fp, $text);
 	fclose($fp);
@@ -136,7 +134,7 @@ if ($is_debug) {
 	copy("$build_dir/$phppdb", "$dist_dir/dev/$phppdb");
 }
 /* copy the sapi */
-copy_file_list($build_dir, "$dist_dir/sapi", $sapi_targets);
+copy_file_list($build_dir, "$dist_dir", $sapi_targets);
 
 /* copy the extensions */
 copy_file_list($build_dir, "$dist_dir/ext", $ext_targets);
@@ -210,7 +208,7 @@ foreach ($extra_dll_deps as $dll) {
 		}
 		$dll = $tdll;
 	}
-	copy($dll, "$dist_dir/dlls/" . basename($dll));
+	copy($dll, "$dist_dir/" . basename($dll));
 }
 
 function copy_dir($source, $dest)
