@@ -1922,7 +1922,11 @@ DLEXPORT PHP_FUNCTION(udm_hash32)
 	str = Z_STRVAL_PP(yystr);
 
 	hash32=UdmHash32((str),strlen(str));
+#if UDM_VERSION_ID >= 30215
+	snprintf(buf,sizeof(buf)-1,"%i",hash32);
+#else
 	snprintf(buf,sizeof(buf)-1,"%u",hash32);
+#endif
 	
 	RETURN_STRING(buf,1);
 }
