@@ -1114,6 +1114,8 @@ xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int sty
 	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 	char *buf;
+	char tzbuf[6];
+
 	xmlNodePtr xmlParam;
 
 	xmlParam = xmlNewNode(NULL, "BOGUS");
@@ -1130,6 +1132,23 @@ xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int sty
 			buf = (char *) erealloc(buf, buf_len);
 			if (!--max_reallocs) break;
 		}
+
+		/* Time zone support */
+#if HAVE_TM_GMTOFF				
+		sprintf(tzbuf, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
+#else
+		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs(((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60));
+#endif
+		if (strcmp(tzbuf,"+0000") == 0) {
+		  strcpy(tzbuf,"Z");
+		  real_len++;
+		} else {
+			real_len += 5;
+		}
+		if (real_len >= buf_len) {
+			buf = (char *) erealloc(buf, real_len+1);
+		}
+		strcat(buf, tzbuf);
 
 		xmlNodeSetContent(xmlParam, buf);
 		efree(buf);
@@ -1156,50 +1175,42 @@ xmlNodePtr to_xml_duration(encodeType type, zval *data, int style)
 
 xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S", style);
 }
 
 xmlNodePtr to_xml_time(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	/* TODO: microsecconds */
 	return to_xml_datetime_ex(type, data, "%H:%M:%S", style);
 }
 
 xmlNodePtr to_xml_date(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m-%d", style);
 }
 
 xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m", style);
 }
 
 xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y", style);
 }
 
 xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "--%m-%d", style);
 }
 
 xmlNodePtr to_xml_gday(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "---%d", style);
 }
 
 xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 {
-	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "--%m--", style);
 }
 
