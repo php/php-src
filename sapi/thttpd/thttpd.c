@@ -25,6 +25,7 @@
 #include "php_variables.h"
 #include "version.h"
 #include "php_ini.h"
+#include "zend_highlight.h"
 
 #include "ext/standard/php_smart_str.h"
 
@@ -578,7 +579,7 @@ static void queue_request(httpd_conn *hc)
 	tsrm_mutex_unlock(qr_lock);
 }
 
-static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC);
+static off_t thttpd_real_php_request(httpd_conn *hc, int TSRMLS_DC);
 
 static void *worker_thread(void *dummy)
 {
@@ -597,7 +598,7 @@ static void *worker_thread(void *dummy)
 
 		thread_atomic_dec(nr_free_threads);
 
-		thttpd_real_php_request(hc TSRMLS_CC);
+		thttpd_real_php_request(hc, 0 TSRMLS_CC);
 		shutdown(hc->conn_fd, 0);
 		destroy_conn(hc);
 		free(hc);
@@ -636,7 +637,7 @@ static void remove_dead_conn(int fd)
 
 #endif
 
-static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
+static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 {
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
@@ -647,7 +648,14 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 	
 	thttpd_request_ctor(TSRMLS_C);
 
-	thttpd_module_main(TSRMLS_C);
+	if (show_source) {
+		zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+		php_get_highlight_struct(&syntax_highlighter_ini);
+		highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC);
+	} else {
+		thttpd_module_main(TSRMLS_C);
+	}
 
 	/* disable kl, if no content-length was seen or Connection: was set */
 	if (TG(seen_cl) == 0 || TG(seen_cn) == 1) {
@@ -671,13 +679,13 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 	return 0;
 }
 
-off_t thttpd_php_request(httpd_conn *hc)
+off_t thttpd_php_request(httpd_conn *hc, int show_source)
 {
 #ifdef ZTS
 	queue_request(hc);
 #else
 	TSRMLS_FETCH();
-	return thttpd_real_php_request(hc TSRMLS_CC);
+	return thttpd_real_php_request(hc, show_source TSRMLS_CC);
 #endif
 }
 
