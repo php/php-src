@@ -341,6 +341,7 @@ static char *php_strerror(int error) {
 #ifndef PHP_WIN32
 	if (error < -10000) {
 		error += 10000;
+		error=-error;
 
 #ifdef HAVE_HSTRERROR
 		buf = hstrerror(error);
@@ -361,6 +362,29 @@ static char *php_strerror(int error) {
 	return (buf ? (char *) buf : "");
 }
 
+/* Sets addr by hostname, or by ip in string form (AF_INET)  */
+int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock  TSRMLS_DC) {
+	struct in_addr tmp;
+	struct hostent *host_entry;
+
+	if (inet_aton(string, &tmp)) {
+		sin->sin_addr.s_addr = tmp.s_addr;
+	} else {
+		if (! (host_entry = gethostbyname(string))) {
+			/* Note: < -10000 indicates a host lookup error */
+			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
+			return 0;
+		}
+		if (host_entry->h_addrtype != AF_INET) {
+			php_error(E_WARNING, "%s() Host lookup failed: Non AF_INET domain returned on AF_INET socket", get_active_function_name(TSRMLS_C));
+			return 0;
+		}
+		memcpy(&(sin->sin_addr.s_addr), host_entry->h_addr_list[0], host_entry->h_length);
+	}
+
+	return 1;
+}
+		
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sockets)
@@ -956,22 +980,11 @@ PHP_FUNCTION(socket_connect)
 
 			sin.sin_family	= AF_INET;
 			sin.sin_port	= htons((unsigned short int)port);
-
-			if (inet_aton(addr, &addr_buf)) {
-				sin.sin_addr.s_addr = addr_buf.s_addr;
-			} else {
-				char *q = (char *) &(sin.sin_addr.s_addr);
-				host_struct = gethostbyname(addr);
-				if ((! host_struct) || (host_struct->h_addrtype != AF_INET)) {
-					RETURN_FALSE;
-				}
 			
-				q[0] = host_struct->h_addr_list[0][0];
-				q[1] = host_struct->h_addr_list[0][1];
-				q[2] = host_struct->h_addr_list[0][2];
-				q[3] = host_struct->h_addr_list[0][3];
+			if (! php_set_inet_addr(&sin, addr, php_sock TSRMLS_CC)) {
+				RETURN_FALSE;
 			}
-	
+
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
 			break;
 
@@ -1037,20 +1050,18 @@ PHP_FUNCTION(socket_bind)
 		
 		case AF_INET:
 			{
-				struct sockaddr_in sa;
-				struct hostent *hp;
+				struct sockaddr_in *sa = (struct sockaddr_in *) sock_type;
 
-				memset(&sa, 0, sizeof(sa));
-
-				if ((hp = gethostbyname(addr)) == NULL) {
-					PHP_SOCKET_ERROR(php_sock, "unable to lookup host", h_errno - 10000);
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
+			     
+				sa->sin_family = AF_INET;
+				sa->sin_port = htons((unsigned short) port);
+			     
+       				if (! php_set_inet_addr(sa, addr, php_sock TSRMLS_CC)) {
 					RETURN_FALSE;
 				}
-		
-				memcpy((char *)&sa.sin_addr, hp->h_addr, hp->h_length);
-				sa.sin_family	= hp->h_addrtype;
-				sa.sin_port		= htons((unsigned short)port);
-				retval = bind(php_sock->bsd_socket, (struct sockaddr *)&sa, sizeof(sa));
+			     
+				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(sa_storage));
 				break;
 			}
 		
@@ -1443,21 +1454,12 @@ PHP_FUNCTION(socket_sendto)
 
 			memset(&sin, 0, sizeof(sin));
 			sin.sin_family = AF_INET;
-	
-			if (inet_aton(addr, &addr_buf) == 0) {
-				sin.sin_addr.s_addr = addr_buf.s_addr;
-			} else {
-				struct hostent *he;
-
-				if ((he = gethostbyname(addr)) == NULL) {
-					PHP_SOCKET_ERROR(php_sock, "unable to sendto", h_errno - 10000);
-					RETURN_FALSE;
-				}
-
-				sin.sin_addr.s_addr = *(int *) (he->h_addr_list[0]);
+			sin.sin_port = htons((unsigned short) port);
+			
+			if (! php_set_inet_addr(&sin, addr, php_sock TSRMLS_CC)) {
+				RETURN_FALSE;
 			}
-
-			sin.sin_port = htons((unsigned short)port);
+	
 			retval	= sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
 
@@ -1646,20 +1648,16 @@ PHP_FUNCTION(socket_sendmsg)
 				hdr.msg_iov = iov->iov_array;
 				hdr.msg_iovlen = iov->count;
 				
-				if (inet_aton(addr, &sin->sin_addr) != 0) {
-					struct hostent *he = gethostbyname(addr);
-
-					if (!he) {
-						PHP_SOCKET_ERROR(php_sock, "unable to send message", h_errno - 10000);
-						RETURN_FALSE;
-					}
-
-					sin->sin_addr.s_addr = *(int *)(he->h_addr_list[0]);
+			        memset(sin, 0, sizeof(sa));
+			     
+				sin->sin_family = AF_INET;
+				sin->sin_port = htons((unsigned short)port);
+			     
+				if (! php_set_inet_addr(sin, addr, php_sock TSRMLS_CC)) {
+					RETURN_FALSE;
 				}
 
-				sin->sin_port = htons((unsigned short)port);
-				
-				if (sendmsg(php_sock->bsd_socket, &hdr, flags) != 0) {
+				if (sendmsg(php_sock->bsd_socket, &hdr, flags) == -1) {
 					PHP_SOCKET_ERROR(php_sock, "unable to send message", errno);
 				}
 
@@ -1681,7 +1679,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 				hdr.msg_namelen = SUN_LEN(s_un);
 
-				if (sendmsg(php_sock->bsd_socket, &hdr, flags) != 0) {
+				if (sendmsg(php_sock->bsd_socket, &hdr, flags) == -1) {
 					PHP_SOCKET_ERROR(php_sock, "unable to send message", errno);
 					RETURN_FALSE;
 				}
