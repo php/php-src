@@ -548,10 +548,6 @@ SOURCE=.\ext\mcal\php3_mcal.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\odbc\php3_odbc.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\php3_string.h
 # End Source File
 # Begin Source File
@@ -561,6 +557,10 @@ SOURCE=.\functions\php3_syslog.h
 # Begin Source File
 
 SOURCE=.\ext\standard\php_lcg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\odbc\php_odbc.h
 # End Source File
 # Begin Source File
 
