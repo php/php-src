@@ -127,8 +127,9 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len,
 	stmt->methods = &sqlite_stmt_methods;
 
 	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
-	if (i == SQLITE_OK)
+	if (i == SQLITE_OK) {
 		return 1;
+	}
 
 	pdo_sqlite_error(dbh);
 
