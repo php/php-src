@@ -255,10 +255,6 @@ SOURCE=..\main\strlcat.c
 
 SOURCE=..\main\strlcpy.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\uuencode.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -1783,6 +1779,10 @@ SOURCE=..\ext\standard\url_scanner.c
 
 SOURCE=..\ext\standard\url_scanner_ex.c
 # ADD CPP /W2
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\uuencode.c
 # End Source File
 # Begin Source File
 
