@@ -491,26 +491,18 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 	DISPID dispid;
 	DISPPARAMS dispparams;
 	HRESULT hr;
-	OLECHAR *funcname;
-	VARIANT *variant_args, *result;
+	OLECHAR *funcname = NULL;
+	VARIANT *variant_args;
+	VARIANT result;
 	int current_arg, current_variant;
 	char *ErrString;
 	TSRMLS_FETCH();
 
-	funcname = php_char_to_OLECHAR(method_name.str, method_name.len, CP_ACP, FALSE);
+	/* if the length of the name is 0, we are dealing with a pointer to a dispid */
+	assert(method_name.len == 0);
+	dispid = *(DISPID*)method_name.str;
 
-	if (FAILED(hr = php_COM_get_ids_of_names((comval *) *data, funcname, &dispid))) {
-		char *error_message;
-	
-		error_message = php_COM_error_message(hr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unable to lookup %s: %s", method_name.str, error_message);
-		LocalFree(error_message);
-		efree(funcname);
-
-		return FAILURE;
-	}
-
-	variant_args = (VARIANT *) emalloc(sizeof(VARIANT) * num_args);
+	variant_args = num_args ? (VARIANT *) emalloc(sizeof(VARIANT) * num_args) : NULL;
 
 	for (current_arg = 0; current_arg < num_args; current_arg++) {
 		current_variant = num_args - current_arg - 1;
@@ -522,10 +514,9 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 	dispparams.cArgs = num_args;
 	dispparams.cNamedArgs = 0;
 
-	result = (VARIANT *) emalloc(sizeof(VARIANT));
-	VariantInit(result);
+	VariantInit(&result);
 
-	hr = php_COM_invoke((comval *) *data, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, result, &ErrString);
+	hr = php_COM_invoke((comval *) *data, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, &result, &ErrString);
 
 	for (current_arg=0;current_arg<num_args;current_arg++) {
 		/* don't release IDispatch pointers as they are used afterwards */
@@ -535,13 +526,14 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 		}
 	}
 
-	efree(result);
-	efree(funcname);
+	if (variant_args) {
+		efree(variant_args);
+		variant_args = NULL;
+	}
 
 	if (FAILED(hr)) {
 		char *error_message;
 
-		efree(result);
 		error_message = php_COM_error_message(hr);
 		if (ErrString) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
@@ -553,7 +545,8 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 		return FAILURE;
 	}
 
-	RETVAL_VARIANT(result, C_CODEPAGE((comval *) *data));
+	RETVAL_VARIANT(&result, C_CODEPAGE((comval *) *data));
+
 	return SUCCESS;
 }
 
