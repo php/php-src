@@ -7,6 +7,10 @@ if test "$supplied_flag" = "--copy"; then
     automake_flags=--copy
 fi
 
+if test -d "ZendEngine2"; then
+    mv ZendEngine2 Zend
+fi
+
 ## build.mk does not check aclocal exit status yet
 ##
 #mv aclocal.m4 aclocal.m4.old 2>/dev/null

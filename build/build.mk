@@ -20,7 +20,7 @@
 # Makefile to generate build tools
 #
 
-ZENDDIR = $(shell if test -d "ZendEngine2"; then echo ZendEngine2; else echo Zend; fi)
+ZENDDIR = Zend
 
 SUBDIRS = $(ZENDDIR) TSRM
 
