@@ -65,6 +65,8 @@ PHP_FUNCTION(sqlite_busy_timeout);
 PHP_FUNCTION(sqlite_last_error);
 PHP_FUNCTION(sqlite_error_string);
 
+PHP_FUNCTION(sqlite_create_aggregate);
+
 #ifdef ZTS
 #define SQLITE_G(v) TSRMG(sqlite_globals_id, zend_sqlite_globals *, v)
 #else
