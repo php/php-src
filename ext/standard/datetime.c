@@ -331,6 +331,9 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'r':		/* rfc822 format */
 				size += 31;
 				break;
+			case 'c':		/* iso8601 date (Dublin Core Date) */
+				size += 25;
+				break;
 			case 'U':		/* seconds since the epoch */
 				size += 10;
 				break;
@@ -557,8 +560,8 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'r':
-#if HAVE_TM_GMTOFF				
-				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
+#if HAVE_TM_GMTOFF
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d",
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
@@ -571,11 +574,39 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					abs( (ta->tm_gmtoff % 3600) / 60 )
 				);
 #else
-				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d",
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
 					ta->tm_year + YEAR_BASE,
+					ta->tm_hour,
+					ta->tm_min,
+					ta->tm_sec,
+					((ta->tm_isdst ? tzone - 3600 : tzone) > 0) ? '-' : '+',
+					abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600),
+					abs( ((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60 )
+				);
+#endif
+				strcat(Z_STRVAL_P(return_value), tmp_buff);
+				break;
+			case 'c':
+#if HAVE_TM_GMTOFF
+				sprintf(tmp_buff, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+					ta->tm_year + YEAR_BASE,
+					ta->tm_mon + 1,
+					ta->tm_mday,
+					ta->tm_hour,
+					ta->tm_min,
+					ta->tm_sec,
+					(ta->tm_gmtoff < 0) ? '-' : '+',
+					abs(ta->tm_gmtoff / 3600),
+					abs( (ta->tm_gmtoff % 3600) / 60 )
+				);
+#else
+				sprintf(tmp_buff, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+					ta->tm_year + YEAR_BASE,
+					ta->tm_mon + 1,
+					ta->tm_mday,
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
