@@ -229,6 +229,8 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_doc_document_element,									NULL)
 	PHP_FE(domxml_doc_add_root,											NULL)
 	PHP_FE(domxml_doc_set_root,											NULL)
+	PHP_FE(domxml_doc_free,												NULL)
+
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,										NULL)
 	PHP_FE(domxml_dump_node,											NULL)
@@ -326,6 +328,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 /*	PHP_FALIAS(children,				domxml_node_children,			NULL) */
 	PHP_FALIAS(add_root,				domxml_doc_add_root,			NULL)
 	PHP_FALIAS(set_root,				domxml_doc_set_root,			NULL)
+	PHP_FALIAS(free,				domxml_doc_free,			NULL)
 	PHP_FALIAS(get_root,				domxml_doc_document_element,	NULL)
 	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
@@ -582,7 +585,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 
 	wrapper = dom_object_get_data(node);
 
-	if (wrapper != NULL) {
+	if (wrapper != NULL ) {
 		refcount = wrapper->refcount;
 		zval_ptr_dtor(&wrapper);
 		/*only set it to null, if refcount was 1 before, otherwise it has still needed references */
@@ -3667,6 +3670,24 @@ PHP_FUNCTION(domxml_dump_mem)
 }
 /* }}} */
 
+/* {{{ proto string domxml_dump_mem(object doc_handle [, int format][, encoding])
+   Dumps document into string and optionally formats it */
+PHP_FUNCTION(domxml_doc_free)
+{
+	zval *id;
+	xmlDoc *docp;
+	zval *wrapper;
+	zval **handle;
+	int refcount;
+	
+	DOMXML_PARAM_NONE(docp, id, le_domxmldocp);
+
+	zend_hash_index_find(Z_OBJPROP_P(id), 0, (void **) &handle);	
+	zend_list_delete(Z_LVAL_PP(handle));	
+	RETURN_TRUE;	
+}
+/* }}} */
+
 /* {{{ proto int domxml_dump_mem_file(string filename [, int compressmode [, int format]])
    Dumps document into file and uses compression if specified. Returns false on error, otherwise the length of the xml-document (uncompressed) */
 PHP_FUNCTION(domxml_dump_mem_file)
@@ -5061,10 +5082,10 @@ static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
-		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar) );
 		snprintf(value, str_len, "'%s'", string);
 	} else {
-		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar) );
 		snprintf(value, str_len, "\"%s\"", string);
 	}
 
