@@ -29,6 +29,7 @@
 #define XML_DefaultCurrent php_XML_DefaultCurrent
 #define XML_ErrorString php_XML_ErrorString
 #define XML_ExpatVersion php_XML_ExpatVersion
+#define XML_ExpatVersionInfo php_XML_ExpatVersionInfo
 #define XML_ExternalEntityParserCreate php_XML_ExternalEntityParserCreate
 #define XML_GetBase php_XML_GetBase
 #define XML_GetBuffer php_XML_GetBuffer
