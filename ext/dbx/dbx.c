@@ -213,7 +213,7 @@ ZEND_MINFO_FUNCTION(dbx)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "dbx support", "enabled");
 	php_info_print_table_row(2, "dbx version", "1.0.0");
-	php_info_print_table_row(2, "supported databases", "MySQL<br />ODBC<br />PostgreSQL<br />Microsoft SQL Server<br />FrontBase<br />Oracle 8 (not really)<br />Sybase-CT");
+	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (not really)\nSybase-CT");
 	php_info_print_table_end();
 }
 
