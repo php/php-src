@@ -101,7 +101,11 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 		void * ptr TSRMLS_DC);
 
 typedef struct _php_stream_statbuf {
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+	struct stat_libc sb; /* regular info */
+#else
 	struct stat sb; /* regular info */
+#endif
 	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 

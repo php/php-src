@@ -26,7 +26,8 @@
 #include "ext/standard/info.h"
 #include "SAPI.h"
 
-#ifndef PHP_WIN32
+/*#ifndef PHP_WIN32*/
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 #include "build-defs.h"
 #endif
 
@@ -34,7 +35,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if HAVE_STRING_H
+/*#if HAVE_STRING_H*/
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -43,6 +45,13 @@
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#include <sys/param.h>
+#else
+#include "netware/param.h"
+#endif
+#define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
@@ -141,7 +150,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	efree(libpath);
 
-	
+#ifndef NETWARE
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 
 	/*
@@ -152,6 +161,23 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	if (!get_module)
 		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "_get_module");
+#else	
+	/* NetWare doesn't support two NLMs exporting same symbol */
+    {
+        char symbol_name[64] = "\0";
+        int module_name_length = Z_STRLEN_P(file) - 4;  /* '.nlm' is 4 characters; knock it off */
+
+        /* Take the module name (e.g.: 'php_ldap') and append '@get_module' to it */
+        strncpy(symbol_name, Z_STRVAL_P(file), module_name_length);
+        symbol_name[module_name_length] = '\0';
+        strcat(symbol_name, "@");
+        strcat(symbol_name, "get_module");
+
+        get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, symbol_name);
+	}
+    /* NetWare doesn't prepend '_' to symbol names; so the corresponding portion of code is also
+	   not required for NetWare */
+#endif
 
 	if (!get_module) {
 		DL_UNLOAD(handle);

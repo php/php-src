@@ -54,6 +54,8 @@
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
+# elif defined(NETWARE)
+#  include "netware/pwd.h"
 # else
 #  include <pwd.h>
 # endif
@@ -335,7 +337,8 @@ PHP_FUNCTION(disk_free_space)
    Change file group */
 PHP_FUNCTION(chgrp)
 {
-#ifndef WINDOWS
+/*#ifndef WINDOWS*/
+#if !defined(WINDOWS) && !defined(NETWARE)  /* I guess 'chgrp' won't be available on NetWare */
 	pval **filename, **group;
 	gid_t gid;
 	struct group *gr=NULL;
@@ -383,7 +386,8 @@ PHP_FUNCTION(chgrp)
    Change file owner */
 PHP_FUNCTION(chown)
 {
-#ifndef WINDOWS
+/*#ifndef WINDOWS*/
+#if !defined(WINDOWS) && !defined(NETWARE)  /* I guess 'chown' won't be available on NetWare */
 	pval **filename, **user;
 	int ret;
 	uid_t uid;
@@ -472,7 +476,11 @@ PHP_FUNCTION(touch)
 {
 	pval **filename, **filetime, **fileatime;
 	int ret;
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+    struct stat_libc sb;
+#else
 	struct stat sb;
+#endif
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = NULL;
@@ -546,7 +554,11 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+	struct stat_libc *stat_sb;
+#else
 	struct stat *stat_sb;
+#endif
 	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
@@ -612,6 +624,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 
 
+#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(BG(sb).st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -641,6 +654,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
+#endif
 
 	switch (type) {
 	case FS_PERMS:
@@ -654,11 +668,23 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_GROUP:
 		RETURN_LONG((long)BG(sb).st_gid);
 	case FS_ATIME:
-		RETURN_LONG((long)BG(sb).st_atime);
+#if defined(NETWARE) && defined(NEW_LIBC)
+        RETURN_LONG((long)(BG(sb).st_atime).tv_nsec);
+#else
+        RETURN_LONG((long)BG(sb).st_atime);
+#endif
 	case FS_MTIME:
-		RETURN_LONG((long)BG(sb).st_mtime);
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)(BG(sb).st_mtime).tv_nsec);
+#else
+        RETURN_LONG((long)BG(sb).st_mtime);
+#endif
 	case FS_CTIME:
-		RETURN_LONG((long)BG(sb).st_ctime);
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)(BG(sb).st_ctime).tv_nsec);
+#else
+        RETURN_LONG((long)BG(sb).st_ctime);
+#endif
 	case FS_TYPE:
 #if HAVE_SYMLINK
 		if (S_ISLNK(BG(lsb).st_mode)) {
@@ -678,16 +704,25 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
+#ifdef NETWARE
+        RETURN_LONG(0);
+#else
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
 		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
+#ifdef NETWARE
+        RETURN_LONG(0);
+#else
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
 		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
+#ifdef NETWARE
+        RETURN_LONG(0);
+#else
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
@@ -726,9 +761,15 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
+#if defined(NETWARE) && defined(NEW_LIBC)
+		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_nsec);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_nsec);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_nsec);
+#else
 		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
 		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
 		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
+#endif
 #ifdef HAVE_ST_BLKSIZE
 		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize); 
 #else
