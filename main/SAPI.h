@@ -64,7 +64,7 @@ typedef struct {
 	const char *request_method;
 	char *query_string;
 	char *post_data;
-	const char *cookie_data;
+	char *cookie_data;
 	long content_length;
 	uint post_data_length;
 
