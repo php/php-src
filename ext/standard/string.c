@@ -2442,11 +2442,14 @@ PHP_FUNCTION(parse_str)
 		php_treat_data(PARSE_STRING, res, NULL ELS_CC PLS_CC SLS_CC);
 	else
 	{
+		int old_rg = PG(register_globals);
+		PG(register_globals) = 0;
 		/* Clear out the array that was passed in. */
 		zval_dtor(*arrayArg);
 		array_init(*arrayArg);
 		
 		php_treat_data(PARSE_STRING, res, *arrayArg ELS_CC PLS_CC SLS_CC);
+		PG(register_globals) = old_rg;
 	}
 }
 /* }}} */
