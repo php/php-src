@@ -2,8 +2,9 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
 - Added zval_debug_dump which works similar to var_dump yet displays extra
-- Added Andrei's tokenizer extension (Stig)
-- Removed Satellite. It is now part of PEAR.
+  internal information such as refcounts, and the true type names. (Jason)
+- Added Andrei's tokenizer extension. (Stig)
+- Removed ext/satellite. It is now part of PEAR. (eriksson)
 - Changed php.ini directive 'safe_mode_include_dir' to accept a
   (semi)colon separated path (like 'include_path') rather than
   a single directory. (jflemer)
