@@ -1323,8 +1323,10 @@ static void php_sqlite_fetch_string(struct php_sqlite_result *res, zend_bool dec
 	if (decode_binary && rowdata[0] != NULL && rowdata[0][0] == '\x01') {
 		decoded = emalloc(strlen(rowdata[0]));
 		decoded_len = sqlite_decode_binary(rowdata[0]+1, decoded);
-		efree((char*)rowdata[0]);
-		rowdata[0] = NULL;
+		if (!res->buffered) {
+			efree((char*)rowdata[0]);
+			rowdata[0] = NULL;
+		}
 	} else if (rowdata[0]) {
 		decoded_len = strlen((char*)rowdata[0]);
 		if (res->buffered) {
