@@ -319,7 +319,7 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 
 ZEND_API void start_memory_manager(ALS_D)
 {
-#if 0
+#ifndef ZTS
 	int i, j;
 	void *cached_entries[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 #endif
@@ -340,8 +340,11 @@ ZEND_API void start_memory_manager(ALS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 
-#if 0
+#ifndef ZTS
 	/* Initialize cache, to prevent fragmentation */
+	/* We can't do this in ZTS mode, because calling emalloc() from within start_memory_manager()
+	 * will yield an endless recursion calling to alloc_globals_ctor()
+	 */
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
 		for (j=0; j<MAX_CACHED_ENTRIES; j++) {
 			cached_entries[i][j] = emalloc(i);
