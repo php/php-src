@@ -64,11 +64,13 @@
 
 #include "php_fopen_wrappers.h"
 
+#define HTTP_HEADER_BLOCK_SIZE		128
+
 FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	FILE *fp=NULL;
 	php_url *resource=NULL;
-	char tmp_line[512];
+	char tmp_line[128];
 	char location[512];
 	char hdr_line[8192];
 	int body = 0;
@@ -76,6 +78,9 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	unsigned char *tmp;
 	int len;
 	int reqok = 0;
+	zval *response_header;
+	char *http_header_line;
+	int http_header_line_length, http_header_line_size;
 
 	resource = url_parse((char *) path);
 	if (resource == NULL) {
@@ -84,8 +89,9 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 		return NULL;
 	}
 	/* use port 80 if one wasn't specified */
-	if (resource->port == 0)
+	if (resource->port == 0) {
 		resource->port = 80;
+	}
 	
 	*socketd = php_hostconnect(resource->host, resource->port, SOCK_STREAM, 0);
 	if (*socketd == -1) {
@@ -171,36 +177,96 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	
 	body = 0;
 	location[0] = '\0';
+
+	MAKE_STD_ZVAL(response_header);
+	array_init(response_header);
+
 	if (!SOCK_FEOF(*socketd)) {
 		/* get response header */
 		if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
+			zval *http_response;
+
+			MAKE_STD_ZVAL(http_response);
 			if (strncmp(tmp_line + 8, " 200 ", 5) == 0) {
 				reqok = 1;
 			}
+			Z_STRLEN_P(http_response) = strlen(tmp_line);
+			Z_STRVAL_P(http_response) = estrndup(tmp_line, Z_STRLEN_P(http_response));
+			if (Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=='\n') {
+				Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=0;
+				Z_STRLEN_P(http_response)--;
+				if (Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=='\r') {
+					Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=0;
+					Z_STRLEN_P(http_response)--;
+				}
+			}
+			Z_TYPE_P(http_response) = IS_STRING;
+			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response, sizeof(zval *), NULL);
 		}
 	}
+
+
 	/* Read past HTTP headers */
 	while (!body && !SOCK_FEOF(*socketd)) {
-		if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
-			char *p = tmp_line;
+		http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
+		http_header_line_size = HTTP_HEADER_BLOCK_SIZE;
+		http_header_line_length = 0;
+		if (SOCK_FGETS(http_header_line, HTTP_HEADER_BLOCK_SIZE-1, *socketd) != NULL) {
+			char *p;
+			zend_bool found_eol=0;
+			zval *http_header;
 			
-			tmp_line[sizeof(tmp_line)-1] = '\0';
+			http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
 			
-			while (*p) {
-				if (*p == '\n' || *p == '\r') {
-					*p = '\0';
+			do {
+				p = http_header_line+http_header_line_length;
+				while (*p) {
+					while (*p == '\n' || *p == '\r') {
+						*p = '\0';
+						p--;
+						found_eol=1;
+					}
+					if (found_eol) {
+						break;
+					}
+					p++;
 				}
-				p++;
+				if (!found_eol) {
+					http_header_line_size += HTTP_HEADER_BLOCK_SIZE;
+					http_header_line_length += HTTP_HEADER_BLOCK_SIZE-1;
+					http_header_line = erealloc(http_header_line, http_header_line_size);
+					if (SOCK_FGETS(http_header_line+http_header_line_length, HTTP_HEADER_BLOCK_SIZE-1, *socketd)==NULL) {
+						http_header_line[http_header_line_length] = 0;
+						break;
+					}
+				} else {
+					http_header_line_length = p-http_header_line+1;
+				}
+			} while (!found_eol);
+			
+			if (!strncasecmp(http_header_line, "Location: ", 10)) {
+				strlcpy(location, http_header_line + 10, sizeof(location));
 			}
 			
-			if (!strncasecmp(tmp_line, "Location: ", 10)) {
-				strlcpy(location, tmp_line + 10, sizeof(location));
+			if (http_header_line[0] == '\0') {
+				body = 1;
 			}
-			
-			if (tmp_line[0] == '\0') {
-					body = 1;
+
+			if (http_header_line_length>0) {
+				MAKE_STD_ZVAL(http_header);
+				Z_STRVAL_P(http_header) = http_header_line;
+				Z_STRLEN_P(http_header) = http_header_line_length;
+				Z_TYPE_P(http_header) = IS_STRING;
+				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
+			} else {
+				efree(http_header_line);
 			}
 		}
+	}
+	{
+		ELS_FETCH();
+
+		zend_hash_update(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header, sizeof(zval *), NULL);
 	}
 	if (!reqok) {
 		SOCK_FCLOSE(*socketd);
