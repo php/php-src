@@ -32,6 +32,7 @@
 
 		$this->constants = array();
 		$this->resources = array();
+		$this->streams   = array();
 		$this->functions = array();
 		$this->internal_functions = array();
 		$this->private_functions = array();
@@ -45,7 +46,11 @@
 		$this->language  = "c";
 		$this->platform  = "all";
 
-		$this->files = array("c"=>array(), "h"=>array());
+		$this->files = array("c"    => array(), 
+												 "h"    => array(),
+												 "conf" => array(),
+												 "doc"  => array()
+												 );
 		
 		parent::__construct($stream);
 	}
@@ -103,7 +108,12 @@
 			$this->license = license::factory($this->release['license']);
 			if (is_object($this->license)) {
 				$this->license->write_license_file();
+				$this->files['doc'][] = "LICENSE";
 			}
+		}
+
+		function handle_release_notes($attr) {
+			$this->release['notes'] = trim($this->cdata);
 		}
 
 	function handle_maintainers_maintainer_user($attr) {
@@ -160,7 +170,9 @@
 	}
 
 	function handle_deps_with($attr) {
-		$this->with = $attr; 
+		$this->with = array();
+		$this->with['attr'] = $attr;
+		$this->with['desc'] = trim($this->cdata);		
 	}
 
   // }}}
@@ -176,6 +188,29 @@
 	}
 
 		// }}} 
+
+  // {{{   streams
+  function hamdle_steams($attr) {
+	}
+
+  function hamdle_steams_stream($attr) {
+		$this->streams[$attr['name']] = new php_stream($attr, $this->stream_data);
+		unset($this->stream_data);
+	}
+
+  function hamdle_steams_stream_description($attr) {
+		$this->stream_data['desc'] = $this->_trimdata;
+	}
+
+  function hamdle_steams_stream_ops($attr) {
+	}
+
+  function hamdle_steams_stream_ops_op($attr) {
+	}
+
+  function hamdle_steams_stream_data($attr) {
+	}
+	// }}}
 
 	// {{{   resources
 
@@ -326,26 +361,7 @@
     </para>
    </section>
 
-<!-- TODO no configure option support yet
    &reference.$id_name.configure;
--->
-
-   <section id='$id_name.configuration'>
-    &reftitle.runtime;
-");
-
-   	if (empty($this->phpini)) {
-			fputs($fp, "    &no.config;\n");
-		} else {
-			fputs($fp, php_ini::docbook_xml_header($this->name)); 
-			foreach ($this->phpini as $phpini) {
-				fputs($fp, $phpini->docbook_xml());
-			}
-			fputs($fp, php_ini::docbook_xml_footer()); 
-		}
-
-		fputs($fp,
-"   </section>
 
    <section id='$id_name.resources'>
     &reftitle.resources;
@@ -387,8 +403,66 @@
 
  </reference>
 ");
-      fputs($fp, php_element::docbook_editor_footer());
+      fputs($fp, php_element::docbook_editor_settings());
 
+			fclose($fp);
+
+			// configure options and dependencies have their own file
+			$fp = fopen("$docdir/configure.xml","w");
+
+      fputs($fp,"\n   <section id='$id_name.requirements'>\n    &reftitle.required;\n");
+     	if (empty($this->libs) && empty($this->headers)) {
+			  fputs($fp, "    &no.requirement;\n");
+		  } else {
+        // TODO allow custom text
+        if (isset($this->libs)) {
+          $libs = array();
+          foreach ($this->libs as $lib) {
+            $libs[] = $lib['name'];
+          }
+          $ies = count($libs)>1 ? "ies" :"y";
+          fputs($fp, "<para>This extension requires the following librar$ies: ".join(",", $libs)."</para>\n");
+        }
+        if (isset($this->headers)) {
+          $headers = array();
+          foreach ($this->headers as $header) {
+            $headers[] = $header['name'];
+          }
+          $s = count($headers)>1 ? "s" : "";
+          fputs($fp, "<para>This extension requires the following header$s: ".join(",", $headers)."</para>\n");
+        }
+		  }
+      fputs($fp, "\n   </section>\n\n");
+
+      fputs($fp,"\n   <section id='$id_name.install'>\n    &reftitle.install;\n");
+     	if (empty($this->with)) {
+			  fputs($fp, "    &no.install;\n");
+		  } else {
+			  if (isset($this->with['desc'])) {
+				  if (strstr($this->with['desc'], "<para>")) {
+					  fputs($fp, $this->with['desc']);
+					} else {
+					  fputs($fp, "    <para>\n".rtrim($this->with['desc'])."\n    </para>\n");
+          }
+        } else {
+				  // TODO default text
+        }
+		  }
+      fputs($fp, "\n   </section>\n\n");
+
+      fputs($fp,"\n   <section id='$id_name.configuration'>\n    &reftitle.runtime;\n");
+     	if (empty($this->phpini)) {
+			  fputs($fp, "    &no.config;\n");
+		  } else {
+			  fputs($fp, php_ini::docbook_xml_header($this->name)); 
+			  foreach ($this->phpini as $phpini) {
+				  fputs($fp, $phpini->docbook_xml());
+			  }
+			  fputs($fp, php_ini::docbook_xml_footer()); 
+		  }
+      fputs($fp, "\n   </section>\n\n");
+			
+      fputs($fp, php_element::docbook_editor_settings());
 			fclose($fp);
 
 			mkdir("$docdir/functions");
@@ -538,8 +612,6 @@ zend_module_entry {$name}_module_entry = {
 			fputs($fp, "#ifndef PHP_{$upname}_H\n");
 			fputs($fp, "#define PHP_{$upname}_H\n\n");
 
-			fputs($fp, "#ifndef PHP_HAVE_{$upname}\n\n");
-
 			if (isset($this->headers)) {
 				foreach ($this->headers as $header) {
 					if (@$header["prepend"] === "yes") {
@@ -556,6 +628,8 @@ zend_module_entry {$name}_module_entry = {
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#ifdef HAVE_'.$upname.'
 
 #include <php.h>
 #include <php_ini.h>
@@ -884,7 +958,6 @@ $code .= "
 
 	// {{{ config.m4 file
 	function write_config_m4() {
-
 		$upname = strtoupper($this->name);
 		
 		ob_start();
@@ -895,7 +968,7 @@ dnl $ Id: $
 dnl
 ';
 		
-		if (isset($this->with)) {
+		if (isset($this->with['attr'])) {
 			echo " 
 PHP_ARG_WITH({$this->name}, whether to enable {$this->name} functions,
 [  --with-{$this->name}[=DIR]      With {$this->name} support], yes)
@@ -903,12 +976,12 @@ PHP_ARG_WITH({$this->name}, whether to enable {$this->name} functions,
 
 		echo "
 if test \"\$PHP_$upname\" != \"no\"; then
-  if test -r \"\$PHP_$upname/{$this->with['testfile']}\"; then
+  if test -r \"\$PHP_$upname/{$this->with['attr']['testfile']}\"; then
     PHP_{$upname}_DIR=\"\$PHP_$upname\"
   else
     AC_MSG_CHECKING(for {$this->name} in default path)
-    for i in ".str_replace(":"," ",$this->with['defaults'])."; do
-      if test -r \"\$i/{$this->with['testfile']}\"; then
+    for i in ".str_replace(":"," ",$this->with['attr']['defaults'])."; do
+      if test -r \"\$i/{$this->with['attr']['testfile']}\"; then
         PHP_{$upname}_DIR=\$i
         AC_MSG_RESULT(found in \$i)
       fi
@@ -942,7 +1015,7 @@ PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
           $first = false;
         }
 
-		    if (isset($this->with)) {
+		    if (isset($this->with['attr'])) {
           echo "PHP_ADD_LIBRARY_WITH_PATH($lib[name], \$PHP_{$upname}_DIR/lib, {$upname}_SHARED_LIBADD)\n";
         } else {
           echo "PHP_ADD_LIBRARY($lib[name],, {$upname}_SHARED_LIBADD)\n";
@@ -969,7 +1042,10 @@ fi
 
 ";
 
-		$fp = fopen("{$this->name}/config.m4", "w");
+		$filename = "{$this->name}/config.m4";
+		$this->files['conf'][] = basename($filename);
+
+		$fp = fopen($filename, "w");
 		fputs($fp, ob_get_contents());
 		fclose($fp);
     ob_end_clean();
@@ -1143,9 +1219,11 @@ echo
 # End Project
 ';
 
+    $filename = "{$this->name}/{$this->name}.dsp"; 
+		$this->files['conf'][] = basename($filename);
 
-
-		$fp = fopen("{$this->name}/{$this->name}.dsp","wb");
+    // write file, enforce DOS/Windows line endings on all platforms
+		$fp = fopen($filename,"wb");
     fputs($fp, str_replace("\n","\r\n",ob_get_contents()));
     fclose($fp);
     ob_end_clean();
@@ -1153,8 +1231,131 @@ echo
 
 // }}} 
 
-	  // }}} 
 
-	}	
+	function write_credits() {
+	  if (count($this->users)) {
+       $this->files['doc'][] = "CREDITS";
+       $fp = fopen("{$this->name}/CREDITS", "w");
+       fputs($fp, "{$this->name}\n");
+       $names = array();
+       foreach($this->users as $user) {
+         if (isset($user['name'])) {
+           $names[] = $user['name'];
+         }
+       }
+       fclose($fp);
+    }
+  }
+
+
+  function write_experimental() {
+    if (isset($this->release['state']) && $this->release['state'] !== 'stable') {
+      $this->files['doc'][] = "EXPERIMENTAL";
+      $fp = fopen("{$this->name}/EXPERIMENTAL", "w");
+      fputs($fp,
+"this extension is experimental,
+its functions may change their names 
+or move to extension all together 
+so do not rely to much on them 
+you have been warned!
+");
+      fclose($fp);
+    }
+  }
+
+	function write_package_xml() {
+		$status = false;
+
+		ob_start();
+		
+		echo 
+"<?xml version=\"1.0\" encoding=\"utf-8\">
+<!DOCTYPE package SYSTEM \"../../package.dtd\">
+<package>
+  <name>{$this->name}</name>
+";
+
+		if (isset($this->summary)) {
+			echo "  <summary>{$this->summary}</summary>\n";
+		}
+
+		if (isset($this->description)) {
+			echo "  <description>\n".rtrim($this->description)."\n  </description>\n";
+		}
+		
+		if (@is_array($this->users)) {
+			echo "\n  <maintainers>\n";
+			foreach ($this->users as $user) {
+				echo "    <maintainer>\n";
+			  foreach (array("user","name","email","role") as $key) {
+					if (isset($user[$key])) {
+						echo "      <$key>{$user[$key]}</$key>\n";
+					}
+				}
+				echo "    <maintainer/>\n";
+			}
+			echo "  <maintainers/>\n";
+		}
+		
+		if (is_array($this->release)) {
+			echo "\n  <release>\n";
+			foreach (array("version","date","state","notes") as $key) {
+				if (isset($this->release[$key])) {
+					echo "    <$key>{$this->release[$key]}</$key>\n";
+				}
+			}
+			echo "  <release/>\n";
+		}
+
+		echo "\n  <filelist>\n";
+		echo "    <dir role=\"doc\" name=\"/\">\n";
+		if (@is_array($this->files['doc'])) {
+			foreach ($this->files['doc'] as $file) {
+				echo "      <file role=\"doc\">$file</file>\n";
+			}
+		}
+		if (@is_array($this->files['conf'])) {
+			foreach ($this->files['conf'] as $file) {
+				echo "      <file role=\"src\">$file</file>\n";
+			}
+		}
+		if (@is_array($this->files['c'])) {
+			foreach ($this->files['c'] as $file) {
+				echo "      <file role=\"src\">$file</file>\n";
+			}
+		}
+		if (@is_array($this->files['h'])) {
+			foreach ($this->files['h'] as $file) {
+				echo "      <file role=\"src\">$file</file>\n";
+			}
+		}
+		
+		echo "    </dir>\n";
+		echo "  </filelist>\n";
+
+
+		echo "</package>\n";
+		
+		$fp = fopen("{$this->name}/package.xml", "w");
+		if (is_resource($fp)) {
+			fputs($fp, ob_get_contents());
+			fclose($fp);
+		}
+		
+		ob_end_clean();
+		return $status;
+	}
+
+	  // }}}
+
+  function write_test_files() {
+    mkdir("$this->name/tests");
+    
+    foreach ($this->functions as $function) {
+      $function->write_test($this);
+    }
+  }
+
+}	
 
 ?>
