@@ -1,3 +1,40 @@
+2000-08-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/image.c: - Fixed warning under VC6
+
+    * ext/mcrypt/config.m4
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h:  Added support for libmcrypt 2.4.4
+
+2000-08-11  David Croft  <david@infotrek.co.uk>
+
+    * NEWS: Added news item for Andi's strncasecmp commit
+
+
+2000-08-11  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - restore ifx_close() to PHP3 behaviour for non-persistent connections
+      by silently reconnecting the existing link if closed earlier (danny)
+
+2000-08-11  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c:
+    Make COM work in a multithreaded environment
+
+2000-08-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/oci8/oci8.c: return type in proto for OCIError fixed
+
+2000-08-11  dickmeiss  <dickmeiss@toye.php.net>
+
+    * ext/yaz/php_yaz.c:
+    Added support for username, group and password for function yaz_connect.
+
+2000-08-11  Andi Gutmans  <andi@php.net>
+
+    * NEWS: *** empty log message ***
+
 2000-08-10  Andi Gutmans  <andi@php.net>
 
     * NEWS: - The commit messages didn't seem to update the news file
