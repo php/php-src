@@ -433,7 +433,6 @@ PHP_RINIT_FUNCTION(ifx)
 	IFXG(num_links) = IFXG(num_persistent);
 	return SUCCESS;
 }
-
 PHP_MINFO_FUNCTION(ifx)
 {
 	char buf[32];
@@ -444,7 +443,7 @@ PHP_MINFO_FUNCTION(ifx)
 	php_info_print_table_row(2, "Active Persistent links", buf);
 	sprintf(buf, "%ld", IFXG(num_links)); 
 	php_info_print_table_row(2, "Active links", buf);
-	sprintf(buf, "%02.2f", (double)(IFX_VERSION/100.0)); 
+	sprintf(buf, "%02.2f", (double)(IFX_VERSION/100.0));
 	php_info_print_table_row(2, "ESQL/C Version", buf);
 	php_info_print_table_end();
 
@@ -1419,7 +1418,7 @@ EXEC SQL END DECLARE SECTION;
 				}
 
 				if (ifx_check() < 0)   {
-					char *ifx_err = ifx_error(ifx)
+					char *ifx_err = ifx_error(ifx);
 					IFXG(sv_sqlcode) = SQLCODE;
 					EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 					EXEC SQL free :statemid;
