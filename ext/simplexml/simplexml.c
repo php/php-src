@@ -274,14 +274,25 @@ static zval * sxe_dimension_read(zval *object, zval *offset, int type TSRMLS_DC)
 static void
 change_node_zval(xmlNodePtr node, zval *value)
 {
+	zval value_copy;
+
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
 		case IS_BOOL:
 		case IS_DOUBLE:
 		case IS_NULL:
+			if (value->refcount > 1) {
+				value_copy = *value;
+				zval_copy_ctor(&value_copy);
+				value = &value_copy;
+			}
 			convert_to_string(value);
+			/* break missing intentionally */
 		case IS_STRING:
 			xmlNodeSetContentLen(node, Z_STRVAL_P(value), Z_STRLEN_P(value));
+			if (value == &value_copy) {
+				zval_dtor(value);
+			}
 			break;
 		default:
 			php_error(E_WARNING, "It is not possible to assign complex types to nodes");
