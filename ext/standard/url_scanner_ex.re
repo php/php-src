@@ -281,7 +281,10 @@ stop:
 	scdebug(("stopped in state %d at pos %d (%d:%c)\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR));
 
 	rest = YYLIMIT - start;
-		
+
+	/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */	
+	if (rest < 0) rest = 0;
+	
 	if (rest) memmove(ctx->buf.c, start, rest);
 	ctx->buf.len = rest;
 }
