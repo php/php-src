@@ -1,1 +1,1 @@
-Zend/zend_execute.lo: $(srcdir)/zend_vm_execute.h
+Zend/zend_execute.lo: $(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_def.h
