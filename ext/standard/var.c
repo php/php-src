@@ -87,8 +87,8 @@ void php_var_dump(zval **struc, int level)
 			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
 			goto head_done;
 		case IS_OBJECT:
-			myht = HASH_OF(*struc);
-			php_printf("%sobject(%s)(%d) {\n", COMMON, (*struc)->value.obj.ce->name, zend_hash_num_elements(myht));
+			myht = Z_OBJPROP_PP(struc);
+			php_printf("%sobject(%s)(%d) {\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht));
 head_done:
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
 			if (level>1) {
@@ -229,7 +229,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 				*p = 0;
 			}
 			return;
-
 		case IS_OBJECT: {
 				zval *retval_ptr = NULL;
 				zval *fname;
@@ -269,7 +268,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 									continue;
 								}
 
-								if (zend_hash_find((*struc)->value.obj.properties,Z_STRVAL_PP(name),Z_STRLEN_PP(name)+1,(void*)&d) == SUCCESS) {
+								if (zend_hash_find(Z_OBJPROP_PP(struc), Z_STRVAL_PP(name), Z_STRLEN_PP(name)+1, (void*)&d) == SUCCESS) {
 									php_var_serialize(buf, name, NULL);
 									php_var_serialize(buf,d,var_hash);	
 								}
@@ -295,7 +294,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 				}
 				return;	
 			}
-
 		case IS_ARRAY:
 		  std_array:
 			myht = HASH_OF(*struc);
@@ -344,7 +342,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 			}
 			STR_CAT(buf, "}", 1);
 			return;
-
 		default:
 			STR_CAT(buf, "i:0;", 4);
 			return;
@@ -521,8 +518,9 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 					ce = &zend_standard_class_def;
 				}
 
-				object_init_ex(*rval,ce);
-				myht = (*rval)->value.obj.properties;
+				/* OBJECTS_FIXME */
+				object_init_ex(*rval, ce);
+				myht = Z_OBJPROP_PP(rval);
 
 				if (incomplete_class)
 					php_store_class_name(*rval, class_name, name_len);
