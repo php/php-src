@@ -48,7 +48,7 @@ PHPAPI void zend_output_startup()
 	ob_buffer = NULL;
 	zend_body_write = zend_ub_body_write;
 	header_request=0;
-	zend_header_write = sapi_functions.ub_write;
+	zend_header_write = sapi_module.ub_write;
 }
 
 

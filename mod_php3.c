@@ -88,7 +88,7 @@ int saved_umask;
 php_apache_info_struct php_apache_info;		/* active config */
 
 int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
-int php_module_startup(sapi_functions_struct *sf);
+int php_module_startup(sapi_module_struct *sf);
 void php_module_shutdown();
 void php_module_shutdown_for_exec();
 
@@ -112,7 +112,7 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 }
 
 
-sapi_functions_struct sapi_functions = {
+sapi_module_struct sapi_module = {
 	zend_apache_ub_write
 };
 
@@ -268,7 +268,7 @@ int php3_xbithack_handler(request_rec * r)
 void php3_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, php_module_shutdown, php_module_shutdown_for_exec);
-	php_module_startup(&sapi_functions);
+	php_module_startup(&sapi_module);
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
 #endif

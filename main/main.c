@@ -755,7 +755,7 @@ static core_globals_ctor(php_core_globals *core_globals)
 #endif
 
 
-int php_module_startup(sapi_functions_struct *sf)
+int php_module_startup(sapi_module_struct *sf)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
@@ -775,7 +775,7 @@ int php_module_startup(sapi_functions_struct *sf)
 		return SUCCESS;
 	}
 
-	sapi_functions = *sf;
+	sapi_module = *sf;
 
 	zend_output_startup();
 
@@ -796,7 +796,6 @@ int php_module_startup(sapi_functions_struct *sf)
 #endif
 
 	PG(header_is_being_sent) = 0;
-	sapi_startup(sf);
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -840,6 +839,14 @@ void php_module_shutdown_for_exec(void)
 	/* used to close fd's in the range 3.255 here, but it's problematic */
 }
 
+
+int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
+{
+	php_module_shutdown();
+	return SUCCESS;
+}
+
+
 void php_module_shutdown()
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
@@ -875,12 +882,12 @@ void php_module_shutdown()
 
 
 /* in 3.1 some of this should move into sapi */
-int _php3_hash_environment(PLS_D)
+int _php3_hash_environment(PLS_D ELS_DC)
 {
 	char **env, *p, *t;
 	unsigned char _gpc_flags[3] = {0,0,0};
 	pval *tmp;
-	ELS_FETCH();
+	SLS_FETCH();
 	
 	p = PG(gpc_order);
 	while(*p) {
@@ -1050,7 +1057,7 @@ int _php3_hash_environment(PLS_D)
 
 
 	/* need argc/argv support as well */
-	_php3_build_argv(request_info.query_string ELS_CC);
+	_php3_build_argv(SG(request_info).query_string ELS_CC);
 
 	return SUCCESS;
 }
@@ -1113,16 +1120,17 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
+	SLS_FETCH();
 
-	if (request_info.query_string && request_info.query_string[0]=='=') {
-		if (!strcmp(request_info.query_string+1, "PHPE9568F34-D428-11d2-A769-00AA001ACF42")) {
+	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=') {
+		if (!strcmp(SG(request_info).query_string+1, "PHPE9568F34-D428-11d2-A769-00AA001ACF42")) {
 			char *header_line = estrndup("Content-type:  image/gif", sizeof("Content-type:  image/gif")-1);
 
 			php4i_add_header_information(header_line);
 			PHPWRITE(php4_logo, sizeof(php4_logo));
 			efree(header_line);
 			return;
-		} else if (!strcmp(request_info.query_string+1, "PHPE9568F35-D428-11d2-A769-00AA001ACF42")) {
+		} else if (!strcmp(SG(request_info).query_string+1, "PHPE9568F35-D428-11d2-A769-00AA001ACF42")) {
 			char *header_line = estrndup("Content-type:  image/gif", sizeof("Content-type:  image/gif")-1);
 
 			php4i_add_header_information(header_line);
@@ -1136,7 +1144,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		PG(unclean_shutdown) = 1;
 		return;
 	}
-	_php3_hash_environment(PLS_C);
+	_php3_hash_environment(PLS_C ELS_CC);
 
 #if WIN32||WINNT
 	UpdateIniFromRegistry(primary_file->filename);

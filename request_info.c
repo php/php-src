@@ -38,10 +38,10 @@ PHPAPI php3_request_info request_info;
 int php3_init_request_info(void *conf)
 {
 	char *buf;	/* temporary buffers */
+	SLS_FETCH();
 
 	request_info.path_info = getenv("PATH_INFO");
 	request_info.path_translated = getenv("PATH_TRANSLATED");
-	request_info.query_string = getenv("QUERY_STRING");
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 	request_info.request_method = getenv("REQUEST_METHOD");
@@ -199,12 +199,12 @@ int php3_init_request_info(void *conf)
 	SLS_FETCH();
 
 	r = ((request_rec *) SG(server_context));
+	SG(request_info).query_string = r->args;
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 
 	request_info.filename = r->filename;
 	request_info.request_method = r->method;
-	request_info.query_string = r->args;
 	request_info.content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
 
 	buf = table_get(r->subprocess_env, "CONTENT_LENGTH");
@@ -227,7 +227,6 @@ int php3_init_request_info(void *conf)
 		request_info.filename = NULL;
 	request_info.path_info = sapi_rqst->path_info;
 	request_info.path_translated = sapi_rqst->path_translated;
-	request_info.query_string = sapi_rqst->query_string;
 	request_info.current_user = sapi_rqst->current_user;
 	request_info.current_user_length = sapi_rqst->current_user_length;
 	request_info.request_method = sapi_rqst->request_method;

@@ -34,7 +34,6 @@ typedef struct {
 	char *filename;
 	char *path_info;
 	const char *path_translated;
-	char *query_string;
 	const char *request_method;
 	char *script_name;
 	char *current_user;
