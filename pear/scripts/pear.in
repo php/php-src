@@ -25,7 +25,7 @@ require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$options = Console_Getopt::getopt($argv, "hv:?e:p:d:");
+$options = Console_Getopt::getopt($argv, "hv:e:p:d:");
 if (PEAR::isError($options)) {
     usage($options);
 }
