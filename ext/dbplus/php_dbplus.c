@@ -50,11 +50,14 @@ var2tuple(relf *r, zval **zv, tuple *t)
   ap = r->r_atts;
   deg = r->r_rel.rel_deg;
   do {
-    if(SUCCESS!=zend_hash_find((*zv)->value.ht, ap->att_name, strlen(ap->att_name)+1, (void **)&element))
+    if(SUCCESS!=zend_hash_find((*zv)->value.ht, ap->att_name, strlen(ap->att_name)+1, (void **)&element)) {
       continue;
+    }
 
-    if (! *element) return 1;
-    
+    if (! *element) {
+      return 1;
+    }
+
     switch(ap->att_type) {
     case FT_SHORT:   
       convert_to_long_ex(element);
@@ -73,6 +76,10 @@ var2tuple(relf *r, zval **zv, tuple *t)
       convert_to_long_ex(element);
       AFFIX(ap, t)->f_date     = (long) (*element)->value.lval; 
       break;
+    case FT_TIME:         
+      convert_to_long_ex(element);
+      AFFIX(ap, t)->f_time     = (long) (*element)->value.lval; 
+      break;
     case FT_FLOAT:        
       convert_to_double_ex(element);
       AFFIX(ap, t)->f_float    = (float) (*element)->value.dval; 
@@ -90,9 +97,8 @@ var2tuple(relf *r, zval **zv, tuple *t)
       str2timestamp(SvPV(sv, na), (timestamp *)AFFIX(ap, t));
       */
       break;
-    case FT_BINARY:
-    case FT_BLOB:
-    case FT_MEMO:
+    default:
+      php_error(E_WARNING,"%s is of yet unsupported type %d",ap->att_name,ap->att_type);
       break;
     }
   } while (ap++, --deg);
@@ -133,6 +139,10 @@ tuple2var(relf * r, tuple * t, zval **zv)
         ZVAL_LONG(element, AFFIX(ap, t)->f_long); 
         break;
 
+      case  FT_TIME:  
+        ZVAL_LONG(element, AFFIX(ap, t)->f_time); 
+        break;
+
       case  FT_FLOAT:  
         ZVAL_DOUBLE(element, AFFIX(ap, t)->f_float); 
         break;
@@ -147,6 +157,9 @@ tuple2var(relf * r, tuple * t, zval **zv)
         ZVAL_STRING(element, AFVAR(ap, t)->f_string, 1);
         break;
 
+    default:
+      php_error(E_WARNING,"%s is of yet unsupported type %d",ap->att_name,ap->att_type);
+      break;
       }
 
       if(element->type!=IS_NULL)
@@ -1040,8 +1053,9 @@ PHP_FUNCTION(dbplus_rkeys)
 
   if(rnew) {
     /* TODO realy delete old relation resource ? */
+#if 0
     zend_list_delete((*relation)->value.lval);  
-    
+#endif     
     ZEND_REGISTER_RESOURCE(return_value, rnew, le_dbplus_relation);
   } else {
     /* TODO error reporting */
@@ -1150,6 +1164,8 @@ PHP_FUNCTION(dbplus_rsecindex)
 
   convert_to_long_ex(compact);
   
+  php_error(E_WARNING,"nkeys: %d keys: '%s', compact: %s",nkeys,keys,_INT(compact));
+
   rnew = cdbRsecindex(r, nkeys, keys, _INT(compact));
   if(name) efree(name);
 
