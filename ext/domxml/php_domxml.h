@@ -61,7 +61,7 @@ PHP_FUNCTION(xmldocfile);
 PHP_FUNCTION(html_doc);
 PHP_FUNCTION(html_doc_file);
 #endif
-PHP_FUNCTION(xmltree);
+PHP_FUNCTION(domxml_xmltree);
 PHP_FUNCTION(domxml_new_xmldoc);
 PHP_FUNCTION(domxml_substitute_entities_default);
 
@@ -79,6 +79,7 @@ PHP_FUNCTION(domxml_doc_create_entity_reference);
 PHP_FUNCTION(domxml_doc_imported_node);
 PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
+PHP_FUNCTION(domxml_doc_ids);
 PHP_FUNCTION(domxml_dump_mem);
 PHP_FUNCTION(domxml_dump_mem_file);
 PHP_FUNCTION(domxml_dump_node);
@@ -108,8 +109,10 @@ PHP_FUNCTION(domxml_node_next_sibling);
 PHP_FUNCTION(domxml_node_previous_sibling);
 PHP_FUNCTION(domxml_node_owner_document);
 PHP_FUNCTION(domxml_node_insert_before);
+PHP_FUNCTION(domxml_node_append_sibling);
 PHP_FUNCTION(domxml_node_append_child);
-PHP_FUNCTION(domxml_node_add_child);
+PHP_FUNCTION(domxml_node_remove_child);
+PHP_FUNCTION(domxml_node_replace_child);
 PHP_FUNCTION(domxml_node_has_attributes);
 PHP_FUNCTION(domxml_node_has_child_nodes);
 PHP_FUNCTION(domxml_node_parent);
@@ -141,8 +144,8 @@ PHP_FUNCTION(domxml_elem_set_attribute);
 PHP_FUNCTION(domxml_elem_remove_attribute);
 PHP_FUNCTION(domxml_elem_get_attribute_node);
 PHP_FUNCTION(domxml_elem_set_attribute_node);
-PHP_FUNCTION(domxml_elem_get_element_by_tagname);
-
+PHP_FUNCTION(domxml_elem_get_elements_by_tagname);
+PHP_FUNCTION(domxml_elem_has_attribute);
 /* Class CData methods */
 PHP_FUNCTION(domxml_cdata_length);
 
@@ -159,6 +162,12 @@ PHP_FUNCTION(domxml_entity_notation_name);
 PHP_FUNCTION(domxml_pi_target);
 PHP_FUNCTION(domxml_pi_data);
 
+/* Class Parser methods */
+PHP_FUNCTION(domxml_parser);
+PHP_FUNCTION(domxml_parser_add_chunk);
+PHP_FUNCTION(domxml_parser_end);
+PHP_FUNCTION(domxml_parser_set_keep_blanks);
+
 /* Class XPathContext methods */
 #if defined(LIBXML_XPATH_ENABLED)
 PHP_FUNCTION(xpath_init);
@@ -166,6 +175,8 @@ PHP_FUNCTION(xpath_new_context);
 PHP_FUNCTION(xpath_eval);
 PHP_FUNCTION(xpath_eval_expression);
 PHP_FUNCTION(xpath_register_ns);
+PHP_FUNCTION(domxml_doc_get_elements_by_tagname);
+PHP_FUNCTION(domxml_doc_get_element_by_id);
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
 PHP_FUNCTION(xptr_new_context);
