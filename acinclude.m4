@@ -517,7 +517,7 @@ AC_DEFUN(PHP_GEN_CONFIG_VARS,[
   echo creating config_vars.mk
   > config_vars.mk
   for i in $PHP_VAR_SUBST; do
-    eval echo "$i = \$$i" >> config_vars.mk
+    eval echo "$i = \$$i" | sed 's%#%\\#%g' >> config_vars.mk
   done
 ])
 
