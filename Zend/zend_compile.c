@@ -1575,9 +1575,6 @@ static zend_bool do_inherit_method_check(zend_function *child, zend_function *pa
 	zend_uint child_flags  = child->common.fn_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
 
-	/* we do not inherit private methods */
-/*	assert(!(parent_flags & ZEND_ACC_PRIVATE));	*/
-
 	/* You cannot change from static to non static and vice versa.
 	 */
 	if ((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC)) {
