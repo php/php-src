@@ -192,6 +192,8 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		case INT8OID:
 			if (sizeof(long)>=8) {
 				cols[colno].param_type = PDO_PARAM_INT;
+			} else {
+				cols[colno].param_type = PDO_PARAM_STR;
 			}
 			break;
 
