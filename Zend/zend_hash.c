@@ -1088,7 +1088,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 
 
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
-							compare_func_t compar, int renumber)
+							compare_func_t compar, int renumber TSRMLS_DC)
 {
 	Bucket **arTmp;
 	Bucket *p;
@@ -1111,7 +1111,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		i++;
 	}
 
-	(*sort_func)((void *) arTmp, i, sizeof(Bucket *), compar);
+	(*sort_func)((void *) arTmp, i, sizeof(Bucket *), compar TSRMLS_CC);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->pListHead = arTmp[0];
@@ -1134,7 +1134,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		i=0;
 		while (p != NULL) {
 			p->nKeyLength = 0;
-			p->h = i++;
+			;
 			p = p->pListNext;
 		}
 		ht->nNextFreeElement = i;
@@ -1212,7 +1212,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 				}
 			}
 		}
-		result = compar(p1->pData, pData2);
+		result = compar(p1->pData, pData2 TSRMLS_CC);
 		if (result!=0) {
 			HASH_UNPROTECT_RECURSION(ht1); 
 			HASH_UNPROTECT_RECURSION(ht2); 
@@ -1230,7 +1230,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 }
 
 
-ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const void *), int flag, void **pData)
+ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC)
 {
 	Bucket *p, *res;
 
@@ -1244,11 +1244,11 @@ ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const 
 	res = p = ht->pListHead;
 	while ((p = p->pListNext)) {
 		if (flag) {
-			if (compar(&res, &p) < 0) { /* max */
+			if (compar(&res, &p TSRMLS_CC) < 0) { /* max */
 				res = p;
 			}
 		} else {
-			if (compar(&res, &p) > 0) { /* min */
+			if (compar(&res, &p TSRMLS_CC) > 0) { /* min */
 				res = p;
 			}
 		}

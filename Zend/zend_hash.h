@@ -34,8 +34,8 @@
 #define HASH_DEL_INDEX 1
 
 typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
-typedef int  (*compare_func_t)(const void *, const void *);
-typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
+typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
+typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t TSRMLS_DC);
 typedef void (*dtor_func_t)(void *pDest);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
@@ -179,9 +179,9 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
 ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite);
 ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *p_new));
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber);
+ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC);
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC);
-ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar)(const void *, const void *), int flag, void **pData);
+ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC);
 
 ZEND_API int zend_hash_num_elements(HashTable *ht);
 
