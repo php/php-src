@@ -182,6 +182,8 @@ extern PHP_RINIT_FUNCTION(odbc);
 extern PHP_RSHUTDOWN_FUNCTION(odbc);
 PHP_MINFO_FUNCTION(odbc);
 
+PHP_FUNCTION(odbc_error);
+PHP_FUNCTION(odbc_errormsg);
 PHP_FUNCTION(odbc_setoption);
 PHP_FUNCTION(odbc_autocommit);
 PHP_FUNCTION(odbc_close);
@@ -229,17 +231,25 @@ PHP_FUNCTION(odbc_primarykeys);
 PHP_FUNCTION(odbc_specialcolumns);
 PHP_FUNCTION(odbc_statistics);
 
-typedef struct odbc_connection {
 #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
-	SQLHANDLE henv;
-	SQLHANDLE hdbc;
+#define ODBC_SQL_ENV_T SQLHANDLE
+#define ODBC_SQL_CONN_T SQLHANDLE
+#define ODBC_SQL_STMT_T SQLHANDLE
 #elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB )
-	SQLHENV	henv;
-	SQLHDBC hdbc;
+#define ODBC_SQL_ENV_T SQLHENV
+#define ODBC_SQL_CONN_T SQLHDBC
+#define ODBC_SQL_STMT_T SQLHSTMT
 #else
-	HENV henv;
-	HDBC hdbc;
+#define ODBC_SQL_ENV_T HENV
+#define ODBC_SQL_CONN_T HDBC
+#define ODBC_SQL_STMT_T HSTMT
 #endif
+
+typedef struct odbc_connection {
+    ODBC_SQL_ENV_T henv;
+    ODBC_SQL_CONN_T hdbc;
+    char laststate[6];
+    char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	int id;
 	int persistent;
 } odbc_connection;
@@ -252,13 +262,7 @@ typedef struct odbc_result_value {
 } odbc_result_value;
 
 typedef struct odbc_result {
-#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
-	SQLHANDLE stmt;
-#elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB )
-	SQLHSTMT stmt;
-#else
-	HSTMT stmt;
-#endif
+    ODBC_SQL_STMT_T stmt;
 	int id;
 	odbc_result_value *values;
 	SWORD numcols;
@@ -285,6 +289,8 @@ typedef struct {
 	int defConn;
     long defaultlrl;
     long defaultbinmode;
+    char laststate[6];
+    char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	HashTable *resource_list;
 	HashTable *resource_plist;
 } php_odbc_globals;
@@ -297,13 +303,7 @@ odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
 int odbc_bindcols(odbc_result *result);
 
-#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
-#define ODBC_SQL_ERROR_PARAMS SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func
-#elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB )
-#define ODBC_SQL_ERROR_PARAMS SQLHENV henv, SQLHDBC conn, SQLHSTMT stmt, char *func
-#else
-#define ODBC_SQL_ERROR_PARAMS HENV henv, HDBC conn, HSTMT stmt, char *func
-#endif
+#define ODBC_SQL_ERROR_PARAMS odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, char *func
 
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
