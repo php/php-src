@@ -345,7 +345,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             $data['data'][] = array($package, $version, $fs);
         }
         if (empty($data['data'])) {
-            $this->ui->outputData('No upgrades avaible');
+            $this->ui->outputData('No upgrades available');
         } else {
             $this->ui->outputData($data, $command);
         }
