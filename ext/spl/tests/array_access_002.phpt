@@ -3,11 +3,11 @@ SPL: array_access without return in set()
 --SKIPIF--
 <?php
 	if (!extension_loaded("spl")) die("skip");
-	if (!in_array("spl::array_access",spl_classes())) die("skip spl::array_access not present");
+	if (!in_array("spl_array_access", spl_classes())) die("skip spl_array_access not present");
 ?>
 --FILE--
 <?php
-class c implements spl::array_access {
+class c implements spl_array_access {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 	function exists($index) {

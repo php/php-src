@@ -4,7 +4,7 @@ SPL: foreach and break
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
-class c_iter implements spl::forward_assoc {
+class c_iter implements spl_forward_assoc {
 
 	private $obj;
 	private $num = 0;
@@ -36,7 +36,7 @@ class c_iter implements spl::forward_assoc {
 	}
 }
 	
-class c implements spl::iterator {
+class c implements spl_iterator {
 
 	public $max = 3;
 

@@ -10,7 +10,7 @@ echo "EXTERNAL\n";
 $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 var_dump($a);
 
-class external implements spl::array_read {
+class external implements spl_array_read {
 
 	function exists($index) {
 		echo __METHOD__ . "($index)\n";
@@ -46,7 +46,7 @@ $out = $obj['4th']; echo "$out\n";
 
 echo "INTERNAL\n";
 
-class internal implements spl::array_read {
+class internal implements spl_array_read {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 

@@ -186,7 +186,6 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	zend_class_entry *current_scope;
 	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
-	zend_namespace *current_namespace = EG(active_namespace);
 	zend_execute_data execute_data;
 	va_list args;
 
@@ -315,7 +314,6 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
-	EG(active_namespace) = current_namespace;
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
