@@ -1,3 +1,51 @@
+2002-01-02  Zak Greant  <zak@jobvillage.com>
+
+    * ext/standard/basic_functions.c:
+    Adding key_exists alias for array_key_exists, at the request of One-Who-Shall-Not-Be-Named-Because-He-Is-On-Vacation
+
+2002-01-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/tests/pear_error.phpt: * PEAR.php line number changes again
+
+    * pear/tests/pear_registry.phpt:
+    * registry files renamed from .inf to .reg, update test
+
+    * pear/PEAR/Installer.php: * support "pear-get install XML_RPC"
+
+    * pear/Makefile.in
+      pear/scripts/.cvsignore
+      pear/scripts/pear-get.in
+      pear/scripts/pear.in:
+    * start splitting "pear" command into "pear" and "pear-get"
+
+    * pear/PEAR/Remote.php: * use new overloading API properly
+
+2002-01-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ftp/php_ftp.c:
+    - Corrected proto for ftp_connect() (new optional parameter for initial
+      custom timeout).
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+    - Added ftp_set_option(), ftp_get_option() and support for setting a
+      custom timeout.
+
+2002-01-02  jim winstead  <jimw@apache.org>
+
+    * ext/gd/gd.c:
+    jpeg2wbmp,png2wbmp: fix prototypes; _php_image_convert: simplify argument count checking
+
+2002-01-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ftp/php_ftp.c: - Fixed ftp_fget() and ftp_mkdir() protos.
+
+    * ext/ftp/php_ftp.c: - Corrected proto for ftp_fget().
+
 2002-01-01  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/ftp/php_ftp.c
