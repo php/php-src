@@ -111,7 +111,7 @@ fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label,
 
 	stream->in_free++;
 
-	php_stream_flush(stream);
+	_php_stream_flush(stream, 1 TSRMLS_CC);
 	
 	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0) {
 		/* Remove entry from the resource list */
@@ -401,10 +401,10 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 	return NULL;
 }
 
-PHPAPI int _php_stream_flush(php_stream *stream TSRMLS_DC)
+PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 {
 	if (stream->filterhead)
-		stream->filterhead->fops->flush(stream, stream->filterhead TSRMLS_CC);
+		stream->filterhead->fops->flush(stream, stream->filterhead, closing TSRMLS_CC);
 
 	if (stream->ops->flush) {
 		return stream->ops->flush(stream TSRMLS_CC);
@@ -440,7 +440,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	if (stream->ops->seek) {
 
 		if (stream->filterhead)
-			stream->filterhead->fops->flush(stream, stream->filterhead TSRMLS_CC);
+			stream->filterhead->fops->flush(stream, stream->filterhead, 0 TSRMLS_CC);
 		
 		return stream->ops->seek(stream, offset, whence TSRMLS_CC);
 	}

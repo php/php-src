@@ -182,7 +182,7 @@ typedef struct _php_stream_filter_ops {
 			const char *buf, size_t count TSRMLS_DC);
 	size_t (*read)(php_stream *stream, php_stream_filter *thisfilter,
 			char *buf, size_t count TSRMLS_DC);
-	int (*flush)(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC);
+	int (*flush)(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC);
 	int (*eof)(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC);
 	void (*dtor)(php_stream_filter *thisfilter TSRMLS_DC);
 	const char *label;
@@ -205,8 +205,8 @@ struct _php_stream_filter {
 	(thisfilter)->next ? (thisfilter)->next->fops->read((stream), (thisfilter)->next, (buf), (size) TSRMLS_CC) \
 	: (stream)->ops->read((stream), (buf), (size) TSRMLS_CC)
 
-#define php_stream_filter_flush_next(stream, thisfilter) \
-	(thisfilter)->next ? (thisfilter)->next->fops->flush((stream), (thisfilter) TSRMLS_CC) \
+#define php_stream_filter_flush_next(stream, thisfilter, closing) \
+	(thisfilter)->next ? (thisfilter)->next->fops->flush((stream), (thisfilter), (closing) TSRMLS_CC) \
 	: (stream)->ops->flush((stream) TSRMLS_CC)
 
 #define php_stream_filter_eof_next(stream, thisfilter) \
@@ -321,8 +321,8 @@ PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC);
 PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC);
 #define php_stream_putc(stream, c)	_php_stream_putc((stream), (c) TSRMLS_CC)
 
-PHPAPI int _php_stream_flush(php_stream *stream TSRMLS_DC);
-#define php_stream_flush(stream)	_php_stream_flush((stream) TSRMLS_CC)
+PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC);
+#define php_stream_flush(stream)	_php_stream_flush((stream), 0 TSRMLS_CC)
 
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_gets((stream), (buf), (maxlen) TSRMLS_CC)
