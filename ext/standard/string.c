@@ -1344,11 +1344,6 @@ PHPAPI void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,p
 	*target = 0;
 }
 
-#if 0
-/*
- * this is a binary safe equivalent to strnstr
- * note that we don't check for the end in str_to_str but here
- */
 
 static inline char *
 _php3_memnstr(char *haystack, char *needle, int needle_len, char *end)
@@ -1414,55 +1409,6 @@ finish:
 	return new;
 }
 
-#else
-
-static char *_php3_memstr(char *s, char *c, size_t n, size_t m)
-{
-    char *p;
-
-    for(p = s; (p - s) < n; p++)
-        if(memcmp(p, c, m) == 0)
-            return p;
-    return NULL;
-}
-
-#define ATTCHSTR(st, sz) \
-    nl += sz; \
-    n = erealloc(n, nl + 1); \
-    memcpy(n + no, st, sz); \
-    no += sz
-
-
-PHPAPI char *_php3_str_to_str(char *a, int al, char *b, int bl, char *c, int cl,
-        int *newlen)
-{
-    char *n = NULL, *p, *q;
-    int nl = 0;
-    int no = 0;
-
-	/* run through all occurences of b in a */
-	for(p = q = a; (p = _php3_memstr(p, b, al - (p - a), bl)); q = p) {
-		/* attach everything between the previous occ. and this one */
-		ATTCHSTR(q, p - q);
-		/* attach the replacement string c */
-		ATTCHSTR(c, cl);
-		/* jump over string b in a */
-		p += bl;
-	}
-	
-	/* anything left over ? */
-	if((al - (q - a)) > 0) {
-		ATTCHSTR(q, al - (q - a));
-	}
-
-	if(newlen) *newlen = nl;
-	n[nl] = '\0';
-
-	return n;
-}
-
-#undef ATTCHSTR
-#endif
 
 /* {{{ proto string str_replace(string needle, string str, string haystack)
    Replace all occurrences of needle in haystack with str */
