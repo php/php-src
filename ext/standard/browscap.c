@@ -51,8 +51,8 @@ static int browser_reg_compare(zval **browser)
 	return 0;
 }
 
-/* {{{ proto object get_browser(string agent_name)
-   ??? */
+/* {{{ proto object get_browser(string browser_name)
+   Get information about the capabilities of a browser */
 PHP_FUNCTION(get_browser)
 {
 	pval **agent_name,**agent, tmp;
