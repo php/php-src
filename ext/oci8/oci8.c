@@ -2747,7 +2747,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	CALL_OCI(
 		OCIEnvNlsCreate(
 			&session->pEnv,
-			OCI_DEFAULT, 
+			PHP_OCI_INIT_MODE, 
 			0, 
 			NULL,
 			NULL,
@@ -6893,7 +6893,7 @@ PHP_FUNCTION(oci_new_collection)
 	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &conn, &tdo, &schema) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+    
 	convert_to_string_ex(tdo);
 
 	if (ac == 3) {
