@@ -117,7 +117,7 @@ Note that the MySQL client library is not bundled anymore.])
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 
-  PHP_NEW_EXTENSION(mysql, php_mysql.c, $mysql_shared)
+  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
 
   MYSQL_MODULE_TYPE=external
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
