@@ -27,8 +27,6 @@
 
 #if HAVE_QTDOM
 
-#warning blah
-
 static zend_function_entry qdomdoc_class_functions[] = {
 	{NULL, NULL, NULL}
 };
