@@ -86,6 +86,10 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 	int         idx = 0;
 	TSRMLS_FETCH();
 
+	/* Skip a warning, when 'NULL' is provided as argument */
+	if ( Z_TYPE_PP(zarr) == IS_NULL)
+		return;
+
 	arr = HASH_OF(*zarr);
 	if (! arr) {
 		php_error(E_WARNING, "Invalid argument or parameter array to %s",
@@ -107,8 +111,12 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 
 		type = zend_hash_get_current_key(arr, &string_key, &num_key, 0);
 		if (type == HASH_KEY_IS_LONG) {
-			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+			php_error(E_WARNING, "Invalid key value for argument or parameter array to %s",
 			          get_active_function_name(TSRMLS_C));
+			/* Make the next index NULL, so it signals the end of the array
+				this will protect against invalid arrays, like:
+				array('foo'=>'bar', 'foobarred', 'oops') */
+			(*carr)[idx] = NULL;
 			return;
 		}
 

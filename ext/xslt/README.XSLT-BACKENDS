@@ -34,32 +34,33 @@
  -------------------------------------------------------------------------------
  Every extension must define the following functions:
  
-	- xslt_sax_create()
-	- xslt_sax_set_scheme_handlers()
-	- xslt_sax_set_sax_handlers()
-	- xslt_sax_set_error_handler()
-	- xslt_sax_set_log()
-	- xslt_sax_process()
+	- xslt_create()
+	- xslt_set_scheme_handlers()
+	- xslt_set_sax_handlers()
+	- xslt_set_error_handler()
+	- xslt_set_log()
+	- xslt_set_object()
+	- xslt_process()
 	- xslt_error()
 	- xslt_errno()
-	- xslt_sax_free()
+	- xslt_free()
  
  These functions are common or implementable with every single XSLT library that 
  I've come across so far (at least every C library) and should there for be 
  defined by the extension.
  
  
- resource xslt_sax_create(void)
+ resource xslt_create(void)
  
  The XSLT create function allocates a new XSLT processor and returns a resource
  pointer to the XSLT processor.  It also handles any initialization that the 
  processor requires.
  
  
- void xslt_sax_set_scheme_handlers(resource processor, array handlers)
+ void xslt_set_scheme_handlers(resource processor, array handlers)
  
  Registers the scheme handlers for the document (aka XPath handlers), given a 
- XSLT processor resource (allocated by xslt_sax_create()) and an array in the 
+ XSLT processor resource (allocated by xslt_create()) and an array in the 
  following format:
  
     array(
@@ -91,10 +92,10 @@
 	 void     close(resource processor, resource fp)
 
 
- void xslt_sax_set_sax_handlers(resource processor, array handlers)
+ void xslt_set_sax_handlers(resource processor, array handlers)
  
  Registers the SAX handlers for the document, given a XSLT processor resource
- (allocated by xslt_sax_create()) and an array in the following format:
+ (allocated by xslt_create()) and an array in the following format:
  
      array(
 	    "document" => array(document_start_function,
@@ -124,11 +125,11 @@
 	 void characters(resource processor, string contents)
 
 
- void xslt_sax_set_error_handler(resource processor, function error_handler)
+ void xslt_set_error_handler(resource processor, function error_handler)
  
  This function sets the user defined error handler to be called when a 
  processing or any other type of error occurs.  It is given a XSLT 
- processor resource (allocated by xslt_sax_create()) and an error function of
+ processor resource (allocated by xslt_create()) and an error function of
  the same syntax described for the scheme handler function.
  
  The user defined error handler as the following syntax:
@@ -136,27 +137,27 @@
  void error(resource processor, int level, int error, array info)
  
  
- void xslt_sax_set_log(resource processor, string logname)
+ void xslt_set_log(resource processor, string logname)
  
  Sets the XSLT log to record log information (processor messages, not errors).
- Its given a XSLT processor (allocated by xslt_sax_create()) and a string containing
+ Its given a XSLT processor (allocated by xslt_create()) and a string containing
  the name of the log file.  If the string is "php://stderr" then the logging 
  should go to standard error (stderr).  Also the default place to send log 
  messages is standard error (if no log file is set).
  
  
- mixed xslt_sax_process(resource processor,
-                        string xml,
-					    string xsl[,
-					    string result[,
-					    array  arguments[,
-					    array  parameters]]])
+ mixed xslt_process(resource processor,
+                    string xml,
+					string xsl[,
+					string result[,
+					array  arguments[,
+					array  parameters]]])
 
  This function performs the magic, it takes the user's data, performs the 
  transformation and depending on the context either saves the result to a file
  or returns the data to the user.
  
- To understand the way the xslt_sax_process() function works, you must first 
+ To understand the way the xslt_process() function works, you must first 
  understand the concept of "argument buffers".  Argument buffers are equivalent
  to the concept of symlinks on a Unix system, take the following example:
  
@@ -169,9 +170,9 @@
  $args = array("/_xml" => $xml,
                "/_xsl" => $xsl);
  
- $xh = xslt_sax_create();
- $data = xslt_sax_process($xh, "arg:/_xml", "arg:/_xsl", NULL, $args);
- xslt_sax_free($xh);
+ $xh = xslt_create();
+ $data = xslt_process($xh, "arg:/_xml", "arg:/_xsl", NULL, $args);
+ xslt_free($xh);
  
  print( "The results of the transformation were\n" );
  print( "<br>\n<hr>\n<br>" );
@@ -180,7 +181,7 @@
  ?>
  
  See what was done?  The argument buffer was declared ($args) and the different
- arguments were defined.  Then when the xslt_sax_process() function was called 
+ arguments were defined.  Then when the xslt_process() function was called 
  instead of giving the XML filename and XSLT filename we instead gave 
  "arguments", which correspond to the XML and XSLT data in the argument buffers.
  
@@ -239,19 +240,19 @@
  string xslt_error(resource processor)
  
  The xslt_error() function returns the last error that occured, given a XSLT
- processor resource (allocated by xslt_sax_create()).
+ processor resource (allocated by xslt_create()).
  
  
  int xslt_errno(resource processor)
  
  The xslt_errno() function returns the last error number that occured given a 
- XSLT processor resource (allocated by xslt_sax_create()).
+ XSLT processor resource (allocated by xslt_create()).
  
  
- void xslt_sax_free(resource processor)
+ void xslt_free(resource processor)
  
  The xslt_free() function free's the given XSLT processor resource (allocated
- by xslt_sax_create()).
+ by xslt_create()).
  
  
  Config.m4
