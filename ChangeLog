@@ -1,3 +1,39 @@
+2000-08-19  Jesus M. Castagnetto  <jesusmc@scripps.edu>
+
+    * ext/standard/php_math.h: Added some more predefined constants
+
+2000-08-19  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/standard/file.c: We only need winsock.h one time
+
+    * win32/.cvsignore: Adding ignore file for Win32
+
+    * win32/php4.dsw: Fixing paths to Zend and libmysql
+
+    * win32/php4dll.dsp:
+    Fixing include path for compiling non thread safe php.exe
+
+2000-08-19  Stig Venaas  <venaas@uninett.no>
+
+    * NEWS: Note about Oracle LDAP SDK support. Should I not say experimental?
+
+2000-08-19  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/file.c: - Update NEWS
+    - Fix non ZTS Windows build
+
+    * NEWS: Update NEWS
+
+    * main/SAPI.c:
+    Avoid an endless loop situation in case of an error situation while sending headers
+
+2000-08-19  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/config.m4
+      ext/ldap/php_ldap.h: Adding Oracle LDAP SDK support
+
 2000-08-18  Andi Gutmans  <andi@php.net>
 
     * main/fopen-wrappers.c: - Centralize more fopen-wrappers functionality.
