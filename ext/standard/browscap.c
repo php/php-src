@@ -25,7 +25,7 @@
 
 HashTable browser_hash;
 
-#define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
+#define DEFAULT_SECTION_NAME "default browser capability settings"
 
 static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
@@ -37,7 +37,10 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
 	if (*found_browser_entry) { /* already found */
 		return 0;
 	}
-	zend_hash_find((*browser)->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
+	if(zend_hash_find((*browser)->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name) == FAILURE) {
+		return 0;
+	}
+
 	if (!strchr(browser_name->value.str.val,'*')) {
 		return 0;
 	}
