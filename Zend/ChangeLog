@@ -1,3 +1,11 @@
+2004-10-29  Andi Gutmans  <andi@zend.com>
+
+    * zend_operators.c:
+      - For Ilia:
+      - MFH: Fixed bug #30572 (crash when comparing SimpleXML attribute to a
+      boolean).
+      - Hope this works well. I will MFH tomorrow if no one complains.
+
 2004-10-28  Dmitry Stogov  <dmitry@zend.com>
 
     * README.ZEND_VM
