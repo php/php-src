@@ -1,3 +1,38 @@
+2000-11-08  Marc Pohl  <m.pohl@gmx.de>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+    add gzdeflate() and gzinflate() for handling of pure gzip-datastreams
+
+2000-11-08  Mathieu Kooiman  <mathieu@gginter.net>
+
+    * ext/gd/gd.c: E_WARNING into E_ERROR, Last commit (today)! I PROMISE! :-)
+
+2000-11-08  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/ovrimos/ovrimos.c: Added license
+
+2000-11-08  Mathieu Kooiman  <mathieu@gginter.net>
+
+    * ext/gd/gd.c: Alert user if they're trying to use
+    ImageCreateFromString() with GD < 1.5..
+    Sorry, should've added this last commit.
+
+    * ext/gd/gd.c: - Made gd extension build when using gd version < 1.5
+
+2000-11-08  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c:
+    Will work on a more thorough implementation for mysql_store_result() after 4.0.4
+
+2000-11-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Make this compile with libxml2.2.7.
+
+    * ext/gd/config.m4: Cleaned up a bit.
+
+    * ext/gd/config.m4: config.m4
+
 2000-11-07  Zeev Suraski  <zeev@zend.com>
 
     * NEWS: Forgot to commit it...
