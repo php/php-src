@@ -158,7 +158,8 @@ typedef struct {
 	char *key;													\
 	ulong num_key;												\
 	zval **struc;												\
-	ELS_FETCH()
+	ELS_FETCH();												\
+	PLS_FETCH()
 
 #define ENCODE_LOOP(code)										\
 	for (zend_hash_internal_pointer_reset(&PS(vars));			\
@@ -197,7 +198,12 @@ static void php_set_session_var(char *name, size_t namelen,
 
 static int php_get_session_var(char *name, size_t namelen, zval ***state_var PSLS_DC ELS_DC)
 {
-	return zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **)state_var);
+	HashTable *ht = &EG(symbol_table);
+
+	if (!PG(register_globals) && PG(track_vars))
+		ht = PS(http_state_vars)->value.ht;
+
+	return zend_hash_find(ht, name, namelen + 1, (void **)state_var);
 }
 
 PS_SERIALIZER_ENCODE_FUNC(php)
