@@ -5,7 +5,7 @@ Convert wanrings to exceptions
 
 class MyException extends Exception
 {
-	function __construct($errstr, $errno, $errfile, $errline)
+	function __construct($errstr, $errno=0, $errfile='', $errline='')
 	{
 		parent::__construct($errstr, $errno);
 		$this->file = $errfile;
@@ -15,7 +15,7 @@ class MyException extends Exception
 
 function Error2Exception($errno, $errstr, $errfile, $errline)
 {
-	throw new ErrorException($errstr, $errno);//, $errfile, $errline);
+	throw new MyException($errstr, $errno);//, $errfile, $errline);
 }
 
 $err_msg = 'no exception';
@@ -23,7 +23,7 @@ set_error_handler('Error2Exception');
 
 try
 {
-	$con = pg_connect('host=localhost dbname=xtest');
+	$con = fopen("/tmp/a_file_that_does_not_exist",'r');
 }
 catch (Exception $e)
 {
@@ -37,5 +37,5 @@ catch (Exception $e)
 <?php exit(0); ?>
 --EXPECTF--
 string(15) "Error2Exception"
-string(10) "pg_connect"
+string(5) "fopen"
 ===DONE===
