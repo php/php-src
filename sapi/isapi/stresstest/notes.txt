@@ -1,10 +1,12 @@
 This stress test program is for debugging threading issues with the isapi module.
 
-Create a file that contains a list of php script files, one per line.  If you need to provide input, you can create an input file for each script file.  File contents would look like:
+2 ways to use it.
 
-e:\inetpub\pages\index.php
-e:\inetpub\pages\info.php
-e:\inetpub\pages\posttest.php e:\inetpub\pages\postdata.txt
+1: test any php script file on multiple threads
+2: run the php test scripts bundled with the source code
+
+
+GLOBAL SETTINGS
 
 If you need to set special environement variables, in addition to your regular environment, create a file that contains them, one setting per line:
 
@@ -14,5 +16,34 @@ This can be used to simulate isapi environment variables if need be.
 
 By default, stress test uses 10 threads.  To change this, change the define NUM_THREADS in stresstest.cpp.
 
-This test program is a work in progress, no garauntees on it working right.
+1: test any php script file on multiple threads
+
+Create a file that contains a list of php script files, one per line.  If you need to provide input, place the GET data, or Query String, after the filename.  File contents would look like:
+
+e:\inetpub\pages\index.php
+e:\inetpub\pages\info.php
+e:\inetpub\pages\test.php a=1&b=2
+
+run: stresstest L files.txt
+
+2: run the php test scripts bundled with the source code
+
+supply the path to the parent of the "tests" directory
+(expect a couple long pauses for a couple of the larger tests)
+
+run: stresstest T c:\php4-source
+
+
+
+TODO:
+
+Make an apropriate test of the output against the EXPECT data for the test files, right now it simply doesn't work since I'm burnt (tired that is).
+
+Make more options configurable: number of threads, itterations, etc.
+
+Improve stdout output to make it more usefull
+
+Log totals for each test.
+
+Implement support for SKIPIF
 
