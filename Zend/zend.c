@@ -1092,7 +1092,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					zval_ptr_dtor(EG(return_value_ptr_ptr));
 					local_retval = NULL;
 				}
-			} else if (!retval) {
+			} else if (!retval && *EG(return_value_ptr_ptr)) {
 				zval_ptr_dtor(EG(return_value_ptr_ptr));
 				local_retval = NULL;
 			}
