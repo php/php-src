@@ -91,14 +91,14 @@ SAPI_API void sapi_activate(SLS_D)
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 	SG(sapi_headers).http_response_code = 200;
+	SG(sapi_headers).http_status_line = NULL;
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
+	SG(request_info).post_data = NULL;
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
 			sapi_read_post_data(SLS_C);
-		} else {
-			SG(request_info).post_data = NULL;
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
 	}
@@ -108,8 +108,16 @@ SAPI_API void sapi_activate(SLS_D)
 SAPI_API void sapi_deactivate(SLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
-	if (SG(server_context) && SG(request_info).post_data) {
+	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
+	}
+	if (SG(server_context)) {
+		if (SG(request_info).auth_user) {
+			efree(SG(request_info).auth_user);
+		}
+		if (SG(request_info).auth_password) {
+			efree(SG(request_info).auth_password);
+		}
 	}
 }
 
@@ -133,15 +141,22 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
 
-	colon_offset = strchr(header_line, ':');
-	if (colon_offset) {
-		*colon_offset = 0;
-		if (!STRCASECMP(header_line, "Content-Type")) {
-			SG(sapi_headers).send_default_content_type = 0;
-		} else if (!STRCASECMP(header_line, "Location")) {
-			SG(sapi_headers).http_response_code = 302; /* redirect */
+	/* Check the header for a few cases that we have special support for in SAPI */
+	if (!memcmp(header_line, "HTTP/", 5)) {
+		SG(sapi_headers).http_status_line = header_line;
+	} else {
+		colon_offset = strchr(header_line, ':');
+		if (colon_offset) {
+			*colon_offset = 0;
+			if (!STRCASECMP(header_line, "Content-Type")) {
+				SG(sapi_headers).send_default_content_type = 0;
+			} else if (!STRCASECMP(header_line, "Location")) {
+				SG(sapi_headers).http_response_code = 302; /* redirect */
+			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
+				SG(sapi_headers).http_response_code = 401; /* authentication-required */
+			}
+			*colon_offset = ':';
 		}
-		*colon_offset = ':';
 	}
 
 	if (sapi_module.header_handler) {
@@ -182,6 +197,14 @@ SAPI_API int sapi_send_headers()
 			return SUCCESS;
 			break;
 		case SAPI_HEADER_DO_SEND:
+			if (SG(sapi_headers).http_status_line) {
+				sapi_header_struct http_status_line;
+
+				http_status_line.header = SG(sapi_headers).http_status_line;
+				http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
+				sapi_module.send_header(&http_status_line, SG(server_context));
+				efree(SG(sapi_headers).http_status_line);
+			}
 			if (SG(sapi_headers).send_default_content_type) {
 				sapi_module.send_header(&default_header, SG(server_context));
 			}

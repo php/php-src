@@ -69,13 +69,6 @@ int php3_init_head(INIT_FUNC_ARGS)
 }
 
 
-PHPAPI void php3_noheader(void)
-{
-	php3_PrintHeader = 0;
-	header_called = 1;
-}
-
-
 #if 0
 /* Adds header information */
 void php4i_add_header_information(char *header_information, uint header_length)

@@ -211,6 +211,10 @@ SOURCE=.\php_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_regex.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
