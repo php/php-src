@@ -795,7 +795,14 @@ class PEAR_Installer extends PEAR_Downloader
                         $this->raiseError("Extension '$_ext_name' already loaded. Please unload it ".
                                           "in your php.ini file prior to install or upgrade it.");
                     }
-                    $dest = $this->config->get('ext_dir') . DIRECTORY_SEPARATOR . $bn;
+                    // extension dir must be created if it doesn't exist
+                    // patch by Tomas Cox (modified by Greg Beaver)
+                    $ext_dir = $this->config->get('ext_dir');
+                    if (!@is_dir($ext_dir) && !System::mkdir(array('-p', $ext_dir))) {
+                        $this->log(3, "+ mkdir -p $ext_dir");
+                        return $this->raiseError("failed to create extension dir '$ext_dir'");
+                    }
+                    $dest = $ext_dir . DIRECTORY_SEPARATOR . $bn;
                     $this->log(1, "Installing '$bn' at ext_dir ($dest)");
                     $this->log(3, "+ cp $ext[file] ext_dir ($dest)");
                     $copyto = $this->_prependPath($dest, $this->installroot);
