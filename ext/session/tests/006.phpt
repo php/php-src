@@ -2,6 +2,7 @@
 References between variables in sessions
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_NOTICE);
 ob_start();
 session_id("test");
 session_start();
