@@ -475,7 +475,6 @@ zend_op_array *compile_string(zval *source_string, char *filename CLS_DC)
 		CG(ZFL)->BeginState(ST_IN_SCRIPTING);
 #endif
 		compiler_result = zendparse(CLS_C);
-		restore_lexical_state(&original_lex_state CLS_CC);
 		
 		if (compiler_result==1) {
 			CG(active_op_array) = original_active_op_array;
@@ -487,6 +486,7 @@ zend_op_array *compile_string(zval *source_string, char *filename CLS_DC)
 			pass_two(op_array);
 			retval = op_array;
 		}
+		restore_lexical_state(&original_lex_state CLS_CC);
 	}
 #ifdef ZTS
 	delete input_stream;
