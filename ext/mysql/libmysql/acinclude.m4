@@ -297,7 +297,8 @@ fi
 
 AC_DEFUN(MYSQL_CHECK_INT_8_16_32,
 [AC_MSG_CHECKING([for int8])
-AC_TRY_RUN([
+AC_CACHE_VAL(ac_cv_int8,
+[AC_TRY_RUN([
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -315,9 +316,14 @@ int main()
     int8 i;
     return 0;
 }
-], AC_DEFINE(HAVE_INT_8_16_32, , [ ]) AC_MSG_RESULT([yes]), AC_MSG_RESULT([no])
-)
+], ac_cv_int8=yes, ac_cv_int8=no, ac_cv_int8=no)])
+AC_MSG_RESULT($ac_cv_int8)
+if test "$ac_cv_int8" = "yes"
+then
+  AC_DEFINE(HAVE_INT_8_16_32,,[ ])
+fi
 ])
+
 
 AC_DEFUN(MYSQL_HEADER_CHECKS,[
 AC_HEADER_STDC
