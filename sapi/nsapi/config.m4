@@ -22,9 +22,11 @@ if test "$PHP_NSAPI" != "no"; then
     AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
   fi
   if test -d $PHP_NSAPI/plugins/include ; then
-    NSAPI_INCLUDE="$NSAPI_INCLUDE -I$PHP_NSAPI/plugins/include"
+    NSAPI_INC_DIR="$NSAPI_INCLUDE"
+    NSAPI_INCLUDE="$PHP_NSAPI/plugins/include"
     AC_MSG_RESULT(iPlanet/4.x style)
     AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
+    NSAPI_INCLUDE="$NSAPI_INC_DIR -I$NSAPI_INCLUDE"
   fi
   if test "$NSAPI_INCLUDE" = ""; then
     AC_MSG_ERROR(Please check you have nsapi.h in either $PHP_NSAPI/include or $PHP_NSAPI/plugins/include)
