@@ -497,7 +497,7 @@ XML_GetErrorCode(XML_Parser parser)
 	return parser->parser->errNo;
 }
 
-const XML_Char *error_mapping[] = {
+static const XML_Char *const error_mapping[] = {
 	"No error",
 	"Internal error",
 	"No memory",
