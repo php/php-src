@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Jouni Ahto <jah@mork.net>                                   |
-   |		  Andrew Avdeev <andy@rsc.mv.ru>                              |
+   |          Andrew Avdeev <andy@rsc.mv.ru>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -49,6 +49,10 @@ A lot... */
 
 #ifdef SQL_INT64
 #include <math.h>
+#endif
+
+#ifndef SQL_DIALECT_CURRENT
+#define SQL_DIALECT_CURRENT 1
 #endif
 
 /*
@@ -162,9 +166,11 @@ typedef struct {
 		short sval;
 		float fval;
 		ISC_QUAD qval;
+#ifdef ISC_TIMESTAMP
 		ISC_TIMESTAMP tsval;
 		ISC_DATE dtval;
 		ISC_TIME tmval;
+#endif
 	} val;
 	short sqlind;
 } BIND_BUF;
@@ -620,7 +626,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	isc_db_handle db_handle = NULL;
 	char *hashed_details;
 	int hashed_details_length = 0;
-	ibase_db_link *ib_link;
+	ibase_db_link *ib_link = NULL;
 	IBLS_FETCH();
 	PLS_FETCH();
 	
@@ -727,7 +733,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			ib_link->link = db_handle;
-			ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : 1);
+			ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 			for (i = 0; i < IBASE_TRANS_ON_LINK; i++)
 				ib_link->trans[i] = NULL;
 			
@@ -791,7 +797,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 		ib_link->link = db_handle;
-		ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : 1);
+		ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 		for (i = 0; i < IBASE_TRANS_ON_LINK; i++)
 			ib_link->trans[i] = NULL;
 
@@ -1127,6 +1133,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				convert_to_double(b_var);
 				var->sqldata = (void ISC_FAR *)(&b_var->value.dval);
 				break;
+#ifdef SQL_INT64
 			case SQL_INT64:
 				/*
 				  Just let InterBase's internal routines handle it.
@@ -1138,13 +1145,38 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				var->sqllen	 = b_var->value.str.len;
 				var->sqltype = SQL_TEXT;
 				break;
+#endif
 #ifndef SQL_TIMESTAMP
 			case SQL_DATE:
 #else
 			case SQL_TIMESTAMP:
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
+#endif
 #ifndef HAVE_STRPTIME
+#ifndef SQL_TIMESTAMP
+				/* Parsing doesn't seem to happen with older versions... */
+				{
+					struct tm t;
+					int n;
+					
+					t.tm_year = t.tm_mon = t.tm_mday = t.tm_hour =
+					t.tm_min = t.tm_sec = 0;
+					
+					convert_to_string(b_var);
+					
+					n = sscanf(b_var->value.str.val,"%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
+						   &t.tm_mon, &t.tm_mday, &t.tm_year,  &t.tm_hour, &t.tm_min, &t.tm_sec);
+					if(n != 3 && n != 6){
+						_php_ibase_module_error("invalid date/time format");
+						return FAILURE;
+					}
+					t.tm_year -= 1900;
+					t.tm_mon--;
+					isc_encode_date(&t, &buf[i].val.qval);
+					var->sqldata = (void ISC_FAR *)(&buf[i].val.qval);
+				}
+#else
 				/*
 				  Once again, InterBase's internal parsing routines
 				  seems to bea good solution... Might change this on
@@ -1154,13 +1186,19 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				*/
 				convert_to_string(b_var);
 				var->sqldata = (void ISC_FAR *)b_var->value.str.val;
-				var->sqllen	 = b_var->value.str.len;
+				var->sqllen = b_var->value.str.len;
 				var->sqltype = SQL_TEXT;
+#endif
 #else
 				{
 					struct tm t;
 
 					convert_to_string(b_var);
+#ifndef SQL_TIMESTAMP
+					strptime(b_var->value.str.val, IBG(timestampformat), &t);
+					isc_encode_date(&t, &buf[i].val.qval);
+					var->sqldata = (void ISC_FAR *)(&buf[i].val.qval);
+#else
 					switch (var->sqltype & ~1) {
 						case SQL_TIMESTAMP:
 							strptime(b_var->value.str.val, IBG(timestampformat), &t);
@@ -1178,10 +1216,10 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 							var->sqldata = (void ISC_FAR *)(&buf[i].val.tmval);
 							break;
 					}
+#endif
 				}
 #endif
 				break;
-#endif
 			case SQL_BLOB:
 				{
 					ibase_blob_handle *ib_blob_id;
@@ -1777,7 +1815,7 @@ static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_arra
 									flag) == FAILURE){
 				return FAILURE;
 			}
-			/* FIXME */
+			/* FIXME ??? */
 			zend_hash_index_update(ar_pval->value.ht,
 								   l_bound + i,
 								   (void *) &tmp, sizeof(pval),NULL);
@@ -1972,9 +2010,6 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 					break;
 			} /*switch*/
 			if (fetch_type & FETCH_ARRAY) {
-				/* FIXME
-				   zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *),NULL);
-				*/
 				switch (tmp->type) {
 				case IS_STRING:
 					add_index_stringl(return_value, i, tmp->value.str.val, tmp->value.str.len, 0);
@@ -1987,9 +2022,6 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 					break;
 				}
 			} else {
-				/* FIXME
-				zend_hash_update(return_value->value.ht, var->aliasname, var->aliasname_length+1, (void *) &tmp, sizeof(pval), NULL);
-				*/
 				switch (tmp->type) {
 				case IS_STRING:
 					add_property_stringl(return_value, var->aliasname, tmp->value.str.val, tmp->value.str.len, 0);
@@ -2295,27 +2327,18 @@ PHP_FUNCTION(ibase_field_info)
 
 	var = ib_result->out_sqlda->sqlvar + (*field_arg)->value.lval;
 
-	/* FIXME */
 	add_get_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, (void **) &ret_val, 1);
-	/*
-	zend_hash_pointer_update(return_value->value.ht, "name", sizeof(char)*5, ret_val);
-	*/
+	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length, 1);
 
 	add_get_index_stringl(return_value, 1, var->aliasname, var->aliasname_length, (void **) &ret_val, 1);
-	/*
-	zend_hash_pointer_update(return_value->value.ht, "alias", sizeof(char)*6, ret_val);
-	*/
+	add_assoc_stringl(return_value, "alias", var->aliasname, var->aliasname_length, 1);
 
 	add_get_index_stringl(return_value, 2, var->relname, var->relname_length, (void **) &ret_val, 1);
-	/*
-	zend_hash_pointer_update(return_value->value.ht, "relation", sizeof(char)*9, ret_val);
-	*/
+	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length, 1);
 
 	len = sprintf(buf, "%d", var->sqllen);
 	add_get_index_stringl(return_value, 3, buf, len, (void **) &ret_val, 1);
-	/*
-	zend_hash_pointer_update(return_value->value.ht, "length", sizeof(char)*7, ret_val);
-	*/
+	add_assoc_stringl(return_value, "length", buf, len, 1);
 
 	switch (var->sqltype & ~1) {
 		case SQL_TEXT:	    s = "TEXT"; break;
@@ -2344,10 +2367,7 @@ PHP_FUNCTION(ibase_field_info)
 		break;
 	}
 	add_get_index_stringl(return_value, 4, s, strlen(s), (void **) &ret_val, 1);
-	/*
-	zend_hash_pointer_update(return_value->value.ht, "type", sizeof(char)*5, ret_val);
-	*/
-
+	add_assoc_stringl(return_value, "type", s, strlen(s), 1);
 }
 /* }}} */
 
@@ -2782,8 +2802,8 @@ extern int wsa_fp;
 PHP_FUNCTION(ibase_blob_import)
 {
 	zval **link_arg, **file_arg;
-	int trans_n, type,	link_id = 0, file_id, size, b;
-	int issock=0, socketd=0, *sock;
+	int trans_n, link_id = 0, file_id, size, b;
+	int issock=0, socketd=0;
 	ibase_blob_handle ib_blob;
 	ibase_db_link *ib_link;
 	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
