@@ -3,6 +3,9 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Informix driver : Changed ifx.ec to use the new high-performance
+  ZEND API. (Danny)
+- IXF_LIBDIR environment variable specifies alternate Informix library
 - Fixed gmmktime() so that the following should always be true:
   gmmktime([args]) == mktime([args]) + date('Z', mktime([args])) (Jouni)
 - setlocale doesn't anymore screw up things if you forgot to change it back
