@@ -95,6 +95,13 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	TG(hc)->bytes_sent += len;
 	n++;
 
+#define DEF_CONTENT_TYPE_LINE "Content-Type: text/html"
+	if (SG(sapi_headers).send_default_content_type) {
+		vec[n].iov_base = DEF_CONTENT_TYPE_LINE;
+		vec[n].iov_len = sizeof(DEF_CONTENT_TYPE_LINE) - 1;
+		n++;
+	}
+
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
 		vec[n].iov_base = h->header;
