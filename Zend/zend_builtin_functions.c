@@ -1298,7 +1298,7 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
 	return arg_array;
 }
 
-void debug_print_backtrace_args(zval *arg_array)
+void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 {
 	zval **tmp;
 	HashPosition iterator;
@@ -1309,7 +1309,7 @@ void debug_print_backtrace_args(zval *arg_array)
 		if (i++) {
 			ZEND_PUTS(", ");
 		}
-		zend_print_flat_zval_r(*tmp);
+		zend_print_flat_zval_r(*tmp TSRMLS_CC);
 		zend_hash_move_forward_ex(arg_array->value.ht, &iterator);
 	}
 }
@@ -1426,7 +1426,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 		zend_printf("%s(", function_name?function_name:"main");
 		if (arg_array) {
-			debug_print_backtrace_args(arg_array);
+			debug_print_backtrace_args(arg_array TSRMLS_CC);
 			zval_ptr_dtor(&arg_array);
 		}
 		zend_printf(") called at [%s:%d]\n", filename, lineno);

@@ -106,7 +106,7 @@ static uint zend_version_info_length;
 
 #define PRINT_ZVAL_INDENT 4
 
-static void print_hash(HashTable *ht, int indent)
+static void print_hash(HashTable *ht, int indent TSRMLS_DC)
 {
 	zval **tmp;
 	char *string_key;
@@ -135,7 +135,7 @@ static void print_hash(HashTable *ht, int indent)
 				break;
 		}
 		ZEND_PUTS("] => ");
-		zend_print_zval_r(*tmp, indent+PRINT_ZVAL_INDENT);
+		zend_print_zval_r(*tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
 		ZEND_PUTS("\n");
 		zend_hash_move_forward_ex(ht, &iterator);
 	}
@@ -146,7 +146,7 @@ static void print_hash(HashTable *ht, int indent)
 	ZEND_PUTS(")\n");
 }
 
-static void print_flat_hash(HashTable *ht)
+static void print_flat_hash(HashTable *ht TSRMLS_DC)
 {
     zval **tmp;
     char *string_key;
@@ -170,7 +170,7 @@ static void print_flat_hash(HashTable *ht)
 		break;
 	}
 	ZEND_PUTS("] => ");
-	zend_print_flat_zval_r(*tmp);
+	zend_print_flat_zval_r(*tmp TSRMLS_CC);
 	zend_hash_move_forward_ex(ht, &iterator);
     }
 }
@@ -256,7 +256,7 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 	return expr->value.str.len;
 }
 
-ZEND_API void zend_print_flat_zval_r(zval *expr)
+ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 {
     zend_write_func_t write_func = zend_write;
 
@@ -268,7 +268,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
 		expr->value.ht->nApplyCount--;
 		return;
 	    }
-	    print_flat_hash(expr->value.ht);
+	    print_flat_hash(expr->value.ht TSRMLS_CC);
 	    ZEND_PUTS(")");
 	    expr->value.ht->nApplyCount--;
 	    break;
@@ -294,7 +294,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
 					properties->nApplyCount--;
 					return;
 				}
-				print_flat_hash(properties);
+				print_flat_hash(properties TSRMLS_CC);
 				properties->nApplyCount--;
 			}
 			ZEND_PUTS(")");
@@ -306,13 +306,13 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
     }
 }
 
-ZEND_API void zend_print_zval_r(zval *expr, int indent)
+ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC)
 {
-	zend_print_zval_r_ex(zend_write, expr, indent);
+	zend_print_zval_r_ex(zend_write, expr, indent TSRMLS_CC);
 }
 
 
-ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent)
+ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC)
 {
 	switch (expr->type) {
 		case IS_ARRAY:
@@ -322,7 +322,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				expr->value.ht->nApplyCount--;
 				return;
 			}
-			print_hash(expr->value.ht, indent);
+			print_hash(expr->value.ht, indent TSRMLS_CC);
 			expr->value.ht->nApplyCount--;
 			break;
 		case IS_OBJECT:
@@ -347,7 +347,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 						properties->nApplyCount--;
 						return;
 					}
-					print_hash(properties, indent);
+					print_hash(properties, indent TSRMLS_CC);
 					properties->nApplyCount--;
 				}
 				break;
