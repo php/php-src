@@ -937,19 +937,17 @@ PHP_MINFO_FUNCTION(mbstring)
 PHP_FUNCTION(mb_language)
 {
 	pval **arg1;
-	char *name;
+	char *name = NULL;
+	int name_len = 0;
 	enum mbfl_no_language no_language;
 
-	if (ZEND_NUM_ARGS() == 0) {
-		name = (char *)mbfl_no_language2name(MBSTRG(current_language));
-		if (name != NULL) {
-			RETURN_STRING(name, 1);
-		} else {
-			RETURN_FALSE;
-		}
-	} else if (ZEND_NUM_ARGS() == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
-		convert_to_string_ex(arg1);
-		no_language = mbfl_name2no_language(Z_STRVAL_PP(arg1));
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (name == NULL) {
+		RETURN_STRING((char *)mbfl_no_language2name(MBSTRG(current_language)), 1);
+	} else {
+		no_language = mbfl_name2no_language(name);
 		if (no_language == mbfl_no_language_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown language \"%s\"", Z_STRVAL_PP(arg1));
 			RETURN_FALSE;
@@ -957,8 +955,6 @@ PHP_FUNCTION(mb_language)
 			MBSTRG(current_language) = no_language;
 			RETURN_TRUE;
 		}
-	} else {
-		WRONG_PARAM_COUNT;
 	}
 }
 /* }}} */
@@ -997,7 +993,7 @@ PHP_FUNCTION(mb_internal_encoding)
 }
 /* }}} */
 
-/* {{{ proto false|string mb_http_input([string type])
+/* {{{ proto mixed mb_http_input([string type])
    Returns the input encoding */
 PHP_FUNCTION(mb_http_input)
 {
@@ -1402,39 +1398,24 @@ PHP_FUNCTION(mb_output_handler)
    Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
-	pval **arg1, **arg2;
 	int n;
 	mbfl_string string;
+	char *enc_name = NULL;
+	int enc_name_len;
 
-	n = ZEND_NUM_ARGS();
-	if ((n == 1 && zend_get_parameters_ex(1, &arg1) == FAILURE) ||
-	   (n == 2 && zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) ||
-	    n < 1 || n > 2) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(arg1) == IS_ARRAY ||
-		Z_TYPE_PP(arg1) == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "arg1 is invalid.");
-		RETURN_FALSE;
-	}
-	if (( n ==2 && Z_TYPE_PP(arg2) == IS_ARRAY) ||
-		( n ==2 && Z_TYPE_PP(arg2) == IS_OBJECT)) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "arg2 is invalid.");
-		RETURN_FALSE;
-	}
-
-	convert_to_string_ex(arg1);
 	mbfl_string_init(&string);
-	string.no_language = MBSTRG(current_language);
-	string.no_encoding = MBSTRG(current_internal_encoding);
-	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
-	string.len = Z_STRLEN_PP(arg1);
 
-	if (n == 2) {
-		convert_to_string_ex(arg2);
-		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg2));
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	string.no_language = MBSTRG(current_language);
+	if (enc_name == NULL) {
+		string.no_encoding = MBSTRG(current_internal_encoding);
+	} else {
+		string.no_encoding = mbfl_name2no_encoding(enc_name);
 		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", enc_name);
 			RETURN_FALSE;
 		}
 	}
@@ -1452,10 +1433,12 @@ PHP_FUNCTION(mb_strlen)
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(mb_strpos)
 {
-	pval **arg1, **arg2, **arg3, **arg4;
-	int offset, n, reverse = 0;
+	int n, reverse = 0;
+	long offset;
 	mbfl_string haystack, needle;
-
+	char *enc_name = NULL;
+	int enc_name_len;
+	
 	mbfl_string_init(&haystack);
 	mbfl_string_init(&needle);
 	haystack.no_language = MBSTRG(current_language);
@@ -1463,51 +1446,27 @@ PHP_FUNCTION(mb_strpos)
 	needle.no_language = MBSTRG(current_language);
 	needle.no_encoding = MBSTRG(current_internal_encoding);
 	offset = 0;
-	switch (ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg3);
-		offset = Z_LVAL_PP(arg3);
-		break;
-	case 4:
-		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg3);
-		offset = Z_LVAL_PP(arg3);
-		convert_to_string_ex(arg4);
-		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg4));
-		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
-			RETURN_FALSE;
-		}
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name, &enc_name_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(arg1);
-	convert_to_string_ex(arg2);
+	if (enc_name != NULL) {
+		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(enc_name);
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", enc_name);
+			RETURN_FALSE;
+		}
+	}
 
-	if (offset < 0 || offset > Z_STRLEN_PP(arg1)) {
+	if (offset < 0 || offset > haystack.len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
 		RETURN_FALSE;
 	}
-	if (Z_STRLEN_PP(arg2) == 0) {
+	if (needle.len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 		RETURN_FALSE;
 	}
-	haystack.val = (unsigned char *)Z_STRVAL_PP(arg1);
-	haystack.len = Z_STRLEN_PP(arg1);
-	needle.val = Z_STRVAL_PP(arg2);
-	needle.len = Z_STRLEN_PP(arg2);
 
 	n = mbfl_strpos(&haystack, &needle, offset, reverse TSRMLS_CC);
 	if (n >= 0) {
