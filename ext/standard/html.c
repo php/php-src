@@ -340,6 +340,47 @@ static entity_table_t ent_cp_866[] = {
 	"#160"
 };
 
+/* MacRoman has a couple of low-ascii chars that need mapping too */
+/* Vertical tab (ASCII 11) is often used to store line breaks inside */
+/* DB exports, this mapping changes it to a space */
+static entity_table_t ent_macroman[] = {
+	"sp", NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, "quot", NULL,
+	NULL, NULL, "amp", NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, "lt", NULL, "gt", NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, "Auml", "Aring", "Ccedil", "Eacute", "Ntilde", "Ouml",
+	"Uuml", "aacute", "agrave", "acirc", "auml", "atilde", "aring",
+	"ccedil", "eacute", "egrave", "ecirc", "euml", "iacute", "igrave",
+	"icirc", "iuml", "ntilde", "oacute", "ograve", "ocirc", "ouml",
+	"otilde", "uacute", "ugrave", "ucirc", "uuml", "dagger", "deg",
+	"cent", "pound", "sect", "bull", "para", "szlig", "reg",
+	"copy", "trade", "acute", "uml", "ne", "AElig", "Oslash",
+	"infin", "plusmn", "le", "ge", "yen", "micro", "part",
+	"sum", "prod", "pi", "int", "ordf", "ordm", "Omega",
+	"aelig", "oslash", "iquest", "iexcl", "not", "radic", "fnof",
+	"asymp", "#8710", "laquo", "raquo", "hellip", "nbsp", "Agrave",
+	"Atilde", "Otilde", "OElig", "oelig", "ndash", "mdash", "ldquo",
+	"rdquo", "lsquo", "rsquo", "divide", "loz", "yuml", "Yuml",
+	"frasl", "euro", "lsaquo", "rsaquo", "#xFB01", "#xFB02", "Dagger",
+	"middot", "sbquo", "bdquo", "permil", "Acirc", "Ecirc", "Aacute",
+	"Euml", "Egrave", "Iacute", "Icirc", "Iuml", "Igrave", "Oacute",
+	"Ocirc", "#xF8FF", "Ograve", "Uacute", "Ucirc", "Ugrave", "#305",
+	"circ", "tilde", "macr", "#728", "#729", "#730", "cedil",
+	"#733", "#731", "#711"
+};
 
 struct html_entity_map {
 	enum entity_charset charset;	/* charset identifier */
@@ -372,6 +413,7 @@ static const struct html_entity_map entity_map[] = {
 	{ cs_cp1251,		0x80, 0xff, ent_cp_1251 },
 	{ cs_8859_5,		0xc0, 0xff, ent_iso_8859_5 },
 	{ cs_cp866,		    0xc0, 0xff, ent_cp_866 },
+	{ cs_macroman,		0x0b, 0xff, ent_macroman },
 	{ cs_terminator }
 };
 
@@ -408,6 +450,7 @@ static const struct {
 	{ "cp866",          cs_cp866 },
 	{ "866",            cs_cp866 },    
 	{ "ibm866",         cs_cp866 },
+	{ "MacRoman",       cs_macroman },
 	{ NULL }
 };
 
