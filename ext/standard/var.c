@@ -304,14 +304,14 @@ head_done:
 /* }}} */
 
 
-/* {{{ proto mixed var_export(mixed var [, int return])
+/* {{{ proto mixed var_export(mixed var [, bool return])
    Outputs or returns a string representation of avariable */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
-	long  i = 0;
+	zend_bool  i = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &var, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &i) == FAILURE) {
 		return;
 	}
 	

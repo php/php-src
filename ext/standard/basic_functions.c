@@ -1869,15 +1869,15 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
 }
 
-/* {{{ proto bool highlight_file(string file_name [, int return] )
+/* {{{ proto bool highlight_file(string file_name [, bool return] )
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
 	zval *filename;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
-	long i = 0;
+	zend_bool i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &filename, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &filename, &i) == FAILURE) {
 		return;
 	}
 	convert_to_string(filename);
@@ -1901,16 +1901,16 @@ PHP_FUNCTION(highlight_file)
 }
 /* }}} */
 
-/* {{{ proto bool highlight_string(string string [, int return] )
+/* {{{ proto bool highlight_string(string string [, bool return] )
    Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
 	zval *expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
-	long  i = 0;
+	zend_bool  i = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &expr, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &expr, &i) == FAILURE) {
 		return;
 	}
 	convert_to_string(expr);
