@@ -5,13 +5,13 @@ subdirectory. Based on the internal implementations or the files in the
 examples subdirectory there are also some .php files to experiment with.
 
 The .inc files are not included automatically because the are sooner or 
-later intergrated into the extension. That means that you either need to 
+later integrated into the extension. That means that you either need to 
 put the code of examples/autoload into your autoprepend file or that you
 have to point your ini setting auto_prepend_file to this file.
 
 1) Iterators
 
-SPL offers some advanced iterator algorythmns:
+SPL offers some advanced iterator algorithms:
 
 interface RecursiveIterator implements Iterator
 class RecursiveIteratorIterator implements Iterator
