@@ -121,7 +121,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	fprintf(stderr,"register %s=%s\n",prefix, ns_uri);
+
 	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
 		RETURN_FALSE
 	}
