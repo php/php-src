@@ -1539,7 +1539,7 @@ zend_module_entry simplexml_module_entry = {
 	"simplexml",
 	simplexml_functions,
 	PHP_MINIT(simplexml),
-	NULL,
+	PHP_MSHUTDOWN(simplexml),
 	NULL,
 	NULL,
 	PHP_MINFO(simplexml),
@@ -1588,6 +1588,14 @@ PHP_MINIT_FUNCTION(simplexml)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION(simplexml)
+ */
+PHP_MSHUTDOWN_FUNCTION(simplexml)
+{
+	sxe_class_entry = NULL;
+	return SUCCESS;
+}
+/* }}} */
 /* {{{ PHP_MINFO_FUNCTION(simplexml)
  */
 PHP_MINFO_FUNCTION(simplexml)
