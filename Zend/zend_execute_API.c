@@ -31,13 +31,17 @@
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
 
 
+#if ZEND_DEBUG
 static void (*original_sigsegv_handler)(int);
 static void zend_handle_sigsegv(int dummy)
 {
 	fflush(stdout);
 	fflush(stderr);
-	signal(SIGSEGV, original_sigsegv_handler);
-	/*
+	if (original_sigsegv_handler==zend_handle_sigsegv) {
+		signal(SIGSEGV, original_sigsegv_handler);
+	} else {
+		signal(SIGSEGV, SIG_DFL);
+	}
 	{
 		ELS_FETCH();
 
@@ -48,9 +52,11 @@ static void zend_handle_sigsegv(int dummy)
 				zend_get_executed_filename(ELS_C),
 				zend_get_executed_lineno(ELS_C));
 	}
-	*/
-	original_sigsegv_handler(dummy);
+	if (original_sigsegv_handler!=zend_handle_sigsegv) {
+		original_sigsegv_handler(dummy);
+	}
 }
+#endif
 
 
 static void zend_extension_activator(zend_extension *extension)
@@ -81,7 +87,7 @@ void init_executor(CLS_D ELS_DC)
 	EG(error_zval_ptr)=&EG(error_zval);
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
-#if !(WIN32||WINNT)
+#if ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
 	EG(return_value) = &EG(global_return_value);
@@ -129,6 +135,9 @@ void shutdown_executor(ELS_D)
 		efree(EG(main_op_array));
 	}
 	clean_non_persistent_constants();
+#if ZEND_DEBUG
+	signal(SIGSEGV, original_sigsegv_handler);
+#endif
 }
 
 
