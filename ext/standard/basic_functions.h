@@ -34,6 +34,8 @@
 #ifndef _BASIC_FUNCTIONS_H
 #define _BASIC_FUNCTIONS_H
 
+#include <sys/stat.h>
+
 #include "zend_highlight.h"
 
 extern php3_module_entry basic_functions_module;
@@ -103,6 +105,12 @@ PHP_FUNCTION(getservbyport);
 PHP_FUNCTION(getprotobyname);
 PHP_FUNCTION(getprotobynumber);
 
+#if MSVC5
+typedef unsigned int php_stat_len;
+#else
+typedef int php_stat_len;
+#endif
+
 typedef struct {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
@@ -113,9 +121,17 @@ typedef struct {
 	char str_ebuf[40];
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;
+	
+	/* pageinfo.c */
 	long page_uid;
 	long page_inode;
 	long page_mtime;
+
+	/* filestat.c */
+	char *CurrentStatFile;
+	php_stat_len CurrentStatLength;
+	struct stat sb;
+	struct stat lsb;
 } php_basic_globals;
 
 #ifdef ZTS
