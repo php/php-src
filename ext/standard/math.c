@@ -316,12 +316,11 @@ PHP_FUNCTION(tanh)
 /* }}} */
 
 #if !defined(PHP_WIN32) && !defined(NETWARE)
+#ifdef HAVE_ASINH
 /* {{{ proto float asinh(float number)
    Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
-
 PHP_FUNCTION(asinh)
 {
-#ifdef HAVE_ASINH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -330,16 +329,15 @@ PHP_FUNCTION(asinh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = asinh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
-#endif
 }
-
 /* }}} */
+#endif /* HAVE_ASINH */
+
+#ifdef HAVE_ACOSH
 /* {{{ proto float acosh(float number)
    Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
-
 PHP_FUNCTION(acosh)
 {
-#ifdef HAVE_ACOSH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -348,16 +346,15 @@ PHP_FUNCTION(acosh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = acosh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
-#endif
 }
-
 /* }}} */
+#endif /* HAVE_ACOSH */
+
+#ifdef HAVE_ATANH
 /* {{{ proto float atanh(float number)
    Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
-
 PHP_FUNCTION(atanh)
 {
-#ifdef HAVE_ATANH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -366,21 +363,19 @@ PHP_FUNCTION(atanh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = atanh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
-#endif
 }
-
 /* }}} */
-#endif
+#endif /* HAVE_ATANH */
+#endif /* !defined(PHP_WIN32) && !defined(NETWARE) */
+
 
 /* {{{ proto float pi(void)
    Returns an approximation of pi */
-
 PHP_FUNCTION(pi)
 {
 	Z_DVAL_P(return_value) = M_PI;
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
-
 /* }}} */
 
 
