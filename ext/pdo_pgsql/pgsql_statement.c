@@ -235,13 +235,63 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 	return 1;
 }
 
+static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
+{
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+	PGresult *res;
+	char *q=NULL;
+	ExecStatusType status;
+	int i;
+	
+	if (!S->result) {
+		return FAILURE;
+	}
+	
+	if (colno >= stmt->column_count) {
+		return FAILURE;
+	}
+	
+	array_init(return_value);
+	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
+
+	/* Fetch metadata from Postgres system catalogue */
+	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%d", S->cols[colno].pgsql_type);
+	res = PQexec(S->H->server, q);
+	efree(q);
+	
+	status = PQresultStatus(res);
+	
+	if (status != PGRES_TUPLES_OK) {
+		/* Failed to get system catalogue, but return success
+		 * with the data we have collected so far
+		 */
+		PQclear(res);
+		return 1;
+	}
+
+	/* We want exactly one row returned */
+	if (1 != PQntuples(res)) {
+		PQclear(res);
+		return 1;
+	}
+
+	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
+
+	PQclear(res);		
+	return 1;
+}
+
 struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_dtor,
 	pgsql_stmt_execute,
 	pgsql_stmt_fetch,
 	pgsql_stmt_describe,
 	pgsql_stmt_get_col,
-	pgsql_stmt_param_hook
+	pgsql_stmt_param_hook,
+	NULL, /* set_attr */
+	NULL, /* get_attr */
+	pgsql_stmt_get_column_meta,
+	NULL  /* next_rowset */
 };
 
 /*
