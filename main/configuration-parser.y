@@ -279,7 +279,7 @@ PHP_FUNCTION(parse_ini_file)
 	cfgin = fopen((*filename)->value.str.val, "r");
 	if (!cfgin) {
 		php_error(E_WARNING,"Cannot open '%s' for reading", (*filename)->value.str.val);
-		return FAILURE;
+		return;
 	}
 	array_init(return_value);
 	init_cfg_scanner();
