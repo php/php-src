@@ -642,7 +642,7 @@ PHP_FUNCTION(unpack)
 			/* Space for name + number, safe as namelen is ensured <= 200 */
 			char n[256];
 
-			if (arg != 1) {
+			if (arg != 1 || namelen == 0) {
 				/* Need to add element number to name */
 				sprintf(n, "%.*s%d", namelen, name, i + 1);
 			} else {
