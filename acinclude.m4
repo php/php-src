@@ -4,9 +4,12 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
-AC_DEFUN(PHP_POSIX_READDIR_R,[
+AC_DEFUN(PHP_READDIR_R_TYPE,[
+  AC_CHECK_FUNCS(readdir_r)
+  if test "$ac_cv_func_readdir_r" = "yes"; then
   AC_CACHE_CHECK(for type of readdir_r, ac_cv_what_readdir_r,[
     AC_TRY_RUN([
+#define _REENTRANT
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -24,13 +27,26 @@ main() {
     ],[
       ac_cv_what_readdir_r=POSIX
     ],[
-      ac_cv_what_readdir_r=none
+      AC_TRY_CPP([
+#define _REENTRANT
+#include <sys/types.h>
+#include <dirent.h>
+int readdir_r(DIR *, struct dirent *);
+        ],[
+          ac_cv_what_readdir_r=old-style
+        ],[
+          ac_cv_what_readdir_r=none
+      ])
     ],[
       ac_cv_what_readdir_r=none
    ])
   ])
-  if test "$ac_cv_what_readdir_r" = "POSIX"; then
-    AC_DEFINE(HAVE_POSIX_READDIR_R,1,[whether you have POSIX readdir_r])
+    case "$ac_cv_what_readdir_r" in
+    POSIX)
+      AC_DEFINE(HAVE_POSIX_READDIR_R,1,[whether you have POSIX readdir_r]);;
+    old-style)
+      AC_DEFINE(HAVE_OLD_READDIR_R,1,[whether you have old-style readdir_r]);;
+    esac
   fi
 ])
 
