@@ -1691,8 +1691,8 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 	len = MIN(len1, len2);
 
 	while (len--) {
-		c1 = tolower(*s1++);
-		c2 = tolower(*s2++);
+		c1 = tolower((int)*(unsigned char *)s1++);
+		c2 = tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
@@ -1710,8 +1710,8 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
 	len = MIN(length, MIN(len1, len2));
 
 	while (len--) {
-		c1 = tolower(*s1++);
-		c2 = tolower(*s2++);
+		c1 = tolower((int)*(unsigned char *)s1++);
+		c2 = tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
