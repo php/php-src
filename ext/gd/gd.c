@@ -494,10 +494,8 @@ PHP_FUNCTION(gd_info)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
+
 #if HAVE_GD_BUNDLED
 	add_assoc_string(return_value, "GD Version", "bundled (2.0 compatible)", 1);
 #elif HAVE_LIBGD20
@@ -2038,9 +2036,8 @@ PHP_FUNCTION(imagecolorsforindex)
 	col = Z_LVAL_PP(index);
 #if HAVE_LIBGD20
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
+
 		add_assoc_long(return_value,"red",  gdImageRed(im,col));
 		add_assoc_long(return_value,"green", gdImageGreen(im,col));
 		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
@@ -2048,9 +2045,8 @@ PHP_FUNCTION(imagecolorsforindex)
 	} 
 #else
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
+
 		add_assoc_long(return_value,"red",  im->red[col]);
 		add_assoc_long(return_value,"green", im->green[col]);
 		add_assoc_long(return_value,"blue", im->blue[col]);
@@ -3060,9 +3056,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		RETURN_FALSE;
 	}
 	
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* return array with the text's bounding box */
 	for (i = 0; i < 8; i++) {
@@ -3441,10 +3435,7 @@ PHP_FUNCTION(imagepstext)
 		}
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't initialize array for returning bounding box");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	add_next_index_long(return_value, str_img->metrics.leftSideBearing);
 	add_next_index_long(return_value, str_img->metrics.descent);
@@ -3546,9 +3537,7 @@ PHP_FUNCTION(imagepsbbox)
 	}
 	if (T1_errno) RETURN_FALSE;
 	
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	/*
 	printf("%d %d %d %d\n", str_bbox.llx, str_bbox.lly, str_bbox.urx, str_bbox.ury);
 	*/
