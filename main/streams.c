@@ -441,7 +441,8 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		}
 	}
 	if (len) {
-		*buf = perealloc_rel_orig(*buf, len, persistent);
+		*buf = perealloc_rel_orig(*buf, len + 1, persistent);
+		(*buf)[len] = '\0';
 	} else {
 		pefree(*buf, persistent);
 		*buf = NULL;
