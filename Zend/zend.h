@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_H
 #define ZEND_H
@@ -92,8 +93,19 @@
 # define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
-#if HAVE_ALLOCA_H
-# include <alloca.h>
+/* AIX requires this to be the first thing in the file.  */
+#ifndef __GNUC__
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#   endif
+#  endif
+# endif
 #endif
 
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
