@@ -308,6 +308,8 @@ union _zend_function;
 
 #define ZEND_CE_ABSTRACT ZEND_ACC_ABSTRACT /* same as ZEND_ACC_ABSTRACT */
 
+#include "zend_iterators.h"
+
 struct _zend_class_entry {
 	char type;
 	char *name;
@@ -331,9 +333,11 @@ struct _zend_class_entry {
 	union _zend_function *__set;
 	union _zend_function *__call;
 
-	
+	zend_class_iterator_funcs *iterator_funcs;
+
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
+	zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object TSRMLS_DC);
 
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
