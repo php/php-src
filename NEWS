@@ -22,7 +22,7 @@ PHP 4.0                                                                    NEWS
   offset and daylight savings time. (Andrei)
 - Moved VC++ Win32 project and workspace files to the win32 directory
   (Zeev)
-- Require the year arg to checkdate to be an integer (Rasmus)
+- Fix checkdate() to not return true on non-numeric arguments (Rasmus)
 - Added --enable-c9x-inline option for compilers which support the new C9x
   standard. If you encounter undefined references to i_zend_is_true and
   other symbols, you should enable this.  (Sascha, Zend Library)
