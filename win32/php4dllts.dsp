@@ -1831,6 +1831,10 @@ SOURCE=..\win32\unistd.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\com\variant.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\wfile.h
 # End Source File
 # End Group
