@@ -112,7 +112,7 @@ AC_ARG_ENABLE(experimental-zts,
   ZEND_EXPERIMENTAL_ZTS=no
 ])  
 
-AC_ARG_ENABLE(large-mem,
+AC_ARG_ENABLE(inline-optimization,
 [  --enable-inline-optimization   If you have much memory and are using
                                  gcc, you might try this.],[
   ZEND_INLINE_OPTIMIZATION=$enableval
