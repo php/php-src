@@ -136,16 +136,18 @@ int main(int argc, char* argv[]) {
 	int i=0;
 	while (fgets(line,sizeof(line)-1,fp)) {
 		// file.php arg1 arg2 etc.
-		char *p = strchr(line, ' ');
-		if (p) {
-			*p = 0;
-			// get file
-			IsapiFileList.Add(line);
-			IsapiArgList.Add(p+1);
-		} else {
-			// just a filename is all
-			IsapiFileList.Add(line);
-			IsapiArgList.Add("");
+		if (strlen(line)>3) {
+			char *p = strchr(line, ' ');
+			if (p) {
+				*p = 0;
+				// get file
+				IsapiFileList.Add(line);
+				IsapiArgList.Add(p+1);
+			} else {
+				// just a filename is all
+				IsapiFileList.Add(line);
+				IsapiArgList.Add("");
+			}
 		}
 		i++;
 	}
@@ -168,14 +170,18 @@ int main(int argc, char* argv[]) {
 	}
 	}
 
-	printf("Starting Threads...\r\n");
+	printf("Starting Threads...\n");
 	// loop creating threads
+	DWORD tid;
+	HANDLE threads[NUM_THREADS];
 	for (i=0; i< NUM_THREADS; i++) {
 		terminate[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-		DWORD tid;
-		if (CreateThread(NULL, 0, IsapiThread, &terminate[i], 0, &tid)==NULL){
+		if ((threads[i]=CreateThread(NULL, 0, IsapiThread, &terminate[i], CREATE_SUSPENDED, &tid))==NULL){
 			SetEvent(terminate[i]);
 		}
+	}
+	for (i=0; i< NUM_THREADS; i++) {
+		if (threads[i]) ResumeThread(threads[i]);
 	}
 	// wait for threads to finish
 	WaitForMultipleObjects(NUM_THREADS, terminate, TRUE, INFINITE);
@@ -197,9 +203,9 @@ DWORD CALLBACK IsapiThread(void *p)
 	for (DWORD j=0; j<ITERATIONS; j++) {
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
-			printf("Thread %d File %s\r\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
+			printf("Thread %d File %s\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
 			stress_main(IsapiFileList.GetAt(i), IsapiArgList.GetAt(i));
-			Sleep(1);
+			//Sleep(10);
 		}
 	}
 	SetEvent(*terminate);
@@ -426,6 +432,8 @@ BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *ECB, TIsapiContex
 	// Fill in the standard CGI environment variables
 	//
 	ECB->lpszMethod = GetEnv("REQUEST_METHOD");
+	if (!ECB->lpszMethod) ECB->lpszMethod = "GET";
+
 	ECB->lpszQueryString = GetEnv("QUERY_STRING");
 	ECB->lpszPathInfo = GetEnv("PATH_INFO");
 	ECB->lpszPathTranslated = GetEnv("PATH_TRANSLATED");
