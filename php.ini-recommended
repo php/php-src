@@ -868,7 +868,7 @@ sockets.use_system_read = On
 ;fbsql.max_links = 128
 ;fbsql.max_persistent = -1
 ;fbsql.max_results = 128
-;fbsql.mbatchSize = 1000
+;fbsql.batchSize = 1000
 
 ; Local Variables:
 ; tab-width: 4
