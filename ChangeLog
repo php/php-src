@@ -1,3 +1,25 @@
+2001-10-20  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/pcre/php_pcre.h
+      main/SAPI.c:
+    Re-instated safe-mode realm mangling as it was in php 2 and 3 albeit
+    in a somewhat more robust way.
+
+2001-10-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/syslog.c: Fix warning,
+
+2001-10-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/url.c: - MFH for bug #13413
+
+    * ext/standard/url.c: - Fix for bug #13413
+
+2001-10-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/DB/mssql.php:
+    'mssql' module works with either mssql or sybase extension
+
 2001-10-19  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/head.c: convert to use new parameter parsing API.
