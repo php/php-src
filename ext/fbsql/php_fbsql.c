@@ -2433,7 +2433,7 @@ PHP_FUNCTION(fbsql_fetch_object)
    Fetch a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(fbsql_fetch_array)
 {
-	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_BOTH);
 }
 /* }}} */
 
