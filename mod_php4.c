@@ -93,8 +93,8 @@ void php_save_umask()
 
 static int zend_apache_ub_write(const char *str, uint str_length)
 {
-	SLS_FETCH();
 	int ret;
+	SLS_FETCH();
 		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
