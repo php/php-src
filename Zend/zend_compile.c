@@ -1543,6 +1543,10 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 	zend_hash_init(&CG(class_entry).function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&CG(class_entry).default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 
+	CG(class_entry).handle_function_call = NULL;
+	CG(class_entry).handle_property_set = NULL;
+	CG(class_entry).handle_property_get = NULL;
+
 	/* code for inheritance from parent class */
 	if (parent_class_name) {
 		zend_class_entry *parent_class;
@@ -1560,6 +1564,11 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 			/* copy default properties */
 			zend_hash_copy(&CG(class_entry).default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
+			/* copy overloaded handlers */
+			CG(class_entry).handle_function_call = parent_class->handle_function_call;
+			CG(class_entry).handle_property_get  = parent_class->handle_property_get;
+			CG(class_entry).handle_property_set  = parent_class->handle_property_set;
+
 			CG(class_entry).parent = parent_class;
 
 			zval_dtor(&parent_class_name->u.constant);
@@ -1570,10 +1579,6 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 	} else {
 		CG(class_entry).parent = NULL;
 	}
-
-	CG(class_entry).handle_function_call = NULL;
-	CG(class_entry).handle_property_set = NULL;
-	CG(class_entry).handle_property_get = NULL;
 
 	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 	opline->op1.op_type = IS_CONST;
