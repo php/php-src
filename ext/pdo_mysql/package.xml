@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package version="1.0">
- <name>pdo_mysql</name>
+ <name>PDO_MYSQL</name>
  <summary>Mysql 3.x/4.0 driver for PDO</summary>
  <maintainers>
   <maintainer>
@@ -22,9 +22,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>alpha</state>
-  <version>0.1</version>
-  <date>2004-05-18</date>
+  <state>beta</state>
+  <version>0.2</version>
+  <date>2005-02-09</date>
 
   <notes>
    Hope it works!
@@ -41,8 +41,8 @@
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0"/>
-   <dep type="ext" name="pdo" rel="ge" version="0.1"/>
+   <dep type="php" rel="ge" version="5.0.3"/>
+   <dep type="ext" name="pdo" rel="ge" version="0.2"/>
   </deps>
  </release>
 </package>
