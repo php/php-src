@@ -589,8 +589,6 @@ PHPAPI const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8,
 #define TAG_FMT_SRATIONAL 10
 #define TAG_FMT_SINGLE    11
 #define TAG_FMT_DOUBLE    12
-
-typedef unsigned char uchar;
 /* }}} */
 
 /* {{{ php_ifd_get16u
@@ -598,9 +596,9 @@ typedef unsigned char uchar;
 static int php_ifd_get16u(void *Short, int motorola_intel)
 {
 	if (motorola_intel) {
-		return (((uchar *)Short)[0] << 8) | ((uchar *)Short)[1];
+		return (((unsigned char *)Short)[0] << 8) | ((unsigned char *)Short)[1];
 	} else {
-		return (((uchar *)Short)[1] << 8) | ((uchar *)Short)[0];
+		return (((unsigned char *)Short)[1] << 8) | ((unsigned char *)Short)[0];
 	}
 }
 /* }}} */
@@ -618,11 +616,11 @@ static signed short php_ifd_get16s(void *Short, int motorola_intel)
 static int php_ifd_get32s(void *Long, int motorola_intel)
 {
 	if (motorola_intel) {
-		return  ((( char *)Long)[0] << 24) | (((uchar *)Long)[1] << 16)
-		      | (((uchar *)Long)[2] << 8 ) | (((uchar *)Long)[3] << 0 );
+		return  ((( char *)Long)[0] << 24) | (((unsigned char *)Long)[1] << 16)
+		      | (((unsigned char *)Long)[2] << 8 ) | (((unsigned char *)Long)[3] << 0 );
 	} else {
-		return  ((( char *)Long)[3] << 24) | (((uchar *)Long)[2] << 16)
-		      | (((uchar *)Long)[1] << 8 ) | (((uchar *)Long)[0] << 0 );
+		return  ((( char *)Long)[3] << 24) | (((unsigned char *)Long)[2] << 16)
+		      | (((unsigned char *)Long)[1] << 8 ) | (((unsigned char *)Long)[0] << 0 );
 	}
 }
 /* }}} */
