@@ -1,3 +1,32 @@
+2004-08-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/__call_002.phpt
+      tests/classes/__call_002.phpt
+      tests/classes/__set__get_002.phpt
+      tests/classes/__set__get_002.phpt
+      tests/classes/__set__get_003.phpt
+      tests/classes/__set__get_003.phpt
+      tests/classes/ctor_failure.phpt
+      tests/classes/destructor_visibility_001.phpt
+      tests/classes/destructor_visibility_001.phpt
+      tests/classes/destructor_visibility_002.phpt
+      tests/classes/destructor_visibility_002.phpt
+      tests/classes/destructor_visibility_003.phpt
+      tests/classes/destructor_visibility_003.phpt:
+      
+      file __call_002.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c:
+      - Enforce protocol on magic methods/functions
+
+2004-08-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/.cvsignore:
+      More hoops for VC6
+
 2004-07-31  Wez Furlong  <wez.php@thebrainroom.net>
 
     * win32/wsyslog.c:
