@@ -26,6 +26,8 @@ PHP 4                                                                      NEWS
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
+- Fixed bug #23951 (constants in static initializers clobbered by inheritance).
+  (Wez, Zend Engine)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
 - Fixed bug #23912 (Invalid CSS in phpinfo() output). (Ilia)
 - Fixed bug #23902 (NULL in CGI header output). (Shane)
