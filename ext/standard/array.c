@@ -2294,8 +2294,7 @@ out:
 /* }}} */
 
 /* {{{ proto array array_diff(array arr1, array arr2 [, mixed ...])
-   Returns the entries of arr1 that have values which are not present in
-   any of the others arguments */
+   Returns the entries of arr1 that have values which are not present in any of the others arguments */
 PHP_FUNCTION(array_diff)
 {
         zval ***args = NULL;
