@@ -355,7 +355,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 				php_libxml_ctx_error_level(E_NOTICE, ctx, LIBXML(error_buffer).c TSRMLS_CC);
 				break;
 			default:
-				php_error(E_WARNING, "%s", LIBXML(error_buffer).c);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", LIBXML(error_buffer).c);
 		}
 		smart_str_free(&LIBXML(error_buffer));
 	}
