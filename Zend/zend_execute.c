@@ -898,7 +898,7 @@ typedef struct _object_info {
 	zval *ptr;
 } object_info;
 
-void execute(zend_op_array *op_array ELS_DC)
+ZEND_API void execute(zend_op_array *op_array ELS_DC)
 {
 	zend_op *opline = op_array->opcodes;
 #if SUPPORT_INTERACTIVE
