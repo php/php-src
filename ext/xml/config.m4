@@ -47,5 +47,6 @@ if test "$PHP_XML" != "no" && test "$PHP_LIBXML" != "no" -o "$PHP_LIBEXPAT_DIR" 
 
   PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared)
   PHP_SUBST(XML_SHARED_LIBADD)
+  PHP_ADD_EXTENSION_DEP(xml, libxml)
   AC_DEFINE(HAVE_XML, 1, [ ])
 fi

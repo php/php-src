@@ -130,7 +130,31 @@ PHP_RUNPATH_SWITCH
 PHP_PROG_RE2C
 AC_PROG_RANLIB
 AC_PROG_LN_S
-AC_PROG_AWK
+
+dnl Some vendors force mawk before gawk; mawk is broken so we don't like that,
+dnl and check manually
+dnl AC_PROG_AWK
+AC_CHECK_PROGS(AWK, gawk nawk awk mawk, bork, /usr/xpg4/bin/:$PATH)
+case "$AWK" in
+	*mawk)
+		AC_MSG_WARN([mawk is known to have problems on some systems.  You should install GNU awk])
+		;;
+	*gawk)
+		;;
+	bork)
+		AC_MSG_ERROR([Could not find awk; Install GNU awk])
+		;;
+	*)
+		AC_MSG_CHECKING([if $AWK is broken])
+		if ! $AWK 'function foo() {}' >/dev/null 2>&1 ; then
+			AC_MSG_RESULT([yes])
+			AC_MSG_ERROR([You should install GNU awk])
+		else
+			AC_MSG_RESULT([no - good!])
+		fi
+		;;
+esac
+
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
     AC_MSG_WARN([You will need bison if you want to regenerate the PHP parsers.])
