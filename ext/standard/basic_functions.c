@@ -304,6 +304,8 @@ function_entry basic_functions[] = {
 	PHP_FE(splice,						first_arg_force_ref)
 	PHP_FE(slice,						NULL)
 	PHP_FE(array_merge,					NULL)
+	PHP_FE(keys,						NULL)
+	PHP_FE(values,						NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -2497,7 +2499,6 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
 		   and copy it into the output hash */
 		for (i=0; i<list_count; i++) {
 			entry = list[i];
-			entry->is_ref = 1;
 			entry->refcount++;
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		}
@@ -2855,7 +2856,10 @@ PHP_FUNCTION(array_merge)
 	array_init(return_value);
 	
 	for (i=0; i<argc; i++) {
-		convert_to_array(args[i]);
+		if (args[i]->type != IS_ARRAY) {
+			zend_error(E_WARNING, "Skipping argument #%d to array_merge(), since it's not an array", i+1);
+			continue;
+		}
 		hash = args[i]->value.ht;
 		
 		zend_hash_internal_pointer_reset(hash);
@@ -2880,6 +2884,93 @@ PHP_FUNCTION(array_merge)
 	}
 	
 	efree(args);
+}
+/* }}} */
+
+
+/* {{{ proto array keys(array input)
+   Return just the keys from the input array */
+PHP_FUNCTION(keys)
+{
+	zval		*input,			/* Input array */
+			   **entry,			/* An entry in the input array */
+				*new_val;		/* New value */
+	char		*string_key;	/* String key */
+	ulong		 num_key;		/* Numeric key */
+	
+	/* Get arguments and do error-checking */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, ARG_COUNT(ht), &input) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (input->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Argument to keys() should be an array");
+		return;
+	}
+	
+	/* Initialize return array */
+	array_init(return_value);
+	
+	/* Go through input array and add keys to the return array */
+	zend_hash_internal_pointer_reset(input->value.ht);
+	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		new_val = (zval *)emalloc(sizeof(zval));
+		new_val->is_ref = 0;
+		new_val->refcount = 1;
+		
+		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
+			case HASH_KEY_IS_STRING:
+				new_val->type = IS_STRING;
+				new_val->value.str.val = string_key;
+				new_val->value.str.len = strlen(string_key);
+				zend_hash_next_index_insert(return_value->value.ht, &new_val,
+											sizeof(zval *), NULL);
+				break;
+
+			case HASH_KEY_IS_LONG:
+				new_val->type = IS_LONG;
+				new_val->value.lval = num_key;
+				zend_hash_next_index_insert(return_value->value.ht, &new_val,
+											sizeof(zval *), NULL);
+				break;
+		}
+
+		zend_hash_move_forward(input->value.ht);
+	}
+}
+/* }}} */
+
+
+/* {{{ proto array values(array input)
+   Return just the values from the input array */
+PHP_FUNCTION(values)
+{
+	zval		*input,		/* Input array */
+			   **entry;		/* An entry in the input array */
+	
+	/* Get arguments and do error-checking */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, ARG_COUNT(ht), &input) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (input->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Argument to values() should be an array");
+		return;
+	}
+	
+	/* Initialize return array */
+	array_init(return_value);
+
+	/* Go through input array and add values to the return array */	
+	zend_hash_internal_pointer_reset(input->value.ht);
+	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		
+		(*entry)->refcount++;
+		zend_hash_next_index_insert(return_value->value.ht, entry,
+											sizeof(zval *), NULL);
+
+		zend_hash_move_forward(input->value.ht);
+	}
 }
 /* }}} */
 
