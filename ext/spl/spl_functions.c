@@ -100,20 +100,12 @@ void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * p
 }
 /* }}} */
 
-/* {{{ spl_inherit method */
-static void spl_inherit_method(zend_function *function)
-{
-	function_add_ref(function);
-}
-/* }}} */
-
 /* {{{ spl_register_implement */
 void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * interface_entry TSRMLS_DC)
 {
-	zend_uint num_interfaces = ++class_entry->num_interfaces;
-	class_entry->interfaces = (zend_class_entry **) realloc(class_entry->interfaces, sizeof(zend_class_entry *) * num_interfaces);
-	class_entry->interfaces[num_interfaces-1] = interface_entry;
-	zend_hash_merge(&class_entry->function_table, &interface_entry->function_table, (copy_ctor_func_t) spl_inherit_method, NULL, sizeof(zend_function), 0);
+	class_entry->interfaces = realloc(class_entry->interfaces, sizeof(zend_class_entry*) * (class_entry->num_interfaces+1));
+	class_entry->interfaces[class_entry->num_interfaces++] = interface_entry;
+	zend_do_implement_interface(class_entry, interface_entry);
 }
 /* }}} */
 
