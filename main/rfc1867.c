@@ -220,9 +220,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					php_error(E_WARNING, "File upload error - no name component in content disposition");
 					SAFE_RETURN;
 				}
-				filename = strstr(s, " filename=\"");
+				filename = strstr(s, "filename=\"");
 				if (filename && filename < loc) {
-					filename += 11;
+					filename += 10;
 					s = memchr(filename, '\"', loc - filename);
 					if (!s) {
 						php_error(E_WARNING, "File Upload Mime headers garbled filename: [%c%c%c%c%c]", *filename, *(filename + 1), *(filename + 2), *(filename + 3), *(filename + 4));
@@ -251,11 +251,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					}
 
 					/* Add $foo[name] */
-                    if (is_arr_upload) {
-                        sprintf(lbuf, "%s[name][%s]", abuf, arr_index);
-                    } else {
-                        sprintf(lbuf, "%s[name]", namebuf);
-                    }
+					if (is_arr_upload) {
+						sprintf(lbuf, "%s[name][%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s[name]", namebuf);
+					}
 					if (s && s > filenamebuf) {
 						register_http_post_files_variable(lbuf, s+1, http_post_files, 0 ELS_CC PLS_CC);
 					} else {
