@@ -53,7 +53,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	return 0;
 }
 
-void php_var_dump(pval **struc, int level)
+void php_var_dump(zval **struc, int level)
 {
 	HashTable *myht;
 
@@ -63,23 +63,23 @@ void php_var_dump(pval **struc, int level)
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
-			php_printf("%sbool(%s)\n", COMMON, ((*struc)->value.lval?"true":"false"));
+			php_printf("%sbool(%s)\n", COMMON, Z_LVAL_PP(struc)?"true":"false");
 			break;
 		case IS_NULL:
 			php_printf("%sNULL\n", COMMON);
 			break;
 		case IS_LONG:
-			php_printf("%sint(%ld)\n", COMMON, (*struc)->value.lval);
+			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
 			break;
 		case IS_DOUBLE: {
 				ELS_FETCH();
 
-				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), (*struc)->value.dval);
+				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
 			}
 			break;
 		case IS_STRING:
-			php_printf("%sstring(%d) \"", COMMON, (*struc)->value.str.len);
-			PHPWRITE((*struc)->value.str.val, (*struc)->value.str.len);
+			php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
+			PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
 			PUTS("\"\n");
 			break;
 		case IS_ARRAY:
@@ -98,8 +98,8 @@ head_done:
 			break;
 		case IS_RESOURCE: {
 			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type((*struc)->value.lval);
-			php_printf("%sresource(%ld) of type (%s)\n", COMMON, (*struc)->value.lval, type_name ? type_name : "Unknown");
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc));
+			php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
 			break;
 		}
 		default:
@@ -139,20 +139,22 @@ PHP_FUNCTION(var_dump)
 
 
 #define STR_CAT(P,S,I) {\
-	pval *__p = (P);\
-	ulong __i = __p->value.str.len;\
-	__p->value.str.len += (I);\
-	if (__p->value.str.val) {\
-		__p->value.str.val = (char *)erealloc(__p->value.str.val, __p->value.str.len + 1);\
+	zval *__p = (P);\
+	ulong __i = Z_STRLEN_P(__p);\
+	Z_STRLEN_P(__p) += (I);\
+	if (Z_STRVAL_P(__p)) {\
+		Z_STRVAL_P(__p) = (char *)erealloc(Z_STRVAL_P(__p), Z_STRLEN_P(__p) + 1);\
 	} else {\
-		__p->value.str.val = emalloc(__p->value.str.len + 1);\
-		*__p->value.str.val = 0;\
+		Z_STRVAL_P(__p) = emalloc(Z_STRLEN_P(__p) + 1);\
+		*Z_STRVAL_P(__p) = 0;\
 	}\
-	strcat(__p->value.str.val + __i, (S));\
+	strcat(Z_STRVAL_P(__p) + __i, (S));\
 }
 
 /* }}} */
 /* {{{ php_var_serialize */
+
+inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old);
 
 inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
 	ulong var_no;
@@ -176,7 +178,7 @@ inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
 	return SUCCESS;
 }
 
-PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
+PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 {
 	char s[256];
 	ulong slen;
@@ -193,7 +195,7 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
-			slen = sprintf(s, "b:%ld;", (*struc)->value.lval);
+			slen = sprintf(s, "b:%ld;", Z_LVAL_PP(struc));
 			STR_CAT(buf, s, slen);
 			return;
 
@@ -202,13 +204,13 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 			return;
 
 		case IS_LONG:
-			slen = sprintf(s, "i:%ld;", (*struc)->value.lval);
+			slen = sprintf(s, "i:%ld;", Z_LVAL_PP(struc));
 			STR_CAT(buf, s, slen);
 			return;
 
 		case IS_DOUBLE: {
 				ELS_FETCH();
-				slen = sprintf(s, "d:%.*G;",(int) EG(precision), (*struc)->value.dval);
+				slen = sprintf(s, "d:%.*G;",(int) EG(precision), Z_DVAL_PP(struc));
 				STR_CAT(buf, s, slen);
 			}
 			return;
@@ -217,12 +219,12 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 				char *p;
 				
 				i = buf->value.str.len;
-				slen = sprintf(s, "s:%d:\"", (*struc)->value.str.len);
-				STR_CAT(buf, s, slen + (*struc)->value.str.len + 2);
-				p = buf->value.str.val + i + slen;
-				if ((*struc)->value.str.len > 0) {
-					memcpy(p, (*struc)->value.str.val, (*struc)->value.str.len);
-					p += (*struc)->value.str.len;
+				slen = sprintf(s, "s:%d:\"", Z_STRLEN_PP(struc));
+				STR_CAT(buf, s, slen + Z_STRLEN_PP(struc) + 2);
+				p = Z_STRVAL_P(buf) + i + slen;
+				if (Z_STRLEN_PP(struc) > 0) {
+					memcpy(p, Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
+					p += Z_STRLEN_PP(struc);
 				}
 				*p++ = '\"';
 				*p++ = ';';
@@ -270,7 +272,7 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 									continue;
 								}
 
-								if (zend_hash_find((*struc)->value.obj.properties,(*name)->value.str.val,(*name)->value.str.len+1,(void*)&d) == SUCCESS) {
+								if (zend_hash_find((*struc)->value.obj.properties,Z_STRVAL_PP(name),Z_STRLEN_PP(name)+1,(void*)&d) == SUCCESS) {
 									php_var_serialize(buf, name, NULL);
 									php_var_serialize(buf,d,var_hash);	
 								}
@@ -313,7 +315,7 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
 				char *key;
-				pval **data,*d;
+				zval **data,*d;
 				ulong index;
 				HashPosition pos;
 				
@@ -328,17 +330,14 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 
 					switch (i) {
 					  case HASH_KEY_IS_LONG:
-							MAKE_STD_ZVAL(d);	
-							d->type = IS_LONG;
-							d->value.lval = index;
+							MAKE_STD_ZVAL(d);
+							ZVAL_LONG(d,index);
 							php_var_serialize(buf, &d, NULL);
 							FREE_ZVAL(d);
 							break;
 						case HASH_KEY_IS_STRING:
 							MAKE_STD_ZVAL(d);	
-							d->type = IS_STRING;
-							d->value.str.val = key;
-							d->value.str.len = strlen(key);
+							ZVAL_STRING(d,key,0);
 							php_var_serialize(buf, &d, NULL);
 							FREE_ZVAL(d);
 							break;
@@ -358,7 +357,7 @@ PHPAPI void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 /* }}} */
 /* {{{ php_var_dump */
 
-PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, HashTable *var_hash)
+PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, HashTable *var_hash)
 {
 	const char *q;
 	char *str;
@@ -366,12 +365,12 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 	char cur;
 	ulong id;
 	HashTable *myht;
-	pval **rval_ref;
+	zval **rval_ref;
 
 	ELS_FETCH();
 	BLS_FETCH();
 
-	if(var_hash && **p != 'R') {  /* references aren't counted by serializer! */
+	if (var_hash && **p != 'R') {  /* references aren't counted by serializer! */
 		zend_hash_next_index_insert(var_hash, rval, sizeof(*rval), NULL);
 	}
 
@@ -389,10 +388,10 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 			}
 			(*p)++;
 			id = atol(q + 2)-1; /* count starts with 1 */
-			if(!var_hash) {
+			if (!var_hash) {
 				return 0;
 			}
-			if(zend_hash_index_find(var_hash, id, (void *)&rval_ref) != SUCCESS) {
+			if (zend_hash_index_find(var_hash, id, (void *)&rval_ref) != SUCCESS) {
 				return 0;
 			}
 			zval_ptr_dtor(rval);
@@ -407,7 +406,7 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 			}
 			(*p)++;
 			INIT_PZVAL(*rval);
-			(*rval)->type = IS_NULL;
+			ZVAL_NULL(*rval);
 			(*p)++;
 			return 1;
 
@@ -424,13 +423,12 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 				return 0;
 			}
 			(*p)++;
-			if (cur == 'b') {
-				(*rval)->type = IS_BOOL;
-			} else {
-				(*rval)->type = IS_LONG;
-			}
 			INIT_PZVAL(*rval);
-			(*rval)->value.lval = atol(q + 2);
+			if (cur == 'b') {
+				ZVAL_BOOL(*rval,atol(q + 2));
+			} else {
+				ZVAL_LONG(*rval,atol(q + 2));
+			}
 			return 1;
 
 		case 'd':
@@ -445,9 +443,8 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 				return 0;
 			}
 			(*p)++;
-			(*rval)->type = IS_DOUBLE;
 			INIT_PZVAL(*rval);
-			(*rval)->value.dval = atof(q + 2);
+			ZVAL_DOUBLE(*rval,atof(q + 2));
 			return 1;
 
 		case 's':
@@ -475,10 +472,8 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 			  	str = estrndup(*p,i);
 			}
 			(*p) += i + 2;
-			(*rval)->type = IS_STRING;
-			(*rval)->value.str.val = str;
-			(*rval)->value.str.len = i;
 			INIT_PZVAL(*rval);
+			ZVAL_STRINGL(*rval,str,i,0);
 			return 1;
 
 		case 'a':
@@ -555,8 +550,8 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 				return 0;
 			}
 			for ((*p) += 2; **p && **p != '}' && i > 0; i--) {
-				pval *key;
-				pval *data;
+				zval *key;
+				zval *data;
 				
 				ALLOC_INIT_ZVAL(key);
 				ALLOC_INIT_ZVAL(data);
@@ -576,10 +571,10 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
 				}
 				switch (key->type) {
 					case IS_LONG:
-						zend_hash_index_update(myht, key->value.lval, &data, sizeof(data), NULL);
+						zend_hash_index_update(myht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						zend_hash_update(myht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						zend_hash_update(myht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 						break;
 				}
 				zval_dtor(key);
@@ -614,12 +609,13 @@ PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, Has
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
-	pval **struc;
+	zval **struc;
 	php_serialize_data_t var_hash;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	return_value->type = IS_STRING;
 	return_value->value.str.val = NULL;
 	return_value->value.str.len = 0;
@@ -636,7 +632,7 @@ PHP_FUNCTION(serialize)
 
 PHP_FUNCTION(unserialize)
 {
-	pval **buf;
+	zval **buf;
 	php_serialize_data_t var_hash;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
@@ -646,15 +642,15 @@ PHP_FUNCTION(unserialize)
 	if ((*buf)->type == IS_STRING) {
 		const char *p = (*buf)->value.str.val;
 
-		if ((*buf)->value.str.len == 0) {
+		if (Z_STRLEN_PP(buf) == 0) {
 			RETURN_FALSE;
 		}
 
 		PHP_VAR_UNSERIALIZE_INIT(var_hash);
-		if (!php_var_unserialize(&return_value, &p, p + (*buf)->value.str.len,  &var_hash)) {
+		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
-			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes",p-(*buf)->value.str.val,(*buf)->value.str.len);
+			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes",p - Z_STRVAL_PP(buf),Z_STRLEN_PP(buf));
 			RETURN_FALSE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
