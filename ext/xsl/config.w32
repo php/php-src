@@ -3,7 +3,7 @@
 
 ARG_WITH("xsl", "xsl support", "no");
 
-if (PHP_XSL == "yes") {
+if (PHP_XSL != "no") {
 	if (CHECK_LIB("libxslt.lib", "xsl", PHP_XSL) && 
 			CHECK_LIB("libxml2.lib", "xsl") &&
 			CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
