@@ -1,3 +1,10 @@
+2004-06-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c
+      main/streams/streams.c:
+      Fix for Bug #28964 fread "greedy" behaviour
+
 2004-06-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/ldap/ldap.c:
