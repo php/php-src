@@ -38,6 +38,8 @@
 #include <string.h>
 #ifdef DB3_INCLUDE_FILE
 #include DB3_INCLUDE_FILE
+#else
+#include <db.h>
 #endif
 
 #define DB3_DATA dba_db3_data *dba = info->dbf
