@@ -434,6 +434,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 				break;
 			default:
 				/* Unknown family */
+				socklen = 0;
 				sa = NULL;
 		}
 
@@ -509,7 +510,7 @@ static void populate_name(
 
 				break;
 
-#if HAVE_IPV6
+#if HAVE_IPV6 && HAVE_INET_NTOP
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
@@ -711,6 +712,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				break;
 			default:
 				/* Unknown family */
+				socklen = 0;
 				sa = NULL;
 		}
 
