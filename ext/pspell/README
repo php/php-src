@@ -38,10 +38,10 @@ Notes on personalized dictionaries
 ----------------------------------
 
 It is now possible to have personalized dictionaries with pspell. This is
-acheived by openeing a dictionary with pspell_new_personal() rather than
-pspell_new() and secifying the custom dictionary as the first parameter.
+achieved by opening a dictionary with pspell_new_personal() rather than
+pspell_new() and specifying the custom dictionary as the first parameter.
 The parameter probably should begin with '/' because otherwise it will
-refer to $HOME, which is probably set to "/root", which is probably not
+be relative to $HOME, which is probably set to "/root". This is probably not
 what you want because you need write access for nobody to be able to write
 to a dictionary. Once the dictionary is open, you can use 
 pspell_add_to_personal() to add words to the wordlist and finally 
