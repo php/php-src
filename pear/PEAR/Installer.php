@@ -467,7 +467,7 @@ class PEAR_Installer extends PEAR_Common
                 }
             }
 
-            if ($this->source_files > 0) {
+            if ($this->source_files > 0 && empty($options['nobuild'])) {
                 $this->log(1, "$this->source_files source files, building");
                 $bob = &new PEAR_Builder($this->ui);
                 $bob->debug = $this->debug;
