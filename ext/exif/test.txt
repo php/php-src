@@ -220,14 +220,17 @@ if (function_exists('exif_tagname')) {
 </table>
 <br clear="all">
 <h2>function exif_read_data for <?=count($possible)?> images</h2>
-<table border='1' cellspacing='0' cellpadding='3' summary="EXIF information">
+
 <?php
 if (function_exists('exif_read_data')) {
-	$num = 0;
+	$num  = 0;
+	$tab1 = "<table border='1' cellspacing='0' cellpadding='3' summary='function results'>\n";
+	$tab2 = "";//"<table border='1' cellspacing='0' cellpadding='3' summary='EXIF information'>\n";
 	foreach($possible as $idx => $file) {
 		$num++;
 		$error = '';
 		$len   = 4;
+		$tab1 .= "<tr><td rowspan='3' valign='top'>$num</td><th colspan='2'>$file</th></tr>\n";
 		$size  = GetImageSize($file);
 		$error = error_msg();// clear message
 		if ( $size === false) {
@@ -235,10 +238,12 @@ if (function_exists('exif_read_data')) {
 		} else {
 			$getimagesize = "[ $size[0], $size[1], $size[2], $size[3] ]";
 		}
+		$tab1 .= AddInfo("GetImageSize",$error);
 		/**/
 		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true);",0);
 		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12',true);
 		$error = error_msg();// clear message
+		$tab1 .= AddInfo("exif_read_data",$error);
 		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true): $error",0);
 		//error_log("exif_read_data($file)",0);
 		$res   = '';
@@ -263,16 +268,19 @@ if (function_exists('exif_read_data')) {
 				}
 			}
 		}
-		echo "<tr><td rowspan='$len' valign='top'>$num</td></tr>\n";
-		echo "<tr><th colspan='2'>$file</th></tr>\n";
-		echo "<tr><td><b>GetImageSize</b></td><td>$getimagesize</td></tr>\n";
-		echo "<tr><td><b>exif_read_data</b></td><td>$error</td></tr>\n";
-		echo $res;
+		$tab2 .= "<tr><td rowspan='$len' valign='top'>$num</td></tr>\n";
+		$tab2 .= "<tr><th colspan='2'>$file</th></tr>\n";
+		$tab2 .= "<tr><td><b>GetImageSize</b></td><td>$getimagesize</td></tr>\n";
+		$tab2 .= "<tr><td><b>exif_read_data</b></td><td>$error</td></tr>\n";
+		$tab2 .= $res;
 	}
+	//$tab1 .= "</table>\n";
+	$tab2 .= "</table>\n";
+	echo $tab1;
+	echo $tab2;
 } else {
-	echo "<tr><td>function exif_read_data is not supported</td></tr>\n";
+	echo "<h1 style='color:red'>function exif_read_data is not supported</h1>\n";
 }
 ?>
-</table>
 </body>
 </html>
