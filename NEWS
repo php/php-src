@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Don't touch any globals in session_unset() if register_globals is set
+  to off. (Thies)
+- Added 3 new optional parameters to OCIFetchStatement(). They control
+  the number of rows to skip at the beginning of the cursor, the
+  maximun numer of rows that should be fetched and the format of the
+  returned array. (Thies)
 - Update the XSLT extension to support Sablotron 0.8 (Petr Cimprich)
 - Fixed a bug in preg_match()/preg_match_all() when matching strings containing
   null bytes. (Andrei)
