@@ -372,8 +372,14 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			function_table = &(*object_pp)->value.obj.ce->function_table;
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry *ce;
+			char *lc_class;
+			int found;
 
-			if (zend_hash_find(EG(class_table), Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp) + 1, (void **) &ce)==FAILURE)
+			lc_class = estrndup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
+			zend_str_tolower(lc_class, Z_STRLEN_PP(object_pp));
+			found = zend_hash_find(EG(class_table), lc_class, Z_STRLEN_PP(object_pp) + 1, (void **) &ce);
+			efree(lc_class);
+			if (found == FAILURE)
 				return FAILURE;
 
 			function_table = &ce->function_table;
