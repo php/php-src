@@ -1741,9 +1741,7 @@ EXEC SQL END DECLARE SECTION;
 	}
 	Ifx_Result->rowid++;
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	num_fields = fieldcount;
 
 	locind = 0;
@@ -2365,9 +2363,7 @@ EXEC SQL END DECLARE SECTION;
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	num_fields = fieldcount;
 	for (i = 1; i <= num_fields; i++) {
 		EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldname = NAME, :fieldtype = TYPE;
@@ -2523,9 +2519,7 @@ EXEC SQL END DECLARE SECTION;
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	num_fields = fieldcount;
 
 	for (i = 1; i <= num_fields; i++) {
@@ -2681,9 +2675,7 @@ PHP_FUNCTION(ifx_getsqlca)
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
 	/* create pseudo-row array to return */
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	/* fill array with 6 fields sqlerrd0 .. sqlerrd5 */
 	/* each ESQLC call saves these sqlca values  */

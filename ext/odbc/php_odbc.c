@@ -1396,9 +1396,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
@@ -1552,10 +1550,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	}
 	
 	if (Z_TYPE_PP(pv_res_arr) != IS_ARRAY) {
-		if (array_init(*pv_res_arr) == FAILURE) {
-			php_error(E_WARNING, "Can't convert to type Array");
-			RETURN_FALSE;
-		}
+		array_init(*pv_res_arr);
 	}
 
 #ifdef HAVE_SQL_EXTENDED_FETCH

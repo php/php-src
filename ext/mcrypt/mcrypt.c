@@ -210,12 +210,6 @@ ZEND_GET_MODULE(mcrypt)
 		return;                                                         \
 	}
 
-#define MCRYPT_INIT_RETURN_ARRAY                     \
-	if (array_init(return_value) == FAILURE) {       \
-		php_error_docref (NULL TSRMLS_CC, E_ERROR, "Unable to initialize array"); \
-		return;                                      \
-	}
-	
 #define MCRYPT_OPEN_MODULE_FAILED "Module initialization failed"
 
 #define MCRYPT_ENTRY2_2_4(a,b) REGISTER_STRING_CONSTANT("MCRYPT_" #a, b, CONST_PERSISTENT)
@@ -546,7 +540,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	int *key_sizes;
 	
 	MCRYPT_GET_TD_ARG
-	MCRYPT_INIT_RETURN_ARRAY
+	array_init(return_value);
 
 	key_sizes = mcrypt_enc_get_supported_key_sizes(td, &count);
 
@@ -797,7 +791,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	int *key_sizes;
 	
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
-	MCRYPT_INIT_RETURN_ARRAY
+	array_init(return_value);
 
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes(module, dir, &count);
 
@@ -823,7 +817,7 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 		return;
 	}
 	
-	MCRYPT_INIT_RETURN_ARRAY
+	array_init(return_value);
 	modules = mcrypt_list_algorithms(lib_dir, &count);
 
 	if (count == 0) {
@@ -851,7 +845,7 @@ PHP_FUNCTION(mcrypt_list_modes)
 		return;
 	}
 
-	MCRYPT_INIT_RETURN_ARRAY
+	array_init(return_value);
 	modules = mcrypt_list_modes(lib_dir, &count);
 
 	if (count == 0) {

@@ -1982,9 +1982,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 		RETURN_FALSE;
 	}
 	
-		if (array_init(return_value)==FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 	
 	arr_cnt = 0;
 	var = ib_result->out_sqlda->sqlvar;
@@ -2427,8 +2425,7 @@ PHP_FUNCTION(ibase_field_info)
 	if (Z_LVAL_PP(field_arg)<0 || Z_LVAL_PP(field_arg)>=ib_result->out_sqlda->sqld)
 		RETURN_FALSE;
 
-	if (array_init(return_value)==FAILURE)
-		RETURN_FALSE;
+	array_init(return_value);
 
 	var = ib_result->out_sqlda->sqlvar + Z_LVAL_PP(field_arg);
 
@@ -2762,9 +2759,7 @@ PHP_FUNCTION(ibase_blob_info)
 	
 	GET_BLOB_ID_ARG(*blob_arg, ib_blob_id);
 
-	if (array_init(return_value)==FAILURE){
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	if (ib_blob_id->bl_qd.gds_quad_high || ib_blob_id->bl_qd.gds_quad_low) { /*not null ?*/
 		if (isc_open_blob(IB_STATUS, &ib_blob_id->link, &ib_blob_id->trans_handle,

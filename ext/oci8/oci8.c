@@ -4034,10 +4034,7 @@ PHP_FUNCTION(ocifetchinto)
 	}
 	
 	zval_dtor(*array);
-	if (array_init(*array) == FAILURE) {
-		php_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
-		RETURN_FALSE;
-	}
+	array_init(*array);
 
 	for (i = 0; i < statement->ncolumns; i++) {
 		column = oci_get_col(statement, i + 1, 0);

@@ -2875,12 +2875,7 @@ PHP_FUNCTION(openssl_seal)
 		ZVAL_STRINGL(sealdata, buf, len1 + len2, 0);
 
 		zval_dtor(ekeys);
-		if (array_init(ekeys) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot initialize return value");
-			RETVAL_FALSE;
-			efree(buf);
-			goto clean_exit;
-		}
+		array_init(ekeys);
 		for (i=0; i<nkeys; i++) {
 			eks[i][eksl[i]] = '\0';
 			add_next_index_stringl(ekeys, erealloc(eks[i], eksl[i] + 1), eksl[i], 0);
