@@ -1,3 +1,24 @@
+2004-04-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Optional parameter to class_exists() that can be used to bypass
+        __autoload() which can be helpfull in __autoload() itself.
+
+    * zend_interfaces.c:
+      - Fix warnings
+
+    * zend_interfaces.c
+      zend_interfaces.h
+      zend_iterators.h:
+      - no unneccessary retval initialization
+      - new c-level iterator handler invalidate_current that is optionally
+        used to clear internal caching like in implementation of Iterator
+
+2004-04-27  Andi Gutmans  <andi@zend.com>
+
+    * zend_reflection_api.c:
+      - Fix prototypes
+
 2004-04-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
