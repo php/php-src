@@ -593,7 +593,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		add_next_index_long(return_value, stat_sb->st_nlink);
 		add_next_index_long(return_value, stat_sb->st_uid);
 		add_next_index_long(return_value, stat_sb->st_gid);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_ST_RDEV
 		add_next_index_long(return_value, stat_sb->st_rdev);
 #else
 		add_next_index_long(return_value, -1);
