@@ -1211,7 +1211,7 @@ PHP_FUNCTION(fbsql_change_user)
 /* }}} */
 
 
-/* {{{ proto int fbsql_create_db(string database_name [, int link_identifier])
+/* {{{ proto bool fbsql_create_db(string database_name [, int link_identifier])
 	*/
 PHP_FUNCTION(fbsql_create_db)
 {
@@ -2827,7 +2827,7 @@ PHP_FUNCTION(fbsql_fetch_field)
 /* }}} */
 
 
-/* {{{ proto int fbsql_field_seek(int result, int field_offset)
+/* {{{ proto bool fbsql_field_seek(int result, int field_offset)
 	*/
 PHP_FUNCTION(fbsql_field_seek)
 {
@@ -3178,7 +3178,7 @@ PHP_FUNCTION(fbsql_field_flags)
 /* }}} */
 
 
-/* {{{ proto int fbsql_free_result(int result)
+/* {{{ proto bool fbsql_free_result(int result)
 	*/
 PHP_FUNCTION(fbsql_free_result)
 {
