@@ -1,6 +1,0 @@
-LTLIBRARY_NAME        = libtokenizer.la
-LTLIBRARY_SOURCES     = tokenizer.c
-LTLIBRARY_SHARED_NAME = tokenizer.la
-LTLIBRARY_SHARED_LIBADD  = $(TOKENIZER_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

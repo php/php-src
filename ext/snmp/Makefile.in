@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libsnmp.la
-LTLIBRARY_SOURCES = snmp.c
-LTLIBRARY_SHARED_NAME = snmp.la
-LTLIBRARY_SHARED_LIBADD = $(SNMP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -7,7 +7,7 @@ PHP_ARG_WITH(pdflib,for PDFlib support,
 
 if test "$PHP_PDFLIB" != "no"; then
 
-  PHP_EXTENSION(pdf, $ext_shared)
+  PHP_NEW_EXTENSION(pdf, pdf.c, $ext_shared)
   PHP_SUBST(PDFLIB_SHARED_LIBADD)
 
   dnl #

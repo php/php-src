@@ -151,7 +151,7 @@ if test "$PHP_ORACLE" != "no"; then
 	  ;;
   esac
 
-  PHP_EXTENSION(oracle, $ext_shared)
+  PHP_NEW_EXTENSION(oracle, oracle.c, $ext_shared)
   AC_DEFINE(HAVE_ORACLE,1,[ ])
 
   PHP_SUBST_OLD(ORACLE_SHARED_LIBADD)

@@ -23,7 +23,7 @@ PHP_ARG_WITH(ldap,for LDAP support,
 
 if test "$PHP_LDAP" != "no"; then
 
-  PHP_EXTENSION(ldap,$ext_shared)
+  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared)
 
   if test "$PHP_LDAP" = "yes"; then
     for i in /usr/local /usr; do

@@ -11,5 +11,5 @@ if test "$PHP_SOCKETS" != "no"; then
   AC_CHECK_HEADERS(netdb.h netinet/tcp.h sys/un.h errno.h)
   AC_DEFINE(HAVE_SOCKETS, 1, [ ])
 
-  PHP_EXTENSION(sockets, $ext_shared)
+  PHP_NEW_EXTENSION(sockets, sockets.c, $ext_shared)
 fi

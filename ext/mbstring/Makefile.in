@@ -1,7 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libmbstring.la
-LTLIBRARY_SOURCES     = mbfilter_ja.c mbfilter.c mbstring.c mbregex.c php_mbregex.c
-LTLIBRARY_SHARED_NAME = mbstring.la
-
-include $(top_srcdir)/build/dynlib.mk

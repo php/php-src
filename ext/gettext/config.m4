@@ -35,7 +35,7 @@ if test "$PHP_GETTEXT" != "no"; then
   LDFLAGS=$O_LDFLAGS
 
   AC_DEFINE(HAVE_LIBINTL,1,[ ])
-  PHP_EXTENSION(gettext, $ext_shared)
+  PHP_NEW_EXTENSION(gettext, gettext.c, $ext_shared)
   PHP_SUBST(GETTEXT_SHARED_LIBADD)
 
   if test -n "$GETTEXT_LIBS"; then

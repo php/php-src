@@ -43,5 +43,5 @@ if test "$PHP_CYRUS" != "no"; then
 
 	AC_DEFINE(HAVE_CYRUS,1,[ ])
 
-	PHP_EXTENSION(cyrus, $ext_shared)
+	PHP_NEW_EXTENSION(cyrus, cyrus.c, $ext_shared)
 fi

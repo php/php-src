@@ -36,6 +36,6 @@ if test "$PHP_YAZ" != "no"; then
     PHP_ADD_LIBRARY_DEFER(yaz,1,YAZ_SHARED_LIBADD)
     PHP_EVAL_INCLINE($YAZINC)
     PHP_SUBST(YAZ_SHARED_LIBADD)
-    PHP_EXTENSION(yaz, $ext_shared)
+    PHP_NEW_EXTENSION(yaz, php_yaz.c, $ext_shared)
   fi
 fi

@@ -18,6 +18,6 @@ if test "$PHP_INTERBASE" != "no"; then
   PHP_ADD_INCLUDE($IBASE_INCDIR)
   AC_DEFINE(HAVE_IBASE,1,[ ])
 dnl  AC_CHECK_LIB(c, strptime, [AC_DEFINE(HAVE_STRPTIME,1,[])])
-  PHP_EXTENSION(interbase, $ext_shared)
+  PHP_NEW_EXTENSION(interbase, interbase.c, $ext_shared)
   PHP_SUBST(INTERBASE_SHARED_LIBADD)
 fi

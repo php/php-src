@@ -21,5 +21,5 @@ if test "$PHP_MHASH" != "no"; then
 
   AC_DEFINE(HAVE_LIBMHASH,1,[ ])
 
-  PHP_EXTENSION(mhash, $ext_shared)
+  PHP_NEW_EXTENSION(mhash, mhash.c, $ext_shared)
 fi

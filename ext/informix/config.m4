@@ -8,7 +8,7 @@ PHP_ARG_WITH(informix,for Informix support,
 
 if test "$PHP_INFORMIX" != "no"; then
 
-  PHP_EXTENSION(informix, $ext_shared)
+  PHP_NEW_EXTENSION(informix, ifx.c, $ext_shared)
   PHP_SUBST(INFORMIX_SHARED_LIBADD)
 
   if test "$INFORMIXDIR" = ""; then

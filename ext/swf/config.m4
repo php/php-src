@@ -31,5 +31,5 @@ if test "$PHP_SWF" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR/lib, SWF_SHARED_LIBADD)
   AC_DEFINE(HAVE_SWF,1,[ ])
 
-  PHP_EXTENSION(swf, $ext_shared)
+  PHP_NEW_EXTENSION(swf, swf.c, $ext_shared)
 fi

@@ -6,7 +6,7 @@ PHP_ARG_WITH(muscat, for Muscat support,
 [  --with-muscat[=DIR]     Include Muscat support.])
 
 if test "$PHP_MUSCAT" != "no"; then
-  PHP_EXTENSION(muscat, $ext_shared)
+  PHP_NEW_EXTENSION(muscat, muscat.c muscat_net.c, $ext_shared)
   for i in $PHP_MUSCAT /usr/local /usr /usr/local/empower /usr/local/empower/developer; do
     if test -f $i/include/Muscat.h; then
       MUSCAT_INCDIR=$i/include

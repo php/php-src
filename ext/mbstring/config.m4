@@ -7,7 +7,7 @@ PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 
 if test "$PHP_MBSTRING" != "no"; then
   AC_DEFINE(HAVE_MBSTRING,1,[ ])
-  PHP_EXTENSION(mbstring, $ext_shared)
+  PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter.c mbstring.c mbregex.c php_mbregex.c, $ext_shared)
 fi
 
 AC_MSG_CHECKING(whether to enable japanese encoding translation)

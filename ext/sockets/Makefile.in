@@ -1,7 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libsockets.la
-LTLIBRARY_SOURCES     = sockets.c
-LTLIBRARY_SHARED_NAME = sockets.la
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libmcve.la
-LTLIBRARY_SOURCES     = mcve.c
-LTLIBRARY_SHARED_NAME = mcve.la
-LTLIBRARY_SHARED_LIBADD  = $(MCVE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

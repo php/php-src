@@ -71,7 +71,7 @@ dnl $PHP_FRIBIDI will be "yes"
     PHP_ADD_LIBRARY_WITH_PATH(fribidi,"$FRIBIDI_LIBDIR", FRIBIDI_SHARED_LIBADD)
 
     AC_DEFINE(HAVE_FRIBIDI, 1, [ ])
-    PHP_EXTENSION(fribidi, $ext_shared)
+    PHP_NEW_EXTENSION(fribidi, fribidi.c, $ext_shared)
     PHP_SUBST(FRIBIDI_SHARED_LIBADD)
   else
     AC_MSG_RESULT([no])

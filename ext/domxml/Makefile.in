@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libdomxml.la
-LTLIBRARY_SOURCES     = php_domxml.c
-LTLIBRARY_SHARED_NAME = domxml.la
-LTLIBRARY_SHARED_LIBADD  = $(DOMXML_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

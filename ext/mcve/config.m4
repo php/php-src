@@ -20,6 +20,6 @@ if test "$PHP_MCVE" != "no"; then
   
   PHP_ADD_INCLUDE($MCVE_DIR/include)
   PHP_ADD_LIBRARY_WITH_PATH(mcve, $MCVE_DIR/lib, MCVE_SHARED_LIBADD)
-  PHP_EXTENSION(mcve, $ext_shared)
+  PHP_NEW_EXTENSION(mcve, mcve.c, $ext_shared)
   PHP_SUBST(MCVE_SHARED_LIBADD)
 fi

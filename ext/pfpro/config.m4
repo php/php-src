@@ -60,5 +60,5 @@ if test "$PHP_PFPRO" != "no"; then
 
   AC_DEFINE(HAVE_PFPRO, 1, [ ])
 
-  PHP_EXTENSION(pfpro, $ext_shared)
+  PHP_NEW_EXTENSION(pfpro, pfpro.c, $ext_shared)
 fi

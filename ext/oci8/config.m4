@@ -77,7 +77,7 @@ if test "$PHP_OCI8" != "no"; then
 	  ;;
   esac
 
-  PHP_EXTENSION(oci8, $ext_shared)
+  PHP_NEW_EXTENSION(oci8, oci8.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
   PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
