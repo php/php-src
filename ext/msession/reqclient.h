@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | msession 1.0                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2001 Mark L. Woodward (Mohawk Software)                |
+   | Copyright (c) 1997-2001 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +82,7 @@ void FreeRequestBuffer(REQB *req);
 REQB *SizeRequestBuffer(REQB *req, unsigned int size);
 REQB *StaticRequestBuffer(char *buffer, unsigned int cb);
 
-int FormatRequest(REQB **buffer, int stat, char *session, char *name, char *value, int param);
+int FormatRequest(REQB **buffer, int stat, const char *session, const char *name, const char *value, int param);
 int FormatRequestMulti(REQB **buffer, int stat, char *session, int n, char **pairs, int param);
 int DoSingleRequest(char *hostname, int port, REQB **preq);
 void *OpenReqConn(char *hostname, int port);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | msession 1.0                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2001 Mark L. Woodward (Mohawk Software)                |
+   | Copyright (c) 1997-2001 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,9 +20,33 @@
 #include "php_ini.h"
 #include "php_msession.h"
 #include "reqclient.h"
+#include "../session/php_session.h"
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+// #define ERR_DEBUG
+
+#ifdef ERR_DEBUG
+#define ELOG( str )	php_log_err( str )
+#else
+#define ELOG( str )
+#endif
+
+char g_msession[]="Msession";
 
 
 #if HAVE_MSESSION
+
+PS_FUNCS(msession);
+
+ps_module ps_mod_msession = {
+	PS_MOD(msession)
+};
 
 // #define ERR_DEBUG
 
@@ -97,6 +121,8 @@ PHP_MINIT_FUNCTION(msession)
 	g_conn = NULL;
 	g_host = g_defhost;
 	
+	php_session_register_module(&ps_mod_msession);
+
 	return SUCCESS;
 }
 
@@ -160,7 +186,7 @@ PHP_FUNCTION(confirm_msession_compiled)
 		g_port);
 	RETURN_STRINGL(string, len, 1);
 }
-int PHPMsessionConnect(char *szhost, int nport)
+int PHPMsessionConnect(const char *szhost, int nport)
 {
 	if(!g_reqb)
 		g_reqb = AllocateRequestBuffer(2048);
@@ -209,7 +235,7 @@ void PHPMsessionDisconnect()
 	}
 }
 
-char *PHPMsessionGetData(char *session)
+char *PHPMsessionGetData(const char *session)
 {
 	char *ret = NULL;
 
@@ -229,7 +255,7 @@ char *PHPMsessionGetData(char *session)
 		ret = safe_estrdup(g_reqb->req.datum);
 	return ret;
 }
-int PHPMsessionSetData(char *session, char *data)
+int PHPMsessionSetData(const char *session, const char *data)
 {
 	int ret=0;
 #ifdef ERR_DEBUG
@@ -246,7 +272,7 @@ int PHPMsessionSetData(char *session, char *data)
 	return ret;
 }
 
-int PHPMsessionDestroy(char *session)
+int PHPMsessionDestroy(const char *session)
 {
 	int ret=0;
 	if(!g_reqb) 
@@ -799,4 +825,52 @@ PHP_FUNCTION(msession_setdata)
 	}
 }
 
+PS_OPEN_FUNC(msession)
+{
+	ELOG( "ps_open_msession");
+	PS_SET_MOD_DATA((void *)1); // session.c needs a non-zero here!
+	return PHPMsessionConnect(save_path, 8086) ? SUCCESS : FAILURE;
+}
+
+PS_CLOSE_FUNC(msession)
+{
+	PHPMsessionDisconnect();
+	ELOG( "ps_close_msession");
+	return SUCCESS;
+}
+
+PS_READ_FUNC(msession)
+{
+	ELOG( "ps_read_msession");
+	*val = PHPMsessionGetData(key);
+	if(*val)
+	{
+		*vallen = strlen(*val);
+	}
+	else
+	{
+		*val = emalloc(1);
+		**val=0;
+		*vallen = 0;
+	}
+	return SUCCESS;
+}
+
+PS_WRITE_FUNC(msession)
+{
+	ELOG( "ps_write_msession");
+	return (PHPMsessionSetData(key,val)) ? SUCCESS : FAILURE;
+}
+
+PS_DESTROY_FUNC(msession)
+{
+	ELOG( "ps_destroy_msession");
+	return (PHPMsessionDestroy(key)) ? SUCCESS : FAILURE;
+}
+
+PS_GC_FUNC(msession)
+{
+	ELOG( "ps_gc_msession");
+	return SUCCESS;
+}
 #endif	/* HAVE_MSESSION */
