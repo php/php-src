@@ -50,11 +50,10 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 ])
 
-
-AC_DEFUN(TSRM_CHECK_PTHREADS,[
-
 sinclude(threads.m4)
 sinclude(TSRM/threads.m4)
+
+AC_DEFUN(TSRM_CHECK_PTHREADS,[
 		
 PTHREADS_CHECK
 		
