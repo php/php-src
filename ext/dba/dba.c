@@ -421,6 +421,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 *
 	 * d: force lock on database file
 	 * l: force lock on lck file
+	 * -: ignore locking
 	 *
 	 * t: test open database, warning if locked
 	 */
