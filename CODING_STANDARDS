@@ -204,8 +204,9 @@ Syntax and indentation
     four spaces.  It is important to maintain consistency in indenture so
     that definitions, comments, and control structures line up correctly.
 
-[5] Precompiler statements (#if and such) MUST start at column one, you
-    cannot indent them.
+[5] Precompiler statements (#if and such) MUST start at column one. To
+    indent preprocessor directives you should put the # at the beginning
+    of a line, followed by any number of whitespace.
 
 Documentation and Folding Hooks
 -------------------------------
