@@ -1730,7 +1730,7 @@ do_fcall_common:
 
 					value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					
-					// Not sure if a complete copy is what we want here
+					/* Not sure if a complete copy is what we want here */
 					MAKE_STD_ZVAL(exception);
 					*exception = *value;
 					if (!EG(free_op1)) {
@@ -1748,7 +1748,7 @@ do_fcall_common:
 				}
 				NEXT_OPCODE();
 			case ZEND_CATCH:
-				// Check if this is really an exception, if not, jump over code
+				/* Check if this is really an exception, if not, jump over code */
 				if (EG(exception) == NULL) {
 						opline = &op_array->opcodes[opline->op2.u.opline_num];
 						continue;

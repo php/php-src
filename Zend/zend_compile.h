@@ -48,7 +48,7 @@ typedef struct _zend_op_array zend_op_array;
 
 typedef struct _znode {
 	int op_type;
-	zend_llist *throw_list; // Try and save this space later on
+	zend_llist *throw_list; /* Try and save this space later on */
 	union {
 		zval constant;
 
