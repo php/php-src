@@ -126,7 +126,7 @@ int ap_php_getopt(int argc, char* const *argv, const char *optstr)
         return(*cp);
     }
     assert(0);
-    return(0);
+    return(0);	/* never reached */
 }
 
 #ifdef TESTGETOPT
