@@ -48,7 +48,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: PREQUIRES
 
 %description
-PHP5 is a powerful apache module that adds scripting and database connection
+PHP 5 is a powerful apache module that adds scripting and database connection
 capabilities to the apache server. This version includes the "php_cgi" binary
 for suExec and stand alone php scripts too.
 
