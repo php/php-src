@@ -968,7 +968,8 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	i_dispatch *obj, *obj_prop;
 	VARIANT *var_result;
 
-	return_value.type = IS_NULL;
+	INIT_ZVAL(return_value);	
+	ZVAL_NULL(&return_value);
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
@@ -987,7 +988,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 		switch(overloaded_property->type)
 		{
 			case OE_IS_ARRAY:
-				if(do_COM_offget(var_result, obj, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE)
+				if(do_COM_offget(var_result, obj, &overloaded_property->element, FALSE) == FAILURE)
 				{
 					efree(var_result);
 					efree(obj_prop);
@@ -996,7 +997,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 				break;
 
 			case OE_IS_OBJECT:
-				if(do_COM_propget(var_result, obj, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE)
+				if(do_COM_propget(var_result, obj, &overloaded_property->element, FALSE) == FAILURE)
 				{
 					efree(var_result);
 					efree(obj_prop);
@@ -1013,23 +1014,20 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 						return_value.type = IS_OBJECT;
 						return_value.value.obj.ce = &com_class_entry;
 						return_value.value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-						return_value.is_ref = 1;
-						return_value.refcount = 1;
 						zend_hash_init(return_value.value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 						ALLOC_ZVAL(handle);
-
-						handle->type = IS_LONG;
-						handle->value.lval = zend_list_insert(obj, php_COM_get_le_idispatch());
-						pval_copy_constructor(handle);
 						INIT_PZVAL(handle);
+						ZVAL_LONG(handle, zend_list_insert(obj, php_COM_get_le_idispatch()));
+
+						pval_copy_constructor(handle);
 						zend_hash_index_update(return_value.value.obj.properties, 0, &handle, sizeof(pval *), NULL);
 					}
 					else
 					{
 						efree(obj_prop);
 						return_value = *object;
-						return_value.refcount++;
+						ZVAL_ADDREF(&return_value);
 					}
 
 					efree(var_result);				
@@ -1041,48 +1039,39 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 		if(var_result->vt == VT_DISPATCH)
 		{
+			pval *handle;
+
 			if(var_result->pdispVal == NULL)
 			{
 					efree(var_result);
 					efree(obj_prop);
 					return return_value;
 			}
+
+			obj = obj_prop;
 			
 			php_COM_set(obj_prop, var_result->pdispVal, TRUE);
-			obj = obj_prop;
+
+			return_value.type = IS_OBJECT;
+			return_value.value.obj.ce = &com_class_entry;
+			return_value.value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+			zend_hash_init(return_value.value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+			ALLOC_ZVAL(handle);
+			INIT_PZVAL(handle);
+			ZVAL_LONG(handle, zend_list_insert(obj, php_COM_get_le_idispatch()));
+
+			pval_copy_constructor(handle);
+			zend_hash_index_update(return_value.value.obj.properties, 0, &handle, sizeof(pval *), NULL);
 		}
 		else
 		{
 			efree(obj_prop);
 			obj_prop = NULL;
+			php_variant_to_pval(var_result, &return_value, TRUE, codepage);
 		}
 
 		pval_destructor(&overloaded_property->element);
-	}
-	
-	if(obj_prop != NULL)
-	{
-		pval *handle;
-
-		return_value.type = IS_OBJECT;
-		return_value.value.obj.ce = &com_class_entry;
-		return_value.value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-		return_value.is_ref = 1;
-		return_value.refcount = 1;
-		zend_hash_init(return_value.value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-		ALLOC_ZVAL(handle);
-
-		handle->type = IS_LONG;
-		handle->value.lval = zend_list_insert(obj, php_COM_get_le_idispatch());
-		pval_copy_constructor(handle);
-		INIT_PZVAL(handle);
-		zend_hash_index_update(return_value.value.obj.properties, 0, &handle, sizeof(pval *), NULL);
-	}
-	else
-	{
-		php_variant_to_pval(var_result, &return_value, TRUE, codepage);
-
 	}
 	efree(var_result);				
 
