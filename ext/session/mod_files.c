@@ -239,7 +239,12 @@ PS_OPEN_FUNC(files)
 
 	data->fd = -1;
 	if ((p = strchr(save_path, ';'))) {
+		errno = 0;
 		data->dirdepth = (size_t) strtol(save_path, NULL, 10);
+		if (errno == ERANGE) {
+			efree(data);
+			return FAILURE;
+		}
 		save_path = p + 1;
 	}
 	data->basedir_len = strlen(save_path);
