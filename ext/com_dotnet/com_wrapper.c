@@ -235,8 +235,11 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 
 	name = php_com_olestring_to_string(bstrName, &namelen, COMG(code_page) TSRMLS_CC);
 
+	trace("Looking for %s, namelen=%d in %p\n", name, namelen, disp->name_to_dispid);
+	
 	/* Lookup the name in the hash */
 	if (zend_hash_find(disp->name_to_dispid, name, namelen+1, (void**)&tmp) == SUCCESS) {
+		trace("found it\n");
 		*pid = Z_LVAL_PP(tmp);
 		ret = S_OK;
 	}
@@ -268,22 +271,24 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
 		/* TODO: add support for overloaded objects */
 
-		trace("-- Invoke: %d %20s flags=%08x args=%d\n", id, Z_STRVAL_PP(name), wFlags, pdp->cArgs);
+		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_PP(name), Z_STRLEN_PP(name), wFlags, pdp->cArgs);
 		
 		/* convert args into zvals.
 		 * Args are in reverse order */
-		params = (zval ***)safe_emalloc(sizeof(zval **), pdp->cArgs, 0);
-		for (i = 0; i < pdp->cArgs; i++) {
-			VARIANT *arg;
-			zval *zarg;
-			
-			arg = &pdp->rgvarg[ pdp->cArgs - 1 - i];
+		if (pdp->cArgs) {
+			params = (zval ***)safe_emalloc(sizeof(zval **), pdp->cArgs, 0);
+			for (i = 0; i < pdp->cArgs; i++) {
+				VARIANT *arg;
+				zval *zarg;
 
-			trace("alloc zval for arg %d VT=%08x\n", i, V_VT(arg));
+				arg = &pdp->rgvarg[ pdp->cArgs - 1 - i];
 
-			ALLOC_INIT_ZVAL(zarg);
-			php_com_wrap_variant(zarg, arg, COMG(code_page) TSRMLS_CC);
-			params[i] = &zarg;
+				trace("alloc zval for arg %d VT=%08x\n", i, V_VT(arg));
+
+				ALLOC_INIT_ZVAL(zarg);
+				php_com_wrap_variant(zarg, arg, COMG(code_page) TSRMLS_CC);
+				params[i] = &zarg;
+			}
 		}
 
 		trace("arguments processed, prepare to do some work\n");	
@@ -300,10 +305,13 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 				if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, *name,
 							&retval, pdp->cArgs, params, 1, NULL TSRMLS_CC)) {
 					ret = S_OK;
+					trace("function called ok\n");
 				} else {
+					trace("failed to call func\n");
 					ret = DISP_E_EXCEPTION;
 				}
 			} zend_catch {
+				trace("something blew up\n");
 				ret = DISP_E_EXCEPTION;
 			} zend_end_try();
 		} else {
@@ -311,9 +319,11 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		}
 	
 		/* release arguments */
-		for (i = 0; i < pdp->cArgs; i++)
-			zval_ptr_dtor(params[i]);
-		efree(params);
+		if (params) {
+			for (i = 0; i < pdp->cArgs; i++)
+				zval_ptr_dtor(params[i]);
+			efree(params);
+		}
 		
 		/* return value */
 		if (retval) {
@@ -473,23 +483,23 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			if (keytype == HASH_KEY_IS_LONG) {
 				sprintf(namebuf, "%d", pid);
 				name = namebuf;
-				namelen = strlen(namebuf);
+				namelen = strlen(namebuf)+1;
 			}
 
 			zend_hash_move_forward_ex(Z_OBJPROP_P(disp->object), &pos);
 
 			/* Find the existing id */
-			if (zend_hash_find(disp->name_to_dispid, name, namelen+1, (void**)&tmp) == SUCCESS)
+			if (zend_hash_find(disp->name_to_dispid, name, namelen, (void**)&tmp) == SUCCESS)
 				continue;
 
 			/* add the mappings */
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, name, namelen, 1);
+			ZVAL_STRINGL(tmp, name, namelen-1, 1);
 			zend_hash_index_update(disp->dispid_to_name, pid, (void*)&tmp, sizeof(zval *), NULL);
 
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_LONG(tmp, pid);
-			zend_hash_update(disp->name_to_dispid, name, namelen+1, (void*)&tmp, sizeof(zval *), NULL);
+			zend_hash_update(disp->name_to_dispid, name, namelen, (void*)&tmp, sizeof(zval *), NULL);
 		}
 	}
 	
@@ -504,23 +514,23 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			if (keytype == HASH_KEY_IS_LONG) {
 				sprintf(namebuf, "%d", pid);
 				name = namebuf;
-				namelen = strlen(namebuf);
+				namelen = strlen(namebuf) + 1;
 			}
 
 			zend_hash_move_forward_ex(Z_OBJPROP_P(disp->object), &pos);
 
 			/* Find the existing id */
-			if (zend_hash_find(disp->name_to_dispid, name, namelen+1, (void**)&tmp) == SUCCESS)
+			if (zend_hash_find(disp->name_to_dispid, name, namelen, (void**)&tmp) == SUCCESS)
 				continue;
 
 			/* add the mappings */
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, name, namelen, 1);
+			ZVAL_STRINGL(tmp, name, namelen-1, 1);
 			zend_hash_index_update(disp->dispid_to_name, pid, (void*)&tmp, sizeof(zval *), NULL);
 
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_LONG(tmp, pid);
-			zend_hash_update(disp->name_to_dispid, name, namelen+1, (void*)&tmp, sizeof(zval *), NULL);
+			zend_hash_update(disp->name_to_dispid, name, namelen, (void*)&tmp, sizeof(zval *), NULL);
 		}
 	}
 }
