@@ -272,7 +272,7 @@ static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce,
 
 	zend_class_entry *ce_it = Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
 
-	if (!ce || !ce_it || !ce_it->get_iterator) {
+	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		zend_error(E_WARNING, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce->name);
 		zval_ptr_dtor(&iterator);
 		return NULL;
@@ -287,7 +287,7 @@ static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce,
 static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
 	/* check that class_type is traversable at c-level or implements at least one of 'aggregate' and 'Iterator' */
-	int i;
+	zend_uint i;
 
 	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
