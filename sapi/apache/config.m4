@@ -26,7 +26,7 @@ AC_ARG_WITH(apxs,
     AC_MSG_RESULT([2.  Apache was not compiled with DSO support (--enable-module=so);])
     AC_MSG_RESULT([3.  'apxs' is not in your path.  Try to use --with-apxs=/path/to/apxs])
     AC_MSG_RESULT([The output of $APXS follows])
-    $APXS
+    $APXS -q CFLAGS
     AC_MSG_ERROR([Aborting]) 
   fi 
 
