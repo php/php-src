@@ -77,7 +77,7 @@ extern "C" {
 #endif
 
 /* startup/shutdown */
-TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_status);
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level);
 TSRM_API void tsrm_shutdown(void);
 
 /* allocates a new thread-safe-resource id */
@@ -95,7 +95,9 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 
 
 /* Debug support */
-TSRM_API void tsrm_debug_set(int status);
+#define TSRM_ERROR_LEVEL_ERROR	1
+#define TSRM_ERROR_LEVEL_INFO	2
+TSRM_API void tsrm_debug_set(int level);
 
 /* utility functions */
 TSRM_API THREAD_T tsrm_thread_id(void);
