@@ -27,7 +27,7 @@ var_dump($baz);
 var_dump($arr);
 session_destroy();
 --EXPECT--
-object(foo)(2) {
+object(foo)#1 (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -35,7 +35,7 @@ object(foo)(2) {
 }
 array(1) {
   [3]=>
-  &object(foo)(2) {
+  object(foo)#2 (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
