@@ -25,22 +25,22 @@
 #endif
 
 #ifndef HAVE_SCANDIR
- #include <sys/types.h>
+#include <sys/types.h>
 
- #ifdef HAVE_DIRENT_H
-  #include <dirent.h>
- #endif
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 
- #ifdef PHP_WIN32
-  #include "win32/readdir.h"
- #endif  
+#ifdef PHP_WIN32
+#include "win32/readdir.h"
+#endif  
 
- #include <stdlib.h>
- #include <search.h>
+#include <stdlib.h>
+#include <search.h>
 #endif
 
 #ifndef HAVE_ALPHASORT
- #include <string.h>
+#include <string.h>
 
 int alphasort(const struct dirent **a, const struct dirent **b)
 {
