@@ -53,20 +53,14 @@ static void op_array_alloc_ops(zend_op_array *op_array)
 void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC)
 {
 	op_array->type = type;
-#if SUPPORT_INTERACTIVE
-	{
-		ELS_FETCH();
 
-		op_array->start_op_number = op_array->end_op_number = op_array->last_executed_op_number = 0;
-		op_array->backpatch_count = 0;
-		if (EG(interactive)) {
-			/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
-			 * will become invalid
-			 */
-			initial_ops_size = 8192;
-		}
+	op_array->backpatch_count = 0;
+	if (CG(interactive)) {
+		/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
+		 * will become invalid
+		 */
+		initial_ops_size = 8192;
 	}
-#endif
 
 	op_array->refcount = (zend_uint *) emalloc(sizeof(zend_uint));
 	*op_array->refcount = 1;
@@ -92,6 +86,8 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_D
 
 	op_array->return_reference = 0;
 	op_array->done_pass_two = 0;
+
+	op_array->start_op = NULL;
 
 	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_ctor_handler, op_array);
 }
@@ -201,16 +197,12 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 	zend_op *next_op;
 
 	if (next_op_num >= op_array->size) {
-#if SUPPORT_INTERACTIVE
-		ELS_FETCH();
-
-		if (EG(interactive)) {
+		if (CG(interactive)) {
 			/* we messed up */
 			zend_printf("Ran out of opcode space!\n"
 						"You should probably consider writing this huge script into a file!\n");
 			zend_bailout();
 		}
-#endif
 		op_array->size *= 4;
 		op_array_alloc_ops(op_array);
 	}

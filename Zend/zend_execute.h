@@ -127,9 +127,7 @@ static inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
 	return SUCCESS;
 }
 
-#if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D);
-#endif
 
 
 /* services */
