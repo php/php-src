@@ -48,8 +48,8 @@ static int php_lcg_initialized = 0;
 
 double php_combined_lcg(void)
 {
-	long q;
-	long z;
+	php_int32 q;
+	php_int32 z;
 	LCGLS_FETCH();
 
 	MODMULT(53668,40014,12211,2147483563L, LCG(s1));

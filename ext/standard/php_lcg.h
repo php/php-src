@@ -21,9 +21,11 @@
 #ifndef PHP_LCG_H
 #define PHP_LCG_H
 
+#include "ext/standard/basic_functions.h"
+
 typedef struct {
-	long s1;
-	long s2;
+	php_int32 s1;
+	php_int32 s2;
 } php_lcg_globals;
 
 double php_combined_lcg(void);
