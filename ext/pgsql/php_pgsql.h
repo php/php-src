@@ -98,6 +98,7 @@ PHP_FUNCTION(pg_field_name);
 PHP_FUNCTION(pg_field_num);
 PHP_FUNCTION(pg_field_size);
 PHP_FUNCTION(pg_field_type);
+PHP_FUNCTION(pg_field_type_oid);
 PHP_FUNCTION(pg_field_prtlen);
 PHP_FUNCTION(pg_field_is_null);
 /* async message functions */
