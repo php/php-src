@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-27 May 2004, PHP 5 Release Candidate 3
+?? ??? 2004, PHP 5 Release Candidate 3
 - Moved the PDFLib extension to PECL. (Wez)
 - Added support for dumping private/protected properties to var_dump().
   (Andrey)
