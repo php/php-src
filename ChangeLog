@@ -1,3 +1,49 @@
+2001-01-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    If we can't call custom replacement function, don't change the subject
+    string.
+
+    * ext/standard/string.c:
+    - Improved str_replace() to accept an array for any parameter - similar
+      to preg_replace(). 
+
+    * ext/pcre/php_pcre.c: Don't need to check for out-of-memory condition.
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h: Z-ify the source.
+
+2001-01-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/mssql/mssql.dsp
+      php.ini-dist
+      php.ini-optimized:
+    rename php_mssql70.dll to php_mssql.dll, as we have only one mssql extension
+
+2001-01-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed extract() to properly prefix numeric keys when EXTR_PREFIX_ALL is
+      used. 
+    - Added EXTR_PREFIX_INVALID flag to extract() to automatically prefix
+      string keys that do not constitute valid variable names. 
+
+2001-01-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c: Kill warning
+
+2001-01-22  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c:
+    Sigh.  Even less sleep than I thought :)  Really fix it this time.
+
+    * sapi/apache/mod_php4.c:
+    Too much work, not enough sleep...  Fix hash lookup
+
+    * NEWS: Update and pastify NEWS
+
+    * sapi/apache/mod_php4.c: Don't overwrite PATH_TRANSLATED if it exists
+
 2001-01-21  Rasmus Lerdorf  <rasmus@php.net>
 
     * NEWS: This probably should have a NEWS entry
