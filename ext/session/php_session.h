@@ -109,8 +109,8 @@ typedef struct _php_ps_globals {
 	long gc_maxlifetime;
 	int module_number;
 	long cache_expire;
-	long bug_compat; /* Whether to behave like PHP 4.2 and earlier */
-	long bug_compat_warn; /* Whether to warn about it */
+	zend_bool bug_compat; /* Whether to behave like PHP 4.2 and earlier */
+	zend_bool bug_compat_warn; /* Whether to warn about it */
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
