@@ -461,6 +461,8 @@ getservbyport \
 getrusage \
 gettimeofday \
 gmtime_r \
+inet_ntoa \
+inet_ntop \
 isascii \
 link \
 localtime_r \

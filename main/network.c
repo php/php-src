@@ -275,9 +275,6 @@ typedef int php_non_blocking_flags_t;
 # endif
 #endif
 
-
-
-
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -376,148 +373,6 @@ ok:
 }
 /* }}} */
 
-/* {{{ php_connect_nonb */
-PHPAPI int php_connect_nonb(int sockfd,
-						const struct sockaddr *addr,
-						socklen_t addrlen,
-						struct timeval *timeout)
-{
-#if (!defined(__BEOS__) && !defined(PHP_WIN32)) && (defined(O_NONBLOCK) || defined(O_NDELAY))
-
-
-	int flags;
-	int n;
-	int error = 0;
-	socklen_t len;
-	int ret = 0;
-	fd_set rset;
-	fd_set wset;
-	fd_set eset;
-
-	if (timeout == NULL)	{
-		/* blocking mode */
-		return connect(sockfd, addr, addrlen);
-	}
-	
-	flags = fcntl(sockfd, F_GETFL, 0);
-	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-
-	if ((n = connect(sockfd, addr, addrlen)) < 0) {
-		if (errno != EINPROGRESS) {
-			return -1;
-		}
-	}
-
-	if (n == 0) {
-		goto ok;
-	}
-
-	FD_ZERO(&rset);
-	FD_ZERO(&eset);
-	FD_SET(sockfd, &rset);
-	FD_SET(sockfd, &eset);
-
-	wset = rset;
-
-	if ((n = select(sockfd + 1, &rset, &wset, &eset, timeout)) == 0) {
-		error = ETIMEDOUT;
-	}
-
-	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
-		len = sizeof(error);
-		/*
-		   BSD-derived systems set errno correctly
-		   Solaris returns -1 from getsockopt in case of error
-		   */
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
-			ret = -1;
-		}
-	} else {
-		/* whoops: sockfd has disappeared */
-		ret = -1;
-	}
-
-ok:
-	fcntl(sockfd, F_SETFL, flags);
-
-	if(error) {
-		errno = error;
-		ret = -1;
-	}
-	return ret;
-#else /* !defined(PHP_WIN32) && ... */
-#ifdef PHP_WIN32
-	return php_connect_nonb_win32((SOCKET) sockfd, addr, addrlen, timeout);
-#endif
-	return connect(sockfd, addr, addrlen);
-#endif
-}
-/* }}} */
-
-#ifdef PHP_WIN32
-/* {{{ php_connect_nonb_win32 */
-PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
-						const struct sockaddr *addr,
-						socklen_t addrlen,
-						struct timeval *timeout)
-{
-	int error = 0, error_len, ret;
-	u_long non_block = TRUE, block = FALSE;
-
-	fd_set rset, wset;
-
-	if (timeout == NULL)	{
-		/* blocking mode */
-		return connect(sockfd, addr, addrlen);
-	}
-	
-	/* Set the socket to be non-blocking */
-	ioctlsocket(sockfd, FIONBIO, &non_block);
-
-	if (connect(sockfd, addr, addrlen) == SOCKET_ERROR) {
-		if (WSAGetLastError() != WSAEWOULDBLOCK) {
-			return SOCKET_ERROR;
-		}
-	}
-
-	FD_ZERO(&rset);
-	FD_SET(sockfd, &rset);
-
-	FD_ZERO(&wset);
-	FD_SET(sockfd, &wset);
-
-	if ((ret = select(sockfd + 1, &rset, &wset, NULL, timeout)) == 0) {
-		WSASetLastError(WSAETIMEDOUT);
-		return SOCKET_ERROR;
-	}
-
-	if (ret == SOCKET_ERROR) {
-		return SOCKET_ERROR;
-	}
-
-	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
-		error_len = sizeof(error);
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char *) &error, &error_len) == SOCKET_ERROR) {
-			return SOCKET_ERROR;
-		}
-	} else {
-		/* whoops: sockfd has disappeared */
-		return SOCKET_ERROR;
-	}
-
-	/* Set the socket back to blocking */
-	ioctlsocket(sockfd, FIONBIO, &block);
-
-	if (error) { 
-		WSASetLastError(error);
-		return SOCKET_ERROR;
-	}
-
-	return 0;
-}
-/* }}} */
-#endif
-
 /* {{{ sub_times */
 static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
 {
@@ -533,6 +388,261 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
 	}
 }
 /* }}} */
+
+/* Bind to a local IP address.
+ * Returns the bound socket, or -1 on failure.
+ * */
+/* {{{ php_network_bind_socket_to_local_addr */
+int php_network_bind_socket_to_local_addr(const char *host, unsigned port,
+		int socktype, char **error_string, int *error_code
+		TSRMLS_DC)
+{
+	int num_addrs, sock, n, err = 0;
+	struct sockaddr **sal, **psal, *sa;
+	socklen_t socklen;
+
+	num_addrs = php_network_getaddresses(host, &psal, error_string TSRMLS_CC);
+
+	if (num_addrs == 0) {
+		/* could not resolve address(es) */
+		return -1;
+	}
+
+	for (sal = psal; *sal != NULL; sal++) {
+		sa = *sal;
+
+		/* create a socket for this address */
+		sock = socket(sa->sa_family, socktype, 0);
+
+		if (sock == SOCK_ERR) {
+			continue;
+		}
+
+		switch (sa->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+			case AF_INET6:
+				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
+				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+				socklen = sizeof(struct sockaddr_in6);
+				break;
+#endif
+			case AF_INET:
+				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
+				((struct sockaddr_in *)sa)->sin_port = htons(port);
+				socklen = sizeof(struct sockaddr_in);
+				break;
+			default:
+				/* Unknown family */
+				sa = NULL;
+		}
+
+		if (sa) {
+			/* attempt to bind */
+		
+#ifdef SO_REUSEADDR
+			{
+				int val = 1;
+				setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+			}
+#endif
+			
+			n = bind(sock, sa, socklen);
+
+			if (n != SOCK_CONN_ERR) {
+				goto bound;
+			}
+
+			err = php_socket_errno();
+		}
+
+		close(sock);
+	}
+	sock = -1;
+
+	if (error_code) {
+		*error_code = err;
+	}
+	if (error_string) {
+		*error_string = php_socket_strerror(err, NULL, 0);
+	}
+	
+bound:
+
+	php_network_freeaddresses(psal);
+	
+	return sock;
+	
+}
+/* }}} */
+
+static void populate_name(
+		/* input address */
+		struct sockaddr *sa, socklen_t sl,
+		/* output readable address */
+		char **textaddr, long *textaddrlen,
+		/* output address */
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC)
+{
+	if (addr) {
+		*addr = emalloc(sl);
+		memcpy(*addr, sa, sl);
+		*addrlen = sl;
+	}
+
+	if (textaddr) {
+#if HAVE_IPV6 && HAVE_INET_NTOP
+		char abuf[256];
+#endif
+		char *buf = NULL;
+
+		switch (sa->sa_family) {
+			case AF_INET:
+				/* generally not thread safe, but it *is* thread safe under win32 */
+				buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
+				if (buf) {
+					*textaddrlen = strlen(buf);
+					*textaddr = estrndup(buf, *textaddrlen);
+				}
+
+				break;
+
+#if HAVE_IPV6
+			case AF_INET6:
+				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
+				if (buf) {
+					*textaddrlen = strlen(buf);
+					*textaddr = estrndup(buf, *textaddrlen);
+				}
+
+				break;
+#endif
+#ifdef AF_UNIX
+			case AF_UNIX:
+				{
+					struct sockaddr_un *ua = (struct sockaddr_un*)sa;
+
+					if (ua->sun_path[0] == '\0') {
+						/* abstract name */
+						int len = strlen(ua->sun_path + 1) + 1;
+						*textaddrlen = len;
+						*textaddr = emalloc(len + 1);
+						memcpy(*textaddr, ua->sun_path, len);
+						(*textaddr)[len] = '\0';
+					} else {
+						*textaddrlen = strlen(ua->sun_path);
+						*textaddr = estrndup(ua->sun_path, *textaddrlen);
+					}
+				}
+				break;
+#endif
+
+		}
+
+	}
+}
+
+PHPAPI int php_network_get_peer_name(int sock, 
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC)
+{
+	php_sockaddr_storage sa;
+	socklen_t sl = sizeof(sa);
+	
+	if (getpeername(sock, (struct sockaddr*)&sa, &sl) == 0) {
+		populate_name((struct sockaddr*)&sa, sl,
+				textaddr, textaddrlen,
+				addr, addrlen
+				TSRMLS_CC);
+		return 0;
+	}
+	return -1;
+}
+
+PHPAPI int php_network_get_sock_name(int sock, 
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC)
+{
+	php_sockaddr_storage sa;
+	socklen_t sl = sizeof(sa);
+	
+	if (getsockname(sock, (struct sockaddr*)&sa, &sl) == 0) {
+		populate_name((struct sockaddr*)&sa, sl,
+				textaddr, textaddrlen,
+				addr, addrlen
+				TSRMLS_CC);
+		return 0;
+	}
+	return -1;
+
+}
+
+
+/* Accept a client connection from a server socket,
+ * using an optional timeout.
+ * Returns the peer address in addr/addrlen (it will emalloc
+ * these, so be sure to efree the result).
+ * If you specify textaddr/textaddrlen, a text-printable
+ * version of the address will be emalloc'd and returned.
+ * */
+
+/* {{{ php_network_accept_incoming */
+PHPAPI int php_network_accept_incoming(int srvsock,
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		char **error_string,
+		int *error_code
+		TSRMLS_DC)
+{
+	int clisock = -1;
+	fd_set rset;
+	int error, n;
+	php_sockaddr_storage sa;
+	socklen_t sl;
+
+	FD_ZERO(&rset);
+	FD_SET(srvsock, &rset);
+		
+	n = select(srvsock + 1, &rset, NULL, NULL, timeout);
+
+	if (n == 0) {
+		error = PHP_TIMEOUT_ERROR_VALUE;
+	} else if (n == -1) {
+		error = php_socket_errno();
+	} else if (FD_ISSET(srvsock, &rset)) {
+		sl = sizeof(sa);
+
+		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
+
+		if (clisock >= 0) {
+			populate_name((struct sockaddr*)&sa, sl,
+					textaddr, textaddrlen,
+					addr, addrlen
+					TSRMLS_CC);
+		} else {
+			error = php_socket_errno();
+		}
+	}
+	
+	if (error_code) {
+		*error_code = error;
+	}
+	if (error_string) {
+		*error_string = php_socket_strerror(error, NULL, 0);
+	}
+	
+	return clisock;
+}
+/* }}} */
+	
+
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
@@ -651,110 +761,6 @@ connected:
 	php_network_freeaddresses(psal);
 	
 	return sock;
-}
-/* }}} */
-
-
-
-/* {{{ php_hostconnect
- * Creates a socket of type socktype and connects to the given host and
- * port, returns the created socket on success, else returns -1.
- * timeout gives timeout in seconds, 0 means blocking mode.
- */
-int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout TSRMLS_DC)
-{	
-	int n, repeatto, s;
-	struct sockaddr **sal, **psal;
-	struct timeval individual_timeout;
-	int set_timeout = 0;
-	int err;
-	
-	n = php_network_getaddresses(host, &sal, NULL TSRMLS_CC);
-
-	if (n == 0)
-		return -1;
-	
-	if (timeout != NULL) {
-		/* is this a good idea? 5s? */
-		repeatto = timeout->tv_sec / n > 5;
-		if (repeatto) {
-			individual_timeout.tv_sec = timeout->tv_sec / n;
-		} else {
-			individual_timeout.tv_sec = timeout->tv_sec;
-		}
-
-		individual_timeout.tv_usec = timeout->tv_usec;
-	} else {
-		individual_timeout.tv_sec = 0;
-		individual_timeout.tv_usec = 0;
-	}
-	
-	/* Boolean indicating whether to pass a timeout */
-	set_timeout = individual_timeout.tv_sec + individual_timeout.tv_usec;
-	
-	psal = sal;
-	while (*sal != NULL) {
-		s = socket((*sal)->sa_family, socktype, 0);
-		if (s != SOCK_ERR) {
-			switch ((*sal)->sa_family) {
-#if defined( HAVE_GETADDRINFO ) && defined( HAVE_IPV6 )
-				case AF_INET6:
-					{
-						struct sockaddr_in6 *sa =
-							(struct sockaddr_in6 *)*sal;
-
-						sa->sin6_family = (*sal)->sa_family;
-						sa->sin6_port = htons(port);
-						if (php_connect_nonb(s, (struct sockaddr *) sa,
-									sizeof(*sa), (set_timeout) ? &individual_timeout : NULL) != SOCK_CONN_ERR)
-							goto ok;
-					} 
-					break;
-#endif
-				case AF_INET:
-					{
-						struct sockaddr_in *sa =
-							(struct sockaddr_in *)*sal;
-
-						sa->sin_family = (*sal)->sa_family;
-						sa->sin_port = htons(port);
-						if (php_connect_nonb(s, (struct sockaddr *) sa,
-									sizeof(*sa), (set_timeout) ? &individual_timeout : NULL) != SOCK_CONN_ERR)
-							goto ok;
-
-					} 
-					break;
-			}
-#ifdef PHP_WIN32
-			/* Preserve the last error */
-			err = WSAGetLastError();
-#else
-			err = errno;
-#endif
-			close (s);
-		}
-		sal++;
-
-		if (err == PHP_TIMEOUT_ERROR_VALUE) {
-			/* if the first attempt timed out, it's highly likely
-			 * that any subsequent attempts will do so also */
-			break;
-		}
-		
-	}
-	php_network_freeaddresses(psal);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_hostconnect: connect failed");
-
-#ifdef PHP_WIN32
-	/* Restore the last error */
-	WSASetLastError(err);
-#endif 
-
-	return -1;
-
- ok:
-	php_network_freeaddresses(psal);
-	return s;
 }
 /* }}} */
 

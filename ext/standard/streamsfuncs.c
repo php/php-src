@@ -27,11 +27,238 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
+#include "streamsfuncs.h"
 
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 #endif
+
+static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
+
+/* Streams based network functions */
+
+/* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode, string &errstring, double timeout, long flags, resource context])
+   Open a client connection to a remote address */
+PHP_FUNCTION(stream_socket_client)
+{
+	char *host;
+	long host_len;
+	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
+	double timeout = FG(default_socket_timeout);
+	unsigned long conv;
+	struct timeval tv;
+	char *hashkey = NULL;
+	php_stream *stream = NULL;
+	int err;
+	long flags = 0;
+	char *errstr = NULL;
+	php_stream_context *context = NULL;
+
+	RETVAL_FALSE;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzd!lr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	if (zcontext) {
+		context = decode_context_param(zcontext TSRMLS_CC);
+	}
+
+	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
+		spprintf(&hashkey, 0, "stream_socket_client__%s", host);
+	}
+	
+	/* prepare the timeout value for use */
+	conv = (unsigned long) (timeout * 1000000.0);
+	tv.tv_sec = conv / 1000000;
+	tv.tv_usec = conv % 1000000;
+
+	if (zerrno)	{
+		zval_dtor(zerrno);
+		ZVAL_LONG(zerrno, 0);
+	}
+	if (zerrstr) {
+		zval_dtor(zerrstr);
+		ZVAL_STRING(zerrstr, "", 1);
+	}
+
+	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT |
+			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
+			hashkey, &tv, context, &errstr, &err);
+
+	if (stream == NULL) {
+		/* host might contain binary characters */
+		char *quoted_host = php_addslashes(host, host_len, NULL, 0 TSRMLS_CC);
+		
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", quoted_host, errstr == NULL ? "Unknown error" : errstr);
+		efree(quoted_host);
+	}
+
+	if (hashkey) {
+		efree(hashkey);
+	}
+	
+	if (stream == NULL)	{
+		if (zerrno) {
+			zval_dtor(zerrno);
+			ZVAL_LONG(zerrno, err);
+		}
+		if (zerrstr && errstr) {
+			/* no need to dup; we need to efree buf anyway */
+			zval_dtor(zerrstr);
+			ZVAL_STRING(zerrstr, errstr, 0);
+		} else if (errstr) {
+			efree(errstr);
+		}
+		RETURN_FALSE;
+	}
+	
+	if (errstr) {
+		efree(errstr);
+	}
+	
+	php_stream_to_zval(stream, return_value);
+}
+/* }}} */
+
+/* {{{ proto resource stream_socket_server(string localaddress [, long &errcode, string &errstring, long flags, resource context])
+   Create a server socket bound to localaddress */
+PHP_FUNCTION(stream_socket_server)
+{
+	char *host;
+	long host_len;
+	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
+	php_stream *stream = NULL;
+	int err;
+	long flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
+	char *errstr = NULL;
+	php_stream_context *context = NULL;
+
+	RETVAL_FALSE;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzlr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	if (zcontext) {
+		context = decode_context_param(zcontext TSRMLS_CC);
+	}
+
+	if (zerrno)	{
+		zval_dtor(zerrno);
+		ZVAL_LONG(zerrno, 0);
+	}
+	if (zerrstr) {
+		zval_dtor(zerrstr);
+		ZVAL_STRING(zerrstr, "", 1);
+	}
+
+	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			STREAM_XPORT_SERVER | flags,
+			NULL, NULL, context, &errstr, &err);
+
+	if (stream == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : errstr);
+	}
+	
+	if (stream == NULL)	{
+		if (zerrno) {
+			zval_dtor(zerrno);
+			ZVAL_LONG(zerrno, err);
+		}
+		if (zerrstr && errstr) {
+			/* no need to dup; we need to efree buf anyway */
+			zval_dtor(zerrstr);
+			ZVAL_STRING(zerrstr, errstr, 0);
+		}
+		RETURN_FALSE;
+	}
+	
+	if (errstr) {
+		efree(errstr);
+	}
+	
+	php_stream_to_zval(stream, return_value);
+
+}
+/* }}} */
+
+/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout, string &peername ])
+   Accept a client connection from a server socket */
+PHP_FUNCTION(stream_socket_accept)
+{
+	double timeout = FG(default_socket_timeout);
+	zval *peername = NULL;
+	unsigned long conv;
+	struct timeval tv;
+	php_stream *stream = NULL, *clistream = NULL;
+	zval *zstream;
+
+	char *errstr = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz!", &zstream, &timeout, &peername) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, &zstream);
+	
+	/* prepare the timeout value for use */
+	conv = (unsigned long) (timeout * 1000000.0);
+	tv.tv_sec = conv / 1000000;
+	tv.tv_usec = conv % 1000000;
+
+	if (peername) {
+		zval_dtor(peername);
+		ZVAL_STRING(peername, "", 1);
+	}
+
+	if (0 == php_stream_xport_accept(stream, &clistream,
+				peername ? &Z_STRVAL_P(peername) : NULL,
+				peername ? &Z_STRLEN_P(peername) : NULL,
+				NULL, NULL,
+				&tv, &errstr
+				TSRMLS_CC) && clistream) {
+
+		php_stream_to_zval(clistream, return_value);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "accept failed: %s", errstr ? errstr : "Unknown error");
+
+		RETVAL_FALSE;
+	}
+
+	if (errstr) {
+		efree(errstr);
+	}
+}
+/* }}} */
+
+/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer)
+   Returns either the locally bound or remote name for a socket stream */
+PHP_FUNCTION(stream_socket_get_name)
+{
+	php_stream *stream;
+	zval *zstream;
+	zend_bool want_peer;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &zstream, &want_peer) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, &zstream);
+
+	Z_TYPE_P(return_value) = IS_STRING;
+	
+	if (0 != php_stream_xport_get_name(stream, want_peer,
+				&Z_STRVAL_P(return_value),
+				&Z_STRLEN_P(return_value),
+				NULL, NULL
+				TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 /* {{{ proto resource stream_get_meta_data(resource fp)
     Retrieves header/meta data from streams/file pointers */

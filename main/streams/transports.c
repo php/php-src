@@ -252,7 +252,7 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error
 
 /* Get the next client and their address (as a string) */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, int *textaddrlen,
 		void **addr, size_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
@@ -263,7 +263,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 
 	memset(&param, 0, sizeof(param));
 
-	param.op = STREAM_XPORT_OP_BIND;
+	param.op = STREAM_XPORT_OP_ACCEPT;
 	param.inputs.timeout = timeout;
 	param.want_addr = addr ? 1 : 0;
 	param.want_textaddr = textaddr ? 1 : 0;
@@ -283,6 +283,37 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		}
 		if (error_text) {
 			*error_text = param.outputs.error_text;
+		}
+
+		return param.outputs.returncode;
+	}
+	return ret;
+}
+
+PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
+		char **textaddr, int *textaddrlen,
+		void **addr, size_t *addrlen
+		TSRMLS_DC)
+{
+	php_stream_xport_param param;
+	int ret;
+
+	memset(&param, 0, sizeof(param));
+
+	param.op = want_peer ? STREAM_XPORT_OP_GET_PEER_NAME : STREAM_XPORT_OP_GET_NAME;
+	param.want_addr = addr ? 1 : 0;
+	param.want_textaddr = textaddr ? 1 : 0;
+	
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_XPORT_API, 0, &param);
+
+	if (ret == PHP_STREAM_OPTION_RETURN_OK) {
+		if (addr) {
+			*addr = param.outputs.addr;
+			*addrlen = param.outputs.addrlen;
+		}
+		if (textaddr) {
+			*textaddr = param.outputs.textaddr;
+			*textaddrlen = param.outputs.textaddrlen;
 		}
 
 		return param.outputs.returncode;

@@ -217,6 +217,25 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					xparam->outputs.returncode = listen(sock->socket, 5);
 					return PHP_STREAM_OPTION_RETURN_OK;
 
+				case STREAM_XPORT_OP_GET_NAME:
+					xparam->outputs.returncode = php_network_get_sock_name(sock->socket,
+							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+							xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
+							xparam->want_addr ? &xparam->outputs.addr : NULL,
+							xparam->want_addr ? &xparam->outputs.addrlen : NULL
+							TSRMLS_CC);
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+				case STREAM_XPORT_OP_GET_PEER_NAME:
+					xparam->outputs.returncode = php_network_get_peer_name(sock->socket,
+							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+							xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
+							xparam->want_addr ? &xparam->outputs.addr : NULL,
+							xparam->want_addr ? &xparam->outputs.addrlen : NULL
+							TSRMLS_CC);
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+
 				default:
 					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 			}
@@ -311,17 +330,97 @@ php_stream_ops php_stream_unixdg_socket_ops = {
 
 /* network socket operations */
 
+#ifdef AF_UNIX
+static inline int parse_unix_address(php_stream_xport_param *xparam, struct sockaddr_un *unix_addr TSRMLS_DC)
+{
+	memset(unix_addr, 0, sizeof(*unix_addr));
+	unix_addr->sun_family = AF_UNIX;
+
+	/* we need to be binary safe on systems that support an abstract
+	 * namespace */
+	if (xparam->inputs.namelen >= sizeof(unix_addr->sun_path)) {
+		/* On linux, when the path begins with a NUL byte we are
+		 * referring to an abstract namespace.  In theory we should
+		 * allow an extra byte below, since we don't need the NULL.
+		 * BUT, to get into this branch of code, the name is too long,
+		 * so we don't care. */
+		xparam->inputs.namelen = sizeof(unix_addr->sun_path) - 1;
+	}
+
+	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
+
+	return 1;
+}
+#endif
+
+static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno TSRMLS_DC)
+{
+	char *colon;
+	char *host = NULL;
+
+	colon = memchr(xparam->inputs.name, ':', xparam->inputs.namelen);
+	if (colon) {
+		*portno = atoi(colon + 1);
+		host = estrndup(xparam->inputs.name, colon - xparam->inputs.name);
+	} else {
+		if (xparam->want_errortext) {
+			spprintf(&xparam->outputs.error_text, 0, "Failed to parse address \"%s\"", xparam->inputs.name);
+		}
+		return NULL;
+	}
+
+	return host;
+}
+
 static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam TSRMLS_DC)
 {
+	char *host = NULL;
+	int portno, err;
 
-	return -1;
+#ifdef AF_UNIX
+	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
+		struct sockaddr_un unix_addr;
+
+		sock->socket = socket(PF_UNIX, stream->ops == &php_stream_unix_socket_ops ? SOCK_STREAM : SOCK_DGRAM, 0);
+
+		if (sock->socket == SOCK_ERR) {
+			if (xparam->want_errortext) {
+				spprintf(&xparam->outputs.error_text, 0, "Failed to create unix%s socket %s",
+						stream->ops == &php_stream_unix_socket_ops ? "" : "datagram",
+						strerror(errno));
+			}
+			return -1;
+		}
+
+		parse_unix_address(xparam, &unix_addr TSRMLS_CC);
+
+		return bind(sock->socket, &unix_addr, sizeof(unix_addr));
+	}
+#endif
+
+	host = parse_ip_address(xparam, &portno TSRMLS_CC);
+
+	if (host == NULL) {
+		return -1;
+	}
+
+	sock->socket = php_network_bind_socket_to_local_addr(host, portno,
+			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
+			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+			&err
+			TSRMLS_CC);
+	
+	if (host) {
+		efree(host);
+	}
+
+	return sock->socket == -1 ? -1 : 0;
 }
 
 static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam TSRMLS_DC)
 {
-	char *colon;
 	char *host = NULL;
 	int portno, err;
 	int ret;
@@ -339,21 +438,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			return -1;
 		}
 
-		memset(&unix_addr, 0, sizeof(unix_addr));
-		unix_addr.sun_family = AF_UNIX;
-
-		/* we need to be binary safe on systems that support an abstract
-		 * namespace */
-		if (xparam->inputs.namelen >= sizeof(unix_addr.sun_path)) {
-			/* On linux, when the path begins with a NUL byte we are
-			 * referring to an abstract namespace.  In theory we should
-			 * allow an extra byte below, since we don't need the NULL.
-			 * BUT, to get into this branch of code, the name is too long,
-			 * so we don't care. */
-			xparam->inputs.namelen = sizeof(unix_addr.sun_path) - 1;
-		}
-
-		memcpy(unix_addr.sun_path, xparam->inputs.name, xparam->inputs.namelen);
+		parse_unix_address(xparam, &unix_addr TSRMLS_CC);
 
 		ret = php_network_connect_socket(sock->socket,
 				(const struct sockaddr *)&unix_addr, sizeof(unix_addr),
@@ -366,15 +451,10 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		goto out;
 	}
 #endif
-	
-	colon = memchr(xparam->inputs.name, ':', xparam->inputs.namelen);
-	if (colon) {
-		portno = atoi(colon + 1);
-		host = estrndup(xparam->inputs.name, colon - xparam->inputs.name);
-	} else {
-		if (xparam->want_errortext) {
-			spprintf(&xparam->outputs.error_text, 0, "Failed to parse address \"%s\"", xparam->inputs.name);
-		}
+
+	host = parse_ip_address(xparam, &portno TSRMLS_CC);
+
+	if (host == NULL) {
 		return -1;
 	}
 
@@ -409,9 +489,42 @@ out:
 }
 
 static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t *sock,
-		php_stream_xport_param *xparam TSRMLS_DC)
+		php_stream_xport_param *xparam STREAMS_DC TSRMLS_DC)
 {
-	return -1;
+	int clisock;
+
+	xparam->outputs.client = NULL;
+
+	clisock = php_network_accept_incoming(sock->socket,
+			xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+			xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
+			xparam->want_addr ? &xparam->outputs.addr : NULL,
+			xparam->want_addr ? &xparam->outputs.addrlen : NULL,
+			xparam->inputs.timeout,
+			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+			&xparam->outputs.error_code
+			TSRMLS_CC);
+
+	if (clisock >= 0) {
+		php_netstream_data_t *clisockdata;
+
+		clisockdata = pemalloc(sizeof(*clisockdata), stream->is_persistent);
+
+		if (clisockdata == NULL) {
+			close(clisock);
+			/* technically a fatal error */
+		} else {
+			memcpy(clisockdata, sock, sizeof(*clisockdata));
+			clisockdata->socket = clisock;
+
+			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
+			if (xparam->outputs.client) {
+				xparam->outputs.client->context = stream->context;
+			}
+		}
+	}
+	
+	return xparam->outputs.client == NULL ? -1 : 0;
 }
 
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
@@ -435,7 +548,7 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 
 
 				case STREAM_XPORT_OP_ACCEPT:
-					xparam->outputs.returncode = php_tcp_sockop_accept(stream, sock, xparam TSRMLS_CC);
+					xparam->outputs.returncode = php_tcp_sockop_accept(stream, sock, xparam STREAMS_CC TSRMLS_CC);
 					return PHP_STREAM_OPTION_RETURN_OK;
 				default:
 					/* fall through */

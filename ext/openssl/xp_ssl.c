@@ -288,7 +288,6 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 			method = TLSv1_server_method();
 			break;
 		default:
-			printf("unknown method\n");
 			return -1;
 
 	}
@@ -307,19 +306,16 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
-		printf("failed to set fd %d\n", sslsock->s.socket);
 		handle_ssl_error(stream, 0 TSRMLS_CC);
 	}
 
 	if (cparam->inputs.session) {
-		printf("sess=%p\n", cparam->inputs.session);
 		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied session stream must be an SSL enabled stream");
 		} else {
 			SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle);
 		}
 	}
-printf("crypto prepared for fd=%d\n", sslsock->s.socket);
 	return 0;
 }
 
@@ -337,13 +333,11 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 				if (n <= 0) {
 					retry = handle_ssl_error(stream, n TSRMLS_CC);
-					printf("error; retry = %d\n", retry);
 				} else {
 					break;
 				}
 			} while (retry);
 
-			printf("enabled_crypto: n=%d\n", n);
 			if (n == 1) {
 				sslsock->ssl_active = 1;
 			}
@@ -359,6 +353,47 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	return -1;
 }
 
+static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_netstream_data_t *sock,
+		php_stream_xport_param *xparam STREAMS_DC TSRMLS_DC)
+{
+	int clisock;
+
+	xparam->outputs.client = NULL;
+
+	clisock = php_network_accept_incoming(sock->s.socket,
+			xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+			xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
+			xparam->want_addr ? &xparam->outputs.addr : NULL,
+			xparam->want_addr ? &xparam->outputs.addrlen : NULL,
+			xparam->inputs.timeout,
+			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+			&xparam->outputs.error_code
+			TSRMLS_CC);
+
+	if (clisock >= 0) {
+		php_openssl_netstream_data_t *clisockdata;
+
+		clisockdata = pemalloc(sizeof(*clisockdata), stream->is_persistent);
+
+		if (clisockdata == NULL) {
+			close(clisock);
+			/* technically a fatal error */
+		} else {
+			/* copy underlying tcp fields */
+			memset(clisockdata, 0, sizeof(*clisockdata));
+			memcpy(clisockdata, sock, sizeof(clisockdata->s));
+
+			clisockdata->s.socket = clisock;
+			
+			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
+			if (xparam->outputs.client) {
+				xparam->outputs.client->context = stream->context;
+			}
+		}
+	}
+	
+	return xparam->outputs.client == NULL ? -1 : 0;
+}
 static int php_openssl_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -403,6 +438,14 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 					break;
+
+				case STREAM_XPORT_OP_ACCEPT:
+					/* we need to copy the additional fields that the underlying tcp transport
+					 * doesn't know about */
+					xparam->outputs.returncode = php_openssl_tcp_sockop_accept(stream, sslsock, xparam STREAMS_CC TSRMLS_CC);
+					return PHP_STREAM_OPTION_RETURN_OK;
+					break;
+
 				default:
 					/* fall through */
 					break;
@@ -464,7 +507,7 @@ PHPAPI php_stream *php_openssl_ssl_socket_factory(const char *proto, long protol
 	php_openssl_netstream_data_t *sslsock = NULL;
 	
 	sslsock = pemalloc(sizeof(php_openssl_netstream_data_t), persistent_id ? 1 : 0);
-	memset(sslsock, 0, sizeof(php_openssl_netstream_data_t));
+	memset(sslsock, 0, sizeof(*sslsock));
 
 	sslsock->s.is_blocked = 1;
 	sslsock->s.timeout.tv_sec = FG(default_socket_timeout);
@@ -488,6 +531,8 @@ PHPAPI php_stream *php_openssl_ssl_socket_factory(const char *proto, long protol
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
 	}
+
+printf("enable_on_connect = %d  --> proto %s\n", sslsock->enable_on_connect, proto);
 	
 	return stream;
 }

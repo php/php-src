@@ -72,10 +72,16 @@ PHPAPI int php_stream_xport_listen(php_stream *stream,
 /* Get the next client and their address as a string, or the underlying address
  * structure.  You must efree either of these if you request them */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, int *textaddrlen,
 		void **addr, size_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
+		TSRMLS_DC);
+
+/* Get the name of either the socket or it's peer */
+PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
+		char **textaddr, int *textaddrlen,
+		void **addr, size_t *addrlen
 		TSRMLS_DC);
 
 /* Structure definition for the set_option interface that the above functions wrap */
@@ -84,7 +90,9 @@ typedef struct _php_stream_xport_param {
 	enum {
 		STREAM_XPORT_OP_BIND, STREAM_XPORT_OP_CONNECT,
 		STREAM_XPORT_OP_LISTEN, STREAM_XPORT_OP_ACCEPT,
-		STREAM_XPORT_OP_CONNECT_ASYNC
+		STREAM_XPORT_OP_CONNECT_ASYNC,
+		STREAM_XPORT_OP_GET_NAME,
+		STREAM_XPORT_OP_GET_PEER_NAME
 	} op;
 	int want_addr:1;
 	int want_textaddr:1;
@@ -99,7 +107,7 @@ typedef struct _php_stream_xport_param {
 	struct {
 		php_stream *client;
 		int returncode;
-		void *addr;
+		struct sockaddr *addr;
 		size_t addrlen;
 		char *textaddr;
 		long textaddrlen;

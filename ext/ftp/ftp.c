@@ -135,7 +135,9 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 	tv.tv_sec = timeout_sec;
 	tv.tv_usec = 0;
 
-	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, &tv TSRMLS_CC);
+	ftp->fd = php_network_connect_socket_to_host(host,
+			(unsigned short) (port ? port : 21), SOCK_STREAM,
+			0, &tv, NULL, NULL TSRMLS_CC);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
