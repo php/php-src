@@ -445,6 +445,7 @@ dnl -------------------------------------------------------------------------
 
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
+alphasort \
 asctime_r \
 chroot \
 ctime_r \
@@ -480,6 +481,7 @@ random \
 rand_r \
 regcomp \
 res_search \
+scandir \
 setitimer \
 setlocale \
 localeconv \
@@ -1093,7 +1095,7 @@ PHP_SUBST(install_targets)
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
-       safe_mode.c fopen_wrappers.c alloca.c \
+       safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        streams.c network.c php_open_temporary_file.c php_logos.c \
