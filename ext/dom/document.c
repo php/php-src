@@ -1076,6 +1076,7 @@ PHP_FUNCTION(dom_document_import_node)
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
+		
 	}
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) retnodep, &ret, intern);
@@ -1406,7 +1407,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 
 
 /* {{{ */
-static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) {
+static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int options TSRMLS_DC) {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt = NULL;
 	dom_doc_props *doc_props;
@@ -1435,7 +1436,9 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	xmlInitParser();
 
+#if LIBXML_VERSION < 20600
 	keep_blanks = xmlKeepBlanksDefault(keep_blanks);
+#endif
 
 	if (mode == DOM_LOAD_FILE) {
 		char *file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
@@ -1447,11 +1450,13 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		ctxt = xmlCreateDocParserCtxt(source);
 	}
 
+#if LIBXML_VERSION < 20600
 	xmlKeepBlanksDefault(keep_blanks);
 	/* xmlIndentTreeOutput default is changed in xmlKeepBlanksDefault
 	reset back to 1 which is default value */
 
 	xmlIndentTreeOutput = 1;
+#endif
 
 	if (ctxt == NULL) {
 		return(NULL);
@@ -1477,11 +1482,6 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		}
 	}
 
-	ctxt->recovery = recover;
-	ctxt->validate = validate;
-    ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
-	ctxt->replaceEntities = substitute_ent;
-
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 
@@ -1489,15 +1489,40 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		ctxt->sax->error = php_libxml_ctx_error;
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
+
+#if LIBXML_VERSION >= 20600
+	if (validate && ! (options & XML_PARSE_DTDVALID)) {
+		options |= XML_PARSE_DTDVALID;
+	}
+	if (resolve_externals && ! (options & XML_PARSE_DTDATTR)) {
+		options |= XML_PARSE_DTDATTR;
+	}
+	if (substitute_ent && ! (options & XML_PARSE_NOENT)) {
+		options |= XML_PARSE_NOENT;
+	}
+	if (keep_blanks == 0 && ! (options & XML_PARSE_NOBLANKS)) {
+		options |= XML_PARSE_NOBLANKS;
+	}
+	if (options > 0) {
+		xmlCtxtUseOptions(ctxt, options);
+	}
+#else
+	ctxt->validate = validate;
+    ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
+	ctxt->replaceEntities = substitute_ent;
+#endif
+
+	ctxt->recovery = recover;
 	if (recover) {
 		old_error_reporting = EG(error_reporting);
 		EG(error_reporting) = old_error_reporting | E_WARNING;
 	}
+
 	xmlParseDocument(ctxt);
 
 	if (ctxt->wellFormed || recover) {
 		ret = ctxt->myDoc;
-		if (recover) {
+		if (ctxt->recovery) {
 			EG(error_reporting) = old_error_reporting;
 		}
 		/* If loading from memory, set the base reference uri for the document */
@@ -1523,14 +1548,14 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	dom_doc_props *doc_prop;
 	dom_object *intern;
 	char *source;
-	int source_len, refcount, ret;
+	int source_len, refcount, ret, options = 0;
 
 	id = getThis();
 	if (id != NULL && ! instanceof_function(Z_OBJCE_P(id), dom_document_class_entry TSRMLS_CC)) {
 		id = NULL;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -1539,7 +1564,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		RETURN_FALSE;
 	}
 
-	newdoc = dom_document_parser(id, mode, source TSRMLS_CC);
+	newdoc = dom_document_parser(id, mode, source, options TSRMLS_CC);
 
 	if (!newdoc)
 		RETURN_FALSE;
@@ -1572,7 +1597,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 }
 /* }}} end dom_parser_document */
 
-/* {{{ proto DOMNode dom_document_load(string source);
+/* {{{ proto DOMNode dom_document_load(string source [, int options]);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
 */
@@ -1582,7 +1607,7 @@ PHP_METHOD(domdocument, load)
 }
 /* }}} end dom_document_load */
 
-/* {{{ proto DOMNode dom_document_loadxml(string source);
+/* {{{ proto DOMNode dom_document_loadxml(string source [, int options]);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-loadXML
 Since: DOM Level 3
 */
