@@ -42,6 +42,7 @@ zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	PHP_FALIAS(setParameter, xsl_xsltprocessor_set_parameter, NULL)
 	PHP_FALIAS(getParameter, xsl_xsltprocessor_get_parameter, NULL)
 	PHP_FALIAS(removeParameter, xsl_xsltprocessor_remove_parameter, NULL)
+	PHP_FALIAS(hasExsltSupport, xsl_xsltprocessor_has_exslt_support, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -415,3 +416,16 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 	}
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
+
+/* {{{ proto xsl_xsltprocessor_has_exslt_support();
+*/
+PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
+{
+#if HAVE_XSL_EXSLT
+	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} end xsl_xsltprocessor_has_exslt_support(); */
+
