@@ -73,6 +73,10 @@ static int le_result, le_link, le_plink;
 #	endif
 #endif
 
+#if MYSQL_VERSION_ID > 32133 || defined(FIELD_TYPE_TINY)
+#define MYSQL_HAS_TINY
+#endif
+
 #define MYSQL_ASSOC		1<<0
 #define MYSQL_NUM		1<<1
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
@@ -1528,7 +1532,7 @@ static char *php_mysql_get_field_name(int field_type)
 		case FIELD_TYPE_VAR_STRING:
 			return "string";
 			break;
-#ifdef FIELD_TYPE_TINY
+#ifdef MYSQL_HAS_TINY
 		case FIELD_TYPE_TINY:
 #endif
 		case FIELD_TYPE_SHORT:
