@@ -23,6 +23,18 @@
 #ifndef PHP_INTERBASE_H
 #define PHP_INTERBASE_H
 
+#ifdef PHP_WIN32
+# ifdef INTERBASE_EXPORTS
+#  define FB_API __declspec(dllexport)
+# elif defined(COMPILE_DL_INTERBASE)
+#  define FB_API __declspec(dllimport)
+# else
+#  define FB_API /* nothing special */
+# endif
+#else
+# define INTERBASE_API /* nothing special */
+#endif
+
 extern zend_module_entry ibase_module_entry;
 #define phpext_interbase_ptr &ibase_module_entry
 
@@ -49,6 +61,7 @@ PHP_FUNCTION(ibase_free_query);
 PHP_FUNCTION(ibase_timefmt);
 
 PHP_FUNCTION(ibase_gen_id);
+PHP_FUNCTION(ibase_insert_id);
 PHP_FUNCTION(ibase_num_fields);
 PHP_FUNCTION(ibase_num_params);
 #if abies_0
@@ -92,6 +105,8 @@ PHP_FUNCTION(ibase_errcode);
 PHP_FUNCTION(ibase_wait_event);
 PHP_FUNCTION(ibase_set_event_handler);
 PHP_FUNCTION(ibase_free_event_handler);
+
+FB_API int php_ibase_var_zval(zval *, void *, int, int, int, int TSRMLS_DC);
 
 #else
 
