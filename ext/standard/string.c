@@ -628,7 +628,7 @@ PHP_FUNCTION(wordwrap)
 {
 	const char *text, *breakchar = "\n";
 	char *newtext;
-	int textlen, breakcharlen = 1, newtextlen;
+	int textlen, breakcharlen = 1, newtextlen, alloced, chk;
 	long current = 0, laststart = 0, lastspace = 0;
 	long linelength = 75;
 	zend_bool docut = 0;
@@ -670,18 +670,24 @@ PHP_FUNCTION(wordwrap)
 	} else {
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
-			/* Add extra 10% to accomodate strings with unpredicatable number of breaks */
-			newtextlen = textlen + (int)((textlen/linelength + 1) * breakcharlen * 1.1) + 1;
+			chk = (int)(textlen/linelength + 1);
+			alloced = textlen + chk * breakcharlen + 1;
 		} else {
-			newtextlen = textlen * (breakcharlen + 1) + 1;
+			chk = textlen;
+			alloced = textlen * (breakcharlen + 1) + 1;
 		}
-		newtext = emalloc(newtextlen);
-	
+		newtext = emalloc(alloced);
+
 		/* now keep track of the actual new text length */
 		newtextlen = 0;
 
 		laststart = lastspace = 0;
 		for (current = 0; current < textlen; current++) {
+			if (chk <= 0) {
+				alloced += (int) (((textlen - current + 1)/linelength + 1) * breakcharlen) + 1;
+				newtext = erealloc(newtext, alloced);
+				chk = (int) ((textlen - current)/linelength) + 1;
+			}
 			/* when we hit an existing break, copy to new buffer, and
 			 * fix up laststart and lastspace */
 			if (text[current] == breakchar[0]
@@ -691,6 +697,7 @@ PHP_FUNCTION(wordwrap)
 				newtextlen += current-laststart+breakcharlen;
 				current += breakcharlen - 1;
 				laststart = lastspace = current + 1;
+				chk--;
 			}
 			/* if it is a space, check if it is at the line boundary,
 			 * copy and insert a break, or just keep track of it */
@@ -701,6 +708,7 @@ PHP_FUNCTION(wordwrap)
 					memcpy(newtext+newtextlen, breakchar, breakcharlen);
 					newtextlen += breakcharlen;
 					laststart = current + 1;
+					chk--;
 				}
 				lastspace = current;
 			}
@@ -714,6 +722,7 @@ PHP_FUNCTION(wordwrap)
 				memcpy(newtext+newtextlen, breakchar, breakcharlen);
 				newtextlen += breakcharlen;
 				laststart = lastspace = current;
+				chk--;
 			}
 			/* if the current word puts us over the linelength, copy
 			 * back up until the last space, insert a break, and move
@@ -725,6 +734,7 @@ PHP_FUNCTION(wordwrap)
 				memcpy(newtext+newtextlen, breakchar, breakcharlen);
 				newtextlen += breakcharlen;
 				laststart = lastspace = lastspace + 1;
+				chk--;
 			}
 		}
 
