@@ -501,7 +501,6 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 	switch (option) {
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			{
-				fd_set rfds;
 				struct timeval tv;
 				char buf;
 				int alive = 1;
