@@ -72,6 +72,25 @@ class PEAR_Command_Common extends PEAR
     }
 
     // }}}
+    // {{{ getShortcuts()
+
+    /**
+     * Return a list of all the command shortcuts defined by this class.
+     * @return array shortcut => command
+     * @access public
+     */
+    function getShortcuts()
+    {
+        $ret = array();
+        foreach (array_keys($this->commands) as $command) {
+            if (isset($this->commands[$command]['shortcut'])) {
+                $ret[$this->commands[$command]['shortcut']] = $command;
+            }
+        }
+        return $ret;
+    }
+
+    // }}}
     // {{{ getOptions()
 
     function getOptions($command)
@@ -151,10 +170,34 @@ class PEAR_Command_Common extends PEAR
         if (isset($this->commands[$command]['options']) &&
             count($this->commands[$command]['options']))
         {
-            $help = "Accepted options:\n";
-            // XXX Add long options
+            $help = "Options:\n";
             foreach ($this->commands[$command]['options'] as $k => $v) {
-                $help .= "   -" . $v['shortopt'] . "   " . $v['doc'] . "\n";
+                if (isset($v['shortopt'])) {
+                    $s = $v['shortopt'];
+                    if (@$s{1} == ':') {
+                        $argname = '';
+                        $optional = false;
+                        if (@$s{2} == ':') {
+                            $optional = true;
+                            $argname = substr($s, 3);
+                        } else {
+                            $argname = substr($s, 2);
+                        }
+                        if (empty($argname)) {
+                            $argname = 'arg';
+                        }
+                        if ($optional) {
+                            $help .= "  -$s [$argname], --{$k}[=$argname]\n";
+                        } else {
+                            $help .= "  -$s $argname, --$k=$argname\n";
+                        }
+                    } else {
+                        $help .= "  -$s, --$k\n";
+                    }
+                } else {
+                    $help .= "  --$k\n";
+                }
+                $help .= "        $v[doc]\n";
             }
             return $help;
         }
@@ -168,7 +211,17 @@ class PEAR_Command_Common extends PEAR
     {
         $func = @$this->commands[$command]['function'];
         if (empty($func)) {
-            return $this->raiseError("unknown command `$command'");
+            // look for shortcuts
+            foreach (array_keys($this->commands) as $cmd) {
+                if (@$this->commands[$cmd]['shortcut'] == $command) {
+                    $command = $cmd;
+                    $func = @$this->commands[$command]['function'];
+                    if (empty($func)) {
+                        return $this->raiseError("unknown command `$command'");
+                    }
+                    break;
+                }
+            }
         }
         return $this->$func($command, $options, $params);
     }

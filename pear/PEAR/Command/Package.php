@@ -37,32 +37,40 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     'doc' => 'Print the name of the packaged file.',
                     ),
                 ),
-            'doc' => 'Creates a PEAR package from its description file (usually
-called package.xml).
+            'doc' => '[descfile]
+Creates a PEAR package from its description file (usually called
+package.xml).
 '
             ),
         'package-info' => array(
             'summary' => 'Display information about a package file',
             'function' => 'doPackageInfo',
+            'shortcut' => 'pi',
             'options' => array(),
-            'doc' => 'Extracts information from a package file and displays it.
+            'doc' => '
+Extracts information from a package file and displays it.
 ',
             ),
         'package-list' => array(
             'summary' => 'List Files in Package',
             'function' => 'doPackageList',
+            'shortcut' => 'pl',
             'options' => array(),
-            'doc' => '',
+            'doc' => '
+',
             ),
         'package-validate' => array(
             'summary' => 'Validate Package Consistency',
             'function' => 'doPackageValidate',
+            'shortcut' => 'pv',
             'options' => array(),
-            'doc' => '',
+            'doc' => '
+',
             ),
         'cvstag' => array(
             'summary' => 'Set CVS Release Tag',
             'function' => 'doCvsTag',
+            'shortcut' => 'ct',
             'options' => array(
                 'quiet' => array(
                     'shortopt' => 'q',
@@ -74,20 +82,28 @@ called package.xml).
                     ),
                 'slide' => array(
                     'shortopt' => 'F',
-                    'doc' => 'Move tag if it exists',
+                    'doc' => 'Move (slide) tag if it exists',
                     ),
                 'delete' => array(
                     'shortopt' => 'd',
-                    'doc' => 'Remote tag',
+                    'doc' => 'Remove tag',
                     ),
                 ),
-            'doc' => '',
+            'doc' => '
+Sets a CVS tag on all files in a package.  Use this command after you have
+packaged a distribution tarball with the "package" command to tag what
+revisions of what files were in that release.  If need to fix something
+after running cvstag once, but before the tarball is released to the public,
+use the "slide" option to move the release tag.
+',
             ),
         'run-tests' => array(
             'summary' => 'Run Regression Tests',
             'function' => 'doRunTests',
+            'shortcut' => 'rt',
             'options' => array(),
-            'doc' => '',
+            'doc' => '[testfile|dir ...]
+Run regression tests with PHP\'s regression testing script (run-tests.php).',
             ),
         );
 

@@ -26,18 +26,23 @@ require_once 'PEAR/Config.php';
 class PEAR_Command_Registry extends PEAR_Command_Common
 {
     var $commands = array(
-        'list-installed' => array(
+        'list' => array(
             'summary' => 'List Installed Packages',
-            'function' => 'doListInstalled',
+            'function' => 'doList',
             'options' => array(),
-            'doc' => 'List the PEAR packages installed in your php_dir ({config php_dir)).
+            'doc' => '[package]
+If invoked without parameters, this command lists the PEAR packages
+installed in your php_dir ({config php_dir)).  With a parameter, it
+lists the files in that package.
 ',
             ),
         'shell-test' => array(
             'summary' => 'Shell Script Test',
+            'shortcut' => 'stest',
             'function' => 'doShellTest',
             'options' => array(),
-            'doc' => 'Tests if a package is installed in the system. Will exit(1) if it is not.
+            'doc' => '<package> [[relation] version]
+Tests if a package is installed in the system. Will exit(1) if it is not.
    <relation>   The version comparison operator. One of:
                 <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne
    <version>    The version to compare with
@@ -54,28 +59,84 @@ class PEAR_Command_Registry extends PEAR_Command_Common
         parent::PEAR_Command_Common($ui, $config);
     }
 
-    function doListInstalled($command, $options, $params)
+    function doList($command, $options, $params)
     {
         $reg = new PEAR_Registry($this->config->get('php_dir'));
-        $installed = $reg->packageInfo();
-        $i = $j = 0;
-        $this->ui->startTable(
-            array('caption' => 'Installed packages:',
-                  'border' => true));
-        foreach ($installed as $package) {
-            if ($i++ % 20 == 0) {
-                $this->ui->tableRow(
-                    array('Package', 'Version', 'State'),
-                    array('bold' => true));
+        if (sizeof($params) == 0) {
+            $installed = $reg->packageInfo();
+            $i = $j = 0;
+            $this->ui->startTable(
+                array('caption' => 'Installed packages:',
+                      'border' => true));
+            foreach ($installed as $package) {
+                if ($i++ % 20 == 0) {
+                    $this->ui->tableRow(
+                        array('Package', 'Version', 'State'),
+                        array('bold' => true));
+                }
+                $this->ui->tableRow(array($package['package'],
+                                          $package['version'],
+                                          @$package['release_state']));
             }
-            $this->ui->tableRow(array($package['package'],
-                                      $package['version'],
-                                      @$package['release_state']));
+            if ($i == 0) {
+                $this->ui->tableRow(array('(no packages installed)'));
+            }
+            $this->ui->endTable();
+        } else {
+            if (file_exists($params[0]) && !is_dir($params[0])) {
+                include_once "PEAR/Common.php";
+                $obj = &new PEAR_Common;
+                $info = $obj->infoFromAny($params[0]);
+                $headings = array('Package File', 'Install Path');
+                $installed = false;
+            } else {
+                $info = $reg->packageInfo($params[0]);
+                $headings = array('Type', 'Install Path');
+                $installed = true;
+            }
+            if (PEAR::isError($info)) {
+                return $this->raiseError($info);
+            }
+
+            $list =$info['filelist'];
+            $caption = 'Contents of ' . basename($params[0]);
+            $this->ui->startTable(array('caption' => $caption,
+                                        'border' => true));
+            $this->ui->tableRow($headings, array('bold' => true));
+            foreach ($list as $file => $att) {
+                if (isset($att['baseinstalldir'])) {
+                    $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
+                        $file;
+                } else {
+                    $dest = $file;
+                }
+                switch ($att['role']) {
+                    case 'test':
+                        $dest = '-- will not be installed --'; break;
+                    case 'doc':
+                        $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
+                            $dest;
+                        break;
+                    case 'php':
+                    default:
+                        $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
+                            $dest;
+                }
+                $dest = preg_replace('!/+!', '/', $dest);
+                $file = preg_replace('!/+!', '/', $file);
+                $opts = array(0 => array('wrap' => 23),
+                              1 => array('wrap' => 45)
+                    );
+                if ($installed) {
+                    $this->ui->tableRow(array($att['role'], $dest), null, $opts);
+                } else {
+                    $this->ui->tableRow(array($file, $dest), null, $opts);
+                }
+            }
+            $this->ui->endTable();
+
+            
         }
-        if ($i == 0) {
-            $this->ui->tableRow(array('(no packages installed yet)'));
-        }
-        $this->ui->endTable();
         return true;
     }
 

@@ -32,14 +32,18 @@ class PEAR_Command_Config extends PEAR_Command_Common
     var $commands = array(
         'config-show' => array(
             'summary' => 'Show All Settings',
+            'function' => 'doConfigShow',
+            'shortcut' => 'csh',
             'options' => array(),
-            'doc' => 'Displays all configuration values.  An optional argument
+            'doc' => '
+Displays all configuration values.  An optional argument
 may be used to tell which configuration layer to display.  Valid
 configuration layers are "user", "system" and "default".
 ',
             ),
         'config-get' => array(
             'summary' => 'Show One Setting',
+            'function' => 'doConfigGet',
             'options' => array(),
             'doc' => 'Displays the value of one configuration parameter.  The
 first argument is the name of the parameter, an optional second argument
@@ -51,6 +55,7 @@ just specified.
             ),
         'config-set' => array(
             'summary' => 'Change Setting',
+            'function' => 'doConfigSet',
             'options' => array(),
             'doc' => 'Sets the value of one configuration parameter.  The first
 argument is the name of the parameter, the second argument is the new value.
@@ -72,74 +77,75 @@ in.  The default layer is "user".
         parent::PEAR_Command_Common($ui, $config);
     }
 
-    function run($command, $options, $params)
+    function doConfigShow($command, $options, $params)
     {
-        $cf = &$this->config;
+        // $params[0] -> the layer
+        if ($error = $this->_checkLayer(@$params[0])) {
+            $failmsg .= $error;
+            break;
+        }
+        $keys = $this->config->getKeys();
+        sort($keys);
+        $this->ui->startTable(array('caption' => 'Configuration:'));
+        foreach ($keys as $key) {
+            $type = $this->config->getType($key);
+            $value = $this->config->get($key, @$params[0]);
+            if ($type == 'password' && $value) {
+                $value = '********';
+            } elseif ($key == 'umask') {
+                $value = sprintf("%03o", $value);
+            }
+            if ($value === null || $value === '') {
+                $value = '<not set>';
+            } elseif ($value === false) {
+                $value = 'false';
+            } elseif ($value === true) {
+                $value = 'true';
+            }
+            $this->ui->tableRow(array($key, $value));
+        }
+        $this->ui->endTable();
+        return true;
+    }
+
+    function doConfigGet($command, $options, $params)
+    {
+        // $params[0] -> the parameter
+        // $params[1] -> the layer
+        if ($error = $this->_checkLayer(@$params[1])) {
+            $failmsg .= $error;
+            break;
+        }
+        if (sizeof($params) < 1 || sizeof($params) > 2) {
+            $failmsg .= "config-get expects 1 or 2 parameters";
+        } elseif (sizeof($params) == 1) {
+            $this->ui->displayLine("$params[0] = " . $this->config->get($params[0]));
+        } else {
+            $this->ui->displayLine("($params[1])$params[0] = " .
+                                   $this->config->get($params[0], $params[1]));
+        }
+        return true;
+    }
+
+    function doConfigSet($command, $options, $params)
+    {
+        // $param[0] -> a parameter to set
+        // $param[1] -> the value for the parameter
+        // $param[2] -> the layer
         $failmsg = '';
-        switch ($command) {
-            case 'config-show': {
-                // $params[0] -> the layer
-                if ($error = $this->_checkLayer(@$params[0])) {
-                    $failmsg .= $error;
-                    break;
-                }
-                $keys = $cf->getKeys();
-                sort($keys);
-                $this->ui->startTable(array('caption' => 'Configuration:'));
-                foreach ($keys as $key) {
-                    $type = $cf->getType($key);
-                    $value = $cf->get($key, @$params[0]);
-                    if ($type == 'password' && $value) {
-                        $value = '********';
-                    }
-                    if (empty($value)) {
-                        $value = '<not set>';
-                    }
-                    $this->ui->tableRow(array($key, $value));
-                }
-                $this->ui->endTable();
-                break;
-            }
-            case 'config-get': {
-                // $params[0] -> the parameter
-                // $params[1] -> the layer
-                if ($error = $this->_checkLayer(@$params[1])) {
-                    $failmsg .= $error;
-                    break;
-                }
-                if (sizeof($params) < 1 || sizeof($params) > 2) {
-                    $failmsg .= "config-get expects 1 or 2 parameters. Try \"help config-get\" for help";
-                } elseif (sizeof($params) == 1) {
-                    $this->ui->displayLine("$params[0] = " . $cf->get($params[0]));
-                } else {
-                    $this->ui->displayLine("($params[1])$params[0] = " .
-                                           $cf->get($params[0], $params[1]));
-                }
-                break;
-            }
-            case 'config-set': {
-                // $param[0] -> a parameter to set
-                // $param[1] -> the value for the parameter
-                // $param[2] -> the layer
-                if (sizeof($params) < 2 || sizeof($params) > 3) {
-                    $failmsg .= "config-set expects 2 or 3 parameters. Try \"help config-set\" for help";
-                    break;
-                }
-                if ($error = $this->_checkLayer(@$params[2])) {
-                    $failmsg .= $error;
-                    break;
-                }
-                if (!call_user_func_array(array(&$cf, 'set'), $params))
-                {
-                    $failmsg = "config-set (" . implode(", ", $params) . ") failed";
-                } else {
-                    $cf->store();
-                }
-                break;
-            }
-            default: {
-                return false;
-            }
+        if (sizeof($params) < 2 || sizeof($params) > 3) {
+            $failmsg .= "config-set expects 2 or 3 parameters";
+            break;
+        }
+        if ($error = $this->_checkLayer(@$params[2])) {
+            $failmsg .= $error;
+            break;
+        }
+        if (!call_user_func_array(array(&$this->config, 'set'), $params))
+        {
+            $failmsg = "config-set (" . implode(", ", $params) . ") failed";
+        } else {
+            $this->config->store();
         }
         if ($failmsg) {
             return $this->raiseError($failmsg);
