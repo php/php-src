@@ -2425,7 +2425,7 @@ int multisort_compare(const void *a, const void *b)
 	efree(args);							\
 	RETURN_FALSE;
 
-/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC] [, array ar2 [, SORT_ASC|SORT_DESC], ...])
+/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...])
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {

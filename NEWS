@@ -18,7 +18,7 @@ PHP 4.0                                                                    NEWS
   parameter was specified.
 - Use dashes and short day name in cookies since some browsers seem picky
   about this (Rasmus)
-- Making pspell compile as a shared module
+- Added pspell module. (Vlad)
 - Added 3 additional arguments to the user-defined error handler - the file
   name and line number in which the error occured, and the context (local
   variables) of the code in which the error occured (Zeev, Zend Engine)
