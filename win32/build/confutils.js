@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.25 2003-12-22 22:33:43 wez Exp $
+// $Id: confutils.js,v 1.26 2003-12-23 00:17:15 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -157,9 +157,12 @@ function analyze_arg(argval)
 		argval = "yes";
 	} else if (argval == null) {
 		/* nothing */
-	} else if (argval.match(new RegExp("^shared,(.*)"))) {
+	} else if (args = argval.match(new RegExp("^shared,(.*)"))) {
 		shared = true;
-		argval = $1;
+		argval = args[1];
+	} else if (args = argval.match(new RegExp("(.*),shared$"))) {
+		shared = true;
+		argval = args[1];
 	}
 
 	ret[0] = shared;
