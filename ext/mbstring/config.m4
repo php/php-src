@@ -14,6 +14,8 @@ PHP_ARG_ENABLE(mbregex, whether to enable multibyte regex support,
 if test "$PHP_MBSTRING" != "no"; then
   AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
   PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter.c mbstring.c mbregex.c php_mbregex.c, $ext_shared)
+else
+  PHP_MBSTR_ENC_TRANS=no
 fi
 
 if test "$PHP_MBSTR_ENC_TRANS" != "no" ; then
