@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added ldap_sort() function. (Stig Venaas)
 - Added md5_file(), which calculaties the MD5 sum of a file.
   (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
