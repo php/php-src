@@ -141,7 +141,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           oci8
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ STATUS:              Working
 COMMENT:             Working except for persistent connections
 -------------------------------------------------------------------------------
 EXTENSION:           oracle
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Using the new OCI8 driver is encouraged where possible.
@@ -339,7 +339,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
 STATUS:              Unknown
 -------------------------------------------------------------------------------

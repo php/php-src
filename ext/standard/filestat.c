@@ -180,7 +180,7 @@ PHP_FUNCTION(diskfreespace)
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
 
-			/* i know - this is ugly, but i works (thies@digicol.de) */
+			/* i know - this is ugly, but i works (thies@thieso.net) */
 			bytesfree  = FreeBytesAvailableToCaller.HighPart *
 				(double) (((unsigned long)1) << 31) * 2.0 +
 				FreeBytesAvailableToCaller.LowPart;

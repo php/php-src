@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
-   |          Thies C. Arntzen <thies@digicol.de>						  |
+   |          Thies C. Arntzen <thies@thieso.net>						  |
    +----------------------------------------------------------------------+
  */
 
@@ -372,7 +372,7 @@ PHP_MINIT_FUNCTION(oci)
 
  	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
 
-/* thies@digicol.de 990203 i do not think that we will need all of them - just in here for completeness for now! */
+/* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_DESCRIBE_ONLY",OCI_DESCRIBE_ONLY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_COMMIT_ON_SUCCESS",OCI_COMMIT_ON_SUCCESS, CONST_CS | CONST_PERSISTENT);
@@ -1661,7 +1661,7 @@ oci_failover_callback(dvoid *svchp,
 					   ub4 fo_event)
 {
 	/* 
-	   this stuff is from an oci sample - it will get cleaned up as soon as i understand it!!! (thies@digicol.de 990420) 
+	   this stuff is from an oci sample - it will get cleaned up as soon as i understand it!!! (thies@thieso.net 990420) 
 	   right now i cant get oracle to even call it;-(((((((((((
 	*/
 
@@ -3546,7 +3546,7 @@ PHP_FUNCTION(ocilogoff)
 	referenced. as this module makes heavy use of zends reference-counting mechanism
 	this is the desired behavior. it has always been a bad idea to close a connection that
     has outstanding transactions. this way we have a nice-clean approach.
-    (thies@digicol.de 20000110)
+    (thies@thieso.net 20000110)
 
 	oci_connection *connection;
 	zval **conn;
