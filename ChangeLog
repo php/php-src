@@ -1,3 +1,33 @@
+2005-02-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/snmp/snmp.c:
+      Missed one place..
+
+    * ext/snmp/snmp.c:
+      This was not good idea.
+
+    * (PHP_4_3)
+      NEWS
+      ext/sockets/config.m4
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c:
+      - Fixed bug #31936 (set_h_errno() is redefined incompatibly)
+
+    * ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c:
+      Remove unused set_h_errno
+
+2005-02-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS
+      tests/lang/bug30862.phpt:
+      - BFN and add test
+
+    * ZendEngine2/zend_execute_API.c:
+      - Bugfix #30682 (autoconversion from false/true to 0/1 missing in case of
+        static property default value)
+
 2005-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c
