@@ -211,10 +211,11 @@ PHP_INI_END()
 /* newer servers hide this functions from the programmer so redefine the functions dynamically
    thanks to Chris Elving from Sun for the function declarations */
 
-int (*nsapi_servact_uri2path)(Session *sn, Request *rq) = NULL;
-int (*nsapi_servact_pathchecks)(Session *sn, Request *rq) = NULL;
-int (*nsapi_servact_fileinfo)(Session *sn, Request *rq) = NULL;
-int (*nsapi_servact_service)(Session *sn, Request *rq) = NULL;
+typedef int (*nsapi_servact_prototype)(Session *sn, Request *rq);
+nsapi_servact_prototype nsapi_servact_uri2path = NULL;
+nsapi_servact_prototype nsapi_servact_pathchecks = NULL;
+nsapi_servact_prototype nsapi_servact_fileinfo = NULL;
+nsapi_servact_prototype nsapi_servact_service = NULL;
 
 /* {{{ php_nsapi_init_dynamic_symbols
  */
@@ -226,12 +227,28 @@ static void php_nsapi_init_dynamic_symbols(void)
 	nsapi_servact_pathchecks = &servact_pathchecks;
 	nsapi_servact_fileinfo = &servact_fileinfo;
 	nsapi_servact_service = &servact_service;
-#elif !defined(PHP_WIN32)
+#else
 	/* find address of internal NSAPI functions */
-	*(void **)(&nsapi_servact_uri2path) = DL_FETCH_SYMBOL(RTLD_DEFAULT, "INTservact_uri2path");
-	*(void **)(&nsapi_servact_pathchecks) = DL_FETCH_SYMBOL(RTLD_DEFAULT, "INTservact_pathchecks");
-	*(void **)(&nsapi_servact_fileinfo) = DL_FETCH_SYMBOL(RTLD_DEFAULT, "INTservact_fileinfo");
-	*(void **)(&nsapi_servact_service) = DL_FETCH_SYMBOL(RTLD_DEFAULT, "INTservact_service");
+#ifdef PHP_WIN32
+	register int i;
+	char module_name[11];
+	DL_HANDLE module = NULL;
+	/* find a LOADED dll module named "ns-httpdX0", where X is version
+	 * currently there are server-dlls in version 2, 3 and 4 in use */
+	for (i=4; i>=2; i--) {
+		sprintf(module_name, "ns-httpd%d0", i);
+		if (module = GetModuleHandle(module_name)) {
+			break;
+		}
+	}
+	if (!module) return;
+#else
+	DL_HANDLE module = RTLD_DEFAULT;
+#endif
+	nsapi_servact_uri2path = (nsapi_servact_prototype)DL_FETCH_SYMBOL(module, "INTservact_uri2path");
+	nsapi_servact_pathchecks = (nsapi_servact_prototype)DL_FETCH_SYMBOL(module, "INTservact_pathchecks");
+	nsapi_servact_fileinfo = (nsapi_servact_prototype)DL_FETCH_SYMBOL(module, "INTservact_fileinfo");
+	nsapi_servact_service = (nsapi_servact_prototype)DL_FETCH_SYMBOL(module, "INTservact_service");
 	if (!(nsapi_servact_uri2path && nsapi_servact_pathchecks && nsapi_servact_fileinfo && nsapi_servact_service)) {
 		/* not found - could be cause they are undocumented */
 		nsapi_servact_uri2path = NULL;
@@ -787,9 +804,9 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 
 	nsapi_free(SG(request_info).query_string);
 	nsapi_free(SG(request_info).request_uri);
-	nsapi_free(SG(request_info).request_method);
+	nsapi_free((void*)(SG(request_info).request_method));
 	nsapi_free(SG(request_info).path_translated);
-	nsapi_free(SG(request_info).content_type);
+	nsapi_free((void*)(SG(request_info).content_type));
 
 	FREE(request_context);
 
