@@ -50,7 +50,9 @@ ext/oci8
 
 ext/standard
 ------------
-    * implement regex-cache for url-funtions.
+    * possibly modify parsing of GPC data to automatically create arrays if
+      variable name is seen more than once.
+    * implement regex-cache for url-functions.
     * strpad() (Andrei)
     * stri_replace() (Andrei)
     * comparing arrays semantically (like Python) (Andrei)
