@@ -15,7 +15,8 @@ libZend_la_SOURCES=\
 	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
 	zend_ini.c zend_qsort.c zend_objects.c
 
-libZend_la_LDFLAGS = @EXTRA_LIBS@
+libZend_la_LDFLAGS =
+libZend_la_LIBADD = @ZEND_EXTRA_LIBS@
 
 # automake isn't too clever about "non-standard" use of lex and yacc
 
