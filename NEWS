@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Enhanced jpeg 2000 support for GetImageSize(). (marcus, Adam Wright)
 - Fixed bug #20155: xmlrpc compile problem with zendengine2 (Derick, Jan
   Schneider)
 - Implemented string.base64 stream filter. (Moriyoshi)
