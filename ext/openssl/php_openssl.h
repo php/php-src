@@ -26,8 +26,9 @@ extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 
 PHP_MINIT_FUNCTION(openssl);
+PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
-PHP_FUNCTION(openssl_read_privatekey);
+PHP_FUNCTION(openssl_get_privatekey);
 PHP_FUNCTION(openssl_get_publickey);
 PHP_FUNCTION(openssl_free_key);
 #if 0
