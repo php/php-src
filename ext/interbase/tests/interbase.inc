@@ -58,6 +58,19 @@ function out_result($result, $table_name = "")
 	echo "---\n";
 }
 
+function out_result_trap_error($result, $table_name = "")
+{  
+   echo "--- $table_name ---\n";
+   while ($r = @ibase_fetch_assoc($result)){
+      while (list($k, $v) = each($r) ){
+         echo "$r[$k]\t";
+      }
+      echo "\n";
+   }
+   echo "errmsg [" . ibase_errmsg() . "]\t\n";
+   echo "---\n";
+} 
+
 /* M/D/Y H:M:S */
 function rand_datetime()
 {

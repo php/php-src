@@ -108,7 +108,8 @@ three transaction on default link
     
 	$tr_1 = ibase_trans();  /* this default transaction also */
 	$tr_2 = ibase_trans(IBASE_READ);
-	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED);
+	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_VERSION+IBASE_WAIT);    
+	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_NO_VERSION+IBASE_NOWAIT);	
     
 	$res = ibase_query("select * from test5");
     
@@ -139,6 +140,10 @@ three transaction on default link
     
     ibase_commit($tr_1);
 
+	$tr_1 = ibase_trans();
+  	 ibase_query($tr_1, "insert into test5 (i) values (5)");
+	
+	/* tr_2 is IBASE_READ + IBASE_CONCURRENCY + IBASE_WAIT */
 	$res = ibase_query($tr_2, "select * from test5");
     
     echo "one row in second transaction\n";
@@ -146,6 +151,7 @@ three transaction on default link
 
     ibase_free_result($res);
 
+	/* tr_3 is IBASE_COMMITTED + IBASE_REC_VERSION + IBASE_WAIT */
 	$res = ibase_query($tr_3, "select * from test5");
     
     echo "three rows in third transaction\n";
@@ -153,6 +159,15 @@ three transaction on default link
 
     ibase_free_result($res);
 
+ 	/* tr_4 IBASE_COMMITED + IBASE_REC_NO_VERSION + IBASE_NOWAIT */
+ 	$res = ibase_query($tr_4, "select * from test5");
+   
+ 	 echo "three rows in fourth transaction with deadlock\n";
+    out_result_trap_error($res,"test5");
+
+    ibase_free_result($res); 
+ 
+	 ibase_rollback($tr_1);
     ibase_close();
 /*
 transactions on second link
@@ -246,6 +261,13 @@ three rows in third transaction
 2	
 3	
 4	
+---
+three rows in fourth transaction with deadlock
+--- test5 ---
+2	
+3	
+4	
+errmsg [lock conflict on no wait transaction deadlock ]	
 ---
 three rows
 --- test5 ---
