@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added new functions:
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)
