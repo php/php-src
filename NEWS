@@ -11,6 +11,8 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Fixed bugs #19156 and #19544 (COM extension leaks memory and keeps
+  components referenced). (Harald)
 - Added fribidi_get_charsets() and fribidi_charset_info() functions. (Tal)
 - Added Oracle TIMESTAMP type to oci8 extension. (Thies)
 - Fixed fgets($fp) to read until EOL when length parameter is not set. (Wez)
