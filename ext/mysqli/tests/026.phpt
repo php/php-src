@@ -15,7 +15,7 @@ mysqli bind_param/bind_result with send_long_data
   	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 varchar(10), c2 text)");
 
 	$stmt = mysqli_prepare ($link, "INSERT INTO test_bind_fetch VALUES (?,?)");
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING, MYSQLI_BIND_SEND_DATA), $c1, $c2);
+	mysqli_bind_param($stmt, "sb", $c1, $c2);
 
 	$c1 = "Hello World";
 

@@ -19,10 +19,7 @@ mysqli bind_param/bind_prepare fetch long values
                                                      c7 int)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?,?,?,?,?,?)");
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT,MYSQLI_BIND_INT,MYSQLI_BIND_INT,
-				       MYSQLI_BIND_INT,MYSQLI_BIND_INT,MYSQLI_BIND_INT,
- 				       MYSQLI_BIND_INT),
-				$c1,$c2,$c3,$c4,$c5,$c6,$c7);
+	mysqli_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);
 	$c1 = -23;
 	$c2 = 35999;
 	$c3 = NULL;
