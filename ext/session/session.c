@@ -487,16 +487,16 @@ static void _php_session_save_current_state(PSLS_D)
 	ulong num_key;
 	PLS_FETCH();
 	
-	if(!PS(http_session_vars)) {
-	  return;
-	}
-
 	if (!PG(register_globals)) {
-		for (zend_hash_internal_pointer_reset(PS(http_session_vars)->value.ht);
-			 zend_hash_get_current_key(PS(http_session_vars)->value.ht, &variable, &num_key) == HASH_KEY_IS_STRING;
-			 zend_hash_move_forward(PS(http_session_vars)->value.ht)) {
-			PS_ADD_VAR(variable);
-		}
+	  if(!PS(http_session_vars)) {
+		return;
+	  }
+
+	  for (zend_hash_internal_pointer_reset(PS(http_session_vars)->value.ht);
+		   zend_hash_get_current_key(PS(http_session_vars)->value.ht, &variable, &num_key) == HASH_KEY_IS_STRING;
+		   zend_hash_move_forward(PS(http_session_vars)->value.ht)) {
+		PS_ADD_VAR(variable);
+	  }
 	}
 
 	val = _php_session_encode(&vallen PSLS_CC);
