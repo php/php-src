@@ -23,7 +23,7 @@ PHP 4                                                                      NEWS
   (Patch by Lenar Lohmus)
 - Added --with-config-file-scan-dir compile-time switch which specifies a
   directory which will be scanned for *.ini files. (Rasmus)
-- Added ob_flush_all(), ob_get_clean() and ob_get_flush(). (Yasuo)
+- Added ob_get_clean() and ob_get_flush(). (Yasuo)
 - Added ftp_ssl_connect() to ext/ftp for FTP over SSL support. (Stefan Esser)
 - Made a few additions and changes to Apache 2 sapi. (Ilia)
   . Added apache_response_headers(), apache_note(), apache_getenv() and 
