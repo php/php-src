@@ -1,3 +1,84 @@
+2002-01-24  Marko Karppinen  <karppinen@pobox.com>
+
+    * build/buildcheck.sh:
+    Latest libtools output a multiline version info. Deal with that
+
+    * ext/standard/parsedate.y:
+    Ignore ordinal suffixes on numbers (bug #15210)
+
+2002-01-24  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/config.m4: Added --disable-cli option.
+
+    * NEWS: Made entry more consistent.
+
+2002-01-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: fix typo, found by edin
+
+2002-01-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c: Revert back to using <char> element for newlines.
+
+2002-01-24  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/CODING_STANDARDS: correct url
+
+2002-01-24  Marko Karppinen  <karppinen@pobox.com>
+
+    * acinclude.m4:
+    Added a case for Darwin / Mac OS X to PHP_SHLIB_SUFFIX_NAME
+
+    * php.ini-dist
+      php.ini-recommended: Corrected a confusing comment (see bug #14972)
+
+2002-01-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.in
+      acinclude.m4
+      configure.in
+      ext/ircg/config.m4: Don't build CLI, if an extension requests that.
+
+    In this case, the ircg extension refers to thttpd-specific symbols
+    which causes the build of the cli sapi module to fail.
+
+2002-01-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS: Change NEWS entry according to pgsql source change.
+
+    * ext/pgsql/pgsql.c:
+    Revert last 2 commit. Instead, make php_pgsql_do_connect() to catch
+    broken connection always.
+
+2002-01-24  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/scripts/pearwin.php
+      pear/PEAR/Installer.php:
+    * Call the PEAR_Registry constructor with the optional parameter
+
+    * pear/PEAR/Registry.php:
+    * Adding the ability to set the PEAR_INSTALL_DIR while creating the Registry object (in the same way as Installer.php)
+
+    * pear/Archive/Tar.php:
+    * Adding support of extraction of remote archive http://www/archive.tgz
+    * Correct bug while using Windows root path c:\xxx\yyy in extract fct
+
+2002-01-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS:
+    Added pgsql connection reset feature. Add my name to --enable-safe-mode fix.
+
+    * ext/pgsql/pgsql.c:
+    Add a little more fault tolerance for pg_host, pg_tty and more.
+
+    * ext/pgsql/pgsql.c:
+    No more httpd restart is required when PostgreSQL is rebooted.
+
+2002-01-24  James Cox  <james@awpimajes.com>
+
+    * INSTALL:
+    updated INSTALL to be more relevant.. more fixes coming (at some point)
+
 2002-01-23  Vincent Blavet  <vincent@blavet.net>
 
     * pear/scripts/pearwin.php: * Add uninstall command
