@@ -3,7 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 2000, Version 4.0.2
 - Made ldap_add(), ldap_modify(), ldap_mod_add(), ldap_mod_replace()
-- binary-safe. Original patch: Terrence Miao <terrence_miao@email.com> (Jani)
+  binary-safe. Original patch: Terrence Miao <terrence_miao@email.com> (Jani)
 - CGI aka. command line version has now an option '-l' for syntax check
   without execution (Hartmut)
 - Fixed bug in ldap_get_values_len() which makes it NULL-safe. (Jani)
