@@ -1,5 +1,7 @@
 --TEST--
 Bug #23298 (serialize() and floats/doubles)
+--INI--
+serialize_precision=100
 --FILE--
 <?php 
 	ini_set('precision', 12);
