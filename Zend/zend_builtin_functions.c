@@ -590,7 +590,9 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 {
 	zval **obj, **class_name;
 	char *lcname;
-	zend_class_entry *ce = NULL;
+	zend_class_entry *instance_ce;
+	zend_class_entry **ce;
+	zend_bool retval;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &obj, &class_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -610,18 +612,26 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
 
-	if (only_subclass)
-		ce = Z_OBJCE_PP(obj)->parent;
-	else
-		ce = Z_OBJCE_PP(obj);
-	for (; ce != NULL; ce = ce->parent) {
-		if ((ce->name_length == Z_STRLEN_PP(class_name)) && !memcmp(ce->name, lcname, ce->name_length)) {
-			efree(lcname);
-			RETURN_TRUE;
+	if (zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(class_name)+1, (void **) &ce)==FAILURE) {
+		efree(lcname);
+		retval = 0;
+	} else {
+		if (only_subclass) {
+			instance_ce = Z_OBJCE_PP(obj)->parent;
+		} else {
+			instance_ce = Z_OBJCE_PP(obj);
+		}
+
+		if (instanceof_function(instance_ce, *ce TSRMLS_CC)) {
+			retval = 1;
+		} else {
+			retval = 0;
 		}
 	}
+
 	efree(lcname);
-	RETURN_FALSE;
+
+	RETURN_BOOL(retval);
 }
 
 

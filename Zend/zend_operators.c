@@ -1362,19 +1362,24 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 }
 
 
-ZEND_API int instanceof_function(zval *result, zval *op1, zend_class_entry *class TSRMLS_DC)
+ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC)
 {
-	if (Z_TYPE_P(op1) == IS_OBJECT) {
-		zend_class_entry *ce;
-		for (ce = Z_OBJCE_P(op1); ce != NULL; ce = ce->parent) {
-			if (ce == class) {
-				ZVAL_BOOL(result, 1);
-				return SUCCESS;
+	zend_uint i;
+
+	while (instance_ce) {
+		if (instance_ce == ce) {
+			return 1;
+		}
+		for (i=0; i<instance_ce->num_interfaces; i++) {
+
+			if (instanceof_function(instance_ce->interfaces[i], ce TSRMLS_CC)) {
+				return 1;
 			}
 		}
+		instance_ce = instance_ce->parent;
 	}
-	ZVAL_BOOL(result, 0);
-	return SUCCESS;
+
+	return 0;
 }
 
 #define LOWER_CASE 1

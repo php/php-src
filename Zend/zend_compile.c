@@ -377,8 +377,17 @@ void zend_do_echo(znode *arg TSRMLS_DC)
 
 void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC)
 {
+	char *method_type;
+
+	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
+		modifiers->u.constant.value.lval |= ZEND_ACC_ABSTRACT;		
+		method_type = "Interface";
+	} else {
+		method_type = "Abstract";
+	}
+
 	if (modifiers->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
-		if (body->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
+		if (body->u.constant.value.lval == ZEND_ACC_ABSTRACT) {
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 			opline->opcode = ZEND_RAISE_ABSTRACT_ERROR;
@@ -386,11 +395,11 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 			SET_UNUSED(opline->op2);
 		} else {
 			/* we had code in the function body */
-			zend_error(E_COMPILE_ERROR, "Abstract function %s() cannot contain body", function_name->u.constant.value.str.val);
+			zend_error(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body", method_type, CG(active_class_entry)->name, function_name->u.constant.value.str.val);
 		}
 	} else {
-		if (body->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
-			zend_error(E_COMPILE_ERROR, "Non-abstract method %s() must contain body", function_name->u.constant.value.str.val);
+		if (body->u.constant.value.lval == ZEND_ACC_ABSTRACT) {
+			zend_error(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
 		}
 	}
 }
@@ -665,10 +674,12 @@ zend_bool zend_is_function_or_method_call(znode *variable)
 	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
 
+
 void zend_do_begin_import(TSRMLS_D)
 {
 	zend_llist_init(&CG(import_commands), sizeof(zend_op), NULL, 0);
 }
+
 
 void zend_do_import(int type, znode *what TSRMLS_DC)
 {
@@ -700,11 +711,11 @@ void zend_do_import(int type, znode *what TSRMLS_DC)
 	zend_llist_add_element(&CG(import_commands), &opline);
 }
 
+
 void zend_do_end_import(znode *import_from TSRMLS_DC)
 {
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr;
-
 	
 	le = CG(import_commands).head;
 
@@ -717,7 +728,6 @@ void zend_do_end_import(znode *import_from TSRMLS_DC)
 	}
 	zend_llist_destroy(&CG(import_commands));
 }
-
 
 
 void zend_do_begin_variable_parse(TSRMLS_D)
@@ -933,12 +943,25 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 }
 
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
 	int name_len = function_name->u.constant.value.str.len;
 	int function_begin_line = function_token->u.opline_num;
+	zend_uint fn_flags;
+
+	if (is_method) {
+		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
+			if (!(fn_flags_znode->u.constant.value.lval & ZEND_ACC_PUBLIC)) {
+				zend_error(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted or declared public", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+			}
+			fn_flags_znode->u.constant.value.lval |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
+		}
+		fn_flags = fn_flags_znode->u.constant.value.lval; /* must be done *after* the above check */
+	} else {
+		fn_flags = 0;
+	}
 
 	function_token->u.op_array = CG(active_op_array);
 	zend_str_tolower(name, name_len);
@@ -972,7 +995,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 					&& (child_op_array == parent_op_array)) {
 				zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 			} else {
-				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", name);
+				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name, name);
 			}
 		}
 
@@ -1680,6 +1703,11 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
+	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
+		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
+		zend_error(E_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
+	}
+
 	ce->parent = parent_ce;
 
 	/* Inherit properties */
@@ -1692,6 +1720,14 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
 }
+
+
+void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
+{
+	zend_hash_merge(&ce->constants_table, &iface->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
+	zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
+}
+
 
 static void create_class(HashTable *class_table, char *name, int name_length, zend_class_entry **ce TSRMLS_DC)
 {
@@ -1716,7 +1752,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-static int create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce TSRMLS_DC)
+static zend_class_entry *create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce TSRMLS_DC)
 {
 	char *cur, *temp;
 	char *last;
@@ -1749,9 +1785,9 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, &new_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
 		new_ce->refcount--;
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class '%s' - class or namespace with this name already exist.", last);
-		return FAILURE;
+		return NULL;
 	}
-	return SUCCESS;
+	return new_ce;
 }
 
 ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time)
@@ -1786,13 +1822,13 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 }
 			
 
-ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC)
+ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 
 	if (zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", opline->op1.u.constant.value.str.val);
-		return FAILURE;
+		return NULL;
 	} else {
 		ce = *pce;
 	}
@@ -1803,13 +1839,13 @@ ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
-		return FAILURE;
+		return NULL;
 	} else {
-		return SUCCESS;
+		return ce;
 	}
 }
 
-ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC)
+ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 	int found_ce;
@@ -1818,7 +1854,7 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 
 	if (found_ce == FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", (*pce)->name);
-		return FAILURE;
+		return NULL;
 	} else {
 		ce = *pce;
 	}
@@ -1840,9 +1876,9 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 		zend_hash_destroy(&ce->properties_info);
 		zend_hash_destroy(ce->static_members);
 		zend_hash_destroy(&ce->constants_table);
-		return FAILURE;
+		return NULL;
 	}
-	return SUCCESS;
+	return ce;
 }
 
 
@@ -2157,9 +2193,13 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->name = class_name->u.constant.value.str.val;
 	new_class_entry->name_length = class_name->u.constant.value.str.len;
 
-	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->parent = NULL;
+	new_class_entry->num_interfaces = 0;
+
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
+	if (class_token->u.constant.value.lval == T_INTERFACE) {
+		new_class_entry->ce_flags |= ZEND_ACC_INTERFACE;
+	}
 
 	if (parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;
@@ -2186,14 +2226,33 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	
 	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &new_class_entry, sizeof(zend_class_entry *), NULL);
 	CG(active_class_entry) = new_class_entry;
+
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.op_type = IS_CONST;
+	CG(implementing_class) = opline->result;
 }
 
 
 void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
+	if (CG(active_class_entry)->num_interfaces > 0) {
+		CG(active_class_entry)->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*CG(active_class_entry)->num_interfaces);
+	}
 	CG(active_class_entry) = NULL;
 }
+
+
+void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_ADD_INTERFACE;
+	opline->op1 = CG(implementing_class);
+	opline->op2 = *interface_znode;
+	opline->extended_value = CG(active_class_entry)->num_interfaces++;
+}
+
 
 void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
 {
@@ -2218,6 +2277,10 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	zend_property_info *existing_property_info;
 	HashTable *target_symbol_table;
 	zend_bool free_var_name = 0;
+
+	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error(E_COMPILE_ERROR, "Interfaces may not include member variables");
+	}
 
 	if (access_type & ZEND_ACC_ABSTRACT) {
 		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");

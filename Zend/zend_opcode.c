@@ -154,6 +154,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			zend_hash_destroy(&ce->class_table);
+			if (ce->num_interfaces > 0) {
+				efree(ce->interfaces);
+			}
 			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:

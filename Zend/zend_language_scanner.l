@@ -614,8 +614,16 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_CLASS;
 }
 
+<ST_IN_SCRIPTING>"interface" {
+	return T_INTERFACE;
+}
+
 <ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
+}
+
+<ST_IN_SCRIPTING>"implements" {
+	return T_IMPLEMENTS;
 }
 
 <ST_IN_SCRIPTING>"namespace" {
