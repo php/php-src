@@ -1,3 +1,70 @@
+2001-08-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xml/xml.c: null terminate the returned string in here too.
+
+    * ext/xml/xml.c: ws fix.
+
+    * ext/domxml/config.m4: MFH
+
+    * ext/domxml/config.m4: libxml 2.4.2 is required now.
+
+    * NEWS: fixed NEWS.
+
+    * NEWS: Fixed the NEWS.
+
+2001-08-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/Experimental/Archive/docs/Tar.txt: * wrapped to 80 columns
+
+2001-08-18  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: MFH
+
+    * configure.in:
+    Added a check for libdmalloc whether it works (is found..) or not.
+
+2001-08-18  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/msql/php_msql.c: MFH
+
+    * NEWS: Update NEWS
+
+    * ext/msql/php_msql.c: Fix bugs #7301, #6827
+
+2001-08-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/time/001.phpt: make this test work.
+
+2001-08-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    added support for the following tags in package.xml:
+    - <State> inside <Release> (package development state: 'alpha','beta','stable','snapshot')
+    - <Changelog> stores <Release> entries
+    - <Maintainers> stores multiple <Maintainer> entries
+    - <Role> inside <Maintainer> ('lead','developer','contributor','helper')
+
+    * pear/DB/tests/db_error2.phpt
+      pear/DB/tests/db_error.phpt: pass test in all pear installations
+
+    * pear/DB/tests/pgsql/010.phpt:
+    added comment "The DB_ERROR_CONSTRAINT test will fail on PostgreSQL < 7.x"
+
+2001-08-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/fsock.c: K&R format changes
+
+    * main/php.h:
+    Fix XtOffsetOf compile problems if someone has already defined it.
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix warning (Doug MacEachern, dougm@covalent.net)
+
+    * sapi/apache2filter/sapi_apache2.c:
+    * sapi/apache2filter/sapi_apache2.c:
+    fix crash bug (Doug MacEachern, dougm@covalent.net)
+
 2001-08-17  Ryan Bloom  <rbb@apache.org>
 
     * sapi/apache2filter/apache_config.c
