@@ -2520,7 +2520,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(function_state).function->common.scope) {
 		if (!EG(This) && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			int severity;
-			if (EX(function_state).function->common.fn_flags & (ZEND_ACC_CTOR|ZEND_ACC_DTOR|ZEND_ACC_CLONE)) {
+			if (EX(function_state).function->common.fn_flags & ZEND_ACC_DYNAMIC) {
 				severity = E_ERROR;
 			} else {
 				severity = E_STRICT;

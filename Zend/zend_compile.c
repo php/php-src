@@ -2389,19 +2389,19 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	do_inherit_parent_constructor(ce);
 
 	if (ce->constructor) {
-		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR|ZEND_ACC_DYNAMIC;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
 		}
 	}
 	if (ce->destructor) {
-		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
+		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR|ZEND_ACC_DYNAMIC;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
 	if (ce->clone) {
-		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
+		ce->clone->common.fn_flags |= ZEND_ACC_CLONE|ZEND_ACC_DYNAMIC;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
 		}
