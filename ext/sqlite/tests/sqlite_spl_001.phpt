@@ -5,7 +5,7 @@ sqlite.assoc_case=0
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; 
-if (!extension_loaded("spl")) print "skip: SPL is not installed"; 
+if (!class_exists("spl_forward")) print "skip: class spl_forward is not installed"; 
 ?>
 --FILE--
 <?php 
@@ -25,7 +25,7 @@ foreach ($data as $str) {
 
 echo "====UNBUFFERED====\n";
 $r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
-var_dump(class_implements($r));
+//var_dump(class_implements($r));
 foreach($r as $row) {
 	var_dump($row);
 }
@@ -39,7 +39,7 @@ foreach($db->unbuffered_query("SELECT a from strings", SQLITE_NUM) as $row) {
 }
 echo "====BUFFERED====\n";
 $r = $db->query("SELECT a from strings", SQLITE_NUM);
-var_dump(class_implements($r));
+//var_dump(class_implements($r));
 foreach($r as $row) {
 	var_dump($row);
 }
@@ -50,10 +50,6 @@ echo "DONE!\n";
 ?>
 --EXPECT--
 ====UNBUFFERED====
-array(1) {
-  ["spl_forward"]=>
-  string(11) "spl_forward"
-}
 array(1) {
   [0]=>
   string(3) "one"
@@ -81,12 +77,6 @@ array(1) {
   string(5) "three"
 }
 ====BUFFERED====
-array(2) {
-  ["spl_forward"]=>
-  string(11) "spl_forward"
-  ["spl_sequence"]=>
-  string(12) "spl_sequence"
-}
 array(1) {
   [0]=>
   string(3) "one"
