@@ -377,8 +377,10 @@ class PEAR
         }
 
         if ($mode == PEAR_ERROR_TRIGGER && $options === null) {
-            if (isset($this) && isset($this->_default_error_options)) {
-                $options = $this->_default_error_options;
+            if (isset($this)) {
+                if (isset($this->_default_error_options)) {
+                    $options = $this->_default_error_options;
+                }
             } else {
                 $options = $GLOBALS['_PEAR_default_error_options'];
             }
