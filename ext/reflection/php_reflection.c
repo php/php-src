@@ -2541,7 +2541,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Interface %s doesn't exist", Z_STRVAL_P(class_name));
+						"Interface %s does not exist", Z_STRVAL_P(class_name));
 				return;
 			}
 			class_ce = *pce;
@@ -2587,7 +2587,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(interface), Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Interface %s doesn't exist", Z_STRVAL_P(interface));
+						"Interface %s does not exist", Z_STRVAL_P(interface));
 				return;
 			}
 			interface_ce = *pce;
