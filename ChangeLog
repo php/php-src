@@ -1,3 +1,48 @@
+2000-05-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix pointer to FAQ entry.
+
+    PR: #4451
+
+    * sapi/apache/config.m4: Fix wording (not "to apxs", but "of apxs").
+
+    * sapi/apache/config.m4:
+    Complain loudly and stop configuration, if we cannot run apxs.
+
+    * sapi/servlet/Makefile.in
+      build/rules.mk
+      configure.in
+      ext/java/Makefile.in:
+    Use "mkdir -p" instead of "test -d || mkdir" where possible
+
+    * INSTALL: Cosmetic changes
+
+    * ext/session/mod_files.c: Complain, if write(2) failed.
+
+2000-05-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/mysql/php_mysql.c:
+    - NULL values are now preserved in the return value of mysql_fetch_array()
+      and mysql_fetch_object(). 
+
+2000-05-15  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c: Define PHP_SELF properly with Zeus+ISAPI
+
+2000-05-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/config.m4
+      ext/oci8/config.m4: fix .sl <-> .so recognition
+
+2000-05-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Drop slower strchr in favor of memchr.
+
+2000-05-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4: this now works on .so and .sl (HP) systems
+
 2000-05-14  Jouni Ahto  <jah@mork.net>
 
     * MODULES_STATUS:
