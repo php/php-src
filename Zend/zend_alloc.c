@@ -35,6 +35,9 @@ static zend_alloc_globals alloc_globals;
 #endif
 
 
+#define ZEND_DISABLE_MEMORY_CACHE 0
+
+
 #if ZEND_DEBUG
 # define END_MAGIC_SIZE sizeof(long)
 # define END_ALIGNMENT(size) (((size)%PLATFORM_ALIGNMENT)?(PLATFORM_ALIGNMENT-((size)%PLATFORM_ALIGNMENT)):0)
@@ -104,7 +107,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	if ((size < MAX_CACHED_MEMORY) && (AG(cache_count)[size] > 0)) {
+	if (!ZEND_DISABLE_MEMORY_CACHE && (size < MAX_CACHED_MEMORY) && (AG(cache_count)[size] > 0)) {
 		p = AG(cache)[size][--AG(cache_count)[size]];
 #if ZEND_DEBUG
 		p->filename = __zend_filename;
@@ -164,7 +167,8 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	memset(ptr, 0x5a, p->size);
 #endif
 
-	if (!p->persistent && (p->size < MAX_CACHED_MEMORY) && (AG(cache_count)[p->size] < MAX_CACHED_ENTRIES)) {
+	if (!ZEND_DISABLE_MEMORY_CACHE 
+		&& !p->persistent && (p->size < MAX_CACHED_MEMORY) && (AG(cache_count)[p->size] < MAX_CACHED_ENTRIES)) {
 		AG(cache)[p->size][AG(cache_count)[p->size]++] = p;
 		p->cached = 1;
 #if ZEND_DEBUG
