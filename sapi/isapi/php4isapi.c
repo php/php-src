@@ -743,7 +743,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 					 * variable won't be present, so fall back to old behaviour.
 					 */
 					efree( file_handle.filename );
-					file_handle.filename = sapi_globals->request_info.path_translated;
+					file_handle.filename = SG(request_info.path_translated);
 					file_handle.free_filename = 0;
 				}
 			}
