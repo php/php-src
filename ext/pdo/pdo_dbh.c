@@ -356,6 +356,8 @@ static PHP_METHOD(PDO, prepare)
 		stmt->refcount = 1;
 		return;
 	}
+
+	efree(stmt->query_string);
 	efree(stmt);
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
