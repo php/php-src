@@ -632,6 +632,8 @@ PHP_MINIT_FUNCTION(openssl)
 	}
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
 
 	/* override the default tcp socket provider */

@@ -691,6 +691,12 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+	} else if (strncmp(proto, "sslv2", protolen) == 0) {
+		sslsock->enable_on_connect = 1;
+		sslsock->method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
+	} else if (strncmp(proto, "sslv3", protolen) == 0) {
+		sslsock->enable_on_connect = 1;
+		sslsock->method = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
 	} else if (strncmp(proto, "tls", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
