@@ -14,6 +14,8 @@ PHP 4                                                                      NEWS
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
 - Fixed bug #20169 (implode() clobbers first argument). (Moriyoshi)
+- Added optional skip parameter to dba_fetch() to support multiple key-value
+  pairs with the same key for cdb handler. (Marcus)
 - Added imagerotate() which is available only when bundled libgd is used.
   (Pierre-Alain Joye, Ilia)
 - Fixed bug #17497 (mssql extension crashes if magic_quotes_runtime is on).
