@@ -37,6 +37,11 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+/* As of curl 7.11.1 this is no longer defined inside curl.h */
+#ifndef HttpPost
+#define HttpPost curl_httppost
+#endif
+
 #define SMART_STR_PREALLOC 4096
 
 #include "ext/standard/php_smart_str.h"
@@ -133,7 +138,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_FOLLOWLOCATION);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTPASCII);
 	REGISTER_CURL_CONSTANT(CURLOPT_PUT);
+#if CURLOPT_MUTE != 0
 	REGISTER_CURL_CONSTANT(CURLOPT_MUTE);
+#endif
 	REGISTER_CURL_CONSTANT(CURLOPT_USERPWD);
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXYUSERPWD);
 	REGISTER_CURL_CONSTANT(CURLOPT_RANGE);
@@ -506,6 +513,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 }
 /* }}} */
 
+#if CURLOPT_PASSWDFUNCTION != 0
 /* {{{ curl_passwd
  */
 static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
@@ -552,6 +560,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	return ret;
 }
 /* }}} */
+#endif
 
 /* {{{ curl_free_string
  */
@@ -697,7 +706,9 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_NETRC:
 		case CURLOPT_FOLLOWLOCATION:
 		case CURLOPT_PUT:
-		case CURLOPT_MUTE:
+#if CURLOPT_MUTE != 0
+		 case CURLOPT_MUTE:
+#endif
 		case CURLOPT_TIMEOUT:
 		case CURLOPT_FTP_USE_EPSV:
 		case CURLOPT_LOW_SPEED_LIMIT:
@@ -842,6 +853,7 @@ PHP_FUNCTION(curl_setopt)
 			ch->handlers->write_header->func   = *zvalue;
 			ch->handlers->write_header->method = PHP_CURL_USER;
 			break;
+#if CURLOPT_PASSWDFUNCTION != 0
 		case CURLOPT_PASSWDFUNCTION:
 			if (ch->handlers->passwd) {
 				zval_ptr_dtor(&ch->handlers->passwd);
@@ -851,6 +863,7 @@ PHP_FUNCTION(curl_setopt)
 			error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDFUNCTION, curl_passwd);
 			error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA,     (void *) ch);
 			break;
+#endif
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_PP(zvalue) == IS_ARRAY || Z_TYPE_PP(zvalue) == IS_OBJECT) {
 				zval            **current;
