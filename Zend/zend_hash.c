@@ -60,7 +60,6 @@ static uint PrimeNumbers[] =
 {5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793, 2097397, 4194103, 8388857, 16777447, 33554201, 67108961, 134217487, 268435697, 536870683, 1073741621, 2147483399};
 
 static int if_full_do_resize(HashTable *ht);
-static int zend_hash_rehash(HashTable *ht);
 
 static uint nNumPrimeNumbers = sizeof(PrimeNumbers) / sizeof(ulong);
 
@@ -655,7 +654,7 @@ static int if_full_do_resize(HashTable *ht)
 	return SUCCESS;
 }
 
-static int zend_hash_rehash(HashTable *ht)
+ZEND_API int zend_hash_rehash(HashTable *ht)
 {
 	Bucket *p;
 	uint nIndex;
