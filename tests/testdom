@@ -86,7 +86,6 @@ $rootnode = $dom->root();
 echo "Test 2: creating a tree with php objects\n";
 $dom = xmltree($xmlstr);
 $dom->root->name = "section";
-var_dump($dom);
 echo $dom->root->name;
 echo "\n";
 /* xmltree() creates a tree which is readonly. This means that a
@@ -107,6 +106,28 @@ $table->setattr("WIDTH", "100%");
 $table->new_child("TR", " ");
 echo $doc->dumpmem();
 
-$doc = new TestNode($xmlstr);
-var_dump($doc);
+/* The following does some testing of the xpath support */
+echo "Test 4: See if XPath works\n";
+if(!$dom = xmldoc($xmlstr)) {
+  echo "Error while parsing the document\n";
+  exit;
+}
+
+if(false === ($xpathctx = xpath_new_context($dom))) {
+	echo "Error in xpath_new_context()\n";
+	exit;
+}
+
+/* What you get back is an object of type XPathObject.
+   Depending on the sub type of XPathObject, the property
+   'value' or 'nodeset' contains the result.
+   The sub type is in property 'type'.
+   See docs for libxml for valid types.
+   1 means XPATH_NODESET which is in PHP an array of DomNodes.
+*/
+$xpathobj = xpath_eval($xpathctx, "/child::*");
+echo $xpathobj->type."\n";
+var_dump($xpathobj);
+foreach($xpathobj->nodeset as $node)
+	echo $node->name."\n";
 ?>
