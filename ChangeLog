@@ -1,3 +1,84 @@
+2003-01-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug21849.phpt:
+      Added test case for bug21849.phpt
+
+2003-01-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO-PHP5:
+      TODO for PHP 5.
+
+2003-01-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+      Really fixed the mb issue of mb_ereg_replace()
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed a mb_ereg_replace() bug; the function was not completely
+      multibyte-safe.
+
+    * tests/lang/bug7515.phpt:
+      Fixed typo
+
+    * tests/lang/029.phpt
+      tests/lang/bug7515.phpt:
+      Changed the test's file name as per the convention
+
+    * ext/standard/tests/serialize/002.phpt
+      ext/standard/tests/serialize/bug14293.phpt:
+      Renamed the test name as per the convension
+
+    * ext/standard/tests/image/bug13213.phpt
+      ext/standard/tests/math/bug21523.phpt
+      ext/standard/tests/network/bug20134.phpt
+      ext/standard/tests/strings/bug20108.phpt
+      ext/standard/tests/strings/bug20169.phpt
+      ext/standard/tests/strings/bug20927.phpt:
+      Test name formatting
+
+    * ext/pcre/tests/bug20528.phpt:
+      Made the test's name more descriptive
+
+    * ext/pcre/tests/bug20528.phpt
+      ext/pcre/tests/bug21732.phpt:
+      Removed pointless checks
+
+    * ext/pcre/tests/bug21732.phpt:
+      Added test case for bug #21732
+
+2003-01-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+      Fix bug: #21817 (only enable this if --with-kerberos is used)
+
+2003-01-23  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dllts.dsp:
+      Fix .dsp
+
+2003-01-23  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+      remove this stupid highlight which causes trouble.
+
+    * ext/gd/config.m4:
+      MFB
+
+    * (PHP_4_3)
+      ext/gd/config.m4:
+      Enable building with freetype 2.1.3
+
+    * ext/ingres_ii/config.m4:
+      Correct default path
+
+    * (PHP_4_3)
+      NEWS:
+      fugbix news
+
+    * tests/func/005a.phpt:
+      
+      Added test for bug: #21513
+
 2003-01-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sybase_ct/php_sybase_ct.c:
