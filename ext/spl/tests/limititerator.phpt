@@ -24,8 +24,9 @@ class NumericArrayIterator implements Iterator
 
 	public function hasMore()
 	{
-		echo __METHOD__ . "\n";
-		return $this->i < count($this->a);
+		$ret = $this->i < count($this->a);
+		echo __METHOD__ . '(' . ($ret ? 'true' : 'false') . ")\n";
+		return $ret;
 	}
 
 	public function key()
@@ -59,14 +60,14 @@ class SeekableNumericArrayIterator extends NumericArrayIterator implements Seeka
 }
 
 $a = array(1, 2, 3, 4, 5);
-foreach (new LimitIterator(new NumericArrayIterator($a)) as $v)
+foreach (new LimitIterator(new NumericArrayIterator($a), 1, 3) as $v)
 {
 	print "$v\n";
 }
 
 echo "===SEEKABLE===\n";
 $a = array(1, 2, 3, 4, 5);
-foreach(new LimitIterator(new SeekableNumericArrayIterator($a)) as $v)
+foreach(new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3) as $v)
 {
 	print "$v\n";
 }
@@ -74,7 +75,7 @@ foreach(new LimitIterator(new SeekableNumericArrayIterator($a)) as $v)
 echo "===SEEKING===\n";
 $a = array(1, 2, 3, 4, 5);
 $l = new LimitIterator(new SeekableNumericArrayIterator($a));
-for($i = 0; $i < 5; $i++)
+for($i = 1; $i < 4; $i++)
 {
 	$l->seek($i);
 	print $l->current() . "\n";
@@ -82,91 +83,62 @@ for($i = 0; $i < 5; $i++)
 
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
-NumericArrayIterator::hasMore
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-1
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-5
-NumericArrayIterator::next
-NumericArrayIterator::hasMore
 ===SEEKABLE===
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
-SeekableNumericArrayIterator::seek(0)
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-1
-NumericArrayIterator::next
-NumericArrayIterator::hasMore
+SeekableNumericArrayIterator::seek(1)
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
 NumericArrayIterator::next
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-5
-NumericArrayIterator::next
-NumericArrayIterator::hasMore
 ===SEEKING===
 NumericArrayIterator::__construct
-SeekableNumericArrayIterator::seek(0)
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-1
 SeekableNumericArrayIterator::seek(1)
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 SeekableNumericArrayIterator::seek(2)
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 SeekableNumericArrayIterator::seek(3)
-NumericArrayIterator::hasMore
+NumericArrayIterator::hasMore(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
-SeekableNumericArrayIterator::seek(4)
-NumericArrayIterator::hasMore
-NumericArrayIterator::current
-NumericArrayIterator::key
-5
 ===DONE===
