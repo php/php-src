@@ -29,6 +29,7 @@ if test "$PHP_PGSQL" != "no"; then
   old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS -L$PGSQL_LIBDIR"
   AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
+  AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[ ]))
   LIBS="$old_LIBS"
   LDFLAGS="$old_LDFLAGS"
   
