@@ -3643,11 +3643,7 @@ PHP_FUNCTION(array_key_exists)
 
 	switch (Z_TYPE_PP(key)) {
 		case IS_STRING:
-			if (zend_is_numeric_key(*key, &lvalue)) {
-				if (zend_hash_index_exists(HASH_OF(*array), lvalue)) {
-					RETURN_TRUE;
-				}
-			} else if (zend_hash_exists(HASH_OF(*array), Z_STRVAL_PP(key), Z_STRLEN_PP(key)+1)) {
+			if (zend_symtable_exists(HASH_OF(*array), Z_STRVAL_PP(key), Z_STRLEN_PP(key)+1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
