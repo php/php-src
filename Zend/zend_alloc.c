@@ -184,7 +184,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #endif
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size, SIZE);
-	if (AG(allocated_memory) > AG(allocated_memory_peak) {
+	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
 		AG(allocated_memory_peak) = AG(allocated_memory);
 	}
 #endif
