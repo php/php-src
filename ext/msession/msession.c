@@ -46,6 +46,20 @@
 /* Uncomment to get debugging messages */
 /* #define ERR_DEBUG */
 
+/* Zend version number is out of whack in 4.0.6 */
+/* Numerical <> do not seem to work, older released version is greater than current */
+/* This sets the PHP API version used in the file. */
+/* If this module does not compile on the version of PHP you are using, look for */
+/* this value in Zend/zend_modules.h, and set appropriately */
+
+#if (ZEND_MODULE_API_NO ==  20001222)
+#define PHP_4_0_API
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#elif (ZEND_MODULE_API_NO >= 20010901)
+#define PHP_4_1_API
+#endif
+
 /*
  * Please do not remove backward compatibility from this module.
  * this same source must also work with 4.0 versions of PHP.
@@ -107,7 +121,7 @@ function_entry msession_functions[] = {
 };
 
 zend_module_entry msession_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
+#ifdef PHP_4_1_API
 	STANDARD_MODULE_HEADER,
 #endif
 	"msession",
@@ -117,7 +131,7 @@ zend_module_entry msession_module_entry = {
 	PHP_RINIT(msession),
 	PHP_RSHUTDOWN(msession),
 	PHP_MINFO(msession),
-#if ZEND_MODULE_API_NO >= 20010901
+#ifdef PHP_4_1_API
 	NO_VERSION_YET,
 #endif
 	STANDARD_MODULE_PROPERTIES
@@ -174,9 +188,7 @@ PHP_MINFO_FUNCTION(msession)
 int PHPMsessionConnect(const char *szhost, int nport)
 {
 
-#if ZEND_MODULE_API_NO >= 20010901
 	TSRMLS_FETCH();
-#endif
 	
 	if(!s_reqb)
 		s_reqb = AllocateRequestBuffer(2048);
@@ -187,11 +199,7 @@ int PHPMsessionConnect(const char *szhost, int nport)
 	if(s_conn)
 	{
 		CloseReqConn(s_conn);
-#ifdef  ZEND_MODULE_API_NO >= 20010901
 		php_log_err("Call to connect with non-null s_conn" TSRMLS_CC);
-#else
-		php_log_err("Call to connect with non-null s_conn");
-#endif
 	}
 	if(strcmp(s_szhost, szhost))
 	{
@@ -739,9 +747,10 @@ PHP_FUNCTION(msession_set_array)
 	HashPosition pos;
 	zval **entry;
 	char *key;
-#if ZEND_MODULE_API_NO >= 20010901
+#ifdef PHP_4_1_API
 	uint keylen;
-#else
+#endif
+#ifdef PHP_4_0_API
 	ulong keylen;
 #endif
 	ulong numndx;
