@@ -447,7 +447,7 @@ void zend_debug_alloc_output(char *format, ...)
 	vsprintf(output_buf, format, args);
 	va_end(args);
 
-#if WIN32||WINNT
+#if ZEND_WIN32
 	OutputDebugString(output_buf);
 #else
 	fprintf(stderr, output_buf);

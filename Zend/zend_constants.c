@@ -79,7 +79,7 @@ void clean_module_constants(int module_number)
 
 int zend_startup_constants(ELS_D)
 {
-#if WIN32|WINNT
+#if ZEND_WIN32
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
