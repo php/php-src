@@ -24,31 +24,20 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_fribidi.h"
-#include "fribidi.h"
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if HAVE_FRIBIDI
 
-/* If you declare any globals in php_fribidi.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(fribidi)
-*/
+#include "ext/standard/info.h"
+#include <fribidi/fribidi.h>
 
-/* True global resources - no need for thread safety here */
-/* static int le_fribidi; */
-
-/* Every user visible function must have an entry in fribidi_functions[].
-*/
 function_entry fribidi_functions[] = {
 	PHP_FE(fribidi_log2vis,	NULL)		
-	{NULL, NULL, NULL}	/* Must be the last line in fribidi_functions[] */
+	{NULL, NULL, NULL}
 };
 
 zend_module_entry fribidi_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"fribidi",
 	fribidi_functions,
 	PHP_MINIT(fribidi),
@@ -56,7 +45,7 @@ zend_module_entry fribidi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(fribidi),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -92,7 +81,8 @@ PHP_MSHUTDOWN_FUNCTION(fribidi)
 PHP_MINFO_FUNCTION(fribidi)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "fribidi support", "enabled");
+	php_info_print_table_header(2, "FriBidi support", "enabled");
+	php_info_print_table_header(2, "FriBidi version", FRIBIDI_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -117,7 +107,7 @@ PHP_MINFO_FUNCTION(fribidi)
 /*				FRIBIDI_CHARSET_ISIRI_3342                      */
 /*                                                              */
 /* Output: on success: The visual string.                       */
-/*         on failure:                                          */ 
+/*         on failure: FALSE                                    */ 
 /*--------------------------------------------------------------*/           
 
 /* {{{ proto string fribidi_log2vis(string str, string direction, int charset)
@@ -125,50 +115,36 @@ PHP_MINFO_FUNCTION(fribidi)
 PHP_FUNCTION(fribidi_log2vis)
 {
 	zval **parameter1, **parameter2, **parameter3;
-
-
 	FriBidiChar *u_logical_str, *u_visual_str;  /* unicode strings .... */
-	char *inString;
-	guchar *outString;
+	char *inString, *outString;
 	int len, alloc_len, utf8_len;
-
-
 	FriBidiCharType base_dir;
-
 	FriBidiStrIndex *position_L_to_V_list;
 	FriBidiStrIndex *position_V_to_L_list;
-	guint8  *embedding_level_list;
+	FriBidiLevel    *embedding_level_list;
 				   
 	/* get parameters from input */
-	
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &parameter1, &parameter2, &parameter3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	/* convert input to expected type.... */
-
 	convert_to_string_ex(parameter1);
 	convert_to_string_ex(parameter2);
 	convert_to_long_ex(parameter3);
 	
 	/* allocate space and prepare all local variables */
-
-
 	len = Z_STRLEN_PP(parameter1);
-	
 	inString = estrndup(Z_STRVAL_PP(parameter1), len);
-
 	alloc_len = len+1;
 
 	u_logical_str = (FriBidiChar*) emalloc(sizeof(FriBidiChar)*alloc_len);
 	u_visual_str = (FriBidiChar*) emalloc(sizeof(FriBidiChar)*alloc_len);
 	
-	position_L_to_V_list =  (FriBidiStrIndex*) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
-	position_V_to_L_list =  (FriBidiStrIndex*) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
-	embedding_level_list = (guint8*) emalloc(sizeof(guint8)*alloc_len);
+	position_L_to_V_list =  (FriBidiStrIndex *) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
+	position_V_to_L_list =  (FriBidiStrIndex *) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
+	embedding_level_list = (FriBidiLevel *) emalloc(sizeof(FriBidiLevel)*alloc_len);
 
-	outString = (guchar*)emalloc(sizeof(guchar)*alloc_len);
-	
 	if(inString[len-1] == '\n') {
 		inString[len-1] = '\0';
 	}
@@ -193,36 +169,36 @@ PHP_FUNCTION(fribidi_log2vis)
 			fribidi_isiri_3342_to_unicode(inString, len, u_logical_str);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown charset");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
 			efree(u_logical_str);
 			efree(u_visual_str);
 			efree(position_L_to_V_list);
 			efree(position_V_to_L_list);
 			efree(embedding_level_list);
-			efree(outString);
+			efree(inString);
 			RETURN_FALSE;
 	}
 	
-	
 	/* visualize the logical.... */
-
 	if ((Z_STRVAL_PP(parameter2))[0] == 'R') {
 		base_dir = FRIBIDI_TYPE_RTL;
-	} else if (Z_STRVAL_PP(parameter2)[0] == 'L')
+	} else if (Z_STRVAL_PP(parameter2)[0] == 'L') {
 		base_dir = FRIBIDI_TYPE_LTR;
-	else
+	} else {
 		base_dir = FRIBIDI_TYPE_N;
+	}
+	
+	outString = (char *) emalloc(sizeof(char)*alloc_len);
 
 	fribidi_log2vis(u_logical_str, len, &base_dir, u_visual_str, position_L_to_V_list, position_V_to_L_list, embedding_level_list);
 	
 	/* convert back to original char set */
-
 	switch(Z_LVAL_PP(parameter3)) {
 		case FRIBIDI_CHARSET_UTF8:
-			fribidi_unicode_to_utf8(u_visual_str, utf8_len , outString);
+			fribidi_unicode_to_utf8(u_visual_str, utf8_len, outString);
 			break;
 		case FRIBIDI_CHARSET_ISO8859_6:
-			fribidi_unicode_to_iso8859_6(u_visual_str, len , outString);
+			fribidi_unicode_to_iso8859_6(u_visual_str, len, outString);
 			break;
 		case FRIBIDI_CHARSET_ISO8859_8:
 			fribidi_unicode_to_iso8859_8(u_visual_str, len , outString);
@@ -237,28 +213,28 @@ PHP_FUNCTION(fribidi_log2vis)
 			fribidi_unicode_to_isiri_3342(u_visual_str, len , outString);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown charset");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
 			efree(u_logical_str);
 			efree(u_visual_str);
 			efree(position_L_to_V_list);
 			efree(position_V_to_L_list);
 			efree(embedding_level_list);
 			efree(outString);
+			efree(inString);
 			RETURN_FALSE;
 	}
-	
 
 	efree(u_logical_str);
 	efree(u_visual_str);
-	
 	efree(position_L_to_V_list);
 	efree(position_V_to_L_list);
 	efree(embedding_level_list);
-	
-	RETURN_STRING(outString, 1);
+	efree(inString);
+
+	RETVAL_STRING(outString, 1);
+	efree(outString);
 }
 /* }}} */
-
 
 #endif	/* HAVE_FRIBIDI */
 
