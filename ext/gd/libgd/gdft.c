@@ -349,7 +349,7 @@ fontTest (void *element, void *key)
   return (strcmp (a->fontlist, b->fontlist) == 0);
 }
 
-static void *fontFetch (char **error, void *key TSRMLS_DC)
+static void *fontFetch (char **error, void *key)
 {
 	font_t *a;
 	fontkey_t *b = (fontkey_t *) key;
@@ -394,6 +394,7 @@ static void *fontFetch (char **error, void *key TSRMLS_DC)
 		}
 		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
 			if (!strcmp(dir, ".")) {
+				TSRMLS_FETCH();
 #if HAVE_GETCWD
 				dir = VCWD_GETCWD(cur_dir, MAXPATHLEN);
 #elif HAVE_GETWD
