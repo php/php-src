@@ -1904,6 +1904,16 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		convert_to_long_ex(z_len);
+		if (Z_LVAL_PP(z_len) > Z_STRLEN_PP(str)) {
+			php_error(E_WARNING, "%s() cannot write more than buffer size %d. Tried to wtite %d",
+					  get_active_function_name(TSRMLS_C), Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			RETURN_FALSE;
+		}
+		if (Z_LVAL_PP(z_len) < 0) {
+			php_error(E_WARNING, "%s() buffer size must be larger than 0. %d specified for buffer size.",
+					  get_active_function_name(TSRMLS_C), Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			RETURN_FALSE;
+		}
 		len = Z_LVAL_PP(z_len);
 	}
 	else {
@@ -1925,7 +1935,7 @@ PHP_FUNCTION(pg_lo_write)
 PHP_FUNCTION(pg_lo_read_all)
 {
   	zval **pgsql_id;
-	int i, tbytes;
+	int tbytes;
 	volatile int nbytes;
 	char buf[PGSQL_LO_READ_BUF_SIZE];
 	pgLofp *pgsql;
