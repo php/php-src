@@ -86,7 +86,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	APR_BRIGADE_INSERT_TAIL(bb, b);
 #endif
 	
-	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS) {
+	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS || ctx->r->connection->aborted) {
 		php_handle_aborted_connection();
 	}
 	
@@ -248,7 +248,7 @@ php_apache_sapi_flush(void *server_context)
 	bb = apr_brigade_create(ctx->r->pool, ba);
 	b = apr_bucket_flush_create(ba);
 	APR_BRIGADE_INSERT_TAIL(bb, b);
-	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS) {
+	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS || ctx->r->connection->aborted) {
 		php_handle_aborted_connection();
 	}
 }
@@ -477,7 +477,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				rv = ap_pass_brigade(f->next, prebb);
 				/* XXX: destroy the prebb, since we know we're
 				 * done with it? */
-				if (rv != APR_SUCCESS) {
+				if (rv != APR_SUCCESS || ctx->r->connection->aborted) {
 					php_handle_aborted_connection();
 				}
 			}

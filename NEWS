@@ -7,6 +7,7 @@ PHP 4                                                                      NEWS
   register_shutdown_function()). (Ilia)
 - Fixed bug #22154 (Possible crash when memory_limit is reached and
   output buffering in addition to session.use_trans_sid is used). (Ilia)
+- Fixed bug #22072 (Apache2 sapis do not detect aborted connections). (Ilia)
 
 30 Jul 2003, Version 4.3.3RC2
 - Improved the NSAPI SAPI module (Uwe Schindler)
