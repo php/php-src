@@ -317,29 +317,11 @@ PHP_MINIT_FUNCTION(odbc)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	/* SQLAllocEnv(&henv); */
 	le_result = register_list_destructors(_free_odbc_result, NULL);
 	le_conn = register_list_destructors(_close_odbc_conn, NULL);
 	le_pconn = register_list_destructors(NULL, _close_odbc_pconn);
 	odbc_module_entry.type = type;
 	
-#ifdef SQLANY_BUG
-	/* Make a dumb connection to avoid crash on SQLFreeEnv(),
-	 * then release it immediately.
-	 * This is required for SQL Anywhere 5.5.00 on QNX 4.24 at least.
-	 * The SQLANY_BUG should be defined in CFLAGS.
-	 */
-	if(SQLAllocConnect(henv, &foobar) != SQL_SUCCESS){
-			ODBC_SQL_ERROR(SQL_NULL_HDBC, SQL_NULL_HSTMT, "SQLAllocConnect");
-	}else{
-		rc = SQLConnect(foobar, ODBCG(defDB), SQL_NTS, ODBCG(defUser), 
-						SQL_NTS, ODBCG(defPW), SQL_NTS);
-		if(rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO)
-			SQLDisconnect(foobar);
-		SQLFreeConnect(foobar);
-	}
-#endif
-
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_PASSTHRU", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_RETURN", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_CONVERT", 2, CONST_CS | CONST_PERSISTENT);
