@@ -1018,10 +1018,16 @@ ANY_CHAR (.|[\n])
 	errno = 0;
 	zendlval->value.lval = strtoul(yytext, NULL, 16);
 	if (errno == ERANGE) { /* overflow */
-		/* not trying strtod - it returns trans on 0x-es */
+		/* not trying strtod - it returns trash on 0x-es */
 		zendlval->value.lval = LONG_MAX; /* maximal long */
 		zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
 	} else {
+		if(zendlval->value.lval < 0) {
+			/* maintain consistency with the old way */
+			zendlval->value.dval = (unsigned long) zendlval->value.lval;
+			zendlval->type = IS_DOUBLE;
+			return T_DNUMBER;
+		}
 		zendlval->type = IS_LONG;
 	}
 	zendlval->type = IS_LONG;
