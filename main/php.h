@@ -37,10 +37,8 @@
 
 #include "zend_API.h"
 
-#if PHP_BROKEN_SPRINTF
 #undef sprintf
 #define sprintf php_sprintf
-#endif
 
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef PHP_DEBUG
@@ -228,9 +226,7 @@ char *strerror(int);
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || PHP_BROKEN_SPRINTF || PHP_BROKEN_SNPRINTF || PHP_BROKEN_VSNPRINTF
 #include "snprintf.h"
-#endif
 #include "spprintf.h"
 
 #define EXEC_INPUT_BUF 4096
