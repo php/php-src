@@ -733,6 +733,7 @@ ZEND_METHOD(reflection_function, invoke)
 	int result;
 	int argc = ZEND_NUM_ARGS();
 	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	reflection_object *intern;
 	zend_function *fptr;
 	
@@ -755,7 +756,11 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = argc;
 	fci.no_separation = 1;
-	/*fci.function_handler_cache = &fptr;*/
+
+	fcc.initialized = 1;
+	fcc.function_handler = fptr;
+	fcc.calling_scope = EG(scope);
+	fcc.object_pp = NULL;
 
 	result = zend_call_function(&fci, NULL TSRMLS_CC);
 
@@ -958,6 +963,7 @@ ZEND_METHOD(reflection_method, invoke)
 	int argc = ZEND_NUM_ARGS();
 	int result;
 	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 	
 	METHOD_NOTSTATIC;
 
@@ -1011,9 +1017,13 @@ ZEND_METHOD(reflection_method, invoke)
 	fci.param_count = argc-1;
 	fci.params = params+1;
 	fci.no_separation = 1;
-	/*fci.function_handler_cache = &mptr;*/
 
-	result = zend_call_function(&fci, NULL TSRMLS_CC);
+	fcc.initialized = 1;
+	fcc.function_handler = mptr;
+	fcc.calling_scope = EG(scope);
+	fcc.object_pp = object_pp;
+
+	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	
 	efree(params);
 
