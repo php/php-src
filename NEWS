@@ -1,6 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Change from E_ERROR to E_WARNING in the exif extension (Rasmus)
+- New pow() implementation, which returns an integer when possible,
+  and warnings on wrong input (jeroen)
+- Added optional second parameter to trim, chop and ltrim. You can
+  now specify which characters to trim (jeroen)
 - Hugely improved the performance of the thread-safe version of PHP, especially
   under Windows (Andi & Zeev) 
 - Improved request-shutdown performance significantly (Andi & Zeev, Zend
