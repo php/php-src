@@ -1147,6 +1147,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	SLS_FETCH();
 
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
+	zend_activate_modules();
+
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
 		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
@@ -1166,8 +1168,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 			return;
 		}
 	}
-
-	zend_activate_modules();
 
 	if (setjmp(EG(bailout))!=0) {
 		zend_deactivate_modules();
