@@ -2434,6 +2434,8 @@ void zend_do_add_list_element(znode *element TSRMLS_DC)
 	list_llist_element lle;
 
 	if (element) {
+		zend_check_writable_variable(element);
+
 		lle.var = *element;
 		zend_llist_copy(&lle.dimensions, &CG(dimension_llist));
 		zend_llist_prepend_element(&CG(list_llist), &lle);
@@ -2624,6 +2626,8 @@ void zend_do_unset(znode *variable, int type TSRMLS_DC)
 {
 	zend_op *last_op;
 
+	zend_check_writable_variable(variable);
+
 	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
 
 	switch (last_op->opcode) {
@@ -2646,10 +2650,8 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	zend_do_end_variable_parse(BP_VAR_IS, 0 TSRMLS_CC);
 
-	/* Check what to do with this later on when adding all of the check writable stuff
-	 * zend_check_writable_variable(variable);
-	 */
-
+	zend_check_writable_variable(variable);
+	
 	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
 	
 	switch (last_op->opcode) {
