@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26548 (ext/session: Malformed HTTP dates headers). (Derick)
+- Fixed bug #26531 (ext/domxml: get_elements_by_tag_name() wildcard fails).
+  (Rob Richards)
 - Fixed bug #26488 (Missing declaration of CRTSCTS in ext/dio/dio.c). (Jani)
 - Fixed bug #26467 (flock() does not force the "wouldblock" parameter to be 
   passed by reference). (Wez)
