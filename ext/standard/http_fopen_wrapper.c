@@ -194,6 +194,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	/* Should we send the entire path in the request line, default to no. */
 	if (context &&
 		php_stream_context_get_option(context, "http", "request_fulluri", &tmpzval) == SUCCESS) {
+		(*tmpzval)->refcount++;
 		SEPARATE_ZVAL(tmpzval);
 		convert_to_boolean_ex(tmpzval);
 		request_fulluri = Z_BVAL_PP(tmpzval) ? 1 : 0;
