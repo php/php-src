@@ -1,69 +1,48 @@
 AOLserver README ($Id$)
 
-To compile PHP 4.0 as a module for AOLserver, you need:
+PHP 4 supports AOLserver 3.0+ and AOLserver 4 out-of-the-box.
 
-- installed AOLserver 3.1 or later
-  (see the note below for AOLserver 3.0)
-
-NOTE: You should not use this module in production. PHP is not 100% stable
-      yet in threaded mode. To increase reliability enable the Global Lock
-      by removing #define NO_GLOBAL_LOCK in main/main.c. Also don't use
-      php_value as it will lead to races in a sub-system (use an ini file
-      instead).
+Note that there might be thread-safety issues with thread-unsafe
+libraries/extensions.  Test thoroughly before you put anything
+into production.
 
 
-1.) Configuring AOLserver
+1.) Installing AOLserver
 
-Read doc/install.txt in the source distribution
+    For AOLserver 4, ./configure; make; make install seems to be enough.
 
-It usually boils down to changing the INST/PREFIX variable in 
-include/Makefile.global and running make all install.
+2.) Install PHP
 
-2.) Configuring PHP
+    $ ./configure \
+        --with-aolserver=/path/to/installed/aolserver \
+        <other options>
+    $ make
+    $ make install
 
-$ ./configure \
-	--with-aolserver=/path/to/installed/aolserver \
-	<other options>
+3.) Enabling PHP in your config.tcl
 
-NOTE: If you are still using AOLserver 3.0, you need to retain the
-      AOLserver source code and pass another option to PHP:
+    Required steps:
 
-      --with-aolserver-src=/path/to/source/distribution
+    Locate the modules section:
 
-3.) Compiling and Installing PHP
+        ns_section "ns/server/${servername}/modules"
 
-$ make install
+    Under that, add this line:
 
-4.) Changing nsd.tcl
+        ns_param php ${bindir}/libphp4.so
 
-a) New section
+    Add a new section at the end of config.tcl to enable PHP support:
 
-Add a new section to pass options to PHP (required):
+        ns_section "ns/server/${servername}/module/php"
+        ns_param map *.php
+    
+    Now, all *.php files will be handled by PHP.
 
-ns_section "ns/server/${servername}/module/php"
+    You can also configure INI variables. E.g.
 
-You can use the following commands in this section:
-
-The 'map' command will cause AOLserver to pass all requests to *.php to
-the PHP module (can be specified multiple times).  Example:
-
-ns_param map *.php
-
-The 'php_value "name val"' command assigns the configuration option name 
-the value val (can be used multiple times). Example:
-
-ns_param php_value "session.auto_start 1"
-
-b) Enabling PHP
-
-Then enable the PHP module:
-
-ns_section "ns/server/${servername}/modules"
-...
-ns_param php ${bindir}/libphp4.so
-
-
+        ns_param php_value "session.auto_start 1"
+    
 =============================================================================
-This has been tested with AOLserver release 3.0.
+This has been tested with AOLserver release 3.1/4.0.
 
 AOLserver support has been written by Sascha Schumann <sascha@schumann.cx>.
