@@ -1,3 +1,122 @@
+2003-10-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/file.c:
+      Add missing reinitialization call
+
+    * ext/standard/file.c:
+      Fixed bug #26003 (fgetcsv() not binary-safe on null bytes)
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/document.c:
+      use php_error_docref
+
+2003-10-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/apache2handler/mod_php5.c:
+      - Fix win32 build.
+
+2003-10-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      tests/lang/bug25831.phpt:
+      Remove test because the problem won't be fixed for 4.x releases.
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/dom006.phpt:
+      extending of domDocument class test
+
+2003-10-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      Fix VPATH build (patch by Joe Orton <jorton at redhat dot com>)
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/dom005.phpt
+      ext/dom/tests/test.html:
+      added html test
+
+2003-10-27  Andi Gutmans  <andi@zend.com>
+
+    * win32/php4dllts.dsp:
+      - Add uuencode.c to the project
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/book.xml
+      ext/dom/tests/dom_xinclude.phpt
+      ext/dom/tests/xinclude.xml:
+      xinclude test
+
+    * ext/dom/document.c
+      ext/dom/dom_fe.h:
+      xinclude support readded to ext/dom
+
+    * ext/dom/tests/book.xml.gz
+      ext/dom/tests/dom004.phpt:
+      streams test
+
+2003-10-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      hrm
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/dom003.phpt:
+      exception/try/catch test
+
+    * ext/xsl/xsltprocessor.c:
+      fix for test Nr 3 bug (not freeing all params)
+
+    * ext/simplexml/tests/book.xml
+      ext/simplexml/tests/simplexml_import_dom.phpt:
+      added interop test
+
+    * ext/dom/tests/book.xml
+      ext/dom/tests/dom_import_simplexml.phpt:
+      interop test
+
+2003-10-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/sqlite_oo_026.phpt:
+      Add another test
+
+    * ext/sqlite/tests/sqlite_oo_025.phpt:
+      Rename test
+
+2003-10-27  Stig Bakken  <ssb@trd.fast.no>
+
+    * pear/PEAR/Frontend/CLI.php:
+      - array_merge is more ticklish in php5
+
+2003-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/php_uuencode.h
+      ext/standard/uuencode.c:
+      Added uuencode() & uudecode() functions.
+
+2003-10-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      cannot import nodes without document
+
+2003-10-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/document.c:
+      remove unneeded variables
+
+    * ext/dom/document.c:
+      - Make distinction in error-reporting between Warnings and Errors from
+      libxml2
+      - Use internal error_handlers during html-parsing as well
+
 2003-10-26  Christian Stocker  <chregu@phant.ch>
 
     * ext/simplexml/tests/bug25756.phpt:
