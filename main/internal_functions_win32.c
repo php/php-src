@@ -15,9 +15,9 @@
 	| Authors: Andi Gutmans <andi@zend.com>                                |
 	|          Zeev Suraski <zeev@zend.com>                                |
 	+----------------------------------------------------------------------+
-
-	$Id$
 */
+
+/* $Id$ */
 
 /* {{{ includes
  */

@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Wez Furlong (wez@thebrainroom.com)                           |
+   | Author: Wez Furlong <wez@thebrainroom.com>                           |
    | With suggestions from:                                               |
    |      Moriyoshi Koizumi <moriyoshi@at.wakwak.com>                     |
    |      Sara Golemon      <pollita@php.net>                             |

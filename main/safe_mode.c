@@ -15,6 +15,7 @@
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
  */
+
 /* $Id$ */
 
 #include "php.h"

@@ -12,11 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   | Wez Furlong (wez@thebrainroom.com)                                   |
+   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
    | Borrowed code from:                                                  |
-   | Rasmus Lerdorf <rasmus@lerdorf.on.ca>                                |
-   | Jim Winstead <jimw@php.net>                                          |
+   |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
 

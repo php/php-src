@@ -34,6 +34,8 @@
  * SUCH DAMAGE.
  */
 
+/* $Id$ */
+
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #endif /* LIBC_SCCS and not lint */
