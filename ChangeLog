@@ -1,3 +1,146 @@
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/skeleton/php_skeleton.h:
+
+2000-06-09  Andi Gutmans  <andi@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.dsp
+      ext/pgsql/php_pgsql.h: - Update postgress to build on Windows
+
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c:
+
+2000-06-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/datetime.c:
+    - Fixed 'Z' flag in date() to adjust for daylight savings time. 
+
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/ext_skel
+      ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.php:
+    - Cosmetic changes.
+    - Optionally, create function entries, stubs and declarations from names
+      listed in a file.
+
+2000-06-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      php_syslog.h:
+    Real fix for std_syslog issue on OpenServer. This is limited to the native
+    development system (/bin/cc and icc) and does not show up with the UDK.
+
+    * Makefile.in
+      sapi/apache/config.m4: The ! command is not portable.
+
+2000-06-09  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: Update news
+
+    * ext/standard/var.c:    Fixed the buffer overflow as well
+
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/ext_skel:
+    - Changed user instructions.
+
+2000-06-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c:
+    - Fixed stripcslashes() to remove to strip \ in unknown escapes instead of
+      leaving it. 
+
+    * ext/wddx/wddx.c
+      fopen-wrappers.c:
+    Changed WDDX to always serialize arrays as structs. PR #4924
+
+2000-06-09  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/standard/url.c: Fix #4928
+    Be *CAREFUL* with the _ex API, guys!
+
+2000-06-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/filestat.c: Make chmod in safe mode not allow SUID bits
+
+2000-06-09  Andi Gutmans  <andi@php.net>
+
+    * ext/oci8/oci8.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/com/COM.c
+      ext/domxml/php_domxml.c
+      ext/java/java.c:
+    - Change register_internal_class to zend_register_internal_class for
+    - consistency.
+    - Andrei: I'm still thinking about the _ex you want me to implement
+
+    * ext/icap/php_icap.c: - Use PHP_WIN32
+
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/ext_skel
+      ext/skeleton/create_module
+      ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c:
+    - As Sascha requested.
+
+2000-06-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      ext/session/session.c:
+    (php_wddx_deserialize_ex) return SUCCESS/FAILURE
+    Use that return value in WDDX session deserializer.
+
+2000-06-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/skeleton/php_skeleton.h: Change COMPILE_DL to COMPILE_DL_EXTNAME
+
+2000-06-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/skeleton/create_module
+      ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.php:
+    - Added skeleton module creating script.
+
+2000-06-09  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      configuration-parser.y
+      main.c:
+    - Parse errors in the php.ini files under Windows will no longer mess up the
+      HTTP headers in CGI mode and are now displayed in a message box
+
+    * ext/standard/info.c: Move back everything to where it belongs...
+
+    * ext/msql/php_msql.c: This should no longer be necessary
+
+    * config.guess:
+    This seems to be a valid report, can't hurt anyway (PR 4252)
+
+    * ext/standard/dl.c:
+    Restore the check for the trailing slash.  Windows does not apply s#/+#/# (PR 4375)
+
+2000-06-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.SELF-CONTAINED-EXTENSIONS:
+    You need to include dynlib.mk in Makefile.in.
+
+    * ext/session/session.c: The default serializer is still php.
+
+    * ext/session/session.c:
+    Automatically recover from a failed attempt to decode a session object.
+
+    PR: #4886
+
 2000-06-08  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c:
