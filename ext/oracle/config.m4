@@ -52,15 +52,9 @@ if test "$PHP_ORACLE" != "no"; then
   fi
 
   if test -f "$ORACLE_DIR/lib/sysliblist"; then
-	ORACLE_SYSLIB="`cat $ORACLE_DIR/lib/sysliblist | sed -e 's/-l//g'`"
+  	PHP_EVAL_LIBLINE(`$ORACLE_DIR/lib/sysliblist`, ORACLE_SHARED_LIBADD)
   elif test -f "$ORACLE_DIR/rdbms/lib/sysliblist"; then
-	ORACLE_SYSLIB="`cat $ORACLE_DIR/rdbms/lib/sysliblist | sed -e 's/-l//g'`"
-  fi
-
-  if test -n "$ORACLE_SYSLIB"; then
-	for oracle_slib in `echo $ORACLE_SYSLIB`; do
-	  AC_ADD_LIBRARY_WITH_PATH($oracle_slib, "", ORACLE_SHARED_LIBADD)
-	done
+  	PHP_EVAL_LIBLINE(`$ORACLE_DIR/rdbms/lib/sysliblist`, ORACLE_SHARED_LIBADD)
   fi
 
   AC_ORACLE_VERSION($ORACLE_DIR)
@@ -162,14 +156,4 @@ if test "$PHP_ORACLE" != "no"; then
   PHP_SUBST(ORACLE_SHARED_LIBADD)
   PHP_SUBST(ORACLE_DIR)
   PHP_SUBST(ORACLE_VERSION)
-
-  # i have no idea if the following will work! thies@digicol.de 20000508
-  if test "$CC" = "gcc" -a "`uname -sv`" = "AIX 4"; then
-    if test "$ext_shared" = "yes"; then
-	  ORACLE_SHARED_LIBADD="$ORACLE_SHARED_LIBADD -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
-    else	  
-	  LIBS="$LIBS -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
-    fi
-  fi
-
 fi
