@@ -385,7 +385,7 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-static zval * pdo_stmt_instanciate(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+static zval * pdo_stmt_instantiate(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {
 	if (ctor_args) {
 		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -505,8 +505,8 @@ static PHP_METHOD(PDO, prepare)
 		ctor_args = NULL;
 	}
 
-	if (!pdo_stmt_instanciate(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", dbstmt_ce->name);
+	if (!pdo_stmt_instantiate(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instantiate statement class %s", dbstmt_ce->name);
 		return;
 	}
 	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);
@@ -829,8 +829,8 @@ static PHP_METHOD(PDO, query)
 	
 	PDO_DBH_CLEAR_ERR();
 
-	if (!pdo_stmt_instanciate(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", pdo_dbstmt_ce->name);
+	if (!pdo_stmt_instantiate(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instantiate statement class %s", pdo_dbstmt_ce->name);
 		return;
 	}
 	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);
@@ -1165,7 +1165,7 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	pefree(dbh, dbh->is_persistent);
 }
 
-static void pdo_dbh_free_storage(void *object TSRMLS_DC)
+static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
 	if (!dbh) {

@@ -1861,7 +1861,7 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	efree(stmt);
 }
 
-void pdo_dbstmt_free_storage(void *object TSRMLS_DC)
+void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
 
@@ -2182,7 +2182,7 @@ zend_object_handlers pdo_row_object_handlers = {
 	NULL
 };
 
-void pdo_row_free_storage(void  *object TSRMLS_DC)
+void pdo_row_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
 

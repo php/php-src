@@ -79,7 +79,7 @@ zend_module_entry pdo_module_entry = {
 	PHP_RINIT(pdo),
 	PHP_RSHUTDOWN(pdo),
 	PHP_MINFO(pdo),
-	"0.2.4",
+	"0.3",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

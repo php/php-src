@@ -33,7 +33,7 @@ extern ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor);
 extern zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_dbstmt_functions[];
 extern zend_class_entry *pdo_dbstmt_ce;
-void pdo_dbstmt_free_storage(void *object TSRMLS_DC);
+void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC);
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
 extern zend_object_handlers pdo_dbstmt_object_handlers;
 int pdo_stmt_describe_columns(pdo_stmt_t *stmt TSRMLS_DC);
@@ -42,7 +42,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 extern zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_row_functions[];
 extern zend_class_entry *pdo_row_ce;
-void pdo_row_free_storage(void *object TSRMLS_DC);
+void pdo_row_free_storage(zend_object *object TSRMLS_DC);
 extern zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
