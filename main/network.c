@@ -17,6 +17,8 @@
  */
 /* $Id$ */
 
+#include "php.h"
+
 #ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
