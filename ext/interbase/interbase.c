@@ -2106,7 +2106,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 				switch (Z_TYPE_P(tmp)) {
 				case IS_STRING:
 					add_property_stringl(return_value, var->aliasname, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
-break;
+					break;
 				case IS_LONG:
 					add_property_long(return_value, var->aliasname, Z_LVAL_P(tmp));
 					break;
@@ -2116,7 +2116,13 @@ break;
 				}
 			}
 			efree(tmp);
-		} /* if not null */
+		} else {
+			if (fetch_type & FETCH_ARRAY) {
+				add_index_null(return_value, i);
+			} else {
+				add_property_null(return_value, var->aliasname);
+			}
+		}
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
 			arr_cnt++;
 		}
