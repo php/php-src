@@ -400,7 +400,7 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_PROGRESS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
 			NULL, 0, (bsofar), (bmax), NULL TSRMLS_CC); } } while(0)
 
-#define php_stream_notify_progress_init(context, sofar, bmax) do { if ((context)->notifier) { \
+#define php_stream_notify_progress_init(context, sofar, bmax) do { if ((context) && (context)->notifier) { \
 	(context)->notifier->progress = (sofar); \
 	(context)->notifier->progress_max = (bmax); \
 	(context)->notifier->mask |= PHP_STREAM_NOTIFIER_PROGRESS; \
