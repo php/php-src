@@ -3201,11 +3201,11 @@ PHP_FUNCTION(domxml_dump_mem)
 	char *encoding;
 	
 
-	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"|ls", &format,&encoding,&encoding_len);
+	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "|ls", &format, &encoding, &encoding_len);
 	if (format) {
 		xmlKeepBlanksDefault(0);
 		if (encoding_len) {
-			xmlDocDumpFormatMemoryEnc(docp, &mem, &size, encoding, format );
+			xmlDocDumpFormatMemoryEnc(docp, &mem, &size, encoding, format);
 		} else {
 			xmlDocDumpFormatMemory(docp, &mem, &size, format);
 		}			
@@ -3237,13 +3237,13 @@ PHP_FUNCTION(domxml_dump_mem_file)
 
 	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|ll", &file, &file_len, &compressmode, &format);
 
-	xmlSetCompressMode (compressmode);
+	xmlSetCompressMode(compressmode);
 
 	if (format) {
 		xmlKeepBlanksDefault(0);
-		bytes = xmlSaveFormatFile(file,docp,format);
+		bytes = xmlSaveFormatFile(file, docp, format);
 	} else {
-		bytes = xmlSaveFile(file,docp);
+		bytes = xmlSaveFile(file, docp);
 	}
 
 	if (bytes == -1) {
@@ -3265,7 +3265,7 @@ PHP_FUNCTION(domxml_dump_node)
 	int level = 0;
 	int format = 0;
 	
-	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"o|ll",&nodep,&format,&level);
+	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "o|ll", &nodep, &format, &level);
 	
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
@@ -3280,7 +3280,7 @@ PHP_FUNCTION(domxml_dump_node)
 		RETURN_FALSE;
 	}
 	
-	xmlNodeDump(buf, docp, elementp,level,format);
+	xmlNodeDump(buf, docp, elementp, level, format);
 
 	mem = (xmlChar*) xmlBufferContent(buf);
 
