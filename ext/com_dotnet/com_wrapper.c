@@ -314,14 +314,8 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		/* return value */
 		if (retval) {
 			if (pvarRes) {
-				if (Z_TYPE_P(retval) == IS_OBJECT) {
-					/* export the object using a dispatch like ourselves */
-					VariantInit(pvarRes);
-					V_VT(pvarRes) = VT_DISPATCH;
-					V_DISPATCH(pvarRes) = php_com_wrapper_export(retval TSRMLS_CC);
-				} else {
-					php_com_variant_from_zval(pvarRes, retval, COMG(code_page) TSRMLS_CC);
-				}
+				VariantInit(pvarRes);
+				php_com_variant_from_zval(pvarRes, retval, COMG(code_page) TSRMLS_CC);
 			}
 			zval_ptr_dtor(&retval);
 		} else if (pvarRes) {
@@ -344,6 +338,8 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbyname(
 
 	FETCH_DISP("DeleteMemberByName");
 
+	/* TODO: unset */
+
 	return S_FALSE;
 }
 
@@ -354,6 +350,8 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbydispid(
 	TSRMLS_FETCH();
 
 	FETCH_DISP("DeleteMemberByDispID");
+	
+	/* TODO: unset */
 	
 	return S_FALSE;
 }
