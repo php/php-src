@@ -361,6 +361,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		(*object_pp)->is_ref = 1;
 	}
 
+	if (object_pp && !*object_pp) {
+		object_pp = NULL;
+	}
 	if (object_pp) {
 		if (Z_TYPE_PP(object_pp) != IS_OBJECT) {
 			return FAILURE;
@@ -446,7 +449,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, *object_pp, 1 ELS_CC);
+		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 ELS_CC);
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(ELS_C);
