@@ -1,3 +1,33 @@
+2005-03-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * main/main.c
+      main/php.h:
+      This makes more sense. (Someone might actually use php_error_docref0() :)
+
+2005-03-08  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+2005-03-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * main/php.h:
+      - This was not needed (said Marcus)
+
+2005-03-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/html.c:
+      Improve the performance of htmlspecialchars_decode() by 20-30%.
+
+2005-03-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/var_unserializer.c:
+      update
+
+    * NEWS:
+      reorder
+
 2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * NEWS:
