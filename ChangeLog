@@ -1,3 +1,120 @@
+2002-04-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_globals.h
+      php.ini-dist
+      php.ini-recommended
+      main/main.c:
+    new feature ignoring repeated error messages (defaults to old behaviour)
+
+2002-04-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c: - MFH zip_entry_read_bug
+
+2002-04-06  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/zlib/zlib_fopen_wrapper.c
+      main/streams.c: Added BC support for old style zlib: wrapper.
+    Added notice when a requested wrapper is not found.
+
+2002-04-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c: - Fix zzip_entry_read
+
+2002-04-06  Richard Heyes  <richard@phpguru.org>
+
+    * pear/PEAR.php: * Added registerShutdownFunc() method
+
+2002-04-06  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS:
+    Inform the masses about where to get a 4.2 compatible mailparse package
+
+2002-04-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache/php4apache.dsp
+      sapi/apache2filter/php4apache2.dsp
+      sapi/fastcgi/fastcgi.dsp: MFH (.dsp fixes)
+
+2002-04-06  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/oci8/05sequences.phpt: Output adapted to the new tests
+
+    * pear/DB/oci8.php:
+    Rethrow errors in nextID() to be handled by the global error handler
+
+    * pear/DB/tests/sequences.inc:
+    Backends with real sequences may don't like DELETE FROM sequence
+
+2002-04-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/fastcgi/fastcgi.dsp
+      sapi/apache2filter/php4apache2.dsp
+      sapi/apache/php4apache.dsp: Fix output directory.
+
+2002-04-06  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/driver/05sequences.phpt
+      pear/DB/tests/mysql/05sequences.phpt: Output adapted to the new tests
+
+    * pear/DB/tests/sequences.inc: More hard tests
+
+    * pear/DB/mysql.php: Work on nextID():
+    - Use push/popErroHandling instead of "the hack"
+    - Optimize the speed
+    - Rethrow errors to be catched by the error handler when set
+    - Move the backwards compatibilty sequence system to its own function
+    - Fix a bug when the sequence table is empty
+
+    * pear/DB/common.php:
+    Fix fail when a error object is "rethrowed" and a class error handler
+    is set
+
+    * pear/PEAR.php:
+    Fix bug in pushErrorHandling() (fail under very specific circumstances)
+
+2002-04-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      pear/pear.m4
+      configure.in: Improve the life of external extension maintainers by
+    not plaguing them with "./" in absolute paths.
+
+    Requested by: Andrei, Wez
+
+2002-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: minor fix..
+
+2002-04-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/php4apache2.dsp: Fix Debug_TS build.
+
+2002-04-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/notice.inc
+      ext/pgsql/php_pgsql.h: Chages for new pg_last_notice()
+
+    * ext/pgsql/pgsql.c:
+    Make pg_last_notice() work as it is designed. It returns last notice message for connection resource specified.
+    Added "pgsql.ignore_notice" ini entry.
+    Added "pgsql.log_notice" ini entry.
+
+2002-04-06  Andrei Zmievski  <andrei@php.net>
+
+    * ext/xmlrpc/config.m4
+      ext/xmlrpc/xmlrpc-epi-php.c:
+    - Fixed a leak in xml_decode().
+    - Fixed it so it's possible to compile as a shared extension.
+
+2002-04-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c:
+    Use get_active_function_name() for error messages.
+
+2002-04-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php: * forgot htmlspecialchars in release notes
+
 2002-04-05  Sterling Hughes  <sterling@bumblebury.com>
 
     * sapi/apache2filter/sapi_apache2.c: MFH changes per doug's request
