@@ -2179,7 +2179,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	#ifdef HAVE_OCI9
 	//following chunk is Oracle 9i+ ONLY
-	if (charset[0] != "\0") {
+	if (*charset) {
 		//get ub2 charset id based on charset
 		//this is pretty secure, since if we don't have a valid character set name,
 		//0 comes back and we can still use the 0 in all further statements -> OCI uses NLS_LANG
