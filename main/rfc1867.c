@@ -372,7 +372,10 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 				fclose(fp);
 				add_protected_variable(namebuf PLS_CC);
 				if (!upload_successful) {
-					efree(temp_filename);
+					if(temp_filename) {
+						unlink(temp_filename);
+						efree(temp_filename);
+					}
 					temp_filename = "none";
 				} else {
 					zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename)+1, &temp_filename, sizeof(char *), NULL);
