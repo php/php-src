@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fix php_realpath not to die on non-existing files (needed for touch()) (Stas and china@thewrittenword.com)
+- Fix get_browser() function (Stas)
 - Fix symbol clash which caused a DSO problem on OpenBSD (Rob Black and
   anil@recoil.org)
 - Added new function: ldap_compare(). (Jani)
