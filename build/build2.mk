@@ -39,7 +39,7 @@ acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
 	cat $(acconfig_h_SOURCES) > $@
 
-SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_PROG_CPP was called before AC_PROG_CC)'||true)
+SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times)'||true)
 
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 
