@@ -1,3 +1,84 @@
+1999-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * acconfig.h.in
+      configure.in: Fix for #2909
+
+1999-12-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/fsock.h
+      ext/standard/info.c: windows build errors
+
+1999-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: inet_aton is in libresolv on Solaris 2.5.1
+
+1999-12-03  David Hedbor  <david@hedbor.org>
+
+    * ext/standard/info.c: Added credit notes for Roxen SAPI module
+
+1999-12-03  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/session/mod_files.c: Include errno.h.
+
+1999-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c: Improve locking when O_EXCL is available
+
+    * ext/java/config.m4:
+    PHP_BUILD_* m4 macros are not intended to be used by extensions.
+    If you want to tell the user that the current choice of a specific SAPI
+    module is bad, check $php_build_target.
+
+    * main.c: 2<<30 (== 1<<31) overflows 32-bit signed int, reverting to 1<<30
+
+    * configure.in:
+    Solaris needs -D_REENTRANT to define prototypes for localtime_r etc.
+
+    * ext/standard/fsock.h
+      ext/standard/fsock.c: Use socklen_t where appropiate
+
+    * configure.in:
+    Add check for socklen_t (we cannot use AC_CHECK_TYPE, because socklen_t
+    is defined in sys/socket.h).
+
+1999-12-03  Stig Bakken  <ssb@fast.no>
+
+    * NEWS: forgot the "@"
+
+    * ext/standard/info.c
+      build-defs.h.in
+      configure.in: Add configure command to phpinfo() output (Stig)
+
+1999-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/posix/config.h.stub
+      ext/posix/config.m4
+      ext/posix/php3_posix.h: Add configure stuff
+    (note that --with-xxx should be only used, if it references something
+     external.)
+
+    * ext/posix/Makefile.am
+      ext/posix/config.h.stub
+      ext/posix/config.m4
+      ext/posix/php3_posix.h
+      ext/posix/posix.c
+      ext/posix/.cvsignore: Add posix module
+
+    * sapi/isapi/php4isapi.c
+      main.c:
+    Add X-Powered-By header in all configurations to ease PHP usage metering
+
+    * sapi/aolserver/aolserver.c (php_ns_sapi_header_handler): use sapi_free_header()
+
+1999-12-03  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS:
+    * php_globals.h
+      main.c:
+1999-12-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/com/COM.c: Support DATE_to_pval and DISPATCH_to_pval
+
 1999-12-02  Rasmus Lerdorf  <rasmus@php.net>
 
     * main.c:
