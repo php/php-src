@@ -115,7 +115,7 @@ Bugfixes, PEAR Library:
     </filelist>
     <deps>
       <dep type="php" rel="ge" version="4.1"/>
-      <dep type="pkg" rel="has" version="0.4">Archive_Tar</dep>
+      <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
     </deps>
   </release>
