@@ -19,6 +19,12 @@
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef ZTS
 static zend_alloc_globals alloc_globals;
@@ -116,7 +122,7 @@ ZEND_API void *_emalloc(size_t size)
 
 	if (!p) {
 		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %ld bytes\n", (long) size);
-#if !(WIN32||WINNT) && ZEND_DEBUG
+#if ZEND_DEBUG && HAVE_KILL && HAVE_GETPID
 		kill(getpid(), SIGSEGV);
 #else
 		exit(1);
@@ -226,7 +232,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
-#if !(WIN32||WINNT) && ZEND_DEBUG
+#if ZEND_DEBUG && HAVE_KILL && HAVE_GETPID
 			kill(getpid(), SIGSEGV);
 #else
 			exit(1);
