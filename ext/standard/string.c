@@ -54,6 +54,9 @@
 #define PHP_PATHINFO_EXTENSION 	4
 #define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION)
 
+#define STR_STRSPN				0
+#define STR_STRCSPN				1
+
 /* {{{ register_string_constants
  */
 void register_string_constants(INIT_FUNC_ARGS)
@@ -195,39 +198,71 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-/* {{{ proto int strspn(string str, string mask)
-   Finds length of initial segment consisting entirely of characters found in mask */
+static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+{
+	char *s11, *s22;
+	long len1, len2, start, len;
+	
+	start = 0;
+	len = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
+				&s22, &len2, &start, &len) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() < 4) {
+		len = len1;
+	}
+	
+	/* look at substr() function for more information */
+	
+	if (start < 0) {
+		start += len1;
+		if (start < 0) {
+			start = 0;
+		}
+	} else if (start > len1) {
+		RETURN_FALSE;
+	}
+	
+	if (len < 0) {
+		len += (len1 - start);
+		if (len < 0) {
+			len = 0;
+		}
+	}
+	
+	if ((start + len) > len1) {
+		len = len1 - start;
+	}
+
+	if (behavior == STR_STRSPN) {
+		RETURN_LONG(php_strspn(s11 + start /*str1_start*/,
+						s22 /*str2_start*/,
+						s11 + start + len /*str1_end*/,
+						s22 + len2 /*str2_end*/));
+	} else if (behavior == STR_STRCSPN) {
+		RETURN_LONG(php_strcspn(s11 + start /*str1_start*/,
+						s22 /*str2_start*/,
+						s11 + start + len /*str1_end*/,
+						s22 + len2 /*str2_end*/));
+	}
+	
+}
+
+/* {{{ proto int strspn(string str, string mask [, start [, len]])
+   Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
-	zval **s1, **s2;
-	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-
-	RETURN_LONG(php_strspn(Z_STRVAL_PP(s1), Z_STRVAL_PP(s2),
-	                       Z_STRVAL_PP(s1) + Z_STRLEN_PP(s1),
-	                       Z_STRVAL_PP(s2) + Z_STRLEN_PP(s2)));
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRSPN);
 }
 /* }}} */
 
-/* {{{ proto int strcspn(string str, string mask)
-   Finds length of initial segment consisting entirely of characters not found in mask */
+/* {{{ proto int strcspn(string str, string mask [, start [, len]])
+   Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
-	zval **s1, **s2;
-	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-
-	RETURN_LONG(php_strcspn(Z_STRVAL_PP(s1), Z_STRVAL_PP(s2),
-	                        Z_STRVAL_PP(s1) + Z_STRLEN_PP(s1),
-	                        Z_STRVAL_PP(s2) + Z_STRLEN_PP(s2)));
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRCSPN);
 }
 /* }}} */
 
