@@ -983,7 +983,7 @@ PHP_FUNCTION(imap_setacl)
 /* }}} */
 
 
-/* {{{ proto array imap_getacl(int stream_id, string mailbox)
+/* {{{ proto array imap_getacl(resource stream_id, string mailbox)
 	Gets the ACL for a given mailbox */
 PHP_FUNCTION(imap_getacl)
 {
