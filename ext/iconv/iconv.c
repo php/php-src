@@ -1241,11 +1241,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 	const char *csname = NULL;
 	size_t csname_len; 
 	const char *encoded_text = NULL;
-	size_t encoded_text_len;
+	size_t encoded_text_len = 0;
 	const char *encoded_word = NULL;
 	const char *spaces = NULL;
 
-	php_iconv_enc_scheme_t enc_scheme;
+	php_iconv_enc_scheme_t enc_scheme = {0};
 
 	if (next_pos != NULL) {
 		*next_pos = NULL;
@@ -1536,6 +1536,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 							case PHP_ICONV_ENC_SCHEME_QPRINT:
 								decoded_text = (char *)php_quot_print_decode((unsigned char*)encoded_text, (int)encoded_text_len, &decoded_text_len, 1);
+								break;
+							default:
+								decoded_text = NULL;
 								break;
 						}
 
@@ -2058,7 +2061,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	int charset_len;
 	long mode = 0;
 	
-	php_iconv_err_t err;
+	php_iconv_err_t err = {0};
 
 	charset = ICONVG(internal_encoding);
 
@@ -2072,10 +2075,10 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 
 	while (encoded_str_len > 0) {
 		smart_str decoded_header = {0};
-		char *header_name;
-		size_t header_name_len;
+		char *header_name = NULL;
+		size_t header_name_len = 0;
 		char *header_value = NULL;
-		size_t header_value_len;
+		size_t header_value_len = 0;
 		char *p, *limit;
 		const char *next_pos;
 
