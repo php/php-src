@@ -33,6 +33,9 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 200?, Version 4.0.6
 - Fixed readfile/passthru losing resources during connection abort (Sascha)
+- Fixed bug in the mcrypt extension that caused segfaults when using a key
+  that is too large for the used algorithm, and a bug that caused
+  mcrypt_generic() to segfault PHP (Derick)
 - Fixed race in writing session files. (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
   specified. (Zeev)
