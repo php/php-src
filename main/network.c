@@ -825,7 +825,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			break;
-			
+
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
 				if (nr_bytes == 0) {
@@ -869,13 +869,13 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 				memcpy(wptr, esbuf, code + 1);
 				wptr += code;
 			}
-			
+
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"SSL operation failed with code %d.%s%s",
 					err, 
 					ebuf ? " OpenSSL Error messages:\n" : "",
 					ebuf ? ebuf : "");
-				
+
 			retry = 0;
 	}
 	return retry;
@@ -1125,12 +1125,45 @@ int _php_network_is_stream_alive(php_stream *stream)
 	 * be read, but a read returns 0 bytes of data, then the socket
 	 * has been closed.
 	 */
-	
+
 	FD_ZERO(&rfds);
 	FD_SET(fd, &rfds);
 	if (select(fd+1, &rfds, NULL, NULL, &tv) > 0) {
 
 		if (FD_ISSET(fd, &rfds)) {
+#if HAVE_OPENSSL_EXT
+			if (sock->ssl_active) {
+				int n;
+			
+				/* we need to loop to be able to handle SSL protocol (re)negotiations */
+				do {
+					n = SSL_peek(sock->ssl_handle, &buf, sizeof(buf));
+
+					if (n <= 0) {
+						int err = SSL_get_error(sock->ssl_handle, n);
+
+						if (err == SSL_ERROR_SYSCALL) {
+							alive = php_socket_errno() == EAGAIN;
+							break;
+						}
+
+						if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+							/* re-negotiate */
+							continue;
+						}
+
+						/* any other problem is a fatal error */
+						alive = 0;
+					}
+
+					/* either the peek was successful, or there was an error;
+					 * the alive flag has been set appropriately */
+					break;
+				} while (1);
+
+				
+			} else
+#endif
 			if (0 == recv(fd, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
 				alive = 0;
 			}
