@@ -697,6 +697,7 @@ _oci_bind_post_exec(void *data TSRMLS_DC)
 
 	if (bind->indicator == -1) { /* NULL */
 		zval *val = bind->zval;
+		*Z_STRVAL_P(val) = '\0'; /* XXX avoid warning in debug mode */
 		zval_dtor(val);
 		ZVAL_NULL(val);
 	} else if (Z_TYPE_P(bind->zval) == IS_STRING && (Z_STRVAL_P(bind->zval) != empty_string)) {
