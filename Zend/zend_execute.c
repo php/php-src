@@ -530,7 +530,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 	zval tmp_varname;
 	HashTable *target_symbol_table=0;
 
-	switch (opline->extended_value) {
+	switch (opline->op2.u.EA.type) {
 		case ZEND_FETCH_LOCAL:
 			target_symbol_table = EG(active_symbol_table);
 			break;
@@ -550,16 +550,32 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		case ZEND_FETCH_STATIC_MEMBER:
 			target_symbol_table = Ts[opline->op2.u.var].EA.class_entry->static_members;
 			break;
-		case ZEND_FETCH_THIS:
+		case ZEND_FETCH_FROM_THIS:
 			if (!EG(this)) {
 				zend_error(E_ERROR, "Using $this when not in object context");
 			}
 			target_symbol_table = Z_OBJPROP_P(EG(this));
 			break;
+		case ZEND_FETCH_THIS:
+			{
+				if (!EG(this)) {
+					zend_error(E_ERROR, "Using $this when not in object context");
+				}
+				/* FIXME: Put this error back.
+				//if (type == BP_VAR_RW || type == BP_VAR_W) {
+				//	zend_error(E_ERROR, "Can't overwrite $this");
+				//}
+				*/
+				Ts[opline->result.u.var].var.ptr_ptr = &EG(this);
+				SELECTIVE_PZVAL_LOCK(EG(this), &opline->result);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
+				return;
+				break;
+			}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
 		convert_to_string(&tmp_varname);
@@ -586,9 +602,9 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (opline->extended_value == ZEND_FETCH_LOCAL) {
+	if (opline->op2.u.EA.type == ZEND_FETCH_LOCAL) {
 		FREE_OP(Ts, &opline->op1, free_op1);
-	} else if (opline->extended_value == ZEND_FETCH_STATIC || opline->extended_value == ZEND_FETCH_STATIC_MEMBER) {
+	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC || opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
 
@@ -1601,7 +1617,7 @@ binary_assign_op_addr: {
 					
 					EX(calling_namespace) = EG(namespace);
 
-					if (EX(opline)->extended_value == ZEND_FETCH_THIS) {
+					if (EX(opline)->extended_value == ZEND_FETCH_FROM_THIS) {
 						if (!EG(this)) {
 							zend_error(E_ERROR, "Can't fetch $this as not in object context");
 						}

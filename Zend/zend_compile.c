@@ -228,12 +228,18 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRM
 	*result = opline_ptr->result;
 	SET_UNUSED(opline_ptr->op2);
 
-	if (varname->op_type == IS_CONST
-		&& varname->u.constant.type == IS_STRING
+	if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
+		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
+		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+		opline_ptr->op2.u.EA.type = ZEND_FETCH_THIS;
+		efree(varname->u.constant.value.str.val);
+		memset(&opline_ptr->op1, 0, sizeof(znode));
+		SET_UNUSED(opline_ptr->op1);
+	} else if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING
 		&& zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
-		opline_ptr->extended_value = ZEND_FETCH_GLOBAL;
+		opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 	} else {
-		opline_ptr->extended_value = ZEND_FETCH_LOCAL;
+		opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
 	}
 
 	if (bp) {
@@ -259,7 +265,7 @@ void zend_do_fetch_static_member(znode *class TSRMLS_DC)
 
 	opline_ptr = (zend_op *)le->data;
 	opline_ptr->op2 = *class;
-	opline_ptr->extended_value = ZEND_FETCH_STATIC_MEMBER;
+	opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
 }
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC)
@@ -918,9 +924,10 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 
 	last_op->opcode = ZEND_INIT_METHOD_CALL;
 
-	if (last_op->extended_value == ZEND_FETCH_THIS) {
-		last_op->op2 = last_op->op1;		
-		memset(&last_op->op1, 0, sizeof(znode));
+	if (last_op->op2.op_type == IS_UNUSED && last_op->op2.u.EA.type == ZEND_FETCH_FROM_THIS) {
+		last_op->op2 = last_op->op1;
+		memset(&last_op->op1, 0, sizeof(znode));  
+		last_op->extended_value = ZEND_FETCH_FROM_THIS;
 	}
 
 	zend_lowercase_znode_if_const(&last_op->op2);
@@ -1995,12 +2002,10 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 
 		le = fetch_list_ptr->head;
 		opline_ptr = (zend_op *) le->data;
-		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-			(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
-			!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
-			efree(opline_ptr->op1.u.constant.value.str.val);
+		if (opline_ptr->op1.op_type == IS_UNUSED && opline_ptr->op2.u.EA.type == ZEND_FETCH_THIS) {
 			opline_ptr->op1 = *property;
-			opline_ptr->extended_value = ZEND_FETCH_THIS;
+			SET_UNUSED(opline_ptr->op2);
+			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
 
 			*result = opline_ptr->result;
 			return;
@@ -2013,7 +2018,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 	opline.result.u.EA.type = 0;
 	opline.result.u.var = get_temporary_variable(CG(active_op_array));
 	opline.op1 = *object;
-	opline.op2 = *property;
+	opline. op2 = *property;
 	*result = opline.result;
 
 	zend_llist_add_element(fetch_list_ptr, &opline);
@@ -2335,7 +2340,7 @@ void zend_do_fetch_global_or_static_variable(znode *varname, znode *static_assig
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *varname;
 	SET_UNUSED(opline->op2);
-	opline->extended_value = fetch_type;
+	opline->op2.u.EA.type = fetch_type;
 	result = opline->result;
 
 	if (varname->op_type == IS_CONST) {
