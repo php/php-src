@@ -56,6 +56,13 @@ Exceptions:
     to parse URL", "Unable to connect to URL server" and "Unable
     to fetch URL text", respectively.
 
+    It has been silently agreed to prefix every php_error() message with the
+    name of the current function if applicable:
+
+    php_error(E_WHATEVER, "%s(): Desc.", get_active_function_name(TSRMLS_C));
+
+    Fixing ("unifying") existing php_error() message is a good thing [tm].
+
 [6] NEVER USE strncat().  If you're absolutely sure you know what you're doing,
     check its man page again, and only then, consider using it, and even then,
     try avoiding it.
