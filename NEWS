@@ -74,6 +74,8 @@ PHP                                                                        NEWS
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 - Fixed bug #28512 (Allocate enough space to store MSSQL data). (Frank)
 - Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
+- Fixed bug #27669 (PHP 5 didn't support all possibilities for calling static
+  methods dynamically). (Dmitry)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
 
 7 Jun 2004, PHP 5 Release Candidate 3
