@@ -88,3 +88,4 @@
 #define PHP_VELOCIS_INCLUDE     ""
 #define PHP_VELOCIS_LIBS        ""
 #define PHP_EXTENSION_DIR       "@EXTENSION_DIR@"
+#define PHP_INCLUDE_PATH	"@INCLUDE_PATH@"
