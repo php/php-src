@@ -502,7 +502,6 @@ function_call:
 	|	cvar_without_objects  '(' { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1 TSRMLS_CC); }
 			function_call_parameter_list ')'
 			{ zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-
 ;
 
 
@@ -590,10 +589,20 @@ rw_cvar:
 	cvar { zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
 ;
 
-
 cvar:
-		cvar_without_objects { $$ = $1; }
-	|	cvar_without_objects T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } ref_list { $$ = $4; }
+		variable { $$ = $1; }
+;
+
+
+variable:
+		variable_property '(' { zend_do_begin_method_call(NULL, &$1 TSRMLS_CC); }
+			function_call_parameter_list ')' { zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+	|	variable_property { $$ = $1; }
+	|	cvar_without_objects { $$ = $1; }
+;
+
+variable_property:
+	variable T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } object_property { $$ = $4; }
 ;
 
 
@@ -620,19 +629,10 @@ dim_offset:
 	|	expr			{ $$ = $1; }
 ;
 
-ref_list:
-		object_property  { $$ = $1; }
-	|	ref_list T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } object_property { $$ = $4; }
-;
 
 object_property:
 		object_dim_list { $$ = $1; }
 	|	cvar_without_objects { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); } { znode tmp_znode;  zend_do_pop_object(&tmp_znode TSRMLS_CC);  zend_do_fetch_property(&$$, &tmp_znode, &$1 TSRMLS_CC);}
-	|	cvar_without_objects '(' { znode tmp_znode; zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_pop_object(&tmp_znode TSRMLS_CC); zend_do_begin_method_call(&tmp_znode, &$1 TSRMLS_CC); }
-			function_call_parameter_list ')' { zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-	|	variable_name '(' { znode tmp_znode; zend_do_pop_object(&tmp_znode TSRMLS_CC); zend_do_begin_method_call(&tmp_znode, &$1 TSRMLS_CC); }
-			function_call_parameter_list ')' { zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-
 ;
 
 object_dim_list:
