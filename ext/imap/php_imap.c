@@ -187,8 +187,15 @@ void mail_close_it(zend_rsrc_list_entry *rsrc)
 
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
 
-	efree(IMAPG(imap_user));
-	efree(IMAPG(imap_password));
+	if (IMAPG(imap_user)) {
+		efree(IMAPG(imap_user));
+		IMAPG(imap_user) = 0;
+	}
+	if (IMAPG(imap_password)) {
+		efree(IMAPG(imap_password));
+		IMAPG(imap_password) = 0;
+	}
+
 	efree(imap_le_struct);
 }
 
@@ -636,6 +643,14 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			cl_flags = CL_EXPUNGE;
 			flags ^= PHP_EXPUNGE;
 		}
+	}
+
+	if (IMAPG(imap_user)) { 
+		efree(IMAPG(imap_user));
+	}
+
+	if (IMAPG(imap_password)) { 
+		efree(IMAPG(imap_password));
 	}
 
 	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
