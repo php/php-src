@@ -24,6 +24,7 @@ int id;
 /* Functions accessable to PHP */
 extern php3_module_entry php3_icap_module_entry;
 #define php3_icap_module_ptr &php3_icap_module_entry
+define phpext_imap_ptr php3_icap_module_ptr
 
 extern int icap_init(INIT_FUNC_ARGS);
 extern int icap_init_request(INIT_FUNC_ARGS);
