@@ -105,7 +105,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler)
 PHPAPI void php_end_ob_buffer(int send_buffer)
 {
 	char *final_buffer=NULL;
-	int final_buffer_length;
+	int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
 	SLS_FETCH();
 	OLS_FETCH();
@@ -409,6 +409,9 @@ PHP_FUNCTION(ob_start)
 				output_handler = *output_handler_p;
 				output_handler->refcount++;
 			}
+			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
 	if (php_start_ob_buffer(output_handler)==FAILURE) {
