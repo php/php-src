@@ -1286,6 +1286,10 @@ PHP_FUNCTION(cpdf_setdash)
 	convert_to_long_ex(arg2);
 	convert_to_long_ex(arg3);
 
+	if (!pdf->currentMemStream) {
+		RETURN_FALSE;
+	}
+
 	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) Z_LVAL_PP(arg2), (int) Z_LVAL_PP(arg3));
 	cpdf_setdash(pdf, buffer);
 
