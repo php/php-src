@@ -11,6 +11,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27135 (Possible crash inside mb_strlen()). (Moriyoshi)
 - Fixed bug #27026 (Added "cgi.nph" php.ini option to allow forcing of
   the 'Status: 200' header that is not normally needed). (Ilia)
+- Fixed bug #26862 (ob_flush() followed by output_reset_rewrite_vars() may
+  result in data loss). (Ilia, scottmacvicar at ntlworld dot com)
 - Fixed bug #26758 (FastCGI exits immediately with status 255). (Ilia, 
   tcarter at noggin dot com dot au)
 - Fixed bug #26653 (open_basedir incorrectly resolved on win32). (Ilia,
