@@ -55,7 +55,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
-	enum pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
+	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_pgsql_error_info *einfo = &H->einfo;
 	char *errmsg = PQerrorMessage(H->server);
 
@@ -69,12 +69,8 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	switch (errcode) {
-		case PGRES_EMPTY_QUERY:
-			*pdo_err = PDO_ERR_SYNTAX;
-			break;
-
 		default:
-			*pdo_err = PDO_ERR_CANT_MAP;
+			strcpy(*pdo_err, "HY000");
 			break;
 	}
 
@@ -83,8 +79,8 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "[%d] %s",
-				einfo->errcode, einfo->errmsg);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 	
 	return errcode;
