@@ -52,6 +52,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 #define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
+#define TEMP_VAR_STACK_LIMIT 2000
 
 /* former zend_execute_locks.h */
 static inline void zend_pzval_lock_func(zval *z)
@@ -1330,7 +1331,11 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	}
 
 #define RETURN_FROM_EXECUTE_LOOP(execute_data)								\
-	efree(EX(Ts));													\
+	if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) {						\
+ 		free_alloca(EX(Ts));													\
+ 	} else {								\
+ 		efree(EX(Ts));							\
+ 	}									\
 	EG(in_execution) = EX(original_in_execution);							\
 	EG(current_execute_data) = EX(prev_execute_data);						\
 	return 1; /* CHECK_ME */
@@ -1349,7 +1354,11 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
-	EX(Ts) = (temp_variable *) safe_emalloc(sizeof(temp_variable), op_array->T, 0);
+ 	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
+ 		EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable) * op_array->T);
+ 	} else {
+ 		EX(Ts) = (temp_variable *) safe_emalloc(sizeof(temp_variable), op_array->T, 0);
+ 	}
 	EX(op_array) = op_array;
 	EX(original_in_execution) = EG(in_execution);
 	EX(prev_execute_data) = EG(current_execute_data);
