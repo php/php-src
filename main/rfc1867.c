@@ -950,6 +950,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 						c++;
 					} else if (*tmp == ']') {
 						c--;
+						if (tmp[1] && tmp[1] != '[') {
+							skip_upload = 1;
+							break;
+						}
 					}
 					if (c < 0) {
 						skip_upload = 1;
