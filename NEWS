@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed bug in imap_compose_mail() which caused crashes. (Jani)
+- Fix reading of IPTC via GetImageInfo() for certain JPEG files. (Thies)
 - Improved the output-buffering functions to be re-entrant (Zeev)
 - Made ldap_add(), ldap_modify(), ldap_mod_add(), ldap_mod_replace()
   binary-safe. Original patch: Terrence Miao <terrence_miao@email.com> (Jani)
