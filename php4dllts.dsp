@@ -140,10 +140,6 @@ SOURCE=".\fopen-wrappers.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\getopt.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\internal_functions_win32.c
 # ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 # End Source File
@@ -178,10 +174,6 @@ SOURCE=.\ext\standard\quot_print.c
 # Begin Source File
 
 SOURCE=.\reentrancy.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\request_info.c
 # End Source File
 # Begin Source File
 
@@ -278,10 +270,6 @@ SOURCE=.\php_variables.h
 # Begin Source File
 
 SOURCE=.\ext\standard\quot_print.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\request_info.h
 # End Source File
 # Begin Source File
 
