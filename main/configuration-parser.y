@@ -384,6 +384,9 @@ void do_cfg_op(char type, zval *result, zval *op1, zval *op2)
 		case '~':
 			i_result = ~i_op1;
 			break;
+		case '!':
+			i_result = !i_op1;
+			break;
 		default:
 			i_result = 0;
 			break;
@@ -429,7 +432,7 @@ void do_cfg_get_constant(zval *result, zval *name)
 %token T_ZEND_EXTENSION_DEBUG
 %token T_ZEND_EXTENSION_DEBUG_TS
 %left '|' '&'
-%right '~'
+%right '~' '!'
 
 %%
 
@@ -568,6 +571,7 @@ expr:
 	|	expr '|' expr			{ do_cfg_op('|', &$$, &$1, &$3); }
 	|	expr '&' expr			{ do_cfg_op('&', &$$, &$1, &$3); }
 	|	'~' expr				{ do_cfg_op('~', &$$, &$2, NULL); }
+	|	'!'	expr				{ do_cfg_op('!', &$$, &$2, NULL); }
 	|	'(' expr ')'			{ $$ = $2; }
 ;
 
