@@ -1,3 +1,40 @@
+2003-03-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php:
+      - Add the exponent to the float modifier
+
+2003-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/interfaces_001.phpt
+      tests/classes/interfaces_002.phpt:
+      fix these tests
+
+2003-03-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/cgi/cgi_main.c:
+      Do the right fix..
+
+    * sapi/cgi/cgi_main.c:
+      Fixed bug #22773
+
+    * main/php_variables.c:
+      On 64bit platforms, pointers are 64bit long..
+
+2003-03-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      CS
+
+2003-03-28  David Hill  <David.Hill@hp.com>
+
+    * ext/standard/parsedate.y:
+      Changing parsedate to be reentrant using pure_parser (Dave)
+
+2003-03-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Removed redundant aliases & CS fix.
+
 2003-03-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * main/php_variables.c:
