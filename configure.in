@@ -192,7 +192,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
 fi
 
 INCLUDES="-I\$(top_builddir)/libzend -I\$(top_builddir)/TSRM"
-EXTRA_LIBS="$EXTRA_LIBS \`\$(SHELL) ./libzend/zend_config --libs\`"
+EXTRA_LIBS="$EXTRA_LIBS \`\$(SHELL) $cwd/libzend/zend_config --libs\`"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
