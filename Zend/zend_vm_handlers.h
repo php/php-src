@@ -2550,7 +2550,7 @@ ZEND_VM_HANDLER(ZEND_SEND_VAR_NO_REF)
 {
 	zend_op *opline = EX(opline);
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
-		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
+		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF) && !(opline->extended_value & ZEND_ARG_SEND_AUTOMATIC)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 		}
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {

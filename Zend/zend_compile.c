@@ -1454,7 +1454,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	}
 
 	if (function_ptr) {
-		send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;	
+		send_by_reference = ARG_SEND_TYPE(function_ptr, (zend_uint) offset);	
 	} else {
 		send_by_reference = 0;
 	}
@@ -1466,7 +1466,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 		op = ZEND_SEND_VAR_NO_REF;
 	}
 
-	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference==ZEND_ARG_SEND_BY_REF) {
+	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference!=0) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
@@ -1474,7 +1474,9 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 				op = ZEND_SEND_REF;
 				break;
 			default:
-				zend_error(E_COMPILE_ERROR, "Only variables can be passed by reference");
+				if (send_by_reference==ZEND_ARG_SEND_BY_REF) {
+					zend_error(E_COMPILE_ERROR, "Only variables can be passed by reference");
+				}
 				break;
 		}
 	}
