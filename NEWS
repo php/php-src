@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
+- Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Improved the engine to use POSIX/socket IO where feasible. (Sascha)
 - Improved NSAPI SAPI module (Uwe Schindler)
   . php4_init (magnus.conf): new parameter to set alternate path to php.ini.
@@ -11,14 +12,15 @@ PHP 4                                                                      NEWS
   . Added support for virtual()
   . Added "nsapi.read_timeout" php.ini option. 
   . Synced $_SERVER variables to be similar to Apache variables
-- Changed mysql.connect_timeout directive to be user-settable (Rasmus)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
-- Fixed ext/yaz to not log unless yaz.log_file is set. (Adam Dickmeiss)
+- Fixed possible integer overflows in bundled GD library. (Ilia)
+- Fixed "mysql.connect_timeout" php.ini option to be settable with ini_set().
+  (Rasmus)
+- Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set.
+  (Adam Dickmeiss)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
-- Synchronized bundled GD library with GD 2.0.15. (Ilia)
-- Added integer overflow checks to bundled GD library. (Ilia)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
 - Fixed bug #23912 (Invalid CSS in phpinfo() output). (Ilia)
 - Fixed bug #23902 (NULL in CGI header output). (Shane)
@@ -29,6 +31,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
 - Fixed bug #23779 (mysql_connect(): disable local infile option if php.ini
   option "open_basedir" is set). (Georg)
+- Fixed bug #23769 (In FreeBSD glob() gives wrong result when pattern not
+  found). (Hartmut)
 - Fixed bug #23733 (Coredump on startup with Oracle 9+). (Edin)
 - Fixed bug #23285 (Potential Stack overflow in zendlex). (Wez)
  
