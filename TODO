@@ -15,6 +15,7 @@ global
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
+    * INI system causes segfaults in ZTS mode (operates on static HashTable)
     * make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * activate all extensions by default that don't rely on external
