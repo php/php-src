@@ -12,13 +12,12 @@ AM_PROG_CC_STDC
 AC_PROG_CC_C_O
 AC_PROG_RANLIB
 
-AC_CHECK_LIB(c_r, pthread_create)
-AC_CHECK_LIB(pthread, pthread_create)
-AC_CHECK_LIB(pthreads, pthread_create)
+AC_CHECK_LIB(c_r, pthread_kill)
+AC_CHECK_LIB(pthread, pthread_kill)
 
-AC_CHECK_FUNCS(pthread_create)
+AC_CHECK_FUNCS(pthread_kill)
 
-if test "$ac_cv_func_pthread_create" != "yes"; then
+if test "$ac_cv_func_pthread_kill" != "yes"; then
   AC_MSG_ERROR(You need pthreads to build TSRM.)
 fi
 
