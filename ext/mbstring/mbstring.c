@@ -540,6 +540,9 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 		case mbfl_no_language_russian:
 			default_enc = "KOI8-R";
 			break;
+		case mbfl_no_language_german:
+			default_enc = "ISO-8859-15";
+			break;
 		case mbfl_no_language_english:
 		default:
 			default_enc = "ISO-8859-1";
