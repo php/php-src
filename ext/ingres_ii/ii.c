@@ -541,6 +541,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		} else { /* already open persistent connection */
 
 			if (Z_TYPE_P(le) != le_ii_plink) {
+				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			/* here we should ensure that the link did not die */
