@@ -1,3 +1,37 @@
+2000-02-03  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Sounds nicer
+
+    * NEWS: - Add some news
+
+2000-02-03  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testdom: - some more testing
+
+    * ext/domxml/domxml.c: - fixed several bugs, left some for tomorrow :-)
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h: - more functions added but none of them tested
+
+    * ext/hyperwave/hw.c: - fixed segm fault in hw_docbyanchor()
+
+2000-02-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php
+      pear/DB.php
+      pear/Makefile.in: * Started playing around with alternatives to javadoc.
+    * Fixed the "make install" rule so it doesn't temporarily break the
+      installed scripts.
+    * implemented prepare/execute emulation for MySQL including file-reference
+      parameters (only binmode/binfetchlen remains now)
+    * started fixing up the ODBC backend
+
+2000-02-03  Zeev Suraski  <zeev@php.net>
+
+    * php4dllts.dsp: fix
+
 2000-02-02  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/string.c
