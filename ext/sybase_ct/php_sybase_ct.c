@@ -935,9 +935,9 @@ PHP_FUNCTION(sybase_select_db)
 
 /* }}} */
 
-static void php_sybase_finish_results (sybase_result *result) 
+static int php_sybase_finish_results (sybase_result *result) 
 {
-	int i;
+	int i, fail;
 	CS_RETCODE retcode;
 	CS_INT restype;
 	TSRMLS_FETCH();
@@ -962,6 +962,7 @@ static void php_sybase_finish_results (sybase_result *result)
 	 * want to return a failure in this case because the application
 	 * won't be getting all the results it asked for.
 	 */
+	fail = 0;
 	while ((retcode = ct_results(result->sybase_ptr->cmd, &restype))==CS_SUCCEED) {
 		switch ((int) restype) {
 			case CS_CMD_SUCCEED:
@@ -969,8 +970,9 @@ static void php_sybase_finish_results (sybase_result *result)
 				break;
 
 			case CS_CMD_FAIL:
-				_free_sybase_result(result);
-				result = NULL;
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Command failed, cancelling rest");
+				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
+				fail = 1;
 				break;
 
 			case CS_COMPUTE_RESULT:
@@ -987,6 +989,10 @@ static void php_sybase_finish_results (sybase_result *result)
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Unexpected results, cancelling all");
 				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 				break;
+		}
+
+		if (fail) {
+			break;
 		}
 	}
 
@@ -1012,8 +1018,11 @@ static void php_sybase_finish_results (sybase_result *result)
 		default:
 			_free_sybase_result(result);
 			result = NULL;
+			retcode = CS_FAIL;
 			break;
 	}
+
+	return retcode;
 }
 
 static int php_sybase_fetch_result_row (sybase_result *result, int numrows) 
@@ -1057,7 +1066,14 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 					case 1:
 						convert_to_long(&result->data[i][j]);
 						break;
-					case 2: 
+					case 2:
+						/* We also get numbers that are actually integers here due to the check on 
+						 * precision against > 9 (ranges are -1E10 to -1E9 and 1E9 to 1E10). As we
+						 * cannot be sure that they "fit" into MIN_LONG <= x <= MAX_LONG, we call
+						 * convert_to_double() on them. This is a small performance penalty, but 
+						 * ensures that "select 2147483648" will be a float and "select 2147483647"
+						 * will be become an int.
+                         */
 						convert_to_double(&result->data[i][j]);
 						break;
 				}
@@ -1070,7 +1086,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	
 	switch (retcode) {
 		case CS_END_DATA:
-			php_sybase_finish_results(result);
+			retcode = php_sybase_finish_results(result);
 			break;
 			
 		case CS_ROW_FAIL:
@@ -1080,6 +1096,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 		default:
 			_free_sybase_result(result);
 			result = NULL;
+			retcode = CS_FAIL;		/* Just to be sure */
 			break;
 	}
 	
@@ -1167,7 +1184,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 			case CS_DECIMAL_TYPE:
 				result->datafmt[i].maxlength = result->datafmt[i].precision + 3;
 				/* numeric(10) vs numeric(10, 1) */
-				result->numerics[i] = (result->datafmt[i].scale == 0 && result->datafmt[i].precision <= 10) ? 1 : 2;
+				result->numerics[i] = (result->datafmt[i].scale == 0 && result->datafmt[i].precision <= 9) ? 1 : 2;
 				break;
 			default:
 				result->datafmt[i].maxlength++;
@@ -1203,6 +1220,9 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 	}
 
 	retcode= php_sybase_fetch_result_row(result, buffered ? 1 : -1);
+	if (retcode == CS_FAIL) {
+		return NULL;
+	}
 
 	return result;
 }
@@ -1332,7 +1352,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot read results");
 			RETURN_FALSE;
 		}
-    
+
 		switch ((int) restype) {
 			case CS_CMD_FAIL:
 			default:
@@ -1361,7 +1381,6 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
 				if (result == NULL) {
 					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
-					sybase_ptr->dead = 1;
 					RETURN_FALSE;
 				}
 				status = Q_RESULT;
@@ -1476,7 +1495,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	}
 
 	/* Indicate we have data in case of buffered queries */
-    id= ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	id= ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 	sybase_ptr->active_result_index= buffered ? id : 0;
 }
 
@@ -2059,7 +2078,7 @@ PHP_FUNCTION(sybase_set_message_handler)
 	}
 
 	if (SybCtG(callback_name)) {
-		zval_dtor(SybCtG(callback_name));
+		zval_ptr_dtor(&SybCtG(callback_name));
 		SybCtG(callback_name)= NULL;
 	}
 	
