@@ -37,13 +37,34 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 #include "ftp.h"
 
+
+/* sends an ftp command, returns true on success, false on error.
+ * it sends the string "cmd args\r\n" if args is non-null, or
+ * "cmd\r\n" if args is null
+ */
+static int		ftp_putcmd(	ftpbuf_t *ftp,
+					const char *cmd,
+					const char *args);
+
+/* wrapper around send/recv to handle timeouts */
+static int		my_send(int s, void *buf, size_t len);
+static int		my_recv(int s, void *buf, size_t len);
+static int		my_connect(int s, const struct sockaddr *addr,
+				int addrlen);
+static int		my_accept(int s, struct sockaddr *addr, int *addrlen);
+
+/* reads a line the socket , returns true on success, false on error */
+static int		ftp_readline(ftpbuf_t *ftp);
 
 /* reads an ftp response, returns true on success, false on error */
 static int		ftp_getresp(ftpbuf_t *ftp);
@@ -84,7 +105,9 @@ ftp_open(const char *host, short port)
 
 	/* set up the address */
 	if ((he = gethostbyname(host)) == NULL) {
+#if 0
 		herror("gethostbyname");
+#endif
 		return NULL;
 	}
 
@@ -107,7 +130,7 @@ ftp_open(const char *host, short port)
 		goto bail;
 	}
 
-	if (connect(fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (my_connect(fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		perror("connect");
 		goto bail;
 	}
@@ -119,11 +142,7 @@ ftp_open(const char *host, short port)
 	}
 
 	ftp->localaddr = addr.sin_addr;
-
-	if ((ftp->fp = fdopen(fd, "r+")) == NULL) {
-		perror("fdopen");
-		goto bail;
-	}
+	ftp->fd = fd;
 
 	if (!ftp_getresp(ftp) || ftp->resp != 220) {
 		goto bail;
@@ -132,9 +151,7 @@ ftp_open(const char *host, short port)
 	return ftp;
 
 bail:
-	if (ftp->fp)
-		fclose(ftp->fp);
-	else if (fd != -1)
+	if (fd != -1)
 		close(fd);
 	free(ftp);
 	return NULL;
@@ -146,8 +163,8 @@ ftp_close(ftpbuf_t *ftp)
 {
 	if (ftp == NULL)
 		return NULL;
-	if (ftp->fp)
-		fclose(ftp->fp);
+	if (ftp->fd)
+		close(ftp->fd);
 	ftp_gc(ftp);
 	free(ftp);
 	return NULL;
@@ -173,7 +190,8 @@ ftp_quit(ftpbuf_t *ftp)
 	if (ftp == NULL)
 		return 0;
 
-	fprintf(ftp->fp, "QUIT\r\n");
+	if (!ftp_putcmd(ftp, "QUIT", NULL))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 221)
 		return 0;
 
@@ -190,14 +208,16 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 	if (ftp == NULL)
 		return 0;
 
-	fprintf(ftp->fp, "USER %s\r\n", user);
+	if (!ftp_putcmd(ftp, "USER", user))
+		return 0;
 	if (!ftp_getresp(ftp))
 		return 0;
 	if (ftp->resp == 230)
 		return 1;
 	if (ftp->resp != 331)
 		return 0;
-	fprintf(ftp->fp, "PASS %s\r\n", pass);
+	if (!ftp_putcmd(ftp, "PASS", pass))
+		return 0;
 	if (!ftp_getresp(ftp))
 		return 0;
 	return (ftp->resp == 230);
@@ -212,7 +232,8 @@ ftp_reinit(ftpbuf_t *ftp)
 
 	ftp_gc(ftp);
 
-	fprintf(ftp->fp, "REIN\r\n");
+	if (!ftp_putcmd(ftp, "REIN", NULL))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 220)
 		return 0;
 
@@ -232,7 +253,8 @@ ftp_syst(ftpbuf_t *ftp)
 	if (ftp->syst)
 		return ftp->syst;
 
-	fprintf(ftp->fp, "SYST\r\n");
+	if (!ftp_putcmd(ftp, "SYST", NULL))
+		return NULL;
 	if (!ftp_getresp(ftp) || ftp->resp != 215)
 		return NULL;
 
@@ -259,7 +281,8 @@ ftp_pwd(ftpbuf_t *ftp)
 	if (ftp->pwd)
 		return ftp->pwd;
 
-	fprintf(ftp->fp, "PWD\r\n");
+	if (!ftp_putcmd(ftp, "PWD", NULL))
+		return NULL;
 	if (!ftp_getresp(ftp) || ftp->resp != 257)
 		return NULL;
 
@@ -284,7 +307,8 @@ ftp_chdir(ftpbuf_t *ftp, const char *dir)
 	free(ftp->pwd);
 	ftp->pwd = NULL;
 
-	fprintf(ftp->fp, "CWD %s\r\n", dir);
+	if (!ftp_putcmd(ftp, "CWD", dir))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
 		return 0;
 
@@ -301,7 +325,8 @@ ftp_cdup(ftpbuf_t *ftp)
 	free(ftp->pwd);
 	ftp->pwd = NULL;
 
-	fprintf(ftp->fp, "CDUP\r\n");
+	if (!ftp_putcmd(ftp, "CDUP", NULL))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
 		return 0;
 
@@ -317,7 +342,8 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	if (ftp == NULL)
 		return NULL;
 
-	fprintf(ftp->fp, "MKD %s\r\n", dir);
+	if (!ftp_putcmd(ftp, "MKD", dir))
+		return NULL;
 	if (!ftp_getresp(ftp) || ftp->resp != 257)
 		return NULL;
 
@@ -339,7 +365,8 @@ ftp_rmdir(ftpbuf_t *ftp, const char *dir)
 	if (ftp == NULL)
 		return 0;
 
-	fprintf(ftp->fp, "RMD %s\r\n", dir);
+	if (!ftp_putcmd(ftp, "RMD", dir))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
 		return 0;
 
@@ -362,57 +389,9 @@ ftp_list(ftpbuf_t *ftp, const char *path)
 
 
 int
-ftp_getresp(ftpbuf_t *ftp)
-{
-	char		tag[4];
-	int		ch;
-	char		*buf;
-	char		*ptr;
-
-	if (ftp == NULL)
-		return 0;
-	buf = ftp->inbuf;
-	ftp->resp = 0;
-
-	do {
-		if (!fread(tag, 4, 1, ftp->fp))
-			return 0;
-
-		if (tag[3] == '-') {
-			while ((ch = getc(ftp->fp)) != '\n')
-				if (ch == EOF) {
-					return 0;
-				}
-		}
-		else if (tag[3] == ' ') {
-			ptr = fgets(buf, FTP_BUFSIZE, ftp->fp);
-			if (!ptr || !(ptr = strchr(buf, '\n')))
-				return 0;
-			if (ptr > buf && ptr[-1] == '\r')
-				ptr--;
-			*ptr = 0;
-		}
-		else {
-			return 0;
-		}
-	} while (tag[3] == '-');
-
-
-	/* translate the tag */
-	if (!isdigit(tag[0]) || !isdigit(tag[1]) || !isdigit(tag[2]))
-		return 0;
-
-	ftp->resp =	100 * (tag[0] - '0') +
-			10 * (tag[1] - '0') +
-			(tag[2] - '0');
-	return 1;
-}
-
-
-int
 ftp_type(ftpbuf_t *ftp, ftptype_t type)
 {
-	char		typechar;
+	char		typechar[2] = "?";
 
 	if (ftp == NULL)
 		return 0;
@@ -421,13 +400,14 @@ ftp_type(ftpbuf_t *ftp, ftptype_t type)
 		return 1;
 
 	if (type == FTPTYPE_ASCII)
-		typechar = 'A';
+		typechar[0] = 'A';
 	else if (type == FTPTYPE_IMAGE)
-		typechar = 'I';
+		typechar[0] = 'I';
 	else
 		return 0;
 
-	fprintf(ftp->fp, "TYPE %c\r\n", typechar);
+	if (!ftp_putcmd(ftp, "TYPE", typechar))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 200)
 		return 0;
 
@@ -455,13 +435,14 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	if (!pasv)
 		return 1;
 
-	fprintf(ftp->fp, "PASV\r\n");
+	if (!ftp_putcmd(ftp, "PASV", NULL))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 227)
 		return 0;
 
 	/* parse out the IP and port */
 	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
-	n = sscanf(ptr, "%u,%u,%u,%u,%u,%u",
+	n = sscanf(ptr, "%lu,%lu,%lu,%lu,%lu,%lu",
 		&b[0], &b[1], &b[2], &b[3], &b[4], &b[5]);
 	if (n != 6)
 		return 0;
@@ -484,7 +465,9 @@ int
 ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 {
 	databuf_t		*data = NULL;
-	int			ch, lastch;
+	char			*ptr;
+	int			lastch;
+	int			rcvd;
 
 	if (ftp == NULL)
 		return 0;
@@ -495,7 +478,8 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
-	fprintf(ftp->fp, "RETR %s\r\n", path);
+	if (!ftp_putcmd(ftp, "RETR", path))
+		goto bail;
 	if (!ftp_getresp(ftp) || ftp->resp != 150)
 		goto bail;
 
@@ -503,25 +487,31 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 		goto bail;
 
 	lastch = 0;
-	while ((ch = getc(data->fp)) != EOF) {
+	while ((rcvd = my_recv(data->fd, data->buf, FTP_BUFSIZE))) {
+		if (rcvd == -1)
+			goto bail;
+
 		if (type == FTPTYPE_ASCII) {
-			if (lastch == '\r' && ch != '\n')
-				putc('\r', outfp);
-			if (ch != '\r')
-				putc(ch, outfp);
-			lastch = ch;
+			for (ptr = data->buf; rcvd; rcvd--, ptr++) {
+				if (lastch == '\r' && *ptr != '\n')
+					putc('\r', outfp);
+				if (*ptr != '\r')
+					putc(*ptr, outfp);
+				lastch = *ptr;
+			}
 		}
 		else {
-			putc(ch, outfp);
+			fwrite(data->buf, rcvd, 1, outfp);
 		}
 	}
+
 	if (type == FTPTYPE_ASCII && lastch == '\r')
 		putc('\r', outfp);
 
-	if (ferror(data->fp) || ferror(outfp))
-		goto bail;
-
 	data = data_close(data);
+
+	if (ferror(outfp))
+		goto bail;
 
 	if (!ftp_getresp(ftp) || ftp->resp != 226)
 		goto bail;
@@ -537,6 +527,8 @@ int
 ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, ftptype_t type)
 {
 	databuf_t		*data = NULL;
+	int			size;
+	char			*ptr;
 	int			ch;
 
 	if (ftp == NULL)
@@ -548,20 +540,38 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, ftptype_t type)
 	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
-	fprintf(ftp->fp, "STOR %s\r\n", path);
+	if (!ftp_putcmd(ftp, "STOR", path))
+		goto bail;
 	if (!ftp_getresp(ftp) || ftp->resp != 150)
 		goto bail;
 
 	if ((data = data_accept(data)) == NULL)
 		goto bail;
 
+	size = 0;
+	ptr = data->buf;
 	while ((ch = getc(infp)) != EOF) {
-		if (type == FTPTYPE_ASCII && ch == '\n')
-			putc('\r', data->fp);
-		putc(ch, data->fp);
+		/* flush if necessary */
+		if (FTP_BUFSIZE - size < 2) {
+			if (my_send(data->fd, data->buf, size) != size)
+				goto bail;
+			ptr = data->buf;
+			size = 0;
+		}
+
+		if (ch == '\n' && type == FTPTYPE_ASCII) {
+			*ptr++ = '\r';
+			size++;
+		}
+
+		*ptr++ = ch;
+		size++;
 	}
 
-	if (ferror(data->fp) || ferror(infp))
+	if (size && my_send(data->fd, data->buf, size) != size)
+		goto bail;
+
+	if (ferror(infp))
 		goto bail;
 
 	data = data_close(data);
@@ -582,7 +592,8 @@ ftp_size(ftpbuf_t *ftp, const char *path)
 	if (ftp == NULL)
 		return -1;
 
-	fprintf(ftp->fp, "SIZE %s\r\n", path);
+	if (!ftp_putcmd(ftp, "SIZE", path))
+		return -1;
 	if (!ftp_getresp(ftp) || ftp->resp != 213)
 		return -1;
 
@@ -602,7 +613,8 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path)
 	if (ftp == NULL)
 		return -1;
 
-	fprintf(ftp->fp, "MDTM %s\r\n", path);
+	if (!ftp_putcmd(ftp, "MDTM", path))
+		return -1;
 	if (!ftp_getresp(ftp) || ftp->resp != 213)
 		return -1;
 
@@ -638,7 +650,8 @@ ftp_delete(ftpbuf_t *ftp, const char *path)
 	if (ftp == NULL)
 		return 0;
 
-	fprintf(ftp->fp, "DELE %s\r\n", path);
+	if (!ftp_putcmd(ftp, "DELE", path))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
 		return 0;
 
@@ -652,19 +665,261 @@ ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest)
 	if (ftp == NULL)
 		return 0;
 
-	fprintf(ftp->fp, "RNFR %s\r\n", src);
+	if (!ftp_putcmd(ftp, "RNFR", src))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 350)
 		return 0;
 
-	fprintf(ftp->fp, "RNTO %s\r\n", dest);
+	if (!ftp_putcmd(ftp, "RNTO", dest))
+		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
 		return 0;
 
 	return 1;
 }
 
-
 /* static functions */
+
+int
+ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
+{
+	int		size;
+	char		*data;
+
+	/* build the output buffer */
+	if (args) {
+		/* "cmd args\r\n\0" */
+		if (strlen(cmd) + strlen(args) + 4 > FTP_BUFSIZE)
+			return 0;
+		size = sprintf(ftp->outbuf, "%s %s\r\n", cmd, args);
+	}
+	else {
+		/* "cmd\r\n\0" */
+		if (strlen(cmd) + 3 > FTP_BUFSIZE)
+			return 0;
+		size = sprintf(ftp->outbuf, "%s\r\n", cmd);
+	}
+
+	data = ftp->outbuf;
+	if (my_send(ftp->fd, data, size) != size)
+		return 0;
+
+	return 1;
+}
+
+
+int
+ftp_readline(ftpbuf_t *ftp)
+{
+	int		size, rcvd;
+	char		*data, *eol;
+
+	/* shift the extra to the front */
+	size = FTP_BUFSIZE;
+	rcvd = 0;
+	if (ftp->extra) {
+		memmove(ftp->inbuf, ftp->extra, ftp->extralen);
+		rcvd = ftp->extralen;
+	}
+
+	data = ftp->inbuf;
+
+	do {
+		size -= rcvd;
+		for (eol = data; rcvd; rcvd--, eol++) {
+			if (*eol == '\r') {
+				*eol = 0;
+				ftp->extra = eol + 1;
+				if (rcvd > 1 && *(eol + 1) == '\n') {
+					ftp->extra++;
+					rcvd--;
+				}
+				if ((ftp->extralen = --rcvd) == 0)
+					ftp->extra = NULL;
+				return 1;
+			}
+			else if (*eol == '\n') {
+				*eol = 0;
+				ftp->extra = eol + 1;
+				if ((ftp->extralen = --rcvd) == 0)
+					ftp->extra = NULL;
+				return 1;
+			}
+		}
+
+		data = eol;
+		if ((rcvd = my_recv(ftp->fd, data, size)) < 1)
+			return 0;
+	} while (size);
+
+	return 0;
+}
+
+
+int
+ftp_getresp(ftpbuf_t *ftp)
+{
+	char		*buf;
+
+	if (ftp == NULL)
+		return 0;
+	buf = ftp->inbuf;
+	ftp->resp = 0;
+
+
+	while (1) {
+		if (!ftp_readline(ftp))
+			return 0;
+		if (ftp->inbuf[3] == '-')
+			continue;
+		else if (ftp->inbuf[3] != ' ')
+			return 0;
+		break;
+	}
+
+	/* translate the tag */
+	if (	!isdigit(ftp->inbuf[0]) ||
+		!isdigit(ftp->inbuf[1]) ||
+		!isdigit(ftp->inbuf[2]))
+	{
+		return 0;
+	}
+
+	ftp->resp =	100 * (ftp->inbuf[0] - '0') +
+			10 * (ftp->inbuf[1] - '0') +
+			(ftp->inbuf[2] - '0');
+
+	memmove(ftp->inbuf, ftp->inbuf + 4, FTP_BUFSIZE - 4);
+
+	return 1;
+}
+
+
+int
+my_send(int s, void *buf, size_t len)
+{
+	fd_set		write_set;
+	struct timeval	tv;
+	int		n, size, sent;
+
+	size = len;
+	while (size) {
+		tv.tv_sec = FTP_TIMEOUT;
+		tv.tv_usec = 0;
+
+		FD_ZERO(&write_set);
+		FD_SET(s, &write_set);
+		n = select(s + 1, NULL, &write_set, NULL, &tv);
+		if (n < 1) {
+			if (n == 0)
+				errno = ETIMEDOUT;
+			return -1;
+		}
+
+		sent = send(s, buf, size, 0);
+		if (sent == -1)
+			return -1;
+
+		buf += sent;
+		size -= sent;
+	}
+
+	return len;
+}
+
+
+int
+my_recv(int s, void *buf, size_t len)
+{
+	fd_set		read_set;
+	struct timeval	tv;
+	int		n;
+
+	tv.tv_sec = FTP_TIMEOUT;
+	tv.tv_usec = 0;
+
+	FD_ZERO(&read_set);
+	FD_SET(s, &read_set);
+	n = select(s + 1, &read_set, NULL, NULL, &tv);
+	if (n < 1) {
+		if (n == 0)
+			errno = ETIMEDOUT;
+		return -1;
+	}
+
+	return recv(s, buf, len, 0);
+}
+
+
+int
+my_connect(int s, const struct sockaddr *addr, int addrlen)
+{
+	fd_set		conn_set;
+	int		flags;
+	int		n;
+	int		error = 0;
+	struct timeval	tv;
+
+	flags = fcntl(s, F_GETFL, 0);
+	fcntl(s, F_SETFL, flags | O_NONBLOCK);
+
+	n = connect(s, addr, addrlen);
+	if (n == -1 && errno != EINPROGRESS)
+		return -1;
+
+	if (n) {
+		FD_ZERO(&conn_set);
+		FD_SET(s, &conn_set);
+
+		tv.tv_sec = FTP_TIMEOUT;
+		tv.tv_usec = 0;
+
+		n = select(s + 1, &conn_set, &conn_set, NULL, &tv);
+		if (n < 1) {
+			if (n == 0)
+				errno = ETIMEDOUT;
+			return -1;
+		}
+
+		if (FD_ISSET(s, &conn_set)) {
+			n = sizeof(error);
+			n = getsockopt(s, SOL_SOCKET, SO_ERROR, &error, &n);
+			if (n == -1 || error) {
+				if (error)
+					errno = error;
+				return -1;
+			}
+		}
+	}
+
+	fcntl(s, F_SETFL, flags);
+
+	return 0;
+}
+
+
+int
+my_accept(int s, struct sockaddr *addr, int *addrlen)
+{
+	fd_set		accept_set;
+	struct timeval	tv;
+	int		n;
+
+	tv.tv_sec = FTP_TIMEOUT;
+	tv.tv_usec = 0;
+	FD_ZERO(&accept_set);
+	FD_SET(s, &accept_set);
+
+	n = select(s + 1, &accept_set, NULL, NULL, &tv);
+	if (n < 1) {
+		if (n == 0)
+			errno = ETIMEDOUT;
+		return -1;
+	}
+
+	return accept(s, addr, addrlen);
+}
+
 
 databuf_t*
 ftp_getdata(ftpbuf_t *ftp)
@@ -674,6 +929,7 @@ ftp_getdata(ftpbuf_t *ftp)
 	struct sockaddr_in	addr;
 	int			size;
 	union ipbox		ipbox;
+	char			arg[sizeof("255,255,255,255,255,255")];
 
 
 	/* ask for a passive connection if we need one */
@@ -687,6 +943,7 @@ ftp_getdata(ftpbuf_t *ftp)
 		return NULL;
 	}
 	data->listener = -1;
+	data->fd = -1;
 	data->type = ftp->type;
 
 	/* bind/listen */
@@ -701,7 +958,7 @@ ftp_getdata(ftpbuf_t *ftp)
 		ftp->pasv = 1;
 
 		/* connect */
-		if (connect(fd, (struct sockaddr*) &ftp->pasvaddr,
+		if (my_connect(fd, (struct sockaddr*) &ftp->pasvaddr,
 			sizeof(ftp->pasvaddr)) == -1)
 		{
 			perror("connect");
@@ -710,14 +967,7 @@ ftp_getdata(ftpbuf_t *ftp)
 			return NULL;
 		}
 
-		/* wrap fd in a FILE stream */
-		data->fp = fdopen(fd, "r+");
-		if (data->fp == NULL) {
-			perror("fdopen");
-			close(fd);
-			free(data);
-			return NULL;
-		}
+		data->fd = fd;
 
 		return data;
 	}
@@ -752,10 +1002,12 @@ ftp_getdata(ftpbuf_t *ftp)
 	/* send the PORT */
 	ipbox.l[0] = ftp->localaddr.s_addr;
 	ipbox.s[2] = addr.sin_port;
-	fprintf(ftp->fp, "PORT %u,%u,%u,%u,%u,%u\r\n",
+	sprintf(arg, "%u,%u,%u,%u,%u,%u",
 		ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3],
 		ipbox.c[4], ipbox.c[5]);
 
+	if (!ftp_putcmd(ftp, "PORT", arg))
+		goto bail;
 	if (!ftp_getresp(ftp) || ftp->resp != 200)
 		goto bail;
 
@@ -774,24 +1026,16 @@ data_accept(databuf_t *data)
 {
 	struct sockaddr_in	addr;
 	int			size;
-	int			fd;
 
-
-	if (data->fp)
+	if (data->fd != -1)
 		return data;
 
 	size = sizeof(addr);
-	fd = accept(data->listener, (struct sockaddr*) &addr, &size);
+	data->fd = my_accept(data->listener, (struct sockaddr*) &addr, &size);
 	close(data->listener);
 	data->listener = -1;
 
-	if (fd == -1) {
-		free(data);
-		return NULL;
-	}
-
-	if ((data->fp = fdopen(fd, "r+")) == NULL) {
-		close(fd);
+	if (data->fd == -1) {
 		free(data);
 		return NULL;
 	}
@@ -807,8 +1051,8 @@ data_close(databuf_t *data)
 		return NULL;
 	if (data->listener != -1)
 		close(data->listener);
-	if (data->fp)
-		fclose(data->fp);
+	if (data->fd != -1)
+		close(data->fd);
 	free(data);
 	return NULL;
 }
@@ -819,8 +1063,9 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 {
 	FILE		*tmpfp = NULL;
 	databuf_t	*data = NULL;
+	char		*ptr;
 	int		ch, lastch;
-	int		size;
+	int		size, rcvd;
 	int		lines;
 	char		**ret = NULL;
 	char		**entry;
@@ -836,10 +1081,8 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
-	if (path)
-		fprintf(ftp->fp, "%s %s\r\n", cmd, path);
-	else
-		fprintf(ftp->fp, "%s\r\n", cmd);
+	if (!ftp_putcmd(ftp, cmd, path))
+		goto bail;
 	if (!ftp_getresp(ftp) || ftp->resp != 150)
 		goto bail;
 
@@ -850,18 +1093,28 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	size = 0;
 	lines = 0;
 	lastch = 0;
-	while ((ch = getc(data->fp)) != EOF) {
-		if (ch == '\n' && lastch == '\r')
-			lines++;
-		else
-			size++;
-		putc(ch, tmpfp);
-		lastch = ch;
+	while ((rcvd = my_recv(data->fd, data->buf, FTP_BUFSIZE))) {
+		if (rcvd == -1)
+			goto bail;
+
+		fwrite(data->buf, rcvd, 1, tmpfp);
+
+		size += rcvd;
+		for (ptr = data->buf; rcvd; rcvd--, ptr++) {
+			if (*ptr == '\n' && lastch == '\r')
+				lines++;
+			else
+				size++;
+			lastch = *ptr;
+		}
 	}
+
 	data = data_close(data);
 
 	if (ferror(tmpfp))
 		goto bail;
+
+
 
 	rewind(tmpfp);
 
