@@ -131,15 +131,27 @@ PHP_FUNCTION(pg_update);
 PHP_FUNCTION(pg_delete);
 PHP_FUNCTION(pg_select);
 
-PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
-PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result TSRMLS_DC);
-PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, zend_bool convert, zend_bool async TSRMLS_DC);
-PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_bool convert, zend_bool async TSRMLS_DC);
-PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_bool convert, zend_bool async TSRMLS_DC);
-PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_bool convert TSRMLS_DC);
+/* php_pgsql_convert options */
+#define PGSQL_CONV_IGNORE_DEFAULT   (1<<1)     /* Do not use DEAFULT value by removing field from returned array */
+#define PGSQL_CONV_FORCE_NULL       (1<<2)     /* Convert to NULL if string is null string */
+#define PGSQL_CONV_IGNORE_NOT_NULL  (1<<3)     /* Ignore NOT NULL constraints */
+#define PGSQL_CONV_OPTS             (PGSQL_CONV_IGNORE_DEFAULT|PGSQL_CONV_FORCE_NULL|PGSQL_CONV_IGNORE_NOT_NULL)
+/* php_pgsql_insert/update/select/delete options */
+#define PGSQL_DML_NO_CONV           (1<<8)     /* Call php_pgsql_convert() */
+#define PGSQL_DML_EXEC              (1<<9)     /* Execute query */
+#define PGSQL_DML_ASYNC             (1<<10)    /* Do async query */
+#define PGSQL_DML_STRING            (1<<11)    /* Return query string */
 
+/* exported functions */
+PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
+PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
+PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, char **sql TSRMLS_DC);
+PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , char **sql TSRMLS_DC);
+PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, char **sql TSRMLS_DC);
+PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, char **sql  TSRMLS_DC);
+
+/* internal functions */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
-/* static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS); */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC);

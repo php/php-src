@@ -18,4 +18,5 @@ array(1) {
     string(3) "BBB"
   }
 }
+SELECT * FROM php_pgsql_test WHERE num=1234;
 Ok
