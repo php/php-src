@@ -219,6 +219,9 @@ log_errors = Off
 ; Store the last error/warning message in $php_errormsg (boolean).
 track_errors = Off
 
+; Disable the inclusion of HTML tags in error messages.
+;html_errors = Off
+  
 ; String to output before an error message.
 ;error_prepend_string = "<font color=ff0000>"
 
