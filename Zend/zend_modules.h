@@ -33,9 +33,8 @@
 #define GINIT_FUNC_ARGS_PASSTHRU
 
 ZEND_API extern unsigned char first_arg_force_ref[];
-ZEND_API extern unsigned char first_arg_allow_ref[];
 ZEND_API extern unsigned char second_arg_force_ref[];
-ZEND_API extern unsigned char second_arg_allow_ref[];
+ZEND_API extern unsigned char third_arg_force_ref[];
 
 #define ZEND_MODULE_API_NO 20001222
 #ifdef ZTS
