@@ -47,6 +47,7 @@
 	Udm_Set_Agent_Param($udm,UDM_PARAM_MIN_WORD_LEN,2);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_MAX_WORD_LEN,16);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PREFIX,UDM_PREFIX_DISABLED);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_VARDIR,"/opt/mnogo/install/var");
 	
 	if (Udm_Api_Version() >= 30111) {
 		Udm_Set_Agent_Param($udm,UDM_PARAM_CROSS_WORDS,UDM_CROSS_WORDS_DISABLED);
