@@ -197,7 +197,7 @@ STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Orphaned
 STATUS:              Working
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           swf
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Orphaned
 STATUS:              Depreciated (Use the ming swf extension instead)
 COMMENT:             Only for Unix (won't change)
 -------------------------------------------------------------------------------
@@ -451,7 +451,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xslt
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANC:          Maintained
+MAINTENANC:          Orphaned
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           yaz
@@ -471,8 +471,8 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zziplib
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
+MAINTENANCE:         Orphaned
+STATUS:              Working
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
 # iptc?
