@@ -188,7 +188,6 @@ PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, in
 	/* mop things up if we ended on a boundary */
 	if (ch == base64_pad) {
 		switch(i % 4) {
-		case 0:
 		case 1:
 			efree(result);
 			return NULL;
