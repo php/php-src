@@ -115,6 +115,8 @@ php_core_globals *main_core_globals=NULL;
 #endif
 
 
+#define SAFE_FILENAME(f) ((f)?(f):"-")
+
 static PHP_INI_MH(OnSetPrecision)
 {
 	ELS_FETCH();
@@ -603,9 +605,9 @@ static void php_message_handler_for_zend(long message, void *data)
 						void *ptr = (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING);
 
 #if WIN32||WINNT
-						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SG(request_info).path_translated);
+						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
 #else
-						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8lX (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, (unsigned long)ptr, t->size,t->filename,t->lineno);
+						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8lX (%d bytes), allocated in %s on line %d<br>\n", SAFE_FILENAME(SG(request_info).path_translated), (unsigned long)ptr, t->size,t->filename,t->lineno);
 #endif
 					} else {
 						unsigned long leak_count = (unsigned long) data;
@@ -613,7 +615,7 @@ static void php_message_handler_for_zend(long message, void *data)
 #if WIN32||WINNT
 						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
 #else
-						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %ld time%s\n", SG(request_info).path_translated, leak_count, (leak_count>1?"s":""));
+						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %ld time%s\n", SAFE_FILENAME(SG(request_info).path_translated), leak_count, (leak_count>1?"s":""));
 #endif
 					}
 #	if WIN32||WINNT
@@ -628,7 +630,7 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_LOG_SCRIPT_NAME: {
 				SLS_FETCH();
 
-				fprintf(stderr, "Script:  '%s'\n", SG(request_info).path_translated);
+				fprintf(stderr, "Script:  '%s'\n", SAFE_FILENAME(SG(request_info).path_translated));
 			}
 			break;
 	}
