@@ -1219,12 +1219,6 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		statement->columns = emalloc(sizeof(HashTable));
 		zend_hash_init(statement->columns, 13, NULL, _oci_column_hash_dtor, 0);
 		
-		OCIHandleAlloc(OCI(pEnv),
-					   (dvoid **)&param,
-					   OCI_DTYPE_PARAM,
-					   0,
-					   NULL);
-
 		counter = 1;
 
 		statement->error = 
@@ -1261,7 +1255,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 									   (dvoid *)statement->pStmt,
 									   OCI_HTYPE_STMT,
 									   statement->pError,
-									   (dvoid*)&param,
+									   (dvoid**)&param,
 									   counter));
 			if (statement->error) {
 				return 0; /* XXX we loose memory!!! */
