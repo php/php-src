@@ -128,6 +128,10 @@ SOURCE=..\ext\standard\aggregation.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\css.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
@@ -273,6 +277,10 @@ InputPath=..\main\config.w32.h.in
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\css.h
 # End Source File
 # Begin Source File
 
