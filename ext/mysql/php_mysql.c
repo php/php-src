@@ -1467,7 +1467,7 @@ PHP_FUNCTION(mysql_num_fields)
 /* }}} */
 
 
-static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args)
 {
 	zval **result, **arg2;
 	MYSQL_RES *mysql_result;
@@ -1477,6 +1477,10 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int num_fields;
 	int i;
 	PLS_FETCH();
+
+	if (ZEND_NUM_ARGS() > expected_args) {
+		WRONG_PARAM_COUNT;
+	}
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1551,7 +1555,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM, 1);
 }
 /* }}} */
 
@@ -1560,7 +1564,7 @@ PHP_FUNCTION(mysql_fetch_row)
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 2);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
@@ -1574,7 +1578,7 @@ PHP_FUNCTION(mysql_fetch_object)
    Fetch a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(mysql_fetch_array)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2);
 }
 /* }}} */
 
@@ -1583,7 +1587,7 @@ PHP_FUNCTION(mysql_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_assoc)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 1);
 }
 /* }}} */
 
