@@ -2170,7 +2170,7 @@ void do_end_heredoc(CLS_D)
 }
 
 
-void do_exit(znode *result, znode *message CLS_DC)
+void zend_do_exit(znode *result, znode *message CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 

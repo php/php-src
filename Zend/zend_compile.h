@@ -354,7 +354,7 @@ void do_declare_end(CLS_D);
 
 void do_end_heredoc(CLS_D);
 
-void do_exit(znode *result, znode *message CLS_DC);
+void zend_do_exit(znode *result, znode *message CLS_DC);
 
 void do_begin_silence(znode *strudel_token CLS_DC);
 void do_end_silence(znode *strudel_token CLS_DC);
