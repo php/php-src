@@ -64,6 +64,11 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #include <winsock.h> /* Includes definition for u_char */
 #endif
 
+#if defined(NETWARE) && !defined(NEW_LIBC)
+/*#include <ws2nlm.h>*/
+#include <sys/socket.h>
+#endif
+
 static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 
