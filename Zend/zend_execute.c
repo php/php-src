@@ -1159,6 +1159,11 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 
 opcode_handler_t zend_opcode_handlers[512];
 
+ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
+{
+	((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, (*(temp_variable *)((char *) execute_data_ptr->Ts + execute_data_ptr->opline->result.u.var)).var.ptr, execute_data_ptr->object, return_value_used TSRMLS_CC);
+}
+
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_execute_data execute_data;
@@ -2550,7 +2555,14 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
-		((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
+
+		if (! zend_execute_internal) {
+			/* saves one function hall if the zend_execute_internal is not used */
+			((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
+		} else {
+			zend_execute_internal(execute_data, return_value_used TSRMLS_CC);
+		}
+
 		EG(current_execute_data) = execute_data;
 		EX_T(EX(opline)->result.u.var).var.ptr->is_ref = 0;
 		EX_T(EX(opline)->result.u.var).var.ptr->refcount = 1;

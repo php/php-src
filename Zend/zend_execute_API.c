@@ -34,6 +34,7 @@
 
 
 ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 #include <process.h>

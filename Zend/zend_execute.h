@@ -51,10 +51,12 @@ typedef union _temp_variable {
 
 BEGIN_EXTERN_C()
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
+ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
 static inline void safe_free_zval_ptr(zval *p)
 {
