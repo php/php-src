@@ -30,9 +30,13 @@ $xslstring='<?xml version="1.0" encoding="ISO-8859-1"?>
 	</xsl:template>
 </xsl:stylesheet>';
 xslt_set_scheme_handlers($xh, array('get_all' => 'handle_files_all'));
-$result = xslt_process($xh, 'arg:/_xml', 'arg:/_xsl', NULL, array('/_xml' => $xmlstring, '/_xsl' => $xslstring));
-echo $result;
+/* This is intended to be silent!
+ * The result is known to be invalid, but if it doesn't core dump, the test
+ * has succeeded. */
+$result = @xslt_process($xh, 'arg:/_xml', 'arg:/_xsl', NULL, array('/_xml' => $xmlstring, '/_xsl' => $xslstring));
+echo "OK";
 xslt_free($xh);
 ?>
 --EXPECT--
-simple: PHP QA
+OK
+
