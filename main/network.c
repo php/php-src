@@ -478,7 +478,94 @@ bound:
 }
 /* }}} */
 
-static void populate_name(
+PHPAPI int php_network_parse_network_address_with_port(const char *addr, long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
+{
+	char *colon;
+	char *host = NULL;
+	int is_v6;
+	char *tmp;
+	int ret = FAILURE;
+	short port;
+	struct sockaddr_in *in4 = (struct sockaddr_in*)sa;
+	struct sockaddr **sal, **psal;
+	int n;
+	char *errstr = NULL;
+#ifdef HAVE_IPV6
+	char *p;
+	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
+#endif
+
+	if (*addr == '[') {
+		colon = memchr(addr + 1, ']', addrlen-1);
+		if (!colon || colon[1] != ':') {
+			return 0;
+		}
+		port = atoi(colon + 2);
+		addr++;
+	} else {
+		colon = memchr(addr, ':', addrlen);
+		port = atoi(colon + 1);
+	}
+
+	tmp = estrndup(addr, colon - addr);
+
+	/* first, try interpreting the address as a numeric address */
+
+#if HAVE_IPV6 && HAVE_INET_PTON
+	if (inet_pton(AF_INET6, tmp, &in6->sin6_addr) > 0) {
+		in6->sin6_port = htons(port);
+		in6->sin6_family = AF_INET6;
+		*sl = sizeof(struct sockaddr_in6);
+		ret = SUCCESS;
+		goto out;
+	}
+#endif
+	if (inet_aton(tmp, &in4->sin_addr) > 0) {
+		in4->sin_port = htons(port);
+		in4->sin_family = AF_INET;
+		*sl = sizeof(struct sockaddr_in);
+		ret = SUCCESS;
+		goto out;
+	}
+
+	/* looks like we'll need to resolve it */
+	n = php_network_getaddresses(tmp, SOCK_DGRAM, &psal, &errstr TSRMLS_CC);
+
+	if (n == 0) {
+		if (errstr) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to resolve `%s': %s", tmp, errstr);
+			STR_FREE(errstr);
+		}
+		goto out;
+	}
+
+	/* copy the details from the first item */
+	switch ((*psal)->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+		case AF_INET6:
+			*in6 = **(struct sockaddr_in6**)psal;
+			in6->sin6_port = htons(port);
+			*sl = sizeof(struct sockaddr_in6);
+			ret = SUCCESS;
+			break;
+#endif
+		case AF_INET:
+			*in4 = **(struct sockaddr_in**)psal;
+			in4->sin_port = htons(port);
+			*sl = sizeof(struct sockaddr_in);
+			ret = SUCCESS;
+			break;
+	}
+
+	php_network_freeaddresses(psal);
+
+out:
+	STR_FREE(tmp);
+	return ret;
+}
+
+
+PHPAPI void php_network_populate_name_from_sockaddr(
 		/* input address */
 		struct sockaddr *sa, socklen_t sl,
 		/* output readable address */
@@ -556,7 +643,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 	socklen_t sl = sizeof(sa);
 	
 	if (getpeername(sock, (struct sockaddr*)&sa, &sl) == 0) {
-		populate_name((struct sockaddr*)&sa, sl,
+		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr, textaddrlen,
 				addr, addrlen
 				TSRMLS_CC);
@@ -575,7 +662,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 	socklen_t sl = sizeof(sa);
 	
 	if (getsockname(sock, (struct sockaddr*)&sa, &sl) == 0) {
-		populate_name((struct sockaddr*)&sa, sl,
+		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr, textaddrlen,
 				addr, addrlen
 				TSRMLS_CC);
@@ -625,7 +712,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
 
 		if (clisock >= 0) {
-			populate_name((struct sockaddr*)&sa, sl,
+			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr, textaddrlen,
 					addr, addrlen
 					TSRMLS_CC);

@@ -173,6 +173,18 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const 
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC);
+PHPAPI void php_network_populate_name_from_sockaddr(
+		/* input address */
+		struct sockaddr *sa, socklen_t sl,
+		/* output readable address */
+		char **textaddr, long *textaddrlen,
+		/* output address */
+		struct sockaddr **addr,
+		socklen_t *addrlen
+		TSRMLS_DC);
+
+PHPAPI int php_network_parse_network_address_with_port(const char *addr,
+		long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC TSRMLS_CC)
