@@ -1,8 +1,8 @@
 --TEST--
-Error message handling (without ZendOptimizer)
+Error message handling (with ZendOptimizer)
 --SKIPIF--
 <?php
-!extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
 ?>
 --FILE--
 <?php
@@ -23,10 +23,11 @@ $error = 1 / 0;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
+%s: %sivision by zero in %s on line %d
 string(1) "1"
 string(4) "2047"
 string(1) "0"
 string(1) "1"
 string(1) "0"
-NULL
+string(%d) "%sivision by zer%s"
 string(%d) "%sivision by zer%s"
