@@ -331,7 +331,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 	efree(I);
 }
 
-static int saproxy_iter_has_more(zend_object_iterator *iter TSRMLS_DC)
+static int saproxy_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
 
@@ -396,7 +396,7 @@ static int saproxy_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 
 static zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_dtor,
-	saproxy_iter_has_more,
+	saproxy_iter_valid,
 	saproxy_iter_get_data,
 	saproxy_iter_get_key,
 	saproxy_iter_move_forwards,

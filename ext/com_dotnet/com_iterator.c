@@ -52,7 +52,7 @@ static void com_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 	efree(I);
 }
 
-static int com_iter_has_more(zend_object_iterator *iter TSRMLS_DC)
+static int com_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
 
@@ -133,7 +133,7 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 
 static zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_dtor,
-	com_iter_has_more,
+	com_iter_valid,
 	com_iter_get_data,
 	com_iter_get_key,
 	com_iter_move_forwards,
