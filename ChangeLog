@@ -1,3 +1,10 @@
+2004-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/string.c:
+      MFH: Fixed a bug in addslashes() handling of the '\0' character.
+
 2004-10-16  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_compile.c:
