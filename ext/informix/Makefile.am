@@ -2,6 +2,9 @@
 
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LTLIBRARIES=libphpext_informix.la
+noinst_LIBRARIES=libifx.a
+libifx_a_SOURCES=stub.c
+libifx_a_LIBADD=@IFX_OBJS@
 libphpext_informix_la_SOURCES=ifx.c
 libphpext_informix_la_LIBADD=@IFX_LIBS@
 
