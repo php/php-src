@@ -655,6 +655,7 @@ int main(int argc, char *argv[])
 		INI_HARDCODED("register_argc_argv", "1");
 		INI_HARDCODED("html_errors", "0");
 		INI_HARDCODED("implicit_flush", "1");
+		INI_HARDCODED("output_buffering", "0");
 		INI_HARDCODED("max_execution_time", "0");
 
 		optind = orig_optind;

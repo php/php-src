@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.5
+- CLI now overrides php.ini settings and switches off output buffering. This
+  fixes issue described in bug #26755. (Edin)
 - Synchronized bundled GD library with GD 2.0.17
 - Upgraded PCRE library to version 4.5. (Andrei)
 - Updated bundled PostgreSQL library to version 7.4 in Windows distribution.
