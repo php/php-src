@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Jul 2004, PHP 5.0.0
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - Changed doc comments to require a single white space after '/**'. (Marcus)
+- Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28868 (Internal filter registry not thread safe). (Sara)
 - Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)
 - Fixed bug #28831 (ArrayObject::offsetGet() does the work of offsetUnset()). 
