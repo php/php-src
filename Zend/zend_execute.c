@@ -2053,6 +2053,9 @@ send_by_ref:
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 										new_op_array = compile_files(1 CLS_CC, 1, &file_handle);
+										if (new_op_array) {
+											pass_include_eval(new_op_array);
+										}	
 									}
 									if (opened_path) {
 										free(opened_path);
@@ -2067,6 +2070,9 @@ send_by_ref:
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC ELS_CC);
+							if (new_op_array) {
+								pass_include_eval(new_op_array);
+							}
 							break;
 						case ZEND_EVAL:
 							new_op_array = compile_string(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC);
