@@ -139,6 +139,7 @@ class PEAR_Dependency
                     $errmsg = "requires package `$name' " .
                         $this->signOperator($relation) . " $req";
                     $code = $this->codeFromRelation($relation, $version, $req);
+                    return PEAR_DEPENDENCY_MISSING;
                 }
                 return false;
         }
