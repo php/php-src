@@ -33,6 +33,7 @@ extern zend_module_entry curl_module_entry;
 
 PHP_MINIT_FUNCTION (curl);
 PHP_MINFO_FUNCTION (curl);
+PHP_FUNCTION (curl_version);
 PHP_FUNCTION (curl_init);
 PHP_FUNCTION (curl_setopt);
 PHP_FUNCTION (curl_exec);
