@@ -192,7 +192,10 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 			}
 		case 5:
 			gmt_offset = php_idate('Z', time, 0) / 3600;
+			break;
 		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid format");
+			RETURN_FALSE;
 			break;
 	}
 	
@@ -210,9 +213,6 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(ret);
 			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid format");
-			RETURN_FALSE;
 	}
 }
 /* }}} */
