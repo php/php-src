@@ -63,6 +63,7 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 	xmlFree(qualified_name);
 }
 
+#if LIBXML_VERSION >= 20600 
 static void
 _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar ** namespaces, int nb_attributes, int nb_defaulted, const xmlChar ** attributes)
 {
@@ -77,6 +78,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 
 	xmlFree(qualified_name);
 }
+#endif
 
 static void
 _namespace_handler(XML_Parser parser, xmlNsPtr nsptr)
@@ -104,6 +106,7 @@ _end_element_handler(void *user, const xmlChar *name)
 	xmlFree(qualified_name);
 }
 
+#if LIBXML_VERSION >= 20600 
 static void
 _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, const xmlChar *URI)
 {
@@ -120,6 +123,7 @@ _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix,
 
 	xmlFree(qualified_name);
 }
+#endif
 
 static void
 _cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
@@ -268,11 +272,14 @@ php_xml_compat_handlers = {
 	NULL,  /* getParameterEntity */
 	_cdata_handler, /* cdataBlock */
 	NULL, /* externalSubset */
-	1,
+	1
+#if LIBXML_VERSION >= 20600 
+	,
 	NULL,
 	_start_element_handler_ns,
 	_end_element_handler_ns,
 	NULL
+#endif
 	
 };
 
@@ -314,7 +321,9 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser->parser->replaceEntities = 1;
 	if (sep != NULL) {
 		parser->use_namespace = 1;
+#if LIBXML_VERSION >= 20600
 		parser->parser->sax2 = 1;
+#endif
 		parser->_ns_seperator = xmlStrdup(sep);
 	}
 	return parser;
@@ -396,6 +405,7 @@ XML_SetEndNamespaceDeclHandler(XML_Parser parser, XML_EndNamespaceDeclHandler en
 PHPAPI int
 XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
+#if LIBXML_VERSION >= 20600
 	int error;
 	error = xmlParseChunk(parser->parser, data, data_len, is_final);
 	if (!error) {
@@ -405,6 +415,9 @@ XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 	} else {
 		return 1;
 	}
+#else
+	return !xmlParseChunk(parser->parser, data, data_len, is_final);
+#endif
 }
 
 PHPAPI int
