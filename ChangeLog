@@ -1,3 +1,126 @@
+2001-08-21  Joey Smith  <joey@joeysmith.com>
+
+    * ext/standard/filestat.c: MFH: Make stat() act like stat, not filesize().
+
+    * ext/standard/filestat.c:
+    Hmmm...not sure what this was trying to do. stat() was acting like filesize().
+
+2001-08-21  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/Benchmark/Iterate.php:
+    - run(100, "obj->method", "test") syntax should work now
+
+2001-08-21  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: MFH
+    Some changes to help out previous users of domxml...
+    node::tagname == node::name.
+    Add property "type" to textnode types.
+
+    * ext/domxml/php_domxml.c:
+    Some changes to help out previous users of domxml...
+    node::tagname == node::name.
+    Add property "type" to textnode types.
+
+2001-08-21  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache2filter/apache_config.c
+      ext/standard/var.c
+      ext/wddx/wddx.c
+      ext/standard/string.c
+      ext/standard/array.c
+      ext/standard/php_var.h
+      ext/ircg/ircg.c
+      ext/openssl/openssl.c
+      ext/session/php_session.h
+      ext/session/session.c: MFH
+
+2001-08-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/cyrus/cyrus.c: Fix typo
+
+2001-08-21  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: Added two new functions:
+
+      int pdf_get_minorversion()
+      int pdf_get_majorversion()
+
+    Both functions are taken from the C-Library. You should be able to determine
+    the API version of the extension/library using pdf_get_value() or
+    pdf_get_parameter() but these functions need a pdf object to work on. This
+    means that you have to create an pdf object before you can find out the
+    API version. Using pdf_get_minorversion() and pdf_get_majorversion() there's
+    no need for this.
+
+2001-08-21  Zeev Suraski  <zeev@zend.com>
+
+    * ext/wddx/wddx.c
+      sapi/apache2filter/apache_config.c
+      ext/standard/php_var.h
+      ext/standard/string.c
+      ext/standard/var.c
+      ext/ircg/ircg.c
+      ext/openssl/openssl.c
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/array.c: API update
+
+2001-08-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/cpdf/config.m4
+      ext/pdf/config.m4
+      configure.in: Further work on autoconf-2.5x support
+
+    * acinclude.m4
+      configure.in: Move PHP_SUBSTs to configure.in.
+
+    * acinclude.m4
+      configure.in
+      ext/imap/config.m4: nuke some apparently harmful spaces
+
+2001-08-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/install.txt: add MDAC note
+
+2001-08-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/cyrus/cyrus.c: Update api and fix some compile warnings
+
+2001-08-21  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dllts.dsp: Fix Release_TSDbg configuration
+
+2001-08-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/File/Find.php: More ws
+
+    * pear/File/Find.php: more ws fix
+
+
+2001-08-21  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/File/Find.php: killed warning when no matches in glob
+
+    * pear/File/Find.php: the withespaces night
+
+2001-08-21  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/odbc.php:
+    add emulated sequences for ODBC. These are _not_ atomic;
+    if someone knows how to make them so with generic sql, please
+    make it so.
+
+    * pear/DB/common.php:
+    make sure errorcodes are actually there before using them
+
+    * pear/DB/odbc.php: remove ^Ms
+
+2001-08-21  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Date/Calc.php: removed trailing whitespaces
+
 2001-08-20  Yavor Shahpasov  <yavo@itenasolutions.com>
 
     * pear/Date/Calc.php: - Fixed getMonthFromFullName() method
