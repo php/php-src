@@ -74,9 +74,6 @@ static int le_pdf;
 /* {{{ pdf_functions[]
  */
 function_entry pdf_functions[] = {
-	/* sorry for sorting this stuff like the pdflib manual,
-	   but this helps me to see what is done :) RJS 
-	   I'll try to avoid rearanging the sources below that => new functions to the end */
 	PHP_FE(pdf_new, NULL)		/* new function */
 	PHP_FE(pdf_delete, NULL)	/* new function */
 	PHP_FE(pdf_open_file, NULL)	/* new function */
@@ -274,11 +271,11 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 	switch (type){
 		case PDF_NonfatalError:
 			/*
-			 * PDFlib warings should be visible to the user
+			 * PDFlib warnings should be visible to the user.
 			 * If he decides to live with PDFlib warnings
-			 * he may user the PDFlib function
+			 * he may use the PDFlib function
 			 * pdf_set_parameter($p, "warning" 0) to switch off
-			 * the warnings inside PDFlib
+			 * the warnings inside PDFlib.
 			 */
 			php_error(E_WARNING,"Internal PDFlib warning: %s", shortmsg);
 			return;
@@ -751,7 +748,7 @@ PHP_FUNCTION(pdf_get_value)
 		if(argc < 3) WRONG_PARAM_COUNT;
 		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), (float)Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
 	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "font"))) {
-		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0)+PDFLIB_IMAGE_OFFSET;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0)+PDFLIB_FONT_OFFSET;
 	} else {
 		if(argc < 3) {
 		    value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0);
@@ -1885,6 +1882,8 @@ PHP_FUNCTION(pdf_open_image_file)
 	PDF *pdf;
 	int pdf_image, argc;
 	char *image;
+	char *stringparam;
+	int intparam;
 
 	switch ((argc = ZEND_NUM_ARGS())) {
 	case 3:
@@ -1915,7 +1914,15 @@ PHP_FUNCTION(pdf_open_image_file)
 	} else {
 	    convert_to_string_ex(arg4);
 	    convert_to_long_ex(arg5);
-		pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, Z_STRVAL_PP(arg4), Z_LVAL_PP(arg5));
+
+	    stringparam = Z_STRVAL_PP(arg4);
+	    intparam = Z_LVAL_PP(arg5);
+
+	    /* adjust the image handle */
+	    if (!strcmp(stringparam, "masked"))
+		intparam -= PDFLIB_IMAGE_OFFSET;
+
+	    pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, stringparam, intparam);
 	}
 
 	if (pdf_image == -1) {
