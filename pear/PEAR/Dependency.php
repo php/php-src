@@ -224,15 +224,26 @@ class PEAR_Dependency
      * @param string $name        Name of the extension to test
      * @param string $req_ext_ver Required extension version to compare with
      * @param string $relation    How to compare versions with eachother
-     * @param bool   $opt       Whether the relationship is optional
+     * @param bool   $opt         Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
      */
     function checkExtension(&$errmsg, $name, $req = null, $relation = 'has',
         $opt = false)
     {
-        // XXX (ssb): could we avoid loading the extension here?
-        if (!PEAR::loadExtension($name)) {
+        if ($relation == 'not') {
+            if (extension_loaded($name)) {
+                $errmsg = "conflicts with  PHP extension '$name'";
+                return PEAR_DEPENDENCY_CONFLICT;
+            } else {
+                return false;
+            }
+        }
+
+        if (!extension_loaded($name)) {
+            if ($relation == 'ne') {
+                return false;
+            }
             if ($opt) {
                 $errmsg = "'$name' PHP extension is recommended to utilize some features";
                 return PEAR_DEPENDENCY_MISSING_OPTIONAL;
@@ -244,19 +255,20 @@ class PEAR_Dependency
             return false;
         }
         $code = false;
-        if (substr($relation, 0, 2) == 'v.') {
-            $ext_ver = phpversion($name);
-            $operator = substr($relation, 2);
-            // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
-            settype($req, "string");
-            if (!version_compare("$ext_ver", "$req", $operator)) {
-                $errmsg = "'$name' PHP extension version " .
-                    $this->signOperator($operator) . " $req is required";
-                $code = $this->codeFromRelation($relation, $ext_ver, $req);
-                if ($opt) {
-                    $errmsg = "'$name' PHP extension version $req is recommended to utilize some features";
-                    return PEAR_DEPENDENCY_MISSING_OPTIONAL;
-                }
+        if (is_string($req) && substr($req, 0, 2) == 'v.') {
+            $req = substr($req, 2);
+        }
+        $ext_ver = phpversion($name);
+        $operator = $relation;
+        // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
+        if (!version_compare("$ext_ver", "$req", $operator)) {
+            $errmsg = "'$name' PHP extension version " .
+                $this->signOperator($operator) . " $req is required";
+            $code = $this->codeFromRelation($relation, $ext_ver, $req, $opt);
+            if ($opt) {
+                $errmsg = "'$name' PHP extension version " . $this->signOperator($operator) .
+                    " $req is recommended to utilize some features";
+                return $code;
             }
         }
         return $code;
