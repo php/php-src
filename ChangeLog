@@ -1,3 +1,65 @@
+2000-06-07  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    - Fixed typo in _php_image_output (s/fp/tmp/) causing segfault.
+    - Fixed bug when calling imagejpeg() with 3 arguments, the second one empty,
+      introduced yesterday.
+    - Nuked even more code.
+
+2000-06-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - fixed compilation error
+
+    * ext/pdf/pdf.c:
+    - more removal of obsolete pdflib functions, but no changes to the php
+      api
+
+2000-06-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Fix test for php_always_shared
+
+2000-06-07  Zeev Suraski  <zeev@php.net>
+
+    * ext/odbc/php_odbc.c
+      php4dll.dsp
+      php4dllts.dsp: - Fix Win32 build
+    - Nuke a warning
+
+2000-06-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    - new function pdf_set_info() to replace pdf_set_info_xxx()
+
+2000-06-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c: beautify
+
+2000-06-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * configuration-parser.y:
+    cyscape's "current" browscap.ini file doesn't terminate the last line
+    in the file with a newline character
+    this resulted in a parse error
+
+2000-06-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Purely formatting.
+
+2000-06-07  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/string.c: Make trim strip \0 to match php 3
+
+2000-06-07  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    - Added functions imagewbmp(), imagecreatefromxbm().
+    - Nuked a lot of duplicate code.
+    - Added function imagecreatefromxbm(). 
+    - Added function imagewbmp(). (Jouni, based on patch from Rune Nordbøe Skillingstad)
+
 2000-06-06  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c
