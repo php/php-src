@@ -106,7 +106,7 @@
 #define DISCARD_PATH 1
 #undef HAVE_SETITIMER
 #define HAVE_IODBC 0 /*getting rid of old odbc*/
-#define HAVE_UODBC 0
+#define HAVE_UODBC 1
 #define HAVE_LIBDL 1
 #define HAVE_SENDMAIL 1
 #define HAVE_GETTIMEOFDAY 1
