@@ -86,25 +86,25 @@ function create_compiled_in_modules_list()  {
 
 function extract_module_name_from_path($path)   {
     if ($pos1=strpos($path,EXT_DIR_NAME)) {
-           $pos3=strpos($path,'/',$pos1+EXT_DIR_NAME_LEN);
-           return substr($path,$pos2=$pos1+EXT_DIR_NAME_LEN,$pos3-$pos2);
+		$pos3=strpos($path,'/',$pos1+EXT_DIR_NAME_LEN);
+		return substr($path,$pos2=$pos1+EXT_DIR_NAME_LEN,$pos3-$pos2);
     }
 }
 
 
 function create_found_tests_4_modules_list() {
-   global $modules_2_test,$testdirs;
+	global $modules_2_test,$testdirs;
 
-   foreach ($testdirs AS $path) {
-       if ($mod_name=extract_module_name_from_path($path))
-           $modules_2_test[$mod_name]=TRUE;
-   }
+	foreach ($testdirs AS $path) {
+		if ($mod_name=extract_module_name_from_path($path))
+			$modules_2_test[$mod_name]=TRUE;
+	}
 }
 
 function create_modules_2_test_list() {
     global $compiled_in_modules,$modules_2_test,$modules_available;
     foreach ($compiled_in_modules AS $value)
-        if (isset($modules_2_test[$value])) $modules_available[]=$value;
+	if (isset($modules_2_test[$value])) $modules_available[]=$value;
 }
 
 
@@ -122,8 +122,8 @@ function in_path($program, $windows_p)
     $slash = DIRECTORY_SEPARATOR;
     $path_components = explode($delim, $HTTP_ENV_VARS['PATH']);
     if ($windows_p) {
-	$cwd = getcwd() . DIRECTORY_SEPARATOR;
-	array_unshift($path_components, "{$cwd}Release_TS_Inline", "{$cwd}Release_TS");
+		$cwd = getcwd() . DIRECTORY_SEPARATOR;
+		array_unshift($path_components, "{$cwd}Release_TS_Inline", "{$cwd}Release_TS");
     }
     foreach ($path_components as $path) {
         $test = "{$path}{$slash}php{$ext}";
@@ -138,8 +138,8 @@ function in_path($program, $windows_p)
 function initialize()
 {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile,
-        $skipped, $failed, $passed, $total, $term_bold, $term_norm,
-        $tests_in_dir;
+	$skipped, $failed, $passed, $total, $term_bold, $term_norm,
+	$tests_in_dir;
 
     // XXX Should support HTML output as well.
     $php = "";
@@ -187,16 +187,16 @@ function initialize()
         exit;
     }
     if ($windows_p) {
-	// modify path to help Windows find DLL files
-	$path = dirname($php) . ";" . getenv("PATH");
-	putenv("PATH={$path}");
+		// modify path to help Windows find DLL files
+		$path = dirname($php) . ";" . getenv("PATH");
+		putenv("PATH={$path}");
     }
 
     create_compiled_in_modules_list();
 
     $skip = array(
-        "CVS" => 1
-    );
+			"CVS" => 1
+			);
     $testdirs = array();
     $tmpfile = array();
     $tests_in_dir = array();
@@ -229,7 +229,7 @@ function &parse_options(&$argc, &$argv)
 function do_testing($argc, &$argv)
 {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile, $opts,
-        $skipped, $failed, $passed, $total, $term_bold, $term_norm, $skipped_extensions;
+	$skipped, $failed, $passed, $total, $term_bold, $term_norm, $skipped_extensions;
 
     if ($argc > 1) {
         if (is_dir($argv[1])) {
@@ -240,13 +240,13 @@ function do_testing($argc, &$argv)
                     case TEST_SKIPPED:
                     case TEST_INTERNAL_ERROR:
                         $skipped++;
-                        break;
+					break;
                     case TEST_FAILED:
                         $failed++;
-                        break;
+					break;
                     case TEST_PASSED:
                         $passed++;
-                        break;
+					break;
                 }
                 $total++;
             }
@@ -315,7 +315,7 @@ function find_testdirs($dir = '.', $first_pass = true)
 
             ) {
             continue;
-            }
+		}
 
         if (strstr("/$path/", "/tests/")) {
             $testdirs[] = $path;
@@ -353,7 +353,7 @@ function run_tests_in_dir($dir = '.')
 
     if ($mod_name=extract_module_name_from_path($dir))   {
         if ($ext_found=in_array($mod_name,$modules_available))
-             dowriteln("Testing extension: $mod_name");
+			dowriteln("Testing extension: $mod_name");
         else $skipped_extensions[$mod_name]=TRUE;
     }
 
@@ -366,13 +366,13 @@ function run_tests_in_dir($dir = '.')
                 case TEST_SKIPPED:
                 case TEST_INTERNAL_ERROR:
                     $skipped++;
-                    break;
+				break;
                 case TEST_FAILED:
                     $failed++;
-                    break;
+				break;
                 case TEST_PASSED:
                     $passed++;
-                    break;
+				break;
             }
             $total++;
         }
@@ -380,7 +380,7 @@ function run_tests_in_dir($dir = '.')
             $skippednow = $skipped - $oskipped;
             dowriteln("[all $skippednow test(s) skipped]");
         }
-       dowriteln("");
+		dowriteln("");
     }
 
     return true;
@@ -390,7 +390,7 @@ function skip_headers($fp)
 {
     // "cli" version of PHP does not output headers
     if (php_sapi_name() == "cli") {
-	return;
+		return;
     }
     while (!feof($fp)) {
         if (trim(fgets($fp, 1024)) == "") {
@@ -405,7 +405,7 @@ function delete_tmpfiles()
     reset($tmpfile);
     while (list($k, $v) = each($tmpfile)) {
         if (file_exists($v)) {
-           //print "unlink($v): "; var_dump(unlink($v));
+			//print "unlink($v): "; var_dump(unlink($v));
             unlink($v);
         }
     }
@@ -421,7 +421,7 @@ function delete_tmpfiles()
  */
 function compare_results($file1, $file2)
 {
-        $data1 = $data2 = "";
+	$data1 = $data2 = "";
     if (!($fp1 = @fopen($file1, "r")) || !($fp2 = @fopen($file2, "r"))) {
         return false;
     }
@@ -442,8 +442,8 @@ function compare_results($file1, $file2)
     fclose($fp2);
     if ((trim($data1) != trim($data2))
         || ($data1=='' && $data2=='')) {
-       //print "data1=";var_dump($data1);
-       //print "data2=";var_dump($data2);
+		//print "data1=";var_dump($data1);
+		//print "data2=";var_dump($data2);
         return false;
     }
     return true;
@@ -518,103 +518,103 @@ function run_test($file)
             fclose($sp);
             if ($skip == "skip") {
                 delete_tmpfiles();
-                return TEST_SKIPPED;
-            }
-        }
-    }
-    putenv("PATH_TRANSLATED=$tmpfile[FILE]");
-    putenv("SCRIPT_FILENAME=$tmpfile[FILE]");
-    if (isset($fps["POST"])) {
-        putenv("REQUEST_METHOD=POST");
-        putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
-        putenv("CONTENT_LENGTH=".filesize($tmpfile["POST"]));
-    } else {
-        putenv("REQUEST_METHOD=GET");
-        putenv("CONTENT_TYPE=");
-        putenv("CONTENT_LENGTH=");
-    }
-    if (isset($fps["POST"])) {
-        if(!$windows_p) {
-            $cmd = "2>&1 $php -q $tmpfile[FILE] < $tmpfile[POST]";
-        }
-        else {
-            $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE] < $tmpfile[POST]";
-        }
-    } else {
-        if(!$windows_p) {
-            $cmd = "2>&1 $php -q $tmpfile[FILE]";
-        }
-        else {
-            $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE]";;
-        }
-    }
-    $ofp = @fopen($tmpfile["OUTPUT"], "w");
-    if (!$ofp) {
-        dowriteln("Error: could not write to output file");
-        delete_tmpfiles();
-        return TEST_INTERNAL_ERROR;
-    }
-    $cp = popen($cmd, "r");
-    if (!$cp) {
-        dowriteln("Error: could not execute: $cmd");
-        delete_tmpfiles();
-        return TEST_INTERNAL_ERROR;
-    }
-    skip_headers($cp);
-    while ($data = fread($cp, 2048)) {
-        fwrite($ofp, $data);
-    }
-    fclose($ofp);
-    pclose($cp);
-    $desc = isset($TEST)?trim($TEST):"";
-    $outfile = ereg_replace('\.phpt$', '.out', $file);
-    $expectfile = ereg_replace('\.phpt$', '.exp', $file);
-    $phpfile = ereg_replace('\.phpt$', '.php', $file);
-    if (compare_results($tmpfile["OUTPUT"], $tmpfile["EXPECT"])) {
-        $status = TEST_PASSED;
-        $text = "passed";
-        $pre = $post = "";
-        if (file_exists($outfile)) {
-            unlink($outfile);
-        }
-        if (file_exists($expectfile)) {
-            unlink($expectfile);
-        }
-        if (file_exists($phpfile)) {
-            unlink($phpfile);
-        }
-    } else {
-        //system("env");
-        $status = TEST_FAILED;
-        $text = "failed";
-        $pre = $term_bold;
-        $post = $term_norm;
-        $desc .= " (".basename($file).")";
-        if (file_exists($outfile)) {
-            unlink($outfile);
-        }
-        copy($tmpfile["OUTPUT"], $outfile);
-        copy($tmpfile["EXPECT"], $expectfile);
-        copy($tmpfile["FILE"], $phpfile);
-    }
-    dowriteln(sprintf("%s%-68s ... %s%s", $pre, substr($desc, 0, 68),
-                    $text, $post));
-//    if ($status == TEST_FAILED) {
-//        for ($i = 0; $i < sizeof($variables); $i++) {
-//            $var = $variables[$i];
-//            print "$var:\n";
-//            if ($tmpfile[$var]) {
-//                if (file_exists($tmpfile[$var])) {
-//                    system("cat ".$tmpfile[$var]);
-//                }
-//            } else {
-//                print $$var;
-//            }
-//        }
-//        print "--\n\n";
-//    }
-    delete_tmpfiles();
-    return $status;
+				return TEST_SKIPPED;
+			}
+		}
+	}
+	putenv("PATH_TRANSLATED=$tmpfile[FILE]");
+	putenv("SCRIPT_FILENAME=$tmpfile[FILE]");
+	if (isset($fps["POST"])) {
+		putenv("REQUEST_METHOD=POST");
+		putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
+		putenv("CONTENT_LENGTH=".filesize($tmpfile["POST"]));
+	} else {
+		putenv("REQUEST_METHOD=GET");
+		putenv("CONTENT_TYPE=");
+		putenv("CONTENT_LENGTH=");
+	}
+	if (isset($fps["POST"])) {
+		if(!$windows_p) {
+			$cmd = "2>&1 $php -q $tmpfile[FILE] < $tmpfile[POST]";
+		}
+		else {
+			$cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE] < $tmpfile[POST]";
+		}
+	} else {
+		if(!$windows_p) {
+			$cmd = "2>&1 $php -q $tmpfile[FILE]";
+		}
+		else {
+			$cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE]";;
+		}
+	}
+	$ofp = @fopen($tmpfile["OUTPUT"], "w");
+	if (!$ofp) {
+		dowriteln("Error: could not write to output file");
+		delete_tmpfiles();
+		return TEST_INTERNAL_ERROR;
+	}
+	$cp = popen($cmd, "r");
+	if (!$cp) {
+		dowriteln("Error: could not execute: $cmd");
+		delete_tmpfiles();
+		return TEST_INTERNAL_ERROR;
+	}
+	skip_headers($cp);
+	while ($data = fread($cp, 2048)) {
+		fwrite($ofp, $data);
+	}
+	fclose($ofp);
+	pclose($cp);
+	$desc = isset($TEST)?trim($TEST):"";
+	$outfile = ereg_replace('\.phpt$', '.out', $file);
+	$expectfile = ereg_replace('\.phpt$', '.exp', $file);
+	$phpfile = ereg_replace('\.phpt$', '.php', $file);
+	if (compare_results($tmpfile["OUTPUT"], $tmpfile["EXPECT"])) {
+		$status = TEST_PASSED;
+		$text = "passed";
+		$pre = $post = "";
+		if (file_exists($outfile)) {
+			unlink($outfile);
+		}
+		if (file_exists($expectfile)) {
+			unlink($expectfile);
+		}
+		if (file_exists($phpfile)) {
+			unlink($phpfile);
+		}
+	} else {
+		//system("env");
+		$status = TEST_FAILED;
+		$text = "failed";
+		$pre = $term_bold;
+		$post = $term_norm;
+		$desc .= " (".basename($file).")";
+		if (file_exists($outfile)) {
+			unlink($outfile);
+		}
+		copy($tmpfile["OUTPUT"], $outfile);
+		copy($tmpfile["EXPECT"], $expectfile);
+		copy($tmpfile["FILE"], $phpfile);
+	}
+	dowriteln(sprintf("%s%-68s ... %s%s", $pre, substr($desc, 0, 68),
+					  $text, $post));
+//	  if ($status == TEST_FAILED) {
+//		  for ($i = 0; $i < sizeof($variables); $i++) {
+//			  $var = $variables[$i];
+//			  print "$var:\n";
+//			  if ($tmpfile[$var]) {
+//				  if (file_exists($tmpfile[$var])) {
+//					  system("cat ".$tmpfile[$var]);
+//				  }
+//			  } else {
+//				  print $$var;
+//			  }
+//		  }
+//		  print "--\n\n";
+//	  }
+	delete_tmpfiles();
+	return $status;
 }
 
 ?>
