@@ -213,6 +213,7 @@ string_or_value:
 	|	CFG_TRUE { $$ = $1; }
 	|	CFG_FALSE { $$ = $1; }
 	|	'\n' { $$.value.str.val = strdup(""); $$.value.str.len=0; $$.type = IS_STRING; }
+	|	/* empty */ { $$.value.str.val = strdup(""); $$.value.str.len=0; $$.type = IS_STRING; }
 ;
 
 expr:
