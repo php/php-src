@@ -332,6 +332,11 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 		php_gd_error("gd-jpeg: warning: jpeg_finish_decompress reports suspended data source");
 	}
 
+	/* Thanks to Truxton Fulton */
+	if (cinfo.err->num_warnings > 0) {
+		goto error;
+	}
+
 	jpeg_destroy_decompress (&cinfo);
 	gdFree (row);
 

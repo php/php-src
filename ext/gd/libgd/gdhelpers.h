@@ -21,5 +21,19 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 #define gdPFree(ptr)		pefree(ptr, 1)
 #define gdPEstrdup(ptr)		pestrdup(ptr, 1)
 
+#ifdef ZTS
+#define gdMutexDeclare(x) MUTEX_T x
+#define gdMutexSetup(x) x = tsrm_mutex_alloc()
+#define gdMutexShutdown(x) tsrm_mutex_free(x)
+#define gdMutexLock(x) tsrm_mutex_lock(x)
+#define gdMutexUnlock(x) tsrm_mutex_unlock(x)
+#else
+#define gdMutexDeclare(x)
+#define gdMutexSetup(x)
+#define gdMutexShutdown(x)
+#define gdMutexLock(x)
+#define gdMutexUnlock(x)
+#endif
+
 #endif /* GDHELPERS_H */
 

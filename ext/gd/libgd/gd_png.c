@@ -622,28 +622,39 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 	 */
 
 	if (im->trueColor) {
+		/* performance optimizations by Phong Tran */
 		int channels = im->saveAlphaFlag ? 4 : 3;
 		/* Our little 7-bit alpha channel trick costs us a bit here. */
 		png_bytep *row_pointers;
+		unsigned char* pOutputRow;
+		int **ptpixels = im->tpixels;
+		int *pThisRow;
+		unsigned char a;
+		int thisPixel;
+		png_bytep *prow_pointers;
+		int saveAlphaFlag = im->saveAlphaFlag;
+
 		row_pointers = safe_emalloc(sizeof(png_bytep), height, 0);
+		prow_pointers = row_pointers;
 		for (j = 0; j < height; ++j) {
-			int bo = 0;
-			row_pointers[j] = (png_bytep) safe_emalloc(width, channels, 0);
+			*prow_pointers = (png_bytep) safe_emalloc(width, channels, 0);
+			pOutputRow = *prow_pointers++;
+			pThisRow = *ptpixels++;
 			for (i = 0; i < width; ++i) {
-				unsigned char a;
-				row_pointers[j][bo++] = gdTrueColorGetRed(im->tpixels[j][i]);
-				row_pointers[j][bo++] = gdTrueColorGetGreen(im->tpixels[j][i]);
-				row_pointers[j][bo++] = gdTrueColorGetBlue(im->tpixels[j][i]);
-				if (im->saveAlphaFlag) {
+				thisPixel = *pThisRow++;
+				*pOutputRow++ = gdTrueColorGetRed(thisPixel);
+				*pOutputRow++ = gdTrueColorGetGreen(thisPixel);
+				*pOutputRow++ = gdTrueColorGetBlue(thisPixel);
+				if (saveAlphaFlag) {
 					/* convert the 7-bit alpha channel to an 8-bit alpha channel.
 					 * We do a little bit-flipping magic, repeating the MSB
 					 * as the LSB, to ensure that 0 maps to 0 and
 					 * 127 maps to 255. We also have to invert to match
 					 * PNG's convention in which 255 is opaque.
 					 */
-					a = gdTrueColorGetAlpha(im->tpixels[j][i]);
+					a = gdTrueColorGetAlpha(thisPixel);
 					/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */ 
-					row_pointers[j][bo++] = 255 - ((a << 1) + (a >> 6));
+					*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
 				}
 			}
 		}

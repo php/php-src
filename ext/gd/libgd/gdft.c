@@ -90,7 +90,11 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
  * if building this version of gd separate from graphviz.
  */
 #ifndef DEFAULT_FONTPATH
+#if defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
+#define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
+#else
 #define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
+#endif
 #endif
 #ifndef PATHSEPARATOR
 #define PATHSEPARATOR ":"
@@ -406,26 +410,18 @@ static void *fontFetch (char **error, void *key)
 				}
 			}
 
-			snprintf(fullname, sizeof(fullname) - 1, "%s/%s", dir, name);
-			if (access(fullname, R_OK) == 0) {
-				font_found++;
-				break;
-			}
-			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.ttf", dir, name);
-			if (access(fullname, R_OK) == 0) {
-				font_found++;
-				break;
-			}
-			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.pfa", dir, name);
-			if (access(fullname, R_OK) == 0) {
-				font_found++;
-				break;
-			}
-			snprintf(fullname, sizeof(fullname) - 1, "%s/%s.pfb", dir, name);
-			if (access(fullname, R_OK) == 0) {
-				font_found++;
-				break;
-			}
+#define GD_CHECK_FONT_PATH(ext)	\
+	snprintf(fullname, sizeof(fullname) - 1, "%s/%s%s", dir, name, ext);	\
+	if (access(fullname, R_OK) == 0) {	\
+		font_found++;	\
+		break;	\
+	}	\
+
+			GD_CHECK_FONT_PATH("");
+			GD_CHECK_FONT_PATH(".ttf");
+			GD_CHECK_FONT_PATH(".pfa");
+			GD_CHECK_FONT_PATH(".pfb");
+			GD_CHECK_FONT_PATH(".dfont");
 		}
 		gdFree(path);
 		path = NULL;
@@ -456,6 +452,16 @@ static void *fontFetch (char **error, void *key)
 	}
 
 	/* FIXME - This mapping stuff is imcomplete - where is the spec? */
+	/* EAM   - It's worse than that. It's pointless to match character encodings here.
+	 *         As currently written, the stored a->face->charmap only matches one of
+	 *         the actual charmaps and we cannot know at this stage if it is the right
+	 *         one. We should just skip all this stuff, and check in gdImageStringFTEx
+	 *         if some particular charmap is preferred and if so whether it is held in
+	 *         one of the a->face->charmaps[0..num_charmaps].
+	 *         And why is it so bad not to find any recognized charmap?  The user may
+	 *         still know what mapping to use, even if we do not.  In that case we can
+	 *         just use the map in a->face->charmaps[num_charmaps] and be done with it.
+	 */
 
 	a->have_char_map_unicode = 0;
 	a->have_char_map_big5 = 0;
@@ -465,6 +471,20 @@ static void *fontFetch (char **error, void *key)
 		charmap = a->face->charmaps[n];
 		platform = charmap->platform_id;
 		encoding = charmap->encoding_id;
+
+/* EAM DEBUG - Newer versions of libfree2 make it easier by defining encodings */
+#ifdef FT_ENCODING_MS_SYMBOL
+	if (charmap->encoding == FT_ENCODING_MS_SYMBOL
+		|| charmap->encoding == FT_ENCODING_ADOBE_CUSTOM
+		|| charmap->encoding == FT_ENCODING_ADOBE_STANDARD) {
+		a->have_char_map_unicode = 1;
+		found = charmap;
+		a->face->charmap = charmap;
+		return (void *)a;
+	}
+#endif /* FT_ENCODING_MS_SYMBOL */
+/* EAM DEBUG */
+
 		if ((platform == 3 && encoding == 1)		/* Windows Unicode */
 			|| (platform == 3 && encoding == 0)	/* Windows Symbol */
 			|| (platform == 2 && encoding == 1)	/* ISO Unicode */
@@ -509,16 +529,12 @@ static void fontRelease (void *element)
 /********************************************************************/
 /* tweencolor cache functions                                            */
 
-static int
-tweenColorTest (void *element, void *key)
+static int tweenColorTest (void *element, void *key)
 {
-  tweencolor_t *a = (tweencolor_t *) element;
-  tweencolorkey_t *b = (tweencolorkey_t *) key;
+	tweencolor_t *a = (tweencolor_t *) element;
+	tweencolorkey_t *b = (tweencolorkey_t *) key;
 
-  return (a->pixel == b->pixel
-	  && a->bgcolor == b->bgcolor
-	  && a->fgcolor == b->fgcolor
-	  && a->im == b->im);
+	return (a->pixel == b->pixel && a->bgcolor == b->bgcolor && a->fgcolor == b->fgcolor && a->im == b->im);
 }
 
 /*
@@ -608,7 +624,8 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
         pcr = pc;
         y = pen_y + row;
         /* clip if out of bounds */
-        if (y >= im->sy || y < 0)
+        /* 2.0.16: clipping rectangle, not image bounds */		
+	if ((y > im->cy2) || (y < im->cy1))
 	  continue;
       for (col = 0; col < bitmap.width; col++, pc++)
 	{
@@ -643,7 +660,8 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
           level = gdAlphaMax - level;  
           x = pen_x + col;
 	      /* clip if out of bounds */
-	      if (x >= im->sx || x < 0)
+	      /* 2.0.16: clip to clipping rectangle, Matt McNabb */
+		if ((x > im->cx2) || (x < im->cx1))
 		continue;
 	      /* get pixel location in gd buffer */
 	    tpixel = &im->tpixels[y][x];
@@ -743,30 +761,46 @@ gdroundupdown (FT_F26Dot6 v1, int updown)
 extern int any2eucjp (char *, char *, unsigned int);
 
 /* Persistent font cache until explicitly cleared */
-/*     Fonts can be used across multiple images */
+/* Fonts can be used across multiple images */
+ 
+/* 2.0.16: thread safety (the font cache is shared) */
+gdMutexDeclare(gdFontCacheMutex);
 static gdCache_head_t *fontCache = NULL;
 static FT_Library library;
 
-void
-gdFreeFontCache()
+void gdFontCacheShutdown()
 {
-  if (fontCache)
-    {
-      gdCacheDelete(fontCache);
-	  fontCache=NULL;
-      FT_Done_FreeType(library);
-    }
+	if (fontCache) {
+ 		gdMutexShutdown(gdFontCacheMutex);
+ 		gdCacheDelete(fontCache);
+		fontCache = NULL;
+ 		FT_Done_FreeType(library);
+	}
+}
+  
+int gdFontCacheSetup(void)
+{
+	if (fontCache) {
+		/* Already set up */
+		return 0;
+	}
+	gdMutexSetup(gdFontCacheMutex);
+	if (FT_Init_FreeType(&library)) {
+		gdMutexShutdown(gdFontCacheMutex);
+		return -1;
+	}
+	fontCache = gdCacheCreate (FONTCACHESIZE, fontTest, fontFetch, fontRelease);
+	return 0;
 }
 
 /********************************************************************/
 /* gdImageStringFT -  render a utf8 string onto a gd image          */
 
 char *
-gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
-		 double ptsize, double angle, int x, int y, char *string)
+gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist, 
+  		 double ptsize, double angle, int x, int y, char *string)
 {
-	return gdImageStringFTEx(im, brect, fg, fontlist,
-		ptsize, angle, x, y, string, 0);
+	return gdImageStringFTEx(im, brect, fg, fontlist, ptsize, angle, x, y, string, 0);
 }
 
 char *
@@ -813,20 +847,21 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	/***** initialize font library and font cache on first call ******/
 
 	if (!fontCache) {
-		if (FT_Init_FreeType (&library)) {
-			gdCacheDelete( tc_cache );
+		if (gdFontCacheSetup() != 0) {
+			gdCacheDelete(tc_cache);
 			return "Failure to initialize font library";
 		}
-		fontCache = gdCacheCreate(FONTCACHESIZE, fontTest, fontFetch, fontRelease);
 	}
 	/*****/
-
+	
+	gdMutexLock(gdFontCacheMutex);
 	/* get the font (via font cache) */
 	fontkey.fontlist = fontlist;
 	fontkey.library = &library;
 	font = (font_t *) gdCacheGet (fontCache, &fontkey);
 	if (!font) {
 		gdCacheDelete(tc_cache);
+		gdMutexUnlock(gdFontCacheMutex);
 		return fontCache->error;
 	}
 	face = font->face;		/* shortcut */
@@ -834,6 +869,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 	if (FT_Set_Char_Size (face, 0, (FT_F26Dot6) (ptsize * 64), GD_RESOLUTION, GD_RESOLUTION)) {
 		gdCacheDelete(tc_cache);
+		gdMutexUnlock(gdFontCacheMutex);
 		return "Could not set character size";
 	}
 
@@ -885,6 +921,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	}
 	if (!mfound) {
 		/* No character set found! */
+		gdMutexUnlock(gdFontCacheMutex);
 		return "No character set found";
 	}
 
@@ -926,6 +963,21 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			  next++;
 			  continue;
 		}
+
+/* EAM DEBUG */
+#ifdef FT_ENCODING_MS_SYMBOL
+		if (font->face->charmap->encoding == FT_ENCODING_MS_SYMBOL) {
+			/* I do not know the significance of the constant 0xf000.
+			 * It was determined by inspection of the character codes
+			 * stored in Microsoft font symbol.
+			 */
+			len = gdTcl_UtfToUniChar (next, &ch);
+			ch |= 0xf000;
+			next += len;
+		} else
+#endif /* FT_ENCODING_MS_SYMBOL */
+/* EAM DEBUG */
+
 		switch (m) {
 			case gdFTEX_Unicode:
 				if (font->have_char_map_unicode) {
@@ -1003,6 +1055,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 				gdFree(tmpstr);
 			}
 			gdCacheDelete(tc_cache);
+			gdMutexUnlock(gdFontCacheMutex);
 			return "Problem loading glyph";
 		}
 
@@ -1045,6 +1098,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 					gdFree(tmpstr);
 				}
 				gdCacheDelete(tc_cache);
+				gdMutexUnlock(gdFontCacheMutex);
 				return "Problem rendering glyph";
 			}
 
@@ -1095,6 +1149,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		gdFree(tmpstr);
 	}
 	gdCacheDelete(tc_cache);
+	gdMutexUnlock(gdFontCacheMutex);
 	return (char *) NULL;
 }
 

@@ -379,14 +379,18 @@ PHP_MINIT_FUNCTION(gd)
 #if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
+#if defined(HAVE_GD_THREAD_SAFE) || defined(HAVE_GD_BUNDLED)
+	gdFontCacheShutdown();
+#else 
 	gdFreeFontCache();
+#endif
 	return SUCCESS;
 }
 #endif
 /* }}} */
 
 #if HAVE_GD_BUNDLED
-#define PHP_GD_VERSION_STRING "bundled (2.0.15 compatible)"
+#define PHP_GD_VERSION_STRING "bundled (2.0.17 compatible)"
 #elif HAVE_LIBGD20
 #define PHP_GD_VERSION_STRING "2.0 or higher"
 #elif HAVE_GDIMAGECOLORRESOLVE
@@ -2960,7 +2964,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	char *error = NULL;
 	int argc;
 #if HAVE_GD_STRINGFTEX
-	gdFTStringExtra strex;
+	gdFTStringExtra strex = {0};
 #endif
 
 #if !HAVE_GD_STRINGFTEX
@@ -3003,7 +3007,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 			HashPosition pos;
 
 			convert_to_array_ex(EXT);
-			memset(&strex, 0, sizeof(strex));
 
 			/* walk the assoc array */
 			zend_hash_internal_pointer_reset_ex(HASH_OF(*EXT), &pos);
@@ -3036,14 +3039,18 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	str = (unsigned char *) Z_STRVAL_PP(C);
 	l = strlen(str);
 
+/*	VCWD_REALPATH(Z_STRVAL_PP(FONTNAME), fontname); */
+
 #ifdef VIRTUAL_DIR
-	if(virtual_filepath(Z_STRVAL_PP(FONTNAME), (char**)&fontname TSRMLS_CC)) {
-		fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
+ 	{
+ 		char tmp_font_path[MAXPATHLEN];
+ 		if (VCWD_REALPATH(Z_STRVAL_PP(FONTNAME), tmp_font_path)) {
+ 			fontname = (unsigned char *) Z_STRVAL_PP(FONTNAME);
+ 		}
 	}
 #else
 	fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
 #endif
-
 
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_GD_STRINGFTEX
