@@ -1329,7 +1329,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
 	int frames_on_stack = 0;
-	int indent;
+	int indent = 0;
 
 	if (ZEND_NUM_ARGS()) {
 		ZEND_WRONG_PARAM_COUNT();
