@@ -1180,7 +1180,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 }
 
 
-static inline zend_free_obj_get_result(zval *op, int free_op)
+static inline void zend_free_obj_get_result(zval *op, int free_op)
 {
 	if (free_op) {
 		if (op->refcount == 0) {
