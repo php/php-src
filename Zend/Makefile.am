@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in -*- makefile -*-
 
-#CLEANFILES = zend_language_parser.c zend_language_parser.h zend_language_scanner.c zend_language_parser.output 
+#CLEANFILES = zend_language_parser.c zend_language_parser.h zend_language_scanner.c zend_language_parser.output zend_ini_parser.c zend_ini_parser.h zend_ini_scanner.c zend_ini_parser.output
 
 AUTOMAKE_OPTIONS=foreign
 EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
@@ -11,6 +11,7 @@ libZend_c_la_SOURCES=zend_language_scanner.c
 
 libZend_la_SOURCES=\
 	zend_language_parser.y \
+	zend_ini_parser.y \
 	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
@@ -26,6 +27,8 @@ libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 $(libZend_la_OBJECTS) zend_language_scanner.lo zend_language_scanner_cc.lo: zend_language_parser.h
 
+# Language parser/scanner rules
+
 zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 	$(LEX) -Pzend -o$@ -i $(srcdir)/zend_language_scanner.l
 
@@ -36,7 +39,19 @@ zend_language_parser.h: zend_language_parser.c
 zend_language_parser.c: $(srcdir)/zend_language_parser.y
 	$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o zend_language_parser.c
 
+# INI parser/scanner rules
+
+zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
+	$(YACC) -p zend_ini -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
+
+zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
+	$(LEX) -Pzend_ini -o$@ -i $(srcdir)/zend_ini_scanner.l
+
+zend_ini_scanner_cc.cc: $(srcdir)/zend_ini_scanner.l
+	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend_ini -o$@ $(srcdir)/zend_ini_scanner.l
+
 depend:
 
 zend_execute.lo: $(srcdir)/zend_execute.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(INLINE_CFLAGS) -c $(srcdir)/zend_execute.c
+
