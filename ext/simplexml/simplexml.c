@@ -360,7 +360,6 @@ sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 	php_sxe_object *sxe;
 	char           *name;
 	xmlNodePtr      node;
-	xmlAttrPtr      attr;
 	
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 	name = Z_STRVAL_P(member);
