@@ -14,8 +14,8 @@
 */
 
 
-#ifndef _TSRM_H
-#define _TSRM_H
+#ifndef TSRM_H
+#define TSRM_H
 
 #ifdef HAVE_CONFIG_H
 # undef PACKAGE
@@ -108,4 +108,4 @@ TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(TH
 }
 #endif
 
-#endif /* _TSRM_H */
+#endif /* TSRM_H */
