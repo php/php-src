@@ -1,3 +1,29 @@
+2003-10-10  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+      Fix Bug #23221 Pear installer - extension re-install segfault
+
+    * pear/PEAR/Installer.php:
+      Partial rewrite of dowload() method:
+      - Full error checking and reporting
+      - Avoid downloads as possible
+      - Made the "force" option work correctly
+      
+
+    * pear/PEAR/Packager.php:
+      avoid chdir() calls
+      remove duplicated validation checks
+      (fix bug #66 contributed by Roman)
+
+2003-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      Fixed bug #25814 (Make flock() return correct value when 3rd argument is
+      used).
+      
+
 2003-10-09  Zeev Suraski  <zeev@zend.com>
 
     * ZendEngine2/zend_compile.c
