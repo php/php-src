@@ -50,13 +50,6 @@ typedef struct {
 } php_aol_context;
 
 static int
-sapi_aol_read_post(char *buf, uint count_bytes SLS_DC)
-{
-	HERE;
-	return FAILURE;
-}
-
-static int
 sapi_ub_write(const char *str, uint str_length)
 {
 	Ns_DString dstr;
@@ -119,8 +112,9 @@ static int
 sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
 	uint total_read = 0;
+	php_aol_context *ctx = (php_aol_context *) SG(server_context);
 
-	HERE;
+	total_read = Ns_ConnRead(ctx->conn, buf, total_read);
 	return total_read;
 }
 	
@@ -163,27 +157,15 @@ php_server_shutdown(void *context)
 }
 
 static int
-module_main(php_aol_context *ctx)
+module_main(php_aol_context *ctx SLS_DC)
 {
 	zend_file_handle file_handle;
-	zend_compiler_globals cg;
-	zend_executor_globals eg;
-	php_core_globals pcg;
-	zend_compiler_globals *compiler_globals = &cg;
-	zend_executor_globals *executor_globals = &eg;
-	php_core_globals *core_globals = &pcg;
-	SLS_FETCH();
+	CLS_FETCH();
+	ELS_FETCH();
+	PLS_FETCH();
 
 	HERE;
 
-	if(setjmp(EG(bailout)) != 0) {
-		return !NS_OK;
-	}
-	
-	compiler_globals =  ts_resource(compiler_globals_id);
-	executor_globals = ts_resource(executor_globals_id);
-	core_globals = ts_resource(core_globals_id);
-	
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	
@@ -205,7 +187,7 @@ request_ctor(php_aol_context *ctx SLS_DC)
 	server = Ns_ConnServer(ctx->conn);
 	
 	SG(server_context) = ctx;
-	SG(request_info).query_string = "";
+	SG(request_info).query_string = ctx->conn->request->query;
 
 	Ns_DStringInit(&ds);
 	Ns_UrlToFile(&ds, server, ctx->conn->request->url);
@@ -213,7 +195,7 @@ request_ctor(php_aol_context *ctx SLS_DC)
 	Ns_DStringFree(&ds);
 	root = Ns_PageRoot(server);
 	SG(request_info).request_uri = SG(request_info).path_translated + strlen(root);
-	SG(request_info).request_method = "GET";
+	SG(request_info).request_method = ctx->conn->request->method;
 	SG(request_info).content_length = Ns_ConnContentLength(ctx->conn);
 	Ns_DStringInit(&ctx->content_type);
 	Ns_ConnCopyToDString(ctx->conn, SG(request_info).content_length, &ctx->content_type);
@@ -243,7 +225,7 @@ request_handler(void *context, Ns_Conn *conn)
 	
 	request_ctor(ctx SLS_CC);
 	
-	status = module_main(ctx);
+	status = module_main(ctx SLS_CC);
 	
 	request_dtor(ctx SLS_CC);
 	
@@ -251,6 +233,30 @@ request_handler(void *context, Ns_Conn *conn)
 
 	return status;
 }
+
+static void config(char *server, char *module, php_aol_context *ctx)
+{
+	int i;
+	char *path;
+	Ns_Set *set;
+	char *map;
+
+	path = Ns_ConfigPath(server, NULL, "php", NULL);
+	map = NULL;
+	set = Ns_ConfigGetSection(path);
+
+	for(i = 0; set && i < Ns_SetSize(set); i++) {
+		char *key = Ns_SetValue(set, i);
+
+		if(!strcasecmp(key, "map")) {
+			map = Ns_SetValue(set, i);
+			Ns_RegisterRequest(server, "GET", map, request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(server, "POST", map, request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(server, "HEAD", map, request_handler, NULL, ctx, 0);
+		}
+	}
+}
+	
 
 int Ns_ModuleInit(char *server, char *module)
 {
@@ -263,9 +269,10 @@ int Ns_ModuleInit(char *server, char *module)
 	ctx = malloc(sizeof *ctx);
 	ctx->sapi_module = &sapi_module;
 
+	config(server, module, ctx);
+
 	Ns_RegisterServerShutdown(server, php_server_shutdown, ctx);
 
-	Ns_RegisterRequest(server, "GET", "/php", request_handler, NULL, ctx, 0);
 	return NS_OK;
 }
 
