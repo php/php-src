@@ -37,8 +37,9 @@
 	memset(emalloc(size), 0, size)
 
 typedef struct {
-	zend_uint        index;
+	zval             *obj;
 	zend_class_entry *obj_ce;
+	zend_uint        index;
 	zend_uint        is_ce_assoc;
 	zend_function    *f_next;
 	zend_function    *f_rewind;
@@ -51,33 +52,41 @@ typedef struct {
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 {
 	zval **obj, *retval;
+	spl_foreach_proxy proxy;
 
-	if (EX(opline)->extended_value) {
-		obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
-			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-			spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval TSRMLS_CC);
-			EX_T(EX(opline)->result.u.var).var.ptr = retval;
-			EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
-			/* EX(opline)->result.u.EA.type = 0; */
-
-			PZVAL_LOCK(retval);
-
-			NEXT_OPCODE();
-		} else if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
-			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-
-			EX_T(EX(opline)->result.u.var).var.ptr = *obj;
-			EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
-			/* EX(opline)->result.u.EA.type = 0; */
-
-			(*obj)->refcount++;
-			PZVAL_LOCK(*obj);
-
-			NEXT_OPCODE();
+	obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+	if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
+		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+		spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval TSRMLS_CC);
+		if (!spl_implements(&retval, spl_ce_forward TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by new_iterator() must implement spl::forward");
+			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
+		PZVAL_LOCK(retval);
+	} else if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
+		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+		(*obj)->refcount += 2; /* lock two times */
+		retval = *obj;
+	} else {
+		ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 	}
-	ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
+
+	/* create the proxy */
+	memset(&proxy, 0, sizeof(spl_foreach_proxy));
+	proxy.obj = retval;
+	proxy.obj_ce = spl_get_class_entry(retval TSRMLS_CC);
+	proxy.is_ce_assoc = spl_implements(&retval, spl_ce_assoc TSRMLS_CC);
+	/* And pack it into a zval. Since it is nowhere accessible using a 
+	 * zval of type STRING is the fastest approach of storing the proxy.
+	 */
+	ALLOC_INIT_ZVAL(retval);
+	ZVAL_STRINGL(retval, (char*)&proxy, sizeof(spl_foreach_proxy), 1);
+	retval->refcount += 2; /* lock two times */
+	/* return the created proxy container */
+	EX_T(EX(opline)->result.u.var).var.ptr = retval;
+	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
+
+	NEXT_OPCODE();
 }
 /* }}} */
 
@@ -109,24 +118,22 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 	znode *op1 = &EX(opline)->op1;
 	zval **obj = spl_get_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
 	zval more, tmp, *value, *key, *result;
-	spl_foreach_proxy *proxy = (spl_foreach_proxy*)op1->u.EA.type;
+	spl_foreach_proxy *proxy;
 
-	if (proxy || spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
-		if (!proxy) {
-			(spl_foreach_proxy*)op1->u.EA.type = proxy = ezalloc(sizeof(spl_foreach_proxy));
-			proxy->obj_ce = spl_get_class_entry(*obj TSRMLS_CC);
-		}
-		
+	if (Z_TYPE_PP(obj) == IS_STRING) {
 		spl_unlock_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
 		PZVAL_LOCK(*obj);
+
+		proxy = (spl_foreach_proxy*)Z_STRVAL_PP(obj);
+		obj = &proxy->obj; /* will be optimized out */
 
 		if (proxy->index++) {
 			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
 		} else {
-			proxy->is_ce_assoc = spl_implements(obj, spl_ce_assoc TSRMLS_CC);
 			if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
 				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
 			}
+			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
 		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
@@ -195,12 +202,35 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 #endif
 			NEXT_OPCODE();
 		}
-		efree(proxy);
-		op1->u.EA.type = 0;
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
 	ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_FETCH);
+}
+/* }}} */
+
+/* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE) */
+ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE)
+{
+	znode *op1 = &EX(opline)->op1;
+	znode *op2 = &EX(opline)->op2;
+	zval *tmp, **obj = spl_get_zval_ptr_ptr(op2, EX(Ts) TSRMLS_CC);
+	spl_foreach_proxy *proxy;
+
+	if (obj) {
+		proxy = (spl_foreach_proxy*)Z_STRVAL_PP(obj);
+		tmp = *obj;
+		*obj = proxy->obj; /* restore */
+
+		zval_dtor(tmp);
+		FREE_ZVAL(tmp);
+
+		spl_unlock_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
+		PZVAL_LOCK(*obj);
+		
+		SET_UNUSED(*op2);
+	}
+	ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_SWITCH_FREE);
 }
 /* }}} */
 
