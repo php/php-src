@@ -3115,6 +3115,19 @@ send_by_ref:
 					}
 				}
 				NEXT_OPCODE();
+			case ZEND_IS_TYPE: {
+					zval *expr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					if (EX(opline)->extended_value) {
+						is_type_function(&EX(Ts)[EX(opline)->result.u.var].tmp_var, expr,
+										 EX(Ts)[EX(opline)->op2.u.var].EA.class_entry, 0 TSRMLS_CC);
+					} else {
+						is_type_function(&EX(Ts)[EX(opline)->result.u.var].tmp_var, expr,
+										 NULL, EX(opline)->op2.u.constant.value.lval TSRMLS_CC);
+					}
+
+					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
+				}
+				NEXT_OPCODE();
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
 				NEXT_OPCODE();

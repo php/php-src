@@ -555,6 +555,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ENDDECLARE;
 }
 
+<ST_IN_SCRIPTING>"is" {
+	return T_IS_TYPE;
+}
+
 <ST_IN_SCRIPTING>"as" {
 	return T_AS;
 }
