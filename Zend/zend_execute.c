@@ -1472,6 +1472,9 @@ do_fcall_common:
 						if (object.ptr) {
 							object.ptr->refcount--;
 						}
+						if (opline->result.u.EA.type & EXT_TYPE_UNUSED) {
+							zendi_zval_dtor(Ts[opline->result.u.var].tmp_var);
+						}
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						HashTable *calling_symbol_table;
 
