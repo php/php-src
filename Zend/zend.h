@@ -49,7 +49,7 @@
 #include "zend_errors.h"
 #include "zend_alloc.h"
 
-typedef unsigned int zend_bool;
+typedef unsigned char zend_bool;
 
 #undef SUCCESS
 #undef FAILURE
