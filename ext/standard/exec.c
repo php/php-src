@@ -79,7 +79,7 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 			goto err;
 		}
 		b = strrchr(cmd, PHP_DIR_SEPARATOR);
-		spprintf(&d, 0, "%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
+		spprintf(&d, 0, "%s%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
 		if (c) {
 			*(c - 1) = ' ';
 		}
