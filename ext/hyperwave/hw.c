@@ -225,12 +225,16 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	char *attrname, *str, *temp, language[3], *title;
 	int iTitle, iDesc, iKeyword;
-	pval title_arr;
-	pval desc_arr;
-	pval keyword_arr;
+	zval *title_arr;
+	zval *desc_arr;
+	zval *keyword_arr;
 	int hasTitle = 0;
 	int hasDescription = 0;
 	int hasKeyword = 0;
+
+	title_arr = (zval *) emalloc(sizeof(zval));
+	desc_arr = (zval *) emalloc(sizeof(zval));
+	keyword_arr = (zval *) emalloc(sizeof(zval));
 
 	if (array_init(*return_value) == FAILURE) {
 		(*return_value)->type = IS_STRING;
@@ -248,21 +252,21 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		iDesc = 0;
 		iKeyword = 0;
 		if(0 == strncmp(attrname, "Title=", 6)) {
-			if ((hasTitle == 0) && (array_init(&title_arr) == FAILURE)) {
+			if ((hasTitle == 0) && (array_init(title_arr) == FAILURE)) {
 				return -1;
 			}
 			hasTitle = 1;
 			str += 6;
 			iTitle = 1;
 		} else if(0 == strncmp(attrname, "Description=", 12)) {
-			if ((hasDescription == 0) && (array_init(&desc_arr) == FAILURE)) {
+			if ((hasDescription == 0) && (array_init(desc_arr) == FAILURE)) {
 				return -1;
 			}
 			hasDescription = 1;
 			str += 12;
 			iDesc = 1;
 		} else if(0 == strncmp(attrname, "Keyword=", 8)) {
-			if ((hasKeyword == 0) && (array_init(&keyword_arr) == FAILURE)) {
+			if ((hasKeyword == 0) && (array_init(keyword_arr) == FAILURE)) {
 				return -1;
 			}
 			hasKeyword = 1;
@@ -279,11 +283,11 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 			title = str;
 			if(iTitle)
-				add_assoc_string(&title_arr, language, title, 1);
+				add_assoc_string(title_arr, language, title, 1);
 			else if(iDesc)
-				add_assoc_string(&desc_arr, language, title, 1);
+				add_assoc_string(desc_arr, language, title, 1);
 			else if(iKeyword)
-				add_assoc_string(&keyword_arr, language, title, 1);
+				add_assoc_string(keyword_arr, language, title, 1);
 		}
 		attrname = strtok(NULL, "\n");
 	}
@@ -291,21 +295,21 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* Add the title array, if we have one */
 	if(hasTitle) {
-		zend_hash_update((*return_value)->value.ht, "Title", 6, &title_arr, sizeof(pval), NULL);
+		zend_hash_update((*return_value)->value.ht, "Title", 6, &title_arr, sizeof(zval *), NULL);
 
 		/* The title array can now be freed, but I don't know how */
 	}
 
 	if(hasDescription) {
 	/* Add the description array, if we have one */
-		zend_hash_update((*return_value)->value.ht, "Description", 12, &desc_arr, sizeof(pval), NULL);
+		zend_hash_update((*return_value)->value.ht, "Description", 12, &desc_arr, sizeof(zval *), NULL);
 
 		/* The description array can now be freed, but I don't know how */
 	}
 
 	if(hasKeyword) {
 	/* Add the keyword array, if we have one */
-		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(pval), NULL);
+		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(zval *), NULL);
 
 		/* The keyword array can now be freed, but I don't know how */
 	}
