@@ -49,7 +49,7 @@ WARNING: You specified Informix base install directory that is different
         dnl Allow override to use static and/or threaded libs
         :
       fi
-      CFLAGS="$CFLAGS $IFX_INCLUDE"
+      CPPFLAGS="$CPPFLAGS $IFX_INCLUDE"
       LDFLAGS="$LDFLAGS $IFX_LFLAGS"
 
       case "$host_alias" in

@@ -45,9 +45,9 @@ libphp4.so: $(SHLIB_OBJS) $(SHLIB_OBJS_LIB)
 #    extension .so-o
 .SUFFIXES: .o .so-o
 .c.o:
-	$(CC) -c $(INCLUDES) $(CFLAGS) $(SPACER) $<
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $(SPACER) $<
 .c.so-o:
-	$(CC) -c $(INCLUDES) $(CFLAGS) $(CFLAGS_SHLIB) $(SPACER) $< && mv $*.o $*.so-o
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(CFLAGS_SHLIB) $(CPPFLAGS) $(SPACER) $< && mv $*.o $*.so-o
 
 #   cleanup
 clean:
@@ -59,7 +59,7 @@ clean:
 depend:
 	cp Makefile.tmpl Makefile.tmpl.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.tmpl > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) $(CPPFLAGS) *.c >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' Makefile.new \
 		> Makefile.tmpl \
 	    && rm Makefile.new

@@ -11,7 +11,8 @@ libbcmath_a_SOURCES= add.c compare.c debug.c div.c divmod.c doaddsub.c \
 
 INCLUDES = -I$(srcdir) -I..
 
-CFLAGS = @CFLAGS@ $(INCLUDES) -Wall
+CFLAGS = @CFLAGS@
+CPPFLAGS = $(INCLUDES) -Wall
 
 MAINTAINERCLEANFILES= Makefile.in $(libbcmath_a_SOURCES) private.h bcmath.h
 
