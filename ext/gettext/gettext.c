@@ -49,6 +49,11 @@ function_entry php_gettext_functions[] = {
 #if HAVE_DCNGETTEXT
 	PHP_FE(dcngettext,			NULL)
 #endif
+#if HAVE_BIND_TEXTDOMAIN_CODESET
+	PHP_FE(bind_textdomain_codeset,		NULL)
+#endif
+
+
     {NULL, NULL, NULL}
 };
 /* }}} */
@@ -268,6 +273,30 @@ PHP_FUNCTION(dcngettext)
 }
 /* }}} */
 #endif
+
+#if HAVE_BIND_TEXTDOMAIN_CODESET
+
+/* {{{ proto string bind_textdomain_codeset (string domain, string codeset)
+   Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
+PHP_FUNCTION(bind_textdomain_codeset)
+{
+	zval **domain, **codeset;
+	char *retval;
+	
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain, &codeset) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_string_ex(domain);
+		convert_to_string_ex(codeset);
+		
+		retval = bind_textdomain_codeset(Z_STRVAL_PP(domain), Z_STRVAL_PP(codeset));
+
+		RETURN_STRING(retval, 1);
+	}	
+}
+/* }}} */
+#endif
+
 
 #endif /* HAVE_LIBINTL */
 
