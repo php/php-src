@@ -1,3 +1,16 @@
+2005-01-15  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend_API.c:
+      - Fix WS
+
+    * (PHP_5_0)
+      zend_API.c:
+      - Change to using DL_UNLOAD macro.
+
+    * zend_API.c:
+      - Unload on MAC OS X (shouldn't be a reason not to)
+
 2005-01-14  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c

@@ -1,3 +1,40 @@
+2005-01-15  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c:
+      - Fix WS
+
+2005-01-15  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      and use it...
+
+    * TSRM/tsrm_virtual_cwd.c:
+      finally use what we calculated
+
+    * ext/standard/php_var.h
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Restore unserialize() speed
+
+2005-01-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/streamsfuncs.c:
+      CS fix
+
+    * ext/gd/gd.c:
+      ws fix
+
+2005-01-15  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c:
+      - Change to using DL_UNLOAD macro.
+
+    * ZendEngine2/zend_API.c:
+      - Unload on MAC OS X (shouldn't be a reason not to)
+
 2005-01-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
