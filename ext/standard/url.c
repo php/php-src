@@ -86,7 +86,7 @@ PHPAPI char *php_replace_controlchars(char *str)
 PHPAPI php_url *php_url_parse(char *str)
 {
 	int length = strlen(str);
-	char port_buf[5];
+	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char *s, *e, *p, *pp, *ue;
 		
