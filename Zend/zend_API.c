@@ -933,90 +933,111 @@ ZEND_API int add_get_index_stringl(zval *arg, uint index, char *str, uint length
 }
 
 
-ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n)
+ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_LONG(tmp, n);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
-ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b)
+ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_BOOL(tmp, b);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
-ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len)
+ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_NULL(tmp);
 	
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
-ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n)
+ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_RESOURCE(tmp, n);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
 
-ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d)
+ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_DOUBLE(tmp, d);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
 
-ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
+ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, str, duplicate);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
-ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
+ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
+	zval z_key;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRINGL(tmp, str, length, duplicate);
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	return SUCCESS;
 }
 
-ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC)
 {
-	TSRMLS_FETCH();
+	zval z_key;
 
-	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
+	ZVAL_STRINGL(&z_key, key, key_len, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value TSRMLS_CC);
+	return SUCCESS;
 }
 
 ZEND_API int zend_startup_module(zend_module_entry *module)

@@ -220,23 +220,23 @@ ZEND_API int add_get_index_double(zval *arg, uint idx, double d, void **dest);
 ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
 
-ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l);
-ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len);
-ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b);
-ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long r);
-ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d);
-ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate);
-ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len,  char *str, uint length, int duplicate);
-ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l TSRMLS_DC);
+ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC);
+ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b TSRMLS_DC);
+ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long r TSRMLS_DC);
+ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d TSRMLS_DC);
+ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len,  char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC);
 
-#define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n)
-#define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1)
-#define add_property_bool(__arg, __key, __b) add_property_bool_ex(__arg, __key, strlen(__key)+1, __b)
-#define add_property_resource(__arg, __key, __r) add_property_resource_ex(__arg, __key, strlen(__key)+1, __r)
-#define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d) 
-#define add_property_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
-#define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
-#define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value)       
+#define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
+#define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1 TSRMLS_CC)
+#define add_property_bool(__arg, __key, __b) add_property_bool_ex(__arg, __key, strlen(__key)+1, __b TSRMLS_CC)
+#define add_property_resource(__arg, __key, __r) add_property_resource_ex(__arg, __key, strlen(__key)+1, __r TSRMLS_CC)
+#define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d TSRMLS_CC) 
+#define add_property_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
+#define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
+#define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)       
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
