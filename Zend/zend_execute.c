@@ -1502,6 +1502,9 @@ binary_assign_op_addr: {
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						zval tmp;
 						zval *class_name;
+						zend_bool is_const;
+						char *class_name_strval;
+						int class_name_strlen;
 						
 						if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
 							if (!EG(namespace)) {
@@ -1523,23 +1526,30 @@ binary_assign_op_addr: {
 							NEXT_OPCODE();
 						} 
 
-						class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+						is_const = (EX(opline)->op2.op_type == IS_CONST);
 
-						if (class_name->type != IS_STRING) {
+						if (is_const) {
+							class_name_strval = EX(opline)->op2.u.constant.value.str.val;
+							class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+						} else {
+							class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
 							tmp = *class_name;
 							zval_copy_ctor(&tmp);
 							convert_to_string(&tmp);
-							class_name = &tmp;
 							zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-						}
 
-						if (zend_hash_find(EG(class_table), class_name->value.str.val, class_name->value.str.len+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
-							zend_error(E_ERROR, "Class '%s' not found", class_name->value.str.val);
+							class_name_strval = tmp.value.str.val;
+							class_name_strlen = tmp.value.str.len;
 						}
-						if (class_name == &tmp) {
+					
+						if (zend_hash_find(EG(class_table), class_name_strval, class_name_strlen+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+							zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
+						}
+						if (!is_const) {
 							zval_dtor(&tmp);
+							FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 						}
-						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					} else {
 						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
@@ -1668,7 +1678,6 @@ binary_assign_op_addr: {
 						tmp = *function_name;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
-						function_name = &tmp;
 						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
 						function_name_strval = tmp.value.str.val;
@@ -1691,6 +1700,7 @@ binary_assign_op_addr: {
 
 					if (!is_const) {
 						zval_dtor(&tmp);
+						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					}
 
 					EX(fbc) = function;
@@ -1719,7 +1729,6 @@ binary_assign_op_addr: {
 						tmp = *function_name;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
-						function_name = &tmp;
 						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
 						function_name_strval = tmp.value.str.val;
@@ -1746,6 +1755,7 @@ binary_assign_op_addr: {
 					
 					if (!is_const) {
 						zval_dtor(&tmp);
+						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					}
 					EX(fbc) = function;
 
