@@ -26,7 +26,6 @@
 #include <limits.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <fcntl.h>
 
 #ifdef ZEND_WIN32
@@ -68,12 +67,8 @@ cwd_state main_cwd_state; /* True global */
 
 #ifdef ZEND_WIN32
 #define php_strtok_r(a,b,c) strtok((a),(b))
-#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
 #define TOKENIZER_STRING "/\\"
-
-#define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && isalpha(path[0]) && path[1] == ':')
 
 #define COPY_WHEN_ABSOLUTE 2
 	
@@ -92,18 +87,12 @@ static int php_check_dots(const char *element, int n)
 
 
 #else
-#define IS_SLASH(c)	((c) == '/')
 #define DEFAULT_SLASH '/'
 #define TOKENIZER_STRING "/"
 #endif
 
 
 /* default macros */
-
-#ifndef IS_ABSOLUTE_PATH	
-#define IS_ABSOLUTE_PATH(path, len) \
-	(IS_SLASH(path[0]))
-#endif
 
 #ifndef IS_DIRECTORY_UP
 #define IS_DIRECTORY_UP(element, len) \

@@ -36,12 +36,28 @@
 #include <unistd.h>
 #endif
 
+#include <ctype.h>
+
 #ifdef ZEND_WIN32
 #include "win32/readdir.h"
+
+#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+
+#define IS_ABSOLUTE_PATH(path, len) \
+	(len >= 2 && isalpha(path[0]) && path[1] == ':')
+
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+
+#define IS_SLASH(c)	((c) == '/')
+
+#endif
+
+#ifndef IS_ABSOLUTE_PATH	
+#define IS_ABSOLUTE_PATH(path, len) \
+	(IS_SLASH(path[0]))
 #endif
 
 #if HAVE_UTIME
