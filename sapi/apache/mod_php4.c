@@ -713,7 +713,7 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 	memcpy(per_dir_entry.value, arg2, per_dir_entry.value_length);
 	per_dir_entry.value[per_dir_entry.value_length] = 0;
 
-	zend_hash_update((HashTable *) conf, per_dir_entry.key, per_dir_entry.key_length, &per_dir_entry, sizeof(php_per_dir_entry), NULL);
+	zend_hash_update(conf, per_dir_entry.key, per_dir_entry.key_length, &per_dir_entry, sizeof(php_per_dir_entry), NULL);
 	return NULL;
 }
 /* }}} */
