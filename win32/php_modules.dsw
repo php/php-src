@@ -243,18 +243,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "iisfunc"=..\ext\iisfunc\iisfunc.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "imap"=..\ext\imap\imap.dsp - Package Owner=<4>
 
 Package=<5>
@@ -471,18 +459,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "printer"=..\ext\printer\printer.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "shmop"=..\ext\shmop\shmop.dsp - Package Owner=<4>
 
 Package=<5>
@@ -543,7 +519,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "xslt"=..\ext\xmlrpc\xmlrpc.dsp - Package Owner=<4>
+Project: "xmlrpc"=..\ext\xmlrpc\xmlrpc.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
