@@ -1,3 +1,8 @@
+2003-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Bugfix #24637 __destruct not called
+
 2003-08-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_compile.c:
