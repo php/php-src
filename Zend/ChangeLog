@@ -1,3 +1,38 @@
+2003-07-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Allow final private methods
+
+2003-07-03  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      win build fixes  (Rob Richards)
+
+    * zend_reflection_api.c:
+      can't forget Andrei
+
+2003-07-03  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      enable Classname() constructor to be called via parent::__constructor()
+
+    * tests/bug19859.phpt:
+      add test for Bug #19859
+
+    * zend_API.c
+      zend_execute_API.c:
+      Fix bug #19859 - allow fast_call_user_function to support __call
+
+    * zend_builtin_functions.c:
+      fix the get_parent_class fix
+
+2003-07-03  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      more of Timm's patches, and mod authors line to give credit where credit is
+      due.
+
 2003-07-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects.c:
