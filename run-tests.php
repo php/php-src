@@ -43,7 +43,13 @@ if ($opts['help']) {
     exit;
 }
 */
-do_testing($argc, $argv);
+set_time_limit(280);
+
+if(!isset($_SERVER['argc'])) {
+	echo "\nWARNING: register_argc_argv seems to be set 'off' in php.ini\n\n";
+}
+        
+@do_testing($_SERVER['argc'], $_SERVER['argv']);
 
 exit;
 
