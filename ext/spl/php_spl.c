@@ -62,9 +62,9 @@ zend_module_entry spl_module_entry = {
 	"SPL",
 	spl_functions,
 	PHP_MINIT(spl),
-	PHP_MSHUTDOWN(spl),
-	PHP_RINIT(spl),
-	PHP_RSHUTDOWN(spl),
+	NULL,
+	NULL,
+	NULL,
 	PHP_MINFO(spl),
 	"0.2",
 	STANDARD_MODULE_PROPERTIES
@@ -102,34 +102,8 @@ PHP_MINIT_FUNCTION(spl)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION(spl)
- */
-PHP_RINIT_FUNCTION(spl)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION(spl)
- */
-PHP_RSHUTDOWN_FUNCTION(spl)
-{                      
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION(spl)
- */
-PHP_MSHUTDOWN_FUNCTION(spl)
-{                      
-	SPL_DEBUG(fprintf(stderr, "%s\n", "Shutting down SPL");)
-
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ class_parents
- */
+/* {{{ array class_parents(object instance)
+ Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
 	zval *obj;
@@ -147,8 +121,8 @@ PHP_FUNCTION(class_parents)
 }
 /* }}} */
 
-/* {{{ class_implements
- */
+/* {{{ proto array class_implements()
+ Return all classes and interfaces implemented by SPL */
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
@@ -199,7 +173,8 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(Subject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 
-/* {{{ spl_classes */
+/* {{{ proto array spl_classes()
+ Return an array containing the names of all clsses and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
 	array_init(return_value);
