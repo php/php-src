@@ -27,8 +27,8 @@
 #endif
 
 typedef struct {
-    long engine;
-    long last_modified;
+	long engine;
+	long last_modified;
 	long xbithack;
 	long terminate_child;
 	zend_bool in_request;
