@@ -2204,6 +2204,8 @@ ZEND_METHOD(reflection_property, export)
 ZEND_METHOD(reflection_property, __construct)
 {
 	zval *name, *class;
+	char *name_str;
+	int name_len;
 	zval *classname;
 	zval *object;
 	reflection_object *intern;
@@ -2213,7 +2215,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info;
 	property_reference *reference;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &class, &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &class, &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -2250,12 +2252,12 @@ ZEND_METHOD(reflection_property, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	convert_to_string_ex(&name);
-	zval_add_ref(&name);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(name), (int) Z_STRLEN_P(name));
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, name_str, name_len, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+	lcname = zend_str_tolower_dup(name_str, name_len);
 
-	if (zend_hash_find(&ce->properties_info, lcname, (int)(Z_STRLEN_P(name) + 1), (void **) &property_info) == FAILURE) {
+	if (zend_hash_find(&ce->properties_info, lcname, name_len + 1, (void **) &property_info) == FAILURE) {
 		efree(lcname);
 		_DO_THROW("Property does not exist");
 		/* returns out of this function */
