@@ -28,6 +28,9 @@
 /* set to enable the crypt command */
 #define HAVE_CRYPT 0
 
+/* set to enable trans sid */
+#define TRANS_SID 1
+
 /* should be added to runtime config*/
 #define PHP_URL_FOPEN 1
 
