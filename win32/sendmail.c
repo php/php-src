@@ -250,7 +250,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	/* Send mail to all Cc rcpt's */
 	efree(tempMailTo);
-	if (headers && pos1 = strstr(headers, "Cc:")) {
+	if (headers && (pos1 = strstr(headers, "Cc:"))) {
 		pos2 = strstr(pos1, "\r\n");
 		tempMailTo = estrndup(pos1, pos2-pos1);
 
