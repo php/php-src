@@ -1795,7 +1795,7 @@ PHP_FUNCTION(mssql_result)
 	}
 
 	*return_value = result->data[Z_LVAL_PP(row)][field_offset];
-	ZVAL_COPY_CTOR(return_value);
+	zval_copy_ctor(return_value);
 }
 /* }}} */
 
