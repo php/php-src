@@ -55,7 +55,9 @@
 
 #include "mbfilter.h"
 
-char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC);
+#define PHP_MBSTRING_API 20020405
+
+PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC);
 
 #if HAVE_MBREGEX
 #include "mbregex.h"
