@@ -50,12 +50,12 @@ ZEND_API zend_alloc_globals alloc_globals;
 
 # if MEMORY_LIMIT
 #  if ZEND_DEBUG
-#define CHECK_MEMORY_LIMIT(s) _CHECK_MEMORY_LIMIT(s, __zend_filename, __zend_lineno)
+#define CHECK_MEMORY_LIMIT(s, rs) _CHECK_MEMORY_LIMIT(s, rs, __zend_filename, __zend_lineno)
 #  else
-#define CHECK_MEMORY_LIMIT(s)	_CHECK_MEMORY_LIMIT(s,NULL,0)
+#define CHECK_MEMORY_LIMIT(s, rs)	_CHECK_MEMORY_LIMIT(s, rs, NULL,0)
 #  endif
 
-#define _CHECK_MEMORY_LIMIT(s,file,lineno) { AG(allocated_memory) += REAL_SIZE((s));\
+#define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { AG(allocated_memory) += rs;\
 								if (AG(memory_limit)<AG(allocated_memory)) {\
 									if (!file) { \
 										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit),s); \
@@ -67,7 +67,7 @@ ZEND_API zend_alloc_globals alloc_globals;
 # endif
 
 #ifndef CHECK_MEMORY_LIMIT
-#define CHECK_MEMORY_LIMIT(s)
+#define CHECK_MEMORY_LIMIT(s, rs)
 #endif
 
 
@@ -170,7 +170,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	*((long *)(((char *) p) + sizeof(zend_mem_header)+SIZE+PLATFORM_PADDING+END_ALIGNMENT(SIZE))) = MEM_BLOCK_END_MAGIC;
 #endif
 #if MEMORY_LIMIT
-	CHECK_MEMORY_LIMIT(size);
+	CHECK_MEMORY_LIMIT(size, SIZE);
 #endif
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return (void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING);
@@ -267,7 +267,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 #endif	
 #if MEMORY_LIMIT
 	/* FIXME: Not sure this is completely accurate with the new code. Need to check it. */
-	CHECK_MEMORY_LIMIT(size - p->size);
+	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
 #endif
 	p->size = size;
 
