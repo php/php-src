@@ -8,7 +8,7 @@ Java Servlet SAPI Module for PHP 4
     Jakarta Tomcat [1]. It builds upon the mechanism defined by PHP's
     Java Extension, which can be found in /php4/ext/java.
 
-    The primary advanatage of this from a PHP perspective is that web
+    The primary advantage of this from a PHP perspective is that web
     servers which support servlets typically take great care in
     pooling and reusing Java Virtual Machines (JVMs).
 
