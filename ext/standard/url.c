@@ -85,107 +85,143 @@ PHPAPI char *php_replace_controlchars(char *str)
  */
 PHPAPI php_url *php_url_parse(char *str)
 {
-	regex_t re;
-	regmatch_t subs[11];
-	int err;
 	int length = strlen(str);
-	char *result;
+	char port_buf[5];
 	php_url *ret = ecalloc(1, sizeof(php_url));
+	char *s, *e, *p, *pp, *ue;
+		
+	s = str;
+	ue = s + length;
 
-	/* from Appendix B of draft-fielding-url-syntax-09,
-	   http://www.ics.uci.edu/~fielding/url/url.txt */
-	err = regcomp(&re, "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?", REG_EXTENDED);
-	if (err) {
-		/*php_error(E_WARNING, "Unable to compile regex: %d\n", err);*/
-		efree(ret);
-		return NULL;
-	}
-	err = regexec(&re, str, 10, subs, 0);
-	if (err) {
-		/*php_error(E_WARNING, "Error with regex\n");*/
-		efree(ret);
-		regfree(&re);
-		return NULL;
-	}
-	/* no processing necessary on the scheme */
-	if (subs[2].rm_so != -1 && subs[2].rm_so <= length) {
-		ret->scheme = estrndup(str + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
+	/* parse scheme */
+	if ((e = strchr(s, ':')) && *(e+1) == '/' && *(e+2) == '/' && (e-s)) {
+		ret->scheme = estrndup(s, (e-s));
 		php_replace_controlchars(ret->scheme);
+		s = e + 3;
+	} else if (e) { /* no scheme, look for port */
+		p = e + 1;
+		pp = p;
+		
+		while (pp-p < 6 && isdigit(*pp)) {
+			pp++;
+		}
+		
+		if (pp-p < 6 && (*pp == '/' || *pp == '\0')) {
+			memcpy(port_buf, p, (pp-p));
+			port_buf[pp-p] = '\0';
+			ret->port = atoi(port_buf);
+		} else {
+			goto just_path;
+		}
+	} else {
+		just_path:
+		ret->path = estrndup(str, length);
+		php_replace_controlchars(ret->path);
+		return ret;
+	}
+	
+	if (!(e = strchr(s, '/'))) {
+		e = ue;
 	}
 
-	/* the path to the resource */
-	if (subs[5].rm_so != -1 && subs[5].rm_so <= length) {
-		ret->path = estrndup(str + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
+	/* check for login and password */
+	if ((p = memchr(s, '@', (e-s)))) {
+		if ((pp = memchr(s, ':', (p-s)))) {
+			if ((pp-s) > 0) {
+				ret->user = estrndup(s, (pp-s));
+				php_replace_controlchars(ret->user);
+			}	
+		
+			if (p-pp > 1) { 
+				ret->pass = estrndup(++pp, (p-pp-1));
+				php_replace_controlchars(ret->pass);
+			}	
+		}
+		
+		s = p + 1;
+	}
+	
+	/* check for port */
+	if ((p = memchr(s, ':', (e-s)))) {
+		if (!ret->port) {
+			p++;
+			if ( e-p > 5 || e-p < 1 ) { /* port cannot be longer then 5 characters */
+				STR_FREE(ret->scheme);
+				STR_FREE(ret->user);
+				STR_FREE(ret->pass);
+				efree(ret);
+				return NULL;
+			}
+		
+			memcpy(port_buf, p, (e-p));
+			port_buf[e-p] = '\0';
+			ret->port = atoi(port_buf);
+			p--;
+		}	
+	} else {
+		p = e;
+	}
+	
+	/* check if we have a valid host, if we don't reject the string as url */
+	if ((p-s) < 1) {
+		STR_FREE(ret->scheme);
+		STR_FREE(ret->user);
+		STR_FREE(ret->pass);
+		efree(ret);
+		return NULL;
+	}
+	
+	ret->host = estrndup(s, (p-s));
+	php_replace_controlchars(ret->host);
+	
+	if (e == ue) {
+		return ret;
+	}
+	
+	s = e;
+	
+	if ((p = strchr(s, '?'))) {
+		pp = strchr(s, '#');
+		
+		if (pp && pp < p) {
+			p = pp;
+			pp = strchr(pp+2, '#');
+		}
+	
+		if (p - s) {
+			ret->path = estrndup(s, (p-s));
+			php_replace_controlchars(ret->path);
+		}	
+	
+		if (pp) {
+			if (pp - ++p) { 
+				ret->query = estrndup(p, (pp-p));
+				php_replace_controlchars(ret->query);
+			}
+			p = pp;
+			goto label_parse;
+		} else if (++p - ue) {
+			ret->query = estrndup(p, (ue-p));
+			php_replace_controlchars(ret->query);
+		}
+	} else if ((p = strchr(s, '#'))) {
+		if (p - s) {
+			ret->path = estrndup(s, (p-s));
+			php_replace_controlchars(ret->path);
+		}	
+		
+		label_parse:
+		p++;
+		
+		if (ue - p) {
+			ret->fragment = estrndup(p, (ue-p));
+			php_replace_controlchars(ret->fragment);
+		}	
+	} else {
+		ret->path = estrndup(s, (ue-s));
 		php_replace_controlchars(ret->path);
 	}
 
-	/* the query part */
-	if (subs[7].rm_so != -1 && subs[7].rm_so <= length) {
-		ret->query = estrndup(str + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
-		php_replace_controlchars(ret->query);
-	}
-
-	/* the fragment */
-	if (subs[9].rm_so != -1 && subs[9].rm_so <= length) {
-		ret->fragment = estrndup(str + subs[9].rm_so, subs[9].rm_eo - subs[9].rm_so);
-		php_replace_controlchars(ret->fragment);
-	}
-
-	/* extract the username, pass, and port from the hostname */
-	if (subs[4].rm_so != -1 && subs[4].rm_so <= length) {
-
-		int cerr;
-		/* extract username:pass@host:port from regex results */
-		result = estrndup(str + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
-		length = strlen(result);
-
-		regfree(&re);			/* free the old regex */
-		
-		if (length) {
-			if ((cerr=regcomp(&re, "^(([^@:]+)(:([^@:]+))?@)?((\\[([^]]+)\\])|([^:@]+))(:([^:@]+))?", REG_EXTENDED))
-				|| (err=regexec(&re, result, 11, subs, 0))) {
-				STR_FREE(ret->scheme);
-				STR_FREE(ret->path);
-				STR_FREE(ret->query);
-				STR_FREE(ret->fragment);
-				efree(ret);
-				efree(result);
-				/*php_error(E_WARNING, "Unable to compile regex: %d\n", err);*/
-				if (!cerr) regfree(&re); 
-				return NULL;
-			}
-			/* now deal with all of the results */
-			if (subs[2].rm_so != -1 && subs[2].rm_so < length) {
-				ret->user = estrndup(result + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
-				php_replace_controlchars(ret->user);
-			}
-			if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
-				ret->pass = estrndup(result + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
-				php_replace_controlchars(ret->pass);
-			}
-			if (subs[7].rm_so != -1 && subs[7].rm_so < length) {
-				ret->host = estrndup(result + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
-				php_replace_controlchars(ret->host);
-			} else if (subs[8].rm_so != -1 && subs[8].rm_so < length) {
-				ret->host = estrndup(result + subs[8].rm_so, subs[8].rm_eo - subs[8].rm_so);
-				php_replace_controlchars(ret->host);
-			}
-			if (subs[10].rm_so != -1 && subs[10].rm_so < length) {
-				ret->port = (unsigned short) strtol(result + subs[10].rm_so, NULL, 10);
-			}
-		}
-		efree(result);
-	}
-	else if (ret->scheme && !strcmp(ret->scheme, "http")) {
-		STR_FREE(ret->scheme);
-		STR_FREE(ret->path);
-		STR_FREE(ret->query);
-		STR_FREE(ret->fragment);
-		efree(ret);
-		regfree(&re);
-		return NULL;
-	}
-	regfree(&re);
 	return ret;
 }
 /* }}} */
