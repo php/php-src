@@ -29,6 +29,10 @@ int lcg_globals_id;
 static php_lcg_globals lcg_globals;
 #endif
 
+#if WIN32||WINNT
+#include <process.h>
+#endif
+
 /*
  * combinedLCG() returns a pseudo random number in the range of (0,1).
  * The function combines two CGs with periods of 
