@@ -429,14 +429,16 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	
 	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
 
-	if(Z_TYPE_P(config) == IS_ARRAY) {
-		_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
-	} else {
-		convert_to_string_ex(&config);
-		TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
-		if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
-			RETVAL_FALSE;
+	if (ZEND_NUM_ARGS() > 1) {
+		if(Z_TYPE_P(config) == IS_ARRAY) {
+			_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
+		} else {
+			convert_to_string_ex(&config);
+			TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
+			if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
+				RETVAL_FALSE;
+			}
 		}
 	}
 
