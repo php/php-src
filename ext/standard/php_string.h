@@ -85,7 +85,9 @@ PHP_FUNCTION(sscanf);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
-
+#if HAVE_STRFMON
+PHP_FUNCTION(money_format);
+#endif
 
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
