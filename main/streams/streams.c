@@ -843,6 +843,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 {
 	char *e, *buf;
 	size_t toread;
+	int skip = 0;
 
 	php_stream_fill_read_buffer(stream, maxlen TSRMLS_CC);
 
@@ -850,15 +851,16 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		toread = maxlen;
 	} else {
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf, *delim, stream->readbuflen);
+			e = memchr(stream->readbuf + stream->readpos, *delim, stream->readbuflen - stream->readpos);
 		} else {
-			e = php_memnstr(stream->readbuf, delim, delim_len, (stream->readbuf + stream->readbuflen));
+			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readbuflen));
 		}
 
 		if (!e) {
 			toread = maxlen;
 		} else {
-			toread = e - (char *) stream->readbuf;
+			toread = e - (char *) stream->readbuf - stream->readpos;
+			skip = 1;
 		}
 	}
 
@@ -868,8 +870,12 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 
 	buf = emalloc(toread + 1);
 	*returned_len = php_stream_read(stream, buf, toread);
-	                
+
 	if (*returned_len >= 0) {
+		if (skip) {
+			stream->readpos += delim_len;
+			stream->position += delim_len;
+		}
 		buf[*returned_len] = '\0';
 		return buf;
 	} else {
