@@ -441,6 +441,10 @@ static zend_function_entry php_xpathobject_class_functions[] = {
 
 static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(domattribute,			domxml_doc_create_attribute,	NULL)
+	PHP_FALIAS(node_name,				domxml_attr_name,				NULL)
+	PHP_FALIAS(node_value,				domxml_attr_value,				NULL)
+	PHP_FALIAS(node_specified,			domxml_attr_specified,			NULL)
+	/* Deprecated left in for BC */
 	PHP_FALIAS(name,					domxml_attr_name,				NULL)
 	PHP_FALIAS(value,					domxml_attr_value,				NULL)
 	PHP_FALIAS(specified,				domxml_attr_specified,			NULL)
