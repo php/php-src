@@ -1061,6 +1061,13 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DTHREAD=1"
 fi
 
+dnl
+dnl Libtool creation
+dnl
+
+PHP_CONFIGURE_PART(Configuring Zend)
+
+LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 AC_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   PHP_SET_LIBTOOL_VARIABLE([--silent])
