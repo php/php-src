@@ -13,20 +13,20 @@ class c_iter implements spl::forward_assoc {
 		$this->obj = $obj;
 	}
 	function current() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		return $this->num;
 	}
 	function next() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		$this->num++;
 	}
 	function has_more() {
 		$more = $this->num < $this->obj->max;
-		echo __CLASS__ . '::' . __FUNCTION__ . ' = ' .($more ? 'true' : 'false') . "\n";
+		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
 	}
 	function key() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		switch($this->num) {
 			case 0: return "1st";
 			case 1: return "2nd";
@@ -41,7 +41,7 @@ class c implements spl::iterator {
 	public $max = 3;
 
 	function new_iterator() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		return new c_iter($this);
 	}
 }
