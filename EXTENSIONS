@@ -98,7 +98,7 @@ PRIMARY MAINTAINER:  Marc Boeren <M.Boeren@guidance.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.6
-COMMENT:             DB abstraction for odbc, mysql, pgsql, mssql, fbsql
+COMMENT:             DB abstraction for odbc, mysql, pgsql, mssql, fbsql and more, see documentation
 -------------------------------------------------------------------------------
 EXTENSION:           filepro
 MAINTENANCE:         Unknown
