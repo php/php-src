@@ -196,7 +196,6 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 }
 
 /* {{{ proto int exec(string command [, array output [, int return_value]])
-
    Execute an external program */
 PHP_FUNCTION(exec)
 {
