@@ -781,7 +781,28 @@ ZEND_FUNCTION(gmp_abs)
    Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
 {
-	gmp_unary_ui_op(mpz_fac_ui);
+	zval **a_arg;
+	mpz_t *gmpnum_tmp;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &a_arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	if (Z_TYPE_PP(a_arg) == IS_RESOURCE) {
+		FETCH_GMP_ZVAL(gmpnum_tmp, a_arg);
+		if (mpz_sgn(*gmpnum_tmp) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Number has to be greater than or equal to 0");
+			RETURN_FALSE;
+		}
+	} else {
+		convert_to_long_ex(a_arg);
+		if (Z_LVAL_PP(a_arg) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Number has to be greater than or equal to 0");
+			RETURN_FALSE;
+		}
+	}
+		
+	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui);
 }
 /* }}} */
 
@@ -839,6 +860,10 @@ ZEND_FUNCTION(gmp_powm)
 		use_ui = 1;
 	} else {
 		FETCH_GMP_ZVAL(gmpnum_exp, exp_arg);
+		if (mpz_sgn(*gmpnum_exp) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Second parameter cannot be less than 0");
+			RETURN_FALSE;
+		}
 	}
 	FETCH_GMP_ZVAL(gmpnum_mod, mod_arg);
 
@@ -862,7 +887,24 @@ ZEND_FUNCTION(gmp_powm)
    Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)
 {
-	gmp_unary_op(mpz_sqrt);
+	zval **a_arg;
+	mpz_t *gmpnum_a, *gmpnum_result;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &a_arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+	
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
+
+	if (mpz_sgn(*gmpnum_a) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Number has to be greater than or equal to 0");
+		RETURN_FALSE;
+	}	
+	
+	INIT_GMP_NUM(gmpnum_result);
+	mpz_sqrt(*gmpnum_result, *gmpnum_a);
+
+	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
 /* }}} */
 
@@ -879,7 +921,12 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
-
+	
+	if (mpz_sgn(*gmpnum_a) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Number has to be greater than or equal to 0");
+		RETURN_FALSE;
+	}
+	
 	INIT_GMP_NUM(gmpnum_result1);
 	INIT_GMP_NUM(gmpnum_result2);
 
