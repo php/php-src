@@ -745,6 +745,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_s
 	sscanf(tmp_line + 4, "%d", (int *)&(ssb->sb.st_size));
 
 	php_stream_close(stream);
+	php_url_free(resource);
 	return 0;
 
  stat_errexit:
