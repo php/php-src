@@ -1,3 +1,34 @@
+2004-03-18  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to RC2-dev
+
+2004-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0RC1)
+      zend.h:
+      Prepare to roll RC1
+
+    * (php_5_0_0RC1)
+      zend_execute.c:
+      Fix possible data corruption with __set()
+
+2004-03-18  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      Improve error message - on E_STRICT, method is actually called,
+      so the error shouldn't say it cannot be called.
+
+2004-03-18  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC1)
+      zend_compile.c:
+      - Change redefinition of constructor from E_COMPILE_ERROR to E_STRICT.
+
+    * (php_5_0_0RC1)
+      ZEND_CHANGES:
+      - Update Changes
+
 2004-03-17  Sascha Schumann  <sascha@schumann.cx>
 
     * zend_multiply.h:

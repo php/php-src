@@ -1,3 +1,156 @@
+2004-03-18  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/tests/bug27582_2.phpt:
+      - Fix the test description and $Id$
+
+2004-03-18  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed layout
+
+2004-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2004-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      NEWS:
+      -** empty log message ***
+
+2004-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go for PHP 4.3.5RC4
+
+    * (PHP_4_3)
+      NEWS
+      ext/ftp/ftp.c:
+      MFH: Fixed bug #27633 (Incorrect EOL translation by ftp_get() in ASCII
+      mode).
+
+    * ext/ftp/ftp.c:
+      Fixed bug #27633 (Incorrect EOL translation by ftp_get() in ASCII mode).
+
+2004-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c
+      ext/standard/tests/serialize/bug27469.phpt:
+      BUG #27469 was fixed (serialize() objects of incomplete class)
+
+2004-03-18  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to RC2-dev
+
+2004-03-18  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * tests/classes/__set_data_corrupt.phpt:
+      - Test for possible data corruption with __set
+
+2004-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0RC1)
+      NEWS:
+      Add missing bug updates
+
+    * NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      Prepare to roll RC1
+
+    * (php_5_0_0RC1)
+      ZendEngine2/zend_execute.c:
+      Fix possible data corruption with __set()
+
+2004-03-18  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (php_5_0_0RC1)
+      sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi-readme.txt:
+      hint to raise stacksize (bug #27231)
+
+2004-03-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Improve error message - on E_STRICT, method is actually called,
+      so the error shouldn't say it cannot be called.
+
+2004-03-18  Georg Richter  <phpinfo@t-online.de>
+
+    * (php_5_0_0RC1)
+      ext/mysqli/mysqli_api.c:
+      fixed problems in mysql_stmt_init (missing alloc from stmt)
+
+    * (php_5_0_0RC1)
+      ext/mysqli/mysqli.c:
+      removed if type=string: val is allocated for any type of data
+
+2004-03-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * (php_5_0_0RC1)
+      pear/PEAR/Command/Mirror.php:
+      - Converting tabs to spaces
+
+    * pear/PEAR/Command/Mirror.php:
+      - Typo fixes
+
+2004-03-18  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/CREDITS:
+      Added myself
+
+2004-03-18  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Reorganize
+
+2004-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0RC1)
+      ext/standard/string.c:
+      BUG #27457 was fixed (using temporary hash table with string keys only)
+
+2004-03-18  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC1)
+      ZendEngine2/zend_compile.c:
+      - Change redefinition of constructor from E_COMPILE_ERROR to E_STRICT.
+
+    * (php_5_0_0RC1)
+      ZendEngine2/ZEND_CHANGES:
+      - Update Changes
+
+2004-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0RC1)
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/com_wrapper.c:
+      s/emalloc/safe_emalloc/ where appropriate.
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #27300 (Improved regex for pg_convert()).
+
+    * (php_5_0_0RC1)
+      ext/pgsql/pgsql.c:
+      Fixed bug #27300 (Improved regex for pg_convert()).
+      
+
 2004-03-17  Sascha Schumann  <sascha@schumann.cx>
 
     * (PHP_4_3)
