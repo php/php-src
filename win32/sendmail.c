@@ -60,7 +60,7 @@ char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
-char *php_mailer = "PHP 3.0 WIN32";
+char *php_mailer = "PHP 4.0 WIN32";
 
 char *get_header(char *h, char *headers);
 
@@ -154,7 +154,7 @@ int TSendMail(char *host, int *error,
 //********************************************************************/
 void TSMClose()
 {
-	Post("QUIT\n");
+	Post("QUIT\r\n");
 	Ack();
 	/* to guarantee that the cleanup is not made twice and 
 	   compomise the rest of the application if sockets are used
@@ -200,6 +200,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	int res, i;
 	char *p;
+	char *tempMailTo, *token, *pos1, *pos2;
 
 	/* check for NULL parameters */
 	if (data == NULL)
@@ -214,7 +215,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if (strchr(mailTo, '@') == NULL)
 		return (BAD_MSG_DESTINATION);
 
-	sprintf(Buffer, "HELO %s\n", LocalHost);
+	sprintf(Buffer, "HELO %s\r\n", LocalHost);
 
 	/* in the beggining of the dialog */
 	/* attempt reconnect if the first Post fail */
@@ -226,20 +227,47 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if ((res = Ack()) != SUCCESS)
 		return (res);
 
-	sprintf(Buffer, "MAIL FROM:<%s>\n", RPath);
+	sprintf(Buffer, "MAIL FROM:<%s>\r\n", RPath);
 	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
 		return (res);
 
 
-	sprintf(Buffer, "RCPT TO:<%s>\n", mailTo);
-	if ((res = Post(Buffer)) != SUCCESS)
-		return (res);
-	if ((res = Ack()) != SUCCESS)
-		return (res);
+	tempMailTo = estrdup(mailTo);
+	
+	/* Send mail to all rcpt's */
+	token = strtok(tempMailTo, ",");
+	while(token != NULL)
+	{
+		sprintf(GLOBAL(Buffer), "RCPT TO:<%s>\r\n", token);
+		if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+			return (res);
+		if ((res = Ack()) != SUCCESS)
+			return (res);
+		token = strtok(NULL, ",");
+	}
 
-	if ((res = Post("DATA\n")) != SUCCESS)
+	/* Send mail to all Cc rcpt's */
+	efree(tempMailTo);
+	if (headers && pos1 = strstr(headers, "Cc:")) {
+		pos2 = strstr(pos1, "\r\n");
+		tempMailTo = estrndup(pos1, pos2-pos1);
+
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS)
+				return (res);
+			if ((res = Ack()) != SUCCESS)
+				return (res);
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
+	}
+
+	if ((res = Post("DATA\r\n")) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
 		return (res);
@@ -335,7 +363,9 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 		p += sprintf(p, "From: %s\r\n", RPath);
 	}
 	p += sprintf(p, "Subject: %s\r\n", Subject);
-	p += sprintf(p, "To: %s\r\n", mailTo);
+	if(!xheaders || !strstr(xheaders, "To:")){
+		p += sprintf(p, "To: %s\r\n", mailTo);
+	}
 	if(xheaders){
 		p += sprintf(p, "%s\r\n", xheaders);
 	}
