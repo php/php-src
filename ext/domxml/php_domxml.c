@@ -282,6 +282,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_xslt_stylesheet_doc,									NULL)
 	PHP_FE(domxml_xslt_stylesheet_file,									NULL)
 	PHP_FE(domxml_xslt_process,											NULL)
+	PHP_FE(domxml_xslt_dump_mem,						  			NULL)
 #endif
 
 	PHP_FALIAS(domxml_add_root,			domxml_doc_add_root,			NULL)
@@ -521,6 +522,7 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 static zend_function_entry php_domxsltstylesheet_class_functions[] = {
 /* TODO: maybe some more methods? */
 	PHP_FALIAS(process, 				domxml_xslt_process, 			NULL)
+	PHP_FALIAS(dump_mem, 			domxml_xslt_dump_mem, 		NULL)
 	{NULL, NULL, NULL}
 };
 #endif
@@ -4172,6 +4174,43 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
+/* {{{ proto string domxml_xslt_dump_mem(object xslstylesheet, object xmldoc)
+   output XSLT result to memory */
+PHP_FUNCTION(domxml_xslt_dump_mem)
+{
+	zval *rv, *idxsl, *idxml;
+	xsltStylesheetPtr xsltstp;
+	xmlDocPtr xmldocp;
+	xmlDocPtr docp;
+	xmlChar *doc_txt_ptr;
+	int doc_txt_len;
+	int ret;
+
+	DOMXML_GET_THIS(idxsl);
+
+	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
+	if (!xsltstp) {
+		php_error(E_WARNING, "%s(): underlying object missing",
+			  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &idxml) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
+
+	ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, xmldocp, xsltstp);
+
+	if (ret) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+}
+/* }}} */
+
 /* {{{ proto object domxml_parser([string buf[,string filename]])
    Creates new xmlparser */
 PHP_FUNCTION(domxml_parser)
@@ -4902,7 +4941,7 @@ PHP_FUNCTION(xptr_eval)
    Get XML library version */
 PHP_FUNCTION(domxml_version)
 {
-	RETURN_STRING(xmlParserVersion,1);
+	RETURN_STRING((char *) xmlParserVersion,1);
 }
 /* }}} */
 
