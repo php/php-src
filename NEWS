@@ -110,6 +110,26 @@ PHP 4                                                                      NEWS
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
+26 Dec 2001, Version 4.1.1
+- Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
+  under other versions of IIS. (Zeev)
+- Fixed bug that caused crashes or error notices on shutdown on threaded
+  platforms. (Zeev)
+- Fixed several crash bugs in the xslt extension. (Markus, Derick)
+- Fixed problem with dbase not returning very large (larger than long)
+  integers properly. (Vlad)
+- Fixed several bugs and memleaks in the domxml extension. (Markus)
+- Fixed bug in gmmktime() which was one hour off during standard time -
+  bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
+- Fixed bug in gmdate() timezone handling on Windows - bug #13885. (jmoore)
+- Fixed several crash bugs in the mcrypt extension. (Derick)
+- Made the mcrypt extension compile with the libmcrypt 2.2 series again.
+  (Sterling)
+- Fixed a bug where the is_file() family of functions would in-correctly give
+  an error when they were given filenames that didn't exist. (Sterling)
+- Fixed a bug in the strtotime() function where it was incorrectly recognizing
+  GMT +0100 and GMT -0100. (Derick)
+
 10 Dec 2001, Version 4.1.0
 - Worked around a bug in the MySQL client library that could cause PHP to hang
   when using unbuffered queries. (Zeev)
