@@ -68,14 +68,17 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->err = NULL;
 	}
 
+	/* need to ensure these go away now */
 	if (BC) {
 		zend_hash_destroy(BC);
-		efree(stmt->bound_columns);
+		FREE_HASHTABLE(stmt->bound_columns);
+		stmt->bound_columns = NULL;
 	}
 	
 	if (BP) {
 		zend_hash_destroy(BP);
-		efree(stmt->bound_params);
+		FREE_HASHTABLE(stmt->bound_params);
+		stmt->bound_params = NULL;
 	}
 	
 	if (S->cols) {
@@ -96,6 +99,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	ub4 rowcount;
+	b4 mode;
 
 	if (!S->stmt_type) {
 		STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_STMT_TYPE",
@@ -107,9 +111,20 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		OCIStmtFetch(S->stmt, S->err, 0, OCI_FETCH_NEXT, OCI_DEFAULT);
 	}
 
+#ifdef OCI_STMT_SCROLLABLE_READONLY /* needed for oci8 ? */
+	if (S->exec_type == OCI_STMT_SCROLLABLE_READONLY) {
+		mode = OCI_STMT_SCROLLABLE_READONLY;
+	} else
+#endif
+	if (stmt->dbh->auto_commit && !stmt->dbh->in_txn) {
+		mode = OCI_COMMIT_ON_SUCCESS;
+	} else {
+		mode = OCI_DEFAULT;
+	}
+
 	STMT_CALL(OCIStmtExecute, (S->H->svc, S->stmt, S->err,
 				S->stmt_type == OCI_STMT_SELECT ? 0 : 1, 0, NULL, NULL,
-				(stmt->dbh->auto_commit && !stmt->dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : S->exec_type));
+				mode));
 
 	if (!stmt->executed) {
 		ub4 colcount;
