@@ -767,7 +767,7 @@ ZEND_FUNCTION(trigger_error)
 			ZEND_WRONG_PARAM_COUNT();	
 	}
 	convert_to_string_ex(z_error_message);
-	zend_error(error_type, (*z_error_message)->value.str.val);
+	zend_error(error_type, "%s", (*z_error_message)->value.str.val);
 	RETURN_TRUE;
 }
 /* }}} */
