@@ -158,7 +158,6 @@ ext/standard
         basename()
         dirname()
         strrpos()
-        strip_tags()
 
 ext/wddx
 --------
