@@ -25,10 +25,10 @@ if test "$PHP_INTERBASE" != "no"; then
     ], [
       AC_MSG_ERROR([libgds or libib_util not found! Check config.log for more information.])
     ], [
-      -L$IBASE_LIBDIR -lcrypt
+      -L$IBASE_LIBDIR
     ])
   ], [
-    -L$IBASE_LIBDIR -lcrypt 
+    -L$IBASE_LIBDIR
   ])
 
   PHP_ADD_LIBRARY_WITH_PATH($IBASE_LIBNAME, $IBASE_LIBDIR, INTERBASE_SHARED_LIBADD)
