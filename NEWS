@@ -4,12 +4,12 @@ PHP 4                                                                      NEWS
 - Make the glue argument to implode() optional, if it is not specified
   default to using "". (Sterling)
 - Fixed fields argument to contain correct info for xslt_set_error_handler.
-  . Patch by Lenar Lohmus.
+  (Patch by Lenar Lohmus)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
 - Added --with-config-file-scan-dir compile-time switch which specifies a
-  directory which will be scanned for *.ini files.
+  directory which will be scanned for *.ini files. (Rasmus)
 - Added ob_flush_all(), ob_get_clean() and ob_get_flush(). (Yasuo)
 - Added ftp_ssl_connect() to ext/ftp for FTP over SSL support. (Stefan Esser)
 - Made a few additions and changes to Apache 2 sapi. (Ilia)
