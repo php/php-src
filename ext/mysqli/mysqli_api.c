@@ -240,7 +240,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	
 	var_cnt = argc - start;
 
-	if (var_cnt != stmt->stmt->field_count) {
+	if (var_cnt != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statmement.");
 		efree(args);
 		RETURN_FALSE;
@@ -321,11 +321,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 		}
 	}
 
-#ifndef HAVE_MYSQLI_OLDAPI	
 	rc = mysql_stmt_bind_result(stmt->stmt, bind);
-#else
-	rc = mysql_bind_result(stmt->stmt, bind);
-#endif
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 
 	if (rc) {
@@ -565,11 +561,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			}	
 		}
 	}
-#ifndef HAVE_MYSQLI_OLDAPI	
 	if (mysql_stmt_execute(stmt->stmt)) {
-#else
-	if (mysql_execute(stmt->stmt)) {
-#endif
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}
@@ -607,11 +599,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 			memset(stmt->result.buf[i].val, 0, stmt->result.buf[i].buflen);
 		}
 	}
-#ifndef HAVE_MYSQLI_OLDAPI	
 	if (!(ret = mysql_stmt_fetch(stmt->stmt))) {
-#else
-	if (!(ret = mysql_fetch(stmt->stmt))) {
-#endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
 			if (stmt->result.vars[i]->type == IS_STRING && stmt->result.vars[i]->value.str.len) {
 		        efree(stmt->result.vars[i]->value.str.val);
@@ -1213,25 +1201,6 @@ PHP_FUNCTION(mysqli_options)
 }   
 /* }}} */
 
-/* {{{ proto int mysqli_param_count(object stmt) {
-   Return the number of parameter for the given statement */
-PHP_FUNCTION(mysqli_stmt_param_count)
-{
-	MY_STMT 	*stmt;
-	zval		*mysql_stmt;
-	
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
-		return;
-	}
-	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
-		
-#ifndef HAVE_MYSQLI_OLDAPI	
-	RETURN_LONG(mysql_stmt_param_count(stmt->stmt));
-#else
-	RETURN_LONG(mysql_param_count(stmt->stmt));
-#endif
-}
-/* }}} */
 
 /* {{{ proto bool mysqli_ping(object link)
    Ping a server connection or reconnect if there is no connection */
@@ -1445,11 +1414,7 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter number");
 		RETURN_FALSE;
 	}
-#ifndef HAVE_MYSQLI_OLDAPI	
 	if (mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len)) {
-#else
-	if (mysql_send_long_data(stmt->stmt, param_nr, data, data_len)) {
-#endif
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1547,7 +1512,22 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 }
 /* }}} */
 
-#ifndef HAVE_MYSQLI_OLDAPI
+/* {{{ proto int mysqli_stmt_field_count(object stmt) {
+   Return the number of result columns for the given statement */
+PHP_FUNCTION(mysqli_stmt_field_count)
+{
+	MY_STMT 	*stmt;
+	zval		*mysql_stmt;
+	
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+		
+	RETURN_LONG(mysql_stmt_field_count(stmt->stmt));
+}
+/* }}} */
+
 /* {{{ proto void mysqli_stmt_free_result(object stmt)
    Free stored result memory for the given statement handle */
 PHP_FUNCTION(mysqli_stmt_free_result) 
@@ -1584,6 +1564,22 @@ PHP_FUNCTION(mysqli_stmt_insert_id)
 }
 /* }}} */
 
+/* {{{ proto int mysqli_stmt_param_count(object stmt) {
+   Return the number of parameter for the given statement */
+PHP_FUNCTION(mysqli_stmt_param_count)
+{
+	MY_STMT 	*stmt;
+	zval		*mysql_stmt;
+	
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+		
+	RETURN_LONG(mysql_stmt_param_count(stmt->stmt));
+}
+/* }}} */
+
 /* {{{ proto void mysqli_stmt_reset(object stmt)
    reset a prepared statement */
 PHP_FUNCTION(mysqli_stmt_reset) 
@@ -1602,7 +1598,6 @@ PHP_FUNCTION(mysqli_stmt_reset)
 	return;
 }
 /* }}} */
-#endif
 
 /* {{{ proto mixed mysqli_stmt_num_rows(object stmt)
    Return the number of rows in statements result set */
@@ -1649,7 +1644,6 @@ PHP_FUNCTION(mysqli_select_db)
 
 /* {{{ proto string mysqli_sqlstate(object link)
    Returns the SQLSTATE error from previous MySQL operation */
-#if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_sqlstate) 
 {
 	MY_MYSQL 	*mysql;
@@ -1661,7 +1655,6 @@ PHP_FUNCTION(mysqli_sqlstate)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 	RETURN_STRING((char *)mysql_sqlstate(mysql->mysql),1);
 }
-#endif
 /* }}} */
 
 /* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher])
@@ -1711,6 +1704,50 @@ PHP_FUNCTION(mysqli_stat)
 
 /* }}} */
  
+/* {{{ proto int mysqli_stmt_attr_set(object stmt, long attr, bool mode)
+*/
+PHP_FUNCTION(mysqli_stmt_attr_set)
+{
+	MY_STMT	*stmt;
+	zval 	*mysql_stmt;
+	ulong	mode;
+	ulong	attr;
+	int		rc;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olb", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+
+	if (rc = mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int mysqli_stmt_attr_get(object stmt, long attr)
+*/
+PHP_FUNCTION(mysqli_stmt_attr_get)
+{
+	MY_STMT	*stmt;
+	zval 	*mysql_stmt;
+	ulong	value;
+	ulong	attr;
+	int		rc;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &attr) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+
+	if (rc = mysql_stmt_attr_get(stmt->stmt, attr, &value)) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(value);
+}
+/* }}} */
+
 /* {{{ proto int mysqli_stmt_errno(object stmt)
 */
 PHP_FUNCTION(mysqli_stmt_errno)
@@ -1808,11 +1845,7 @@ PHP_FUNCTION(mysqli_stmt_result_metadata)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
 
-#ifndef HAVE_MYSQLI_OLDAPI	
 	if (!(result = mysql_stmt_result_metadata(stmt->stmt))){
-#else
-	if (!(result = mysql_get_metadata(stmt->stmt))){
-#endif
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}

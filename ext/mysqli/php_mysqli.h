@@ -334,13 +334,14 @@ PHP_FUNCTION(mysqli_rpl_parse_enabled);
 PHP_FUNCTION(mysqli_rpl_probe);
 PHP_FUNCTION(mysqli_rpl_query_type);
 PHP_FUNCTION(mysqli_select_db);
+PHP_FUNCTION(mysqli_stmt_attr_get);
+PHP_FUNCTION(mysqli_stmt_attr_set);
 PHP_FUNCTION(mysqli_stmt_bind_param);
 PHP_FUNCTION(mysqli_stmt_bind_result);
 PHP_FUNCTION(mysqli_stmt_execute);
-#ifndef MYSQLI_HAVE_OLDAPI
+PHP_FUNCTION(mysqli_stmt_field_count);
 PHP_FUNCTION(mysqli_stmt_init);
 PHP_FUNCTION(mysqli_stmt_prepare);
-#endif
 PHP_FUNCTION(mysqli_stmt_fetch);
 PHP_FUNCTION(mysqli_stmt_param_count);
 PHP_FUNCTION(mysqli_stmt_send_long_data);
@@ -350,9 +351,7 @@ PHP_FUNCTION(mysqli_server_init);
 PHP_FUNCTION(mysqli_server_end);
 #endif
 PHP_FUNCTION(mysqli_slave_query);
-#if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_sqlstate);
-#endif
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
 PHP_FUNCTION(mysqli_stmt_affected_rows);
@@ -360,15 +359,11 @@ PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_data_seek);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
-#ifndef HAVE_MYSQLI_OLDAPI
 PHP_FUNCTION(mysqli_stmt_free_result);
 PHP_FUNCTION(mysqli_stmt_reset);
-#endif
 PHP_FUNCTION(mysqli_stmt_insert_id);
 PHP_FUNCTION(mysqli_stmt_num_rows);
-#if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_stmt_sqlstate);
-#endif
 PHP_FUNCTION(mysqli_stmt_store_result);
 PHP_FUNCTION(mysqli_store_result);
 PHP_FUNCTION(mysqli_thread_id);

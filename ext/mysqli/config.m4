@@ -44,10 +44,10 @@ if test "$PHP_MYSQLI" != "no"; then
     PHP_EVAL_INCLINE($MYSQLI_INCLINE)
     PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
     AC_DEFINE(HAVE_MYSQLILIB,1,[ ])
-    PHP_CHECK_LIBRARY(mysqlclient, mysql_bind_param,
-    [
-       AC_DEFINE(HAVE_MYSQLI_OLDAPI,1,[ ])
-    ],[],[])
+    PHP_CHECK_LIBRARY(mysqlclient, mysql_stmt_field_count,
+    [ ],[
+		AC_MSG_ERROR([MySQLI doesn't support versions < 4.1.3 anymore. Please update your libraries.])
+	],[])
   ],[
     AC_MSG_ERROR([wrong mysql library version or lib not found. Check config.log for more information.])
   ],[
