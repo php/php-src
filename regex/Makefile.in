@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME = libregex.la
-LTLIBRARY_SOURCES = regcomp.c regexec.c regerror.c regfree.c
-
-include $(top_srcdir)/build/ltlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libdio.la
-LTLIBRARY_SOURCES     = dio.c
-LTLIBRARY_SHARED_NAME = dio.la
-LTLIBRARY_SHARED_LIBADD  = $(DIO_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libpfpro.la
-LTLIBRARY_SOURCES     = pfpro.c
-LTLIBRARY_SHARED_NAME = pfpro.la
-LTLIBRARY_SHARED_LIBADD = $(PFPRO_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
