@@ -62,18 +62,27 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 	long local_lval;
 	double local_dval;
 	char *end_ptr;
+	int conv_base=10;
 
 	if (!length) {
 		return 0;
 	}
 	
+	/* handle hex numbers */
+	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
+		conv_base=16;
+	}
 	errno=0;
-	local_lval = strtol(str, &end_ptr, 10);
+	local_lval = strtol(str, &end_ptr, 16);
 	if (errno!=ERANGE && end_ptr == str+length) { /* integer string */
 		if (lval) {
 			*lval = local_lval;
 		}
 		return IS_LONG;
+	}
+
+	if (conv_base==16) { /* hex string, under UNIX strtod() messes it up */
+		return 0;
 	}
 
 	errno=0;
