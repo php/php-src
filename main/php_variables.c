@@ -300,10 +300,11 @@ void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
+			val_len = php_url_decode(val, val-var);
 			php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
 		}
 		else {
+			php_url_decode(var, strlen(var));
 			php_register_variable_safe(var, "", 0, array_ptr TSRMLS_CC);
 		}
 		
