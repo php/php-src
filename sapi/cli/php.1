@@ -18,8 +18,9 @@
 ./" 
 .TH PHP 1
 .SH NAME
+.TP 15
 .B php
-Command Line Interface 'CLI'
+PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
 .B php
 [options] [
@@ -68,16 +69,18 @@ Command Line Interface 'CLI'
 ]
 .LP
 .SH DESCRIPTION
+.B PHP
+is a widely-used general-purpose scripting language that is especially suited for 
+Web development and can be embedded into HTML. This is the command line interface
+that enables you to the following:
+.P
 You can parse and execute files by using parameter -f followed by the name of the 
 .IR file 
 to be executed.
 .LP
-Using parameter -r you can directly execute
-.B PHP 
+Using parameter -r you can directly execute PHP 
 .IR code 
-simply as you would do inside a 
-.B php 
-file when using the 
+simply as you would do inside a .php file when using the 
 .B eval() 
 function.
 .LP
@@ -93,11 +96,12 @@ contains the number of the actual line being processed. Further more
 the paramters -B and -E can be used to execute 
 .IR code
 (see -r) before and
-after input line processing respectively.
+after all input lines have been processed respectively.
 .LP
-If none of -r -f -B -R -F or -E is present but a single parameter is
-given then this is taken as the filename to process (same as with -f). If
-no parameter is present then the standard input is read and executed.
+If none of -r -f -B -R -F or -E is present but a single parameter is given 
+then this parameter is taken as the filename to parse and execute (same as 
+with -f). If no parameter is present then the standard input is read and 
+executed.
 .SH OPTIONS
 .TP 15
 .B -a
@@ -106,7 +110,10 @@ Run interactively
 .B -c path|file 
 Look for 
 .B php.ini 
-file in this directory
+file in the directory
+.IR path
+or use the specified
+.IR file
 .TP
 .B -n
 No 
@@ -130,8 +137,7 @@ Parse and execute
 This help
 .TP
 .B -i
-.B PHP
-information
+PHP information and configuration
 .TP
 .B -l
 Syntax check only (lint)
@@ -140,21 +146,18 @@ Syntax check only (lint)
 Show compiled in modules
 .TP
 .B -r code
-Run 
-.B PHP 
+Run PHP 
 .IR code
 without using script tags
 .B '<?..?>'
 .TP
 .B -B code
-Run 
-.B PHP 
+Run PHP 
 .IR code
 before processing input lines
 .TP
 .B -R code
-Run 
-.B PHP 
+Run PHP 
 .IR code
 for every input line
 .TP
@@ -164,8 +167,7 @@ Parse and execute
 for every input line
 .TP
 .B -E code
-Run 
-.B PHP 
+Run PHP 
 .IR code
 after processing all input lines
 .TP
@@ -192,26 +194,82 @@ or script is read from stdin
 .SH FILES
 .TP 15
 .B php-cli.ini
-The configuration file for the CLI version of 
-.B PHP.
+The configuration file for the CLI version of PHP.
 .TP
 .B php.ini
 The standard configuration file will only be used when 
 .B php-cli.ini
 cannot not be found.
+.SH EXAMPLES
+.TP 5
+php -r "echo 'Hello World';"
+This command simply writes the text "Hello World" to stabdard out.
+.TP
+php -d html_errors=1 -i | php -R 'echo strip_tags($argn)."\\n";'
+This example uses PHP first to generate a HTML output. This is 
+meant to be replaced with any tool that displays HTML (for instance
+you could use 'cat file.html'). The second php command now strips off
+the HTML tags line by line and outputs the result.
+.TP
+php -E 'echo "Lines: $argi\\n";'
+This command shows the number of lines being input.
+.TP
+php -R '@$l+=count(file($argn));' -E ' echo "Lines: $l\\n";'
+This commands expects each input line beeing a file. It counts all lines 
+of the files specified by each input line and shows the summarized result. 
+You may combine this with tools like find and change the php scriptlet.
+.SH TIPS
+You can use a shebang line to automatically invoke php
+from scripts. Only the CLI version of PHP will ignore
+such a first line as shown below:
+.P
+.PD 0
+#!/bin/php
+.P
+<?php
+.P
+ // your script
+.P
+?>
+.PD 1
+.P
+.SH SEE ALSO
+For a more or less complete description of PHP look here:
+.PD 0
+.P
+.B http://www.php.net/manual/
+.PD 1
+.SH BUGS
+You can view the list of known bugs or add any new bug you
+found here:
+.PD 0
+.P
+.B http://bugs.php.net
+.PD 1
+.SH AUTHORS
+The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.
+.P
+Additional work for the CLI sapi was done by Edin Kadribasic and Marcus Boerger.
+.P
+A List of active developers can be found here:
+.PD 0
+.P
+.B http://www.php.net/credits.php
+.PD 1
+.P
+And last but not least PHP was developed with the help of a huge amount of 
+contributors all around the world.
 .SH COPYRIGHT
 Copyright (c) 1997-2003 The PHP Group
 .LP
-This source file is subject to version 2.02 of the 
-.B PHP 
-license,
+This source file is subject to version 2.02 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
 available at through the world-wide-web at
 .PD 0
 .P
-.B http://www.php.net/license/2_02.txt.
-.P
+.B http://www.php.net/license/2_02.txt
 .PD 1
+.P
 If you did not receive a copy of the PHP license and are unable to
 obtain it through the world-wide-web, please send a note to
 .B license@php.net 
