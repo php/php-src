@@ -139,6 +139,8 @@ PHP_FUNCTION(solid_fetch_prev);
 #elif defined(HAVE_DBMAKER) /* DBMaker */
 
 #define ODBC_TYPE "DBMaker"
+#undef ODBCVER
+#define ODBCVER 0x0300
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <odbc.h>
 
@@ -189,6 +191,10 @@ PHP_FUNCTION(odbc_cursor);
 PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_do);
 PHP_FUNCTION(odbc_execute);
+#ifdef HAVE_DBMAKER
+PHP_FUNCTION(odbc_fetch_array);
+PHP_FUNCTION(odbc_fetch_object);
+#endif
 PHP_FUNCTION(odbc_fetch_into);
 PHP_FUNCTION(odbc_fetch_row);
 PHP_FUNCTION(odbc_field_len);
