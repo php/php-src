@@ -359,10 +359,9 @@ static int apprentice(void)
     char line[BUFSIZ + 1];
     int errs = 0;
     int lineno;
-	TSRMLS_FETCH();
-
     char *fname;
     magic_server_config_rec *conf = &mime_global;
+    TSRMLS_FETCH();
 
     fname = conf->magicfile; /* todo cwd? */
     f = fopen(fname, "rb");
