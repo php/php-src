@@ -290,14 +290,14 @@ PHP_FUNCTION(flock)
 PHP_FUNCTION(get_meta_tags)
 {
 	pval **filename, **arg2;
-	FILE *fp;
 	int use_include_path = 0;
-	int issock=0, socketd=0;
-	int in_tag=0, in_meta_tag=0, looking_for_val=0, done=0, ulc=0;
-	int num_parts=0, lc=0;
-	int token_len=0;
-	char *token_data=NULL, *name=NULL, *value=NULL, *temp=NULL;
+	int in_tag=0, in_meta_tag=0, done=0;
+	int looking_for_val=0, have_name=0, have_content=0;
+	int saw_name=0, saw_content=0;
+	int num_parts=0;
+	char *name=NULL, *value=NULL, *temp=NULL;
 	php_meta_tags_token tok, tok_last;
+	php_meta_tags_data md;
 	PLS_FETCH();
 
 	/* check args */
@@ -319,9 +319,9 @@ PHP_FUNCTION(get_meta_tags)
 	}
 	convert_to_string_ex(filename);
 
-	fp = php_fopen_wrapper((*filename)->value.str.val,"rb", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
-	if (!fp && !socketd) {
-		if (issock != BAD_URL) {
+	md.fp = php_fopen_wrapper((*filename)->value.str.val, "rb", use_include_path|ENFORCE_SAFE_MODE, &md.issock, &md.socketd, NULL);
+	if (!md.fp && !md.socketd) {
+		if (md.issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING,"get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
@@ -331,30 +331,34 @@ PHP_FUNCTION(get_meta_tags)
 	}
 
 	if (array_init(return_value)==FAILURE) {
-		if (issock) {
-			SOCK_FCLOSE(socketd);
+		if (md.issock) {
+			SOCK_FCLOSE(md.socketd);
 		} else {
-			fclose(fp);
+			fclose(md.fp);
 		}
 		RETURN_FALSE;
 	}
 
 	tok_last = TOK_EOF;
 
-	while (!done && (tok = php_next_meta_token(fp,socketd,issock,&ulc,&lc,&token_data,&token_len)) != TOK_EOF) {
+	md.ulc        = 0;
+	md.token_data = NULL;
+	md.token_len  = 0;
+
+	while (!done && (tok = php_next_meta_token(&md)) != TOK_EOF) {
+
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
-				in_meta_tag = !strcasecmp("meta",token_data);
+				in_meta_tag = !strcasecmp("meta",md.token_data);
 			} else if (tok_last == TOK_SLASH && in_tag) {
-				if (strcasecmp("head",token_data) == 0) {
+				if (strcasecmp("head", md.token_data) == 0) {
 					/* We are done here! */
 					done = 1;
 				}
 			} else if (tok_last == TOK_EQUAL && looking_for_val) {
-
-				if (!num_parts) {
-					/* This is a single word attribute */
-					temp = name = estrndup(token_data,token_len);
+				if (saw_name) {
+					/* Get the NAME attr (Single word attr, non-quoted) */
+					temp = name = estrndup(md.token_data,md.token_len);
 
 					while (temp && *temp) {
 						if (strchr(PHP_META_UNSAFE, *temp)) {
@@ -362,78 +366,98 @@ PHP_FUNCTION(get_meta_tags)
 						}
 						temp++;
 					}
-					num_parts++;
-				} else {
+
+					have_name = 1;
+				} else if (saw_content) {
+					/* Get the CONTENT attr (Single word attr, non-quoted) */
 					if (PG(magic_quotes_runtime)) {
-						value = php_addslashes(token_data,0,&token_len,0);
+						value = php_addslashes(md.token_data,0,&md.token_len,0);
 					} else {
-						value = estrndup(token_data,token_len);
+						value = estrndup(md.token_data,md.token_len);
 					}
 
-					/* Insert the value into the array */
-					add_assoc_string(return_value, name, value, 0);
-					num_parts = 0;
+					have_content = 1;
 				}
+
 				looking_for_val = 0;
 			} else {
 				if (in_meta_tag) {
-					if (strcasecmp("name",token_data) == 0 || strcasecmp("content",token_data) == 0) {
+					if (strcasecmp("name", md.token_data) == 0) {
+						saw_name = 1;
+						saw_content = 0;
 						looking_for_val = 1;
-					} else {
-						looking_for_val = 0;
+					} else if (strcasecmp("content", md.token_data) == 0) {
+						saw_name = 0;
+						saw_content = 1;
+						looking_for_val = 1;
 					}
 				}
 			}
 		} else if (tok == TOK_STRING && tok_last == TOK_EQUAL && looking_for_val) {
-			if (!num_parts) {
-				/* First, get the name value and store it */
-				temp = name = estrndup(token_data,token_len);
+			if (saw_name) {
+				/* Get the NAME attr (Quoted single/double) */
+				temp = name = estrndup(md.token_data,md.token_len);
+
 				while (temp && *temp) {
 					if (strchr(PHP_META_UNSAFE, *temp)) {
 						*temp = '_';
 					}
 					temp++;
 				}
-				num_parts++;
-			} else {
-				/* Then get the value value and store it, quoting if neccessary */
+
+				have_name = 1;
+			} else if (saw_content) {
+				/* Get the CONTENT attr (Single word attr, non-quoted) */
 				if (PG(magic_quotes_runtime)) {
-					value = php_addslashes(token_data,0,&token_len,0);
+					value = php_addslashes(md.token_data,0,&md.token_len,0);
 				} else {
-					value = estrndup(token_data,token_len);
+					value = estrndup(md.token_data,md.token_len);
 				}
 
-				/* Insert the value into the array */
-				add_assoc_string(return_value, name, value, 0);
-				num_parts = 0;
+				have_content = 1;
 			}
+
 			looking_for_val = 0;
 		} else if (tok == TOK_OPENTAG) {
 			if (looking_for_val) {
 				looking_for_val = 0;
+				have_name = saw_name = 0;
+				have_content = saw_content = 0;
 			}
 			in_tag = 1;
 		} else if (tok == TOK_CLOSETAG) {
-			/* We never made it to the value, free the name */
-			if (num_parts) {
+			if (have_name) {
+				if (have_content) {
+					add_assoc_string(return_value, name, value, 0); 
+				} else {
+					add_assoc_string(return_value, name, empty_string, 0);
+				}
+
 				efree(name);
+			} else if (have_content) {
+				efree(value);
 			}
+
+			name = value = NULL;
+				
 			/* Reset all of our flags */
 			in_tag = in_meta_tag = looking_for_val = num_parts = 0;
+			have_name = saw_name = 0;
+			have_content = saw_content = 0;
 		}
 
 		tok_last = tok;
 
-		if (token_data)
-			efree(token_data);
+		if (md.token_data)
+			efree(md.token_data);
 
-		token_data = NULL;
+		md.token_data = NULL;
 	}
 
-    if (issock) {
-        SOCK_FCLOSE(socketd);
+    if (md.issock) {
+        SOCK_FCLOSE(md.socketd);
     } else {
-        fclose(fp);
+        fclose(md.fp);
     }
 }
 
@@ -2367,20 +2391,21 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 
 /* {{{ php_next_meta_token
    Tokenizes an HTML file for get_meta_tags */
-php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *use_last_char, int *last_char, char **data, int *datalen) {
-	int ch, compliment;
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
+{
+	int ch = 0, compliment;
 	char buff[META_DEF_BUFSIZE + 1];
 
 	memset((void *)buff,0,META_DEF_BUFSIZE + 1);
 
-	while (*use_last_char || (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)))) {
+	while (md->ulc || (!FP_FEOF(md->socketd,md->fp,md->issock) && (ch = FP_FGETC(md->socketd,md->fp,md->issock)))) {
 
-		if(FP_FEOF(socketd,fp,issock))
+		if(FP_FEOF(md->socketd,md->fp,md->issock))
 			break;
 
-		if (*use_last_char) {
-			ch = *last_char;
-			*use_last_char = 0;
+		if (md->ulc) {
+			ch = md->lc;
+			md->ulc = 0;
 		}
 
         switch (ch) {
@@ -2399,16 +2424,25 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
         case '\'':
         case '"':
             compliment = ch;
-            *datalen = 0;
-            while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && ch != compliment) {
-				buff[(*datalen)++] = ch;
+            md->token_len = 0;
+            while (!FP_FEOF(md->socketd,md->fp,md->issock) &&
+				   (ch = FP_FGETC(md->socketd,md->fp,md->issock)) &&
+				   ch != compliment && ch != '<' && ch != '>') {
 
-				if (*datalen == META_DEF_BUFSIZE)
+				buff[(md->token_len)++] = ch;
+
+				if (md->token_len == META_DEF_BUFSIZE)
 					break;
 			}
 
-            *data = (char *) emalloc( *datalen + 1 );
-			memcpy(*data,buff,*datalen+1);
+			if (ch == '<' || ch == '>') {
+				/* Was just an apostrohpe */
+				md->ulc = 1;
+				md->lc  = ch;
+			}
+
+            md->token_data = (char *) emalloc(md->token_len + 1);
+			memcpy(md->token_data,buff,md->token_len+1);
 
 			return TOK_STRING;
 			break;
@@ -2421,26 +2455,26 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
             break;
         default:
             if (isalnum(ch)) {
-                *datalen = 0;
-                buff[(*datalen)++] = ch;
-				while (!FP_FEOF(socketd,fp,issock) &&
-					   (ch = FP_FGETC(socketd,fp,issock)) &&
+                md->token_len = 0;
+                buff[(md->token_len)++] = ch;
+				while (!FP_FEOF(md->socketd,md->fp,md->issock) &&
+					   (ch = FP_FGETC(md->socketd,md->fp,md->issock)) &&
 					   (isalnum(ch) || strchr(PHP_META_HTML401_CHARS,ch))) {
 
-					buff[(*datalen)++] = ch;
+					buff[(md->token_len)++] = ch;
 
-					if (*datalen == META_DEF_BUFSIZE)
+					if (md->token_len == META_DEF_BUFSIZE)
 						break;
 				}
 
 				/* This is ugly, but we have to replace ungetc */
                 if (!isalpha(ch) && ch != '-') {
-					*use_last_char = 1;
-					*last_char = ch;
+					md->ulc = 1;
+					md->lc  = ch;
 				}
 
-                *data = (char *) emalloc( *datalen + 1 );
-                memcpy(*data,buff,*datalen+1);
+                md->token_data = (char *) emalloc(md->token_len + 1);
+                memcpy(md->token_data,buff,md->token_len+1);
 
 				return TOK_ID;
 			} else {
