@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed include_once() to issue a warning in case the supplied file name is
+  not found (Zeev, Zend Engine)
+- Fixed a bug in get_declared_classes() which could return the same class
+  multiple times under certain circumstances (Zeev, Zend Engine)
 - Fixed a bug in rawurldecode() that would cause in rawurldecode() corrupting
   its argument (Zeev)
 - Parse errors (or other errors) in the php.ini files under Windows will no
