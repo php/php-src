@@ -549,15 +549,12 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 	int total_bytes=0, read_bytes=0;
 
 	while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf) TSRMLS_CC))) {
+		out = erealloc(out, total_bytes + read_bytes + 1);
+		memcpy(out + total_bytes, buf, read_bytes);
 		total_bytes += read_bytes;
-		out = erealloc(out, total_bytes);
-		memcpy(out, buf, read_bytes);
 	}
 
-	if (out) {
-		out = erealloc(out, total_bytes + 1);
-		out[total_bytes] = '\0';
-	}
+	if (out) out[total_bytes] = '\0';
 
 	return out;
 }
@@ -601,6 +598,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	boundary_len = strlen(boundary);
 
 	if (boundary[0] == '"' && boundary[boundary_len-1] == '"') {
+		if (boundary_len < 2) { /* otherwise a single " passes */
+			sapi_module.sapi_error(E_WARNING, "Invalid boundary in multipart/form-data POST data");
+			return;
+		}
 		boundary++;
 		boundary_len -= 2;
 		boundary[boundary_len] = '\0';
@@ -740,21 +741,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
 			}
 
-			/* Initialize variables */
-			add_protected_variable(param TSRMLS_CC);
-
-			magic_quotes_gpc = PG(magic_quotes_gpc);
-			PG(magic_quotes_gpc) = 0;
-			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
-
 			/* is_arr_upload is true when name of file upload field
 			 * ends in [.*]
 			 * start_arr is set to point to 1st [
 			 * end_arr points to last ]
 			 */
 			is_arr_upload =	(start_arr = strchr(param,'[')) &&
-							(end_arr = strrchr(param,']')) && 
-							(end_arr = param+strlen(param)-1);
+							(param[strlen(param)-1] == ']');
 
 			if (is_arr_upload) {
 				array_len = strlen(start_arr);
@@ -764,12 +757,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				array_index = estrndup(start_arr+1, array_len-2);   
 			}
 			
-	
 			/* Add $foo_name */
 			if (lbuf) {
 				efree(lbuf);
 			}
-			lbuf = (char *) emalloc(strlen(param) + array_len + MAX_SIZE_OF_INDEX + 1);
+			lbuf = (char *) emalloc(strlen(param) + MAX_SIZE_OF_INDEX + 1);
 			
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
@@ -778,6 +770,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				sprintf(lbuf, "%s_name", param);
 			}
+
+			/* Initialize variables */
+			add_protected_variable(param TSRMLS_CC);
+
+			magic_quotes_gpc = PG(magic_quotes_gpc);
+			PG(magic_quotes_gpc) = 0;
+			/* if param is of form xxx[.*] this will cut it to xxx */
+			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
 
 			s = strrchr(filename, '\\');
 			if (s && s > filename) {
