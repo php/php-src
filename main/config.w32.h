@@ -226,6 +226,8 @@
 /* Define if you have the setlocale function.  */
 #define HAVE_SETLOCALE 1
 
+#define HAVE_LOCALECONV 1
+
 #define HAVE_LOCALE_H 1
 
 /* Define if you have the setvbuf function.  */
