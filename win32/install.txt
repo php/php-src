@@ -198,6 +198,20 @@ Installation of Windows extensions
 Web server configuration
 ========================
 
+Due to a security issue with PHP on various win32 webservers, we have 
+enabled functionality to disable calls to the php binary directly. This 
+has meant we have 2 new php ini lines:
+
+    cgi.force_redirect 0|1
+    cgi.redirect_status_env ENV_VAR_NAME
+
+if cgi.force_redirect is turned on, and you are not running under Apache or Netscape 
+(iPlanet) web servers, you MAY need to set an environment variable name that PHP
+will look for to know it is OK to continue execution.  Setting this variable MAY
+cause security issues, KNOW WHAT YOU ARE DOING FIRST.
+
+if you are unsure, set cgi.force_redirect to 1, and see if your scripts execute.
+
  Installing PHP on Windows with Apache 1.3.x
 
   There are two ways to set up PHP to work with Apache 1.3.x
@@ -223,11 +237,9 @@ Web server configuration
    AddModule mod_php4.c
    AddType application/x-httpd-php .php
 
-  If you wish to install PHP as a CGI binary, read this first:
-
-    http://www.cert.org/advisories/CA-1996-11.html
-
-  and then if you are really sure, insert these lines to your conf file: 
+If you wish to install PHP as a CGI binary, (the sapi is much better)
+you need to enable the apache security fix in your php.ini by 
+setting cgi.force_redirect = 1. Then, insert these lines to your conf file:
 
    ScriptAlias /php/ "c:/php/"
    AddType application/x-httpd-php .php
@@ -240,8 +252,9 @@ Web server configuration
   Note, we consider installing PHP like this suicidal.
 
   As a further precaution, we recommend you change the "/php/"
-  ScriptAlias to something more random, to prevent the binary being
-  called directly, which is a security risk.
+  ScriptAlias to something more random, to prevent any attempts to 
+  call your binary (like the Code Red scripts) for returning a response
+  other than 404.
 
   Remember when you have finished to restart the server, for example,
    NET STOP APACHE
