@@ -3752,6 +3752,9 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			zval_ptr_dtor(&array_ptr);
 			FREE_OP(Ts, op1, EG(free_op1));
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			NEXT_OPCODE();
 			return 0;

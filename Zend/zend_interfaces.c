@@ -21,6 +21,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
@@ -275,7 +276,7 @@ static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce,
 	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		if (!EG(exception))
 		{
-			zend_error(E_WARNING, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce->name);
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce->name);
 		}
 		if (iterator)
 		{
