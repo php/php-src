@@ -280,10 +280,7 @@ static void thttpd_module_main(TLS_D SLS_DC)
 
 static void thttpd_request_ctor(TLS_D SLS_DC)
 {
-	char buf[1024];
 	int offset;
-	size_t filename_len;
-	size_t cwd_len;
 	smart_str s = {0};
 
 	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
