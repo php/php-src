@@ -35,17 +35,18 @@ PEAR_FILES = \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
 	Cache.php \
-	Cache/Container.php \
-	Cache/Function.php \
-	Cache/Graphics.php \
-	Cache/Output.php \
 	Cache/Error.php \
-	Cache/OutputCompression.php \
+	Cache/Container.php \
 	Cache/Container/db.php \
 	Cache/Container/dbx.php \
 	Cache/Container/file.php \
 	Cache/Container/phplib.php \
 	Cache/Container/shm.php \
+	Cache/DB.php \
+	Cache/Function.php \
+	Cache/Graphics.php \
+	Cache/Output.php \
+	Cache/OutputCompression.php \
 	Console/Getopt.php \
 	Crypt/CBC.php \
 	Crypt/HCEMD5.php \
