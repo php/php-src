@@ -969,13 +969,24 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 {
 	int command_length;
+	int dir_length, extra = 0;
 	char *command_line;
-	char *ptr;
+	char *ptr, *dir;
 	FILE *retval;
 
 	command_length = strlen(command);
 
-	ptr = command_line = (char *) malloc(command_length + sizeof("cd  ; ") + CWDG(cwd).cwd_length+1);
+	dir_length = CWDG(cwd).cwd_length;
+	dir = CWDG(cwd).cwd;
+	while (dir_length > 0) {
+		if (*dir == '\'') extra+=3;
+		dir++;
+		dir_length--;
+	}
+	dir_length = CWDG(cwd).cwd_length;
+	dir = CWDG(cwd).cwd;
+
+	ptr = command_line = (char *) malloc(command_length + sizeof("cd '' ; ") + dir_length +1+1);
 	if (!command_line) {
 		return NULL;
 	}
@@ -985,8 +996,21 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 	if (CWDG(cwd).cwd_length == 0) {
 		*ptr++ = DEFAULT_SLASH;
 	} else {
-		memcpy(ptr, CWDG(cwd).cwd, CWDG(cwd).cwd_length);
-		ptr += CWDG(cwd).cwd_length;
+		*ptr++ = '\'';
+		while (dir_length > 0) {
+			switch (*dir) {
+			case '\'':
+				*ptr++ = '\'';
+				*ptr++ = '\\';
+				*ptr++ = '\'';
+				/* fall-through */
+			default:
+				*ptr++ = *dir;
+			}
+			dir++;
+			dir_length--;
+		}
+		*ptr++ = '\'';
 	}
 	
 	*ptr++ = ' ';
