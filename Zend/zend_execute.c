@@ -4064,32 +4064,6 @@ int zend_isset_isempty_prop_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	return zend_isset_isempty_dim_prop_obj_handler(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
-int zend_goto_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op **target;
-	zval *label = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	zval tmp;
-
-	tmp = *label;
-	zval_copy_ctor(&tmp);
-	convert_to_string(&tmp);
-	label = &tmp;
-
-	if (op_array->labels &&
-		zend_hash_find(op_array->labels, label->value.str.val, label->value.str.len + 1, (void **)&target) == SUCCESS) {
-#if DEBUG_ZEND>=2
-		printf("Jumping on goto to opcode %08X\n", *target);
-#endif
-		zval_dtor(&tmp);
-		SET_OPCODE(*target);
-		return 0;
-	}
-
-	zend_error(E_ERROR, "Unknown label %s", Z_STRVAL_P(label));
-	zval_dtor(&tmp);
-	NEXT_OPCODE();
-}
-
 int zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (opline->op1.op_type != IS_UNUSED) {
@@ -4464,7 +4438,6 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_HANDLE_EXCEPTION] = zend_handle_exception_handler;
 
-	zend_opcode_handlers[ZEND_GOTO] = zend_goto_handler;
 }
 
 /*

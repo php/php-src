@@ -170,7 +170,6 @@ struct _zend_op_array {
 	zend_uint *refcount;
 
 	zend_op *opcodes;
-	HashTable *labels;
 	zend_uint last, size;
 
 	zend_uint T;
@@ -460,8 +459,6 @@ void zend_do_declare_end(znode *declare_token TSRMLS_DC);
 void zend_do_end_heredoc(TSRMLS_D);
 
 void zend_do_exit(znode *result, znode *message TSRMLS_DC);
-void zend_do_goto(znode *label TSRMLS_DC);
-void zend_do_label(znode *label TSRMLS_DC);
 
 void zend_do_begin_silence(znode *strudel_token TSRMLS_DC);
 void zend_do_end_silence(znode *strudel_token TSRMLS_DC);
@@ -717,7 +714,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_HANDLE_EXCEPTION		149
 
-#define ZEND_GOTO			150
 /* end of block */
 /* END: OPCODES */
 

@@ -63,7 +63,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->size = initial_ops_size;
 	op_array->last = 0;
 	op_array->opcodes = NULL;
-	op_array->labels = NULL;
 	op_array_alloc_ops(op_array);
 
 	op_array->T = 0;
@@ -224,11 +223,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		opline++;
 	}
 	efree(op_array->opcodes);
-
-	if (op_array->labels) {
-		zend_hash_destroy(op_array->labels);
-		efree(op_array->labels);
-	}
 
 	if (op_array->function_name) {
 		efree(op_array->function_name);
