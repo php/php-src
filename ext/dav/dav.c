@@ -241,7 +241,7 @@ int phpdav_mkcol_create_handler(request_rec *r)
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto void   dav_set_mkcol_handlers(string test, string create)
+/* {{{ proto void dav_set_mkcol_handlers(string test, string create)
    Sets the function to test whether a DAV collection exists for MKCOL */
 PHP_FUNCTION(dav_set_mkcol_handlers)
 {

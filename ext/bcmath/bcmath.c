@@ -107,7 +107,7 @@ PHP_FUNCTION(bcadd)
 /* }}} */
 
 /* {{{ proto string bcsub(string left_operand, string right_operand [, int scale])
-   Returns the difference between two arbitrary precision numbers (subtration) */
+   Returns the difference between two arbitrary precision numbers */
 PHP_FUNCTION(bcsub)
 {
 	pval **left, **right,**scale_param;
