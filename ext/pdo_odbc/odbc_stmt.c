@@ -73,11 +73,11 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			break;
 		case SQL_NO_DATA_FOUND:
 		case SQL_SUCCESS_WITH_INFO:
-			odbc_error(stmt->dbh, "SQLExecute", S->stmt);
+			pdo_odbc_stmt_error("SQLExecute");
 			break;
 
 		default:
-			odbc_error(stmt->dbh, "SQLExecute", S->stmt);
+			pdo_odbc_stmt_error("SQLExecute");
 			return 0;
 	}
 
@@ -156,7 +156,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 
-	odbc_error(stmt->dbh, "SQLFetch", S->stmt);
+	pdo_odbc_stmt_error("SQLFetch");
 
 	return 0;
 }
