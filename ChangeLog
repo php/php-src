@@ -1,3 +1,49 @@
+2002-01-30  Edin Kadribasic  <edink@proventum.net>
+
+    * acinclude.m4
+      configure.in
+      sapi/cli/Makefile.in:
+    Enable extensions to specify that they are not supposed to be
+    built with the CLI SAPI. This is done by passing "nocli" as the
+    3rd parameter to PHP_EXTENSION macro.
+
+2002-01-30  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c: Fix for bug #14803
+
+2002-01-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Fugbix typo. Update path to /lib/optional.
+
+2002-01-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: * don't make command libs executable
+
+    * pear/scripts/pear-get.in
+      pear/scripts/pear.in
+      pear/scripts/pearcmd-common.php
+      pear/scripts/pearcmd-help.php
+      pear/scripts/pearcmd-info.php
+      pear/scripts/pearcmd-install.php
+      pear/scripts/pearcmd-list.php
+      pear/scripts/pearcmd-package.php
+      pear/scripts/pearcmd-remote-list.php
+      pear/scripts/pearcmd-show-config.php
+      pear/scripts/pearcmd-uninstall.php
+      pear/Makefile.in:
+    * modularize "pear" and "pear-get" commands somewhat.  checking options
+      etc. is done for both in pearcmd-common.php.
+
+    * pear/PEAR/Common.php: * silence warning
+
+    * pear/HTML/Form.php: * XHTML fixes by Hans Westerbeek
+
+    * pear/package.dtd: * bring DTD up to date
+
+2002-01-30  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: enable "user-interrupts"
+
 2002-01-29  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/DB/mysql.php:
