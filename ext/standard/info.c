@@ -638,7 +638,7 @@ PHP_FUNCTION(php_logo_guid)
 }
 /* }}} */
 
-/* {{{ proto string php_egg_logo_id(void)
+/* {{{ proto string php_egg_logo_guid(void)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_egg_logo_guid)
 {
@@ -647,7 +647,7 @@ PHP_FUNCTION(php_egg_logo_guid)
 /* }}} */
 
 
-/* {{{ proto string zend_logo_id(void)
+/* {{{ proto string zend_logo_guid(void)
    Return the special ID used to request the Zend logo in phpinfo screens*/
 PHP_FUNCTION(zend_logo_guid)
 {
