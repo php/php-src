@@ -1,3 +1,57 @@
+2003-01-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php:
+      - allways fall back to PHP_SYSCONFDIR
+
+2003-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      Fixed a small memory leak when a NULL variable is passed to
+      openssl_csr_sign() as the first argument.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/html.c:
+      Fixed bug #21338 (crash inside html_entity_decode() when "" is passed).
+      Added test case for the bug.
+
+    * ext/standard/tests/strings/bug21338.phpt:
+      
+      Fixed bug #21338 (crash inside html_entity_decode() when "" is passed).
+      Added test case for the bug.
+
+    * acinclude.m4
+      configure.in:
+      Raise required OpenSSL version to 0.9.6.
+
+2003-01-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/SAPI.h:
+      - Fixed bug #21169: Compile Failure, and lots of warnings on UnixWare
+
+    * (PHP_4_3)
+      main/SAPI.h:
+      -** empty log message ***
+
+2003-01-02  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/php4apache.dsp:
+      Fix .dsp
+
+2003-01-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_streams.h:
+      - Fix warnings on UnixWare
+
+    * (PHP_4_3)
+      Makefile.global:
+      - MFH: Fix "make test" when CC was set to something with a parameter
+
+    * Makefile.global:
+      - Fix "make test" when CC was set to something with a parameter
+
 2003-01-01  Frank M. Kromann  <frank@kromann.info>
 
     * ext/standard/base64.c
