@@ -285,7 +285,6 @@ PHP_FUNCTION(flock)
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
-
    Extracts all meta tag content attributes from a file and returns an array */
 
 PHP_FUNCTION(get_meta_tags)
@@ -2381,7 +2380,6 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 #define PHP_META_HTML401_CHARS "-_.:"
 
 /* {{{ php_next_meta_token
-
    Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 {
