@@ -37,13 +37,23 @@ if test "$PHP_NCURSES" != "no"; then
 
    PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL, [
      AC_DEFINE(HAVE_NCURSESLIB,1,[ ])
-     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $NCURSES_DIR/lib, NCURSES_SHARED_LIBADD)
+	 
+	 PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $NCURSES_DIR/lib, NCURSES_SHARED_LIBADD)
+
+     PHP_CHECK_LIBRARY(panel, new_panel, [
+   	   AC_DEFINE(HAVE_NCURSES_PANEL,1,[ ])
+	   PHP_ADD_LIBRARY_WITH_PATH(panel, $NCURSES_DIR/lib, NCURSES_SHARED_LIBADD)
+     ], [
+     ], [ -L$NCURSES_DIR/lib -l$LIBNAME -lm
+     ])
+	
+
    ], [
      AC_MSG_ERROR(Wrong ncurses lib version or lib not found)
    ], [
      -L$NCURSES_DIR/lib -lm
    ])
-  
+ 
    AC_CHECK_LIB($LIBNAME, color_set,   [AC_DEFINE(HAVE_NCURSES_COLOR_SET,  1, [ ])])
    AC_CHECK_LIB($LIBNAME, slk_color,   [AC_DEFINE(HAVE_NCURSES_SLK_COLOR,  1, [ ])])
    AC_CHECK_LIB($LIBNAME, asume_default_colors,   [AC_DEFINE(HAVE_NCURSES_ASSUME_DEFAULT_COLORS,  1, [ ])])

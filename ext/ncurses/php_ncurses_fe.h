@@ -148,6 +148,30 @@ PHP_FUNCTION(ncurses_wgetch);
 PHP_FUNCTION(ncurses_keypad);
 PHP_FUNCTION(ncurses_wmove);
 
+PHP_FUNCTION(ncurses_newpad);
+PHP_FUNCTION(ncurses_prefresh);
+PHP_FUNCTION(ncurses_pnoutrefresh);
+
+PHP_FUNCTION(ncurses_wstandout);
+PHP_FUNCTION(ncurses_wstandend);
+PHP_FUNCTION(ncurses_wattrset);
+PHP_FUNCTION(ncurses_wattron);
+PHP_FUNCTION(ncurses_wattroff);
+#if HAVE_NCURSES_PANEL
+PHP_FUNCTION(ncurses_update_panels);
+PHP_FUNCTION(ncurses_panel_window);
+PHP_FUNCTION(ncurses_panel_below);
+PHP_FUNCTION(ncurses_panel_above);
+PHP_FUNCTION(ncurses_replace_panel);
+PHP_FUNCTION(ncurses_move_panel);
+PHP_FUNCTION(ncurses_bottom_panel);
+PHP_FUNCTION(ncurses_top_panel);
+PHP_FUNCTION(ncurses_show_panel);
+PHP_FUNCTION(ncurses_hide_panel);
+PHP_FUNCTION(ncurses_del_panel);
+PHP_FUNCTION(ncurses_new_panel);
+#endif
+
 
 #endif
 

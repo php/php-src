@@ -30,10 +30,12 @@ ZEND_DECLARE_MODULE_GLOBALS(ncurses)
 */
 
 /* True global resources - no need for thread safety here */
-int le_ncurses;
+int le_ncurses_windows;
+#if HAVE_NCURSES_PANEL
+int le_ncurses_panels;
+#endif
 
-
-static void ncurses_destruct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void ncurses_destruct_window(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
     WINDOW **pwin = (WINDOW **)rsrc->ptr;
 
@@ -41,6 +43,15 @@ static void ncurses_destruct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
     efree(pwin);
 }
 
+#if HAVE_NCURSES_PANEL
+static void ncurses_destruct_panel(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	PANEL **ppanel = (PANEL **)rsrc->ptr;
+
+	del_panel(*ppanel);
+	efree(ppanel);
+}
+#endif
 
 /* {{{ ncurses_module_entry
  */
@@ -238,7 +249,10 @@ PHP_MINIT_FUNCTION(ncurses)
     PHP_NCURSES_CONST(ALL_MOUSE_EVENTS);
     PHP_NCURSES_CONST(REPORT_MOUSE_POSITION);
 
-    le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_handle", module_number);
+    le_ncurses_windows = zend_register_list_destructors_ex(ncurses_destruct_window, NULL, "ncurses_window", module_number);
+#if HAVE_NCURSES_PANEL
+    le_ncurses_panels = zend_register_list_destructors_ex(ncurses_destruct_panel, NULL, "ncurses_panel", module_number);
+#endif
 
     return SUCCESS;
 }

@@ -25,9 +25,10 @@
 #include "php_ini.h"
 #include "php_ncurses.h"
 
-#define FETCH_WINRES(r, z)   ZEND_FETCH_RESOURCE((void**)r, WINDOW *, z, -1, "ncurses_handle", le_ncurses); \
-                                    if(!r) RETURN_FALSE;
-
+#define FETCH_WINRES(r, z)  ZEND_FETCH_RESOURCE(r, WINDOW **, z, -1, "ncurses_window", le_ncurses_windows)
+#if HAVE_NCURSES_PANEL
+# define FETCH_PANEL(r, z)  ZEND_FETCH_RESOURCE(r, PANEL **, z, -1, "ncurses_panel", le_ncurses_panels)
+#endif
 
 /* {{{ proto int ncurses_addch(int ch)
    Adds character at current position and advance cursor */
@@ -65,7 +66,7 @@ PHP_FUNCTION(ncurses_color_set)
 PHP_FUNCTION(ncurses_delwin)
 {
 	zval **handle;
-	WINDOW *w;
+	WINDOW **w;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -105,10 +106,27 @@ PHP_FUNCTION(ncurses_has_colors)
    Initializes ncurses */
 PHP_FUNCTION(ncurses_init)
 {
+	zend_constant c;
+	WINDOW **pscr = (WINDOW**)emalloc(sizeof(WINDOW *));
+	zval *zscr;
+	
 	initscr();             /* initialize the curses library */
 	keypad(stdscr, TRUE);  /* enable keyboard mapping */
 	(void) nonl();         /* tell curses not to do NL->CR/NL on output */
-	(void) cbreak();       /* take input chars one at a time, no wait for \n */}
+	(void) cbreak();       /* take input chars one at a time, no wait for \n */
+
+	*pscr = stdscr;
+	MAKE_STD_ZVAL(zscr);
+	ZEND_REGISTER_RESOURCE(zscr, pscr, le_ncurses_windows);
+	c.value = *zscr;
+	zval_copy_ctor(&c.value);
+	c.flags = CONST_CS;
+	c.name = zend_strndup("STDSCR", 7);
+	c.name_len = 7;
+	zend_register_constant(&c TSRMLS_CC);
+
+	FREE_ZVAL(zscr);
+}
 /* }}} */
 
 /* {{{ proto int ncurses_init_pair(int pair, int fg, int bg)
@@ -137,6 +155,68 @@ PHP_FUNCTION(ncurses_move)
 }
 /* }}} */
 
+/* {{{ proto resource ncurses_newpad(int rows, int cols)
+   Creates a new pad (window) */
+PHP_FUNCTION(ncurses_newpad)
+{
+	long rows,cols;
+	WINDOW **pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&rows,&cols)==FAILURE) {
+		return;
+	}
+
+	*pwin = newpad(rows,cols);
+
+	if(!*pwin) {
+		efree(pwin);
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, pwin, le_ncurses_windows);
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_prefresh(resource pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
+   Copys a region from a pad into the virtual screen */
+PHP_FUNCTION(ncurses_prefresh)
+{
+	WINDOW **pwin;
+	zval *phandle;
+	long pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllll", &phandle, &pminrow,
+				&pmincol, &sminrow, &smincol, &smaxrow, &smaxcol) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(pwin, &phandle);
+
+	RETURN_LONG(prefresh(*pwin, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_pnoutrefresh(resource pad, int pminrow, int pmincol, int sminrow, int smincol, int smaxrow, int smaxcol)
+   Copys a region from a pad into the virtual screen */
+PHP_FUNCTION(ncurses_pnoutrefresh)
+{
+	WINDOW **pwin;
+	zval *phandle;
+	long pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllll", &phandle, &pminrow,
+				&pmincol, &sminrow, &smincol, &smaxrow, &smaxcol) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(pwin, &phandle);
+
+	RETURN_LONG(pnoutrefresh(*pwin, pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol));
+}
+/* }}} */
+
+
 
 /* {{{ proto int ncurses_newwin(int rows, int cols, int y, int x)
    Creates a new window */
@@ -156,7 +236,7 @@ PHP_FUNCTION(ncurses_newwin)
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, pwin, le_ncurses);
+	ZEND_REGISTER_RESOURCE(return_value, pwin, le_ncurses_windows);
 }
 /* }}} */
 
@@ -361,6 +441,7 @@ PHP_FUNCTION(ncurses_inch)
 
 	RETURN_STRINGL (temp, 1, 1);
 }
+/* }}} */
 
 /* {{{ proto bool ncurses_insertln(void)
    Inserts a line, move rest of screen down */
@@ -470,9 +551,6 @@ PHP_FUNCTION(ncurses_use_default_colors)
 	RETURN_LONG(use_default_colors());
 }
 /* }}} */
-
-/* {{{ proto bool ncurses_slk_clear(void)
- */
 
 /* {{{ proto bool ncurses_slk_attr(void)
    Returns current soft label keys attribute */
@@ -1617,6 +1695,7 @@ PHP_FUNCTION(ncurses_wmove)
 
 	RETURN_LONG(wmove(*win, Z_LVAL_PP(y), Z_LVAL_PP(x)));
 }
+/* }}} */
 
 /* {{{ proto int ncurses_keypad(resource window, bool bf)
    Turns keypad on or off */
@@ -1649,7 +1728,7 @@ PHP_FUNCTION(ncurses_wcolor_set)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&handle, &color_pair) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-  FETCH_WINRES(win, handle);
+  	FETCH_WINRES(win, handle);
 	convert_to_long_ex(color_pair);
 
 	RETURN_LONG(wcolor_set(*win, Z_LVAL_PP(color_pair), 0));
@@ -1734,6 +1813,333 @@ PHP_FUNCTION(ncurses_wgetch)
 }
 /* }}} */
 
+/* {{{ proto int wattroff(resource window, int attrs)
+   Turns off attributes for a window */
+PHP_FUNCTION(ncurses_wattroff)
+{
+	zval *handle;
+	WINDOW **win;
+	long attrs;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &handle, &attrs) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(wattroff(*win, attrs));
+}
+/* }}} */
+
+/* {{{ proto int wattron(resource window, int attrs)
+   Turns on attributes for a window */
+PHP_FUNCTION(ncurses_wattron)
+{
+	zval *handle;
+	WINDOW **win;
+	long attrs;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &handle, &attrs) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(wattron(*win, attrs));
+}
+/* }}} */
+
+/* {{{ proto int wattrset(resource window, int attrs)
+   Set the attributes for a window */
+PHP_FUNCTION(ncurses_wattrset)
+{
+	zval *handle;
+	WINDOW **win;
+	long attrs;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &handle, &attrs) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(wattrset(*win, attrs));
+}
+/* }}} */
+
+/* {{{ proto int wstandend(resource window)
+   End standout mode for a window */
+PHP_FUNCTION(ncurses_wstandend)
+{
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &handle) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(wstandend(*win));
+}
+/* }}} */
+
+/* {{{ proto int wstandout(resource window)
+   Enter standout mode for a window */
+PHP_FUNCTION(ncurses_wstandout)
+{
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &handle) == FAILURE) {
+		return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(wstandout(*win));
+}
+/* }}} */
+
+
+
+#if HAVE_NCURSES_PANEL
+/* {{{ proto resource ncurses_new_panel(resource window)
+   Create a new panel and associate it with window */
+PHP_FUNCTION(ncurses_new_panel)
+{
+	zval **handle;
+	WINDOW **win;
+	PANEL **panel = (PANEL **)emalloc(sizeof(PANEL *));
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_WINRES(win, handle);
+
+	*panel = new_panel(*win);
+
+	if (*panel == NULL) {
+		efree(panel);
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, panel, le_ncurses_panels);
+	}
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_del_panel(resource panel)
+   Remove panel from the stack and delete it (but not the associated window) */
+PHP_FUNCTION(ncurses_del_panel)
+{
+	zval **handle;
+	PANEL **panel;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_PANEL(panel, handle);
+
+	RETURN_LONG(del_panel(*panel));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_hide_panel(resource panel)
+   Remove panel from the stack, making it invisible */
+PHP_FUNCTION(ncurses_hide_panel)
+{
+	zval **handle;
+	PANEL **panel;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_PANEL(panel, handle);
+
+	RETURN_LONG(hide_panel(*panel));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_show_panel(resource panel)
+   Places an invisible panel on top of the stack, making it visible */
+PHP_FUNCTION(ncurses_show_panel)
+{
+	zval **handle;
+	PANEL **panel;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_PANEL(panel, handle);
+
+	RETURN_LONG(show_panel(*panel));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_top_panel(resource panel)
+   Moves a visible panel to the top of the stack */
+PHP_FUNCTION(ncurses_top_panel)
+{
+	zval **handle;
+	PANEL **panel;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_PANEL(panel, handle);
+
+	RETURN_LONG(top_panel(*panel));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_bottom_panel(resource panel)
+   Moves a visible panel to the bottom of the stack */
+PHP_FUNCTION(ncurses_bottom_panel)
+{
+	zval **handle;
+	PANEL **panel;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_PANEL(panel, handle);
+
+	RETURN_LONG(bottom_panel(*panel));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_move_panel(resource panel, int startx, int starty)
+   Moves a panel so that it's upper-left corner is at [startx, starty] */
+PHP_FUNCTION(ncurses_move_panel)
+{
+	zval *handle;
+	PANEL **panel;
+	long startx, starty;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &handle, &startx, &starty)) {
+		return;
+	}
+
+	FETCH_PANEL(panel, &handle);
+
+	RETURN_LONG(move_panel(*panel, startx, starty));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_replace_panel(resource panel, resource window)
+   Replaces the window associated with panel */
+PHP_FUNCTION(ncurses_replace_panel)
+{
+	zval *phandle, *whandle;
+	PANEL **panel;
+	WINDOW **window;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &phandle, &whandle)) {
+		return;
+	}
+
+	FETCH_PANEL(panel, &phandle);
+	FETCH_WINRES(window, &whandle);
+
+	RETURN_LONG(replace_panel(*panel, *window));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_panel_above(resource panel)
+   Returns the panel above panel. If panel is null, returns the bottom panel in the stack */
+PHP_FUNCTION(ncurses_panel_above)
+{
+	zval *phandle = NULL;
+	PANEL **panel;
+	PANEL **above = (PANEL **)emalloc(sizeof(PANEL *));
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!", &phandle)) {
+		return;
+	}
+
+	if (phandle) {
+		FETCH_PANEL(panel, &phandle);
+		*above = panel_above(*panel);
+	} else {
+		*above = panel_above((PANEL *)0);
+	}
+
+	if (*above == NULL) {
+		efree(above);
+		RETURN_FALSE;
+	}
+	ZEND_REGISTER_RESOURCE(return_value, above, le_ncurses_panels);
+}
+/* }}} */
+
+/* {{{ proto int ncurses_panel_below(resource panel)
+   Returns the panel below panel. If panel is null, returns the top panel in the stack */
+PHP_FUNCTION(ncurses_panel_below)
+{
+	zval *phandle = NULL;
+	PANEL **panel;
+	PANEL **below = (PANEL **)emalloc(sizeof(PANEL *));
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!", &phandle)) {
+		return;
+	}
+
+	if (phandle) {
+		FETCH_PANEL(panel, &phandle);
+		*below = panel_below(*panel);
+	} else {
+		*below = panel_below((PANEL *)0);
+	}
+
+	if (*below == NULL) {
+		efree(below);
+		RETURN_FALSE;
+	}
+	ZEND_REGISTER_RESOURCE(return_value, below, le_ncurses_panels);
+}
+/* }}} */
+
+/* {{{ proto int ncurses_panel_window(resource panel)
+   Returns the window associated with panel */
+PHP_FUNCTION(ncurses_panel_window)
+{
+	zval *phandle = NULL;
+	PANEL **panel;
+	WINDOW **win = (WINDOW **)emalloc(sizeof(WINDOW *));
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &phandle)) {
+		return;
+	}
+
+	FETCH_PANEL(panel, &phandle);
+	*win = panel_window(*panel);
+
+	if (*win == NULL) {
+		efree(win);
+		RETURN_FALSE;
+	}
+	ZEND_REGISTER_RESOURCE(return_value, win, le_ncurses_windows);
+}
+/* }}} */
+
+/* {{{ proto void ncurses_update_panels(void)
+   Refreshes the virtual screen to reflect the relations between panels in the stack. */
+PHP_FUNCTION(ncurses_update_panels)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+	update_panels();
+}
+/* }}} */
+#endif /* HAVE_NCURSES_PANEL */
 
 /*
  * Local variables:
