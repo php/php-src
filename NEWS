@@ -1,8 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 RC1
-- Added xsltprocessor->registerPHPFunctions() (Christian)
-- Bundled new SPL extension (Marcus, Derick)
+- Added xsltprocessor->registerPHPFunctions(). (Christian)
+- Bundled new SPL extension. (Marcus, Derick)
 - Upgraded SQLite library to version 2.8.11. (Ilia, Wez)
 - Fixed var_export() to show public, protected and private modifiers properly.
   (Derick)
