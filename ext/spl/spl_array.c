@@ -224,6 +224,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM)
 				SELECTIVE_PZVAL_LOCK(value, &EX(opline)->result);
 				DELETE_RET_ZVAL(retval);			
 			} else {
+				SELECTIVE_PZVAL_LOCK(retval, &EX(opline)->result);
 				EX_T(EX(opline)->result.u.var).var.ptr = retval;
 				retval->refcount--;
 			}
