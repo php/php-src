@@ -31,6 +31,7 @@
 # include <locale.h>
 #endif
 #ifdef HAVE_LANGINFO_H
+#define __USE_GNU
 # include <langinfo.h>
 #endif
 #include "scanf.h"
