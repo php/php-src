@@ -1213,23 +1213,53 @@ PHPAPI void php_stripslashes(char *string, int *len)
 	}
 }
 
+/* {{{ proto string addcslashes(string str, string charlist)
+   Escape all chars mentioned in charlist with backslash. It creates
+   octal representations if asked to backslash characters with 8th bit set
+   or with ASCII<32 (except '\n', '\r', '\t' etc...) */
+PHP_FUNCTION(addcslashes)
+{
+	pval *str, *what;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &str, &what) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(str);
+	convert_to_string(what);
+	return_value->value.str.val = php_addcslashes(str->value.str.val,str->value.str.len,&return_value->value.str.len,0,what->value.str.val,what->value.str.len);
+	return_value->type = IS_STRING;
+}
+/* }}} */
+
 /* {{{ proto string addslashes(string str)
    Escape single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	pval *str,*what;
+	pval *str;
 
-	if ((ARG_COUNT(ht) != 1 && ARG_COUNT(ht) != 2) || getParameters(ht, ARG_COUNT(ht), &str, &what) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(str);
-	if (ARG_COUNT(ht) == 1) {
-		return_value->value.str.val = php_addslashes(str->value.str.val,str->value.str.len,&return_value->value.str.len,0);
-	} else {
-		convert_to_string(what);
-		return_value->value.str.val = php_addslashes_ex(str->value.str.val,str->value.str.len,&return_value->value.str.len,0,what->value.str.val,what->value.str.len);
-	}
+	return_value->value.str.val = php_addslashes(str->value.str.val,str->value.str.len,&return_value->value.str.len,0);
 	return_value->type = IS_STRING;
+}
+/* }}} */
+
+/* {{{ proto string stripcslashes(string str)
+   Strip backslashes from a string. Uses C-style conventions*/
+PHP_FUNCTION(stripcslashes)
+{
+	pval *str;
+	
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(str);
+
+	/* let RETVAL do the estrdup() */
+	RETVAL_STRING(str->value.str.val,1);
+	php_stripcslashes(return_value->value.str.val,&return_value->value.str.len);
 }
 /* }}} */
 
@@ -1267,20 +1297,70 @@ char *strerror(int errnum)
 #endif
 #endif
 
-PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free, char *what, int wlength)
+PHPAPI void php_stripcslashes(char *str, int *len)
 {
-	int  newlen;
+	char *source,*target,*end;
+	int  nlen = *len, i;
+	char numtmp[4];
+
+	for (source=str,end=str+nlen,target=str; source<end; source++) {
+		if (*source == '\\' && source+1<end) {
+			source++;
+			switch (*source) {
+				case 'n': *target++='\n'; nlen--; break;
+				case 'r': *target++='\r'; nlen--; break;
+				case 'a': *target++='\a'; nlen--; break;
+				case 't': *target++='\t'; nlen--; break;
+				case 'v': *target++='\v'; nlen--; break;
+				case 'b': *target++='\b'; nlen--; break;
+				case 'f': *target++='\f'; nlen--; break;
+				case '\\': *target++='\\'; nlen--; break;
+				case 'x': if (source+1<end && isxdigit(*(source+1))) {
+						numtmp[0] = *++source;
+						if (source+1<end && isxdigit(*(source+1))) {
+							numtmp[1] = *++source;
+							numtmp[2] = '\0';
+							nlen-=3;
+						} else {
+							numtmp[1] = '\0';
+							nlen-=2;
+						}
+						*target++=strtol(numtmp, NULL, 16);
+						break;
+					}
+					/* break is left intentionally */
+				default: i=0; 
+					while (source<end && *source>='0' && *source<='7' && i<3) {
+						numtmp[i++] = *source++;
+					}
+					if (i) {
+						numtmp[i]='\0';
+						*target++=strtol(numtmp, NULL, 8);
+						nlen-=i;
+						source--;
+					} else {
+						*target++='\\';
+						*target++=*source;
+					}
+			}
+		} else {
+			*target++=*source;
+		}
+	}
+	*target='\0';
+
+	*len = nlen;
+}
+			
+
+PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength)
+{
 	char flags[256];
-	char *new_str; 
+	char *new_str = emalloc((length?length:(length=strlen(str)))*4+1); 
 	char *source,*target;
 	char *end;
 	char c;
-	PLS_FETCH();
-
-	if (!what) {
-		what = "\'\"\\";
-		wlength = 4;
-	}
+	int  newlen;
 
 	if (!wlength) {
 		wlength = strlen(what);
@@ -1292,52 +1372,40 @@ PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int shoul
 
 	memset(flags, '\0', sizeof(flags));
 	for (source=what,end=source+wlength; (c=*source) || source<end; source++) {
-		flags[c]=1;
+		if (source+3<end && *(source+1) == '.' && *(source+2) == '.' && (unsigned char)*(source+3)>=(unsigned char)c) {
+			memset(flags+c, 1, (unsigned char)*(source+3)-(unsigned char)c+1);
+			source+=3;
+		} else
+			flags[(unsigned char)c]=1;
 	}
 
-	newlen = length+1;
-	for (source=str,end=source+length; (c=*source) || source<end; source++) {
-		if (flags[c]) {
-			if (c<32 || c>126) {
-				switch (c) {
-					case '\n':
-					case '\t':
-					case '\r': newlen++; break;
-					default: newlen+=3;
-				}
-			} else {
-				newlen++;
-			}
-		}
-	}
-
-	new_str = (char *)emalloc(newlen);
-	
 	for (source=str,end=source+length,target=new_str; (c=*source) || source<end; source++) {
-		if (flags[c]) {
-			if (c<32 || c>126) {
+		if (flags[(unsigned char)c]) {
+			if ((unsigned char)c<32 || (unsigned char)c>126) {
 				*target++ = '\\';
 				switch (c) {
 					case '\n': *target++ = 'n'; break;
 					case '\t': *target++ = 't'; break;
 					case '\r': *target++ = 'r'; break;
-					default: target += sprintf(target, "%03o", c);
+					case '\a': *target++ = 'a'; break;
+					case '\v': *target++ = 'v'; break;
+					case '\b': *target++ = 'b'; break;
+					case '\f': *target++ = 'f'; break;
+					default: target += sprintf(target, "%03o", (unsigned char)c);
 				}
-			} else {
-				if (c=='\'' && PG(magic_quotes_sybase)) {
-					*target++ = '\'';
-					*target++ = '\'';
-				} else {
-					*target++ = '\\';
-					*target++ = c;
-				}
-			}
-		} else
-			*target++ = c;
+				continue;
+			} 
+			*target++ = '\\';
+		}
+		*target++ = c;
 	}
 	*target = 0;
+	newlen = target-new_str;
+	if (target-new_str<length*4) {
+		new_str = erealloc(new_str, newlen+1);
+	}
 	if (new_length) {
-		*new_length = target - new_str;
+		*new_length = newlen;
 	}
 	if (should_free) {
 		STR_FREE(str);
@@ -1348,35 +1416,16 @@ PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int shoul
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free)
 {
 	/* maximum string length, worst case situation */
-	char *new_str; 
+	char *new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
 	char *source,*target;
 	char *end;
 	char c;
-	int  newlen;
 	PLS_FETCH();
 
-	if (!length) {
-		length = strlen(str);
-	}
-
-	newlen = length+1;
-	for (source=str,end=source+length; (c = *source) || source<end; source++) {
-		switch(c) {
-			case '\0': newlen+=3; break;
-			case '\'':
-			case '\"':
-			case '\\': newlen++; break;
-		}
-	}
-	
-	new_str = (char *)emalloc(newlen);
-	
 	for (source=str,end=source+length,target=new_str; (c = *source) || source<end; source++) {
 		switch(c) {
 			case '\0':
-				*target++ = '\\'; /* what if somebody escapes "foo\0"."12bar"? */
-				*target++ = '0';  /* we have to add \000 instead of just \0. */
-				*target++ = '0';
+				*target++ = '\\';
 				*target++ = '0';
 				break;
 			case '\'':
