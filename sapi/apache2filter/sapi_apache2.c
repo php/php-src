@@ -380,7 +380,7 @@ static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 	if (SG(request_info).query_string) {
 		free(SG(request_info).query_string);
 	}
-	if (SG(request_info).query_string) {
+	if (SG(request_info).request_uri) {
 		free(SG(request_info).request_uri);
 	}
 }
