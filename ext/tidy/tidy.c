@@ -93,13 +93,13 @@
         } \
     }
 
-#define REGISTER_TIDY_CLASS(classname, name, parent) \
+#define REGISTER_TIDY_CLASS(classname, name, parent, __flags) \
 	{ \
 		zend_class_entry ce; \
 		INIT_CLASS_ENTRY(ce, # classname, tidy_funcs_ ## name); \
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
-		tidy_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
+		tidy_ce_ ## name->ce_flags |= __flags;  \
 		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
 	}
@@ -895,8 +895,8 @@ PHP_MINIT_FUNCTION(tidy)
 	ZEND_INIT_MODULE_GLOBALS(tidy, tidy_globals_ctor, tidy_globals_dtor);
 
 	REGISTER_INI_ENTRIES();
-	REGISTER_TIDY_CLASS(tidy, doc,	NULL);
-	REGISTER_TIDY_CLASS(tidyNode, node,	NULL);
+	REGISTER_TIDY_CLASS(tidy, doc,	NULL, 0);
+	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL_CLASS);
 	/* no exceptions for now..
 	REGISTER_TIDY_CLASS(tidyException, exception,	zend_exception_get_default());
 	*/
