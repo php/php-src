@@ -24,8 +24,27 @@
 
 extern zend_class_entry *spl_ce_RecursiveIterator;
 extern zend_class_entry *spl_ce_RecursiveIteratorIterator;
+extern zend_class_entry *spl_ce_FilterIterator;
+extern zend_class_entry *spl_ce_ParentIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
+
+typedef struct _spl_dual_it_object {
+	zend_object              std;
+	struct {
+		zval                 *zobject;
+		zend_class_entry     *ce;
+		zend_object          *object;
+		zend_object_iterator *iterator;
+	} inner;
+	struct {
+		zval                 **data;
+		char                 *str_key;
+		uint                 str_key_len;
+		ulong                int_key;
+		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */
+	} current;
+} spl_dual_it_object;
 
 #endif /* SPL_ITERATORS_H */
 
