@@ -323,7 +323,11 @@ zend_module_entry gd_module_entry = {
 	PHP_MINIT(gd),
 	NULL,
 	NULL,
+#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 	PHP_RSHUTDOWN(gd),
+#else
+	NULL,
+#endif
 	PHP_MINFO(gd),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -426,13 +430,13 @@ PHP_MINIT_FUNCTION(gd)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
+#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
-#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 	gdFreeFontCache();
-#endif
 	return SUCCESS;
 }
+#endif
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION
