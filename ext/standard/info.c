@@ -60,7 +60,7 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 
 static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 {
-	zval **data, **tmp;
+	zval **data, **tmp, *tmp2;
 	char *string_key;
 	ulong num_key;
 
@@ -68,16 +68,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 		&& ((*data)->type==IS_ARRAY)) {
 		zend_hash_internal_pointer_reset((*data)->value.ht);
 		while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
-			zval tmp2, *value_ptr;
 
-			if ((*tmp)->type != IS_STRING) {
-				tmp2 = **tmp;
-				zval_copy_ctor(&tmp2);
-				convert_to_string(&tmp2);
-				value_ptr = &tmp2;
-			} else {
-				value_ptr = *tmp;
-			}
 			PUTS("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
 			PUTS("<TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\"><B>");
 			PUTS(name);
@@ -95,14 +86,17 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 				PUTS("<PRE>");
 				zend_print_zval_r(*tmp, 0);
 				PUTS("</PRE>");
+			} else if ((*tmp)->type != IS_STRING) {
+				tmp2 = *tmp;
+				zval_copy_ctor(tmp2);
+				convert_to_string(tmp2);
+				PUTS(tmp2->value.str.val);
+				zval_dtor(tmp2);
 			} else {
-				PUTS(value_ptr->value.str.val);
+				PUTS((*tmp)->value.str.val);
 			}
 			PUTS("</TD></TR>\n");
 			zend_hash_move_forward((*data)->value.ht);
-			if (value_ptr==&tmp2) {
-				zval_dtor(value_ptr);
-			}
 		}
 	}
 }
