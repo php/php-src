@@ -21,7 +21,7 @@
 #include "zend.h"
 #include "zend_llist.h"
 
-ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *data), unsigned char persistent)
+ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent)
 {
 	l->head = NULL;
 	l->tail = NULL;
