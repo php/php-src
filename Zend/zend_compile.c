@@ -683,7 +683,7 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 }
 
 
-void do_begin_function_call(znode *function_name CLS_DC)
+int do_begin_function_call(znode *function_name CLS_DC)
 {
 	zend_function *function;
 	
@@ -693,7 +693,7 @@ void do_begin_function_call(znode *function_name CLS_DC)
 
 		zval_copy_ctor(&tmp.u.constant);
 		do_begin_dynamic_function_call(&tmp CLS_CC);
-		return;
+		return 1; // Dynamic
 	}
 	
 	switch (function->type) {
@@ -710,6 +710,7 @@ void do_begin_function_call(znode *function_name CLS_DC)
 			}
 			break;
 	}
+	return 0;
 }
 
 
@@ -748,12 +749,12 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 }
 
 
-void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method CLS_DC)
+void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	ELS_FETCH();
 	
-	if (function_name->op_type==IS_CONST && !is_method) {
+	if (function_name->op_type==IS_CONST && !is_method && !is_dynamic_fcall) {
 		opline->opcode = ZEND_DO_FCALL;
 	} else {
 		opline->opcode = ZEND_DO_FCALL_BY_NAME;
@@ -1330,6 +1331,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 		full_class_name[0] = ':';
 		full_class_name++;
 		memcpy(full_class_name, CG(class_entry).name, CG(class_entry).name_length);
+		zval_dtor(&parent_class_name->u.constant);
 		full_class_name += CG(class_entry).name_length;
 		full_class_name[0] = 0;
 		opline->extended_value = ZEND_DECLARE_INHERITED_CLASS;
@@ -1437,7 +1439,7 @@ void do_end_new_object(znode *result, znode *class_name, znode *new_token, znode
 	if (class_name->op_type == IS_CONST) {
 		zval_copy_ctor(&class_name->u.constant);
 	}
-	do_end_function_call(class_name, &ctor_result, argument_list, 1 CLS_CC);
+	do_end_function_call(class_name, &ctor_result, argument_list, 1, 0 CLS_CC);
 	do_free(&ctor_result CLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));

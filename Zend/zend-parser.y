@@ -413,15 +413,15 @@ expr_without_variable:
 	|	expr '?' { do_begin_qm_op(&$1, &$2 CLS_CC); }
 		expr ':' { do_qm_true(&$4, &$2, &$5 CLS_CC); }
 		expr	 { do_qm_false(&$$, &$7, &$2, &$5 CLS_CC); }
-	|	T_STRING	'(' { do_extended_fcall_begin(CLS_C); do_begin_function_call(&$1 CLS_CC); }
+	|	T_STRING	'(' { do_extended_fcall_begin(CLS_C); $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
 				function_call_parameter_list
-				')' { do_end_function_call(&$1, &$$, &$4, 0 CLS_CC); do_extended_fcall_end(CLS_C); }
+				')' { do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num CLS_CC); do_extended_fcall_end(CLS_C); }
 	|	r_cvar '(' { do_extended_fcall_begin(CLS_C); do_begin_dynamic_function_call(&$1 CLS_CC); } 
 				function_call_parameter_list 
-				')' { do_end_function_call(&$1, &$$, &$4, 0 CLS_CC); do_extended_fcall_end(CLS_C);}
+				')' { do_end_function_call(&$1, &$$, &$4, 0, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { do_extended_fcall_begin(CLS_C); do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
 											function_call_parameter_list 
-											')' { do_end_function_call(&$3, &$$, &$6, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
+											')' { do_end_function_call(&$3, &$$, &$6, 1, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 		{ do_cast(&$$, &$2, IS_LONG CLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ do_cast(&$$, &$2, IS_DOUBLE CLS_CC); }
