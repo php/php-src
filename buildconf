@@ -1,21 +1,85 @@
 #!/bin/sh
 
-if test "$1" = "--copy"; then
-  automake_flags=--copy
+# do some version checking for the tools we use
+if test "$1" = "--force"; then
+    shift
+else
+    echo "buildconf: checking installation..."
+
+    # autoconf 2.13 or newer
+    ac_version=`autoconf --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+    if test "$ac_version" = ""; then
+	echo "buildconf: autoconf not found."
+	echo "           You need autoconf version 2.13 or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    fi
+    IFS=.; set $ac_version; IFS=' '
+    if test "$1" = "2" -a "$2" -lt "13" || test "$1" -lt "2"; then
+	echo "buildconf: autoconf version $ac_version found."
+	echo "           You need autoconf version 2.13 or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    else
+	echo "buildconf: autoconf version $ac_version (ok)"
+    fi
+
+    # automake 1.4 or newer
+    am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+    if test "$am_version" = ""; then
+	echo "buildconf: automake not found."
+	echo "           You need automake version 1.4 or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    fi
+    IFS=.; set $am_version; IFS=' '
+    if test "$1" = "1" -a "$2" -lt "4" || test "$1" -lt "1"; then
+	echo "buildconf: automake version $ac_version found."
+	echo "           You need automake version 1.4 or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    else
+	echo "buildconf: automake version $am_version (ok)"
+    fi
+
+    # The stuff from libtool we need is in CVS right now, so it is
+    # not required to run buildconf.
 fi
 
-test -d libzend || ln -s ../libzend .
-test -d TSRM || ln -s ../TSRM .
+if test "$1" = "--copy"; then
+    automake_flags=--copy
+fi
+
+if ! test -d libzend; then
+    if test -d ../libzend; then
+	echo "buildconf: linking ../libzend to ./libzend"
+        ln -s ../libzend .
+    else
+        echo "buildconf: can not find libzend"
+        echo "           libzend should be installed in . or .."
+	exit 1
+    fi
+fi
+if ! test -d TSRM; then
+    if test -d ../TSRM; then
+	echo "buildconf: linking ../TSRM to ./TSRM"
+        ln -s ../TSRM .
+    else
+        echo "buildconf: can not find TSRM"
+        echo "           TSRM should be installed in . or .."
+	exit 1
+    fi
+fi
 
 ./scripts/preconfig
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
 if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
-    echo keeping aclocal.m4
+    echo "buildconf: keeping aclocal.m4"
     mv aclocal.m4.old aclocal.m4
 else
-    echo created or modified aclocal.m4
+    echo "buildconf: created or modified aclocal.m4"
 fi
 
 autoheader
@@ -25,10 +89,10 @@ automake --add-missing --include-deps $automake_flags
 mv configure configure.old 2>/dev/null
 autoconf
 if cmp configure.old configure > /dev/null 2>&1; then
-    echo keeping configure
+    echo "buildconf: keeping configure"
     mv configure.old configure
 else
-    echo created or modified configure
+    echo "buildconf: created or modified configure"
 fi
 
 (cd libzend; ./buildconf libzend/)
