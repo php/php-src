@@ -67,6 +67,10 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->opcodes = NULL;
 	op_array_alloc_ops(op_array);
 
+	op_array->size_var = 0; /* FIXME:??? */
+	op_array->last_var = 0;
+	op_array->vars = NULL;
+
 	op_array->T = 0;
 
 	op_array->function_name = NULL;
@@ -208,6 +212,15 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	efree(op_array->refcount);
+
+	if (op_array->vars) {
+		i = op_array->last_var;
+		while (i > 0) {
+			i--;
+			efree(op_array->vars[i].name);
+		}
+		efree(op_array->vars);
+	}
 
 	while (opline<end) {
 		if (opline->op1.op_type==IS_CONST) {

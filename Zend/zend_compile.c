@@ -221,6 +221,32 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 	return (op_array->T)++ * sizeof(temp_variable);
 }
 
+static int lookup_cv(zend_op_array *op_array, char* name, int name_len)
+{
+	int i = 0;
+	ulong hash_value = zend_inline_hash_func(name, name_len+1);
+
+	while (i < op_array->last_var) {
+		if (op_array->vars[i].hash_value == hash_value &&
+		    op_array->vars[i].name_len == name_len &&
+		    strcmp(op_array->vars[i].name, name) == 0) {
+		  efree(name);
+		  return i;
+		}
+		i++;
+	}
+	i = op_array->last_var;
+	op_array->last_var++;
+	if (op_array->last_var > op_array->size_var) {
+		op_array->size_var += 16; /* FIXME */		
+		op_array->vars = erealloc(op_array->vars, op_array->size_var*sizeof(zend_compiled_variable));
+	}
+	op_array->vars[i].name = name; //estrndup(name, name_len);
+	op_array->vars[i].name_len = name_len;
+	op_array->vars[i].hash_value = hash_value;
+	return i;
+}
+
 
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
@@ -295,12 +321,21 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	}
 }
 
-
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC)
 {
 	zend_op opline;
 	zend_op *opline_ptr;
 	zend_llist *fetch_list_ptr;
+
+	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING &&
+	    !zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
+	    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
+	      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this")))) {
+		result->op_type = IS_CV;
+		result->u.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len);
+		result->u.EA.type = 0;
+		return;
+	}
 
 	if (bp) {
 		opline_ptr = &opline;
@@ -336,18 +371,56 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC)
 	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W TSRMLS_CC);
 }
 
-void zend_do_fetch_static_member(znode *class_znode TSRMLS_DC)
+void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
 	zend_op *opline_ptr;
+	zend_op opline;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-	le = fetch_list_ptr->head;
+	if (result->op_type == IS_CV) {
+		init_op(&opline TSRMLS_CC);
 
-	opline_ptr = (zend_op *)le->data;
-	opline_ptr->op2 = *class_znode;
-	opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
+		opline.opcode = ZEND_FETCH_W;
+		opline.result.op_type = IS_VAR;
+		opline.result.u.EA.type = 0;
+		opline.result.u.var = get_temporary_variable(CG(active_op_array));
+		opline.op1.op_type = IS_CONST;
+		opline.op1.u.constant.type = IS_STRING;
+		opline.op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[result->u.var].name);
+		opline.op1.u.constant.value.str.len = CG(active_op_array)->vars[result->u.var].name_len;
+		SET_UNUSED(opline.op2);
+		opline.op2 = *class_znode;
+		opline.op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
+		*result = opline.result;
+
+		zend_llist_add_element(fetch_list_ptr, &opline);
+	} else {
+		le = fetch_list_ptr->head;
+
+		opline_ptr = (zend_op *)le->data;
+		if (opline_ptr->opcode != ZEND_FETCH_W && opline_ptr->op1.op_type == IS_CV) {
+			init_op(&opline TSRMLS_CC);
+			opline.opcode = ZEND_FETCH_W;
+			opline.result.op_type = IS_VAR;
+			opline.result.u.EA.type = 0;
+			opline.result.u.var = get_temporary_variable(CG(active_op_array));
+			opline.op1.op_type = IS_CONST;
+			opline.op1.u.constant.type = IS_STRING;
+			opline.op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[opline_ptr->op1.u.var].name);
+			opline.op1.u.constant.value.str.len = CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len;
+			SET_UNUSED(opline.op2);
+			opline.op2 = *class_znode;
+			opline.op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
+			opline_ptr->op1 = opline.result;
+
+			zend_llist_prepend_element(fetch_list_ptr, &opline);
+		} else {
+			opline_ptr->op2 = *class_znode;
+			opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
+		}
+	}
 }
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC)
@@ -864,13 +937,6 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 	opline->op1 = *result;
 	opline->op2 = *op2;
 	*result = opline->result;
-}
-
-static void zend_lowercase_znode_if_const(znode *z)
-{
-	if (z->op_type == IS_CONST) {
-		zend_str_tolower(z->u.constant.value.str.val, z->u.constant.value.str.len);
-	}
 }
 
 void zend_do_free(znode *op1 TSRMLS_DC)
@@ -1396,7 +1462,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
 		/* Method call */
 		op = ZEND_SEND_VAR_NO_REF;
-	} else if (op == ZEND_SEND_VAL && param->op_type == IS_VAR) {
+	} else if (op == ZEND_SEND_VAL && (param->op_type & (IS_VAR|IS_CV))) {
 		op = ZEND_SEND_VAR_NO_REF;
 	}
 
@@ -1404,6 +1470,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
+			case IS_CV:
 				op = ZEND_SEND_REF;
 				break;
 			default:
@@ -2993,6 +3060,7 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 				last_container = *expr;
 				switch (expr->op_type) {
 					case IS_VAR:
+					case IS_CV:
 						opline->opcode = ZEND_FETCH_DIM_R;
 						break;
 					case IS_TMP_VAR:
@@ -3166,22 +3234,34 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 
 	zend_check_writable_variable(variable);
 
-	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
+	if (variable->op_type == IS_CV) {
+		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_UNSET_VAR;
+		opline->op1.op_type = IS_CONST;
+		opline->op1.u.constant.type = IS_STRING;
+		opline->op1.u.constant.value.str.len = CG(active_op_array)->vars[variable->u.var].name_len;
+		opline->op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[variable->u.var].name);
+		SET_UNUSED(opline->op2);
+		opline->op2.u.EA.type = ZEND_FETCH_LOCAL;
+		SET_UNUSED(opline->result);
+	} else {
+		last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
 
-	switch (last_op->opcode) {
-		case ZEND_FETCH_UNSET:
-			last_op->opcode = ZEND_UNSET_VAR;
-			break;
-		case ZEND_FETCH_DIM_UNSET:
-			last_op->opcode = ZEND_UNSET_DIM_OBJ;
-			last_op->extended_value = ZEND_UNSET_DIM;
-			break;
-		case ZEND_FETCH_OBJ_UNSET:
-			last_op->opcode = ZEND_UNSET_DIM_OBJ;
-			last_op->extended_value = ZEND_UNSET_OBJ;
-			break;
+		switch (last_op->opcode) {
+			case ZEND_FETCH_UNSET:
+				last_op->opcode = ZEND_UNSET_VAR;
+				break;
+			case ZEND_FETCH_DIM_UNSET:
+				last_op->opcode = ZEND_UNSET_DIM_OBJ;
+				last_op->extended_value = ZEND_UNSET_DIM;
+				break;
+			case ZEND_FETCH_OBJ_UNSET:
+				last_op->opcode = ZEND_UNSET_DIM_OBJ;
+				last_op->extended_value = ZEND_UNSET_OBJ;
+				break;
 
-	}
+		}
+	}	
 }
 
 
@@ -3193,18 +3273,29 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	zend_check_writable_variable(variable);
 	
-	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
+	if (variable->op_type == IS_CV) {
+		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);
+		last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
+		last_op->op1.op_type = IS_CONST;
+		last_op->op1.u.constant.type = IS_STRING;
+		last_op->op1.u.constant.value.str.len = CG(active_op_array)->vars[variable->u.var].name_len;
+		last_op->op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[variable->u.var].name);
+		SET_UNUSED(last_op->op2);
+		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
+	} else {
+		last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
 	
-	switch (last_op->opcode) {
-		case ZEND_FETCH_IS:
-			last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
-			break;
-		case ZEND_FETCH_DIM_IS:
-			last_op->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
-			break;
-		case ZEND_FETCH_OBJ_IS:
-			last_op->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
-			break;
+		switch (last_op->opcode) {
+			case ZEND_FETCH_IS:
+				last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
+				break;
+			case ZEND_FETCH_DIM_IS:
+				last_op->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
+				break;
+			case ZEND_FETCH_OBJ_IS:
+				last_op->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
+				break;
+		}
 	}
 	last_op->result.op_type = IS_TMP_VAR;
 	last_op->extended_value = type;

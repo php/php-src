@@ -83,114 +83,133 @@
 #define SPEC__TMP_CODE                          _TMP_CODE
 #define SPEC__VAR_CODE                          _VAR_CODE
 #define SPEC__UNUSED_CODE                       _UNUSED_CODE
+#define SPEC__CV_CODE                           _CV_CODE
 
 #define SPEC_OP1_TYPE_ANY                       opline->op1.op_type
 #define SPEC_OP1_TYPE_CONST                     IS_CONST
 #define SPEC_OP1_TYPE_TMP                       IS_TMP_VAR
 #define SPEC_OP1_TYPE_VAR                       IS_VAR
 #define SPEC_OP1_TYPE_UNUSED                    IS_UNUSED
+#define SPEC_OP1_TYPE_CV                        IS_CV
 
-#define SPEC_GET_OP1_ZVAL_PTR_ANY(T)            _get_zval_ptr(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_ZVAL_PTR_ANY(T)            get_zval_ptr(&opline->op1, EX(Ts), &free_op1, T)
 #define SPEC_GET_OP1_ZVAL_PTR_CONST(T)          _get_zval_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_TMP(T)            _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_VAR(T)            _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_UNUSED(T)         _get_zval_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_ZVAL_PTR_CV(T)             _get_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, T TSRMLS_CC)
 
-#define SPEC_GET_OP1_ZVAL_PTR_PTR_ANY(T)        _get_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_ZVAL_PTR_PTR_ANY(T)        get_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1, T)
 #define SPEC_GET_OP1_ZVAL_PTR_PTR_CONST(T)      _get_zval_ptr_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_PTR_TMP(T)        _get_zval_ptr_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_PTR_VAR(T)        _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_ZVAL_PTR_PTR_UNUSED(T)     _get_zval_ptr_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_ZVAL_PTR_PTR_CV(T)         _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), &free_op1, T TSRMLS_CC)
 
-#define SPEC_GET_OP1_OBJ_ZVAL_PTR_ANY(T)        _get_obj_zval_ptr(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_OBJ_ZVAL_PTR_ANY(T)        get_obj_zval_ptr(&opline->op1, EX(Ts), &free_op1, T)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_CONST(T)      _get_obj_zval_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_TMP(T)        _get_obj_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_VAR(T)        _get_obj_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_UNUSED(T)     _get_obj_zval_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_OBJ_ZVAL_PTR_CV(T)         _get_obj_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, T TSRMLS_CC)
 
-#define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_ANY(T)    _get_obj_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_ANY(T)    get_obj_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1, T)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_CONST(T)  _get_obj_zval_ptr_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_TMP(T)    _get_obj_zval_ptr_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_VAR(T)    _get_obj_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
 #define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_UNUSED(T) _get_obj_zval_ptr_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)
+#define SPEC_GET_OP1_OBJ_ZVAL_PTR_PTR_CV(T)     _get_obj_zval_ptr_ptr_cv(&opline->op1, EX(Ts), &free_op1, T TSRMLS_CC)
 
 #define SPEC_IS_OP1_TMP_FREE_ANY()              IS_TMP_FREE(free_op1)
 #define SPEC_IS_OP1_TMP_FREE_CONST()            0
 #define SPEC_IS_OP1_TMP_FREE_TMP()              1
 #define SPEC_IS_OP1_TMP_FREE_VAR()              0
 #define SPEC_IS_OP1_TMP_FREE_UNUSED()           0
+#define SPEC_IS_OP1_TMP_FREE_CV()               0
 
 #define SPEC_FREE_OP1_ANY()                     FREE_OP(free_op1);
 #define SPEC_FREE_OP1_CONST()
 #define SPEC_FREE_OP1_TMP()                     zval_dtor(free_op1.var)
 #define SPEC_FREE_OP1_VAR()                     FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_UNUSED()
+#define SPEC_FREE_OP1_CV()
 
 #define SPEC_FREE_OP1_IF_VAR_ANY()              FREE_OP_IF_VAR(free_op1);
 #define SPEC_FREE_OP1_IF_VAR_CONST()
 #define SPEC_FREE_OP1_IF_VAR_TMP()
 #define SPEC_FREE_OP1_IF_VAR_VAR()              FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_IF_VAR_UNUSED()
+#define SPEC_FREE_OP1_IF_VAR_CV()
 
 #define SPEC_FREE_OP1_VAR_PTR_ANY()             FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_VAR_PTR_CONST()
 #define SPEC_FREE_OP1_VAR_PTR_TMP()
 #define SPEC_FREE_OP1_VAR_PTR_VAR()             FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_VAR_PTR_UNUSED()
+#define SPEC_FREE_OP1_VAR_PTR_CV()
 
 #define SPEC_OP2_TYPE_ANY                       opline->op2.op_type
 #define SPEC_OP2_TYPE_CONST                     IS_CONST
 #define SPEC_OP2_TYPE_TMP                       IS_TMP_VAR
 #define SPEC_OP2_TYPE_VAR                       IS_VAR
 #define SPEC_OP2_TYPE_UNUSED                    IS_UNUSED
+#define SPEC_OP2_TYPE_CV                        IS_CV
 
-#define SPEC_GET_OP2_ZVAL_PTR_ANY(T)            _get_zval_ptr(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_ZVAL_PTR_ANY(T)            get_zval_ptr(&opline->op2, EX(Ts), &free_op2, T)
 #define SPEC_GET_OP2_ZVAL_PTR_CONST(T)          _get_zval_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_TMP(T)            _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_VAR(T)            _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_UNUSED(T)         _get_zval_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_ZVAL_PTR_CV(T)             _get_zval_ptr_cv(&opline->op2, EX(Ts), &free_op2, T TSRMLS_CC)
 
-#define SPEC_GET_OP2_ZVAL_PTR_PTR_ANY(T)        _get_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_ZVAL_PTR_PTR_ANY(T)        get_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2, T)
 #define SPEC_GET_OP2_ZVAL_PTR_PTR_CONST(T)      _get_zval_ptr_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_PTR_TMP(T)        _get_zval_ptr_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_PTR_VAR(T)        _get_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_ZVAL_PTR_PTR_UNUSED(T)     _get_zval_ptr_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_ZVAL_PTR_PTR_CV(T)         _get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), &free_op2, T TSRMLS_CC)
 
-#define SPEC_GET_OP2_OBJ_ZVAL_PTR_ANY(T)        _get_obj_zval_ptr(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_OBJ_ZVAL_PTR_ANY(T)        get_obj_zval_ptr(&opline->op2, EX(Ts), &free_op2, T)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_CONST(T)      _get_obj_zval_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_TMP(T)        _get_obj_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_VAR(T)        _get_obj_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_UNUSED(T)     _get_obj_zval_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_OBJ_ZVAL_PTR_CV(T)         _get_obj_zval_ptr_cv(&opline->op2, EX(Ts), &free_op2, T TSRMLS_CC)
 
-#define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_ANY(T)    _get_obj_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_ANY(T)    get_obj_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2, T)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_CONST(T)  _get_obj_zval_ptr_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_TMP(T)    _get_obj_zval_ptr_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_VAR(T)    _get_obj_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
 #define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_UNUSED(T) _get_obj_zval_ptr_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)
+#define SPEC_GET_OP2_OBJ_ZVAL_PTR_PTR_CV(T)     _get_obj_zval_ptr_ptr_cv(&opline->op2, EX(Ts), &free_op2, T TSRMLS_CC)
 
 #define SPEC_IS_OP2_TMP_FREE_ANY()              IS_TMP_FREE(free_op2)
 #define SPEC_IS_OP2_TMP_FREE_CONST()            0
 #define SPEC_IS_OP2_TMP_FREE_TMP()              1
 #define SPEC_IS_OP2_TMP_FREE_VAR()              0
 #define SPEC_IS_OP2_TMP_FREE_UNUSED()           0
+#define SPEC_IS_OP2_TMP_FREE_CV()               0
 
 #define SPEC_FREE_OP2_ANY()                     FREE_OP(free_op2);
 #define SPEC_FREE_OP2_CONST()
 #define SPEC_FREE_OP2_TMP()                     zval_dtor(free_op2.var)
 #define SPEC_FREE_OP2_VAR()                     FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_UNUSED()
+#define SPEC_FREE_OP2_CV()
 
 #define SPEC_FREE_OP2_IF_VAR_ANY()              FREE_OP_IF_VAR(free_op2);
 #define SPEC_FREE_OP2_IF_VAR_CONST()
 #define SPEC_FREE_OP2_IF_VAR_TMP()
 #define SPEC_FREE_OP2_IF_VAR_VAR()              FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_IF_VAR_UNUSED()
+#define SPEC_FREE_OP2_IF_VAR_CV()
 
 #define SPEC_FREE_OP2_VAR_PTR_ANY()             FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_VAR_PTR_CONST()
 #define SPEC_FREE_OP2_VAR_PTR_TMP()
 #define SPEC_FREE_OP2_VAR_PTR_VAR()             FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_VAR_PTR_UNUSED()
+#define SPEC_FREE_OP2_VAR_PTR_CV()
 
 #ifndef ZEND_VM_SPEC
 
@@ -208,22 +227,38 @@
 
 #else
 
-# define M_ANY                  (IS_ANY)
-# define M_CONST                (IS_CONST)
-# define M_TMP                  (IS_TMP_VAR)
-# define M_VAR                  (IS_VAR)
-# define M_UNUSED               (IS_UNUSED)
-# define M_CONST_TMP            (IS_CONST|IS_TMP_VAR)
-# define M_CONST_VAR            (IS_CONST|IS_VAR)
-# define M_CONST_UNUSED         (IS_CONST|IS_UNUSED)
-# define M_CONST_TMP_VAR        (IS_CONST|IS_TMP_VAR|IS_VAR)
-# define M_CONST_TMP_UNUSED     (IS_CONST|IS_TMP_VAR|IS_UNUSED)
-# define M_CONST_VAR_UNUSED     (IS_CONST|IS_VAR|IS_UNUSED)
-# define M_CONST_TMP_VAR_UNUSED (IS_CONST|IS_TMP_VAR|IS_VAR|IS_UNUSED)
-# define M_TMP_VAR              (IS_TMP_VAR|IS_VAR)
-# define M_TMP_UNUSED           (IS_TMP_VAR|IS_UNUSED)
-# define M_TMP_VAR_UNUSED       (IS_TMP_VAR|IS_VAR|IS_UNUSED)
-# define M_VAR_UNUSED           (IS_VAR|IS_UNUSED)
+# define M_ANY                     (IS_ANY)
+# define M_CONST                   (IS_CONST)
+# define M_TMP                     (IS_TMP_VAR)
+# define M_VAR                     (IS_VAR)
+# define M_UNUSED                  (IS_UNUSED)
+# define M_CONST_TMP               (IS_CONST|IS_TMP_VAR)
+# define M_CONST_VAR               (IS_CONST|IS_VAR)
+# define M_CONST_UNUSED            (IS_CONST|IS_UNUSED)
+# define M_CONST_TMP_VAR           (IS_CONST|IS_TMP_VAR|IS_VAR)
+# define M_CONST_TMP_UNUSED        (IS_CONST|IS_TMP_VAR|IS_UNUSED)
+# define M_CONST_VAR_UNUSED        (IS_CONST|IS_VAR|IS_UNUSED)
+# define M_CONST_TMP_VAR_UNUSED    (IS_CONST|IS_TMP_VAR|IS_VAR|IS_UNUSED)
+# define M_TMP_VAR                 (IS_TMP_VAR|IS_VAR)
+# define M_TMP_UNUSED              (IS_TMP_VAR|IS_UNUSED)
+# define M_TMP_VAR_UNUSED          (IS_TMP_VAR|IS_VAR|IS_UNUSED)
+# define M_VAR_UNUSED              (IS_VAR|IS_UNUSED)
+# define M_CV                      (IS_CV)
+# define M_CONST_CV                (IS_CONST|IS_CV)
+# define M_TMP_CV                  (IS_TMP_VAR|IS_CV)
+# define M_VAR_CV                  (IS_VAR|IS_CV)
+# define M_UNUSED_CV               (IS_UNUSED|IS_CV)
+# define M_CONST_TMP_CV            (IS_CONST|IS_TMP_VAR|IS_CV)
+# define M_CONST_VAR_CV            (IS_CONST|IS_VAR|IS_CV)
+# define M_CONST_UNUSED_CV         (IS_CONST|IS_UNUSED|IS_CV)
+# define M_CONST_TMP_VAR_CV        (IS_CONST|IS_TMP_VAR|IS_VAR|IS_CV)
+# define M_CONST_TMP_UNUSED_CV     (IS_CONST|IS_TMP_VAR|IS_UNUSED|IS_CV)
+# define M_CONST_VAR_UNUSED_CV     (IS_CONST|IS_VAR|IS_UNUSED|IS_CV)
+# define M_CONST_TMP_VAR_UNUSED_CV (IS_CONST|IS_TMP_VAR|IS_VAR|IS_UNUSED|IS_CV)
+# define M_TMP_VAR_CV              (IS_TMP_VAR|IS_VAR|IS_CV)
+# define M_TMP_UNUSED_CV           (IS_TMP_VAR|IS_UNUSED|IS_CV)
+# define M_TMP_VAR_UNUSED_CV       (IS_TMP_VAR|IS_VAR|IS_UNUSED|IS_CV)
+# define M_VAR_UNUSED_CV           (IS_VAR|IS_UNUSED|IS_CV)
 
 # define OP1_OP2_MASK(OP1T, OP2T) \
   ((OP1 & (OP1T)) && (OP2 & (OP2T)))
@@ -336,6 +371,12 @@
 
 # undef  OP1
 # undef  OP2
+# define OP1 IS_CV
+# define OP2 IS_ANY
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
 # define OP1 IS_ANY
 # define OP2 IS_CONST
 # include "zend_vm_handlers.h"
@@ -356,6 +397,12 @@
 # undef  OP2
 # define OP1 IS_ANY
 # define OP2 IS_UNUSED
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_ANY
+# define OP2 IS_CV
 # include "zend_vm_handlers.h"
 
 # undef  OP1
@@ -384,6 +431,12 @@
 
 # undef  OP1
 # undef  OP2
+# define OP1 IS_UNUSED
+# define OP2 IS_CV
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
 # define OP1 IS_CONST
 # define OP2 IS_UNUSED
 # include "zend_vm_handlers.h"
@@ -397,6 +450,12 @@
 # undef  OP1
 # undef  OP2
 # define OP1 IS_VAR
+# define OP2 IS_UNUSED
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_CV
 # define OP2 IS_UNUSED
 # include "zend_vm_handlers.h"
 
@@ -420,6 +479,12 @@
 
 # undef  OP1
 # undef  OP2
+# define OP1 IS_CONST
+# define OP2 IS_CV
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
 # define OP1 IS_TMP_VAR
 # define OP2 IS_CONST
 # include "zend_vm_handlers.h"
@@ -438,6 +503,12 @@
 
 # undef  OP1
 # undef  OP2
+# define OP1 IS_TMP_VAR
+# define OP2 IS_CV
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
 # define OP1 IS_VAR
 # define OP2 IS_CONST
 # include "zend_vm_handlers.h"
@@ -452,6 +523,36 @@
 # undef  OP2
 # define OP1 IS_VAR
 # define OP2 IS_VAR
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_VAR
+# define OP2 IS_CV
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_CV
+# define OP2 IS_CONST
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_CV
+# define OP2 IS_TMP_VAR
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_CV
+# define OP2 IS_VAR
+# include "zend_vm_handlers.h"
+
+# undef  OP1
+# undef  OP2
+# define OP1 IS_CV
+# define OP2 IS_CV
 # include "zend_vm_handlers.h"
 
 /* LABELS */
@@ -472,6 +573,22 @@
 # undef M_TMP_UNUSED
 # undef M_TMP_VAR_UNUSED
 # undef M_VAR_UNUSED
+# undef M_CV
+# undef M_CONST_CV
+# undef M_TMP_CV
+# undef M_VAR_CV
+# undef M_UNUSED_CV
+# undef M_CONST_TMP_CV
+# undef M_CONST_VAR_CV
+# undef M_CONST_UNUSED_CV
+# undef M_CONST_TMP_VAR_CV
+# undef M_CONST_TMP_UNUSED_CV
+# undef M_CONST_VAR_UNUSED_CV
+# undef M_CONST_TMP_VAR_UNUSED_CV
+# undef M_TMP_VAR_CV
+# undef M_TMP_UNUSED_CV
+# undef M_TMP_VAR_UNUSED_CV
+# undef M_VAR_UNUSED_CV
 
 # undef OPDEF
 
@@ -479,92 +596,160 @@
 	SPEC_LABELS1_##OP1M(OP##_SPEC, OP, OP2M)
 
 # define SPEC_LABELS1_M_ANY(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _ANY, _ANY, _ANY, _ANY)
+  SPEC_LABELS2_##OP2M(OP, CODE, _ANY, _ANY, _ANY, _ANY, _ANY)
 # define SPEC_LABELS1_M_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _NULL, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _NULL, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_VAR(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _NULL, _NULL)
 # define SPEC_LABELS1_M_VAR_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_TMP(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _NULL, _NULL)
 # define SPEC_LABELS1_M_TMP_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_TMP_VAR(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _NULL, _NULL)
 # define SPEC_LABELS1_M_TMP_VAR_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_CONST(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _NULL, _NULL)
 # define SPEC_LABELS1_M_CONST_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_CONST_VAR(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _NULL, _NULL)
 # define SPEC_LABELS1_M_CONST_VAR_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_CONST_TMP(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _NULL, _NULL)
 # define SPEC_LABELS1_M_CONST_TMP_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _UNUSED, _NULL)
 # define SPEC_LABELS1_M_CONST_TMP_VAR(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _NULL)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _NULL, _NULL)
 # define SPEC_LABELS1_M_CONST_TMP_VAR_UNUSED(OP, CODE, OP2M) \
-  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _UNUSED)
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _UNUSED, _NULL)
+# define SPEC_LABELS1_M_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _NULL, _NULL, _CV)
+# define SPEC_LABELS1_M_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS1_M_VAR_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _NULL, _CV)
+# define SPEC_LABELS1_M_VAR_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _NULL, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS1_M_TMP_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _NULL, _CV)
+# define SPEC_LABELS1_M_TMP_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS1_M_TMP_VAR_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _NULL, _CV)
+# define SPEC_LABELS1_M_TMP_VAR_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _NULL, _TMP, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS1_M_CONST_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _NULL, _CV)
+# define SPEC_LABELS1_M_CONST_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS1_M_CONST_VAR_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _NULL, _CV)
+# define SPEC_LABELS1_M_CONST_VAR_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _NULL, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS1_M_CONST_TMP_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _NULL, _CV)
+# define SPEC_LABELS1_M_CONST_TMP_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS1_M_CONST_TMP_VAR_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _NULL, _CV)
+# define SPEC_LABELS1_M_CONST_TMP_VAR_UNUSED_CV(OP, CODE, OP2M) \
+  SPEC_LABELS2_##OP2M(OP, CODE, _CONST, _TMP, _VAR, _UNUSED, _CV)
 
-# define SPEC_LABELS2_M_ANY(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _ANY, _ANY, _ANY, _ANY)
-# define SPEC_LABELS2_M_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _NULL, _NULL, _UNUSED)
-# define SPEC_LABELS2_M_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _NULL, _VAR, _NULL)
-# define SPEC_LABELS2_M_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _NULL, _VAR, _UNUSED)
-# define SPEC_LABELS2_M_TMP(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _TMP, _NULL, _NULL)
-# define SPEC_LABELS2_M_TMP_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _TMP, _NULL, _UNUSED)
-# define SPEC_LABELS2_M_TMP_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _TMP, _VAR, _NULL)
-# define SPEC_LABELS2_M_TMP_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _NULL, _TMP, _VAR, _UNUSED)
-# define SPEC_LABELS2_M_CONST(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _NULL, _NULL, _NULL)
-# define SPEC_LABELS2_M_CONST_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _NULL, _NULL, _UNUSED)
-# define SPEC_LABELS2_M_CONST_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _NULL, _VAR, _NULL)
-# define SPEC_LABELS2_M_CONST_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _NULL, _VAR, _UNUSED)
-# define SPEC_LABELS2_M_CONST_TMP(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _TMP, _NULL, _NULL)
-# define SPEC_LABELS2_M_CONST_TMP_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _TMP, _NULL, _UNUSED)
-# define SPEC_LABELS2_M_CONST_TMP_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _TMP, _VAR, _NULL)
-# define SPEC_LABELS2_M_CONST_TMP_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U) \
-  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, _CONST, _TMP, _VAR, _UNUSED)
+# define SPEC_LABELS2_M_ANY(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _ANY, _ANY, _ANY, _ANY, _NULL)
+# define SPEC_LABELS2_M_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _NULL, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _VAR, _NULL, _NULL)
+# define SPEC_LABELS2_M_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _VAR, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_TMP(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _NULL, _NULL, _NULL)
+# define SPEC_LABELS2_M_TMP_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _NULL, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_TMP_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _VAR, _NULL, _NULL)
+# define SPEC_LABELS2_M_TMP_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _VAR, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_CONST(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _NULL, _NULL, _NULL)
+# define SPEC_LABELS2_M_CONST_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _NULL, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_CONST_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _VAR, _NULL, _NULL)
+# define SPEC_LABELS2_M_CONST_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _VAR, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_CONST_TMP(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _NULL, _NULL, _NULL)
+# define SPEC_LABELS2_M_CONST_TMP_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _NULL, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_CONST_TMP_VAR(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _VAR, _NULL, _NULL)
+# define SPEC_LABELS2_M_CONST_TMP_VAR_UNUSED(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _VAR, _UNUSED, _NULL)
+# define SPEC_LABELS2_M_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _NULL, _NULL, _CV)
+# define SPEC_LABELS2_M_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS2_M_VAR_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _VAR, _NULL, _CV)
+# define SPEC_LABELS2_M_VAR_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _NULL, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS2_M_TMP_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _NULL, _NULL, _CV)
+# define SPEC_LABELS2_M_TMP_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS2_M_TMP_VAR_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _VAR, _NULL, _CV)
+# define SPEC_LABELS2_M_TMP_VAR_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _NULL, _TMP, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS2_M_CONST_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _NULL, _NULL, _CV)
+# define SPEC_LABELS2_M_CONST_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS2_M_CONST_VAR_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _VAR, _NULL, _CV)
+# define SPEC_LABELS2_M_CONST_VAR_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _NULL, _VAR, _UNUSED, _CV)
+# define SPEC_LABELS2_M_CONST_TMP_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _NULL, _NULL, _CV)
+# define SPEC_LABELS2_M_CONST_TMP_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _NULL, _UNUSED, _CV)
+# define SPEC_LABELS2_M_CONST_TMP_VAR_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _VAR, _NULL, _CV)
+# define SPEC_LABELS2_M_CONST_TMP_VAR_UNUSED_CV(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X) \
+  SPEC_LABELS(OP, CODE, OP1C, OP1T, OP1V, OP1U, OP1X, _CONST, _TMP, _VAR, _UNUSED, _CV)
 
-# define LABELS_1(OP,CODE,OP1,OP2C,OP2T,OP2V,OP2U) \
+# define LABELS_1(OP,CODE,OP1,OP2C,OP2T,OP2V,OP2U,OP2X) \
   OP1##OP2C(OP,CODE), \
   OP1##OP2T(OP,CODE), \
   OP1##OP2V(OP,CODE), \
-  OP1##OP2U(OP,CODE)
+  OP1##OP2U(OP,CODE), \
+  OP1##OP2X(OP,CODE)
 
-# define SPEC_LABELS(OP,CODE,OP1C,OP1T,OP1V,OP1U,OP2C,OP2T,OP2V,OP2U) \
-	LABELS_1(OP,CODE,SPEC_LABEL##OP1C,OP2C,OP2T,OP2V,OP2U), \
-	LABELS_1(OP,CODE,SPEC_LABEL##OP1T,OP2C,OP2T,OP2V,OP2U), \
-	LABELS_1(OP,CODE,SPEC_LABEL##OP1V,OP2C,OP2T,OP2V,OP2U), \
-	LABELS_1(OP,CODE,SPEC_LABEL##OP1U,OP2C,OP2T,OP2V,OP2U)
+# define SPEC_LABELS(OP,CODE,OP1C,OP1T,OP1V,OP1U,OP1X,OP2C,OP2T,OP2V,OP2U,OP2X) \
+	LABELS_1(OP,CODE,SPEC_LABEL##OP1C,OP2C,OP2T,OP2V,OP2U,OP2X), \
+	LABELS_1(OP,CODE,SPEC_LABEL##OP1T,OP2C,OP2T,OP2V,OP2U,OP2X), \
+	LABELS_1(OP,CODE,SPEC_LABEL##OP1V,OP2C,OP2T,OP2V,OP2U,OP2X), \
+	LABELS_1(OP,CODE,SPEC_LABEL##OP1U,OP2C,OP2T,OP2V,OP2U,OP2X), \
+	LABELS_1(OP,CODE,SPEC_LABEL##OP1X,OP2C,OP2T,OP2V,OP2U,OP2X)
 
 # define SPEC_LABEL_CONST_NULL(OP,CODE)    ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_TMP_NULL(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_VAR_NULL(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_UNUSED_NULL(OP,CODE)   ZEND_VM_SPEC_NULL_LABEL
+# define SPEC_LABEL_CV_NULL(OP,CODE)       ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_ANY_NULL(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_CONST(OP,CODE)    ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_TMP(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_VAR(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_UNUSED(OP,CODE)   ZEND_VM_SPEC_NULL_LABEL
+# define SPEC_LABEL_NULL_CV(OP,CODE)       ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_ANY(OP,CODE)      ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_NULL_NULL(OP,CODE)     ZEND_VM_SPEC_NULL_LABEL
 # define SPEC_LABEL_ANY_ANY(OP,CODE) \
@@ -577,6 +762,8 @@
   ZEND_VM_SPEC_LABEL(OP##_ANY_VAR, ZEND_VM_CODE(CODE, _ANY_CODE, _VAR_CODE))
 # define SPEC_LABEL_ANY_UNUSED(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_ANY_UNUSED, ZEND_VM_CODE(CODE, _ANY_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_ANY_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_ANY_CV, ZEND_VM_CODE(CODE, _ANY_CODE, _CV_CODE))
 # define SPEC_LABEL_CONST_ANY(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_CONST_ANY, ZEND_VM_CODE(CODE, _CONST_CODE, _ANY_CODE))
 # define SPEC_LABEL_CONST_CONST(OP,CODE) \
@@ -587,6 +774,8 @@
   ZEND_VM_SPEC_LABEL(OP##_CONST_VAR, ZEND_VM_CODE(CODE, _CONST_CODE, _VAR_CODE))
 # define SPEC_LABEL_CONST_UNUSED(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_CONST_UNUSED, ZEND_VM_CODE(CODE, _CONST_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_CONST_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CONST_CV, ZEND_VM_CODE(CODE, _CONST_CODE, _CV_CODE))
 # define SPEC_LABEL_TMP_ANY(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_TMP_ANY, ZEND_VM_CODE(CODE, _TMP_CODE, _ANY_CODE))
 # define SPEC_LABEL_TMP_CONST(OP,CODE) \
@@ -597,6 +786,8 @@
   ZEND_VM_SPEC_LABEL(OP##_TMP_VAR, ZEND_VM_CODE(CODE, _TMP_CODE, _VAR_CODE))
 # define SPEC_LABEL_TMP_UNUSED(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_TMP_UNUSED, ZEND_VM_CODE(CODE, _TMP_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_TMP_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_TMP_CV, ZEND_VM_CODE(CODE, _TMP_CODE, _CV_CODE))
 # define SPEC_LABEL_VAR_ANY(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_VAR_ANY, ZEND_VM_CODE(CODE, _VAR_CODE, _ANY_CODE))
 # define SPEC_LABEL_VAR_CONST(OP,CODE) \
@@ -607,6 +798,8 @@
   ZEND_VM_SPEC_LABEL(OP##_VAR_VAR, ZEND_VM_CODE(CODE, _VAR_CODE, _VAR_CODE))
 # define SPEC_LABEL_VAR_UNUSED(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_VAR_UNUSED, ZEND_VM_CODE(CODE, _VAR_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_VAR_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_VAR_CV, ZEND_VM_CODE(CODE, _VAR_CODE, _CV_CODE))
 # define SPEC_LABEL_UNUSED_ANY(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_UNUSED_ANY, ZEND_VM_CODE(CODE, _UNUSED_CODE, _ANY_CODE))
 # define SPEC_LABEL_UNUSED_CONST(OP,CODE) \
@@ -617,9 +810,32 @@
   ZEND_VM_SPEC_LABEL(OP##_UNUSED_VAR, ZEND_VM_CODE(CODE, _UNUSED_CODE, _VAR_CODE))
 # define SPEC_LABEL_UNUSED_UNUSED(OP,CODE) \
   ZEND_VM_SPEC_LABEL(OP##_UNUSED_UNUSED, ZEND_VM_CODE(CODE, _UNUSED_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_UNUSED_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_UNUSED_CV, ZEND_VM_CODE(CODE, _UNUSED_CODE, _CV_CODE))
+# define SPEC_LABEL_CV_ANY(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_ANY, ZEND_VM_CODE(CODE, _CV_CODE, _ANY_CODE))
+# define SPEC_LABEL_CV_CONST(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_CONST, ZEND_VM_CODE(CODE, _CV_CODE, _CONST_CODE))
+# define SPEC_LABEL_CV_TMP(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_TMP, ZEND_VM_CODE(CODE, _CV_CODE, _TMP_CODE))
+# define SPEC_LABEL_CV_VAR(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_VAR, ZEND_VM_CODE(CODE, _CV_CODE, _VAR_CODE))
+# define SPEC_LABEL_CV_UNUSED(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_UNUSED, ZEND_VM_CODE(CODE, _CV_CODE, _UNUSED_CODE))
+# define SPEC_LABEL_CV_CV(OP,CODE) \
+  ZEND_VM_SPEC_LABEL(OP##_CV_CV, ZEND_VM_CODE(CODE, _CV_CODE, _CV_CODE))
 
 # undef ZEND_VM_NULL_LABEL
 # define ZEND_VM_NULL_LABEL \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
+  ZEND_VM_SPEC_NULL_LABEL, \
   ZEND_VM_SPEC_NULL_LABEL, \
   ZEND_VM_SPEC_NULL_LABEL, \
   ZEND_VM_SPEC_NULL_LABEL, \
@@ -643,7 +859,7 @@
 
 #endif
 
-#if defined(ZEND_VM_SPEC) && (ZEND_VM_KIND == ZEND_VM_KIND_CALL)
+#if defined(ZEND_VM_HAVE_OLD_EXECUTOR) && defined(ZEND_VM_SPEC) && (ZEND_VM_KIND == ZEND_VM_KIND_CALL)
 ZEND_VM_NULL_HANDLER();
 #else
 ZEND_VM_NULL_HANDLER()

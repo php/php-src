@@ -152,6 +152,12 @@ typedef struct _zend_arg_info {
 	int required_num_args;
 } zend_arg_info;
 
+typedef struct _zend_compiled_variable {
+	char *name;
+	int name_len;
+	ulong hash_value;
+} zend_compiled_variable;
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
@@ -170,6 +176,9 @@ struct _zend_op_array {
 
 	zend_op *opcodes;
 	zend_uint last, size;
+
+	zend_compiled_variable *vars;
+	int last_var, size_var;
 
 	zend_uint T;
 
@@ -273,8 +282,10 @@ struct _zend_execute_data {
 	zend_op_array *op_array;
 	zval *object;
 	union _temp_variable *Ts;
+	zval ***CVs;
 	zend_bool original_in_execution;
 	zend_class_entry *calling_scope;
+	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 };
 
@@ -285,6 +296,7 @@ struct _zend_execute_data {
 #define IS_TMP_VAR	(1<<1)
 #define IS_VAR		(1<<2)
 #define IS_UNUSED	(1<<3)	/* Unused variable */
+#define IS_CV		(1<<4)	/* Compiled variable */
 
 #define EXT_TYPE_UNUSED		(1<<0)
 
@@ -328,7 +340,7 @@ void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
-void zend_do_fetch_static_member(znode *class_znode TSRMLS_DC);
+void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
 void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval *);

@@ -43,6 +43,7 @@ void zend_vm_set_opcode_handler(zend_op* opcode);
 #define _TMP_CODE    1
 #define _VAR_CODE    2
 #define _UNUSED_CODE 3
+#define _CV_CODE     4
 
 #ifndef ZEND_VM_KIND
 #  ifdef __GNUC__
@@ -81,11 +82,19 @@ static const int zend_vm_decode[] = {
 	_UNUSED_CODE, /* 5              */
 	_UNUSED_CODE, /* 6              */
 	_UNUSED_CODE, /* 7              */
-	_UNUSED_CODE  /* 8 = IS_UNUSED  */
+	_UNUSED_CODE, /* 8 = IS_UNUSED  */
+	_UNUSED_CODE, /* 9              */
+	_UNUSED_CODE, /* 10             */
+	_UNUSED_CODE, /* 11             */
+	_UNUSED_CODE, /* 12             */
+	_UNUSED_CODE, /* 13             */
+	_UNUSED_CODE, /* 14             */
+	_UNUSED_CODE, /* 15             */
+	_CV_CODE      /* 16 = IS_CV     */
 };
 
 #  define ZEND_VM_CODE(opcode, op1, op2) \
-     opcode * 16 + op1 * 4 + op2
+     opcode * 25 + op1 * 5 + op2
 #  define ZEND_VM_SPEC_OPCODE(opcode, op1, op2) \
      ZEND_VM_CODE(opcode, zend_vm_decode[op1], zend_vm_decode[op2])
 #  ifdef ZEND_VM_HAVE_OLD_EXECUTOR
@@ -173,6 +182,7 @@ static const int zend_vm_decode[] = {
      }
 
 #  define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+     free_alloca(EX(CVs)); \
      if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
        free_alloca(EX(Ts)); \
      } else { \
@@ -267,6 +277,7 @@ static const int zend_vm_decode[] = {
      }
 
 #  define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+     free_alloca(EX(CVs)); \
      if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
        free_alloca(EX(Ts)); \
      } else { \
@@ -358,6 +369,7 @@ static const int zend_vm_decode[] = {
      }
 
 #  define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+     free_alloca(EX(CVs)); \
      if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
        free_alloca(EX(Ts)); \
      } else { \

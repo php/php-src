@@ -771,7 +771,7 @@ variable_without_objects:
 ;
 
 static_member:
-		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $3; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $3; zend_do_fetch_static_member(&$$, &$1 TSRMLS_CC); }
 ;
 
 
