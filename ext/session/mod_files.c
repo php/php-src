@@ -142,7 +142,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		ps_files_close(data);
 		
 		if (!ps_files_valid_key(key)) {
-			php_error(E_WARNING, "The session id contains illegal characters, valid characters are only a-z, A-Z and 0-9");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are only a-z, A-Z and 0-9");
 			return;
 		}
 		if (!ps_files_path_create(buf, sizeof(buf), data, key))
@@ -157,11 +157,11 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 
 #ifdef F_SETFD
 			if (fcntl(data->fd, F_SETFD, 1)) {
-				php_error(E_WARNING, "fcntl(%d, F_SETFD, 1) failed: %s (%d)", data->fd, strerror(errno), errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, 1) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
 #endif
 		} else {
-			php_error(E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, 
 					strerror(errno), errno);
 		}
 	}
@@ -180,7 +180,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 
 	dir = opendir(dirname);
 	if (!dir) {
-		php_error(E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)\n", dirname, strerror(errno), errno);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)\n", dirname, strerror(errno), errno);
 		return (0);
 	}
 
@@ -280,9 +280,9 @@ PS_READ_FUNC(files)
 
 	if (n != sbuf.st_size) {
 		if (n == -1)
-			php_error(E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
 		else
-			php_error(E_WARNING, "read returned less bytes than requested");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read returned less bytes than requested");
 		efree(*val);
 		return FAILURE;
 	}
@@ -316,9 +316,9 @@ PS_WRITE_FUNC(files)
 
 	if (n != vallen) {
 		if (n == -1)
-			php_error(E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		else
-			php_error(E_WARNING, "write wrote less bytes than requested");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write wrote less bytes than requested");
 		return FAILURE;
 	}
 

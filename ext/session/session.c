@@ -86,7 +86,7 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	if (PS(session_status) == php_session_active) {
-		php_error(E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
 		return FAILURE;
 	}
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
@@ -98,7 +98,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 
 #if 0
 	if(!PS(mod)) {
-		php_error(E_ERROR,"Cannot find save handler %s",new_value);
+		php_error_docref(E_ERROR, "Cannot find save handler %s", new_value);
 	}
 #endif
 	return SUCCESS;
@@ -107,7 +107,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 static PHP_INI_MH(OnUpdateSerializer)
 {
 	if (PS(session_status) == php_session_active) {
-		php_error(E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
 		return FAILURE;
 	}
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
@@ -119,7 +119,7 @@ static PHP_INI_MH(OnUpdateSerializer)
 
 #if 0
 	if(!PS(serializer)) {
-		php_error(E_ERROR,"Cannot find serialization handler %s",new_value);
+		php_error_docref(E_ERROR, "Cannot find serialization handler %s", new_value);
 	}
 #endif
 	return SUCCESS;
@@ -531,7 +531,7 @@ static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 {
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
-		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed.");
 	}
 }
 
@@ -598,7 +598,7 @@ static void php_session_initialize(TSRMLS_D)
 
 	/* Open session handler first */
 	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
-		php_error(E_ERROR, "Failed to initialize session module");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to initialize session module");
 		return;
 	}
 	
@@ -639,7 +639,7 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 			}
 			break;
 		case HASH_KEY_IS_LONG:
-			php_error(E_NOTICE, "The session bug compatibility code will not "
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The session bug compatibility code will not "
 					"try to locate the global variable $%d due to its "
 					"numeric nature.", num_key);
 			break;
@@ -671,7 +671,7 @@ static void php_session_save_current_state(TSRMLS_D)
 			}
 
 			if (do_warn && PS(bug_compat_warn)) {
-				php_error(E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.");
 			}
 		}
 
@@ -689,7 +689,7 @@ static void php_session_save_current_state(TSRMLS_D)
 		}
 
 		if (ret == FAILURE)
-			php_error(E_WARNING, "Failed to write session data (%s). Please "
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write session data (%s). Please "
 					"verify that the current setting of session.save_path "
 					"is correct (%s)",
 					PS(mod)->name,
@@ -808,10 +808,10 @@ static int php_session_cache_limiter(TSRMLS_D)
 		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)",
 				output_start_filename, output_start_lineno);
 		} else {
-			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent");
 		}	
 		return -2;
 	}
@@ -842,10 +842,10 @@ static void php_session_send_cookie(TSRMLS_D)
 		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			php_error(E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)",
 				output_start_filename, output_start_lineno);
 		} else {
-			php_error(E_WARNING, "Cannot send session cookie - headers already sent");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cookie - headers already sent");
 		}	
 		return;
 	}
@@ -1051,7 +1051,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0
 			if (nrdels != -1)
-				php_error(E_NOTICE, "purged %d expired session objects\n", nrdels);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects\n", nrdels);
 #endif
 		}
 	}
@@ -1062,13 +1062,13 @@ static zend_bool php_session_destroy(TSRMLS_D)
 	zend_bool retval = SUCCESS;
 
 	if (PS(session_status) != php_session_active) {
-		php_error(E_WARNING, "Trying to destroy uninitialized session");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to destroy uninitialized session");
 		return FAILURE;
 	}
 
 	if (PS(mod)->destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 		retval = FAILURE;
-		php_error(E_WARNING, "Session object destruction failed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
 	}
 	
 	php_rshutdown_session_globals(TSRMLS_C);
@@ -1119,7 +1119,7 @@ PHP_FUNCTION(session_get_cookie_params)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "Cannot initialize return value from session_get_cookie_parameters");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot initialize return value from session_get_cookie_parameters");
 		RETURN_FALSE;
 	}
 
@@ -1177,7 +1177,7 @@ PHP_FUNCTION(session_module_name)
 			PS(mod_data) = NULL;
 		} else {
 			efree(old);
-			php_error(E_ERROR, "Cannot find named PHP session module (%s)",
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find named PHP session module (%s)",
 					Z_STRVAL_PP(p_name));
 			RETURN_FALSE;
 		}
