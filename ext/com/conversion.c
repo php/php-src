@@ -35,7 +35,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 			break;
 			
 		case IS_OBJECT:
-			if(strstr(pval_arg->value.obj.ce->name, "VARIANT"))
+			if(!strcmp(pval_arg->value.obj.ce->name, "VARIANT"))
 			{
 				int type;
 				pval **var_handle;
@@ -44,6 +44,23 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 				zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &var_handle);
 				var_arg->pvarVal = (VARIANT FAR*) zend_list_find((*var_handle)->value.lval, &type);
 				var_arg->vt = VT_VARIANT|VT_BYREF;
+			}
+			else if(!strcmp(pval_arg->value.obj.ce->name, "COM"))
+			{
+				pval **idispatch_handle;
+				IDispatch *i_dispatch;
+				int type;
+
+				/* fetch the IDispatch interface */
+				zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &idispatch_handle);
+				i_dispatch = (IDispatch *)zend_list_find((*idispatch_handle)->value.lval, &type);
+				if (!i_dispatch || (type != php_COM_get_le_idispatch()))
+					var_arg->vt = VT_EMPTY;
+				else
+				{
+					var_arg->vt = VT_DISPATCH;
+					var_arg->pdispVal = i_dispatch;
+				}
 			}
 			break;
 		
@@ -84,49 +101,49 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 		OLECHAR *unicode_str;
 
 		// set type
-		if(strstr(pval_type->value.str.val, "VT_UI1"))
+		if(!strcmp(pval_type->value.str.val, "VT_UI1"))
 			var_arg->vt = VT_UI1;
-		else if(strstr(pval_type->value.str.val, "VT_I2"))
+		else if(!strcmp(pval_type->value.str.val, "VT_I2"))
 			var_arg->vt = VT_I4;
-		else if(strstr(pval_type->value.str.val, "VT_R4"))
+		else if(!strcmp(pval_type->value.str.val, "VT_R4"))
 			var_arg->vt = VT_R4;
-		else if(strstr(pval_type->value.str.val, "VT_R8"))
+		else if(!strcmp(pval_type->value.str.val, "VT_R8"))
 			var_arg->vt = VT_R8;
-		else if(strstr(pval_type->value.str.val, "VT_BOOL"))
+		else if(!strcmp(pval_type->value.str.val, "VT_BOOL"))
 			var_arg->vt = VT_BOOL;
-		else if(strstr(pval_type->value.str.val, "VT_ERROR"))
+		else if(!strcmp(pval_type->value.str.val, "VT_ERROR"))
 			var_arg->vt = VT_ERROR;
-		else if(strstr(pval_type->value.str.val, "VT_CY"))
+		else if(!strcmp(pval_type->value.str.val, "VT_CY"))
 			var_arg->vt = VT_CY;
-		else if(strstr(pval_type->value.str.val, "VT_DATE"))
+		else if(!strcmp(pval_type->value.str.val, "VT_DATE"))
 			var_arg->vt = VT_DATE;
-		else if(strstr(pval_type->value.str.val, "VT_BSTR"))
+		else if(!strcmp(pval_type->value.str.val, "VT_BSTR"))
 			var_arg->vt = VT_BSTR;
-		else if(strstr(pval_type->value.str.val, "VT_DECIMAL"))
+		else if(!strcmp(pval_type->value.str.val, "VT_DECIMAL"))
 			var_arg->vt = VT_DECIMAL;
-		else if(strstr(pval_type->value.str.val, "VT_UNKNOWN"))
+		else if(!strcmp(pval_type->value.str.val, "VT_UNKNOWN"))
 			var_arg->vt = VT_UNKNOWN;
-		else if(strstr(pval_type->value.str.val, "VT_DISPATCH"))
+		else if(!strcmp(pval_type->value.str.val, "VT_DISPATCH"))
 			var_arg->vt = VT_DISPATCH;
-		else if(strstr(pval_type->value.str.val, "VT_VARIANT"))
+		else if(!strcmp(pval_type->value.str.val, "VT_VARIANT"))
 			var_arg->vt = VT_VARIANT;
-		else if(strstr(pval_type->value.str.val, "VT_I1"))
+		else if(!strcmp(pval_type->value.str.val, "VT_I1"))
 			var_arg->vt = VT_I1;
-		else if(strstr(pval_type->value.str.val, "VT_UI2"))
+		else if(!strcmp(pval_type->value.str.val, "VT_UI2"))
 			var_arg->vt = VT_UI2;
-		else if(strstr(pval_type->value.str.val, "VT_UI4"))
+		else if(!strcmp(pval_type->value.str.val, "VT_UI4"))
 			var_arg->vt = VT_UI4;
-		else if(strstr(pval_type->value.str.val, "VT_INT"))
+		else if(!strcmp(pval_type->value.str.val, "VT_INT"))
 			var_arg->vt = VT_INT;
-		else if(strstr(pval_type->value.str.val, "VT_UINT"))
+		else if(!strcmp(pval_type->value.str.val, "VT_UINT"))
 			var_arg->vt = VT_UINT;
 
 		// is safearray
-		if(strstr(pval_type->value.str.val, "VT_ARRAY"))
+		if(!strcmp(pval_type->value.str.val, "VT_ARRAY"))
 			var_arg->vt |= VT_ARRAY;
 
 		// by reference
-		if(strstr(pval_type->value.str.val, "VT_BYREF"))
+		if(!strcmp(pval_type->value.str.val, "VT_BYREF"))
 			var_arg->vt |= VT_BYREF;
 
 		switch(var_arg->vt)
