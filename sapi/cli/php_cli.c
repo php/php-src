@@ -449,18 +449,21 @@ static void cli_register_file_handles(TSRMLS_D)
 	ic.flags = CONST_CS;
 	ic.name = zend_strndup("STDIN", 6);
 	ic.name_len = 6;
+	ic.module_number = 0;
 	zend_register_constant(&ic TSRMLS_CC);
 
 	oc.value = *zout;
 	oc.flags = CONST_CS;
 	oc.name = zend_strndup("STDOUT", 7);
 	oc.name_len = 7;
+	oc.module_number = 0;
 	zend_register_constant(&oc TSRMLS_CC);
 
 	ec.value = *zerr;
 	ec.flags = CONST_CS;
 	ec.name = zend_strndup("STDERR", 7);
 	ec.name_len = 7;
+	ec.module_number = 0;
 	zend_register_constant(&ec TSRMLS_CC);
 
 	FREE_ZVAL(zin);
