@@ -42,10 +42,10 @@ function_entry bcmath_functions[] = {
 zend_module_entry bcmath_module_entry = {
 	"bcmath",
     bcmath_functions,
-	NULL,
-	NULL,
+	PHP_MINIT(bcmath),
+	PHP_MSHUTDOWN(bcmath),
 	PHP_RINIT(bcmath),
-	PHP_RSHUTDOWN(bcmath),
+	NULL,
 	PHP_MINFO(bcmath),
 	STANDARD_MODULE_PROPERTIES
 };
@@ -58,20 +58,29 @@ ZEND_GET_MODULE(bcmath)
 static long bc_precision;
 #endif
 
-PHP_RINIT_FUNCTION(bcmath)
+PHP_MINIT_FUNCTION(bcmath)
 {
 	init_numbers();
+	return SUCCESS;
+}
+
+
+
+PHP_MSHUTDOWN_FUNCTION(bcmath)
+{
+	destruct_numbers();
+	return SUCCESS;
+}
+
+
+PHP_RINIT_FUNCTION(bcmath)
+{
 	if (cfg_get_long("bcmath.scale",&bc_precision)==FAILURE) {
 		bc_precision=0;
 	}
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(bcmath)
-{
-	destruct_numbers();
-	return SUCCESS;
-}
 
 PHP_MINFO_FUNCTION(bcmath)
 {
