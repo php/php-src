@@ -62,7 +62,7 @@ static int php_restore_ini_entry_cb(php_ini_entry *ini_entry, int stage)
  */
 int php_ini_mstartup()
 {
-	if (zend_hash_init(&known_directives, 100, NULL, NULL, 1)==FAILURE) {
+	if (zend_hash_init_ex(&known_directives, 100, NULL, NULL, 1, 0)==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;

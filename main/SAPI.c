@@ -75,7 +75,7 @@ SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
 	sapi_module = *sf;
-	zend_hash_init(&known_post_content_types, 5, NULL, NULL, 1);
+	zend_hash_init_ex(&known_post_content_types, 5, NULL, NULL, 1, 0);
 
 	sapi_register_post_entries(supported_post_entries);
 
