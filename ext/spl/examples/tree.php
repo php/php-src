@@ -26,6 +26,7 @@ EOF;
 	exit(1);
 }
 
+echo $argv[1]."\n";
 foreach(new DirectoryGraphIterator($argv[1]) as $file) {
 	echo $file . "\n";
 }
