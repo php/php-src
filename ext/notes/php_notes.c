@@ -31,7 +31,12 @@
 #include "php_notes.h"
 #include "ext/standard/info.h"
 
+#ifdef PHP_WIN32
+#include <global.h>
+#else
 #include <notes_global.h>
+#endif
+
 #include <nsfdb.h>
 #include <nsfdata.h>
 #include <osmisc.h>
@@ -58,9 +63,14 @@
 #include <io.h>
 #include <direct.h>
 #include <fcntl.h>
-
 #include <globerr.h>
+
+#ifdef PHP_WIN32
+#include <mail.h>
+#else
 #include <notes_mail.h>
+#endif
+
 #include <mailserv.h>
 #include <nsf.h>
 #include <osfile.h>                     /* OSPathNetConstruct */
