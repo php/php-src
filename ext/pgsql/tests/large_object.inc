@@ -28,7 +28,20 @@ pg_lo_close($handle);
 pg_exec ($db, "commit");
 
 pg_exec ($db, "begin");
-pg_lo_unlink($oid);
+pg_lo_unlink($db, $oid) or print("pg_lo_unlink() error\n");
+pg_exec ($db, "commit");
+
+// more pg_lo_unlink() tests
+// Test without connection 
+pg_exec ($db, "begin");
+$oid = pg_lo_create ($db) or print("pg_lo_create() error\n");
+pg_lo_unlink($oid) or print("pg_lo_unlink() error\n");
+pg_exec ($db, "commit");
+
+// Test with string oid value
+pg_exec ($db, "begin");
+$oid = pg_lo_create ($db) or print("pg_lo_create() error\n");
+pg_lo_unlink($db, (string)$oid) or print("pg_lo_unlink() error\n");
 pg_exec ($db, "commit");
 
 echo "OK";

@@ -1649,39 +1649,69 @@ PHP_FUNCTION(pg_lo_create)
    Delete a large object */
 PHP_FUNCTION(pg_lo_unlink)
 {
-	zval **pgsql_link = NULL, **oid;
+	zval *pgsql_link = NULL;
+	long oid_long;
+	char *oid_string, *end_ptr;
+	size_t oid_strlen;
 	PGconn *pgsql;
-	Oid pgsql_oid;
+	Oid oid;
 	int id = -1;
+	int argc = ZEND_NUM_ARGS();
 
-	/* FIXME: Does not work when  OID is larger than LONG_MAX */
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &oid)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(oid);
-			pgsql_oid = Z_LVAL_PP(oid);
-			id = PGG(default_link);
-			CHECK_DEFAULT_LINK(id);
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &pgsql_link, &oid)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(oid);
-			pgsql_oid = Z_LVAL_PP(oid);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	/* accept string type since Oid type is unsigned int */
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "rs", &pgsql_link, &oid_string, &oid_strlen) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "rl", &pgsql_link, &oid_long) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "s", &oid_string, &oid_strlen) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		id = PGG(default_link);
+		CHECK_DEFAULT_LINK(id);
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "l", &oid_long) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
+		id = PGG(default_link);
+		CHECK_DEFAULT_LINK(id);
+	}
+	else {
+		php_error(E_WARNING, "%s() exptects 1 or 2 arguments",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 	
-	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-	
-	if (lo_unlink(pgsql, pgsql_oid) == -1) {
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	if (lo_unlink(pgsql, oid) == -1) {
 		php_error(E_WARNING, "%s() unable to delete PostgreSQL large object %u",
-				  get_active_function_name(TSRMLS_C), pgsql_oid);
+				  get_active_function_name(TSRMLS_C), oid);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1692,42 +1722,67 @@ PHP_FUNCTION(pg_lo_unlink)
    Open a large object and return fd */
 PHP_FUNCTION(pg_lo_open)
 {
-	zval **pgsql_link = NULL, **oid, **mode;
+	zval *pgsql_link = NULL;
+	long oid_long;
+	char *oid_string, *end_ptr, *mode_string;
+	size_t oid_strlen, mode_strlen;
 	PGconn *pgsql;
-	Oid pgsql_oid;
+	Oid oid;
 	int id = -1, pgsql_mode=0, pgsql_lofd;
 	int create=0;
-	char *mode_string=NULL;
 	pgLofp *pgsql_lofp;
+	int argc = ZEND_NUM_ARGS();
 
-	/* FIXME: Does not work when  OID is larger than LONG_MAX */
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &oid, &mode)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(oid);
-			pgsql_oid = Z_LVAL_PP(oid);
-			convert_to_string_ex(mode);
-			mode_string = Z_STRVAL_PP(mode);
-			id = PGG(default_link);
-			CHECK_DEFAULT_LINK(id);
-			break;
-		case 3:
-			if (zend_get_parameters_ex(3, &pgsql_link, &oid, &mode)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(oid);
-			pgsql_oid = Z_LVAL_PP(oid);
-			convert_to_string_ex(mode);
-			mode_string = Z_STRVAL_PP(mode);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	/* accept string type since Oid is unsigned int */
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "rss", &pgsql_link, &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
 	}
-
-	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "rls", &pgsql_link, &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "ss", &oid_string, &oid_strlen, &mode_string, &mode_strlen) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		id = PGG(default_link);
+		CHECK_DEFAULT_LINK(id);
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "ls", &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
+		id = PGG(default_link);
+		CHECK_DEFAULT_LINK(id);
+	}
+	else {
+		php_error(E_WARNING, "%s() exptects 1 or 2 arguments",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	/* r/w/+ is little bit more PHP-like than INV_READ/INV_WRITE and a lot of
 	   faster to type. Unfortunately, doesn't behave the same way as fopen()...
@@ -1750,16 +1805,16 @@ PHP_FUNCTION(pg_lo_open)
 
 	pgsql_lofp = (pgLofp *) emalloc(sizeof(pgLofp));
 
-	if ((pgsql_lofd = lo_open(pgsql, pgsql_oid, pgsql_mode)) == -1) {
+	if ((pgsql_lofd = lo_open(pgsql, oid, pgsql_mode)) == -1) {
 		if (create) {
-			if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == 0) {
+			if ((oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == 0) {
 				efree(pgsql_lofp);
 				php_error(E_WARNING, "%s() unable to create PostgreSQL large object",
 						  get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			} else {
-				if ((pgsql_lofd = lo_open(pgsql, pgsql_oid, pgsql_mode)) == -1) {
-					if (lo_unlink(pgsql, pgsql_oid) == -1) {
+				if ((pgsql_lofd = lo_open(pgsql, oid, pgsql_mode)) == -1) {
+					if (lo_unlink(pgsql, oid) == -1) {
 						efree(pgsql_lofp);
 						php_error(E_WARNING, "%s() Something's really messed up!!! Your database is badly corrupted in a way NOT related to PHP",
 								  get_active_function_name(TSRMLS_C));
@@ -1978,39 +2033,89 @@ PHP_FUNCTION(pg_lo_import)
 PHP_FUNCTION(pg_lo_export)
 {
 	zval *pgsql_link = NULL;
-	char *file_out;
-	int id = -1, name_len, oid_id;
-	int argc = ZEND_NUM_ARGS();
+	char *file_out, *oid_string, *end_ptr;
+	size_t oid_strlen;
+	int id = -1, name_len;
+	long oid_long;
 	Oid oid;
 	PGconn *pgsql;
+	int argc = ZEND_NUM_ARGS();
 
-	/* FIXME: Does not work when OID is larger than LONG_MAX */
+	/* allow string to handle large OID value correctly */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-								 "rls", &pgsql_link, &oid_id, &file_out, &name_len) == SUCCESS) {
-		;
+								 "rls", &pgsql_link, &oid_long, &file_out, &name_len) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									  "ls",  &oid_id, &file_out, &name_len) == SUCCESS) {
+								 "rss", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+									  "ls",  &oid_long, &file_out, &name_len) == SUCCESS) {
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									  "lsr", &oid_id, &file_out, &name_len, &pgsql_link) == SUCCESS) {
+								 "ss", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		id = PGG(default_link);
+		CHECK_DEFAULT_LINK(id);
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+								 "ssr", &oid_string, &oid_strlen, &file_out, &name_len, &pgsql_link) == SUCCESS) {
+		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
+		if ((oid_string+oid_strlen) != end_ptr) {
+			/* wrong integer format */
+			php_error(E_NOTICE, "%s() wrong OID value passed",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	}
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
+									  "lsr", &oid_long, &file_out, &name_len, &pgsql_link) == SUCCESS) {
 		php_error(E_NOTICE, "Old API for %s() is used.", get_active_function_name(TSRMLS_C));
+		if (oid_long <= InvalidOid) {
+			php_error(E_NOTICE, "%s() invalid OID is specified",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+		oid = (Oid)oid_long;
 	}
 	else {
-		WRONG_PARAM_COUNT;
+		php_error(E_WARNING, "%s() expects 2 or 3 arguments",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	oid = (Oid) oid_id;
-
 	if (lo_export(pgsql, oid, file_out)) {
 		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	} 
+	RETURN_FALSE;
 }
 /* }}} */
 
