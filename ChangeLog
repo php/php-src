@@ -1,3 +1,46 @@
+2003-09-19  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/docs/rfc01_PEAR_pecl-binaries.txt:
+      RFC about PECL binary creation and distribution
+
+2003-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/package.xml:
+      MFB: Add myself to credits
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml:
+      Add myself to credits
+
+2003-09-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * win32/install.txt:
+      - Fixed typo
+
+2003-09-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * header:
+      Is the version 5 now? :)
+
+    * scripts/Makefile.frag:
+      MFB
+
+    * (PHP_4_3)
+      scripts/Makefile.frag:
+      Make sure phpize/php-config are build
+
+2003-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #25570 (Possible crash in apache2handler when zend_bailout
+      called outside of zend_try {} block).
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #25570 (Possible crash in apache2handler when zend_bailout called
+      outside of zend_try {} block).
+
 2003-09-18  Sara Golemon  <php@alphaweb.net>
 
     * ext/ftp/ftp.c:
