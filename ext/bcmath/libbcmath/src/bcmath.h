@@ -101,9 +101,9 @@ typedef struct bc_struct
 
 _PROTOTYPE(void bc_init_numbers, (TSRMLS_D));
 
-_PROTOTYPE(bc_num bc_new_num, (int length, int scale));
+_PROTOTYPE(bc_num _bc_new_num_ex, (int length, int scale, int persistent));
 
-_PROTOTYPE(void bc_free_num, (bc_num *num));
+_PROTOTYPE(void _bc_free_num_ex, (bc_num *num, int persistent));
 
 _PROTOTYPE(bc_num bc_copy_num, (bc_num num));
 
@@ -155,4 +155,8 @@ _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
 _PROTOTYPE(void bc_rt_warn, (char *mesg ,...));
 _PROTOTYPE(void bc_rt_error, (char *mesg ,...));
 _PROTOTYPE(void bc_out_of_memory, (void));
+
+#define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
+#define bc_free_num(num)			_bc_free_num_ex((num), 0)
+
 #endif

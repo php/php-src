@@ -49,7 +49,7 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
-#if WITH_BCMATH
+#if HAVE_BCMATH
 #include "ext/bcmath/php_bcmath.h"
 #endif
 #if HAVE_CALENDAR
@@ -105,7 +105,7 @@
  */
 zend_module_entry *php_builtin_extensions[] = {
 	phpext_standard_ptr
-#if WITH_BCMATH
+#if HAVE_BCMATH
 	,phpext_bcmath_ptr
 #endif
 #if HAVE_CALENDAR

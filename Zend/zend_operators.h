@@ -30,7 +30,7 @@
 #endif
 
 
-#if 0&&WITH_BCMATH
+#if 0&&HAVE_BCMATH
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
@@ -106,7 +106,7 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 			if (dval) {
 				*dval = local_dval;
 			}
-#if 0&&WITH_BCMATH
+#if 0&&HAVE_BCMATH
 			if (length>16) {
 				register char *ptr=str, *end=str+length;
 				

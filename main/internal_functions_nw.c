@@ -65,7 +65,7 @@
  */
 zend_module_entry *php_builtin_extensions[] = {
 	phpext_standard_ptr,
-#if WITH_BCMATH
+#if HAVE_BCMATH
 	phpext_bcmath_ptr,
 #endif
 	phpext_calendar_ptr,
