@@ -309,6 +309,10 @@ function_entry basic_functions[] = {
 	PHP_FE(connection_status,			NULL)
 	PHP_FE(ignore_user_abort,			NULL)
 
+	PHP_FE(get_loaded_extensions,		NULL)
+	PHP_FE(extension_loaded,			NULL)
+	PHP_FE(get_extension_funcs,			NULL)
+	
 	{NULL, NULL, NULL}
 };
 
@@ -1496,6 +1500,75 @@ PHP_FUNCTION(getprotobynumber)
 		RETURN_FALSE;
 
 	RETURN_STRING(ent->p_name,1);
+}
+/* }}} */
+
+
+static int php_add_extension_info(zend_module_entry *module, void *arg)
+{
+	zval *name_array = (zval *)arg;
+	add_next_index_string(name_array, module->name, 1);
+	return 0;
+}
+
+/* {{{ proto array get_loaded_extensions(void)
+   Return an array containing names of loaded extensions */
+PHP_FUNCTION(get_loaded_extensions)
+{
+	if (ARG_COUNT(ht) != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void*)) php_add_extension_info, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto bool extension_loaded(string extension_name)
+   Returns true if the named extension is loaded */
+PHP_FUNCTION(extension_loaded)
+{
+	zval **extension_name;
+
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &extension_name)) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(extension_name);
+	if (zend_hash_exists(&module_registry, (*extension_name)->value.str.val, (*extension_name)->value.str.len+1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* proto array get_extension_funcs(string extension_name)
+   Returns an array with the names of functions belonging to the named extension */
+PHP_FUNCTION(get_extension_funcs)
+{
+	zval **extension_name;
+	zend_module_entry *module;
+	zend_function_entry *func;
+
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &extension_name)) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(extension_name);
+	if (zend_hash_find(&module_registry, (*extension_name)->value.str.val,
+				       (*extension_name)->value.str.len+1, (void**)&module) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	func = module->functions;
+	while(func->fname) {
+		add_next_index_string(return_value, func->fname, 1);
+		func++;
+	}
 }
 /* }}} */
 
