@@ -1235,7 +1235,10 @@ class PEAR_Common extends PEAR
     function buildProvidesArray($srcinfo)
     {
         $file = basename($srcinfo['source_file']);
-        $pn  = $this->_packageName;
+        $pn = '';
+        if (isset($this->_packageName)) {
+            $pn = $this->_packageName;
+        }
         $pnl = strlen($pn);
         foreach ($srcinfo['declared_classes'] as $class) {
             $key = "class;$class";
