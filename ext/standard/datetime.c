@@ -459,10 +459,8 @@ PHP_FUNCTION(gmdate)
 }
 /* }}} */
 
-/* {{{ proto array localtime([int timestamp[, bool associative_array]])
-   Returns the results of the C system call localtime as an associative array
-   if the associative_array argument is set to 1 other wise it is a regular
-   array. */
+/* {{{ proto array localtime([int timestamp [, bool associative_array]])
+   Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
 	zval **timestamp_arg, **assoc_array_arg;
