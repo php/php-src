@@ -30,6 +30,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_globals.h"
 
 #if HAVE_PCRE
 
@@ -119,8 +120,10 @@ void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS)
 /* {{{ int php_minit_pcre(INIT_FUNC_ARGS) */
 int php_minit_pcre(INIT_FUNC_ARGS)
 {
+	ELS_FETCH();
+
 #ifdef ZTS
-	pcre_globals_id = tsrm_allocate_id(
+	pcre_globals_id = ts_allocate_id(
 							sizeof(php_pcre_globals),
 							_php_pcre_init_globals,
 							_php_pcre_shutdown_globals);
@@ -459,7 +462,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 					}
 				}
 
-				php_pcre_free(stringlist);
+				php_pcre_free((void *) stringlist);
 				
 				/* Advance to the position right after the last full match */
 				piece += offsets[1];
