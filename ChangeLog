@@ -1,10 +1,7 @@
 1999-12-02  Rasmus Lerdorf  <rasmus@php.net>
 
     * main.c:
-    * ext/mysql/php_mysql.c:
-1999-12-02  Andrei Zmievski  <zmievski@ispi.net>
-
-    * NEWS: *** empty log message ***
+    * ext/mysql/php_mysql.c: Add optional socket path to mysql_?connect() functions
 
 1999-12-02  Sascha Schumann  <sascha@schumann.cx>
 
@@ -186,8 +183,6 @@
 
 1999-11-29  Andrei Zmievski  <zmievski@ispi.net>
 
-    * NEWS: *** empty log message ***
-
     * NEWS: Name update.
 
 1999-11-29  Sam Ruby  <rubys@us.ibm.com>
@@ -271,8 +266,6 @@
 
 1999-11-27  Andrei Zmievski  <zmievski@ispi.net>
 
-    * NEWS: *** empty log message ***
-
     * ext/domxml/.cvsignore: Don't cry, CVS.
 
     * ext/session/session.c:
@@ -324,10 +317,6 @@
       strlcat.c
       strlcpy.c
       strtok_r.c: Get Win32 to compile again
-
-1999-11-26  Zeev Suraski  <zeev@php.net>
-
-    * NEWS: *** empty log message ***
 
 1999-11-26  Sascha Schumann  <sascha@schumann.cx>
 
@@ -568,8 +557,6 @@
 
 1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
 
-    * TODO: *** empty log message ***
-
     * TODO: Re-arranging a bit.
 
 1999-11-23  Zeev Suraski  <zeev@php.net>
@@ -596,10 +583,6 @@
     * sapi/cgi/cgi_main.c:
     (main) Remove redundant statement, this is part of the initialization
     function.
-
-1999-11-23  Thies C. Arntzen  <thies@digicol.de>
-
-    * TODO: *** empty log message ***
 
 1999-11-23  Sascha Schumann  <sascha@schumann.cx>
 
@@ -661,10 +644,6 @@
 
     * ext/mssql/mssql.dsp:
     Project changed to allow compilation for MS SQL 6.5 or 7.0
-
-1999-11-22  Zeev Suraski  <zeev@php.net>
-
-    * NEWS: *** empty log message ***
 
 1999-11-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
@@ -793,8 +772,6 @@
 1999-11-20  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/string.c:    (PHP strtr) new 2-Arg version.
-
-    * NEWS: *** empty log message ***
 
 1999-11-20  Andi Gutmans  <andi@php.net>
 
@@ -1423,10 +1400,6 @@
     - Add include path. Used relative include path assuming php4 and bindlib_w32
       are in the same directory.
 
-1999-11-03  Andrei Zmievski  <zmievski@ispi.net>
-
-    * TODO: *** empty log message ***
-
 1999-11-03  Frank M. Kromann  <fmk@swwwing.com>
 
     * MAINTAINERS
@@ -1474,8 +1447,6 @@
     * NEWS: NEWS update
 
 1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
-
-    * NEWS: *** empty log message ***
 
     * ext/standard/basic_functions.c
       ext/standard/basic_functions.h: Added array_pad() function.
@@ -2759,8 +2730,6 @@
 
 1999-09-29  Stig Bakken  <ssb@fast.no>
 
-    * ChangeLog: *** empty log message ***
-
     * scripts/preconfig
       sapi/apache/Makefile.am
       sapi/apache/Makefile.inc
@@ -3027,8 +2996,6 @@
 
 1999-09-25  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
 
-    * ChangeLog: *** empty log message ***
-
     * ext/odbc/php_odbc.c: odbc now uses the new Zend function api
 
 1999-09-25  Stefan Roehrich  <sr@linux.de>
@@ -3057,8 +3024,6 @@
       ChangeLog: - Updated array functions to use high-performance API
     - Updated preg_split() to allow returning only non-empty pieces
 
-    * ChangeLog: *** empty log message ***
-
     * ext/pcre/php_pcre.c
       ChangeLog: Update to new high-performance function API.
 
@@ -3079,8 +3044,6 @@
       ext/sysvshm/sysvshm.c:     Use new Zend API and some minor cleanup.
 
 1999-09-24  Andrei Zmievski  <andrei@ispi.net>
-
-    * ChangeLog: *** empty log message ***
 
     * ext/standard/var.c: Extended var_dump to handle IS_RESOURCE somewhat.
 
@@ -3268,8 +3231,6 @@
 
 1999-09-21  Andrei Zmievski  <andrei@ispi.net>
 
-    * ChangeLog: *** empty log message ***
-
     * ext/wddx/wddx.c:
     WDDX can now serialize and deserialize objects. It uses a variable named
     'php_classname' to store the class name as part of the structure. This way
@@ -3328,10 +3289,6 @@
 
         For portability reasons we set the integer part of our result to 0.
         This is equivalent to using tv_usec % 1000000.
-
-1999-09-21  Zeev Suraski  <zeev@php.net>
-
-    * ChangeLog: *** empty log message ***
 
 1999-09-21  Rasmus Lerdorf  <rasmus@php.net>
 
@@ -3392,8 +3349,6 @@
 
 1999-09-20  Andrei Zmievski  <andrei@ispi.net>
 
-    * ChangeLog: *** empty log message ***
-
     * ext/standard/php3_var.h
       ext/standard/var.c
       ext/sysvshm/sysvshm.c
@@ -3422,8 +3377,6 @@
 
 1999-09-20  Zeev Suraski  <zeev@php.net>
 
-    * ChangeLog: *** empty log message ***
-
     * ChangeLog
       mod_php4.c:
     Fixed a memory leak in the Apache per-directory directives handler
@@ -3435,10 +3388,6 @@
       ext/standard/basic_functions.h: added array_count_values function.
 
     * ext/standard/var.c: new API for var_dump
-
-1999-09-19  Zeev Suraski  <zeev@php.net>
-
-    * ChangeLog: *** empty log message ***
 
 1999-09-18  Andi Gutmans  <andi@php.net>
 
@@ -4493,8 +4442,6 @@
     - Fixed several problems with output buffering and HEAD requests (Zeev)
     - Fixed HTTP Status code issue with ISAPI module (Zeev)
 
-    * ChangeLog: *** empty log message ***
-
 1999-09-02  Stig Bakken  <ssb@fast.no>
 
     * ext/xml/Makefile.am
@@ -4681,8 +4628,6 @@
 
     * ext/sybase_ct/.cvsignore: shut up CVS
 
-    * ChangeLog: *** empty log message ***
-
     * ext/wddx/wddx.c: Fix for #2161
 
 1999-08-26  Andi Gutmans  <andi@php.net>
@@ -4785,8 +4730,6 @@
 
 1999-08-20  Andrei Zmievski  <andrei@ispi.net>
 
-    * ChangeLog: *** empty log message ***
-
     * ext/ldap/ldap.c: Fix bug #2025
 
 1999-08-19  Egon Schmid  <eschmid@delos.lf.net>
@@ -4812,10 +4755,6 @@
 
     * ext/hyperwave/hw.c: - fixed several memory leaks
     - fixed broken hw_cp and hw_mv functions
-
-1999-08-19  Andrei Zmievski  <andrei@ispi.net>
-
-    * ChangeLog: *** empty log message ***
 
 1999-08-19  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
@@ -4862,8 +4801,6 @@
 
     * ext/mysql/mysql.c
       ChangeLog: Fix #2090
-
-    * ChangeLog: *** empty log message ***
 
     * ext/standard/basic_functions.c: Fix #2096
 
@@ -4963,8 +4900,6 @@
       php.h: Close bug #1742
 
 1999-08-14  Andrei Zmievski  <andrei@ispi.net>
-
-    * ChangeLog: *** empty log message ***
 
     * ext/standard/basic_functions.c: Forgot to have internal pointer reset.
 
@@ -5152,8 +5087,6 @@
 
 1999-08-07  Andrei Zmievski  <andrei@ispi.net>
 
-    * ChangeLog: *** empty log message ***
-
     * ext/standard/basic_functions.c:
     Modified array_walk() function so that the userland callback is passed
     a key and possible user data in addition to the value.  It's still backward
@@ -5195,8 +5128,6 @@
     - Improved call_user_func() and call_user_method() - they now support passing
       arguments by reference
     - Fixed usort() and uksort()
-
-    * ChangeLog: *** empty log message ***
 
 1999-08-06  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
@@ -5248,8 +5179,6 @@
     hope i haven't missed anything - but we're no longer in the 3.x tree
 
 1999-08-04  Zeev Suraski  <zeev@php.net>
-
-    * ChangeLog: *** empty log message ***
 
     * makedist: Fix makedist to work with the libtool enabled distribution
 
@@ -5513,8 +5442,6 @@
 
     * LICENSE: License update
 
-    * ChangeLog: *** empty log message ***
-
 1999-07-27  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/hyperwave/hw.h
@@ -5545,8 +5472,6 @@
 
     * ext/standard/basic_functions.c
       ChangeLog: check for nKeyLength not arKey
-
-    * ChangeLog: *** empty log message ***
 
     * ext/standard/basic_functions.c: Fix for bug #1887.
 
@@ -5758,8 +5683,6 @@
 
     * .cvsignore: Ignore generated file.
 
-    * ChangeLog: *** empty log message ***
-
     * ext/standard/.cvsignore: Ignore parsedate.c
 
     * ext/wddx/wddx.c:
@@ -5774,8 +5697,6 @@
     * php_version.h: required for the Windows build, re-adding
 
 1999-07-23  Andrei Zmievski  <andrei@ispi.net>
-
-    * ChangeLog: *** empty log message ***
 
     * ext/standard/datetime.c
       ext/standard/datetime.h
