@@ -26,7 +26,7 @@
 * (requires php >= 4.1)
 */
 
-class PEAR_Dependencie
+class PEAR_Dependency
 {
     /**
     * Package dependencies check method
