@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Jani Taskinen <sniper@php.net>                              |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
+
 
 #include <stdio.h>
 #include "php.h"
@@ -109,8 +111,8 @@ void destroy_uploaded_files_hash(TSRMLS_D)
 }
 
 
-/* 
- * Following code is borrowed from Apache
+/*
+ *  Following code is based on apache_multipart_buffer.c from libapreq-0.33 package.
  *
  */
 
@@ -172,6 +174,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	return actual_read;
 }
 
+
 /* eof if we are out of bytes, or if we hit the final boundary */
 static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 {
@@ -181,6 +184,7 @@ static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 		return 0;
 	}
 }
+
 
 /* create new multipart_buffer structure */
 static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
@@ -205,6 +209,7 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 
 	return self;
 }
+
 
 /*
   gets the next CRLF terminated line from the input buffer.
@@ -251,6 +256,7 @@ static char *next_line(multipart_buffer *self)
 	return line;
 }
 
+
 /* returns the next CRLF terminated line from the client */
 static char *get_line(multipart_buffer *self TSRMLS_DC)
 {
@@ -264,12 +270,14 @@ static char *get_line(multipart_buffer *self TSRMLS_DC)
 	return ptr;
 }
 
+
 /* Free header entry */
 static void php_free_hdr_entry(mime_header_entry *h)
 {
 	if(h->key)   efree(h->key);
 	if(h->value) efree(h->value);
 }
+
 
 /* finds a boundary */
 static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
@@ -288,6 +296,7 @@ static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
 	/* didn't find the boundary */
 	return 0;
 }
+
 
 /* parse headers */
 static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header TSRMLS_DC)
@@ -378,6 +387,7 @@ static char *php_ap_getword(char **line, char stop)
 	return res;
 }
 
+
 static char *substring_conf(char *start, int len, char quote)
 {
 	char *result = emalloc(len + 2);
@@ -395,6 +405,7 @@ static char *substring_conf(char *start, int len, char quote)
 	*resp++ = '\0';
 	return result;
 }
+
 
 static char *php_ap_getword_conf(char **line)
 {
@@ -441,6 +452,7 @@ static char *php_ap_getword_conf(char **line)
 	return res;
 }
 
+
 /*
   search for a string in a fixed-length byte string.
   if partial is true, partial matches are allowed at the end of the buffer.
@@ -468,6 +480,7 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 
 	return ptr;
 }
+
 
 /* read until a boundary condition */
 static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes TSRMLS_DC)
@@ -508,6 +521,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes TS
 
 	return len;
 }
+
 
 /*
   XXX: this is horrible memory-usage-wise, but we only expect
