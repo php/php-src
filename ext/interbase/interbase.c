@@ -105,9 +105,11 @@ function_entry ibase_functions[] = {
 #endif
 
 	PHP_FE(ibase_num_fields, NULL)
+	PHP_FE(ibase_num_params, NULL)
 	PHP_FE(ibase_num_rows, NULL)
 	PHP_FE(ibase_affected_rows, NULL)
 	PHP_FE(ibase_field_info, NULL)
+	PHP_FE(ibase_param_info, NULL)
 
 	PHP_FE(ibase_trans, NULL)
 	PHP_FE(ibase_commit, NULL)
@@ -250,22 +252,24 @@ static void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_
 	int type;
 
 	IBDEBUG("Transaction or database link?");
-	if (zend_list_find(Z_LVAL_PP(link_id), &type) && type == le_trans) {
-		/* Transaction resource: make sure it refers to one link only, then 
-		   fetch it; database link is stored in ib_trans->db_link[]. */
-		IBDEBUG("Type is le_trans");
-		ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, "InterBase transaction", le_trans);
-		if ((*trans)->link_cnt > 1) {
-			_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections.");
+	if (zend_list_find(Z_LVAL_PP(link_id), &type)) {
+	 	if (type == le_trans) {
+			/* Transaction resource: make sure it refers to one link only, then 
+			   fetch it; database link is stored in ib_trans->db_link[]. */
+			IBDEBUG("Type is le_trans");
+			ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, "InterBase transaction", le_trans);
+			if ((*trans)->link_cnt > 1) {
+				_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections.");
+				return;
+			}				
+			*ib_link = (*trans)->db_link[0];
 			return;
-		}				
-		*ib_link = (*trans)->db_link[0];
-	} else {
-		IBDEBUG("Type is le_[p]link or id not found");
-		/* Database link resource, use default transaction. */
-		*trans = NULL;
-		ZEND_FETCH_RESOURCE2(*ib_link, ibase_db_link *, link_id, -1, "InterBase link", le_link, le_plink);
-	}
+		}
+	} 
+	IBDEBUG("Type is le_[p]link or id not found");
+	/* Database link resource, use default transaction. */
+	*trans = NULL;
+	ZEND_FETCH_RESOURCE2(*ib_link, ibase_db_link *, link_id, -1, "InterBase link", le_link, le_plink);
 }
 	
 #define RESET_ERRMSG { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; }
@@ -2932,12 +2936,13 @@ PHP_FUNCTION(ibase_timefmt)
 /* }}} */
 #endif
 
-/* {{{ proto int ibase_num_fields(resource result)
+/* {{{ proto int ibase_num_fields(resource {query|result})
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
 {
 	zval **result;
-	ibase_result *ib_result;
+	int type;
+	XSQLDA *sqlda;
 
 	RESET_ERRMSG;
 
@@ -2945,14 +2950,25 @@ PHP_FUNCTION(ibase_num_fields)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result, -1, "InterBase result", le_result);
+	zend_list_find(Z_LVAL_PP(result), &type);
+	
+	if (type == le_query) {
+		ibase_query *ib_query;
 
-	if (ib_result->out_sqlda == NULL) {
-		_php_ibase_module_error("Trying to get the number of fields from a non-select query");
-		RETURN_FALSE;
+		ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result, -1, "InterBase query", le_query);
+		sqlda = ib_query->out_sqlda;
+	} else {
+		ibase_result *ib_result;
+		
+		ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result, -1, "InterBase result", le_result);
+		sqlda = ib_result->out_sqlda;
+	}					
+
+	if (sqlda == NULL) {
+		RETURN_LONG(0);
+	} else {
+		RETURN_LONG(sqlda->sqld);
 	}
-
-	RETURN_LONG(ib_result->out_sqlda->sqld);
 }
 /* }}} */
 
@@ -3030,6 +3046,97 @@ PHP_FUNCTION(ibase_field_info)
 		break;
 	}
 	add_get_index_stringl(return_value, 4, s, strlen(s), (void **) &ret_val, 1);
+	add_assoc_stringl(return_value, "type", s, strlen(s), 1);
+}
+/* }}} */
+
+/* {{{ proto int ibase_num_params(resource query)
+   Get the number of params in a prepared query */
+PHP_FUNCTION(ibase_num_params)
+{
+	zval **result;
+	ibase_query *ib_query;
+
+	RESET_ERRMSG;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result, -1, "InterBase query", le_query);
+
+	if (ib_query->in_sqlda == NULL) {
+		RETURN_LONG(0);
+	} else {
+		RETURN_LONG(ib_query->in_sqlda->sqld);
+	}
+}
+/* }}} */
+
+/* {{{ proto array ibase_param_info(resource query, int field_number)
+   Get information about a parameter */
+PHP_FUNCTION(ibase_param_info)
+{
+	zval *ret_val;
+	zval **result_arg, **field_arg;
+	ibase_query *ib_query;
+	char buf[30], *s;
+	int len;
+	XSQLVAR *var;
+
+	RESET_ERRMSG;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result_arg, &field_arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result_arg, -1, "InterBase query", le_query);
+
+	if (ib_query->in_sqlda == NULL) {
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(field_arg);
+
+	if (Z_LVAL_PP(field_arg) < 0 || Z_LVAL_PP(field_arg) >= ib_query->in_sqlda->sqld) {
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
+
+	var = ib_query->in_sqlda->sqlvar + Z_LVAL_PP(field_arg);
+
+	len = sprintf(buf, "%d", var->sqllen);
+	add_get_index_stringl(return_value, 0, buf, len, (void **) &ret_val, 1);
+	add_assoc_stringl(return_value, "length", buf, len, 1);
+
+	switch (var->sqltype & ~1) {
+		case SQL_TEXT:	    s = "TEXT"; break;
+		case SQL_VARYING:   s = "VARYING"; break;
+		case SQL_SHORT:	    s = "SHORT"; break;
+		case SQL_LONG:	    s = "LONG"; break;
+		case SQL_FLOAT:	    s = "FLOAT"; break;
+		case SQL_DOUBLE:    s = "DOUBLE"; break;
+		case SQL_D_FLOAT:   s = "D_FLOAT"; break;
+#ifdef SQL_INT64
+		case SQL_INT64:     s = "INT64"; break;
+#endif
+#ifdef SQL_TIMESTAMP
+		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
+		case SQL_TYPE_DATE:	s = "DATE"; break;
+		case SQL_TYPE_TIME:	s = "TIME"; break;
+#else
+		case SQL_DATE:	    s = "DATE"; break;
+#endif
+		case SQL_BLOB:	    s = "BLOB"; break;
+		case SQL_ARRAY:	    s = "ARRAY"; break;
+		case SQL_QUAD:	    s = "QUAD"; break;
+	default:
+		sprintf(buf, "unknown (%d)", var->sqltype & ~1);
+		s = buf;
+		break;
+	}
+	add_get_index_stringl(return_value, 1, s, strlen(s), (void **) &ret_val, 1);
 	add_assoc_stringl(return_value, "type", s, strlen(s), 1);
 }
 /* }}} */
