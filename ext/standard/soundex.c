@@ -29,7 +29,7 @@
 PHP_FUNCTION(soundex)
 {
 	char	*somestring;
-	int		i, small, len;
+	int	i, small, len, code, last;
 	pval	*arg;
 	char	soundex[4 + 1];
 
@@ -72,6 +72,7 @@ PHP_FUNCTION(soundex)
 	len = arg->value.str.len;
 
 	/* build soundex string */
+	last = -1;
 	for (i = 0, small = 0; i < len && small < 4; i++) {
 		/* convert chars to upper case and strip non-letter chars */
 		/* BUG: should also map here accented letters used in non */
