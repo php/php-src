@@ -9,3 +9,5 @@ $(srcdir)/url_scanner_ex.c: $(srcdir)/url_scanner_ex.re
 	$(RE2C) -b $(srcdir)/url_scanner_ex.re > $@
 
 $(srcdir)/info.c: $(builddir)/../../main/build-defs.h
+
+$(builddir)/basic_functions.lo: Zend/zend_language_parser.h
