@@ -1463,7 +1463,10 @@ do_fcall_common:
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), (object.ptr?object.ptr:NULL));
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr);
+						if (object.ptr) {
+							object.ptr->refcount--;
+						}
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						HashTable *calling_symbol_table;
 
