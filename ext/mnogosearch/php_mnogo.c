@@ -86,6 +86,7 @@
 #define UDM_PARAM_SITEID		28
 #define UDM_PARAM_DETECT_CLONES		29
 #define UDM_PARAM_SORT_ORDER		30
+#define UDM_PARAM_RESULTS_LIMIT		31
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -324,6 +325,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SITEID",	UDM_PARAM_SITEID,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_DETECT_CLONES",UDM_PARAM_DETECT_CLONES,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SORT_ORDER",UDM_PARAM_SORT_ORDER,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_RESULTS_LIMIT",UDM_PARAM_RESULTS_LIMIT,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -462,7 +464,11 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 #if UDM_VERSION_ID >= 30204
 				Env=UdmEnvInit(NULL);
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+#if UDM_VERSION_ID >= 30215
+				UdmSetLogLevel(NULL,0);
+#else
 				UdmSetLogLevel(Env,0);
+#endif
 				UdmOpenLog("mnoGoSearch-php",Env,0);
 #if UDM_VERSION_ID <= 30210
 				if(!memcmp(dbaddr,"searchd:",8)){
@@ -519,7 +525,11 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 #if UDM_VERSION_ID >= 30204
 				Env=UdmEnvInit(NULL);
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+#if UDM_VERSION_ID >= 30215
+				UdmSetLogLevel(NULL,0);
+#else
 				UdmSetLogLevel(Env,0);
+#endif
 				UdmOpenLog("mnoGoSearch-php",Env,0);
 #if UDM_VERSION_ID <= 30210
 				if(!memcmp(dbaddr,"searchd:",8)){
@@ -1092,6 +1102,12 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 #endif
 
+#if UDM_VERSION_ID >= 30215
+		case UDM_PARAM_RESULTS_LIMIT: 
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"ResultsLimit",val);
+		
+			break;
+#endif
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown agent session parameter");
 			RETURN_FALSE;
@@ -1823,7 +1839,11 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent_array)
 				
 				Env=UdmEnvInit(NULL);
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+#if UDM_VERSION_ID >= 30215
+				UdmSetLogLevel(NULL,0);
+#else
 				UdmSetLogLevel(Env,0);
+#endif
 				UdmOpenLog("mnoGoSearch-php",Env,0);
 				
 				zend_hash_internal_pointer_reset_ex(HASH_OF(*yydbaddr), &pos);
