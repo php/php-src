@@ -1394,6 +1394,48 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			stl_info.t1=(time_t)(atol(val+1));
 			UdmAddTimeLimit(Agent->Conf,&stl_info);
 			}
+#elif UDM_VERSION_ID >= 30210
+                        {
+                    	    struct tm       *d_tm;
+                            time_t          d_t;
+                            char            *d_val2;
+                            char            d_db[20], d_de[20];
+                            d_t = atol (val+1);
+                            d_tm = localtime (&d_t);
+                            if (val[0] == '>') {
+                        	UdmVarListReplaceStr(&Agent->Conf->Vars,"dt","er");
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dx","1");
+                                sprintf (d_db, "%d", d_tm->tm_mday);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dd",d_db);
+                                sprintf (d_db, "%d", d_tm->tm_mon);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dm",d_db);
+                                sprintf (d_db, "%d", d_tm->tm_year+1900);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dy",d_db);
+                                RETURN_TRUE;
+                            } else if (val[0] == '<') {
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dt","er");
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dx","-1");
+                                sprintf (d_db, "%d", d_tm->tm_mday);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dd",d_db);
+                                sprintf (d_db, "%d", d_tm->tm_mon);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dm",d_db);
+                                sprintf (d_db, "%d", d_tm->tm_year+1900);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dy",d_db);
+                                RETURN_TRUE;
+                            } else if ( (val[0]=='#') && (d_val2 = strchr(val,',')) ){
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"dt","range");
+                                sprintf (d_db, "%d/%d/%d", d_tm->tm_mday, d_tm->tm_mon+1, d_tm->tm_year+1900);
+                                d_t = atol (d_val2+1);
+                                d_tm = localtime (&d_t);
+                                sprintf (d_de, "%d/%d/%d", d_tm->tm_mday, d_tm->tm_mon+1, d_tm->tm_year+1900);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"db",d_db);
+                                UdmVarListReplaceStr(&Agent->Conf->Vars,"de",d_de);
+                                RETURN_TRUE;
+                            } else {
+                                php_error_docref(NULL TSRMLS_CC, E_WARNING,"Incorrect date limit format");
+                                RETURN_FALSE;
+                            }
+                       }
 #endif
 			break;
 		default:
@@ -2200,9 +2242,9 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			{
 			    int len,i;
 			    for(len = i = 0; i < Res->WWList.nwords; i++) 
-				len += Res->WWList.Word[i].len;
+				len += Res->WWList.Word[i].len + 64;
 			    {	
-				size_t wsize=(1+len*15)*sizeof(char);
+				size_t wsize=(1+len)*sizeof(char);
 				char *wordinfo = (char*) malloc(wsize);
 	  
 				*wordinfo = '\0';
@@ -2230,9 +2272,9 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			{
 			    int len,i,j;
 			    for(len = i = 0; i < Res->WWList.nwords; i++) 
-				len += Res->WWList.Word[i].len;
+				len += Res->WWList.Word[i].len + 64;
 			    {	
-				size_t wsize=(1+len*15)*sizeof(char);
+				size_t wsize=(1+len)*sizeof(char);
 				char *wordinfo = (char*) malloc(wsize);
 				int corder = (size_t)-1, ccount = 0;
 	  
