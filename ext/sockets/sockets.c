@@ -444,7 +444,7 @@ static int open_listen_sock(int port)
 	return fd;
 }
 
-/* {{{ proto long open_listen_sock(long port)
+/* {{{ proto int open_listen_sock(int port)
    Opens a socket on port to accept connections */
 PHP_FUNCTION(open_listen_sock)
 {
@@ -847,26 +847,19 @@ PHP_FUNCTION(connect)
 	struct sockaddr sa;
 	struct sockaddr_in *sin;
 	struct sockaddr_un *sun;
-	int salen = sizeof(sa);
-	int ret;
+	int ret, salen = sizeof(sa);
 	struct in_addr addr_buf;
 	struct hostent *host_struct;
-	int args;
+	int argc = ZEND_NUM_ARGS();
 
-	args = ZEND_NUM_ARGS();
-
-	if (args < 2) {
+	if (argc < 2 || argc > 3 ||
+	    zend_get_parameters_ex(argc, &sockfd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	ret = zend_get_parameters_ex(args, &sockfd, &addr, &port);
-	if (ret == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
 	convert_to_long_ex(sockfd)
 	convert_to_string_ex(addr);
-	if (args > 2) {
+	
+	if (argc > 2) {
 		convert_to_long_ex(port);
 	}
 
@@ -880,7 +873,12 @@ PHP_FUNCTION(connect)
 	switch(sa.sa_family) {
 		case AF_INET: {
 			sin = &sa;
-			sin->sin_port = htons((unsigned short int) Z_LVAL_PP(port));
+
+			if (argc != 3) {
+				WRONG_PARAM_COUNT;
+			}
+
+			sin->sin_port = htons((unsigned short int)Z_LVAL_PP(port));
 			if (inet_aton(Z_STRVAL_PP(addr), &addr_buf) == 0) {
 				sin->sin_addr.s_addr = addr_buf.s_addr;
 			} else {
