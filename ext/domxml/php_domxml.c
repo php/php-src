@@ -2246,8 +2246,8 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 {
 	zval *id, *rv;
 	xmlNode *nodep;
-	xmlAttr  *attrp;   
-  	int name_len, ret;
+	xmlAttr  *attrp;
+	int name_len, ret;
 	char *name;
 
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
@@ -2291,7 +2291,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 {
 	zval *id, *rv, *contextnode = NULL,*ctxpin = NULL;
 	xmlXPathContextPtr ctxp;
-   	xmlDocPtr docp;
+	xmlDocPtr docp;
 
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
@@ -2301,15 +2301,12 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	contextnode = NULL;
 	contextnodep = NULL;
 
-    DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
+	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
 	
 	/* if no xpath_context was submitted, create a new one */
-	if (ctxpin == NULL)
-	{
+	if (ctxpin == NULL) {
 		ctxp = xmlXPathNewContext(docp);
-	}
-	else
-	{
+	} else {
 		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
 	}
 
@@ -2318,10 +2315,9 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	}
 	ctxp->node = contextnodep;
 	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
-	if (str == NULL)
-	{
-		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));		
-	}		
+	if (str == NULL) {
+		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));
+	}
 	sprintf(str ,"//%s",name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);
@@ -2377,7 +2373,7 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 {
 	zval *id, *rv, *contextnode = NULL, *ctxpin = NULL;
 	xmlXPathContextPtr ctxp ;
-   	xmlDocPtr docp;
+	xmlDocPtr docp;
 
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
@@ -2390,12 +2386,9 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
 	
 	/* if no xpath_context was submitted, create a new one */
-	if (ctxpin == NULL)
-	{
+	if (ctxpin == NULL) {
 		ctxp = xmlXPathNewContext(docp);
-	}
-	else
-	{
+	} else {
 		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
 	}
 	
@@ -2404,11 +2397,10 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	}
 	ctxp->node = contextnodep;
 	str = (char*) emalloc((name_len+14) * sizeof(char)) ;
-	if (str == NULL)
-	{
-		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));		
-	}		
-	sprintf(str ,"//*[@ID = '%s']",name);   
+	if (str == NULL) {
+		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));
+	}
+	sprintf(str ,"//*[@ID = '%s']",name);
 	xpathobjp = xmlXPathEval(str, ctxp);
 	efree(str);
 	ctxp->node = NULL;
@@ -2445,9 +2437,10 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 
 	*return_value = *rv;
 	FREE_ZVAL(rv);
-}	
+}
 /* }}} */
 #endif
+
 /* {{{ proto string domxml_elem_get_elements_by_tagname(string tagname)
    Returns array with nodes with given tagname in element or empty array, if not found */
 PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
@@ -2455,15 +2448,14 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 	zval *id,*rv;
 	xmlNode *nodep;
 	int name_len,i;
-	char *name;	
+	char *name;
 	xmlNodeSet *nodesetp;
 
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
 
 	MAKE_STD_ZVAL(rv);
 	
-	if(array_init(rv) != SUCCESS)
-	{
+	if(array_init(rv) != SUCCESS) {
 		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
@@ -2471,7 +2463,6 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 	nodesetp = php_get_elements_by_tagname(nodep,name);
 
 	if(nodesetp) {
-
 		for (i = 0; i < nodesetp->nodeNr; i++) {
 			xmlNodePtr node = nodesetp->nodeTab[i];
 			zval *child;
@@ -2825,13 +2816,12 @@ PHP_FUNCTION(domxml_dump_mem)
 	int size;
 
 	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|l",&format);
-	if (format)
-	{
+	if (format) {
 		xmlKeepBlanksDefault(0);
 		xmlDocDumpFormatMemory(docp, &mem, &size, format);
-	}
-	else
+	} else {
 		xmlDocDumpMemory(docp, &mem, &size);
+	}
 
 	if (!size) {
 		RETURN_FALSE;
@@ -2856,16 +2846,14 @@ PHP_FUNCTION(domxml_dump_mem_file)
 
 	xmlSetCompressMode (compressmode);
 
-	if (format)
-	{
+	if (format) {
 		xmlKeepBlanksDefault(0);
 		bytes = xmlSaveFormatFile(file,docp,format);
-	}
-	else
+	} else {
 		bytes = xmlSaveFile(file,docp);
+	}
 
-	if (bytes == -1)
-	{
+	if (bytes == -1) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(bytes);
@@ -2882,21 +2870,20 @@ PHP_FUNCTION(domxml_dump_node)
 	xmlChar *mem ;
 	xmlBufferPtr buf;
 	int level = 0;
-	int format = 0;	
+	int format = 0;
 	
 	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"o|ll",&nodep,&format,&level);
-		
+	
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
 	if (Z_TYPE_P(elementp) == XML_DOCUMENT_NODE || Z_TYPE_P(elementp) == XML_HTML_DOCUMENT_NODE ) {
-		php_error(E_WARNING, "%s(): cannot dump element with a document node", get_active_function_name(TSRMLS_C)); 
+		php_error(E_WARNING, "%s(): cannot dump element with a document node", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
 	buf = xmlBufferCreate();
-	if (!buf)
-	{
-		php_error(E_WARNING, "%s(): could fetch buffer", get_active_function_name(TSRMLS_C)); 
+	if (!buf) {
+		php_error(E_WARNING, "%s(): could fetch buffer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -3687,36 +3674,33 @@ PHP_FUNCTION(domxml_xslt_stylesheet_file)
 
 /* {{{ php_domxslt_string_to_xpathexpr()
    Translates a string to a XPath Expression */
-static char *php_domxslt_string_to_xpathexpr(const char *str)
+static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 {
 	const xmlChar *string = (const xmlChar *)str;
 
 	xmlChar *value;
 
-	TSRMLS_FETCH();
-	
-        if (xmlStrchr(string, '"')) {
-    		if (xmlStrchr(string, '\'')) {
+	if (xmlStrchr(string, '"')) {
+		if (xmlStrchr(string, '\'')) {
 			php_error(E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes) in %s",
-			          get_active_function_name(TSRMLS_C));
-                	return NULL;
-                }
-                value = xmlStrdup((const xmlChar *)"'");
-                value = xmlStrcat(value, string);
-                value = xmlStrcat(value, (const xmlChar *)"'");
-        }
-	else {
-        	value = xmlStrdup((const xmlChar *)"\"");
-                value = xmlStrcat(value, string);
-                value = xmlStrcat(value, (const xmlChar *)"\"");
-        }
+					  get_active_function_name(TSRMLS_C));
+			return NULL;
+		}
+		value = xmlStrdup((const xmlChar *)"'");
+		value = xmlStrcat(value, string);
+		value = xmlStrcat(value, (const xmlChar *)"'");
+	} else {
+		value = xmlStrdup((const xmlChar *)"\"");
+		value = xmlStrcat(value, string);
+		value = xmlStrcat(value, (const xmlChar *)"\"");
+	}
 
 	return (char *)value;
 }
 
 /* {{{ php_domxslt_make_params()
    Translates a PHP array to a libxslt parameters array */
-static char **php_domxslt_make_params(zval *idvars, int xpath_params)
+static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 {
 	HashTable *parht;
 	int parsize;
@@ -3725,8 +3709,6 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params)
 	ulong num_key;
 	char **params = NULL;
 	int i = 0;
-
-	TSRMLS_FETCH();
 
 	parht = HASH_OF(idvars);
 	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
@@ -3739,7 +3721,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params)
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
 			php_error(E_WARNING, "Invalid argument or parameter array to %s",
-			          get_active_function_name(TSRMLS_C));
+					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
 		else {
@@ -3747,7 +3729,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params)
 			convert_to_string_ex(value);
 
 			if (!xpath_params) {
-				xpath_expr = php_domxslt_string_to_xpathexpr(Z_STRVAL_PP(value));
+				xpath_expr = php_domxslt_string_to_xpathexpr(Z_STRVAL_PP(value) TSRMLS_CC);
 			}
 			else {
 				xpath_expr = Z_STRVAL_PP(value);
@@ -3798,7 +3780,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
 
 	if (idparams) {
-		params = php_domxslt_make_params(idparams, xpath_params);
+		params = php_domxslt_make_params(idparams, xpath_params TSRMLS_CC);
 	}
 
 	docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
