@@ -1,3 +1,13 @@
+2004-11-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/fdf/fdf.c
+      ext/fdf/fdf.c:
+      MFH: Fixed possible crash on fstat() failure.
+
+    * ext/fdf/fdf.c:
+      Fixed possible crash on fstat() failure.
+
 2004-11-05  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
