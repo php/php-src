@@ -102,6 +102,28 @@ php.ini:
    extension=libphp_java.so
 
 ========================================================================
+===     JVM=Sun/Blackdown 1.2pre-release-v2, OS=Linux (glibc 2.1)    ===
+========================================================================
+
+build instructions:
+
+   ./configure --with-java=/usr/local/lib/jdk1.2
+
+php.ini:
+
+   [java]
+   java.library=/usr/local/lib/jdk1.2/jre/lib/i386/libjava.so
+   java.library.path=/usr/local/lib/jdk1.2/jre/lib/i386/classic:/usr/local/lib/jdk1.2/jre/lib/i386/native_threads:/usr/local/lib/jdk1.2/jre/lib/i386:/var/tmp/work/php4/modules
+   java.class.path=/usr/local/lib/jdk1.2/jre/lib/rt.jar:/usr/local/lib/jdk1.2/jre/lib/i18n.jar:/var/tmp/work/php4/modules/php_java.jar
+   extension_dir=/var/tmp/work/php4/modules
+   extension=libphp_java.so
+
+You may also have to adapt your LD_LIBRARY_PATH environment variable,
+if you didn't add the jdk library paths to /etc/ld.so.conf :
+
+LD_LIBRARY_PATH="/usr/local/lib/jdk1.2/jre/lib/i386:/usr/local/lib/jdk1.2/jre/lib/i386/classic:/usr/local/lib/jdk1.2/jre/lib/i386/native_threads:$LD_LIBRARY_PATH"
+
+========================================================================
 ===                JVM=Sun JDK 1.1.8, OS=Windows NT 4                ===
 ========================================================================
 

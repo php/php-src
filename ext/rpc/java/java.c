@@ -159,7 +159,7 @@ static int jvm_create() {
 #ifdef JNI_12
 
   vm_args.version = JNI_VERSION_1_2;
-  vm_args.ignoreUnrecognized = FALSE;
+  vm_args.ignoreUnrecognized = JNI_FALSE;
   vm_args.options = options;
   vm_args.nOptions = 0;
 
