@@ -89,7 +89,7 @@ typedef struct {
 static int
 compare_special_version_forms(char *form1, char *form2)
 {
-	int i, found1 = -1, found2 = -1;
+	int found1 = -1, found2 = -1;
 	special_forms_t special_forms[9] = {
 		{"dev", 0},
 		{"alpha", 1},
