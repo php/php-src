@@ -67,6 +67,7 @@ struct _php_core_globals {
 	char *output_handler;
 
 	char *unserialize_callback_func;
+	long serialize_precision;
 
 	char *safe_mode_exec_dir;
 

@@ -150,6 +150,11 @@ implicit_flush = Off
 ; callback-function.
 unserialize_callback_func=
 
+; When floats & doubles are serialized store serialize_precision significant
+; digits after the floating point. The default value ensures that when floats
+; are decoded with unserialize, the data will remain the same.
+serialize_precision = 100
+
 ; Whether to enable the ability to force arguments to be passed by reference
 ; at function call time.  This method is deprecated and is likely to be
 ; unsupported in future versions of PHP/Zend.  The encouraged method of
