@@ -398,6 +398,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 			break;
 		case ZEND_FETCH_GLOBAL:
 			if (op1->op_type == IS_VAR) {
+				PZVAL_LOCK(varname);
 				EG(AiCount)++;
 			}
 			target_symbol_table = &EG(symbol_table);
@@ -1101,6 +1102,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_DIM_R:
 				if (opline->extended_value == ZEND_FETCH_NO_AI_COUNT) {
+					PZVAL_LOCK(*Ts[opline->op1.u.var].var);
 					EG(AiCount)++;
 				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
@@ -1289,7 +1291,9 @@ binary_assign_op_addr: {
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 						EG(AiCount)++; /* for op1 */
+						PZVAL_LOCK(*Ts[opline->op1.u.var].var);
 						if (opline->op2.op_type==IS_VAR) {
+							PZVAL_LOCK(*Ts[opline->op2.u.var].var);
 							EG(AiCount)++;
 						}
 					}
@@ -1613,6 +1617,7 @@ send_by_ref:
 				break;
 			case ZEND_CASE:
 				if (opline->op1.op_type == IS_VAR) {
+					PZVAL_LOCK(*Ts[opline->op1.u.var].var);
 					EG(AiCount)++;
 				}
 				is_equal_function(&Ts[opline->result.u.var].tmp_var, 
@@ -1871,6 +1876,7 @@ send_by_ref:
 					zval *object;
 
 					EG(AiCount)++;
+					PZVAL_LOCK(*Ts[opline->op1.u.var].var);
 					object = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 					if (!object->value.obj.ce->handle_function_call
 						&& !zend_hash_exists(&object->value.obj.ce->function_table, object->value.obj.ce->name, object->value.obj.ce->name_length+1)) {
