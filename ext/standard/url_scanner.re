@@ -158,8 +158,10 @@ static void url_scanner(lexdata *state)
   			break;
 	}
 nextiter:
+	;
 	}
 finish:
+	;
 }
 
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen)
