@@ -2202,7 +2202,7 @@ PHP_FUNCTION(array_flip)
 		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 1, &pos)) {
 			case HASH_KEY_IS_STRING:
 				Z_STRVAL_P(data) = string_key;
-				Z_STRLEN_P(data) = str_key_len;
+				Z_STRLEN_P(data) = str_key_len-1;
 				Z_TYPE_P(data) = IS_STRING;
 				break;
 			case HASH_KEY_IS_LONG:
