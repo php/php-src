@@ -122,6 +122,8 @@
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
+%token T_CLASS_C
+%token T_FUNC_C
 %token T_LINE
 %token T_FILE
 %token T_COMMENT
@@ -599,6 +601,8 @@ common_scalar:
 	|	T_CONSTANT_ENCAPSED_STRING	{ $$ = $1; }
 	|	T_LINE 						{ $$ = $1; }
 	|	T_FILE 						{ $$ = $1; }
+	|	T_CLASS_C					{ $$ = $1; }
+	|	T_FUNC_C					{ $$ = $1; }
 ;
 
 
