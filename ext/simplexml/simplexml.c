@@ -190,6 +190,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 					}
 					
 					if (match_ns(sxe, node, name)) {
+						APPEND_PREV_ELEMENT(counter, value);
 						MAKE_STD_ZVAL(value);
 						_node_as_zval(sxe, node->parent, value TSRMLS_CC);
 						APPEND_CUR_ELEMENT(counter, value);
@@ -647,6 +648,16 @@ sxe_method_get(zval *object, char *name, int len TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ simplexml_ce_xpath_register_ns()
+ */
+static void 
+simplexml_ce_xpath_register_ns(char *prefix, xmlXPathContext *xpath, char *href)
+{
+  	xmlXPathRegisterNs(xpath, prefix, href);
+}
+/* }}} */
+
+
 /* {{{ xsearch()
  */ 
 SXE_METHOD(xsearch)
@@ -656,6 +667,8 @@ SXE_METHOD(xsearch)
 	char              *query;
 	int                query_len;
 	int                i;
+	int                nsnbr = 0;
+	xmlNsPtr          *ns = NULL;
 	xmlXPathObjectPtr  retval;
 	xmlNodeSetPtr      result;
 
@@ -673,14 +686,38 @@ SXE_METHOD(xsearch)
 
 	sxe->xpath->node = sxe->node->node;
 
+ 	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, (xmlNodePtr) sxe->node->node);
+
+	if (ns != NULL) {
+		while (ns[nsnbr] != NULL) {
+			nsnbr++;
+		}
+	}
+
+	sxe->xpath->namespaces = ns;
+	sxe->xpath->nsNr = nsnbr;
+
+	/* Register namespaces added in simplexml_cs_register_ns() */
+	xmlHashScan((xmlHashTablePtr) sxe->nsmapptr->nsmap, (xmlHashScanner) simplexml_ce_xpath_register_ns, sxe->xpath);
+
 	retval = xmlXPathEval(query, sxe->xpath);
+
+	/* Cleanup registered namespaces added in simplexml_cs_register_ns() */
+	xmlXPathRegisteredNsCleanup(sxe->xpath);
+
+	if (ns != NULL) {
+		xmlFree(ns);
+		sxe->xpath->namespaces = NULL;
+		sxe->xpath->nsNr = 0;
+	}
+
 	if (!retval) {
 		RETURN_FALSE;
 	}
 
-	
 	result = retval->nodesetval;
 	if (!result) {
+		xmlXPathFreeObject(retval);
 		RETURN_FALSE;
 	}
 
@@ -699,7 +736,9 @@ SXE_METHOD(xsearch)
 			_node_as_zval(sxe, result->nodeTab[i], value TSRMLS_CC);
 		}
 		add_next_index_zval(return_value, value);
-	}	
+	}
+	
+	xmlXPathFreeObject(retval);
 }
 /* }}} */
 
@@ -812,7 +851,7 @@ SXE_METHOD(register_ns)
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-	xmlHashAddEntry(sxe->nsmapptr->nsmap, nsvalue, nsname);
+	xmlHashAddEntry(sxe->nsmapptr->nsmap, nsvalue, xmlStrdup(nsname));
 }
 /* }}} */
 
