@@ -1631,7 +1631,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 						if (syntax_only)
 							return 1;
 
-						lcname = zend_str_tolower_dup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
+						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
 
 						if (EG(active_op_array) && strcmp(lcname, "self") == 0) {
 							ce = EG(active_op_array)->scope;
@@ -1643,7 +1643,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 						
 						efree(lcname);
 					} else {
-						ce = Z_OBJCE_PP(obj); /* ??? */
+						ce = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 
 						if (callable_name) {
 							char *ptr;
