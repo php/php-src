@@ -105,6 +105,8 @@
 #define XSD_POSITIVEINTEGER_STRING "positiveInteger"
 #define XSD_ANYTYPE 143
 #define XSD_ANYTYPE_STRING "anyType"
+#define XSD_UR_TYPE 144
+#define XSD_UR_TYPE_STRING "ur-type"
 
 #define APACHE_NAMESPACE "http://xml.apache.org/xml-soap"
 #define APACHE_NS_PREFIX "apache"

@@ -120,6 +120,34 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 	sdlTypePtr type;
 
 	type = enc.sdl_type;
+
+	if (type && type->restrictions &&
+	    data &&  data->children && data->children->content) {
+		if (type->restrictions->whiteSpace && type->restrictions->whiteSpace->value) {
+			if (strcmp(type->restrictions->whiteSpace->value,"replace") == 0) {
+				whiteSpace_replace(data->children->content);
+			} else if (strcmp(type->restrictions->whiteSpace->value,"collapse") == 0) {
+				whiteSpace_collapse(data->children->content);
+			}	
+		}
+		if (type->restrictions->enumeration) {
+			if (!zend_hash_exists(type->restrictions->enumeration,data->children->content,strlen(data->children->content)+1)) {
+				php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\"",data->children->content);
+			}
+		}
+		if (type->restrictions->minLength &&
+		    strlen(data->children->content) < type->restrictions->minLength->value) {
+		  php_error(E_WARNING,"Restriction: length less then 'minLength'");
+		}
+		if (type->restrictions->maxLength &&
+		    strlen(data->children->content) > type->restrictions->maxLength->value) {
+		  php_error(E_WARNING,"Restriction: length greater then 'maxLength'");
+		}
+		if (type->restrictions->length &&
+		    strlen(data->children->content) != type->restrictions->length->value) {
+		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
+		}
+	}	
 	if (type->encode) {
 		if (type->encode->details.type == IS_ARRAY ||
 			type->encode->details.type == SOAP_ENC_ARRAY) {
@@ -149,13 +177,23 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 
 	type = enc.sdl_type;
 
-	if (type->restrictions) {
+	if (type && type->restrictions && Z_TYPE_P(data) == IS_STRING) {
 		if (type->restrictions->enumeration) {
-			if (Z_TYPE_P(data) == IS_STRING) {
-				if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
-					php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\".",Z_STRVAL_P(data));
-				}
+			if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
+				php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\".",Z_STRVAL_P(data));
 			}
+		}
+		if (type->restrictions->minLength &&
+		    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
+		  php_error(E_WARNING,"Restriction: length less then 'minLength'");
+		}
+		if (type->restrictions->maxLength &&
+		    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
+		  php_error(E_WARNING,"Restriction: length greater then 'maxLength'");
+		}
+		if (type->restrictions->length &&
+		    Z_STRLEN_P(data) != type->restrictions->length->value) {
+		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
 		}
 	}
 
