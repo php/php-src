@@ -149,7 +149,7 @@ char *alloca ();
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
 #else
-# define ZEND_GCC_VERSION
+# define ZEND_GCC_VERSION 0
 #endif
 
 #if ZEND_GCC_VERSION >= 2096
