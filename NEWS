@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fix stdout support with the swf extension. (Sterling)
+- Fix byte order for ip2long and long2ip (Stas)
 - Fixed dbase_add_record. (Sterling)
 - Added support for libmcrypt 2.4.4 (Derick)
 - Added strncasecmp function (Andi, Zend Engine)
