@@ -515,7 +515,10 @@ function_entry basic_functions[] = {
 	PHP_FE(getrusage,														NULL)
 #endif
 
+#ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(uniqid,															NULL)
+#endif
+
 	PHP_FE(quoted_printable_decode,											NULL)
 	PHP_FE(convert_cyr_string,												NULL)
 	PHP_FE(get_current_user,												NULL)
