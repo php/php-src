@@ -4,20 +4,24 @@ PEAR_Registry v1.1
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    return;
 }
 $statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';
 if (file_exists($statedir)) {
     // don't delete existing directories!
     echo 'skip';
+    return;
 }
 include_once 'PEAR/Registry.php';
 $pv = phpversion() . '';
 $av = $pv{0} == '4' ? 'apiversion' : 'apiVersion';
 if (!in_array($av, get_class_methods('PEAR_Registry'))) {
     echo 'skip';
+    return;
 }
 if (PEAR_Registry::apiVersion() != '1.1') {
     echo 'skip';
+    return;
 }
 ?>
 --FILE--

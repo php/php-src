@@ -4,12 +4,14 @@ PEAR_Config v1.1
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    return;
 }
 include_once 'PEAR/Config.php';
 $pv = phpversion() . '';
 $av = $pv{0} == '4' ? 'apiversion' : 'apiVersion';
 if (!in_array($av, get_class_methods('PEAR_Config'))) {
     echo 'skip';
+    return;
 }
 if (PEAR_Config::apiVersion() != '1.1') {
     echo 'skip';
