@@ -395,6 +395,7 @@ int MailConnect()
 {
 
 	int res;
+	int portnum;
 
 	/* Create Socket */
 	if ((sc = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
@@ -412,9 +413,15 @@ int MailConnect()
 	}
         */
 
+	if (INI_INT("sendmail_port")){
+		portnum = INI_INT("sendmail_port"));
+	} else {
+		portnum = 25;
+	}	
+
 	/* Connect to server */
 	sock_in.sin_family = AF_INET;
-	sock_in.sin_port = htons(25);
+	sock_in.sin_port = htons(portnum);
 	sock_in.sin_addr.S_un.S_addr = GetAddr(MailHost);
 
 	if (connect(sc, (LPSOCKADDR) & sock_in, sizeof(sock_in)))
