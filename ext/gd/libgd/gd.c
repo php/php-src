@@ -3410,7 +3410,7 @@ int gdImageContrast(gdImagePtr src, double contrast)
 		return 0;
 	}
 	
-	contrast = (double)(100.0-80.0)/100.0;
+	contrast = (double)(100.0-contrast)/100.0;
 	contrast = contrast*contrast;
 	
 	for (y=0; y<src->sy; ++y) {
