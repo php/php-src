@@ -289,10 +289,11 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		                           retval, 2, argv);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Cannot call the CURLOPT_WRITEFUNCTION");
-			return -1;
+			length = -1;
 		}
-
-		length = Z_LVAL_P(retval);
+		else {
+			length = Z_LVAL_P(retval);
+		}
 
 		zval_ptr_dtor(&argv[0]);
 		zval_ptr_dtor(&argv[1]);
@@ -341,17 +342,17 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		                           retval, 3, argv);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Cannot call the CURLOPT_READFUNCTION");
-			break;
+			length = -1;
 		}
-		
-		memcpy(data, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-		length = Z_STRLEN_P(retval);
+		else {
+			memcpy(data, Z_STRVAL_P(retval), size * nmemb);
+			length = Z_STRLEN_P(retval);
+		}
 
 		zval_ptr_dtor(&argv[0]);
 		zval_ptr_dtor(&argv[1]);
 		zval_ptr_dtor(&argv[2]);
 		zval_ptr_dtor(&retval);
-
 		break;
 	}
 	}
@@ -360,54 +361,73 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 }
 /* }}} */
 
-/* {{{ _php_curl_write_header
+/* {{{ curl_write_header
  */
-static size_t _php_curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
+static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
-	php_curl  *ch   = (php_curl *) ctx;
-	zval      *func = ch->handlers->write_header;
-	zval      *argv[2];
-	zval      *retval;
-	int        error;
-	int        length;
+	php_curl       *ch  = (php_curl *) ctx;
+	php_curl_write *t   = ch->handlers->write_header;
+	int             error;
+	int             length;
 	ELS_FETCH();
+	
+	switch (t->method) {
+	case PHP_CURL_STDOUT:
+		/* Handle special case write when we're returning the entire transfer
+		 */
+		if (ch->handlers->write->method == PHP_CURL_RETURN)
+			smart_str_appendl(&ch->handlers->write->buf, data, size * nmemb);
+		else
+			PUTS(data);
+		break;
+	case PHP_CURL_FILE:
+		length = fwrite(data, size, nmemb, t->fp);
+		break;
+	case PHP_CURL_USER: {
+		zval *argv[2];
+		zval *retval;
+	
+		MAKE_STD_ZVAL(argv[0]);
+		MAKE_STD_ZVAL(argv[1]);
+		MAKE_STD_ZVAL(retval);
 
-	MAKE_STD_ZVAL(argv[0]);
-	MAKE_STD_ZVAL(argv[1]);
-	MAKE_STD_ZVAL(retval);
+		ZVAL_RESOURCE(argv[0], ch->id);
+		zend_list_addref(ch->id);
+		ZVAL_STRINGL(argv[0], data, size * nmemb, 1);
 
-	ZVAL_RESOURCE(argv[0], ch->id);
-	zend_list_addref(ch->id);
-	ZVAL_STRINGL(argv[0], data, size * nmemb, 1);
+		error = call_user_function(EG(function_table), 
+	    	                       NULL,
+		                           t->func,
+	        	                   retval, 2, argv);
+		if (error == FAILURE) {
+			php_error(E_WARNING, "Couldn't call the CURLOPT_HEADERFUNCTION");
+			length = -1;
+		}
+		else {
+			length = Z_LVAL_P(retval);
+		}
 
-	error = call_user_function(EG(function_table), 
-	                           NULL,
-	                           func,
-	                           retval, 2, argv);
-	if (error == FAILURE) {
-		php_error(E_WARNING, "Couldn't call the CURLOPT_HEADERFUNCTION");
-		return -1;
+		zval_ptr_dtor(&argv[0]);
+		zval_ptr_dtor(&argv[1]);
+		zval_ptr_dtor(&retval);
+		break;
 	}
-
-	length = Z_LVAL_P(retval);
-
-	zval_ptr_dtor(&argv[0]);
-	zval_ptr_dtor(&argv[1]);
-	zval_ptr_dtor(&retval);
-
+	}
+	
 	return length;
 }
 /* }}} */
 
-/* {{{ _php_curl_passwd
+/* {{{ curl_passwd
  */
-static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
+static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 {
 	php_curl    *ch   = (php_curl *) ctx;
 	zval        *func = ch->handlers->passwd;
 	zval        *argv[3];
 	zval        *retval;
 	int          error;
+	int          ret = 0;
 	ELS_FETCH();
 
 	MAKE_STD_ZVAL(argv[0]);
@@ -425,22 +445,24 @@ static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	                           retval, 2, argv);
 	if (error == FAILURE) {
 		php_error(E_WARNING, "Couldn't call the CURLOPT_PASSWDFUNCTION");
-		return -1;
+		ret = -1;
 	}
-
-	if (Z_STRLEN_P(retval) > buflen) {
-		php_error(E_WARNING, "Returned password is too long for libcurl to handle");
-		return -1;
+	else {
+		if (Z_STRLEN_P(retval) > buflen) {
+			php_error(E_WARNING, "Returned password is too long for libcurl to handle");
+			ret = -1;
+		}
+		else {
+			strlcpy(buf, Z_STRVAL_P(retval), buflen);
+		}
 	}
-
-	strlcpy(buf, Z_STRVAL_P(retval), buflen);
-
+	
 	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[1]);
 	zval_ptr_dtor(&argv[2]);
 	zval_ptr_dtor(&retval);
 
-	return 0;
+	return ret;
 }
 /* }}} */
 
@@ -483,6 +505,7 @@ static void alloc_curl_handle(php_curl **ch)
 	*ch                    = emalloc(sizeof(php_curl));
 	(*ch)->handlers        = ecalloc(1, sizeof(php_curl_handlers));
 	(*ch)->handlers->write = ecalloc(1, sizeof(php_curl_write));
+	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read  = ecalloc(1, sizeof(php_curl_read));
 
 	zend_llist_init(&(*ch)->to_free.str, sizeof(char *), 
@@ -526,6 +549,8 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_READFUNCTION,      curl_read);
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
+	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	if (argc > 0) {
 		char *urlcopy;
 		convert_to_string_ex(url);
@@ -629,17 +654,24 @@ PHP_FUNCTION(curl_setopt)
 		FILE *fp;
 		ZEND_FETCH_RESOURCE(fp, FILE *, zvalue, -1, "File-Handle", php_file_le_fopen());
 		
-		if (option == CURLOPT_FILE) {
+		error = CURLE_OK;
+		switch (option) {
+		case CURLOPT_FILE:
 			ch->handlers->write->fp = fp;
 			ch->handlers->write->method = PHP_CURL_FILE;
-		}
-		else if (option == CURLOPT_INFILE) {
+			break;
+		case CURLOPT_WRITEHEADER:
+			ch->handlers->write_header->fp = fp;
+			ch->handlers->write_header->method = PHP_CURL_FILE;
+			break;
+		case CURLOPT_INFILE:
 			zend_list_addref(Z_LVAL_PP(zvalue));
 			ch->handlers->read->fp = fp;
 			ch->handlers->read->fd = Z_LVAL_PP(zvalue);
-		}
-		else {
+			break;
+		default:
 			error = curl_easy_setopt(ch->cp, option, fp);
+			break;
 		}
 
 		break;
@@ -657,7 +689,7 @@ PHP_FUNCTION(curl_setopt)
 		ch->handlers->write->type = PHP_CURL_BINARY;
 	case CURLOPT_WRITEFUNCTION:
 		zval_add_ref(zvalue);
-		ch->handlers->write->func = *zvalue;
+		ch->handlers->write->func   = *zvalue;
 		ch->handlers->write->method = PHP_CURL_USER;
 		break;
 	case CURLOPT_READFUNCTION:
@@ -667,14 +699,13 @@ PHP_FUNCTION(curl_setopt)
 		break;
 	case CURLOPT_HEADERFUNCTION:
 		zval_add_ref(zvalue);
-		ch->handlers->write_header = *zvalue;
-		error = curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, _php_curl_write_header);
-		error = curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER, (void *) ch);
+		ch->handlers->write_header->func   = *zvalue;
+		ch->handlers->write_header->method = PHP_CURL_USER;
 		break;
 	case CURLOPT_PASSWDFUNCTION:
 		zval_add_ref(zvalue);
 		ch->handlers->passwd = *zvalue;
-		error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDFUNCTION, _php_curl_passwd);
+		error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDFUNCTION, curl_passwd);
 		error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA,     (void *) ch);
 		break;
 	case CURLOPT_POSTFIELDS:
@@ -963,10 +994,11 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 
 	if (ch->handlers->write->func) zval_ptr_dtor(&ch->handlers->write->func);
 	if (ch->handlers->read->func)  zval_ptr_dtor(&ch->handlers->read->func);
-	if (ch->handlers->write_header) zval_ptr_dtor(&ch->handlers->write_header);
+	if (ch->handlers->write_header->func) zval_ptr_dtor(&ch->handlers->write_header->func);
 	if (ch->handlers->passwd) zval_ptr_dtor(&ch->handlers->passwd);
 
 	efree(ch->handlers->write);
+	efree(ch->handlers->write_header);
 	efree(ch->handlers->read);
 	efree(ch->handlers);
 	efree(ch);
