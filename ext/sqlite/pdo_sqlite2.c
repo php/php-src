@@ -94,7 +94,6 @@ static int pdo_sqlite2_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	S->einfo.errcode = sqlite_compile(S->H->db, stmt->active_query_string, &tail, &S->vm, &errmsg);
 	if (S->einfo.errcode != SQLITE_OK) {
-		fprintf(stderr, "SQL:%s\n", stmt->active_query_string);
 		pdo_sqlite2_error_stmt(errmsg, stmt);
 		return 0;
 	}
