@@ -130,7 +130,7 @@ static entity_table_t ent_uni_greek[] = {
 	/* 938 - 944 are not mapped */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-	"iota", "kappa", "lamda", "mu", "nu", "x1", "omicron", "p1", "rho",
+	"iota", "kappa", "lambda", "mu", "nu", "x1", "omicron", "p1", "rho",
 	"sigmaf", "sigma", "tau", "upsilon", "ph1", "ch1", "ps1", "omega",
 	/* 970 - 976 are not mapped */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
