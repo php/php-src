@@ -94,6 +94,7 @@
 
 enum mbfl_no_language {
 	mbfl_no_language_invalid = -1,
+	mbfl_no_language_neutral,
 	mbfl_no_language_uni,
 	mbfl_no_language_min,
 	mbfl_no_language_catalan,		/* ca */
