@@ -101,6 +101,8 @@ class PEAR_Dependency
                         $this->signOperator($operator) . " $req is required";
             }
             return false;
+        } elseif ($relation == 'has') {
+            return false;
         }
         return "Relation '$relation' with requirement '$req' is not supported";
     }
