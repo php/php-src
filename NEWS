@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Oct 2003, Version 4.3.4RC2
 - Fixed multibyte regex engine to properly handle ".*" pattern under
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
+- Fixed bug #25814 (Make flock() return correct value when 3rd argument is
+  used). (Ilia)
 - Fixed bug #25780 (ext/session: invalid "session.cookie_lifetime" makes 
   session_start() to crash in win32). (Jani)
 - Fixed bug #25770 (Segfault with PHP and bison 1.875). (eggert@gnu.org, Marcus)

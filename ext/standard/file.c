@@ -226,7 +226,7 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 PHP_FUNCTION(flock)
 {
 	zval **arg1, **arg2, **arg3;
-	int fd, act, ret, arg_count = ZEND_NUM_ARGS();
+	int fd, act, arg_count = ZEND_NUM_ARGS();
 	php_stream *stream;
 
 	if (arg_count < 2 || arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
@@ -250,11 +250,12 @@ PHP_FUNCTION(flock)
 	/* flock_values contains all possible actions
 	   if (arg2 & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (Z_LVAL_PP(arg2) & 4 ? LOCK_NB : 0);
-	if ((ret=flock(fd, act)) == -1) {
-		RETURN_FALSE;
-	}
-	if(ret == -1 && errno == EWOULDBLOCK && arg_count == 3) {
-		ZVAL_LONG(*arg3, 1);
+	if (flock(fd, act)) {
+		if (errno == EWOULDBLOCK && arg_count == 3) {
+			ZVAL_LONG(*arg3, 1);
+		} else {
+			RETURN_FALSE;
+		}	
 	}
 	RETURN_TRUE;
 }
