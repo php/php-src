@@ -205,47 +205,43 @@ PHP_FUNCTION(dom_xpath_query)
 	}
 
 
+	MAKE_STD_ZVAL(retval);
+	array_init(retval);
+
 	if (xpathobjp->type ==  XPATH_NODESET) {
 		int i;
 		xmlNodeSetPtr nodesetp;
 
-		if (NULL == (nodesetp = xpathobjp->nodesetval)) {
-			xmlXPathFreeObject (xpathobjp);
-			RETURN_FALSE;
-		}
+		if (NULL != (nodesetp = xpathobjp->nodesetval)) {
 
-		MAKE_STD_ZVAL(retval);
-		array_init(retval);
+			for (i = 0; i < nodesetp->nodeNr; i++) {
+				xmlNodePtr node = nodesetp->nodeTab[i];
+				zval *child;
 
-		for (i = 0; i < nodesetp->nodeNr; i++) {
-			xmlNodePtr node = nodesetp->nodeTab[i];
-			zval *child;
+				MAKE_STD_ZVAL(child);
+				
+				if (node->type == XML_NAMESPACE_DECL) {
+					xmlNsPtr curns;
+					xmlNodePtr nsparent;
 
-			MAKE_STD_ZVAL(child);
-			
-			if (node->type == XML_NAMESPACE_DECL) {
-				xmlNsPtr curns;
-				xmlNodePtr nsparent;
-
-				nsparent = node->_private;
-				curns = xmlNewNs(NULL, node->name, NULL);
-				if (node->children) {
-					curns->prefix = xmlStrdup((char *) node->children);
+					nsparent = node->_private;
+					curns = xmlNewNs(NULL, node->name, NULL);
+					if (node->children) {
+						curns->prefix = xmlStrdup((char *) node->children);
+					}
+					if (node->children) {
+						node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
+					} else {
+						node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
+					}
+					node->type = XML_NAMESPACE_DECL;
+					node->parent = nsparent;
+					node->ns = curns;
 				}
-				if (node->children) {
-					node = xmlNewDocNode(docp, NULL, (char *) node->children, node->name);
-				} else {
-					node = xmlNewDocNode(docp, NULL, "xmlns", node->name);
-				}
-				node->type = XML_NAMESPACE_DECL;
-				node->parent = nsparent;
-				node->ns = curns;
+				child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
+				add_next_index_zval(retval, child);
 			}
-			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
-			add_next_index_zval(retval, child);
 		}
-	} else {
-		retval = NULL;
 	}
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
