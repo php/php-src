@@ -928,7 +928,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!class_name) {
 		class_name = "";
 	}
-	zendlval->value.str.len = CG(active_class_entry)->name_length;
+	zendlval->value.str.len = strlen(class_name);
 	zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
 	zendlval->type = IS_STRING;
 	return T_CLASS_C;
