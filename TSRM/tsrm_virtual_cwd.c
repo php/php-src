@@ -424,7 +424,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 				path = resolved_path;
 				path_length = strlen(path);
 			} else {
-				return 1;
+				/* disable for now
+				return 1; */
 			}
 		}
 	} else { /* Concat current directory with relative path and then run realpath() on it */
@@ -450,8 +451,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 				path = resolved_path;
 				path_length = strlen(path);
 			} else {
+				/* disable for now 
 				free(tmp);
-				return 1;
+				return 1; */
 			}
 		}
 		free(tmp);
