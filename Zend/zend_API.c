@@ -393,14 +393,17 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 			{
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
-				if (!instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC)) {
+
+				if (Z_TYPE_PP(arg) == IS_OBJECT &&
+						instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC)) {
+					*p = *arg;
+				} else {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
 						return ce->name;
 					}
-				} else
-					*p = *arg;
+				}
 			}
 			break;
 
