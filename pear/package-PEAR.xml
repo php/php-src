@@ -47,6 +47,7 @@
 * pear makerpm, now works and generates a better system independant spec file
 * pear install|build &lt;pecl-package&gt;, now exposes the compilation progress
 * Installer now checks dependencies on package uninstall
+* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
 * Added new pear bundle command, which downloads and uncompress a &lt;pecl-package&gt;.
 The main purpouse of this command is for easily adding extensions to the PHP sources
 before compiling it.
