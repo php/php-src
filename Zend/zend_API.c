@@ -1237,6 +1237,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	class_entry->constants_updated = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->private_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
+	zend_hash_init(&class_entry->protected_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	class_entry->static_members = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(class_entry->static_members, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1);
