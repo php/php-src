@@ -502,9 +502,10 @@ class PEAR
     */
     function _explodePHPVersion($version)
     {
-        @list($v, ) = explode('-', $version); // 4.0.7-dev
-        list($mayor, $minor, $sub) = explode('.', $v);
-        @list($sub, $patch) = explode('pl', $sub); // 4.0.14pl1
+        @list($version, ) = explode('-', $version);  // 4.0.7-dev
+        @list($version, ) = explode('RC', $version); // 4.0.7RC1
+        list($mayor, $minor, $sub) = explode('.', $version);
+        @list($sub, $patch) = explode('pl', $sub);   // 4.0.14pl1
         if ($patch === null) {
             $patch = 0;
         }
