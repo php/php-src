@@ -1,3 +1,26 @@
+2003-03-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Dedicated to Greg Beaver <greg@chiaraquartet.net>.
+
+    * ZEND_CHANGES:
+      Document 'final'.
+
+    * ZEND_CHANGES:
+      Fix class type hints example.
+
+    * ZEND_CHANGES:
+      Update 'abstract' section.
+
+2003-03-07  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_ini.c
+      zend_ini.h:
+      Renamed OnUpdateInt -> OnUpdateLong to prevent further misunderstandings.
+
+    * zend_execute.c:
+      Better fix for the memleaks (bug 19943) by Moriyoshi
+
 2003-03-06  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
