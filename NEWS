@@ -1,8 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Added automatic connection reset for pgsql. Web server reboot is not needed
-  in most cases when PostgreSQL server is rebooted. (Yasuo)
+- Fixed pg_pconnect(). It catches broken connection and reconnects to PostgreSQL 
+  server always. When PostgreSQL is rebooted, web server reboot is not needed
+  to avoid errors. (Yasuo)
 - Fix --enable-safe-mode. This configure option was not working. (Yasuo)
 - added function domxml_dump_node($doc,$node). Dumps a node plus all
   children into a string. (chregu)
