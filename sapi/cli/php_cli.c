@@ -829,7 +829,6 @@ int main(int argc, char *argv[])
 		case PHP_MODE_STRIP:
 			if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 				zend_strip(TSRMLS_C);
-				fclose(file_handle.handle.fp);
 			}
 			goto out;
 			break;
@@ -840,7 +839,6 @@ int main(int argc, char *argv[])
 				if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 					php_get_highlight_struct(&syntax_highlighter_ini);
 					zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
-					fclose(file_handle.handle.fp);
 				}
 				goto out;
 			}
