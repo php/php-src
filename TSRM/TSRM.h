@@ -133,7 +133,7 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 #else /* non ZTS */
 
 #define TSRMLS_FETCH()
-#define TSRMLS_D
+#define TSRMLS_D	void
 #define TSRMLS_DC
 #define TSRMLS_C
 #define TSRMLS_CC
