@@ -328,28 +328,28 @@ PHP_FUNCTION(dio_fcntl)
 		}
 		if (Z_TYPE_P(arg) == IS_ARRAY) {
 			fh = HASH_OF(arg);
-			if (zend_hash_find(fh, "start", 5, (void **) &element) == FAILURE) {
+			if (zend_hash_find(fh, "start", sizeof("start"), (void **) &element) == FAILURE) {
 				lk.l_start = 0;
 			}
 			else {
 				lk.l_start = Z_LVAL_PP(element);
 			}
 
-			if (zend_hash_find(fh, "length", 6, (void **) &element) == FAILURE) {
+			if (zend_hash_find(fh, "length", sizeof("length"), (void **) &element) == FAILURE) {
 				lk.l_len = 0;
 			}
 			else {
 				lk.l_len = Z_LVAL_PP(element);
 			}
 
-			if (zend_hash_find(fh, "whence", 6, (void **) &element) == FAILURE) {
+			if (zend_hash_find(fh, "whence", sizeof("whence"), (void **) &element) == FAILURE) {
 				lk.l_whence = 0;
 			}
 			else {
 				lk.l_whence = Z_LVAL_PP(element);
 			}
 
-			if (zend_hash_find(fh, "type", 4, (void **) &element) == FAILURE) {
+			if (zend_hash_find(fh, "type", sizeof("type"), (void **) &element) == FAILURE) {
 				lk.l_type = 0;
 			}
 			else {
