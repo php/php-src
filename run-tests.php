@@ -388,7 +388,7 @@ COMMAND $cmd
     
     // Does the output match what is expected?
     
-    $output = trim(preg_replace('/^(..+\n)+\n/','',$out));
+    $output = trim($out);
     $wanted = trim($section_text['EXPECT']);
     
     $output = preg_replace('/\r\n/',"\n",$output);
