@@ -576,7 +576,7 @@ php_ns_config(php_ns_context *ctx, char global)
 	
 /*
  * php_ns_server_shutdown() performs the last steps before the
- * server exists. Shutdowns basic services and frees memory
+ * server exits. Shutdowns basic services and frees memory
  */
 
 static void
