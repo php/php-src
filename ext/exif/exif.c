@@ -3687,7 +3687,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 		return FALSE;
 	}
 
-	ImageInfo->FileName = php_basename(FileName, strlen(FileName), NULL, 0);
+	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;

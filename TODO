@@ -136,8 +136,6 @@ ext/standard
       variable name is seen more than once.
     * Implement regex-cache for url-functions.
     * Move socket related functions to fsock.c.
-    * NOT binary safe:
-        basename()
 
 ext/wddx
 --------

@@ -1074,20 +1074,10 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
+PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, int *p_len)
 {
-	char *ret=NULL, *c, *p=NULL, buf='\0', *p2=NULL, buf2='\0';
+	char *ret=NULL, *c;
 	c = s + len - 1;	
-
-	/* do suffix removal as the unix command does */
-	if (suffix && (len > sufflen)) {
-		if (!strncmp(suffix, c-sufflen+1, sufflen)) {
-			c -= sufflen; 
-			buf2 = *(c + 1); /* Save overwritten char */
-			*(c + 1) = '\0'; /* overwrite char */
-			p2 = c + 1;      /* Save pointer to overwritten char */
-		}
-	}
 
 	/* strip trailing slashes */
 	while (*c == '/'
@@ -1096,30 +1086,44 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 #endif
 	) {
 		c--;
+		len--;
 	}
 
-	if (c < s+len-1) {
-		buf = *(c + 1);  /* Save overwritten char */
-		*(c + 1) = '\0'; /* overwrite char */
-		p = c + 1;       /* Save pointer to overwritten char */
-	}
-
-	if ((c = strrchr(s, '/'))
+	/* do suffix removal as the unix command does */
+	if (suffix && (len > sufflen)) {
+		if (!memcmp(suffix, c-sufflen+1, sufflen)) {
+			if( (*(c-sufflen) != '/')
 #ifdef PHP_WIN32
-		|| ((c = strrchr(s, '\\')) && !IsDBCSLeadByte(*(c-1)))
-#endif
-	) {
-		ret = estrdup(c + 1);
-	} else {
-		ret = estrdup(s);
+		   && ( *(c-sufflen) != '\\' || IsDBCSLeadByte(*(c-sufflen-1)))
+#endif			
+				) {
+				c -= sufflen;
+				len -= sufflen;
+			}
+		}
 	}
-	if (buf) {
-		*p = buf;
+		
+	while(c>=s) {
+		if(*c == '/'
+#ifdef PHP_WIN32
+		   || ( *c == '\\' && !IsDBCSLeadByte(*c-1))
+#endif			
+		   ) {
+			c++;
+			break;
+		}
+		c--;
 	}
-	if (buf2) {
-		*p2 = buf2;
-	}
-	return (ret);
+
+	if (c<s) c=s;
+
+	len -= (c-s);
+	ret = emalloc(len+1);
+	memcpy(ret, c, len);
+	ret[len] = '\0';
+
+	if(p_ret) *p_ret = ret;
+	if(p_len) *p_len = len;
 }
 /* }}} */
 
@@ -1127,16 +1131,15 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
    Returns the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	char *ret;
-	char *string, *suffix = NULL;
-	int   string_len, suffix_len = 0;
+	char *string, *suffix = NULL, *ret;
+	int   string_len, suffix_len = 0, ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
 		return;
 	}
 
-	ret = php_basename(string, string_len, suffix, suffix_len);	
-	RETURN_STRING(ret, 0);
+	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len);	
+	RETURN_STRINGL(ret, ret_len, 0);
 }
 /* }}} */
 
@@ -1233,7 +1236,7 @@ PHP_FUNCTION(pathinfo)
 {
 	zval *tmp;
 	char *path, *ret = NULL;
-	int path_len;
+	int path_len, ret_len;
 	long opt = PHP_PATHINFO_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
@@ -1253,8 +1256,8 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME) {
-		ret = php_basename(path, path_len, NULL, 0);
-		add_assoc_string(tmp, "basename", ret, 0);
+		php_basename(path, path_len, NULL, 0, &ret, &ret_len);
+		add_assoc_stringl(tmp, "basename", ret, ret_len, 0);
 	}			
 	
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
@@ -1265,10 +1268,8 @@ PHP_FUNCTION(pathinfo)
 
 		/* Have we alrady looked up the basename? */
 		if (!have_basename) {
-			ret = php_basename(path, path_len, NULL, 0);
+			php_basename(path, path_len, NULL, 0, &ret, &ret_len);
 		}
-
-		ret_len = strlen(ret);
 
 		p = strrchr(ret, '.');
 
