@@ -43,7 +43,10 @@
 #endif
 
 #ifdef TSRM_WIN32
-#include "win32/readdir.h"
+#include "readdir.h"
+
+/* mode_t isn't defined on Windows */
+typedef int mode_t;
 
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 
@@ -70,7 +73,7 @@
 # endif
 #endif
 
-#ifdef PHP_EXPORTS
+#ifdef TSRM_EXPORTS
 #define CWD_EXPORTS
 #endif
 
@@ -97,7 +100,6 @@ CWD_API char *virtual_getcwd_ex(int *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API int virtual_chdir(const char *path);
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
-/* CWD_API void virtual_real_chdir_file(const char *path); */
 CWD_API int virtual_filepath(const char *path, char **filepath);
 CWD_API char *virtual_realpath(const char *path, char *real_path);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
@@ -116,7 +118,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
-#ifndef PHP_WIN32
+#ifndef TSRM_WIN32
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group);
 #endif
 

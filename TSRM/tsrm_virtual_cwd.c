@@ -28,9 +28,14 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#include "tsrm_config.h"
-#include "tsrm_strtok_r.h"
 #include "tsrm_virtual_cwd.h"
+
+#ifndef TSRM_WIN32
+#include "tsrm_config.h"
+#endif
+
+#include "tsrm_strtok_r.h"
+
 
 /* Are we doing enough to detect this? */
 #ifndef MAXPATHLEN
@@ -42,15 +47,14 @@
 #  define do_alloca(p) alloca(p)
 #  define free_alloca(p)
 # else
-#  define do_alloca(p)       emalloc(p)
-#  define free_alloca(p) efree(p)
+#  define do_alloca(p)   malloc(p)
+#  define free_alloca(p) free(p)
 # endif
 #endif
 
 #ifdef TSRM_WIN32
-/* mode_t isn't defined on Windows */
-typedef int mode_t;
 #include <sys/utime.h>
+#include <io.h>
 #endif
 
 #define VIRTUAL_CWD_DEBUG 0
@@ -175,7 +179,7 @@ static void cwd_globals_dtor(virtual_cwd_globals *cwd_globals)
 	CWD_STATE_FREE(&cwd_globals->cwd);
 }
 
-static char *tsrm_strndup(const char *s, uint length)
+static char *tsrm_strndup(const char *s, size_t length)
 {
     char *p;
 
@@ -509,7 +513,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	return f;
 }
 
-#if HAVE_UTIME
+#if HAVE_UTIME || defined(TSRM_WIN32)
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf)
 {
 	cwd_state new_state;
@@ -541,7 +545,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode)
 	return ret;
 }
 
-#ifndef PHP_WIN32
+#ifndef TSRM_WIN32
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group)
 {
 	cwd_state new_state;
@@ -657,8 +661,11 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode)
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, pathname, NULL);
 
+#ifdef TSRM_WIN32
+	retval = mkdir(new_state.cwd);
+#else
 	retval = mkdir(new_state.cwd, mode);
-
+#endif
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
@@ -677,6 +684,10 @@ CWD_API int virtual_rmdir(const char *pathname)
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
+
+#ifdef TSRM_WIN32
+DIR *opendir(const char *name);
+#endif
 
 CWD_API DIR *virtual_opendir(const char *pathname)
 {
@@ -724,7 +735,11 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 	*ptr++ = ' ';
 
 	memcpy(ptr, command, command_length+1);
+#ifdef TSRM_WIN32
+	retval = _popen(command_line, type);
+#else
 	retval = popen(command_line, type);
+#endif
 	free(command_line);
 	return retval;
 }
@@ -751,7 +766,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 #endif
 
 	chdir(CWDG(cwd).cwd);
-	retval = popen(command, type);
+	retval = _popen(command, type);
 	chdir(prev_cwd);
 
 #ifdef ZTS
