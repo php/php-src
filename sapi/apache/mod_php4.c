@@ -20,6 +20,10 @@
 /* $Id$ */
 
 #define NO_REGEX_EXTRA_H
+#ifdef WIN32
+#include <winsock2.h>
+#include <stddef.h>
+#endif
 
 #include "zend.h"
 #include "php.h"
@@ -235,8 +239,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
 	char *script_filename=NULL;
-	ELS_FETCH();
-	PLS_FETCH();
+	// Theses are already in parameters?
+//	ELS_FETCH();
+//	PLS_FETCH();
 
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
@@ -262,10 +267,28 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 static int
 php_apache_startup(sapi_module_struct *sapi_module)
 {
+#ifdef PHP_WIN32
+	// this is needed because apache reloads this dll twice due
+	// to a colision.  A better way to do this is to define the load
+	// address for the dll, but am not sure what it should be.
+	// this is just a quick hack to get it working.
+
+	static int php_apache_started=0;
+	static int apache_startup_success = FAILURE;
+	if (php_apache_started>0) return apache_startup_success;
+	php_apache_started=1;
+#endif
+
     if(php_module_startup(sapi_module) == FAILURE
             || zend_startup_module(&apache_module_entry) == FAILURE) {
+#ifdef PHP_WIN32
+		apache_startup_success = FAILURE;
+#endif
         return FAILURE;
     } else {
+#ifdef PHP_WIN32
+		apache_startup_success = SUCCESS;
+#endif
         return SUCCESS;
     }
 }
@@ -343,8 +366,13 @@ static sapi_module_struct sapi_module = {
 	sapi_apache_register_server_variables,		/* register server variables */
 	php_apache_log_message,			/* Log message */
 
+#ifdef PHP_WIN32
+	NULL,
+	NULL,
+#else
 	block_alarms,					/* Block interruptions */
 	unblock_alarms,					/* Unblock interruptions */
+#endif
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -562,9 +590,9 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 	php_per_dir_entry per_dir_entry;
 
 	if (!apache_php_initialized) {
+		apache_php_initialized = 1;
 		sapi_startup(&sapi_module);
 		php_apache_startup(&sapi_module);
-		apache_php_initialized = 1;
 	}
 	per_dir_entry.type = mode;
 
@@ -656,9 +684,9 @@ void php_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, (void (*)(void *))php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
+		apache_php_initialized = 1;
 		sapi_startup(&sapi_module);
 		php_apache_startup(&sapi_module);
-		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
 	{
@@ -763,6 +791,33 @@ module MODULE_VAR_EXPORT php4_module =
 #endif
 };
 
+
+#ifdef PHP_WIN32
+__declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+	switch (fdwReason) {
+		case DLL_PROCESS_ATTACH:
+			tsrm_startup(1, 1, 0);
+			sapi_startup(&sapi_module);
+			if (sapi_module.startup) {
+				sapi_module.startup(&sapi_module);
+			}
+			break;
+		case DLL_THREAD_ATTACH:
+			break;
+		case DLL_THREAD_DETACH:
+			ts_free_thread();
+			break;
+		case DLL_PROCESS_DETACH:
+			if (sapi_module.shutdown) {
+				sapi_module.shutdown(&sapi_module);
+			}
+			tsrm_shutdown();
+			break;
+	}
+	return TRUE;
+}
+#endif
 /*
  * Local variables:
  * tab-width: 4

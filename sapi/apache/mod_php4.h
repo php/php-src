@@ -36,7 +36,7 @@ typedef struct {
 extern zend_module_entry apache_module_entry;
 extern php_apache_info_struct php_apache_info;
 
-#if MSVC5
+#ifdef WIN32
 #define S_IXUSR _S_IEXEC
 #endif
 
