@@ -3210,12 +3210,12 @@ PHP_FUNCTION(setlocale)
 			RETVAL_STRING(retval, 1);
 			
 			if (cat == LC_NUMERIC || cat == LC_ALL) {
-				struct lconv *lc;
-				lc = localeconv();
+				struct lconv lc;
+				localeconv_r(&lc);
 			
-				EG(float_separator)[0] = (lc->decimal_point)[0];
+				EG(float_separator)[0] = (lc.decimal_point)[0];
 
-				if ((lc->decimal_point)[0] != '.') {
+				if ((lc.decimal_point)[0] != '.') {
 					/* set locale back to C */
 					setlocale(LC_NUMERIC, "C");	
 				}
