@@ -91,6 +91,8 @@ struct _EnumMemberType
 
 CORBA_boolean TypeManager_Init(const char * pIdlDirectory)
 {
+	gTypeManager.mRoot = NULL;
+
 	if (pIdlDirectory != NULL)
 	{
 		glob_t result;
