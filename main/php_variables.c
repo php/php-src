@@ -668,7 +668,7 @@ int php_hash_environment(TSRMLS_D)
 	}
 
 	for (i=0; i<num_track_vars; i++) {
-		if (jit_initialization && auto_global_records[i].jit_initialization) {
+		if ((jit_initialization && auto_global_records[i].jit_initialization) || _gpc_flags[i]) {
 			continue;
 		}
 		if (!PG(http_globals)[i]) {
