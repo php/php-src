@@ -102,8 +102,8 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 #define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)  \
     zend_register_resource(rsrc_result, rsrc_pointer, rsrc_type);
 
-#define ZEND_GET_LE(le_id, le_type_name)               \
-    if(le_id == 0) {                                   \
+#define ZEND_GET_RESOURCE_ID(le_id, le_type_name)      \
+    if (le_id == 0) {                                  \
         le_id = zend_fetch_list_dtor_id(le_type_name); \
 	}
 
