@@ -1044,7 +1044,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
    	ulong num_key;
 	uint str_key_len;
    	char *string_key;
-	int (*compare_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
+	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
       	
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
@@ -1064,14 +1064,14 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	if (ZEND_NUM_ARGS() == 3) {
 		convert_to_boolean_ex(strict);
 		if (Z_LVAL_PP(strict)) {
-			compare_func = is_identical_function;
+			is_equal_func = is_identical_function;
 	    }
 	}
 
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
-     	compare_func(&res, *value, *entry TSRMLS_CC);
+     	is_equal_func(&res, *value, *entry TSRMLS_CC);
 		if (Z_LVAL(res)) {
 			if (behavior==0) {	     
 				RETURN_TRUE;
