@@ -74,7 +74,7 @@ typedef struct _zend_fast_cache_list_entry {
 	{																\
 		ALS_FETCH();												\
 																	\
-		((zend_fast_cache_list_entry *) (p))->next = AG(fast_cache_list_head)[fc_type];	\
+		((zend_fast_cache_list_entry *) (p))->next = (zend_fast_cache_list_entry *) AG(fast_cache_list_head)[fc_type];	\
 		AG(fast_cache_list_head)[fc_type] = (zend_fast_cache_list_entry *) (p);			\
 	}
 
