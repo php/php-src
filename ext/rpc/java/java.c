@@ -263,7 +263,9 @@ static jobjectArray _java_makeArray(int argc, pval** argv) {
   for (i=0; i<argc; i++) {
     switch (argv[i]->type) {
       case IS_STRING:
-        arg=(*jenv)->NewStringUTF(jenv,argv[i]->value.str.val);
+        arg=(*jenv)->NewByteArray(jenv,argv[i]->value.str.len);
+        (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)arg,0,
+          argv[i]->value.str.len, argv[i]->value.str.val);
         break;
 
       case IS_OBJECT:
@@ -498,16 +500,16 @@ ZEND_GET_MODULE(java)
 /***************************************************************************/
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromString
-  (JNIEnv *jenv, jclass self, jlong result, jstring value)
+  (JNIEnv *jenv, jclass self, jlong result, jbyteArray jvalue)
 {
   jboolean isCopy;
-  const char *valueAsUTF = (*jenv)->GetStringUTFChars(jenv, value, &isCopy);
+  jbyte *value = (*jenv)->GetByteArrayElements(jenv, jvalue, &isCopy);
   pval *presult = (pval*)(long)result;
   presult->type=IS_STRING;
-  presult->value.str.len=strlen(valueAsUTF);
+  presult->value.str.len=(*jenv)->GetArrayLength(jenv, jvalue);
   presult->value.str.val=emalloc(presult->value.str.len+1);
-  strcpy(presult->value.str.val, valueAsUTF);
-  if (isCopy) (*jenv)->ReleaseStringUTFChars(jenv, value, valueAsUTF);
+  strcpy(presult->value.str.val, value);
+  if (isCopy) (*jenv)->ReleaseByteArrayElements(jenv, jvalue, value, 0);
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromLong
