@@ -1101,7 +1101,7 @@ AC_DEFUN(PHP_FOPENCOOKIE,[
 									   ],
 	                   [ cookie_io_functions_t cookie; ],
                      [ have_cookie_io_functions_t=yes ],
-										 [ ] )
+										 [] )
 
 		  if test "$have_cookie_io_functions_t" = "yes" ; then
         cookie_io_functions_t=cookie_io_functions_t
