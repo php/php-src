@@ -628,7 +628,7 @@ void _xml_startElementHandler(void *userData, const char *name,
 		parser->level++;
 
 		if (parser->case_folding) {
-			name = php_strtoupper(estrdup(name));
+			name = php_strtoupper(estrdup(name), strlen(name));
 		}
 
 		if (parser->startElementHandler) {
