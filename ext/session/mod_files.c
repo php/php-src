@@ -107,6 +107,14 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 #define O_BINARY 0
 #endif 
 
+static void ps_files_close(ps_files *data)
+{
+	if (data->fd != -1) {
+		close(data->fd);
+		data->fd = -1;
+	}
+}
+
 static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
@@ -116,10 +124,8 @@ static void ps_files_open(ps_files *data, const char *key)
 			efree(data->lastkey);
 			data->lastkey = NULL;
 		}
-		if (data->fd != -1) {
-			close(data->fd);
-			data->fd = -1;
-		}
+
+	ps_files_close(data);
 		
 		if (!ps_files_valid_key(key) || 
 				!ps_files_path_create(buf, sizeof(buf), data, key))
@@ -209,8 +215,8 @@ PS_CLOSE_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	if (data->fd > -1) 
-		close(data->fd);
+	ps_files_close(data);
+
 	if (data->lastkey) 
 		efree(data->lastkey);
 	efree(data->basedir);
@@ -272,6 +278,8 @@ PS_DESTROY_FUNC(files)
 
 	if (!ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
+	
+	ps_files_close(data);
 	
 	if (V_UNLINK(buf) == -1) {
 		return FAILURE;
