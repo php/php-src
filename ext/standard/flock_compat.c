@@ -25,6 +25,7 @@
 #if HAVE_STRUCT_FLOCK
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/file.h>
 #endif
 
 #ifdef PHP_WIN32
