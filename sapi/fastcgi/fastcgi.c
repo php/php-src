@@ -53,6 +53,8 @@
 #include <io.h>
 #include <fcntl.h>
 #include "win32/php_registry.h"
+/* don't want to include fcgios.h, causes conflicts */
+extern int OS_SetImpersonate(void);
 #else
 #include <sys/wait.h>
 #endif
@@ -357,6 +359,8 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 	char *s;
 	int status;
+#else
+	int impersonate = 0;
 #endif
 	char *argv0=NULL;
 	char *script_file=NULL;
@@ -461,6 +465,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+		/* Initialise FastCGI request structure */
+	FCGX_Init();
+	FCGX_InitRequest( &request, fcgi_fd, 0 );
+
 #ifndef PHP_WIN32
 	/* Pre-fork, if required */
 	if( getenv( "PHP_FCGI_CHILDREN" )) {
@@ -471,10 +479,6 @@ int main(int argc, char *argv[])
 			exit( 1 );
 		}
 	}
-
-	/* Initialise FastCGI request structure */
-	FCGX_Init();
-	FCGX_InitRequest( &request, fcgi_fd, 0 );
 
 	if( children ) {
 		int running = 0;
@@ -545,6 +549,14 @@ int main(int argc, char *argv[])
 	/* Main FastCGI loop */
 #ifdef DEBUG_FASTCGI
 	fprintf( stderr, "Going into accept loop\n" );
+#endif
+#ifdef PHP_WIN32
+	/* attempt to set security impersonation for fastcgi
+	   will only happen on NT based OS, others will ignore it. */
+	if (cfg_get_long("fastcgi.impersonate", &impersonate) == FAILURE) {
+		impersonate = 0;
+	}
+	if (impersonate) OS_SetImpersonate();
 #endif
 
 	while( FCGX_Accept_r( &request ) >= 0 ) {
