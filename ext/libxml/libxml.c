@@ -40,6 +40,9 @@
 #include <libxml/tree.h>
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
+#ifdef LIBXML_SCHEMAS_ENABLED
+#include <libxml/relaxng.h>
+#endif
 
 #include "php_libxml.h"
 
@@ -241,7 +244,11 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 int php_libxml_streams_IO_match_wrapper(const char *filename)
 {
 	TSRMLS_FETCH();
-	return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
+
+	if (zend_is_executing(TSRMLS_C)) {
+		return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
+	}
+	return 0;
 }
 
 void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
@@ -408,6 +415,9 @@ PHP_LIBXML_API void php_libxml_initialize() {
 
 PHP_LIBXML_API void php_libxml_shutdown() {
 	if (_php_libxml_initialized) {
+#if defined(LIBXML_SCHEMAS_ENABLED)
+		xmlRelaxNGCleanupTypes();
+#endif
 		xmlCleanupParser();
 		zend_hash_destroy(&php_libxml_exports);
 		_php_libxml_initialized = 0;
