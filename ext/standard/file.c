@@ -240,7 +240,7 @@ function_entry file_functions[] = {
     PHP_FE(flock,				NULL)
 	PHP_FE(get_meta_tags,		NULL)
 	PHP_FE(set_socket_blocking,	NULL)
-#if (0 && defined(HAVE_SYS_TIME_H) && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
+#if HAVE_SYS_TIME_H
 	PHP_FE(set_socket_timeout,	NULL)
 #endif
 #if 0 /* needs to be rethought 991221 thies@digicol.de */
@@ -879,32 +879,40 @@ PHP_FUNCTION(set_socket_blocking)
 /* {{{ proto int set_socket_timeout(int socket descriptor, int timeout )
    NYI */
 
-#if (0 && defined(HAVE_SYS_TIME_H) && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
+#if HAVE_SYS_TIME_H
 /* this doesn't work, as it appears those properties are read-only :( */
 PHP_FUNCTION(set_socket_timeout)
 {
-	pval *socket,*timeout;
-	int type, *sock;
+	zval **socket, **seconds, **microseconds;
+	int type;
+	void *what;
+	int socketd = 0;
 	struct timeval t;
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht, 2, &socket, &timeout)==FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket, &seconds, &microseconds)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(socket);
-	convert_to_long(timeout);
+
+	what = zend_fetch_resource(socket, -1, "File-Handle", &type, 1, le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+	socketd = *(int *)what;
 	
-	sock = zend_list_find(socket->value.lval, &type);
-	if (type!=le_socket) {
-		php_error(E_WARNING,"%d is not a socket id",socket->value.lval);
-		RETURN_FALSE;
+	convert_to_long_ex(seconds);
+	t.tv_sec = (*seconds)->value.lval;
+
+	if (ZEND_NUM_ARGS() == 3) {
+		convert_to_long_ex(microseconds);
+		t.tv_usec = (*microseconds)->value.lval % 1000000;
+		t.tv_sec += (*microseconds)->value.lval / 1000000;
 	}
-	t.tv_sec = timeout->value.lval;
-	t.tv_usec = 0;
-	setsockopt(*sock,SOL_SOCKET,SO_SNDTIMEO,(void *) &t,sizeof(struct timeval));
-	setsockopt(*sock,SOL_SOCKET,SO_RCVTIMEO,(void *) &t,sizeof(struct timeval));
+	else
+		t.tv_usec = 0;
+
+	php_sockset_timeout(socketd, &t);
 	RETURN_TRUE;
 }
-#endif
+#endif /* HAVE_SYS_TIME_H */
 
 /* }}} */
 /* {{{ proto string fgets(int fp, int length)

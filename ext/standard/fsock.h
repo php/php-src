@@ -67,6 +67,7 @@ int php_sock_feof(int socket);
 int php_sock_fgetc(int socket);
 int php_is_persistent_sock(int);
 int php_sockset_blocking(int socket, int mode);
+void php_sockset_timeout(int socket, struct timeval *timeout);
 int php_sockdestroy(int socket);
 int php_sock_close(int socket);
 size_t php_sock_set_def_chunk_size(size_t size);
