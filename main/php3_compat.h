@@ -99,26 +99,4 @@ typedef zval pval;
 
 #define list_entry			zend_rsrc_list_entry
 
-/* Compatibility macros */
-#define PHP_FN(name)				ZEND_FN(name)
-#define PHP_NAMED_FUNCTION(name)	ZEND_NAMED_FUNCTION(name)
-#define PHP_FUNCTION(name)			ZEND_FUNCTION(name)
-
-#define PHP_NAMED_FE(php_name, name, arg_types)	ZEND_NAMED_FE(php_name, name, arg_types)
-#define PHP_FE(name, arg_types)					ZEND_FE(name, arg_types)
-#define PHP_FALIAS(name, alias, arg_types)		ZEND_FALIAS(name, alias, arg_types)
-#define PHP_STATIC_FE(php_name, func_name, arg_types) ZEND_STATIC_FE(php_name, func_name, arg_types)
-
-#define PHP_MINIT(module)		ZEND_MODULE_STARTUP_N(module)
-#define PHP_MSHUTDOWN(module)	ZEND_MODULE_SHUTDOWN_N(module)
-#define PHP_RINIT(module)		ZEND_MODULE_ACTIVATE_N(module)
-#define PHP_RSHUTDOWN(module)	ZEND_MODULE_DEACTIVATE_N(module)
-#define PHP_MINFO(module)		ZEND_MODULE_INFO_N(module)
-
-#define PHP_MINIT_FUNCTION(module)		ZEND_MODULE_STARTUP_D(module)
-#define PHP_MSHUTDOWN_FUNCTION(module)	ZEND_MODULE_SHUTDOWN_D(module)
-#define PHP_RINIT_FUNCTION(module)		ZEND_MODULE_ACTIVATE_D(module)
-#define PHP_RSHUTDOWN_FUNCTION(module)	ZEND_MODULE_DEACTIVATE_D(module)
-#define PHP_MINFO_FUNCTION(module)		ZEND_MODULE_INFO_D(module)
-
 #endif							/* PHP3_COMPAT_H */
