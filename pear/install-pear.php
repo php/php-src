@@ -75,7 +75,6 @@ foreach ($install_files as $package => $instfile) {
         $old_ver = $reg->packageInfo($package, 'version');
         if (version_compare($new_ver, $old_ver, 'gt')) {
             $options['upgrade'] = true;
-            print_r($options);
             $err = $installer->install($instfile, $options);
             if (PEAR::isError($err)) {
                 $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
