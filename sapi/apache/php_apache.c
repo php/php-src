@@ -136,7 +136,7 @@ PHP_FUNCTION(apache_note)
 {
 	pval **arg_name, **arg_val;
 	char *note_val;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count<1 || arg_count>2 ||
 		zend_get_parameters_ex(arg_count, &arg_name, &arg_val) ==FAILURE ) {
@@ -303,7 +303,7 @@ PHP_FUNCTION(virtual)
 	pval **filename;
 	request_rec *rr = NULL;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -410,7 +410,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	pval **filename;
 	request_rec *rr=NULL;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -485,7 +485,7 @@ PHP_FUNCTION(apache_exec_uri)
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);

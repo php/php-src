@@ -1008,7 +1008,7 @@ PHP_FUNCTION(mb_http_input)
 	retname = 1;
 	if (ZEND_NUM_ARGS() == 0) {
 		result = MBSTRG(http_input_identify);
-	} else if (ARG_COUNT(ht) == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
+	} else if (ZEND_NUM_ARGS() == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
 		convert_to_string_ex(arg1);
 		switch (*(Z_STRVAL_PP(arg1))) {
 		case 'G':
