@@ -108,7 +108,7 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));									\
 		(p)->pData = &(p)->pDataPtr;													\
 	} else {																			\
-		if (!(p)->pDataPtr) {															\
+		if ((p)->pDataPtr) {															\
 			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);				\
 			(p)->pDataPtr=NULL;															\
 		} else {																		\
