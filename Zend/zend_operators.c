@@ -1236,7 +1236,7 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, int l
 	
 	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
 	if (!retval) {
-		return (len1 - len2);
+		return (MIN(length, len1) - MIN(length, len2));
 	} else {
 		return retval;
 	}
