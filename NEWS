@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Update the XSLT extension to support Sablotron 0.8 (Sterling)
+- Update the XSLT extension to support Sablotron 0.8 (Petr Cimprich)
 - Fixed a bug in preg_match()/preg_match_all() when matching strings containing
   null bytes. (Andrei)
 - Added xpath_register_ns() function. This makes it possible to issue XPath 
