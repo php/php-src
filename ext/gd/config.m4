@@ -214,6 +214,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageEllipse,         [AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,        1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])

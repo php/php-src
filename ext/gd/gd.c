@@ -133,14 +133,17 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreatetruecolor,					NULL)
 	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
-	PHP_FE(imageellipse,							NULL)
-	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagefilledarc,							NULL)
+	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagealphablending,						NULL)
 	PHP_FE(imagecolorresolvealpha, 					NULL)
 	PHP_FE(imagecolorclosestalpha,					NULL)
 	PHP_FE(imagecolorexactalpha,					NULL)
 	PHP_FE(imagecopyresampled,						NULL)
+#endif
+
+#if HAVE_GD_IMAGEELLIPSE
+	PHP_FE(imageellipse,							NULL)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -645,7 +648,7 @@ PHP_FUNCTION(imagesetthickness)
 }
 /* }}} */
 
-#if 0  /* this function is missing from GD 2.0.1 */
+#ifdef HAVE_GD_IMAGEELLIPSE  /* this function is missing from GD 2.0.1 */
 /* {{{ proto void imageellipse(resource im, int cx, int cy, int w, int h, int color)
    Draw an ellipse */
 PHP_FUNCTION(imageellipse)
