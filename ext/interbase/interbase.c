@@ -1727,7 +1727,7 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 			/* fallout */
 		case SQL_TEXT:
 			val->value.str.val = (char *)emalloc(sizeof(char)*(len+1));
-            memcpy(val->value.str.val, data, len);
+			memcpy(val->value.str.val, data, len);
 			val->value.str.val[len] = '\0';
 			if (PG(magic_quotes_runtime)) {
 				val->value.str.val = php_addslashes(val->value.str.val, len, &len, 1);
