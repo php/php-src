@@ -679,7 +679,7 @@ PHP_FUNCTION(gzcompress)
 }
 /* }}} */
 
-/* {{{ proto string gzuncompress(string data ,int length) 
+/* {{{ proto string gzuncompress(string data, int length) 
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzuncompress)
 {
