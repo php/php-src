@@ -206,7 +206,7 @@ gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
 #define RETURN_HWB(h, w, b) {HWB->H = h; HWB->W = w; HWB->B = b; return HWB;}
 #define RETURN_RGB(r, g, b) {RGB->R = r; RGB->G = g; RGB->B = b; return RGB;}
 #define HWB_UNDEFINED -1
-#define SETUP_RGB(s, r, g, b) {s.R = r/255.0; s.G = g/255.0; s.B = b/255.0;}
+#define SETUP_RGB(s, r, g, b) {s.R = r/255.0f; s.G = g/255.0f; s.B = b/255.0f;}
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MIN3(a,b,c) ((a)<(b)?(MIN(a,c)):(MIN(b,c)))
@@ -290,6 +290,7 @@ HWB_Diff (int r1, int g1, int b1, int r2, int g2, int b2)
 }
 
 
+#if 0
 /*
  * This is not actually used, but is here for completeness, in case someone wants to
  * use the HWB stuff for anything else...
@@ -332,8 +333,8 @@ HWB_to_RGB (HWBType HWB, RGBType * RGB)
     }
 
   return RGB;
-
 }
+#endif /* 0 */
 
 int
 gdImageColorClosestHWB (gdImagePtr im, int r, int g, int b)
@@ -657,6 +658,22 @@ gdImageSetPixel (gdImagePtr im, int x, int y, int color)
     }
 }
 
+static int
+gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
+{
+  int p = gdImageGetPixel (im, x, y);
+  if (!im->trueColor)
+    {
+      return gdTrueColorAlpha (im->red[p], im->green[p], im->blue[p],
+			       (im->transparent == p) ? gdAlphaTransparent :
+			       gdAlphaOpaque);
+    }
+  else
+    {
+      return p;
+    }
+}
+
 static void
 gdImageBrushApply (gdImagePtr im, int x, int y)
 {
@@ -790,22 +807,6 @@ gdImageGetPixel (gdImagePtr im, int x, int y)
   else
     {
       return 0;
-    }
-}
-
-int
-gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
-{
-  int p = gdImageGetPixel (im, x, y);
-  if (!im->trueColor)
-    {
-      return gdTrueColorAlpha (im->red[p], im->green[p], im->blue[p],
-			       (im->transparent == p) ? gdAlphaTransparent :
-			       gdAlphaOpaque);
-    }
-  else
-    {
-      return p;
     }
 }
 
@@ -968,7 +969,7 @@ gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
   int dashStep = 0;
   int on = 1;
   int wid;
-  int w, wstart, vert;
+  int vert;
   int thick = im->thick;
 
   dx = abs (x2 - x1);
@@ -1905,7 +1906,6 @@ gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX
 		}
 	      if (dst->trueColor)
 		{
-		  int d;
 		  mapTo = gdImageGetTrueColorPixel (src, x, y);
 		  /* Added 7/24/95: support transparent copies */
 		  if (gdImageGetTransparent (src) == mapTo)
@@ -1985,7 +1985,6 @@ gdImageCopyResampled (gdImagePtr dst,
 		      int srcW, int srcH)
 {
   int x, y;
-  float sx, sy;
   if (!dst->trueColor)
     {
       gdImageCopyResized (
@@ -1997,11 +1996,11 @@ gdImageCopyResampled (gdImagePtr dst,
     {
       for (x = dstX; (x < dstX + dstW); x++)
 	{
-	  int pd = gdImageGetPixel (dst, x, y);
+	  /*int pd = gdImageGetPixel (dst, x, y);*/
 	  float sy1, sy2, sx1, sx2;
 	  float sx, sy;
 	  float spixels = 0;
-	  float red = 0.0, green = 0.0, blue = 0.0, alpha = 0.0;
+	  float red = 0.0f, green = 0.0f, blue = 0.0f, alpha = 0.0f;
 	  sy1 = ((float) y - (float) dstY) * (float) srcH /
 	    (float) dstH;
 	  sy2 = ((float) (y + 1) - (float) dstY) * (float) srcH /
@@ -2012,7 +2011,7 @@ gdImageCopyResampled (gdImagePtr dst,
 	      float yportion;
 	      if (floor (sy) == floor (sy1))
 		{
-		  yportion = 1.0 - (sy - floor (sy));
+		  yportion = 1.0f - (sy - floor (sy));
 		  if (yportion > sy2 - sy1)
 		    {
 		      yportion = sy2 - sy1;

@@ -1,6 +1,7 @@
 #include "gd.h"
 #include "gdhelpers.h"
 #include <stdlib.h>
+#include <string.h>
 
 /* TBB: gd_strtok_r is not portable; provide an implementation */
 

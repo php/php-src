@@ -249,7 +249,7 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
     }
   jpeg_finish_compress (&cinfo);
-error:
+/*error:*/
   jpeg_destroy_compress (&cinfo);
   gdFree (row);
 }
@@ -282,8 +282,9 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
   volatile JSAMPROW row = 0;
   volatile gdImagePtr im = 0;
   JSAMPROW rowptr[1];
-  int i, j, retval;
+  JDIMENSION i, j;
   JDIMENSION nrows;
+  int retval;
 
 #ifdef JPEG_DEBUG
   printf ("gd-jpeg: gd JPEG version %s\n", GD_JPEG_VERSION);

@@ -195,7 +195,6 @@ void
 _gdPutColors (gdImagePtr im, gdIOCtx * out)
 {
   int i;
-  int trans;
 
   gdPutC (im->trueColor, out);
   if (!im->trueColor)

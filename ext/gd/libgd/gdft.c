@@ -14,6 +14,7 @@
 
 #ifndef MSWIN32
 #include <unistd.h>
+extern int access(const char *pathname, int mode);
 #else
 #define R_OK 2
 #endif
@@ -25,7 +26,7 @@ char *
 gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
 		  double ptsize, double angle, int x, int y, char *string)
 {
-  gdImageStringFT (im, brect, fg, fontlist, ptsize,
+  return gdImageStringFT (im, brect, fg, fontlist, ptsize,
 		   angle, x, y, string);
 }
 
@@ -331,7 +332,7 @@ fontFetch (char **error, void *key)
   int n;
   int font_found = 0;
   unsigned short platform, encoding;
-  char *fontsearchpath, *fontpath, *fontlist;
+  char *fontsearchpath, *fontlist;
   char *fullname = NULL;
   char *name, *path, *dir;
   char *strtok_ptr;
@@ -537,7 +538,6 @@ static char *
 gdft_draw_bitmap (gdImage * im, int fg, FT_Bitmap bitmap, int pen_x, int pen_y)
 {
   unsigned char *pixel;
-  int *tpixel;
   int x, y, row, col, pc;
 
   tweencolor_t *tc_elem;
@@ -629,6 +629,14 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 		 double ptsize, double angle, int x, int y, char *string)
 {
 	return gdImageStringFTEx(im, brect, fg, fontlist, ptsize, angle, x, y, string, NULL);
+}
+
+static int
+gdroundupdown (FT_F26Dot6 v1, int updown)
+{
+  return (!updown)
+    ? (v1 < 0 ? ((v1 - 63) >> 6) : v1 >> 6)
+    : (v1 > 0 ? ((v1 + 63) >> 6) : v1 >> 6);
 }
 
 char *
@@ -739,8 +747,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       if (ch == '\r')
 	{
 	  penf.x = 0;
-	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -749,10 +757,10 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       /* newlines */
       if (ch == '\n')
 	{
-			penf.y -= face->size->metrics.height * linespace;
+	  penf.y -= (long)(face->size->metrics.height * linespace);
 	  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -918,14 +926,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   if (tmpstr)
     gdFree (tmpstr);
   return (char *) NULL;
-}
-
-int
-gdroundupdown (FT_F26Dot6 v1, int updown)
-{
-  return (!updown)
-    ? (v1 < 0 ? ((v1 - 63) >> 6) : v1 >> 6)
-    : (v1 > 0 ? ((v1 + 63) >> 6) : v1 >> 6);
 }
 
 #endif /* HAVE_LIBFREETYPE */
