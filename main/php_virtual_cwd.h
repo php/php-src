@@ -118,17 +118,17 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group);
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 
-ZEND_BEGIN_MODULE_GLOBALS(cwd)
+typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
-ZEND_END_MODULE_GLOBALS(cwd)
+} virtual_cwd_globals;
 
 #ifdef ZTS
-# define CWDLS_D  zend_cwd_globals *cwd_globals
+# define CWDLS_D  virtual_cwd_globals *cwd_globals
 # define CWDLS_DC , CWDLS_D
 # define CWDLS_C  cwd_globals
 # define CWDLS_CC , CWDLS_C
 # define CWDG(v) (cwd_globals->v)
-# define CWDLS_FETCH()    zend_cwd_globals *cwd_globals = ts_resource(cwd_globals_id)
+# define CWDLS_FETCH()    virtual_cwd_globals *cwd_globals = ts_resource(cwd_globals_id)
 #else
 # define CWDLS_D  void
 # define CWDLS_DC
