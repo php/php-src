@@ -109,7 +109,7 @@ typedef struct {
 
 function_entry exif_functions[] = {
     PHP_FE(read_exif_data, NULL)
-    {0}
+    {NULL, NULL, NULL}
 };
 
 PHP_MINFO_FUNCTION(exif);
