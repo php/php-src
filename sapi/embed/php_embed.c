@@ -177,7 +177,7 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 
   sapi_startup(&php_embed_module);
 
-  if (php_module_startup(&php_embed_module, NULL, 0)==FAILURE) {
+  if (php_embed_module.startup(&php_embed_module)==FAILURE) {
 	  return FAILURE;
   }
  
