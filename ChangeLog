@@ -1,3 +1,36 @@
+1999-12-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/config.m4: Cache results of crypt capability checks
+
+1999-12-26  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * sapi/isapi/php4isapi.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/wddx/wddx.c
+      ext/standard/array.c
+      ext/standard/iptc.c
+      ext/standard/post.c
+      ext/standard/var.c
+      ext/session/session.c
+      ext/pcre/php_pcre.c
+      ext/java/java.c
+      ext/odbc/php_odbc.c
+      ext/hyperwave/hw.c
+      ext/dav/dav.c
+      ext/com/COM.c
+      main.c
+      rfc1867.c: Change ALLOC_ZVAL() semantics
+
+    * main.c: namespace protection
+
+    * ext/pgsql/pgsql.c
+      ext/standard/basic_functions.h
+      ext/standard/rand.c:
+    - Change uint32 to php_uint32 (PostgreSQL defines uint32, and perhaps other packages too)
+    - PostgreSQL finally compiles&links
+
 1999-12-25  Zeev Suraski  <zeev@php.net>
 
     * ext/pgsql/pgsql.c: Make PostgreSQL compile again
