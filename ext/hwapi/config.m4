@@ -1,7 +1,7 @@
 dnl $Id$
 
 PHP_ARG_WITH(hwapi, for hwapi support,
-[  --with-hwapi[=DIR]    Include official Hyperwave API support])
+[  --with-hwapi[=DIR]      Include official Hyperwave API support])
 
 if test "$PHP_HWAPI" != "no"; then
   if test -r $PHP_HWAPI/include/sdk/api/object.h; then
