@@ -1,3 +1,65 @@
+2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      Make object parameter optional
+
+2004-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.c:
+      Fixed bug #27590 (crash during shutdown when freeing persistent resources
+      in ZTS mode).
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute_API.c:
+      - Fix windows build
+
+    * zend_execute_API.c:
+      - Fix for bug #27504
+
+    * zend_builtin_functions.c:
+      - Fixing bug #27123
+
+    * zend_operators.c:
+      - Improve compatibility mode and compare objects according to property
+      - comparison (sucky but this is how PHP 4 behaved).
+
+    * zend.c:
+      - Fix flow of logic
+
+    * zend_operators.c:
+      - Support old style of converting objects to long/double/bool.
+      - This is only enabled in compatibility mode, else it calls cast_object()
+      - and if that is not available we return 1 (true) so that the following
+      - code would work:
+      if ($obj) {
+      }
+
+2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.c:
+      Fix: Add return type void
+
+2004-03-14  Andi Gutmans  <andi@zend.com>
+
+    * zend.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.c:
+      - Support Cast operator in convert_to_* so that we support internal
+      - extensions such as SimpleXML. This is for Sterling.
+
+    * zend_operators.c:
+      - Fix memory leak in the following code (Dmitry):
+      <?php
+      $a = array();
+      $a .= "x";
+      ?>
+
+    * zend_operators.c:
+      - Initial commit which allows comparing overloaded objects with native
+      - types (only for internal classes and not for user-land classes).
+
 2004-03-11  Andi Gutmans  <andi@zend.com>
 
     * zend_objects_API.c:
