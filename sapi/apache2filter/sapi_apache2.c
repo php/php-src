@@ -407,6 +407,14 @@ php_apache_server_shutdown(void *tmp)
 	return APR_SUCCESS;
 }
 
+static void php_apache_add_version(apr_pool_t *p)
+{
+	TSRMLS_FETCH();
+	if (PG(expose_php)) {
+		ap_add_version_component(p, "PHP/" PHP_VERSION);
+	}
+}
+
 static void
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
@@ -416,6 +424,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_register_module();
+	php_apache_add_version(pconf);
 }
 
 static void php_add_filter(request_rec *r, ap_filter_t *f)
