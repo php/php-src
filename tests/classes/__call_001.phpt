@@ -28,7 +28,7 @@ array(4) {
   [1]=>
   string(1) "2"
   [2]=>
-  float(000000002)
+  float(3.4)
   [3]=>
   bool(true)
 }
