@@ -1,3 +1,197 @@
+2003-08-13  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4:
+      MFB
+
+2003-08-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/pspell/pspell.dsp:
+      MFB: standard location for the include files
+
+    * (PHP_4_3)
+      ext/pspell/pspell.dsp:
+      Added standard location for the headers
+
+2003-08-13  Brian France  <list@firehawksystems.com>
+
+    * (PHP_4_3)
+      acinclude.m4:
+      
+      	Fixed two translit so they don't remove underscores
+
+2003-08-13  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * (PHP_4_3)
+      pear/package-PEAR.xml:
+      1.2b5 becomes 1.2 final, no more changes
+
+2003-08-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/browscap.c:
+      It's boolean, not long.
+
+2003-08-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear2.phpt:
+      fixed include, verified that it indeed works, and PEAR.php passes the test
+      :)
+
+    * pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php:
+      fix uninstall for optional dependencies, bug #25080
+
+    * pear/PEAR/Common.php:
+      fix optional dependencies in reading, validating,  and writing of
+      package.xml
+
+2003-08-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+      this comment makes no sense after the previous commit
+
+2003-08-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      updating for release
+
+    * pear/PEAR.php:
+      fix for Bug #21845 $this in static calls
+
+    * pear/tests/pear2.phpt:
+      tests for pear error handling
+
+2003-08-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+      changes to accomodate win32 build
+
+2003-08-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      MFH Fix CTCP handling so that commands without parameters are processed
+      MFH Use %ld for time_t's
+      MFH Provide a warning when irc_connect fails
+
+2003-08-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.dsp:
+      
+      win32 build is now possible Credit is due to Jan Gehring
+      <gehring@egotec.de> for figuring that out
+
+2003-08-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg.c:
+      Fix CTCP handling so that commands without parameters are processed
+      
+      Use %ld for time_t's
+      
+      Provide a warning when irc_connect fails
+
+2003-08-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/iconv/iconv.c:
+      MFH(r-1.96): Slight improvement. Hope this will make some difference.
+
+    * ext/iconv/iconv.c:
+      Slight improvement. Hope this will make some difference.
+
+2003-08-13  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Be a bit more wordy..
+
+2003-08-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-08-13  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Fixed crash in _php_ibase_error() after request shutdown (also fixes #7014)
+
+2003-08-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/array/001.phpt:
+      fix test
+
+    * ext/interbase/interbase.c:
+      Disable the debugging to prevent the tests from failing.
+
+    * ext/standard/tests/array/bug21918.phpt:
+      Fix the test. (this was mixed test with bug #24159)
+
+    * NEWS:
+      more informix stuff
+
+2003-08-13  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/tests/003.phpt
+      ext/dbx/tests/dbx_test.p:
+      Remove special-case from test for SQLite persistent connections.
+
+2003-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_objects_API.c:
+      Add missing entry
+
+    * ZendEngine2/zend_API.c:
+      - Show classes in case of methods
+      - Using sprintf here was a bad idea
+
+2003-08-13  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Allow the use of EXECUTE PROCEDURE statements
+
+2003-08-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      MFH: Don't forget to flush() buffers for -w -s
+
+    * sapi/cgi/cgi_main.c:
+      Don't forget to flush() buffers for -w -s
+
+2003-08-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/array.c:
+      revert that, it did not fix anything
+
+2003-08-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cli/php_cli.c:
+      MFH: Fixed bug #20896 (-s -w modes with php-cli cause php to hang).
+
+    * sapi/cli/php_cli.c:
+      Fixed bug #20896 (-s -w modes with php-cli cause php to hang).
+
+2003-08-13  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Fixed bug #23936 (fail to select and fetch) MFH
+
+2003-08-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/array.c:
+      Fix external builds (configure run outside srcdir)
+
+2003-08-13  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/php_rand.h:
+      Prevent carryover when max-min > signed int max
+
 2003-08-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c
