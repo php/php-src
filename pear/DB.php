@@ -469,7 +469,7 @@ class DB_result {
 		if (DB::isError($err)) {
 			return $err;
 		}
-		$this->dbh = $this->result = false;
+		$this->result = false;
 		return true;
     }
 
