@@ -425,6 +425,15 @@ ii.default_database			=		; default database (format : [node_id::]dbname[/srv_cla
 ii.default_user				=		; default user
 ii.default_password			=		; default password
 
+[Payflow Pro]
+pfpro.defaulthost 			=	test.signio.com		; default Signio server to use
+pfpro.defaultport 			=	443			; default port to connect to
+pfpro.defaulttimeout			=	30			; default seconds before timing out a transaction
+;pfpro.proxyaddress 			=				; default proxy IP address (if you have a proxy)
+;pfpro.proxyport 			=				; default proxy port
+;pfpro.proxylogon 			=				; default proxy logon
+;pfpro.proxypassword 			=				; default proxy password
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
