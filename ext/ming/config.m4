@@ -18,12 +18,6 @@ if test "$PHP_MING" != "no"; then
     AC_MSG_ERROR(Please reinstall ming distribution. libming.(a|so) not found.)
   fi
 
-  for i in /usr/local /usr; do
-    if test -f $i/lib/libming.$SHLIB_SUFFIX_NAME -o -f $i/lib/libming.a; then
-      MING_DIR=$i
-    fi
-  done
-
   for i in $MING_DIR/include $MING_DIR/include/ming $MING_DIR/ming/include; do
     if test -f $i/ming.h; then
       MING_INC_DIR=$i
