@@ -45,7 +45,7 @@
 
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
-#define DL_ERROR php_win_err()
+#define DL_ERROR php_win_err
 #endif
 
 
@@ -87,7 +87,6 @@ static char *libpath   = 0;
 static char *javahome  = 0;
 static char *javalib   = 0;
 
-static int iniUpdated  = 0;
 static void *dl_handle = 0;
 
 /* {{{ ZEND_BEGIN_MODULE_GLOBALS
@@ -113,22 +112,21 @@ static zend_class_entry java_class_entry;
 static PHP_INI_MH(OnIniUpdate)
 {
 	if (new_value) *(char**)mh_arg1 = new_value;
-	iniUpdated=1;
 	return SUCCESS;
 }
 
 /* {{{ PHP_INI_BEGIN 
  */
 PHP_INI_BEGIN()
-  PHP_INI_ENTRY1("java.class.path",   NULL, PHP_INI_ALL, OnIniUpdate, &classpath)
+  PHP_INI_ENTRY1("java.class.path",   NULL, PHP_INI_SYSTEM, OnIniUpdate, &classpath)
 #ifndef JNI_11
-  PHP_INI_ENTRY1("java.home",         NULL, PHP_INI_ALL, OnIniUpdate, &javahome)
-  PHP_INI_ENTRY1("java.library.path", NULL, PHP_INI_ALL, OnIniUpdate, &libpath)
+  PHP_INI_ENTRY1("java.home",         NULL, PHP_INI_SYSTEM, OnIniUpdate, &javahome)
+  PHP_INI_ENTRY1("java.library.path", NULL, PHP_INI_SYSTEM,OnIniUpdate, &libpath)
 #endif
 #ifdef JAVALIB
-  PHP_INI_ENTRY1("java.library", JAVALIB, PHP_INI_ALL, OnIniUpdate, &javalib)
+  PHP_INI_ENTRY1("java.library", JAVALIB, PHP_INI_SYSTEM, OnIniUpdate, &javalib)
 #else
-  PHP_INI_ENTRY1("java.library", NULL,    PHP_INI_ALL, OnIniUpdate, &javalib)
+  PHP_INI_ENTRY1("java.library", NULL,    PHP_INI_SYSTEM, OnIniUpdate, &javalib)
 #endif
 PHP_INI_END()
 /* }}} */
@@ -143,14 +141,7 @@ PHP_INI_END()
 void jvm_destroy(TSRMLS_D) 
 {
   if (JG(php_reflect)) (*JG(jenv))->DeleteGlobalRef(JG(jenv), JG(php_reflect));
-  if (JG(jvm)) {
-    (*JG(jvm))->DetachCurrentThread(JG(jvm));
-    (*JG(jvm))->DestroyJavaVM(JG(jvm));
-    JG(jvm) = 0;
-  }
-  if (dl_handle) DL_UNLOAD(dl_handle);
   JG(php_reflect) = 0;
-  JG(jenv) = 0;
 }
 /* }}} */
 
@@ -196,14 +187,13 @@ static int jvm_create(TSRMLS_D)
 #endif
 #endif
 
-  iniUpdated=0;
 
   if (javalib) {
     dl_handle = DL_LOAD(javalib);
 
     if (!dl_handle) {
       php_error(E_ERROR, "Unable to load Java Library %s, error: %s", 
-        javalib, DL_ERROR);
+        javalib, DL_ERROR());
       return -1;
     }
   }
@@ -452,7 +442,6 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
   getParametersArray(ht, arg_count, arguments);
 
-  if (iniUpdated && JG(jenv)) jvm_destroy(TSRMLS_C);
   if (!JG(jenv)) jvm_create(TSRMLS_C);
   if (!JG(jenv)) return;
   jenv = JG(jenv);
@@ -854,7 +843,6 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
 {
   jobject local_php_reflect;
 
-  iniUpdated=0;
   JG(jenv)=newJenv;
 
   if (!self) self = (*JG(jenv))->FindClass(JG(jenv), "net/php/reflect");
