@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.4
+- Fixed Content-Type so that charset is applied. (Yasuo)
 - Fixed GET/POST/COOKIE value handlings. (Yoshimori, Yasuo)
 
 06 Sep 2002, Version 4.2.3
