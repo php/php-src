@@ -46,7 +46,7 @@
 #endif
 
 #ifndef ZTS
-void init_cfg_scanner()
+void init_ini_scanner()
 {
 	ini_lineno=1;
 }
@@ -116,7 +116,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 	CG(ini_scanner) = new ZendIniFlexLexer;
 	CG(ini_scanner)->switch_streams(fh->handle.is, &cout);
 #else
-	init_cfg_scanner();
+	init_ini_scanner();
 	yyin = fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 #endif
@@ -132,8 +132,9 @@ void zend_ini_close_file(zend_file_handle *fh)
 			break;
 		case ZEND_HANDLE_STDIOSTREAM: {
 				CLS_FETCH();
-
+#ifdef ZTS
 				delete CG(ini_scanner);
+#endif
 			}
 			break;
 	}
