@@ -56,6 +56,7 @@ typedef struct {
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
+	int filemode;
 } ps_files;
 
 ps_module ps_mod_files = {
@@ -152,7 +153,8 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		
 		data->lastkey = estrdup(key);
 		
-		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, 0600);
+		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, 
+				data->filemode);
 		
 		if (data->fd != -1) {
 			flock(data->fd, LOCK_EX);
@@ -226,23 +228,54 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 PS_OPEN_FUNC(files)
 {
 	ps_files *data;
-	char *p;
+	const char *p, *last;
+	const char *argv[3];
+	int argc = 0;
+	size_t dirdepth = 0;
+	int filemode = 0600;
 
-	data = ecalloc(sizeof(*data), 1);
-	PS_SET_MOD_DATA(data);
+	/* split up input parameter */
+	last = save_path;
+	p = strchr(save_path, ';');
+	while (p) {
+		argv[argc++] = last;
+		last = ++p;
+		p = strchr(p, ';');
+		if (argc > 1) break;
+	}
+	argv[argc++] = last;
 
-	data->fd = -1;
-	if ((p = strchr(save_path, ';'))) {
+	if (argc > 1) {
 		errno = 0;
-		data->dirdepth = (size_t) strtol(save_path, NULL, 10);
+		dirdepth = (size_t) strtol(argv[0], NULL, 10);
 		if (errno == ERANGE) {
-			efree(data);
+			php_error(E_WARNING, 
+					"The first parameter in session.save_path is invalid");
 			return FAILURE;
 		}
-		save_path = p + 1;
 	}
+	
+	if (argc > 2) {
+		errno = 0;
+		filemode = strtol(argv[1], NULL, 8);
+		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
+			php_error(E_WARNING, 
+					"The second parameter in session.save_path is invalid");
+			return FAILURE;
+		}
+	}
+	save_path = argv[argc - 1];
+
+	data = emalloc(sizeof(*data));
+	memset(data, 0, sizeof(*data));
+	
+	data->fd = -1;
+	data->dirdepth = dirdepth;
+	data->filemode = filemode;
 	data->basedir_len = strlen(save_path);
 	data->basedir = estrndup(save_path, data->basedir_len);
+	
+	PS_SET_MOD_DATA(data);
 	
 	return SUCCESS;
 }
