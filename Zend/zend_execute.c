@@ -1110,6 +1110,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	EX(fbc) = NULL;
 	EX(object) = NULL;
 	EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
+	EX(op_array) = op_array;
 	EX(original_in_execution) = EG(in_execution);
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = &execute_data;

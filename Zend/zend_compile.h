@@ -188,6 +188,7 @@ typedef struct _zend_execute_data {
 	zend_function_state function_state;
 	zend_function *fbc; /* Function Being Called */
 	zend_function *fbc_constructor;
+	zend_op_array *op_array;
 	zval *object;
 	union _temp_variable *Ts;
 	zend_bool original_in_execution;
