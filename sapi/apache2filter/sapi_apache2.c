@@ -467,3 +467,12 @@ AP_MODULE_DECLARE_DATA module php4_module = {
     php_dir_cmds,			/* command apr_table_t */
     php_register_hook		/* register hooks */
 };
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */
