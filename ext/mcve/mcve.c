@@ -682,7 +682,7 @@ PHP_FUNCTION(mcve_ping)
 }
 /* }}} */
 
-/* {{{ proto long mcve_transnew(resource conn)
+/* {{{ proto int mcve_transnew(resource conn)
    Start a new transaction */
 PHP_FUNCTION(mcve_transnew)
 {
