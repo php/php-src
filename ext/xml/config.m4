@@ -24,7 +24,7 @@ AC_ARG_WITH(xml,
 	AC_CHECK_LIB(xmltok, main,
 	  AC_CHECK_LIB(xmlparse, main, XML_LIBS="-lxmlparse -lxmltok", 
 	    AC_MSG_ERROR(No expat library found for the xml module),"-lxmltok"),
-	  AC_MSG_ERROR(No expart library found for the xml module))
+	  AC_MSG_ERROR(No expat library found for the xml module))
       )
     else
       XML_LIBS="-L$withval/lib -lexpat"
