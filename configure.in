@@ -703,7 +703,6 @@ phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
 AC_SUBST(phplibdir)
 AC_SUBST(phptempdir)
-LDFLAGS="$LDFLAGS -module"
 EXTRA_LIBS="$LIBS $EXTRA_LIBS"
 LIBS=""
 
