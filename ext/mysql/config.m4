@@ -108,7 +108,7 @@ elif test "$PHP_MYSQL" != "no"; then
   done
 
   if test -z "$MYSQL_DIR"; then
-    AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
+    AC_MSG_ERROR(Cannot find MySQL header files under $PHP_MYSQL)
   fi
 
   MYSQL_MODULE_TYPE=external
