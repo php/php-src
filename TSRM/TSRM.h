@@ -40,14 +40,6 @@ typedef int ts_rsrc_id;
 #endif
 
 
-/* Define TSRM_FUNC */
-#ifdef __cplusplus
-#define TSRM_FUNC	extern "C" TSRM_API
-#else
-#define TSRM_FUNC	TSRM_API
-#endif
-
-
 /* Define THREAD_T and MUTEX_T */
 #if defined(WIN32)
 # define THREAD_T DWORD
@@ -66,32 +58,42 @@ typedef int ts_rsrc_id;
 
 #define THREAD_HASH_OF(thr,ts)  thr%ts
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* startup/shutdown */
-TSRM_FUNC int tsrm_startup(int expected_threads, int expected_resources, int debug_status);
-TSRM_FUNC void tsrm_shutdown();
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_status);
+TSRM_API void tsrm_shutdown();
 
 /* allocates a new thread-safe-resource id */
-TSRM_FUNC ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource));
+TSRM_API ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource));
 
 /* fetches the requested resource for the current thread */
-TSRM_FUNC void *ts_resource(ts_rsrc_id id);
+TSRM_API void *ts_resource(ts_rsrc_id id);
 
 /* frees all resources allocated for the current thread */
-TSRM_FUNC void ts_free_thread();
+TSRM_API void ts_free_thread();
 
 /* deallocates all occurrences of a given id */
-TSRM_FUNC void ts_free_id(ts_rsrc_id id);
+TSRM_API void ts_free_id(ts_rsrc_id id);
 
 
 /* Debug support */
-TSRM_FUNC void tsrm_debug_set(int status);
+TSRM_API void tsrm_debug_set(int status);
 
 /* utility functions */
-TSRM_FUNC THREAD_T tsrm_thread_id(void);
-TSRM_FUNC MUTEX_T tsrm_mutex_alloc(void);
-TSRM_FUNC void tsrm_mutex_free(MUTEX_T mutexp);
-TSRM_FUNC int tsrm_mutex_lock(MUTEX_T mutexp);
-TSRM_FUNC int tsrm_mutex_unlock(MUTEX_T mutexp);
+TSRM_API THREAD_T tsrm_thread_id(void);
+TSRM_API MUTEX_T tsrm_mutex_alloc(void);
+TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
+TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
+TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
+
+TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler)(THREAD_T thread_id));
+TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(THREAD_T thread_id));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _TSRM_H */

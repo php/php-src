@@ -51,13 +51,17 @@ static int					resource_types_table_size;
 
 static MUTEX_T tsmm_mutex;	/* thread-safe memory manager mutex */
 
+/* New thread handlers */
+static void (*tsrm_new_thread_begin_handler)();
+static void (*tsrm_new_thread_end_handler)();
+
 /* Debug support */
 static int tsrm_debug(const char *format, ...);
 static int tsrm_debug_status;
 
 
 /* Startup TSRM (call once for the entire process) */
-TSRM_FUNC int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
 {
 	tsrm_tls_table_size = expected_threads;
 	tsrm_tls_table = (tsrm_tls_entry **) calloc(tsrm_tls_table_size, sizeof(tsrm_tls_entry *));
@@ -75,6 +79,8 @@ TSRM_FUNC int tsrm_startup(int expected_threads, int expected_resources, int deb
 
 	tsmm_mutex = tsrm_mutex_alloc();
 
+	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
+
 	tsrm_debug_status = debug_status;
 
 	tsrm_debug("Started up TSRM, %d expected threads, %d expected resources\n", expected_threads, expected_resources);
@@ -83,7 +89,7 @@ TSRM_FUNC int tsrm_startup(int expected_threads, int expected_resources, int deb
 
 
 /* Shutdown TSRM (call once for the entire process) */
-TSRM_FUNC void tsrm_shutdown()
+TSRM_API void tsrm_shutdown()
 {
 	int i;
 
@@ -114,7 +120,7 @@ TSRM_FUNC void tsrm_shutdown()
 
 
 /* allocates a new thread-safe-resource id */
-TSRM_FUNC ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource))
+TSRM_API ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource))
 {
 	ts_rsrc_id new_id;
 	int i;
@@ -170,6 +176,10 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 {
 	int i;
 
+	if (tsrm_new_thread_begin_handler) {
+		tsrm_new_thread_begin_handler(thread_id);
+	}
+
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
 	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
 	(*thread_resources_ptr)->count = id_count;
@@ -180,6 +190,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		if (resource_types_table[i].ctor) {
 			resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);
 		}
+	}
+	if (tsrm_new_thread_end_handler) {
+		tsrm_new_thread_end_handler(thread_id);
 	}
 }
 
@@ -278,7 +291,7 @@ void ts_free_id(ts_rsrc_id id)
  */
 
 /* Obtain the current thread id */
-TSRM_FUNC THREAD_T tsrm_thread_id(void)
+TSRM_API THREAD_T tsrm_thread_id(void)
 {
 #ifdef WIN32
 	return GetCurrentThreadId();
@@ -293,7 +306,7 @@ TSRM_FUNC THREAD_T tsrm_thread_id(void)
 
 
 /* Allocate a mutex */
-TSRM_FUNC MUTEX_T tsrm_mutex_alloc( void )
+TSRM_API MUTEX_T tsrm_mutex_alloc( void )
 {
     MUTEX_T mutexp;
 
@@ -315,7 +328,7 @@ TSRM_FUNC MUTEX_T tsrm_mutex_alloc( void )
 
 
 /* Free a mutex */
-TSRM_FUNC void tsrm_mutex_free( MUTEX_T mutexp )
+TSRM_API void tsrm_mutex_free( MUTEX_T mutexp )
 {
     if (mutexp) {
 #ifdef WIN32
@@ -335,7 +348,7 @@ TSRM_FUNC void tsrm_mutex_free( MUTEX_T mutexp )
 
 
 /* Lock a mutex */
-TSRM_FUNC int tsrm_mutex_lock( MUTEX_T mutexp )
+TSRM_API int tsrm_mutex_lock( MUTEX_T mutexp )
 {
 	//tsrm_debug("Mutex locked thread: %ld\n",tsrm_thread_id());
 #ifdef WIN32
@@ -351,7 +364,7 @@ TSRM_FUNC int tsrm_mutex_lock( MUTEX_T mutexp )
 
 
 /* Unlock a mutex */
-TSRM_FUNC int tsrm_mutex_unlock( MUTEX_T mutexp )
+TSRM_API int tsrm_mutex_unlock( MUTEX_T mutexp )
 {
 	//tsrm_debug("Mutex unlocked thread: %ld\n",tsrm_thread_id());
 #ifdef WIN32
@@ -364,6 +377,25 @@ TSRM_FUNC int tsrm_mutex_unlock( MUTEX_T mutexp )
 	return PISync_unlock(mutexp);
 #endif
 }
+
+
+TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler)(THREAD_T thread_id))
+{
+	void *retval = (void *) tsrm_new_thread_begin_handler;
+
+	tsrm_new_thread_begin_handler = new_thread_begin_handler;
+	return retval;
+}
+
+
+TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(THREAD_T thread_id))
+{
+	void *retval = (void *) tsrm_new_thread_end_handler;
+
+	tsrm_new_thread_end_handler = new_thread_end_handler;
+	return retval;
+}
+
 
 
 /*
