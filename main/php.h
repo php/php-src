@@ -97,6 +97,27 @@ extern unsigned char second_arg_allow_ref[];
 #include <alloca.h>
 #endif
 
+/*
+ * This is a fast version of strlcpy which should be used, if you
+ * know the maximum size of the destination buffer and if you know
+ * the length of the source string.
+ *
+ * size is the allocated number of bytes
+ * src_size is the number of bytes excluding the NUL
+ */
+
+#define PHP_STRLCPY(dst, src, size, src_size)	\
+	{											\
+		size_t php_str_len;						\
+												\
+		if (src_size >= size)					\
+			php_str_len = size - 1;				\
+		else									\
+			php_str_len = src_size;				\
+		memcpy(dst, src, php_str_len);			\
+		dst[php_str_len] = '\0';				\
+	}
+
 #ifndef HAVE_STRLCPY
 PHPAPI size_t strlcpy(char *dst, const char *src, size_t siz);
 #endif
