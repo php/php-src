@@ -2174,7 +2174,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	pval **pv_db, **pv_uid, **pv_pwd, **pv_opt;
 	odbc_connection *db_conn;
 	char *hashed_details;
-	int hashed_len, len, cur_opt;
+	int hashed_len, cur_opt;
 
 	/*  Now an optional 4th parameter specifying the cursor type
 	 *  defaulting to the cursors default
@@ -2220,7 +2220,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		persistent = 0;
 	}
 
-	hashed_len = spprintf(hashed_details, 0, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
+	hashed_len = spprintf(&hashed_details, 0, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
 
 	/* FIXME the idea of checking to see if our connection is already persistent
 		is good, but it adds a lot of overhead to non-persistent connections.  We
