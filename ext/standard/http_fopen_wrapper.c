@@ -467,7 +467,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 						char *s = strrchr(resource->path, '/');
 						if (!s) {
 							s = resource->path;
-							*s = '/';
+							if (!s[0]) {
+								efree(s);
+								s = resource->path = estrdup("/");
+							} else {
+								*s = '/';
+							}
 						}
 						s[1] = '\0'; 
 						if (resource->path && *(resource->path) == '/' && *(resource->path + 1) == '\0') {
