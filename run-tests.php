@@ -46,6 +46,7 @@ $cwd = getcwd();
 set_time_limit(0);
 ob_implicit_flush();
 error_reporting(E_ALL);
+ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
 
 if (ini_get('safe_mode')) {
 	echo <<< SAFE_MODE_WARNING
@@ -607,7 +608,7 @@ COMMAND $cmd
 			// %f allows two points "-.0.0" but that is the best *simple* expression
 		}
 /* DEBUG YOUR REGEX HERE
-		var_dump($wanted);
+		var_dump($wanted_re);
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
