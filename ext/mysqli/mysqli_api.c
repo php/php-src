@@ -711,7 +711,7 @@ PHP_FUNCTION(mysqli_fetch)
 			RETURN_FALSE;
 		break;
 		default:
-			RETURN_LONG(ret);
+			RETURN_NULL();
 		break;
 	}
 }
