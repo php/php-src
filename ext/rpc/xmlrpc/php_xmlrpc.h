@@ -93,28 +93,14 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
    for thread safety instead of using true globals.
 */
 typedef struct {
-	/* You can use the next one as type if your module registers any
-	   resources. Oh, you can of course rename it to something more
-	   suitable, add list entry types or remove it if it not needed.
-	   It's just an example.
-	*/
-        int le_xmlrpc_server;
-} php_xmlrpc_globals;
+} zend_xmlrpc_globals;
 
-/* In every function that needs to use variables in php_xmlrpc_globals,
+/* In every function that needs to use variables in zend_xmlrpc_globals,
    do call XMLRPCLS_FETCH(); after declaring other variables used by
    that function, and always refer to them as XMLRPCG(variable).
    You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
-
-#ifdef ZTS
-#define XMLRPCG(v) (xmlrpc_globals->v)
-#define XMLRPCLS_FETCH() php_xmlrpc_globals *xmlrpc_globals = ts_resource(gd_xmlrpc_id)
-#else
-#define XMLRPCG(v) (xmlrpc_globals.v)
-#define XMLRPCLS_FETCH()
-#endif
 
 #else
 
