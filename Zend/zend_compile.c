@@ -1043,6 +1043,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 		} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
+		} else if (!(fn_flags & ZEND_ACC_STATIC)) {
+			CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 		}
 		free_alloca(short_class_name);
 
@@ -2389,19 +2391,19 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	do_inherit_parent_constructor(ce);
 
 	if (ce->constructor) {
-		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR|ZEND_ACC_DYNAMIC;
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
 		}
 	}
 	if (ce->destructor) {
-		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR|ZEND_ACC_DYNAMIC;
+		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
 	if (ce->clone) {
-		ce->clone->common.fn_flags |= ZEND_ACC_CLONE|ZEND_ACC_DYNAMIC;
+		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
 		}

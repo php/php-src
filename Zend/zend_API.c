@@ -1293,22 +1293,25 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		scope->destructor = dtor;
 		scope->clone = clone;
 		if (ctor) {
-			ctor->common.fn_flags |= ZEND_ACC_CTOR|ZEND_ACC_DYNAMIC;
+			ctor->common.fn_flags |= ZEND_ACC_CTOR;
 			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Constructor %s::%s cannot be static", ctor->common.scope->name, ctor->common.function_name);
 			}
+			ctor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (dtor) {
-			dtor->common.fn_flags |= ZEND_ACC_DTOR|ZEND_ACC_DYNAMIC;
+			dtor->common.fn_flags |= ZEND_ACC_DTOR;
 			if (dtor->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Destructor %s::%s cannot be static", dtor->common.scope->name, dtor->common.function_name);
 			}
+			dtor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (clone) {
-			clone->common.fn_flags |= ZEND_ACC_CLONE|ZEND_ACC_DYNAMIC;
+			clone->common.fn_flags |= ZEND_ACC_CLONE;
 			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Constructor %s::%s cannot be static", clone->common.scope->name, clone->common.function_name);
 			}
+			clone->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 	}
 	return SUCCESS;
