@@ -315,6 +315,10 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	void *conf = ap_get_module_config(f->r->per_dir_config, &php4_module);
 	TSRMLS_FETCH();
 
+	if (f->r->proxyreq) {
+		return ap_pass_brigade(f->next, bb);
+	}
+
 	ctx = SG(server_context);
 	INIT_CTX;
 
