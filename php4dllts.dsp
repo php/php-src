@@ -375,6 +375,10 @@ SOURCE=.\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\mcal\php3_mcal.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
@@ -512,6 +516,10 @@ SOURCE=.\functions\php3_ldap.h
 # Begin Source File
 
 SOURCE=.\ext\standard\php3_mail.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\mcal\php3_mcal.h
 # End Source File
 # Begin Source File
 
