@@ -5164,7 +5164,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 				smart_str_append_long(&querystr, Z_LVAL_PP(val));
 				break;
 			case IS_DOUBLE:
-				smart_str_appendl(&querystr, buf, sprintf(buf, "%f", Z_DVAL_PP(val)));
+				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%f", Z_DVAL_PP(val)));
 				break;
 			default:
 				/* should not happen */
