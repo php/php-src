@@ -863,6 +863,7 @@ function_entry basic_functions[] = {
 #endif
 
 	PHP_FE(str_rot13, NULL)
+	PHP_FE(stream_get_filters, NULL)
 	PHP_FE(stream_register_filter, NULL)
 
 	/* functions from aggregate.c */
