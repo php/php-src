@@ -77,6 +77,10 @@ int send_parsed_php_source(request_rec * r);
 int php_xbithack_handler(request_rec * r);
 void php_init_handler(server_rec *s, pool *p);
 
+#if MODULE_MAGIC_NUMBER >= 19970728
+void php_child_exit_handler(server_rec *s, pool *p);
+#endif
+
 #if MODULE_MAGIC_NUMBER > 19961007
 #define CONST_PREFIX const
 #else
@@ -678,11 +682,30 @@ static void apache_php_module_shutdown_wrapper(void)
 {
 	apache_php_initialized = 0;
 	sapi_module.shutdown(&sapi_module);
+
+#if MODULE_MAGIC_NUMBER >= 19970728
+	/* This function is only called on server exit if the apache API
+	 * child_exit handler exists, so shutdown globally 
+	 */
+	sapi_shutdown();
+#endif
+
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
 }
 
+#if MODULE_MAGIC_NUMBER >= 19970728
+static void php_child_exit_handler(server_rec *s, pool *p)
+{
+/*	apache_php_initialized = 0; */
+	sapi_module.shutdown(&sapi_module);
+
+#ifdef ZTS
+	tsrm_shutdown();
+#endif
+}
+#endif
 
 void php_init_handler(server_rec *s, pool *p)
 {
@@ -791,7 +814,7 @@ module MODULE_VAR_EXPORT php4_module =
 	,NULL             			/* child_init */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970728
-	,NULL						/* child_exit */
+	,php_child_exit_handler		/* child_exit */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970902
 	,NULL						/* post read-request */
