@@ -1978,7 +1978,6 @@ PHP_FUNCTION(fgetcsv)
 									state = 1;
 								} else if (*bptr == enclosure) {
 									state = 2;
-								} else {
 								}
 								bptr++;
 								break;
@@ -1998,7 +1997,6 @@ PHP_FUNCTION(fgetcsv)
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
 								break;
-								/* break is missing intentionally */
 							default:
 								bptr += inc_len;
 								break;
