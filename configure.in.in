@@ -125,13 +125,15 @@ AC_CACHE_VAL(php_cc_rdynamic,[
 	LIBS="${SAVE_LIBS}"])
 AC_MSG_RESULT($php_cc_rdynamic)
 if test $php_cc_rdynamic = "yes"; then
+  AC_CHECK_CC_OPTION(rdynamic)
+fi
+if test $php_cc_rdynamic = "yes"; then
 	LDFLAGS="${LDFLAGS} -rdynamic"
 	RDYNAMIC_LFLAGS="-rdynamic"
 else
 	RDYNAMIC_LFLAGS=""
 fi
 AC_SUBST(RDYNAMIC_LFLAGS)
-
 
 dnl AC_PROG_INSTALL
 AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH /usr/bin /usr/sbin /usr/etc /etc /usr/ucblib)
