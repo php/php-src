@@ -211,6 +211,12 @@ PHPAPI char *php_get_uname(char mode)
 	DWORD dwVersion = GetVersion();
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
+	DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
+	char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+	SYSTEM_INFO SysInfo;
+
+	GetComputerName(ComputerName, &dwSize);
+	GetSystemInfo(&SysInfo);
 
 	if (mode == 's') {
 		if (dwVersion < 0x80000000) {
@@ -222,25 +228,57 @@ PHPAPI char *php_get_uname(char mode)
 		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
 		php_uname = tmp_uname;
 	} else if (mode == 'n') {
-		/* XXX HOW TO GET THIS ON WINDOWS? */
-		php_uname = "localhost";
+		php_uname = ComputerName;
 	} else if (mode == 'v') {
 		dwBuild = (DWORD)(HIWORD(dwVersion));
 		snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
 		php_uname = tmp_uname;
 	} else if (mode == 'm') {
-		/* XXX HOW TO GET THIS ON WINDOWS? */
-		php_uname = "i386";
+		switch (SysInfo.wProcessorArchitecture) {
+			case PROCESSOR_ARCHITECTURE_INTEL :
+				snprintf(tmp_uname, sizeof(tmp_uname), "i%d", SysInfo.dwProcessorType);
+				php_uname = tmp_uname;
+				break;
+			case PROCESSOR_ARCHITECTURE_MIPS :
+				php_uname = "MIPS R4000";
+				php_uname = tmp_uname;
+				break;
+			case PROCESSOR_ARCHITECTURE_ALPHA :
+				snprintf(tmp_uname, sizeof(tmp_uname), "Alpha %d", SysInfo.wProcessorLevel);
+				php_uname = tmp_uname;
+				break;
+			case PROCESSOR_ARCHITECTURE_PPC :
+				snprintf(tmp_uname, sizeof(tmp_uname), "PPC 6%02d", SysInfo.wProcessorLevel);
+				php_uname = tmp_uname;
+				break;
+			case PROCESSOR_ARCHITECTURE_IA64 :
+				php_uname = "IA64";
+				break;
+#if defined(PROCESSOR_ARCHITECTURE_IA32_ON_WIN64)
+			case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64 :
+				php_uname = "IA32";
+				break;
+#endif
+#if defined(PROCESSOR_ARCHITECTURE_AMD64)
+			case PROCESSOR_ARCHITECTURE_AMD64 :
+				php_uname = "AMD64";
+				break;
+#endif
+			case PROCESSOR_ARCHITECTURE_UNKNOWN :
+			default :
+				php_uname = "Unknown";
+				break;
+		}
 	} else { /* assume mode == 'a' */
 		/* Get build numbers for Windows NT or Win95 */
 		if (dwVersion < 0x80000000){
 			dwBuild = (DWORD)(HIWORD(dwVersion));
 			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d",
-					 "Windows NT", "localhost",
+					 "Windows NT", ComputerName,
 					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
 		} else {
 			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
-					 "Windows 9x", "localhost",
+					 "Windows 9x", ComputerName,
 					 dwWindowsMajorVersion, dwWindowsMinorVersion);
 		}
 		php_uname = tmp_uname;
