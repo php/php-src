@@ -914,6 +914,7 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 	} else {
 		SET_UNUSED(opline->op1);
 	}
+	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	opline->op2 = *class_name;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
@@ -948,12 +949,14 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	
-	if (function_name->op_type==IS_CONST && !is_method && !is_dynamic_fcall) {
+	if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 		opline->opcode = ZEND_DO_FCALL;
+		opline->op1 = *function_name;
 	} else {
 		opline->opcode = ZEND_DO_FCALL_BY_NAME;
+		SET_UNUSED(opline->op1);
 	}
-	opline->op1 = *function_name;
+	
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_VAR;
 	*result = opline->result;
@@ -1824,7 +1827,7 @@ void zend_do_pop_object(znode *object TSRMLS_DC)
 }
 
 
-void zend_do_begin_new_object(znode *new_token, znode *class_name TSRMLS_DC)
+void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	unsigned char *ptr = NULL;
@@ -1832,7 +1835,7 @@ void zend_do_begin_new_object(znode *new_token, znode *class_name TSRMLS_DC)
 	opline->opcode = ZEND_NEW;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *class_name;
+	opline->op1 = *class_type;
 	SET_UNUSED(opline->op2);
 
 	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
@@ -1851,14 +1854,11 @@ void zend_do_begin_new_object(znode *new_token, znode *class_name TSRMLS_DC)
 }
 
 
-void zend_do_end_new_object(znode *result, znode *class_name, znode *new_token, znode *argument_list TSRMLS_DC)
+void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_list TSRMLS_DC)
 {
 	znode ctor_result;
 
-	if (class_name->op_type == IS_CONST) {
-		zval_copy_ctor(&class_name->u.constant);
-	}
-	zend_do_end_function_call(class_name, &ctor_result, argument_list, 1, 0 TSRMLS_CC);
+	zend_do_end_function_call(NULL, &ctor_result, argument_list, 1, 0 TSRMLS_CC);
 	zend_do_free(&ctor_result TSRMLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));

@@ -313,8 +313,8 @@ void zend_do_push_object(znode *object TSRMLS_DC);
 void zend_do_pop_object(znode *object TSRMLS_DC);
 
 
-void zend_do_begin_new_object(znode *new_token, znode *class_name TSRMLS_DC);
-void zend_do_end_new_object(znode *result, znode *class_name, znode *new_token, znode *argument_list TSRMLS_DC);
+void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC);
+void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_list TSRMLS_DC);
 
 void zend_do_fetch_constant(znode *result, znode *constant_name, int mode TSRMLS_DC);
 
