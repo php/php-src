@@ -1,3 +1,84 @@
+2002-05-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/base64.c: - MFH
+
+    * ext/standard/base64.c:
+    - Fix String is not zero-terminated error in base64_decode
+
+2002-05-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c:
+    - Update protos for socket_read() and socket_write().
+    - Set last_error in socket_write().
+
+    * ext/sockets/sockets.c: - Update protos for getpeer/getsock-name.
+
+2002-05-01  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Fix BYREF_FORCE that was not being read
+    Fix error message
+
+2002-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: MFH
+
+    * configure.in:
+    Add a big disclaimer regarding register_globals.  It just bit me again
+    but now on a live customer site :-/
+
+2002-05-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_version.h
+      configure.in: - Update version number
+
+    * main/php_version.h
+      NEWS
+      configure.in: - Go with 4.2.1rc1
+
+2002-05-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+    - Rename setopt and getopt to set_option and get_option, provide alias.
+
+    * ext/sockets/sockets.c:
+    - Fix couple of problems with socket_create_pair():
+      - Force fourth argument to be passed by reference
+      - Since the argument is modified there is no need to force it to be an array
+        since it's destroyed anyway
+      - Only modify the argument if socketpair() was successfully
+      - Fix string modified for error message message
+      - Set global last_error when socketpair() fails
+
+    * ext/sockets/sockets.c: - Add SOMAXCONN constant.
+
+2002-05-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c: Fix for #16885
+
+    * ext/openssl/openssl.c: No asserts in branch
+
+    * ext/openssl/openssl.c:
+    MFH fix for #16940, compiler warnings and TSRMLS build fixes.
+
+    * ext/openssl/openssl.c: Probable fix for #16940.
+
+2002-05-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: - WS fixes
+
+    * NEWS: - Mention the socket_select() API change
+
+    * ext/sockets/sockets.c:
+    - MFH fix for socket_select() and some minor memory leak; NEWS entry follows.
+
+2002-05-01  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    Changed socket_select to force reference copy, the older code would modify all references
+
+    Also fix small memory leak.
+
 2002-04-30  Harald Radi  <h.radi@nme.at>
 
     * ext/overload/overload.c: ZE2 compatibility fixes
