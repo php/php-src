@@ -516,7 +516,7 @@ php_ns_config(php_ns_context *ctx)
 	char *path;
 	Ns_Set *set;
 
-	path = Ns_ConfigPath(ctx->ns_server, ctx->ns_module, NULL);
+	path = Ns_ConfigGetPath(ctx->ns_server, ctx->ns_module, NULL);
 	set = Ns_ConfigGetSection(path);
 
 	for(i = 0; set && i < Ns_SetSize(set); i++) {
