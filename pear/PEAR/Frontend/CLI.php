@@ -25,6 +25,13 @@ class PEAR_Frontend_CLI extends PEAR
 {
     // {{{ properties
 
+    /**
+     * What type of user interface this frontend is for.
+     * @var string
+     * @access public
+     */
+    var $type = 'CLI';
+
     var $omode = 'plain';
     var $params = array();
     var $term = array(
