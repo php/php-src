@@ -1,3 +1,98 @@
+2004-05-30  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      Update the mcve module for libmonetra 4.0
+      A compatability layer has been introduced which should mean all
+      scripts written for v 3.2 of the module should continue working,
+      as well as compilation should still work against libmcve 3.2.x.
+      This module eventually needs to be renamed to 'monetra' to reflect
+      the naming change of the underlying library.
+
+2004-05-30  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Restrict 'CREATE DATABASE' in sql safe mode
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/interbase.c:
+      Fix Win32 build
+      Added missing 'break'
+
+2004-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Fixed memory leak on ifx_error().
+
+    * (PHP_4_3)
+      NEWS
+      ext/informix/Makefile.frag
+      ext/informix/ifx.ec:
+      MFH: Fixed bug #28564 (Problem building informix as a shared extension).
+
+    * ext/informix/Makefile.frag
+      ext/informix/ifx.ec:
+      Fixed bug #28564 (Problem building informix as a shared extension).
+      Patch by: roques at mti dot ag
+
+2004-05-30  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache_hooks/php_apache.c:
+      Fix prototypes
+
+2004-05-30  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Fix unregistered bug (segfault on uninitialised pointer)
+      Return string("0 ") from ibase_query() if query succeeded but did not
+      affect any rows
+
+2004-05-30  Zeev Suraski  <zeev@zend.com>
+
+    * ext/dom/node.c:
+      No meaning for unsigned
+
+2004-05-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_channelfile.phpt
+      pear/tests/pear_dependency_checkPackage.phpt
+      pear/tests/pear_installer4.phpt
+      pear/tests/pear_installer_install_channels.phpt
+      pear/tests/pear_packager.phpt
+      pear/tests/pear_registry.phpt:
+      fix unit tests for 1.4.0dev3
+
+2004-05-30  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/tests/interbase.inc:
+      Use default character set in generated test DB
+
+    * ext/interbase/interbase.c:
+      Fix HTML/table layout in info() entry
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h
+      ext/interbase/tests/003.phpt
+      ext/interbase/tests/006.phpt
+      ext/interbase/tests/007.phpt:
+      Removed ibase_timefmt() - use ini_set() instead
+      Improved phpinfo() appearance
+
+2004-05-30  Zeev Suraski  <zeev@zend.com>
+
+    * ext/ming/ming.c:
+      Update to PHP-style prototypes
+      (a PHP function returning char *?  What were you smoking? :)
+
+2004-05-30  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/config.m4:
+      manually check for egrep
+
+    * (PHP_4_3)
+      ext/mcve/config.m4:
+      Manually check for egrep
+
 2004-05-29  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/proc_open.c:
