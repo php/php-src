@@ -1,3 +1,64 @@
+2001-03-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Send pointless HTML, if nothing else happens to avoid timeouts.
+
+    * ext/ircg/ircg.c:
+    Increment the pointer and evaluate the next character after
+    recognizing a modifier.
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re:
+    Disable the speed-up role for now.  Needs to be improved.
+
+    * ext/ircg/ircg.c:
+    Add 1 modifier which causes a JS-encoded string to be inserted
+
+2001-03-10  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/attachment.c
+      ext/midgard/element.c
+      ext/midgard/event.c
+      ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/image.c
+      ext/midgard/member.c
+      ext/midgard/mgd_internal.h
+      ext/midgard/midgard.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/pagelink.c
+      ext/midgard/php_midgard.h
+      ext/midgard/preferences.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c: Fetch sitegroup field when listing objects
+
+2001-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4:
+    This should fix the problems with not including -lz.
+
+2001-03-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php.in: * only register the destructor if it exists
+
+2001-03-10  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB/pgsql.php:
+    Make the #options, $tty, and $port parameters optional.
+
+2001-03-10  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/pdf/pdf.c: just reversed a previous patch.
+
+    * ext/pdf/pdf.c
+      ext/iconv/iconv.c:
+    initialized some strings in global variable structure.
+
 2001-03-09  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/odbc/php_odbc.c
