@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
   input filter support is used. (Derick)
-- Added EXSLT support in ext/xsl. (Christian).
+- Added EXSLT support in ext/xsl. (Christian)
 - Added new functions:
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)
