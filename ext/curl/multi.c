@@ -195,7 +195,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	CURLMsg   *tmp_msg;
 	int        queued_msgs;
 
-	// XXX: Not Implemented
+	/* XXX: Not Implemented */
 	return;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_mh) == FAILURE) {
@@ -212,7 +212,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	array_init(return_value);
 	add_assoc_long(return_value, "msg", tmp_msg->msg);
 	add_assoc_long(return_value, "result", tmp_msg->data.result);
-//	add_assoc_resource(return_value, "handle", _find_handle(tmp_msg->easy_handle));
+/*	add_assoc_resource(return_value, "handle", _find_handle(tmp_msg->easy_handle)); */
 	add_assoc_string(return_value, "whatever", (char *) tmp_msg->data.whatever, 1);
 }
 /* }}} */
@@ -235,7 +235,7 @@ void _php_curl_multi_close(zend_rsrc_list_entry *rsrc)
 {
 	php_curlm *mh = (php_curlm *) rsrc->ptr;
 	curl_multi_cleanup(mh->multi);
-	// XXX: keep track of all curl handles and zval_ptr_dtor them here
+	/* XXX: keep track of all curl handles and zval_ptr_dtor them here */
 }
 
 #endif
