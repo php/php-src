@@ -10,4 +10,6 @@ extern int php_minit_crypt(INIT_FUNC_ARGS);
 #define crypt_module_ptr NULL
 #endif
 
+#define phpext_crypt_ptr crypt_module_ptr
+
 #endif

@@ -45,4 +45,6 @@ extern void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_readdir(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_getdir(INTERNAL_FUNCTION_PARAMETERS);
 
+#define phpext_dir_ptr php3_dir_module_ptr
+
 #endif /* _PHP3_DIR_H */

@@ -39,4 +39,6 @@ extern int php3_minit_pack(INIT_FUNC_ARGS);
 extern void php3_pack(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_unpack(INTERNAL_FUNCTION_PARAMETERS);
 
+#define phpext_pack_ptr pack_module_ptr
+
 #endif /* _PACK_H */

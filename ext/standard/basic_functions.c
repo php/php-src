@@ -122,7 +122,6 @@ function_entry basic_functions[] = {
 	{"rtrim",		php3_chop,					NULL},
 	{"pos",			array_current,				first_arg_force_ref},
 
-	{"fsockopen",			php3_fsockopen,		third_and_fourth_args_force_ref},
 	{"getimagesize",		php3_getimagesize,	NULL},
 	{"htmlspecialchars",	php3_htmlspecialchars,	NULL},
 	{"htmlentities",		php3_htmlentities,	NULL},
