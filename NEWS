@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Fixed bug #20424 (stream_get_meta_data craches on a normal file stream).
+  (Derick, Wez)
 - Added imagefilter() function which allows application of various filters.
   This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
 
