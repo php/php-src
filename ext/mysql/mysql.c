@@ -78,63 +78,65 @@ static int le_result,le_link,le_plink;
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
 
 function_entry mysql_functions[] = {
-	{"mysql_connect",		php3_mysql_connect,			NULL},
-	{"mysql_pconnect",		php3_mysql_pconnect,		NULL},
-	{"mysql_close",			php3_mysql_close,			NULL},
-	{"mysql_select_db",		php3_mysql_select_db,		NULL},
-	{"mysql_create_db",		php3_mysql_create_db,		NULL},
-	{"mysql_drop_db",		php3_mysql_drop_db,			NULL},
-	{"mysql_query",			php3_mysql_query,			NULL},
-	{"mysql_db_query",		php3_mysql_db_query,		NULL},
-	{"mysql_list_dbs",		php3_mysql_list_dbs,		NULL},
-	{"mysql_list_tables",	php3_mysql_list_tables,		NULL},
-	{"mysql_list_fields",	php3_mysql_list_fields,		NULL},
-	{"mysql_error",			php3_mysql_error,			NULL},
+	PHP_FE(mysql_connect,								NULL)
+	PHP_FE(mysql_pconnect,								NULL)
+	PHP_FE(mysql_close,									NULL)
+	PHP_FE(mysql_select_db,								NULL)
+	PHP_FE(mysql_create_db,								NULL)
+	PHP_FE(mysql_drop_db,								NULL)
+	PHP_FE(mysql_query,									NULL)
+	PHP_FE(mysql_db_query,								NULL)
+	PHP_FE(mysql_list_dbs,								NULL)
+	PHP_FE(mysql_list_tables,							NULL)
+	PHP_FE(mysql_list_fields,							NULL)
+	PHP_FE(mysql_error,									NULL)
 #ifdef mysql_errno
-	{"mysql_errno",			php3_mysql_errno,			NULL},
+	PHP_FE(mysql_errno,									NULL)
 #endif
-	{"mysql_affected_rows",	php3_mysql_affected_rows,	NULL},
-	{"mysql_insert_id",		php3_mysql_insert_id,		NULL},
-	{"mysql_result",		php3_mysql_result,			NULL},
-	{"mysql_num_rows",		php3_mysql_num_rows,		NULL},
-	{"mysql_num_fields",	php3_mysql_num_fields,		NULL},
-	{"mysql_fetch_row",		php3_mysql_fetch_row,		NULL},
-	{"mysql_fetch_array",	php3_mysql_fetch_array,		NULL},
-	{"mysql_fetch_object",	php3_mysql_fetch_object,	NULL},
-	{"mysql_data_seek",		php3_mysql_data_seek,		NULL},
-	{"mysql_fetch_lengths",	php3_mysql_fetch_lengths,	NULL},
-	{"mysql_fetch_field",	php3_mysql_fetch_field,		NULL},
-	{"mysql_field_seek",	php3_mysql_field_seek,		NULL},
-	{"mysql_free_result",	php3_mysql_free_result,		NULL},
-	{"mysql_field_name",	php3_mysql_field_name,		NULL},
-	{"mysql_field_table",	php3_mysql_field_table,		NULL},
-	{"mysql_field_len",		php3_mysql_field_len,		NULL},
-	{"mysql_field_type",	php3_mysql_field_type,		NULL},
-	{"mysql_field_flags",	php3_mysql_field_flags,		NULL}, 
+	PHP_FE(mysql_affected_rows,							NULL)
+	PHP_FE(mysql_insert_id,								NULL)
+	PHP_FE(mysql_result,								NULL)
+	PHP_FE(mysql_num_rows,								NULL)
+	PHP_FE(mysql_num_fields,							NULL)
+	PHP_FE(mysql_fetch_row,								NULL)
+	PHP_FE(mysql_fetch_array,							NULL)
+	PHP_FE(mysql_fetch_object,							NULL)
+	PHP_FE(mysql_data_seek,								NULL)
+	PHP_FE(mysql_fetch_lengths,							NULL)
+	PHP_FE(mysql_fetch_field,							NULL)
+	PHP_FE(mysql_field_seek,							NULL)
+	PHP_FE(mysql_free_result,							NULL)
+	PHP_FE(mysql_field_name,							NULL)
+	PHP_FE(mysql_field_table,							NULL)
+	PHP_FE(mysql_field_len,								NULL)
+	PHP_FE(mysql_field_type,							NULL)
+	PHP_FE(mysql_field_flags,							NULL)
+	 
 	/* for downwards compatability */
-	{"mysql",				php3_mysql_db_query,		NULL},
-	{"mysql_fieldname",		php3_mysql_field_name,		NULL},
-	{"mysql_fieldtable",	php3_mysql_field_table,		NULL},
-	{"mysql_fieldlen",		php3_mysql_field_len,		NULL},
-	{"mysql_fieldtype",		php3_mysql_field_type,		NULL},
-	{"mysql_fieldflags",	php3_mysql_field_flags,		NULL},
-	{"mysql_selectdb",		php3_mysql_select_db,		NULL},
-	{"mysql_createdb",		php3_mysql_create_db,		NULL},
-	{"mysql_dropdb",		php3_mysql_drop_db,			NULL},
-	{"mysql_freeresult",	php3_mysql_free_result,		NULL},
-	{"mysql_numfields",		php3_mysql_num_fields,		NULL},
-	{"mysql_numrows",		php3_mysql_num_rows,		NULL},
-	{"mysql_listdbs",		php3_mysql_list_dbs,		NULL},
-	{"mysql_listtables",	php3_mysql_list_tables,		NULL},
-	{"mysql_listfields",	php3_mysql_list_fields,		NULL},
-	{"mysql_db_name",		php3_mysql_result,			NULL},
-	{"mysql_dbname",		php3_mysql_result,			NULL},
-	{"mysql_tablename",		php3_mysql_result,			NULL},
+	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
+	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	NULL)
+	PHP_FALIAS(mysql_fieldtable,	mysql_field_table,	NULL)
+	PHP_FALIAS(mysql_fieldlen,		mysql_field_len,	NULL)
+	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	NULL)
+	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	NULL)
+	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	NULL)
+	PHP_FALIAS(mysql_createdb,		mysql_create_db,	NULL)
+	PHP_FALIAS(mysql_dropdb,		mysql_drop_db,		NULL)
+	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	NULL)
+	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	NULL)
+	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		NULL)
+	PHP_FALIAS(mysql_listdbs,		mysql_list_dbs,		NULL)
+	PHP_FALIAS(mysql_listtables,	mysql_list_tables,	NULL)
+	PHP_FALIAS(mysql_listfields,	mysql_list_fields,	NULL)
+	PHP_FALIAS(mysql_db_name,		mysql_result,		NULL)
+	PHP_FALIAS(mysql_dbname,		mysql_result,		NULL)
+	PHP_FALIAS(mysql_tablename,		mysql_result,		NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry mysql_module_entry = {
-	"MySQL", mysql_functions, php3_minit_mysql, php3_mshutdown_mysql, php3_rinit_mysql, NULL, php3_info_mysql, STANDARD_MODULE_PROPERTIES
+	"MySQL", mysql_functions, PHP_MINIT(mysql), PHP_MSHUTDOWN(mysql), PHP_RINIT(mysql), NULL, 
+			 PHP_MINFO(mysql), STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef ZTS
@@ -263,7 +265,7 @@ static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
 #endif
 
 
-int php3_minit_mysql(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(mysql)
 {
 #ifdef ZTS
 	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
@@ -285,14 +287,14 @@ int php3_minit_mysql(INIT_FUNC_ARGS)
 }
 
 
-int php3_mshutdown_mysql(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(mysql)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
 
-int php3_rinit_mysql(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(mysql)
 {
 	MySLS_FETCH();
 	
@@ -302,7 +304,7 @@ int php3_rinit_mysql(INIT_FUNC_ARGS)
 }
 
 
-void php3_info_mysql(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(mysql)
 {
 	char maxp[16],maxl[16];
 	MySLS_FETCH();

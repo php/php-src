@@ -113,34 +113,35 @@ typedef struct {
 	HashTable *conns;
 } oracle_module;
 
-extern void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Commit(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_CommitOff(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_CommitOn(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_ErrorCode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Exec(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_ColumnType(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_ColumnName(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_ColumnSize(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_GetColumn(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_NumCols(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_NumRows(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Logoff(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Logon(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_PLogon(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS);
-extern int php3_minit_oracle(INIT_FUNC_ARGS);
-extern int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS);
-extern int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS);
-extern int php3_rinit_oracle(INIT_FUNC_ARGS);
+extern PHP_FUNCTION(Ora_Bind);
+extern PHP_FUNCTION(Ora_Close);
+extern PHP_FUNCTION(Ora_Commit);
+extern PHP_FUNCTION(Ora_CommitOff);
+extern PHP_FUNCTION(Ora_CommitOn);
+extern PHP_FUNCTION(Ora_Do);
+extern PHP_FUNCTION(Ora_Error);
+extern PHP_FUNCTION(Ora_ErrorCode);
+extern PHP_FUNCTION(Ora_Exec);
+extern PHP_FUNCTION(Ora_Fetch);
+extern PHP_FUNCTION(Ora_FetchInto);
+extern PHP_FUNCTION(Ora_ColumnType);
+extern PHP_FUNCTION(Ora_ColumnName);
+extern PHP_FUNCTION(Ora_ColumnSize);
+extern PHP_FUNCTION(Ora_GetColumn);
+extern PHP_FUNCTION(Ora_NumCols);
+extern PHP_FUNCTION(Ora_NumRows);
+extern PHP_FUNCTION(Ora_Logoff);
+extern PHP_FUNCTION(Ora_Logon);
+extern PHP_FUNCTION(Ora_PLogon);
+extern PHP_FUNCTION(Ora_Open);
+extern PHP_FUNCTION(Ora_Parse);
+extern PHP_FUNCTION(Ora_Rollback);
+
+extern PHP_MINIT_FUNCTION(oracle);
+extern PHP_RINIT_FUNCTION(oracle);
+extern PHP_MSHUTDOWN_FUNCTION(oracle);
+extern PHP_RSHUTDOWN_FUNCTION(oracle);
+extern PHP_MINFO_FUNCTION(oracle);
 
 #else
 

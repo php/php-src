@@ -45,10 +45,11 @@ extern php3_module_entry msql_module_entry;
 #define msql_module_ptr &msql_module_entry
 
 /* mSQL functions */
-extern DLEXPORT int php3_minit_msql(INIT_FUNC_ARGS);
-extern DLEXPORT int php3_rinit_msql(INIT_FUNC_ARGS);
-extern DLEXPORT int php3_mshutdown_msql(SHUTDOWN_FUNC_ARGS);
-extern DLEXPORT void php3_info_msql(ZEND_MODULE_INFO_FUNC_ARGS);
+extern DLEXPORT PHP_MINIT_FUNCTION(msql);
+extern DLEXPORT PHP_RINIT_FUNCTION(msql);
+extern DLEXPORT PHP_MSHUTDOWN_FUNCTION(msql);
+extern DLEXPORT PHP_MINFO_FUNCTION(msql);
+
 extern DLEXPORT PHP_FUNCTION(msql_connect);
 extern DLEXPORT PHP_FUNCTION(msql_pconnect);
 extern DLEXPORT PHP_FUNCTION(msql_close);

@@ -30,24 +30,24 @@
 #if HAVE_VELOCIS && !HAVE_UODBC
 
 function_entry velocis_functions[] = {
-	{"velocis_connect",     php3_velocis_connect,           NULL},
-	{"velocis_close",       php3_velocis_close,             NULL},
-	{"velocis_exec",        php3_velocis_exec,              NULL},
-	{"velocis_fetch",       php3_velocis_fetch,             NULL},
-	{"velocis_result",      php3_velocis_result,            NULL},
-	{"velocis_freeresult",  php3_velocis_freeresult,        NULL},
-	{"velocis_autocommit",  php3_velocis_autocommit,        NULL},
-	{"velocis_off_autocommit",      php3_velocis_off_autocommit,    NULL},
-	{"velocis_commit",      php3_velocis_commit,            NULL},
-	{"velocis_rollback",    php3_velocis_rollback,          NULL},
-	{"velocis_fieldnum",    php3_velocis_fieldnum,          NULL},
-	{"velocis_fieldname",   php3_velocis_fieldname,         NULL},
+	PHP_FE(velocis_connect,								NULL)
+	PHP_FE(velocis_close,								NULL)
+	PHP_FE(velocis_exec,								NULL)
+	PHP_FE(velocis_fetch,								NULL)
+	PHP_FE(velocis_result,								NULL)
+	PHP_FE(velocis_freeresult,							NULL)
+	PHP_FE(velocis_autocommit,							NULL)
+	PHP_FE(velocis_off_autocommit,						NULL)
+	PHP_FE(velocis_commit,								NULL)
+	PHP_FE(velocis_rollback,							NULL)
+	PHP_FE(velocis_fieldnum,							NULL)
+	PHP_FE(velocis_fieldname,							NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry velocis_module_entry = {
-	"Velocis", velocis_functions, php3_minit_velocis, php3_shutdown_velocis,
-		php3_rinit_velocis, NULL, php3_info_velocis, STANDARD_MODULE_PROPERTIES
+	"Velocis", velocis_functions, PHP_MINIT(velocis), PHP_MSHUTDOWN(velocis),
+		PHP_RINIT(velocis), NULL, PHP_MINFO(velocis), STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -80,7 +80,7 @@ static void _free_velocis_result(Vresult *res)
 	}
 }
 
-int php3_minit_velocis(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(velocis)
 {
 	SQLAllocEnv(&henv);
 	if ( cfg_get_long("velocis.max_links",&php3_velocis_module.max_links) == FAILURE ) {
@@ -93,18 +93,18 @@ int php3_minit_velocis(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_rinit_velocis(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(velocis)
 {
 	return SUCCESS;
 }
 
 
-void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(velocis)
 {
 	php3_printf("RAIMA Velocis Support Active");
 }
 
-int php3_shutdown_velocis(void)
+PHP_MSHUTDOWN_FUNCTION(velocis)
 {
 	SQLFreeEnv(henv);
 	return SUCCESS;
