@@ -39,6 +39,9 @@
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
+#define RAND_RANGE(__n, __min, __max, __tmax) \
+    (__n) = (__min) + (long) ((double) ((__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
+
 /* MT Rand */
 #define PHP_MT_RAND_MAX ((long) (0x7FFFFFFF)) /* (1<<31) - 1 */ 
 
