@@ -327,20 +327,6 @@ PHP_FUNCTION(passthru)
 }
 /* }}} */
 
-/* {{{ php_get_index
- */
-static int php_get_index(char *s, char c)
-{
-	register int x;
-
-	for (x = 0; s[x]; x++)
-		if (s[x] == c)
-			return x;
-
-	return -1;
-}
-/* }}} */
-
 /* {{{ php_escape_shell_cmd
    Escape all chars that could possibly be used to
    break out of a shell command
@@ -350,51 +336,76 @@ static int php_get_index(char *s, char c)
 
    *NOT* safe for binary strings
 */
-char * php_escape_shell_cmd(char *str) {
+char *php_escape_shell_cmd(char *str) {
 	register int x, y, l;
 	char *cmd;
 
 	l = strlen(str);
 	cmd = emalloc(2 * l + 1);
-	strcpy(cmd, str);
-	for (x = 0; cmd[x]; x++) {
-		if (php_get_index("#&;`'\"|*?~<>^()[]{}$\\\x0A\xFF", cmd[x]) != -1) {
-			for (y = l + 1; y > x; y--)
-				cmd[y] = cmd[y - 1];
-			l++;				/* length has been increased */
-			cmd[x] = '\\';
-			x++;				/* skip the character */
+	
+	for (x = 0, y = 0; x < l; x++) {
+		switch (str[x]) {
+			case '#': /* This is character-set independent */
+			case '&':
+			case ';':
+			case '`':
+			case '\'':
+			case '"':
+			case '|':
+			case '*':
+			case '?':
+			case '~':
+			case '<':
+			case '>':
+			case '^':
+			case '(':
+			case ')':
+			case '[':
+			case ']':
+			case '{':
+			case '}':
+			case '$':
+			case '\\':
+			case '\x0A': /* excluding these two */
+			case '\xFF':
+				cmd[y++] = '\\';
+				/* fall-through */
+			default:
+				cmd[y++] = str[x];
+
 		}
 	}
+	cmd[y] = '\0';
 	return cmd;
 }
 /* }}} */
 
 /* {{{ php_escape_shell_arg
  */
-char * php_escape_shell_arg(char *str) {
-	register int x, y, l;
+char *php_escape_shell_arg(char *str) {
+	int x, y, l;
 	char *cmd;
 
+	y = 0;
 	l = strlen(str);
-	cmd = emalloc(4 * l + 3);
-	cmd[0] = '\'';
-	strcpy(cmd+1, str);
-	l++;
-
-	for (x = 1; cmd[x]; x++) {
-		if (cmd[x] == '\'') {
-			for (y = l + 3; y > x+1; y--) {
-				cmd[y] = cmd[y - 3];
-			}
-			cmd[++x] = '\\';
-			cmd[++x] = '\'';
-			cmd[++x] = '\'';
-			l+=3;				/* length was increased by 3 */
+	
+	cmd = emalloc(4 * l + 3); /* worst case */
+	
+	cmd[y++] = '\'';
+	
+	for (x = 0; x < l; x++) {
+		switch (str[x]) {
+		case '\'':
+			cmd[y++] = '\'';
+			cmd[y++] = '\\';
+			cmd[y++] = '\'';
+			/* fall-through */
+		default:
+			cmd[y++] = str[x];
 		}
 	}
-	cmd[l++] = '\'';
-	cmd[l] = '\0';
+	cmd[y++] = '\'';
+	cmd[y] = '\0';
 	return cmd;
 }
 /* }}} */
