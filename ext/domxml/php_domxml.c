@@ -782,7 +782,7 @@ void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type
 	return obj;
 }
 
-static void php_xsltstylesheet_set_object(zval *wrapper, void *obj, int rsrc_type)
+static void php_xsltstylesheet_set_object(zval *wrapper, void *obj, int rsrc_type TSRMLS_DC)
 {
 	zval *handle, *addr;
 
@@ -4992,7 +4992,7 @@ static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
 
 	object_init_ex(wrapper, domxsltstylesheet_class_entry);
 	rsrc_type = le_domxsltstylesheetp;
-	php_xsltstylesheet_set_object(wrapper, (void *) obj, rsrc_type);
+	php_xsltstylesheet_set_object(wrapper, (void *) obj, rsrc_type TSRMLS_CC);
 
 	return (wrapper);
 }
