@@ -96,8 +96,8 @@ typedef unsigned char zend_bool;
 #include "zend_hash.h"
 #include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, HashTable *list, HashTable *plist, zval *this_ptr
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist, this_ptr
+#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, HashTable *list, HashTable *plist, zval *this_ptr, char used_return_value
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist, this_ptr, used_return_value
 
 /*
  * zval

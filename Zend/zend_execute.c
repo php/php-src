@@ -882,7 +882,7 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 	zend_property_reference *property_reference;
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(property_reference->object)->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, property_reference->object, property_reference);
+	(property_reference->object)->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, property_reference->object, 0, property_reference);
 	zend_llist_destroy(&property_reference->elements_list);
 
 	zend_stack_del_top(&EG(overloaded_objects_stack));
@@ -1468,7 +1468,7 @@ do_fcall_common:
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr);
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr, (opline->result.u.EA.type ^ EXT_TYPE_UNUSED));
 						if (object.ptr) {
 							object.ptr->refcount--;
 						}
