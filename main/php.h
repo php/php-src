@@ -307,6 +307,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
 #define V_RMDIR(pathname) virtual_rmdir(pathname)
 #define V_OPENDIR(pathname) virtual_opendir(pathname)
+#define V_POPEN(command, type) virtual_popen(command, type)
 #else
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
@@ -321,6 +322,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_MKDIR(pathname, mode) mkdir(pathname, mode)
 #define V_RMDIR(pathname) rmdir(pathname)
 #define V_OPENDIR(pathname) opendir(pathname)
+#define V_POPEN(command, type) popen(command, type)
 #endif
 
 #include "zend_constants.h"

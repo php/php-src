@@ -59,6 +59,7 @@ CWD_API int virtual_unlink(const char *path);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
 CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
+CWD_API FILE *virtual_popen(const char *command, const char *type);
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 
