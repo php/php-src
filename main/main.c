@@ -519,7 +519,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			docref = get_active_function_name(TSRMLS_C);
 			if (!docref)
 				docref = "Unknown";
-			php_error(type, "%s(%s): %s", class_name, space, docref, params, buffer);
+			php_error(type, "%s%s%s(%s): %s ", class_name, space, docref, params, buffer);
 		}
 
 		if (PG(track_errors) && EG(active_symbol_table)) {
