@@ -289,10 +289,10 @@ static void _free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateBool,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
-	STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
-	STD_PHP_INI_BOOLEAN("pgsql.auto_reset_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateBool,		auto_reset_persistent,	php_pgsql_globals,		pgsql_globals)
+STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateBool,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
+STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
+STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
+STD_PHP_INI_BOOLEAN("pgsql.auto_reset_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateBool,		auto_reset_persistent,	php_pgsql_globals,		pgsql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -410,75 +410,75 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1: { /* new style, using connection string */
-				zval **yyconnstring;
-				if (zend_get_parameters_ex(1, &yyconnstring) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyconnstring);
-				connstring = Z_STRVAL_PP(yyconnstring);
-				hashed_details_length = Z_STRLEN_PP(yyconnstring)+5+1;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "pgsql_%s", connstring); /* SAFE */
+			zval **yyconnstring;
+			if (zend_get_parameters_ex(1, &yyconnstring) == FAILURE) {
+				RETURN_FALSE;
 			}
+			convert_to_string_ex(yyconnstring);
+			connstring = Z_STRVAL_PP(yyconnstring);
+			hashed_details_length = Z_STRLEN_PP(yyconnstring)+5+1;
+			hashed_details = (char *) emalloc(hashed_details_length+1);
+			sprintf(hashed_details, "pgsql_%s", connstring); /* SAFE */
+		}
 			break;
 		case 3: { /* host, port, dbname */
-				zval **yyhost, **yyport, **yydbname;
+			zval **yyhost, **yyport, **yydbname;
 				
-				if (zend_get_parameters_ex(3, &yyhost, &yyport, &yydbname) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyport);
-				convert_to_string_ex(yydbname);
-				host = Z_STRVAL_PP(yyhost);
-				port = Z_STRVAL_PP(yyport);
-				dbname = Z_STRVAL_PP(yydbname);
-				options=tty=NULL;
-				hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yydbname) + 5 + 5;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "pgsql_%s_%s___%s", host, port, dbname);  /* SAFE */
+			if (zend_get_parameters_ex(3, &yyhost, &yyport, &yydbname) == FAILURE) {
+				RETURN_FALSE;
 			}
+			convert_to_string_ex(yyhost);
+			convert_to_string_ex(yyport);
+			convert_to_string_ex(yydbname);
+			host = Z_STRVAL_PP(yyhost);
+			port = Z_STRVAL_PP(yyport);
+			dbname = Z_STRVAL_PP(yydbname);
+			options=tty=NULL;
+			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yydbname) + 5 + 5;
+			hashed_details = (char *) emalloc(hashed_details_length+1);
+			sprintf(hashed_details, "pgsql_%s_%s___%s", host, port, dbname);  /* SAFE */
+		}
 			break;
 		case 4: { /* host, port, options, dbname */
-				zval **yyhost, **yyport, **yyoptions, **yydbname;
+			zval **yyhost, **yyport, **yyoptions, **yydbname;
 				
-				if (zend_get_parameters_ex(4, &yyhost, &yyport, &yyoptions, &yydbname) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyport);
-				convert_to_string_ex(yyoptions);
-				convert_to_string_ex(yydbname);
-				host = Z_STRVAL_PP(yyhost);
-				port = Z_STRVAL_PP(yyport);
-				options = Z_STRVAL_PP(yyoptions);
-				dbname = Z_STRVAL_PP(yydbname);
-				tty=NULL;
-				hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yydbname) + 5 + 5;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "pgsql_%s_%s_%s__%s", host, port, options, dbname);  /* SAFE */
+			if (zend_get_parameters_ex(4, &yyhost, &yyport, &yyoptions, &yydbname) == FAILURE) {
+				RETURN_FALSE;
 			}
+			convert_to_string_ex(yyhost);
+			convert_to_string_ex(yyport);
+			convert_to_string_ex(yyoptions);
+			convert_to_string_ex(yydbname);
+			host = Z_STRVAL_PP(yyhost);
+			port = Z_STRVAL_PP(yyport);
+			options = Z_STRVAL_PP(yyoptions);
+			dbname = Z_STRVAL_PP(yydbname);
+			tty=NULL;
+			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yydbname) + 5 + 5;
+			hashed_details = (char *) emalloc(hashed_details_length+1);
+			sprintf(hashed_details, "pgsql_%s_%s_%s__%s", host, port, options, dbname);  /* SAFE */
+		}
 			break;
 		case 5: { /* host, port, options, tty, dbname */
-				zval **yyhost, **yyport, **yyoptions, **yytty, **yydbname;
+			zval **yyhost, **yyport, **yyoptions, **yytty, **yydbname;
 				
-				if (zend_get_parameters_ex(5, &yyhost, &yyport, &yyoptions, &yytty, &yydbname) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyport);
-				convert_to_string_ex(yyoptions);
-				convert_to_string_ex(yytty);
-				convert_to_string_ex(yydbname);
-				host = Z_STRVAL_PP(yyhost);
-				port = Z_STRVAL_PP(yyport);
-				options = Z_STRVAL_PP(yyoptions);
-				tty = Z_STRVAL_PP(yytty);
-				dbname = Z_STRVAL_PP(yydbname);
-				hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yytty) + Z_STRLEN_PP(yydbname) + 5 + 5;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "pgsql_%s_%s_%s_%s_%s", host, port, options, tty, dbname);  /* SAFE */
+			if (zend_get_parameters_ex(5, &yyhost, &yyport, &yyoptions, &yytty, &yydbname) == FAILURE) {
+				RETURN_FALSE;
 			}
+			convert_to_string_ex(yyhost);
+			convert_to_string_ex(yyport);
+			convert_to_string_ex(yyoptions);
+			convert_to_string_ex(yytty);
+			convert_to_string_ex(yydbname);
+			host = Z_STRVAL_PP(yyhost);
+			port = Z_STRVAL_PP(yyport);
+			options = Z_STRVAL_PP(yyoptions);
+			tty = Z_STRVAL_PP(yytty);
+			dbname = Z_STRVAL_PP(yydbname);
+			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yytty) + Z_STRLEN_PP(yydbname) + 5 + 5;
+			hashed_details = (char *) emalloc(hashed_details_length+1);
+			sprintf(hashed_details, "pgsql_%s_%s_%s_%s_%s", host, port, options, tty, dbname);  /* SAFE */
+		}
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -1542,7 +1542,7 @@ PHP_FUNCTION(pg_lo_create)
 	   What's the use of an object that can be only written to, but not read from, and vice
 	   versa? Beats me... And the access type (r/w) must be specified again when opening
 	   the object, probably (?) overrides this. (Jouni) 
-	 */
+	*/
 
 	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE))==0) {
 		php_error(E_WARNING,"Unable to create PostgreSQL large object");
@@ -1638,7 +1638,7 @@ PHP_FUNCTION(pg_lo_open)
 	/* r/w/+ is little bit more PHP-like than INV_READ/INV_WRITE and a lot of
 	   faster to type. Unfortunately, doesn't behave the same way as fopen()...
 	   (Jouni)
-	 */
+	*/
 
 	if (strchr(mode_string, 'r') == mode_string) {
 		pgsql_mode |= INV_READ;
@@ -1690,8 +1690,8 @@ PHP_FUNCTION(pg_lo_open)
 		pgsql_lofp->lofd = pgsql_lofd;
 		ZEND_REGISTER_RESOURCE(return_value, pgsql_lofp, le_lofp);
 		/*
-		Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp);
-		Z_TYPE_P(return_value) = IS_LONG;
+		  Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp);
+		  Z_TYPE_P(return_value) = IS_LONG;
 		*/
 	}
 }
@@ -1847,12 +1847,12 @@ PHP_FUNCTION(pg_lo_import)
 		;
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									 "s", &file_in, &name_len) == SUCCESS) {
+									  "s", &file_in, &name_len) == SUCCESS) {
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									 "rs", &pgsql_link, &file_in, &name_len) == SUCCESS) {
+									  "rs", &pgsql_link, &file_in, &name_len) == SUCCESS) {
 		php_error(E_NOTICE, "Old API for %s() is used.", get_active_function_name(TSRMLS_C));
 	}
 	else {
@@ -1891,12 +1891,12 @@ PHP_FUNCTION(pg_lo_export)
 		;
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									 "ls",  &oid_id, &file_out, &name_len) == SUCCESS) {
+									  "ls",  &oid_id, &file_out, &name_len) == SUCCESS) {
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									 "lsr", &oid_id, &file_out, &name_len, &pgsql_link) == SUCCESS) {
+									  "lsr", &oid_id, &file_out, &name_len, &pgsql_link) == SUCCESS) {
 		php_error(E_NOTICE, "Old API for %s() is used.", get_active_function_name(TSRMLS_C));
 	}
 	else {
@@ -2031,7 +2031,7 @@ PHP_FUNCTION(pg_client_encoding)
 #endif
 
 	Z_STRVAL_P(return_value) 
-		= (char *) pg_encoding_to_char(PQclientEncoding(pgsql));
+	= (char *) pg_encoding_to_char(PQclientEncoding(pgsql));
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_STRVAL_P(return_value) = (char *) estrdup(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -2073,8 +2073,8 @@ PHP_FUNCTION(pg_end_copy)
 	if (result!=0) {
 		php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
 		RETURN_FALSE;
-   }
-   RETURN_TRUE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2154,7 +2154,7 @@ PHP_FUNCTION(pg_copy_to)
 
 	query = (char *)emalloc(strlen(query_template) + strlen(table_name) + strlen(pg_null_as) + 1);
 	sprintf(query, "COPY \"%s\" TO STDOUT DELIMITERS '%s' WITH NULL AS '%s'",
-				table_name,	pg_delim, pg_null_as);
+			table_name,	pg_delim, pg_null_as);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -2270,7 +2270,7 @@ PHP_FUNCTION(pg_copy_from)
 
 	query = (char *)emalloc(strlen(query_template) + strlen(table_name) + strlen(pg_null_as) + 1);
 	sprintf(query, "COPY \"%s\" FROM STDIN DELIMITERS '%s' WITH NULL AS '%s'",
-				table_name, pg_delim, pg_null_as);
+			table_name, pg_delim, pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
@@ -2311,7 +2311,7 @@ PHP_FUNCTION(pg_copy_from)
 				}
 				if (PQendcopy(pgsql)) {
 					php_error(E_WARNING, "%s() query failed: %s",
-							   get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
+							  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 					RETURN_FALSE;
 				}
 				while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2392,7 +2392,7 @@ PHP_FUNCTION(pg_result_error)
 
 	pgsql_result = pg_result->result;
 	if (!pgsql_result) {
-			RETURN_FALSE;
+		RETURN_FALSE;
 	}
 	RETURN_STRING(PQresultErrorMessage(pgsql_result),1);
 }
