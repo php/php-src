@@ -1082,22 +1082,6 @@ PHP_FUNCTION(mysqli_num_rows)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_num_warnings 
- */
-PHP_FUNCTION(mysqli_num_warnings)
-{
-	MYSQL *mysql;
-	zval  *mysql_link = NULL;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
-		return;
-	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
-
-	RETURN_LONG(mysql_warning_count(mysql));
-}
-/* }}} */
-
 /* {{{ proto bool mysqli_options(resource link, int flags, mixed values)
    set options */
 PHP_FUNCTION(mysqli_options)
