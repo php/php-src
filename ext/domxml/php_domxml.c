@@ -107,6 +107,10 @@ zend_module_entry php_domxml_module_entry = {
 	"domxml", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_DOMXML
+ZEND_GET_MODULE(php_domxml)
+#endif
+
 void _free_node(xmlNode *tmp) {
 /*fprintf(stderr, "Freeing node: %s\n", tmp->name);*/
 }
