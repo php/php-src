@@ -29,6 +29,8 @@
 
 #if HAVE_MSQL
 
+#define OS_UNIX 1
+
 #if defined(WIN32) && defined(MSQL1)
 #include <msql1.h>
 #else
@@ -448,11 +450,7 @@ static int php3_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	MSQL_TLS_VARS;
 	if (MSQL_GLOBAL(php3_msql_module).default_link==-1) { /* no link opened yet, implicitly open one */
-		HashTable tmp;
-		
-		_php3_hash_init(&tmp,0,NULL,NULL,0);
-		php3_msql_do_connect(&tmp,return_value,list,plist,0);
-		_php3_hash_destroy(&tmp);
+		php3_msql_do_connect(0, return_value, list, plist, this_ptr,0);
 	}
 	return MSQL_GLOBAL(php3_msql_module).default_link;
 }
@@ -1028,7 +1026,6 @@ static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int type;
 	int num_fields;
 	int i;
-	pval *pval_ptr;
 	PLS_FETCH();
 	MSQL_TLS_VARS;
 	
