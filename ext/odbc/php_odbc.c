@@ -607,7 +607,17 @@ static int _close_pconn_with_id(list_entry *le, int *id)
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
+#if defined HAVE_SOLID
+	/* this seems to be necessary for Solid2.3 tested by tammy@synchronis.com
+	 * Solid 2.3 does not seem to declare a SQLINTEGER, but it does declare
+	 * a SQL_INTEGER which does not work (despite being the same type as a
+	 * SDWORD.  It is unknown if this is the same behavior for Solid3.0. 
+	 * Solid 3.5 does not have this problem.
+	 */
+	SDWORD len;
+#else
 	SQLINTEGER len;
+#endif
 	pval **pv_res, **pv_num;
 
 	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
