@@ -99,6 +99,7 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 
 #define ZEND_ACC_CHANGED	0x80
+#define ZEND_ACC_IMPLICIT_PUBLIC	0x100
 
 char *zend_visibility_string(zend_uint fn_flags);
 
@@ -357,7 +358,7 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 
 void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(znode *class_token TSRMLS_DC);
-void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC);
+void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);
