@@ -144,8 +144,8 @@ typedef struct ps_serializer_struct {
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
 
 #ifdef TRANS_SID
-void session_adapt_uris(const char *, size_t, char **, size_t *);
-void session_adapt_url(const char *, size_t, char **, size_t *);
+void session_adapt_uris(const char *, size_t, char **, size_t * TSRMLS_DC);
+void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 void session_adapt_flush(int (*)(const char *, uint));
 #else
 #define session_adapt_uris(a,b,c,d) do { } while(0)
