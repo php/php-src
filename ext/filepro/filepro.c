@@ -237,20 +237,20 @@ PHP_FUNCTION(filepro)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "filePro: cannot open map: [%d] %s",
+		php_error(E_WARNING, "%s(): Cannot open map: [%d] %s", get_active_function_name(TSRMLS_C),
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	if (!fgets(readbuf, sizeof(readbuf), fp)) {
 		fclose(fp);
-		php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
+		php_error(E_WARNING, "%s(): Cannot read map: [%d] %s", get_active_function_name(TSRMLS_C),
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	
 	/* Get the field count, assume the file is readable! */
 	if (strcmp(php_strtok_r(readbuf, ":", &strtok_buf), "map")) {
-		php_error(E_WARNING, "filePro: map file corrupt or encrypted");
+		php_error(E_WARNING, "%s(): Map file corrupt or encrypted", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	FP_GLOBAL(fp_keysize) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
@@ -261,7 +261,7 @@ PHP_FUNCTION(filepro)
 	for (i = 0; i < FP_GLOBAL(fp_fcount); i++) {
 		if (!fgets(readbuf, sizeof(readbuf), fp)) {
 			fclose(fp);
-			php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
+			php_error(E_WARNING, "%s(): Cannot read map: [%d] %s", get_active_function_name(TSRMLS_C),
 						errno, strerror(errno));
 			RETURN_FALSE;
 		}
@@ -317,7 +317,7 @@ PHP_FUNCTION(filepro_rowcount)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -335,7 +335,7 @@ PHP_FUNCTION(filepro_rowcount)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
+		php_error(E_WARNING, "%s(): Cannot open key: [%d] %s", get_active_function_name(TSRMLS_C),
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
@@ -375,7 +375,7 @@ PHP_FUNCTION(filepro_fieldname)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -386,7 +386,7 @@ PHP_FUNCTION(filepro_fieldname)
 	}
 
 	php_error(E_WARNING,
-				"filePro: unable to locate field number %d.\n",
+				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 
 	RETVAL_FALSE;
@@ -416,7 +416,7 @@ PHP_FUNCTION(filepro_fieldtype)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -426,7 +426,7 @@ PHP_FUNCTION(filepro_fieldtype)
 		}
 	}
 	php_error(E_WARNING,
-				"filePro: unable to locate field number %d.\n",
+				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }
@@ -455,7 +455,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -465,7 +465,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 		}
 	}
 	php_error(E_WARNING,
-				"filePro: unable to locate field number %d.\n",
+				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }
@@ -489,7 +489,7 @@ PHP_FUNCTION(filepro_fieldcount)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -523,7 +523,7 @@ PHP_FUNCTION(filepro_retrieve)
 
 	if (!FP_GLOBAL(fp_database)) {
 		php_error(E_WARNING,
-					"filePro: must set database directory first!\n");
+					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -534,7 +534,7 @@ PHP_FUNCTION(filepro_retrieve)
 	rnum = Z_LVAL_P(rno);
     
 	if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
-		php_error(E_WARNING, "filepro: parameters out of range");
+		php_error(E_WARNING, "%s(): Parameters out of range", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
     
@@ -543,7 +543,7 @@ PHP_FUNCTION(filepro_retrieve)
 		offset += lp->width;
 	}
 	if (!lp) {
-		php_error(E_WARNING, "filePro: cannot locate field");
+		php_error(E_WARNING, "%s(): Cannot locate field", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
     
@@ -559,7 +559,7 @@ PHP_FUNCTION(filepro_retrieve)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
+		php_error(E_WARNING, "%s(): Cannot open key: [%d] %s", get_active_function_name(TSRMLS_C),
 					errno, strerror(errno));
 		fclose(fp);
 		RETURN_FALSE;
@@ -568,7 +568,7 @@ PHP_FUNCTION(filepro_retrieve)
 	
 	readbuf = emalloc (lp->width+1);
 	if (fread(readbuf, lp->width, 1, fp) != 1) {
-        	php_error(E_WARNING, "filePro: cannot read data: [%d] %s",
+        	php_error(E_WARNING, "%s(): Cannot read data: [%d] %s", get_active_function_name(TSRMLS_C),
 					errno, strerror(errno));
 		efree(readbuf);
 		fclose(fp);
