@@ -49,7 +49,7 @@ class key_filter implements spl_forward_assoc
 	protected function fetch() {
 		$this->key = false;
 		$this->curr = false;
-		while ($this->it->has_more()) {
+		while ($this->it->hasMore()) {
 			$key = $this->it->key();
 			if (ereg($this->regex, $key)) {
 				$this->key = $key;
@@ -73,7 +73,7 @@ class key_filter implements spl_forward_assoc
 	/**
 	 * @return Whether more elements are available
 	 */
-	function has_more() {
+	function hasMore() {
 		return $this->key !== false;
 	}
 	

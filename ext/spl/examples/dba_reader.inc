@@ -64,7 +64,7 @@ class dba_reader implements spl_sequence_assoc
 	/**
 	 * @return Whether more elements are available.
 	 */
-	function has_more() {
+	function hasMore() {
 		if ($this->db && $this->key !== false) {
 			return true;
 		} else {

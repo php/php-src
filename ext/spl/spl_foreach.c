@@ -69,11 +69,11 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		obj_ce = instance_ce;
-		spl_call_method_0(obj, obj_ce, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
+		spl_call_method_0(obj, obj_ce, NULL, "newiterator", sizeof("newiterator")-1, &retval);
 		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
 		is_a = spl_implements(instance_ce);
 		if (!(is_a & SPL_IS_A_FORWARD)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by %s::new_iterator() must implement spl_forward", obj_ce->name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by %s::newIterator() must implement spl_forward", obj_ce->name);
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
 		spl_pzval_lock_func(retval);
@@ -158,7 +158,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
-		spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more);
+		spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.more, "hasmore", sizeof("hasmore")-1, &more);
 		has_more = i_zend_is_true(more);
 		zval_dtor(more);
 		FREE_ZVAL(more);

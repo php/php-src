@@ -112,11 +112,11 @@ echo "Done\n";
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: spl_array_it::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
 1=>1 - 0=>0
 1=>1 - 2=>2
 
-Notice: next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: spl_array_it::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
 0=>0 - 0=>0
 0=>0 - 2=>2
 2=>2 - 0=>0
@@ -128,11 +128,11 @@ Notice: next(): Array was modified outside object and internal position is no lo
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: has_more(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::hasmore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: has_more(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::hasmore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 Done

@@ -30,7 +30,7 @@ class c2 {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		echo __METHOD__ . "\n";
 		return $this->num < $this->max;
 	}

@@ -20,7 +20,7 @@ class c_iter implements spl_forward_assoc {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		$more = $this->num < $this->obj->max;
 		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
@@ -40,7 +40,7 @@ class c implements spl_iterator {
 
 	public $max = 3;
 
-	function new_iterator() {
+	function newIterator() {
 		echo __METHOD__ . "\n";
 		return new c_iter($this);
 	}
@@ -58,33 +58,33 @@ foreach($t as $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 Done

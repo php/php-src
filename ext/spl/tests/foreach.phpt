@@ -10,6 +10,8 @@ class c_iter implements spl_forward_assoc {
 	private $num = 0;
 
 	function __construct($obj) {
+		echo __METHOD__ . "\n";
+		$this->num = 0;
 		$this->obj = $obj;
 	}
 	function current() {
@@ -20,7 +22,7 @@ class c_iter implements spl_forward_assoc {
 		echo __METHOD__ . "\n";
 		$this->num++;
 	}
-	function has_more() {
+	function hasMore() {
 		$more = $this->num < $this->obj->max;
 		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
@@ -40,7 +42,7 @@ class c implements spl_iterator {
 
 	public $max = 3;
 
-	function new_iterator() {
+	function newIterator() {
 		echo __METHOD__ . "\n";
 		return new c_iter($this);
 	}
@@ -48,7 +50,7 @@ class c implements spl_iterator {
 
 $t = new c();
 
-for ($iter = $t->new_iterator(); $iter->has_more(); $iter->next()) {
+for ($iter = $t->newIterator(); $iter->hasMore(); $iter->next()) {
 	echo $iter->current() . "\n";
 }
 
@@ -74,120 +76,127 @@ foreach($t as $i => $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 2
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 array:0
 array:1
 array:2
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::has_more = false
-c::new_iterator
-c_iter::has_more = true
+c_iter::hasmore = false
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:0:1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:0:2
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:1:1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:1:2
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
-c::new_iterator
-c_iter::has_more = true
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:2:1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 double:2:2
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 c_iter::next
-c_iter::has_more = false
-c::new_iterator
-c_iter::has_more = true
+c_iter::hasmore = false
+c::newiterator
+c_iter::__construct
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::has_more = true
+c_iter::hasmore = true
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::has_more = false
+c_iter::hasmore = false
 Done
