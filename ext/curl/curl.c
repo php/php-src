@@ -103,6 +103,8 @@ PHP_MINFO_FUNCTION(curl)
  */
 PHP_MINIT_FUNCTION(curl)
 {
+	int startup_options;
+
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	
 	/* Constants for curl_setopt() */
@@ -254,7 +256,13 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_OBSOLETE);
 	REGISTER_CURL_CONSTANT(CURLE_SSL_PEER_CERTIFICATE);
 	
-	if (curl_global_init(CURL_GLOBAL_NOTHING) != CURLE_OK) {
+#if HAVE_OPENSSL_EXT    /* OpenSSL already takes care of initialization */
+	startup_options = CURL_GLOBAL_NOTHING;
+#else
+	startup_options = CURL_GLOBAL_ALL;
+#endif
+
+	if (curl_global_init(startup_options) != CURLE_OK) {
 		return FAILURE;
 	}
 
