@@ -23,10 +23,12 @@
 #include "php.h"
 #include "php_readline.h"
 
-#if HAVE_LIBREADLINE
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
 #include <readline/readline.h>
+#ifndef HAVE_LIBEDIT
 #include <readline/history.h>
+#endif
 
 PHP_FUNCTION(readline);
 PHP_FUNCTION(readline_add_history);
@@ -51,7 +53,11 @@ static zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_info,  	            NULL)
 	PHP_FE(readline_add_history, 		NULL)
 	PHP_FE(readline_clear_history, 		NULL)
+#ifdef HAVE_READLINE
 	PHP_FE(readline_list_history, 		NULL)
+#else
+	PHP_FALIAS(readline_list_history, warn_not_available,			NULL)
+#endif
 	PHP_FE(readline_read_history, 		NULL)
 	PHP_FE(readline_write_history, 		NULL)
 	PHP_FE(readline_completion_function,NULL)
@@ -137,15 +143,17 @@ PHP_FUNCTION(readline_info)
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer),1);
 		add_assoc_long(return_value,"point",rl_point);
 		add_assoc_long(return_value,"end",rl_end);
+#ifdef HAVE_READLINE
 		add_assoc_long(return_value,"mark",rl_mark);
 		add_assoc_long(return_value,"done",rl_done);
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
+		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
+		add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name),1);
+#endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
-		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
 		add_assoc_string(return_value,"library_version",SAFE_STRING(rl_library_version),1);
-		add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name),1);
 		add_assoc_string(return_value,"readline_name",SAFE_STRING(rl_readline_name),1);
 	} else {
 		convert_to_string_ex(what);
@@ -162,6 +170,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_LONG(rl_point);
 		} else if (! strcasecmp((*what)->value.str.val,"end")) {
 			RETVAL_LONG(rl_end);
+#ifdef HAVE_READLINE
 		} else if (! strcasecmp((*what)->value.str.val,"mark")) {
 			RETVAL_LONG(rl_mark);
 		} else if (! strcasecmp((*what)->value.str.val,"done")) {
@@ -178,6 +187,11 @@ PHP_FUNCTION(readline_info)
 				rl_pending_input = (*value)->value.str.val[0];
 			}
 			RETVAL_LONG(oldval);
+		} else if (! strcasecmp((*what)->value.str.val,"prompt")) {
+			RETVAL_STRING(SAFE_STRING(rl_prompt),1);
+		} else if (! strcasecmp((*what)->value.str.val,"terminal_name")) {
+			RETVAL_STRING(SAFE_STRING(rl_terminal_name),1);
+#endif
 #if HAVE_ERASE_EMPTY_LINE
 		} else if (! strcasecmp((*what)->value.str.val,"erase_empty_line")) {
 			oldval = rl_erase_empty_line;
@@ -187,12 +201,8 @@ PHP_FUNCTION(readline_info)
 			}
 			RETVAL_LONG(oldval);
 #endif
-		} else if (! strcasecmp((*what)->value.str.val,"prompt")) {
-			RETVAL_STRING(SAFE_STRING(rl_prompt),1);
 		} else if (! strcasecmp((*what)->value.str.val,"library_version")) {
 			RETVAL_STRING(SAFE_STRING(rl_library_version),1);
-		} else if (! strcasecmp((*what)->value.str.val,"terminal_name")) {
-			RETVAL_STRING(SAFE_STRING(rl_terminal_name),1);
 		} else if (! strcasecmp((*what)->value.str.val,"readline_name")) {
 			oldstr = rl_readline_name;
 			if (ac == 2) {
@@ -242,6 +252,7 @@ PHP_FUNCTION(readline_clear_history)
 /* }}} */
 /* {{{ proto array readline_list_history(void) 
    Lists the history */
+#ifdef HAVE_READLINE
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
@@ -262,7 +273,7 @@ PHP_FUNCTION(readline_list_history)
 		}
 	}
 }
-
+#endif
 /* }}} */
 /* {{{ proto int readline_read_history([string filename] [, int from] [,int to]) 
    Reads the history */

@@ -2,6 +2,8 @@ dnl $Id$
 dnl config.m4 for extension readline
 dnl don't forget to call PHP_EXTENSION(readline)
 
+PHP_ARG_WITH(libedit,for libedit readline replacement, 
+[  --with-libedit[=DIR]    Include libedit readline replacement.])
 
 PHP_ARG_WITH(readline,for readline support,
 [  --with-readline[=DIR]   Include readline support.  DIR is the readline
@@ -30,5 +32,30 @@ if test "$PHP_READLINE" != "no"; then
   PHP_SUBST(READLINE_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
+  PHP_EXTENSION(readline, $ext_shared)
+fi
+
+if test "$PHP_LIBEDIT" != "no"; then
+  for i in /usr/local /usr $PHP_LIBEDIT; do
+    if test -f $i/include/readline/readline.h; then
+      LIBEDIT_DIR=$i
+    fi
+  done
+
+  if test -z "$LIBEDIT_DIR"; then
+    AC_MSG_ERROR(Please reinstall libedit - I cannot find readline.h)
+  fi
+  AC_ADD_INCLUDE($LIBEDIT_DIR/include)
+
+  AC_CHECK_LIB(ncurses, tgetent, [
+    AC_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE__SHARED_LIBADD)],[
+    AC_CHECK_LIB(termcap, tgetent, [
+      AC_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)])
+  ])
+
+  AC_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
+  PHP_SUBST(READLINE_SHARED_LIBADD)
+
+  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
   PHP_EXTENSION(readline, $ext_shared)
 fi

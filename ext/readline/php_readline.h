@@ -21,7 +21,7 @@
 #ifndef PHP_READLINE_H
 #define PHP_READLINE_H
 
-#if HAVE_LIBREADLINE
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
 #ifdef ZTS 
 #warning Readline module will *NEVER* be thread-safe
 #endif
