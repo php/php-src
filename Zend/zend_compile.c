@@ -976,6 +976,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.scope = CG(active_class_entry);
 	op_array.ns = CG(active_namespace);
 
+	op_array.line_start = CG(zend_lineno);
+
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
 		int short_class_name_length = CG(active_class_entry)->name_length;
@@ -1073,6 +1075,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 	pass_two(CG(active_op_array) TSRMLS_CC);
+	CG(active_op_array)->line_end = CG(zend_lineno);
 	CG(active_op_array) = function_token->u.op_array;
 
 	/* Pop the switch and foreach seperators */
@@ -3210,6 +3213,7 @@ int zendlex(znode *zendlval TSRMLS_DC)
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch (retval) {
 		case T_COMMENT:
+		case T_DOC_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:
 			retval = zendlex(zendlval TSRMLS_CC);

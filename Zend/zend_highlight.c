@@ -97,6 +97,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				next_color = syntax_highlighter_ini->highlight_html;
 				break;
 			case T_COMMENT:
+			case T_DOC_COMMENT:
 				next_color = syntax_highlighter_ini->highlight_comment;
 				break;
 			case T_OPEN_TAG:
