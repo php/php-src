@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pdflib,whether to include PDFlib support,
-[  --with-pdflib[=DIR]     Include pdflib 3.x support. DIR is the pdflib
+[  --with-pdflib[=DIR]     Include PDFlib support. DIR is the pdflib
                           base install directory, defaults to /usr/local
                           Set DIR to "shared" to build as dl, or "shared,DIR"
                           to build as dl and still specify DIR.])
@@ -111,7 +111,7 @@ if test "$PHP_PDFLIB" != "no"; then
           PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDFLIB_SHARED_LIBADD)
           PHP_ADD_INCLUDE($PDFLIB_INCLUDE)
         ],[
-          AC_MSG_ERROR(pdflib extension requires pdflib 3.x.)
+          AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x.)
         ],[
           -L$PHP_PDFLIB/lib
         ])
