@@ -1219,6 +1219,7 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 		opline->op1 = *namespace_name;
 	} else {
 		SET_UNUSED(opline->op1);
+		opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
 	}
 	CG(catch_begin) = fetch_class_op_number;
 	if (class_name) {
