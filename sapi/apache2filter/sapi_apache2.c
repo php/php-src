@@ -334,7 +334,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	}
 
 	/* moves all buckets from bb to ctx->bb */
-	ap_save_brigade(f, &ctx->bb, &bb);
+	ap_save_brigade(f, &ctx->bb, &bb, f->r->pool);
 
 	/* If we have received all data from the previous filters,
 	 * we "flatten" the buckets by creating a single string buffer.
