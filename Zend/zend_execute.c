@@ -4124,7 +4124,15 @@ int zend_handle_exception_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;
 	int i;
 	int encapsulating_block=-1;
+	zval **stack_zval_pp;
 	
+	stack_zval_pp = (zval **) EG(argument_stack).top_element - 1;
+	while (*stack_zval_pp != NULL) {
+		zval_ptr_dtor(stack_zval_pp);
+		EG(argument_stack).top_element--;
+		stack_zval_pp--;
+	}
+
 	for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
 		if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
