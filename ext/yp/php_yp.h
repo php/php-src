@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stephanie Wehner <_@r4k.net>                                |
+   |          Fredrik Ohrn                                                |
    +----------------------------------------------------------------------+
 */
 
@@ -22,6 +23,12 @@
 #define PHP_YP_H
 
 #if HAVE_YP
+
+#ifdef PHP_WIN32
+#define PHP_YP_API __declspec(dllexport)
+#else
+#define PHP_YP_API
+#endif
 
 extern zend_module_entry yp_module_entry;
 #define yp_module_ptr &yp_module_entry
@@ -33,7 +40,33 @@ PHP_FUNCTION(yp_master);
 PHP_FUNCTION(yp_match);
 PHP_FUNCTION(yp_first);
 PHP_FUNCTION(yp_next);
+PHP_FUNCTION(yp_all);
+PHP_FUNCTION(yp_cat);
+PHP_FUNCTION(yp_errno);
+PHP_FUNCTION(yp_err_string);
+PHP_MINIT_FUNCTION(yp);
+PHP_RINIT_FUNCTION(yp);
 PHP_MINFO_FUNCTION(yp);
+
+typedef struct {
+	int error;
+} php_yp_globals;
+
+#ifdef ZTS
+#define YPLS_D php_yp_globals *yp_globals
+#define YPLS_DC , YPLS_D
+#define YPLS_C yp_globals
+#define YPLS_CC , YPLS_C
+#define YP(v) (yp_globals->v)
+#define YPLS_FETCH() php_yp_globals *yp_globals = ts_resource(yp_globals_id)
+#else
+#define YPLS_D
+#define YPLS_DC
+#define YPLS_C
+#define YPLS_CC
+#define YP(v) (yp_globals.v)
+#define YPLS_FETCH()
+#endif
 
 #else
 
