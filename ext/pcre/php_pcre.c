@@ -385,7 +385,8 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	num_subpats = pcre_info(re, NULL, NULL) + 1;
+	pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
+	num_subpats++;
 	size_offsets = num_subpats * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 
@@ -434,29 +435,38 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 				if (global) {	/* global pattern matching */
 					if (subpats_order_val == PREG_PATTERN_ORDER) {
-						/* For each subpattern, insert it into the appropriate array */
-						for (i=0; i<count; i++) {
+						/* For each subpattern, insert it into the appropriate array. */
+						for (i = 0; i < count; i++) {
 							add_next_index_string(match_sets[i], (char *)stringlist[i], 1);
 						}
-					}
-					else {
+						/*
+						 * If the number of captured subpatterns on this run is
+						 * less than the total possible number, pad the result
+						 * arrays with empty strings.
+						 */
+						if (count < num_subpats) {
+							for (; i < num_subpats; i++) {
+								add_next_index_string(match_sets[i], empty_string, 1);
+							}
+						}
+					} else {
 						/* Allocate the result set array */
 						ALLOC_ZVAL(result_set);
 						array_init(result_set);
 						INIT_PZVAL(result_set);
 						
 						/* Add all the subpatterns to it */
-						for (i=0; i<count; i++) {
+						for (i = 0; i < count; i++) {
 							add_next_index_string(result_set, (char *)stringlist[i], 1);
 						}
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &result_set,
-								sizeof(zval *), NULL);
+													sizeof(zval *), NULL);
 					}
 				}
 				else {			/* single pattern matching */
 					/* For each subpattern, insert it into the subpatterns array. */
-					for (i=0; i<count; i++) {
+					for (i = 0; i < count; i++) {
 						add_next_index_string((*subpats), (char *)stringlist[i], 1);
 					}
 				}
