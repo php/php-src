@@ -1,3 +1,1116 @@
+2000-04-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: fseek() idea.
+
+2000-04-13  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.java: Oops - remove debug statement
+
+    * sapi/servlet/servlet.java
+      sapi/servlet/sessions.php: match changes to Tomcat example
+
+2000-04-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+
+2000-04-13  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/strnatcmp.c
+      php4dll.dsp
+      php4dllts.dsp
+      NEWS: - Make Windows builds build again
+    - Make non-gcc based platforms compile again
+
+2000-04-13  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/strnatcmp.c:
+    the asset call caused an undefined __eprintf here!
+
+2000-04-13  Martin Kraemer  <Martin.Kraemer@Mch.SNI.De>
+
+    * acinclude.m4
+      configure.in: Test for EBCDIC platform
+
+2000-04-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c: Fix for bug #4125
+
+2000-04-12  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c: - Fixed a couple of POST problems.
+    - Use virtual path functionality when available, to set the cwd of the
+    script to it's own directory prior to starting it.
+    - Fixed a bug in php_roxen_sapi_header_handler.
+
+2000-04-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Claim some stuff.
+
+    * TODO: Already done.
+
+    * ext/standard/Makefile.in
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/strnatcmp.c:
+    Added natural comparison/sorting routines using code from Martin Pool.
+
+
+2000-04-12  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/pcre/pcrelib/internal.h: make it compile on Win32
+
+2000-04-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: something with the @ commit stuff *is* broken.
+
+2000-04-12  joosters  <joosters@www>
+
+    * INSTALL
+      README.Zeus
+      sapi/isapi/php4isapi.c:
+    - Zeus Webserver support (version 3.3.6+) for ISAPI
+
+2000-04-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/INSTALL
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/Makefile.in
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/RunTest
+      ext/pcre/pcrelib/chartables.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/dll.mk
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre-config.in
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/perltest
+      ext/pcre/pcrelib/pgrep.c
+      ext/pcre/pcrelib/study.c: Re-add.
+
+    * TODO: One off the list.
+
+    * ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.3
+      ext/pcre/pcrelib/doc/pcre.html
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/doc/pcreposix.3
+      ext/pcre/pcrelib/doc/pcreposix.html
+      ext/pcre/pcrelib/doc/pcreposix.txt
+      ext/pcre/pcrelib/doc/pcretest.txt
+      ext/pcre/pcrelib/doc/perltest.txt
+      ext/pcre/pcrelib/doc/pgrep.1
+      ext/pcre/pcrelib/doc/pgrep.html
+      ext/pcre/pcrelib/doc/pgrep.txt: Added PCRE 3.01.
+
+    * ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/Makefile.in
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/RunTest
+      ext/pcre/pcrelib/Tech.Notes
+      ext/pcre/pcrelib/chartables.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/dll.mk
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.3
+      ext/pcre/pcrelib/pcre.3.html
+      ext/pcre/pcrelib/pcre.3.txt
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcreposix.3
+      ext/pcre/pcrelib/pcreposix.3.html
+      ext/pcre/pcrelib/pcreposix.3.txt
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/perltest
+      ext/pcre/pcrelib/pgrep.1
+      ext/pcre/pcrelib/pgrep.1.html
+      ext/pcre/pcrelib/pgrep.1.txt
+      ext/pcre/pcrelib/pgrep.c
+      ext/pcre/pcrelib/study.c
+      ext/pcre/pcrelib/testinput1
+      ext/pcre/pcrelib/testinput2
+      ext/pcre/pcrelib/testinput3
+      ext/pcre/pcrelib/testinput4
+      ext/pcre/pcrelib/testoutput1
+      ext/pcre/pcrelib/testoutput2
+      ext/pcre/pcrelib/testoutput3
+      ext/pcre/pcrelib/testoutput4: *** empty log message ***
+
+2000-04-11  Andi Gutmans  <andi@php.net>
+
+    * php.h
+      fopen-wrappers.c: - Turn off VIRTUAL_DIR by default
+
+2000-04-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: another option
+
+2000-04-11  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: Eliminate warning if virtual cwd is specified
+
+2000-04-10  Zeev Suraski  <zeev@php.net>
+
+    * fopen-wrappers.c: Fix another missing opened_path assignment
+
+    * NEWS
+      ext/com/COM.c:
+    - Added support for reading properties that require arguments in the COM
+      module - writing to them will only be supported in PHP 4.1 (Zeev)
+
+    * ext/com/COM.c: indent
+
+    * NEWS
+      ext/com/COM.c: *** empty log message ***
+
+    * ext/domxml/domxml.c
+      ext/java/java.c
+      ext/standard/basic_functions.c
+      ext/standard/info.c
+      tests/testcom
+      ext/com/COM.c:
+    Object overloading API changed slightly (llist is now a pointer)
+
+2000-04-10  Andi Gutmans  <andi@php.net>
+
+    * main.c
+      php_virtual_cwd.c
+      php_virtual_cwd.h:
+    - Try and resolve the problem with current working directories not being
+      set to the script directory
+
+2000-04-09  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c
+      fopen-wrappers.h
+      php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Don't need to extern functions
+    - Use virtual_file_ex() in expand_filepath()
+
+2000-04-09  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/recode/recode.c:
+    fixed unterminated string constant introduces by foreign patch.
+
+2000-04-08  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/phpmath.h:
+    added the other usefull constants besides M_PI from math.h
+     as PHP constants
+
+2000-04-08  Andi Gutmans  <andi@php.net>
+
+    * php.h: - Make all CVS users use the new virtual dir support.
+      Will probably disable this for the release.
+
+2000-04-08  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c:
+    - Fixed several problems with the PATH_TRANSLATED and PHP_SELF under Apache
+      (Paul Gregg & Zeev)
+
+2000-04-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    -Added ldap_get_values_len function from PHP3 to PHP4. 
+
+2000-04-07  Zeev Suraski  <zeev@php.net>
+
+    * fopen-wrappers.c: Add a missing expand_filepath()
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: - Fix const declaratirs in virtual cwd
+    - Fixed a problem in include_once() with non constant arguments (Andi & Zeev,
+      Zend Engine)
+
+    * php.ini-optimized: *** empty log message ***
+
+2000-04-07  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/gd/gd.c
+      ext/pdf/pdf.c: recommended changes
+
+    * sapi/apache/php_apache.c: last one ... promise
+
+    * sapi/apache/php_apache.c: typo
+
+    * sapi/roxen/roxen.c
+      sapi/isapi/php4isapi.c: prettying
+
+    * sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c: *** empty log message ***
+
+    * ext/standard/info.c
+      ext/standard/info.h
+      sapi/apache/php_apache.c: more prettiness
+
+2000-04-07  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: Unify
+
+2000-04-07  tedp  <tedp@www>
+
+    * ext/imap/php_imap.c: Removed some compiler warnings.
+
+2000-04-07  Zeev Suraski  <zeev@php.net>
+
+    * php.ini-optimized: - Added php.ini-optimized 
+
+2000-04-07  Andi Gutmans  <andi@php.net>
+
+    * php.h:
+    - This slipped in. Enable VIRTUAL_DIR when we're in ZTS. Eventually it
+      should always be enabled.
+
+    * internal_functions_win32.c
+      php.h: - Add wddx support to the default build
+
+2000-04-07  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/php_imap.c:
+    cleaning up some small off-by-one errors and argcount follies. Can someone
+    take a look at the errors imap_mime_header_decode() generates when
+    compiling? I took a quick look, but don't have time to puzzle through that
+    code.
+
+2000-04-06  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/info.c: - ZEND_DEBUG is always defined
+
+2000-04-06  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/ldap/ldap.c: phpinfo() pretying
+
+    That should be everything.
+
+    * ext/sybase/sybase.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/session/session.c
+      ext/snmp/snmp.c
+      ext/pdf/pdf.c
+      ext/recode/recode.c
+      ext/oracle/oracle.c
+      ext/pcre/php_pcre.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/odbc/velocis.c
+      ext/interbase/interbase.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c: phpinfo() prettying
+
+    * ext/mcal/php_mcal.c: *** empty log message ***
+
+    * ext/interbase/interbase.c: a better way, i've been told (thanks)
+
+    * ext/ldap/ldap.c
+      ext/mcal/php_mcal.c
+      ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c:
+    More phpinfo() prettying.
+
+    Can someone check my code for the interbase
+    support, and I need someone else to decode the LDAP stuff ... it's beyond
+    me.
+
+2000-04-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    - Added ldap_errno, ldap_err2str and ldap_error from PHP3 to PHP4. 
+
+2000-04-06  Jakub Skopal  <j@kubs.cz>
+
+    * ext/dba/dba.c:
+    Corrected compilation error with wrong number of arguments to
+    php_info_print_box_start()
+
+2000-04-05  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/gd/gd.c: typo
+
+    * ext/gettext/gettext.c
+      ext/standard/info.c
+      ext/fdf/fdf.c
+      ext/gd/gd.c
+      ext/dba/dba.c
+      ext/domxml/domxml.c
+      ext/aspell/aspell.c
+      ext/cpdf/cpdf.c
+      ext/dav/dav.c
+      ext/db/db.c: phpinfo() prettying
+
+    I will get to the rest of the functions later tonight or tomorrow
+    (i.e. from hyperwave to snmp)
+
+    * ext/xml/xml.c
+      ext/yp/yp.c
+      ext/zlib/zlib.c
+      ext/posix/posix.c
+      ext/standard/basic_functions.c
+      ext/standard/dl.c
+      ext/standard/mail.c
+      ext/standard/reg.c: phpinfo() prettying
+
+2000-04-05  Zeev Suraski  <zeev@php.net>
+
+    * logos.h: Update the PHP logo
+
+2000-04-05  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/standard/info.c: finally (thanks Andreas)
+
+    * ext/standard/info.c: still cant get this
+
+2000-04-05  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - Not needed anymore
+
+    * php_virtual_cwd.c: - More fixes
+
+2000-04-05  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/standard/info.c: phpinfo() prettying
+
+2000-04-05  Andi Gutmans  <andi@php.net>
+
+    * php4dllts.dsp
+      php_virtual_cwd.c: - Fix
+
+2000-04-05  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/pcre/php_pcre.c: phpinfo() prettying
+
+    * ext/standard/info.c:
+    fixed the segfault problem (probably not the prettiest way, but)
+
+    * ext/mysql/php_mysql.c: phpinfo() prettying
+
+    * ext/standard/info.c
+      ext/standard/info.h
+      php_ini.c:
+    Prettying up the output of phpinfo().  Someone has to tell me how
+    to get a new .gif logo in there, and why the ZEND_DEBUG output is
+    causing seg faults.
+
+    I also need to go through all the modules and fix up the output they
+    create.
+
+2000-04-05  Zeev Suraski  <zeev@php.net>
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h:
+    Fix a problem with the virtual directory mechanism (corruption of the filenames to open)
+
+    * sapi/isapi/php4isapi.c:
+    The ISAPI module was incompatible with the CGI fix, which ruined POST's
+
+2000-04-05  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/config.m4: fix typo: wrong variable name
+
+    * sapi/servlet/config.m4: look for Tomcat binaries too
+
+    * ext/java/jawt.php:
+    Make it clear that the jawt example is only intented to be run as a CGI
+
+    * sapi/servlet/servlet.java: Define PHP_SELF in sapi/servlet.
+    Reported by Lim Swee Tat <limst@ncscom.sg>
+
+2000-04-04  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4dllts.dsp: Windows build: xmltok is needed by wddx
+
+    * ext/mysql/php_mysql.h:
+    Make MySLS_FETCH use the same globals ID as ZEND_INIT_MODULE_GLOBALS
+
+2000-04-04  Andi Gutmans  <andi@php.net>
+
+    * win32/registry.c: - One more fopen -> PHP_FOPEN patch
+
+2000-04-04  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/php_imap.c:
+    return false after determining that a message number is bad, instead of
+    going on to crash.
+
+2000-04-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c: Additional check for IS_OBJECT.
+
+2000-04-04  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c: - should fix a problem with ifdef
+
+2000-04-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/wddx/wddx.c: - WDDX now defaults to ISO-8859-1. 
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c: export xml_utf8_decode for wddx module
+
+    * ext/standard/var.c: (var_dump) cleaned up some weird & buggy stuff
+
+2000-04-04  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c:
+    - all functions returning a list of object record should be faster now
+      and require less accesses on the server
+
+2000-04-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: forgot @ thingie
+
+    * ext/wddx/wddx.c: buffer was short by one
+
+2000-04-04  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/array.c: Return type was missing.
+
+2000-04-04  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c: tweaks to prototypes
+
+    * ext/imap/php_imap.c: update function protos. should all be there now
+
+    * MODULES_STATUS: adding mcal and gettext to MODULES_STATUS
+
+2000-04-03  Andi Gutmans  <andi@php.net>
+
+    * ext/ldap/ldap.c: - Fix build bug
+
+2000-04-03  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/php_imap.c:
+    - Fix crash resulting from IMAP's error handling 
+
+    * ext/imap/IMAP_Win32_HOWTO.txt: *** empty log message ***
+
+2000-04-03  Andi Gutmans  <andi@php.net>
+
+    * configuration-parser.y: - fopen and ZTS fixes
+
+    * ext/imap/php_imap.c: - Fix typo
+
+2000-04-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/Makefile.in
+      ext/java/Makefile.in:
+    test -e doesn't exist on Solaris - substituting test -d
+
+2000-04-03  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+2000-04-02  Zeev Suraski  <zeev@php.net>
+
+    * rfc1867.c: *** empty log message ***
+
+    * ext/imap/php_imap.c
+      rfc1867.c:
+    - Add $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
+      retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] 
+    - Changed IMAP Win32 definitions
+
+2000-04-02  Andi Gutmans  <andi@php.net>
+
+    * SAPI.c
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Create dtor function
+
+    * php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h
+      sapi/apache/mod_php4.c:
+    - This version of chdir_file should be compatible with the Apache one.
+
+    * php_virtual_cwd.c: - A bit more cleanups.
+    - Need to implement virtual_chdir_file() to replace chdir_file() in
+      sapi/apache so that we can start testing apache and debug it.
+
+    * SAPI.c
+      php.h
+      php_virtual_cwd.c:
+    - Virtual cwd compiles now (need to uncomment #define in php.h for it to
+      be enbaled right now).
+      It seems to work very basic stuff
+
+2000-04-01  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/IMAP_Win32_HOWTO.txt
+      ext/ldap/LDAP_Win32_HOWTO.txt: *** empty log message ***
+
+2000-04-01  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: - Move to new Zend macros
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: - PHP_WIN32 is not defined here use ZEND_WIN32
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: - More virtual_cwd work
+
+    * Makefile.in
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Make php_virtual_cwd compile
+
+2000-04-01  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.java:
+    Accomodate back level (JSDK 2.0) implementations
+
+2000-04-01  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.h: - Need zend.h for ZTS
+
+    * php_virtual_cwd.c: -
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: - Intermediate commit
+
+2000-04-01  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/Makefile.in
+      ext/imap/php_imap.c
+      ext/imap/php_imap.h: Oh yeah, committing these would be a good idea:)
+
+    * ext/imap/imap.dsp
+      ext/ldap/ldap.dsp: Several fixes
+
+    * ext/ldap/ldap.c
+      ext/ldap/ldap.dsp
+      ext/ldap/php_ldap.h
+      ext/mysql/mysql.dsp
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/imap/IMAP_Win32_HOWTO.txt
+      ext/imap/imap.c
+      ext/imap/imap.dsp
+      ext/imap/imap.h
+      php_modules.dsw:
+    - Made the IMAP and LDAP modules compilable under Windows and thread-safe 
+
+2000-04-01  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4:
+    Don't try to install php_java.jar if --with-servlet was specified
+    (Fix to PHP 4.0 Bug #4001 submitted by sashi@easy.com.au)
+
+2000-04-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Fix the HPUX 10.20 check for non-standard reentrant time functions
+
+    * TODO: .
+
+    * configure.in
+      php_version.h:
+    Up version number to 4.0RC2-dev. (4.0-dev looks too general for now.)
+
+2000-04-01  Zeev Suraski  <zeev@php.net>
+
+    * SAPI.c
+      SAPI.h: - Fix a problem when dealing with large POST blocks in CGI mode
+
+2000-03-31  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: Added some things that I forgot to add when I did them.
+
+2000-03-31  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c:
+    - This shouldn't do any harm and might fix a problem with Win32
+
+2000-03-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Would be good.
+
+2000-03-31  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/mysql.dsp
+      config.w32.h
+      ext/imap/imap.dsp
+      php4.dsw
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsw
+      php_modules.dsw:
+    Several fixes, plus remove bindlib_w32 (it's more trouble than it's worth)
+
+    * NEWS: *** empty log message ***
+
+2000-03-31  Andi Gutmans  <andi@php.net>
+
+    * php4.dsw
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsw: - Add bindlib to the Win32 build
+
+2000-03-31  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: Use C style comments, per the CODING_STANDARDS
+
+2000-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/library.mk: Remove trailing slash
+
+2000-03-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: fix indentation (this project has tabstop=4!)
+
+    * sapi/servlet/servlet.c: eliminate chdir if it is already virtual
+
+2000-03-30  Andi Gutmans  <andi@php.net>
+
+    * sapi/servlet/servlet.c
+      ext/standard/dir.c
+      ext/standard/filestat.c
+      ext/standard/image.c
+      ext/standard/iptc.c
+      sapi/isapi/php4isapi.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/posix/posix.c
+      ext/com/COM.c
+      ext/db/db.c
+      ext/filepro/filepro.c
+      php.h:
+    - Hopefully got most of them. We also need a chdir_file function like
+      for Apache.
+
+    * fopen-wrappers.c
+      main.c
+      rfc1867.c: - Baby steps... Use PHP_FOPEN()
+
+    * fopen-wrappers.c: - Use PHP_CHDIR()
+
+    * ext/session/session.c
+      fopen-wrappers.c
+      php.h
+      php_realpath.c
+      safe_mode.c: - Fix another bug in session.c
+    - Start using the new PHP_GETCWD() and co. macros
+
+    * ext/session/session.c: - Fix compile bug in session_get_cookie_params()
+
+2000-03-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/session/session.c:
+2000-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4: Non-functional changes
+
+    * configure.in:
+    Build the bundled mysqlclient library thread-safe in thread-safe mode.
+
+2000-03-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c: -added session_get_cookie_params (sterling)
+
+2000-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * SAPI.c: kill warning
+
+    * acinclude.m4
+      configure.in:
+    * Add --enable-libgcc which explicitly links against libgcc.
+
+    * Some cleanup and increased use of PHP_ARG_[ENABLE|WITH]
+
+    * ext/gd/config.m4:
+    Fix libpng and libz order and stuff the libjpeg into its own macro.
+
+2000-03-30  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c:
+    - Fixed return of stristr() to no longer always be lowercased. 
+
+2000-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+    * ext/standard/dl.c: Allocate enough memory for additional /.
+
+    Also remove the extra check for the trailing /. Unix will automatically
+    apply s#/+#/#
+
+    Partly suggested by: drew@elysium.ltd.uk
+    PR: #3956
+
+    * configure.in: Propagate pthread_cflags to CXXFLAGS and INLINE_CFLAGS
+
+2000-03-30  Jim Jagielski  <jim@jaguNET.com>
+
+    * ext/db/php_db.h:
+    Fix the problem with dbmopen() not being defined. Patch by
+    Geoff (geoff@mcrent.com) and The Red Fox
+
+2000-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/dl.c:
+    Some OS prepend _ to symbol names while their dynamic linker
+    does not do that automatically. Thus we check manually for
+    _get_module.
+
+    * Makefile.in
+      ext/standard/Makefile.in:
+    Specifically mention $(srcdir), so that OpenBSD's make gets it
+
+2000-03-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/snmp/snmp.c: fix bug 3971, SNMP now compiles on FreeBSD.
+
+2000-03-29  Torben Wilson  <torben@netmill.com>
+
+    * NEWS:
+
+    Missed Andrei's @ note...
+
+2000-03-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    GC now prints out how many session objects were removed
+
+    * ext/session/mod_files.c: Improved error messages
+
+2000-03-29  Zeev Suraski  <zeev@php.net>
+
+    * configuration-parser.y:
+    - Changed the Windows version of PHP so that a php.ini file is no
+      longer mandatory 
+
+    * NEWS: *** empty log message ***
+
+2000-03-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c:
+    Do not add dl function, if libdl is not present.
+
+    PR: #3947
+
+    Declare user_shutdown_function_name() as static to kill warning.
+
+2000-03-29  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/array.c: Re-fixed return value of min and max
+
+    * ext/standard/browscap.c: single, sorta proto.
+
+    * ext/standard/array.c: 1.  Holy protos Batman.
+    2.  Converted some functions from using "return" to RETURN_FALSE
+
+2000-03-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/session/session.c:
+    - session_start() is now more verbose if headers cannot be send. 
+
+2000-03-29  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/basic_functions.c: Tis protoriffic.
+
+2000-03-28  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/datetime.c:
+    Sterling, only one line for the short descritption, even it is massiv.
+
+2000-03-28  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h: *** empty log message ***
+
+2000-03-28  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mssql/php_mssql.c: Description differs between version 3 and 4.
+
+2000-03-28  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    - added pdf_open_image_file() to read jpeg, tiff, gif and png images
+
+2000-03-28  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/mssql/php_mssql.c: Couple of thangs:
+      1.  We've got protos!
+      2.  The second half of the script is now most Zendiferous.
+
+2000-03-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mcrypt/config.m4
+      ext/mhash/config.m4: Use PHP_ARG_WITH
+
+    * ext/wddx/config.m4
+      ext/ftp/config.m4
+      ext/session/config.m4
+      acinclude.m4
+      ext/dbase/config.m4
+      ext/ext_skel
+      ext/filepro/config.m4:
+    Welcome PHP_ARG_ENABLE and PHP_ARG_WITH. They are there to replace the common
+    AC_MSG_CHECKING, AC_ARG_[ENABLE,WITH], AC_MSG_RESULT trio.
+
+    * ext/ext_skel: Generate better skeleton config.m4
+
+    * ext/session/session.c: These should not be exported
+
+    * ext/dba/config.m4: * Check the default location of Berkeley DB 3.0
+    * Check additionally for libdb-3
+
+2000-03-27  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: That's one thing @ missed...
+
+2000-03-27  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/datetime.c: Slight change for time on the return side.
+
+
+    * pear/Makefile.in: *** empty log message ***
+
+2000-03-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * INSTALL: GNU make is not required
+
+2000-03-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4ts.dsw: Whoops!  Not everybody want Java included by default!
+
+2000-03-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * INSTALL
+      MODULES_STATUS: Update the INSTALL docs
+
+2000-03-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      php4.dsp
+      php4dll.dsp
+      php4ts.dsw: Remove debug runtime libraries from Release builds
+
+2000-03-26  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.dsp
+      ext/java/java.dsp: support non-debug builds
+
+2000-03-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4: PHP_EXTENSION sets $ext_src_base
+
+    * sapi/apache/config.m4
+      ext/odbc/config.m4
+      ext/pdf/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/domxml/config.m4: Some white-space changes
+
+    * pear/Makefile.in: Ignore errors at this place
+
+    * ext/mysql/Makefile.in
+      ext/mysql/config.m4:
+    Allow MySQL to be compiled against extern mysqlclient library
+
+2000-03-26  Zeev Suraski  <zeev@php.net>
+
+    * makedist: Use compression for makedist
+
+    * NEWS
+      configure.in
+      php_version.h: Package RC1
+
+    * ext/standard/string.c:
+    - Change new -> result. Using C++ keywords isn't too hot
+
+2000-03-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Fix internal_functions.c screwup for people not using --with-mm
+
+2000-03-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/snmp/snmp.c: Return value corrected.
+
+2000-03-26  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/mysql/libmysql/global.h
+      ext/oci8/config.m4: no c++ comments // please
+
+2000-03-26  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c: imap_clearflag_full now returns true appropriately.
+
+2000-03-26  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4:
+    JAVA_LIBPATH was not allways being added to the LIBPATH
+
+2000-03-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/config.m4
+      acinclude.m4
+      configure.in
+      genif.sh:
+    Revamp session's config.m4 and reenable support for mm. The shared memory
+    module works now successfully again under Apache and other web servers.
+
+2000-03-26  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/php_mysql.c:    Hopefully that settles this one.
+
+2000-03-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Add MSIE 5-specific Cache-Control fields
+
+2000-03-25  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/snmp/snmp.c: Tid Bit More.
+
+2000-03-25  Zeev Suraski  <zeev@php.net>
+
+    * php4.dsp
+      php4dll.dsp: Update .dsp's
+
+2000-03-25  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/snmp/php_snmp.h
+      ext/snmp/snmp.c: - snmpwalkoid is an alias now
+    - small optimizations
+    - delete that switch case in php_snmp
+      =The different functions are now in the PHP_FUNCTION declaration thingies
+    - If-else blocks have brackets
+
+2000-03-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      php.h: - Update dsp
+    - Remove unnecessary includes
+
+2000-03-25  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - Support getcwd() semantics.
+    - We need to change this whole business to work with ZTS globals
+
+2000-03-25  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4
+      ext/java/java.c
+      ext/standard/dl.c:
+    Dynamically load java support, for better error messages
+
+2000-03-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      php4.dsp
+      php4dll.dsp: Update dsp's
+
+2000-03-25  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS:
+    andrei, i'm sure we're missing some @ entries in NEWS (this one is one of them)
+
+2000-03-25  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/snmp/snmp.c: Fixed a few protos and ...
+
+2000-03-25  Zeev Suraski  <zeev@php.net>
+
+    * win32/registry.c:
+    - Modified the registry INI entry reader (Win32) to work with drive letters.  For
+      example, if you wish to wish to specify INI entries for C:\foo\bar, you should
+      create HKLM\PHP\Per Directory Values\C\foo\bar in the registry, and add
+      string values for each directive you want to override in this directory 
+
+2000-03-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed extract() for EXTR_PREFIX_SAME and EXTR_SKIP cases. 
+
+2000-03-24  Andi Gutmans  <andi@php.net>
+
+    * main.c
+      php3_compat.h
+      php_variables.c: - Nuke hash_*_ptr() functions
+
+2000-03-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h: - several clean ups
+
+2000-03-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      TODO: Added get_class_methods().
+
+2000-03-22  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:    fix #3890
+
+2000-03-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Attribution.
+
+2000-03-21  Andi Gutmans  <andi@php.net>
+
+    * main.c: - Adjust for change in zend_startup()
+
+2000-03-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Please use @ in front of _all_ lines intended for NEWS file.
+
+2000-03-20  Rasmus Lerdorf  <rasmus@php.net>
+
+    * SAPI.h
+      php.ini-dist:
+    As it turns out, there are some browsers that can't handle default
+    charsets.  I think forcing this on is going to cause us a lot of headache,
+    so turn it off by default.
+
+    * ext/mysql/php_mysql.c:
+    Make it possible to specify both a port and a socket in mysql_[p]connect
+
+2000-03-20  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/imap/imap.c: Fixed a proto.
+
 2000-03-20  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Please use @ in front of _all_ lines intended for NEWS file.
