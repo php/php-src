@@ -82,6 +82,22 @@ typedef struct {
 } oci_descriptor;
 
 typedef struct {
+    int id;
+    int open;
+    oci_connection *conn;
+    oci_session *session;
+    OCISvcCtx   *pServiceContext;
+    OCIType     *tdo;
+    OCITypeCode coll_typecode;
+    OCIRef      *elem_ref;
+    OCIType     *element_type;
+    OCITypeCode element_typecode;
+    OCIColl     *coll;
+    sword       error;
+    OCIError    *pError;
+} oci_collection;
+
+typedef struct {
     zval *zval;
     text *name;
     ub4 name_len;
