@@ -208,7 +208,7 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-void php_dl(pval *file, int type, pval *return_value)
+void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 {
 	php_error(E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
 	RETURN_FALSE;
