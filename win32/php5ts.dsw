@@ -213,18 +213,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "servlet"=..\sapi\servlet\servlet.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "testsuite"=.\testsuite.dsp - Package Owner=<4>
 
 Package=<5>
