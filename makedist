@@ -99,7 +99,7 @@ echo ""
 # remove CVS stuff...
 find . \( \( -name CVS -type d \) -o -name .cvsignore \) -exec rm -rf {} \;
 
-# The full ChangeLog is available seperately from lxr.php.net
+# The full ChangeLog is available separately from lxr.php.net
 rm ChangeLog
 
 # hide away our own versions of libtool-generated files
