@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Changed 'Z' flag to date() to always return timezone offset with
+  negative sign if it's west of UTC. (Andrei)
+- Add the HTML_Processor class which provides common functions for processing HTML.
+  (Sterling)
+- Added localeconv() and strcoll() functions for localization. (Sean)
 - Added the xslt_set_base function. (Sterling)
 - Support Zeus 3.3.8
 - Added odbc_error() and odbc_errormsg() functions (Stig)
