@@ -82,7 +82,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	long num_links, num_persistent;
 	long max_links, max_persistent;
 	long allow_persistent;
-	int le_blob, le_link, le_plink, le_result, le_query, le_trans;
 	char *default_user, *default_password;
 	char *timestampformat;
 	char *cfg_timestampformat;
