@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -287,7 +287,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	return SUCCESS;
 }
 
-PS_SERIALIZER_DECODE_FUNC(wddx) 
+PS_SERIALIZER_DECODE_FUNC(wddx)
 {
 	zval *retval;
 	zval **ent;
@@ -436,11 +436,11 @@ static void _php_session_save_current_state(PSLS_D)
 }
 
 static char *month_names[] = {
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static char *week_days[] = { 
+static char *week_days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 };
 
@@ -660,7 +660,7 @@ static void _php_session_start(PSLS_D)
        http://yoursite/<session-name>=<session-id>/script.php */
 
 	if(!PS(id) &&
-			zend_hash_find(&EG(symbol_table), "REQUEST_URI", 
+			zend_hash_find(&EG(symbol_table), "REQUEST_URI",
 				sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
 			(*data)->type == IS_STRING &&
 			(p = strstr((*data)->value.str.val, PS(session_name))) &&
@@ -675,7 +675,7 @@ static void _php_session_start(PSLS_D)
 	/* check whether the current request was referred to by
 	   an external site which invalidates the previously found id */
 	
-	if(PS(id) && 
+	if(PS(id) &&
 			PS(extern_referer_chk)[0] != '\0' &&
 			zend_hash_find(&EG(symbol_table), "HTTP_REFERER",
 				sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
@@ -720,7 +720,7 @@ static void _php_session_start(PSLS_D)
 	if(PS(mod_data) && PS(gc_probability) > 0) {
 		srand(time(NULL));
 		nrand = (int) (100.0*rand()/RAND_MAX);
-		if(nrand < PS(gc_probability)) 
+		if(nrand < PS(gc_probability))
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime));
 	}
 }
