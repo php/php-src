@@ -124,7 +124,6 @@ typedef struct {
 	long max_links;
 	long num_persistent;
 	long num_links;
-	int le_conn, le_pconn, le_cursor;
 	HashTable *conns;
 } php_ora_globals;
 
