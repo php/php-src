@@ -12,4 +12,4 @@ class Y {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare a() in %s/bug17882.php on line %d
+Fatal error: Cannot redeclare a() in %s/bug17882.php on line 4
