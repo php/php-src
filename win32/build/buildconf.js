@@ -1,4 +1,4 @@
-// $Id: buildconf.js,v 1.2 2003-12-03 14:55:03 wez Exp $
+// $Id: buildconf.js,v 1.3 2003-12-04 01:37:52 wez Exp $
 /*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.2 2003-12-03 14:55:03 wez Exp $ */
+/* $Id: buildconf.js,v 1.3 2003-12-04 01:37:52 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -64,6 +64,7 @@ C.Write(file_get_contents("win32/build/confutils.js"));
 modules = file_get_contents("win32/build/config.w32");
 find_config_w32("sapi");
 find_config_w32("ext");
+find_config_w32("pecl");
 
 // Look for ARG_ENABLE or ARG_WITH calls
 re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");
