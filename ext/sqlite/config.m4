@@ -47,24 +47,7 @@ if test "$PHP_SQLITE" != "no"; then
 	# use bundled library
 
 	PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src"
-      
-	if test "ek$EXTENSION_DIR" = "ek"; then
-		if test "$PHP_DEBUG" = "0"; then
-			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
-		fi
-		if test "$enable_experimental_zts" = "yes"; then
-			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
-		fi
-	else
-		php_sqlite_no_debug=`echo $EXTENSION_DIR | grep -c "no-debug"`
-		php_sqlite_non_zts=`echo $EXTENSION_DIR | grep -c "non-zts"`
-		if test "$php_sqlite_no_debug" != "0"; then
-			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
-		fi
-		if test "$php_sqlite_non_zts" = "0"; then
-			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
-		fi
-	fi
+
 
 	sources="libsqlite/src/opcodes.c
 		libsqlite/src/parse.c libsqlite/src/encode.c \
@@ -97,15 +80,25 @@ if test "$PHP_SQLITE" != "no"; then
 	SQLITE_VERSION=`cat $ext_srcdir/libsqlite/VERSION`
 	AC_SUBST(SQLITE_VERSION)
 
+	if test "$ext_shared" = "no"; then
+	  echo '#include "php_config.h"' > $ext_srcdir/libsqlite/src/config.h
+	else
+	  echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/libsqlite/src/config.h
+	fi
+	
+	cat >> $ext_srcdir/libsqlite/src/config.h <<EOF
+#if ZTS
+# define THREADSAFE 1
+#endif
+#if !ZEND_DEBUG
+# define NDEBUG
+#endif
+EOF
+
 	sed -e s/--VERS--/`cat $ext_srcdir/libsqlite/VERSION`/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in >$ext_srcdir/libsqlite/src/sqlite.h
 
 	PHP_ADD_MAKEFILE_FRAGMENT
 
-	dnl if not building a shared extension, we need to generate a config.h file for
-	dnl the library
-	if test "$ext_shared" = "no"; then
-	  echo '#include "php_config.h"' > $ext_srcdir/libsqlite/src/config.h
-	fi
   fi
 
   AC_CHECK_FUNCS(usleep nanosleep)
