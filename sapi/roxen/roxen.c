@@ -491,13 +491,11 @@ static int php_roxen_startup(sapi_module_struct *sapi_module)
 
 /* this structure is static (as in "it does not change") */
 
-void pike_module_exit(void);
-
 static sapi_module_struct sapi_module = {
   "Roxen",
 
   php_module_startup,						/* startup */
-  pike_module_exit,							/* shutdown */
+  php_module_shutdown_wrapper,				/* shutdown */
 
   NULL,										/* activate */
   NULL,										/* deactivate */
