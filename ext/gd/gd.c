@@ -479,6 +479,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_WBMP
 	php_info_print_table_row(2, "WBMP Support", "enabled");
 #endif
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+	php_info_print_table_row(2, "XPM Support", "enabled");
+#endif
 #ifdef HAVE_GD_XBM
 	php_info_print_table_row(2, "XBM Support", "enabled");
 #endif
@@ -551,6 +554,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "WBMP Support", 1);
 #else
 	add_assoc_bool(return_value, "WBMP Support", 0);
+#endif
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+	add_assoc_bool(return_value, "XPM Support", 1);
+#else
+	add_assoc_bool(return_value, "XPM Support", 0);
 #endif
 #ifdef HAVE_GD_XBM
 	add_assoc_bool(return_value, "XBM Support", 1);
@@ -1211,7 +1219,7 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_WBMP
 	ret |= 8;
 #endif
-#ifdef HAVE_GD_XPM
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	ret |= 16;
 #endif
 	if (ZEND_NUM_ARGS() != 0) {
