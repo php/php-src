@@ -1,41 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Introduced extension version numbers (Stig)
-- Add new ZEND_GET_LE macro for retrieving destructor
-  id's from remote extensions. (Jmoore, Zend Engine)
-- * Fixed a possible crash in get_class_methods() (Zeev)
-- Fix problem with nested foreach()'s (Andi, Zend Engine)
-- Fix switch which only has a default rule (Andi, Zend Engine)
-- Change require_once() to use the same file list as include_once().
-  Patch includes making require() & include() to behave the same when it
-  comes to scoping. require() is now an include() which isn't allowed to fail.
-  require() caused too many memory reallocations which ended up being quite
-  slow for sites that required lots of files. (Andi & Zeev, Zend Engine)
-- Make define return false and issue E_NOTICE when trying to redefine constant (Stas)
-- Added strncasecmp function (Andi)
-- "use" is not yet supported; instead use include_once() or require_once()
-  for the time being (Andi, Zend library)
-- Comparing the string "inf" with "inf" returned false - fixed (Zeev)
-- number.h comes from ext/bcmath, not functions/
-- Restored the PHP_VERSION and PHP_OS constants (Zeev)
-- Add new ZEND_GET_LE macro for retrieving destructor
-  id's from remote extensions. (Jmoore, Zend Engine)
-- * Fixed a possible crash in get_class_methods() (Zeev)
-- Fix problem with nested foreach()'s (Andi, Zend Engine)
-- Fix switch which only has a default rule (Andi, Zend Engine)
-- Change require_once() to use the same file list as include_once().
-  Patch includes making require() & include() to behave the same when it
-  comes to scoping. require() is now an include() which isn't allowed to fail.
-  require() caused too many memory reallocations which ended up being quite
-  slow for sites that required lots of files. (Andi & Zeev, Zend Engine)
-- Make define return false and issue E_NOTICE when trying to redefine constant (Stas)
-- Added strncasecmp function (Andi)
-- "use" is not yet supported; instead use include_once() or require_once()
-  for the time being (Andi, Zend library)
-- Comparing the string "inf" with "inf" returned false - fixed (Zeev)
-- number.h comes from ext/bcmath, not functions/
-- Restored the PHP_VERSION and PHP_OS constants (Zeev)
 - Added debug_zval_dump(), which works similar to var_dump, yet displays extra
   internal information such as refcounts and true type names. (Jason)
 - Added Andrei's tokenizer extension. (Stig)
