@@ -1,3 +1,25 @@
+2004-07-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c:
+      MFH: Fixed bug #29049 (array sorting via user function/method does not
+      validate it).
+
+    * ext/standard/array.c:
+      Fixed bug #29049 (array sorting via user function/method does not validate
+      it).
+
+2004-07-08  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - A bugfix in search words hilightling code (mnogosearch extension).
+
+2004-07-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_saproxy.c:
+      Last dangerous alloca() bits.
+
 2004-07-07  Georg Richter  <georg@mysql.com>
 
     * ext/mysqli/config.m4
