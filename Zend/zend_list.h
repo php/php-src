@@ -55,7 +55,7 @@ typedef struct _zend_rsrc_list_dtors_entry {
 } zend_rsrc_list_dtors_entry;
 
 
-#define register_list_destructors(ld, pld) zend_register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
+#define register_list_destructors(ld, pld, name) zend_register_list_destructors_ex(ld, pld, name, module_number);
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number);
 
