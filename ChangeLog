@@ -1,3 +1,132 @@
+2000-10-29  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    parse_ini_file() supports a new optional 2nd argument that instructs it
+    to divide the directives to arrays according to the sections in which they
+    reside
+
+    * ext/standard/browscap.c
+      main/configuration-parser.y:
+    Move browscap code to the new modular INI parser
+
+    * NEWS: Forgot the @...
+
+    * ext/standard/basic_functions.c
+      main/configuration-parser.y
+      main/php_ini.c
+      main/php_ini.h: Use the new INI parser for parse_ini_str()
+    - parse_ini_str() is now thread-safe, and supported under Windows (Zeev)
+
+2000-10-29  Thomas Weinert  <subjective@subjective.de>
+
+    * pear/DB/tests/mysql/003.phpt: I`m was wrong, sorry.
+
+2000-10-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/README: POSTs work fine
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c: Add standard license
+
+    * NEWS: This is actually user-visible.
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c: Unify handling of aborted connections
+
+    * sapi/cgi/cgi_main.c: Unify aborted connection handling
+
+    * sapi/thttpd/thttpd.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache2filter/sapi_apache2.c: Add/unify aborted connection handling
+
+    * main/main.c
+      main/php_main.h: Add php_handle_aborted_connection()
+
+    Call this from your SAPI module to signal an aborted connection.
+
+    * sapi/apache2filter/README: New directive AddRequestBodyFilters
+
+    Currently it requires this patch:
+
+    http://schumann.cx/request-body-filters
+
+    * sapi/apache2filter/sapi_apache2.c: Handle user aborts
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Add Request Body filters. This is a much nicer concept than
+    ap_get_req_body, since it is much more flexible and does not
+    need to buffer everything in memory (PHP still does..).
+
+2000-10-29  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: Fix Windows build
+
+    * sapi/cgi/cgi_main.c
+      win32/registry.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache2/mod_php4.c
+      sapi/apache2filter/apache_config.c
+      ext/session/session.c
+      ext/standard/basic_functions.c
+      ext/standard/info.c
+      main/configuration-parser.y
+      main/main.c
+      main/php_ini.c
+      main/php_ini.h:
+    Initial steps to move the INI mechanism to the Zend engine
+
+2000-10-29  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/phttpd/README
+      sapi/phttpd/php_phttpd.h
+      sapi/phttpd/phttpd.c
+      ext/sybase/php_sybase_db.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      sapi/cgi/cgi_main.c
+      ext/readline/php_readline.h
+      ext/readline/readline.c
+      ext/standard/assert.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/iptc.c
+      ext/standard/math.c
+      ext/standard/metaphone.c
+      ext/standard/output.c
+      ext/standard/php_assert.h
+      ext/standard/php_dir.h
+      ext/standard/php_iptc.h
+      ext/standard/php_metaphone.h
+      ext/standard/var.c
+      EXTENSIONS
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8.h
+      ext/oracle/oracle.c: update my email.
+
+2000-10-29  Stig Bakken  <ssb@fast.no>
+
+    * run-tests.php: Test descriptions showed up blank, fixed.
+
+2000-10-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4: Check also that the file isn't empty.
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4:
+    - Fixed conflict with OpenLDAP and Oracle 8.1.x 
+
 2000-10-28  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ldap/ldap.c
