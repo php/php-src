@@ -208,6 +208,12 @@ PHP_FUNCTION(shm_remove)
 	id = Z_LVAL_PP(arg_id);
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
+
+    if (!shm_list_ptr) {
+        php_error(E_WARNING, "The parameter is not a valid shm_indentifier");
+        RETURN_FALSE;
+    }
+
 	if(shmctl(shm_list_ptr->id,IPC_RMID,NULL)<0) {
 		php_error(E_WARNING, "shm_remove() failed for key 0x%x, id %i: %s", shm_list_ptr->key, id,strerror(errno));
 		RETURN_FALSE;
