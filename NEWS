@@ -1,6 +1,14 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
+- Fixed crash in iptcparse() if the supplied data was bogus. (Thies)
+- Fix return value for a failed snmpset() - now returns false  (Rasmus)
+- Add hostname:port support to snmp functions
+  (nbougues@axialys.net, Rasmus)
+- Fixed crash in iptcparse() if the supplied data was bogus. (Thies)
+- Fix return value for a failed snmpset() - now returns false  (Rasmus)
+- Add hostname:port support to snmp functions
+  (nbougues@axialys.net, Rasmus)
 - Add fdf_set_encoding() function (Masaki YATSU, Rasmus)
 - Fix return value for a failed snmpset() - now returns false  (Rasmus)
 - Add hostname:port support to snmp functions (nbougues@axialys.net, Rasmus)
