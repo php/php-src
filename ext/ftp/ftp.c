@@ -1204,7 +1204,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 
 	fclose(tmpfp);
 
-	if (!ftp_getresp(ftp) || ftp->resp != 226) {
+	if (!ftp_getresp(ftp) || ftp->resp != 226 || ftp->resp != 250) {
 		free(ret);
 		return NULL;
 	}
