@@ -61,8 +61,7 @@ ZEND_GET_MODULE(pdo_mysql)
  */
 PHP_MINIT_FUNCTION(pdo_mysql)
 {
-	php_pdo_register_driver(&pdo_mysql_driver);
-	return SUCCESS;
+	return php_pdo_register_driver(&pdo_mysql_driver);
 }
 /* }}} */
 
