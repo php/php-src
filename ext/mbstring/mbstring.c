@@ -931,8 +931,6 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 /* {{{ PHP_MINFO_FUNCTION(mbstring) */
 PHP_MINFO_FUNCTION(mbstring)
 {
-	char buf[32];
-
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
 	php_info_print_table_row(2, "Multibyte string engine", "libmbfl");
