@@ -58,40 +58,16 @@ static HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
 
 static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 {
-	zval **call_args[1];
 	zval *retval = NULL;
-	zval __get_name;
-	int call_result;
+	zend_class_entry *ce = Z_OBJCE_P(object);
 	
-	/* __get handler is called with two arguments:
-	   property name
-	   return value for the object (by reference)
+	/* __get handler is called with one argument:
+	      property name
 
 	   it should return whether the call was successfull or not
 	*/
-	INIT_PZVAL(&__get_name);
-	ZVAL_STRINGL(&__get_name, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1, 0);
+	zend_call_method_with_1_params(&object, ce, &ce->__get, ZEND_GET_FUNC_NAME, &retval, member);
 
-	call_args[0] = &member;
-
-	/* go call the __get handler */
-	call_result = call_user_function_ex(NULL,
-										&object,
-										&__get_name,
-										&retval,
-										1, call_args,
-										0, NULL TSRMLS_CC);
-
-	/* 
-	   call_result is if call_user_function gone OK.
-	   retval returns the value that is received
-	*/
-	
-
-	if (call_result == FAILURE) {
-		zend_error(E_ERROR, "Could not call __get handler for class %s", Z_OBJCE_P(object)->name);
-		return NULL;
-	}
 	if (retval) {
 		retval->refcount--;
 	}
@@ -101,43 +77,19 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 
 static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_DC)
 {
-	zval **call_args[2];
 	zval *retval = NULL;
-	zval __set_name;
-	int call_result;
 	int ret;
+	zend_class_entry *ce = Z_OBJCE_P(object);
 	
+	value->refcount++;
+
 	/* __set handler is called with two arguments:
-	   property name
-	   value to be set
+	     property name
+	     value to be set
 
 	   it should return whether the call was successfull or not
 	*/
-	INIT_PZVAL(&__set_name);
-	ZVAL_STRINGL(&__set_name, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1, 0);
-
-	call_args[0] = &member;
-	value->refcount++;
-	call_args[1] = &value;
-
-	/* go call the __set handler */
-	call_result = call_user_function_ex(NULL,
-										&object,
-										&__set_name,
-										&retval,
-										2, call_args,
-										0, NULL TSRMLS_CC);
-
-	/* 
-	   call_result is if call_user_function gone OK.
-	   retval shows if __get method went OK.
-	*/
-	
-
-	if (call_result == FAILURE) {
-		zend_error(E_ERROR, "Could not call __set handler for class %s", Z_OBJCE_P(object)->name);
-		return FAILURE;
-	}
+	zend_call_method_with_2_params(&object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
 
 	zval_ptr_dtor(&value);
 
@@ -525,18 +477,18 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval ***args;
 	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
-	zval method_name, method_args, __call_name;
+	zval method_name, method_args;
 	zval *method_name_ptr, *method_args_ptr;
-	zval **call_args[2];
 	zval *method_result_ptr = NULL;
-	int i, call_result;
+	zend_class_entry *ce = Z_OBJCE_P(this_ptr);
 	
-	args = (zval ***)emalloc(ZEND_NUM_ARGS() * sizeof(zval **));
+	method_args_ptr = &method_args;
+	INIT_PZVAL(method_args_ptr);
+	array_init(method_args_ptr);
 
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		efree(args);
+	if (zend_copy_parameters_array(ZEND_NUM_ARGS(), method_args_ptr TSRMLS_CC) == FAILURE) {
+		zval_dtor(method_args_ptr);
 		zend_error(E_ERROR, "Cannot get arguments for __call");
 		RETURN_FALSE;
 	}
@@ -545,50 +497,19 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	INIT_PZVAL(method_name_ptr);
 	ZVAL_STRING(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
 
-	method_args_ptr = &method_args;
-	INIT_PZVAL(method_args_ptr);
-	array_init(method_args_ptr);
-
-	for(i=0; i<ZEND_NUM_ARGS(); i++) {
-		zval_add_ref(args[i]);
-		add_next_index_zval(method_args_ptr, *args[i]);
-	}
-
-	efree(args);
-	
-	INIT_PZVAL(&__call_name);
-	ZVAL_STRINGL(&__call_name, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1, 0);
-	
 	/* __call handler is called with two arguments:
 	   method name
 	   array of method parameters
 
 	*/
-	call_args[0] = &method_name_ptr;
-	call_args[1] = &method_args_ptr;
+	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
-	/* go call the __call handler */
-	call_result = call_user_function_ex(NULL,
-										&this_ptr,
-										&__call_name,
-										&method_result_ptr,
-										2, call_args,
-										0, NULL TSRMLS_CC);
-
-	/* call_result is if call_user_function gone OK.
-	   method_result_ptr is the true result of the called method
-	*/
-	
 	if (method_result_ptr) {
 		*return_value = *method_result_ptr;
 		zval_copy_ctor(return_value);
 		zval_ptr_dtor(&method_result_ptr);
 	}
 	
-	if (call_result == FAILURE) {
-		zend_error(E_ERROR, "Could not call __call handler for class %s", Z_OBJCE_P(this_ptr)->name);
-	}
-
 	/* now destruct all auxiliaries */
 	zval_dtor(method_args_ptr);
 	zval_dtor(method_name_ptr);
