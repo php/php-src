@@ -243,10 +243,16 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
+  char *file_path = file_handle->opened_path;
+  if(!file_path) {
+	file_path = file_handle->filename;
+  }
+
 #ifndef ZTS
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
 			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
+		    file_path = file_handle->opened_path; 
 			break;
 		case ZEND_HANDLE_FD:
 			file_handle->opened_path = NULL;
@@ -309,7 +315,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	CG(ZFL) = new ZendFlexLexer;
 	CG(ZFL)->switch_streams(file_handle->handle.is, &cout);
 #endif
-	zend_set_compiled_filename(file_handle->filename);
+	zend_set_compiled_filename(file_path);
 	CG(zend_lineno) = 1;
 	return SUCCESS;
 }

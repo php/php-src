@@ -2040,6 +2040,7 @@ send_by_ref:
 								file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
 								file_handle.type = ZEND_HANDLE_FP;
 								file_handle.filename = inc_filename->value.str.val;
+								file_handle.opened_path = opened_path;
 								file_handle.free_filename = 0;
 								
 								if (file_handle.handle.fp) {
