@@ -385,6 +385,18 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 #endif
 /* }}} */
 
+#if HAVE_GD_BUNDLED
+#define PHP_GD_VERSION_STRING "bundled (2.0.12 compatible)"
+#elif HAVE_LIBGD20
+#define PHP_GD_VERSION_STRING "2.0 or higher"
+#elif HAVE_GDIMAGECOLORRESOLVE
+#define PHP_GD_VERSION_STRING "1.6.2 or higher"
+#elif HAVE_LIBGD13
+#define PHP_GD_VERSION_STRING "between 1.3 and 1.6.1"
+#else
+#define PHP_GD_VERSION_STRING "1.2"
+#endif
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(gd)
@@ -394,17 +406,7 @@ PHP_MINFO_FUNCTION(gd)
 
 	/* need to use a PHPAPI function here because it is external module in windows */
 
-#if HAVE_GD_BUNDLED
-	php_info_print_table_row(2, "GD Version", "bundled (2.0.11 compatible)");
-#elif HAVE_LIBGD20
-	php_info_print_table_row(2, "GD Version", "2.0 or higher");
-#elif HAVE_GDIMAGECOLORRESOLVE
-	php_info_print_table_row(2, "GD Version", "1.6.2 or higher");
-#elif HAVE_LIBGD13
-	php_info_print_table_row(2, "GD Version", "between 1.3 and 1.6.1");
-#else
-	php_info_print_table_row(2, "GD Version", "1.2");
-#endif
+	php_info_print_table_row(2, "GD Version", PHP_GD_VERSION_STRING);
 
 #ifdef ENABLE_GD_TTF
 	php_info_print_table_row(2, "FreeType Support", "enabled");
@@ -456,17 +458,7 @@ PHP_FUNCTION(gd_info)
 
 	array_init(return_value);
 
-#if HAVE_GD_BUNDLED
-	add_assoc_string(return_value, "GD Version", "bundled (2.0 compatible)", 1);
-#elif HAVE_LIBGD20
-	add_assoc_string(return_value, "GD Version", "2.0 or higher", 1);
-#elif HAVE_GDIMAGECOLORRESOLVE
-	add_assoc_string(return_value, "GD Version", "1.6.2 or higher", 1);
-#elif HAVE_LIBGD13
-	add_assoc_string(return_value, "GD Version", "between 1.3 and 1.6.1", 1);
-#else
-	add_assoc_string(return_value, "GD Version", "1.2", 1);
-#endif
+	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING, 1);
 
 #ifdef ENABLE_GD_TTF
 	add_assoc_bool(return_value, "FreeType Support", 1);
