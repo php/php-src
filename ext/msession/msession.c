@@ -53,11 +53,12 @@
 /* this value in Zend/zend_modules.h, and set appropriately */
 
 #if (ZEND_MODULE_API_NO ==  20001222)
-#define PHP_4_0_API
+#define PHP_4_0
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
+#define HAVE_PHP_SESSION
 #elif (ZEND_MODULE_API_NO >= 20010901)
-#define PHP_4_1_API
+#define PHP_4_1
 #endif
 
 /*
@@ -121,7 +122,7 @@ function_entry msession_functions[] = {
 };
 
 zend_module_entry msession_module_entry = {
-#ifdef PHP_4_1_API
+#ifdef PHP_4_1
 	STANDARD_MODULE_HEADER,
 #endif
 	"msession",
@@ -131,7 +132,7 @@ zend_module_entry msession_module_entry = {
 	PHP_RINIT(msession),
 	PHP_RSHUTDOWN(msession),
 	PHP_MINFO(msession),
-#ifdef PHP_4_1_API
+#ifdef PHP_4_1
 	NO_VERSION_YET,
 #endif
 	STANDARD_MODULE_PROPERTIES
@@ -747,10 +748,10 @@ PHP_FUNCTION(msession_set_array)
 	HashPosition pos;
 	zval **entry;
 	char *key;
-#ifdef PHP_4_1_API
+#ifdef PHP_4_1
 	uint keylen;
 #endif
-#ifdef PHP_4_0_API
+#ifdef PHP_4_0
 	ulong keylen;
 #endif
 	ulong numndx;
