@@ -14,6 +14,7 @@ bottom of this file for instructions.
 INSTALLATION WITH THE ZEUS WEB SERVER:
 --Please see the 'README.Zeus' file included in this distribution
 
+
 QUICK INSTALL (DSO)
 
 For this to work your Apache httpd must have mod_so enabled.
@@ -35,6 +36,9 @@ $ make install
 If you get an error telling you that the apxs script could not be found,
 look for it on your system and if you find it, provide the full path to it
 as: --with-apxs=/path/to/apxs
+
+Next you must copy php.ini-dist to the appropriate place (normally
+/usr/local/lib/php.ini) and edit it as necessary to set PHP options.
 
 The only thing left to do is to edit your httpd.conf file and make sure the
 PHP 4 mime type is there and uncommented.  You need a line that looks like
@@ -64,10 +68,10 @@ $ cd ../apache_1.3.x
 $ ./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
  (The above line is correct!  Yes, we know libphp4.a does not exist at this
   stage.  It isn't supposed to.  It will be created.)
-make
+$ make
  (you should now have an httpd binary which you can copy to your Apache bin dir)
-cd ../php-4.0.x
-cp php.ini-dist /usr/local/lib/php.ini
+$ cd ../php-4.0.x
+$ cp php.ini-dist /usr/local/lib/php.ini
 You can edit /usr/local/lib/php.ini file to set PHP options.
 Edit your httpd.conf or srm.conf file and add:
   AddType application/x-httpd-php .php
@@ -263,14 +267,12 @@ Installing PHP can be done in four simple steps:
    Note!  If a line has a # at the beginning, then it is commented out
    and you need to remove the # for that line to take effect.
 
+   Finally you need to copy php.ini-dist to the appropriate place
+   (normally /usr/local/lib/php.ini) and edit if necessary.
+
    Once you have made these changes you should be ready to restart your
    server and try it out.  Type: apachectl restart
    
-   The create a test file named test.php in your web tree somewhere and
-   put some test PHP tags in it.  <?phpinfo()?> is a good first test.
-   This tag tells PHP to do a braindump and tells you all sorts of things
-   about itself.  
-
 4b. Setting up the server. (Static Module)
    
    You should now have a new httpd binary.  Shut down your existing server,
@@ -289,12 +291,24 @@ Installing PHP can be done in four simple steps:
    Any file ending in .phps will now be displayed with full colour syntax
    highlighting instead of being executed.
 
-   When you are finished making changes to your httpd.conf file, you can
-   start up your server.  Note that on some older server setups, the 
-   AddType lines are in the conf/srm.conf file instead of conf/httpd.conf.
+   Note that on some older server setups, the AddType lines are in the
+   conf/srm.conf file instead of conf/httpd.conf.
 
    Note!  If a line has a # at the beginning, then it is commented out
    and you need to remove the # for that line to take effect.
+
+   When you are finished making changes to your httpd.conf file, you need
+   to copy php.ini-dist to the appropriate place (normally
+   /usr/local/lib/php.ini) and edit if necessary. You can then
+   start up your server.
+
+5. Testing it all worked
+
+   Create a test file named test.php in your web tree somewhere and
+   put some test PHP tags in it.  <?phpinfo()?> is a good first test.
+   This tag tells PHP to do a braindump and tells you all sorts of things
+   about itself.  
+
 
 WHY DISABLING -fPIC WORKS ON LINUX
 
