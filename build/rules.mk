@@ -30,7 +30,7 @@ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EX
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@
-mkinstalldirs = $(top_srcdir)/build/shtool mkdir -f -p
+mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
 SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@

@@ -12,8 +12,7 @@ java.c : ../../ext/java/java.c
 	@cp ../../ext/java/java.c .
 
 phpsrvlt.jar : servlet.java ../../ext/java/reflect.java
-	@test -d net || mkdir net
-	@test -d net/php || mkdir net/php
+	$(mkinstalldirs) net/php
 	@echo library=php4>net/php/reflect.properties
 	@echo library=php4>net/php/servlet.properties
 	@cp formatter.java net/php
