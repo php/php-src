@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26488 (Missing declaration of CRTSCTS in ext/dio/dio.c). (Jani)
 - Fixed bug #26467 (flock() does not force the "wouldblock" parameter to be 
   passed by reference). (Wez)
 - Fixed bug #26463 (Incorrect handling of semicolons after heredoc). (Ilia)
