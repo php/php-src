@@ -161,16 +161,26 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 		case IS_NULL:
 			TRACE_APPEND_STR("NULL, ");
 			break;
-		case IS_STRING:
+		case IS_STRING: {
+			int l_added;
 			TRACE_APPEND_CHR('\'');
 			if (Z_STRLEN_PP(arg) > 15) {
 				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
 				TRACE_APPEND_STR("...', ");
+				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
 			} else {
-				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+				l_added = Z_STRLEN_PP(arg);
+				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), l_added);
 				TRACE_APPEND_STR("', ");
+				l_added += 3 + 1;
+			}
+			while (--l_added) {
+				if ((*str)[*len - l_added] < 32) {
+					(*str)[*len - l_added] = '?';
+				}
 			}
 			break;
+		}
 		case IS_BOOL:
 			if (Z_LVAL_PP(arg)) {
 				TRACE_APPEND_STR("true, ");
