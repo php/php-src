@@ -18,7 +18,7 @@
 // +----------------------------------------------------------------------+
 //
 
-require_once "PEAR.php";
+require_once 'PEAR.php';
 
 class PEAR_Common extends PEAR
 {
@@ -74,6 +74,37 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ mkDirHier()
+
+    function mkDirHier($dir)
+    {
+        $dirstack = array();
+        while (!@is_dir($dir) && $dir != DIRECTORY_SEPARATOR) {
+            array_unshift($dirstack, $dir);
+            $dir = dirname($dir);
+        }
+        while ($newdir = array_shift($dirstack)) {
+            if (mkdir($newdir, 0777)) {
+                $this->log(2, "created dir $newdir");
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // }}}
+    // {{{ log()
+
+    function log($level, $msg)
+    {
+        if ($this->debug >= $level) {
+            print "$msg\n";
+        }
+    }
+
+    // }}}
+
     // {{{ _element_start()
 
     function _element_start($xp, $name, $attribs)
