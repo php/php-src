@@ -23,6 +23,7 @@ PHP 4                                                                      NEWS
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #22402 (opening of ftp for read/write could fail due to invalid
   return code handling). (Ilia)
+- Fixed bug #22384 (FNM_CASEFOLD is not available). (Hartmut)
 - Fixed bug #22382 (fgetcsv() did not handle \" correctly). (Ilia)
 - Fixed bug #22376 (wrong httpd.conf modified when using INSTALL_ROOT). (Jani)
 - Fixed bug #22363 (combinations of fwrite(), fread() and fseek() produce
