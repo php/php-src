@@ -1004,10 +1004,12 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 		MYSQL_RES *mysql_result;
 
 		mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);
-		if (mysql_result && type==le_result && !mysql_eof(mysql_result)) {
-			php_error(E_NOTICE, "Called %s() without first fetching all rows from a previous unbuffered query",
-						get_active_function_name(TSRMLS_C));
-			while (mysql_fetch_row(mysql_result));
+		if (mysql_result && type==le_result) {
+			if (!mysql_eof(mysql_result)) {
+				php_error(E_NOTICE, "Called %s() without first fetching all rows from a previous unbuffered query",
+							get_active_function_name(TSRMLS_C));
+				while (mysql_fetch_row(mysql_result));
+			}
 			zend_list_delete(mysql->active_result_id);
 			mysql->active_result_id = 0;
 		}
