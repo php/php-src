@@ -276,7 +276,8 @@ class PEAR_Registry extends PEAR
             @ini_restore('track_errors');
 
             if (!is_resource($this->lock_fp)) {
-                return $this->raiseError("could not create lock file: $php_errormsg");
+                return $this->raiseError("could not create lock file" .
+                                         (isset($php_errormsg) ? ": " . $php_errormsg : ""));
             }
             if (!(int)flock($this->lock_fp, $mode)) {
                 switch ($mode) {
