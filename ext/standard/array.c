@@ -39,6 +39,7 @@
 #include "php_globals.h"
 #include "php_array.h"
 #include "basic_functions.h"
+#include "php_string.h"
 
 #ifdef ZTS
 int array_globals_id;
@@ -252,6 +253,98 @@ static int array_reverse_data_compare(const void *a, const void *b)
 {
 	return array_data_compare(a,b)*-1;
 }
+
+static int array_natural_general_compare(const void *a, const void *b, int fold_case)
+{
+	Bucket *f, *s;
+	zval *fval, *sval;
+	zval first, second;
+	int result;
+ 
+	f = *((Bucket **) a);
+	s = *((Bucket **) b);
+ 
+	fval = *((pval **) f->pData);
+	sval = *((pval **) s->pData);
+	first = *fval;
+	second = *sval;
+	if (fval->type != IS_STRING) {
+		zval_copy_ctor(&first);
+		convert_to_string(&first);
+	}
+	if (sval->type != IS_STRING) {
+		zval_copy_ctor(&first);
+		convert_to_string(&second);
+	}
+
+	result = strnatcmp_ex(first.value.str.val, first.value.str.len,
+						  second.value.str.val, second.value.str.len, fold_case);
+
+	if (fval->type != IS_STRING)
+		zval_dtor(&first);
+	if (sval->type != IS_STRING)
+		zval_dtor(&second);
+	
+	return result;
+}
+
+static int array_natural_compare(const void *a, const void *b)
+{
+	return array_natural_general_compare(a, b, 0);
+}
+
+static int array_natural_case_compare(const void *a, const void *b)
+{
+	return array_natural_general_compare(a, b, 1);
+}
+
+static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
+{
+	zval **array;
+	HashTable *target_hash;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error(E_WARNING, "Wrong datatype in %s() call",
+				  get_active_function_name());
+		return;
+	}
+
+	if (fold_case) {
+		if (zend_hash_sort(target_hash, qsort, array_natural_case_compare, 0) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_hash_sort(target_hash, qsort, array_natural_compare, 0) == FAILURE) {
+			return;
+		}
+	}
+
+	RETURN_TRUE;
+}
+
+
+/* {{{ proto void natsort(array array_arg)
+   Sort an array using natural sort */
+PHP_FUNCTION(natsort)
+{
+	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+
+/* {{{ proto void natcasesort(array array_arg)
+   Sort an array using case-insensitive natural sort */
+PHP_FUNCTION(natcasesort)
+{
+	php_natsort(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 
 /* {{{ proto void asort(array array_arg)
    Sort an array and maintain index association */
