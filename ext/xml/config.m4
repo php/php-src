@@ -5,9 +5,9 @@ dnl
 AC_C_BIGENDIAN
 
 if test "$ac_cv_c_bigendian" = "yes"; then
-  order=21
+  order=4321
 else
-  order=12
+  order=1234
 fi
 
 PHP_ARG_ENABLE(xml,whether to enable XML support,
@@ -20,8 +20,11 @@ if test "$PHP_XML" = "yes"; then
   AC_DEFINE(HAVE_LIBEXPAT,  1, [ ])
 
   if test "$PHP_EXPAT_DIR" = "no"; then
-    AC_DEFINE(HAVE_LIBEXPAT_BUNDLED, 1, [ ])
-    PHP_NEW_EXTENSION(xml, xml.c expat/xmlparse.c expat/xmlrole.c expat/xmltok.c, $ext_shared,,-DXML_BYTE_ORDER=$order)
+    AC_DEFINE(HAVE_LIBEXPAT_BUNDLED, 1, [Bundled libexpat is used.])
+    AC_DEFINE(XML_NS, 1, [Define to make XML Namespaces functionality available.])
+    AC_DEFINE(XML_DTD, 1, [Define to make parameter entity parsing functionality available.])
+    AC_DEFINE(XML_CONTEXT_BYTES, 1024, [Define to specify how much context to retain around the current parse point.])
+    PHP_NEW_EXTENSION(xml, xml.c expat/xmlparse.c expat/xmlrole.c expat/xmltok.c, $ext_shared,,-DBYTEORDER=$order)
     PHP_ADD_INCLUDE($ext_srcdir/expat)
     PHP_ADD_BUILD_DIR($ext_builddir/expat)
   else

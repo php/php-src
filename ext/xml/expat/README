@@ -1,7 +1,7 @@
 
-			Expat, Release 1.95.2
+                        Expat, Release 1.95.6
 
-This is expat, a C library for parsing XML, written by James Clark.
+This is Expat, a C library for parsing XML, written by James Clark.
 Expat is a stream-oriented XML parser.  This means that you register
 handlers with the parser before starting the parse.  These handlers
 are called when the parser discovers the associated structures in the
@@ -17,15 +17,26 @@ the terms of the License contained in the file COPYING distributed
 with this package.  This license is the same as the MIT/X Consortium
 license.
 
-Versions of expat that have an odd minor version (the middle number in
+Versions of Expat that have an odd minor version (the middle number in
 the release above), are development releases and should be considered
 as beta software.  Releases with even minor version numbers are
 intended to be production grade software.
 
-To build expat, you first run the configuration shell script in the
-top level distribution directory:
+If you are building Expat from a check-out from the CVS repository,
+you need to run a script that generates the configure script using the
+GNU autoconf and libtool tools.  To do this, you need to have
+autoconf 2.52 or newer and libtool 1.4 or newer.  Run the script like
+this:
 
-	./configure
+        ./buildconf.sh
+
+Once this has been done, follow the same instructions as for building
+from a source distribution.
+
+To build Expat from a source distribution, you first run the
+configuration shell script in the top level distribution directory:
+
+        ./configure
 
 There are many options which you may provide to configure (which you
 can discover by running configure with the --help option).  But the
@@ -36,19 +47,41 @@ xmlwf into /usr/local/bin.  If, for example, you'd prefer to install
 into /home/me/mystuff/lib, /home/me/mystuff/include, and
 /home/me/mystuff/bin, you can tell configure about that with:
 
-	./configure --prefix=/home/me/mystuff
+        ./configure --prefix=/home/me/mystuff
 
 After running the configure script, the "make" command will build
 things and "make install" will install things into their proper
 location.  Note that you need to have write permission into the
 directories into which things will be installed.
 
-When building for use with C++, you may need to add additional
-compiler flags to support proper interaction with exceptions.  This
-can be done by setting the CFLAGS environment variable.  For example,
-when using GCC, you can use:
+If you are interested in building Expat to provide document
+information in UTF-16 rather than the default UTF-8, following these
+instructions:
 
-	CFLAGS=-fexceptions ./configure
+        1. For UTF-16 output as unsigned short (and version/error
+           strings as char), run:
+
+               ./configure CPPFLAGS=-DXML_UNICODE
+
+           For UTF-16 output as wchar_t (incl. version/error strings),
+           run:
+
+               ./configure CFLAGS="-g -O2 -fshort-wchar" \
+                           CPPFLAGS=-DXML_UNICODE_WCHAR_T
+
+        2. Edit the MakeFile, changing:
+
+               LIBRARY = libexpat.la
+
+           to:
+
+               LIBRARY = libexpatw.la
+
+           (Note the additional "w" in the library name.)
+
+        3. Run "make buildlib" (which builds the library only).
+
+        4. Run "make installlib" (which installs the library only).
 
 Note for Solaris users:  The "ar" command is usually located in
 "/usr/ccs/bin", which is not in the default PATH.  You will need to
@@ -57,16 +90,23 @@ to GNU make (the "make" found in /usr/ccs/bin does not seem to work
 properly -- appearantly it does not understand .PHONY directives).  If
 you're using ksh or bash, use this command to build:
 
-	PATH=/usr/ccs/bin:$PATH make
+        PATH=/usr/ccs/bin:$PATH make
+
+When using Expat with a project using autoconf for configuration, you
+can use the probing macro in conftools/expat.m4 to determine how to
+include Expat.  See the comments at the top of that file for more
+information.
 
 A reference manual is available in the file doc/reference.html in this
 distribution.
 
-The homepage for this project is http://expat.sourceforge.net/.  There
+The homepage for this project is http://www.libexpat.org/.  There
 are links there to connect you to the bug reports page.  If you need
 to report a bug when you don't have access to a browser, you may also
-send a bug report by email to expat-bugs@lists.sourceforge.net.
+send a bug report by email to expat-bugs@mail.libexpat.org.
 
 Discussion related to the direction of future expat development takes
-place on expat-discuss@lists.sourceforge.net.  Archives of this list
-may be found at http://www.geocrawler.com/redir-sf.php3?list=expat-discuss.
+place on expat-discuss@mail.libexpat.org.  Archives of this list and
+other Expat-related lists may be found at:
+
+        http://mail.libexpat.org/mailman-21/listinfo/
