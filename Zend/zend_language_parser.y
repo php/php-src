@@ -169,7 +169,6 @@ inner_statement_list:
 inner_statement:
 		statement
 	|	function_declaration_statement
-	|	class_declaration_statement
 ;
 
 
