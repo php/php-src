@@ -63,6 +63,7 @@ PHP_FUNCTION(mysql_num_rows);
 PHP_FUNCTION(mysql_num_fields);
 PHP_FUNCTION(mysql_fetch_row);
 PHP_FUNCTION(mysql_fetch_array);
+PHP_FUNCTION(mysql_fetch_assoc);
 PHP_FUNCTION(mysql_fetch_object);
 PHP_FUNCTION(mysql_data_seek);
 PHP_FUNCTION(mysql_fetch_lengths);

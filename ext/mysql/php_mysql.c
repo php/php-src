@@ -108,6 +108,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_num_fields,							NULL)
 	PHP_FE(mysql_fetch_row,								NULL)
 	PHP_FE(mysql_fetch_array,							NULL)
+	PHP_FE(mysql_fetch_assoc,							NULL)
 	PHP_FE(mysql_fetch_object,							NULL)
 	PHP_FE(mysql_data_seek,								NULL)
 	PHP_FE(mysql_fetch_lengths,							NULL)
@@ -1352,13 +1353,21 @@ PHP_FUNCTION(mysql_fetch_object)
 
 
 /* {{{ proto array mysql_fetch_array(int result [, int result_type])
-   Fetch a result row as an associative array */
+   Fetch a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(mysql_fetch_array)
 {
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
+
+/* {{{ proto array mysql_fetch_assoc(int result)
+   Fetch a result row as an associative array */
+PHP_FUNCTION(mysql_fetch_assoc)
+{
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC);
+}
+/* }}} */
 
 /* {{{ proto int mysql_data_seek(int result, int row_number)
    Move internal result pointer */
