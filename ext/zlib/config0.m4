@@ -36,17 +36,12 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
     AC_MSG_ERROR(Cannot find libz)
   fi
 
-  case $ZLIB_DIR in
-  /usr) ac_extra= ;; 
-  *) ac_extra=-L$ZLIB_DIR/lib ;;
-  esac
-
   PHP_CHECK_LIBRARY(z, gzgets, [
     AC_DEFINE(HAVE_ZLIB,1,[ ]) 
   ],[
     AC_MSG_ERROR(ZLIB extension requires zlib >= 1.0.9)
   ],[
-    $ac_extra
+    -L$ZLIB_DIR/lib
   ])
 
   PHP_ADD_LIBPATH($ZLIB_DIR/lib, ZLIB_SHARED_LIBADD)
