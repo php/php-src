@@ -1,3 +1,46 @@
+2001-07-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php: (PEAR DB) some doc fixes
+
+    * pear/DB/storage.php: (PEAR DB_storage) fixed validation bug
+
+2001-07-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/var.c: Update cast
+
+    * main/main.c: Fix warning
+
+    * ext/imap/php_imap.c: Fix an inline
+
+    * ext/com/conversion.c
+      ext/java/java.c
+      ext/standard/file.c: Get rid of var_uninit()
+
+    * ext/com/COM.c
+      ext/standard/var.c
+      sapi/cgi/cgi_main.c
+      NEWS:
+    Improved interactive mode - it is now available in all builds, without any significant slowdown
+
+    * ext/standard/scanf.c
+      ext/standard/scanf.h: Fix an inline
+
+    * main/fopen_wrappers.c:
+    Fix a crash with the new check-in-cwd code.  It will now work only
+    with files which are included in runtime, and not files which are opened at startup (e.g., php.ini)
+
+    * main/main.c: 2nd bug in the same line
+
+    * main/main.c: remove bogus &
+
+    * main/main.c: Make bailouts valid at request_startup
+
+2001-07-15  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Fixed memory leaks in ldap_get_entries() and ldap_get_dn() when using
+    RFC1823 API
+
 2001-07-13  Boian Bonev  <boian@bonev.com>
 
     * ext/vpopmail/php_vpopmail.c:
