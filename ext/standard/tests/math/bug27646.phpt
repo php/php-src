@@ -2,6 +2,7 @@
 Bug #27646 (Cannot serialize/unserialize non-finite numeric values)
 --FILE--
 <?php
+set_time_limit(5);
 
 $f=12.3;
 var_dump($f);
