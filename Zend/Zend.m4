@@ -177,18 +177,13 @@ AC_C_INLINE
 
 AC_SUBST(INLINE_CFLAGS)
 
-])
-
-AC_DEFUN(LIBZEND_CPLUSPLUS_CHECKS,[
-
-])
 
 dnl test and set the alignment define for ZEND_MM
 dnl this also does the logarithmic test for ZEND_MM.
-
 AC_MSG_CHECKING(for MM alignment and log values)
 
-AC_TRY_RUN([#include <stdio.h>
+AC_TRY_RUN([
+#include <stdio.h>
 
 typedef union _mm_align_test {
   void *ptr;
@@ -196,35 +191,42 @@ typedef union _mm_align_test {
   long lng;
 } mm_align_test;
 
-int main() {
-
 #if (defined (__GNUC__) && __GNUC__ >= 2)
 #define ZEND_MM_ALIGNMENT (__alignof__ (mm_align_test))
 #else
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
-int i = ZEND_MM_ALIGNMENT;
-int zeros = 0;
-FILE *f = fopen("conftest.zend", "w");
+int main()
+{
+  int i = ZEND_MM_ALIGNMENT;
+  int zeros = 0;
+  FILE *fp;
 
-while (i & ~0x1) {
-  zeros++;
-  i = i >> 1;
+  while (i & ~0x1) {
+    zeros++;
+    i = i >> 1;
+  }
+
+  fp = fopen("conftest.zend", "w");
+  fprintf(fp, "%d %d", ZEND_MM_ALIGNMENT, zeros);  
+  fclose(fp);
+
+  exit(0);
 }
-
-fprintf(f, "%d %d", ZEND_MM_ALIGNMENT, zeros);  
-
- exit(0);
-}],zend_mm_test=true,zend_mm_test=false,zend_mm_test=false)
-
-if test $zend_mm_test = true; then
-
-	LIBZEND_MM_ALIGN=`cat ./conftest.zend | cut -d ' ' -f 1`
-	LIBZEND_MM_ALIGN_LOG2=`cat ./conftest.zend | cut -d ' ' -f 2`
-
-	AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
-	AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ]) 
-fi;
+], [
+  LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`
+  LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ]) 
+])
 
 AC_MSG_RESULT(done)
+
+])
+
+
+AC_DEFUN(LIBZEND_CPLUSPLUS_CHECKS,[
+
+])
+
