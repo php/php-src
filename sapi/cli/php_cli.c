@@ -156,7 +156,7 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	_php_import_environment_variables(track_vars_array TSRMLS_CC);
 
 	/* Build the special-case PHP_SELF variable for the CLI version */
 	php_register_variable("PHP_SELF", php_self, track_vars_array TSRMLS_CC);
