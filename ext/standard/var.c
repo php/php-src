@@ -50,7 +50,15 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+		if (va_arg(args, int) && hash_key->arKey[0] == '\0') { 
+			/* XXX: perphaps when we are inside the class we should permit access to 
+			 * private & protected values
+			 */
+			return 0;
+		}
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
 	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
@@ -107,7 +115,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		efree(class_name);
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
@@ -166,7 +174,15 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+		/* XXX: perphaps when we are inside the class we should permit access to 
+		 * private & protected values
+		 */
+		if (va_arg(args, int) && hash_key->arKey[0] == '\0') {
+			return 0;
+		}
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
 	php_debug_zval_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
@@ -213,7 +229,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		efree(class_name);
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level);
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
@@ -271,11 +287,20 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		char *key;
-		int key_len;
-		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
-		php_printf("%*c'%s' => ", level + 1, ' ', key);
-		efree(key);
+		/* XXX: perphaps when we are inside the class we should permit access to 
+		 * private & protected values
+		 */
+		if (va_arg(args, int) && hash_key->arKey[0] == '\0') {
+			return 0;
+		} else {
+			char *key;
+			int key_len;
+			key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
+			php_printf("%*c'", level + 1, ' ');
+			PHPWRITE(key, key_len);
+			php_printf("' => ");
+			efree(key);
+		}
 	}
 	php_var_export(zv, level + 2 TSRMLS_CC);
 	PUTS (",\n");
@@ -331,7 +356,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		PUTS ("array (\n");
-		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_export, 1, level);
+		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_export, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
