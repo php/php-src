@@ -59,7 +59,7 @@ typedef struct _spl_dual_it_object {
 		zend_object_iterator *iterator;
 	} inner;
 	struct {
-		zval                 **data;
+		zval                 *data;
 		char                 *str_key;
 		uint                 str_key_len;
 		ulong                int_key;
