@@ -82,6 +82,14 @@
 # else
 #  define DL_FETCH_SYMBOL			dlsym
 # endif
+# define DL_ERROR					dlerror
+# define DL_HANDLE					void *
+# define ZEND_EXTENSIONS_SUPPORT	1
+#elif defined(HAVE_MACH_O_DYLD_H)
+# define DL_LOAD(libname)			zend_mh_bundle_load(libname)
+# define DL_UNLOAD(handle)			zend_mh_bundle_unload(handle)
+# define DL_FETCH_SYMBOL(h,s)		zend_mh_bundle_symbol(h,s)
+# define DL_ERROR					zend_mh_bundle_error
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1
 #elif defined(ZEND_WIN32)
