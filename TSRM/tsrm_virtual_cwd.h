@@ -163,7 +163,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_DC);
 #endif
 
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
 
 typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
