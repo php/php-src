@@ -152,7 +152,7 @@ PHP_FUNCTION(ovrimos_close)
 /* }}} */
 
 
-/* {{{ proto int ovrimos_longreadlen(int result_id, int length)
+/* {{{ proto bool ovrimos_longreadlen(int result_id, int length)
    Handle LONG columns */
 PHP_FUNCTION(ovrimos_longreadlen)
 {
@@ -278,7 +278,7 @@ PHP_FUNCTION(ovrimos_prepare)
 /*
  * Execute prepared SQL statement. Supports only input parameters.
  */
-/* {{{ proto int ovrimos_execute(int result_id [, array parameters_array])
+/* {{{ proto bool ovrimos_execute(int result_id [, array parameters_array])
    Execute a prepared statement */
 PHP_FUNCTION(ovrimos_execute)
 {
@@ -601,7 +601,7 @@ static void column_to_string(SQLS stmt, int i, char *buffer, int *len, PSTATEMEN
 }
 /* }}} */
 
-/* {{{ proto int ovrimos_fetch_into(int result_id, array result_array [, string how, [int rownumber]])
+/* {{{ proto bool ovrimos_fetch_into(int result_id, array result_array [, string how [, int rownumber]])
    Fetch one result row into an array
    how: 'Next' (default), 'Prev', 'First', 'Last', 'Absolute'
    */
@@ -727,7 +727,7 @@ PHP_FUNCTION(ovrimos_fetch_into)
 
 /* }}} */
 
-/* {{{ proto int ovrimos_fetch_row(int result_id [, int how, [int row_number]])
+/* {{{ proto bool ovrimos_fetch_row(int result_id [, int how [, int row_number]])
    how: 'Next' (default), 'Prev', 'First', 'Last', 'Absolute'
    Fetch a row */
 PHP_FUNCTION(ovrimos_fetch_row)
@@ -936,7 +936,7 @@ PHP_FUNCTION(ovrimos_result_all)
 
 /* }}} */
 
-/* {{{ proto int ovrimos_free_result(int result_id)
+/* {{{ proto bool ovrimos_free_result(int result_id)
    Free resources associated with a result */
 PHP_FUNCTION(ovrimos_free_result)
 {
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(ovrimos_field_name)
 
 /* }}} */
 
-/* {{{ proto string ovrimos_field_type(int result_id, int field_number)
+/* {{{ proto int ovrimos_field_type(int result_id, int field_number)
    Get the datatype of a column */
 PHP_FUNCTION(ovrimos_field_type)
 {
@@ -1162,7 +1162,7 @@ PHP_FUNCTION(ovrimos_autocommit)
 /* }}} */
 #endif
 
-/* {{{ proto int ovrimos_commit(int connection_id)
+/* {{{ proto bool ovrimos_commit(int connection_id)
    Commit an ovrimos transaction */
 PHP_FUNCTION(ovrimos_commit)
 {
@@ -1193,7 +1193,7 @@ PHP_FUNCTION(ovrimos_commit)
 
 /* }}} */
 
-/* {{{ proto int ovrimos_rollback(int connection_id)
+/* {{{ proto bool ovrimos_rollback(int connection_id)
    Rollback a transaction */
 PHP_FUNCTION(ovrimos_rollback)
 {

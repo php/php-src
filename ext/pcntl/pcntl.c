@@ -222,7 +222,7 @@ PHP_FUNCTION(pcntl_alarm)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_waitpid(long pid, long status, long options)
+/* {{{ proto int pcntl_waitpid(int pid, int &status, int options)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
@@ -246,7 +246,7 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifexited(long status) 
+/* {{{ proto bool pcntl_wifexited(int status) 
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
@@ -266,7 +266,7 @@ PHP_FUNCTION(pcntl_wifexited)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifstopped(long status) 
+/* {{{ proto bool pcntl_wifstopped(int status) 
    Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
@@ -286,7 +286,7 @@ PHP_FUNCTION(pcntl_wifstopped)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifsignaled(long status) 
+/* {{{ proto bool pcntl_wifsignaled(int status) 
    Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
 {
@@ -306,7 +306,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wexitstatus(long status) 
+/* {{{ proto int pcntl_wexitstatus(int status) 
    Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
@@ -329,7 +329,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wtermsig(long status) 
+/* {{{ proto int pcntl_wtermsig(int status) 
    Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
@@ -350,7 +350,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wstopsig(long status) 
+/* {{{ proto int pcntl_wstopsig(int status) 
    Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
 {
@@ -466,7 +466,7 @@ PHP_FUNCTION(pcntl_exec)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_signal(long signo, callback handle, [bool restart_syscalls])
+/* {{{ proto bool pcntl_signal(int signo, callback handle [, bool restart_syscalls])
    Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
@@ -511,7 +511,7 @@ PHP_FUNCTION(pcntl_signal)
 /* }}} */
 
 #ifdef HAVE_GETPRIORITY
-/* {{{ proto int pcntl_getpriority(int pid, [int process_identifier]])
+/* {{{ proto int pcntl_getpriority([int pid [, int process_identifier]])
    Get the priority of any process */
 PHP_FUNCTION(pcntl_getpriority)
 {
@@ -549,7 +549,7 @@ PHP_FUNCTION(pcntl_getpriority)
 #endif
 
 #ifdef HAVE_SETPRIORITY
-/* {{{ proto bool pcntl_setpriority(int priority, [int pid, [int process_identifier]])
+/* {{{ proto bool pcntl_setpriority(int priority [, int pid [, int process_identifier]])
    Change the priority of any process */
 PHP_FUNCTION(pcntl_setpriority)
 {
