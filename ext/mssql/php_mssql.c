@@ -797,9 +797,12 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			ZVAL_STRINGL(result, data, length, 1); 
 			break;
 		}
+		case SQLMONEY4:
 		case SQLFLT4:
 			ZVAL_DOUBLE(result, (double) floatcol4(offset));
 			break;
+		case SQLMONEY:
+		case SQLMONEYN:
 		case SQLFLT8:
 			ZVAL_DOUBLE(result, (double) floatcol8(offset));
 			break;
@@ -891,8 +894,19 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 
 		if ((column_type != SQLDATETIME && column_type != SQLDATETIM4) || MS_SQL_G(datetimeconvert)) {
 
-			if (column_type == SQLDATETIM4) res_length += 14;
-			if (column_type == SQLDATETIME) res_length += 10;
+			switch (column_type) {
+				case SQLDATETIM4 :
+					res_length += 14;
+					break;
+				case SQLDATETIME :
+					res_length += 10;
+					break;
+				case SQLMONEY :
+				case SQLMONEY4 :
+				case SQLMONEYN :
+					res_length += 5;
+					break;
+			}
 			
 			res_buf = (unsigned char *) emalloc(res_length+1);
 			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR, res_buf, -1);
@@ -947,6 +961,9 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 						case SQLFLT4:
 						case SQLFLT8:
 						case SQLFLTN:
+						case SQLMONEY4:
+						case SQLMONEY:
+						case SQLMONEYN:
 							convert_to_double_ex(&bind->zval);
 							Z_DVAL_P(bind->zval) = *((double *)(dbretdata(mssql_ptr->link,i)));
 							break;
