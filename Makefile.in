@@ -73,7 +73,9 @@ LIBOBJS=@LIBOBJS@
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \
        safe_mode.c fopen-wrappers.c php3_realpath.c alloca.c output.c \
-       php_ini.c SAPI.c cgi_main.c rfc1867.c dlist.c php_content_types.c
+       php_ini.c SAPI.c cgi_main.c rfc1867.c dlist.c php_content_types.c \
+       aolserver.c
+
 OBJS = $(SOURCE:.c=.o) $(LIBOBJS)
 PHPLIBS = -Llibzend -lzend -Lext -lphpext
 LIBS = $(PHPLIBS) $(EXTRA_LIBS) @LIBS@
@@ -113,6 +115,9 @@ libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
 	-@test -f ./mod_php4.c || test -h ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
 	$(APXS) $(INCLUDE) -c -o libphp4.so @VERSION_SCRIPT@ @RPATHS@ ./mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
 
+php4_aol.so: libmodphp4-so.a
+	g++ $(LDFLAGS) aolserver.o -rdynamic -shared -o $@ libmodphp4-so.a $(LIBS) @TSRM_LIB@
+	
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
 
