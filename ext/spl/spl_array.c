@@ -43,6 +43,7 @@ SPL_METHOD(Array, offsetExists);
 SPL_METHOD(Array, offsetGet);
 SPL_METHOD(Array, offsetSet);
 SPL_METHOD(Array, offsetUnset);
+SPL_METHOD(Array, append);
 SPL_METHOD(Array, getArrayCopy);
 
 static
@@ -61,6 +62,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_offsetSet, 0)
 	ZEND_ARG_INFO(0, newval)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array_append, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getIterator,   NULL, ZEND_ACC_PUBLIC)
@@ -68,6 +74,7 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -83,6 +90,7 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -334,11 +342,22 @@ SPL_METHOD(Array, offsetGet)
  Sets the value at the specified $index to $newval. */
 SPL_METHOD(Array, offsetSet)
 {
-	zval *index, *value;
+	zval *index, *value = NULL;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &index, &value) == FAILURE) {
 		return;
 	}
 	spl_array_write_dimension(getThis(), index, value TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto bool ArrayObject::append(mixed $newval)
+ Appends the value. */
+SPL_METHOD(Array, append)
+{
+	zval *value;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+		return;
+	}
+	spl_array_write_dimension(getThis(), NULL, value TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetUnset(mixed $index)
