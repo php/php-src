@@ -777,7 +777,7 @@ dnl
 dnl PHP_BUILD_THREAD_SAFE
 dnl
 AC_DEFUN([PHP_BUILD_THREAD_SAFE],[
-  enable_experimental_zts=yes
+  enable_maintainer_zts=yes
   if test "$pthreads_working" != "yes"; then
     AC_MSG_ERROR([ZTS currently requires working POSIX threads. We were unable to verify that your system supports Pthreads.])
   fi
