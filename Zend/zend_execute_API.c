@@ -619,7 +619,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				EX(function_state).function = calling_scope->__call;
 				/* prepare params */
 				ALLOC_INIT_ZVAL(method_name);
-				ZVAL_STRING(method_name, function_name_lc, 1);
+				ZVAL_STRINGL(method_name, function_name_lc, fci->function_name->value.str.len, 0);
 
 				ALLOC_INIT_ZVAL(params_array);
 				array_init(params_array);
@@ -628,8 +628,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				efree(function_name_lc);
 				return FAILURE;
 			}
+		} else {
+			efree(function_name_lc);
 		}
-		efree(function_name_lc);
 		if (fci_cache) {
 			fci_cache->function_handler = EX(function_state).function;
 			fci_cache->object_pp = fci->object_pp;
