@@ -326,7 +326,7 @@ if test "$ac_cv_atof_accept_inf" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
 fi
 
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
+AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
   AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
@@ -342,6 +342,28 @@ AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
 #define zend_isinf(a) 0
 #endif
 
+int main(int argc, char** argv)
+{
+	return zend_isinf(HUGE_VAL) ? 0 : 1;
+}
+  ],[
+      ac_cv_huge_val_inf=yes
+  ],[
+      ac_cv_huge_val_inf=no
+  ],[
+      ac_cv_huge_val_inf=yes
+  ])
+])
+dnl This is the most probable fallback so we assume yes in case of cross compile.
+if test "$ac_cv_huge_val_inf" = "yes"; then
+  AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
+fi
+
+AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
+  AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
 #elif defined(HAVE_FPCLASS)
@@ -356,7 +378,7 @@ int main(int argc, char** argv)
 	/* prevent bug #27830 */
 	return 1;
 #else
-	return zend_isinf(HUGE_VAL) && zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
+	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
 #endif
 }
   ],[
