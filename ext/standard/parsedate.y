@@ -136,6 +136,7 @@ struct date_yy {
 	int	yyRelMonth;
 	int	yyRelSeconds;
 	int	yyRelYear;
+	int yyFlag;
 };
 
 typedef union _date_ll {
@@ -150,30 +151,30 @@ typedef union _date_ll {
 
 %}
 
-/* This grammar has 17 shift/reduce conflicts. */
-%expect 17
+/* This grammar has 19 shift/reduce conflicts. */
+%expect 19
 %pure_parser
 
-%token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID
+%token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tZZONE 
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
 %token	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE
 
 %type	<Number>	tDAY tDAY_UNIT tDAYZONE tHOUR_UNIT tMINUTE_UNIT
 %type	<Number>	tMONTH tMONTH_UNIT
-%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE
+%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE tTZONE tZZONE 
 %type	<Meridian>	tMERIDIAN o_merid
 
 %%
 
 spec	: /* NULL */
 	| spec item
-	;
+    ;
 
 item	: time {
 	    ((struct date_yy *)parm)->yyHaveTime++;
 	}
 	| zone {
-	    ((struct date_yy *)parm)->yyHaveZone++;
+	        ((struct date_yy *)parm)->yyHaveZone++;
 	}
 	| date {
 	    ((struct date_yy *)parm)->yyHaveDate++;
@@ -251,7 +252,26 @@ pgsqlzonepart : tSNUMBER {
 	| /* empty */
 	;
 
-zone	: tZONE {
+	/* we have to deal with a special case for the datetime format 
+	   of XML Schema here: '2003-11-18T22:40:00Z'
+	   the combination of a 'T' timezone specifier later followed
+	   by a 'Z' is now recognized and allowed
+	   TODO: change the grammer so that the exact positions are checked
+	   right now '2003-11-18 22:40:00 TZ' is also accepted (hartmut)
+	*/
+	   
+zone	: tTZONE {
+	    ((struct date_yy *)parm)->yyFlag = 1;
+	    ((struct date_yy *)parm)->yyTimezone = $1;
+	}
+	| tZZONE {
+		if (((struct date_yy *)parm)->yyFlag) {
+	        ((struct date_yy *)parm)->yyHaveZone--;
+			((struct date_yy *)parm)->yyFlag = 0;
+		}
+	    ((struct date_yy *)parm)->yyTimezone = $1;
+	}
+	| tZONE {
 	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
 	| tDAYZONE {
@@ -659,13 +679,13 @@ static TABLE const MilitaryTable[] = {
     { "q",	tZONE,	HOUR (- 4) },
     { "r",	tZONE,	HOUR (- 5) },
     { "s",	tZONE,	HOUR (- 6) },
-    { "t",	tZONE,	HOUR (- 7) },
+    { "t",	tTZONE,	HOUR (- 7) },
     { "u",	tZONE,	HOUR (- 8) },
     { "v",	tZONE,	HOUR (- 9) },
     { "w",	tZONE,	HOUR (-10) },
     { "x",	tZONE,	HOUR (-11) },
     { "y",	tZONE,	HOUR (-12) },
-    { "z",	tZONE,	HOUR (  0) },
+    { "z",	tZZONE,	HOUR (  0) },
     { NULL, 0, 0 }
 };
 
@@ -969,6 +989,7 @@ time_t php_parse_date(char *p, time_t *now)
   date.yyHaveRel = 0;
   date.yyHaveTime = 0;
   date.yyHaveZone = 0;
+  date.yyFlag = 0;
 
   if (yyparse ((void *)&date)
       || date.yyHaveTime > 1 || date.yyHaveZone > 1 
@@ -1050,6 +1071,7 @@ time_t php_parse_date(char *p, time_t *now)
       if (!gmt)
 	return -1;
       delta = date.yyTimezone * 60L + difftm (&tm, gmt);
+
       if ((Start + delta < Start) != (delta < 0))
 	return -1;		/* time_t overflow */
       Start += delta;
