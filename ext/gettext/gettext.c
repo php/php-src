@@ -53,7 +53,7 @@ PHP_MINFO_FUNCTION(gettext)
 }
 
 /* {{{ proto string textdomain(string domain)
-   Set the textdomain to "domain". Returns the current domain. */
+   Set the textdomain to "domain". Returns the current domain */
 PHP_FUNCTION(textdomain)
 {
     pval **domain;
@@ -79,7 +79,7 @@ PHP_FUNCTION(textdomain)
 /* }}} */
 
 /* {{{ proto string gettext(string msgid)
-   Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist. */
+   Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(gettext)
 {
     pval **msgid;
@@ -97,7 +97,7 @@ PHP_FUNCTION(gettext)
 /* }}} */
 
 /* {{{ proto string dgettext(string domain_name, string msgid)
-   Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist. */
+   Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dgettext)
 {
 	pval **domain_name, **msgid;
@@ -118,7 +118,7 @@ PHP_FUNCTION(dgettext)
 /* }}} */
 
 /* {{{ proto string dcgettext(string domain_name, string msgid, long category)
-   Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist. */
+   Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(dcgettext)
 {
 	pval **domain_name, **msgid, **category;
@@ -142,7 +142,7 @@ PHP_FUNCTION(dcgettext)
 /* }}} */
 
 /* {{{ proto string bindtextdomain(string domain_name, string dir)
-   Bind to the text domain domain_name, looking for translations in dir. Returns the current domain. */
+   Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_FUNCTION(bindtextdomain)
 {
 	pval **domain_name, **dir;
