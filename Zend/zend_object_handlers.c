@@ -802,7 +802,8 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 		ce = zobj->ce;
 	}
 
-	zend_make_full_classname(ce, class_name, class_name_len);
+	*class_name_len = ce->name_length;
+	*class_name = estrndup(ce->name, ce->name_length);
 	return SUCCESS;
 }
 
