@@ -160,6 +160,21 @@ static PHP_INI_MH(OnDisableFunctions)
 }
 
 
+static PHP_INI_MH(OnUpdateTimeout)
+{
+	ELS_FETCH();
+
+	EG(timeout_seconds) = atoi(new_value);
+	if (stage==PHP_INI_STAGE_STARTUP) {
+		/* Don't set a timeout on startup, only per-request */
+		return SUCCESS;
+	}
+	zend_unset_timeout();
+	zend_set_timeout(EG(timeout_seconds));
+	return SUCCESS;
+}
+
+
 /* Need to convert to strings and make use of:
  * DEFAULT_SHORT_OPEN_TAG
  * PHP_SAFE_MODE
@@ -227,7 +242,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",		PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("max_execution_time",		"30",		PHP_INI_ALL,		OnUpdateInt, 			max_execution_time,		php_core_globals,	core_globals)
+	PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
 	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	open_basedir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("safe_mode_exec_dir",		"1",		PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_exec_dir,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("upload_max_filesize",	"2097152",	PHP_INI_ALL,		OnUpdateInt,			upload_max_filesize,	php_core_globals,	core_globals)
@@ -602,9 +617,9 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 #ifdef VIRTUAL_DIR
 	virtual_cwd_activate(SG(request_info).path_translated);
 #endif
-
-	zend_set_timeout(PG(max_execution_time));
 	
+	zend_set_timeout(EG(timeout_seconds));
+
 	if (PG(expose_php)) {
 		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 	}
