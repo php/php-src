@@ -2815,10 +2815,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH");
 		RETURN_FALSE;
 	}
-	if (array_init(return_value)==FAILURE)
-	{
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	if (result->fetchHandle == NULL)
 	{
 		if (result->array == NULL && result->list == NULL)
@@ -3015,7 +3012,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 	ZEND_FETCH_RESOURCE(result, PHPFBResult *, fbsql_result_index, -1, "FrontBase-Result", le_result);
 
 	if (result->row == NULL) RETURN_FALSE;
-	if (array_init(return_value)==FAILURE) RETURN_FALSE;
+	array_init(return_value);
 	for (i=0; i < result->columnCount; i++)
 	{
 		unsigned  length = 0;

@@ -841,10 +841,8 @@ PHP_FUNCTION(dba_handlers)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
+
 	for(hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
 			add_assoc_string(return_value, hptr->name, hptr->info(hptr, NULL TSRMLS_CC), 0);
@@ -868,10 +866,8 @@ PHP_FUNCTION(dba_list)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
+
 	numitems = zend_hash_next_free_element(&EG(regular_list));
 	for (i=1; i<numitems; i++) {
 		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {

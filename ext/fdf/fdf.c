@@ -358,10 +358,7 @@ PHP_FUNCTION(fdf_get_value)
 		} 
 #if HAVE_FDFTK_5
 	} else if((err == FDFErcValueIsArray) && (which == -1)) {
-		if (array_init(return_value) == FAILURE) {
-			efree(buffer);
-			FDF_FAILURE(FDFErcInternalError);
-		}
+		array_init(return_value);
 		which = 0;
 		do {
 			err = FDFGetNthValue(fdf, fieldname, which, buffer, size-2, &nr); 
@@ -1037,9 +1034,7 @@ PHP_FUNCTION(fdf_get_opt) {
 		if(err != FDFErcOK) {
 			FDF_FAILURE(err);
 		}
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		add_next_index_stringl(return_value, buf1, strlen(buf1), 1);
 		add_next_index_stringl(return_value, buf2, strlen(buf2), 1);
 		efree(buf1);
@@ -1470,9 +1465,7 @@ PHP_FUNCTION(fdf_get_attachment) {
 		FDF_FAILURE(err);
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	add_assoc_string(return_value, "path", pathbuf, 1);
     add_assoc_string(return_value, "type", mimebuf, 1);
 	stat(pathbuf, &statBuf);

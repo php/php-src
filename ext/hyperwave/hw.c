@@ -255,13 +255,7 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	int hidden, collhead, fullcollhead, total;
         int collheadnr, fullcollheadnr;
 
-	if (array_init(*return_value) == FAILURE) {
-		/* Ups, failed! Let's at least free the memory */
-		for(i=0; i<count; i++)
-			efree(objrecs[i]);
-		efree(objrecs);
-		return -1;
-	}
+	array_init(*return_value);
 
 	hidden = collhead = fullcollhead = total = 0;
 	collheadnr = fullcollheadnr = -1;
@@ -288,9 +282,7 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 
 	/* Array for statistics */
 	MAKE_STD_ZVAL(stat_arr);
-	if (array_init(stat_arr) == FAILURE) {
-		return -1;
-	}
+	array_init(stat_arr);
 
 	add_assoc_long(stat_arr, "Hidden", hidden);
 	add_assoc_long(stat_arr, "CollectionHead", collhead);
@@ -332,12 +324,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		add_assoc_long(spec_arr, "SQLStmt", HW_ATTR_NR);
 	}
 
-	if (array_init(*return_value) == FAILURE) {
-		Z_TYPE_PP(return_value) = IS_STRING;
-		Z_STRVAL_PP(return_value) = empty_string;
-		Z_STRLEN_PP(return_value) = 0;
-		return -1;
-	}
+	array_init(*return_value);
 
 	/* Loop through the attributes of object record and check
 	   if the attribute has a specification. If it has the value
@@ -438,12 +425,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	MAKE_STD_ZVAL(keyword_arr);
 	MAKE_STD_ZVAL(group_arr);
 
-	if (array_init(*return_value) == FAILURE) {
-		Z_TYPE_PP(return_value) = IS_STRING;
-		Z_STRVAL_PP(return_value) = empty_string;
-		Z_STRLEN_PP(return_value) = 0;
-		return -1;
-	}
+	array_init(*return_value);
 
 	/* Fill Array of titles, descriptions and keywords */
 	temp = estrdup(objrec);
@@ -455,30 +437,34 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		iKeyword = 0;
 		iGroup = 0;
 		if(0 == strncmp(attrname, "Title=", 6)) {
-			if ((hasTitle == 0) && (array_init(title_arr) == FAILURE)) {
+			if (hasTitle == 0) {
 				return -1;
 			}
+			array_init(title_arr);
 			hasTitle = 1;
 			str += 6;
 			iTitle = 1;
 		} else if(0 == strncmp(attrname, "Description=", 12)) {
-			if ((hasDescription == 0) && (array_init(desc_arr) == FAILURE)) {
+			if (hasDescription == 0) {
 				return -1;
 			}
+			array_init(desc_arr);
 			hasDescription = 1;
 			str += 12;
 			iDesc = 1;
 		} else if(0 == strncmp(attrname, "Keyword=", 8)) {
-			if ((hasKeyword == 0) && (array_init(keyword_arr) == FAILURE)) {
+			if (hasKeyword == 0) {
 				return -1;
 			}
+			array_init(keyword_arr);
 			hasKeyword = 1;
 			str += 8;
 			iKeyword = 1;
 		} else if(0 == strncmp(attrname, "Group=", 6)) {
-			if ((hasGroup == 0) && (array_init(group_arr) == FAILURE)) {
+			if (hasGroup == 0) {
 				return -1;
 			}
+			array_init(group_arr);
 			hasGroup = 1;
 			str += 6;
 			iGroup = 1;
@@ -1414,10 +1400,7 @@ php_printf("%s\n", ptr);
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(object);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	temp = estrdup(ptr);
 	attrname = php_strtok_r(temp, "\n", &strtok_buf);
@@ -1426,10 +1409,7 @@ php_printf("%s\n", ptr);
 		char *name;
 
 		ALLOC_ZVAL(user_arr);
-		if (array_init(user_arr) == FAILURE) {
-			efree(object);
-			RETURN_FALSE;
-		}
+		array_init(user_arr);
 
 		ptr = attrname;
 		if(*ptr++ == '*')
@@ -1594,10 +1574,7 @@ PHP_FUNCTION(hw_getobject)
 			RETURN_FALSE;
 			}
 		efree(ids);
-		if (array_init(return_value) == FAILURE) {
-			efree(objects);
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 
 		for(i=0; i<count; i++) {
 			add_index_string(return_value, i, objects[i], 0);
@@ -2390,10 +2367,7 @@ php_printf("count = %d, remainder = <HR>%s---<HR>", count, remainder);
 		Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
 		Z_TYPE_P(return_value) = IS_LONG;
 	} else {
-		if (array_init(return_value) == FAILURE) {
-			efree(offsets);
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 
 		ptr1 = remainder;
 		for(i=0; i<count; i++) {
@@ -3015,10 +2989,7 @@ PHP_FUNCTION(hw_getparents)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++) {
 		add_index_long(return_value, i, childIDs[i]);
@@ -3055,10 +3026,7 @@ PHP_FUNCTION(hw_children)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++) {
 		add_index_long(return_value, i, childIDs[i]);
@@ -3125,10 +3093,7 @@ PHP_FUNCTION(hw_getchildcoll)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++) {
 		add_index_long(return_value, i, childIDs[i]);
@@ -3252,10 +3217,7 @@ PHP_FUNCTION(hw_getobjectbyquery)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
@@ -3325,10 +3287,7 @@ PHP_FUNCTION(hw_getobjectbyquerycoll)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
@@ -3399,10 +3358,7 @@ PHP_FUNCTION(hw_getobjectbyftquery)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value) ;
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
@@ -3474,10 +3430,7 @@ PHP_FUNCTION(hw_getobjectbyftquerycoll)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
@@ -3544,10 +3497,7 @@ PHP_FUNCTION(hw_getchilddoccoll)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(childIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
@@ -3608,10 +3558,7 @@ PHP_FUNCTION(hw_getanchors)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		efree(anchorIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, anchorIDs[i]);
@@ -3802,10 +3749,7 @@ PHP_FUNCTION(hw_incollections)
 	if(objectIDs) efree(objectIDs);
 	if(collIDs) efree(collIDs);
 
-	if (array_init(return_value) == FAILURE) {
-		efree(retIDs);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<cretids; i++)
 		add_index_long(return_value, i, retIDs[i]);

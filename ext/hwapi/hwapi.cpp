@@ -311,9 +311,7 @@ static void print_hwapi_stringarray(const HW_API_StringArray& strings) {
 }
 
 static int stringArray2indexArray(pval **return_value, HW_API_StringArray *values) {
-	if (array_init(*return_value) == FAILURE) {
-		return 0;
-	}
+	array_init(*return_value);
 	for (int i=0; i<values->count(); i++) {
 		HW_API_String str;
 		values->string(i, str);
@@ -324,9 +322,7 @@ static int stringArray2indexArray(pval **return_value, HW_API_StringArray *value
 }
 
 static int objectArray2indexArray(pval **return_value, HW_API_ObjectArray *objarr) {
-	if (array_init(*return_value) == FAILURE) {
-		return 0;
-	}
+	array_init(*return_value);
 
 	for(int i=0; i<objarr->count(); i++) {
 		zval *child;
@@ -2400,9 +2396,7 @@ PHP_FUNCTION(hwapi_mychildren) {
 		objarr = (HW_API_ObjectArray) out.objects();
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for(i=0; i<objarr.count(); i++) {
 		zval *child;
@@ -2544,9 +2538,7 @@ PHP_FUNCTION(hwapi_find) {
 	/* FIXME: No a good idea to return just the objects. There is actually
 	 * more to return. Changing this to an object of type hw_api_find_out would
 	 * mean to change hw_api_parents() and hw_api_children() as well. */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* FIXME: More than just the list of objects is returned by find() */
 	if(0 == objectArray2indexArray(&rv, &objarr)) {
@@ -4092,9 +4084,7 @@ PHP_FUNCTION(hwapi_info) {
 
 	if (!out.error().error()) {
 		HW_API_StringArray languages, customidx, systemidx;
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		HW_API_Object *object = new HW_API_Object(out.typeInfo());
 		rv = php_hwapi_object_new(object, le_hwapi_objectp);
 		zend_hash_add(return_value->value.ht, "typeInfo", 9, &rv, sizeof(zval *), NULL);
@@ -4588,16 +4578,13 @@ PHP_FUNCTION(hwapi_content_read) {
 	Z_TYPE_PP(arg1) = IS_STRING;
 	/* FIXME: Need to finish the new zval */
 	value = (char *) emalloc(Z_LVAL_PP(arg2)+1);
-	if(value) {
-		Z_STRVAL_PP(arg1) = value;
-		len = contentp->read(value, Z_LVAL_PP(arg2));
-		value[len] = '\0';
-		Z_STRLEN_PP(arg1) = len;
 
-		RETURN_LONG(len);
-	} else {
-		RETURN_FALSE;
-	}
+	Z_STRVAL_PP(arg1) = value;
+	len = contentp->read(value, Z_LVAL_PP(arg2));
+	value[len] = '\0';
+	Z_STRLEN_PP(arg1) = len;
+
+	RETURN_LONG(len);
 }
 /* }}} */
 

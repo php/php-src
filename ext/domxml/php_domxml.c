@@ -1343,9 +1343,7 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 		zval *errormessages;
 	   	MAKE_STD_ZVAL(errormessages);
 
-		if(array_init(errormessages) != SUCCESS) {
-			/* do error handling here */
-		} 
+		array_init(errormessages);
 		add_assoc_string(errormessages,"errormessage",buf,1);				
 		input = ctxt->input;
 		if (ctxt->name) {
@@ -1380,9 +1378,7 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
    	if (ctxt != NULL && ctxt->errors != NULL) {
 		zval *errormessages;
 	   	MAKE_STD_ZVAL(errormessages);
-		if(array_init(errormessages) != SUCCESS) {
-			/* do error handling here */
-		} 
+		array_init(errormessages);
 		if (ctxt->parser != NULL) {
 			if (ctxt->parser->name) {
 				add_assoc_string(errormessages,"nodename",ctxt->parser->name,1); 
@@ -2254,9 +2250,7 @@ PHP_FUNCTION(domxml_node_children)
 	else
 		last = nodep->children;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	if (last) {
 		while (last) {
@@ -2932,9 +2926,6 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	}
 	ctxp->node = contextnodep;
 	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
-	if (str == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate memory for string");
-	}
 	sprintf(str ,"//%s",name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);
@@ -2945,11 +2936,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	}
 	MAKE_STD_ZVAL(rv);
 
-	if(array_init(rv) != SUCCESS)
-	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required array");
-		RETURN_FALSE;
-	}
+	array_init(rv);
 
 	switch (Z_TYPE_P(xpathobjp)) {
 
@@ -3040,10 +3027,7 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 
 	MAKE_STD_ZVAL(rv);
 
-	if(array_init(rv) != SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required array");
-		RETURN_FALSE;
-	}
+	array_init(rv);
 
 	nodesetp = php_get_elements_by_tagname(nodep, name, NULL);
 
@@ -3139,9 +3123,7 @@ PHP_FUNCTION(domxml_doctype_entities)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	while (last) {
 		zval *child;
@@ -3170,9 +3152,7 @@ PHP_FUNCTION(domxml_doctype_notations)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	while (last) {
 		zval *child;
@@ -3774,10 +3754,7 @@ PHP_FUNCTION(domxml_doc_ids)
 	ids = docp->ids;
 
 	if(ids) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
-
+		array_init(return_value);
 		xmlHashScan(ids, (void *)idsHashScanner2, return_value);
 	} else {
 		RETURN_FALSE;
@@ -4508,9 +4485,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 
 	/* create an php array for the children */
 	MAKE_STD_ZVAL(*attributes);
-	if (array_init(*attributes) == FAILURE) {
-		return -1;
-	}
+	array_init(*attributes);
 
 	while (ns) {
 		zval *pattr;
@@ -4792,10 +4767,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 			xmlNodeSetPtr nodesetp;
 
 			MAKE_STD_ZVAL(arr);
-			if (array_init(arr) == FAILURE) {
-				zval_dtor(rv);
-				RETURN_FALSE;
-			}
+			array_init(arr);
 
 			if (NULL == (nodesetp = xpathobjp->nodesetval)) {
 				zval_dtor(rv);
