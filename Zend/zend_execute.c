@@ -1275,11 +1275,9 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 		*retval = *z;
 		zendi_zval_copy_ctor(*retval);
 		incdec_op(z);
+		z->refcount++;
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		if (z->refcount == 0) {
-			zval_dtor(z);
-			FREE_ZVAL(z);
-		}
+		zval_ptr_dtor(&z);
 	}
 	
 	FREE_OP(Ts, op2, EG(free_op2));
