@@ -118,7 +118,6 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
  */
 function_entry gd_functions[] = {
 	PHP_FE(imagearc,								NULL)
-	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagechar,								NULL)
 	PHP_FE(imagecharup,								NULL)
 	PHP_FE(imagecolorallocate,						NULL)
@@ -149,6 +148,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreatetruecolor,					NULL)
 	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
+	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagefilledarc,							NULL)
 	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagealphablending,						NULL)
