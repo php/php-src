@@ -1644,13 +1644,20 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 {
 	FILE *fp;
 	char *realpath = NULL;
+	struct stat st;
+	php_stream *ret;
 
 	realpath = expand_filepath(filename, NULL TSRMLS_CC);
 
 	fp = fopen(realpath, mode);
 
 	if (fp)	{
-		php_stream *ret = php_stream_fopen_from_file_rel(fp, mode);
+		/* this is done to prevent opening of anything other then regular files */
+		if (fstat(fileno(fp), &st) == -1 || !S_ISREG(st.st_mode)) {
+			goto err;
+		}
+	
+		ret = php_stream_fopen_from_file_rel(fp, mode);
 
 		if (ret)	{
 			if (opened_path)	{
@@ -1662,7 +1669,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 
 			return ret;
 		}
-
+		err:
 		fclose(fp);
 	}
 	efree(realpath);
