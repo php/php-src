@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed crash in gzopen(). (Thies)
+- Multiple character set support in gdttf.c (Rob Goodwin)
 - When using HTTP auth from PHP, fill in the %u custom log field so the
   authenticated used id will get logged in the Apache access_log (Rasmus)
 - Support for pdflib 3.01. (Uwe)
