@@ -1,0 +1,77 @@
+##
+##  Apache 1.3 Makefile template for PHP 4.0 Module
+##  [src/modules/php4/Makefile.tmpl]
+##
+
+#   the parametrized target
+LIB=libphp4.$(LIBEXT)
+
+#   objects for building the static library
+OBJS=mod_php4.o
+OBJS_LIB=libmodphp4.a
+
+#   objects for building the shared object library
+SHLIB_OBJS=mod_php4.so-o
+SHLIB_OBJS_LIB=libmodphp4.a
+
+#   the general targets
+all: lib
+lib: $(LIB)
+
+#   build the static library by merging the object files
+libphp4.a: $(OBJS) $(OBJS_LIB)
+	cp $(OBJS_LIB) $@
+	ar r $@ $(OBJS)
+	$(RANLIB) $@
+
+#   ugly hack to support older Apache-1.3 betas that don't set $LIBEXT
+libphp4.: $(OBJS) $(OBJS_LIB)
+	cp $(OBJS_LIB) $@
+	ar r $@ $(OBJS)
+	$(RANLIB) $@
+	cp libphp4. libphp4.a
+
+#   build the shared object library by linking the object files
+libphp4.so: $(SHLIB_OBJS) $(SHLIB_OBJS_LIB)
+	rm -f $@
+	$(LD_SHLIB) $(LDFLAGS_SHLIB) -o $@ $(SHLIB_OBJS) $(SHLIB_OBJS_LIB) $(LIBS) $(PHP_LIBS) 
+
+# 1. extension .o for shared objects cannot be used here because
+#    first these files aren't still shared objects and second we
+#    have to use a different name to trigger the different
+#    implicit Make rule
+# 2. extension -so.o (as used elsewhere) cannot be used because
+#    the suffix feature of Make really wants just .x, so we use
+#    extension .so-o
+.SUFFIXES: .o .so-o
+.c.o:
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(PHP_CFLAGS) $(CPPFLAGS) $(SPACER) $<
+.c.so-o:
+	$(CC) -c $(INCLUDES) $(CFLAGS) $(CFLAGS_SHLIB) $(PHP_CFLAGS) $(CPPFLAGS) $(SPACER) $< && mv $*.o $*.so-o
+
+#   cleanup
+clean:
+	-rm -f $(OBJS) $(SHLIB_OBJS) $(LIB)
+
+# We really don't expect end users to use this rule.  It works only with
+# gcc, and rebuilds Makefile.tmpl.  You have to re-run Configure after
+# using it.
+depend:
+	cp Makefile.tmpl Makefile.tmpl.bak \
+	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.tmpl > Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) $(PHP_CFLAGS) $(CPPFLAGS) *.c >> Makefile.new \
+	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' Makefile.new \
+		> Makefile.tmpl \
+	    && rm Makefile.new
+
+#Dependencies
+
+$(OBJS): Makefile
+
+# DO NOT REMOVE
+mod_php4.o: mod_php4.c $(INCDIR)/httpd.h $(INCDIR)/conf.h \
+ $(INCDIR)/buff.h \
+ $(INCDIR)/http_config.h \
+ $(INCDIR)/http_core.h $(INCDIR)/http_main.h \
+ $(INCDIR)/http_protocol.h $(INCDIR)/http_request.h \
+ $(INCDIR)/http_log.h $(INCDIR)/util_script.h mod_php4.h
