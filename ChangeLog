@@ -1,3 +1,58 @@
+2004-05-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/cpdf/cpdf.c:
+      MFH: Fixed crash inside cpdf_place_inline_image() when working with
+      truecolor images.
+
+    * ext/cpdf/cpdf.c:
+      Fixed crash inside cpdf_place_inline_image() when working with truecolor
+      images.
+
+2004-05-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - Fix comparison of objects
+      - Clarify convert_object_to_type()
+
+2004-05-10  Stefan Esser  <sesser@suspekt.org>
+
+    * ZendEngine2/zend_alloc.c:
+      Checking MEMORY_LIMIT before doing emalloc/erealloc solves several ugly
+      problems.
+
+2004-05-10  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php5dllts.dsp:
+      Fix Win32 build
+
+2004-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4:
+      - Decouple NAN and INF
+
+2004-05-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.h:
+      Added missing upgrade bit.
+
+    * ext/gd/libgd/gd.h:
+      Missing part of the upgrade patch.
+
+2004-05-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_db4.c:
+      - Fix problems with c mode
+
 2004-05-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
