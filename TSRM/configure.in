@@ -12,6 +12,11 @@ AM_PROG_CC_STDC
 AC_PROG_CC_C_O
 AC_PROG_RANLIB
 
+AM_PROG_LIBTOOL
+if test "$enable_debug" != "yes"; then
+  AM_SET_LIBTOOL_VARIABLE([--silent])
+fi
+
 AC_CHECK_LIB(c_r, pthread_kill)
 AC_CHECK_LIB(pthread, pthread_kill)
 
@@ -25,5 +30,4 @@ AC_DEFINE(PTHREADS)
 
 AC_CHECK_HEADERS(stdarg.h)
 
-AC_OUTPUT(Makefile tsrm_config)
-AC_OUTPUT_COMMANDS([chmod +x tsrm_config])
+AC_OUTPUT(Makefile)
