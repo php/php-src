@@ -88,11 +88,13 @@ typedef struct php_iovec {
 } php_iovec_t;
 
 #ifndef PHP_WIN32
-typedef int SOCKET;
+typedef int PHP_SOCKET;
+#else
+typedef SOCKET PHP_SOCKET;
 #endif
 
 typedef struct {
-	SOCKET	bsd_socket;
+	PHP_SOCKET bsd_socket;
 	int		type;
 	int		error;
 } php_socket;
