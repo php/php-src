@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- OCI8 doesn't use define callbacks any longer. (Thies) 
 - OCI8 Driver now supports LOBs like PHP3. (Thies)
 - var_dump now dumps the properties of an object (Thies)
 - Rewrote the GET/POST/Cookie data reader to support multi-dimensional
