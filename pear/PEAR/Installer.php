@@ -790,30 +790,46 @@ class PEAR_Installer extends PEAR_Downloader
                 $this->log(1, "\nBuild process completed successfully");
                 foreach ($built as $ext) {
                     $bn = basename($ext['file']);
-                    list($_ext_name, ) = explode('.', $bn);
-                    if (extension_loaded($_ext_name)) {
-                        $this->raiseError("Extension '$_ext_name' already loaded. Please unload it ".
-                                          "in your php.ini file prior to install or upgrade it.");
+                    list($_ext_name, $_ext_suff) = explode('.', $bn);
+
+					if ($_ext_suff == '.so' || $_ext_suff == '.dll' /* || something more portable */) {
+                        /* it is an extension */
+                        if (extension_loaded($_ext_name)) {
+                            $this->raiseError(
+                                "Extension '$_ext_name' already loaded. Please unload it ".
+                                "from your php.ini file prior to install or upgrade it.");
+                        }
+                        $role = 'ext';
+                    } else {
+                        $role = 'src';
                     }
-                    // extension dir must be created if it doesn't exist
-                    // patch by Tomas Cox (modified by Greg Beaver)
-                    $ext_dir = $this->config->get('ext_dir');
-                    if (!@is_dir($ext_dir) && !System::mkdir(array('-p', $ext_dir))) {
-                        $this->log(3, "+ mkdir -p $ext_dir");
-                        return $this->raiseError("failed to create extension dir '$ext_dir'");
+                
+                    $this->log(1, "Installing $ext[file]\n");
+                    $copyto = $this->_prependPath($ext['dest'], $this->installroot);
+                    $copydir = dirname($copyto);
+                    if (!@is_dir($copydir)) {
+                        if (!$this->mkDirHier($copydir)) {
+                            return $this->raiseError("failed to mkdir $copydir", PEAR_INSTALLER_FAILED);
+                        }
+                        $this->log(3, "+ mkdir $copydir");
                     }
-                    $dest = $ext_dir . DIRECTORY_SEPARATOR . $bn;
-                    $this->log(1, "Installing '$bn' at ext_dir ($dest)");
-                    $this->log(3, "+ cp $ext[file] ext_dir ($dest)");
-                    $copyto = $this->_prependPath($dest, $this->installroot);
                     if (!@copy($ext['file'], $copyto)) {
-                        $this->rollbackFileTransaction();
-                        return $this->raiseError("failed to copy $bn to $copyto");
+                        return $this->raiseError("failed to write $copyto", PEAR_INSTALLER_FAILED);
                     }
+                    $this->log(3, "+ cp $ext[file] $copyto");
+                    if (!OS_WINDOWS) {
+                        $mode = 0666 & ~(int)octdec($this->config->get('umask'));
+                        $this->addFileOperation('chmod', array($mode, $copyto));
+                        if (!@chmod($copyto, $mode)) {
+                            $this->log(0, "failed to chamge mode of $copyto");
+                        }
+                    }
+                    $this->addFileOperation('rename', array($ext['file'], $copyto));
+                            
                     $pkginfo['filelist'][$bn] = array(
-                        'role' => 'ext',
-                        'installed_as' => $dest,
-                        'php_api' => $ext['php_api'],
+                        'role' => $role,
+                        'installed_as' => $ext['dest'],
+                        'php_api'      => $ext['php_api'],
                         'zend_mod_api' => $ext['zend_mod_api'],
                         'zend_ext_api' => $ext['zend_ext_api'],
                         );
