@@ -2674,7 +2674,6 @@ PHP_FUNCTION(yaz_es_result)
 #else
 	if (p && p->es_response)
 	{
-		int i;
 		Z_ExtendedServicesResponse *res = p->es_response;
 
 		if (res->taskPackage && 
