@@ -70,9 +70,56 @@ ZEND_GET_MODULE(xsl)
 /* {{{ xsl_objects_clone */
 void xsl_objects_clone(void *object, void **object_clone TSRMLS_DC)
 {
-	/* TODO */
+	xsl_object *intern = (xsl_object *) object;
+	xsl_object *clone;
+	zval *tmp;
+	zend_class_entry *class_type;
+
+	class_type = intern->std.ce;
+
+	clone = emalloc(sizeof(xsl_object));
+	clone->std.ce = class_type;
+	clone->std.in_get = 0;
+	clone->std.in_set = 0;
+	clone->ptr = NULL;
+	clone->prop_handler = NULL;
+	clone->parameter = NULL;
+	clone->hasKeys = intern->hasKeys;
+	clone->registerPhpFunctions = 0;
+
+	ALLOC_HASHTABLE(clone->std.properties);
+	zend_hash_init(clone->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(clone->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	ALLOC_HASHTABLE(clone->parameter);
+	zend_hash_init(clone->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	*object_clone = (void *) clone;
 }
 /* }}} */
+
+zend_object_value xsl_objects_store_clone_obj(zval *zobject TSRMLS_DC)
+{
+	zend_object_value retval;
+	void *new_object;
+	xsl_object *intern;
+	struct _store_object *obj;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+
+	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
+	
+	if (obj->clone == NULL) {
+		zend_error(E_CORE_ERROR, "Trying to clone uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
+	}		
+
+	obj->clone(obj->object, &new_object TSRMLS_CC);
+
+	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
+	intern = (xsl_object *) new_object;
+	intern->handle = retval.handle;
+	retval.handlers = Z_OBJ_HT_P(zobject);
+	
+	return retval;
+}
 
 /* {{{ xsl_objects_free_storage */
 void xsl_objects_free_storage(void *object TSRMLS_DC)
@@ -134,7 +181,8 @@ PHP_MINIT_FUNCTION(xsl)
 	zend_class_entry ce;
 	
 	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	
+	xsl_object_handlers.clone_obj = xsl_objects_store_clone_obj;
+
 	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
