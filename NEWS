@@ -53,6 +53,7 @@ PHP                                                                        NEWS
   . inet_ntop() (Sara)
   . fputcsv() (David Sklar)
   . posix_access() (Magnus)
+  . htmlspecialchars_decode() (Ilia)
 - Added DomDocument::$recover property for parsing not well-formed
   XML Documents. (Christian)   
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
