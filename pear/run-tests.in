@@ -1,0 +1,47 @@
+#!@prefix@/bin/php
+<?php // -*- C++ -*-
+
+$prefix = "@prefix@";
+$bindir = "@prefix@/bin";
+$php = "$bindir/php";
+$installdir = '@PEAR_INSTALLDIR@';
+$extdir = '@EXTENSION_DIR@';
+$abs_srcdir = '@abs_srcdir@/pear';
+
+$incpath = ".:$abs_srcdir/pear/tests:$abs_srcdir/pear/tests";
+
+$start = "*";
+print "argc=$argc\n";
+if ($argc > 1) {
+    $start = implode(" ", $argv);
+}
+$fp = popen("find $start -name tests -type d -print", "r");
+if (!$fp) {
+    die("Could not run find!\n");
+}
+while ($dir = trim(fgets($fp, 1024))) {
+    print "dir=$dir\n";
+    $dp = opendir($dir);
+    while ($ent = readdir($dp)) {
+	if (substr($ent, -2) != ".t") {
+	    continue;
+	}
+	$res = "$dir/".substr($ent, 0, -1) . 'r';
+	$out = "$dir/".substr($ent, 0, -1) . 'o';
+	$cmd = ("$php -d include_path=$incpath -d auto_prepend_file=none ".
+		"-f $dir/$ent | tee $out | cmp -s $res -");
+	print "cmd=$cmd\n";
+	$err = 0;
+	system($cmd, &$err);
+	print "$dir/$ent: ";
+	if ($err) {
+	    print "failed\n";
+	} else {
+	    print "passed\n";
+	}
+    }
+    closedir($dp);
+}
+pclose($fp);
+
+?>
