@@ -231,15 +231,12 @@ static PHP_METHOD(PDOStatement, execute)
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval *input_params = NULL;
 	int ret = 1;
-	char *original_query;
-	int orginal_querylen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &input_params)) {
 		RETURN_FALSE;
 	}
 	
 	if (input_params) {
-		int i;
 		struct pdo_bound_param_data param;
 		zval **tmp;
 		uint str_length;
@@ -247,8 +244,6 @@ static PHP_METHOD(PDOStatement, execute)
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(input_params));
 		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(input_params), (void*)&tmp)) {
-			char *quotedstr;
-			int  quotedstrlen;
 			memset(&param, 0, sizeof(param));
 
 			if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(input_params),
@@ -434,7 +429,6 @@ static PHP_METHOD(PDOStatement, fetch)
 {
 	long how = PDO_FETCH_BOTH;
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	int i;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &how)) {
 		RETURN_FALSE;
@@ -448,7 +442,7 @@ static PHP_METHOD(PDOStatement, fetch)
 
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
-	struct pdo_bound_param_data param = {0}, *pparam = NULL;
+	struct pdo_bound_param_data param = {0};
 
 	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
@@ -530,7 +524,6 @@ static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zval *return_value;
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
-	zval tmp_zv;
 
 	convert_to_string(member);
 
