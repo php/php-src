@@ -168,7 +168,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 ZEND_API void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
-ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_function *fptr, int error_type TSRMLS_DC);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);

@@ -175,7 +175,7 @@ ZEND_METHOD(error_exception, __construct)
 	if (argc >= 4) {
 	    zend_update_property_string(default_exception_ce, object, "file", sizeof("file")-1, filename TSRMLS_CC);
     	if (argc < 5) {
-    	    lineno = 0; /* invalidate lineno */
+    	    lineno = 0; // invalidate lineno
     	}
     	zend_update_property_long(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
 	}

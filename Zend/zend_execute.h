@@ -167,6 +167,8 @@ void zend_shutdown_timeout_thread();
 
 #define active_opline (*EG(opline_ptr))
 
+void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts TSRMLS_DC);
+
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */

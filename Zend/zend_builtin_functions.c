@@ -1621,7 +1621,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			zval_ptr_dtor(&arg_array);
 		}
 		zend_printf(") called at [%s:%d]\n", filename, lineno);
-		include_filename = function_name?NULL:filename;
+		include_filename = filename;
 		ptr = ptr->prev_execute_data;
 		++indent;
 	}
@@ -1766,7 +1766,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 
 		add_next_index_zval(return_value, stack_frame);
 
-		include_filename = function_name?NULL:filename; 
+		include_filename = filename; 
 
 		ptr = ptr->prev_execute_data;
 	}
