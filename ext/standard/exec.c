@@ -345,8 +345,8 @@ PHP_FUNCTION(escapeshellcmd)
 }
 /* }}} */
 
-/* {{{ proto string shell_exec(strng cmd)
-   What excatly is this variant for ??? */
+/* {{{ proto string shell_exec(string cmd)
+   Use pclose() for FILE* that has been opened via popen() */
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
