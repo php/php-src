@@ -2760,24 +2760,11 @@ int zend_do_fcall_handler(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
-	do {
-		/*
-		if (EG(scope)) {
-			if (zend_hash_find(&EG(scope)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
-				if ((EX(object) = EG(This))) {
-					EX(object)->refcount++;
-				}
-				EX(calling_scope) = EG(scope);
-				break;
-			}
-		}
-		*/
-		if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
-			zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
-		}
-		EX(object) = NULL;
-		EX(calling_scope) = EX(function_state).function->common.scope;
-	} while (0);
+	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+		zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
+	}
+	EX(object) = NULL;
+	EX(calling_scope) = EX(function_state).function->common.scope;
 
 	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
 					
