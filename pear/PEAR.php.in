@@ -27,19 +27,8 @@ define('PEAR_ERROR_DIE', 8);
 define('PEAR_ERROR_CALLBACK', 16);
 
 define('PHP_BINDIR', '@prefix@/bin');
-define('PEAR_INSTALL_DIR', '@EXPANDED_PEAR_INSTALLDIR@');
-define('PEAR_EXTENSION_DIR', '@EXPANDED_EXTENSION_DIR@');
-define('PHP_LOCALSTATEDIR', '@EXPANDED_LOCALSTATEDIR@');
-
-if (substr(php_uname(), 0, 7) == 'Windows') {
-    define('OS_WINDOWS', true);
-    define('OS_UNIX', false);
-    define('PEAR_OS', 'Windows');
-} else {
-    define('OS_WINDOWS', false);
-    define('OS_UNIX', true);
-    define('PEAR_OS', 'Unix'); // not exactly true, but...
-}
+define('PEAR_INSTALL_DIR', '@PEAR_INSTALLDIR@');
+define('PEAR_EXTENSION_DIR', '@EXTENSION_DIR@');
 
 $_PEAR_default_error_mode = PEAR_ERROR_RETURN;
 $_PEAR_default_error_options = E_USER_NOTICE;
