@@ -269,7 +269,7 @@ class DB {
 				DB_ERROR_UNSUPPORTED    => "not supported",
 				DB_ERROR_MISMATCH       => "mismatch",
 				DB_ERROR_INVALID        => "invalid",
-				DB_ERROR_NOT_CAPABLE    => "DB implementation not capable",
+				DB_ERROR_NOT_CAPABLE    => "DB backend not capable",
 				DB_ERROR_INVALID_NUMBER => "invalid number",
 				DB_ERROR_INVALID_DATE   => "invalid date or time",
 				DB_ERROR_DIVZERO        => "division by zero",
@@ -281,6 +281,9 @@ class DB {
 				DB_ERROR_NOSUCHFIELD    => "no such field",
 				DB_WARNING_READ_ONLY    => "warning: read only"
 			);
+		}
+		if (DB::isError($value)) {
+			$value = $value->code;
 		}
 		return $errorMessages[$value];
 	}
