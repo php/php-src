@@ -195,7 +195,7 @@ Installation of Windows extensions
   php_zlib.dll      ZLib compression functions
 
  For more information see the section about Windows extensions at
- http://www.php.net/manual/en/install-windows.php#install.windows.extensions
+ http://www.php.net/manual/en/install.windows.php#install.windows.extensions
 
 
 Web server configuration
