@@ -28,6 +28,8 @@ char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const c
 
 char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen);
 
+char *url_adapt_flush(size_t *);
+
 #include "php_smart_str_public.h"
 
 typedef struct {
