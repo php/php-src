@@ -76,6 +76,7 @@ static int le_outline;
 #endif
 
 function_entry cpdf_functions[] = {
+  PHP_FE(cpdf_global_set_documents_settings, NULL)
 	PHP_FE(cpdf_set_creator, NULL)
 	PHP_FE(cpdf_set_title, NULL)
 	PHP_FE(cpdf_set_subject, NULL)
@@ -189,6 +190,31 @@ PHP_MINFO_FUNCTION(cpdf) {
 PHP_MSHUTDOWN_FUNCTION(cpdf){
 	return SUCCESS;
 }
+
+/* {{{ proto void cpdf_global_set_document_settings(int maxPages, int maxFonts, int maxImages, int maxAnnots, int maxObjects)
+   Sets document settings for all documents */
+PHP_FUNCTION(cpdf_global_set_documents_settings) {
+	pval *argv[5];
+	int argc;
+	CPDF_TLS_VARS;
+
+	argc = ARG_COUNT(ht);
+	if(argc != 5)
+		WRONG_PARAM_COUNT;
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(argv[0]);
+	convert_to_long(argv[1]);
+	convert_to_long(argv[2]);
+	convert_to_long(argv[3]);
+	convert_to_long(argv[4]);
+
+	cpdf_setGlobalDocumentLimits(argv[0]->value.lval, argv[1]->value.lval, argv[2]->value.lval, argv[3]->value.lval, argv[4]->value.lval);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 /* {{{ proto bool cpdf_set_creator(int pdfdoc, string creator)
    Sets the creator field */
@@ -337,8 +363,7 @@ PHP_FUNCTION(cpdf_set_viewer_preferences) {
    Opens a new pdf document */
 PHP_FUNCTION(cpdf_open) {
 	pval *arg1, *arg2, *arg3;
-	int id, type, argc;
-	FILE *fp;
+	int id, argc;
 	CPDFdoc *cpdf;
 	CPDF_TLS_VARS;
 
@@ -1230,7 +1255,6 @@ PHP_FUNCTION(cpdf_setflat) {
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	int flatness;
 	CPDF_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
@@ -1404,7 +1428,7 @@ PHP_FUNCTION(cpdf_setdash) {
 		RETURN_FALSE;
 	}
 
-	snprintf(buffer, BUFFERLEN, "[%d %d] 0", arg2->value.lval, arg3->value.lval);
+	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) arg2->value.lval, (int) arg3->value.lval);
 	cpdf_setdash(pdf, buffer);
 
 	RETURN_TRUE;
@@ -2176,7 +2200,6 @@ PHP_FUNCTION(cpdf_finalize) {
    Returns the internal memory stream as string */
 PHP_FUNCTION(cpdf_output_buffer) {
 	pval *arg1;
-	pval out_arr;
 	int id, type, lenght;
 	CPDFdoc *pdf;
 	char *buffer;
@@ -2308,7 +2331,6 @@ PHP_FUNCTION(cpdf_place_inline_image) {
 	pval *argv[11];
 	int id, gid, type, argc, mode=0;
 	int count, i, j, color;
-	float width, height;
 	CPDFdoc *pdf;
 	unsigned char *buffer, *ptr;
 	gdImagePtr im;
