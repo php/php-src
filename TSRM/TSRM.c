@@ -13,6 +13,7 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef ZTS
 
 #include "TSRM.h"
 #include <stdio.h>
@@ -454,3 +455,5 @@ void tsrm_debug_set(int status)
 {
 	tsrm_debug_status = status;
 }
+
+#endif /* TSRM */
