@@ -154,7 +154,7 @@ PHP_FUNCTION(assert)
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
 
-		myeval = (*assertion)->value.str.val;
+		myeval = Z_STRVAL_PP(assertion);
 
 		if (ASSERT(quiet_eval)) {
 			old_error_reporting = EG(error_reporting);
@@ -174,10 +174,10 @@ PHP_FUNCTION(assert)
 		}
 
 		convert_to_boolean(&retval);
-		val = retval.value.lval;
+		val = Z_LVAL(retval);
 	} else {
 		convert_to_boolean_ex(assertion);
-		val = (*assertion)->value.lval;
+		val = Z_LVAL_PP(assertion);
 	}
 
 	if (val) {
@@ -210,18 +210,17 @@ PHP_FUNCTION(assert)
 		MAKE_STD_ZVAL(args[4]);
 		*/
 
-		args[0]->type = IS_STRING; args[0]->value.str.val = estrdup(SAFE_STRING(cbfunc)); 	args[0]->value.str.len = strlen(args[0]->value.str.val);
-		args[1]->type = IS_STRING; args[1]->value.str.val = estrdup(SAFE_STRING(filename)); args[1]->value.str.len = strlen(args[1]->value.str.val);
-		args[2]->type = IS_LONG;   args[2]->value.lval    = lineno;      
-		args[3]->type = IS_STRING; args[3]->value.str.val = estrdup(SAFE_STRING(myeval));   args[3]->value.str.len = strlen(args[3]->value.str.val);
+		ZVAL_STRING(args[0],SAFE_STRING(cbfunc),1);
+		ZVAL_STRING(args[1],SAFE_STRING(filename),1);
+		ZVAL_LONG (args[2],lineno);
+		ZVAL_STRING(args[3],SAFE_STRING(myeval),1);
 		/*
 		  this is always "assert" so it's useless
 		  args[4]->type = IS_STRING; args[4]->value.str.val = estrdup(SAFE_STRING(function));         args[4]->value.str.len = strlen(args[4]->value.str.val);
 		*/
 		
 		MAKE_STD_ZVAL(retval);
-		retval->type = IS_BOOL;
-		retval->value.lval = 0;
+		ZVAL_BOOL(retval,0);
 
 		/* XXX do we want to check for error here? */
 		call_user_function(CG(function_table), NULL, args[0], retval, 3, args+1);
@@ -268,7 +267,7 @@ PHP_FUNCTION(assert_options)
 		oldint = ASSERT(active);
 		if (ac == 2) {
 			convert_to_long_ex(value);
-			ASSERT(active) = (*value)->value.lval;
+			ASSERT(active) = Z_LVAL_PP(value);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -277,7 +276,7 @@ PHP_FUNCTION(assert_options)
 		oldint = ASSERT(bail);
 		if (ac == 2) {
 			convert_to_long_ex(value);
-			ASSERT(bail) = (*value)->value.lval;
+			ASSERT(bail) = Z_LVAL_PP(value);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -286,7 +285,7 @@ PHP_FUNCTION(assert_options)
 		oldint = ASSERT(quiet_eval);
 		if (ac == 2) {
 			convert_to_long_ex(value);
-			ASSERT(quiet_eval) = (*value)->value.lval;
+			ASSERT(quiet_eval) = Z_LVAL_PP(value);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -295,7 +294,7 @@ PHP_FUNCTION(assert_options)
 		oldint = ASSERT(warning);
 		if (ac == 2) {
 			convert_to_long_ex(value);
-			ASSERT(warning) = (*value)->value.lval;
+			ASSERT(warning) = Z_LVAL_PP(value);
 		}
 		RETURN_LONG(oldint);
 		break;
@@ -309,13 +308,13 @@ PHP_FUNCTION(assert_options)
 				efree(oldstr);
 			} 
 			convert_to_string_ex(value);
-			ASSERT(callback) = estrndup((*value)->value.str.val,(*value)->value.str.len);
+			ASSERT(callback) = estrndup(Z_STRVAL_PP(value), Z_STRLEN_PP(value));
 		}
 		return;
 		break;
 
 	default:
-		php_error(E_WARNING,"Unknown value %d.",(*what)->value.lval);
+		php_error(E_WARNING,"Unknown value %d.",Z_LVAL_PP(what));
 		break;
 	}
 
