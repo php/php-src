@@ -1486,7 +1486,11 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 			zend_timeout(0);
 		}
 #endif
-
+#ifdef NETWARE
+		if (EG(nw_stack_limit) || (stackavail() <= 2048)) {
+			zend_nw_stack_limit(0);
+		}
+#endif
 		if (EX(opline)->handler(&execute_data TSRMLS_CC)) {
 			return;
 		}
