@@ -56,7 +56,7 @@ if test "$PHP_XSLT" != "no"; then
   if test -z "$XSLT_DIR"; then
     AC_MSG_ERROR([not found. Please re-install the $XSLT_BACKEND_NAME distribution.])
   fi
-					
+				
   if test "$PHP_XSLT_SABLOT" != "no"; then
     AC_MSG_CHECKING([for sablot-config])
     if test -x $XSLT_DIR/bin/sablot-config ; then
@@ -132,6 +132,7 @@ int main ()
       PHP_CHECK_LIBRARY(js, JS_GetRuntime,
       [
         PHP_ADD_LIBRARY_WITH_PATH(js, $PHP_SABLOT_JS_DIR/lib, XSLT_SHARED_LIBADD)
+        PHP_SABLOT_JS_LIBS=-L$PHP_SABLOT_JS_DIR/lib -ljs
       ], [
         AC_MSG_ERROR([libjs not found. Please check config.log for more information.])
       ], [
@@ -143,7 +144,7 @@ int main ()
     [
       AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ])
     ], [], [
-      -L$XSLT_DIR/lib
+      -L$XSLT_DIR/lib $PHP_SABLOT_JS_LIBS
     ])
 
     dnl SablotSetOptions implemented in Sablotron CVS > 2002/10/31
@@ -151,7 +152,7 @@ int main ()
     [
       AC_DEFINE(HAVE_SABLOT_GET_OPTIONS, 1, [Whether Sablotron supports SablotGetOptions])
     ], [], [
-      -L$XSLT_DIR/lib
+      -L$XSLT_DIR/lib $PHP_SABLOT_JS_LIBS
     ])
 
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
