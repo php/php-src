@@ -1006,7 +1006,6 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		static const char *cast_names[3] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
 		};
-		TSRMLS_FETCH();
 
 		zend_error(E_WARNING, "%s(): cannot represent a stream of type %s as a %s",
 			get_active_function_name(TSRMLS_C),
