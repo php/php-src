@@ -1,3 +1,90 @@
+2001-05-09  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mysql/php_mysql.c:
+    Reverse my earlier patch for mysql_db_query() & emit an E_NOTICE of it's
+    deprecated status.
+
+2001-05-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Switching to zend_register_list_destructors_ex()
+
+2001-05-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    - Added is_callable() function that can be used to find out whether
+      its argument is a valid callable construct. 
+
+2001-05-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Minor change to the way string lengths are calculated and space alocated.
+
+2001-05-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Document overwriting behaviour of PHP_ARG_WITH/ENABLE with regard
+    to ext_shared.
+
+2001-05-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c: Getting rid of memset.
+
+2001-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4
+      ext/xslt/config.m4:
+    The PHP_EXTENSION() has to be before any other PHP_ARG_*()'s
+
+2001-05-09  Wenhui Zhang  <zhang@empress.com>
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.h
+      ext/odbc/setup.stub: Change for Empress PHP support
+
+2001-05-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Also remove -L/usr/lib/? from LDFLAGS.
+
+    * acinclude.m4
+      configure.in: Remove -L/usr/lib/? from PHP_LDFLAGS.
+
+    * ext/saprfc/config.m4: This probably was the cause for messages like
+
+    autoconf: Undefined macros:
+    ***BUG in Autoconf--please report*** AC_ADD_INCLUDE
+    ***BUG in Autoconf--please report*** AC_ADD_LIBRARY_WITH_PATH
+
+2001-05-09  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    remaked mb_gpc_handler as mb_parse_str() in mbstring.
+
+2001-05-09  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/saprfc/.cvsignore
+      ext/saprfc/Makefile.in
+      ext/saprfc/README
+      ext/saprfc/config.m4
+      ext/saprfc/php_saprfc.c
+      ext/saprfc/php_saprfc.h
+      ext/saprfc/saprfc.php: some basic functionality: o
+    - pen/close rfc connections
+    - get connection and server info
+
+2001-05-09  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/sockets.c:
+    fix crash bug (unlikely, but this is the only place where the reported bug
+    would make sense, and it can't hurt)...
+
+2001-05-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/config.m4: Fixed a typo.
+
 2001-05-08  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c: Use RETURN_ macros to define function returns.
