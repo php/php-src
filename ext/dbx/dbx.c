@@ -76,9 +76,9 @@ int get_module_identifier(char * module_name) {
 
 int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** pdbx_module, zval *** pdbx_database) {
     convert_to_object_ex(dbx_object);
-    if (zend_hash_find((*dbx_object)->value.obj.properties, "handle", 7, (void **) pdbx_handle)==FAILURE
-    || zend_hash_find((*dbx_object)->value.obj.properties, "module", 7, (void **) pdbx_module)==FAILURE
-    || zend_hash_find((*dbx_object)->value.obj.properties, "database", 9, (void **) pdbx_database)==FAILURE) {
+    if (zend_hash_find(Z_OBJPROP_PP(dbx_object), "handle", 7, (void **) pdbx_handle)==FAILURE
+    || zend_hash_find(Z_OBJPROP_PP(dbx_object), "module", 7, (void **) pdbx_module)==FAILURE
+    || zend_hash_find(Z_OBJPROP_PP(dbx_object), "database", 9, (void **) pdbx_database)==FAILURE) {
         return 0;
         }
     return 1;
@@ -284,9 +284,9 @@ ZEND_FUNCTION(dbx_connect)
         RETURN_LONG(0);
         }
 
-    zend_hash_update(return_value->value.obj.properties, "handle", 7, (void *)&(rv_dbx_handle), sizeof(zval *), NULL);
-    zend_hash_update(return_value->value.obj.properties, "module", 7, (void *)&(dbx_module), sizeof(zval *), NULL);
-    zend_hash_update(return_value->value.obj.properties, "database", 9, (void *)&(db_name), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_dbx_handle), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "module", 7, (void *)&(dbx_module), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "database", 9, (void *)&(db_name), sizeof(zval *), NULL);
 }
 /* }}} */
 
@@ -387,7 +387,7 @@ ZEND_FUNCTION(dbx_query)
         RETURN_LONG(0);
         }
     /* add result_handle property to return_value */
-    zend_hash_update(return_value->value.obj.properties, "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
     /* init info property as array and add to return_value as a property */
     if (info_flags & DBX_RESULT_INFO) {
         MAKE_STD_ZVAL(info); 
@@ -396,7 +396,7 @@ ZEND_FUNCTION(dbx_query)
             FREE_ZVAL(info);
             RETURN_LONG(0);
             }
-        zend_hash_update(return_value->value.obj.properties, "info", 5, (void *)&(info), sizeof(zval *), NULL);
+        zend_hash_update(Z_OBJPROP_P(return_value), "info", 5, (void *)&(info), sizeof(zval *), NULL);
         }
     /* init data property as array and add to return_value as a property */
     MAKE_STD_ZVAL(data); 
@@ -405,7 +405,7 @@ ZEND_FUNCTION(dbx_query)
         FREE_ZVAL(data);
         RETURN_LONG(0);
         }
-    zend_hash_update(return_value->value.obj.properties, "data", 5, (void *)&(data), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "data", 5, (void *)&(data), sizeof(zval *), NULL);
     /* get columncount and add to returnvalue as property */
     MAKE_STD_ZVAL(rv_column_count); 
     ZVAL_LONG(rv_column_count, 0);
@@ -415,7 +415,7 @@ ZEND_FUNCTION(dbx_query)
         FREE_ZVAL(rv_column_count);
         RETURN_LONG(0); 
         }
-    zend_hash_update(return_value->value.obj.properties, "cols", 5, (void *)&(rv_column_count), sizeof(zval *), NULL);
+    zend_hash_update(Z_OBJPROP_P(return_value), "cols", 5, (void *)&(rv_column_count), sizeof(zval *), NULL);
     /* fill the info array with columnnames and types (indexed and assoc) */
     if (info_flags & DBX_RESULT_INFO) {
         zval * info_row_name;
@@ -645,7 +645,7 @@ ZEND_FUNCTION(dbx_sort)
         RETURN_LONG(0);
         }
 
-    if (zend_hash_find((*arguments[0])->value.obj.properties, "data", 5, (void **) &zval_data)==FAILURE
+    if (zend_hash_find(Z_OBJPROP_PP(arguments[0]), "data", 5, (void **) &zval_data)==FAILURE
     || (*zval_data)->type != IS_ARRAY) {
         zend_error(E_WARNING, "Wrong argument type for sort");
         RETURN_LONG(0);
@@ -653,9 +653,8 @@ ZEND_FUNCTION(dbx_sort)
 
     arguments[0] = zval_data;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "usort", &returned_zval, number_of_arguments, arguments);
-    zval_dtor(returned_zval);
-    FREE_ZVAL(returned_zval);
-
+	zval_ptr_dtor(&returned_zval);
+    
     RETURN_LONG(1);
 }
 

@@ -1384,9 +1384,7 @@ PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
-		return_value->type=IS_OBJECT;
-		return_value->value.obj.properties = return_value->value.ht;
-		return_value->value.obj.ce = &zend_standard_class_def;
+		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
 	}
 }
 /* }}} */
