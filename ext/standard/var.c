@@ -85,7 +85,9 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 			}
 		} else {
 			php_printf("%*c[\"%s", level + 1, ' ', hash_key->arKey);
+#ifdef ANDREY_0
 			ZEND_PUTS(":public");
+#endif
 		}
 		ZEND_PUTS("\"]=>\n");
 	}
