@@ -1,3 +1,53 @@
+2002-07-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in:
+    1. PHP_CHECK_FUNC(func, lib1, lib2, ..., libn) searches for
+       func and __func using LIBS, and if unsuccessful, searches
+       each specified lib.  Defines HAVE_FUNC, if found.  If func/__func is
+       found in library foo, HAVE_LIBFOO is defined.
+
+       (Jani, me)
+
+    2. Autoconf 2.5x is more pedantic regarding locating header files.
+       We include the proper header files now in the check. (me)
+
+    3. The nsl/bind/socket/etc checks have been rewritten using PHP_CHECK_FUNC.
+       This ensures that no extra library is used, if the symbol is
+       available in libc which avoids issues on BSD/OS, OpenBSD and others.
+       (Jani)
+
+2002-07-04  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Common.php: * Remove http:// from the proxy server string.
+
+    Patch by: "michiel bakker" <michiel_bakker@hotmail.com>
+
+2002-07-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+    - Added optional 3rd parameter 'recursive' to ftp_rawlist() which will
+      do 'LIST -R' instead of 'LIST'. 
+
+2002-07-04  Marko Karppinen  <karppinen@pobox.com>
+
+    * Makefile.global
+      sapi/cgi/config.m4:
+    Moved the cgi link line to sapi/cgi/config.m4 and stopped
+    using libtool on Darwin on it
+
+2002-07-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * config.sub
+      config.guess: Upgrade to the version shipped with automake-1.6.2
+
+    * sapi/cgi/cgi_main.c:
+    Generate content-type header, if the user did not specify one of its own.
+
+    Noticed by: Edin Kadribasic <edink@proventum.net>
+
 2002-07-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * main/rfc1867.c: fixed ZTS build.
