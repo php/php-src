@@ -32,21 +32,29 @@
 #ifndef _FSOCK_H
 #define _FSOCK_H
 
+#if WIN32|WINNT
+#	ifndef WINNT
+#	define WINNT 1
+#	endif
+#undef FD_SETSIZE
+#include "arpa/inet.h"
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 extern php3_module_entry fsock_module_entry;
 #define fsock_module_ptr &fsock_module_entry
 
 PHP_FUNCTION(fsockopen);
 PHP_FUNCTION(pfsockopen);
-int lookup_hostname(const char *addr, struct in_addr *in);
-char *_php3_sock_fgets(char *buf, size_t maxlen, int socket);
-size_t _php3_sock_fread(char *buf, size_t maxlen, int socket);
-int _php3_sock_feof(int socket);
-int _php3_sock_fgetc(int socket);
-int _php3_is_persistent_sock(int);
-int _php3_sock_set_blocking(int socket, int mode);
-int _php3_sock_destroy(int socket);
-int _php3_sock_close(int socket);
+extern int lookup_hostname(const char *addr, struct in_addr *in);
+extern int _php3_sock_fgets(char *buf, int maxlen, int socket);
+extern int _php3_sock_fread(char *buf, int maxlen, int socket);
+extern int _php3_is_persistent_sock(int);
+int _php3_sock_eof(int socket);
 
-PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, int addrlen, struct timeval *timeout);
+#define phpext_fsock_ptr fsock_module_ptr
 
 #endif /* _FSOCK_H */
