@@ -112,7 +112,7 @@ zend_class_entry* soap_var_class_entry;
 zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_header_class_entry;
 
-ZEND_DECLARE_MODULE_GLOBALS(soap);
+ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
 
@@ -232,7 +232,7 @@ ZEND_BEGIN_ARG_INFO(__call_args, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(1)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 #else
 unsigned char __call_args[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
@@ -1119,15 +1119,9 @@ PHP_METHOD(soapserver, handle)
 
 	if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
 		&& ((*raw_post)->type==IS_STRING)) {
-		int old_error_reporting = EG(error_reporting);
 		sdlFunctionPtr function;
 
-		EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
-
-		doc_request = xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
-		xmlCleanupParser();
-
-		EG(error_reporting) = old_error_reporting;
+		doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
 
 		if (doc_request == NULL) {
 			php_error(E_ERROR, "Bad Request");
@@ -1271,7 +1265,7 @@ PHP_METHOD(soapserver, handle)
 			if (function && function->responseName) {
 				response_name = estrdup(function->responseName);
 			} else {
-				response_name = emalloc(Z_STRLEN(function_name) + strlen("Response") + 1);
+				response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
 				sprintf(response_name,"%sResponse",Z_STRVAL(function_name));
 			}
 			SOAP_GLOBAL(overrides) = service->mapping;
@@ -2230,7 +2224,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 					}
 					attr = get_attribute_ex(hdr_func->properties,"actor",envelope_ns);
 					if (attr != NULL) {
-						if (strcmp(attr->children->content,"http://schemas.xmlsoap.org/soap/actor/next") != 0 &&
+						if (strcmp(attr->children->content,SOAP_1_1_ACTOR_NEXT) != 0 &&
 						    (actor == NULL || strcmp(attr->children->content,actor) != 0)) {
 						  goto ignore_header;
 						}
@@ -2242,8 +2236,8 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 					}
 					attr = get_attribute_ex(hdr_func->properties,"role",envelope_ns);
 					if (attr != NULL) {
-						if (strcmp(attr->children->content,"http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver") != 0 &&
-						    strcmp(attr->children->content,"http://www.w3.org/2003/05/soap-envelope/role/next") != 0 &&
+						if (strcmp(attr->children->content,SOAP_1_2_ACTOR_UNLIMATERECEIVER) != 0 &&
+						    strcmp(attr->children->content,SOAP_1_2_ACTOR_NEXT) != 0 &&
 						    (actor == NULL || strcmp(attr->children->content,actor) != 0)) {
 						  goto ignore_header;
 						}
@@ -2369,10 +2363,10 @@ static int seralize_response_call2(xmlNodePtr body, sdlFunctionPtr function, cha
 			if (main && version == SOAP_1_2) {
 				xmlNs *rpc_ns = xmlNewNs(body, RPC_SOAP12_NAMESPACE, RPC_SOAP12_NS_PREFIX);
 				rpc_result = xmlNewChild(method, rpc_ns, "result", NULL);
-			}
-			param = seralize_parameter(parameter, ret, 0, "return", use, method TSRMLS_CC);
-			if (main && version == SOAP_1_2) {
+				param = seralize_parameter(parameter, ret, 0, "return", use, method TSRMLS_CC);
 				xmlNodeSetContent(rpc_result,param->name);
+			} else {
+				param = seralize_parameter(parameter, ret, 0, "return", use, method TSRMLS_CC);
 			}
 		} else {
 			param = seralize_parameter(parameter, ret, 0, "return", use, body TSRMLS_CC);
@@ -2814,6 +2808,7 @@ static xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int ind
 {
 	char *paramName;
 	xmlNodePtr xmlParam;
+	char paramNameBuf[10];
 
 	if (Z_TYPE_P(param_val) == IS_OBJECT &&
 		Z_OBJCE_P(param_val) == soap_param_class_entry) {
@@ -2828,19 +2823,17 @@ static xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int ind
 	}
 
 	if (param != NULL && param->paramName != NULL) {
-		paramName = estrdup(param->paramName);
+		paramName = param->paramName;
 	} else {
 		if (name == NULL) {
-			paramName = emalloc(10);
+			paramName = paramNameBuf;
 			sprintf(paramName,"param%d",index);
 		} else {
-			paramName = estrdup(name);
+			paramName = name;
 		}
 	}
 
 	xmlParam = seralize_zval(param_val, param, paramName, style, parent TSRMLS_CC);
-
-	efree(paramName);
 
 	return xmlParam;
 }

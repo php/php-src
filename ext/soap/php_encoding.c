@@ -1731,9 +1731,6 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 		}
 		get_position_ex(dimension, tmp, &pos);
 	}
-	if (enc == NULL) {
- 		enc = get_conversion(UNKNOWN_TYPE);
- 	}
 
 	array_init(ret);
 	trav = data->children;
@@ -1821,7 +1818,6 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 			zval **temp_data;
 			char *key_val;
 			int int_val;
-			encodePtr enc;
 
 			zend_hash_get_current_data(data->value.ht, (void **)&temp_data);
 			if (Z_TYPE_PP(temp_data) != IS_NULL) {
@@ -1847,9 +1843,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 					smart_str_free(&tmp);
 				}
 
-
-				enc = get_conversion((*temp_data)->type);
-				xparam = master_to_xml(enc, (*temp_data), style, item);
+				xparam = master_to_xml(get_conversion((*temp_data)->type), (*temp_data), style, item);
 
 				xmlNodeSetName(xparam, "value");
 			}
@@ -1867,7 +1861,6 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data)
 {
 	zval *ret, *key, *value;
 	xmlNodePtr trav, item, xmlKey, xmlValue;
-	encodePtr enc;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(ret);
@@ -1877,7 +1870,6 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data)
 		array_init(ret);
 		trav = data->children;
 
-		enc = get_conversion(UNKNOWN_TYPE);
 		trav = data->children;
 		FOREACHNODE(trav, "item", item) {
 			xmlKey = get_node(item->children, "key");
@@ -1890,8 +1882,8 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data)
 				php_error(E_ERROR, "SOAP-ERROR: Encoding: Can't decode apache map, missing value");
 			}
 
-			key = master_to_zval(enc, xmlKey);
-			value = master_to_zval(enc, xmlValue);
+			key = master_to_zval(NULL, xmlKey);
+			value = master_to_zval(NULL, xmlValue);
 
 			if (Z_TYPE_P(key) == IS_STRING) {
 				zend_hash_update(Z_ARRVAL_P(ret), Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &value, sizeof(zval *), NULL);
@@ -2497,7 +2489,7 @@ static void get_array_type(xmlNodePtr node, zval *array, smart_str *type TSRMLS_
 	HashTable *ht = HASH_OF(array);
 	int i, count, cur_type, prev_type, different;
 	zval **tmp;
-	char *prev_stype, *cur_stype, *prev_ns, *cur_ns;
+	char *prev_stype = NULL, *cur_stype = NULL, *prev_ns = NULL, *cur_ns = NULL;
 
 	if (!array || Z_TYPE_P(array) != IS_ARRAY) {
 		smart_str_appendl(type, "xsd:anyType", 11);

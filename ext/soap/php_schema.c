@@ -122,12 +122,10 @@ static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlChar *location, xmlAt
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
 
-		doc = xmlParseFile(location);
-		xmlCleanupParser();
+		doc = soap_xmlParseFile(location);
 		if (doc == NULL) {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s'",location);
 		}
-		cleanup_xml(doc);
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
 			xmlFreeDoc(doc);
@@ -666,29 +664,29 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (!strcmp(trav->name, "minExclusive")) {
+		if (node_is_equal(trav, "minExclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minExclusive);
-		} else if (!strcmp(trav->name, "minInclusive")) {
+		} else if (node_is_equal(trav, "minInclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minInclusive);
-		} else if (!strcmp(trav->name, "maxExclusive")) {
+		} else if (node_is_equal(trav, "maxExclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxExclusive);
-		} else if (!strcmp(trav->name, "maxInclusive")) {
+		} else if (node_is_equal(trav, "maxInclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxInclusive);
-		} else if (!strcmp(trav->name, "totalDigits")) {
+		} else if (node_is_equal(trav, "totalDigits")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->totalDigits);
-		} else if (!strcmp(trav->name, "fractionDigits")) {
+		} else if (node_is_equal(trav, "fractionDigits")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->fractionDigits);
-		} else if (!strcmp(trav->name, "length")) {
+		} else if (node_is_equal(trav, "length")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->length);
-		} else if (!strcmp(trav->name, "minLength")) {
+		} else if (node_is_equal(trav, "minLength")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minLength);
-		} else if (!strcmp(trav->name, "maxLength")) {
+		} else if (node_is_equal(trav, "maxLength")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxLength);
-		} else if (!strcmp(trav->name, "whiteSpace")) {
+		} else if (node_is_equal(trav, "whiteSpace")) {
 			schema_restriction_var_char(trav, &cur_type->restrictions->whiteSpace);
-		} else if (!strcmp(trav->name, "pattern")) {
+		} else if (node_is_equal(trav, "pattern")) {
 			schema_restriction_var_char(trav, &cur_type->restrictions->pattern);
-		} else if (!strcmp(trav->name, "enumeration")) {
+		} else if (node_is_equal(trav, "enumeration")) {
 			sdlRestrictionCharPtr enumval = NULL;
 
 			schema_restriction_var_char(trav, &enumval);
@@ -807,8 +805,8 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 	fixed = get_attribute(val->properties, "fixed");
 	(*valptr)->fixed = FALSE;
 	if (fixed != NULL) {
-		if (!strcmp(fixed->children->content, "true") ||
-			!strcmp(fixed->children->content, "1"))
+		if (!strncmp(fixed->children->content, "true", sizeof("true")) ||
+			!strncmp(fixed->children->content, "1", sizeof("1")))
 			(*valptr)->fixed = TRUE;
 	}
 
@@ -834,8 +832,8 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 	fixed = get_attribute(val->properties, "fixed");
 	(*valptr)->fixed = FALSE;
 	if (fixed != NULL) {
-		if (!strcmp(fixed->children->content, "true") ||
-		    !strcmp(fixed->children->content, "1")) {
+		if (!strncmp(fixed->children->content, "true", sizeof("true")) ||
+		    !strncmp(fixed->children->content, "1", sizeof("1"))) {
 			(*valptr)->fixed = TRUE;
 		}
 	}
@@ -1009,7 +1007,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 
 	attr = get_attribute(all->properties, "maxOccurs");
 	if (attr) {
-		if (!strcmp(attr->children->content, "unbounded")) {
+		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
 			newModel->max_occurs = -1;
 		} else {
 			newModel->max_occurs = atoi(attr->children->content);
@@ -1131,7 +1129,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 
 	attr = get_attribute(groupType->properties, "maxOccurs");
 	if (attr) {
-		if (!strcmp(attr->children->content, "unbounded")) {
+		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
 			newModel->max_occurs = -1;
 		} else {
 			newModel->max_occurs = atoi(attr->children->content);
@@ -1209,7 +1207,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 
 	attr = get_attribute(choiceType->properties, "maxOccurs");
 	if (attr) {
-		if (!strcmp(attr->children->content, "unbounded")) {
+		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
 			newModel->max_occurs = -1;
 		} else {
 			newModel->max_occurs = atoi(attr->children->content);
@@ -1275,7 +1273,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 
 	attr = get_attribute(seqType->properties, "maxOccurs");
 	if (attr) {
-		if (!strcmp(attr->children->content, "unbounded")) {
+		if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
 			newModel->max_occurs = -1;
 		} else {
 			newModel->max_occurs = atoi(attr->children->content);
@@ -1577,7 +1575,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 
 			attr = get_attribute(attrs, "maxOccurs");
 			if (attr) {
-				if (!strcmp(attr->children->content, "unbounded")) {
+				if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
 					newModel->max_occurs = -1;
 				} else {
 					newModel->max_occurs = atoi(attr->children->content);
@@ -1797,9 +1795,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "fixed", SCHEMA_NAMESPACE)) {
 			newAttr->fixed = strdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "form", SCHEMA_NAMESPACE)) {
-			if (strcmp(attr->children->content,"qualified") == 0) {
+			if (strncmp(attr->children->content,"qualified",sizeof("qualified")) == 0) {
 			  newAttr->form = XSD_FORM_QUALIFIED;
-			} else if (strcmp(attr->children->content,"unqualified") == 0) {
+			} else if (strncmp(attr->children->content,"unqualified",sizeof("unqualified")) == 0) {
 			  newAttr->form = XSD_FORM_UNQUALIFIED;
 			} else {
 			  newAttr->form = XSD_FORM_DEFAULT;
@@ -1813,11 +1811,11 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
 			/* already processed */
 		} else if (attr_is_equal_ex(attr, "use", SCHEMA_NAMESPACE)) {
-			if (strcmp(attr->children->content,"prohibited") == 0) {
+			if (strncmp(attr->children->content,"prohibited",sizeof("prohibited")) == 0) {
 			  newAttr->use = XSD_USE_PROHIBITED;
-			} else if (strcmp(attr->children->content,"required") == 0) {
+			} else if (strncmp(attr->children->content,"required",sizeof("required")) == 0) {
 			  newAttr->use = XSD_USE_REQUIRED;
-			} else if (strcmp(attr->children->content,"optional") == 0) {
+			} else if (strncmp(attr->children->content,"optional",sizeof("optional")) == 0) {
 			  newAttr->use = XSD_USE_OPTIONAL;
 			} else {
 			  newAttr->use = XSD_USE_DEFAULT;
@@ -1825,7 +1823,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else {
 			xmlNsPtr nsPtr = attr_find_ns(attr);
 
-			if (strcmp(nsPtr->href, SCHEMA_NAMESPACE)) {
+			if (strncmp(nsPtr->href, SCHEMA_NAMESPACE, sizeof(SCHEMA_NAMESPACE))) {
 				smart_str key2 = {0};
 
 				if (!newAttr->extraAttributes) {
@@ -2009,7 +2007,7 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				}
 				attr->encode = (*tmp)->encode;
 			}
-		} 
+		}
 		if (attr->name == NULL && attr->ref != NULL) {
 			char *name, *ns;
 			parse_namespace(attr->ref, &name, &ns);
