@@ -141,7 +141,7 @@ AC_ARG_ENABLE(memory-limit,
   ZEND_MEMORY_LIMIT=no
 ])
 
-AC_MSG_CHECKING(whether to enable experimental ZTS)
+AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_EXPERIMENTAL_ZTS)
 
 AC_MSG_CHECKING(whether to enable inline optimization for GCC)
