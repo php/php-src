@@ -186,8 +186,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 									var->value.str.val = (str); \
 									var->value.str.len = strlen((str)); \
 									var->type = IS_STRING; \
-									var->EA=0; \
-									var->refcount=1; \
+									INIT_PZVAL(var); \
 									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
 								} \
 							}
@@ -199,8 +198,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 										var->value.str.val = (v); \
 										var->value.str.len = (l); \
 										var->type = IS_STRING; \
-										var->EA=0; \
-										var->refcount=1; \
+										INIT_PZVAL(var); \
 										zend_hash_update(&EG(symbol_table), name, strlen(name)+1, &var, sizeof(zval *), NULL); \
 									} \
 								}
@@ -210,8 +208,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 									\
 									var->value.lval = (v); \
 									var->type = IS_LONG; \
-									var->EA=0; \
-									var->refcount=1; \
+									INIT_PZVAL(var); \
 									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
 								} \
 							}
@@ -221,8 +218,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 									\
 									var->value.dval = (v); \
 									var->type = IS_DOUBLE; \
-									var->EA=0; \
-									var->refcount=1; \
+									INIT_PZVAL(var); \
 									zend_hash_update(&EG(symbol_table)), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
 								} \
 							}

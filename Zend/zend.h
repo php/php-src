@@ -91,7 +91,10 @@ struct _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
 	unsigned char type;	/* active type */
-	unsigned char EA;
+	struct {
+		unsigned int locks:7;
+		unsigned int is_ref:1;
+	} EA;
 	short refcount;
 };
 
@@ -172,12 +175,6 @@ typedef struct _zend_utility_values {
 #define IS_CONSTANT	9
 #define IS_METHOD	10 /* for overloaded function calls */
 
-#define MAKE_STD_ZVAL(zv) \
-	zv = (zval *) emalloc(sizeof(zval)); \
-	zv->refcount = 1; \
-	zv->EA = 0;
-
-
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown();
 
@@ -234,5 +231,14 @@ extern zend_utility_values zend_uv;
 #define ZMSG_MEMORY_LEAK_DETECTED		5L
 #define ZMSG_MEMORY_LEAK_REPEATED		6L
 #define ZMSG_LOG_SCRIPT_NAME		7L
+
+#define INIT_PZVAL(z)		\
+	(z)->refcount = 1;		\
+	(z)->EA.is_ref = 0;		\
+	(z)->EA.locks = 0;
+
+#define MAKE_STD_ZVAL(zv) \
+	zv = (zval *) emalloc(sizeof(zval)); \
+	INIT_PZVAL(zv);
 
 #endif /* _ZEND_H */

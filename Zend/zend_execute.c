@@ -86,6 +86,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 		case IS_VAR:
 			if (Ts[node->u.var].var) {
 				DEC_AI_COUNT();
+				PZVAL_UNLOCK(*Ts[node->u.var].var);
 				*should_free = 0;
 				return *Ts[node->u.var].var;
 			} else {
@@ -95,7 +96,8 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 					case IS_OVERLOADED_OBJECT:
 						Ts[node->u.var].tmp_var = get_overloaded_property(ELS_C);
 						Ts[node->u.var].tmp_var.refcount=1;
-						Ts[node->u.var].tmp_var.EA=1;
+						Ts[node->u.var].tmp_var.EA.is_ref=1;
+						Ts[node->u.var].tmp_var.EA.locks=0;
 						return &Ts[node->u.var].tmp_var;
 						break;
 					case IS_STRING_OFFSET: {
@@ -114,7 +116,8 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 							}
 							zval_ptr_dtor(&str);
 							T->tmp_var.refcount=1;
-							T->tmp_var.EA=1;
+							T->tmp_var.EA.is_ref=1;
+							T->tmp_var.EA.locks=0;
 							T->tmp_var.type = IS_STRING;
 							return &T->tmp_var;
 						}
@@ -141,6 +144,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 		case IS_VAR:
 			if (Ts[node->u.var].var) {
 				DEC_AI_COUNT();
+				PZVAL_UNLOCK(*Ts[node->u.var].var);
 			}
 			return Ts[node->u.var].var;
 			break;
@@ -207,6 +211,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 {
 	zval **variable_ptr_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
 	zval *variable_ptr;
+	int previous_lock_count;
 
 	if (!variable_ptr_ptr) {
 		switch (Ts[op1->u.var].EA.type) {
@@ -251,6 +256,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
 		INC_AI_COUNT(result);
+		/* No need to lock anything */
 		return;
 	}
 
@@ -260,6 +266,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (result) {
 			Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
 			INC_AI_COUNT(result);
+			/* No need to lock anything */
 		}
 		return;
 	}
@@ -268,10 +275,12 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (variable_ptr!=value) {
 			short refcount=variable_ptr->refcount;
 	
+			previous_lock_count = variable_ptr->EA.locks;
 			zendi_zval_dtor(*variable_ptr);
 			*variable_ptr = *value;
 			variable_ptr->refcount = refcount;
-			variable_ptr->EA = ZEND_EA_IS_REF;
+			variable_ptr->EA.is_ref = 1;
+			variable_ptr->EA.locks = previous_lock_count;
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
 			}
@@ -287,9 +296,11 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					} else if (PZVAL_IS_REF(value)) {
 						zval tmp = *value;
 
+						previous_lock_count = variable_ptr->EA.locks;
 						tmp = *value;
 						zval_copy_ctor(&tmp);
 						tmp.refcount=1;
+						tmp.EA.locks = previous_lock_count;
 						zendi_zval_dtor(*variable_ptr);
 						*variable_ptr = tmp;
 					} else {
@@ -303,6 +314,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					zendi_zval_dtor(*variable_ptr);
 					value->refcount=1;
 					*variable_ptr = *value;
+					variable_ptr->EA.locks = previous_lock_count;
 					break;
 			}
 		} else { /* we need to split */
@@ -314,6 +326,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						*variable_ptr = *value;
 						zval_copy_ctor(variable_ptr);
 						variable_ptr->refcount=1;
+						variable_ptr->EA.locks = previous_lock_count;
 						break;
 					}
 					*variable_ptr_ptr = value;
@@ -322,16 +335,18 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				case IS_TMP_VAR:
 					(*variable_ptr_ptr) = (zval *) emalloc(sizeof(zval));
 					value->refcount=1;
+					value->EA.locks = 0;
 					**variable_ptr_ptr = *value;
 					break;
 			}
 		}
-		(*variable_ptr_ptr)->EA=0;
+		(*variable_ptr_ptr)->EA.is_ref=0;
 	}
 	if (result) {
 		Ts[result->u.var].var = variable_ptr_ptr;
 		INC_AI_COUNT(result);
-	}
+		PZVAL_LOCK(*variable_ptr_ptr);
+	} 
 }
 
 
@@ -431,6 +446,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	}
 	Ts[result->u.var].var = retval;	
 	INC_AI_COUNT(result);
+	PZVAL_LOCK(*retval);
 }
 
 
@@ -550,6 +566,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 
 	if (container == EG(error_zval_ptr)) {
 		INC_AI_COUNT(result);
+		/* No need to lock anything */
 		*retval = &EG(error_zval_ptr);
 		return;
 	}
@@ -562,7 +579,8 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 					container->refcount--;
 					if (container->refcount>0) {
 						container = *container_ptr = (zval *) emalloc(sizeof(zval));
-						container->EA=0;
+						container->EA.is_ref=0;
+						container->EA.locks = 0;
 					}
 					container->refcount=1;
 				}
@@ -578,8 +596,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				*container_ptr = (zval *) emalloc(sizeof(zval));
 				**container_ptr = *container;
 				container = *container_ptr;
-				container->refcount=1;
-				container->EA=0;
+				INIT_PZVAL(container);
 				zendi_zval_copy_ctor(*container);
 			}
 			if (op2->op_type == IS_UNUSED) {
@@ -590,6 +607,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
+			PZVAL_LOCK(**retval);
 			break;
 		case IS_STRING: {
 				zval *offset;
@@ -632,6 +650,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			break;
 	}
 	INC_AI_COUNT(result);
+	/* Relevant cases handled above */
 }
 
 
@@ -642,12 +661,14 @@ static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znod
 
 	if (container->type != IS_ARRAY) {
 		INC_AI_COUNT(result);
+		/* No need to lock anything */
 		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
 		return;
 	}
 
 	INC_AI_COUNT(result);
 	Ts[result->u.var].var = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, BP_VAR_R ELS_CC);
+	PZVAL_LOCK(*Ts[result->u.var].var);
 }
 
 
@@ -695,6 +716,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 	container = *container_ptr;
 	if (container == EG(error_zval_ptr)) {
 		INC_AI_COUNT(result);
+		/* No need to lock anything */
 		*retval = &EG(error_zval_ptr);
 		return;
 	}
@@ -729,7 +751,8 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 					container->refcount--;
 					if (container->refcount>0) {
 						container = *container_ptr = (zval *) emalloc(sizeof(zval));
-						container->EA=0;
+						container->EA.is_ref=0;
+						container->EA.locks = 0;
 					}
 					container->refcount=1;
 				}
@@ -744,6 +767,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 		FREE_OP(op2, free_op2);
 		INC_AI_COUNT(result);
+		/* No need to lock anything */
 		if (type==BP_VAR_R || type==BP_VAR_IS) {
 			*retval = &EG(uninitialized_zval_ptr);
 			return;
@@ -759,12 +783,12 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		*container_ptr = (zval *) emalloc(sizeof(zval));
 		**container_ptr = *container;
 		container = *container_ptr;
-		container->refcount=1;
-		container->EA=0;
+		INIT_PZVAL(container);
 		zendi_zval_copy_ctor(*container);
 	}
-	INC_AI_COUNT(result);
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
+	INC_AI_COUNT(result);
+	PZVAL_LOCK(**retval);
 }
 
 
@@ -856,7 +880,8 @@ void execute(zend_op_array *op_array ELS_DC)
 		zval *globals = (zval *) emalloc(sizeof(zval));
 
 		globals->refcount=1;
-		globals->EA=ZEND_EA_IS_REF;
+		globals->EA.is_ref=1;
+		globals->EA.locks = 0;
 		globals->type = IS_ARRAY;
 		globals->value.ht = &EG(symbol_table);
 		if (zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL)==FAILURE) {
@@ -971,6 +996,7 @@ binary_assign_op_addr: {
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
 						INC_AI_COUNT(&opline->result);
+						/* No need to lock anything */
 						opline++;
 						continue;
 					}
@@ -988,6 +1014,7 @@ binary_assign_op_addr: {
 					binary_op(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R));
 					Ts[opline->result.u.var].var = var_ptr;
 					INC_AI_COUNT(&opline->result);
+					PZVAL_LOCK(*var_ptr);
 					FREE_OP(&opline->op2, free_op2);
 				}
 				break;
@@ -1004,6 +1031,7 @@ binary_assign_op_addr: {
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
 						INC_AI_COUNT(&opline->result);
+						/* No need to lock anything */
 						opline++;
 						continue;
 					}
@@ -1034,6 +1062,7 @@ binary_assign_op_addr: {
 						case ZEND_PRE_DEC:
 							Ts[opline->result.u.var].var = var_ptr;
 							INC_AI_COUNT(&opline->result);
+							PZVAL_LOCK(*var_ptr);
 							break;
 					}
 				}
@@ -1100,6 +1129,7 @@ binary_assign_op_addr: {
 			case ZEND_ASSIGN_REF:
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
 				INC_AI_COUNT(&opline->result);
+				/* Handled inside zend_assign_to_variable_reference() now */
 				break;
 			case ZEND_JMP:
 #if DEBUG_ZEND>=2
@@ -1358,8 +1388,7 @@ do_fcall_common:
 							zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 
 							var_uninit(dummy);
-							dummy->refcount=1;
-							dummy->EA=0;
+							INIT_PZVAL(dummy);
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 							zend_assign_to_variable_reference(NULL, this_ptr, object_ptr, NULL ELS_CC);
 							object_ptr = NULL;
@@ -1419,8 +1448,7 @@ do_fcall_common:
 					zval *valptr = (zval *) emalloc(sizeof(zval));
 
 					*valptr = Ts[opline->op1.u.var].tmp_var;
-					valptr->refcount=1;
-					valptr->EA=0;
+					INIT_PZVAL(valptr);
 					zend_ptr_stack_push(&EG(argument_stack), valptr);
 				}
 				break;
@@ -1439,13 +1467,15 @@ do_fcall_common:
 						varptr = (zval *) emalloc(sizeof(zval));
 						var_uninit(varptr);
 						varptr->refcount=0;
-						varptr->EA=0;
+						varptr->EA.is_ref=0;
+						varptr->EA.locks = 0;
 					} else if (PZVAL_IS_REF(varptr)) {
 						zval *original_var = varptr;
 
 						varptr = (zval *) emalloc(sizeof(zval));
 						*varptr = *original_var;
-						varptr->EA = 0;
+						varptr->EA.is_ref = 0;
+						varptr->EA.locks = 0;
 						varptr->refcount = 0;
 						zval_copy_ctor(varptr);
 					}
@@ -1469,7 +1499,8 @@ send_by_ref:
 							varptr->refcount = 1;
 							zval_copy_ctor(varptr);
 						}
-						varptr->EA = ZEND_EA_IS_REF;
+						varptr->EA.is_ref = 1;
+						varptr->EA.locks = 0;
 						/* at the end of this code refcount is always 1 */
 					}
 					varptr->refcount++;
@@ -1482,6 +1513,7 @@ send_by_ref:
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
 						DEC_AI_COUNT();
+						/* No need to unlock anything, I think */
 					} else if (PZVAL_IS_REF(*param)) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
 					} else {
@@ -1495,6 +1527,7 @@ send_by_ref:
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						if (opline->op2.op_type == IS_UNUSED) {
 							DEC_AI_COUNT();
+							/* No need to unlock anything, I think */
 							break;
 						}
 						if (opline->op2.u.constant.type == IS_CONSTANT) {
@@ -1509,7 +1542,8 @@ send_by_ref:
 								*default_value = tmp;
 							}
 							default_value->refcount=0;
-							default_value->EA=0;
+							default_value->EA.is_ref=0;
+							default_value->EA.locks = 0;
 							param = &default_value;
 							assignment_value = default_value;
 						} else {
@@ -1621,8 +1655,7 @@ send_by_ref:
 
 						*new_expr = *expr;
 						expr = new_expr;
-						expr->refcount=1;
-						expr->EA=0;
+						INIT_PZVAL(expr);
 					} else {
 						if (PZVAL_IS_REF(expr)) {
 							zval *new_expr = (zval *) emalloc(sizeof(zval));
@@ -1630,8 +1663,7 @@ send_by_ref:
 							*new_expr = *expr;
 							expr = new_expr;
 							zendi_zval_copy_ctor(*expr);
-							expr->refcount=1;
-							expr->EA=0;
+							INIT_PZVAL(expr);
 						} else {
 							expr->refcount++;
 						}
@@ -1809,8 +1841,7 @@ send_by_ref:
 					zend_hash_index_update(result->value.ht, 0, value, sizeof(zval *), NULL);
 
 					key = (zval *) emalloc(sizeof(zval));
-					key->refcount=1;
-					key->EA=0;
+					INIT_PZVAL(key);
 					switch (zend_hash_get_current_key(array->value.ht, &str_key, &int_key)) {
 						case HASH_KEY_IS_STRING:
 							key->value.str.val = str_key;

@@ -61,17 +61,23 @@ ZEND_API int zval_dtor(zval *zvalue)
 				ELS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
+#ifdef USE_AI_COUNT
 					if (EG(AiCount)==0) {
 						zend_hash_destroy(zvalue->value.ht);
 						efree(zvalue->value.ht);
 					} else {
 						zend_ptr_stack_push(&EG(garbage), zvalue->value.ht);
 					}
+#else
+					zend_hash_destroy(zvalue->value.ht);
+					efree(zvalue->value.ht);
+#endif
 				}
 			}
 			break;
 		case IS_OBJECT: {
-				ELS_FETCH();
+#ifdef USE_AI_COUNT
+			ELS_FETCH();
 
 				if (EG(AiCount)==0) {
 					zend_hash_destroy(zvalue->value.obj.properties);
@@ -79,6 +85,10 @@ ZEND_API int zval_dtor(zval *zvalue)
 				} else {
 					zend_ptr_stack_push(&EG(garbage), zvalue->value.obj.properties);
 				}
+#else
+				zend_hash_destroy(zvalue->value.obj.properties);
+				efree(zvalue->value.obj.properties);
+#endif
 			}
 			break;
 		case IS_RESOURCE:
