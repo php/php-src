@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.31 2003-05-09 12:03:09 derick Exp $
+     $Id: package.dtd,v 1.32 2003-06-05 07:01:20 mj Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -83,9 +83,10 @@
 
 <!ELEMENT dep (#PCDATA)>
 <!ATTLIST dep
-	type    (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
-	rel     (has|eq|lt|le|gt|ge) 'has'
-	version CDATA                #IMPLIED>
+	optional    (yes|no)    'no'
+	type        (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
+	rel         (has|eq|lt|le|gt|ge) 'has'
+	version     CDATA                #IMPLIED>
 
 <!ELEMENT provides (#PCDATA)>
 <!ATTLIST provides
