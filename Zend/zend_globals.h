@@ -126,7 +126,7 @@ struct _zend_compiler_globals {
 
 	zend_llist import_commands;
 
-	int access_type;
+	zend_uint access_type;
 };
 
 

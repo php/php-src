@@ -152,12 +152,44 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	return ret;
 }
 
+
+inline int zend_verify_property_access(zend_property_info *property_info, zend_object *zobj TSRMLS_DC)
+{
+	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
+		case ZEND_ACC_PUBLIC:
+			return 1;
+		case ZEND_ACC_PRIVATE:
+			if (zobj->ce == EG(scope)) {
+				return 1;
+			} else {
+				return 0;
+			}
+			break;
+		case ZEND_ACC_PROTECTED: {
+				zend_class_entry *ce = zobj->ce;
+
+				while (ce) {
+					if (ce==EG(scope)) {
+						return 1;
+					}
+					ce = ce->parent;
+				}
+				return 0;
+			}			
+			break;
+	}
+	return 0;
+}
+
+
 zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zend_object *zobj;
 	zval tmp_member;
 	zval **retval;
 	zval *rv = NULL;
+	zend_property_info *property_info;
+	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -171,8 +203,23 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
-	
-	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &retval) == FAILURE) {
+
+	if (zend_hash_find(&zobj->ce->default_properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
+		std_property_info.flags = ZEND_ACC_PUBLIC;
+		std_property_info.name = Z_STRVAL_P(member);
+		std_property_info.name_length = Z_STRLEN_P(member);
+		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
+		property_info = &std_property_info;
+	}
+
+#if DEBUG_OBJECT_HANDLERS
+	zend_printf("Access type for %s::%s is %s\n", zobj->ce->name, Z_STRVAL_P(member), zend_visibility_string(property_info->flags));
+#endif
+	if (!zend_verify_property_access(property_info, zobj TSRMLS_CC)) {
+		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
+	}
+
+	if (zend_hash_find(zobj->properties, property_info->name, property_info->name_length+1, (void **) &retval) == FAILURE) {
 		if (zobj->ce->__get && !zobj->in_get) {
 			/* have getter - try with it! */
 			zobj->in_get = 1; /* prevent circular getting */
@@ -213,12 +260,15 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	return *retval;
 }
 
+
 static void zend_std_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	zend_object *zobj;
 	zval tmp_member;
 	zval **variable_ptr;
 	int setter_done = 0;
+	zend_property_info *property_info;
+	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -229,7 +279,23 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = &tmp_member;
 	}
 
-	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &variable_ptr) == SUCCESS) {
+	if (zend_hash_find(&zobj->ce->default_properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
+		std_property_info.flags = ZEND_ACC_PUBLIC;
+		std_property_info.name = Z_STRVAL_P(member);
+		std_property_info.name_length = Z_STRLEN_P(member);
+		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
+		property_info = &std_property_info;
+	}
+
+#if DEBUG_OBJECT_HANDLERS
+	zend_printf("Access type for %s::%s is %s\n", zobj->ce->name, Z_STRVAL_P(member), zend_visibility_string(property_info->flags));
+#endif
+
+	if (!zend_verify_property_access(property_info, zobj TSRMLS_CC)) {
+		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
+	}
+
+	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, std_property_info.h, (void **) &variable_ptr) == SUCCESS) {
 		if (*variable_ptr == value) {
 			/* if we already have this value there, we don't actually need to do anything */
 			setter_done = 1;

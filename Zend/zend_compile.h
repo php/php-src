@@ -102,6 +102,15 @@ typedef struct _zend_brk_cont_element {
 
 char *zend_visibility_string(zend_uint fn_flags);
 
+
+typedef struct _zend_property_info {
+	zend_uint flags;
+	char *name;
+	int name_length;
+	ulong h;
+} zend_property_info;
+
+
 struct _zend_op_array {
 	zend_uchar type;			/* MUST be the first element of this struct! */
 
@@ -434,6 +443,10 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
+
+
+void zend_duplicate_property_info(zend_property_info *property_info);
+void zend_destroy_property_info(zend_property_info *property_info);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) destroy_zend_function
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class

@@ -194,7 +194,7 @@ ZEND_API ulong zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLen
 	ulong retval;
 
 	begin_read(ht);
-	retval = zend_get_hash_value(TS_HASH(ht), arKey, nKeyLength);
+	retval = zend_get_hash_value(arKey, nKeyLength);
 	end_read(ht);
 
 	return retval;
@@ -273,11 +273,11 @@ ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_
 	end_read(source);
 }
 
-ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *p_new))
+ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam)
 {
 	begin_read(source);
 	begin_write(target);
-	zend_hash_merge_ex(TS_HASH(target), TS_HASH(source), pCopyConstructor, size, pReplaceOrig);
+	zend_hash_merge_ex(TS_HASH(target), TS_HASH(source), pCopyConstructor, size, pMergeSource, pParam);
 	end_write(target);
 	end_read(source);
 }

@@ -303,8 +303,7 @@ struct _zend_class_entry {
 
 	HashTable function_table;
 	HashTable default_properties;
-	HashTable private_properties; /* This is only needed at compile-time */
-	HashTable protected_properties; /* This is only needed at compile-time */
+	HashTable default_properties_info;
 	HashTable class_table;
 	HashTable *static_members;
 	HashTable constants_table;
