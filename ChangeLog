@@ -1,3 +1,124 @@
+2000-10-22  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * php.ini-dist
+      php.ini-optimized: Added new INI entries to default php.ini files.
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+    Added ini entry for choosing whether to use the read() wrapper or directly
+    calling the read() system call.
+
+2000-10-22  Frank M. Kromann  <fmk@swwwing.com>
+
+    * win32/php_modules.dsw: Adding iisfunc to modules workspace
+
+    * ext/iisfunc/iisfunc.dsp: Adding missing ZTS define
+
+    * ext/iisfunc/iisfunc.dsp: Oops. wrong module name !
+
+    * ext/iisfunc/.cvsignore
+      ext/iisfunc/errors.txt
+      ext/iisfunc/iisfunc.cpp
+      ext/iisfunc/iisfunc.dsp
+      ext/iisfunc/iisfunc.h
+      ext/iisfunc/setup.c
+      ext/iisfunc/setup.h:
+    Adding new extention used to manage IIS webservers on NT4 and Windows 2000
+
+
+2000-10-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.h: Need a global server filter for the Apache 2.0 module
+
+2000-10-22  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    - OCIBindByName() now does better parameter-checking. 
+
+2000-10-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/curl/curl.c:
+    Makes curl extension compile again plus some typo fixes.
+
+2000-10-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache2/mod_php4.c:
+    Output function now passes the data onto the next filter in the chain
+    Clean up some variables - bb = bucket brigade, b = bucket
+
+    * sapi/apache2/mod_php4.c: Code to flatten Apache 2.0 bucket brigades
+
+2000-10-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/fopen-wrappers.c:
+    We don't need to store NUL of the key which simplifies the lookup
+    significantly.
+
+    * ext/standard/basic_functions.c:
+    Fix php://* being handled by the ftp handler
+
+2000-10-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache2/mod_php4.c.rej
+      sapi/apache2/mod_php4.c~
+      sapi/apache2/mod_php4.rasmus
+      sapi/apache2/sapi_apache.diff: Woops, get rid of some crap
+
+    * sapi/apache2/Makefile.in
+      sapi/apache2/apMakefile.libdir
+      sapi/apache2/apMakefile.tmpl
+      sapi/apache2/config.m4
+      sapi/apache2/libphp4.module
+      sapi/apache2/libphp4.module.in
+      sapi/apache2/mod_php4.c
+      sapi/apache2/mod_php4.c.rej
+      sapi/apache2/mod_php4.c~
+      sapi/apache2/mod_php4.exp
+      sapi/apache2/mod_php4.h
+      sapi/apache2/mod_php4.rasmus
+      sapi/apache2/php.sym
+      sapi/apache2/php4apache.dsp
+      sapi/apache2/php_apache.c
+      sapi/apache2/php_apache_http.h
+      sapi/apache2/sapi_apache.c
+      sapi/apache2/sapi_apache.diff: The start of an Apache 2.0 module
+
+2000-10-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/pws-php4cgi.reg
+      win32/pws-php4isapi.reg: added reg. files for the pws, thanks to phil
+
+    * sapi/isapi/PWS-php4.reg: i'll place the reg file in the win32 folder
+    cause it doesn't really fit in this folder
+
+2000-10-22  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Corrected prototype comments for ldap_get_option and ldap_set_option
+
+    * ext/standard/array.c:
+    Fixed array_type_data_compare(). I want strings to always differ from
+    numbers, but not say 7 and 7.0 to differ.
+
+2000-10-22  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c:
+    Hopefully made some compile fixes for Solaris ("sun" is an already defined
+    symbol on Solaris.. s_un isn't...), and corrected bugs with checking for a
+    string by checking if Z_STRVAL_PP(ptr) == NULL instead of
+    Z_STRLEN_PP == 0, causing segfaults when uninitialized values were passed
+    into certain functions.
+
+    * ext/sockets/sockets.c: Oops, forgot to remove those .. thought I had..
+
+    * ext/sockets/config.m4
+      ext/sockets/sockets.c:
+    Corrected some bugs dealing with compile failures (should now compile
+    on most varieties of Linux, and should hopefully fix at least 3 of the
+    compile errors that were discovered). Also modified read() slightly
+    to take an optional parameter as to whether the data was binary or
+    text so it wouldn't stop reading on a newline or null byte received.
+
 2000-10-21  Daniel Beulshausen  <daniel@php4win.de>
 
     * ext/oci8/oci8.c: added missing def.
