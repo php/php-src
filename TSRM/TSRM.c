@@ -285,7 +285,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	for (i=0; i<id_count; i++) {
 #if MBO_0
 		if (resource_types_table[i].done) {
-			thread_resources_ptr)->storage[i] = NULL;
+			(*thread_resources_ptr)->storage[i] = NULL;
 		} else
 #endif
 		{
