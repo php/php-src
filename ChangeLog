@@ -1,3 +1,38 @@
+1999-12-31  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.dsp
+      php4.dsp
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp: .dsp updates
+
+    * php4.dsp
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp
+      sapi/isapi/php4isapi.dsp:
+    Add new Release_inline builds to Win32.  Standard release versions will not use
+    inline under Win32.
+
+    * ext/mysql/php_mysql.c
+      ext/standard/array.c
+      php.h: Happy new year (especially to Thies :)
+    - Zend branch patches merged in - get the PHP tree uptodate
+    - Clean
+
+1999-12-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/odbc/php_odbc.h:
+    Fix linking problems with iODBC. This is from the Adabas section, so
+    this might work for iODBC.
+
+    * ext/odbc/config.m4: First try at getting the ODBC stuff right
+
+    * build/rules_pear.mk: Synchronize with rules.mk
+
+    * build/rules.mk:
+    Perform manual interpolation for EXTRA_INCLUDES and EXTRA_CFLAGS
+
 1999-12-30  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
 
     * ext/odbc/php_odbc.c
