@@ -58,6 +58,7 @@ PHP_FUNCTION(mailparse_msg_extract_file);
 PHP_FUNCTION(mailparse_rfc822_parse_addresses);
 PHP_FUNCTION(mailparse_determine_best_xfer_encoding);
 PHP_FUNCTION(mailparse_stream_encode);
+PHP_FUNCTION(mailparse_uudecode_all);
 
 #include "rfc2045.h"
 #include "mailparse_rfc822.h"
