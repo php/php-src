@@ -1,3 +1,12 @@
+2004-11-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      zend_execute_API.c:
+      fix #30543
+
+    * zend_execute_API.c:
+      fix crash
+
 2004-11-16  Derick Rethans  <php@derickrethans.nl>
 
     * zend_strtod.c
