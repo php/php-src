@@ -1,3 +1,252 @@
+2004-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      Must be initialized in ZTS mode
+
+    * ZendEngine2/ZEND_CHANGES
+      ZendEngine2/ZEND_CHANGES:
+      Update
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      tests/classes/interface_doubled.phpt:
+      Fix: <interface> [extends <interface> [, <ineterface>]* ]
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFH: Bug #27104 CLI/CGI SAPI module variable name conflict
+
+2004-02-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/pspell/pspell.c:
+      There is CODING_STANDARDS..at least NEW code should respect those..
+
+    * NEWS:
+      style
+
+2004-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Bugfix #27104 CLI/CGI SAPI module variable name conflict
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      Prevent SimpleXML from silently modifying types of variables that are
+      assigned to its objects.
+      
+      Implementation notes for overloaded object modules:
+      
+      - If you return a zval which is not otherwise referenced by the extension
+        or the engine's symbol table, its reference count should be 0.
+      - If you receive a value zval in write_property/write_dimension, you
+        may only modify it if its reference count is 1.  Otherwise, you must
+        create a copy of that zval before making any changes.  You should NOT
+        modify the reference count of the value passed to you.
+      
+      Have fun!
+
+    * ZendEngine2/zend_execute.c:
+      Fix leaks in assignments to overloaded objects
+
+2004-02-11  Brian France  <list@firehawksystems.com>
+
+    * NEWS:
+      
+      	- Added checks for invalid characters in a cookie name or cookie data
+      	  from setrawcookie. (Brian)
+      	- Added new pspell functions to set the dict-dir and data-dir options.
+      (Brian)
+
+    * ext/standard/head.c:
+      
+      	Added checks for invalid characters in a cookie name or cookie data from
+      setrawcookie
+
+    * ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+      
+      	Added two new functions to set the dict-dir and data-dir options.
+
+2004-02-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/url_scanner_ex.c:
+      MFH: 'Touch' the file to make sure re2c is not needed.
+
+    * ext/standard/url_scanner_ex.c:
+      'Touch' the file to make sure re2c is not needed.
+
+    * (PHP_4_3)
+      NEWS
+      main/user_streams.c:
+      Fixed bug #27183 (userland stream wrapper segfaults on stream_write).
+
+    * ext/standard/tests/file/bug27183.phpt
+      ext/standard/tests/file/bug27183.phpt:
+      
+      file bug27183.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/tests/bug26862.phpt
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      MFH: Fixed bug #26862 (ob_flush() followed by output_reset_rewrite_vars()
+      may result in data loss).
+
+    * ext/session/tests/bug26862.phpt:
+      
+      Fixed bug #26862 (ob_flush() followed by output_reset_rewrite_vars() may
+      result in data loss).
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      Fixed bug #26862 (ob_flush() followed by output_reset_rewrite_vars() may
+      result in data loss).
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev tree (forgot to restore versions).
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix leak with overloaded objects, when they're used just "for the hell
+      of it" :)
+
+2004-02-11  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/config.m4:
+      Look in the right place for lib
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * tests/func/002.phpt
+      tests/func/003.phpt
+      tests/func/004.phpt:
+      Get rid of some yucky past, and reenable these tests
+
+    * ZendEngine2/zend_execute.c:
+      Fixed a bug the caused overloaded array indices to be converted to strings
+
+    * ZendEngine2/zend_execute.c:
+      Turn off bogus warnings with overloaded dimensions and += (and friends)
+
+2004-02-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c:
+      Proper win32 fix.
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Improve the implementation of unset() on array dimensions to be more
+      consistent with that of regular variables and string offsets
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix bug #25038
+
+2004-02-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/tests/014.phpt:
+      Fix test
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix crash (patch by Rob Richards)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c:
+      Fix exceptions thrown without a stack frame
+      Always enable set_exception_handler()
+
+2004-02-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt
+      ext/simplexml/tests/016.phpt
+      ext/simplexml/tests/bug27010.phpt:
+      Fix compiler warnings
+      Update tests
+
+2004-02-11  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Add version info about run-time client library
+
+    * ext/interbase/ibase_events.c
+      ext/interbase/ibase_service.c:
+      CS/WS
+
+2004-02-11  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      main/php_version.h:
+      - Change to b4
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_list.h:
+      Change FETCH_RESOURCE to return false on error instead of null, for
+      consistency with other error situations
+
+    * ext/standard/dl.c:
+      Finally add a notice to hint people that using dl() is a bad idea...
+
+    * ZendEngine2/zend_compile.c:
+      Fix bug #26802 (the right aspects of it found by Marcus, anyway :)
+
+    * ZendEngine2/tests/bug26802.phpt:
+      Fix and clarify the test case
+
+    * ZendEngine2/zend_execute_API.c:
+      Complete the fix for handling of exceptions happening during the
+      argument passing phase of function calls (fixes bug #26866)
+
+    * ZendEngine2/zend_execute_API.c:
+      whitespace
+
+2004-02-11  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      removed printfs :)
+      Thx Andi!
+
+    * ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt:
+      changed first param in mysqli_bind_param
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      changed first parameter in mysqli_bind_param from array to string
+      (as discussed on berlin db meeting)
+
+2004-02-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      fixed a compilation error.
+
 2004-02-10  Zeev Suraski  <zeev@zend.com>
 
     * ZendEngine2/tests/bug26698.phpt:
