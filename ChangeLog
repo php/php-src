@@ -1,3 +1,40 @@
+2003-05-27  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/PEAR/Registry.php:
+      - Fix the "weird bug" with different serialized file under cli/cgi or
+      apache sapi
+      Important Notice:
+      *always* use 'wb' to write file, sapi cli and cgi force the default to be
+      binary, apache does not.
+
+2003-05-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/browscap.c:
+      MFB: php_error_docref -> zend_error (MINIT)
+
+    * (PHP_4_3)
+      ext/standard/browscap.c:
+      There is no point using php_error_docref in MINIT.
+
+2003-05-27  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * (PHP_4_3)
+      ext/yaz/php_yaz.c:
+      Fix close of log file.
+
+    * ext/yaz/php_yaz.c:
+      Fix close of log file. Ensure that YAZ log file is reset too
+
+2003-05-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xml/xml.c:
+      Fix compiler warnings.
+
+2003-05-27  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/string.c:
+      MFB: LC_MESSAGES support
+
 2003-05-26  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/cgi/cgi_main.c:
