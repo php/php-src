@@ -135,6 +135,7 @@ pval *cfg_get_entry(char *name, uint name_length);
 
 
 /* Standard message handlers */
+PHPAPI PHP_INI_MH(OnUpdateBool);
 PHPAPI PHP_INI_MH(OnUpdateInt);
 PHPAPI PHP_INI_MH(OnUpdateReal);
 PHPAPI PHP_INI_MH(OnUpdateString);
