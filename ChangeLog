@@ -1,3 +1,135 @@
+2001-10-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Another fix for Tomcat 4.
+
+    * sapi/servlet/web.xml: Fix for Tomcat 4.
+
+2001-10-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS: updated status of getListOf()
+
+    * pear/DB/mysql.php: added list of databases and users
+
+    * pear/DB/pgsql.php: added list of databases
+
+    * pear/DB/common.php:
+    make getListOf() to more datatype returned by drivers->getSpecialQuery()
+
+2001-10-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zlib/zlib.c: - fix crash bug
+
+2001-10-27  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimePart.php: Whitespace
+
+    * pear/Mail/mimePart.php:
+    Changed output format of the headers to enable easy passing to pear smtp,
+    sendmail and mail classes.
+
+2001-10-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/parsedate.y
+      ext/standard/tests/time/002.phpt: - MFH for bug fix of #9640 and #13789
+
+    * ext/standard/tests/time/002.phpt
+      ext/standard/parsedate.y: - Fix for bugs #9640 and #13789
+
+2001-10-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php: return "not capable" when try to get the "views list"
+
+    * pear/DB/common.php:
+    the returned param from getSpecialQuery can be now a error code or
+    a Pear Error object
+
+    * pear/DB/STATUS
+      pear/DB/pgsql.php: added users list for pgsql
+
+    * pear/DB/STATUS: added status of the new getListOf() method
+
+2001-10-27  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php:
+    Now returns permissions and filename of the decoded file.
+
+    * pear/Mail/mimeDecode.php: Minor documentation fix for uudecode function.
+
+    * pear/Mail/mimeDecode.php: Added uudecode function.
+
+2001-10-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php: Added views list
+
+    * pear/DB/odbc.php
+      pear/DB/sybase.php
+      pear/DB/oci8.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php:
+    added getSpecialQuery support for the rest of backends and for some
+    of them the table list
+
+    * pear/DB/mysql.php
+      pear/DB/pgsql.php
+      pear/DB/common.php:
+    Initial support for retrieving special info from the backend.
+    Actually only tables list for mysql and postgres
+
+2001-10-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/skeleton.c: These were supposed to match
+
+2001-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Get rid of post_off-hack which was only suitable for POST data
+    which fit into the small thttpd read buffer.  Do a small recv
+    after content-length bytes have been read to accomodate non-conforming
+    user-agents.
+
+    * sapi/thttpd/thttpd.c: Improved handling of posts
+
+2001-10-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zlib/zlib.c: Modified the error message a bit. Happy now Andi? :)
+
+2001-10-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php
+      pear/scripts/pear.in: * actually implement -s/-S options :-)
+
+2001-10-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/config.m4
+      ext/wddx/wddx.c: MFH
+
+    * ext/msession/config.m4
+      ext/session/config.m4
+      ext/wddx/wddx.c: Fixed bug: #13844
+
+    * main/rfc1867.c:
+    - Fixed HTTP file upload support to handle big files better. 
+
+    * ext/zlib/zlib.c
+      php.ini-dist
+      php.ini-recommended:
+    - Prevent PHP from starting if output_handler is set and
+      zlib.output_compression is on
+    - Added notes to the bundled php.ini files about this.
+
+2001-10-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/array.c:
+    - Added array_chunk() function that splits an array into chunks of specified
+      size. 
+
 2001-10-26  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/crc32.c
