@@ -404,7 +404,6 @@ class PEAR_Downloader extends PEAR_Common
             $this->log(0, "Package '{$curinfo['package']}' already installed, skipping");
             return false;
         }
-        $curver = $curinfo['version'];
         $releases = $this->_remote->call('package.info', $pkgfile, 'releases');
         if (!count($releases)) {
             return $this->raiseError("No releases found for package '$pkgfile'");
