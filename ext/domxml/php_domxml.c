@@ -326,6 +326,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(parent,					domxml_node_parent,				NULL)
 	PHP_FALIAS(parent_node,				domxml_node_parent,				NULL)
 	PHP_FALIAS(insert_before,			domxml_node_insert_before,		NULL)
+	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(append_child,			domxml_node_append_child,		NULL)
 	PHP_FALIAS(remove_child,			domxml_node_remove_child,		NULL)
 	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
@@ -2048,6 +2049,44 @@ PHP_FUNCTION(domxml_node_append_child)
 	 */
 //	child = xmlAddSibling(nodep, new_child);
 	child = xmlAddChild(nodep, new_child);
+
+	if (NULL == child) {
+		php_error(E_WARNING, "%s(): couldn't append node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	DOMXML_RET_OBJ(rv, child, &ret);
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_append_sibling(object domnode)
+   Adds node to list of siblings */
+PHP_FUNCTION(domxml_node_append_sibling)
+{
+	zval *id, *rv, *node;
+	xmlNodePtr child, nodep, new_child;
+	int ret;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
+		return;
+	}
+
+	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
+
+	if (child->type == XML_ATTRIBUTE_NODE) {
+		php_error(E_WARNING, "%s(): can't append attribute node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (NULL == (new_child = xmlCopyNode(child, 1))) {
+		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	// FIXME reverted xmlAddChildList; crashes
+	child = xmlAddSibling(nodep, new_child);
 
 	if (NULL == child) {
 		php_error(E_WARNING, "%s(): couldn't append node", get_active_function_name(TSRMLS_C));
