@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added "pear" executable, requires CGI version installed (Stig)
+- Added extension ii for Ingres II native support. See README in ext/ii
+  directory. (David H)
+- Added Win32 project for the Interbase module (Zeev)
 - Added ability to perform calls to the parent class without explicitly
   specifying its name, using parent::func_name(...) (Zeev, Zend Engine)
 - You can now call Ora_Error() without prameters to get the reason
