@@ -23,6 +23,7 @@ PHP_MINFO_FUNCTION(rpc);
 ZEND_BEGIN_MODULE_GLOBALS(rpc)
 	zend_object_handle handle;
 	HashTable *instance;
+	HashTable *handlers;
 ZEND_END_MODULE_GLOBALS(rpc)
 
 #ifdef ZTS
