@@ -18,6 +18,11 @@
 #define _COMPILE_H
 
 #include "zend.h"
+
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
 #include "zend_llist.h"
 #define YYSTYPE znode
 #include "zend-parser.h"
