@@ -31,7 +31,7 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
-dGVzdA==
+%s
 To: example@example.com
 Subject: =?BIG5?B?tPrF5yBUcmFkaXRpb25hbCBDaGluZXNl?=
 Mime-Version: 1.0
