@@ -125,8 +125,8 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_OBJECT: {
 				zval function_name;
 
-				function_name.value.str.len = sizeof("__print")-1;
-				function_name.value.str.val = estrndup("__print", function_name.value.str.len);
+				function_name.value.str.len = sizeof("to_string")-1;
+				function_name.value.str.val = estrndup("to_string", function_name.value.str.len);
 				function_name.type = IS_STRING;
 
 				if (call_user_function(NULL, expr, &function_name, expr_copy, 0, NULL)==FAILURE) {
