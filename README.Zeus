@@ -12,6 +12,8 @@ website (http://www.zeus.com) for upgrade instructions.
 Earlier versions of Zeus (3.3.6) can also run PHP, but it is
 suggested that you upgrade for full compatibility.
 
+You should compile PHP using the gcc compiler. Other compilers may
+cause build errors.
 
 To build the ISAPI version of PHP, start the configuration with:
 
