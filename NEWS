@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Made pageinfo.c thread-safe (Sascha)
 - Made implode() binary-safe (Andrei)
 - Made strstr(), stristr(), and ucwords() binary-safe() (Andrei)
 - Made strtoupper(), strtolower(), substr_replace() binary-safe. (Andrei)
