@@ -41,6 +41,7 @@ typedef struct {
 	int key;					/* For error reporting. */
 	int semid;					/* Returned by semget(). */
 	int count;					/* Acquire count for auto-release. */
+	int auto_release;			/* flag that says to auto-release. */
 } sysvsem_sem;
 
 extern sysvsem_module php_sysvsem_module;
