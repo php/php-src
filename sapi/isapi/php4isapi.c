@@ -74,8 +74,6 @@ static char *isapi_special_server_variable_names[] = {
 #define SPECIAL_VAR_HTTPS		1
 #define SPECIAL_VAR_PHP_SELF	2
 
-static char *isapi_special_server_variables[NUM_SPECIAL_VARS];
-
 static char *isapi_server_variable_names[] = {
 	"AUTH_PASSWORD",
 	"AUTH_TYPE",
@@ -426,6 +424,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	char *variable;
 	char *strtok_buf = NULL;
+	char *isapi_special_server_variables[NUM_SPECIAL_VARS];
 	LPEXTENSION_CONTROL_BLOCK lpECB;
 
 	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
