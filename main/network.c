@@ -768,6 +768,12 @@ static int php_sockop_flush(php_stream *stream TSRMLS_DC)
 	return fsync(sock->socket);
 }
 
+static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	return fstat(sock->socket, &ssb->sb);
+}
+
 static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -869,9 +875,10 @@ static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS
 php_stream_ops php_stream_socket_ops = {
 	php_sockop_write, php_sockop_read,
 	php_sockop_close, php_sockop_flush,
+	"socket",
 	NULL, php_sockop_gets,
 	php_sockop_cast,
-	"socket"
+	php_sockop_stat
 };
 
 

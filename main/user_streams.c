@@ -33,6 +33,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 
 static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
+	NULL,
+	NULL,
 	NULL
 };
 
@@ -504,9 +506,10 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_write, php_userstreamop_read,
 	php_userstreamop_close, php_userstreamop_flush,
+	"user-space",
 	php_userstreamop_seek, php_userstreamop_gets,
 	NULL, /* cast */
-	"user-space"
+	NULL /* stat */
 };
 
 

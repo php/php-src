@@ -1529,9 +1529,8 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	int type;
-	void *what;
-	struct stat stat_sb;
-	int fd;
+	php_stream *stream;
+	php_stream_statbuf stat_ssb;
 	
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
@@ -1540,41 +1539,37 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	stream = (php_stream *) zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
+	ZEND_VERIFY_RESOURCE(stream);
 
-	if (FAILURE == php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
-		RETURN_FALSE;
-	}
-	
-	if (fstat(fd, &stat_sb)) {
+	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb.st_dev);
-	MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb.st_ino);
-	MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb.st_mode);
-	MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_sb.st_nlink);
-	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb.st_uid);
-	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb.st_gid);
+	MAKE_LONG_ZVAL_INCREF(stat_dev, stat_ssb.sb.st_dev);
+	MAKE_LONG_ZVAL_INCREF(stat_ino, stat_ssb.sb.st_ino);
+	MAKE_LONG_ZVAL_INCREF(stat_mode, stat_ssb.sb.st_mode);
+	MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_ssb.sb.st_nlink);
+	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
+	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb.st_rdev); 
+	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev); 
 #else
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
-	MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb.st_size);
-	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb.st_atime);
-	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb.st_mtime);
-	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb.st_ctime);
+	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
+	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
+	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
+	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb.st_blksize); 
+	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize); 
 #else
 	MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-	MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_sb.st_blocks);
+	MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_ssb.sb.st_blocks);
 #else
 	MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
 #endif

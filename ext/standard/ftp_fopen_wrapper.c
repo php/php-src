@@ -77,8 +77,21 @@ static int php_get_ftp_result(php_stream *stream TSRMLS_DC)
 	return strtol(tmp_line, NULL, 10);
 }
 
+static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
+		php_stream *stream,
+		php_stream_statbuf *ssb
+		TSRMLS_DC)
+{
+	/* For now, we return with a failure code to prevent the underlying
+	 * file's details from being used instead. */
+	return -1;
+}
+
+
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
+	NULL,
+	php_stream_ftp_stream_stat,
 	NULL
 };
 

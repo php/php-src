@@ -43,6 +43,8 @@
 #include "build-defs.h"
 #endif
 
+#define STREAM_DEBUG 0
+
 /* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
 #define emalloc_rel_orig(size)	\
@@ -76,6 +78,10 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, int pe
 
 	memset(ret, 0, sizeof(php_stream));
 
+#if STREAM_DEBUG
+fprintf(stderr, "stream_alloc: %s:%p\n", ops->label, ret);
+#endif
+	
 	ret->ops = ops;
 	ret->abstract = abstract;
 	ret->is_persistent = persistent;
@@ -90,6 +96,10 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 {
 	int ret = 1;
 
+#if STREAM_DEBUG
+fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label, stream, stream->in_free, close_options);
+#endif
+	
 	if (stream->in_free)
 		return 1;
 
@@ -112,8 +122,6 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 			return fclose(stream->stdiocast);
 		}
 
-		php_stream_flush(stream);
-
 		ret = stream->ops->close(stream, close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 0 : 1 TSRMLS_CC);
 		stream->abstract = NULL;
 
@@ -126,7 +134,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
 
-		if (stream->wrapper && stream->wrapper->wops->closer) {
+		if (stream->wrapper && stream->wrapper->wops && stream->wrapper->wops->closer) {
 			stream->wrapper->wops->closer(stream->wrapper, stream TSRMLS_CC);
 			stream->wrapper = NULL;
 		}
@@ -202,6 +210,26 @@ PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC)
 		return 1;
 	}
 	return 0;
+}
+
+PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	memset(ssb, 0, sizeof(*ssb));
+
+	/* if the stream was wrapped, allow the wrapper to stat it */
+	if (stream->wrapper && stream->wrapper->wops->stream_stat != NULL) {
+		return stream->wrapper->wops->stream_stat(stream->wrapper, stream, ssb TSRMLS_CC);
+	}
+
+	/* if the stream doesn't directly support stat-ing, return with failure.
+	 * We could try and emulate this by casting to a FD and fstat-ing it,
+	 * but since the fd might not represent the actual underlying content
+	 * this would give bogus results. */
+	if (stream->ops->stat == NULL) {
+		return -1;
+	}
+
+	return stream->ops->stat(stream, ssb TSRMLS_CC);
 }
 
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
@@ -367,20 +395,29 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		if (fstat(srcfd, &sbuf) == 0) {
 			void *srcfile;
 
+#if STREAM_DEBUG
+			fprintf(stderr, "mmap attempt: maxlen=%d filesize=%d\n", maxlen, sbuf.st_size);
+#endif
+	
 			if (maxlen > sbuf.st_size || maxlen == 0)
 				maxlen = sbuf.st_size;
-
+#if STREAM_DEBUG
+			fprintf(stderr, "mmap attempt: will map maxlen=%d\n", maxlen);
+#endif
+		
 			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
 
-				*buf = pemalloc_rel_orig(persistent, maxlen);
+				*buf = pemalloc_rel_orig(maxlen + 1, persistent);
 
 				if (*buf)	{
 					memcpy(*buf, srcfile, maxlen);
+					(*buf)[maxlen] = '\0';
 					ret = maxlen;
 				}
 
 				munmap(srcfile, maxlen);
+
 				return ret;
 			}
 		}
@@ -388,7 +425,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	}
 #endif
 
-	ptr = *buf = pemalloc_rel_orig(persistent, step);
+	ptr = *buf = pemalloc_rel_orig(step, persistent);
 	max_len = step;
 
 	while((ret = php_stream_read(src, ptr, max_len - len)))	{
@@ -687,11 +724,25 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	}
 }
 
+static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	int fd;
+	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
+
+	assert(data != NULL);
+
+	fd = fileno(data->file);
+
+	return fstat(fd, &ssb->sb);
+}
+
 php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
-	php_stdiop_close, php_stdiop_flush, php_stdiop_seek,
+	php_stdiop_close, php_stdiop_flush,
+	"STDIO",
+	php_stdiop_seek,
 	php_stdiop_gets, php_stdiop_cast,
-	"STDIO"
+	php_stdiop_stat
 };
 /* }}} */
 
@@ -850,7 +901,6 @@ static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 {
 	ssize_t ret;
 	TSRMLS_FETCH();
-
 	ret = php_stream_read(((php_stream *)cookie), buffer, size);
 	return ret;
 }
