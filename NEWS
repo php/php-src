@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Oct 2003, Version 4.3.4RC3
+29 Oct 2003, Version 4.3.4RC3
 - Fixed bug #25955 (Compile failure on MacOSX 10.3 Panther). (Marko, Dan)
 - Fixed bug #25922 (Crash in error handler when 5th argument is modified). 
   (Ilia)
