@@ -310,7 +310,9 @@ static int pdo_sqlite2_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
-		add_next_index_string(info, einfo->errmsg, 1);
+		if (einfo->errmsg) {
+			add_next_index_string(info, einfo->errmsg, 1);
+		}
 	}
 
 	return 1;
