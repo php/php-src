@@ -1,0 +1,6 @@
+# $Id$
+
+define_option with-mysql 'mysql support?' yesnodir \
+    "defs" \
+'    Whether to include mysql support.'
+	

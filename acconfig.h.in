@@ -124,10 +124,6 @@
 #define HAVE_SYBASE 0
 #define HAVE_SYBASE_CT 0
 
-#ifndef HAVE_MYSQL
-#define HAVE_MYSQL 0
-#endif
-
 #ifndef HAVE_MSQL
 #define HAVE_MSQL 0
 #endif
