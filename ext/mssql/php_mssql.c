@@ -78,7 +78,7 @@ zend_module_entry mssql_module_entry = {
 #ifdef ZTS
 int mssql_globals_id;
 #else
-PHP_MSSQL_API php_mssql_globals mssql_globals;
+PHP_MSSQL_API zend_mssql_globals mssql_globals;
 #endif
 
 #ifdef COMPILE_DL_MSSQL
@@ -89,16 +89,16 @@ ZEND_GET_MODULE(mssql)
 
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("mssql.allow_persistent",		"1",	PHP_INI_SYSTEM,	OnUpdateBool,	allow_persistent,			php_mssql_globals,		mssql_globals)
-	STD_PHP_INI_ENTRY_EX("mssql.max_persistent",		"-1",	PHP_INI_SYSTEM,	OnUpdateInt,	max_persistent,				php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.max_links",				"-1",	PHP_INI_SYSTEM,	OnUpdateInt,	max_links,					php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.min_error_severity",	"10",	PHP_INI_ALL,	OnUpdateInt,	cfg_min_error_severity,		php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.min_message_severity",	"10",	PHP_INI_ALL,	OnUpdateInt,	cfg_min_message_severity,	php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_BOOLEAN("mssql.compatability_mode",		"0",	PHP_INI_ALL,	OnUpdateBool,	compatability_mode,			php_mssql_globals,		mssql_globals)
-	STD_PHP_INI_ENTRY_EX("mssql.connect_timeout",    	"5",	PHP_INI_ALL,	OnUpdateInt,	connect_timeout,			php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.textsize",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textsize,					php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.textlimit",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textlimit,					php_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					php_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_BOOLEAN("mssql.allow_persistent",		"1",	PHP_INI_SYSTEM,	OnUpdateBool,	allow_persistent,			zend_mssql_globals,		mssql_globals)
+	STD_PHP_INI_ENTRY_EX("mssql.max_persistent",		"-1",	PHP_INI_SYSTEM,	OnUpdateInt,	max_persistent,				zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.max_links",				"-1",	PHP_INI_SYSTEM,	OnUpdateInt,	max_links,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.min_error_severity",	"10",	PHP_INI_ALL,	OnUpdateInt,	cfg_min_error_severity,		zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.min_message_severity",	"10",	PHP_INI_ALL,	OnUpdateInt,	cfg_min_message_severity,	zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_BOOLEAN("mssql.compatability_mode",		"0",	PHP_INI_ALL,	OnUpdateBool,	compatability_mode,			zend_mssql_globals,		mssql_globals)
+	STD_PHP_INI_ENTRY_EX("mssql.connect_timeout",    	"5",	PHP_INI_ALL,	OnUpdateInt,	connect_timeout,			zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.textsize",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textsize,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.textlimit",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textlimit,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 PHP_INI_END()
 
 /* error handler */
@@ -201,8 +201,7 @@ static void _close_mssql_plink(zend_rsrc_list_entry *rsrc)
 	MS_SQL_G(num_links)--;
 }
 
-#ifdef ZTS
-static void php_mssql_init_globals(php_mssql_globals *mssql_globals)
+static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 {
 	MS_SQL_G(num_persistent) = 0;
 	if (MS_SQL_G(compatability_mode)) {
@@ -211,18 +210,10 @@ static void php_mssql_init_globals(php_mssql_globals *mssql_globals)
 		MS_SQL_G(get_column_content) = php_mssql_get_column_content_without_type;	
 	}
 }
-#endif
 
 PHP_MINIT_FUNCTION(mssql)
 {
-	MSSQLLS_D;
-
-#ifdef ZTS
-	mssql_globals_id = ts_allocate_id(sizeof(php_mssql_globals), php_mssql_init_globals, NULL);
-	mssql_globals = ts_resource(mssql_globals_id);
-#else
-	MS_SQL_G(num_persistent) = 0;
-#endif
+	ZEND_INIT_MODULE_GLOBALS(mssql, php_mssql_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 	le_result = zend_register_list_destructors_ex(_free_mssql_result, NULL, "mssql result", module_number);
@@ -235,8 +226,6 @@ PHP_MINIT_FUNCTION(mssql)
 	}
 	dberrhandle((DBERRHANDLE_PROC) php_mssql_error_handler);
 	dbmsghandle((DBMSGHANDLE_PROC) php_mssql_message_handler);
-	if (MS_SQL_G(connect_timeout) < 1) MS_SQL_G(connect_timeout) = 1;
-	dbsetlogintime(MS_SQL_G(connect_timeout));
 
 	return SUCCESS;
 }
@@ -248,7 +237,6 @@ PHP_MSHUTDOWN_FUNCTION(mssql)
 	return SUCCESS;
 }
 
-
 PHP_RINIT_FUNCTION(mssql)
 {
 	MSSQLLS_FETCH();
@@ -259,6 +247,8 @@ PHP_RINIT_FUNCTION(mssql)
 	MS_SQL_G(server_message) = empty_string;
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
+	if (MS_SQL_G(connect_timeout) < 1) MS_SQL_G(connect_timeout) = 1;
+	dbsetlogintime(MS_SQL_G(connect_timeout));
 
 	return SUCCESS;
 }
