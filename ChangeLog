@@ -1,3 +1,49 @@
+2000-07-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README:
+    Fix bug 5619 - explain how to add to the classpath on Win32 machines.
+
+    Reported by: "Carl S. in 't Veld" <cveld@bigfoot.com>
+
+2000-07-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/ext_skel:
+    Make ext_skel create a Makefile.in set up to handle shared extension
+    support automatically
+
+2000-07-27  James L. Pine  <jlp@valinux.com>
+
+    * pear/Makefile.in: added DB/oci8.php to PEAR_FILES
+
+2000-07-27  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/session/session.c:
+    Reworded some of the php_error messages for grammar and clarity.
+    (For example, settled on "cannot" instead of "can't" in all case)
+
+2000-07-27  Stanislav Malyshev  <stas@zend.com>
+
+    * NEWS: Add news of recent fixes
+
+    * main/php_realpath.c:
+    Fix realpath not to die on non-existing files (bug #5790)
+    Thanks to china@thewrittenword.com
+
+2000-07-27  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in
+      pear/Socket.php:
+    Add a Socket class. If this should be somewhere other than top-level, just
+    let me know - none of the existing subdirectories made sense to me, and I
+    didn't want to add a new one just for this.
+
+2000-07-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/filestat.c: Fix safe mode handling by touch
+
+    * ext/standard/filestat.c:
+    Fix memory leak in touch when safety check fails
+
 2000-07-26  Kristian Köhntopp  <kk@shonline.de>
 
     * ext/posix/posix.c: Access to global variable safe_mode fixed.
