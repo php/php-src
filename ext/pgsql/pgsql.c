@@ -694,7 +694,7 @@ PHP_FUNCTION(pg_cmdtuples)
 /* }}} */
 
 
-char *get_fieldname(PGconn *pgsql, Oid oid, HashTable *list)
+char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
 	PGresult *result;
 	char hashed_oid_key[32];
@@ -794,7 +794,7 @@ void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string pg_fieldname(int result, int field_number)
    Returns the name of the field */
-PHP_FUNCTION(pg_field_name)
+PHP_FUNCTION(pg_fieldname)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_NAME);
 }
