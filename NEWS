@@ -19,6 +19,7 @@ PHP 4                                                                      NEWS
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
 - Fixed bug #23912 (Invalid CSS in phpinfo() output). (Ilia)
+- Fixed bug #23902 (NULL in CGI header output). (Shane)
 - Fixed bug #23898 (Proper handling of NULLs in odbc_result, odbc_fetch_into
   and odbc_result_all). (Ilia)
 - Fixed bug #23897 (Fixed a check for mbfilter_ru.h). (aleks@m2media.ru, Ilia)
@@ -26,6 +27,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
 - Fixed bug #23779 (mysql_connect(): disable local infile option if php.ini
   option "open_basedir" is set). (Georg)
+- Fixed bug #23733 (Coredump on startup with Oracle 9+). (Edin)
 - Fixed bug #23285 (Potential Stack overflow in zendlex). (Wez)
  
 29 May 2003, Version 4.3.2
