@@ -125,6 +125,10 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 	
 	stream->rsrc_id = FAILURE;
 
+	if (stream->context) {
+		stream->context = NULL;
+	}
+
 	return 0;
 }
 

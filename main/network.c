@@ -917,8 +917,9 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 		}
 	}
 	
-	if (didwrite > 0)
+	if (didwrite > 0) {
 		php_stream_notify_progress_increment(stream->context, didwrite, 0);
+	}
 
 	return didwrite;
 }
@@ -975,6 +976,13 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	if (sock->ssl_active) {
 		int retry = 1;
 
+		if (sock->is_blocked && !SSL_pending(sock->ssl_handle)) {
+			php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
+			if (sock->timeout_event) {
+				return 0;
+			}
+		}
+
 		do {
 			nr_bytes = SSL_read(sock->ssl_handle, buf, count);
 
@@ -994,8 +1002,9 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	{
 		if (sock->is_blocked) {
 			php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
-			if (sock->timeout_event)
+			if (sock->timeout_event) {
 				return 0;
+			}
 		}
 
 		nr_bytes = recv(sock->socket, buf, count, 0);
@@ -1005,8 +1014,9 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 		}
 	}
 
-	if (nr_bytes > 0)
+	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+	}
 
 	return nr_bytes;
 }
@@ -1126,6 +1136,7 @@ int _php_network_is_stream_alive(php_stream *stream)
 			}
 		}
 	}
+
 	return alive;
 }
 

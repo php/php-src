@@ -1110,8 +1110,9 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	}
 
 	php_stream_to_zval(stream, return_value);
-
-	return;
+	if (zcontext) {
+		ZVAL_ADDREF(zcontext);
+	}
 }
 /* }}} */
 
