@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Improved the php.ini reader to support constants and bitwise operators (Zeev)
 - strrev() no longer modifies arg1. (Thies)
 - Fixed buffer overruns in iptcembed(). (Thies)
 - Fixed a bug in ODBC error reporting (Zeev)
