@@ -3772,9 +3772,8 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						if (Z_STRLEN_PP(val) == 0) {
 							if (opt & PGSQL_CONV_FORCE_NULL) {
 								ZVAL_STRING(new_val, "NULL", 1);
-							}
-							else {
-								ZVAL_STRING(new_val, empty_string, 1);
+							} else {
+								ZVAL_STRING(new_val, "''", 1);
 							}
 						}
 						else {
