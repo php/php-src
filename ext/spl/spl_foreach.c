@@ -141,6 +141,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 	spl_foreach_proxy *proxy;
 
 	if (Z_TYPE_PP(obj) == IS_STRING) {
+		int has_more;
 
 		proxy = (spl_foreach_proxy*)Z_STRVAL_PP(obj);
 		obj = &proxy->obj; /* will be optimized out */
@@ -159,13 +160,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		}
 
 		spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more);
-		if (!more->type == IS_BOOL && !more->type == IS_LONG) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Method %s::has_more implements spl_forward::has_more and should return a value of type boolean or int");
-			convert_to_boolean(more);
-		}
-		if (more->value.lval) {
-			zval_dtor(more);
-			FREE_ZVAL(more);
+		has_more = i_zend_is_true(more);
+		zval_dtor(more);
+		FREE_ZVAL(more);
+		if (has_more) {
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 
 			spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value);
@@ -230,8 +228,6 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 #endif
 			NEXT_OPCODE();
 		}
-		zval_dtor(more);
-		FREE_ZVAL(more);
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
