@@ -1,3 +1,63 @@
+2005-01-27  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c:
+      MFH: Hack to fix crash caused by FBCAccess not returning errors when
+      creating an index that exists in the database.
+
+    * ext/fbsql/php_fbsql.c:
+      Hack to fix crash caused by FBCAccess not returning errors when creating an
+      index that exists in the database.
+
+2005-01-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar)
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar).
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar)
+
+2005-01-27  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/mysqli/mysqli.c:
+      MFB: fix leak in mysqli_fetch_array()
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli.c:
+      fix leak in mysqli_fetch_array() when using invalid resulttype
+
+2005-01-27  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      fix for bug #31710 (return value for mysql_rollback is reverted)
+      fixed also same behaviour for mysql_commit and mysql_autocommit
+
+2005-01-27  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/mysqli/mysqli_api.c:
+      MFB: fix segfault when invalid field offset is passed to
+      mysqli_fetch_field_direct()
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      fix segfault when invalid field offset is passed to
+      mysqli_fetch_field_direct()
+
 2005-01-26  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_3)
