@@ -696,26 +696,28 @@ class PEAR_Common extends PEAR
     function infoFromTgzFile($file)
     {
         if (!@is_file($file)) {
-            return $this->raiseError("tgz :: could not open file \"$file\"");
+            return $this->raiseError("could not open file \"$file\"");
         }
         $tar = new Archive_Tar($file);
         $content = $tar->listContent();
         if (!is_array($content)) {
-            return $this->raiseError("tgz :: could not get contents of package \"$file\"");
+            return $this->raiseError("could not get contents of package \"$file\"");
         }
         $xml = null;
         foreach ($content as $file) {
             $name = $file['filename'];
             if ($name == 'package.xml') {
                 $xml = $name;
-            } elseif (ereg('^.*/package.xml$', $name, $match)) {
+                break;
+            } elseif (ereg('package.xml$', $name, $match)) {
                 $xml = $match[0];
+                break;
             }
         }
         $tmpdir = System::mkTemp('-d pear');
         $this->addTempFile($tmpdir);
         if (!$xml || !$tar->extractList($xml, $tmpdir)) {
-            return $this->raiseError('tgz :: could not extract the package.xml file');
+            return $this->raiseError('could not extract the package.xml file');
         }
         return $this->infoFromDescriptionFile("$tmpdir/$xml");
     }
