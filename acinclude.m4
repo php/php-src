@@ -5,6 +5,15 @@ dnl This file contains local autoconf functions.
 sinclude(dynlib.m4)
 
 dnl
+dnl Separator into the configure --help display.
+dnl 
+AC_DEFUN(PHP_HELP_SEPARATOR,[
+AC_ARG_ENABLE([],[
+$1
+],[])
+])
+
+dnl
 dnl PHP_TARGET_RDYNAMIC
 dnl
 dnl Checks whether -rdynamic is supported by the compiler.  This

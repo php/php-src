@@ -141,6 +141,7 @@ sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
 
 divert(2)
+PHP_HELP_SEPARATOR([SAPI modules:])
 
 PTHREADS_CHECK
 
@@ -467,6 +468,7 @@ if test $ac_cv_type_in_addr_t = no; then
 fi
 
 divert(4)
+PHP_HELP_SEPARATOR([General settings:])
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
 [  --enable-debug          Compile with debugging symbols.], no)
@@ -637,6 +639,17 @@ AC_CHECK_LIB(crypt, crypt, [
 ])
 
 divert(5)
+PHP_HELP_SEPARATOR([Extensions:
+
+  --with-EXTENSION=[shared[,PATH]]
+  
+    NOTE: Not all extensions can be build as 'shared'.
+
+    Example: --with-foobar=shared,/usr/local/foobar/
+
+      o Builds the foobar extension as shared extension.
+      o foobar package install prefix is /usr/local/foobar/
+])
 
 PHP_CONFIGURE_PART(Configuring extensions)
 
@@ -644,6 +657,9 @@ PHP_CONFIGURE_PART(Configuring extensions)
 esyscmd(./scripts/config-stubs ext)
 
 PHP_FAST_OUTPUT(sapi/$PHP_SAPI/Makefile)
+
+
+PHP_HELP_SEPARATOR([Other settings:])
 
 AC_MSG_CHECKING([whether to enable versioning])
 AC_ARG_ENABLE(versioning,
