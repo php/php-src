@@ -140,8 +140,8 @@ PHP_FUNCTION(imap_utf7_encode);
 PHP_FUNCTION(imap_mime_header_decode);
 
 ZEND_BEGIN_MODULE_GLOBALS(imap)
-	char imap_user[80];
-	char imap_password[80];
+	char *imap_user;
+	char *imap_password;
 	STRINGLIST *imap_folders;
 	STRINGLIST *imap_sfolders;
 	STRINGLIST *imap_alertstack;
