@@ -1,3 +1,81 @@
+2003-09-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      fix some threading issues
+      fix mem leaks in append_child with attribute nodes
+
+2003-09-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Show name of missing function as typed
+
+    * ZendEngine2/zend_default_classes.c:
+      Use studlyCaps in exception class
+
+    * ZendEngine2/zend_compile.c
+      tests/classes/interfaces_002.phpt:
+      Go with studlyCaps in error messages/backtrace/reflection output
+
+2003-09-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/php_apache_http.h:
+      regex_t is used by both Apache & mbregex. This little check prevent compile
+      failure, while php is compiled as dso module & mbstring is enabled.
+
+2003-09-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * php4.spec.in:
+      MFB
+
+    * (PHP_4_3)
+      php4.spec.in:
+      --enable-track-vars does not exist
+
+2003-09-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer3.phpt:
+      add rmdir test, add comment to remind me to finish installed_as test before
+      moving on to next one
+
+    * pear/tests/pear_installer3.phpt:
+      modify chmod test to be truly permissions-filesystem-based-specific
+
+    * pear/tests/pear_installer3.phpt:
+      more file transaction tests
+
+    * pear/PEAR/Installer.php:
+      oops - params are reversed, my bad
+
+    * pear/PEAR/Installer.php:
+      bug in chmod file transaction operation error message
+      bug in chmod file transaction test - was testing the perms to see if they
+      were a writable file
+
+    * pear/PEAR/Installer.php:
+      phpdoc error
+
+2003-09-17  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/interbase.dsp
+      ext/interbase/interbase.rc:
+      Link to fbclient.dll if available
+      Add client lib name to dll version info
+
+2003-09-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer3.phpt:
+      cut-and-paste error
+
+    * pear/PEAR/Installer.php:
+      correct typo "committed"
+      add error checking to commitFileTransaction()
+
+    * pear/tests/pear_installer3.phpt:
+      some beginning tests for commitFileTransaction()
+
 2003-09-16  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_installer3.phpt:
