@@ -113,6 +113,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;
+	intern->hasKeys = 0;
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -145,6 +146,10 @@ PHP_MINIT_FUNCTION(xsl)
 	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
 				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_object_php);
+ 
+	REGISTER_LONG_CONSTANT("XSL_CLONE_AUTO",      0,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_CLONE_NEVER",    -1,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_CLONE_ALWAYS",    1,     CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
