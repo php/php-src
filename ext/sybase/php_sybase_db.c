@@ -1108,9 +1108,11 @@ PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
-		Z_TYPE_P(return_value)=IS_OBJECT;
-		Z_OBJPROP_P(return_value) = Z_ARRVAL_P(return_value);
-		Z_OBJCE_P(return_value) = ZEND_STANDARD_CLASS_DEF_PTR;
+		object_and_properties_init(
+			return_value,
+			ZEND_STANDARD_CLASS_DEF_PTR,
+			Z_ARRVAL_P(return_value)
+		);
 	}
 }
 /* }}} */
