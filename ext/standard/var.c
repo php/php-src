@@ -199,7 +199,7 @@ void php_var_serialize(pval *buf, pval **struc)
 			return;
 
 		case IS_OBJECT: {
-				zval *retval_ptr;
+				zval *retval_ptr = NULL;
 				zval *fname;
 				int res;
 				CLS_FETCH();
@@ -510,7 +510,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			}
 
 			if ((*rval)->type == IS_OBJECT) {
-				zval *retval_ptr;
+				zval *retval_ptr = NULL;
 				zval *fname;
 				CLS_FETCH();
 
