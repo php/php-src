@@ -1,3 +1,35 @@
+2000-05-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/dba/dba_cdb.c: fix bug 4533
+
+2000-05-21  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/basic_functions.c:
+    Fix #4230. Putenv() was modifying its argument, a no-no.
+
+2000-05-21  Andi Gutmans  <andi@php.net>
+
+    * main.c:
+    - Move activate_models() back to where it was. I don't want to make such
+    - an optimization right before 4.0.0. Who knows, maybe one of the phpinfo()
+    - functions depends on some information only available after RINIT.
+    - In any case, my fix for .phps stays in.
+
+    * main.c:
+    - Fix Apache php source highlighting mode. It was crashing due to the
+    - module shutdown functions being called when the startup functions weren't
+    - being called.
+
+2000-05-21  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/cookies.php: use simpler foreach instead of while
+
+    * ext/java/reflect.java: passing Strings as Objects
+
+2000-05-21  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c: Turn off retrieving the whole error stack
+
 2000-05-20  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
 
     * ext/standard/php_string.h
