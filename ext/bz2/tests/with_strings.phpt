@@ -2,8 +2,6 @@
 BZ2 with strings
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php // $Id$
 

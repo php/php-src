@@ -1,7 +1,5 @@
 --TEST--
 is_scalar() function test
---POST--
---GET--
 --FILE--
 <?php
 class foo {}

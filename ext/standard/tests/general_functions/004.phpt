@@ -1,7 +1,5 @@
 --TEST--
 fgetcsv() with tab delimited fields (BUG #8258)
---POST--
---GET--
 --FILE--
 <?php 
 chdir(dirname(__FILE__));

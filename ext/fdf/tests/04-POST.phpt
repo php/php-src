@@ -2,7 +2,6 @@
 FDF POST data parsing
 --SKIPIF--
 <?php if (php_sapi_name()=='cli' || !extension_loaded("fdf")) print "skip"; ?>
---CGI--
 --HEADERS--
 return <<<END
 Content-Type=application/vnd.fdf
@@ -29,7 +28,6 @@ trailer
 
 >>
 %%EOF
---GET--
 --FILE--
 <?php 
 echo strlen($HTTP_FDF_DATA)."\n";

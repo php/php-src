@@ -2,8 +2,6 @@
 Check for ncurses presence
 --SKIPIF--
 <?php if (!extension_loaded("ncurses")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 echo "ncurses extension is available";

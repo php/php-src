@@ -2,8 +2,6 @@
 InterBase: array handling
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

@@ -2,8 +2,6 @@
 InterBase: connect, close and pconnect
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

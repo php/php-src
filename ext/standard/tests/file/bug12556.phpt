@@ -1,7 +1,5 @@
 --TEST--
 Bug #12556 (fgetcsv() ignores lengths when quotes not closed)
---POST--
---GET--
 --FILE--
 <?php
 $fp = fopen(dirname(__FILE__)."/test.csv", "r");

@@ -1,7 +1,5 @@
 --TEST--
 sprintf() function
---POST--
---GET--
 --FILE--
 <?php 
 

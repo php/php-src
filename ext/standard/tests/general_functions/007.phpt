@@ -1,7 +1,5 @@
 --TEST--
 MD5 / Base64
---POST--
---GET--
 --FILE--
 <?php
 function test($str) {

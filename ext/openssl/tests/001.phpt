@@ -3,8 +3,6 @@ OpenSSL private key functions
 --SKIPIF--
 <?php // vim600:syn=php
 include('skipif.inc'); ?>
---POST--
---GET--
 --FILE--
 <?php
 echo "Creating private key\n";

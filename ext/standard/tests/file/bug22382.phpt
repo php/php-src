@@ -1,7 +1,5 @@
 --TEST--
 Bug #22382 (fgetcsv() does not handle escaped quotes correctly)
---POST--
---GET--
 --FILE--
 <?php
 $fp = fopen(dirname(__FILE__)."/test2.csv", "r");

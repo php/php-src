@@ -2,8 +2,6 @@
 Check for dio presence
 --SKIPIF--
 <?php if (!extension_loaded("dio")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 echo "dio extension is available";

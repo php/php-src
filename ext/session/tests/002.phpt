@@ -7,7 +7,5 @@ session_unset() without a initialized session
 error_reporting(E_ALL);
 session_unset();
 print "ok\n";
---GET--
---POST--
 --EXPECT--
 ok

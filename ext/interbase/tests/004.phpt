@@ -2,8 +2,6 @@
 InterBase: BLOB test
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

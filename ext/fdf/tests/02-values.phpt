@@ -2,8 +2,6 @@
 FDF open/save and set/get values
 --SKIPIF--
 <?php if (!extension_loaded("fdf")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
 $f1 = fdf_create();
