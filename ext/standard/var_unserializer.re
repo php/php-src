@@ -463,6 +463,10 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 
 	*p = YYCURSOR;
 
+	if (elements < 0) {
+		return 0;
+	}
+
 	INIT_PZVAL(*rval);
 	Z_TYPE_PP(rval) = IS_ARRAY;
 	ALLOC_HASHTABLE(Z_ARRVAL_PP(rval));
