@@ -515,6 +515,14 @@ static inline void php_register_server_variables(TSRMLS_D)
 	if (SG(request_info).auth_password) {
 		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr TSRMLS_CC);
 	}
+	/* store request init time */
+	{
+		zval new_entry;
+		Z_TYPE(new_entry) = IS_LONG;
+		Z_LVAL(new_entry) = sapi_get_request_time(TSRMLS_C);
+		php_register_variable_ex("REQUEST_TIME", &new_entry, array_ptr TSRMLS_CC);
+	}
+
 	PG(magic_quotes_gpc) = magic_quotes_gpc;
 }
 /* }}} */
