@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.2
+- Syncronized bundled GD library with GD 2.0.11. (Ilia)
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
   (Sebastian, Edin)
 - Improved dba extension (Marcus)
@@ -24,6 +25,7 @@ PHP 4                                                                      NEWS
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22544 (writing transparency to truecolor png images). (Ilia)
 - Fixed bug #22520 (mcrypt_generic_deinit() was not available on Windows). (Edin)
 - Fixed bug #22508 (Added protection against circular HTML redirects). (Ilia)
 - Fixed bug #22402 (opening of ftp for read/write could fail due to invalid
