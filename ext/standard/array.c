@@ -53,12 +53,12 @@ php_array_globals array_globals;
 #define EXTR_PREFIX_SAME	2
 #define	EXTR_PREFIX_ALL		3
 
-#define SORT_DESC		   -1
-#define SORT_ASC		    1
-
 #define SORT_REGULAR		0
 #define SORT_NUMERIC		1
 #define	SORT_STRING			2
+
+#define SORT_DESC		   	3
+#define SORT_ASC		    4
 
 PHP_MINIT_FUNCTION(array)
 {
@@ -2392,6 +2392,10 @@ out:
 }
 /* }}} */
 
+#define MULTISORT_ORDER	0
+#define MULTISORT_TYPE	1
+#define MULTISORT_LAST	2
+
 int multisort_compare(const void *a, const void *b)
 {
 	Bucket**	  ab = *(Bucket ***)a;
@@ -2403,8 +2407,10 @@ int multisort_compare(const void *a, const void *b)
 	
 	r = 0;
 	do {
+		set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r]);
+
 		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
-		result = ARRAYG(multisort_flags)[r] * temp.value.lval;
+		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * temp.value.lval;
 		if (result != 0)
 			return result;
 		r++;
@@ -2413,7 +2419,8 @@ int multisort_compare(const void *a, const void *b)
 }
 
 #define MULTISORT_ABORT						\
-	efree(ARRAYG(multisort_flags));			\
+	for (k = 0; k < MULTISORT_LAST; k++)	\
+		efree(ARRAYG(multisort_flags)[k]);	\
 	efree(arrays);							\
 	efree(args);							\
 	RETURN_FALSE;
@@ -2430,9 +2437,10 @@ PHP_FUNCTION(array_multisort)
 	int				argc;
 	int				array_size;
 	int				num_arrays = 0;
-	int				parse_state = 0;      /* 0 - flag not allowed
-                                             1 - flag allowed     */
+	int				parse_state[MULTISORT_LAST];   /* 0 - flag not allowed
+                                             	      1 - flag allowed     */
 	int				sort_order = SORT_ASC;
+	int				sort_type  = SORT_REGULAR;
 	int				i, k;
 	ARRAYLS_FETCH();
 	
@@ -2449,9 +2457,12 @@ PHP_FUNCTION(array_multisort)
 		WRONG_PARAM_COUNT;
 	}
 
-	/* Allocate space for storing pointers to input arrays and sort flags */
+	/* Allocate space for storing pointers to input arrays and sort flags. */
 	arrays = (zval ***)ecalloc(argc, sizeof(zval **)); 
-	ARRAYG(multisort_flags) = (int *)ecalloc(argc, sizeof(int));
+	for (i = 0; i < MULTISORT_LAST; i++) {
+		parse_state[i] = 0;
+		ARRAYG(multisort_flags)[i] = (int *)ecalloc(argc, sizeof(int));
+	}
 
 	/* Here we go through the input arguments and parse them. Each one can
 	   be either an array or a sort order flag which follows an array. If
@@ -2460,47 +2471,69 @@ PHP_FUNCTION(array_multisort)
 	   to be an array.
 	 */
 	for (i = 0; i < argc; i++) {
-		if ((*args[i])->type == IS_ARRAY) {
+		if (Z_TYPE_PP(args[i]) == IS_ARRAY) {
 			/* We see the next array so update the sort order of
 			   the previous array and reset the sort order */
 			if (i > 0) {
-				ARRAYG(multisort_flags)[num_arrays-1] = sort_order;
+				ARRAYG(multisort_flags)[MULTISORT_ORDER][num_arrays-1] = sort_order;
+				ARRAYG(multisort_flags)[MULTISORT_TYPE][num_arrays-1] = sort_type;
 				sort_order = SORT_ASC;
+				sort_type = SORT_REGULAR;
 			}
 			arrays[num_arrays++] = args[i];
 
 			/* next one may be array or sort flag */
-			parse_state = 1;
-		} else if ((*args[i])->type == IS_LONG) {
-			/* flag allowed here */
-			if (parse_state == 1) {
-				if ((*args[i])->value.lval == SORT_ASC || (*args[i])->value.lval == SORT_DESC) {
-					/* Save the flag and make sure then next arg is not a flag */
-					sort_order = (*args[i])->value.lval;
-					parse_state = 0;
-				} else {
+			for (k = 0; k < MULTISORT_LAST; k++)
+				parse_state[k] = 1;
+		} else if (Z_TYPE_PP(args[i]) == IS_LONG) {
+			switch (Z_LVAL_PP(args[i])) {
+				case SORT_ASC:
+				case SORT_DESC:
+					/* flag allowed here */
+					if (parse_state[MULTISORT_ORDER] == 1) {
+						/* Save the flag and make sure then next arg is not the current flag. */
+						sort_order = Z_LVAL_PP(args[i]) == SORT_DESC ? -1 : 1;
+						parse_state[MULTISORT_ORDER] = 0;
+					} else {
+						php_error(E_WARNING, "Argument %i to %s() is expected to be an array or sorting flag that has not already been specified", i+1, get_active_function_name());
+						MULTISORT_ABORT;
+					}
+					break;
+
+				case SORT_REGULAR:
+				case SORT_NUMERIC:
+				case SORT_STRING:
+					/* flag allowed here */
+					if (parse_state[MULTISORT_TYPE] == 1) {
+						/* Save the flag and make sure then next arg is not the current flag. */
+						sort_type = Z_LVAL_PP(args[i]);
+						parse_state[MULTISORT_TYPE] = 0;
+					} else {
+						php_error(E_WARNING, "Argument %i to %s() is expected to be an array or sorting flag that has not already been specified", i+1, get_active_function_name());
+						MULTISORT_ABORT;
+					}
+					break;
+
+				default:
 					php_error(E_WARNING, "Argument %i to %s() is an unknown sort flag", i+1,
 							  get_active_function_name());
 					MULTISORT_ABORT;
-				}
-			} else {
-				php_error(E_WARNING, "Argument %i to %s() is expected to be an array", i+1,
-						  get_active_function_name());
-				MULTISORT_ABORT;
+					break;
+
 			}
 		} else {
-			php_error(E_WARNING, "Argument %i to %s() is expected to be an array or a sort flag", i+1,
-					  get_active_function_name());
+			php_error(E_WARNING, "Argument %i to %s() is expected to be an array or a sort flag", i+1, get_active_function_name());
 			MULTISORT_ABORT;
 		}
 	}
-	/* Take care of the last array sort flag */
-	ARRAYG(multisort_flags)[num_arrays-1] = sort_order;
+	/* Take care of the last array sort flags. */
+	ARRAYG(multisort_flags)[MULTISORT_ORDER][num_arrays-1] = sort_order;
+	ARRAYG(multisort_flags)[MULTISORT_TYPE][num_arrays-1] = sort_type;
 	
 	/* Make sure the arrays are of the same size */
-	array_size = zend_hash_num_elements((*arrays[0])->value.ht);
+	array_size = zend_hash_num_elements(Z_ARRVAL_PP(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
-		if (zend_hash_num_elements((*arrays[i])->value.ht) != array_size) {
+		if (zend_hash_num_elements(Z_ARRVAL_PP(arrays[i])) != array_size) {
 			php_error(E_WARNING, "Array sizes are inconsistent");
 			MULTISORT_ABORT;
 		}
@@ -2509,7 +2542,8 @@ PHP_FUNCTION(array_multisort)
 	/* If all arrays are empty or have only one entry,
 	   we don't need to do anything. */
 	if (array_size <= 1) {
-		efree(ARRAYG(multisort_flags));
+		for (k = 0; k < MULTISORT_LAST; k++)
+			efree(ARRAYG(multisort_flags)[k]);
 		efree(arrays);
 		efree(args);
 		RETURN_TRUE;
@@ -2526,17 +2560,14 @@ PHP_FUNCTION(array_multisort)
 	
 	for (i = 0; i < num_arrays; i++) {
 		k = 0;
-		for (p = (*arrays[i])->value.ht->pListHead; p; p = p->pListNext, k++) {
+		for (p = Z_ARRVAL_PP(arrays[i])->pListHead; p; p = p->pListNext, k++) {
 			indirect[k][i] = p;
 		}
 	}
 	for (k = 0; k < array_size; k++)
 		indirect[k][num_arrays] = NULL;
 
-	/* For now, assume it's always regular sort. */
-	set_compare_func(SORT_REGULAR);
-
-	/* Do the actual sort magic - bada-bim, bada-boom */
+	/* Do the actual sort magic - bada-bim, bada-boom. */
 	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
 	
 	/* Restructure the arrays based on sorted indirect - this is mostly
@@ -2573,7 +2604,8 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < array_size; i++)
 		efree(indirect[i]);
 	efree(indirect);
-	efree(ARRAYG(multisort_flags));
+	for (k = 0; k < MULTISORT_LAST; k++)
+		efree(ARRAYG(multisort_flags)[k]);
 	efree(arrays);
 	efree(args);
 	RETURN_TRUE;
