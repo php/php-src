@@ -218,6 +218,7 @@ static void fastcgi_module_main(TLS_D SLS_DC)
 static void init_request_info( SLS_D )
 {
 	char *content_length = getenv("CONTENT_LENGTH");
+	char *content_type = getenv( "CONTENT_TYPE" );
 	const char *auth;
 	struct stat st;
 	char *pi = getenv( "PATH_INFO" );
@@ -227,7 +228,7 @@ static void init_request_info( SLS_D )
 	SG(request_info).request_method = getenv("REQUEST_METHOD");
 	SG(request_info).query_string = getenv("QUERY_STRING");
 	SG(request_info).request_uri = path_info;
-	SG(request_info).content_type = getenv("CONTENT_TYPE");
+	SG(request_info).content_type = ( content_type ? content_type : "" );
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 	SG(sapi_headers).http_response_code = 200;
 
