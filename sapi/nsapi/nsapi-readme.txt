@@ -118,4 +118,4 @@ For both error and directory listing pages the original URI and
 translated URI are in the variables $_SERVER['PATH_INFO'] and
 $_SERVER['PATH_TRANSLATED'].
 
-$ Id: $
+$Id$
