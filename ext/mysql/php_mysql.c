@@ -331,6 +331,7 @@ PHP_RINIT_FUNCTION(mysql)
 
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
+	MySLS_FETCH();
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
