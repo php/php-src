@@ -1,0 +1,36 @@
+sorry, no real documentation yet ...
+just a short look at what is going on
+
+ext_skel_ng.php gets an extension description
+from an "extension.xml" file and generates working
+code and documentation stubs from that
+
+call "php ext_skel_ng.php" to see it at work,
+it will create a dummy extension including 
+
+- module globals and ini paramter setup
+- function registration and stubbs
+- documentation framework
+- config.m4 (only minimal for now)
+- ...
+
+almost every aspect of an extension may now be 
+configured using one xml description file instead
+of the old mixture of command line parameters
+and a proto file
+
+it is even possible to embed function code into
+the xml description right away, so it should be
+possible to create complete working extensions
+from just the xml description without further
+editing in a not to distant future
+
+for now almost all the 'helpfull comments' have 
+been removed from the generated code. some of
+them (like 'uncomment this if you have ini params)
+just don't make sense anymore, others will come
+back (configurable) at a later state 
+
+... have fun!
+
+Hartmut Holzgraefe <hholzgra@php.net>

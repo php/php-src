@@ -1,0 +1,80 @@
+<!--
+  -->
+
+<!ELEMENT extension (name|summary|description|license|maintainers|release|changelog|functions|constants|globals|deps)*>
+<!ATTLIST extension type    (source|binary|empty) "empty"
+                  version CDATA                 #REQUIRED>
+
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT summary (#PCDATA)>
+
+<!ELEMENT description (#PCDATA)>
+
+<!ELEMENT maintainers (maintainer)+>
+
+<!ELEMENT maintainer (user|role|name|email)*>
+
+<!ELEMENT user (#PCDATA)>
+
+<!ELEMENT role (#PCDATA)>
+
+<!ELEMENT email (#PCDATA)>
+
+<!ELEMENT changelog (release)*>
+
+<!ELEMENT release (version|license|state|date|notes|filelist|deps)*>
+
+<!ELEMENT version (#PCDATA)>
+
+<!ELEMENT state (#PCDATA)>
+
+<!ELEMENT license (#PCDATA)>
+
+<!ELEMENT date (#PCDATA)>
+
+<!ELEMENT notes (#PCDATA)>
+
+<!ELEMENT functions (function)*>
+<!ELEMENT function (summary,proto,description*)>
+<!ATTLIST function
+  name  CDATA #REQUIRED
+>
+<!ELEMENT proto (#PCDATA)>  
+
+<!ELEMENT constants (constant)*>
+<!ELEMENT constant (#PCDATA)>
+<!ATTLIST constant
+  name  CDATA #REQUIRED
+  value CDATA #REQUIRED
+  type  (string|int|float) "string"
+>
+
+<!ELEMENT globals (phpini|global)*>
+<!ELEMENT phpini (#PCDATA)>
+<!ATTLIST phpini
+  name CDATA #REQUIRED
+  type CDATA #REQUIRED
+  value CDATA #REQUIRED
+  access (system|perdir|user|all) "all"
+  onupdate CDATA #IMPLIED
+>
+<!ELEMENT global (#PCDATA)>
+<!ATTLIST global
+  name CDATA #REQUIRED
+  type CDATA #REQUIRED
+>
+
+<!ELEMENT deps (with|lib|header|file|program)*>
+<!ELEMENT with (#PCDATA)>
+<!ATTLIST with
+  defaults CDATA #REQUIRED
+  testfile CDATA #REQUIRED
+  name     CDATA #IMPLIED
+>
+<!ELEMENT lib (#PCDATA)>
+<!ATTLIST lib
+  name       CDATA #REQUIRED
+  function   CDATA #REQUIRED
+  searchpath CDATA #IMPLIED
+>
