@@ -50,6 +50,8 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_close,								NULL)
 	PHP_FE(mysqli_commit,								NULL)
 	PHP_FE(mysqli_connect, 								NULL)
+	PHP_FE(mysqli_connect_errno,						NULL)
+	PHP_FE(mysqli_connect_error,						NULL)
 	PHP_FE(mysqli_data_seek,							NULL)
 	PHP_FE(mysqli_debug,								NULL)
 	PHP_FE(mysqli_disable_reads_from_master,			NULL)

@@ -76,6 +76,7 @@ PHP_FUNCTION(mysqli_connect)
 		mysql_close(mysql);
 		RETURN_FALSE;
 	}
+	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
 
 	if (MyG(profiler)) {
 		prmysql = (PR_MYSQL *)MYSQLI_PROFILER_NEW(prmain, MYSQLI_PR_MYSQL, 0);
@@ -96,6 +97,22 @@ PHP_FUNCTION(mysqli_connect)
 	} else {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
+}
+/* }}} */
+
+/* {{{ proto int mysqli_connct_errno()
+   Returns the numerical value of the error message from last connect command */
+PHP_FUNCTION(mysqli_connect_errno)
+{
+	RETURN_LONG(MyG(error_no));
+}
+/* }}} */
+
+/* {{{ proto string mysqli_connect_error()
+   Returns the text of the error message from previous MySQL operation */
+PHP_FUNCTION(mysqli_connect_error) 
+{
+	RETURN_STRING(MyG(error_msg),1);
 }
 /* }}} */
 
