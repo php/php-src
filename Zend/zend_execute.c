@@ -1532,7 +1532,7 @@ do_fcall_common:
 
 							zend_hash_update(function_state.function_symbol_table, "this", sizeof("this"), &null_ptr, sizeof(zval *), (void **) &this_ptr);
 							if (!PZVAL_IS_REF(object.ptr)) {
-								zend_error(E_WARNING,"Problem with method call. Report this bug\n");
+								zend_error(E_WARNING, "Problem with method call - please report this bug");
                 			}
 							*this_ptr = object.ptr;
 							object.ptr = NULL;
