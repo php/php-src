@@ -351,7 +351,6 @@ PHP_MINFO_FUNCTION(mcrypt)
 	MCLS_FETCH();
 
 	modules = mcrypt_list_algorithms (MCG(algorithms_dir), &count);
-	printf ("boo\n");
 	if (count == 0) {
 		smart_str_appends (&tmp1, "none");
 	}
