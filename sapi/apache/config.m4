@@ -16,6 +16,13 @@ AC_ARG_WITH(apxs,
                           pathname to the Apache apxs tool; defaults to "apxs".],[
 	if test "$withval" = "yes"; then
 		APXS=apxs
+                if $APXS -q CFLAGS >/dev/null 2>&1; then
+                  :
+                else
+                  if test -x /usr/sbin/apxs ; then #SUSE 6.x 
+                    APXS=/usr/sbin/apxs
+                  fi
+                fi
 	else
 		AC_EXPAND_PATH($withval, APXS)
 	fi
