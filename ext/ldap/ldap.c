@@ -1292,7 +1292,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		if (zend_hash_get_current_key(Z_ARRVAL_PP(entry), &attribute, &index, 0) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrdup(attribute);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown attribute in the data");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown attribute in the data");
 			/* Free allocated memory */
 			while (i >= 0) {
 				efree(ldap_mods[i--]);
@@ -2098,7 +2098,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 		RETVAL_STRINGL(ldap_buf, ldap_len, 1);
 		free(ldap_buf);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Conversion from iso-8859-1 to t61 failed: %s", ldap_err2string(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Conversion from iso-8859-1 to t61 failed: %s", ldap_err2string(result));
 		RETVAL_FALSE;
 	}
 
