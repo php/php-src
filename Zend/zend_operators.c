@@ -28,6 +28,7 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_globals.h"
+#include "zend_list.h"
 
 #if WITH_BCMATH
 #include "functions/number.h"
@@ -59,98 +60,111 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				break;
 		}
 		STR_FREE(strval);
-	} else if (op->type == IS_BOOL || op->type==IS_RESOURCE) {
+	} else if (op->type == IS_BOOL) {
+		op->type = IS_LONG;
+	} else if (op->type==IS_RESOURCE) {
+		zend_list_delete(op->value.lval);
 		op->type = IS_LONG;
 	}
 }
 
-#define zendi_convert_scalar_to_number(op, holder, result) \
-	if (op==result) { \
-		convert_scalar_to_number(op); \
-	} else if ((op)->type == IS_STRING) { \
-		switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) { \
-			case IS_DOUBLE: \
-			case IS_LONG: \
-				break; \
-			case IS_BC: \
-				(holder).type = IS_DOUBLE; /* may have lost significant digits */ \
-				break; \
-			default: \
-				(holder).value.lval = strtol((op)->value.str.val, NULL, 10); \
-				(holder).type = IS_LONG; \
-				break; \
-		} \
-		(op) = &(holder); \
-	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) { \
-		(holder) = *(op); \
-		(holder).type = IS_LONG; \
-		(op) = &(holder); \
+#define zendi_convert_scalar_to_number(op, holder, result)			\
+	if (op==result) {												\
+		convert_scalar_to_number(op);								\
+	} else if ((op)->type == IS_STRING) {							\
+		switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) {	\
+			case IS_DOUBLE:											\
+			case IS_LONG:											\
+				break;												\
+			case IS_BC:												\
+				(holder).type = IS_DOUBLE; /* may have lost significant digits */	\
+				break;												\
+			default:												\
+				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
+				(holder).type = IS_LONG;							\
+				break;												\
+		}															\
+		(op) = &(holder);											\
+	} else if ((op)->type==IS_BOOL) {								\
+		(holder) = *(op);											\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
+	} else if ((op)->type==IS_RESOURCE) {							\
+		(holder) = *(op);											\
+		zend_list_delete((holder).value.lval);						\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
 	}
 
 
-#define zendi_convert_to_long(op, holder, result) \
-	if (op==result) { \
-		convert_to_long(op); \
-	} else if ((op)->type != IS_LONG) { \
-		switch ((op)->type) { \
-			case IS_BOOL: \
-			case IS_RESOURCE: \
-				break; \
-			case IS_DOUBLE: \
-				(holder).value.lval = (long) (op)->value.dval; \
-				break; \
-			case IS_STRING: \
-				(holder).value.lval = strtol((op)->value.str.val, NULL, 10); \
-				break; \
-			case IS_ARRAY: \
-				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0); \
-				break; \
-			case IS_OBJECT: \
-				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0); \
-				break; \
-			default: \
-				zend_error(E_WARNING, "Cannot convert to ordinal value"); \
-				(holder).value.lval = 0; \
-				break; \
-		} \
-		(holder).type = IS_LONG; \
-		(op) = &(holder); \
+
+#define zendi_convert_to_long(op, holder, result)					\
+	if (op==result) {												\
+		convert_to_long(op);										\
+	} else if ((op)->type != IS_LONG) {								\
+		switch ((op)->type) {										\
+			case IS_RESOURCE:										\
+				zend_list_delete((op)->value.lval);					\
+				/* break missing intentionally */					\
+			case IS_BOOL:											\
+				break;												\
+			case IS_DOUBLE:											\
+				(holder).value.lval = (long) (op)->value.dval;		\
+				break;												\
+			case IS_STRING:											\
+				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
+				break;												\
+			case IS_ARRAY:											\
+				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
+				break;												\
+			case IS_OBJECT:											\
+				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
+				break;												\
+			default:												\
+				zend_error(E_WARNING, "Cannot convert to ordinal value");			\
+				(holder).value.lval = 0;							\
+				break;												\
+		}															\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
 	}
 
 
-#define zendi_convert_to_boolean(op, holder, result) \
-	if (op==result) { \
-		convert_to_boolean(op); \
-	} else if ((op)->type != IS_BOOL) { \
-		switch ((op)->type) { \
-			case IS_LONG: \
-			case IS_RESOURCE: \
-				(holder).value.lval = ((op)->value.lval ? 1 : 0); \
-				break; \
-			case IS_DOUBLE: \
-				(holder).value.lval = ((op)->value.dval ? 1 : 0); \
-				break; \
-			case IS_STRING: \
-				if ((op)->value.str.len == 0 \
-					|| ((op)->value.str.len==1 && (op)->value.str.val[0]=='0')) { \
-					(holder).value.lval = 0; \
-				} else { \
-					(holder).value.lval = 1; \
-				} \
-				break; \
-			case IS_ARRAY: \
-				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0); \
-				break; \
-			case IS_OBJECT: \
-				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0); \
-				break; \
-			default: \
-				(holder).value.lval = 0; \
-				break; \
-		} \
-		(holder).type = IS_BOOL; \
-		(op) = &(holder); \
-	} \
+#define zendi_convert_to_boolean(op, holder, result)				\
+	if (op==result) {												\
+		convert_to_boolean(op);										\
+	} else if ((op)->type != IS_BOOL) {								\
+		switch ((op)->type) {										\
+			case IS_RESOURCE:										\
+				zend_list_delete((op)->value.lval);					\
+				/* break missing intentionally */					\
+			case IS_LONG:											\
+				(holder).value.lval = ((op)->value.lval ? 1 : 0);	\
+				break;												\
+			case IS_DOUBLE:											\
+				(holder).value.lval = ((op)->value.dval ? 1 : 0);	\
+				break;												\
+			case IS_STRING:											\
+				if ((op)->value.str.len == 0						\
+					|| ((op)->value.str.len==1 && (op)->value.str.val[0]=='0')) {	\
+					(holder).value.lval = 0;						\
+				} else {											\
+					(holder).value.lval = 1;						\
+				}													\
+				break;												\
+			case IS_ARRAY:											\
+				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
+				break;												\
+			case IS_OBJECT:											\
+				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
+				break;												\
+			default:												\
+				(holder).value.lval = 0;							\
+				break;												\
+		}															\
+		(holder).type = IS_BOOL;									\
+		(op) = &(holder);											\
+	}
 
 
 ZEND_API void convert_to_long(zval *op)
@@ -165,8 +179,10 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 	long tmp;
 
 	switch (op->type) {
-		case IS_BOOL:
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
+		case IS_BOOL:
 		case IS_LONG:
 			break;
 		case IS_DOUBLE:
@@ -204,8 +220,10 @@ ZEND_API void convert_to_double(zval *op)
 	double tmp;
 
 	switch (op->type) {
-		case IS_BOOL:
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
+		case IS_BOOL:
 		case IS_LONG:
 			op->value.dval = (double) op->value.lval;
 			op->type = IS_DOUBLE;
@@ -249,8 +267,10 @@ ZEND_API void convert_to_boolean(zval *op)
 	switch (op->type) {
 		case IS_BOOL:
 			break;
-		case IS_LONG:
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
+		case IS_LONG:
 			op->value.lval = (op->value.lval ? 1 : 0);
 			break;
 		case IS_DOUBLE:
