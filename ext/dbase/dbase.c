@@ -563,7 +563,7 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 /* {{{ proto bool dbase_create(string filename, array fields)
    Creates a new dBase-format database file */
 PHP_FUNCTION(dbase_create) {
-	pval *filename, *fields, *field, *value;
+	pval *filename, *fields, *field, **value;
 	int fd;
 	dbhead_t *dbh;
 
@@ -620,7 +620,7 @@ PHP_FUNCTION(dbase_create) {
 	
 	for (i = 0, cur_f = dbf; i < num_fields; i++, cur_f++) {
 		/* look up the first field */
-		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
+		if (zend_hash_index_find(fields->value.ht, i, (void **)&value) == FAILURE) {
 			php_error(E_WARNING, "unable to find field %d", i);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
@@ -638,21 +638,21 @@ PHP_FUNCTION(dbase_create) {
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
-		convert_to_string(value);
-		if (value->value.str.len > 10 || value->value.str.len == 0) {
-			php_error(E_WARNING, "invalid field name '%s' (must be non-empty and less than or equal to 10 characters)", value->value.str.val);
+		convert_to_string_ex(value);
+		if ((*value)->value.str.len > 10 || (*value)->value.str.len == 0) {
+			php_error(E_WARNING, "invalid field name '%s' (must be non-empty and less than or equal to 10 characters)", (*value)->value.str.val);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
-		copy_crimp(cur_f->db_fname, value->value.str.val, value->value.str.len);
+		copy_crimp(cur_f->db_fname, (*value)->value.str.val, (*value)->value.str.len);
 
 		/* field type */
 		if (zend_hash_index_find(field->value.ht,1,(void **)&value) == FAILURE) {
 			php_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
 			RETURN_FALSE;
 		}
-		convert_to_string(value);
-		cur_f->db_type = toupper(*value->value.str.val);
+		convert_to_string_ex(value);
+		cur_f->db_type = toupper(*(*value)->value.str.val);
 
 		cur_f->db_fdc = 0;
 
@@ -677,8 +677,8 @@ PHP_FUNCTION(dbase_create) {
 				free_dbf_head(dbh);
 				RETURN_FALSE;
 			}
-			convert_to_long(value);
-			cur_f->db_flen = value->value.lval;
+			convert_to_long_ex(value);
+			cur_f->db_flen = (*value)->value.lval;
 
 			if (cur_f->db_type == 'N') {
 				if (zend_hash_index_find(field->value.ht,3,(void **)&value) == FAILURE) {
@@ -686,8 +686,8 @@ PHP_FUNCTION(dbase_create) {
 					free_dbf_head(dbh);
 					RETURN_FALSE;
 				}
-				convert_to_long(value);
-				cur_f->db_fdc = value->value.lval;
+				convert_to_long_ex(value);
+				cur_f->db_fdc = (*value)->value.lval;
 			}
 			break;
 		default:
