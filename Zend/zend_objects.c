@@ -38,7 +38,7 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 }
 
 
-static inline void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	zend_objects_call_destructor(object, handle TSRMLS_CC);
 	/* Nuke the object */
