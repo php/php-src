@@ -54,8 +54,12 @@ typedef union _align_test {
 
 #define MAX_CACHED_MEMORY   64
 #define MAX_CACHED_ENTRIES	16
-
+#if (defined (__GNUC__) && __GNUC__ >= 2)
+#define PLATFORM_ALIGNMENT (__alignof__ (zend_mem_header))
+#else
 #define PLATFORM_ALIGNMENT (sizeof(align_test))
+#endif
+
 #define PLATFORM_PADDING (((PLATFORM_ALIGNMENT-sizeof(zend_mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length);
