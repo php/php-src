@@ -1323,7 +1323,11 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL
 		|| op1->type == IS_NULL || op2->type == IS_NULL) {
-		zendi_convert_to_boolean(op1, op1_copy, result);
+		if (free_op1) {
+			convert_to_boolean(op1);
+		} else {
+			zendi_convert_to_boolean(op1, op1_copy, result);
+		}
 		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
 		result->value.lval = ZEND_NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
