@@ -2168,6 +2168,8 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 						return 0;
 					}
 					SEPARATE_ZVAL(dest_entry);
+					SEPARATE_ZVAL(src_entry);
+					
 					convert_to_array_ex(dest_entry);
 					convert_to_array_ex(src_entry);
 					if (!php_array_merge(Z_ARRVAL_PP(dest_entry),
