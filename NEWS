@@ -36,10 +36,10 @@ PHP 4                                                                      NEWS
 
 26 Mar 2004, Version 4.3.5
 - Fixed possible crash using an invalid color index with a palette image in
-  imagecolortransparent (Pierre)
+  imagecolortransparent. (Pierre)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
-  This fixes our test cases allowing INI with GET sections to work (Rasmus)
-- Fixed getopt() so it works without $_SERVER (Rasmus, bfrance)
+  This fixes our test cases allowing INI with GET sections to work. (Rasmus)
+- Fixed getopt() so it works without $_SERVER. (Rasmus, bfrance)
 - Fixed crash in php_ini_scanned_files() when no additional INI files were
   actually parsed. (Jon)
 - Fixed possible crashes inside socket extension, due to missing check inside
@@ -53,7 +53,7 @@ PHP 4                                                                      NEWS
   . Added "sybct.packet_size" php.ini option.
   . Changed "sybct.login_timeout" php.ini option changeable at runtime.
   . Fixed memory leak in sybase_set_message_handler().
-- Synchronized bundled GD library with GD 2.0.17
+- Synchronized bundled GD library with GD 2.0.17. (Ilia)
 - Upgraded PCRE library to version 4.5. (Andrei)
 - Updated bundled PostgreSQL library to version 7.4 in Windows distribution.
   (Edin)
