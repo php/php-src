@@ -1,3 +1,7 @@
+2001-04-21  Andi Gutmans  <andi@zend.com>
+
+    * main/php_ini.c: - Get rid of warning.
+
 2001-04-20  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Let people know what the heck I was up to.
