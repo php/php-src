@@ -268,8 +268,8 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 	return SUCCESS;
 }
 
-static void curl_free_string(void *string) {
-	free(string);
+static void curl_free_string(void **string) {
+	efree(*string);
 }
 
 /* {{{ proto string curl_version(void)
