@@ -839,6 +839,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	zval ***params;
 	zval *retval;
 	zval *z_error_type, *z_error_message, *z_error_filename, *z_error_lineno, *z_context;
+	zval lz_context;
 	char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
@@ -901,10 +902,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			ALLOC_INIT_ZVAL(z_error_type);
 			ALLOC_INIT_ZVAL(z_error_filename);
 			ALLOC_INIT_ZVAL(z_error_lineno);
-			ALLOC_INIT_ZVAL(z_context);
 
 			z_error_message->value.str.len = zend_vspprintf(&z_error_message->value.str.val, 0, format, args);
-
 			z_error_message->type = IS_STRING;
 
 			z_error_type->value.lval = type;
@@ -919,10 +918,11 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			z_error_lineno->value.lval = error_lineno;
 			z_error_lineno->type = IS_LONG;
 
-			z_context->value.ht = EG(active_symbol_table);
-			z_context->type = IS_ARRAY;
-			z_context->is_ref = 1;
-			z_context->refcount = 2; /* we don't want this one to be freed */
+			lz_context.value.ht = EG(active_symbol_table);
+			lz_context.type = IS_ARRAY;
+			lz_context.is_ref = 1;
+			lz_context.refcount = 2; /* we don't want this one to be freed */
+			z_context = &lz_context;
 
 			params = (zval ***) emalloc(sizeof(zval **)*5);
 			params[0] = &z_error_type;
@@ -948,9 +948,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			zval_ptr_dtor(&z_error_type);
 			zval_ptr_dtor(&z_error_filename);
 			zval_ptr_dtor(&z_error_lineno);
-			if (ZVAL_REFCOUNT(z_context) == 2) {
-				FREE_ZVAL(z_context);
-			}
+			ZVAL_DELREF(z_context);
 			break;
 	}
 
