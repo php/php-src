@@ -171,6 +171,7 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));					\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else if (nDataSize == 0) {										\
+		(p)->pDataPtr = (void *) 1;										\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
 		(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
