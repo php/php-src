@@ -11,6 +11,7 @@ if (PHP_BZ2 != "no") {
 		// BZ2 extension does this slightly differently from others
 		if (PHP_BZ2_SHARED) {
 			ADD_FLAG("CFLAGS_BZ2", "/D PHP_BZ2_EXPORTS ");
+			ADD_DEF_FILE("ext\\bz2\\php_bz2.def");
 		}
 	} else {
 		WARNING("bz2 not enabled; libraries and headers not found");
