@@ -1,3 +1,15 @@
+2002-07-17  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_compile.c:
+    - Remove code which wasn't supposed to go into the patch.
+
+    * zend_compile.c
+      zend_language_parser.y: - Rejuggle some code.
+
+2002-07-17  sniper  <sniper@pb1.pair.com>
+
+    * ZEND_CHANGES: This was mentioned already above (with an example too :)
+
 2002-07-16  Andi Gutmans  <andi@pb1.pair.com>
 
     * ZEND_CHANGES: - Before I forget to list it, this was also added.

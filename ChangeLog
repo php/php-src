@@ -1,3 +1,65 @@
+2002-07-17  sniper  <sniper@pb1.pair.com>
+
+    * configure.in:
+    We have a macro for checking -R, etc. switches. (exactly same code)
+
+2002-07-17  Andrei Zmievski  <andrei@pb1.pair.com>
+
+    * ext/wddx/wddx.c: Fix DL entry point.
+
+2002-07-17  sniper  <sniper@pb1.pair.com>
+
+    * ext/gd/config.m4: Remove evil quotes
+
+2002-07-17  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/TODO: even more items on the TODO list
+
+    * ext/domxml/php_domxml.c:
+    nodename is not always set, check if it really is.
+
+2002-07-17  hholzgra  <hholzgra@pb1.pair.com>
+
+    * tests/lang/034.phpt
+      tests/lang/035.phpt:
+    Zend Engine behaviour is affected by setlocale() due to use of
+    locale aware functions like strtod(), atof(), tolower(), toupper() :(
+
+2002-07-17  derick  <derick@pb1.pair.com>
+
+    * main/main.c:
+    - set_time_limit() now returns whether it succeeded in changing the time
+      limit.
+
+2002-07-17  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c: Fixed build.
+
+2002-07-17  sniper  <sniper@pb1.pair.com>
+
+    * ext/mbstring/config.m4: unbreak the shared build..again
+
+2002-07-17  yohgaki  <yohgaki@pb1.pair.com>
+
+    * main/safe_mode.c: Accoding to safe_mode.h, php_checkuid() has six modes.
+
+    * ext/pgsql/pgsql.c:
+    Added safe_mode & open_basedir checks for pg_lo_export()
+
+    * ext/pgsql/pgsql.c: Added open_basedir check.
+
+    * php.ini-dist
+      php.ini-recommended:
+    Fixed open_basedir note - thanks to Sander. I also notice I have to modify pg_lo_import(), etc. It does not check open_basedir at all. It checks UID/GID, though. We are better to note how we should treat files in coding standard.
+
+    * ext/mbstring/config.m4:
+    Changed configure option order to make it clear option dependecy to users.
+
+    * ext/mbstring/config.m4: Disable input encoding tranlation by default.
+
+    * php.ini-recommended
+      php.ini-dist: Added note for open_basedir
+
 2002-07-16  sniper  <sniper@pb1.pair.com>
 
     * NEWS: This is the real world..
