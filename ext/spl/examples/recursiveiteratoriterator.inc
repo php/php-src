@@ -63,7 +63,7 @@ class RecursiveIteratorIterator implements Iterator
 					$sub->rewind();
 					if ($sub->hasMore()) {
 						$this->ait[++$this->count] = $sub;
-						if (!$sub instanceof RecursiveIterator)) {
+						if (!$sub instanceof RecursiveIterator) {
 							throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
 						} 
 						return;
