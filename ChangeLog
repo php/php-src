@@ -1,3 +1,132 @@
+2002-07-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * main/rfc1867.c: fixed ZTS build.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h: fixed ZTS build and added language check.
+
+2002-07-03  Jani Taskinen  <sniper@iki.fi>
+
+    * Makefile.global
+      ext/java/Makefile.frag
+      pear/Makefile.frag:
+    - Let's be tad more verbose what's happening during 'make install'
+
+2002-07-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/rfc1867.c: Fix ZTS build.
+
+2002-07-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/mbstring.c: Removed unneeded check for MBSTR_ENC_TRANS
+
+    * main/config.w32.h.in:
+    Added MBSTR_ENC_TRANS to allow compilation and linking under win32
+
+2002-07-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.PARAMETER_PARSING_API:
+    Please note that you need to use 'int' as a length type when
+    fetching strings.
+
+2002-07-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/mbstring.dsp: Adding _RU files to project
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h: Fixing ZTS build
+
+    * ext/standard/php_string.h: Adding missing prototype
+
+2002-07-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * README.PARAMETER_PARSING_API: - Fix README
+
+2002-07-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+    fixed shift_jis character corruption including 0x5c as second byte on uploaded filename.
+
+2002-07-03  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c: formatting fixes
+
+    * ext/curl/curl.c: fix bug #17963
+
+2002-07-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/cgi_main.c: Add CRLF after complete HTTP reply header
+
+    * sapi/cgi/cgi_main.c:
+    Use "Status: %d" instead of "HTTP/1.0 %d X" in the CGI SAPI module
+    as per the CGI RFC.
+
+    The status notation is incompatible with Apache's non-parsed-header mode
+    "nph-*", but that has never worked before anyway.  One could make the
+    format string configurable.
+
+    Noticed by: Sebastian Bergmann
+
+2002-07-03  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/xmlrpc/libxmlrpc/encodings.c: MFH (win32 build fix)
+
+    * ext/xmlrpc/libxmlrpc/encodings.c: Fixed win32 build.
+
+2002-07-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.c: fix typo
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/pi3web/pi3web_sapi.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c
+      ext/standard/head.c:
+    Add sapi_header_op interface which supersedes the sapi_add_header and _ex
+    calls.
+
+    Revert the change to the sapi_add_header_ex interface.
+
+    Fix various bugs:
+
+    1.  header("HTTP/1.0 306 foo");
+        header("Location: absolute-uri");
+
+        did not work in combination with several SAPI modules, because
+        http_status_line was never properly reset.  And thus, all SAPI
+        modules which looked at http_status_line ignored the changed
+        http_response_code.
+
+    2.  The CGI SAPI did not send out the HTTP status line at all, if
+        http_status_line had not been set explicitly by calling
+        header("HTTP/1.0 200 foo");
+
+2002-07-03  Christian Stocker  <chregu@phant.ch>
+
+    * pear/PEAR/WebInstaller.php:
+    - Not maintained (and maybe not working) anymore
+    - There's a new project PEAR_Frontend_Web which does a much better job
+
+2002-07-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h: - Fix windows build
+
+2002-07-03  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hyperwave/hw.c: - fixed bug in hwnew_new_document_from_file
+
+2002-07-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/filestat.c:
+    Fix the nasty crash. And Sterling..test next time before you commit?
+
+    * ext/session/session.c: ws fix
+
 2002-07-02  Frank M. Kromann  <frank@kromann.info>
 
     * ext/standard/mail.c:
