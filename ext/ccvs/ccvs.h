@@ -12,25 +12,25 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Brendan W. McAdams <brendan@plexmedia.com>                  |
+   | Authors: Brendan W. McAdams <bmcadams@php.net>                  |
    |              Doug DeJulio <ddj@redhat.com>                           |
    +----------------------------------------------------------------------+
-*/ 
+*/
 
 	#include <cv_api.h>
-	
+
 	extern zend_module_entry ccvs_module_entry;
-	
+
 	#define ccvs_module_ptr &ccvs_module_entry
 	#define phpext_ccvs_ptr ccvs_module_ptr
-	
+
 	/* Declare functions not in cv_api.h but in libccvs.a. */
 	char *hks_ptr_ptrtostring(void *vptr);
 	void *hks_ptr_stringtoptr(char *str);
-	
+
 	/* Declare the Functions this Module Makes Available to Zend */
-	
-	
+
+
 		/* Pre-declarations of functions */
 		PHP_FUNCTION(ccvs_init);
 		PHP_FUNCTION(ccvs_done);
@@ -47,13 +47,13 @@
 		PHP_FUNCTION(ccvs_lookup);
 		PHP_FUNCTION(ccvs_report);
 		PHP_FUNCTION(ccvs_command);
-		PHP_FUNCTION(ccvs_textvalue); 
+		PHP_FUNCTION(ccvs_textvalue);
 		PHP_MINFO_FUNCTION(ccvs);
-		
+
 		/* Declare the information we need to dynamically link this module later */
 		#if COMPILE_DL
 		DLEXPORT zend_module_entry *get_module(void) { return &ccvs_module_entry; }
 		#endif
-		
+
 	/* End exports */
-	
+
