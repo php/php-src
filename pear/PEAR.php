@@ -567,6 +567,35 @@ class PEAR
     }
 
     // }}}
+    // {{{ assertExtension()
+
+    /**
+    * OS independant PHP extension load
+    *
+    * @param string $ext The extension name
+    * @return bool Success or not on the dl() call
+    */
+    function loadExtension($ext)
+    {
+        if (!extension_loaded($ext)) {
+            if (OS_WINDOWS) {
+                $suffix = '.dll';
+            } elseif (PHP_OS == 'HP-UX') {
+                $suffix = '.sl';
+            } elseif (PHP_OS == 'AIX') {
+                $suffix = '.a';
+            } elseif (PHP_OS == 'OSX') {
+                $suffix = '.bundle';
+            } else {
+                $suffix = '.so';
+            }
+            $ext = strtolower($ext);
+            return @dl('php_'.$ext.$suffix) || @dl($ext.$suffix);
+        }
+        return true;
+    }
+
+    // }}}
 }
 
 // {{{ _PEAR_call_destructors()
