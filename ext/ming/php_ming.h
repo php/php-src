@@ -30,11 +30,6 @@
 
 #include "ming.h"
 
-/* Checking for thread safety and issue warning if necessary. */
-#ifdef ZTS
-#warning ming has not been tested for thread-safety!  nyah!
-#endif
-
 extern zend_module_entry ming_module_entry;
 #define ming_module_ptr &ming_module_entry
 
