@@ -55,39 +55,39 @@ static char const cvsid[] = "$Id$";
 	* 
 	*/
 
-	zend_function_entry ccvs_functions[] = {
-		ZEND_FE(ccvs_init,NULL)
-		ZEND_FALIAS(cv_init,ccvs_init,NULL)
-		ZEND_FE(ccvs_done,NULL)
-		ZEND_FALIAS(cv_done,ccvs_done,NULL)
-		ZEND_FE(ccvs_new,NULL)
-		ZEND_FALIAS(cv_new,ccvs_new,NULL)
-		ZEND_FE(ccvs_add,NULL)
-		ZEND_FALIAS(cv_add,ccvs_add,NULL)
-		ZEND_FE(ccvs_delete,NULL)
-		ZEND_FALIAS(cv_delete,ccvs_delete,NULL)
-		ZEND_FE(ccvs_auth,NULL)
-		ZEND_FALIAS(cv_auth,ccvs_auth,NULL)
-		ZEND_FE(ccvs_return,NULL)
-		ZEND_FALIAS(cv_return,ccvs_return,NULL)
-		ZEND_FE(ccvs_reverse,NULL)
-		ZEND_FALIAS(cv_reverse,ccvs_reverse,NULL)
-		ZEND_FE(ccvs_sale,NULL)
-		ZEND_FALIAS(cv_sale,ccvs_sale,NULL)
-		ZEND_FE(ccvs_void,NULL)
-		ZEND_FALIAS(cv_void,ccvs_void,NULL)
-		ZEND_FE(ccvs_status,NULL)
-		ZEND_FALIAS(cv_status,ccvs_status,NULL)
-		ZEND_FE(ccvs_count,NULL)
-		ZEND_FALIAS(cv_count,ccvs_count,NULL)
-		ZEND_FE(ccvs_lookup,NULL)
-		ZEND_FALIAS(cv_lookup,ccvs_lookup,NULL)
-		ZEND_FE(ccvs_report,NULL)
-		ZEND_FALIAS(cv_report,ccvs_report,NULL)
-		ZEND_FE(ccvs_command,NULL)
-		ZEND_FALIAS(cv_command,ccvs_command,NULL)
-		ZEND_FE(ccvs_textvalue,NULL)
-		ZEND_FALIAS(cv_textvalue,ccvs_textvalue,NULL)
+	function_entry ccvs_functions[] = {
+		PHP_FE(ccvs_init,NULL)
+		PHP_FALIAS(cv_init,ccvs_init,NULL)
+		PHP_FE(ccvs_done,NULL)
+		PHP_FALIAS(cv_done,ccvs_done,NULL)
+		PHP_FE(ccvs_new,NULL)
+		PHP_FALIAS(cv_new,ccvs_new,NULL)
+		PHP_FE(ccvs_add,NULL)
+		PHP_FALIAS(cv_add,ccvs_add,NULL)
+		PHP_FE(ccvs_delete,NULL)
+		PHP_FALIAS(cv_delete,ccvs_delete,NULL)
+		PHP_FE(ccvs_auth,NULL)
+		PHP_FALIAS(cv_auth,ccvs_auth,NULL)
+		PHP_FE(ccvs_return,NULL)
+		PHP_FALIAS(cv_return,ccvs_return,NULL)
+		PHP_FE(ccvs_reverse,NULL)
+		PHP_FALIAS(cv_reverse,ccvs_reverse,NULL)
+		PHP_FE(ccvs_sale,NULL)
+		PHP_FALIAS(cv_sale,ccvs_sale,NULL)
+		PHP_FE(ccvs_void,NULL)
+		PHP_FALIAS(cv_void,ccvs_void,NULL)
+		PHP_FE(ccvs_status,NULL)
+		PHP_FALIAS(cv_status,ccvs_status,NULL)
+		PHP_FE(ccvs_count,NULL)
+		PHP_FALIAS(cv_count,ccvs_count,NULL)
+		PHP_FE(ccvs_lookup,NULL)
+		PHP_FALIAS(cv_lookup,ccvs_lookup,NULL)
+		PHP_FE(ccvs_report,NULL)
+		PHP_FALIAS(cv_report,ccvs_report,NULL)
+		PHP_FE(ccvs_command,NULL)
+		PHP_FALIAS(cv_command,ccvs_command,NULL)
+		PHP_FE(ccvs_textvalue,NULL)
+		PHP_FALIAS(cv_textvalue,ccvs_textvalue,NULL)
 		{NULL,NULL}
 	};
 
@@ -107,9 +107,9 @@ static char const cvsid[] = "$Id$";
 		
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
 
-ZEND_FUNCTION(ccvs_init) /* cv_init() */
+PHP_FUNCTION(ccvs_init) /* cv_init() */
 {
-  zval **name;
+  pval **name;
   void *vsess;
   char *p;
   
@@ -152,9 +152,9 @@ ZEND_FUNCTION(ccvs_init) /* cv_init() */
   return;
 }
 
-ZEND_FUNCTION(ccvs_done) /* cv_done() */
+PHP_FUNCTION(ccvs_done) /* cv_done() */
 {
-  zval **sess;
+  pval **sess;
   void *vsess;
 
   if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &sess) != SUCCESS)) /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
@@ -171,10 +171,10 @@ ZEND_FUNCTION(ccvs_done) /* cv_done() */
   RETURN_STRING("OK", 1);
 }
 
-ZEND_FUNCTION(ccvs_new) /* cv_new() */
+PHP_FUNCTION(ccvs_new) /* cv_new() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   int r;
@@ -195,12 +195,12 @@ ZEND_FUNCTION(ccvs_new) /* cv_new() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_add) /* cv_add() */
+PHP_FUNCTION(ccvs_add) /* cv_add() */
 {
-  zval **psess;
-  zval **pinvoice;
-  zval **pargtype;
-  zval **pargval;
+  pval **psess;
+  pval **pinvoice;
+  pval **pargtype;
+  pval **pargval;
   void *sess;
   char *invoice;
   int argtype;
@@ -236,10 +236,10 @@ ZEND_FUNCTION(ccvs_add) /* cv_add() */
 *  to the CCVS C API ref.  I didn't try to implement it for that reason.  If anyone needs it, they can add it in
 *	themselves I'm sure.
 */
-ZEND_FUNCTION(ccvs_delete) /* cv_delete() */
+PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -259,10 +259,10 @@ ZEND_FUNCTION(ccvs_delete) /* cv_delete() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_auth) /* cv_auth() */
+PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -282,10 +282,10 @@ ZEND_FUNCTION(ccvs_auth) /* cv_auth() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_return) /* cv_return() */
+PHP_FUNCTION(ccvs_return) /* cv_return() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -305,10 +305,10 @@ ZEND_FUNCTION(ccvs_return) /* cv_return() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_reverse) /* cv_reverse() */
+PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -328,10 +328,10 @@ ZEND_FUNCTION(ccvs_reverse) /* cv_reverse() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_sale) /* cv_sale() */
+PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -351,10 +351,10 @@ ZEND_FUNCTION(ccvs_sale) /* cv_sale() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_void) /* cv_void() */
+PHP_FUNCTION(ccvs_void) /* cv_void() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -374,10 +374,10 @@ ZEND_FUNCTION(ccvs_void) /* cv_void() */
   RETURN_STRING(cv_ret2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_status) /* cv_status() */
+PHP_FUNCTION(ccvs_status) /* cv_status() */
 {
-  zval **psess;
-  zval **pinvoice;
+  pval **psess;
+  pval **pinvoice;
   void *sess;
   char *invoice;
   register int r;
@@ -397,10 +397,10 @@ ZEND_FUNCTION(ccvs_status) /* cv_status() */
   RETURN_STRING(cv_stat2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_count) /* cv_count() */
+PHP_FUNCTION(ccvs_count) /* cv_count() */
 {
-  zval **psess;
-  zval **ptype;
+  pval **psess;
+  pval **ptype;
   void *sess;
   int type;
   register int r;
@@ -420,11 +420,11 @@ ZEND_FUNCTION(ccvs_count) /* cv_count() */
   RETURN_LONG(r);
 }
 
-ZEND_FUNCTION(ccvs_lookup) /* cv_lookup() */
+PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
 {
-  zval **psess;
-  zval **ptype;
-  zval **pinum;
+  pval **psess;
+  pval **ptype;
+  pval **pinum;
   void *sess;
   int type;
   long inum;
@@ -447,10 +447,10 @@ ZEND_FUNCTION(ccvs_lookup) /* cv_lookup() */
   RETURN_STRING(cv_textvalue(sess), 1);
 }
 
-ZEND_FUNCTION(ccvs_report) /* cv_report() */
+PHP_FUNCTION(ccvs_report) /* cv_report() */
 {
-  zval **psess;
-  zval **ptype;
+  pval **psess;
+  pval **ptype;
   void *sess;
   int type;
   long inum;
@@ -471,11 +471,11 @@ ZEND_FUNCTION(ccvs_report) /* cv_report() */
   RETURN_STRING(cv_stat2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_command) /* cv_command() */
+PHP_FUNCTION(ccvs_command) /* cv_command() */
 {
-  zval **psess;
-  zval **ptype;
-  zval **pargval;
+  pval **psess;
+  pval **ptype;
+  pval **pargval;
   void *sess;
   int type;
   register int r;
@@ -498,9 +498,9 @@ ZEND_FUNCTION(ccvs_command) /* cv_command() */
   RETURN_STRING(cv_stat2str(r), 1);
 }
 
-ZEND_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
+PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
 {
-  zval **psess;
+  pval **psess;
   void *sess;
 
   if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &psess) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
