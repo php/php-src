@@ -80,6 +80,17 @@
 # include <dlfcn.h>
 #endif
 
+#if HAVE_MACH_O_DYLD_H
+#include <mach-o/dyld.h>
+
+/* MH_BUNDLE loading functions for Mac OS X / Darwin */
+void *zend_mh_bundle_load (char* bundle_path);
+int zend_mh_bundle_unload (void *bundle_handle);
+void *zend_mh_bundle_symbol(void *bundle_handle, const char *symbol_name);
+const char *zend_mh_bundle_error(void);
+
+#endif /* HAVE_MACH_O_DYLD_H */
+
 #if defined(HAVE_LIBDL)
 
 # ifndef RTLD_LAZY
