@@ -32,8 +32,9 @@
 
 #include "ext/standard/php_string.h"
 
-#define PREG_PATTERN_ORDER			0
-#define PREG_SET_ORDER				1
+#define PREG_PATTERN_ORDER			1
+#define PREG_SET_ORDER				2
+#define PREG_OFFSET_CAPTURE			(1<<8)
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -99,6 +100,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -310,6 +312,21 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 }
 /* }}} */
 
+static inline void add_offset_pair(zval *result, char *str, int len, int offset)
+{
+	zval *match_pair;
+
+	ALLOC_ZVAL(match_pair);
+	array_init(match_pair);
+	INIT_PZVAL(match_pair);
+
+	/* Add (match, offset) to the return value */
+	add_next_index_stringl(match_pair, str, len, 1);
+	add_next_index_long(match_pair, offset);
+	
+	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
+}
+
 /* {{{ php_pcre_match
  */
 static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
@@ -317,8 +334,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	zval			**regex,			/* Regular expression */
 					**subject,			/* String to match against */
 					**subpats = NULL,	/* Array for subpatterns */
-					**subpats_order,	/* Order of the results in the subpatterns
-										   array for global match */
+					**flags,			/* Match control flags */
 					*result_set,		/* Holds a set of subpatterns after
 										   a global match */
 				   **match_sets = NULL;	/* An array of sets of matches for each
@@ -334,7 +350,8 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int				 start_offset;		/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
 	int				 i;
-	int				 subpats_order_val = 0;	/* Integer value of subpats_order */
+	int				 subpats_order = 0;	/* Order of subpattern matches */
+	int				 offset_capture = 0;/* Capture match offsets: yes/no */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	const char	   **stringlist;		/* Used to hold list of subpatterns */
 	char			*match;				/* The current match */
@@ -353,20 +370,21 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				WRONG_PARAM_COUNT;
 			}
 			if (global)
-				subpats_order_val = PREG_PATTERN_ORDER;
+				subpats_order = PREG_PATTERN_ORDER;
 			break;
 
 		case 4:
-			if (zend_get_parameters_ex(4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
+			if (zend_get_parameters_ex(4, &regex, &subject, &subpats, &flags) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 	
-			/* Make sure subpats_order is a number */
-			convert_to_long_ex(subpats_order);
-			subpats_order_val = Z_LVAL_PP(subpats_order);
-			if (subpats_order_val < PREG_PATTERN_ORDER ||
-				subpats_order_val > PREG_SET_ORDER) {
-				zend_error(E_WARNING, "Wrong value for parameter 4 in call to preg_match_all()");
+			convert_to_long_ex(flags);
+			offset_capture = Z_LVAL_PP(flags) & PREG_OFFSET_CAPTURE;
+			subpats_order = Z_LVAL_PP(flags) & 0xff;
+			if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
+				(!global && subpats_order != 0)) {
+				zend_error(E_WARNING, "Wrong value for parameter 4 in call to %s()", get_active_function_name());
+				return;
 			}
 			break;
 			
@@ -396,7 +414,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 
 	/* Allocate match sets array and initialize the values */
-	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
+	if (global && subpats_order == PREG_PATTERN_ORDER) {
 		match_sets = (zval **)emalloc(num_subpats * sizeof(zval *));
 		for (i=0; i<num_subpats; i++) {
 			ALLOC_ZVAL(match_sets[i]);
@@ -439,11 +457,16 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				}
 
 				if (global) {	/* global pattern matching */
-					if (subpats_order_val == PREG_PATTERN_ORDER) {
+					if (subpats_order == PREG_PATTERN_ORDER) {
 						/* For each subpattern, insert it into the appropriate array. */
 						for (i = 0; i < count; i++) {
-							add_next_index_stringl(match_sets[i], (char *)stringlist[i],
-												   offsets[(i<<1)+1] - offsets[i<<1], 1);
+							if (offset_capture) {
+								add_offset_pair(match_sets[i], (char *)stringlist[i],
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+							} else {
+								add_next_index_stringl(match_sets[i], (char *)stringlist[i],
+													   offsets[(i<<1)+1] - offsets[i<<1], 1);
+							}
 						}
 						/*
 						 * If the number of captured subpatterns on this run is
@@ -463,19 +486,28 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						
 						/* Add all the subpatterns to it */
 						for (i = 0; i < count; i++) {
-							add_next_index_stringl(result_set, (char *)stringlist[i],
-												   offsets[(i<<1)+1] - offsets[i<<1], 1);
+							if (offset_capture) {
+								add_offset_pair(result_set, (char *)stringlist[i],
+												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+							} else {
+								add_next_index_stringl(result_set, (char *)stringlist[i],
+													   offsets[(i<<1)+1] - offsets[i<<1], 1);
+							}
 						}
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &result_set,
 													sizeof(zval *), NULL);
 					}
-				}
-				else {			/* single pattern matching */
+				} else {			/* single pattern matching */
 					/* For each subpattern, insert it into the subpatterns array. */
 					for (i = 0; i < count; i++) {
-						add_next_index_stringl((*subpats), (char *)stringlist[i],
-											   offsets[(i<<1)+1] - offsets[i<<1], 1);
+						if (offset_capture) {
+							add_offset_pair(*subpats, (char *)stringlist[i],
+											offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1]);
+						} else {
+							add_next_index_stringl(*subpats, (char *)stringlist[i],
+												   offsets[(i<<1)+1] - offsets[i<<1], 1);
+						}
 					}
 				}
 
@@ -505,7 +537,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	} while (global);
 
 	/* Add the match sets to the output array and clean up */
-	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
+	if (global && subpats_order == PREG_PATTERN_ORDER) {
 		for (i=0; i<num_subpats; i++) {
 			zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
@@ -518,7 +550,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns])
+/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags]])
    Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
@@ -526,7 +558,7 @@ PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int order])
+/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags])
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
@@ -1063,21 +1095,6 @@ PHP_FUNCTION(preg_replace_callback)
 	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
-static inline void add_offset_pair(zval *result, char *str, int len, int offset)
-{
-	zval *match_pair;
-
-	ALLOC_ZVAL(match_pair);
-	array_init(match_pair);
-	INIT_PZVAL(match_pair);
-
-	/* Add (match, offset) to the return value */
-	add_next_index_stringl(match_pair, str, len, 1);
-	add_next_index_long(match_pair, offset);
-	
-	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
-}
 
 /* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) 
    Split string into an array using a perl-style regular expression as a delimiter */
