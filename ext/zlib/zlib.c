@@ -39,6 +39,7 @@
 #include "ext/standard/head.h"
 #include "safe_mode.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "php_zlib.h"
 #include "fopen-wrappers.h"
 #if HAVE_PWD_H
@@ -141,11 +142,11 @@ PHP_MSHUTDOWN_FUNCTION(zlib)
 
 PHP_MINFO_FUNCTION(zlib)
 {
-		PUTS("Zlib support active (compiled with ");
-		PUTS(ZLIB_VERSION);
-		PUTS(", linked with ");
-		PUTS((char *)zlibVersion());
-		PUTS(").");
+	php_info_print_table_start();
+	php_info_print_table_row(2, "ZLib Support", "enabled");
+	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION );
+	php_info_print_table_row(2, "Linked Version", (char *)zlibVersion() );
+	php_info_print_table_end();
 }
 
 static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path);

@@ -31,6 +31,7 @@
 
 
 #include "php.h"
+#include "ext/standard/info.h"
 #if !defined(PHP_API_VERSION) || PHP_API_VERSION < 19990421
 #include "internal_functions.h"
 #endif
@@ -134,7 +135,9 @@ DLEXPORT zend_module_entry *get_module(void) { return &posix__module_entry; }
 
 static PHP_MINFO_FUNCTION(posix)
 {
-    PUTS("$Revision$\n");
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Revision", "$Revision$");
+	php_info_print_table_end();
 }
 
 /* {{{ proto int posix_kill(int pid, int sig)

@@ -23,6 +23,7 @@
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -708,9 +709,11 @@ PHP_GINIT_FUNCTION(basic)
 
 PHP_MINFO_FUNCTION(basic)
 {
+        php_info_print_table_start();
 	PHP_MINFO(regex)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 	PHP_MINFO(dl)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 	PHP_MINFO(mail)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+        php_info_print_table_end();
 	PHP_MINFO(assert)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 

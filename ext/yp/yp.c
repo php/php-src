@@ -18,6 +18,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "ext/standard/info.h"
 
 #if HAVE_YP
 
@@ -176,6 +177,8 @@ PHP_FUNCTION(yp_next) {
 /* }}} */
 
 PHP_MINFO_FUNCTION(yp) {
-	PUTS("Compiled with YP Support.");
+        php_info_print_table_start();
+        php_info_print_table_row(2, "YP Support", "enabled");
+        php_info_print_table_end();
 }
 #endif /* HAVE_YP */
