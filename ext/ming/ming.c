@@ -37,19 +37,19 @@ static zend_function_entry ming_functions[] = {
   { NULL, NULL, NULL }
 };
 
-static inline SWFMovie getMovie(zval *id);
-static inline SWFFill getFill(zval *id);
-static inline SWFGradient getGradient(zval *id);
-static inline SWFBitmap getBitmap(zval *id);
-static inline SWFShape getShape(zval *id);
-static inline SWFFont getFont(zval *id);
-static inline SWFText getText(zval *id);
-static inline SWFTextField getTextField(zval *id);
-static inline SWFDisplayItem getDisplayItem(zval *id);
-static inline SWFButton getButton(zval *id);
-static inline SWFAction getAction(zval *id);
-static inline SWFMorph getMorph(zval *id);
-static inline SWFMovieClip getSprite(zval *id);
+static SWFMovie getMovie(zval *id);
+static SWFFill getFill(zval *id);
+static SWFGradient getGradient(zval *id);
+static SWFBitmap getBitmap(zval *id);
+static SWFShape getShape(zval *id);
+static SWFFont getFont(zval *id);
+static SWFText getText(zval *id);
+static SWFTextField getTextField(zval *id);
+static SWFDisplayItem getDisplayItem(zval *id);
+static SWFButton getButton(zval *id);
+static SWFAction getAction(zval *id);
+static SWFMorph getMorph(zval *id);
+static SWFMovieClip getSprite(zval *id);
 
 PHP_FUNCTION(ming_setCubicThreshold)
 {
@@ -207,7 +207,7 @@ PHP_FUNCTION(swfaction_init)
 /* {{{ internal function getAction
    Returns the SWFAction object contained in zval *id */
 
-static inline SWFAction getAction(zval *id)
+static SWFAction getAction(zval *id)
 {
   void *action = SWFgetProperty(id, "action", 6, le_swfactionp);
 
@@ -314,7 +314,7 @@ static void destroy_SWFBitmap_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getBitmap
    Returns the SWFBitmap object contained in zval *id */
 
-static inline SWFBitmap getBitmap(zval *id)
+static SWFBitmap getBitmap(zval *id)
 {
   void *bitmap = SWFgetProperty(id, "bitmap", 6, le_swfbitmapp);
 
@@ -386,7 +386,7 @@ static void destroy_SWFButton_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getButton
    Returns the SWFButton object contained in zval *id */
 
-static inline SWFButton getButton(zval *id)
+static SWFButton getButton(zval *id)
 {
   void *button = SWFgetProperty(id, "button", 6, le_swfbuttonp);
 
@@ -955,7 +955,7 @@ static void destroy_SWFFill_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getFill
    Returns the SWFFill object contained in zval *id */
 
-static inline SWFFill getFill(zval *id)
+static SWFFill getFill(zval *id)
 {
   void *fill = SWFgetProperty(id, "fill", 4, le_swffillp);
 
@@ -1218,7 +1218,7 @@ static void destroy_SWFGradient_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getGradient
    Returns the SWFGradient object contained in zval *id */
 
-static inline SWFGradient getGradient(zval *id)
+static SWFGradient getGradient(zval *id)
 {
   void *gradient = SWFgetProperty(id, "gradient", 8, le_swfgradientp);
 
@@ -1297,7 +1297,7 @@ static void destroy_SWFMorph_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getMorph
    Returns the SWFMorph object contained in zval *id */
 
-static inline SWFMorph getMorph(zval *id)
+static SWFMorph getMorph(zval *id)
 {
   void *morph = SWFgetProperty(id, "morph", 5, le_swfmorphp);
 
@@ -1700,7 +1700,7 @@ static void destroy_SWFShape_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getShape
    Returns the SWFShape object contained in zval *id */
 
-static inline SWFShape getShape(zval *id)
+static SWFShape getShape(zval *id)
 {
   void *shape = SWFgetProperty(id, "shape", 5, le_swfshapep);
 
@@ -2667,7 +2667,7 @@ static void destroy_SWFTextField_resource(zend_rsrc_list_entry *resource)
 /* {{{ internal function getTextField
    Returns the SWFTextField object contained in zval *id */
 
-static inline SWFTextField getTextField(zval *id)
+static SWFTextField getTextField(zval *id)
 {
   void *field = SWFgetProperty(id, "textfield", 9, le_swftextfieldp);
 
