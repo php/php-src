@@ -32,14 +32,14 @@
 #define BUFSIZE 256
 #endif
 
-PHP_RINIT_FUNCTION(url_scanner)
+int php_url_scanner_activate(TSRMLS_D)
 {
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;
 }
 
 
-PHP_RSHUTDOWN_FUNCTION(url_scanner)
+int php_url_scanner_deactivate(TSRMLS_D)
 {
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;

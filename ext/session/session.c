@@ -83,6 +83,7 @@ php_ps_globals ps_globals;
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
+
 static int session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
 	if (PS(define_sid) && (PS(session_status) == php_session_active)) {
@@ -92,6 +93,7 @@ static int session_adapt_uris(const char *src, size_t srclen, char **new, size_t
 		return FAILURE;
 	}
 }
+
 
 
 static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
@@ -107,19 +109,26 @@ static void php_session_output_handler(char *output, uint output_len, char **han
 }
 
 
-static void php_session_start_output_handler(INIT_FUNC_ARGS, uint chunk_size)
+static void php_session_start_output_handler(uint chunk_size TSRMLS_DC)
 {
-	PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
+	php_url_scanner_activate(TSRMLS_C);
+	php_url_scanner_ex_activate(TSRMLS_C);
 	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
 	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
 }
 
 
+static void php_session_activate(TSRMLS_D)
+{
+}
+
+
+
+
 static void php_session_end_output_handler(SHUTDOWN_FUNC_ARGS)
 {
-	PHP_RSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-	PHP_RSHUTDOWN(url_scanner)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	php_url_scanner_ex_deactivate(TSRMLS_C);
+	php_url_scanner_deactivate(TSRMLS_C);
 }
 
 
@@ -923,7 +932,10 @@ static void php_session_start(TSRMLS_D)
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
 	PS(define_sid) = define_sid;
 
-	PS(session_status)= php_session_active;
+	PS(session_status) = php_session_active;
+	if (!send_cookie && PS(use_trans_sid)) {
+		php_session_start_output_handler(4096 TSRMLS_CC);
+	}
 
 	php_session_cache_limiter(TSRMLS_C);
 	php_session_initialize(TSRMLS_C);
@@ -1392,10 +1404,6 @@ PHP_RINIT_FUNCTION(session)
 
 	if (PS(auto_start)) {
 		php_session_start(TSRMLS_C);
-	}
-
-	if (PS(use_trans_sid)) {
-		php_session_start_output_handler(INIT_FUNC_ARGS_PASSTHRU, 4096);
 	}
 
 	return SUCCESS;
