@@ -193,10 +193,7 @@ AC_CHECK_LIB(m, sin)
 
 AC_CHECK_LIB(bind, inet_aton, [
   AC_ADD_LIBRARY(bind)
-  AC_DEFINE(HAVE_LIBBIND) ], [
-   AC_CHECK_LIB(bind, __inet_aton, [
-    AC_ADD_LIBRARY(bind)
-    AC_DEFINE(HAVE_LIBBIND) ], []) ]) 
+  AC_DEFINE(HAVE_LIBBIND) ], []) 
 
 AC_CHECK_LIB(resolv, inet_aton)
 
