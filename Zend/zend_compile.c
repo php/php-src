@@ -196,14 +196,13 @@ void do_fetch_globals(znode *varname CLS_DC)
 	}
 }
 
-
-void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC)
+void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op CLS_DC)
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	zend_llist *fetch_list_ptr;
 
-	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
+	opline->opcode = op;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
@@ -216,6 +215,12 @@ void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC)
 		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 		zend_llist_add_element(fetch_list_ptr, &next_op_number);
 	}
+}
+
+void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC)
+{
+	/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
+	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W CLS_CC);
 }
 
 
@@ -1799,10 +1804,13 @@ void do_indirect_references(znode *result, znode *num_references, znode *variabl
 {
 	int i;
 
-	for (i=1; i<=num_references->u.constant.value.lval; i++) {
-		fetch_simple_variable(result, variable, 1 CLS_CC);
+	do_end_variable_parse(BP_VAR_R CLS_CC);
+	for (i=1; i<num_references->u.constant.value.lval; i++) {
+		fetch_simple_variable_ex(result, variable, 0, ZEND_FETCH_R CLS_CC);
 		*variable = *result;
 	}
+	do_begin_variable_parse(CLS_C);
+	fetch_simple_variable(result, variable, 1 CLS_CC);
 }
 
 
