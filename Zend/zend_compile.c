@@ -3506,7 +3506,8 @@ void zend_do_label(znode *label TSRMLS_DC)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 
-	if (label->op_type == IS_CONST) {
+	if (label->op_type == IS_CONST &&
+		label->u.constant.type == IS_STRING) {
 		if (!CG(active_op_array)->labels) {
 			CG(active_op_array)->labels = emalloc(sizeof(HashTable));
 			zend_hash_init(CG(active_op_array)->labels, 16, NULL, NULL, 0);
@@ -3517,6 +3518,7 @@ void zend_do_label(znode *label TSRMLS_DC)
 			/* Point to our newly created NOP instruction */
 			zend_hash_add(CG(active_op_array)->labels, label->u.constant.value.str.val, label->u.constant.value.str.len + 1, &opline, sizeof(zend_op*), NULL);
 		}
+		zval_dtor(&label->u.constant);
 	} else {
 		zend_error(E_COMPILE_ERROR, "Invalid label identifier, expecting T_STRING");
 	}

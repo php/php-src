@@ -4080,11 +4080,13 @@ int zend_goto_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Jumping on goto to opcode %08X\n", *target);
 #endif
+		zval_dtor(&tmp);
 		SET_OPCODE(*target);
 		return 0;
 	}
 
-	zend_error(E_WARNING, "Unknown label %s", Z_STRVAL_P(label));
+	zval_dtor(&tmp);
+	zend_error(E_ERROR, "Unknown label %s", Z_STRVAL_P(label));
 	NEXT_OPCODE();
 }
 
