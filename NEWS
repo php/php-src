@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added a new parameter to the header() function which overrides the HTTP
+  response code. (Derick)
 - Change the order of which modules are unloaded to the reverse order of
   which they were loaded. (Derick, Zend Engine)
 - Fixed a crash in ereg_replace() when backreference number was greater
