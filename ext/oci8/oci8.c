@@ -200,6 +200,7 @@ static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void _oci_column_hash_dtor(void *data);
 static void _oci_define_hash_dtor(void *data);
 static void _oci_bind_hash_dtor(void *data);
+static void _oci_desc_flush_hash_dtor(void *data);
 
 static oci_connection *oci_get_conn(zval ** TSRMLS_DC);
 static oci_statement *oci_get_stmt(zval ** TSRMLS_DC);
@@ -236,6 +237,50 @@ static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_
 
 static int oci_lob_flush(oci_descriptor*, int);
 
+/* }}} */
+/* {{{ extension macros */
+
+#define OCI_GET_STMT(statement,value) \
+	statement = oci_get_stmt(value TSRMLS_CC); \
+	if (statement == NULL) { \
+		RETURN_FALSE; \
+	}
+
+#define OCI_GET_CONN(connection,value) \
+	connection = oci_get_conn(value TSRMLS_CC); \
+	if (connection == NULL) { \
+		RETURN_FALSE; \
+	}
+
+#define OCI_GET_DESC(descriptor,index) \
+	descriptor = oci_get_desc(index TSRMLS_CC); \
+	if (descriptor == NULL) { \
+		RETURN_FALSE; \
+	}
+
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
+#define OCI_GET_COLL(collection,index) \
+	collection = oci_get_coll(index TSRMLS_CC); \
+	if (collection == NULL) { \
+		RETURN_FALSE; \
+	}
+#endif
+
+#define IS_LOB_INTERNAL(lob) \
+	if (lob->type != OCI_DTYPE_LOB) { \
+		switch (lob->type) { \
+			case OCI_DTYPE_FILE: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, FILE locator is given"); \
+				break; \
+			case OCI_DTYPE_ROWID: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, ROWID locator is given"); \
+				break; \
+			default: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, locator of unknown type is given"); \
+				break; \
+		} \
+		RETURN_FALSE; \
+	}
 /* }}} */
 /* {{{ extension function prototypes */
 
@@ -312,48 +357,6 @@ PHP_FUNCTION(oci_collection_size);
 PHP_FUNCTION(oci_collection_max);
 PHP_FUNCTION(oci_collection_trim);
 #endif
-
-#define OCI_GET_STMT(statement,value) \
-	statement = oci_get_stmt(value TSRMLS_CC); \
-	if (statement == NULL) { \
-		RETURN_FALSE; \
-	}
-
-#define OCI_GET_CONN(connection,value) \
-	connection = oci_get_conn(value TSRMLS_CC); \
-	if (connection == NULL) { \
-		RETURN_FALSE; \
-	}
-
-#define OCI_GET_DESC(descriptor,index) \
-	descriptor = oci_get_desc(index TSRMLS_CC); \
-	if (descriptor == NULL) { \
-		RETURN_FALSE; \
-	}
-
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
-#define OCI_GET_COLL(collection,index) \
-	collection = oci_get_coll(index TSRMLS_CC); \
-	if (collection == NULL) { \
-		RETURN_FALSE; \
-	}
-#endif
-
-#define IS_LOB_INTERNAL(lob) \
-	if (lob->type != OCI_DTYPE_LOB) { \
-		switch (lob->type) { \
-			case OCI_DTYPE_FILE: \
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, FILE locator is given"); \
-				break; \
-			case OCI_DTYPE_ROWID: \
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, ROWID locator is given"); \
-				break; \
-			default: \
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, locator of unknown type is given"); \
-				break; \
-		} \
-		RETURN_FALSE; \
-	}
 
 /* }}} */
 /* {{{ extension definition structures */
@@ -820,6 +823,20 @@ _oci_define_hash_dtor(void *data)
 }
 
 /* }}} */
+/* {{{ _oci_desc_flush_hash_dtor()
+ */
+
+static void 
+_oci_desc_flush_hash_dtor(void *data)
+{
+	oci_descriptor *descr = *((oci_descriptor **)data);
+	if (descr->buffering == 2 && (descr->type == OCI_DTYPE_LOB || descr->type == OCI_DTYPE_FILE)) {
+        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE);
+        descr->buffering = 1;
+	}
+}
+
+/* }}} */
 /* {{{ _oci_bind_hash_dtor() */
 
 static void
@@ -944,7 +961,7 @@ _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		zend_hash_destroy(statement->defines);
 		efree(statement->defines);
 	}
-
+    
 	oci_debug("END   _oci_stmt_list_dtor: id=%d",statement->id);
 
 	efree(statement);
@@ -988,6 +1005,11 @@ _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC)
 		/* close associated session when destructed */
 		zend_list_delete(connection->session->num);
 	}
+    
+    if (connection->descriptors) {
+        zend_hash_destroy(connection->descriptors);
+        efree(connection->descriptors);
+    }
 
 	if (connection->pError) {
 		CALL_OCI(OCIHandleFree(
@@ -1041,7 +1063,13 @@ _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	oci_descriptor *descr = (oci_descriptor *)rsrc->ptr;
 	oci_debug("START _oci_descriptor_list_dtor: %d",descr->id);
-
+    
+    /* flushing Lobs & Files with buffering enabled */
+    if ((descr->type == OCI_DTYPE_FILE || descr->type == OCI_DTYPE_LOB) && descr->buffering == 2) {
+    	oci_debug("descriptor #%d needs to be flushed. flushing..",descr->id);
+        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE);
+    }
+    
 	CALL_OCI(OCIDescriptorFree(
 				descr->ocidescr, 
 				Z_TYPE_P(descr)));
@@ -1248,8 +1276,7 @@ static oci_statement *oci_get_stmt(zval **stmt TSRMLS_DC)
 }
 
 /* }}} */
-/* {{{ oci_get_desc() */
-
+/* {{{ oci_get_desc() */   
 static oci_descriptor *oci_get_desc(int ind TSRMLS_DC)
 {
 	oci_descriptor *descriptor;
@@ -1325,6 +1352,7 @@ oci_new_desc(int type,oci_connection *connection)
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %d.",Z_TYPE_P(descr));
+            efree(descr);
 			return 0;
 	}
 	
@@ -1339,6 +1367,7 @@ oci_new_desc(int type,oci_connection *connection)
 		ub4 error;
 		error = oci_error(OCI(pError),"OCIDescriptorAlloc %d",OCI(error));
 		oci_handle_error(connection, error);
+        efree(descr);
 		return 0;
 	}
 
@@ -1348,7 +1377,16 @@ oci_new_desc(int type,oci_connection *connection)
 	descr->lob_size = -1;				/* we should set it to -1 to know, that it's just not initialized */
 	descr->buffering = 0;				/* buffering is off by default */
 	zend_list_addref(connection->id);
+   
+    if (descr->type == OCI_DTYPE_LOB || descr->type == OCI_DTYPE_FILE) {
+        /* add Lobs & Files to hash. we'll flush them ate the end */
+        if (! connection->descriptors) {
+            ALLOC_HASHTABLE(connection->descriptors);
+            zend_hash_init(connection->descriptors, 13, NULL, _oci_desc_flush_hash_dtor, 0);
+        }
 
+        zend_hash_next_index_insert(connection->descriptors,&descr,sizeof(oci_descriptor *),NULL);
+    }    
 	oci_debug("oci_new_desc %d",descr->id);
 
 	return descr;
@@ -3234,7 +3272,7 @@ static void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expec
         oci_statement *statement;
         oci_out_column *column;
         ub4 nrows = 1;
-        int i, used;
+        int i;
 
         if (ZEND_NUM_ARGS() > expected_args) {
                 WRONG_PARAM_COUNT;
@@ -5020,6 +5058,10 @@ PHP_FUNCTION(oci_rollback)
 
 	OCI_GET_CONN(connection,conn);
 
+    if (connection->descriptors) {
+        zend_hash_apply(connection->descriptors,(apply_func_t) _oci_desc_flush_hash_dtor TSRMLS_CC);
+    }
+
 	oci_debug("<OCITransRollback");
 
 	CALL_OCI_RETURN(connection->error, OCITransRollback(
@@ -5056,6 +5098,10 @@ PHP_FUNCTION(oci_commit)
 
 	OCI_GET_CONN(connection,conn);
 
+    if (connection->descriptors) {
+        zend_hash_apply(connection->descriptors,(apply_func_t) _oci_desc_flush_hash_dtor TSRMLS_CC);
+    }
+    
 	oci_debug("<OCITransCommit");
 
 	CALL_OCI_RETURN(connection->error, OCITransCommit(
