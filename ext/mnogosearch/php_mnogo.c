@@ -430,7 +430,7 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 
 static char* MyRemoveHiLightDup(const char *s){
   size_t len=strlen(s)+1;
-  char	 *d, *res = (char*)UdmMalloc(len);
+  char	 *d, *res = (char*)emalloc(len);
   
   for(d=res; s[0]; s++)
   {
@@ -1625,7 +1625,7 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 	
 		al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "")));
 		UdmVarListReplaceInt(&(Res->Doc[row].Sections), "STORED_ID", UdmCRC32(al, strlen(al)));
-		free(al);
+		efree(al);
 		
 #if UDM_VERSION_ID >= 30216
 		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), ExcerptSize, ExcerptPadding);
@@ -1777,7 +1777,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
 		    char	*al;
 		    al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), field, "")));
 		    UdmVarListReplaceStr(&Res->Doc[row].Sections,field,al);
-		    free(al);
+		    efree(al);
 		}
 		RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,field,""),1);
 	} else {
@@ -1839,12 +1839,11 @@ DLEXPORT PHP_FUNCTION(udm_store_doc_cgi)
 	if(!Doc->Buf.content) {
 	    UdmResultFree(Res);
 	    UdmDocFree(Doc);
-    	    UDM_FREE(HDoc);
 	
 	    RETURN_FALSE;
 	}
 	
-	HEnd=HDoc = (char*)UdmMalloc(UDM_MAXDOCSIZE + 32);
+	HEnd=HDoc = (char*)emalloc(UDM_MAXDOCSIZE + 32);
 	*HEnd='\0';
 	
 	if (strncasecmp(content_type, "text/plain", 10) == 0) {
@@ -1885,7 +1884,7 @@ DLEXPORT PHP_FUNCTION(udm_store_doc_cgi)
 	
 	UdmResultFree(Res);
 	UdmDocFree(Doc);
-	UDM_FREE(HDoc);
+	efree(HDoc);
 	
 	RETURN_TRUE;
 }
@@ -2066,7 +2065,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				char	*al;
 				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "")));
 				UdmVarListReplaceStr(&Res->Doc[row].Sections,"URL",al);
-				free(al);
+				efree(al);
 				
 				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"URL",""),1);
 			    }
@@ -2256,7 +2255,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 				len += Res->WWList.Word[i].len + 64;
 			    {	
 				size_t wsize=(1+len)*sizeof(char);
-				char *wordinfo = (char*) malloc(wsize);
+				char *wordinfo = (char*) emalloc(wsize);
 	  
 				*wordinfo = '\0';
 	  
@@ -2270,7 +2269,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 					sprintf(UDM_STREND(wordinfo)," %s : stopword", Res->WWList.Word[i].word);
 				    }
 				}
-				RETURN_STRING(wordinfo,1);
+				RETURN_STRING(wordinfo,0);
 			    }
 			}
 #else
@@ -2286,7 +2285,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 				len += Res->WWList.Word[i].len + 64;
 			    {	
 				size_t wsize=(1+len)*sizeof(char);
-				char *wordinfo = (char*) malloc(wsize);
+				char *wordinfo = (char*) emalloc(wsize);
 				int corder = (size_t)-1, ccount = 0;
 	  
 				*wordinfo = '\0';
@@ -2305,7 +2304,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 					sprintf(UDM_STREND(wordinfo),"%s%s : %d / %d", (*wordinfo) ? ", " : "", Res->WWList.Word[i].word, Res->WWList.Word[i].count, ccount);
 				    } else continue;
 				}
-				RETURN_STRING(wordinfo,1);
+				RETURN_STRING(wordinfo,0);
 			    }
 			}
 			break;
@@ -2489,7 +2488,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 #endif
 		array_init(return_value);
 		
-		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
+		if (!(buf=ecalloc(1,UDMSTRSIZ+1))) {
 			RETURN_FALSE;
 		}
 		
@@ -2513,7 +2512,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 			c++;
 		}
 #endif		
-		free(buf);
+		efree(buf);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2563,7 +2562,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 #endif
 		array_init(return_value);
 		
-		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
+		if (!(buf=ecalloc(1,UDMSTRSIZ+1))) {
 			RETURN_FALSE;
 		}
 		
@@ -2587,7 +2586,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 			c++;
 		}
 #endif		
-		free(buf);
+		efree(buf);
 	} else {
 		RETURN_FALSE;
 	}
