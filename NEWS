@@ -18,6 +18,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #30654 (oci8 persistent connection is deleted from hash 
   if there was exclusive connection with the same credentials). (Tony)
 - Fixed bug #30613 (Prevent infinite recursion in url redirection). (Ilia)
+- Fixed bug #30587 (array_multisort doesn't separate zvals before 
+  changing them). (Tony)
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
 - Fixed bug #30388 (rename across filesystems loses ownership and
