@@ -860,10 +860,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 					if(q<0||q>255) {
 						php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
 					}
-					(*func_p)(im, q, fp);
+					(*func_p)(im, q, tmp);
 					break;
 				default:
-					(*func_p)(im, fp);
+					(*func_p)(im, tmp);
 					break;
 			}
 
