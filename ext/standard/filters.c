@@ -865,11 +865,20 @@ typedef struct _php_conv_qprint_decode {
 
 	int scan_stat;
 	unsigned int next_char;
+	const char *lbchars;
+	int lbchars_dup;
+	size_t lbchars_len;
+	int persistent;
+	unsigned int lb_ptr;
+	unsigned int lb_cnt;	
 } php_conv_qprint_decode;
 
 static void php_conv_qprint_decode_dtor(php_conv_qprint_decode *inst)
 {
-	/* do nothing */
+	assert(inst != NULL);
+	if (inst->lbchars_dup && inst->lbchars != NULL) {
+		pefree((void *)inst->lbchars, inst->persistent);
+	}
 }
 
 static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
@@ -878,9 +887,13 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	size_t icnt, ocnt;
 	unsigned char *ps, *pd;
 	unsigned int scan_stat;
-	unsigned int v;
+	unsigned int next_char;
+	unsigned int lb_ptr, lb_cnt;
 
-	if (in_pp == NULL || in_left_p == NULL) {
+	lb_ptr = inst->lb_ptr;
+	lb_cnt = inst->lb_cnt;
+
+	if ((in_pp == NULL || in_left_p == NULL) && lb_cnt == lb_ptr) {
 		if (inst->scan_stat != 0) {
 			return PHP_CONV_ERR_UNEXPECTED_EOS;
 		}
@@ -892,12 +905,14 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
 	scan_stat = inst->scan_stat;
+	next_char = inst->next_char;
 
-	v = 0;
-
-	for (;icnt > 0; icnt--) {
+	for (;;) {
 		switch (scan_stat) {
 			case 0: {
+				if (icnt <= 0) {
+					goto out;
+				}
 				if (*ps == '=') {
 					scan_stat = 1;
 				} else {
@@ -908,41 +923,104 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					*(pd++) = *ps;
 					ocnt--;
 				}
+				ps++, icnt--;
 			} break;
 
-			case 1: case 2: {
-				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
+			case 1: {
+				if (icnt <= 0) {
+					goto out;
+				}
+				if (*ps == ' ' || *ps == '\t') {
+					scan_stat = 4;
+					ps++, icnt--;
+					break;
+				} else if (lb_cnt < inst->lbchars_len &&
+							*ps == (unsigned char)inst->lbchars[lb_cnt]) {
+					lb_cnt++;
+					scan_stat = 5;
+					ps++, icnt--;
+					break;
+				}
+			} /* break is missing intentionally */
+
+			case 2: {
+				unsigned int nbl;
+	
+				if (icnt <= 0) {
+					goto out;
+				}
+				nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
 
 				if (nbl > 15) {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
-				v = (v << 4) | nbl;
+				next_char = (next_char << 4) | nbl;
 
 				scan_stat++;
-				if (scan_stat == 3) {
-					if (ocnt < 1) {
-						inst->next_char = v;
-						err = PHP_CONV_ERR_TOO_BIG;
-						goto out;
-					}
-					*(pd++) = v;
-					ocnt--;
-					scan_stat = 0;
+				ps++, icnt--;
+				if (scan_stat != 3) {
+					break;
 				}
-			} break;
+			} /* break is missing intentionally */
 
 			case 3: {
 				if (ocnt < 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
 					goto out;
 				}
-				*(pd++) = inst->next_char;
+				*(pd++) = next_char;
 				ocnt--;
 				scan_stat = 0;
 			} break;
+
+			case 4: {
+				if (icnt <= 0) {
+					goto out;
+				}
+				if (lb_cnt < inst->lbchars_len &&
+					*ps == (unsigned char)inst->lbchars[lb_cnt]) {
+					lb_cnt++;
+					scan_stat = 5;
+				}
+				if (*ps != '\t' && *ps != ' ') {
+					err = PHP_CONV_ERR_INVALID_SEQ;
+					goto out;
+				}
+				ps++, icnt--;
+			} break;
+
+			case 5: {
+				if (lb_cnt >= inst->lbchars_len) {
+					/* soft line break */
+					lb_cnt = lb_ptr = 0;
+					scan_stat = 0;
+				} else if (icnt > 0) {
+					if (*ps == (unsigned char)inst->lbchars[lb_cnt]) {
+						lb_cnt++;
+						ps++, icnt--;
+					} else {
+						scan_stat = 6; /* no break for short-cut */
+					}
+				} else {
+					goto out;
+				}
+			} break;
+
+			case 6: {
+				if (lb_ptr < lb_cnt) {
+					if (ocnt < 1) {
+						err = PHP_CONV_ERR_TOO_BIG;
+						goto out;
+					}
+					*(pd++) = inst->lbchars[lb_ptr++];
+					ocnt--;
+				} else {
+					scan_stat = 0;
+					lb_cnt = lb_ptr = 0;
+				}
+			} break;
 		}
-		ps++;
 	}
 out:
 	*in_pp = (const char *)ps;
@@ -950,16 +1028,28 @@ out:
 	*out_pp = (char *)pd;
 	*out_left_p = ocnt;
 	inst->scan_stat = scan_stat;
+	inst->lb_ptr = lb_ptr;
+	inst->lb_cnt = lb_cnt;
+	inst->next_char = next_char;
 
 	return err;
 }
-static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst)
+static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, const char *lbchars, size_t lbchars_len, int lbchars_dup, int persistent)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_decode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_decode_dtor;
 	inst->scan_stat = 0;
 	inst->next_char = 0;
-
+	inst->lb_ptr = inst->lb_cnt = 0;
+	if (lbchars != NULL) {
+		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars_len = lbchars_len;
+	} else {
+		inst->lbchars = NULL;
+		inst->lbchars_len = 0;
+	}
+	inst->lbchars_dup = lbchars_dup;
+	inst->persistent = persistent;
 	return PHP_CONV_ERR_SUCCESS;
 }
 /* }}} */
@@ -1208,12 +1298,30 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			}
 		} break;
 	
-		case PHP_CONV_QPRINT_DECODE:
-			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
-			if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval)) {
-				goto out_failure;
+		case PHP_CONV_QPRINT_DECODE: {
+			char *lbchars = NULL;
+			size_t lbchars_len;
+
+			if (options != NULL) {
+				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
+				if (lbchars == NULL) {
+					lbchars = pestrdup("\r\n", 0);
+					lbchars_len = 2;
+				}
 			}
-			break;
+			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
+			if (lbchars != NULL) {
+				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, lbchars, lbchars_len, 1, persistent)) {
+					pefree(lbchars, 0);
+					goto out_failure;
+				}
+				pefree(lbchars, 0);
+			} else {
+				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, NULL, 0, 0, persistent)) {
+					goto out_failure;
+				}
+			}
+		} break;
 
 		default:
 			retval = NULL;
