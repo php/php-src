@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   returning the value). (Ilia)
 
 10 Aug 2004, PHP 5.0.1RC1
+- Call destructors prior to request shutdown. (Marcus)
 - Rewritten UNIX and Windows install help files. (Documentation Team)
 - Updated several libraries bundled with the windows release which now 
   includes libxml2-2.6.11, libxslt-1.1.7 and iconv-1.9.1. (Rob, Edin)
