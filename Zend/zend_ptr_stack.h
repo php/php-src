@@ -32,9 +32,9 @@ typedef struct _zend_ptr_stack {
 
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr);
-ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count,...);
+ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...);
 ZEND_API void *zend_ptr_stack_pop(zend_ptr_stack *stack);
-ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count,...);
+ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *));
