@@ -1,3 +1,78 @@
+2004-03-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend_multiply.h:
+      more accurate overflow detection
+
+    * ZendEngine2/zend_multiply.h:
+      Readd x86 implementation
+
+2004-03-17  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/tests/file/userdirstream.phpt:
+      Userspace Directory Stream Test
+
+2004-03-17  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      NEWS:
+      - Add entry, crash in imagecolortransparent
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      - MFH (crash in imagecolortransparent with invalid color index)
+
+    * ext/gd/libgd/gd.c:
+      - Fix crash when an invalid color index is used with imagecolortransparent
+
+2004-03-17  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      ZendEngine2/zend_multiply.h:
+      - Improved patch for support multiplication on 64bit machines
+
+    * (php_5_0_0RC1RC2)
+      ZendEngine2/zend_execute.c:
+      - Fix tiny bug (one of the reasons we can't support __toString() for
+      - regular objects).
+
+2004-03-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      ext/sqlite/tests/sqlite_oo_030.phpt:
+      Test was fixed
+
+2004-03-17  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      ZendEngine2/zend.c:
+      - Stop make_printable_zval() from calling __toString()
+
+    * ZendEngine2/zend_execute.c:
+      - Fixed problem with __toString(). Due to the engine's architecture it is
+      - currently not possible to call __toString() anywhere besides print &
+      eval.
+      - Follow up will be on internals@
+
+2004-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (php_5_0_0RC1RC2)
+      ZendEngine2/zend_compile.c:
+      fix typo
+
+2004-03-17  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_operators.c:
+      - Apply Ard's patch to support multiplication & overflow on both 32bit
+        and 64bit machines
+
+2004-03-17  Sara Golemon  <php@alphaweb.net>
+
+    * (php_5_0_0RC1RC2)
+      main/streams/userspace.c:
+      Provide a meaningful error message when registration fails
+
 2004-03-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
