@@ -1,3 +1,28 @@
+2004-12-26  Georg Richter  <georg@mysql.com>
+
+    * NEWS:
+      added constructors for mysqli_stmt and mysqli_resultset classes
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/062.phpt
+      ext/mysqli/tests/063.phpt:
+      added constructors for mysqli_stmt and mysqli_result classes
+
+2004-12-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php.h:
+      bump PHP API number.
+      
+      This is so that we can work around the signature change in the get_method
+      overloaded object handler in our portable extensions.
+      
+      Yes, you could argue that the zend api number needs bumping, but then you
+      could
+      argue which one to bump, as neither of them is specific or generic enough.
+      
+      Besides all that, the PHP API number really needs a good old bump anyway.
+
 2004-12-24  Antony Dovgal  <tony2001@phpclub.net>
 
     * ext/pcre/php_pcre.c:
