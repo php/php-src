@@ -843,6 +843,29 @@ SXE_METHOD(xpath)
 
 	xmlXPathFreeObject(retval);
 }
+
+SXE_METHOD(registerNamespace)
+{
+	php_sxe_object    *sxe;
+	zval *id;
+	int prefix_len, ns_uri_len;
+	char *prefix, *ns_uri;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	if (!sxe->xpath) {
+		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
+	}
+
+	if (xmlXPathRegisterNs(sxe->xpath, prefix, ns_uri) != 0) {
+		RETURN_FALSE
+	}
+	RETURN_TRUE;
+}
+
 /* }}} */
 
 /* {{{ proto asXML([string filename])
@@ -1604,6 +1627,7 @@ static zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(registerNamespace,      NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(children,			   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
