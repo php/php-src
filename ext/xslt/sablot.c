@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Sterling Hughes <sterling@php.net>                          |
    |          David Viner <dviner@php.net>                                |
-   |          Lehnar Lohmus <flex@php.net>                                |
+   |          Lenar Lohmus <flex@php.net>                                 |
    |          Melvyn Sopacua <msopacua@php.net>                           |
    +----------------------------------------------------------------------+
  */
