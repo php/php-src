@@ -24,6 +24,8 @@ import java.util.Enumeration;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import java.lang.reflect.Method;
+
 public class servlet extends HttpServlet {
 
     char slash=System.getProperty("file.separator").charAt(0);
@@ -34,6 +36,7 @@ public class servlet extends HttpServlet {
     static int startup_count = 0;
 
     protected boolean display_source_mode = false;
+    private Method addHeader;
 
     /******************************************************************/
     /*                          native methods                        */ 
@@ -78,6 +81,10 @@ public class servlet extends HttpServlet {
     }
 
     void header(String data) {
+
+      // try to send the header using the most specific servlet API
+      // as possible (some servlet engines will add a content type
+      // header unless the setContentType method is called).
       try {
         if (data.startsWith("Content-type: ")) {
           response.setContentType(data.substring(data.indexOf(" ")+1));
@@ -86,22 +93,27 @@ public class servlet extends HttpServlet {
         } else {
           int colon = data.indexOf(": ");
           if (colon > 0) {
-            response.addHeader(data.substring(0,colon),
-              data.substring(colon+2));
+            try {
+              addHeader.invoke(response, new Object[]
+                { data.substring(0,colon), data.substring(colon+2) } );
+            } catch (Exception e) {
+              e.printStackTrace(System.err);
+            }
           } else {
             response.getWriter().println(data);
           }
         }
       } catch (IOException e) {
-        System.err.print(data);
+        e.printStackTrace(System.err);
       }
+
     }
 
     void write(String data) {
       try {
         response.getWriter().print(data);
       } catch (IOException e) {
-        System.err.print(data);
+        e.printStackTrace(System.err);
       }
     }
 
@@ -112,6 +124,24 @@ public class servlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
       super.init(config);
       if (0 == startup_count++) startup();
+
+      // try to find the addHeader method (added in the servlet API 2.2)
+      // otherwise settle for the setHeader method
+      try {
+        Class c = Class.forName("javax.servlet.http.HttpServletResponse");
+        Method method[] = c.getDeclaredMethods();
+        for (int i=0; i<method.length; i++) {
+          if (method[i].getName().equals("addHeader")) {
+            addHeader = method[i];
+            break;
+          }
+          if (method[i].getName().equals("setHeader")) {
+            addHeader = method[i];
+          }
+        }
+      } catch (Exception e) {
+        e.printStackTrace(System.err);
+      }
     }
 
     public void service(HttpServletRequest request,
@@ -132,7 +162,7 @@ public class servlet extends HttpServlet {
        try {
          if (stream != null) stream.close();
        } catch (IOException e) {
-         throw new ServletException(e);
+         throw new ServletException(e.toString());
        }
     }
 
