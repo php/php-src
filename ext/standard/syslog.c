@@ -191,6 +191,12 @@ static void start_syslog(TSRMLS_D)
    Initializes all syslog-related variables */
 PHP_FUNCTION(define_syslog_variables)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		php_error(E_WARNING, "%s() expects no parameters, %d given",
+				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
+		return;
+	}
+
 	if (!BG(syslog_started)) {
 		start_syslog(TSRMLS_C);
 	}
@@ -206,19 +212,19 @@ PHP_FUNCTION(define_syslog_variables)
  */
 PHP_FUNCTION(openlog)
 {
-	pval **ident, **option, **facility;
+	char *ident;
+	long option, facility;
+	int ident_len;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &ident, &option, &facility) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident, &option,
+							  &facility) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(ident);
-	convert_to_long_ex(option);
-	convert_to_long_ex(facility);
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));
 	}
-	BG(syslog_device) = estrndup(Z_STRVAL_PP(ident), Z_STRLEN_PP(ident));
-	openlog(BG(syslog_device), Z_LVAL_PP(option), Z_LVAL_PP(facility));
+	BG(syslog_device) = estrndup(ident, ident_len);
+	openlog(BG(syslog_device), option, facility);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -227,6 +233,12 @@ PHP_FUNCTION(openlog)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		php_error(E_WARNING, "%s() expects no parameters, %d given",
+				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
+		return;
+	}
+
 	closelog();
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));
@@ -240,20 +252,21 @@ PHP_FUNCTION(closelog)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
-	pval **priority, **message;
+	long priority;
+	char *message;
+	int message_len;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &priority, &message) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &priority,
+							  &message, &message_len) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(priority);
-	convert_to_string_ex(message);
 
 	/*
 	 * CAVEAT: if the message contains patterns such as "%s",
 	 * this will cause problems.
 	 */
 
-	php_syslog(Z_LVAL_PP(priority), "%.500s", Z_STRVAL_PP(message));
+	php_syslog(priority, "%.500s", message);
 	RETURN_TRUE;
 }
 /* }}} */
