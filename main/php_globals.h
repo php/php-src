@@ -25,6 +25,9 @@ struct _php_core_globals {
     long magic_quotes_gpc;
     long magic_quotes_runtime;
     long magic_quotes_sybase;
+
+	long asp_tags;
+	long short_tags;
 };
 
 
