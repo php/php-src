@@ -10,6 +10,8 @@ var_dump(hexdec("12345+?!"));
 var_dump(hexdec("12345q"));
 var_dump(hexdec("1234500001"));
 var_dump(hexdec("17fffffff"));
+
+?>
 --EXPECT--
 int(74565)
 int(74565)
