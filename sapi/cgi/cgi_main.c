@@ -398,25 +398,27 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] |  {<file> [args...]}\n"
-			   "  -q               Quiet-mode.  Suppress HTTP Header output.\n"
-			   "  -s               Display colour syntax highlighted source.\n"
-			   "  -w               Display source with stripped comments and whitespace.\n"
-			   "  -f <file>        Parse <file>.  Implies `-q'\n"
-			   "  -v               Version number\n"
-			   "  -C               Do not chdir to the script's directory\n"
-			   "  -c <path>|<file> Look for php.ini file in this directory\n"
+	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] \n"
+			   "       %s <file> [args...]\n"
+			   "  -a               Run interactively\n"
 #ifdef PHP_FASTCGI
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
 #endif
-			   "  -a               Run interactively\n"
+			   "  -C               Do not chdir to the script's directory\n"
+			   "  -c <path>|<file> Look for php.ini file in this directory\n"
 			   "  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 			   "  -e               Generate extended information for debugger/profiler\n"
-			   "  -z <file>        Load Zend extension <file>.\n"
+			   "  -f <file>        Parse <file>.  Implies `-q'\n"
+			   "  -h               This help\n",
+			   "  -i               PHP information\n"
 			   "  -l               Syntax check only (lint)\n"
 			   "  -m               Show compiled in modules\n"
-			   "  -i               PHP information\n"
-			   "  -h               This help\n", prog);
+			   "  -q               Quiet-mode.  Suppress HTTP Header output.\n"
+			   "  -s               Display colour syntax highlighted source.\n"
+			   "  -v               Version number\n"
+			   "  -w               Display source with stripped comments and whitespace.\n"
+			   "  -z <file>        Load Zend extension <file>.\n"
+			   prog, prog);
 }
 /* }}} */
 
