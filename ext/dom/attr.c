@@ -210,13 +210,25 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-
 /* {{{ proto boolean dom_attr_is_id();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_attr_is_id)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id;
+	dom_object *intern;
+	xmlAttrPtr attrp;
+	xmlNodePtr nodep;
+
+	DOM_GET_THIS_OBJ(attrp, id, xmlAttrPtr, intern);
+
+	nodep = attrp->parent;
+
+	if (xmlIsID(attrp->doc, nodep, attrp)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} end dom_attr_is_id */
