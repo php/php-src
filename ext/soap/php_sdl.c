@@ -638,6 +638,8 @@ static sdlPtr load_wsdl(char *struri)
 
 				if (address->ns && !strcmp(address->ns->href, WSDL_SOAP_NAMESPACE)) {
 					tmpbinding->bindingType = BINDING_SOAP;
+				} else if (address->ns && !strcmp(address->ns->href, WSDL_SOAP12_NAMESPACE)) {
+					tmpbinding->bindingType = BINDING_SOAP;
 				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP_NAMESPACE)) {
 					tmpbinding->bindingType = BINDING_HTTP;
 				} else {
