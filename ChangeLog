@@ -1,3 +1,70 @@
+2002-06-12  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Fix entry
+
+2002-06-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php: * comment typos
+
+    * pear/package-PEAR.xml: * set working version to 0.91-dev
+
+    * pear/Makefile.frag: * minor cleanup
+
+    * LICENSE: * this should have been done last year :)
+
+2002-06-12  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/php_pcre.c
+      NEWS:
+    This patch adds ability to capture string offsets in the preg_match_*()
+    results.
+
+2002-06-12  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: typofix
+
+    * ext/standard/basic_functions.c:
+    - Fixed bug #17669. PG(magic_quotes_runtime) wasn't reset for each request.
+
+    * NEWS: cleanup
+
+2002-06-12  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS:
+    set_error_handler() should take methods as callbacks. Also fixed it to report
+    invalid callbacks.
+
+    * ext/overload/overload.c
+      NEWS: Properly return the result of __call() handler.
+
+2002-06-12  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.bat:
+    Attempt to make pear.bat work better under Windows
+
+2002-06-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/datetime.c
+      ext/standard/tests/time/003.phpt:
+    fix for bug #10616 -> mktime() with negative date offsets not working on MacOSX
+
+2002-06-12  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: MFH (fixed domxml_get_element_by_id() )
+
+    * ext/domxml/php_domxml.c: Fixed domxml_get_element_by_id()
+
+2002-06-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c
+      ext/session/php_session.h:
+    This option enables administrators to make their users invulnerable to
+    attacks which involve passing session ids in URLs.
+
+2002-06-12  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/bz2/bz2.c: - MFH fixes.
+
 2002-06-11  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/domxml/TODO: - Those have been implemented already.
