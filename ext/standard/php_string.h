@@ -46,6 +46,7 @@ PHP_FUNCTION(soundex);
 PHP_FUNCTION(levenshtein);
 
 PHP_FUNCTION(count_chars);
+PHP_FUNCTION(wordwrap);
 PHP_FUNCTION(explode);
 PHP_FUNCTION(implode);
 PHP_FUNCTION(strtok);
