@@ -1,5 +1,5 @@
 <?php
-//
+/* vim: set expandtab tabstop=4 shiftwidth=4: */
 // +----------------------------------------------------------------------+
 // | PHP version 4.0                                                      |
 // +----------------------------------------------------------------------+
@@ -14,7 +14,7 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
-// |                                                                      |
+// |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -346,95 +346,106 @@ class DB
      *
      * @return array an associative array with the following keys:
      *
-     * phptype: Database backend used in PHP (mysql, odbc etc.)
-     * dbsyntax: Database used with regards to SQL syntax etc.
-     * protocol: Communication protocol to use (tcp, unix etc.)
-     * hostspec: Host specification (hostname[:port])
-     * database: Database to use on the DBMS server
-     * username: User name for login
-     * password: Password for login
+     *  phptype: Database backend used in PHP (mysql, odbc etc.)
+     *  dbsyntax: Database used with regards to SQL syntax etc.
+     *  protocol: Communication protocol to use (tcp, unix etc.)
+     *  hostspec: Host specification (hostname[:port])
+     *  database: Database to use on the DBMS server
+     *  username: User name for login
+     *  password: Password for login
      *
      * The format of the supplied DSN is in its fullest form:
      *
      *  phptype(dbsyntax)://username:password@protocol+hostspec/database
      *
      * Most variations are allowed:
-     *  phptype://username:password@protocol+hostspec/database</li>
-     *  phptype://username:password@hostspec/database</li>
-     *  phptype://username:password@hostspec</li>
-     *  phptype://hostspec/database</li>
-     *  phptype://hostspec</li>
-     *  phptype(dbsyntax)</li>
-     *  phptype</li>
      *
-     * @return bool FALSE is returned on error
+     *  phptype://username:password@protocol+hostspec:110//usr/db_file.db
+     *  phptype://username:password@hostspec/database_name
+     *  phptype://username:password@hostspec
+     *  phptype://username@hostspec
+     *  phptype://hostspec/database
+     *  phptype://hostspec
+     *  phptype(dbsyntax)
+     *  phptype
+     *
+     * @author Tomas V.V.Cox <cox@idecnet.com>
      */
     function parseDSN($dsn)
     {
-	if (is_array($dsn)) {
-	    return $dsn;
-	}
-    
-	$parsed = array(
-	    "phptype"  => false,
-	    "dbsyntax" => false,
-	    "protocol" => false,
-	    "hostspec" => false,
-	    "database" => false,
-	    "username" => false,
-	    "password" => false
-	);
+        if (is_array($dsn)) {
+            return $dsn;
+        }
 
-	if (preg_match("|^([^:]+)://|", $dsn, $arr)) {
-	    $dbtype = $arr[ 1 ];
-	    $dsn = preg_replace( "|^[^:]+://|", '', $dsn);
-	    
-	    // match "phptype(dbsyntax)"
-	    if (preg_match("|^([^\(]+)\((.+)\)$|", $dbtype, $arr)) {
-		$parsed["phptype"] = $arr[1];
-		$parsed["dbsyntax"] = $arr[2];
-	    } else {
-		$parsed["phptype"] = $dbtype;
-	    }
+        $parsed = array(
+            'phptype'  => false,
+            'dbsyntax' => false,
+            'protocol' => false,
+            'hostspec' => false,
+            'database' => false,
+            'username' => false,
+            'password' => false
+        );
+
+        // Find phptype and dbsyntax
+        if (($pos = strpos($dsn, '://')) !== false) {
+            $str = substr($dsn, 0, $pos);
+            $dsn = substr($dsn, $pos + 3);
         } else {
-	    // match "phptype(dbsyntax)"
-	    if (preg_match("|^([^\(]+)\((.+)\)$|", $dsn, $arr)) {
-		$parsed["phptype"] = $arr[1];
-		$parsed["dbsyntax"] = $arr[2];
-	    } else {
-		$parsed["phptype"] = $dsn;
-	    }
-
-	    return $parsed;
+            $str = $dsn;
+            $dsn = NULL;
         }
 
-        if (preg_match("|^(.*)/([^/]+)/?$|", $dsn, $arr)) {
-	    $parsed["database"] = $arr[2];
-	    $dsn = $arr[1];
+        // Get phptype and dbsyntax
+        // $str => phptype(dbsyntax)
+        if (preg_match('|^([^(]+)\(([^(]*)\)$|', $str, $arr)) {
+            $parsed['phptype'] = $arr[1];
+            $parsed['dbsyntax'] = (empty($arr[2])) ? $arr[1] : $arr[2];
+        } else {
+            $parsed['phptype'] = $str;
+            $parsed['dbsyntax'] = $str;
+        }
+	
+        if (empty($dsn)) {
+            return $parsed;
         }
 
-        if (preg_match("|^([^:]+):([^@]*)@?(.*)$|", $dsn, $arr)) {
-	    $parsed["username"] = urldecode($arr[1]);
-	    $parsed["password"] = urldecode($arr[2]);
-	    $dsn = $arr[3];
-        } elseif (preg_match("|^([^:]+)@(.*)$|", $dsn, $arr)) {
-	    $parsed["username"] = urldecode($arr[1]);
-	    $dsn = $arr[2];
+        // Get (if found): username and password
+        // $dsn => username:password@protocol+hostspec/database
+        if (($at = strpos($dsn,'@')) !== false) {
+            $str = substr($dsn, 0, $at);
+            $dsn = substr($dsn, $at + 1);
+            if (($pos = strpos($str, ':')) !== false) {
+                $parsed['username'] = urldecode(substr($str, 0, $pos));
+                $parsed['password'] = urldecode(substr($str, $pos + 1));
+            } else {
+                $parsed['username'] = urldecode($str);
+            }
         }
 
-        if (preg_match("|^([^\+]+)\+(.*)$|", $dsn, $arr)) {
-	    $parsed["protocol"] = $arr[1];
-	    $dsn = $arr[2];
+        // Find protocol and hostspec
+        // $dsn => protocol+hostspec/database
+        if (($pos=strpos($dsn, '/')) !== false) {
+            $str = substr($dsn, 0, $pos);
+            $dsn = substr($dsn, $pos + 1);
+        } else {
+            $str = $dsn;
+            $dsn = NULL;
         }
 
-        if (!$parsed["database"]) {
-	    $dsn = preg_replace("|/+$|", "", $dsn);
+        // Get protocol + hostspec
+        // $str => protocol+hostspec
+        if (($pos=strpos($str, '+')) !== false) {
+            $parsed['protocol'] = substr($str, 0, $pos);
+            $parsed['hostspec'] = urldecode(substr($str, $pos + 1));
+        } else {
+            $parsed['hostspec'] = urldecode($str);
         }
 
-        $parsed["hostspec"] = urldecode($dsn);
-
-        if(!$parsed["dbsyntax"]) {
-	    $parsed["dbsyntax"] = $parsed["phptype"];
+        // Get dabase if any
+        // $dsn => database
+        if (!empty($dsn)) {
+            $parsed['database'] = $dsn;
         }
 
         return $parsed;
