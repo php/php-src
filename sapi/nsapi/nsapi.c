@@ -94,15 +94,16 @@ typedef struct nsapi_equiv {
 } nsapi_equiv;
 
 static nsapi_equiv nsapi_headers[] = {
-	{ "CONTENT_LENGTH",		"content-length" },
-	{ "CONTENT_TYPE",		"content-type" },
-	{ "HTTP_ACCEPT",		"accept" },
+	{ "CONTENT_LENGTH",			"content-length" },
+	{ "CONTENT_TYPE",			"content-type" },
+	{ "HTTP_ACCEPT",			"accept" },
 	{ "HTTP_ACCEPT_ENCODING",	"accept-encoding" },
 	{ "HTTP_ACCEPT_LANGUAGE",	"accept-language" },
+	{ "HTTP_ACCEPT_CHARSET",	"accept-charset" },
 	{ "HTTP_AUTHORIZATION",		"authorization" },
-	{ "HTTP_COOKIE",		"cookie" },
+	{ "HTTP_COOKIE",			"cookie" },
 	{ "HTTP_IF_MODIFIED_SINCE",	"if-modified-since" },
-	{ "HTTP_REFERER",		"referer" },
+	{ "HTTP_REFERER",			"referer" },
 	{ "HTTP_USER_AGENT",		"user-agent" },
 	{ "HTTP_USER_DEFINED",		"user-defined" }
 };
@@ -113,20 +114,22 @@ static nsapi_equiv nsapi_reqpb[] = {
 	{ "REQUEST_LINE",		"clf-request" },
 	{ "REQUEST_METHOD",		"method" },
 	{ "SCRIPT_NAME",		"uri" },
-	{ "SCRIPT_PROTOCOL",		"protocol" }
+	{ "SERVER_PROTOCOL",	"protocol" }
 };
 static size_t nsapi_reqpb_size = sizeof(nsapi_reqpb)/sizeof(nsapi_reqpb[0]);
 
 static nsapi_equiv nsapi_vars[] = {
-	{ "AUTH_TYPE",			"auth-type" },
 	{ "PATH_INFO",			"path-info" },
+	{ "PATH_TRANSLATED",	"path" },
+	{ "AUTH_TYPE",			"auth-type" },
+	{ "CLIENT_CERT",		"auth-cert" },
 	{ "REMOTE_USER",		"auth-user" }
 };
 static size_t nsapi_vars_size = sizeof(nsapi_vars)/sizeof(nsapi_vars[0]);
 
 static nsapi_equiv nsapi_client[] = {
 	{ "HTTPS_KEYSIZE",		"keysize" },
-	{ "HTTPS_SECRETSIZE",		"secret-keysize" },
+	{ "HTTPS_SECRETSIZE",	"secret-keysize" },
 	{ "REMOTE_ADDR",		"ip" }
 };
 static size_t nsapi_client_size = sizeof(nsapi_client)/sizeof(nsapi_client[0]);
@@ -279,46 +282,66 @@ sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC
 {
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	size_t i;
-	char *value = NULL;
+	char *value;
 	char buf[128];
 
-	*buf = 0;
 	for (i = 0; i < nsapi_reqpb_size; i++) {
-		if ((value = pblock_findval(nsapi_reqpb[i].nsapi_eq, rc->rq->reqpb)) == NULL) {
-			value = buf;
+		value = pblock_findval(nsapi_reqpb[i].nsapi_eq, rc->rq->reqpb);
+		if (value) {
+			php_register_variable( (char *)nsapi_reqpb[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 		}
-		php_register_variable( (char *)nsapi_reqpb[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 	}
 	
 	for (i = 0; i < nsapi_headers_size; i++) {
-		if ((value = pblock_findval(nsapi_headers[i].nsapi_eq, rc->rq->headers)) == NULL) {
-			value = buf;
+		value = pblock_findval(nsapi_headers[i].nsapi_eq, rc->rq->headers);
+		if (value) {
+			php_register_variable( (char *)nsapi_headers[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 		}
-		php_register_variable( (char *)nsapi_headers[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 	}
 
 	for (i = 0; i < nsapi_vars_size; i++) {
-		if ((value = pblock_findval(nsapi_vars[i].nsapi_eq, rc->rq->vars)) == NULL) {
-			value = buf;
+		value = pblock_findval(nsapi_vars[i].nsapi_eq, rc->rq->vars);
+		if (value) {
+			php_register_variable( (char *)nsapi_vars[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 		}
-		php_register_variable( (char *)nsapi_vars[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 	}
 
 	for (i = 0; i < nsapi_client_size; i++) {
-		if ((value = pblock_findval(nsapi_client[i].nsapi_eq, rc->sn->client)) == NULL) {
-			value = buf;
+		value = pblock_findval(nsapi_client[i].nsapi_eq, rc->sn->client);
+		if (value) {
+			php_register_variable( (char *)nsapi_client[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 		}
-		php_register_variable( (char *)nsapi_client[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 	}
+	
+	value = session_dns(rc->sn);
+	if (value) {
+		php_register_variable("REMOTE_HOST", value, track_vars_array ELS_CC PLS_CC );
+	}
+	sprintf(buf, "%d", conf_getglobals()->Vport);
+	php_register_variable("SERVER_PORT", buf, track_vars_array ELS_CC PLS_CC );
+	php_register_variable("SERVER_NAME", util_hostname(), track_vars_array ELS_CC PLS_CC );
+	php_register_variable("SERVER_URL", http_uri2url("", ""), track_vars_array ELS_CC PLS_CC );
+	php_register_variable("HTTPS", (security_active ? "ON" : "OFF"), track_vars_array ELS_CC PLS_CC );
+/*	php_register_variable("SERVER_SOFTWARE", MAGNUS_VERSION_STRING, track_vars_array ELS_CC PLS_CC ); */
 
 	/*
 	 * Special PHP_SELF variable.
 	 */
-	value = pblock_findval( "uri", rc->rq->reqpb );
-	if( value != NULL ) {
-		php_register_variable( "PHP_SELF", value, track_vars_array ELS_CC PLS_CC );
-	}
+	value = pblock_findval("uri", rc->rq->reqpb);
+	if ( value != NULL ) {
+		php_register_variable("PHP_SELF", value, track_vars_array ELS_CC PLS_CC );
+ 	}
 }
+  
+static void
+nsapi_log_message(char *message)
+{
+	SLS_FETCH();
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+	log_error(LOG_INFORM, "PHP_log_message", rc->sn, rc->rq,
+		"%s", message);
+}
+
 
 static sapi_module_struct nsapi_sapi_module = {
 	"nsapi",				/* name */
@@ -345,7 +368,7 @@ static sapi_module_struct nsapi_sapi_module = {
 	sapi_nsapi_read_cookies,		/* read Cookies */
 
 	sapi_nsapi_register_server_variables,	/* register server variables */
-	NULL,					/* Log message */
+	nsapi_log_message,			/* Log message */
 
 	NULL,					/* Block interruptions */
 	NULL,					/* Unblock interruptions */
@@ -357,7 +380,7 @@ static char *
 nsapi_strdup(char *str)
 {
 	if (str != NULL)
-		return strdup(str);
+		return STRDUP(str);
 	return NULL;
 }
 
@@ -365,78 +388,7 @@ static void
 nsapi_free(void *addr)
 {
 	if (addr != NULL)
-		free(addr);
-}
-
-/*
- * Add symbols to the interpreter.
- */
-static void
-nsapi_add_string(const char *name, const char *buf)
-{
-	zval *pval;
-	ELS_FETCH();
-
-	if (buf == NULL)
-		buf = "";
-
-	MAKE_STD_ZVAL(pval);
-	pval->type = IS_STRING;
-	pval->value.str.len = strlen(buf);
-	pval->value.str.val = estrndup(buf, pval->value.str.len);
-	zend_hash_update(&EG(symbol_table), (char *)name, strlen(name) + 1, &pval, sizeof(zval *), NULL);
-}
-
-static void
-nsapi_hash_environment(NSLS_D SLS_DC)
-{
-	size_t i;
-	const char *remote_host = NULL, *server_url = NULL, *path_translated = NULL;
-	char *value = NULL, buf[128];
-
-	remote_host = session_dns(NSG(sn));
-	server_url = http_uri2url("", "");
-	path_translated = SG(request_info).path_translated;
-
-	*buf = 0;
-
-	for (i = 0; i < nsapi_headers_size; i++) {
-		if ((value = pblock_findval(nsapi_headers[i].nsapi_eq, NSG(rq)->headers)) == NULL) {
-			value = buf;
-		}
-		nsapi_add_string(nsapi_headers[i].env_var, value);
-	}
-
-	for (i = 0; i < nsapi_reqpb_size; i++) {
-		if ((value = pblock_findval(nsapi_reqpb[i].nsapi_eq, NSG(rq)->reqpb)) == NULL) {
-			value = buf;
-		}
-		nsapi_add_string(nsapi_reqpb[i].env_var, value);
-	}
-
-	for (i = 0; i < nsapi_vars_size; i++) {
-		if ((value = pblock_findval(nsapi_vars[i].nsapi_eq, NSG(rq)->vars)) == NULL) {
-			value = buf;
-		}
-		nsapi_add_string(nsapi_vars[i].env_var, value);
-	}
-
-	for (i = 0; i < nsapi_client_size; i++) {
-		if ((value = pblock_findval(nsapi_client[i].nsapi_eq, NSG(sn)->client)) == NULL) {
-			value = buf;
-		}
-		nsapi_add_string(nsapi_client[i].env_var, value);
-	}
-
-	sprintf(buf, "%d", conf_getglobals()->Vport);
-	nsapi_add_string("SERVER_PORT", buf);
-
-	nsapi_add_string("HTTPS", (security_active ? "ON" : "OFF"));
-	nsapi_add_string("SERVER_NAME", server_hostname);
-	nsapi_add_string("REMOTE_HOST", remote_host);
-	nsapi_add_string("SERVER_URL", server_url);
-/*	nsapi_add_string("SERVER_SOFTWARE", MAGNUS_VERSION_STRING); */
-	nsapi_add_string("PATH_TRANSLATED", path_translated);
+		FREE(addr);
 }
 
 static void
@@ -445,12 +397,12 @@ nsapi_request_ctor(NSLS_D SLS_DC)
 	char *query_string = pblock_findval("query", NSG(rq)->reqpb);
 	char *uri = pblock_findval("uri", NSG(rq)->reqpb);
 	char *path_info = pblock_findval("path-info", NSG(rq)->vars);
-	char *path_translated = NULL;
+	char *path_translated = pblock_findval("path", NSG(rq)->vars);
 	char *request_method = pblock_findval("method", NSG(rq)->reqpb);
 	char *content_type = pblock_findval("content-type", NSG(rq)->headers);
 	char *content_length = pblock_findval("content-length", NSG(rq)->headers);
 
-	if (uri != NULL)
+	if ((path_translated == NULL) && (uri != NULL))
 		path_translated = request_translate_uri(uri, NSG(sn));
 
 #if defined(NSAPI_DEBUG)
@@ -472,7 +424,7 @@ nsapi_request_ctor(NSLS_D SLS_DC)
 #endif
 
 	SG(request_info).query_string = nsapi_strdup(query_string);
-	SG(request_info).request_uri = nsapi_strdup(path_info);
+	SG(request_info).request_uri = nsapi_strdup(uri);
 	SG(request_info).request_method = nsapi_strdup(request_method);
 	SG(request_info).path_translated = nsapi_strdup(path_translated);
 	SG(request_info).content_type = nsapi_strdup(content_type);
@@ -514,17 +466,13 @@ nsapi_module_main(NSLS_D SLS_DC)
 		"Parsing [%s]", SG(request_info).path_translated);
 #endif
 
-#if 0
-	result = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
-	if (result == FAILURE) {
-		return FAILURE;
-	}
-#endif
-
-	nsapi_hash_environment(NSLS_C SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	php_request_shutdown(NULL);
 
+#if defined(NSAPI_DEBUG)
+	log_error(LOG_INFORM, "nsapi_module_main", NSG(sn), NSG(rq),
+		"PHP request finished Ok");
+#endif
 	return SUCCESS;
 }
 
@@ -560,7 +508,7 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 
 	SLS_FETCH();
 
-	request_context = (nsapi_request_context *)malloc(sizeof(nsapi_request_context));
+	request_context = (nsapi_request_context *)MALLOC(sizeof(nsapi_request_context));
 	request_context->pb = pb;
 	request_context->sn = sn;
 	request_context->rq = rq;
@@ -572,7 +520,7 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 	retval = nsapi_module_main(NSLS_C SLS_CC);
 	nsapi_request_dtor(NSLS_C SLS_CC);
 
-	free(request_context);
+	FREE(request_context);
 
 	return (retval == SUCCESS) ? REQ_PROCEED : REQ_EXIT;
 }
