@@ -335,6 +335,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
+	STD_PHP_INI_BOOLEAN("mysql.load_infile",		"0",	PHP_INI_SYSTEM,		OnUpdateInt,		load_infile,		zend_mysql_globals, 	mysql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -350,6 +351,7 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 	mysql_globals->connect_errno = 0;
 	mysql_globals->connect_error = NULL;
 	mysql_globals->connect_timeout = 0;
+	mysql_globals->load_infile = 0;
 }
 /* }}} */
 
@@ -368,8 +370,6 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_USE_RESULT", MYSQL_USE_RESULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_STORE_RESULT", MYSQL_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_COMPRESS", CLIENT_COMPRESS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
@@ -446,6 +446,7 @@ PHP_MINFO_FUNCTION(mysql)
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
+
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -475,8 +476,12 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
+	long load_infile;
+
 
 	connect_timeout = MySG(connect_timeout);
+	load_infile = MySG(load_infile);
+
 	socket = MySG(default_socket);
 
 	if (PG(sql_safe_mode)) {
@@ -632,6 +637,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (connect_timeout != -1)
 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+			mysql_options(&mysql->conn, MYSQL_OPT_LOCAL_INFILE, (const char *)&load_infile);
 
 			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
@@ -729,6 +735,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		if (connect_timeout != -1)
 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+		mysql_options(&mysql->conn, MYSQL_OPT_LOCAL_INFILE, (const char *)&connect_timeout);
 
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
