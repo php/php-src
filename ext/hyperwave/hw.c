@@ -313,6 +313,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		add_assoc_long(spec_arr, "Group", HW_ATTR_NONE);
 		add_assoc_long(spec_arr, "HtmlAttr", HW_ATTR_NONE);
 		add_assoc_long(spec_arr, "Parent", HW_ATTR_NONE);
+		add_assoc_long(spec_arr, "SQLStmt", HW_ATTR_NR);
 	}
 
 	if (array_init(*return_value) == FAILURE) {
@@ -549,9 +550,10 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 #define BUFFERLEN 1024
 /* {{{ make_objrec_from_array
  */
-static char * make_objrec_from_array(HashTable *lht) {
+static char * make_objrec_from_array(HashTable *lht, char delim) {
 	int i, count, keytype;
-	ulong length;
+	ulong idx;
+	uint length;
 	char *key, str[BUFFERLEN], *objrec = NULL;
 	zval *keydata, **keydataptr;
 
@@ -560,25 +562,32 @@ static char * make_objrec_from_array(HashTable *lht) {
 
 	if(0 == (count = zend_hash_num_elements(lht)))
 		return NULL;
-	
+
+	if(delim == 0)
+		delim = '=';
+
 	zend_hash_internal_pointer_reset(lht);
 	objrec = malloc(1);
 	*objrec = '\0';
 	for(i=0; i<count; i++) {
-		keytype = zend_hash_get_current_key(lht, &key, &length, 0);
+		keytype = zend_hash_get_current_key_ex(lht, &key, &length, &idx, 0, NULL);
 /*		if(HASH_KEY_IS_STRING == keytype) { */
 			zend_hash_get_current_data(lht, (void **) &keydataptr);
 			keydata = *keydataptr;
 			switch(Z_TYPE_P(keydata)) {
 				case IS_STRING:
 					if(HASH_KEY_IS_STRING == keytype)
-						snprintf(str, BUFFERLEN, "%s=%s\n", key, Z_STRVAL_P(keydata));
+						snprintf(str, BUFFERLEN, "%s%c%s\n", key, delim, Z_STRVAL_P(keydata));
+					else if(HASH_KEY_IS_LONG == keytype)
+						snprintf(str, BUFFERLEN, "%ld%c%s\n", idx, delim, Z_STRVAL_P(keydata));
 					else
 						snprintf(str, BUFFERLEN, "%s\n", Z_STRVAL_P(keydata));
 					break;
 				case IS_LONG:
 					if(HASH_KEY_IS_STRING == keytype)
-						snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, Z_LVAL_P(keydata));
+						snprintf(str, BUFFERLEN, "%s%c0x%lX\n", key, delim, Z_LVAL_P(keydata));
+					else if(HASH_KEY_IS_LONG == keytype)
+						snprintf(str, BUFFERLEN, "%ld%c%s\n", idx, delim, Z_STRVAL_P(keydata));
 					else
 						snprintf(str, BUFFERLEN, "0x%lX\n", Z_LVAL_P(keydata));
 					break;
@@ -587,7 +596,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 					char *strarr, *ptr, *ptr1;
 					count = zend_hash_num_elements(Z_ARRVAL_P(keydata));
 					if(count > 0) {
-						strarr = make_objrec_from_array(Z_ARRVAL_P(keydata));
+						strarr = make_objrec_from_array(Z_ARRVAL_P(keydata), ':');
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1)))) {
@@ -605,8 +614,8 @@ static char * make_objrec_from_array(HashTable *lht) {
 								strcpy(ptr1, key);
 								ptr1 += keylen;
 								*ptr1++ = '=';
-							} else if(strarr[i] == '=')
-								ptr1[-1] = ':';
+							}/* else if(strarr[i] == '=')
+								ptr1[-1] = ':'; */
 						}
 						*ptr1++ = '\n';
 						*ptr1 = '\0';
@@ -1904,7 +1913,7 @@ PHP_FUNCTION(hw_modifyobject)
 					char *strarr, *ptr, *ptr1;
 					count = zend_hash_num_elements(Z_ARRVAL_P(data));
 					if(count > 0) {
-						strarr = make_objrec_from_array(Z_ARRVAL_P(data));
+						strarr = make_objrec_from_array(Z_ARRVAL_P(data), ':');
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
@@ -1928,8 +1937,8 @@ PHP_FUNCTION(hw_modifyobject)
 								strcpy(ptr1, key);
 								ptr1 += keylen;
 								*ptr1++ = '=';
-							} else if(strarr[i] == '=')
-								ptr1[-1] = ':';
+							} /* else if(strarr[i] == '=')
+								ptr1[-1] = ':'; */
 						}
 						*ptr1 = '\0';
 						strlcpy(addattribute, ptr, sizeof(addattribute));
@@ -1974,7 +1983,7 @@ PHP_FUNCTION(hw_modifyobject)
 					char *strarr, *ptr, *ptr1;
 					count = zend_hash_num_elements(Z_ARRVAL_P(data));
 					if(count > 0) {
-						strarr = make_objrec_from_array(Z_ARRVAL_P(data));
+						strarr = make_objrec_from_array(Z_ARRVAL_P(data), ':');
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
@@ -1998,8 +2007,8 @@ PHP_FUNCTION(hw_modifyobject)
 								strcpy(ptr1, key);
 								ptr1 += keylen;
 								*ptr1++ = '=';
-							} else if(strarr[i] == '=')
-								ptr1[-1] = ':';
+							} /* else if(strarr[i] == '=')
+								ptr1[-1] = ':'; */
 						}
 						*ptr1++ = '\n';
 						*ptr1 = '\0';
@@ -4046,7 +4055,7 @@ PHP_FUNCTION(hw_array2objrec)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_array_ex(arg1);
-	objrec = make_objrec_from_array(Z_ARRVAL_PP(arg1));
+	objrec = make_objrec_from_array(Z_ARRVAL_PP(arg1), '=');
 	if(objrec) {
 		retobj = estrdup(objrec);
 		free(objrec);
@@ -4141,7 +4150,7 @@ PHP_FUNCTION(hw_inscoll)
 		RETURN_FALSE;
 	}
 
-	if(NULL == (objrec = make_objrec_from_array(Z_ARRVAL_PP(arg3)))) {
+	if(NULL == (objrec = make_objrec_from_array(Z_ARRVAL_PP(arg3), '='))) {
 		php_error(E_WARNING, "%s(): Could not create Object Record from Array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
