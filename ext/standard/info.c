@@ -543,6 +543,47 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				php_info_print_table_row(2, "Stream Socket Transports", "disabled"); /* ?? */
 			}
 		}
+
+		{
+			HashTable *stream_filter_hash;
+			char *filter_name, *filter_buf = NULL;
+			int filter_name_len, filter_buf_len = 0, filter_buf_size = 0;
+			ulong num_key;
+
+			if ((stream_filter_hash = php_get_stream_filters_hash())) {
+				for(zend_hash_internal_pointer_reset(stream_filter_hash);
+					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, &filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+					zend_hash_move_forward(stream_filter_hash)) {
+					if (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
+						while (filter_buf_len + filter_name_len + 3 > filter_buf_size) {
+							filter_buf_size += 256;
+						}
+						if (filter_buf) {
+							filter_buf = erealloc(filter_buf, filter_buf_size);
+						} else {
+							filter_buf = emalloc(filter_buf_size);
+						}
+					}
+					if (filter_buf_len > 0) {
+						filter_buf[filter_buf_len++] = ',';
+						filter_buf[filter_buf_len++] = ' ';
+					}
+					memcpy(filter_buf + filter_buf_len, filter_name, filter_name_len);
+					filter_buf_len += filter_name_len;
+					filter_buf[filter_buf_len] = '\0';
+				}
+				if (filter_buf) {
+					php_info_print_table_row(2, "Registered Stream Filters", filter_buf);
+					efree(filter_buf);
+				} else {
+					/* Any chances we will ever hit this? */
+					php_info_print_table_row(2, "Registered Stream Filters", "no filters registered");
+				}
+			} else {
+				/* Any chances we will ever hit this? */
+				php_info_print_table_row(2, "Stream Filters", "disabled"); /* ?? */
+			}
+		}
 		
 		php_info_print_table_end();
 
