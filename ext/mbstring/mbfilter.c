@@ -6918,30 +6918,30 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
 		if (c >= 0) {
 			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, "U+" TSRMLS_CC);
+				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+" TSRMLS_CC);
 			} else {
 				if (c < MBFL_WCSGROUP_WCHARMAX) {
 					m = c & ~MBFL_WCSPLANE_MASK;
 					switch (m) {
 					case MBFL_WCSPLANE_JIS0208:
-						ret = mbfl_convert_filter_strcat(filter, "JIS+" TSRMLS_CC);
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS+" TSRMLS_CC);
 						break;
 					case MBFL_WCSPLANE_JIS0212:
-						ret = mbfl_convert_filter_strcat(filter, "JIS2+" TSRMLS_CC);
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+" TSRMLS_CC);
 						break;
 					case MBFL_WCSPLANE_WINCP932:
-						ret = mbfl_convert_filter_strcat(filter, "W932+" TSRMLS_CC);
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+" TSRMLS_CC);
 						break;
 					case MBFL_WCSPLANE_8859_1:
-						ret = mbfl_convert_filter_strcat(filter, "I8859_1+" TSRMLS_CC);
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"I8859_1+" TSRMLS_CC);
 						break;
 					default:
-						ret = mbfl_convert_filter_strcat(filter, "?+" TSRMLS_CC);
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+" TSRMLS_CC);
 						break;
 					}
 					c &= MBFL_WCSPLANE_MASK;
 				} else {
-					ret = mbfl_convert_filter_strcat(filter, "BAD+" TSRMLS_CC);
+					ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"BAD+" TSRMLS_CC);
 					c &= MBFL_WCSGROUP_MASK;
 				}
 			}
@@ -7720,7 +7720,7 @@ collector_strpos(int c, void* data TSRMLS_DC)
 			}
 		} else if (pc->needle_pos != 0) {
 retry:
-			h = pc->needle.buffer;
+			h = (int *)pc->needle.buffer;
 			h++;
 			for (;;) {
 				pc->found_pos++;
@@ -9100,7 +9100,7 @@ mime_header_decoder_collector(int c, void* data TSRMLS_DC)
 		if (c == 0x3f) {		/* ? */
 			/* identify charset */
 			mbfl_memory_device_output('\0', &pd->tmpdev TSRMLS_CC);
-			encoding = mbfl_name2encoding(&pd->tmpdev.buffer[pd->cspos]);
+			encoding = mbfl_name2encoding((const char *)&pd->tmpdev.buffer[pd->cspos]);
 			if (encoding != NULL) {
 				pd->incode = encoding->no_encoding;
 				pd->status = 3;

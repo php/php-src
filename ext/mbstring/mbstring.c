@@ -1423,7 +1423,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 		if (identd) {
 			n = 0;
 			while (n < num) {
-				string.val = val_list[n];
+				string.val = (unsigned char *)val_list[n];
 				string.len = len_list[n];
 				if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
 					break;
@@ -1453,10 +1453,10 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 
 	n = 0;
 	while (n < num) {
-		string.val = val_list[n];
+		string.val = (unsigned char *)val_list[n];
 		string.len = len_list[n];
 		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resvar TSRMLS_CC) != NULL) {
-			var = resvar.val;
+			var = (char *)resvar.val;
 		} else {
 			var = val_list[n];
 		}
@@ -1738,7 +1738,7 @@ PHP_FUNCTION(mb_parse_str)
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
-				string.val = str_list[n];
+				string.val = (unsigned char *)str_list[n];
 				string.len = len_list[n];
 				if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
 					break;
@@ -1778,7 +1778,7 @@ PHP_FUNCTION(mb_parse_str)
 		string.val = str_list[n];
 		string.len = len_list[n];
 		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resvar TSRMLS_CC) != NULL) {
-			var = resvar.val;
+			var = (char *)resvar.val;
 		} else {
 			var = str_list[n];
 		}
@@ -1890,7 +1890,7 @@ PHP_FUNCTION(mb_output_handler)
  	mbfl_string_init(&string);
  	string.no_language = MBSTRG(current_language);
  	string.no_encoding = MBSTRG(current_internal_encoding);
- 	string.val = arg_string;
+ 	string.val = (unsigned char *)arg_string;
  	string.len = arg_string_len;
  	mbfl_buffer_converter_feed(MBSTRG(outconv), &string TSRMLS_CC);
  	if (last_feed)
@@ -1898,7 +1898,7 @@ PHP_FUNCTION(mb_output_handler)
  
  	/* get the converter output, and return it */
  	mbfl_buffer_converter_result(MBSTRG(outconv), &result TSRMLS_CC);
- 	RETVAL_STRINGL(result.val, result.len, 0);		/* the string is already strdup()'ed */
+ 	RETVAL_STRINGL((char *)result.val, result.len, 0);		/* the string is already strdup()'ed */
  
  	/* delete the converter if it is the last feed. */
  	if (last_feed) {
@@ -1937,7 +1937,7 @@ PHP_FUNCTION(mb_strlen)
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
 	string.no_encoding = MBSTRG(current_internal_encoding);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	if (n == 2) {
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(mb_strpos)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 		RETURN_FALSE;
 	}
-	haystack.val = Z_STRVAL_PP(arg1);
+	haystack.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	haystack.len = Z_STRLEN_PP(arg1);
 	needle.val = Z_STRVAL_PP(arg2);
 	needle.len = Z_STRLEN_PP(arg2);
@@ -2089,9 +2089,9 @@ PHP_FUNCTION(mb_strrpos)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
-	haystack.val = Z_STRVAL_PP(arg1);
+	haystack.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	haystack.len = Z_STRLEN_PP(arg1);
-	needle.val = Z_STRVAL_PP(arg2);
+	needle.val = (unsigned char *)Z_STRVAL_PP(arg2);
 	needle.len = Z_STRLEN_PP(arg2);
 	n = mbfl_strpos(&haystack, &needle, 0, 1 TSRMLS_CC);
 	if (n >= 0) {
@@ -2142,7 +2142,7 @@ PHP_FUNCTION(mb_substr)
 	}
 
 	convert_to_string_ex(arg1);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	convert_to_long_ex(arg2);
@@ -2182,7 +2182,7 @@ PHP_FUNCTION(mb_substr)
 
 	ret = mbfl_substr(&string, &result, from, len TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);		/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2288,7 +2288,7 @@ PHP_FUNCTION(mb_strwidth)
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
 	string.no_encoding = MBSTRG(current_internal_encoding);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	if (n == 2){
@@ -2353,7 +2353,7 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 
 	convert_to_string_ex(arg1);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	convert_to_long_ex(arg2);
@@ -2373,13 +2373,13 @@ PHP_FUNCTION(mb_strimwidth)
 
 	if (ZEND_NUM_ARGS() >= 4) {
 		convert_to_string_ex(arg4);
-		marker.val = Z_STRVAL_PP(arg4);
+		marker.val = (unsigned char *)Z_STRVAL_PP(arg4);
 		marker.len = Z_STRLEN_PP(arg4);
 	}
 
 	ret = mbfl_strimwidth(&string, &marker, &result, from, width TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);		/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2418,7 +2418,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 	from_encoding = MBSTRG(current_internal_encoding);
 	string.no_encoding = from_encoding;
 	string.no_language = MBSTRG(current_language);
-	string.val = input;
+	string.val = (unsigned char *)input;
 	string.len = length;
 
 	/* pre-conversion encoding */
@@ -2463,7 +2463,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 		if (output_len) {
 			*output_len = ret->len;
 		}
-		output = ret->val;
+		output = (char *)ret->val;
 	}
 
 	mbfl_buffer_converter_delete(convd TSRMLS_CC);
@@ -2476,8 +2476,8 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 PHP_FUNCTION(mb_convert_encoding)
 {
 	pval **arg_str, **arg_new, **arg_old;
-	int size, i;
-	size_t l,n;
+	int i;
+	size_t size, l, n;
 	char *_from_encodings, *ret, *s_free = NULL;
 
 	zval **hash_entry;
@@ -2675,7 +2675,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	convert_to_string_ex(arg_str);
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
-	string.val = Z_STRVAL_PP(arg_str);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg_str);
 	string.len = Z_STRLEN_PP(arg_str);
 	ret = mbfl_identify_encoding_name(&string, elist, size TSRMLS_CC);
 	if (list != NULL) {
@@ -2751,7 +2751,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.len = Z_STRLEN_PP(argv[0]);
 	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, 0 TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0)	/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0)	/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2773,11 +2773,11 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	mbfl_string_init(&result);
 	string.no_language = MBSTRG(current_language);
 	string.no_encoding = MBSTRG(current_internal_encoding);
-	string.val = Z_STRVAL_PP(arg_str);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg_str);
 	string.len = Z_STRLEN_PP(arg_str);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding) TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0)	/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0)	/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2807,7 +2807,7 @@ PHP_FUNCTION(mb_convert_kana)
 	}
 
 	convert_to_string_ex(arg1);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	/* option */
@@ -2891,7 +2891,7 @@ PHP_FUNCTION(mb_convert_kana)
 
 	ret = mbfl_ja_jp_hantozen(&string, &result, opt TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);		/* the string is already strdup()'ed */
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3006,7 +3006,7 @@ PHP_FUNCTION(mb_convert_variables)
 										continue;
 									}
 								} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
-									string.val = Z_STRVAL_PP(hash_entry);
+									string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
 									string.len = Z_STRLEN_PP(hash_entry);
 									if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
 										goto detect_end;		/* complete detecting */
@@ -3015,7 +3015,7 @@ PHP_FUNCTION(mb_convert_variables)
 							}
 						}
 					} else if (Z_TYPE_PP(var) == IS_STRING) {
-						string.val = Z_STRVAL_PP(var);
+						string.val = (unsigned char *)Z_STRVAL_PP(var);
 						string.len = Z_STRLEN_PP(var);
 						if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
 							goto detect_end;		/* complete detecting */
@@ -3092,24 +3092,24 @@ detect_end:
 									continue;
 								}
 							} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
-								string.val = Z_STRVAL_PP(hash_entry);
+								string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
 								string.len = Z_STRLEN_PP(hash_entry);
 								ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
 								if (ret != NULL) {
 									STR_FREE(Z_STRVAL_PP(hash_entry));
-									Z_STRVAL_PP(hash_entry) = ret->val;
+									Z_STRVAL_PP(hash_entry) = (char *)ret->val;
 									Z_STRLEN_PP(hash_entry) = ret->len;
 								}
 							}
 						}
 					}
 				} else if (Z_TYPE_PP(var) == IS_STRING) {
-					string.val = Z_STRVAL_PP(var);
+					string.val = (unsigned char *)Z_STRVAL_PP(var);
 					string.len = Z_STRLEN_PP(var);
 					ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
 					if (ret != NULL) {
 						STR_FREE(Z_STRVAL_PP(var));
-						Z_STRVAL_PP(var) = ret->val;
+						Z_STRVAL_PP(var) = (char *)ret->val;
 						Z_STRLEN_PP(var) = ret->len;
 					}
 				}
@@ -3152,7 +3152,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
 	string.no_encoding = MBSTRG(current_internal_encoding);
-	string.val = Z_STRVAL_PP(arg1);
+	string.val = (unsigned char *)Z_STRVAL_PP(arg1);
 	string.len = Z_STRLEN_PP(arg1);
 
 	/* encoding */
@@ -3198,7 +3198,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type TSRMLS_CC);
 	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0);
+		RETVAL_STRINGL((char *)ret->val, ret->len, 0);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3281,7 +3281,7 @@ PHP_FUNCTION(mb_send_mail)
 	convert_to_string_ex(argv[1]);
 	if (Z_STRVAL_PP(argv[1])) {
 		orig_str.no_language = MBSTRG(current_language);
-		orig_str.val = Z_STRVAL_PP(argv[1]);
+		orig_str.val = (unsigned char *)Z_STRVAL_PP(argv[1]);
 		orig_str.len = Z_STRLEN_PP(argv[1]);
 		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
 		if(orig_str.no_encoding == mbfl_no_encoding_invalid) {
@@ -3289,7 +3289,7 @@ PHP_FUNCTION(mb_send_mail)
 		}
 		pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]") TSRMLS_CC);
 		if (pstr != NULL) {
-			subject_buf = subject = pstr->val;
+			subject_buf = subject = (char *)pstr->val;
 		} else {
 			subject = Z_STRVAL_PP(argv[1]);
 		}
@@ -3310,7 +3310,7 @@ PHP_FUNCTION(mb_send_mail)
 		}
 		pstr = mbfl_convert_encoding(&orig_str, &conv_str, tran_cs TSRMLS_CC);
 		if (pstr != NULL) {
-			message_buf = message = pstr->val;
+			message_buf = message = (char *)pstr->val;
 		} else {
 			message = Z_STRVAL_PP(argv[2]);
 		}
@@ -3346,7 +3346,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 	mbfl_memory_device_strcat(&device, p TSRMLS_CC);
 	mbfl_memory_device_output('\0', &device TSRMLS_CC);
-	headers = device.buffer;
+	headers = (char *)device.buffer;
 
 	if (argc == 5) {	/* extra options that get passed to the mailer */
 		convert_to_string_ex(argv[4]);
