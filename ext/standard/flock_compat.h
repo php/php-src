@@ -26,7 +26,7 @@
 #	define LOCK_EX 2
 #	define LOCK_NB 4
 #	define LOCK_UN 8
-int flock(int fd, int operation);
+PHPAPI int flock(int fd, int operation);
 #endif
 
 #ifdef PHP_WIN32
