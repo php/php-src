@@ -38,7 +38,7 @@ typedef struct _StaticAllocator {
 	zend_uint current_block;
 } StaticAllocator;
 
-int static_allocator_init(StaticAllocator *sa);
+void static_allocator_init(StaticAllocator *sa);
 char *static_allocator_allocate(StaticAllocator *sa, zend_uint size);
 void static_allocator_destroy(StaticAllocator *sa);
 

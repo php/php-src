@@ -42,7 +42,7 @@ inline static void block_destroy(Block *block)
 	efree(block->bp);
 }
 
-int static_allocator_init(StaticAllocator *sa)
+void static_allocator_init(StaticAllocator *sa)
 {
 	sa->Blocks = (Block *) emalloc(sizeof(Block));
 	block_init(sa->Blocks, ALLOCATOR_BLOCK_SIZE);
