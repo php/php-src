@@ -1074,7 +1074,6 @@ PHP_FUNCTION(set_file_buffer)
 	pval **arg1, **arg2;
 	int ret,type,buff;
 	void *what;
-	PLS_FETCH();
       
 	switch (ARG_COUNT(ht)) {
 	case 2:
@@ -1526,7 +1525,6 @@ PHP_FUNCTION(fgetcsv) {
 	int issock=0;
 	int socketd=0;
 	void *what;
-	PLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
