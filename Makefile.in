@@ -117,7 +117,7 @@ configuration-scanner.c:	$(srcdir)/configuration-scanner.l
 	flex -Pcfg -oconfiguration-scanner.c -i $(srcdir)/configuration-scanner.l
 
 clean: clean-recursive
-	-rm -f libphp4.a libmodphp4.a php *.o
+	-rm -f libphp4.a libmodphp4.a libphp4.so php *.o
 	-rm -f test/php.desc test/php.in test/php.out test/php.test
 	-rm -f test/a.tmp test/b.tmp test/test.dbm*
 

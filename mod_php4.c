@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>            |
    | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>                      |
    +----------------------------------------------------------------------+
@@ -58,7 +58,7 @@
 # include "mod_dav.h"
 #endif
 
-PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
+PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
 
 /* ### these should be defined in mod_php4.h or somewhere else */
 #define USE_PATH 1
@@ -87,7 +87,7 @@ php_apache_info_struct php_apache_info;		/* active config */
 
 
 
-void php3_save_umask()
+void php_save_umask()
 {
 	saved_umask = umask(077);
 	umask(saved_umask);
@@ -191,7 +191,7 @@ sapi_module_struct sapi_module = {
 };
 
 
-void php3_restore_umask()
+void php_restore_umask()
 {
 	umask(saved_umask);
 }
@@ -207,7 +207,7 @@ static void init_request_info(SLS_D)
 	SG(request_info).query_string = r->args;
 	SG(request_info).path_translated = r->filename;
 	SG(request_info).request_uri = r->uri;
-	SG(request_info).request_method = r->method;
+	SG(request_info).request_method = (char *)r->method;
 	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 
@@ -233,7 +233,7 @@ static void init_request_info(SLS_D)
 }
 
 
-int send_php3(request_rec *r, int display_source_mode, char *filename)
+int send_php(request_rec *r, int display_source_mode, char *filename)
 {
 	int fd, retval;
 	SLS_FETCH();
@@ -249,7 +249,7 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 		return NOT_FOUND;
 	}
 
-	/* If PHP parser engine has been turned off with a "php3_engine off"
+	/* If PHP parser engine has been turned off with an "engine off"
 	 * directive, then decline to handle this request
 	 */
 	if (!php_apache_info.engine) {
@@ -293,36 +293,36 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 	SG(server_context) = r;
 	init_request_info(SLS_C);
 	
-	php3_save_umask();
+	php_save_umask();
 	chdir_file(filename);
 	add_common_vars(r);
 	add_cgi_vars(r);
-	apache_php3_module_main(r, fd, display_source_mode SLS_CC);
+	apache_php_module_main(r, fd, display_source_mode SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
-	php3_restore_umask();
+	php_restore_umask();
 	kill_timeout(r);
 	pclosef(r->pool, fd);
 	return OK;
 }
 
 
-int send_parsed_php3(request_rec * r)
+int send_parsed_php(request_rec * r)
 {
-	return send_php3(r, 0, NULL);
+	return send_php(r, 0, NULL);
 }
 
 
-int send_parsed_php3_source(request_rec * r)
+int send_parsed_php_source(request_rec * r)
 {
-	return send_php3(r, 0, NULL);
+	return send_php(r, 0, NULL);
 }
 
 
 /*
  * Create the per-directory config structure with defaults
  */
-static void *php3_create_dir(pool * p, char *dummy)
+static void *php_create_dir(pool * p, char *dummy)
 {
 	php_apache_info_struct *new;
 
@@ -362,7 +362,7 @@ CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struc
 }
 
 
-int php3_xbithack_handler(request_rec * r)
+int php_xbithack_handler(request_rec * r)
 {
 	php_apache_info_struct *conf;
 
@@ -375,11 +375,11 @@ int php3_xbithack_handler(request_rec * r)
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
-	return send_parsed_php3(r);
+	return send_parsed_php(r);
 }
 
 
-void php3_init_handler(server_rec *s, pool *p)
+void php_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, php_module_shutdown, php_module_shutdown_for_exec);
 	php_module_startup(&sapi_module);
@@ -394,17 +394,17 @@ void php3_init_handler(server_rec *s, pool *p)
 extern int phpdav_mkcol_test_handler(request_rec *r);
 extern int phpdav_mkcol_create_handler(request_rec *r);
 
-/* conf is being read twice (both here and in send_php3()) */
-int send_parsed_php3_dav_script(request_rec *r)
+/* conf is being read twice (both here and in send_php()) */
+int send_parsed_php_dav_script(request_rec *r)
 {
 	php_apache_info_struct *conf;
 
 	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config,
 													&php4_module);
-	return send_php3(r, 0, 0, conf->dav_script);
+	return send_php(r, 0, 0, conf->dav_script);
 }
 
-static int php3_type_checker(request_rec *r)
+static int php_type_checker(request_rec *r)
 {
 	php_apache_info_struct *conf;
 
@@ -413,7 +413,7 @@ static int php3_type_checker(request_rec *r)
 
     /* If DAV support is enabled, use mod_dav's type checker. */
     if (conf->dav_script) {
-		dav_api_set_request_handler(r, send_parsed_php3_dav_script);
+		dav_api_set_request_handler(r, send_parsed_php_dav_script);
 		dav_api_set_mkcol_handlers(r, phpdav_mkcol_test_handler,
 								   phpdav_mkcol_create_handler);
 		/* leave the rest of the request to mod_dav */
@@ -425,21 +425,21 @@ static int php3_type_checker(request_rec *r)
 
 #else /* HAVE_MOD_DAV */
 
-# define php3_type_checker NULL
+# define php_type_checker NULL
 
 #endif /* HAVE_MOD_DAV */
 
 
-handler_rec php3_handlers[] =
+handler_rec php_handlers[] =
 {
-	{"application/x-httpd-php3", send_parsed_php3},
-	{"application/x-httpd-php3-source", send_parsed_php3_source},
-	{"text/html", php3_xbithack_handler},
+	{"application/x-httpd-php3", send_parsed_php},
+	{"application/x-httpd-php3-source", send_parsed_php_source},
+	{"text/html", php_xbithack_handler},
 	{NULL}
 };
 
 
-command_rec php3_commands[] =
+command_rec php_commands[] =
 {
 	{"php4_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
 	{"php4_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
@@ -451,18 +451,18 @@ command_rec php3_commands[] =
 module MODULE_VAR_EXPORT php4_module =
 {
 	STANDARD_MODULE_STUFF,
-	php3_init_handler,			/* initializer */
-	php3_create_dir,			/* per-directory config creator */
+	php_init_handler,			/* initializer */
+	php_create_dir,				/* per-directory config creator */
 	NULL,						/* dir merger */
 	NULL,						/* per-server config creator */
 	NULL, 						/* merge server config */
-	php3_commands,				/* command table */
-	php3_handlers,				/* handlers */
+	php_commands,				/* command table */
+	php_handlers,				/* handlers */
 	NULL,						/* filename translation */
 	NULL,						/* check_user_id */
 	NULL,						/* check auth */
 	NULL,						/* check access */
-	php3_type_checker,			/* type_checker */
+	php_type_checker,			/* type_checker */
 	NULL,						/* fixups */
 	NULL						/* logger */
 #if MODULE_MAGIC_NUMBER >= 19970103
