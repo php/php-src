@@ -1005,8 +1005,12 @@ ZEND_FUNCTION(set_error_handler)
 ZEND_FUNCTION(restore_error_handler)
 {
 	if (EG(user_error_handler)) {
-		zval_ptr_dtor(&EG(user_error_handler));
+		zval *zeh = EG(user_error_handler);
+
+		EG(user_error_handler) = NULL;
+		zval_ptr_dtor(&zeh);
 	}
+
 	if (zend_ptr_stack_num_elements(&EG(user_error_handlers))==0) {
 		EG(user_error_handler) = NULL;
 	} else {
