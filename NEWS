@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added session_regenerate_id(). (Sascha)
 - Added session.hash_function and session.hash_bits_per_character. (Sascha)
 - Input Filter support added. See  README.input_filter. (Rasmus)
 - Updated IFX_VERSION entry to work with new Version output of ESQL/C (Corne')
