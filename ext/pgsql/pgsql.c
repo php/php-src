@@ -78,8 +78,11 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_put_line,		NULL)
 	PHP_FE(pg_end_copy,		NULL)
 #if HAVE_PQCLIENTENCODING
-	PHP_FE(pg_clientencoding,	NULL)
-	PHP_FE(pg_setclientencoding,	NULL)
+	PHP_FE(pg_client_enc,		NULL)
+	PHP_FE(pg_set_client_enc,	NULL)
+	/* for downwards compatibility */
+	PHP_FALIAS(pg_clientencoding,		pg_client_enc,		NULL)
+	PHP_FALIAS(pg_setclientencoding,	pg_set_client_enc,	NULL)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -1706,9 +1709,9 @@ PHP_FUNCTION(pg_loexport)
 
 #if HAVE_PQCLIENTENCODING
 
-/* {{{ proto int pg_setclientencoding([int connection,] string encoding)
+/* {{{ proto int pg_set_client_enc([int connection,] string encoding)
    Set client encoding */
-PHP_FUNCTION(pg_setclientencoding)
+PHP_FUNCTION(pg_set_client_enc)
 {
 	zval **encoding, **pgsql_link = NULL;
 	int id = -1;
@@ -1742,9 +1745,9 @@ PHP_FUNCTION(pg_setclientencoding)
 }
 /* }}} */
 
-/* {{{ proto string pg_clientencoding([int connection])
+/* {{{ proto string pg_client_enc([int connection])
    Get the current client encoding */
-PHP_FUNCTION(pg_clientencoding)
+PHP_FUNCTION(pg_client_enc)
 {
 	zval **pgsql_link = NULL;
 	int id = -1;
