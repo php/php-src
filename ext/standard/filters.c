@@ -665,7 +665,8 @@ typedef struct _php_conv_qprint_encode {
 	unsigned int lb_cnt;
 } php_conv_qprint_encode;
 
-#define PHP_CONV_QPRINT_OPT_BINARY 0x00000001
+#define PHP_CONV_QPRINT_OPT_BINARY             0x00000001
+#define PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST 0x00000002
 
 static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst);
 static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p);
@@ -772,7 +773,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				line_ccnt--;
 				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 			}
-		} else if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
+		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
 			if (line_ccnt < 2) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
@@ -1172,10 +1173,12 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 
 			if (options != NULL) {
 				int opt_binary = 0;
+				int opt_force_encode_first = 0;
 
 				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
 				GET_UINT_PROP(options, line_len, "line-length");
 				GET_BOOL_PROP(options, opt_binary, "binary"); 
+				GET_BOOL_PROP(options, opt_force_encode_first, "force-encode-first"); 
 
 				if (line_len < 4) {
 					if (lbchars != NULL) {
@@ -1189,6 +1192,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 					}
 				}
 				opts |= (opt_binary ? PHP_CONV_QPRINT_OPT_BINARY : 0);
+				opts |= (opt_force_encode_first ? PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST : 0);
 			}
 			retval = pemalloc(sizeof(php_conv_qprint_encode), persistent);
 			if (lbchars != NULL) {
