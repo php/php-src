@@ -35,18 +35,31 @@ int zend_sprintf(char *buffer, const char *format, ...);
 # define zend_sprintf sprintf
 #endif
 
+#ifdef HAVE_ISNAN
+#define zend_isnan(a) isnan(a)
+#elif defined(NAN)
+#define zend_isnan(a) (((a)==NAN)?1:0)
+#else
+#define zend_isnan(a) 0
+#endif
+
+#ifdef HAVE_ISINF
+#define zend_isinf(a) isinf(a)
+#elif defined(INFINITY)
+/* Might not work, but is required by ISO C99 */
+#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#else
+#define zend_isinf(a) 0
+#endif
+
+#include <math.h>
+
 #ifdef HAVE_FINITE
 #define zend_finite(a) finite(a)
 #elif defined(HAVE_ISFINITE)
 #define zend_finite(a) isfinite(a)
-#elif defined(HAVE_ISNAN) && defined(HAVE_ISINF)
-#define zend_finite(a) (isnan(a) ? 0 : isinf(a) ? 0 : 1)
-#elif defined(HAVE_ISNAN)
-#define zend_finite(a) (isnan(a) ? 0 : 1)
-#elif defined(HAVE_ISINF)
-#define zend_finite(a) (isinf(a) ? 0 : 1)
 #else
-#define zend_finite(a) (1)
+#define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
 #endif
 
 /*
