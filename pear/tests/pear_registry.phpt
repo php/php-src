@@ -5,13 +5,20 @@ PEAR_Registry
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
 }
+$statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';
+if (file_exists($statedir)) {
+    // don't delete existing directories!
+    echo 'skip';
+}
 ?>
 --FILE--
 <?php
 
 error_reporting(E_ALL);
+include_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pear_registry_inc.php';
 include_once "PEAR/Registry.php";
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
+$statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';
 cleanall();
 
 $files1 = array(
@@ -52,8 +59,7 @@ $files3_new = array(
     );
 
 print "creating registry object\n";
-$reg = new PEAR_Registry;
-$reg->statedir = getcwd();
+$reg = new PEAR_Registry($statedir);
 dumpall($reg);
 
 $reg->addPackage("pkg1", array("name" => "pkg1", "version" => "1.0", "filelist" => $files1));
@@ -72,98 +78,76 @@ dumpall($reg);
 var_dump($reg->deletePackage("pkg2"));
 dumpall($reg);
 
+echo "add package with conflicting files:\n";
+var_dump($reg->addPackage('pkg2', array('name' => 'pkg2', 'version' => '1.0', 'filelist' => $files1)));
+dumpall($reg);
+
 $reg->updatePackage("pkg3", array("version" => "3.1b1", "status" => "beta"));
 dumpall($reg);
 
 $testing = $reg->checkFilemap(array_merge($files3, $files2));
 $ok = ($testing == array('pkg3-1.php' => 'pkg3', 'pkg3' . DIRECTORY_SEPARATOR . 'pkg3-2.php' => 'pkg3'));
 echo 'filemap OK? ' . ($ok ? "yes\n" : "no\n");
+if (!$ok) {
+    var_dump($testing);
+}
 
 $reg->updatePackage("pkg3", array("filelist" => $files3_new));
 dumpall($reg);
 
 print "tests done\n";
-
-cleanall();
-
-// ------------------------------------------------------------------------- //
-
-function cleanall()
-{
-    $dp = opendir(".");
-    while ($ent = readdir($dp)) {
-        if (substr($ent, -4) == ".reg") {
-            unlink($ent);
-        }
-    }
-}
-
-function dumpall(&$reg)
-{
-    print "dumping registry...\n";
-    $info = $reg->packageInfo();
-    foreach ($info as $pkg) {
-        print $pkg["name"] . ":";
-        unset($pkg["name"]);
-        foreach ($pkg as $k => $v) {
-            if ($k == '_lastmodified') continue;
-            if (is_array($v) && $k == 'filelist') {
-                print " $k=array(";
-                $i = 0;
-                foreach ($v as $k2 => $v2) {
-                    if ($i++ > 0) print ",";
-                    print "{$k2}[";
-                    $j = 0;
-                    foreach ($v2 as $k3 => $v3) {
-                        if ($j++ > 0) print ",";
-                        print "$k3=$v3";
-                    }
-                    print "]";
-                }
-                print ")";
-            } else {
-                print " $k=\"$v\"";
-            }
-        }
-        print "\n";
-    }
-    print "dump done\n";
-}
-
 ?>
 --EXPECT--
 creating registry object
 dumping registry...
+channel pear:
 dump done
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 dump done
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg2: version="2.0" filelist=array(pkg2-1.php[role=php],pkg2-2.php[role=php,baseinstalldir=pkg2])
 pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
 dump done
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg2: version="2.1" filelist=array(pkg2-1.php[role=php],pkg2-2.php[role=php,baseinstalldir=pkg2])
 pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
 dump done
 bool(true)
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
 dump done
 bool(false)
 dumping registry...
+channel pear:
+pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
+pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
+dump done
+add package with conflicting files:
+caught ErrorStack error:
+message: package pear::pkg2 has files that conflict with installed packages pear::pkg1
+code: -5
+bool(false)
+dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
 dump done
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.1b1" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3]) status="beta"
 dump done
 filemap OK? yes
 dumping registry...
+channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.1b1" filelist=array(pkg3-3.php[role=php,baseinstalldir=pkg3],pkg3-4.php[role=php]) status="beta"
 dump done
