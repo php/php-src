@@ -116,6 +116,8 @@ struct php_sockbuf {
 	char persistent;
 	char is_blocked;
 	size_t chunk_size;
+	struct timeval timeout;
+	int timeout_event;
 };
 
 typedef struct php_sockbuf php_sockbuf;
@@ -459,6 +461,7 @@ static php_sockbuf *php_sockcreate(int socket FLS_DC)
 	sock->persistent = persistent;
 	sock->is_blocked = 1;
 	sock->chunk_size = FG(def_chunk_size);
+	sock->timeout.tv_sec = -1;
 	FG(phpsockbuf) = sock;
 
 	return sock;
@@ -528,13 +531,25 @@ int php_sock_close(int socket)
 static void php_sockwait_for_data(php_sockbuf *sock)
 {
 	fd_set fdr, tfdr;
+	int retval;
+	struct timeval timeout;
 
 	FD_ZERO(&fdr);
 	FD_SET(sock->socket, &fdr);
+	sock->timeout_event = 0;
 
 	while(1) {
 		tfdr = fdr;
-		if(select(sock->socket + 1, &tfdr, NULL, NULL, NULL) == 1) 
+		timeout = sock->timeout;
+		if (timeout.tv_sec == -1)
+			retval = select(sock->socket + 1, &tfdr, NULL, NULL, NULL);
+		else {
+			retval = select(sock->socket + 1, &tfdr, NULL, NULL, &timeout);
+			if (retval == 0)
+				sock->timeout_event = 1;
+		}
+
+		if(retval == 1 || retval == 0)
 			break;
 	}
 }
@@ -555,6 +570,8 @@ static size_t php_sockread_internal(php_sockbuf *sock)
 	
 	if(sock->is_blocked) {
 		php_sockwait_for_data(sock);
+		if (sock->timeout_event)
+			return 0;
 	}
 
 	/* read at a maximum sock->chunk_size */
@@ -577,7 +594,7 @@ static size_t php_sockread_internal(php_sockbuf *sock)
 
 static void php_sockread_total(php_sockbuf *sock, size_t maxread)
 {
-	while(!sock->eof && TOREAD(sock) < maxread) {
+	while(!sock->eof && TOREAD(sock) < maxread && !sock->timeout_event) {
 		php_sockread_internal(sock);
 	}
 }
@@ -607,6 +624,13 @@ int php_sockset_blocking(int socket, int mode)
 	sock->is_blocked = mode;
 	
 	return old;
+}
+
+void php_sockset_timeout(int socket, struct timeval *timeout)
+{
+	SOCK_FIND(sock, socket);
+
+	sock->timeout = *timeout;
 }
 
 #define SOCK_FIND_AND_READ_MAX(max) \
