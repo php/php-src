@@ -133,7 +133,11 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 				if (!ip) {
 					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
 					*(index_s - 1) = '_';
-					index_len = var_len = strlen(index);
+
+					index_len = var_len = 0;
+					if (index) {
+						index_len = var_len = strlen(index);
+					}
 					goto plain_var;
 					return;
 				}
