@@ -3,8 +3,6 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.2.0-dev
 - Added md5_file(), which calculaties the MD5 sum of a file.
   (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
-- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
-  element if it was a scalar one. (Andrei)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
 - Renamed key_exists tp array_key_exists. (Derick)
 - Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
@@ -84,6 +82,8 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.1.0
 - Fixed a bug which caused set_time_limit() to affect all requests to an
   Apache child. (Zeev)
+- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
+  element if it was a scalar one. (Andrei)
 - Removed the sablotron extension in favor of the new XSLT extension.
   (Sterling)
 - Fixed a bug preg_match_all() that would return results under improper indices
