@@ -24,7 +24,10 @@
 typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
 
 #define REGISTER_SPL_STD_CLASS(class_name, obj_ctor) \
-	spl_register_std_class(&spl_ce_ ## class_name, "spl_" # class_name, obj_ctor TSRMLS_CC);
+	spl_register_std_class(&spl_ce_ ## class_name, "spl_" # class_name, obj_ctor, NULL TSRMLS_CC);
+
+#define REGISTER_SPL_STD_CLASS_EX(class_name, obj_ctor, funcs) \
+	spl_register_std_class(&spl_ce_ ## class_name, "spl_" # class_name, obj_ctor, funcs TSRMLS_CC);
 
 #define REGISTER_SPL_INTERFACE(class_name) \
 	spl_register_interface(&spl_ce_ ## class_name, "spl_" # class_name TSRMLS_CC);
@@ -43,7 +46,7 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 
 void spl_destroy_class(zend_class_entry ** ppce);
 
-void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor TSRMLS_DC);
+void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor, function_entry * function_list TSRMLS_DC);
 
 void spl_register_interface(zend_class_entry ** ppce, char * class_name TSRMLS_DC);
 
@@ -57,10 +60,10 @@ void spl_add_interfaces(zval * list, zend_class_entry * pce TSRMLS_DC);
 int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);
 
 #define SPL_CLASS_FE(class_name, function_name, arg_types) \
-	PHP_NAMED_FE( function_name, spl_ ## class_name ## function_name, arg_types)
+	PHP_NAMED_FE( function_name, spl_ ## class_name ## _ ## function_name, arg_types)
 
 #define SPL_CLASS_FUNCTION(class_name, function_name) \
-	PHP_NAMED_FUNCTION(spl_ ## class_name ## function_name)
+	PHP_NAMED_FUNCTION(spl_ ## class_name ## _ ## function_name)
 
 #endif /* PHP_FUNCTIONS_H */
 

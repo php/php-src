@@ -95,6 +95,8 @@ PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 
+PHP_MINIT_FUNCTION(spl_directory);
+
 #endif /* PHP_SPL_H */
 
 /*
