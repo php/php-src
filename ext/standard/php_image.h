@@ -25,6 +25,7 @@
 PHP_FUNCTION(getimagesize);
 
 PHP_FUNCTION(image_type_to_mime_type);
+PHP_FUNCTION(image_type_to_extension);
 
 /* {{{ enum image_filetype
    This enum is used to have ext/standard/image.c and ext/exif/exif.c use
