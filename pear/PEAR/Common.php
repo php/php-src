@@ -547,7 +547,6 @@ class PEAR_Common extends PEAR
                 break;
             case 'dep':
                 if ($data && !$this->in_changelog) {
-                    echo "D:: $data\n";
                     $this->pkginfo['release_deps'][$this->d_i]['name'] = $data;
                 }
                 break;
