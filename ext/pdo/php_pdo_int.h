@@ -25,6 +25,9 @@
 extern zend_class_entry *pdo_exception_ce;
 int php_pdo_list_entry(void);
 
+void pdo_dbh_init(TSRMLS_D);
+void pdo_stmt_init(TSRMLS_D);
+
 extern zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_dbh_functions[];
 extern zend_class_entry *pdo_dbh_ce;

@@ -406,8 +406,17 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	return object;
 } /* }}} */
 
-static void pdo_stmt_construct(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {	
+	zval *query_string;
+	zval z_key;
+
+	MAKE_STD_ZVAL(query_string);
+	ZVAL_STRINGL(query_string, stmt->query_string, stmt->query_stringlen, 1);
+	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
+	std_object_handlers.write_property(object, &z_key, query_string TSRMLS_CC);
+	zval_ptr_dtor(&query_string);
+
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
@@ -493,9 +502,9 @@ static PHP_METHOD(PDO, prepare)
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
-		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
-				"user-supplied statement class must have a public constructor" TSRMLS_CC);
+				"user-supplied statement class cannot have a public constructor" TSRMLS_CC);
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
@@ -538,7 +547,7 @@ static PHP_METHOD(PDO, prepare)
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options TSRMLS_CC)) {
-		pdo_stmt_construct(return_value, dbstmt_ce, ctor_args TSRMLS_CC);
+		pdo_stmt_construct(stmt, return_value, dbstmt_ce, ctor_args TSRMLS_CC);
 		return;
 	}
 
@@ -882,7 +891,7 @@ static PHP_METHOD(PDO, query)
 					stmt->executed = 1;
 				}
 				if (ret) {
-					pdo_stmt_construct(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC);
+					pdo_stmt_construct(stmt, return_value, pdo_dbstmt_ce, NULL TSRMLS_CC);
 					return;
 				}
 			}
@@ -947,61 +956,6 @@ function_entry pdo_dbh_functions[] = {
 };
 
 /* {{{ overloaded object handlers for PDO class */
-static zval *dbh_prop_read(zval *object, zval *member, int type TSRMLS_DC)
-{
-	zval *return_value;
-
-	MAKE_STD_ZVAL(return_value);
-	ZVAL_NULL(return_value);
-
-	return return_value;
-}
-
-static void dbh_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
-{
-	return;
-}
-
-static zval *dbh_read_dim(zval *object, zval *offset, int type TSRMLS_DC)
-{
-	zval *return_value;
-
-	MAKE_STD_ZVAL(return_value);
-	ZVAL_NULL(return_value);
-
-	return return_value;
-}
-
-static void dbh_write_dim(zval *object, zval *offset, zval *value TSRMLS_DC)
-{
-	return;
-}
-
-static int dbh_prop_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
-{
-	return 0;
-}
-
-static int dbh_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
-{
-	return 0;
-}
-
-static void dbh_prop_delete(zval *object, zval *offset TSRMLS_DC)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDO DBH");
-}
-
-static void dbh_dim_delete(zval *object, zval *offset TSRMLS_DC)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete dimensions from a PDO DBH");
-}
-
-static HashTable *dbh_get_properties(zval *object TSRMLS_DC)
-{
-	return NULL;
-}
-
 int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
 	function_entry *funcs;
@@ -1103,64 +1057,25 @@ out:
 	return fbc;
 }
 
-static int dbh_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
-}
-
-
-static union _zend_function *dbh_get_ctor(zval *object TSRMLS_DC)
-{
- 	static zend_internal_function ctor = {0};
-	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name = "__construct";
-	ctor.scope = pdo_dbh_ce;
-	ctor.handler = ZEND_FN(dbh_constructor);
-
-	return (union _zend_function*)&ctor;
-}
-
-static zend_class_entry *dbh_get_ce(zval *object TSRMLS_DC)
-{
-	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
-	return dbh->ce;
-}
-
-static int dbh_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
-{
-	*class_name = estrndup("PDO", sizeof("PDO")-1);
-	*class_name_len = sizeof("PDO")-1;
-	return 0;
-}
-
 static int dbh_compare(zval *object1, zval *object2 TSRMLS_DC)
 {
 	return -1;
 }
 
-static zend_object_handlers pdo_dbh_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-	dbh_prop_read,
-	dbh_prop_write,
-	dbh_read_dim,
-	dbh_write_dim,
-	NULL,
-	NULL,
-	NULL,
-	dbh_prop_exists,
-	dbh_prop_delete,
-	dbh_dim_exists,
-	dbh_dim_delete,
-	dbh_get_properties,
-	dbh_method_get,
-	dbh_call_method,
-	dbh_get_ctor,
-	dbh_get_ce,
-	dbh_get_classname,
-	dbh_compare,
-	NULL, /* cast */
-	NULL
-};
+static zend_object_handlers pdo_dbh_object_handlers;
+
+void pdo_dbh_init(TSRMLS_D)
+{
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
+	pdo_dbh_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	pdo_dbh_ce->create_object = pdo_dbh_new;
+
+	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_dbh_object_handlers.get_method = dbh_method_get;
+	pdo_dbh_object_handlers.compare_objects = dbh_compare;
+}
 
 static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 {
@@ -1184,13 +1099,8 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	pefree(dbh, dbh->is_persistent);
 }
 
-static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
+static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
-	if (!dbh) {
-		return;
-	}
-
 	if (dbh->properties) {
 		zend_hash_destroy(dbh->properties);
 		efree(dbh->properties);
@@ -1206,16 +1116,19 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 	pdo_dbh_t *dbh;
+	zval *tmp;
+
 	dbh = emalloc(sizeof(*dbh));
 	memset(dbh, 0, sizeof(*dbh));
 	dbh->ce = ce;
 	dbh->refcount = 1;
 	ALLOC_HASHTABLE(dbh->properties);
 	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(dbh->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	
-	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_dbh_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbh_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbh_object_handlers;
-
+	
 	return retval;
 }
 

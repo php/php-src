@@ -34,6 +34,7 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "php_memory_streams.h"
 
 #if COMPILE_DL_PDO
@@ -1671,66 +1672,30 @@ function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
+static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
-	zval *return_value;
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
 	convert_to_string(member);
 
 	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
-		MAKE_STD_ZVAL(return_value);
-		ZVAL_STRINGL(return_value, stmt->query_string, stmt->query_stringlen, 1);
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
-		MAKE_STD_ZVAL(return_value);
-		ZVAL_NULL(return_value);
+		std_object_handlers.write_property(object, member, value TSRMLS_CC);
 	}
-	return return_value;
 }
 
-static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
 {
-	return;
-}
+	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-static zval *dbstmt_read_dim(zval *object, zval *offset, int type TSRMLS_DC)
-{
-	zval *return_value;
+	convert_to_string(member);
 
-	MAKE_STD_ZVAL(return_value);
-	ZVAL_NULL(return_value);
-
-	return return_value;
-}
-
-static void dbstmt_write_dim(zval *object, zval *offset, zval *value TSRMLS_DC)
-{
-	return;
-}
-
-static int dbstmt_prop_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
-{
-	return 0;
-}
-
-static int dbstmt_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
-{
-	return 0;
-}
-
-static void dbstmt_prop_delete(zval *object, zval *offset TSRMLS_DC)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a PDOStatement");
-}
-
-static void dbstmt_dim_delete(zval *object, zval *offset TSRMLS_DC)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete dimensions from a PDOStatement");
-}
-
-static HashTable *dbstmt_get_properties(zval *object TSRMLS_DC)
-{
-	return NULL;
+	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
+	} else {
+		std_object_handlers.unset_property(object, member TSRMLS_CC);
+	}
 }
 
 static union _zend_function *dbstmt_method_get(
@@ -1776,54 +1741,35 @@ out:
 	return fbc;
 }
 
-static int dbstmt_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
-}
-
-static union _zend_function *dbstmt_get_ctor(zval *object TSRMLS_DC)
-{
-	return std_object_handlers.get_constructor(object TSRMLS_CC);
-}
-
-static zend_class_entry *dbstmt_get_ce(zval *object TSRMLS_DC)
-{
-	return std_object_handlers.get_class_entry(object TSRMLS_CC);
-}
-
-static int dbstmt_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
-{
-	return std_object_handlers.get_class_name(object, class_name, class_name_len, parent TSRMLS_CC);
-}
-
 static int dbstmt_compare(zval *object1, zval *object2 TSRMLS_DC)
 {
 	return -1;
 }
 
-zend_object_handlers pdo_dbstmt_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-	dbstmt_prop_read,
-	dbstmt_prop_write,
-	dbstmt_read_dim,
-	dbstmt_write_dim,
-	NULL,
-	NULL,
-	NULL,
-	dbstmt_prop_exists,
-	dbstmt_prop_delete,
-	dbstmt_dim_exists,
-	dbstmt_dim_delete,
-	dbstmt_get_properties,
-	dbstmt_method_get,
-	dbstmt_call_method,
-	dbstmt_get_ctor,
-	dbstmt_get_ce,
-	dbstmt_get_classname,
-	dbstmt_compare,
-	NULL, /* cast */
-	NULL
-};
+static zend_object_handlers pdo_dbstmt_object_handlers;
+
+void pdo_stmt_init(TSRMLS_D)
+{
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
+	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
+	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	zend_class_implements(pdo_dbstmt_ce TSRMLS_CC, 1, zend_ce_traversable); 
+	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
+	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
+	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
+	pdo_dbstmt_object_handlers.compare_objects = dbstmt_compare;
+
+	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
+	pdo_row_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL_CLASS; /* when removing this a lot of handlers need to be redone */
+	pdo_row_ce->create_object = pdo_row_new;
+}
 
 static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -1879,6 +1825,7 @@ void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
+	zval *tmp;
 
 	pdo_stmt_t *stmt;
 	stmt = emalloc(sizeof(*stmt));
@@ -1887,6 +1834,7 @@ zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 	stmt->refcount = 1;
 	ALLOC_HASHTABLE(stmt->properties);
 	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(stmt->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbstmt_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbstmt_object_handlers;
@@ -2164,7 +2112,7 @@ static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-zend_object_handlers pdo_row_object_handlers = {
+static zend_object_handlers pdo_row_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	row_prop_or_dim_read,
 	row_prop_or_dim_write,
