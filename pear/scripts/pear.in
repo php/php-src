@@ -49,7 +49,7 @@ require_once 'PEAR/Remote.php';
 require_once 'PEAR/Registry.php';
 require_once 'Console/Getopt.php';
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_NOTICE);
 
 PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
@@ -152,7 +152,9 @@ $command = (isset($options[1][1])) ? $options[1][1] : null;
 $rest = array_slice($options[1], 2);
 
 $command_options = array(
-    "list" => "v",
+    "list-installed" => "v",
+    "install"        => "r",
+    "uninstall"      => "r",
 );
 
 if (isset($command_options[$command])) {
@@ -160,10 +162,10 @@ if (isset($command_options[$command])) {
     if (PEAR::isError($tmp)) {
         usage($tmp);
     }
-    $cmdopt = $tmp[0];
+    $cmdopts = $tmp[0];
     $cmdargs = $tmp[1];
 } else {
-    $cmdopt = array();
+    $cmdopts = array();
     $cmdargs = $rest;
 }
 
@@ -175,12 +177,22 @@ switch ($command) {
 
     case 'install': {
         include_once 'PEAR/Installer.php';
-        $pkgfile = $options[1][2];
+        $pkgfile = $cmdargs[0];
         $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
         $installer->setErrorHandling(PEAR_ERROR_DIE,
                                      basename($pkgfile) . ": %s\n");
         $installer->debug = $verbose;
-        $installer->install($pkgfile);
+        $install_options = array();
+        foreach ($cmdopts as $opt) {
+            if ($opt[0] == 'r') {
+                // This option is for use by rpm and other package
+                // tools that can install files etc. by itself, but
+                // still needs to register the package as installed in
+                // PEAR's local registry.
+                $install_options['register_only'] = true;
+            }
+        }
+        $installer->install($pkgfile, $install_options);
         print "install ok\n";
         break;
     }
@@ -189,12 +201,18 @@ switch ($command) {
     // {{{ uninstall
     case 'uninstall': {
         include_once 'PEAR/Installer.php';
-        $pkgfile = $options[1][2];
+        $pkgfile = $cmdargs[0];
         $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
         $installer->setErrorHandling(PEAR_ERROR_DIE,
                                      basename($pkgfile) . ": %s\n");
         $installer->debug = $verbose;
-        $installer->uninstall($pkgfile);
+        $uninstall_options = array();
+        foreach ($cmdopts as $opt) {
+            if ($opt[0] == 'r') {
+                $uninstall_options['register_only'] = true;
+            }
+        }
+        $installer->uninstall($pkgfile, $uninstall_options);
         print "uninstall ok\n";
         break;
     }
@@ -203,7 +221,7 @@ switch ($command) {
 
     case 'package': {
         include_once 'PEAR/Packager.php';
-        $pkginfofile = isset($options[1][2]) ? $options[1][2] : null;
+        $pkginfofile = isset($cmdargs[0]) ? $cmdargs[0] : null;
         $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
         $packager->setErrorHandling(PEAR_ERROR_DIE, "pear page: %s\n");
         $packager->debug = $verbose;
@@ -221,7 +239,7 @@ switch ($command) {
     case 'info': {
         $parser = new PEAR_Common;
         $parser->setErrorHandling(PEAR_ERROR_DIE, "pear info: %s\n");
-        $info = $parser->infoFromTgzFile($options[1][2]);
+        $info = $parser->infoFromTgzFile($cmdargs[0]);
         unset($info['filelist']);
         present_array($info);
         break;
@@ -234,7 +252,7 @@ switch ($command) {
         $reg = new PEAR_Registry;
         $installed = $reg->packageInfo();
         $i = $j = 0;
-        print "Installed packages:\n===================\n";
+        heading("Installed packages:");
         foreach ($installed as $package) {
             if ($i++ % 20 == 0) {
                 if ($j++ > 0) {
@@ -257,7 +275,7 @@ switch ($command) {
         $remote = new PEAR_Remote($config);
         $result = $remote->call('package.listAll');
         $i = $j = 0;
-        print "Available packages:\n===================\n";
+        heading("Available packages");
         foreach ($result as $package) {
             if ($i++ % 20 == 0) {
                 if ($j++ > 0) {
@@ -286,8 +304,8 @@ switch ($command) {
             if ($config->isDefaulted($key)) {
                 $xi .= " (default)";
             }
-            if ($fallback_done[$key]) {
-                $xi .= " (fallback)";
+            if (isset($fallback_done[$key])) {
+                $xi .= " (built-in)";
             }
             printf("%s = %s%s\n", $key, $value, $xi);
         }
@@ -314,7 +332,7 @@ function usage($error = null)
         fputs($stderr, $error);
     }
     fputs($stderr,
-          "Usage: pear [options] command <parameters>\n".
+          "Usage: pear [options] command [command-options] <parameters>\n".
           "Options:\n".
           "     -v         increase verbosity level (default 1)\n".
           "     -q         be quiet, decrease verbosity level\n".
@@ -327,8 +345,9 @@ function usage($error = null)
           "     -u foo     unset `foo' in the user configuration\n".
           "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
-          "   install <package file>\n".
-          "   uninstall <package name>\n".
+          "   help [command]\n".
+          "   install [-r] <package file>\n".
+          "   uninstall [-r] <package name>\n".
           "   package [package info file]\n".
           "   list-installed\n".
           "   list-available\n".
@@ -360,7 +379,15 @@ function present_array(&$arr, $keys = null)
 }
 
 // }}}
+// {{{ heading()
 
+function heading($text)
+{
+    $l = strlen(trim($text));
+    print rtrim($text) . "\n" . str_repeat("=", $l) . "\n";
+}
+
+// }}}
 
 /*
  * Local variables:
