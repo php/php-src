@@ -6,6 +6,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
+- Changed ini parser to allow for handling of quoted multi-line values. (Ilia)
 - Changed get_extension_funcs() to return list of the built-in Zend Engine 
   functions if "zend" is specified as the module name. (Ilia)
 - Changed is_executable() to be available also on Windows. (Shane)
