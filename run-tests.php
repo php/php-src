@@ -128,6 +128,7 @@ $ini_overwrites = array(
 		"error_append_string=",
 		'auto_prepend_file=',
 		'auto_append_file=',
+		'magic_quotes_runtime=0',
 	);
 $info_params = array();
 settings2array($ini_overwrites,$info_params);
