@@ -856,7 +856,7 @@ connected:
 /* {{{ php_any_addr
  * Fills the any (wildcard) address into php_sockaddr_storage
  */
-void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
+PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
 {
 	memset(addr, 0, sizeof(php_sockaddr_storage));
 	switch (family) {
@@ -883,7 +883,7 @@ void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
 /* {{{ php_sockaddr_size
  * Returns the size of struct sockaddr_xx for the family
  */
-int php_sockaddr_size(php_sockaddr_storage *addr)
+PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
 {
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
