@@ -5,6 +5,8 @@ cd ..
 if "%1" == "clean" make -f netware\phplib.mak clean
 if "%1" == "/?" goto USAGE
 
+call netware\BisonExtStandard
+
 REM Build command
 make -f netware\phplib.mak
 goto EXIT
