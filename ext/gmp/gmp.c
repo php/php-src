@@ -86,15 +86,15 @@ function_entry gmp_functions[] = {
 /* {{{ gmp_module_entry
  */
 zend_module_entry gmp_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"gmp",
 	gmp_functions,
 	ZEND_MODULE_STARTUP_N(gmp),
 	ZEND_MODULE_SHUTDOWN_N(gmp),
-	NULL,		/* Replace with NULL if there's nothing to do at request start */
-	NULL,	    /* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	ZEND_MODULE_INFO_N(gmp),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -193,6 +193,7 @@ if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base) 
 {
 	int ret = 0;
+	int skip_lead = 0;
 
 	*gmpnumber = emalloc(sizeof(mpz_t));
 	switch(Z_TYPE_PP(val)) {
@@ -207,14 +208,19 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base)
 	case IS_STRING:
 		{
 			char *numstr = Z_STRVAL_PP(val);
-			if (base==0) {
-				if(numstr[0] == '0' && (numstr[1] == 'x' || numstr[1] == 'X')) {
-					base=16;
-				} else {
-					base=10;
+
+			if (Z_STRLEN_PP(val) > 2) {
+				if (numstr[0] == '0') {
+					if (numstr[1] == 'x' || numstr[1] == 'X') {
+						base = 16;
+						skip_lead = 1;
+					} else if (numstr[1] == 'b' || numstr[1] == 'B') {
+						base = 2;
+						skip_lead = 1;
+					}
 				}
 			}
-			ret = mpz_init_set_str(**gmpnumber, numstr, base);
+			ret = mpz_init_set_str(**gmpnumber, (skip_lead ? &numstr[2] : numstr), base);
 		}
 		break;
 	default:
@@ -222,8 +228,13 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base)
 		efree(*gmpnumber);
 		return FAILURE;
 	}
+
+	if (ret) {
+		FREE_GMP_NUM(*gmpnumber);
+		return FAILURE;
+	}
 	
-	return ret?FAILURE:SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -530,7 +541,19 @@ ZEND_FUNCTION(gmp_strval)
 		num_len++;
 	}
 	mpz_get_str(out_string, base, *gmpnum);
-	out_string[num_len] = '\0';
+
+	/* 
+	From GMP documentation for mpz_sizeinbase():
+	The returned value will be exact or 1 too big.  If base is a power of
+	2, the returned value will always be exact.
+
+	So let's check to see if we already have a \0 byte...
+	*/
+
+	if (out_string[num_len-1] == '\0')
+		num_len--;
+	else
+		out_string[num_len] = '\0';
 
 	RETVAL_STRINGL(out_string, num_len, 0);
 }
