@@ -219,7 +219,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
-		close(info->lock.fd);
+		/*close(info->lock.fd);*/
 		info->lock.fd = 0;
 	}
 	if (info->lock.fp) php_stream_close(info->lock.fp);
@@ -444,6 +444,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	} else {
 		lock_flag = (hptr->flags&DBA_LOCK_ALL);
+		lock_dbf = 1;
 	}
 	switch (*pmode++) {
 		case 'r': 
@@ -530,9 +531,14 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_file_mode = file_mode;
 		} else {
 			spprintf(&info->lock.name, 0, "%s.lck", info->path);
-			lock_file_mode = "a+b";
+			lock_file_mode = "rb";
 		}
 		info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		if (!info->lock.fp && !lock_dbf) {
+			/* when using a .lck file and that could not be opened we try to create one */
+			lock_file_mode = "a+b";
+			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		}
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
@@ -801,4 +807,3 @@ PHP_FUNCTION(dba_list)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
