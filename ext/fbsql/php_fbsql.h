@@ -83,6 +83,9 @@ PHP_FUNCTION(fbsql_rollback);
 
 PHP_FUNCTION(fbsql_create_blob);
 PHP_FUNCTION(fbsql_create_clob);
+PHP_FUNCTION(fbsql_set_lob_mode);
+PHP_FUNCTION(fbsql_read_blob);
+PHP_FUNCTION(fbsql_read_clob);
 
 PHP_FUNCTION(fbsql_hostname);
 PHP_FUNCTION(fbsql_database);
