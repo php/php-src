@@ -2152,7 +2152,9 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
+#ifdef HAVE_OCI9
 	ub2 charsetid;
+#endif
 	TSRMLS_FETCH();
 
 	/* 
