@@ -21,6 +21,12 @@ if test "$PHP_JAVA" != "no"; then
     else
       JAVA_JAR=
     fi
+    PHP_JAVAC=`which javac`
+    if test -z "$PHP_JAVAC"; then
+        AC_MSG_ERROR([Unable to locate the javac binary in your system path
+Either adjust your Java installation or provide the Java installation path,
+e.g. --with-java=/java expecting /java/bin/ to contain the binaries])
+    fi
     PHP_JAVA=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
   else
     test -x $PHP_JAVA/bin/jar && JAVA_JAR="$PHP_JAVA/bin/jar cf"
