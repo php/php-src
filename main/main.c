@@ -133,13 +133,15 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 static PHP_INI_MH(OnUpdateErrorReporting)
 {
+	PLS_FETCH();
 	ELS_FETCH();
 
 	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE;
+		PG(error_reporting) = E_ALL & ~E_NOTICE;
 	} else {
-		EG(error_reporting) = atoi(new_value);
+		PG(error_reporting) = atoi(new_value);
 	}
+	EG(error_reporting) = PG(error_reporting);
 	return SUCCESS;
 }
 
@@ -656,6 +658,7 @@ void php_request_shutdown(void *dummy)
 	php_call_shutdown_functions();
 	
 	php_ini_rshutdown();
+	EG(error_reporting) = PG(error_reporting);
 
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
