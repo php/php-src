@@ -1,5 +1,11 @@
 --TEST--
 Sort with SORT_LOCALE_STRING
+--SKIPIF--
+<?php
+if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
+  die("skip setlocale() failed\n");
+}
+?>
 --FILE--
 <?php
 setlocale(LC_ALL, 'fr_FR');
