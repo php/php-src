@@ -36,7 +36,7 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/php3_var.h"
 #include "ext/standard/datetime.h"
-#include "ext/session/php_lcg.h"
+#include "ext/standard/php_lcg.h"
 
 #ifdef ZTS
 int ps_globals_id;
