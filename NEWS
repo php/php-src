@@ -154,6 +154,16 @@ PHP 4                                                                      NEWS
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
+27 Feb 2002, Version 4.1.2
+- Fixed start up failure when mm save handler is used and there is multiple
+  SAPIs are working at the same time. (Yasuo)
+- Fixed the Roxen SAPI (Yasuo)
+- Fixed a buffer overflow in the RFC-1867 file upload code (Stefan)
+- Fixed a crash in the session module (Yasuo)
+- Fixed a crash in the pspell module (Yasuo)
+- Changed the default output encoding of mbstring 'pass' to fix
+  initialization problem (Rui)
+
 26 Dec 2001, Version 4.1.1
 - Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
   under other versions of IIS. (Zeev)
