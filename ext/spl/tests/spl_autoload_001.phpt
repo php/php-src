@@ -1,11 +1,13 @@
 --TEST--
-SPL spl_autoload() and friends
+SPL: spl_autoload() and friends
 --INI--
 include_path=.
 --FILE--
 <?php
 
 echo "===EMPTY===\n";
+
+var_dump(spl_autoload_extensions());
 
 try
 {
@@ -57,7 +59,7 @@ spl_autoload_register();
 
 try
 {
-	spl_autoload_extensions(".inc");
+	var_dump(spl_autoload_extensions(".inc"));
 	var_dump(class_exists("TestClass", true));
 }
 catch(Exception $e)
@@ -102,6 +104,7 @@ catch(Exception $e)
 <?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
+string(13) ".inc,.inc.php"
 %stestclass.inc
 Exception: Class TestClass could not be loaded
 ===()===
@@ -116,6 +119,7 @@ Exception: Class TestClass could not be loaded
 Exception: Class TestClass could not be loaded
 Exception: Class TestClass could not be loaded
 ===SPL_AUTOLOAD()===
+string(4) ".inc"
 Exception: Class TestClass could not be loaded
 ===REGISTER===
 TestFunc1(TestClass)
