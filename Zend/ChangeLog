@@ -1,3 +1,27 @@
+2004-05-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects_API.c:
+      - Fix problem with object being destroyed more than once
+
+    * zend_builtin_functions.c:
+      - Fix the following script (it crashed):
+      <?php
+         class ErrorHandler {
+           function __construct() {
+             set_error_handler(array(&$this, 'handle'));
+           }
+      
+           function __destruct() {
+             restore_error_handler();
+           }
+      
+           function handle($code, $msg, $file, $line, $locals) {
+           }
+         }
+      
+         new ErrorHandler();
+      ?>
+
 2004-05-20  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_exceptions.c

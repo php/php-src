@@ -1,3 +1,80 @@
+2004-05-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      - Fix problem with object being destroyed more than once
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix the following script (it crashed):
+      <?php
+         class ErrorHandler {
+           function __construct() {
+             set_error_handler(array(&$this, 'handle'));
+           }
+      
+           function __destruct() {
+             restore_error_handler();
+           }
+      
+           function handle($code, $msg, $file, $line, $locals) {
+           }
+         }
+      
+         new ErrorHandler();
+      ?>
+
+    * NEWS:
+      - NEWS
+
+    * TSRM/TSRM.c:
+      - Fix typo although it isn't being built
+
+    * main/main.c:
+      - Fixed bug #27640 memory leak of registered_zend_ini_directives  (Dmitry)
+
+2004-05-23  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      adding this
+
+    * NEWS:
+      Ansrei reverted this
+
+2004-05-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      main/network.c:
+      MFH: Bugfix for #23220: IIS messes up SSL shutdown
+
+    * ext/openssl/xp_ssl.c:
+      Finally a fix for #23220: IIS does not cleanly close SSL connections.
+      Also enable the safe and recommended bug work around options in the SSL
+      context.
+
+2004-05-23  Stefan Esser  <sesser@suspekt.org>
+
+    * main/rfc1867.c:
+      This is more correct.
+
+2004-05-23  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/ErrorStack.php:
+      Fix #1395: PEAR_ErrorStack::staticCallback needs to instantiate the stack
+      Fix up default callback, so that it can be set for each package as well as
+      for all packages.
+      
+      Callbacks now have 3 levels of control, which may be a bit too complex,
+      default callbacks might have to go for debugging reasons.  Either that or
+      some kind of origination information should be appended to the error array
+      describing which callbacks were called, so debugging is at least possible
+
+    * pear/tests/PEAR_test_mock_pearweb.php.inc:
+      in preparation for testing all remote functionality, use a mock object for
+      a functioning pearweb server
+
 2004-05-22  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/interbase.c:
