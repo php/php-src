@@ -34,16 +34,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_31
-#include "os/nt/flock.h"
-#else
-#ifdef PHP_WIN32
-#include "win32/flock.h"
-#else
-#include <sys/file.h>
-#endif
-#endif
-
 #define FLATFILE_DATA flatfile *dba = info->dbf
 #define FLATFILE_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
 
@@ -51,14 +41,6 @@ DBA_OPEN_FUNC(flatfile)
 {
 	char *fmode;
 	php_stream *fp;
-	int lock;
-	char *lockfn = NULL;
-	int lockfd = 0;
-#if NFS_HACK
-	int last_try = 0;
-	struct stat sb;
-	int retries = 0;
-#endif
 
 	info->dbf = emalloc(sizeof(flatfile));
 	memset(info->dbf, 0, sizeof(flatfile));
@@ -66,78 +48,29 @@ DBA_OPEN_FUNC(flatfile)
 	switch(info->mode) {
 		case DBA_READER:
 			fmode = "r";
-			lock = 0;
 			break;
 		case DBA_WRITER:
 			fmode = "r+b";
-			lock = 1;
 			break;
 		case DBA_CREAT:
 			fmode = "a+b";
-			lock = 1;
 			break;
 		case DBA_TRUNC:
 			fmode = "w+b";
-			lock = 1;
 			break;
 		default:
 			efree(info->dbf);
 			return FAILURE; /* not possible */
 	}
 
-	if (lock) {
-		spprintf(&lockfn, 0, "%s.lck", info->path);
-
-#if NFS_HACK      
-		while((last_try = VCWD_STAT(lockfn, &sb))==0) {
-			retries++;
-			php_sleep(1);
-			if (retries>30) 
-				break;
-		}	
-		if (last_try!=0) {
-			lockfd = open(lockfn, O_RDWR|O_CREAT, 0644);
-			close(lockfd);
-		} else {
-			*error = "File appears to be locked";
-			efree(lockfn);
-			efree(info->dbf);
-			return FAILURE;
-		}
-#else /* NFS_HACK */
-		lockfd = VCWD_OPEN_MODE(lockfn, O_RDWR|O_CREAT, 0644);
-
-		if (!lockfd || flock(lockfd, LOCK_EX)) {
-			if (lockfd)
-				close(lockfd);
-			efree(lockfn);
-			efree(info->dbf);
-			*error = "Unable to establish lock";
-			return FAILURE;
-		}
-#endif /* else NFS_HACK */
-	}
-
 	fp = php_stream_open_wrapper(info->path, fmode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 	if (!fp) {
 		*error = "Unable to open file";
-#if NFS_HACK
-		VCWD_UNLINK(lockfn);
-#else
-		if (lockfn) {
-			lockfd = VCWD_OPEN_MODE(lockfn, O_RDWR, 0644);
-			flock(lockfd, LOCK_UN);
-			close(lockfd);
-		}
-#endif
-		efree(lockfn);
 		efree(info->dbf);
 		return FAILURE;
 	}
 
 	((flatfile*)info->dbf)->fp = fp;
-	((flatfile*)info->dbf)->lockfn = lockfn;
-	((flatfile*)info->dbf)->lockfd = lockfd;
 
 	return SUCCESS;
 }
@@ -145,17 +78,6 @@ DBA_OPEN_FUNC(flatfile)
 DBA_CLOSE_FUNC(flatfile)
 {
 	FLATFILE_DATA;
-
-	if (dba->lockfn) {
-#if NFS_HACK
-		VCWD_UNLINK(dba->lockfn);
-#else
-		/*dba->lockfd = VCWD_OPEN_MODE(dba->lockfn, O_RDWR, 0644);*/
-		flock(dba->lockfd, LOCK_UN);
-		close(dba->lockfd);
-#endif
-		efree(dba->lockfn);
-	}
 
 	php_stream_close(dba->fp);
 	if (dba->nextkey.dptr)
