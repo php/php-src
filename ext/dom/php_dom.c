@@ -933,7 +933,7 @@ void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 					clone->document = intern->document;
 				}
 				php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc TSRMLS_CC);
-				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, NULL TSRMLS_CC);
+				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone TSRMLS_CC);
 			}
 
 		}
