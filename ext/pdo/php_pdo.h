@@ -20,6 +20,7 @@
 
 #ifndef PHP_PDO_H
 #define PHP_PDO_H
+#include "php.h"
 
 extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry

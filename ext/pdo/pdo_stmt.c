@@ -32,6 +32,7 @@
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
+#include "php_pdo_sql_parser.h"
 #include "zend_exceptions.h"
 
 /* {{{ content from zend_arg_defs.c:
@@ -228,6 +229,8 @@ static PHP_METHOD(PDOStatement, execute)
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval *input_params = NULL;
 	int ret = 1;
+	char *original_query;
+	int orginal_querylen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &input_params)) {
 		RETURN_FALSE;
@@ -265,15 +268,6 @@ static PHP_METHOD(PDOStatement, execute)
 			}
 
 			param.param_type = PDO_PARAM_STR;
-#if 0
-			if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 
-			   &quotedstr, &quotedstrlen TSRMLS_DC)) {
-				int refcount = (*tmp)->refcount;
-				zval_dtor(*tmp);
-				ZVAL_STRINGL(*tmp, quotedstr, quotedstrlen, 0);
-				(*tmp)->refcount = refcount;
-			}
-#endif
 			param.parameter = *tmp;
 
 			if (!really_register_bound_param(&param, stmt, 1 TSRMLS_CC)) {
@@ -285,19 +279,21 @@ static PHP_METHOD(PDOStatement, execute)
 	}
 
 	if (stmt->dbh->emulate_prepare) {
-		/* XXX: here we need to:
-		 *  - walk stmt->bound_params, quoting each zval value
-		 *    (without modifying the zval)
-		 *  - substitute these values according to name/position
-		 *  - stash that into stmt->query_string
-		 *
-		 *  When the executer() is called, it will use that query string */
-
+		/* handle the emulated parameter binding,
+         * stmt->active_query_string holds the query with binds expanded and 
+		 * quoted.
+         */
+		if(pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen, 
+				&stmt->active_query_string, &stmt->active_query_stringlen) == 0) {
+			// parse error in handling the query
+			RETURN_FALSE;
+		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	
 	if (stmt->methods->executer(stmt TSRMLS_CC)) {
+		efree(stmt->active_query_string);
+		stmt->active_query_string = NULL;
 		if (!stmt->executed) {
 			/* this is the first execute */
 
@@ -316,6 +312,8 @@ static PHP_METHOD(PDOStatement, execute)
 			
 		RETURN_BOOL(ret);
 	}
+	efree(stmt->active_query_string);
+	stmt->active_query_string = NULL;
 	RETURN_FALSE;
 }
 /* }}} */

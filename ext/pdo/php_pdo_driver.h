@@ -279,8 +279,13 @@ struct _pdo_stmt_t {
 	/* not always meaningful */
 	long row_count;
 
-	/* used only when PDO is emulating prepare for the driver */
+	/* used to hold the statement's current query */
 	char *query_string;
+	int query_stringlen;
+
+	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
+	char *active_query_string;
+	int active_query_stringlen;
 };
 
 /* call this in MINIT to register your PDO driver */
