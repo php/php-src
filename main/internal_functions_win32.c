@@ -48,6 +48,7 @@
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php3_odbc.h"
+#include "ext/lcg/php_lcg.h"
 
 /* SNMP has to be moved to ext */
 /* #include "dl/snmp/php3_snmp.h" */
@@ -76,7 +77,8 @@ zend_module_entry *php3_builtin_modules[] = {
 	COM_module_ptr,
 	phpext_regex_ptr,
 	phpext_pcre_ptr,
-	phpext_odbc_ptr
+	phpext_odbc_ptr,
+	phpext_lcg_ptr
 };
 
 	
