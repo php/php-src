@@ -693,7 +693,7 @@ class PEAR_ErrorStack {
                 $this->_errorsByLevel[$level][$i] = false;
             }
             // array_filter removes all entries === false
-            array_filter($this->_errors);
+            $this->_errors = array_filter($this->_errors);
             unset($this->_errorsByLevel[$level]);
             return $ret;
         }
