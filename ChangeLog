@@ -1,3 +1,40 @@
+2004-02-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/scripts/pear.bat:
+      re-add as binary
+
+    * (PHP_4_3)
+      pear/scripts/pear.bat:
+      remove in order to re-add binary
+
+2004-02-14  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/dl.c:
+       - improve error message
+
+2004-02-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      bfn
+
+2004-02-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_iterators.c:
+      dtor's may not be called from free_storage handlers
+
+2004-02-14  Derick Rethans  <php@derickrethans.nl>
+
+    * main/php_ini.c:
+      - We always need to destroy the llist though.
+
+    * NEWS
+      main/php_ini.c:
+      - Fixed zero bytes memory allocation when no extra ini files are found in
+      the
+        --with-config-file-scan-dir specified directory. (patch by Eric Colinet
+        <e.colinet@laposte.net>)
+
 2004-02-13  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/simplexml/simplexml.c:
