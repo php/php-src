@@ -248,10 +248,10 @@ static dba_handler handler[] = {
 	DBA_HND(db4, DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_INIFILE
-	DBA_HND(inifile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
+	DBA_HND(inifile, DBA_STREAM_OPEN|DBA_LOCK_ALL|DBA_CAST_AS_FD) /* No lock in lib */
 #endif
 #if DBA_FLATFILE
-	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
+	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL|DBA_NO_APPEND) /* No lock in lib */
 #endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -801,6 +801,23 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
+		}
+		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
+			/* Needed becasue some systems do not allow to write to the original 
+			 * file contents with O_APPEND being set.
+			 */
+			if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&info->fd, 1)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not cast stream");
+				dba_close(info TSRMLS_CC);
+				FREENOW;
+				RETURN_FALSE;
+#ifdef F_SETFL
+			} else if (modenr == DBA_CREAT) {
+				int flags = fcntl(info->fd, F_SETFL);
+				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
+#endif
+			}
+				
 		}
 	}
 

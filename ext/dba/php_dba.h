@@ -43,6 +43,7 @@ typedef struct dba_info {
 	char *path;
 	dba_mode_t mode;
 	php_stream *fp;  /* this is the database stream for builtin handlers */
+	int fd;
 	/* arg[cv] are only available when the dba_open handler is called! */
 	int argc;
 	zval ***argv;
@@ -63,6 +64,9 @@ typedef struct dba_info {
 
 #define DBA_STREAM_OPEN  (0x0010)
 #define DBA_PERSISTENT   (0x0020)
+
+#define DBA_CAST_AS_FD   (0x0050)
+#define DBA_NO_APPEND    (0x00D0)
 
 extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
