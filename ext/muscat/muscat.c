@@ -131,7 +131,7 @@ PHP_MINFO_FUNCTION(muscat)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "muscat support", "enabled");
-	php_info_print_table_row(2, "Muscat/Empower 1.5 Module for PHP version 4.0<br>Copyright (c) 2000 <a href=\"www.ananova.com\">Ananova Ltd<a/>","For information on Muscat/Empower without php see <a href=\"www.smartlogik.com\">www.smartlogik.com</a><br><small>Muscat and Empower are probably trade marks</small>");
+	php_info_print_table_row(2, "Muscat/Empower 1.5 Module for PHP version 4.0<br />Copyright (c) 2000 <a href=\"www.ananova.com\">Ananova Ltd<a/>","For information on Muscat/Empower without php see <a href=\"www.smartlogik.com\">www.smartlogik.com</a><br /><small>Muscat and Empower are probably trade marks</small>");
 	php_info_print_table_row(2, "muscat path", PHP_MUSCAT_DIR);
 	php_info_print_table_end();
 

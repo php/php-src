@@ -87,7 +87,7 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 	PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
 	PHPWRITE(ini_entry->name, ini_entry->name_length-1);
-	PUTS("</b><br></td><td align=\"center\">");
+	PUTS("</b><br /></td><td align=\"center\">");
 	php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
 	PUTS("</td><td align=\"center\">");
 	php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);

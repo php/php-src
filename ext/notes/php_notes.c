@@ -2317,7 +2317,7 @@ STATUS LNPUBLIC ReadSummaryData
 
     /* Print the note ID. */
 
-    php_printf ("\nNote ID is: %lX.\n<br>", SearchMatch.ID.NoteID);
+    php_printf ("\nNote ID is: %lX.\n<br />", SearchMatch.ID.NoteID);
 
     /* Print the summary data. */
 

@@ -1018,7 +1018,7 @@ static void oci_debug(const char *format, ...)
 		vsnprintf(buffer, sizeof(buffer)-1, format, args);
 		va_end(args);
 		buffer[sizeof(buffer)-1] = '\0';
-		php_printf("OCIDebug: %s<br>\n", buffer);
+		php_printf("OCIDebug: %s<br />\n", buffer);
 	}
 }
 
