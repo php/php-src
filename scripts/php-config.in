@@ -1,0 +1,32 @@
+#! /bin/sh
+
+prefix="@prefix@"
+version="@PHP_VERSION@"
+includedir="@includedir@/php"
+includes="-I$includedir -I$includedir/main -I$includedir/Zend"
+ldflags="@PHP_LDFLAGS@"
+libs="@EXTRA_LIBS@"
+if test '@TSRM_DIR@' != ''; then
+    includes="$includes -I$includedir/TSRM"
+fi
+extension_dir='@EXTENSION_DIR@'
+
+case "$1" in
+--prefix)
+	echo $prefix;;
+--includes)
+	echo $includes;;
+--ldflags)
+	echo $ldflags;;
+--libs)
+	echo $libs;;
+--extension-dir)
+	echo $extension_dir;;
+--version)
+	echo $version;;
+*)
+	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--version]"
+	exit 1;;
+esac
+
+exit 0
