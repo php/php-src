@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ????, Version 4.1.1
+- Fixed several crash bugs in the xslt extension (Markus, Derick)
+- Fixed problem with dbase not returning very large (larger than long)
+- integers properly. (Vlad)
 - Fixed several bugs and memleaks in the domxml extension. (Markus)
 - Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
 - Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
