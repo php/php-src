@@ -26,15 +26,10 @@ if test "$PHP_HWAPI" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(hwapi, $HWAPI_DIR/lib, HWAPI_SHARED_LIBADD)
   AC_DEFINE(HAVE_HWAPI,1,[ ])
 
-  AC_MSG_RESULT(yes)
   PHP_REQUIRE_CXX
-dnl  PHP_EXTENSION(hwapi, $ext_shared)
-  PHP_NEW_EXTENSION(hwapi, hwapi.cpp)
+  PHP_NEW_EXTENSION(hwapi, hwapi.cpp, $ext_shared)
   PHP_ADD_LIBRARY(hwapi)
   PHP_ADD_LIBRARY(pthread)
   PHP_ADD_LIBRARY(stdc++)
   PHP_ADD_INCLUDE($HWAPI_DIR/include)
-else
-  AC_DEFINE(HAVE_HWAPI,0,[ ])
-  AC_MSG_RESULT(no)
 fi
