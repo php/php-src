@@ -81,8 +81,15 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_gc_probability", "1", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_lifetime", "0", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_serializer", "php", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
+PS_SERIALIZER_FUNCS(php);
+
+const static ps_serializer ps_serializers[] = {
+	PS_SERIALIZER_ENTRY(php),
+	{0}
+};
 
 static int php_minit_session(INIT_FUNC_ARGS);
 static int php_rinit_session(INIT_FUNC_ARGS);
@@ -117,12 +124,11 @@ zend_module_entry session_module_entry = {
 #define STD_FMT "%s|"
 #define NOTFOUND_FMT "!%s|"
 
-static char *_php_session_encode(int *newlen PSLS_DC)
+PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	pval *buf;
 	pval **struc;
 	char *key;
-	char *ret = NULL;
 	char strbuf[MAX_STR + 1];
 	ELS_FETCH();
 
@@ -146,10 +152,10 @@ static char *_php_session_encode(int *newlen PSLS_DC)
 	}
 
 	if(newlen) *newlen = buf->value.str.len;
-	ret = buf->value.str.val;
+	*newstr = buf->value.str.val;
 	efree(buf);
 
-	return ret;
+	return SUCCESS;
 }
 
 #define PS_ADD_VARL(name,namelen) \
@@ -158,16 +164,15 @@ static char *_php_session_encode(int *newlen PSLS_DC)
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
 #define PS_DEL_VARL(name,namelen) \
-	zend_hash_del(&PS(vars), name, namelen);
+	zend_hash_del(&PS(vars), name, namelen + 1);
 
 #define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
 
-	
-static void _php_session_decode(char *val, int vallen PSLS_DC)
+PS_SERIALIZER_DECODE_FUNC(php)	
 {
-	char *p, *q;
+	const char *p, *q;
 	char *name;
-	char *endptr = val + vallen;
+	const char *endptr = val + vallen;
 	pval *current;
 	int namelen;
 	int has_value;
@@ -197,6 +202,22 @@ static void _php_session_decode(char *val, int vallen PSLS_DC)
 		PS_ADD_VAR(name);
 		efree(name);
 	}
+
+	return SUCCESS;
+}
+
+static char *_php_session_encode(int *newlen PSLS_DC)
+{
+	char *ret = NULL;
+
+	PS(serializer)->encode(&ret, newlen PSLS_CC);
+
+	return ret;
+}
+
+static void _php_session_decode(const char *val, int vallen PSLS_DC)
+{
+	PS(serializer)->decode(val, vallen PSLS_CC);
 }
 
 static char *_php_create_id(int *newlen)
@@ -292,6 +313,21 @@ static ps_module *_php_find_ps_module(char *name PSLS_DC)
 		}
 	}
 	
+	return ret;
+}
+
+static const ps_serializer *_php_find_ps_serializer(char *name PSLS_DC)
+{
+	const ps_serializer *ret = NULL;
+	const ps_serializer *mod;
+
+	for(mod = ps_serializers; mod->name; mod++) {
+		if(!strcasecmp(name, mod->name)) {
+			ret = mod;
+			break;
+		}
+	}
+
 	return ret;
 }
 
@@ -565,6 +601,8 @@ PHP_FUNCTION(session_destroy)
 static void php_rinit_session_globals(PSLS_D)
 {
 	PS(mod) = _php_find_ps_module(INI_STR("session_module_name") PSLS_CC);
+	PS(serializer) = \
+		_php_find_ps_serializer(INI_STR("session_serializer") PSLS_CC);
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(save_path) = estrdup(INI_STR("session_save_path"));

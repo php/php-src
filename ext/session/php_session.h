@@ -30,6 +30,11 @@
 #ifndef PHP_SESSION_H
 #define PHP_SESSION_H
 
+/* 
+ * some relict. ignore it, unless you want to build locking
+ * functionality into the session code 
+ */
+
 typedef enum {
 	LOCK,
 	UNLOCK
@@ -43,7 +48,7 @@ typedef enum {
 #define PS_GC_ARGS void **mod_data, int maxlifetime
 
 typedef struct ps_module_struct {
-	char *name;
+	const char *name;
 	int (*open)(PS_OPEN_ARGS);
 	int (*close)(PS_CLOSE_ARGS);
 	int (*read)(PS_READ_ARGS);
@@ -85,6 +90,7 @@ typedef struct {
 	int nr_open_sessions;
 	int gc_probability;
 	int gc_maxlifetime;
+	const struct ps_serializer_struct *serializer;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;
@@ -118,5 +124,25 @@ PHP_FUNCTION(session_destroy);
 #define PSLS_FETCH()
 #endif
 
+#define PS_SERIALIZER_ENCODE_ARGS char **newstr, int *newlen PSLS_DC
+#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen PSLS_DC
+
+typedef struct ps_serializer_struct {
+	const char *name;
+	int (*encode)(PS_SERIALIZER_ENCODE_ARGS);
+	int (*decode)(PS_SERIALIZER_DECODE_ARGS);
+} ps_serializer;
+
+#define PS_SERIALIZER_ENCODE_FUNC(x) \
+	int _ps_srlzr_encode_##x(PS_SERIALIZER_ENCODE_ARGS)
+#define PS_SERIALIZER_DECODE_FUNC(x) \
+	int _ps_srlzr_decode_##x(PS_SERIALIZER_DECODE_ARGS)
+
+#define PS_SERIALIZER_FUNCS(x) \
+	PS_SERIALIZER_ENCODE_FUNC(x); \
+	PS_SERIALIZER_DECODE_FUNC(x)
+
+#define PS_SERIALIZER_ENTRY(x) \
+	{ #x, _ps_srlzr_encode_##x, _ps_srlzr_decode_##x }
 
 #endif
