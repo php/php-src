@@ -386,8 +386,10 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 	return (union _zend_function*)&f;
 	
 	switch (obj->ce->name[0]) {
+#if HAVE_MSCOREE_H
 		case 'd':
 			POPULATE_CTOR(d, com_dotnet_create_instance);
+#endif
 		
 		case 'c':
 			POPULATE_CTOR(d, com_create_instance);
