@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- fixed a bug that caused php to crash in php_COM_get_ids_of_names() (Harald, Paul)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
@@ -84,6 +83,8 @@ PHP 4                                                                      NEWS
 - Added debug_zval_dump() which works similarly to var_dump, but displays 
   extra internal information such as refcounts and true type names. (Jason)
 - Added Andrei's tokenizer extension. (Stig)
+- Fixed a bug in the COM extension which caused php to crash in
+  php_COM_get_ids_of_names(). (Paul, Harald)
 - Removed ext/satellite. It is now part of PEAR. (eriksson)
 - Changed php.ini directive 'safe_mode_include_dir' to accept a (semi)colon 
   separated path (like 'include_path') rather than a single directory.
