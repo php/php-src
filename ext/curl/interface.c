@@ -788,10 +788,10 @@ PHP_FUNCTION(curl_init)
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
-	zval     *zid;
-	CURL     *cp;
-	php_curl *ch;
-	php_curl *dupch;
+	zval     **zid;
+	CURL      *cp;
+	php_curl  *ch;
+	php_curl  *dupch;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zid) == FAILURE) {
 		WRONG_PARAM_COUNT;
