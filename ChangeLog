@@ -1,3 +1,66 @@
+2004-07-11  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      reorder + add
+
+    * (PHP_4_3)
+      NEWS:
+      news stuff
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/string.c
+      ext/standard/tests/array/bug28974.phpt:
+      MFH:
+      fixed bug #28974 : overflow in array_slice()
+      The same kind of overflow appeared in array_splice(), substr() and
+      substr_replace()
+
+    * ext/standard/array.c
+      ext/standard/string.c
+      ext/standard/tests/array/bug28974.phpt:
+      fixing bug #28974 : overflow in array_slice()
+      The same kind of overflow appeared in array_splice(), substr() and
+      substr_replace()
+
+2004-07-11  Stefan Esser  <sesser@suspekt.org>
+
+    * main/php_variables.c:
+      Ooups...
+
+    * main/php_variables.c:
+      Fixed: PARSE_TYPE parameter to input_filter
+      Fixed: input_filter should also be able to filter empty variables by name
+
+2004-07-11  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug28739.phpt:
+      fixing bug #28739
+      array_*diff() and array_*intersect() not clearing the fci cache before
+      work.
+      FCI call cache was introduced in HEAD. All functions that perform sorting
+      of arrays clear the fci cache before work. array_*diff() and\
+      array_*intersect()
+      were somehow missed to be updated.
+
+    * ext/standard/tests/general_functions/bug29038.phpt:
+      
+      fixing the name of the test
+
+    * ext/standard/array.c
+      ext/standard/tests/general_functions/bug29038.phpt:
+      fixing bug 29038:
+      EXTR_PREFIX_SAME is prevented from creating a new variable when the key
+      is a empty string. EXTR_PREFIX_ALL is also prevented from doing that,
+      but works for numbers.
+
+2004-07-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/array.c:
+      Fixed bug #29008 (array_combine() does not handle non-numeric/string keys).
+
 2004-07-10  Jon Parise  <jon+php@csh.rit.edu>
 
     * (PHP_4_3)
