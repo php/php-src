@@ -282,9 +282,12 @@ static const struct {
 	enum entity_charset charset;
 } charset_map[] = {
 	{ "ISO-8859-1", 	cs_8859_1 },
+	{ "ISO8859-1",	 	cs_8859_1 },
 	{ "ISO-8859-15", 	cs_8859_15 },
+	{ "ISO8859-15", 	cs_8859_15 },
 	{ "utf-8", 			cs_utf_8 },
 	{ "cp1252", 		cs_cp1252 },
+	{ "Windows-1252", 	cs_cp1252 },
 	{ "BIG5",			cs_big5 },
 	{ "GB2312",			cs_gb2312 },
 	{ "BIG5-HKSCS",		cs_big5hkscs },
@@ -525,82 +528,108 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	int i;
 	enum entity_charset charset = cs_8859_1;
 	int len = 0;
+	zval *uf_result = NULL;
 
 	/* Guarantee default behaviour for backwards compatibility */
 	if (charset_hint == NULL)
 		return cs_8859_1;
 
-	if ((len = strlen(charset_hint)) == 0) {
+	if ((len = strlen(charset_hint)) != 0) {
+		goto det_charset;
+	}
 #if HAVE_MBSTRING
+#if !defined(COMPILE_DL_MBSTRING)
 	/* XXX: Ugly things. Why don't we look for a more sophisticated way? */
-		switch (MBSTRG(internal_encoding)) {
-			case mbfl_no_encoding_8859_1:
-				return cs_8859_1;
+	switch (MBSTRG(current_internal_encoding)) {
+		case mbfl_no_encoding_8859_1:
+			return cs_8859_1;
 
-			case mbfl_no_encoding_utf8:
-				return cs_utf_8;
+		case mbfl_no_encoding_utf8:
+			return cs_utf_8;
 
-			case mbfl_no_encoding_euc_jp:
-			case mbfl_no_encoding_eucjp_win:
-				return cs_eucjp;
+		case mbfl_no_encoding_euc_jp:
+		case mbfl_no_encoding_eucjp_win:
+			return cs_eucjp;
 
-			case mbfl_no_encoding_sjis:
-			case mbfl_no_encoding_sjis_win:
-			case mbfl_no_encoding_sjis_mac:
-				return cs_sjis;
+		case mbfl_no_encoding_sjis:
+		case mbfl_no_encoding_sjis_win:
+		case mbfl_no_encoding_sjis_mac:
+			return cs_sjis;
 
-			case mbfl_no_encoding_cp1252:
-				return cs_cp1252;
+		case mbfl_no_encoding_cp1252:
+			return cs_cp1252;
 
-			case mbfl_no_encoding_8859_15:
-				return cs_8859_15;
+		case mbfl_no_encoding_8859_15:
+			return cs_8859_15;
 
-			case mbfl_no_encoding_big5:
-				return cs_big5;
+		case mbfl_no_encoding_big5:
+			return cs_big5;
 
-			case mbfl_no_encoding_euc_cn:
-			case mbfl_no_encoding_hz:
-			case mbfl_no_encoding_cp936:
-				return cs_gb2312;
-		}
-#endif
-		charset_hint = SG(default_charset);
-		if (charset_hint == NULL || (len=strlen(charset_hint)) == 0) {
-			/* try to detect the charset for the locale */
-#if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
-			charset_hint = nl_langinfo(CODESET);
-#endif
-#if HAVE_LOCALE_H
-			if (charset_hint == NULL) {
-				/* try to figure out the charset from the locale */
-				char *localename;
-				char *dot, *at;
+		case mbfl_no_encoding_euc_cn:
+		case mbfl_no_encoding_hz:
+		case mbfl_no_encoding_cp936:
+			return cs_gb2312;
+	}
+#else
+	{
+		zval nm_mb_internal_encoding;
 
-				/* lang[_territory][.codeset][@modifier] */
-				localename = setlocale(LC_CTYPE, NULL);
+		ZVAL_STRING(&nm_mb_internal_encoding, "mb_internal_encoding", 0);
 
-				dot = strchr(localename, '.');
-				if (dot) {
-					dot++;
-					/* locale specifies a codeset */
-					at = strchr(dot, '@');
-					if (at)
-						len = at - dot;
-					else
-						len = strlen(dot);
-					charset_hint = dot;
-				} else {
-					/* no explicit name; see if the name itself
-					 * is the charset */
-					charset_hint = localename;
-					len = strlen(charset_hint);
-				}
-			} else {
-				len = strlen(charset_hint);
-			}
-#endif
+		if (call_user_function_ex(CG(function_table), NULL, &nm_mb_internal_encoding, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE) {
+
+			charset_hint = Z_STRVAL_P(uf_result);
+			len = Z_STRLEN_P(uf_result);
+			
+			goto det_charset;
 		}
 	}
+#endif
+#endif
+
+	charset_hint = SG(default_charset);
+	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
+		goto det_charset;
+	}
+
+	/* try to detect the charset for the locale */
+#if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
+	charset_hint = nl_langinfo(CODESET);
+	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
+		goto det_charset;
+	}
+#endif
+
+#if HAVE_LOCALE_H
+	/* try to figure out the charset from the locale */
+	{
+		char *localename;
+		char *dot, *at;
+
+		/* lang[_territory][.codeset][@modifier] */
+		localename = setlocale(LC_CTYPE, NULL);
+
+		dot = strchr(localename, '.');
+		if (dot) {
+			dot++;
+			/* locale specifies a codeset */
+			at = strchr(dot, '@');
+			if (at)
+				len = at - dot;
+			else
+				len = strlen(dot);
+			charset_hint = dot;
+		} else {
+			/* no explicit name; see if the name itself
+			 * is the charset */
+			charset_hint = localename;
+			len = strlen(charset_hint);
+		}
+	}
+#endif
+
+det_charset:
+
 	if (charset_hint) {
 		int found = 0;
 		
@@ -616,6 +645,9 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "charset `%s' not supported, assuming iso-8859-1",
 					charset_hint);
 		}
+	}
+	if (uf_result != NULL) {
+		zval_ptr_dtor(&uf_result);
 	}
 	return charset;
 }
