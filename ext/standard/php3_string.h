@@ -85,23 +85,23 @@ PHP_FUNCTION(bin2hex);
 PHP_FUNCTION(similar_text);
 PHP_FUNCTION(strip_tags);
 
-extern PHPAPI char *_php3_strtoupper(char *s);
-extern PHPAPI char *_php3_strtolower(char *s);
-extern PHPAPI char *_php3_strtr(char *string, int len, char *str_from, char *str_to, int trlen);
+extern PHPAPI char *php_strtoupper(char *s);
+extern PHPAPI char *php_strtolower(char *s);
+extern PHPAPI char *php_strtr(char *string, int len, char *str_from, char *str_to, int trlen);
 extern PHPAPI char *php_addslashes(char *string, int length, int *new_length, int freeit);
 extern PHPAPI char *php_addcslashes(char *string, int length, int *new_length, int freeit, char *what, int wlength);
 extern PHPAPI void php_stripslashes(char *string, int *len);
 extern PHPAPI void php_stripcslashes(char *string, int *len);
-extern PHPAPI void _php3_dirname(char *str, int len);
-extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
+extern PHPAPI void php_dirname(char *str, int len);
+extern PHPAPI char *php_stristr(unsigned char *s, unsigned char *t);
 extern PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length);
-extern PHPAPI void _php3_trim(pval *str, pval *return_value, int mode);
-extern PHPAPI void _php3_strip_tags(char *rbuf, int len, int state, char *allow);
+extern PHPAPI void php_trim(pval *str, pval *return_value, int mode);
+extern PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow);
 
 extern PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
 
-extern PHPAPI void _php3_implode(pval *delim, pval *arr, pval *return_value);
-extern PHPAPI void _php3_explode(pval *delim, pval *str, pval *return_value);
+extern PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value);
+extern PHPAPI void php_explode(pval *delim, pval *str, pval *return_value);
 
 #endif /* _PHPSTRING_H */

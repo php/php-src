@@ -426,12 +426,12 @@ PHP_FUNCTION(get_meta_tags)
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, 8191);
 	while((FP_FGETS(buf,8191,socketd,fp,issock) != NULL)
-		  && !php3i_stristr(buf,"</head>")) {
-		if(php3i_stristr(buf,"<meta")) {
+		  && !php_stristr(buf,"</head>")) {
+		if(php_stristr(buf,"<meta")) {
 
 			memset(var_name,0,50);
 			/* get the variable name from the name attribute of the meta tag */
-			tmp=php3i_stristr(buf,"name=\"");
+			tmp=php_stristr(buf,"name=\"");
 			if(tmp) {
 				tmp+=6;
 				end=strstr(tmp,"\"");
@@ -466,7 +466,7 @@ PHP_FUNCTION(get_meta_tags)
 				}
 
 				/* get the variable value from the content attribute of the meta tag */
-				tmp=php3i_stristr(buf,"content=\"");
+				tmp=php_stristr(buf,"content=\"");
 				if(tmp) {
 					tmp+=9;
 					end=strstr(tmp,"\"");
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(fgetss)
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	_php3_strip_tags(buf, strlen(buf), FIL(fgetss_state), allow?(*allow)->value.str.val:NULL);
+	php_strip_tags(buf, strlen(buf), FIL(fgetss_state), allow?(*allow)->value.str.val:NULL);
 
 	RETURN_STRING(buf, 0);
 }

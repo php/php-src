@@ -295,7 +295,7 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 	}
 	
 	temp = estrdup(fn);
-	_php3_dirname(temp, strlen(temp));
+	php_dirname(temp, strlen(temp));
 	if (*temp) {
 		chdir(temp);
 	}
