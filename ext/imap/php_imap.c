@@ -584,6 +584,7 @@ PHP_MINIT_FUNCTION(imap)
 
     le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 
+	return SUCCESS;
 }
 /* }}} */
 
