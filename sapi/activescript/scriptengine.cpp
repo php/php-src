@@ -116,7 +116,12 @@ class TWideString {
 			return ret;
 		}
 
-		int ansi_len(void) { return m_ansi_strlen; }
+		int ansi_len(void) {
+			/* force conversion if it has not already occurred */
+			if (m_ansi == NULL)
+				ansi_string();
+			return m_ansi_strlen;
+		}
 
 		static BSTR bstr_from_ansi(char *ansi) {
 			OLECHAR *ole = NULL;
