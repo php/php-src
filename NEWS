@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- exif_read_data returns mime-type now for image and thumbnail And exif_thumbnail now optionally returns imagetype. (Marcus)
+- GetImageSize now returns additional index 'MimeType' and new function
+  imagetype2mimetype to convert php imagetypes to mime-types. (Marcus)
 - Added a new parameter to the header() function which overrides the HTTP
   response code. (Derick)
 - Change the order of which modules are unloaded to the reverse order of
