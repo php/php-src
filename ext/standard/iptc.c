@@ -351,7 +351,7 @@ PHP_FUNCTION(iptcparse)
 
 		sprintf(key,"%d#%03d",(unsigned int) dataset,(unsigned int) recnum);
 
-		if ((inx + len) > length)
+		if ((len > length) || (inx + len) > length)
 			break;
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
