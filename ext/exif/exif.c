@@ -1267,8 +1267,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 	int l;
 	int tag, format, components;
 	char *value_ptr, tagname[64];
-	size_t byte_count;
-	unsigned offset_val;
+	size_t byte_count, offset_val;
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -1285,12 +1284,20 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 	if (byte_count > 4) {
 		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
-		if (offset_val+byte_count > IFDlength) {
-			/* Bogus pointer offset and / or byte_count value */
-			php_error(E_WARNING, "Illegal pointer offset(x%04X + x%04X = x%04X > x%04X) in IFD for Tag(x%04X=%s): ", offset_val, byte_count, offset_val+byte_count, IFDlength, tag, exif_get_tagname(tag,tagname));
+		value_ptr = offset_base+offset_val;
+		/*php_error(E_WARNING, "DE: x%08X, OB: x%08X, VP: x%08X, %s", dir_entry, offset_base, value_ptr, value_ptr<dir_entry?"error":"o.k.");*/
+		if (offset_val+byte_count > IFDlength || value_ptr < dir_entry) {
+			if (value_ptr < dir_entry) {
+				/* we can read this if offset_val > 0 */
+				/* some files have their values in other parts of the file */
+				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag,tagname), offset_val, dir_entry);
+			} else {
+				/* this is for sure not allowed */
+				/* exception are IFD pointers */
+				php_error(E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag,tagname), offset_val, byte_count, offset_val+byte_count, IFDlength);
+			}
 			return;
 		}
-		value_ptr = offset_base+offset_val;
 	} else {
 		/* 4 bytes or less and value is in the dir entry itself */
 		value_ptr = dir_entry+8;
@@ -1930,7 +1937,7 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo, FILE *infile)
 	    	return exif_scan_JPEG_header(ImageInfo,infile);
 		} else if ( ImageInfo->FileSize >= 8) {
 			fread(file_header+2, 1, 6, infile);
-		    if ( !memcmp(file_header,"II\x2A\x00\x08\x00\x00\x00", 8))
+		    if ( !memcmp(file_header,"II\x2A\x00", 4))
 		    {
 		    	ImageInfo->FileType = IMAGE_FILETYPE_TIFF;
 		    	ImageInfo->motorola_intel = 0;
@@ -1938,10 +1945,10 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo, FILE *infile)
 		    	php_error(E_NOTICE,"File(%s) has TIFF/II format", ImageInfo->FileName);
 		    	#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-		    	return exif_process_IFD_in_TIFF(ImageInfo,infile,8,SECTION_IFD0);
+		    	return exif_process_IFD_in_TIFF(ImageInfo,infile,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0);
 		    }
 		    else
-		    if ( !memcmp(file_header,"MM\x00\x2a\x00\x00\x00\x08", 8))
+		    if ( !memcmp(file_header,"MM\x00\x2a", 4))
 		    {
 		    	ImageInfo->FileType = IMAGE_FILETYPE_TIFF;
 		    	ImageInfo->motorola_intel = 1;
@@ -1949,11 +1956,14 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo, FILE *infile)
 		    	php_error(E_NOTICE,"File(%s) has TIFF/MM format", ImageInfo->FileName);
 		    	#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-		    	return exif_process_IFD_in_TIFF(ImageInfo,infile,8,SECTION_IFD0);
+		    	return exif_process_IFD_in_TIFF(ImageInfo,infile,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0);
+		    } else {
+				php_error(E_WARNING,"File(%s) not supported", ImageInfo->FileName);
+				return FALSE;
 		    }
 		}
 	}
-	php_error(E_WARNING,"File(%s) to small or filetype not supported", ImageInfo->FileName);
+	php_error(E_WARNING,"File(%s) to small (%d)", ImageInfo->FileName, ImageInfo->FileSize);
 	return FALSE;
 }
 /* }}} */
