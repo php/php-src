@@ -1,3 +1,33 @@
+2004-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/string.c:
+      MFH: Fixed bug #30356 (str_ireplace() does not work on all strings).
+
+    * ext/standard/string.c:
+      Fixed bug #30356 (str_ireplace() does not work on all strings).
+
+2004-10-07  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_open_temporary_file.c:
+      removed unwanted NEW_LIBC checks for NETWARE and removing custom mktemp.h
+      as LibC itself supports mkstemp functionality
+
+2004-10-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/php_dom.c
+      ext/dom/text.c:
+      add DOMDocument xmlEncoding, xmlStandalone, xmlVersion (spec name changes)
+      add DOMText isElementContentWhitespace (spec name change)
+       - old props/method kept for BC.
+       - spec names changed when Level 3 went from Draft to Recommendation
+      nuke some unused code
+
+    * ext/dom/documentfragment.c:
+      fix segfault in appendXML due to libxml bug
+
 2004-10-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * TSRM/tsrm_virtual_cwd.c:
