@@ -74,7 +74,7 @@ static zend_class_entry *oci_lob_class_entry_ptr;
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 #include "build-defs.h"
 #endif
 
@@ -490,7 +490,7 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	php_info_print_table_row(2, "Oracle Version", PHP_ORACLE_VERSION );
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_ORACLE_HOME );
 	php_info_print_table_row(2, "Libraries Used", PHP_ORACLE_LIBS );
