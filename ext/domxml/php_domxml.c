@@ -2500,7 +2500,7 @@ PHP_FUNCTION(domxml_node_replace_child)
 {
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
-	int foundoldchild = 0, foundnewchild = 0;
+	int foundoldchild = 0;
 	int ret;
 
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
