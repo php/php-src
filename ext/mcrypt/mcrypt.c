@@ -202,12 +202,12 @@ PHP_FUNCTION(mcrypt_ofb)
 	convert_to_string(key);
 	convert_to_string(iv);
 
+	bsize = get_block_size(cipher->value.lval);
 	if(iv->value.str.len != bsize) {
 		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
 		RETURN_FALSE;
 	}
 
-	bsize = get_block_size(cipher->value.lval);
 	nr = (data->value.str.len + bsize - 1) / bsize;
 	nsize = nr * bsize;
 
@@ -251,12 +251,12 @@ PHP_FUNCTION(mcrypt_cfb)
 	convert_to_string(key);
 	convert_to_string(iv);
 
+	bsize = get_block_size(cipher->value.lval);
 	if(iv->value.str.len != bsize) {
 		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
 		RETURN_FALSE;
 	}
 
-	bsize = get_block_size(cipher->value.lval);
 	nr = (data->value.str.len + bsize - 1) / bsize;
 	nsize = nr * bsize;
 
