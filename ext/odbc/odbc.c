@@ -50,8 +50,8 @@
 #include "php.h"
 #include "dl/phpdl.h"
 #include "ext/standard/php3_standard.h"
-#include "php3_unified_odbc.h"
-#include "head.h"
+#include "php3_odbc.h"
+#include "functions/head.h"
 #include "snprintf.h"
 
 #if HAVE_UODBC
