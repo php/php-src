@@ -304,6 +304,11 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 			break;
 	}
 
+	if (EG(implicit_clone)) {
+		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
+		object = *object_ptr;
+	}
+
 	/* here property is a string */
 	
 	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);

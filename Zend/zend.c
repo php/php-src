@@ -69,8 +69,20 @@ static ZEND_INI_MH(OnUpdateErrorReporting)
 }
 
 
+static ZEND_INI_MH(OnUpdateImplicitClone)
+{
+	if (!new_value) {
+		EG(implicit_clone) = 0;
+	} else {
+		EG(implicit_clone) = atoi(new_value) ? 1 : 0;
+	}
+	return SUCCESS;
+}
+
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	ZEND_INI_ENTRY("zend2.implicit_clone",		NULL,		ZEND_INI_ALL,		OnUpdateImplicitClone)
 ZEND_INI_END()
 
 
@@ -268,7 +280,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
 		    ZEND_PUTS(" *RECURSION*");
 		    object->properties->nApplyCount--;
 		    return;
-		}   
+		}
 		zend_printf("%s Object (", object->ce->name);
 		print_flat_hash(object->properties);
 		ZEND_PUTS(")");
@@ -287,7 +299,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent)
 }
 
 
-ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent) 
+ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent)
 {
 	switch (expr->type) {
 		case IS_ARRAY:
@@ -333,7 +345,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 static void register_standard_class(void)
 {
 	zend_standard_class_def = malloc(sizeof(zend_class_entry));
-	
+
 	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
 	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
 	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
@@ -730,7 +742,7 @@ void zend_deactivate_modules(TSRMLS_D)
 void zend_deactivate(TSRMLS_D)
 {
 	/* we're no longer executing anything */
-	EG(opline_ptr) = NULL; 
+	EG(opline_ptr) = NULL;
 	EG(active_symbol_table) = NULL;
 
 	zend_try {
@@ -864,7 +876,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 				z_error_filename->value.str.val = estrndup(error_filename, z_error_filename->value.str.len);
 				z_error_filename->type = IS_STRING;
 			}
-				
+
 			z_error_lineno->value.lval = error_lineno;
 			z_error_lineno->type = IS_LONG;
 
@@ -944,7 +956,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval *local_retval=NULL;
-	
+
 	va_start(files, file_count);
 	for (i=0; i<file_count; i++) {
 		file_handle = va_arg(files, zend_file_handle *);

@@ -129,6 +129,7 @@ void init_executor(TSRMLS_D)
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
 	EG(symtable_cache_limit)=EG(symtable_cache)+SYMTABLE_CACHE_SIZE-1;
 	EG(no_extensions)=0;
+	EG(implicit_clone)=0;
 
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
