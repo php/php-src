@@ -879,8 +879,6 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
-	zval *orig_garbage[2];
-	int  orig_garbage_ptr;
 	TSRMLS_FETCH();
 
 	/* Obtain relevant filename and lineno */
@@ -973,12 +971,6 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
 	    
-			orig_garbage_ptr = EG(garbage_ptr);
-			EG(garbage_ptr) = 0;
-			if (orig_garbage_ptr > 0) {
-				memcpy(&orig_garbage, &EG(garbage), sizeof(zval*)*orig_garbage_ptr);
-			}
-
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 				if (retval) {
 					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
@@ -989,14 +981,6 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			} else {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
-			}
-
-			if (orig_garbage_ptr > 0) {
-				while (EG(garbage_ptr)) {
-					zval_ptr_dtor(&EG(garbage)[--EG(garbage_ptr)]);
-				}				
-				EG(garbage_ptr) = orig_garbage_ptr;
-				memcpy(&EG(garbage), &orig_garbage, sizeof(zval*)*orig_garbage_ptr);
 			}
 
 			EG(user_error_handler) = orig_user_error_handler;
