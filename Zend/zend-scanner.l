@@ -881,7 +881,10 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <IN_SCRIPTING>"}" {
-	yy_pop_state();
+	/* This is a temporary fix which is dependant on flex and it's implementation */
+	if (yy_start_stack_ptr) {
+		yy_pop_state();
+	}
 	return '}';
 }
 
