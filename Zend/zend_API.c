@@ -1241,6 +1241,12 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		scope->constructor = ctor;
 		scope->destructor = dtor;
 		scope->clone = clone;
+		if (ctor) {
+			ctor->common.fn_flags |= ZEND_ACC_CTOR;
+		}
+		if (dtor) {
+			dtor->common.fn_flags |= ZEND_ACC_DTOR;
+		}
 	}
 	return SUCCESS;
 }
