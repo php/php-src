@@ -29,6 +29,7 @@ typedef php_stream *(php_stream_transport_factory_func)(const char *proto, long 
 		php_stream_context *context STREAMS_DC TSRMLS_DC);
 typedef php_stream_transport_factory_func *php_stream_transport_factory;
 
+BEGIN_EXTERN_C()
 PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC);
 PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC);
 
@@ -103,6 +104,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
  * sending it as OOB data */
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
 		long flags, void *addr, socklen_t addrlen TSRMLS_DC);
+END_EXTERN_C()
 
 /* Structure definition for the set_option interface that the above functions wrap */
 
@@ -157,8 +159,10 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_TLS_SERVER
 } php_stream_xport_crypt_method_t;
 
+BEGIN_EXTERN_C()
 PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream TSRMLS_DC);
 PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRMLS_DC);
+END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {
 	enum {
@@ -175,8 +179,10 @@ typedef struct _php_stream_xport_crypto_param {
 	} outputs;
 } php_stream_xport_crypto_param;
 
+BEGIN_EXTERN_C()
 PHPAPI HashTable *php_stream_xport_get_hash(void);
 PHPAPI php_stream_transport_factory_func php_stream_generic_socket_factory;
+END_EXTERN_C()
 
 /*
  * Local variables:
