@@ -441,7 +441,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF
 				sprintf(tmp_buff, "%ld", ta->tm_gmtoff);
 #else
-				sprintf(tmp_buff, "%ld", ta->tm_isdst ? timezone - 3600 : timezone);
+				sprintf(tmp_buff, "%ld", ta->tm_isdst ? -(timezone - 3600) : -timezone);
 #endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
