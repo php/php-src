@@ -41,8 +41,8 @@ FILE *(*zend_fopen)(const char *filename);
 void (*zend_block_interruptions)();
 void (*zend_unblock_interruptions)();
 #ifdef ZTS
-int compiler_globals_id;
-int executor_globals_id;
+ZEND_API int compiler_globals_id;
+ZEND_API int executor_globals_id;
 int alloc_globals_id;
 HashTable *global_function_table;
 HashTable *global_class_table;
