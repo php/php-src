@@ -205,20 +205,27 @@ spec	: /* NULL */
 
 item	: time {
 	    yyHaveTime++;
+		printf ("TIME");
 	}
 	| zone {
 	    yyHaveZone++;
+		printf ("ZONE");
 	}
 	| date {
 	    yyHaveDate++;
+		printf ("DATE");
 	}
 	| day {
 	    yyHaveDay++;
+		printf ("DAY");
 	}
 	| rel {
 	    yyHaveRel++;
+		printf ("REL");
 	}
-	| number
+	| number {
+		printf ("NUMBER");
+	}
 	;
 
 time	: tUNUMBER tMERIDIAN {
