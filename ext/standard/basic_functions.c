@@ -2019,8 +2019,8 @@ PHP_FUNCTION(highlight_file)
 /* }}} */
 
 
-/* {{{ proto void highlight_file(string file_name)
-   Syntax highlight a source file */
+/* {{{ proto void highlight_file(string string)
+   Syntax highlight a string */
 PHP_FUNCTION(highlight_string)
 {
 	pval *expr;
