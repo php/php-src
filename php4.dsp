@@ -200,6 +200,10 @@ SOURCE=.\php3_realpath.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_globals.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.h
 # End Source File
 # Begin Source File
