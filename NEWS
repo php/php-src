@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 26 Jun 2003, Version 4.3.3RC2
+- Fixed bug #24313 (file_exist() warning on non-existent files
+  when open_basedir is used). (Ilia)
 - Fixed bug #24284 (Fixed memory leak inside pg_ping()). (Ilia)
 
 19 Jun 2003, Version 4.3.3RC1

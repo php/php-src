@@ -163,9 +163,14 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 }
 /* }}} */
 
+PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
+{
+	return php_check_open_basedir_ex(path, 1 TSRMLS_DC);
+}
+
 /* {{{ php_check_open_basedir
  */
-PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
+PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC)
 {
 	/* Only check when open_basedir is available */
 	if (PG(open_basedir) && *PG(open_basedir)) {
@@ -191,8 +196,10 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
 
 			ptr = end;
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
-			"open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
+		if (warn) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, 
+				"open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
+		}
 		efree(pathbuf);
 		errno = EPERM; /* we deny permission to open it */
 		return -1;
