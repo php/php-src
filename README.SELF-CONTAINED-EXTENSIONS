@@ -1,5 +1,7 @@
-HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
 $Id$
+=============================================================================
+
+HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
 
   A self-contained extension can be distributed independently of
   the PHP source. To create such an extension, three things are
@@ -13,7 +15,40 @@ $Id$
   together.
 
 
-SPECIFYING THE EXTENSION
+CONVERTING AN EXISTING EXTENSION
+
+  Just to show you how easy it is to create a self-contained
+  extension, we will convert an embedded extension into a
+  self-contained one. Install PHP and execute the following
+  commands.
+  
+     $ mkdir /tmp/newext
+     $ cd /tmp/newext
+
+  You now have an empty directory. We will copy the files from
+  the mysql extension:
+
+     $ cp -rp php-4.0.X/ext/mysql/* .
+
+  It is time to finish the module. Run:
+
+     $ phpize
+
+  You can now ship the contents of the directory - the extension
+  can live completely on its own.
+
+  The user instructions boil down to
+
+     $ ./configure \
+            [--with-php-config=/path/to/php-config] \
+            [--with-mysql=MYSQL-DIR]
+     $ make install
+
+  The MySQL module will either use the embedded MySQL client 
+  library or the MySQL installation in MYSQL-DIR.
+
+
+DEFINING THE NEW EXTENSION
 
   Our demo extension is called "foobar".
 
@@ -84,23 +119,11 @@ CREATING THE SELF-CONTAINED EXTENSION
 
   And that's it. You now have a self-contained extension.
 
-  It can be installed by running:
+INSTALLING A SELF-CONTAINED EXTENSION
 
-  $ ./configure [--with-php-config=/path/to/php-config]
-  $ make install
+  An extension can be installed by running:
 
-CONVERTING AN EXISTING EXTENSION
-
-  If you want to distribute an extension from the PHP repository, copy
-  all files from the extension's directory to a new directory and
-  run phpize as described above. That's all!
-
-  For example:
-
-     $ dir=/tmp/new_moduke
-     $ cd php4/ext/mysql
-     $ mkdir $dir
-     $ cp -rp * $dir
-     $ cd $dir
-     $ phpize
+     $ ./configure \
+            [--with-php-config=/path/to/php-config]
+     $ make install
   
