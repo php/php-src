@@ -452,12 +452,8 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style)
 		zval_dtor(&tmp);
 	}
 
-	pstr = malloc(new_len + 1);
-	memcpy(pstr, str, new_len);
-	pstr[new_len] = '\0';
+	xmlNodeSetContentLen(ret, str, new_len);
 	efree(str);
-
-	xmlNodeSetContentLen(ret, pstr, new_len);
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);
@@ -1975,10 +1971,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		xmlNodeSetContent(xmlParam, buf);
 		efree(buf);
 	} else if (Z_TYPE_P(data) == IS_STRING) {
-		buf = malloc(Z_STRLEN_P(data)+1);
-		strcpy(buf, Z_STRVAL_P(data));
-
-		xmlNodeSetContentLen(xmlParam, buf, Z_STRLEN_P(data));
+		xmlNodeSetContentLen(xmlParam, Z_STRVAL_P(data), Z_STRLEN_P(data));
 	}
 
 	if (style == SOAP_ENCODED) {
