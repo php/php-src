@@ -4638,6 +4638,11 @@ PHP_FUNCTION(ocicollgetelem)
 			oci_error(connection->pError, "OCICollGetElem", connection->error);
 			RETURN_FALSE;
 		}
+		
+		// Return false if value does not exist at that location
+		if(exists == 0) {
+			RETURN_FALSE;
+		}
 
 		switch (coll->element_typecode) {
 		   case OCI_TYPECODE_DATE:
