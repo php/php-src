@@ -94,7 +94,7 @@ PHP_FUNCTION(ldap_rename);
 PHP_FUNCTION(ldap_start_tls);
 #endif
 
-#ifdef HAVE_3ARG_SETREBINDPROC
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 PHP_FUNCTION(ldap_set_rebind_proc);
 #endif
 
