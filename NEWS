@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added odbc_error() and odbc_errormsg() functions (Stig)
 - vpopmail extension updated to working alfa. give it a try but keep in
   mind that it is not ready for production environments (Boian Bonev)
 - New extension for vpopmail - http://www.inter7.com/vpopmail (David Croft)
