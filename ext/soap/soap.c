@@ -1705,9 +1705,6 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	MAKE_STD_ZVAL(fault);
 //	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail TSRMLS_CC);
 	set_soap_fault(fault, fault_code, fault_string, fault_actor, fault_detail TSRMLS_CC);
-#ifdef ZEND_ENGINE_2
-	fault->refcount--;
-#endif
 	add_property_zval(obj, "__soap_fault", fault);
 	return fault;
 }
@@ -1753,9 +1750,6 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 		add_property_string(obj, "faultactor", fault_actor, 1);
 	}
 	if (fault_detail != NULL) {
-#ifdef ZEND_ENGINE_2
-		fault_detail->refcount--;
-#endif
 		add_property_zval(obj, "detail", fault_detail);
 	}
 }
