@@ -46,6 +46,6 @@ PHP_FUNCTION(aggregate_properties_by_list);
 PHP_FUNCTION(aggregate_properties_by_regexp);
 PHP_FUNCTION(aggregate);
 PHP_FUNCTION(deaggregate);
-PHP_FUNCTION(aggregation_info);
+PHP_FUNCTION(aggregate_info);
 
 #endif /* AGGREGATION_H */
