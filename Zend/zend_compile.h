@@ -195,6 +195,8 @@ typedef struct _zend_execute_data {
 	struct _zend_execute_data *prev_execute_data;
 } zend_execute_data;
 
+#define EX(element) execute_data.element
+
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)

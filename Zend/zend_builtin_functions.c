@@ -1188,23 +1188,33 @@ ZEND_FUNCTION(debug_backtrace)
 {
 	zend_execute_data *ptr;
 	int lineno;
-
+	char *function_name;
+	char *filename;
 
 	ptr = EG(current_execute_data);
 	lineno = ptr->opline->lineno;
-
-	ptr = ptr->prev_execute_data;
-
+	
 	while (ptr) {
 		if (ptr->object) {
 			printf("%s::", Z_OBJCE(*ptr->object)->name);
 		}
-		printf("%s() [%s:%d]\n", ptr->function_state.function->common.function_name, ptr->function_state.function->op_array.filename, lineno);
-		lineno = ptr->opline->lineno;
-		ptr = ptr->prev_execute_data;
-	}
+		function_name = ptr->function_state.function->common.function_name;
+		if (!function_name) {
+			function_name = "main";
+		}
 
-	printf("main() [...:%d]\n", lineno);
+		ptr = ptr->prev_execute_data;
+		if (!ptr) {
+			break;
+		}
+		
+		filename = ptr->function_state.function->op_array.filename;
+		
+		printf("%s() [%s:%d]\n", function_name, filename, lineno);
+		if (ptr->opline) {
+			lineno = ptr->opline->lineno;
+		}
+	}
 	RETURN_TRUE;
 }
 
