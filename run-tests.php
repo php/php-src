@@ -435,7 +435,7 @@ TEST $file
 			@unlink($tmp_skipif);
 			if (ereg("^skip", trim($output))){
 				echo "SKIP $tested";
-				$reason = (ereg("^skip\s*(.+)$", trim($output))) ? ereg_replace("^skip\s*(.+)$", "\\1", trim($output)) : FALSE;
+				$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					echo " (reason: $reason)\n";
 				} else {
