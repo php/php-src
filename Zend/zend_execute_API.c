@@ -903,6 +903,14 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return FAILURE;
 	}
 
+	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
+	 * (doesn't impact fuctionality of __autoload()
+	 */
+	if (zend_is_compiling(TSRMLS_C)) {
+		free_alloca(lc_name);
+		return FAILURE;
+	}
+
 	ZVAL_STRINGL(&autoload_function, "__autoload", sizeof("__autoload")-1,  0);
 
 	INIT_PZVAL(class_name_ptr);
