@@ -31,8 +31,8 @@
  */
 
 
-#ifndef _PHP3_IFX_H
-#define _PHP3_IFX_H
+#ifndef _PHP_IFX_H
+#define _PHP_IFX_H
 
 
 #if COMPILE_DL
@@ -228,4 +228,4 @@ typedef struct _IFX_IDRES {
 
 #define phpext_informix_ptr ifx_module_ptr
 
-#endif /* _PHP3_IFX_H */
+#endif /* _PHP_IFX_H */

@@ -29,7 +29,7 @@
 #include "zend_globals.h"		/* needs ELS */
 
 
-#define PHP3_CONF_LONG(directive,value1,value2) \
+#define PHP_CONF_LONG(directive,value1,value2) \
 	php_printf("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">%s</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td></tr>\n",directive,value1,value2);
 
 #define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")

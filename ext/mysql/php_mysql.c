@@ -1548,11 +1548,11 @@ PHP_FUNCTION(mysql_field_seek)
 /* }}} */
 
 
-#define PHP3_MYSQL_FIELD_NAME 1
-#define PHP3_MYSQL_FIELD_TABLE 2
-#define PHP3_MYSQL_FIELD_LEN 3
-#define PHP3_MYSQL_FIELD_TYPE 4
-#define PHP3_MYSQL_FIELD_FLAGS 5
+#define PHP_MYSQL_FIELD_NAME 1
+#define PHP_MYSQL_FIELD_TABLE 2
+#define PHP_MYSQL_FIELD_LEN 3
+#define PHP_MYSQL_FIELD_TYPE 4
+#define PHP_MYSQL_FIELD_FLAGS 5
  
 
 static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -1580,27 +1580,27 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	switch (entry_type) {
-		case PHP3_MYSQL_FIELD_NAME:
+		case PHP_MYSQL_FIELD_NAME:
 			return_value->value.str.len = strlen(mysql_field->name);
 			return_value->value.str.val = estrndup(mysql_field->name,return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MYSQL_FIELD_TABLE:
+		case PHP_MYSQL_FIELD_TABLE:
 			return_value->value.str.len = strlen(mysql_field->table);
 			return_value->value.str.val = estrndup(mysql_field->table,return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MYSQL_FIELD_LEN:
+		case PHP_MYSQL_FIELD_LEN:
 			return_value->value.lval = mysql_field->length;
 			return_value->type = IS_LONG;
 			break;
-		case PHP3_MYSQL_FIELD_TYPE:
+		case PHP_MYSQL_FIELD_TYPE:
 			return_value->value.str.val = php_mysql_get_field_name(mysql_field->type);
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->value.str.val = estrndup(return_value->value.str.val, return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MYSQL_FIELD_FLAGS:
+		case PHP_MYSQL_FIELD_FLAGS:
 			strcpy(buf, "");
 #ifdef IS_NOT_NULL
 			if (IS_NOT_NULL(mysql_field->flags)) {
@@ -1679,7 +1679,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Get the name of the specified field in a result */
 PHP_FUNCTION(mysql_field_name)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_NAME);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_NAME);
 }
 /* }}} */
 
@@ -1688,7 +1688,7 @@ PHP_FUNCTION(mysql_field_name)
    Get name of the table the specified field is in */
 PHP_FUNCTION(mysql_field_table)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_TABLE);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_TABLE);
 }
 /* }}} */
 
@@ -1697,7 +1697,7 @@ PHP_FUNCTION(mysql_field_table)
    Returns the length of the specified field */
 PHP_FUNCTION(mysql_field_len)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_LEN);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_LEN);
 }
 /* }}} */
 
@@ -1706,7 +1706,7 @@ PHP_FUNCTION(mysql_field_len)
    Get the type of the specified field in a result */
 PHP_FUNCTION(mysql_field_type)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_TYPE);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_TYPE);
 }
 /* }}} */
 
@@ -1715,7 +1715,7 @@ PHP_FUNCTION(mysql_field_type)
    Get the flags associated with the specified field in a result */
 PHP_FUNCTION(mysql_field_flags)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_FLAGS);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_FLAGS);
 }
 /* }}} */
 

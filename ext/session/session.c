@@ -370,17 +370,17 @@ static void _php_session_decode(const char *val, int vallen PSLS_DC)
 
 static char *_php_create_id(int *newlen PSLS_DC)
 {
-	PHP3_MD5_CTX context;
+	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	char buf[256];
 	struct timeval tv;
 	int i;
 
 	gettimeofday(&tv, NULL);
-	PHP3_MD5Init(&context);
+	PHP_MD5Init(&context);
 	
 	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg() * 10);
-	PHP3_MD5Update(&context, buf, strlen(buf));
+	PHP_MD5Update(&context, buf, strlen(buf));
 
 	if (PS(entropy_length) > 0) {
 		int fd;
@@ -393,14 +393,14 @@ static char *_php_create_id(int *newlen PSLS_DC)
 			p = emalloc(PS(entropy_length));
 			n = read(fd, p, PS(entropy_length));
 			if (n > 0) {
-				PHP3_MD5Update(&context, p, n);
+				PHP_MD5Update(&context, p, n);
 			}
 			efree(p);
 			close(fd);
 		}
 	}
 
-	PHP3_MD5Final(digest, &context);
+	PHP_MD5Final(digest, &context);
 
 	for (i = 0; i < 16; i++)
 		sprintf(buf + (i << 1), "%02x", digest[i]);

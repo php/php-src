@@ -120,4 +120,4 @@ PHP_FUNCTION(cpdf_set_action_url);
 #define cpdf_module_ptr NULL
 #endif
 #define phpext_cpdf_ptr cpdf_module_ptr
-#endif /* _PHP3_PDF_H */
+#endif /* _PHP_PDF_H */

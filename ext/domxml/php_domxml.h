@@ -72,4 +72,4 @@ PHP_FUNCTION(domxml_attrname);
 #endif /* HAVE_DOMXML */
 #define phpext_domxml_ptr php_domxml_module_ptr
 
-#endif /* _PHP3_DIR_H */
+#endif /* _PHP_DIR_H */

@@ -60,49 +60,49 @@ zend_module_entry crypt_module_entry = {
 
 /* 
    The capabilities of the crypt() function is determined by the test programs
-   run by configure from aclocal.m4.  They will set PHP3_STD_DES_CRYPT,
-   PHP3_EXT_DES_CRYPT, PHP3_MD5_CRYPT and PHP3_BLOWFISH_CRYPT as appropriate 
+   run by configure from aclocal.m4.  They will set PHP_STD_DES_CRYPT,
+   PHP_EXT_DES_CRYPT, PHP_MD5_CRYPT and PHP_BLOWFISH_CRYPT as appropriate 
    for the target platform
 */
-#if PHP3_STD_DES_CRYPT
-#define PHP3_MAX_SALT_LEN 2
+#if PHP_STD_DES_CRYPT
+#define PHP_MAX_SALT_LEN 2
 #endif
-#if PHP3_EXT_DES_CRYPT
-#undef PHP3_MAX_SALT_LEN
-#define PHP3_MAX_SALT_LEN 9
+#if PHP_EXT_DES_CRYPT
+#undef PHP_MAX_SALT_LEN
+#define PHP_MAX_SALT_LEN 9
 #endif
-#if PHP3_MD5_CRYPT
-#undef PHP3_MAX_SALT_LEN
-#define PHP3_MAX_SALT_LEN 12
+#if PHP_MD5_CRYPT
+#undef PHP_MAX_SALT_LEN
+#define PHP_MAX_SALT_LEN 12
 #endif
-#if PHP3_BLOWFISH_CRYPT
-#undef PHP3_MAX_SALT_LEN
-#define PHP3_MAX_SALT_LEN 17
+#if PHP_BLOWFISH_CRYPT
+#undef PHP_MAX_SALT_LEN
+#define PHP_MAX_SALT_LEN 17
 #endif
 
 #if HAVE_LRAND48
-#define PHP3_CRYPT_RAND lrand48()
+#define PHP_CRYPT_RAND lrand48()
 #else
 #if HAVE_RANDOM
-#define PHP3_CRYPT_RAND random()
+#define PHP_CRYPT_RAND random()
 #else
-#define PHP3_CRYPT_RAND rand()
+#define PHP_CRYPT_RAND rand()
 #endif
 #endif
 
 PHP_MINIT_FUNCTION(crypt)
 {
-#if PHP3_STD_DES_CRYPT
+#if PHP_STD_DES_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 2, CONST_CS | CONST_PERSISTENT);
 #else
-#if PHP3_MD5_CRYPT
+#if PHP_MD5_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 12, CONST_CS | CONST_PERSISTENT);
 #endif
 #endif
-    REGISTER_LONG_CONSTANT("CRYPT_STD_DES", PHP3_STD_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", PHP3_EXT_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP3_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP3_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("CRYPT_STD_DES", PHP_STD_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", PHP_EXT_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
     return SUCCESS;
 }
 
@@ -117,13 +117,13 @@ static void php_to64(char *s, long v, int n)	{
 
 PHP_FUNCTION(crypt)
 {
-	char salt[PHP3_MAX_SALT_LEN+1];
+	char salt[PHP_MAX_SALT_LEN+1];
 	pval **arg1, **arg2;
 
-	salt[0]=salt[PHP3_MAX_SALT_LEN]='\0';
+	salt[0]=salt[PHP_MAX_SALT_LEN]='\0';
 	/* This will produce suitable results if people depend on DES-encryption
 	   available (passing always 2-character salt). At least for glibc6.1 */
-	memset(&salt[1], '$', PHP3_MAX_SALT_LEN-1);
+	memset(&salt[1], '$', PHP_MAX_SALT_LEN-1);
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -136,7 +136,7 @@ PHP_FUNCTION(crypt)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);
-			memcpy(salt, (*arg2)->value.str.val, MIN(PHP3_MAX_SALT_LEN,(*arg2)->value.str.len));
+			memcpy(salt, (*arg2)->value.str.val, MIN(PHP_MAX_SALT_LEN,(*arg2)->value.str.len));
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -156,14 +156,14 @@ PHP_FUNCTION(crypt)
 #endif
 #endif
 
-#if PHP3_STD_DES_CRYPT
-		php_to64(&salt[0], PHP3_CRYPT_RAND, 2);
+#if PHP_STD_DES_CRYPT
+		php_to64(&salt[0], PHP_CRYPT_RAND, 2);
 		salt[2] = '\0';
 #else
-#if PHP3_MD5_CRYPT
+#if PHP_MD5_CRYPT
 		strcpy(salt, "$1$");
-		php_to64(&salt[3], PHP3_CRYPT_RAND, 4);
-		php_to64(&salt[7], PHP3_CRYPT_RAND, 4);
+		php_to64(&salt[3], PHP_CRYPT_RAND, 4);
+		php_to64(&salt[7], PHP_CRYPT_RAND, 4);
 		strcpy(&salt[11], "$");
 #endif
 #endif

@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_IBASE_H
-#define _PHP3_IBASE_H
+#ifndef _PHP_IBASE_H
+#define _PHP_IBASE_H
 
 #if COMPILE_DL
 #undef HAVE_IBASE
@@ -101,7 +101,7 @@ extern ibase_module php_ibase_module;
 
 #define phpext_interbase_ptr php_ibase_module_ptr
 
-#endif /* _PHP3_IBASE_H */
+#endif /* _PHP_IBASE_H */
 
 /*
  * Local variables:

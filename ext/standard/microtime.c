@@ -113,27 +113,27 @@ PHP_FUNCTION(getrusage)
 	}
 
 	array_init(return_value);
-#define PHP3_RUSAGE_PARA(a) \
+#define PHP_RUSAGE_PARA(a) \
 		add_assoc_long(return_value, #a, usg.a)
 #ifndef _OSD_POSIX /* BS2000 has only a few fields in the rusage struct */
-	PHP3_RUSAGE_PARA(ru_oublock);
-	PHP3_RUSAGE_PARA(ru_inblock);
-	PHP3_RUSAGE_PARA(ru_msgsnd);
-	PHP3_RUSAGE_PARA(ru_msgrcv);
-	PHP3_RUSAGE_PARA(ru_maxrss);
-	PHP3_RUSAGE_PARA(ru_ixrss);
-	PHP3_RUSAGE_PARA(ru_idrss);
-	PHP3_RUSAGE_PARA(ru_minflt);
-	PHP3_RUSAGE_PARA(ru_majflt);
-	PHP3_RUSAGE_PARA(ru_nsignals);
-	PHP3_RUSAGE_PARA(ru_nvcsw);
-	PHP3_RUSAGE_PARA(ru_nivcsw);
+	PHP_RUSAGE_PARA(ru_oublock);
+	PHP_RUSAGE_PARA(ru_inblock);
+	PHP_RUSAGE_PARA(ru_msgsnd);
+	PHP_RUSAGE_PARA(ru_msgrcv);
+	PHP_RUSAGE_PARA(ru_maxrss);
+	PHP_RUSAGE_PARA(ru_ixrss);
+	PHP_RUSAGE_PARA(ru_idrss);
+	PHP_RUSAGE_PARA(ru_minflt);
+	PHP_RUSAGE_PARA(ru_majflt);
+	PHP_RUSAGE_PARA(ru_nsignals);
+	PHP_RUSAGE_PARA(ru_nvcsw);
+	PHP_RUSAGE_PARA(ru_nivcsw);
 #endif /*_OSD_POSIX*/
-	PHP3_RUSAGE_PARA(ru_utime.tv_usec);
-	PHP3_RUSAGE_PARA(ru_utime.tv_sec);
-	PHP3_RUSAGE_PARA(ru_stime.tv_usec);
-	PHP3_RUSAGE_PARA(ru_stime.tv_sec);
-#undef PHP3_RUSAGE_PARA
+	PHP_RUSAGE_PARA(ru_utime.tv_usec);
+	PHP_RUSAGE_PARA(ru_utime.tv_sec);
+	PHP_RUSAGE_PARA(ru_stime.tv_usec);
+	PHP_RUSAGE_PARA(ru_stime.tv_sec);
+#undef PHP_RUSAGE_PARA
 }
 #endif /* HAVE_GETRUSAGE */
 
