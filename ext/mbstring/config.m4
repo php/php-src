@@ -38,6 +38,6 @@ fi
 PHP_ARG_ENABLE(mbregex, whether to enable multibyte regex support,
 [  --disable-mbregex       Disable multibyte regex support], yes, no)
 
-if test "$MBREGEX" != "no" ; then
+if test "$PHP_MBREGEX" != "no" ; then
   AC_DEFINE(HAVE_MBREGEX, 1, [whether to have multibyte regex support])
 fi
