@@ -1,3 +1,66 @@
+2003-09-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c:
+      Manageability
+
+    * NEWS:
+      Added ftp_alloc()
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+      Add ftp_alloc() for servers which require client to predeclare filesize to
+      be sent.
+
+2003-09-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Nuke vars no longer needed
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_reflection_api.c:
+      Go with studlyCaps
+
+    * ZendEngine2/zend_reflection_api.c:
+      Change tostring() into __toString() to match method name used in casting.
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_operators.c:
+      Fallback to default behaviour for unsupported object type conversions
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_operators.c
+      tests/classes/tostring.phpt:
+      - Allow partial type conversion support for objects.
+      - Add support for object to string conversion from userspace by method
+        __toString() and add a test.
+
+    * ZendEngine2/zend_API.c:
+      Add missing check
+
+2003-09-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      add rollback for installed_as
+
+    * pear/tests/pear_installer3.phpt:
+      add rollback test for installed_as
+
+    * pear/tests/pear_installer3.phpt:
+      finished transaction tests
+
+    * pear/PEAR/Installer.php:
+      unit testing finds another bug :)
+      another case that would cause an endless loop in installed_as file
+      transaction
+
+2003-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      When track_errors was enabled, we tried to assign value already freed char.
+
 2003-09-17  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_4_3)
