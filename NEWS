@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
+- Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
+  (Ilia)
 - Fixed bug #32560 (configure looks for incorrect db2 library). (Tony)
 - Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
   longer then the original string). (Ilia)
