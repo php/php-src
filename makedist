@@ -114,6 +114,8 @@ flex -Pzend -ozend-scanner.c -i zend-scanner.l
 cd ..
 bison -p cfg -d configuration-parser.y -o configuration-parser.c
 flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.l
+echo "/* Dummy File */" > ext/bcmath/number.c
+echo "/* Dummy File */" > ext/bcmath/number.h
 
 #perl -i -p -e 's/\r\n/\n/' *.dsw *.dsp
 set +x
