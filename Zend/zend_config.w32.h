@@ -31,7 +31,13 @@
 #include <crtdbg.h>
 
 #include <string.h>
+
+#ifndef ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <winsock2.h>
 #include <windows.h>
+
 #include <float.h>
 
 typedef unsigned long ulong;
