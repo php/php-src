@@ -705,7 +705,7 @@ PHP_FUNCTION(mysql_select_db)
 
 #ifdef HAVE_GETINFO_FUNCS
 
-/* {{{ proto string mysql_get_client_info([int link_identifier])
+/* {{{ proto string mysql_get_client_info(void)
    Returns a string that represents the client library version */
 PHP_FUNCTION(mysql_get_client_info)
 {
