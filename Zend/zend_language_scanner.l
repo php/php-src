@@ -1702,8 +1702,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
-		zendlval->value.str.val = estrndup(yytext, yyleng); /* unput destroys yytext */
-		zendlval->value.str.len = yyleng;
+		zendlval->value.str.val = estrndup(yytext, label_len); /* unput destroys yytext */
+		zendlval->value.str.len = label_len;
 		if (unput_semicolon) {
 			unput(';');
 		}
