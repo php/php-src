@@ -14,7 +14,6 @@ extern zend_module_entry ovrimos_module_entry;
 
 PHP_FUNCTION(ovrimos_connect);
 PHP_FUNCTION(ovrimos_close);
-PHP_FUNCTION(ovrimos_close_all);
 PHP_FUNCTION(ovrimos_longreadlen);
 PHP_FUNCTION(ovrimos_prepare);
 PHP_FUNCTION(ovrimos_execute);
@@ -31,10 +30,10 @@ PHP_FUNCTION(ovrimos_field_name);
 PHP_FUNCTION(ovrimos_field_type);
 PHP_FUNCTION(ovrimos_field_len);
 PHP_FUNCTION(ovrimos_field_num);
-PHP_FUNCTION(ovrimos_autocommit);
+/*PHP_FUNCTION(ovrimos_autocommit);*/
 PHP_FUNCTION(ovrimos_commit);
 PHP_FUNCTION(ovrimos_rollback);
-PHP_FUNCTION(ovrimos_setoption);
+/*PHP_FUNCTION(ovrimos_setoption);*/
 
 #else
 #define ovrimos_module_ptr NULL
