@@ -27,6 +27,8 @@ PHP 4.0                                                                    NEWS
   using the 'zlib:' fopen wrapper (Hartmut)
 - Fixed a problem in the configuration parser (two null bytes were added
   to each ENCAPSULATED TC_STRING) (alex@zend.com)
+- Added HMAC support in the mhash module (nmav@altera.gr)
+- Added module for Ovrimos sql server (nmav@altera.gr)
 
 11 Oct 2000, Version 4.0.3
 - Fixed a possible crash in -a interactive mode (Zeev, Zend Engine)
