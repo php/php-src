@@ -53,7 +53,8 @@ static const short base64_reverse_table[256] = {
 /* }}} */
 
 /* {{{ */
-unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length) {
+unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length)
+{
 	const unsigned char *current = str;
 	int i = 0;
 	unsigned char *result = (unsigned char *)emalloc(((length + 3 - length % 3) * 4 / 3 + 1) * sizeof(char));
@@ -94,7 +95,8 @@ unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_
 /* generate reverse table (do not set index 0 to 64)
 static unsigned short base64_reverse_table[256];
 #define rt base64_reverse_table
-void php_base64_init() {
+void php_base64_init()
+{
 	char *s = emalloc(10240), *sp;
 	char *chp;
 	short idx;
@@ -125,7 +127,8 @@ void php_base64_init() {
 
 /* {{{ */
 /* as above, but backwards. :) */
-unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length) {
+unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
+{
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
 	/* this sucks for threaded environments */
