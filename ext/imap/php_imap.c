@@ -57,7 +57,8 @@
 MAILSTREAM DEFAULTPROTO;
 #endif
 
-#define CRLF	"\015\012"
+#define CRLF	 "\015\012"
+#define CRLF_LEN sizeof("\015\012") - 1
 #define PHP_EXPUNGE 32768
 #define PHP_IMAP_ADDRESS_SIZE_BUF 10
 
@@ -3079,22 +3080,40 @@ PHP_FUNCTION(imap_mail_compose)
 		zend_hash_move_forward(Z_ARRVAL_PP(body));
 	}
 
+	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot generate multipart e-mail without components.");
+		RETVAL_FALSE;
+		goto done;
+	}
+
 	rfc822_encode_body_7bit(env, topbod); 
 	rfc822_header (tmp, env, topbod);
 
 	/* add custom envelope headers */
 	if (custom_headers_param) {
+		int l = strlen(tmp) - 2, l2;
+		PARAMETER *tp = custom_headers_param;
+
 		/* remove last CRLF from tmp */
-		tmp[strlen(tmp) - 2] = '\0';
-		tempstring = emalloc(strlen(tmp) + 1);
-		strcpy(tempstring, tmp);
+		tmp[l] = '\0';
+		tempstring = emalloc(l);
+		memcpy(tempstring, tmp, l);
+		
 		do {
-			tempstring = erealloc(tempstring, strlen(tempstring) + strlen(custom_headers_param->value) + strlen(CRLF) + 1);
-			sprintf(tempstring, "%s%s%s", tempstring, custom_headers_param->value, CRLF);
+			l2 = strlen(custom_headers_param->value);
+			tempstring = erealloc(tempstring, l + l2 + CRLF_LEN + 1);
+			memcpy(tempstring + l, custom_headers_param->value, l2);
+			memcpy(tempstring + l + l2, CRLF, CRLF_LEN);
+			l += l2 + CRLF_LEN;
 		} while ((custom_headers_param = custom_headers_param->next));
 
-		mystring = emalloc(strlen(tempstring) + strlen(CRLF) + 1);
-		sprintf(mystring, "%s%s", tempstring, CRLF);
+		mail_free_body_parameter(&tp);		
+
+		mystring = emalloc(l + CRLF_LEN + 1);
+		memcpy(mystring, tempstring, l);
+		memcpy(mystring + l , CRLF, CRLF_LEN);
+		mystring[l + CRLF_LEN] = '\0';
+
 		efree(tempstring);
 	} else {
 		mystring = emalloc(strlen(tmp) + 1);
