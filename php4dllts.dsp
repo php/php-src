@@ -124,11 +124,11 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=".\configuration-parser.c"
+SOURCE=".\main\configuration-parser.c"
 # End Source File
 # Begin Source File
 
-SOURCE=".\configuration-scanner.c"
+SOURCE=".\main\configuration-scanner.c"
 # End Source File
 # Begin Source File
 
@@ -213,11 +213,7 @@ SOURCE=.\main\config.w32.h
 # End Source File
 # Begin Source File
 
-SOURCE=".\configuration-parser.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\configuration-parser.tab.h"
+SOURCE=".\main\configuration-parser.h"
 # End Source File
 # Begin Source File
 
@@ -961,6 +957,31 @@ SOURCE=.\win32\wfile.h
 # Begin Source File
 
 SOURCE=".\main\configuration-parser.y"
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# Begin Custom Build
+InputPath=".\main\configuration-parser.y"
+
+BuildCmds= \
+	cd main \
+	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
+	
+
+"main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1012,6 +1033,24 @@ InputPath=.\ext\standard\parsedate.y
 # Begin Source File
 
 SOURCE=".\main\configuration-scanner.l"
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# Begin Custom Build
+InputPath=".\main\configuration-scanner.l"
+
+"main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd main 
+	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Text Files"
