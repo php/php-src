@@ -630,7 +630,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 	SET_INCONSISTENT(HT_OK);
 }
 
-
+#if 0
 /* This function is used by the various apply() functions.
  * It deletes the passed bucket, and returns the address of the
  * next bucket.  The hash *may* be altered during that time, the
@@ -678,16 +678,24 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 	return retval;
 }
 
+#endif
+
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 {
-	Bucket *p;
+	Bucket *p, *q;
 
 	IS_CONSISTENT(ht);
 
 	p = ht->pListHead;
 	while (p != NULL) {
-		p = zend_hash_apply_deleter(ht, p);
+		q = p;
+		p = p->pListNext;
+		if (q->nKeyLength==0) {
+			zend_hash_index_del(ht, q->h);
+		} else {
+			zend_hash_del(ht, q->arKey, q->nKeyLength);
+		}
 	}
 	pefree(ht->arBuckets,ht->persistent);
 
@@ -702,41 +710,49 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 
 ZEND_API void zend_hash_apply(HashTable *ht,int (*destruct) (void *))
 {
-	Bucket *p;
+        Bucket *p, *q;
 
-	IS_CONSISTENT(ht);
+        IS_CONSISTENT(ht);
 
-	p = ht->pListHead;
-	while (p != NULL) {
-		if (destruct(p->pData)) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
-		}
-	}
+        p = ht->pListHead;
+        while (p != NULL) {
+                q = p;
+                p = p->pListNext;
+		if (destruct(q->pData)) {
+			if (q->nKeyLength==0) {
+				zend_hash_index_del(ht, q->h);
+			} else {
+				zend_hash_del(ht, q->arKey, q->nKeyLength);
+			}
+                }
+        }
 }
 
 
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct) (void *, void *), void *argument)
 {
-	Bucket *p;
+        Bucket *p, *q;
 
-	IS_CONSISTENT(ht);
+        IS_CONSISTENT(ht);
 
-	p = ht->pListHead;
-	while (p != NULL) {
-		if (destruct(p->pData, argument)) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
-		}
-	}
+        p = ht->pListHead;
+        while (p != NULL) {
+                q = p;  
+                p = p->pListNext;
+                if (destruct(q->pData, argument)) {
+                        if (q->nKeyLength==0) {
+                                zend_hash_index_del(ht, q->h);
+                        } else {
+                                zend_hash_del(ht, q->arKey, q->nKeyLength);
+                        }
+                }
+        }
 }
 
 
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht,int (*destruct)(void *, int, va_list, zend_hash_key *), int num_args, ...)
 {
-	Bucket *p;
+	Bucket *p, *q;
 	va_list args;
 	zend_hash_key hash_key;
 
@@ -746,13 +762,17 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht,int (*destruct)(void 
 
 	p = ht->pListHead;
 	while (p != NULL) {
-		hash_key.arKey = p->arKey;
-		hash_key.nKeyLength = p->nKeyLength;
-		hash_key.h = p->h;
-		if (destruct(p->pData, num_args, args, &hash_key)) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
+		q = p;
+		p = p->pListNext;
+		hash_key.arKey = q->arKey;
+		hash_key.nKeyLength = q->nKeyLength;
+		hash_key.h = q->h;
+		if (destruct(q->pData, num_args, args, &hash_key)) {
+			if (q->nKeyLength==0) {
+                                zend_hash_index_del(ht, q->h);
+                        } else {
+                                zend_hash_del(ht, q->arKey, q->nKeyLength);
+                        }
 		}
 	}
 
