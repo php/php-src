@@ -3492,6 +3492,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *result = &EX_T(EX(opline)->result.u.var).tmp_var;
 	zval **value, *key;
 	char *str_key;
+	uint str_key_len;
 	ulong int_key;
 	HashTable *fe_ht;
 
@@ -3514,10 +3515,10 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ALLOC_ZVAL(key);
 	INIT_PZVAL(key);
-	switch (zend_hash_get_current_key(fe_ht, &str_key, &int_key, 1)) {
+	switch (zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL)) {
 		case HASH_KEY_IS_STRING:
 			key->value.str.val = str_key;
-			key->value.str.len = strlen(str_key);
+			key->value.str.len = str_key_len-1;
 			key->type = IS_STRING;
 			break;
 		case HASH_KEY_IS_LONG:
