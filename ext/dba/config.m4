@@ -2,24 +2,24 @@ dnl $Id$
 dnl config.m4 for extension dba
 dnl don't forget to call PHP_EXTENSION(dba)
 
-AC_DEFUN(AC_TEMP_LDFLAGS,[
-  old_LDFLAGS="$LDFLAGS"
+AC_DEFUN(PHP_TEMP_LDFLAGS,[
+  old_LDFLAGS=$LDFLAGS
   LDFLAGS="$1 $LDFLAGS"
   $2
-  LDFLAGS="$old_LDFLAGS"
+  LDFLAGS=$old_LDFLAGS
 ])
 
 
 dnl Assign INCLUDE/LFLAGS from PREFIX
-AC_DEFUN(AC_DBA_STD_ASSIGN,[
-  if test "$THIS_PREFIX" != "" -a "$THIS_PREFIX" != "/usr"; then
+AC_DEFUN(PHP_DBA_STD_ASSIGN,[
+  if test -n "$THIS_PREFIX" && test "$THIS_PREFIX" != "/usr"; then
     THIS_INCLUDE="$THIS_PREFIX/include"
     THIS_LFLAGS="$THIS_PREFIX/lib"
   fi
 ])
 
 dnl Standard check
-AC_DEFUN(AC_DBA_STD_CHECK,[
+AC_DEFUN(PHP_DBA_STD_CHECK,[
   THIS_RESULT="yes"
   if test "$THIS_PREFIX" != "/usr" -a "$THIS_INCLUDE" = ""; then
     AC_MSG_ERROR(cannot find necessary header file(s))
@@ -30,7 +30,7 @@ AC_DEFUN(AC_DBA_STD_CHECK,[
 ])
 
 dnl Attach THIS_x to DBA_x
-AC_DEFUN(AC_DBA_STD_ATTACH,[
+AC_DEFUN(PHP_DBA_STD_ATTACH,[
   PHP_ADD_INCLUDE($THIS_INCLUDE)
   PHP_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS, DBA_SHARED_LIBADD)
 
@@ -64,13 +64,13 @@ AC_ARG_WITH(gdbm,
     done
 
     unset ac_cv_lib_gdbm_gdbm_open
-    AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+    PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
     AC_CHECK_LIB(gdbm, gdbm_open, [AC_DEFINE(DBA_GDBM, 1, [ ]) THIS_LIBS="gdbm"])
     ])
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for GDBM support)
@@ -94,14 +94,14 @@ AC_ARG_WITH(ndbm,
     fi
 
     for LIB in db1 ndbm c; do
-      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, dbm_open, [AC_DEFINE(DBA_NDBM,1, [ ]) THIS_LIBS="$LIB"])
       ])
     done
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for NDBM support)
@@ -139,14 +139,14 @@ AC_ARG_WITH(db2,
     fi
 
     for LIB in db db2 c; do
-      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, db_appinit, [AC_DEFINE(DBA_DB2,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for Berkeley DB2 support)
@@ -167,14 +167,14 @@ AC_ARG_WITH(db3,
     fi
 
     for LIB in db db-3; do
-      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for Berkeley DB3 support)
@@ -190,14 +190,14 @@ AC_ARG_WITH(dbm,
 	done
 
     for LIB in db1 dbm c; do
-      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, dbminit, [AC_DEFINE(DBA_DBM,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for DBM support)
@@ -213,14 +213,14 @@ AC_ARG_WITH(cdb,
 	done
 
     for LIB in cdb c; do
-      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, cdb_bread, [AC_DEFINE(DBA_CDB,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
-    AC_DBA_STD_ASSIGN
-    AC_DBA_STD_CHECK
-    AC_DBA_STD_ATTACH
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
   fi
 ])
 AC_MSG_CHECKING(for CDB support)
