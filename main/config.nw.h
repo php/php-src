@@ -21,11 +21,29 @@
 /* config.nw.h.  Configure file for NetWare platform */
 
 
+#ifndef CONFIG_NW_H
+#define CONFIG_NW_H
+#define HAVE_GLOB 1
+#define HAVE_FTOK 1
+#define HAVE_SYS_IPC_H 1
+#define HAVE_REALPATH 1
+#define HAVE_FNMATCH 1
+#define HAVE_HYPOT 1
+#define HAVE_STRCOLL 1
+#define HAVE_NANOSLEEP 1
+#define HAVE_GETOPT 1
+#define SUPPORT_UTF8 1
+#define HAVE_NL_LANGINFO 1
+#define HAVE_LANGINFO_H 1
+#define HAVE_SYSLOG_H 1
+#define HAVE_XML 1
+#define HAVE_SYS_TIME_H 1
+#define HAVE_SETLOCALE 1
+#define PHP_CAN_SUPPORT_PROC_OPEN 1
 /* Define if PHP to setup it's own SIGCHLD handler (not needed on NetWare) */
 #define PHP_SIGCHILD 0
 
-/* dns functions found in resolv.lib */
-#define HAVE_LIBBIND 1
+#undef HAVE_LIBBIND
 
 #define HAVE_GETSERVBYNAME 1
 #define HAVE_GETSERVBYPORT 1
@@ -44,6 +62,7 @@
 /* set to enable SNMP */
 /*#define HAVE_SNMP 1*/
 
+#define HAVE_OPENSSL_EXT 1
 /* defines for PostgreSQL extension */
 #define HAVE_PGSQL 1
 #define PHP_PGSQL_PRIVATE 1
@@ -60,8 +79,11 @@
 #define HAVE_WDDX 0
 
 /* set to enable the crypt command */
-/* #define HAVE_CRYPT 1 */
-/* #define HAVE_CRYPT_H 1 */
+#define HAVE_CRYPT 1
+#define PHP_STD_DES_CRYPT 1
+#define PHP_EXT_DES_CRYPT 0
+#define PHP_MD5_CRYPT 1
+#define PHP_BLOWFISH_CRYPT 0
 
 /* set to enable force cgi redirect */
 #define FORCE_CGI_REDIRECT 0
@@ -98,7 +120,7 @@
 
 /* ----------------------------------------------------------------
    The following may or may not be (or need to be) ported to the
-   windows environment.
+   NetWare environment.
    ---------------------------------------------------------------*/
 
 /* Define if you have the link function.  */
@@ -149,17 +171,14 @@
 /* Though we have alloca(), this seems to be causing some problem with the stack pointer -- hence not using it */
 /* #define HAVE_ALLOCA 1 */
 
-/* Define if you have <sys/time.h> */
-#undef HAVE_SYS_TIME_H
-
 /* Define if you have <signal.h> */
 #define HAVE_SIGNAL_H 1
 
 /* Define if your struct stat has st_blksize.  */
-#define HAVE_ST_BLKSIZE
+#define HAVE_ST_BLKSIZE 1
 
 /* Define if your struct stat has st_blocks.  */
-#define HAVE_ST_BLOCKS
+#define HAVE_ST_BLOCKS 1
 
 /* Define if your struct stat has st_rdev.  */
 #define HAVE_ST_RDEV 1
@@ -195,9 +214,6 @@
 
 /* Define if you have the regcomp function.  */
 #define HAVE_REGCOMP 1
-
-/* Define if you have the setlocale function.  */
-/* #define HAVE_SETLOCALE 1 */    /* LibC doesn't seem to be supporting fully -- hence commenting for now */
 
 #define HAVE_LOCALECONV 1
 
@@ -277,12 +293,6 @@
 
 #define HAVE_STRFTIME 1
 
-/* Defined since unsetenv function is defined in LibC.
- * This is used to destroy env values in the function php_putenv_destructor.
- * If we do not use unsetenv, then the environment variables are directlt manipulated.
- * This will then result in LibC not being able to do the maintenance
- * that is required for NetWare.
- */
 #define HAVE_UNSETENV 1
 
 /* Default directory for loading extensions.  */
@@ -295,7 +305,11 @@
 /* This is the default configuration file to read */
 #define CONFIGURATION_FILE_PATH "php.ini"
 
+#ifdef APACHE_2_BUILD
+#define APACHE_MODULE_DIR "sys:/apache2/modules"
+#else
 #define APACHE_MODULE_DIR "sys:/apache/modules"
+#endif
 #define PHP_BINDIR "sys:/php"
 #define PHP_LIBDIR PHP_BINDIR
 #define PHP_DATADIR PHP_BINDIR
@@ -304,13 +318,14 @@
 #define PHP_CONFIG_FILE_PATH "sys:/php"
 #define PEAR_INSTALLDIR "sys:/php/pear"
 
-#define PHP_CONFIG_FILE_SCAN_DIR NULL
+#define PHP_CONFIG_FILE_SCAN_DIR ""
 #define PHP_EXTENSION_DIR "sys:/php/ext"
 
-#define PHP_INCLUDE_PATH NULL
+#define PHP_INCLUDE_PATH ".;sys:/php/includes"
 
 #define PHP_PREFIX "sys:/php"
 #define PHP_SHLIB_SUFFIX "nlm"
 
 #define USE_CONFIG_FILE 1
 
+#endif
