@@ -1,3 +1,73 @@
+2000-08-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * EXTENSIONS: ext/icap is obsolete.
+
+2000-08-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: added curl, dbase and gettext to the project
+
+    * ext/curl/curl.dsp: win32 projectfile for the curl extension
+
+2000-08-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: Add note about --with-kerberos
+
+2000-08-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/dbase/dbase.dsp: win32 projectfile for the dbase extension
+
+    * ext/gettext/gettext.dsp: win32 projectfile fot the gettext extension
+
+    * sapi/aolserver/php4aolserver.dsp
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp
+      sapi/nsapi/php4nsapi.dsp
+      sapi/servlet/servlet.dsp:
+    changed the output directorys from the windowsbuilds
+
+    * win32/php4dllts.dsp
+      win32/php4ts.dsp:
+    changed the intermediate output dir, to make it a bit cleaner
+
+2000-08-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in:
+    phpextdist is located in $(srcdir), so don't try to install it from
+    $(builddir).
+
+2000-08-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/sockets/sockets.c: Changed long to int.
+
+2000-08-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: formatting.
+
+2000-08-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/odbc/config.m4: -lt is preferred over \>
+
+    * ext/gd/config.m4: Fix library order for -lpng -lz.
+
+    PR: #3978
+
+2000-08-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/php_parsedate.h: Make parsedate build again
+
+2000-08-23  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sockets/sockets.c: A little condensing,
+      Add an additional check to make sure port is specified with
+      AF_INET in connect().
+
+2000-08-23  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c:
+    Corrected bugs in php_if_connect() to make it work properly -- needed to
+    run htons() on the port number provided, and needed to perform DNS lookups
+    properly and store the results as expected.
+
 2000-08-22  Dan Kalowsky  <dkalowsky@wgate.com>
 
     * ext/odbc/config.m4
