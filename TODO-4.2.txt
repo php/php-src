@@ -17,3 +17,7 @@
 * Fix Zend shallow copy issues with objects and arrays.
 
 * Make all extensions thread-safe.
+
+* Finish PHP streams abstraction, nuke all that issock stuff, implement SSL
+  socket support. (wez)
+
