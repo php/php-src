@@ -32,6 +32,9 @@
 							efree((v));
 
 #define ZVAL_VARIANT(z, v, cp)													\
+	if (V_VT(v) == VT_DISPATCH && V_DISPATCH(v) == NULL) {						\
+		V_VT(v) = VT_NULL;                                                      \
+	}                                                                           \
 	if (V_VT(v) == VT_DISPATCH) {												\
 		comval *obj;															\
 		ALLOC_COM(obj);															\

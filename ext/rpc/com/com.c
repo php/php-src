@@ -34,6 +34,7 @@
 
 
 static ZEND_FUNCTION(com_indexed_prop_set);
+static ZEND_FUNCTION(com_create_guid);
 
 /* protos */
 static int com_hash(rpc_string, rpc_string *, void *, int, char *, int);
@@ -96,6 +97,7 @@ RPC_FUNCTION_ENTRY_BEGIN(com)
 	ZEND_FE(com_load_typelib,	NULL)
 	ZEND_FE(com_print_typeinfo,	NULL)
 	ZEND_FE(com_indexed_prop_set,	NULL)
+	ZEND_FE(com_create_guid,		NULL)
 RPC_FUNCTION_ENTRY_END()
 
 zend_module_entry com_module_entry = {
@@ -829,6 +831,27 @@ static int com_get_properties(HashTable **properties, void *data)
 
 
 /* custom functions */
+
+static ZEND_FUNCTION(com_create_guid)
+{
+	GUID retval;
+	OLECHAR *guid_string;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	if (CoCreateGuid(&retval) && StringFromCLSID(&retval, &guid_string)) {
+		Z_TYPE_P(return_value) = IS_STRING;
+		Z_STRVAL_P(return_value) = php_OLECHAR_to_char(guid_string, &Z_STRLEN_P(return_value), CP_ACP, 0);
+
+		CoTaskMemFree(guid_string);
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+
 
 static ZEND_FUNCTION(com_indexed_prop_set)
 {
