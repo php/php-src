@@ -611,7 +611,6 @@ PHP_FUNCTION(odbc_close_all)
 	int type;
 	int i;
 	int nument;
-	ELS_FETCH();
 	
 	nument = zend_hash_next_free_element(&EG(regular_list));
 	
@@ -1891,7 +1890,6 @@ PHP_FUNCTION(odbc_close)
 	int type;
 	int is_pconn = 0;
 	ODBCLS_FETCH();
-	ELS_FETCH();
 
     if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
