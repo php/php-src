@@ -772,9 +772,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
-			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
-			PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
-			AI_USE_PTR(EX_T(opline->result.u.var).var);
+			EX_T(opline->result.u.var).tmp_var = *EG(uninitialized_zval_ptr);
 		}
 		FREE_OP1_VAR_PTR();
 		ZEND_VM_NEXT_OPCODE();
@@ -812,9 +810,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
-			EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
-			PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
-			AI_USE_PTR(EX_T(opline->result.u.var).var);
+			EX_T(opline->result.u.var).tmp_var = *EG(uninitialized_zval_ptr);
 		}
 		FREE_OP1_VAR_PTR();
 		ZEND_VM_NEXT_OPCODE();
