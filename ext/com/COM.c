@@ -804,9 +804,8 @@ PHP_FUNCTION(com_invoke)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
+	RETVAL_VARIANT(var_result);
 
-	FREE_VARIANT(var_result);
 	efree(arguments);
 }
 /* }}} */
@@ -1049,9 +1048,7 @@ PHP_FUNCTION(com_propget)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
-
-	FREE_VARIANT(var_result);
+	RETVAL_VARIANT(var_result);
 }
 /* }}} */
 
@@ -1201,8 +1198,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 		pval_destructor(&overloaded_property->element);
 	}
 
-	if (obj_prop != NULL)
-	{
+	if (obj_prop != NULL) {
 		RETVAL_COM(obj);
 	}
 
