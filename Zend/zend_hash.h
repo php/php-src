@@ -60,6 +60,9 @@ typedef struct hashtable {
 	Bucket **arBuckets;
 	int (*pDestructor) (void *pData);
 	unsigned char persistent;
+#if ZEND_DEBUG
+	int inconsistent;
+#endif
 } HashTable;
 
 typedef int  (*compare_func_t) (const void *, const void *);
