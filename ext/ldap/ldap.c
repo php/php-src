@@ -2026,6 +2026,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 	zval **cb_args[2];
 	zval *cb_retval;
 	zval *cb_link = (zval *) params;
+	TSRMLS_FETCH();
 
 	ld = (ldap_linkdata *) zend_fetch_resource(&cb_link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
 
