@@ -943,7 +943,7 @@ PHP_FUNCTION(max)
 }
 /* }}} */
 
-static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
+static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive TSRMLS_DC)
 {
 	zval **args[3],			/* Arguments to userland function */
 		  *retval_ptr,			/* Return value - unused */
@@ -961,33 +961,44 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 
 	/* Iterate through hash */
 	while (zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
-		/* Allocate space for key */
-		MAKE_STD_ZVAL(key);
-
-		/* Set up the key */
-		if (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, &pos) == HASH_KEY_IS_LONG) {
-			Z_TYPE_P(key) = IS_LONG;
-			Z_LVAL_P(key) = num_key;
-		} else {
-			ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
-		}
-		
-		/* Call the userland function */
-		if (call_user_function_ex(EG(function_table), NULL, *BG(array_walk_func_name),
-						   &retval_ptr, userdata ? 3 : 2, args, 0, NULL TSRMLS_CC) == SUCCESS) {
-		
-			zval_ptr_dtor(&retval_ptr);
-		} else {
-			char *func_name;
-
-			if (zend_is_callable(*BG(array_walk_func_name), 0, &func_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", func_name);
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", func_name);
+		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
+			HashTable *thash;
+			
+			thash = HASH_OF(*(args[0]));
+			if (thash == target_hash) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+				return 0;
 			}
+			php_array_walk(thash, userdata, recursive TSRMLS_CC);
+		} else {
+			/* Allocate space for key */
+			MAKE_STD_ZVAL(key);
 
-			efree(func_name);
-			break;
+			/* Set up the key */
+			if (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, &pos) == HASH_KEY_IS_LONG) {
+				Z_TYPE_P(key) = IS_LONG;
+				Z_LVAL_P(key) = num_key;
+			} else {
+				ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
+			}
+		
+			/* Call the userland function */
+			if (call_user_function_ex(EG(function_table), NULL, *BG(array_walk_func_name),
+							   &retval_ptr, userdata ? 3 : 2, args, 0, NULL TSRMLS_CC) == SUCCESS) {
+		
+				zval_ptr_dtor(&retval_ptr);
+			} else {
+				char *func_name;
+
+				if (zend_is_callable(*BG(array_walk_func_name), 0, &func_name)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", func_name);
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", func_name);
+				}
+
+				efree(func_name);
+				break;
+			}
 		}
 
 		zval_ptr_dtor(&key);
@@ -1026,11 +1037,46 @@ PHP_FUNCTION(array_walk)
 		BG(array_walk_func_name) = old_walk_func_name;
 		RETURN_FALSE;
 	}
-	php_array_walk(target_hash, userdata TSRMLS_CC);
+	php_array_walk(target_hash, userdata, 0 TSRMLS_CC);
 	BG(array_walk_func_name) = old_walk_func_name;
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto bool array_walk_recursive(array input, string funcname [, mixed userdata])
+   Apply a user function recursively to every member of an array */
+PHP_FUNCTION(array_walk_recursive)
+{
+	int	argc;
+	zval **array,
+		 **userdata = NULL,
+		 **old_walk_func_name;
+	HashTable *target_hash;
+
+	argc = ZEND_NUM_ARGS();
+	old_walk_func_name = BG(array_walk_func_name);
+	if (argc < 2 || argc > 3 ||
+		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
+		BG(array_walk_func_name) = old_walk_func_name;
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+		BG(array_walk_func_name) = old_walk_func_name;
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(BG(array_walk_func_name)) != IS_ARRAY && Z_TYPE_PP(BG(array_walk_func_name)) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
+		BG(array_walk_func_name) = old_walk_func_name;
+		RETURN_FALSE;
+	}
+	php_array_walk(target_hash, userdata, 1 TSRMLS_CC);
+	BG(array_walk_func_name) = old_walk_func_name;
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
  *	  0 = return boolean

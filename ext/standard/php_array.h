@@ -39,6 +39,7 @@ PHP_FUNCTION(usort);
 PHP_FUNCTION(uasort);
 PHP_FUNCTION(uksort);
 PHP_FUNCTION(array_walk);
+PHP_FUNCTION(array_walk_recursive);
 PHP_FUNCTION(count);
 PHP_FUNCTION(end);
 PHP_FUNCTION(prev);
