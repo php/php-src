@@ -16,24 +16,24 @@ var_dump($struct);
 --GET--
 --POST--
 --EXPECT--
-string(3) "ÄÖÜ"
+string(3) "äöü"
 array(1) {
-  ["ÜÄß"]=>
+  ["üäß"]=>
   string(3) "Üäß"
 }
-string(3) "ÄÖÜ"
+string(3) "äöü"
 array(1) {
   [0]=>
   array(5) {
     ["tag"]=>
-    string(3) "ÄÖÜ"
+    string(3) "äöü"
     ["type"]=>
     string(8) "complete"
     ["level"]=>
     int(1)
     ["attributes"]=>
     array(1) {
-      ["ÜÄß"]=>
+      ["üäß"]=>
       string(3) "Üäß"
     }
     ["value"]=>
