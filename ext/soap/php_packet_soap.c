@@ -8,6 +8,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	xmlNodePtr trav, env, head, body, resp, cur, fault;
 	int param_count = 0;
 	int old_error_reporting;
+	int soap_version;
 
 	ZVAL_NULL(return_value);
 
@@ -37,9 +38,11 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV_NAMESPACE)) {
 				env = trav;
 				envelope_ns = SOAP_1_1_ENV_NAMESPACE;
+				soap_version = SOAP_1_1;
 			} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV_NAMESPACE)) {
 				env = trav;
 				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
+				soap_version = SOAP_1_2;
 			} else {
 				add_soap_fault(this_ptr, "Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
@@ -92,26 +95,42 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		zval *details = NULL;
 		xmlNodePtr tmp;
 
-		tmp = get_node(fault->children,"faultcode");
-		if (tmp != NULL && tmp->children != NULL) {
-			faultcode = tmp->children->content;
-		}
+		if (soap_version == SOAP_1_1) {
+			tmp = get_node(fault->children,"faultcode");
+			if (tmp != NULL && tmp->children != NULL) {
+				faultcode = tmp->children->content;
+			}
 
-		tmp = get_node(fault->children,"faultstring");
-		if (tmp != NULL && tmp->children != NULL) {
-			faultstring = tmp->children->content;
-		}
+			tmp = get_node(fault->children,"faultstring");
+			if (tmp != NULL && tmp->children != NULL) {
+				faultstring = tmp->children->content;
+			}
 
-		tmp = get_node(fault->children,"faultactor");
-		if (tmp != NULL && tmp->children != NULL) {
-			faultactor = tmp->children->content;
-		}
+			tmp = get_node(fault->children,"faultactor");
+			if (tmp != NULL && tmp->children != NULL) {
+				faultactor = tmp->children->content;
+			}
 
-		tmp = get_node(fault->children,"detail");
-		if (tmp != NULL) {
-			details = master_to_zval(NULL, tmp);
-		}
+			tmp = get_node(fault->children,"detail");
+			if (tmp != NULL) {
+				details = master_to_zval(NULL, tmp);
+			}
+		} else {
+			tmp = get_node(fault->children,"Code");
+			if (tmp != NULL && tmp->children != NULL) {
+				faultcode = tmp->children->content;
+			}
 
+			tmp = get_node(fault->children,"Reason");
+			if (tmp != NULL && tmp->children != NULL) {
+				faultstring = tmp->children->content;
+			}
+
+			tmp = get_node(fault->children,"Detail");
+			if (tmp != NULL) {
+				details = master_to_zval(NULL, tmp);
+			}
+		}
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
 		xmlFreeDoc(response);
 		return FALSE;
