@@ -230,6 +230,7 @@ crypt.h \
 dlfcn.h \
 fcntl.h \
 grp.h \
+ieeefp.h \
 limits.h \
 locale.h \
 memory.h \
