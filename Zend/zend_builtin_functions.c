@@ -657,68 +657,72 @@ ZEND_FUNCTION(is_a)
 /* }}} */
 
 
+/* {{{ add_class_vars */
+static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *return_value TSRMLS_DC)
+{
+	int instanceof = EG(scope) && instanceof_function(EG(scope), ce TSRMLS_CC);
+
+	if (zend_hash_num_elements(properties) > 0) {
+		HashPosition pos;
+		zval **prop;
+
+		zend_hash_internal_pointer_reset_ex(properties, &pos);
+		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
+			char *key, *class_name, *prop_name;
+			uint key_len;
+			ulong num_index;
+			zval *prop_copy;
+
+			zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
+			zend_hash_move_forward_ex(properties, &pos);
+			zend_unmangle_property_name(key, &class_name, &prop_name);
+			if (class_name) {
+				if (class_name[0] != '*' && strcmp(class_name, ce->name)) {
+					/* filter privates from base classes */
+					continue;
+				} else if (!instanceof) {
+					/* filter protected if not inside class */
+					continue;
+				}
+			}
+
+			/* copy: enforce read only access */
+			ALLOC_ZVAL(prop_copy);
+			*prop_copy = **prop;
+			zval_copy_ctor(prop_copy);
+			INIT_PZVAL(prop_copy);
+
+			/* this is necessary to make it able to work with default array 
+			* properties, returned to user */
+			if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || Z_TYPE_P(prop_copy) == IS_CONSTANT) {
+				zval_update_constant(&prop_copy, 0 TSRMLS_CC);
+			}
+                           
+			add_assoc_zval(return_value, prop_name, prop_copy);
+		}
+	}
+}
+/* }}} */
+
+
 /* {{{ proto array get_class_vars(string class_name)
-   Returns an array of default properties of the class */
+   Returns an array of default properties of the class. */
 ZEND_FUNCTION(get_class_vars)
 {
-	zval **class_name;
-	zend_class_entry *ce, **pce;
-	int instanceof;
+	char *class_name;
+	int class_name_len;
+	zend_class_entry **pce;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &class_name, &class_name_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(class_name);
-	
-	if (zend_lookup_class(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	} else {
-		ce = *pce;
-
-		instanceof = EG(scope) && instanceof_function(EG(scope), ce TSRMLS_CC);
-
 		array_init(return_value);
-
-		if (zend_hash_num_elements(&ce->default_properties) > 0) {
-			HashPosition pos;
-			zval **prop;
-	
-			zend_hash_internal_pointer_reset_ex(&ce->default_properties, &pos);
-			while (zend_hash_get_current_data_ex(&ce->default_properties, (void **) &prop, &pos) == SUCCESS) {
-				char *key, *class_name, *prop_name;
-				uint key_len;
-				ulong num_index;
-				zval *prop_copy;
-	
-				zend_hash_get_current_key_ex(&ce->default_properties, &key, &key_len, &num_index, 0, &pos);
-				zend_hash_move_forward_ex(&ce->default_properties, &pos);
-				zend_unmangle_property_name(key, &class_name, &prop_name);
-				if (class_name) {
-					if (class_name[0] != '*' && strcmp(class_name, ce->name)) {
-						/* filter privates from base classes */
-						continue;
-					} else if (!instanceof) {
-						/* filter protected if not inside class */
-						continue;
-					}
-				}
-	
-				/* copy: enforce read only access */
-				ALLOC_ZVAL(prop_copy);
-				*prop_copy = **prop;
-				zval_copy_ctor(prop_copy);
-				INIT_PZVAL(prop_copy);
-	
-				/* this is necessary to make it able to work with default array 
-				* properties, returned to user */
-				if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || Z_TYPE_P(prop_copy) == IS_CONSTANT) {
-					zval_update_constant(&prop_copy, 0 TSRMLS_CC);
-				}
-                               
-				add_assoc_zval(return_value, prop_name, prop_copy);
-			}
-		}
+		add_class_vars(*pce, &(*pce)->default_properties, return_value TSRMLS_CC);
+		add_class_vars(*pce, (*pce)->static_members, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
