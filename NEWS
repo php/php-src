@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Methods that override parent methods are now subject to prototype checking,
   and have to be compatible with the method they're overriding - this check is 
   disabled in compatibility mode. (Andi, Zeev)
+- Fixed crash in php_ini_scanned_files() when no additional INI files were
+  actually parsed. (Jon)
 - Fixed bug in gdImageFilledRectangle in the bundled GD library, that required
   x1 < x2 and y1 < y2 for coordinates. (Derick)
 - Fixed crash with foreach() and temporary objects($obj->method()->a ...) where
