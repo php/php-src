@@ -380,6 +380,10 @@ try_again:
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
 			"Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);
+		if (phpurl->port != 80) {
+			smart_str_appendc(&soap_headers, ':');
+			smart_str_append_unsigned(&soap_headers, phpurl->port);
+		}
 		smart_str_append_const(&soap_headers, "\r\n"
 			"Connection: Keep-Alive\r\n"
 /*
