@@ -27,6 +27,8 @@
  * http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset3.asp
  * http://www.unicode.org/Public/MAPPINGS/OBSOLETE/UNI2SGML.TXT
  *
+ * http://www.w3.org/TR/2002/REC-xhtml1-20020801/dtds.html#h-A2
+ * 
  */
 
 #include "php.h"
@@ -106,23 +108,19 @@ static entity_table_t ent_iso_8859_15[] = {
 };
 
 static entity_table_t ent_uni_338_402[] = {
-	/* 338 */
-	"OElig", "oelig", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	/* 352 */
-	"Scaron", "scaron",
-	/* 354 - 375 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 376 */
-	"Yuml",
-	/* 377 - 401 */
+	/* 338 (0x0152) */
+	"OElig", "oelig", NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 352 (0x0160) */
+	"Scaron", "scaron", NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 376 (0x0178)
+	"Yuml", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 402 */
-	"fnof"
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 400 (0x0190)*/
+	NULL, NULL, "fnof"
 };
 
 static entity_table_t ent_uni_spacing[] = {
@@ -147,9 +145,9 @@ static entity_table_t ent_uni_greek[] = {
 	"sigmaf", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega",
 	/* 970 - 976 are not mapped */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	"thetasym", "ups1h",
+	"thetasym", "upsih",
 	NULL, NULL, NULL,
-	"p1v" 
+	"piv" 
 };
 
 static entity_table_t ent_uni_punct[] = {
@@ -193,7 +191,7 @@ static entity_table_t ent_uni_8592_9002[] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8624 (0x21b0) */
-	NULL, NULL, NULL, NULL, "crarr", NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, "crarr", NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8640 (0x21c0) */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -208,9 +206,9 @@ static entity_table_t ent_uni_8592_9002[] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8704 (0x2200) */
 	"forall", "comp", "part", "exist", "nexist", "empty", NULL, "nabla",
-	"isin", "notin", "epsis", NULL, "ni", "bepsi", NULL, "prod",
+	"isin", "notin", "epsis", "ni", "notni", "bepsi", NULL, "prod",
 	/* 8720 (0x2210) */
-	"coprod", "sum", "minus", "mnplus", "plusdo", NULL, "setmn", NULL,
+	"coprod", "sum", "minus", "mnplus", "plusdo", NULL, "setmn", "lowast",
 	"compfn", NULL, "radic", NULL, NULL, "prop", "infin", "ang90",
 	/* 8736 (0x2220) */
 	"ang", "angmsd", "angsph", "mid", "nmid", "par", "npar", "and",
@@ -220,7 +218,7 @@ static entity_table_t ent_uni_8592_9002[] = {
 	NULL, NULL, NULL, NULL, "sim", "bsim", NULL, NULL,
 	/* 8768 (0x2240) */
 	"wreath", "nsim", NULL, "sime", "nsime", "cong", NULL, "ncong",
-	"ap", "nap", "ape", NULL, "bcong", "asymp", "bump", "bumpe",
+	"asymp", "nap", "ape", NULL, "bcong", "asymp", "bump", "bumpe",
 	/* 8784 (0x2250) */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
