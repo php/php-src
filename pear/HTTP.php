@@ -107,7 +107,8 @@ class HTTP {
         /* Check for a valid language code in the top-level domain of
          * the client's host address.
          */
-        if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], $arr)) {
+        if (isset($HTTP_SERVER_VARS['REMOTE_HOST']) &&
+            ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], $arr)) {
             $lang = strtolower($arr[1]);
             if (!empty($supported[$lang])) {
                 return $lang;
