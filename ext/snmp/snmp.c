@@ -104,12 +104,6 @@
 #define snmp_parse_oid read_objid
 #endif
 
-/* ucd-snmp 3.3.1 changed the name of a few #defines... They've been changed back to the original ones in 3.5.3! */
-#ifndef SNMP_MSG_GET
-#define SNMP_MSG_GET GET_REQ_MSG
-#define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG
-#endif
-
 #define SNMP_VALUE_LIBRARY	0
 #define SNMP_VALUE_PLAIN	1
 #define SNMP_VALUE_OBJECT	2
