@@ -514,16 +514,17 @@ class PEAR
 
     /**
     * Find if a version is minor or greater than a given PHP version
-    * (useful for dependencies checking).
-    * Usage:
-    * PEAR::phpVersionIs('4.0.7')           => if version 4.0.7 if minor than
-    *                                          the current version
-    * PEAR::phpVersionIs(null, '4.0.12pl3') => if version 4.0.12pl3 is greater
-    * PEAR::phpVersionIs('4.0.5', '4.0.7')  => if version is between 4.0.5 and 4.0.7
+    * (it should be red as "if my php version is minor|greater|between this one)
     *
-    * @param string $minorthan PHP version that should be minor than the given version
-    * @param string $greaterthan PHP version that should be greater
-    * @param string $version The PHP version to compare with (defaults to current)
+    * Usage:
+    * PEAR::phpVersionIs('4.0.7')           => if the current version
+    *                                          is minor than version 4.0.7
+    * PEAR::phpVersionIs(null, '4.0.12pl3') => if current is greater that 4.0.12pl3
+    * PEAR::phpVersionIs('4.0.9', '4.0.4')  => if current is between 4.0.9 and 4.0.4
+    *
+    * @param string $minorthan   Version should be minor than this param
+    * @param string $greaterthan Version should be greater than this param
+    * @param string $version     Version to compare with (defaults to current)
     *
     * @return bool If the comparation was successful or not
     */
@@ -534,7 +535,7 @@ class PEAR
         if ($minorthan) {
             $minor = PEAR::_explodePHPVersion($minorthan);
             for ($i=0; $i < count($version)-1 && $minor[$i] == $version[$i]; $i++);
-            if ($minor[$i] >= $version[$i]) {
+            if ($version[$i] >= $minor[$i]) {
                 return false;
             }
             $ret = true;
@@ -542,7 +543,7 @@ class PEAR
         if ($greaterthan) {
             $greater = PEAR::_explodePHPVersion($greaterthan);
             for ($i=0; $i < count($version)-1 && $greater[$i] == $version[$i]; $i++);
-            $ret = ($greater[$i] > $version[$i]) ? true : false;
+            $ret = ($version[$i] > $greater[$i]) ? true : false;
         }
         return $ret;
     }
