@@ -8,7 +8,7 @@ pear_DBdir=$(prefix)/lib/php/DB
 pear_Filedir=$(prefix)/lib/php/File
 
 install-data-local:
-	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) && \
+	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) $(pear_Filedir)  && \
 	$(INSTALL_DATA) $(srcdir)/DB.php $(peardir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/common.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/odbc.php $(pear_DBdir) && \
