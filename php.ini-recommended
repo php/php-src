@@ -288,7 +288,7 @@ disable_classes =
 ; (e.g. by adding its signature to the Web server header).  It is no security
 ; threat in any way, but it makes it possible to determine whether you use PHP
 ; on your server or not.
-expose_php = On
+expose_php = Off
 
 
 ;;;;;;;;;;;;;;;;;;;
