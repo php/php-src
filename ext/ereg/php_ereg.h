@@ -32,9 +32,9 @@ PHP_FUNCTION(split);
 PHP_FUNCTION(spliti);
 PHPAPI PHP_FUNCTION(sql_regcase);
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(reg)
 	HashTable ht_rc;
-} php_reg_globals;
+ZEND_END_MODULE_GLOBALS(reg)
 
 PHP_MINIT_FUNCTION(regex);
 PHP_MSHUTDOWN_FUNCTION(regex);
