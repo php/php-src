@@ -3307,6 +3307,7 @@ PHP_FUNCTION(mb_send_mail)
 	    head_enc,	/* header transfar encoding */
 	    body_enc;	/* body transfar encoding */
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
+	const mbfl_language *lang;
 	int err = 0;
 
 	/* initialize */
@@ -3318,16 +3319,11 @@ PHP_FUNCTION(mb_send_mail)
 	tran_cs = mbfl_no_encoding_utf8;
 	head_enc = mbfl_no_encoding_base64;
 	body_enc = mbfl_no_encoding_base64;
-	switch (MBSTRG(current_language)) {
-	case mbfl_no_language_japanese:
-		tran_cs = mbfl_no_encoding_2022jp;
-		body_enc = mbfl_no_encoding_7bit;
-		break;
-	case mbfl_no_language_english:
-		tran_cs = mbfl_no_encoding_8859_1;
-		head_enc = mbfl_no_encoding_qprint;
-		body_enc = mbfl_no_encoding_qprint;
-		break;
+	lang = mbfl_no2language(MBSTRG(current_language));
+	if (lang != NULL) {
+		tran_cs = lang->mail_charset;
+		head_enc = lang->mail_header_encoding;
+		body_enc = lang->mail_body_encoding;
 	}
 
 	argc = ZEND_NUM_ARGS();
