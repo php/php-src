@@ -981,7 +981,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	void ***tsrm_ls;
 
 	php_core_globals *core_globals;
-	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	WORD wVersionRequested = MAKEWORD(2, 0);
