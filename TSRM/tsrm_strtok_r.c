@@ -2,7 +2,6 @@
 
 #include "tsrm_config_common.h"
 #include "tsrm_strtok_r.h"
-
 static inline int in_character_class(char ch, const char *delim)
 {
 	while (*delim) {
