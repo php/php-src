@@ -1,3 +1,43 @@
+2005-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_reflection_api.c:
+      - Be more gracious in reflection API
+
+2005-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      Fixed test.
+
+2005-02-13  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/session/mod_files.h
+      ext/session/mod_mm.h
+      ext/session/mod_user.h
+      ext/session/php_session.h:
+      - Missing $Id$ tags
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      MFH: - Added the alias session_commit() (more intuitive name for
+      session_write_close())
+      MFH: - Partial sync of the file by adding macro SESSION_CHECK_ACTIVE_STATE
+
+2005-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fix doc comment handling
+
+2005-02-13  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/session/php_session.h:
+      MFB_4_3: cvs diff -r1.84.2.5 -r1.84.2.6 php_session.h
+
+2005-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/config.m4:
+      same fix here
+
 2005-02-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/snmp/snmp.c:
