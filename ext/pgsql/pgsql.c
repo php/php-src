@@ -343,7 +343,7 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		PQclear(res);
 	}
 #if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
-	if ((PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE) || (PQprotocolVersion(link) < 3)
+	if ((PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE) || PQprotocolVersion(link) < 3)
 #endif
 	{
 		orig = PGG(ignore_notices);
