@@ -83,3 +83,10 @@
 #define PHP_LDAP_LIBS		"@LDAP_LIBS@"
 #define PHP_VELOCIS_INCLUDE     "@VELOCIS_INCLUDE@"
 #define PHP_VELOCIS_LIBS        "@VELOCIS_LIBS@"
+
+#define ODBC_TYPE       "@ODBC_TYPE@"
+#define ODBC_INCDIR     "@ODBC_INCDIR@"
+#define ODBC_INCLUDE    "@ODBC_INCLUDE@"
+#define ODBC_LIBDIR     "@ODBC_LIBDIR@"
+#define ODBC_LFLAGS     "@ODBC_LFLAGS@"
+#define ODBC_LIBS       "@ODBC_LIBS@"

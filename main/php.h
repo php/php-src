@@ -39,6 +39,12 @@
 
 #include "php_version.h"
 #include "zend.h"
+#ifdef PACKAGE
+# undef PACKAGE
+#endif
+#ifdef VERSION
+# undef VERSION
+#endif
 #include "zend_API.h"
 
 
@@ -329,6 +335,7 @@ extern PHPAPI int php3_fhttpd_write(char *a,int n);
 
 #define PHP_NAMED_FE(php_name, name, arg_types) { #php_name, name, arg_types },
 #define PHP_FE(name, arg_types) PHP_NAMED_FE(name, php3_##name, arg_types)
+#define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, php3_##alias, arg_types)
 
 
 
