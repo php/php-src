@@ -26,6 +26,8 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
       AC_ADD_LIBRARY(jpeg)
       AC_ADD_LIBRARY(z)
       ;;
+    no)
+      ;;
     *)
       test -f $withval/include/pdflib.h && PDFLIB_INCLUDE="$withval/include"
       if test -n "$PDFLIB_INCLUDE" ; then
