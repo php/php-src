@@ -1018,6 +1018,55 @@ ifelse($3,,[
 ])
 
 dnl
+dnl PHP_ADD_FRAMEWORK(framework [,before])
+dnl
+dnl add a (Darwin / Mac OS X) framework to the link
+dnl line. if before is 1, the framework is added
+dnl to the beginning of the line.
+
+AC_DEFUN(PHP_ADD_FRAMEWORK, [
+  AC_PHP_ONCE(FRAMEWORK, $1, [
+    if test "$2"; then
+      PHP_FRAMEWORKS="-framework $1 $PHP_FRAMEWORKS"
+    else
+      PHP_FRAMEWORKS="$PHP_FRAMEWORKS -framework $1"
+    fi
+  ])
+])
+
+dnl
+dnl PHP_ADD_FRAMEWORKPATH(path [,before])
+dnl
+dnl add a (Darwin / Mac OS X) framework path to the link
+dnl and include lines. default paths include (but are
+dnl not limited to) /Local/Library/Frameworks and
+dnl /System/Library/Frameworks, so these don't need
+dnl to be specifically added. if before is 1, the
+dnl framework path is added to the beginning of the
+dnl relevant lines.
+
+AC_DEFUN(PHP_ADD_FRAMEWORKPATH, [
+  PHP_EXPAND_PATH($1, ai_p)
+  AC_PHP_ONCE(FRAMEWORKPATH, $ai_p, [
+    if test "$2"; then
+      PHP_FRAMEWORKS="-F$ai_p $PHP_FRAMEWORKS"
+    else
+      PHP_FRAMEWORKS="$PHP_FRAMEWORKS -F$ai_p"
+    fi
+  ])
+])
+
+dnl
+dnl PHP_ADD_FRAMEWORK_WITH_PATH(framework, path)
+dnl
+dnl add a (Darwin / Mac OS X) framework path and the
+dnl framework itself to the link and include lines.
+AC_DEFUN(PHP_ADD_FRAMEWORK_WITH_PATH, [
+  PHP_ADD_FRAMEWORKPATH($2)
+  PHP_ADD_FRAMEWORK($1)
+])
+
+dnl
 dnl Set libtool variable
 dnl
 AC_DEFUN(PHP_SET_LIBTOOL_VARIABLE,[
@@ -1401,6 +1450,26 @@ AC_DEFUN(PHP_CHECK_LIBRARY, [
     LDFLAGS=$save_old_LDFLAGS
     $4
   ])dnl
+])
+
+dnl
+dnl PHP_CHECK_FRAMEWORK(framework, function [, action-found [, action-not-found ]])
+dnl
+dnl El cheapo wrapper for AC_CHECK_LIB
+dnl
+AC_DEFUN(PHP_CHECK_FRAMEWORK, [
+  save_old_LDFLAGS=$LDFLAGS
+  LDFLAGS="-framework $1 $LDFLAGS"
+  dnl supplying "c" to AC_CHECK_LIB is technically cheating, but
+  dnl rewriting AC_CHECK_LIB is overkill and this only affects
+  dnl the "checking.." output anyway.
+  AC_CHECK_LIB(c,[$2],[
+    LDFLAGS=$save_old_LDFLAGS
+    $3
+  ],[
+    LDFLAGS=$save_old_LDFLAGS
+    $4
+  ])
 ])
 
 dnl 
