@@ -47,10 +47,10 @@ zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bcmath",
 	bcmath_functions,
-	PHP_MINIT(bcmath),
-	PHP_MSHUTDOWN(bcmath),
-	PHP_RINIT(bcmath),
 	NULL,
+	NULL,
+	PHP_RINIT(bcmath),
+	PHP_RSHUTDOWN(bcmath),
 	PHP_MINFO(bcmath),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -65,9 +65,9 @@ static long bc_precision;
 #endif
 
 /* Storage used for special numbers. */
-bc_num _zero_;
-bc_num _one_;
-bc_num _two_;
+extern bc_num _zero_;
+extern bc_num _one_;
+extern bc_num _two_;
 
 
 /* Make a copy of a number!  Just increments the reference count! */
@@ -85,34 +85,12 @@ void init_num (bc_num *num)
 }
 
 
-PHP_MINIT_FUNCTION(bcmath)
-{
-	extern bc_num _zero_;
-	extern bc_num _one_;
-	extern bc_num _two_;
-
-	_zero_ = bc_new_num (1, 0);
-	_one_  = bc_new_num (1, 0);
-	_one_->n_value[0] = 1;
-	_two_  = bc_new_num (1, 0);
-	_two_->n_value[0] = 2;
-	persist_alloc(_zero_);
-	persist_alloc(_one_);
-	persist_alloc(_two_);
-	persist_alloc(_zero_->n_ptr);
-	persist_alloc(_one_->n_ptr);
-	persist_alloc(_two_->n_ptr);
-
-	return SUCCESS;
-}
-
-
-
-PHP_MSHUTDOWN_FUNCTION(bcmath)
+PHP_RSHUTDOWN_FUNCTION(bcmath)
 {
 	bc_free_num(&_zero_);
 	bc_free_num(&_one_);
 	bc_free_num(&_two_);
+
 	return SUCCESS;
 }
 
@@ -122,6 +100,9 @@ PHP_RINIT_FUNCTION(bcmath)
 	if (cfg_get_long("bcmath.scale", &bc_precision)==FAILURE) {
 		bc_precision=0;
 	}
+	
+	bc_init_numbers();
+	
 	return SUCCESS;
 }
 
