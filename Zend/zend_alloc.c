@@ -344,6 +344,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	char *last_filename = NULL;
 	uint last_lineno = 0;
 	uint leak_count=0, total_bytes=0;
+	unsigned char had_leaks=0;
 #endif
 	ALS_FETCH();
 
@@ -353,6 +354,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		if (!t->cached || clean_cache) {
 #if ZEND_DEBUG
 			if (!t->cached) {
+				had_leaks = 1;
 				if (last_filename != t->filename || last_lineno!=t->lineno) {
 					/* flush old leak */
 					if (leak_count>0) {
@@ -383,6 +385,13 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 #if ZEND_DEBUG
 	if (!silent && leak_count>1) {
 		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (leak_count-1));
+	}
+	if (had_leaks) {
+		ELS_FETCH();
+
+		if (EG(AiCount)!=0) {
+			fprintf(stderr, "AiCount did not zero out:  %d\n", EG(AiCount));
+		}
 	}
 #endif
 }
