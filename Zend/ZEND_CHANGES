@@ -48,6 +48,9 @@ Changes in the Zend Engine 2.0
         
         ?>
 
+        Zend Engine 2.0 will issue a compile error, if an assignment
+        to $this is found.
+
     * Private and Protected Members.
 
       The Zend Engine 2.0 introduces private and protected member 
@@ -238,8 +241,7 @@ Changes in the Zend Engine 2.0
     * Final methods and classes.
 
       The Zend Engine 2.0 introduces the "final" keyword to declare
-      final members and methods. Those cannot be overridden by
-      sub-classes. 
+      final methods. Those cannot be overridden by sub-classes.
 
       Example:
 
@@ -266,7 +268,7 @@ Changes in the Zend Engine 2.0
         // class Bork extends Foo {}
         ?>
 
-      Properties cannot be final.
+      Properties cannot be final. See per-class constants below.
 
       Old code that has no user-defined classes or functions named 
       'final' should run without modifications.
@@ -306,7 +308,7 @@ Changes in the Zend Engine 2.0
       will supply a function that imports all of the properties from
       the source object, so that they can start with a by-value
       replica of the source object, and only override properties that
-      need to be changed. [The function hasn't been implemented yet]
+      need to be changed.
 
       Example:
 
