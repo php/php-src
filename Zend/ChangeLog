@@ -1,3 +1,35 @@
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Fix error messages
+
+    * zend_API.c:
+      Allow redeclaring of protected properties as public (for internal classes).
+
+    * zend_reflection_api.c:
+      Use appropriate function for property name unmangling.
+
+    * zend_reflection_api.c:
+      Make these static as noticed by Andrey
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_objects.c:
+      Synch/Unify error messages related to function/method calls
+
+    * zend_compile.c:
+      Fix error level
+
+    * zend_API.c
+      zend_compile.c:
+      Currently we cannot support static ctor/dtor
+
+    * zend_reflection_api.c:
+      These are implicit properties as denoted by the flag. Dynamic properties
+      only
+      exist in one single object and currently reflection api is not capable of
+      showing those.
+
 2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:

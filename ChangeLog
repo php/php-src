@@ -1,3 +1,210 @@
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Fix error messages
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Nuke far pointers
+
+    * ext/interbase/interbase.c:
+      CS fixes
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/Makefile.frag:
+      Add a shortcut
+
+    * ZendEngine2/zend_API.c:
+      Allow redeclaring of protected properties as public (for internal classes).
+
+2003-09-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      acinclude.m4
+      configure.in
+      configure.in
+      scripts/phpize.m4
+      scripts/phpize.m4:
+      enable re2c check for self-contained extensions
+
+    * scripts/phpize.m4
+      scripts/phpize.m4:
+      provide RE2C to external extensions
+
+    * ext/ircg/ircg_scanner.re:
+      blank -> _blank
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Make ibase_{param|field}_info() return typenames that actually mean
+      something
+
+2003-09-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * (IRCG_4_23)
+      ext/ircg/ircg.c:
+      using the fastcgi filter on a network connection usually helps.
+
+    * (IRCG_4_23)
+      ext/ircg/ircg_common.c:
+      use sapi calls as fallback
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      fetch fd correctly in fastcgi case
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_private.h:
+      enable fastcgi support
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      MFH: Don't choke on repeated fetch() after result is exhausted
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Use appropriate function for property name unmangling.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Make these static as noticed by Andrey
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      tests/classes/factory_and_singleton_002.phpt
+      tests/classes/factory_and_singleton_003.phpt
+      tests/classes/factory_and_singleton_004.phpt
+      tests/classes/factory_and_singleton_005.phpt
+      tests/classes/factory_and_singleton_006.phpt
+      tests/classes/factory_and_singleton_007.phpt
+      tests/classes/factory_and_singleton_008.phpt:
+      Synch/Unify error messages related to function/method calls
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.h
+      main/SAPI.h
+      main/php.h
+      main/php_ini.h
+      main/php_main.h
+      main/php_variables.h:
+      Fix use of EXTERN_C macros
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Fix error level
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c:
+      Currently we cannot support static ctor/dtor
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Can't ignore variadic DEBUG macro for compilers
+      that don't support them. Revert.
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      These are implicit properties as denoted by the flag. Dynamic properties
+      only
+      exist in one single object and currently reflection api is not capable of
+      showing those.
+
+2003-09-02  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Changed some formatting/macro/debugging/variadic stuff
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      Error message clean up part IV: spprintf/estrndup don't return on 'out of
+      mem'
+      Error message clean up part V: Show PHP Startup/Shutdown
+
+2003-09-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+      enable setting of keep alive interval through php.ini
+
+    * ext/ircg/ircg_common.c:
+      fix typo
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      implement get_fd/force_http_10 methods for CGI SAPI
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      nuke unused var
+
+2003-09-02  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      main/streams.c:
+      ws
+
+    * (PHP_4_3)
+      main/streams.c:
+      fix typo
+
+    * (PHP_4_3)
+      main/streams.c:
+      don't report errors if asked not to report
+
+2003-09-02  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      if a package.xml is passed to InfoFrom*(), and the package version is
+      invalid, current CVS causes a whole bunch of xml parser warnings and craps
+      out without telling the user why.  Now it exits gracefully.
+
+    * pear/PEAR/Installer.php:
+      fixes rather obvious problem.  Try this with CVS before:
+      
+      pear install package-PEAR.xml
+      
+      It attempts to split on the - as if PEAR.xml were a version and package
+      were the package name.  Now, it doesn't do that if the $pkgfile is a local
+      filename.
+
+2003-09-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      pear/Makefile.frag:
+      MFH: - Fixed bug #25348 ("make install" fails with --enable-short-tags).
+
+    * pear/Makefile.frag:
+      - Fixed bug #25348 ("make install" fails with --enable-short-tags).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/filestat.c:
+      MFH: - Fixed bug #25343 (is_dir() gives warning on FreeBSD).
+
+    * ext/standard/filestat.c:
+      - Fixed bug #25343 (is_dir() gives warning on FreeBSD).
+
+2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      Error message clean up part III: Fix ini setting logic & respect
+      docref_root
+
 2003-08-31  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
