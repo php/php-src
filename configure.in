@@ -685,10 +685,12 @@ fi
 
 PHP_REGEX
 
-dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
-test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
+case "`uname -s`" in
+SunOS*)
+	CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS";;
+esac
 
-CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT"
+CPPFLAGS="$CPPFLAGS -D_REENTRANT"
 
 LIBZEND_BASIC_CHECKS
 LIBZEND_OTHER_CHECKS
