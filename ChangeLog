@@ -1,3 +1,111 @@
+2003-10-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_API.c
+      ext/standard/tests/array/bug24766.phpt:
+      Fixed bug #24766 (strange result array from unpack())
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      MFZE2(r-1.226): Bug #25738 (alloca() related problems on the Darwin
+      platform)
+
+    * ZendEngine2/zend.h:
+      Bug #25738 (alloca() related problems on the Darwin platform)
+
+2003-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sybase/php_sybase_db.c:
+      More ZTS stuff.
+
+2003-10-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt:
+      MFH(r-1.5, r-1.5, r-1.4): Specify full path to cat for mb_send_mail() tests
+
+    * (PHP_4_3)
+      ext/ctype/tests/bug25745.phpt:
+      MFH(r-1.1): Add regression test for bug #25745
+
+    * ext/ctype/tests/bug25745.phpt:
+      
+      Add regression test for bug #25745
+
+    * (PHP_4_3)
+      Zend/zend_API.h:
+      MFZE2(r-1.162): Ensure lval to have *boolean* value.
+
+    * ZendEngine2/zend_API.h:
+      Ensure lval to have a *boolean* value.
+
+    * (PHP_4_3)
+      ext/ctype/ctype.c:
+      MFH(r-1.28): Fixed bug #25745 (ctype functions don't deal with non-ascii
+      characters properly)
+
+    * ext/ctype/ctype.c:
+      Bug #25745 (ctype functions don't deal with non-ascii characters properly)
+
+2003-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/sybase/php_sybase_db.c:
+      MFH: Fixed bug #25744 (make ZTS build of ext/sybase compile)
+
+    * ext/sybase/php_sybase_db.c:
+      Fixed bug #25744 (make ZTS build of ext/sybase compile)
+
+2003-10-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/array/bug24766.phpt:
+      
+      - Added test for bug #24766
+
+    * configure.in
+      TSRM/tsrm.m4
+      ZendEngine2/Zend.m4
+      ext/dba/config.m4
+      ext/filepro/config.m4
+      ext/imap/config.m4
+      ext/mime_magic/config.m4
+      ext/mnogosearch/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/oracle/config.m4
+      sapi/apache2filter/config.m4
+      sapi/caudium/config.m4
+      sapi/cgi/config9.m4
+      sapi/isapi/config.m4
+      sapi/milter/config.m4
+      sapi/pi3web/config.m4
+      sapi/servlet/config.m4:
+      Aligned configure help texts.
+
+    * acinclude.m4:
+      Really fixed bug #25719.
+      (basically reverted to the original style of openssl checks found in
+      4.3.3)
+
+2003-10-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/imap/config.m4
+      ext/odbc/config.m4:
+      Alignment fix
+
+2003-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/domexception.c
+      ext/mysql/php_mysql.c:
+      Fixed compile warnings.
+
 2003-10-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_4_3)
