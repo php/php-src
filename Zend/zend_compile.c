@@ -795,11 +795,12 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 				CG(active_op_array)->arg_types[i] = BYREF_NONE;
 			}
 			CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
+			CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
 		}
 	} else {
 		CG(active_op_array)->arg_types = (unsigned char *) erealloc(CG(active_op_array)->arg_types, sizeof(unsigned char)*(offset->u.constant.value.lval+1));
+		CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
 		CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
-		CG(active_op_array)->arg_types[0]++;
 	}
 }
 
