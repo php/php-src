@@ -86,9 +86,9 @@ gdCacheDelete (gdCache_head_t * head)
       (*(head->gdCacheRelease)) (elem->userdata);
       prev = elem;
       elem = elem->next;
-      gdFree ((char *) prev);
+      gdPFree ((char *) prev);
     }
-  gdFree ((char *) head);
+  gdPFree ((char *) head);
 }
 
 void *
