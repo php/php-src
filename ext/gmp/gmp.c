@@ -28,9 +28,12 @@
 #if HAVE_GMP
 
 #include <gmp.h>
-/* If you declare any globals in php_gmp.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(gmp)
-*/
+
+/* Needed for gmp_random() */
+#include "ext/standard/php_rand.h"
+#include "ext/standard/php_lcg.h"
+#include <gmp-mparam.h>
+#define GMP_ABS(x) ((x) >= 0 ? (x) : -(x))
 
 /* True global resources - no need for thread safety here */
 static int le_gmp;
@@ -92,12 +95,14 @@ zend_module_entry gmp_module_entry = {
 	ZEND_MODULE_STARTUP_N(gmp),
 	ZEND_MODULE_SHUTDOWN_N(gmp),
 	NULL,
-	NULL,
+	ZEND_MODULE_DEACTIVATE_N(gmp),
 	ZEND_MODULE_INFO_N(gmp),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
+
+ZEND_DECLARE_MODULE_GLOBALS(gmp)
 
 #ifdef COMPILE_DL_GMP
 ZEND_GET_MODULE(gmp)
@@ -135,16 +140,39 @@ static void gmp_efree(void *ptr, size_t size)
 }
 /* }}} */
 
+/* {{{ php_gmp_init_globals
+ */
+static void php_gmp_init_globals(zend_gmp_globals *gmp_globals)
+{
+	gmp_globals->rand_initialized = 0;
+}
+/* }}} */
+
 /* {{{ ZEND_MINIT_FUNCTION
  */
 ZEND_MODULE_STARTUP_D(gmp)
 {
+    ZEND_INIT_MODULE_GLOBALS(gmp, php_gmp_init_globals, NULL);
+
 	le_gmp = zend_register_list_destructors_ex(_php_gmpnum_free, NULL, GMP_RESOURCE_NAME, module_number);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
 
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ ZEND_RSHUTDOWN_FUNCTION
+ */
+ZEND_MODULE_DEACTIVATE_D(gmp)
+{
+	if (GMPG(rand_initialized)) {
+		gmp_randclear(GMPG(rand_state));
+		GMPG(rand_initialized) = 0;
+	}
 
 	return SUCCESS;
 }
@@ -1041,7 +1069,17 @@ ZEND_FUNCTION(gmp_random)
 	}
 
 	INIT_GMP_NUM(gmpnum_result);
-	mpz_random(*gmpnum_result, limiter);
+
+	if (!GMPG(rand_initialized)) {
+		/* Initialize */
+		gmp_randinit_lc_2exp_size(GMPG(rand_state), 32L);
+
+		/* Seed */
+		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
+
+		GMPG(rand_initialized) = 1;
+	}
+	mpz_urandomb(*gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * BITS_PER_MP_LIMB);
 
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
