@@ -229,8 +229,6 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_doc_document_element,									NULL)
 	PHP_FE(domxml_doc_add_root,											NULL)
 	PHP_FE(domxml_doc_set_root,											NULL)
-	PHP_FE(domxml_doc_free,												NULL)
-
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,										NULL)
 	PHP_FE(domxml_dump_node,											NULL)
@@ -328,7 +326,6 @@ static function_entry php_domxmldoc_class_functions[] = {
 /*	PHP_FALIAS(children,				domxml_node_children,			NULL) */
 	PHP_FALIAS(add_root,				domxml_doc_add_root,			NULL)
 	PHP_FALIAS(set_root,				domxml_doc_set_root,			NULL)
-	PHP_FALIAS(free,				domxml_doc_free,			NULL)
 	PHP_FALIAS(get_root,				domxml_doc_document_element,	NULL)
 	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
@@ -3667,24 +3664,6 @@ PHP_FUNCTION(domxml_dump_mem)
 	}
 	RETVAL_STRINGL(mem, size, 1);
 	xmlFree(mem);
-}
-/* }}} */
-
-/* {{{ proto string domxml_dump_mem(object doc_handle [, int format][, encoding])
-   Dumps document into string and optionally formats it */
-PHP_FUNCTION(domxml_doc_free)
-{
-	zval *id;
-	xmlDoc *docp;
-	zval *wrapper;
-	zval **handle;
-	int refcount;
-	
-	DOMXML_PARAM_NONE(docp, id, le_domxmldocp);
-
-	zend_hash_index_find(Z_OBJPROP_P(id), 0, (void **) &handle);	
-	zend_list_delete(Z_LVAL_PP(handle));	
-	RETURN_TRUE;	
 }
 /* }}} */
 
