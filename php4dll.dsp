@@ -140,7 +140,7 @@ SOURCE=".\fopen-wrappers.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\internal_functions_win32.c
+SOURCE=.\main\internal_functions_win32.c
 
 !IF  "$(CFG)" == "php4dll - Win32 Debug"
 
@@ -159,11 +159,11 @@ SOURCE=.\core\internal_functions_win32.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\main.c
+SOURCE=.\main\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\mergesort.c
+SOURCE=.\main\mergesort.c
 # End Source File
 # Begin Source File
 
@@ -171,27 +171,27 @@ SOURCE=.\ext\standard\output.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_content_types.c
+SOURCE=.\main\php_content_types.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_ini.c
+SOURCE=.\main\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_realpath.c
+SOURCE=.\main\php_realpath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_ticks.c
+SOURCE=.\main\php_ticks.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_variables.c
+SOURCE=.\main\php_variables.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_virtual_cwd.c
+SOURCE=.\main\php_virtual_cwd.c
 # End Source File
 # Begin Source File
 
@@ -199,27 +199,27 @@ SOURCE=.\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\reentrancy.c
+SOURCE=.\main\reentrancy.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\rfc1867.c
+SOURCE=.\main\rfc1867.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\safe_mode.c
+SOURCE=.\main\safe_mode.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\SAPI.c
+SOURCE=.\main\SAPI.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\strlcat.c
+SOURCE=.\main\strlcat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\strlcpy.c
+SOURCE=.\main\strlcpy.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -227,7 +227,7 @@ SOURCE=.\core\strlcpy.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\core\config.w32.h
+SOURCE=.\main\config.w32.h
 # End Source File
 # Begin Source File
 
@@ -243,59 +243,59 @@ SOURCE=.\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\getopt.h
+SOURCE=.\main\getopt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\internal_functions_registry.h
+SOURCE=.\main\internal_functions_registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\logos.h
+SOURCE=.\main\logos.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\main.h
+SOURCE=.\main\main.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\output.h
+SOURCE=.\main\output.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php.h
+SOURCE=.\main\php.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php3_compat.h
+SOURCE=.\main\php3_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_content_types.h
+SOURCE=.\main\php_content_types.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_globals.h
+SOURCE=.\main\php_globals.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_ini.h
+SOURCE=.\main\php_ini.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_realpath.h
+SOURCE=.\main\php_realpath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_ticks.h
+SOURCE=.\main\php_ticks.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_variables.h
+SOURCE=.\main\php_variables.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\php_virtual_cwd.h
+SOURCE=.\main\php_virtual_cwd.h
 # End Source File
 # Begin Source File
 
@@ -303,19 +303,19 @@ SOURCE=.\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\rfc1867.h
+SOURCE=.\main\rfc1867.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\safe_mode.h
+SOURCE=.\main\safe_mode.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\SAPI.h
+SOURCE=.\main\SAPI.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\core\win95nt.h
+SOURCE=.\main\win95nt.h
 # End Source File
 # End Group
 # End Group
