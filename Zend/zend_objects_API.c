@@ -127,20 +127,27 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
-	if (--obj->refcount == 0) {
+			/*	Make sure we hold a reference count during the destructor call
+				otherwise, when the destructor ends the storage might be freed
+				when the refcount reaches 0 a second time
+			*/
+	if (obj->refcount == 1) {
 		if (!EG(objects_store).object_buckets[handle].destructor_called) {
 			EG(objects_store).object_buckets[handle].destructor_called = 1;
+
 			if (obj->dtor) {
 				obj->dtor(obj->object, handle TSRMLS_CC);
 			}
 		}
-		if (obj->refcount == 0) {
+		if (obj->refcount == 1) {
 			if (obj->free_storage) {
 				obj->free_storage(obj->object TSRMLS_CC);
 			}
 			ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 		}
 	}
+	obj->refcount--;
+
 #if ZEND_DEBUG_OBJECTS
 	if (obj->refcount == 0) {
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
