@@ -109,7 +109,6 @@ $ECHO_N " config.m4$ECHO_C"
 cat >config.m4 <<eof
 dnl \$Id\$
 dnl config.m4 for extension $extname
-dnl don't forget to call PHP_EXTENSION($extname)
 
 dnl Comments in this file start with the string 'dnl'.
 dnl Remove where necessary. This file will not work
@@ -128,10 +127,43 @@ dnl Make sure that the comment is aligned:
 dnl [  --enable-$extname           Enable $extname support])
 
 if test "\$PHP_$EXTNAME" != "no"; then
-  dnl If you will not be testing anything external, like existence of
-  dnl headers, libraries or functions in them, just uncomment the 
-  dnl following line and you are ready to go.
   dnl Write more examples of tests here...
+
+  dnl # --with-$extname -> check with-path
+	dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
+  dnl SEARCH_FOR="/include/$extname.h"  # you most likely want to change this
+  dnl if test -r \$PHP_$EXTNAME/$SEARCH_FOR; then # path given as parameter
+  dnl   ${EXTNAME}_DIR=\$PHP_$EXTNAME
+  dnl else # search default path list
+  dnl   AC_MSG_CHECKING(for $extname files in default path)
+  dnl   for i in \$SEARCH_PATH ; do
+  dnl     if test -r \$i/\$SEARCH_FOR; then
+  dnl       ${EXTNAME}_DIR=\$i
+  dnl       AC_MSG_RESULT(found in \$i)
+  dnl     fi
+  dnl   done
+  dnl fi
+  dnl
+  dnl if test -z "\$${EXTNAME}_DIR"; then
+  dnl   AC_MSG_RESULT(not found)
+  dnl   AC_MSG_ERROR(Please reinstall the $extname distribution)
+  dnl fi
+
+  dnl # --with-$extname -> add include path
+  dnl AC_ADD_INCLUDE(\$${EXTNAME}_DIR/include)
+
+  dnl # --with-$extname -> chech for lib and symbol presence
+  dnl LIBNAME=$extname # you may wnat to change this
+  dnl LIBSYMBOL=$extname # you most likely want to change this 
+  dnl old_LIBS=\$LIBS
+  dnl LIBS="\$LIBS -L\$${EXTNAME}_DIR/lib -lm -ldl"
+  dnl AC_CHECK_LIB(\$LIBNAME, \$LIBSYMBOL, [AC_DEFINE(HAVE_${EXTNAME}LIB,1,[ ])],
+	dnl			[AC_MSG_ERROR(wrong $extname lib version or lib not found)])
+  dnl LIBS=\$old_LIBS
+  dnl
+  dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
+  dnl AC_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, SAPRFC_SHARED_LIBADD)
+
   PHP_EXTENSION($extname, \$ext_shared)
 fi
 eof
