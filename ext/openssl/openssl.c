@@ -1260,7 +1260,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC)
 {
 	X509_REQ * csr = NULL;
-	char * filename;
+	char * filename = NULL;
 	BIO * in;
 	
 	if (resourceval)
@@ -1386,7 +1386,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	long num_days;
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
-	EVP_PKEY * key, *priv_key;
+	EVP_PKEY * key = NULL, *priv_key;
 	long csr_resource, certresource, keyresource;
 	int i;
 	struct php_x509_request req;
@@ -1938,7 +1938,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
    Verifys that the data block is intact, the signer is who they say they are, and returns the CERTs of the signers */
 PHP_FUNCTION(openssl_pkcs7_verify)
 {
-	X509_STORE * store;
+	X509_STORE * store = NULL;
 	zval * cainfo = NULL;
 	STACK_OF(X509) *signers= NULL;
 	STACK_OF(X509) *others = NULL;
@@ -2367,7 +2367,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf;
+	unsigned char *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	long padding = RSA_PKCS1_PADDING;
@@ -2487,7 +2487,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf;
+	unsigned char *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	long keyresource = -1;

@@ -84,7 +84,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	int reqok = 0;
 	char *http_header_line = NULL;
 	char tmp_line[128];
-	size_t chunk_size, file_size = 0;
+	size_t chunk_size = 0, file_size = 0;
 	int redirected = 0;
 
 	resource = php_url_parse(path);
