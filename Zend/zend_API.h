@@ -197,8 +197,9 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\
-									zval *var = (zval *) emalloc(sizeof(zval));								\
+									zval *var;																\
 									char *str=(v); /* prevent 'v' from being evaluated more than once */	\
+									MAKE_STD_ZVAL(var);													\
 																											\
 									var->value.str.val = (str);												\
 									var->value.str.len = strlen((str));										\
@@ -209,7 +210,8 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define SET_VAR_STRINGL(n,v,l)	{														\
 									{													\
-										zval *var = (zval *) emalloc(sizeof(zval));		\
+										zval *var;										\
+										MAKE_STD_ZVAL(var);								\
 																						\
 										var->value.str.val = (v);						\
 										var->value.str.len = (l);						\
@@ -220,7 +222,8 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define SET_VAR_LONG(n,v)	{															\
 								{														\
-									zval *var = (zval *) emalloc(sizeof(zval));			\
+									zval *var;											\
+									MAKE_STD_ZVAL(var);									\
 																						\
 									var->value.lval = (v);								\
 									var->type = IS_LONG;								\
@@ -230,7 +233,8 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define SET_VAR_DOUBLE(n,v)	{															\
 								{														\
-									zval *var = (zval *) emalloc(sizeof(zval));			\
+									zval *var;											\
+									MAKE_STD_ZVAL(var);									\
 																						\
 									var->value.dval = (v);								\
 									var->type = IS_DOUBLE;								\
