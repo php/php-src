@@ -380,7 +380,7 @@ PHP_FUNCTION(domxml_attrname)
 }
 /* }}} */
 
-/* {{{ proto class node(string name)
+/* {{{ proto class domxml_node(string name)
    Creates node */
 PHP_FUNCTION(domxml_node)
 {

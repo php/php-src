@@ -1152,7 +1152,7 @@ PHP_FUNCTION(session_encode)
 }
 /* }}} */
 
-/* {{{ proto session_decode(string data)
+/* {{{ proto bool session_decode(string data)
    Deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(session_decode)
 }
 /* }}} */
 
-/* {{{ proto session_start(void)
+/* {{{ proto bool session_start(void)
    Begin session - reinitializes freezed variables, registers browsers etc */
 PHP_FUNCTION(session_start)
 {
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
-/* {{{ proto session_destroy(void)
+/* {{{ proto void session_destroy(void)
    Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
@@ -1207,7 +1207,7 @@ void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
 }
 #endif
 
-/* {{{ proto session_unset(void)
+/* {{{ proto void session_unset(void)
    Unset all registered variables */
 PHP_FUNCTION(session_unset)
 {

@@ -260,6 +260,8 @@ PHP_MINIT_FUNCTION(browscap)
 }
 
 
+/* {{{ proto void parse_ini_file(string filename)
+   Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
 #ifdef ZTS
@@ -286,7 +288,7 @@ PHP_FUNCTION(parse_ini_file)
 	fclose(cfgin);
 #endif
 }
-
+/* }}} */
 
 int php_shutdown_config(void)
 {

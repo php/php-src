@@ -364,7 +364,7 @@ PHP_FUNCTION(ob_end_clean)
 /* }}} */
 
 
-/* proto string ob_get_contents(void)
+/* {{{ proto string ob_get_contents(void)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {

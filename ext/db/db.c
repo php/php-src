@@ -740,7 +740,7 @@ int php_dbm_delete(dbm_info *info, char *key) {
 	return(ret);
 }
 
-/* {{{ string dbmfirstkey(int dbm_identifier)
+/* {{{ proto string dbmfirstkey(int dbm_identifier)
    Retrieves the first key from a dbm database */
 PHP_FUNCTION(dbmfirstkey)
 {
