@@ -574,6 +574,28 @@ CWD_API int virtual_creat(const char *path, mode_t mode)
 	return f;
 }
 
+CWD_API int virtual_rename(char *oldname, char *newname)
+{
+	cwd_state old_state;
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&old_state, &CWDG(cwd));
+	virtual_file_ex(&old_state, oldname, NULL);
+	oldname = old_state.cwd;
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, newname, NULL);
+	newname = new_state.cwd;
+ 
+	retval = rename(oldname, newname);
+
+	CWD_STATE_FREE(&old_state);
+	CWD_STATE_FREE(&new_state);
+
+	return retval;
+}
 
 CWD_API int virtual_stat(const char *path, struct stat *buf)
 {
