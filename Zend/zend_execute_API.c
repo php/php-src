@@ -177,9 +177,10 @@ void init_executor(TSRMLS_D)
 	EG(exception) = NULL;
 
 	EG(scope) = NULL;
+	EG(active_namespace) = &CG(global_namespace);
 
-	EG(main_class_ptr) = &CG(main_class);
-	CG(main_class).static_members = &EG(symbol_table);
+	EG(global_namespace_ptr) = &CG(global_namespace);
+	CG(global_namespace).static_members = &EG(symbol_table);
 
 	EG(current_execute_data) = NULL;
 
@@ -191,6 +192,11 @@ void init_executor(TSRMLS_D)
 
 void shutdown_executor(TSRMLS_D)
 {
+	/* return to global namespace here */
+	if(EG(active_namespace) != EG(global_namespace_ptr)) {
+		zend_switch_namespace(EG(global_namespace_ptr));
+	}
+
 	zend_try {
 		zend_ptr_stack_destroy(&EG(arg_types_stack));
 
@@ -531,7 +537,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_class_entry *current_scope;
 	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
-
+	zend_namespace *current_namespace = EG(active_namespace);
 	zend_execute_data execute_data;
 
 	/* Initialize execute_data */
@@ -708,6 +714,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
+	EG(active_namespace) = current_namespace;
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
@@ -727,11 +734,6 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	zval *retval_ptr;
 	int retval;
 
-	if (EG(scope)) {
-		if (zend_hash_find(&EG(scope)->class_table, name, name_length+1, (void **) ce) == SUCCESS) {
-			return SUCCESS;
-		}
-	}
 	if (zend_hash_find(EG(class_table), name, name_length+1, (void **) ce) == SUCCESS) {
 		return SUCCESS;
 	}
@@ -1035,6 +1037,17 @@ void zend_unset_timeout(TSRMLS_D)
 	}
 #	endif
 #endif
+}
+
+void zend_switch_namespace(zend_namespace *ns TSRMLS_DC)
+{
+	if(NULL == ns) {
+		return;
+	}
+	EG(active_namespace) = ns;
+	EG(function_table) = &ns->function_table;
+	EG(class_table) = &ns->class_table;
+/*	EG(zend_constants) = &ns->constants_table; */
 }
 
 /*

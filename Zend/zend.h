@@ -262,7 +262,18 @@ struct _zval_struct {
 	zend_uchar is_ref;
 };
 
+struct _zend_op_array;
 
+/* typedef struct _zend_namespace {
+	char *name;
+	zend_uint name_length;
+	HashTable function_table;
+	HashTable class_table;
+	HashTable constants_table;
+	HashTable *global_variables;
+	struct _zend_op_array *op_array;
+} zend_namespace;
+*/
 
 typedef struct _zend_function_entry {
 	char *fname;
@@ -308,6 +319,7 @@ struct _zend_class_entry {
 	HashTable *static_members;
 	HashTable constants_table;
 	zend_function_entry *builtin_functions;
+	struct _zend_class_entry *namespace;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -316,6 +328,7 @@ struct _zend_class_entry {
 	union _zend_function *__set;
 	union _zend_function *__call;
 
+	
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
 
@@ -327,6 +340,7 @@ struct _zend_class_entry {
 #endif
 };
 
+typedef struct _zend_class_entry zend_namespace; /* namespace is the same as class */
 
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);

@@ -74,7 +74,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_stack_init(&CG(object_stack));
 	zend_stack_init(&CG(declare_stack));
 	CG(active_class_entry) = NULL;
-	CG(active_ce_parent_class_name).value.str.val = NULL;
+	CG(active_namespace) = &CG(global_namespace);
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_stack_init(&CG(list_stack));
@@ -937,6 +937,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.fn_flags = fn_flags;
 
 	op_array.scope = CG(active_class_entry);
+	op_array.namespace = CG(active_namespace);
 
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
@@ -1150,7 +1151,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 }
 
 
-void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_DC)
+void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC)
 {
 	long fetch_class_op_number;
 	zend_op *opline;
@@ -1159,8 +1160,9 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_FETCH_CLASS;
-	if (class_entry) {
-		opline->op1 = *class_entry;
+	if (namespace_name) {
+		zend_str_tolower(namespace_name->u.constant.value.str.val, namespace_name->u.constant.value.str.len);
+		opline->op1 = *namespace_name;
 	} else {
 		SET_UNUSED(opline->op1);
 		CG(catch_begin) = fetch_class_op_number;
@@ -1675,6 +1677,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	zend_initialize_class_data(new_class_entry, 1);
 
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
+
 	if (zend_hash_update(class_table, new_class_entry->name, name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL) == FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Can't create class. Fatal error, please report!");
 	}
@@ -1715,7 +1718,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 	new_ce->refcount++;
 	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, &new_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
 		new_ce->refcount--;
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", last);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class '%s' - class or namespace with this name already exist.", last);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1726,7 +1729,7 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 	zend_function *function;
 
 	if (opline->opcode != ZEND_DECLARE_FUNCTION) {
-		zend_error(E_ERROR, "Internal compiler error.  Please report!");
+		zend_error(E_COMPILE_ERROR, "Internal compiler error.  Please report!");
 	}
 
 	zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void *) &function);
@@ -1758,7 +1761,7 @@ ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable
 	zend_class_entry *ce, **pce;
 
 	if (zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce)==FAILURE) {
-		zend_error(E_ERROR, "Internal Zend error - Missing class information for %s", opline->op1.u.constant.value.str.val);
+		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", opline->op1.u.constant.value.str.val);
 		return FAILURE;
 	} else {
 		ce = *pce;
@@ -1769,7 +1772,7 @@ ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable
 	ce->refcount++;
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
-		zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 		return FAILURE;
 	} else {
 		return SUCCESS;
@@ -1784,7 +1787,7 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 	found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce);
 
 	if (found_ce == FAILURE) {
-		zend_error(E_ERROR, "Cannot redeclare class %s", (*pce)->name);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", (*pce)->name);
 		return FAILURE;
 	} else {
 		ce = *pce;
@@ -1800,7 +1803,7 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 
 	/* Register the derived class */
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
-		zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 		ce->refcount--;
 		zend_hash_destroy(&ce->function_table);
 		zend_hash_destroy(&ce->default_properties);
@@ -2114,7 +2117,6 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	int doing_inheritance = 0;
 	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
 
-	class_token->u.previously_active_class_entry = CG(active_class_entry);
 	if (!(strcmp(class_name->u.constant.value.str.val, "main") && strcmp(class_name->u.constant.value.str.val, "self") &&
 			strcmp(class_name->u.constant.value.str.val, "parent"))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
@@ -2148,7 +2150,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
 	opline->op2.u.constant.refcount = 1;
-
+	
 	if (doing_inheritance) {
 		opline->extended_value = parent_class_name->u.var;
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
@@ -2158,7 +2160,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	opline->op2.u.constant.value.str.val = estrndup(new_class_entry->name, new_class_entry->name_length);
 	opline->op2.u.constant.value.str.len = new_class_entry->name_length;
-
+	
 	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &new_class_entry, sizeof(zend_class_entry *), NULL);
 	CG(active_class_entry) = new_class_entry;
 }
@@ -2167,11 +2169,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
-	CG(active_class_entry) = class_token->u.previously_active_class_entry;
-	if (CG(active_ce_parent_class_name).value.str.val) {
-		efree(CG(active_ce_parent_class_name).value.str.val);
-		CG(active_ce_parent_class_name).value.str.val = NULL;
-	}
+	CG(active_class_entry) = NULL;
 }
 
 void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
@@ -3180,6 +3178,116 @@ void zend_destroy_property_info(zend_property_info *property_info)
 	efree(property_info->name);
 }
 
+void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
+{
+	zend_hash_init(&ns->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
+	zend_hash_init(&ns->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
+	ALLOC_HASHTABLE(ns->static_members);
+	zend_hash_init(ns->static_members, 0, NULL, ZVAL_PTR_DTOR, 0);
+	ns->constructor = NULL;
+	ns->type = ZEND_NAMESPACE;
+}
+
+void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
+{
+	zend_namespace *ns = emalloc(sizeof(zend_namespace));
+	zend_op *opline;
+	
+	zend_str_tolower(ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len);
+	ns->name = ns_name->u.constant.value.str.val;
+	ns->name_length = ns_name->u.constant.value.str.len;
+
+	if(zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL) != SUCCESS) {
+		efree(ns);
+		zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_DECLARE_NAMESPACE;
+	opline->op1.op_type = IS_CONST;
+	opline->op1.u.constant.type = IS_STRING;
+	opline->op1.u.constant.value.str.val = estrndup(ns->name, ns->name_length);
+	opline->op1.u.constant.value.str.len = ns->name_length;
+	opline->op1.u.constant.refcount = 1;
+	SET_UNUSED(opline->op2);
+
+	zend_init_namespace(ns TSRMLS_CC);
+
+	ns->constructor = emalloc(sizeof(zend_op_array));
+	init_op_array((zend_op_array *)ns->constructor, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
+	ns->constructor->op_array.namespace = CG(active_namespace);
+
+	ns_token->u.op_array = CG(active_op_array);	
+	
+	CG(active_op_array) = &ns->constructor->op_array;
+	CG(active_namespace) = ns;
+
+	/* new symbol tables */
+	CG(class_table) = &ns->class_table;
+	CG(function_table) = &ns->function_table;
+	
+	fprintf(stderr, "Start namespace '%s'\n", ns->name);
+}
+
+void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
+{
+	zend_namespace *ns = CG(active_op_array)->namespace;
+	int handle = CG(handle_op_arrays);
+
+	
+	zend_do_return(NULL, 0 TSRMLS_CC);
+	CG(handle_op_arrays) = 0;
+	pass_two(CG(active_op_array) TSRMLS_CC);
+	CG(handle_op_arrays) = handle;
+	
+	CG(active_op_array)->namespace = CG(active_namespace);
+
+	CG(active_namespace) = ns;
+	CG(active_op_array) = ns_token->u.op_array;
+	/* restore symbol tables */
+	CG(class_table) = &CG(active_namespace)->class_table;
+	CG(function_table) = &CG(active_namespace)->function_table;
+	
+	fprintf(stderr, "End namespace\n");
+}
+
+void zend_do_declare_namespace_var(znode *var_name, znode *value TSRMLS_DC)
+{
+	zval *var;
+
+	ALLOC_ZVAL(var);
+
+	if (value) {
+		*var = value->u.constant;
+	} else {
+		INIT_PZVAL(var);
+		var->type = IS_NULL;
+	}
+
+	zend_hash_update(CG(active_namespace)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &var, sizeof(zval *), NULL);
+
+	FREE_PNODE(var_name);
+}
+
+void zend_do_declare_namespace_constant(znode *var_name, znode *value TSRMLS_DC)
+{
+	zval *var;
+
+	ALLOC_ZVAL(var);
+
+	if (value) {
+		*var = value->u.constant;
+	} else {
+		INIT_PZVAL(var);
+		var->type = IS_NULL;
+	}
+
+	zend_hash_update(&CG(active_namespace)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &var, sizeof(zval *), NULL);
+
+	FREE_PNODE(var_name);
+}
 
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers)
 {
@@ -3211,6 +3319,8 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 		ce->__call = NULL;
 		ce->create_object = NULL;
 	}
+
+	ce->namespace = CG(active_namespace);
 }
 
 /*
