@@ -62,7 +62,7 @@ void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC) {
 	} else {
 		return;
 	}
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s used in query %s", index, query);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s used in query/prepared statement %s", index, query);
 #else
 	return;
 #endif

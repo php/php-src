@@ -189,7 +189,6 @@ MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, STMT, stmt->mysql->last_u
 MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, STMT, stmt->affected_rows);
 #endif
 MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_num_rows_read, STMT, stmt->result->row_count);
-MYSQLI_MAP_PROPERTY_STRING(stmt_query_read, STMT, stmt->query);
 MYSQLI_MAP_PROPERTY_LONG(stmt_param_count_read, STMT, stmt->param_count);
 MYSQLI_MAP_PROPERTY_LONG(stmt_field_count_read, STMT, stmt->field_count);
 MYSQLI_MAP_PROPERTY_LONG(stmt_id_read, STMT, stmt->stmt_id);
@@ -236,7 +235,6 @@ mysqli_property_entry mysqli_result_property_entries[] = {
 mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"affected_rows", stmt_affected_rows_read, NULL},
 	{"num_rows", stmt_num_rows_read, NULL},
-	{"query", stmt_query_read, NULL},
 	{"param_count", stmt_param_count_read, NULL},
 	{"field_count", stmt_field_count_read, NULL},
 	{"id", stmt_id_read, NULL},

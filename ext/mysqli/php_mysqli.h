@@ -47,6 +47,7 @@ typedef struct {
 	MYSQL_STMT	*stmt;
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
+	char		*query;
 } STMT;
 
 typedef struct {
@@ -349,6 +350,7 @@ PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
 #ifndef HAVE_MYSQLI_OLDAPI
 PHP_FUNCTION(mysqli_stmt_free_result);
+PHP_FUNCTION(mysqli_stmt_reset);
 #endif
 PHP_FUNCTION(mysqli_stmt_num_rows);
 #if MYSQL_VERSION_ID >= 40101

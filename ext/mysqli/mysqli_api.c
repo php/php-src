@@ -578,7 +578,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		RETURN_FALSE;
 	}
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index(stmt->stmt->query, stmt->stmt->mysql->server_status TSRMLS_CC);
+		php_mysqli_report_index(stmt->query, stmt->stmt->mysql->server_status TSRMLS_CC);
 	}
 	
 	RETURN_TRUE;
@@ -1225,6 +1225,8 @@ PHP_FUNCTION(mysqli_prepare)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
+	stmt->query = (query_len) ? (char *)emalloc(query_len + 1) : NULL;
+	strcpy(stmt->query, query);
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
 }
 /* }}} */
@@ -1498,6 +1500,25 @@ PHP_FUNCTION(mysqli_stmt_free_result)
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt");
 
 	mysql_stmt_free_result(stmt->stmt);
+
+	return;
+}
+/* }}} */
+
+/* {{{ proto void mysqli_stmt_reset(object stmt)
+   reset a prepared statement */
+PHP_FUNCTION(mysqli_stmt_reset) 
+{
+	STMT 			*stmt;
+	zval    		*mysql_stmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt");
+
+	mysql_stmt_reset(stmt->stmt);
 
 	return;
 }
