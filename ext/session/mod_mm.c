@@ -35,7 +35,7 @@
 # error mm is not thread-safe
 #endif
 
-#define PS_MM_PATH "/tmp/session_mm"
+#define PS_MM_FILE "session_mm"
 
 /* For php_uint32 */
 #include "ext/standard/basic_functions.h"
@@ -247,8 +247,18 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
+    char *ps_mm_path = calloc(strlen(PS(save_path))+1+strlen(PS_MM_FILE)+1, 1); /* Directory + '/' + File + \0 */
+
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-	if (ps_mm_initialize(ps_mm_instance, PS_MM_PATH) != SUCCESS) {
+
+    strcpy(ps_mm_path, PS(save_path));
+
+    if((strlen(ps_mm_path) > 0) && (ps_mm_path[strlen(ps_mm_path)-1] != '/'))
+        strcat(ps_mm_path, "/");  /* Fixme Windows */
+
+    strcat(ps_mm_path, PS_MM_FILE);
+
+	if (ps_mm_initialize(ps_mm_instance, ps_mm_path) != SUCCESS) {
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
