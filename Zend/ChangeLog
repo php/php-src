@@ -1,3 +1,45 @@
+2003-01-14  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_operators.c
+      zend_operators.h:
+      - Change "is" to "instanceof" as it explains better what the operator
+      means.
+      - "is_a" was also appropriate but ugly.
+
+2003-01-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c:
+      fix memory leaks and key size
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y:
+      MFZE2
+
+2003-01-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      fix warning
+
+    * zend_API.c
+      zend_API.h:
+      Make add_property_ functions work via write_property handler
+
+    * zend.c
+      zend_object_handlers.c:
+      ws
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y:
+      Reverting previous patch.
+
 2003-01-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini_parser.y:
