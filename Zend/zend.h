@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.0.0RC2RC1"
+#define ZEND_VERSION "2.0.0RC2-dev"
 
 #define ZEND_ENGINE_2
 
