@@ -102,7 +102,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayFatalError($eobj)
     {
-        $this->_displayError($eobj);
+        $this->displayError($eobj);
         exit(1);
     }
 
