@@ -402,8 +402,10 @@ PHP_FUNCTION(touch)
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir((*filename)->value.str.val))
+	if (php_check_open_basedir((*filename)->value.str.val)) {
+		if (newtime) efree(newtime);
 		RETURN_FALSE;
+	}
 
 	/* create the file if it doesn't exist already */
 	ret = V_STAT((*filename)->value.str.val, &sb);
