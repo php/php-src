@@ -793,6 +793,7 @@ int php_module_startup(sapi_module_struct *sf)
 #endif
 
 	SG(server_context) = NULL;
+	SG(request_info).request_method = NULL;
 	sapi_activate(SLS_C);
 
 	if (module_initialized) {
