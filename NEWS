@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.0 Release
+22 Mar 2000, Version 4.0.0 Release
 - Improved round() to allow specification of rounding precision.
   (Andrei, Todd Kirby <kirbyt@yahoo.com>)
 - Added SORT_REGULAR, SORT_NUMERIC, SORT_STRING flags that can be used with
