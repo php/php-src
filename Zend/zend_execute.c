@@ -272,10 +272,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, zval *valu
 			}
 		}
 	} else {
-		if (--variable_ptr->refcount==0) {
-			zval_dtor(variable_ptr);
-		}
-		variable_ptr = *variable_ptr_ptr;
+		variable_ptr->refcount--;
 		if (variable_ptr->refcount==0) {
 			switch (type) {
 				case IS_VAR:
@@ -283,6 +280,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, zval *valu
 					if (variable_ptr==value) {
 						variable_ptr->refcount++;
 					} else if (value->is_ref) {
+						zendi_zval_dtor(*variable_ptr);
 						*variable_ptr = *value;
 						zval_copy_ctor(variable_ptr);
 						variable_ptr->refcount=1;
