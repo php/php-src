@@ -223,9 +223,9 @@ PHP_FUNCTION(xslt_output_begintransform)
 
     /**
      * Start output buffering, NULL signifies that no "user-space" output function
-     * will be used.
+     * will be used.  The 0 disables chunking
      */
-	php_start_ob_buffer(NULL);
+	php_start_ob_buffer(NULL, 0);
 }
 /* }}} */
 
@@ -343,29 +343,29 @@ PHP_FUNCTION(xslt_transform)
 	 * parameters.
 	 */
 	if (argc > 3) {
-		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0 ||
-		    Z_TYPE_PP(xslt_params) != IS_NULL) {
-			int numelems, 
-			    size;
-			HashTable *ar = HASH_OF(*xslt_params);
+		HashTable *ar = HASH_OF(*xslt_params);
+        if (ar) {
+    		int numelems, 
+	   		    size;
 
             /**
              * Allocate 2 times the number of elements in
              * the array, since with associative arrays in PHP
              * keys are not counted.
              */
-			numelems = zend_hash_num_elements(ar);
-			size = (numelems * 2 + 1) * sizeof(char *);
+
+	    	numelems = zend_hash_num_elements(ar);
+		    size = (numelems * 2 + 1) * sizeof(char *);
 			
-			params = (char **)emalloc(size+1);
-			memset((char *)params, 0, size);
+		    params = (char **)emalloc(size+1);
+   			memset((char *)params, 0, size);
 			
-			/**
-			 * Translate a PHP array (HashTable *) into a 
-			 * Sablotron array (char **).
-			 */
-			_php_sablot_ht_char(ar, params);
-		}
+    		/**
+	    	 * Translate a PHP array (HashTable *) into a 
+		     * Sablotron array (char **).
+   			 */
+   			_php_sablot_ht_char(ar, params);
+   		}
 	}
 	
 	/**
@@ -374,20 +374,19 @@ PHP_FUNCTION(xslt_transform)
 	 * arguments.
 	 */
 	if (argc > 4) {
-		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0 ||
-		    Z_TYPE_PP(xslt_args) != IS_NULL) {
-			int numelems, 
-			    size;
-			HashTable *ar = HASH_OF(*xslt_args);
+		HashTable *ar = HASH_OF(*xslt_args);
+		if (ar) {
+	    	int numelems, 
+		        size;
 
-			numelems = zend_hash_num_elements(ar);
-			size = (numelems * 2 + 1) * sizeof(char *);
+    		numelems = zend_hash_num_elements(ar);
+	   		size = (numelems * 2 + 1) * sizeof(char *);
+		
+	    	args = (char **)emalloc(size+1);
+		    memset((char *)args, 0, size);
 			
-			args = (char **)emalloc(size+1);
-			memset((char *)args, 0, size);
-			
-			_php_sablot_ht_char(ar, args);
-		}
+    		_php_sablot_ht_char(ar, args);
+    	}
 	}
 	
 	SABLOT_BASIC_CREATE_PROCESSOR();
@@ -577,35 +576,29 @@ PHP_FUNCTION(xslt_run)
 		result = estrndup(Z_STRVAL_PP(xslt_result), Z_STRLEN_PP(xslt_result));
 	}
 	
-	if (argc > 4) {
-		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0) { 
-			int numelems, 
-			    size;	
-			HashTable *ar = HASH_OF(*xslt_params);
-
-			numelems = zend_hash_num_elements(ar);
-			size = (numelems * 2 + 1) * sizeof(char *);
+	if (argc > 4) {	
+		HashTable *ar = HASH_OF(*xslt_params);
+        if (ar) {
+    		numelems = zend_hash_num_elements(ar);
+	    	size = (numelems * 2 + 1) * sizeof(char *);
+		
+		    params = (char **)emalloc(size+1);
+	    	memset((char *)params, 0, size);
 			
-			params = (char **)emalloc(size+1);
-			memset((char *)params, 0, size);
-			
-			_php_sablot_ht_char(ar, params);
+		    _php_sablot_ht_char(ar, params);
 		}
 	}
 	
 	if (argc > 5) {
-		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0) {
-			int numelems, 
-			    size;
-			HashTable *ar = HASH_OF(*xslt_args);
-
-			numelems = zend_hash_num_elements(ar);
-			size = (numelems * 2 + 1) * sizeof(char *);
+		HashTable *ar = HASH_OF(*xslt_args);
+        if (ar) {
+	    	numelems = zend_hash_num_elements(ar);
+		    size = (numelems * 2 + 1) * sizeof(char *);
 			
-			args = (char **)emalloc(size+1);
-			memset((char *)args, 0, size);
-			
-			_php_sablot_ht_char(ar, args);
+    		args = (char **)emalloc(size+1);
+	    	memset((char *)args, 0, size);
+		
+		    _php_sablot_ht_char(ar, args);
 		}
 	}
 	
