@@ -69,11 +69,20 @@ dnl Figure out which library file to link with for the Empress support.
 dnl
 AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
   AC_MSG_CHECKING([Empress library file])
-  ODBC_LIBS=`echo $1/empodbc.so | cut -d' ' -f1`
+  ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/empodbc.a | cut -d' ' -f1`
+    ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
   fi
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
+])
+
+AC_DEFUN(AC_FIND_EMPRESS_BCS_LIBS,[
+  AC_MSG_CHECKING([Empress local access library file])
+  ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
+  if test ! -f $ODBCBCS_LIBS; then
+    ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
+  fi
+  AC_MSG_RESULT(`echo $ODBCBCS_LIBS | sed -e 's!.*/!!'`)
 ])
 
 if test -z "$ODBC_TYPE"; then
@@ -201,16 +210,18 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
-                          install directory, defaults to \$EMPRESSPATH],
+                           install directory, defaults to \$EMPRESSPATH.
+                           From PHP4, this option only supports Empress Version
+                           8.60 and above],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
-      ODBC_INCDIR=$EMPRESSPATH/odbccl/include
-      ODBC_LIBDIR=$EMPRESSPATH/odbccl/lib
+      ODBC_INCDIR=$EMPRESSPATH/include/odbc
+      ODBC_LIBDIR=$EMPRESSPATH/shlib
     else
-      ODBC_INCDIR=$withval/include
-      ODBC_LIBDIR=$withval/lib
+      ODBC_INCDIR=$withval/include/odbc
+      ODBC_LIBDIR=$withval/shlib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
@@ -218,6 +229,53 @@ AC_ARG_WITH(empress,
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
     AC_MSG_RESULT(yes)
     AC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for Empress local access support)
+AC_ARG_WITH(empress-bcs,
+[  --with-empress-bcs[=DIR]Include Empress Local Access support.  DIR is the 
+                           Empress base install directory, defaults to \$EMPRESSPATH.
+                           From PHP4, this option only supports Empress Version
+                           8.60 and above],
+[
+  PHP_WITH_SHARED
+  if test "$withval" != "no"; then
+    if test "$withval" = "yes"; then
+      ODBC_INCDIR=$EMPRESSPATH/include/odbc
+      ODBC_LIBDIR=$EMPRESSPATH/shlib
+    else
+      ODBC_INCDIR=$withval/include/odbc
+      ODBC_LIBDIR=$withval/shlib
+    fi
+    CC="empocc -bcs";export CC;
+    LD="empocc -bcs";export LD;
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    LIST=`empocc -listlines -bcs -o a a.c`
+
+    NEWLIST=
+    for I in $LIST
+    do
+        case $I in
+          $EMPRESSPATH/odbccl/lib/* | \
+          $EMPRESSPATH/rdbms/lib/* | \
+          $EMPRESSPATH/common/lib/*)
+                NEWLIST="$NEWLIST $I"
+                ;;
+        esac
+    done
+    ODBC_LIBS="-lempphpbcs -lms -lmscfg -lbasic -lbasic_os -lnlscstab -lnlsmsgtab -lm -ldl -lcrypt"
+    ODBC_TYPE=empress
+    AC_DEFINE(HAVE_EMPRESS,1,[ ])
+    AC_MSG_RESULT(yes)
+    AC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
   else
     AC_MSG_RESULT(no)
   fi
@@ -474,10 +532,10 @@ if test -n "$ODBC_TYPE"; then
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
   PHP_SUBST(ODBC_INCDIR)
+  PHP_SUBST(ODBC_INCLUDE)
   PHP_SUBST(ODBC_LIBDIR)
-  PHP_SUBST_OLD(ODBC_INCLUDE)
-  PHP_SUBST_OLD(ODBC_LIBS)
-  PHP_SUBST_OLD(ODBC_LFLAGS)
+  PHP_SUBST(ODBC_LIBS)
+  PHP_SUBST(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
   PHP_EXTENSION(odbc, $shared)
 fi

@@ -11,7 +11,17 @@ if test "$option_value_with_solid" = "no"; then
 define_option with-empress 'Empress support?' yesnodir \
     "no $EMPRESSPATH Empress home" \
 '    Whether to build PHP with Empress support.  Has been confirmed to
-    work with Empress Version 8.10.  If you have not set up your
+    work with Empress Version 8.60.  If you have not set up your
+    Empress environment, enter what $EMPRESSPATH is usually set to here.
+    More info about Empress can be found at http://www.empress.com/.'
+fi
+
+# Empress
+if test "$option_value_with_solid" = "no"; then
+define_option with-empress-bcs 'Empress support?' yesnodir \
+    "no $EMPRESSPATH Empress home" \
+'    Whether to build PHP with Empress support.  Has been confirmed to
+    work with Empress Version 8.60.  If you have not set up your
     Empress environment, enter what $EMPRESSPATH is usually set to here.
     More info about Empress can be found at http://www.empress.com/.'
 fi
