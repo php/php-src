@@ -1,3 +1,64 @@
+2001-07-20  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/pi3web_sapi.c: Updated
+
+    * sapi/pi3web/pi3web_sapi.h
+      sapi/pi3web/pi3web_sapi.c:
+    Updated PHP mode, fixed indent mode, added syntax check mode
+
+2001-07-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/iconv/iconv.c
+      ext/sablot/sablot.c:
+    Fix last two instances of using ext/standard/php_output.h
+
+2001-07-20  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/mbstring/mbstring.c
+      ext/mailparse/mailparse.c: fix include
+
+2001-07-20  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h:
+    Retain downwards compatibility - cool idea Jon :)
+
+    * NEWS: Update NEWS
+
+    * ext/standard/Makefile.in
+      main/Makefile.in: Fix UNIX build
+
+    * ext/session/session.c
+      ext/standard/output.c
+      main/internal_functions_win32.c
+      main/output.c
+      main/php.h
+      win32/php4dllts.dsp: Fix Windows build
+
+    * ext/standard/output.c
+      ext/standard/php_output.h
+      main/main.c
+      main/output.c
+      main/php_output.h:
+    Avoid getting bailouts on text output during shutdown.  Text output is now
+    'officially' disabled during shutdown (this doesn't change the Apache module
+    behavior, but may change behavior of other server modules, in which it was
+    possible to emit output during shutdown;  I think it's a good step towards
+    consistency, though)
+
+    * configure.in: Fix broken text
+
+2001-07-20  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gd.c: fix font handling in vdir mode
+
+2001-07-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Retire a hash function and use FNV-1
+
+    * ext/standard/string.c
+      NEWS: Add optional support for using boyer-moore to str_replace.
+
 2001-07-19  Joey Smith  <joey@joeysmith.com>
 
     * ext/ext_skel: I just got annoyed by this, eventually. :)
