@@ -585,7 +585,7 @@ class testHarness {
 					$out .= fread($fd, 8192);
 				fclose($fd);
 			}
-			#unlink($tmp_file);
+			unlink($tmp_file);
 			if ($removeheaders &&
 				preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $this->incoming_payload, $match)) {
 					return $match[2];
@@ -1436,7 +1436,7 @@ class testHarness {
 				$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
 				$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
 				$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-				$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*", $wanted_re);
+				$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
 				$wanted_re = str_replace("%c", ".", $wanted_re);
 				// %f allows two points "-.0.0" but that is the best *simple* expression
 			}
