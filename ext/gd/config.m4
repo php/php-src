@@ -266,7 +266,7 @@ dnl These are always available with bundled library
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
 
-  if test -n "$GD_JPG_DIR"; then
+  if test -n "$GD_JPEG_DIR"; then
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
   fi
