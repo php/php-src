@@ -23,6 +23,8 @@
 #include "php_ini.h"
 #include "php_sockets.h"
 
+#include "../standard/info.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -35,6 +37,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/uio.h>
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
@@ -43,8 +46,10 @@
 
 #ifdef ZTS
 int sockets_globals_id;
+
 #else
 php_sockets_globals sockets_globals;
+
 #endif
 
 #define ZVAL(arg, type) ((*(arg))->value.type)
@@ -66,10 +71,18 @@ void v_convert_to_long_ex(int items,...)
 	va_end(ap);
 
 }
-
 /* *INDENT-OFF* */
 static unsigned char second_and_third_args_force_ref[] =
 {3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
+
+static unsigned char second_fifth_and_sixth_args_force_ref[] =
+{6, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
+
+static unsigned char fourth_arg_force_ref[] =
+{4, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE};
+
+static unsigned char third_through_seventh_args_force_ref[] =
+{7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
 
 /* Every user visible function must have an entry in sockets_functions[].
  */
@@ -105,10 +118,29 @@ function_entry sockets_functions[] =
 	PHP_FE(connect, 			NULL)	/* OK */
 	PHP_FE(strerror, 			NULL)	/* OK */
 	PHP_FE(bind,				NULL)
+	PHP_FE(recv,				second_arg_force_ref)
+	PHP_FE(send,				NULL)
+	PHP_FE(recvfrom,			second_fifth_and_sixth_args_force_ref)
+	PHP_FE(sendto,				NULL)
+	PHP_FE(build_iovec,			NULL)
+	PHP_FE(fetch_iovec,			NULL)
+	PHP_FE(free_iovec,			NULL)
+	PHP_FE(add_iovec,			NULL)
+	PHP_FE(delete_iovec,			NULL)
+	PHP_FE(set_iovec,			NULL)
+	PHP_FE(recvmsg,				third_through_seventh_args_force_ref)
+	PHP_FE(sendmsg,				NULL)
+	PHP_FE(readv,				NULL)
+	PHP_FE(writev,				NULL)
+	PHP_FE(getsockopt,			fourth_arg_force_ref)
+	PHP_FE(setsockopt,			NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in sockets_functions[] */
 };
 
 /* *INDENT-ON* */
+
+
+
 
 zend_module_entry sockets_module_entry =
 {
@@ -123,6 +155,7 @@ zend_module_entry sockets_module_entry =
 };
 
 int le_destroy;
+int le_iov;
 
 #ifdef COMPILE_DL_SOCKETS
 ZEND_GET_MODULE(sockets)
@@ -133,9 +166,28 @@ ZEND_GET_MODULE(sockets)
    PHP_INI_END()
  */
 
+typedef struct php_iovec {
+	struct iovec *iov_array;
+	unsigned int count;
+} php_iovec_t;
+
 static void destroy_fd_sets(fd_set * set)
 {
 	efree(set);
+}
+
+static void destroy_iovec(php_iovec_t * iov)
+{
+	int i;
+
+	if (iov->count && iov->iov_array) {
+		for (i = 0; i < iov->count; i++) {
+			efree(iov->iov_array[i].iov_base);
+		}
+
+		efree(iov->iov_array);
+		efree(iov);
+	}
 }
 
 PHP_MINIT_FUNCTION(sockets)
@@ -144,6 +196,45 @@ PHP_MINIT_FUNCTION(sockets)
    REGISTER_INI_ENTRIES();
  */
 	le_destroy = register_list_destructors(destroy_fd_sets, NULL);
+	le_iov = register_list_destructors(destroy_iovec, NULL);
+
+	REGISTER_LONG_CONSTANT("AF_UNIX", 		AF_UNIX, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("AF_INET", 		AF_INET, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOCK_STREAM", 		SOCK_STREAM, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOCK_DGRAM", 		SOCK_DGRAM, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOCK_RAW", 		SOCK_RAW, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOCK_SEQPACKET", 	SOCK_SEQPACKET, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOCK_RDM", 		SOCK_RDM, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSG_OOB", 		MSG_OOB, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSG_WAITALL", 		MSG_WAITALL, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSG_PEEK", 		MSG_PEEK, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSG_DONTROUTE",		MSG_DONTROUTE,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_DEBUG", 		SO_DEBUG, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_REUSEADDR", 		SO_REUSEADDR, 	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_KEEPALIVE",		SO_KEEPALIVE,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_DONTROUTE",		SO_DONTROUTE,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_LINGER",		SO_LINGER,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_BROADCAST",		SO_BROADCAST,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_OOBINLINE",		SO_OOBINLINE,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_SNDBUF",		SO_SNDBUF,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_RCVBUF",		SO_RCVBUF,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_SNDLOWAT",		SO_SNDLOWAT,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_RCVLOWAT",		SO_RCVLOWAT,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_SNDTIMEO",		SO_SNDTIMEO,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_RCVTIMEO",		SO_RCVTIMEO,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_TYPE",		SO_TYPE,	CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_ERROR",		SO_ERROR,	CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SOL_SOCKET",		SOL_SOCKET,	CONST_PERSISTENT);
+	{
+		struct protoent *pe;
+		pe = getprotobyname("tcp");
+		if (pe)
+			REGISTER_LONG_CONSTANT("SOL_TCP",	pe->p_proto,	CONST_PERSISTENT);
+		pe = getprotobyname("udp");
+		if (pe)
+			REGISTER_LONG_CONSTANT("SOL_UDP",	pe->p_proto,	CONST_PERSISTENT);
+	}
 	return SUCCESS;
 }
 
@@ -196,7 +287,6 @@ PHP_FUNCTION(confirm_sockets_compiled)
 PHP_FUNCTION(fd_alloc)
 {
 	fd_set *set;
-	zval *new_resource;
 	int ret;
 
 	set = emalloc(sizeof(fd_set));
@@ -204,8 +294,7 @@ PHP_FUNCTION(fd_alloc)
 		zend_error(E_ERROR, "Can't allocate memory for fd_set");
 		RETVAL_FALSE;
 	}
-	ret = ZEND_REGISTER_RESOURCE(new_resource, set, le_destroy);
-	RETURN_RESOURCE(ret);
+	ret = ZEND_REGISTER_RESOURCE(return_value, set, le_destroy);
 }
 /* }}} */
 
@@ -247,7 +336,6 @@ PHP_FUNCTION(fd_clear)
 {
 	zval **set, **fd;
 	fd_set *the_set;
-	int ret;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fd, &set) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -265,12 +353,11 @@ PHP_FUNCTION(fd_clear)
 /* }}} */
 
 /* {{{ proto bool fd_isset(long fd, resource set)
-   Check to see if a file descriptor is set within the file descriptor set */
+   Check to see if a file descriptor is set within the file descrirptor set */
 PHP_FUNCTION(fd_isset)
 {
 	zval **set, **fd;
 	fd_set *the_set;
-	int ret;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fd, &set) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -311,34 +398,33 @@ PHP_FUNCTION(fd_zero)
 /* }}} */
 
 /* {{{ proto void select(long max_fd, resource readfds, resource writefds, resource exceptfds, long tv_sec, long tv_usec)
-   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
-/*
-   See select(2) man page for details.
+   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec. */
+/* See select(2) man page for details.
 
    From man page:
    select waits for a number of file descriptors to change status.
 
-   Three independent sets of descriptors are watched.  Those in
-   readfds will be watched to see if characters become avaliable for
-   reading, those in writefds will be watched to see if it is ok to
-   immediately write on them, and those in exceptfds will be watched
-   for exceptions.  On exit, the sets are modified in place to
+   Three independent sets of descriptors are watched.  Those in 
+   readfds will be watched to see if characters become avaliable for 
+   reading, those in writefds will be watched to see if it is ok to 
+   immediately write on them, and those in exceptfds will be watched 
+   for exceptions.  On exit, the sets are modified in place to 
    indicate which descriptors actually changed status.
 
-   -1 is passed for any sets for which NULL would be passed to the
-   system call. 
+   -1 is passed for any sets for which NULL would be passed to the 
+   system call.
  */
 
 PHP_FUNCTION(select)
 {
-	zval **max_fd, **readfds, **writefds, **exceptfds, **tv_sec,
-	**tv_usec;
+	zval **max_fd, **readfds, **writefds, **exceptfds, **tv_sec, 
+             **tv_usec;
 	struct timeval tv;
 	fd_set *rfds, *wfds, *xfds;
 	int ret = 0;
 
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &max_fd, &readfds, &writefds, &exceptfds,
-					 &tv_sec, &tv_usec) == FAILURE) {
+		 			   &tv_sec, &tv_usec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	v_convert_to_long_ex(6, max_fd, readfds, writefds, exceptfds, tv_sec, tv_usec);
@@ -425,10 +511,11 @@ PHP_FUNCTION(open_listen_sok)
 /* }}} */
 
 /* {{{ proto int accept_connect(long fd)
-   Accepts a connection on the listening socket fd */
+   accepts a connection on the listening socket fd */
 int accept_connect(int fd, struct sockaddr *la)
 {
 	int foo, m;
+
 	m = sizeof(*la);
 	if ((foo = accept(fd, la, &m)) < 0) {
 		return -1;
@@ -458,7 +545,7 @@ PHP_FUNCTION(accept_connect)
 /* }}} */
 
 /* {{{ proto bool set_nonblock(long fd)
-   Sets nonblocking mode for file descriptor fd */
+   sets nonblocking mode for file descriptor fd */
 PHP_FUNCTION(set_nonblock)
 {
 	zval **fd;
@@ -479,7 +566,7 @@ PHP_FUNCTION(set_nonblock)
 /* }}} */
 
 /* {{{ proto bool listen(long fd, long backlog)
-   Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
+   sets the maximum number of connections allowed to be waited for on the socket specified by fd */
 PHP_FUNCTION(listen)
 {
 	zval **fd, **backlog;
@@ -577,7 +664,7 @@ PHP_FUNCTION(read)
 /* }}} */
 
 /* {{{ proto long getsockname(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port int addr and port describing the local side of a socket */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the local side of a socket. */
 
 /* A lock to prevent inet_ntoa() from causing problems in threading */
 volatile int inet_ntoa_lock = 0;
@@ -601,10 +688,12 @@ PHP_FUNCTION(getsockname)
 		RETURN_LONG(-errno);
 	} else {
 		char *addr_string;
+
 		while (inet_ntoa_lock == 1);
 		inet_ntoa_lock = 1;
 		addr_string = inet_ntoa(sa.sin_addr);
 		tmp = emalloc(strlen(addr_string) + 1);
+		bzero(tmp, strlen(addr_string) + 1);
 		strncpy(tmp, addr_string, strlen(addr_string));
 		inet_ntoa_lock = 0;
 
@@ -670,7 +759,7 @@ PHP_FUNCTION(gethostbyname)
 #endif
 
 /* {{{ proto long getpeername(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port int addr and port describing the remote side of a socket */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket. */
 
 PHP_FUNCTION(getpeername)
 {
@@ -691,6 +780,7 @@ PHP_FUNCTION(getpeername)
 		RETURN_LONG(-errno);
 	} else {
 		char *addr_string;
+
 		while (inet_ntoa_lock == 1);
 		inet_ntoa_lock = 1;
 		addr_string = inet_ntoa(sa.sin_addr);
@@ -760,46 +850,27 @@ PHP_FUNCTION(gethostbyaddr)
 
 #endif
 
-/* {{{ proto long socket(string domain, string type, long protocol)
+/* {{{ proto long socket(long domain, long type, long protocol)
    Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket)
 {
 	zval **domain, **type, **protocol;
 	int ret;
-	int my_type, my_domain;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &domain, &type, &protocol) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(domain);
-	convert_to_string_ex(type);
-	convert_to_long_ex(protocol);
+	v_convert_to_long_ex(3, domain, type, protocol);
 
-	if (!strcasecmp(ZVAL(domain, str.val), "af_inet")) {
-		my_domain = AF_INET;
-	} else if (!strcasecmp(ZVAL(domain, str.val), "af_unix")) {
-		my_domain = AF_UNIX;
-	} else {
-		zend_error(E_WARNING, "invalid communications domain specified - assuming AF_INET");
-		my_domain = AF_INET;
+	if (ZVAL(domain, lval) != AF_INET && ZVAL(domain, lval) != AF_UNIX) {
+		zend_error(E_WARNING, "invalid socket domain specified - assuming AF_INET");
+		ZVAL(domain, lval) = AF_INET;
 	}
-
-	if (!strcasecmp(ZVAL(type, str.val), "sock_stream")) {
-		my_type = SOCK_STREAM;
-	} else if (!strcasecmp(ZVAL(type, str.val), "sock_dgram")) {
-		my_type = SOCK_DGRAM;
-	} else if (!strcasecmp(ZVAL(type, str.val), "sock_raw")) {
-		my_type = SOCK_RAW;
-	} else if (!strcasecmp(ZVAL(type, str.val), "sock_seqpacket")) {
-		my_type = SOCK_SEQPACKET;
-	} else if (!strcasecmp(ZVAL(type, str.val), "sock_rdm")) {
-		my_type = SOCK_RDM;
-	} else {
+	if (ZVAL(type, lval) > 10) {
 		zend_error(E_WARNING, "invalid socket type specified - assuming SOCK_STREAM");
-		my_type = SOCK_STREAM;
+		ZVAL(type, lval) = SOCK_STREAM;
 	}
-
-	ret = socket(my_domain, my_type, ZVAL(protocol, lval));
+	ret = socket(ZVAL(domain, lval), ZVAL(type, lval), ZVAL(protocol, lval));
 	if (ret < 0) {
 		RETURN_LONG(-errno);
 	} else {
@@ -872,51 +943,59 @@ PHP_FUNCTION(strerror)
 }
 /* }}} */
 
-/* {{{ proto long bind(long sockfd, string domain [, string ...])
-   Binds an open socket to a listening port */
-/*	-- domain = "af_unix", 3rd arg is path to socket
-	-- domain = "af_inet", 3rd arg is address to bind to, 4th arg is port */
+/* {{{ proto long bind(long sockfd, long addr [, long port])
+   Binds an open socket to a listening port. */
+/* Port is only specified if sockfd is in the AF_INET family. */
 PHP_FUNCTION(bind)
 {
-	zval **arg0, **arg1, **arg2, **arg3;
+	zval **arg0, **arg1, **arg2;
 	long ret;
-	void **p;
-	int arg_count;
-	va_list ptr;
-	ELS_FETCH();
+	struct sockaddr sock_type;
+	socklen_t length = sizeof(sock_type);
 
 	if (ZEND_NUM_ARGS() < 2) {
 		WRONG_PARAM_COUNT;
 	}
-
-	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
-
-	arg0 = (zval **) p-(arg_count --);
-	arg1 = (zval **) p-(arg_count--);
+	switch (ZEND_NUM_ARGS()) {
+	case 2:
+		if (zend_get_parameters_ex(2, &arg0, &arg1) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 3:
+		if (zend_get_parameters_ex(3, &arg0, &arg1, &arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
 
 	convert_to_long_ex(arg0);
-	convert_to_string_ex(arg1);
 
-	if (!strcasecmp(ZVAL(arg1, str.val), "af_unix")) {
+	ret = getsockname(ZVAL(arg0, lval), &sock_type, &length);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+	if (sock_type.sa_family == AF_UNIX) {
 		struct sockaddr_un sa;
+
+		if (ZEND_NUM_ARGS() < 2) {
+			WRONG_PARAM_COUNT;
+		}
+		snprintf(sa.sun_path, 108, "%s", ZVAL(arg1, str.val));
+		ret = bind(ZVAL(arg0, lval), &sa, SUN_LEN(&sa));
+	} else if (sock_type.sa_family == AF_INET) {
+		struct sockaddr_in sa;
+		struct in_addr addr_buf;
+
 		if (ZEND_NUM_ARGS() != 3) {
 			WRONG_PARAM_COUNT;
 		}
-		arg2 = (zval **) p-(arg_count--);
-		snprintf(sa.sun_path, 108, "%s", ZVAL(arg2, str.val));
-		ret = bind(ZVAL(arg0, lval), &sa, sizeof(sa));
-	} else if (!strcasecmp(ZVAL(arg1, str.val), "af_inet")) {
-		struct sockaddr_in sa;
-		struct in_addr addr_buf;
-		if (ZEND_NUM_ARGS() != 4) {
-			WRONG_PARAM_COUNT;
-		}
-		arg2 = (zval **) p-(arg_count--);
-		arg3 = (zval **) p-(arg_count--);
-		sa.sin_port = htons(ZVAL(arg3, lval));
-		if (inet_aton(ZVAL(arg2, str.val), &addr_buf) < 0) {
-			struct hostent *host_struct = gethostbyname(ZVAL(arg2, str.val));
+		sa.sin_port = htons(ZVAL(arg2, lval));
+		if (inet_aton(ZVAL(arg1, str.val), &addr_buf) < 0) {
+			struct hostent *host_struct = gethostbyname(ZVAL(arg1, str.val));
+
 			if (host_struct == NULL) {
 				RETURN_LONG(-(h_errno) - 10000);
 			}
@@ -937,10 +1016,870 @@ PHP_FUNCTION(bind)
 }
 /* }}} */
 
+/* {{{ proto resource build_iovec(int num_vectors, ...)
+   Build a 'struct iovec' for use with sendmsg, recvmsg, writev, and readv. */
+/* First parameter is number of vectors, each additional parameter is the
+   length of the vector to create.
+ */
+
+PHP_FUNCTION(build_iovec)
+{
+	zval **num_vectors, **vector_len;
+	php_iovec_t *vector;
+	struct iovec *vector_array;
+	void **p;
+	int arg_count;
+	int i;
+
+	ELS_FETCH();
+
+	if (ZEND_NUM_ARGS() < 1) {
+		WRONG_PARAM_COUNT;
+	}
+	p = EG(argument_stack).top_element - 2;
+	arg_count = (ulong) * p;
+
+	num_vectors = (zval **) p - (arg_count--);
+
+	convert_to_long_ex(num_vectors);
+
+	vector_array = emalloc(sizeof(struct iovec) * (ZVAL(num_vectors, lval) + 1));
+
+	for (i = 0; i < ZVAL(num_vectors, lval); i++) {
+		if (arg_count < 1) {
+			WRONG_PARAM_COUNT;
+		}
+		vector_len = (zval **) p - (arg_count--);
+
+		convert_to_long_ex(vector_len);
+
+		vector_array[i].iov_base = emalloc(ZVAL(vector_len, lval));
+		vector_array[i].iov_len = ZVAL(vector_len, lval);
+	}
+
+	vector = emalloc(sizeof(php_iovec_t));
+	vector->iov_array = vector_array;
+	vector->count = ZVAL(num_vectors, lval);
+
+	ZEND_REGISTER_RESOURCE(return_value, vector, le_iov);
+}
+/* }}} */
+
+/* {{{ proto string fetch_iovec(resource iovec_id, long iovec_position)
+   Returns the data held in the iovec specified by iovec_id[iovec_position]. */
+PHP_FUNCTION(fetch_iovec)
+{
+	zval **iovec_id, **iovec_position;
+	php_iovec_t *vector;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &iovec_id, &iovec_position) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	if (ZVAL(iovec_position, lval) > vector->count) {
+		zend_error(E_WARNING, "Can't access a vector position past the amount of vectors set in the array");
+		RETURN_NULL();
+	}
+	RETURN_STRINGL(vector->iov_array[ZVAL(iovec_position, lval)].iov_base,
+		       vector->iov_array[ZVAL(iovec_position, lval)].iov_len,
+		       1);
+}
+/* }}} */
+
+/* {{{ proto bool set_iovec(resource iovec_id, long iovec_position, string new_val)
+   Sets the data held in iovec_id[iovec_position] to new_val. */
+PHP_FUNCTION(set_iovec)
+{
+	zval **iovec_id, **iovec_position, **new_val;
+	php_iovec_t *vector;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &iovec_id, &iovec_position, &new_val) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	if (ZVAL(iovec_position, lval) > vector->count) {
+		zend_error(E_WARNING, "Can't access a vector position outside of the vector array bounds");
+		RETURN_FALSE;
+	}
+	if (vector->iov_array[ZVAL(iovec_position, lval)].iov_base) {
+		efree(vector->iov_array[ZVAL(iovec_position, lval)].iov_base);
+	}
+	vector->iov_array[ZVAL(iovec_position, lval)].iov_base = estrdup(ZVAL(new_val, str.val));
+	vector->iov_array[ZVAL(iovec_position, lval)].iov_len = strlen(ZVAL(new_val, str.val));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool add_iovec(resource iovec_id, long iov_len)
+   Adds a new vector to the scatter/gather array */
+PHP_FUNCTION(add_iovec)
+{
+	zval **iovec_id, **iov_len;
+	php_iovec_t *vector;
+	struct iovec *vector_array;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &iovec_id, &iov_len) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	vector_array = emalloc(sizeof(struct iovec) * (vector->count + 2));
+	bcopy(vector->iov_array, vector_array, sizeof(struct iovec) * vector->count);
+
+	vector_array[vector->count].iov_base = emalloc(ZVAL(iov_len, lval));
+	vector_array[vector->count].iov_len = ZVAL(iov_len, lval);
+	efree(vector->iov_array);
+	vector->iov_array = vector_array;
+	vector->count++;
+
+	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto bool delete_iovec(resource iovec_id, long iov_pos)
+   Deletes a vector from an array of vectors */
+PHP_FUNCTION(delete_iovec)
+{
+	zval **iovec_id, **iov_pos;
+	php_iovec_t *vector;
+	struct iovec *vector_array;
+	int i;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &iovec_id, &iov_pos) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	if (ZVAL(iov_pos, lval) > vector->count) {
+		zend_error(E_WARNING, "Can't delete an IO vector that is out of array bounds");
+		RETURN_FALSE;
+	}
+	vector_array = emalloc(vector->count * sizeof(struct iovec));
+
+	for (i = 0; i < vector->count; i++) {
+		if (i < ZVAL(iov_pos, lval)) {
+			bcopy(&(vector_array[i]), &(vector->iov_array[i]), sizeof(struct iovec));
+		} else if (i > ZVAL(iov_pos, lval)) {
+			bcopy(&(vector_array[i - 1]), &(vector->iov_array[i]), sizeof(struct iovec));
+		}
+	}
+
+	efree(vector->iov_array);
+	vector->iov_array = vector_array;
+
+	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto bool free_iovec(resource iovec_id)
+   Frees the iovec specified by iovec_id. */
+PHP_FUNCTION(free_iovec)
+{
+	zval **iovec_id;
+	php_iovec_t *vector;
+	int pos;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &iovec_id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	for (pos = 0; pos < vector->count; pos++) {
+		efree(vector->iov_array[pos].iov_base);
+	}
+
+	efree(vector->iov_array);
+
+	vector->iov_array = NULL;
+	vector->count = 0;
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto long readv(long fd, resource iovec_id)
+   Reads from an fd, using the scatter-gather array defined by iovec_id. */
+PHP_FUNCTION(readv)
+{
+	zval **fd, **iovec_id;
+	php_iovec_t *vector;
+	int ret;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fd, &iovec_id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	ret = readv(ZVAL(fd, lval), vector->iov_array, vector->count);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	} else {
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto long writev(long fd, resource iovec_id)
+   Writes to a fd, using the scatter-gather array defined by iovec_id. */
+PHP_FUNCTION(writev)
+{
+	zval **fd, **iovec_id;
+	php_iovec_t *vector;
+	int ret;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fd, &iovec_id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	(*iovec_id)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
+
+	ret = writev(ZVAL(fd, lval), vector->iov_array, vector->count);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	} else {
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto long recv(long fd, string buf, long len, long flags)
+   Receive data from a connected socket. */
+/* May be used with SOCK_DGRAM sockets. */
+PHP_FUNCTION(recv)
+{
+	zval **fd, **buf, **len, **flags;
+	int ret;
+	char *recv_buf;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fd, &buf, &len, &flags) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	v_convert_to_long_ex(3, fd, len, flags);
+	convert_to_string_ex(buf);
+
+	recv_buf = emalloc(ZVAL(len, lval) + 2);
+	bzero(recv_buf, ZVAL(len, lval) + 2);
+
+	ret = recv(ZVAL(fd, lval), recv_buf, ZVAL(len, lval), ZVAL(flags, lval));
+	if (ret < 0) {
+		efree(recv_buf);
+		RETURN_LONG(-errno);
+	} else {
+		if (ZVAL(buf, str.val) != NULL) {
+			efree(ZVAL(buf, str.val));
+		}
+		ZVAL(buf, str.val) = estrndup(recv_buf, strlen(recv_buf));
+		ZVAL(buf, str.len) = strlen(recv_buf);
+
+		efree(recv_buf);
+
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto long send(long fd, string buf, long len, long flags)
+   Send data to a connected socket. */
+/* May be used with SOCK_DGRAM sockets. */
+PHP_FUNCTION(send)
+{
+	zval **fd, **buf, **len, **flags;
+	int ret;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fd, &buf, &len, &flags) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	v_convert_to_long_ex(3, fd, len, flags);
+	convert_to_string_ex(buf);
+
+	ret = send(ZVAL(fd, lval), ZVAL(buf, str.val),
+		   (ZVAL(buf, str.len) < ZVAL(len, lval) ? ZVAL(buf, str.len) : ZVAL(len, lval)),
+		   ZVAL(flags, lval));
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	} else {
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto long recvfrom(long fd, string &buf, long len, long flags, string &name [, long &port])
+   Receive data from a socket, connected or not. */
+PHP_FUNCTION(recvfrom)
+{
+	zval **fd, **buf, **len, **flags, **name, **port;
+	int ret;
+	struct sockaddr sa;
+	socklen_t salen;
+
+	if (ZEND_NUM_ARGS() < 5) {
+		WRONG_PARAM_COUNT;
+	}
+	switch (ZEND_NUM_ARGS()) {
+	case 5:
+		if (zend_get_parameters_ex(5, &fd, &buf, &len, &flags, &name) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 6:
+		if (zend_get_parameters_ex(6, &fd, &buf, &len, &flags, &name, &port) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	salen = sizeof(sa);
+
+	ret = getsockname(ZVAL(fd, lval), &sa, &salen);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+	switch (sa.sa_family) {
+	case AF_UNIX:
+		{
+			struct sockaddr_un sun;
+			char *recv_buf = emalloc(ZVAL(len, lval) + 2);
+			socklen_t sun_length = sizeof(sun);
+
+			if (ZEND_NUM_ARGS() != 5) {
+				WRONG_PARAM_COUNT;
+			}
+			bzero(recv_buf, ZVAL(len, lval) + 2);
+
+			ret = recvfrom(ZVAL(fd, lval), recv_buf, ZVAL(len, lval), ZVAL(flags, lval),
+				       (struct sockaddr *) &sun, (socklen_t *) & sun_length);
+
+			if (ret < 0) {
+				efree(recv_buf);
+				RETURN_LONG(-errno);
+			}
+			if (ZVAL(buf, str.val) != NULL) {
+				efree(ZVAL(buf, str.val));
+			}
+			ZVAL(buf, str.val) = estrndup(recv_buf, strlen(recv_buf));
+			ZVAL(buf, str.len) = strlen(recv_buf);
+
+			if (ZVAL(name, str.val) != NULL) {
+				efree(ZVAL(name, str.val));
+			}
+			ZVAL(name, str.val) = estrdup(sun.sun_path);
+			ZVAL(name, str.len) = strlen(sun.sun_path);
+
+			efree(recv_buf);
+
+			RETURN_LONG(ret);
+		}
+		break;
+	case AF_INET:
+		{
+			struct sockaddr_in sin;
+			char *recv_buf = emalloc(ZVAL(len, lval) + 2);
+			socklen_t sin_length = sizeof(sin);
+			char *address;
+
+			if (ZEND_NUM_ARGS() != 6) {
+				WRONG_PARAM_COUNT;
+			}
+			bzero(recv_buf, ZVAL(len, lval) + 2);
+
+			ret = recvfrom(ZVAL(fd, lval), recv_buf, ZVAL(len, lval), ZVAL(flags, lval),
+				       (struct sockaddr *) &sin, (socklen_t *) & sin_length);
+
+			if (ret < 0) {
+				efree(recv_buf);
+				RETURN_LONG(-errno);
+			}
+			if (ZVAL(buf, str.val) != NULL) {
+				efree(ZVAL(buf, str.val));
+			}
+			if (ZVAL(name, str.val) != NULL) {
+				efree(ZVAL(name, str.val));
+			}
+			ZVAL(buf, str.val) = estrdup(recv_buf);
+			ZVAL(buf, str.len) = strlen(recv_buf);
+
+			address = inet_ntoa(sin.sin_addr);
+			if (address == NULL) {
+				ZVAL(name, str.val) = estrdup("0.0.0.0");
+				ZVAL(name, str.len) = strlen(ZVAL(name, str.val));
+			} else {
+				ZVAL(name, str.val) = estrdup(address);
+				ZVAL(name, str.len) = strlen(address);
+			}
+
+			ZVAL(port, lval) = ntohs(sin.sin_port);
+
+			efree(recv_buf);
+			RETURN_LONG(ret);
+		}
+		break;
+	default:
+		RETURN_LONG(-EPROTONOSUPPORT);
+
+	}
+}
+/* }}} */
+
+/* {{{ proto long sendto(long fd, string buf, long len, long flags, string addr [, long port])
+   Sends a message to a socket, whether it is connected or not. */
+PHP_FUNCTION(sendto)
+{
+	zval **fd, **buf, **len, **flags, **addr, **port;
+	struct sockaddr sa;
+	socklen_t salen = sizeof(sa);
+	int ret;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 5:
+		ret = zend_get_parameters_ex(5, &fd, &buf, &len, &flags, &addr);
+		break;
+	case 6:
+		ret = zend_get_parameters_ex(6, &fd, &buf, &len, &flags, &addr, &port);
+		break;
+	default:
+		ret = FAILURE;
+	}
+
+	if (ret == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	v_convert_to_long_ex(3, fd, len, flags);
+	convert_to_string_ex(buf);
+
+	if (ZEND_NUM_ARGS() == 6) {
+		convert_to_long_ex(port);
+	}
+	ret = getsockname(ZVAL(fd, lval), &sa, &salen);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+	switch (sa.sa_family) {
+	case AF_UNIX:
+		{
+			struct sockaddr_un sun;
+
+			if (ZEND_NUM_ARGS() != 5) {
+				WRONG_PARAM_COUNT;
+			}
+			bzero(&sun, sizeof(sun));
+			sun.sun_family = AF_UNIX;
+			snprintf(sun.sun_path, 108, "%s", ZVAL(port, str.val));
+			ret = sendto(ZVAL(fd, lval), ZVAL(buf, str.val),
+				     (ZVAL(buf, str.len) > ZVAL(len, lval) ? ZVAL(len, lval) : ZVAL(buf, str.len)),
+				     ZVAL(flags, lval), &sun, SUN_LEN(&sun));
+			if (ret < 0) {
+				RETURN_LONG(-errno);
+			} else {
+				RETURN_LONG(ret);
+			}
+		}
+		break;
+	case AF_INET:
+		{
+			struct sockaddr_in sin;
+			struct in_addr addr_buf;
+
+			if (ZEND_NUM_ARGS() != 6) {
+				WRONG_PARAM_COUNT;
+			}
+			bzero(&sin, sizeof(sin));
+			sin.sin_family = AF_INET;
+
+			if (inet_aton(ZVAL(addr, str.val), &addr_buf) == 0) {
+				sin.sin_addr.s_addr = addr_buf.s_addr;
+			} else {
+				struct hostent *he;
+
+				he = gethostbyname(ZVAL(addr, str.val));
+				if (he == NULL) {
+					RETURN_LONG(-(h_errno) - 10000);
+				}
+				sin.sin_addr.s_addr = *(int *) (he->h_addr_list[0]);
+			}
+			sin.sin_port = htons(ZVAL(port, lval));
+			ret = sendto(ZVAL(fd, lval), ZVAL(buf, str.val),
+				     (ZVAL(buf, str.len) > ZVAL(len, lval) ? ZVAL(len, lval) : ZVAL(buf, str.len)),
+				     ZVAL(flags, lval), &sin, sizeof(sin));
+			if (ret < 0) {
+				RETURN_LONG(-errno);
+			} else {
+				RETURN_LONG(ret);
+			}
+		}
+		break;
+	default:
+		RETURN_LONG(-EPROTONOSUPPORT);
+		break;
+	}
+}
+/* }}} */
+
+/* {{{ proto long recvmsg(long fd, resource iovec, array &control, long &controllen, long &flags, string &addr [, long &port])
+   Used to receive messages on a socket, whether connection-oriented or not. */
+PHP_FUNCTION(recvmsg)
+{
+	zval **fd, **iovec, **control, **controllen, **flags, **addr, **port;
+	zval *control_array = NULL;
+	php_iovec_t *iov;
+	struct msghdr hdr;
+	struct sockaddr sa;
+	struct sockaddr_in *sin = (struct sockaddr_in *) &sa;
+	struct sockaddr_un *sun = (struct sockaddr_un *) &sa;
+	struct cmsghdr *ctl_buf;
+	socklen_t salen = sizeof(sa);
+	int ret;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 6:
+		ret = zend_get_parameters_ex(6, &fd, &iovec, &control, &controllen, &flags, &addr);
+		break;
+	case 7:
+		ret = zend_get_parameters_ex(7, &fd, &iovec, &control, &controllen, &flags, &addr, &port);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	if (ret == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	v_convert_to_long_ex(4, fd, iovec, controllen, flags);
+	convert_to_string_ex(control);
+	convert_to_string_ex(addr);
+	if (ZEND_NUM_ARGS() == 7) {
+		convert_to_long_ex(port);
+	}
+	(*iovec)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", le_iov);
+
+	ret = getsockname(ZVAL(fd, lval), &sa, &salen);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+	if (ZVAL(controllen, lval) > sizeof(struct cmsghdr)) {
+		ctl_buf = emalloc(ZVAL(controllen, lval));
+	} else {
+		ctl_buf = NULL;
+	}
+
+	switch (sa.sa_family) {
+	case AF_INET:
+		{
+			if (ZEND_NUM_ARGS() != 7) {
+				efree(ctl_buf);
+				WRONG_PARAM_COUNT;
+			}
+			bzero(&sa, sizeof(sa));
+			hdr.msg_name = sin;
+			hdr.msg_namelen = sizeof(sa);
+			hdr.msg_iov = iov->iov_array;
+			hdr.msg_iovlen = iov->count;
+
+			if (ctl_buf) {
+				hdr.msg_control = ctl_buf;
+				hdr.msg_controllen = ZVAL(controllen, lval);
+			} else {
+				hdr.msg_control = NULL;
+				hdr.msg_controllen = 0;
+			}
+
+			hdr.msg_flags = 0;
+
+			ret = recvmsg(ZVAL(fd, lval), &hdr, ZVAL(flags, lval));
+			if (ret < 0) {
+				RETURN_LONG(-errno);
+			} else {
+				struct cmsghdr *mhdr = (struct cmsghdr *) hdr.msg_control;
+
+				/* copy values as appropriate... */
+				array_init(control_array);
+				add_assoc_long(control_array, "cmsg_level", mhdr->cmsg_level);
+				add_assoc_long(control_array, "cmsg_type", mhdr->cmsg_type);
+				add_assoc_string(control_array, "cmsg_data", CMSG_DATA(mhdr), 1);
+				*control = control_array;
+				ZVAL(controllen, lval) = hdr.msg_controllen;
+				ZVAL(flags, lval) = hdr.msg_flags;
+				if (ZVAL(addr, str.val) != NULL) {
+					efree(ZVAL(addr, str.val));
+				} {
+					char *tmp = inet_ntoa(sin->sin_addr);
+
+					if (tmp == NULL) {
+						ZVAL(addr, str.val) = estrdup("0.0.0.0");
+					} else {
+						ZVAL(addr, str.val) = estrdup(tmp);
+					}
+				}
+				ZVAL(addr, str.len) = strlen(ZVAL(addr, str.val));
+				ZVAL(port, lval) = ntohs(sin->sin_port);
+				RETURN_LONG(ret);
+			}
+		}
+		break;
+	case AF_UNIX:
+		{
+			if (ZEND_NUM_ARGS() != 6) {
+				efree(ctl_buf);
+				WRONG_PARAM_COUNT;
+			}
+			bzero(&sa, sizeof(sa));
+			hdr.msg_name = sun;
+			hdr.msg_namelen = sizeof(sa);
+			hdr.msg_iov = iov->iov_array;
+			hdr.msg_iovlen = iov->count;
+
+			if (ctl_buf) {
+				hdr.msg_control = ctl_buf;
+				hdr.msg_controllen = ZVAL(controllen, lval);
+			} else {
+				hdr.msg_control = NULL;
+				hdr.msg_controllen = 0;
+			}
+
+			hdr.msg_flags = 0;
+
+			ret = recvmsg(ZVAL(fd, lval), &hdr, ZVAL(flags, lval));
+			if (ret < 0) {
+				RETURN_LONG(-errno);
+			} else {
+				struct cmsghdr *mhdr = (struct cmsghdr *) hdr.msg_control;
+
+				/* copy values as appropriate... */
+				array_init(control_array);
+				add_assoc_long(control_array, "cmsg_level", mhdr->cmsg_level);
+				add_assoc_long(control_array, "cmsg_type", mhdr->cmsg_type);
+				add_assoc_string(control_array, "cmsg_data", CMSG_DATA(mhdr), 1);
+				*control = control_array;
+				ZVAL(controllen, lval) = hdr.msg_controllen;
+				ZVAL(flags, lval) = hdr.msg_flags;
+				if (ZVAL(addr, str.val) != NULL) {
+					efree(ZVAL(addr, str.val));
+				}
+				ZVAL(addr, str.val) = estrdup(sun->sun_path);
+				RETURN_LONG(ret);
+			}
+		}
+		break;
+	default:
+		RETURN_LONG(-EPROTONOSUPPORT);
+	}
+}
+/* }}} */
+
+/* {{{ proto long sendmsg(long fd, resource iovec, long flags, string addr [, long port])
+   Sends a message to a socket, regardless of whether it is connection-oriented or not */
+PHP_FUNCTION(sendmsg)
+{
+	zval **fd, **iovec, **flags, **addr, **port;
+	php_iovec_t *iov;
+	int ret;
+	struct sockaddr sa;
+	int salen;
+
+	if (ZEND_NUM_ARGS() == 4) {
+		ret = zend_get_parameters_ex(4, &fd, &iovec, &flags, &addr);
+	} else if (ZEND_NUM_ARGS() == 5) {
+		ret = zend_get_parameters_ex(5, &fd, &iovec, &flags, &addr, &port);
+	}
+
+	if (ret == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	salen = sizeof(sa);
+	ret = getsockname(ZVAL(fd, lval), &sa, &salen);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+
+	(*iovec)->type = IS_RESOURCE;
+	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", le_iov);
+
+	switch(sa.sa_family)
+	{
+		case AF_INET:
+			{
+				struct msghdr hdr;
+				struct sockaddr_in *sin = (struct sockaddr_in *) &sa;
+				h_errno = 0;
+				errno = 0;
+				bzero(&hdr, sizeof(hdr));
+				hdr.msg_name = &sa;
+				hdr.msg_namelen = sizeof(sa);
+				hdr.msg_iov = iov->iov_array;
+				hdr.msg_iovlen = iov->count;
+				
+				if (inet_aton(ZVAL(addr, str.val), &sin->sin_addr) != 0) {
+					struct hostent *he = gethostbyname(ZVAL(addr, str.val));
+					if (!he) {
+						RETURN_LONG(h_errno > 0 ? -(h_errno) - 10000 : -errno)
+					}
+					sin->sin_addr.s_addr = *(int *)(he->h_addr_list[0]);
+				}
+
+				sin->sin_port = htons(ZVAL(port, lval));
+				ret = sendmsg(ZVAL(fd, lval), &hdr, ZVAL(flags, lval));
+				if (ret < 0) {
+					RETURN_LONG(-errno);
+				} else {
+					RETURN_LONG(ret);
+				}
+			}
+			break;
+		case AF_UNIX:
+			{
+				struct msghdr hdr;
+				struct sockaddr_un *sun = (struct sockaddr_un *) &sa;
+				errno = 0;
+				hdr.msg_name = sun;
+				hdr.msg_iov = iov->iov_array;
+				hdr.msg_iovlen = iov->count;
+
+				snprintf(sun->sun_path, 108, "%s", ZVAL(addr, str.val));
+
+				hdr.msg_namelen = SUN_LEN(sun);
+
+				ret = sendmsg(ZVAL(fd, lval), &hdr, ZVAL(flags, lval));
+				if (ret < 0) {
+					RETURN_LONG(-errno);
+				} else {
+					RETURN_LONG(ret);
+				}
+			}
+			break;
+		default:
+			RETURN_LONG(-EPROTONOSUPPORT);
+	}
+}
+/* }}} */
+
+/* {{{ proto long getsockopt(long fd, long level, long optname, array/long &optval)
+   Gets socket options for the socket. */
+/* If optname is SO_LINGER, optval is returned as an array with members 
+   "l_onoff" and "l_linger", otherwise it is an integer.
+*/
+PHP_FUNCTION(getsockopt)
+{
+	zval **fd, **level, **optname, **optval;
+	struct linger linger_val;
+	int other_val;
+	int optlen;
+	int ret;
+
+	fd = level = optname = optval = NULL;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fd, &level, &optname, &optval) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	v_convert_to_long_ex(3, fd, level, optname);
+	/* optname is set on the way out .. */
+
+	if (ZVAL(level, lval) == SO_LINGER) {
+		zval *optval_array = NULL;
+		optlen = sizeof(struct linger);
+		ret = getsockopt(ZVAL(fd, lval), ZVAL(level, lval), ZVAL(optname, lval), &linger_val, &optlen);
+
+		if (ret < 0) {
+			RETURN_LONG(-errno);
+		}
+
+		array_init(optval_array);
+		add_assoc_long(optval_array, "l_onoff", linger_val.l_onoff);
+		add_assoc_long(optval_array, "l_linger", linger_val.l_linger);
+
+		*optval = optval_array;
+		RETURN_LONG(ret);
+	} else {
+		optlen = sizeof(other_val);
+		ret = getsockopt(ZVAL(fd, lval), ZVAL(level, lval), ZVAL(optname, lval), &other_val, &optlen);
+		if (ret < 0) {
+			RETURN_LONG(-errno);
+		}
+
+		ZVAL_LONG(*optval, other_val);
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto long setsockopt(long fd, long level, long optname, long/array optval)
+   Sets socket options for the socket. */
+/* If optname is SO_LINGER, optval is expected to be an array
+   with members "l_onoff" and "l_linger", otherwise it should be an integer. */
+PHP_FUNCTION(setsockopt)
+{
+	zval **fd, **level, **optname, **optval;
+	int ret;
+	struct linger lv;
+	int ov;
+	int optlen;
+
+	errno = 0;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fd, &level, &optname, &optval) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	v_convert_to_long_ex(3, fd, level, optname);
+
+	if (ZVAL(optname, lval) == SO_LINGER) {
+		HashTable *ht;
+		zval **l_onoff;
+		zval **l_linger;
+
+		convert_to_array_ex(optval);
+		ht = HASH_OF(*optval);
+
+		if (zend_hash_find(ht, "l_onoff", strlen("l_onoff") + 1, (void **) &l_onoff) == FAILURE) {
+			zend_error(E_ERROR, "No key \"l_onoff\" passed in optval");
+			return;
+		}
+		if (zend_hash_find(ht, "l_linger", strlen("l_linger") + 1, (void **) &l_linger) == FAILURE) {
+			zend_error(E_ERROR, "No key \"l_linger\" passed in optval");
+			return;
+		}
+
+		convert_to_long_ex(l_onoff);
+		convert_to_long_ex(l_linger);
+
+		lv.l_onoff = ZVAL(l_onoff, lval);
+		lv.l_linger = ZVAL(l_linger, lval);
+
+		optlen = sizeof(lv);
+		ret = setsockopt(ZVAL(fd, lval), ZVAL(level, lval), ZVAL(optname, lval), &lv, optlen);
+	} else {
+		convert_to_long_ex(optval);
+
+		optlen = sizeof(ov);
+		ov = ZVAL(optval, lval);
+
+		ret = setsockopt(ZVAL(fd, lval), ZVAL(level, lval), ZVAL(optname, lval), &ov, optlen);
+	}
+
+	printf("returning: ret = %i, errno = %i\n", ret, errno);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	} else {
+		RETURN_LONG(ret);
+	}
+}
+/* }}} */
+
 #endif				/* HAVE_SOCKETS */
-
-
-
 
 /*
  * Local variables:
