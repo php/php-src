@@ -484,15 +484,6 @@ else
   AC_DEFINE(PHP_SIGCHILD, 0, [ ])
 fi
 
-PHP_ARG_ENABLE(track-vars,whether to enable track_vars variables by default,
-[  --enable-track-vars     Enable GET/POST/Cookie track variables by default.],yes)
-
-if test "$PHP_TRACK_VARS" = "yes"; then
-  AC_DEFINE(PHP_TRACK_VARS, 1, [ ])
-else
-  AC_DEFINE(PHP_TRACK_VARS, 0, [ ])
-fi
-
 PHP_ARG_ENABLE(magic-quotes,whether to enable magic quotes by default,
 [  --enable-magic-quotes   Enable magic quotes by default.])
 
