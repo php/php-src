@@ -6,8 +6,13 @@
   system("rm -rf {$ext->name}");
   mkdir($ext->name);
 
-	$ext->write_config_m4();
+	// generate code
 	$ext->write_header_file();
 	$ext->write_code_file();
+
+	// generate project files for configure and ms dev studio
+	$ext->write_config_m4();
+	$ext->write_ms_devstudio_dsp();
+
 	$ext->generate_documentation();
 ?>

@@ -27,6 +27,8 @@
 		$this->phpini    = array();
 		$this->users     = array();
 		$this->dependson = array();
+
+		$this->files = array("c"=>array(), "h"=>array());
 		
 		parent::xml_stream_callback_parser($stream);
 	}
@@ -410,7 +412,10 @@ ZEND_GET_MODULE('.$this->name.')
 	// {{{ header file
 
 	  function write_header_file() {
-			$fp = fopen("{$this->name}/php_{$this->name}.h", "w");
+			$filename = "php_{$this->name}.h";
+
+			$this->files["h"][] = $filename; 
+			$fp = fopen("{$this->name}/$filename", "w");
 
 			$upname = strtoupper($this->name);
 			
@@ -716,7 +721,10 @@ $code .= "
   // {{{ code file
 
 	function write_code_file() {
-			$fp = fopen("{$this->name}/{$this->name}.c", "w");
+			$filename = "{$this->name}.c";
+
+			$this->files["c"][] = $filename; 
+			$fp = fopen("{$this->name}/$filename", "w");
 
 			$upname = strtoupper($this->name);
 			
@@ -761,6 +769,7 @@ $code .= "
 	// }}} 
 
 
+	// {{{ config.m4 file
 	function write_config_m4() {
 
 		$upname = $this->name;
@@ -776,11 +785,171 @@ PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
 
 if test \"\$PHP_$upname\" != \"no\"; then
   AC_DEFINE(HAVE_$upname, 1, [ ])
-  PHP_NEW_EXTENSION({$this->name}, {$this->name}.c, \$ext_shared)
+  PHP_NEW_EXTENSION({$this->name}, ".join(" ", $this->files['c'])." , \$ext_shared)
 fi
 ");
 		fclose($fp);
 	}
+
+	// }}} 
+
+	// {{{ M$ dev studio project file
+
+	function write_ms_devstudio_dsp() {
+    // TODO files should come from external list
+
+		$fp = fopen("{$this->name}/{$this->name}.dsp","w");
+		fwrite($fp,
+'# Microsoft Developer Studio Project File - Name="'.$this->name.'" - Package Owner=<4>
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
+# ** DO NOT EDIT **
+
+# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
+
+CFG='.$this->name.' - Win32 Debug_TS
+!MESSAGE This is not a valid makefile. To build this project using NMAKE,
+!MESSAGE use the Export Makefile command and run
+!MESSAGE 
+!MESSAGE NMAKE /f "'.$this->name.'.mak".
+!MESSAGE 
+!MESSAGE You can specify a configuration when running NMAKE
+!MESSAGE by defining the macro CFG on the command line. For example:
+!MESSAGE 
+!MESSAGE NMAKE /f "'.$this->name.'.mak" CFG="'.$this->name.' - Win32 Debug_TS"
+!MESSAGE 
+!MESSAGE Possible choices for configuration are:
+!MESSAGE 
+!MESSAGE "'.$this->name.' - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "'.$this->name.' - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE 
+
+# Begin Project
+# PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
+CPP=cl.exe
+MTL=midl.exe
+RSC=rc.exe
+
+!IF  "$(CFG)" == "'.$this->name.' - Win32 Release_TS"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_TS"
+# PROP Intermediate_Dir "Release_TS"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "'.strtoupper($this->name).'_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D "WIN32" /D "PHP_EXPORTS" /D "COMPILE_DL_'.strtoupper($this->name).'" /D ZTS=1 /D HAVE_'.strtoupper($this->name).'=1 /D ZEND_DEBUG=0 /D "NDEBUG" /D "_WINDOWS" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x407 /d "NDEBUG"
+# ADD RSC /l 0x407 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
+# ADD LINK32 php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_'.$this->name.'.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+
+!ELSEIF  "$(CFG)" == "'.$this->name.' - Win32 Debug_TS"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "Debug_TS"
+# PROP BASE Intermediate_Dir "Debug_TS"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "Debug_TS"
+# PROP Intermediate_Dir "Debug_TS"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "'.strtoupper($this->name).'_EXPORTS" /YX /FD /GZ  /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "PHP_EXPORTS" /D "COMPILE_DL_'.strtoupper($this->name).'" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_'.strtoupper($this->name).'=1 /YX /FD /GZ  /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x407 /d "_DEBUG"
+# ADD RSC /l 0x407 /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_'.$this->name.'.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+
+!ENDIF 
+
+# Begin Target
+
+# Name "'.$this->name.' - Win32 Release_TS"
+# Name "'.$this->name.' - Win32 Debug_TS"
+');
+
+
+		fputs($fp,'
+# Begin Group "Source Files"
+
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+');
+
+		foreach($this->files['c'] as $filename) {
+			if($filename{0}!='/' && $filename{0}!='.') {
+				$filename = "./$filename";
+			}
+			$filename = str_replace("/","\\",$filename);
+
+			fputs($fp,"
+# Begin Source File
+
+SOURCE=$filename
+# End Source File
+");
+		}
+
+fputs($fp,'
+# End Group
+');
+
+
+
+
+fputs($fp,'
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+');
+		foreach($this->files['h'] as $filename) {
+			if($filename{0}!='/' && $filename{0}!='.') {
+				$filename = "./$filename";
+			}
+			$filename = str_replace("/","\\",$filename);
+
+			fputs($fp,"
+# Begin Source File
+
+SOURCE=$filename
+# End Source File
+");
+		}
+
+fputs($fp,
+'# End Group
+# End Target
+# End Project
+');
+
+
+
+fclose($fp);
+	}
+
+// }}} 
 
 	  // }}} 
 
