@@ -119,7 +119,7 @@ class Console_Getopt {
             /* Try to find the short option in the specifier string. */
             if (($spec = strstr($short_options, $opt)) === false || $arg{$i} == ':')
             {
-                return new Getopt_Error("unrecognized option -- $opt\n");
+                return PEAR::raiseError("Console_Getopt: unrecognized option -- $opt");
             }
 
             if (strlen($spec) > 1 && $spec{1} == ':') {
@@ -139,7 +139,7 @@ class Console_Getopt {
                     } else if (list(, $opt_arg) = each($args))
                         /* Else use the next argument. */;
                     else
-                        return new Getopt_Error("option requires an argument -- $opt\n");
+                        return PEAR::raiseError("Console_Getopt: option requires an argument -- $opt");
                 }
             }
 
@@ -171,7 +171,7 @@ class Console_Getopt {
             if ($opt_rest != '' && $opt{0} != '=' &&
                 $i + 1 < count($long_options) &&
                 $opt == substr($long_options[$i+1], 0, $opt_len)) {
-                return new Getopt_Error("option --$opt is ambiguous\n");
+                return PEAR::raiseError("Console_Getopt: option --$opt is ambiguous");
             }
 
             if (substr($long_opt, -1) == '=') {
@@ -179,18 +179,18 @@ class Console_Getopt {
                     /* Long option requires an argument.
                        Take the next argument if one wasn't specified. */;
                     if (!$opt_arg && !(list(, $opt_arg) = each($args))) {
-                        return new Getopt_Error("option --$opt requires an argument\n");
+                        return PEAR::raiseError("Console_Getopt: option --$opt requires an argument");
                     }
                 }
             } else if ($opt_arg) {
-                return new Getopt_Error("option --$opt doesn't allow an argument\n");
+                return PEAR::raiseError("Console_Getopt: option --$opt doesn't allow an argument");
             }
 
             $opts[] = array('--' . $opt, $opt_arg);
             return;
         }
 
-        return new Getopt_Error("unrecognized option --$opt\n");
+        return PEAR::raiseError("Console_Getopt: unrecognized option --$opt");
     }
 
     /**
@@ -204,9 +204,9 @@ class Console_Getopt {
     {
         global $argv;
         if (!is_array($argv)) {
-            if (!is_array($_SERVER['argv'])) {
+            if (!@is_array($_SERVER['argv'])) {
                 if (!is_array($HTTP_SERVER_VARS['argv'])) {
-                    return new Getopt_Error("Could not read cmd args (register_argc_argv=Off?)\n");
+                    return PEAR::raiseError("Console_Getopt: Could not read cmd args (register_argc_argv=Off?)");
                 }
                 return $HTTP_SERVER_VARS['argv'];
             }
@@ -215,17 +215,6 @@ class Console_Getopt {
         return $argv;
     }
 
-}
-
-
-class Getopt_Error extends PEAR_Error {
-    var $classname             = 'Getopt';
-    var $error_message_prepend = 'Error in Getopt';
-
-    function Getopt_Error($message, $code = 0, $mode = PEAR_ERROR_RETURN, $level = E_USER_NOTICE)
-    {
-        $this->PEAR_Error($message, $code, $mode, $level);
-    }
 }
 
 ?>
