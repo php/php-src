@@ -227,6 +227,11 @@ case $host_alias in
     LIBS="$LIBS -lbe -lroot";;
 *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
+*hpux*)
+    if test "$GCC" = "yes"; then
+      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"  
+    fi  
+    ;;
 esac
 
 
