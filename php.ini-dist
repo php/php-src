@@ -378,6 +378,7 @@ allow_url_fopen = On
 ;extension=php_db.dll
 ;extension=php_dba.dll
 ;extension=php_dbase.dll
+;extension=php_dbx.dll
 ;extension=php_domxml.dll
 ;extension=php_dotnet.dll
 ;extension=php_exif.dll
