@@ -1,3 +1,36 @@
+2002-02-03  jim winstead  <jimw@apache.org>
+
+    * makedist: don't include old changelogs in distribution, either
+
+2002-02-03  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * Makefile.in
+      configure.in:
+    Zend config sets ZEND_EXTRA_LIBS. Bugs 14452, 14602, 14616, 14824
+
+2002-02-03  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/DB/ibase.php:
+    * nextID() and tableInfo() support by Lutz Brueckner <lb@lamuella.de>.
+
+2002-02-03  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_files.c
+      ext/session/session.c:
+    Revert last commit. Last patch has problem for the 1st request.
+
+    * ext/session/mod_files.c
+      ext/session/session.c: Fixed crash when save_path is invalid.
+    Fixed crash when user save handler is incorrectly used.
+    Fixed crash when session read failed.
+
+    * ext/iconv/tests/001.phpt
+      ext/iconv/tests/002.inc
+      ext/iconv/tests/002.phpt
+      ext/iconv/tests/skipif.inc: Added UCS4 test
+
+    * sapi/roxen/roxen.c: MFH
+
 2002-02-02  Shane Caraveo  <shane@caraveo.com>
 
     * sapi/isapi/stresstest/getopt.c
