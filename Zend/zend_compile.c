@@ -2216,17 +2216,18 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			SET_UNUSED(opline_ptr->op2);
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
 
-			if ((opline_ptr->op1.op_type == IS_CONST) && zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
-				char *priv_name;
-				int priv_name_length;
+			if (CG(active_class_entry)) {
+				if ((opline_ptr->op1.op_type == IS_CONST) && zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+					char *priv_name;
+					int priv_name_length;
 
-				mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+					mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
 
-				STR_FREE(opline_ptr->op1.u.constant.value.str.val);
-				opline_ptr->op1.u.constant.value.str.val = priv_name;
-				opline_ptr->op1.u.constant.value.str.len = priv_name_length;
+					STR_FREE(opline_ptr->op1.u.constant.value.str.val);
+					opline_ptr->op1.u.constant.value.str.val = priv_name;
+					opline_ptr->op1.u.constant.value.str.len = priv_name_length;
+				}
 			}
-
 			*result = opline_ptr->result;
 			return;
 		}
