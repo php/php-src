@@ -30,6 +30,7 @@ PHPAPI void php_start_ob_buffer(void);
 PHPAPI void php_end_ob_buffer(int send_buffer);
 PHPAPI void php_end_ob_buffers(int send_buffer);
 PHPAPI int php_ob_get_buffer(pval *p);
+PHPAPI int php_ob_get_length(pval *p);
 PHPAPI void php_start_implicit_flush(void);
 PHPAPI void php_end_implicit_flush(void);
 PHPAPI char *php_get_output_start_filename(void);
@@ -39,6 +40,7 @@ PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_end_flush);
 PHP_FUNCTION(ob_end_clean);
 PHP_FUNCTION(ob_get_contents);
+PHP_FUNCTION(ob_get_length);
 PHP_FUNCTION(ob_implicit_flush);
 
 PHP_GINIT_FUNCTION(output);

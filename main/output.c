@@ -269,6 +269,19 @@ int php_ob_get_buffer(pval *p)
 }
 
 
+/* Return the size of the current output buffer */
+int php_ob_get_length(pval *p)
+{
+	OLS_FETCH();
+
+	if (OG(nesting_level) == 0) {
+		return FAILURE;
+	}
+	p->type = IS_LONG;
+	p->value.lval = OG(active_ob_buffer).text_length;
+	return SUCCESS;
+}
+
 /*
  * Wrapper functions - implementation
  */
@@ -377,6 +390,17 @@ PHP_FUNCTION(ob_end_clean)
 PHP_FUNCTION(ob_get_contents)
 {
 	if (php_ob_get_buffer(return_value)==FAILURE) {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto string ob_get_length(void)
+   Return the length of the output buffer */
+PHP_FUNCTION(ob_get_length)
+{
+	if (php_ob_get_length(return_value)==FAILURE) {
 		RETURN_FALSE;
 	}
 }
