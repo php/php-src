@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.31 2004-01-07 20:06:32 wez Exp $
+// $Id: confutils.js,v 1.32 2004-01-08 00:25:48 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -952,13 +952,13 @@ function ADD_SOURCES(dir, file_list, target)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
-			MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(" + bd_flags_name + ") -c " + dir + "\\" + src + " -o " + sub_build + obj);
+			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") -c " + dir + "\\" + src + " -o " + sub_build + obj);
 		}
 	}
 
 	if (PHP_ONE_SHOT == "yes") {
 		MFO.WriteLine(objs_line + ": " + srcs_line);
-		MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(" + bd_flags_name + ") -c " + srcs_line);
+		MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") -c " + srcs_line);
 	}
 
 	DEFINE(sym, tv);
