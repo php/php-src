@@ -368,7 +368,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #if APACHE
 	void (*handler) (int);
 #endif
-	char *user,*passwd,*host,*tmp;
+	char *user,*passwd,*host,*socket=NULL,*tmp;
 	char *hashed_details;
 	int hashed_details_length,port;
 	MYSQL *mysql;
@@ -443,7 +443,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	if (host && (tmp=strchr(host,':'))) {
 		*tmp=0;
 		tmp++;
-		port = atoi(tmp);
+		if (tmp[0] != '/') {
+			port = atoi(tmp);
+		} else {
+			socket = tmp;
+		}
 	} else {
 		port = MySG(default_port);
 	}
@@ -476,7 +480,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		mysql = (MYSQL *) malloc(sizeof(MYSQL));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(mysql);
-		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,NULL,0)==NULL) {
+		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,socket,0)==NULL) {
 #else
 		if (mysql_connect(mysql,host,user,passwd)==NULL) {
 #endif
@@ -514,7 +518,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				signal(SIGPIPE,handler);
 #endif
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-				if (mysql_real_connect(le->ptr,host,user,passwd,NULL,port,NULL,0)==NULL) {
+				if (mysql_real_connect(le->ptr,host,user,passwd,NULL,port,socket,0)==NULL) {
 #else
 				if (mysql_connect(le->ptr,host,user,passwd)==NULL) {
 #endif
@@ -605,7 +609,7 @@ static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
 }
 
 
-/* {{{ proto int mysql_connect([string hostname[:port]] [, string username] [, string password])
+/* {{{ proto int mysql_connect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
    Open a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
 {
@@ -614,7 +618,7 @@ PHP_FUNCTION(mysql_connect)
 /* }}} */
 
 
-/* {{{ proto int mysql_pconnect([string hostname[:port]] [, string username] [, string password])
+/* {{{ proto int mysql_pconnect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
    Open a persistent connection to a MySQL Server */
 PHP_FUNCTION(mysql_pconnect)
 {
