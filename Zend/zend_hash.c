@@ -1138,14 +1138,20 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 	ht->pListTail = NULL;
 	ht->pInternalPointer = ht->pListHead;
 
-	for (j = 0; j < i; j++) {
-		if (ht->pListTail) {
-			ht->pListTail->pListNext = arTmp[j];
-		}
-		arTmp[j]->pListLast = ht->pListTail;
-		arTmp[j]->pListNext = NULL;
-		ht->pListTail = arTmp[j];
-	}
+	arTmp[0]->pListLast = NULL;
+	if (i > 1) {
+    	arTmp[0]->pListNext = arTmp[1];
+    	for (j = 1; j < i-1; j++) {
+    		arTmp[j]->pListLast = arTmp[j-1];
+    		arTmp[j]->pListNext = arTmp[j+1];
+    	}
+    	arTmp[j]->pListLast = ht->pListTail;
+    	arTmp[j]->pListNext = NULL;
+    } else {
+    	arTmp[0]->pListNext = NULL;
+    }
+   	ht->pListTail = arTmp[i-1];
+
 	pefree(arTmp, ht->persistent);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
