@@ -160,15 +160,17 @@ string(32) "# hello All, I sAid hi planet! #"
 As you can see the file is devided into several sections. Below is a
 list of all possible sections:
 
-"--TEST--"    is title of the test (required).
-"--SKIPIF--"  is condition when to skip this test (optional).
-"--POST--"    is POST variable passed to test script (optional).
-"--GET--"     is GET variable passed to test script (optional).
-"--INI--"     each line contains an ini setting e.g. foo=bar (optional).
-"--FILE--"    is the test script (required).
-"--EXPECT--"  is the expected output from the test script (required).
-"--EXPECTF--" this is the alternative of --EXPECT--. The difference is
-              that this form uses sscanf for output validation (alternative).
+"--TEST--"        is title of the test (required).
+"--SKIPIF--"      is condition when to skip this test (optional).
+"--POST--"        is POST variable passed to test script (optional).
+"--GET--"         is GET variable passed to test script (optional).
+"--INI--"         each line contains an ini setting e.g. foo=bar (optional).
+"--FILE--"        is the test script (required).
+"--EXPECT--"      is the expected output from the test script (required).
+"--EXPECTF--"     is an alternative of --EXPECT--. The difference is that
+                  this form uses sscanf for output validation (alternative).
+"--EXPECTREGEX--" is an alternative of --EXPECT--. This form allows the tester
+                  to specify the result in a regular expression (alternative).
 
 A test must at least contain the sections TEST, FILE and either EXPECT
 or EXPECTF. When a test is called run-test.php takes the name from the
@@ -182,7 +184,8 @@ EXPECTF instead of EXPECT. From time to time the algorithm used for shuffle
 changed and sometimes the machine used to execute the code has influence 
 on the result of shuffle. But it always returns a three character string 
 detectable by %s. Other scan-able forms are %i for integers, %d for numbers
-only, %f for floating point values and %x for hexadecimal values.
+only, %f for floating point values, %c for single characters and %x for 
+hexadecimal values.
 
 ==== /ext/standard/tests/strings/str_shuffle.phpt ===
 --TEST--
@@ -198,6 +201,26 @@ var_dump($s);
 string(3) %s
 string(3) "123"
 ==== end of /ext/standard/tests/strings/str_shuffle.phpt ===
+
+/ext/standard/tests/strings/strings001.phpt is a good example for using 
+EXPECTREGEX instead of EXPECT. This test also shows that in both EXPECTF
+and EXPECTREGEX some characters need to be escaped since otherwise they
+would be interpreted as a regular expression.
+
+==== /ext/standard/tests/strings/strings001.phpt ===
+--TEST--
+Test whether strstr() and strrchr() are binary safe.
+--FILE--
+<?php
+/* Do not change this test it is a REATME.TESTING example. */
+$s = "alabala nica".chr(0)."turska panica";
+var_dump(strstr($s, "nic"));
+var_dump(strrchr($s," nic"));
+?>
+--EXPECTREGEX--
+string\(18\) \"nica\x00turska panica\"
+string\(19\) \" nica\x00turska panica\"
+==== end of /ext/standard/tests/strings/strings001.phpt ===
 
 Some tests depend on modules or functions available only in certain versions 
 or they even require minimum version of php or zend. These tests should be 
