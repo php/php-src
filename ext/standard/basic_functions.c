@@ -1370,8 +1370,8 @@ static void free_argv(char **argv, int argc)
 PHP_FUNCTION(getopt)
 {
 	char *options = NULL, **argv = NULL;
-	char opt[1] = { '\0' };
-	int argc = 0, options_len = 0;
+	char opt[2] = { '\0' };
+	int argc = 0, options_len = 0, o;
 	zval *val, **args = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
@@ -1391,8 +1391,11 @@ PHP_FUNCTION(getopt)
 
 		argc = zend_hash_num_elements(Z_ARRVAL_PP(args));
 
-		/* Attempt to allocate enough memory to hold all of the arguments. */
-		if ((argv = (char **) emalloc(argc * sizeof(char *))) == NULL) {
+		/* 
+		 * Attempt to allocate enough memory to hold all of the arguments
+		 * and a trailing NULL 
+		 */
+		if ((argv = (char **) emalloc((argc + 1) * sizeof(char *))) == NULL) {
 			RETURN_FALSE;
 		}
 
@@ -1405,6 +1408,15 @@ PHP_FUNCTION(getopt)
 			argv[pos++] = estrdup(Z_STRVAL_PP(arg));
 			zend_hash_move_forward(Z_ARRVAL_PP(args));
 		}
+
+		/* 
+		 * The C Standard requires argv[argc] to be NULL - this might
+		 * keep some getopt implementations happy. 
+		 */
+		argv[argc] = NULL;
+	} else {
+		/* Return false if we can't find argv. */
+		RETURN_FALSE;
 	}
 
 	/* Initialize the return value as an array. */
@@ -1416,15 +1428,15 @@ PHP_FUNCTION(getopt)
 	opterr = 0;
 
 	/* Invoke getopt(3) on the argument array. */
-	while (getopt(argc, argv, options) != -1) {
+	while ((o = getopt(argc, argv, options)) != -1) {
 
 		/* Skip unknown arguments. */
-		if (optopt == '?') {
+		if (o == '?') {
 			continue;
 		}
 
 		/* Prepare the option character and the argument string. */
-		opt[0] = optopt;
+		opt[0] = o;
 
 		MAKE_STD_ZVAL(val);
 		if (optarg != NULL) {
@@ -1434,7 +1446,7 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Add this option / argument pair to the result hash. */
-		if (zend_hash_add(HASH_OF(return_value), opt, 1, (void *)&val,
+		if (zend_hash_add(HASH_OF(return_value), opt, sizeof(opt), (void *)&val,
 							 sizeof(zval *), NULL) == FAILURE) {
 			free_argv(argv, argc);
 			RETURN_FALSE;
