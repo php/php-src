@@ -2,6 +2,31 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- array_walk() now automatically resets the array. (Andrei)
+- Added natural comparison/sorting routines strnatcmp(), strnatcasecmp(),
+  natsort(), and natcasesort(). These are useful for comparing and sorting
+  strings that contain numbers. Based on the code from Martin Pool
+  <mbp@humbug.org.au>. See http://www.linuxcare.com.au/projects/natsort/
+  for more info on natural sorting. (Andrei)
+- Zeus Webserver support (version 3.3.6+) for ISAPI
+- Fixed several problems with the PATH_TRANSLATED and PHP_SELF under Apache
+  (Paul Gregg & Zeev)
+- Added ldap_get_values_len function from PHP3 to PHP4. (Sterling)
+- Fixed a problem in include_once() with non constant arguments (Andi & Zeev,
+  Zend Engine)
+- Added php.ini-optimized (Zeev)
+- Added ldap_errno, ldap_err2str and ldap_error from PHP3 to PHP4. (Sterling)
+- WDDX now defaults to ISO-8859-1. (Thies)
+- Fix crash resulting from IMAP's error handling (Stanislav)
+- Add $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
+  retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] (Zeev)
+- Made the IMAP and LDAP modules compilable under Windows and thread-safe (Zeev)
+- Fix a problem when dealing with large POST blocks in CGI mode
+- added session_get_cookie_params (Sterling)
+- Fixed return of stristr() to no longer always be lowercased. (Andrei)
+- Changed the Windows version of PHP so that a php.ini file is no
+  longer mandatory (Zeev)
+- session_start() is now more verbose if headers cannot be send. (Thies)
 - Fixed a memory leak when using assign-op bitwise operators on strings (Zeev,
   Zend Engine)
 - Added support for reading properties that require arguments in the COM
@@ -34,10 +59,17 @@ PHP 4.0                                                                    NEWS
 - Fixed a crash problem in func_num_args(), func_get_arg() and func_get_args()
   when used as function arguments (Andi, Zend Engine)
 - Added get_class_methods(string classname) function. (Andrei)
-- Don't default to iso-8859-1 since this confuses some browsers (Rasmus)
+- Added 'I' switch to test whether or not DST is active. (Sterling)
+- Fix a data corruption bug in mysql_result(), if used in table.fieldname mode (Zeev)
+- Modified the registry INI entry reader (Win32) to work with drive letters.  For
+  example, if you wish to wish to specify INI entries for C:\foo\bar, you should
+  create HKLM\PHP\Per Directory Values\C\foo\bar in the registry, and add
+  string values for each directive you want to override in this directory (Zeev)
+- Fixed extract() for EXTR_PREFIX_SAME and EXTR_SKIP cases. (Andrei)
 - stristr() no longer modifies it's arguments. (Thies)
-- Make it possible to specify both a port and a socket in
-  mysql_[p]connect (Rasmus)
+- Don't default to iso-8859-1 since this confuses some browsers. (Rasmus)
+- Make it possible to specify both a port and a socket
+  in mysql_[p]connect.  (Rasmus)
 - Added --disable-pic for disabling generating PIC for shared objects
   on platforms which support it (i.e. Linux) (Sascha)
 - serialize()/unserialize() now call __sleep() and __wakeup() when
