@@ -37,26 +37,33 @@ PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 	*sha1str = '\0';
 }
 
-/* {{{ proto string sha1(string str)
+/* {{{ proto string sha1(string str [, bool raw_output])
    Calculate the sha1 hash of a string */
 PHP_FUNCTION(sha1)
 {
-	zval **arg;
+	char *arg;
+	int arg_len;
+	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
-	unsigned char digest[20];
+	unsigned char digest[21];
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg);
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
-	make_sha1_digest(sha1str, digest);
-	RETVAL_STRING(sha1str, 1);
+	if (raw_output) {
+		digest[20] = '\0';
+		RETURN_STRINGL(digest, 20, 1);
+	} else {
+		make_sha1_digest(sha1str, digest);
+		RETVAL_STRING(sha1str, 1);
+	}
+
 }
 
 /* }}} */
