@@ -771,7 +771,6 @@ dnl
 
 AC_ARG_ENABLE(all,
 [ --disable-all   Disable all extensions enabled by default.
- --enable-all    Enable all extensions.
 ], [
   PHP_ENABLE_ALL=$enableval
 ])
