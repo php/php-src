@@ -479,7 +479,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 
 /* }}} */
-/* {{{ proto array file(string filename)
+/* {{{ proto array file(string filename [, int use_include_path])
    Read entire file into an array */
 
 PHP_FUNCTION(file)
@@ -786,7 +786,7 @@ PHP_FUNCTION(feof)
 /* }}} */
 
 
-/* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
+/* {{{ proto int set_socket_blocking(int socket_descriptor, int mode)
    Set blocking/non-blocking mode on a socket */
 PHPAPI int php_set_sock_blocking(int socketd, int block)
 {
@@ -853,7 +853,7 @@ PHP_FUNCTION(set_socket_blocking)
 	PHP_FN(socket_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-/* {{{ proto bool socket_set_timeout(int socket descriptor, int seconds, int microseconds)
+/* {{{ proto bool socket_set_timeout(int socket_descriptor, int seconds, int microseconds)
    Set timeout on socket read to seconds + microseonds */
 PHP_FUNCTION(socket_set_timeout)
 {
@@ -1064,8 +1064,8 @@ PHP_FUNCTION(fgetss)
 }
 
 /* }}} */
-/* {{{ proto  mixed fscanf(string str,string format, ...)
-     implements a mostly ANSI compatible  fscanf() . */
+/* {{{ proto mixed fscanf(string str, string format [, string ...])
+   Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
     int  result;
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(fwrite)
 
 /* }}} */	
 /* {{{ proto int fflush(int fp)
-   flushes output */
+   Flushes output */
 
 PHP_FUNCTION(fflush)
 {
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(ftruncate)
 }
 /* }}} */
 
-/* {{{ proto int fstat (int fp)
+/* {{{ proto int fstat(int fp)
    Stat() on a filehandle */
 PHP_FUNCTION(fstat)
 {
