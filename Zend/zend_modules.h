@@ -17,13 +17,10 @@
 #ifndef _MODULES_H
 #define _MODULES_H
 
-#define INIT_FUNC_ARGS int type, int module_number
+#define INIT_FUNC_ARGS		int type, int module_number
+#define SHUTDOWN_FUNC_ARGS	int type, int module_number
 
-#ifdef HAS_ZEND_INI_ENTRIES
 #define STANDARD_MODULE_PROPERTIES 0, 0, 0, NULL, 0
-#else
-#define STANDARD_MODULE_PROPERTIES 0, 0, 0, NULL, 0
-#endif
 
 
 #define MODULE_PERSISTENT 1
@@ -33,9 +30,9 @@ typedef struct {
 	char *name;
 	function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
-	int (*module_shutdown_func)(void);
+	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	int (*request_startup_func)(INIT_FUNC_ARGS);
-	int (*request_shutdown_func)(void);
+	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(void);
 	int request_started,module_started;
 	unsigned char type;
