@@ -1147,7 +1147,7 @@ dnl ---------------------------------------------- CLI static module
       PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,)
       EXT_STATIC="$EXT_STATIC $1"
     else
-      PHP_ADD_SOURCES($ext_srcdir,$2,$ac_extra,cli)
+      PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,cli)
       EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
     fi
     EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
