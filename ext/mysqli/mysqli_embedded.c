@@ -31,6 +31,7 @@
    initialize and start embedded server */
 PHP_FUNCTION(mysqli_embedded_server_start)
 {
+#ifdef HAVE_EMBEDDED_MYSQLI
 	int	argc = 0;
 	char **arguments;
 	char **groups;
@@ -50,68 +51,63 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 		mysql_server_init(-1,NULL, NULL);
 		RETURN_TRUE;
 	}
+	/* get arguments */
+	if ((argc = zend_hash_num_elements(HASH_OF(*args)))) {
+		arguments = safe_emalloc(sizeof(char *), argc + 1, 0);
+		arguments[0] = NULL; 
 
-	if (MyG(embedded)) {
-		/* get arguments */
-		if ((argc = zend_hash_num_elements(HASH_OF(*args)))) {
-			arguments = safe_emalloc(sizeof(char *), argc + 1, 0);
-			arguments[0] = NULL; 
-	
-			zend_hash_internal_pointer_reset_ex(HASH_OF(*args), &pos);
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*args), &pos);
 
-			for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*args), &pos))	{
-				zval **item;
+		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*args), &pos))	{
+			zval **item;
 
-				if (zend_hash_get_current_data_ex(HASH_OF(*args), (void **) &item, &pos) == FAILURE) {
-					break;
-				}
-
-				convert_to_string_ex(item);
-	
-				arguments[++index] = Z_STRVAL_PP(item);
+			if (zend_hash_get_current_data_ex(HASH_OF(*args), (void **) &item, &pos) == FAILURE) {
+				break;
 			}
-			argc++;
+
+			convert_to_string_ex(item);
+
+			arguments[++index] = Z_STRVAL_PP(item);
 		}
-
-		/* get groups */
-		if ((zend_hash_num_elements(HASH_OF(*grps)))) {
-			groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(*grps)) + 1, 0);
-			arguments[0] = NULL; 
-
-			zend_hash_internal_pointer_reset_ex(HASH_OF(*args), &pos);
-
-			for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*args), &pos))	{
-				zval ** item;
-	
-				if (zend_hash_get_current_data_ex(HASH_OF(*args), (void **) &item, &pos) == FAILURE) {
-					break;
-				}
-
-				convert_to_string_ex(item);
-
-				groups[++index] = Z_STRVAL_PP(item);
-			}
-			groups[index] = NULL;	
-		} else {
-			groups = safe_emalloc(sizeof(char *), 1, 0);
-			groups[0] = NULL;
-		}
-
-		rc = mysql_server_init(argc, arguments, NULL);
-
-		if (argc) {
-			efree(arguments);
-		}
-		efree(groups);
-
-		if (rc) {
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
+		argc++;
 	}
 
- 	php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-					"Can't start embedded server. PHP wasn't configured with mysql embedded server support");
+	/* get groups */
+	if ((zend_hash_num_elements(HASH_OF(*grps)))) {
+		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(*grps)) + 1, 0);
+		arguments[0] = NULL; 
+
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*args), &pos);
+
+		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*args), &pos))	{
+			zval ** item;
+
+			if (zend_hash_get_current_data_ex(HASH_OF(*args), (void **) &item, &pos) == FAILURE) {
+				break;
+			}
+
+			convert_to_string_ex(item);
+
+			groups[++index] = Z_STRVAL_PP(item);
+		}
+		groups[index] = NULL;	
+	} else {
+		groups = safe_emalloc(sizeof(char *), 1, 0);
+		groups[0] = NULL;
+	}
+
+	rc = mysql_server_init(argc, arguments, NULL);
+
+	if (argc) {
+		efree(arguments);
+	}
+	efree(groups);
+
+	if (rc) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -119,6 +115,8 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 */
 PHP_FUNCTION(mysqli_embedded_server_end)
 {
+#ifdef HAVE_MYSQLI_EMBEDDED
 	mysql_server_end();
+#endif
 }
 /* }}} */
