@@ -568,6 +568,10 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 	}
 	per_dir_entry.type = mode;
 
+	if (strcasecmp(arg2, "none") == 0) {
+		arg2 = "";
+	}
+
 	per_dir_entry.key_length = strlen(arg1);
 	per_dir_entry.value_length = strlen(arg2);
 
