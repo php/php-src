@@ -58,8 +58,6 @@
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
-# elif defined(NETWARE)
-#  include "netware/pwd.h"
 # else
 #  include <pwd.h>
 # endif
@@ -313,7 +311,11 @@ PHP_FUNCTION(disk_free_space)
 	}
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+#ifdef NETWARE
+	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
+#else
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
+#endif
 #endif
 #endif /* WINDOWS */
 
@@ -645,19 +647,19 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_GROUP:
 		RETURN_LONG((long)ssb.sb.st_gid);
 	case FS_ATIME:
-#if defined(NETWARE) && defined(NEW_LIBC)
+#ifdef NETWARE
 		RETURN_LONG((long)((stat_sb->st_atime).tv_sec));
 #else
 		RETURN_LONG((long)ssb.sb.st_atime);
 #endif
 	case FS_MTIME:
-#if defined(NETWARE) && defined(NEW_LIBC)
+#ifdef NETWARE
 		RETURN_LONG((long)((stat_sb->st_mtime).tv_sec));
 #else
 		RETURN_LONG((long)ssb.sb.st_mtime);
 #endif
 	case FS_CTIME:
-#if defined(NETWARE) && defined(NEW_LIBC)
+#ifdef NETWARE
 		RETURN_LONG((long)((stat_sb->st_ctime).tv_sec));
 #else
 		RETURN_LONG((long)ssb.sb.st_ctime);
@@ -709,7 +711,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
-#if defined(NETWARE) && defined(NEW_LIBC)
+#ifdef NETWARE
 		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
 		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
 		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
