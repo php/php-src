@@ -113,6 +113,7 @@ static int fsock_globals_id;
 
 /*
  * Converts a host name to an IP address.
+ * TODO: This looks like unused code suitable for nuking.
  */
 PHPAPI int php_lookup_hostname(const char *addr, struct in_addr *in)
 {
@@ -144,13 +145,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
-#ifdef PHP_WIN32
 	int err;
-#endif
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzzd", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzzd", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -204,8 +203,8 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		int socktype = SOCK_STREAM;
 		int i;
 
-		for (i = 0; sockmodes[i].proto != NULL; i++)	{
-			if (strncmp(host, sockmodes[i].proto, sockmodes[i].protolen) == 0)	{
+		for (i = 0; sockmodes[i].proto != NULL; i++) {
+			if (strncmp(host, sockmodes[i].proto, sockmodes[i].protolen) == 0) {
 				ssl_flags = sockmodes[i].ssl_flags;		
 				socktype = sockmodes[i].socktype;
 				host += sockmodes[i].protolen;
@@ -213,24 +212,22 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 #if !HAVE_OPENSSL_EXT
-		if (ssl_flags != php_ssl_none)	{
+		if (ssl_flags != php_ssl_none) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "no SSL support in this build");
 		}
 		else
 #endif
 		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, &tv, hashkey);
 
-#ifdef PHP_WIN32
 		/* Preserve error */
-		err = WSAGetLastError();
-#endif
+		err = php_socket_errno();
 
 		if (stream == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d", host, port);
 		}
 		
 #if HAVE_OPENSSL_EXT
-		if (stream && ssl_flags != php_ssl_none)	{
+		if (stream && ssl_flags != php_ssl_none) {
 			int ssl_ret = FAILURE;
 			switch(ssl_flags)	{
 				case php_ssl_v23:
@@ -248,8 +245,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 #endif
 		
-	} else	
+	} else {
+		/* FIXME: Win32 - this probably does not return sensible errno and errstr */
 		stream = php_stream_sock_open_unix(host, host_len, hashkey, &tv);
+		err = php_socket_errno();
+	}
 
 	if (hashkey)
 		efree(hashkey);
@@ -257,30 +257,14 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-#ifndef PHP_WIN32
-			ZVAL_LONG(zerrno, errno);
-#else
 			ZVAL_LONG(zerrno, err);
-#endif
 		}
-#ifndef PHP_WIN32
 		if (zerrstr) {
-			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrstr, strerror(errno), 1);
-		}
-#else
-		if (zerrstr) {
-			char *buf;
+			char *buf = php_socket_strerror(err, NULL, 0);
 
-			if (! FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, 
-					Z_LVAL_P(zerrno), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&buf, 0, NULL)) {
-				RETURN_FALSE;
-			}
-
-			ZVAL_STRING(zerrstr, buf, 1);
-			LocalFree(buf);
+			/* no need to dup; we would only need to efree buf anyway */
+			ZVAL_STRING(zerrstr, buf, 0);
 		}
-#endif
 		RETURN_FALSE;
 	}
 		
