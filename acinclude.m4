@@ -790,12 +790,17 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
   php_cxx_post=' && echo > $[@]'
   php_lo=o
-  
+
+  case $with_pic in
+    yes) pic_setting='-prefer-pic';;
+    no)  pic_setting='-prefer-non-pic';;
+  esac
+
   shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
-  shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) -prefer-pic'
+  shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) '$pic_setting
   shared_c_post=
   shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
-  shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) -prefer-pic'
+  shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
 
