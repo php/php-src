@@ -33,9 +33,9 @@
 
 #include "php.h"
 #include "php_COM.h"
-#include "unknwn.h"
+#include "php_VARIANT.h"
 
-// prototypes
+/* prototypes */
 
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage);
 PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage);
@@ -43,7 +43,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
 PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
-// implementations
+/* implementations */
 
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 {
@@ -76,14 +76,14 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 			}
 			else if(!strcmp(pval_arg->value.obj.ce->name, "COM"))
 			{
-				pval **idispatch_handle;
+				pval **comval_handle;
 				comval *obj;
 				int type;
 
 				/* fetch the IDispatch interface */
-				zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &idispatch_handle);
-				obj = (comval *)zend_list_find(Z_LVAL_P(*idispatch_handle), &type);
-				if(!obj || (type != php_COM_get_le_idispatch()) || !C_ISREFD(obj))
+				zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &comval_handle);
+				obj = (comval *)zend_list_find(Z_LVAL_P(*comval_handle), &type);
+				if(!obj || (type != IS_COM) || !C_ISREFD(obj))
 				{
 					VariantInit(var_arg);
 				}
@@ -115,7 +115,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				if(pval_arg->is_ref)
 				{
 					V_VT(var_arg) = VT_VARIANT|VT_BYREF;            /* Create a VARIANT to reference */
-					V_VARIANTREF(var_arg) = emalloc(sizeof(VARIANT));
+					ALLOC_VARIANT(V_VARIANTREF(var_arg));
 					var_arg = V_VARIANTREF(var_arg);                        /* & put the array in that VARIANT */
 				}
 
@@ -731,7 +731,6 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			/* break missing intentionaly */
 		case VT_DISPATCH:
 			{
-				pval *handle;
 				comval *obj;
 
 				if(V_DISPATCH(var_arg) == NULL)
@@ -741,20 +740,10 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				}
 				else
 				{
-					obj = emalloc(sizeof(comval));
+					ALLOC_COM(obj);
 					php_COM_set(obj, V_DISPATCH(var_arg), TRUE);
 
-					Z_TYPE_P(pval_arg) = IS_OBJECT;
-					pval_arg->value.obj.ce = &com_class_entry;
-					ALLOC_HASHTABLE(pval_arg->value.obj.properties);
-					zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-					ALLOC_ZVAL(handle);
-					INIT_PZVAL(handle);
-					ZVAL_LONG(handle, zend_list_insert(obj, php_COM_get_le_idispatch()));
-
-					pval_copy_constructor(handle);
-					zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
+					ZVAL_COM(pval_arg, obj);
 				}
 			}
 			break;
@@ -827,14 +816,14 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
 {
 	OLECHAR *unicode_str;
 
-	//request needed buffersize
+	/* request needed buffersize */
 	uint reqSize = MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
 
 	if(reqSize)
 	{
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * reqSize);
 
-		//convert string
+		/* convert string */
 		MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, unicode_str, reqSize);
 	}
 	else
@@ -860,14 +849,14 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int per
 	char *C_str;
 	uint length = 0;
 
-	//request needed buffersize
+	/* request needed buffersize */
 	uint reqSize = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
 
 	if(reqSize)
 	{
 		C_str = (char *) pemalloc(sizeof(char) * reqSize, persistent);
 
-		//convert string
+		/* convert string */
 		length = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	}
 	else

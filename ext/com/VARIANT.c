@@ -28,12 +28,16 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "php_VARIANT.h"
+#include "variant.h"
 #include "conversion.h"
 #include "ext/standard/info.h"
 
 #include <unknwn.h> 
 
+PHP_MINIT_FUNCTION(VARIANT);
+PHP_MSHUTDOWN_FUNCTION(VARIANT);
+
+int php_VARIANT_get_le_variant();
 void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 pval php_VARIANT_get_property_handler(zend_property_reference *property_reference);
 static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value);
@@ -108,18 +112,23 @@ PHP_MSHUTDOWN_FUNCTION(VARIANT)
 	return SUCCESS;
 }
 
+int php_VARIANT_get_le_variant()
+{
+	return le_variant;
+}
+
 void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	pval *object = property_reference->object;
 	zend_overloaded_element *function_name = (zend_overloaded_element *) property_reference->elements_list->tail->data;
 	VARIANT *pVar;
 
-	if((zend_llist_count(property_reference->elements_list)==1) && !strcmp(function_name->element.value.str.val, "variant"))
+	if((zend_llist_count(property_reference->elements_list)==1) && !strcmp(Z_STRVAL(function_name->element), "variant"))
 	{
 		/* constructor */
 		pval *object_handle, *data, *type, *code_page;
 
-		pVar = emalloc(sizeof(VARIANT));
+		ALLOC_VARIANT(pVar);
 		VariantInit(pVar);
 
 		switch(ZEND_NUM_ARGS())
@@ -148,8 +157,7 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 				break;
 		}
 
-		return_value->type = IS_LONG;
-		return_value->value.lval = zend_list_insert(pVar, le_variant);
+		RETVAL_LONG(zend_list_insert(pVar, IS_VARIANT));
 
 		if(!zend_is_true(return_value))
 		{
@@ -177,9 +185,9 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 
 	/* fetch the VARIANT structure */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
-	var_arg = zend_list_find((*var_handle)->value.lval, &type);
+	var_arg = zend_list_find(Z_LVAL_PP(var_handle), &type);
 
-	if(!var_arg || (type != le_variant))
+	if(!var_arg || (type != IS_VARIANT))
 	{
 		var_reset(&result);
 	}
@@ -197,10 +205,9 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 				{
 					php_variant_to_pval(var_arg, &result, 0, codepage);
 				}
-				else if(!strcmp(overloaded_property->element.value.str.val, "type"))
+				else if(!strcmp(Z_STRVAL(overloaded_property->element), "type"))
 				{
-					result.value.lval = var_arg->vt;
-					result.type = IS_LONG;
+					ZVAL_LONG(&result, V_VT(var_arg))
 				}
 				else
 				{
@@ -230,9 +237,9 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 
 	/* fetch the VARIANT structure */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
-	var_arg = zend_list_find((*var_handle)->value.lval, &type);
+	var_arg = zend_list_find(Z_LVAL_PP(var_handle), &type);
 
-	if(!var_arg || (type != le_variant))
+	if(!var_arg || (type != IS_VARIANT))
 		return FAILURE;
 
 	overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
@@ -245,163 +252,163 @@ static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value)
 {
 	pval type;
 
-	type.type = IS_STRING;
+	Z_TYPE(type) = IS_STRING;
 
-	if(!strcmp(arg_property->value.str.val, "bVal"))
+	if(!strcmp(Z_STRVAL_P(arg_property), "bVal"))
 	{
-		type.value.lval = VT_UI1;
+		Z_LVAL(type) = VT_UI1;
 	}
-	else if(!strcmp(arg_property->value.str.val, "iVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "iVal"))
 	{
-		type.value.lval = VT_I2;
+		Z_LVAL(type) = VT_I2;
 	}
-	else if(!strcmp(arg_property->value.str.val, "lVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "lVal"))
 	{
-		type.value.lval = VT_I4;
+		Z_LVAL(type) = VT_I4;
 	}
-	else if(!strcmp(arg_property->value.str.val, "fltVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "fltVal"))
 	{
-		type.value.lval = VT_R4;
+		Z_LVAL(type) = VT_R4;
 	}
-	else if(!strcmp(arg_property->value.str.val, "dblVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "dblVal"))
 	{
-		type.value.lval = VT_R8;
+		Z_LVAL(type) = VT_R8;
 	}
-	else if(!strcmp(arg_property->value.str.val, "boolVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "boolVal"))
 	{
-		type.value.lval = VT_BOOL;
+		Z_LVAL(type) = VT_BOOL;
 	}
-	else if(!strcmp(arg_property->value.str.val, "scode"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "scode"))
 	{
-		type.value.lval = VT_ERROR;
+		Z_LVAL(type) = VT_ERROR;
 	}
-	else if(!strcmp(arg_property->value.str.val, "cyVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "cyVal"))
 	{
-		type.value.lval = VT_CY;
+		Z_LVAL(type) = VT_CY;
 	}
-	else if(!strcmp(arg_property->value.str.val, "date"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "date"))
 	{
-		type.value.lval = VT_DATE;
+		Z_LVAL(type) = VT_DATE;
 	}
-	else if(!strcmp(arg_property->value.str.val, "bstrVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "bstrVal"))
 	{
-		type.value.lval = VT_BSTR;
+		Z_LVAL(type) = VT_BSTR;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pdecVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pdecVal"))
 	{
-		type.value.lval = VT_DECIMAL|VT_BYREF;
+		Z_LVAL(type) = VT_DECIMAL|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "punkVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "punkVal"))
 	{
-		type.value.lval = VT_UNKNOWN;
+		Z_LVAL(type) = VT_UNKNOWN;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pdispVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pdispVal"))
 	{
-		type.value.lval = VT_DISPATCH;
+		Z_LVAL(type) = VT_DISPATCH;
 	}
-	else if(!strcmp(arg_property->value.str.val, "parray"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "parray"))
 	{
-		type.value.lval = VT_ARRAY;
+		Z_LVAL(type) = VT_ARRAY;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pbVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pbVal"))
 	{
-		type.value.lval = VT_UI1|VT_BYREF;
+		Z_LVAL(type) = VT_UI1|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "piVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "piVal"))
 	{
-		type.value.lval = VT_I2|VT_BYREF;
+		Z_LVAL(type) = VT_I2|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "plVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "plVal"))
 	{
-		type.value.lval = VT_I4|VT_BYREF;
+		Z_LVAL(type) = VT_I4|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pfltVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pfltVal"))
 	{
-		type.value.lval = VT_R4|VT_BYREF;
+		Z_LVAL(type) = VT_R4|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pdblVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pdblVal"))
 	{
-		type.value.lval = VT_R8|VT_BYREF;
+		Z_LVAL(type) = VT_R8|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pboolVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pboolVal"))
 	{
-		type.value.lval = VT_BOOL|VT_BYREF;
+		Z_LVAL(type) = VT_BOOL|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pscode"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pscode"))
 	{
-		type.value.lval = VT_ERROR|VT_BYREF;
+		Z_LVAL(type) = VT_ERROR|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pcyVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pcyVal"))
 	{
-		type.value.lval = VT_CY|VT_BYREF;
+		Z_LVAL(type) = VT_CY|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pdate"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pdate"))
 	{
-		type.value.lval = VT_DATE|VT_BYREF;
+		Z_LVAL(type) = VT_DATE|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pbstrVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pbstrVal"))
 	{
-		type.value.lval = VT_BSTR|VT_BYREF;
+		Z_LVAL(type) = VT_BSTR|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "ppunkVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "ppunkVal"))
 	{
-		type.value.lval = VT_UNKNOWN|VT_BYREF;
+		Z_LVAL(type) = VT_UNKNOWN|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "ppdispVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "ppdispVal"))
 	{
-		type.value.lval = VT_DISPATCH|VT_BYREF;
+		Z_LVAL(type) = VT_DISPATCH|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pparray"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pparray"))
 	{
-		type.value.lval = VT_ARRAY|VT_BYREF;
+		Z_LVAL(type) = VT_ARRAY|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pvarVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pvarVal"))
 	{
-		type.value.lval = VT_VARIANT|VT_BYREF;
+		Z_LVAL(type) = VT_VARIANT|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "byref"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "byref"))
 	{
-		type.value.lval = VT_BYREF;
+		Z_LVAL(type) = VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "cVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "cVal"))
 	{
-		type.value.lval = VT_I1;
+		Z_LVAL(type) = VT_I1;
 	}
-	else if(!strcmp(arg_property->value.str.val, "uiVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "uiVal"))
 	{
-		type.value.lval = VT_UI2;
+		Z_LVAL(type) = VT_UI2;
 	}
-	else if(!strcmp(arg_property->value.str.val, "ulVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "ulVal"))
 	{
-		type.value.lval = VT_UI4;
+		Z_LVAL(type) = VT_UI4;
 	}
-	else if(!strcmp(arg_property->value.str.val, "intVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "intVal"))
 	{
-		type.value.lval = VT_INT;
+		Z_LVAL(type) = VT_INT;
 	}
-	else if(!strcmp(arg_property->value.str.val, "uintVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "uintVal"))
 	{
-		type.value.lval = VT_UINT|VT_BYREF;
+		Z_LVAL(type) = VT_UINT|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pcVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pcVal"))
 	{
-		type.value.lval = VT_I1|VT_BYREF;
+		Z_LVAL(type) = VT_I1|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "puiVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "puiVal"))
 	{
-		type.value.lval = VT_UI2|VT_BYREF;
+		Z_LVAL(type) = VT_UI2|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pulVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pulVal"))
 	{
-		type.value.lval = VT_UI4|VT_BYREF;
+		Z_LVAL(type) = VT_UI4|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "pintVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "pintVal"))
 	{
-		type.value.lval = VT_INT|VT_BYREF;
+		Z_LVAL(type) = VT_INT|VT_BYREF;
 	}
-	else if(!strcmp(arg_property->value.str.val, "puintVal"))
+	else if(!strcmp(Z_STRVAL_P(arg_property), "puintVal"))
 	{
-		type.value.lval = VT_UINT|VT_BYREF;
+		Z_LVAL(type) = VT_UINT|VT_BYREF;
 	}
 	else
 	{
