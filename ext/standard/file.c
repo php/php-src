@@ -2109,7 +2109,7 @@ PHP_FUNCTION(fgetcsv)
 	/* first section exactly as php_fgetss */
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
-	int len;
+	int len, temp_len;
 	char *buf;
 	php_stream *stream;
 
@@ -2194,7 +2194,8 @@ PHP_FUNCTION(fgetcsv)
 
 	/* reserve workspace for building each individual field */
 
-	temp = emalloc(len);	/* unlikely but possible! */
+	temp_len = len;
+	temp = emalloc(temp_len + 1);	/* unlikely but possible! */
 	tptr = temp;
 
 	/* Initialize return array */
@@ -2209,7 +2210,7 @@ PHP_FUNCTION(fgetcsv)
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (enclosure && *bptr == enclosure) {
 			bptr++;	/* move on to first character in field */
-			
+
 			/* 2A. handle enclosure delimited field */
 			while (*bptr) {
 				if (*bptr == enclosure) {
@@ -2236,6 +2237,13 @@ PHP_FUNCTION(fgetcsv)
 						memset(buf, 0, len+1);
 
 						if (php_stream_gets(stream, buf, len) == NULL) {
+							/* we've got an unterminated enclosure, assign all the data
+							 * from the start of the enclosure to end of data to the last element
+							 */
+							if (temp_len > len) { 
+								break;
+							}
+							
 							efree(lineEnd); 
 							efree(temp); 
 							efree(buf);
@@ -2243,6 +2251,8 @@ PHP_FUNCTION(fgetcsv)
 							RETURN_FALSE;
 						}
 
+						temp_len += len;
+						temp = erealloc(temp, temp_len+1);
 						bptr = buf;
 						tptr = buf + strlen(buf) -1;
 						while (isspace((int) *tptr) && (*tptr!=delimiter) && (tptr > bptr)) 
