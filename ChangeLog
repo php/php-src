@@ -1,3 +1,40 @@
+2002-06-08  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Remote.php: add modes to list-all. fix a mergerbug
+
+2002-06-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c: too many flushes are bad
+
+2002-06-08  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    Hopefully fixed a couple of problems with destination paths:
+    - Bug #17529
+    - In Windows getting <pear>\/\<file>
+    - Documentation under <doc_dir>/Package/Package/
+
+
+2002-06-08  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: *** empty log message ***
+
+2002-06-08  James Cox  <james@blog.at>
+
+    * ext/mysql/config.m4:
+     added support for --with-mysql-sock so people can specify it (eg, NFS compiles, etc)
+      changed the default mysql.sock location to use the one from the RPM. Added /usr/local
+      locations to the search list. (imajes)
+
+2002-06-08  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/info.c
+      main/php_streams.h
+      main/streams.c:
+    - Since streams are always enabled, instead of just printing 'enabled' we tell
+      what streams are currently registered.
+
 2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Registry.php:
