@@ -100,7 +100,15 @@ SOURCE=.\mbfilter_ja.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mbregex.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbstring.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_mbregex.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -117,6 +125,10 @@ SOURCE=.\mbfilter.h
 # Begin Source File
 
 SOURCE=.\mbfilter_ja.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbregex.h
 # End Source File
 # Begin Source File
 
