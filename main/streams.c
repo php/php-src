@@ -460,7 +460,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		return 0;
 	}
 
-	zend_error(E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
 	return -1;
 }
 
@@ -720,7 +720,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		}
 		fclose(fp);
 
-		zend_error(E_WARNING, "%s(): unable to allocate stream", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
 
 		return NULL;
 	}
@@ -734,12 +734,12 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 
 	fp = tmpfile();
 	if (fp == NULL) {
-		zend_error(E_WARNING, "tmpfile(): %s", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
 		return NULL;
 	}
 	stream = php_stream_fopen_from_file_rel(fp, "r+");
 	if (stream == NULL)	{
-		zend_error(E_WARNING, "tmpfile(): %s", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
 		fclose(fp);
 		return NULL;
 	}
@@ -1230,7 +1230,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			b) no memory
 			-> lets bail
 		*/
-		zend_error(E_ERROR, "%s(): fopencookie failed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "fopencookie failed");
 		return FAILURE;
 #endif
 
@@ -1250,8 +1250,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
 		};
 
-		zend_error(E_WARNING, "%s(): cannot represent a stream of type %s as a %s",
-			get_active_function_name(TSRMLS_C),
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot represent a stream of type %s as a %s",
 			stream->ops->label,
 			cast_names[castas]
 			);
@@ -1432,7 +1431,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		/* BC with older php scripts and zlib wrapper */
 		protocol = "compress.zlib";
 		n = 13;
-		zend_error(E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
 	}
 
 	if (protocol)	{
@@ -1443,7 +1442,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 				n = sizeof(wrapper_name) - 1;
 			PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 			
-			zend_error(E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
 			wrapper = NULL;
@@ -1454,7 +1453,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		if (protocol && path[n+1] == '/' && path[n+2] == '/')	{
 			if (options & REPORT_ERRORS)
-				zend_error(E_WARNING, "remote host file access not supported, %s", path);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "remote host file access not supported, %s", path);
 			return NULL;
 		}
 		if (protocol && path_for_open)
@@ -1466,7 +1465,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 
 	if (wrapper && wrapper->is_url && !PG(allow_url_fopen)) {
 		if (options & REPORT_ERRORS)
-			zend_error(E_WARNING, "URL file-access is disabled in the server configuration");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 		return NULL;
 	}
 	
@@ -1519,7 +1518,7 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 			msg = "no suitable wrapper could be found";
 		
 		php_strip_url_passwd(tmp);
-		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, msg);
+		php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s", msg);
 		efree(tmp);
 	}
 	return stream;
