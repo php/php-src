@@ -29,6 +29,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #26003 (Make fgetcsv() binary safe). (Ilia, Moriyoshi)
 - Fixed bug #25794 (Cannot open existing hash db3 file with write" ext/dba).
   (Marcus)
+- Fixed Bug #25694 (round() and number_format() give inconsistent results).
+  (Ilia)
 - Fixed bug #25581 (getimagesize () return incorrect values on bitmap
   (os2) files). (Marcus)
 

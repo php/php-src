@@ -40,6 +40,18 @@
 # endif
 #endif
 
+#define PHP_ROUND_WITH_FUZZ(val, places) {			\
+	double tmp_val=val, f = pow(10.0, (double) places);	\
+	tmp_val *= f;					\
+	if (tmp_val >= 0.0) {				\
+		tmp_val = floor(tmp_val + PHP_ROUND_FUZZ);	\
+	} else {					\
+		tmp_val = ceil(tmp_val - PHP_ROUND_FUZZ);	\
+	}						\
+	tmp_val /= f;					\
+	val = !zend_isnan(tmp_val) ? tmp_val : val;	\
+}							\
+
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
 
@@ -121,7 +133,7 @@ PHP_FUNCTION(round)
 {
 	zval **value, **precision;
 	int places = 0;
-	double f, return_val;
+	double return_val;
 	
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &precision) == FAILURE) {
@@ -147,14 +159,7 @@ PHP_FUNCTION(round)
 			return_val = (Z_TYPE_PP(value) == IS_LONG) ?
 							(double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
 
-			f = pow(10.0, (double) places);
-
-			return_val *= f;
-			if (return_val >= 0.0)
-				return_val = floor(return_val + PHP_ROUND_FUZZ);
-			else
-				return_val = ceil(return_val - PHP_ROUND_FUZZ);
-			return_val /= f;
+			PHP_ROUND_WITH_FUZZ(return_val, places);
 
 			RETURN_DOUBLE(return_val);
 			break;
@@ -995,12 +1000,14 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
-	
+
 	if (d < 0) {
 		is_negative = 1;
 		d = -d;
 	}
 	dec = MAX(0, dec);
+
+	PHP_ROUND_WITH_FUZZ(d, dec);
 
 	tmplen = spprintf(&tmpbuf, 0, "%.*f", dec, d);
 
