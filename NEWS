@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added missing AddRef() calls in the COM extension. This should
+  fix weird behaviour (in particular with ADODB). (Harald)
 - Fixed some dummy errors. (dets)
 - Fix segfault in version_compare() (Stig)
 - Added support to getimagesize() for compressed Flash MX files. (Derick)
