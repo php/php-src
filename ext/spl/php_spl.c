@@ -53,7 +53,7 @@ function_entry spl_functions[] = {
  */
 zend_module_entry spl_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"spl",
+	"SPL",
 	spl_functions,
 	PHP_MINIT(spl),
 	PHP_MSHUTDOWN(spl),
