@@ -46,11 +46,11 @@ extern PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(xmldoc);
 PHP_FUNCTION(xmldocfile);
 PHP_FUNCTION(xmltree);
-PHP_FUNCTION(domxml_newxmldoc);
+PHP_FUNCTION(domxml_new_xmldoc);
 
 /* Class Document methods */
 PHP_FUNCTION(domxml_root);
-PHP_FUNCTION(domxml_addroot);
+PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_dumpmem);
 
@@ -62,7 +62,7 @@ PHP_FUNCTION(domxml_children);
 PHP_FUNCTION(domxml_lastchild);
 PHP_FUNCTION(domxml_parent);
 PHP_FUNCTION(domxml_node);
-PHP_FUNCTION(domxml_newchild);
+PHP_FUNCTION(domxml_new_child);
 
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attrname);
