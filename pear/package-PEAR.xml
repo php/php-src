@@ -67,6 +67,11 @@
         <file baseinstalldir="/" role="script" name="pear.bat"></file>
       </dir>
     </filelist>
+    <deps>
+      <dep type="php" rel="ge" version="4.1"/>
+      <dep type="pkg" rel="has">Archive_Tar</dep>
+      <dep type="pkg" rel="has">Console_Getopt</dep>
+    </deps>
   </release>
   <changelog>
     <release>
