@@ -470,7 +470,16 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						if (op2) {
 							if (op2->op_type == IS_VAR) {
 								if (value == &T(op2->u.var).tmp_var) {
-									STR_FREE(value->value.str.val);
+									if(result->u.EA.type & EXT_TYPE_UNUSED) {
+										/* We are not going to use return value, drop it */
+										STR_FREE(value->value.str.val);
+									} else {
+										/* We are going to use return value, make it real zval */
+										ALLOC_INIT_ZVAL(value);
+										*value = T(op2->u.var).tmp_var;
+										value->is_ref = 0;
+										value->refcount = 0; /* LOCK will increase it */
+									}
 								}
 							} else {
 								if (final_value == &T(op2->u.var).tmp_var) {
@@ -495,7 +504,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
-		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+/*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
+		T(result->u.var).var.ptr_ptr = &value;
 		SELECTIVE_PZVAL_LOCK(*T(result->u.var).var.ptr_ptr, result);
 		AI_USE_PTR(T(result->u.var).var);
 		return;
