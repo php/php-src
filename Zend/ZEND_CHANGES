@@ -175,6 +175,11 @@ Changes in the Zend Engine 2.0
         Foo::$aVariable = 'someValue';
         ?>
 
+      A namespace's name may contain colons to denote "sub-namespaces".
+      This is pure syntactic sugar, the Zend Engine will not see, for 
+      instance, the namespaces "Package", "Package:Subpackage" and 
+      "Package:Subpackage:Subsubpackage" as related.
+
       To avoid ambiguities in the '::' resolution there may be no
       global class and namespace with the same name.
 
