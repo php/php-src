@@ -456,7 +456,7 @@ static XML_Char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_
 {
 	int pos = len;
 	char *newbuf;
-	unsigned short c;
+	unsigned int c;
 	unsigned short (*encoder)(unsigned char) = NULL;
 	xml_encoding *enc = xml_get_encoding(encoding);
 
