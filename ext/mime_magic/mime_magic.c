@@ -465,7 +465,7 @@ static int parse(char *l, int lineno)
     m->offset = (int) strtol(l, &t, 0);
     if (l == t) {
 		php_error(E_WARNING,
-					 MODNAME ": offset %s invalid", l);
+					 MODNAME ": (line %d) offset `%s' invalid", lineno, l);
     }
     l = t;
 
