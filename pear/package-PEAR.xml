@@ -52,7 +52,6 @@
     <state>beta</state>
     <notes>
 PEAR Installer:
-
 * Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
 * Bug #249 installing from an url doesnt work
 * Bug #248 --force command does not work as expected
@@ -61,7 +60,7 @@ PEAR Installer:
 * Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
 * Moved download code into its own class
 * Fully unit tested the installer, packager, downloader, and PEAR_Common
-
+* Bug #521 Incorrect filename in naming warnings
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
