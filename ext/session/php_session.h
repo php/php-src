@@ -102,6 +102,7 @@ PHP_FUNCTION(session_is_registered);
 PHP_FUNCTION(session_encode);
 PHP_FUNCTION(session_start);
 PHP_FUNCTION(session_destroy);
+PHP_FUNCTION(session_unset);
 
 #ifdef ZTS
 #define PSLS_D php_ps_globals *ps_globals

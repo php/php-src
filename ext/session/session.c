@@ -60,6 +60,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_encode, NULL)
 	PHP_FE(session_start, NULL)
 	PHP_FE(session_destroy, NULL)
+	PHP_FE(session_unset, NULL)
 	{0}
 };
 
@@ -89,6 +90,7 @@ static int php_rinit_session(INIT_FUNC_ARGS);
 static int php_mshutdown_session(SHUTDOWN_FUNC_ARGS);
 static int php_rshutdown_session(SHUTDOWN_FUNC_ARGS);
 static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS);
+static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
 
 zend_module_entry session_module_entry = {
@@ -353,7 +355,6 @@ static void _php_session_save_current_state(PSLS_D)
 		PS(mod)->write(&PS(mod_data), PS(id), "", 0);
 	}
 	PS(mod)->close(&PS(mod_data));
-	PS(nr_open_sessions)--;
 }
 
 #define COOKIE_FMT 		"Set-cookie: %s=%s"
@@ -519,10 +520,14 @@ static void _php_session_start(PSLS_D)
 static void _php_session_destroy(PSLS_D)
 {
 	if(PS(nr_open_sessions) == 0)
+	{
+		php_error(E_WARNING, "Trying to destroy uninitialized session");
 		return;
+	}
 
 	PS(mod)->destroy(&PS(mod_data), PS(id));
 	php_rshutdown_session_globals(PSLS_C);
+	php_rinit_session_globals(PSLS_C);
 	PS(nr_open_sessions)--;
 }
 
@@ -746,8 +751,29 @@ PHP_FUNCTION(session_start)
 PHP_FUNCTION(session_destroy)
 {
 	PSLS_FETCH();
-	
+		
 	_php_session_destroy(PSLS_C);
+}
+/* }}} */
+
+
+/* {{{ proto session_unset()
+   Unset all registered variables */
+PHP_FUNCTION(session_unset)
+{
+	zval	**tmp;
+	char	 *variable;
+	ELS_FETCH();
+	PSLS_FETCH();
+	
+	for(zend_hash_internal_pointer_reset(&PS(vars));
+			zend_hash_get_current_key(&PS(vars), &variable, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_move_forward(&PS(vars))) {
+		if(zend_hash_find(EG(active_symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
+				== SUCCESS) {
+			zend_hash_del(EG(active_symbol_table), variable, strlen(variable) + 1);
+		}
+	}
 }
 /* }}} */
 

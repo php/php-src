@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added session_unset() function (Andrey)
+- Fixed double session globals shutdown crash (Andrey)
 - Fixed crash related to ignore_user_abort ini entry (Andrey)
 - Added support for external entropy sources for session id creation 
   (on Unices /dev/random and /dev/urandom) (Sascha)
