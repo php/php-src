@@ -287,6 +287,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	pdo_odbc_db_handle *H;
 	RETCODE rc;
 	int use_direct = 0;
+	SQLUINTEGER cursor_lib;
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 
@@ -326,6 +327,15 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 			odbc_handle_closer(dbh TSRMLS_CC);
 			return 0;
 		}
+	}
+
+	/* set up the cursor library, if needed, or if configured explicitly */
+	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
+	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_UINTEGER);
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
+		odbc_handle_closer(dbh TSRMLS_CC);
+		return 0;
 	}
 	
 	if (strchr(dbh->data_source, ';')) {
