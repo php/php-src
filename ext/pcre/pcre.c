@@ -272,19 +272,18 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
    Perform a Perl-style regular expression match */
 PHP_FUNCTION(pcre_match)
 {
-	zval			*regex,
-					*subject,
-					*subpats = NULL;
-	pcre			*re = NULL;
-	pcre_extra		*extra = NULL;
-	int			 	 exoptions = 0;
-	int			 	 count;
-	int			 	*offsets;
-	int			 	 size_offsets;
-	int			 	 matched;
+	zval			*regex,				/* Regular expression */
+					*subject,			/* String to match against */
+					*subpats = NULL;	/* Array for subpatterns */
+	pcre			*re = NULL;			/* Compiled regular expression */
+	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	int			 	 exoptions = 0;		/* Execution options */
+	int			 	 count;				/* Count of matched subpatterns */
+	int			 	*offsets;			/* Array of subpattern offsets */
+	int			 	 size_offsets;		/* Size of the offsets array */
+	int			 	 matched;			/* Has anything matched */
 	int				 i;
-	zval			*entry;
-	const char	   **stringlist;
+	const char	   **stringlist;		/* Used to hold list of subpatterns */
 
 	/* Get function parameters and do error-checking. */
 	switch(ARG_COUNT(ht)) {
@@ -348,18 +347,9 @@ PHP_FUNCTION(pcre_match)
 			zval_dtor(subpats);
 			array_init(subpats);
 
-			/* For each subpattern, allocate an array entry, initialize it,
-			   and fill in the matched pattern. Then insert it into the
-			   subpatterns array. */
+			/* For each subpattern, insert it into the subpatterns array. */
 			for (i=0; i<count; i++) {
-				entry = (zval *)emalloc(sizeof(zval));
-				entry->type = IS_STRING;
-				entry->value.str.val = estrdup(stringlist[i]);
-				entry->value.str.len = offsets[(i<<1)+1] - offsets[i<<1];
-				entry->is_ref = 0;
-				entry->refcount = 1;
-
-				zend_hash_index_update(subpats->value.ht, i, &entry, sizeof(zval *), NULL);
+				add_next_index_string(subpats, (char *)stringlist[i], 1);
 			}
 			
 			php_pcre_free(stringlist);
@@ -402,22 +392,22 @@ static int _pcre_get_backref(const char *walk, int *backref)
 /* {{{ char *_php_pcre_replace(char *regex, char *subject, char *replace) */
 char *_php_pcre_replace(char *regex, char *subject, char *replace)
 {
-	pcre			*re = NULL;
-	pcre_extra		*extra = NULL;
-	int			 	 exoptions = 0;
-	int			 	 count = 0;
-	int			 	*offsets;
-	int			 	 size_offsets;
-	int				 new_len;
-	int				 alloc_len;
-	int				 subject_len;
-	int				 subject_offset;
-	int				 result_len;
-	int				 backref;
-	char			*result,
-					*new_buf,
-					*walkbuf,
-					*walk;
+	pcre			*re = NULL;			/* Compiled regular expression */
+	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	int			 	 exoptions = 0;		/* Execution options */
+	int			 	 count = 0;			/* Count of matched subpatterns */
+	int			 	*offsets;			/* Array of subpattern offsets */
+	int			 	 size_offsets;		/* Size of the offsets array */
+	int				 new_len;			/* Length of needed storage */
+	int				 alloc_len;			/* Actual allocated length */
+	int				 subject_len;		/* Length of the subject string */
+	int				 result_len;		/* Current length of the result */
+	int				 subject_offset;	/* Current position in the subject string */
+	int				 backref;			/* Backreference number */
+	char			*result,			/* Result of replacement */
+					*new_buf,			/* Temporary buffer for re-allocation */
+					*walkbuf,			/* Location of current replacement in the result */
+					*walk;				/* Used to walk the replacement string */
 
 	/* Compile regex or get it from cache. */
 	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL)
@@ -544,33 +534,51 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 	char		*replace_value,
 				*subject_value,
 				*result;
-	
+
+	/* Make sure we're dealing with strings. */	
 	convert_to_string(subject);
 	
+	/* If regex is an array */
 	if (regex->type == IS_ARRAY) {
+		/* Duplicating subject string for repeated replacement */
 		subject_value = estrdup(subject->value.str.val);
+		
 		zend_hash_internal_pointer_reset(regex->value.ht);
 
 		if (replace->type == IS_ARRAY)
 			zend_hash_internal_pointer_reset(replace->value.ht);
 		else
+			/* Set replacement value to the passed one */
 			replace_value = replace->value.str.val;
 		
+		/* For each entry in the regex array, get the entry */
 		while (zend_hash_get_current_data(regex->value.ht, (void **)&regex_entry_ptr) == SUCCESS) {
 			regex_entry = *regex_entry_ptr;
+
+			/* Make sure we're dealing with strings. */	
 			convert_to_string(regex_entry);
 		
+			/* If replace is an array */
 			if (replace->type == IS_ARRAY) {
+				/* Get current entry */
 				if (zend_hash_get_current_data(replace->value.ht, (void **)&replace_entry_ptr) == SUCCESS) {
 					replace_entry = *replace_entry_ptr;
+					
+					/* Make sure we're dealing with strings. */	
 					convert_to_string(replace_entry);
+					
+					/* Set replacement value to the one we got from array */
 					replace_value = replace_entry->value.str.val;
 
 					zend_hash_move_forward(replace->value.ht);
 				}
 				else
+					/* We've run out of replacement strings, so use an empty one */
 					replace_value = empty_string;
 			}
+			
+			/* Do the actual replacement and put the result back into subject_value
+			   for further replacements. */
 			if ((result = _php_pcre_replace(regex_entry->value.str.val,
 											subject_value,
 											replace_value)) != NULL) {
@@ -584,6 +592,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 		return subject_value;
 	}
 	else {
+		/* Make sure we're dealing with strings and do the replacement */
 		convert_to_string(replace);
 		result = _php_pcre_replace(regex->value.str.val,
 									subject->value.str.val,
@@ -593,7 +602,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 }
 
 
-/* {{{ proto pcre_replace()
+/* {{{ proto pcre_replace(string|array regex, string|array replace, string|array subject)
     Perform Perl-style regular expression replacement */
 PHP_FUNCTION(pcre_replace)
 {
@@ -610,46 +619,27 @@ PHP_FUNCTION(pcre_replace)
 		WRONG_PARAM_COUNT;
 	}
 
+	/* if subject is an array */
 	if (subject->type == IS_ARRAY) {
 		array_init(return_value);
 		zend_hash_internal_pointer_reset(subject->value.ht);
 		
+		/* For each subject entry, convert it to string, then perform replacement
+		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(subject->value.ht, (void **)&subject_entry_ptr) == SUCCESS) {
 			subject_entry = *subject_entry_ptr;
+			
 			if ((result = _php_replace_in_subject(regex, replace, subject_entry)) != NULL)
 				add_next_index_string(return_value, result, 0);
+		
 			zend_hash_move_forward(subject->value.ht);
 		}
 	}
-	else {
+	else {	/* if subject is not an array */
 		result = _php_replace_in_subject(regex, replace, subject);
 		RETVAL_STRING(result, 1);
 		efree(result);
-	}
-	
-	/*
-		if subject is an array
-			do for each entry in subject array
-				convert subject entry to string
-				if regex is an array
-					do for each entry in regex array
-						convert regex entry to string
-						if replace is an array
-							get corresponding entry for regex from replace array
-							if current regex index is greater than the number of entries in the replace array, use empty string
-							do pcre_replace with regex entry and replace entry
-						else
-							do pcre_replace with regex entry and replace string
-						endif
-					enddo
-				else
-					do pcre_replace with regex string and replace string
-				endif
-			enddo
-		else
-			do pcre_replace with strings
-		endif
-	*/
+	}	
 }
 /* }}} */
 
