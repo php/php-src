@@ -1,3 +1,54 @@
+2001-09-16  Andy Sautins  <asautins@veripost.net>
+
+    * ext/oci8/oci8.c:
+    Collection fix.  getelem method now handles returning nulls
+    correctly and gives warning when accessing an index that does
+    not exist.
+
+2001-09-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.h
+      ext/standard/crypt.c
+      ext/standard/php_rand.h
+      ext/standard/rand.c: Make rand thread safe when ZTS is defined.
+
+    * ext/standard/rand.c: Hopefully fix compile warnings on win32 systems
+
+2001-09-16  Andi Gutmans  <andi@zend.com>
+
+    * ext/notes/php_notes.c:
+    - Start giving the notes extension an indentation face lift but I got
+    - tried half way through :)
+
+2001-09-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.c:
+    WS-fix and directly use ap_psprintf instead of sprintf/ap_pstrdup
+
+2001-09-16  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/apache/mod_php4.c: fixed memory_peak reporting
+
+    * sapi/apache/mod_php4.c: fixed memory_peak resetting
+
+2001-09-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c
+      ext/dbplus/dbplus.c: compiles without warnings now
+
+2001-09-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/rand.c: for the daft folks that think 0 is a good seed.
+
+    * ext/standard/rand.c:
+    Please, if anyone has any comments on the way I generate this seed, speak up!
+    This seems to be the most "random" seed I could come up with...
+
+    This commit is 100% backwards compatible :)
+
+    Add myself to the authors list cause of recent work on the file
+
 2001-09-15  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/xslt/sablot.c:
