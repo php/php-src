@@ -93,6 +93,8 @@ static sapi_module_struct sapi_module = {
 
 	zend_cgibin_ub_write,			/* unbuffered write */
 
+	php3_error,						/* error handler */
+
 	NULL,							/* header handler */
 	NULL,							/* send headers handler */
 	sapi_cgi_send_header,			/* send header handler */

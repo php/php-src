@@ -76,9 +76,8 @@ SAPI_API void sapi_startup(sapi_module_struct *sf);
 SAPI_API void sapi_activate(SLS_D);
 SAPI_API void sapi_deactivate(SLS_D);
 
-SAPI_API int sapi_add_header(const char *header_line, uint header_line_len);
+SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
 SAPI_API int sapi_send_headers();
-
 
 struct _sapi_module_struct {
 	char *name;
@@ -87,6 +86,8 @@ struct _sapi_module_struct {
 	int (*shutdown)(struct _sapi_module_struct *sapi_module);
 
 	int (*ub_write)(const char *str, unsigned int str_length);
+
+	void (*sapi_error)(int type, const char *error_msg, ...);
 
 	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers);
 	int (*send_headers)(sapi_headers_struct *sapi_headers SLS_DC);

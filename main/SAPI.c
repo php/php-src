@@ -1,3 +1,21 @@
+/*
+   +----------------------------------------------------------------------+
+   | Server API Abstraction Layer                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 SAPI Development Team                       |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Design:  Shane Caraveo <shane@caraveo.com>                           |
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+
 #include "SAPI.h"
 #ifdef ZTS
 #include "TSRM.h"
@@ -10,6 +28,9 @@
 #endif
 
 
+SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
+
+
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 #else
@@ -17,8 +38,9 @@ sapi_globals_struct sapi_globals;
 #endif
 
 
-/* A true global (no need for thread safety) */
+/* True globals (no need for thread safety) */
 sapi_module_struct sapi_module;
+SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 
 
 SAPI_API void sapi_startup(sapi_module_struct *sf)
@@ -57,13 +79,19 @@ SAPI_API void sapi_deactivate(SLS_D)
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
-SAPI_API int sapi_add_header(const char *header_line, uint header_line_len)
+SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 {
 	int retval;
 	sapi_header_struct sapi_header;
 	SLS_FETCH();
 
-	sapi_header.header = (char *) header_line;
+	if (SG(headers_sent)) {
+		sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent");
+		efree(header_line);
+		return FAILURE;
+	}
+
+	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
 
 	if (sapi_module.header_handler) {
