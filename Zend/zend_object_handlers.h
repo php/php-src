@@ -104,6 +104,8 @@ zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_na
 #define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
 
+int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
+
 #endif
 
 /*
