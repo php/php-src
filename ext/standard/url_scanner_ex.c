@@ -290,7 +290,7 @@ static inline void handle_val(STD_PARA, char quotes, char type)
 #define scdebug(x)
 #endif
 
-static void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
+static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
 {
 	char *end, *q;
 	char *xp;
@@ -828,7 +828,7 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 
 	smart_str_sets(&ctx->q_name, name);
 	smart_str_sets(&ctx->q_value, value);
-	mainloop(ctx, src, srclen TSRMLS_CC);
+	xx_mainloop(ctx, src, srclen TSRMLS_CC);
 
 	*newlen = ctx->result.len;
 	if (!ctx->result.c) {
