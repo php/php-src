@@ -55,10 +55,25 @@ PHP_INI_END()
 */
 /* }}} */
 
+/* {{{ php_extname_init_globals
+ */
+/* Uncomment this function if you have INI entries
+static void php_extname_init_globals(zend_extname_globals *extname_globals)
+{
+	extname_globals->value = 0;
+	extname_globals->string = NULL;
+}
+*/
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(extname)
 {
+	/* If you have INI entries, uncomment these lines 
+	ZEND_INIT_MODULE_GLOBALS(extname, php_extname_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
+	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -67,6 +82,9 @@ PHP_MINIT_FUNCTION(extname)
  */
 PHP_MSHUTDOWN_FUNCTION(extname)
 {
+	/* uncomment this line if you have INI entries
+	UNREGISTER_INI_ENTRIES();
+	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -102,6 +120,7 @@ PHP_MINFO_FUNCTION(extname)
 	*/
 }
 /* }}} */
+
 
 /* Remove the following function when you have succesfully modified config.m4
    so that your module can be compiled into PHP, it exists only for testing
