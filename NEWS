@@ -38,7 +38,6 @@ PHP                                                                        NEWS
 - Fixed bug #26534 (stream_get_meta_data() -> Access Violation). (Wez)
 - Fixed bug #26528 (HTML entities are not being decoded by 
   xml_parse()/xml_parse_into_struct()). (Ilia)
-- Fixed bug #26304 (Unexpected data loss when opening dba file). (Marcus)
 - Fixed bug #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals).
   (Moriyoshi)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
