@@ -198,7 +198,7 @@ unticked_statement:
 	|	T_USE use_filename ';'		{ zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");  zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' w_cvar T_AS { do_foreach_begin(&$1, &$3, &$2, &$4, 1 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
-	|	T_FOREACH '(' expr_without_variable T_AS { do_foreach_begin(&$1, &$3, &$2, &$4, 0 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
+	|	T_FOREACH '(' array_construct T_AS { do_foreach_begin(&$1, &$3, &$2, &$4, 0 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
 	|	T_DECLARE { do_declare_begin(CLS_C); } '(' declare_list ')' declare_statement { do_declare_end(CLS_C); }
 	|	';'		/* empty statement */
 ;
@@ -479,11 +479,14 @@ expr_without_variable:
 	|	T_EXIT exit_expr	{ do_exit(&$$, &$2 CLS_CC); }
 	|	'@' { do_begin_silence(&$1 CLS_CC); } expr { do_end_silence(&$1 CLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
-	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
+	|	array_construct { $$ = $1; }
 	|	'`' encaps_list '`'		{ do_shell_exec(&$$, &$2 CLS_CC); }
 	|	T_PRINT expr  { do_print(&$$, &$2 CLS_CC); }
 ;
 
+array_construct:
+	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
+;
 
 function_call:
 		T_STRING	'(' { $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
