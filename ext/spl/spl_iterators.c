@@ -689,6 +689,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 				if (instanceof_function(ce, zend_ce_aggregate TSRMLS_CC)) {
 					zval *retval;
 					zobject = zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
+					ce = Z_OBJCE_P(zobject);
 				}
 			}
 			break;
