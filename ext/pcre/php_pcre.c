@@ -329,7 +329,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
-	int				 start_offset;		/* Where the new search starts */
+	unsigned int	 start_offset;		/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
 	int				 i;
 	int				 subpats_order_val = 0;	/* Integer value of subpats_order */
@@ -485,7 +485,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < Z_STRLEN_PP(subject)) {
+			if (g_notempty != 0 && (start_offset < Z_STRLEN_PP(subject))) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 			} else
@@ -694,7 +694,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 eval;				/* If the replacement string should be eval'ed */
-	int				 start_offset;		/* Where the new search starts */
+	unsigned int	 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	int				 replace_len;		/* Length of replacement string */
 	char			*result,			/* Result of replacement */
@@ -845,7 +845,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject_len) {
+			if (g_notempty != 0 && (start_offset < subject_len)) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 				memcpy(&result[*result_len], piece, 1);
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(preg_split)
 	int				 no_empty = 0;		/* If NO_EMPTY flag is set */
 	int				 delim_capture = 0; /* If delimiters should be captured */
 	int				 count = 0;			/* Count of matched subpatterns */
-	int				 start_offset;		/* Where the new search starts */
+	unsigned int	 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*last_match;		/* Location of last match */
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(preg_split)
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < Z_STRLEN_PP(subject)) {
+			if (g_notempty != 0 && (start_offset < Z_STRLEN_PP(subject))) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 			} else
@@ -1186,7 +1186,7 @@ PHP_FUNCTION(preg_split)
 		start_offset = offsets[1];
 	}
 	
-	if (!no_empty || start_offset != Z_STRLEN_PP(subject))
+	if (!no_empty || (start_offset != Z_STRLEN_PP(subject)))
 		/* Add the last piece to the return value */
 		add_next_index_string(return_value,
 							  &Z_STRVAL_PP(subject)[start_offset], 1);
