@@ -76,7 +76,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	
 	PS(mod) = _php_find_ps_module(new_value PSLS_CC);
 	if(!PS(mod)) {
-	  php_error(E_ERROR,"Can't find save handler %s",new_value);
+	  php_error(E_ERROR,"Cannot find save handler %s",new_value);
 	}
 	return SUCCESS;
 }
@@ -88,7 +88,7 @@ static PHP_INI_MH(OnUpdateSerializer)
 
 	PS(serializer) = _php_find_ps_serializer(new_value PSLS_CC);
 	if(!PS(serializer)) {
-	  php_error(E_ERROR,"Can't find serializer handler %s",new_value);
+	  php_error(E_ERROR,"Cannot find serialization handler %s",new_value);
 	}	  
 	return SUCCESS;
 }
@@ -416,7 +416,7 @@ static void _php_session_decode(const char *val, int vallen PSLS_DC)
 		php_session_track_init();
 	if (PS(serializer)->decode(val, vallen PSLS_CC) == FAILURE) {
 		_php_session_destroy(PSLS_C);
-		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed now.");
+		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
 	}
 }
 
@@ -747,12 +747,12 @@ static void _php_session_start(PSLS_D)
 	track_vars = INI_BOOL("track_vars");
 
 	if (!register_globals && !track_vars) {
-		php_error(E_ERROR, "The session module will not work, if you have disabled track_vars and register_globals. Enable at least one of them.");
+		php_error(E_ERROR, "The session module will not work if you have disabled track_vars and register_globals. At least one of them must be enabled.");
 		return;
 	}
 
 	if (!track_vars && PS(use_cookies))
-		php_error(E_NOTICE, "Because track_vars are disabled, the session module will not be able to determine whether the user has sent a cookie. SID will always be defined.");
+		php_error(E_NOTICE, "Because track_vars is disabled, the session module will not be able to determine whether the user has sent a cookie. SID will always be defined.");
 	
 	/*
 	 * If our only resource is the global symbol_table, then check it.
@@ -888,7 +888,7 @@ static zend_bool _php_session_destroy(PSLS_D)
 
 	if (PS(mod)->destroy(&PS(mod_data), PS(id)) == FAILURE) {
 		retval = FAILURE;
-		php_error(E_WARNING, "Destroying the session object failed");
+		php_error(E_WARNING, "Session object destruction failed");
 	}
 	
 	php_rshutdown_session_globals(PSLS_C);
