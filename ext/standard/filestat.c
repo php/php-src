@@ -72,7 +72,6 @@
 #endif
 
 #include "basic_functions.h"
-
 #include "php_filestat.h"
 
 #ifndef S_ISDIR
@@ -83,25 +82,6 @@
 #endif
 #ifndef S_ISLNK
 #define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
-#endif
-
-#ifdef PHP_WIN32
-#define S_IRUSR S_IREAD
-#define S_IWUSR S_IWRITE
-#define S_IXUSR S_IEXEC
-
-#define S_IRGRP S_IREAD
-#define S_IWGRP S_IWRITE
-#define S_IXGRP S_IEXEC
-
-#define S_IROTH S_IREAD
-#define S_IWOTH S_IWRITE
-#define S_IXOTH S_IEXEC
-
-#undef getgid
-#define getgroups(a,b) 0
-#define getgid() 1
-#define getuid() 1
 #endif
 
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
