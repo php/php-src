@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Fixed str_rot13() to not mangle source string (Rasmus)
+- Fixed str_rot13() to not mangle source string. (Rasmus)
 - Fixed imap_get_quota() to work with multiple returned resources as per
   the RFC 2087 and bug #14673. (kalowsky, Sander Steffann)
 - Added MarkerNote decoding to exif_read_data() for several Cameras. (Marcus)
