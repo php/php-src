@@ -40,9 +40,9 @@ ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 static inline int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
         if (zvalue->type <= IS_BOOL) {
-                return;
+                return SUCCESS;
         }
-	_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_CC);
+	return _zval_copy_ctor_func(zvalue ZEND_FILE_LINE_CC);
 }
 
 
