@@ -31,7 +31,7 @@ win32\phpts.def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > win32\phpts.def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	bison --output=Zend/zend_ini_parser.\ -v -d -p ini_ Zend/zend_ini_parser.y
+	bison --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	bison --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
