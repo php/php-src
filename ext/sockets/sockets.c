@@ -129,6 +129,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_create_pair,		NULL)
 	PHP_FE(socket_accept, 			NULL)
 	PHP_FE(socket_set_nonblock,		NULL)
+	PHP_FE(socket_set_block,		NULL)				       
 	PHP_FE(socket_listen, 			NULL)
 	PHP_FE(socket_close,			NULL)
 	PHP_FE(socket_write, 			NULL)
@@ -138,7 +139,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_connect, 			NULL)
 	PHP_FE(socket_strerror, 		NULL)
 	PHP_FE(socket_bind,				NULL)
-	PHP_FE(socket_recv,				NULL)
+	PHP_FE(socket_recv,				second_arg_force_ref)
 	PHP_FE(socket_send,				NULL)
 	PHP_FE(socket_recvfrom,			second_fifth_and_sixth_args_force_ref)
 	PHP_FE(socket_sendto,			NULL)
@@ -150,6 +151,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_setopt,			NULL)
 	PHP_FE(socket_shutdown,			NULL)
 	PHP_FE(socket_last_error,		NULL)
+	PHP_FE(socket_clear_error,		NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -676,18 +678,56 @@ PHP_FUNCTION(socket_accept)
 /* }}} */
 
 /* {{{ proto bool socket_set_nonblock(resource socket)
-   Sets nonblocking mode for file descriptor fd */
+   Sets nonblocking mode on a socket resource */
 PHP_FUNCTION(socket_set_nonblock)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-
+	int		flags;
+   
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
 		return;
 	
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+   
+	flags=fcntl(php_sock->bsd_socket, F_GETFL);
 
-	if (fcntl(php_sock->bsd_socket, F_SETFL, O_NONBLOCK) == 0) {
+	/* Safely append non blocking to other flags unless the get fails.
+	 * Note: This does not abort on failure becuse getfl will always fail
+	 *       under the current win32 code. */
+	if (flags > -1) flags |= O_NONBLOCK;
+		else flags=O_NONBLOCK;
+   
+	if (fcntl(php_sock->bsd_socket, F_SETFL, flags) > -1) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool socket_set_block(resource socket)
+   Sets blocking mode on a socket resource */
+PHP_FUNCTION(socket_set_block)
+{
+	zval		*arg1;
+	php_socket	*php_sock;
+	int		flags;
+   
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
+		return;
+	
+	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+   
+	flags=fcntl(php_sock->bsd_socket, F_GETFL);
+
+	/* Safely remove blocking from flags unless the get fails.
+	 * Note: This does not abort on failure becuse getfl will always fail
+	 *       under the current win32 code. */
+	if (flags > -1) flags &= ~O_NONBLOCK;
+		else flags=0;
+   
+	if (fcntl(php_sock->bsd_socket, F_SETFL, flags) > -1) {
 		RETURN_TRUE;
 	}
 
@@ -1298,30 +1338,42 @@ PHP_FUNCTION(socket_writev)
 }
 /* }}} */
 
-/* {{{ proto string socket_recv(resource socket, int len, int flags)
+/* {{{ proto int socket_recv(resource socket, string &buf, int len, int flags)
    Receives data from a connected socket */
 PHP_FUNCTION(socket_recv)
 {
-	zval		*arg1;
+	zval		*php_sock_res, *buf;
 	char		*recv_buf;
 	php_socket	*php_sock;
 	int			retval, len, flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &arg1, &len, &flags) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE)
 		return;
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &php_sock_res, -1, le_socket_name, le_socket);
 
-	recv_buf = emalloc(len + 2);
-	memset(recv_buf, 0, len + 2);
+	recv_buf = emalloc(len + 1);
+	memset(recv_buf, 0, len + 1);
 
-	if ((retval = recv(php_sock->bsd_socket, recv_buf, len, flags)) == 0) {
+	if ((retval = recv(php_sock->bsd_socket, recv_buf, len, flags)) < 1) {
+		if (retval == -1) PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
+	   
 		efree(recv_buf);
-		RETURN_FALSE;
+	   
+		zval_dtor(buf);
+		Z_TYPE_P(buf)=IS_NULL;
+	} else {
+		recv_buf[retval+1] = '\0';
+
+		/* Rebuild buffer zval */
+		zval_dtor(buf);
+   
+		Z_STRVAL_P(buf)=recv_buf;
+		Z_STRLEN_P(buf)=retval;
+		Z_TYPE_P(buf)=IS_STRING;
 	}
 
-	recv_buf[retval+1] = '\0';
-	RETURN_STRING(recv_buf, 0);
+	RETURN_LONG(retval);
 }
 /* }}} */
 
@@ -1930,7 +1982,7 @@ PHP_FUNCTION(socket_shutdown)
 /* }}} */
 
 /* {{{ proto int socket_last_error(resource socket)
-   Returns/Clears the last error on the socket */
+   Returns the last error on the socket */
 PHP_FUNCTION(socket_last_error)
 {
 	zval		*arg1;
@@ -1943,11 +1995,30 @@ PHP_FUNCTION(socket_last_error)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg1, -1, le_socket_name, le_socket);
 
 	error = php_sock->error;
-	php_sock->error = 0;
 
 	RETURN_LONG(error);
-}
+}  
 /* }}} */
+
+/* {{{ proto void socket_clear_error(resource socket)
+   Clears the error on the socket */
+PHP_FUNCTION(socket_clear_error)
+{
+	zval		*arg1;
+	php_socket	*php_sock;
+	int			error;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
+		return;	
+
+	ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg1, -1, le_socket_name, le_socket);
+
+	php_sock->error=0;
+
+	return;
+}  
+/* }}} */
+   
 #endif
 
 /*
