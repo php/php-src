@@ -77,16 +77,16 @@ ZEND_DECLARE_MODULE_GLOBALS(xmlrpc)
 
 static int le_xmlrpc_server;
 
-static unsigned char second_arg_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
-static unsigned char first_arg_force_ref[] = { 2, BYREF_FORCE, BYREF_NONE };
+static unsigned char second_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
+static unsigned char first_args_force_ref[] = { 2, BYREF_FORCE, BYREF_NONE };
 
 function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									NULL) 
 	PHP_FE(xmlrpc_decode,									NULL)
-	PHP_FE(xmlrpc_decode_request,							second_arg_force_ref)
+	PHP_FE(xmlrpc_decode_request,							second_args_force_ref)
 	PHP_FE(xmlrpc_encode_request,							NULL)
 	PHP_FE(xmlrpc_get_type,									NULL)
-	PHP_FE(xmlrpc_set_type,									first_arg_force_ref)
+	PHP_FE(xmlrpc_set_type,									first_args_force_ref)
 	PHP_FE(xmlrpc_server_create,							NULL)
 	PHP_FE(xmlrpc_server_destroy,							NULL)
 	PHP_FE(xmlrpc_server_register_method,					NULL)
