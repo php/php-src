@@ -3139,7 +3139,7 @@ PHP_FUNCTION(ocicolumnprecision)
 
 /* }}} */
 
-/* {{{ proto mixed  ocicolumntype(int stmt, int col)
+/* {{{ proto mixed ocicolumntype(int stmt, int col)
    Tell the data type of a column */
 
 PHP_FUNCTION(ocicolumntype)
@@ -3202,7 +3202,7 @@ PHP_FUNCTION(ocicolumntype)
 
 /* }}} */
 
-/* {{{ proto mixed  ocicolumntyperaw(int stmt, int col)
+/* {{{ proto mixed ocicolumntyperaw(int stmt, int col)
    Tell the raw oracle data type of a column */
 
 PHP_FUNCTION(ocicolumntyperaw)
