@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 20??, Version 4.?.?
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
   them sort based on the current locale. (Derick)
+- Fixed bug #32538 (ext/swf/swf.c does not compile with gcc-3.4.x or newer).
+  (adam dot greenfield at gmail dot com)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)

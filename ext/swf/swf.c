@@ -240,7 +240,10 @@ PHP_FUNCTION(swf_openfile)
 	na = tmpna;
 #endif
 	if (php_check_open_basedir(na TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(na, "wb+", CHECKUID_CHECK_MODE_PARAM))) {
-		goto err;
+#ifdef VIRTUAL_DIR
+		free(na);
+#endif
+		return;
 	}
 	
 	if (!SWFG(use_file))
@@ -249,10 +252,6 @@ PHP_FUNCTION(swf_openfile)
 	swf_openfile(na,(float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
       		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), 
       		 	 (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
-err:
-#ifdef VIRTUAL_DIR
-	free(na);
-#endif
 }
 /* }}} */
 
