@@ -142,9 +142,8 @@ zend_module_entry session_module_entry = {
 #define ENCODE_VARS 											\
 	char *key;													\
 	ulong num_key;												\
-	zval **struc												\
-	PSLS_FETCH();												\
-	ELS_FETCH();
+	zval **struc;												\
+	ELS_FETCH()
 
 #define ENCODE_LOOP(code)										\
 	for(zend_hash_internal_pointer_reset(&PS(vars));			\
@@ -189,7 +188,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	zval *buf;
 	char strbuf[MAX_STR + 1];
-	ENCODE_VARS
+	ENCODE_VARS;
 
 	buf = ecalloc(sizeof(*buf), 1);
 	buf->type = IS_STRING;
@@ -252,7 +251,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 PS_SERIALIZER_ENCODE_FUNC(wddx)
 {
 	wddx_packet *packet;
-	ENCODE_VARS
+	ENCODE_VARS;
 
 	packet = _php_wddx_constructor();
 	if(!packet) return FAILURE;
@@ -343,6 +342,8 @@ static char *_php_session_encode(int *newlen PSLS_DC)
 
 static void _php_session_decode(const char *val, int vallen PSLS_DC)
 {
+	PLS_FETCH();
+
 	if (PG(track_vars))
 		php_session_track_init();
 	PS(serializer)->decode(val, vallen PSLS_CC);
