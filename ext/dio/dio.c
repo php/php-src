@@ -188,7 +188,7 @@ PHP_FUNCTION(dio_read)
 		RETURN_NULL();
 	}
 
-	data = erealloc(data, res);
+	data = erealloc(data, res + 1);
 	data[res] = 0;
 
 	RETURN_STRINGL(data, res, 0);
