@@ -134,12 +134,13 @@ class PEAR_Command_Package extends PEAR_Command_Common
                                     if ($i++ > 0) {
                                         $mstr .= "\n";
                                     }
+                                    $mstr .= $m['name'] . " <";
                                     if (isset($m['email'])) {
                                         $mstr .= $m['email'];
                                     } else {
                                         $mstr .= $m['handle'] . '@php.net';
                                     }
-                                    $mstr .= " ($m[role])";
+                                    $mstr .= "> ($m[role])";
                                 }
                                 $info[$key] = $mstr;
                                 break;
@@ -185,6 +186,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $this->ui->startTable(array('caption' => $caption,
                                             'border' => true));
                 foreach ($info as $key => $value) {
+                    $key = ucwords(str_replace('_', ' ', $key));
                     $this->ui->tableRow(array($key, $value), null, array(1 => array('wrap' => 55)));
                 }
                 $this->ui->endTable();
