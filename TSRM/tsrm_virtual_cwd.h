@@ -134,19 +134,9 @@ typedef struct _virtual_cwd_globals {
 } virtual_cwd_globals;
 
 #ifdef ZTS
-# define CWDLS_D  virtual_cwd_globals *cwd_globals
-# define CWDLS_DC , CWDLS_D
-# define CWDLS_C  cwd_globals
-# define CWDLS_CC , CWDLS_C
-# define CWDG(v) (cwd_globals->v)
-# define CWDLS_FETCH()    virtual_cwd_globals *cwd_globals = ts_resource(cwd_globals_id)
+# define CWDG(v) TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
 #else
-# define CWDLS_D  void
-# define CWDLS_DC
-# define CWDLS_C
-# define CWDLS_CC
 # define CWDG(v) (cwd_globals.v)
-# define CWDLS_FETCH()
 #endif
 
 /* The actual macros to be used in programs using TSRM

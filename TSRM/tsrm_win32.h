@@ -38,12 +38,11 @@ typedef struct {
 } tsrm_win32_globals;
 
 #ifdef ZTS
-# define TWG(v) (win32_globals->v)
-# define TWLS_FETCH() tsrm_win32_globals *win32_globals = ts_resource(win32_globals_id)
+# define TWG(v) TSRMG(win32_globals_id, tsrm_win32_globals *, v)
 #else
 # define TWG(v) (win32_globals.v)
-# define TWLS_FETCH()
 #endif
+
 #endif
 
 TSRM_API void tsrm_win32_startup(void);
