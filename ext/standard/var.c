@@ -92,7 +92,7 @@ void php_var_dump(pval **struc, int level)
 head_done:
 			zend_hash_apply_with_arguments(myht, (ZEND_STD_HASH_APPLIER) php_array_element_dump, 1, level);
 			if (level>1) {
-				php_printf("%*c\n", level-1, ' ');
+				php_printf("%*c", level-1, ' ');
 			}
 			PUTS("}\n");
 			break;	
