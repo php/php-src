@@ -43,7 +43,7 @@ all: .deps Zend/Makefile.am TSRM/Makefile.am $(targets)
 
 .deps:
 	@echo creating empty dependencies
-	find ext sapi regex -type d \! -name \*CVS -exec touch {}/.deps {} \;
+	find ext sapi regex -type d \! -name \*CVS -exec touch {}/.deps \;
 	touch pear/.deps
 	touch $@
 	
