@@ -519,7 +519,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 		init_request_info(TSRMLS_C);
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
-		CG(extended_info) = 0;
 
 		SG(request_info).argv0 = argv0;
 
