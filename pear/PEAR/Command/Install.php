@@ -145,24 +145,6 @@ More than one package may be specified at once.
     }
 
     // }}}
-
-    // {{{ getCommands()
-
-    /**
-     * Return a list of all the commands defined by this class.
-     * @return array list of commands
-     * @access public
-     */
-    function getCommands()
-    {
-        $ret = array();
-        foreach (array_keys($this->commands) as $command) {
-            $ret[$command] = $this->commands[$command]['summary'];
-        }
-        return $ret;
-    }
-
-    // }}}
     // {{{ run()
 
     function run($command, $options, $params)
