@@ -298,17 +298,24 @@ PHPAPI int php_printf(const char *format, ...)
 
 
 /* extended error handling function */
-PHPAPI void php_error(int type, const char *format, ...)
+#if ZEND_NEW_ERROR_HANDLING
+static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list orig_args)
+#else
+PHPAPI void php_error_cb(int type, const char *format, ...)
+#endif
 {
-	va_list args;
+#if !ZEND_NEW_ERROR_HANDLING
 	char *error_filename = NULL;
 	uint error_lineno;
+#endif
 	char buffer[1024];
 	int size = 0;
+	va_list args;
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
+#if !ZEND_NEW_ERROR_HANDLING
 	switch (type) {
 		case E_CORE_ERROR:
 		case E_CORE_WARNING:
@@ -344,6 +351,7 @@ PHPAPI void php_error(int type, const char *format, ...)
 	if (!error_filename) {
 		error_filename = "Unknown";
 	}
+#endif
 		
 	if (EG(error_reporting) & type || (type & E_CORE)) {
 		char *error_type_str;
@@ -377,7 +385,11 @@ PHPAPI void php_error(int type, const char *format, ...)
 
 		/* get include file name */
 		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
+#if ZEND_NEW_ERROR_HANDLING
+			args = orig_args;
+#else
 			va_start(args, format);
+#endif
 			size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
 			va_end(args);
 			buffer[sizeof(buffer) - 1] = 0;
@@ -419,9 +431,14 @@ PHPAPI void php_error(int type, const char *format, ...)
 	if (PG(track_errors)) {
 		pval *tmp;
 
+#if ZEND_NEW_ERROR_HANDLING
+		args = orig_args;
+#else
 		va_start(args, format);
+#endif
 		size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
 		va_end(args);
+
 		buffer[sizeof(buffer) - 1] = 0;
 
 		ALLOC_ZVAL(tmp);
@@ -812,7 +829,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 	php_output_startup();
 
-	zuf.error_function = php_error;
+	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_body_write_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
