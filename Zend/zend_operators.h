@@ -86,6 +86,13 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 		convert_to_##lower_type(*ppzv);						\
 	}
 
+#define convert_to_writable_ex_master(ppzv, lower_type, upper_type)	\
+	if ((*ppzv)->type!=IS_##upper_type) {							\
+		SEPARATE_ZVAL(ppzv);										\
+		convert_to_##lower_type(*ppzv);								\
+	}
+
+
 #define convert_to_boolean_ex(ppzv)	convert_to_ex_master(ppzv, boolean, BOOL)
 #define convert_to_long_ex(ppzv)	convert_to_ex_master(ppzv, long, LONG)
 #define convert_to_double_ex(ppzv)	convert_to_ex_master(ppzv, double, DOUBLE)
@@ -93,6 +100,15 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 #define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
 #define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
+
+#define convert_to_writable_boolean_ex(ppzv)	convert_to_writable_ex_master(ppzv, boolean, BOOL)
+#define convert_to_writable_long_ex(ppzv)		convert_to_writable_ex_master(ppzv, long, LONG)
+#define convert_to_writable_double_ex(ppzv)		convert_to_writable_ex_master(ppzv, double, DOUBLE)
+#define convert_to_writable_string_ex(ppzv)		convert_to_writable_ex_master(ppzv, string, STRING)
+#define convert_to_writable_array_ex(ppzv)		convert_to_writable_ex_master(ppzv, array, ARRAY)
+#define convert_to_writable_object_ex(ppzv)		convert_to_writable_ex_master(ppzv, object, OBJECT)
+#define convert_to_writable_null_ex(ppzv)		convert_to_writable_ex_master(ppzv, null, NULL)
+
 
 #define convert_scalar_to_number_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_LONG && (*ppzv)->type!=IS_DOUBLE) {		\
