@@ -228,6 +228,8 @@ function_entry file_functions[] = {
 	PHP_FE(fread,				NULL)
 	PHP_FE(fopen,				NULL)
 	PHP_FE(fpassthru,			NULL)
+	PHP_FE(ftruncate,    		NULL)
+	PHP_FE(fstat,    			NULL)
 	PHP_FE(fseek,				NULL)
 	PHP_FE(ftell,				NULL)
 	PHP_FE(fwrite,				NULL)
@@ -584,6 +586,7 @@ PHP_FUNCTION(file)
 		fclose(fp);
 	}
 }
+
 
 /* }}} */
 /* {{{ proto string tempnam(string dir, string prefix)
@@ -1504,6 +1507,81 @@ PHP_FUNCTION(rename)
 }
 
 /* }}} */
+/* {{{ proto int ftruncate (int fp, int size)
+   Truncate file to 'size' length */
+PHP_FUNCTION(ftruncate)
+{
+	zval **fp , **size;
+	short int ret;
+	int type;
+	void *what;
+
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fp, &size) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	what = zend_fetch_resource(fp,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket)
+	{
+		php_error(E_WARNING, "can't truncate sockets!");
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(size);
+
+	ret = ftruncate(fileno((FILE *)what), (*size)->value.lval);
+	RETURN_LONG(ret);
+}
+/* }}} */
+
+/* {{{ proto int fstat (int fp)
+   Stat() on a filehandle */
+PHP_FUNCTION(fstat)
+{
+	zval **fp;
+	int type;
+	void *what;
+	struct stat stat_sb;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	what = zend_fetch_resource(fp,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (fstat(fileno((FILE *) what ), &stat_sb)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	add_assoc_long ( return_value , "dev" , stat_sb.st_dev );
+	add_assoc_long ( return_value , "ino" , stat_sb.st_ino );
+	add_assoc_long ( return_value , "mode" , stat_sb.st_mode );
+	add_assoc_long ( return_value , "nlink" , stat_sb.st_nlink );
+	add_assoc_long ( return_value , "uid" , stat_sb.st_uid );
+	add_assoc_long ( return_value , "gid" , stat_sb.st_gid );
+
+#ifdef HAVE_ST_BLKSIZE
+	add_assoc_long ( return_value, "rdev" , stat_sb.st_rdev );
+	add_assoc_long ( return_value , "blksize" , stat_sb.st_blksize );
+#endif
+	
+	add_assoc_long ( return_value , "size" , stat_sb.st_size );
+	add_assoc_long ( return_value , "atime" , stat_sb.st_atime );
+	add_assoc_long ( return_value , "mtime" , stat_sb.st_mtime );
+	add_assoc_long ( return_value , "ctime" , stat_sb.st_ctime );
+
+#ifdef HAVE_ST_BLOCKS
+	add_assoc_long ( return_value , "blocks" , stat_sb.st_blocks );
+#endif
+}
+/* }}} */
+
+
 /* {{{ proto int copy(string source_file, string destination_file)
    Copy a file */
 
