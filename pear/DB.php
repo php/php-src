@@ -341,40 +341,43 @@ class DB
      */
     function errorMessage($value)
     {
-        static $errorMessages = array(
-            DB_ERROR                    => 'unknown error',
-            DB_ERROR_ALREADY_EXISTS     => 'already exists',
-            DB_ERROR_CANNOT_CREATE      => 'can not create',
-            DB_ERROR_CANNOT_DELETE      => 'can not delete',
-            DB_ERROR_CANNOT_DROP        => 'can not drop',
-            DB_ERROR_CONSTRAINT         => 'constraint violation',
-            DB_ERROR_DIVZERO            => 'division by zero',
-            DB_ERROR_INVALID            => 'invalid',
-            DB_ERROR_INVALID_DATE       => 'invalid date or time',
-            DB_ERROR_INVALID_NUMBER     => 'invalid number',
-            DB_ERROR_MISMATCH           => 'mismatch',
-            DB_ERROR_NODBSELECTED       => 'no database selected',
-            DB_ERROR_NOSUCHFIELD        => 'no such field',
-            DB_ERROR_NOSUCHTABLE        => 'no such table',
-            DB_ERROR_NOT_CAPABLE        => 'DB backend not capable',
-            DB_ERROR_NOT_FOUND          => 'not found',
-            DB_ERROR_NOT_LOCKED         => 'not locked',
-            DB_ERROR_SYNTAX             => 'syntax error',
-            DB_ERROR_UNSUPPORTED        => 'not supported',
-            DB_ERROR_VALUE_COUNT_ON_ROW => 'value count on row',
-            DB_ERROR_INVALID_DSN        => 'invalid DSN',
-            DB_ERROR_CONNECT_FAILED     => 'connect failed',
-            DB_OK                       => 'no error',
-            DB_WARNING                  => 'unknown warning',
-            DB_WARNING_READ_ONLY        => 'read only',
-            DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
-        );
+        static $errorMessages;
+        if (!isset($errorMessages)) {
+            $errorMessages = array(
+                DB_ERROR                    => 'unknown error',
+                DB_ERROR_ALREADY_EXISTS     => 'already exists',
+                DB_ERROR_CANNOT_CREATE      => 'can not create',
+                DB_ERROR_CANNOT_DELETE      => 'can not delete',
+                DB_ERROR_CANNOT_DROP        => 'can not drop',
+                DB_ERROR_CONSTRAINT         => 'constraint violation',
+                DB_ERROR_DIVZERO            => 'division by zero',
+                DB_ERROR_INVALID            => 'invalid',
+                DB_ERROR_INVALID_DATE       => 'invalid date or time',
+                DB_ERROR_INVALID_NUMBER     => 'invalid number',
+                DB_ERROR_MISMATCH           => 'mismatch',
+                DB_ERROR_NODBSELECTED       => 'no database selected',
+                DB_ERROR_NOSUCHFIELD        => 'no such field',
+                DB_ERROR_NOSUCHTABLE        => 'no such table',
+                DB_ERROR_NOT_CAPABLE        => 'DB backend not capable',
+                DB_ERROR_NOT_FOUND          => 'not found',
+                DB_ERROR_NOT_LOCKED         => 'not locked',
+                DB_ERROR_SYNTAX             => 'syntax error',
+                DB_ERROR_UNSUPPORTED        => 'not supported',
+                DB_ERROR_VALUE_COUNT_ON_ROW => 'value count on row',
+                DB_ERROR_INVALID_DSN        => 'invalid DSN',
+                DB_ERROR_CONNECT_FAILED     => 'connect failed',
+                DB_OK                       => 'no error',
+                DB_WARNING                  => 'unknown warning',
+                DB_WARNING_READ_ONLY        => 'read only',
+                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
+            );
+        }
 
         if (DB::isError($value)) {
             $value = $value->getCode();
         }
 
-        return $errorMessages[$value];
+        return isset($errorMessages[$value]) ? $errorMessages[$value] : $errorMessages[DB_ERROR];
     }
 
     /**
