@@ -685,8 +685,15 @@ Changes in the Zend Engine 2.0
             $str = (string) $obj; // call __toString()
         ?>
 
-    * Reflection
-
+    * Reflection API
+      
+      PHP5 comes with a complete reflection API that adds the ability to
+      reverse-engineer classes, interfaces, functions and methods as well
+      as extensions.
+      
+      The reflection API also offers ways of getting doc comments for
+      functions, classes and methods.
+      
       Nearly all aspects of object oriented code can be reflected by
       using the reflection API which is documented separatley:
       http://sitten-polizei.de/php/reflection_api/docs/language.reflection.html
