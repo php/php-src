@@ -242,10 +242,10 @@ static zend_module_entry php_webjames_module = {
   STANDARD_MODULE_PROPERTIES
 };
 
+
 static int php_webjames_startup(sapi_module_struct *sapi_module)
 {
-  if(php_module_startup(sapi_module) == FAILURE
-     || zend_startup_module(&php_webjames_module) == FAILURE) {
+  if(php_module_startup(sapi_module, &php_webjames_module, 1) == FAILURE) {
     return FAILURE;
   } else {
     return SUCCESS;

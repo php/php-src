@@ -296,8 +296,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 static int php_isapi_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module)==FAILURE
-		|| zend_startup_module(&php_isapi_module)==FAILURE) {
+	if (php_module_startup(sapi_module, &php_isapi_module, 1)==FAILURE) {
 		return FAILURE;
 	} else {
 		bTerminateThreadsOnError = (zend_bool) INI_INT("isapi.terminate_threads_on_error");

@@ -230,11 +230,22 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
+
+extern zend_module_entry php_apache_module;
+
+static int php_apache2_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, &php_apache_module, 1)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static sapi_module_struct apache2_sapi_module = {
 	"apache2filter",
 	"Apache 2.0 Filter",
 
-	php_module_startup,						/* startup */
+	php_apache2_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	NULL,									/* activate */

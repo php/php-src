@@ -30,8 +30,7 @@
 
 static int php_activescript_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module) == FAILURE ||
-			zend_startup_module(&php_activescript_module) == FAILURE) {
+	if (php_module_startup(sapi_module, &php_activescript_module, 1) == FAILURE) {
 		return FAILURE;
 	} else {
 		return SUCCESS;
