@@ -1,3 +1,36 @@
+2005-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects_API.c:
+      - We cannot provide this fallback becuase it requires zend_object ptr's.
+
+2005-02-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * Zend.m4:
+      Fix cross-compile
+
+    * acconfig.h:
+      Fix build (it was #ifNdef NETWARE..)
+
+2005-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c
+      zend_objects.h
+      zend_objects_API.h:
+      - Fix signatures they are all meant to be able to deal with any type in any
+        object storage (though we are still missing several parts)
+
+    * zend_objects_API.c:
+      - Force calling of dtors unless otherwise specified (fixes several
+      __destruct bugs)
+
+2005-02-22  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend.h:
+      NetWare can include autoconf generated config headers
+
+    * acconfig.h:
+      NetWare can make use of the configure script generated header file.
+
 2005-02-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * Makefile.am:
