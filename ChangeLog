@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- OCI8 Driver now supports LOBs like PHP3. (Thies)
+- var_dump now dumps the properties of an object (Thies)
 - Rewrote the GET/POST/Cookie data reader to support multi-dimensional
   arrays! (Zeev)
 - Renamed allow_builtin_links to expose_php (defaults to On).  This directive

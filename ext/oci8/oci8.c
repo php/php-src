@@ -74,6 +74,7 @@
 /* True globals, no need for thread safety */
 static int le_conn; /* active connections */
 static int le_stmt; /* active statements */
+static zend_class_entry *oci_lob_class_entry_ptr;
 
 #ifndef SQLT_BFILEE
   #define SQLT_BFILEE 114
@@ -133,7 +134,7 @@ static int oci_make_pval(pval *,oci_statement *,oci_out_column *, char *, int mo
 static int oci_parse(oci_connection *, char *, int, HashTable *);
 static int oci_execute(oci_statement *, char *,ub4 mode,HashTable *);
 static int oci_fetch(oci_statement *, ub4, char *);
-static ub4 oci_loaddesc(oci_connection *, oci_descriptor *, char **);
+static ub4 oci_loadlob(oci_connection *, oci_descriptor *, char **);
 static int oci_setprefetch(oci_statement *statement,int size);
 
 static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclusive);
@@ -179,9 +180,9 @@ PHP_FUNCTION(ocilogon);
 PHP_FUNCTION(ocinlogon);
 PHP_FUNCTION(ociplogon);
 PHP_FUNCTION(ocierror);
-PHP_FUNCTION(ocifreedescriptor);
-PHP_FUNCTION(ocisavedesc);
-PHP_FUNCTION(ociloaddesc);
+PHP_FUNCTION(ocifreedesc);
+PHP_FUNCTION(ocisavelob);
+PHP_FUNCTION(ociloadlob);
 PHP_FUNCTION(ocicommit);
 PHP_FUNCTION(ocirollback);
 PHP_FUNCTION(ocinewdescriptor);
@@ -233,13 +234,20 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocinlogon,        NULL)
     PHP_FE(ociplogon,        NULL)
     PHP_FE(ocierror,         NULL)
-    PHP_FE(ocifreedescriptor,NULL)
-    PHP_FE(ocisavedesc,      NULL)
-    PHP_FE(ociloaddesc,      NULL)
+    PHP_FE(ocifreedesc,NULL)
+    PHP_FE(ocisavelob,      NULL)
+    PHP_FE(ociloadlob,      NULL)
     PHP_FE(ocicommit,        NULL)
     PHP_FE(ocirollback,      NULL)
     PHP_FE(ocinewdescriptor, NULL)
     PHP_FE(ocisetprefetch,   NULL)
+    {NULL,NULL,NULL}
+};
+
+static zend_function_entry php_oci_lob_class_functions[] = {
+    PHP_FALIAS(load,	ociloadlob,      NULL)
+    PHP_FALIAS(save,	ocisavelob,      NULL)
+    PHP_FALIAS(free,	ocifreedesc,      NULL)
     {NULL,NULL,NULL}
 };
 
@@ -309,7 +317,9 @@ static void php_oci_init_globals(php_oci_globals *oci_globals)
 
 PHP_MINIT_FUNCTION(oci)
 {
+	zend_class_entry oci_lob_class_entry;
 	ELS_FETCH();
+
 #ifdef ZTS
 	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), php_oci_init_globals, NULL);
 #else
@@ -334,12 +344,9 @@ PHP_MINIT_FUNCTION(oci)
 	le_conn = register_list_destructors(_oci_close_conn, NULL);
 	le_stmt = register_list_destructors(_oci_free_stmt, NULL);
 
-	/*
-	if (cfg_get_long("oci8.debug_mode",
-					 &OCI(debug_mode)) == FAILURE) {
-		OCI(debug_mode) = 0;
-	}
-	*/
+	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
+
+ 	oci_lob_class_entry_ptr = register_internal_class(&oci_lob_class_entry);
 
 /* thies@digicol.de 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);
@@ -818,7 +825,7 @@ oci_make_pval(pval *value,oci_statement *statement,oci_out_column *column, char 
             	return -1;
         	}
 
-			loblen = oci_loaddesc(statement->conn,descr,&buffer);
+			loblen = oci_loadlob(statement->conn,descr,&buffer);
 
 			if (loblen > 0)	{
 				value->type = IS_STRING;
@@ -828,20 +835,9 @@ oci_make_pval(pval *value,oci_statement *statement,oci_out_column *column, char 
 				var_reset(value);
 			}
 		} else { /* return the locator */
-#if 0
-			object_init(value);
-
+			object_init_ex(value, oci_lob_class_entry_ptr);
 			add_property_long(value, "connection", statement->conn->id);
 			add_property_long(value, "descriptor", (long) column->data);
-
-			if (column->data_type != SQLT_RDD) { /* ROWIDs don't have any user-callable methods */
-				if ((column->data_type != SQLT_BFILEE) && (column->data_type != SQLT_CFILEE)) { 
-					add_method(value, "save", php3_oci_savedesc); /* oracle does not support writing of files as of now */
-				}
-				add_method(value, "load", php3_oci_loaddesc);
-			}
-			/* there is NO free call here, 'cause the memory gets deallocated together with the statement! */
-#endif
 		}
 	} else {
 		switch (column->retcode) {
@@ -1353,9 +1349,9 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 }
 
 /* }}} */
-/* {{{ oci_loaddesc() */
+/* {{{ oci_loadlob() */
 static ub4
-oci_loaddesc(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
+oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 {
 	ub4 loblen;
 
@@ -1422,7 +1418,7 @@ oci_loaddesc(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 		
 	(*buffer)[ loblen ] = 0;
 
-	oci_debug("OCIloaddesc: size=%d",loblen);
+	oci_debug("OCIloadlob: size=%d",loblen);
 
 	return loblen;
 }
@@ -2295,7 +2291,7 @@ PHP_FUNCTION(ocidefinebyname)
 
 PHP_FUNCTION(ocibindbyname)
 {
-	pval *stmt, *name, *var, *maxlen, *tmp,*type;
+	pval *stmt, *name, *var, *maxlen, **tmp,*type;
 	oci_statement *statement;
 	oci_statement *bindstmt;
 	oci_bind *bind, *tmp_bind;
@@ -2326,12 +2322,12 @@ PHP_FUNCTION(ocibindbyname)
 
 	switch (var->type) {
 		case IS_OBJECT :
-	        if (zend_hash_find(var->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+	        if (zend_hash_find(var->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
    		         php_error(E_WARNING, "unable to find my descriptor property");
    		         RETURN_FALSE;
         	}
 
-			if (zend_hash_index_find(statement->conn->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
+			if (zend_hash_index_find(statement->conn->descriptors, (*tmp)->value.lval, (void **)&descr) == FAILURE) {
    		         php_error(E_WARNING, "unable to find my descriptor");
    		         RETURN_FALSE;
 			}
@@ -2436,34 +2432,30 @@ PHP_FUNCTION(ocibindbyname)
 /* {{{ proto string ocifreedesc(object lob)
  */
 
-PHP_FUNCTION(ocifreedescriptor)
+PHP_FUNCTION(ocifreedesc)
 {
-	pval *id, *conn, *desc;
+	pval *id, **conn, **desc;
 	oci_connection *connection;
 
-#if PHP_API_VERSION < 19990421       
-	if (getThis(&id) == SUCCESS) {
-#else
 	if ((id = getThis()) != 0) {
-#endif
-        if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+        if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
             php_error(E_WARNING, "unable to find my statement property");
             RETURN_FALSE;
         }
 
-        connection = oci_get_conn(conn->value.lval, "OCIfreedesc", list);
+        connection = oci_get_conn((*conn)->value.lval, "OCIfreedesc", list);
         if (connection == NULL) {
             RETURN_FALSE;
         }
 
-   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
+   		if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
 			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
-		oci_debug("OCOfreedesc: descr=%d",desc->value.lval);
+		oci_debug("OCOfreedesc: descr=%d",(*desc)->value.lval);
 
-		zend_hash_index_del(connection->descriptors,desc->value.lval);
+		zend_hash_index_del(connection->descriptors,(*desc)->value.lval);
 
 	 	RETURN_TRUE;
 	}
@@ -2471,39 +2463,35 @@ PHP_FUNCTION(ocifreedescriptor)
   RETURN_FALSE;
 }
 /* }}} */
-/* {{{ proto string ocisavedesc(object lob)
+/* {{{ proto string ocisavelob(object lob)
  */
 
-PHP_FUNCTION(ocisavedesc)
+PHP_FUNCTION(ocisavelob)
 {
-	pval *id, *tmp, *conn, *arg;
+	pval *id, **tmp, **conn, *arg;
 	OCILobLocator *mylob;
 	oci_connection *connection;
 	oci_descriptor *descr;
 	ub4 loblen;
 
-#if PHP_API_VERSION < 19990421       
-	if (getThis(&id) == SUCCESS) {
-#else
 	if ((id = getThis()) != 0) {
-#endif
-   		if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+   		if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
 			php_error(E_WARNING, "unable to find my statement property");
 			RETURN_FALSE;
 		}
 
-		connection = oci_get_conn(conn->value.lval, "OCIsavedesc", list); 
+		connection = oci_get_conn((*conn)->value.lval, "OCIsavelob", list); 
 		if (connection == NULL) {
 			RETURN_FALSE;
 		}
 
-   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+   		if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
-        if (zend_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
-        	php_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
+        if (zend_hash_index_find(connection->descriptors, (*tmp)->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",(*tmp)->value.lval);
             RETURN_FALSE;
         }
 
@@ -2523,7 +2511,6 @@ PHP_FUNCTION(ocisavedesc)
 			php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
 			RETURN_FALSE;
 		}
-
 		
 		connection->error = 
 			OCILobWrite(connection->pServiceContext,
@@ -2539,7 +2526,7 @@ PHP_FUNCTION(ocisavedesc)
 						(ub2) 0,
 						(ub1) SQLCS_IMPLICIT );
 
-		oci_debug("OCIsavedesc: size=%d",loblen);
+		oci_debug("OCIsavelob: size=%d",loblen);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobWrite", connection->error);
@@ -2553,43 +2540,39 @@ PHP_FUNCTION(ocisavedesc)
 }
 
 /* }}} */
-/* {{{ proto string ociloaddesc(object lob)
+/* {{{ proto string ociloadlob(object lob)
  */
 
-PHP_FUNCTION(ociloaddesc)
+PHP_FUNCTION(ociloadlob)
 {
-	pval *id, *tmp, *conn;
+	pval *id, **tmp, **conn;
 	oci_connection *connection;
 	oci_descriptor *descr;
 	char *buffer;
 	ub4 loblen;
 
-#if PHP_API_VERSION < 19990421       
-	if (getThis(&id) == SUCCESS) {
-#else
 	if ((id = getThis()) != 0) {
-#endif
-   		if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+   		if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
 			php_error(E_WARNING, "unable to find my statement property");
 			RETURN_FALSE;
 		}
 
-		connection = oci_get_conn(conn->value.lval, "OCIsavedesc", list); 
+		connection = oci_get_conn((*conn)->value.lval, "OCIsavelob", list); 
 		if (connection == NULL) {
 			RETURN_FALSE;
 		}
 
-   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+   		if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
 			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
-        if (zend_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
-        	php_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
+        if (zend_hash_index_find(connection->descriptors, (*tmp)->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",(*tmp)->value.lval);
             RETURN_FALSE;
         }
 
-		loblen = oci_loaddesc(connection,descr,&buffer);
+		loblen = oci_loadlob(connection,descr,&buffer);
 
 		if (loblen > 0) {
 	 		RETURN_STRINGL(buffer,loblen,0);
@@ -2656,24 +2639,9 @@ PHP_FUNCTION(ocinewdescriptor)
 
 	oci_debug("OCINewDescriptor: new descriptor for %d -> %x",mylob,descr.ocidescr);
 	
-	object_init(return_value);
-#if 0
+	object_init_ex(return_value, oci_lob_class_entry_ptr);
 	add_property_long(return_value, "descriptor", (long) mylob);
 	add_property_long(return_value, "connection", conn->value.lval);
-	add_method(return_value, "free", php3_oci_freedesc);
-
-	switch (descr.type) {
-		case OCI_DTYPE_LOB :
-			add_method(return_value, "save", php3_oci_savedesc);
-			/* breaktruh */
-		case OCI_DTYPE_FILE :
-			add_method(return_value, "load", php3_oci_loaddesc);
-			break;
-			
-	}
-
-	add_method(return_value, "free", php3_oci_freedesc);
-#endif
 }
 
 /* }}} */
