@@ -275,8 +275,7 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 		} else {
 			mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 		}
-	}
-	else {
+	} else {
 		mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 	}
 }
