@@ -232,6 +232,7 @@ PHP_MINIT_FUNCTION(ldap)
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
 	le_result_entry = zend_register_list_destructors_ex(NULL, NULL, "ldap result entry", module_number);
+	le_ber_entry = zend_register_list_destructors_ex(NULL, NULL, "ldap ber entry", module_number);
 
 	Z_TYPE(ldap_module_entry) = type;
 
@@ -1001,7 +1002,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	if ((attribute = ldap_first_attribute(ld->link, ldap_result_entry, &ber)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
+		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
@@ -1032,7 +1033,7 @@ PHP_FUNCTION(ldap_next_attribute)
 	if ((attribute = ldap_next_attribute(ld->link, ldap_result_entry, ber)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
+		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
