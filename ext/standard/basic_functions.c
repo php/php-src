@@ -395,10 +395,14 @@ function_entry basic_functions[] = {
 #if HAVE_SYS_TIME_H
 	PHP_FE(socket_set_timeout,	NULL)
 #else
-	PHP_FALIAS(socket_set_timeout  , warn_not_available,      NULL)                             
+	PHP_FALIAS(socket_set_timeout, warn_not_available,      NULL)                             
 #endif
 	PHP_FE(socket_get_status,	NULL)
+#if !PHP_WIN32 || defined(ZTS)
 	PHP_FE(realpath,			NULL)
+#else
+	PHP_FALIAS(realpath,		warn_not_available,		NULL)
+#endif
 
 	/* functions from fsock.c */
 	PHP_FE(fsockopen, 			third_and_fourth_args_force_ref)

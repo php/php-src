@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed memory leaks in eval();  A script that used eval() extensively, could
+  end up consuming very large amounts of memory during execution (Zeev, Zend
+  Engine)
 - Fixed memory_limit feature, which did not work properly in previous versions
   (Zeev, Zend Engine)
 - Fixed stdout support with the swf extension. (Sterling)
