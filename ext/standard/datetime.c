@@ -255,8 +255,14 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'F':		/* month, textual, full */
 			case 'l':		/* day (of the week), textual */
-			case 'T':		/* timezone name */
 				size += 28;
+				break;
+			case 'T':		/* timezone name */
+#if HAVE_TM_ZONE
+				size += strlen(ta->tm_zone);
+#else
+				size += strlen(tzname[0]);
+#endif
 				break;
 			case 'Z':		/* timezone offset in seconds */
 				size += 6;
