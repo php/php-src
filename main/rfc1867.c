@@ -6,6 +6,7 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
+
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_0.txt.                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
@@ -32,6 +33,7 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
+#include "ext/standard/php_string.h"
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
@@ -847,7 +849,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
 	{
 		char buff[FILLUNIT];
-		char *cd=NULL,*param=NULL,*filename=NULL, *tmp=NULL;
+		char *cd=NULL,*param=NULL,*filename=NULL;
 		int blen=0, wlen=0;
 
 		zend_llist_clean(&header);
@@ -1077,37 +1079,16 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					str_len = strlen(filename);
 					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
-				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-				if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
-					s = tmp;
-				}
 				num_vars--;
-			} else {
-				s = strrchr(filename, '\\');
-				if ((tmp = strrchr(filename, '/')) > s) {
-					s = tmp;
-				}
-			}
-#else
-			s = strrchr(filename, '\\');
-			if ((tmp = strrchr(filename, '/')) > s) {
-				s = tmp;
 			}
 #endif
-			
+ 			/* ensure that the uploaded file name only contains the path */
+ 			php_basename(filename, strlen(filename), NULL, 0, &s, NULL TSRMLS_CC);
+ 			efree(filename);
+ 			filename = s;
+
 			if (!is_anonymous) {
-				if (PG(magic_quotes_gpc)) {
-					s = s ? s : filename;
-					tmp = strrchr(s, '\'');
-					s = tmp > s ? tmp : s;
-					tmp = strrchr(s, '"');
-					s = tmp > s ? tmp : s;
-				}
-				if (s && s > filename) {
-					safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
-				} else {
-					safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
-				}
+				safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
 			}
 
 			/* Add $foo[name] */
@@ -1116,11 +1097,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				sprintf(lbuf, "%s[name]", param);
 			}
-			if (s && s > filename) {
-				register_http_post_files_variable(lbuf, s+1, http_post_files, 0 TSRMLS_CC);
-			} else {
-				register_http_post_files_variable(lbuf, filename, http_post_files, 0 TSRMLS_CC);
-			}
+			register_http_post_files_variable(lbuf, filename, http_post_files, 0 TSRMLS_CC);
 			efree(filename);
 			s = NULL;
 	
