@@ -537,7 +537,7 @@ fi
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     if test "$shared" != "yes"; then
-      PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], OBDC_SHARED_LIBADD)
+      PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
     fi
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
