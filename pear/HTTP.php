@@ -82,7 +82,7 @@ class HTTP {
         if (isset($HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'])) {
             $accepted = split(',[[:space:]]*', $HTTP_ACCEPT_LANGUAGE);
             for ($i = 0; $i < count($accepted); $i++) {
-                if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], &$arr)) {
+                if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], $arr)) {
                     $q = (double)$arr[2];
                     $l = $arr[1];
                 } else {
@@ -107,7 +107,7 @@ class HTTP {
         /* Check for a valid language code in the top-level domain of
          * the client's host address.
          */
-        if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], &$arr)) {
+        if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], $arr)) {
             $lang = strtolower($arr[1]);
             if (!empty($supported[$lang])) {
                 return $lang;
@@ -115,6 +115,58 @@ class HTTP {
         }
 
         return $default;
+    }
+
+    /**
+    * Sends a "HEAD" HTTP command to a server and returns the headers
+    * as an associative array. Example output could be:
+    *    Array
+    *    (
+    *        [response_code] => 200          // The HTTP response code
+    *        [response] => HTTP/1.1 200 OK   // The full HTTP response string
+    *        [Date] => Fri, 11 Jan 2002 01:41:44 GMT
+    *        [Server] => Apache/1.3.20 (Unix) PHP/4.1.1
+    *        [X-Powered-By] => PHP/4.1.1
+    *        [Connection] => close
+    *        [Content-Type] => text/html
+    *    )
+    *
+    * @param string $url A valid url, for ex: http://pear.php.net/credits.php
+    * @return mixed Assoc array or PEAR error on no conection
+    *
+    * @author Tomas V.V.Cox <cox@idecnet.com>
+    */
+    function head($url)
+    {
+        $purl = parse_url($url);
+        $port = (isset($purl['port'])) ? $purl['port'] : 80;
+        $fp = fsockopen($purl['host'], $port, $errno, $errstr, 10);
+        if (!$fp) {
+            return PEAR::raiseError("HTTP::head Error $errstr ($erno)");
+        }
+        $path = (!empty($purl['path'])) ? $purl['path'] : '/';
+
+        fputs($fp, "HEAD $path HTTP/1.0\r\n");
+        fputs($fp, "Host: " . $purl['host'] . "\r\n\r\n");
+
+        $response = rtrim(fgets($fp, 4096));
+        if(preg_match("|^HTTP/[^\s]*\s(.*?)\s|", $response, $status)) {
+            $headers['response_code'] = $status[1];
+        }
+        $headers['response'] = $response;
+
+        while ($line = fgets($fp, 4096)) {
+            if (!trim($line)) {
+                break;
+            }
+            if (($pos = strpos($line, ':')) !== false) {
+                $header = substr($line, 0, $pos);
+                $value  = trim(substr($line, $pos + 1));
+                $headers[$header] = $value;
+            }
+        }
+        fclose($fp);
+        return $headers;
     }
 }
 ?>
