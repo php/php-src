@@ -107,7 +107,7 @@ PHPAPI int php_stream_puts(php_stream *stream, char *buf);
 PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen);
 /* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
-PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent);
+PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent);
 
 /* maybe implement someday */
 #define php_stream_error(stream)	(0)

@@ -227,7 +227,7 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 	return -1;
 }
 
-PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
+PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent)
 {
 	size_t ret = 0;
 	char *ptr;
@@ -237,6 +237,15 @@ PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
 #if HAVE_MMAP
 	int srcfd;
 #endif
+
+	if (buf)
+		*buf = NULL;
+	
+	if (maxlen == 0)
+		return 0;
+
+	if (maxlen == PHP_STREAM_COPY_ALL)
+		maxlen = 0;
 
 #if HAVE_MMAP
 	/* try and optimize the case where we are copying from the start of a plain file.
@@ -251,18 +260,21 @@ PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
 
 		if (fstat(srcfd, &sbuf) == 0) {
 			void *srcfile;
-			
-			srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, srcfd, 0);
+
+			if (maxlen > sbuf.st_size || maxlen == 0)
+				maxlen = sbuf.st_size;
+				
+			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
 
-				*buf = pemalloc(persistent, sbuf.st_size);
+				*buf = pemalloc(persistent, maxlen);
 
 				if (*buf)	{
-					memcpy(*buf, srcfile, sbuf.st_size);
-					ret = sbuf.st_size;
+					memcpy(*buf, srcfile, maxlen);
+					ret = maxlen;
 				}
 				
-				munmap(srcfile, sbuf.st_size);
+				munmap(srcfile, maxlen);
 				return ret;
 			}
 		}
