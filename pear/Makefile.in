@@ -34,7 +34,6 @@ PEAR_FILES = \
 	HTML/Form.php \
 	HTTP.php \
 	Net/Socket.php \
-	PEAR.php \
 	PEAR/Installer.php \
 	Payment/Verisign.php \
 	XML/Parser.php
