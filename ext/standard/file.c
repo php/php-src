@@ -1496,7 +1496,7 @@ PHPAPI PHP_FUNCTION(fseek)
 PHP_FUNCTION(mkdir)
 {
 	int dir_len, ret;
-	mode_t mode = 0777;
+	long mode = 0777;
 	char *dir;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &dir, &dir_len, &mode) == FAILURE) {
@@ -1511,7 +1511,7 @@ PHP_FUNCTION(mkdir)
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_MKDIR(dir, mode);
+	ret = VCWD_MKDIR(dir, (mode_t)mode);
 	if (ret < 0) {
 		php_error(E_WARNING, "mkdir() failed (%s)", strerror(errno));
 		RETURN_FALSE;
