@@ -38,6 +38,8 @@
 function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
+	PHP_FE(mcrypt_get_block_size, NULL)
+	PHP_FE(mcrypt_get_key_size, NULL)
 	{0},
 };
 
@@ -83,6 +85,36 @@ static int php3_minit_mcrypt(INIT_FUNC_ARGS)
 	MCRYPT_ENTRY(CRYPT);
 #endif
 	return SUCCESS;
+}
+
+/* proto mcrypt_get_key_size(int cipher)
+   get the key size of cipher */
+PHP_FUNCTION(mcrypt_get_key_size)
+{
+	pval *cipher;
+
+	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(cipher);
+
+	RETURN_LONG(get_key_size(cipher->value.lval));
+}
+
+/* proto mcrypt_get_block_size(int cipher)
+   get the block size of cipher */
+PHP_FUNCTION(mcrypt_get_block_size)
+{
+	pval *cipher;
+
+	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(cipher);
+
+	RETURN_LONG(get_block_size(cipher->value.lval));
 }
 
 /* proto mcrypt_cbc(int cipher, string key, string data, int mode)
