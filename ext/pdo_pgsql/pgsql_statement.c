@@ -125,7 +125,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
 	/* We have already increased count by 1 in pgsql_stmt_fetch() */
-	*ptr = estrdup(PQgetvalue(S->result, S->current_row - 1, colno));
+	*ptr = PQgetvalue(S->result, S->current_row - 1, colno);
 	*len = strlen(*ptr);
 
 	return 1;
