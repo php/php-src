@@ -96,7 +96,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (char *) emalloc(oldlen * 2 * sizeof(char));
+	result = (char *) emalloc(oldlen * 2 * sizeof(char) + 1);
 	if(!result) {
 		return result;
 	}
@@ -105,6 +105,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
 	}
+	result[j] = '\0';
 
 	if(newlen) *newlen = oldlen * 2 * sizeof(char);
 
