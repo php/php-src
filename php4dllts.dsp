@@ -1118,6 +1118,10 @@ SOURCE=".\php.ini-dist"
 # End Source File
 # Begin Source File
 
+SOURCE=".\php.ini-optimized"
+# End Source File
+# Begin Source File
+
 SOURCE=".\README.CVS-RULES"
 # End Source File
 # Begin Source File
