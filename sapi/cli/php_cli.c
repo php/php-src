@@ -609,12 +609,14 @@ int main(int argc, char *argv[])
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
+		EG(uninitialized_zval_ptr) = NULL;
 
 		if (cli_sapi_module.php_ini_path_override && cli_sapi_module.php_ini_ignore) {
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 			PUTS("You cannot use both -n and -c switch. Use -h for help.\n");
-			exit(1);
+			exit_status=1;
+			goto out_err;
 		}
 	
 		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
