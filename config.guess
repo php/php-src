@@ -618,12 +618,12 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
-#	# uname on the ARM produces all sorts of strangeness, and we need to
-#	# filter it out.
-#	case "$UNAME_MACHINE" in
-#	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
-#	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
-#	esac
+	# uname on the ARM produces all sorts of strangeness, and we need to
+	# filter it out.
+	case "$UNAME_MACHINE" in
+	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
+	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
+	esac
 
 	# The BFD linker knows what the default object file format is, so
 	# first see if it will tell us. cd to the root directory to prevent
@@ -641,7 +641,6 @@ EOF
 	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32arm)   echo "${UNAME_MACHINE}-unknown-linux-gnu"     ; exit 0 ;;
 	  elf32ppc)
 		# Determine Lib Version
 		cat >$dummy.c <<EOF
