@@ -339,7 +339,6 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		zend_file_handle zfd;
 		apr_bucket *eos;
 		TSRMLS_FETCH();
-		TSRMLS_FETCH();
 
 		/* We want to execute only one script per request.
 		 * A bug in Apache or other filters could cause us
