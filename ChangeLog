@@ -1,3 +1,290 @@
+1999-12-04  Zeev Suraski  <zeev@php.net>
+
+    * php4dllts.dsp: Win32 .dsp update
+
+    * php.h
+      php3_compat.h
+      php_compat.h:
+    That one is actually supposed to have 'php3' on it - it's the PHP 3.0 compatibility defines for 4.0
+
+1999-12-04  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/config.h.stub
+      ext/standard/dl.c
+      ext/standard/dl.h: in libzend).
+
+1999-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Create ``libs'' subdirectory as the current user and add /usr/ucblib
+    always to the libpath, if it exists (#2752).
+
+1999-12-04  Sam Ruby  <rubys@us.ibm.com>
+
+    * configuration-parser.y: Build error
+
+1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/session/session.c:
+    Cast val to (char *) to avoid compile warning.
+    Forgot ; at the end and need to derefence the ent pointer.
+
+1999-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/icap/php3_icap.h
+      ext/icap/php_icap.h
+      ext/interbase/php3_interbase.h
+      ext/interbase/php_interbase.h
+      ext/gettext/php3_gettext.h
+      ext/gettext/php_gettext.h
+      ext/hyperwave/php3_hyperwave.h
+      ext/hyperwave/php_hyperwave.h
+      ext/fdf/php3_fdf.h
+      ext/fdf/php_fdf.h
+      ext/gd/php3_gd.h
+      ext/gd/php_gd.h
+      ext/db/php3_db.h
+      ext/db/php_db.h
+      ext/dba/php3_cdb.h
+      ext/dba/php3_db2.h
+      ext/dba/php3_db3.h
+      ext/dba/php3_dba.h
+      ext/dba/php3_dbm.h
+      ext/dba/php3_gdbm.h
+      ext/dba/php3_ndbm.h
+      ext/dba/php_cdb.h
+      ext/dba/php_db2.h
+      ext/dba/php_db3.h
+      ext/dba/php_dba.h
+      ext/dba/php_dbm.h
+      ext/dba/php_gdbm.h
+      ext/dba/php_ndbm.h
+      ext/bcmath/php3_bcmath.h
+      ext/bcmath/php_bcmath.h
+      ext/dav/php3_dav.h
+      ext/dav/php_dav.h
+      ext/aspell/php3_aspell.h
+      ext/aspell/php_aspell.h
+      sapi/servlet/servlet.c
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      ext/zlib/php3_zlib.h
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      sapi/apache/mod_php4.c
+      ext/xml/php3_xml.h
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/yp/php3_yp.h
+      ext/yp/php_yp.h
+      ext/yp/yp.c
+      ext/sysvshm/php3_sysvshm.h
+      ext/sysvshm/php_sysvshm.h
+      ext/sysvshm/sysvshm.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvsem/php3_sysvsem.h
+      ext/sysvsem/php_sysvsem.h
+      ext/sysvsem/sysvsem.c
+      ext/standard/syslog.c
+      ext/standard/var.c
+      ext/sybase/php3_sybase.h
+      ext/sybase/php_sybase.h
+      ext/sybase/sybase.c
+      ext/standard/reg.c
+      ext/standard/soundex.c
+      ext/standard/string.c
+      ext/standard/php3_dir.h
+      ext/standard/php3_filestat.h
+      ext/standard/php3_iptc.h
+      ext/standard/php3_link.h
+      ext/standard/php3_mail.h
+      ext/standard/php3_standard.h
+      ext/standard/php3_string.h
+      ext/standard/php3_syslog.h
+      ext/standard/php3_var.h
+      ext/standard/php_browscap.h
+      ext/standard/php_crypt.h
+      ext/standard/php_dir.h
+      ext/standard/php_filestat.h
+      ext/standard/php_iptc.h
+      ext/standard/php_link.h
+      ext/standard/php_mail.h
+      ext/standard/php_standard.h
+      ext/standard/php_string.h
+      ext/standard/php_syslog.h
+      ext/standard/php_var.h
+      ext/standard/post.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/dir.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/formatted_print.c
+      ext/standard/head.c
+      ext/standard/iptc.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/pack.c
+      ext/standard/php3_browscap.h
+      ext/standard/php3_crypt.h
+      ext/session/session.c
+      ext/snmp/php3_snmp.h
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c
+      ext/posix/php3_posix.h
+      ext/posix/php_posix.h
+      ext/posix/posix.c
+      ext/pdf/pdf.c
+      ext/pdf/php3_pdf.h
+      ext/pdf/php_pdf.h
+      ext/pgsql/pgsql.c
+      ext/pgsql/php3_pgsql.h
+      ext/pgsql/php_pgsql.h
+      ext/pcre/php_pcre.c
+      ext/oracle/oracle.c
+      ext/oracle/php3_oracle.h
+      ext/oracle/php_oracle.h
+      ext/odbc/config.m4
+      ext/odbc/php3_velocis.h
+      ext/odbc/php_odbc.c
+      ext/odbc/php_velocis.h
+      ext/odbc/velocis.c
+      ext/mysql/php_mysql.c
+      ext/oci8/oci8.c
+      ext/oci8/php3_oci8.h
+      ext/oci8/php_oci8.h
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mcal/php3_mcal.c
+      ext/mcal/php3_mcal.h
+      ext/mcal/php_mcal.h
+      ext/ldap/ldap.c
+      ext/ldap/php3_ldap.h
+      ext/ldap/php_ldap.h
+      ext/interbase/interbase.c
+      ext/icap/php3_icap.c
+      ext/gettext/gettext.c
+      ext/hyperwave/hw.c
+      ext/gd/gd.c
+      ext/domxml/domxml.c
+      ext/domxml/php3_domxml.h
+      ext/domxml/php_domxml.h
+      ext/fdf/fdf.c
+      ext/db/db.c
+      ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dav/dav.c
+      ext/cpdf/cpdf.c
+      ext/cpdf/php3_cpdf.h
+      ext/cpdf/php_cpdf.h
+      ext/aspell/aspell.c
+      ext/bcmath/bcmath.c
+      dl/mssql/mssql.c
+      dl/mssql/php3_mssql.h
+      dl/mssql/php_mssql.h
+      dl/snmp/php3_snmp.h
+      dl/snmp/php_snmp.h
+      dl/snmp/snmp.c
+      dl/snmp/winsnmp.c
+      fopen-wrappers.c
+      internal_functions_win32.c
+      main.c
+      php.h
+      php3_compat.h
+      php3_realpath.h
+      php_compat.h
+      php_realpath.h
+      rfc1867.c:
+    Clean up php3.*\.h files. The files itself are renamed, and references in all
+    .*\.[ch] files were changed. There is a slight chance that my script missed
+    a few changes, please correct them manually.
+
+1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/session/session.c:
+    (php_set_session_var) Initialize the refcount here.
+
+1999-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: ZTS fixes
+
+    * ext/pgsql/config.m4: Remove custom LDFLAGS/LIBS changes
+
+    * configure.in:
+    Don't overwrite EXTRA_LIBS, some ext config.m4s access it directly
+
+    * main.c
+      sapi/servlet/servlet.c
+      sapi/cgi/cgi_main.c: Remove code references to serverapi
+
+    * acinclude.m4
+      configure.in:
+    Use LIBS instead of EXTRA_LIBS, so that inter-library dependences can
+    be tested for using standard autoconf macros.
+
+1999-12-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: some more ideas
+
+1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/session/session.c:
+    (PHP session_register) Correct calling convention.
+
+    * ext/session/php_session.h
+      ext/session/session.c
+      main.c:
+    Session variables now obey track_vars and gpc_globals settings.
+    If track_vars is on then decoded variables appear in $HTTP_STATE_VARS
+    array. If gpc_globals is on, then session vars are decoded into global
+    variables. If both are on, then globals and $HTTP_STATE_VARS contents
+    are references to each other.
+
+    The /decoder functions now just need to call php_set_session_var()
+    this behavior.
+
+
+
+1999-12-04  Stig Bakken  <ssb@fast.no>
+
+    * ext/mysql/php_mysql.c
+      ext/xml/xml.c
+      ext/gd/gd.c
+      acinclude.m4: Fix shared mode for gd/xml/mysql extensions.
+
+1999-12-04  Zeev Suraski  <zeev@php.net>
+
+    * NEWS:
+    - Added get_used_files() function - returns a hash mapping the use()'d files
+      to their full path (Zeev)
+
+    * sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      main.c
+      sapi/aolserver/aolserver.c:
+    - zend_file_handles must now flag whether their .filename property should be
+      free by Zend or not (uses e*() functions)
+
+1999-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/config.m4
+      configure.in:
+    Check for htonl in libsocket (sol251), and move inet_aton check in libbind to configure.in, so that our later AC_CHECK_FUNCS(inet_aton) will find inet_aton in libbind (if it is there).
+
+1999-12-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: fixed tiny leak
+
 1999-12-03  Sascha Schumann  <sascha@schumann.cx>
 
     * acconfig.h.in
