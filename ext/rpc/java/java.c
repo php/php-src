@@ -653,7 +653,8 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromString
   presult->type=IS_STRING;
   presult->value.str.len=(*jenv)->GetArrayLength(jenv, jvalue);
   presult->value.str.val=emalloc(presult->value.str.len+1);
-  strcpy(presult->value.str.val, value);
+  memcpy(presult->value.str.val, value, presult->value.str.len);
+  presult->value.str.val[presult->value.str.len]=0;
   if (isCopy) (*jenv)->ReleaseByteArrayElements(jenv, jvalue, value, 0);
 }
 
