@@ -61,6 +61,7 @@ void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC)
 void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC) {
 	char index[15];
 
+#if MYSQL_VERSION_ID > 40101
 	if (status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
 		strcpy(index, "Bad index");
 	} else if (status & SERVER_QUERY_NO_INDEX_USED) {
@@ -68,6 +69,9 @@ void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC) {
 	} else {
 		return;
 	}
+#else
+	return;
+#endif
 
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s used in query %s", index, query);
 }
