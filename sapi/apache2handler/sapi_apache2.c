@@ -61,7 +61,7 @@
  
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php-script"
+#define PHP_SCRIPT "php5-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -564,22 +564,12 @@ zend_first_try {
 	return OK;
 }
 
-static void php_register_hook(apr_pool_t *p)
+void php_ap2_register_hook(apr_pool_t *p)
 {
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
-
-AP_MODULE_DECLARE_DATA module php5_module = {
-	STANDARD20_MODULE_STUFF,
-	create_php_config,		/* create per-directory config structure */
-	merge_php_config,		/* merge per-directory config structures */
-	NULL,				/* create per-server config structure */
-	NULL,				/* merge per-server config structures */
-	php_dir_cmds,			/* command apr_table_t */
-	php_register_hook		/* register hooks */
-};
 
 /*
  * Local variables:
