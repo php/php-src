@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Implement access to INI variables from within .ini file. (Andrei)
+- Implemented access to INI variables from within .ini file. (Andrei)
 - PHP will now respect extension dependencies when initializing. (Wez)
 - Added SAPI hook to get the current request time. (Rasmus)
 - Added new functions:
@@ -25,8 +25,8 @@ PHP                                                                        NEWS
 - Added bz2 stream filter support. (Sara)
 - Added support of parameter->value arrays to xsl_xsltprocessor_set_parameter() 
   (Tony)
-- Fixed bug with raw_post_data not getting set (Brian)
-- Fixed bug in mysql->client_version (Georg)
+- Fixed bug with raw_post_data not getting set. (Brian)
+- Fixed bug in mysql->client_version. (Georg)
 - Fixed ZTS destruction. (Marcus)
 - Fixed bug #29728 (Reflection API Feature: Default parameter value). (Marcus)
 - Fixed bug #29522 (accessing properties without connection). (Georg)
