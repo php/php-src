@@ -30,9 +30,9 @@ var_dump($sxe->xpath("***"));
 --EXPECTF--
 array(1) {
   [0]=>
-  object(simplexml_element)#%d (1) {
+  object(SimpleXMLElement)#%d (1) {
     ["test"]=>
-    object(simplexml_element)#%d (0) {
+    object(SimpleXMLElement)#%d (0) {
     }
   }
 }
