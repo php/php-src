@@ -1,3 +1,58 @@
+2002-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    Converted extract() to use smart_str for variable name manipulation. This
+    sped it up a bit.
+
+2002-02-01  James E. Flemer  <jflemer@acm.jhu.edu>
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h:
+    Changed php.ini directive 'safe_mode_include_dir' to accept a
+    (semi)colon separated path, rather than a single directory.
+    Also moved checking of said path into a separate path for code
+    readability.
+
+2002-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Added is_a() function.
+
+2002-02-01  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: Fixes in MARC decoder (base adress, DANmarc case).
+
+2002-02-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB.php: Fix remote security risk, pointed out by Wolfram Kriesing
+
+    * pear/DB/tests/db_parsedsn.phpt
+      pear/DB.php:
+    Added support for passing special backend params in DSN. Ex:
+    ibase://user:pass@localhost/db?role=foo&dialect=bar
+
+2002-02-01  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/readline/readline.c: remove some crap
+
+2002-02-01  James Cox  <james@awpimajes.com>
+
+    * php.gif
+      php4.gif
+      php4.spec.in:
+    2 years is ages.... and no way temporary. changed the php4 logo to a versionless one.
+
+2002-02-01  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/gd/gd.c:
+    - Fix for bug 14899 (patch by Sander Roobol <sander@php.net>)
+
+2002-02-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/iconv/iconv.c:
+    Fixed bug with encodings that has 0 byte in strings. Patch by <itai@siftology.com>
+    Fixed possible problem with encodings that a char can be larger than
+    4 bytes.
+
 2002-01-31  James Cox  <james@awpimajes.com>
 
     * LICENSE: updating license to 2002 (hasn't been done since 2000)
