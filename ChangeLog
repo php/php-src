@@ -1,3 +1,33 @@
+2001-09-15  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/sablot.c:
+    fix this in a couple of other places and use estrndup() when we have the
+    string length.
+
+    * ext/xslt/sablot.c:
+    properly grab field and value pairs, plus avoid a segfault when errmsg isn't
+    defined
+
+2001-09-15  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    A bug fixed when trying to return NULL strings.
+    Added a new example of building search frontend based on mnoGoSearch
+    extension.
+
+2001-09-15  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Form.php:
+    * also pass extra attributes to displaySelectRow() and returnSelectRow
+      (proposed by Wolfram Kriesing)
+
+2001-09-15  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/standard/html.c:
+     Added support for japanese encoding to htmlentites() and htmlspecialchars(). @ Added support for japanese encoding to htmlentites() and htmlspecialchars(). (Rui)
+
 2001-09-14  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/HTML/Menu.php: * reverted patch
