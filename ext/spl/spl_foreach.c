@@ -112,7 +112,6 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 
 			NEXT_OPCODE();
 		}
-		else
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
