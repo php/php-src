@@ -456,6 +456,7 @@ allow_url_fopen = On
 ;extension=php_bz2.dll
 ;extension=php_ctype.dll
 ;extension=php_cpdf.dll
+;extension=php_crack.dll
 ;extension=php_curl.dll
 ;extension=php_cybercash.dll
 ;extension=php_db.dll
@@ -894,6 +895,11 @@ sockets.use_system_read = On
 ;fbsql.max_persistent = -1
 ;fbsql.max_results = 128
 ;fbsql.batchSize = 1000
+
+[Crack]
+; Modify the setting below to match the directory location of the cracklib
+; dictionary files.  Include the base filename, but not the file extension.
+crack.default_dictionary = "c:\php4\lib\cracklib_dict"
 
 ; Local Variables:
 ; tab-width: 4
