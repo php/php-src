@@ -231,7 +231,10 @@ PHP_MINIT_FUNCTION(xml)
 	php_xml_mem_hdlrs.free_fcn = php_xml_free_wrapper;
 
 #ifdef LIBXML_EXPAT_COMPAT
-	xmlInitThreads();
+	if (!xml_parser_inited) {
+		xmlInitThreads();
+		xml_parser_inited = 1;
+	}
 #endif
 	return SUCCESS;
 }
@@ -245,18 +248,18 @@ PHP_RINIT_FUNCTION(xml)
 
 PHP_MSHUTDOWN_FUNCTION(xml)
 {
+#ifdef LIBXML_EXPAT_COMPAT
+	if (xml_parser_inited) {
+		xmlCleanupParser();
+		xml_parser_inited = 0;
+	}
+#endif
 	return SUCCESS;
 }
 
 
 PHP_RSHUTDOWN_FUNCTION(xml)
 {
-#ifdef LIBXML_EXPAT_COMPAT
-	if (xml_parser_inited) {
-		xmlCleanupParser();
-		xml_parser_inited = 0;
-	}
-#endif	
 	return SUCCESS;
 }
 
