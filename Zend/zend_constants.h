@@ -46,7 +46,7 @@ typedef struct _zend_constant {
 
 void clean_module_constants(int module_number);
 int free_zend_constant(zend_constant *c);
-int zend_startup_constants(HashTable *constants ELS_DC);
+int zend_startup_constants(ELS_D);
 int zend_shutdown_constants(ELS_D);
 void zend_register_standard_constants(ELS_D);
 void clean_non_persistent_constants(void);

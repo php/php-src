@@ -262,7 +262,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 static void executor_globals_ctor(zend_executor_globals *executor_globals)
 {
 	if (global_constants_table) {
-		zend_startup_constants(executor_globals->zend_constants ELS_CC);
+		zend_startup_constants(ELS_C);
 		zend_copy_constants(executor_globals->zend_constants, global_constants_table);
 	}
 	init_resource_plist(ELS_C);
@@ -334,10 +334,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	compiler_globals_dtor(compiler_globals);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
-	zend_startup_constants(EG(zend_constants), executor_globals);
+	zend_startup_constants(executor_globals);
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
-	zend_startup_constants(EG(zend_constants));
+	zend_startup_constants();
 #endif
 	zend_register_standard_constants(ELS_C);
 

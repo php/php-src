@@ -78,7 +78,7 @@ void clean_module_constants(int module_number)
 }
 
 
-int zend_startup_constants(HashTable *constants ELS_DC)
+int zend_startup_constants(ELS_D)
 {
 #if WIN32|WINNT
 	DWORD dwBuild=0;
