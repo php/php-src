@@ -156,7 +156,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:%d", host, port);
+		spprintf(&hashkey, 0, "pfsockopen__%s:%ld", host, port);
 
 		switch(php_stream_from_persistent_id(hashkey, &stream TSRMLS_CC)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
