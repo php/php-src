@@ -2,9 +2,14 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0 Release
+- Fixed dynamic loading where extension_dir had no trailing slash (Sascha)
+- Fixed dynamic loading on OpenBSD (Sascha)
+- Improved POSIX threads check. ZTS works now on at least Linux, Solaris, 
+  FreeBSD and OpenBSD (Sascha, TSRM)
+- Added !== operator support. (Torben, Zend library)
 
 27 March 2000, Version 4.0 Release Candidate 1
-- added !== operator support. (Torben, Zend library)
+- Added support for UCD-SNMP 4.1.x (Sascha)
 - Fixed a data corruption bug in mysql_result(), if used in table.fieldname
   mode (Zeev)
 - Fixed a crash problem in func_num_args(), func_get_arg() and func_get_args()
@@ -32,7 +37,12 @@ PHP 4.0                                                                    NEWS
 - Add GD-JPEG Support (Rasmus)
 - Prevent from loading dynamic PHP modules which were compiled with different
   debug and thread safety modes than PHP, which resulted in a crash (Andi)
-- connection_aborted() and friends work again. (Thies)
+- connection_aborted() and friends work again (Thies)
+- Upgraded to libtool 1.3.4 (Sascha)
+- UNIX configure creates config.nice in the build directory now which allows
+  easy reuse of configuration options (Sascha)
+- Added support for embedded MySQL client library. Unless you specify a path
+  to --with-mysql, the bundled MySQL client library will be used (Sascha)
 - Added include_once() and require_once() functionality (Andi, Zend library)
 - Removed support for pdflib < 3.0 (Uwe)
 - Added auto-registration of everything in $HTTP_SESSION_VARS[] if
