@@ -434,7 +434,7 @@ static void *fontFetch (char **error, void *key)
 		encoding = charmap->encoding_id;
 
 /* EAM DEBUG - Newer versions of libfree2 make it easier by defining encodings */
-#if (defined(FREETYPE_MAJOR) && (FREETYPE_MAJOR >=2 ) && (FREETYPE_MINOR >= 1))
+#if (defined(FREETYPE_MAJOR) && ((FREETYPE_MAJOR == 2 && ((FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 3) || FREETYPE_MINOR > 1) || FREETYPE_MAJOR > 2)))
 	if (charmap->encoding == FT_ENCODING_MS_SYMBOL
 		|| charmap->encoding == FT_ENCODING_ADOBE_CUSTOM
 		|| charmap->encoding == FT_ENCODING_ADOBE_STANDARD) {
@@ -443,7 +443,7 @@ static void *fontFetch (char **error, void *key)
 		a->face->charmap = charmap;
 		return (void *)a;
 	}
-#endif /* Freetype 2.1 or better */
+#endif /* Freetype 2.1.3 or better */
 /* EAM DEBUG */
 
 		if ((platform == 3 && encoding == 1)		/* Windows Unicode */
@@ -773,6 +773,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	*   colorindexes.          -- 27.06.2001 <krisku@arrak.fi>
 	*/
 	gdCache_head_t  *tc_cache;
+	/* Tuneable horizontal and vertical resolution in dots per inch */
+	int hdpi, vdpi;
 
 	if (strex && ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)) {
 		linespace = strex->linespacing;
@@ -802,7 +804,19 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	face = font->face;		/* shortcut */
 	slot = face->glyph;		/* shortcut */
 
-	if (FT_Set_Char_Size (face, 0, (FT_F26Dot6) (ptsize * 64), GD_RESOLUTION, GD_RESOLUTION)) {
+	/*
+	 * Added hdpi and vdpi to support images at non-screen resolutions, i.e. 300 dpi TIFF,
+	 * or 100h x 50v dpi FAX format. 2.0.23.
+	 * 2004/02/27 Mark Shackelford, mark.shackelford@acs-inc.com
+	 */
+	hdpi = GD_RESOLUTION;
+	vdpi = GD_RESOLUTION;
+	if (strex && (strex->flags & gdFTEX_RESOLUTION)) {
+		hdpi = strex->hdpi;
+		vdpi = strex->vdpi;
+	}
+
+	if (FT_Set_Char_Size(face, 0, (FT_F26Dot6) (ptsize * 64), hdpi, vdpi)) {
 		gdCacheDelete(tc_cache);
 		gdMutexUnlock(gdFontCacheMutex);
 		return "Could not set character size";
