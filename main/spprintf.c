@@ -100,7 +100,7 @@
 /*
  * Size for realloc operations
  */
-#define SPPRINTF_BLOCK_SIZE 10
+#define SPPRINTF_BLOCK_SIZE 128
 
 /*
  * Descriptor for buffer area
