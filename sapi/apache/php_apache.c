@@ -320,7 +320,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 	
-	php_end_ob_buffering(1);
+	php_end_ob_buffers(1);
 	php_header();
 
 	if (run_sub_req(rr)) {

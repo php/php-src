@@ -89,7 +89,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC
 	}
 	
 	php_header();			/* Make sure headers have been sent */
-	php_end_ob_buffering(1);
+	php_end_ob_buffers(1);
 	return (OK);
 }
 

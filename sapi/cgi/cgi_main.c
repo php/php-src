@@ -485,7 +485,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_end_ob_buffering(1);
+					php_end_ob_buffers(1);
 					exit(1);
 					break;
 			}
@@ -556,7 +556,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_end_ob_buffering(1);
+					php_end_ob_buffers(1);
 					exit(1);
 					break;
 
@@ -606,7 +606,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						SG(headers_sent) = 1;
 					}
 					php_printf("%s\n", PHP_VERSION);
-					php_end_ob_buffering(1);
+					php_end_ob_buffers(1);
 					exit(1);
 					break;
 
