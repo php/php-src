@@ -272,6 +272,7 @@ union SockAddrUnion {
  *   on Unix for local process communication.  It will create a
  *   domain socket or a TCP/IP socket bound to "localhost" and return
  *   a file descriptor to it to the caller.
+ *   bCreateMutex is ignored for unix
  *
  * Results:
  *      Listener socket created.  This call returns either a valid
@@ -282,7 +283,7 @@ union SockAddrUnion {
  *
  *----------------------------------------------------------------------
  */
-int OS_CreateLocalIpcFd(const char *bindPath, int backlog)
+int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex)
 {
     int listenSock, servLen;
     union   SockAddrUnion sa;
@@ -311,12 +312,12 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog)
 	  hep = gethostbyname(host);
 	  if ((!hep) || (hep->h_addrtype != AF_INET || !hep->h_addr_list[0])) {
 	    fprintf(stderr, "Cannot resolve host name %s -- exiting!\n", host);
-	    exit(1);
+	    return -1;
 	  }
 	  if (hep->h_addr_list[1]) {
 	    fprintf(stderr, "Host %s has multiple addresses ---\n", host);
 	    fprintf(stderr, "you must choose one explicitly!!!\n");
-	    exit(1);
+	    return -1;
 	  }
 	  tcp_ia = ((struct in_addr *) (hep->h_addr))->s_addr;
 	}
@@ -330,7 +331,7 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog)
             if(setsockopt(listenSock, SOL_SOCKET, SO_REUSEADDR,
                           (char *) &flag, sizeof(flag)) < 0) {
                 fprintf(stderr, "Can't set SO_REUSEADDR.\n");
-	        exit(1001);
+	        return -1;
 	    }
 	}
     } else {
@@ -353,13 +354,13 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog)
 	unlink(bindPath);
 	if(OS_BuildSockAddrUn(bindPath, &sa.unixVariant, &servLen)) {
 	    fprintf(stderr, "Listening socket's path name is too long.\n");
-	    exit(1000);
+	    return -1;
 	}
     }
     if(bind(listenSock, (struct sockaddr *) &sa.unixVariant, servLen) < 0
        || listen(listenSock, backlog) < 0) {
 	perror("bind/listen");
-        exit(errno);
+        return -1;
     }
 
     return listenSock;
@@ -408,7 +409,7 @@ int OS_FcgiConnect(char *bindPath)
 	struct	hostent	*hp;
 	if((hp = gethostbyname((*host ? host : "localhost"))) == NULL) {
 	    fprintf(stderr, "Unknown host: %s\n", bindPath);
-	    exit(1000);
+	    return -1;
 	}
 	sa.inetVariant.sin_family = AF_INET;
 	memcpy(&sa.inetVariant.sin_addr, hp->h_addr, hp->h_length);
@@ -418,7 +419,7 @@ int OS_FcgiConnect(char *bindPath)
     } else {
 	if(OS_BuildSockAddrUn(bindPath, &sa.unixVariant, &servLen)) {
 	    fprintf(stderr, "Listening socket's path name is too long.\n");
-	    exit(1000);
+	    return -1;
 	}
 	resultSock = socket(AF_UNIX, SOCK_STREAM, 0);
     }
@@ -497,13 +498,13 @@ int OS_Write(int fd, char * buf, size_t len)
  *
  *----------------------------------------------------------------------
  */
-int OS_SpawnChild(char *appPath, int listenFd)
+int OS_SpawnChild(char *appPath, int listenFd, PROCESS_INFORMATION *pInfo, char *env)
 {
     int forkResult;
 
     forkResult = fork();
     if(forkResult < 0) {
-        exit(errno);
+        return -1;
     }
 
     if(forkResult == 0) {
@@ -542,7 +543,7 @@ int OS_SpawnChild(char *appPath, int listenFd)
 	 *
 	 * perror("exec");
 	 */
-	exit(errno);
+	return -1;
     }
     return 0;
 }
@@ -818,7 +819,9 @@ int OS_DoIo(struct timeval *tmo)
         selectStatus = select((maxFd+1), &readFdSetCpy, &writeFdSetCpy,
                               NULL, tmo);
         if(selectStatus < 0) {
-            exit(errno);
+            /*exit(errno);*/
+			/* not sure what's best to do here */
+			return -1;
 	}
 
         for(fd = 0; fd <= maxFd; fd++) {
@@ -1256,10 +1259,10 @@ void OS_SetFlags(int fd, int flags)
 {
     int val;
     if((val = fcntl(fd, F_GETFL, 0)) < 0) {
-        exit(errno);
+        return;
     }
     val |= flags;
     if(fcntl(fd, F_SETFL, val) < 0) {
-        exit(errno);
+        return;
     }
 }
