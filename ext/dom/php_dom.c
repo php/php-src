@@ -73,7 +73,6 @@ static zend_function_entry dom_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ int dom_node_is_read_only(xmlNodePtr node) */
 int dom_node_is_read_only(xmlNodePtr node) {
 	switch (node->type) {
 		case XML_ENTITY_REF_NODE:
@@ -95,9 +94,7 @@ int dom_node_is_read_only(xmlNodePtr node) {
 			}
 	}
 }
-/* }}} end dom_node_is_read_only */
 
-/* {{{ int dom_node_children_valid(xmlNodePtr node) */
 int dom_node_children_valid(xmlNodePtr node) {
 	switch (node->type) {
 		case XML_DOCUMENT_TYPE_NODE:
@@ -112,7 +109,6 @@ int dom_node_children_valid(xmlNodePtr node) {
 			return SUCCESS;
 	}
 }
-/* }}} end dom_node_children_valid */
 
 int dom_get_strict_error(dom_ref_obj *document) {
 	if (document) {
@@ -122,7 +118,6 @@ int dom_get_strict_error(dom_ref_obj *document) {
 	}
 }
 
-/* {{{ int increment_document_reference(dom_object *object) */
 int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 	int ret_refcount = -1;
 
@@ -139,9 +134,7 @@ int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 
 	return ret_refcount;
 }
-/* }}} end increment_document_reference */
 
-/* {{{ int decrement_document_reference(dom_object *object) */
 int decrement_document_reference(dom_object *object TSRMLS_DC) {
 	int ret_refcount = -1;
 
@@ -160,9 +153,7 @@ int decrement_document_reference(dom_object *object TSRMLS_DC) {
 
 	return ret_refcount;
 }
-/* }}} end decrement_document_reference */
 
-/* {{{ int decrement_node_ptr(dom_object *object) */
 int decrement_node_ptr(dom_object *object TSRMLS_DC) {
 	int ret_refcount = -1;
 	node_ptr *obj_node;
@@ -181,9 +172,7 @@ int decrement_node_ptr(dom_object *object TSRMLS_DC) {
 
 	return ret_refcount;
 }
-/* }}} end decrement_node_ptr */
 
-/* {{{ xmlNodePtr dom_object_get_node(dom_object *obj) */
 xmlNodePtr dom_object_get_node(dom_object *obj)
 {
 	if (obj->ptr != NULL) {
@@ -192,9 +181,7 @@ xmlNodePtr dom_object_get_node(dom_object *obj)
 		return NULL;
 	}
 }
-/* }}} end dom_object_get_node */
 
-/* {{{ dom_object_set_data */
 static void dom_object_set_data(xmlNodePtr obj, dom_object *wrapper TSRMLS_DC)
 {
 	if (wrapper == NULL) {
@@ -203,9 +190,7 @@ static void dom_object_set_data(xmlNodePtr obj, dom_object *wrapper TSRMLS_DC)
 		obj->_private = wrapper->ptr;
 	}
 }
-/* }}} end dom_object_set_data */
 
-/* {{{ dom_object *dom_object_get_data(xmlNodePtr obj) */
 dom_object *dom_object_get_data(xmlNodePtr obj)
 {
 	if (obj->_private != NULL) {
@@ -214,9 +199,7 @@ dom_object *dom_object_get_data(xmlNodePtr obj)
 		return NULL;
 	}
 }
-/* }}} end dom_object_get_data */
 
-/* {{{ php_dom_clear_object */
 static void php_dom_clear_object(dom_object *object TSRMLS_DC)
 {
 	if (object->prop_handler) {
@@ -225,9 +208,7 @@ static void php_dom_clear_object(dom_object *object TSRMLS_DC)
 	decrement_node_ptr(object TSRMLS_CC);
 	decrement_document_reference(object TSRMLS_CC);
 }
-/* }}} end php_dom_clear_object */
 
-/* {{{ void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC) */
 void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC)
 {
 	node_ptr *obj_node;
@@ -248,9 +229,7 @@ void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC)
 		}
 	}
 }
-/* }}} end php_dom_set_object */
 
-/* {{{ dom_unregister_node */
 void dom_unregister_node(xmlNodePtr nodep TSRMLS_DC)
 {
 	dom_object *wrapper;
@@ -260,26 +239,20 @@ void dom_unregister_node(xmlNodePtr nodep TSRMLS_DC)
 		php_dom_clear_object(wrapper TSRMLS_CC);
 	}
 }
-/* }}} end dom_unregister_node */
 
-/* {{{ dom_read_na */
 static int dom_read_na(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	*retval = NULL;
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot read property");
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ dom_write_na */
 static int dom_write_na(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot write property");
 	return FAILURE;
 }
-/* }}} */
 
-/* {{{ dom_register_prop_handler */
 static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_read_t read_func, dom_write_t write_func TSRMLS_DC)
 {
 	dom_prop_handler hnd;
@@ -288,9 +261,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_r
 	hnd.write_func = write_func ? write_func : dom_write_na;
 	zend_hash_add(prop_handler, name, strlen(name)+1, &hnd, sizeof(dom_prop_handler), NULL);
 }
-/* }}} */
 
-/* {{{ dom_read_property */
 zval *dom_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 {
 	dom_object *obj;
@@ -331,9 +302,7 @@ zval *dom_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 	}
 	return retval;
 }
-/* }}} */
 
-/* {{{ dom_write_property */
 void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	dom_object *obj;
@@ -370,7 +339,6 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		zval_dtor(member);
 	}
 }
-/* }}} */
 
 zend_module_entry dom_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -400,7 +368,12 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
-	REGISTER_DOM_CLASS(ce, "domexception", NULL, php_dom_domexception_class_functions, dom_domexception_class_entry);
+	INIT_CLASS_ENTRY(ce, "domexception", php_dom_domexception_class_functions);
+	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	dom_domexception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
+
 	REGISTER_DOM_CLASS(ce, "domstringlist", NULL, php_dom_domstringlist_class_functions, dom_domstringlist_class_entry);
 	
 	zend_hash_init(&dom_domstringlist_prop_handlers, 0, NULL, NULL, 1);
@@ -637,13 +610,30 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_ENUMERATION",	XML_ATTRIBUTE_ENUMERATION,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NOTATION",	XML_ATTRIBUTE_NOTATION,		CONST_CS | CONST_PERSISTENT);
 
+	/* domException Codes */
+	REGISTER_LONG_CONSTANT("DOM_INDEX_SIZE_ERR",		INDEX_SIZE_ERR,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOMSTRING_SIZE_ERR",		DOMSTRING_SIZE_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_HIERARCHY_REQUEST_ERR",	HIERARCHY_REQUEST_ERR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_WRONG_DOCUMENT_ERR",	WRONG_DOCUMENT_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_INVALID_CHARACTER_ERR",	INVALID_CHARACTER_ERR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_NO_DATA_ALLOWED_ERR",	NO_DATA_ALLOWED_ERR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_NO_MODIFICATION_ALLOWED_ERR", NO_MODIFICATION_ALLOWED_ERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_NOT_FOUND_ERR",			NOT_FOUND_ERR,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_NOT_SUPPORTED_ERR",		NOT_SUPPORTED_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_INUSE_ATTRIBUTE_ERR",	INUSE_ATTRIBUTE_ERR,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_INVALID_STATE_ERR",		INVALID_STATE_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_SYNTAX_ERR",			SYNTAX_ERR,				CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_INVALID_MODIFICATION_ERR",	INVALID_MODIFICATION_ERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_NAMESPACE_ERR",			NAMESPACE_ERR,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_INVALID_ACCESS_ERR",	INVALID_ACCESS_ERR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM_VALIDATION_ERR",		VALIDATION_ERR,			CONST_CS | CONST_PERSISTENT);
+
 	xmlInitParser();
 
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ */
 PHP_MINFO_FUNCTION(dom)
 {
 	php_info_print_table_start();
@@ -661,7 +651,6 @@ PHP_MINFO_FUNCTION(dom)
 #endif
 	php_info_print_table_end();
 }
-/* }}} */
 
 PHP_MSHUTDOWN_FUNCTION(dom)
 {
@@ -698,7 +687,6 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	return SUCCESS;
 }
 
-/* {{{ node_list_unlink */
 void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 {
 	dom_object *wrapper;
@@ -728,10 +716,7 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 		node = node->next;
 	}
 }
-/* }}} end node_list_unlink */
 
-
-/* {{{ void dom_node_free(xmlNodePtr node) */
 void dom_node_free(xmlNodePtr node)
 {
 	if(node) {
@@ -766,9 +751,7 @@ void dom_node_free(xmlNodePtr node)
 		}
 	}
 }
-/* }}} end dom_node_free */
 
-/* {{{ node_free_list */
 void node_free_list(xmlNodePtr node TSRMLS_DC)
 {
 	xmlNodePtr curnode;
@@ -803,9 +786,7 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 		}
 	}
 }
-/* }}} end node_free_list */
 
-/* {{{ node_free_resource */
 void node_free_resource(xmlNodePtr node TSRMLS_DC)
 {
 	if (!node) {
@@ -837,17 +818,13 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 			}
 	}
 }
-/* }}} */
 
-/* {{{ dom_objects_clone */
 void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 {
 	/* TODO */
 }
-/* }}} */
 
 #if defined(LIBXML_XPATH_ENABLED)
-/* {{{ dom_xpath_objects_dtor */
 void dom_xpath_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
@@ -863,10 +840,8 @@ void dom_xpath_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	efree(object);
 }
-/* }}} */
 #endif
 
-/* {{{ dom_objects_dtor */
 void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
@@ -887,9 +862,7 @@ void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	efree(object);
 }
-/* }}} */
 
-/* {{{ dom_objects_set_class */
 static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_class_entry *base_class;
@@ -917,9 +890,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 
 	return intern;
 }
-/* }}} */
 
-/* {{{ dom_objects_new */
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -936,7 +907,6 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* }}} */
 
 #if defined(LIBXML_XPATH_ENABLED)
-/* {{{ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC) */
 zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -950,10 +920,8 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	return retval;
 }
-/* }}} */
 #endif
 
-/* {{{ php_dom_create_object */
 zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
@@ -1066,14 +1034,12 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 	php_dom_set_object(intern, (void *) obj TSRMLS_CC);
 	return (wrapper);
 }
-/* }}} end php_domobject_new */
 
 
 void php_dom_create_implementation(zval **retval  TSRMLS_DC) {
 	object_init_ex(*retval, dom_domimplementation_class_entry);
 }
 
-/* {{{ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child) */
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child) 
 {
 	xmlNodePtr nodep;
@@ -1093,9 +1059,7 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 
     return SUCCESS;
 }
-/* }}} end dom_hierarchy */
 
-/* {{{ dom_has_feature(char *feature, char *version) */
 int dom_has_feature(char *feature, char *version)
 {
 	int retval = 0;
@@ -1107,9 +1071,7 @@ int dom_has_feature(char *feature, char *version)
 
 	return retval;
 }
-/* }}} end dom_has_feature */
 
-/* {{{ void dom_element_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC) */
 void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC)
 {
 	dom_object *wrapper;
@@ -1132,10 +1094,7 @@ void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local
 		nodep = nodep->next;
 	}
 }
-/* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 
-
-/* {{{ void dom_normalize (xmlNodePtr nodep TSRMLS_DC) */
 void dom_normalize (xmlNodePtr nodep TSRMLS_DC)
 {
 	xmlNodePtr child, nextp, newnextp;
@@ -1178,10 +1137,7 @@ void dom_normalize (xmlNodePtr nodep TSRMLS_DC)
 		child = child->next;
 	}
 }
-/* }}} end dom_normalize */
 
-
-/* {{{ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) */
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 	xmlNs *cur;
 
@@ -1205,7 +1161,6 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 	}
 	cur->next = ns;
 }
-/* }}} end dom_set_old_ns */
 
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
 	int errorcode = 0;
@@ -1225,7 +1180,6 @@ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, i
 	return errorcode;
 }
 
-/* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	xmlNsPtr nsptr = NULL;
 
@@ -1242,9 +1196,7 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	return nsptr;
 
 }
-/* }}} end dom_get_ns */
 
-/* {{{ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) */
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	xmlNsPtr cur;
 	xmlNs *ret = NULL;
@@ -1272,7 +1224,6 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	}
 	return ret;
 }
-/* }}} end dom_get_nsdecl */
 
 #endif /* HAVE_DOM */
 
