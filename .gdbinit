@@ -238,17 +238,17 @@ define printzn
 
 	if $znode->op_type == 1
 		printf ": "
-		____printzv &$znode->u.constant
+		____printzv &$znode->u.constant 0
 	end
 	if $znode->op_type == 2
 		printf ": "
 		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
-		____printzv ((union _temp_variable *)$tvar)->tmp_var
+		____printzv ((union _temp_variable *)$tvar)->tmp_var 0
 	end
 	if $znode->op_type == 4
 		printf ": "
 		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
-		____printzv *$tvar->var.ptr_ptr
+		____printzv *$tvar->var.ptr_ptr 0
 	end
 	if $znode->op_type == 8
 		printf "\n"
