@@ -29,9 +29,9 @@
 int lcg_globals_id;
 #else
 static php_lcg_globals lcg_globals;
-#endif
-
 static int php_lcg_initialized = 0;
+#endif
+ 
 
 #ifdef PHP_WIN32
 #include <process.h>
