@@ -16,6 +16,7 @@
   |          Mike Jackson <mhjack@tscnet.com>                            |
   |          Steven Lawrance <slawrance@technologist.com>                |
   |          Harrie Hazewinkel <harrie@lisanza.net>                      |
+  |          Johann Hanne <jonny@nurfuerspam.de>                         |
   +----------------------------------------------------------------------+
 */
 
@@ -109,6 +110,12 @@
 #define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG
 #endif
 
+#define SNMP_VALUE_LIBRARY	0
+#define SNMP_VALUE_PLAIN	1
+#define SNMP_VALUE_OBJECT	2
+
+ZEND_DECLARE_MODULE_GLOBALS(snmp)
+
 /* constant - can be shared among threads */
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
@@ -131,6 +138,8 @@ function_entry snmp_functions[] = {
 	PHP_FE(snmp3_walk, NULL)
 	PHP_FE(snmp3_real_walk, NULL)
 	PHP_FE(snmp3_set, NULL)
+	PHP_FE(snmp_set_valueretrieval, NULL)
+	PHP_FE(snmp_get_valueretrieval, NULL)
 	{NULL,NULL,NULL}
 };
 /* }}} */
@@ -157,11 +166,39 @@ ZEND_GET_MODULE(snmp)
 
 /* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
 
+/* {{{ php_snmp_init_globals
+ */
+static void php_snmp_init_globals(zend_snmp_globals *snmp_globals)
+{
+	snmp_globals->valueretrieval = 0;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(snmp)
 {
 	init_snmp("snmpapp");
+
+	ZEND_INIT_MODULE_GLOBALS(snmp, php_snmp_init_globals, NULL);
+
+	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY", SNMP_VALUE_LIBRARY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN", SNMP_VALUE_PLAIN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_VALUE_OBJECT", SNMP_VALUE_OBJECT, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SNMP_BIT_STR", ASN_BIT_STR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OCTET_STR", ASN_OCTET_STR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OPAQUE", ASN_OPAQUE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_NULL", ASN_NULL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OBJECT_ID", ASN_OBJECT_ID, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_IPADDRESS", ASN_IPADDRESS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_COUNTER", ASN_GAUGE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_UNSIGNED", ASN_UNSIGNED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_TIMETICKS", ASN_TIMETICKS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_UINTEGER", ASN_UINTEGER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_INTEGER", ASN_INTEGER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_COUNTER64", ASN_COUNTER64, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -181,6 +218,95 @@ PHP_MINFO_FUNCTION(snmp)
 	php_info_print_table_end();
 }
 /* }}} */
+
+static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_DC)
+{
+	zval *val;
+#if I64CHARSZ > 2047
+	char buf[I64CHARSZ + 1];
+#else
+	char buf[2048];
+#endif
+
+	if (SNMP_G(valueretrieval) == 0) {
+#ifdef HAVE_NET_SNMP
+		snprint_value(buf, sizeof(buf), vars->name, vars->name_length, vars);
+#else
+		sprint_value(buf,vars->name, vars->name_length, vars);
+#endif
+		ZVAL_STRING(snmpval, buf, 1);
+		return;
+	}
+
+	MAKE_STD_ZVAL(val);
+
+	switch (vars->type) {
+	case ASN_BIT_STR:		/* 0x03, asn1.h */
+		ZVAL_STRINGL(val, vars->val.bitstring, vars->val_len, 1);
+		break;
+
+	case ASN_OCTET_STR:		/* 0x04, asn1.h */
+	case ASN_OPAQUE:		/* 0x44, snmp_impl.h */
+		ZVAL_STRINGL(val, vars->val.string, vars->val_len, 1);
+		break;
+
+	case ASN_NULL:			/* 0x05, asn1.h */
+		ZVAL_NULL(val);
+		break;
+
+	case ASN_OBJECT_ID:		/* 0x06, asn1.h */
+#ifdef HAVE_NET_SNMP
+		snprint_objid(buf, sizeof(buf), vars->val.objid, vars->val_len / sizeof(oid));
+#else
+		sprint_objid(buf, vars->val.objid, vars->val_len / sizeof(oid));
+#endif
+
+		ZVAL_STRING(val, buf, 1);
+		break;
+
+	case ASN_IPADDRESS:		/* 0x40, snmp_impl.h */
+		snprintf(buf, sizeof(buf)-1, "%d.%d.%d.%d",
+		         (vars->val.string)[0], (vars->val.string)[1],
+		         (vars->val.string)[2], (vars->val.string)[3]);
+		buf[sizeof(buf)-1]=0;
+		ZVAL_STRING(val, buf, 1);
+		break;
+
+	case ASN_COUNTER:		/* 0x41, snmp_impl.h */
+	case ASN_GAUGE:			/* 0x42, snmp_impl.h */
+	/* ASN_UNSIGNED is the same as ASN_GAUGE */
+	case ASN_TIMETICKS:		/* 0x43, snmp_impl.h */
+	case ASN_UINTEGER:		/* 0x47, snmp_impl.h */
+		snprintf(buf, sizeof(buf)-1, "%u", *vars->val.integer);
+		buf[sizeof(buf)-1]=0;
+		ZVAL_STRING(val, buf, 1);
+		break;
+
+	case ASN_INTEGER:		/* 0x02, asn1.h */
+		snprintf(buf, sizeof(buf)-1, "%d", *vars->val.integer);
+		buf[sizeof(buf)-1]=0;
+		ZVAL_STRING(val, buf, 1);
+		break;
+
+	case ASN_COUNTER64:		/* 0x46, snmp_impl.h */
+		printU64(buf, vars->val.counter64);
+		ZVAL_STRING(val, buf, 1);
+		break;
+
+	default:
+		ZVAL_STRING(val, "Unknown value type", 1);
+		break;
+	}
+
+	if (SNMP_G(valueretrieval) == 1) {
+		*snmpval = *val;
+		zval_copy_ctor(snmpval);
+	} else {
+		object_init(snmpval);
+		add_property_long(snmpval, "type", vars->type);
+		add_property_zval(snmpval, "value", val);
+	}
+}
 
 /* {{{ php_snmp_internal
 *
@@ -213,6 +339,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS,
 	char buf2[2048];
 	int keepwalking=1;
 	char *err;
+	zval *snmpval;
 
 	if (st >= 2) { /* walk */
 		rootlen = MAX_NAME_LEN;
@@ -291,24 +418,23 @@ retry:
 					}
 
 					if (st != 11) {
-#ifdef HAVE_NET_SNMP
-						snprint_value(buf, sizeof(buf), vars->name, vars->name_length, vars);
-#else
-						sprint_value(buf,vars->name, vars->name_length, vars);
-#endif
+						MAKE_STD_ZVAL(snmpval);
+						php_snmp_getvalue(vars, snmpval TSRMLS_CC);
 					}
 
 					if (st == 1) {
-						RETVAL_STRING(buf,1);
+						*return_value = *snmpval;
+						zval_copy_ctor(return_value);
+						return;
 					} else if (st == 2) {
-						add_next_index_string(return_value,buf,1); /* Add to returned array */
+						add_next_index_zval(return_value,snmpval); /* Add to returned array */
 					} else if (st == 3)  {
 #ifdef HAVE_NET_SNMP
 						snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 #else
 						sprint_objid(buf2, vars->name, vars->name_length);
 #endif
-						add_assoc_string(return_value,buf2,buf,1);
+						add_assoc_zval(return_value,buf2,snmpval);
 					}
 					if (st >= 2 && st != 11) {
 						if (vars->type != SNMP_ENDOFMIBVIEW && 
@@ -874,6 +1000,35 @@ PHP_FUNCTION(snmp3_real_walk)
 PHP_FUNCTION(snmp3_set)
 {
 	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 11);
+}
+/* }}} */
+
+/* {{{ proto int snmp_set_valueretrieval(int method)
+   Specify the method how the SNMP values will be returned */
+PHP_FUNCTION(snmp_set_valueretrieval)
+{
+	zval **method;
+
+	if (ZEND_NUM_ARGS() != 1 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &method) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(method);
+
+	if ((Z_LVAL_PP(method) == SNMP_VALUE_LIBRARY) ||
+	    (Z_LVAL_PP(method) == SNMP_VALUE_PLAIN) ||
+	    (Z_LVAL_PP(method) == SNMP_VALUE_OBJECT)) {
+		SNMP_G(valueretrieval) = Z_LVAL_PP(method);
+	}
+}
+/* }}} */
+
+/* {{{ proto int snmp_get_valueretrieval()
+   Return the method how the SNMP values will be returned */
+PHP_FUNCTION(snmp_get_valueretrieval)
+{
+	RETURN_LONG(SNMP_G(valueretrieval));
 }
 /* }}} */
 
