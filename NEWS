@@ -1,6 +1,18 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 05 May 2002, Version 4.2.1
+- Major update of domxml. New functions, better DOM compliance and bug fixes:
+  * Changed the old $node->append_child() to $node->append_sibling() since
+    the new append_child() behaves correctly (= W3C standard).
+  * Added domxml functions:
+    . domxml_elem_get_elements_by_tagname() 
+    . domxml_doc_get_elements_by_tagname()
+    . domxml_doc_get_element_by_id()
+    . domxml_elem_remove_attribute()
+    . domxml_elem_get_attribute_node()
+  * Fixed a segfault in domxml_unlink(). 
+  * Added formatting option to domxml_dump_mem(). 
+  (Uwe, jtate, Chregu)
 - Fixed a bug in socket_select() that could cause unexpected behavior when
   using a statement like $w = $e = array($sock); This change unfortunately
   prevents the use of constant values (e.g. NULL) for the socket array
