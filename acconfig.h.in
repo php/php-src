@@ -7,7 +7,7 @@
 #undef HAVE_STRUCT_FLOCK
 #undef HAVE_TM_GMTOFF
 
-#define CONFIGURATION_FILE_PATH "php3.ini"
+#define CONFIGURATION_FILE_PATH "php.ini"
 #define USE_CONFIG_FILE 1
 
 #undef HAVE_DMALLOC
