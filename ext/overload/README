@@ -42,10 +42,11 @@ class OO {
         return true;
     }
 
-    function __call($method, $args)
+    function __call($method, $args, &$return_value)
     {
         print '-- OO::' . $method . "() was called.--\n";
-        return call_user_func_array(array(&$this, 'my_' . $method), $args);
+        $return_value = call_user_func_array(array(&$this, 'my_' . $method), $args);
+        return true;
     }
 
     function my_whatever($f1, $f2, $f3)
