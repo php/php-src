@@ -985,6 +985,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				size_t ini_in_left;
 				const char *ini_in_p;
 				size_t out_reserved = 4;
+				int dummy;
 
 				smart_str_appendc(pretval, 'B');
 				char_cnt--;
@@ -1066,7 +1067,9 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 				prev_in_left = in_left;
 
-				encoded = php_base64_encode(buf, (int)(out_size - out_left), &encoded_len);
+				encoded = php_base64_encode(buf, (int)(out_size - out_left), &dummy);
+				encoded_len = (size_t)dummy;
+
 				if (char_cnt < encoded_len) {
 					/* something went wrong! */
 					err = PHP_ICONV_ERR_UNKNOWN;
@@ -1480,10 +1483,12 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					case '\r': case '\n': case ' ': case '\t': {
 						char *decoded_text;
 						size_t decoded_text_len;
+						int dummy;
 
 						switch (enc_scheme) {
 							case PHP_ICONV_ENC_SCHEME_BASE64:
-								decoded_text = (char *)php_base64_decode((unsigned char*)encoded_text, (int)encoded_text_len, &decoded_text_len);
+								decoded_text = (char *)php_base64_decode((unsigned char*)encoded_text, (int)encoded_text_len, &dummy);
+								decoded_text_len = (size_t)dummy;
 								break;
 
 							case PHP_ICONV_ENC_SCHEME_QPRINT:
