@@ -49,7 +49,7 @@
 #include "functions/php3_ifx.h"
 #include "functions/php3_crypt.h"
 #include "functions/php3_ldap.h"
-#include "functions/php3_mysql.h"
+#include "ext/mysql/php3_mysql.h"
 #include "functions/php3_bcmath.h"
 #include "functions/php3_msql.h"
 #include "functions/php3_oci8.h"

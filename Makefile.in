@@ -71,7 +71,7 @@ OBJS = main.o internal_functions.o snprintf.o php3_sprintf.o \
 FUNCTIONS_SOURCE = functions/apache.c functions/fhttpd.c \
        functions/crypt.c functions/db.c functions/dl.c functions/filepro.c \
        functions/head.c functions/imap.c functions/mime.c \
-       functions/msql.c functions/mysql.c \
+       functions/msql.c \
        functions/oracle.c functions/oci8.c functions/pgsql.c \
        functions/post.c functions/sybase.c \
        functions/sybase-ct.c @BCMATH_SRC@ functions/xml.c \
@@ -138,7 +138,7 @@ distclean: clean distclean-recursive
 	-rm -f libphp3.module stamp-h
 	-rm -f regex/*.o regex/*.a regex/*.ih
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
-	-rm -f do-conf test/test.log extra/gd/bdf2gdfont
+	-rm -f do-conf test/test.log
 	-rm -f doc/Makefile regex/Makefile
 
 maintainer-clean-depend: maintainer-clean-depend-recursive
