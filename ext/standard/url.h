@@ -31,12 +31,12 @@ typedef struct php_url {
 	char *fragment;
 } php_url;
 
-void free_url(php_url *);
-extern php_url *url_parse(char *);
-extern int php_url_decode(char *, int); /* return value: length of decoded string */
-extern char *php_url_encode(char *, int);
-extern int php_raw_url_decode(char *, int); /* return value: length of decoded string */
-extern char *php_raw_url_encode(char *, int);
+PHPAPI void php_url_free(php_url *);
+PHPAPI extern php_url *php_url_parse(char *);
+PHPAPI extern int php_url_decode(char *, int); /* return value: length of decoded string */
+PHPAPI extern char *php_url_encode(char *, int);
+PHPAPI extern int php_raw_url_decode(char *, int); /* return value: length of decoded string */
+PHPAPI extern char *php_raw_url_encode(char *, int);
 
 PHP_FUNCTION(parse_url);
 PHP_FUNCTION(urlencode);

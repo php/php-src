@@ -38,7 +38,7 @@
 
 /* {{{ free_url
  */
-void free_url(php_url * theurl)
+PHPAPI void php_url_free(php_url * theurl)
 {
 	if (theurl->scheme)
 		efree(theurl->scheme);
@@ -60,7 +60,7 @@ void free_url(php_url * theurl)
 
 /* {{{ url_parse
  */
-php_url *url_parse(char *str)
+PHPAPI php_url *php_url_parse(char *str)
 {
 	regex_t re;
 	regmatch_t subs[11];
@@ -175,7 +175,7 @@ PHP_FUNCTION(parse_url)
 	}
 	convert_to_string_ex(str);
 
-	resource = url_parse((*str)->value.str.val);
+	resource = php_url_parse((*str)->value.str.val);
 
 	if (resource == NULL) {
 		php_error(E_WARNING, "unable to parse url (%s)", (*str)->value.str.val);
@@ -183,7 +183,7 @@ PHP_FUNCTION(parse_url)
 	}
 	/* allocate an array for return */
 	if (array_init(return_value) == FAILURE) {
-		free_url(resource);
+		php_url_free(resource);
 		RETURN_FALSE;
 	}
 	/* add the various elements to the array */
@@ -203,7 +203,7 @@ PHP_FUNCTION(parse_url)
 		add_assoc_string(return_value, "query", resource->query, 1);
 	if (resource->fragment != NULL)
 		add_assoc_string(return_value, "fragment", resource->fragment, 1);
-	free_url(resource);
+	php_url_free(resource);
 }
 /* }}} */
 
@@ -245,7 +245,7 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 /* {{{ php_url_encode
  */
-char *php_url_encode(char *s, int len)
+PHPAPI char *php_url_encode(char *s, int len)
 {
 	register int x, y;
 	unsigned char *str;
@@ -327,7 +327,7 @@ PHP_FUNCTION(urldecode)
 
 /* {{{ php_url_decode
  */
-int php_url_decode(char *str, int len)
+PHPAPI int php_url_decode(char *str, int len)
 {
 	char *dest = str;
 	char *data = str;
@@ -355,7 +355,7 @@ int php_url_decode(char *str, int len)
 
 /* {{{ php_raw_url_encode
  */
-char *php_raw_url_encode(char *s, int len)
+PHPAPI char *php_raw_url_encode(char *s, int len)
 {
 	register int x, y;
 	unsigned char *str;
@@ -430,7 +430,7 @@ PHP_FUNCTION(rawurldecode)
 
 /* {{{ php_raw_url_decode
  */
-int php_raw_url_decode(char *str, int len)
+PHPAPI int php_raw_url_decode(char *str, int len)
 {
 	char *dest = str;
 	char *data = str;

@@ -90,14 +90,14 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 	int i;
 	char *tpath, *ttpath;
 	
-	resource = url_parse((char *) path);
+	resource = php_url_parse((char *) path);
 	if (resource == NULL) {
 		php_error(E_WARNING, "Invalid URL specified, %s", path);
 		*issock = BAD_URL;
 		return NULL;
 	} else if (resource->path == NULL) {
 		php_error(E_WARNING, "No file-path specified");
-		free_url(resource);
+		php_url_free(resource);
 		*issock = BAD_URL;
 		return NULL;
 	}
@@ -110,12 +110,12 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 		goto errexit;
 #if 0
 	if ((fpc = fdopen(*socketd, "r+")) == NULL) {
-		free_url(resource);
+		php_url_free(resource);
 		return NULL;
 	}
 #ifdef HAVE_SETVBUF
 	if ((setvbuf(fpc, NULL, _IONBF, 0)) != 0) {
-		free_url(resource);
+		php_url_free(resource);
 		fclose(fpc);
 		return NULL;
 	}
@@ -180,7 +180,7 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 		/* when reading file, it must exist */
 		if (result > 299 || result < 200) {
 			php_error(E_WARNING, "File not found");
-			free_url(resource);
+			php_url_free(resource);
 			SOCK_FCLOSE(*socketd);
 			*socketd = 0;
 			errno = ENOENT;
@@ -190,7 +190,7 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 		/* when writing file, it must NOT exist */
 		if (result <= 299 && result >= 200) {
 			php_error(E_WARNING, "File already exists");
-			free_url(resource);
+			php_url_free(resource);
 			SOCK_FCLOSE(*socketd);
 			*socketd = 0;
 			errno = EEXIST;
@@ -285,29 +285,29 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 #if 0
 	if (mode[0] == 'r') {
 		if ((fp = fdopen(*socketd, "r+")) == NULL) {
-			free_url(resource);
+			php_url_free(resource);
 			return NULL;
 		}
 	} else {
 		if ((fp = fdopen(*socketd, "w+")) == NULL) {
-			free_url(resource);
+			php_url_free(resource);
 			return NULL;
 		}
 	}
 #ifdef HAVE_SETVBUF
 	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
-		free_url(resource);
+		php_url_free(resource);
 		fclose(fp);
 		return NULL;
 	}
 #endif
 #endif
-	free_url(resource);
+	php_url_free(resource);
 	*issock = 1;
 	return (fp);
 
  errexit:
-	free_url(resource);
+	php_url_free(resource);
 	SOCK_FCLOSE(*socketd);
 	*socketd = 0;
 	return NULL;
