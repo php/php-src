@@ -107,6 +107,40 @@ extern int gdImageColorResolve(gdImagePtr, int, int, int);
 int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #endif
 
+/* Section Filters Declarations */
+/* IMPORTANT NOTE FOR NEW FILTER
+ * Do not forget to update:
+ * IMAGE_FILTER_MAX: define the last filter index
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amout of arguments
+ * image_filter array in PHP_FUNCTION(imagefilter)
+ * */
+#if HAVE_GD_BUNDLED
+#define IMAGE_FILTER_NEGATE         0
+#define IMAGE_FILTER_GRAYSCALE      1
+#define IMAGE_FILTER_BRIGHTNESS     2
+#define IMAGE_FILTER_CONTRAST       3
+#define IMAGE_FILTER_COLORIZE       4
+#define IMAGE_FILTER_EDGEDETECT     5
+#define IMAGE_FILTER_EMBOSS         6
+#define IMAGE_FILTER_GAUSSIAN_BLUR  7
+#define IMAGE_FILTER_SELECTIVE_BLUR 8
+#define IMAGE_FILTER_MEAN_REMOVAL   9
+#define IMAGE_FILTER_SMOOTH         10
+#define IMAGE_FILTER_MAX            10
+#define IMAGE_FILTER_MAX_ARGS       5
+static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_edgedetect(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_emboss(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS);
+#endif
+/* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string (zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC);
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
@@ -269,6 +303,12 @@ function_entry gd_functions[] = {
 	PHP_FE(imagelayereffect,						NULL)
 	PHP_FE(imagecolormatch,							NULL)
 #endif
+/* gd filters */
+#ifdef HAVE_GD_BUNDLED
+	PHP_FE(imagefilter,     						NULL)
+#endif
+
+
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -352,6 +392,19 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
+    /* Section Filters */
+	REGISTER_LONG_CONSTANT("IMG_FILTER_NEGATE", IMAGE_FILTER_NEGATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_GRAYSCALE", IMAGE_FILTER_GRAYSCALE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_BRIGHTNESS", IMAGE_FILTER_BRIGHTNESS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_CONTRAST", IMAGE_FILTER_CONTRAST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_COLORIZE", IMAGE_FILTER_COLORIZE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_EDGEDETECT", IMAGE_FILTER_EDGEDETECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_GAUSSIAN_BLUR", IMAGE_FILTER_GAUSSIAN_BLUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_SELECTIVE_BLUR", IMAGE_FILTER_SELECTIVE_BLUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_EMBOSS", IMAGE_FILTER_EMBOSS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
+    /* End Section Filters */
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -3705,6 +3758,258 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 #endif /* HAVE_GD_WBMP */
 
 #endif	/* HAVE_LIBGD */
+
+/* Section Filters */
+#ifdef HAVE_GD_BUNDLED
+
+static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if ( im_src==NULL ) {
+		RETURN_FALSE;
+	}
+	if (gdImageNegate(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_array_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageGrayScale(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *SIM;
+	gdImagePtr im_src;
+	long brightness, tmp;
+
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "zll", &SIM, &tmp, &brightness) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageBrightness(im_src, (int)brightness)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *SIM;
+	gdImagePtr im_src;
+	long contrast, tmp;
+    
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "rll", &SIM, &tmp, &contrast) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageBrightness(im_src, (int)contrast)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *SIM;
+	gdImagePtr im_src;
+	long r,g,b,tmp;
+
+	if (ZEND_NUM_ARGS()!=5 || zend_parse_parameters(5, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageColor(im_src, (int)r, (int)g, (int)b)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_edgedetect(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageEdgeDetectQuick(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_emboss(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageEmboss(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageGaussianBlur(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE){
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageSelectiveBlur(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval **SIM;
+	gdImagePtr im_src;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageMeanRemoval(im_src)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *SIM;
+	long tmp;
+	gdImagePtr im_src;
+	double weight;
+
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "rld", &SIM, &tmp, &weight) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	if (im_src==NULL) {
+		RETURN_FALSE;
+	}
+	if (gdImageSmooth(im_src, weight)==1) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+/* {{{ proto int imagefilter(int src_im, int filtertype, [args] )
+   Applies Filter an image using a custom angle */
+PHP_FUNCTION(imagefilter)
+{
+	zval *tmp;
+
+	typedef void (*image_filter)(INTERNAL_FUNCTION_PARAMETERS);
+	long filtertype;
+	image_filter filters[] = 
+	{
+		php_image_filter_negate ,
+		php_image_filter_grayscale,
+		php_image_filter_brightness,
+		php_image_filter_contrast,
+		php_image_filter_colorize,
+		php_image_filter_edgedetect,
+		php_image_filter_emboss,
+		php_image_filter_gaussian_blur,
+		php_image_filter_selective_blur,
+		php_image_filter_mean_removal,
+		php_image_filter_smooth
+	};
+
+	if (ZEND_NUM_ARGS()<2 || ZEND_NUM_ARGS()>5 || zend_parse_parameters(2, "rl", &tmp, &filtertype) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}	
+
+	if (filtertype>=0 && filtertype<=IMAGE_FILTER_MAX) {
+		filters[filtertype](INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
+}
+/* }}} */
+#endif
+/* End section: Filters */
 
 /*
  * Local variables:
