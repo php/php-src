@@ -341,7 +341,7 @@ class PEAR_Installer extends PEAR_Common
      * @see startFileTransaction()
      * @var string $type This can be one of:
      *    - rename:  rename a file ($data has 2 values)
-     *    - chmod:   change permissions on a file ($data has 1 value)
+     *    - chmod:   change permissions on a file ($data has 2 values)
      *    - delete:  delete a file ($data has 1 value)
      *    - rmdir:   delete a directory if empty ($data has 1 value)
      *    - installed_as: mark a file as installed ($data has 4 values).
