@@ -1,3 +1,40 @@
+2004-10-23  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/ldap/config.w32:
+      Make ldap_parse_reference() available on Windows (Bug #29492)
+
+2004-10-23  Joe Orton  <jorton@redhat.com>
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      - always convert apr_time_t to time_t using apr_time_sec() to be
+      future-proof.
+      - print apr_time_t values using APR_TIME_T and apr_snprintf.
+      - remove redundant add_property_long calls.
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Fix the get_request_time implementation for the 2.0 SAPIs to return
+      seconds not microseconds and to use TSRM stuff correctly.
+
+2004-10-23  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      ext/oci8/oci8.c:
+      MFH: commit fixes by <mikael dot suvi at trigger dot ee>
+      (segfaults under heavy load)
+
+    * ext/oci8/oci8.c:
+      commit fixes by <mikael dot suvi at trigger dot ee>
+      (segfaults under heavy load)
+
+2004-10-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_vm_execute.h:
+      - Add missing file
+
 2004-10-22  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_vm_handlers.h
