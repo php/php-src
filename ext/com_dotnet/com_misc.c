@@ -38,7 +38,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 	}
 	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);
 	if (free_msg) {
-		efree(message);
+		LocalFree(message);
 	}
 }
 
