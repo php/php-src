@@ -391,7 +391,6 @@ PHP 4                                                                      NEWS
   when dealing with built-in extensions. (Sebastian)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
-- Changed the mbstring extension to be enabled by default. (Yasuo)
 - Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (Thies)
 - Added php.ini options for EXIF extension to encode and decode Unicode/JIS
   user comments. (Marcus)
