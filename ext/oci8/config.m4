@@ -66,7 +66,7 @@ if test "$PHP_OCI8" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
       ;;
 
-    8.1|9.0)
+    8.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       if test -f $OCI8_DIR/lib/libocijdbc8.so ; then
         PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
@@ -74,6 +74,17 @@ if test "$PHP_OCI8" != "no"; then
       PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
+      ;;
+
+    9.0)
+      PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
+      if test -f $OCI8_DIR/lib/libocijdbc8.so ; then
+        PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
+      fi
+      PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
+      AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
+      AC_DEFINE(HAVE_OCI9,1,[])
       ;;
 
     *)

@@ -194,7 +194,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 static oci_server *_oci_open_server(char *dbname,int persistent);
 static void _oci_close_server(oci_server *server);
 
-static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive);
+static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive, char *charset);
 static void _oci_close_session(oci_session *session);
 
 static sb4 oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
@@ -1157,7 +1157,7 @@ oci_new_desc(int type,oci_connection *connection)
 	}
 	
 	CALL_OCI_RETURN(OCI(error), OCIDescriptorAlloc(
-				OCI(pEnv),
+				connection->session->pEnv,
 				(dvoid*)&(descr->ocidescr), 
 				Z_TYPE_P(descr), 
 				(size_t) 0, 
@@ -1348,14 +1348,14 @@ static oci_statement *oci_parse(oci_connection *connection, char *query, int len
 	statement = ecalloc(1,sizeof(oci_statement));
 
 	CALL_OCI(OCIHandleAlloc(
-				OCI(pEnv),
+				connection->session->pEnv,
 				(dvoid **)&statement->pStmt,
 				OCI_HTYPE_STMT, 
 				0, 
 				NULL));
 
 	CALL_OCI(OCIHandleAlloc(
-				OCI(pEnv),
+				connection->session->pEnv,
 				(dvoid **)&statement->pError,
 				OCI_HTYPE_ERROR,
 				0,
@@ -1902,7 +1902,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 					readlen,		 			/* size of buffer */ 
 					(dvoid *)0, 
 					(OCICallbackLobRead) 0, 	/* callback... */ 
-					(ub2) 0, 					/* The character set ID of the buffer data. */ 
+					(ub2) connection->session->charsetId, 					/* The character set ID of the buffer data. */ 
 					(ub1) SQLCS_IMPLICIT));		/* The character set form of the buffer data. */
 
 		siz += readlen;
@@ -2123,11 +2123,12 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 
  */
 
-static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive)
+static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive,char *charset)
 {
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
+	ub2 charsetid;
 	TSRMLS_FETCH();
 
 	/* 
@@ -2176,9 +2177,44 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->server = server;
 	session->exclusive = exclusive;
 
+	#ifdef HAVE_OCI9
+	//following chunk is Oracle 9i+ ONLY
+	if (charset[0] != "\0") {
+		//get ub2 charset id based on charset
+		//this is pretty secure, since if we don't have a valid character set name,
+		//0 comes back and we can still use the 0 in all further statements -> OCI uses NLS_LANG
+		//setting in that case
+		CALL_OCI_RETURN(charsetid, OCINlsCharSetNameToId(
+							OCI(pEnv),
+							charset));
+		
+		session->charsetId = charsetid;
+		oci_debug("oci_do_connect: using charset id=%d",charsetid);
+	}
+	
+	//create an environment using the character set id, Oracle 9i+ ONLY
+	CALL_OCI(OCIEnvNlsCreate(
+				&session->pEnv,
+				OCI_DEFAULT, 
+				0, 
+				NULL,
+				NULL,
+				NULL,
+				0,
+				NULL,
+				charsetid,
+				charsetid));
+
+	#else
+	//fallback solution (simply use global env and charset, same behaviour as always been)
+	session->pEnv = OCI(pEnv);
+	session->charsetId = 0;
+
+	#endif  /*HAVE_OCI9*/
+
 	/* allocate temporary Service Context */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
-				OCI(pEnv), 
+				session->pEnv, 
 				(dvoid **)&svchp, 
 				OCI_HTYPE_SVCCTX, 
 				0, 
@@ -2191,7 +2227,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	/* allocate private session-handle */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
-				OCI(pEnv), 
+				session->pEnv, 
 				(dvoid **)&session->pSession, 
 				OCI_HTYPE_SESSION, 
 				0, 
@@ -2309,7 +2345,7 @@ _oci_close_session(oci_session *session)
 	if (session->is_open) {
 		/* Temporary Service Context */
 		CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
-					OCI(pEnv), 
+					session->pEnv, 
 					(dvoid **) &svchp, 
 					(ub4) OCI_HTYPE_SVCCTX, 
 					(size_t) 0, 
@@ -2555,13 +2591,25 @@ _oci_close_server(oci_server *server)
  */
 static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclusive)
 {
-	char *username, *password, *dbname;
-	zval **userParam, **passParam, **dbParam;
+	char *username, *password, *dbname, *charset;
+	zval **userParam, **passParam, **dbParam, **charParam;
 	oci_server *server = 0;
 	oci_session *session = 0;
 	oci_connection *connection = 0;
 	
-	if (zend_get_parameters_ex(3, &userParam, &passParam, &dbParam) == SUCCESS) {
+    //if a forth parameter is handed over, it is the charset identifier (but is only used in Oracle 9i+)
+    if (zend_get_parameters_ex(4, &userParam, &passParam, &dbParam, &charParam) == SUCCESS) {
+		convert_to_string_ex(userParam);
+		convert_to_string_ex(passParam);
+		convert_to_string_ex(dbParam);
+		convert_to_string_ex(charParam);
+
+		username = Z_STRVAL_PP(userParam);
+		password = Z_STRVAL_PP(passParam);
+		dbname = Z_STRVAL_PP(dbParam);
+		charset = Z_STRVAL_PP(charParam);
+		oci_debug("oci_do_connect: using charset=%s",charset);
+	} else if (zend_get_parameters_ex(3, &userParam, &passParam, &dbParam) == SUCCESS) {
 		convert_to_string_ex(userParam);
 		convert_to_string_ex(passParam);
 		convert_to_string_ex(dbParam);
@@ -2600,7 +2648,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		persistent = server->persistent; 
 	}
 
-	session = _oci_open_session(server,username,password,persistent,exclusive);
+	session = _oci_open_session(server,username,password,persistent,exclusive,charset);
 
 	if (! session) {
 		goto CLEANUP;
@@ -2611,7 +2659,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	/* allocate our private error-handle */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
-				OCI(pEnv), 
+				connection->session->pEnv, 
 				(dvoid **)&connection->pError, 
 				OCI_HTYPE_ERROR, 
 				0, 
@@ -2624,7 +2672,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	/* allocate our service-context */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
-				OCI(pEnv), 
+				connection->session->pEnv, 
 				(dvoid **)&connection->pServiceContext, 
 				OCI_HTYPE_SVCCTX, 
 				0, 
@@ -3480,7 +3528,7 @@ PHP_FUNCTION(ocicloselob)
 			}
 
 			connection->error = 
-				OCILobIsTemporary(OCI(pEnv),
+				OCILobIsTemporary(connection->session->pEnv,
 									connection->pError,
 									mylob,
 									&is_temporary);
@@ -4667,7 +4715,7 @@ PHP_FUNCTION(ocifreecollection)
 			oci_debug("OCIfreecollection: coll=%d",inx);
 
 			CALL_OCI_RETURN(connection->error, OCIObjectFree(
-						OCI(pEnv), 
+						connection->session->pEnv, 
 						connection->pError, 
 						(dvoid *)coll->coll, 
 						(ub2)(OCI_OBJECTFREE_FORCE)));
@@ -4719,7 +4767,7 @@ PHP_FUNCTION(ocicollappend)
 		convert_to_string_ex(arg);
 		if(Z_STRLEN_PP(arg) == 0) {
 			CALL_OCI_RETURN(connection->error, OCICollAppend(
-				  OCI(pEnv), 
+				  connection->session->pEnv, 
 				  connection->pError, 
 				  (dword *)0, 
 				  &null_ind, 
@@ -4752,7 +4800,7 @@ PHP_FUNCTION(ocicollappend)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAppend(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							(dvoid *) &dt, 
 							(dvoid *) &new_ind, 
@@ -4768,7 +4816,7 @@ PHP_FUNCTION(ocicollappend)
 				convert_to_string_ex(arg);
 
 				CALL_OCI_RETURN(connection->error, OCIStringAssignText(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							Z_STRVAL_PP(arg), 
 							Z_STRLEN_PP(arg), 
@@ -4780,7 +4828,7 @@ PHP_FUNCTION(ocicollappend)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAppend(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							(dvoid *) ocistr, 
 							(dvoid *) &new_ind, 
@@ -4817,7 +4865,7 @@ PHP_FUNCTION(ocicollappend)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAppend(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							(dvoid *) &num, 
 							(dvoid *) &new_ind, 
@@ -4865,7 +4913,7 @@ PHP_FUNCTION(ocicollgetelem)
 		connection = coll->conn;
 
 		CALL_OCI_RETURN(connection->error, OCICollGetElem(
-					OCI(pEnv), 
+					connection->session->pEnv, 
 					connection->pError, 
 					coll->coll, 
 					ndx, 
@@ -4905,7 +4953,7 @@ PHP_FUNCTION(ocicollgetelem)
 				RETURN_STRINGL(buff,len,1);
 			case OCI_TYPECODE_VARCHAR2 :
 				ocistr = *(OCIString **)elem;
-				str = OCIStringPtr(OCI(pEnv),ocistr); /* XXX not protected against recursion! */
+				str = OCIStringPtr(connection->session->pEnv,ocistr); /* XXX not protected against recursion! */
 				RETURN_STRINGL(str,strlen(str),1);
 				break;
 			case OCI_TYPECODE_UNSIGNED16 :                       /* UNSIGNED SHORT  */
@@ -4964,7 +5012,7 @@ PHP_FUNCTION(ocicollassign)
 		connection = coll->conn;
 	
 		CALL_OCI_RETURN(connection->error, OCICollAssign(
-					OCI(pEnv),
+					connection->session->pEnv,
 					connection->pError, 
 					from_coll->coll,
 					coll->coll));
@@ -5024,7 +5072,7 @@ PHP_FUNCTION(ocicollassignelem)
 
 		if(Z_STRLEN_PP(val) == 0) {
 			CALL_OCI_RETURN(connection->error, OCICollAssignElem(
-				  OCI(pEnv), 
+				  connection->session->pEnv, 
 				  connection->pError, 
 				  ndx, 
 				  (dword *)0, 
@@ -5057,7 +5105,7 @@ PHP_FUNCTION(ocicollassignelem)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAssignElem(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
 							(dword *)&dt, 
@@ -5073,7 +5121,7 @@ PHP_FUNCTION(ocicollassignelem)
 				convert_to_string_ex(val);
 
 				CALL_OCI_RETURN(connection->error, OCIStringAssignText(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							Z_STRVAL_PP(val), 
 							Z_STRLEN_PP(val), 
@@ -5085,7 +5133,7 @@ PHP_FUNCTION(ocicollassignelem)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAssignElem(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
 							(dword *)ocistr, 
@@ -5124,7 +5172,7 @@ PHP_FUNCTION(ocicollassignelem)
 				}
 
 				CALL_OCI_RETURN(connection->error, OCICollAssignElem(
-							OCI(pEnv), 
+							connection->session->pEnv, 
 							connection->pError, 
 							ndx, 
 							(dword *)&num, 
@@ -5161,7 +5209,7 @@ PHP_FUNCTION(ocicollsize)
 		connection = coll->conn;
 
 		CALL_OCI_RETURN(connection->error, OCICollSize(
-					OCI(pEnv),
+					connection->session->pEnv,
 					coll->conn->pError,
 					coll->coll,
 					&sz));
@@ -5265,7 +5313,7 @@ PHP_FUNCTION(ocinewcollection)
 	zend_list_addref(connection->id);
 
 	CALL_OCI_RETURN(connection->error, OCITypeByName(
-				OCI(pEnv), 
+				connection->session->pEnv, 
 				connection->pError, 
 				connection->pServiceContext, 
 				ac==3?(text *)Z_STRVAL_PP(schema):(text *)0, 
@@ -5284,7 +5332,7 @@ PHP_FUNCTION(ocinewcollection)
 	}
 
 	CALL_OCI_RETURN(connection->error, OCIHandleAlloc(
-				OCI(pEnv), 
+				connection->session->pEnv, 
 				(dvoid **) &dschp1, 
 				(ub4) OCI_HTYPE_DESCRIBE, 
 				(size_t) 0, 
@@ -5368,7 +5416,7 @@ PHP_FUNCTION(ocinewcollection)
 			}
 
 			CALL_OCI_RETURN(connection->error, OCITypeByRef(
-						OCI(pEnv), 
+						connection->session->pEnv, 
 						connection->pError, 
 						coll->elem_ref, 
 						OCI_DURATION_SESSION, 
@@ -5400,7 +5448,7 @@ PHP_FUNCTION(ocinewcollection)
 
 	/* Create object to hold return table */
 	CALL_OCI_RETURN(connection->error, OCIObjectNew(
-				OCI(pEnv), 
+				connection->session->pEnv, 
 				connection->pError, 
 				connection->pServiceContext, 
 				OCI_TYPECODE_TABLE, 

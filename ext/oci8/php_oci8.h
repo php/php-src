@@ -70,6 +70,8 @@ typedef struct {
 	char *hashed_details;
 	oci_server *server;
 	OCISession *pSession;
+	OCIEnv *pEnv;				//sessions own environment
+	ub2 charsetId;				//sessions used character set (mostly this will be 0, so NLS_LANG will be used.
 } oci_session;
 
 typedef struct {
