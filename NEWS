@@ -17,6 +17,7 @@ PHP 4                                                                      NEWS
   (Ilia, Jani)
 - Fixed bug #24792 (--enable-zend-multibyte causes random segfaults with ZTS).
   (fujimoto)
+- Fixed bug #24224 (ibase_blob_get() overflow). (Ard)
 - Fixed bug #24142 (workaround for a gcc bug affecting round()). (Marcus, Ilia)
 - Fixed bug #24063 (serialize() missing 0 after the . on scientific notation).
   (Marcus, Ilia)
@@ -27,6 +28,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21957 (serialize() mangles objects with __sleep). (Ilia)
 - Fixed bug #21918 (strange behaviour of mixed type in array-keys). (Marcus)
 - Fixed bug #20896 (-s -w modes with php-cli cause php to hang). (Ilia)
+- Fixed bug #18744 (blob_add() has max limit of 64k). (Ard)
 - Fixed bug #7014 (crash in _php_ibase_error() after request shutdown). (Ard)
 
 07 Aug 2003, Version 4.3.3RC3
