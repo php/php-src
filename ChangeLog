@@ -1,3 +1,219 @@
+2004-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_002.phpt
+      ext/sqlite/tests/sqlite_oo_003.phpt
+      ext/sqlite/tests/sqlite_oo_008.phpt
+      ext/sqlite/tests/sqlite_oo_009.phpt
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_011.phpt
+      ext/sqlite/tests/sqlite_oo_012.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_015.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt
+      ext/sqlite/tests/sqlite_oo_025.phpt
+      ext/sqlite/tests/sqlite_oo_026.phpt
+      ext/sqlite/tests/sqlite_oo_028.phpt
+      ext/sqlite/tests/sqlite_oo_029.phpt
+      ext/sqlite/tests/sqlite_oo_030.phpt
+      ext/sqlite/tests/sqlite_oo_031.phpt:
+      Revert studlyCaps change for now
+
+2004-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/snmp/snmp.c:
+      Fixed bug #27661 (snmpget() does not close the socket in some cases).
+
+2004-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var_unserializer.c:
+      Update .c output after .re
+
+    * ext/standard/basic_functions.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/math/bug27646.phpt:
+      - Allow negative infinity
+      - Register missing constants, they work anyway but cause an E_NOTICE
+
+    * NEWS:
+      BFN
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Bugfix #27646: Cannot serialize/unserialize non-finite numeric values
+
+2004-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Prepare NEWS file for 4.3.5 release.
+
+2004-03-23  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/bcmath/.cvsignore
+      ext/bz2/.cvsignore
+      ext/calendar/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/ctype/.cvsignore
+      ext/curl/.cvsignore
+      ext/dba/.cvsignore
+      ext/dbase/.cvsignore
+      ext/dbx/.cvsignore
+      ext/dio/.cvsignore
+      ext/dom/.cvsignore
+      ext/exif/.cvsignore
+      ext/fam/.cvsignore
+      ext/fbsql/.cvsignore
+      ext/fdf/.cvsignore
+      ext/filepro/.cvsignore
+      ext/ftp/.cvsignore
+      ext/gd/.cvsignore
+      ext/gettext/.cvsignore
+      ext/gmp/.cvsignore
+      ext/hwapi/.cvsignore
+      ext/iconv/.cvsignore
+      ext/imap/.cvsignore
+      ext/informix/.cvsignore
+      ext/ingres_ii/.cvsignore
+      ext/interbase/.cvsignore
+      ext/ircg/.cvsignore
+      ext/ldap/.cvsignore
+      ext/mbstring/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mcve/.cvsignore
+      ext/mhash/.cvsignore
+      ext/mime_magic/.cvsignore
+      ext/ming/.cvsignore
+      ext/mnogosearch/.cvsignore
+      ext/msession/.cvsignore
+      ext/msql/.cvsignore
+      ext/mssql/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mysqli/.cvsignore
+      ext/ncurses/.cvsignore
+      ext/oci8/.cvsignore
+      ext/odbc/.cvsignore
+      ext/openssl/.cvsignore
+      ext/oracle/.cvsignore
+      ext/ovrimos/.cvsignore
+      ext/pcntl/.cvsignore
+      ext/pcre/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pfpro/.cvsignore
+      ext/pgsql/.cvsignore
+      ext/posix/.cvsignore
+      ext/pspell/.cvsignore
+      ext/readline/.cvsignore
+      ext/recode/.cvsignore
+      ext/session/.cvsignore
+      ext/shmop/.cvsignore
+      ext/simplexml/.cvsignore
+      ext/snmp/.cvsignore
+      ext/sockets/.cvsignore
+      ext/sqlite/.cvsignore
+      ext/standard/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/sysvmsg/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/tokenizer/.cvsignore
+      ext/w32api/.cvsignore
+      ext/wddx/.cvsignore
+      ext/xml/.cvsignore
+      ext/xmlrpc/.cvsignore
+      ext/xsl/.cvsignore
+      ext/yaz/.cvsignore
+      ext/yp/.cvsignore
+      ext/zlib/.cvsignore:
+      make sure that all extensions ignore build system helper files
+      (both autotools and VisualStudio) and common editor backup files
+      (especially usefull in combination with 'cvsclean')
+
+    * ext/bcmath/package.xml
+      ext/bz2/package.xml
+      ext/calendar/package.xml
+      ext/com_dotnet/package.xml
+      ext/cpdf/package.xml
+      ext/ctype/package.xml
+      ext/curl/package.xml
+      ext/dbase/package.xml
+      ext/dio/package.xml
+      ext/exif/package.xml
+      ext/fam/package.xml
+      ext/fdf/package.xml
+      ext/ftp/package.xml
+      ext/mime_magic/package.xml
+      ext/mysql/package.xml
+      ext/mysqli/package.xml
+      ext/ncurses/package.xml
+      ext/oci8/package.xml
+      ext/oracle/package.xml
+      ext/pcntl/package.xml
+      ext/pdf/package.xml
+      ext/posix/package.xml
+      ext/sysvmsg/package.xml
+      ext/sysvsem/package.xml
+      ext/sysvshm/package.xml
+      ext/w32api/package.xml
+      ext/xml/package.xml
+      ext/yp/package.xml
+      ext/zlib/package.xml:
+      "The Visa to Sibiria" (work in progress)
+      
+      Adding a package.xml to a bundled extension does not only
+      ease the transition to PECL whereever suitable but also
+      allows to build and install an extension as "shared" using
+      the PEAR installer without having to deal with phpize and
+      friends by hand
+
+2004-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_009.phpt
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_012.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_015.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_025.phpt
+      ext/sqlite/tests/sqlite_oo_026.phpt
+      ext/sqlite/tests/sqlite_oo_029.phpt
+      ext/sqlite/tests/sqlite_oo_030.phpt
+      ext/sqlite/tests/sqlite_oo_031.phpt:
+      Consitency rules
+
+    * NEWS
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_002.phpt
+      ext/sqlite/tests/sqlite_oo_003.phpt
+      ext/sqlite/tests/sqlite_oo_008.phpt
+      ext/sqlite/tests/sqlite_oo_009.phpt
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_011.phpt
+      ext/sqlite/tests/sqlite_oo_012.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_015.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt
+      ext/sqlite/tests/sqlite_oo_025.phpt
+      ext/sqlite/tests/sqlite_oo_026.phpt
+      ext/sqlite/tests/sqlite_oo_028.phpt
+      ext/sqlite/tests/sqlite_oo_029.phpt
+      ext/sqlite/tests/sqlite_oo_030.phpt
+      ext/sqlite/tests/sqlite_oo_031.phpt:
+      Changed sqlite's OO API to studlyCaps.
+
 2004-03-22  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/com_dotnet/com_handlers.c:
