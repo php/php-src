@@ -607,7 +607,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #if UDM_VERSION_ID > 30112
 
 		case UDM_PARAM_VARDIR:
-			sprintf(Agent->Conf->vardir,"%s%s",val,UDMSLASHSTR);
+			udm_snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
 
 			break;
 			
