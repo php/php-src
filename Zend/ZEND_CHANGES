@@ -187,7 +187,9 @@ Changes in the Zend Engine 2.0
       
       An interface may extend one or more base interfaces (but not 
       implement them). Neither a class nor an interface can inherit
-      methods of the same name from different root interfaces.
+      methods of the same name from different root interfaces. 
+      
+      Interfaces may contain abstract static methods.
 
       Example:
 
@@ -196,12 +198,12 @@ Changes in the Zend Engine 2.0
           function dump();
         }
         
-        interface Streamable {
+        interface Streamable extends Printable {
           function writeToStream();
           static function readFromStream();
         }
 
-        class PrintableExample implements Printable, Streamable {
+        class PrintableExample implements Streamable {
           public function dump() {
             // ...
           }
