@@ -406,7 +406,7 @@ int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len
 
 		php_url_scanner_ex_activate(TSRMLS_C);
 		php_start_ob_buffer(NULL, chunk_size, 1 TSRMLS_CC);
-		php_ob_set_internal_handler(php_url_scanner_output_handler, chunk_size, estrdup("URL-Rewriter"), 1 TSRMLS_CC);
+		php_ob_set_internal_handler(php_url_scanner_output_handler, chunk_size, "URL-Rewriter", 1 TSRMLS_CC);
 		BG(url_adapt_state_ex).active = 1;
 	}
 
