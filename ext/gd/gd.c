@@ -52,11 +52,6 @@
 #ifdef ENABLE_GD_TTF
 # include "gdttf.h"
 #endif
-/*
-#if HAVE_LIBT1
-#include "gdt1.h"
-#endif
-*/
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -71,6 +66,7 @@ DWORD GDlibTls;
 static int numthreads=0;
 void *gdlib_mutex=NULL;
 
+/*
 typedef struct gdlib_global_struct{
 	int le_gd;
 	int le_gd_font;
@@ -92,6 +88,7 @@ int le_gd_font;
 int le_ps_font;
 int le_ps_enc;
 #endif
+*/
 #endif
 
 function_entry gd_functions[] = {
@@ -160,6 +157,12 @@ zend_module_entry gd_module_entry = {
 	"gd", gd_functions, PHP_MINIT(gd), PHP_MSHUTDOWN(gd), NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef ZTS
+int gd_globals_id;
+#else
+static php_gd_globals gd_globals;
+#endif
+
 #ifdef COMPILE_DL_GD
 # include "dl/phpdl.h"
 DLEXPORT zend_module_entry *get_module(void) { return &gd_module_entry; }
@@ -177,8 +180,11 @@ static void php_free_gd_font(gdFontPtr fp)
 }
 
 
+
 PHP_MINIT_FUNCTION(gd)
 {
+	GDLS_FETCH();
+
 #if defined(THREAD_SAFE)
 	gdlib_global_struct *gdlib_globals;
 	PHP_MUTEX_ALLOC(gdlib_mutex);
@@ -197,14 +203,14 @@ PHP_MINIT_FUNCTION(gd)
 		return FAILURE;
 	}
 #endif
-	GD_GLOBAL(le_gd) = register_list_destructors(gdImageDestroy, NULL);
-	GD_GLOBAL(le_gd_font) = register_list_destructors(php_free_gd_font, NULL);
+	GDG(le_gd) = register_list_destructors(gdImageDestroy, NULL);
+	GDG(le_gd_font) = register_list_destructors(php_free_gd_font, NULL);
 #if HAVE_LIBT1
 	T1_SetBitmapPad(8);
 	T1_InitLib(NO_LOGFILE|IGNORE_CONFIGFILE|IGNORE_FONTDATABASE);
 	T1_SetLogLevel(T1LOG_DEBUG);
-	GD_GLOBAL(le_ps_font) = register_list_destructors(php_free_ps_font, NULL);
-	GD_GLOBAL(le_ps_enc) = register_list_destructors(php_free_ps_enc, NULL);
+	GDG(le_ps_font) = register_list_destructors(php_free_ps_font, NULL);
+	GDG(le_ps_enc) = register_list_destructors(php_free_ps_enc, NULL);
 #endif
 	return SUCCESS;
 }
@@ -243,7 +249,8 @@ PHP_MINFO_FUNCTION(gd)
 
 PHP_MSHUTDOWN_FUNCTION(gd)
 {
-	GD_TLS_VARS;
+	GDLS_FETCH();
+
 #ifdef THREAD_SAFE
 	PHP3_TLS_THREAD_FREE(gdlib_globals);
 	PHP_MUTEX_LOCK(gdlib_mutex);
@@ -262,8 +269,9 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
 PHPAPI int phpi_get_le_gd(void)
 {
-	GD_TLS_VARS;
-	return GD_GLOBAL(le_gd);
+	GDLS_FETCH();
+
+	return GDG(le_gd);
 }
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
@@ -323,25 +331,25 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 /* {{{ proto int imageloadfont(string filename)
    Load a new font */
 PHP_FUNCTION(imageloadfont) {
-	pval *file;
+	zval **file;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int ind, body_size, n=0, b;
 	gdFontPtr font;
 	FILE *fp;
 	int issock=0, socketd=0;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(file);
+	convert_to_string_ex(file);
 
 #if WIN32|WINNT
-	fp = fopen(file->value.str.val, "rb");
+	fp = fopen((*file)->value.str.val, "rb");
 #else
-	fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (fp == NULL) {
 		php_error(E_WARNING, "ImageFontLoad: unable to open file");
@@ -396,7 +404,7 @@ PHP_FUNCTION(imageloadfont) {
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	ind = 5 + zend_list_insert(font, GD_GLOBAL(le_gd_font));
+	ind = 5 + zend_list_insert(font, GDG(le_gd_font));
 
 	RETURN_LONG(ind);
 }
@@ -406,22 +414,20 @@ PHP_FUNCTION(imageloadfont) {
    Create a new image */
 PHP_FUNCTION(imagecreate)
 {
-	pval *x_size, *y_size;
-	int ind;
+	zval **x_size, **y_size;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &x_size, &y_size) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(x_size);
-	convert_to_long(y_size);
+	convert_to_long_ex(x_size);
+	convert_to_long_ex(y_size);
 
-	im = gdImageCreate(x_size->value.lval, y_size->value.lval);
-	ind = zend_list_insert(im, GD_GLOBAL(le_gd));		
+	im = gdImageCreate((*x_size)->value.lval, (*y_size)->value.lval);
 
-	RETURN_LONG(ind);
+	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
 }
 /* }}} */
 
@@ -431,34 +437,34 @@ PHP_FUNCTION(imagecreate)
    Create a new image from file or URL */
 PHP_FUNCTION(imagecreatefrompng)
 {
-      pval *file;
-      int ind;
-      gdImagePtr im;
-      char *fn=NULL;
-      FILE *fp;
-      int issock=0, socketd=0;
-      GD_TLS_VARS;
-      if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &file) == FAILURE) {
-              WRONG_PARAM_COUNT;
-      }
-      convert_to_string(file);
-      fn = file->value.str.val;
+	zval **file;
+	gdImagePtr im;
+	char *fn=NULL;
+	FILE *fp;
+	int issock=0, socketd=0;
+	GDLS_FETCH;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(file);
+	fn = (*file)->value.str.val;
 #if WIN32|WINNT
-      fp = fopen(file->value.str.val, "rb");
+	fp = fopen((*file)->value.str.val, "rb");
 #else
-      fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
-      if (!fp) {
-              php_strip_url_passwd(fn);
-              php_error(E_WARNING,
-                                      "ImageCreateFromPng: Unable to open %s for reading", fn);
-              RETURN_FALSE;
-      }
-      im = gdImageCreateFromPng (fp);
-      fflush(fp);
-      fclose(fp);
-      ind = zend_list_insert(im, GD_GLOBAL(le_gd));
-      RETURN_LONG(ind);
+	if (!fp) {
+		php_strip_url_passwd(fn);
+		php_error(E_WARNING,
+				  "ImageCreateFromPng: Unable to open %s for reading", fn);
+		RETURN_FALSE;
+	}
+	im = gdImageCreateFromPng(fp);
+	fflush(fp);
+	fclose(fp);
+
+	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
 }
 /* }}} */
 
@@ -466,56 +472,55 @@ PHP_FUNCTION(imagecreatefrompng)
    Output image to browser or file */
 PHP_FUNCTION(imagepng)
 {
-      pval *imgind, *file;
-      gdImagePtr im;
-      char *fn=NULL;
-      FILE *fp;
-      int argc;
-      int ind_type;
-      int output=1;
-      GD_TLS_VARS;
-      argc = ARG_COUNT(ht);
-      if (argc < 1 || argc > 2 || zend_get_parameters(ht, argc, &imgind, &file) == FAILURE) {
-              WRONG_PARAM_COUNT;
-      }
-      convert_to_long(imgind);
-      if (argc == 2) {
-              convert_to_string(file);
-              fn = file->value.str.val;
-              if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
-                      php_error(E_WARNING, "ImagePng: Invalid filename");
-                      RETURN_FALSE;
-              }
-      }
-      im = zend_list_find(imgind->value.lval, &ind_type);
-      if (!im || ind_type != GD_GLOBAL(le_gd)) {
-              php_error(E_WARNING, "ImagePng: unable to find image pointer");
-              RETURN_FALSE;
-      }
-      if (argc == 2) {
-              fp = fopen(fn, "wb");
-              if (!fp) {
-                      php_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
-                      RETURN_FALSE;
-              }
-              gdImagePng (im,fp);
-              fflush(fp);
-              fclose(fp);
-      }
-      else {
-              int   b;
-              FILE *tmp;
-              char  buf[4096];
-              tmp = tmpfile();
-              if (tmp == NULL) {
-                      php_error(E_WARNING, "Unable to open temporary file");
-                      RETURN_FALSE;
-              }
-              output = php_header();
-              if (output) {
-                      gdImagePng (im, tmp);
+	zval **imgind, **file;
+	gdImagePtr im;
+	char *fn=NULL;
+	FILE *fp;
+	int argc;
+	int ind_type;
+	int output=1;
+	GDLS_FETCH();
+
+	argc = ARG_COUNT(ht);
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &imgind, &file) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	if (argc == 2) {
+		convert_to_string_ex(file);
+		fn = (*file)->value.str.val;
+		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
+			php_error(E_WARNING, "ImagePng: Invalid filename");
+			RETURN_FALSE;
+		}
+	}
+
+	if (argc == 2) {
+		fp = fopen(fn, "wb");
+		if (!fp) {
+			php_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
+			RETURN_FALSE;
+		}
+		gdImagePng(im,fp);
+		fflush(fp);
+		fclose(fp);
+	}
+	else {
+		int   b;
+		FILE *tmp;
+		char  buf[4096];
+		tmp = tmpfile();
+		if (tmp == NULL) {
+			php_error(E_WARNING, "Unable to open temporary file");
+			RETURN_FALSE;
+		}
+		output = php_header();
+		if (output) {
+			gdImagePng(im, tmp);
             fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
+			SLS_FETCH();
             /* This is a binary file already: avoid EBCDIC->ASCII conversion */
             ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
 #endif
@@ -538,78 +543,68 @@ PHP_FUNCTION(imagepng)
    Create a new image from file or URL */
 PHP_FUNCTION(imagecreatefromgif )
 {
-	pval *file;
-	int ind;
+	zval **file;
 	gdImagePtr im;
 	char *fn=NULL;
 	FILE *fp;
 	int issock=0, socketd=0;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(file);
+	convert_to_string_ex(file);
 
-	fn = file->value.str.val;
+	fn = (*file)->value.str.val;
 
 #if WIN32|WINNT
-	fp = fopen(file->value.str.val, "rb");
+	fp = fopen((*file)->value.str.val, "rb");
 #else
-	fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (!fp) {
 		php_strip_url_passwd(fn);
 		php_error(E_WARNING,
-					"ImageCreateFromGif: Unable to open %s for reading", fn);
+				  "ImageCreateFromGif: Unable to open %s for reading", fn);
 		RETURN_FALSE;
 	}
 
-	im = gdImageCreateFromGif (fp);
-
+	im = gdImageCreateFromGif(fp);
+	
 	fflush(fp);
 	fclose(fp);
 
-	ind = zend_list_insert(im, GD_GLOBAL(le_gd));
-
-	RETURN_LONG(ind);
+	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
 }
 /* }}} */
 
 /* {{{ proto int imagegif(int im [, string filename])
    Output image to browser or file */
-PHP_FUNCTION(imagegif )
+PHP_FUNCTION(imagegif)
 {
-	pval *imgind, *file;
+	zval **imgind, **file;
 	gdImagePtr im;
 	char *fn=NULL;
 	FILE *fp;
 	int argc;
-	int ind_type;
 	int output=1;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || zend_get_parameters(ht, argc, &imgind, &file) == FAILURE) {
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &imgind, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(imgind);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
 	if (argc == 2) {
-		convert_to_string(file);
-		fn = file->value.str.val;
+		convert_to_string_ex(file);
+		fn = (*file)->value.str.val;
 		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
 			php_error(E_WARNING, "ImageGif: Invalid filename");
 			RETURN_FALSE;
 		}
-	}
-
-	im = zend_list_find(imgind->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageGif: unable to find image pointer");
-		RETURN_FALSE;
 	}
 
 	if (argc == 2) {
@@ -618,7 +613,7 @@ PHP_FUNCTION(imagegif )
 			php_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
 			RETURN_FALSE;
 		}
-		gdImageGif (im,fp);
+		gdImageGif(im, fp);
 		fflush(fp);
 		fclose(fp);
 	}
@@ -636,7 +631,7 @@ PHP_FUNCTION(imagegif )
 		output = php_header();
 
 		if (output) {
-			gdImageGif (im, tmp);
+			gdImageGif(im, tmp);
 			fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
 			{
@@ -664,15 +659,17 @@ PHP_FUNCTION(imagegif )
    Destroy an image */
 PHP_FUNCTION(imagedestroy)
 {
-	pval *imgind;
+	zval **imgind;
+	gdImagePtr im;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &imgind) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &imgind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(imgind);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
-	zend_list_delete(imgind->value.lval);
+	zend_list_delete((*imgind)->value.lval);
 
 	RETURN_TRUE;
 }
@@ -682,33 +679,27 @@ PHP_FUNCTION(imagedestroy)
    Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
 {
-	pval *imgind, *red, *green, *blue;
-	int ind, ind_type;
+	zval **imgind, **red, **green, **blue;
 	int col;
 	int r, g, b;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters(ht, 4, &imgind, &red,
+	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &imgind, &red,
 											&green, &blue) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(red);
-	convert_to_long(green);
-	convert_to_long(blue);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
 	
-	ind = imgind->value.lval;
-	r = red->value.lval;
-	g = green->value.lval;
-	b = blue->value.lval;
+	r = (*red)->value.lval;
+	g = (*green)->value.lval;
+	b = (*blue)->value.lval;
 	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorAllocate: Unable to find image pointer");
-		RETURN_FALSE;
-	}
 	col = gdImageColorAllocate(im, r, g, b);
 	RETURN_LONG(col);
 }
@@ -719,31 +710,23 @@ PHP_FUNCTION(imagecolorallocate)
    Get the index of the color of a pixel */
 PHP_FUNCTION(imagecolorat)
 {
-	pval *imgind, *x, *y;
-	int ind, ind_type;
+	zval **imgind, **x, **y;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters(ht, 3, &imgind, &x, &y) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &imgind, &x, &y) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(x);
-	convert_to_long(y);
-	
-	ind = imgind->value.lval;
-	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorAt: Unable to find image pointer");
-		RETURN_FALSE;
-	}
-	if (gdImageBoundsSafe(im, x->value.lval, y->value.lval)) {
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+
+	if (gdImageBoundsSafe(im, (*x)->value.lval, (*y)->value.lval)) {
 #if HAVE_LIBGD13
-		RETURN_LONG(im->pixels[y->value.lval][x->value.lval]);
+		RETURN_LONG(im->pixels[(*y)->value.lval][(*x)->value.lval]);
 #else
-		RETURN_LONG(im->pixels[x->value.lval][y->value.lval]);
+		RETURN_LONG(im->pixels[(*x)->value.lval][(*y)->value.lval]);
 #endif
 	}
 	else {
@@ -756,33 +739,27 @@ PHP_FUNCTION(imagecolorat)
    Get the index of the closest color to the specified color */
 PHP_FUNCTION(imagecolorclosest)
 {
-	pval *imgind, *red, *green, *blue;
-	int ind, ind_type;
+	zval **imgind, **red, **green, **blue;
 	int col;
 	int r, g, b;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters(ht, 4, &imgind, &red,
-											&green, &blue) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &imgind, &red,
+													 &green, &blue) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(red);
-	convert_to_long(green);
-	convert_to_long(blue);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
 	
-	ind = imgind->value.lval;
-	r = red->value.lval;
-	g = green->value.lval;
-	b = blue->value.lval;
+	r = (*red)->value.lval;
+	g = (*green)->value.lval;
+	b = (*blue)->value.lval;
 	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorClosest: Unable to find image pointer");
-		RETURN_FALSE;
-	}
 	col = gdImageColorClosest(im, r, g, b);
 	RETURN_LONG(col);
 }
@@ -792,34 +769,28 @@ PHP_FUNCTION(imagecolorclosest)
    De-allocate a color for an image */
 PHP_FUNCTION(imagecolordeallocate)
 {
-	pval *imgind, *index;
-	int ind, ind_type, col;
+	zval **imgind, **index;
+	int col;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &imgind, &index) == FAILURE) {
-	WRONG_PARAM_COUNT;
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &imgind, &index) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(imgind);
-	convert_to_long(index);
-	ind = imgind->value.lval;
-	col = index->value.lval;
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorDeallocate: Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	convert_to_long_ex(index);
+	col = (*index)->value.lval;
 
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
 		gdImageColorDeallocate(im, col);
 		RETURN_TRUE;
-        }
-        else {
-                php_error(E_WARNING, "Color index out of range");
-                RETURN_FALSE;
-        }
+	}
+	else {
+		php_error(E_WARNING, "Color index out of range");
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -827,33 +798,27 @@ PHP_FUNCTION(imagecolordeallocate)
    Get the index of the specified color or its closest possible alternative */
 PHP_FUNCTION(imagecolorresolve)
 {
-	pval *imgind, *red, *green, *blue;
-	int ind, ind_type;
+	zval **imgind, **red, **green, **blue;
 	int col;
 	int r, g, b;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters(ht, 4, &imgind, &red,
-											&green, &blue) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &imgind, &red,
+													 &green, &blue) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(red);
-	convert_to_long(green);
-	convert_to_long(blue);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
 	
-	ind = imgind->value.lval;
-	r = red->value.lval;
-	g = green->value.lval;
-	b = blue->value.lval;
+	r = (*red)->value.lval;
+	g = (*green)->value.lval;
+	b = (*blue)->value.lval;
 	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorResolve: Unable to find image pointer");
-		RETURN_FALSE;
-	}
 	col = gdImageColorResolve(im, r, g, b);
 	RETURN_LONG(col);
 }
@@ -863,33 +828,27 @@ PHP_FUNCTION(imagecolorresolve)
    Get the index of the specified color */
 PHP_FUNCTION(imagecolorexact)
 {
-	pval *imgind, *red, *green, *blue;
-	int ind, ind_type;
+	zval **imgind, **red, **green, **blue;
 	int col;
 	int r, g, b;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters(ht, 4, &imgind, &red,
-											&green, &blue) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &imgind, &red,
+													 &green, &blue) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(red);
-	convert_to_long(green);
-	convert_to_long(blue);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
 	
-	ind = imgind->value.lval;
-	r = red->value.lval;
-	g = green->value.lval;
-	b = blue->value.lval;
+	r = (*red)->value.lval;
+	g = (*green)->value.lval;
+	b = (*blue)->value.lval;
 	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorExact: Unable to find image pointer");
-		RETURN_FALSE;
-	}
 	col = gdImageColorExact(im, r, g, b);
 	RETURN_LONG(col);
 }
@@ -899,34 +858,28 @@ PHP_FUNCTION(imagecolorexact)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
-	pval *imgind, *color, *red, *green, *blue;
-	int ind, ind_type;
+	zval **imgind, **color, **red, **green, **blue;
 	int col;
 	int r, g, b;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 5 || zend_get_parameters(ht, 5, &imgind, &color, &red, &green, &blue) == FAILURE) {
+	if (ARG_COUNT(ht) != 5 || zend_get_parameters_ex(5, &imgind, &color, &red, &green, &blue) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(color);
-	convert_to_long(red);
-	convert_to_long(green);
-	convert_to_long(blue);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(color);
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
 	
-	ind = imgind->value.lval;
-	col = color->value.lval;
-	r = red->value.lval;
-	g = green->value.lval;
-	b = blue->value.lval;
+	col = (*color)->value.lval;
+	r = (*red)->value.lval;
+	g = (*green)->value.lval;
+	b = (*blue)->value.lval;
 	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorSet: Unable to find image pointer");
-		RETURN_FALSE;
-	}
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
 		im->red[col] = r;
 		im->green[col] = g;
@@ -942,26 +895,20 @@ PHP_FUNCTION(imagecolorset)
    Get the colors for an index */
 PHP_FUNCTION(imagecolorsforindex)
 {
-	pval *imgind, *index;
-	int col, ind, ind_type;
+	zval **imgind, **index;
+	int col;
 	gdImagePtr im;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &imgind, &index) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &imgind, &index) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(imgind);
-	convert_to_long(index);
-	ind = imgind->value.lval;
-	col = index->value.lval;
-	
-	im = zend_list_find(ind, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageColorsForIndex: Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
+	convert_to_long_ex(index);
+	col = (*index)->value.lval;
+	
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
@@ -981,32 +928,26 @@ PHP_FUNCTION(imagecolorsforindex)
    Set a single pixel */
 PHP_FUNCTION(imagesetpixel)
 {
-	pval *imarg, *xarg, *yarg, *colarg;
+	zval **imgind, **xarg, **yarg, **colarg;
 	gdImagePtr im;
 	int col, y, x;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 4 ||
-		zend_get_parameters(ht, 4, &imarg, &xarg, &yarg, &colarg) == FAILURE)
+		zend_get_parameters_ex(4, &imgind, &xarg, &yarg, &colarg) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(imarg);
-	convert_to_long(xarg);
-	convert_to_long(yarg);
-	convert_to_long(colarg);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
-	col = colarg->value.lval;
-	y = yarg->value.lval;
-	x = xarg->value.lval;
+	convert_to_long_ex(xarg);
+	convert_to_long_ex(yarg);
+	convert_to_long_ex(colarg);
 
-	im = zend_list_find(imarg->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	col = (*colarg)->value.lval;
+	y = (*yarg)->value.lval;
+	x = (*xarg)->value.lval;
 
 	gdImageSetPixel(im,x,y,col);
 
@@ -1019,36 +960,30 @@ PHP_FUNCTION(imagesetpixel)
    Draw a line */
 PHP_FUNCTION(imageline)
 {
-	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
+	zval **IM, **COL, **X1, **Y1, **X2, **Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 6 ||
-		zend_get_parameters(ht, 6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
+		zend_get_parameters_ex(6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X1);
-	convert_to_long(Y1);
-	convert_to_long(X2);
-	convert_to_long(Y2);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	x1 = X1->value.lval;
-	y1 = Y1->value.lval;
-	x2 = X2->value.lval;
-	y2 = Y2->value.lval;
-	col = COL->value.lval;
+	convert_to_long_ex(X1);
+	convert_to_long_ex(Y1);
+	convert_to_long_ex(X2);
+	convert_to_long_ex(Y2);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	x1 = (*X1)->value.lval;
+	y1 = (*Y1)->value.lval;
+	x2 = (*X2)->value.lval;
+	y2 = (*Y2)->value.lval;
+	col = (*COL)->value.lval;
 
 	gdImageLine(im,x1,y1,x2,y2,col);
 	RETURN_TRUE;
@@ -1059,35 +994,29 @@ PHP_FUNCTION(imageline)
    Draw a dashed line */
 PHP_FUNCTION(imagedashedline)
 {
-	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
+	zval **IM, **COL, **X1, **Y1, **X2, **Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 6 || zend_get_parameters(ht, 6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
+	if (ARG_COUNT(ht) != 6 || zend_get_parameters_ex(6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X1);
-	convert_to_long(Y1);
-	convert_to_long(X2);
-	convert_to_long(Y2);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	x1 = X1->value.lval;
-	y1 = Y1->value.lval;
-	x2 = X2->value.lval;
-	y2 = Y2->value.lval;
-	col = COL->value.lval;
+	convert_to_long_ex(X1);
+	convert_to_long_ex(Y1);
+	convert_to_long_ex(X2);
+	convert_to_long_ex(Y2);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	x1 = (*X1)->value.lval;
+	y1 = (*Y1)->value.lval;
+	x2 = (*X2)->value.lval;
+	y2 = (*Y2)->value.lval;
+	col = (*COL)->value.lval;
 
 	gdImageDashedLine(im,x1,y1,x2,y2,col);
 	RETURN_TRUE;
@@ -1099,36 +1028,31 @@ PHP_FUNCTION(imagedashedline)
    Draw a rectangle */
 PHP_FUNCTION(imagerectangle)
 {
-	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
+	zval **IM, **COL, **X1, **Y1, **X2, **Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 6 ||
-		zend_get_parameters(ht, 6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
+		zend_get_parameters_ex(6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X1);
-	convert_to_long(Y1);
-	convert_to_long(X2);
-	convert_to_long(Y2);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	x1 = X1->value.lval;
-	y1 = Y1->value.lval;
-	x2 = X2->value.lval;
-	y2 = Y2->value.lval;
-	col = COL->value.lval;
+	convert_to_long_ex(IM);
+	convert_to_long_ex(X1);
+	convert_to_long_ex(Y1);
+	convert_to_long_ex(X2);
+	convert_to_long_ex(Y2);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	x1 = (*X1)->value.lval;
+	y1 = (*Y1)->value.lval;
+	x2 = (*X2)->value.lval;
+	y2 = (*Y2)->value.lval;
+	col = (*COL)->value.lval;
 
 	gdImageRectangle(im,x1,y1,x2,y2,col);
 	RETURN_TRUE;
@@ -1140,36 +1064,30 @@ PHP_FUNCTION(imagerectangle)
    Draw a filled rectangle */
 PHP_FUNCTION(imagefilledrectangle)
 {
-	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
+	zval **IM, **COL, **X1, **Y1, **X2, **Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 6 ||
-		zend_get_parameters(ht, 6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
+		zend_get_parameters_ex(6, &IM, &X1, &Y1, &X2, &Y2, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X1);
-	convert_to_long(Y1);
-	convert_to_long(X2);
-	convert_to_long(Y2);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	x1 = X1->value.lval;
-	y1 = Y1->value.lval;
-	x2 = X2->value.lval;
-	y2 = Y2->value.lval;
-	col = COL->value.lval;
+	convert_to_long_ex(X1);
+	convert_to_long_ex(Y1);
+	convert_to_long_ex(X2);
+	convert_to_long_ex(Y2);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	x1 = (*X1)->value.lval;
+	y1 = (*Y1)->value.lval;
+	x2 = (*X2)->value.lval;
+	y2 = (*Y2)->value.lval;
+	col = (*COL)->value.lval;
 
 	gdImageFilledRectangle(im,x1,y1,x2,y2,col);
 	RETURN_TRUE;
@@ -1180,46 +1098,40 @@ PHP_FUNCTION(imagefilledrectangle)
    Draw a partial ellipse */
 PHP_FUNCTION(imagearc)
 {
-	pval *COL, *E, *ST, *H, *W, *CY, *CX, *IM;
+	zval **COL, **E, **ST, **H, **W, **CY, **CX, **IM;
 	gdImagePtr im;
 	int col, e, st, h, w, cy, cx;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 8 ||
-		zend_get_parameters(ht, 8, &IM, &CX, &CY, &W, &H, &ST, &E, &COL) == FAILURE)
+		zend_get_parameters_ex(ht, 8, &IM, &CX, &CY, &W, &H, &ST, &E, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(CX);
-	convert_to_long(CY);
-	convert_to_long(W);
-	convert_to_long(H);
-	convert_to_long(ST);
-	convert_to_long(E);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	col = COL->value.lval;
-	e = E->value.lval;
-	st = ST->value.lval;
-	h = H->value.lval;
-	w = W->value.lval;
-	cy = CY->value.lval;
-	cx = CX->value.lval;
+	convert_to_long_ex(CX);
+	convert_to_long_ex(CY);
+	convert_to_long_ex(W);
+	convert_to_long_ex(H);
+	convert_to_long_ex(ST);
+	convert_to_long_ex(E);
+	convert_to_long_ex(COL);
+
+	col = (*COL)->value.lval;
+	e = (*E)->value.lval;
+	st = (*ST)->value.lval;
+	h = (*H)->value.lval;
+	w = (*W)->value.lval;
+	cy = (*CY)->value.lval;
+	cx = (*CX)->value.lval;
 
 	if (e < 0) {
 		e %= 360;
 	}
 	if (st < 0) {
 		st %= 360;
-	}
-
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
 	}
 
 	gdImageArc(im,cx,cy,w,h,st,e,col);
@@ -1232,34 +1144,28 @@ PHP_FUNCTION(imagearc)
    Flood fill to specific color */
 PHP_FUNCTION(imagefilltoborder)
 {
-	pval *IM, *X, *Y, *BORDER, *COL;
+	zval **IM, **X, **Y, **BORDER, **COL;
 	gdImagePtr im;
 	int col, border, y, x;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 5 ||
-		zend_get_parameters(ht, 5, &IM, &X, &Y, &BORDER, &COL) == FAILURE)
+		zend_get_parameters_ex(5, &IM, &X, &Y, &BORDER, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X);
-	convert_to_long(Y);
-	convert_to_long(BORDER);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	col = COL->value.lval;
-	border = BORDER->value.lval;
-	y = Y->value.lval;
-	x = X->value.lval;
+	convert_to_long_ex(X);
+	convert_to_long_ex(Y);
+	convert_to_long_ex(BORDER);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	col = (*COL)->value.lval;
+	border = (*BORDER)->value.lval;
+	y = (*Y)->value.lval;
+	x = (*X)->value.lval;
 
 	gdImageFillToBorder(im,x,y,border,col);
 	RETURN_TRUE;
@@ -1271,32 +1177,26 @@ PHP_FUNCTION(imagefilltoborder)
    Flood fill */
 PHP_FUNCTION(imagefill)
 {
-	pval *IM, *X, *Y, *COL;
+	zval **IM, **X, **Y, **COL;
 	gdImagePtr im;
 	int col, y, x;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 4 ||
-		zend_get_parameters(ht, 4, &IM, &X, &Y, &COL) == FAILURE)
+		zend_get_parameters_ex(4, &IM, &X, &Y, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(X);
-	convert_to_long(Y);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	col = COL->value.lval;
-	y = Y->value.lval;
-	x = X->value.lval;
+	convert_to_long_ex(X);
+	convert_to_long_ex(Y);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	col = (*COL)->value.lval;
+	y = (*Y)->value.lval;
+	x = (*X)->value.lval;
 
 	gdImageFill(im,x,y,col);
 	RETURN_TRUE;
@@ -1307,21 +1207,14 @@ PHP_FUNCTION(imagefill)
    Find out the number of colors in an image's palette */
 PHP_FUNCTION(imagecolorstotal)
 {
-	pval *IM;
+	zval **IM;
 	gdImagePtr im;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &IM) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(IM);
-
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
 	RETURN_LONG(gdImageColorsTotal(im));
 }
@@ -1332,37 +1225,31 @@ PHP_FUNCTION(imagecolorstotal)
    Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
 {
-	pval *IM, *COL = NULL;
+	zval **IM, **COL = NULL;
 	gdImagePtr im;
 	int col;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (zend_get_parameters(ht, 1, &IM) == FAILURE) {
+		if (zend_get_parameters_ex(1, &IM) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (zend_get_parameters(ht, 2, &IM, &COL) == FAILURE) {
+		if (zend_get_parameters_ex(2, &IM, &COL) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(COL);
+		convert_to_long_ex(COL);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(IM);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	if (COL != NULL) {
-		col = COL->value.lval;
+	if ((*COL) != NULL) {
+		col = (*COL)->value.lval;
 		gdImageColorTransparent(im,col);
 	}
 	col = gdImageGetTransparent(im);
@@ -1375,37 +1262,31 @@ PHP_FUNCTION(imagecolortransparent)
    Enable or disable interlace */
 PHP_FUNCTION(imageinterlace)
 {
-	pval *IM, *INT = NULL;
+	zval **IM, **INT = NULL;
 	gdImagePtr im;
 	int interlace;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (zend_get_parameters(ht, 1, &IM) == FAILURE) {
+		if (zend_get_parameters_ex(1, &IM) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (zend_get_parameters(ht, 2, &IM, &INT) == FAILURE) {
+		if (zend_get_parameters_ex(2, &IM, &INT) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(INT);
+		convert_to_long_ex(INT);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(IM);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	if (INT != NULL) {
-		interlace = INT->value.lval;
+	if ((*INT) != NULL) {
+		interlace = (*INT)->value.lval;
 		gdImageInterlace(im,interlace);
 	}
 	interlace = gdImageGetInterlaced(im);
@@ -1417,33 +1298,28 @@ PHP_FUNCTION(imageinterlace)
    arg = 1  filled polygon */
 /* im, points, num_points, col */
 static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
-	pval *IM, *POINTS, *NPOINTS, *COL, **var;
+	zval **IM, **POINTS, **NPOINTS, **COL;
+	pval **var = NULL;
 	gdImagePtr im;
 	gdPoint points[PolyMaxPoints];	
 	int npoints, col, nelem, i;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 4 ||
-		zend_get_parameters(ht, 4, &IM, &POINTS, &NPOINTS, &COL) == FAILURE)
+		zend_get_parameters_ex(4, &IM, &POINTS, &NPOINTS, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(NPOINTS);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	npoints = NPOINTS->value.lval;
-	col = COL->value.lval;
+	convert_to_long_ex(NPOINTS);
+	convert_to_long_ex(COL);
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	npoints = (*NPOINTS)->value.lval;
+	col = (*COL)->value.lval;
 
-	if (POINTS->type != IS_ARRAY) {
+	if ((*POINTS)->type != IS_ARRAY) {
 		php_error(E_WARNING, "2nd argument to imagepolygon not an array");
 		RETURN_FALSE;
 	}
@@ -1457,7 +1333,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
     }
 */
 
-	nelem = zend_hash_num_elements(POINTS->value.ht);
+	nelem = zend_hash_num_elements((*POINTS)->value.ht);
 	if (nelem < 6) {
 		php_error(E_WARNING,
 					"you must have at least 3 points in your array");
@@ -1477,12 +1353,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	}
 
 	for (i = 0; i < npoints; i++) {
-		if (zend_hash_index_find(POINTS->value.ht, (i * 2), (void **)&var) == SUCCESS) {
-			SEPARATE_ZVAL(var);
+		if (zend_hash_index_find((*POINTS)->value.ht, (i * 2), (void **) &var) == SUCCESS) {
+			SEPARATE_ZVAL((var));
 			convert_to_long(*var);
 			points[i].x = (*var)->value.lval;
 		}
-		if (zend_hash_index_find(POINTS->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
+		if (zend_hash_index_find((*POINTS)->value.ht, (i * 2) + 1, (void **) &var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_long(*var);
 			points[i].y = (*var)->value.lval;
@@ -1521,7 +1397,7 @@ static gdFontPtr php_find_gd_font(int size)
 {
 	gdFontPtr font;
 	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	switch (size) {
     	case 1:
@@ -1541,7 +1417,7 @@ static gdFontPtr php_find_gd_font(int size)
 			 break;
 	    default:
 			font = zend_list_find(size - 5, &ind_type);
-			 if (!font || ind_type != GD_GLOBAL(le_gd_font)) {
+			 if (!font || ind_type != GDG(le_gd_font)) {
 				  if (size < 1) {
 					   font = gdFontTiny;
 				  } else {
@@ -1620,48 +1496,39 @@ void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
  * arg = 3  ImageStringUp
  */
 static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
-	pval *IM, *SIZE, *X, *Y, *C, *COL;
+	zval **IM, **SIZE, **X, **Y, **C, **COL;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
 	unsigned char *str = NULL;
-	int ind_type;
 	gdFontPtr font;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 6 ||
-		zend_get_parameters(ht, 6, &IM, &SIZE, &X, &Y, &C, &COL) == FAILURE) {
+		zend_get_parameters_ex(6, &IM, &SIZE, &X, &Y, &C, &COL) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(IM);
-	convert_to_long(SIZE);
-	convert_to_long(X);
-	convert_to_long(Y);
-	convert_to_string(C);
-	convert_to_long(COL);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	col = COL->value.lval;
+	convert_to_long_ex(SIZE);
+	convert_to_long_ex(X);
+	convert_to_long_ex(Y);
+	convert_to_string_ex(C);
+	convert_to_long_ex(COL);
+
+	col = (*COL)->value.lval;
 
 	if (mode < 2) {
-		ch = (int)((unsigned char)*(C->value.str.val));
+		ch = (int)((unsigned char)*((*C)->value.str.val));
 	} else {
-		str = (unsigned char *) estrndup(C->value.str.val,C->value.str.len);
+		str = (unsigned char *) estrndup((*C)->value.str.val, (*C)->value.str.len);
 		l = strlen(str);
 	}
 
-	y = Y->value.lval;
-	x = X->value.lval;
-	size = SIZE->value.lval;
+	y = (*Y)->value.lval;
+	x = (*X)->value.lval;
+	size = (*SIZE)->value.lval;
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		if (str) {
-			efree(str);
-		}
-		RETURN_FALSE;
-	}
-	
 	font = php_find_gd_font(size);
 
 	switch(mode) {
@@ -1725,46 +1592,34 @@ PHP_FUNCTION(imagestringup) {
    Copy part of an image */ 
 PHP_FUNCTION(imagecopy)
 {
-	pval *SIM, *DIM, *SX, *SY, *SW, *SH, *DX, *DY;
+	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY;
 	gdImagePtr im_dst;
 	gdImagePtr im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 8 ||
-		zend_get_parameters(ht, 8, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH)
+		zend_get_parameters_ex(8, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH)
 						 == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(SIM);
-	convert_to_long(DIM);
-	convert_to_long(SX);
-	convert_to_long(SY);
-	convert_to_long(SW);
-	convert_to_long(SH);
-	convert_to_long(DX);
-	convert_to_long(DY);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
 
-	srcX = SX->value.lval;
-	srcY = SY->value.lval;
-	srcH = SH->value.lval;
-	srcW = SW->value.lval;
-	dstX = DX->value.lval;
-	dstY = DY->value.lval;
+	convert_to_long_ex(SX);
+	convert_to_long_ex(SY);
+	convert_to_long_ex(SW);
+	convert_to_long_ex(SH);
+	convert_to_long_ex(DX);
+	convert_to_long_ex(DY);
 
-	im_src = zend_list_find(SIM->value.lval, &ind_type);
-	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
-
-	im_dst = zend_list_find(DIM->value.lval, &ind_type);
-	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	srcX = (*SX)->value.lval;
+	srcY = (*SY)->value.lval;
+	srcH = (*SH)->value.lval;
+	srcW = (*SW)->value.lval;
+	dstX = (*DX)->value.lval;
+	dstY = (*DY)->value.lval;
 
 	gdImageCopy(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH);
 	RETURN_TRUE;
@@ -1775,50 +1630,38 @@ PHP_FUNCTION(imagecopy)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
 {
-	pval *SIM, *DIM, *SX, *SY, *SW, *SH, *DX, *DY, *DW, *DH;
+	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **DW, **DH;
 	gdImagePtr im_dst;
 	gdImagePtr im_src;
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 10 ||
-		zend_get_parameters(ht, 10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH,
-					  &SW, &SH) == FAILURE) {
+		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH,
+							   &SW, &SH) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(SIM);
-	convert_to_long(DIM);
-	convert_to_long(SX);
-	convert_to_long(SY);
-	convert_to_long(SW);
-	convert_to_long(SH);
-	convert_to_long(DX);
-	convert_to_long(DY);
-	convert_to_long(DW);
-	convert_to_long(DH);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
 
-	srcX = SX->value.lval;
-	srcY = SY->value.lval;
-	srcH = SH->value.lval;
-	srcW = SW->value.lval;
-	dstX = DX->value.lval;
-	dstY = DY->value.lval;
-	dstH = DH->value.lval;
-	dstW = DW->value.lval;
+	convert_to_long_ex(SX);
+	convert_to_long_ex(SY);
+	convert_to_long_ex(SW);
+	convert_to_long_ex(SH);
+	convert_to_long_ex(DX);
+	convert_to_long_ex(DY);
+	convert_to_long_ex(DW);
+	convert_to_long_ex(DH);
 
-	im_src = zend_list_find(SIM->value.lval, &ind_type);
-	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
-
-	im_dst = zend_list_find(DIM->value.lval, &ind_type);
-	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	srcX = (*SX)->value.lval;
+	srcY = (*SY)->value.lval;
+	srcH = (*SH)->value.lval;
+	srcW = (*SW)->value.lval;
+	dstX = (*DX)->value.lval;
+	dstY = (*DY)->value.lval;
+	dstH = (*DH)->value.lval;
+	dstW = (*DW)->value.lval;
 
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH,
 					   srcW, srcH);
@@ -1830,20 +1673,15 @@ PHP_FUNCTION(imagecopyresized)
    Get image width */
 PHP_FUNCTION(imagesx)
 {
-	pval *IM;
+	zval **IM;
 	gdImagePtr im;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &IM) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
 	RETURN_LONG(gdImageSX(im));
 }
@@ -1853,20 +1691,15 @@ PHP_FUNCTION(imagesx)
    Get image height */
 PHP_FUNCTION(imagesy)
 {
-	pval *IM;
+	zval **IM;
 	gdImagePtr im;
-	int ind_type;
-	GD_TLS_VARS;
+	GDLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &IM) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	im = zend_list_find(IM->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
 	RETURN_LONG(gdImageSY(im));
 }
@@ -1896,55 +1729,48 @@ PHP_FUNCTION(imagettftext)
 static
 void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	pval *IM, *PTSIZE, *ANGLE, *X, *Y, *C, *FONTNAME, *COL;
+	zval **IM, **PTSIZE, **ANGLE, **X, **Y, **C, **FONTNAME, **COL;
 	gdImagePtr im;
-	int  col, x, y, l=0, i;
+	int col, x, y, l=0, i;
 	int brect[8];
 	double ptsize, angle;
 	unsigned char *str = NULL, *fontname = NULL;
-	int ind_type;
-	char				*error;
-
-	GD_TLS_VARS;
+	char *error;
+	GDLS_FETCH();
 
 	if (mode == TTFTEXT_BBOX) {
-		if (ARG_COUNT(ht) != 4 || zend_get_parameters(ht, 4, &PTSIZE, &ANGLE, &FONTNAME, &C) == FAILURE) {
+		if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &PTSIZE, &ANGLE, &FONTNAME, &C) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	} else {
-		if (ARG_COUNT(ht) != 8 || zend_get_parameters(ht, 8, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C) == FAILURE) {
+		if (ARG_COUNT(ht) != 8 || zend_get_parameters_ex(8, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
+		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 	}
 
-	convert_to_double(PTSIZE);
-	convert_to_double(ANGLE);
-	convert_to_string(FONTNAME);
-	convert_to_string(C);
+	convert_to_double_ex(PTSIZE);
+	convert_to_double_ex(ANGLE);
+	convert_to_string_ex(FONTNAME);
+	convert_to_string_ex(C);
 	if (mode == TTFTEXT_BBOX) {
               im = NULL;
 		col = x = y = -1;
 	} else {
-		convert_to_long(X);
-		convert_to_long(Y);
-		convert_to_long(IM);
-		convert_to_long(COL);
-		col = COL->value.lval;
-		y = Y->value.lval;
-		x = X->value.lval;
-              im = zend_list_find(IM->value.lval, &ind_type);
-              if (!im || ind_type != GD_GLOBAL(le_gd)) {
-                      php_error(E_WARNING, "Unable to find image pointer");
-                      RETURN_FALSE;
-              }
+		convert_to_long_ex(X);
+		convert_to_long_ex(Y);
+		convert_to_long_ex(COL);
+		col = (*COL)->value.lval;
+		y = (*Y)->value.lval;
+		x = (*X)->value.lval;
 	}
 
-	ptsize = PTSIZE->value.dval;
-	angle = ANGLE->value.dval * (M_PI/180); /* convert to radians */
+	ptsize = (*PTSIZE)->value.dval;
+	angle = (*ANGLE)->value.dval * (M_PI/180); /* convert to radians */
 
-	str = (unsigned char *) C->value.str.val;
+	str = (unsigned char *) (*C)->value.str.val;
 	l = strlen(str);
-	fontname = (unsigned char *) FONTNAME->value.str.val;
+	fontname = (unsigned char *) (*FONTNAME)->value.str.val;
 
 	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 
@@ -1983,7 +1809,7 @@ void php_free_ps_enc(char **enc)
 PHP_FUNCTION(imagepsloadfont)
 {
 	zval **file;
-	int f_ind, l_ind;
+	int f_ind;
 	int *font;
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
@@ -2016,7 +1842,7 @@ PHP_FUNCTION(imagepsloadfont)
 
 	font = (int *) emalloc(sizeof(int));
 	*font = f_ind;
-	ZEND_REGISTER_RESOURCE(return_value, font, GD_GLOBAL(le_ps_font));
+	ZEND_REGISTER_RESOURCE(return_value, font, GDG(le_ps_font));
 }
 /* }}} */
 
@@ -2038,7 +1864,7 @@ PHP_FUNCTION(imagepscopyfont)
 
 	of_ind = zend_list_find(fnt->value.lval, &type);
 
-	if (type != GD_GLOBAL(le_ps_font)) {
+	if (type != GDG(le_ps_font)) {
 		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
@@ -2070,7 +1896,7 @@ PHP_FUNCTION(imagepscopyfont)
 	}
 
 	nf_ind->extend = 1;
-	l_ind = zend_list_insert(nf_ind, GD_GLOBAL(le_ps_font));
+	l_ind = zend_list_insert(nf_ind, GDG(le_ps_font));
 	RETURN_LONG(l_ind);
 }
 */
@@ -2087,7 +1913,7 @@ PHP_FUNCTION(imagepsfreefont)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 	zend_list_delete((*fnt)->value.lval);
 	RETURN_TRUE;
@@ -2100,7 +1926,6 @@ PHP_FUNCTION(imagepsencodefont)
 {
 	zval **fnt, **enc;
 	char **enc_vector;
-	int type;
 	int *f_ind;
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
@@ -2109,7 +1934,7 @@ PHP_FUNCTION(imagepsencodefont)
 
 	convert_to_string_ex(enc);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 	if ((enc_vector = T1_LoadEncoding((*enc)->value.str.val)) == NULL) {
 		php_error(E_WARNING, "Couldn't load encoding vector from %s", (*enc)->value.str.val);
@@ -2122,7 +1947,7 @@ PHP_FUNCTION(imagepsencodefont)
 		php_error(E_WARNING, "Couldn't reencode font");
 		RETURN_FALSE;
 	}
-	zend_list_insert(enc_vector, GD_GLOBAL(le_ps_enc));
+	zend_list_insert(enc_vector, GDG(le_ps_enc));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2132,7 +1957,6 @@ PHP_FUNCTION(imagepsencodefont)
 PHP_FUNCTION(imagepsextendfont)
 {
 	zval **fnt, **ext;
-	int type;
 	int *f_ind;
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
@@ -2141,7 +1965,7 @@ PHP_FUNCTION(imagepsextendfont)
 
 	convert_to_double_ex(ext);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 	if (T1_ExtendFont(*f_ind, (*ext)->value.dval) != 0) RETURN_FALSE;
 
@@ -2154,7 +1978,6 @@ PHP_FUNCTION(imagepsextendfont)
 PHP_FUNCTION(imagepsslantfont)
 {
 	zval **fnt, **slt;
-	int type;
 	int *f_ind;
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
@@ -2163,7 +1986,7 @@ PHP_FUNCTION(imagepsslantfont)
 
 	convert_to_double_ex(slt);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 	if (T1_SlantFont(*f_ind, (*slt)->value.dval) != 0) RETURN_FALSE;
 	RETURN_TRUE;
@@ -2176,7 +1999,7 @@ PHP_FUNCTION(imagepstext)
 {
 	zval **img, **str, **fnt, **sz, **fg, **bg, **sp, **px, **py, **aas, **wd, **ang;
 	int i, j, x, y;
-	int space, type;
+	int space;
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
 	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl;
@@ -2233,14 +2056,8 @@ PHP_FUNCTION(imagepstext)
 		WRONG_PARAM_COUNT;
 	}
 
-	bg_img = zend_list_find((*img)->value.lval, &type);
-
-	if (!bg_img || type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
-		RETURN_FALSE;
-	}
-
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 	fg_rd = gdImageRed(bg_img, (*fg)->value.lval);
 	fg_gr = gdImageGreen(bg_img, (*fg)->value.lval);
@@ -2331,12 +2148,12 @@ PHP_FUNCTION(imagepstext)
 PHP_FUNCTION(imagepsbbox)
 {
 	zval **str, **fnt, **sz, **sp, **wd, **ang;
-	int i, space, add_width, char_width, amount_kern, type;
+	int i, space, add_width, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
 	int per_char = 0;
-	double angle, sin_a, cos_a;
+	double angle, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
 	switch(ARG_COUNT(ht)) {
@@ -2368,7 +2185,7 @@ PHP_FUNCTION(imagepsbbox)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GD_GLOBAL(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
 
 #define max(a, b) (a > b ? a : b)
 #define min(a, b) (a < b ? a : b)
