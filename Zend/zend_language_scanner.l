@@ -1179,11 +1179,11 @@ ANY_CHAR (.|[\n])
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>"?"|">" {
+<ST_ONE_LINE_COMMENT>"?"|"%"|">" {
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?>]+ {
+<ST_ONE_LINE_COMMENT>[^\n\r?%>]+ {
 	yymore();
 }
 
@@ -1196,13 +1196,17 @@ ANY_CHAR (.|[\n])
 	return T_COMMENT;
 }
 
-<ST_ONE_LINE_COMMENT>"?>" {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	yyless(yyleng-2);
-	BEGIN(ST_IN_SCRIPTING);
-	return T_COMMENT;
+<ST_ONE_LINE_COMMENT>"?>"|"%>" {
+    if(CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
+		zendlval->value.str.val = yytext; /* no copying - intentional */
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
+		yyless(yyleng-2);
+		BEGIN(ST_IN_SCRIPTING);
+		return T_COMMENT;
+	} else {
+		yymore();
+	}
 }
 
 <ST_IN_SCRIPTING>"/*" {
