@@ -1,5 +1,5 @@
 --TEST--
-Output buffering tests
+Output buffering test
 --POST--
 --GET--
 --FILE--
