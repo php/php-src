@@ -67,6 +67,8 @@ PHP_FUNCTION(cpdf_show_xy);
 PHP_FUNCTION(cpdf_continue_text);
 PHP_FUNCTION(cpdf_text);
 PHP_FUNCTION(cpdf_set_font);
+PHP_FUNCTION(cpdf_set_font_directories);
+PHP_FUNCTION(cpdf_set_font_map_file);
 PHP_FUNCTION(cpdf_set_leading);
 PHP_FUNCTION(cpdf_set_text_rendering);
 PHP_FUNCTION(cpdf_set_horiz_scaling);
