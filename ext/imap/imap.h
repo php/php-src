@@ -82,6 +82,7 @@ PHP_FUNCTION(imap_search);
 PHP_FUNCTION(imap_utf8);
 PHP_FUNCTION(imap_utf7_decode);
 PHP_FUNCTION(imap_utf7_encode);
+PHP_FUNCTION(imap_mime_header_decode);
 #else
 #define imap_module_ptr NULL
 #endif /* HAVE_IMAP */
