@@ -143,7 +143,7 @@ Changes in the Zend Engine 2.0
         print $obj->address . "\n";
         ?>
 
-    * Nested classes (namespaces).
+    * Namespaces.
 
       The Zend Engine 1.0 provided only three scopes: the global
       scope, the class scope and the function scope. All scopes but
@@ -153,177 +153,33 @@ Changes in the Zend Engine 2.0
       Zend Engine 1.0's scoping methods were inherently limited for
       solving symbol name collision problems.
 
-      The Zend Engine 2.0 introduces the concept of nested classes
+      The Zend Engine 2.0 introduces the concept of namespaces
       to solve the symbol collision problem by making it possible to
       define multiple symbol tables able to contain all types of
-      symbols. The Zend Engine is aware of a current class,
-      defaulting to the global scope. Each class can contain it's
-      own set of constants, functions and static variables. In order
-      to access a class's local symbols you can use the self:: class
-      accessor, for example, you can do self::$my_static_name = "Hello".
-      You can also use the class's name such as
-      MyClass::$my_static_name = "Hello". With both constants and
-      functions, if you don't specify a class context the current class
-      will be searched first and if the search fails then the global
-      scope will be searched. If you want to force PHP to only check the
-      global scope you can use the main:: accessor. For example,
-      main::strlen() to make sure you're calling the strlen() in the main
-      scope. You will only need to worry about this if you are defining
-      methods which have the same name as global functions. For
-      constants you can use the same notation such as self::MY_CONSTANT
-      or main::MY_CONSTANT.
-      Sometimes you will not want to access constants, functions or classes
-      via the class accessor (i.e. MyClass::) because you use them very
-      often and are an extremely slow typist. In this case, you can import
-      functions, classes and constants from classes with the import keyword.
-      It's quite self explanatory and there are a few examples below.
+      symbols.
 
+      A namespace may contain classes, constants, functions and variables. 
+      The member of a namespace is accessed by prefixing its name with the 
+      name of the namespace followed by '::'.
 
-        * Classes may contain classes.
+      Example:
 
-          Example:
+        <?php
+        namespace Foo {
+          class Bar {}
+          const aConstant = 'someValue';
+          function aFunction() {}
+          var $aVariable;
+        }
 
-            <?php
-            class DB::MySQL {
-                var $host = '';
+        $o = new Foo::Bar;
+        echo Foo::aConstant;
+        Foo::aFunction();
+        Foo::$aVariable = 'someValue';
+        ?>
 
-                function db_connect($user) {
-                    print "Connecting to MySQL database '$this->host' as $user\n";
-                }
-            }
-
-            class DB::Oracle {
-                var $host = 'localhost';
-
-                function db_connect($user) {
-                    print "Connecting to Oracle database '$this->host' as $user\n";
-                }
-            }
-
-            $MySQL_obj = new DB::MySQL();
-            $MySQL_obj->db_connect('Susan');
-
-            $Oracle_obj = new DB::Oracle();
-            $Oracle_obj->db_connect('Barbara');
-            ?>
-
-        * Classes may contain constants.
-
-          Example:
-
-            <?php
-            class foo {
-                const hey = 'hello';
-            }
-
-            print foo::hey;
-            ?>
-
-        * Current namespace's symbol tables are searched first for
-          constants and functions.
-
-          Example:
-
-            The following code prints "foobar", not "foo", because
-            the class constant overrides the "global" constant of
-            the same name.
-
-            <?php
-            define('foo', 'bar');
-
-            class FooClass {
-                const foo = 'foobar';
-
-                function printFoo() {
-                    print foo;
-                }
-            }
-            ?>
-
-        * In the scope of a function, the current namespace is that
-          of the containing class/namespace.
-
-          Example:
-
-            <?php
-            class FooClass {
-                function foo() {
-                    $this->bar();
-                    bar();
-                }
-
-                function bar() {
-                    print "foobar\n";
-                }
-            }
-
-            $obj = new FooClass;
-            $obj->foo();
-            $obj->foo();
-            ?>
-
-          This prints "foobar" two times, since a bar() method exists
-          in the current namespace.
-
-        * It is possible to "import" symbols from one namespace into
-          another.
-
-          Example:
-
-            <?php
-            class MyClass {
-                class MyClass2 {
-                    function hello() {
-                        print "Hello, World in MyClass2\n";
-                    }
-                }
-
-                function hello() {
-                    print "Hello, World\n";
-                }
-            }
-
-            import function hello, class MyClass2 from MyClass;
-
-            MyClass2::hello();
-            hello();
-            ?>
-
-          Example:
-
-            <?php
-            class MyOuterClass {
-                class MyInnerClass {
-                    function func1() {
-                        print "func1()\n";
-                    }
-
-                    function func2() {
-                        print "func2()\n";
-                    }
-                }
-            }
-
-            import class * from MyOuterClass;
-            import function func2 from MyOuterClass::MyInnerClass;
-
-            MyInnerClass::func1();
-            func2();
-            ?>
-
-          Example:
-
-            <?php
-            class MyOuterClass {
-                const Hello = "Hello, World\n";
-            }
-
-            import const Hello from MyOuterClass;
-            print Hello;
-            ?>
-
-      Old code that does not take advantage of namespaces will run
-      without modifications.
+      To avoid ambiguities in the '::' resolution there may be no
+      global class and namespace with the same name.
 
     * Unified Constructors.
 
