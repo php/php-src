@@ -30,7 +30,7 @@
 
 #if HAVE_MBREGEX
 
-extern ZEND_DECLARE_MODULE_GLOBALS(mbstring)
+ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
 /*
  * string buffer

@@ -158,7 +158,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	mb_regex_t *search_re;
 	struct mbre_registers *search_regs;
 #endif
-ZEND_END_MODULE_GLOBALS(mbstring);
+ZEND_END_MODULE_GLOBALS(mbstring)
 
 #define MB_OVERLOAD_MAIL 1
 #define MB_OVERLOAD_STRING 2
