@@ -88,7 +88,6 @@ if test "$PHP_ICONV" != "no"; then
 
     AC_MSG_CHECKING([if iconv supports errno])
     AC_TRY_RUN([
-#define LIBICONV_PLUG
 #include <$PHP_ICONV_H_PATH>
 #include <errno.h>
 
