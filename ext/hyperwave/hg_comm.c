@@ -287,7 +287,7 @@ void fnListAnchor(DLIST *pAnchorList)
 * Return: As strcmp                                                    *
 ***********************************************************************/
 #ifdef newlist
-int fnCmpAnchors(const void *e1, const void *e2)
+int fnCmpAnchors(const void *e1, const void *e2 TSRMLS_DC)
 {
 	ANCHOR *a1, **aa1, *a2, **aa2;
 	zend_llist_element **ee1, **ee2;
@@ -298,7 +298,7 @@ int fnCmpAnchors(const void *e1, const void *e2)
 	a1 = *aa1;
 	a2 = *aa2;
 #else
-int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2)
+int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2 TSRMLS_DC)
 {
 #endif
 	if(a1->start < a2->start)

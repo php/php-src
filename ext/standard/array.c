@@ -114,14 +114,13 @@ static void set_compare_func(int sort_type TSRMLS_DC)
 	}
 }
 
-static int array_key_compare(const void *a, const void *b)
+static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	pval result;
-	pval first;
-	pval second;
-	TSRMLS_FETCH();
+	zval result;
+	zval first;
+	zval second;
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -169,9 +168,9 @@ static int array_key_compare(const void *a, const void *b)
 	return 0;
 }
 
-static int array_reverse_key_compare(const void *a, const void *b)
+static int array_reverse_key_compare(const void *a, const void *b TSRMLS_DC)
 {
-	return array_key_compare(a, b)*-1;
+	return array_key_compare(a, b TSRMLS_CC) * -1;
 }
 
 /* {{{ proto int krsort(array array_arg [, int sort_flags])
@@ -196,7 +195,7 @@ PHP_FUNCTION(krsort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_reverse_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -225,7 +224,7 @@ PHP_FUNCTION(ksort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -261,14 +260,13 @@ PHP_FUNCTION(count)
  *
  * This is not correct any more, depends on what compare_func is set to.
  */
-static int array_data_compare(const void *a, const void *b)
+static int array_data_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
 	pval result;
 	pval *first;
 	pval *second;
-	TSRMLS_FETCH();
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -301,9 +299,9 @@ static int array_data_compare(const void *a, const void *b)
 	return 0;
 }
 
-static int array_reverse_data_compare(const void *a, const void *b)
+static int array_reverse_data_compare(const void *a, const void *b TSRMLS_DC)
 {
-	return array_data_compare(a, b)*-1;
+	return array_data_compare(a, b TSRMLS_CC)*-1;
 }
 
 static int array_natural_general_compare(const void *a, const void *b, int fold_case)
@@ -340,12 +338,12 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	return result;
 }
 
-static int array_natural_compare(const void *a, const void *b)
+static int array_natural_compare(const void *a, const void *b TSRMLS_DC)
 {
 	return array_natural_general_compare(a, b, 0);
 }
 
-static int array_natural_case_compare(const void *a, const void *b)
+static int array_natural_case_compare(const void *a, const void *b TSRMLS_DC)
 {
 	return array_natural_general_compare(a, b, 1);
 }
@@ -367,11 +365,11 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 	}
 
 	if (fold_case) {
-		if (zend_hash_sort(target_hash, qsort, array_natural_case_compare, 0) == FAILURE) {
+		if (zend_hash_sort(target_hash, zend_qsort, array_natural_case_compare, 0 TSRMLS_CC) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_hash_sort(target_hash, qsort, array_natural_compare, 0) == FAILURE) {
+		if (zend_hash_sort(target_hash, zend_qsort, array_natural_compare, 0 TSRMLS_CC) == FAILURE) {
 			return;
 		}
 	}
@@ -420,7 +418,7 @@ PHP_FUNCTION(asort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_data_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 0 TSRMLS_CC) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -449,7 +447,7 @@ PHP_FUNCTION(arsort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -478,7 +476,7 @@ PHP_FUNCTION(sort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_data_compare, 1) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -507,26 +505,25 @@ PHP_FUNCTION(rsort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare, 1) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 
 
-static int array_user_compare(const void *a, const void *b)
+static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
-	pval **args[2];
-	pval *retval_ptr;
-	TSRMLS_FETCH();
+	zval **args[2];
+	zval *retval_ptr;
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
-	args[0] = (pval **) f->pData;
-	args[1] = (pval **) s->pData;
+	args[0] = (zval **) f->pData;
+	args[1] = (zval **) s->pData;
 
 	if (call_user_function_ex(EG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL TSRMLS_CC)==SUCCESS
 		&& retval_ptr) {
@@ -560,7 +557,7 @@ PHP_FUNCTION(usort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(target_hash, qsort, array_user_compare, 1) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -588,7 +585,7 @@ PHP_FUNCTION(uasort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(target_hash, qsort, array_user_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -597,7 +594,7 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static int array_user_key_compare(const void *a, const void *b)
+static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket *f;
 	Bucket *s;
@@ -605,7 +602,6 @@ static int array_user_key_compare(const void *a, const void *b)
 	pval *args[2];
 	pval retval;
 	int status;
-	TSRMLS_FETCH();
 
 	args[0] = &key1;
 	args[1] = &key2;
@@ -664,7 +660,7 @@ PHP_FUNCTION(uksort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(target_hash, qsort, array_user_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -856,7 +852,7 @@ PHP_FUNCTION(min)
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC)==SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -908,7 +904,7 @@ PHP_FUNCTION(max)
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC)==SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -1376,8 +1372,8 @@ PHP_FUNCTION(range)
 /* }}} */
 
 
-static int array_data_shuffle(const void *a, const void*b) {
-	TSRMLS_FETCH();
+static int array_data_shuffle(const void *a, const void *b TSRMLS_DC) 
+{
 	return (php_rand(TSRMLS_C) % 2) ? 1 : -1;
 }
 
@@ -1395,7 +1391,7 @@ PHP_FUNCTION(shuffle)
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(Z_ARRVAL_PP(array), (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_PP(array), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2276,12 +2272,12 @@ PHP_FUNCTION(array_unique)
 		arTmp[i] = p;
 	arTmp[i] = NULL;
     set_compare_func(SORT_STRING TSRMLS_CC);
-	qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare);
+	zend_qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare TSRMLS_CC);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
-		if (array_data_compare(lastkept, cmpdata)) {
+		if (array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
 		        lastkept = cmpdata;
 		} else {
 			p = *cmpdata;
@@ -2334,7 +2330,7 @@ PHP_FUNCTION(array_intersect)
 		for (p = hash->pListHead; p; p = p->pListNext)
 			*list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+		zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
 	}
 
 	/* copy the argument array */
@@ -2344,7 +2340,7 @@ PHP_FUNCTION(array_intersect)
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
 		for (i=1; i<argc; i++) {
-			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
 				ptrs[i]++;
 			if (!*ptrs[i]) {
 				/* delete any values corresponding to remains of ptrs[0] */
@@ -2374,7 +2370,7 @@ PHP_FUNCTION(array_intersect)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (0 <= array_data_compare(ptrs[0], ptrs[i]))
+				if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))
 					break;
 			}
 		} else {
@@ -2383,7 +2379,7 @@ PHP_FUNCTION(array_intersect)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
 					break;
 			}
 		}
@@ -2439,7 +2435,7 @@ PHP_FUNCTION(array_diff)
 		for (p = hash->pListHead; p; p = p->pListNext)
 		        *list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+		zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
 	}
 
 	/* copy the argument array */
@@ -2451,7 +2447,7 @@ PHP_FUNCTION(array_diff)
 	while (*ptrs[0]) {
 		c = 1;
 		for (i=1; i<argc; i++) {
-			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
 				ptrs[i]++;
 			if (!c) {
 				if (*ptrs[i])
@@ -2470,7 +2466,7 @@ PHP_FUNCTION(array_diff)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
 					break;
 			}
 		} else {
@@ -2479,7 +2475,7 @@ PHP_FUNCTION(array_diff)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
 					break;
 			}
 		}
@@ -2499,14 +2495,13 @@ out:
 #define MULTISORT_TYPE	1
 #define MULTISORT_LAST	2
 
-int multisort_compare(const void *a, const void *b)
+int multisort_compare(const void *a, const void *b TSRMLS_DC)
 {
 	Bucket**	  ab = *(Bucket ***)a;
 	Bucket**	  bb = *(Bucket ***)b;
 	int			  r;
 	int			  result = 0;
 	zval		  temp;
-	TSRMLS_FETCH();
 	
 	r = 0;
 	do {
@@ -2670,7 +2665,7 @@ PHP_FUNCTION(array_multisort)
 		indirect[k][num_arrays] = NULL;
 
 	/* Do the actual sort magic - bada-bim, bada-boom. */
-	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
+	zend_qsort(indirect, array_size, sizeof(Bucket **), multisort_compare TSRMLS_CC);
 	
 	/* Restructure the arrays based on sorted indirect - this is mostly
 	   taken from zend_hash_sort() function. */
@@ -2791,7 +2786,7 @@ PHP_FUNCTION(array_rand)
 	}  
 
 	if (num_req_val == num_avail) {
-		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
