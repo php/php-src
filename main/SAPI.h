@@ -224,7 +224,7 @@ struct _sapi_post_entry {
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_POST_READER_FUNC(php_default_post_reader);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL
 
 #endif /* SAPI_H */
 
