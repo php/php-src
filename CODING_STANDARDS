@@ -183,7 +183,7 @@ Syntax and indentation
     indentation and comment styles and up to function declaration
     syntax.
 
-    (see also http://www.tuxedo.org/~esr/jargon/html/entry/indent-style.html)
+    (see also http://www.catb.org/~esr/jargon/html/I/indent-style.html)
     
 [3] Be generous with whitespace and braces.  Always prefer:
 
