@@ -1167,11 +1167,6 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	EG(current_execute_data) = EX(prev_execute_data);						\
 	return 1; /* CHECK_ME */
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, zend_op_array *op_array TSRMLS_DC
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, op_array TSRMLS_CC
-
-typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
-
 opcode_handler_t zend_opcode_handlers[512];
 
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
@@ -1220,7 +1215,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 
 		zend_clean_garbage(TSRMLS_C);
-		if (zend_opcode_handlers[EX(opline)->opcode](&execute_data, op_array TSRMLS_CC)) {
+		if (EX(opline)->handler(&execute_data, op_array TSRMLS_CC)) {
 			return;
 		}
 	}
@@ -3471,7 +3466,6 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	int result = 0;
 
 	if (container) {
-
 		if ((*container)->type == IS_ARRAY) {
 			HashTable *ht;
 			int isset = 0;

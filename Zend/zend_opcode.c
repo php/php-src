@@ -306,6 +306,7 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 			opline->op2.u.constant.is_ref = 1;
 			opline->op2.u.constant.refcount = 2;
 		}
+		opline->handler = zend_opcode_handlers[opline->opcode];
 		opline++;
 	}
 	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
