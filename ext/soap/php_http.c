@@ -205,19 +205,13 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 	}
 
-	/* Check if keep-alive connection is still opened */
-	if (stream != NULL && !stream_alive(stream TSRMLS_CC)) {
-		php_stream_close(stream);
-		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-		stream = NULL;
-		use_proxy = 0;
-	}
-
 	if (location != NULL && location[0] != '\000') {
 		phpurl = php_url_parse(location);
 	}
-	if (phpurl == NULL) {
+	if (phpurl == NULL || phpurl->host == NULL) {
+	  if (phpurl != NULL) {
+	  	php_url_free(phpurl);
+	  }
 		xmlFree(buf);
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL TSRMLS_CC);
 		return FALSE;
@@ -254,6 +248,37 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		phpurl->port = use_ssl ? 443 : 80;
 	}
 
+	/* Check if request to the same host */
+	if (stream != NULL) {
+	  php_url *orig;
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"), (void **)&tmp) == SUCCESS &&
+		    (orig = (php_url *) zend_fetch_resource(tmp TSRMLS_CC, -1, "httpurl", NULL, 1, le_url)) != NULL &&
+		    ((use_proxy && !use_ssl) ||
+		     (((use_ssl && orig->scheme != NULL && strcmp(orig->scheme, "https") == 0) ||
+		      (!use_ssl && orig->scheme == NULL) ||
+		      (!use_ssl && strcmp(orig->scheme, "https") != 0)) &&
+		     strcmp(orig->host, phpurl->host) == 0 &&
+		     orig->port == phpurl->port))) {
+    } else {
+			php_stream_close(stream);
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+			stream = NULL;
+			use_proxy = 0;
+    }
+	}
+
+	/* Check if keep-alive connection is still opened */
+	if (stream != NULL && !stream_alive(stream TSRMLS_CC)) {
+		php_stream_close(stream);
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+		stream = NULL;
+		use_proxy = 0;
+	}
+
 	if (!stream) {
 		stream = http_connect(this_ptr, phpurl, use_ssl, &use_proxy TSRMLS_CC);
 		if (stream) {
@@ -270,6 +295,10 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 	if (stream) {
 		zval **cookies, **login, **password;
+	  int ret = zend_list_insert(phpurl, le_url);
+
+		add_property_resource(this_ptr, "httpurl", ret);
+		/*zend_list_addref(ret);*/
 
 		smart_str_append_const(&soap_headers, "POST ");
 		if (use_proxy && !use_ssl) {
@@ -347,15 +376,15 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 					request = Z_STRVAL(retval);
 					request_size = Z_STRLEN(retval);
 				} else {
-			php_url_free(phpurl);
-			if (request != buf) {efree(request);}
-			xmlFree(buf);
-			smart_str_free(&soap_headers);
-			php_stream_close(stream);
-			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-			zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-			add_soap_fault(this_ptr, "HTTP", "Compression Failed", NULL, NULL TSRMLS_CC);
-			return FALSE;
+					if (request != buf) {efree(request);}
+					xmlFree(buf);
+					smart_str_free(&soap_headers);
+					php_stream_close(stream);
+					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
+					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+					zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+					add_soap_fault(this_ptr, "HTTP", "Compression Failed", NULL, NULL TSRMLS_CC);
+					return FALSE;
 				}
 		  }
 		}
@@ -402,26 +431,45 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 					zend_hash_get_current_data(Z_ARRVAL_PP(cookies), (void **)&data);
 					zend_hash_get_current_key(Z_ARRVAL_PP(cookies), &key, NULL, FALSE);
 
-					smart_str_appendl(&soap_headers, key, strlen(key));
-					smart_str_appendc(&soap_headers, '=');
-					smart_str_appendl(&soap_headers, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
-					smart_str_append_const(&soap_headers, ";");
+					if (Z_TYPE_PP(data) == IS_ARRAY) {
+					  zval** value;
+
+						if (zend_hash_index_find(Z_ARRVAL_PP(data), 0, (void**)&value) == SUCCESS &&
+						    Z_TYPE_PP(value) == IS_STRING) {
+						  zval **tmp;
+						  if (zend_hash_index_find(Z_ARRVAL_PP(data), 1, (void**)&tmp) == SUCCESS &&
+						      strncmp(phpurl->path,Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0 &&
+						      zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == SUCCESS &&
+						      strcmp(phpurl->host,Z_STRVAL_PP(tmp)) == 0 &&
+						      (use_ssl || zend_hash_index_find(Z_ARRVAL_PP(data), 3, (void**)&tmp) == FAILURE)) {
+								smart_str_appendl(&soap_headers, key, strlen(key));
+								smart_str_appendc(&soap_headers, '=');
+								smart_str_appendl(&soap_headers, Z_STRVAL_PP(value), Z_STRLEN_PP(value));
+								smart_str_appendc(&soap_headers, ';');
+							}
+						}
+					}
 					zend_hash_move_forward(Z_ARRVAL_PP(cookies));
 				}
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		}
 		smart_str_append_const(&soap_headers, "\r\n");
+		smart_str_0(&soap_headers);
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+		    Z_LVAL_PP(trace) > 0) {
+			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.c, soap_headers.len, 1);
+		}
 		smart_str_appendl(&soap_headers, request, request_size);
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if (err != soap_headers.len) {
-			php_url_free(phpurl);
 			if (request != buf) {efree(request);}
 			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL TSRMLS_CC);
@@ -430,7 +478,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		smart_str_free(&soap_headers);
 
 	}
-	php_url_free(phpurl);
 	if (request != buf) {efree(request);}
 	xmlFree(buf);
 	return TRUE;
@@ -462,6 +509,11 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
 		return FALSE;
+	}
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+	    Z_LVAL_PP(trace) > 0) {
+		add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
 	}
 
 	/* Check to see what HTTP status was sent */
@@ -597,50 +649,86 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	   matter too much
 	*/
 	cookie_itt = strstr(http_headers,"Set-Cookie: ");
-	while (cookie_itt) {
-		char *end_pos, *cookie;
-		char *eqpos, *sempos;
-		smart_str name = {0}, value = {0};
-		zval **cookies, *z_cookie;
+	if (cookie_itt &&
+		  zend_hash_find(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"), (void **)&tmp) == SUCCESS) {
 
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
-			zval *tmp_cookies;
-			MAKE_STD_ZVAL(tmp_cookies);
-			array_init(tmp_cookies);
-			zend_hash_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), &tmp_cookies, sizeof(zval *), (void **)&cookies);
-		}
+	  php_url *phpurl = (php_url*)zend_fetch_resource(tmp TSRMLS_CC, -1, "httpurl", NULL, 1, le_url);
 
-		end_pos = strstr(cookie_itt,"\r\n");
-		cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
+	  if (phpurl) {
+			while (cookie_itt) {
+				char *end_pos, *cookie;
+				char *eqpos, *sempos;
+				zval **cookies;
 
-		eqpos = strstr(cookie, "=");
-		sempos = strstr(cookie, ";");
-		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-			int cookie_len;
+				if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
+					zval *tmp_cookies;
+					MAKE_STD_ZVAL(tmp_cookies);
+					array_init(tmp_cookies);
+					zend_hash_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), &tmp_cookies, sizeof(zval *), (void **)&cookies);
+				}
 
-			if (sempos != NULL) {
-				cookie_len = sempos-(eqpos+1);
-			} else {
-				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+				end_pos = strstr(cookie_itt,"\r\n");
+				cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
+
+				eqpos = strstr(cookie, "=");
+				sempos = strstr(cookie, ";");
+				if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
+					smart_str name = {0};
+					int cookie_len;
+					zval *zcookie;
+
+					if (sempos != NULL) {
+						cookie_len = sempos-(eqpos+1);
+					} else {
+						cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+					}
+
+					smart_str_appendl(&name, cookie, eqpos - cookie);
+					smart_str_0(&name);
+
+					ALLOC_INIT_ZVAL(zcookie);
+					array_init(zcookie);
+					add_index_stringl(zcookie, 0, eqpos + 1, cookie_len, 1);
+
+					if (sempos != NULL) {
+						char *options = cookie + cookie_len+1;
+						while (*options) {
+							while (*options == ' ') {options++;}
+							sempos = strstr(options, ";");
+							if (strstr(options,"path=") == options) {
+								eqpos = options + sizeof("path=")-1;
+								add_index_stringl(zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+							} else if (strstr(options,"domain=") == options) {
+								eqpos = options + sizeof("domain=")-1;
+								add_index_stringl(zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+							} else if (strstr(options,"secure") == options) {
+								add_index_bool(zcookie, 3, 1);
+							}
+							if (sempos != NULL) {
+								options = sempos+1;
+							} else {
+							  break;
+							}
+						}
+					}
+	        if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 1)) {
+	          char *c = strrchr(phpurl->path, '/');
+	          if (c) {
+							add_index_stringl(zcookie, 1, phpurl->path, c-phpurl->path, 1);
+						}
+	        }
+	        if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 2)) {
+						add_index_string(zcookie, 2, phpurl->host, 1);
+	        }
+
+					add_assoc_zval_ex(*cookies, name.c, name.len+1, zcookie);
+					smart_str_free(&name);
+				}
+
+				cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
+				efree(cookie);
 			}
-
-			smart_str_appendl(&name, cookie, eqpos - cookie);
-			smart_str_0(&name);
-
-			smart_str_appendl(&value, eqpos + 1, cookie_len);
-			smart_str_0(&value);
-
-			MAKE_STD_ZVAL(z_cookie);
-			ZVAL_STRINGL(z_cookie, value.c, value.len, 1);
-
-			zend_hash_update(Z_ARRVAL_PP(cookies), name.c, name.len + 1, &z_cookie, sizeof(zval *), NULL);
 		}
-
-		cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
-
-		smart_str_free(&value);
-		smart_str_free(&name);
-		efree(cookie);
 	}
 
 	content_encoding = get_http_header_value(http_headers,"Content-Encoding: ");
