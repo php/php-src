@@ -919,9 +919,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.scope = CG(active_class_entry);
 
 	if (is_method) {
-		if (zend_hash_add(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Multiply defined method '%s'", name);
-		}
+		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
