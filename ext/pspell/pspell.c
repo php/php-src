@@ -42,6 +42,10 @@ function_entry pspell_functions[] = {
 	PHP_FE(pspell_runtogether,	NULL)
 	PHP_FE(pspell_check,		NULL)
 	PHP_FE(pspell_suggest,		NULL)
+	PHP_FE(pspell_store_replacement,		NULL)
+	PHP_FE(pspell_add_to_personal,		NULL)
+	PHP_FE(pspell_add_to_session,		NULL)
+	PHP_FE(pspell_clear_session,		NULL)
 };
 
 static int le_pspell;
@@ -116,7 +120,7 @@ PHP_FUNCTION(pspell_new){
 /* }}} */
 
 
-/* {{{ proto int pspell_mode(string mode)
+/* {{{ proto int pspell_mode(pspell int, string mode)
    Change the mode between 'fast', 'normal' and 'bad-spellers' */
 PHP_FUNCTION(pspell_mode)
 {
@@ -155,7 +159,7 @@ PHP_FUNCTION(pspell_mode)
 }
 /* }}} */
 
-/* {{{ proto int pspell_runtogether(string mode)
+/* {{{ proto int pspell_runtogether(pspell int, string mode)
    Change the mode between whether we want to treat run-together words as valid */
 PHP_FUNCTION(pspell_runtogether)
 {
@@ -190,7 +194,7 @@ PHP_FUNCTION(pspell_runtogether)
 }
 /* }}} */
 
-/* {{{ proto int pspell_check(aspell int, string word)
+/* {{{ proto int pspell_check(pspell int, string word)
    Return if word is valid */
 PHP_FUNCTION(pspell_check){
 	int type;
@@ -219,7 +223,7 @@ PHP_FUNCTION(pspell_check){
 }
 /* }}} */
 
-/* {{{ proto array pspell_suggest(aspell int, string word)
+/* {{{ proto array pspell_suggest(pspell int, string word)
    Return array of Suggestions */
 PHP_FUNCTION(pspell_suggest)
 {
@@ -260,6 +264,138 @@ PHP_FUNCTION(pspell_suggest)
 	}
 }
 /* }}} */
+
+
+/* {{{ proto int pspell_store_replacement(pspell int, string misspell, string correct)
+   Notify the dictionary of a user-selected replacement */
+PHP_FUNCTION(pspell_store_replacement)
+{
+	int type;
+	zval **scin,**miss,**corr;
+	PspellManager *manager;
+
+	int argc;
+	argc = ZEND_NUM_ARGS();
+	if (argc != 3 || zend_get_parameters_ex(argc, &scin,&miss,&corr) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+    
+	convert_to_long_ex(scin);
+	convert_to_string_ex(miss);
+	convert_to_string_ex(corr);
+	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
+	if(!manager){
+		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_manager_store_replacement(manager, (*miss)->value.str.val, (*corr)->value.str.val);
+	if(pspell_manager_error_number(manager) == 0){
+		RETURN_TRUE;
+	}else{
+		php_error(E_WARNING, "pspell_store_replacement() gave error: %s", pspell_manager_error_message(manager));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int pspell_add_to_personal(pspell int, string word)
+   Add a word to a personal list */
+PHP_FUNCTION(pspell_add_to_personal)
+{
+	int type;
+	zval **scin,**word;
+	PspellManager *manager;
+
+	int argc;
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+    
+	convert_to_long_ex(scin);
+	convert_to_string_ex(word);
+	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
+	if(!manager){
+		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_manager_add_to_personal(manager, (*word)->value.str.val);
+	if(pspell_manager_error_number(manager) == 0){
+		RETURN_TRUE;
+	}else{
+		php_error(E_WARNING, "pspell_add_to_personal() gave error: %s", pspell_manager_error_message(manager));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto int pspell_add_to_session(pspell int, string word)
+   Add a word to the current session */
+PHP_FUNCTION(pspell_add_to_session)
+{
+	int type;
+	zval **scin,**word;
+	PspellManager *manager;
+
+	int argc;
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+    
+	convert_to_long_ex(scin);
+	convert_to_string_ex(word);
+	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
+	if(!manager){
+		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_manager_add_to_session(manager, (*word)->value.str.val);
+	if(pspell_manager_error_number(manager) == 0){
+		RETURN_TRUE;
+	}else{
+		php_error(E_WARNING, "pspell_add_to_session() gave error: %s", pspell_manager_error_message(manager));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto int pspell_clear_session(pspell int)
+   Clear the current session */
+PHP_FUNCTION(pspell_clear_session)
+{
+	int type;
+	zval **scin;
+	PspellManager *manager;
+
+	int argc;
+	argc = ZEND_NUM_ARGS();
+	if (argc != 1 || zend_get_parameters_ex(argc, &scin) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+    
+	convert_to_long_ex(scin);
+	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
+	if(!manager){
+		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_manager_clear_session(manager);
+	if(pspell_manager_error_number(manager) == 0){
+		RETURN_TRUE;
+	}else{
+		php_error(E_WARNING, "pspell_clear_session() gave error: %s", pspell_manager_error_message(manager));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 PHP_MINFO_FUNCTION(pspell)
 {
