@@ -1867,12 +1867,12 @@ PHP_FUNCTION(imagecolordeallocate)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-#	if HAVE_LIBGD20
+#if HAVE_LIBGD20
 	/* We can return right away for a truecolor image as deallocating colours is meaningless here */
 	if (gdImageTrueColor(im)) {
 		RETURN_TRUE;
 	}
-#	endif
+#endif
 
 	convert_to_long_ex(index);
 	col = Z_LVAL_PP(index);
