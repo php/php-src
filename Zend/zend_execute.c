@@ -2027,6 +2027,7 @@ binary_assign_op_addr_obj:
 					
 
 					do {
+						/*
 						if (EG(scope)) {
 							if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
 								if ((EX(object) = EG(This))) {
@@ -2036,6 +2037,7 @@ binary_assign_op_addr_obj:
 								break;
 							}
 						}
+						*/
 						if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
