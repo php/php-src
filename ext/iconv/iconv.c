@@ -2548,6 +2548,7 @@ static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D)
 	return PHP_ICONV_ERR_SUCCESS;
 }
 /* }}} */
+/* }}} */
 #endif
 
 /*
