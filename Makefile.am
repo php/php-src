@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = foreign
 ZEND_DIR = $(srcdir)/libzend
 SUBDIRS = libzend ext sapi $(TSRM_DIR) regex
 
-CPPFLAGS := $(INCLUDES) -I$(ZEND_DIR) -I$(srcdir)/TSRM
+CPPFLAGS = $(INCLUDES) -I$(ZEND_DIR) -I$(srcdir)/TSRM
 
 BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
