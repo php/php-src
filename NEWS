@@ -62,6 +62,7 @@ PHP                                                                        NEWS
   . iconv_mime_encode()
 
 - Added misc. new functions:
+  . ldap_sasl_bind(). (peter_c60@hotmail.com, Jani)
   . imap_getacl(). (Dan, Holger Burbach)
   . file_put_contents(). (Sterling)
   . proc_nice() - Changes priority of the current process. (Ilia)
