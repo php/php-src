@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Apache php_flag values only recognized 'On' (case sensitive) - changed
+  to case insensitive (Zeev)
 - Fixed a memory leak with switch statement containing return statements
   (Andi & Zeev, libzend)
 - Fixed a crash problem in switch statements that had a string offset
