@@ -20,6 +20,8 @@
 #include "php.h"
 #include "snprintf.h"
 
+#ifdef TRANS_SID
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -192,3 +194,5 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 
 	return state.target;
 }
+
+#endif
