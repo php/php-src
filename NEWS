@@ -23,6 +23,7 @@ PHP 4                                                                      NEWS
 - Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set.
   (Adam Dickmeiss)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
+- Fixed bug #24060 (del_panel function in ext/ncurses). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
 - Fixed bug #23912 (Invalid CSS in phpinfo() output). (Ilia)
