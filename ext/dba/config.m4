@@ -320,8 +320,10 @@ AC_ARG_WITH(dbm,
             fi
             AC_DEFINE(DBA_DBM,1,[ ]) 
             THIS_LIBS=$LIB
-            break
           ])
+          if test -n "$THIS_LIBS"; then
+            break
+          fi
         ])
       done
     fi

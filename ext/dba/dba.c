@@ -51,7 +51,7 @@
  */
 function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)
-	PHP_FALIAS(dba_popen, dba_open, NULL)
+	PHP_FE(dba_popen, NULL)
 	/* Disabled until 4.3.1, when persistent STDIO streams are implemented.   */
 	/* PHP_FE(dba_popen, NULL) */
 	PHP_FE(dba_close, NULL)
@@ -202,16 +202,26 @@ static int le_pdb;
  */ 
 static void dba_close(dba_info *info TSRMLS_DC)
 {
-	if (info->hnd) info->hnd->close(info TSRMLS_CC);
-	if (info->path) pefree(info->path, info->flags&DBA_PERSISTENT);
-	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
+	if (info->hnd) {
+		info->hnd->close(info TSRMLS_CC);
+	}
+	if (info->path) {
+		pefree(info->path, info->flags&DBA_PERSISTENT);
+	}
+	if (info->fp && info->fp!=info->lock.fp) {
+		php_stream_close(info->fp);
+	}
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
 		/*close(info->lock.fd);*/
 		info->lock.fd = 0;
 	}
-	if (info->lock.fp) php_stream_close(info->lock.fp);
-	if (info->lock.name) pefree(info->lock.name, info->flags&DBA_PERSISTENT);
+	if (info->lock.fp) {
+		php_stream_close(info->lock.fp);
+	}
+	if (info->lock.name) {
+		pefree(info->lock.name, info->flags&DBA_PERSISTENT);
+	}
 	pefree(info, info->flags&DBA_PERSISTENT);
 }
 /* }}} */
@@ -221,8 +231,25 @@ static void dba_close(dba_info *info TSRMLS_DC)
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	dba_info *info = (dba_info *)rsrc->ptr; 
-	
+
 	dba_close(info TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ dba_close_pe_rsrc_deleter */
+int dba_close_pe_rsrc_deleter(list_entry *le, void *pDba TSRMLS_DC)
+{
+	return le->ptr == pDba;
+}
+/* }}} */
+
+/* {{{ dba_close_pe_rsrc */
+static void dba_close_pe_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	dba_info *info = (dba_info *)rsrc->ptr; 
+
+	/* closes the resource by calling dba_close_rsrc() */
+	zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) dba_close_pe_rsrc_deleter, info TSRMLS_CC);
 }
 /* }}} */
 
@@ -231,7 +258,7 @@ static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 PHP_MINIT_FUNCTION(dba)
 {
 	le_db = zend_register_list_destructors_ex(dba_close_rsrc, NULL, "dba", module_number);
-	le_pdb = zend_register_list_destructors_ex(NULL, dba_close_rsrc, "dba persistent", module_number);
+	le_pdb = zend_register_list_destructors_ex(dba_close_pe_rsrc, dba_close_rsrc, "dba persistent", module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -348,6 +375,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
+	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	
 	if(ac < 3) {
 		WRONG_PARAM_COUNT;
@@ -533,7 +561,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read ony mode on .lck file */
 				lock_file_mode = "rb";
-				info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+				info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
 			}
 			if (!info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
@@ -541,7 +569,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (!info->lock.fp) {
-			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
 		}
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
@@ -565,7 +593,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (info->lock.fp && lock_dbf) {
 			info->fp = info->lock.fp; /* use the same stream for locking and database access */
 		} else {
-			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
 		}
 		if (!info->fp) {
 			dba_close(info TSRMLS_CC);
@@ -592,6 +620,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		Z_TYPE(new_le) = le_pdb;
 		new_le.ptr = info;
 		if (zend_hash_update(&EG(persistent_list), key, keylen+1, &new_le, sizeof(list_entry), NULL) == FAILURE) {
+			dba_close(info TSRMLS_CC);
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
 			RETURN_FALSE;
 		}
