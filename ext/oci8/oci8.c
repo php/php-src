@@ -464,10 +464,22 @@ PHP_MINIT_FUNCTION(oci)
 	zend_class_entry oci_coll_class_entry;
 #endif
 
+#ifdef HAVE_OCI8_SHARED_MODE
+
+#ifdef WITH_COLLECTIONS
+#define PHP_OCI_INIT_MODE OCI_SHARED | OCI_OBJECT
+#else
+#define PHP_OCI_INIT_MODE OCI_SHARED
+#endif
+
+#else
+
 #ifdef WITH_COLLECTIONS
 #define PHP_OCI_INIT_MODE OCI_DEFAULT | OCI_OBJECT
 #else
 #define PHP_OCI_INIT_MODE OCI_DEFAULT
+#endif
+
 #endif
 
 #if OCI_USE_EMALLOC
