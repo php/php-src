@@ -1031,15 +1031,13 @@ ZEND_FUNCTION(gmp_random)
 
 	argc = ZEND_NUM_ARGS();
 
-	if (argc < 0  || argc > 1 || zend_get_parameters_ex(1, &limiter_arg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-
-	if(argc) {
+	if (argc == 0) {
+		limiter = 20;
+	} else if (argc == 1 && zend_get_parameters_ex(1, &limiter_arg) == SUCCESS) {
 		convert_to_long_ex(limiter_arg);
 		limiter = Z_LVAL_PP(limiter_arg);
 	} else {
-		limiter = 20;
+		WRONG_PARAM_COUNT;
 	}
 
 	INIT_GMP_NUM(gmpnum_result);
