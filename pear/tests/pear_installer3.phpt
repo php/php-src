@@ -1,7 +1,11 @@
 --TEST--
 PEAR_Installer test #3 File Transactions
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
