@@ -533,7 +533,7 @@ mysql.max_links = -1
 ; Default port number for mysql_connect().  If unset, mysql_connect() will use
 ; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-' at MYSQL_PORT.
+; at MYSQL_PORT.
 mysql.default_port =
 
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
