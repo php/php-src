@@ -9,6 +9,7 @@ Zend
 
 global
 ------
+    * sort ini entries so that phpinfo() show them in some nice order.
     * make everything on the language-level independent of your locate setings.
     * allow methods to be called as callbacks. eg: array_walk($myarray,"this->print()");
     * always build the standalone executable as well as the chosen SAPI 
