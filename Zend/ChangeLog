@@ -1,3 +1,20 @@
+2003-02-17  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_parser.y:
+      Whitespace & minor renames
+
+    * zend_language_parser.y:
+      whitespace
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Improve handling of static member variables
+
+    * zend_config.w32.h
+      zend_ini_parser.y:
+      Improve Win32 build performance
+
 2003-02-16  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c:

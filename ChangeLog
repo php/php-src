@@ -1,3 +1,163 @@
+2003-02-17  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt:
+      additional tests for non freed objects
+
+2003-02-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/config.m4:
+      MFB: Sanity check.
+
+    * (PHP_4_3)
+      ext/snmp/config.m4:
+      Sanity check to prevent errors in other extensions tests.
+
+    * NEWS:
+      Update
+
+2003-02-17  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/049.phpt:
+      test for mysql_fetch_row (oo-style)
+
+2003-02-17  Zeev Suraski  <zeev@zend.com>
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/conversion.c
+      ext/rpc/com/dispatch.c
+      ext/rpc/com/variant.c
+      ext/snmp/winsnmp.c
+      ext/standard/file.c
+      ext/standard/flock_compat.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/pack.c
+      ext/standard/rand.c
+      ext/w32api/w32api.c
+      ext/zlib/zlib.c
+      main/fopen_wrappers.c
+      main/main.c
+      main/network.c
+      main/php.h
+      main/php_open_temporary_file.c
+      sapi/apache/php_apache_http.h
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c:
+      Win32 build improvements
+
+2003-02-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/isapi/php4isapi.c:
+      Fix build under win32
+
+2003-02-17  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      added close method/alias for result object (for compatibility with
+      statement and
+      link objects)
+
+    * ext/mysqli/tests/048.phpt:
+      test for OO-Implementation (bind_result)
+
+2003-02-17  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/standard/proc_open.c:
+      you know it's time to get away from the keyboard when you do this.
+      
+      fix my last fix
+
+2003-02-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/proc_open.c:
+      - Style polizei
+
+2003-02-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/php_standard.h
+      ext/standard/php_sunfuncs.h
+      ext/standard/sunfuncs.c
+      ext/standard/sunfuncs.h
+      win32/php4dllts.dsp:
+      - Cleaned this mess a bit:
+        . Centralized the functions sunrise/sunset to php_sunrise_sunset
+          to lessen duplicate code.
+        . Made wrapper function php_do_date_sunrise_sunset() to lessen
+          duplicate code.
+        . Coding style fixes.
+        . renamed sunfuncs.h -> php_sunfuncs.h
+
+    * ext/standard/tests/time/idate.phpt:
+      - These results were obviously got with TZ=GMT
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      Assuming the results were created in system with Asia/Jerusalem as TZ
+
+2003-02-17  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/standard/proc_open.c:
+      fix it the right way
+
+2003-02-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      override precision ini setting
+
+2003-02-17  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c:
+      prevent possible crash if used in combo with mod_gzip
+      fix command line
+
+    * ext/standard/proc_open.c:
+      If you pass NULL, you do not get a NULL value, make sure it is.
+
+2003-02-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/config.h
+      ext/ovrimos/ovrimos.c
+      ext/standard/flock_compat.c
+      win32/glob.c
+      win32/time.h
+      win32/winutil.c:
+      - Let's be consistent with these..
+
+2003-02-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_streams.h
+      main/streams/context.h
+      main/streams/filter_api.h
+      main/streams/plain_wrapper.h
+      main/streams/userspace.h:
+      Move some of the streams header into supplementary files
+      
+
+2003-02-17  Shane Caraveo  <shane@caraveo.com>
+
+    * run-tests2.php:
+      bring up to date with change in run-tests
+
+2003-02-17  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Bump up the version.
+
+2003-02-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/sunfuncs.c:
+      Fix compile warning
+
 2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
 
     * win32/installer/setini.php:
