@@ -1,3 +1,16 @@
+2003-08-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_compile.c:
+      Fix segfault when a referenced parameter is specified with typehint.
+      Result of the node will never be used because verify_instanceof handler
+      has
+      been eliminated.
+
+2003-08-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      Precise destructor errors
+
 2003-08-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/bug21478.phpt:
