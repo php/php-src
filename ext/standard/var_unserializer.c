@@ -56,6 +56,30 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
+static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
+{
+	var_entries *var_hash = var_hashx->first_dtor, *prev = NULL;
+
+	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
+		prev = var_hash;
+		var_hash = var_hash->next;
+	}
+
+	if (!var_hash) {
+		var_hash = emalloc(sizeof(var_entries));
+		var_hash->used_slots = 0;
+		var_hash->next = 0;
+
+		if (!var_hashx->first_dtor)
+			var_hashx->first_dtor = var_hash;
+		else
+			prev->next = var_hash;
+	}
+
+	(*rval)->refcount++;
+	var_hash->data[var_hash->used_slots++] = *rval;
+}
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	int i;
@@ -93,9 +117,21 @@ static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
+	int i;
 	var_entries *var_hash = var_hashx->first;
 	
 	while (var_hash) {
+		next = var_hash->next;
+		efree(var_hash);
+		var_hash = next;
+	}
+	
+	var_hash = var_hashx->first_dtor;
+	
+	while (var_hash) {
+		for (i = 0; i < var_hash->used_slots; i++) {
+			zval_ptr_dtor(&var_hash->data[i]);
+		}
 		next = var_hash->next;
 		efree(var_hash);
 		var_hash = next;
