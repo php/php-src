@@ -73,6 +73,7 @@ PHP_MINIT_FUNCTION(VARIANT)
 	REGISTER_LONG_CONSTANT("VT_EMPTY", VT_EMPTY, 0);
 	REGISTER_LONG_CONSTANT("VT_UI1", VT_UI1, 0);
 	REGISTER_LONG_CONSTANT("VT_I2", VT_I2, 0);
+	REGISTER_LONG_CONSTANT("VT_I4", VT_I4, 0);
 	REGISTER_LONG_CONSTANT("VT_R4", VT_R4, 0);
 	REGISTER_LONG_CONSTANT("VT_R8", VT_R8, 0);
 	REGISTER_LONG_CONSTANT("VT_BOOL", VT_BOOL, 0);
@@ -181,22 +182,22 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
 	var_arg = zend_list_find((*var_handle)->value.lval, &type);
 
-	if (!var_arg || (type != le_variant))
+	if (!var_arg || (type != le_variant)) {
 		var_reset(&result);
-	else
-	{
+	} else 	{
 		overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
-		switch (overloaded_property->type)
-		{
+		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
 				var_reset(&result);
 				break;
 
 			case OE_IS_OBJECT:
-				if(!strcmp(overloaded_property->element.value.str.val, "value"))
+				if(!strcmp(overloaded_property->element.value.str.val, "value")) {
 					php_variant_to_pval(var_arg, &result, 0, codepage);
-				else
-				{
+				} else if(!strcmp(overloaded_property->element.value.str.val, "type")) {
+					result.value.lval = var_arg->vt;
+					result.type = IS_LONG;
+				} else {
 					var_reset(&result);
 					php_error(E_WARNING, "Unknown member.");
 				}
