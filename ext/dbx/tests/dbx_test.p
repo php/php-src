@@ -60,6 +60,14 @@ switch ($connection) {
         $password="dbx_testpassword";
         $module_name="sybase_ct";
         break;
+    case DBX_SQLITE:
+        $module=DBX_SQLITE;
+        $host="";
+        $database="ext\\dbx\\tests\\dbx_test.sqlite.db";
+        $username="";
+        $password="";
+        $module_name="sqlite";
+        break;
     }
 
 ?>

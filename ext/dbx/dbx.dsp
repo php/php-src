@@ -122,6 +122,10 @@ SOURCE=.\dbx_pgsql.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dbx_sqlite.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dbx_sybasect.c
 # End Source File
 # End Group
@@ -155,6 +159,10 @@ SOURCE=.\dbx_odbc.h
 # Begin Source File
 
 SOURCE=.\dbx_pgsql.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbx_sqlite.h
 # End Source File
 # Begin Source File
 
