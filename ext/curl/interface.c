@@ -320,10 +320,21 @@ PHP_MINIT_FUNCTION(curl)
 	}
 
 #ifdef PHP_CURL_URL_WRAPPERS
+# if HAVE_CURL_VERSION_INFO
+	{
+		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
+		char **p = (char **)info->protocols;
+
+		while (*p != NULL) {
+			php_register_url_stream_wrapper(*p++, &php_curl_wrapper TSRMLS_CC);
+		}
+	}
+# else
 	php_register_url_stream_wrapper("http", &php_curl_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("https", &php_curl_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftp", &php_curl_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ldap", &php_curl_wrapper TSRMLS_CC);
+# endif
 #endif
 	
 	return SUCCESS;

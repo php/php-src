@@ -140,18 +140,6 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 {
 	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
 	size_t didread = 0;
-
-	if (buf == NULL && count == 0) {
-		/* check for EOF */
-
-		/* if we have buffered data, then we are not at EOF */
-		if (curlstream->readbuffer.writepos > 0
-				&& curlstream->readbuffer.readpos < curlstream->readbuffer.writepos)
-			return 0;
-		
-
-		return curlstream->pending ? 0 : EOF;
-	}
 	
 	if (curlstream->readbuffer.readpos >= curlstream->readbuffer.writepos && curlstream->pending) {
 		/* we need to read some more data */
@@ -198,6 +186,11 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 		curlstream->readbuffer.readpos = php_stream_tell(curlstream->readbuffer.buf);
 
 	}
+
+	if (didread == 0) {
+		stream->eof = 1;
+	}
+	
 	return didread;
 }
 
