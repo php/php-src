@@ -12,7 +12,7 @@ PHP 4                                                                      NEWS
 - Added man page for CLI version of PHP. (Marcus)
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
-- Added zlib_get_coding_type() function. Returns the coding type used for 
+- Added zlib_get_coding_type() function which returns the coding type used for 
   output compression. (Moriyoshi)
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
 - Added memory_get_usage(). Only available when PHP is configured with 
