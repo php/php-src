@@ -846,7 +846,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 
 	php_stream_fill_read_buffer(stream, maxlen TSRMLS_CC);
 
-	if (delim_len == 0) {
+	if (delim_len == 0 || !delim) {
 		toread = maxlen;
 	} else {
 		if (delim_len == 1) {
@@ -870,6 +870,7 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	*returned_len = php_stream_read(stream, buf, toread);
 	                
 	if (*returned_len >= 0) {
+		buf[*returned_len] = '\0';
 		return buf;
 	} else {
 		efree(buf);
