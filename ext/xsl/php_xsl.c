@@ -135,7 +135,7 @@ PHP_MINIT_FUNCTION(xsl)
 	
 	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	
-	REGISTER_XSL_CLASS(ce, "xsltprocessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
+	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
