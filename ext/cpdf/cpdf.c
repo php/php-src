@@ -33,7 +33,7 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "zend/zend_list.h"
+#include "zend_list.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include <math.h>
