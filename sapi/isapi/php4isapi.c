@@ -356,7 +356,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 			return;
 		}
 	}
-	variable = strtok_r(variable_buf, "\r\n", &strtok_buf);
+	variable = php_strtok_r(variable_buf, "\r\n", &strtok_buf);
 	while (variable) {
 		char *colon = strchr(variable, ':');
 
@@ -370,7 +370,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 			php_register_variable(variable, value, track_vars_array ELS_CC PLS_CC);
 			*colon = ':';
 		}
-		variable = strtok_r(NULL, "\r\n", &strtok_buf);
+		variable = php_strtok_r(NULL, "\r\n", &strtok_buf);
 	}
 	if (variable_buf!=static_variable_buf) {
 		efree(variable_buf);

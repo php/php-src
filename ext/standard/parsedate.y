@@ -556,13 +556,13 @@ int GetTimeInfo(TIMEINFO *Now)
 
     /* Now get the timezone if the last time < HH:00:00 <= now for some HH.  */
     if (NextHour <= Now->time) {
-	if ((tm = localtime_r(&Now->time, &tmbuf)) == NULL)
+	if ((tm = php_localtime_r(&Now->time, &tmbuf)) == NULL)
 	    return -1;
 	secondsUntilNextHour = 60 * (60 - tm->tm_min) - tm->tm_sec;
 #if	!defined(HAVE_TM_GMTOFF)
 	/* To get the timezone, compare localtime with GMT. */
 	local = *tm;
-	if ((tm = gmtime_r(&Now->time, &tmbuf)) == NULL)
+	if ((tm = php_gmtime_r(&Now->time, &tmbuf)) == NULL)
 	    return -1;
 	gmt = *tm;
 
@@ -661,7 +661,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes, tim
 	return -1;
     Julian += tod;
     tod = Julian;
-    if (dst == DSTon || (dst == DSTmaybe && localtime_r(&tod,&tmbuf)->tm_isdst))
+    if (dst == DSTon || (dst == DSTmaybe && php_localtime_r(&tod,&tmbuf)->tm_isdst))
 	Julian -= DST_OFFSET * 60 * 60;
     return Julian;
 }
@@ -674,8 +674,8 @@ DSTcorrect(time_t Start, time_t Future)
     time_t	FutureDay;
     struct tm	tmbuf;
 
-    StartDay = (localtime_r(&Start,&tmbuf)->tm_hour + 1) % 24;
-    FutureDay = (localtime_r(&Future,&tmbuf)->tm_hour + 1) % 24;
+    StartDay = (php_localtime_r(&Start,&tmbuf)->tm_hour + 1) % 24;
+    FutureDay = (php_localtime_r(&Future,&tmbuf)->tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * DST_OFFSET * 60 * 60;
 }
 
@@ -687,7 +687,7 @@ RelativeMonth(time_t Start, time_t RelMonth)
     time_t	Month;
     time_t	Year;
 
-    tm = localtime_r(&Start, &tmbuf);
+    tm = php_localtime_r(&Start, &tmbuf);
     Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
     Year = Month / 12;
     Year += 1900;
@@ -862,7 +862,7 @@ time_t parsedate(char *p, TIMEINFO *now)
 		(void)GetTimeInfo(&ti);
     }
 
-    tm = localtime_r(&now->time, &tmbuf);
+    tm = php_localtime_r(&now->time, &tmbuf);
     yyYear = tm->tm_year + 1900;
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;

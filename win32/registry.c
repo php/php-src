@@ -49,7 +49,7 @@ void UpdateIniFromRegistry(char *path)
 	}
 
 
-	path = p = strtok_r(path, "\\/", &strtok_buf);
+	path = p = php_strtok_r(path, "\\/", &strtok_buf);
 
 	while (p) {
 		HKEY hKey;
@@ -73,7 +73,7 @@ void UpdateIniFromRegistry(char *path)
 		}
 
 		RegCloseKey(hKey);
-		p = strtok_r(NULL, "\\/", &strtok_buf);
+		p = php_strtok_r(NULL, "\\/", &strtok_buf);
 	}
 	RegCloseKey(MainKey);
 	efree(orig_path);

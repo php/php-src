@@ -4,6 +4,36 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
+  AC_MSG_CHECKING(for missing declarations of reentrant functions)
+  AC_TRY_COMPILE([#include <time.h>],[struct tm *(*func)() = localtime_r],[
+    :
+  ],[
+    AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
+  ])
+  AC_TRY_COMPILE([#include <time.h>],[struct tm *(*func)() = gmtime_r],[
+    :
+  ],[
+    AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
+  ])
+  AC_TRY_COMPILE([#include <time.h>],[char *(*func)() = asctime_r],[
+    :
+  ],[
+    AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
+  ])
+  AC_TRY_COMPILE([#include <time.h>],[char *(*func)() = ctime_r],[
+    :
+  ],[
+    AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
+  ])
+  AC_TRY_COMPILE([#include <string.h>],[char *(*func)() = strtok_r],[
+    :
+  ],[
+    AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
+  ])
+  AC_MSG_RESULT(done)
+])
+
 dnl
 dnl PHP_LIBGCC_LIBPATH(gcc)
 dnl Stores the location of libgcc in libgcc_libpath
@@ -96,7 +126,7 @@ EOF
 ])
 
 AC_DEFUN(PHP_TIME_R_TYPE,[
-AC_CACHE_CHECK(for time_r type, ac_cv_time_r_type,[
+AC_CACHE_CHECK(for *time_r type, ac_cv_time_r_type,[
 AC_TRY_RUN([
 #include <time.h>
 #include <stdlib.h>

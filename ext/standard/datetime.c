@@ -103,7 +103,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	** default parameters for PHP gmmktime would be the current
 	** GMT time values...
 	*/
-	ta = localtime_r(&t, &tmbuf);
+	ta = php_localtime_r(&t, &tmbuf);
 
 	/* Let DST be unknown. mktime() should compute the right value
 	** and behave correctly. Unless the user overrides this.
@@ -221,9 +221,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	convert_to_string_ex(format);
 
 	if (gm) {
-		ta = gmtime_r(&the_time, &tmbuf);
+		ta = php_gmtime_r(&the_time, &tmbuf);
 	} else {
-		ta = localtime_r(&the_time, &tmbuf);
+		ta = php_localtime_r(&the_time, &tmbuf);
 	}
 
 	if (!ta) {			/* that really shouldn't happen... */
@@ -489,7 +489,7 @@ PHP_FUNCTION(localtime)
 			assoc_array = (*assoc_array_arg)->value.lval;
 			break;
 	}
-	ta = localtime_r(&timestamp, &tmbuf);
+	ta = php_localtime_r(&timestamp, &tmbuf);
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_ERROR, "Cannot prepare return array from localtime");
 		RETURN_FALSE;
@@ -536,7 +536,7 @@ PHP_FUNCTION(getdate)
 		timestamp = (*timestamp_arg)->value.lval;
 	}
 
-	ta = localtime_r(&timestamp, &tmbuf);
+	ta = php_localtime_r(&timestamp, &tmbuf);
 	if (!ta) {
 		php_error(E_WARNING, "Cannot perform date calculation");
 		return;
@@ -566,7 +566,7 @@ char *php_std_date(time_t t)
 	char *str;
 	PLS_FETCH();
 
-	tm1 = gmtime_r(&t, &tmbuf);
+	tm1 = php_gmtime_r(&t, &tmbuf);
 	str = emalloc(81);
 	if (PG(y2k_compliance)) {
 		snprintf(str, 80, "%s, %02d %s %04d %02d:%02d:%02d GMT",
@@ -658,9 +658,9 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 	format = (*format_arg)->value.str.val;
 	if (gm) {
-		ta = gmtime_r(&timestamp, &tmbuf);
+		ta = php_gmtime_r(&timestamp, &tmbuf);
 	} else {
-		ta = localtime_r(&timestamp, &tmbuf);
+		ta = php_localtime_r(&timestamp, &tmbuf);
 	}
 
 	buf = (char *) emalloc(buf_len);

@@ -255,7 +255,7 @@ void php_log_err(char *log_message)
 		log_file = V_FOPEN(PG(error_log), "a");
 		if (log_file != NULL) {
 			time(&error_time);
-			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", localtime_r(&error_time, &tmbuf)); 
+			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
 			fprintf(log_file, "[%s] ", error_time_str);
 			fprintf(log_file, log_message);
 			fprintf(log_file, "\n");
@@ -626,8 +626,8 @@ static void php_message_handler_for_zend(long message, void *data)
 				SLS_FETCH();
 
 				time(&curtime);
-				ta = localtime_r(&curtime, &tmbuf);
-				datetime_str = asctime_r(ta, asctimebuf);
+				ta = php_localtime_r(&curtime, &tmbuf);
+				datetime_str = php_asctime_r(ta, asctimebuf);
 				datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the trailing newline */
 				fprintf(stderr, "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(SG(request_info).path_translated));
 			}
