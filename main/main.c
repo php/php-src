@@ -818,17 +818,27 @@ int php_module_startup(sapi_module_struct *sf)
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
+
+	/* this will read in php.ini, set up the configuration parameters,
+	   load zend extensions and register php function extensions 
+	   to be loaded later */
 	if (php_init_config(sf->php_ini_path_override) == FAILURE) {
 		return FAILURE;
 	}
 
 	REGISTER_INI_ENTRIES();
 
+	/* initialize fopen wrappers registry 
+	   (this uses configuration parameters from php.ini)
+	 */
 	if (php_init_fopen_wrappers() == FAILURE) {
 		php_printf("PHP:  Unable to initialize fopen url wrappers.\n");
 		return FAILURE;
 	}
 
+	/* initialize registry for images to be used in phpinfo() 
+	   (this uses configuration parameters from php.ini)
+	 */
 	if (php_init_info_logos() == FAILURE) {
 		php_printf("PHP:  Unable to initialize info phpinfo logos.\n");
 		return FAILURE;
@@ -846,14 +856,34 @@ int php_module_startup(sapi_module_struct *sf)
 		return FAILURE;
 	}
 
+	/* startup extensions staticly compiled in */
 	if (php_startup_internal_extensions() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
+
+	/* load and startup extensions compiled as shared objects (aka DLLs)
+	   as requested by php.ini entries
+	   theese are loaded after initialization of internal extensions
+	   as extensions *might* rely on things from ext/standard
+	   which is always an internal extension and to be initialized
+       ahead of all other internals
+	 */
+	if (php_startup_loaded_extensions() == FAILURE) {
+		php_printf("Unable to start loaded modules\n");
+		return FAILURE;
+	}
+
+	/* disable certain functions as requested by php.ini */
 	php_disable_functions();
+
 	zend_startup_extensions();
+
+	/* */
 	module_initialized = 1;
 	sapi_deactivate(SLS_C);
+
+	/* we're done */
 	return SUCCESS;
 }
 

@@ -1,18 +1,18 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP version 4.0													  |
+   | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group				      |
+   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.02 of the PHP license,	  |
-   | that is bundled with this package in the file LICENSE, and is		  |
-   | available at through the world-wide-web at						      |
-   | http://www.php.net/license/2_02.txt.								  |
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to		  |
-   | license@php.net so we can mail you a copy immediately.			      |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>								  |
+   | Author: Zeev Suraski <zeev@zend.com>                                 |
    +----------------------------------------------------------------------+
  */
 
@@ -131,12 +131,8 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 					break;
 				}
 				if (!strcasecmp(Z_STRVAL_P(arg1), "extension")) { /* load function module */
-					zval copy;
-					
-					copy = *arg2;
-					zval_copy_ctor(&copy);
-					copy.refcount = 0;
-					zend_llist_add_element(&extension_lists->functions, &copy); 
+					char *extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
+					zend_llist_add_element(&extension_lists->functions, &extension_name);
 				} else if (!strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
 					char *extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					
@@ -153,12 +149,32 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 }
 
 
+static zend_llist *php_load_extension_list = NULL; 
+
+static void php_startup_loaded_extension_cb(void *arg){
+	zval *extension, ret;
+
+	MAKE_STD_ZVAL(extension);
+	ZVAL_STRING(extension,*((char **) arg),0);
+	php_dl(extension, MODULE_PERSISTENT, &ret);
+	FREE_ZVAL(extension);
+}
+
+int php_startup_loaded_extensions(void)
+{
+	zend_llist_apply(php_load_extension_list, php_startup_loaded_extension_cb);
+}
+
 static void php_load_function_extension_cb(void *arg)
 {
-	zval *extension = (zval *) arg;
-	zval zval;
+	char *extension = estrdup(*((char **)arg));
 
-	php_dl(extension, MODULE_PERSISTENT, &zval);
+	if(! php_load_extension_list) {
+		php_load_extension_list=(zend_llist*)malloc(sizeof(zend_llist));
+		zend_llist_init(php_load_extension_list, sizeof(char **), free_estring, 1);
+	}
+
+	zend_llist_add_element(php_load_extension_list, &extension);
 }
 
 
@@ -182,8 +198,17 @@ int php_init_config(char *php_ini_path_override)
 		return FAILURE;
 	}
 
-	zend_llist_init(&extension_lists.engine, sizeof(zval), free_estring, 1);
-	zend_llist_init(&extension_lists.functions, sizeof(zval), ZVAL_DESTRUCTOR, 1);
+	/* some extensions may be configured by ini entries
+     if we would load them right away upon finding an extension
+		 entry we would have to use the config cache directly as 
+		 the ini mechanism is not finaly initialized yet and we 
+		 would introduce a order dependency in the ini file.
+		 to avoid this we temporarily store the extensions to
+		 be loaded in linked lists and process theese immediately 
+		 *after* we have finished setting up the ini mechanism
+		 */
+	zend_llist_init(&extension_lists.engine   , sizeof(char **), free_estring, 1);
+	zend_llist_init(&extension_lists.functions, sizeof(char **), free_estring, 1);
 	
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
@@ -236,9 +261,12 @@ int php_init_config(char *php_ini_path_override)
 
 	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
 
+	/* now that we are done with the configuration settings 
+		 we can load all requested extensions
+	*/
 	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb);
 	zend_llist_apply(&extension_lists.functions, php_load_function_extension_cb);
-
+ 
 	zend_llist_destroy(&extension_lists.engine);
 	zend_llist_destroy(&extension_lists.functions);
 	
