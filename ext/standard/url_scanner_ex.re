@@ -161,18 +161,23 @@ enum {
 #define YYMARKER q
 #define STATE ctx->state
 
-#define PASSTHRU() {\
-	smart_str_appendl(&ctx->result, start, YYCURSOR - start); \
+#define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR
+#define STD_ARGS ctx, start, xp
+
+static inline void passthru(STD_PARA) 
+{
+	smart_str_appendl(&ctx->result, start, YYCURSOR - start);
 }
 
-#define HANDLE_FORM() {\
-	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", 4) == 0) {\
-		smart_str_appends(&ctx->result, "<INPUT TYPE=\"HIDDEN\" NAME=\""); \
-		smart_str_append(&ctx->result, &ctx->q_name); \
-		smart_str_appends(&ctx->result, "\" VALUE=\""); \
-		smart_str_append(&ctx->result, &ctx->q_value); \
-		smart_str_appends(&ctx->result, "\">"); \
-	} \
+static inline void handle_form(STD_PARA) 
+{
+	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", 4) == 0) {
+		smart_str_appends(&ctx->result, "<INPUT TYPE=\"HIDDEN\" NAME=\""); 
+		smart_str_append(&ctx->result, &ctx->q_name);
+		smart_str_appends(&ctx->result, "\" VALUE=\"");
+		smart_str_append(&ctx->result, &ctx->q_value);
+		smart_str_appends(&ctx->result, "\">");
+	}
 }
 
 /*
@@ -182,25 +187,30 @@ enum {
  *  HTML stuff to the result buffer.
  */
 
-#define HANDLE_TAG() {\
-	int ok = 0; \
-	int i; \
-	ctx->tag.len = 0; \
-	smart_str_appendl(&ctx->tag, start, YYCURSOR - start); \
-	for (i = 0; i < ctx->tag.len; i++) \
-		ctx->tag.c[i] = tolower(ctx->tag.c[i]); \
-	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, (void **) &ctx->lookup_data) == SUCCESS) \
-		ok = 1; \
-	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN; \
+static inline void handle_tag(STD_PARA) 
+{
+	int ok = 0;
+	int i;
+
+	ctx->tag.len = 0;
+	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
+	for (i = 0; i < ctx->tag.len; i++)
+		ctx->tag.c[i] = tolower(ctx->tag.c[i]);
+	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, (void **) &ctx->lookup_data) == SUCCESS)
+		ok = 1;
+	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }
 
-#define HANDLE_ARG() {\
-	ctx->arg.len = 0; \
-	smart_str_appendl(&ctx->arg, start, YYCURSOR - start); \
+static inline void handle_arg(STD_PARA) 
+{
+	ctx->arg.len = 0;
+	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
 }
-#define HANDLE_VAL(quotes, type) {\
-	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
-	tag_arg(ctx, type PLS_CC); \
+
+static inline void handle_val(STD_PARA, char quotes, char type) 
+{
+	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
+	tag_arg(ctx, type PLS_CC);
 }
 
 #ifdef SCANNER_DEBUG
@@ -234,46 +244,46 @@ alpha = [a-zA-Z];
 		
 		case STATE_PLAIN:
 /*!re2c
-  [<]			{ PASSTHRU(); STATE = STATE_TAG; continue; }
-  (any\[<])		{ PASSTHRU(); continue; }
+  [<]			{ passthru(STD_ARGS); STATE = STATE_TAG; continue; }
+  (any\[<])		{ passthru(STD_ARGS); continue; }
 */
 			break;
 			
 		case STATE_TAG:
 /*!re2c
-  alpha+	{ HANDLE_TAG() /* Sets STATE */; PASSTHRU(); continue; }
-  any		{ PASSTHRU(); STATE = STATE_PLAIN; continue; }
+  alpha+	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); continue; }
+  any		{ passthru(STD_ARGS); STATE = STATE_PLAIN; continue; }
 */
   			break;
 			
 		case STATE_NEXT_ARG:
 /*!re2c
-  ">"		{ PASSTHRU(); HANDLE_FORM(); STATE = STATE_PLAIN; continue; }
-  [ \n]		{ PASSTHRU(); continue; }
+  ">"		{ passthru(STD_ARGS); handle_form(STD_ARGS); STATE = STATE_PLAIN; continue; }
+  [ \n]		{ passthru(STD_ARGS); continue; }
   alpha		{ YYCURSOR--; STATE = STATE_ARG; continue; }
-  any		{ PASSTHRU(); STATE = STATE_PLAIN; continue; }
+  any		{ passthru(STD_ARGS); STATE = STATE_PLAIN; continue; }
 */
  	 		break;
 
 		case STATE_ARG:
 /*!re2c
-  alpha+	{ PASSTHRU(); HANDLE_ARG(); STATE = STATE_BEFORE_VAL; continue; }
-  any		{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
+  alpha+	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; continue; }
+  any		{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; continue; }
 */
 
 		case STATE_BEFORE_VAL:
 /*!re2c
-  [ ]* "=" [ ]*		{ PASSTHRU(); STATE = STATE_VAL; continue; }
+  [ ]* "=" [ ]*		{ passthru(STD_ARGS); STATE = STATE_VAL; continue; }
   any				{ YYCURSOR--; STATE = STATE_NEXT_ARG; continue; }
 */
 			break;
 
 		case STATE_VAL:
 /*!re2c
-  ["] (any\[">])* ["]	{ HANDLE_VAL(1, '"');  STATE = STATE_NEXT_ARG; continue; }
-  ['] (any\['>])* [']	{ HANDLE_VAL(1, '\''); STATE = STATE_NEXT_ARG; continue; }
-  (any\[ \n>"])+		{ HANDLE_VAL(0, '"');  STATE = STATE_NEXT_ARG; continue; }
-  any					{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
+  ["] (any\[">])* ["]	{ handle_val(STD_ARGS, 1, '"');  STATE = STATE_NEXT_ARG; continue; }
+  ['] (any\['>])* [']	{ handle_val(STD_ARGS, 1, '\''); STATE = STATE_NEXT_ARG; continue; }
+  (any\[ \n>"])+		{ handle_val(STD_ARGS, 0, '"');  STATE = STATE_NEXT_ARG; continue; }
+  any					{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; continue; }
 */
 			break;
 	}
