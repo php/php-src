@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.4  2002/11/26 23:01:16  fmk
+ *   removing unused variables
+ *
  *   Revision 1.3  2002/07/05 04:43:53  danda
  *   merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
  *
@@ -95,6 +98,7 @@ static const char rcsid[] = "#(@) $Id$";
 #endif
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "xml_element.h"
 #include "queue.h"
@@ -468,18 +472,20 @@ static void xml_element_serialize(xml_element *el, int (*fptr)(void *data, const
 }
 
 /* print buf to file */
-static file_out_fptr(void *f, const char *text, int size)
+static int file_out_fptr(void *f, const char *text, int size)
 {
    fputs(text, (FILE *)f);
+   return 0;
 }
 
 /* print buf to simplestring */
-static simplestring_out_fptr(void *f, const char *text, int size)
+static int simplestring_out_fptr(void *f, const char *text, int size)
 {
    simplestring* buf = (simplestring*)f;
    if(buf) {
       simplestring_addn(buf, text, size);
    }
+   return 0;
 }
 
 /****f* xml_element/xml_elem_serialize_to_string
@@ -693,7 +699,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
          if(byte_idx >= 0) {
              snprintf(buf, 
                       sizeof(buf),
-                      "\n\tdata beginning %i before byte index: %s\n",
+                      "\n\tdata beginning %ld before byte index: %s\n",
                       byte_idx > 10  ? 10 : byte_idx,
                       in_buf + (byte_idx > 10 ? byte_idx - 10 : byte_idx));
          }
@@ -702,7 +708,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
                 "\tdescription: %s\n"
                 "\tline: %i\n"
                 "\tcolumn: %i\n"
-                "\tbyte index: %i\n"
+                "\tbyte index: %ld\n"
                 "\ttotal bytes: %i\n%s ",
                 err_code, error_str, line_num, 
                 col_num, byte_idx, byte_total, buf);
