@@ -158,11 +158,7 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
-/*
-	if (level > 1) {
-		php_printf("%*c", level - 1, ' ');
-	}
-*/
+
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
 		php_printf("%s", Z_LVAL_PP(struc) ? "true" : "false");
