@@ -1,3 +1,74 @@
+2002-09-08  Jon Parise  <jon@csh.rit.edu>
+
+    * CODING_STANDARDS: Reword item 10 for greater clarity.
+
+2002-09-08  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * CODING_STANDARDS:
+    It seems we're better to mention about missing functions.
+    PHP_FUNCTION -> ZEND_FUNCTION
+
+2002-09-08  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      main/network.c
+      main/php_network.h: Added possibility to reuse an old SSL session id.
+
+    Ugly but needed for f.e.: debians ftpd-ssl
+
+2002-09-08  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: s/send/sent/
+
+    * NEWS: nice..nice..
+
+2002-09-08  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/cyrus/config.m4: Capitalization
+
+2002-09-08  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/standard/ftp_fopen_wrapper.c: someone missed code requiring ssl
+
+2002-09-08  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+    ftp(s) fopen() wrapper does no longer ignore the ip returned by PASV.
+
+    * NEWS: Added ftps:// fopen() wrapper to NEWS.
+
+    * ext/standard/ftp_fopen_wrapper.c:
+    Control connection gets closed in ssl mode now, too.
+
+2002-09-08  Dan Kalowsky  <dank@deadmime.org>
+
+    * sapi/nsapi/config.m4: Fix for bug #19290
+
+2002-09-08  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/basic_functions.c: Added EXPERIMENTAL ftps fopen wrapper.
+
+    For now this leaks the control connection stream because you cannot
+    close the control connection in ssl mode before you read the data.
+
+2002-09-08  Andi Gutmans  <andi@zend.com>
+
+    * makedist.ZendEngine2: - Simplify makedist
+
+2002-09-08  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/info.c: Fix typo
+
+2002-09-08  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/SAPI.c: Added missing charset.
+
+    * main/php_variables.c: MFH
+
+    * main/php_variables.c:
+    Fix last commit. This line isn't supposed to be replaced.
+
 2002-09-07  Wez Furlong  <wez.php@thebrainroom.net>
 
     * NEWS: Mention php://output wrapper.
