@@ -13,6 +13,9 @@
  *
  * SPL - Standard PHP Library
  *
+ * You can download this documentation as a chm file 
+ * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
+ *
  * (c) Marcus Boerger, 2003 - 2004
  */
 
@@ -358,8 +361,10 @@ class LimitIetrator implements Iterator
 	
 	/** Seek to a specific position if available or throw an exception.
 	 * If the inner iterator is an instance of SeekableIterator its seek()
-	 * method will be used. Otherwise the iterator will me manually forwared
-	 * and rewinded first if necessary.
+	 * method will be used. Otherwise the iterator will be rewound if
+	 * necessary and then manually advanced element by element.
+	 *
+	 * \param $position index to seek to.
 	 */
 	function seek($position);
 	
@@ -539,6 +544,13 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 
 /** \ingroup SPL
  * \brief recursive SimpleXML_Element iterator
+ *
+ * The SimpleXMLIterator implements the RecursiveIterator interface. This 
+ * allows iteration over all elements using foreach or an appropriate while
+ * construct, just like SimpleXMLElement does. When using the foreach construct,
+ * you will also iterate over the subelements. For every element which
+ * has subelements, hasChildren() returns true.  This will trigger a call to
+ * getChildren() which returns the iterator for that sub element.
  */
 class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 {
