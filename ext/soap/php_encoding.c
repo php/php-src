@@ -23,6 +23,7 @@
 
 #include "php_soap.h"
 #include "ext/libxml/php_libxml.h"
+#include "zend_strtod.h"
 
 /* zval type decode */
 static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data);
@@ -685,7 +686,7 @@ static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data)
 			errno = 0;
 			ret->value.lval = strtol(data->children->content, NULL, 0);
 			if (errno == ERANGE) { /* overflow */
-				ret->value.dval = strtod(data->children->content, NULL);
+				ret->value.dval = zend_strtod(data->children->content, NULL);
 				ret->type = IS_DOUBLE;
 			} else {
 				ret->type = IS_LONG;
