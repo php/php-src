@@ -36,7 +36,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
-void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
+PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	int i;
 	var_entries *var_hash = var_hashx->first;
@@ -70,7 +70,7 @@ static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
 	return SUCCESS;
 }
 
-void var_destroy(php_unserialize_data_t *var_hashx)
+PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
 	var_entries *var_hash = var_hashx->first;
