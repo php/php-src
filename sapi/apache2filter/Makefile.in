@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libsapi.la
-LTLIBRARY_SOURCES = sapi_apache2.c apache_config.c php_functions.c
-
-EXTRA_INCLUDES = $(APACHE_INCLUDE)
-
-include $(top_srcdir)/build/ltlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libzip.la
-LTLIBRARY_SOURCES     = zip.c
-LTLIBRARY_SHARED_NAME = zip.la
-LTLIBRARY_SHARED_LIBADD  = $(ZIP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
