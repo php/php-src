@@ -1,3 +1,38 @@
+2002-08-23  Andi Gutmans  <andi@pb1.pair.com>
+
+    * Zend.m4: - Add \n to configure fprintf
+
+    * zend_extensions.c: - dlerror -> DL_ERROR
+
+2002-08-23  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    debug_backtrace: show include/require/eval as normal functions on the stack
+
+2002-08-23  derick  <derick@pb1.pair.com>
+
+    * zend_builtin_functions.c: - No spaces :)
+
+2002-08-23  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    - debug_backtrace now also returns an array containing the arguments of the
+      called function.
+
+    zeev, andi - is knowing the structure of the stack considered a bad thing in
+    zend_builtin_function? if yes i would have to create a new function in
+    zend_ptr_stack.c (but i think we are save this way)
+
+    * zend_builtin_functions.c
+      zend_execute_API.c: - debug_backtrace:
+    	added "type" ('->' or '::') for object calls.
+    	made calls done thru call_user_func show-up correct in backtraces.
+
+    andi,
+    does this look correct to you?
+
+    * zend_execute.c: those are set by RETURN_FROM_EXECUTE
+
 2002-08-21  Thies Arntzen  <thies@pb1.pair.com>
 
     * zend_execute.c:
