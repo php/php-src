@@ -50,6 +50,7 @@ PHP_FUNCTION(mysql_select_db);
 PHP_FUNCTION(mysql_create_db);
 PHP_FUNCTION(mysql_drop_db);
 PHP_FUNCTION(mysql_query);
+PHP_FUNCTION(mysql_unbuffered_query);
 PHP_FUNCTION(mysql_db_query);
 PHP_FUNCTION(mysql_list_dbs);
 PHP_FUNCTION(mysql_list_tables);
