@@ -378,12 +378,16 @@ static char *php_strerror(int error TSRMLS_DC)
 static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock TSRMLS_DC)
 {
 	struct in6_addr tmp;
-	struct hostent *host_entry;
+	struct addrinfo hints;
+	struct addrinfo *addrinfo = NULL;
 
 	if (inet_pton(AF_INET6, string, &tmp)) {
 		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
 	} else {
-		if (! (host_entry = gethostbyname2(string, AF_INET6))) {
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = PF_INET6;
+		getaddrinfo(string, NULL, &hints, &addrinfo);
+		if (!addrinfo) {
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
 #else
@@ -391,11 +395,14 @@ static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socke
 #endif
 			return 0;
 		}
-		if (host_entry->h_addrtype != AF_INET6) {
+		if (addrinfo->ai_family != PF_INET6 || addrinfo->ai_addrlen != sizeof(struct sockaddr_in6)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host lookup failed: Non AF_INET6 domain returned on AF_INET6 socket");
+			freeaddrinfo(addrinfo);
 			return 0;
 		}
-		memcpy(&(sin6->sin6_addr.s6_addr), host_entry->h_addr_list[0], host_entry->h_length);
+
+		memcpy(&(sin6->sin6_addr.s6_addr), ((struct sockaddr_in6*)(addrinfo->ai_addr))->sin6_addr.s6_addr, sizeof(struct in6_addr));
+		freeaddrinfo(addrinfo);
 	}
 
 	return 1;
