@@ -83,7 +83,7 @@ PEAR_FILES = \
 	Log/composite.php \
 	Log/file.php \
 	Log/mcal.php \
-	Log/observer.php \
+	Log/Observer.php \
 	Log/sql.php \
 	Log/syslog.php \
 	Mail.php \
