@@ -1,4 +1,5 @@
 #include "php_soap.h"
+#include "libxml/uri.h"
 
 typedef struct sdlCtx {
 	sdlPtr root;
@@ -198,7 +199,17 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 				/* TODO: namespace ??? */
 				xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 				if (tmp) {
-					load_wsdl_ex(tmp->children->content, ctx, 1);
+				  xmlChar *uri;
+					xmlChar *base = xmlNodeGetBase(trav->doc, trav);
+
+					if (base == NULL) {
+				    uri = xmlBuildURI(tmp->children->content, trav->doc->URL);
+					} else {
+	    			uri = xmlBuildURI(tmp->children->content, base);
+				    xmlFree(base);
+					}
+					load_wsdl_ex(uri, ctx, 1);
+			    xmlFree(uri);
 				}
 
 			} else if (strcmp(trav->name,"message") == 0) {
