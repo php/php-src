@@ -1,7 +1,5 @@
 --TEST--
 Classes inheritance test
---POST--
---GET--
 --FILE--
 <?php 
 

@@ -1,5 +1,5 @@
 --TEST--
-A private method cannot be called in another class
+ZE2 A private method cannot be called in another class
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--

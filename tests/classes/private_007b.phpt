@@ -1,5 +1,5 @@
 --TEST--
-A derived class does not know about privates of ancestors
+ZE2 A derived class does not know about privates of ancestors
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
