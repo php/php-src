@@ -1,3 +1,54 @@
+2004-07-14  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFH: Made php -m output sorted case-insensitevly
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Made php -m output sorted case-insensitevly
+
+2004-07-14  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/strip_tags.phpt:
+      Ups... CAN-2004-0595 regression test went into wrong branch...
+
+    * (PHP_4_3_7)
+      ext/standard/tests/strings/strip_tags.phpt:
+      Add CAN-2004-0595 regression test. (modified from Joe Ortons version)
+
+    * sapi/apache_hooks/mod_php5.c:
+      same bug.
+
+2004-07-14  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/iconv/config.m4:
+      - Fixed text.
+
+2004-07-14  Stefan Esser  <sesser@suspekt.org>
+
+    * sapi/apache/mod_php5.c:
+      Security Fix broken! Destroyed Basic auth. Blame: me
+      4.3.x not affected
+
+2004-07-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      be consistent with write_dimension
+
+    * ZendEngine2/zend_object_handlers.c:
+      fix #28957
+
+2004-07-14  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h:
+      Bugfix# 28829 bcmath values for 0, 1, and 2 initialized/freed at wrong time
+      for threaded sapis.
+
 2004-07-13  Andi Gutmans  <andi@zend.com>
 
     * NEWS
