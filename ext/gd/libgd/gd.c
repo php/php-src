@@ -2613,7 +2613,7 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
 		
-		for (uY = 0; uY<src->sx; uY++) {
+		for (uY = 0; uY<src->sy; uY++) {
 			for (uX = 0; uX<src->sx; uX++) {
 				c = f (src, uX, uY);
 				gdImageSetPixel(dst, (dst->sx - uY - 1), uX, c);
