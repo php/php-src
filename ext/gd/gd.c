@@ -1550,7 +1550,7 @@ PHP_FUNCTION(imagefontwidth)
 /* }}} */
 
 /* {{{ proto int imagefontheight(int font)
-Get font height */
+   Get font height */
 PHP_FUNCTION(imagefontheight)
 {
 	php_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1818,7 +1818,7 @@ PHP_FUNCTION(imagesx)
 /* }}} */
 
 /* {{{ proto int imagesy(int im)
-Get image height */
+   Get image height */
 PHP_FUNCTION(imagesy)
 {
 	pval *IM;
