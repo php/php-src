@@ -42,13 +42,12 @@ AC_ARG_WITH(apxs,
 	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
 	APXS_CFLAGS=`$APXS -q CFLAGS`
+	for flag in $APXS_CFLAGS; do
+		case $flag in
+		-D*) CPPFLAGS="$CPPFLAGS $flag";;
+		esac
+	done
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
-	if `echo $APXS_CFLAGS|grep USE_HSREGEX>/dev/null`; then
-		APACHE_HAS_REGEX=yes
-	fi
-	if `echo $APXS_CFLAGS|grep EAPI>/dev/null`; then
-	   CPPFLAGS="$CPPFLAGS -DEAPI"
-	fi
 	PHP_SAPI=apache
 	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
