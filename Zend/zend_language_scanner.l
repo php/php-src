@@ -1111,18 +1111,9 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_IN_SCRIPTING>{NAMESPACE_NAME} {
-	int i;
-
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	
-	/* Nuke this code */
-	for (i=0; i<yyleng; i++) {
-		if (zendlval->value.str.val[i] == ':') {
-			zendlval->value.str.val[i] = '_';
-		}
-	}
 	return T_NAMESPACE_NAME;
 }
 
