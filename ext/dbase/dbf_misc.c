@@ -9,6 +9,8 @@
 
 #include "dbf_misc.h"
 
+#include "php_reentrancy.h"
+
 /*
  * routine to change little endian long to host long
  */
