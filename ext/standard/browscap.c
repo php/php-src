@@ -49,18 +49,7 @@ static void convert_browscap_pattern(zval *pattern)
 	register int i, j;
 	char *t;
 
-	for (i=0; i<Z_STRLEN_P(pattern); i++) {
-		if (Z_STRVAL_P(pattern)[i]=='*' || Z_STRVAL_P(pattern)[i]=='?' || Z_STRVAL_P(pattern)[i]=='.') {
-			break;
-		}
-	}
-
-	if (i==Z_STRLEN_P(pattern)) { /* no wildcards */
-		Z_STRVAL_P(pattern) = zend_strndup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
-		return;
-	}
-
-	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 1);
+	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 3);
 	t[0] = '^';
 
 	for (i=0, j=1; i<Z_STRLEN_P(pattern); i++, j++) {
@@ -81,11 +70,12 @@ static void convert_browscap_pattern(zval *pattern)
 				break;
 		}
 	}
-	
+
 	if (j && (t[j-1] == '.')) {
 		t[j++] = '*';
 	}
-	
+
+	t[j++]='$';
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
 	Z_STRLEN_P(pattern) = j;
@@ -112,7 +102,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				Z_STRVAL_P(new_property) = Z_STRLEN_P(arg2)?zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)):"";
 				Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
 				Z_TYPE_P(new_property) = IS_STRING;
-				
+
 				new_key = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
 				zend_hash_update(Z_ARRVAL_P(current_section), new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
@@ -128,7 +118,6 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
 				current_section = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(current_section);
-				array_init(current_section);
 				processed = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(processed);
 				unprocessed = (zval *) malloc(sizeof(zval));
@@ -225,8 +214,10 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 }
 /* }}} */
 
-/* {{{ proto object get_browser(string browser_name)
-   Get information about the capabilities of a browser */
+/* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
+   Get information about the capabilities of a browser. If browser_name is omitted
+   or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array
+   is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
 	zval **agent_name = NULL, **agent, **retarr;
@@ -263,7 +254,7 @@ PHP_FUNCTION(get_browser)
 		lookup_browser_name = Z_STRVAL_PP(agent_name);
 		found_browser_entry = NULL;
 		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
-		
+
 		if (found_browser_entry) {
 			agent = &found_browser_entry;
 		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent)==FAILURE) {
@@ -279,7 +270,7 @@ PHP_FUNCTION(get_browser)
 		object_init(return_value);
 		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	}
-	
+
 	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
 		if (zend_hash_find(&browser_hash, Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name)+1, (void **)&agent)==FAILURE) {
 			break;
