@@ -30,102 +30,79 @@
 #include "php_string.h"
 #include "php_var.h"
 
-#define COMMON level, ' ', ((*struc)->is_ref?"&":"")
+#define COMMON ((*struc)->is_ref?"&":"")
 
 /* }}} */
 /* {{{ php_var_dump */
 
+static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+
+	level = va_arg(args, int);
+
+	if (hash_key->nKeyLength==0) { /* numeric key */
+		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+	} else { /* string key */
+		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+	}
+	php_var_dump(zv, level + 2);
+	return 0;
+}
+
+
 void php_var_dump(pval **struc, int level)
 {
-	ulong index;
-	char *key;
-	int i;
-	pval **data;
-	char buf[512];
 	HashTable *myht;
+
+	if (level>1) {
+		php_printf("%*c", level-1, ' ');
+	}
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
-			i = sprintf(buf, "%*c%sbool(%s)\n", COMMON, ((*struc)->value.lval?"true":"false"));
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sbool(%s)\n", COMMON, ((*struc)->value.lval?"true":"false"));
 			break;
-
 		case IS_NULL:
-			i = sprintf(buf, "%*c%sNULL\n", COMMON);
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sNULL\n", COMMON);
 			break;
-
 		case IS_LONG:
-			i = sprintf(buf, "%*c%sint(%ld)\n", COMMON, (*struc)->value.lval);
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sint(%ld)\n", COMMON, (*struc)->value.lval);
 			break;
-
 		case IS_DOUBLE: {
 				ELS_FETCH();
-				i = sprintf(buf, "%*c%sfloat(%.*G)\n", COMMON, (int) EG(precision), (*struc)->value.dval);
-				PHPWRITE(&buf[1], i - 1);
+
+				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), (*struc)->value.dval);
 			}
 			break;
-
 		case IS_STRING:
-			i = sprintf(buf, "%*c%sstring(%d) \"", COMMON, (*struc)->value.str.len);
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sstring(%d) \"", COMMON, (*struc)->value.str.len);
 			PHPWRITE((*struc)->value.str.val, (*struc)->value.str.len);
-			strcpy(buf, "\"\n");
-			PHPWRITE(buf, strlen(buf));
+			PUTS("\"\n");
 			break;
-
 		case IS_ARRAY:
 			myht = HASH_OF(*struc);
-			i = sprintf(buf, "%*c%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
 			goto head_done;
-
 		case IS_OBJECT:
 			myht = HASH_OF(*struc);
-			i = sprintf(buf, "%*c%sobject(%s)(%d) {\n", COMMON, (*struc)->value.obj.ce->name, zend_hash_num_elements(myht));
-			PHPWRITE(&buf[1], i - 1);
-		  head_done:
-
-			zend_hash_internal_pointer_reset(myht);
-			for (;; zend_hash_move_forward(myht)) {
-				if ((i = zend_hash_get_current_key(myht, &key, &index)) == HASH_KEY_NON_EXISTANT)
-					break;
-
-				if (zend_hash_get_current_data(myht, (void **) (&data)) != SUCCESS || !data || (data == struc)) {
-					if (i == HASH_KEY_IS_STRING)
-						efree(key);
-					continue;
-				}
-				switch (i) {
-					case HASH_KEY_IS_LONG:
-						sprintf(buf, "%*c[%ld]=>\n", level + 1, ' ', index);
-						PHPWRITE(buf,strlen(buf));
-						break;
-
-					case HASH_KEY_IS_STRING:
-						sprintf(buf, "%*c[\"%s\"]=>\n", level + 1, ' ', key);
-						PHPWRITE(buf, strlen(buf));
-						efree(key);
-						break;
-				}
-				php_var_dump(data, level + 2);
+			php_printf("%sobject(%s)(%d) {\n", COMMON, (*struc)->value.obj.ce->name, zend_hash_num_elements(myht));
+head_done:
+			zend_hash_apply_with_arguments(myht, php_array_element_dump, 1, level);
+			if (level>1) {
+				php_printf("%*c\n", level-1, ' ');
 			}
-			i = sprintf(buf, "%*c}\n", level, ' ');
-			PHPWRITE(&buf[1], i - 1);
-			break;
-			
+			PUTS("}\n");
+			break;	
 		case IS_RESOURCE: {
 			int type;
 			zend_list_find((*struc)->value.lval, &type);
-			i = sprintf(buf, "%*c%sresource(%ld) of type %d\n", COMMON,(*struc)->value.lval, type);
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sresource(%ld) of type %d\n", COMMON, (*struc)->value.lval, type);
 			break;
 		}
-
 		default:
-			i = sprintf(buf, "%*c%sUNKNOWN:0\n",COMMON);
-			PHPWRITE(&buf[1], i - 1);
+			php_printf("%sUNKNOWN:0\n",COMMON);
+			break;
 	}
 }
 
