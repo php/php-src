@@ -1441,10 +1441,7 @@ PHP_FUNCTION(pg_fetch_object)
 	   must be allowed for compatibility */
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
-		zval tmp = *return_value;
-		return_value->type = IS_NULL;
-		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL(tmp));
-		zval_dtor(&tmp);
+		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	} else {
 		zval_dtor(return_value);
 		return_value->type = IS_NULL;
