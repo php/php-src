@@ -31,6 +31,12 @@
 
 #if HAVE_LIBMCRYPT
 
+#if PHP_API_VERSION < 19990421
+#define  zend_module_entry php3_module_entry
+#include "modules.h"
+#include "internal_functions.h"
+#endif
+
 #include "fcntl.h"
 
 #include "php_mcrypt.h"
@@ -49,12 +55,12 @@ function_entry mcrypt_functions[] = {
 	{0},
 };
 
-static int php3_minit_mcrypt(INIT_FUNC_ARGS);
+static int php_minit_mcrypt(INIT_FUNC_ARGS);
 
 zend_module_entry mcrypt_module_entry = {
 	"mcrypt", 
 	mcrypt_functions,
-	php3_minit_mcrypt, NULL,
+	php_minit_mcrypt, NULL,
 	NULL, NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES,
@@ -120,7 +126,7 @@ static mcrypt_global_struct mcryptg;
 
 #define MCRYPT_ENTRY(a) REGISTER_LONG_CONSTANT("MCRYPT_" #a, a, 0)
 
-static int php3_minit_mcrypt(INIT_FUNC_ARGS)
+static int php_minit_mcrypt(INIT_FUNC_ARGS)
 {
 	/* modes for mcrypt_??? routines */
 	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, 0);
