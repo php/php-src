@@ -25,7 +25,9 @@
  #pragma alloca
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
+#    ifndef NETWARE
 char *alloca ();
+#    endif
 #   endif
 #  endif
 # endif
