@@ -30,6 +30,7 @@
  * */
 
 #define _WIN32_DCOM
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
 extern "C" {
@@ -42,9 +43,9 @@ extern "C" {
 #include "php_variables.h"
 #include "php_ini.h"
 #include "php4activescript.h"
-#include "ext/com/com.h"
-#include "ext/com/php_COM.h"
-#include "ext/com/conversion.h"
+#include "ext/rpc/com/com.h"
+#include "ext/rpc/com/php_COM.h"
+#include "ext/rpc/com/conversion.h"
 }
 #include "php_ticks.h"
 #include "php4as_scriptengine.h"
