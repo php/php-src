@@ -37,6 +37,8 @@
 @BOTTOM@
 #endif
 
+#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
+
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
@@ -95,6 +97,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #else
 #define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
 #endif
+
+#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 /*
  * Local variables:
