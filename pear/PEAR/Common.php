@@ -983,13 +983,16 @@ class PEAR_Common extends PEAR
     /**
      * Validate XML package definition file.
      *
-     * @param  string Filename of the package archive or of the package definition file
-     * @param  array  Array that will contain the errors
-     * @param  array  Array that will contain the warnings
+     * @param  string $info Filename of the package archive or of the
+     *                package definition file
+     * @param  array $errors Array that will contain the errors
+     * @param  array $warnings Array that will contain the warnings
+     * @param  string $dir_prefix (optional) directory where source files
+     *                may be found, or empty if they are not available
      * @access public
      * @return boolean
      */
-    function validatePackageInfo($info, &$errors, &$warnings)
+    function validatePackageInfo($info, &$errors, &$warnings, $dir_prefix = '')
     {
         global $_PEAR_Common_maintainer_roles,
                $_PEAR_Common_release_states,
@@ -1104,9 +1107,12 @@ class PEAR_Common extends PEAR
                 } elseif (!in_array($fa['role'], $_PEAR_Common_file_roles)) {
                     $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $_PEAR_Common_file_roles);
                 }
-                if ($fa['role'] == 'php') {
-                    $srcinfo = $this->analyzeSourceCode($file);
-                    $this->buildProvidesArray($srcinfo);
+                if ($fa['role'] == 'php' && $dir_prefix) {
+                    $this->log(1, "Analyzing $file");
+                    $srcinfo = $this->analyzeSourceCode($dir_prefix . DIRECTORY_SEPARATOR . $file);
+                    if ($srcinfo) {
+                        $this->buildProvidesArray($srcinfo);
+                    }
                 }
                 // (ssb) Any checks we can do for baseinstalldir?
                 // (cox) Perhaps checks that either the target dir and
@@ -1169,7 +1175,6 @@ class PEAR_Common extends PEAR
             }
             $this->pkginfo['provides'][$key] =
                 array('type' => 'class', 'name' => $class);
-            //var_dump($key, $this->pkginfo['provides'][$key]);
         }
         foreach ($srcinfo['declared_methods'] as $class => $methods) {
             foreach ($methods as $method) {
@@ -1181,7 +1186,6 @@ class PEAR_Common extends PEAR
                 }
                 $this->pkginfo['provides'][$key] =
                     array('type' => 'function', 'name' => $function);
-                //var_dump($key, $this->pkginfo['provides'][$key]);
             }
         }
         foreach ($srcinfo['declared_functions'] as $function) {
@@ -1191,7 +1195,6 @@ class PEAR_Common extends PEAR
             }
             $this->pkginfo['provides'][$key] =
                 array('type' => 'function', 'name' => $function);
-            //var_dump($key, $this->pkginfo['provides'][$key]);
         }
     }
 
