@@ -46,12 +46,13 @@
  *  Lift a leg, Yunie.  Luv ya forever!!!!
  */
 
+#include "php.h"
 #include <windows.h>
 #include <io.h>
 #include <errno.h>
 #include "flock.h"
 
-int flock(int fd, int op)
+PHPAPI int flock(int fd, int op)
 {
 	HANDLE hdl = (HANDLE) _get_osfhandle(fd);
 	DWORD low = 1, high = 0;
