@@ -19,7 +19,7 @@ Having said that, here are the organizational rules:
 
    2. Discuss any significant changes on the list before committing. 
 
-   3. Look at MAINTANERS file to see who is the primary maintainer of
+   3. Look at EXTENSIONS file to see who is the primary maintainer of
       the code you want to contribute to.
 
    4. If you "strongly disagree" about something another person did, don't
