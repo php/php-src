@@ -1236,7 +1236,7 @@ ZEND_FUNCTION(debug_backtrace)
 		}
 		add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 		add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
-		//add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1);
+		/* add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1); */
 		
 		add_next_index_zval(return_value, stack_frame);
 
