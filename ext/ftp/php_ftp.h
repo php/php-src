@@ -39,6 +39,7 @@ extern zend_module_entry php_ftp_module_entry;
 #define php_ftp_module_ptr &php_ftp_module_entry
 
 PHP_MINIT_FUNCTION(ftp);
+PHP_MINFO_FUNCTION(ftp);
 
 PHP_FUNCTION(ftp_connect);
 PHP_FUNCTION(ftp_login);
