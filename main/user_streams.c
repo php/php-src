@@ -29,7 +29,13 @@ struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 };
 
-static php_stream *user_wrapper_factory(char *filename, char *mode, int options, char **opened_path, void * wrappercontext STREAMS_DC TSRMLS_DC);
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC);
+
+static php_stream_wrapper_ops user_stream_wops = {
+	user_wrapper_opener,
+	NULL
+};
+
 
 static void stream_wrapper_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -107,9 +113,9 @@ function stream_open($path, $mode, $options, &$opened_path)
    
  * */
 
-static php_stream *user_wrapper_factory(char *filename, char *mode, int options, char **opened_path, void *wrappercontext STREAMS_DC TSRMLS_DC)
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
-	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrappercontext;
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
 	zval *zfilename, *zmode, *zopened, *zoptions, *zretval = NULL, *zfuncname;
 	zval **args[4];	
@@ -206,14 +212,14 @@ PHP_FUNCTION(file_register_wrapper)
 	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
 	uwrap->protoname = estrndup(protocol, protocol_len);
 	uwrap->classname = estrndup(classname, classname_len);
-	uwrap->wrapper.create = user_wrapper_factory;
-	uwrap->wrapper.wrappercontext = uwrap;
+	uwrap->wrapper.wops = &user_stream_wops;
+	uwrap->wrapper.abstract = uwrap;
 
 	zend_str_tolower(uwrap->classname, classname_len);
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
 	
 	if (zend_hash_find(EG(class_table), uwrap->classname, classname_len + 1, (void**)&uwrap->ce) == SUCCESS) {
-#ifdef ZEND_ENGINE_2
+#if ZEND_ENGINE_2
 		uwrap->ce = *(zend_class_entry**)uwrap->ce;
 #endif
 		if (php_register_url_stream_wrapper(protocol, &uwrap->wrapper TSRMLS_CC) == SUCCESS) {

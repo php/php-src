@@ -92,7 +92,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL, "ZLIB"
 };
 
-php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path, void *wrappercontext STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL;
@@ -126,9 +126,13 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	return NULL;
 }
 
-php_stream_wrapper php_stream_gzip_wrapper =	{
+static php_stream_wrapper_ops gzip_stream_wops = {
 	php_stream_gzopen,
-	NULL,
+	NULL
+};
+
+php_stream_wrapper php_stream_gzip_wrapper =	{
+	&gzip_stream_wops,
 	NULL
 };
 
