@@ -115,7 +115,7 @@ ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 
 ZEND_API void start_memory_manager(TSRMLS_D);
-ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
+ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC);
 
 #if ZEND_DEBUG
 ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);

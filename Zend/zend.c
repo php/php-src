@@ -358,7 +358,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
-	shutdown_memory_manager(0, 1);
+	shutdown_memory_manager(0, 1 TSRMLS_CC);
 }
 
 

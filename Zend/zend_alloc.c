@@ -445,7 +445,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 }
 
 
-ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
+ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 {
 	zend_mem_header *p, *t;
 	unsigned int fci, i, j;
@@ -453,7 +453,6 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	int had_leaks = 0;
 #endif
 	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
-	TSRMLS_FETCH();
 
 #if defined(ZEND_WIN32) && !ZEND_DEBUG
 	if (clean_cache && AG(memory_heap)) {
