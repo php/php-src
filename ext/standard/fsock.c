@@ -71,7 +71,6 @@
 #ifdef ZTS
 static int fsock_globals_id;
 #else
-static php_fsock_globals fsock_globals;
 extern int le_fp;
 #endif
 
