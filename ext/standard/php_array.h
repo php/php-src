@@ -75,6 +75,7 @@ PHP_FUNCTION(array_unique);
 PHP_FUNCTION(array_intersect);
 PHP_FUNCTION(array_diff);
 PHP_FUNCTION(array_sum);
+PHP_FUNCTION(array_filter);
 
 HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive);
