@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- do not use the "Type" attribute here, that one is only for
+     generated package.xml files -->
+<package version="1.0">
+  <name>Net_SMTP</name>
+  <summary>Provides an implementation of the SMTP protocol</summary>
+  <description>
+Provides an implementation of the SMTP protocol using PEAR's Net_Socket:: class.
+  </description>
+  <license>PHP License</license>
+  <maintainers>
+    <maintainer>
+      <user>chagenbu</user>
+      <role>lead</role>
+      <name>Chuck Hagenbuch</name>
+      <email>chuck@horde.org</email>
+    </maintainer>
+  </maintainers>
+  <release>
+    <version>1.0</version>
+    <date>2002-06-11</date>
+    <notes>Initial release as PEAR package</notes>
+    <state>stable</state>
+    <filelist>
+        <dir name="/Net">
+            <file name="SMTP.php" role="php"/>
+        </dir>
+    </filelist>
+  </release>
+  <deps>
+    <dep type="pkg" rel="has">Net_Socket</dep>    
+  </deps>
+</package>
