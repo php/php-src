@@ -38,7 +38,7 @@ typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
 typedef void (*dtor_func_t)(void *pDest);
 typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
-typedef int (*apply_func_arg_t)(void *pDest, void *argument);
+typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
 struct _hashtable;

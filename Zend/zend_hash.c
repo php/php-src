@@ -711,7 +711,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (apply_func(p->pData, argument)) {
+		if (apply_func(p->pData, argument TSRMLS_CC)) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
@@ -721,7 +721,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 }
 
 
-ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void *, int, va_list, zend_hash_key *), int num_args, ...)
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t destruct, int num_args, ...)
 {
 	Bucket *p;
 	va_list args;
