@@ -696,11 +696,19 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			MySG(num_persistent)++;
 			MySG(num_links)++;
-		} else {  /* we do */
+		} else {  /* The link is in our list of persistent connections */
 			if (Z_TYPE_P(le) != le_plink) {
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			/* ensure that the link did not die */
+#if MYSQL_VERSION_ID > 32230 /* Use mysql_ping to ensure link is alive (and to reconnect if needed) */
+			if (mysql_ping(le->ptr)) {
+					php_error(E_WARNING, "%s: Link to server lost, unable to reconnect", get_active_function_name(TSRMLS_C));
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
+					efree(hashed_details);
+					MYSQL_DO_CONNECT_RETURN_FALSE();
+			}
+#else	/* Use mysql_stat() to check if server is alive */
 			handler=signal(SIGPIPE, SIG_IGN);
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
@@ -721,6 +729,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			}
 			signal(SIGPIPE, handler);
+#endif /* end Use mysql_ping ... */
+
 			mysql = (php_mysql_conn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
