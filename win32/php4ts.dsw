@@ -3,37 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "php4apache"=.\sapi\apache\php4apache.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name php4dllts
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "php4nsapi"=.\sapi\nsapi\php4nsapi.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name php4dllts
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "TSRM"=.\TSRM\TSRM.dsp - Package Owner=<4>
+Project: "TSRM"=..\TSRM\TSRM.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -45,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ZendTS"=.\Zend\ZendTS.dsp - Package Owner=<4>
+Project: "ZendTS"=..\Zend\ZendTS.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -60,7 +30,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libmysql"=.\ext\mysql\libmysql\libmysql.dsp - Package Owner=<4>
+Project: "libmysql"=..\ext\mysql\libmysql\libmysql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -68,6 +38,21 @@ Package=<5>
 
 Package=<4>
 {{{
+}}}
+
+###############################################################################
+
+Project: "php4apache"=..\sapi\apache\php4apache.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -96,7 +81,22 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4isapi"=.\sapi\isapi\php4isapi.dsp - Package Owner=<4>
+Project: "php4isapi"=..\sapi\isapi\php4isapi.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "php4nsapi"=..\sapi\nsapi\php4nsapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -129,19 +129,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "java"=.\ext\java\java.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "servlet"=.\sapi\servlet\servlet.dsp - Package Owner=<4>
+Project: "servlet"=..\sapi\servlet\servlet.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -164,3 +152,4 @@ Package=<3>
 }}}
 
 ###############################################################################
+
