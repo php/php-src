@@ -2748,6 +2748,11 @@ int zend_return_handler(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Cannot return overloaded elements or string offsets by reference");
 		}
 
+		if (!(*retval_ptr_ptr)->is_ref
+			&& EX_T(EX(opline)->op1.u.var).var.ptr_ptr == &EX_T(EX(opline)->op1.u.var).var.ptr) {
+			zend_error(E_ERROR, "Only variables or references can be returned by reference");
+		}
+		
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
 		(*retval_ptr_ptr)->refcount++;
 		
