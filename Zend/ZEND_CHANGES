@@ -109,4 +109,3 @@ shamelessly lying about it.  Here's why:
   This incompatability is due to the full variable reference
   within quoted strings feature added in Zend.
   
-
