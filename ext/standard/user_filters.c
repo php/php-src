@@ -324,7 +324,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval *obj, *zfilter;
 	zval func_name;
 	zval *retval = NULL;
-	zval **tmp; 
 	
 	/* some sanity checks */
 	if (persistent) {

@@ -23,6 +23,7 @@
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
