@@ -329,7 +329,7 @@ PHP_MINIT_FUNCTION(oci)
 	ELS_FETCH();
 
 #ifdef ZTS
-	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), php_oci_init_globals, NULL);
+	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
 #else
 	OCI(user_num)   = 1000;
 	OCI(server_num) = 2000;
@@ -1314,8 +1314,8 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 									((char*)column->data) + column->retlen4,
 									&(column->cb_retlen),
 									OCI_NEXT_PIECE,
-									NULL,
-									NULL);
+									&column->indicator,
+									&column->retcode);
 			}
 		}	
 
