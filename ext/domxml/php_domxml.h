@@ -65,6 +65,7 @@ PHP_FUNCTION(xpath_eval);
 PHP_FUNCTION(xpath_eval_expression);
 #if defined(LIBXML_XPTR_ENABLED)
 PHP_FUNCTION(xptr_new_context);
+PHP_FUNCTION(xptr_eval);
 #endif
 
 PHP_FUNCTION(domxml_test);

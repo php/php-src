@@ -62,6 +62,11 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node,	NULL)
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
+	PHP_FE(xpath_new_context, NULL)
+	PHP_FE(xpath_eval, NULL)
+	PHP_FE(xpath_eval_expression, NULL)
+	PHP_FE(xptr_new_context, NULL)
+	PHP_FE(xptr_eval, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -186,6 +191,8 @@ PHP_MINIT_FUNCTION(domxml)
 	domxmlnode_class_entry_ptr = zend_register_internal_class(&domxmlnode_class_entry);
 	domxmlattr_class_entry_ptr = zend_register_internal_class(&domxmlattr_class_entry);
 	domxmlns_class_entry_ptr = zend_register_internal_class(&domxmlns_class_entry);
+	xpathctx_class_entry_ptr = zend_register_internal_class(&xpathctx_class_entry);
+	xpathobject_class_entry_ptr = zend_register_internal_class(&xpathobject_class_entry);
 
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE", XML_ELEMENT_NODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NODE", XML_ATTRIBUTE_NODE, CONST_CS | CONST_PERSISTENT);
@@ -1041,7 +1048,7 @@ PHP_FUNCTION(xmldoc)
 	}
 	convert_to_string(arg);
 
-	docp = xmlParseMemory(arg->value.str.val, arg->value.str.len);
+	docp = xmlParseDoc(arg->value.str.val); //, arg->value.str.len);
 	if (!docp) {
 		RETURN_FALSE;
 	}
@@ -1489,7 +1496,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		id_to_find = id->value.lval;
 	}
 		
-	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
+	docp = (xmlDocPtr) zend_list_find(id_to_find, &type);
 	if (!docp || type != le_domxmldocp) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -1508,7 +1515,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, xpathctx_class_entry_ptr);
-	add_property_resource(return_value, "xpathctx", id_to_find);
+	add_property_resource(return_value, "xpathctx", ret);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1557,7 +1564,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	}
 	convert_to_string(str);
 
-		ctxp = (xmlXPathContextPtr) zend_list_find(id_to_find, &type);
+	ctxp = (xmlXPathContextPtr) zend_list_find(id_to_find, &type);
 	if (!ctxp || type != le_xpathctxp) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -1580,9 +1587,12 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		RETURN_FALSE;
 	}
 
+	ret = zend_list_insert(xpathobjp, le_xpathobjectp);
+	zend_list_addref(ret);
+
 	/* construct an object with some methods */
 	object_init_ex(return_value, xpathobject_class_entry_ptr);
-	add_property_resource(return_value, "xpathobject", id_to_find);
+	add_property_resource(return_value, "xpathobject", ret);
 	add_property_long(return_value, "type", xpathobjp->type);
 	switch(xpathobjp->type) {
 		case XPATH_UNDEFINED:
@@ -1639,8 +1649,6 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		case XPATH_USERS:
 			break;
 	}
-	ret = zend_list_insert(xpathobjp, le_xpathobjectp);
-	zend_list_addref(ret);
 }
 /* }}} */
 
@@ -1661,7 +1669,7 @@ PHP_FUNCTION(xpath_eval_expression) {
 #if defined(LIBXML_XPTR_ENABLED)
 /* {{{ proto int xptr_eval([int xpathctx_handle,] string str)
    Evaluate the XPtr Location Path in the given string */
-PHP_FUNCTION(xpath_ptr) {
+PHP_FUNCTION(xptr_eval) {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPTR, 0);
 }
 /* }}} */
