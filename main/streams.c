@@ -1360,7 +1360,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	FILE *fp = NULL;
 	php_stream *stream = NULL;
 
-	stream = php_stream_open_wrapper_rel(path, mode, options, opened_path);
+	stream = php_stream_open_wrapper_rel(path, mode, options|STREAM_WILL_CAST, opened_path);
 
 	if (stream == NULL)
 		return NULL;
@@ -1428,12 +1428,19 @@ PHPAPI void php_stream_notification_notify(php_stream_context *context, int noti
 
 PHPAPI void php_stream_context_free(php_stream_context *context)
 {
+	zval_ptr_dtor(&context->options);
 	efree(context);
 }
 
 PHPAPI php_stream_context *php_stream_context_alloc(void)
 {
-	return ecalloc(1, sizeof(php_stream_context));
+	php_stream_context *context;
+	
+	context = ecalloc(1, sizeof(php_stream_context));
+	MAKE_STD_ZVAL(context->options);
+	array_init(context->options);
+
+	return context;
 }
 
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
@@ -1444,6 +1451,41 @@ PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 {
 	efree(notifier);
+}
+
+PHPAPI int php_stream_context_get_option(php_stream_context *context,
+		const char *wrappername, const char *optionname, zval **optionvalue)
+{
+	zval **wrapperhash;
+	
+	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash))
+		return FAILURE;
+
+	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue);
+}
+
+PHPAPI int php_stream_context_set_option(php_stream_context *context,
+		const char *wrappername, const char *optionname, zval *optionvalue)
+{
+	zval **wrapperhash;
+
+printf("set option %s:%s:%p\n", wrappername, optionname, optionvalue);
+	
+	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
+		// Create the entry here
+		
+printf("creating a zval for wrapper:%s\n", wrappername);
+		
+		MAKE_STD_ZVAL(*wrapperhash);
+		array_init(*wrapperhash);
+		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)wrapperhash, sizeof(zval *), NULL))
+			return FAILURE;
+
+		ZVAL_ADDREF(optionvalue);
+	}
+printf("storing value with key %s in wrapper hash\n", optionname);
+
+	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue, sizeof(zval *), NULL);
 }
 
 

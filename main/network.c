@@ -17,6 +17,7 @@
  */
 /* $Id$ */
 
+/*#define DEBUG_MAIN_NETWORK 1*/
 #define MAX_CHUNKS_PER_READ 10
 
 #include "php.h"
@@ -591,7 +592,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 #if ZEND_DEBUG && DEBUG_MAIN_NETWORK
 static inline void dump_sock_state(char *msg, php_netstream_data_t *sock TSRMLS_DC)
 {
-	printf("%s: blocked=%d timeout_event=%d eof=%d inbuf=%d\n", msg, sock->is_blocked, sock->timeout_event, sock->eof, TOREAD(sock));
+	printf("%s: blocked=%d timeout_event=%d eof=%d inbuf=%d timeout=%d\n", msg, sock->is_blocked, sock->timeout_event, sock->eof, TOREAD(sock), sock->timeout);
 }
 # define DUMP_SOCK_STATE(msg, sock)	dump_sock_state(msg, sock TSRMLS_CC)
 #else
@@ -600,7 +601,7 @@ static inline void dump_sock_state(char *msg, php_netstream_data_t *sock TSRMLS_
 
 static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
-	fd_set fdr, tfdr;
+	fd_set fdr, tfdr, fdx;
 	int retval;
 	struct timeval timeout, *ptimeout;
 
@@ -616,11 +617,12 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	
 	while(1) {
 		tfdr = fdr;
+		fdx = fdr;
 		timeout = sock->timeout;
 
 DUMP_SOCK_STATE("wait_for_data", sock);
 
-		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
+		retval = select(sock->socket + 1, &tfdr, NULL, &fdx, ptimeout);
 
 		if (retval == 0)
 			sock->timeout_event = 1;
@@ -663,6 +665,10 @@ DUMP_SOCK_STATE("read_internal about to recv/SSL_read", sock);
 #endif
 	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
 DUMP_SOCK_STATE("read_internal after recv/SSL_read", sock);
+
+#if DEBUG_MAIN_NETWORK
+printf("read_internal read %d/%d bytes\n", nr_bytes, sock->chunk_size);
+#endif
 
 	if(nr_bytes > 0) {
 
@@ -768,7 +774,10 @@ DUMP_SOCK_STATE("check for EOF", sock);
 		memcpy(buf, READPTR(sock), ret);
 		sock->readpos += ret;
 	}
-
+#if DEBUG_MAIN_NETWORK
+	DUMP_SOCK_STATE("sockop_read", sock);
+	printf("sockop_read returning with %d bytes read\n", ret);
+#endif
 	return ret;
 }
 
