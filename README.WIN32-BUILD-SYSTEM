@@ -2,11 +2,8 @@ The Win32 Build System.
 $Id$
 Wez Furlong <wez@thebrainroom.com>
 
-NB: Please don't mail me asking for help on this, unless
-you are a Core PHP developer, or you are prepared to donate
-some money via paypal or buy me something from my wishlist.
-http://pecl.php.net/user/wez
-Thanks :-)
+If you need help with the build system, send mail to
+internals@lists.php.net; please don't email me directly.
 
 ===========================================================
 Contents:
@@ -18,6 +15,7 @@ Contents:
  e. Building
  f. Cleaning up
  g. Running the test suite
+ h. snapshot building
  
 2. How to write config.w32 files
  x. to be written.
@@ -28,9 +26,8 @@ a. Requirements
 
  You need:
   - Windows Scripting Host (cscript.exe)
-  - Microsoft Build Tools from either:
+  - Microsoft Build Tools from:
      Microsoft Visual Studio (VC6) or later
-  Microsoft Platform SDK
  
  You also need:
   - bindlib_w32 [http://www.php.net/extra/bindlib_w32.zip]
@@ -158,6 +155,20 @@ g. Running the test suite
  by defing the TESTS variable - if you wanted to run the
  sqlite test suite only, you would type
  "nmake /D TESTS=ext/sqlite/tests test"
+
+h. Snapshot Building
+
+ If you want to set up an automated build that will tolerate
+ breakages in some of the modules, you can use the
+ --enable-snapshot-build configure option to generate a
+ makefile optimized for that purpose.  A snapshot build will
+ switch the argument parser so that the default option for
+ configure switches that your don't specify will be set
+ to "shared".  The effect of this is to turn on all options
+ unless you explicitly disable them.  When you have configured
+ your snapshot build, you can use "nmake build-snap" to build
+ everything, ignoring build errors in individual extensions
+ or SAPI.
 
 vim:tw=78:sw=1:ts=1:et
 
