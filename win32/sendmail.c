@@ -571,12 +571,16 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	}
 
 	if ((res = Post("DATA\r\n")) != SUCCESS) {
-		efree(stripped_header);
+		if (stripped_header) {
+			efree(stripped_header);
+		}
 		return (res);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
-		efree(stripped_header);
+		if (stripped_header) {
+			efree(stripped_header);
+		}
 		return (res);
 	}
 
