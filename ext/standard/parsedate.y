@@ -220,6 +220,7 @@ item	: time {
 	| rel {
 	    yyHaveRel++;
 	}
+	| number
 	;
 
 time	: tUNUMBER tMERIDIAN {
