@@ -197,7 +197,7 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 SINCE:               4.0.3
@@ -215,7 +215,7 @@ STATUS:              Working
 SINCE:               4.0.6
 -------------------------------------------------------------------------------
 EXTENSION:           calendar
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ STATUS:              Experimental
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
 EXTENSION:           ctype
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -469,7 +469,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xslt
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working (mostly)
 -------------------------------------------------------------------------------
@@ -489,7 +489,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zziplib
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 SINCE:               4.0.5

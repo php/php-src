@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Shane Caraveo             <shane@caraveo.com>               | 
    |          Colin Viebrock            <colin@easydns.com>               |
-   |          Hartmut Holzgraefe        <hartmut@six.de>                  |
+   |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    |          Wez Furlong               <wez@thebrainroom.com>            |
    +----------------------------------------------------------------------+
  */
