@@ -25,28 +25,10 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.9</version>
-    <state>stable</state>
-    <date>2002-04-07</date>
+    <version>0.9.1</version>
+    <state>beta</state>
+    <date>yyyy-mm-dd</date>
     <notes>
-First package release.  Commands implemented:
-   remote-package-info
-   list-upgrades
-   list-remote-packages
-   download
-   config-show
-   config-get
-   config-set
-   list-installed
-   shell-test
-   install
-   uninstall
-   upgrade
-   package
-   package-list
-   package-info
-   login
-   logout
 </notes>
     <filelist>
       <file role="php" name="PEAR.php"/>
@@ -75,9 +57,36 @@ First package release.  Commands implemented:
       </dir>
       <dir name="scripts">
 	<file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
-          <replace from="@prefix@" to="PHP_PREFIX" type="pear-config"/>
+          <replace from="@bindir@" to="PHP_BINDIR" type="php-const"/>
         </file>
       </dir>
     </filelist>
   </release>
+  <changelog>
+    <release>
+      <version>0.9</version>
+      <state>beta</state>
+      <date>2002-04-07</date>
+      <notes>
+First package release.  Commands implemented:
+   remote-package-info
+   list-upgrades
+   list-remote-packages
+   download
+   config-show
+   config-get
+   config-set
+   list-installed
+   shell-test
+   install
+   uninstall
+   upgrade
+   package
+   package-list
+   package-info
+   login
+   logout
+</notes>
+    </release>
+  </changelog>
 </package>
