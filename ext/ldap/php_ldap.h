@@ -98,10 +98,8 @@ PHP_FUNCTION(ldap_8859_to_t61);
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
-	long default_link;
 	long num_links;
 	long max_links;
-	char *base_dn;
 ZEND_END_MODULE_GLOBALS(ldap)
 
 #ifdef ZTS
