@@ -116,7 +116,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* [{{ php_iconv_init_globals */
+/* {{{ php_iconv_init_globals */
 static void php_iconv_init_globals(zend_iconv_globals *iconv_globals)
 {
 	iconv_globals->input_encoding = NULL;
@@ -352,6 +352,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *in_charset, c
 			break;
 	}
 }
+/* }}} */
 
 /* {{{ proto string iconv(string in_charset, string out_charset, string str)
    Returns str converted to the out_charset character set */
