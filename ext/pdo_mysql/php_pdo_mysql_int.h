@@ -23,7 +23,7 @@
 
 #include <mysql.h>
 
-/* stuff we use in an OCI database handle */
+/* stuff we use in a mySQL database handle */
 typedef struct {
 	MYSQL 		*server;
 	unsigned int	last_err;
