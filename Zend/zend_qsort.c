@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "zend.h"
 
 #include <limits.h>
@@ -24,20 +26,30 @@
 
 static void _zend_qsort_swap(void *a, void *b, size_t siz)
 {
+	register char  *tmp_a_char;
+	register char  *tmp_b_char;
+	register int   *tmp_a_int;
+	register int   *tmp_b_int;
 	register size_t i;
-	register int    t_i;
-	register char   t_c;
-	
+	int             t_i;
+	char            t_c;
+
+	tmp_a_int = (int *) a;
+	tmp_b_int = (int *) b;
+
 	for (i = sizeof(int); i <= siz; i += sizeof(int)) {
-		t_i = *(int *) a;
-		*((int *) a)++ = *(int *) b;
-		*((int *) b)++ = t_i;
+		t_i = *tmp_a_int;
+		*tmp_a_int++ = *tmp_b_int;
+		*tmp_b_int++ = t_i;
 	}
 
+	tmp_a_char = (char *) tmp_a_int;
+	tmp_b_char = (char *) tmp_b_int;
+
 	for (i = i - sizeof(int) + 1; i <= siz; ++i) {
-		t_c = *(char *) a;
-		*((char *) a)++ = *(char *) b;
-		*((char *) b)++ = t_c;
+		t_c = *tmp_a_char;
+		*tmp_a_char++ = *tmp_b_char;
+		*tmp_b_char++ = t_c;
 	}
 }
 
@@ -104,3 +116,12 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 		}
 	}
 }
+
+/* 
+ * Local Variables:
+ * c-basic-offset: 4 
+ * tab-width: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
+ */
