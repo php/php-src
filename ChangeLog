@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added extra metadata functions to ODBC, SQLTables etc (nick@easysoft.com)
 - Fixed SEGV in mcal make_event_object() (Andrew Skalski)
 - Fixed Ora_PLogon (Thies)
 - Resourcified Oracle (Thies)
