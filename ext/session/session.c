@@ -1645,8 +1645,8 @@ PHP_MINFO_FUNCTION(session)
 	
 	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++) {
 		if (*mod && (*mod)->s_name) {
-			smart_str_appends(&save_handlers, (*mod)->s_name);
-			smart_str_appendc(&save_handlers, ' ');
+			smart_str_appends(&handlers, (*mod)->s_name);
+			smart_str_appendc(&handlers, ' ');
 		}
 	}
 
