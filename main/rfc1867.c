@@ -153,30 +153,39 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 				}
 				break;
 			case 1:			/* Check content-disposition */
-				if (strncasecmp(ptr, "Content-Disposition: form-data;", 31)) {
+				while (strncasecmp(ptr, "Content-Disposition: form-data;", 31)) {
 					if (rem < 31) {
 						SAFE_RETURN;
 					}
-					php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
-					SAFE_RETURN;
+					if (ptr[1] == '\n') {
+                                                /* empty line as end of header found */
+						php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+						SAFE_RETURN;
+                                        }
+					/* some other headerfield found, skip it */
+                                        loc = (char *) memchr(ptr, '\n', rem)+1;
+					while (*loc == ' ' || *loc == '\t')
+						/* other field is folded, skip it */
+                                        	loc = (char *) memchr(loc, '\n', rem-(loc-ptr))+1;
+					rem -= (loc - ptr);
+					ptr = loc;
 				}
 				loc = memchr(ptr, '\n', rem);
+				while (loc[1] == ' ' || loc[1] == '\t')
+					/* field is folded, look for end */
+					loc = memchr(loc+1, '\n', rem-(loc-ptr)-1);
 				name = strstr(ptr, " name=");
 				if (name && name < loc) {
 					name += 6;
-					s = memchr(name, '\"', loc - name);
-					if ( name == s ) { 
+					if ( *name == '\"' ) { 
 						name++;
 						s = memchr(name, '\"', loc - name);
 						if(!s) {
 							php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
 							SAFE_RETURN;
 						}
-					} else if(!s) {
-						s = loc;
 					} else {
-						php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
-						SAFE_RETURN;
+						s = strpbrk(name, " \t()<>@,;:\\\"/[]?=\r\n");
 					}
 					if (namebuf) {
 						efree(namebuf);
@@ -187,9 +196,13 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					}
 					lbuf = emalloc(s-name + MAX_SIZE_OF_INDEX + 1);
 					state = 2;
-					loc2 = memchr(loc + 1, '\n', rem);
-					rem -= (loc2 - ptr) + 1;
-					ptr = loc2 + 1;
+					loc2 = loc;
+					while (loc2[2] != '\n') {
+						/* empty line as end of header not yet found */
+						loc2 = memchr(loc2 + 1, '\n', rem-(loc2-ptr)-1);
+					}
+					rem -= (loc2 - ptr) + 3;
+					ptr = loc2 + 3;
 					/* is_arr_upload is true when name of file upload field
 					 * ends in [.*]
 					 * start_arr is set to point to 1st [
