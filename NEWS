@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added zval_debug_dump which works similar to var_dump yet displays extra
 - Added Andrei's tokenizer extension (Stig)
 - Removed Satellite. It is now part of PEAR.
 - Changed php.ini directive 'safe_mode_include_dir' to accept a
