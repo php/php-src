@@ -80,7 +80,7 @@ function initialize() {
     if ($windows_p) {
 	$php = "./php.exe";
     } else {
-	$php = "./php";
+	$php = $GLOBALS["TOP_BUILDDIR"]."/php";
     }
 
     if (!is_executable($php)) {
@@ -145,7 +145,7 @@ function do_testing($argc, &$argv) {
 	    }
 	}
     } else {
-	$dir = ".";
+	$dir = $GLOBALS["TOP_SRCDIR"];
     }
 
     if ($dir) {

@@ -54,7 +54,7 @@ distclean: distclean-recursive clean-x
 	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
 
 test: $(top_builddir)/php
-	@$(top_builddir)/php -q $(top_srcdir)/run-tests.php `pwd`
+	@TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/php -q $(top_srcdir)/run-tests.php $(srcdir)
 
 include $(builddir)/.deps
 
