@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:s="http://www.w3.org/2001/XMLSchema"
+xmlns:s0="http://tempuri.org/"
+xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/"
+xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+targetNamespace="http://tempuri.org/"
+xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema elementFormDefault="qualified"
+targetNamespace="http://tempuri.org/">
+      <s:element name="LoginMGDIS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iUserLogin"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iUserId"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iUserPassword"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iProfilId"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LoginMGDISResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetIdentification">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetIdentificationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetIdentificationResult" type="s0:ArrayOfAnyType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfAnyType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="anyType"
+nillable="true" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RollbackCurrentTransaction">
+        <s:complexType />
+      </s:element>
+      <s:element name="RollbackCurrentTransactionResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetListeProfil">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iUserLogin"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iUserPassword"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="MGCodeLibelle">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Code"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Libelle"
+type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Defaut"
+type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tag" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfMGCodeLibelle">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded"
+name="MGCodeLibelle" nillable="true" type="s0:MGCodeLibelle" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetListeProfilResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetListeProfilResult" type="s0:ArrayOfMGCodeLibelle" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetListeValCodif">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Code"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfMGCodif">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="MGCodif"
+nillable="true" type="s0:MGCodif" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MGCodif">
+        <s:complexContent mixed="false">
+          <s:extension base="s0:MGCodeLibelle" />
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetListeValCodifResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetListeValCodifResult" type="s0:ArrayOfMGCodif" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="TestPhpSoap">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="entree"
+type="s0:MGCodif" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="TestPhpSoapResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="TestPhpSoapResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetListeCodif">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1"
+name="iGetListeValeur" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="MGCodifGrp">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TypeCodif"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LibCodif"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ListeCodifs"
+type="s0:ArrayOfMGCodif" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfMGCodifGrp">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded"
+name="MGCodifGrp" nillable="true" type="s0:MGCodifGrp" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetListeCodifResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetListeCodifResult" type="s0:ArrayOfMGCodifGrp" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DroitCreation">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iObjet"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iProfil"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DroitCreationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1"
+name="DroitCreationResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListeDroitCreation">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iListeObjet"
+type="s0:ArrayOfString" />
+            <s:element minOccurs="0" maxOccurs="1" name="iProfil"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string"
+nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListeDroitCreationResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="ListeDroitCreationResult" type="s0:ArrayOfAnyType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDroitsObjetProtege">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iObjet"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iProfil"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iUtilisateur"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="MGDroitsObjetProtege">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LbUti"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LbProf"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LbServ"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LbDir"
+type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="isProtected"
+type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ListeDroitsAcces"
+type="s0:ArrayOfMGDroitAcces" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfMGDroitAcces">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded"
+name="MGDroitAcces" nillable="true" type="s0:MGDroitAcces" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="MGDroitAcces">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="IdProfil"
+type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Lecture"
+type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Modification"
+type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Suppression"
+type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetDroitsObjetProtegeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetDroitsObjetProtegeResult" type="s0:MGDroitsObjetProtege" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPrivileges">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iIdSupport"
+type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="iIdForme"
+type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="iProfil"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPrivilegesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetPrivilegesResult" type="s0:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLibelleProfil">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iIdProfil"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLibelleProfilResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetLibelleProfilResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValeurRecherche">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iChampSource"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iTable"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iOrderByClause"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValeurRechercheResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetValeurRechercheResult" type="s0:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValeurRechercheWithClauseWhere">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="iChampSource"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iTable"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iClauseWhere"
+type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="iOrderByClause"
+type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValeurRechercheWithClauseWhereResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetValeurRechercheWithClauseWhereResult" type="s0:ArrayOfString"
+/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetEnvironnement">
+        <s:complexType />
+      </s:element>
+      <s:complexType name="MGEnvironnement">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="RepBureautique"
+type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1"
+name="RepBureautiqueImage" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1"
+name="RepBureautiqueDoc" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetEnvironnementResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1"
+name="GetEnvironnementResult" type="s0:MGEnvironnement" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </types>
+  <message name="LoginMGDISSoapIn">
+    <part name="parameters" element="s0:LoginMGDIS" />
+  </message>
+  <message name="LoginMGDISSoapOut">
+    <part name="parameters" element="s0:LoginMGDISResponse" />
+  </message>
+  <message name="GetIdentificationSoapIn">
+    <part name="parameters" element="s0:GetIdentification" />
+  </message>
+  <message name="GetIdentificationSoapOut">
+    <part name="parameters" element="s0:GetIdentificationResponse" />
+  </message>
+  <message name="RollbackCurrentTransactionSoapIn">
+    <part name="parameters" element="s0:RollbackCurrentTransaction" />
+  </message>
+  <message name="RollbackCurrentTransactionSoapOut">
+    <part name="parameters"
+element="s0:RollbackCurrentTransactionResponse" />
+  </message>
+  <message name="GetListeProfilSoapIn">
+    <part name="parameters" element="s0:GetListeProfil" />
+  </message>
+  <message name="GetListeProfilSoapOut">
+    <part name="parameters" element="s0:GetListeProfilResponse" />
+  </message>
+  <message name="GetListeValCodifSoapIn">
+    <part name="parameters" element="s0:GetListeValCodif" />
+  </message>
+  <message name="GetListeValCodifSoapOut">
+    <part name="parameters" element="s0:GetListeValCodifResponse" />
+  </message>
+  <message name="TestPhpSoapSoapIn">
+    <part name="parameters" element="s0:TestPhpSoap" />
+  </message>
+  <message name="TestPhpSoapSoapOut">
+    <part name="parameters" element="s0:TestPhpSoapResponse" />
+  </message>
+  <message name="GetListeCodifSoapIn">
+    <part name="parameters" element="s0:GetListeCodif" />
+  </message>
+  <message name="GetListeCodifSoapOut">
+    <part name="parameters" element="s0:GetListeCodifResponse" />
+  </message>
+  <message name="DroitCreationSoapIn">
+    <part name="parameters" element="s0:DroitCreation" />
+  </message>
+  <message name="DroitCreationSoapOut">
+    <part name="parameters" element="s0:DroitCreationResponse" />
+  </message>
+  <message name="ListeDroitCreationSoapIn">
+    <part name="parameters" element="s0:ListeDroitCreation" />
+  </message>
+  <message name="ListeDroitCreationSoapOut">
+    <part name="parameters" element="s0:ListeDroitCreationResponse" />
+  </message>
+  <message name="GetDroitsObjetProtegeSoapIn">
+    <part name="parameters" element="s0:GetDroitsObjetProtege" />
+  </message>
+  <message name="GetDroitsObjetProtegeSoapOut">
+    <part name="parameters" element="s0:GetDroitsObjetProtegeResponse"
+/>
+  </message>
+  <message name="GetPrivilegesSoapIn">
+    <part name="parameters" element="s0:GetPrivileges" />
+  </message>
+  <message name="GetPrivilegesSoapOut">
+    <part name="parameters" element="s0:GetPrivilegesResponse" />
+  </message>
+  <message name="GetLibelleProfilSoapIn">
+    <part name="parameters" element="s0:GetLibelleProfil" />
+  </message>
+  <message name="GetLibelleProfilSoapOut">
+    <part name="parameters" element="s0:GetLibelleProfilResponse" />
+  </message>
+  <message name="GetValeurRechercheSoapIn">
+    <part name="parameters" element="s0:GetValeurRecherche" />
+  </message>
+  <message name="GetValeurRechercheSoapOut">
+    <part name="parameters" element="s0:GetValeurRechercheResponse" />
+  </message>
+  <message name="GetValeurRechercheWithClauseWhereSoapIn">
+    <part name="parameters"
+element="s0:GetValeurRechercheWithClauseWhere" />
+  </message>
+  <message name="GetValeurRechercheWithClauseWhereSoapOut">
+    <part name="parameters"
+element="s0:GetValeurRechercheWithClauseWhereResponse" />
+  </message>
+  <message name="GetEnvironnementSoapIn">
+    <part name="parameters" element="s0:GetEnvironnement" />
+  </message>
+  <message name="GetEnvironnementSoapOut">
+    <part name="parameters" element="s0:GetEnvironnementResponse" />
+  </message>
+  <portType name="MGServiceNoyauNETSoap">
+    <operation name="LoginMGDIS">
+      <input message="s0:LoginMGDISSoapIn" />
+      <output message="s0:LoginMGDISSoapOut" />
+    </operation>
+    <operation name="GetIdentification">
+      <input message="s0:GetIdentificationSoapIn" />
+      <output message="s0:GetIdentificationSoapOut" />
+    </operation>
+    <operation name="RollbackCurrentTransaction">
+      <input message="s0:RollbackCurrentTransactionSoapIn" />
+      <output message="s0:RollbackCurrentTransactionSoapOut" />
+    </operation>
+    <operation name="GetListeProfil">
+      <input message="s0:GetListeProfilSoapIn" />
+      <output message="s0:GetListeProfilSoapOut" />
+    </operation>
+    <operation name="GetListeValCodif">
+      <input message="s0:GetListeValCodifSoapIn" />
+      <output message="s0:GetListeValCodifSoapOut" />
+    </operation>
+    <operation name="TestPhpSoap">
+      <input message="s0:TestPhpSoapSoapIn" />
+      <output message="s0:TestPhpSoapSoapOut" />
+    </operation>
+    <operation name="GetListeCodif">
+      <input message="s0:GetListeCodifSoapIn" />
+      <output message="s0:GetListeCodifSoapOut" />
+    </operation>
+    <operation name="DroitCreation">
+      <input message="s0:DroitCreationSoapIn" />
+      <output message="s0:DroitCreationSoapOut" />
+    </operation>
+    <operation name="ListeDroitCreation">
+      <input message="s0:ListeDroitCreationSoapIn" />
+      <output message="s0:ListeDroitCreationSoapOut" />
+    </operation>
+    <operation name="GetDroitsObjetProtege">
+      <input message="s0:GetDroitsObjetProtegeSoapIn" />
+      <output message="s0:GetDroitsObjetProtegeSoapOut" />
+    </operation>
+    <operation name="GetPrivileges">
+      <input message="s0:GetPrivilegesSoapIn" />
+      <output message="s0:GetPrivilegesSoapOut" />
+    </operation>
+    <operation name="GetLibelleProfil">
+      <input message="s0:GetLibelleProfilSoapIn" />
+      <output message="s0:GetLibelleProfilSoapOut" />
+    </operation>
+    <operation name="GetValeurRecherche">
+      <input message="s0:GetValeurRechercheSoapIn" />
+      <output message="s0:GetValeurRechercheSoapOut" />
+    </operation>
+    <operation name="GetValeurRechercheWithClauseWhere">
+      <input message="s0:GetValeurRechercheWithClauseWhereSoapIn" />
+      <output message="s0:GetValeurRechercheWithClauseWhereSoapOut" />
+    </operation>
+    <operation name="GetEnvironnement">
+      <input message="s0:GetEnvironnementSoapIn" />
+      <output message="s0:GetEnvironnementSoapOut" />
+    </operation>
+  </portType>
+  <binding name="MGServiceNoyauNETSoap"
+type="s0:MGServiceNoyauNETSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+style="document" />
+    <operation name="LoginMGDIS">
+      <soap:operation soapAction="http://tempuri.org/LoginMGDIS"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetIdentification">
+      <soap:operation soapAction="http://tempuri.org/GetIdentification"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="RollbackCurrentTransaction">
+      <soap:operation
+soapAction="http://tempuri.org/RollbackCurrentTransaction"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetListeProfil">
+      <soap:operation soapAction="http://tempuri.org/GetListeProfil"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetListeValCodif">
+      <soap:operation soapAction="http://tempuri.org/GetListeValCodif"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="TestPhpSoap">
+      <soap:operation soapAction="http://tempuri.org/TestPhpSoap"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetListeCodif">
+      <soap:operation soapAction="http://tempuri.org/GetListeCodif"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="DroitCreation">
+      <soap:operation soapAction="http://tempuri.org/DroitCreation"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="ListeDroitCreation">
+      <soap:operation soapAction="http://tempuri.org/ListeDroitCreation"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetDroitsObjetProtege">
+      <soap:operation
+soapAction="http://tempuri.org/GetDroitsObjetProtege" style="document"
+/>
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetPrivileges">
+      <soap:operation soapAction="http://tempuri.org/GetPrivileges"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetLibelleProfil">
+      <soap:operation soapAction="http://tempuri.org/GetLibelleProfil"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetValeurRecherche">
+      <soap:operation soapAction="http://tempuri.org/GetValeurRecherche"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetValeurRechercheWithClauseWhere">
+      <soap:operation
+soapAction="http://tempuri.org/GetValeurRechercheWithClauseWhere"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="GetEnvironnement">
+      <soap:operation soapAction="http://tempuri.org/GetEnvironnement"
+style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="MGServiceNoyauNET">
+    <port name="MGServiceNoyauNETSoap"
+binding="s0:MGServiceNoyauNETSoap">
+      <soap:address
+location="http://localhost/SoapSrvSOFI/MGServiceNoyauNET.asmx" />
+    </port>
+  </service>
+</definitions>

@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Fixed bug #28985 (__getTypes() returning nothing on complex WSDL). (Dmitry)
 - Fixed bug #29236 (memory error when wsdl-cache is enabled). (Dmitry)
 - Fixed bug #29109 (SoapFault exception: [WSDL] Out of memory). (Dmitry)
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
