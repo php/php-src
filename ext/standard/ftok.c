@@ -25,8 +25,8 @@
 #include <sys/types.h>                                                                                                        
 #include <sys/ipc.h>
 
-/* {{{ proto int ftok(string pathname, char proj)
-   convert a pathname and a project identifier to a System V IPC key */
+/* {{{ proto int ftok(string pathname, string proj)
+   Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {
     pval **pathname, **proj;
