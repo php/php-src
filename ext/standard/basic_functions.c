@@ -713,11 +713,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
 
-#ifdef TRANS_SID
-	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
-	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
-#endif
-
 #ifdef PHP_WIN32
 	CoInitialize(NULL);
 #endif
@@ -794,9 +789,7 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(assert)(INIT_FUNC_ARGS_PASSTHRU);
-#ifdef TRANS_SID
 	PHP_MINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 
 	if(PG(allow_url_fopen)) {
@@ -835,9 +828,7 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-#ifdef TRANS_SID
 	PHP_MSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-#endif
 	PHP_MSHUTDOWN(file)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	PHP_MSHUTDOWN(localeconv)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -881,11 +872,9 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(dir)(INIT_FUNC_ARGS_PASSTHRU);
 
-#ifdef TRANS_SID
 	if (BG(use_trans_sid)) {
 		php_session_start_output_handler(INIT_FUNC_ARGS_PASSTHRU, 4096);
 	}
-#endif
 
 	return SUCCESS;
 }
@@ -913,10 +902,9 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	PHP_RSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
-#ifdef TRANS_SID
-	PHP_RSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-	PHP_RSHUTDOWN(url_scanner)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-#endif
+	if (BG(use_trans_sid)) {
+		php_session_end_output_handler(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	}
 
 	if (BG(user_tick_functions)) {
 		zend_llist_destroy(BG(user_tick_functions));

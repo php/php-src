@@ -19,8 +19,6 @@
 
 #include "php.h"
 
-#ifdef TRANS_SID
-
 #include "php_globals.h"
 
 #include <sys/types.h>
@@ -373,7 +371,6 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 	return out;
 }
 /* }}} */
-#endif
 
 /*
  * Local variables:

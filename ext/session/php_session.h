@@ -143,17 +143,13 @@ typedef struct ps_serializer_struct {
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
 
-#ifdef TRANS_SID
 void session_adapt_uris(const char *, size_t, char **, size_t *,zend_bool TSRMLS_DC);
 void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
-#else
-#define session_adapt_uris(a,b,c,d,e) do { } while(0)
-#define session_adapt_url(a,b,c,d) do { } while(0)
-#endif
 
 void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash TSRMLS_DC);
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC);
 void php_session_start_output_handler(INIT_FUNC_ARGS, uint chunk_size);
+void php_session_end_output_handler(SHUTDOWN_FUNC_ARGS);
 
 int php_session_register_module(ps_module *);
 

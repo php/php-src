@@ -33,9 +33,6 @@
 #define HAVE_CRYPT 0
 /* #define HAVE_CRYPT_H 1 */
 
-/* set to enable trans sid */
-#define TRANS_SID 1
-
 /* set to enable force cgi redirect */
 #define FORCE_CGI_REDIRECT 0
 

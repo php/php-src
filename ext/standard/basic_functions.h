@@ -26,10 +26,8 @@
 
 #include "zend_highlight.h"
 
-#ifdef TRANS_SID
-#  include "url_scanner.h"
-#  include "url_scanner_ex.h"
-#endif
+#include "url_scanner.h"
+#include "url_scanner_ex.h"
 
 extern zend_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
@@ -183,12 +181,10 @@ typedef struct {
 	zend_class_entry *incomplete_class;
 	zend_bool use_trans_sid;
 
-#ifdef TRANS_SID
 	/* url_scanner.c */
 	url_adapt_state_t url_adapt_state;
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;
-#endif
 
 #ifdef HAVE_MMAP
 	void *mmap_file;
