@@ -13,6 +13,22 @@
  * fails on executing this script.
  */
 
+$file = array_key_exists('thumbnail',$_REQUEST) ? $_REQUEST['thumbnail'] : '';
+//$file = '/t/temp/kodak-dc4800.tif';
+//$file = '/t/temp/canon-ixus.jpg';
+if ( $file) {
+	$image = exif_thumbnail($file);
+	if ( $image!==false) {
+    	@Header("content-type: image/jpeg");
+		echo $image;
+	} else {
+		echo "<html><body><table>\n";
+		echo "Thumbnail could not be extracted.\n";
+		echo "</table></body></html>";
+	}
+	die();
+}
+
 $possible = array();
 
 /****************************************************************************/
@@ -182,18 +198,18 @@ What to look for in detail:
 	</ul>
 </li>
 </ul>
-<h2>function exif_headername</h2>
+<h2>function exif_tagname</h2>
 <table border='1' cellspacing='0' cellpadding='3' summary="EXIF headernames">
 <?php
-if (function_exists('exif_headername')) {
+if (function_exists('exif_tagname')) {
 ?>
-<tr><td>ImageWidth</td><td><?=@exif_headername(0x0100)?></td><td><?=error_msg()?></td></tr>
-<tr><td>JPEGProc</td><td><?=@exif_headername(0x0200)?></td><td><?=error_msg()?></td></tr>
-<tr><td>SceneType</td><td><?=@exif_headername(0xA301)?></td><td><?=error_msg()?></td></tr>
-<tr><td>false</td><td><?=@exif_headername(0x0000)===false?'false':'value'?></td><td><?=error_msg()?></td></tr>
+<tr><td>ImageWidth</td><td><?=@exif_tagname(0x0100)?></td><td><?=error_msg()?></td></tr>
+<tr><td>JPEGProc</td><td><?=@exif_tagname(0x0200)?></td><td><?=error_msg()?></td></tr>
+<tr><td>SceneType</td><td><?=@exif_tagname(0xA301)?></td><td><?=error_msg()?></td></tr>
+<tr><td>false</td><td><?=@exif_tagname(0x0000)===false?'false':'value'?></td><td><?=error_msg()?></td></tr>
 <?php
 } else {
-	echo "<tr><td>function exif_headername is not supported</td></tr>\n";
+	echo "<tr><td>function exif_tagname is not supported</td></tr>\n";
 }
 ?>
 </table>
@@ -215,8 +231,8 @@ if (function_exists('read_exif_data')) {
 			$getimagesize = "[ $size[0], $size[1], $size[2], $size[3] ]";
 		}
 		/**/
-		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');",0);
-		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');
+		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true);",0);
+		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12',true);
 		$error = error_msg();// clear message
 		//error_log("exif_read_data($file)",0);
 		$res   = '';
@@ -230,6 +246,7 @@ if (function_exists('read_exif_data')) {
 						$len++;
 						$res .= AddInfo($Name,'Array('.count($Value).')');
 						foreach( $Value as $idx => $Entry) {
+							if ($idx=='Thumbnail') $Entry = '&lt;data&gt;';
 							$len++;
 							$res .= AddInfo($Name.':'.$idx,$Entry);
 						}
