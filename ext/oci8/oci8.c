@@ -2153,7 +2153,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
-#ifdef HAVE_OCI9
+#ifdef HAVE_OCI_9_2
 	ub2 charsetid = 0;
 #endif
 	TSRMLS_FETCH();
@@ -2204,7 +2204,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->server = server;
 	session->exclusive = exclusive;
 
-#ifdef HAVE_OCI9
+#ifdef HAVE_OCI_9_2
 
 	/* following chunk is Oracle 9i+ ONLY */
 	if (*charset) {
@@ -2242,7 +2242,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->pEnv = OCI(pEnv);
 	session->charsetId = 0;
 
-#endif  /* HAVE_OCI9 */
+#endif  /* HAVE_OCI_9_2 */
 
 	/* allocate temporary Service Context */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
