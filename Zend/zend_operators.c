@@ -743,47 +743,6 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int boolean_or_function(zval *result, zval *op1, zval *op2)
-{
-	zval op1_copy, op2_copy;
-	
-	result->type = IS_BOOL;
-
-	zendi_convert_to_boolean(op1, op1_copy, result);
-	if (op1->value.lval) {
-		result->value.lval = 1;
-		return SUCCESS;
-	}
-	zendi_convert_to_boolean(op2, op2_copy, result);
-	if (op2->value.lval) {
-		result->value.lval = 1;
-		return SUCCESS;
-	}
-	result->value.lval = 0;
-	return SUCCESS;
-}
-
-
-ZEND_API int boolean_and_function(zval *result, zval *op1, zval *op2)
-{
-	zval op1_copy, op2_copy;
-	
-	result->type = IS_BOOL;
-
-	zendi_convert_to_boolean(op1, op1_copy, result);
-	if (!op1->value.lval) {
-		result->value.lval = 0;
-		return SUCCESS;
-	}
-	zendi_convert_to_boolean(op2, op2_copy, result);
-	if (!op2->value.lval) {
-		result->value.lval = 0;
-		return SUCCESS;
-	}
-	result->value.lval = 1;
-	return SUCCESS;
-}
-
 
 ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2)
 {
