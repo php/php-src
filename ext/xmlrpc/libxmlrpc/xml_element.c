@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.5  2003/12/16 21:00:21  sniper
+ *   Fix some compile warnings (patch by Joe Orton)
+ *
  *   Revision 1.4  2002/11/26 23:01:16  fmk
  *   removing unused variables
  *
@@ -265,10 +268,9 @@ static int create_xml_escape(char *pString, unsigned char c)
     pString[counter++] = c / 100 + '0';
     c = c % 100;
   }
-  if(c >= 10) {
-    pString[counter++] = c / 10 + '0';
-    c = c % 10;
-  }
+  pString[counter++] = c / 10 + '0';
+  c = c % 10;
+
   pString[counter++] = c + '0';
   pString[counter++] = ';';
   return counter; 
