@@ -358,3 +358,19 @@ ZEND_API char *get_zend_version()
 {
 	return zend_version_info;
 }
+
+
+void zend_activate(CLS_D ELS_DC)
+{
+	init_compiler(CLS_C ELS_CC);
+	init_executor(CLS_C ELS_CC);
+	startup_scanner(CLS_C);
+}
+
+void zend_deactivate(CLS_D ELS_DC)
+{
+	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
+	shutdown_scanner(CLS_C);
+	shutdown_executor(ELS_C);
+	shutdown_compiler(CLS_C);
+}

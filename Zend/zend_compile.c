@@ -73,7 +73,6 @@ void init_compiler(CLS_D ELS_DC)
 
 void shutdown_compiler(CLS_D)
 {
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 	zend_stack_destroy(&CG(bp_stack));
 	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
