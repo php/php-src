@@ -268,9 +268,9 @@ switch_case_list:
 
 
 case_list:
-		/* empty */	{ $$.u.opline_num = -1; }
-	|	case_list T_CASE expr case_separator { do_case_before_statement(&$1, &$2, &$3 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
-	|	case_list T_DEFAULT case_separator { do_default_before_statement(&$1, &$2 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
+		/* empty */	{ $$.op_type = IS_UNUSED; }
+	|	case_list T_CASE expr case_separator { do_case_before_statement(&$1, &$2, &$3 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST }
+	|	case_list T_DEFAULT case_separator { do_default_before_statement(&$1, &$2 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST; }
 ;
 
 
