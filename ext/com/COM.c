@@ -1627,6 +1627,11 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 
 		FREE_VARIANT(var_result);
 
+		/* free the string we allocated; invoked object made its own copy */
+		if (V_VT(new_value) == VT_BSTR) {
+			VariantClear(new_value);
+		}
+		
 		efree(new_value);
 		efree(propname);
 
@@ -1659,7 +1664,11 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		FREE_VARIANT(var_result);
 	}
 
-	efree(new_value); // FREE_VARIANT does a VariantClear() which is not desired here !
+	/* free the string we allocated; invoked object made its own copy */
+	if (V_VT(new_value) == VT_BSTR) {
+		VariantClear(new_value);
+	}
+	efree(new_value);
 	efree(propname);
 }
 
