@@ -282,7 +282,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						if (op2
 							&& op2->op_type == IS_VAR
 							&& value==&Ts[op2->u.var].tmp_var) {
-							efree(value->value.str.val);
+							STR_FREE(value->value.str.val);
 						}
 						if (final_value == &tmp) {
 							zval_dtor(final_value);
