@@ -97,7 +97,6 @@ PHP_FUNCTION(ini_restore);
 PHP_FUNCTION(print_r);
 
 PHP_FUNCTION(connection_aborted);
-PHP_FUNCTION(connection_timeout);
 PHP_FUNCTION(connection_status);
 PHP_FUNCTION(ignore_user_abort);
 
