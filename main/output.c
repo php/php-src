@@ -673,7 +673,7 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 }
 
 
-/* {{{ poto array ob_get_status([bool full_status])
+/* {{{ proto array ob_get_status([bool full_status])
    Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_status)
 {

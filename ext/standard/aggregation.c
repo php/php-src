@@ -457,7 +457,7 @@ PHP_FUNCTION(aggregate_properties)
 /* }}} */
 
 
-/* {{{ proto void aggregate_properites_by_list(object obj, string class, array props_list [, bool exclude])
+/* {{{ proto void aggregate_properties_by_list(object obj, string class, array props_list [, bool exclude])
    */
 PHP_FUNCTION(aggregate_properties_by_list)
 {
