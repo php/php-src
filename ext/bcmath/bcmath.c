@@ -23,6 +23,7 @@
 #if WITH_BCMATH
 
 #include "number.h"
+#include "ext/standard/info.h"
 #include "php_bcmath.h"
 
 function_entry bcmath_functions[] = {
@@ -39,7 +40,14 @@ function_entry bcmath_functions[] = {
 };
 
 zend_module_entry bcmath_module_entry = {
-	"bcmath", bcmath_functions, NULL, NULL, PHP_RINIT(bcmath), PHP_RSHUTDOWN(bcmath), NULL, STANDARD_MODULE_PROPERTIES
+	"bcmath",
+    bcmath_functions,
+	NULL,
+	NULL,
+	PHP_RINIT(bcmath),
+	PHP_RSHUTDOWN(bcmath),
+	PHP_MINFO(bcmath),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_BCMATH
@@ -63,6 +71,13 @@ PHP_RSHUTDOWN_FUNCTION(bcmath)
 {
 	destruct_numbers();
 	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(bcmath)
+{
+  php_info_print_table_start();
+  php_info_print_table_row(2, "BCMath support", "enabled");
+  php_info_print_table_end();
 }
 
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
