@@ -75,11 +75,9 @@ EUC-JP
 ERR: Warning
 OK_BAD_SET
 EUC-JP
-ERR: Notice
 ERR: Warning
 OK_BAD_ARY_SET
 EUC-JP
-ERR: Notice
 ERR: Warning
 OK_BAD_OBJ_SET
 EUC-JP
