@@ -1,3 +1,27 @@
+2004-04-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_exceptions.c:
+      Classnames shall start with an uppercase character
+
+2004-04-13  Zeev Suraski  <zeev@zend.com>
+
+    * zend_builtin_functions.c:
+      Fix debug_backtrace to show arguments again
+      We need to merge code from debug_backtrace & debug_print_backtrace at
+      some point!
+
+2004-04-13  Andi Gutmans  <andi@zend.com>
+
+    * zend_extensions.h:
+      - Fix API no of Engine 2. The first number is the engine version and the
+      - rest is the API_NO. This way engine2_api_no is always greater than
+      - engine1_api_no.
+
+    * zend.c
+      zend_exceptions.c
+      zend_exceptions.h:
+      - Add hook for exception handler (Derick)
+
 2004-04-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.h:
