@@ -1,3 +1,124 @@
+2002-03-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/imap/php_imap.h: - MFH for bug #16008
+
+    * ext/imap/php_imap.h: - fix bug #16008
+
+2002-03-11  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+     implemented domxml_elem_get_elements_by_tagname
+     new function domxml_doc_get_elements_by_tagname
+     new function domxml_doc_get_element_by_id (chregu)
+
+2002-03-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/iconv/iconv.c: - Slightly unify error/warning messages.
+    - Switch to zend_parse_parameters().
+    - Fix whitespaces.
+
+2002-03-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS: -Change status of ext/exif
+
+    * ext/standard/image.c
+      ext/standard/php_image.h
+      ext/exif/exif.c: -fixes: memory handling & corrupted files
+
+2002-03-11  Shane Caraveo  <shane@caraveo.com>
+
+    * win32/php4ts.dsp: fix on more build config
+
+2002-03-11  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/bz2/bz2.c
+      ext/mcve/mcve.c: Maintain headers
+
+2002-03-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/CREDITS
+      sapi/cli/php_cli.c: -passing arguments to CLI, see: php -h
+
+2002-03-11  Stig Bakken  <ssb@fast.no>
+
+    * Makefile.global: * make "make test TESTS=..." work again
+
+    * pear/PEAR/Registry.php: * added file locking
+    * added file name to package map
+
+2002-03-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Print function names in error messages
+
+2002-03-11  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/README.Apache:
+    Instructions for using FastCGI-PHP with Apache
+
+    * sapi/fastcgi/README.FastCGI:
+    Improved documentation for FastCGI SAPI. Documents the environment
+    variable tunings and the new command line usage.
+
+    * sapi/fastcgi/fastcgi.c:
+    Add command line option to FastCGI SAPI to make it bind & listen to a
+    socket. This makes setting up 'remote' fastcgi much easier.
+
+2002-03-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/config.m4:
+    Add global include path, so that other extensions can access
+    the expat header.
+
+    * pear/Makefile.frag
+      configure.in: Invoke pear-related targets conditionally and
+    rename install-data-local target to install-pear.
+    Also remove PEAR_DIR, because it is unused.
+
+    * configure.in: Use standard PHP shell check syntax
+
+    * configure.in:
+    You don't need a C++ compiler to build 100% of PHP (and the largest part of
+    the extensions), so I don't see a reason why PHP should not build on
+    a system without a C++ compiler.
+
+    If your extension uses C++ objects, put PHP_REQUIRE_CXX into your
+    config.m4.
+
+    This should also be removed from the 4.2.0 branch, because it will
+    cause portability problems otherwise.
+
+    * sapi/thttpd/README: MFH: refining supported thttpd version
+
+    * sapi/thttpd/README: Add a note regarding which version we support
+
+2002-03-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cgi/libfcgi/os_win32.c: Fix warning, hope this is okay.
+
+2002-03-11  Shane Caraveo  <shane@caraveo.com>
+
+    * win32/php4ts.dsp: fix include paths for fcgi headers
+
+2002-03-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: WS and indent
+
+    * ext/pgsql/pgsql.c:
+    Add comments for constants. Remove unneeded constants included by mistake.
+
+    * ext/standard/reg.c: Small memory leak fix that does not matter much.
+
+    * ext/pgsql/pgsql.c: Fix possible build error under Windows.
+
+2002-03-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/math.c: Fix thread-safe build.
+
+2002-03-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Fix WS
+
 2002-03-10  jim winstead  <jimw@apache.org>
 
     * ext/standard/math.c:
