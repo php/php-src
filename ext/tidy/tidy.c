@@ -43,12 +43,11 @@ PHP_INI_ENTRY("tidy.clean_output",     "0",    PHP_INI_PERDIR,         NULL)
 PHP_INI_END()
 
 function_entry tidy_functions[] = {
-	PHP_FE(tidy_setopt,             NULL)
 	PHP_FE(tidy_getopt,             NULL)
 	PHP_FE(tidy_parse_string,       NULL)
 	PHP_FE(tidy_parse_file,         NULL)
 	PHP_FE(tidy_get_output,         NULL)
-	PHP_FE(tidy_get_error_buffer,   NULL)
+	PHP_FE(tidy_get_error_buffer,   NULL) 
 	PHP_FE(tidy_clean_repair,       NULL)
 	PHP_FE(tidy_repair_string,	NULL)
 	PHP_FE(tidy_repair_file,	NULL)
@@ -63,27 +62,19 @@ function_entry tidy_functions[] = {
 	PHP_FE(tidy_warning_count,	NULL)
 	PHP_FE(tidy_access_count,	NULL)
 	PHP_FE(tidy_config_count,	NULL)
-	PHP_FE(tidy_load_config,	NULL)
-	PHP_FE(tidy_load_config_enc,	NULL)
-	PHP_FE(tidy_set_encoding,	NULL)
-	PHP_FE(tidy_save_config,	NULL)
 	PHP_FE(tidy_get_root,		NULL)
 	PHP_FE(tidy_get_head,		NULL)
 	PHP_FE(tidy_get_html,		NULL)
 	PHP_FE(tidy_get_body,		NULL)
-	PHP_FE(tidy_reset_config,	NULL)
-	PHP_FE(tidy_snapshot_config,	NULL)
-	PHP_FE(tidy_restore_config,	NULL)
 	PHP_FE(ob_tidyhandler,		NULL)
 	{NULL, NULL, NULL}
 };
 
 function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(setopt, tidy_setopt, NULL)
 	TIDY_METHOD_MAP(getopt, tidy_getopt, NULL)
-	TIDY_METHOD_MAP(parse_string, tidy_parse_string, NULL)
-	TIDY_METHOD_MAP(parse_file, tidy_parse_file, NULL)
 	TIDY_METHOD_MAP(clean_repair, tidy_clean_repair, NULL)
+	TIDY_DOC_ME(parse_file, NULL)
+	TIDY_DOC_ME(parse_string, NULL)
 	TIDY_METHOD_MAP(repair_string, tidy_repair_string, NULL)
 	TIDY_METHOD_MAP(repair_file, tidy_repair_file, NULL)
 	TIDY_METHOD_MAP(diagnose, tidy_diagnose, NULL)
@@ -93,17 +84,11 @@ function_entry tidy_funcs_doc[] = {
 	TIDY_METHOD_MAP(get_html_ver, tidy_get_html_ver, NULL)
 	TIDY_METHOD_MAP(is_xhtml, tidy_is_xhtml, NULL)
 	TIDY_METHOD_MAP(is_xml, tidy_is_xml, NULL)
-	TIDY_METHOD_MAP(load_config, tidy_load_config, NULL)
-	TIDY_METHOD_MAP(load_config_enc, tidy_load_config_enc, NULL)
-	TIDY_METHOD_MAP(set_encoding, tidy_set_encoding, NULL)
-	TIDY_METHOD_MAP(save_config, tidy_save_config, NULL)
 	TIDY_METHOD_MAP(root, tidy_get_root, NULL)
 	TIDY_METHOD_MAP(head, tidy_get_head, NULL)
 	TIDY_METHOD_MAP(html, tidy_get_html, NULL)
 	TIDY_METHOD_MAP(body, tidy_get_body, NULL)
-	TIDY_METHOD_MAP(reset_config, tidy_reset_config, NULL)
-	TIDY_METHOD_MAP(snapshot_config, tidy_snapshot_config, NULL)
-	TIDY_METHOD_MAP(restore_config, tidy_restore_config, NULL)
+	TIDY_DOC_ME(__construct, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -121,20 +106,14 @@ function_entry tidy_funcs_node[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry tidy_funcs_attr[] = {
-	TIDY_ATTR_ME(__construct, NULL)
-	{NULL, NULL, NULL}
-};
-
 function_entry tidy_funcs_exception[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_attr, *tidy_ce_exception;
+zend_class_entry *tidy_ce_doc, *tidy_ce_node, *tidy_ce_exception;
 
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
-static zend_object_handlers tidy_object_handlers_attr;
 static zend_object_handlers tidy_object_handlers_exception;
 
 zend_module_entry tidy_module_entry = {
@@ -185,12 +164,12 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 	opt = tidyGetOptionByName(doc, optname);
 
 	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+		TIDY_THROW("Unknown Tidy Configuration Option '%s'", optname);
 		return FAILURE;
 	}
 	
 	if (tidyOptIsReadOnly(opt)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted to set read-only option '%s'", optname);
+		TIDY_THROW("Attempt to set read-only option '%s'", optname);
 		return FAILURE;
 	}
 
@@ -217,7 +196,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to set");
+			TIDY_THROW("Unable to determine type of configuration option");
 			break;
 	}	
 	
@@ -226,22 +205,18 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
-	char *data=NULL, *cfg_file=NULL, *arg1;
-	int cfg_file_len, arg1_len;
+	char *data=NULL, *arg1, *enc = NULL;
+	int arg1_len, enc_len = 0;
 	zend_bool use_include_path = 0;
 	TidyDoc doc;
 	TidyBuffer *errbuf;
+	zval *config;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sb", &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	if (getThis()) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call this function from an object context");
-		RETURN_FALSE;
-		
-	} 
-
 	if (is_file) {
 		if (!(data = php_tidy_file_to_mem(arg1, use_include_path TSRMLS_CC))) {
 			RETURN_FALSE;
@@ -263,14 +238,26 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	
 	TIDY_SET_DEFAULT_CONFIG(doc);
 	
-	if (cfg_file && cfg_file[0]) {
-		TIDY_SAFE_MODE_CHECK(cfg_file);
-		if (tidyLoadConfig(doc, cfg_file) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", cfg_file);
+	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
+	   
+	if(Z_TYPE_P(config) == IS_ARRAY) {
+		_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
+	} else {
+		convert_to_string_ex(&config);
+		TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
+		if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
 			RETVAL_FALSE;
 		}
 	}
 
+	if(enc_len) {
+		if (tidySetCharEncoding(doc, enc) < 0) {
+			TIDY_THROW("Could not set encoding '%s'", enc);
+			RETVAL_FALSE;
+		}
+	}
+	
 	if (data) {
 		if (tidyParseString(doc, data) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf->bp);
@@ -351,9 +338,6 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 		case is_node:
 			break;
 
-		case is_attr:
-			break;
-
 		case is_doc:
 			tidySetMallocCall(php_tidy_malloc);
 			tidySetReallocCall(php_tidy_realloc);
@@ -362,8 +346,6 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 
 			intern->ptdoc = emalloc(sizeof(PHPTidyDoc));
 			intern->ptdoc->doc = tidyCreate();
-			intern->ptdoc->parsed = FALSE;
-			intern->ptdoc->repaired = FALSE;
 			intern->ptdoc->ref_count = 1;
 			intern->ptdoc->errbuf = emalloc(sizeof(TidyBuffer));
 			tidyBufInit(intern->ptdoc->errbuf);
@@ -395,13 +377,6 @@ static zend_object_value tidy_object_new_node(zend_class_entry *class_type TSRML
 	return retval;
 }
 
-static zend_object_value tidy_object_new_attr(zend_class_entry *class_type TSRMLS_DC)
-{
-	zend_object_value retval;
-	tidy_object_new(class_type, &tidy_object_handlers_attr, &retval, is_attr TSRMLS_CC);
-	return retval;
-}
-
 static zend_object_value tidy_object_new_doc(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -419,11 +394,6 @@ static zend_object_value tidy_object_new_exception(zend_class_entry *class_type 
 static zend_class_entry *tidy_get_ce_node(zval *object TSRMLS_DC)
 {
 	return tidy_ce_node;
-}
-
-static zend_class_entry *tidy_get_ce_attr(zval *object TSRMLS_DC)
-{
-	return tidy_ce_attr;
 }
 
 static zend_class_entry *tidy_get_ce_doc(zval *object TSRMLS_DC)
@@ -509,34 +479,25 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type, int free TSRMLS
 
 static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 {
-	if (obj->ptdoc->parsed) {
-		TidyBuffer output = {0};
-		zval *temp;
 
-		tidySaveBuffer (obj->ptdoc->doc, &output);
+	TidyBuffer output = {0};
+	zval *temp;
 
-		if (output.size) {
-			MAKE_STD_ZVAL(temp);
-			ZVAL_STRINGL(temp, output.bp, output.size, TRUE);
-			zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
-		}
-
-		tidyBufFree(&output);
-
-		if (obj->ptdoc->errbuf->size) {
-			MAKE_STD_ZVAL(temp);
-			ZVAL_STRINGL(temp, obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size, TRUE);
-			zend_hash_update(obj->std.properties, "error_buf", sizeof("error_buf"), (void *)&temp, sizeof(zval *), NULL);
-		}
+	tidySaveBuffer (obj->ptdoc->doc, &output);
+	
+	if (output.size) {
+		MAKE_STD_ZVAL(temp);
+		ZVAL_STRINGL(temp, output.bp, output.size, TRUE);
+		zend_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
-}
+	
+	tidyBufFree(&output);
 
-static void tidy_globals_ctor(zend_tidy_globals *g TSRMLS_DC)
-{
-}
-
-static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
-{
+	if (obj->ptdoc->errbuf->size) {
+		MAKE_STD_ZVAL(temp);
+		ZVAL_STRINGL(temp, obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size, TRUE);
+		zend_hash_update(obj->std.properties, "error_buf", sizeof("error_buf"), (void *)&temp, sizeof(zval *), NULL);
+	}
 }
 
 static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC)
@@ -600,7 +561,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 					MAKE_STD_ZVAL(temp);
 					tidy_instanciate(tidy_ce_node, temp TSRMLS_CC);
 					newobj = (PHPTidyObj *) zend_object_store_get_object(temp TSRMLS_CC);
-					newobj->attr = NULL;
 					newobj->node = tempnode;
 					newobj->type = is_node;
 					newobj->ptdoc = obj->ptdoc;
@@ -617,12 +577,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 
 			zend_hash_update(obj->std.properties, "child", sizeof("child"), (void *)&children, sizeof(zval *), NULL);
 
-			break;
-
-		case is_attr:
-			ADD_PROPERTY_STRING(obj->std.properties, name, tidyAttrName(obj->attr));
-			ADD_PROPERTY_STRING(obj->std.properties, value, tidyAttrValue(obj->attr));
-			ADD_PROPERTY_LONG(obj->std.properties, id, tidyAttrGetId(obj->attr));
 			break;
 
 		case is_doc:
@@ -667,11 +621,10 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes node)
 {
 	PHPTidyObj *newobj;
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
 	newobj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	newobj->attr = NULL;
 	newobj->type = is_node;
 	newobj->ptdoc = obj->ptdoc;
 	newobj->ptdoc->ref_count++;
@@ -699,7 +652,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRMLS_DC)
 {
-	char *opt_name;
+	char *opt_name = NULL;
 	zval **opt_val;
 	ulong opt_indx;
 	
@@ -708,67 +661,43 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 		 zend_hash_move_forward(ht_options)) {
 		
 		if(zend_hash_get_current_key(ht_options, &opt_name, &opt_indx, FALSE) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not retrieve key from array");
+			TIDY_THROW("Could not retrieve key from option array");
+			return FAILURE;
 		}
-		
-		_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
+		if(opt_name) {
+			_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
+		}
 					
 	}
 	
 	return SUCCESS;
 }
 
-static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
-{
-	char *inputfile;
-	int input_len;
-	zend_bool use_include_path = 0;
-	char *contents;
-	zval *options = NULL;
-	
-	zend_bool is_object = FALSE;
-
-	zval *object = getThis();
-	PHPTidyObj *obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ab", &inputfile, &input_len, &options, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (object) {
-		is_object = TRUE;
-		obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
-
-		if (obj->ptdoc->parsed) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot parse two documents with the same tidy instance");
-			RETURN_FALSE;
+static int php_tidy_parse_string(PHPTidyObj *obj, char *string, char *enc TSRMLS_DC)
+{	
+	if(enc) {
+		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
+			TIDY_THROW("Could not set encoding '%s'", enc);
+			return FAILURE;
 		}
-	} else {
-		tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
-		obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	}
-
-	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-		RETURN_FALSE;
-	}
-
-	if(options) {
-		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options) TSRMLS_CC);		
 	}
 	
-	if (tidyParseString(obj->ptdoc->doc, contents) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
-		RETVAL_FALSE;
+	if (tidyParseString(obj->ptdoc->doc, string) < 0) {
+		TIDY_THROW("%s", obj->ptdoc->errbuf->bp);
+		return FAILURE;
+	
 	} else {
-		obj->ptdoc->parsed = TRUE;
 		tidy_doc_update_properties(obj TSRMLS_CC);
 
-		if (is_object) {
-			RETVAL_TRUE;
-		}
+		return SUCCESS;
 	}
+	
+	tidy_doc_update_properties(obj TSRMLS_CC);
+	
+}
 
-	efree(contents);
+static void tidy_globals_ctor(void *global TSRMLS_DC)
+{
 }
 
 PHP_MINIT_FUNCTION(tidy)
@@ -776,20 +705,17 @@ PHP_MINIT_FUNCTION(tidy)
 	ZEND_INIT_MODULE_GLOBALS(tidy, tidy_globals_ctor, tidy_globals_dtor);
 
 	REGISTER_INI_ENTRIES();
-	REGISTER_TIDY_CLASS(doc,	NULL);
-	REGISTER_TIDY_CLASS(node,	NULL);
-	REGISTER_TIDY_CLASS(attr,	NULL);
-	REGISTER_TIDY_CLASS(exception,	zend_exception_get_default());
+	REGISTER_TIDY_CLASS(tidy, doc,	NULL);
+	REGISTER_TIDY_CLASS(tidy_node, node,	NULL);
+	REGISTER_TIDY_CLASS(tidy_exception, exception,	zend_exception_get_default());
 
 	tidy_object_handlers_doc.get_class_entry = tidy_get_ce_doc;
 	tidy_object_handlers_node.get_class_entry = tidy_get_ce_node;
-	tidy_object_handlers_attr.get_class_entry = tidy_get_ce_attr;
-
+	
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;
 
 	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
-	_php_tidy_register_attributes(INIT_FUNC_ARGS_PASSTHRU);
 	_php_tidy_register_nodetypes(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
@@ -821,15 +747,11 @@ PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Tidy support", "enabled");
-	php_info_print_table_row(2, "libTidy Library Version", (char *)tidyReleaseDate());
+	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 	php_info_print_table_row(2, "Extension Version", PHP_TIDY_MODULE_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
-}
-
-TIDY_ATTR_METHOD(__construct)
-{
 }
 
 PHP_FUNCTION(ob_tidyhandler)
@@ -861,9 +783,9 @@ PHP_FUNCTION(ob_tidyhandler)
 
 	if (input_len > 1) {
 		if (tidyParseString(doc, input) < 0 || tidyCleanAndRepair(doc) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf.bp);
-		}
-		{
+			TIDY_THROW(errbuf.bp);
+			RETVAL_NULL();
+		} else {
 			TidyBuffer output = {0};
 			tidyBufInit(&output);
 
@@ -880,52 +802,31 @@ PHP_FUNCTION(ob_tidyhandler)
 	tidyBufFree(&errbuf);
 }
 
-/* {{{ proto bool tidy_parse_string(string input)
+/* {{{ proto bool tidy_parse_string(string input [, mixed config_options [, string encoding]])
    Parse a document stored in a string */
 PHP_FUNCTION(tidy_parse_string)
 {
-	char *input;
-	int input_len;
+	char *input, *enc = NULL;
+	int input_len, enc_len = 0;
 	zval *options = NULL;
 	
-	zend_bool is_object = FALSE;
-
-	zval *object = getThis();
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &input, &input_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (object) {
-		is_object = TRUE;
-		obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
-
-		if (obj->ptdoc->parsed) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot parse two documents with the same tidy instance");
-			RETURN_FALSE;
-		}
-	} else {
-		tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
-		obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	}
-
-	if(options) {
-		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options) TSRMLS_CC);
+	tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+		
+	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+	
+	if(php_tidy_parse_string(obj, input, enc TSRMLS_CC) == FAILURE) {
+		zval_dtor(return_value);
+		INIT_ZVAL(*return_value);
+		RETURN_FALSE;
 	}
 	
-	if (tidyParseString(obj->ptdoc->doc, input) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
-		return;
-	}
-
-	obj->ptdoc->parsed = TRUE;
-
-	tidy_doc_update_properties(obj TSRMLS_CC);
-
-	if (is_object) {
-		RETURN_TRUE;
-	}
 }
 /* }}} */
 
@@ -944,7 +845,7 @@ PHP_FUNCTION(tidy_get_error_buffer)
 PHP_FUNCTION(tidy_get_output)
 {
 	TidyBuffer output = {0};
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	tidySaveBuffer(obj->ptdoc->doc, &output);
 
@@ -954,11 +855,38 @@ PHP_FUNCTION(tidy_get_output)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_parse_file(string file [, array config_options [, bool use_include_path]])
+/* {{{ proto boolean tidy_parse_file(string file [, mixed config_options [, string encoding [, bool use_include_path]]])
    Parse markup in file or URI */
 PHP_FUNCTION(tidy_parse_file)
 {
-	php_tidy_parse_file(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	char *inputfile, *enc = NULL;
+	int input_len, enc_len = 0;
+	zend_bool use_include_path = 0;
+	char *contents;
+	zval *options = NULL;
+	
+	PHPTidyObj *obj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
+							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+	}
+
+	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+
+	if(php_tidy_parse_string(obj, contents, enc TSRMLS_CC) == FAILURE) {
+		zval_dtor(return_value);
+		INIT_ZVAL(*return_value);
+		RETVAL_FALSE;
+	}
+	efree(contents);
 }
 /* }}} */
 
@@ -969,7 +897,6 @@ PHP_FUNCTION(tidy_clean_repair)
 	TIDY_FETCH_OBJECT;
 
 	if (tidyCleanAndRepair(obj->ptdoc->doc) >= 0) {
-		obj->ptdoc->repaired = TRUE;
 		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
 	}
@@ -978,7 +905,7 @@ PHP_FUNCTION(tidy_clean_repair)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_repair_string(string data [, string config_file])
+/* {{{ proto boolean tidy_repair_string(string data [, mixed config_file [, string encoding]])
    Repair a string using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_string)
 {
@@ -986,7 +913,7 @@ PHP_FUNCTION(tidy_repair_string)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_repair_file(string filename [, string config_file [, bool use_include_path]])
+/* {{{ proto boolean tidy_repair_file(string filename [, mixed config_file [, string encoding [, bool use_include_path]]])
    Repair a file using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_file)
 {
@@ -1074,7 +1001,7 @@ PHP_FUNCTION(tidy_get_status)
    Get the Detected HTML version for the specified document. */
 PHP_FUNCTION(tidy_get_html_ver)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_LONG(tidyDetectedHtmlVersion(obj->ptdoc->doc));
 }
@@ -1084,7 +1011,7 @@ PHP_FUNCTION(tidy_get_html_ver)
    Indicates if the document is a XHTML document. */
 PHP_FUNCTION(tidy_is_xhtml)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_BOOL(tidyDetectedXhtml(obj->ptdoc->doc));
 }
@@ -1094,7 +1021,7 @@ PHP_FUNCTION(tidy_is_xhtml)
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 PHP_FUNCTION(tidy_is_xml)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_BOOL(tidyDetectedGenericXml(obj->ptdoc->doc));
 }
@@ -1104,7 +1031,7 @@ PHP_FUNCTION(tidy_is_xml)
    Returns the Number of Tidy errors encountered for specified document. */
 PHP_FUNCTION(tidy_error_count)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_LONG(tidyErrorCount(obj->ptdoc->doc));
 }
@@ -1114,7 +1041,7 @@ PHP_FUNCTION(tidy_error_count)
    Returns the Number of Tidy warnings encountered for specified document. */
 PHP_FUNCTION(tidy_warning_count)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_LONG(tidyWarningCount(obj->ptdoc->doc));
 }
@@ -1124,7 +1051,7 @@ PHP_FUNCTION(tidy_warning_count)
    Returns the Number of Tidy accessibility warnings encountered for specified document. */
 PHP_FUNCTION(tidy_access_count)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_LONG(tidyAccessWarningCount(obj->ptdoc->doc));
 }
@@ -1134,215 +1061,9 @@ PHP_FUNCTION(tidy_access_count)
    Returns the Number of Tidy configuration errors encountered for specified document. */
 PHP_FUNCTION(tidy_config_count)
 {
-	TIDY_FETCH_PARSED_OBJECT;
+	TIDY_FETCH_OBJECT;
 
 	RETURN_LONG(tidyConfigErrorCount(obj->ptdoc->doc));
-}
-/* }}} */
-
-/* {{{ proto void tidy_load_config(string filename)
-   Load an ASCII Tidy configuration file */
-PHP_FUNCTION(tidy_load_config)
-{
-	char *filename;
-	int filename_len;
-
-	zval *object = getThis();
-	PHPTidyObj *obj;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Os", &object, tidy_ce_doc, &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	TIDY_SAFE_MODE_CHECK(filename);
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	if (tidyLoadConfig(obj->ptdoc->doc, filename) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", filename);
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto void tidy_load_config(string filename, string encoding)
-   Load an ASCII Tidy configuration file with the specified encoding */
-PHP_FUNCTION(tidy_load_config_enc)
-{
-	char *filename, *encoding;
-	int file_len, enc_len;
-
-	zval *object = getThis();
-	PHPTidyObj *obj;
-
-	if (object) {
-		if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &filename, &file_len, &encoding, &enc_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if(zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Oss", &object, tidy_ce_doc,
-										&filename, &file_len, &encoding, &enc_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	TIDY_SAFE_MODE_CHECK(filename);
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	if (tidyLoadConfigEnc(obj->ptdoc->doc, filename, encoding) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s' using encoding '%s'", filename, encoding);
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto boolean tidy_set_encoding(string encoding)
-   Set the input/output character encoding for parsing markup. Values include: ascii, latin1, raw, utf8, iso2022, mac, win1252, utf16le, utf16be, utf16, big5 and shiftjis. */
-PHP_FUNCTION(tidy_set_encoding)
-{
-	zval *object = getThis();
-	PHPTidyObj *obj;
-	char *encoding;
-	int enc_len;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &encoding, &enc_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Os", &object, tidy_ce_doc, &encoding, &enc_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	if (tidySetCharEncoding(obj->ptdoc->doc, encoding) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", encoding);
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto boolean tidy_snapshot_config()
-   Take a snapshot of the configuration for this document so it can be modified
-   and later restored. */
-PHP_FUNCTION(tidy_snapshot_config)
-{
-	TIDY_FETCH_OBJECT;
-
-	if (tidyOptSnapshot(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-/* {{{ proto boolean tidy_restore_config()
-   Restore the configuration for the document to the last snapshot */
-PHP_FUNCTION(tidy_restore_config)
-{
-	TIDY_FETCH_OBJECT;
-
-	if (tidyOptResetToSnapshot(obj->ptdoc->doc)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-/* {{{ proto boolean tidy_restore_config(boolean ignore_default)
-   Reset the configuration for the document to default config */
-PHP_FUNCTION(tidy_reset_config)
-{
-	TIDY_FETCH_OBJECT;
-
-	if (tidyOptResetAllToDefault(obj->ptdoc->doc)) {
-		if (TG(default_config) && TG(default_config)[0]) {
-			if (tidyLoadConfig(obj->ptdoc->doc, TG(default_config)) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load Tidy configuration file at '%s'.", TG(default_config));
-				RETURN_FALSE;
-			}
-		}
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-/* {{{ proto boolean tidy_save_config(string filename)
-   Save current settings to named file. Only non-default values are written. */
-PHP_FUNCTION(tidy_save_config)
-{
-	zval *object = getThis();
-	PHPTidyObj *obj;
-	char *filename;
-	int file_len;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &file_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Os", &object, tidy_ce_doc, &filename, &file_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	TIDY_SAFE_MODE_CHECK(filename);
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	if (tidyOptSaveFile(obj->ptdoc->doc, filename) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not write tidy configuration file '%s'", filename);
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto boolean tidy_setopt(string option, mixed newvalue)
-   Updates the configuration settings for the specified tidy document. */
-PHP_FUNCTION(tidy_setopt)
-{
-	zval *object = getThis();
-	PHPTidyObj *obj;
-
-	zval *value;
-	char *optname;
-	int optname_len;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &optname, &optname_len, &value) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, NULL, "Osz", &object, tidy_ce_doc, &optname, &optname_len, &value) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
-
-	if(_php_tidy_set_tidy_opt(obj->ptdoc->doc, optname, value TSRMLS_CC) == SUCCESS) {
-		RETURN_TRUE;
-	}
-	
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1372,7 +1093,7 @@ PHP_FUNCTION(tidy_getopt)
 
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+		TIDY_THROW("Unknown Tidy Configuration Option '%s'", optname);
 		RETURN_FALSE;
 	}
 
@@ -1395,13 +1116,102 @@ PHP_FUNCTION(tidy_getopt)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to get");
+			TIDY_THROW("Unable to determine type of configuration constant");
 			break;
 	}
 
 	RETURN_FALSE;
 }
 /* }}} */
+
+TIDY_DOC_METHOD(__construct)
+{
+	char *inputfile, *enc = NULL;
+	int input_len, enc_len = 0;
+	zend_bool use_include_path = 0;
+	char *contents;
+	zval *options = NULL;
+	
+	zval *object = getThis();
+	PHPTidyObj *obj;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szsb", &inputfile, &input_len,
+							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		return;
+	}
+
+	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+
+	php_tidy_parse_string(obj, contents, enc TSRMLS_CC);
+	
+	efree(contents);
+
+}
+
+TIDY_DOC_METHOD(parse_file)
+{
+	char *inputfile, *enc = NULL;
+	int input_len, enc_len = 0;
+	zend_bool use_include_path = 0;
+	char *contents;
+	zval *options = NULL;
+	zval *object = getThis();
+	PHPTidyObj *obj;	
+
+	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
+							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		RETURN_FALSE;
+	}
+
+	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+
+	if(php_tidy_parse_string(obj, contents, enc TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+
+	efree(contents);
+}
+
+TIDY_DOC_METHOD(parse_string)
+{
+	char *input, *enc = NULL;
+	int input_len, enc_len = 0;
+	zval *options = NULL;
+	
+	zval *object = getThis();
+	PHPTidyObj *obj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
+
+	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+
+	if(php_tidy_parse_string(obj, input, enc TSRMLS_CC) == SUCCESS) {
+		RETURN_TRUE;
+	}
+	
+	RETURN_FALSE;
+}
+
 
 /* {{{ proto TidyNode tidy_get_root()
    Returns a TidyNode Object representing the root of the tidy parse tree */
@@ -1438,7 +1248,7 @@ PHP_FUNCTION(tidy_get_body)
 /* {{{ proto void tidy_node::tidy_node()
    Constructor. */
 TIDY_NODE_METHOD(__construct)
-{
+{	
 }
 /* }}} */
 
@@ -1721,165 +1531,6 @@ void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(VAR);
 	TIDY_TAG_CONST(WBR);
 	TIDY_TAG_CONST(XMP);
-}
-
-void _php_tidy_register_attributes(INIT_FUNC_ARGS)
-{
-	TIDY_ATTR_CONST(UNKNOWN);
-	TIDY_ATTR_CONST(ABBR);
-	TIDY_ATTR_CONST(ACCEPT);
-	TIDY_ATTR_CONST(ACCEPT_CHARSET);
-	TIDY_ATTR_CONST(ACCESSKEY);
-	TIDY_ATTR_CONST(ACTION);
-	TIDY_ATTR_CONST(ADD_DATE);
-	TIDY_ATTR_CONST(ALIGN);
-	TIDY_ATTR_CONST(ALINK);
-	TIDY_ATTR_CONST(ALT);
-	TIDY_ATTR_CONST(ARCHIVE);
-	TIDY_ATTR_CONST(AXIS);
-	TIDY_ATTR_CONST(BACKGROUND);
-	TIDY_ATTR_CONST(BGCOLOR);
-	TIDY_ATTR_CONST(BGPROPERTIES);
-	TIDY_ATTR_CONST(BORDER);
-	TIDY_ATTR_CONST(BORDERCOLOR);
-	TIDY_ATTR_CONST(BOTTOMMARGIN);
-	TIDY_ATTR_CONST(CELLPADDING);
-	TIDY_ATTR_CONST(CELLSPACING);
-	TIDY_ATTR_CONST(CHAR);
-	TIDY_ATTR_CONST(CHAROFF);
-	TIDY_ATTR_CONST(CHARSET);
-	TIDY_ATTR_CONST(CHECKED);
-	TIDY_ATTR_CONST(CITE);
-	TIDY_ATTR_CONST(CLASS);
-	TIDY_ATTR_CONST(CLASSID);
-	TIDY_ATTR_CONST(CLEAR);
-	TIDY_ATTR_CONST(CODE);
-	TIDY_ATTR_CONST(CODEBASE);
-	TIDY_ATTR_CONST(CODETYPE);
-	TIDY_ATTR_CONST(COLOR);
-	TIDY_ATTR_CONST(COLS);
-	TIDY_ATTR_CONST(COLSPAN);
-	TIDY_ATTR_CONST(COMPACT);
-	TIDY_ATTR_CONST(CONTENT);
-	TIDY_ATTR_CONST(COORDS);
-	TIDY_ATTR_CONST(DATA);
-	TIDY_ATTR_CONST(DATAFLD);
- /* TIDY_ATTR_CONST(DATAFORMATSAS); */
-	TIDY_ATTR_CONST(DATAPAGESIZE);
-	TIDY_ATTR_CONST(DATASRC);
-	TIDY_ATTR_CONST(DATETIME);
-	TIDY_ATTR_CONST(DECLARE);
-	TIDY_ATTR_CONST(DEFER);
-	TIDY_ATTR_CONST(DIR);
-	TIDY_ATTR_CONST(DISABLED);
-	TIDY_ATTR_CONST(ENCODING);
-	TIDY_ATTR_CONST(ENCTYPE);
-	TIDY_ATTR_CONST(FACE);
-	TIDY_ATTR_CONST(FOR);
-	TIDY_ATTR_CONST(FRAME);
-	TIDY_ATTR_CONST(FRAMEBORDER);
-	TIDY_ATTR_CONST(FRAMESPACING);
-	TIDY_ATTR_CONST(GRIDX);
-	TIDY_ATTR_CONST(GRIDY);
-	TIDY_ATTR_CONST(HEADERS);
-	TIDY_ATTR_CONST(HEIGHT);
-	TIDY_ATTR_CONST(HREF);
-	TIDY_ATTR_CONST(HREFLANG);
-	TIDY_ATTR_CONST(HSPACE);
-	TIDY_ATTR_CONST(HTTP_EQUIV);
-	TIDY_ATTR_CONST(ID);
-	TIDY_ATTR_CONST(ISMAP);
-	TIDY_ATTR_CONST(LABEL);
-	TIDY_ATTR_CONST(LANG);
-	TIDY_ATTR_CONST(LANGUAGE);
-	TIDY_ATTR_CONST(LAST_MODIFIED);
-	TIDY_ATTR_CONST(LAST_VISIT);
-	TIDY_ATTR_CONST(LEFTMARGIN);
-	TIDY_ATTR_CONST(LINK);
-	TIDY_ATTR_CONST(LONGDESC);
-	TIDY_ATTR_CONST(LOWSRC);
-	TIDY_ATTR_CONST(MARGINHEIGHT);
-	TIDY_ATTR_CONST(MARGINWIDTH);
-	TIDY_ATTR_CONST(MAXLENGTH);
-	TIDY_ATTR_CONST(MEDIA);
-	TIDY_ATTR_CONST(METHOD);
-	TIDY_ATTR_CONST(MULTIPLE);
-	TIDY_ATTR_CONST(NAME);
-	TIDY_ATTR_CONST(NOHREF);
-	TIDY_ATTR_CONST(NORESIZE);
-	TIDY_ATTR_CONST(NOSHADE);
-	TIDY_ATTR_CONST(NOWRAP);
-	TIDY_ATTR_CONST(OBJECT);
-	TIDY_ATTR_CONST(OnAFTERUPDATE);
-	TIDY_ATTR_CONST(OnBEFOREUNLOAD);
-	TIDY_ATTR_CONST(OnBEFOREUPDATE);
-	TIDY_ATTR_CONST(OnBLUR);
-	TIDY_ATTR_CONST(OnCHANGE);
-	TIDY_ATTR_CONST(OnCLICK);
-	TIDY_ATTR_CONST(OnDATAAVAILABLE);
-	TIDY_ATTR_CONST(OnDATASETCHANGED);
-	TIDY_ATTR_CONST(OnDATASETCOMPLETE);
-	TIDY_ATTR_CONST(OnDBLCLICK);
-	TIDY_ATTR_CONST(OnERRORUPDATE);
-	TIDY_ATTR_CONST(OnFOCUS);
-	TIDY_ATTR_CONST(OnKEYDOWN);
-	TIDY_ATTR_CONST(OnKEYPRESS);
-	TIDY_ATTR_CONST(OnKEYUP);
-	TIDY_ATTR_CONST(OnLOAD);
-	TIDY_ATTR_CONST(OnMOUSEDOWN);
-	TIDY_ATTR_CONST(OnMOUSEMOVE);
-	TIDY_ATTR_CONST(OnMOUSEOUT);
-	TIDY_ATTR_CONST(OnMOUSEOVER);
-	TIDY_ATTR_CONST(OnMOUSEUP);
-	TIDY_ATTR_CONST(OnRESET);
-	TIDY_ATTR_CONST(OnROWENTER);
-	TIDY_ATTR_CONST(OnROWEXIT);
-	TIDY_ATTR_CONST(OnSELECT);
-	TIDY_ATTR_CONST(OnSUBMIT);
-	TIDY_ATTR_CONST(OnUNLOAD);
-	TIDY_ATTR_CONST(PROFILE);
-	TIDY_ATTR_CONST(PROMPT);
-	TIDY_ATTR_CONST(RBSPAN);
-	TIDY_ATTR_CONST(READONLY);
-	TIDY_ATTR_CONST(REL);
-	TIDY_ATTR_CONST(REV);
-	TIDY_ATTR_CONST(RIGHTMARGIN);
-	TIDY_ATTR_CONST(ROWS);
-	TIDY_ATTR_CONST(ROWSPAN);
-	TIDY_ATTR_CONST(RULES);
-	TIDY_ATTR_CONST(SCHEME);
-	TIDY_ATTR_CONST(SCOPE);
-	TIDY_ATTR_CONST(SCROLLING);
-	TIDY_ATTR_CONST(SELECTED);
-	TIDY_ATTR_CONST(SHAPE);
-	TIDY_ATTR_CONST(SHOWGRID);
-	TIDY_ATTR_CONST(SHOWGRIDX);
-	TIDY_ATTR_CONST(SHOWGRIDY);
-	TIDY_ATTR_CONST(SIZE);
-	TIDY_ATTR_CONST(SPAN);
-	TIDY_ATTR_CONST(SRC);
-	TIDY_ATTR_CONST(STANDBY);
-	TIDY_ATTR_CONST(START);
-	TIDY_ATTR_CONST(STYLE);
-	TIDY_ATTR_CONST(SUMMARY);
-	TIDY_ATTR_CONST(TABINDEX);
-	TIDY_ATTR_CONST(TARGET);
-	TIDY_ATTR_CONST(TEXT);
-	TIDY_ATTR_CONST(TITLE);
-	TIDY_ATTR_CONST(TOPMARGIN);
-	TIDY_ATTR_CONST(TYPE);
-	TIDY_ATTR_CONST(USEMAP);
-	TIDY_ATTR_CONST(VALIGN);
-	TIDY_ATTR_CONST(VALUE);
-	TIDY_ATTR_CONST(VALUETYPE);
-	TIDY_ATTR_CONST(VERSION);
-	TIDY_ATTR_CONST(VLINK);
-	TIDY_ATTR_CONST(VSPACE);
-	TIDY_ATTR_CONST(WIDTH);
-	TIDY_ATTR_CONST(WRAP);
-	TIDY_ATTR_CONST(XML_LANG);
-	TIDY_ATTR_CONST(XML_SPACE);
-	TIDY_ATTR_CONST(XMLNS);
 }
 
 #endif
