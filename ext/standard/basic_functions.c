@@ -719,7 +719,8 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	/* Check if locale was changed and change it back
 	   to the value in startup environment */
 	if (BG(locale_string) != NULL) {
-		setlocale(LC_ALL, "");
+		setlocale(LC_ALL, "C");
+		setlocale(LC_CTYPE, "");
 	}
 	STR_FREE(BG(locale_string));
 
