@@ -117,8 +117,8 @@ socklen_t x;
 ],[
   ac_cv_socklen_t=no
 ]))
-if test "$ac_cv_socklen_t" = "no"; then
-  AC_DEFINE(socklen_t, unsigned int)
+if test "$ac_cv_socklen_t" = "yes"; then
+  AC_DEFINE(HAVE_SOCKLEN_T, 1, [Whether you have socklen_t])
 fi
 ])
 
