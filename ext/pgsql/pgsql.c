@@ -21,6 +21,11 @@
 
 #include <stdlib.h>
 
+
+#if COMPILE_DL
+#include "dl/phpdl.h"
+#endif
+
 #include "php.h"
 #include "php3_pgsql.h"
 #include "ext/standard/php3_standard.h"
