@@ -1,3 +1,71 @@
+2002-10-01  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/filestat.c: repairing the chaos
+
+    utime("filename", NULL) is not only valid but a MUST on linux if you are
+    not the owner...
+
+2002-10-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c:
+    Disable pread/pwrite for now until we can clarify why it should be
+    impossible to write a check for a broken OS feature.
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    The session extension ensures now that get_session_var can rely
+    on the state of $_SESSION/$HTTP_SESSION_VARS. It does not look up
+    symbols in the global symbol table anymore.
+
+    This was achieved by actually planting references between every
+    $_SESSION["x"] and $x, not only when restoring a session, but also
+    when registering a session variable (in a register_globals=1 context).
+
+    Upon registering a new variable, this memory leak continues to show
+    up, regardless of register_globals.
+
+    ext/session/session.c(272) :  Freeing 0x0818F01C (12 bytes), script=test
+
+    Obviously, the newly allocated empty zval is not properly freed.  If anyone
+    has any idea on how to fix that, please step forward.
+
+2002-10-01  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * tests/lang/031.phpt: WS and added missing output.
+    It seems this bug is fixed in latest version at least.
+
+    * main/output.c: FMH. Implicit flush.
+
+    * main/output.c: MFH
+
+2002-10-01  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mbstring/php_unicode.c: Fix warnings
+
+2002-10-01  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Bug fix
+
+    * main/output.c: Fixed bug #17825. Double zval_ptr_dtor().
+
+    * NEWS: Implicit flush fix
+
+2002-10-01  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: - Revert the removal of dlopen check here.
+
+2002-10-01  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c: Fixed implicit flush.
+
+2002-10-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/config.m4
+      configure.in:
+    - Removed unnecessary dlopen checks. (this is done in Zend.m4 already)
+
+    * NEWS: some typos fixed..
+
 2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * main/output.c:
