@@ -351,6 +351,8 @@ END_EXTERN_C()
 #define ZEND_MAX_RESERVED_RESOURCES	1
 
 #if (WINNT|WIN32)
+/* Only use this macro if you know for sure that all of the switches values
+   are covered by its case statements */
 #define EMPTY_SWITCH_DEFAULT_CASE() \
 			default:				\
 				__assume(0);		\
