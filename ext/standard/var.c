@@ -532,7 +532,6 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 					ce = &zend_standard_class_def;
 				}
 
-				/* OBJECTS_FIXME */
 				object_init_ex(*rval, ce);
 				myht = Z_OBJPROP_PP(rval);
 
