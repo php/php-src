@@ -37,8 +37,8 @@
 #if HAVE_DOMXML
 #include <gnome-xml/parser.h>
 
-extern zend_module_entry php3_domxml_module_entry;
-#define php3_domxml_module_ptr &php3_domxml_module_entry
+extern zend_module_entry php_domxml_module_entry;
+#define php_domxml_module_ptr &php_domxml_module_entry
 
 /* directory functions */
 extern PHP_MINIT_FUNCTION(domxml);
@@ -61,8 +61,8 @@ PHP_FUNCTION(domxml_parent);
 PHP_FUNCTION(domxml_attrname);
 
 #else
-#define php3_domxml_module_ptr NULL
+#define php_domxml_module_ptr NULL
 #endif /* HAVE_DOMXML */
-#define phpext_domxml_ptr php3_domxml_module_ptr
+#define phpext_domxml_ptr php_domxml_module_ptr
 
 #endif /* _PHP3_DIR_H */

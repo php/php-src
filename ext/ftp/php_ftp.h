@@ -40,14 +40,10 @@
 
 #if HAVE_FTP
 
-extern zend_module_entry php3_ftp_module_entry;
-#define php3_ftp_module_ptr &php3_ftp_module_entry
+extern zend_module_entry php_ftp_module_entry;
+#define php_ftp_module_ptr &php_ftp_module_entry
 
-#ifdef ZEND_VERSION
 PHP_MINIT_FUNCTION(ftp);
-#else
-int php3_minit_ftp(INIT_FUNC_ARGS);
-#endif
 
 PHP_FUNCTION(ftp_connect);
 PHP_FUNCTION(ftp_login);
@@ -70,10 +66,10 @@ PHP_FUNCTION(ftp_rename);
 PHP_FUNCTION(ftp_delete);
 PHP_FUNCTION(ftp_quit);
 
-#define phpext_ftp_ptr php3_ftp_module_ptr
+#define phpext_ftp_ptr php_ftp_module_ptr
 
 #else
-#define php3_ftp_module_ptr NULL
+#define php_ftp_module_ptr NULL
 #endif	/* HAVE_FTP */
 
 #endif
