@@ -1,3 +1,86 @@
+2001-04-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Allocate memory for js escaped strings using the C library's malloc.
+
+2001-04-17  Alexander Feldman  <alex@zend.com>
+
+    * ext/standard/file.c:
+    Merged the patch of the buffering patch as it fixes a pretty major bug.
+
+2001-04-17  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/parser/PhpdocParserCore.php:
+    Patch requested by chuckc@sonic.net (Chuck Clayton) to keep linebreaks.
+
+    * pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php:
+    Applied a bugfix provided by Joerg.Wedekind@OnVista.de.
+
+2001-04-17  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Adding fbsql_fetch_assoc() functon
+
+2001-04-17  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c: Discovered warn_not_available and used it.
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/info.c:
+    Changes for streams.  Added temporary fopenstream function to PHP so that
+    the streams can be tested.
+
+    * main/Makefile.in
+      main/php.h
+      main/php_streams.h
+      main/streams.c: Added files for PHP streams
+
+    * configure.in:
+    Added --enable-php-streams option for experimental file abstraction
+
+2001-04-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/scripts/pear.in:
+    * PEAR_Installer un-broken again, it still doesn't update the
+      package list though
+    * better error handling in "pear" script
+
+2001-04-17  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    This change seems to fix bugs 7158, 7807, 8531, and 8636.  After asking why this patch was applied no one seemed to respond with anything useful.  If you find this change in error, sorry, I tested it on as many systems as I could.
+
+2001-04-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_error.phpt
+      pear/.cvsignore
+      pear/DB.php
+      pear/PEAR.php.in: * have DB.php use PEAR::raiseError in factory methods
+
+    * pear/PEAR.php.in: * enable static use of PEAR::raiseError
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/scripts/pear.in
+      pear/PEAR.php.in:
+    * implemented PEAR_Packager to make distribution packages.  Currently only
+      runs on platforms with GNU tar installed
+    * the "pear" script now requires a command parameter (similar to cvs),
+      for example "pear package Cache.xml"
+    * broke PEAR_Installer :-)
+
+2001-04-17  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/gd/config.m4:
+    Fixed lame attempt to prevent ttf linkage when using freetype2
+
 2001-04-16  Stig Bakken  <ssb@fast.no>
 
     * build/rules.mk
