@@ -587,6 +587,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 static int php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
 {
 	if (MySG(default_link)==-1) { /* no link opened yet, implicitly open one */
+		ht = 0;
 		php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	}
 	return MySG(default_link);

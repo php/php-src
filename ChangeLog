@@ -1,0 +1,12 @@
+PHP 4.0 CHANGE LOG                                                    ChangeLog
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+??? ?? 1999, Version 4.0 Beta 2
+- Added missing E_ error level constants (Zeev, libzend)
+- Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
+- Fixed implicit connect on the MySQL, mSQL, PostgreSQL and Sybase
+  modules (Zeev)
+  
+  
+July 19 1999, Version 4.0 Beta 1
+- First public beta of PHP 4.0

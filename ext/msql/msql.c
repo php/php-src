@@ -450,7 +450,8 @@ static int php3_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	MSQL_TLS_VARS;
 	if (MSQL_GLOBAL(php3_msql_module).default_link==-1) { /* no link opened yet, implicitly open one */
-		php3_msql_do_connect(0, return_value, list, plist, this_ptr,0);
+		ht = 0;
+		php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	}
 	return MSQL_GLOBAL(php3_msql_module).default_link;
 }
