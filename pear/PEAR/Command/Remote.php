@@ -88,6 +88,16 @@ Download a package tarball.  The file will be named as suggested by the
 server, for example if you download the DB package and the latest stable
 version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             ),
+        'clear-cache' => array(
+            'summary' => 'Clear XML-RPC Cache',
+            'function' => 'doClearCache',
+            'shortcut' => 'cc',
+            'options' => array(),
+            'doc' => '
+Clear the XML-RPC cache.  See also the cache_ttl configuration
+parameter.
+',
+            ),
         );
 
     // }}}
@@ -352,6 +362,43 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             $this->ui->outputData($data, $command);
         }
         return true;
+    }
+
+    // }}}
+    // {{{ doClearCache()
+
+    function doClearCache($command, $options, $params)
+    {
+        $cache_dir = $this->config->get('cache_dir');
+        $verbose = $this->config->get('verbose');
+        $output = '';
+        if (!($dp = @opendir($cache_dir))) {
+            return $this->raiseError("opendir($cache_dir) failed: $php_errormsg");
+        }
+        if ($verbose >= 1) {
+            $output .= "reading directory $cache_dir\n";
+        }
+        $num = 0;
+        while ($ent = readdir($dp)) {
+            if (preg_match('/^xmlrpc_cache_[a-z0-9]{32}$/', $ent)) {
+                $path = $cache_dir . DIRECTORY_SEPARATOR . $ent;
+                $ok = @unlink($path);
+                if ($ok) {
+                    if ($verbose >= 2) {
+                        $output .= "deleted $path\n";
+                    }
+                    $num++;
+                } elseif ($verbose >= 1) {
+                    $output .= "failed to delete $path\n";
+                }
+            }
+        }
+        closedir($dp);
+        if ($verbose >= 1) {
+            $output .= "$num cache entries cleared\n";
+        }
+        $this->ui->outputData(rtrim($output), $command);
+        return $num;
     }
 
     // }}}
