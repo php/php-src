@@ -618,7 +618,8 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 	 * highest possible address.
 	 */
 	if (xbuf_init(&xbuf, max_len)) {
-		*pbuf = NULL;
+		if (pbuf)
+			*pbuf = NULL;
 		return 0;
 	} else {
 		/*
