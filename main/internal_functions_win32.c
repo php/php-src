@@ -32,8 +32,6 @@
 #include <stdio.h>
 
 #include "ext/bcmath/php_bcmath.h"
-#include "ext/db/php_db.h"
-#include "ext/gd/php_gd.h"
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
