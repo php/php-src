@@ -1056,7 +1056,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 				}
 				return 1;
 			} else if (model->min_occurs == 0) {
-				return 1;
+				return 2;
 			} else {
 				if (strict) {
 					php_error(E_ERROR, "SOAP-ERROR: Encoding: object hasn't '%s' property",model->u.element->name);
@@ -1080,15 +1080,19 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 		}
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr *tmp;
+			int ret = 0;
 
 			zend_hash_internal_pointer_reset(model->u.content);
 			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
-				if (model_to_xml_object(node, *tmp, prop, style, 0)) {
+				int tmp_ret = model_to_xml_object(node, *tmp, prop, style, 0);
+				if (tmp_ret == 1) {
 					return 1;
+				} else if (tmp_ret != 0) {
+					ret = 1;
 				}
 				zend_hash_move_forward(model->u.content);
 			}
-			return 0;
+			return ret;
 		}
 		case XSD_CONTENT_GROUP: {
 			return model_to_xml_object(node, model->u.group->model, prop, style, model->min_occurs > 0);
