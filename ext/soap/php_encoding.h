@@ -153,14 +153,14 @@ struct _encodeType {
 
 struct _encode {
 	encodeType details;
-	zval *(*to_zval)(encodeType type, xmlNodePtr data);
-	xmlNodePtr (*to_xml)(encodeType type, zval *data, int style);
+	zval *(*to_zval)(encodeTypePtr type, xmlNodePtr data);
+	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style);
 
-	xmlNodePtr (*to_zval_before)(encodeType type, xmlNodePtr data, int style);
-	zval *(*to_zval_after)(encodeType type, zval *data);
+	xmlNodePtr (*to_zval_before)(encodeTypePtr type, xmlNodePtr data, int style);
+	zval *(*to_zval_after)(encodeTypePtr type, zval *data);
 
-	zval *(*to_xml_before)(encodeType type, zval *data);
-	xmlNodePtr (*to_xml_after)(encodeType type, xmlNodePtr data, int style);
+	zval *(*to_xml_before)(encodeTypePtr type, zval *data);
+	xmlNodePtr (*to_xml_after)(encodeTypePtr type, xmlNodePtr data, int style);
 };
 
 smart_str *build_soap_action(zval *this_ptr, char *soapaction);
@@ -171,26 +171,26 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data);
 
 #ifdef HAVE_PHP_DOMXML
 /* user defined mapping */
-zval *to_xml_before_user(encodeType type, zval *data);
-xmlNodePtr to_xml_user(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_after_user(encodeType type, xmlNodePtr node, int style);
-xmlNodePtr to_zval_before_user(encodeType type, xmlNodePtr node, int style);
-zval *to_zval_user(encodeType type, xmlNodePtr node);
-zval *to_zval_after_user(encodeType type, zval *data);
+zval *to_xml_before_user(encodeTypePtr type, zval *data);
+xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style);
+xmlNodePtr to_xml_after_user(encodeTypePtr type, xmlNodePtr node, int style);
+xmlNodePtr to_zval_before_user(encodeTypePtr type, xmlNodePtr node, int style);
+zval *to_zval_user(encodeTypePtr type, xmlNodePtr node);
+zval *to_zval_after_user(encodeTypePtr type, zval *data);
 #endif
 
 void whiteSpace_replace(char* str);
 void whiteSpace_collapse(char* str);
 
-zval *to_zval_object(encodeType type, xmlNodePtr data);
-zval *to_zval_array(encodeType type, xmlNodePtr data);
+zval *to_zval_object(encodeTypePtr type, xmlNodePtr data);
+zval *to_zval_array(encodeTypePtr type, xmlNodePtr data);
 
-xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
+xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style);
+xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style);
 
 /* Try and guess for non-wsdl clients and servers */
-zval *guess_zval_convert(encodeType type, xmlNodePtr data);
-xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
+zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data);
+xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style);
 
 #define get_conversion(e) get_conversion_ex(SOAP_GLOBAL(defEncIndex), e)
 #define get_conversion_from_type(n, t) get_conversion_from_type_ex(SOAP_GLOBAL(defEnc), n, t)
@@ -198,7 +198,7 @@ xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
 
 void encode_reset_ns();
 smart_str *encode_new_ns();
-void set_ns_and_type(xmlNodePtr node, encodeType type);
+void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
 encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, const char *type);

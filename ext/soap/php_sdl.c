@@ -161,7 +161,7 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const 
 	return enc;
 }
 
-static zval* to_zval_list(encodeType enc, xmlNodePtr data) {
+static zval* to_zval_list(encodeTypePtr enc, xmlNodePtr data) {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
@@ -178,7 +178,7 @@ static zval* to_zval_list(encodeType enc, xmlNodePtr data) {
 	return ret;
 }
 
-static xmlNodePtr to_xml_list(encodeType enc, zval *data, int style) {
+static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style) {
 	xmlNodePtr ret;
 
 	ret = xmlNewNode(NULL, "BOGUS");
@@ -220,21 +220,21 @@ static xmlNodePtr to_xml_list(encodeType enc, zval *data, int style) {
 	return ret;
 }
 
-static zval* to_zval_union(encodeType enc, xmlNodePtr data) {
+static zval* to_zval_union(encodeTypePtr enc, xmlNodePtr data) {
 	/*FIXME*/
 	return to_zval_list(enc, data);
 }
 
-static xmlNodePtr to_xml_union(encodeType enc, zval *data, int style) {
+static xmlNodePtr to_xml_union(encodeTypePtr enc, zval *data, int style) {
 	/*FIXME*/
 	return to_xml_list(enc,data,style);
 }
 
-zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
+zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 {
 	sdlTypePtr type;
 
-	type = enc.sdl_type;
+	type = enc->sdl_type;
 
 	if (type && type->restrictions &&
 	    data &&  data->children && data->children->content) {
@@ -243,7 +243,7 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 				whiteSpace_replace(data->children->content);
 			} else if (strcmp(type->restrictions->whiteSpace->value,"collapse") == 0) {
 				whiteSpace_collapse(data->children->content);
-			}	
+			}
 		}
 		if (type->restrictions->enumeration) {
 			if (!zend_hash_exists(type->restrictions->enumeration,data->children->content,strlen(data->children->content)+1)) {
@@ -262,42 +262,40 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 		    strlen(data->children->content) != type->restrictions->length->value) {
 		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
 		}
-	}	
-	if (type->kind == XSD_TYPEKIND_SIMPLE) {
-		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-			return master_to_zval(type->encode, data);
-		}
-	} else if (type->kind == XSD_TYPEKIND_LIST) {
-		return to_zval_list(enc, data);
-	} else if (type->kind == XSD_TYPEKIND_UNION) {
-		return to_zval_union(enc, data);
-	} else if (type->kind == XSD_TYPEKIND_COMPLEX) {
-		if (type->encode &&
-		    (type->encode->details.type == IS_ARRAY ||
-		     type->encode->details.type == SOAP_ENC_ARRAY)) {
-			return to_zval_array(enc, data);
-		}
-		if (type->encode &&
-		    (type->encode->details.type == IS_OBJECT ||
-		     type->encode->details.type == SOAP_ENC_OBJECT)) {
-			return to_zval_array(enc, data);
-		}
-		if (type->model || type->attributes) {
+	}
+	switch (type->kind) {
+		case XSD_TYPEKIND_SIMPLE:
+			if (type->encode && enc != &type->encode->details) {
+				return master_to_zval(type->encode, data);
+			}
+			break;
+		case XSD_TYPEKIND_LIST:
+			return to_zval_list(enc, data);
+		case XSD_TYPEKIND_UNION:
+			return to_zval_union(enc, data);
+		case XSD_TYPEKIND_COMPLEX:
+		case XSD_TYPEKIND_SIMPLE_RESTRICTION:
+		case XSD_TYPEKIND_SIMPLE_EXTENSION:
+		case XSD_TYPEKIND_COMPLEX_RESTRICTION:
+		case XSD_TYPEKIND_COMPLEX_EXTENSION:
+			if (type->encode &&
+			    (type->encode->details.type == IS_ARRAY ||
+			     type->encode->details.type == SOAP_ENC_ARRAY)) {
+				return to_zval_array(enc, data);
+			}
 			return to_zval_object(enc, data);
-		}
-		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-			return master_to_zval(type->encode, data);
-		}
+		default:
+			break;
 	}
 	return guess_zval_convert(enc, data);
 }
 
-xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
+xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style)
 {
 	sdlTypePtr type;
 	xmlNodePtr ret = NULL;
 
-	type = enc.sdl_type;
+	type = enc->sdl_type;
 
 	if (type) {
 		if (type->restrictions && Z_TYPE_P(data) == IS_STRING) {
@@ -320,28 +318,33 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 			}
 		}
 	}
-	if (type->kind == XSD_TYPEKIND_SIMPLE) {
-		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-			ret = master_to_xml(type->encode, data, style);
-		}
-	} else if (type->kind == XSD_TYPEKIND_LIST) {
-		ret = to_xml_list(enc, data, style);
-	} else if (type->kind == XSD_TYPEKIND_UNION) {
-		ret = to_xml_union(enc, data, style);
-	} else if (type->kind == XSD_TYPEKIND_COMPLEX) {
-		if (type->encode &&
-		    (type->encode->details.type == IS_ARRAY ||
-		     type->encode->details.type == SOAP_ENC_ARRAY)) {
-			ret = to_xml_array(enc, data, style);
-		} else if (type->encode &&
-		           (type->encode->details.type == IS_OBJECT ||
-		            type->encode->details.type == SOAP_ENC_OBJECT)) {
-			ret = to_xml_object(enc, data, style);
-		} else if (type->model || type->attributes) {
-			ret = to_xml_object(enc, data, style);
-		} else if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-			ret = master_to_xml(type->encode, data, style);
-		}
+	switch(type->kind) {
+		case XSD_TYPEKIND_SIMPLE:
+			if (type->encode && enc != &type->encode->details) {
+				ret = master_to_xml(type->encode, data, style);
+			}
+			break;
+		case XSD_TYPEKIND_LIST:
+			ret = to_xml_list(enc, data, style);
+			break;
+		case XSD_TYPEKIND_UNION:
+			ret = to_xml_union(enc, data, style);
+			break;
+		case XSD_TYPEKIND_COMPLEX:
+		case XSD_TYPEKIND_SIMPLE_RESTRICTION:
+		case XSD_TYPEKIND_SIMPLE_EXTENSION:
+		case XSD_TYPEKIND_COMPLEX_RESTRICTION:
+		case XSD_TYPEKIND_COMPLEX_EXTENSION:
+			if (type->encode &&
+			    (type->encode->details.type == IS_ARRAY ||
+			     type->encode->details.type == SOAP_ENC_ARRAY)) {
+				ret = to_xml_array(enc, data, style);
+			} else {
+				ret = to_xml_object(enc, data, style);
+			}
+			break;
+		default:
+			break;
 	}
 	if (ret == NULL) {
 		ret = guess_xml_convert(enc, data, style);
@@ -792,7 +795,7 @@ static sdlPtr load_wsdl(char *struri)
 									element = get_attribute(part->properties, "element");
 									if (element != NULL) {
 										param->encode = get_encoder_from_element(ctx.root, part, element->children->content);
-									} 
+									}
 								}
 
 								zend_hash_next_index_insert(function->requestParameters, &param, sizeof(sdlParamPtr), NULL);

@@ -17,9 +17,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	/* Parse XML packet */
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
-	
+
 	EG(error_reporting) = old_error_reporting;
-	
+
 	if (!response) {
 		add_soap_fault(this_ptr, "Client", "looks like we got no XML document", NULL, NULL TSRMLS_CC);
 		return FALSE;
@@ -111,7 +111,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		if (tmp != NULL) {
 			encodePtr enc;
 			enc = get_conversion(UNKNOWN_TYPE);
-			details = enc->to_zval(enc->details, tmp);
+			details = master_to_zval(enc, tmp);
 		}
 
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
