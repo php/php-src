@@ -2301,15 +2301,19 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	char *key;
 	HashPosition hpos;
 	smart_str result = {0};
+	HashTable tmp_hash;
 	
+	zend_hash_init(&tmp_hash, 0, NULL, NULL, 0);
 	zend_hash_internal_pointer_reset_ex(hash, &hpos);
 	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
 		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
 			case HASH_KEY_IS_STRING:
 				len = string_key_len-1;
 				if (len < 1) {
+					zend_hash_destroy(&tmp_hash);
 					RETURN_FALSE;
 				}
+				zend_hash_add(&tmp_hash, string_key, string_key_len, entry, sizeof(zval*), NULL);
 				if (len > maxlen) {
 					maxlen = len;
 				}
@@ -2324,6 +2328,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 			
 				convert_to_string(&ctmp);
 				len = Z_STRLEN(ctmp);
+				zend_hash_add(&tmp_hash, Z_STRVAL(ctmp), len+1, entry, sizeof(zval*), NULL);
 				zval_dtor(&ctmp);
 
 				if (len > maxlen) {
@@ -2351,7 +2356,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 		for (len = maxlen; len >= minlen; len--) {
 			key[len] = 0;
 			
-			if (zend_hash_find(hash, key, len+1, (void**)&trans) == SUCCESS) {
+			if (zend_hash_find(&tmp_hash, key, len+1, (void**)&trans) == SUCCESS) {
 				char *tval;
 				int tlen;
 				zval tmp;
@@ -2384,6 +2389,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	}
 
 	efree(key);
+	zend_hash_destroy(&tmp_hash);
 	smart_str_0(&result);
 	RETVAL_STRINGL(result.c, result.len, 0);
 }
