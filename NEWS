@@ -132,6 +132,7 @@ PHP                                                                        NEWS
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30725 (PHP segfaults when an exception is thrown in getIterator() 
   within foreach). (Marcus)
+- Fixed bug #30609 (cURL functions bypass open_basedir). (Jani)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30430 (odbc_next_result() doesn't bind values and that results 
   in segfault). (pdan-php at esync dot org, Tony)
