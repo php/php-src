@@ -417,6 +417,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
 
+	EG(function_state_ptr) = &function_state;
+
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		if (symbol_table) {
