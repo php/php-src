@@ -115,19 +115,17 @@ Changes 09/03/1999 (danny.heijl@cevi.be)
 #include "dl/phpdl.h"
 #endif
 
-//
-// php 3.0
-//#if defined(THREAD_SAFE)
-//#include "tls.h"
-//DWORD InformixTls;
-//static int numthreads=0;
-//void *ifx_mutex;
-//#endif
+
+#include "php.h"
+#include "php_globals.h"
+#include "ext/standard/php3_standard.h"
+#include "php_informix.h"
+#include "php_globals.h"
+
 
 #if WIN32|WINNT
 #include <winsock.h>
 #else
-#include "config.h"
 #include "build-defs.h"
 
 #if HAVE_SYS_TYPES_H
@@ -137,10 +135,7 @@ Changes 09/03/1999 (danny.heijl@cevi.be)
 #include <netinet/in.h>
 #endif
 
-#include "php.h"
-#include "php3_string.h"
-#include "build-defs.h"
-#include "php_informix.h"
+#include "php_ini.h"
 
 
 #if HAVE_IFX
@@ -193,8 +188,6 @@ EXEC SQL include sqlstype;
 #include <errno.h>
 
 typedef char IFX[128];
-
-#include "php3_list.h"
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -269,23 +262,12 @@ BOOL WINAPI DllMain(HANDLE hModule,
 #endif
 #endif
 
-
-#if defined(THREAD_SAFE)
-typedef struct ifx_global_struct{
-    ifx_module php3_ifx_module;
-}ifx_global_struct;
-
-#define Informix_GLOBAL(a) ifx_globals->a
-
-#define Informix_TLS_VARS \
-    ifx_global_struct *ifx_globals; \
-    ifx_globals=TlsGetValue(InformixTls); 
-
+#ifdef ZTS 
+int ifx_globals_id;
 #else
-#define Informix_GLOBAL(a) a
-#define Informix_TLS_VARS
-ifx_module php3_ifx_module;
+PHP_IFX_API php_ifx_globals ifx_globals;
 #endif
+
 
 #define CHECK_LINK(link) {     \
     if (link==0) {             \
@@ -337,10 +319,12 @@ static char *ifx_error(ifx)
    char   c;
    int errorcode;
 
-   if (Informix_GLOBAL(php3_ifx_module).sv_sqlcode == 0)
+   IFXLS_FETCH();
+
+   if (IFXG(sv_sqlcode) == 0)
        errorcode = SQLCODE;
    else
-       errorcode = Informix_GLOBAL(php3_ifx_module).sv_sqlcode;
+       errorcode = IFXG(sv_sqlcode);
 
    switch (ifx_check()) {
        case IFX_SUCCESS:
@@ -379,12 +363,12 @@ static void _close_ifx_link(link)
     EXEC SQL END DECLARE SECTION;
 {
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
     EXEC SQL DISCONNECT CURRENT;
     efree(link);
-    Informix_GLOBAL(php3_ifx_module).num_links--;
+    IFXG(num_links)--;
 }
 
 static void _close_ifx_plink(link)
@@ -393,14 +377,14 @@ EXEC SQL BEGIN DECLARE SECTION;
 EXEC SQL END DECLARE SECTION;
 {
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
     EXEC SQL DISCONNECT CURRENT;
 
     free(link);
-    Informix_GLOBAL(php3_ifx_module).num_persistent--;
-    Informix_GLOBAL(php3_ifx_module).num_links--;
+    IFXG(num_persistent)--;
+    IFXG(num_links)--;
 }
 
 static void ifx_free_result(a_result_id)
@@ -429,79 +413,79 @@ int php3_minit_ifx(INIT_FUNC_ARGS)
 #endif
 
     if (cfg_get_long("ifx.blobinfile",
-                      &Informix_GLOBAL(php3_ifx_module).blobinfile)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).blobinfile=BLOBINFILE;
+                      &IFXG(blobinfile))==FAILURE) {
+        IFXG(blobinfile)=BLOBINFILE;
     }
 
     if (cfg_get_long("ifx.textasvarchar",
-                      &Informix_GLOBAL(php3_ifx_module).textasvarchar)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).textasvarchar=0;
+                      &IFXG(textasvarchar))==FAILURE) {
+        IFXG(textasvarchar)=0;
     }
 
 
     if (cfg_get_long("ifx.byteasvarchar",
-                      &Informix_GLOBAL(php3_ifx_module).byteasvarchar)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).byteasvarchar=0;
+                      &IFXG(byteasvarchar))==FAILURE) {
+        IFXG(byteasvarchar)=0;
     }
 
     if (cfg_get_long("ifx.charasvarchar",
-                      &Informix_GLOBAL(php3_ifx_module).charasvarchar)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).charasvarchar=0;
+                      &IFXG(charasvarchar))==FAILURE) {
+        IFXG(charasvarchar)=0;
     }
 
     if (cfg_get_long("ifx.nullformat",
-                      &Informix_GLOBAL(php3_ifx_module).nullformat)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).nullformat=0;
+                      &IFXG(nullformat))==FAILURE) {
+        IFXG(nullformat)=0;
     }
     
-    Informix_GLOBAL(php3_ifx_module).nullvalue = malloc(1);
-    Informix_GLOBAL(php3_ifx_module).nullvalue[0] = 0;
-    Informix_GLOBAL(php3_ifx_module).nullstring = malloc(5);
-    strcpy(Informix_GLOBAL(php3_ifx_module).nullstring, "NULL");
+    IFXG(nullvalue) = malloc(1);
+    IFXG(nullvalue)[0] = 0;
+    IFXG(nullstring) = malloc(5);
+    strcpy(IFXG(nullstring), "NULL");
 
     if (cfg_get_long("ifx.allow_persistent",
-                      &Informix_GLOBAL(php3_ifx_module).allow_persistent)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).allow_persistent=1;
+                      &IFXG(allow_persistent))==FAILURE) {
+        IFXG(allow_persistent)=1;
     }
     if (cfg_get_long("ifx.max_persistent",
-                      &Informix_GLOBAL(php3_ifx_module).max_persistent)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).max_persistent=-1;
+                      &IFXG(max_persistent))==FAILURE) {
+        IFXG(max_persistent)=-1;
     }
     if (cfg_get_long("ifx.max_links",
-                     &Informix_GLOBAL(php3_ifx_module).max_links)==FAILURE) {
-        Informix_GLOBAL(php3_ifx_module).max_links=-1;
+                     &IFXG(max_links))==FAILURE) {
+        IFXG(max_links)=-1;
     }
     if (cfg_get_string("ifx.default_host",
-                      &Informix_GLOBAL(php3_ifx_module).default_host)==FAILURE
-              || Informix_GLOBAL(php3_ifx_module).default_host[0]==0) {
-        Informix_GLOBAL(php3_ifx_module).default_host=NULL;
+                      &IFXG(default_host))==FAILURE
+              || IFXG(default_host)[0]==0) {
+        IFXG(default_host)=NULL;
     }
     if (cfg_get_string("ifx.default_user",
-                       &Informix_GLOBAL(php3_ifx_module).default_user)==FAILURE
-              || Informix_GLOBAL(php3_ifx_module).default_user[0]==0) {
-        Informix_GLOBAL(php3_ifx_module).default_user=NULL;
+                       &IFXG(default_user))==FAILURE
+              || IFXG(default_user)[0]==0) {
+        IFXG(default_user)=NULL;
     }
     if (cfg_get_string("ifx.default_password",
-                        &Informix_GLOBAL(php3_ifx_module).default_password)==FAILURE
-              || Informix_GLOBAL(php3_ifx_module).default_password[0]==0) {    
-        Informix_GLOBAL(php3_ifx_module).default_password=NULL;
+                        &IFXG(default_password))==FAILURE
+              || IFXG(default_password)[0]==0) {    
+        IFXG(default_password)=NULL;
     }
-    Informix_GLOBAL(php3_ifx_module).num_persistent=0;
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode=0;
-    Informix_GLOBAL(php3_ifx_module).le_result = 
+    IFXG(num_persistent)=0;
+    IFXG(sv_sqlcode)=0;
+    IFXG(le_result) = 
             register_list_destructors(ifx_free_result,NULL);
-    Informix_GLOBAL(php3_ifx_module).le_idresult = 
+    IFXG(le_idresult) = 
             register_list_destructors(ifx_free_result,NULL);
-    Informix_GLOBAL(php3_ifx_module).le_link =  
+    IFXG(le_link) =  
             register_list_destructors(_close_ifx_link,NULL);
-    Informix_GLOBAL(php3_ifx_module).le_plink = 
+    IFXG(le_plink) = 
             register_list_destructors(NULL,_close_ifx_plink);
 
 #if 0
     printf("Registered:  %d,%d,%d\n",
-         Informix_GLOBAL(php3_ifx_module).le_result,
-         Informix_GLOBAL(php3_ifx_module).le_link,
-         Informix_GLOBAL(php3_ifx_module).le_plink);
+         IFXG(le_result),
+         IFXG(le_link),
+         IFXG(le_plink));
 #endif
     ifx_module_entry.type = type;
 
@@ -520,9 +504,9 @@ $endif;
 }
 
 
-int php3_mshutdown_ifx(void){
+int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS){
 #if defined(THREAD_SAFE)
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
     if (ifx_globals != 0) 
         LocalFree((HLOCAL) ifx_globals); 
     SET_MUTEX(ifx_mutex);
@@ -540,30 +524,30 @@ int php3_mshutdown_ifx(void){
 
 int php3_rinit_ifx(INIT_FUNC_ARGS)
 {
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
-    Informix_GLOBAL(php3_ifx_module).default_link=-1;
-    Informix_GLOBAL(php3_ifx_module).num_links = 
-                 Informix_GLOBAL(php3_ifx_module).num_persistent;
+    IFXG(default_link)=-1;
+    IFXG(num_links) = 
+                 IFXG(num_persistent);
     return SUCCESS;
 }
 
-void php3_info_ifx(void)
+void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS)
 {
     char maxp[16],maxl[16];
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     
-    if (Informix_GLOBAL(php3_ifx_module).max_persistent==-1) {
+    if (IFXG(max_persistent)==-1) {
         strcpy(maxp,"Unlimited");
     } else {
-        snprintf(maxp,15,"%ld",Informix_GLOBAL(php3_ifx_module).max_persistent);
+        snprintf(maxp,15,"%ld",IFXG(max_persistent));
         maxp[15]=0;
     }
-    if (Informix_GLOBAL(php3_ifx_module).max_links==-1) {
+    if (IFXG(max_links)==-1) {
         strcpy(maxl,"Unlimited");
     } else {
-        snprintf(maxl,15,"%ld",Informix_GLOBAL(php3_ifx_module).max_links);
+        snprintf(maxl,15,"%ld",IFXG(max_links));
         maxl[15]=0;
     }
     php3_printf("<table cellpadding=5>"
@@ -578,9 +562,9 @@ void php3_info_ifx(void)
                 "IFX_LIBS=%s<br></tt></td></tr>"
 #endif
                 "</table>\n",
-                (Informix_GLOBAL(php3_ifx_module).allow_persistent?"Yes":"No"),
-                Informix_GLOBAL(php3_ifx_module).num_persistent,maxp,
-                Informix_GLOBAL(php3_ifx_module).num_links,maxl,
+                (IFXG(allow_persistent)?"Yes":"No"),
+                IFXG(num_persistent),maxp,
+                IFXG(num_links),maxl,
                 (double)(CLIENT_SQLI_VER/100.0)
 #if !(WIN32|WINNT)
                 ,PHP_IFX_INCLUDE,
@@ -609,9 +593,11 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
     char *hashed_details;
     int hashed_details_length;
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
-    if (php3_ini.sql_safe_mode) {
+    PLS_FETCH();
+    
+    if (PG(sql_safe_mode)) {
         if (ARG_COUNT(ht)>0) {
             php3_error(E_NOTICE,
             "SQL safe mode in effect - ignoring host/user/password information");
@@ -622,9 +608,9 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         hashed_details = (char *) emalloc(hashed_details_length+1);
         sprintf(hashed_details,"ifx__%s_",user);
     } else {
-        host = Informix_GLOBAL(php3_ifx_module).default_host;
-        user = Informix_GLOBAL(php3_ifx_module).default_user;
-        passwd = Informix_GLOBAL(php3_ifx_module).default_password;
+        host = IFXG(default_host);
+        user = IFXG(default_user);
+        passwd = IFXG(default_password);
         
         switch(ARG_COUNT(ht)) {
             case 0: /* defaults */
@@ -681,9 +667,9 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
     }
 
 
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
 
-    if (!Informix_GLOBAL(php3_ifx_module).allow_persistent) {
+    if (!IFXG(allow_persistent)) {
         persistent=0;
     }
     if (persistent) {
@@ -694,37 +680,37 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                             (void **) &le)==FAILURE) {  /* we don't */
             list_entry new_le;
 
-            if (Informix_GLOBAL(php3_ifx_module).max_links!=-1 &&
-                    Informix_GLOBAL(php3_ifx_module).num_links >=
-                    Informix_GLOBAL(php3_ifx_module).max_links) {
+            if (IFXG(max_links)!=-1 &&
+                    IFXG(num_links) >=
+                    IFXG(max_links)) {
                 php3_error(E_WARNING,
                            "Informix:  Too many open links (%d)",
-                           Informix_GLOBAL(php3_ifx_module).num_links);
+                           IFXG(num_links));
                 efree(hashed_details);
                 RETURN_FALSE;
             }
-            if (Informix_GLOBAL(php3_ifx_module).max_persistent!=-1 && 
-                    Informix_GLOBAL(php3_ifx_module).num_persistent >=
-                    Informix_GLOBAL(php3_ifx_module).max_persistent) {
+            if (IFXG(max_persistent)!=-1 && 
+                    IFXG(num_persistent) >=
+                    IFXG(max_persistent)) {
                 php3_error(E_WARNING,
                            "Informix:  Too many open persistent links (%d)",
-                           Informix_GLOBAL(php3_ifx_module).num_persistent);
+                           IFXG(num_persistent));
                 efree(hashed_details);
                 RETURN_FALSE;
             }
             /* create the link */
             ifx = (char *)malloc(sizeof(IFX));
-            Informix_GLOBAL(php3_ifx_module).connectionid++;
+            IFXG(connectionid)++;
             sprintf(ifx,"%s%x", 
                     user, 
-                    Informix_GLOBAL(php3_ifx_module).connectionid);
+                    IFXG(connectionid));
 
             EXEC SQL CONNECT TO :host AS :ifx 
                      USER :user USING :passwd 
                      WITH CONCURRENT TRANSACTION;  
 
             if (ifx_check() == IFX_ERROR) {
-                Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+                IFXG(sv_sqlcode) = SQLCODE;
                 php3_error(E_WARNING,ifx_error(ifx));
                 free(ifx);
                 efree(hashed_details);
@@ -732,7 +718,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             }
             
             /* hash it up */
-            new_le.type = Informix_GLOBAL(php3_ifx_module).le_plink;
+            new_le.type = IFXG(le_plink);
             new_le.ptr = ifx;
             if (_php3_hash_update(plist, hashed_details, 
                    hashed_details_length+1, 
@@ -741,10 +727,10 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                 efree(hashed_details);
                 RETURN_FALSE;
             }
-            Informix_GLOBAL(php3_ifx_module).num_persistent++;
-            Informix_GLOBAL(php3_ifx_module).num_links++;
+            IFXG(num_persistent)++;
+            IFXG(num_links)++;
         } else {  /* we do */
-            if (le->type != Informix_GLOBAL(php3_ifx_module).le_plink) {
+            if (le->type != IFXG(le_plink)) {
                 RETURN_FALSE;
             }
             /* ensure that the link did not die */
@@ -758,7 +744,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                          WITH CONCURRENT TRANSACTION;  
 
                 if (ifx_check() == IFX_ERROR) {
-                    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+                    IFXG(sv_sqlcode) = SQLCODE;
                     php3_error(E_WARNING,
                                "Informix:  Link to server lost, unable to reconnect (%s)",
                                ifx_error(ifx));
@@ -771,7 +757,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             ifx = le->ptr;
         }
         return_value->value.lval = php3_list_insert(ifx,
-                               Informix_GLOBAL(php3_ifx_module).le_plink);
+                               IFXG(le_plink));
         return_value->type = IS_LONG;
     } else { /* non persistent */
         list_entry *index_ptr,new_index_ptr;
@@ -791,10 +777,10 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             }
             link = (int) index_ptr->ptr;
             ptr = php3_list_find(link,&type);   /* check if the link is still there */
-            if (ptr && (type==Informix_GLOBAL(php3_ifx_module).le_link ||
-                        type==Informix_GLOBAL(php3_ifx_module).le_plink)) {
+            if (ptr && (type==IFXG(le_link) ||
+                        type==IFXG(le_plink))) {
                 return_value->value.lval = 
-                          Informix_GLOBAL(php3_ifx_module).default_link = 
+                          IFXG(default_link) = 
                           link;
                 return_value->type = IS_LONG;
                 efree(hashed_details);
@@ -803,25 +789,25 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                 _php3_hash_del(list,hashed_details,hashed_details_length+1);
             }
         }
-        if (Informix_GLOBAL(php3_ifx_module).max_links != -1 && 
-            Informix_GLOBAL(php3_ifx_module).num_links >= 
-                             Informix_GLOBAL(php3_ifx_module).max_links) {
+        if (IFXG(max_links) != -1 && 
+            IFXG(num_links) >= 
+                             IFXG(max_links)) {
             php3_error(E_WARNING,
                        "Informix:  Too many open links (%d)",
-                       Informix_GLOBAL(php3_ifx_module).num_links);
+                       IFXG(num_links));
             efree(hashed_details);
             RETURN_FALSE;
         }
         ifx = (char *) emalloc(sizeof(IFX));
-        Informix_GLOBAL(php3_ifx_module).connectionid++;        
+        IFXG(connectionid)++;        
         sprintf(ifx,"connec%x", 
-                Informix_GLOBAL(php3_ifx_module).connectionid);
+                IFXG(connectionid));
 
         EXEC SQL CONNECT TO :host AS :ifx 
              USER :user USING :passwd 
              WITH CONCURRENT TRANSACTION;  
         if (ifx_check() == IFX_ERROR) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"ifx_pconnect : %s", ifx_error(ifx));
             efree(hashed_details);
             efree(ifx);
@@ -830,7 +816,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
         /* add it to the list */
         return_value->value.lval = 
-             php3_list_insert(ifx,Informix_GLOBAL(php3_ifx_module).le_link);
+             php3_list_insert(ifx,IFXG(le_link));
         return_value->type = IS_LONG;
         
         /* add it to the hash */
@@ -844,10 +830,10 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             efree(hashed_details);
             RETURN_FALSE;
         }
-        Informix_GLOBAL(php3_ifx_module).num_links++;
+        IFXG(num_links)++;
     }
     efree(hashed_details);
-    Informix_GLOBAL(php3_ifx_module).default_link=return_value->value.lval;
+    IFXG(default_link)=return_value->value.lval;
 }
 
 
@@ -869,16 +855,16 @@ PHP_FUNCTION(ifx_pconnect)
 
 static int php3_ifx_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
-    if (Informix_GLOBAL(php3_ifx_module).default_link==-1) { /* no link opened yet, implicitly open one */
+    if (IFXG(default_link)==-1) { /* no link opened yet, implicitly open one */
         HashTable tmp;
         
         _php3_hash_init(&tmp,0,NULL,NULL,0);
-        php3_ifx_do_connect(&tmp,return_value,list,plist,0);
+        php3_ifx_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
         _php3_hash_destroy(&tmp);
     }
-    return Informix_GLOBAL(php3_ifx_module).default_link;
+    return IFXG(default_link);
 }
 
 /* ----------------------------------------------------------------------
@@ -900,13 +886,13 @@ EXEC SQL BEGIN DECLARE SECTION;
     char *ifx;
 EXEC SQL END DECLARE SECTION;
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
 
     
     switch (ARG_COUNT(ht)) {
         case 0:
-            id = Informix_GLOBAL(php3_ifx_module).default_link;
+            id = IFXG(default_link);
             break;
         case 1:
             if (getParameters(ht, 1, &ifx_link)==FAILURE) {
@@ -920,11 +906,11 @@ EXEC SQL END DECLARE SECTION;
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
 
     ifx = (char *) php3_list_find(id,&type);
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_link && 
-            type!=Informix_GLOBAL(php3_ifx_module).le_plink) {
+    if (type!=IFXG(le_link) && 
+            type!=IFXG(le_plink)) {
         php3_error(E_WARNING,
                    "ifx_close : %d (type %d) is not an Informix link index",
                    id, 
@@ -1002,13 +988,13 @@ EXEC SQL END DECLARE SECTION;
     int  query_type;
     int  cursoryproc;
         
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     if(ARG_COUNT(ht)<2) {
      WRONG_PARAM_COUNT;
     }
 
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
 
     /* get the first 2 parameters */
     if (getParameters(ht, 2, &query, &ifx_link)==FAILURE) {
@@ -1018,8 +1004,8 @@ EXEC SQL END DECLARE SECTION;
     id = ifx_link->value.lval;
 
     ifx = (char *) php3_list_find(id,&type);
-    if (type != Informix_GLOBAL(php3_ifx_module).le_link && 
-            type!=Informix_GLOBAL(php3_ifx_module).le_plink) {
+    if (type != IFXG(le_link) && 
+            type!=IFXG(le_plink)) {
         php3_error(E_WARNING,
                    "ifx_query : %d (type %d) is not a Informix link index",
                    id,
@@ -1032,14 +1018,14 @@ EXEC SQL END DECLARE SECTION;
     convert_to_string(query);
 
     statement = query->value.str.val;
-    Informix_GLOBAL(php3_ifx_module).cursorid++;    
-    sprintf(statemid, "statem%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
-    sprintf(cursorid, "cursor%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
-    sprintf(descrpid, "descrp%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
+    IFXG(cursorid)++;    
+    sprintf(statemid, "statem%x", IFXG(cursorid)); 
+    sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
+    sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
     
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -1047,7 +1033,7 @@ EXEC SQL END DECLARE SECTION;
     }
     EXEC SQL PREPARE :statemid FROM :statement;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Prepare fails (%s)",
                               ifx_error(ifx));
         RETURN_FALSE;
@@ -1058,7 +1044,7 @@ EXEC SQL END DECLARE SECTION;
    
     EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 256;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Allocate desciptor <%s> fails (%s)",
                               descrpid,
                               ifx_error(ifx));
@@ -1067,7 +1053,7 @@ EXEC SQL END DECLARE SECTION;
     }
     EXEC SQL DESCRIBE :statemid USING SQL DESCRIPTOR :descrpid;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Describe fails (%s)",
                               ifx_error(ifx));
         EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1182,7 +1168,7 @@ EXEC SQL END DECLARE SECTION;
           EXEC SQL EXECUTE :statemid;
       }
       if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Execute immediate fails : %s (%s)",
                                  statement,
                                  ifx_error(ifx));
@@ -1226,7 +1212,7 @@ EXEC SQL END DECLARE SECTION;
        
         EXEC SQL GET DESCRIPTOR :descrpid :fieldcount = COUNT;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Can not get descriptor %s (%s)",
                                   descrpid,
                                   ifx_error(ifx));
@@ -1255,7 +1241,7 @@ EXEC SQL END DECLARE SECTION;
                EXEC SQL DECLARE :cursorid CURSOR FOR :statemid;
                 
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Declare cursor fails (%s)", ifx_error(ifx));
             efree(Ifx_Result);
             EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1264,7 +1250,7 @@ EXEC SQL END DECLARE SECTION;
         }
         EXEC SQL OPEN :cursorid;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Open cursor fails (%s)", ifx_error(ifx));
             efree(Ifx_Result);
             EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1296,7 +1282,7 @@ $endif;
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                } 
                if(fieldtype==SQLBYTES) {
-                   if(Informix_GLOBAL(php3_ifx_module).blobinfile==0) {
+                   if(IFXG(blobinfile)==0) {
                        bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,list);
                        locator=php3_intifx_get_blobloc(bid,list);
                    } else {
@@ -1324,7 +1310,7 @@ $endif;
     }
 
 
-    RETURN_LONG(php3_list_insert(Ifx_Result,Informix_GLOBAL(php3_ifx_module).le_result));
+    RETURN_LONG(php3_list_insert(Ifx_Result,IFXG(le_result)));
 }
 /* }}} */
 
@@ -1384,13 +1370,13 @@ EXEC SQL END DECLARE SECTION;
     int  query_type;
     int  cursoryproc;
     
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     if(ARG_COUNT(ht)<2) {
      WRONG_PARAM_COUNT;
     }
 
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
 
     /* get the first 2 parameters */
     if (getParameters(ht, 2, &query, &ifx_link)==FAILURE) {
@@ -1400,8 +1386,8 @@ EXEC SQL END DECLARE SECTION;
     id = ifx_link->value.lval;
     
     ifx = (char *) php3_list_find(id,&type);
-    if (type != Informix_GLOBAL(php3_ifx_module).le_link && 
-            type!=Informix_GLOBAL(php3_ifx_module).le_plink) {
+    if (type != IFXG(le_link) && 
+            type!=IFXG(le_plink)) {
         php3_error(E_WARNING,
                    "ifx_query : %d (type %d) is not a Informix link index",
                    id,
@@ -1415,14 +1401,14 @@ EXEC SQL END DECLARE SECTION;
     convert_to_string(query);
 
     statement = query->value.str.val;
-    Informix_GLOBAL(php3_ifx_module).cursorid++;    
-    sprintf(statemid, "statem%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
-    sprintf(cursorid, "cursor%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
-    sprintf(descrpid, "descrp%x", Informix_GLOBAL(php3_ifx_module).cursorid); 
+    IFXG(cursorid)++;    
+    sprintf(statemid, "statem%x", IFXG(cursorid)); 
+    sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
+    sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
     
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -1430,7 +1416,7 @@ EXEC SQL END DECLARE SECTION;
     }
     EXEC SQL PREPARE :statemid FROM :statement;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Prepare fails (%s)",
                               ifx_error(ifx));
         RETURN_FALSE;
@@ -1439,7 +1425,7 @@ EXEC SQL END DECLARE SECTION;
     for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
     EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 256;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Allocate desciptor <%s> fails (%s)",
                               descrpid,
                               ifx_error(ifx));
@@ -1448,7 +1434,7 @@ EXEC SQL END DECLARE SECTION;
     }
     EXEC SQL DESCRIBE :statemid USING SQL DESCRIPTOR :descrpid;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Describe fails (%s)",
                               ifx_error(ifx));
         EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1460,7 +1446,7 @@ EXEC SQL END DECLARE SECTION;
     
     Ifx_Result = (IFX_RES *)emalloc(sizeof(IFX_RES));
     if (Ifx_Result == NULL) { 
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Out of memory allocating IFX_RES");
         EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
         EXEC SQL free :statemid;
@@ -1592,7 +1578,7 @@ EXEC SQL END DECLARE SECTION;
         for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlerrd[e];
         EXEC SQL GET DESCRIPTOR :descrpid :fieldcount = COUNT;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Can not get descriptor %s (%s)",
                                   descrpid,
                                   ifx_error(ifx));
@@ -1611,7 +1597,7 @@ EXEC SQL END DECLARE SECTION;
 
    } /* if select */
 
-   RETURN_LONG(php3_list_insert(Ifx_Result,Informix_GLOBAL(php3_ifx_module).le_result));
+   RETURN_LONG(php3_list_insert(Ifx_Result,IFXG(le_result)));
 }
 /* }}} */
 
@@ -1657,7 +1643,7 @@ EXEC SQL END DECLARE SECTION;
     int  locind;
     char *blobfilename;
     
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch(ARG_COUNT(ht)) {
         case 0:
@@ -1675,9 +1661,9 @@ EXEC SQL END DECLARE SECTION;
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not an Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -1691,7 +1677,7 @@ EXEC SQL END DECLARE SECTION;
 
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -1710,7 +1696,7 @@ EXEC SQL END DECLARE SECTION;
            EXEC SQL EXECUTE :statemid;
         }
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Execute immediate fails : %s ",
                                   ifx_error(ifx));
             RETURN_FALSE;
@@ -1730,13 +1716,13 @@ EXEC SQL END DECLARE SECTION;
                EXEC SQL DECLARE :cursorid CURSOR FOR :statemid;
 
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Declare cursor fails (%s)", ifx_error(ifx));
             RETURN_FALSE;
         }
         EXEC SQL OPEN :cursorid;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Open cursor fails (%s)", ifx_error(ifx));
             RETURN_FALSE;
         }
@@ -1761,7 +1747,7 @@ $endif;
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                } 
                if(fieldtype==SQLBYTES) {
-                   if(Informix_GLOBAL(php3_ifx_module).blobinfile==0) {
+                   if(IFXG(blobinfile)==0) {
                        bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,list);
                        locator=php3_intifx_get_blobloc(bid,list);
                    } else {
@@ -1811,12 +1797,12 @@ PHP_FUNCTION(ifx_error)
 {
     pval *ifx_link;
     int id;
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     
     switch(ARG_COUNT(ht)) {
         case 0:
-            id = Informix_GLOBAL(php3_ifx_module).default_link;
+            id = IFXG(default_link);
             break;
         case 1:
             if (getParameters(ht, 1, &ifx_link)==FAILURE) {
@@ -1855,14 +1841,14 @@ PHP_FUNCTION(ifx_errormsg)
     char *ifx_errmsg;
     char * returnmsg;
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
     
     switch(ARG_COUNT(ht)) {
         case 0:
-            if (Informix_GLOBAL(php3_ifx_module).sv_sqlcode == 0)
+            if (IFXG(sv_sqlcode) == 0)
                 ifx_errorcode = SQLCODE;
             else
-                ifx_errorcode = Informix_GLOBAL(php3_ifx_module).sv_sqlcode;
+                ifx_errorcode = IFXG(sv_sqlcode);
             break;
         case 1:
             if (getParameters(ht, 1, &errcode)==FAILURE) {
@@ -1916,7 +1902,7 @@ PHP_FUNCTION(ifx_affected_rows)
     int type;
     IFX_RES *Ifx_Result;
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch(ARG_COUNT(ht)) {
         case 0:
@@ -1934,9 +1920,9 @@ PHP_FUNCTION(ifx_affected_rows)
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode )= 0;
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not an Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -2016,7 +2002,7 @@ EXEC SQL END DECLARE SECTION;
 
     char *nullstr;
     
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch(ARG_COUNT(ht)) {
         case 0:
@@ -2052,9 +2038,9 @@ EXEC SQL END DECLARE SECTION;
     
     nullstr=php3_intifx_null();
 
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not an Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -2072,7 +2058,7 @@ EXEC SQL END DECLARE SECTION;
 
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -2113,7 +2099,7 @@ EXEC SQL END DECLARE SECTION;
    if(SQLCODE!=-451) {    
     switch (ifx_check()) {
         case IFX_ERROR:
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,
                        "Can not fetch row on cursor %s (%s)",
                        ifx_error(ifx),
@@ -2141,7 +2127,7 @@ EXEC SQL END DECLARE SECTION;
                                                    :fieldleng = LENGTH,
                                                    :indicator = INDICATOR;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Get descriptor (field # %d) fails (%s)",
                                  i,
                                  ifx_error(ifx));
@@ -2156,9 +2142,9 @@ EXEC SQL END DECLARE SECTION;
             sprintf(fieldname, "[Expr_%d]", i);
 
         if (indicator == -1) {        /* NULL */
-           if((Informix_GLOBAL(php3_ifx_module).textasvarchar==0 
+           if((IFXG(textasvarchar)==0 
                                                   && fieldtype==SQLTEXT) 
-              || (Informix_GLOBAL(php3_ifx_module).byteasvarchar==0 
+              || (IFXG(byteasvarchar)==0 
                                                   && fieldtype==SQLBYTES)) {
   
               bid_b=Ifx_Result->res_id[locind];
@@ -2260,7 +2246,7 @@ $endif;
                     RETURN_FALSE;
                 }
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :char_data = DATA;
-                if (Informix_GLOBAL(php3_ifx_module).charasvarchar != 0
+                if (IFXG(charasvarchar) != 0
                      && (fieldtype == SQLCHAR || fieldtype == SQLNCHAR)) {
                     ldchar(char_data, fieldleng, char_data);
                 }
@@ -2309,9 +2295,9 @@ $endif;
                                 /* note that in case of "blobinfile" */
                                 /* you get the file name             */
                                 /* a new one for every row !         */
-                if((Informix_GLOBAL(php3_ifx_module).textasvarchar!=0 
+                if((IFXG(textasvarchar)!=0 
                                             && fieldtype==SQLTEXT) 
-                  || (Informix_GLOBAL(php3_ifx_module).byteasvarchar!=0 
+                  || (IFXG(byteasvarchar)!=0 
                                             && fieldtype==SQLBYTES)) {
                    char *content;
                    long lg;
@@ -2406,7 +2392,7 @@ EXEC SQL END DECLARE SECTION;
     char *table_options;
     int  moredata;
 
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch (ARG_COUNT(ht)) {
         case 1:
@@ -2426,12 +2412,12 @@ EXEC SQL END DECLARE SECTION;
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
 
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,
                    "%d is not a Informix result index",result->value.lval);
         RETURN_FALSE;
@@ -2450,7 +2436,7 @@ EXEC SQL END DECLARE SECTION;
 
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -2462,7 +2448,7 @@ EXEC SQL END DECLARE SECTION;
     EXEC SQL FETCH :cursorid USING SQL DESCRIPTOR :descrpid;
     switch (ifx_check()) {
         case IFX_ERROR:
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,
                        "Can not fetch next row on cursor %s (%s)",
                        ifx_error(ifx),
@@ -2494,7 +2480,7 @@ EXEC SQL END DECLARE SECTION;
     for (i = 1; i <= num_fields; i++) {
         EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldname = NAME;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Get descriptor (field # %d) fails (%s)",
                                  i,
                                  ifx_error(ifx));
@@ -2521,7 +2507,7 @@ EXEC SQL END DECLARE SECTION;
                                                        :fieldleng = LENGTH,
                                                        :indicator = INDICATOR;
             if (ifx_check() < 0) {
-                Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+                IFXG(sv_sqlcode) = SQLCODE;
                 php3_error(E_WARNING,"Get descriptor (field # %d) fails (%s)",
                                      i,
                                      ifx_error(ifx));
@@ -2616,7 +2602,7 @@ $endif;
                         RETURN_FALSE;
                     }
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :char_data = DATA;
-                    if (Informix_GLOBAL(php3_ifx_module).charasvarchar != 0
+                    if (IFXG(charasvarchar) != 0
                           && (fieldtype == SQLCHAR || fieldtype == SQLNCHAR)) {
                         ldchar(char_data, fieldleng, char_data);
                     }
@@ -2680,7 +2666,7 @@ $endif;
         EXEC SQL FETCH :cursorid USING SQL DESCRIPTOR :descrpid;
         switch (ifx_check()) {
             case IFX_ERROR:
-                Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+                IFXG(sv_sqlcode) = SQLCODE;
                 php3_error(E_WARNING,
                            "Can not fetch next row on cursor %s (%s)",
                            ifx_error(ifx),
@@ -2740,7 +2726,7 @@ EXEC SQL END DECLARE SECTION;
     char *p;
     char *table_options;
             
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch (ARG_COUNT(ht)) {
         case 1:
@@ -2760,12 +2746,12 @@ EXEC SQL END DECLARE SECTION;
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,
                    "%d is not a Informix result index",result->value.lval);
         RETURN_FALSE;
@@ -2784,7 +2770,7 @@ EXEC SQL END DECLARE SECTION;
 
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -2799,7 +2785,7 @@ EXEC SQL END DECLARE SECTION;
         EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldname = NAME,
                                                    :fieldtype = TYPE;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Get descriptor (field # %d) fails (%s)",
                                  i,
                                  ifx_error(ifx));
@@ -2935,7 +2921,7 @@ EXEC SQL END DECLARE SECTION;
     char *p;
     char *table_options;
             
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     switch (ARG_COUNT(ht)) {
         case 1:
@@ -2955,12 +2941,12 @@ EXEC SQL END DECLARE SECTION;
             break;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,
                    "%d is not a Informix result index",result->value.lval);
         RETURN_FALSE;
@@ -2979,7 +2965,7 @@ EXEC SQL END DECLARE SECTION;
 
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -2999,7 +2985,7 @@ EXEC SQL END DECLARE SECTION;
                                                    :scale = SCALE,
                                                    :isnullable = NULLABLE;
         if (ifx_check() < 0) {
-            Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+            IFXG(sv_sqlcode) = SQLCODE;
             php3_error(E_WARNING,"Get descriptor (field # %d) fails (%s)",
                                  i,
                                  ifx_error(ifx));
@@ -3113,18 +3099,18 @@ PHP_FUNCTION(ifx_num_rows)
     pval *result;
     IFX_RES *Ifx_Result;
     int type;
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not a Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -3156,18 +3142,18 @@ PHP_FUNCTION(ifx_getsqlca)
     char fieldname[16];
     int e;
    
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not a Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -3204,18 +3190,18 @@ PHP_FUNCTION(ifx_num_fields)
     pval *result;
     IFX_RES *Ifx_Result;
     int type;
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
     if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode) = 0;
     
     convert_to_long(result);
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not a Informix result index",
                    result->value.lval);
         RETURN_FALSE;
@@ -3256,7 +3242,7 @@ EXEC SQL END DECLARE SECTION;
 
     int i, locind;
     
-    Informix_TLS_VARS;
+    IFXLS_FETCH();
 
 
     if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
@@ -3270,13 +3256,13 @@ EXEC SQL END DECLARE SECTION;
     
     Ifx_Result = (IFX_RES *) php3_list_find(result->value.lval,&type);
     
-    if (type!=Informix_GLOBAL(php3_ifx_module).le_result) {
+    if (type!=IFXG(le_result)) {
         php3_error(E_WARNING,"%d is not a Informix result index",
                    result->value.lval);
         RETURN_FALSE;
     }
     
-    Informix_GLOBAL(php3_ifx_module).sv_sqlcode = 0;
+    IFXG(sv_sqlcode = 0);
 
 
     for (i = 0; i < MAX_RESID; ++i) {
@@ -3293,7 +3279,7 @@ EXEC SQL END DECLARE SECTION;
     
     EXEC SQL set connection :ifx;
     if (ifx_check() < 0) {
-        Informix_GLOBAL(php3_ifx_module).sv_sqlcode = SQLCODE;
+        IFXG(sv_sqlcode) = SQLCODE;
         php3_error(E_WARNING,"Set connection %s fails (%s)",
                               ifx,
                               ifx_error(ifx));
@@ -3337,7 +3323,7 @@ static long php3_intifx_getType(long id, HashTable *list) {
  int type;
 
  Ifx_res = (IFX_IDRES *) php3_list_find(id,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult) {
+ if (type!=IFXG(le_idresult)) {
   php3_error(E_WARNING,"%d is not a Informix id-result index",
             id);
   return -1;
@@ -3457,7 +3443,7 @@ static long php3_intifx_create_blob(long type, long mode, char* param, long len,
   Ifx_blob->BLOB.blob_data.loc_oflags=LOC_WONLY;
   Ifx_blob->BLOB.blob_data.loc_size=-1;
  }
- return php3_list_insert(Ifx_blob,Informix_GLOBAL(php3_ifx_module).le_idresult);
+ return php3_list_insert(Ifx_blob,IFXG(le_idresult));
 }
 
 
@@ -3512,7 +3498,7 @@ static long php3_intifx_copy_blob(long bid, HashTable *list) {
  int type;
 
  Ifx_blob_orig = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
+ if (type!=IFXG(le_idresult) || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return -1;
@@ -3564,7 +3550,7 @@ static long php3_intifx_copy_blob(long bid, HashTable *list) {
   locator->loc_oflags=locator_orig->loc_oflags;
  }
  
- return php3_list_insert(Ifx_blob,Informix_GLOBAL(php3_ifx_module).le_idresult);
+ return php3_list_insert(Ifx_blob,IFXG(le_idresult));
 }
 
 
@@ -3614,7 +3600,7 @@ static long php3_intifx_free_blob(long bid, HashTable *list) {
  int type;
  
  Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return -1;
@@ -3656,7 +3642,7 @@ static long php3_intifx2_free_blob(long bid, HashTable *list) {
  int type;
  
  Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return -1;
@@ -3731,7 +3717,7 @@ static long php3_intifx_get_blob(long bid, HashTable *list, char** content) {
  int type;
  
  Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return -1;
@@ -3761,7 +3747,7 @@ static loc_t *php3_intifx_get_blobloc(long bid, HashTable *list) {
  int type;
  
  Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return NULL;
@@ -3824,7 +3810,7 @@ static long php3_intifx_update_blob(long bid, char* param, long len, HashTable *
  int type;
  
  Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php3_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
   return -1;
@@ -3923,7 +3909,7 @@ PHP_FUNCTION(ifx_blobinfile_mode) {
  }
  convert_to_long(pmode);
 
-  Informix_GLOBAL(php3_ifx_module).blobinfile=pmode->value.lval;
+  IFXG(blobinfile)=pmode->value.lval;
   RETURN_TRUE;
 }
 /* }}} */
@@ -3951,7 +3937,7 @@ PHP_FUNCTION(ifx_textasvarchar) {
  }
  convert_to_long(pmode);
 
-  Informix_GLOBAL(php3_ifx_module).textasvarchar=pmode->value.lval;
+  IFXG(textasvarchar)=pmode->value.lval;
   RETURN_TRUE;
 }
 /* }}} */
@@ -3978,7 +3964,7 @@ PHP_FUNCTION(ifx_byteasvarchar) {
  }
  convert_to_long(pmode);
 
-  Informix_GLOBAL(php3_ifx_module).byteasvarchar=pmode->value.lval;
+  IFXG(byteasvarchar)=pmode->value.lval;
   RETURN_TRUE;
 }
 
@@ -4005,7 +3991,7 @@ PHP_FUNCTION(ifx_nullformat) {
  }
  convert_to_long(pmode);
 
-  Informix_GLOBAL(php3_ifx_module).nullformat=pmode->value.lval;
+  IFXG(nullformat)=pmode->value.lval;
   RETURN_TRUE;
 }
 /* }}} */
@@ -4021,10 +4007,10 @@ PHP_FUNCTION(ifx_nullformat) {
 static char* php3_intifx_null() {
   char* tmp;
 
-  if(Informix_GLOBAL(php3_ifx_module).nullformat==0) {
-   tmp=Informix_GLOBAL(php3_ifx_module).nullvalue;
+  if(IFXG(nullformat)==0) {
+   tmp=IFXG(nullvalue);
   } else {
-   tmp=Informix_GLOBAL(php3_ifx_module).nullstring;
+   tmp=IFXG(nullstring);
   }
   return tmp;
 }
@@ -4107,7 +4093,7 @@ static long php3_intifx_create_char(char* param, long len, HashTable *list) {
   Ifx_char->CHAR.char_data[len]=0;
   Ifx_char->CHAR.len=len;
  }
- return php3_list_insert(Ifx_char,Informix_GLOBAL(php3_ifx_module).le_idresult);
+ return php3_list_insert(Ifx_char,IFXG(le_idresult));
 }
 
 /* ----------------------------------------------------------------------
@@ -4158,7 +4144,7 @@ static long php3_intifx_get_char(long bid, HashTable *list, char** content) {
  int type;
  
  Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php3_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
   return -1;
@@ -4212,7 +4198,7 @@ static long php3_intifx_free_char(long bid, HashTable *list) {
  int type;
  
  Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php3_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
   return -1;
@@ -4279,7 +4265,7 @@ static long php3_intifx_update_char(long bid, char* param, long len, HashTable *
  int type;
  
  Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+ if (type!=IFXG(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php3_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
   return -1;
@@ -4424,7 +4410,7 @@ static long php3_intifxus_create_slob(long create_mode, HashTable *list) {
   return -1;
  }
 
- return php3_list_insert(Ifx_slob,Informix_GLOBAL(php3_ifx_module).le_idresult);
+ return php3_list_insert(Ifx_slob,IFXG(le_idresult));
 }
 
 
@@ -4473,7 +4459,7 @@ static long php3_intifxus_free_slob(long bid, HashTable *list) {
  int type;
  
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   return -1;
@@ -4539,7 +4525,7 @@ static long php3_intifxus_close_slob(long bid, HashTable *list) {
  int type;
  
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   return -1;
@@ -4624,7 +4610,7 @@ static long php3_intifxus_open_slob(long bid, long create_mode, HashTable *list)
  
 
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult  || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult)  || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   return -1;
@@ -4673,7 +4659,7 @@ static long php3_intifxus_new_slob(HashTable *list) {
  Ifx_slob->type=TYPE_SLOB;
  Ifx_slob->SLOB.lofd=-1;
  Ifx_slob->SLOB.createspec=NULL;
- return php3_list_insert(Ifx_slob,Informix_GLOBAL(php3_ifx_module).le_idresult);
+ return php3_list_insert(Ifx_slob,IFXG(le_idresult));
 }
 
 
@@ -4692,7 +4678,7 @@ static ifx_lo_t *php3_intifxus_get_slobloc(long bid, HashTable *list) {
  int errcode, type;
  
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult  || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult)  || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   return NULL;
@@ -4732,7 +4718,7 @@ PHP_FUNCTION(ifxus_tell_slob) {
  convert_to_long(pbid);
  bid=pbid->value.lval;
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   RETURN_FALSE;
@@ -4782,7 +4768,7 @@ PHP_FUNCTION(ifxus_seek_slob) {
  
  bid=pbid->value.lval;
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   RETURN_FALSE;
@@ -4841,7 +4827,7 @@ PHP_FUNCTION(ifxus_read_slob) {
  
  bid=pbid->value.lval;
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   RETURN_FALSE;
@@ -4892,7 +4878,7 @@ PHP_FUNCTION(ifxus_write_slob) {
  
  bid=pbid->value.lval;
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
- if (type!=Informix_GLOBAL(php3_ifx_module).le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+ if (type!=IFXG(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php3_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
   RETURN_FALSE;

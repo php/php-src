@@ -40,22 +40,36 @@
 #define HAVE_IFX 1
 #endif
 
-#if HAVE_IFX
+#if WIN32||WINNT
+#define PHP_IFX_API __declspec(dllexport)
+#else
+#define PHP_IFX_API
+#endif
+
+
+#if HAVE_IFX                        /* with Informix */
+
 #ifndef DLEXPORT
 #define DLEXPORT
 #endif
 
-#include "locator.h"
-#include "sqltypes.h"
-
+#ifdef ZTS
+#include "TSRM.h"
+#endif
 
 extern php3_module_entry ifx_module_entry;
 #define ifx_module_ptr &ifx_module_entry
 
+
+#include "locator.h"
+#include "sqltypes.h"
+
+/* user functions */
 extern int php3_minit_ifx(INIT_FUNC_ARGS);
 extern int php3_rinit_ifx(INIT_FUNC_ARGS);
 extern int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS);
 void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS);
+/* functions common to all Informix versions */
 PHP_FUNCTION(ifx_connect);
 PHP_FUNCTION(ifx_pconnect);
 PHP_FUNCTION(ifx_close);
@@ -73,7 +87,7 @@ PHP_FUNCTION(ifx_htmltbl_result);
 PHP_FUNCTION(ifx_fieldtypes);
 PHP_FUNCTION(ifx_fieldproperties);
 PHP_FUNCTION(ifx_getsqlca);
-
+/* BLOB related stuff, IDS & IUS only */
 PHP_FUNCTION(ifx_create_blob);
 PHP_FUNCTION(ifx_free_blob) ;
 PHP_FUNCTION(ifx_get_blob);
@@ -83,13 +97,12 @@ PHP_FUNCTION(ifx_copy_blob);
 PHP_FUNCTION(ifx_textasvarchar);
 PHP_FUNCTION(ifx_byteasvarchar);
 PHP_FUNCTION(ifx_nullformat);
-
 PHP_FUNCTION(ifx_create_char);
 PHP_FUNCTION(ifx_free_char) ;
 PHP_FUNCTION(ifx_update_char);
 PHP_FUNCTION(ifx_get_char);
 
-
+/* SLOB, CLOB : IUS only functions */
 #if HAVE_IFX_IUS
 PHP_FUNCTION(ifxus_create_slob);
 PHP_FUNCTION(ifxus_free_slob) ;
@@ -118,11 +131,36 @@ typedef struct {
         long nullformat;     /* 0=NULL as "", 1= NULL as "NULL" */
         char *nullvalue;     /* "" */
         char *nullstring;    /* "NULL" */
-} ifx_module;
+} php_ifx_globals;           /* formerly "ifx_module" in the php3 version */
+
+#ifndef ZTS
+extern php_ifx_globals ifx_globals;
+#endif
+
+#ifdef ZTS
+# define IFXLS_D	php_ifx_globals *ifx_globals
+# define IFXLS_DC	, IFXLS_D
+# define IFXLS_C	ifx_globals
+# define IFXLS_CC , IFXLS_C
+# define IFXG(v) (ifx_globals->v)
+# define IFXLS_FETCH()	php_ifx_globals *ifx_globals = ts_resource(ifx_globals_id)
+# define IFX_TLS_VARS char *globals; IFXLS_FETCH(); globals = (char *)ifx_globals;
+#else
+# define IFXLS_D
+# define IFXLS_DC
+# define IFXLS_C
+# define IFXLS_CC
+# define IFXG(v) (ifx_globals.v)
+# define IFXLS_FETCH()
+# define IFX_TLS_VARS char *globals = (char *)&ifx_globals
+extern ZEND_API php_ifx_globals ifx_globals;
+#endif
+
 
 #define MAX_RESID          64
 #define BLOBINFILE 0      /* 0=in memory, 1=in file */
 
+/* query result set data */
 typedef struct ifx_res {
 	char connecid[16];
 	char cursorid[16];
@@ -174,18 +212,12 @@ typedef struct _IFX_IDRES {
 #endif
 
 
-
-
-
-
-#ifndef THREAD_SAFE
-extern ifx_module php3_ifx_module;
-#endif
-
-#else
+#else                                /* not HAVE_IFX  */
 
 #define ifx_module_ptr NULL
 
 #endif
+
+#define phpext_informix_ptr ifx_module_ptr
 
 #endif /* _PHP3_IFX_H */
