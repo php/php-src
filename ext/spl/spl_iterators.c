@@ -85,6 +85,8 @@ typedef struct _spl_recursive_it_object {
 	spl_sub_iterator         *iterators;
 	int                      level;
 	RecursiveIteratorMode    mode;
+	zend_function            *callHasChildren;
+	zend_function            *callGetChildren;
 	zend_function            *beginChildren;
 	zend_function            *endChildren;
 	zend_class_entry         *ce;
@@ -183,7 +185,11 @@ next_step:
 			case RS_TEST:
 				ce = object->iterators[object->level].ce;
 				zobject = object->iterators[object->level].zobject;
-				zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
+				if (object->callHasChildren) {
+					zend_call_method_with_0_params(&zthis, object->ce, &object->callHasChildren, "callHasChildren", &retval);
+				} else {
+					zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
+				}
 				if (retval) {
 					has_children = zend_is_true(retval);
 					zval_ptr_dtor(&retval);
@@ -211,13 +217,17 @@ next_step:
 			case RS_CHILD:
 				ce = object->iterators[object->level].ce;
 				zobject = object->iterators[object->level].zobject;
-				zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
-				ce = child ? Z_OBJCE_P(child) : NULL;
+				if (object->callGetChildren) {
+					zend_call_method_with_0_params(&zthis, object->ce, &object->callGetChildren, "callGetChildren", &child);
+				} else {
+					zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
+				}
+				ce = child && Z_TYPE_P(child) == IS_OBJECT ? Z_OBJCE_P(child) : NULL;
 				if (!ce || !instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC)) {
 					if (child) {
 						zval_ptr_dtor(&child);
 					}
-					zend_throw_exception(spl_ce_InvalidArgumentException, "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
+					zend_throw_exception(spl_ce_UnexpectedValueException, "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
 					return;
 				}
 				if (object->mode == RIT_CHILD_FIRST) {
@@ -234,7 +244,7 @@ next_step:
 				if (sub_iter->funcs->rewind) {
 					sub_iter->funcs->rewind(sub_iter TSRMLS_CC);
 				}
-				if (!object->beginChildren || object->beginChildren->common.scope != spl_ce_RecursiveIteratorIterator) {
+				if (object->beginChildren) {
 					zend_call_method_with_0_params(&zthis, object->ce, &object->beginChildren, "beginchildren", NULL);
 				}
 				goto next_step;
@@ -244,7 +254,7 @@ next_step:
 			iterator->funcs->dtor(iterator TSRMLS_CC);
 			zval_ptr_dtor(&object->iterators[object->level].zobject);
 			object->level--;
-			if (!object->endChildren || object->endChildren->common.scope != spl_ce_RecursiveIteratorIterator) {
+			if (object->endChildren) {
 				zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
 			}
 		} else {
@@ -335,9 +345,23 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
-	intern->beginChildren = NULL;
-	intern->endChildren = NULL;
 	intern->ce = Z_OBJCE_P(object);
+	zend_hash_find(&intern->ce->function_table, "callhaschildren", sizeof("callHasChildren"), (void **) &intern->callHasChildren);
+	if (intern->callHasChildren->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->callHasChildren = NULL;
+	}
+	zend_hash_find(&intern->ce->function_table, "callgetchildren", sizeof("callGetChildren"), (void **) &intern->callGetChildren);
+	if (intern->callGetChildren->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->callGetChildren = NULL;
+	}
+	zend_hash_find(&intern->ce->function_table, "beginchildren", sizeof("beginchildren"), (void **) &intern->beginChildren);
+	if (intern->beginChildren->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->beginChildren = NULL;
+	}
+	zend_hash_find(&intern->ce->function_table, "endchildren", sizeof("endchildren"), (void **) &intern->endChildren);
+	if (intern->endChildren->common.scope == spl_ce_RecursiveIteratorIterator) {
+		intern->endChildren = NULL;
+	}
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
 	iterator->refcount++;
@@ -443,6 +467,40 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
 } /* }}} */
 
+/* {{{ proto bool RecursiveIteratorIterator::callHasChildren()
+   Called for each element to test whether it has children */
+SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zend_class_entry *ce = object->iterators[object->level].ce;
+	zval *retval, *zobject;
+
+	zobject = object->iterators[object->level].zobject;
+	if (!zobject) {
+		RETURN_FALSE;
+	} else {
+		zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
+		RETURN_ZVAL(retval, 0, 1);
+	}
+} /* }}} */
+
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::callGetChildren()
+   Return children of current element */
+SPL_METHOD(RecursiveIteratorIterator, callGetChildren)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zend_class_entry *ce = object->iterators[object->level].ce;
+	zval *retval, *zobject;
+
+	zobject = object->iterators[object->level].zobject;
+	if (!zobject) {
+		return;
+	} else {
+		zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &retval);
+		RETURN_ZVAL(retval, 0, 1);
+	}
+} /* }}} */
+
 /* {{{ proto RecursiveIterator RecursiveIteratorIterator::beginChildren()
    Called when recursing one level down */
 SPL_METHOD(RecursiveIteratorIterator, beginChildren)
@@ -538,10 +596,12 @@ static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getDepth,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getSubIterator,arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getInnerIterator,NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginChildren, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getSubIterator,    arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

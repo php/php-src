@@ -37,6 +37,7 @@ extern PHPAPI zend_class_entry *spl_ce_OutOfBoundsException;
 extern PHPAPI zend_class_entry *spl_ce_OverflowException;
 extern PHPAPI zend_class_entry *spl_ce_RangeException;
 extern PHPAPI zend_class_entry *spl_ce_UnderflowException;
+extern PHPAPI zend_class_entry *spl_ce_UnexpectedValueException;
 
 PHP_MINIT_FUNCTION(spl_exceptions);
 

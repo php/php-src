@@ -45,6 +45,7 @@ PHPAPI zend_class_entry *spl_ce_OutOfBoundsException;
 PHPAPI zend_class_entry *spl_ce_OverflowException;
 PHPAPI zend_class_entry *spl_ce_RangeException;
 PHPAPI zend_class_entry *spl_ce_UnderflowException;
+PHPAPI zend_class_entry *spl_ce_UnexpectedValueException;
 
 #define spl_ce_Exception zend_exception_get_default()
 
@@ -64,6 +65,7 @@ PHP_MINIT_FUNCTION(spl_exceptions)
     REGISTER_SPL_SUB_CLASS_EX(OverflowException,        RuntimeException, NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(RangeException,           RuntimeException, NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(UnderflowException,       RuntimeException, NULL, NULL);
+    REGISTER_SPL_SUB_CLASS_EX(UnexpectedValueException, RuntimeException, NULL, NULL);
 
 	return SUCCESS;
 }
