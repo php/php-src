@@ -241,8 +241,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (param->name) {
+fprintf(stderr, "registering %d %s\n", param->namelen, param->name);
 		param->name = estrndup(param->name, param->namelen);
-		zend_hash_update(hash, param->name, param->namelen+1, param, sizeof(*param), (void**)&pparam);
+		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
 	} else {
 		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
@@ -540,13 +541,14 @@ static PHP_METHOD(PDOStatement, fetchAll)
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
 	struct pdo_bound_param_data param = {0};
+	int param_namelen;
 
 	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
-				&param.name, &param.namelen, &param.parameter, &param.param_type,
+				&param.name, &param_namelen, &param.parameter, &param.param_type,
 				&param.max_value_len,
 				&param.driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
@@ -554,6 +556,12 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 			return 0;
 		}	
 	}
+	/* 
+       yes, this is correct.  really.  truly.
+       We need to count the null terminating byte as well, 
+       which parse_parameters does not do. 
+    */
+    param.namelen = param_namelen + 1;
 
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
