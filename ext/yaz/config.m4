@@ -29,7 +29,7 @@ if test "$PHP_YAZ" != "no"; then
     if test "$yaz_version" -ge 1009000; then
       AC_MSG_RESULT([$YAZVERSION])
     else
-      AC_MSG_ERROR(YAZ version 1.9 or later required.])
+      AC_MSG_ERROR([YAZ version 1.9 or later required.])
     fi
 
     dir=""
