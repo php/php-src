@@ -215,11 +215,6 @@ extern char *strerror(int);
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if FHTTPD /* fhttpd */
-#define BLOCK_INTERRUPTIONS		NULL
-#define UNBLOCK_INTERRUPTIONS	NULL
-#endif
-
 #if (!HAVE_SNPRINTF)
 #define snprintf ap_snprintf
 #define vsnprintf ap_vsnprintf
@@ -228,46 +223,6 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #endif
 
 #define EXEC_INPUT_BUF 4096
-
-
-#if FHTTPD
-
-#include <servproc.h>
-
-#ifndef IDLE_TIMEOUT
-#define IDLE_TIMEOUT 120
-#endif
-#ifndef SIGACTARGS
-#define SIGACTARGS int n
-#endif
-
-extern struct http_server *server;
-extern struct request *req;
-extern struct httpresponse *response;
-extern int global_alarmflag;
-extern int idle_timeout;
-extern int exit_status;
-extern int headermade;
-extern char **currentheader;
-extern char *headerfirstline;
-extern int headerlines;
-
-void alarmhandler(SIGACTARGS);
-void setalarm(int t);
-int checkinput(int h);
-
-extern PHPAPI void php3_fhttpd_free_header(void);
-extern PHPAPI void php3_fhttpd_puts_header(char *s);
-extern PHPAPI void php3_fhttpd_puts(char *s);
-extern PHPAPI void php3_fhttpd_putc(char c);
-extern PHPAPI int php3_fhttpd_write(char *a,int n);
-# if !defined(COMPILE_DL)
-# define PUTS(s) php3_fhttpd_puts(s)
-# define PUTC(c) php3_fhttpd_putc(c)
-# define PHPWRITE(a,n) php3_fhttpd_write((a),(n))
-# endif
-#endif
-
 
 
 #define DONT_FREE 0
@@ -297,9 +252,6 @@ extern PHPAPI int php3_fhttpd_write(char *a,int n);
 #define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, php3_##alias, arg_types)
 
 
-
-
-
 /* global variables */
 extern pval *data;
 #if !(WIN32||WINNT)
@@ -325,9 +277,6 @@ extern void html_putc(char c);
 #define phpin zendin
 
 /* functions */
-#ifndef THREAD_SAFE
-extern int end_current_file_execution(int *retval);
-#endif
 extern int module_startup_modules(void);
 
 /* needed for modules only */
@@ -355,85 +304,6 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #include "zend_variables.h"
 #include "zend_constants.h"
 
-#define RETVAL_LONG(l) { return_value->type = IS_LONG; \
-                         return_value->value.lval = l; }
-#define RETVAL_DOUBLE(d) { return_value->type = IS_DOUBLE; \
-                           return_value->value.dval = d; }
-#define RETVAL_STRING(s,duplicate) { char *__s=(s); \
-			return_value->value.str.len = strlen(__s); \
-			return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s); \
-			return_value->type = IS_STRING; }
-#define RETVAL_STRINGL(s,l,duplicate) { char *__s=(s); int __l=l; \
-			return_value->value.str.len = __l; \
-			return_value->value.str.val = (duplicate?estrndup(__s,__l):__s); \
-      			return_value->type = IS_STRING; }
-
-#define RETVAL_FALSE  {var_reset(return_value);}
-#define RETVAL_TRUE   RETVAL_LONG(1L)
-
-#define RETURN_LONG(l) { return_value->type = IS_LONG; \
-                         return_value->value.lval = l; \
-                         return; }
-#define RETURN_DOUBLE(d) { return_value->type = IS_DOUBLE; \
-                           return_value->value.dval = d; \
-                           return; }
-#define RETURN_STRING(s,duplicate) { char *__s=(s); \
-			return_value->value.str.len = strlen(__s); \
-			return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s); \
-			return_value->type = IS_STRING; \
-			return; }
-#define RETURN_STRINGL(s,l,duplicate) { char *__s=(s); int __l=l; \
-			return_value->value.str.len = __l; \
-			return_value->value.str.val = (duplicate?estrndup(__s,__l):__s); \
-      			return_value->type = IS_STRING; \
-			return; }
-
-/*#define RETURN_NEG    RETURN_LONG(-1L) */
-#define RETURN_ZERO   RETURN_LONG(0L)
-#define RETURN_FALSE  {var_reset(return_value); return;}
-#define RETURN_TRUE   RETURN_LONG(1L)
-
-#define SET_VAR_STRING(n,v) { \
-                           { \
-                               pval var; \
-							   char *str=v; /* prevent 'v' from being evaluated more than once */ \
-                               var.value.str.val = (str); \
-                               var.value.str.len = strlen((str)); \
-                               var.type = IS_STRING; \
-                               _php3_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(pval),NULL); \
-                           } \
-                       }
-#define SET_VAR_STRINGL(n,v,l) { \
-                           { \
-                               pval var; \
-                               char *name=(n); \
-                               var.value.str.val = (v); \
-                               var.value.str.len = (l); \
-                               var.type = IS_STRING; \
-                               _php3_hash_update(&EG(symbol_table), name, strlen(name)+1, &var, sizeof(pval),NULL); \
-                           } \
-                       }
-#define SET_VAR_LONG(n,v) { \
-                           { \
-                               pval var; \
-                               var.value.lval = (v); \
-                               var.type = IS_LONG; \
-                               _php3_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(pval),NULL); \
-                           } \
-                       }
-#define SET_VAR_DOUBLE(n,v) { \
-                           { \
-                               pval var; \
-                               var.value.dval = (v); \
-                               var.type = IS_DOUBLE; \
-                               _php3_hash_update(&EG(symbol_table)), (n), strlen((n))+1, &var, sizeof(pval),NULL); \
-                           } \
-                       }
-
-#ifndef THREAD_SAFE
-extern int yylineno;
-#endif
-extern void phprestart(FILE *input_file);
 
 
 /* Finding offsets of elements within structures.
