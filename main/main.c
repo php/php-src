@@ -270,7 +270,7 @@ void php3_log_err(char *log_message)
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
 #if HAVE_SYSLOG_H
-		if (strcmp(PG(error_log), "syslog")) {
+		if (!strcmp(PG(error_log), "syslog")) {
 			syslog(LOG_NOTICE, log_message);
 			return;
 		} else {
