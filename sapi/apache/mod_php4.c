@@ -295,11 +295,8 @@ static void php_apache_request_shutdown(void *dummy)
 
 static int php_apache_sapi_activate(SLS_D)
 {
-	request_rec *r; 
-	SLS_FETCH();
+	request_rec *r = (request_rec *) SG(server_context); 
 	APLS_FETCH();
-
-	r = (request_rec *) SG(server_context);
 
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
