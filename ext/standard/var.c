@@ -41,72 +41,74 @@
 
 #include "php3_var.h"
 
-void php3api_var_dump(pval *struc, int level)
+void php3api_var_dump(pval **struc, int level)
 {
 	ulong index;
 	char *key;
 	int i, c = 0;
-	pval *data;
+	pval **data;
 	char buf[512];
 
-	switch (struc->type) {
+	switch ((*struc)->type) {
 		case IS_LONG:
-			i = sprintf(buf, "%*cint(%ld)\n", level, ' ', struc->value.lval);
+			i = sprintf(buf, "%*cint(%ld)\n", level, ' ', (*struc)->value.lval);
 			PHPWRITE(&buf[1], i - 1);
 			break;
 
 		case IS_DOUBLE:
-			i = sprintf(buf, "%*cfloat(%g)\n", level, ' ', struc->value.dval);
+			i = sprintf(buf, "%*cfloat(%g)\n", level, ' ', (*struc)->value.dval);
 			PHPWRITE(&buf[1], i - 1);
 			break;
 
 		case IS_STRING:
-			i = sprintf(buf, "%*cstring(%d) \"", level, ' ', struc->value.str.len);
+			i = sprintf(buf, "%*cstring(%d) \"", level, ' ', (*struc)->value.str.len);
 			PHPWRITE(&buf[1], i - 1);
-			PHPWRITE(struc->value.str.val, struc->value.str.len);
+			PHPWRITE((*struc)->value.str.val, (*struc)->value.str.len);
 			strcpy(buf, "\"\n");
 			PHPWRITE(buf, strlen(buf));
 			break;
 
 		case IS_ARRAY:
-			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', _php3_hash_num_elements(struc->value.ht));
+			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', _php3_hash_num_elements((*struc)->value.ht));
 			PHPWRITE(&buf[1], i - 1);
 			goto head_done;
 
 		case IS_OBJECT:
-			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', _php3_hash_num_elements(struc->value.ht));
+			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', _php3_hash_num_elements((*struc)->value.ht));
 			PHPWRITE(&buf[1], i - 1);
 		  head_done:
 
-			_php3_hash_internal_pointer_reset(struc->value.ht);
-			for (;; _php3_hash_move_forward(struc->value.ht)) {
-				if ((i = _php3_hash_get_current_key(struc->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT)
+			_php3_hash_internal_pointer_reset((*struc)->value.ht);
+			for (;; _php3_hash_move_forward((*struc)->value.ht)) {
+				if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT)
 					break;
 				if (c > 0) {
 					strcpy(buf, "\n");
 					PHPWRITE(buf, strlen(buf));
 				}
 				c++;
-				if (_php3_hash_get_current_data(struc->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc))
+				if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc))
 					continue;
 				switch (i) {
 					case HASH_KEY_IS_LONG:{
-							pval d;
+							pval *d = emalloc(sizeof(pval));
 
-							d.type = IS_LONG;
-							d.value.lval = index;
+							d->type = IS_LONG;
+							d->value.lval = index;
 							php3api_var_dump(&d, level + 2);
+							efree(d);
 						}
 						break;
 
 					case HASH_KEY_IS_STRING:{
-							pval d;
+							pval *d = emalloc(sizeof(pval));
 
-							d.type = IS_STRING;
-							d.value.str.val = key;
-							d.value.str.len = strlen(key);
+							d->type = IS_STRING;
+							d->value.str.val = key;
+							d->value.str.len = strlen(key);
 							php3api_var_dump(&d, level + 2);
 							efree(key);
+							efree(d);
 						}
 						break;
 				}
@@ -130,7 +132,7 @@ PHP_FUNCTION(var_dump)
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &struc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	php3api_var_dump(struc, 1);
+	php3api_var_dump(&struc, 1);
 }
 
 
