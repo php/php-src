@@ -1,3 +1,44 @@
+2004-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      tests/lang/bug23384.phpt:
+      Switch from ZEND_ACC_DYNAMIC to ZEND_ACC_ALLOW_STATIC and disallow calling
+      internal non-static methods statically.
+
+2004-01-24  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      prototype fixes
+
+2004-01-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c:
+      Change message as proposed by Jon.
+
+2004-01-24  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      
+
+2004-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      This is a definitive 'must'
+
+2004-01-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/array.c:
+      Added third parameter (optional) to array_keys for strictness. It behaves
+      like the "strict" parameter of in_array().
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      Adding note about declaration first use after that for classes.
+
 2004-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c
