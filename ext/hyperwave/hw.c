@@ -389,7 +389,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 	int i, count, keytype;
 	ulong length;
 	char *key, str[BUFFERLEN], *objrec = NULL;
-	pval *keydata;
+	zval *keydata, **keydataptr;
 
 	if(NULL == lht)
 		return NULL;
@@ -403,7 +403,8 @@ static char * make_objrec_from_array(HashTable *lht) {
 	for(i=0; i<count; i++) {
 		keytype = zend_hash_get_current_key(lht, &key, &length);
 		if(HASH_KEY_IS_STRING == keytype) {
-			zend_hash_get_current_data(lht, (void **) &keydata);
+			zend_hash_get_current_data(lht, (void **) &keydataptr);
+			keydata = *keydataptr;
 			switch(keydata->type) {
 				case IS_STRING:
 					snprintf(str, BUFFERLEN, "%s=%s\n", key, keydata->value.str.val);
@@ -456,8 +457,8 @@ static char * make_objrec_from_array(HashTable *lht) {
 
 static int * make_ints_from_array(HashTable *lht) {
 	int i, count;
-	int *objrec = NULL;
-	pval *keydata;
+	int *objids = NULL;
+	zval **keydata;
 
 	if(NULL == lht)
 		return NULL;
@@ -466,20 +467,20 @@ static int * make_ints_from_array(HashTable *lht) {
 		return NULL;
 	
 	zend_hash_internal_pointer_reset(lht);
-	if(NULL == (objrec = emalloc(count*sizeof(int))))
+	if(NULL == (objids = emalloc(count*sizeof(int))))
 		return NULL;
 	for(i=0; i<count; i++) {
 		zend_hash_get_current_data(lht, (void **) &keydata);
-		switch(keydata->type) {
+		switch((*keydata)->type) {
 			case IS_LONG:
-				objrec[i] = keydata->value.lval;
+				objids[i] = (*keydata)->value.lval;
 				break;
 			default:
-				objrec[i] = 0;
+				objids[i] = 0;
 		}
 		zend_hash_move_forward(lht);
 	}
-	return objrec;
+	return objids;
 }
 
 #define BUFFERLEN 30
@@ -1175,7 +1176,7 @@ PHP_FUNCTION(hw_getobject) {
 		char **objects = NULL;
 		int count, *ids, i;
 		HashTable *lht;
-		pval *keydata;
+		zval **keydata;
 
 		lht = argv[1]->value.ht;
         	if(0 == (count = zend_hash_num_elements(lht)))
@@ -1185,12 +1186,12 @@ PHP_FUNCTION(hw_getobject) {
 		zend_hash_internal_pointer_reset(lht);
 		for(i=0; i<count; i++) {
 			zend_hash_get_current_data(lht, (void **) &keydata);
-			switch(keydata->type) {
+			switch((*keydata)->type) {
 				case IS_LONG:
-					ids[i] = keydata->value.lval;
+					ids[i] = (*keydata)->value.lval;
 					break;
 				default:
-					ids[i] = keydata->value.lval;
+					ids[i] = (*keydata)->value.lval;
 			}
 			zend_hash_move_forward(lht);
 		}
@@ -1375,12 +1376,13 @@ PHP_FUNCTION(hw_changeobject) {
 	modification = strdup("");
 	for(i=0; i<zend_hash_num_elements(newobjarr); i++) {
 		char *key, *str, *str1, newattribute[BUFFERLEN];
-		pval *data;
+		pval *data, **dataptr;
 		int j, noinsert=1;
 		ulong ind;
 
 		zend_hash_get_current_key(newobjarr, &key, &ind);
-		zend_hash_get_current_data(newobjarr, (void *) &data);
+		zend_hash_get_current_data(newobjarr, (void *) &dataptr);
+		data = *dataptr;
 		switch(data->type) {
 			case IS_STRING:
 				if(strlen(data->value.str.val) == 0)
@@ -1474,12 +1476,13 @@ PHP_FUNCTION(hw_modifyobject) {
 		zend_hash_internal_pointer_reset(addobjarr);
 		for(i=0; i<zend_hash_num_elements(addobjarr); i++) {
 			char *key, addattribute[BUFFERLEN];
-			pval *data;
+			zval *data, **dataptr;
 			int noinsert=1;
 			ulong ind;
 
 			zend_hash_get_current_key(addobjarr, &key, &ind);
-			zend_hash_get_current_data(addobjarr, (void *) &data);
+			zend_hash_get_current_data(addobjarr, (void *) &dataptr);
+			data = *dataptr;
 			switch(data->type) {
 				case IS_STRING:
 					if(strlen(data->value.str.val) > 0) {
@@ -1542,12 +1545,13 @@ PHP_FUNCTION(hw_modifyobject) {
 		nr = zend_hash_num_elements(remobjarr);
 		for(i=0; i<nr; i++) {
 			char *key, remattribute[BUFFERLEN];
-			pval *data;
+			zval *data, **dataptr;
 			int noinsert=1;
 			ulong ind;
 
 			zend_hash_get_current_key(remobjarr, &key, &ind);
-			zend_hash_get_current_data(remobjarr, (void *) &data);
+			zend_hash_get_current_data(remobjarr, (void *) &dataptr);
+			data = *dataptr;
 			switch(data->type) {
 				case IS_STRING:
 					if(strlen(data->value.str.val) > 0) {
