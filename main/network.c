@@ -93,7 +93,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 		sap = *sal;
                 do {
                         switch (sai->ai_family) {
-#  ifdef HAVE_STRUCT_SOCKADDR_IN6
+#  ifdef HAVE_IPV6
                         case AF_INET6: {
 				*sap = emalloc(sizeof(struct sockaddr_in6));
 				if (*sap == NULL) {
@@ -170,7 +170,7 @@ int php_hostconnect(char *host, unsigned short port, int socktype, int timeout)
 		s = socket((*sal)->sa_family, socktype, 0);
 		if (s != SOCK_ERR) {
 			switch ((*sal)->sa_family) {
-#if defined( HAVE_GETADDRINFO ) && defined( HAVE_STRUCT_SOCKADDR_IN6 )
+#if defined( HAVE_GETADDRINFO ) && defined( HAVE_IPV6 )
 			case AF_INET6: {
 				struct sockaddr_in6 *sa =
 					(struct sockaddr_in6 *)*sal;

@@ -333,13 +333,13 @@ dnl Checks for types
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
-dnl Check for struct sockaddr_in6
-AC_CACHE_CHECK([for struct sockaddr_in6], ac_cv_struct_sockaddr_in6,
+dnl Check for IPv6 support
+AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_TRY_COMPILE([#include <sys/socket.h>
-#include <netinet/in.h>], [struct sockaddr_in6 s; s;],
-  ac_cv_struct_sockaddr_in6=yes, ac_cv_struct_sockaddr_in6=no)])
-if test "$ac_cv_struct_sockaddr_in6" = yes; then
-  AC_DEFINE(HAVE_STRUCT_SOCKADDR_IN6,1,[Whether you have struct sockaddr_in6])
+#include <netinet/in.h>], [struct sockaddr_in6 s; int i=AF_INET6; s],
+  ac_cv_ipv6_support=yes, ac_cv_ipv6_support=no)])
+if test "$ac_cv_ipv6_support" = yes; then
+  AC_DEFINE(HAVE_IPV6,1,[Whether you have IPv6 support])
 fi
 
 dnl Checks for library functions.
