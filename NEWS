@@ -13,7 +13,6 @@ PHP 4                                                                      NEWS
 
 
 ? ? ??? 2002, Version 4.3.0
-- Fixed bug #20934 (htmlspecialchars returns latin1 from UTF-8). (Moriyoshi)
 - Fixed a security bug in the bundled MySQL library. (Georg, Stefan)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
@@ -43,6 +42,7 @@ PHP 4                                                                      NEWS
 - Fixed a memory leak in the bundled GD library inside 
   gdImageTrueColorToPalette(). (Ilia)
 - Fixed bug #12776 (array_walk crash). (Moriyoshi)
+- Fixed bug #20934 (htmlspecialchars returns latin1 from UTF-8). (Moriyoshi)
 - Fixed bugs #20270, #15702, #18600 (segfaults in ext/java). (Tony J. White)
 - Made bcmath extension thread safe. (Sander)
 - Fixed bug #19566 (get_declared_classes() segfaults). (Moriyoshi, Marcus, Andi)
