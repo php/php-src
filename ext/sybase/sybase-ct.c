@@ -1246,7 +1246,7 @@ PHP_FUNCTION(sybct_fetch_row)
 	pval *sybct_result_index;
 	int type,i,id;
 	sybct_result *result;
-	pval field_content;
+	pval *field_content;
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &sybct_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1267,9 +1267,11 @@ PHP_FUNCTION(sybct_fetch_row)
 	
 	array_init(return_value);
 	for (i=0; i<result->num_fields; i++) {
-		field_content = result->data[result->cur_row][i];
-		pval_copy_constructor(&field_content);
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval),NULL);
+		field_content = (pval *) emalloc(sizeof(pval));
+		*field_content = result->data[result->cur_row][i];
+		INIT_PZVAL(field_content);
+		pval_copy_constructor(field_content);
+		_php3_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval* ), NULL);
 	}
 	result->cur_row++;
 }
@@ -1281,7 +1283,7 @@ static PHP_FUNCTION(sybct_fetch_hash)
 	sybct_result *result;
 	int type;
 	int i;
-	pval *pval_ptr,tmp;
+	pval *tmp;
 	PLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &sybct_result_index)==FAILURE) {
@@ -1305,13 +1307,15 @@ static PHP_FUNCTION(sybct_fetch_hash)
 	}
 	
 	for (i=0; i<result->num_fields; i++) {
-		tmp = result->data[result->cur_row][i];
-		pval_copy_constructor(&tmp);
-		if (PG(magic_quotes_runtime) && tmp.type == IS_STRING) {
-			tmp.value.str.val = _php3_addslashes(tmp.value.str.val,tmp.value.str.len,&tmp.value.str.len,1);
+		tmp = (pval *) emalloc(sizeof(pval));
+		*tmp = result->data[result->cur_row][i];
+		INIT_PZVAL(tmp);
+		pval_copy_constructor(tmp);
+		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
+			tmp->value.str.val = _php3_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,1);
 		}
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval), (void **) &pval_ptr);
-		_php3_hash_pointer_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, pval_ptr);
+		_php3_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
+		_php3_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *) NULL);
 	}
 	result->cur_row++;
 }
