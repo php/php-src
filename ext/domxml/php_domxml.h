@@ -24,6 +24,7 @@
 #if HAVE_DOMXML
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlerror.h>
 #if defined(LIBXML_HTML_ENABLED)
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
