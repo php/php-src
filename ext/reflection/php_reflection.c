@@ -71,25 +71,28 @@ typedef struct _string {
 
 void string_init(string *str)
 {
-	str->string = (char *) emalloc(sizeof(char));
+	str->string = (char *) emalloc(1042);
 	str->len = 1;
-	str->alloced = 1;
+	str->alloced = 1024;
 	*str->string = '\0';
 }
 	
 string *string_printf(string *str, const char *format, ...)
 {
-	int n;
+	int len;
 	va_list arg;
 	char *s_tmp;
 
 	va_start(arg, format);
-	n = zend_vspprintf(&s_tmp, 0, format, arg);
-	if (n) {
-		str->alloced += n;
-		str->string = erealloc(str->string, str->alloced);
-		memcpy(str->string + str->len - 1, s_tmp, n + 1);
-		str->len += n;
+	len = zend_vspprintf(&s_tmp, 0, format, arg);
+	if (len) {
+		register int nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
+		if (str->alloced < nlen) {
+			str->alloced = nlen;
+			str->string = erealloc(str->string, str->alloced);
+		}
+		memcpy(str->string + str->len - 1, s_tmp, len + 1);
+		str->len += len;
 	}
 	efree(s_tmp);
 	va_end(arg);
@@ -98,15 +101,14 @@ string *string_printf(string *str, const char *format, ...)
 
 string *string_write(string *str, char *buf, int len)
 {
-	if (str->alloced - str->len < len) {
-		while (str->alloced - str->len < len) {
-			str->alloced *= 2;
-		}		
-		str->string = erealloc(str->string, str->alloced + 1);
+	register int nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
+	if (str->alloced < nlen) {
+		str->alloced = nlen;
+		str->string = erealloc(str->string, str->alloced);
 	}
 	memcpy(str->string + str->len - 1, buf, len);
 	str->len += len;
-	str->string[str->len] = '\0';
+	str->string[str->len - 1] = '\0';
 	return str;
 }
 
@@ -645,7 +647,7 @@ void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, i
 
 	fcc.initialized = 1;
 	fcc.function_handler = reflection_class_ptr->constructor;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = reflection_class_ptr;
 	fcc.object_pp = &reflector_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -1347,6 +1349,7 @@ ZEND_METHOD(reflection_method, invoke)
 	int result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
+	zend_class_entry *obj_ce;
 	
 	METHOD_NOTSTATIC;
 
@@ -1387,9 +1390,11 @@ ZEND_METHOD(reflection_method, invoke)
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 		object_pp = NULL;
+		obj_ce = NULL;
 	} else {
+		obj_ce = Z_OBJCE_PP(params[0]);
 		if ((Z_TYPE_PP(params[0]) != IS_OBJECT)
-			|| (!instanceof_function(Z_OBJCE_PP(params[0]), mptr->common.scope TSRMLS_CC))) {
+			|| (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC))) {
 			efree(params);
 
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
@@ -1411,7 +1416,7 @@ ZEND_METHOD(reflection_method, invoke)
 
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = obj_ce;
 	fcc.object_pp = object_pp;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
