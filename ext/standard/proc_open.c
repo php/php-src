@@ -444,16 +444,16 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
-/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env]])
+/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env] [, array other_options]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
-
 	char *command, *cwd=NULL;
 	long command_len, cwd_len;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;
+	zval *other_options = NULL;
 	php_process_env_t env;
 	int ndesc = 0;
 	int i;
@@ -466,13 +466,16 @@ PHP_FUNCTION(proc_open)
 	BOOL newprocok;
 	SECURITY_ATTRIBUTES security;
 	char *command_with_cmd;
+	UINT old_error_mode;
+	int suppress_errors = 0;
 #endif
 	php_process_id_t child;
 	struct php_process_handle *proc;
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!", &command,
-				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
+				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
+				&other_options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -480,6 +483,15 @@ PHP_FUNCTION(proc_open)
 		RETURN_FALSE;
 	}
 
+	if (other_options) {
+		zval **item;
+		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
+			if (Z_TYPE_PP(item) == IS_BOOL && Z_BVAL_PP(item)) {
+				suppress_errors = 1;
+			}
+		}	
+	}
+	
 	command_len = strlen(command);
 
 	if (environment) {
@@ -669,7 +681,17 @@ PHP_FUNCTION(proc_open)
 	
 	command_with_cmd = emalloc(command_len + sizeof(COMSPEC_9X) + 1 + sizeof(" /c "));
 	sprintf(command_with_cmd, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
+
+	if (suppress_errors) {
+		old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+	}
+	
 	newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
+
+	if (suppress_errors) {
+		SetErrorMode(old_error_mode);
+	}
+	
 	efree(command_with_cmd);
 
 	if (FALSE == newprocok) {
