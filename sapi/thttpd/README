@@ -5,7 +5,7 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	turbo, throttling HTTP server by Jef Poskanzer.
 
 	NOTE: All requests will be serialized. That means, one long running
-	      script will block all other requests. Choose another web-server,
+	      script will block all other requests. Choose another web server,
 	      if you want to execute arbitrary scripts.
 
 	The module contains a patch against version 2.21b of thttpd. The patch
