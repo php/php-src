@@ -654,7 +654,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* the create/append check will be done on the lock
 				 * when the lib opens the file it is already created
 				 */
-				file_mode = "w+b";
+				file_mode = "a+b";
 				lock_file_mode = "a+b";
 			}
 			break;
