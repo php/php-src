@@ -173,10 +173,10 @@ class PEAR_Installer extends PEAR_Common
             case 'script':
                 $dest_dir = $this->config->get('bin_dir');
                 break;
+            case 'src':
             case 'extsrc':
-                // don't install test files for now
-                $this->log(2, "$file: no support for building extensions yet");
-                return PEAR_INSTALLER_OK;
+                $this->source_files++;
+                return;
             default:
                 break;
         }
@@ -223,10 +223,12 @@ class PEAR_Installer extends PEAR_Common
                     }
                 } elseif ($a['type'] == 'pear-config') {
                     $to = $this->config->get($a['to']);
+                } elseif ($a['type'] == 'package-info') {
+                    $to = $this->pkginfo[$a['to']];
                 }
                 if ($to) {
-                    $subst_from = $a['from'];
-                    $subst_to = $to;
+                    $subst_from[] = $a['from'];
+                    $subst_to[] = $to;
                 }
             }
             $this->log(2, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
@@ -243,10 +245,10 @@ class PEAR_Installer extends PEAR_Common
         }
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
-                $mode = 0777 & ~$this->config->get('umask');
+                $mode = 0777 & ~(int)octdec($this->config->get('umask'));
                 $this->log(3, "+ chmod +x $dest_file");
             } else {
-                $mode = 0666 & ~$this->config->get('umask');
+                $mode = 0666 & ~(int)octdec($this->config->get('umask'));
             }
             if (!@chmod($dest_file, $mode)) {
                 $this->log(0, "failed to change mode of $dest_file");
@@ -425,6 +427,9 @@ class PEAR_Installer extends PEAR_Common
 
         // info from the package it self we want to access from _installFile
         $this->pkginfo = &$pkginfo;
+        // used to determine whether we should build any C code
+        $this->source_files = 0;
+
         if (empty($options['register-only'])) {
             if (!is_dir($this->config->get('php_dir'))) {
                 return $this->raiseError("no script destination directory\n",
@@ -451,7 +456,6 @@ class PEAR_Installer extends PEAR_Common
                 $this->popExpect();
                 if (PEAR::isError($res)) {
                     if (empty($options['force'])) {
-                        print "raising error!\n";
                         return $this->raiseError($res);
                     } else {
                         $this->log(0, "Warning: " . $res->getMessage());
@@ -460,6 +464,33 @@ class PEAR_Installer extends PEAR_Common
                 if ($res != PEAR_INSTALLER_OK) {
                     // Do not register files that were not installed
                     unset($pkginfo['filelist'][$file]);
+                }
+            }
+
+            if ($this->source_files > 0) {
+                $this->log(1, "$this->source_files source files, building");
+                $bob = &new PEAR_Builder($this->ui);
+                $bob->debug = $this->debug;
+                $built = $bob->build($descfile, array(&$this, '_buildCallback'));
+                if (PEAR::isError($built)) {
+                    return $built;
+                }
+                foreach ($built as $ext) {
+                    $bn = basename($ext['file']);
+                    $this->log(2, "installing $bn");
+                    $dest = $this->config->get('ext_dir') .
+                        DIRECTORY_SEPARATOR . $bn;
+                    $this->log(3, "+ cp $ext[file] ext_dir");
+                    if (!@copy($ext['file'], $dest)) {
+                        return $this->raiseError("failed to copy $bn to $dest");
+                    }
+                    $pkginfo['filelist'][$bn] = array(
+                        'role' => 'ext',
+                        'installed_as' => $dest,
+                        'php_api' => $ext['php_api'],
+                        'zend_mod_api' => $ext['zend_mod_api'],
+                        'zend_ext_api' => $ext['zend_ext_api'],
+                        );
                 }
             }
         }
@@ -530,6 +561,22 @@ class PEAR_Installer extends PEAR_Common
             case 'done':
                 $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
                 break;
+        }
+        if (method_exists($this->ui, '_downloadCallback'))
+            $this->ui->_downloadCallback($msg, $params);
+    }
+
+    // }}}
+    // {{{ _buildCallback()
+
+    function _buildCallback($what, $data)
+    {
+        switch ($what) {
+            
+        }
+        if (($what == 'cmdoutput' && $this->debug > 1) ||
+            ($what == 'output' && $this->debug > 0)) {
+            $this->ui->outputData(rtrim($data), 'build');
         }
     }
 

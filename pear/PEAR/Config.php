@@ -93,51 +93,80 @@ class PEAR_Config extends PEAR
      * @var array layer => array(infotype => value, ...)
      */
     var $configuration_info = array(
+        // Internet Access
         'master_server' => array(
             'type' => 'string',
             'default' => 'pear.php.net',
             'doc' => 'name of the main PEAR server',
+            'prompt' => 'PEAR server',
+            'group' => 'Internet Access',
             ),
+        'http_proxy' => array(
+            'type' => 'string',
+            'default' => '',
+            'doc' => 'HTTP proxy (host:port) to use when downloading packages',
+            'prompt' => 'HTTP Proxy Server Address',
+            'group' => 'Internet Access',
+            ),
+        // File Locations
         'php_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_PHPDIR,
             'doc' => 'directory where .php files are installed',
+            'prompt' => 'PEAR directory',
+            'group' => 'File Locations',
             ),
         'ext_dir' => array(
             'type' => 'directory',
             'default' => PEAR_EXTENSION_DIR,
             'doc' => 'directory where loadable extensions are installed',
+            'prompt' => 'PHP extension directory',
+            'group' => 'File Locations',
             ),
         'doc_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_DOCDIR,
             'doc' => 'directory where documentation is installed',
-            ),
-        'data_dir' => array(
-            'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_DATADIR,
-            'doc' => 'directory where data files are installed',
-            ),
-        'test_dir' => array(
-            'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_TESTDIR,
-            'doc' => 'directory where regression tests are installed',
+            'prompt' => 'PEAR documentation directory',
+            'group' => 'File Locations',
             ),
         'bin_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_BINDIR,
             'doc' => 'directory where executables are installed',
+            'prompt' => 'PEAR executables directory',
+            'group' => 'File Locations',
             ),
+        'data_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_DATADIR,
+            'doc' => 'directory where data files are installed',
+            'prompt' => 'PEAR data directory',
+            'group' => 'File Locations (Advanced)',
+            ),
+        'test_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_TESTDIR,
+            'doc' => 'directory where regression tests are installed',
+            'prompt' => 'PEAR test directory',
+            'group' => 'File Locations (Advanced)',
+            ),
+        // Maintainers
         'username' => array(
             'type' => 'string',
             'default' => '',
             'doc' => '(maintainers) your PEAR account name',
+            'prompt' => 'PEAR username (for maintainers)',
+            'group' => 'Maintainers',
             ),
         'password' => array(
             'type' => 'password',
             'default' => '',
             'doc' => '(maintainers) your PEAR account password',
+            'prompt' => 'PEAR password (for maintainers)',
+            'group' => 'Maintainers',
             ),
+        // Advanced
         'verbose' => array(
             'type' => 'integer',
             'default' => 1,
@@ -146,6 +175,8 @@ class PEAR_Config extends PEAR
 1: somewhat quiet
 2: verbose
 3: debug',
+            'prompt' => 'Debug Log Level',
+            'group' => 'Advanced',
             ),
         'preferred_state' => array(
             'type' => 'set',
@@ -153,16 +184,15 @@ class PEAR_Config extends PEAR
             'doc' => 'the installer will prefer releases with this state when installing packages without a version or state specified',
             'valid_set' => array(
                 'stable', 'beta', 'alpha', 'devel', 'snapshot'),
-            ),
-        'http_proxy' => array(
-            'type' => 'string',
-            'default' => '',
-            'doc' => 'HTTP proxy (host:port) to use when downloading packages',
+            'prompt' => 'Preferred Package State',
+            'group' => 'Advanced',
             ),
         'umask' => array(
-            'type' => 'int',
+            'type' => 'mask',
             'default' => PEAR_DEFAULT_UMASK,
             'doc' => 'umask used when creating files (Unix-like systems only)',
+            'prompt' => 'Unix file mask',
+            'group' => 'Advanced',
             ),
 /*
         'testset1' => array(
@@ -455,6 +485,10 @@ class PEAR_Config extends PEAR
                     $data[$key] = base64_encode($data[$key]);
                     break;
                 }
+                case 'mask': {
+                    $data[$key] = octdec($data[$key]);
+                    break;
+                }
             }
         }
         return true;
@@ -487,6 +521,10 @@ class PEAR_Config extends PEAR
             switch ($type) {
                 case 'password': {
                     $data[$key] = base64_decode($data[$key]);
+                    break;
+                }
+                case 'mask': {
+                    $data[$key] = decoct($data[$key]);
                     break;
                 }
             }
@@ -547,10 +585,9 @@ class PEAR_Config extends PEAR
         }
         extract($this->configuration_info[$key]);
         switch ($type) {
-            case 'integer': {
+            case 'integer': 
                 $value = (int)$value;
                 break;
-            }
             case 'set': {
                 // If a valid_set is specified, require the value to
                 // be in the set.  If there is no valid_set, accept
@@ -611,6 +648,90 @@ class PEAR_Config extends PEAR
             return $this->configuration_info[$key]['doc'];
         }
         return false;
+    }
+       // }}}
+    // {{{ getPrompt(key)
+
+    /**
+     * Get the short documentation for a config value.
+     *
+     * @param string  config key
+     *
+     * @return string short documentation string
+     *
+     * @access public
+     *
+     */
+    function getPrompt($key)
+    {
+        if (isset($this->configuration_info[$key])) {
+            return $this->configuration_info[$key]['prompt'];
+        }
+        return false;
+    }
+    // }}}
+    // {{{ getGroup(key)
+
+    /**
+     * Get the parameter group for a config key.
+     *
+     * @param string  config key
+     *
+     * @return string parameter group
+     *
+     * @access public
+     *
+     */
+    function getGroup($key)
+    {
+        if (isset($this->configuration_info[$key])) {
+            return $this->configuration_info[$key]['group'];
+        }
+        return false;
+    }
+
+    // }}}
+    // {{{ getGroups()
+
+    /**
+     * Get the list of parameter groups.
+     *
+     * @return array list of parameter groups
+     *
+     * @access public
+     *
+     */
+    function getGroups()
+    {
+        $tmp = array();
+        foreach ($this->configuration_info as $key => $info) {
+            $tmp[$info['group']] = 1;
+        }
+        return array_keys($tmp);
+    }
+
+    // }}}
+    // {{{ getGroupKeys()
+
+    /**
+     * Get the list of the parameters in a group.
+     *
+     * @param string $group parameter group
+     *
+     * @return array list of parameters in $group
+     *
+     * @access public
+     *
+     */
+    function getGroupKeys($group)
+    {
+        $keys = array();
+        foreach ($this->configuration_info as $key => $info) {
+            if ($info['group'] == $group) {
+                $keys[] = $key;
+            }
+        }
+        return $keys;
     }
 
     // }}}

@@ -12,27 +12,27 @@ copy("user2.input", "user2.conf");
 copy("merge.input", "merge.conf");
 PEAR::setErrorHandling(PEAR_ERROR_PRINT, "%s\n");
 
-print "#0 starting up\n";
+print "\n#0 starting up\n";
 dump_files();
 
-print "#1 testing: constructor\n";
+print "\n#1 testing: constructor\n";
 $config = new PEAR_Config("user.conf", "system.conf");
 dump_array("files", $config->files);
 
-print "#2 testing: singleton\n";
+print "\n#2 testing: singleton\n";
 $o1 = &PEAR_Config::singleton();
 $o1->blah = 'blah';
 $o2 = &PEAR_Config::singleton();
 var_dump($o1->blah);
 @var_dump($o2->blah);
 
-print "#3 testing: readConfigFile\n";
+print "\n#3 testing: readConfigFile\n";
 $config->readConfigFile("user2.conf", "user");
 dump_config($config);
 $config->readConfigFile("user.conf");
 dump_config($config);
 
-print "#4 testing: mergeConfigFile\n";
+print "\n#4 testing: mergeConfigFile\n";
 $config->readConfigFile("user2.conf");
 dump_config($config, "user");
 $config->mergeConfigFile("merge.conf", true);
@@ -44,11 +44,11 @@ $config->readConfigFile("user.conf");
 dump_config($config, "user");
 $config->mergeConfigFile("merge.conf", true, "xyzzy");
 
-print "#5 testing: config file version detection\n";
+print "\n#5 testing: config file version detection\n";
 $config->readConfigFile("user.conf", "user");
 $config->readConfigFile("toonew.conf", "user");
 
-print "#6 testing: get/set/remove\n";
+print "\n#6 testing: get/set/remove\n";
 var_dump($config->get("verbose"));
 $config->set("verbose", 100, "system");
 var_dump($config->get("verbose"));
@@ -62,21 +62,21 @@ var_dump($config->get("verbose"));
 $config->remove("verbose", "system");
 var_dump($config->get("verbose"));
 
-print "#7 testing: getType\n";
+print "\n#7 testing: getType\n";
 var_dump($config->getType("__unknown__"));
 var_dump($config->getType("verbose"));
 var_dump($config->getType("master_server"));
 var_dump($config->getType("ext_dir"));
 
-print "#8 testing: getDocs\n";
+print "\n#8 testing: getDocs\n";
 print "master_server: " . $config->getDocs("master_server") . "\n";
 
-print "#9 testing: getKeys\n";
+print "\n#9 testing: getKeys\n";
 $keys = $config->getKeys();
 sort($keys);
 print implode(" ", $keys) . "\n";
 
-print "#10 testing: definedBy\n";
+print "\n#10 testing: definedBy\n";
 var_dump($config->definedBy("verbose"));
 $config->set("verbose", 6, "system");
 $config->set("verbose", 3, "user");
@@ -89,23 +89,34 @@ var_dump($config->definedBy("verbose"));
 $config->remove("verbose", "system");
 var_dump($config->definedBy("verbose"));
 
-print "#11 testing: isDefined\n";
+print "\n#11 testing: isDefined\n";
 var_dump($config->isDefined("php_dir"));
 var_dump($config->isDefined("verbose"));
 var_dump($config->isDefined("HTTP_GET_VARS"));
 var_dump($config->isDefined("query"));
 
-/*
-print "setting user values\n";
-var_dump($config->set("master_server", "pear.localdomain"));
-var_dump($config->writeConfigFile(null, "user"));
-dumpall();
+print "\n#12 testing: getGroup\n";
+foreach ($keys as $key) {
+    print "$key: ".$config->getGroup($key)."\n";
+}
 
-print "going back to defaults\n";
-$config->remove("master_server", "user");
-$config->writeConfigFile(null, "user");
-dumpall();
-*/
+print "\n#13 testing: getGroups\n";
+$groups = $config->getGroups();
+sort($groups);
+print implode(", ", $groups) . "\n";
+
+print "\n#14 testing: getGroupKeys\n";
+foreach ($groups as $group) {
+    $gk = $config->getGroupKeys($group);
+    sort($gk);
+    print "$group: " . implode(", ", $gk) . "\n";
+}
+
+print "\n#15 testing: getPrompt\n";
+foreach ($keys as $key) {
+    print "$key: ".$config->getPrompt($key)."\n";
+}
+
 
 // 
 
@@ -167,24 +178,30 @@ function dump_config(&$obj, $layer = null) {
 #0 starting up
 ..system.conf: master_server="pear.php.net"
 ..user.conf: <empty>
+
 #1 testing: constructor
 files: system="system.conf" user="user.conf"
+
 #2 testing: singleton
 string(4) "blah"
 string(4) "blah"
+
 #3 testing: readConfigFile
 user: verbose="2"
 system: master_server="pear.php.net"
 user: <empty>
 system: master_server="pear.php.net"
+
 #4 testing: mergeConfigFile
 user: verbose="2"
 user: verbose="100"
 user: verbose="2"
 user: <empty>
 unknown config file type `xyzzy'
+
 #5 testing: config file version detection
 toonew.conf: unknown version `2.0'
+
 #6 testing: get/set/remove
 int(1)
 int(100)
@@ -192,24 +209,69 @@ int(2)
 int(50)
 int(2)
 int(1)
+
 #7 testing: getType
 bool(false)
 string(7) "integer"
 string(6) "string"
 string(9) "directory"
+
 #8 testing: getDocs
 master_server: name of the main PEAR server
+
 #9 testing: getKeys
 bin_dir data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state test_dir umask username verbose
+
 #10 testing: definedBy
 string(7) "default"
 string(4) "user"
 string(4) "user"
 string(6) "system"
 string(7) "default"
+
 #11 testing: isDefined
 bool(true)
 bool(true)
 bool(false)
 bool(false)
+
+#12 testing: getGroup
+bin_dir: File Locations
+data_dir: File Locations (Advanced)
+doc_dir: File Locations
+ext_dir: File Locations
+http_proxy: Internet Access
+master_server: Internet Access
+password: Maintainers
+php_dir: File Locations
+preferred_state: Advanced
+test_dir: File Locations (Advanced)
+umask: Advanced
+username: Maintainers
+verbose: Advanced
+
+#13 testing: getGroups
+Advanced, File Locations, File Locations (Advanced), Internet Access, Maintainers
+
+#14 testing: getGroupKeys
+Advanced: preferred_state, umask, verbose
+File Locations: bin_dir, doc_dir, ext_dir, php_dir
+File Locations (Advanced): data_dir, test_dir
+Internet Access: http_proxy, master_server
+Maintainers: password, username
+
+#15 testing: getPrompt
+bin_dir: PEAR executables directory
+data_dir: PEAR data directory
+doc_dir: PEAR documentation directory
+ext_dir: PHP extension directory
+http_proxy: HTTP Proxy Server Address
+master_server: PEAR server
+password: PEAR password (for package maintainers)
+php_dir: PEAR directory
+preferred_state: Preferred Package State
+test_dir: PEAR test directory
+umask: Unix file mask
+username: PEAR username (for package maintainers)
+verbose: Debug Log Level
 done
