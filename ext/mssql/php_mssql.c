@@ -306,6 +306,7 @@ PHP_MINIT_FUNCTION(mssql)
 	REGISTER_LONG_CONSTANT("SQLINT2",SQLINT2, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLINT4",SQLINT4, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLBIT",SQLBIT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLFLT4",SQLFLT4, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLFLT8",SQLFLT8, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLFLTN",SQLFLTN, CONST_CS | CONST_PERSISTENT);
 	/* END MSSQL data types for mssql_sp_bind */
@@ -922,6 +923,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 							Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
 							break;
 			
+						case SQLFLT4:
 						case SQLFLT8:
 						case SQLFLTN:
 							convert_to_double_ex(&bind->zval);
@@ -992,6 +994,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 			case SQLINT2:
 			case SQLINT4:
 			case SQLINTN:
+			case SQLFLT4:
 			case SQLFLT8:
 			case SQLNUMERIC:
 			case SQLDECIMAL:
@@ -1419,6 +1422,7 @@ static char *php_mssql_get_field_name(int type)
 			return "datetime";
 			break;
 		case SQLDECIMAL:
+		case SQLFLT4:
 		case SQLFLT8:
 		case SQLFLTN:
 			return "real";
@@ -1957,6 +1961,7 @@ PHP_FUNCTION(mssql_bind)
 
 		switch (type)	{
 
+			case SQLFLT4:
 			case SQLFLT8:
 			case SQLFLTN:
 				convert_to_double_ex(var);
