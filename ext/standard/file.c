@@ -245,6 +245,7 @@ function_entry file_functions[] = {
 	PHP_FE(set_socket_timeout,	NULL)
 #endif
 	PHP_FE(fd_set, NULL)
+	PHP_FE(fd_isset, NULL)
 	PHP_FE(select, NULL)
 	{NULL, NULL, NULL}
 };
@@ -1681,7 +1682,7 @@ PHP_FUNCTION(fd_set)
                 if(getParametersEx(1, &arg) == FAILURE) {
                         WRONG_PARAM_COUNT;
                 }
-        what = zend_fetch_resource(arg,-1,"Select",&type,3,le_fopen,le_socket,le_popen);
+        what = zend_fetch_resource(arg,-1,"select",&type,3,le_fopen,le_socket,le_popen);
         ZEND_VERIFY_RESOURCE(what);
         if(type == le_socket) {
                 fd = *(int *)what;
@@ -1733,3 +1734,27 @@ PHP_FUNCTION(select)
 	RETURN_LONG(select(max_fd + 1,&readfd,NULL,NULL,((*timeout)->value.lval <= 0) ? NULL : &tv));
 }
 
+PHP_FUNCTION(fd_isset)
+{
+	pval **fdarg;
+	void *what;
+	int type, fd;
+
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &fdarg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	what = zend_fetch_resource(fdarg,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if(type == le_socket) {
+		fd = *(int *)what;
+	} else {
+		fd = fileno((FILE *)what);
+	}
+
+	if(FD_ISSET(fd,&readfd)) {
+		RETURN_TRUE;
+	}	
+	RETURN_FALSE;
+}	
