@@ -1031,6 +1031,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 #endif
 
+#ifdef PHP_WIN32
 		/* prevent more data from coming in */
 		shutdown(sock->socket, SHUT_RD);
 
@@ -1050,6 +1051,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		
 			n = select(sock->socket + 1, NULL, &wrfds, &efds, &timeout);
 		} while (n == -1 && php_socket_errno() == EINTR);
+#endif
 		
 		closesocket(sock->socket);
 
@@ -1058,12 +1060,6 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	pefree(sock, php_stream_is_persistent(stream));
 	
 	return 0;
-}
-
-static int php_sockop_flush(php_stream *stream TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	return fsync(sock->socket);
 }
 
 static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
@@ -1136,7 +1132,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 
 php_stream_ops php_stream_socket_ops = {
 	php_sockop_write, php_sockop_read,
-	php_sockop_close, php_sockop_flush,
+	php_sockop_close, NULL,
 	"socket",
 	NULL, /* seek */
 	php_sockop_cast,
