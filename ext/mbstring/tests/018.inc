@@ -2,7 +2,7 @@
 // TODO: Add more encoding, strings.....
 //$debug = true;
 ini_set('include_path','.');
-include_once('common.php');
+include_once('common.inc');
 
 // EUC-JP
 $euc_jp = '0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。';
