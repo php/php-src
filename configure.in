@@ -605,8 +605,8 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
 fi
 
 # compatibility
-if test "x$with_pear" = "x" -a "x$enable_pear" = "xno"; then
-    with_pear=no
+if test -z "$with_pear" && test "$enable_pear" = "no"; then
+  with_pear=no
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR, and where],
@@ -618,7 +618,7 @@ if test "$PHP_PEAR" != "no"; then
   PEAR_INSTALLDIR=$PHP_PEAR
 fi
 
-if test "$PHP_PEAR" = "DEFAULT" -o "x$PHP_PEAR" = "xyes"; then
+if test "$PHP_PEAR" = "DEFAULT" || test "$PHP_PEAR" = "yes"; then
   case $PHP_LAYOUT in
     GNU) PEAR_INSTALLDIR=$datadir/pear;;
     *)   PEAR_INSTALLDIR=$libdir/php;;
