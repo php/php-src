@@ -173,6 +173,7 @@ typedef struct _zend_utility_values {
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown();
+
 void zend_set_utility_values(zend_utility_values *utility_values);
 BEGIN_EXTERN_C()
 ZEND_API void zend_bailout();
