@@ -1,60 +1,37 @@
 --TEST--
-User-space filters
+stream userfilter test
 --FILE--
 <?php
 # vim600:syn=php:
+class testfilter extends php_user_filter {
+  function filter($in, $out, &$consumed, $closing) {
+    while ($bucket = stream_bucket_make_writeable($in)) {
+      $bucket->data = strtoupper($bucket->data);
+      $consumed += strlen($bucket->data);
+      stream_bucket_append($out, $bucket);
+    }
+    return PSFS_PASS_ON;    
+  }
 
-class UpperCaseFilter extends php_user_filter {
-	function oncreate()
-	{
-		echo "oncreate:\n";
-		var_dump($this->filtername);
-		var_dump($this->params);
-	}
+  function oncreate() {
+    echo "params: {$this->params}\n";
+  }
+}
 
-	function flush($closing)
-	{
-		echo "flush:\n";
-	}
+stream_register_filter('testfilter','testfilter');
 
-	function onclose()
-	{
-		echo "onclose:\n";
-	}
+$text = "Hello There!";
 
-	function write($data)
-	{
-		echo "write:\n";
-		$x = parent::write($data);
-		return strlen($data);
-	}
-
-	function read($bytes)
-	{
-		echo "read:\n";
-		$x = parent::read($bytes);
-		return strtoupper($x);
-	}
-};
-
-var_dump(stream_register_filter("string.uppercase", "UpperCaseFilter"));
 $fp = tmpfile();
+fwrite($fp, $text);
 
-fwrite($fp, "hello there");
 rewind($fp);
+stream_filter_append($fp, 'testfilter', STREAM_FILTER_READ, 'testuserfilter');
 
-var_dump(stream_filter_prepend($fp, "string.uppercase"));
 var_dump(fgets($fp));
 fclose($fp);
+
 ?>
 --EXPECT--
-bool(true)
-oncreate:
-string(16) "string.uppercase"
-NULL
-bool(true)
-read:
-read:
-string(11) "HELLO THERE"
-flush:
-onclose:
+params: testuserfilter
+string(12) "HELLO THERE!"
