@@ -2764,6 +2764,13 @@ PHP_FUNCTION(array_rand)
 
 		num_avail--;
 		zend_hash_move_forward(Z_ARRVAL_PP(input));
+	}  
+
+	if (num_req_val == num_avail) {
+		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)mergesort, array_data_shuffle, 1) == FAILURE) {
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
 	}
 }
 /* }}} */
