@@ -52,11 +52,11 @@ typedef struct {
 	pcre *re;
 	pcre_extra *extra;
 	int preg_options;
-	int compile_options;
 #if HAVE_SETLOCALE
 	char *locale;
 	unsigned const char *tables;
 #endif
+	int compile_options;
 } pcre_cache_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
