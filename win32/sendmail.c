@@ -589,7 +589,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	time_t tNow = time(NULL);
 	struct tm *tm = localtime(&tNow);
 	int zoneh = abs(_timezone);
-	int zonem, res, len;
+	int zonem, res;
 	char *header_buffer;
 	char *headers_lc = NULL;
 	size_t i;
