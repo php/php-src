@@ -48,6 +48,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23539 (curl_exec() produces strange results). (daniel@haxx.se)
 - Fixed bug #23527 (PostScript Type 1 fonts do not render properly).
   (nid@home.se, Ilia)
+- Fixed bug #23402 (crash with improper use of mssql_bind()). (Frank)
 - Fixed bug #23371 (configure falsely detects c-client using SSL). (Jani)
 - Fixed bug #23340 (fopen on multiple URLs causes memory corruption). (Wez)
 - Fixed bug #23298 (serialize cuts off floats & doubles). (Ilia, Marcus)
