@@ -1,3 +1,63 @@
+2004-09-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c:
+      Adding swfvideostreamp and swfprebuiltclipp, available in ming 0.3
+
+2004-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var.c:
+      Fix memleak in serialize
+
+    * ext/standard/tests/serialize/bug14293.phpt:
+      Fix test
+
+2004-09-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_compile.c:
+      Fugbix typo.
+
+2004-09-02  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/filestat.c:
+      MF4: fix crash if shutdown uses file stats
+
+    * (PHP_4_3)
+      ext/standard/filestat.c:
+      this crashed if some of the shutdown handlers called some file stat
+      function
+
+2004-09-02  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/lang/bug29944.phpt:
+      - Added test for bug #29944.
+
+    * tests/lang/bug29944.phpt:
+        1.1.4;
+      file bug29944.phpt was initially added on branch PHP_4_3.
+
+2004-09-02  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/php_mysqli.h:
+      fixed bug #29283
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/php_mysqli.h:
+      fixed compiler warnings
+      fixed bug #29283
+
+2004-09-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/session/session.c:
+      MFH: Fixed bug #29925 (Added a check to prevent illegal characters in
+      session key).
+
+    * ext/session/session.c:
+      Fixed bug #29925 (Added a check to prevent illegal characters in session
+      key).
+
 2004-08-31  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
