@@ -2,7 +2,7 @@
 
 phplibdir=$(libdir)/php
 
-SRC=mysql.c
+SRC=php_mysql.c
 INCLUDES=@INCLUDES@ @MYSQL_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LIBRARIES=@MYSQL_STATIC@
 EXTRA_LIBRARIES=libphpext_mysql.a
