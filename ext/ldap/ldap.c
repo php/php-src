@@ -1928,7 +1928,7 @@ PHP_FUNCTION(ldap_parse_reference)
 /* }}} */
 #endif
 
-/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, boolean deleteoldrdn);
+/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn);
    Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {

@@ -2132,7 +2132,7 @@ PHP_FUNCTION(connection_status)
 }
 /* }}} */
 
-/* {{{ proto int ignore_user_abort(boolean value)
+/* {{{ proto int ignore_user_abort(bool value)
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
@@ -2466,7 +2466,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 }
 
 
-/* {{{ proto array parse_ini_file(string filename [, boolean process_sections])
+/* {{{ proto array parse_ini_file(string filename [, bool process_sections])
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
