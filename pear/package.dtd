@@ -1,17 +1,12 @@
 <!--
-     $Id: package.dtd,v 1.1 2000-07-25 00:55:36 ssb Exp $
+     $Id: package.dtd,v 1.2 2001-01-10 01:01:52 ssb Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
 
          "-//PHP Group//DTD PEAR Package 1.0//EN//XML"
 
-     Using XML namespaces is optional, but the namespace that should
-     be used for this DTD is:
-
-         "http://xmlns.php.net/pear/package".
-
-     Copyright (c) 1997, 1998, 1999, 2000 The PHP Group
+     Copyright (c) 1997-2001 The PHP Group             
 
      This source file is subject to version 2.02 of the PHP license,
      that is bundled with this package in the file LICENSE, and is
@@ -30,9 +25,10 @@
 <!ENTITY % global.atts		"id		ID	#IMPLIED">
 
 <!--============== attributes common to several elements ===================-->
+<!ENTITY % role.atts		"Role		(php|ext|test|doc) 'php'">
 <!ENTITY % extension.atts	"Debug		(on|off) 'off'
 				 ThreadSafe	(on|off) 'off'">
-<!ENTITY % format.atts		"Format		CDATA	#REQUIRED">
+<!ENTITY % format.atts		"Format		CDATA	#IMPLIED">
 
 <!--=============== ELEMENT: Package =======================================-->
 <!ELEMENT Package		(Name,Summary,Maintainer,Release,FileList)>
@@ -76,15 +72,8 @@
 <!ATTLIST Notes			%global.atts;>
 
 <!--=============== ELEMENT: FileList ======================================-->
-<!ELEMENT FileList		(DestDir |
-				 Dir     | File     |
-				 ExtDir  | ExtFile  |
-				 DocDir  | DocFile)*>
+<!ELEMENT FileList		(Dir | File)*>
 <!ATTLIST FileList		%global.atts;>
-
-<!--=============== ELEMENT: DestDir =======================================-->
-<!ELEMENT DestDir		(#PCDATA)>
-<!ATTLIST DestDir		%global.atts;>
 
 <!--=============== ELEMENT: Dir ===========================================-->
 <!ELEMENT Dir			(#PCDATA)>
@@ -92,22 +81,7 @@
 
 <!--=============== ELEMENT: File ==========================================-->
 <!ELEMENT File			(#PCDATA)>
-<!ATTLIST File			%global.atts;>
-
-<!--=============== ELEMENT: ExtDir ========================================-->
-<!ELEMENT ExtDir		(#PCDATA)>
-<!ATTLIST ExtDir		%global.atts;>
-
-<!--=============== ELEMENT: ExtFile =======================================-->
-<!ELEMENT ExtFile		(#PCDATA)>
-<!ATTLIST ExtFile		%global.atts;
-				%extension.atts;>
-
-<!--=============== ELEMENT: DocDir ========================================-->
-<!ELEMENT DocDir		(#PCDATA)>
-<!ATTLIST DocDir		%global.atts;>
-
-<!--=============== ELEMENT: DocFile =======================================-->
-<!ELEMENT DocFile		(#PCDATA)>
-<!ATTLIST DocFile		%global.atts;
-				%format.atts;>
+<!ATTLIST File			%global.atts;
+                                %role.atts;
+                                %extension.atts;
+                                %format.atts;>
