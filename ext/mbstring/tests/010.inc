@@ -3,7 +3,7 @@
 
 //$debug=true;
 ini_set('include_path','.');
-include_once('common.php');
+include_once('common.inc');
 
 
 // Test string
