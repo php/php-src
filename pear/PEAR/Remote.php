@@ -162,6 +162,10 @@ class PEAR_Remote extends PEAR
             $response .= $chunk;
         }
         fclose($fp);
+        if ($this->config->get('verbose') > 3) {
+            print "XMLRPC RESPONSE:\n";
+            var_dump($response);
+        }
         $ret = xmlrpc_decode($response);
         if (is_array($ret) && isset($ret['__PEAR_TYPE__'])) {
             if ($ret['__PEAR_TYPE__'] == 'error') {
@@ -182,9 +186,9 @@ class PEAR_Remote extends PEAR
                                              null, null, $ret['userinfo']);
                 }
             }
-        } elseif (is_array($ret) && sizeof($ret) == 1 &&
-                  isset($ret[0]['faultString']) &&
-                  isset($ret[0]['faultCode'])) {
+        } elseif (is_array($ret) && sizeof($ret) == 1 && is_array($ret[0]) &&
+                  !empty($ret[0]['faultString']) &&
+                  !empty($ret[0]['faultCode'])) {
             extract($ret[0]);
             $faultString = "XML-RPC Server Fault: " .
                  str_replace("\n", " ", $faultString);
