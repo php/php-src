@@ -80,7 +80,9 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
+#if HAVE_ZLIB	
 	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
+#endif	
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
@@ -823,6 +825,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 	int arg_c = ZEND_NUM_ARGS();
 
 	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
+		RETVAL_FALSE;
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(p_image_type);
@@ -894,6 +897,7 @@ PHP_FUNCTION(getimagesize)
 
 	case 1:
 		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+			RETVAL_FALSE;
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(arg1);
@@ -901,20 +905,21 @@ PHP_FUNCTION(getimagesize)
 
 	case 2:
 		if (zend_get_parameters_ex(2, &arg1, &info) == FAILURE) {
+			RETVAL_FALSE;
 			WRONG_PARAM_COUNT;
 		}
 		zval_dtor(*info);
 
 		if (array_init(*info) == FAILURE) {
-			return;
+			RETURN_FALSE;
 		}
 
 		convert_to_string_ex(arg1);
 		break;
 
 	default:
+		RETVAL_FALSE;
 		WRONG_PARAM_COUNT;
-		break;
 	}
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
@@ -974,7 +979,7 @@ PHP_FUNCTION(getimagesize)
 		if (array_init(return_value) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
 			efree(result);
-			return;
+			RETURN_FALSE;
 		}
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
