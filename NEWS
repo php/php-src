@@ -59,6 +59,7 @@ PHP 4                                                                      NEWS
   . Added optional skip parameter to dba_fetch() to support multiple key-value
     pairs with the same key for cdb handler.
   . Added locking for those handlers that do not have their own locking.
+  . Added support for magic_quotes_runtime php.ini option.
   . Added flatfile support what finally makes ext/db deprecated.
 - Added imagerotate() which is available only when bundled libgd is used.
   (Pierre-Alain Joye, Ilia)
