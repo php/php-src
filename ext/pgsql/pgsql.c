@@ -29,6 +29,10 @@
 #if HAVE_PGSQL
 
 
+#define PGSQL_ASSOC		1<<0
+#define PGSQL_NUM		1<<1
+#define PGSQL_BOTH		(PGSQL_ASSOC|PGSQL_NUM)
+
 
 function_entry pgsql_functions[] = {
 	{"pg_connect",		php3_pgsql_connect,			NULL},
@@ -857,58 +861,13 @@ PHP_FUNCTION(pgsql_result)
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pgsql_fetch_row)
 {
-	pval *result, *row;
-	PGresult *pgsql_result;
-	pgsql_result_handle *pg_result;
-	int type;
-	int i,num_fields;
-	char *element;
-	uint element_len;
-	PLS_FETCH();
-	
-	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &row)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long(result);
-	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=php3_pgsql_module.le_result) {
-		php3_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
-	pgsql_result = pg_result->result;
-	
-	convert_to_long(row);
-	if (row->value.lval<0 || row->value.lval>=PQntuples(pgsql_result)) {
-		php3_error(E_WARNING,"Unable to jump to row %d on PostgresSQL result index %d",row->value.lval,result->value.lval);
-		RETURN_FALSE;
-	}
-	array_init(return_value);
-	for (i=0,num_fields=PQnfields(pgsql_result); i<num_fields; i++) {
-		element = PQgetvalue(pgsql_result,row->value.lval,i);
-		element_len = (element ? strlen(element) : 0);
-		element = safe_estrndup(element,element_len);
-        if (element) {
-            if (PG(magic_quotes_runtime)) {
-                char *tmp=_php3_addslashes(element,element_len,&element_len,0);
-
-                add_index_stringl(return_value, i, tmp, element_len, 0);
-            } else {
-                add_index_stringl(return_value, i, element, element_len, 1);
-            }
-        } else {
-            /* NULL field, don't set it */
-            /*add_index_stringl(return_value, i, empty_string, 0, 1);*/
-        }
-	}
+	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM);
 }
 /* }}} */
 
-PHP_FUNCTION(pgsql_fetch_hash)
+static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
-	pval *result, *row, *pval_ptr;
+	pval *result, *row, *pval_ptr, *arg3;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type;
@@ -917,9 +876,26 @@ PHP_FUNCTION(pgsql_fetch_hash)
 	uint element_len;
 	PLS_FETCH();
 	
-	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &row)==FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	switch (ARG_COUNT(ht)) {
+		case 2:
+			if (getParameters(ht, 2, &result, &row)==FAILURE) {
+				RETURN_FALSE;
+			}
+			if (!result_type) {
+				result_type = PGSQL_BOTH;
+			}
+			break;
+		case 3:
+			if (getParameters(ht, 2, &result, &row, &arg3)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long(arg3);
+			result_type = arg3->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	
 	convert_to_long(result);
@@ -942,15 +918,28 @@ PHP_FUNCTION(pgsql_fetch_hash)
 		element_len = (element ? strlen(element) : 0);
 		element = safe_estrndup(element,element_len);
 		if (element) {
-            if (PG(magic_quotes_runtime)) {
-                char *tmp=_php3_addslashes(element,element_len,&element_len,0);
+			char *data;
+			int data_len;
+			int should_copy;
 
-                add_get_index_stringl(return_value, i, tmp, element_len, (void **) &pval_ptr, 0);
-            } else {
-                add_get_index_stringl(return_value, i, element, element_len, (void **) &pval_ptr, 1);
-            }
-			field_name = PQfname(pgsql_result,i);
-            _php3_hash_pointer_update(return_value->value.ht, field_name, strlen(field_name)+1, pval_ptr);
+			if (PG(magic_quotes_runtime)) {
+				data = _php3_addslashes(element,element_len,&data_len,0);
+				should_copy = 0;
+			} else {
+				data = element;
+				data_len = element_len;
+				should_copy = 1;
+			}
+			
+			if (result_type & PGSQL_NUM) {
+				add_index_stringl(return_value, i, data, data_len, should_copy);
+				should_copy = 1;
+			}
+			
+			if (result_type & PGSQL_ASSOC) {
+				field_name = PQfname(pgsql_result,i);
+				add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+			}
         } else {
             /* NULL field, don't set it */
             /* add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr); */
@@ -958,12 +947,13 @@ PHP_FUNCTION(pgsql_fetch_hash)
 	}
 }
 
+
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
 /* {{{ proto array pg_fetch_array(int result, int row)
    Fetch a row as an array */
 PHP_FUNCTION(pgsql_fetch_array)
 {
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -971,9 +961,11 @@ PHP_FUNCTION(pgsql_fetch_array)
    Fetch a row as an object */
 PHP_FUNCTION(pgsql_fetch_object)
 {
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
-		return_value->type = IS_OBJECT;
+		return_value->type=IS_OBJECT;
+		return_value->value.obj.properties = return_value->value.ht;
+		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
 /* }}} */
