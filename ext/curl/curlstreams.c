@@ -30,7 +30,7 @@
 #include "php.h"
 #include "php_memory_streams.h"
 
-#if HAVE_CURL
+#if HAVE_CURL && defined(PHP_CURL_URL_WRAPPERS)
 
 #include <stdio.h>
 #include <string.h>
