@@ -751,7 +751,7 @@ class PEAR_Common extends PEAR
         xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
 
         $this->element_stack = array();
-        $this->pkginfo = array();
+        $this->pkginfo = array('provides' => array());
         $this->current_element = false;
         unset($this->dir_install);
         $this->pkginfo['filelist'] = array();
