@@ -79,6 +79,97 @@ static void proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 	}
 }
 
+static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, int *use_proxy TSRMLS_DC)
+{
+	php_stream *stream;
+	zval **proxy_host, **proxy_port;
+	char *host;
+#ifdef ZEND_ENGINE_2
+	char *name;
+	long namelen;
+#endif
+	int port;
+	int old_error_reporting;
+	
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
+	    Z_TYPE_PP(proxy_host) == IS_STRING &&
+	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
+	    Z_TYPE_PP(proxy_port) == IS_LONG) {
+		host = Z_STRVAL_PP(proxy_host);
+		port = Z_LVAL_PP(proxy_port);
+		*use_proxy = 1;
+	} else {
+		host = phpurl->host;
+		port = phpurl->port;
+	}
+
+	old_error_reporting = EG(error_reporting);
+	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
+
+#ifdef ZEND_ENGINE_2
+	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
+	stream = php_stream_xport_create(name, namelen,
+		ENFORCE_SAFE_MODE | REPORT_ERRORS,
+		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
+		NULL /*persistent_id*/,
+		NULL /*timeout*/,
+		NULL, NULL, NULL);
+	efree(name);
+#else
+	stream = php_stream_sock_open_host(host, port, SOCK_STREAM, NULL, NULL);
+#endif
+
+	/* SSL & proxy */
+	if (stream && *use_proxy && use_ssl) {
+		smart_str soap_headers = {0};
+		char *http_headers;
+		int http_header_size;
+
+		smart_str_append_const(&soap_headers, "CONNECT ");
+		smart_str_appends(&soap_headers, phpurl->host);
+		smart_str_appendc(&soap_headers, ':');
+		smart_str_append_unsigned(&soap_headers, phpurl->port);
+		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
+		proxy_authentication(this_ptr, &soap_headers);
+		smart_str_append_const(&soap_headers, "\r\n");
+		if (php_stream_write(stream, soap_headers.c, soap_headers.len) != soap_headers.len) {
+			php_stream_close(stream);
+			stream = NULL;						
+		}
+ 	 	smart_str_free(&soap_headers);
+
+ 	 	if (stream) {
+			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC) || http_headers == NULL) {
+				php_stream_close(stream);
+				stream = NULL;						
+			}
+			efree(http_headers);
+		}
+#ifdef ZEND_ENGINE_2
+		/* enable SSL transport layer */
+		if (stream) {
+			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
+			    php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0) {
+				php_stream_close(stream);
+				stream = NULL;
+			}
+		}
+#endif
+	}
+
+#if !defined(ZEND_ENGINE_2) && defined(HAVE_OPENSSL_EXT)
+	if (stream && use_ssl) {
+		/* enable SSL transport layer */
+		if (FAILURE == php_stream_sock_ssl_activate(stream, 1)) {
+			php_stream_close(stream);
+			stream = NULL;
+		}
+	}
+#endif
+	EG(error_reporting) = old_error_reporting;
+	return stream;
+}
+
 int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction, int soap_version TSRMLS_DC)
 {
 	xmlChar *buf;
@@ -87,7 +178,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval **trace, **tmp;
-	int old_error_reporting;
 	int use_proxy = 0;
 	int use_ssl;
 
@@ -156,75 +246,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 	}
 
 	if (!stream) {
-#ifdef ZEND_ENGINE_2
-		{
-			char *res;
-			long reslen;
-			zval **proxy_host, **proxy_port;
-
-			if (!use_ssl &&
-			    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
-			    Z_TYPE_PP(proxy_host) == IS_STRING &&
-			    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
-			    Z_TYPE_PP(proxy_port) == IS_LONG) {
-			  use_proxy = 1;
-    		reslen = spprintf(&res, 0, "tcp://%s:%ld", Z_STRVAL_PP(proxy_host), Z_LVAL_PP(proxy_port));
-			} else {
-				reslen = spprintf(&res, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", phpurl->host, phpurl->port);
-			}
-
-			old_error_reporting = EG(error_reporting);
-			EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
-			stream = php_stream_xport_create(res, reslen,
-				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
-				NULL  /*persistent_id*/,
-				NULL /*timeout*/,
-				NULL, NULL, NULL);
-			EG(error_reporting) = old_error_reporting;
-
-			efree(res);
-		}
-#else
-		{
-			char *res;
-			zval **proxy_host, **proxy_port;
-
-			old_error_reporting = EG(error_reporting);
-			EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
-			if (!use_ssl &&
-			    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
-			    Z_TYPE_PP(proxy_host) == IS_STRING &&
-			    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
-			    Z_TYPE_PP(proxy_port) == IS_LONG) {
-			  use_proxy = 1;
-				stream = php_stream_sock_open_host(Z_STRVAL_PP(proxy_host), Z_LVAL_PP(proxy_port), SOCK_STREAM, NULL, NULL);
-			} else {
-#ifdef ZTS
-				stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, NULL);
-#else
-				spprintf(&res, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", phpurl->host, phpurl->port);
-				stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, res);
-				efree(res);
-#endif
-			}
-			EG(error_reporting) = old_error_reporting;
- 			if (stream && use_ssl) {
-#ifdef HAVE_OPENSSL_EXT
-	 			if (FAILURE == php_stream_sock_ssl_activate(stream, 1)) {
-#endif
-					php_stream_close(stream);
-					xmlFree(buf);
-	 				php_url_free(phpurl);
- 		 			add_soap_fault(this_ptr, "HTTP", "SSL Connection attempt failed", NULL, NULL TSRMLS_CC);
-	 	 			return FALSE;
-#ifdef HAVE_OPENSSL_EXT
- 				}
-#endif
-	 		}
-	 	}
-#endif
-
+		stream = http_connect(this_ptr, phpurl, use_ssl, &use_proxy TSRMLS_CC);
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
@@ -236,31 +258,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			return FALSE;
 		}
 	} 
-
-	/* TODO: SSL & proxy */
-/*
-	if (stream && use_proxy && use_ssl) {
-		char *http_headers;
-		int http_header_size;
-
-		smart_str_append_const(&soap_headers, "CONNECT ");
-		smart_str_appends(&soap_headers, phpurl->host);
-		smart_str_appendc(&soap_headers, ':');
-		smart_str_append_unsigned(&soap_headers, phpurl->port);
-		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
-		proxy_authentication(this_ptr, &soap_headers);
-		smart_str_append_const(&soap_headers, "\r\n");
-		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
-		if (err != soap_headers.len) {
-		}
-   	smart_str_free(&soap_headers);
-
-		if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC) || http_headers == NULL) {
-		}
-		efree(http_headers);
-		FIXME: How to enbale SSL here???
-	}
-*/
 
 	if (stream) {
 		zval **cookies, **login, **password;
