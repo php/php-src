@@ -18,7 +18,8 @@ What is PHP4 ext/java?
 
      3) Both static and instance members can be accessed on an object with
         the same syntax.  Furthermore, if the java object is of type
-        "java.lang.Class", then static members
+        "java.lang.Class", then static members of the class (fields and
+        methods) can be accessed.
 
      4) Exceptions raised result in PHP warnings, and null results.  The
         warnings may be eliminated by prefixing the method call with an
@@ -146,11 +147,17 @@ php.ini:
 ===                    JVM=Sun JDK 1.2.2, OS=Linux                   ===
 ========================================================================
 
-This compiler is not supported at this time.  At the moment, only green
-threads are supported, requiring system calls to be wrapped, which is
-incompatible with the JNI Invocation API.  Once native threads are
-supported, It is expected that the configuration will be identical to
-the Blackdown JDK. 
+build instructions:
+
+   ./configure --with-java
+
+php.ini:
+
+   [java]
+   java.class.path=/home/rubys/php4/lib/php_java.jar
+   java.library.path=/home/rubys/php4/modules
+   extension_dir=/home/rubys/php4/modules
+   extension=libphp_java.so
 
 ========================================================================
 ===                JVM=Sun JDK 1.1.8, OS=Windows NT 4                ===
