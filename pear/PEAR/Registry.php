@@ -167,7 +167,7 @@ class PEAR_Registry extends PEAR
      */
     function _packageFileName($package)
     {
-        return "{$this->statedir}/{$package}.reg";
+        return $this->statedir . DIRECTORY_SEPARATOR . strtolower($package) . '.reg';        
     }
 
     // }}}
