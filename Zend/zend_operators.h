@@ -231,7 +231,6 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 #define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)
-#define 
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
