@@ -57,14 +57,15 @@ static void build_runtime_defined_function_key(zval *result, zval *name, zend_op
 }
 
 
-static void init_compiler_declarables(CLS_D ELS_DC)
+static void init_compiler_declarables(CLS_D)
 {
 	CG(declarables).ticks.type = IS_LONG;
 	CG(declarables).ticks.value.lval = 0;
 }
 
 
-void init_compiler(CLS_D ELS_DC)
+
+void zend_init_compiler_data_structures(CLS_D)
 {
 	zend_stack_init(&CG(bp_stack));
 	zend_stack_init(&CG(function_call_stack));
@@ -75,13 +76,19 @@ void init_compiler(CLS_D ELS_DC)
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
-	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
+	init_compiler_declarables(CLS_C);
+}
+
+
+void init_compiler(CLS_D ELS_DC)
+{
+	zend_init_compiler_data_structures(CLS_C);
 	zend_init_rsrc_list(ELS_C);
-	CG(unclean_shutdown) = 0;
+	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
-	init_compiler_declarables(CLS_C ELS_CC);
+	CG(unclean_shutdown) = 0;
 }
 
 
