@@ -48,7 +48,7 @@ ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
-void (*zend_ticks_function)(int ticks);
+ZEND_API void (*zend_ticks_function)(int ticks);
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
