@@ -1,3 +1,106 @@
+2003-03-03  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/php_mysqli.h:
+      fixed bug in macro-definition
+
+    * ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt:
+      disabled output of errormessages
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_profiler.c
+      ext/mysqli/php_mysqli.h:
+      added profiler support
+
+2003-03-03  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      Update credits.
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/mcrypt/mcrypt.dsp:
+      MFB: Enabled mcrypt_generic_deinit() on windows (#22520)
+
+    * (PHP_4_3)
+      ext/mcrypt/mcrypt.dsp:
+      Enabled mcrypt_generic_deinit() on windows (#22520)
+
+2003-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      More compiler warnings fixed.
+
+    * main/php_variables.h
+      main/streams/xp_socket.c:
+      Compiler warning fix.
+
+    * main/php_variables.c:
+      Fixed compiler warnings.
+
+2003-03-03  J Smith  <jsmith@tutorbuddy.com>
+
+    * tests/classes/__call_001.phpt
+      tests/classes/__clone_001.phpt
+      tests/classes/__set__get_001.phpt
+      tests/classes/constants_scope_001.phpt
+      tests/classes/dereferencing_001.phpt
+      tests/classes/factory_001.phpt
+      tests/classes/object_reference_001.phpt
+      tests/classes/singleton_001.phpt
+      tests/lang/error_2_exception_001.phpt
+      tests/lang/namespace_001.phpt:
+      Added some tests for ZE2 features and their functionality.
+
+2003-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/ctor_dtor.phpt
+      tests/classes/ctor_dtor_inheritance.phpt:
+      Adding tests for ctor/dtor handling
+
+    * tests/classes/abstract_static.phpt:
+      Adding tests for abstract static methods
+
+    * tests/classes/abstract_final.phpt
+      tests/classes/final.phpt
+      tests/classes/final_abstract.phpt
+      tests/classes/final_redeclare.phpt:
+      Adding tests for final methods
+
+2003-03-03  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      main/main.c:
+      MFH: adding disable_classes ini directive
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: adding placeholder for the new disable_classes directive
+
+    * php.ini-dist
+      php.ini-recommended:
+      adding placeholder for the new disable_classes directive
+
+    * main/main.c:
+      adding disable_classes ini directive based on the
+      newly introduced zend_disable_class function
+
+2003-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/run-test/test008a.phpt:
+      (re)check in non ZendOptimizer version of test
+
+    * sapi/cli/TODO:
+      remove entry done already
+
 2003-03-02  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ldap/config.m4:
