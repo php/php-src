@@ -2265,8 +2265,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 					if(allow) {
 						*(tp++) = '>';
 						*tp='\0';
-						if(php_tag_find(tbuf, tp-tbuf, allow)) {
-							memcpy(rp,tbuf,tp-tbuf);
+						if(php_tag_find(tbuf, tp-tbuf+1, allow)) {
+							memcpy(rp,tbuf,tp-tbuf+1);
 							rp += tp-tbuf;
 						}
 						tp = tbuf;
