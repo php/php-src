@@ -311,10 +311,12 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 
 	list = NULL;
 	if (value == NULL || value_length <= 0) {
-		if (return_list)
+		if (return_list) {
 			*return_list = NULL;
-		if (return_size)
+		}
+		if (return_size) {
 			*return_size = 0;
+		}
 		return 0;
 	} else {
 		/* copy the value string for work */
@@ -380,23 +382,28 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 				p1 = p2 + 1;
 			} while (n < size && p2 != NULL);
 			if (n > 0) {
-				if (return_list)
+				if (return_list) {
 					*return_list = list;
-				else
+				} else {
 					pefree(list, persistent);
+				}
 			} else {
 				pefree(list, persistent);
-				if (return_list)
+				if (return_list) {
 					*return_list = NULL;
+				}
 				ret = 0;
 			}
-			if (return_size)
+			if (return_size) {
 				*return_size = n;
+			}
 		} else {
-			if (return_list)
+			if (return_list) {
 				*return_list = NULL;
-			if (return_size)
+			}
+			if (return_size) {
 				*return_size = 0;
+			}
 			ret = 0;
 		}
 		efree(tmpstr);
@@ -463,23 +470,28 @@ php_mb_parse_encoding_array(zval *array, int **return_list, int *return_size, in
 				i--;
 			}
 			if (n > 0) {
-				if (return_list)
+				if (return_list) {
 					*return_list = list;
-				else
+				} else {
 					pefree(list, persistent);
+				}
 			} else {
 				pefree(list, persistent);
-				if (return_list)
+				if (return_list) {
 					*return_list = NULL;
+				}
 				ret = 0;
 			}
-			if (return_size)
+			if (return_size) {
 				*return_size = n;
+			}
 		} else {
-			if (return_list)
+			if (return_list) {
 				*return_list = NULL;
-			if (return_size)
+			}
+			if (return_size) {
 				*return_size = 0;
+			}
 			ret = 0;
 		}
 	}
@@ -623,7 +635,7 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 		MBSTRG(current_internal_encoding) = no_encoding;
 #if HAVE_MBREGEX
 		p=&(mbctype_tbl[0]);
-		while(p->regex_encoding >= 0){
+		while (p->regex_encoding >= 0){
 			if (p->mbfl_encoding == MBSTRG(internal_encoding)){
 				MBSTRG(default_mbctype) = p->regex_encoding;
 				MBSTRG(current_mbctype) = p->regex_encoding;
@@ -688,10 +700,10 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 	   return FAILURE;
 	}
 
-	if(!strncasecmp(new_value, "off", sizeof("off"))) {
+	if (!strncasecmp(new_value, "off", sizeof("off"))) {
 		new_value = "0";
 		new_value_length = sizeof("0");
-	} else if(!strncasecmp(new_value, "on", sizeof("on"))) {
+	} else if (!strncasecmp(new_value, "on", sizeof("on"))) {
 		new_value = "1";
 		new_value_length = sizeof("1");
 	}
@@ -801,7 +813,7 @@ PHP_MINIT_FUNCTION(mbstring)
 	REGISTER_INI_ENTRIES();
 
 
-	if(MBSTRG(encoding_translation)) {
+	if (MBSTRG(encoding_translation)) {
 		sapi_unregister_post_entry(mbstr_post_entries);
 		sapi_register_post_entries(mbstr_post_entries);
 		sapi_register_treat_data(mbstr_treat_data);
@@ -841,7 +853,7 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 		free(MBSTRG(detect_order_list));
 	}
 
-	if(MBSTRG(encoding_translation)) {
+	if (MBSTRG(encoding_translation)) {
 		sapi_unregister_post_entry(mbstr_post_entries);
 		sapi_register_post_entries(php_post_entries);
 		sapi_register_treat_data(php_default_treat_data);
@@ -1006,7 +1018,7 @@ PHP_MINFO_FUNCTION(mbstring)
 #if defined(HAVE_MBSTR_KR)
 	php_info_print_table_row(2, "Korean support", "enabled");	
 #endif
-	if(MBSTRG(encoding_translation)) {
+	if (MBSTRG(encoding_translation)) {
 		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
 	}
 #if defined(HAVE_MBREGEX)
@@ -1142,8 +1154,9 @@ PHP_FUNCTION(mb_http_input)
 						temp = list;
 						spprintf(&list, 0, "%s,%s", temp, name);
 						efree(temp);
-						if (!list) 
+						if (!list) { 
 							break;
+						}
 					} else {
 						list = estrdup(name);
 					}
@@ -1151,8 +1164,9 @@ PHP_FUNCTION(mb_http_input)
 				entry++;
 				n--;
 			}
-			if (!list)
+			if (!list) {
 				RETURN_FALSE;
+			}
 			RETVAL_STRING(list, 0);
 			retname = 0;
 			break;
@@ -1275,7 +1289,7 @@ PHP_FUNCTION(mb_substitute_character)
 	if (ZEND_NUM_ARGS() == 0) {
 		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			RETVAL_STRING("none", 1);
-		} else if(MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
+		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
 			RETVAL_STRING("long", 1);
 		} else {
 			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
@@ -1371,11 +1385,13 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	 * separaror chars are set in php.ini (arg_separator.input)
 	 */
 	num = 1;
-	for (s1=res; *s1 != '\0'; s1++)
-		for (s2=separator; *s2 != '\0'; s2++)
-			if (*s1 == *s2)
+	for (s1=res; *s1 != '\0'; s1++) {
+		for (s2=separator; *s2 != '\0'; s2++) {
+			if (*s1 == *s2) {
 				num++;
-				
+			}	
+		}
+	}
 	num *= 2; /* need space for variable name and value */
 	
 	val_list = (char **)ecalloc(num, sizeof(char *));
@@ -1617,7 +1633,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		}
 	}
 
-	if(arg != PARSE_COOKIE) {
+	if (arg != PARSE_COOKIE) {
 		efree(separator);
 	}
 
@@ -1767,7 +1783,7 @@ PHP_FUNCTION(mb_parse_str)
 	/* convert encoding */
 	string.no_encoding = from_encoding;
 	old_rg = PG(register_globals);
-	if(argc == 1) {
+	if (argc == 1) {
 		PG(register_globals) = 1;
 	} else {
 		PG(register_globals) = 0;
@@ -1864,8 +1880,9 @@ PHP_FUNCTION(mb_output_handler)
 			charset = mbfl_no2preferred_mime_name(encoding);
 			if (charset) {
 				len = spprintf( &p, 0, "Content-Type: %s; charset=%s",  mimetype, charset ); 
-				if (sapi_add_header(p, len, 0) != FAILURE)
+				if (sapi_add_header(p, len, 0) != FAILURE) {
 					SG(sapi_headers).send_default_content_type = 0;
+				}
 			}
  			/* activate the converter */
  			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0 TSRMLS_CC);
@@ -1893,9 +1910,9 @@ PHP_FUNCTION(mb_output_handler)
  	string.val = (unsigned char *)arg_string;
  	string.len = arg_string_len;
  	mbfl_buffer_converter_feed(MBSTRG(outconv), &string TSRMLS_CC);
- 	if (last_feed)
+ 	if (last_feed) {
  		mbfl_buffer_converter_flush(MBSTRG(outconv) TSRMLS_CC);
- 
+	} 
  	/* get the converter output, and return it */
  	mbfl_buffer_converter_result(MBSTRG(outconv), &result TSRMLS_CC);
  	RETVAL_STRINGL((char *)result.val, result.len, 0);		/* the string is already strdup()'ed */
@@ -1943,7 +1960,7 @@ PHP_FUNCTION(mb_strlen)
 	if (n == 2) {
 		convert_to_string_ex(arg2);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg2));
-		if(string.no_encoding == mbfl_no_encoding_invalid) {
+		if (string.no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
@@ -1994,7 +2011,7 @@ PHP_FUNCTION(mb_strpos)
 		offset = Z_LVAL_PP(arg3);
 		convert_to_string_ex(arg4);
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg4));
-		if(haystack.no_encoding == mbfl_no_encoding_invalid) {
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
 			RETURN_FALSE;
 		}
@@ -2070,7 +2087,7 @@ PHP_FUNCTION(mb_strrpos)
 		}
 		convert_to_string_ex(arg3);
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg3));
-		if(haystack.no_encoding == mbfl_no_encoding_invalid) {
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
 			RETURN_FALSE;
 		}
@@ -2294,7 +2311,7 @@ PHP_FUNCTION(mb_strwidth)
 	if (n == 2){
 		convert_to_string_ex(arg2);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg2));
-		if(string.no_encoding == mbfl_no_encoding_invalid) {
+		if (string.no_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
@@ -2563,9 +2580,9 @@ PHP_FUNCTION(mb_convert_case)
 
 	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, from_encoding TSRMLS_CC);
 
-	if (newstr)
+	if (newstr) {
 		RETVAL_STRINGL(newstr, ret_len, 0);
-	
+	}	
 }
 /* }}} */
 
@@ -2585,9 +2602,9 @@ PHP_FUNCTION(mb_strtoupper)
 	}
 	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
 
-	if (newstr)
+	if (newstr) {
 		RETURN_STRINGL(newstr, ret_len, 0);
-
+	}
 	RETURN_FALSE;
 }
 /* }}} */
@@ -2608,9 +2625,9 @@ PHP_FUNCTION(mb_strtolower)
 	}
 	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
 
-	if (newstr)
+	if (newstr) {
 		RETURN_STRINGL(newstr, ret_len, 0);
-
+	}
 	RETURN_FALSE;
 }
 /* }}} */
@@ -3284,7 +3301,7 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.val = (unsigned char *)Z_STRVAL_PP(argv[1]);
 		orig_str.len = Z_STRLEN_PP(argv[1]);
 		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
-		if(orig_str.no_encoding == mbfl_no_encoding_invalid) {
+		if (orig_str.no_encoding == mbfl_no_encoding_invalid) {
 			orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		}
 		pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]") TSRMLS_CC);
@@ -3305,7 +3322,7 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.val = Z_STRVAL_PP(argv[2]);
 		orig_str.len = Z_STRLEN_PP(argv[2]);
 		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
-		if(orig_str.no_encoding == mbfl_no_encoding_invalid) {
+		if (orig_str.no_encoding == mbfl_no_encoding_invalid) {
 			orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		}
 		pstr = mbfl_convert_encoding(&orig_str, &conv_str, tran_cs TSRMLS_CC);
@@ -3397,40 +3414,32 @@ PHP_FUNCTION(mb_get_info)
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			add_assoc_string(return_value, "internal_encoding", name, 1);
 		}
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify))) != NULL) {
 			add_assoc_string(return_value, "http_input", name, 1);
 		}
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding))) != NULL) {
 			add_assoc_string(return_value, "http_output", name, 1);
 		}
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload))) != NULL) {
 			add_assoc_string(return_value, "func_overload", name, 1);
 		}
 	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
 	} else if (!strcasecmp("http_input", Z_STRVAL_PP(type))) {
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
 	} else if (!strcasecmp("http_output", Z_STRVAL_PP(type))) {
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}		
 	} else if (!strcasecmp("func_overload", Z_STRVAL_PP(type))) {
-		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload)))
- != NULL) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload))) != NULL) {
 			RETVAL_STRING(name, 1);
 		}
 	} else {
@@ -3450,8 +3459,8 @@ PHPAPI int php_mb_encoding_translation(TSRMLS_D)
 PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
 {
 	if (enc != NULL) {
-		if(enc->flag & MBFL_ENCTYPE_MBCS) {
-			if(enc->mblen_table != NULL) {
+		if (enc->flag & MBFL_ENCTYPE_MBCS) {
+			if (enc->mblen_table != NULL) {
 				if (s != NULL) return enc->mblen_table[*(unsigned char *)s];
 			}
 		} else if (enc->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
@@ -3537,18 +3546,17 @@ PHPAPI int php_mb_set_zend_encoding(TSRMLS_D)
 		name = (char *)mbfl_no_encoding2name(*entry);
 		if (name) {
 			list_size += strlen(name) + 1;
-			if (!list)
-			{
+			if (!list) {
 				list = (char*)emalloc(list_size);
-				if (!list)
+				if (!list) {
 					return -1;
+				}
 				*list = (char)NULL;
-			}
-			else
-			{
+			} else {
 				list = (char*)erealloc(list, list_size);
-				if (!list)
+				if (!list) {
 					return -1;
+				}
 				strcat(list, ",");
 			}
 			strcat(list, name);
@@ -3557,14 +3565,14 @@ PHPAPI int php_mb_set_zend_encoding(TSRMLS_D)
 		n--;
 	}
 	zend_multibyte_set_script_encoding(list, (list ? strlen(list) : 0) TSRMLS_CC);
-	if (list)
+	if (list) {
 		efree(list);
-
+	}
 	encoding_detector = php_mb_encoding_detector;
 	encoding_converter = NULL;
 	multibyte_oddlen = php_mb_oddlen;
 
-	if(MBSTRG(encoding_translation)) {
+	if (MBSTRG(encoding_translation)) {
 		/* notify internal encoding to Zend Engine */
 		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
 		zend_multibyte_set_internal_encoding(name, strlen(name) TSRMLS_CC);
@@ -3593,9 +3601,9 @@ char* php_mb_encoding_detector(const char *arg_string, int arg_length, char *arg
 	list = NULL;
 	size = 0;
 	php_mb_parse_encoding_list(arg_list, strlen(arg_list), &list, &size, 0);
-	if (size <= 0)
+	if (size <= 0) {
 		return NULL;
-
+	}
 	if (size > 0 && list != NULL) {
 		elist = list;
 	} else {
@@ -3630,14 +3638,14 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 
 	/* new encoding */
 	to_encoding = mbfl_name2no_encoding(encoding_to);
-	if (to_encoding == mbfl_no_encoding_invalid)
+	if (to_encoding == mbfl_no_encoding_invalid) {
 		return -1;
-	
+	}	
 	/* old encoding */
 	from_encoding = mbfl_name2no_encoding(encoding_from);
-	if (from_encoding == mbfl_no_encoding_invalid)
+	if (from_encoding == mbfl_no_encoding_invalid) {
 		return -1;
-
+	}
 	/* initialize string */
 	mbfl_string_init(&string);
 	mbfl_string_init(&result);
@@ -3648,8 +3656,9 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len TSRMLS_CC);
-	if (convd == NULL)
+	if (convd == NULL) {
 		return -1;
+	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
 
@@ -3679,9 +3688,9 @@ int php_mb_oddlen(const char *string, int length, const char *encoding TSRMLS_DC
 	mb_string.val = (char*)string;
 	mb_string.len = length;
 
-	if(mb_string.no_encoding == mbfl_no_encoding_invalid)
+	if (mb_string.no_encoding == mbfl_no_encoding_invalid) {
 		return 0;
-
+	}
 	return mbfl_oddlen(&mb_string);
 }
 /* }}} */
