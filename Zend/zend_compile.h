@@ -219,6 +219,7 @@ void do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 CLS_DC);
 void do_assign(znode *result, znode *variable, znode *value CLS_DC);
 void do_assign_ref(znode *result, znode *lvar, znode *rvar CLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC);
+void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op CLS_DC);
 void do_indirect_references(znode *result, znode *num_references, znode *variable CLS_DC);
 void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type CLS_DC);
 void do_fetch_globals(znode *varname CLS_DC);
