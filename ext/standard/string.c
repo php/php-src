@@ -854,7 +854,7 @@ PHP_FUNCTION(implode)
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]	
 
-/* {{{ proto string strtok(string str [, string token])
+/* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
