@@ -460,6 +460,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 	} else {
 		ZVAL_STRINGL(&call_handler, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
 	}
+	INIT_PZVAL(&call_handler);
 	
 	call_result = call_user_function_ex(NULL,
 										&object,
