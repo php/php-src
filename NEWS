@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Added user_error(), to allow explicitly generate error messages from scripts
+  (Zeev, Zend Engine)
 - Fixed long2ip() to return the correct IP address. (Evan)
 - Fix many memory leaks in the IMAP module (Stanislav, Andi, Zeev)
 - Fix bug in number_format (Jon Forsberg)

@@ -145,6 +145,9 @@ memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
 ; E_CORE_WARNING	- warnings (non fatal errors) that occur during PHP's initial startup
 ; E_COMPILE_ERROR	- fatal compile-time errors
 ; E_COMPILE_WARNING	- compile-time warnings (non fatal errors)
+; E_USER_ERROR		- user-generated error message
+; E_USER_WARNING	- user-generated warning message
+; E_USER_NOTICE		- user-generated notice message
 ; Examples:
 ; error_reporting = E_ALL & ~E_NOTICE						; show all errors, except for notices
 ; error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR	; show only errors

@@ -321,6 +321,9 @@ PHPAPI void php_error(int type, const char *format, ...)
 		case E_ERROR:
 		case E_NOTICE:
 		case E_WARNING:
+		case E_USER_ERROR:
+		case E_USER_WARNING:
+		case E_USER_NOTICE:
 			if (zend_is_compiling()) {
 				error_filename = zend_get_compiled_filename(CLS_C);
 				error_lineno = zend_get_compiled_lineno(CLS_C);
@@ -349,11 +352,13 @@ PHPAPI void php_error(int type, const char *format, ...)
 			case E_ERROR:
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
 				error_type_str = "Fatal error";
 				break;
 			case E_WARNING:
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
+			case E_USER_WARNING:
 				error_type_str = "Warning";
 				break;
 			case E_PARSE:
@@ -361,6 +366,9 @@ PHPAPI void php_error(int type, const char *format, ...)
 				break;
 			case E_NOTICE:
 				error_type_str = "Warning";
+				break;
+			case E_USER_NOTICE:
+				error_type_str = "Notice";
 				break;
 			default:
 				error_type_str = "Unknown error";
@@ -400,6 +408,7 @@ PHPAPI void php_error(int type, const char *format, ...)
 		case E_CORE_ERROR:
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
 			if (module_initialized) {
 				zend_bailout();
 				return;
