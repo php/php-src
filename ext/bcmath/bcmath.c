@@ -339,7 +339,7 @@ PHP_FUNCTION(bc_powmod)
 	bc_num first, second, mod, result;
 	int scale=bc_precision;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_C, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
         	WRONG_PARAM_COUNT;
 	}
 
