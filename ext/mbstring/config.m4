@@ -221,10 +221,10 @@ if test "$PHP_MBSTRING" != "no"; then
   if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "cn"; then
     AC_DEFINE([HAVE_MBSTR_CN],1,[whether to have simplified chinese support])
   fi
-  if test "$PHP_MBSTRING" = "all" -o  "$PHP_MBSTRING" = "tw"; then
+  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "tw"; then
     AC_DEFINE([HAVE_MBSTR_TW],1,[whether to have traditional chinese support])
   fi
-  if test "$PHP_MBSTRING" = "all" -o  "$PHP_MBSTIRNG" = "kr"; then
+  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTIRNG" = "kr"; then
     AC_DEFINE([HAVE_MBSTR_KR],1,[whether to have korean support])
   fi
   if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "ru"; then
