@@ -41,6 +41,9 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 #define REGISTER_SPL_IMPLEMENTS(class_name, interface_name) \
 	zend_class_implements(spl_ce_ ## class_name TSRMLS_CC, 1, spl_ce_ ## interface_name);
 
+#define REGISTER_SPL_ITERATOR(class_name) \
+	zend_class_implements(spl_ce_ ## class_name TSRMLS_CC, 1, zend_ce_iterator);
+
 #define REGISTER_SPL_FUNCTIONS(class_name, function_list) \
 	spl_register_functions(spl_ce_ ## class_name, function_list TSRMLS_CC);
 

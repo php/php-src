@@ -28,8 +28,27 @@ extern zend_class_entry *spl_ce_FilterIterator;
 extern zend_class_entry *spl_ce_ParentIterator;
 extern zend_class_entry *spl_ce_SeekableIterator;
 extern zend_class_entry *spl_ce_LimitIterator;
+extern zend_class_entry *spl_ce_CachingIterator;
+extern zend_class_entry *spl_ce_CachingRecursiveIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
+
+typedef enum {
+	DIT_Default = 0,
+	DIT_LimitIterator,
+	DIT_CachingIterator,
+	DIT_CachingRecursiveIterator
+} dual_it_type;
+
+enum {
+	/* public */
+	CIT_CALL_TOSTRING   = 1,
+	CIT_CATCH_GET_CHILD = 2,
+	CIT_PUBLIC          = CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD,
+	/* private */
+	CIT_HAS_MORE        = 4,
+	CIT_HAS_CHILDREN    = 8
+};
 
 typedef struct _spl_dual_it_object {
 	zend_object              std;
@@ -47,11 +66,17 @@ typedef struct _spl_dual_it_object {
 		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */
 		int                  pos;
 	} current;
+	dual_it_type             dit_type;
 	union {
 		struct {
 			int              offset;
 			int              count;
 		} limit;
+		struct {
+			int              flags; /* CIT_HAS_MORE, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD */
+			zval             *zstr;
+			zval             *zchildren;
+		} caching;
 	} u;
 } spl_dual_it_object;
 
