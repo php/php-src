@@ -243,6 +243,7 @@ static zval * reflection_instanciate(zend_class_entry *pce, zval *object TSRMLS_
 	return object;
 }
 
+static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
 static void _function_string(string *str, zend_function *fptr, char *indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
@@ -324,11 +325,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while (zend_hash_get_current_data_ex(&ce->constants_table, (void **) &value, &pos) == SUCCESS) {
 				zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_len, &num_index, 0, &pos);
-				
-				string_printf(str, "%s    Constant [ %s %s ] { }\n",
-						   indent,
-						   zend_zval_type_name(*value),
-						   key);
+
+				_const_string(str, key, *value, indent TSRMLS_CC);
 				zend_hash_move_forward_ex(&ce->constants_table, &pos);
 			}
 		}
@@ -489,6 +487,16 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	
 	string_printf(str, "%s}\n", indent);
 	string_free(&sub_indent);
+}
+/* }}} */
+
+/* {{{ _const_string */
+static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
+{
+	string_printf(str, "%s    Constant [ %s %s ] { }\n",
+			   indent,
+			   zend_zval_type_name(value),
+			   name);
 }
 /* }}} */
 
