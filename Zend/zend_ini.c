@@ -147,10 +147,25 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 	zend_ini_entry *p = ini_entry;
 	zend_ini_entry *hashed_ini_entry;
 	zval default_value;
+	HashTable *directives = registered_zend_ini_directives;
+
+#ifdef ZTS
+	/* if we are called during the request, eg: from dl(),
+	 * then we should not touch the global directives table,
+	 * and should update the per-(request|thread) version instead.
+	 * This solves two problems: one is that ini entries for dl()'d
+	 * extensions will now work, and the second is that updating the
+	 * global hash here from dl() is not mutex protected and can
+	 * lead to death.
+	 */
+	if (directives != EG(ini_directives)) {
+		directives = EG(ini_directives);
+	}
+#endif
 
 	while (p->name) {
 		p->module_number = module_number;
-		if (zend_hash_add(registered_zend_ini_directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
+		if (zend_hash_add(directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
 			zend_unregister_ini_entries(module_number TSRMLS_CC);
 			return FAILURE;
 		}
