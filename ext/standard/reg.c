@@ -278,10 +278,12 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 
 	string_len = strlen(string);
 
-	if (icase)
+	if (icase) {
 		copts = REG_ICASE;
-	if (extended)
+	}
+	if (extended) {
 		copts |= REG_EXTENDED;
+	}
 
 	err = regcomp(&re, pattern, copts);
 	if (err) {
@@ -321,7 +323,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 
 			new_l = strlen(buf) + subs[0].rm_so; /* part before the match */
 			walk = replace;
-			while (*walk)
+			while (*walk) {
 				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= ((char) re.re_nsub)) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1) {
 						new_l += subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
@@ -331,7 +333,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 					new_l++;
 					walk++;
 				}
-
+			}
 			if (new_l + 1 > buf_len) {
 				buf_len = 1 + buf_len + 2 * new_l;
 				nbuf = emalloc(buf_len);
@@ -346,7 +348,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 			/* copy replacement and backrefs */
 			walkbuf = &buf[tmp + subs[0].rm_so];
 			walk = replace;
-			while (*walk)
+			while (*walk) {
 				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= re.re_nsub) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
@@ -359,13 +361,15 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 					walk += 2;
 				} else {
 					*walkbuf++ = *walk++;
-				}	
+				}
+			}
 			*walkbuf = '\0';
 
 			/* and get ready to keep looking for replacements */
 			if (subs[0].rm_so == subs[0].rm_eo) {
-				if (subs[0].rm_so + pos >= string_len)
+				if (subs[0].rm_so + pos >= string_len) {
 					break;
+				}
 				new_l = strlen (buf) + 1;
 				if (new_l + 1 > buf_len) {
 					buf_len = 1 + buf_len + 2 * new_l;
