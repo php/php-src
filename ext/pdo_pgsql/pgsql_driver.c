@@ -33,9 +33,10 @@
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
 
-static char * _pdo_pgsql_trim_message(const char *message)
+static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	register int i = strlen(message)-1;
+	char *tmp;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;
@@ -44,7 +45,11 @@ static char * _pdo_pgsql_trim_message(const char *message)
 		--i;
 	}
 	++i;
-	return estrndup(message, i);
+	tmp = pemalloc(i + 1, persistent);
+	memcpy(tmp, message, i);
+	tmp[i] = '\0';
+	
+	return tmp;
 }
 
 int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC) /* {{{ */
@@ -59,7 +64,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	einfo->line = line;
 
 	if (einfo->errmsg) {
-		efree(einfo->errmsg);
+		pefree(einfo->errmsg, dbh->is_persistent);
 		einfo->errmsg = NULL;
 	}
 
@@ -74,7 +79,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (errmsg) {
-		einfo->errmsg = _pdo_pgsql_trim_message(errmsg);
+		einfo->errmsg = _pdo_pgsql_trim_message(errmsg, dbh->is_persistent);
 	}
 
 	if (!dbh->methods) {
@@ -109,7 +114,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			H->server = NULL;
 		}
 		if (H->einfo.errmsg) {
-			efree(H->einfo.errmsg);
+			pefree(H->einfo.errmsg, dbh->is_persistent);
 			H->einfo.errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
