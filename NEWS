@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
+- Fix possible crash when internal get_method is not defined (Andi)
+- Use the scope of the PHP user function when calling methods using
+  call_user_func() in conjuntion with the array("Class", "Method") syntax
+  (Dmitry)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
   This fixes our test cases allowing INI with GET sections to work (Rasmus)
 - Fixed getopt() so it works without $_SERVER (Rasmus, bfrance)
