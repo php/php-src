@@ -246,8 +246,19 @@ int dbx_odbc_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL
     }
 
 int dbx_odbc_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS) {
-    /* returns empty string, no equivalent in odbc module (yet???) */
-    ZVAL_EMPTY_STRING((*rv));
+    /* returns string */
+    int number_of_arguments=1;
+    zval ** arguments[1];
+    zval * returned_zval=NULL;
+
+    arguments[0]=dbx_handle;
+    if (!dbx_handle) number_of_arguments=0;
+    dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_errormsg", &returned_zval, number_of_arguments, arguments);
+    if (!returned_zval || returned_zval->type!=IS_STRING) {
+        if (returned_zval) zval_ptr_dtor(&returned_zval);
+        return 0;
+        }
+    MOVE_RETURNED_TO_RV(rv, returned_zval);
     return 1;
     }
 
