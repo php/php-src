@@ -55,6 +55,8 @@ PHP_FUNCTION(usleep);
 PHP_FUNCTION(flush);
 PHP_FUNCTION(gettype);
 PHP_FUNCTION(settype);
+PHP_FUNCTION(ip2long);
+PHP_FUNCTION(long2ip);
 
 /* system functions */
 PHP_FUNCTION(getenv);

@@ -30,6 +30,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -234,6 +235,8 @@ function_entry basic_functions[] = {
 	PHP_FE(dechex,									NULL)
 	PHP_FE(base_convert,							NULL)
 	PHP_FE(number_format,							NULL)
+	PHP_FE(ip2long,									NULL)
+	PHP_FE(long2ip,									NULL)
 
 	PHP_FE(getenv,									NULL)
 #ifdef HAVE_PUTENV
@@ -480,6 +483,42 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 
 	return SUCCESS;
 }
+
+
+PHP_FUNCTION(ip2long)
+{
+	zval **str;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(str);
+
+	if ((*str)->type != IS_STRING) {
+		RETURN_FALSE;
+	}
+	
+	RETURN_LONG ( inet_addr ( ( *str ) -> value.str.val ) );
+}
+
+
+PHP_FUNCTION(long2ip)
+{
+	zval **num;
+	struct in_addr myaddr;
+	
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long_ex(num);
+	myaddr.s_addr = (*num) -> value.lval;
+
+	RETURN_STRING ( inet_ntoa ( myaddr ) , 1 );
+}
+
+
 
 /********************
  * System Functions *
