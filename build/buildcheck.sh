@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.10 2001-05-23 19:13:24 sas Exp $ 
+# $Id: buildcheck.sh,v 1.11 2001-05-24 12:36:09 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -40,14 +40,15 @@ echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 # automake 1.4 or newer
-am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//' -e 's/-p[0-9]*$//'`
+am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+am_version_clean=`echo $am_version|sed -e 's/-p[0-9]*$//'`
 if test "$am_version" = ""; then
 echo "buildconf: automake not found."
 echo "           You need automake version 1.4 or newer installed"
 echo "           to build PHP from CVS."
 exit 1
 fi
-IFS=.; set $am_version; IFS=' '
+IFS=.; set $am_version_clean; IFS=' '
 if test "$1" = "1" -a "$2" -lt "4" || test "$1" -lt "1"; then
 echo "buildconf: automake version $am_version found."
 echo "           You need automake version 1.4 or newer installed"
