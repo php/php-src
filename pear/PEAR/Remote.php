@@ -168,7 +168,7 @@ class PEAR_Remote extends PEAR
                 if ($ret['message']  === '') $ret['message']  = null;
                 if ($ret['userinfo'] === '') $ret['userinfo'] = null;
                 if (strtolower($class) == 'db_error') {
-                    $ret = $this->raiseError(DB::errorMessage($ret['code']),
+                    $ret = $this->raiseError(PEAR::errorMessage($ret['code']),
                                              $ret['code'], null, null,
                                              $ret['userinfo']);
                 } else {
