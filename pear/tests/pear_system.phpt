@@ -72,15 +72,15 @@ if (!@System::rm("-r $del")) {
 }
 
 /*******************
-        type
+        which
 ********************/
 
 if (OS_UNIX) {
-    if (System::type('ls') != '/bin/ls') {
-        print "System::type('ls') failed\n";
+    if (System::which('ls') != '/bin/ls') {
+        print "System::which('ls') failed\n";
     }
-    if (System::type('i_am_not_a_command')) {
-        print "System::type('i_am_not_a_command') did not failed\n";
+    if (System::which('i_am_not_a_command')) {
+        print "System::which('i_am_not_a_command') did not failed\n";
     }
 } // XXX Windows test
 
