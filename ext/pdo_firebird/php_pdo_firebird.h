@@ -25,9 +25,15 @@ extern zend_module_entry pdo_firebird_module_entry;
 #define phpext_pdo_firebird_ptr &pdo_firebird_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_PDO_FB_API __declspec(dllexport)
+# ifdef PDO_FIREBIRD_EXPORTS
+#  define PDO_FB_API __declspec(dllexport)
+# elif defined(COMPILE_DL_PDO_FIREBIRD)
+#  define PDO_FB_API __declspec(dllimport)
+# else
+#  define PDO_FB_API
+# endif
 #else
-#define PHP_PDO_FB_API
+# define PDO_FB_API
 #endif
 
 #ifdef ZTS

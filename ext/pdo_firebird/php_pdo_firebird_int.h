@@ -31,14 +31,10 @@
 
 #define PDO_FB_DIALECT 3
 
+#define SHORT_MAX (1 << 8*sizeof(short)-1)
 
-typedef struct {
-	const char *file;
-	int line;
-	long errcode;
-	char *errmsg;
-} pdo_firebird_error_info;
-
+/* Firebird API has a couple of missing const decls in its API */
+#define const_cast(s) ((char*)(s))
 
 typedef struct {
 
@@ -62,14 +58,27 @@ typedef struct {
 	/* the statement handle */
 	isc_stmt_handle stmt;
 	
+	/* the name of the cursor (if it has one) */
+	char name[32];
+	
+	/* whether EOF was reached for this statement */
+	unsigned exhausted:1;
+
+	unsigned _reserved:31;
+	
+	/* the input SQLDA */
+	XSQLDA *in_sqlda;
+	
 	/* the output SQLDA */
-	XSQLDA out_sqlda[1]; /* last member */
+	XSQLDA out_sqlda; /* last member */
 	
 } pdo_firebird_stmt;
 
 extern pdo_driver_t pdo_firebird_driver;
 
 extern struct pdo_stmt_methods firebird_stmt_methods;
+
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC);
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */
 
