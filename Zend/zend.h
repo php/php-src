@@ -23,6 +23,7 @@
 
 #define ZEND_VERSION "0.90"
 
+#include <stdarg.h>
 
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
