@@ -98,6 +98,7 @@ void init_compiler(CLS_D ELS_DC)
 	zend_llist_init(&CG(filenames_list), sizeof(char *), free_filename, 0);
 	CG(short_tags) = ZEND_UV(short_tags);
 	CG(asp_tags) = ZEND_UV(asp_tags);
+	CG(allow_call_time_pass_reference) = ZEND_UV(allow_call_time_pass_reference);
 	CG(handle_op_arrays) = 1;
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
 	init_resource_list(ELS_C);
@@ -667,7 +668,7 @@ void do_free(znode *op1 CLS_DC)
 }
 
 
-void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method CLS_DC)
+void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  CLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -678,8 +679,10 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	zend_str_tolower(name, name_len);
 
 	init_op_array(&op_array, INITIAL_OP_ARRAY_SIZE);
+
 	op_array.function_name = name;
 	op_array.arg_types = NULL;
+	op_array.return_reference = return_reference;
 
 	if (is_method) {
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
@@ -839,7 +842,7 @@ void do_end_function_call(znode *function_name, znode *result, znode *argument_l
 	}
 	opline->op1 = *function_name;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
 	opline->op2.u.constant.value.lval = is_method;
@@ -855,8 +858,22 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 	int original_op=op;
 	zend_function **function_ptr_ptr, *function_ptr;
 
+						
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
 	function_ptr = *function_ptr_ptr;
+
+	if (original_op==ZEND_SEND_REF
+		&& !CG(allow_call_time_pass_reference)) {
+		zend_error(E_COMPILE_WARNING,
+					"Call-time pass-by-reference has been deprecated - argument passed by value;  "
+					"If you would like to pass it by reference, modify the declaration of %s().  "
+					"If you would like to enable call-time pass-by-reference, you can set"
+					"allow_call_time_pass_reference to true in your INI file.  "
+					"However, future versions may not support this any longer.",
+					(function_ptr?function_ptr->common.function_name:"[runtime function name]"),
+					offset+1);
+	}
+
 	if (function_ptr) {
 		arg_types = function_ptr->common.arg_types;
 	} else {
@@ -952,6 +969,13 @@ void do_return(znode *expr CLS_DC)
 {
 	zend_op *opline;
 	
+	if (expr->op_type==IS_VAR) {
+		if (CG(active_op_array)->return_reference) {
+			do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
+		} else {
+			do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+		}
+	}
 #ifdef ZTS
 	zend_stack_apply_with_argument(&CG(switch_cond_stack), (int (*)(void *element, void *)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
 	zend_stack_apply_with_argument(&CG(foreach_copy_stack), (int (*)(void *element, void *)) generate_free_foreach_copy, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
@@ -963,6 +987,7 @@ void do_return(znode *expr CLS_DC)
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_RETURN;
+	
 	if (expr) {
 		opline->op1 = *expr;
 	} else {

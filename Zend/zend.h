@@ -187,8 +187,9 @@ typedef struct _zend_utility_functions {
 
 		
 typedef struct _zend_utility_values {
-	unsigned char short_tags;
-	unsigned char asp_tags;
+	zend_bool short_tags;
+	zend_bool asp_tags;
+	zend_bool allow_call_time_pass_reference;
 	char *import_use_extension;
 	uint import_use_extension_length;
 } zend_utility_values;

@@ -99,6 +99,8 @@ void init_op_array(zend_op_array *op_array, int initial_ops_size)
 
 	op_array->uses_globals = 0;
 
+	op_array->return_reference = 0;
+
 	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_ctor_handler, op_array);
 }
 

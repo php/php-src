@@ -180,7 +180,8 @@ statement:
 	|	T_CONTINUE ';'		{ do_brk_cont(ZEND_CONT, NULL CLS_CC); }
 	|	T_CONTINUE expr ';'	{ do_brk_cont(ZEND_CONT, &$2 CLS_CC); }
 	|	T_RETURN ';'			{ do_return(NULL CLS_CC); }
-	|	T_RETURN expr ';'		{ do_return(&$2 CLS_CC); }
+	|	T_RETURN expr_without_variable ';'		{ do_return(&$2 CLS_CC); }
+	|	T_RETURN cvar ';'		{ do_return(&$2 CLS_CC); }
 	|	T_GLOBAL global_var_list
 	|	T_STATIC static_var_list
 	|	T_ECHO echo_expr_list ';'
@@ -201,9 +202,9 @@ use_filename:
 
 
 declaration_statement:
-		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
+		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { do_begin_function_declaration(&$1, &$4, 0, $3.op_type CLS_CC); }
 			'(' parameter_list ')' '{' inner_statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
-	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING  { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
+	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { do_begin_function_declaration(&$1, &$4, 0, $3.op_type CLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
 	|	T_CLASS T_STRING { do_begin_class_declaration(&$2, NULL CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
 	|	T_CLASS T_STRING T_EXTENDS T_STRING { do_begin_class_declaration(&$2, &$4 CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
@@ -347,13 +348,16 @@ class_statement_list:
 
 class_statement:
 		T_VAR class_variable_decleration ';'
-	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 1 CLS_CC); } '(' 
+	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { do_begin_function_declaration(&$1, &$4, 1, $3.op_type CLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
-	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 1 CLS_CC); }
+	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { do_begin_function_declaration(&$1, &$4, 1, $3.op_type CLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
 
 ;
 
+is_reference:
+		/* empty */ { $$.op_type = ZEND_RETURN_VAL; }
+	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
 
 class_variable_decleration:
 		class_variable_decleration ',' T_VARIABLE { do_declare_property(&$3, NULL CLS_CC); }
@@ -384,6 +388,7 @@ expr_without_variable:
 		T_LIST '(' { do_list_init(CLS_C); } assignment_list ')' '=' expr { do_list_end(&$$, &$7 CLS_CC); }
 	|	cvar '=' expr		{ do_end_variable_parse(BP_VAR_W, 0 CLS_CC); do_assign(&$$, &$1, &$3 CLS_CC); }
 	|	cvar '=' '&' w_cvar	{ do_end_variable_parse(BP_VAR_W, 0 CLS_CC); do_assign_ref(&$$, &$1, &$4 CLS_CC); }
+	|	cvar '=' '&' function_call { do_end_variable_parse(BP_VAR_W, 0 CLS_CC); do_assign_ref(&$$, &$1, &$4 CLS_CC); }
 	|	T_NEW class_name { do_extended_fcall_begin(CLS_C); do_begin_new_object(&$1, &$2 CLS_CC); } ctor_arguments { do_end_new_object(&$$, &$2, &$1, &$4 CLS_CC); do_extended_fcall_end(CLS_C);}
 	|	cvar T_PLUS_EQUAL expr 	{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 CLS_CC); }
 	|	cvar T_MINUS_EQUAL expr	{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 CLS_CC); }
@@ -431,15 +436,7 @@ expr_without_variable:
 	|	expr '?' { do_begin_qm_op(&$1, &$2 CLS_CC); }
 		expr ':' { do_qm_true(&$4, &$2, &$5 CLS_CC); }
 		expr	 { do_qm_false(&$$, &$7, &$2, &$5 CLS_CC); }
-	|	T_STRING	'(' { do_extended_fcall_begin(CLS_C); $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
-				function_call_parameter_list
-				')' { do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num CLS_CC); do_extended_fcall_end(CLS_C); }
-	|	r_cvar '(' { do_extended_fcall_begin(CLS_C); do_begin_dynamic_function_call(&$1 CLS_CC); } 
-				function_call_parameter_list 
-				')' { do_end_function_call(&$1, &$$, &$4, 0, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
-	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { do_extended_fcall_begin(CLS_C); do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
-											function_call_parameter_list 
-											')' { do_end_function_call(&$3, &$$, &$6, 1, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
+	|	function_call { $$ = $1; }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 		{ do_cast(&$$, &$2, IS_LONG CLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ do_cast(&$$, &$2, IS_DOUBLE CLS_CC); }
@@ -453,6 +450,19 @@ expr_without_variable:
 	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
 	|	'`' encaps_list '`'		{ do_shell_exec(&$$, &$2 CLS_CC); }
 	|	T_PRINT expr  { do_print(&$$, &$2 CLS_CC); }
+;
+
+
+function_call:
+		T_STRING	'(' { do_extended_fcall_begin(CLS_C); $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
+				function_call_parameter_list
+				')' { do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num CLS_CC); do_extended_fcall_end(CLS_C); }
+	|	r_cvar '(' { do_extended_fcall_begin(CLS_C); do_begin_dynamic_function_call(&$1 CLS_CC); } 
+				function_call_parameter_list 
+				')' { do_end_function_call(&$1, &$$, &$4, 0, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { do_extended_fcall_begin(CLS_C); do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
+											function_call_parameter_list 
+											')' { do_end_function_call(&$3, &$$, &$6, 1, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
 ;
 
 

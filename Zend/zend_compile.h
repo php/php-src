@@ -115,6 +115,7 @@ struct _zend_op_array {
 	int last_executed_op_number;
 	int backpatch_count;
 #endif
+	zend_bool return_reference;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -260,7 +261,7 @@ void do_add_char(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_string(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_variable(znode *result, znode *op1, znode *op2 CLS_DC);
 
-void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method CLS_DC);
+void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference CLS_DC);
 void do_end_function_declaration(znode *function_token CLS_DC);
 void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, unsigned char pass_type CLS_DC);
 int do_begin_function_call(znode *function_name CLS_DC);
@@ -573,20 +574,23 @@ int zendlex(znode *zendlval CLS_DC);
 #define PZVAL_IS_REF(z)		((z)->is_ref)
 
 #define PZVAL_LOCK(z)	((z)->refcount++)
-#define PZVAL_UNLOCK(z)	{ ((z)->refcount--);							\
-							if (!(z)->refcount) {						\
-								EG(garbage)[EG(garbage_ptr)++] = (z);	\
-								if (EG(garbage_ptr) == 4) {				\
-									zval_dtor(EG(garbage)[0]);			\
-									efree(EG(garbage)[0]);				\
-									zval_dtor(EG(garbage)[1]);			\
-									efree(EG(garbage)[1]);				\
-									EG(garbage)[0] = EG(garbage)[2];	\
-									EG(garbage)[1] = EG(garbage)[3];	\
-									EG(garbage_ptr) -= 2;				\
-								}										\
-							}											\
+#define PZVAL_UNLOCK(z)	{ ((z)->refcount--);								\
+							if (!(z)->refcount && !EG(suspend_garbage)) {	\
+								EG(garbage)[EG(garbage_ptr)++] = (z);		\
+								if (EG(garbage_ptr) == 4) {					\
+									zval_dtor(EG(garbage)[0]);				\
+									efree(EG(garbage)[0]);					\
+									zval_dtor(EG(garbage)[1]);				\
+									efree(EG(garbage)[1]);					\
+									EG(garbage)[0] = EG(garbage)[2];		\
+									EG(garbage)[1] = EG(garbage)[3];		\
+									EG(garbage_ptr) -= 2;					\
+								}											\
+							}												\
 						}
+
+#define SUSPEND_GARBAGE() (EG(suspend_garbage)=1)
+#define RESUME_GARBAGE() (EG(suspend_garbage)=0)
 
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
@@ -608,5 +612,8 @@ int zendlex(znode *zendlval CLS_DC);
 			)														\
 		)															\
 	)
+
+#define ZEND_RETURN_VAL 0
+#define ZEND_RETURN_REF 1
 
 #endif /* _COMPILE_H */
