@@ -10,6 +10,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include <m_string.h>
+
+/* HPUX 11.0 doesn't allow us to change the environ pointer */
+#ifdef HPUX11
+#undef HAVE_TEMPNAM
+#endif
+
 #include "my_static.h"
 #include "mysys_err.h"
 
@@ -19,7 +25,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 #ifdef HAVE_TEMPNAM
-#if !defined( MSDOS) && !defined(OS2)
+#if !defined( MSDOS) && !defined(OS2) && !defined(__NETWARE__)
 extern char **environ;
 #endif
 #endif
@@ -92,17 +98,23 @@ my_string my_tempnam(const char *dir, const char *pfx,
   if (buffer[strlen(buffer)-1] == '\\')
      buffer[strlen(buffer)-1] = '\0';
   putenv( buffer);
-#else
+#elif !defined(__NETWARE__)
   old_env=(char**)environ;
   if (dir)
   {				/* Don't use TMPDIR if dir is given */
-    ((char **)environ)=(char**)temp_env;		/* May give warning */
+    /*
+      The following strange cast is required because the IBM compiler on AIX
+      doesn't allow us to cast the value of environ.
+      The cast of environ is needed as some systems doesn't allow us to
+      update environ with a char ** pointer. (const mismatch)
+    */
+    (*(char***) &environ)=(char**) temp_env;
     temp_env[0]=0;
   }
 #endif
   res=tempnam((char*) dir,(my_string) pfx); /* Use stand. dir with prefix */
-#ifndef OS2
-  ((char**)environ)=(char**)old_env;		/* May give warning */
+#if !defined(OS2) && !defined(__NETWARE__)
+  (*(char***) &environ)=(char**) old_env;
 #endif
   if (!res)
     DBUG_PRINT("error",("Got error: %d from tempnam",errno));
