@@ -1,7 +1,12 @@
 --TEST--
 UCS4BE to ASCII
 --SKIPIF--
-<?php /* include('skipif.inc'); */ ?>
+<?php
+/* include('skipif.inc'); */
+if (@iconv("ascii","UCS-4LE", "abcd") == '') {
+	die("skip conversion to UCS-4LE not supported"); 
+}
+?>
 --INI--
 error_reporting=2039
 --FILE--
