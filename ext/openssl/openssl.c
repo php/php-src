@@ -676,7 +676,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 
 /* }}} */
 
-/* {{{ proto openssl_x509_export_to_file(mixed x509, string outfilename [, bool notext = true])
+/* {{{ proto bool openssl_x509_export_to_file(mixed x509, string outfilename [, bool notext = true])
    Exports a CERT to file or a var */
 PHP_FUNCTION(openssl_x509_export_to_file)
 {
@@ -718,7 +718,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 }
 /* }}} */
 
-/* {{{ proto openssl_x509_export(mixed x509, string &out [, bool notext = true])
+/* {{{ proto bool openssl_x509_export(mixed x509, string &out [, bool notext = true])
    Exports a CERT to file or a var */
 PHP_FUNCTION(openssl_x509_export)
 {
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(openssl_x509_read)
 }
 /* }}} */
 
-/* {{{ proto void openssl_free_x509(resource x509)
+/* {{{ proto void openssl_x509_free(resource x509)
    Frees X.509 certificates */
 PHP_FUNCTION(openssl_x509_free)
 {
@@ -1285,7 +1285,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 }
 /* }}} */
 
-/* {{{ proto openssl_csr_export_to_file(resource csr, string outfilename [, bool notext=true])
+/* {{{ proto bool openssl_csr_export_to_file(resource csr, string outfilename [, bool notext=true])
    Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export_to_file)
 {
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 
 
 
-/* {{{ proto openssl_csr_export(resource csr, string &out [, bool notext=true])
+/* {{{ proto bool openssl_csr_export(resource csr, string &out [, bool notext=true])
    Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export)
 {
