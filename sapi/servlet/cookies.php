@@ -16,7 +16,7 @@
   } else {
     echo "Your browser is sending the following cookies:<br>\n";
 
-    while (list($i,$cookie) = each($cookies)) {
+    foreach ($cookies as $cookie) {
       echo "Cookie Name: $cookie->name<br>Cookie value: $cookie->value<br>\n";
     }
   }
