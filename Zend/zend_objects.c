@@ -60,7 +60,7 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	return retval;
 }
 
-ZEND_API ZEND_API zend_object *zend_objects_get_address(zval *zobject)
+ZEND_API zend_object *zend_objects_get_address(zval *zobject)
 {
 	TSRMLS_FETCH();
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
