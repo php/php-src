@@ -409,7 +409,7 @@ static void php_cgi_usage(char *argv0)
 			   "  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 			   "  -e               Generate extended information for debugger/profiler\n"
 			   "  -f <file>        Parse <file>.  Implies `-q'\n"
-			   "  -h               This help\n",
+			   "  -h               This help\n"
 			   "  -i               PHP information\n"
 			   "  -l               Syntax check only (lint)\n"
 			   "  -m               Show compiled in modules\n"
@@ -417,7 +417,7 @@ static void php_cgi_usage(char *argv0)
 			   "  -s               Display colour syntax highlighted source.\n"
 			   "  -v               Version number\n"
 			   "  -w               Display source with stripped comments and whitespace.\n"
-			   "  -z <file>        Load Zend extension <file>.\n"
+			   "  -z <file>        Load Zend extension <file>.\n",
 			   prog, prog);
 }
 /* }}} */
