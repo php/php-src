@@ -484,7 +484,7 @@ PHP_FUNCTION(imageloadfont)
 /* }}} */
 
 /* {{{ proto void imagesetstyle(resource im, array styles)
-	Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
+   Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
 PHP_FUNCTION(imagesetstyle)
 {
 	zval **IM, **styles;
