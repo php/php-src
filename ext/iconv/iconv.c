@@ -42,6 +42,10 @@
 #include <iconv.h>
 #endif
 
+#ifdef HAVE_GLIBC_ICONV
+#include <gnu/libc-version.h>
+#endif
+
 #ifdef HAVE_LIBICONV
 #define LIBICONV_PLUG
 #define icv_open(a, b) libiconv_open(a, b)
@@ -118,9 +122,12 @@ PHP_MINIT_FUNCTION(miconv)
 		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f)); 
 		version = buf;
 	}
+#elif HAVE_GLIBC_ICONV
+	version = (char *)gnu_get_libc_version();
 #endif
-#ifdef ICONV_IMPL
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
+
+#ifdef PHP_ICONV_IMPL
+	REGISTER_STRING_CONSTANT("ICONV_IMPL", PHP_ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
 #endif
