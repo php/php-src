@@ -88,5 +88,6 @@
 
 #define _php3_addslashes	php_addslashes
 #define _php3_stripslashes	php_stripslashes
+#define php3_dl             php_dl
 
 #endif							/* _PHP3_COMPAT_H */

@@ -236,44 +236,36 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
    portable file locking */
 PHP_FUNCTION(flock)
 {
-    pval *arg1, *arg2;
-    FILE *fp;
+    pval **arg1, **arg2;
     int type;
-    int issock=0;
-    int *sock, fd=0;
+    int fd=0;
     int act = 0;
+	void *what;
 
-    if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+    if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
-    convert_to_long(arg1);
-    convert_to_long(arg2);
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_socket,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+	
+	if (type == le_socket) {
+		fd = *(int *) what;
+	} else {
+		fd = fileno((FILE*) what);
+	}
+	
+    convert_to_long_ex(arg2);
 
-    fp = php3_list_find(arg1->value.lval, &type);
-    if (type == le_socket){
-        issock = 1;
-        sock = php3_list_find(arg1->value.lval, &type);
-        fd = *sock;
+    act = (*arg2)->value.lval & 3;
+    if (act < 1 || act > 3) {
+		php_error(E_WARNING, "illegal value for second argument");
+		RETURN_FALSE;
     }
 
-    if ((!fp || (type!=le_fopen && type!=le_popen)) && (!fd || type!=le_socket)) {
-        php_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
-        RETURN_FALSE;
-    }
-
-    if (!issock) {
-        fd = fileno(fp);
-    }
-
-    act = arg2->value.lval & 3;
-    if(act < 1 || act > 3) {
-            php_error(E_WARNING, "illegal value for second argument");
-            RETURN_FALSE;
-    }
     /* flock_values contains all possible actions
        if (arg2 & 4) we won't block on the lock */
-    act = flock_values[act - 1] | (arg2->value.lval & 4 ? LOCK_NB : 0);
+    act = flock_values[act - 1] | ((*arg2)->value.lval & 4 ? LOCK_NB : 0);
     if (flock(fd, act) == -1) {
         RETURN_FALSE;
     }
@@ -545,7 +537,6 @@ PHP_FUNCTION(fopen)
 	FILE *fp;
 	char *p;
 	int *sock;
-	int id;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
 	
@@ -583,16 +574,17 @@ PHP_FUNCTION(fopen)
 		efree(p);
 		RETURN_FALSE;
 	}
+
+	efree(p);
 	fgetss_state=0;
+
 	if (issock) {
 		sock=emalloc(sizeof(int));
 		*sock=socketd;
-		id = php3_list_insert(sock,le_socket);
+		ZEND_REGISTER_RESOURCE(return_value,sock,le_socket);
 	} else {
-		id = php3_list_insert(fp,le_fopen);
+		ZEND_REGISTER_RESOURCE(return_value,fp,le_fopen);
 	}
-	efree(p);
-	RETURN_LONG(id);
 }
 /* }}} */	
 
@@ -627,7 +619,6 @@ PHP_FUNCTION(popen)
 {
 	pval *arg1, *arg2;
 	FILE *fp;
-	int id;
 	char *p;
 	char *b, buf[1024];
 	PLS_FETCH();
@@ -670,9 +661,9 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	}
-	id = php3_list_insert(fp,le_popen);
 	efree(p);
-	RETURN_LONG(id);
+
+	ZEND_REGISTER_RESOURCE(return_value,fp,le_popen);
 }
 /* }}} */
 

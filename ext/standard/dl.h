@@ -35,7 +35,7 @@
 #ifndef _DL_H
 #define _DL_H
 
-void php3_dl(pval *file,int type,pval *return_value);
+void php_dl(pval *file,int type,pval *return_value);
 
 
 #if HAVE_LIBDL

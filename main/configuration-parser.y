@@ -370,7 +370,7 @@ statement:
 			printf("Loading '%s'\n",$3.value.str.val);
 #endif
 			
-			php3_dl(&$3,MODULE_PERSISTENT,&dummy);
+			php_dl(&$3,MODULE_PERSISTENT,&dummy);
 		}
 	|	T_ZEND_EXTENSION '=' string {
 #if !defined(ZTS) && !ZEND_DEBUG
