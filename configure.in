@@ -30,6 +30,9 @@ dnl -------------------------------------------------------------------------
 AC_PREREQ(2.13)
 AC_INIT(README.CVS-RULES)
 
+dnl check for working sed
+PHP_PROG_SED
+
 PHP_CONFIG_NICE(config.nice)
 for arg in $0 "$@"; do
   CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
@@ -127,9 +130,6 @@ dnl AC_PROG_CXXCPP
 
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
-
-dnl check for working sed (disabled for now, waiting for comments)
-dnl PHP_PROG_SED
 
 AC_PROG_RANLIB
 AC_PROG_LN_S
