@@ -2937,7 +2937,7 @@ PHP_FUNCTION(count_chars)
 		array_init(return_value);
 	}
 
-	for (inx=0; inx < 255; inx++) {
+	for (inx=0; inx < 256; inx++) {
 		switch (mymode) {
  		case 0:
 			add_index_long(return_value,inx,chars[inx]);
