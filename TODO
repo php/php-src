@@ -12,9 +12,6 @@ global
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
-    * let every module (source-file) have it's own module & function_entry 
-      block. Right now the math functions are in math.c but the corresponding
-      function-entries are in basic_functions.
     * make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * activate all extensions by default that don't rely on external
@@ -25,7 +22,6 @@ global
       reentrant-save functions
     * on some platforms unimplemented function will just do nothing (eg symlink)
       they should print a warning or be not even defined!
-    * banish the legacy of php3_ prefixes
     * implement javadoc based function docs template system
     * use thread-safe resolver functions (either require BIND 8 or adns)
     * check for incorrect *_r (time related) on HPSUX
