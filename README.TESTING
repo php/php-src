@@ -47,7 +47,7 @@ this, so we can address the issue.
 [Which test scripts are executed]
 ---------------------------------
  "run-tests.php" ("make test"), without any arguments executes all
-test scripts by looking extracting all directories named "tests"
+test scripts by extracting all directories named "tests"
 from the source root and any subdirectories below. If there are files,
 which have a "phpt" extension, "run-tests.php" looks at the sections
 in these files, determines whether it should run it, by evaluating
