@@ -2,9 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed md5() in the Apache module (Thies)
 - Introduced build process for dynamic modules (Stig)
 - Improved ISAPI module to supprt large server variables (Zeev)
-- Imported PHP3 fixes for problem with PHP as a dynamic module and Redhat
+- Imported PHP 3.0 fixes for problem with PHP as a dynamic module and Redhat
   libc2.1 in zlib module (Stefan)
 - Fixed sybase_fetch_object() (Zeev)
 - Made the IMAP module work with PHP 4.0 (Zeev)
@@ -12,36 +13,36 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Fixed a bug in implode() that caused it to corrupt its arguments (Zeev)
 - Added get_class($obj), get_parent_class($obj) and method_exists($obj,"name")
   (Andi & Zeev)
-- Fixed various inheritance problems (Andi & Zeev, libzend)
+- Fixed various inheritance problems (Andi & Zeev, Zend library)
 - Children now inherit their parent's constructor, if they do not supply a
   constructor of their own.
 - Fixed runtime inheritence of classes (parent methods/properties were
-  overriding their children) (Zeev, libzend)
-- Fixed backwards incompatibility with the "new" operator (Andi, libzend)
+  overriding their children) (Zeev, Zend library)
+- Fixed backwards incompatibility with the "new" operator (Andi, Zend library)
 - Fixed bugs in uksort() and ksort() sort ordering (Andrey)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
-  string (Zeev, libzend)
+  string (Zeev, Zend library)
 - Fixed a problem in inheritence from classes that are defined in include()d
-  files (Zeev, libzend)
+  files (Zeev, Zend library)
 - Fixed a problem with the PHP error handler that could result in a crash
   on certain operating systems (Zeev)
 - Apache php_flag values only recognized 'On' (case sensitive) - changed
   to case insensitive (Zeev)
 - Fixed a memory leak with switch statement containing return statements
-  (Andi & Zeev, libzend)
+  (Andi & Zeev, Zend library)
 - Fixed a crash problem in switch statements that had a string offset
-  as a conditional (Andi & Zeev, libzend)
-- Imported PHP3 fixes for rand() and mt_rand() (Rasmus)
+  as a conditional (Andi & Zeev, Zend library)
+- Imported PHP 3.0 fixes for rand() and mt_rand() (Rasmus)
 - Added function entries for strip_tags() and similar_text() (Andrey)
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
   instead of a variable name (Andrey)
-- Ported strtotime() function from PHP3 (Andrey)
+- Ported strtotime() function from PHP 3.0 (Andrey)
 - Merged in gdttf stuff from php3 (Sascha)
 - buildconf now checks your installation (Stig)
 - XML module now built dynamically with --with-xml=shared (Stig)
 - Added a check for freetype.h - fixed build on RedHat 6.0 (Zeev)
-- Fixed array_walk() to work in PHP4 (Andrey)
-- Ported all remaining date() format options from PHP3 (Andrey)
+- Fixed array_walk() to work in PHP 4.0 (Andrey)
+- Ported all remaining date() format options from PHP 3.0 (Andrey)
 - $php_errormsg now works (Andrey)
 - Added locale support for Perl Compatible Regexp functions (Andrey)
 - Informix module ported (Danny)
@@ -53,11 +54,11 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Added session id detection within REQUEST_URI (Sascha)
 - Merged in HP-UX/ANSI compatibility switch from php3 (Sascha)
 - Fixed rpath handling for utilitites built during Apache build (Sascha)
-- Added missing E_ error level constants (Zeev, libzend)
+- Added missing E_ error level constants (Zeev, Zend library)
 - Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
 - Fixed implicit connect on the MySQL, mSQL, PostgreSQL and Sybase
   modules (Zeev)
-- Gave PHP4's SNMP extension all the functionality of PHP 3.0.12 (SteveL)
+- Gave PHP 4.0's SNMP extension all the functionality of PHP 3.0.12 (SteveL)
   
   
 July 19 1999, Version 4.0 Beta 1
