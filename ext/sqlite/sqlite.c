@@ -29,6 +29,11 @@
 #include "ext/standard/info.h"
 #include "php_sqlite.h"
 
+#if HAVE_TIME_H
+# include <time.h>
+#endif
+#include <unistd.h>
+
 #include <sqlite.h>
 
 static unsigned char arg3_force_ref[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
@@ -36,10 +41,14 @@ static unsigned char arg3_force_ref[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE 
 static int le_sqlite_db, le_sqlite_result;
 
 struct php_sqlite_result {
-	char **table;
-	int nrows;
+	sqlite_vm *vm;
+	int buffered;
 	int ncolumns;
+	int nrows;
 	int curr_row;
+	char **col_names;
+	int alloc_rows;
+	char **table;
 };
 
 struct php_sqlite_db {
@@ -67,6 +76,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_busy_timeout, NULL)
 	PHP_FE(sqlite_last_error, NULL)
 	PHP_FE(sqlite_error_string, NULL)
+	PHP_FE(sqlite_unbuffered_query, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -93,6 +103,19 @@ zend_module_entry sqlite_module_entry = {
 ZEND_GET_MODULE(sqlite)
 #endif
 
+static void short_sleep(void)
+{
+#if HAVE_NANOSLEEP
+	struct timespec req = { 0, 500 * 1000 };
+	nanosleep(&req, NULL);
+#elif HAVE_USLEEP
+	usleep(500 * 1000);
+#elif PHP_WIN32
+	Sleep(500);
+#else
+	php_sleep(1);
+#endif
+}
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 {
@@ -100,15 +123,40 @@ static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 	
 	sqlite_close(db->db);
 
-	efree(db);
+	pefree(db, db->is_persistent);
+}
+
+static void real_result_dtor(struct php_sqlite_result *res)
+{
+	int i, j, base;
+
+	if (res->vm) {
+		sqlite_finalize(res->vm, NULL);
+	}
+	
+	for (i = 0; i < res->nrows; i++) {
+		base = i * res->ncolumns;
+		for (j = 0; j < res->ncolumns; j++) {
+			efree(res->table[base + j]);
+		}
+	}
+	if (res->table) {
+		efree(res->table);
+	}
+	if (res->col_names) {
+		for (j = 0; j < res->ncolumns; j++) {
+			efree(res->col_names[j]);
+		}
+		efree(res->col_names);
+	}
+
+	efree(res);
 }
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
 {
 	struct php_sqlite_result *res = (struct php_sqlite_result *)rsrc->ptr;
-
-	sqlite_free_table(res->table);
-	efree(res);
+	real_result_dtor(res);
 }
 
 /* {{{ PHP Function interface */
@@ -359,17 +407,19 @@ PHP_FUNCTION(sqlite_close)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_query(string query, resource db)
-   Executes a query against a given database and returns a result handle */
-PHP_FUNCTION(sqlite_query)
+/* {{{ proto resource sqlite_unbuffered_query(string query, resource db)
+   Execute a query that does not prefetch and buffer all data */
+PHP_FUNCTION(sqlite_unbuffered_query)
 {
 	zval *zdb;
 	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
 	struct php_sqlite_result res, *rres;
-	int ret;
+	int ret, i, base;
 	char *errtext = NULL;
+	const char *tail;
+	const char **rowdata, **colnames;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb)) {
 		return;
@@ -379,7 +429,7 @@ PHP_FUNCTION(sqlite_query)
 
 	memset(&res, 0, sizeof(res));
 
-	ret = sqlite_get_table(db->db, sql, &res.table, &res.nrows, &res.ncolumns, &errtext);
+	ret = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
 	db->last_err_code = ret;
 
 	if (ret != SQLITE_OK) {
@@ -392,7 +442,102 @@ PHP_FUNCTION(sqlite_query)
 	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
 	memcpy(rres, &res, sizeof(*rres));
 
-	rres->curr_row = 1;	/* 0 holds the column header names */
+	/* now the result set is ready for stepping */
+	rres->curr_row = 0;
+
+	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
+}
+/* }}} */
+
+/* {{{ proto resource sqlite_query(string query, resource db)
+   Executes a query against a given database and returns a result handle */
+PHP_FUNCTION(sqlite_query)
+{
+	zval *zdb;
+	struct php_sqlite_db *db;
+	char *sql;
+	long sql_len;
+	struct php_sqlite_result res, *rres;
+	int ret, i, base;
+	char *errtext = NULL;
+	const char *tail;
+	const char **rowdata, **colnames;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb)) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
+
+	memset(&res, 0, sizeof(res));
+	res.buffered = 1;
+
+	ret = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
+	db->last_err_code = ret;
+
+	if (ret != SQLITE_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+		
+		RETURN_FALSE;
+	}
+
+	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
+	memcpy(rres, &res, sizeof(*rres));
+
+next_row:
+	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
+	db->last_err_code = ret;
+
+	switch (ret) {
+		case SQLITE_ROW:
+			/* add the row to our collection */
+			if (rres->nrows + 1 >= rres->alloc_rows) {
+				rres->alloc_rows = rres->alloc_rows ? rres->alloc_rows * 2 : 16;
+				rres->table = erealloc(rres->table, rres->alloc_rows * rres->ncolumns * sizeof(char *));
+			}
+
+			base = rres->nrows * rres->ncolumns;
+			for (i = 0; i < rres->ncolumns; i++) {
+				if (rowdata[i]) {
+					rres->table[base + i] = estrdup(rowdata[i]);
+				} else {
+					rres->table[base + i] = NULL;
+				}
+			}
+
+			rres->nrows++;
+			goto next_row;
+
+		case SQLITE_DONE:
+			/* no more rows - lets copy the column names */
+			rres->col_names = emalloc(rres->ncolumns * sizeof(char *));
+			for (i = 0; i < rres->ncolumns; i++) {
+				rres->col_names[i] = estrdup(colnames[i]);
+			}
+			break;
+
+		case SQLITE_BUSY:
+		case SQLITE_ERROR:
+		case SQLITE_MISUSE:
+		default:
+			/* fall through to finalize */
+	}
+
+	ret = sqlite_finalize(rres->vm, &errtext);
+	db->last_err_code = ret;
+	rres->vm = NULL;
+
+	if (ret != SQLITE_OK) {
+
+		real_result_dtor(rres);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+		
+		RETURN_FALSE;
+	}
+	
+	rres->curr_row = 0;
 
 	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
 }
@@ -405,7 +550,9 @@ PHP_FUNCTION(sqlite_fetch_array)
 	zval *zres;
 	struct php_sqlite_result *res;
 	int mode = PHPSQLITE_BOTH;
-	int i, j;
+	int j, ret;
+	const char **rowdata, **colnames;
+	char *errtext = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zres, &mode)) {
 		return;
@@ -413,31 +560,65 @@ PHP_FUNCTION(sqlite_fetch_array)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 	
-	/* check range of the row */
-	if (res->curr_row > res->nrows) {
-		/* no more */
-		RETURN_FALSE;
+	if (res->buffered) {
+		/* check range of the row */
+		if (res->curr_row >= res->nrows) {
+			/* no more */
+			RETURN_FALSE;
+		}
+
+		rowdata = (const char**)&res->table[res->curr_row * res->ncolumns];
+		colnames = (const char**)res->col_names;
+		
+	} else {
+		/* unbuffered; we need to manually fetch the row now */
+
+		if (res->vm == NULL) {
+			/* sanity check */
+			RETURN_FALSE;
+		}
+		
+		ret = sqlite_step(res->vm, &res->ncolumns, &rowdata, &colnames);
+		switch (ret) {
+			case SQLITE_ROW:
+				/* safe to fall through */
+				break;
+				
+			case SQLITE_DONE:
+				/* no more rows */
+				RETURN_FALSE;
+				
+			case SQLITE_ERROR:
+			case SQLITE_MISUSE:
+			case SQLITE_BUSY:
+			default:
+				/* error; lets raise the error now */
+				ret = sqlite_finalize(res->vm, &errtext);
+				res->vm = NULL;
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+				sqlite_freemem(errtext);
+				RETURN_FALSE;
+		}
+
+		/* we got another row */
 	}
 
-	array_init(return_value);
-	
-	/* calculate the starting slot for the row */
-	i = res->curr_row * res->ncolumns;
-
 	/* now populate the result */
+	array_init(return_value);
+
 	for (j = 0; j < res->ncolumns; j++) {
 		if (mode & PHPSQLITE_NUM) {
-			if (res->table[i + j] == NULL) {
+			if (rowdata[j] == NULL) {
 				add_index_null(return_value, j);
 			} else {
-				add_index_string(return_value, j, res->table[i + j], 1);
+				add_index_string(return_value, j, (char*)rowdata[j], 1);
 			}
 		}
 		if (mode & PHPSQLITE_ASSOC) {
-			if (res->table[i + j] == NULL) {
-				add_assoc_null(return_value, res->table[j]);
+			if (rowdata[j] == NULL) {
+				add_assoc_null(return_value, (char*)colnames[j]);
 			} else {
-				add_assoc_string(return_value, res->table[j], res->table[i + j], 1);
+				add_assoc_string(return_value, (char*)colnames[j], (char*)rowdata[j], 1);
 			}
 		}
 	}
@@ -516,8 +697,12 @@ PHP_FUNCTION(sqlite_num_rows)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	RETURN_LONG(res->nrows);
-	
+	if (res->buffered) {
+		RETURN_LONG(res->nrows);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Row count is not available for unbuffered queries");
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -534,7 +719,12 @@ PHP_FUNCTION(sqlite_num_fields)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	RETURN_LONG(res->ncolumns);
+	if (res->buffered) {
+		RETURN_LONG(res->ncolumns);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of fields not available for unbuffered queries");
+		RETURN_FALSE;
+	}
 	
 }
 /* }}} */
@@ -553,12 +743,17 @@ PHP_FUNCTION(sqlite_field_name)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	if (field < 0 || field >= res->ncolumns) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %d out of range", field);
+	if (res->buffered) {
+		if (field < 0 || field >= res->ncolumns) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %d out of range", field);
+			RETURN_FALSE;
+		}
+
+		RETURN_STRING(res->table[field], 1);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field name not available for unbuffered queries");
 		RETURN_FALSE;
 	}
-	
-	RETURN_STRING(res->table[field], 1);	
 }
 /* }}} */
 
@@ -576,12 +771,17 @@ PHP_FUNCTION(sqlite_seek)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
+	if (!res->buffered) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot seek an unbuffered result set");
+		RETURN_FALSE;
+	}
+	
 	if (row < 1 || row >= res->nrows) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "row %d out of range", row);
 		RETURN_FALSE;
 	}
 
-	res->curr_row = row;
+	res->curr_row = row - 1;
 	RETURN_TRUE;
 }
 /* }}} */

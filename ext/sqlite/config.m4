@@ -63,7 +63,6 @@ if test "$PHP_SQLITE" != "no"; then
 	AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
 	AC_DEFINE(OS_UNIX, 1, [if this is unix])
 	AC_DEFINE(OS_WIN, 0, [if this is windows])
-	AC_CHECK_FUNCS(usleep)
 	dnl use latin 1 for now; the utf-8 handling in funcs.c uses assert(),
 	dnl which is a bit silly and something we want to avoid
 	SQLITE_ENCODING="iso8859"
@@ -82,4 +81,7 @@ if test "$PHP_SQLITE" != "no"; then
 	PHP_ADD_MAKEFILE_FRAGMENT
   fi
 
+  AC_CHECK_FUNCS(usleep nanosleep)
+
+  AC_CHECK_HEADERS(time.h)
 fi
