@@ -38,33 +38,48 @@ static long _php_rand_sys(void)
 	return (long) rand_r(&BG(rand_sys_seed));
 }
 
-php_randgen_entries[PHP_RAND_SYS] = {
-	_php_srand_sys,	/* void srand(long seed)	*/
-	_php_rand_sys,	/* long rand(void)			*/
+PHP_MINIT_FUNCTION(rand_sys)
+{
+	php_randgen_entries[PHP_RAND_SYS] = {
+		_php_srand_sys,	/* void srand(long seed)	*/
+		_php_rand_sys,	/* long rand(void)			*/
 #ifdef RAND_MAX
-	(long)RANDMAX,	/* long randmax				*/
+		(long)RANDMAX,	/* long randmax				*/
 #else
-	(long)(1<<15),	/* long randmax				*/
+		(long)(1<<15),	/* long randmax				*/
 #endif
-	"system"		/* char *ini_str			*/
-}
+		"system"		/* char *ini_str			*/
+	};
+
+	/*
+	php_randgen_entries[PHP_RAND_SYS]->srand = _php_srand_sys;
+	php_randgen_entries[PHP_RAND_SYS].rand = _php_rand_sys;
+#ifdef RAND_MAX
+	php_randgen_entries[PHP_RAND_SYS].randmax = (long)RAND_MAX;
+#else
+	php_randgen_entries[PHP_RAND_SYS].randmax = (long)(1<<15);
+#endif
+	php_randgen_entries[PHP_RAND_SYS].ini_str = "system";
+	*/
 
 /* random() is left away, no manual page on my system, no bigger range than
  * rand() 
  *    --jeroen
  */
 
-/* lrand48 (_not_ TS) */
+	/* lrand48 (_not_ TS) */
 #if HAVE_LRAND48
-php_randgen_entries[PHP_RAND_LRAND48] = {
-	srand48,		/* void srand(long seed)	*/
-	lrand48,		/* long rand(void)			*/
-	2147483647L,	/* long randmax				*/
-	"lrand48"		/* char *ini_str			*/
-}
+	php_randgen_entries[PHP_RAND_LRAND48] = {
+		srand48,		/* void srand(long seed)	*/
+		lrand48,		/* long rand(void)			*/
+		2147483647L,	/* long randmax				*/
+		"lrand48"		/* char *ini_str			*/
+	};
 #else
-php_randgen_entries[PHP_RAND_LRAND48] = NULL;
+	php_randgen_entries[PHP_RAND_LRAND48] = NULL;
 #endif
+
+}
 
 /*
  * Local variables:

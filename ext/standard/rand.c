@@ -42,9 +42,13 @@
 	};
 #endif
 
-#define FOREACH_RANDGEN(var,i) for ( (var) = php_randgen_entry[(i)=0] ; (var) < PHP_RAND_NUMGENS ; (var) = php_randgen_entry[++(i)] )
+php_randgen_entry (*php_randgen_entries)[PHP_RAND_NUMRANDS];
 
-php_randgen_entry php_randgen_entries[PHP_RAND_NUMGENS];
+/* TODO: make sure this will be called */
+PHP_MINIT_FUNCTION(rand)
+{
+	/* call: rand_sys, rand_mt, etc */
+}
 
 /* TODO: check that this function is called on the start of each script
  * execution: not more often, not less often.
@@ -55,15 +59,14 @@ php_randgen_entry php_randgen_entries[PHP_RAND_NUMGENS];
  */
 PHP_RINIT_FUNCTION(rand)
 {
-	register php_randgen_entry *randgen;
 	register int i;
 
 	/* seed all number-generators */
 	/* FIXME: or seed relevant numgen on init/update ini-entry? */
-	FOREACH_RANDGEN(randgen,i) {
-		if (randgen.srand) {
+	for (i = 0 ; i < PHP_RAND_NUMRANDS ; i++) {
+		if (PHP_HAS_SRAND(i)) {
 #define SRAND_A_RANDOM_SEED (time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
-			randgen->srand(SRAND_A_RANDOM_SEED);
+			PHP_SRAND(i,SRAND_A_RANDOM_SEED);
 		}
 	}
 }
@@ -71,11 +74,10 @@ PHP_RINIT_FUNCTION(rand)
 /* INI */
 static int randgen_str_to_int(char *str, int strlen)
 {
-	register php_randgen_entry *randgen;
 	register int i;
 
-	FOREACH_RANDGEN(randgen,i) {
-		if (!strcasecmp(str, randgen.ini_str))
+	for (i = 0 ; i < PHP_RAND_NUMRANDS ; i++) {
+		if (!strcasecmp(str, PHP_RAND_INISTR(i)))
 			return i;
 	}
 	return -1;
@@ -93,7 +95,7 @@ static PHP_INI_MH(OnUpdateRandGen)
 		 * ini-parsing at startup? */
 		php_error(E_WARNING,"Invalid value for random_number_generator: \"%s\"", new_value);
 		/* Fallback: */
-		BG(rand_generator) = RAND_DEFAULT;
+		BG(rand_generator) = PHP_RAND_DEFAULT;
 	}
 #ifdef DEBUG_RAND
 	printf("\nRAND-INI updated: %d\n",BG(rand_generator));
@@ -102,7 +104,8 @@ static PHP_INI_MH(OnUpdateRandGen)
 }
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("random_number_generator", PHP_RAND_INISTR(PHP_RAND_DEFAULT), PHP_INI_ALL, OnUpdateRandGen)
+	/* FIXME: default is hardcoded here, this is the second place */
+	PHP_INI_ENTRY("random_number_generator", "mt", PHP_INI_ALL, OnUpdateRandGen)
 PHP_INI_END()
 
 /* srand */
@@ -273,5 +276,5 @@ PHP_FUNCTION(mt_getrandmax)
  * c-basic-offset: 4
  * End:
  * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim: sw=4 ts=4 tw=78
  */
