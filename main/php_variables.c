@@ -300,9 +300,10 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
+			val_len = php_url_decode(val, val-var);
 			php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
 		} else {
+			php_url_decode(var, strlen(var));
 			php_register_variable_safe(var, "", 0, array_ptr TSRMLS_CC);
 		}
 		var = php_strtok_r(NULL, separator, &strtok_buf);
