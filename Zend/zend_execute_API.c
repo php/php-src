@@ -438,13 +438,14 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 }
 
 
-ZEND_API void zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
 {
 	zval pv;
 	zend_op_array *new_op_array;
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
 	int original_handle_op_arrays;
+	int retval;
 
 	if (retval_ptr) {
 		pv.value.str.len = strlen(str)+sizeof("return  ;")-1;
@@ -495,10 +496,12 @@ ZEND_API void zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
 		destroy_op_array(new_op_array);
 		efree(new_op_array);
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
+		retval = SUCCESS;
 	} else {
-		printf("Failed executing:\n%s\n", str);
+		retval = FAILURE;
 	}
 	zval_dtor(&pv);
+	return retval;
 }
 
 
