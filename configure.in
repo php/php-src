@@ -614,7 +614,7 @@ PHP_ARG_WITH(pear, [whether to install PEAR, and where],
   --without-pear          Do not install PEAR], DEFAULT)
 
 if test "$PHP_PEAR" != "no"; then
-  PEAR_DIR=pear
+  install_pear="install-pear install-build install-headers install-programs"
   PEAR_INSTALLDIR=$PHP_PEAR
 fi
 
@@ -1000,7 +1000,6 @@ PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST(PEAR_DIR)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST(PHP_BUILD_DATE)
 PHP_SUBST(PHP_COMPILE)
@@ -1058,7 +1057,7 @@ INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
-install_targets='install-sapi install-modules install-cli install-data-local install-headers install-build install-programs'
+install_targets="install-sapi install-modules install-cli $install_pear"
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 
