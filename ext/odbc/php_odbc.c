@@ -2438,24 +2438,22 @@ PHP_FUNCTION(odbc_tables)
 	int argc;
 
 	argc = ZEND_NUM_ARGS();
-	if (argc == 1) {
-		if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
-            WRONG_PARAM_COUNT;
-		}
-	} else if (argc == 5) {
-		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_type) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(pv_cat);
-		cat = (*pv_cat)->value.str.val;
-		convert_to_string_ex(pv_schema);
-		schema = (*pv_schema)->value.str.val;
-		convert_to_string_ex(pv_table);
-		table = (*pv_table)->value.str.val;
-		convert_to_string_ex(pv_type);
-		type = (*pv_type)->value.str.val;
-	} else {
+	if (argc < 1 || argc > 5 || zend_get_parameters_ex(argc, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+	switch (argc) {
+		case 5:
+			convert_to_string_ex(pv_type);
+			type = (*pv_type)->value.str.val;
+		case 4:
+			convert_to_string_ex(pv_table);
+			table = (*pv_table)->value.str.val;
+		case 3:
+			convert_to_string_ex(pv_schema);
+			schema = (*pv_schema)->value.str.val;
+		case 2:
+			convert_to_string_ex(pv_cat);
+			cat = (*pv_cat)->value.str.val;
 	}
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
@@ -2520,24 +2518,22 @@ PHP_FUNCTION(odbc_columns)
 	int argc;
 
 	argc = ZEND_NUM_ARGS();
-	if (argc == 1) {
-        if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
-            WRONG_PARAM_COUNT;
-		}
-	} else if (argc == 5) {
-		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
+	if (argc < 1 || argc > 5 || zend_get_parameters_ex(argc, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
 			WRONG_PARAM_COUNT;
-		}
-	    convert_to_string_ex(pv_cat);
-	    cat = (*pv_cat)->value.str.val;
-	    convert_to_string_ex(pv_schema);
-	    schema = (*pv_schema)->value.str.val;
-	    convert_to_string_ex(pv_table);
-	    table = (*pv_table)->value.str.val;
-	    convert_to_string_ex(pv_column);
-	    column = (*pv_column)->value.str.val;
-	} else {
-		WRONG_PARAM_COUNT;
+	}
+	switch (argc) {
+		case 5:
+			convert_to_string_ex(pv_column);
+			column = (*pv_column)->value.str.val;
+		case 4:
+			convert_to_string_ex(pv_table);
+			table = (*pv_table)->value.str.val;
+		case 3:
+			convert_to_string_ex(pv_schema);
+			schema = (*pv_schema)->value.str.val;
+		case 2:
+			convert_to_string_ex(pv_cat);
+			cat = (*pv_cat)->value.str.val;
 	}
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
