@@ -56,14 +56,14 @@
 #define ISC_LONG_MAX 2147483647
 
 #ifdef PHP_WIN32
-# ifndef ISC_UINT64
-#  define ISC_UINT64 unsigned __int64
+# ifndef ISC_INT64
+#  define ISC_INT64 __int64
 # endif
 # define LL_MASK "I64"
 # define LL_LIT(lit) lit ## I64
 #else
-# ifndef ISC_UINT64
-#  define ISC_UINT64 unsigned long long int
+# ifndef ISC_INT64
+#  define ISC_INT64 long long int
 # endif
 # define LL_MASK "ll"
 # define LL_LIT(lit) lit ## ll
@@ -317,10 +317,10 @@ typedef struct {
 static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 {
 	/* shortcut for most common case */
-	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
-		return sscanf(id, BLOB_ID_MASK, (ISC_UINT64 *) qd);
+	if (sizeof(ISC_QUAD) == sizeof(unsigned ISC_INT64)) {
+		return sscanf(id, BLOB_ID_MASK, (unsigned ISC_INT64 *) qd);
 	} else {
-		ISC_UINT64 res;
+		unsigned ISC_INT64 res;
 		if (sscanf(id, BLOB_ID_MASK, &res)) {
 			qd->gds_quad_high = (ISC_LONG) (res >> 0x20);
 			qd->gds_quad_low = (unsigned ISC_LONG) (res & 0xFFFFFFFF);
@@ -335,10 +335,10 @@ static inline char *_php_ibase_quad_to_string(ISC_QUAD const qd)
 	char *result = (char *) emalloc(BLOB_ID_LEN+1);
 
 	/* shortcut for most common case */
-	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
-		sprintf(result, BLOB_ID_MASK, *(ISC_UINT64*)(void *) &qd); 
+	if (sizeof(ISC_QUAD) == sizeof(unsigned ISC_INT64)) {
+		sprintf(result, BLOB_ID_MASK, *(unsigned ISC_INT64*)(void *) &qd); 
 	} else {
-		ISC_UINT64 res = ((ISC_UINT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
+		unsigned ISC_INT64 res = ((unsigned ISC_INT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
 		sprintf(result, BLOB_ID_MASK, res);
 	}
 	result[BLOB_ID_LEN] = '\0';
@@ -1105,7 +1105,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 	
 	for (i = 0; i < sqlda->sqld; i++, var++) {
 		unsigned short dim;
-		unsigned long ar_length;
+		unsigned long ar_size;
 		
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
 			ISC_ARRAY_DESC *ar_desc = &IB_ARRAY[i].ar_desc;
@@ -1182,11 +1182,11 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 					return FAILURE;
 			} /* switch array_desc_type */
 			
-			ar_length = 0; /* calculate elements count */
+			ar_size = 1; /* calculate elements count */
 			for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
-				ar_length += 1 + ar_desc->array_desc_bounds[dim].array_bound_upper - ar_desc->array_desc_bounds[dim].array_bound_lower;
+				ar_size *= 1 + ar_desc->array_desc_bounds[dim].array_bound_upper - ar_desc->array_desc_bounds[dim].array_bound_lower;
 			}
-			IB_ARRAY[i].ar_size = IB_ARRAY[i].el_size * ar_length;
+			IB_ARRAY[i].ar_size = IB_ARRAY[i].el_size * ar_size;
 		} /* if SQL_ARRAY */
 	} /* for column */
 	return SUCCESS;
@@ -1320,11 +1320,206 @@ static int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC)
 }	
 /* }}} */
 
+/* {{{ _php_ibase_bind_array() */
+static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, ibase_array *array, int dim TSRMLS_DC)
+{
+	int 
+		u_bound = array->ar_desc.array_desc_bounds[dim].array_bound_upper,
+		l_bound = array->ar_desc.array_desc_bounds[dim].array_bound_lower,
+		dim_len = 1 + u_bound - l_bound;
+
+	if (dim < array->ar_desc.array_desc_dimensions) {
+		unsigned long slice_size = buf_size / dim_len;
+		unsigned short i;
+				
+		if (Z_TYPE_P(val) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_P(val)) != dim_len) {
+			_php_ibase_module_error("Array parameter binding argument must fit perfectly (mismatch at depth %d)" TSRMLS_CC, dim+1);
+			return FAILURE;
+		}
+
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
+
+		for (i = 0; i < dim_len; ++i) { 
+			zval **subval;
+			
+			if (zend_hash_get_current_data(Z_ARRVAL_P(val), (void *) &subval) == FAILURE ||
+				_php_ibase_bind_array(*subval, buf, slice_size, array, dim + 1 TSRMLS_CC) == FAILURE) {
+
+				return FAILURE;
+			}
+			buf += slice_size;
+			zend_hash_move_forward(Z_ARRVAL_P(val));
+		}
+
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
+
+	} else {
+		/* expect a single value */
+		if (array->ar_desc.array_desc_scale < 0) {
+
+			/* no coercion for array types */
+			
+			switch (array->el_type) {
+				double l;
+
+				case SQL_SHORT:
+					convert_to_double(val);
+					l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale);
+					if (l > SHRT_MAX || l < SHRT_MIN) {
+						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
+						return FAILURE;
+					}
+					*(short*) buf = (short) l;
+					break;
+				case SQL_LONG:
+					convert_to_double(val);
+					l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale);
+					if (l > ISC_LONG_MAX || l < ISC_LONG_MIN) {
+						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
+						return FAILURE;
+					}
+					*(ISC_LONG*) buf = (ISC_LONG) l;
+					break;
+#ifdef SQL_INT64
+				case SQL_INT64:
+					{
+						long double l;
+						
+						convert_to_string(val);
+
+						if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "f", &l)) {
+							_php_ibase_module_error("Cannot convert '%s' to long double" TSRMLS_CC, Z_STRVAL_P(val));
+							return FAILURE;
+						} else {
+							*(ISC_INT64 *) buf = (ISC_INT64)(l * pow(10, -array->ar_desc.array_desc_scale));
+						}
+					}
+					break;
+#endif
+			}			
+		} else {
+			struct tm t = { 0, 0, 0, 0, 0, 0 };
+
+			switch (array->el_type) {
+				unsigned short n;
+				
+				case SQL_SHORT:
+					convert_to_long(val);
+					if (Z_LVAL_P(val) > SHRT_MAX || Z_LVAL_P(val) < SHRT_MIN) {
+						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
+						return FAILURE;
+					}
+					*(short *) buf = (short) Z_LVAL_P(val);
+					break;
+				case SQL_LONG:
+					convert_to_long(val);
+#if (SIZEOF_LONG > 4)
+					if (Z_LVAL_P(val) > ISC_LONG_MAX || Z_LVAL_P(val) < ISC_LONG_MIN) {
+						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
+						return FAILURE;
+					}
+#endif
+					*(ISC_LONG *) buf = (ISC_LONG) Z_LVAL_P(val);
+					break;
+#ifdef SQL_INT64
+				case SQL_INT64:
+#if (SIZEOF_LONG >= 8)
+					convert_to_long(val);
+					*(long *) buf = Z_LVAL_P(val);
+#else
+					{
+						ISC_INT64 l;
+
+						convert_to_string(val);
+						if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "d", &l)) {
+							_php_ibase_module_error("Cannot convert '%s' to long integer" TSRMLS_CC, Z_STRVAL_P(val));
+							return FAILURE;
+						} else {
+							*(ISC_INT64 *) buf = l;
+						}
+					}
+#endif
+					break;
+#endif
+				case SQL_FLOAT:
+					convert_to_double(val);
+					*(float*) buf = (float) Z_DVAL_P(val);
+					break;
+				case SQL_DOUBLE:
+					convert_to_double(val);
+					*(double*) buf = Z_DVAL_P(val);
+					break;
+#ifndef SQL_TIMESTAMP
+				case SQL_DATE:
+#else
+				case SQL_TIMESTAMP:
+#endif
+					convert_to_string(val);
+#ifdef HAVE_STRPTIME
+					strptime(Z_STRVAL_P(val), IBG(timestampformat), &t);
+#else
+					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d", &t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
+	
+					if (n != 3 && n != 6) {
+						_php_ibase_module_error("Invalid date/time format (expected 3 or 6 fields, got %d. Use format 'm/d/Y H:i:s'. You gave '%s')" TSRMLS_CC, n, Z_STRVAL_P(val));
+						return FAILURE;
+					}
+					t.tm_year -= 1900;
+					t.tm_mon--;
+#endif
+#ifndef SQL_TIMESTAMP
+					isc_encode_date(&t, (ISC_QUAD *) buf);
+					break;
+#else
+					isc_encode_timestamp(&t, (ISC_TIMESTAMP * ) buf);
+					break;
+				case SQL_TYPE_DATE:
+					convert_to_string(val);
+#ifdef HAVE_STRPTIME
+					strptime(Z_STRVAL_P(val), IBG(dateformat), &t);
+#else
+					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d", &t.tm_mon, &t.tm_mday, &t.tm_year);
+	
+					if (n != 3) {
+						_php_ibase_module_error("Invalid date format (expected 3 fields, got %d. Use format 'm/d/Y' You gave '%s')" TSRMLS_CC, n, Z_STRVAL_P(val));
+						return FAILURE;
+					}
+					t.tm_year -= 1900;
+					t.tm_mon--;
+#endif
+					isc_encode_sql_date(&t, (ISC_DATE *) buf);
+					break;
+				case SQL_TYPE_TIME:
+					convert_to_string(val);
+#ifdef HAVE_STRPTIME
+					strptime(Z_STRVAL_P(val), IBG(timeformat), &t);
+#else
+					n = sscanf(Z_STRVAL_P(val), "%d%*[:]%d%*[:]%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
+	
+					if (n != 3) {
+						_php_ibase_module_error("Invalid time format (expected 3 fields, got %d. Use format 'H:i:s'. You gave '%s')" TSRMLS_CC, n, Z_STRVAL_P(val));
+						return FAILURE;
+					}
+#endif
+					isc_encode_sql_time(&t, (ISC_TIME *) buf);
+					break;
+#endif
+				default:
+					convert_to_string(val);
+					strncpy(buf, Z_STRVAL_P(val), array->el_size);
+					buf[array->el_size-1] = '\0';
+			}	
+		}
+	}
+	return SUCCESS;
+}		
+/* }}} */
+
 /* {{{ _php_ibase_bind()
    Bind parameter placeholders in a previously prepared query */
 static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_query *ib_query TSRMLS_DC)
 {
-	int i , rv = SUCCESS;
+	int i, rv = SUCCESS;
 	XSQLVAR *var = sqlda->sqlvar;
 
 	for (i = 0; i < sqlda->sqld; ++var, ++i) { /* bound vars */
@@ -1472,8 +1667,45 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					var->sqldata = (void *) &buf[i].val.qval;
 					break;
 				case SQL_ARRAY:
-					_php_ibase_module_error("Parameter %d: arrays not supported" TSRMLS_CC, i+1);
-					rv = FAILURE;
+					if (Z_TYPE_P(b_var) != IS_ARRAY) {
+						convert_to_string(b_var);
+		
+						if (Z_STRLEN_P(b_var) != BLOB_ID_LEN ||
+							!_php_ibase_string_to_quad(Z_STRVAL_P(b_var), &buf[i].val.qval)) {
+
+							_php_ibase_module_error("Parameter %d: invalid array ID" TSRMLS_CC,i+1);
+							rv = FAILURE;
+						}
+					} else {
+						/* convert the array data into something IB can understand */
+						void *array_data = emalloc(ib_query->in_array[i].ar_size);
+						ISC_QUAD array_id = { 0, 0 };
+
+						if (_php_ibase_bind_array(b_var, array_data, ib_query->in_array[i].ar_size, 
+							&ib_query->in_array[i], 0 TSRMLS_CC) == FAILURE) 
+						{
+							_php_ibase_module_error("Parameter %d: failed to bind array argument" TSRMLS_CC,i+1);
+							efree(array_data);
+							rv = FAILURE;
+							break;
+						}
+							
+						if (isc_array_put_slice(IB_STATUS, 
+												&ib_query->link->handle, 
+												&ib_query->trans->handle, 
+												&array_id, 
+												&ib_query->in_array[i].ar_desc, 
+												array_data, 
+												&ib_query->in_array[i].ar_size))
+						{
+							_php_ibase_error(TSRMLS_C);
+							efree(array_data);
+							return FAILURE;
+						}
+						buf[i].val.qval = array_id;
+						efree(array_data);
+					}				
+					var->sqldata = (void *) &buf[i].val.qval;
 					break;
 				default:
 					convert_to_string(b_var);
@@ -2441,11 +2673,11 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 		dim_len = 1 + u_bound - l_bound;
 	unsigned short i;
 		
-	array_init(ar_zval);
-
-	if (dim < ib_array->ar_desc.array_desc_dimensions - 1) { /* array again */
+	if (dim < ib_array->ar_desc.array_desc_dimensions) { /* array again */
 		unsigned long slice_size = data_size / dim_len;
 		
+		array_init(ar_zval);
+
 		for (i = 0; i < dim_len; ++i) {
 			zval *slice_zval;
 			ALLOC_INIT_ZVAL(slice_zval);
@@ -2460,21 +2692,12 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 		}
 	} else { /* data at last */
 		
-		for (i = 0; i < dim_len; ++i) {
-			zval *var_zval;
-			ALLOC_INIT_ZVAL(var_zval);
-			
-			if (_php_ibase_var_zval(var_zval, data, 
-									ib_array->el_type,
-									ib_array->ar_desc.array_desc_length,
-									ib_array->ar_desc.array_desc_scale,
-									flag TSRMLS_CC) == FAILURE) {
-				return FAILURE;
-			}
-			
-			add_index_zval(ar_zval,l_bound+i,var_zval);
-
-			data += ib_array->el_size;
+		if (_php_ibase_var_zval(ar_zval, data, 
+								ib_array->el_type,
+								ib_array->ar_desc.array_desc_length,
+								ib_array->ar_desc.array_desc_scale,
+								flag TSRMLS_CC) == FAILURE) {
+			return FAILURE;
 		}
 	}
 	return SUCCESS;
@@ -2992,13 +3215,28 @@ PHP_FUNCTION(ibase_num_fields)
 }
 /* }}} */
 
-/* {{{ static char * _php_ibase_field_type() */
-static char * _php_ibase_field_type(XSQLVAR *var)
+/* {{{ _php_ibase_field_info() */
+static void _php_ibase_field_info(zval *return_value, XSQLVAR *var)
 {
-	char *s = "(unknown type)";
+	unsigned short len;
+	char buf[16], *s = buf;
 	
+	array_init(return_value);
+
+	add_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, 1);
+	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length, 1);
+
+	add_index_stringl(return_value, 1, var->aliasname, var->aliasname_length, 1);
+	add_assoc_stringl(return_value, "alias", var->aliasname, var->aliasname_length, 1);
+
+	add_index_stringl(return_value, 2, var->relname, var->relname_length, 1);
+	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length, 1);
+
+	len = sprintf(buf, "%d", var->sqllen);
+	add_index_stringl(return_value, 3, buf, len, 1);
+	add_assoc_stringl(return_value, "length", buf, len, 1);
+
 	if (var->sqlscale < 0) {
-		char buf[16];
 		unsigned short precision;
 
 		switch (var->sqltype & ~1) {
@@ -3015,8 +3253,9 @@ static char * _php_ibase_field_type(XSQLVAR *var)
 				break;
 #endif
 		}
-		sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
-		return estrdup(buf);
+		len = sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
+		add_index_stringl(return_value, 4, s, len, 1);
+		add_assoc_stringl(return_value, "type", s, len, 1);
 	} else {
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
@@ -3068,8 +3307,9 @@ static char * _php_ibase_field_type(XSQLVAR *var)
 				s = "QUAD";
 				break;
 		}
+		add_index_string(return_value, 4, s, 1);
+		add_assoc_string(return_value, "type", s, 1);
 	}
-	return estrdup(s);
 }
 /* }}} */
 
@@ -3078,10 +3318,8 @@ static char * _php_ibase_field_type(XSQLVAR *var)
 PHP_FUNCTION(ibase_field_info)
 {
 	zval **result_arg, **field_arg;
-	char buf[8], *s;
-	int len, type;
+	int type;
 	XSQLDA *sqlda;
-	XSQLVAR *var;
 
 	RESET_ERRMSG;
 
@@ -3113,27 +3351,7 @@ PHP_FUNCTION(ibase_field_info)
 	if (Z_LVAL_PP(field_arg) < 0 || Z_LVAL_PP(field_arg) >= sqlda->sqld) {
 		RETURN_FALSE;
 	}
-	
-	array_init(return_value);
-
-	var = sqlda->sqlvar + Z_LVAL_PP(field_arg);
-
-	add_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, 1);
-	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length, 1);
-
-	add_index_stringl(return_value, 1, var->aliasname, var->aliasname_length, 1);
-	add_assoc_stringl(return_value, "alias", var->aliasname, var->aliasname_length, 1);
-
-	add_index_stringl(return_value, 2, var->relname, var->relname_length, 1);
-	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length, 1);
-
-	len = sprintf(buf, "%d", var->sqllen);
-	add_index_stringl(return_value, 3, buf, len, 1);
-	add_assoc_stringl(return_value, "length", buf, len, 1);
-
-	s = _php_ibase_field_type(var);
-	add_index_string(return_value, 4, s, 1);
-	add_assoc_string(return_value, "type", s, 0);
+	_php_ibase_field_info(return_value,sqlda->sqlvar + Z_LVAL_PP(field_arg));
 }
 /* }}} */
 
@@ -3166,9 +3384,6 @@ PHP_FUNCTION(ibase_param_info)
 {
 	zval **result_arg, **field_arg;
 	ibase_query *ib_query;
-	char buf[8], *s;
-	int len;
-	XSQLVAR *var;
 
 	RESET_ERRMSG;
 
@@ -3188,17 +3403,7 @@ PHP_FUNCTION(ibase_param_info)
 		RETURN_FALSE;
 	}
 	
-	array_init(return_value);
-
-	var = ib_query->in_sqlda->sqlvar + Z_LVAL_PP(field_arg);
-
-	len = sprintf(buf, "%d", var->sqllen);
-	add_index_stringl(return_value, 0, buf, len, 1);
-	add_assoc_stringl(return_value, "length", buf, len, 1);
-
-	s = _php_ibase_field_type(var);
-	add_index_string(return_value, 1, s, 1);
-	add_assoc_string(return_value, "type", s, 0);
+	_php_ibase_field_info(return_value,ib_query->in_sqlda->sqlvar + Z_LVAL_PP(field_arg));
 }
 /* }}} */
 
