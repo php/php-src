@@ -1228,7 +1228,7 @@ binary_assign_op_addr: {
 
 					if ((opline>EG(active_op_array)->opcodes)
 						&& opline->op1.op_type==IS_VAR
-						&& opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
+						&& (opline-1)->opcode == ZEND_JMP_NO_CTOR) {
 						/* constructor call */
 						EG(AiCount)++; /* for op1 */
 						if (opline->op2.op_type==IS_VAR) {
