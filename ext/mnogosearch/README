@@ -13,8 +13,7 @@ library. To do this you should compile php with specefying mysql-dir
   TODO
   ----
 
-1. Implement all mnoGoSearch functions and update module
-   accoding to the latest version of mnoGoSearch.
+1. Implement native ispell functions. 
 
-2. Test with more databases. Currently tested with MySQL.
-Actually it should work fine with other supported databases.
+2. Implement indexing functions of the library.
+   For example retrieving, parsing, checking of the URL and so on...
