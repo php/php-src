@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.3 1999-05-08 21:44:12 sas Exp $
+# $Id: genif.sh,v 1.4 1999-05-08 22:00:02 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -16,21 +16,21 @@ fi
 module_ptrs=""
 includes=""
 
-# the 'ä' is used as a newline replacement
-# its later tr'd to '\n'
-
-for ext in $* ; do
-	module_ptrs="	phpext_${ext}_ptr,ä$module_ptrs"
+for ext in ${1+"$@"} ; do
+	module_ptrs="	phpext_${ext}_ptr,\\\n$module_ptrs"
 	for pre in php3 php php4 zend; do
 		hdrfile="ext/$ext/${pre}_${ext}.h"
 		if test -f $hdrfile ; then
-			includes="#include \"$hdrfile\"ä$includes"
+			includes="#include \"$hdrfile\"\\\n$includes"
 		fi
 	done
 done
 
 cat $infile | \
-	sed "s'@EXT_INCLUDE_CODE@'$includes'" | \
-	sed "s'@EXT_MODULE_PTRS@'$module_ptrs'" | \
-	tr ä '\n'
+	sed \
+	-e "s'@EXT_INCLUDE_CODE@'$includes'" \
+	-e "s'@EXT_MODULE_PTRS@'$module_ptrs'" \
+	-e 's/\\n/\
+/g'
+
 
