@@ -21,16 +21,6 @@
 //
 
 class SOAP_Interop_GroupB {
-    var $method_namespace = 'http://soapinterop.org/';
-    var $dispatch_map = array();
-
-    function SOAP_Interop_GroupB() {
-      $this->dispatch_map['echoStructAsSimpleTypes'] =
-        array('in' => array('inputStruct' => 'SOAPStruct'),
-              'out' => array('outputString' => 'string', 'outputInteger' => 'int', 'outputFloat' => 'float')
-             );
-
-    }
 
     function echoStructAsSimpleTypes ($struct)
     {
@@ -53,7 +43,6 @@ class SOAP_Interop_GroupB {
 
     function echo2DStringArray($ary)
     {
-//      $ret->options['flatten'] = TRUE;
       return $ary;
     }
 

@@ -91,9 +91,10 @@ class Interop_Client
 
         // retreive endpoints from the endpoint server
         $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/info/","http://soapinterop.org/info/");
-        if (PEAR::isError($endpointArray)) {
-            print $soapclient->wire;
+        if ($soapclient->__isfault() || PEAR::isError($endpointArray)) {
+            print "<pre>".$soapclient->wire."\n";
             print_r($endpointArray);
+            print "</pre>";
             return;
         }
 
@@ -185,6 +186,8 @@ class Interop_Client
             if (!$all) $sql .= "and status=1";
         } else
         if (!$all) $sql .= "where status=1";
+        $sql .= " order by endpointName";
+        
 
         $db_ep = $this->dbc->getAll($sql,NULL, DB_FETCHMODE_ASSOC );
         if (DB::isError($db_ep)) {
