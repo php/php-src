@@ -16,6 +16,11 @@ regex.h, but I didn't want to risk possible problems with existing files of
 that name by distributing it that way. To use it with an existing program that
 uses the POSIX API, it will have to be renamed or pointed at by a link.
 
+If you are using the POSIX interface to PCRE and there is already a POSIX regex
+library installed on your system, you must take care when linking programs to
+ensure that they link with PCRE's libpcreposix library. Otherwise they may pick
+up the "real" POSIX functions of the same name.
+
 
 Contributions by users of PCRE
 ------------------------------
@@ -96,6 +101,16 @@ library. You can read more about them in the pcrebuild man page.
   is a representation of the compiled pattern, and this changes with the link
   size.
 
+. You can build PCRE so that its match() function does not call itself
+  recursively. Instead, it uses blocks of data from the heap via special
+  functions pcre_stack_malloc() and pcre_stack_free() to save data that would
+  otherwise be saved on the stack. To build PCRE like this, use
+
+  --disable-stack-for-recursion
+
+  on the "configure" command. PCRE runs more slowly in this mode, but it may be
+  necessary in environments with limited stack sizes.
+
 The "configure" script builds five files:
 
 . libtool is a script that builds shared and/or static libraries
@@ -123,16 +138,6 @@ prints the version number, and
 outputs information about where the library is installed. This command can be
 included in makefiles for programs that use PCRE, saving the programmer from
 having to remember too many details.
-
-
-Cross-compiling PCRE on a Unix-like system
-------------------------------------------
-
-PCRE needs to compile and run an auxiliary program as part of the building
-process. Obviously, if the real compilation is for some other system, it can't
-use the same CC and CFLAGS values when it is doing this. For cross compilation,
-therefore, you must set CC_FOR_BUILD to the local host's compiler, and you can
-set flags in CFLAGS_FOR_BUILD if you need to.
 
 
 Shared libraries on Unix-like systems
@@ -169,17 +174,20 @@ order to cross-compile PCRE for some other host. However, during the building
 process, the dftables.c source file is compiled *and run* on the local host, in
 order to generate the default character tables (the chartables.c file). It
 therefore needs to be compiled with the local compiler, not the cross compiler.
-You can do this by specifying HOST_CC (and if necessary HOST_CFLAGS) when
-calling the "configure" command. If they are not specified, they default to the
-values of CC and CFLAGS.
+You can do this by specifying CC_FOR_BUILD (and if necessary CFLAGS_FOR_BUILD)
+when calling the "configure" command. If they are not specified, they default
+to the values of CC and CFLAGS.
 
 
 Building on non-Unix systems
 ----------------------------
 
-For a non-Unix system, read the comments in the file NON-UNIX-USE. PCRE has
-been compiled on Windows systems and on Macintoshes, but I don't know the
-details because I don't use those systems. It should be straightforward to
+For a non-Unix system, read the comments in the file NON-UNIX-USE, though if
+the system supports the use of "configure" and "make" you may be able to build
+PCRE in the same way as for Unix systems.
+
+PCRE has been compiled on Windows systems and on Macintoshes, but I don't know
+the details because I don't use those systems. It should be straightforward to
 build PCRE on any system that has a Standard C compiler, because it uses only
 Standard C functions.
 
@@ -189,7 +197,7 @@ Testing PCRE
 
 To test PCRE on a Unix system, run the RunTest script that is created by the
 configuring process. (This can also be run by "make runtest", "make check", or
-"make test".) For other systems, see the instruction in NON-UNIX-USE.
+"make test".) For other systems, see the instructions in NON-UNIX-USE.
 
 The script runs the pcretest test program (which is documented in its own man
 page) on each of the testinput files (in the testdata directory) in turn,
@@ -222,13 +230,13 @@ bug in PCRE.
 
 The third set of tests checks pcre_maketables(), the facility for building a
 set of character tables for a specific locale and using them instead of the
-default tables. The tests make use of the "fr" (French) locale. Before running
-the test, the script checks for the presence of this locale by running the
-"locale" command. If that command fails, or if it doesn't include "fr" in the
-list of available locales, the third test cannot be run, and a comment is
-output to say why. If running this test produces instances of the error
+default tables. The tests make use of the "fr_FR" (French) locale. Before
+running the test, the script checks for the presence of this locale by running
+the "locale" command. If that command fails, or if it doesn't include "fr_FR"
+in the list of available locales, the third test cannot be run, and a comment
+is output to say why. If running this test produces instances of the error
 
-  ** Failed to set locale "fr"
+  ** Failed to set locale "fr_FR"
 
 in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
@@ -354,4 +362,4 @@ The distribution should contain the following files:
   makevp.bat
 
 Philip Hazel <ph10@cam.ac.uk>
-February 2003
+December 2003

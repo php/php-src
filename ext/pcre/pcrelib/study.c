@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2002 University of Cambridge
+           Copyright (c) 1997-2003 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -260,6 +260,9 @@ do
       case OP_TYPEMINQUERY:
       switch(tcode[1])
         {
+        case OP_ANY:
+        return FALSE;
+
         case OP_NOT_DIGIT:
         for (c = 0; c < 32; c++)
           start_bits[c] |= ~cd->cbits[c+cbit_digit];
@@ -297,19 +300,50 @@ do
       /* Character class where all the information is in a bit map: set the
       bits and either carry on or not, according to the repeat count. If it was
       a negative class, and we are operating with UTF-8 characters, any byte
-      with the top-bit set is a potentially valid starter because it may start
-      a character with a value > 255. (This is sub-optimal in that the
-      character may be in the range 128-255, and those characters might be
-      unwanted, but that's as far as we go for the moment.) */
+      with a value >= 0xc4 is a potentially valid starter because it starts a
+      character with a value > 255. */
 
       case OP_NCLASS:
-      if (utf8) memset(start_bits+16, 0xff, 16);
+      if (utf8)
+        {
+        start_bits[24] |= 0xf0;              /* Bits for 0xc4 - 0xc8 */
+        memset(start_bits+25, 0xff, 7);      /* Bits for 0xc9 - 0xff */
+        }
       /* Fall through */
 
       case OP_CLASS:
         {
         tcode++;
-        for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];
+
+        /* In UTF-8 mode, the bits in a bit map correspond to character
+        values, not to byte values. However, the bit map we are constructing is
+        for byte values. So we have to do a conversion for characters whose
+        value is > 127. In fact, there are only two possible starting bytes for
+        characters in the range 128 - 255. */
+
+        if (utf8)
+          {
+          for (c = 0; c < 16; c++) start_bits[c] |= tcode[c];
+          for (c = 128; c < 256; c++)
+            {
+            if ((tcode[c/8] && (1 << (c&7))) != 0)
+              {
+              int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
+              start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */
+              c = (c & 0xc0) + 0x40 - 1;          /* next relevant character. */
+              }
+            }
+          }
+
+        /* In non-UTF-8 mode, the two bit maps are completely compatible. */
+
+        else
+          {
+          for (c = 0; c < 32; c++) start_bits[c] |= tcode[c];
+          }
+
+        /* Advance past the bit map, and act on what follows */
+
         tcode += 32;
         switch (*tcode)
           {
@@ -363,7 +397,7 @@ Returns:    pointer to a pcre_extra block, with study_data filled in and the
             NULL on error or if no optimization possible
 */
 
-pcre_extra *
+EXPORT pcre_extra *
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 uschar start_bits[32];

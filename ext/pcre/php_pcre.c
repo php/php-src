@@ -106,6 +106,15 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
+
+	pcre_malloc = php_pcre_malloc;
+	pcre_free = php_pcre_free;
+
+#ifdef NO_RECURSE
+	pcre_stack_malloc = php_pcre_malloc;
+	pcre_stack_free = php_pcre_free;
+#endif
+	
 	return SUCCESS;
 }
 /* }}} */
@@ -117,16 +126,6 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 	php_pcre_shutdown_globals(&pcre_globals TSRMLS_CC);
 #endif
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION(pcre) */
-static PHP_RINIT_FUNCTION(pcre)
-{
-	pcre_malloc = php_pcre_malloc;
-	pcre_free = php_pcre_free;
-	
 	return SUCCESS;
 }
 /* }}} */
@@ -1520,7 +1519,7 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-	PHP_RINIT(pcre),
+	NULL,
 	NULL,
 	PHP_MINFO(pcre),
 	NO_VERSION_YET,

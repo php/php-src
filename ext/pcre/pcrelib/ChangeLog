@@ -1,6 +1,161 @@
 ChangeLog for PCRE
 ------------------
 
+Version 4.5 01-Dec-03
+---------------------
+
+ 1. There has been some re-arrangement of the code for the match() function so
+    that it can be compiled in a version that does not call itself recursively.
+    Instead, it keeps those local variables that need separate instances for
+    each "recursion" in a frame on the heap, and gets/frees frames whenever it
+    needs to "recurse". Keeping track of where control must go is done by means
+    of setjmp/longjmp. The whole thing is implemented by a set of macros that
+    hide most of the details from the main code, and operates only if
+    NO_RECURSE is defined while compiling pcre.c. If PCRE is built using the
+    "configure" mechanism, "--disable-stack-for-recursion" turns on this way of
+    operating.
+
+    To make it easier for callers to provide specially tailored get/free
+    functions for this usage, two new functions, pcre_stack_malloc, and
+    pcre_stack_free, are used. They are always called in strict stacking order,
+    and the size of block requested is always the same.
+
+    The PCRE_CONFIG_STACKRECURSE info parameter can be used to find out whether
+    PCRE has been compiled to use the stack or the heap for recursion. The
+    -C option of pcretest uses this to show which version is compiled.
+
+    A new data escape \S, is added to pcretest; it causes the amounts of store
+    obtained and freed by both kinds of malloc/free at match time to be added
+    to the output.
+
+ 2. Changed the locale test to use "fr_FR" instead of "fr" because that's
+    what's available on my current Linux desktop machine.
+
+ 3. When matching a UTF-8 string, the test for a valid string at the start has
+    been extended. If start_offset is not zero, PCRE now checks that it points
+    to a byte that is the start of a UTF-8 character. If not, it returns
+    PCRE_ERROR_BADUTF8_OFFSET (-11). Note: the whole string is still checked;
+    this is necessary because there may be backward assertions in the pattern.
+    When matching the same subject several times, it may save resources to use
+    PCRE_NO_UTF8_CHECK on all but the first call if the string is long.
+
+ 4. The code for checking the validity of UTF-8 strings has been tightened so
+    that it rejects (a) strings containing 0xfe or 0xff bytes and (b) strings
+    containing "overlong sequences".
+
+ 5. Fixed a bug (appearing twice) that I could not find any way of exploiting!
+    I had written "if ((digitab[*p++] && chtab_digit) == 0)" where the "&&"
+    should have been "&", but it just so happened that all the cases this let
+    through by mistake were picked up later in the function.
+
+ 6. I had used a variable called "isblank" - this is a C99 function, causing
+    some compilers to warn. To avoid this, I renamed it (as "blankclass").
+
+ 7. Cosmetic: (a) only output another newline at the end of pcretest if it is
+    prompting; (b) run "./pcretest /dev/null" at the start of the test script
+    so the version is shown; (c) stop "make test" echoing "./RunTest".
+
+ 8. Added patches from David Burgess to enable PCRE to run on EBCDIC systems.
+
+ 9. The prototype for memmove() for systems that don't have it was using
+    size_t, but the inclusion of the header that defines size_t was later. I've
+    moved the #includes for the C headers earlier to avoid this.
+
+10. Added some adjustments to the code to make it easier to compiler on certain
+    special systems:
+
+      (a) Some "const" qualifiers were missing.
+      (b) Added the macro EXPORT before all exported functions; by default this
+          is defined to be empty.
+      (c) Changed the dftables auxiliary program (that builds chartables.c) so
+          that it reads its output file name as an argument instead of writing
+          to the standard output and assuming this can be redirected.
+
+11. In UTF-8 mode, if a recursive reference (e.g. (?1)) followed a character
+    class containing characters with values greater than 255, PCRE compilation
+    went into a loop.
+
+12. A recursive reference to a subpattern that was within another subpattern
+    that had a minimum quantifier of zero caused PCRE to crash. For example,
+    (x(y(?2))z)? provoked this bug with a subject that got as far as the
+    recursion. If the recursively-called subpattern itself had a zero repeat,
+    that was OK.
+
+13. In pcretest, the buffer for reading a data line was set at 30K, but the
+    buffer into which it was copied (for escape processing) was still set at
+    1024, so long lines caused crashes.
+
+14. A pattern such as /[ab]{1,3}+/ failed to compile, giving the error
+    "internal error: code overflow...". This applied to any character class
+    that was followed by a possessive quantifier.
+
+15. Modified the Makefile to add libpcre.la as a prerequisite for
+    libpcreposix.la because I was told this is needed for a parallel build to
+    work.
+
+16. If a pattern that contained .* following optional items at the start was
+    studied, the wrong optimizing data was generated, leading to matching
+    errors. For example, studying /[ab]*.*c/ concluded, erroneously, that any
+    matching string must start with a or b or c. The correct conclusion for
+    this pattern is that a match can start with any character.
+
+
+Version 4.4 13-Aug-03
+---------------------
+
+ 1. In UTF-8 mode, a character class containing characters with values between
+    127 and 255 was not handled correctly if the compiled pattern was studied.
+    In fixing this, I have also improved the studying algorithm for such
+    classes (slightly).
+
+ 2. Three internal functions had redundant arguments passed to them. Removal
+    might give a very teeny performance improvement.
+
+ 3. Documentation bug: the value of the capture_top field in a callout is *one
+    more than* the number of the hightest numbered captured substring.
+
+ 4. The Makefile linked pcretest and pcregrep with -lpcre, which could result
+    in incorrectly linking with a previously installed version. They now link
+    explicitly with libpcre.la.
+
+ 5. configure.in no longer needs to recognize Cygwin specially.
+
+ 6. A problem in pcre.in for Windows platforms is fixed.
+
+ 7. If a pattern was successfully studied, and the -d (or /D) flag was given to
+    pcretest, it used to include the size of the study block as part of its
+    output. Unfortunately, the structure contains a field that has a different
+    size on different hardware architectures. This meant that the tests that
+    showed this size failed. As the block is currently always of a fixed size,
+    this information isn't actually particularly useful in pcretest output, so
+    I have just removed it.
+
+ 8. Three pre-processor statements accidentally did not start in column 1.
+    Sadly, there are *still* compilers around that complain, even though
+    standard C has not required this for well over a decade. Sigh.
+
+ 9. In pcretest, the code for checking callouts passed small integers in the
+    callout_data field, which is a void * field. However, some picky compilers
+    complained about the casts involved for this on 64-bit systems. Now
+    pcretest passes the address of the small integer instead, which should get
+    rid of the warnings.
+
+10. By default, when in UTF-8 mode, PCRE now checks for valid UTF-8 strings at
+    both compile and run time, and gives an error if an invalid UTF-8 sequence
+    is found. There is a option for disabling this check in cases where the
+    string is known to be correct and/or the maximum performance is wanted.
+
+11. In response to a bug report, I changed one line in Makefile.in from
+
+        -Wl,--out-implib,.libs/lib@WIN_PREFIX@pcreposix.dll.a \
+    to
+        -Wl,--out-implib,.libs/@WIN_PREFIX@libpcreposix.dll.a \
+
+    to look similar to other lines, but I have no way of telling whether this
+    is the right thing to do, as I do not use Windows. No doubt I'll get told
+    if it's wrong...
+
+
 Version 4.3 21-May-03
 ---------------------
 

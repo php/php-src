@@ -38,7 +38,7 @@ Makefile. */
 #define LOOPREPEAT 50000
 
 #define BUFFER_SIZE 30000
-#define DBUFFER_SIZE 1024
+#define DBUFFER_SIZE BUFFER_SIZE
 
 
 static FILE *outfile;
@@ -48,9 +48,9 @@ static int callout_extra;
 static int callout_fail_count;
 static int callout_fail_id;
 static int first_callout;
+static int show_malloc;
 static int use_utf8;
 static size_t gotten_store;
-
 
 
 static const int utf8_table1[] = {
@@ -321,13 +321,16 @@ if (post_start > 0)
   }
 
 fprintf(outfile, "\n");
-
 first_callout = 0;
 
-if ((int)(cb->callout_data) != 0)
+if (cb->callout_data != NULL)
   {
-  fprintf(outfile, "Callout data = %d\n", (int)(cb->callout_data));
-  return (int)(cb->callout_data);
+  int callout_data = *((int *)(cb->callout_data));
+  if (callout_data != 0)
+    {
+    fprintf(outfile, "Callout data = %d\n", callout_data);
+    return callout_data;
+    }
   }
 
 return (cb->callout_number != callout_fail_id)? 0 :
@@ -336,7 +339,7 @@ return (cb->callout_number != callout_fail_id)? 0 :
 
 
 /*************************************************
-*            Local malloc function               *
+*            Local malloc functions              *
 *************************************************/
 
 /* Alternative malloc function, to test functionality and show the size of the
@@ -344,10 +347,37 @@ compiled re. */
 
 static void *new_malloc(size_t size)
 {
+void *block = malloc(size);
 gotten_store = size;
-return malloc(size);
+if (show_malloc)
+  fprintf(outfile, "malloc       %3d %p\n", size, block);
+return block;
 }
 
+static void new_free(void *block)
+{
+if (show_malloc)
+  fprintf(outfile, "free             %p\n", block);
+free(block);
+}
+
+
+/* For recursion malloc/free, to test stacking calls */
+
+static void *stack_malloc(size_t size)
+{
+void *block = malloc(size);
+if (show_malloc)
+  fprintf(outfile, "stack_malloc %3d %p\n", size, block);
+return block;
+}
+
+static void stack_free(void *block)
+{
+if (show_malloc)
+  fprintf(outfile, "stack_free       %p\n", block);
+free(block);
+}
 
 
 /*************************************************
@@ -397,8 +427,8 @@ unsigned char *dbuffer;
 /* Get buffers from malloc() so that Electric Fence will check their misuse
 when I am debugging. */
 
-buffer = malloc(BUFFER_SIZE);
-dbuffer = malloc(DBUFFER_SIZE);
+buffer = (unsigned char *)malloc(BUFFER_SIZE);
+dbuffer = (unsigned char *)malloc(DBUFFER_SIZE);
 
 /* Static so that new_malloc can use it. */
 
@@ -440,6 +470,8 @@ while (argc > 1 && argv[op][0] == '-')
     printf("  POSIX malloc threshold = %d\n", rc);
     (void)pcre_config(PCRE_CONFIG_MATCH_LIMIT, &rc);
     printf("  Default match limit = %d\n", rc);
+    (void)pcre_config(PCRE_CONFIG_STACKRECURSE, &rc);
+    printf("  Match recursion uses %s\n", rc? "stack" : "heap");
     exit(0);
     }
   else
@@ -464,7 +496,7 @@ while (argc > 1 && argv[op][0] == '-')
 /* Get the store for the offsets vector, and remember what it was */
 
 size_offsets_max = size_offsets;
-offsets = malloc(size_offsets_max * sizeof(int));
+offsets = (int *)malloc(size_offsets_max * sizeof(int));
 if (offsets == NULL)
   {
   printf("** Failed to get %d bytes of memory for offsets vector\n",
@@ -497,6 +529,9 @@ if (argc > 2)
 /* Set alternative malloc function */
 
 pcre_malloc = new_malloc;
+pcre_free = new_free;
+pcre_stack_malloc = stack_malloc;
+pcre_stack_free = stack_free;
 
 /* Heading line, then prompt for first regex if stdin */
 
@@ -619,6 +654,7 @@ while (!done)
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
       case '8': options |= PCRE_UTF8; use_utf8 = 1; break;
+      case '?': options |= PCRE_NO_UTF8_CHECK; break;
 
       case 'L':
       ppp = pp;
@@ -787,7 +823,7 @@ while (!done)
         }
 
       if (get_options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((get_options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((get_options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -796,7 +832,8 @@ while (!done)
           ((get_options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((get_options & PCRE_EXTRA) != 0)? " extra" : "",
           ((get_options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
-          ((get_options & PCRE_UTF8) != 0)? " utf8" : "");
+          ((get_options & PCRE_UTF8) != 0)? " utf8" : "",
+          ((get_options & PCRE_NO_UTF8_CHECK) != 0)? " no_utf8_check" : "");
 
       if (((((real_pcre *)re)->options) & PCRE_ICHANGED) != 0)
         fprintf(outfile, "Case state changes\n");
@@ -861,13 +898,17 @@ while (!done)
       else if (extra == NULL)
         fprintf(outfile, "Study returned NULL\n");
 
+      /* Don't output study size; at present it is in any case a fixed
+      value, but it varies, depending on the computer architecture, and
+      so messes up the test suite. */
+
       else if (do_showinfo)
         {
         size_t size;
         uschar *start_bits = NULL;
         new_info(re, extra, PCRE_INFO_STUDYSIZE, &size);
         new_info(re, extra, PCRE_INFO_FIRSTTABLE, &start_bits);
-        fprintf(outfile, "Study size = %d\n", size);
+        /* fprintf(outfile, "Study size = %d\n", size); */
         if (start_bits == NULL)
           fprintf(outfile, "No starting character set\n");
         else
@@ -929,6 +970,7 @@ while (!done)
     callout_count = 0;
     callout_fail_count = 999999;
     callout_fail_id = -1;
+    show_malloc = 0;
 
     if (infile == stdin) printf("data> ");
     if (fgets((char *)buffer, BUFFER_SIZE, infile) == NULL)
@@ -1105,7 +1147,7 @@ while (!done)
           {
           size_offsets_max = n;
           free(offsets);
-          use_offsets = offsets = malloc(size_offsets_max * sizeof(int));
+          use_offsets = offsets = (int *)malloc(size_offsets_max * sizeof(int));
           if (offsets == NULL)
             {
             printf("** Failed to get %d bytes of memory for offsets vector\n",
@@ -1117,8 +1159,16 @@ while (!done)
         if (n == 0) use_offsets = NULL;   /* Ensures it can't write to it */
         continue;
 
+        case 'S':
+        show_malloc = 1;
+        continue;
+
         case 'Z':
         options |= PCRE_NOTEOL;
+        continue;
+
+        case '?':
+        options |= PCRE_NO_UTF8_CHECK;
         continue;
         }
       *q++ = c;
@@ -1136,7 +1186,7 @@ while (!done)
       int eflags = 0;
       regmatch_t *pmatch = NULL;
       if (use_size_offsets > 0)
-        pmatch = malloc(sizeof(regmatch_t) * use_size_offsets);
+        pmatch = (regmatch_t *)malloc(sizeof(regmatch_t) * use_size_offsets);
       if ((options & PCRE_NOTBOL) != 0) eflags |= REG_NOTBOL;
       if ((options & PCRE_NOTEOL) != 0) eflags |= REG_NOTEOL;
 
@@ -1203,7 +1253,7 @@ while (!done)
 
         if (extra == NULL)
           {
-          extra = malloc(sizeof(pcre_extra));
+          extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
         extra->flags |= PCRE_EXTRA_MATCH_LIMIT;
@@ -1242,11 +1292,11 @@ while (!done)
         {
         if (extra == NULL)
           {
-          extra = malloc(sizeof(pcre_extra));
+          extra = (pcre_extra *)malloc(sizeof(pcre_extra));
           extra->flags = 0;
           }
         extra->flags |= PCRE_EXTRA_CALLOUT_DATA;
-        extra->callout_data = (void *)callout_data;
+        extra->callout_data = &callout_data;
         count = pcre_exec(re, extra, (char *)bptr, len, start_offset,
           options | g_notempty, use_offsets, use_size_offsets);
         extra->flags &= ~PCRE_EXTRA_CALLOUT_DATA;
@@ -1345,24 +1395,36 @@ while (!done)
 
       /* Failed to match. If this is a /g or /G loop and we previously set
       g_notempty after a null match, this is not necessarily the end.
-      We want to advance the start offset, and continue. Fudge the offset
-      values to achieve this. We won't be at the end of the string - that
-      was checked before setting g_notempty. */
+      We want to advance the start offset, and continue. In the case of UTF-8
+      matching, the advance must be one character, not one byte. Fudge the
+      offset values to achieve this. We won't be at the end of the string -
+      that was checked before setting g_notempty. */
 
       else
         {
         if (g_notempty != 0)
           {
+          int onechar = 1;
           use_offsets[0] = start_offset;
-          use_offsets[1] = start_offset + 1;
+          if (use_utf8)
+            {
+            while (start_offset + onechar < len)
+              {
+              int tb = bptr[start_offset+onechar];
+              if (tb <= 127) break;
+              tb &= 0xc0;
+              if (tb != 0 && tb != 0xc0) onechar++;
+              }
+            }
+          use_offsets[1] = start_offset + onechar;
           }
         else
           {
-          if (gmatched == 0)   /* Error if no previous matches */
+          if (count == PCRE_ERROR_NOMATCH)
             {
-            if (count == -1) fprintf(outfile, "No match\n");
-              else fprintf(outfile, "Error %d\n", count);
+            if (gmatched == 0) fprintf(outfile, "No match\n");
             }
+          else fprintf(outfile, "Error %d\n", count);
           break;  /* Out of the /g loop */
           }
         }
@@ -1414,7 +1476,7 @@ while (!done)
     }
   }
 
-fprintf(outfile, "\n");
+if (infile == stdin) fprintf(outfile, "\n");
 return 0;
 }
 

@@ -1,12 +1,19 @@
 Compiling PCRE on non-Unix systems
 ----------------------------------
 
-See below for comments on Cygwin or MinGW usage.
+See below for comments on Cygwin or MinGW usage. I (Philip Hazel) have no
+knowledge of Windows sytems and how their libraries work. The items in the
+PCRE Makefile that relate to anything other than Unix-like systems have been
+contributed by PCRE users. There are some other comments and files in the
+Contrib directory on the ftp site that you may find useful.
 
-If you want to compile PCRE for a non-Unix system, note that it consists
-entirely of code written in Standard C, and so should compile successfully
-on any machine with a Standard C compiler and library, using normal compiling
-commands to do the following:
+The following are generic comments about building PCRE:
+
+If you want to compile PCRE for a non-Unix system (or perhaps, more strictly,
+for a system that does not support "configure" and make files), note that PCRE
+consists entirely of code written in Standard C, and so should compile
+successfully on any machine with a Standard C compiler and library, using
+normal compiling commands to do the following:
 
 (1) Copy or rename the file config.in as config.h, and change the macros that
 define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
@@ -21,15 +28,17 @@ for PCRE_MAJOR, PCRE_MINOR, and PCRE_DATE near its start to the values set in
 configure.in.
 
 (3) Compile dftables.c as a stand-alone program, and then run it with
-the standard output sent to chartables.c. This generates a set of standard
-character tables.
+the single argument "chartables.c". This generates a set of standard
+character tables and writes them to that file.
 
 (4) Compile maketables.c, get.c, study.c and pcre.c and link them all
 together into an object library in whichever form your system keeps such
 libraries. This is the pcre library (chartables.c is included by means of an
-#include directive).
+#include directive). If your system has static and shared libraries, you may
+have to do this once for each type.
 
-(5) Similarly, compile pcreposix.c and link it as the pcreposix library.
+(5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
+library.
 
 (6) Compile the test program pcretest.c. This needs the functions in the
 pcre and pcreposix libraries when linking.
@@ -79,7 +88,7 @@ These are some further comments about Win32 builds from Mark Evans. They
 were contributed before Fred Cox's changes were made, so it is possible that
 they may no longer be relevant.
 
-The documentation for Win32 builds is a bit shy.  Under MSVC6 I
+"The documentation for Win32 builds is a bit shy.  Under MSVC6 I
 followed their instructions to the letter, but there were still
 some things missing.
 
@@ -89,7 +98,7 @@ some things missing.
 
 (2) Missing some #ifdefs relating to the function pointers
     pcre_malloc and pcre_free.  See my solution below.  (The stubs
-    may not be mandatory but they made me feel better.)
+    may not be mandatory but they made me feel better.)"
 
 =========================
 #ifdef _WIN32
