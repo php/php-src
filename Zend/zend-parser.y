@@ -49,7 +49,7 @@
 %pure_parser
 %expect 7
 
-%left T_INCLUDE T_EVAL T_IMPORT
+%left T_INCLUDE T_INCLUDE_ONCE T_EVAL
 %left ','
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -108,6 +108,7 @@
 %token T_CONST
 %token T_RETURN
 %token T_REQUIRE
+%token T_REQUIRE_ONCE
 %token T_USE
 %token T_GLOBAL
 %token T_STATIC
@@ -200,6 +201,7 @@ unticked_statement:
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
 	|	expr ';'			{ do_free(&$1 CLS_CC); }
 	|	T_REQUIRE expr ';'			{ do_require(&$2 CLS_CC); }
+	|	T_REQUIRE_ONCE use_filename ';'			{ do_require(&$2 CLS_CC); }
 	|	T_USE use_filename ';'		{ use_filename($2.u.constant.value.str.val, $2.u.constant.value.str.len CLS_CC); zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' cvar ')' ';' { do_end_variable_parse(BP_VAR_UNSET, 0 CLS_CC); do_unset(&$3 CLS_CC); }
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
@@ -708,8 +710,8 @@ internal_functions_in_yacc:
 		T_ISSET '(' cvar ')'	{ do_isset_or_isempty(ZEND_ISSET, &$$, &$3 CLS_CC); }
 	|	T_EMPTY '(' cvar ')'	{ do_isset_or_isempty(ZEND_ISEMPTY, &$$, &$3 CLS_CC); }
 	|	T_INCLUDE expr 			{ do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
+	|	T_INCLUDE_ONCE expr 	{ do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
 	|	T_EVAL '(' expr ')' 	{ do_include_or_eval(ZEND_EVAL, &$$, &$3 CLS_CC); }
-	|	T_IMPORT '(' expr ')'	{ do_include_or_eval(ZEND_IMPORT, &$$, &$3 CLS_CC); }
 ;
 
 

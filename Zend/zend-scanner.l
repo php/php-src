@@ -918,12 +918,16 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_INCLUDE;
 }
 
-<ST_IN_SCRIPTING>"import" {
-	return T_IMPORT;
+<ST_IN_SCRIPTING>"include_once" {
+	return T_INCLUDE_ONCE;
 }
 
 <ST_IN_SCRIPTING>"require" {
 	return T_REQUIRE;
+}
+
+<ST_IN_SCRIPTING>"require_once" {
+	return T_REQUIRE_ONCE;
 }
 
 <ST_IN_SCRIPTING>"use" {
