@@ -3,7 +3,7 @@ xml_parse_into_struct/umlauts in tags
 --SKIPIF--
 <?php // vim600: syn=php
 include("skipif.inc");
-if(strtoupper("äöü") == "äöü")
+if(strtoupper("äöüß") != "ÄÖÜß")
 {
 	die("skip strtoupper on non-ascii not supported on this platform");
 }
