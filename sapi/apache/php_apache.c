@@ -34,7 +34,7 @@ int php_apache_info_id;
 php_apache_info_struct php_apache_info;
 #endif
 
-#define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
+#define SECTION(name)  PUTS("<h2 class=\"section\">" name "</h2>\n")
 
 extern module *top_module;
 
