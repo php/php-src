@@ -737,7 +737,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	int				fetchtype;
+	long			fetchtype;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
 	MYSQL_ROW		row;
