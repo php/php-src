@@ -1,3 +1,142 @@
+2000-10-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * TODO: added generalized SMTP code todo
+
+    * main/fdfdata.h: removed fdfdata.h
+
+    * main/fdfdata.c: removed fdfdata.c
+
+    * ext/fdf/fdf.c
+      main/SAPI.c
+      main/SAPI.h:    the FDF handler is now working and totaly living
+    in the fdf extension, no more special code in
+    main is needed
+
+    * ext/zlib/config.m4
+      ext/zlib/zlib.c:
+     -read and write .gz-files transparently on glibc based systems
+      using the 'zlib:' fopen wrapper 
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: This patch didn't make it for 4.0.3...
+
+2000-10-11  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/Socket.php:
+    fix a problem with the readLine() method of Net_Socket that occurred when
+    there was no timeout set.
+
+2000-10-11  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/ovrimos/libs.mk
+      ext/ovrimos/ovrimos.c: fixed some includes and removed an unneeded file.
+
+    * ext/ovrimos/Makefile.in: corrected typo
+
+2000-10-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/session/session.c:
+    Add session_write_close(). This is primarily intended to enable
+    script writers to release the lock associated with the session lock
+    before the request finishes.
+
+    You can pass arrays now to session_set_save_handler(), so that the handlers
+    can be located in an object for better abstraction.
+
+    * sapi/thttpd/thttpd.c: Provide basic auth info to scripts.
+
+    Protect shutdown handler from being called multiple times.
+
+2000-10-11  Alexander Feldman  <alex@zend.com>
+
+    * NEWS
+      main/configuration-scanner.l:
+    Fixed a problem in the configuration scanner where two extra NULL bytes
+    were added to each encapsulated string.
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: NEWS update
+
+    * NEWS
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h: Added mysql_escape_String()
+
+2000-10-11  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: *** empty log message ***
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/pgsql/pgsql.c: Remove conflict
+
+2000-10-11  Andi Gutmans  <andi@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+    - Commit Kristian's PHP 3 patch to PHP 4. Kristian I hope it's also the
+      same here.
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h: Go with 4.0.3
+
+2000-10-11  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/ovrimos/ovrimos.c: Corrected a wrong include
+
+    * ext/ovrimos/Makefile.in
+      ext/ovrimos/config.m4
+      ext/ovrimos/libs.mk
+      ext/ovrimos/ovrimos.c
+      ext/ovrimos/php_ovrimos.h
+      ext/ovrimos/setup.stub: Added support for Ovrimos SQL Server.
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c
+      NEWS:
+    Fixed a problem that allowed users to override admin_value's and admin_flag's
+
+2000-10-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Fix the readdir_r POSIX check
+
+2000-10-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c: proto typo fixes
+
+    * ext/ccvs/ccvs.c: added protos
+
+2000-10-11  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS:
+    avoid giving the impression that they fix the security bug by upgrading...
+
+    * NEWS
+      ext/pgsql/pgsql.c:
+    Old PostgreSQL fix I forgot to commit, and NEWS consistency update
+
+2000-10-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c: added missing protos
+
+    * ext/standard/basic_functions.c: added some missing protos
+
+    * ext/shmop/shmop.c: protos fixed
+
+2000-10-11  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php_modules.dsw: added sablotron extension
+
+    * ext/sablot/sablot.c
+      ext/sablot/sablot.dsp: make windows compile
+
 2000-10-10  Sterling Hughes  <stirling@bestweb.net>
 
     * ext/sablot/sablot.c: Fix compilation, I wonder when these were omitted??
