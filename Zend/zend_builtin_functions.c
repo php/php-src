@@ -107,14 +107,13 @@ ZEND_FUNCTION(func_num_args)
 	void **p;
 	int arg_count;
 
-	p = EG(argument_stack).top_element-1;
-	if (p) {
+	p = EG(argument_stack).top_element-1-1;
+	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
+	p -= 1+arg_count;
+	if (*p) {
 		zend_error(E_ERROR, "func_num_args(): Can't be used as a function parameter");
 	}
 	--p;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
-
-	p = EG(argument_stack).top_element-1-arg_count-2;
 	if (p>=EG(argument_stack).elements) {
 		RETURN_LONG((ulong) *p);
 	} else {
@@ -138,14 +137,13 @@ ZEND_FUNCTION(func_get_arg)
 	convert_to_long_ex(z_requested_offset);
 	requested_offset = (*z_requested_offset)->value.lval;
 
-	p = EG(argument_stack).top_element-1;
-	if (p) {
+	p = EG(argument_stack).top_element-1-1;
+	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_get_arg(); */
+	p -= 1+arg_count;
+	if (*p) {
 		zend_error(E_ERROR, "func_get_arg(): Can't be used as a function parameter");
 	}
-	--p;	
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
-
-	p = EG(argument_stack).top_element-1-arg_count-2;
+	--p;
 	if (p<EG(argument_stack).elements) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
@@ -169,15 +167,14 @@ ZEND_FUNCTION(func_get_args)
 	int arg_count;
 	int i;
 
-	p = EG(argument_stack).top_element-1;
-	if (p) {
+	p = EG(argument_stack).top_element-1-1;
+	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_get_args(); */
+	p -= 1+arg_count;
+	if (*p) {
 		zend_error(E_ERROR, "func_get_args(): Can't be used as a function parameter");
 	}
-	--p;	
-	
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
+	--p;
 
-	p = EG(argument_stack).top_element-1-arg_count-2;
 	if (p<EG(argument_stack).elements) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
