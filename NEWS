@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
+- Fixed pg_last_notice() crash. (Yasuo)
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
   enabled. (Jason)
 - Fixed HTTP file upload support to handle big files better. (Jani)
