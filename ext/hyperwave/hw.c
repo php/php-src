@@ -2851,7 +2851,7 @@ PHP_FUNCTION(hw_new_document)
 	}
 	memcpy(doc->data, Z_STRVAL_P(arg2), Z_LVAL_P(arg3));
 	ptr = doc->data;
-	Z_LVAL_P(ptr[arg3)] = '\0';
+	ptr[Z_LVAL_P(arg3)] = '\0';
 	doc->attributes = strdup(Z_STRVAL_P(arg1));
 	doc->bodytag = NULL;
 	doc->size = Z_LVAL_P(arg3);
