@@ -183,7 +183,7 @@ inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 BEGIN_EXTERN_C()
 
 
-ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
+ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
@@ -235,7 +235,7 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 }
 
 
-ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
+ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle CLS_DC)
 {
 	zend_llist_del_element(&CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);
 }
@@ -252,18 +252,19 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 		    file_path = file_handle->opened_path; 
 			break;
 		case ZEND_HANDLE_FD:
-			file_path = file_handle->filename;
-			file_handle->opened_path = NULL;
+		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
 			break;
 		case ZEND_HANDLE_FP:
-			file_path = file_handle->filename;
-			file_handle->opened_path = NULL;
+		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.fp = file_handle->handle.fp;
 			break;
 	}
 	if (!file_handle->handle.fp) {
 		return FAILURE;
+	}
+	if (!file_path) {
+		file_path = file_handle->filename;
 	}
 	file_handle->type = ZEND_HANDLE_FP;	
 	if (file_handle->handle.fp != stdin) {
@@ -276,7 +277,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 #else
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			file_handle->opened_path = NULL;
+		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.is = new ifstream(file_handle->handle.fd);
 			file_handle->type = ZEND_HANDLE_FSTREAM;
 			break;
@@ -291,7 +292,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 				break;
 			}
 		case ZEND_HANDLE_FP:
-			file_handle->opened_path = NULL;
+		  /* file_handle->opened_path = NULL; */
 			if (file_handle->handle.fp==stdin) {
 				file_handle->handle.is = &cin;
 			} else {
@@ -353,7 +354,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC)
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
 		compiler_result = zendparse(CLS_C);
-		zend_close_file_handle(file_handle CLS_CC);
 		do_return(&retval_znode, 0 CLS_CC);
 		restore_lexical_state(&original_lex_state CLS_CC);
 		CG(in_compilation) = original_in_compilation;
@@ -404,6 +404,7 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 		EG(error_reporting) = 0;
 	}
 	retval = zend_compile_file(&file_handle CLS_CC);
+	zend_destroy_file_handle(&file_handle CLS_CC);
 
 	if (type==ZEND_REQUIRE) {
 		EG(error_reporting) = error_reporting;
@@ -513,7 +514,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
-	zend_close_file_handle(&file_handle CLS_CC);
+	zend_destroy_file_handle(&file_handle CLS_CC);
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }

@@ -65,12 +65,6 @@ static void build_runtime_defined_function_key(zval *result, zval *name, zend_op
 }
 
 
-static void zend_open_file_dtor_wrapper(zend_file_handle *fh)
-{
-	zend_open_file_dtor(fh);
-}
-
-
 static void init_compiler_declarables(CLS_D ELS_DC)
 {
 	CG(declarables).ticks.type = IS_LONG;
@@ -94,7 +88,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(in_compilation) = 0;
 	zend_init_rsrc_list(ELS_C);
 	CG(unclean_shutdown) = 0;
-	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
+	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
 	init_compiler_declarables(CLS_C ELS_CC);
 }
 

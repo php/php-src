@@ -213,6 +213,7 @@ static void thttpd_module_main(TLS_D SLS_DC)
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = TG(hc)->expnfilename;
 	file_handle.free_filename = 0;
+	file_handle.opened_path = NULL;
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return;

@@ -707,6 +707,7 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
 			continue;
 		}
 		EG(active_op_array) = zend_compile_file(file_handle CLS_CC);
+		zend_destroy_file_handle(file_handle CLS_CC);
 		if (EG(active_op_array)) {
 			zend_execute(EG(active_op_array) ELS_CC);
 			zval_ptr_dtor(EG(return_value_ptr_ptr));
