@@ -1581,8 +1581,8 @@ ZEND_API int zval_is_true(zval *op)
 
 ZEND_API char *zend_str_tolower_copy(char *str, unsigned int length)
 {
+	char          *start;
 	register char *result;
-	register char *start;
 	register char *p = str;
 	register char *end = p + length;
 
