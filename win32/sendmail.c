@@ -24,10 +24,10 @@
 #include <stdlib.h>
 #ifndef NETWARE
 #include <winsock2.h>
-#else	/* NETWARE */
-#include <netware\sendmail_nw.h>
-#endif	/* NETWARE */
 #include "time.h"
+#else	/* NETWARE */
+#include <netware/sendmail_nw.h>
+#endif	/* NETWARE */
 #include <string.h>
 #include <math.h>
 #ifndef NETWARE
