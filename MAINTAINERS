@@ -87,6 +87,14 @@ EXTENSION:           pgsql
 PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
 STATUS:              Odd fixes
 --------------------------------------------------------------------------------
+EXTENSION:           posix
+PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           recode
+PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained

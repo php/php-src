@@ -412,8 +412,10 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Oracle", "Stig Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
 		CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
 		CREDIT_LINE("PDF", "Uwe Steinmann");
+		CREDIT_LINE("Posix", "Kristian Köhntopp");
 		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
 		CREDIT_LINE("Readline", "Thies C. Arntzen");
+		CREDIT_LINE("Recode", "Kristian Köhntopp");
 		CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
 		CREDIT_LINE("SWF", "Sterling Hughes");
