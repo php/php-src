@@ -78,7 +78,6 @@ typedef struct ps_module_struct {
 	#x, _ps_open_##x, _ps_close_##x, _ps_read_##x, _ps_write_##x, \
 	 _ps_delete_##x, _ps_gc_##x 
 
-	
 typedef struct {
 	char *save_path;
 	char *session_name;
@@ -90,7 +89,9 @@ typedef struct {
 	int nr_open_sessions;
 	int gc_probability;
 	int gc_maxlifetime;
+	int module_number;
 	const struct ps_serializer_struct *serializer;
+	char *php_sid;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;
