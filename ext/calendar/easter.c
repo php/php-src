@@ -29,8 +29,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
-	struct tm *ta, te;
-	time_t the_time;
+	struct tm te;
 	long year, golden, solar, lunar, pfm, dom, tmp, easter;
 	long method = CAL_EASTER_DEFAULT;
 
