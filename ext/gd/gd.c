@@ -2761,7 +2761,6 @@ static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) 
 }
 
 
-#ifdef HAVE_GD_JPG
 /* _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	zval **f_org, **f_dest, **height, **width, **threshold;
@@ -2832,6 +2831,17 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 		}
 
 		switch (image_type) {
+#ifdef HAVE_GD_GIF
+			case PHP_GDIMG_TYPE_GIF:
+				im_org = gdImageCreateFromGif (org);
+				if (im_org == NULL) {
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid GIF file", get_active_function_name(), fn_dest);
+					RETURN_FALSE;
+				}
+				break;
+#endif /* HAVE_GD_GIF */
+
+#ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
 				im_org = gdImageCreateFromJpeg (org);
 				if (im_org == NULL) {
@@ -2839,6 +2849,10 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 					RETURN_FALSE;
 				}
 				break;
+#endif /* HAVE_GD_JPG */
+
+
+#ifdef HAVE_GD_PNG
 			case PHP_GDIMG_TYPE_PNG:
 				im_org = gdImageCreateFromPng(org);
 				if (im_org == NULL) {
@@ -2846,6 +2860,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 					RETURN_FALSE;
 				}
 				break;
+#endif /* HAVE_GD_PNG */
+
 			default:
 				php_error(E_WARNING, "%s: Format not supported", get_active_function_name());
 				break;
@@ -2939,8 +2955,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	}
 	WRONG_PARAM_COUNT;
 }
-#endif /* HAVE_GD_JPG */
-
 #endif /* HAVE_GD_WBMP */
 
 
