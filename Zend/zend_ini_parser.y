@@ -57,7 +57,6 @@ zval yylval;
 #ifndef ZTS
 extern int ini_lex(zval *ini_lval TSRMLS_DC);
 extern FILE *ini_in;
-extern int ini_lineno;
 extern void init_cfg_scanner(void);
 #endif
 

@@ -49,15 +49,15 @@ ZEND_API zend_scanner_globals ini_scanner_globals;
 
 static char *ini_filename;
 
-void init_ini_scanner()
+void init_ini_scanner(TSRMLS_D)
 {
-	ini_lineno=1;
+       SCNG(lineno)=1;
 }
 
 
 int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
-	return ini_lineno;
+       return SCNG(lineno);
 }
 
 
@@ -83,7 +83,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 			return FAILURE;
 	}
 
-	init_ini_scanner();
+	init_ini_scanner(TSRMLS_C);
 	yyin = fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	ini_filename = fh->filename;
@@ -105,7 +105,6 @@ void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 NEWLINE ("\r"|"\n"|"\r\n")
 
 %option noyywrap
-%option yylineno
 
 %%
 
@@ -133,6 +132,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		yyleng--;
 		yytext[yyleng]=0;
 	}
+
+	SCNG(lineno)++;
 
 	/* eat leading [ */
 	yytext++;
@@ -200,15 +201,20 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>[=\n] {
+	if (yytext[0] == '\n') {
+		SCNG(lineno)++;
+	}	
 	return yytext[0];
 }
 
 <INITIAL>{NEWLINE} {
+	SCNG(lineno)++;
 	return '\n';
 }
 
 <INITIAL>[;][^\r\n]*{NEWLINE}? {
 	/* comment */
+	SCNG(lineno)++;
 	return '\n';
 }
 
