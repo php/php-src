@@ -68,6 +68,13 @@ class PEAR_Common extends PEAR
      */
     var $releases_states  = array('alpha','beta','stable','snapshot','devel');
 
+    /**
+     * User Interface object (PEAR_Frontend_* class).  If null,
+     * log() uses print.
+     * @var object
+     */
+    var $ui = null;
+
     // }}}
 
     // {{{ constructor
@@ -159,7 +166,11 @@ class PEAR_Common extends PEAR
     function log($level, $msg)
     {
         if ($this->debug >= $level) {
-            print "$msg\n";
+            if (is_object($this->ui)) {
+                $this->ui->displayLine($msg);
+            } else {
+                print "$msg\n";
+            }
         }
     }
 
@@ -192,6 +203,15 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ setFrontend()
+
+    function setFrontend(&$ui)
+    {
+        $this->ui = &$ui;
+    }
+
+    // }}}
+
     // {{{ _element_start()
 
     /**
