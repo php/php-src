@@ -1,3 +1,9 @@
+2004-05-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ext/standard/dl.c:
+      Don't load modules twice
+
 2004-04-30  Derick Rethans  <php@derickrethans.nl>
 
     * ext/sqlite/package.xml:
