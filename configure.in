@@ -95,6 +95,7 @@ fi
 dnl ## there has to be a better way...
 dnl## OLDLIBS=$LIBS; LIBS=""
 AC_PROG_CC
+AC_AIX
 dnl## LIBS=$OLDLIBS
 
 AM_PROG_CC_STDC
@@ -782,8 +783,20 @@ if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
 fi
 
-test -d TSRM && echo '#include "../php_config.h"' > TSRM/tsrm_config.h
-echo '#include "../php_config.h"' > Zend/zend_config.h
+################################################################
+# Create configuration headers
+#
+
+if test -d TSRM; then
+  echo '#include "../php_config.h"' > TSRM/tsrm-config.h
+fi
+
+cat >Zend/zend_config.h <<FEO
+#include "../php_config.h"
+#ifdef APACHE
+#undef HAVE_DLFCN_H
+#endif
+FEO
 
 # run this only when generating all the files?
 if true; then
