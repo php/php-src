@@ -1,3 +1,128 @@
+2000-11-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * win32/php4dllts.dsp: Adding credits.c to project to allow compilation.
+
+    * main/main.c: removing compiler warning by including credits.h
+
+2000-11-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zlib/config.m4
+      ext/zlib/zlib.c:
+    fixed a compile problem with glibc<=2.1.1 (#7327, #7892)
+
+2000-11-20  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php:
+    updated class to work statically. Added four new functions, see
+    www.phpinsider.com for details
+
+2000-11-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ccvs/ccvs.c: Fixed typo. #6933
+
+2000-11-20  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/skeleton/php_skeleton.h: Revert.
+
+2000-11-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c: Move "replace value" logic to Zend
+
+2000-11-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/wddx/CREDITS
+      ext/xml/CREDITS
+      ext/yaz/CREDITS
+      ext/yp/CREDITS
+      ext/zlib/CREDITS
+      ext/sybase_ct/CREDITS
+      ext/sysvsem/CREDITS
+      ext/sysvshm/CREDITS
+      ext/swf/CREDITS
+      ext/sybase/CREDITS
+      ext/standard/CREDITS
+      ext/shmop/CREDITS
+      ext/skeleton/CREDITS
+      ext/snmp/CREDITS
+      ext/sockets/CREDITS
+      ext/recode/CREDITS
+      ext/sablot/CREDITS
+      ext/satellite/CREDITS
+      ext/session/CREDITS
+      ext/posix/CREDITS
+      ext/printer/CREDITS
+      ext/pspell/CREDITS
+      ext/qtdom/CREDITS
+      ext/readline/CREDITS
+      ext/oracle/CREDITS
+      ext/ovrimos/CREDITS
+      ext/pcre/CREDITS
+      ext/pdf/CREDITS
+      ext/pfpro/CREDITS
+      ext/pgsql/CREDITS
+      ext/odbc/CREDITS
+      ext/openssl/CREDITS
+      ext/mssql/CREDITS
+      ext/mysql/CREDITS
+      ext/oci8/CREDITS
+      ext/mcrypt/CREDITS
+      ext/mhash/CREDITS
+      ext/msql/CREDITS
+      ext/java/CREDITS
+      ext/ldap/CREDITS
+      ext/mcal/CREDITS
+      ext/ingres_ii/CREDITS
+      ext/interbase/CREDITS
+      ext/ircg/CREDITS
+      ext/imap/CREDITS
+      ext/informix/CREDITS
+      ext/hyperwave/CREDITS
+      ext/icap/CREDITS
+      ext/iisfunc/CREDITS
+      ext/ftp/CREDITS
+      ext/gd/CREDITS
+      ext/gettext/CREDITS
+      ext/fribidi/CREDITS
+      ext/fdf/CREDITS
+      ext/filepro/CREDITS
+      ext/domxml/CREDITS
+      ext/dotnet/CREDITS
+      ext/exif/CREDITS
+      ext/db/CREDITS
+      ext/dbase/CREDITS
+      ext/cybercash/CREDITS
+      ext/dav/CREDITS
+      ext/dba/CREDITS
+      ext/cpdf/CREDITS
+      ext/curl/CREDITS
+      ext/calendar/CREDITS
+      ext/ccvs/CREDITS
+      ext/com/CREDITS
+      ext/aspell/CREDITS
+      ext/bcmath/CREDITS
+      ext/bz2/CREDITS
+      ext/apache/CREDITS
+      sapi/thttpd/CREDITS
+      sapi/phttpd/CREDITS
+      sapi/pi3web/CREDITS
+      sapi/servlet/CREDITS
+      sapi/isapi/CREDITS
+      sapi/nsapi/CREDITS
+      sapi/apache/CREDITS
+      sapi/caudium/CREDITS
+      sapi/cgi/CREDITS
+      sapi/fhttpd/CREDITS
+      sapi/apache2filter/CREDITS
+      sapi/aolserver/CREDITS: 2nd step towards auto-credits
+
+    * ext/standard/Makefile.in
+      ext/standard/credits.c
+      ext/standard/credits.h
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      ext/standard/info.c
+      ext/standard/info.h: first step towards auto-generated credits
+
 2000-11-19  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/info.c: typo fix (copy/paste bug?)
