@@ -464,6 +464,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	int max_key_size, key_size, iv_size;
 	MCRYPT td;
 	int argc;
+	int result = 0;
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (3,3)
@@ -503,7 +504,27 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	memcpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
-	RETVAL_LONG (mcrypt_generic_init (td, key_s, key_size, iv_s));
+	result = mcrypt_generic_init (td, key_s, key_size, iv_s);
+
+	/* If this function fails, close the mcrypt module to prevent crashes
+	 * when further functions want to access this resource */
+	if (result < 0) {
+		zend_list_delete (Z_LVAL_PP(mcryptind));
+		switch (result) {
+			case -3:
+				php_error (E_WARNING, "mcrypt_generic_init: Key length incorrect");
+				break;
+			case -4:
+				php_error (E_WARNING, "mcrypt_generic_init: Memory allocation error");
+				break;
+			case -1:
+			default:
+				php_error (E_WARNING, "mcrypt_generic_init: Unknown error");
+				break;
+		}
+	}
+	RETVAL_LONG (result);
+
 	efree (iv_s);
 	efree (key_s);
 }
