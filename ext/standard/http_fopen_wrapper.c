@@ -134,7 +134,16 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	else if (resource->port == 0)
 		resource->port = 80;
 
-	transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+	if (context && !use_ssl &&
+		php_stream_context_get_option(context, "http", "proxy", &tmpzval) == SUCCESS &&
+		Z_TYPE_PP(tmpzval) == IS_STRING &&
+		Z_STRLEN_PP(tmpzval) > 0) {
+		/* Don't use proxy server for SSL resources */
+		transport_len = Z_STRLEN_PP(tmpzval);
+		transport_string = estrndup(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
+	} else {
+		transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+	}
 
 	stream = php_stream_xport_create(transport_string, transport_len, options,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
