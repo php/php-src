@@ -1290,7 +1290,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 /* Disabled functions support */
 
-static ZEND_FUNCTION(display_disabled_function)
+ZEND_API ZEND_FUNCTION(display_disabled_function)
 {
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name(TSRMLS_C));
 }
