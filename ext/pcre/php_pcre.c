@@ -440,7 +440,8 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 					if (subpats_order_val == PREG_PATTERN_ORDER) {
 						/* For each subpattern, insert it into the appropriate array. */
 						for (i = 0; i < count; i++) {
-							add_next_index_string(match_sets[i], (char *)stringlist[i], 1);
+							add_next_index_stringl(match_sets[i], (char *)stringlist[i],
+												   offsets[(i<<1)+1] - offsets[i<<1], 1);
 						}
 						/*
 						 * If the number of captured subpatterns on this run is
@@ -460,7 +461,8 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						
 						/* Add all the subpatterns to it */
 						for (i = 0; i < count; i++) {
-							add_next_index_string(result_set, (char *)stringlist[i], 1);
+							add_next_index_stringl(result_set, (char *)stringlist[i],
+												   offsets[(i<<1)+1] - offsets[i<<1], 1);
 						}
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_PP(subpats), &result_set,
@@ -470,7 +472,8 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				else {			/* single pattern matching */
 					/* For each subpattern, insert it into the subpatterns array. */
 					for (i = 0; i < count; i++) {
-						add_next_index_string((*subpats), (char *)stringlist[i], 1);
+						add_next_index_stringl((*subpats), (char *)stringlist[i],
+											   offsets[(i<<1)+1] - offsets[i<<1], 1);
 					}
 				}
 
