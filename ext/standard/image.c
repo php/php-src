@@ -568,7 +568,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 	struct gfxinfo *result = NULL;
 	int i, num_entries;
 	unsigned char *dir_entry;
-	size_t ifd_size, dir_size, entry_value, entry_length, width, height, ifd_addr;
+	size_t ifd_size, dir_size, entry_value, entry_length, width=0, height=0, ifd_addr;
 	int entry_tag , entry_type;
 	char *ifd_data, ifd_ptr[4];
 
