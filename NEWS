@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, Version 4.3.11
+13 Mar 2005, Version 4.3.11RC1
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
   and gmp_fact() to prevent SIGFPE. (Tony)
