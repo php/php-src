@@ -268,7 +268,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 
 	p = orig = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-MEM_HEADER_PADDING);
 
-#if defined(ZTS) && ZEND_DEBUG
+#if defined(ZTS) && TSRM_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
 		void *new_p;
 
