@@ -705,7 +705,7 @@ encaps_var_offset:
 
 
 internal_functions_in_yacc:
-		T_ISSET '(' cvar ')'	{ zend_do_isset_or_isempty(ZEND_ISSET, &$$, &$3 CLS_CC); }
+		T_ISSET '(' isset_variables ')' { $$ = $3; }
 	|	T_EMPTY '(' cvar ')'	{ zend_do_isset_or_isempty(ZEND_ISEMPTY, &$$, &$3 CLS_CC); }
 	|	T_INCLUDE expr 			{ zend_do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
 	|	T_INCLUDE_ONCE expr 	{ zend_do_include_or_eval(ZEND_INCLUDE_ONCE, &$$, &$2 CLS_CC); }
@@ -714,6 +714,10 @@ internal_functions_in_yacc:
 	|	T_REQUIRE_ONCE expr		{ zend_do_include_or_eval(ZEND_REQUIRE_ONCE, &$$, &$2 CLS_CC); }
 ;
 
+isset_variables:
+		cvar 				{ zend_do_isset_or_isempty(ZEND_ISSET, &$$, &$1 CLS_CC); }
+	|	isset_variables ',' { zend_do_boolean_and_begin(&$1, &$2 CLS_CC); } cvar { znode tmp; zend_do_isset_or_isempty(ZEND_ISSET, &tmp, &$4 CLS_CC); zend_do_boolean_and_end(&$$, &$1, &tmp, &$2 CLS_CC); }
+;	
 
 %%
 
