@@ -626,9 +626,6 @@ divert(5)
 
 PHP_CONFIGURE_PART(Configuring extensions)
 
-# zlib checks have to be here
-sinclude(./ext/zlib/zlib.m4)
-
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 

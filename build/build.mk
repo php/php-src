@@ -34,7 +34,7 @@ generated_lists:
 		TSRM/Makefile.am > $@
 	@echo config_h_files = Zend/acconfig.h TSRM/acconfig.h >> $@
 	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 \
-		Zend/acinclude.m4 ext/*/config.m4 sapi/*/config.m4 >> $@
+		Zend/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
 	@build/buildcheck.sh && touch $(STAMP)
