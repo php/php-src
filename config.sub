@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 #   2000, 2001, 2002 Free Software Foundation, Inc.
 
-timestamp='2002-05-28'
+timestamp='2002-09-05'
 
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
@@ -118,7 +118,7 @@ esac
 # Here we must recognize all the valid KERNEL-OS combinations.
 maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
 case $maybe_os in
-  nto-qnx* | linux-gnu* | storm-chaos* | os2-emx* | windows32-* | rtmk-nova*)
+  nto-qnx* | linux-gnu* | freebsd*-gnu* | storm-chaos* | os2-emx* | windows32-* | rtmk-nova*)
     os=-$maybe_os
     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
     ;;
@@ -229,24 +229,34 @@ case $basic_machine in
 	| alpha | alphaev[4-8] | alphaev56 | alphaev6[78] | alphapca5[67] \
 	| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] | alpha64pca5[67] \
 	| arc | arm | arm[bl]e | arme[lb] | armv[2345] | armv[345][lb] | avr \
-	| c4x | clipper \
+	| clipper \
 	| d10v | d30v | dlx | dsp16xx \
-	| fr30 \
+	| fr30 | frv \
 	| h8300 | h8500 | hppa | hppa1.[01] | hppa2.0 | hppa2.0[nw] | hppa64 \
 	| i370 | i860 | i960 | ia64 \
+	| ip2k \
 	| m32r | m68000 | m68k | m88k | mcore \
-	| mips | mips16 | mips64 | mips64el | mips64orion | mips64orionel \
-	| mips64vr4100 | mips64vr4100el | mips64vr4300 \
-	| mips64vr4300el | mips64vr5000 | mips64vr5000el \
-	| mipsbe | mipseb | mipsel | mipsle | mipstx39 | mipstx39el \
-	| mipsisa32 | mipsisa64 \
+	| mips | mipsbe | mipseb | mipsel | mipsle \
+	| mips16 \
+	| mips64 | mips64el \
+	| mips64vr | mips64vrel \
+	| mips64orion | mips64orionel \
+	| mips64vr4100 | mips64vr4100el \
+	| mips64vr4300 | mips64vr4300el \
+	| mips64vr5000 | mips64vr5000el \
+	| mipsisa32 | mipsisa32el \
+	| mipsisa64 | mipsisa64el \
+	| mipsisa64sb1 | mipsisa64sb1el \
+	| mipsisa64sr71k | mipsisa64sr71kel \
+	| mipstx39 | mipstx39el \
 	| mn10200 | mn10300 \
 	| ns16k | ns32k \
 	| openrisc | or32 \
 	| pdp10 | pdp11 | pj | pjl \
 	| powerpc | powerpc64 | powerpc64le | powerpcle | ppcbe \
 	| pyramid \
-	| sh | sh[34] | sh[34]eb | shbe | shle | sh64 \
+	| sh | sh[1234] | sh3e | sh[34]eb | shbe | shle | sh[1234]le | sh3ele \
+	| sh64 | sh64le \
 	| sparc | sparc64 | sparc86x | sparclet | sparclite | sparcv9 | sparcv9b \
 	| strongarm \
 	| tahoe | thumb | tic80 | tron \
@@ -284,31 +294,42 @@ case $basic_machine in
 	| arm-*  | armbe-* | armle-* | armeb-* | armv*-* \
 	| avr-* \
 	| bs2000-* \
-	| c[123]* | c30-* | [cjt]90-* | c54x-* \
+	| c[123]* | c30-* | [cjt]90-* | c4x-* | c54x-* \
 	| clipper-* | cydra-* \
 	| d10v-* | d30v-* | dlx-* \
 	| elxsi-* \
-	| f30[01]-* | f700-* | fr30-* | fx80-* \
+	| f30[01]-* | f700-* | fr30-* | frv-* | fx80-* \
 	| h8300-* | h8500-* \
 	| hppa-* | hppa1.[01]-* | hppa2.0-* | hppa2.0[nw]-* | hppa64-* \
 	| i*86-* | i860-* | i960-* | ia64-* \
+	| ip2k-* \
 	| m32r-* \
 	| m68000-* | m680[012346]0-* | m68360-* | m683?2-* | m68k-* \
 	| m88110-* | m88k-* | mcore-* \
-	| mips-* | mips16-* | mips64-* | mips64el-* | mips64orion-* \
-	| mips64orionel-* | mips64vr4100-* | mips64vr4100el-* \
-	| mips64vr4300-* | mips64vr4300el-* | mipsbe-* | mipseb-* \
-	| mipsle-* | mipsel-* | mipstx39-* | mipstx39el-* \
+	| mips-* | mipsbe-* | mipseb-* | mipsel-* | mipsle-* \
+	| mips16-* \
+	| mips64-* | mips64el-* \
+	| mips64vr-* | mips64vrel-* \
+	| mips64orion-* | mips64orionel-* \
+	| mips64vr4100-* | mips64vr4100el-* \
+	| mips64vr4300-* | mips64vr4300el-* \
+	| mips64vr5000-* | mips64vr5000el-* \
+	| mipsisa32-* | mipsisa32el-* \
+	| mipsisa64-* | mipsisa64el-* \
+	| mipsisa64sb1-* | mipsisa64sb1el-* \
+	| mipsisa64sr71k-* | mipsisa64sr71kel-* \
+	| mipstx39 | mipstx39el \
 	| none-* | np1-* | ns16k-* | ns32k-* \
 	| orion-* \
 	| pdp10-* | pdp11-* | pj-* | pjl-* | pn-* | power-* \
 	| powerpc-* | powerpc64-* | powerpc64le-* | powerpcle-* | ppcbe-* \
 	| pyramid-* \
 	| romp-* | rs6000-* \
-	| sh-* | sh[34]-* | sh[34]eb-* | shbe-* | shle-* | sh64-* \
+	| sh-* | sh[1234]-* | sh3e-* | sh[34]eb-* | shbe-* \
+	| shle-* | sh[1234]le-* | sh3ele-* | sh64-* | sh64le-* \
 	| sparc-* | sparc64-* | sparc86x-* | sparclet-* | sparclite-* \
 	| sparcv9-* | sparcv9b-* | strongarm-* | sv1-* | sx?-* \
-	| tahoe-* | thumb-* | tic30-* | tic54x-* | tic80-* | tron-* \
+	| tahoe-* | thumb-* | tic30-* | tic4x-* | tic54x-* | tic80-* | tron-* \
 	| v850-* | v850e-* | vax-* \
 	| we32k-* \
 	| x86-* | x86_64-* | xps100-* | xscale-* | xstormy16-* \
@@ -728,13 +749,13 @@ case $basic_machine in
 	pbb)
 		basic_machine=m68k-tti
 		;;
-        pc532 | pc532-*)
+	pc532 | pc532-*)
 		basic_machine=ns32k-pc532
 		;;
 	pentium | p5 | k5 | k6 | nexgen | viac3)
 		basic_machine=i586-pc
 		;;
-	pentiumpro | p6 | 6x86 | athlon)
+	pentiumpro | p6 | 6x86 | athlon | athlon_*)
 		basic_machine=i686-pc
 		;;
 	pentiumii | pentium2)
@@ -755,22 +776,22 @@ case $basic_machine in
 	power)	basic_machine=power-ibm
 		;;
 	ppc)	basic_machine=powerpc-unknown
-	        ;;
+		;;
 	ppc-*)	basic_machine=powerpc-`echo $basic_machine | sed 's/^[^-]*-//'`
 		;;
 	ppcle | powerpclittle | ppc-le | powerpc-little)
 		basic_machine=powerpcle-unknown
-	        ;;
+		;;
 	ppcle-* | powerpclittle-*)
 		basic_machine=powerpcle-`echo $basic_machine | sed 's/^[^-]*-//'`
 		;;
 	ppc64)	basic_machine=powerpc64-unknown
-	        ;;
+		;;
 	ppc64-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
 		;;
 	ppc64le | powerpc64little | ppc64-le | powerpc64-little)
 		basic_machine=powerpc64le-unknown
-	        ;;
+		;;
 	ppc64le-* | powerpc64little-*)
 		basic_machine=powerpc64le-`echo $basic_machine | sed 's/^[^-]*-//'`
 		;;
@@ -800,6 +821,12 @@ case $basic_machine in
 	sa29200)
 		basic_machine=a29k-amd
 		os=-udi
+		;;
+	sb1)
+		basic_machine=mipsisa64sb1-unknown
+		;;
+	sb1el)
+		basic_machine=mipsisa64sb1el-unknown
 		;;
 	sequent)
 		basic_machine=i386-sequent
@@ -866,7 +893,7 @@ case $basic_machine in
 	sun386 | sun386i | roadrunner)
 		basic_machine=i386-sun
 		;;
-        sv1)
+	sv1)
 		basic_machine=sv1-cray
 		os=-unicos
 		;;
@@ -885,6 +912,10 @@ case $basic_machine in
 	t90)
 		basic_machine=t90-cray
 		os=-unicos
+		;;
+        tic4x | c4x*)
+		basic_machine=tic4x-unknown
+		os=-coff
 		;;
 	tic54x | c54x*)
 		basic_machine=tic54x-unknown
@@ -924,8 +955,8 @@ case $basic_machine in
 		os=-vms
 		;;
 	vpp*|vx|vx-*)
-               basic_machine=f301-fujitsu
-               ;;
+		basic_machine=f301-fujitsu
+		;;
 	vxworks960)
 		basic_machine=i960-wrs
 		os=-vxworks
@@ -950,7 +981,7 @@ case $basic_machine in
 		basic_machine=i386-pc
 		os=-windows32-msvcrt
 		;;
-        xps | xps100)
+	xps | xps100)
 		basic_machine=xps100-honeywell
 		;;
 	ymp)
@@ -996,7 +1027,7 @@ case $basic_machine in
 	we32k)
 		basic_machine=we32k-att
 		;;
-	sh3 | sh4 | sh3eb | sh4eb)
+	sh3 | sh4 | sh3eb | sh4eb | sh[1234]le | sh3ele)
 		basic_machine=sh-unknown
 		;;
 	sh64)
@@ -1005,7 +1036,7 @@ case $basic_machine in
 	sparc | sparcv9 | sparcv9b)
 		basic_machine=sparc-sun
 		;;
-        cydra)
+	cydra)
 		basic_machine=cydra-cydrome
 		;;
 	orion)
@@ -1019,10 +1050,6 @@ case $basic_machine in
 		;;
 	pmac | pmac-mpw)
 		basic_machine=powerpc-apple
-		;;
-	c4x*)
-		basic_machine=c4x-none
-		os=-coff
 		;;
 	*-unknown)
 		# Make sure to match an already-canonicalized machine name.
@@ -1155,7 +1182,7 @@ case $os in
 		os=-rtmk-nova
 		;;
 	-ns2 )
-	        os=-nextstep2
+		os=-nextstep2
 		;;
 	-nsk*)
 		os=-nsk
@@ -1194,8 +1221,8 @@ case $os in
 	-xenix)
 		os=-xenix
 		;;
-        -*mint | -mint[0-9]* | -*MiNT | -MiNT[0-9]*)
-	        os=-mint
+	-*mint | -mint[0-9]* | -*MiNT | -MiNT[0-9]*)
+		os=-mint
 		;;
 	-none)
 		;;
@@ -1232,7 +1259,7 @@ case $basic_machine in
 	pdp10-*)
 		os=-tops20
 		;;
-        pdp11-*)
+	pdp11-*)
 		os=-none
 		;;
 	*-dec | vax-*)
@@ -1325,19 +1352,19 @@ case $basic_machine in
 	*-next)
 		os=-nextstep3
 		;;
-        *-gould)
+	*-gould)
 		os=-sysv
 		;;
-        *-highlevel)
+	*-highlevel)
 		os=-bsd
 		;;
 	*-encore)
 		os=-bsd
 		;;
-        *-sgi)
+	*-sgi)
 		os=-irix
 		;;
-        *-siemens)
+	*-siemens)
 		os=-sysv4
 		;;
 	*-masscomp)
