@@ -337,6 +337,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_merge,					NULL)
 	PHP_FE(array_keys,					NULL)
 	PHP_FE(array_values,				NULL)
+	PHP_FE(array_count_values,		   	NULL)
 
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
@@ -3239,6 +3240,66 @@ PHP_FUNCTION(array_values)
 											sizeof(zval *), NULL);
 
 		zend_hash_move_forward(input->value.ht);
+	}
+}
+/* }}} */
+
+/* {{{ proto array array_count_values(array input)
+   Return the value as key and the frequency of that value in <input> as value */
+PHP_FUNCTION(array_count_values)
+{
+	zval	   **input,		/* Input array */
+			   **entry;		/* An entry in the input array */
+	zval       **tmp;
+	HashTable   *myht;
+	
+	/* Get arguments and do error-checking */
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &input) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if ((*input)->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Argument to array_count_values() should be an array");
+		return;
+	}
+	
+	/* Initialize return array */
+	array_init(return_value);
+
+	/* Go through input array and add values to the return array */	
+	myht = (*input)->value.ht;
+	zend_hash_internal_pointer_reset(myht);
+	while (zend_hash_get_current_data(myht, (void **)&entry) == SUCCESS) {
+		if ((*entry)->type == IS_LONG) {
+			if (zend_hash_index_find(return_value->value.ht, 
+									 (*entry)->value.lval, 
+									 (void**)&tmp) == FAILURE) {
+				zval *data;
+				MAKE_STD_ZVAL(data);
+				data->type = IS_LONG;
+				data->value.lval = 1;
+				zend_hash_index_update(return_value->value.ht,(*entry)->value.lval, &data, sizeof(data), NULL);
+			} else {
+				(*tmp)->value.lval++;
+			}
+		} else if ((*entry)->type == IS_STRING) {
+			if (zend_hash_find(return_value->value.ht, 
+							   (*entry)->value.str.val, 
+							   (*entry)->value.str.len+1, 
+							   (void**)&tmp) == FAILURE) {
+				zval *data;
+				MAKE_STD_ZVAL(data);
+				data->type = IS_LONG;
+				data->value.lval = 1;
+				zend_hash_update(return_value->value.ht,(*entry)->value.str.val,(*entry)->value.str.len + 1, &data, sizeof(data), NULL);
+			} else {
+				(*tmp)->value.lval++;
+			}
+		} else {
+			zend_error(E_WARNING, "Can only count STRING and INTEGER values!");
+		}
+
+		zend_hash_move_forward(myht);
 	}
 }
 /* }}} */

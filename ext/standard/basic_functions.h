@@ -141,6 +141,7 @@ PHP_FUNCTION(array_slice);
 PHP_FUNCTION(array_merge);
 PHP_FUNCTION(array_keys);
 PHP_FUNCTION(array_values);
+PHP_FUNCTION(array_count_values);
 
 #if HAVE_PUTENV
 typedef struct {
