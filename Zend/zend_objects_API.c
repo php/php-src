@@ -115,12 +115,14 @@ void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 	
 	if (--obj->refcount == 0) {
 		if (EG(objects_store).object_buckets[handle].valid) {
-			if(obj->dtor && !EG(objects_store).object_buckets[handle].destructor_called) {
+			if(!EG(objects_store).object_buckets[handle].destructor_called) {
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
-				obj->dtor(obj->object, handle TSRMLS_CC);
+				if (obj->dtor) {
+					obj->dtor(obj->object, handle TSRMLS_CC);
+				}
+				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 			}
 		}
-		ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 #if ZEND_DEBUG_OBJECTS
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
 #endif
