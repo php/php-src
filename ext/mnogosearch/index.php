@@ -1,9 +1,9 @@
-<!-- 
+<?
+
+/* 
     $Source$
     $Id$ 
--->
-
-<?
+*/
 
 /*   mnoGoSearch-php-lite v.1.1
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
@@ -468,6 +468,13 @@ function make_nav($query_orig){
    	print "Cannot determine php version: <b>".phpversion()."</b>\n";
    	exit;
    }
+     
+   $have_spell_flag=0;
+
+   $udm_agent=Udm_Alloc_Agent($dbaddr,$dbmode);	
+
+   Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_SIZE,$ps);
+   Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_NUM,$np);
 
    if ($phpver >= 40006) {
         if ($temp_cp_arr=Udm_Cat_Path($udm_agent,$cat)) {
@@ -503,13 +510,6 @@ function make_nav($query_orig){
 	        $t_DY=$temp_cp;
 	}
    }
-     
-   $have_spell_flag=0;
-
-   $udm_agent=Udm_Alloc_Agent($dbaddr,$dbmode);	
-
-   Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_SIZE,$ps);
-   Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_NUM,$np);
 
    $trackquery=strtolower($trackquery);
    if ($trackquery == 'yes') {
@@ -564,11 +564,13 @@ function make_nav($query_orig){
 	if ($hlbeg != '') {
 		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLBEG,$hlbeg);	
 	} else {
+	        $hlbeg='<font color="000088"><b>';
 		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLBEG,'<font color="000088"><b>');	
 	}
 	if ($hlend != '') {
 		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLEND,$hlend);	
 	} else {
+		$hlend='</b></font>';
 		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLEND,'</b></font>');	
 	}
    }
@@ -899,19 +901,23 @@ if(($errno=Udm_Errno($udm_agent))>0){
         for($i=0;$i<$rows;$i++){
 		$ndoc=Udm_Get_Res_Field($res,$i,UDM_FIELD_ORDER);
 		$rating=Udm_Get_Res_Field($res,$i,UDM_FIELD_RATING);
-                $url=Udm_Get_Res_Field($res,$i,UDM_FIELD_URL);
-        	$title=Udm_Get_Res_Field($res,$i,UDM_FIELD_TITLE);
-  		$title=($title) ? htmlspecialChars($title):'No title';
-  		$text=htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_TEXT));
-  		$contype=Udm_Get_Res_Field($res,$i,UDM_FIELD_CONTENT);
-  		$docsize=Udm_Get_Res_Field($res,$i,UDM_FIELD_SIZE);
-  		$lastmod=format_lastmod(Udm_Get_Res_Field($res,$i,UDM_FIELD_MODIFIED));
-  		$keyw=htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_KEYWORDS));
-  		$desc=htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_DESC));
-  		$crc=Udm_Get_Res_Field($res,$i,UDM_FIELD_CRC);
-  		$rec_id=Udm_Get_Res_Field($res,$i,UDM_FIELD_URLID);
+		$url=Udm_Get_Res_Field($res,$i,UDM_FIELD_URL);
+		$contype=Udm_Get_Res_Field($res,$i,UDM_FIELD_CONTENT);
+		$docsize=Udm_Get_Res_Field($res,$i,UDM_FIELD_SIZE);
+		$lastmod=format_lastmod(Udm_Get_Res_Field($res,$i,UDM_FIELD_MODIFIED));
+		
+		$title=Udm_Get_Res_Field($res,$i,UDM_FIELD_TITLE);   
+		$title=($title) ? htmlspecialChars($title):'No title';
+		
+		$title=ParseDocText($title);
+		$text=ParseDocText(htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_TEXT)));
+		$keyw=ParseDocText(htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_KEYWORDS)));
+		$desc=ParseDocText(htmlspecialChars(Udm_Get_Res_Field($res,$i,UDM_FIELD_DESC)));
 
-  		if ($phpver >= 40006) {
+		$crc=Udm_Get_Res_Field($res,$i,UDM_FIELD_CRC);
+		$rec_id=Udm_Get_Res_Field($res,$i,UDM_FIELD_URLID);
+		
+		if ($phpver >= 40006) {
   			$category=Udm_Get_Res_Field($res,$i,UDM_FIELD_CATEGORY);
   		} else {
   			$category='';
