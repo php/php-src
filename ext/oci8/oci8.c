@@ -922,6 +922,10 @@ static ub4
 oci_handle_error(oci_connection *connection, ub4 errcode)
 {
 	switch (errcode) {
+		case 1013: /* user requested cancel of current operation */
+			zend_bailout();
+			break;
+
     	case 22:   /* ORA-00022 Invalid session id */
        	case 1012: /* ORA-01012: */
        	case 3113: /* ORA-03113: end-of-file on communication channel */
