@@ -171,7 +171,7 @@ AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
   if test "$EXT_SHARED" != ""; then
     os=`uname -sr 2>/dev/null`
     case "$os" in
-        "SunOS 5"*)
+        "SunOS 5.6"|"SunOS 5.7")
           case "$CC" in
 	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
 	    *) CFLAGS="$CFLAGS -fpic";;
