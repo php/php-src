@@ -150,12 +150,12 @@ extern xslt_args *xslt_parse_arguments(char  *xml,
 	if (! strncasecmp(xml, "arg:", 4)) {
 		char *key = xml + 5;
 
-		Z_TYPE(return_value->xml) = XSLT_IS_DATA;
+		return_value->xml.type = XSLT_IS_DATA;
 		return_value->xml.ptr  = _find_xslt_argument((const char **) argv, 
 		                                             (const char *)  key);
 	}
 	else {
-		Z_TYPE(return_value->xml) = XSLT_IS_FILE;
+		return_value->xml.type = XSLT_IS_FILE;
 		return_value->xml.ptr  = estrdup(xml);
 	}
 
@@ -163,12 +163,12 @@ extern xslt_args *xslt_parse_arguments(char  *xml,
 	if (! strncasecmp(xsl, "arg:", 4)) {
 		char *key = xsl + 5;
 
-		Z_TYPE(return_value->xsl) = XSLT_IS_DATA;
+		return_value->xsl.type = XSLT_IS_DATA;
 		return_value->xsl.ptr  = _find_xslt_argument((const char **) argv, 
 		                                             (const char *)  key);
 	}
 	else {
-		Z_TYPE(return_value->xsl) = XSLT_IS_FILE;
+		return_value->xsl.type = XSLT_IS_FILE;
 		return_value->xsl.ptr  = estrdup(xsl);
 	}
 
@@ -176,12 +176,12 @@ extern xslt_args *xslt_parse_arguments(char  *xml,
 	if (! strncasecmp(result, "arg:", 4)) {
 		char *key = result + 5;
 
-		Z_TYPE(return_value->result) = XSLT_IS_DATA;
+		return_value->result.type = XSLT_IS_DATA;
 		return_value->result.ptr  = _find_xslt_argument((const char **) argv, 
 		                                                (const char *)  key);
 	}
 	else {
-		Z_TYPE(return_value->result) = XSLT_IS_FILE;
+		return_value->result.type = XSLT_IS_FILE;
 		return_value->result.ptr  = estrdup(result);
 	}
 
