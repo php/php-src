@@ -74,9 +74,11 @@ function_entry posix_functions[] = {
 	PHP_FE(posix_getuid,	NULL)
 	PHP_FE(posix_setuid,	NULL)
 	PHP_FE(posix_geteuid,	NULL)
+	PHP_FE(posix_seteuid,	NULL)
 	PHP_FE(posix_getgid,	NULL)
 	PHP_FE(posix_setgid,	NULL)
 	PHP_FE(posix_getegid,	NULL)
+	PHP_FE(posix_setegid,	NULL)
 	PHP_FE(posix_getgroups,	NULL)
 	PHP_FE(posix_getlogin,	NULL)
 
@@ -284,6 +286,65 @@ PHP_FUNCTION(posix_setgid)
 	RETURN_TRUE;                                  
 }
 /* }}} */
+
+/* {{{ proto long posix_seteuid(long uid)
+   Set effective user id */
+PHP_FUNCTION(posix_seteuid)
+{
+#ifdef HAVE_SETEUID
+	pval *uid;
+	int   result;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &uid)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(uid);
+  
+	result = seteuid(uid->value.lval);
+	if (result < 0) {
+		php_error(E_WARNING, "posix_setuid(%d) failed with '%s'.",
+			uid->value.lval,
+			strerror(errno));
+			RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto long posix_setegid(long uid)
+   Set effective group id */
+PHP_FUNCTION(posix_setegid)
+{
+#ifdef HAVE_SETEGID
+	pval *gid;
+	int   result;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &gid)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(gid);
+  
+	result = setegid(gid->value.lval);
+	if (result < 0) {
+		php_error(E_WARNING, "posix_setgid(%d) failed with '%s'.",
+	    	gid->value.lval,
+			strerror(errno));
+			RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
 
 /* {{{ proto long posix_getgroups(void) 
    Get supplementary group id's (POSIX.1, 4.2.3) */

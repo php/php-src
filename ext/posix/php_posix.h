@@ -52,6 +52,9 @@ PHP_FUNCTION(posix_geteuid);
 PHP_FUNCTION(posix_getegid);
 PHP_FUNCTION(posix_setuid);
 PHP_FUNCTION(posix_setgid);
+PHP_FUNCTION(posix_seteuid);
+PHP_FUNCTION(posix_setegid);
+
 PHP_FUNCTION(posix_getgroups);
 PHP_FUNCTION(posix_getlogin);
 
