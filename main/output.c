@@ -654,9 +654,10 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 	zval *elem;
 
 	MAKE_STD_ZVAL(elem);
-	if (array_init(elem))
+	if (array_init(elem) == FAILURE) {
 		return FAILURE;
-	
+	}
+
 	if (ob_buffer->internal_output_handler) {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
 	}
