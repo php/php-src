@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2004, PHP 5.0.2
 - Added PHP_EOL constant that contains the OS way of representing newlines.
   (Paul Hudson, Derick)
-- Fixed Apache 2.0 SAPI build against Apache 2 HEAD. (Joe Orton, Derick)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE
@@ -15,6 +14,8 @@ PHP                                                                        NEWS
   (Christian, Rob)
 - Fixed bug #29656 (segfault on result and statement properties). (Georg)
 - Fixed bug #29447 (Reflection API issues). (Marcus)
+- Fixed bug #27791 (Apache 2.0 SAPI build against Apache 2 HEAD). (Joe Orton,
+  Derick)
 - Fixed bug #26737 (private/protected properties not serialized when user
   declared method __sleep() exists). E_NOTICE thrown when __sleep() returns
   name of non-existing member. (Andrey, Curt)
