@@ -3,10 +3,10 @@ parenthesis means that person has taken on this project.
 
 global
 ------
-	* activate all extensions by default that don't rely on external
-	  dependices. (eg ftp)
-	* --enable-all in configure. (--enable-shared=max ...)
-	* make configure print out a summary when it's done (like XEmacs)
+    * activate all extensions by default that don't rely on external
+      dependices. (eg ftp)
+    * --enable-all in configure. (--enable-shared=max ...)
+    * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
       reentrant-save functions
     * there is only one current directory per process; to make
@@ -14,8 +14,8 @@ global
       current directory
     * on some platforms unimplemented function will just do nothing (eg symlink)
       they should print a warning or be not even defined!
-	* banish the legacy of php3_ prefixes
-	* implement javadoc based function docs template system
+    * banish the legacy of php3_ prefixes
+    * implement javadoc based function docs template system
 
 documentation
 -------------
@@ -24,21 +24,21 @@ documentation
 
 ext/apache
 --------
-	* all apache specific functions should be in sapi/apache
+    * all apache specific functions should be in sapi/apache
 
 ext/oci8
 --------
-	* map boolean value false to oracle NULL.
-	* all OCIFetch*() functions should return 0 for no more data and false on error.
+    * map boolean value false to oracle NULL.
+    * all OCIFetch*() functions should return 0 for no more data and false on error.
 
 ext/standard
 ------------
     * strpad() (Andrei)
-	* comparing arrays semantically (like Python) (Andrei)
-	* NOT binary safe:
-		strtok()
-		basename()
-		dirname()
-		strrpos()
-		strrchr()
-		strip_tags()
+    * comparing arrays semantically (like Python) (Andrei)
+    * NOT binary safe:
+        strtok()
+        basename()
+        dirname()
+        strrpos()
+        strrchr()
+        strip_tags()
