@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ??? 2000, Version 4.0 Release
+
 27 March 2000, Version 4.0 Release Candidate 1
 - Fixed a data corruption bug in mysql_result(), if used in table.fieldname
   mode (Zeev)
