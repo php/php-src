@@ -59,6 +59,7 @@ PHP 4.0                                                                    NEWS
 - Changed the sablot configuration file so that if you use any version of
   Sablotron below 0.44 you must use Sablotron's built-in Expat libraries.
   (Sterling)
+- Added basic authentication support to thttpd (Sascha)
 - Added support for the Caudium webserver (http://caudium.net/). It's based
   on the Roxen SAPI module. Many bugs have been identified and fixed. (David)
 - Fixed mysql_close(), pg_close(), msql_close() and sybase_close() - they
