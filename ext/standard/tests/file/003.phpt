@@ -7,5 +7,5 @@ is_file/file_exist
 --EXPECT--
 bool(false)
 bool(false)
-int(1)
+bool(true)
 bool(true)
