@@ -68,7 +68,8 @@ cwd_state main_cwd_state; /* True global */
 #endif
 
 #ifdef TSRM_WIN32
-#define tsrm_strtok_r(a,b,c) strtok((a),(b))
+#include <tchar.h>
+#define tsrm_strtok_r(a,b,c) _tcstok((a),(b))
 #define TOKENIZER_STRING "/\\"
 	
 static int php_check_dots(const char *element, int n) 
