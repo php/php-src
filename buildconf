@@ -70,7 +70,7 @@ if test "$1" = "--copy"; then
     automake_flags=--copy
 fi
 
-if ! test -d libzend; then
+if test ! -d libzend; then
     if test -d ../libzend; then
 	echo "buildconf: linking ../libzend to ./libzend"
         ln -s ../libzend .
@@ -80,7 +80,7 @@ if ! test -d libzend; then
 	exit 1
     fi
 fi
-if ! test -d TSRM; then
+if test ! -d TSRM; then
     if test -d ../TSRM; then
 	echo "buildconf: linking ../TSRM to ./TSRM"
         ln -s ../TSRM .
