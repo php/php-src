@@ -81,7 +81,7 @@ static FILE *tsrm_error_file;
 	}
 #else
 #define TSRM_ERROR
-#define RETURN_TSRM_SAFE_ARRAY_OFFSET(array, offset, range)	return array[offset]
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)	return array[offset]
 #endif
 
 #if defined(PTHREADS)
