@@ -535,7 +535,7 @@ typedef ulonglong my_off_t;
 typedef unsigned long my_off_t;
 #endif
 #define MY_FILEPOS_ERROR	(~(my_off_t) 0)
-typedef off_t os_off_t;
+//typedef off_t os_off_t;
 
 typedef uint8		int7;	/* Most effective integer 0 <= x <= 127 */
 typedef short		int15;	/* Most effective integer 0 <= x <= 32767 */
