@@ -39,11 +39,6 @@
 #include <locale.h>
 #endif
 
-PHP_MINFO_FUNCTION(pcre);
-PHP_MINIT_FUNCTION(pcre);
-PHP_MSHUTDOWN_FUNCTION(pcre);
-PHP_RINIT_FUNCTION(pcre);
-
 PHP_FUNCTION(preg_match);
 PHP_FUNCTION(preg_match_all);
 PHP_FUNCTION(preg_replace);

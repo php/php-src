@@ -31,29 +31,6 @@
 
 #define PREG_REPLACE_EVAL	(1<<0)
 
-/* {{{ module definition structures */
-
-unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-
-function_entry pcre_functions[] = {
-	PHP_FE(preg_match,		third_arg_force_ref)
-	PHP_FE(preg_match_all,	third_arg_force_ref)
-	PHP_FE(preg_replace,	NULL)
-	PHP_FE(preg_split,		NULL)
-	PHP_FE(preg_quote,		NULL)
-	PHP_FE(preg_grep,		NULL)
-	{NULL, 		NULL, 		NULL}
-};
-
-zend_module_entry pcre_module_entry = {
-   "PCRE", pcre_functions, PHP_MINIT(pcre), PHP_MSHUTDOWN(pcre),
-		   PHP_RINIT(pcre), NULL,
-		   PHP_MINFO(pcre), STANDARD_MODULE_PROPERTIES
-};
-
-/* }}} */
-
-
 #ifdef ZTS
 int pcre_globals_id;
 #else
@@ -98,7 +75,7 @@ static void _php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
 #endif
 
 
-/* {{{ PHP_MINFO_FUNCTION(pcre) */
+static /* {{{ PHP_MINFO_FUNCTION(pcre) */
 PHP_MINFO_FUNCTION(pcre)
 {
 	php_printf("Perl Compatible Regular Expressions");
@@ -111,7 +88,7 @@ PHP_MINFO_FUNCTION(pcre)
 
 
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
-PHP_MINIT_FUNCTION(pcre)
+static PHP_MINIT_FUNCTION(pcre)
 {
 	ELS_FETCH();
 
@@ -132,7 +109,7 @@ PHP_MINIT_FUNCTION(pcre)
 
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
-PHP_MSHUTDOWN_FUNCTION(pcre)
+static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 #ifndef ZTS
 	zend_hash_destroy(&PCRE_G(pcre_cache));
@@ -145,7 +122,7 @@ PHP_MSHUTDOWN_FUNCTION(pcre)
 
 
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
-PHP_RINIT_FUNCTION(pcre)
+static PHP_RINIT_FUNCTION(pcre)
 {
 	pcre_malloc = php_pcre_malloc;
 	pcre_free = php_pcre_free;
@@ -1124,6 +1101,29 @@ PHP_FUNCTION(preg_grep)
 	efree(entry);
 	efree(offsets);
 }
+/* }}} */
+
+
+/* {{{ module definition structures */
+
+unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+
+function_entry pcre_functions[] = {
+	PHP_FE(preg_match,		third_arg_force_ref)
+	PHP_FE(preg_match_all,	third_arg_force_ref)
+	PHP_FE(preg_replace,	NULL)
+	PHP_FE(preg_split,		NULL)
+	PHP_FE(preg_quote,		NULL)
+	PHP_FE(preg_grep,		NULL)
+	{NULL, 		NULL, 		NULL}
+};
+
+zend_module_entry pcre_module_entry = {
+   "PCRE", pcre_functions, PHP_MINIT(pcre), PHP_MSHUTDOWN(pcre),
+		   PHP_RINIT(pcre), NULL,
+		   PHP_MINFO(pcre), STANDARD_MODULE_PROPERTIES
+};
+
 /* }}} */
 
 
