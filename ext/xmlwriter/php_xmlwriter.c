@@ -172,7 +172,8 @@ PHP_FUNCTION(xmlwriter_set_indent)
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	zend_bool indent, retval;
+	int retval;
+	zend_bool indent;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &pind, &indent) == FAILURE) {
 		return;
@@ -1097,7 +1098,8 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	int name_len, isparm, retval;
+	int name_len, retval;
+	zend_bool isparm;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsb", &pind, &name, &name_len, &isparm) == FAILURE) {
 		return;
@@ -1253,7 +1255,7 @@ PHP_FUNCTION(xmlwriter_output_memory)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr buffer;
-	int flush = 1;
+	zend_bool flush = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &pind, &flush) == FAILURE) {
 		return;
