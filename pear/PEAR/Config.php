@@ -24,7 +24,7 @@ require_once 'PEAR.php';
  * Last created PEAR_Config instance.
  * @var object
  */
-$GLOBALS['_PEAR_Config_last_instance'] = null;
+$GLOBALS['_PEAR_Config_instance'] = null;
 
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
        PHP_DATADIR.DIRECTORY_SEPARATOR.'pear'.DIRECTORY_SEPARATOR.'doc');
@@ -165,7 +165,6 @@ class PEAR_Config extends PEAR
         $this->layers = array_keys($this->configuration);
         $this->files['user'] = $user_file;
         $this->files['system'] = $system_file;
-        $GLOBALS['_PEAR_Config_last_instance'] = &$this;
         if ($user_file && file_exists($user_file)) {
             $this->readConfigFile($user_file);
         }
@@ -175,6 +174,7 @@ class PEAR_Config extends PEAR
         foreach ($this->configuration_info as $key => $info) {
             $this->configuration['default'][$key] = $info['default'];
         }
+        //$GLOBALS['_PEAR_Config_instance'] = &$this;
     }
 
     // }}}
@@ -197,11 +197,12 @@ class PEAR_Config extends PEAR
      */
     function &singleton($user_file = '', $system_file = '')
     {
-        if (empty($GLOBALS['_PEAR_Config_last_instance'])) {
-            $obj =& new PEAR_Config($user_file, $system_file);
-            $GLOBALS['_PEAR_Config_last_instance'] = &$obj;
+        if (is_object($GLOBALS['_PEAR_Config_instance'])) {
+            return $GLOBALS['_PEAR_Config_instance'];
         }
-        return $GLOBALS['_PEAR_Config_last_instance'];
+        $GLOBALS['_PEAR_Config_instance'] =
+             &new PEAR_Config($user_file, $system_file);
+        return $GLOBALS['_PEAR_Config_instance'];
     }
 
     // }}}
@@ -318,7 +319,7 @@ class PEAR_Config extends PEAR
         }
         $data = $this->configuration[$layer];
         $this->_encodeOutput($data);
-        if (!@is_writeable($file)) {
+        if (@file_exists($file) && !@is_writeable($file)) {
             return $this->raiseError("no write access to $file!");
         }
         $fp = @fopen($file, "w");
@@ -635,6 +636,23 @@ class PEAR_Config extends PEAR
             return true;
         }
         return false;
+    }
+
+    // }}}
+    // {{{ store([layer])
+
+    /**
+     * Stores configuration data in a layer.
+     *
+     * @param string config layer to store
+     *
+     * @return bool TRUE on success, or PEAR error on failure
+     *
+     * @access public
+     */
+    function store($layer = 'user')
+    {
+        return $this->writeConfigFile(null, $layer);
     }
 
     // }}}

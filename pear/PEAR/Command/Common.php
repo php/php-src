@@ -19,7 +19,7 @@
 // $Id$
 
 require_once "PEAR.php";
-require_once "PEAR/CommandResponse.php";
+//require_once "PEAR/CommandResponse.php";
 
 class PEAR_Command_Common extends PEAR
 {
@@ -32,14 +32,21 @@ class PEAR_Command_Common extends PEAR
     var $config;
 
     /**
+     * User Interface object, for all interaction with the user.
+     * @var object
+     */
+    var $ui;
+
+    /**
      * PEAR_Command_Common constructor.
      *
      * @access public
      */
-    function PEAR_Command_Common()
+    function PEAR_Command_Common(&$ui)
     {
         parent::PEAR();
-        $this->config = PEAR_Config::singleton();
+        $this->config = &PEAR_Config::singleton();
+        $this->ui = $ui;
     }
 
     /**
@@ -56,13 +63,13 @@ class PEAR_Command_Common extends PEAR
      *
      * @see PEAR_CommandResponse
      */
+/*
     function &makeResponse($status, $message, $encoding = null)
     {
-        $obj =& new PEAR_CommandResponse($status, $message, $encoding);
+        $obj = &new PEAR_CommandResponse($status, $message, $encoding);
         return $obj;
     }
-
-    
+*/
 }
 
 ?>

@@ -19,37 +19,26 @@
 // $Id$
 
 require_once "PEAR/Command/Common.php";
-require_once "PEAR/Installer.php";
+require_once "PEAR/Remote.php";
+require_once "PEAR/Config.php";
 
 /**
- * PEAR commands for installation or deinstallation/upgrading of
- * packages.
+ * PEAR commands for managing configuration data.
  *
  */
-class PEAR_Command_Install extends PEAR_Command_Common
+class PEAR_Command_Login extends PEAR_Command_Common
 {
     // {{{ properties
-
-    /** Stack of executing commands, to make run() re-entrant
-     * @var array
-     */
-    var $command_stack; // XXX UNUSED to make run() re-entrant
-
-    /** Currently executing command.
-     * @var string
-     */
-    var $command; // XXX UNUSED
-
     // }}}
 
     // {{{ constructor
 
     /**
-     * PEAR_Command_Install constructor.
+     * PEAR_Command_Login constructor.
      *
      * @access public
      */
-    function PEAR_Command_Install($ui)
+    function PEAR_Command_Login($ui)
     {
         parent::PEAR_Command_Common($ui);
     }
@@ -65,7 +54,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('install', 'uninstall', 'upgrade');
+        return array('login', 'logout');
     }
 
     // }}}
@@ -73,34 +62,37 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
     function run($command, $options, $params)
     {
-        $installer =& new PEAR_Installer($options['php_dir'],
-                                         $options['ext_dir'],
-                                         $options['doc_dir']);
-        $installer->debug = @$options['verbose'];
+        $cf = $this->config;
         $failmsg = '';
+        $server = $cf->get('master_server');
         switch ($command) {
-            case 'install':
-            case 'upgrade': {
-                if ($command == 'upgrade') {
-                    $options['upgrade'] = true;
-                }
-                if ($installer->install($params[0], $options, $this->config)) {
-                    $this->ui->displayLine("install ok");
+            case 'login': {
+                $username = $cf->get('username');
+                if (empty($username)) {
+                    $this->ui->displayLine("Logging in to $server.");
+                    $username = trim($this->ui->userDialog('Username'));
+                    $cf->set('username', $username);
                 } else {
-                    $failmsg = "install failed";
+                    $this->ui->displayLine("Logging in as `$username' to $server.");
                 }
+                $password = trim($this->ui->userDialog('Password', 'password'));
+                $cf->set('password', $password);
+                $cf->store();
+                $remote = new PEAR_Remote;
+                $ok = $remote->call('logintest');
+                print "logintest=";var_dump($ok);
                 break;
             }
-            case 'uninstall': {
-                if ($installer->uninstall($params[0], $uninstall_options)) {
-                    $this->ui->displayLine("uninstall ok");
-                } else {
-                    $failmsg = "uninstall failed";
-                }
+            case 'logout': {
+                $this->ui->displayLine("Logging out from $server.");
+                $cf->remove('username');
+                $cf->remove('password');
+                $cf->store();
                 break;
-            }                
+            }
             default: {
-                return false;
+                $failmsg = "unknown command: $command";
+                break;
             }
         }
         if ($failmsg) {
