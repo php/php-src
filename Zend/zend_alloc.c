@@ -241,6 +241,30 @@ ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_
 	return 0;
 }
 
+ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset)
+{
+
+	if (nmemb < LONG_MAX
+			&& size < LONG_MAX
+			&& offset < LONG_MAX
+			&& nmemb >= 0
+			&& size >= 0
+			&& offset >= 0) {
+		long lval;
+		double dval;
+		int use_dval;
+
+		ZEND_SIGNED_MULTIPLY_LONG(nmemb, size, lval, dval, use_dval);
+
+		if (!use_dval
+				&& lval < (long) (LONG_MAX - offset)) {
+			return pemalloc(lval + offset, 1);
+		}
+	}
+
+	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+	return 0;
+}
 
 
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
