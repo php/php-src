@@ -305,6 +305,7 @@ init_syntax_once()
 	static int done = 0;
 	char *s = emalloc(10240), *sp;
 	int ch;
+	TSRMLS_FETCH();
 
    if (done)
      return;
