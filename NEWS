@@ -5,7 +5,7 @@ PHP 4.0                                                                    NEWS
 - Improved extension build framework. Refer to README.SELF-CONTAINED-EXTENSIONS
   for an introduction. (Sascha)
 - Dynamically allocate points for ImagePolygon (Marc Pohl)
-- Added configure time checking for bcmath package (Joey)
+- Added configure time checking for bcmath package (Joey, Sascha)
 - Added get_declared_classes(). (Andrei, Zend library)
 - Add initial NSAPI module from Jayakumar Muthukumarasamy. (Rasmus)
 - Added the SWF module which allows you to create Macromedia Flash files via 
