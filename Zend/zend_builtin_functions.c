@@ -485,7 +485,8 @@ ZEND_FUNCTION(function_exists)
 {
 	zval **function_name;
 	char *lcname;
-	CLS_FETCH();
+	int retval;
+	ELS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -493,13 +494,11 @@ ZEND_FUNCTION(function_exists)
 	convert_to_string_ex(function_name);
 	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
 	zend_str_tolower(lcname, (*function_name)->value.str.len);
-	if (zend_hash_exists(CG(function_table), lcname, (*function_name)->value.str.len+1) == FAILURE) {
-		efree(lcname);
-		RETURN_FALSE;
-	} else {
-		efree(lcname);
-		RETURN_TRUE;
-	}
+
+	retval = zend_hash_exists(EG(function_table), lcname, (*function_name)->value.str.len+1);
+	efree(lcname);
+
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
