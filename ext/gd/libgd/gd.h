@@ -5,9 +5,15 @@
 extern "C" {
 #endif
 
+#ifndef WIN32
 /* default fontpath for unix systems */
 #define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
 #define PATHSEPARATOR ":"
+#else
+/* default fontpath for windows systems */
+#define DEFAULT_FONTPATH "c:\\winnt\\fonts"
+#define PATHSEPARATOR ";"
+#endif
 
 /* gd.h: declarations file for the graphic-draw module.
  * Permission to use, copy, modify, and distribute this software and its
