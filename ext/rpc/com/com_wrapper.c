@@ -1224,6 +1224,7 @@ PHP_FUNCTION(com_load_typelib)
 			{
 				mode &= ~CONST_CS;
 			}
+			break;
 		default:
 			WRONG_PARAM_COUNT;
 	}
