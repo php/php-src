@@ -47,7 +47,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_SNMP=1 /D "THREAD_SAFE" /D "NDEBUG" /D "MSVC5" /D "COMPILE_DL" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\snmp.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_SNMP=1 /D "THREAD_SAFE" /D "NDEBUG" /D "MSVC5" /D "COMPILE_DL_SNMP" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\snmp.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -121,7 +121,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../" /I "../../../" /I "../../include" /D HAVE_SNMP=1 /D "THREAD_SAFE" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D COMPILE_DL=1 /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\snmp.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../" /I "../../../" /I "../../include" /D HAVE_SNMP=1 /D "THREAD_SAFE" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D COMPILE_DL_SNMP=1 /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\snmp.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<

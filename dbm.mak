@@ -48,7 +48,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D NDBM=1 /D GDBM=0 /D BSD2=1 /D "NDEBUG" /D "COMPILE_DL" /D "MSVC5" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\dbm.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D NDBM=1 /D GDBM=0 /D BSD2=1 /D "NDEBUG" /D "COMPILE_DL_DBM" /D "MSVC5" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\dbm.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -121,7 +121,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D NDBM=1 /D GDBM=0 /D BSD2=1 /D "DEBUG" /D "_DEBUG" /D COMPILE_DL=1 /D "MSVC5" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\dbm.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D NDBM=1 /D GDBM=0 /D BSD2=1 /D "DEBUG" /D "_DEBUG" /D COMPILE_DL_DBM=1 /D "MSVC5" /D "WIN32" /D "_WINDOWS" /Fp"$(INTDIR)\dbm.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<

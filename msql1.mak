@@ -47,7 +47,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL" /D "MSVC5" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL_MSQL" /D "MSVC5" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -121,7 +121,7 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "MSVC5" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL_MSQL" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "MSVC5" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -187,7 +187,7 @@ SOURCE=.\functions\msql.c
 
 !IF  "$(CFG)" == "msql1 - Win32 Release"
 
-CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL" /D "MSVC5" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL_MSQL" /D "MSVC5" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\msql.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -197,7 +197,7 @@ CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /I "./" /I "../" /I "../../include" /D HAVE
 
 !ELSEIF  "$(CFG)" == "msql1 - Win32 Debug"
 
-CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "MSVC5" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../" /I "../../include" /D HAVE_MSQL=1 /D MSQL1=1 /D "COMPILE_DL_MSQL" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "MSVC5" /Fp"$(INTDIR)\msql1.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\msql.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
