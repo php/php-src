@@ -297,7 +297,6 @@ struct _zend_class_entry {
 };
 
 
-
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 	int (*printf_function)(const char *format, ...);
