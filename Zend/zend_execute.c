@@ -1691,8 +1691,8 @@ send_by_ref:
 					case IS_VAR:
 						if (!Ts[opline->op1.u.var].var) {
 							get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+							FREE_OP(&opline->op1, free_op1);
 						}
-						FREE_OP(&opline->op1, free_op1);
 						break;
 					case IS_TMP_VAR:
 						zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
