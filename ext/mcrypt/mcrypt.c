@@ -71,6 +71,33 @@ static mcrypt_global_struct mcryptg;
 
 #endif
 
+#define MCRYPT_SIZE \
+	bsize = get_block_size(cipher->value.lval); \
+	nr = (data->value.str.len + bsize - 1) / bsize; \
+	nsize = nr * bsize
+
+#define MCRYPT_CHECK_TD_CPY \
+	if(td == -1) { \
+		php3_error(E_WARNING, MCRYPT_FAILED); \
+		RETURN_FALSE; \
+	} \
+	ndata = ecalloc(nr, bsize); \
+	memcpy(ndata, data->value.str.val, data->value.str.len)
+
+#define MCRYPT_CHECK_IV \
+	convert_to_string(iv); \
+	if(iv->value.str.len != bsize) { \
+		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); \
+		RETURN_FALSE; \
+	}
+
+#define MCRYPT_ACTION(x) \
+	if(mode->value.lval == 0) \
+		mcrypt_##x(td, ndata, nsize); \
+	else \
+		mdecrypt_##x(td, ndata, nsize); \
+	end_mcrypt_##x(td)
+
 #define MCRYPT_IV_WRONG_SIZE "The IV paramater must be as long as the blocksize"
 #define MCRYPT_FAILED "mcrypt initialization failed"
 
@@ -200,32 +227,13 @@ PHP_FUNCTION(mcrypt_ofb)
 	convert_to_long(mode);
 	convert_to_string(data);
 	convert_to_string(key);
-	convert_to_string(iv);
 
-	bsize = get_block_size(cipher->value.lval);
-	if(iv->value.str.len != bsize) {
-		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
-		RETURN_FALSE;
-	}
-
-	nr = (data->value.str.len + bsize - 1) / bsize;
-	nsize = nr * bsize;
+	MCRYPT_SIZE;
+	MCRYPT_CHECK_IV;
 
 	td = init_mcrypt_ofb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
-	if(td == -1) {
-		php3_error(E_WARNING, MCRYPT_FAILED);
-		RETURN_FALSE;
-	}
-	
-	ndata = ecalloc(nr, bsize);
-	memcpy(ndata, data->value.str.val, data->value.str.len);
-	
-	if(mode->value.lval == 0)
-		mcrypt_ofb(td, ndata, nsize);
-	else
-		mdecrypt_ofb(td, ndata, nsize);
-	
-	end_mcrypt_ofb(td);
+	MCRYPT_CHECK_TD_CPY;
+	MCRYPT_ACTION(ofb);
 
 	RETURN_STRINGL(ndata, nsize, 0);
 }
@@ -249,35 +257,17 @@ PHP_FUNCTION(mcrypt_cfb)
 	convert_to_long(mode);
 	convert_to_string(data);
 	convert_to_string(key);
-	convert_to_string(iv);
-
-	bsize = get_block_size(cipher->value.lval);
-	if(iv->value.str.len != bsize) {
-		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
-		RETURN_FALSE;
-	}
-
-	nr = (data->value.str.len + bsize - 1) / bsize;
-	nsize = nr * bsize;
+	
+	MCRYPT_SIZE;
+	MCRYPT_CHECK_IV;
 
 	td = init_mcrypt_cfb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
-	if(td == -1) {
-		php3_error(E_WARNING, MCRYPT_FAILED);
-		RETURN_FALSE;
-	}
-	
-	ndata = ecalloc(nr, bsize);
-	memcpy(ndata, data->value.str.val, data->value.str.len);
-	
-	if(mode->value.lval == 0)
-		mcrypt_cfb(td, ndata, nsize);
-	else
-		mdecrypt_cfb(td, ndata, nsize);
-	
-	end_mcrypt_cfb(td);
+	MCRYPT_CHECK_TD_CPY;
+	MCRYPT_ACTION(cfb);
 
 	RETURN_STRINGL(ndata, nsize, 0);
 }
+
 
 /* proto mcrypt_cbc(int cipher, string key, string data, int mode [,string iv])
    CBC crypt/decrypt data using key key with cipher cipher using optional iv */
@@ -300,39 +290,21 @@ PHP_FUNCTION(mcrypt_cbc)
 	convert_to_long(mode);
 	convert_to_string(data);
 	convert_to_string(key);
-	
-	bsize = get_block_size(cipher->value.lval);
+		
+	MCRYPT_SIZE;
 	if(ac > 4 && mode == 0) {
-		convert_to_string(iv);
-		if(iv->value.str.len != bsize) {
-			php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
-			RETURN_FALSE;
-		}
-	}
-
-	nr = (data->value.str.len + bsize - 1) / bsize;
-	nsize = nr * bsize;
-
-	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
-	if(td == -1) {
-		php3_error(E_WARNING, MCRYPT_FAILED);
-		RETURN_FALSE;
+		MCRYPT_CHECK_IV;
 	}
 	
-	ndata = ecalloc(nr, bsize);
-	memcpy(ndata, data->value.str.val, data->value.str.len);
+	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
+	MCRYPT_CHECK_TD_CPY;
 	
 	/* iv may be only used in encryption */
 	if(ac > 4 && mode == 0) {
 		mcrypt(td, iv->value.str.val);
 	}
 	
-	if(mode->value.lval == 0)
-		mcrypt_cbc(td, ndata, nsize);
-	else
-		mdecrypt_cbc(td, ndata, nsize);
-	
-	end_mcrypt_cbc(td);
+	MCRYPT_ACTION(cbc);
 
 	RETURN_STRINGL(ndata, nsize, 0);
 }
@@ -356,26 +328,12 @@ PHP_FUNCTION(mcrypt_ecb)
 	convert_to_long(mode);
 	convert_to_string(data);
 	convert_to_string(key);
-
-	bsize = get_block_size(cipher->value.lval);
-	nr = (data->value.str.len + bsize - 1) / bsize;
-	nsize = nr * bsize;
-
+	
+	MCRYPT_SIZE;
+	
 	td = init_mcrypt_ecb(cipher->value.lval, key->value.str.val, key->value.str.len);
-	if(td == -1) {
-		php3_error(E_WARNING, MCRYPT_FAILED);
-		RETURN_FALSE;
-	}
-	
-	ndata = ecalloc(nr, bsize);
-	memcpy(ndata, data->value.str.val, data->value.str.len);
-	
-	if(mode->value.lval == 0)
-		mcrypt_ecb(td, ndata, nsize);
-	else
-		mdecrypt_ecb(td, ndata, nsize);
-	
-	end_mcrypt_ecb(td);
+	MCRYPT_CHECK_TD_CPY;
+	MCRYPT_ACTION(ecb);
 
 	RETURN_STRINGL(ndata, nsize, 0);
 }
