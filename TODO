@@ -85,8 +85,6 @@ documentation
 
 ext/curl
 --------
-    * Use the cURL write handler to save data for use when returning data or 
-      outputting data.
     * Have a warning scheme for when people use unsupported features.
 
 ext/oci8
@@ -145,10 +143,6 @@ ext/standard
         strip_tags()
     * Rewrite win32 SMTP code to be usable for *ix to, maybe as a (default)
       module of its own (Hartmut)
-
-ext/zziplib
-------------
-    * More fully support the zziplib API
 
 ext/wddx
 --------
