@@ -196,7 +196,7 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 
 inline static void
 php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
-						int width, char padding, int alignment, int expprec)
+						int width, char padding, int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register unsigned int magn, nmagn, i = NUM_BUF_SIZE - 1, neg = 0;
@@ -229,7 +229,7 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
 				  number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 neg, expprec);
+							 neg, 0);
 }
 
 
@@ -238,7 +238,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 int *size, double number,
 						 int width, char padding,
 						 int alignment, int precision,
-						 int adjust, char fmt, int expprec)
+						 int adjust, char fmt)
 {
 	char numbuf[NUM_BUF_SIZE];
 	char *cvt;
@@ -290,7 +290,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		width += (precision + 1);
 	}
 	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
-							 alignment, i, sign, expprec);
+							 alignment, i, sign, 0);
 }
 
 
@@ -493,7 +493,7 @@ php_formatted_print(int ht, int *len)
 					convert_to_long_ex(args[currarg]);
 					php_sprintf_appendint(&result, &outpos, &size,
 										  (*args[currarg])->value.lval,
-										  width, padding, alignment, expprec);
+										  width, padding, alignment);
 					break;
 
 				case 'e':
@@ -504,7 +504,7 @@ php_formatted_print(int ht, int *len)
 											 (*args[currarg])->value.dval,
 											 width, padding, alignment,
 											 precision, adjusting,
-											 format[inpos], expprec);
+											 format[inpos]);
 					break;
 
 				case 'c':
