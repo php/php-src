@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Added the xslt_set_error_handler() function to the Sablotron extension.
+  (Sterling)
+- Improved Sablotron's error handling system allowing you to catch all
+  errors before they are outputted to the screen. (Sterling)
 - Added OpenSSL extension (Stig Venaas)
 - Fixed/created support for Solid 3.0 databases (kalowsky)
 - Fixed support for Solid 2.3 databases (kalowsky)
