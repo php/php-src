@@ -32,6 +32,14 @@
 #include "zend_extensions.h"
 
 
+#define AI_USE_PTR(ai) \
+	if ((ai).ptr_ptr) { \
+		(ai).ptr = *((ai).ptr_ptr); \
+		(ai).ptr_ptr = &((ai).ptr); \
+	} else { \
+		(ai).ptr = NULL; \
+	}
+
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
 
 
@@ -501,6 +509,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 	if (result && (result->op_type != IS_UNUSED)) {
 		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
 		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
+		AI_USE_PTR(Ts[result->u.var].var);
 	}
 }
 

@@ -28,6 +28,7 @@ typedef union _temp_variable {
 	zval tmp_var;
 	struct {
 		zval **ptr_ptr;
+		zval *ptr;
 	} var;
 	struct {
 		zval tmp_var; /* a dummy */
