@@ -1,7 +1,7 @@
 dnl config.m4 for PHP4 MCVE Extension
 
 PHP_ARG_WITH(mcve, for MCVE support,
-[  --with-mcve[=DIR]       Include MCVE support])
+[  --with-mcve[=DIR]       Include MCVE support. libmcve >= 3.2.2 required])
 
 PHP_ARG_WITH(openssl-dir,OpenSSL dir for MCVE,
 [  --with-openssl-dir[=DIR]  MCVE: openssl install prefix.], no, no)
