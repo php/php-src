@@ -259,6 +259,8 @@ static PHP_INI_DISP(display_defPW)
 #else
 		PUTS("********");
 #endif
+	} else {
+		PUTS("<i>no value</i>");
 	}
 }
 

@@ -1,3 +1,5 @@
+dnl $Id$
+
 dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
@@ -366,6 +368,9 @@ AC_ARG_WITH(iodbc,
     PHP_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
     PHP_ADD_INCLUDE($withval/include)
     ODBC_TYPE=iodbc
+    ODBC_INCLUDE=-I$withval/include
+    ODBC_LFLAGS=-L$withval/lib
+    ODBC_LIBS=-liodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
     AC_MSG_RESULT(yes)
   else
@@ -533,10 +538,10 @@ if test -n "$ODBC_TYPE"; then
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
   PHP_SUBST(ODBC_INCDIR)
-  PHP_SUBST(ODBC_INCLUDE)
   PHP_SUBST(ODBC_LIBDIR)
-  PHP_SUBST(ODBC_LIBS)
-  PHP_SUBST(ODBC_LFLAGS)
+  PHP_SUBST_OLD(ODBC_INCLUDE)
+  PHP_SUBST_OLD(ODBC_LIBS)
+  PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
   PHP_EXTENSION(odbc, $shared)
 fi
