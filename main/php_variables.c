@@ -28,7 +28,7 @@
 #include "zend_globals.h"
 
 
-PHPAPI void php_register_variable(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
+PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array ELS_DC PLS_DC)
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
@@ -265,7 +265,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				/* FIXME: XXX: not binary safe, discards returned length */
 				php_url_decode(var, strlen(var));
 				php_url_decode(val, strlen(val));
-				php_register_variable(val, var, array_ptr ELS_CC PLS_CC);
+				php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {
 				var = strtok_r(NULL, ";", &strtok_buf);
@@ -303,7 +303,7 @@ void php_import_environment_variables(ELS_D PLS_DC)
 			continue;
 		}
 		t = estrndup(*env, p - *env);
-		php_register_variable(p+1, t, array_ptr ELS_CC PLS_CC);
+		php_register_variable(t, p+1, array_ptr ELS_CC PLS_CC);
 		efree(t);
 	}
 }
