@@ -1,3 +1,21 @@
+2000-11-30  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c:
+    Changed presentation of default values for textsize and textlimit in phpinfo().
+    the value -1 means "Server default"
+
+2000-11-30  David Eriksson  <david@2good.com>
+
+    * ext/satellite/README
+      ext/satellite/config.m4: updated documentation and configuration
+
+    * ext/satellite/object.c
+      ext/satellite/struct.c: changed variable names to *_class_functions
+
+2000-11-30  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/bcmath/config.m4: fix configure --help option name...
+
 2000-11-29  Frank M. Kromann  <fmk@swwwing.com>
 
     * php.ini-dist
