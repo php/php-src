@@ -727,7 +727,7 @@ PHP_FUNCTION(cpdf_show_xy)
 /* }}} */
 
 /* {{{ proto void cpdf_continue_text(int pdfdoc, string text)
-   Output text in next line */
+   Outputs text in next line */
 PHP_FUNCTION(cpdf_continue_text)
 {
 	pval *arg1, *arg2;
@@ -754,7 +754,7 @@ PHP_FUNCTION(cpdf_continue_text)
 /* }}} */
 
 /* {{{ proto void cpdf_text(int pdfdoc, string text [, float x-koor, float y-koor [, int mode [, float orientation [, int alignmode]]]])
-   Output text */
+   Outputs text */
 PHP_FUNCTION(cpdf_text)
 {
 	pval *argv[7];
@@ -844,7 +844,7 @@ PHP_FUNCTION(cpdf_text)
 /* }}} */
 
 /* {{{ proto void cpdf_set_font(int pdfdoc, string font, float size, string encoding)
-   Select the current font face, size and encoding */
+   Selects the current font face, size and encoding */
 PHP_FUNCTION(cpdf_set_font)
 {
 	pval *arg1, *arg2, *arg3, *arg4;
@@ -878,7 +878,7 @@ PHP_FUNCTION(cpdf_set_font)
 /* }}} */
 
 /* {{{ proto void cpdf_set_font_directories(int pdfdoc, string pfmdir, string pfbdir)
-   Set directories to search when using external fonts. */
+   Sets directories to search when using external fonts */
 PHP_FUNCTION(cpdf_set_font_directories)
 {
 	pval *arg1, *arg2, *arg3;
@@ -906,7 +906,7 @@ PHP_FUNCTION(cpdf_set_font_directories)
 /* }}} */
 
 /* {{{ proto void cpdf_set_font_map_file(int pdfdoc, string filename)
-   Set fontname to filename translation map when using external fonts. */
+   Sets fontname to filename translation map when using external fonts */
 PHP_FUNCTION(cpdf_set_font_map_file)
 {
 	pval *arg1, *arg2;
@@ -1094,7 +1094,7 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 /* }}} */
 
 /* {{{ proto void cpdf_set_text_pos(int pdfdoc, float x, float y [, int mode])
-   Set the position of text for the next cpdf_show call */
+   Sets the position of text for the next cpdf_show call */
 PHP_FUNCTION(cpdf_set_text_pos)
 {
 	pval *argv[4];
@@ -1963,7 +1963,7 @@ PHP_FUNCTION(cpdf_closepath_stroke)
 /* }}} */
 
 /* {{{ proto void cpdf_stroke(int pdfdoc)
-   Draw line along path path */
+   Draws line along path path */
 PHP_FUNCTION(cpdf_stroke)
 {
 	pval *arg1;
@@ -1989,7 +1989,7 @@ PHP_FUNCTION(cpdf_stroke)
 /* }}} */
 
 /* {{{ proto void cpdf_fill(int pdfdoc)
-   Fill current path */
+   Fills current path */
 PHP_FUNCTION(cpdf_fill)
 {
 	pval *arg1;
@@ -2015,7 +2015,7 @@ PHP_FUNCTION(cpdf_fill)
 /* }}} */
 
 /* {{{ proto void cpdf_fill_stroke(int pdfdoc)
-   Fill and stroke current path */
+   Fills and stroke current path */
 PHP_FUNCTION(cpdf_fill_stroke)
 {
 	pval *arg1;
@@ -2206,7 +2206,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill)
 /* }}} */
 
 /* {{{ proto void cpdf_setrgbcolor_stroke(int pdfdoc, float red, float green, float blue)
-   Sets drawing color to rgb color value */
+   Sets drawing color to RGB color value */
 PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 {
 	pval *arg1, *arg2, *arg3, *arg4;
@@ -2235,7 +2235,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 /* }}} */
 
 /* {{{ proto void cpdf_setrgbcolor(int pdfdoc, float red, float green, float blue)
-   Sets drawing and filling color to rgb color value */
+   Sets drawing and filling color to RGB color value */
 PHP_FUNCTION(cpdf_setrgbcolor)
 {
 	pval *arg1, *arg2, *arg3, *arg4;
@@ -2296,7 +2296,7 @@ PHP_FUNCTION(cpdf_set_page_animation)
 /* }}} */
 
 /* {{{ proto array cpdf_finalize(int pdfdoc)
-   Creates pdf doc in memory */
+   Creates PDF doc in memory */
 PHP_FUNCTION(cpdf_finalize)
 {
 	pval *arg1;
@@ -2383,7 +2383,7 @@ PHP_FUNCTION(cpdf_save_to_file)
 /* }}} */
 
 /* {{{ proto void cpdf_import_jpeg(int pdfdoc, string filename, float x, float y, float angle, float width, float height, float x_scale, float y_scale, int gsave [, int mode])
-   Includes jpeg image */
+   Includes JPEG image */
 PHP_FUNCTION(cpdf_import_jpeg)
 {
 	pval *argv[11];
@@ -2603,7 +2603,7 @@ PHP_FUNCTION(cpdf_add_annotation)
 /* }}} */
 
 /* {{{ proto void cpdf_set_action_url(int pdfdoc, float xll, float yll, float xur, float xur, string url [, int mode])
-   Sets Hyperlink */
+   Sets hyperlink */
 PHP_FUNCTION(cpdf_set_action_url)
 {
 	pval *argv[11];
@@ -2660,7 +2660,7 @@ PHP_FUNCTION(cpdf_set_action_url)
 /* }}} */
 
 /* {{{ proto int cpdf_add_outline(int pdfdoc, int lastoutline, int sublevel, int open, int pagenr, string title)
-   Add outline */
+   Adds outline */
 PHP_FUNCTION(cpdf_add_outline)
 {
 	pval *argv[11];
