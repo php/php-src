@@ -84,6 +84,7 @@ PHP_FUNCTION(ibase_modify_user);
 PHP_FUNCTION(ibase_delete_user);
 #endif
 PHP_FUNCTION(ibase_errmsg);
+PHP_FUNCTION(ibase_errcode);
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
@@ -103,18 +104,19 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	char *timeformat;
 	char *cfg_timeformat;
 	char errmsg[MAX_ERRMSG];
+	long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
 	isc_db_handle link;
-	struct tr_list *trans;
+	struct tr_list *tr_list;
 	unsigned short dialect;
 } ibase_db_link;
 
 typedef struct {
 	isc_tr_handle handle;
 	int link_cnt;
-	ibase_db_link *link[1];
+	ibase_db_link *db_link[1];
 } ibase_trans;
 
 typedef struct tr_list {
