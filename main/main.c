@@ -391,8 +391,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				error_type_str = "Parse error";
 				break;
 			case E_NOTICE:
-				error_type_str = "Warning";
-				break;
 			case E_USER_NOTICE:
 				error_type_str = "Notice";
 				break;
