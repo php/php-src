@@ -59,15 +59,12 @@ gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
    * regardless of whether _BSD_SOURCE or anything else has (or has not)
    * been defined. */
 
-  fprintf (stderr, "gd-png:  fatal libpng error: %s\n", msg);
-  fflush (stderr);
+  php_gd_error_ex(E_ERROR, "gd-png:  fatal libpng error: %s\n", msg);
 
   jmpbuf_ptr = png_get_error_ptr (png_ptr);
   if (jmpbuf_ptr == NULL)
     {				/* we are completely hosed now */
-      fprintf (stderr,
-	       "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.\n");
-      fflush (stderr);
+      php_gd_error_ex(E_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.\n");
       exit (99);
     }
 
@@ -148,14 +145,14 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 #endif
   if (png_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng main struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng main struct\n");
       return NULL;
     }
 
   info_ptr = png_create_info_struct (png_ptr);
   if (info_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng info struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng info struct\n");
       png_destroy_read_struct (&png_ptr, NULL, NULL);
       return NULL;
     }
@@ -169,7 +166,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 #ifndef PNG_SETJMP_NOT_SUPPORTED
   if (setjmp (gdPngJmpbufStruct.jmpbuf))
     {
-      fprintf (stderr, "gd-png error: setjmp returns error condition\n");
+      php_gd_error("gd-png error: setjmp returns error condition\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       return NULL;
     }
@@ -193,7 +190,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
     }
   if (im == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate gdImage struct\n");
+      php_gd_error("gd-png error: cannot allocate gdImage struct\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       gdFree (image_data);
       gdFree (row_pointers);
@@ -209,7 +206,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
     case PNG_COLOR_TYPE_PALETTE:
       png_get_PLTE (png_ptr, info_ptr, &palette, &num_palette);
 #ifdef DEBUG
-      fprintf (stderr, "gd-png color_type is palette, colors: %d\n",
+      php_gd_error("gd-png color_type is palette, colors: %d\n",
 	       num_palette);
 #endif /* DEBUG */
       if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS))
@@ -238,7 +235,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
       /* create a fake palette and check for single-shade transparency */
       if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL)
 	{
-	  fprintf (stderr, "gd-png error: cannot allocate gray palette\n");
+	  php_gd_error("gd-png error: cannot allocate gray palette\n");
 	  png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
 	  return NULL;
 	}
@@ -306,13 +303,13 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   rowbytes = png_get_rowbytes (png_ptr, info_ptr);
   if ((image_data = (png_bytep) gdMalloc (rowbytes * height)) == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate image data\n");
+      php_gd_error("gd-png error: cannot allocate image data\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       return NULL;
     }
   if ((row_pointers = (png_bytepp) gdMalloc (height * sizeof (png_bytep))) == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate row pointers\n");
+      php_gd_error("gd-png error: cannot allocate row pointers\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       gdFree (image_data);
       return NULL;
@@ -401,7 +398,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 	{
 	  if (!open[i])
 	    {
-	      fprintf (stderr, "gd-png warning: image data references out-of-range"
+	      php_gd_error("gd-png warning: image data references out-of-range"
 		       " color index (%d)\n", i);
 	    }
 	}
@@ -466,14 +463,14 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 #endif
   if (png_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng main struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng main struct\n");
       return;
     }
 
   info_ptr = png_create_info_struct (png_ptr);
   if (info_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng info struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng info struct\n");
       png_destroy_write_struct (&png_ptr, (png_infopp) NULL);
       return;
     }
@@ -481,7 +478,7 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 #ifndef PNG_SETJMP_NOT_SUPPORTED
   if (setjmp (gdPngJmpbufStruct.jmpbuf))
     {
-      fprintf (stderr, "gd-png error: setjmp returns error condition\n");
+      php_gd_error("gd-png error: setjmp returns error condition\n");
       png_destroy_write_struct (&png_ptr, &info_ptr);
       return;
     }
@@ -672,14 +669,14 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
       row_pointers = gdMalloc (sizeof (png_bytep) * height);
       if (row_pointers == NULL)
 	{
-	  fprintf (stderr, "gd-png error: unable to allocate row_pointers\n");
+	  php_gd_error("gd-png error: unable to allocate row_pointers\n");
 	}
       for (j = 0; j < height; ++j)
 	{
 	  int bo = 0;
 	  if ((row_pointers[j] = (png_bytep) gdMalloc (width * channels)) == NULL)
 	    {
-	      fprintf (stderr, "gd-png error: unable to allocate rows\n");
+	      php_gd_error("gd-png error: unable to allocate rows\n");
 	      for (i = 0; i < j; ++i)
 		gdFree (row_pointers[i]);
 	      return;
@@ -719,13 +716,13 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 	  row_pointers = gdMalloc (sizeof (png_bytep) * height);
 	  if (row_pointers == NULL)
 	    {
-	      fprintf (stderr, "gd-png error: unable to allocate row_pointers\n");
+	      php_gd_error("gd-png error: unable to allocate row_pointers\n");
 	    }
 	  for (j = 0; j < height; ++j)
 	    {
 	      if ((row_pointers[j] = (png_bytep) gdMalloc (width)) == NULL)
 		{
-		  fprintf (stderr, "gd-png error: unable to allocate rows\n");
+		  php_gd_error("gd-png error: unable to allocate rows\n");
 		  for (i = 0; i < j; ++i)
 		    gdFree (row_pointers[i]);
 		  return;

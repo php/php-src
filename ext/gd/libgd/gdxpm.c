@@ -115,7 +115,7 @@ gdImageCreateFromXpm (char *filename)
 
       colors[i] = gdImageColorResolve (im, red, green, blue);
       if (colors[i] == -1)
-	fprintf (stderr, "ARRRGH\n");
+	php_gd_error("ARRRGH\n");
     }
 
   apixel = (char *) gdMalloc (image.cpp + 1);
