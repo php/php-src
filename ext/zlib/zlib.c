@@ -687,7 +687,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	Bytef *buffer;
 	uInt prev_outlen, outlen;
 	int err;
-	int start_offset = (do_start?10:0);
+	int start_offset = ((do_start && ZLIBG(compression_coding) == CODING_GZIP) ? 10 : 0);
 	int end_offset = (do_end?8:0);
 
 	outlen = (uint)(sizeof(char) * (str_length * 1.001f + 12) + 1); /* leave some room for a trailing \0 */
@@ -764,14 +764,14 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 	ZLIBG(stream).next_in = (Bytef*) str;
 	ZLIBG(stream).avail_in = (uInt) str_length;
 
-	if (ZLIBG(compression_coding) == 1) {
+	if (ZLIBG(compression_coding) == CODING_GZIP) {
 		ZLIBG(crc) = crc32(ZLIBG(crc), (const Bytef *) str, str_length);
 	}
 
 	err = php_do_deflate(str_length, (Bytef **) newstr, new_length, do_start, do_end TSRMLS_CC);
 	/* TODO: error handling (err may be Z_STREAM_ERROR, Z_BUF_ERROR, ?) */
 
-	if (do_start) {
+	if (do_start && ZLIBG(compression_coding) == CODING_GZIP) {
 		/* Write a very simple .gz header: */
 		(*newstr)[0] = gz_magic[0];
 		(*newstr)[1] = gz_magic[1];
@@ -781,7 +781,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 		*new_length += 10;
 	}
 	if (do_end) {
-		if (ZLIBG(compression_coding) == 1) {
+		if (ZLIBG(compression_coding) == CODING_GZIP) {
 			char *trailer = (*newstr)+(*new_length);
 
 			/* write crc & stream.total_in in LSB order */
