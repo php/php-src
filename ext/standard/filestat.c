@@ -69,7 +69,7 @@
 # endif
 #endif
 
-#include "ext/standard/basic_functions.h"
+#include "basic_functions.h"
 
 #include "php_filestat.h"
 
@@ -564,41 +564,6 @@ FileFunction(PHP_FN(is_link),14)
 FileFunction(PHP_FN(file_exists),15)
 FileFunction(PHP_FN(lstat),16)
 FileFunction(PHP_FN(stat),17)
-
-function_entry php_filestat_functions[] = {
-	PHP_FE(fileatime,								NULL)
-	PHP_FE(filectime,								NULL)
-	PHP_FE(filegroup,								NULL)
-	PHP_FE(fileinode,								NULL)
-	PHP_FE(filemtime,								NULL)
-	PHP_FE(fileowner,								NULL)
-	PHP_FE(fileperms,								NULL)
-	PHP_FE(filesize,								NULL)
-	PHP_FE(filetype,								NULL)
-	PHP_FE(file_exists,								NULL)
-	PHP_FE(is_writable,								NULL)
-	PHP_FALIAS(is_writeable,	is_writable,		NULL)
-	PHP_FE(is_readable,								NULL)
-	PHP_FE(is_executable,							NULL)
-	PHP_FE(is_file,									NULL)
-	PHP_FE(is_dir,									NULL)
-	PHP_FE(is_link,									NULL)
-	PHP_FE(stat,									NULL)
-	PHP_FE(lstat,									NULL)
-	PHP_FE(chown,									NULL)
-	PHP_FE(chgrp,									NULL)
-	PHP_FE(chmod,									NULL)
-	PHP_FE(touch,									NULL)
-	PHP_FE(clearstatcache,							NULL)
-	PHP_FE(diskfreespace,							NULL)
-	{NULL, NULL, NULL}
-};
-
-
-zend_module_entry php_filestat_module_entry = {
-	"PHP_filestat", php_filestat_functions, NULL, NULL, PHP_RINIT(filestat),
-					PHP_RSHUTDOWN(filestat), NULL, STANDARD_MODULE_PROPERTIES
-};
 
 /*
  * Local variables:

@@ -26,23 +26,6 @@ static int metaphone(char *word, int max_phonemes, char **phoned_word, int tradi
 
 PHP_FUNCTION(metaphone);
 
-function_entry metaphone_functions[] = {
-	PHP_FE(metaphone, NULL)
-	{0},
-};
-
-zend_module_entry metaphone_module_entry = 
-{
-	"Metaphone",
-	metaphone_functions,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES,
-};
-
 /* metaphone -- Breaks english phrases down into their phonemes. */
 PHP_FUNCTION(metaphone)
 {
@@ -472,3 +455,10 @@ static int metaphone(char *word, int max_phonemes, char **phoned_word, int tradi
 
 	return 0;
 }								/* END metaphone */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

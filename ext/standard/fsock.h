@@ -55,9 +55,6 @@
 #include <sys/time.h>
 #endif
 
-extern zend_module_entry fsock_module_entry;
-#define phpext_fsock_ptr &fsock_module_entry
-
 struct php_sockbuf {
 	int socket;
 	unsigned char *readbuf;

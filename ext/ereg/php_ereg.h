@@ -33,9 +33,6 @@
 #ifndef _REG_H
 #define _REG_H
 
-extern zend_module_entry regexp_module_entry;
-#define regexp_module_ptr &regexp_module_entry
-
 char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
 
 PHP_FUNCTION(ereg);
@@ -48,6 +45,10 @@ PHPAPI PHP_FUNCTION(sql_regcase);
 typedef struct {
 	HashTable ht_rc;
 } php_reg_globals;
+
+PHP_MINIT_FUNCTION(regex);
+PHP_MSHUTDOWN_FUNCTION(regex);
+PHP_MINFO_FUNCTION(regex);
 
 
 #ifdef ZTS
@@ -65,7 +66,5 @@ typedef struct {
 #define REG(v) (reg_globals.v)
 #define REGLS_FETCH()
 #endif
-
-#define phpext_regex_ptr regexp_module_ptr
 
 #endif /* _REG_H */

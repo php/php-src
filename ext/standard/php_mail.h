@@ -32,18 +32,13 @@
 
 #ifndef _MAIL_H
 #define _MAIL_H
+
 #if HAVE_SENDMAIL
-extern zend_module_entry mail_module_entry;
-#define mail_module_ptr &mail_module_entry
 
 PHP_FUNCTION(mail);
 PHP_MINFO_FUNCTION(mail);
 extern int php_mail(char *to, char *subject, char *message, char *headers);
 
-#else
-#define mail_module_ptr NULL
 #endif
-
-#define phpext_mail_ptr mail_module_ptr
 
 #endif /* _MAIL_H */

@@ -213,65 +213,6 @@ char *tempnam(const char *dir, const char *pfx)
 /* }}} */
 /* {{{ Module-Stuff */
 
-function_entry file_functions[] = {
-	PHP_FE(pclose,				NULL)
-	PHP_FE(popen,				NULL)
-	PHP_FE(readfile,			NULL)
-	PHP_FE(rewind,				NULL)
-	PHP_FE(rmdir,				NULL)
-	PHP_FE(umask,				NULL)
-	PHP_FE(fclose,				NULL)
-	PHP_FE(feof,				NULL)
-	PHP_FE(fgetc,				NULL)
-	PHP_FE(fgets,				NULL)
-	PHP_FE(fgetss,				NULL)
-	PHP_FE(fread,				NULL)
-	PHP_FE(fopen,				NULL)
-	PHP_FE(fpassthru,			NULL)
-	PHP_FE(ftruncate,    		NULL)
-	PHP_FE(fstat,    			NULL)
-	PHP_FE(fseek,				NULL)
-	PHP_FE(ftell,				NULL)
-	PHP_FE(fwrite,				NULL)
-	PHP_FALIAS(fputs,	fwrite,	NULL)
-	PHP_FE(mkdir,				NULL)
-	PHP_FE(rename,				NULL)
-	PHP_FE(copy,				NULL)
-	PHP_FE(tempnam,				NULL)
-	PHP_FE(tmpfile,				NULL)
-	PHP_FE(file,				NULL)
-	PHP_FE(fgetcsv,				NULL)
-    PHP_FE(flock,				NULL)
-	PHP_FE(get_meta_tags,		NULL)
-	/* set_socket_blocking() is deprecated,
-	   use socket_set_blocking() instead */
-	PHP_FE(set_socket_blocking,	NULL)
-	PHP_FE(socket_set_blocking,	NULL)
-#if HAVE_SYS_TIME_H
-	PHP_FE(socket_set_timeout,	NULL)
-#endif
-	PHP_FE(socket_get_status,	NULL)
-	PHP_FE(realpath,			NULL)
-#if 0 /* needs to be rethought 991221 thies@digicol.de */
-	PHP_FE(fd_set, NULL)
-	PHP_FE(fd_isset, NULL)
-	PHP_FE(select, NULL)
-#endif
-	{NULL, NULL, NULL}
-};
-
-zend_module_entry file_module_entry = {
-	"File functions",
-	file_functions,
-	PHP_MINIT(file),
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES
-};
-
-
 static void _file_popen_dtor(FILE *pipe)
 {
 	FIL_FETCH();
@@ -1931,3 +1872,10 @@ PHP_FUNCTION(fd_isset)
 }	
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

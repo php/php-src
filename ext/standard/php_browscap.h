@@ -31,15 +31,9 @@
 #ifndef _PHP_BROWSCAP_H
 #define _PHP_BROWSCAP_H
 
-extern zend_module_entry browscap_module_entry;
-#define browscap_module_ptr &browscap_module_entry
-
 extern PHP_MINIT_FUNCTION(browscap);
 extern PHP_MSHUTDOWN_FUNCTION(browscap);
 
 PHP_FUNCTION(get_browser);
-
-
-#define phpext_browscap_ptr browscap_module_ptr
 
 #endif /* _PHP_BROWSCAP_H */

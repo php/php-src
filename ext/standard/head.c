@@ -268,15 +268,6 @@ PHP_FUNCTION(headers_sent)
 	}
 }
 
-function_entry php_header_functions[] = {
-	{NULL, NULL, NULL}
-};
-
-
-zend_module_entry php_header_module_entry = {
-	"PHP_head", php_header_functions, NULL, NULL, PHP_RINIT(head), NULL, NULL, STANDARD_MODULE_PROPERTIES
-};
-
 /*
  * Local variables:
  * tab-width: 4

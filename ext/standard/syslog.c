@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@guardian.no>                        |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    +----------------------------------------------------------------------+
  */
 
@@ -252,26 +252,6 @@ PHP_FUNCTION(syslog)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
-function_entry syslog_functions[] = {
-	PHP_FE(openlog,									NULL)
-	PHP_FE(syslog,									NULL)
-	PHP_FE(closelog,								NULL)
-	PHP_FE(define_syslog_variables,					NULL)
-	{NULL, NULL, NULL}
-};
-
-
-zend_module_entry syslog_module_entry = {
-	"Syslog", syslog_functions, PHP_MINIT(syslog), NULL, PHP_RINIT(syslog), PHP_RSHUTDOWN(syslog), NULL, STANDARD_MODULE_PROPERTIES
-};
-
-
-#if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &syslog_module_entry; }
-#endif
-
 
 /*
  * Local variables:

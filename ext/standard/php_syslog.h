@@ -23,8 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    +----------------------------------------------------------------------+
  */
 
@@ -32,8 +31,6 @@
 #define _PHP_SYSLOG_H
 
 #if HAVE_SYSLOG_H
-extern zend_module_entry syslog_module_entry;
-#define syslog_module_ptr &syslog_module_entry
 
 extern PHP_MINIT_FUNCTION(syslog);
 extern PHP_RINIT_FUNCTION(syslog);
@@ -44,10 +41,6 @@ PHP_FUNCTION(syslog);
 PHP_FUNCTION(closelog);
 PHP_FUNCTION(define_syslog_variables);
 
-#else
-#define syslog_module_ptr NULL
 #endif
-
-#define phpext_syslog_ptr syslog_module_ptr
 
 #endif /* _PHP_SYSLOG_H */

@@ -233,8 +233,8 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define PHP_RINIT_FUNCTION(module)	int PHP_RINIT(module)(INIT_FUNC_ARGS)
 #define PHP_RSHUTDOWN_FUNCTION(module)	int PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define PHP_MINFO_FUNCTION(module)	void PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
-#define PHP_GINIT_FUNCTION(module)	static int PHP_GINIT(module)(void)
-#define PHP_GSHUTDOWN_FUNCTION(module)	static int PHP_GSHUTDOWN(module)(void)
+#define PHP_GINIT_FUNCTION(module)	int PHP_GINIT(module)(GINIT_FUNC_ARGS)
+#define PHP_GSHUTDOWN_FUNCTION(module)	int PHP_GSHUTDOWN(module)(void)
 
 
 /* global variables */

@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Thies C. Arntzen <thies@digicol.de>						  |
+   | Authors: Thies C. Arntzen <thies@digicol.de>                         |
    +----------------------------------------------------------------------+
  */
  
@@ -21,7 +21,6 @@
 #ifndef _php_metaphone_h
 #define _php_metaphone_h
 
-extern zend_module_entry metaphone_module_entry;
-#define phpext_metaphone_ptr &metaphone_module_entry
+PHP_FUNCTION(metaphone);
 
 #endif

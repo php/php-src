@@ -63,6 +63,11 @@
 #include "dl.h"
 #include "php_crypt.h"
 #include "head.h"
+#include "php_lcg.h"
+#include "php_metaphone.h"
+#include "php_output.h"
+#include "php_array.h"
+#include "php_assert.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 
