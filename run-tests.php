@@ -32,7 +32,7 @@ if ($opts['help']) {
     exit;
 }
 */
-do_testing($argc, &$argv);
+do_testing($argc, $argv);
 
 exit;
 
@@ -119,7 +119,7 @@ function &parse_options(&$argc, &$argv) {
     return $options;
 }
 
-function do_testing($argc, $argv) {
+function do_testing($argc, &$argv) {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile, $opts,
 	$skipped, $failed, $passed, $total, $term_bold, $term_norm;
 
