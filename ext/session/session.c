@@ -678,7 +678,7 @@ char *php_session_create_id(PS_CREATE_SID_ARGS)
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	j = bin_to_readable(digest, digest_len, buf, PS(hash_bits_per_character)) - buf;
+	j = (int) (bin_to_readable(digest, digest_len, buf, PS(hash_bits_per_character)) - buf);
 	
 	if (newlen) 
 		*newlen = j;
