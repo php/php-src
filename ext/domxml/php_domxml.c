@@ -334,8 +334,8 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 	PHP_FALIAS(get_attribute,			domxml_elem_get_attribute,		NULL)
 	PHP_FALIAS(set_attribute,			domxml_elem_set_attribute,		NULL)
 	PHP_FALIAS(remove_attribute,		domxml_elem_remove_attribute,	NULL)
-	PHP_FALIAS(get_attributenode,		domxml_elem_get_attribute_node,	NULL)
-	PHP_FALIAS(set_attributenode,		domxml_elem_set_attribute_node,	NULL)
+	PHP_FALIAS(get_attribute_node,		domxml_elem_get_attribute_node,	NULL)
+	PHP_FALIAS(set_attribute_node,		domxml_elem_set_attribute_node,	NULL)
 	PHP_FALIAS(get_element_by_tagname,	domxml_elem_get_element_by_tagname,	NULL)
 	{NULL, NULL, NULL}
 };
@@ -2219,23 +2219,19 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
    Returns value of given attribute */
 PHP_FUNCTION(domxml_elem_get_attribute_node)
 {
-	zval *id, *arg1;
+	zval *id, *rv;
 	xmlNode *nodep;
+	xmlAttr  *attrp;   
+  	int name_len, ret;
+	char *name;
 
-	DOMXML_NOT_IMPLEMENTED();
-
-	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
-		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
-	} else {
-		WRONG_PARAM_COUNT;
+	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
+	attrp = xmlHasProp(nodep,name);
+	if (attrp == NULL)
+	{
+		RETURN_FALSE;
 	}
-
-	convert_to_string(arg1);
-
-	/* FIXME: not implemented */
-
-	RETURN_TRUE;
+	DOMXML_RET_OBJ(rv, (xmlNodePtr) attrp, &ret);
 }
 /* }}} */
 
