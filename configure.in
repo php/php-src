@@ -402,7 +402,6 @@ stdlib.h \
 string.h \
 syslog.h \
 sysexits.h \
-sys/bitypes.h \
 sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
