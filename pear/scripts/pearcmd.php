@@ -33,7 +33,6 @@ ob_implicit_flush(true);
 ini_set('track_errors', true);
 ini_set('html_errors', false);
 ini_set('magic_quotes_runtime', false);
-error_reporting(E_ALL & ~E_NOTICE);
 set_error_handler('error_handler');
 
 $pear_package_version = "@pear_version@";
@@ -265,7 +264,7 @@ function cmdHelp($command)
 // }}}
 
 function error_handler($errno, $errmsg, $file, $line, $vars) {
-    if (error_reporting() == 0 || ($errno & E_STRICT)) {
+    if ((defined('E_STRICT') && $errno & E_STRICT) || !error_reporting()) {
         return; // @silenced error
     }
     $errortype = array (
