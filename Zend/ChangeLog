@@ -1,3 +1,23 @@
+2005-01-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug31098.phpt:
+      Restore behavior of $str["str"]. (Now $str["str"] is equivalent to $str[0]
+      again)
+
+    * (PHP_5_0)
+      tests/bug31098.phpt:
+      Path -> pattern
+
+    * (PHP_5_0)
+      zend_execute.c
+      tests/bug31098.phpt:
+      Revert to old behavior of $str["str"]. ($str["str"] is equivalent of
+      $str[0])
+
 2005-01-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
