@@ -1,3 +1,9 @@
+2005-01-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Additional fix for fix of bug #29883
+
 2005-01-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
