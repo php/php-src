@@ -306,12 +306,15 @@ int php_init_config()
 		if (!VCWD_STAT(sapi_module.php_ini_path_override, &statbuf)) {
 			if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
 				fh.handle.fp = VCWD_FOPEN(sapi_module.php_ini_path_override, "r");
+				fh.filename = sapi_module.php_ini_path_override;
 			}
 		}
 	}
 	/* Search php.ini file in search path */
-	if (!fh.handle.fp)
+	if (!fh.handle.fp) {
 		fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+		fh.filename = php_ini_opened_path;
+	}
 	if (free_ini_search_path) {
 		efree(php_ini_search_path);
 	}
@@ -322,18 +325,18 @@ int php_init_config()
 		return SUCCESS;  /* having no configuration file is ok */
 	}
 	fh.type = ZEND_HANDLE_FP;
-	fh.filename = php_ini_opened_path;
 
 	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
 	
-	if (php_ini_opened_path) {
+	{
 		zval tmp;
 		
-		Z_STRLEN(tmp) = strlen(php_ini_opened_path);
-		Z_STRVAL(tmp) = zend_strndup(php_ini_opened_path, Z_STRLEN(tmp));
+		Z_STRLEN(tmp) = strlen(fh.filename);
+		Z_STRVAL(tmp) = zend_strndup(fh.filename, Z_STRLEN(tmp));
 		Z_TYPE(tmp) = IS_STRING;
 		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"), (void *) &tmp, sizeof(zval), NULL);
-		efree(php_ini_opened_path);
+		if(php_ini_opened_path) 
+			efree(php_ini_opened_path);
 		php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 	}
 	
