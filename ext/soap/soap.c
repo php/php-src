@@ -1266,7 +1266,7 @@ PHP_METHOD(SoapServer, handle)
 	int soap_version, old_soap_version;
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
-	xmlDocPtr doc_request, doc_return;
+	xmlDocPtr doc_request=NULL, doc_return;
 	zval function_name, **params, **raw_post, *soap_obj, retval, **server_vars;
 	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
