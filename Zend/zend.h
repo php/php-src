@@ -351,13 +351,12 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 
 
 /* Messages for applications of Zend */
-#define ZMSG_ENABLE_TRACK_VARS			1L
-#define ZMSG_FAILED_INCLUDE_FOPEN		2L
-#define ZMSG_FAILED_REQUIRE_FOPEN		3L
-#define ZMSG_FAILED_HIGHLIGHT_FOPEN		4L
-#define ZMSG_MEMORY_LEAK_DETECTED		5L
-#define ZMSG_MEMORY_LEAK_REPEATED		6L
-#define ZMSG_LOG_SCRIPT_NAME		7L
+#define ZMSG_FAILED_INCLUDE_FOPEN		1L
+#define ZMSG_FAILED_REQUIRE_FOPEN		2L
+#define ZMSG_FAILED_HIGHLIGHT_FOPEN		3L
+#define ZMSG_MEMORY_LEAK_DETECTED		4L
+#define ZMSG_MEMORY_LEAK_REPEATED		5L
+#define ZMSG_LOG_SCRIPT_NAME			6L
 
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
