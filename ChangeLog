@@ -1,3 +1,58 @@
+1999-10-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk: automake scans aclocal.m4 as well
+
+1999-10-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * build.mk: (build.mk) fix suggested by sascha.
+
+    * build.mk:
+    (build.mk) make cvsclean now also deletes the libzend & TSRM symlinks.
+
+1999-10-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/informix/stub.c: Add stub.c for helper library.
+
+1999-10-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * build.mk:
+    (build.mk) added target cvsclean: removed all files listed in all .cvsignore files found in the current tree.
+
+1999-10-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/informix/Makefile.am
+      ext/informix/config.m4:
+    Workaround for Informix set of libraries. One library depends on
+    another "library" (an object file). We build a standard library
+    out of this object here, so that we can link it in at the right place
+    later.
+
+    * ext/gd/gd.c
+      ext/pgsql/pgsql.c
+      ext/snmp/snmp.c:
+    Remove -DPIC preprocessor macros. This is defined by libtool
+    automatically, if a shared library is built. This would lead
+    to multiple definitions of get_module(). If you want to build
+    modules, add -DCOMPILE_DL to your CFLAGS.
+
+    * ext/informix/Makefile.am
+      ext/informix/config.m4: Link in IFX_LIBS properly.
+
+1999-10-10  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+1999-10-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk:
+    Clean up and add 'clean' target which removes standard targets recursively
+
+    * build.mk: build.mk can be used to generate build tools. It is usually
+    faster than buildconf, since it rebuilds only components, if
+    it is necessary. To use it, run
+
+        $ make -f build.mk
+
 1999-10-09  Sascha Schumann  <sascha@schumann.cx>
 
     * Makefile.am: Remove redundant library declaration. All libtool libraries
