@@ -39,6 +39,10 @@
 #include "php_variables.h"
 #include "php_fdf.h"
 
+#ifndef S_ISDIR
+#define S_ISDIR(m) (((m) & _S_IFDIR) == _S_IFDIR)
+#endif
+
 static int le_fdf;
 
 SAPI_POST_HANDLER_FUNC(fdf_post_handler);
