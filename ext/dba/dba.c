@@ -797,7 +797,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* }}} */
 #undef FREENOW
 
-/* {{{ proto int dba_popen(string path, string mode [, string handlername, string ...])
+/* {{{ proto resource dba_popen(string path, string mode [, string handlername, string ...])
    Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
@@ -805,7 +805,7 @@ PHP_FUNCTION(dba_popen)
 }
 /* }}} */
 
-/* {{{ proto int dba_open(string path, string mode [, string handlername, string ...])
+/* {{{ proto resource dba_open(string path, string mode [, string handlername, string ...])
    Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
