@@ -51,6 +51,7 @@ PHP_FUNCTION(domxml_doc_create_text_node);
 PHP_FUNCTION(domxml_doc_create_comment);
 PHP_FUNCTION(domxml_doc_create_processing_instruction);
 PHP_FUNCTION(domxml_doc_create_attribute);
+PHP_FUNCTION(domxml_doc_imported_node);
 PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_dumpmem);
@@ -62,6 +63,10 @@ PHP_FUNCTION(domxml_doctype_notations);
 PHP_FUNCTION(domxml_doctype_public_id);
 PHP_FUNCTION(domxml_doctype_system_id);
 PHP_FUNCTION(domxml_doctype_internal_subset);
+
+/* Class Notation methods */
+PHP_FUNCTION(domxml_notation_public_id);
+PHP_FUNCTION(domxml_notation_system_id);
 
 /* Class Node methods */
 PHP_FUNCTION(domxml_node_attributes);
