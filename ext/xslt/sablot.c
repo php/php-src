@@ -745,13 +745,19 @@ static int scheme_getall(void *user_data, SablotHandle proc, const char *scheme,
 	xslt_call_function("scheme get all", XSLT_SCHEME(handle).get_all, 
 	                   3, argv, &retval);
 
+	if(!retval) {
+		/* return failure */
+		return 1;
+	}
+	
 	/* Save the return value in the buffer (copying it) */
 	*buffer     = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 	*byte_count = Z_STRLEN_P(retval);
 
 	/* Free return value */
 	zval_ptr_dtor(&retval);
-
+		
+	/* return success */
 	return 0;
 }
 /* }}} */
@@ -823,11 +829,21 @@ static int  scheme_open(void *user_data, SablotHandle proc, const char *scheme, 
 	xslt_call_function("scheme open", XSLT_SCHEME(handle).open,
 	                   3, argv, &retval);
 
+	if(!retval) {
+		/* return failure */
+		return 1;
+	}
+
 	/* Return value is a resource pointer to an open file */
 	*fd = Z_LVAL_P(retval);
-
+		
 	/* Free it all up */
 	zval_ptr_dtor(&retval);
+
+	if(!*fd) {
+		/* return failure - unsupported scheme */
+		return SH_ERR_UNSUPPORTED_SCHEME;
+	}
 
 	/* return success */
 	return 0;
@@ -866,6 +882,11 @@ static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer,
 	/* Call the function */
 	xslt_call_function("scheme get", XSLT_SCHEME(handle).get,
 	                   3, argv, &retval);
+	
+	if(!retval) {
+		/* return failure */
+		return 1;
+	}
 	
 	/* Returns the number of bytes read */
 	*byte_count = Z_LVAL_P(retval);
@@ -911,6 +932,11 @@ static int  scheme_put(void *user_data, SablotHandle proc, int fd, const char *b
 	xslt_call_function("scheme put", XSLT_SCHEME(handle).put,
 	                   3, argv, &retval);
 
+	if(!retval) {
+		/* return failure */
+		return 1;
+	}
+	
 	/* The return value is the number of bytes written */
 	*byte_count = Z_LVAL_P(retval);
 
@@ -952,6 +978,11 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 	xslt_call_function("scheme close", XSLT_SCHEME(handle).close,
 	                   2, argv, &retval);
 
+	if(!retval) {
+		/* return failure */
+		return 1;
+	}
+	
 	/* Free everything up */
 	zval_ptr_dtor(&retval);
 
@@ -986,7 +1017,8 @@ static SAX_RETURN sax_startdoc(void *ctx, SablotHandle processor)
 	                   1, argv, &retval);
 
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1034,7 +1066,8 @@ static SAX_RETURN sax_startelement(void *ctx, SablotHandle processor,
 	                   3, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1068,7 +1101,8 @@ static SAX_RETURN sax_endelement(void *ctx, SablotHandle processor, const char *
 	                   2, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1107,7 +1141,8 @@ static SAX_RETURN sax_startnamespace(void *ctx, SablotHandle processor,
 	                   3, argv, &retval);
 
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1141,7 +1176,8 @@ static SAX_RETURN sax_endnamespace(void *ctx, SablotHandle processor, const char
 	                   2, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1175,7 +1211,8 @@ static SAX_RETURN sax_comment(void *ctx, SablotHandle processor, const char *con
 	                   2, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1214,7 +1251,8 @@ static SAX_RETURN sax_pi(void *ctx, SablotHandle processor,
 	                   3, argv, &retval);
 
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1250,7 +1288,8 @@ static SAX_RETURN sax_characters(void *ctx, SablotHandle processor,
 	                   2, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1281,7 +1320,8 @@ static SAX_RETURN sax_enddoc(void *ctx, SablotHandle processor)
 	                   1, argv, &retval);
 	
 	/* Cleanup */
-	zval_ptr_dtor(&retval);
+	if(retval)
+		zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -1499,7 +1539,8 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		                   4, argv, &retval);
 
 		/* Free up */
-		zval_ptr_dtor(&retval);
+		if(retval)
+			zval_ptr_dtor(&retval);
 	}
 	else {
 		char *errmsg  = NULL;                                  /* Error message */
