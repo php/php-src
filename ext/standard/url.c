@@ -94,10 +94,15 @@ PHPAPI php_url *php_url_parse(char *str)
 	ue = s + length;
 
 	/* parse scheme */
-	if ((e = strchr(s, ':')) && *(e+1) == '/' && *(e+2) == '/' && (e-s)) {
+	if ((e = strchr(s, ':')) && *(e+1) == '/' && (e-s)) {
 		ret->scheme = estrndup(s, (e-s));
 		php_replace_controlchars(ret->scheme);
-		s = e + 3;
+		
+		if (*(e+2) == '/') {
+			s = e + 3;
+		} else {
+			s = e + 2;
+		}	
 	} else if (e) { /* no scheme, look for port */
 		p = e + 1;
 		pp = p;
