@@ -1541,7 +1541,7 @@ ZEND_METHOD(reflection_parameter, getName)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass Reflection_Parameter::getClass()
+/* {{{ proto public ReflectionClass ReflectionParameter::getClass()
    Returns this parameters's class hint or NULL if there is none */
 ZEND_METHOD(reflection_parameter, getClass)
 {
@@ -1879,7 +1879,7 @@ ZEND_METHOD(reflection_method, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass Reflection_Method::getDeclaringClass()
+/* {{{ proto public ReflectionClass ReflectionMethod::getDeclaringClass()
    Get the declaring class */
 ZEND_METHOD(reflection_method, getDeclaringClass)
 {
@@ -2134,7 +2134,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod Reflection_Class::getConstructor()
+/* {{{ proto public ReflectionMethod ReflectionClass::getConstructor()
    Returns the class' constructor if there is one, NULL otherwise */
 ZEND_METHOD(reflection_class, getConstructor)
 {
@@ -2152,7 +2152,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod Reflection_Class::getMethod(string name)
+/* {{{ proto public ReflectionMethod ReflectionClass::getMethod(string name) throws ReflectionException
    Returns the class' method specified by it's name */
 ZEND_METHOD(reflection_class, getMethod)
 {
@@ -2172,7 +2172,9 @@ ZEND_METHOD(reflection_class, getMethod)
 	if (zend_hash_find(&ce->function_table, name, name_len + 1, (void**) &mptr) == SUCCESS) {
 		reflection_method_factory(ce, mptr, return_value TSRMLS_CC);
 	} else {
-		RETURN_NULL();
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Method %s does not exist", name);
+		return;
 	}
 }
 /* }}} */
@@ -2195,7 +2197,7 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod[] Reflection_Class::getMethods()
+/* {{{ proto public ReflectionMethod[] ReflectionClass::getMethods()
    Returns an array of this class' methods */
 ZEND_METHOD(reflection_class, getMethods)
 {
@@ -2221,7 +2223,7 @@ ZEND_METHOD(reflection_class, getMethods)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty Reflection_Class::getProperty(string name)
+/* {{{ proto public ReflectionProperty ReflectionClass::getProperty(string name) throws ReflectionException
    Returns the class' property specified by it's name */
 ZEND_METHOD(reflection_class, getProperty)
 {
@@ -2240,7 +2242,9 @@ ZEND_METHOD(reflection_class, getProperty)
 	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS) {
 		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
 	} else {
-		RETURN_NULL();
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Property %s does not exist", name);
+		return;
 	}
 }
 /* }}} */
@@ -2263,7 +2267,7 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty[] Reflection_Class::getProperties()
+/* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties()
    Returns an array of this class' properties */
 ZEND_METHOD(reflection_class, getProperties)
 {
@@ -2478,7 +2482,7 @@ ZEND_METHOD(reflection_class, newInstance)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass[] Reflection_Class::getInterfaces()
+/* {{{ proto public ReflectionClass[] ReflectionClass::getInterfaces()
    Returns an array of interfaces this class implements */
 ZEND_METHOD(reflection_class, getInterfaces)
 {
@@ -2504,7 +2508,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass Reflection_Class::getParentClass()
+/* {{{ proto public ReflectionClass ReflectionClass::getParentClass()
    Returns the class' parent class, or, if none exists, FALSE */
 ZEND_METHOD(reflection_class, getParentClass)
 {
@@ -2541,7 +2545,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Interface %s doesn't exist", Z_STRVAL_P(class_name));
+						"Interface %s does not exist", Z_STRVAL_P(class_name));
 				return;
 			}
 			class_ce = *pce;
@@ -2587,7 +2591,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(interface), Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Interface %s doesn't exist", Z_STRVAL_P(interface));
+						"Interface %s does not exist", Z_STRVAL_P(interface));
 				return;
 			}
 			interface_ce = *pce;
@@ -2953,7 +2957,7 @@ ZEND_METHOD(reflection_property, setValue)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionClass Reflection_Property::getDeclaringClass()
+/* {{{ proto public ReflectionClass ReflectionProperty::getDeclaringClass()
    Get the declaring class */
 ZEND_METHOD(reflection_property, getDeclaringClass)
 {
@@ -3056,7 +3060,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionFunction[] Reflection_Extension::getFunctions()
+/* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions()
    Returns an array of this extension's fuctions */
 ZEND_METHOD(reflection_extension, getFunctions)
 {
