@@ -1,3 +1,28 @@
+2001-09-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/config.m4: be more flexible in finding a db++ installation
+
+2001-09-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Menu.php:
+    * Patch by Ronald van den Berg <vandenberg@auxilium-sd.nl>
+
+2001-09-12  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ifx.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/fbsql.php: added \$Id\$ cvs tags
+
+2001-09-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/dir.c
+      ext/standard/php_dir.h: Enable chroot() only if SAPI is CGI.
+
 2001-09-11  Andy Sautins  <asautins@veripost.net>
 
     * ext/oci8/oci8.c: oops.  Used C++ style comments.  Make C style
