@@ -617,13 +617,13 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 		while (entry) {
 			if (!PG(safe_mode) || strncasecmp(entry->param->name, "authorization", 13)) {
 				snprintf(buf, NS_BUF_SIZE, "HTTP_%s", entry->param->name);
+				buf[NS_BUF_SIZE]='\0';
 				for(p = buf + 5; *p; p++) {
 					*p = toupper(*p);
 					if (*p < 'A' || *p > 'Z') {
 						*p = '_';
 					}
 				}
-				buf[NS_BUF_SIZE]='\0';
 				php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			}
 			entry=entry->next;
