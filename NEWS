@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added --disable-pear option (Andrei)
+- Renamed libzend repository to Zend (Zeev)
+- Added support for thttpd (Sascha)
+- Added session.cache_limiter and cache_expire options (Sascha)
 - Restored the PHP_VERSION and PHP_OS constants (Zeev)
 - Added get_loaded_extensions(), extension_loaded(), and
   get_extension_funcs() functions. (Andrei)
@@ -20,9 +24,9 @@ PHP 4.0                                                                    NEWS
 - OCI8 now returns NULL values in LONG columns correct. (Thies)
 - Added support for a C-like assert() function. (Thies)
 - Added CyberCash support. (Evan)
-- explode() is now binary-safe. (Thies)
-- strpos() is now binary-safe. (Thies)
-- added XML_Set_Object() function, now you can use the XML-Parser from
+- Made explode() binary-safe. (Thies)
+- Made strpos() binary-safe. (Thies)
+- Added XML_Set_Object() function, now you can use the XML-Parser from
   within an object. (Thies)
 - Session vars are now decoded into $HTTP_STATE_VARS[] array and the
   globals, depending on track_vars and gpc_globals settings (Andrei)
@@ -30,8 +34,8 @@ PHP 4.0                                                                    NEWS
   to their full path (Zeev)
 - PHP 4 scripts will now obey the max_execution_time setting and actually
   time out (Rasmus)
-- Add configure command to phpinfo() output (Stig)
-- Add optional socket path to the mysql_?connect() functions (Rasmus)
+- Added configure command to phpinfo() output (Stig)
+- Added optional socket path to the mysql_?connect() functions (Rasmus)
 - Made mysql and gd work as shared extensions again (Stig)
 - Make the global GET/POST/Cookie variables and their $HTTP_*_VARS[] counterparts
   be references to each other (Zeev)
