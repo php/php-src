@@ -1148,7 +1148,7 @@ PHPAPI void php_dirname(char *path, int len)
 	}
 	if (end < path) {
 		/* The path only contained slashes */
-		path[0] = DEFAULT_SLASH;
+		path[0] = '/';
 		path[1] = '\0';
 		return;
 	}
@@ -1169,7 +1169,7 @@ PHPAPI void php_dirname(char *path, int len)
 		end--;
 	}
 	if (end < path) {
-		path[0] = DEFAULT_SLASH;
+		path[0] = '/';
 		path[1] = '\0';
 		return;
 	}
