@@ -218,7 +218,7 @@ class PEAR_Builder extends PEAR_Common
                     ($r == 'yes' || $r == 'autodetect')) {
                     $configure_command .= " --$o[name]";
                 } else {
-                    $configure_command .= " --$o[name]=$r";
+                    $configure_command .= " --$o[name]=".trim($r);
                 }
             }
         }
