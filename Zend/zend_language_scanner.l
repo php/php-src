@@ -127,7 +127,6 @@ void startup_scanner(TSRMLS_D)
 	CG(heredoc_len)=0;
 	SCNG(yy_start_stack_ptr) = 0;
 	SCNG(yy_start_stack_depth) = 0;
-	SCNG(yy_start_stack) = 0;
 }
 
 
