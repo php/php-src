@@ -132,7 +132,7 @@ AC_ARG_WITH(apache,
     # For Apache 2.0.x
     elif test -f $withval/include/httpd.h &&
          test -f $withval/srclib/apr/include/apr_general.h ; then
-      AC_MSG_ERROR([Use --with-apache2 with Apache 2.x!])
+      AC_MSG_ERROR([Use --with-apxs2 with Apache 2.x!])
     # For Apache 1.3.x
     elif test -f $withval/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
