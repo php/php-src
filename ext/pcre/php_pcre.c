@@ -76,12 +76,10 @@ static void php_pcre_init_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 }
 
-#ifdef ZTS
 static void php_pcre_shutdown_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 }
-#endif
 
 
 static /* {{{ PHP_MINFO_FUNCTION(pcre) */
@@ -113,6 +111,10 @@ static PHP_MINIT_FUNCTION(pcre)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
+#ifndef ZTS
+	php_pcre_shutdown_globals(&pcre_globals TSRMLS_CC);
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
