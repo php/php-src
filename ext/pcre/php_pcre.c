@@ -568,7 +568,7 @@ static int preg_do_repl_func(char *function_name, char *subject, int *offsets, i
 	zval		*retval_ptr;		/* Function return value */
 	zval		 function;			/* Function to call */
 	zval		*function_ptr = &function;		/* Pointer to function to call */
-	zval	   **args[0];			/* Argument to pass to function */
+	zval	   **args[1];			/* Argument to pass to function */
 	zval		*subpats;			/* Captured subpatterns */ 
 	int			 result_len;		/* Return value length */
 	int			 i;
