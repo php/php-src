@@ -34,10 +34,9 @@ if test "$PHP_MBSTRING" != "no"; then
   PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter_cn.c mbfilter_tw.c mbfilter_kr.c mbfilter_ru.c mbfilter.c mbstring.c mbregex.c php_mbregex.c html_entities.c php_unicode.c mb_gpc.c, $ext_shared)
 fi
 
-
 PHP_ARG_ENABLE(mbregex, whether to enable multibyte regex support,
-[  --enable-mbregex        Enable multibyte regex support], no, no)
+[  --disable-mbregex       Disable multibyte regex support], yes, no)
 
-if test "$PHP_MBREGEX" != "no" ; then
+if test "$PHP_MBREGEX" != "no" -a "$PHP_MBSTRING" != "no"; then
   AC_DEFINE(HAVE_MBREGEX, 1, [whether to have multibyte regex support])
 fi
