@@ -998,7 +998,17 @@ void do_return(znode *expr, int do_end_vparse CLS_DC)
 static void function_add_ref(zend_function *function)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
-		(*((zend_op_array *) function)->refcount)++;
+		zend_op_array *op_array = &function->op_array;
+
+		(*op_array->refcount)++;
+		if (op_array->static_variables) {
+			HashTable *static_variables = op_array->static_variables;
+			zval *tmp_zval;
+
+			op_array->static_variables = (HashTable *) emalloc(sizeof(HashTable));
+			zend_hash_init(op_array->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(op_array->static_variables, static_variables, (void (*)(void *)) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
+		}
 	}
 }
 
