@@ -30,6 +30,7 @@
 #include "php_globals.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
+#include "url.h"
 #undef STATE_TAG
 
 #define url_scanner url_scanner_ex
@@ -421,13 +422,13 @@ int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len
 		zend_hash_init(BG(url_adapt_state_ex).rewrite_vars, 0, NULL, (void (*)(void *)) php_url_scanner_var_dtor, 0);
 	}
 
-	smart_str_setl(&(var.var), estrndup(name, name_len), name_len);
+	smart_str_appendl(&(var.var), name, name_len);
 
 	if (urlencode) {
 		encoded = php_url_encode(value, value_len, &encoded_len);
 		smart_str_setl(&(var.val), encoded, encoded_len);
 	} else {
-		smart_str_setl(&(var.val), estrndup(value, value_len), value_len);
+		smart_str_appendl(&(var.val), value, value_len);
 	}
 
 	return zend_hash_add(BG(url_adapt_state_ex).rewrite_vars, name, name_len, &var, sizeof(url_adapt_var_t), NULL);
