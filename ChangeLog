@@ -1,3 +1,110 @@
+2001-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c: Implement internal output compression0:wq
+
+    * ext/standard/output.c: Fix freeing of buffers
+
+    * ext/standard/output.c: Fixes to internal output buffering
+
+2001-03-06  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/mgd_internal.h
+      ext/midgard/midgard.c: added ability to break tree walking
+
+2001-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/build2.mk
+      configure.in:
+    Replace AM_PROG_LEX with a separated call to AC_PROG_LEX and AC_DECL_YYTEXT.
+    The latter is only called, if lex was found, so that PHP configures now
+    on setups without (f)lex.
+
+2001-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h: More internal output buffering fixes
+
+    * ext/standard/output.c
+      ext/standard/php_output.h: Fix internal output buffering
+
+    * ext/standard/output.c
+      ext/standard/php_output.h:
+    Initial work on internal output handlers - should be much quicker
+
+2001-03-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache.php
+      pear/Cache/Container.php
+      pear/Cache/Container/db.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache/Graphics.php
+      pear/Cache/Output.php: Whitespace only.
+
+2001-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: Avoid using ret uninitialized
+
+2001-03-06  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    Thread hashtable was being initialized with a size of 1! Changed to 128 as
+    a more sensible number.
+
+2001-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c:
+    Avoid writing to error_log in case of aborted connections.
+
+2001-03-06  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/file.php:
+    deleteDir deletes now the created "group"-Directories as well.
+    Hope it works on windows as well...
+
+2001-03-06  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_ini.c: Don't insert empty path if PHPRC is empty
+
+2001-03-06  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container.php
+      pear/Cache/Container/db.php
+      pear/Cache/Container/phplib.php:
+    replaced db->quoteString with addslashes
+
+    adjusted encoding_mode = "slash" that it doesn't quote slashes, the
+    save() function in phplib/db-container is now in charge for that.
+
+2001-03-06  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/article.c
+      ext/midgard/element.c
+      ext/midgard/event.c
+      ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/preferences.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c: Object integrity checks cleanup
+
+    * ext/midgard/sitegroup.c: Bug #123
+
+2001-03-06  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/file.c: Typo.
+
+    * ext/standard/file.c:
+    get_meta_tags now allows attributes that are not quoted as well as those
+    that are.  It follows the HTML 4.01 specification for attribute values
+    outlined here -> http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2
+
 2001-03-05  Rainer Schaaf  <rjs@pdflib.com>
 
     * ext/pdf/pdf.c: fixed bug in PDF_getbuffer (happend only on Windows)
