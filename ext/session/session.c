@@ -121,6 +121,8 @@ static PHP_INI_MH(OnUpdateSerializer)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
+	STD_PHP_INI_BOOLEAN("session.bug_compat_42",    "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.bug_compat_warn",  "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat_warn,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.save_path",          "/tmp",      PHP_INI_ALL, OnUpdateString, save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
@@ -162,6 +164,9 @@ static ps_module *ps_modules[MAX_MODULES + 1] = {
 	ps_files_ptr,
 	ps_user_ptr
 };
+
+#define IF_SESSION_VARS() \
+	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY)
 
 PHPAPI int php_session_register_serializer(const char *name, 
 		int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
@@ -305,14 +310,14 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 		} else {
 			zend_set_hash_symbol(state_val, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		}
-	} else if (PS(http_session_vars)) {
+	} else IF_SESSION_VARS() {
 		zend_set_hash_symbol(state_val, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
 
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
-	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY) {
+	IF_SESSION_VARS() {
 		return zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
 				namelen+1, (void **) state_var);
 	}
@@ -483,13 +488,12 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 {
 	char *ret = NULL;
 
-	if (!PS(http_session_vars)) {
+	IF_SESSION_VARS() {
+		if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
+			ret = NULL;
+	} else {
 		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session.");
-		 return NULL;
 	}
-
-	if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
-		ret = NULL;
 
 	return ret;
 }
@@ -586,33 +590,66 @@ static void php_session_initialize(TSRMLS_D)
 	}
 }
 
+static void migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
+{
+	char *str;
+	uint str_len;
+	ulong num_key;
+	int n;
+	zval **val = NULL;
+	
+	n = zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, pos);
+
+	switch (n) {
+		case HASH_KEY_IS_STRING:
+			zend_hash_find(&EG(symbol_table), str, str_len, (void **) &val);
+			if (val) {
+				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, 1, 0);
+			}
+			break;
+		case HASH_KEY_IS_LONG:
+			php_error(E_NOTICE, "The session bug compatibility code will not "
+					"try to locate the global variable $%d due to its "
+					"numeric nature.", num_key);
+			break;
+	}
+}
+
 static void php_session_save_current_state(TSRMLS_D)
 {
-	char *val;
-	int vallen;
 	int ret = FAILURE;
-	char *variable;
-	uint variable_len;
-	ulong num_key;
-	HashPosition pos;
 	
-	if (!PG(register_globals) && !PS(http_session_vars)) {
-		return;
-	}
-		
-	if (PS(http_session_vars) && PS(http_session_vars)->type != IS_ARRAY) {
-		return;
-	}
-		
-	if (PS(http_session_vars)) {
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
-				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-				zend_hash_move_forward_ex(Z_ARRVAL_P(PS(http_session_vars)),&pos)) {
-			PS_ADD_VARL(variable, variable_len-1);
+	IF_SESSION_VARS() {
+		if (PS(bug_compat) && !PG(register_globals)) {
+			HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
+			HashPosition pos;
+			zval **val;
+			int do_warn = 0;
+
+			zend_hash_internal_pointer_reset_ex(ht, &pos);
+
+			while (zend_hash_get_current_data_ex(ht, 
+						(void **) &val, &pos) != FAILURE) {
+				if (Z_TYPE_PP(val) == IS_NULL) {
+					do_warn = 1;
+
+					migrate_global(ht, &pos);
+				}
+				zend_hash_move_forward_ex(ht, &pos);
+			}
+
+			if (do_warn && PS(bug_compat_warn)) {
+				php_error(E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn.");
+			}
 		}
+	} else {
+		return;
 	}
 
 	if (PS(mod_data)) {
+		char *val;
+		int vallen;
+
 		val = php_session_encode(&vallen TSRMLS_CC);
 		if (val) {
 			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
@@ -1328,11 +1365,17 @@ PHP_FUNCTION(session_is_registered)
 	
 	convert_to_string_ex(p_name);
 	
-	if (zend_hash_find(&PS(vars), Z_STRVAL_PP(p_name), 
-				Z_STRLEN_PP(p_name)+1, (void **)&p_var) == SUCCESS)
-		RETURN_TRUE
-	else
+	if (PS(session_status) == php_session_none)
 		RETURN_FALSE;
+
+	IF_SESSION_VARS() {
+		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), 
+					Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name)+1, 
+					(void **)&p_var) == SUCCESS) {
+			RETURN_TRUE;
+		}
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1402,25 +1445,30 @@ PHP_FUNCTION(session_destroy)
    Unset all registered variables */
 PHP_FUNCTION(session_unset)
 {
-	zval	**tmp;
-	char	 *variable;
-	ulong     num_key;
-	
 	if (PS(session_status) == php_session_none)
 		RETURN_FALSE;
 
-	if (PG(register_globals)) {
-		for (zend_hash_internal_pointer_reset(&PS(vars));
-				zend_hash_get_current_key(&PS(vars), &variable, &num_key, 0) == HASH_KEY_IS_STRING;
-				zend_hash_move_forward(&PS(vars))) {
-			if (zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
-					== SUCCESS)
-				zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
-		}
-	}
+	IF_SESSION_VARS() {
+		HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
 
-	/* Clean $HTTP_SESSION_VARS. */
-	zend_hash_clean(Z_ARRVAL_P(PS(http_session_vars)));
+		if (PG(register_globals)) {
+			uint str_len;
+			char *str;
+			ulong num_key;
+			HashPosition pos;
+			
+			zend_hash_internal_pointer_reset_ex(ht, &pos);
+
+			while (zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 
+						0, &pos) == HASH_KEY_IS_STRING) {
+				zend_hash_del(&EG(symbol_table), str, str_len);
+				zend_hash_move_forward_ex(ht, &pos);
+			}
+		}
+		
+		/* Clean $_SESSION. */
+		zend_hash_clean(ht);
+	}
 }
 /* }}} */
 
@@ -1433,7 +1481,6 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
 
 static void php_rinit_session_globals(TSRMLS_D)
 {		
-	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
@@ -1448,7 +1495,6 @@ static void php_rshutdown_session_globals(TSRMLS_D)
 	if (PS(id)) {
 		efree(PS(id));
 	}
-	zend_hash_destroy(&PS(vars));
 }
 
 

@@ -103,12 +103,13 @@ typedef struct _php_ps_globals {
 	zend_bool  cookie_secure;
 	ps_module *mod;
 	void *mod_data;
-	HashTable vars;
 	php_session_status session_status;
 	long gc_probability;
 	long gc_maxlifetime;
 	int module_number;
 	long cache_expire;
+	long bug_compat; /* Whether to behave like PHP 4.2 and earlier */
+	long bug_compat_warn; /* Whether to warn about it */
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
@@ -188,14 +189,12 @@ PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 PHPAPI void php_session_start(TSRMLS_D);
 
 #define PS_ADD_VARL(name,namelen) do {										\
-	zend_hash_add_empty_element(&PS(vars), name, namelen + 1);				\
 	php_add_session_var(name, namelen TSRMLS_CC);							\
 } while (0)
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
 #define PS_DEL_VARL(name,namelen) do {										\
-	zend_hash_del(&PS(vars), name, namelen+1);								\
 	if (PS(http_session_vars)) {											\
 		zend_hash_del(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1);	\
 	}																		\
@@ -210,7 +209,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 
 #define PS_ENCODE_LOOP(code)										\
 	{																\
-		HashTable *_ht = (PS(http_session_vars) ? Z_ARRVAL_P(PS(http_session_vars)) : &PS(vars)); \
+		HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars)); \
 																	\
 		for (zend_hash_internal_pointer_reset(_ht);			\
 				zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
