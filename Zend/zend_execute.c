@@ -1691,16 +1691,29 @@ binary_assign_op_addr: {
 					zval *function_name;
 					zend_function *function;
 					zval tmp;
+					zend_bool is_const;
+					char *function_name_strval;
+					int function_name_strlen;
 
 					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
 
-					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
-					tmp = *function_name;
-					zval_copy_ctor(&tmp);
-					convert_to_string(&tmp);
-					function_name = &tmp;
-					zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
+					if (is_const) {
+						function_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+					} else {
+						function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
+						tmp = *function_name;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						function_name = &tmp;
+						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
+
+						function_name_strval = tmp.value.str.val;
+						function_name_strlen = tmp.value.str.len;
+					}
 					
 					EX(calling_namespace) = EG(namespace);
 
@@ -1708,17 +1721,19 @@ binary_assign_op_addr: {
 
 					do {
 						if (EG(namespace)) {
-							if (zend_hash_find(&EG(namespace)->function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function) == SUCCESS) {
+							if (zend_hash_find(&EG(namespace)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
 								break;
 							}
 						}
-						if (zend_hash_find(EG(function_table), function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
-							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
+						if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
 						EX(calling_namespace) = NULL;
 					} while (0);
 					
-					zval_dtor(&tmp);
+					if (!is_const) {
+						zval_dtor(&tmp);
+					}
 					EX(fbc) = function;
 
 					NEXT_OPCODE();
