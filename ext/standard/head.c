@@ -242,10 +242,10 @@ CookieList *php_pop_cookie_list(void)
 /* php_set_cookie(name,value,expires,path,domain,secure) */
 PHP_FUNCTION(setcookie)
 {
-	char *cookie;
+	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
 	time_t t;
-	char *r, *dt;
+	char *dt;
 	char *name = NULL, *value = NULL, *path = NULL, *domain = NULL;
 	time_t expires = 0;
 	int secure = 0;
@@ -293,7 +293,8 @@ PHP_FUNCTION(setcookie)
 		len += strlen(name);
 	}
 	if (value) {
-		len += strlen(value);
+		encoded_value = php_url_encode(value, strlen (value));
+		len += strlen(encoded_value);
 	}
 	if (path) {
 		len += strlen(path);
@@ -316,9 +317,7 @@ PHP_FUNCTION(setcookie)
 		efree(dt);
 	} else {
 		/* FIXME: XXX: this is not binary data safe */
-		r = php_url_encode(value, strlen (value));
-		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? r : "");
-		if (r) efree(r);
+		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (value) efree(value);
 		value=NULL;
 		if (name) efree(name);
@@ -330,6 +329,9 @@ PHP_FUNCTION(setcookie)
 			efree(dt);
 		}
 	}
+
+	if (encoded_value) efree(encoded_value);
+
 	if (path && strlen(path)) {
 		strcat(cookie, "; path=");
 		strcat(cookie, path);
