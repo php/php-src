@@ -33,9 +33,22 @@
  * Zeev
  */
 
+/*
+ * 28.12.2000
+ * unicode conversion fixed by Harald Radi <h.radi@nme.at>
+ *
+ * now all these strange '?'s should be disapeared
+ */
+
 #ifdef PHP_WIN32
 
 #define _WIN32_DCOM
+
+#ifdef CP_THREAD_ACP
+#define PHP_COM_CODEPAGE CP_THREAD_ACP
+#else
+#define PHP_COM_CODEPAGE CP_ACP
+#endif
 
 #include "php.h"
 #include "php_COM.h"
@@ -46,6 +59,7 @@
 #include "objbase.h"
 #include "olestd.h" 
 #include <ctype.h> 
+#include <windows.h>
  
 
 static int le_idispatch;
@@ -104,13 +118,32 @@ char *php_COM_error_message(HRESULT hr)
 
 static OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
 {
-	OLECHAR *unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR)*(strlen+1));
-	OLECHAR *unicode_ptr = unicode_str;
+	OLECHAR *unicode_str;
 
-	while (*C_str) {
-		*unicode_ptr++ = (unsigned short) *C_str++;
+	//request needed buffersize
+	uint reqSize = MultiByteToWideChar(PHP_COM_CODEPAGE, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+
+	if(reqSize)
+	{
+		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * reqSize);
+
+		//convert string
+		MultiByteToWideChar(PHP_COM_CODEPAGE, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, unicode_str, reqSize);
 	}
-	*unicode_ptr = 0;
+	else
+	{
+		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR));
+		*unicode_str = 0;
+		
+		switch(GetLastError())
+		{
+			case ERROR_NO_UNICODE_TRANSLATION:
+				php_error(E_WARNING,"No unicode translation available for the specified string");
+				break;
+			default:
+				php_error(E_WARNING,"Error in php_char_to_OLECHAR()");
+		}
+	}
 
 	return unicode_str;
 }
@@ -118,17 +151,29 @@ static OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
 
 char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent)
 {
-	uint length = OLESTRLEN(unicode_str);
-	char *C_str = (char *) pemalloc(length+1, persistent), *p = C_str;
+	char *C_str;
+	uint length = 0;
 
-	while (*unicode_str) {
-		*p++ = (char) *unicode_str++;
+	//request needed buffersize
+	uint reqSize = WideCharToMultiByte(PHP_COM_CODEPAGE, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
+	
+	if(reqSize)
+	{
+		C_str = (char *) pemalloc(sizeof(char) * reqSize, persistent);
+
+		//convert string
+		length = WideCharToMultiByte(PHP_COM_CODEPAGE, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	}
-	*p = 0;
+	else
+	{
+		C_str = (char *) pemalloc(sizeof(char), persistent);
+		*C_str = 0;
+		
+		php_error(E_WARNING,"Error in php_OLECHAR_to_char()");
+	}
 
-	if (out_length) {
+	if(out_length)
 		*out_length = length;
-	}
 
 	return C_str;
 }
