@@ -1105,21 +1105,16 @@ PHP_FUNCTION(mssql_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set query");
 		RETURN_FALSE;
 	}
-	if (dbsqlexec(mssql_ptr->link)==FAIL || dbresults(mssql_ptr->link)==FAIL) {
+	if (dbsqlexec(mssql_ptr->link)==FAIL || (retvalue = dbresults(mssql_ptr->link))==FAIL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed");
 		RETURN_FALSE;
 	}
 	
-	/* The following is more or less the equivalent of mysql_store_result().
-	 * fetch all rows from the server into the row buffer, thus:
-	 * 1)  Being able to fire up another query without explicitly reading all rows
-	 * 2)  Having numrows accessible
-	 */
-#ifdef HAVE_FREETDS
+	// Skip results not returning any columns
+	while ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && retvalue == SUCCEED) {
+		retvalue = dbresults(mssql_ptr->link);
+	}
 	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0) {
-#else
-	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && !dbdataready(mssql_ptr->link)) {
-#endif
 		RETURN_TRUE;
 	}
 
@@ -1186,6 +1181,7 @@ PHP_FUNCTION(mssql_free_result)
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
 	/* Release remaining results */
 	do {
+		dbcanquery(result->mssql_ptr->link);
 		retvalue = dbresults(result->mssql_ptr->link);
 	} while (retvalue == SUCCEED);
 
@@ -2026,7 +2022,7 @@ PHP_FUNCTION(mssql_execute)
 {
 	zval **stmt, **skip;
 	zend_bool skip_results = 0;
-	int retvalue,retval_results;
+	int retvalue, retval_results;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	mssql_result *result;
@@ -2036,7 +2032,7 @@ PHP_FUNCTION(mssql_execute)
 	int ac = ZEND_NUM_ARGS();
 
 	batchsize = MS_SQL_G(batchsize);
-	if (ac < 1 || ac > 2 || zend_get_parameters_ex(1, &stmt, &skip)==FAILURE) {
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &stmt, &skip)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
 	if (ac == 2) {
@@ -2064,34 +2060,40 @@ PHP_FUNCTION(mssql_execute)
  	 */
 	result=NULL;
 	if (retval_results == SUCCEED) {
-		if ( (retvalue=(dbnextrow(mssql_ptr->link)))!=NO_MORE_ROWS ) {
-			num_fields = dbnumcols(mssql_ptr->link);
-			if (num_fields <= 0) {
-				RETURN_TRUE;
-			}
-			
-			result = (mssql_result *) emalloc(sizeof(mssql_result));
-			result->batchsize = batchsize;
-			result->blocks_initialized = 1;
-			result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
-			result->mssql_ptr = mssql_ptr;
-			result->cur_field=result->cur_row=result->num_rows=0;
-			result->num_fields = num_fields;
-
-			result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
-			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
-			result->statement = statement;
-		}
 		if (skip_results) {
 			do {
+				dbcanquery(mssql_ptr->link);
 				retval_results = dbresults(mssql_ptr->link);
 			} while (retval_results == SUCCEED);
 
 			_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 		}
+		else {
+			// Skip results not returning any columns
+			while ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && retval_results == SUCCEED) {
+				retval_results = dbresults(mssql_ptr->link);
+			}
+			if ((num_fields = dbnumcols(mssql_ptr->link)) > 0) {
+				retvalue = dbnextrow(mssql_ptr->link);
+				result = (mssql_result *) emalloc(sizeof(mssql_result));
+				result->batchsize = batchsize;
+				result->blocks_initialized = 1;
+				result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
+				result->mssql_ptr = mssql_ptr;
+				result->cur_field=result->cur_row=result->num_rows=0;
+				result->num_fields = num_fields;
+
+				result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
+				result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
+				result->statement = statement;
+			}
+			else {
+				_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
+			}
+		}
 	}
 	else if (retval_results == NO_MORE_RESULTS || retval_results == NO_MORE_RPC_RESULTS) {
-		_mssql_get_sp_result(mssql_ptr, statement  TSRMLS_CC);
+		_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 	}
 	
 	if (result==NULL) {
@@ -2122,6 +2124,7 @@ PHP_FUNCTION(mssql_free_statement)
 	ZEND_FETCH_RESOURCE(statement, mssql_statement *, mssql_statement_index, -1, "MS SQL-statement", le_statement);	
 	/* Release remaining results */
 	do {
+		dbcanquery(statement->link->link);
 		retvalue = dbresults(statement->link->link);
 	} while (retvalue == SUCCEED);
 
