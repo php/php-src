@@ -1590,6 +1590,12 @@ static zend_bool do_inherit_method_check(zend_function *child, zend_function *pa
 	if ((child_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
 		zend_error(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 	}
+
+	/* Prevent derived classes from restricting access that was available in parent classes
+	 */
+	if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
+		zend_error(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(child), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+	}
 	return SUCCESS;
 }
 
@@ -2201,6 +2207,12 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 		property->type = IS_NULL;
 	}
 
+	if (CG(access_type) & ZEND_ACC_STATIC) {
+		/* FIXME:  Currently, ignores access type for static variables */
+		zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		return;
+	}
+
 	switch (CG(access_type)) {
 		case ZEND_ACC_PRIVATE:
 			{
@@ -2244,9 +2256,6 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 			}
 		case ZEND_ACC_PUBLIC:
 			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-			break;
-		case ZEND_ACC_STATIC:
-			zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 			break;
 	}
 	FREE_PNODE(var_name);
