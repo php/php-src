@@ -1,5 +1,5 @@
 --TEST--
-Bug #20134 UDP reads from invalid ports
+Bug #20134 (UDP reads from invalid ports)
 --FILE--
 <?php
 # vim600:syn=php:

@@ -1,5 +1,5 @@
 --TEST--
-Bug #21523 number_format tries to allocate negative amount of memory
+Bug #21523 (number_format tries to allocate negative amount of memory)
 --FILE--
 <?php // $Id$ vim600:syn=php
 

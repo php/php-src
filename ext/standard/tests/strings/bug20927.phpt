@@ -1,5 +1,5 @@
 --TEST--
-Segfault on wordwrap statement bug #20927
+Bug #20927 (Segfault on wordwrap statement)
 --SKIPIF--
 --FILE--
 <?php
