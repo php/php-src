@@ -396,7 +396,7 @@ PHP_FUNCTION(ob_get_contents)
 PHP_FUNCTION(ob_implicit_flush)
 {
 	zval **zv_flag;
-	int flag;
+	int flag = 0;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
