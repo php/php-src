@@ -100,7 +100,7 @@ typedef struct {
 } sapi_request_info;
 
 
-typedef struct {
+typedef struct _sapi_globals_struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
