@@ -251,12 +251,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 
 void init_op(zend_op *op TSRMLS_DC)
 {
-	memset(&op->result, 0, sizeof(znode));
+	memset(op, 0, sizeof(zend_op));
 	op->lineno = CG(zend_lineno);
 	SET_UNUSED(op->result);
-	op->extended_value = 0;
-	memset(&op->op1, 0, sizeof(znode));
-	memset(&op->op2, 0, sizeof(znode));
 }
 
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
