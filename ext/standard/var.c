@@ -594,6 +594,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_hash_find(Z_OBJPROP_PP(struc), priv_name, prop_name_length, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, priv_name, prop_name_length-1);
+							efree(priv_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
@@ -601,12 +602,16 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_hash_find(Z_OBJPROP_PP(struc), prot_name, prop_name_length, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, prot_name, prop_name_length - 1);
+							efree(prot_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
 						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_PP(name));
 						php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 						php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);
+						
+						efree(prot_name);
+						efree(priv_name);
 					} while (0);
 				} else {
 					php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
