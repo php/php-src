@@ -38,6 +38,7 @@
 function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
+	PHP_FE(mcrypt_cfb, NULL)
 	PHP_FE(mcrypt_get_block_size, NULL)
 	PHP_FE(mcrypt_get_key_size, NULL)
 	{0},
@@ -65,6 +66,9 @@ static mcrypt_global_struct mcryptg;
 #define MCRYPTG(x) mcryptg.x
 
 #endif
+
+#define MCRYPT_IV_WRONG_SIZE "The IV paramater must be as long as the blocksize"
+#define MCRYPT_FAILED "mcrypt initialization failed"
 
 #define MCRYPT_ENTRY(a) REGISTER_LONG_CONSTANT("MCRYPT_" #a, a, 0)
 
@@ -117,38 +121,102 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	RETURN_LONG(get_block_size(cipher->value.lval));
 }
 
-/* proto mcrypt_cbc(int cipher, string key, string data, int mode)
-   CBC crypt/decrypt data using key key with cipher cipher */
-PHP_FUNCTION(mcrypt_cbc)
+/* proto mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
+   CFB crypt/decrypt data using key key with cipher cipher starting with iv */
+PHP_FUNCTION(mcrypt_cfb)
 {
-	pval *cipher, *data, *key, *mode;
+	pval *cipher, *data, *key, *mode, *iv;
 	int td;
 	char *ndata;
 	size_t bsize;
 	size_t nr;
 	size_t nsize;
 
-	if(ARG_COUNT(ht) != 4 || 
-			getParameters(ht, 4, &cipher, &key, &data, &mode) == FAILURE) {
+	if(ARG_COUNT(ht) != 5 || 
+			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(cipher);
 	convert_to_long(mode);
 	convert_to_string(data);
 	convert_to_string(key);
+	convert_to_string(iv);
+
+	if(iv->value.str.len != bsize) {
+		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
+		RETURN_FALSE;
+	}
 
 	bsize = get_block_size(cipher->value.lval);
 	nr = (data->value.str.len + bsize - 1) / bsize;
 	nsize = nr * bsize;
 
-	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
+	td = init_mcrypt_cfb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
 	if(td == -1) {
-		php3_error(E_WARNING, "mcrypt initialization failed");
+		php3_error(E_WARNING, MCRYPT_FAILED);
 		RETURN_FALSE;
 	}
 	
 	ndata = ecalloc(nr, bsize);
 	memcpy(ndata, data->value.str.val, data->value.str.len);
+	
+	if(mode->value.lval == 0)
+		mcrypt_cfb(td, ndata, nsize);
+	else
+		mdecrypt_cfb(td, ndata, nsize);
+	
+	end_mcrypt_cfb(td);
+
+	RETURN_STRINGL(ndata, nsize, 0);
+}
+
+/* proto mcrypt_cbc(int cipher, string key, string data, int mode [,string iv])
+   CBC crypt/decrypt data using key key with cipher cipher using optional iv */
+PHP_FUNCTION(mcrypt_cbc)
+{
+	pval *cipher, *data, *key, *mode, *iv;
+	int td;
+	int ac = ARG_COUNT(ht);
+	char *ndata;
+	size_t bsize;
+	size_t nr;
+	size_t nsize;
+
+	if(ac < 4 || ac > 5 || 
+			getParameters(ht, ac, &cipher, &key, &data, &mode, &iv) == 
+			FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(cipher);
+	convert_to_long(mode);
+	convert_to_string(data);
+	convert_to_string(key);
+	
+	bsize = get_block_size(cipher->value.lval);
+	if(ac > 4 && mode == 0) {
+		convert_to_string(iv);
+		if(iv->value.str.len != bsize) {
+			php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
+			RETURN_FALSE;
+		}
+	}
+
+	nr = (data->value.str.len + bsize - 1) / bsize;
+	nsize = nr * bsize;
+
+	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
+	if(td == -1) {
+		php3_error(E_WARNING, MCRYPT_FAILED);
+		RETURN_FALSE;
+	}
+	
+	ndata = ecalloc(nr, bsize);
+	memcpy(ndata, data->value.str.val, data->value.str.len);
+	
+	/* iv may be only used in encryption */
+	if(ac > 4 && mode == 0) {
+		mcrypt(td, iv->value.str.val);
+	}
 	
 	if(mode->value.lval == 0)
 		mcrypt_cbc(td, ndata, nsize);
@@ -186,7 +254,7 @@ PHP_FUNCTION(mcrypt_ecb)
 
 	td = init_mcrypt_ecb(cipher->value.lval, key->value.str.val, key->value.str.len);
 	if(td == -1) {
-		php3_error(E_WARNING, "mcrypt initialization failed");
+		php3_error(E_WARNING, MCRYPT_FAILED);
 		RETURN_FALSE;
 	}
 	
