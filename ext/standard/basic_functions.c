@@ -61,6 +61,7 @@
 #endif
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+static unsigned char first_and_second_args_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
 /* uncomment this if/when we actually need it - tired of seeing the warning
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 */
@@ -322,6 +323,7 @@ function_entry basic_functions[] = {
 	PHP_FE(extract,						NULL)
 	PHP_FE(compact,						NULL)
 	PHP_FE(range,						NULL)
+	PHP_FE(multisort,					first_and_second_args_force_ref)
 	PHP_FE(array_push,					first_arg_force_ref)
 	PHP_FE(array_pop,					first_arg_force_ref)
 	PHP_FE(array_shift,					first_arg_force_ref)
@@ -333,6 +335,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_values,				NULL)
 	PHP_FE(array_count_values,		   	NULL)
 	PHP_FE(array_reverse,				NULL)
+	PHP_FE(array_pad,					NULL)
 
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
@@ -3005,6 +3008,7 @@ PHP_FUNCTION(array_values)
 }
 /* }}} */
 
+
 /* {{{ proto array array_count_values(array input)
    Return the value as key and the frequency of that value in <input> as value */
 PHP_FUNCTION(array_count_values)
@@ -3065,6 +3069,7 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
+
 /* {{{ proto array array_reverse(array input)
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
@@ -3109,6 +3114,7 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
+
 /* {{{ proto int getservbyname(string service, string protocol)
    Returns port associated with service. protocol must be "tcp" or "udp". */
 PHP_FUNCTION(getservbyname)
@@ -3131,6 +3137,7 @@ PHP_FUNCTION(getservbyname)
 }
 /* }}} */
 
+
 /* {{{ proto string getservbyport(int port, string protocol)
    Returns service name associated with port. Protocol must be "tcp" or "udp". */
 PHP_FUNCTION(getservbyport)
@@ -3152,6 +3159,121 @@ PHP_FUNCTION(getservbyport)
 	RETURN_STRING(serv->s_name,1);
 }
 /* }}} */
+
+
+/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
+   Returns a copy of input array padded with pad_value to size pad_size */
+PHP_FUNCTION(array_pad)
+{
+	zval		**input;		/* Input array */
+	zval		**pad_size;		/* Size to pad to */
+	zval		**pad_value;	/* Padding value obviously */
+	zval	   ***pads;			/* Array to pass to splice */
+	HashTable	 *new_hash;		/* Return value from splice */
+	int			  input_size;	/* Size of the input array */
+	int			  pad_size_abs; /* Absolute value of pad_size */
+	int			  num_pads;		/* How many pads do we need */
+	int			  do_pad;		/* Whether we should do padding at all */
+	int			  i;
+	
+	/* Get arguments and do error-checking */
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &input, &pad_size, &pad_value) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Make sure arguments are of the proper type */
+	if ((*input)->type != IS_ARRAY) {
+		php_error(E_WARNING, "Argument to %s() should be an array",
+				  get_active_function_name());
+		return;
+	}
+	convert_to_long_ex(pad_size);
+	
+	/* Do some initial calculations */
+	input_size = zend_hash_num_elements((*input)->value.ht);
+	pad_size_abs = abs((*pad_size)->value.lval);
+	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
+	
+	/* Copy the original array */
+	*return_value = **input;
+	zval_copy_ctor(return_value);
+	
+	/* If no need to pad, no need to continue */
+	if (!do_pad)
+		return;
+	
+	/* Populate the pads array */
+	num_pads = pad_size_abs - input_size;
+	/*(*pad_value)->refcount += num_pads;*/
+	pads = (zval **)emalloc(num_pads * sizeof(zval **));
+	for (i = 0; i < num_pads; i++)
+		pads[i] = pad_value;
+	
+	/* Pad on the right or on the left */
+	if ((*pad_size)->value.lval > 0)
+		new_hash = _phpi_splice(return_value->value.ht, input_size, 0, pads, num_pads, NULL);
+	else
+		new_hash = _phpi_splice(return_value->value.ht, 0, 0, pads, num_pads, NULL);
+
+	
+	/* Copy the result hash into return value */
+	zend_hash_destroy(return_value->value.ht);
+	efree(return_value->value.ht);
+	return_value->value.ht = new_hash;
+	
+	/* Clean up */
+	efree(pads);
+}
+/* }}} */
+
+
+PHP_FUNCTION(multisort)
+{
+	zval	   ***args;
+	zval		 *entry;
+	Bucket	   ***indirect;
+	Bucket		 *p;
+	int			  argc;
+	int			  max_size = 0;
+	int			  i, k;
+	
+	/* Get the argument count and check it */
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i = 0; i < argc; i++) {
+		if (zend_hash_num_elements((*args[i])->value.ht) > max_size)
+			max_size = zend_hash_num_elements((*args[i])->value.ht);
+	}
+
+	indirect = (Bucket ***)emalloc(max_size * sizeof(Bucket **));
+	for (i = 0; i < max_size; i++)
+		indirect[i] = (Bucket **)emalloc(argc * sizeof(Bucket *));
+	
+	for (i = 0; i < argc; i++) {
+		k = 0;
+		for (p = (*args[i])->value.ht->pListHead; p; p = p->pListNext, k++) {
+			indirect[k][i] = p;
+		}
+		
+		for (; k < max_size; k++)
+			indirect[k][i] = NULL;
+	}
+	
+	for (i = 0; i < max_size; i++)
+		efree(indirect[i]);
+	efree(indirect);
+	efree(args);
+}
 
 
 /*
