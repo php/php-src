@@ -71,7 +71,11 @@ PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	int to_len,message_len,headers_len,subject_len,extra_cmd_len,i;
-	
+
+	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
+		php_error(E_WARNING, "%s(): SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.", get_active_function_name(TSRMLS_C));
+		return;
+	}	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
 							  &to, &to_len,
@@ -132,10 +136,10 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message) == FAILURE) {
 			if (tsm_errmsg) {
-				php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
+				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
 				efree(tsm_errmsg);
 			} else {
-				php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
 			}
 			return 0;
 		}
@@ -168,7 +172,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (sendmail) {
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
-			php_error(E_WARNING, "%s() permission denied; unable to execute shell to run mail delivery binary",
+			php_error(E_WARNING, "%s(): Permission denied; unable to execute shell to run mail delivery binary",
 					  get_active_function_name(TSRMLS_C));
 			pclose(sendmail);
 			return 0;
@@ -196,7 +200,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			return 1;
 		}
 	} else {
-		php_error(E_WARNING, "%s() could not execute mail delivery program",
+		php_error(E_WARNING, "%s(): Could not execute mail delivery program",
 				  get_active_function_name(TSRMLS_C));
 		return 0;
 	}
