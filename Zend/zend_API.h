@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andrei Zmievski <andrei@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -110,6 +111,16 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...);
 ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_array);
 ZEND_API int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_array);
+
+
+/* Parameter parsing API -- andrei */
+
+#define ZEND_PARSE_PARAMS_QUIET 1<<1
+ZEND_API int zend_parse_parameters(int num_args, char *type_spec, ...);
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
+
+/* Parameter parsing API -- andrei */
+
 
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
