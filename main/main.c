@@ -473,16 +473,6 @@ PHP_FUNCTION(set_time_limit)
 	}
 
 	convert_to_long_ex(new_timeout);
-	/* FIXME ** This is BAD...in a threaded situation, any user
-	   can set the timeout for php on a server wide basis. 
-	   INI variables should not be reset via a user script
-
-	   Fix what?  At least on Unix, timers like these are
-	   per-thread timers.  Well, with a little work they will
-	   be.  If we use a bound thread and proper masking it
-	   should work fine.  Is this FIXME a WIN32 problem?  Is
-	   there no way to do per-thread timers on WIN32?
-	 */
 	zend_unset_timeout();
 	zend_set_timeout(Z_LVAL_PP(new_timeout));
 }
