@@ -29,7 +29,7 @@
  */
 /* $Id$ */
 
-/* Synced with php3 revision 1.62 1999-06-16 [ssb] */
+/* Synced with php3 revision 1.66 1999-06-18 [ssb] */
 
 #include "php.h"
 #include "php_globals.h"
@@ -430,7 +430,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
  * If the specified path starts with "ftp://" (insensitive to case),
  * a pair of sockets are used to request the specified file and a file
  * pointer to the requested file is returned. Passive mode ftp is used,
- * so if the server doesn't suppor this, it will fail!
+ * so if the server doesn't support this, it will fail!
  *
  * Otherwise, fopen is called as usual and the file pointer is returned.
  */
