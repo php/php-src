@@ -1494,6 +1494,7 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		int end_offset;
 		int i;
 		char tag_str[4];
+		int identifier_flag = 1;
 		
         memcpy (tag_str, buf+entry_p, 3);
 		entry_p += 3;
@@ -1544,8 +1545,16 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		entry_p += length_starting;
 		i = data_offset + base_address;
 		end_offset = i+data_length-1;
+
+		if (indicator_length == 2)
+		{
+			if (buf[i + indicator_length] != ISO2709_IDFS)
+				identifier_flag = 0;
+		}
+		else if (!memcmp (tag_str, "00", 2))
+			identifier_flag = 0;
 		
-        if (memcmp (tag_str, "00", 2) && indicator_length)
+        if (identifier_flag && indicator_length)
 		{
 			/* indicator */
 			tag->tagValue->u.string = odr_malloc(o, indicator_length+1);
