@@ -54,6 +54,11 @@ Note that the MySQL client library is not bundled anymore.])
 	PHP_SUBST_OLD(PDO_MYSQL_LIBS)
   fi
 
+  _SAVE_LDFLAGS=$LDFLAGS
+  LDFLAGS="$LDFLAGS $PDO_MYSQL_LIBS"
+  AC_CHECK_FUNCS([mysql_commit mysql_rollback mysql_autocommit]) 	
+  LDFLAGS=$_SAVE_LDFLAGS
+
   if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
   	pdo_inc_path=$prefix/include/php/ext
   elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
