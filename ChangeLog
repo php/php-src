@@ -2,6 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed a memory leak with switch statement containing return statements
+  (Andi & Zeev, libzend)
+- Fixed a crash problem in switch statements that had a string offset
+  as a conditional (Andi & Zeev, libzend)
 - Imported PHP3 fixes for rand() and mt_rand() (Rasmus)
 - Added function entries for strip_tags() and similar_text() (Andrey)
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
