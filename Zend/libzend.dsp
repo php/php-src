@@ -157,7 +157,7 @@ SOURCE=.\zend_ptr_stack.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\php4\zend_sprintf.c
+SOURCE=.\zend_sprintf.c
 # End Source File
 # Begin Source File
 
