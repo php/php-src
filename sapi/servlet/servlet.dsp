@@ -168,6 +168,7 @@ SOURCE=.\servlet.java
 
 !IF  "$(CFG)" == "servlet - Win32 Release"
 
+USERDEP__SERVL="..\..\ext\java\reflect.java"
 # Begin Custom Build
 OutDir=.\..\..\Release
 InputPath=.\servlet.java
@@ -190,6 +191,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Debug"
 
+USERDEP__SERVL="..\..\ext\java\reflect.java"
 # Begin Custom Build
 OutDir=.\..\..\Debug
 InputPath=.\servlet.java
@@ -212,7 +214,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Debug_TS"
 
-USERDEP__SERVL=".\servlet.java"	
+USERDEP__SERVL="..\..\ext\java\reflect.java"
 # Begin Custom Build
 OutDir=.\..\..\Debug_TS
 InputPath=.\servlet.java
@@ -235,6 +237,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Release_TS"
 
+USERDEP__SERVL="..\..\ext\java\reflect.java"
 # Begin Custom Build
 OutDir=.\..\..\Release_TS
 InputPath=.\servlet.java
