@@ -6,10 +6,10 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_INSTALL_FLAGS = -n -dsafe_mode=0
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php $(srcdir)/package-*.xml
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php -d "$(peardir)" $(srcdir)/package-*.xml
 
 install-pear-packages: $(top_builddir)/sapi/cli/php
-	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php -d "$(peardir)" $(srcdir)/packages/*.tar
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
