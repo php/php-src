@@ -90,8 +90,8 @@ void var_destroy(php_unserialize_data_t *var_hashx)
 
 
 /*!re2c
-iv = [0-9]+;
-nv = ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]+);
+iv = [+-]? [0-9]+;
+nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]+);
 nvexp = nv [eE] [+-]? iv;
 any = [\000-\277];
 */
@@ -102,7 +102,16 @@ static inline int parse_iv2(const char *p, const char **q)
 {
 	char cursor;
 	int result = 0;
+	int neg = 0;
 
+	switch (*p) {
+		case '-':
+			neg++;
+			/* fall-through */
+		case '+':
+			p++;
+	}
+	
 	while (1) {
 		cursor = *p;
 		if (cursor >= '0' && cursor <= '9') {
@@ -113,6 +122,7 @@ static inline int parse_iv2(const char *p, const char **q)
 		p++;
 	}
 	if (q) *q = p;
+	if (neg) return -result;
 	return result;
 }
 
@@ -169,7 +179,9 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 	if (*((*p)++) == '}') 
 		return 1;
 
+#if SOMETHING_NEW_MIGHT_LEAD_TO_CRASH_ENABLE_IF_YOU_ARE_BRAVE
 	zval_ptr_dtor(rval);
+#endif
 	return 0;
 }
 
