@@ -685,12 +685,12 @@ static mbfl_encoding mbfl_encoding_2022jp = {
 
 
 #if defined(HAVE_MBSTR_CN)
-static const char *mbfl_encoding_euc_cn_aliases[] = {"EUC_CN", "eucCN", "x-euc-cn", NULL};
+static const char *mbfl_encoding_euc_cn_aliases[] = {"CN-GB", "EUC_CN", "eucCN", "x-euc-cn", NULL};
 
 static mbfl_encoding mbfl_encoding_euc_cn = {
 	mbfl_no_encoding_euc_cn,
 	"EUC-CN",
-	"EUC-CN",
+	"CN-GB",
 	(const char *(*)[])&mbfl_encoding_euc_cn_aliases,
 	mblen_table_euccn,
 	MBFL_ENCTYPE_MBCS
@@ -721,12 +721,12 @@ static mbfl_encoding mbfl_encoding_euc_tw = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static const char *mbfl_encoding_big5_aliases[] = {"big5", "CP950", NULL};
+static const char *mbfl_encoding_big5_aliases[] = {"CN-BIG5", "BIG5", "BIG-FIVE", "BIGFIVE", "CP950", NULL};
 
 static mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_no_encoding_big5,
 	"BIG-5",
-	"BIG-5",
+	"CN-BIG5",
 	(const char *(*)[])&mbfl_encoding_big5_aliases,
 	mblen_table_big5,
 	MBFL_ENCTYPE_MBCS
@@ -6995,7 +6995,53 @@ mbfl_strlen(mbfl_string *string TSRMLS_DC)
 	return len;
 }
 
+#ifdef ZEND_MULTIBYTE
+/*
+ *	oddlen
+ */
+int
+mbfl_oddlen(mbfl_string *string)
+{
+	int len, n, m, k;
+	unsigned char *p;
+	const unsigned char *mbtab;
+	mbfl_encoding *encoding;
 
+	encoding = mbfl_no2encoding(string->no_encoding);
+	if (encoding == NULL || string == NULL) {
+		return -1;
+	}
+
+	len = 0;
+	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+		return 0;
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		return len % 2;
+	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		return len % 4;
+	} else if (encoding->mblen_table != NULL) {
+ 		mbtab = encoding->mblen_table;
+ 		n = 0;
+		p = string->val;
+		k = string->len;
+		/* count */
+		if (p != NULL) {
+			while (n < k) {
+				m = mbtab[*p];
+				n += m;
+				p += m;
+			};
+		}
+		return n-k;
+	} else {
+		/* how can i do ? */
+		return 0;
+	}
+	/* NOT REACHED */
+}
+#endif /* ZEND_MULTIBYTE */
+ 
+ 
 /*
  *  strpos
  */
