@@ -51,6 +51,7 @@
 #include "ext/standard/php_mail.h"
 #include "ext/standard/url.h"
 #include "ext/standard/php_output.h"
+#include "ext/standard/info.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
@@ -763,8 +764,10 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
+#if defined(MBSTR_ENC_TRANS)
+static void
+php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 
-static php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 	char *var, *val;
 	char *strtok_buf = NULL, **val_list;
 	zval *array_ptr = (zval *) arg;
@@ -875,6 +878,7 @@ static php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 		}
 		if (ret != NULL) {
 			php_register_variable_safe(val_list[n], ret->val, ret->len, array_ptr ELS_CC PLS_CC);
+			efree(ret->val);
 		} else {
 			php_register_variable_safe(val_list[n], val_list[n+1], len_list[n+1], array_ptr ELS_CC PLS_CC);
 		}
@@ -1023,6 +1027,7 @@ void mbstr_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 		efree(res);
 	}
 }
+#endif
 
 /* {{{ proto array mb_gpc_handler(string query, int type)
     */
