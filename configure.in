@@ -401,6 +401,12 @@ PHP_TM_GMTOFF
 PHP_STRUCT_FLOCK
 PHP_SOCKLEN_T
 
+AC_CHECK_SIZEOF(intmax_t, 0)
+AC_CHECK_SIZEOF(size_t, 8)
+AC_CHECK_SIZEOF(ssize_t, 8)
+AC_CHECK_SIZEOF(ptrdiff_t, 8)
+AC_CHECK_SIZEOF(long long, 8)
+AC_CHECK_SIZEOF(long long int, 8)
 AC_CHECK_SIZEOF(long, 8)
 AC_CHECK_SIZEOF(int, 4)
 
@@ -1166,7 +1172,8 @@ PHP_ADD_SOURCES(Zend, \
     zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_mm.c zend_default_classes.c zend_reflection_api.c)
+  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_mm.c \
+    zend_default_classes.c zend_reflection_api.c zend_interfaces.c)
 fi
 
 dnl Selectively disable optimization due to high RAM usage during
