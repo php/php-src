@@ -32,6 +32,7 @@
 #include "php_sablot.h"
 
 static int le_sablot;
+static SablotHandle processor;
 
 /* Functions related to PHP's list handling */
 static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc);
@@ -81,23 +82,23 @@ static zval *_php_sablot_resource_zval(long);
 
 /* Sablotron Basic Api macro's */
 #define SABLOT_BASIC_CREATE_PROCESSOR() \
-    if (SABLOTG(processor) == NULL) { \
+    if (processor == NULL) { \
         int ret = 0; \
         \
-        ret = SablotCreateProcessor(&SABLOTG(processor)); \
+        ret = SablotCreateProcessor(&processor); \
         if (ret) { \
             SABLOTG(last_errno) = ret; \
             return; \
         } \
         \
-        ret = SablotRegHandler(SABLOTG(processor), HLR_MESSAGE, (void *)&mh, (void *)NULL); \
+        ret = SablotRegHandler(processor, HLR_MESSAGE, (void *)&mh, (void *)NULL); \
         if (ret) { \
             SABLOTG(last_errno) = ret; \
             return; \
         } \
     }
 
-#define SABLOT_BASIC_HANDLE SABLOTG(processor)
+#define SABLOT_BASIC_HANDLE processor
 
 /**
  * SAX Handler structure, this defines the different functions to be
@@ -160,9 +161,9 @@ zend_module_entry sablot_module_entry = {
     "sablot",
     sablot_functions,
     PHP_MINIT(sablot),
-	NULL,
+	PHP_MSHUTDOWN(sablot),
     NULL,
-    PHP_RSHUTDOWN(sablot),
+    NULL,
     PHP_MINFO(sablot),
     STANDARD_MODULE_PROPERTIES
 };
@@ -176,18 +177,17 @@ ZEND_GET_MODULE(sablot)
 PHP_MINIT_FUNCTION(sablot)
 {
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
+	processor = NULL;
 
     return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(sablot)
+PHP_MSHUTDOWN_FUNCTION(sablot)
 {
-    SABLOTLS_FETCH();
-
-    if (SABLOTG(processor)) {
-        SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
-        SablotDestroyProcessor(SABLOTG(processor));
-    }
+	if (processor) {
+		SablotUnregHandler(processor, HLR_MESSAGE, NULL, NULL);
+		SablotDestroyProcessor(processor);
+	}
 
     return SUCCESS;
 }
