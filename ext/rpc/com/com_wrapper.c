@@ -521,7 +521,7 @@ PHP_FUNCTION(com_load)
 	obj = (comval *) emalloc(sizeof(comval));
 
 	/* obtain CLSID */
-	if(FAILED(CLSIDFromProgID(ProgID, &clsid)))
+	if(FAILED(CLSIDFromString(ProgID, &clsid)))
 	{
 		/* Perhaps this is a Moniker? */
 		IBindCtx *pBindCtx;
