@@ -103,7 +103,7 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 	
 	errno = 0;
 
-	ret = readdir_r(dirp, entry);
+	ret = readdir_r(dirp, entry, result);
 	
 	if (ret == 0)
 		*result = entry;
