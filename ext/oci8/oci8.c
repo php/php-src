@@ -5004,7 +5004,7 @@ PHP_FUNCTION(ocicollassignelem)
 		ndx = Z_LVAL_PP(index);
 
 		connection = coll->conn;
-											  
+
 		if (connection->error) {
 			oci_error(connection->pError, "OCICollAssignElem", connection->error);
 			RETURN_FALSE;
