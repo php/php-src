@@ -168,10 +168,6 @@ typedef zval pval;
 extern char *strerror(int);
 #endif
 
-#ifdef HAVE_MKSTEMP
-# define mktemp mkstemp
-#endif
-
 #include "fopen-wrappers.h"
 
 #if APACHE /* apache httpd */
