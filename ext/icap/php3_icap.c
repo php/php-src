@@ -143,7 +143,7 @@ PHP_MINIT_FUNCTION(icap)
 }
 
 
-inline int add_assoc_object(pval *arg, char *key, pval *tmp)
+static int add_assoc_object(pval *arg, char *key, pval *tmp)
 {
         HashTable *symtable;
         
@@ -769,7 +769,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 
        	if(_php3_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
-	  convert_to_object(*temppvalue);
+	  convert_to_array(*temppvalue);
 	  
 	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
@@ -801,11 +801,12 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	    convert_to_long(*pvalue);
 	    myevent->start.sec=(*pvalue)->value.lval;
 	  }
+	  myevent->start.has_date=true;
 	}
 
        	if(_php3_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
-	  convert_to_object(*temppvalue);
+	  convert_to_array(*temppvalue);
 	  
 	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
@@ -837,6 +838,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	    convert_to_long(*pvalue);
 	    myevent->end.sec=(*pvalue)->value.lval;
 	  }
+	  myevent->end.has_date=true;
 	}
 
 	cal_append(icap_le_struct->icap_stream,"INBOX",&uid,myevent);
