@@ -22,6 +22,7 @@ Fixed:
     flock (Sascha)
     register_shutdown_function (Sascha)
     mb_strcut('', [number greater than the length of first arg]) (Moriyoshi)
+    ext/exif, ext/dba (7) (Marcus)
 	
 Open:
 
@@ -31,7 +32,6 @@ Open:
     php_imagepolygon            (4)
     imagesetstyle               (5)
     bundled gd                  (6)
-    exif extension		(7)
     php_base64_encode		(8)
     pack			(9)
 	
