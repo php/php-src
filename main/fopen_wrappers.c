@@ -42,6 +42,7 @@
 #include "ext/standard/head.h"
 #include "ext/standard/php_standard.h"
 #include "zend_compile.h"
+#include "php_network.h"
 
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
@@ -476,7 +477,6 @@ static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, 
 {
 	FILE *fp=NULL;
 	php_url *resource=NULL;
-	struct sockaddr_in server;
 	char tmp_line[512];
 	char location[512];
 	char hdr_line[8192];
@@ -496,24 +496,8 @@ static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, 
 	if (resource->port == 0)
 		resource->port = 80;
 	
-	*socketd = socket(AF_INET, SOCK_STREAM, 0);
-	if (*socketd == SOCK_ERR) {
-		SOCK_FCLOSE(*socketd);
-		*socketd = 0;
-		free_url(resource);
-		return NULL;
-	}
-	server.sin_family = AF_INET;
-	
-	if (lookup_hostname(resource->host, &server.sin_addr)) {
-		SOCK_FCLOSE(*socketd);
-		*socketd = 0;
-		free_url(resource);
-		return NULL;
-	}
-	server.sin_port = htons(resource->port);
-	
-	if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
+	*socketd = hostconnect(resource->host, resource->port, SOCK_STREAM, 0);
+	if (*socketd == -1) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
 		free_url(resource);
