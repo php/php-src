@@ -94,7 +94,7 @@ four ways of specifying packages.
                     ),
                 'nocompress' => array(
                     'shortopt' => 'Z',
-                    'request uncompressed files when downloading',
+                    'doc' => 'request uncompressed files when downloading',
                     ),
                 ),
             'doc' => 'Upgrades one or more PEAR packages.  See documentation for the
