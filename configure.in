@@ -269,7 +269,6 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
-INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
 test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 
 
@@ -923,6 +922,9 @@ else
   PHP_THREAD_SAFETY=no
 fi
 
+INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
+INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
+
 if test "$abs_srcdir" != "$abs_builddir"; then
   INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
   INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM -I\$(top_builddir)/"
@@ -1094,7 +1096,6 @@ PHP_SUBST(CXX)
 PHP_SUBST(CXXFLAGS)
 PHP_SUBST(CXXFLAGS_CLEAN)
 PHP_SUBST_OLD(DEBUG_CFLAGS)
-PHP_SUBST(DEFS)
 PHP_SUBST_OLD(EXTENSION_DIR)
 PHP_SUBST_OLD(EXTRA_LDFLAGS)
 PHP_SUBST_OLD(EXTRA_LDFLAGS_PROGRAM)
