@@ -24,7 +24,8 @@ Sybase-CT select and types
     convert(datetime, "2004-01-23") as "date",
     NULL as "null",
     convert(bit, 1) as "bit",
-    convert(smalldatetime, "2004-01-23") as "smalldate"
+    convert(smalldatetime, "2004-01-23") as "smalldate",
+    convert(char(10), "char") as "char10"
   '));
       
   sybase_close($db);
@@ -42,7 +43,8 @@ Sybase-CT select and types
     convert(datetime, "2004-01-23") as "date",
     NULL as "null",
     convert(bit, 1) as "bit",
-    convert(smalldatetime, "2004-01-23") as "smalldate"
+    convert(smalldatetime, "2004-01-23") as "smalldate",
+    convert(char(10), "char") as "char10"
   
 <<< Return: resource
 array(1) {
@@ -72,5 +74,7 @@ array(1) {
     int(1)
     ["smalldate"]=>
     string(19) "Jan 23 2004 12:00AM"
+    ["char10"]=>
+    string(10) "char      "
   }
 }
