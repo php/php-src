@@ -1425,7 +1425,7 @@ PHP_FUNCTION(range)
 	int err = 0, is_step_double = 0;
 	double step = 1.0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &zlow, &zhigh, &zstep) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/|z/", &zlow, &zhigh, &zstep) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1461,8 +1461,8 @@ PHP_FUNCTION(range)
 			goto long_str;
 		}
 		
-		convert_to_string_ex(&zlow);
-		convert_to_string_ex(&zhigh);
+		convert_to_string(zlow);
+		convert_to_string(zhigh);
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
@@ -1488,8 +1488,8 @@ PHP_FUNCTION(range)
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high;
 double_str:		
-		convert_to_double_ex(&zlow);
-		convert_to_double_ex(&zhigh);
+		convert_to_double(zlow);
+		convert_to_double(zhigh);
 		low = Z_DVAL_P(zlow);
 		high = Z_DVAL_P(zhigh);
 		
@@ -1516,8 +1516,8 @@ double_str:
 		int low, high;
 		long lstep;
 long_str:
-		convert_to_long_ex(&zlow);
-		convert_to_long_ex(&zhigh);
+		convert_to_long(zlow);
+		convert_to_long(zhigh);
 		low = Z_LVAL_P(zlow);
 		high = Z_LVAL_P(zhigh);
 		lstep = (long) step;
