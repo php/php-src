@@ -44,6 +44,7 @@ typedef struct {
 	httpd_conn *hc;
 	void (*on_close)(int);
 
+	size_t unconsumed_length;
 	smart_str sbuf;
 	int seen_cl;
 	int seen_cn;
@@ -227,14 +228,12 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0;
-	int c;
 
-	c = SIZEOF_UNCONSUMED_BYTES();
-	if (c > 0) {
-		read_bytes = MIN(c, count_bytes);
+	if (TG(unconsumed_length) > 0) {
+		read_bytes = MIN(TG(unconsumed_length), count_bytes);
 		memcpy(buffer, TG(hc)->read_buf + TG(hc)->checked_idx, read_bytes);
+		TG(unconsumed_length) -= read_bytes;
 		CONSUME_BYTES(read_bytes);
-		count_bytes -= read_bytes;
 	}
 	
 	return read_bytes;
@@ -436,6 +435,8 @@ static void thttpd_request_ctor(TSRMLS_D)
 		SG(request_info).content_type = strdup(TG(hc)->contenttype);
 	SG(request_info).content_length = TG(hc)->contentlength == -1 ? 0
 		: TG(hc)->contentlength;
+
+	TG(unconsumed_length) = SG(request_info).content_length;
 	
 	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
 }
