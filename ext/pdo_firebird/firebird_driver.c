@@ -32,12 +32,15 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, long, XSQLDA*, isc_stmt_handle*,
+	HashTable* TSRMLS_DC);
+
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H 
 		: (pdo_firebird_db_handle *)dbh->driver_data;
-	enum pdo_error_type *error_code = stmt ? &stmt->error_code : &dbh->error_code;
+	enum pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 	
 	switch (isc_sqlcode(H->isc_status)) {
 
@@ -60,7 +63,7 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long li
 		case -829:
 			*error_code = PDO_ERR_NOT_FOUND;
 			break;
-		case -607: 		
+
 			*error_code = PDO_ERR_ALREADY_EXISTS;
 			break;
 		
@@ -117,27 +120,25 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	pdo_firebird_stmt *S = NULL;
+	HashTable *np;
 
 	do {
 		isc_stmt_handle s = NULL;
 		XSQLDA num_sqlda;
-		static char info[] = {isc_info_sql_stmt_type};
+		static char const info[] = { isc_info_sql_stmt_type };
 		char result[8];
 
 		num_sqlda.version = PDO_FB_SQLDA_VERSION;
 		num_sqlda.sqln = 1;
 
-		/* allocate a statement handle */
-		if (isc_dsql_allocate_statement(H->isc_status, &H->db, &s)) {
-			break;
-		}
-
-		/* prepare the SQL statement */
-		if (isc_dsql_prepare(H->isc_status, &H->tr, &s, (short)sql_len, const_cast(sql),
-				PDO_FB_DIALECT, &num_sqlda)) {
-			break;
-		}
+		ALLOC_HASHTABLE(np);
+		zend_hash_init(np, 8, NULL, NULL, 0);
 		
+		/* allocate and prepare statement */
+		if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &num_sqlda, &s, np TSRMLS_CC)) {
+			break;
+		}
+	
 		/* allocate a statement handle struct of the right size (struct out_sqlda is inlined) */
 		S = ecalloc(1, sizeof(*S)-sizeof(XSQLDA) + XSQLDA_LENGTH(num_sqlda.sqld));
 		S->H = H;
@@ -145,9 +146,11 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 		S->fetch_buf = ecalloc(1,sizeof(char*) * num_sqlda.sqld);
 		S->out_sqlda.version = PDO_FB_SQLDA_VERSION;
 		S->out_sqlda.sqln = stmt->column_count = num_sqlda.sqld;
+		S->named_params = np;
 
 		/* determine the statement type */
-		if (isc_dsql_sql_info(H->isc_status, &s, sizeof(info), info, sizeof(result), result)) {
+		if (isc_dsql_sql_info(H->isc_status, &s, sizeof(info), const_cast(info), sizeof(result),
+				result)) {
 			break;
 		}
 		S->statement_type = result[3];	
@@ -182,6 +185,9 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 
 	RECORD_ERROR(dbh);
 	
+	zend_hash_destroy(np);
+	FREE_HASHTABLE(np);
+	
 	if (S) {
 		if (S->in_sqlda) {
 			efree(S->in_sqlda);
@@ -193,12 +199,12 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_le
 }
 /* }}} */
 
-/* called by PDO to execute a statement that doesn't produce a result */
+/* called by PDO to execute a statement that doesn't produce a result set */
 static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = NULL;
-	static char info_count[] = { isc_info_sql_records };
+	static char const info_count[] = { isc_info_sql_records };
 	char result[64];
 	int ret = 0;
 	XSQLDA in_sqlda, out_sqlda;
@@ -207,31 +213,8 @@ static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len T
 	in_sqlda.version = out_sqlda.version = PDO_FB_SQLDA_VERSION;
 	in_sqlda.sqld = out_sqlda.sqld = 0;
 	
-	/* start a new transaction implicitly if auto_commit is enabled and no transaction is open */
-	if (dbh->auto_commit && !dbh->in_txn) {
-		if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, 0, NULL)) {
-			RECORD_ERROR(dbh);
-			return -1;
-		}
-		dbh->in_txn = 1;
-	}
-	
-	/* allocate the statement */
-	if (isc_dsql_allocate_statement(H->isc_status, &H->db, &stmt)) {
-		RECORD_ERROR(dbh);
-		return -1;
-	}
-	
-	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > SHORT_MAX) {
-		dbh->error_code = PDO_ERR_TRUNCATED;
-		return -1;
-	}
-	
-	/* prepare the statement */
-	if (isc_dsql_prepare(H->isc_status, &H->tr, &stmt, (short) sql_len, const_cast(sql),
-			PDO_FB_DIALECT, &out_sqlda)) {
-		RECORD_ERROR(dbh);
+	/* allocate and prepare statement */
+	if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &out_sqlda, &stmt, 0 TSRMLS_CC)) {
 		return -1;
 	}
 
@@ -242,8 +225,8 @@ static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len T
 	}
 	
 	/* find out how many rows were affected */
-	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), info_count, sizeof(result),
-			result)) {
+	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), const_cast(info_count),
+			sizeof(result),	result)) {
 		RECORD_ERROR(dbh);
 		return -1;
 	}
@@ -313,8 +296,48 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unqu
 static int firebird_handle_begin(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
+#if abies_0	
+	if (dbh->transaction_flags & PDO_TRANS_ISOLATION_LEVEL) {
+		if (dbh->transaction_flags & PDO_TRANS_READ_UNCOMMITTED) {
+			/* this is a poor fit, but it's all we have */
+			*ptpb++ = isc_tpb_read_committed;
+			*ptpb++ = isc_tpb_rec_version;
+			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_UNCOMMITTED);
+		} else if (dbh->transaction_flags & PDO_TRANS_READ_COMMITTED) {
+			*ptpb++ = isc_tpb_read_committed;
+			*ptpb++ = isc_tpb_no_rec_version;
+			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_COMMITTED);
+		} else if (dbh->transaction_flags & PDO_TRANS_REPEATABLE_READ) {
+			*ptpb++ = isc_tpb_concurrency;
+			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_REPEATABLE_READ);
+		} else {
+			*ptpb++ = isc_tpb_consistency;
+			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_SERIALIZABLE);
+		}
+	}
+		
+	if (dbh->transaction_flags & PDO_TRANS_ACCESS_MODE) {
+		if (dbh->transaction_flags & PDO_TRANS_READONLY) {
+			*ptpb++ = isc_tpb_read;
+			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READONLY);
+		} else {
+			*ptpb++ = isc_tpb_write;
+			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READWRITE);
+		}
+	}
 
-	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, 0, NULL)) {
+	if (dbh->transaction_flags & PDO_TRANS_CONFLICT_RESOLUTION) {
+		if (dbh->transaction_flags & PDO_TRANS_RETRY) {
+			*ptpb++ = isc_tpb_wait;
+			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_RETRY);
+		} else {
+			*ptpb++ = isc_tpb_nowait;
+			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_ABORT);
+		}
+	}
+#endif
+	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
 		RECORD_ERROR(dbh);
 		return 0;
 	}
@@ -348,6 +371,80 @@ static int firebird_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+/* used by prepare and exec to allocate a statement handle and prepare the SQL */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql_len,
+	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	char *c, *new_sql, in_quote, in_param, pname[64], *ppname;
+	long l, pindex = -1;
+		
+	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
+	if (sql_len > SHORT_MAX) {
+		dbh->error_code = PDO_ERR_TRUNCATED;
+		return 0;
+	}
+	
+	/* start a new transaction implicitly if auto_commit is enabled and no transaction is open */
+	if (dbh->auto_commit && !dbh->in_txn) {
+		/* dbh->transaction_flags = PDO_TRANS_READ_UNCOMMITTED; */
+
+		if (!firebird_handle_begin(dbh TSRMLS_CC)) {
+			return 0;
+		}
+		dbh->in_txn = 1;
+	}
+	
+	/* allocate the statement */
+	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
+		RECORD_ERROR(dbh);
+		return 0;
+	}
+	
+	/* in order to support named params, which Firebird itself doesn't, 
+	   we need to replace :foo by ?, and store the name we just replaced */
+	new_sql = c = emalloc(sql_len+1);
+	
+	for (l = in_quote = in_param = 0; l <= sql_len; ++l) {
+		if ( !(in_quote ^= (sql[l] == '\''))) {
+			if (!in_param) {
+				switch (sql[l]) {
+					case ':':
+						in_param = 1;
+						ppname = pname;
+					case '?':
+						*c++ = '?';
+						++pindex;
+					continue;
+				}
+			} else {
+				if ((in_param &= (sql[l] == '_') || (sql[l] >= 'A' && sql[l] <= 'Z') 
+						|| (sql[l] >= 'a' && sql[l] <= 'z')	|| (sql[l] >= '0' && sql[l] <= '9'))) {
+					*ppname++ = sql[l];
+					continue;
+				} else {
+					*ppname++ = 0;
+					if (named_params) {
+						zend_hash_update(named_params, pname, (unsigned int)(ppname-pname),
+							(void*)&pindex, sizeof(long),NULL);
+					}
+				}
+			}
+		}
+		*c++ = sql[l];
+	}
+
+	/* prepare the statement */
+	if (isc_dsql_prepare(H->isc_status, &H->tr, s, 0, new_sql, PDO_FB_DIALECT, out_sqlda)) {
+		RECORD_ERROR(dbh);
+		efree(new_sql);
+		return 0;
+	}
+	
+	efree(new_sql);
+	return 1;
+}
+	
 /* called by PDO to set a driver-specific dbh attribute */
 static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
@@ -356,25 +453,25 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 
-			convert_to_long(val);
+			convert_to_boolean(val);
 	
-			/* if (the value is really being changed and a transaction is open) */			
-			if ((Z_LVAL_P(val)?1:0) ^ dbh->auto_commit && dbh->in_txn) {
-				
-				if ((dbh->auto_commit = Z_BVAL_P(val))) {
-					/* just keep the running transaction but commit it */
-					if (isc_commit_retaining(H->isc_status, &H->tr)) {
-						RECORD_ERROR(dbh);
-						break;
+			/* ignore if the new value equals the old one */			
+			if (dbh->auto_commit ^ Z_BVAL_P(val)) {
+				if (dbh->in_txn) {
+					if (Z_BVAL_P(val)) {
+						/* turning on auto_commit with an open transaction is illegal, because
+						   we won't know what to do with it */
+						H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
+						return 0;
+					} else {
+						/* close the transaction */
+						if (!firebird_handle_commit(dbh TSRMLS_CC)) {
+							break;
+						}
+						dbh->in_txn = 0;
 					}
-				} else {
-					/* close the transaction */
-					if (isc_commit_transaction(H->isc_status, &H->tr)) {
-						RECORD_ERROR(dbh);
-						break;
-					}
-					dbh->in_txn = 0;
 				}
+				dbh->auto_commit = Z_BVAL_P(val);
 			}
 			return 1;
 	}
@@ -395,7 +492,7 @@ static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 /* }}} */
 
 /* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_handle_get_attribute(pdo_dbh_t const *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
