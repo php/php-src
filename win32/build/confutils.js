@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.35 2004-01-09 11:19:40 wez Exp $
+// $Id: confutils.js,v 1.36 2004-01-09 13:17:58 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -773,7 +773,13 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 
 	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
-	ADD_FLAG("SAPI_TARGETS", makefiletarget);
+
+	if (configure_module_dirname.match("pecl")) {
+		ADD_FLAG("PECL_TARGETS", makefiletarget);
+	} else {
+		ADD_FLAG("SAPI_TARGETS", makefiletarget);
+	}
+
 	MFO.WriteBlankLines(1);
 }
 
@@ -865,7 +871,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname)
 		MFO.WriteLine("\t" + ld + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
 		MFO.WriteBlankLines(1);
 
-		ADD_FLAG("EXT_TARGETS", dllname);
+		if (configure_module_dirname.match("pecl")) {
+			ADD_FLAG("PECL_TARGETS", dllname);
+		} else {
+			ADD_FLAG("EXT_TARGETS", dllname);
+		}
 		MFO.WriteLine(dllname + ": $(BUILD_DIR)\\" + dllname);
 		MFO.WriteLine("\t@echo EXT " + extname + " build complete");
 		MFO.WriteBlankLines(1);

@@ -20,7 +20,7 @@
 CC="$(CL)"
 LD="$(LINK)"
 
-all: $(BUILD_DIR) $(BUILD_DIRS_SUB) generated_files $(EXT_TARGETS) $(SAPI_TARGETS)
+all: $(BUILD_DIR) $(BUILD_DIRS_SUB) generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
 generated_files: Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
@@ -87,10 +87,14 @@ build-snap:
 
 build-dist: $(BUILD_DIR)\deplister.exe
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-pecl
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip
-	$(BUILD_DIR)\php.exe -n win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
+	$(BUILD_DIR)\php.exe -n win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -r ..\php-$(PHP_VERSION_STRING).zip .
+	cd ..\..
+	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-pecl
+	-$(ZIP) -9 -r ..\php-$(PHP_VERSION_STRING)-pecl.zip .
 	cd ..\..
 
 dist: all build-dist
@@ -100,7 +104,7 @@ $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) -o$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 msi-installer: dist
-	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)"
+	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
 install: all
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
