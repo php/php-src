@@ -315,14 +315,12 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 		p1 = &buf[NDIG];
 		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
-			if (p1 > &buf[0]) {
-				*--p1 = (int) ((fj + .03) * 10) + '0';
-			} else {
+			if (p1 <= &buf[0]) {
 				mvl = NDIG - ndigits;
 				memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
 				p1 += mvl;
-				*--p1 = (int) ((fj + .03) * 10) + '0';
 			}
+			*--p1 = (int) ((fj + .03) * 10) + '0';
 			r2++;
 		}
 		while (p1 < &buf[NDIG])
@@ -344,9 +342,17 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 		buf[0] = '\0';
 		return (buf);
 	}
-	while (p <= p1 && p < &buf[NDIG]) {
+	if (p <= p1 && p < &buf[NDIG]) {
 		arg = modf(arg * 10, &fj);
-		*p++ = (int) fj + '0';
+		if ((int)fj==10) {
+			*p++ = '1';
+			fj = 0;
+			*decpt = ++r2;
+		}
+		while (p <= p1 && p < &buf[NDIG]) {
+			*p++ = (int) fj + '0';
+			arg = modf(arg * 10, &fj);
+		}
 	}
 	if (p1 >= &buf[NDIG]) {
 		buf[NDIG - 1] = '\0';
