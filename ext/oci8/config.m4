@@ -52,9 +52,9 @@ if test "$PHP_OCI8" != "no"; then
   fi
 
   if test -f "$OCI8_DIR/lib/sysliblist"; then
-  	PHP_EVAL_LIBLINE(`$OCI8_DIR/lib/sysliblist`, OCI8_SYSLIB)
+  	PHP_EVAL_LIBLINE(`cat $OCI8_DIR/lib/sysliblist`, OCI8_SYSLIB)
   elif test -f "$OCI8_DIR/rdbms/lib/sysliblist"; then
-  	PHP_EVAL_LIBLINE(`$OCI8_DIR/rdbms/lib/sysliblist`, OCI8_SYSLIB)
+  	PHP_EVAL_LIBLINE(`cat $OCI8_DIR/rdbms/lib/sysliblist`, OCI8_SYSLIB)
   fi
 
   AC_OCI8_VERSION($OCI8_DIR)
