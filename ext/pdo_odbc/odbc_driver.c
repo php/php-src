@@ -101,7 +101,7 @@ static int odbc_handle_doer(pdo_dbh_t *dbh, const char *sql TSRMLS_DC)
 	return 0;
 }
 
-static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, char **quoted, int *quotedlen  TSRMLS_DC)
+static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
