@@ -1195,12 +1195,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 		var->sqlind = &buf[i].sqlind;
 		
 		if (Z_TYPE_P(b_var) == IS_NULL) {
-
-			if ((var->sqltype & 1) != 1) {
-				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
-				rv = FAILURE;
-			}
-
 			buf[i].sqlind = -1;
 		} else {
 			buf[i].sqlind = 0;
