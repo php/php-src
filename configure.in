@@ -24,7 +24,6 @@ dnl ## All of these are normally in the extension directories.
 dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 
 
-
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
@@ -39,6 +38,10 @@ AC_CANONICAL_HOST
 AC_CONFIG_HEADER(main/php_config.h)
 
 VERSION=4.3.0-dev
+
+dnl Define where extension directories are located in the configure context
+AC_DEFUN(PHP_EXT_BUILDDIR,[ext/$1])
+AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir/ext/$1])
 
 
 dnl Setting up the PHP version based on the information above.
