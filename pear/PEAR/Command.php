@@ -31,7 +31,7 @@ $GLOBALS['_PEAR_Command_commandlist'] = array();
  * Which user interface class is being used.
  * @var string class name
  */
-$GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_CommandUI_CLI';
+$GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_Frontend_CLI';
 
 /**
 * The options accepted by the commands
@@ -101,13 +101,13 @@ class PEAR_Command
         }
         if (isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
             $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
-            $obj = &new $class(PEAR_Command::getUIObject(), $config);
+            $obj = &new $class(PEAR_Command::getFrontendObject(), $config);
             return $obj;
         }
         return PEAR::raiseError("unknown command `$command'");
     }
 
-    function &getUIObject()
+    function &getFrontendObject()
     {
         global $_PEAR_Command_uiclass, $_PEAR_Command_uiobject;
         if (empty($_PEAR_Command_uiobject)) {
@@ -116,7 +116,7 @@ class PEAR_Command
         return $_PEAR_Command_uiobject;
     }
 
-    function setUIClass($uiclass)
+    function setFrontendClass($uiclass)
     {
         $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
         $file = str_replace("_", "/", $uiclass) . '.php';
@@ -124,10 +124,10 @@ class PEAR_Command
         return class_exists(strtolower($uiclass));
     }
 
-    function setUIType($uitype)
+    function setFrontendType($uitype)
     {
-        $uiclass = 'PEAR_CommandUI_' . $uitype;
-        return PEAR_Command::setUIClass($uiclass);
+        $uiclass = 'PEAR_Frontend_' . $uitype;
+        return PEAR_Command::setFrontendClass($uiclass);
     }
 
     /**

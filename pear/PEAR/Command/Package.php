@@ -8,7 +8,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
     // {{{ constructor
 
     /**
-     * PEAR_Command_Login constructor.
+     * PEAR_Command_Package constructor.
      *
      * @access public
      */
