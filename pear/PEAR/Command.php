@@ -88,14 +88,14 @@ class PEAR_Command
      *
      * @access public
      */
-    function factory($command)
+    function factory($command, &$config)
     {
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
         }
         if (isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
             $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
-            $obj = &new $class(PEAR_Command::getUIObject());
+            $obj = &new $class(PEAR_Command::getUIObject(), $config);
             return $obj;
         }
         return PEAR::raiseError("unknown command `$command'");

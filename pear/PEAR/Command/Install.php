@@ -29,17 +29,6 @@ require_once "PEAR/Installer.php";
 class PEAR_Command_Install extends PEAR_Command_Common
 {
     // {{{ properties
-
-    /** Stack of executing commands, to make run() re-entrant
-     * @var array
-     */
-    var $command_stack; // XXX UNUSED to make run() re-entrant
-
-    /** Currently executing command.
-     * @var string
-     */
-    var $command; // XXX UNUSED
-
     // }}}
 
     // {{{ constructor
@@ -49,9 +38,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
      *
      * @access public
      */
-    function PEAR_Command_Install($ui)
+    function PEAR_Command_Install(&$ui, &$config)
     {
-        parent::PEAR_Command_Common($ui);
+        parent::PEAR_Command_Common($ui, $config);
     }
 
     // }}}
@@ -71,19 +60,21 @@ class PEAR_Command_Install extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
-    function run($command, $options, $params)
+    function run($command, $params)
     {
-        $installer =& new PEAR_Installer($options['php_dir'],
-                                         $options['ext_dir'],
-                                         $options['doc_dir']);
-        $installer->debug = @$options['verbose'];
+        $installer =& new PEAR_Installer($this->config->get('php_dir'),
+                                         $this->config->get('ext_dir'),
+                                         $this->config->get('doc_dir'));
+        $installer->debug = $this->config->get('verbose');
         $failmsg = '';
+        $options = array();
         switch ($command) {
             case 'install':
             case 'upgrade': {
                 if ($command == 'upgrade') {
                     $options['upgrade'] = true;
                 }
+                // The ['force'] and ['nodeps'] options are still missing
                 if ($installer->install($params[0], $options, $this->config)) {
                     $this->ui->displayLine("install ok");
                 } else {
@@ -92,13 +83,13 @@ class PEAR_Command_Install extends PEAR_Command_Common
                 break;
             }
             case 'uninstall': {
-                if ($installer->uninstall($params[0], $uninstall_options)) {
+                if ($installer->uninstall($params[0], $options)) {
                     $this->ui->displayLine("uninstall ok");
                 } else {
                     $failmsg = "uninstall failed";
                 }
                 break;
-            }                
+            }
             default: {
                 return false;
             }

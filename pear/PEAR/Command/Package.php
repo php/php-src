@@ -12,9 +12,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
      *
      * @access public
      */
-    function PEAR_Command_Package(&$ui)
+    function PEAR_Command_Package(&$ui, &$config)
     {
-        parent::PEAR_Command_Common($ui);
+        parent::PEAR_Command_Common($ui, $config);
     }
 
     // }}}
@@ -48,7 +48,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
      *
      * @access public
      */
-    function run($command, $options, $params)
+    function run($command, $params)
     {
         $failmsg = '';
         switch ($command) {
