@@ -57,7 +57,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	return 0;
 }
 
-void php_var_dump(zval **struc, int level TSRMLS_DC)
+PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht = NULL;
 	zend_object *object = NULL;
@@ -165,7 +165,7 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	return 0;
 }
 
-void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
+PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht = NULL;
 
@@ -278,7 +278,7 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 	return 0;
 }
 
-void php_var_export(zval **struc, int level TSRMLS_DC)
+PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
