@@ -1,3 +1,27 @@
+2004-06-24  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      Let's not throw this error in PHP4.  5.0.0 introduces it at E_STRICT and
+      5.1.0 (may) raise it to a proper E_WARNING.  Ease into it.
+
+    * ZendEngine2/zend_execute.c:
+      Ease off on severity of new error (Using Resources as array offsets)
+
+2004-06-24  Stefan Esser  <sesser@suspekt.org>
+
+    * README.input_filter:
+      Fixed zend_parse_parameters arguments...
+
+2004-06-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftok.c:
+      Added missing safe_mode & open_basedir checks.
+
+    * (PHP_4_3)
+      ext/standard/ftok.c:
+      MFH: Added missing safe_mode & open_basedir checks.
+
 2004-06-23  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
