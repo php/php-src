@@ -77,6 +77,9 @@ static int le_result,le_link,le_plink;
 #define MYSQL_NUM		1<<1
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
 
+#define MYSQL_USE_RESULT	0
+#define MYSQL_STORE_RESULT	1
+
 #if MYSQL_VERSION_ID < 32224
 #define PHP_MYSQL_VALID_RESULT(mysql)		\
 	(mysql_num_fields(mysql)>0)
@@ -270,6 +273,8 @@ PHP_MINIT_FUNCTION(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("MYSQL_USE_RESULT", MYSQL_USE_RESULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_STORE_RESULT", MYSQL_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -742,12 +747,12 @@ PHP_FUNCTION(mysql_drop_db)
 /* }}} */
 
 
-/* {{{ proto int mysql_query(string query [, int link_identifier])
+/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
 {
-	pval **query, **mysql_link;
-	int id;
+	pval **query, **mysql_link, **store_result;
+	int id,use_store=MYSQL_STORE_RESULT;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -763,6 +768,16 @@ PHP_FUNCTION(mysql_query)
 		case 2:
 			if (zend_get_parameters_ex(2, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+	    case 3:
+			if(zend_get_parameters_ex(3, &query, &mysql_link, &store_result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(store_result);
+			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
+				use_store = MYSQL_USE_RESULT;
 			}
 			id = -1;
 			break;
@@ -784,7 +799,12 @@ PHP_FUNCTION(mysql_query)
 		RETURN_FALSE;
 	}
 #endif
-	if ((mysql_result=mysql_store_result(mysql))==NULL) {
+	if(use_store == MYSQL_USE_RESULT) {
+		mysql_result=mysql_use_result(mysql);
+	} else {
+		mysql_result=mysql_store_result(mysql);
+	}
+	if (mysql_result==NULL) {
 		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
@@ -797,12 +817,12 @@ PHP_FUNCTION(mysql_query)
 /* }}} */
 
 
-/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier])
+/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier] [, int result_mode])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
 {
-	pval **db, **query, **mysql_link;
-	int id;
+	pval **db, **query, **mysql_link, **store_result;
+	int id,use_store=MYSQL_STORE_RESULT;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -818,6 +838,16 @@ PHP_FUNCTION(mysql_db_query)
 		case 3:
 			if (zend_get_parameters_ex(3, &db, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+	    case 4:
+			if(zend_get_parameters_ex(4, &db, &query, &mysql_link, &store_result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(store_result);
+			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
+				use_store = MYSQL_USE_RESULT;
 			}
 			id = -1;
 			break;
@@ -844,7 +874,12 @@ PHP_FUNCTION(mysql_db_query)
 		RETURN_FALSE;
 	}
 #endif
-	if ((mysql_result=mysql_store_result(mysql))==NULL) {
+	if(use_store == MYSQL_USE_RESULT) {
+		mysql_result=mysql_use_result(mysql);
+	} else {
+		mysql_result=mysql_store_result(mysql);
+	}
+	if (mysql_result==NULL) {
 		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
