@@ -4,16 +4,17 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.0 of the PHP license,       |
+   | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_0.txt.                                  |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -185,8 +186,6 @@ dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 
 /* {{{ proto array db_id_list(void)
    Return an associative array id->filename */ 
-#if HELLY_0
-/* New function not needed yet */
 PHP_FUNCTION(db_id_list)
 {
 	ulong numitems, i;
@@ -212,7 +211,6 @@ PHP_FUNCTION(db_id_list)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ php_get_info_db
  */
@@ -1096,7 +1094,7 @@ datum flatfile_firstkey(FILE *dbf) {
 }
 /* }}} */
 
-/* {{{ latfile_nextkey
+/* {{{ flatfile_nextkey
  */
 datum flatfile_nextkey(FILE *dbf) {
 	datum buf;
@@ -1170,9 +1168,7 @@ function_entry dbm_functions[] = {
 	PHP_FE(dbmdelete,								NULL)
 	PHP_FE(dbmfirstkey,								NULL)
 	PHP_FE(dbmnextkey,								NULL)
-#if HELLY_0
 	PHP_FE(db_id_list,                              NULL)
-#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
