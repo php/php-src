@@ -39,6 +39,8 @@ PHP 4.0                                                                    NEWS
 - Added 4th optional parameter to sybase_[p]connect to specify the charset
   for the connection (alf@alpha.ulatina.ac.cr)
 - Fixed support for current thttpd releases. (Sascha)
+- Added support for kerberized IMAP library using --with-kerberos 
+  (Rasmus, Sascha)
 - Virtualize realpath, chmod, chown and utime (Stas)
 - Support content-encoding headers in file upload MIME parts
   (Ragnar Kjørstad)
