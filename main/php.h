@@ -150,6 +150,8 @@ typedef zval pval;
 #else
 # ifndef HAVE_MEMCPY
 #  define memcpy(d, s, n)	bcopy((s), (d), (n))
+# endif
+# ifndef HAVE_MEMMOVE
 #  define memmove(d, s, n)	bcopy ((s), (d), (n))
 # endif
 #endif
