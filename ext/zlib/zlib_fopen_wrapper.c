@@ -35,8 +35,8 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 	size_t ret;
 	
 	ret = gzread(self->gz_file, buf, count);
-
-	if (ret == 0 && gzeof(self->gz_file))
+	
+	if (gzeof(self->gz_file))
 		stream->eof = 1;
 	
 	return ret;
@@ -45,7 +45,7 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-	return gzwrite(self->gz_file, (char*)buf, count); 
+	return gzwrite(self->gz_file, (char*)buf, count);
 }
 
 static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
@@ -66,8 +66,9 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	int ret = EOF;
 	
-	if (close_handle)
+	if (close_handle) {
 		ret = gzclose(self->gz_file);
+	}
 	php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | (close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0));
 	efree(self);
 
