@@ -71,7 +71,7 @@ ext/mcrypt
 ext/standard
 ------------
     * add a version number to data serialized via serialize().
-    * array_add(), array_rand() (Andrei)
+    * array_add(), array_rand(), array_uniq() (Andrei)
     * implement pathinfo() (what the heck is it?)
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
