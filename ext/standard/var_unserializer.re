@@ -265,6 +265,9 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
+	if (*rval != NULL) {
+		zval_ptr_dtor(rval);
+	}
 	*rval = *rval_ref;
 	(*rval)->refcount++;
 	(*rval)->is_ref = 1;
