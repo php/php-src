@@ -57,13 +57,12 @@ PHP_FUNCTION(file_get_contents);
 PHP_FUNCTION(set_socket_blocking); /* deprecated */
 PHP_FUNCTION(stream_set_blocking);
 PHP_FUNCTION(stream_select);
-PHP_FUNCTION(socket_set_timeout);
-PHP_FUNCTION(set_file_buffer);
+PHP_FUNCTION(stream_set_timeout);
+PHP_FUNCTION(stream_set_write_buffer);
 PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-PHP_FUNCTION(select);
 #if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 PHP_FUNCTION(realpath);
 PHP_FUNCTION(fnmatch);
@@ -71,8 +70,8 @@ PHP_FUNCTION(fnmatch);
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
 
-PHP_FUNCTION(file_get_meta_data);
-PHP_FUNCTION(file_register_wrapper);
+PHP_FUNCTION(stream_get_meta_data);
+PHP_FUNCTION(stream_register_wrapper);
 PHP_FUNCTION(stream_context_create);
 PHP_FUNCTION(stream_context_set_params);
 PHP_FUNCTION(stream_context_set_option);
