@@ -262,7 +262,7 @@ typedef struct _zend_utility_values {
 #define BYREF_ALLOW 2
 #define BYREF_FORCE_REST 3
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions);
+int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(void);
 
 void zend_set_utility_values(zend_utility_values *utility_values);
