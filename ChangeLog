@@ -1,3 +1,48 @@
+2003-01-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php:
+      - whoops, heritage shows through :)
+
+2003-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Simplify
+
+2003-01-26  Sander Roobol  <phy@wanadoo.nl>
+
+    * (PHP_4_3)
+      ext/mime_magic/mime_magic.c:
+      MFH (well... it's not really an MFH... but who cares :)
+
+    * ext/mime_magic/mime_magic.c:
+      Fix build
+
+2003-01-26  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/isapi/php4isapi.c:
+      normalize CGI variables to the CGI spec
+      PATH_INFO and PATH_TRANSLATED are correct now
+      SCRIPT_FILENAME now contains the full path to the script
+
+    * (PHP_4_3)
+      main/php_ini.c
+      win32/readdir.c
+      win32/readdir.h:
+      MFH
+      fix broken build by adding scandir and alphasort
+
+    * main/php_ini.c
+      win32/readdir.c
+      win32/readdir.h:
+      Fix broken build by adding scandir and alphasort for win32
+
+2003-01-26  Sara Golemon  <php@alphaweb.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      Feature Request #21784  Added: imagecolorallocatealpha
+      (pollita@php.net,jasper@pointless.net)
+
 2003-01-25  Shane Caraveo  <shane@caraveo.com>
 
     * (PHP_4_3)
