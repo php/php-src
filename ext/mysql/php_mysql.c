@@ -100,6 +100,11 @@ static int le_result, le_link, le_plink;
 	(mysql_field_count(mysql)>0)
 #endif
 
+typedef struct _php_mysql_conn {
+	MYSQL conn;
+} php_mysql_conn;
+
+
 function_entry mysql_functions[] = {
 	PHP_FE(mysql_connect,								NULL)
 	PHP_FE(mysql_pconnect,								NULL)
@@ -206,12 +211,12 @@ static void php_mysql_set_default_link(int id)
 
 static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 {
-	MYSQL *link = (MYSQL *)rsrc->ptr;
+	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);   
 	MySLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
-	mysql_close(link);
+	mysql_close(&link->conn);
 	signal(SIGPIPE, handler);
 	efree(link);
 	MySG(num_links)--;
@@ -219,12 +224,12 @@ static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 
 static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
 {
-	MYSQL *link = (MYSQL *)rsrc->ptr;
+	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);
 	MySLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
-	mysql_close(link);
+	mysql_close(&link->conn);
 	signal(SIGPIPE, handler);
 
 	free(link);
@@ -356,7 +361,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
 	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
-	MYSQL *mysql=NULL;
+	php_mysql_conn *mysql=NULL;
 	void (*handler) (int);
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL;
 	zend_bool free_host=0;
@@ -475,14 +480,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			/* create the link */
-		mysql = (MYSQL *) malloc(sizeof(MYSQL));
+		mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-		mysql_init(mysql);
-		if (mysql_real_connect(mysql, host, user, passwd, NULL, port, socket, 0)==NULL) {
+		mysql_init(&mysql->conn);
+		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-		if (mysql_connect(mysql, host, user, passwd)==NULL) {
+		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
-				php_error(E_WARNING, "%s", mysql_error(mysql));
+				php_error(E_WARNING, "%s", mysql_error(&mysql->conn));
 				free(mysql);
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -506,7 +511,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			handler=signal(SIGPIPE, SIG_IGN);
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
-			if (mysql_errno((MYSQL *)le->ptr) == CR_SERVER_GONE_ERROR) {
+			if (mysql_errno(&((php_mysql_conn *) le->ptr)->conn) == CR_SERVER_GONE_ERROR) {
 #else
 			if (!strcasecmp(mysql_stat(le->ptr), "mysql server has gone away")) { /* the link died */
 #endif
@@ -523,7 +528,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			}
 			signal(SIGPIPE, handler);
-			mysql = (MYSQL *) le->ptr;
+			mysql = (php_mysql_conn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
@@ -561,14 +566,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
 
-		mysql = (MYSQL *) emalloc(sizeof(MYSQL));
+		mysql = (php_mysql_conn *) emalloc(sizeof(php_mysql_conn));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-		mysql_init(mysql);
-		if (mysql_real_connect(mysql, host, user, passwd, NULL, port, socket, 0)==NULL) {
+		mysql_init(&mysql->conn);
+		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-		if (mysql_connect(mysql, host, user, passwd)==NULL) {
+		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
-			php_error(E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(mysql));
+			php_error(E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(&mysql->conn));
 			efree(hashed_details);
 			efree(mysql);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -627,7 +632,7 @@ PHP_FUNCTION(mysql_close)
 {
 	zval **mysql_link=NULL;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
@@ -645,7 +650,7 @@ PHP_FUNCTION(mysql_close)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if (id==-1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(mysql_link));
@@ -668,7 +673,7 @@ PHP_FUNCTION(mysql_select_db)
 {
 	zval **db, **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -691,11 +696,11 @@ PHP_FUNCTION(mysql_select_db)
 	}
 	
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	
-	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
+	if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -723,7 +728,7 @@ PHP_FUNCTION(mysql_get_host_info)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
@@ -742,9 +747,9 @@ PHP_FUNCTION(mysql_get_host_info)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_host_info(mysql),1);
+	RETURN_STRING(mysql_get_host_info(&mysql->conn),1);
 }
 /* }}} */
 
@@ -754,7 +759,7 @@ PHP_FUNCTION(mysql_get_proto_info)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
@@ -773,9 +778,9 @@ PHP_FUNCTION(mysql_get_proto_info)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG(mysql_get_proto_info(mysql));
+	RETURN_LONG(mysql_get_proto_info(&mysql->conn));
 }
 /* }}} */
 
@@ -785,7 +790,7 @@ PHP_FUNCTION(mysql_get_server_info)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
@@ -804,9 +809,9 @@ PHP_FUNCTION(mysql_get_server_info)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_server_info(mysql),1);
+	RETURN_STRING(mysql_get_server_info(&mysql->conn),1);
 }
 /* }}} */
 
@@ -818,7 +823,7 @@ PHP_FUNCTION(mysql_create_db)
 {
 	zval **db, **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -840,10 +845,10 @@ PHP_FUNCTION(mysql_create_db)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-	if (mysql_create_db(mysql, (*db)->value.str.val)==0) {
+	if (mysql_create_db(&mysql->conn, (*db)->value.str.val)==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -858,7 +863,7 @@ PHP_FUNCTION(mysql_drop_db)
 {
 	zval **db, **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -881,10 +886,10 @@ PHP_FUNCTION(mysql_drop_db)
 	}
 	
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-	if (mysql_drop_db(mysql, (*db)->value.str.val)==0) {
+	if (mysql_drop_db(&mysql->conn, (*db)->value.str.val)==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -902,7 +907,7 @@ PHP_FUNCTION(mysql_query)
 	zval **store_result;
 #endif
 	int id, use_store=MYSQL_STORE_RESULT;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
@@ -937,26 +942,26 @@ PHP_FUNCTION(mysql_query)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(query);
 	/* mysql_query binary unsafe, use mysql_real_query */
 #if MYSQL_VERSION_ID > 32199 
-	if (mysql_real_query(mysql, (*query)->value.str.val, (*query)->value.str.len)!=0) {
+	if (mysql_real_query(&mysql->conn, (*query)->value.str.val, (*query)->value.str.len)!=0) {
 		RETURN_FALSE;
 	}
 #else
-	if (mysql_query(mysql, (*query)->value.str.val)!=0) {
+	if (mysql_query(&mysql->conn, (*query)->value.str.val)!=0) {
 		RETURN_FALSE;
 	}
 #endif
 	if(use_store == MYSQL_USE_RESULT) {
-		mysql_result=mysql_use_result(mysql);
+		mysql_result=mysql_use_result(&mysql->conn);
 	} else {
-		mysql_result=mysql_store_result(mysql);
+		mysql_result=mysql_store_result(&mysql->conn);
 	}
 	if (!mysql_result) {
-		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
+		if (PHP_MYSQL_VALID_RESULT(&mysql->conn)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
 		} else {
@@ -977,7 +982,7 @@ PHP_FUNCTION(mysql_db_query)
 	zval **store_result;
 #endif
 	int id, use_store=MYSQL_STORE_RESULT;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
@@ -1012,31 +1017,31 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
+	if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
 		RETURN_FALSE;
 	}
 	
 	convert_to_string_ex(query);
 	/* mysql_query is binary unsafe, use mysql_real_query */
 #if MYSQL_VERSION_ID > 32199 
-	if (mysql_real_query(mysql, (*query)->value.str.val, (*query)->value.str.len)!=0) {
+	if (mysql_real_query(&mysql->conn, (*query)->value.str.val, (*query)->value.str.len)!=0) {
 		RETURN_FALSE;
 	}
 #else
-	if (mysql_query(mysql, (*query)->value.str.val)!=0) {
+	if (mysql_query(&mysql->conn, (*query)->value.str.val)!=0) {
 		RETURN_FALSE;
 	}
 #endif
 	if(use_store == MYSQL_USE_RESULT) {
-		mysql_result=mysql_use_result(mysql);
+		mysql_result=mysql_use_result(&mysql->conn);
 	} else {
-		mysql_result=mysql_store_result(mysql);
+		mysql_result=mysql_store_result(&mysql->conn);
 	}
 	if (!mysql_result) {
-		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
+		if (PHP_MYSQL_VALID_RESULT(&mysql->conn)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
 		} else {
@@ -1054,7 +1059,7 @@ PHP_FUNCTION(mysql_list_dbs)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
@@ -1074,9 +1079,9 @@ PHP_FUNCTION(mysql_list_dbs)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	if ((mysql_result=mysql_list_dbs(mysql, NULL))==NULL) {
+	if ((mysql_result=mysql_list_dbs(&mysql->conn, NULL))==NULL) {
 		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
@@ -1091,7 +1096,7 @@ PHP_FUNCTION(mysql_list_tables)
 {
 	zval **db, **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
@@ -1114,13 +1119,13 @@ PHP_FUNCTION(mysql_list_tables)
 			break;
 	}
 		
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
+	if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
 		RETURN_FALSE;
 	}
-	if ((mysql_result=mysql_list_tables(mysql, NULL))==NULL) {
+	if ((mysql_result=mysql_list_tables(&mysql->conn, NULL))==NULL) {
 		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
@@ -1135,7 +1140,7 @@ PHP_FUNCTION(mysql_list_fields)
 {
 	zval **db, **table, **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
@@ -1158,14 +1163,14 @@ PHP_FUNCTION(mysql_list_fields)
 			break;
 	}
 		
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
+	if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
 		RETURN_FALSE;
 	}
 	convert_to_string_ex(table);
-	if ((mysql_result=mysql_list_fields(mysql, (*table)->value.str.val, NULL))==NULL) {
+	if ((mysql_result=mysql_list_fields(&mysql->conn, (*table)->value.str.val, NULL))==NULL) {
 		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
@@ -1180,7 +1185,7 @@ PHP_FUNCTION(mysql_error)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1201,9 +1206,9 @@ PHP_FUNCTION(mysql_error)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
-	RETURN_STRING(mysql_error(mysql), 1);
+	RETURN_STRING(mysql_error(&mysql->conn), 1);
 }
 /* }}} */
 
@@ -1215,7 +1220,7 @@ PHP_FUNCTION(mysql_errno)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1236,9 +1241,9 @@ PHP_FUNCTION(mysql_errno)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
-	RETURN_LONG(mysql_errno(mysql));
+	RETURN_LONG(mysql_errno(&mysql->conn));
 }
 #endif
 /* }}} */
@@ -1250,7 +1255,7 @@ PHP_FUNCTION(mysql_affected_rows)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1269,10 +1274,10 @@ PHP_FUNCTION(mysql_affected_rows)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	/* conversion from int64 to long happing here */
-	return_value->value.lval = (long) mysql_affected_rows(mysql);
+	return_value->value.lval = (long) mysql_affected_rows(&mysql->conn);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -1305,7 +1310,7 @@ PHP_FUNCTION(mysql_insert_id)
 {
 	zval **mysql_link;
 	int id;
-	MYSQL *mysql;
+	php_mysql_conn *mysql;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1324,10 +1329,10 @@ PHP_FUNCTION(mysql_insert_id)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	/* conversion from int64 to long happing here */
-	return_value->value.lval = (long) mysql_insert_id(mysql);
+	return_value->value.lval = (long) mysql_insert_id(&mysql->conn);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -1988,3 +1993,4 @@ PHP_FUNCTION(mysql_free_result)
  * c-basic-offset: 4
  * End:
  */
+
