@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Uwe Steinmann <Uwe.Steinmann@fernuni-hagen.de>              |
-   |          Hartmut Holzgraefe <hartmut@six.de>                         |
+   |          Hartmut Holzgraefe <hholzgra@php.net>                       |
    +----------------------------------------------------------------------+
  */
 

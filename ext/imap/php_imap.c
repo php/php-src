@@ -20,7 +20,7 @@
    |          Rasmus Lerdorf      <rasmus@php.net>                        |
    |          Chuck Hagenbuch     <chuck@horde.org>                       |
    |          Andrew Skalski      <askalski@chekinc.com>                  |
-   |          Hartmut Holzgraefe  <hartmut@six.de>                        |
+   |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <sniper@iki.fi>                         |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |

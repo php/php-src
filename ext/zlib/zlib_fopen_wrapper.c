@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>, based on work by:        |
-   |         Hartmut Holzgraefe <hartmut@six.de>                          |
+   |         Hartmut Holzgraefe <hholzgra@php.net>                        |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
