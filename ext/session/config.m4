@@ -18,9 +18,7 @@ fi
 
 if test "$PHP_MM" != "no"; then
   for i in $PHP_MM /usr/local /usr; do
-    if test -f "$i/include/mm.h"; then
-      MM_DIR=$i
-    fi
+    test -f "$i/include/mm.h" && MM_DIR=$i && break
   done
 
   if test -z "$MM_DIR" ; then

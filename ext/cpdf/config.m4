@@ -58,7 +58,7 @@ AC_ARG_WITH(cpdflib,
     CPDF_JPEG_TEST
     CPDF_TIFF_TEST
 
-    for i in $cpdf_withval /usr /usr/local; do
+    for i in $cpdf_withval /usr/local /usr; do
       if test -f "$i/include/cpdflib.h"; then
         CPDFLIB_INCLUDE=$i/include
         AC_MSG_CHECKING(for cpdflib.h)

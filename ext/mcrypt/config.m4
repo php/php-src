@@ -25,9 +25,7 @@ PHP_ARG_WITH(mcrypt, for mcrypt support,
 
 if test "$PHP_MCRYPT" != "no"; then
   for i in $PHP_MCRYPT /usr/local /usr; do
-    if test -f $i/include/mcrypt.h; then
-      MCRYPT_DIR=$i
-    fi
+    test -f $i/include/mcrypt.h && MCRYPT_DIR=$i && break
   done
 
   if test -z "$MCRYPT_DIR"; then

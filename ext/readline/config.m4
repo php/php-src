@@ -10,9 +10,7 @@ PHP_ARG_WITH(readline,for readline support,
 
 if test "$PHP_READLINE" != "no"; then
   for i in $PHP_READLINE /usr/local /usr; do
-    if test -f $i/include/readline/readline.h; then
-      READLINE_DIR=$i
-    fi
+    test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
   done
 
   if test -z "$READLINE_DIR"; then
@@ -49,17 +47,14 @@ if test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/lib 
   ])
 
-  PHP_SUBST(READLINE_SHARED_LIBADD)
-
-  AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
+  PHP_SUBST(READLINE_SHARED_LIBADD)
+  AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
 elif test "$PHP_LIBEDIT" != "no"; then
 
   for i in $PHP_LIBEDIT /usr/local /usr; do
-    if test -f $i/include/readline/readline.h; then
-      LIBEDIT_DIR=$i
-    fi
+    test -f $i/include/readline/readline.h && LIBEDIT_DIR=$i && break
   done
 
   if test -z "$LIBEDIT_DIR"; then
@@ -87,8 +82,7 @@ elif test "$PHP_LIBEDIT" != "no"; then
     -L$READLINE_DIR/lib 
   ])
 
-  PHP_SUBST(READLINE_SHARED_LIBADD)
-
-  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
+  PHP_SUBST(READLINE_SHARED_LIBADD)
+  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
 fi

@@ -50,8 +50,8 @@ dnl
 AC_DEFUN(PHP_GD_JPEG,[
   if test "$PHP_JPEG_DIR" != "no"; then
 
-    for i in $PHP_JPEG_DIR /usr /usr/local; do
-      test -f $i/lib/libjpeg.$SHLIB_SUFFIX_NAME -o -f $i/lib/libjpeg.a && GD_JPEG_DIR=$i
+    for i in $PHP_JPEG_DIR /usr/local /usr; do
+      test -f $i/lib/libjpeg.$SHLIB_SUFFIX_NAME -o -f $i/lib/libjpeg.a && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
@@ -75,8 +75,8 @@ AC_DEFUN(PHP_GD_JPEG,[
 AC_DEFUN(PHP_GD_PNG,[
   if test "$PHP_PNG_DIR" != "no"; then
 
-    for i in $PHP_PNG_DIR /usr /usr/local; do
-      test -f $i/lib/libpng.$SHLIB_SUFFIX_NAME -o -f $i/lib/libpng.a && GD_PNG_DIR=$i
+    for i in $PHP_PNG_DIR /usr/local /usr; do
+      test -f $i/lib/libpng.$SHLIB_SUFFIX_NAME -o -f $i/lib/libpng.a && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
@@ -110,8 +110,8 @@ AC_DEFUN(PHP_GD_PNG,[
 AC_DEFUN(PHP_GD_XPM,[
   if test "$PHP_XPM_DIR" != "no"; then
 
-    for i in $PHP_XPM_DIR /usr /usr/local /usr/X11R6; do
-      test -f $i/lib/libXpm.$SHLIB_SUFFIX_NAME -o -f $i/lib/libXpm.a && GD_XPM_DIR=$i
+    for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
+      test -f $i/lib/libXpm.$SHLIB_SUFFIX_NAME -o -f $i/lib/libXpm.a && GD_XPM_DIR=$i && break
     done
 
     if test -z "$GD_XPM_DIR"; then
@@ -144,9 +144,9 @@ AC_DEFUN(PHP_GD_XPM,[
 AC_DEFUN(PHP_GD_FREETYPE1,[
   if test "$PHP_TTF" != "no"; then
     if test "$PHP_FREETYPE_DIR" = "no" -o "$PHP_FREETYPE_DIR" = ""; then
-      if test -n "$PHP_TTF" ; then
-        for i in $PHP_TTF /usr /usr/local; do
-          if test -f "$i/include/freetype.h" ; then
+      if test -n "$PHP_TTF"; then
+        for i in $PHP_TTF /usr/local /usr; do
+          if test -f "$i/include/freetype.h"; then
             TTF_DIR=$i
             unset TTF_INC_DIR
           fi
@@ -158,6 +158,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
             TTF_DIR=$i
             TTF_INC_DIR=$i/include/freetype1/freetype
           fi
+          test -n "$TTF_DIR" && break
         done
       fi
       if test -n "$TTF_DIR" ; then
@@ -178,10 +179,11 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
 AC_DEFUN(PHP_GD_FREETYPE2,[
   if test "$PHP_FREETYPE_DIR" != "no"; then
 
-    for i in $PHP_FREETYPE_DIR /usr /usr/local; do
+    for i in $PHP_FREETYPE_DIR /usr/local /usr; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
         FREETYPE2_DIR=$i
         FREETYPE2_INC_DIR=$i/include/freetype2
+        break
       fi
     done
     
@@ -202,8 +204,8 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
 AC_DEFUN(PHP_GD_T1LIB,[
   if test "$PHP_T1LIB" != "no"; then
 
-    for i in $PHP_T1LIB /usr /usr/local; do
-      test -f "$i/include/t1lib.h" && GD_T1_DIR=$i
+    for i in $PHP_T1LIB /usr/local /usr; do
+      test -f "$i/include/t1lib.h" && GD_T1_DIR=$i && break
     done
 
     if test -z "$GD_T1_DIR"; then

@@ -6,18 +6,17 @@ AC_DEFUN(IMAP_INC_CHK,[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i
     IMAP_INC_DIR=$i$1
+    break
   elif test -r "$i$1/rfc822.h"; then 
     IMAP_DIR=$i; 
     IMAP_INC_DIR=$i$1
+	break
 ])
 
 AC_DEFUN(IMAP_LIB_CHK,[
   str="$IMAP_DIR/$1/lib$lib.*"
   for i in `echo $str`; do
-    if test -r $i; then
-      IMAP_LIBDIR=$IMAP_DIR/$1
-      break 2
-    fi
+    test -r $i && IMAP_LIBDIR=$IMAP_DIR/$1 && break 2
   done
 ])
 
