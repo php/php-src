@@ -365,7 +365,7 @@ ZEND_FUNCTION(dbx_close)
 }
 /* }}} */
 
-/* {{{ proto dbx_result_object dbx_query(dbx_link_object dbx_link, string sql_statement [, long flags])
+/* {{{ proto dbx_result_object dbx_query(dbx_link_object dbx_link, string sql_statement [, int flags])
    Returns a dbx_link_object on success and returns 0 on failure */
 ZEND_FUNCTION(dbx_query)
 {
