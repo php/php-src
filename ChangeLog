@@ -1,3 +1,67 @@
+2001-10-17  eschmid  <eschmid@pb1.pair.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: Fixed some protos.
+
+2001-10-17  fmk  <fmk@pb1.pair.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Return a warning when fbsql_read_blob or fbsql_read_clob is called with an invalid handle
+
+2001-10-17  Andrei Zmievski  <andrei@pb1.pair.com>
+
+    * ext/pcre/php_pcre.c:
+    - Fixed a bug in preg_replace() that would change the type of the replacement
+      array entries to string. 
+
+2001-10-17  Stig Bakken  <ssb@pb1.pair.com>
+
+    * ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.m4
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection_private.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/xmlrpc/CREDITS
+      ext/xmlrpc/EXPERIMENTAL
+      ext/xmlrpc/Makefile.in
+      ext/xmlrpc/config.m4
+      ext/xmlrpc/libxmlrpc/.cvsignore
+      ext/xmlrpc/libxmlrpc/Makefile.in
+      ext/xmlrpc/libxmlrpc/README
+      ext/xmlrpc/libxmlrpc/acinclude.m4
+      ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/base64.h
+      ext/xmlrpc/libxmlrpc/encodings.c
+      ext/xmlrpc/libxmlrpc/encodings.h
+      ext/xmlrpc/libxmlrpc/libs.mk
+      ext/xmlrpc/libxmlrpc/queue.c
+      ext/xmlrpc/libxmlrpc/queue.h
+      ext/xmlrpc/libxmlrpc/simplestring.c
+      ext/xmlrpc/libxmlrpc/simplestring.h
+      ext/xmlrpc/libxmlrpc/system_methods.c
+      ext/xmlrpc/libxmlrpc/system_methods_private.h
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xml_element.h
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.h
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/php_config.h.in
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/.cvsignore: MFH
+
+2001-10-17  phanto  <phanto@pb1.pair.com>
+
+    * main/internal_functions_win32.c: rename com module entry
+
+    * ext/com/php_COM.h: rename module entry
+
+    * ext/com/conversion.c: fixed unicode bug
+
+    * ext/overload/overload.dsp: win32 project file
+
 2001-10-16  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c
