@@ -285,39 +285,41 @@
 		// {{{   docbook documentation
 
 		function generate_documentation() {
+			$id_name = str_replace('_', '-', $this->name);
+
 			system("rm -rf {$this->name}/manual");
 			mkdir("{$this->name}/manual");
 
-			$docdir = "{$this->name}/manual/".$this->name;
+			$docdir = "{$this->name}/manual/$id_name";
 			mkdir($docdir);
 
 			$fp = fopen("$docdir/reference.xml", "w");
 			fputs($fp,
 "<?xml version='1.0' encoding='iso-8859-1'?>
 <!-- ".'$'."Revision: 1.1 $ -->
- <reference id='ref.{$this->name}'>
+ <reference id='ref.$id_name'>
   <title>{$this->summary}</title>
-  <titleabbrev>{$this->name}</titleabbrev>
+  <titleabbrev>$id_name</titleabbrev>
 
   <partintro>
-   <section id='{$this->name}.intro'>
+   <section id='$id_name.intro'>
     &reftitle.intro;
     <para>
 {$this->description}
     </para>
    </section>
    
-   <section id='{$this->name}.requirements'>
+   <section id='$id_name.requirements'>
     &reftitle.required;
     <para>
     </para>
    </section>
 
 <!-- TODO no configure option support yet
-   &reference.{$this->name}.configure;
+   &reference.$id_name.configure;
 -->
 
-   <section id='{$this->name}.configuration'>
+   <section id='$id_name.configuration'>
     &reftitle.runtime;
 ");
 
@@ -326,7 +328,7 @@
 		} else {
 			fputs($fp, 
 "    <table>
-     <title>{$this->name} runtime configuration</title>
+     <title>$id_name runtime configuration</title>
 			<tgroup cols='3'>
 			 <thead>
         <row>
@@ -356,7 +358,7 @@
 		fputs($fp,
 "   </section>
 
-   <section id='{$this->name}.resources'>
+   <section id='$id_name.resources'>
     &reftitle.resources;
 ");
 
@@ -372,7 +374,7 @@
   fputs($fp,
 "   </section>
 
-   <section id='{$this->name}.constants'>
+   <section id='$id_name.constants'>
     &reftitle.constants;
 ");
   if(empty($this->constants)) {
@@ -380,7 +382,7 @@
   } else {
     fputs($fp, 
 "    <table>
-     <title>{$this->name} constants</title>
+     <title>$id_name constants</title>
       <tgroup cols='3'>
        <thead>
         <row>
@@ -405,7 +407,7 @@
    
   </partintro>
 
-&reference.{$this->name}.functions;
+&reference.$id_name.functions;
 
  </reference>
 ");
