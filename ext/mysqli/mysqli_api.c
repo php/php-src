@@ -68,7 +68,7 @@ PHP_FUNCTION(mysqli_autocommit)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_bind_param(object stmt, array types, mixed variable [,mixed,....])
+/* {{{ proto bool mysqli_bind_param(object stmt, string types, mixed variable [,mixed,....])
    Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_bind_param)
 {
@@ -81,8 +81,8 @@ PHP_FUNCTION(mysqli_bind_param)
 	STMT			*stmt;
 	zval 			*mysql_stmt;
 	MYSQL_BIND		*bind;
-	zval			*types;
-	HashPosition	hpos;
+	char			*types;
+	int				typelen;
 	unsigned long	rc;
 
 	/* calculate and check number of parameters */
@@ -96,7 +96,7 @@ PHP_FUNCTION(mysqli_bind_param)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_method_parameters((getThis()) ? 1:2 TSRMLS_CC, getThis(), "Oa", &mysql_stmt, mysqli_stmt_class_entry, &types) == FAILURE) {
+	if (zend_parse_method_parameters((getThis()) ? 1:2 TSRMLS_CC, getThis(), "Os", &mysql_stmt, mysqli_stmt_class_entry, &types, &typelen) == FAILURE) {
 		return;	
 	}
 
@@ -106,9 +106,9 @@ PHP_FUNCTION(mysqli_bind_param)
 		start = 1;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(types)) != argc - start) {
-		/* number of bind variables doesn't match number of elements in array */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type array doesn't match number of bind variables");
+	if (strlen(types) != argc - start) {
+		/* number of bind variables doesn't match number of elements in type definition string */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type definition string doesn't match number of bind variables");
 	}
 
 	/* prevent leak if variables are already bound */
@@ -126,35 +126,30 @@ PHP_FUNCTION(mysqli_bind_param)
 	stmt->param.is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *)ecalloc(num_vars, sizeof(MYSQL_BIND));
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(types), &hpos);
-
 	ofs = 0;
 	for (i=start; i < argc; i++) {
-		zval **ctype;
-
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(types), (void **)&ctype, &hpos);
 
 		/* set specified type */
-		switch (Z_LVAL_PP(ctype)) {
-			case MYSQLI_BIND_DOUBLE:
+		switch (types[ofs]) {
+			case 'd': /* Double */
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
 				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
-			case MYSQLI_BIND_INT:
+			case 'i': /* Integer */
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
 				bind[ofs].buffer = (gptr)&Z_LVAL_PP(args[i]);
 				bind[ofs].is_null = &stmt->param.is_null[ofs];
 				break;
 
-			case MYSQLI_BIND_SEND_DATA:
+			case 'b': /* Blob (send data) */
 				bind[ofs].buffer_type = MYSQL_TYPE_VAR_STRING;
 				bind[ofs].is_null = 0;
 				bind[ofs].length = 0;
 				break;
 
-			case MYSQLI_BIND_STRING:
+			case 's': /* string */
 				bind[ofs].buffer_type = MYSQL_TYPE_VAR_STRING;
 				bind[ofs].buffer = NULL; 
 				bind[ofs].buffer_length = 0;
@@ -162,14 +157,13 @@ PHP_FUNCTION(mysqli_bind_param)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %ld (parameter %d)", Z_LVAL_PP(args[i]), i+1);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i+1);
 				efree(args);
 				efree(bind);
 				RETURN_FALSE; 
 				break;
 		}
 		ofs++;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(types), &hpos);
 	}
 	
 	rc = mysql_bind_param(stmt->stmt, bind);
@@ -1266,6 +1260,8 @@ PHP_FUNCTION(mysqli_prepare)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+
+	if (stmt->stmt->fields) printf("**********\n");
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
