@@ -27,9 +27,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	foreach ($no_arg_filters as $filt) {
 		$im = imagecreatefrompng($SOURCE_IMG);
 		if (imagefilter($im, constant($filt))) {
-			imagepng($im, $SAVE_DIR. $filt. ".png");
+			imagepng($im, $SAVE_DIR."/".$filt. ".png");
 			echo "$filt success\n";
-			@unlink($SAVE_DIR. $filt. ".png");
+			@unlink($SAVE_DIR."/".$filt. ".png");
 		} else {
 			echo "$filt failed\n";
 		}
@@ -38,9 +38,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
 	if (imagefilter($im, IMG_FILTER_SMOOTH, -1924.124)) {
-		imagepng($im, $SAVE_DIR . "IMG_FILTER_SMOOTH.png");
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
 		echo "IMG_FILTER_SMOOTH success\n";
-		@unlink($SAVE_DIR . "IMG_FILTER_SMOOTH.png");
+		@unlink($SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
 	} else {
 		echo "IMG_FILTER_SMOOTH failed\n";
 	}
@@ -48,9 +48,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
 	if (imagefilter($im, IMG_FILTER_COLORIZE, -127.12, -127.98, 127)) {
-		imagepng($im, $SAVE_DIR . "IMG_FILTER_COLORIZE.png");
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
 		echo "IMG_FILTER_COLORIZE success\n";
-		unlink($SAVE_DIR . "IMG_FILTER_COLORIZE.png");
+		unlink($SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
 	} else {
 		echo "IMG_FILTER_COLORIZE failed\n";
 	}
@@ -58,9 +58,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
 	if (imagefilter($im, IMG_FILTER_CONTRAST, -90)) {
-		imagepng($im, $SAVE_DIR . "IMG_FILTER_CONTRAST.png");
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_CONTRAST.png");
 		echo "IMG_FILTER_CONTRAST success\n";
-		unlink($SAVE_DIR . "IMG_FILTER_CONTRAST.png");
+		unlink($SAVE_DIR . "/IMG_FILTER_CONTRAST.png");
 	} else {
 		echo "IMG_FILTER_CONTRAST failed\n";
 	}
@@ -68,9 +68,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
 	if (imagefilter($im, IMG_FILTER_BRIGHTNESS, 98)) {
-		imagepng($im, $SAVE_DIR . "IMG_FILTER_BRIGHTNESS.png");
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_BRIGHTNESS.png");
 		echo "IMG_FILTER_BRIGHTNESS success\n";
-		unlink($SAVE_DIR . "IMG_FILTER_BRIGHTNESS.png");
+		unlink($SAVE_DIR . "/IMG_FILTER_BRIGHTNESS.png");
 	} else {
 		echo "IMG_FILTER_BRIGHTNESS failed\n";
 	}
