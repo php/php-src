@@ -34,7 +34,7 @@
  -------------------------------------------------------------------------------
  Every extension must define the following functions:
  
-    - xslt_create()
+	- xslt_create()
 	- xslt_set_scheme_handlers()
 	- xslt_set_sax_handlers()
 	- xslt_set_error_handler()
