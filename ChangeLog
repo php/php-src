@@ -1,3 +1,93 @@
+2001-08-09  David Eriksson  <david@2good.com>
+
+    * ext/satellite/namedvalue_to_zval.c: Prevent potential crash
+
+    * ext/satellite/zval_to_namedvalue.c: Convert parameter to long if needed.
+
+    * ext/satellite/struct.c:
+    Added zend_ prefix to wrong_param_count in enum.c, object.c and struct.c
+
+    * ext/satellite/enum.c: struct.c
+
+    * ext/satellite/class.c: Prevent potential crashes.
+
+    * ext/satellite/object.c
+      ext/satellite/php_orbit.c
+      ext/satellite/php_orbit.h:
+    (PHP satellite_object_to_string) Added function to get IOR of object.
+
+    * ext/satellite/Makefile.in
+      ext/satellite/config.m4: rewrote configuration script
+
+    * ext/satellite/README
+      ext/satellite/multiple_components.patch:
+    Added patch for ORBit that handles "Multiple Components Profile" in an IOR.
+
+2001-08-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php: added nosuchtable to errors map
+
+    * pear/DB/pgsql.php:
+    modify nosuchfield to work in postgres 7.x and added constraint to regex's
+
+    * pear/DB/tests/pgsql/010.phpt: added constraint error to expected output
+
+2001-08-09  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: K&R-ify the switch statments.
+
+    * ext/domxml/php_domxml.c:
+    Commit acutal code only, will do ws on another pass.
+
+    * ext/domxml/php_domxml.c:
+    Revert patch to seperate code from whitespace changes.
+
+    * ext/domxml/php_domxml.c:
+    Restore xpath_eval() and the underlying php_xpathptr_eval().
+    It still leaks like crazy, but does not appear to crash, and
+    seems to work correctly.
+
+    Anyone who can possibly test this, please do.
+
+
+2001-08-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Mail.php: fix multiple factory calls problem with php < 4.0.7
+
+    * pear/Mail.php: *** empty log message ***
+
+    * pear/Mail.php: spaces
+
+2001-08-09  Jani Taskinen  <sniper@iki.fi>
+
+    * win32/install.txt: Updated the extension part a little bit.
+
+2001-08-09  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c: More ext_skel cleanup
+
+2001-08-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/library.mk
+      build/program.mk
+      build/rules_common.mk:
+    Workaround which avoids passing pic-related flags in link mode
+
+2001-08-09  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Mail.php
+      pear/Mail/RFC822.php
+      pear/Mail/mail.php
+      pear/Mail/mime.php
+      pear/Mail/sendmail.php
+      pear/Mail/smtp.php: fix PHPDoc
+
+2001-08-09  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-optimized: Added missing entries.
+
 2001-08-08  Zeev Suraski  <zeev@zend.com>
 
     * NEWS: Update NEWS
