@@ -487,10 +487,29 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 		}
 		MBSTRG(current_language) = MBSTRG(language);
 		if (default_enc) {
-			zend_alter_ini_entry("mbstring.internal_encoding",
-			                     sizeof("mbstring.internal_encoding"),
-			                     default_enc, strlen(default_enc),
-			                     PHP_INI_PERDIR, stage); 
+			enum mbfl_no_encoding no_encoding;
+#if HAVE_MBREGEX
+			const struct def_mbctype_tbl *p = NULL;
+#endif
+			no_encoding = mbfl_name2no_encoding(default_enc);
+			if (no_encoding != mbfl_no_encoding_invalid) {
+				MBSTRG(internal_encoding) = no_encoding;
+				MBSTRG(current_internal_encoding) = no_encoding;
+#if HAVE_MBREGEX
+				p=&(mbctype_tbl[0]);
+				while (p->regex_encoding >= 0){
+					if (p->mbfl_encoding == MBSTRG(internal_encoding)){
+						MBSTRG(default_mbctype) = p->regex_encoding;
+						MBSTRG(current_mbctype) = p->regex_encoding;
+						break;
+					}
+					p++;
+				}
+#endif
+#ifdef ZEND_MULTIBYTE
+				zend_multibyte_set_internal_encoding(new_value, new_value_length TSRMLS_CC);
+#endif /* ZEND_MULTIBYTE */
+			}
 		}
 	} else {
 		return FAILURE;
