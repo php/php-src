@@ -2077,19 +2077,29 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto bool print_r(mixed var)
-   Prints out information about the specified variable */
+/* {{{ proto bool print_r(mixed var [, bool return])
+   Prints out or returns information about the specified variable */
 PHP_FUNCTION(print_r)
 {
-	pval **expr;
+	zval *var;
+	zend_bool i = 0;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &expr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &i) == FAILURE) {
+		return;
+	}
+	
+	if (i) {
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
-	zend_print_pval_r(*expr, 0);
+	zend_print_pval_r(var, 0);
 
-	RETURN_TRUE;
+	if (i) {
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
