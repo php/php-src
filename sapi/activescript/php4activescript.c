@@ -17,8 +17,6 @@
  */
 /* $Id$ */
 
-#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
-
 #include "php.h"
 #include "php_main.h"
 #include "SAPI.h"
@@ -41,7 +39,7 @@ static int php_activescript_startup(sapi_module_struct *sapi_module)
 
 static int sapi_activescript_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
-	/* In theory, this is a blackhole.  In practice, I wan't to see the output
+	/* In theory, this is a blackhole.  In practice, I want to see the output
 	 * in the debugger! */
 
 	char buf[1024];
