@@ -94,7 +94,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 			}
 			
 			if (param->is_param) {
-				switch (param->param_type) {
+				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_LOB:
 					case PDO_PARAM_STMT:
 						return 0;
