@@ -485,10 +485,10 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		}
 		case IS_ARRAY:
+			zend_error(E_NOTICE, "Array to string conversion");
 			zval_dtor(op);
 			op->value.str.val = estrndup_rel("Array", sizeof("Array")-1);
 			op->value.str.len = sizeof("Array")-1;
-			zend_error(E_NOTICE, "Array to string conversion");
 			break;
 		case IS_OBJECT:
 			if (op->value.obj.handlers->cast_object) {
