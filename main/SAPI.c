@@ -28,6 +28,9 @@
 #endif
 
 #include "rfc1867.h"
+#if HAVE_FDFLIB
+#include "fdfdata.h"
+#endif
 
 #ifdef PHP_WIN32
 #define STRCASECMP stricmp
@@ -35,12 +38,14 @@
 #define STRCASECMP strcasecmp
 #endif
 
+#include "php_content_types.h"
 
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
+SAPI_POST_READER_FUNC(php_default_post_reader);
 
 static sapi_post_entry supported_post_entries[] = {
 #if HAVE_FDFLIB
-	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	sapi_read_standard_form_data },
+	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	php_default_post_reader, fdf_post_handler},
 #endif
 	{ NULL, 0, NULL }
 };
