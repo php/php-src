@@ -202,7 +202,7 @@ _cyr_mac = {
 *    d - x-cp866
 *    m - x-mac-cyrillic
 *****************************************************************************/
-static char * php_convert_cyr_string(unsigned char *str, char from, char to)
+static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to)
 {
 	const unsigned char *from_table, *to_table;
 	unsigned char tmp;
@@ -259,7 +259,7 @@ static char * php_convert_cyr_string(unsigned char *str, char from, char to)
 	if (!str)
 		return (char *)str;
 	
-	for( i = 0; str[i]; i++)
+	for( i = 0; i<length; i++)
 	{
 		tmp = (from_table == NULL)? str[i] : from_table[ str[i] ];
 		str[i] = (to_table == NULL) ? tmp : to_table[tmp + 256];
@@ -282,9 +282,9 @@ PHP_FUNCTION(convert_cyr_string)
     convert_to_string_ex(fr_cs);
     convert_to_string_ex(to_cs);
 
-	str = (unsigned char*) (*str_arg)->value.str.val;
+	str = (unsigned char*) estrndup((*str_arg)->value.str.val, (*str_arg)->value.str.len);
 	
-	php_convert_cyr_string(str, (*fr_cs)->value.str.val[0],(*to_cs)->value.str.val[0]);
-	RETVAL_STRING((char *)str, 1)
+	php_convert_cyr_string(str, (*str_arg)->value.str.len, (*fr_cs)->value.str.val[0], (*to_cs)->value.str.val[0]);
+	RETVAL_STRING((char *)str, 0)
 }
 /* }}} */
