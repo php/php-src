@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Bakken <ssb@gaurdian.no>                               |
+   | Authors: Stig Bakken <ssb@php.net>                                   |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
