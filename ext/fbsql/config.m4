@@ -21,7 +21,7 @@ if test "$PHP_FBSQL" != "no"; then
     done
 
     if test -z "$FBSQL_INSTALLATION_DIR"; then
-      AC_MSG_ERROR(Cannot find FrontBase in well know installation directories)
+      AC_MSG_ERROR(Cannot find FrontBase in known installation directories)
     fi
 
   elif test "$PHP_FBSQL" != "no"; then
