@@ -3,7 +3,7 @@ dnl config.m4 for extension sqlite
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_WITH(sqlite, for sqlite support,
-[  --with-sqlite           Include sqlite support], yes)
+[  --with-sqlite           Include sqlite support])
 
 if test "$PHP_SQLITE" != "no"; then
 
