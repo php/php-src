@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Venkat Raghavan S <rvenkat@novell.com>                      |
+   | Authors: Daniel Beulshausen <daniel@php4win.de>                      |
+   | Modified for NetWare: Novell, Inc.                                   |
    +----------------------------------------------------------------------+
 */
 

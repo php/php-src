@@ -5,11 +5,13 @@
 # define TSRM_WIN32
 #endif
 
-#ifndef TSRM_WIN32
+#ifdef TSRM_WIN32
+# include "tsrm_config.w32.h"
+#elif defined(NETWARE)
+# include "tsrm_config.nw.h"
+#else
 # include "tsrm_config.h"
 # include <sys/param.h>
-#else
-# include "tsrm_config.w32.h"
 #endif
 
 #ifdef TSRM_WIN32

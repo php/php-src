@@ -36,12 +36,18 @@
 #include "tsrm_win32.h"
 #endif
 
+#ifdef NETWARE
+/*#include "pipe.h"*/
+#include "tsrm_nw.h"
+#endif
+
 #define VIRTUAL_CWD_DEBUG 0
 
 #include "TSRM.h"
 
-/* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
-#if defined(TSRM_WIN32) && defined(ZTS)
+/* Only need mutex for popen() in Windows and NetWare because it doesn't chdir() on UNIX */
+#if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
+#define TSRM_CWD_MUTEX 1
 MUTEX_T cwd_mutex;
 #endif
 
@@ -86,6 +92,16 @@ static int php_check_dots(const char *element, int n)
 	(len == 1 && ptr[0] == '.')
 
 
+/* NetWare has strtok() (in LibC) and allows both slashes in paths,
+ * like Windows. But rest of the stuff is like Unix
+ */
+#elif defined(NETWARE)
+/* strtok() call in LibC is abending when used in a different address space.
+ * Hence using PHP's version itself for now
+ */
+/*#define tsrm_strtok_r(a,b,c) strtok((a),(b))*/
+#define TOKENIZER_STRING "/\\"
+
 #else
 #define TOKENIZER_STRING "/"
 #endif
@@ -121,9 +137,15 @@ static int php_check_dots(const char *element, int n)
 	
 static int php_is_dir_ok(const cwd_state *state) 
 {
+#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 	struct stat buf;
 
 	if (stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
+#else
+	struct stat_libc buf;
+
+	if (stat(state->cwd, (struct stat*)(&buf)) == 0 && S_ISDIR(buf.st_mode))
+#endif
 		return (0);
 
 	return (1);
@@ -131,9 +153,15 @@ static int php_is_dir_ok(const cwd_state *state)
 
 static int php_is_file_ok(const cwd_state *state) 
 {
+#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 	struct stat buf;
 
 	if (stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
+#else
+	struct stat_libc buf;
+
+	if (stat(state->cwd, (struct stat*)(&buf)) == 0 && S_ISREG(buf.st_mode))
+#endif
 		return (0);
 
 	return (1);
@@ -182,7 +210,7 @@ CWD_API void virtual_cwd_startup(void)
 	cwd_globals_ctor(&cwd_globals TSRMLS_CC);
 #endif
 
-#if defined(TSRM_WIN32) && defined(ZTS)
+#ifdef TSRM_CWD_MUTEX
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -192,7 +220,7 @@ CWD_API void virtual_cwd_shutdown(void)
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals TSRMLS_CC);
 #endif
-#if defined(TSRM_WIN32) && defined(ZTS)
+#ifdef TSRM_CWD_MUTEX
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
@@ -274,7 +302,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	if (path_length == 0) 
 		return (0);
 
-#if !defined(TSRM_WIN32) && !defined(__BEOS__)
+#if !defined(TSRM_WIN32) && !defined(__BEOS__) && !defined(NETWARE)
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		if (realpath(path, resolved_path)) {
 			path = resolved_path;
@@ -309,7 +337,12 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
 #endif
 	if (IS_ABSOLUTE_PATH(path_copy, path_length)) {
+/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
+#ifndef NETWARE
 		copy_amount = COPY_WHEN_ABSOLUTE;
+#else
+		copy_amount = COPY_WHEN_ABSOLUTE(path_copy);
+#endif
 		is_absolute = 1;
 #ifdef TSRM_WIN32
 	} else if (IS_UNC_PATH(path_copy, path_length)) {
@@ -368,6 +401,11 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 				IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
 				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 			}
+#elif defined(NETWARE)
+			/* If the token is a volume name, it will have colon at the end -- so, no slash before it */
+			if (ptr[ptr_length-1] != ':') {
+				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+			}
 #else
 			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
@@ -377,7 +415,12 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
+/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
+#ifndef NETWARE
 	if (state->cwd_length == COPY_WHEN_ABSOLUTE) {
+#else
+	if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
+#endif
 		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
 		state->cwd[state->cwd_length] = DEFAULT_SLASH;
 		state->cwd[state->cwd_length+1] = '\0';
@@ -427,7 +470,12 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 		return -1;
 	}
 
+/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
+#ifndef NETWARE
 	if (length == COPY_WHEN_ABSOLUTE && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
+#else
+	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
+#endif
 		length++;
 	}
 	temp = (char *) tsrm_do_alloca(length+1);
@@ -526,7 +574,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC)
 	return ret;
 }
 
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_DC)
 {
 	cwd_state new_state;
@@ -602,7 +650,11 @@ CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC)
 	return retval;
 }
 
+#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
+#else
+CWD_API int virtual_stat(const char *path, struct stat_libc *buf TSRMLS_DC)
+#endif
 {
 	cwd_state new_state;
 	int retval;
@@ -610,13 +662,17 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, path, NULL);
 
+#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 	retval = stat(new_state.cwd, buf);
+#else
+	retval = stat(new_state.cwd, (struct stat*)buf);
+#endif
 
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
 
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 {
@@ -697,7 +753,69 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC)
 	return retval;
 }
 
-#ifndef TSRM_WIN32
+#ifdef TSRM_WIN32
+
+/* On Windows the trick of prepending "cd cwd; " doesn't work so we need to perform
+   a real chdir() and mutex it
+ */
+CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
+{
+	char prev_cwd[MAXPATHLEN];
+	char *getcwd_result;
+	FILE *retval;
+
+	getcwd_result = getcwd(prev_cwd, MAXPATHLEN);
+	if (!getcwd_result) {
+		return NULL;
+	}
+
+#ifdef ZTS
+	tsrm_mutex_lock(cwd_mutex);
+#endif
+
+	chdir(CWDG(cwd).cwd);
+	retval = popen(command, type);
+	chdir(prev_cwd);
+
+#ifdef ZTS
+	tsrm_mutex_unlock(cwd_mutex);
+#endif
+
+	return retval;
+}
+
+#elif defined(NETWARE)
+
+/* On NetWare, the trick of prepending "cd cwd; " doesn't work so we need to perform
+ * a VCWD_CHDIR() and mutex it.
+ */
+CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
+{
+	char prev_cwd[MAXPATHLEN];
+	char *getcwd_result;
+	FILE *retval;
+
+	getcwd_result = VCWD_GETCWD(prev_cwd, MAXPATHLEN);
+	if (!getcwd_result) {
+		return NULL;
+	}
+
+#ifdef ZTS
+	tsrm_mutex_lock(cwd_mutex);
+#endif
+
+	VCWD_CHDIR(CWDG(cwd).cwd);
+	retval = popen(command, type);
+	VCWD_CHDIR(prev_cwd);
+
+#ifdef ZTS
+	tsrm_mutex_unlock(cwd_mutex);
+#endif
+
+	return retval;
+}
+
+#else
 
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 {
@@ -730,37 +848,6 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 	retval = popen(command_line, type);
 
 	free(command_line);
-	return retval;
-}
-
-#else
-
-/* On Windows the trick of prepending "cd cwd; " doesn't work so we need to perform
-   a real chdir() and mutex it
- */
-CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
-{
-	char prev_cwd[MAXPATHLEN];
-	char *getcwd_result;
-	FILE *retval;
-
-	getcwd_result = getcwd(prev_cwd, MAXPATHLEN);
-	if (!getcwd_result) {
-		return NULL;
-	}
-
-#ifdef ZTS
-	tsrm_mutex_lock(cwd_mutex);
-#endif
-
-	chdir(CWDG(cwd).cwd);
-	retval = popen(command, type);
-	chdir(prev_cwd);
-
-#ifdef ZTS
-	tsrm_mutex_unlock(cwd_mutex);
-#endif
-
 	return retval;
 }
 
