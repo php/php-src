@@ -852,7 +852,7 @@ sockets.use_system_read = On
 ;mbstring.substitute_character = none;
 
 [FrontBase]
-;fbsql.allow_persistant = On
+;fbsql.allow_persistent = On
 ;fbsql.autocommit = On
 ;fbsql.default_database = 
 ;fbsql.default_database_password =
