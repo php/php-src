@@ -1,5 +1,4 @@
 --TEST--
-Bug #23894 (sprintf() decimal specifiers problem)
 Bug #27278 (sprintf(): global variable changing type when passed to function by value)
 --FILE--
 <?php
