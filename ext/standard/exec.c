@@ -896,6 +896,18 @@ PHP_FUNCTION(proc_open)
 	child = pi.hProcess;
 	CloseHandle(pi.hThread);
 
+#elif defined(NETWARE)
+
+	/* clean up all the descriptors */
+	for (i = 0; i < ndesc; i++) {
+		close(descriptors[i].childend);
+		close(descriptors[i].parentend);
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "fork not supported on NetWare");
+
+	goto exit_fail;
+
 #else
 	/* the unix way */
 

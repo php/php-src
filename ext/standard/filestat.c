@@ -664,26 +664,30 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_INODE:
 		RETURN_LONG((long)BG(sb).st_ino);
 	case FS_SIZE:
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)(stat_sb->st_size));
+#else
 		RETURN_LONG((long)BG(sb).st_size);
+#endif
 	case FS_OWNER:
 		RETURN_LONG((long)BG(sb).st_uid);
 	case FS_GROUP:
 		RETURN_LONG((long)BG(sb).st_gid);
 	case FS_ATIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
-		RETURN_LONG((long)(BG(sb).st_atime).tv_nsec);
+		RETURN_LONG((long)((stat_sb->st_atime).tv_sec));
 #else
 		RETURN_LONG((long)BG(sb).st_atime);
 #endif
 	case FS_MTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
-		RETURN_LONG((long)(BG(sb).st_mtime).tv_nsec);
+		RETURN_LONG((long)((stat_sb->st_mtime).tv_sec));
 #else
-	RETURN_LONG((long)BG(sb).st_mtime);
+		RETURN_LONG((long)BG(sb).st_mtime);
 #endif
 	case FS_CTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
-		RETURN_LONG((long)(BG(sb).st_ctime).tv_nsec);
+		RETURN_LONG((long)((stat_sb->st_ctime).tv_sec));
 #else
 		RETURN_LONG((long)BG(sb).st_ctime);
 #endif
@@ -706,28 +710,25 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
-#ifdef NETWARE
-		RETURN_LONG(0);
-#endif
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
-#ifdef NETWARE
-		RETURN_LONG(0);
-#endif
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
-#ifdef NETWARE
-		RETURN_LONG(0);
-#endif
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
@@ -762,9 +763,9 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
 #if defined(NETWARE) && defined(NEW_LIBC)
-		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_nsec);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_nsec);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_nsec);
+		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
 		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);

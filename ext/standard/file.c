@@ -54,6 +54,7 @@
 #include "netware/param.h"
 #else
 #include <sys/param.h>
+#include <sys/select.h>
 #if defined(NETWARE) && defined(USE_WINSOCK)
 #include <novsock2.h>
 #else
@@ -1979,9 +1980,16 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime.tv_sec);
+	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime.tv_sec);
+	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime.tv_sec);
+#else
 	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
 	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
 	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
+#endif
+
 #ifdef HAVE_ST_BLKSIZE
 	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize); 
 #else
