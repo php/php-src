@@ -584,9 +584,9 @@ static void php_message_handler_for_zend(long message, void *data)
 						void *ptr = (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING);
 
 #if WIN32||WINNT
-						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, ptr, t->size, SG(request_info).path_translated);
+						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SG(request_info).path_translated);
 #else
-						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, ptr, t->size,t->filename,t->lineno);
+						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8lX (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, (unsigned long)ptr, t->size,t->filename,t->lineno);
 #endif
 					} else {
 						uint leak_count = (uint) data;
@@ -879,7 +879,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 
 
-void php_module_shutdown_for_exec(void)
+void php_module_shutdown_for_exec()
 {
 	/* used to close fd's in the range 3.255 here, but it's problematic */
 }
@@ -1218,7 +1218,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 /* some systems are missing these from their header files */
 
 #if APACHE
-PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
+PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
 {
 	zend_file_handle file_handle;
 #ifdef ZTS
