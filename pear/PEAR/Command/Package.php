@@ -63,15 +63,6 @@ Creates a PEAR package from its description file (usually called
 package.xml).
 '
             ),
-        'package-info' => array(
-            'summary' => 'Display information about a package file',
-            'function' => 'doPackageInfo',
-            'shortcut' => 'pi',
-            'options' => array(),
-            'doc' => '
-Extracts information from a package file and displays it.
-',
-            ),
         'package-validate' => array(
             'summary' => 'Validate Package Consistency',
             'function' => 'doPackageValidate',
@@ -188,82 +179,6 @@ List all depencies the package has.'
         if (PEAR::isError($result)) {
             $this->ui->displayLine("Package failed: ".$result->getMessage());
         }
-        return true;
-    }
-
-    function doPackageInfo($command, $options, $params)
-    {
-        // $params[0] -> the PEAR package to list its information
-        if (sizeof($params) != 1) {
-            return $this->raiseError("bad parameter(s), try \"help $command\"");
-        }
-
-        $obj = new PEAR_Common();
-        if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
-            return $info;
-        }
-        unset($info['filelist']);
-        unset($info['changelog']);
-        $keys = array_keys($info);
-        $longtext = array('description', 'summary');
-        foreach ($keys as $key) {
-            if (is_array($info[$key])) {
-                switch ($key) {
-                    case 'maintainers': {
-                        $i = 0;
-                        $mstr = '';
-                        foreach ($info[$key] as $m) {
-                            if ($i++ > 0) {
-                                $mstr .= "\n";
-                            }
-                            $mstr .= $m['name'] . " <";
-                            if (isset($m['email'])) {
-                                $mstr .= $m['email'];
-                            } else {
-                                $mstr .= $m['handle'] . '@php.net';
-                            }
-                            $mstr .= "> ($m[role])";
-                        }
-                        $info[$key] = $mstr;
-                        break;
-                    }
-                    case 'release_deps': {
-                        $i = 0;
-                        $dstr = '';
-                        foreach ($info[$key] as $d) {
-                            if ($i++ > 0) {
-                                $dstr .= ", ";
-                            }
-                            if (isset($this->_deps_rel_trans[$d['rel']])) {
-                                $d['rel'] = $this->_deps_rel_trans[$d['rel']];
-                            }
-                            $dstr .= "$d[type] $d[rel]";
-                            if (isset($d['version'])) {
-                                $dstr .= " $d[version]";
-                            }
-                        }
-                        $info[$key] = $dstr;
-                        break;
-                    }
-                    default: {
-                        $info[$key] = implode(", ", $info[$key]);
-                        break;
-                    }
-                }
-            }
-            $info[$key] = trim($info[$key]);
-            if (in_array($key, $longtext)) {
-                $info[$key] = preg_replace('/  +/', ' ', $info[$key]);
-            }
-        }
-        $caption = 'About ' . basename($params[0]);
-        $this->ui->startTable(array('caption' => $caption,
-                                    'border' => true));
-        foreach ($info as $key => $value) {
-            $key = ucwords(str_replace('_', ' ', $key));
-            $this->ui->tableRow(array($key, $value), null, array(1 => array('wrap' => 55)));
-        }
-        $this->ui->endTable();
         return true;
     }
 
