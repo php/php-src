@@ -1,3 +1,33 @@
+2001-09-18  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mbstring/mbstring.dsp: Fixing win32 debug build
+
+2001-09-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: MFH irc_ignore_add change
+
+    * ext/ircg/ircg.c:
+    Before adding a username to the ignore list, ensure that it is unlisted.
+
+2001-09-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c: argument count fix
+
+2001-09-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/math.c: another attempt at fixing compile warnings...
+
+2001-09-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    added error msg mapping for DB_ERROR_NOSUCHFIELD in Postgres 7.x
+
+2001-09-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/math.c
+      ext/standard/rand.c: hopefully fix win32 compile warnings
+
+
 2001-09-17  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/ncurses/config.m4
