@@ -355,6 +355,7 @@ int php3api_var_unserialize(pval **rval, char **p, char *max)
 					return 0;
 				}
 				if (!php3api_var_unserialize(&data, p, max)) {
+					pval_destructor(key);
 				    efree(key);
 					efree(data);
 					return 0;
