@@ -72,7 +72,7 @@ typedef struct _zend_execute_data zend_execute_data;
 
 typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
-extern ZEND_API opcode_handler_t zend_opcode_handlers[512];
+extern ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 struct _zend_op {
 	opcode_handler_t handler;

@@ -21,14 +21,23 @@
 #ifndef ZEND_VM_H
 #define ZEND_VM_H
 
+#define ZEND_VM_HAVE_OLD_EXECUTOR
+
 #define ZEND_VM_KIND_CALL   1
 #define ZEND_VM_KIND_SWITCH 2
 #define ZEND_VM_KIND_GOTO   3
 
-/* #define ZEND_VM_KIND ZEND_VM_KIND_CALL */
-#define ZEND_VM_SPEC
+#ifndef ZEND_VM_OLD_EXECUTOR
+/*#  define ZEND_VM_KIND ZEND_VM_KIND_CALL */
+#  define ZEND_VM_SPEC
+#endif
 
 /* don't edit the rest of the file */
+
+#ifdef ZEND_VM_HAVE_OLD_EXECUTOR
+ZEND_API void zend_vm_use_old_executor();
+void zend_vm_set_opcode_handler(zend_op* opcode);
+#endif
 
 #define _CONST_CODE  0
 #define _TMP_CODE    1
@@ -43,7 +52,7 @@
 #  endif
 #endif
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(ZEND_VM_OLD_EXECUTOR)
 #  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
 /*extern void zend_error_noreturn(int type, const char *format, ...) __asm__("zend_error") __attribute__ ((noreturn));*/
@@ -55,8 +64,13 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alia
 #ifndef ZEND_VM_SPEC
 #  define ZEND_VM_CODE(opcode, op1, op2) opcode
 #  define ZEND_VM_SPEC_OPCODE(opcode, op1, op2) opcode
-#  define ZEND_VM_SET_OPCODE_HANDLER(opline) \
-	   opline->handler = zend_opcode_handlers[opline->opcode];
+#  ifdef ZEND_VM_HAVE_OLD_EXECUTOR
+#    define ZEND_VM_SET_OPCODE_HANDLER(opline) \
+	     zend_vm_set_opcode_handler(opline)
+#  else
+#    define ZEND_VM_SET_OPCODE_HANDLER(opline) \
+	     opline->handler = zend_opcode_handlers[opline->opcode]
+#  endif
 #else
 static const int zend_vm_decode[] = {
 	_UNUSED_CODE, /* 0              */
@@ -74,8 +88,13 @@ static const int zend_vm_decode[] = {
      opcode * 16 + op1 * 4 + op2
 #  define ZEND_VM_SPEC_OPCODE(opcode, op1, op2) \
      ZEND_VM_CODE(opcode, zend_vm_decode[op1], zend_vm_decode[op2])
-#  define ZEND_VM_SET_OPCODE_HANDLER(opline) \
-	   opline->handler = zend_opcode_handlers[ZEND_VM_SPEC_OPCODE(opline->opcode, opline->op1.op_type, opline->op2.op_type)]
+#  ifdef ZEND_VM_HAVE_OLD_EXECUTOR
+#    define ZEND_VM_SET_OPCODE_HANDLER(opline) \
+	     zend_vm_set_opcode_handler(opline)
+#  else
+#    define ZEND_VM_SET_OPCODE_HANDLER(opline) \
+	     opline->handler = zend_opcode_handlers[ZEND_VM_SPEC_OPCODE(opline->opcode, opline->op1.op_type, opline->op2.op_type)]
+#  endif
 #endif
 
 
