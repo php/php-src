@@ -83,6 +83,10 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQsendQueryParams,AC_DEFINE(HAVE_PQSENDQUERYPARAMS,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQsendPrepare,AC_DEFINE(HAVE_PQSENDPREPARE,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQsendQueryPrepared,AC_DEFINE(HAVE_PQSENDQUERYPREPARED,1,[PostgreSQL 7.4 or later]))
+  AC_CHECK_LIB(pq, PQputCopyData,AC_DEFINE(HAVE_PQPUTCOPYDATA,1,[PostgreSQL 7.4 or later]))
+  AC_CHECK_LIB(pq, PQputCopyEnd,AC_DEFINE(HAVE_PQPUTCOPYEND,1,[PostgreSQL 7.4 or later]))
+  AC_CHECK_LIB(pq, PQgetCopyData,AC_DEFINE(HAVE_PQGETCOPYDATA,1,[PostgreSQL 7.4 or later]))
+  AC_CHECK_LIB(pq, PQsetErrorVerbosity,AC_DEFINE(HAVE_PQSETERRORVERBOSITY,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibye]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS

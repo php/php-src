@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . ext/mnogosearch (Jani, Derick)
   . ext/w32api      (Jani, Derick)
   . ext/yp          (Jani, Derick)
+- Updated pg_copy_from and pg_copy_to to use non-deprecated COPY API if
+  it exists (Christopher)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
@@ -39,6 +41,7 @@ PHP                                                                        NEWS
   . pg_send_execute() - async equivalent of pg_execute().
   . pg_result_error_field() - highly detailed error information, 
     most importantly the SQLSTATE error code.
+  . pg_set_error_verbosity() - set verbosity of errors
 - Added optional fifth parameter "count" to preg_replace_callback() and
   preg_replace() to count the number of replacements made. FR #32275. (Andrey)
 - Added optional third parameter "charlist" to str_word_count() which
