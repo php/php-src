@@ -120,6 +120,13 @@ php_file_globals file_globals;
 #endif
 
 /* }}} */
+
+#define PHP_STREAM_TO_ZVAL(stream, arg) \
+	php_stream_from_zval_no_verify(stream, arg); \
+	if (stream == NULL) {	\
+		RETURN_FALSE;	\
+	}
+
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
 /* sharing globals is *evil* */
@@ -233,7 +240,7 @@ PHP_FUNCTION(flock)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE)	{
 		RETURN_FALSE;
@@ -606,7 +613,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	array_init(return_value);
 	
@@ -1086,7 +1093,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	php_stream_from_zval(stream, &zstream);
+	PHP_STREAM_TO_ZVAL(stream, &zstream);
 	
 	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
 	if (filter == NULL)
@@ -1162,7 +1169,7 @@ PHPAPI PHP_FUNCTION(fclose)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 	if (!stream->is_persistent) {
 		zend_list_delete(stream->rsrc_id);
 	} else {
@@ -1251,7 +1258,7 @@ PHP_FUNCTION(pclose)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	zend_list_delete(stream->rsrc_id);
 	RETURN_LONG(FG(pclose_ret));
@@ -1269,7 +1276,7 @@ PHPAPI PHP_FUNCTION(feof)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (php_stream_eof(stream)) {
 		RETURN_TRUE;
@@ -1291,7 +1298,7 @@ PHP_FUNCTION(stream_set_blocking)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	block = Z_LVAL_PP(arg2);
@@ -1326,7 +1333,7 @@ PHP_FUNCTION(stream_set_timeout)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, socket);
+	PHP_STREAM_TO_ZVAL(stream, socket);
 
 	convert_to_long_ex(seconds);
 	t.tv_sec = Z_LVAL_PP(seconds);
@@ -1363,11 +1370,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval_no_verify(stream, arg1);
-	if (stream == NULL) {
-		/* want a false return value here */
-		goto exit_failed;
-	}
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
@@ -1421,7 +1424,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	buf = emalloc(2 * sizeof(char));
 
@@ -1471,7 +1474,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		break;
 	}
 
-	php_stream_from_zval(stream, fd);
+	PHP_STREAM_TO_ZVAL(stream, fd);
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
@@ -1589,7 +1592,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		break;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (!arg3 && PG(magic_quotes_runtime)) {
 		buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
@@ -1617,7 +1620,7 @@ PHPAPI PHP_FUNCTION(fflush)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	ret = php_stream_flush(stream);
 	if (ret) {
@@ -1648,7 +1651,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 		break;
 	}
 	
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 	
 	convert_to_long_ex(arg2);
 	buff = Z_LVAL_PP(arg2);
@@ -1675,7 +1678,7 @@ PHPAPI PHP_FUNCTION(rewind)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
@@ -1696,7 +1699,7 @@ PHPAPI PHP_FUNCTION(ftell)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	ret = php_stream_tell(stream);
 	if (ret == -1)	{
@@ -1719,7 +1722,7 @@ PHPAPI PHP_FUNCTION(fseek)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	if (argcount > 2) {
@@ -1871,7 +1874,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
@@ -1967,7 +1970,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, fp);
+	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	convert_to_long_ex(size);
 
@@ -2000,7 +2003,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, fp);
+	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -2136,7 +2139,7 @@ PHPAPI PHP_FUNCTION(fread)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
@@ -2290,7 +2293,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	php_stream_from_zval(stream, fd);
+	PHP_STREAM_TO_ZVAL(stream, fd);
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
