@@ -424,6 +424,7 @@ ctime_r \
 cuserid \
 crypt \
 flock \
+ftok \
 gai_strerror \
 gcvt \
 getlogin \
