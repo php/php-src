@@ -1337,9 +1337,9 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 	zend_hash_internal_pointer_reset_ex(src, &pos);
 	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos);
-		if (Z_TYPE_PP(src_entry) != IS_ARRAY || 
-				(string_key_len && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) != SUCCESS) ||
-				(!string_key_len && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
+		if (Z_TYPE_PP(src_entry) != IS_ARRAY
+				|| (key_type==HASH_KEY_IS_STRING && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) != SUCCESS)
+				|| (key_type==HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
 				|| Z_TYPE_PP(dest_entry) != IS_ARRAY) {
 			(*src_entry)->refcount++;
 			if (key_type == HASH_KEY_IS_STRING) {
