@@ -52,6 +52,8 @@ PHP_FUNCTION(yaz_ccl_parse);
 PHP_FUNCTION(yaz_database);
 PHP_FUNCTION(yaz_sort);
 PHP_FUNCTION(yaz_schema);
+PHP_FUNCTION(yaz_set_option);
+PHP_FUNCTION(yaz_get_option);
 
 ZEND_BEGIN_MODULE_GLOBALS(yaz)
     int assoc_seq;

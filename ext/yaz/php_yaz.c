@@ -59,7 +59,7 @@ struct Yaz_AssociationInfo {
 	ZOOM_connection zoom_conn;
 	ZOOM_resultset zoom_set;
 	ZOOM_scanset zoom_scan;
-    ZOOM_package zoom_package;
+	ZOOM_package zoom_package;
 	char *sort_criteria;
 	int persistent;
 	int in_use;
@@ -137,6 +137,8 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_database, NULL)
 	PHP_FE(yaz_sort, NULL)
 	PHP_FE(yaz_schema, NULL)
+	PHP_FE(yaz_set_option, NULL)
+	PHP_FE(yaz_get_option, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -262,7 +264,7 @@ static int strcmp_null(const char *s1, const char *s2)
 	return strcmp(s1, s2);
 }
 
-/* {{{ proto int yaz_connect(string zurl [ array options])
+/* {{{ proto int yaz_connect(string zurl [, array options])
    Create target with given zurl. Returns positive id if successful. */
 PHP_FUNCTION(yaz_connect)
 {
@@ -343,15 +345,7 @@ PHP_FUNCTION(yaz_connect)
 			!strcmp_null(option_get(as, "pass"), pass_str) &&
 			!strcmp_null(option_get(as, "cookie"), cookie_str) &&
 			!strcmp_null(option_get(as, "charset"), charset_str))
-		{
-            option_set (as, "clientIP", client_IP);
-            option_set (as, "otherInfo0", otherInfo[0]);
-            option_set (as, "otherInfo1", otherInfo[1]);
-            option_set (as, "otherInfo2", otherInfo[2]);
-            option_set (as, "piggyback", piggyback ? "1" : "0");
-            ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
-		}
 	}
 	if (i == YAZSG(max_links))
 	{
@@ -383,21 +377,19 @@ PHP_FUNCTION(yaz_connect)
 		}
 		shared_associations[i] = as = yaz_association_mk ();
 
+        option_set (as, "proxy", proxy_str);
 		option_set (as, "user", user_str);
 		option_set (as, "group", group_str);
 		option_set (as, "pass", pass_str);
 		option_set (as, "cookie", cookie_str);
-        option_set (as, "clientIP", client_IP);
-
-        option_set (as, "otherInfo0", otherInfo[0]);
-        option_set (as, "otherInfo1", otherInfo[1]);
-        option_set (as, "otherInfo2", otherInfo[2]);
-        option_set (as, "proxy", proxy_str);
-        option_set (as, "piggyback", piggyback ? "1" : "0");
         option_set (as, "charset", charset_str);
-        
-		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 	}
+    option_set (as, "otherInfo0", otherInfo[0]);
+    option_set (as, "otherInfo1", otherInfo[1]);
+    option_set (as, "otherInfo2", otherInfo[2]);
+    option_set (as, "clientIP", client_IP);
+    option_set (as, "piggyback", piggyback ? "1" : "0");
+    ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 	as->in_use = 1;
 	as->persistent = persistent;
 	as->order = YAZSG(assoc_seq);
@@ -409,7 +401,7 @@ PHP_FUNCTION(yaz_connect)
 }
 /* }}} */
 
-/* {{{ proto int yaz_close(int id)
+/* {{{ proto int yaz_close(resource id)
    Destory and close target */
 PHP_FUNCTION(yaz_close)
 {
@@ -428,7 +420,7 @@ PHP_FUNCTION(yaz_close)
 }
 /* }}} */
 
-/* {{{ proto int yaz_search(int id, string type, string query)
+/* {{{ proto int yaz_search(resource id, string type, string query)
    Specify query of type for search - returns true if successful */
 PHP_FUNCTION(yaz_search)
 {
@@ -464,6 +456,8 @@ PHP_FUNCTION(yaz_search)
 		ZOOM_query_prefix (q, query_str);
 		if (p->sort_criteria)
 			ZOOM_query_sortby (q, p->sort_criteria);
+        xfree (p->sort_criteria);
+        p->sort_criteria = 0;
 		p->zoom_set = ZOOM_connection_search (p->zoom_conn, q);
 		ZOOM_query_destroy (q);
 		RETVAL_TRUE;
@@ -476,7 +470,7 @@ PHP_FUNCTION(yaz_search)
 }
 /* }}} */
 
-/* {{{ proto int yaz_present(int id)
+/* {{{ proto int yaz_present(resource id)
    Retrieve records */
 PHP_FUNCTION(yaz_present)
 {
@@ -557,7 +551,7 @@ PHP_FUNCTION(yaz_wait)
 }
 /* }}} */
 
-/* {{{ proto int yaz_errno(int id)
+/* {{{ proto int yaz_errno(resource id)
    Return last error number (>0 for bib-1 diagnostic, <0 for other error, 0 for no error */
 PHP_FUNCTION(yaz_errno)
 {
@@ -577,7 +571,7 @@ PHP_FUNCTION(yaz_errno)
 }
 /* }}} */
 
-/* {{{ proto string yaz_error(int id)
+/* {{{ proto string yaz_error(resource id)
    Return last error message */
 PHP_FUNCTION(yaz_error)
 {
@@ -603,7 +597,7 @@ PHP_FUNCTION(yaz_error)
 }
 /* }}} */
 
-/* {{{ proto string yaz_addinfo(int id)
+/* {{{ proto string yaz_addinfo(resource id)
    Return additional info for last error (empty string if none) */
 PHP_FUNCTION(yaz_addinfo)
 {
@@ -626,7 +620,7 @@ PHP_FUNCTION(yaz_addinfo)
 }
 /* }}} */
 
-/* {{{ proto int yaz_hits(int id)
+/* {{{ proto int yaz_hits(resource id)
    Return number of hits (result count) for last search */
 PHP_FUNCTION(yaz_hits)
 {
@@ -912,7 +906,7 @@ static void retval_grs1 (zval *return_value, Z_GenericRecord *p)
 }
 
 
-/* {{{ proto string yaz_record(int id, int pos, string type)
+/* {{{ proto string yaz_record(resource id, int pos, string type)
    Return record information at given result set position */
 PHP_FUNCTION(yaz_record)
 {
@@ -990,7 +984,7 @@ PHP_FUNCTION(yaz_record)
 /* }}} */
 
 
-/* {{{ proto int yaz_syntax(int id, string syntax)
+/* {{{ proto int yaz_syntax(resource id, string syntax)
    Set record syntax for retrieval */
 PHP_FUNCTION(yaz_syntax)
 {
@@ -1008,7 +1002,7 @@ PHP_FUNCTION(yaz_syntax)
 }
 /* }}} */
 
-/* {{{ proto int yaz_element(int id, string elementsetname)
+/* {{{ proto int yaz_element(resource id, string elementsetname)
    Set Element-Set-Name for retrieval */
 PHP_FUNCTION(yaz_element)
 {
@@ -1026,7 +1020,7 @@ PHP_FUNCTION(yaz_element)
 }
 /* }}} */
 
-/* {{{ proto int yaz_schema(int id, string schema)
+/* {{{ proto int yaz_schema(resource id, string schema)
    Set Schema for retrieval */
 PHP_FUNCTION(yaz_schema)
 {
@@ -1044,7 +1038,103 @@ PHP_FUNCTION(yaz_schema)
 }
 /* }}} */
 
-/* {{{ proto int yaz_range(int id, int start, int number)
+/* {{{ proto int yaz_set_option(resource id, mixed options)
+   Set Option(s) for connection */
+PHP_FUNCTION(yaz_set_option)
+{
+	pval **pval_ar, **pval_name, **pval_val, **pval_id;
+	Yaz_Association p;
+
+    if (ZEND_NUM_ARGS() == 2)
+    {
+        if (zend_get_parameters_ex(2, &pval_id, &pval_ar) == FAILURE)
+            WRONG_PARAM_COUNT;
+        if (Z_TYPE_PP(pval_ar) != IS_ARRAY)
+            WRONG_PARAM_COUNT;
+
+        get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+        if (p)
+        {
+            HashPosition pos;
+            HashTable *ht;
+            zval **ent;
+            
+            ht = Z_ARRVAL_PP(pval_ar);
+            for(zend_hash_internal_pointer_reset_ex(ht, &pos);
+                zend_hash_get_current_data_ex(ht, (void**) &ent, &pos) == SUCCESS;
+                zend_hash_move_forward_ex(ht, &pos)) 
+            {
+                char *key;
+                ulong idx;
+#if PHP_API_VERSION > 20010101
+                int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+                                                        &idx, 0, &pos);
+#else
+                int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+                                                        &idx, &pos);
+#endif
+                if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
+                    continue;
+                
+                option_set(p, key, (*ent)->value.str.val);
+            }
+            release_assoc (p);
+        }
+    }
+    else if (ZEND_NUM_ARGS() == 3)
+    {
+        if (zend_get_parameters_ex(3, &pval_id, &pval_name, &pval_val)
+            == FAILURE)
+            WRONG_PARAM_COUNT;
+        get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+        convert_to_string_ex(pval_name);
+        convert_to_string_ex(pval_val);
+        option_set(p, (*pval_name)->value.str.val, (*pval_val)->value.str.val);
+        
+        release_assoc (p);
+    }
+    else
+    {
+        WRONG_PARAM_COUNT;
+    }
+}
+/* }}} */
+
+/* {{{ proto string yaz_get_option(resource id, string name)
+   Set Option(s) for connection */
+PHP_FUNCTION(yaz_get_option)
+{
+	pval **pval_id, **pval_name;
+	Yaz_Association p;
+
+    if (ZEND_NUM_ARGS() != 2)
+        WRONG_PARAM_COUNT;
+    if (zend_get_parameters_ex(2, &pval_id, &pval_name) == FAILURE)
+        WRONG_PARAM_COUNT;
+    get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+    if (p)
+    {
+        const char *name_str, *v;
+        convert_to_string_ex (pval_name);
+        name_str = (*pval_name)->value.str.val;
+
+        v = option_get(p, name_str);
+        if (!v)
+            v = "";
+        return_value->value.str.len = strlen(v);
+        return_value->value.str.val = 
+            estrndup(v, return_value->value.str.len);
+        return_value->type = IS_STRING;
+    }
+    else
+    {
+        RETVAL_FALSE;
+    }
+    release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_range(resource id, int start, int number)
    Set result set start point and number of records to request */
 
 PHP_FUNCTION(yaz_range)
@@ -1066,7 +1156,7 @@ PHP_FUNCTION(yaz_range)
 }
 /* }}} */
 
-/* {{{ proto int yaz_sort(int id, string sortspec)
+/* {{{ proto int yaz_sort(resource id, string sortspec)
    Set result set sorting criteria */
 
 PHP_FUNCTION(yaz_sort)
@@ -1096,7 +1186,7 @@ const char *ill_array_lookup (void *handle, const char *name)
 }
 
 
-/* {{{ proto int yaz_itemorder(int id, array package)
+/* {{{ proto int yaz_itemorder(resource id, array package)
    Sends Item Order request */
 
 PHP_FUNCTION(yaz_itemorder)
@@ -1132,7 +1222,7 @@ PHP_FUNCTION(yaz_itemorder)
 
 
 
-/* {{{ proto int yaz_scan(int id, type, query [, flags])
+/* {{{ proto int yaz_scan(resource id, type, query [, flags])
    Sends Scan Request */
 PHP_FUNCTION(yaz_scan)
 {
@@ -1183,7 +1273,7 @@ PHP_FUNCTION(yaz_scan)
 }
 /* }}} */
 
-/* {{{ proto int yaz_es_result(int id)
+/* {{{ proto int yaz_es_result(resource id)
    Inspects Extended Services Result */
 PHP_FUNCTION(yaz_es_result)
 {
@@ -1217,7 +1307,7 @@ PHP_FUNCTION(yaz_es_result)
 }
 /* }}} */
 
-/* {{{ proto int yaz_scan_result(int id, array options)
+/* {{{ proto int yaz_scan_result(resource id, array options)
    Inspects Scan Result */
 PHP_FUNCTION(yaz_scan_result)
 {
@@ -1299,7 +1389,7 @@ PHP_FUNCTION(yaz_scan_result)
 }
 /* }}} */
 
-/* {{{ proto int yaz_ccl_conf(int id, array package)
+/* {{{ proto int yaz_ccl_conf(resource id, array package)
    Configure CCL package */
 
 PHP_FUNCTION(yaz_ccl_conf)
@@ -1348,7 +1438,7 @@ PHP_FUNCTION(yaz_ccl_conf)
 }
 /* }}} */
 
-/* {{{ proto int yaz_ccl_parse(int id, string query, array res)
+/* {{{ proto int yaz_ccl_parse(resource id, string query, array res)
    Parse a CCL query */
 
 PHP_FUNCTION(yaz_ccl_parse)
@@ -1406,7 +1496,7 @@ PHP_FUNCTION(yaz_ccl_parse)
 }
 /* }}} */
 
-/* {{{ proto int yaz_database (int id, string databases)
+/* {{{ proto int yaz_database (resource id, string databases)
    Specify the databases within a session */
 
 PHP_FUNCTION(yaz_database)
@@ -1462,7 +1552,7 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL,
                       OnUpdateInt, max_links,
                       zend_yaz_globals, yaz_globals)
-    STD_PHP_INI_ENTRY("yaz.log_file", "", PHP_INI_ALL,
+    STD_PHP_INI_ENTRY("yaz.log_file", NULL, PHP_INI_ALL,
                       OnUpdateString, log_file,
                       zend_yaz_globals, yaz_globals)
     PHP_INI_END()
@@ -1475,16 +1565,18 @@ PHP_MINIT_FUNCTION(yaz)
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
 #endif
-    yaz_log_init_file ("/dev/null");
 	ZEND_INIT_MODULE_GLOBALS(yaz, php_yaz_init_globals, NULL);
 
     REGISTER_INI_ENTRIES();
 
     if (YAZSG(log_file))
-    {
+	{
+        yaz_log_init_level(LOG_ALL);
         yaz_log_init_file(YAZSG(log_file));
-        yaz_log_init_level (LOG_ALL);
     }
+	else
+	    yaz_log_init_level (0);
+
 	le_link = zend_register_list_destructors_ex (yaz_close_link, 0,
 												"YAZ link", module_number);
 	order_associations = 1;
