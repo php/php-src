@@ -1,3 +1,69 @@
+2004-08-13  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+      Checking in a patch by Dave Lawson (dlawson@masterytech.com) to correct
+      some of the behavior found in the odbc_fetch_*() functions.  This patch
+      NEEDS to be tested on MS Access before a release is done with it.  This
+      submission is to get it into the daily builds for testing.
+
+2004-08-13  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fixed bug #29656 (segfault on result and statement properties)
+
+2004-08-13  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      regex/engine.c
+      regex/regexec.c:
+      MFH: fix yet another annoying compile warning
+
+    * regex/engine.c
+      regex/regexec.c:
+      fix yet another annoying compile warning
+
+    * ext/iconv/iconv.c:
+      fix compile warning
+
+2004-08-13  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS:
+      Forgot to add DomDocumentFragment->appendXML(), when I commited it back
+      then
+
+    * NEWS
+      ext/dom/document.c
+      ext/dom/dom_properties.h
+      ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      Added DomDocument->recover property for parsing not well-formed XML
+      Documents.
+
+2004-08-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      Fixed bug #29599 (domxml_error segfaults another apache module)
+
+2004-08-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      main/main.c:
+      - MFH: Added PHP_EOL constant that contains the OS way of representing
+        newlines. (Patch by Paul Hudson)
+
+    * main/main.c:
+      - Added the PHP_EOL constant (Patch by Paul Hudson)
+
 2004-08-12  Georg Richter  <georg@mysql.com>
 
     * ext/mysqli/mysqli_api.c
