@@ -314,7 +314,7 @@ $UNINSTALL = implode("\n", $uninstall) . "\n" . implode("\n", $rmdirs) . "\n";
 !define MUI_PRODUCT "PHP - Hypertext Preprocessor"
 !define MUI_VERSION "<?= PHPVERSION ?>"
 ; The second UI has a wider area for the component names
-!define MUI_UI "${NSISDIR}\Contrib\UIs\modern3.exe"	
+!define MUI_UI "${NSISDIR}\Contrib\UIs\modern2.exe"	
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -347,16 +347,19 @@ LicenseData "license.txt"
 
 ;Folder-selection page
 InstallDir "C:\PHP-<?= PHPVERSION ?>"
-  
+;define NSIS_CONFIG_LOG "install.log"
+;LogSet on
+
+!cd <?= SOURCEDIR ?>win32\installer
+
 ;Things that need to be extracted on startup (keep these lines before any File command!)
 ;Only useful for BZIP2 compression
 ;Use ReserveFile for your own Install Options ini files too!
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 !insertmacro MUI_RESERVEFILE_SPECIALINI
 !insertmacro MUI_RESERVEFILE_SPECIALBITMAP
-  
-;--------------------------------
-;Modern UI System
+
+!cd <?= DISTDIR ?>
 
 !insertmacro MUI_SYSTEM
 
@@ -380,9 +383,9 @@ Function CopyPHPIni
 	; Extensions will call a function to activate their entry
 	; in the ini file as they are installed.
 
-	ifFileExists "<?= $SYSDIR ?>\php.ini" "" +2
-	Rename "<?= $SYSDIR ?>\php.ini" "<?= $SYSDIR ?>\php.ini.old"
-	CopyFiles "$INSTDIR\php.ini-dist" "<?= $SYSDIR ?>\php.ini"
+	ifFileExists "$WINDIR\php.ini" "" +2
+	Rename "<?= $SYSDIR ?>\php.ini" "$WINDIR\php.ini.old"
+	CopyFiles "$INSTDIR\php.ini-dist" "$WINDIR\php.ini"
 
 ; For editing the ini, put the cli and the php4ts.dll in the same dir
 ; these files will be deleted during post-installation
@@ -403,8 +406,7 @@ FunctionEnd
 ; Perform final actions after everything has been installed
 Section -post
 	; Merge ini settings
-	nsExec::ExecToLog "$\"$INSTDIR\strap-php.exe$\" $\"$INSTDIR\setini.php$\" $\"<?= $SYSDIR ?>\php.ini$\" $\"$INSTDIR\.ini-add$\""
-
+	ExecWait "$\"$INSTDIR\strap-php.exe$\" $\"$INSTDIR\setini.php$\" $\"$WINDIR\php.ini$\" $\"$INSTDIR\.ini-add$\""
 	Delete "$INSTDIR\.ini-add" ; Created by the AddIniSetting function
 	Delete "$INSTDIR\setini.php"
 	Delete "$INSTDIR\strap-php.exe"
@@ -431,6 +433,7 @@ Section "Uninstall"
 <?= $UNINSTALL ?>
 
 	Delete "$INSTDIR\Uninstall.exe"
+	Delete "$WINDIR\php.ini"
 	RMDir "$INSTDIR"
 	; Remove from Add/Remove programs list
 	DeleteRegKey /ifempty HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PHP-<?= PHPVERSION ?>"
