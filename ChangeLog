@@ -1,3 +1,7 @@
+1999-10-25  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-24  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/fsock.c: kill warning
