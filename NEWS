@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2003, Version 4.3.2
-- Fixed spurious fsync calls during socket communication. (Sascha)
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
 - Removed support for GDLIB version 1.x.x (php_gd.dll) on Windows. (Edin)
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
@@ -32,6 +31,7 @@ PHP 4                                                                      NEWS
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Added KOI8-R, CP866, and CP1251 support for htmlentities(). (Antony Dovgal, Moriyoshi)
 - Added domdocument->free() to free XML-documents from memory. (Rob Richards)
+- Fixed spurious fsync calls during socket communication. (Sascha)
 - Fixed a possible vhost issue in thttpd. (Sascha, dgl@dgl.cx)
 - Fixed including from HTTP URLs. (Sascha)
 - Fixed a lot of memory leaks in domxml. (Rob Richards, Chregu)
