@@ -152,9 +152,9 @@ ZEND_API int zend_print_variable(zval *var)
 
 
 #if ZEND_DEBUG
-ZEND_API int _zval_copy_ctor_wrapper(zval *zvalue)
+ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
 {
-	return zval_copy_ctor(zvalue);
+	zval_copy_ctor(zvalue);
 }
 
 
