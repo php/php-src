@@ -46,7 +46,7 @@ IFS="$old_IFS"
 
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
 ZENDROOT=:pserver:cvsread@cvs.php.net:/repository
-PHPMOD=php4
+PHPMOD=php-src
 ZENDMOD=Zend
 TSRMMOD=TSRM
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
