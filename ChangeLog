@@ -1,3 +1,90 @@
+2001-09-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * TODO-4.1.txt: revert (I'll fix the subject stuff in a second)
+
+    * TODO-4.1.txt: testing
+
+2001-09-07  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c: API update: use zend_parse_parameters
+
+2001-09-07  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: build fixes
+
+    * ext/yaz/php_yaz.c: fix def.
+
+    * ext/informix/ifx.ec: don't use ifx_free_result here
+
+    * ext/informix/ifx.ec: fix result freeing
+
+
+2001-09-07  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/sysvshm/sysvshm.c: Fix for bug #13190
+
+2001-09-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/mcrypt/mcrypt.c: MFB
+
+    * ext/mcrypt/mcrypt.c: add proto
+
+2001-09-07  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/servlet/servlet.c: fix zts build
+
+2001-09-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h: MFH
+
+    * NEWS: add a news entry
+
+    * ext/mcrypt/mcrypt.c: get rid of global mess
+
+    * ext/mcrypt/mcrypt.c: register a list destructor
+
+2001-09-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH (Fix for bug 13052)
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #13052
+
+2001-09-07  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c: MFH
+
+2001-09-07  Jani Taskinen  <sniper@iki.fi>
+
+    * main/SAPI.c
+      main/SAPI.h: Cleanup.
+
+    * ext/iconv/config.m4
+      ext/oci8/config.m4
+      ext/oracle/config.m4
+      ext/sablot/config.m4
+      ext/snmp/config.m4
+      ext/xml/config.m4
+      ext/domxml/config.m4
+      ext/gd/config.m4
+      ext/gd/gd.c: MFH
+
+    * ext/xmlrpc/config.m4: Almost missed this one..
+
+    * ext/xml/config.m4
+      ext/oracle/config.m4
+      ext/sablot/config.m4
+      ext/snmp/config.m4
+      ext/iconv/config.m4
+      ext/oci8/config.m4
+      ext/gd/config.m4
+      ext/domxml/config.m4:
+    if test -f /usr/local/lib/libexample.s?; then   <-- no workie
+    if test -f /usr/local/lib/libexample.so; then   <-- workie
+
 2001-09-06  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/mysql.php:
