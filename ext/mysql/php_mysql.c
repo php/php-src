@@ -229,7 +229,7 @@ void timeout(int sig);
 static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link;
-	char	query[128];
+	char	query[17];		/* Increase size if query length increases */
 	char	user[128];
 	char 	passwd[128];
 
@@ -239,13 +239,27 @@ static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	link = (php_mysql_conn *) rsrc->ptr;
 
+	/* Find the active result set and free it */
+	if (link->active_result_id) {
+		int type;
+		MYSQL_RES *mysql_result;
+
+		mysql_result = (MYSQL_RES *) zend_list_find(link->active_result_id, &type);
+		if (mysql_result && type==le_result) {
+			zend_list_delete(link->active_result_id);
+			link->active_result_id = 0;
+		}
+	}
+
 	/* rollback possible transactions */
 	strcpy (query, "ROLLBACK");
-	mysql_real_query(&link->conn, query, strlen(query));
+	/* Binary safe query not required here */
+	mysql_query(&link->conn, query);
 
 	/* restore session variable "autocommit" to default (=1) */
 	strcpy (query, "SET AUTOCOMMIT=1");
-	mysql_real_query(&link->conn, query, strlen(query));
+	/* Binary safe query not required here */
+	mysql_query(&link->conn, query);
 
 	/* unset the current selected db */
 #if MYSQL_VERSION_ID > 32329
