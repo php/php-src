@@ -81,7 +81,7 @@ ZEND_DECLARE_MODULE_GLOBALS(iconv)
 ZEND_GET_MODULE(iconv)
 #endif
 
-int php_iconv_string(char *, char **, char *, char *);
+static int php_iconv_string(char *, unsigned int, char **, unsigned int *, char *, char *);
 
 /* {{{ PHP_INI
  */
@@ -123,20 +123,31 @@ PHP_MINFO_FUNCTION(miconv)
 
 /* {{{ php_iconv_string
  */
-int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset)
+static int php_iconv_string(char *in_p, unsigned int in_len,
+							char **out, unsigned int *out_len,
+							char *in_charset, char *out_charset)
 {
-    unsigned int in_size, out_size;
+    unsigned int in_size, out_size, out_left;
     char *out_buffer, *out_p;
     iconv_t cd;
     size_t result;
     typedef unsigned int ucs4_t;
+	
+    in_size  = in_len;
 
-    in_size  = strlen(in_p) * sizeof(char) + 1;
-    out_size = strlen(in_p) * sizeof(ucs4_t) + 1;
-
+    /*
+	  FIXME: This is not the right way to get output size...
+	  This is not space efficient for large text.
+	  This is also problem encoding like UTF-7/UTF-8/ISO-2022 which
+	  a single char can be more than 4 bytes.
+	  I added 15 extra bytes for safety. <yohgaki@php.net>
+	*/
+    out_size = in_len * sizeof(ucs4_t) + 16;
     out_buffer = (char *) emalloc(out_size);
+
 	*out = out_buffer;
     out_p = out_buffer;
+	out_left = out_size;
   
     cd = icv_open(out_charset, in_charset);
   
@@ -147,14 +158,16 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 		return FAILURE;
 	}
 	
-	result = icv(cd, (const char **) &in_p, &in_size, (char **)
-				   &out_p, &out_size);
+	result = icv(cd, (char **) &in_p, &in_size, (char **)
+				   &out_p, &out_left);
 
     if (result == (size_t)(-1)) {
-		 efree(out_buffer);
+		efree(out_buffer);
 		return FAILURE;
     }
 
+	*out_len = out_size - out_left;
+	out[*out_len] = '\0';
     icv_close(cd);
 
     return SUCCESS;
@@ -167,6 +180,7 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 {
 	zval **in_charset, **out_charset, **in_buffer;
 	char *out_buffer;
+	unsigned int out_len;
 	
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &in_charset, &out_charset, &in_buffer) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -176,8 +190,10 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	convert_to_string_ex(out_charset);
 	convert_to_string_ex(in_buffer);
 
-	if (php_iconv_string(Z_STRVAL_PP(in_buffer), &out_buffer, Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset)) == SUCCESS) {
-		RETVAL_STRING(out_buffer, 0);
+	if (php_iconv_string(Z_STRVAL_PP(in_buffer), Z_STRLEN_PP(in_buffer),
+						 &out_buffer,  &out_len,
+						 Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset)) == SUCCESS) {
+		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -190,6 +206,7 @@ PHP_FUNCTION(ob_iconv_handler)
 {
 	char *out_buffer;
 	zval **zv_string, **zv_status;
+	unsigned int out_len;
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_status)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -199,10 +216,11 @@ PHP_FUNCTION(ob_iconv_handler)
 	convert_to_long_ex(zv_status);
 
 	if (SG(sapi_headers).send_default_content_type &&
-		php_iconv_string(Z_STRVAL_PP(zv_string), &out_buffer,
+		php_iconv_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string),
+						 &out_buffer, &out_len,
 						 ICONVG(internal_encoding), 
 						 ICONVG(output_encoding))==SUCCESS) {
-		RETVAL_STRING(out_buffer, 0);
+		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		zval_dtor(return_value);
 		*return_value = **zv_string;
