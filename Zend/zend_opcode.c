@@ -310,17 +310,17 @@ int print_class(zend_class_entry *class_entry)
 	return 0;
 }
 
-ZEND_API void *get_unary_op(int opcode)
+ZEND_API unary_op_type get_unary_op(int opcode)
 {
 	switch(opcode) {
 		case ZEND_BW_NOT:
-			return (void *) bitwise_not_function;
+			return bitwise_not_function;
 			break;
 		case ZEND_BOOL_NOT:
-			return (void *) boolean_not_function;
+			return boolean_not_function;
 			break;
 		default:
-			return (void *) NULL;
+			return (unary_op_type) NULL;
 			break;
 	}
 }

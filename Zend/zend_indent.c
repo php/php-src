@@ -38,7 +38,7 @@ static void handle_whitespace(int *emit_whitespace)
 	for (c=0; c<128; c++) {
 		if (emit_whitespace[c]>0) {
 			for (i=0; i<emit_whitespace[c]; i++) {
-				zend_write(&c, 1);
+				zend_write((char *) &c, 1);
 			}
 		}
 	}

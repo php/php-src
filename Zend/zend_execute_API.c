@@ -306,7 +306,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
-	zend_ptr_stack_push(&EG(argument_stack), (void *) param_count);
+	zend_ptr_stack_push(&EG(argument_stack), (void *) (long) param_count);
 
 	var_uninit(retval);
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
