@@ -1,9 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 200?, Version 4.0.7
-- Add pg_last_notice() function (Rasmus from suggestion by Dirk@rackspace.com)
 
 ?? ??? 200?, Version 4.0.6
+- Improved interactive mode - supports function calls, and works in
+  multithreaded builds (Zeev, Zend Engine)
+- Fixed a crash bug in interactive mode (Zeev, Zend Engine)
+- Add pg_last_notice() function (Rasmus from suggestion by Dirk@rackspace.com)
 - Fixed a bug in preg_split() that would incorrectly limit the number of
   results when used along with PREG_SPLIT_NO_EMPTY flag. (Andrei)
 - Added connection error support to mysql_error() and mysql_errno() (Jason)
