@@ -151,7 +151,7 @@ void init_executor(TSRMLS_D)
 	zend_ptr_stack_init(&EG(user_error_handlers));
 
 	EG(orig_error_reporting) = EG(error_reporting);
-
+	zend_objects_init(&EG(objects), 1024);
 #ifdef ZEND_WIN32
 	EG(timed_out) = 0;
 #endif
@@ -207,6 +207,7 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 
 		EG(error_reporting) = EG(orig_error_reporting);
+		zend_objects_destroy(&EG(objects));
 	} zend_end_try();
 }
 
@@ -268,7 +269,7 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 	if ((*zval_ptr)->refcount==0) {
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr(*zval_ptr);
-	} else if (((*zval_ptr)->refcount == 1) && ((*zval_ptr)->type != IS_OBJECT)) {
+	} else if ((*zval_ptr)->refcount == 1) {
 		(*zval_ptr)->is_ref = 0;
 	}
 }
@@ -411,7 +412,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	if (object_pp) {
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
-			function_table = &(*object_pp)->value.obj.ce->function_table;
+			function_table = &Z_OBJCE_PP(object_pp)->function_table;
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry *ce;
 			char *lc_class;

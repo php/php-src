@@ -704,7 +704,6 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
-
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  TSRMLS_DC)
 {
 	zend_op_array op_array;
@@ -2022,7 +2021,7 @@ void zend_do_indirect_references(znode *result, znode *num_references, znode *va
 }
 
 
-void zend_do_unset(znode *variable TSRMLS_DC)
+void zend_do_unset(znode *variable, int type TSRMLS_DC)
 {
 	zend_op *last_op;
 
@@ -2038,6 +2037,7 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 			break;
 
 	}
+	last_op->extended_value = type;
 }
 
 
