@@ -193,7 +193,6 @@ static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
 {
   II_LINK *link = (II_LINK *)rsrc->ptr;
   IIAPI_AUTOPARM autoParm;
-  TSRMLS_FETCH();
 
   if(link->autocommit) {
 
@@ -239,7 +238,7 @@ static void php_ii_set_default_link(int id)
    if none has been set, tries to open a new one with default
    parameters
 */
-static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
+static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (IIG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -662,7 +661,7 @@ PHP_FUNCTION(ingres_query)
   }
   
   if (argc < 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
   
@@ -734,7 +733,7 @@ PHP_FUNCTION(ingres_num_rows)
   }
   
   if (argc < 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -775,7 +774,7 @@ PHP_FUNCTION(ingres_num_fields)
   }
   
   if (argc < 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -808,7 +807,7 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
   }
 
   if (argc < 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -1189,7 +1188,7 @@ PHP_FUNCTION(ingres_fetch_array)
   }
 
   if (argc != 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   if (argc != 0) {
@@ -1218,7 +1217,7 @@ PHP_FUNCTION(ingres_fetch_row)
   }
 
   if (argc != 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -1242,7 +1241,7 @@ PHP_FUNCTION(ingres_fetch_object)
   }
 
   if (argc != 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
   }
 
   if (argc != 0) {
