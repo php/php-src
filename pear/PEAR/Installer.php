@@ -174,7 +174,7 @@ class PEAR_Installer extends PEAR_Common
         // - upgrade       : upgrade existing install
         //
         if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry;
+            $this->registry = new PEAR_Registry($this->phpdir);
         }
         $oldcwd = getcwd();
         $need_download = false;
@@ -327,7 +327,7 @@ class PEAR_Installer extends PEAR_Common
     function uninstall($package)
     {
         if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry;
+            $this->registry = new PEAR_Registry($this->phpdir);
         }
 
         // Delete the files
