@@ -33,7 +33,7 @@ require_once 'Console/Getopt.php';
 PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
-
+$ui = &PEAR_Command::getFrontendObject();
 $progname = basename(__FILE__);
 
 // XXX change Getopt to use raiseError() ?
@@ -43,7 +43,7 @@ if (PEAR::isError($options)) {
     usage($options);
 }
 
-PEAR::setErrorHandling(PEAR_ERROR_DIE, "$progname: %s\n");
+PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($ui, "displayFatalError"));
 $opts = $options[0];
 
 $pear_user_config = '';
