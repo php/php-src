@@ -56,7 +56,7 @@ RANLIB = @RANLIB@
 YACC = @YACC@
 MAINT = @MAINT@
 APXS = @APXS@
-APXS_LDFLAGS = $(EXTRA_LIBS)
+APXS_LDFLAGS = $(EXTRA_LIBS) $(LIBS)
 WARNING_LEVEL = @WARNING_LEVEL@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
