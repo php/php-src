@@ -1,8 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Fixed bug #17098 (make Apache aware that PHP scripts represent dynamic data
+  and should not be cached). (Ilia)
 - Make uniqid() parameters optional and allow any prefix length. (Marcus)
-- New range() functionality
+- New range() functionality (Ilia)
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
