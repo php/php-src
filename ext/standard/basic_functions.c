@@ -623,7 +623,7 @@ function_entry basic_functions[] = {
 	PHP_FE(set_socket_blocking,												NULL)
 	PHP_FE(socket_set_blocking,												NULL)
 
-	PHP_FE(fgetwrapperdata,													NULL)
+	PHP_FE(file_get_wrapper_data,											NULL)
 	PHP_FE(file_register_wrapper,											NULL)
 
 #if HAVE_SYS_TIME_H
