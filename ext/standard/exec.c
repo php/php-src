@@ -42,7 +42,7 @@
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-int php_Exec(int type, char *cmd, pval *array, pval *return_value)
+int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
@@ -54,7 +54,6 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif
-	TSRMLS_FETCH();
 
 	buf = (char*) emalloc(EXEC_INPUT_BUF);
     if (!buf) {
@@ -248,13 +247,13 @@ PHP_FUNCTION(exec)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
 			break;
 		case 2:
-			ret = php_Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value);
+			ret = php_Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value TSRMLS_CC);
 			break;
 		case 3:
-			ret = php_Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value);
+			ret = php_Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value TSRMLS_CC);
 			Z_TYPE_PP(arg3) = IS_LONG;
 			Z_LVAL_PP(arg3)=ret;
 			break;
@@ -276,10 +275,10 @@ PHP_FUNCTION(system)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
 			break;
 		case 2:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
 			break;
@@ -300,10 +299,10 @@ PHP_FUNCTION(passthru)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
 			break;
 		case 2:
-			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
 			break;
