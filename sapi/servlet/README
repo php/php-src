@@ -12,17 +12,7 @@ What is PHP4 sapi/servlet?
         reports, success stories and/or patches required to get this code
         to run on other engines would be appreciated.
 
-     2) This code clean compiles on Win32 and Linux, and is able to process
-        phpinfo() commands.  Most of the code is in place, but very little
-        testing has been done on even such basic things as cookies and
-        sessions.  Treat this code as early alpha at this point.
-
-     3) Until overload resolution is addressed in php/java, much of the
-        javax.servlet interfaces can not be directly called.  For example,
-        don't try to get the output stream from $response, and expect to
-        be able to use println.  For now, use PHP's "echo" instead.
-
-     4) PHP has a habit of changing the working directory.  Sapi/servlet will
+     2) PHP has a habit of changing the working directory.  Sapi/servlet will
         eventually change it back, but while PHP is running the servlet engine
         may not be able to load any classes from the CLASSPATH which are
         specified using a relative directory syntax, or find the work directory

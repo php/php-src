@@ -1,3 +1,4 @@
+<html>
 <?
 
   $system = new Java("java.lang.System");
@@ -13,3 +14,4 @@
   print $formatter->format(new Java("java.util.Date"))."\n";
 
 ?>
+</html>
