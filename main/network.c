@@ -150,7 +150,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
  * port, returns the created socket on success, else returns -1.
  * timeout gives timeout in seconds, 0 means blocking mode.
  */
-int hostconnect(char *host, int port, int socktype, int timeout)
+int php_hostconnect(char *host, int port, int socktype, int timeout)
 {	
 	int s;
 	struct sockaddr **sal, **psal;
