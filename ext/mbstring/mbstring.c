@@ -721,7 +721,7 @@ static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ static void mbstring_globals_dtor() */
+/* {{{ static void _php_mb_globals_dtor() */
 static void _php_mb_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
 #if HAVE_MBREGEX
