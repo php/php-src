@@ -623,15 +623,16 @@ void do_free(znode *op1 CLS_DC)
 {
 	if (op1->op_type==IS_TMP_VAR) {
 		zend_op *last_opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
 		if ((last_opline->opcode == ZEND_DO_FCALL) || (last_opline->opcode == ZEND_DO_FCALL_BY_NAME)) {
 			last_opline->result.u.EA.type |= EXT_TYPE_UNUSED;
-		}
+		} else {
+			zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-		opline->opcode = ZEND_FREE;
-		opline->op1 = *op1;
-		SET_UNUSED(opline->op2);
+			opline->opcode = ZEND_FREE;
+			opline->op1 = *op1;
+			SET_UNUSED(opline->op2);
+		}
 	} else if (op1->op_type==IS_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
