@@ -2508,7 +2508,7 @@ PHP_FUNCTION(ibase_affected_rows)
 }
 /* }}} */
 
-/* {{{ proto ibase_num_rows( resource result_identifier ) 
+/* {{{ proto int ibase_num_rows( resource result_identifier ) 
  */
 #if abies_0
 PHP_FUNCTION(ibase_num_rows) 
