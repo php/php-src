@@ -38,6 +38,28 @@ class PEAR_Command_Common extends PEAR
      */
     var $ui;
 
+    var $_deps_rel_trans = array(
+                                 'lt' => '<',
+                                 'le' => '<=',
+                                 'eq' => '=',
+                                 'ne' => '!=',
+                                 'gt' => '>',
+                                 'ge' => '>=',
+                                 'has' => '=='
+                                 );
+
+    var $_deps_type_trans = array(
+                                  'pkg' => 'package',
+                                  'extension' => 'extension',
+                                  'php' => 'PHP',
+                                  'prog' => 'external program',
+                                  'ldlib' => 'external library for linking',
+                                  'rtlib' => 'external runtime library',
+                                  'os' => 'operating system',
+                                  'websrv' => 'web server',
+                                  'sapi' => 'SAPI backend'
+                                  );
+
     // }}}
     // {{{ constructor
 
