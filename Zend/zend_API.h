@@ -35,11 +35,13 @@ BEGIN_EXTERN_C()
 #define ZEND_FN(name) zif_##name
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(ZEND_FN(name))
+#define ZEND_METHOD(class, name) ZEND_NAMED_FUNCTION(ZEND_FN(class##_##name))
 
 #define ZEND_NAMED_FE(zend_name, name, arg_types) { #zend_name, name, arg_types },
 #define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(name), arg_types)
 #define ZEND_FALIAS(name, alias, arg_types) ZEND_NAMED_FE(name, ZEND_FN(alias), arg_types)
 #define ZEND_STATIC_FE(name, impl_name, arg_types) { name, impl_name, arg_types },
+#define ZEND_ME(class, name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(class##_##name), arg_types)
 
 /* Name macros */
 #define ZEND_MODULE_STARTUP_N(module)       zm_startup_##module
