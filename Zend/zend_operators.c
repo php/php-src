@@ -33,7 +33,7 @@
 #include "ext/bcmath/number.h"
 #endif
 
-#define LONG_SIGN_MASK (1L << (8*SIZEOF_LONG-1))
+#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
