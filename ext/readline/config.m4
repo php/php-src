@@ -9,9 +9,7 @@ PHP_ARG_WITH(readline,for readline support,
 [  --with-readline[=DIR]   Include readline support.])
 
 if test "$PHP_READLINE" != "no" -o "$PHP_LIBEDIT" != "no"; then
-  if test "$PHP_SAPI" != "cgi"; then
-    AC_MSG_ERROR([readline extension can only be used with CGI build!])
-  fi
+  PHP_CHECK_INTERACTIVE(readline)
 fi
 
 if test "$PHP_READLINE" != "no"; then
@@ -32,8 +30,22 @@ if test "$PHP_READLINE" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)])
   ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
-  PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+  PHP_CHECK_LIBRARY(readline, readline, [
+		PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+  ], [
+    AC_MSG_ERROR(readline library not found)
+  ], [
+    -L$READLINE_DIR/lib 
+  ])
+
+  PHP_CHECK_LIBRARY(history, add_history, [
+	  PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+  ], [
+    AC_MSG_ERROR(history library required by readline not found)
+  ], [
+    -L$READLINE_DIR/lib 
+  ])
+
   PHP_SUBST(READLINE_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
@@ -58,7 +70,14 @@ if test "$PHP_LIBEDIT" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)])
   ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
+  PHP_CHECK_LIBRARY(edit, readline, [
+	  PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
+  ], [
+    AC_MSG_ERROR(edit library required by readline not found)
+  ], [
+    -L$READLINE_DIR/lib 
+  ])
+
   PHP_SUBST(READLINE_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
