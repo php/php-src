@@ -283,6 +283,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("BC Math", "Andi Gutmans");
 		CREDIT_LINE("Win32 COM", "Zeev Suraski");
 		CREDIT_LINE("DAV", "Stig Sather Bakken");
+		CREDIT_LINE("DBA", "Sascha Schumann");
 		CREDIT_LINE("DBM", "Rasmus Lerdorf, Jim Winstead");
 		CREDIT_LINE("dBase", "Jim Winstead");
 		CREDIT_LINE("FDF", "Uwe Steinmann");
