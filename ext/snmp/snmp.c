@@ -174,7 +174,7 @@ static void php_snmp_init_globals(zend_snmp_globals *snmp_globals)
  */
 PHP_MINIT_FUNCTION(snmp)
 {
-	init_snmp("php");
+	init_snmp("snmpapp");
 
 	ZEND_INIT_MODULE_GLOBALS(snmp, php_snmp_init_globals, NULL);
 
