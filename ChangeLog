@@ -1,3 +1,25 @@
+1999-11-03  Andrei Zmievski  <zmievski@ispi.net>
+
+    * TODO: *** empty log message ***
+
+1999-11-03  Frank M. Kromann  <fmk@businessnet.dk>
+
+    * MAINTAINERS
+      NEWS: Added MS SQL server module
+
+1999-11-03  Andi Gutmans  <andi@php.net>
+
+    * NEWS:
+1999-11-03  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/basic_functions.c: Fix compile warning
+
+1999-11-03  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-11-02  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/url_scanner.c
