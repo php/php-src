@@ -629,7 +629,7 @@ PHP_FUNCTION(domxml_getattr)
 }
 /* }}} */
 
-/* {{{ proto string domxml_setattr([int node,] string attrname, string value)
+/* {{{ proto bool domxml_setattr([int node,] string attrname, string value)
    Sets value of given attribute */
 PHP_FUNCTION(domxml_setattr)
 {
@@ -676,7 +676,7 @@ PHP_FUNCTION(domxml_setattr)
 }
 /* }}} */
 
-/* {{{ proto string domxml_attributes([int node])
+/* {{{ proto array domxml_attributes([int node])
    Returns list of attributes of node */
 PHP_FUNCTION(domxml_attributes)
 {
