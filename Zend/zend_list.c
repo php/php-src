@@ -35,6 +35,7 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 {
 	int index;
 	zend_rsrc_list_entry le;
+	ELS_FETCH();
 
 	le.ptr=ptr;
 	le.type=type;
@@ -66,6 +67,7 @@ ZEND_API int zend_list_delete(int id)
 ZEND_API void *zend_list_find(int id, int *type)
 {
 	zend_rsrc_list_entry *le;
+	ELS_FETCH();
 
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 		*type = le->type;
