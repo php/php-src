@@ -87,7 +87,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
-	
+
 	name = Z_STRVAL_P(member);
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
@@ -108,10 +108,10 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		attr = attr->next;
 	}
 
-	node = node->xmlChildrenNode;
 	if (!sxe->node) {
 		sxe->node = node;
 	}
+	node = node->xmlChildrenNode;
 
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
@@ -131,7 +131,6 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		return_value = value;
 	}
 
-			
 	return return_value;
 }
 /* }}} */
@@ -216,13 +215,15 @@ static zval **
 sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 {
 	zval **property_ptr;
-	zval  *property;
-	
+	zval *property;
+
+	property_ptr = emalloc(sizeof(zval **));
+
 	property = sxe_property_read(object, member TSRMLS_CC);
 	zval_add_ref(&property);
 
-	property_ptr = &property;
-
+	memcpy(property_ptr, &property, sizeof(zval *));
+	
 	return property_ptr;
 }
 /* }}} */
