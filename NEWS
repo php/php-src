@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Improve memory cache performance and increase cache size. (Stas, Zend Engine)
 - Add a crc32 checksum function - used by the udm_search search engine
   and currently run through a system call.  This will speed up the udm_search
   php frontend significantly. (Rasmus)
