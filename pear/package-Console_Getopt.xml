@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE package SYSTEM "../package.dtd">
+<!DOCTYPE package SYSTEM "package.dtd">
 <!-- do not use the "Type" attribute here, that one is only for
      generated package.xml files -->
 <package version="1.0">
@@ -23,9 +23,9 @@ short and long options.</description>
     </maintainer>
   </maintainers>
   <release>
-    <version>0.9</version>
+    <version>0.10</version>
     <date>2002-05-12</date>
-    <notes>Initial release</notes>
+    <notes>Packaging fix</notes>
     <state>beta</state>
     <filelist>
      <dir name="Console">
@@ -33,4 +33,12 @@ short and long options.</description>
      </dir>
     </filelist>
   </release>
+  <changelog>
+    <release>
+      <version>0.9</version>
+      <date>2002-05-12</date>
+      <notes>Initial release</notes>
+      <state>beta</state>
+    </release>
+  </changelog>
 </package>
