@@ -1323,6 +1323,27 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 }
 #endif
 
+
+#define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
+#define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
+
+char *mbstr_strrchr(const char *s, char c){
+	unsigned char *p = (unsigned char *)s, *last = NULL;
+	while(*p++) {
+		if (*p == c) {
+			last = p;
+		}
+		if (*p == '\0'){
+			break;
+		}
+		if (MBSTRG(current_language) == mbfl_no_language_japanese 
+			&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))) {
+			p++;
+		}
+	}
+	return last;
+}
+
 /* http input processing */
 void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 {
