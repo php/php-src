@@ -373,7 +373,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
 			memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
-			state->cwd_length += ptr_length;		}
+			state->cwd_length += ptr_length;
+		}
 		ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
