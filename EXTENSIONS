@@ -304,8 +304,13 @@ MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
+EXTENSION:           overload
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 EXTENSION:           pcre
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -406,7 +411,7 @@ STATUS:              Experimental
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
 EXTENSION:           wddx
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
