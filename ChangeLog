@@ -1,3 +1,53 @@
+2001-07-26  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/config.m4: detect oracle9i
+
+2001-07-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/odbc/009.phpt
+      pear/DB/odbc.php:
+    * implemented DB_odbc::numRows (it is still limited by backend capabilities
+      though)
+
+2001-07-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re: Add missing end-of-string check
+
+    * sapi/thttpd/thttpd.c: Remove unneeded variables
+
+2001-07-26  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c
+      ext/com/php_COM.h
+      ext/com/COM.c: again fixed a few memory issues
+
+    * ext/com/COM.c
+      ext/com/conversion.c: fixed a few memory issues
+
+2001-07-26  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/ovrimos/ovrimos.c
+      ext/ovrimos/php_ovrimos.h: Fixes for the module to be reentrant
+
+2001-07-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/RPC.php:
+    * in case of "NULL" values, XML_RPC_encode() returns an empty string (is
+      there anything else that makes more sense?)
+
+2001-07-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Benchmark/Iterate.php: Fix whitespace in previous commit.
+
+2001-07-26  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    return useful error message on connect and non existant database
+
+    * pear/DB.php:
+    DB::assertExtension-> trigger a useful error message if backend extension couldn't be loaded
+
 2001-07-25  Thies C. Arntzen  <thies@thieso.net>
 
     * ext/oci8/oci8.c:
