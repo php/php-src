@@ -1,3 +1,33 @@
+2004-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdf/pdf.c:
+      Remove unused variable.
+
+2004-02-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      - Reordering.
+
+2004-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdf/pdf.c:
+      Memory allocation check.
+
+2004-02-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      - BFN & misc.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h:
+      - Upgrade bundled oniguruma regex library to 2.2.2 (Rui, Moriyoshi)
+        . Supports various encodings such as BIG5, GB2312 and ISO-8859-*
+        . Fixes bug #26677 (mbstring compile errors with IRIX)
+        . Many thanks to K.Kosako.
+      - Remove redundant files that are not relevant to the build.
+
 2004-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * sapi/cgi/cgi_main.c:
