@@ -1,3 +1,12 @@
+2003-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c
+      zend_execute_API.c
+      zend_globals.h
+      tests/bug26697.phpt:
+      Fixed bug #26697 (calling class_exists on a nonexistent class in __autoload
+      results in segfault).
+
 2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug26229.phpt
