@@ -1,3 +1,20 @@
+2000-12-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ltconfig: Enabled improved shared library handling on HP-UX 11.
+
+    * ext/swf/swf.c: MFH fix for #8181
+
+    * ext/swf/swf.c: Fetch SWF globals
+
+    PR: #8181
+
+2000-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    Removed unused variable definitions. And libxml can be build NOT
+    to have support for either XPath or XPtr.
+
 2000-12-08  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gettext/gettext.c: wb clean.
