@@ -37,6 +37,7 @@
 		$this->phpini    = array();
 		$this->users     = array();
 		$this->dependson = array();
+    $this->language  = "c";
 
 		$this->files = array("c"=>array(), "h"=>array());
 		
@@ -108,6 +109,14 @@
 
 
 		// }}} 
+
+  // {{{   dependencies
+
+  function handle_deps($attr) {
+    if (isset($attr["language"])) $this->language = $attr["language"];
+  }
+
+  // }}}
 
 	// {{{   constants
 
@@ -824,7 +833,7 @@ $code .= "
   // {{{ code file
 
 	function write_code_file() {
-			$filename = "{$this->name}.c";
+      $filename = "{$this->name}.{$this->language}";  // todo extension logic
 
 			$this->files["c"][] = $filename; 
 			$fp = fopen("{$this->name}/$filename", "w");
@@ -899,11 +908,23 @@ dnl
 PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
 [  --disable-{$this->name}         Disable {$this->name} functions], yes)
 
+");
+
+    if ($this->language === "cpp") {
+      fputs($fp, "PHP_REQUIRE_CXX\n");
+    }
+
+    fputs($fp, "
 if test \"\$PHP_$upname\" != \"no\"; then
   AC_DEFINE(HAVE_$upname, 1, [ ])
   PHP_NEW_EXTENSION({$this->name}, ".join(" ", $this->files['c'])." , \$ext_shared)
 fi
 ");
+
+    if ($this->language === "cpp") {
+      echo "PHP_ADD_LIBRARY(stdc++)\n";
+    }
+
 		fclose($fp);
 	}
 
