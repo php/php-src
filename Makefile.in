@@ -45,10 +45,10 @@ install-local:
 	-@$(mkinstalldirs) $(bindir)
 	$(INSTALL_IT)
 
-configuration-parser.h configuration-parser.c: configuration-parser.y
+configuration-parser.h configuration-parser.c: $(srcdir)/configuration-parser.y
 	$(YACC) -p cfg -v -d $< -o configuration-parser.c
 
-configuration-scanner.c: configuration-scanner.l
+configuration-scanner.c: $(srcdir)/configuration-scanner.l
 	$(LEX) -Pcfg -o$@ -i $<
 
 internal_functions.c: internal_functions.c.in config.status
