@@ -192,7 +192,18 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
 					case PARSE_POST:
-						zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL);
+						if (zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL)==FAILURE) {
+							zval **p;
+
+							/* This could happen if we're in RFC 1867 file upload */
+							/* The parsing portion of the POST reader should actually move
+							 * to this function  - Zeev
+							 */
+							zval_dtor(array_ptr);
+							FREE_ZVAL(array_ptr);
+							zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &p);
+							array_ptr = *p;
+						}
 						break;
 					case PARSE_GET:
 						zend_hash_add_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), array_ptr, sizeof(pval *),NULL);
