@@ -1,3 +1,14 @@
+2002-10-22  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c: - Nuke unused get_incdec_op()
+    - Nuke old comment
+
+    * zend_compile.h
+      zend_execute.c
+      zend_globals.h: - Improve overall engine performance
+
+    * zend_execute.c: - Fix bug reported by Daniel T. Gorski
+
 2002-10-21  Thies C. Arntzen  <thies@thieso.net>
 
     * zend_builtin_functions.c: MFZE1
