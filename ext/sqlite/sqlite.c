@@ -1637,7 +1637,7 @@ PHP_FUNCTION(sqlite_seek)
 		RETURN_FALSE;
 	}
 	
-	if (row < 1 || row >= res->nrows) {
+	if (row < 0 || row >= res->nrows) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "row %d out of range", row);
 		RETURN_FALSE;
 	}
