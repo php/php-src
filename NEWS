@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Made the output of var_dump() more informative. (Thies)
+- Fixed some OCIBindByName() problems. (Thies)
 - Protect the ISAPI module against exceptions.  Stack overflows in scripts are
   now nicely detected and handled (Zeev)
 - Fixed possible buffer-overflow in base64_decode. (Thies)
