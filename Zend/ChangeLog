@@ -1,3 +1,28 @@
+2003-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Reenable __tostring() magic for print,echo,concatenation,function naming...
+      but not for other internal things.
+
+2003-12-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_execute.c:
+      ws + cs (no c++ comments in c code)
+
+2003-12-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c:
+      Bug #24773 was fixed (Zend/tests/bug24773.phpt)
+      Assign_op operators (+=) were fixed for elements of overloaded objects
+      Memory leaks during accessing ptoperies/elements of overloaded objects
+      were fixed
+
+    * zend_execute_API.c
+      zend_reflection_api.c:
+      Memory corruptions were fixed in zend_str_tolower_copy()
+
 2003-12-14  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c

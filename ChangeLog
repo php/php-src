@@ -1,3 +1,90 @@
+2003-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      Check validity of seeks.
+      WS/CS
+
+2003-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gdft.c:
+      MFH: Fixed bug #26635 (fixed look up for fonts in the current directory
+      w/ZTS)
+
+    * ext/gd/libgd/gdft.c:
+      Fixed bug #26635 (fixed look up for fonts in the current directory w/ZTS)
+
+2003-12-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c:
+      -** empty log message ***
+
+2003-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug26634.phpt
+      ext/standard/tests/file/bug26634.phpt
+      ext/standard/tests/file/test4.csv
+      ext/standard/tests/file/test4.csv:
+      
+      file bug26634.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Fixed bug #26634 & added test case.
+
+2003-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      tests/classes/tostring.phpt:
+      Reenable __tostring() magic for print,echo,concatenation,function naming...
+      but not for other internal things.
+
+2003-12-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_execute.c:
+      ws + cs (no c++ comments in c code)
+
+2003-12-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Bug #24773 was fixed (Zend/tests/bug24773.phpt)
+      Assign_op operators (+=) were fixed for elements of overloaded objects
+      Memory leaks during accessing ptoperies/elements of overloaded objects
+      were fixed
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_reflection_api.c:
+      Memory corruptions were fixed in zend_str_tolower_copy()
+
+2003-12-15  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/url.c:
+      Scan for : in host:port pair from right instead of left.
+      This will allow handling of http://[fe80::1]:443/foo.html
+      IPv6 Numeric addressing with port number to parse correctly.
+
+2003-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * win32/select.c:
+      Removed unused variable.
+
+2003-12-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      TSRM/TSRM.c:
+      MFH: Fix from Michael Sisolak (destructors weren't always properly called)
+
+    * NEWS:
+      lalalaa..
+
 2003-12-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/tests/014.phpt:
