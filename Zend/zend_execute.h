@@ -33,8 +33,13 @@ typedef union _temp_variable {
 	struct {
 		zval tmp_var; /* a dummy */
 
-		zval *str;
-		int offset;
+		union {
+			struct {
+				zval *str;
+				int offset;
+			} str_offset;
+		} data;
+			
 		unsigned char type;
 	} EA;
 } temp_variable;

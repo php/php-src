@@ -103,14 +103,14 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 						break;
 					case IS_STRING_OFFSET: {
 							temp_variable *T = &Ts[node->u.var];
-							zval *str = T->EA.str;
+							zval *str = T->EA.data.str_offset.str;
 
-							if (T->EA.str->type != IS_STRING
-								|| (T->EA.str->value.str.len <= T->EA.offset)) {
+							if (T->EA.data.str_offset.str->type != IS_STRING
+								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
 								T->tmp_var.value.str.val = empty_string;
 								T->tmp_var.value.str.len = 0;
 							} else {
-								char c = str->value.str.val[T->EA.offset];
+								char c = str->value.str.val[T->EA.data.str_offset.offset];
 
 								T->tmp_var.value.str.val = estrndup(&c, 1);
 								T->tmp_var.value.str.len = 1;
@@ -148,7 +148,7 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 				return Ts[node->u.var].var.ptr;
 			} else {
 				if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
-					PZVAL_UNLOCK(Ts[node->u.var].EA.str);
+					PZVAL_UNLOCK(Ts[node->u.var].EA.data.str_offset.str);
 				}
 				*should_free = 1;
 				return NULL;
@@ -169,7 +169,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 		if (Ts[node->u.var].var.ptr_ptr) {
 			PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 		} else if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
-			PZVAL_UNLOCK(Ts[node->u.var].EA.str);
+			PZVAL_UNLOCK(Ts[node->u.var].EA.data.str_offset.str);
 		}
 		return Ts[node->u.var].var.ptr_ptr;
 	} else {
@@ -270,8 +270,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			case IS_STRING_OFFSET: {
 					temp_variable *T = &Ts[op1->u.var];
 
-					if (T->EA.str->type == IS_STRING
-						&& (T->EA.offset < T->EA.str->value.str.len)) {
+					if (T->EA.data.str_offset.str->type == IS_STRING
+						&& (T->EA.data.str_offset.offset < T->EA.data.str_offset.str->value.str.len)) {
 						zval tmp;
 						zval *final_value = value;
 
@@ -284,7 +284,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 							final_value = &tmp;
 						}
 
-						T->EA.str->value.str.val[T->EA.offset] = final_value->value.str.val[0];
+						T->EA.data.str_offset.str->value.str.val[T->EA.data.str_offset.offset] = final_value->value.str.val[0];
 						if (op2
 							&& op2->op_type == IS_VAR
 							&& value==&Ts[op2->u.var].tmp_var) {
@@ -295,10 +295,10 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						}
 						/*
 						 * the value of an assignment to a string offset is undefined
-						Ts[result->u.var].var = &T->EA.str;
+						Ts[result->u.var].var = &T->EA.data.str_offset.str;
 						*/
 					}
-					/* zval_ptr_dtor(&T->EA.str); Nuke this line if it doesn't cause a leak */
+					/* zval_ptr_dtor(&T->EA.data.str_offset.str); Nuke this line if it doesn't cause a leak */
 					T->tmp_var.type = IS_STRING;
 				}
 				break;
@@ -733,9 +733,9 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				container = *container_ptr;
-				Ts[result->u.var].EA.str = container;
+				Ts[result->u.var].EA.data.str_offset.str = container;
 				PZVAL_LOCK(container);
-				Ts[result->u.var].EA.offset = offset->value.lval;
+				Ts[result->u.var].EA.data.str_offset.offset = offset->value.lval;
 				Ts[result->u.var].EA.type = IS_STRING_OFFSET;
 				FREE_OP(op2, free_op2);
 				*retval = NULL;
@@ -788,7 +788,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		zend_overloaded_element overloaded_element;
 
 		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
-			zval_ptr_dtor(&Ts[op1->u.var].EA.str);
+			zval_ptr_dtor(&Ts[op1->u.var].EA.data.str_offset.str);
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_IS:
@@ -1887,7 +1887,7 @@ send_by_ref:
 						} else {
 							switch_expr_is_overloaded = 1;
 							if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
-								Ts[opline->op1.u.var].EA.str->refcount++;
+								Ts[opline->op1.u.var].EA.data.str_offset.str->refcount++;
 							}
 						}
 					}
@@ -2258,8 +2258,8 @@ send_by_ref:
 
 					if (!var) {
 						if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
-							if (Ts[opline->op1.u.var].EA.offset>=0
-								&& Ts[opline->op1.u.var].EA.offset<Ts[opline->op1.u.var].EA.str->value.str.len) {
+							if (Ts[opline->op1.u.var].EA.data.str_offset.offset>=0
+								&& Ts[opline->op1.u.var].EA.data.str_offset.offset<Ts[opline->op1.u.var].EA.data.str_offset.str->value.str.len) {
 								isset = 1;
 							} else {
 								isset = 0;
@@ -2281,7 +2281,7 @@ send_by_ref:
 						case ZEND_ISEMPTY:
 							if (!var) {
 								if (!isset
-									|| Ts[opline->op1.u.var].EA.str->value.str.val[Ts[opline->op1.u.var].EA.offset]=='0') {
+									|| Ts[opline->op1.u.var].EA.data.str_offset.str->value.str.val[Ts[opline->op1.u.var].EA.data.str_offset.offset]=='0') {
 									Ts[opline->result.u.var].tmp_var.value.lval = 1;
 								} else {
 									Ts[opline->result.u.var].tmp_var.value.lval = 0;
