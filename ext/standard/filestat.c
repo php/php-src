@@ -650,7 +650,7 @@ FileFunction(PHP_FN(filesize), 2)
 FileFunction(PHP_FN(fileowner),3)
 /* }}} */
 
-/* {{{ proto nt filegroup(string filename)
+/* {{{ proto int filegroup(string filename)
    Get file group */
 FileFunction(PHP_FN(filegroup),4)
 /* }}} */
