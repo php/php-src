@@ -133,11 +133,11 @@ Notice: main(): ArrayIterator::next(): Array was modified outside object and int
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: main(): ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
+Notice: main(): ArrayIterator::current(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
 Notice: main(): ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
-Notice: main(): ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
+Notice: main(): ArrayIterator::current(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
 Notice: main(): ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 Done
