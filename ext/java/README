@@ -95,7 +95,7 @@ php.ini:
    java.library.path=/usr/lib/kaffe:/home/rubys/php4/modules
    java.class.path=/usr/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
-   extension=libphp_java.so
+   extension=java.so
 
 ========================================================================
 ===     JVM=Kaffe 1.0.5 (built from source), OS=Redhat Linux 6.1     ===
@@ -111,7 +111,7 @@ php.ini:
    java.library.path=/usr/local/lib/kaffe:/home/rubys/php4/modules
    java.class.path=/usr/local/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
-   extension=libphp_java.so
+   extension=java.so
 
 ========================================================================
 ===                JVM=IBM 1.1.8, OS=Redhat Linux 6.1                ===
@@ -126,7 +126,7 @@ php.ini:
    [java]
    java.class.path=/home/jdk118/lib/classes.zip:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
-   extension=libphp_java.so
+   extension=java.so
 
 ========================================================================
 ===           JVM=Blackdown 1.2.2 RC4, OS=Redhat Linux 6.1           ===
@@ -141,7 +141,7 @@ php.ini:
    [java]
    java.class.path=/home/rubys/php4/lib/php_java.jar
    extension_dir=/home/rubys/php4/modules
-   extension=libphp_java.so
+   extension=java.so
 
 ========================================================================
 ===                    JVM=Sun JDK 1.2.2, OS=Linux                   ===
@@ -157,7 +157,7 @@ php.ini:
    java.class.path=/home/rubys/php4/lib/php_java.jar
    java.library.path=/home/rubys/php4/modules
    extension_dir=/home/rubys/php4/modules
-   extension=libphp_java.so
+   extension=java.so
 
 ========================================================================
 ===                JVM=Sun JDK 1.1.8, OS=Windows NT 4                ===
