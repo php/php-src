@@ -16,8 +16,7 @@ dnl
 dnl PHP_BUILD_THREAD_SAFE
 dnl
 AC_DEFUN(PHP_BUILD_THREAD_SAFE,[
-  enable_thread_safety=yes
-  passthru="$passthru --enable-thread-safety"
+  PHP_THREAD_SAFETY=yes
 ])
 
 dnl
