@@ -186,10 +186,6 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
 {
 	switch (fh->type) {
-		case ZEND_HANDLE_FILENAME:
-			fclose(fh->handle.fp);
-			break;
-
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
@@ -525,6 +521,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
+	file_handle.opened_path = NULL;
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (open_file_for_scanning(&file_handle CLS_CC)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
