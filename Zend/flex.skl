@@ -229,8 +229,6 @@ static char yy_hold_char;
 
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 
-int yyleng;
-
 /* Points to current character in buffer. */
 #define yy_c_buf_p SCNG(c_buf_p)
 #define yy_init SCNG(init)
@@ -292,14 +290,12 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define YY_AT_BOL() (yy_current_buffer->yy_at_bol)
 
 %% yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here
-#ifdef ZTS
 #undef yyleng
 #define yyleng SCNG(yy_leng)
 #undef yytext
 #define yytext SCNG(yy_text)
 #undef yytext_ptr
 #define yytext_ptr SCNG(yy_text)
-#endif
 
 
 %- Standard (non-C++) definition

@@ -25,14 +25,6 @@
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
 
-#ifndef ZTS
-extern char *zendtext;
-extern int zendleng;
-#else
-#define zendtext LANG_SCNG(yy_text)
-#define zendleng LANG_SCNG(yy_leng)
-#endif
-
 ZEND_API void zend_html_putc(char c)
 {
 	switch (c) {
@@ -116,7 +108,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				in_string = !in_string;
 				break;				
 			case T_WHITESPACE:
-				zend_html_puts(zendtext, zendleng);  /* no color needed */
+				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));  /* no color needed */
 				token.type = 0;
 				continue;
 				break;
@@ -147,7 +139,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				zend_html_puts(token.value.str.val, token.value.str.len);
 				break;
 			default:
-				zend_html_puts(zendtext, zendleng);
+				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 		}
 
