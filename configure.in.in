@@ -352,6 +352,7 @@ divert(2)
 
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
+AC_SUBST(abs_srcdir)
 AC_SUBST(abs_builddir)
 
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
@@ -365,7 +366,11 @@ AC_ARG_WITH(apxs,
     fi
     AC_EXPAND_PATH($withval, APXS)
     APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
-    APACHE_INCLUDE="-I`$APXS -q INCLUDEDIR`"
+    APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
+	if test -d "$APXS_INCLUDEDIR/xml" ; then
+	  XML_INCLUDE="$APXS_INCLUDEDIR/xml"
+	fi
+	APACHE_INCLUDE="-I$APXS_INCLUDEDIR"
     BINNAME=libphp4.so
     INSTALL_IT="\$(APXS) -i -a -n php4 $BINNAME"
     CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
@@ -472,6 +477,9 @@ AC_ARG_WITH(apache,
 	  elif test -f $withval/src/include/httpd.h; then
 	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
 	    APACHE_TARGET=$withval/src/modules/php4
+	    if test -d $withval/src/lib/expat-lite ; then
+		  XML_INCLUDE=$withval/src/lib/expat-lite
+		fi
 		if test ! -d $APACHE_TARGET; then
 			mkdir $APACHE_TARGET
 		fi
