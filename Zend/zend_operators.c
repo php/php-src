@@ -328,12 +328,9 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 					if (ht) {
 						retval = (zend_hash_num_elements(ht)?1:0);
 					}
-				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to integer", Z_OBJCE_P(op)->name);
+					zval_dtor(op);
+					ZVAL_LONG(op, retval);
 				}
-				
-				zval_dtor(op);
-				ZVAL_LONG(op, retval);
 				break;
 			}
 		default:
