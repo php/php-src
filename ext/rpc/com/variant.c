@@ -33,6 +33,8 @@
 #include "conversion.h"
 #include "variant.h"
 
+#include "../php_rpc.h"
+
 #include <unknwn.h> 
 
 static zend_object_value variant_objects_new(zend_class_entry * TSRMLS_DC);
