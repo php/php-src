@@ -51,12 +51,14 @@ int init_resource_plist(ELS_D);
 void destroy_resource_list(void);
 void destroy_resource_plist(void);
 
-int zend_list_insert(void *ptr, int type);
-int zend_plist_insert(void *ptr, int type);
-int zend_list_addref(int id);
-int zend_list_delete(int id);
-int zend_plist_delete(int id);
-void *zend_list_find(int id, int *type);
-void *zend_plist_find(int id, int *type);
+ZEND_API int zend_list_insert(void *ptr, int type);
+ZEND_API int zend_plist_insert(void *ptr, int type);
+ZEND_API int zend_list_addref(int id);
+ZEND_API int zend_list_delete(int id);
+ZEND_API int zend_plist_delete(int id);
+ZEND_API void *zend_list_find(int id, int *type);
+ZEND_API void *zend_plist_find(int id, int *type);
+
+extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
 #endif

@@ -380,7 +380,7 @@ static void convert_scalar_to_array(zval *op, int type)
 			op->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
 			zend_hash_init(op->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
 			zend_hash_update(op->value.obj.properties, "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
-			op->value.obj.ce = &standard_class;
+			op->value.obj.ce = &zend_standard_class_def;
 			op->type = IS_OBJECT;
 			break;
 	}
@@ -411,7 +411,7 @@ ZEND_API void convert_to_object(zval *op)
 		case IS_ARRAY:
 			op->type = IS_OBJECT;
 			op->value.obj.properties = op->value.ht;
-			op->value.obj.ce = &standard_class;
+			op->value.obj.ce = &zend_standard_class_def;
 			return;
 			break;
 		case IS_OBJECT:

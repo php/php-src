@@ -220,7 +220,7 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 
 ZEND_API inline int object_init(zval *arg)
 {
-	return object_init_ex(arg, &standard_class);
+	return object_init_ex(arg, &zend_standard_class_def);
 }
 
 
