@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - ATTENTION!! "make install" will *always* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you did enable the CGI binary to be build, it is
   installed as {PREFIX}/bin/php-cgi.
+- Added pg_fetch_assoc() returns associative array from result resource.
+  (Yasu)
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
