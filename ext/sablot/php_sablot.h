@@ -48,7 +48,6 @@ PHP_FUNCTION(xslt_free);
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
 
-#ifdef SABLOT_ERRORS
 struct _php_sablot_error {
 	char *key;
 	char *value;
@@ -56,14 +55,11 @@ struct _php_sablot_error {
 };
 
 typedef struct _php_sablot_error php_sablot_error;
-#endif
 
 typedef struct {
 	long index;
 	int last_errno;
-#ifdef SABLOT_ERRORS
 	php_sablot_error *errors, errors_start;
-#endif
 	zval *startDocHandler;
 	zval *startElementHandler;
 	zval *endElementHandler;
