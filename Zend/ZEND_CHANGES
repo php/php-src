@@ -11,7 +11,7 @@ Changes in the Zend Engine 2.0
       is, that semantically the whole object was copied when a
       variable was assigned or parameters were passed to a method. The
       new approach refers to objects by handle and not by value (one
-      can think of a handle as an objects' ID).
+      can think of a handle as an object's ID).
 
       Many PHP programmers aren't even aware of the copying quirks of
       the old object model and, therefore, there is a relatively good
