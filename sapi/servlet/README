@@ -111,9 +111,10 @@ Java Servlet SAPI Module for PHP 4
 
     1.) Build the Java Servlet SAPI Module as described above.
 
-    2.) Copy phpsrvlet.jar into your Cocoon/lib directory and rebuild
-        Cocoon. You need the Cocoon source tree in order to do this, a
-        binary distribution does not suffice.
+    2.) Get the Cocoon2 source tree, either by CVS or from a
+        release archive; a binary distribution does not suffice.
+        Copy the phpsrvlet.jar file into your xml-cocoon2/lib
+        directory and build Cocoon.
 
 -- 
  [1] http://jakarta.apache.org/tomcat/
