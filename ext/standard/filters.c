@@ -1445,7 +1445,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 	char *pd;
 	size_t ocnt;
 
-	if (buckets_in->head == NULL && buckets_in->tail == NULL) {
+	if (flags != PSFS_FLAG_NORMAL) {
 		/* flush operation */
 
 		out_buf_size = 64;
