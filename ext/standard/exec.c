@@ -145,7 +145,9 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 
 		
 			if (type == 1) {
+#if APACHE
 				SLS_FETCH();
+#endif
 				
 				if (output) PUTS(buf);
 #if APACHE

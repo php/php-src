@@ -26,8 +26,6 @@ PHPAPI php3_request_info request_info;
 #if CGI_BINARY
 int php3_init_request_info(void *conf)
 {
-	SLS_FETCH();
-
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 	request_info.script_name = getenv("SCRIPT_NAME");
@@ -56,8 +54,10 @@ int php3_init_request_info(void *conf)
 	   php3_destroy_request_info()! */
 #if DISCARD_PATH
 	if (request_info.script_filename) {
+		SLS_FETCH();
 		SG(request_info).path_translated = estrdup(request_info.script_filename);
 	} else {
+		SLS_FETCH();
 		SG(request_info).path_translated = NULL;
 	}
 #endif
