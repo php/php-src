@@ -1770,7 +1770,7 @@ PHP_FUNCTION(imagecolorsforindex)
 }
 /* }}} */
 
-/* {{{ proto int imagegammacorrect(int im, double inputgamma, double outputgamma)
+/* {{{ proto int imagegammacorrect(int im, float inputgamma, float outputgamma)
    Apply a gamma correction to a GD image */
 PHP_FUNCTION(imagegammacorrect)
 {
@@ -2970,7 +2970,7 @@ PHP_FUNCTION(imagepsencodefont)
 }
 /* }}} */
 
-/* {{{ proto bool imagepsextendfont(int font_index, double extend)
+/* {{{ proto bool imagepsextendfont(int font_index, float extend)
    Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
@@ -2996,7 +2996,7 @@ PHP_FUNCTION(imagepsextendfont)
 }
 /* }}} */
 
-/* {{{ proto bool imagepsslantfont(int font_index, double slant)
+/* {{{ proto bool imagepsslantfont(int font_index, float slant)
    Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
@@ -3021,7 +3021,7 @@ PHP_FUNCTION(imagepsslantfont)
 }
 /* }}} */
 
-/* {{{ proto array imagepstext(int image, string text, int font, int size, int xcoord, int ycoord [, int space, int tightness, double angle, int antialias])
+/* {{{ proto array imagepstext(int image, string text, int font, int size, int xcoord, int ycoord [, int space, int tightness, float angle, int antialias])
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {

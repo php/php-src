@@ -61,7 +61,7 @@ PHP_FUNCTION(abs)
 }
 
 /* }}} */ 
-/* {{{ proto double ceil(double number)
+/* {{{ proto float ceil(float number)
    Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil) 
 {
@@ -83,7 +83,7 @@ PHP_FUNCTION(ceil)
 }
 
 /* }}} */
-/* {{{ proto double floor(double number)
+/* {{{ proto float floor(float number)
    Returns the next lowest integer value from the number */
 
 PHP_FUNCTION(floor)
@@ -108,7 +108,7 @@ PHP_FUNCTION(floor)
 /* }}} */
 
 
-/* {{{ proto double round(double number [, int precision])
+/* {{{ proto float round(float number [, int precision])
    Returns the number rounded to specified precision. */
 PHP_FUNCTION(round)
 {
@@ -158,7 +158,7 @@ PHP_FUNCTION(round)
 	}
 }
 /* }}} */
-/* {{{ proto double sin(double number)
+/* {{{ proto float sin(float number)
    Returns the sine of the number in radians */
 
 PHP_FUNCTION(sin)
@@ -174,7 +174,7 @@ PHP_FUNCTION(sin)
 }
 
 /* }}} */
-/* {{{ proto double cos(double number)
+/* {{{ proto float cos(float number)
    Returns the cosine of the number in radians */
 
 PHP_FUNCTION(cos)
@@ -189,7 +189,7 @@ PHP_FUNCTION(cos)
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 /* }}} */
-/* {{{ proto double tan(double number)
+/* {{{ proto float tan(float number)
    Returns the tangent of the number in radians */
 PHP_FUNCTION(tan)
 {
@@ -204,7 +204,7 @@ PHP_FUNCTION(tan)
 }
 
 /* }}} */
-/* {{{ proto double asin(double number)
+/* {{{ proto float asin(float number)
    Returns the arc sine of the number in radians */
 
 PHP_FUNCTION(asin)
@@ -220,7 +220,7 @@ PHP_FUNCTION(asin)
 }
 
 /* }}} */
-/* {{{ proto double acos(double number)
+/* {{{ proto float acos(float number)
    Return the arc cosine of the number in radians */
 
 PHP_FUNCTION(acos)
@@ -236,7 +236,7 @@ PHP_FUNCTION(acos)
 }
 
 /* }}} */
-/* {{{ proto double atan(double number)
+/* {{{ proto float atan(float number)
    Returns the arc tangent of the number in radians */
 
 PHP_FUNCTION(atan)
@@ -252,7 +252,7 @@ PHP_FUNCTION(atan)
 }
 
 /* }}} */
-/* {{{ proto double atan2(double y, double x)
+/* {{{ proto float atan2(float y, float x)
    Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
 
 PHP_FUNCTION(atan2)
@@ -269,7 +269,7 @@ PHP_FUNCTION(atan2)
 }
 
 /* }}} */
-/* {{{ proto double sinh(double number)
+/* {{{ proto float sinh(float number)
    Returns the hyperbolic sine of the number,
    defined as (exp(number) - exp(-number))/2 */
 
@@ -286,7 +286,7 @@ PHP_FUNCTION(sinh)
 }
 
 /* }}} */
-/* {{{ proto double cosh(double number)
+/* {{{ proto float cosh(float number)
    Returns the hyperbolic cosine of the number,
    defined as (exp(number) + exp(-number))/2 */
 
@@ -302,7 +302,7 @@ PHP_FUNCTION(cosh)
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 /* }}} */
-/* {{{ proto double tanh(double number)
+/* {{{ proto float tanh(float number)
    Returns the hyperbolic tangent of the number,
    defined as sinh(number)/cosh(number) */
 PHP_FUNCTION(tanh)
@@ -320,7 +320,7 @@ PHP_FUNCTION(tanh)
 /* }}} */
 
 #ifndef PHP_WIN32
-/* {{{ proto double asinh(double number)
+/* {{{ proto float asinh(float number)
    Returns the inverse hyperbolic sine of the number,
    i.e. the value whose hyperbolic sine is number */
 
@@ -337,7 +337,7 @@ PHP_FUNCTION(asinh)
 }
 
 /* }}} */
-/* {{{ proto double acosh(double number)
+/* {{{ proto float acosh(float number)
    Returns the inverse hyperbolic cosine of the number,
    i.e. the value whose hyperbolic cosine is number */
 
@@ -354,7 +354,7 @@ PHP_FUNCTION(acosh)
 }
 
 /* }}} */
-/* {{{ proto double atanh(double number)
+/* {{{ proto float atanh(float number)
    Returns the inverse hyperbolic tangent of the number,
    i.e. the value whose hyperbolic tangent is number */
 
@@ -373,7 +373,7 @@ PHP_FUNCTION(atanh)
 /* }}} */
 #endif
 
-/* {{{ proto double pi(void)
+/* {{{ proto float pi(void)
    Returns an approximation of pi */
 
 PHP_FUNCTION(pi)
@@ -495,7 +495,7 @@ PHP_FUNCTION(pow)
 }
 
 /* }}} */
-/* {{{ proto double exp(double number)
+/* {{{ proto float exp(float number)
    Returns e raised to the power of the number */
 
 PHP_FUNCTION(exp)
@@ -514,7 +514,7 @@ PHP_FUNCTION(exp)
 
 
 #ifndef PHP_WIN32
-/* {{{ proto double expm1(double number)
+/* {{{ proto float expm1(float number)
    Returns exp(number) - 1, computed in a way that accurate even when 
    the value of number is close to zero 
    WARNING: this function is expermental: it could change its name or 
@@ -534,7 +534,7 @@ PHP_FUNCTION(expm1)
 }
 
 /* }}} */
-/* {{{ proto double log1p(double number)
+/* {{{ proto float log1p(float number)
    Returns log(1 + number), computed in a way that accurate even when 
    the value of number is close to zero 
    WARNING: this function is expermental: it could change its name or 
@@ -556,7 +556,7 @@ PHP_FUNCTION(log1p)
 /* }}} */
 
 #endif
-/* {{{ proto double log(double number)
+/* {{{ proto float log(float number)
    Returns the natural logarithm of the number */
 
 PHP_FUNCTION(log)
@@ -572,7 +572,7 @@ PHP_FUNCTION(log)
 }
 
 /* }}} */
-/* {{{ proto double log10(double number)
+/* {{{ proto float log10(float number)
    Returns the base-10 logarithm of the number */
 
 PHP_FUNCTION(log10)
@@ -588,7 +588,7 @@ PHP_FUNCTION(log10)
 }
 
 /* }}} */
-/* {{{ proto double sqrt(double number)
+/* {{{ proto float sqrt(float number)
    Returns the square root of the number */
 
 PHP_FUNCTION(sqrt)
@@ -606,7 +606,7 @@ PHP_FUNCTION(sqrt)
 /* }}} */
 
 
-/* {{{ proto double hypot(double num1, double num2)
+/* {{{ proto float hypot(float num1, float num2)
    Returns sqrt( num1*num1 + num2*num2) 
    WARNING: this function is expermental: it could change its name or 
    disappear in the next version of PHP!
@@ -627,7 +627,7 @@ PHP_FUNCTION(hypot)
 
 /* }}} */
 
-/* {{{ proto double deg2rad(double number)
+/* {{{ proto float deg2rad(float number)
    Converts the number in degrees to the radian equivalent */
 
 PHP_FUNCTION(deg2rad)
@@ -642,7 +642,7 @@ PHP_FUNCTION(deg2rad)
 }
 
 /* }}} */
-/* {{{ proto double rad2deg(double number)
+/* {{{ proto float rad2deg(float number)
    Converts the radian number to the equivalent number in degrees */
 
 PHP_FUNCTION(rad2deg)
@@ -1034,7 +1034,7 @@ char *_php_math_number_format(double d, int dec, char dec_point, char thousand_s
 }
 
 /* }}} */
-/* {{{ proto string number_format(double number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]])
+/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]])
    Formats a number with grouped thousands */
 
 PHP_FUNCTION(number_format)

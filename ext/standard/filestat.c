@@ -125,7 +125,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat) {
 	return SUCCESS;
 }
 
-/* {{{ proto double disk_total_space(string path)
+/* {{{ proto float disk_total_space(string path)
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
@@ -228,7 +228,7 @@ PHP_FUNCTION(disk_total_space)
 }
 /* }}} */
 
-/* {{{ proto double disk_free_space(string path)
+/* {{{ proto float disk_free_space(string path)
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {

@@ -108,7 +108,7 @@ PHP_RINIT_FUNCTION(lcg)
 	return SUCCESS;
 }
 
-/* {{{ proto double lcg_value()
+/* {{{ proto float lcg_value()
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {

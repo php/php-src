@@ -2108,7 +2108,7 @@ static int php_similar_char(const char *txt1, int len1,
 }
 /* }}} */
 
-/* {{{ proto int similar_text(string str1, string str2 [, double percent])
+/* {{{ proto int similar_text(string str1, string str2 [, float percent])
    Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
 {

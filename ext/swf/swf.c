@@ -173,7 +173,7 @@ PHP_RINIT_FUNCTION(swf)
 }
 /* }}} */
          
-/* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
+/* {{{ proto void swf_openfile(string name, float xsize, float ysize, float framerate, float r, float g, float b)
    Create a Shockwave Flash file given by name, with width xsize and height ysize at a frame rate of framerate and a background color specified by a red value of r, green value of g and a blue value of b */
 PHP_FUNCTION(swf_openfile)
 {
@@ -329,7 +329,7 @@ void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 }
 /* }}} */
 
-/* {{{ proto void swf_mulcolor(double r, double g, double b, double a)
+/* {{{ proto void swf_mulcolor(float r, float g, float b, float a)
    Sets the global multiply color to the rgba value specified */
 PHP_FUNCTION(swf_mulcolor)
 {
@@ -337,7 +337,7 @@ PHP_FUNCTION(swf_mulcolor)
 }
 /* }}} */ 
          
-/* {{{ proto void swf_addcolor(double r, double g, double b, double a)
+/* {{{ proto void swf_addcolor(float r, float g, float b, float a)
    Set the global add color to the rgba value specified */
 PHP_FUNCTION(swf_addcolor)
 {
@@ -559,7 +559,7 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 }
 /* }}} */
 
-/* {{{ proto void swf_defineline(int objid, double x1, double y1, double x2, double y2, double width)
+/* {{{ proto void swf_defineline(int objid, float x1, float y1, float x2, float y2, float width)
    Create a line with object id, objid, starting from x1, y1 and going to x2, y2 with width, width */
 PHP_FUNCTION(swf_defineline)
 {
@@ -567,7 +567,7 @@ PHP_FUNCTION(swf_defineline)
 }
 /* }}} */
 
-/* {{{ proto void swf_definerect(int objid, double x1, double y1, double x2, double y2, double width)
+/* {{{ proto void swf_definerect(int objid, float x1, float y1, float x2, float y2, float width)
    Create a rectangle with object id, objid, the upper lefthand coordinate is given by x1, y1 the bottom right coordinate is x2, y2 and with is the width of the line */
 PHP_FUNCTION(swf_definerect)
 {
@@ -575,7 +575,7 @@ PHP_FUNCTION(swf_definerect)
 }
 /* }}} */
 
-/* {{{ proto void swf_definepoly(int obj_id, array coords, int npoints, double width)
+/* {{{ proto void swf_definepoly(int obj_id, array coords, int npoints, float width)
    Define a Polygon from an array of x,y coordinates, coords. */
 PHP_FUNCTION(swf_definepoly)
 {
@@ -630,7 +630,7 @@ PHP_FUNCTION(swf_startshape)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapelinesolid(double r, double g, double b, double a, double width)
+/* {{{ proto void swf_shapelinesolid(float r, float g, float b, float a, float width)
    Create a line with color defined by rgba, and a width of width */
 PHP_FUNCTION(swf_shapelinesolid)
 {
@@ -657,7 +657,7 @@ PHP_FUNCTION(swf_shapefilloff)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapefillsolid(double r, double g, double b, double a)
+/* {{{ proto void swf_shapefillsolid(float r, float g, float b, float a)
    Sets the current fill style to a solid fill with the specified rgba color */
 PHP_FUNCTION(swf_shapefillsolid)
 {
@@ -731,7 +731,7 @@ void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapemoveto(double x, double y)
+/* {{{ proto void swf_shapemoveto(float x, float y)
    swf_shapemoveto moves the current position to the given x,y. */
 PHP_FUNCTION(swf_shapemoveto)
 {
@@ -739,7 +739,7 @@ PHP_FUNCTION(swf_shapemoveto)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapelineto(double x, double y)
+/* {{{ proto void swf_shapelineto(float x, float y)
    Draws a line from the current position to x,y, the current position is then set to x,y */
 PHP_FUNCTION(swf_shapelineto)
 {
@@ -747,7 +747,7 @@ PHP_FUNCTION(swf_shapelineto)
 }
 /* }}} */
  
-/* {{{ proto void swf_shapecurveto(double x1, double y1, double x2, double y2)
+/* {{{ proto void swf_shapecurveto(float x1, float y1, float x2, float y2)
    Draws a quadratic bezier curve starting at the current position using x1, y1 as an off curve control point and using x2, y2 as the end point. The current position is then set to x2, y2. */
 PHP_FUNCTION(swf_shapecurveto)
 {
@@ -765,7 +765,7 @@ PHP_FUNCTION(swf_shapecurveto)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapecurveto3(double x1, double y1, double x2, double y2, double x3, double y3)
+/* {{{ proto void swf_shapecurveto3(float x1, float y1, float x2, float y2, float x3, float y3)
    Draws a cubic bezier curve starting at the current position using x1, y1 and x2, y2 as off curve control points and using x3,y3 as the end point.  The current position is then sent to x3, y3 */
 PHP_FUNCTION(swf_shapecurveto3)
 {
@@ -786,7 +786,7 @@ PHP_FUNCTION(swf_shapecurveto3)
 }
 /* }}} */
 
-/* {{{ proto void swf_shapearc(double x, double y, double r, double ang1, double ang2)
+/* {{{ proto void swf_shapearc(float x, float y, float r, float ang1, float ang2)
    Draws a circular arc from ang1 to ang2. The center of the circle is given by x, and y. r specifies the radius of the arc */
 PHP_FUNCTION(swf_shapearc)
 {
@@ -844,7 +844,7 @@ PHP_FUNCTION(swf_setfont)
 }
 /* }}} */
 
-/* {{{ proto void swf_fontsize(double height)
+/* {{{ proto void swf_fontsize(float height)
    Sets the current font's height to the value specified by height */
 PHP_FUNCTION(swf_fontsize)
 {
@@ -859,7 +859,7 @@ PHP_FUNCTION(swf_fontsize)
 }
 /* }}} */
 
-/* {{{ proto void swf_fontslant(double slant)
+/* {{{ proto void swf_fontslant(float slant)
    Set the current font slant to the angle indicated by slant */
 PHP_FUNCTION(swf_fontslant)
 {
@@ -1084,7 +1084,7 @@ void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 } 
 /* }}} */
 
-/* {{{ proto void swf_viewport(double xmin, double xmax, double ymin, double ymax)
+/* {{{ proto void swf_viewport(float xmin, float xmax, float ymin, float ymax)
    Selects an area on the drawing surface for future drawing */
 PHP_FUNCTION(swf_viewport)
 {
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(swf_viewport)
 }
 /* }}} */
 
-/* {{{ proto void swf_ortho2(double xmin, double xmax, double ymin, double ymax)
+/* {{{ proto void swf_ortho2(float xmin, float xmax, float ymin, float ymax)
    Defines a 2-D orthographic mapping of user coordinates onto the current viewport */ 
 PHP_FUNCTION(swf_ortho2)
 {
@@ -1100,7 +1100,7 @@ PHP_FUNCTION(swf_ortho2)
 }
 /* }}} */
 
-/* {{{ proto void swf_ortho(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax)
+/* {{{ proto void swf_ortho(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
    Defines an orthographic mapping of user coordinates onto the current viewport */
 PHP_FUNCTION(swf_ortho)
 {
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(swf_ortho)
 }
 /* }}} */
 
-/* {{{ proto void swf_polarview(double dist, double azimuth, double incidence, double twist)
+/* {{{ proto void swf_polarview(float dist, float azimuth, float incidence, float twist)
    Defines he viewer's position in polar coordinates */
 PHP_FUNCTION(swf_polarview)
 {
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(swf_polarview)
 }
 /* }}} */
 
-/* {{{ proto void swf_perspective(double fovy, double aspect, double near, double far)
+/* {{{ proto void swf_perspective(float fovy, float aspect, float near, float far)
    Define a perspective projection transformation. */
 PHP_FUNCTION(swf_perspective)
 {
@@ -1138,7 +1138,7 @@ PHP_FUNCTION(swf_perspective)
 }
 /* }}} */
 
-/* {{{ proto void swf_lookat(double vx, double vy, double vz, double px, double py, double pz, double twist)
+/* {{{ proto void swf_lookat(float vx, float vy, float vz, float px, float py, float pz, float twist)
    Defines a viewing transformation by giving the view position vx, vy, vz, and the coordinates of a reference point in the scene at px, py, pz. Twist controls a rotation along the viewer's z axis */
 PHP_FUNCTION(swf_lookat)
 {
@@ -1176,7 +1176,7 @@ PHP_FUNCTION(swf_popmatrix)
 }
 /* }}} */
 
-/* {{{ proto void swf_scale(double x, double y, double z)
+/* {{{ proto void swf_scale(float x, float y, float z)
    Scale the current transformation */
 PHP_FUNCTION(swf_scale)
 {
@@ -1193,7 +1193,7 @@ PHP_FUNCTION(swf_scale)
 }
 /* }}} */
 
-/* {{{ proto void swf_translate(double x, double y, double z)
+/* {{{ proto void swf_translate(float x, float y, float z)
    Translate the current transformation */
 PHP_FUNCTION(swf_translate)
 {
@@ -1210,7 +1210,7 @@ PHP_FUNCTION(swf_translate)
 }
 /* }}} */
 
-/* {{{ proto void swf_rotate(double angle, string axis)
+/* {{{ proto void swf_rotate(float angle, string axis)
    Rotate the current transformation by the given angle about x, y, or z axis. The axis may be 'x', 'y', or 'z' */
 PHP_FUNCTION(swf_rotate)
 {
