@@ -45,7 +45,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "image.h"
+#include "php_image.h"
 
 /* file type markers */
 const char php3_sig_gif[3] =
@@ -62,6 +62,8 @@ const char php3_sig_png[8] =
 struct gfxinfo {
 	unsigned int width;
 	unsigned int height;
+	unsigned int bits;
+	unsigned int channels;
 };
 
 /* routine to handle GIF files. If only everything were that easy... ;} */
@@ -70,7 +72,7 @@ static struct gfxinfo *php3_handle_gif (FILE *fp)
 	struct gfxinfo *result = NULL;
 	unsigned char a[2];
 
-	result = (struct gfxinfo *) emalloc(sizeof(struct gfxinfo));
+	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
 	fseek(fp, 6L, SEEK_SET);
 	fread(a,sizeof(a),1,fp);
 	result->width = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
@@ -96,7 +98,7 @@ static struct gfxinfo *php3_handle_png(FILE *fp)
 	struct gfxinfo *result = NULL;
 	unsigned long in_width, in_height;
 
-	result = (struct gfxinfo *) emalloc(sizeof(struct gfxinfo));
+	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
 	fseek(fp, 16L, SEEK_SET);
 	in_width = php3_read4(fp);
 	in_height = php3_read4(fp);
@@ -211,7 +213,6 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker;
-	unsigned short in_width, in_height;
 
 	fseek(fp, 0L, SEEK_SET);		/* position file pointer on SOF */
 
@@ -239,20 +240,20 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 			case M_SOF15:
 				if (result == NULL) {
 					/* handle SOFn block */
-					fseek(fp, 3L, SEEK_CUR);	/* skip length and precision bytes */
-					in_height = php3_read2(fp);
-					in_width = php3_read2(fp);
-					/* fill a gfxinfo struct to return the data */
-					result = (struct gfxinfo *) emalloc(sizeof(struct gfxinfo));
-
-					result->width = (unsigned int) in_width;
-					result->height = (unsigned int) in_height;	
-
+					result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
+ 
+					fseek(fp, 2, SEEK_CUR);
+ 
+					result->bits = fgetc(fp);
+					result->height = php3_read2(fp);
+					result->width = php3_read2(fp);
+					result->channels = fgetc(fp);
+ 
 					if (! info) /* if we don't want an extanded info -> return */
 						return result;
 				} else {
 					php3_skip_variable(fp);
-				}	
+				}
 				break;
 
 			case M_APP0:
@@ -321,6 +322,7 @@ PHP_FUNCTION(getimagesize)
         }
 
 		pval_destructor(info);
+
 		if (array_init(info) == FAILURE) {
 			return;
 		}
@@ -369,6 +371,13 @@ PHP_FUNCTION(getimagesize)
 		add_index_long(return_value, 2, itype);
 		sprintf(temp, "width=\"%d\" height=\"%d\"", result->width, result->height); /* safe */
 		add_index_string(return_value, 3, temp, 1);
+
+		if (result->bits != 0) {
+			add_assoc_long(return_value,"bits",result->bits);
+		}
+		if (result->channels != 0) {
+			add_assoc_long(return_value,"channels",result->channels);
+		} 
 		
 		efree(result);
 	}

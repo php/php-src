@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Ported newest GetImageSize (Thies)
 - Added session compile support in Win32 (Andi)
 - Added -d switch to the CGI binary that allows overriding php.ini values
   from the command line (Zeev)
