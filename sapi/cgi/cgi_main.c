@@ -218,13 +218,8 @@ static void print_extensions(TSRMLS_D)
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint str_length TSRMLS_DC)
+static size_t sapi_cgibin_single_write(const char *str, uint str_length TSRMLS_DC)
 {
-#ifdef PHP_WRITE_STDOUT
-	long ret;
-#else
-	size_t ret;
-#endif
 
 #if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
@@ -236,13 +231,22 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 		return ret;
 	}
 #endif
+
 #ifdef PHP_WRITE_STDOUT
-	ret = write(STDOUT_FILENO, str, str_length);
-	if (ret <= 0) return 0;
-	return ret;
+	{
+		long ret;
+
+		ret = write(STDOUT_FILENO, str, str_length);
+		if (ret <= 0) return 0;
+		return ret;
+	}
 #else
-	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
-	return ret;
+	{
+		size_t ret;
+
+		ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
+		return ret;
+	}
 #endif
 }
 

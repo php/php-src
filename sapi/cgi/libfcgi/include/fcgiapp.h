@@ -24,11 +24,7 @@
 
 #ifndef DLLAPI
 #ifdef _WIN32
-#if defined(_LIB) || defined(FCGI_STATIC)
-#define DLLAPI
-#else
 #define DLLAPI __declspec(dllimport)
-#endif
 #else
 #define DLLAPI
 #endif
@@ -80,19 +76,6 @@ typedef struct FCGX_Stream {
 typedef char **FCGX_ParamArray;
 
 /*
- * A vector of pointers representing the parameters received
- * by a FastCGI application server, with the vector's length
- * and last valid element so adding new parameters is efficient.
- */
-
-typedef struct Params {
-    FCGX_ParamArray vec;    /* vector of strings */
-    int length;		    /* number of string vec can hold */
-    char **cur;		    /* current item in vec; *cur == NULL */
-} Params;
-typedef Params *ParamsPtr;
-
-/*
  * FCGX_Request Flags
  *
  * Setting FCGI_FAIL_ACCEPT_ON_INTR prevents FCGX_Accept() from
@@ -111,18 +94,19 @@ typedef struct FCGX_Request {
     FCGX_Stream *in;
     FCGX_Stream *out;
     FCGX_Stream *err;
-	FCGX_ParamArray envp;
+    char **envp;
 
-	/* Don't use anything below here */
+    /* Don't use anything below here */
 
-    ParamsPtr paramsPtr;
+    struct Params *paramsPtr;
     int ipcFd;               /* < 0 means no connection */
     int isBeginProcessed;     /* FCGI_BEGIN_REQUEST seen */
     int keepConnection;       /* don't close ipcFd at end of request */
     int appStatus;
     int nWriters;             /* number of open writers (0..2) */
-	int flags;
-	int listen_sock;
+    int flags;
+    int listen_sock;
+    int detached;
 } FCGX_Request;
 
 
@@ -632,6 +616,15 @@ DLLAPI void FCGX_FreeStream(FCGX_Stream **stream);
  * ----------------------------------------------------------------------
  */
 DLLAPI void FCGX_ShutdownPending(void);
+
+
+/*
+ *  Attach/Detach an accepted request from its listen socket.
+ *  XXX This is not fully implemented at this time (patch welcome).
+ */
+DLLAPI int FCGX_Attach(FCGX_Request * r);
+DLLAPI int FCGX_Detach(FCGX_Request * r);
+
 
 #if defined (__cplusplus) || defined (c_plusplus)
 } /* terminate extern "C" { */

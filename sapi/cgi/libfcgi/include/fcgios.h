@@ -30,6 +30,10 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #if defined (c_plusplus) || defined (__cplusplus)
 extern "C" {
 #endif
@@ -47,11 +51,7 @@ extern "C" {
 
 #ifndef DLLAPI
 #ifdef _WIN32
-#if defined(_LIB) || defined(FCGI_STATIC)
-#define DLLAPI
-#else
 #define DLLAPI __declspec(dllimport)
-#endif
 #else
 #define DLLAPI
 #endif
@@ -97,33 +97,31 @@ extern "C" {
 #   endif /* __STDC__ */
 #define _CLIENTDATA
 #endif
-#define MUTEX_VARNAME "_FCGI_MUTEX_"
-#define SHUTDOWN_EVENT_NAME "_FCGI_SHUTDOWN_EVENT_"
 
 typedef void (*OS_AsyncProc) (ClientData clientData, int len);
 
 DLLAPI int OS_LibInit(int stdioFds[3]);
 DLLAPI void OS_LibShutdown(void);
-DLLAPI int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex);
+DLLAPI int OS_CreateLocalIpcFd(const char *bindPath, int backlog);
 DLLAPI int OS_FcgiConnect(char *bindPath);
 DLLAPI int OS_Read(int fd, char * buf, size_t len);
 DLLAPI int OS_Write(int fd, char * buf, size_t len);
 #ifdef _WIN32
-DLLAPI int OS_SpawnChild(char *execPath, int listenFd, PROCESS_INFORMATION *pInfo, char *env);
+DLLAPI int OS_SpawnChild(char *execPath, int listenFd, PROCESS_INFORMATION *, char *);
 #else
-DLLAPI int OS_SpawnChild(char *execPath, int listenfd);
+DLLAPI int OS_SpawnChild(char *execPath, int listenFd);
 #endif
 DLLAPI int OS_AsyncReadStdin(void *buf, int len, OS_AsyncProc procPtr,
-                      ClientData clientData);
+                             ClientData clientData);
 DLLAPI int OS_AsyncRead(int fd, int offset, void *buf, int len,
-		 OS_AsyncProc procPtr, ClientData clientData);
+                        OS_AsyncProc procPtr, ClientData clientData);
 DLLAPI int OS_AsyncWrite(int fd, int offset, void *buf, int len,
-		  OS_AsyncProc procPtr, ClientData clientData);
-DLLAPI int OS_Close(int fd);
+                         OS_AsyncProc procPtr, ClientData clientData);
+DLLAPI int OS_Close(int fd, int shutdown);
 DLLAPI int OS_CloseRead(int fd);
 DLLAPI int OS_DoIo(struct timeval *tmo);
 DLLAPI int OS_Accept(int listen_sock, int fail_on_intr, const char *webServerAddrs);
-DLLAPI int OS_IpcClose(int ipcFd);
+DLLAPI int OS_IpcClose(int ipcFd, int shutdown);
 DLLAPI int OS_IsFcgi(int sock);
 DLLAPI void OS_SetFlags(int fd, int flags);
 

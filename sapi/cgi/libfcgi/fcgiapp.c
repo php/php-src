@@ -70,7 +70,6 @@ static int libInitialized = 0;
 static int isFastCGI = -1;
 static char *webServerAddressList = NULL;
 static FCGX_Request the_request;
-void _FCGX_FreeStream(FCGX_Stream **streamPtr, int freeData);
 
 void FCGX_ShutdownPending(void)
 {
@@ -108,14 +107,20 @@ static char *StringCopy(char *str)
  */
 int FCGX_GetChar(FCGX_Stream *stream)
 {
-    if(stream->rdNext != stream->stop)
-        return *stream->rdNext++;
-    if(stream->isClosed || !stream->isReader)
+    if (stream->isClosed || ! stream->isReader)
         return EOF;
-    stream->fillBuffProc(stream);
-    stream->stopUnget = stream->rdNext;
-    if(stream->rdNext != stream->stop)
+
+    if (stream->rdNext != stream->stop)
         return *stream->rdNext++;
+
+    stream->fillBuffProc(stream);
+    if (stream->isClosed)
+        return EOF;
+
+    stream->stopUnget = stream->rdNext;
+    if (stream->rdNext != stream->stop)
+        return *stream->rdNext++;
+
     ASSERT(stream->isClosed); /* bug in fillBufProc if not */
     return EOF;
 }
@@ -139,7 +144,7 @@ int FCGX_GetStr(char *str, int n, FCGX_Stream *stream)
 {
     int m, bytesMoved;
 
-    if(n <= 0) {
+    if (stream->isClosed || ! stream->isReader || n <= 0) {
         return 0;
     }
     /*
@@ -164,10 +169,13 @@ int FCGX_GetStr(char *str, int n, FCGX_Stream *stream)
             if(bytesMoved == n)
                 return bytesMoved;
             str += m;
-	}
+        }
         if(stream->isClosed || !stream->isReader)
             return bytesMoved;
         stream->fillBuffProc(stream);
+        if (stream->isClosed)
+            return bytesMoved;
+
         stream->stopUnget = stream->rdNext;
     }
 }
@@ -938,8 +946,9 @@ static void SetError(FCGX_Stream *stream, int FCGI_errno)
      */
     if(stream->FCGI_errno == 0) {
         stream->FCGI_errno = FCGI_errno;
-        stream->isClosed = TRUE;
     }
+  
+    stream->isClosed = TRUE;
 }
 
 /*
@@ -980,7 +989,18 @@ void FCGX_ClearError(FCGX_Stream *stream) {
      */
 }
 
+/*
+ * A vector of pointers representing the parameters received
+ * by a FastCGI application server, with the vector's length
+ * and last valid element so adding new parameters is efficient.
+ */
 
+typedef struct Params {
+    FCGX_ParamArray vec;    /* vector of strings */
+    int length;         /* number of string vec can hold */
+    char **cur;         /* current item in vec; *cur == NULL */
+} Params;
+typedef Params *ParamsPtr;
 
 /*
  *----------------------------------------------------------------------
@@ -1826,18 +1846,12 @@ static FCGX_Stream *NewStream(
  */
 void FCGX_FreeStream(FCGX_Stream **streamPtr)
 {
-	_FCGX_FreeStream(streamPtr, TRUE);
-}
-
-void _FCGX_FreeStream(FCGX_Stream **streamPtr, int freeData)
-{
     FCGX_Stream *stream = *streamPtr;
     FCGX_Stream_Data *data;
     if(stream == NULL) {
         return;
     }
     data = (FCGX_Stream_Data *)stream->data;
-	if (freeData && data->reqDataPtr) free(data->reqDataPtr);
     data->reqDataPtr = NULL;
     free(data->mBuff);
     free(data);
@@ -2038,21 +2052,21 @@ void FCGX_Free(FCGX_Request * request, int close)
     if (request == NULL) 
         return;
 
-    _FCGX_FreeStream(&request->in, FALSE);
-    _FCGX_FreeStream(&request->out, FALSE);
-    _FCGX_FreeStream(&request->err, FALSE);
+    FCGX_FreeStream(&request->in);
+    FCGX_FreeStream(&request->out);
+    FCGX_FreeStream(&request->err);
     FreeParams(&request->paramsPtr);
-	request->envp = NULL;
 
     if (close) {
-        OS_IpcClose(request->ipcFd);
+        OS_IpcClose(request->ipcFd, ! request->detached);
         request->ipcFd = -1;
+        request->detached = 0;
     }
 }
 
 int FCGX_OpenSocket(const char *path, int backlog)
 {
-    int rc = OS_CreateLocalIpcFd(path, backlog, 1);
+    int rc = OS_CreateLocalIpcFd(path, backlog);
     if (rc == FCGI_LISTENSOCK_FILENO && isFastCGI == 0) {
         /* XXX probably need to call OS_LibInit() again for Win */
         isFastCGI = 1;
@@ -2321,3 +2335,23 @@ void FCGX_SetExitStatus(int status, FCGX_Stream *stream)
     data->reqDataPtr->appStatus = status;
 }
 
+
+int 
+FCGX_Attach(FCGX_Request * r)
+{
+    r->detached = FALSE;
+    return 0;
+}
+
+
+int 
+FCGX_Detach(FCGX_Request * r)
+{
+    if (r->ipcFd <= 0)
+    {
+        return -1;
+    }
+
+    r->detached = TRUE;
+    return 0;
+}

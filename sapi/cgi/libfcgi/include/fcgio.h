@@ -30,7 +30,7 @@
 #ifndef FCGIO_H
 #define FCGIO_H
 
-#include <iostream.h>
+#include <iostream>
 
 #include "fcgiapp.h"
 
@@ -42,10 +42,14 @@
 #endif
 #endif
 
+#if ! HAVE_STREAMBUF_CHAR_TYPE
+typedef char char_type;
+#endif
+
 /*
  *  fcgi_streambuf
  */
-class fcgi_streambuf : public streambuf
+class DLLAPI fcgi_streambuf : public std::streambuf
 {
 public:
 
@@ -54,50 +58,50 @@ public:
     // assigned, I/O is a bit less effecient and output streams will
     // have to be flushed (or the streambuf destroyed) before the next 
     // call to "accept".
-    DLLAPI fcgi_streambuf(FCGX_Stream * fcgx, char * buf, int len);
+    fcgi_streambuf(FCGX_Stream * fcgx, char * buf, int len);
     
-    DLLAPI fcgi_streambuf(char * buf, int len);
+    fcgi_streambuf(char_type * buf, std::streamsize len);
     
-    DLLAPI fcgi_streambuf(FCGX_Stream * fcgx = NULL);
+    fcgi_streambuf(FCGX_Stream * fcgx = 0);
 
-    DLLAPI ~fcgi_streambuf(void);
+    ~fcgi_streambuf(void);
 
-    DLLAPI int attach(FCGX_Stream * fcgx);
+    int attach(FCGX_Stream * fcgx);
 
 protected:
 
     // Consume the put area (if buffered) and c (if c is not EOF).
-    DLLAPI virtual int overflow(int);
+    virtual int overflow(int);
 
     // Flush the put area (if buffered) and the FCGX buffer to the client.
-    DLLAPI virtual int sync();
+    virtual int sync();
 
     // Remove and return the current character.
-    DLLAPI virtual int uflow();
+    virtual int uflow();
 
     // Fill the get area (if buffered) and return the current character.
-    DLLAPI virtual int underflow();
+    virtual int underflow();
 
     // Use a buffer.  The only reasons that a buffer would be useful is
     // to support the use of the unget()/putback() or seek() methods.  Using
     // a buffer will result in less efficient I/O.  Note: the underlying
     // FastCGI library (FCGX) maintains its own input and output buffers.  
-    DLLAPI virtual streambuf * setbuf(char * buf, int len);
+    virtual std::streambuf * setbuf(char_type * buf, std::streamsize len);
 
-    DLLAPI virtual int xsgetn(char * s, int n);
-    DLLAPI virtual int xsputn(const char * s, int n);
+    virtual std::streamsize xsgetn(char_type * s, std::streamsize n);
+    virtual std::streamsize xsputn(const char_type * s, std::streamsize n);
 
 private:
 
     FCGX_Stream * fcgx;
 
     // buf is just handy to have around
-    char * buf;
+    char_type * buf;
 
     // this isn't kept by the base class
-    int bufsize;
+    std::streamsize bufsize;
     
-    void init(FCGX_Stream * fcgx, char * buf, int bufsize);
+    void init(FCGX_Stream * fcgx, char_type * buf, std::streamsize bufsize);
 
     void reset(void);
 };
@@ -105,18 +109,18 @@ private:
 /*
  *  fcgi_istream - deprecated
  */
-class fcgi_istream : public istream
+class DLLAPI fcgi_istream : public std::istream
 {
 public:
 
     // deprecated
-    DLLAPI fcgi_istream(FCGX_Stream * fcgx = NULL);
+    fcgi_istream(FCGX_Stream * fcgx = 0);
     
     // deprecated
-    DLLAPI ~fcgi_istream(void) {}
+    ~fcgi_istream(void) {}
 
     // deprecated
-    DLLAPI virtual void attach(FCGX_Stream * fcgx);
+    virtual void attach(FCGX_Stream * fcgx);
 
 private:
 
@@ -126,18 +130,18 @@ private:
 /*
  *  fcgi_ostream - deprecated
  */
-class fcgi_ostream : public ostream
+class DLLAPI fcgi_ostream : public std::ostream
 {
 public:
     
     // deprecated
-    DLLAPI fcgi_ostream(FCGX_Stream * fcgx = NULL);
+    fcgi_ostream(FCGX_Stream * fcgx = 0);
     
     // deprecated
-    DLLAPI ~fcgi_ostream(void) {}
+    ~fcgi_ostream(void) {}
 
     // deprecated
-    DLLAPI virtual void attach(FCGX_Stream *fcgx);
+    virtual void attach(FCGX_Stream *fcgx);
 
 private:
 
