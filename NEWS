@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Fixed bug #27628 (Simplify the process of making a POST request via stream
   context). (Ilia)
 - Fixed bug #27619 (filters not applied to pre-buffered stream data). (Sara)
+- Fixed bug #27519 (Reflection_Function constructor crashes with non-existant 
+  function's name). (Marcus)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 - Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 
