@@ -497,6 +497,10 @@ SOURCE=..\ext\ctype\ctype.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\mbstring\html_entities.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\mbstring\mbfilter.c
 # End Source File
 # Begin Source File
@@ -526,10 +530,6 @@ SOURCE=..\ext\mbstring\mbregex.c
 # Begin Source File
 
 SOURCE=..\ext\mbstring\mbstring.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\html_entities.c
 # End Source File
 # Begin Source File
 
@@ -1864,6 +1864,10 @@ SOURCE=..\ext\mysql\php_mysql.h
 # Begin Source File
 
 SOURCE=..\ext\odbc\php_odbc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\odbc\php_odbc_includes.h
 # End Source File
 # Begin Source File
 
