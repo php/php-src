@@ -33,7 +33,7 @@
 #include "ftp.h"
 
 static int	le_ftpbuf;
-
+#define le_ftpbuf_name "FTP Buffer"
 
 function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
@@ -57,7 +57,8 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_rename,			NULL)
 	PHP_FE(ftp_delete,			NULL)
 	PHP_FE(ftp_site,			NULL)
-	PHP_FE(ftp_quit,			NULL)
+	PHP_FE(ftp_close,			NULL)
+	PHP_FALIAS(ftp_quit, ftp_close, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -106,97 +107,56 @@ PHP_MINFO_FUNCTION(ftp)
 	php_info_print_table_end();
 }
 
+#define	XTYPE(xtype, mode)	{ \
+								if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
+									php_error(E_WARNING, "%s(): mode must be FTP_ASCII or FTP_IMAGE", get_active_function_name(TSRMLS_C)); \
+									RETURN_FALSE; \
+								} \
+								xtype = mode; \
+							}
 
-#define	FTPBUF(ftp, pval) { \
-	int	id, type; \
-	convert_to_long(pval); \
-	id = Z_LVAL_P(pval); \
-	(ftp) = zend_list_find(id, &type); \
-	if (!(ftp) || type != le_ftpbuf) { \
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id); \
-		RETURN_FALSE; \
-	} \
-	}
+#define	FILEP(fp, pval)		ZEND_FETCH_RESOURCE(fp, FILE *, &pval, -1, "File-Handle", php_file_le_fopen());
 
-#define	XTYPE(xtype, pval) { \
-	convert_to_long(pval); \
-	if (	Z_LVAL_P(pval) != FTPTYPE_ASCII && \
-		Z_LVAL_P(pval) != FTPTYPE_IMAGE) \
-	{ \
-		php_error(E_WARNING, "arg4 must be FTP_ASCII or FTP_IMAGE"); \
-		RETURN_FALSE; \
-	} \
-	(xtype) = Z_LVAL_P(pval); \
-	}
-
-#define	FILEP(fp, pval) { \
-	ZEND_FETCH_RESOURCE(fp, FILE *, &pval, -1, "File-Handle", php_file_le_fopen()); \
-	}
-
-/* {{{ proto int ftp_connect(string host [, int port])
+/* {{{ proto resource ftp_connect(string host [, int port])
    Opens a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
-	pval		*arg1, *arg2;
 	ftpbuf_t	*ftp;
-	short		port = 0;
+	char		*host;
+	int			host_len, port = 21;
 
-	/* arg1 - hostname
-	 * arg2 - [port]
-	 */
-	switch (ZEND_NUM_ARGS()) {
-	case 1:
-		if (getParameters(ht, 1, &arg1) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(arg2);
-		port = (short) Z_LVAL_P(arg2);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &host, &host_len, &port) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg1);
-
 	/* connect */
-	ftp = ftp_open(Z_STRVAL_P(arg1), htons(port));
-	if (ftp == NULL)
+	ftp = ftp_open(host, htons((short)port));
+	if (ftp == NULL) {
 		RETURN_FALSE;
+	}
 
-	RETURN_LONG(zend_list_insert(ftp, le_ftpbuf));
+	ZEND_REGISTER_RESOURCE(return_value, ftp, le_ftpbuf);
 }
 /* }}} */
 
-/* {{{ proto int ftp_login(int stream, string username, string password)
+/* {{{ proto bool ftp_login(resource stream, string username, string password)
    Logs into the FTP server */
 PHP_FUNCTION(ftp_login)
 {
-	pval		*arg1, *arg2, *arg3;
+	zval 		*z_ftp;
 	ftpbuf_t	*ftp;
+	char *user, *pass;
+	int user_len, pass_len;
 
-	/* arg1 - ftp
-	 * arg2 - username
-	 * arg3 - password
-	 */
-	if (	ZEND_NUM_ARGS() != 3 ||
-		getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &z_ftp, &user, &user_len, &pass, &pass_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* log in */
-	if (!ftp_login(ftp, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3))) {
-		php_error(E_WARNING, "ftp_login: %s", ftp->inbuf);
+	if (!ftp_login(ftp, user, pass)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -204,25 +164,23 @@ PHP_FUNCTION(ftp_login)
 }
 /* }}} */
 
-/* {{{ proto string ftp_pwd(int stream)
+/* {{{ proto string ftp_pwd(resource stream)
    Returns the present working directory */
 PHP_FUNCTION(ftp_pwd)
 {
-	pval		*arg1;
+	zval 		*z_ftp;
 	ftpbuf_t	*ftp;
 	const char	*pwd;
 
-	/* arg1 - ftp
-	 */
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	pwd = ftp_pwd(ftp);
 	if (pwd == NULL) {
-		php_error(E_WARNING, "ftp_pwd: %s", ftp->inbuf);
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -230,23 +188,21 @@ PHP_FUNCTION(ftp_pwd)
 }
 /* }}} */
 
-/* {{{ proto int ftp_cdup(int stream)
+/* {{{ proto bool ftp_cdup(resource stream)
    Changes to the parent directory */
 PHP_FUNCTION(ftp_cdup)
 {
-	pval		*arg1;
+	zval 		*z_ftp;
 	ftpbuf_t	*ftp;
 
-	/* arg1 - ftp
-	 */
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	if (!ftp_cdup(ftp)) {
-		php_error(E_WARNING, "ftp_cdup: %s", ftp->inbuf);
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -254,59 +210,49 @@ PHP_FUNCTION(ftp_cdup)
 }
 /* }}} */
 
-/* {{{ proto int ftp_chdir(int stream, string directory)
+/* {{{ proto bool ftp_chdir(resource stream, string directory)
    Changes directories */
 PHP_FUNCTION(ftp_chdir)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*dir;
+	int			dir_len;
 
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
-
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* change directories */
-	if (!ftp_chdir(ftp, Z_STRVAL_P(arg2))) {
-		php_error(E_WARNING, "ftp_chdir: %s", ftp->inbuf);
-			RETURN_FALSE;
+	if (!ftp_chdir(ftp, dir)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
+		RETURN_FALSE;
 	}
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int ftp_exec(int stream, string command)
+/* {{{ proto bool ftp_exec(resource stream, string command)
    Requests execution of a program on the ftp server */
 PHP_FUNCTION(ftp_exec)
 {
-	pval		*arg1, *arg2;
+	pval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*cmd;
+	int			cmd_len;
 
-	/* arg1 - ftp
-	 * arg2 - command
-	 */
-	if (ARG_COUNT(ht) != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+		return;
 	}
-
-	convert_to_string(arg2);
 	
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	/* change directories */
-	if (!ftp_exec(ftp, Z_STRVAL_P(arg2))) {
-		php_error(E_WARNING, "ftp_exec: %s", ftp->inbuf);
+	/* execute serverside command */
+	if (!ftp_exec(ftp, cmd)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -314,67 +260,49 @@ PHP_FUNCTION(ftp_exec)
 }
 /* }}} */
 
-/* {{{ proto string ftp_mkdir(int stream, string directory)
-   Creates a directory */
+/* {{{ proto mixed ftp_mkdir(resource stream, string directory)
+   Creates a directory. Returns the absolute path for the new directory or false on error. */
 PHP_FUNCTION(ftp_mkdir)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		*ret, *tmp;
+	char		*dir, *tmp;
+	int			dir_len;
 
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	FTPBUF(ftp, arg1);
-
-	/* change directories */
-	tmp = ftp_mkdir(ftp, Z_STRVAL_P(arg2));
-	if (tmp == NULL) {
-		php_error(E_WARNING, "ftp_mkdir: %s", ftp->inbuf);
+	/* create directorie */
+	if (NULL == (tmp = ftp_mkdir(ftp, dir))) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
-	if ((ret = estrdup(tmp)) == NULL) {
-		free(tmp);
-		php_error(E_WARNING, "estrdup failed");
-		RETURN_FALSE;
-	}
-
-	RETURN_STRING(ret, 0);
+	RETURN_STRING(tmp, 1);
 }
 /* }}} */
 
-/* {{{ proto int ftp_rmdir(int stream, string directory)
+/* {{{ proto bool ftp_rmdir(resource stream, string directory)
    Removes a directory */
 PHP_FUNCTION(ftp_rmdir)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*dir;
+	int			dir_len;
 
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	FTPBUF(ftp, arg1);
-
-	/* change directories */
-	if (!ftp_rmdir(ftp, Z_STRVAL_P(arg2))) {
-		php_error(E_WARNING, "ftp_rmdir: %s", ftp->inbuf);
+	/* remove directorie */
+	if (!ftp_rmdir(ftp, dir)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -382,30 +310,23 @@ PHP_FUNCTION(ftp_rmdir)
 }
 /* }}} */
 
-/* {{{ proto array ftp_nlist(int stream, string directory)
+/* {{{ proto array ftp_nlist(resource stream, string directory)
    Returns an array of filenames in the given directory */
 PHP_FUNCTION(ftp_nlist)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		**nlist, **ptr;
+	char		**nlist, **ptr, *dir;
+	int			dir_len;
 
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
-
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get list of files */
-	nlist = ftp_nlist(ftp, Z_STRVAL_P(arg2));
-	if (nlist == NULL) {
+	if (NULL == (nlist = ftp_nlist(ftp, dir))) {
 		RETURN_FALSE;
 	}
 
@@ -416,30 +337,23 @@ PHP_FUNCTION(ftp_nlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_rawlist(int stream, string directory)
+/* {{{ proto array ftp_rawlist(resource stream, string directory)
    Returns a detailed listing of a directory as an array of output lines */
 PHP_FUNCTION(ftp_rawlist)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	char		**llist, **ptr;
+	char		**llist, **ptr, *dir;
+	int			dir_len;
 
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	FTPBUF(ftp, arg1);
-
-	/* get directory listing */
-	llist = ftp_list(ftp, Z_STRVAL_P(arg2));
-	if (llist == NULL) {
+	/* get raw directory listing */
+	if (NULL == (llist = ftp_list(ftp, dir))) {
 		RETURN_FALSE;
 	}
 
@@ -450,27 +364,23 @@ PHP_FUNCTION(ftp_rawlist)
 }
 /* }}} */
 
-/* {{{ proto string ftp_systype(int stream)
+/* {{{ proto string ftp_systype(resource stream)
    Returns the system type identifier */
 PHP_FUNCTION(ftp_systype)
 {
-	pval		*arg1;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	const char	*syst;
 
-
-	/* arg1 - ftp
-	 * arg2 - directory
-	 */
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	syst = ftp_syst(ftp);
-	if (syst == NULL) {
-		php_error(E_WARNING, "ftp_syst: %s", ftp->inbuf);
+	if (NULL == (syst = ftp_syst(ftp))) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -478,38 +388,32 @@ PHP_FUNCTION(ftp_systype)
 }
 /* }}} */
 
-/* {{{ proto int ftp_fget(int stream, int fp, string remote_file, int mode)
+/* {{{ proto bool ftp_fget(resource stream, int fp, string remote_file, int mode)
    Retrieves a file from the FTP server and writes it to an open file */
 PHP_FUNCTION(ftp_fget)
 {
-	pval		*arg1, *arg2, *arg3, *arg4;
+	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	FILE		*fp;
+	char		*file;
+	int			file_len, mode;
 
-	/* arg1 - ftp
-	 * arg2 - fp
-	 * arg3 - remote file
-	 * arg4 - transfer mode
-	 */
-	if (	ZEND_NUM_ARGS() != 4 ||
-		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
-	{
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsl", &z_ftp, &z_file, &file, &file_len, &mode) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	FILEP(fp, arg2);
-	convert_to_string(arg3);
-	XTYPE(xtype, arg4);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+	FILEP(fp, z_file);
+	XTYPE(xtype, mode);
 
-	if (!ftp_get(ftp, fp, Z_STRVAL_P(arg3), xtype) || ferror(fp)) {
-		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
+	if (!ftp_get(ftp, fp, file, xtype) || ferror(fp)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
 	if (ferror(fp)) {
-		php_error(E_WARNING, "error writing %s", Z_STRVAL_P(arg2));
+		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), Z_STRVAL_P(z_file));
 		RETURN_FALSE;
 	}
 
@@ -517,82 +421,68 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ proto int ftp_pasv(int stream, int pasv)
+/* {{{ proto bool ftp_pasv(resource stream, bool pasv)
    Turns passive mode on or off */
 PHP_FUNCTION(ftp_pasv)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	zend_bool	pasv;
 
-	/* arg1 - ftp
-	 * arg2 - pasv
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &z_ftp, &pasv) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_long(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	if (!ftp_pasv(ftp, (Z_LVAL_P(arg2)) ? 1 : 0))
+	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {
 		RETURN_FALSE;
+	}
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int ftp_get(int stream, string local_file, string remote_file, int mode)
+/* {{{ proto bool ftp_get(resource stream, string local_file, string remote_file, int mode)
    Retrieves a file from the FTP server and writes it to a local file */
 PHP_FUNCTION(ftp_get)
 {
-	pval		*arg1, *arg2, *arg3, *arg4;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	FILE		*outfp, *tmpfp;
-	int		ch;
+	int			ch;
+	char		*local, *remote;
+	int			local_len, remote_len, mode;
 
-
-	/* arg1 - ftp
-	 * arg2 - destination (local) file
-	 * arg3 - source (remote) file
-	 * arg4 - transfer mode
-	 */
-	if (	ZEND_NUM_ARGS() != 4 ||
-		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl", &z_ftp, &local, &local_len, &remote, &remote_len, &mode) == FAILURE) {
+		return;
 	}
-
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	XTYPE(xtype, arg4);
+	
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+	XTYPE(xtype, mode);
 
 	/* get to temporary file, so if there is an error, no existing
 	 * file gets clobbered
 	 */
 	if ((tmpfp = tmpfile()) == NULL) {
-		php_error(E_WARNING, "error opening tmpfile");
+		php_error(E_WARNING, "%s(): error opening tmpfile", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	if (	!ftp_get(ftp, tmpfp, Z_STRVAL_P(arg3), xtype) ||
-		ferror(tmpfp))
-	{
+	if (!ftp_get(ftp, tmpfp, remote, xtype) || ferror(tmpfp)) {
 		fclose(tmpfp);
 		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
 
 #ifdef PHP_WIN32
-	if ((outfp = VCWD_FOPEN(Z_STRVAL_P(arg2), "wb")) == NULL) {
+	if ((outfp = VCWD_FOPEN(local, "wb")) == NULL) {
 #else
-	if ((outfp = VCWD_FOPEN(Z_STRVAL_P(arg2), "w")) == NULL) {
+	if ((outfp = VCWD_FOPEN(local, "w")) == NULL) {
 #endif
 		fclose(tmpfp);
-		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg2));
+		php_error(E_WARNING, "%s(): error opening %s", get_active_function_name(TSRMLS_C), local);
 		RETURN_FALSE;
 	}
 
@@ -603,7 +493,7 @@ PHP_FUNCTION(ftp_get)
 	if (ferror(tmpfp) || ferror(outfp)) {
 		fclose(tmpfp);
 		fclose(outfp);
-		php_error(E_WARNING, "error writing %s", Z_STRVAL_P(arg2));
+		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), local);
 		RETURN_FALSE;
 	}
 
@@ -614,35 +504,28 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
-/* {{{ proto int ftp_fput(int stream, string local_file, string remote_file, int mode)
+/* {{{ proto bool ftp_fput(resource stream, string remote_file, resource local_file, int mode)
    Stores a file from an open file to the FTP server */
 PHP_FUNCTION(ftp_fput)
 {
-	pval		*arg1, *arg2, *arg3, *arg4;
+	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	int		type;
+	int			type, mode, remote_len;
 	void		*rsrc;
+	char		*remote;
 
-	/* arg1 - ftp
-	 * arg2 - remote file
-	 * arg3 - fp
-	 * arg4 - transfer mode
-	 */
-	if (	ZEND_NUM_ARGS() != 4 ||
-		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrl", &z_ftp, &remote, &remote_len, &z_file, &mode) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
-   	rsrc = zend_fetch_resource(&arg3 TSRMLS_CC,-1,"File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+   	rsrc = zend_fetch_resource(&z_file TSRMLS_CC, -1, "File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
 	ZEND_VERIFY_RESOURCE(rsrc);   
-	XTYPE(xtype, arg4);
+	XTYPE(xtype, mode);
 
-	if (!ftp_put(ftp, Z_STRVAL_P(arg2), (FILE*)rsrc, *(int*) rsrc, (type==php_file_le_socket()), xtype)) {
-		php_error(E_WARNING, "ftp_put: %s", ftp->inbuf);
+	if (!ftp_put(ftp, remote, (FILE*)rsrc, *(int*) rsrc, (type==php_file_le_socket()), xtype)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -650,45 +533,35 @@ PHP_FUNCTION(ftp_fput)
 }
 /* }}} */
 
-/* {{{ proto int ftp_put(int stream, string remote_file, string local_file, int mode)
+/* {{{ proto bool ftp_put(resource stream, string remote_file, string local_file, int mode)
    Stores a file on the FTP server */
 PHP_FUNCTION(ftp_put)
 {
-	pval		*arg1, *arg2, *arg3, *arg4;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	FILE		*infp;
+	char		*remote, *local;
+	int			remote_len, local_len, mode;
 
-
-	/* arg1 - ftp
-	 * arg2 - destination (remote) file
-	 * arg3 - source (local) file
-	 * arg4 - transfer mode
-	 */
-	if (	ZEND_NUM_ARGS() != 4 ||
-		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl", &z_ftp, &remote, &remote_len, &local, &local_len, &mode) == FAILURE) {
+		return;
 	}
-
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	XTYPE(xtype, arg4);
+	
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+	XTYPE(xtype, mode);
 
 #ifdef PHP_WIN32
-	if ((infp = VCWD_FOPEN(Z_STRVAL_P(arg3), "rb")) == NULL) {
+	if ((infp = VCWD_FOPEN(local, "rb")) == NULL) {
 #else
-	if ((infp = VCWD_FOPEN(Z_STRVAL_P(arg3), "r")) == NULL) {
+	if ((infp = VCWD_FOPEN(local, "r")) == NULL) {
 #endif
-		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg3));
+		php_error(E_WARNING, "%s(): error opening %s", get_active_function_name(TSRMLS_C), local);
 		RETURN_FALSE;
 	}
-	if (	!ftp_put(ftp, Z_STRVAL_P(arg2), infp, 0, 0, xtype) ||
-		ferror(infp))
-	{
+	if (!ftp_put(ftp, remote, infp, 0, 0, xtype) || ferror(infp)) {
 		fclose(infp);
-		php_error(E_WARNING, "ftp_put: %s", ftp->inbuf);
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 	fclose(infp);
@@ -697,78 +570,64 @@ PHP_FUNCTION(ftp_put)
 }
 /* }}} */
 
-/* {{{ proto int ftp_size(int stream, string path)
+/* {{{ proto int ftp_size(resource stream, string filename)
    Returns the size of the file, or -1 on error */
 PHP_FUNCTION(ftp_size)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*file;
+	int			file_len;
 
-	/* arg1 - ftp
-	 * arg2 - path
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get file size */
-	RETURN_LONG(ftp_size(ftp, Z_STRVAL_P(arg2)));
+	RETURN_LONG(ftp_size(ftp, file));
 }
 /* }}} */
 
-/* {{{ proto int ftp_mdtm(int stream, string path)
+/* {{{ proto int ftp_mdtm(resource stream, string filename)
    Returns the last modification time of the file, or -1 on error */
 PHP_FUNCTION(ftp_mdtm)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*file;
+	int			file_len;
 
-	/* arg1 - ftp
-	 * arg2 - path
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get file mod time */
-	RETURN_LONG(ftp_mdtm(ftp, Z_STRVAL_P(arg2)));
+	RETURN_LONG(ftp_mdtm(ftp, file));
 }
 /* }}} */
 
-/* {{{ proto int ftp_rename(int stream, string src, string dest)
+/* {{{ proto bool ftp_rename(resource stream, string src, string dest)
    Renames the given file to a new path */
 PHP_FUNCTION(ftp_rename)
 {
-	pval		*arg1, *arg2, *arg3;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*src, *dest;
+	int			src_len, dest_len;
 
-	/* arg1 - ftp
-	 * arg2 - src
-	 * arg3 - dest
-	 */
-	if (	ZEND_NUM_ARGS() != 3 ||
-		getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &z_ftp, &src, &src_len, &dest, &dest_len) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* rename the file */
-	if (!ftp_rename(ftp, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3))) {
-		php_error(E_WARNING, "ftp_rename: %s", ftp->inbuf);
+	if (!ftp_rename(ftp, src, dest)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -776,28 +635,24 @@ PHP_FUNCTION(ftp_rename)
 }
 /* }}} */
 
-/* {{{ proto int ftp_delete(int stream, string path)
+/* {{{ proto bool ftp_delete(resource stream, string file)
    Deletes a file */
 PHP_FUNCTION(ftp_delete)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*file;
+	int			file_len;
 
-	/* arg1 - ftp
-	 * arg2 - path
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* delete the file */
-	if (!ftp_delete(ftp, Z_STRVAL_P(arg2))) {
-		php_error(E_WARNING, "ftp_delete: %s", ftp->inbuf);
+	if (!ftp_delete(ftp, file)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -805,28 +660,24 @@ PHP_FUNCTION(ftp_delete)
 }
 /* }}} */
 
-/* {{{ proto int ftp_site(int stream, string cmd)
+/* {{{ proto bool ftp_site(resource stream, string cmd)
    Sends a SITE command to the server */
 PHP_FUNCTION(ftp_site)
 {
-	pval		*arg1, *arg2;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
+	char		*cmd;
+	int			cmd_len;
 
-	/* arg1 - ftp
-	 * arg2 - cmd
-	 */
-	if (	ZEND_NUM_ARGS() != 2 ||
-		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+		return;
 	}
 
-	FTPBUF(ftp, arg1);
-	convert_to_string(arg2);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* send the site command */
-	if (!ftp_site(ftp, Z_STRVAL_P(arg2))) {
-		php_error(E_WARNING, "ftp_site: %s", ftp->inbuf);
+	if (!ftp_site(ftp, cmd)) {
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -834,24 +685,20 @@ PHP_FUNCTION(ftp_site)
 }
 /* }}} */
 
-/* {{{ proto int ftp_quit(int stream)
+/* {{{ proto void ftp_close(resource stream)
    Closes the FTP stream */
-PHP_FUNCTION(ftp_quit)
+PHP_FUNCTION(ftp_close)
 {
-	pval		*arg1;
-	int		id, type;
+	zval		*z_ftp;
+	ftpbuf_t	*ftp;
 
-	/* arg1 - ftp
-	 */
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
+		return;
 	}
 
-	id = Z_LVAL_P(arg1);
-	if (zend_list_find(id, &type) && type == le_ftpbuf)
-		zend_list_delete(id);
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	RETURN_TRUE;
+	zend_list_delete(Z_LVAL_P(z_ftp));
 }
 /* }}} */
 
