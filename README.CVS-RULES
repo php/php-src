@@ -29,7 +29,14 @@ Having said that, here are the organizational rules:
    5. If you don't know how to do something, ask first!
 
    6. Test your changes before committing them. We mean it. Really.
-	
+
+Currently we have the following branches in use:
+HEAD     Will become PHP 5.1. This CVS branch is for active development.
+PHP_5_0  Is used to release the PHP 5.0.x series. Only minor feature
+		 enhancements may go in here, but please keep that as infrequent as
+		 possible.
+PHP_4_3  Is used to release the PHP 4.3.x series. Only bugfixes are permitted
+         on this branch.
 
 The next few rules are more of a technical nature.
 
@@ -61,26 +68,27 @@ The next few rules are more of a technical nature.
 
 The format of the commit messages is pretty simple.
 
+Use a - to start a new item in your commit message.
+
 If a line begins with #, it is taken to be a comment and will not appear
 in the ChangeLog. Everything else goes into the ChangeLog.
 
 It is important to note that if your comment or news logline spans multiple
 lines, you have to put # at the beginning of _every_ such line. 
 
-Example. Say you modified two files, datetime.c and string.c. In datetime.c
-you added a new format option for date() function, and in string.c you fixed
-a memory leak in php_trim(). Don't commit both of these at once. Commit them
+Example. Say you modified two files, datetime.c and string.c. In datetime.c you
+added a new format option for the date() function, and in string.c you fixed a
+memory leak in php_trim(). Don't commit both of these at once. Commit them
 separately and try to make sure your commit messages look something like the
 following.
 
 For datetime.c:
-
-(PHP date) Added new 'K' format modifier for printing out number of
-           days until New Year's Eve.
+- Added new 'K' format modifier to date() for printing out number of days until
+  New Year's Eve.
 
 For string.c:
-(php_trim) Fixed a memory leak resulting from improper use of zval_dtor().
-# Man, that thing was leaking all over the place!
+- Fixed a memory leak in php_trim() resulting from improper use of zval_dtor().
+#- Man, that thing was leaking all over the place!
 
 The # lines will be omitted from the ChangeLog automagically.
 
@@ -90,7 +98,7 @@ bug report when developers are browsing CVS via. LXR or Bonsai.
 
 Example:
 
-Fixed pgsql notice handler double free crash bug. Bug #14016
+Fixed bug #14016 (pgsql notice handler double free crash bug.)
 
 If you don't see your messages in ChangeLog right away, don't worry!
 These files are updated once a day, so your stuff will not show up until
