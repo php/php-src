@@ -2,7 +2,7 @@
 .SH NAME
 pcregrep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
-.B pcregrep [-Vcfhilnrsvx] pattern [file] ...
+.B pcregrep [-Vcfhilnrsvx] [pattern] [file1 file2 ...]
 
 
 .SH DESCRIPTION
@@ -10,6 +10,9 @@ pcregrep - a grep with Perl-compatible regular expressions.
 grep commands do, but it uses the PCRE regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
 \fBpcre(3)\fR for a full description of syntax and semantics.
+
+A pattern must be specified on the command line unless the \fB-f\fR option is
+used (see below).
 
 If no files are specified, \fBpcregrep\fR reads the standard input. By default,
 each line that matches the pattern is copied to the standard output, and if
@@ -32,11 +35,12 @@ Do not print individual lines; instead just print a count of the number of
 lines that would otherwise have been printed. If several files are given, a
 count is printed for each of them.
 .TP
-\fB-f\fIfilename\fR
-Read patterns from the file, one per line, and match all patterns against each
-line. There is a maximum of 100 patterns. Trailing white space is removed, and
-blank lines are ignored. An empty file contains no patterns and therefore
-matches nothing.
+\fB-f\fIfilename\fR Read a number of patterns from the file, one per line, and
+match all of them against each line of input. A line is output if any of the
+patterns match it. When \fB-f\fR is used, no pattern is taken from the command
+line; all arguments are treated as file names. There is a maximum of 100
+patterns. Trailing white space is removed, and blank lines are ignored. An
+empty file contains no patterns and therefore matches nothing.
 .TP
 \fB-h\fR
 Suppress printing of filenames when searching multiple files.
@@ -83,6 +87,6 @@ for syntax errors or inacessible files (even if matches were found).
 .SH AUTHOR
 Philip Hazel <ph10@cam.ac.uk>
 
-Last updated: 15 August 2001
+Last updated: 25 July 2002
 .br
-Copyright (c) 1997-2001 University of Cambridge.
+Copyright (c) 1997-2002 University of Cambridge.

@@ -62,7 +62,7 @@ to call PCRE. None of the other options has any effect when <B>-p</B> is set.
 </P>
 <P>
 <B>-t</B>
-Run each compile, study, and match 20000 times with a timer, and output
+Run each compile, study, and match many times with a timer, and output
 resulting time per compile or match (in milliseconds). Do not set <B>-t</B> with
 <B>-m</B>, because you will then get the size output 20000 times and the timing
 will be distorted.
@@ -78,10 +78,18 @@ expressions, and "data&#62;" to prompt for data lines.
 <P>
 The program handles any number of sets of input on a single input file. Each
 set starts with a regular expression, and continues with any number of data
-lines to be matched against the pattern. An empty line signals the end of the
-data lines, at which point a new regular expression is read. The regular
-expressions are given enclosed in any non-alphameric delimiters other than
-backslash, for example
+lines to be matched against the pattern.
+</P>
+<P>
+Each line is matched separately and independently. If you want to do
+multiple-line matches, you have to use the \n escape sequence in a single line
+of input to encode the newline characters. The maximum length of data line is
+30,000 characters.
+</P>
+<P>
+An empty line signals the end of the data lines, at which point a new regular
+expression is read. The regular expressions are given enclosed in any
+non-alphameric delimiters other than backslash, for example
 </P>
 <P>
 <PRE>
@@ -364,6 +372,6 @@ Cambridge CB2 3QG, England.
 Phone: +44 1223 334714
 </P>
 <P>
-Last updated: 15 August 2001
+Last updated: 25 August 2002
 <BR>
-Copyright (c) 1997-2001 University of Cambridge.
+Copyright (c) 1997-2002 University of Cambridge.

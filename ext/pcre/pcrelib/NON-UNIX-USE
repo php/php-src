@@ -41,13 +41,49 @@ Makefile.in to create Makefile, substituting suitable values for the variables
 at the head of the file.
 
 Some help in building a Win32 DLL of PCRE in GnuWin32 environments was
-contributed by Paul.Sokolovsky@technologist.com. These environments are
-Mingw32 (http://www.xraylith.wisc.edu/~khan/software/gnu-win32/) and
-CygWin  (http://sourceware.cygnus.com/cygwin/). Paul comments:
+contributed by Paul Sokolovsky. These environments are Mingw32
+(http://www.xraylith.wisc.edu/~khan/software/gnu-win32/) and CygWin
+(http://sourceware.cygnus.com/cygwin/). Paul comments:
 
   For CygWin, set CFLAGS=-mno-cygwin, and do 'make dll'. You'll get
   pcre.dll (containing pcreposix also), libpcre.dll.a, and dynamically
   linked pgrep and pcretest. If you have /bin/sh, run RunTest (three
   main test go ok, locale not supported).
+
+A script for building PCRE using Borland's C++ compiler for use with VPASCAL
+was contributed by Alexander Tokarev. It is called makevp.bat.
+
+These are some further comments about Win32 builds from Mark Evans:
+
+The documentation for Win32 builds is a bit shy.  Under MSVC6 I
+followed their instructions to the letter, but there were still
+some things missing.
+
+(1) Must #define STATIC for entire project if linking statically.
+    (I see no reason to use DLLs for code this compact.)  This of
+    course is a project setting in MSVC under Preprocessor.
+
+(2) Missing some #ifdefs relating to the function pointers
+    pcre_malloc and pcre_free.  See my solution below.  (The stubs
+    may not be mandatory but they made me feel better.)
+
+=========================
+#ifdef _WIN32
+#include <malloc.h>
+
+void* malloc_stub(size_t N)
+{ return malloc(N); }
+void free_stub(void* p)
+{ free(p); }
+void *(*pcre_malloc)(size_t) = &malloc_stub;
+void  (*pcre_free)(void *) = &free_stub;
+
+#else
+
+void *(*pcre_malloc)(size_t) = malloc;
+void  (*pcre_free)(void *) = free;
+
+#endif
+=========================
 
 ****

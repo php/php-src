@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2001 University of Cambridge
+           Copyright (c) 1997-2002 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -99,7 +99,7 @@ volatile int dummy;
 
 do
   {
-  const uschar *tcode = code + 3;
+  const uschar *tcode = code + 1 + LINK_SIZE;
   BOOL try_next = TRUE;
 
   while (try_next)
@@ -119,6 +119,12 @@ do
       default:
       return FALSE;
 
+      /* Skip over callout */
+
+      case OP_CALLOUT:
+      tcode += 2;
+      break;
+
       /* Skip over extended extraction bracket number */
 
       case OP_BRANUMBER:
@@ -130,8 +136,8 @@ do
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
-      do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
-      tcode += 3;
+      do tcode += GET(tcode, 1); while (*tcode == OP_ALT);
+      tcode += 1+LINK_SIZE;
       break;
 
       /* Skip over an option setting, changing the caseless flag */
@@ -148,8 +154,8 @@ do
       if (!set_start_bits(++tcode, start_bits, caseless, cd))
         return FALSE;
       dummy = 1;
-      do tcode += (tcode[1] << 8) + tcode[2]; while (*tcode == OP_ALT);
-      tcode += 3;
+      do tcode += GET(tcode,1); while (*tcode == OP_ALT);
+      tcode += 1+LINK_SIZE;
       break;
 
       /* Single-char * or ? sets the bit and tries the next item */
@@ -314,7 +320,7 @@ do
       }      /* End of switch */
     }        /* End of try_next loop */
 
-  code += (code[1] << 8) + code[2];   /* Advance to next branch */
+  code += GET(code, 1);   /* Advance to next branch */
   }
 while (*code == OP_ALT);
 return TRUE;
@@ -346,6 +352,8 @@ pcre_study(const pcre *external_re, int options, const char **errorptr)
 uschar start_bits[32];
 real_pcre_extra *extra;
 const real_pcre *re = (const real_pcre *)external_re;
+uschar *code = (uschar *)re + sizeof(real_pcre) +
+  (re->name_count * re->name_entry_size);
 compile_data compile_block;
 
 *errorptr = NULL;
@@ -362,9 +370,9 @@ if ((options & ~PUBLIC_STUDY_OPTIONS) != 0)
   return NULL;
   }
 
-/* For an anchored pattern, or an unchored pattern that has a first char, or a
-multiline pattern that matches only at "line starts", no further processing at
-present. */
+/* For an anchored pattern, or an unanchored pattern that has a first char, or
+a multiline pattern that matches only at "line starts", no further processing
+at present. */
 
 if ((re->options & (PCRE_ANCHORED|PCRE_FIRSTSET|PCRE_STARTLINE)) != 0)
   return NULL;
@@ -379,7 +387,7 @@ compile_block.ctypes = re->tables + ctypes_offset;
 /* See if we can find a fixed set of initial characters for the pattern. */
 
 memset(start_bits, 0, 32 * sizeof(uschar));
-if (!set_start_bits(re->code, start_bits, (re->options & PCRE_CASELESS) != 0,
+if (!set_start_bits(code, start_bits, (re->options & PCRE_CASELESS) != 0,
   &compile_block)) return NULL;
 
 /* Get an "extra" block and put the information therein. */

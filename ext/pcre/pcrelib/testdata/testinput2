@@ -173,7 +173,7 @@
 /<.*>/U
     abc<def>ghi<klm>nop
     
-/<.*>(?U)/
+/(?U)<.*>/
     abc<def>ghi<klm>nop
 
 /<.*?>/U
@@ -658,6 +658,8 @@
              
 /^[[:ascii:]]/D
 
+/^[[:blank:]]/D
+
 /^[[:cntrl:]]/D
 
 /^[[:digit:]]/D
@@ -681,6 +683,8 @@
 /^[[:^cntrl:]]/D
 
 /^[12[:^digit:]]/D
+
+/^[[:^blank:]]/D
 
 /[01[:alpha:]%]/D
 
@@ -720,4 +724,439 @@
     mainmain
     mainOmain
     
+/These are all cases where Perl does it differently (nested captures)/
+
+/^(a(b)?)+$/
+    aba
+   
+/^(aa(bb)?)+$/
+    aabbaa    
+    
+/^(aa|aa(bb))+$/
+    aabbaa 
+    
+/^(aa(bb)??)+$/
+    aabbaa    
+    
+/^(?:aa(bb)?)+$/
+    aabbaa    
+    
+/^(aa(b(b))?)+$/
+    aabbaa    
+
+/^(?:aa(b(b))?)+$/
+    aabbaa    
+
+/^(?:aa(b(?:b))?)+$/
+    aabbaa    
+
+/^(?:aa(bb(?:b))?)+$/
+    aabbbaa    
+    
+/^(?:aa(b(?:bb))?)+$/
+    aabbbaa    
+
+/^(?:aa(?:b(b))?)+$/
+    aabbaa    
+
+/^(?:aa(?:b(bb))?)+$/
+    aabbbaa    
+
+/^(aa(b(bb))?)+$/
+    aabbbaa    
+
+/^(aa(bb(bb))?)+$/
+    aabbbbaa    
+
+/--------------------------------------------------------------------/ 
+    
+/#/xMD
+
+/a#/xMD
+
+/[\s]/D
+
+/[\S]/D
+
+/a(?i)b/D
+    ab
+    aB
+    *** Failers 
+    AB  
+
+/(a(?i)b)/D
+    ab
+    aB
+    *** Failers 
+    AB  
+    
+/   (?i)abc/xD
+
+/#this is a comment
+  (?i)abc/xD
+
+/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/D
+
+/\Q123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/D
+
+/\Q\E/D
+    \
+
+/\Q\Ex/D
+
+/ \Q\E/D
+
+/a\Q\E/D
+  abc
+  bca
+  bac  
+
+/a\Q\Eb/D
+  abc
+
+/\Q\Eabc/D
+
+/x*+\w/D
+    ****Failers
+    xxxxx
+    
+/x?+/D
+
+/x++/D
+
+/x{1,3}+/D 
+
+/(x)*+/D
+
+/^(\w++|\s++)*$/
+    now is the time for all good men to come to the aid of the party
+    *** Failers
+    this is not a line with only words and spaces!
+    
+/(\d++)(\w)/
+    12345a
+    *** Failers
+    12345+ 
+
+/a++b/
+    aaab
+
+/(a++b)/
+    aaab
+
+/(a++)b/
+    aaab
+
+/([^()]++|\([^()]*\))+/
+    ((abc(ade)ufh()()x
+    
+/\(([^()]++|\([^()]+\))+\)/ 
+    (abc)
+    (abc(def)xyz)
+    *** Failers
+    ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   
+
+/(abc){1,3}+/D
+
+/a+?+/
+
+/a{2,3}?+b/
+
+/(?U)a+?+/
+
+/a{2,3}?+b/U
+
+/x(?U)a++b/D
+    xaaaab
+
+/(?U)xa++b/D
+    xaaaab
+
+/^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/D
+
+/^x(?U)a+b/D
+
+/^x(?U)(a+)b/D
+
+/[.x.]/
+
+/[=x=]/
+
+/[:x:]/
+
+/\l/
+
+/\L/
+
+/\N{name}/
+
+/\pP/
+
+/\PP/
+
+/\p{prop}/
+
+/\P{prop}/
+
+/\u/
+
+/\U/
+
+/\X/
+
+/[/
+
+/[a-/
+
+/[[:space:]/
+
+/[\s]/DM
+
+/[[:space:]]/DM
+
+/[[:space:]abcde]/DM
+
+/< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/x
+    <>
+    <abcd>
+    <abc <123> hij>
+    <abc <def> hij>
+    <abc<>def> 
+    <abc<>      
+    *** Failers
+    <abc
+
+|8J\$WE\<\.rX\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|DM
+
+|\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|DM
+
+/(.*)\d+\1/I
+
+/(.*)\d+/I
+    
+/(.*)\d+\1/Is
+
+/(.*)\d+/Is
+
+/(.*(xyz))\d+\2/I
+
+/((.*))\d+\1/I
+    abc123bc
+    
+/a[b]/I
+
+/(?=a).*/I
+
+/(?=abc).xyz/iI
+
+/(?=abc)(?i).xyz/I
+
+/(?=a)(?=b)/I
+
+/(?=.)a/I
+
+/((?=abcda)a)/I
+
+/((?=abcda)ab)/I
+
+/()a/I
+
+/(?(1)ab|ac)/I
+
+/(?(1)abz|acz)/I
+
+/(?(1)abz)/I
+
+/(?(1)abz)123/I
+
+/(a)+/I
+
+/(a){2,3}/I
+
+/(a)*/I
+
+/[a]/I
+
+/[ab]/I
+
+/[ab]/IS
+
+/[^a]/I
+
+/\d456/I
+
+/\d456/IS
+
+/a^b/I
+
+/^a/mI
+  abcde
+  xy\nabc 
+  *** Failers 
+  xyabc 
+
+/c|abc/I
+
+/(?i)[ab]/IS
+
+/[ab](?i)cd/IS
+
+/abc(?C)def/
+    abcdef
+    1234abcdef 
+    *** Failers
+    abcxyz
+    abcxyzf   
+
+/abc(?C)de(?C1)f/
+    123abcdef
+    
+/(?C1)\dabc(?C2)def/ 
+    1234abcdef
+    *** Failers
+    abcdef 
+    
+/(?C255)ab/
+
+/(?C256)ab/
+
+/(?Cab)xx/ 
+
+/(?C12vr)x/
+
+/abc(?C)def/
+    *** Failers
+    \x83\x0\x61bcdef
+
+/(abc)(?C)de(?C1)f/
+    123abcdef
+    123abcdef\C+ 
+    123abcdef\C- 
+    *** Failers
+    123abcdef\C!1 
+    
+/(?C0)(abc(?C1))*/
+    abcabcabc
+    abcabc\C!1!3   
+    *** Failers
+    abcabcabc\C!1!3   
+
+/(\d{3}(?C))*/
+    123\C+
+    123456\C+
+    123456789\C+  
+
+/((xyz)(?C)p|(?C1)xyzabc)/
+    xyzabc\C+
+
+/(X)((xyz)(?C)p|(?C1)xyzabc)/
+    Xxyzabc\C+
+
+/(?=(abc))(?C)abcdef/
+    abcdef\C+
+    
+/(?!(abc)(?C1)d)(?C2)abcxyz/
+    abcxyz\C+ 
+
+/(?<=(abc)(?C))xyz/
+   abcxyz\C+
+   
+/(?C)abc/ 
+
+/(?C)^abc/
+
+/(?C)a|b/S
+
+/(?R)/
+
+/(a|(?R))/
+
+/(ab|(bc|(de|(?R))))/
+
+/x(ab|(bc|(de|(?R))))/
+    xab
+    xbc
+    xde
+    xxab
+    xxxab
+    *** Failers
+    xyab   
+
+/(ab|(bc|(de|(?1))))/
+
+/x(ab|(bc|(de|(?1)x)x)x)/
+
+/^([^()]|\((?1)*\))*$/
+    abc
+    a(b)c
+    a(b(c))d  
+    *** Failers)
+    a(b(c)d  
+
+/^>abc>([^()]|\((?1)*\))*<xyz<$/
+   >abc>123<xyz<
+   >abc>1(2)3<xyz<
+   >abc>(1(2)3)<xyz<
+
+/(a(?1)b)/D
+
+/(a(?1)+b)/D
+
+/^\W*(?:((.)\W*(?1)\W*\2|)|((.)\W*(?3)\W*\4|\W*.\W*))\W*$/i
+    1221
+    Satan, oscillate my metallic sonatas!
+    A man, a plan, a canal: Panama!
+    Able was I ere I saw Elba. 
+    *** Failers
+    The quick brown fox  
+    
+/^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/
+    12
+    (((2+2)*-3)-7)
+    -12
+    *** Failers
+    ((2+2)*-3)-7)
+         
+/^(x(y|(?1){2})z)/
+    xyz
+    xxyzxyzz 
+    *** Failers
+    xxyzz
+    xxyzxyzxyzz   
+
+/((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/x
+    <>
+    <abcd>
+    <abc <123> hij>
+    <abc <def> hij>
+    <abc<>def> 
+    <abc<>      
+    *** Failers
+    <abc
+
+/(?1)/
+
+/((?2)(abc)/
+
+/^(abc)def(?1)/
+    abcdefabc
+
+/^(a|b|c)=(?1)+/
+    a=a
+    a=b
+    a=bc  
+
+/^(a|b|c)=((?1))+/
+    a=a
+    a=b
+    a=bc  
+
+/a(?P<name1>b|c)d(?P<longername2>e)/D
+    abde
+    acde 
+
+/(?:a(?P<c>c(?P<d>d)))(?P<a>a)/D
+
+/(?P<a>a)...(?P=a)bbb(?P>a)d/D
+
 / End of testinput2 /

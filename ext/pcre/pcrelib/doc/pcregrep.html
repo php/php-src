@@ -22,7 +22,7 @@ pcregrep - a grep with Perl-compatible regular expressions.
 </P>
 <LI><A NAME="SEC2" HREF="#TOC1">SYNOPSIS</A>
 <P>
-<B>pcregrep [-Vcfhilnrsvx] pattern [file] ...</B>
+<B>pcregrep [-Vcfhilnrsvx] [pattern] [file1 file2 ...]</B>
 </P>
 <LI><A NAME="SEC3" HREF="#TOC1">DESCRIPTION</A>
 <P>
@@ -30,6 +30,10 @@ pcregrep - a grep with Perl-compatible regular expressions.
 grep commands do, but it uses the PCRE regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
 <B>pcre(3)</B> for a full description of syntax and semantics.
+</P>
+<P>
+A pattern must be specified on the command line unless the <B>-f</B> option is
+used (see below).
 </P>
 <P>
 If no files are specified, <B>pcregrep</B> reads the standard input. By default,
@@ -55,11 +59,12 @@ lines that would otherwise have been printed. If several files are given, a
 count is printed for each of them.
 </P>
 <P>
-\fB-f<I>filename</I>
-Read patterns from the file, one per line, and match all patterns against each
-line. There is a maximum of 100 patterns. Trailing white space is removed, and
-blank lines are ignored. An empty file contains no patterns and therefore
-matches nothing.
+\fB-f<I>filename</I> Read a number of patterns from the file, one per line, and
+match all of them against each line of input. A line is output if any of the
+patterns match it. When <B>-f</B> is used, no pattern is taken from the command
+line; all arguments are treated as file names. There is a maximum of 100
+patterns. Trailing white space is removed, and blank lines are ignored. An
+empty file contains no patterns and therefore matches nothing.
 </P>
 <P>
 <B>-h</B>
@@ -115,6 +120,6 @@ for syntax errors or inacessible files (even if matches were found).
 Philip Hazel &#60;ph10@cam.ac.uk&#62;
 </P>
 <P>
-Last updated: 15 August 2001
+Last updated: 25 July 2002
 <BR>
-Copyright (c) 1997-2001 University of Cambridge.
+Copyright (c) 1997-2002 University of Cambridge.

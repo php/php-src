@@ -1,116 +1,304 @@
-PCRE version 3.9 02-Jan-2002
+PCRE version 3.92 11-Sep-2002
 
-/^[\w]+/
+/-- Do not use the \x{} construct except with patterns that have the --/
+/-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
+No match
+/-- that option is set. However, the latest Perls recognize them always. --/
+No match
+
+/a.b/8
+    acb
+ 0: acb
+    a\x7fb
+ 0: a\x{7f}b
+    a\x{100}b 
+ 0: a\x{100}b
     *** Failers
 No match
-    École
+    a\nb  
 No match
 
-/^[\w]+/Lfr
-    École
- 0: École
-
-/^[\w]+/
+/a(.{3})b/8
+    a\x{4000}xyb 
+ 0: a\x{4000}xyb
+ 1: \x{4000}xy
+    a\x{4000}\x7fyb 
+ 0: a\x{4000}\x{7f}yb
+ 1: \x{4000}\x{7f}y
+    a\x{4000}\x{100}yb 
+ 0: a\x{4000}\x{100}yb
+ 1: \x{4000}\x{100}y
     *** Failers
 No match
-    École
+    a\x{4000}b 
+No match
+    ac\ncb 
 No match
 
-/^[\W]+/
-    École
- 0: \xc9
+/a(.*?)(.)/
+    a\xc0\x88b
+ 0: a\xc0
+ 1: 
+ 2: \xc0
 
-/^[\W]+/Lfr
+/a(.*?)(.)/8
+    a\x{100}b
+ 0: a\x{100}
+ 1: 
+ 2: \x{100}
+
+/a(.*)(.)/
+    a\xc0\x88b
+ 0: a\xc0\x88b
+ 1: \xc0\x88
+ 2: b
+
+/a(.*)(.)/8
+    a\x{100}b
+ 0: a\x{100}b
+ 1: \x{100}
+ 2: b
+
+/a(.)(.)/
+    a\xc0\x92bcd
+ 0: a\xc0\x92
+ 1: \xc0
+ 2: \x92
+
+/a(.)(.)/8
+    a\x{240}bcd
+ 0: a\x{240}b
+ 1: \x{240}
+ 2: b
+
+/a(.?)(.)/
+    a\xc0\x92bcd
+ 0: a\xc0\x92
+ 1: \xc0
+ 2: \x92
+
+/a(.?)(.)/8
+    a\x{240}bcd
+ 0: a\x{240}b
+ 1: \x{240}
+ 2: b
+
+/a(.??)(.)/
+    a\xc0\x92bcd
+ 0: a\xc0
+ 1: 
+ 2: \xc0
+
+/a(.??)(.)/8
+    a\x{240}bcd
+ 0: a\x{240}
+ 1: 
+ 2: \x{240}
+
+/a(.{3})b/8
+    a\x{1234}xyb 
+ 0: a\x{1234}xyb
+ 1: \x{1234}xy
+    a\x{1234}\x{4321}yb 
+ 0: a\x{1234}\x{4321}yb
+ 1: \x{1234}\x{4321}y
+    a\x{1234}\x{4321}\x{3412}b 
+ 0: a\x{1234}\x{4321}\x{3412}b
+ 1: \x{1234}\x{4321}\x{3412}
     *** Failers
- 0: *** 
-    École
+No match
+    a\x{1234}b 
+No match
+    ac\ncb 
 No match
 
-/[\b]/
-    \b
- 0: \x08
+/a(.{3,})b/8
+    a\x{1234}xyb 
+ 0: a\x{1234}xyb
+ 1: \x{1234}xy
+    a\x{1234}\x{4321}yb 
+ 0: a\x{1234}\x{4321}yb
+ 1: \x{1234}\x{4321}y
+    a\x{1234}\x{4321}\x{3412}b 
+ 0: a\x{1234}\x{4321}\x{3412}b
+ 1: \x{1234}\x{4321}\x{3412}
+    axxxxbcdefghijb 
+ 0: axxxxbcdefghijb
+ 1: xxxxbcdefghij
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+ 0: a\x{1234}\x{4321}\x{3412}\x{3421}b
+ 1: \x{1234}\x{4321}\x{3412}\x{3421}
     *** Failers
 No match
-    a
+    a\x{1234}b 
 No match
 
-/[\b]/Lfr
-    \b
- 0: \x08
+/a(.{3,}?)b/8
+    a\x{1234}xyb 
+ 0: a\x{1234}xyb
+ 1: \x{1234}xy
+    a\x{1234}\x{4321}yb 
+ 0: a\x{1234}\x{4321}yb
+ 1: \x{1234}\x{4321}y
+    a\x{1234}\x{4321}\x{3412}b 
+ 0: a\x{1234}\x{4321}\x{3412}b
+ 1: \x{1234}\x{4321}\x{3412}
+    axxxxbcdefghijb 
+ 0: axxxxb
+ 1: xxxx
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+ 0: a\x{1234}\x{4321}\x{3412}\x{3421}b
+ 1: \x{1234}\x{4321}\x{3412}\x{3421}
     *** Failers
 No match
-    a
+    a\x{1234}b 
 No match
 
-/^\w+/
+/a(.{3,5})b/8
+    a\x{1234}xyb 
+ 0: a\x{1234}xyb
+ 1: \x{1234}xy
+    a\x{1234}\x{4321}yb 
+ 0: a\x{1234}\x{4321}yb
+ 1: \x{1234}\x{4321}y
+    a\x{1234}\x{4321}\x{3412}b 
+ 0: a\x{1234}\x{4321}\x{3412}b
+ 1: \x{1234}\x{4321}\x{3412}
+    axxxxbcdefghijb 
+ 0: axxxxb
+ 1: xxxx
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+ 0: a\x{1234}\x{4321}\x{3412}\x{3421}b
+ 1: \x{1234}\x{4321}\x{3412}\x{3421}
+    axbxxbcdefghijb 
+ 0: axbxxb
+ 1: xbxx
+    axxxxxbcdefghijb 
+ 0: axxxxxb
+ 1: xxxxx
     *** Failers
 No match
-    École
+    a\x{1234}b 
+No match
+    axxxxxxbcdefghijb 
 No match
 
-/^\w+/Lfr
-    École
- 0: École
-
-/(.+)\b(.+)/
-    École
- 0: \xc9cole
- 1: \xc9
- 2: cole
-
-/(.+)\b(.+)/Lfr
+/a(.{3,5}?)b/8
+    a\x{1234}xyb 
+ 0: a\x{1234}xyb
+ 1: \x{1234}xy
+    a\x{1234}\x{4321}yb 
+ 0: a\x{1234}\x{4321}yb
+ 1: \x{1234}\x{4321}y
+    a\x{1234}\x{4321}\x{3412}b 
+ 0: a\x{1234}\x{4321}\x{3412}b
+ 1: \x{1234}\x{4321}\x{3412}
+    axxxxbcdefghijb 
+ 0: axxxxb
+ 1: xxxx
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+ 0: a\x{1234}\x{4321}\x{3412}\x{3421}b
+ 1: \x{1234}\x{4321}\x{3412}\x{3421}
+    axbxxbcdefghijb 
+ 0: axbxxb
+ 1: xbxx
+    axxxxxbcdefghijb 
+ 0: axxxxxb
+ 1: xxxxx
     *** Failers
- 0: *** Failers
- 1: *** 
- 2: Failers
-    École
+No match
+    a\x{1234}b 
+No match
+    axxxxxxbcdefghijb 
 No match
 
-/École/i
-    École
- 0: \xc9cole
+/^[a\x{c0}]/8
     *** Failers
 No match
-    école
+    \x{100}
 No match
 
-/École/iLfr
-    École
- 0: École
-    école
- 0: école
+/(?<=aXb)cd/8
+    aXbcd
+ 0: cd
 
-/\w/IS
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-Starting character set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
-  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
+/(?<=a\x{100}b)cd/8
+    a\x{100}bcd
+ 0: cd
 
-/\w/ISLfr
-Capturing subpattern count = 0
-No options
-No first char
-No need char
-Starting character set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
-  Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
-  À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å 
-  æ ç è é ê ë ì í î ï ð ñ ò ó ô õ ö ø ù ú û ü ý þ ÿ 
-
-/^[\xc8-\xc9]/iLfr
-    École
- 0: É
-    école
- 0: é
-
-/^[\xc8-\xc9]/Lfr
-    École
- 0: É
+/(?<=a\x{100000}b)cd/8
+    a\x{100000}bcd
+ 0: cd
+    
+/(?:\x{100}){3}b/8
+    \x{100}\x{100}\x{100}b
+ 0: \x{100}\x{100}\x{100}b
     *** Failers 
 No match
-    école
+    \x{100}\x{100}b
 No match
+
+/\x{ab}/8
+    \x{ab} 
+ 0: \x{ab}
+    \xc2\xab
+ 0: \x{ab}
+    *** Failers 
+No match
+    \x00{ab}
+No match
+
+/(?<=(.))X/8
+    WXYZ
+ 0: X
+ 1: W
+    \x{256}XYZ 
+ 0: X
+ 1: \x{256}
+    *** Failers
+No match
+    XYZ 
+No match
+
+/X(\C{3})/8
+    X\x{1234}
+ 0: X\x{1234}
+ 1: \x{1234}
+
+/X(\C{4})/8
+    X\x{1234}YZ
+ 0: X\x{1234}Y
+ 1: \x{1234}Y
+    
+/X\C*/8
+    XYZabcdce
+ 0: XYZabcdce
+    
+/X\C*?/8
+    XYZabcde
+ 0: X
+    
+/X\C{3,5}/8
+    Xabcdefg   
+ 0: Xabcde
+    X\x{1234} 
+ 0: X\x{1234}
+    X\x{1234}YZ
+ 0: X\x{1234}YZ
+    X\x{1234}\x{512}  
+ 0: X\x{1234}\x{512}
+    X\x{1234}\x{512}YZ
+ 0: X\x{1234}\x{512}
+
+/X\C{3,5}?/8
+    Xabcdefg   
+ 0: Xabc
+    X\x{1234} 
+ 0: X\x{1234}
+    X\x{1234}YZ
+ 0: X\x{1234}
+    X\x{1234}\x{512}  
+ 0: X\x{1234}
 
 / End of testinput4 /
 

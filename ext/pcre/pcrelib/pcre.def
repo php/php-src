@@ -8,7 +8,10 @@ pcre_copy_substring
 pcre_exec
 pcre_get_substring
 pcre_get_substring_list
+pcre_free_substring
+pcre_free_substring_list
 pcre_info
+pcre_fullinfo
 pcre_maketables
 pcre_study
 pcre_version

@@ -1,65 +1,155 @@
-/^[\w]+/
+/-- Do not use the \x{} construct except with patterns that have the --/
+/-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
+/-- that option is set. However, the latest Perls recognize them always. --/
+
+/a.b/8
+    acb
+    a\x7fb
+    a\x{100}b 
     *** Failers
-    École
+    a\nb  
 
-/^[\w]+/Lfr
-    École
-
-/^[\w]+/
+/a(.{3})b/8
+    a\x{4000}xyb 
+    a\x{4000}\x7fyb 
+    a\x{4000}\x{100}yb 
     *** Failers
-    École
+    a\x{4000}b 
+    ac\ncb 
 
-/^[\W]+/
-    École
+/a(.*?)(.)/
+    a\xc0\x88b
 
-/^[\W]+/Lfr
+/a(.*?)(.)/8
+    a\x{100}b
+
+/a(.*)(.)/
+    a\xc0\x88b
+
+/a(.*)(.)/8
+    a\x{100}b
+
+/a(.)(.)/
+    a\xc0\x92bcd
+
+/a(.)(.)/8
+    a\x{240}bcd
+
+/a(.?)(.)/
+    a\xc0\x92bcd
+
+/a(.?)(.)/8
+    a\x{240}bcd
+
+/a(.??)(.)/
+    a\xc0\x92bcd
+
+/a(.??)(.)/8
+    a\x{240}bcd
+
+/a(.{3})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
     *** Failers
-    École
+    a\x{1234}b 
+    ac\ncb 
 
-/[\b]/
-    \b
+/a(.{3,})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
     *** Failers
-    a
+    a\x{1234}b 
 
-/[\b]/Lfr
-    \b
+/a(.{3,}?)b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
     *** Failers
-    a
+    a\x{1234}b 
 
-/^\w+/
+/a(.{3,5})b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    axbxxbcdefghijb 
+    axxxxxbcdefghijb 
     *** Failers
-    École
+    a\x{1234}b 
+    axxxxxxbcdefghijb 
 
-/^\w+/Lfr
-    École
-
-/(.+)\b(.+)/
-    École
-
-/(.+)\b(.+)/Lfr
+/a(.{3,5}?)b/8
+    a\x{1234}xyb 
+    a\x{1234}\x{4321}yb 
+    a\x{1234}\x{4321}\x{3412}b 
+    axxxxbcdefghijb 
+    a\x{1234}\x{4321}\x{3412}\x{3421}b 
+    axbxxbcdefghijb 
+    axxxxxbcdefghijb 
     *** Failers
-    École
+    a\x{1234}b 
+    axxxxxxbcdefghijb 
 
-/École/i
-    École
+/^[a\x{c0}]/8
     *** Failers
-    école
+    \x{100}
 
-/École/iLfr
-    École
-    école
+/(?<=aXb)cd/8
+    aXbcd
 
-/\w/IS
+/(?<=a\x{100}b)cd/8
+    a\x{100}bcd
 
-/\w/ISLfr
-
-/^[\xc8-\xc9]/iLfr
-    École
-    école
-
-/^[\xc8-\xc9]/Lfr
-    École
+/(?<=a\x{100000}b)cd/8
+    a\x{100000}bcd
+    
+/(?:\x{100}){3}b/8
+    \x{100}\x{100}\x{100}b
     *** Failers 
-    école
+    \x{100}\x{100}b
+
+/\x{ab}/8
+    \x{ab} 
+    \xc2\xab
+    *** Failers 
+    \x00{ab}
+
+/(?<=(.))X/8
+    WXYZ
+    \x{256}XYZ 
+    *** Failers
+    XYZ 
+
+/X(\C{3})/8
+    X\x{1234}
+
+/X(\C{4})/8
+    X\x{1234}YZ
+    
+/X\C*/8
+    XYZabcdce
+    
+/X\C*?/8
+    XYZabcde
+    
+/X\C{3,5}/8
+    Xabcdefg   
+    X\x{1234} 
+    X\x{1234}YZ
+    X\x{1234}\x{512}  
+    X\x{1234}\x{512}YZ
+
+/X\C{3,5}?/8
+    Xabcdefg   
+    X\x{1234} 
+    X\x{1234}YZ
+    X\x{1234}\x{512}  
 
 / End of testinput4 /
