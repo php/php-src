@@ -153,6 +153,10 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\ext\standard\aggregation.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
@@ -239,6 +243,10 @@ SOURCE=..\main\strlcpy.c
 # Begin Source File
 
 SOURCE=..\main\config.w32.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
