@@ -2328,7 +2328,6 @@ void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC)
 void zend_do_switch_cond(znode *cond TSRMLS_DC)
 {
 	zend_switch_entry switch_entry;
-	zend_op *opline;
 
 	switch_entry.cond = *cond;
 	switch_entry.default_case = -1;
