@@ -892,6 +892,7 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 	wddx_stack *stack = (wddx_stack *)user_data;
 	char *decoded_value;
 	int decoded_len;
+	TSRMLS_FETCH();
 
 	if (!wddx_stack_is_empty(stack)) {
 		wddx_stack_top(stack, (void**)&ent);
@@ -928,7 +929,7 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 				Z_TYPE_P(ent->data) = IS_STRING;
 				Z_STRLEN_P(ent->data) = len;
 				Z_STRVAL_P(ent->data) = estrndup(s, len);
-				convert_scalar_to_number(ent->data);
+				convert_scalar_to_number(ent->data TSRMLS_CC);
 				break;
 
 			case ST_BOOLEAN:
@@ -996,7 +997,7 @@ PHP_FUNCTION(wddx_serialize_value)
 	int comment_len = 0;
 	wddx_packet *packet;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s",
 							  &var, &comment, &comment_len) == FAILURE)
 		return;
 	
@@ -1094,7 +1095,7 @@ PHP_FUNCTION(wddx_packet_start)
 
 	comment = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &comment, &comment_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &comment, &comment_len) == FAILURE)
 		return;
 
 	packet = php_wddx_constructor();
@@ -1116,7 +1117,7 @@ PHP_FUNCTION(wddx_packet_end)
 	zval *packet_id;
 	wddx_packet *packet = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &packet_id) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &packet_id) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
@@ -1156,7 +1157,7 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	packet_id = args[0];
 
-	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", NULL, 1, le_wddx);
+	packet = (wddx_packet *)zend_fetch_resource(packet_id TSRMLS_CC, -1, "WDDX packet ID", NULL, 1, le_wddx);
 	if (!packet)
 	{
 		efree(args);
@@ -1181,7 +1182,7 @@ PHP_FUNCTION(wddx_deserialize)
 	char *packet;
 	int packet_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &packet, &packet_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &packet, &packet_len) == FAILURE)
 		return;
 
 	if (packet_len == 0)

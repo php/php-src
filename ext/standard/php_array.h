@@ -85,7 +85,7 @@ int multisort_compare(const void *a, const void *b);
 
 typedef struct {
 	int *multisort_flags[2];
-	int (*compare_func)(zval *result, zval *op1, zval *op2);
+	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 } php_array_globals;
 
 #ifdef ZTS

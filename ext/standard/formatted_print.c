@@ -408,7 +408,7 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *
  */
 static char *
-php_formatted_print(int ht, int *len)
+php_formatted_print(int ht, int *len TSRMLS_DC)
 {
 	pval ***args;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
@@ -632,7 +632,7 @@ PHP_FUNCTION(user_sprintf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht,&len))==NULL) {
+	if ((result=php_formatted_print(ht, &len TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(result,len,1);
@@ -647,7 +647,7 @@ PHP_FUNCTION(user_printf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht,&len))==NULL) {
+	if ((result=php_formatted_print(ht, &len TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	PHPWRITE(result,len);

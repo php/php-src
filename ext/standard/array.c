@@ -146,7 +146,7 @@ static int array_key_compare(const void *a, const void *b)
 		Z_STRLEN(second) = s->nKeyLength;
 	}
  
-    if (ARRAYG(compare_func)(&result, &first, &second) == FAILURE) {
+    if (ARRAYG(compare_func)(&result, &first, &second TSRMLS_CC) == FAILURE) {
         return 0;
     } 
 
@@ -278,7 +278,7 @@ static int array_data_compare(const void *a, const void *b)
 	first = *((pval **) f->pData);
 	second = *((pval **) s->pData);
 
-    if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
+    if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
         return 0;
     } 
 
@@ -878,7 +878,7 @@ PHP_FUNCTION(min)
 		min = args[0];
 
 		for (i=1; i<ZEND_NUM_ARGS(); i++) {
-			is_smaller_function(&result, *args[i], *min);
+			is_smaller_function(&result, *args[i], *min TSRMLS_CC);
 			if (Z_LVAL(result) == 1) {
 				min = args[i];
 			}
@@ -930,7 +930,7 @@ PHP_FUNCTION(max)
 		max = args[0];
 
 		for (i=1; i<ZEND_NUM_ARGS(); i++) {
-			is_smaller_or_equal_function(&result, *args[i], *max);
+			is_smaller_or_equal_function(&result, *args[i], *max TSRMLS_CC);
 			if (Z_LVAL(result) == 0) {
 				max = args[i];
 			}
@@ -1044,7 +1044,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	HashPosition pos;			/* hash iterator */
    	ulong num_key;
    	char *string_key;
-	int (*compare_func)(zval *, zval *, zval *) = is_equal_function;
+	int (*compare_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
       	
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
@@ -1065,13 +1065,13 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		convert_to_boolean_ex(strict);
 		if (Z_LVAL_PP(strict)) {
 			compare_func = is_identical_function;
-	        } 
+	    }
 	}
 
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
-     	compare_func(&res, *value, *entry);
+     	compare_func(&res, *value, *entry TSRMLS_CC);
 		if (Z_LVAL(res) == 1) {
 			if (behavior==0) {	     
 				RETURN_TRUE;
@@ -1941,7 +1941,7 @@ PHP_FUNCTION(array_keys)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		if (search_value != NULL) {
-     		is_equal_function(&res, *search_value, *entry);
+     		is_equal_function(&res, *search_value, *entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
 		}
 	
@@ -2513,7 +2513,7 @@ int multisort_compare(const void *a, const void *b)
 	do {
 		set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r]);
 
-		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
+		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData) TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
 		if (result != 0)
 			return result;
@@ -2830,7 +2830,7 @@ PHP_FUNCTION(array_sum)
 			continue;
 
 		SEPARATE_ZVAL(entry);
-		convert_scalar_to_number(*entry);
+		convert_scalar_to_number(*entry TSRMLS_CC);
 
 		if (Z_TYPE_PP(entry) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
 			Z_LVAL_P(return_value) += Z_LVAL_PP(entry);

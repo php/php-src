@@ -1518,7 +1518,7 @@ PHP_FUNCTION(ora_error)
 	}
 
 	if (argc == 1) {
-		res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+		res = zend_fetch_resource(arg TSRMLS_CC, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
 		ZEND_VERIFY_RESOURCE(res);
 
 		if (what == le_cursor) {
@@ -1550,7 +1550,7 @@ PHP_FUNCTION(ora_errorcode)
 	}
 
 	if (argc == 1) {
-		res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+		res = zend_fetch_resource(arg TSRMLS_CC, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
 		ZEND_VERIFY_RESOURCE(res);
 
 		if (what == le_cursor) {
@@ -1595,7 +1595,7 @@ ora_get_cursor(HashTable *list, pval **ind)
 	oraConnection *db_conn;
 	TSRMLS_FETCH();
 
-	cursor = (oraCursor *) zend_fetch_resource(ind, -1, "Oracle-Cursor", NULL, 1, le_cursor);
+	cursor = (oraCursor *) zend_fetch_resource(ind TSRMLS_CC, -1, "Oracle-Cursor", NULL, 1, le_cursor);
 	if (! cursor) {
 		return NULL;
 	}

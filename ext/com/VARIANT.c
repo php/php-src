@@ -179,6 +179,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
+	TSRMLS_FETCH();
 
 	pval result, **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
@@ -231,6 +232,7 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
+	TSRMLS_FETCH();
 
 	pval **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
