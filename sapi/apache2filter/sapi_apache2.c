@@ -118,7 +118,7 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 
 	to_read = ctx->post_len - ctx->post_idx;
-	n = MIN(to_read, count_bytes);
+	n = MIN(to_read, (int) count_bytes);
 	
 	if (n > 0) {
 		memcpy(buf, ctx->post_data + ctx->post_idx, n);
