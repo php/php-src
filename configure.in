@@ -249,6 +249,7 @@ sys/time.h \
 sys/types.h \
 sys/varargs.h \
 sys/wait.h \
+sys/resource.h \
 syslog.h \
 unistd.h \
 unix.h \
