@@ -103,6 +103,10 @@ ZEND_GET_MODULE(birdstep)
 THREAD_LS birdstep_module php_birdstep_module;
 THREAD_LS static HENV henv;
 
+#define PHP_GET_BIRDSTEP_RES_IDX(id) convert_to_long_ex(id); if (!(res = birdstep_find_result(list, Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d)", Z_LVAL_PP(id)); RETURN_FALSE; } 
+#define PHP_BIRDSTEP_CHK_LNK(id) convert_to_long_ex(id); if (!(conn = birdstep_find_conn(list,Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)", Z_LVAL_PP(id)); RETURN_FALSE; }
+                                                        
+
 static void _close_birdstep_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	VConn *conn = (VConn *)rsrc->ptr;
@@ -222,11 +226,11 @@ static void birdstep_del_result(HashTable *list,int ind)
 
 /* Users functions */
 
-/* {{{ proto int birdstep_connect(string server, string user, sting pass)
+/* {{{ proto int birdstep_connect(string server, string user, string pass)
  */
 PHP_FUNCTION(birdstep_connect)
 {
-	pval *serv,*user,*pass;
+	zval **serv,**user,**pass;
 	char *Serv = NULL;
 	char *User = NULL;
 	char *Pass = NULL;
@@ -236,35 +240,30 @@ PHP_FUNCTION(birdstep_connect)
 	long ind;
 
 	if ( php_birdstep_module.max_links != -1 && php_birdstep_module.num_links == php_birdstep_module.max_links ) {
-		php_error(E_WARNING,"Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;
 	}
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht,3,&serv,&user,&pass) == FAILURE ) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &serv, &user, &pass) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(serv);
-	convert_to_string(user);
-	convert_to_string(pass);
-	Serv = Z_STRVAL_P(serv);
-	User = Z_STRVAL_P(user);
-	Pass = Z_STRVAL_P(pass);
+	convert_to_string_ex(serv);
+	convert_to_string_ex(user);
+	convert_to_string_ex(pass);
+	Serv = Z_STRVAL_PP(serv);
+	User = Z_STRVAL_PP(user);
+	Pass = Z_STRVAL_PP(pass);
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Could not allocate connection handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not allocate connection handle");
 		RETURN_FALSE;
 	}
 	stat = SQLConnect(hdbc,Serv,SQL_NTS,User,SQL_NTS,Pass,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
 	new = (VConn *)emalloc(sizeof(VConn));
-	if ( new == NULL ) {
-		php_error(E_WARNING,"Birdstep: Out of memory for store connection");
-		SQLFreeConnect(hdbc);
-		RETURN_FALSE;
-	}
 	ind = birdstep_add_conn(list,new,hdbc);
 	php_birdstep_module.num_links++;
 	RETURN_LONG(ind);
@@ -275,21 +274,17 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	pval *id;
+	zval **id;
 	VConn *conn;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(id);
-	conn = birdstep_find_conn(list,Z_LVAL_P(id));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
-		RETURN_FALSE;
-	}
+	PHP_BIRDSTEP_CHK_LNK(id);
+
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
-	birdstep_del_conn(list,Z_LVAL_P(id));
+	birdstep_del_conn(list,Z_LVAL_PP(id));
 	php_birdstep_module.num_links--;
 	RETURN_TRUE;
 }
@@ -299,7 +294,7 @@ PHP_FUNCTION(birdstep_close)
  */
 PHP_FUNCTION(birdstep_exec)
 {
-	pval *ind,*exec_str;
+	zval **ind, **exec_str;
 	char *query = NULL;
 	int indx;
 	VConn *conn;
@@ -308,32 +303,24 @@ PHP_FUNCTION(birdstep_exec)
 	SWORD cols,i,colnamelen;
 	SDWORD rows,coldesc;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&exec_str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &exec_str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	conn = birdstep_find_conn(list,Z_LVAL_P(ind));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(ind));
-		RETURN_FALSE;
-	}
-	convert_to_string(exec_str);
-	query = Z_STRVAL_P(exec_str);
+	PHP_BIRDSTEP_CHK_LNK(ind);
+
+	convert_to_string_ex(exec_str);
+	query = Z_STRVAL_PP(exec_str);
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
-	if ( res == NULL ) {
-		php_error(E_WARNING,"Birdstep: Out of memory for result");
-		RETURN_FALSE;
-	}
 	stat = SQLAllocStmt(conn->hdbc,&res->hstmt);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: SQLAllocStmt return %d",stat);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLAllocStmt return %d",stat);
 		efree(res);
 		RETURN_FALSE;
 	}
 	stat = SQLExecDirect(res->hstmt,query,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Can not execute \"%s\" query",query);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Can not execute \"%s\" query",query);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -341,7 +328,7 @@ PHP_FUNCTION(birdstep_exec)
 	/* Success query */
 	stat = SQLNumResultCols(res->hstmt,&cols);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLNumResultCols return %d",stat);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -349,7 +336,7 @@ PHP_FUNCTION(birdstep_exec)
 	if ( !cols ) { /* Was INSERT, UPDATE, DELETE, etc. query */
 		stat = SQLRowCount(res->hstmt,&rows);
 		if ( stat != SQL_SUCCESS ) {
-			php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLNumResultCols return %d",stat);
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -359,12 +346,6 @@ PHP_FUNCTION(birdstep_exec)
 		RETURN_LONG(rows);
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)emalloc(sizeof(VResVal)*cols);
-		if ( res->values == NULL ) {
-			php_error(E_WARNING,"Birdstep: Out of memory for result columns");
-			SQLFreeStmt(res->hstmt,SQL_DROP);
-			efree(res);
-			RETURN_FALSE;
-		}
 		res->numcols = cols;
 		for ( i = 0; i < cols; i++ ) {
 			SQLColAttributes(res->hstmt,i+1,SQL_COLUMN_NAME,
@@ -383,11 +364,7 @@ PHP_FUNCTION(birdstep_exec)
 			SQLColAttributes(res->hstmt,i+1,SQL_COLUMN_DISPLAY_SIZE,
 			   NULL,0,NULL,&coldesc);
 			res->values[i].value = (char *)emalloc(coldesc+1);
-			if ( res->values[i].value != NULL ) {
-				SQLBindCol(res->hstmt,i+1,SQL_C_CHAR,
-				   res->values[i].value,coldesc+1,
-				   &res->values[i].vallen);
-			}
+			SQLBindCol(res->hstmt,i+1,SQL_C_CHAR, res->values[i].value,coldesc+1, &res->values[i].vallen);
 		}
 	}
 	res->fetched = 0;
@@ -400,31 +377,27 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	pval *ind;
+	zval **ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
 	UWORD   RowStat[1];
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	res = birdstep_find_result(list,Z_LVAL_P(ind));
-	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
-		RETURN_FALSE;
-	}
+	PHP_GET_BIRDSTEP_RES_IDX(ind);
+
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 	if ( stat == SQL_NO_DATA_FOUND ) {
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_P(ind));
+		birdstep_del_result(list,Z_LVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: SQLFetch return error");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_P(ind));
+		birdstep_del_result(list,Z_LVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	res->fetched = 1;
@@ -436,7 +409,7 @@ PHP_FUNCTION(birdstep_fetch)
  */
 PHP_FUNCTION(birdstep_result)
 {
-	pval *ind,*col;
+	zval **ind, **col;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -445,20 +418,16 @@ PHP_FUNCTION(birdstep_result)
 	SWORD indx = -1;
 	char *field = NULL;
 
-	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &col) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	res = birdstep_find_result(list,Z_LVAL_P(ind));
-	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
-		RETURN_FALSE;
-	}
-	if ( Z_TYPE_P(col) == IS_STRING ) {
-		field = Z_STRVAL_P(col);
+	PHP_GET_BIRDSTEP_RES_IDX(ind);
+
+	if ( Z_TYPE_PP(col) == IS_STRING ) {
+		field = Z_STRVAL_PP(col);
 	} else {
-		convert_to_long(col);
-		indx = Z_LVAL_P(col);
+		convert_to_long_ex(col);
+		indx = Z_LVAL_PP(col);
 	}
 	if ( field ) {
 		for ( i = 0; i < res->numcols; i++ ) {
@@ -468,12 +437,12 @@ PHP_FUNCTION(birdstep_result)
 			}
 		}
 		if ( indx < 0 ) {
-			php_error(E_WARNING, "Field %s not found",field);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,  "Field %s not found",field);
 			RETURN_FALSE;
 		}
 	} else {
 		if ( indx < 0 || indx >= res->numcols ) {
-			php_error(E_WARNING,"Birdstep: Field index not in range");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 			RETURN_FALSE;
 		}
 	}
@@ -481,13 +450,13 @@ PHP_FUNCTION(birdstep_result)
 		stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 		if ( stat == SQL_NO_DATA_FOUND ) {
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_P(ind));
+			birdstep_del_result(list,Z_LVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-			php_error(E_WARNING,"Birdstep: SQLFetch return error");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_P(ind));
+			birdstep_del_result(list,Z_LVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		res->fetched = 1;
@@ -501,22 +470,18 @@ PHP_FUNCTION(birdstep_result)
 l1:
 			if ( !res->values[indx].value ) {
 				res->values[indx].value = emalloc(4096);
-				if ( !res->values[indx].value ) {
-					php_error(E_WARNING,"Out of memory");
-					RETURN_FALSE;
-				}
 			}
 			stat = SQLGetData(res->hstmt,indx+1,sql_c_type,
 				res->values[indx].value,4095,&res->values[indx].vallen);
 			if ( stat == SQL_NO_DATA_FOUND ) {
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_P(ind));
+				birdstep_del_result(list,Z_LVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-				php_error(E_WARNING,"Birdstep: SQLGetData return error");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_P(ind));
+				birdstep_del_result(list,Z_LVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
@@ -536,20 +501,16 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	pval *ind;
+	zval **ind;
 	Vresult *res;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	res = birdstep_find_result(list,Z_LVAL_P(ind));
-	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
-		RETURN_FALSE;
-	}
+	PHP_GET_BIRDSTEP_RES_IDX(ind);
+
 	SQLFreeStmt(res->hstmt,SQL_DROP);
-	birdstep_del_result(list,Z_LVAL_P(ind));
+	birdstep_del_result(list,Z_LVAL_PP(ind));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -558,22 +519,18 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	pval *id;
+	zval **id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(id);
-	conn = birdstep_find_conn(list,Z_LVAL_P(id));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
-		RETURN_FALSE;
-	}
+	PHP_BIRDSTEP_CHK_LNK(id);
+
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Set autocommit_on option failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Set autocommit_on option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -584,22 +541,18 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	pval *id;
+	zval **id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(id);
-	conn = birdstep_find_conn(list,Z_LVAL_P(id));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
-		RETURN_FALSE;
-	}
+	PHP_BIRDSTEP_CHK_LNK(id);
+
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Set autocommit_off option failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Set autocommit_off option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -610,22 +563,18 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	pval *id;
+	zval **id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(id);
-	conn = birdstep_find_conn(list,Z_LVAL_P(id));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
-		RETURN_FALSE;
-	}
+	PHP_BIRDSTEP_CHK_LNK(id)
+
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Commit failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Commit failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -636,22 +585,18 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	pval *id;
+	zval **id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(id);
-	conn = birdstep_find_conn(list,Z_LVAL_P(id));
-	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
-		RETURN_FALSE;
-	}
+	PHP_BIRDSTEP_CHK_LNK(id);
+
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Rollback failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Rollback failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -662,23 +607,19 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	pval *ind,*col;
+	zval **ind, **col;
 	Vresult *res;
 	SWORD indx;
 
-	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &col) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	res = birdstep_find_result(list,Z_LVAL_P(ind));
-	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
-		RETURN_FALSE;
-	}
-	convert_to_long(col);
-	indx = Z_LVAL_P(col);
+	PHP_GET_BIRDSTEP_RES_IDX(ind);
+
+	convert_to_long_ex(col);
+	indx = Z_LVAL_PP(col);
 	if ( indx < 0 || indx >= res->numcols ) {
-		php_error(E_WARNING,"Birdstep: Field index not in range");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 		RETURN_FALSE;
 	}
 	RETURN_STRING(res->values[indx].name,TRUE);
@@ -689,18 +630,14 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	pval *ind;
+	zval **ind;
 	Vresult *res;
 
-	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ind);
-	res = birdstep_find_result(list,Z_LVAL_P(ind));
-	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
-		RETURN_FALSE;
-	}
+	PHP_GET_BIRDSTEP_RES_IDX(ind);
+
 	RETURN_LONG(res->numcols);
 }
 /* }}} */
