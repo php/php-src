@@ -553,16 +553,15 @@ sxe_properties_get(zval *object TSRMLS_DC)
 		while (node) {
 			SKIP_TEXT(node);
 
-			_get_base_node_value(sxe, node, &value TSRMLS_CC);
-			
 			name = (char *) node->name;
 			if (!name) {
-				name = "CDATA";
-				namelen = sizeof("CDATA");
+				goto next_iter;
 			} else {
 				namelen = xmlStrlen(node->name) + 1;
 			}
 
+			_get_base_node_value(sxe, node, &value TSRMLS_CC);
+			
 			h = zend_hash_func(name, namelen);
 			if (zend_hash_quick_find(rv, name, namelen, h, (void **) &data_ptr) == SUCCESS) {
 				if (Z_TYPE_PP(data_ptr) == IS_ARRAY) {
@@ -884,7 +883,7 @@ static int
 sxe_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	*class_name = estrdup("simplexml_element");
-	*class_name_len = sizeof("simplexml_element");
+	*class_name_len = sizeof("simplexml_element")-1;
 
 	return 0;
 }
@@ -1216,17 +1215,28 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = {
 
 static void php_sxe_iterator_current(php_sxe_iterator *iterator TSRMLS_DC)
 {
+	xmlNodePtr      node;
+
 	while (iterator->node) {
-		SKIP_TEXT(iterator->node);
+		node = iterator->node;
+
+		SKIP_TEXT(node);
 	
-		_get_base_node_value(iterator->sxe, iterator->node, &iterator->data TSRMLS_CC);
-		
+		do if (node->ns) {
+			if (node->parent->ns) {
+				if (!xmlStrcmp(node->ns->href, node->parent->ns->href)) {
+					break;
+				}
+			}
+		} while (0);
+	
 		if (!iterator->node->name) {
-			iterator->name = "CDATA";
-			iterator->namelen = sizeof("CDATA");
+			goto next_iter;
 		} else {
-			iterator->namelen = xmlStrlen(iterator->node->name)+1;
-			iterator->name = (char *) iterator->node->name;
+			iterator->namelen = xmlStrlen(node->name)+1;
+			iterator->name = (char *) node->name;
+			MAKE_STD_ZVAL(iterator->data);
+			_node_as_zval(iterator->sxe, node, iterator->data TSRMLS_CC);
 		}
 		break;
 next_iter:

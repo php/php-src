@@ -11,11 +11,10 @@ print_r($sxe);
 
 $elem1 = $sxe->elem1;
 $elem2 = $elem1->elem2;
-echo($elem2->CDATA);
-
-echo "---Done---\n";
+var_dump(trim((string)$elem2));
 
 ?>
+===DONE===
 --EXPECT--
 simplexml_element Object
 (
@@ -27,10 +26,6 @@ simplexml_element Object
 
             [elem2] => simplexml_element Object
                 (
-                    [CDATA] => simplexml_element Object
-                        (
-                        )
-
                     [elem3] => simplexml_element Object
                         (
                             [elem4] => simplexml_element Object
@@ -48,4 +43,5 @@ simplexml_element Object
         )
 
 )
----Done--- 
+string(11) "CDATA block"
+===DONE===
