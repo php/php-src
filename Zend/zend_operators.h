@@ -69,6 +69,8 @@ END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
