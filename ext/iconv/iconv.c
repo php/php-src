@@ -1600,7 +1600,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	char *in_charset;
 	char *out_charset;
 	long line_len = 76;
-	char *lfchars = "\r\n";
+	zval lfchars;
 
 	php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
 
@@ -1664,23 +1664,18 @@ PHP_FUNCTION(iconv_mime_encode)
 	}
 
 	if (zend_hash_find(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars"), (void **)&ppval) == SUCCESS) {
-		pval = *ppval;
-		if (Z_TYPE_P(pval) != IS_STRING) {
-			val = *pval;
-			zval_copy_ctor(&val);
-			convert_to_string(&val);
-			pval = &val;
-		}
+		lfchars = **ppval;
+		zval_copy_ctor(&lfchars);
 
-		lfchars = Z_STRVAL_P(pval);
-
-		if (pval == &val) {
-			zval_dtor(&val);
+		if (Z_TYPE(lfchars) != IS_STRING) {
+			convert_to_string(&lfchars);
 		}
+	} else {
+		ZVAL_STRING(&lfchars, "\r\n", 1);
 	}
 
 	err = _php_iconv_mime_encode(&retval, field_name, field_name_len,
-		field_value, field_value_len, line_len, lfchars, scheme_id,
+		field_value, field_value_len, line_len, Z_STRVAL(lfchars), scheme_id,
 		out_charset, in_charset);
 	_php_iconv_show_error(err, out_charset, in_charset TSRMLS_CC);
 
@@ -1694,6 +1689,8 @@ PHP_FUNCTION(iconv_mime_encode)
 		smart_str_free(&retval);
 		RETVAL_FALSE;
 	}
+
+	zval_dtor(&lfchars);
 }
 /* }}} */
 
