@@ -138,13 +138,22 @@ ZEND_API void *zend_plist_find(int id, int *type)
 }
 
 
-ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int resource_type)
-{
-	return zend_fetch_resource_ex(passed_id, default_id, resource_type_name, 1, resource_type);
+ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type)
+{	
+	int rsrc_id;
+
+	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type);
+	
+	if (rsrc_result) {
+		rsrc_result->value.lval = rsrc_id;
+		rsrc_result->type = IS_RESOURCE;
+	}
+
+	return rsrc_id;
 }
 
 
-ZEND_API void *zend_fetch_resource_ex(zval **passed_id, int default_id, char *resource_type_name, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
 {
 	int id;
 	int actual_resource_type;
@@ -180,6 +189,9 @@ ZEND_API void *zend_fetch_resource_ex(zval **passed_id, int default_id, char *re
 	for (i=0; i<num_resource_types; i++) {
 		if (actual_resource_type == va_arg(resource_types, int)) {
 			va_end(resource_types);
+			if (found_resource_type) {
+				*found_resource_type = actual_resource_type;
+			}
 			return resource;
 		}
 	}

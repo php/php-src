@@ -62,8 +62,9 @@ ZEND_API int zend_list_delete(int id);
 ZEND_API int zend_plist_delete(int id);
 ZEND_API void *zend_list_find(int id, int *type);
 ZEND_API void *zend_plist_find(int id, int *type);
-ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int resource_type);
-ZEND_API void *zend_fetch_resource_ex(zval **passed_id, int default_id, char *resource_type_name, int num_resource_types, ...);
+
+ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
+ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
@@ -72,14 +73,15 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 		RETURN_FALSE;					\
 	}
 
-
 #define ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
-	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, resource_type);	\
+	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type);	\
 	ZEND_VERIFY_RESOURCE(rsrc);
 
+#define ZEND_FETCH_RESOURCE2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1,resource_type2)	\
+	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);	\
+	ZEND_VERIFY_RESOURCE(rsrc);
 
-#define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)		\
-	rsrc_result->value.lval = zend_list_insert(rsrc_pointer, rsrc_type);	\
-	rsrc_result->type = IS_RESOURCE
+#define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)  \
+    zend_register_resource(rsrc_result, rsrc_pointer, rsrc_type);
 
 #endif
