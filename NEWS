@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- rewrite of domxml. It's now mostly DOM Level 2 conform (Uwe)
 - Added array_map() function that applies a callback to the elements
   of given arrays and returns the result. It can also be used with a
   null callback to transpose arrays. (Andrei)
