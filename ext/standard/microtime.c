@@ -53,9 +53,9 @@
 
 /* {{{ proto string microtime(void)
    Returns a string containing the current time in seconds and microseconds */
+#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(microtime)
 {
-#ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp;
 	long sec = 0L;
 	double msec = 0.0;
@@ -68,17 +68,18 @@ PHP_FUNCTION(microtime)
 		if (msec >= 1.0) msec -= (long) msec;
 		snprintf(ret, 100, "%.8f %ld", msec, sec);
 		RETVAL_STRING(ret,1);
-	} else
-#endif
+	} else {
 		RETURN_FALSE;
+	}
 }
+#endif
 /* }}} */
 
 /* {{{ proto array gettimeofday(void)
    Returns the current time as array */
+#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(gettimeofday)
 {
-#ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp;
 	struct timezone tz;
 	
@@ -95,10 +96,11 @@ PHP_FUNCTION(gettimeofday)
 #endif			
 		add_assoc_long(return_value, "dsttime", tz.tz_dsttime);
 		return;
-	} else
-#endif
-	RETURN_FALSE;
+	} else {
+		RETURN_FALSE;
+	}
 }
+#endif
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE

@@ -21,8 +21,12 @@
 #ifndef MICROTIME_H
 #define MICROTIME_H
 
+#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(microtime);
 PHP_FUNCTION(gettimeofday);
+#endif
+#ifdef HAVE_GETRUSAGE
 PHP_FUNCTION(getrusage);
+#endif
 
 #endif /* MICROTIME_H */

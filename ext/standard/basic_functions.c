@@ -508,8 +508,10 @@ function_entry basic_functions[] = {
 	PHP_FE(getopt,															NULL)
 #endif
 
+#ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(microtime,														NULL)
 	PHP_FE(gettimeofday,													NULL)
+#endif
 
 #ifdef HAVE_GETRUSAGE
 	PHP_FE(getrusage,														NULL)
