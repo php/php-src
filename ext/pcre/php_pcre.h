@@ -39,10 +39,10 @@
 #include <locale.h>
 #endif
 
-extern void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS);
-extern int php_minit_pcre(INIT_FUNC_ARGS);
-extern int php_mshutdown_pcre(SHUTDOWN_FUNC_ARGS);
-extern int php_rinit_pcre(INIT_FUNC_ARGS);
+PHP_MINFO_FUNCTION(pcre);
+PHP_MINIT_FUNCTION(pcre);
+PHP_MSHUTDOWN_FUNCTION(pcre);
+PHP_RINIT_FUNCTION(pcre);
 
 PHP_FUNCTION(preg_match);
 PHP_FUNCTION(preg_match_all);
