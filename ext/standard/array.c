@@ -3000,6 +3000,7 @@ PHP_FUNCTION(array_map)
 	zval ***params;
 	zval *callback;
 	zval *result, *null;
+	HashPosition *array_pos;
 	char *callback_name;
 	int i, k, maxlen = 0;
 	int *array_len;
@@ -3025,8 +3026,9 @@ PHP_FUNCTION(array_map)
 		efree(callback_name);
 	}
 
-	/* Cache array sizes. */
+	/* Allocate array sizes and iterators. */
 	array_len = (int*)emalloc((ZEND_NUM_ARGS()-1) * sizeof(int));
+	array_pos = (HashPosition*)emalloc((ZEND_NUM_ARGS()-1) * sizeof(HashPosition));
 
 	/* Check that arrays are indeed arrays and calculate maximum size. */
 	for (i = 0; i < ZEND_NUM_ARGS()-1; i++) {
@@ -3040,6 +3042,7 @@ PHP_FUNCTION(array_map)
 		array_len[i] = zend_hash_num_elements(Z_ARRVAL_PP(args[i+1]));
 		if (array_len[i] > maxlen)
 			maxlen = array_len[i];
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args[i+1]), &array_pos[i]);
 	}
 
 	/* Short-circuit: if no callback and only one array, just return it. */
@@ -3047,6 +3050,7 @@ PHP_FUNCTION(array_map)
 		*return_value = **args[1];
 		zval_copy_ctor(return_value);
 		efree(array_len);
+		efree(array_pos);
 		efree(args);
 		return;
 	}
@@ -3058,6 +3062,10 @@ PHP_FUNCTION(array_map)
 
 	/* We iterate through all the arrays at once. */
 	for (k = 0; k < maxlen; k++) {
+		uint num_key, str_key_len;
+		char *str_key;
+		int key_type;
+
 		/*
 		 * If no callback, the result will be an array, consisting of current
 		 * entries from all arrays.
@@ -3073,7 +3081,17 @@ PHP_FUNCTION(array_map)
 			 * parameter list, otherwise use null value.
 			 */
 			if (k < array_len[i]) {
-				zend_hash_index_find(Z_ARRVAL_PP(args[i+1]), k, (void **)&params[i]);
+				zend_hash_get_current_data_ex(Z_ARRVAL_PP(args[i+1]), (void **)&params[i], &array_pos[i]);
+
+				/*
+				 * It is safe to store only last value of key type, because
+				 * this loop will run just once if there is only 1 array.
+				 */
+				if (ZEND_NUM_ARGS() == 2) {
+					key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(args[1]), &str_key, &str_key_len, &num_key, 0, &array_pos[i]);
+				}
+															
+				zend_hash_move_forward_ex(Z_ARRVAL_PP(args[i+1]), &array_pos[i]);
 			} else {
 				if (Z_TYPE_P(callback) == IS_NULL)
 					zval_add_ref(&null);
@@ -3089,17 +3107,26 @@ PHP_FUNCTION(array_map)
 				php_error(E_WARNING, "%s() had an error invoking the map callback", get_active_function_name(TSRMLS_C));
 				efree(array_len);
 				efree(args);
+				efree(array_pos);
 				zval_dtor(return_value);
 				RETURN_NULL();
 			}
 		}
 
-		add_next_index_zval(return_value, result);
+		if (ZEND_NUM_ARGS() > 2) {
+			add_next_index_zval(return_value, result);
+		} else {
+			if (key_type == HASH_KEY_IS_STRING)
+				add_assoc_zval_ex(return_value, str_key, str_key_len, result);
+			else
+				add_index_zval(return_value, num_key, result);
+		}
 	}
 	
 	zval_ptr_dtor(&null);
 	efree(params);
 	efree(array_len);
+	efree(array_pos);
 	efree(args);
 }
 /* }}} */
