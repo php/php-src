@@ -170,8 +170,24 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	yyin = tmp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 	BEGIN(INITIAL);
-	#else
-	ifstream *input_file = new ifstream(file_handle->filename);
+#else
+	ifstream *input_file;
+
+	switch (file_handle->type) {
+		case ZEND_HANDLE_FD:
+			input_file = new ifstream(file_handle->handle.fd);
+			break;
+		case ZEND_HANDLE_FILENAME:
+			input_file = new ifstream(file_handle->filename);
+			break;
+		case ZEND_HANDLE_FP:
+			if (file_handle->handle.fp==stdin) {
+				input_file = (ifstream *) &cin;
+			} else {
+				input_file = new ifstream(file_handle->filename);
+			}	
+			break;
+	}
 	CG(ZFL) = new ZendFlexLexer;
 
 	CG(ZFL)->switch_streams(input_file, &cout);
