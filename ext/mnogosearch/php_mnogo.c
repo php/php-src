@@ -52,6 +52,8 @@
 #define UDM_FIELD_LANG		14
 #define UDM_FIELD_CHARSET	15
 #define UDM_FIELD_SITEID	16
+#define UDM_FIELD_POP_RANK	17
+#define UDM_FIELD_ORIGINID	18
 
 /* udm_set_agent_param constants */
 #define UDM_PARAM_PAGE_SIZE		1
@@ -82,6 +84,7 @@
 #define UDM_PARAM_STORED		26
 #define UDM_PARAM_GROUPBYSITE		27
 #define UDM_PARAM_SITEID		28
+#define UDM_PARAM_DETECT_CLONES		29
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -260,6 +263,8 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_FIELD_LANG",	UDM_FIELD_LANG,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_CHARSET",	UDM_FIELD_CHARSET,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_SITEID",	UDM_FIELD_SITEID,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_POP_RANK",	UDM_FIELD_POP_RANK,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_ORIGINID",	UDM_FIELD_ORIGINID,CONST_CS | CONST_PERSISTENT);
 
 	/* udm_set_agent_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_SIZE",	UDM_PARAM_PAGE_SIZE,CONST_CS | CONST_PERSISTENT);
@@ -310,6 +315,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_REMOTE_ADDR",	UDM_PARAM_REMOTE_ADDR,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_QUERY",	UDM_PARAM_QUERY,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SITEID",	UDM_PARAM_SITEID,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_DETECT_CLONES",UDM_PARAM_DETECT_CLONES,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -450,12 +456,13 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
 				UdmSetLogLevel(Env,0);
 				UdmOpenLog("mnoGoSearch-php",Env,0);
-				
+
 				if(!memcmp(dbaddr,"searchd:",8)){
 					UDM_URL	Url;
 					UdmURLParse(&Url,dbaddr);
 					UdmDBListAdd(&Env->sdcl,Url.hostinfo);
 				}
+				
 				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
 				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
 				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
@@ -463,6 +470,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				    php_error(E_WARNING,"%s(): Invalid DBAddr", get_active_function_name(TSRMLS_C));
 				    RETURN_FALSE;
 				}
+				
 				Agent=UdmAgentInit(NULL,Env,0);
 #elif UDM_VERSION_ID >= 30200
 				Env=UdmAllocEnv();
@@ -1024,7 +1032,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					php_error(E_WARNING,"%s(): Unknown crosswords mode", get_active_function_name(TSRMLS_C));
+					php_error(E_WARNING,"%s(): Unknown groupbysite mode", get_active_function_name(TSRMLS_C));
 					RETURN_FALSE;
 					break;
 			}
@@ -1036,6 +1044,25 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		
 			break;
 
+		case UDM_PARAM_DETECT_CLONES: 
+			switch (atoi(val)){
+				case UDM_ENABLED:
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"DetectClones","yes");
+					
+					break;
+					
+				case UDM_DISABLED:
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"DetectClones","no");
+
+					break;
+					
+				default:
+					php_error(E_WARNING,"%s(): Unknown clones mode", get_active_function_name(TSRMLS_C));
+					RETURN_FALSE;
+					break;
+			}
+			
+			break;
 #endif
 
 		default:
@@ -1291,11 +1318,15 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 #if UDM_VERSION_ID < 30200			
 			{
 			struct udm_stl_info_t stl_info = { 0, 0, 0 };
+			char *edate;
 			
 			if (val[0] == '>') {
 				Z_TYPE(stl_info)=1;
 			} else if (val[0] == '<') {
 				Z_TYPE(stl_info)=-1;
+			} else if((val[0]=='#')&&(edate=strchr(val,','))){
+				Z_TYPE(stl_info)=2;
+				stl_info.t2=(time_t)(atol(edate+1));
 			} else {
 				php_error(E_WARNING,"%s(): Incorrect date limit format", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
@@ -1832,9 +1863,17 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Site_id",0));
 				
 				break;
+
+			case UDM_FIELD_POP_RANK:
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Pop_Rank",""),1);
+				
+				break;
+
+			case UDM_FIELD_ORIGINID:
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Origin-Id",0));
+
+				break;
 #endif
-
-
 				
 			default: 
 				php_error(E_WARNING,"%s(): Unknown mnoGoSearch field name", get_active_function_name(TSRMLS_C));
