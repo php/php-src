@@ -25,6 +25,7 @@
 zend_class_entry *zend_ce_traversable;
 zend_class_entry *zend_ce_aggregate;
 zend_class_entry *zend_ce_iterator;
+zend_class_entry *zend_ce_arrayaccess;
 
 /* {{{ zend_call_method 
  Only returns the returned zval if retval_ptr != NULL */
@@ -344,6 +345,13 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 }
 /* }}} */
 
+/* {{{ zend_implement_arrayaccess */
+static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
+{
+	return SUCCESS;
+}
+/* }}}*/
+
 /* {{{ function tables */
 zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -360,6 +368,26 @@ zend_function_entry zend_funcs_iterator[] = {
 };
 
 zend_function_entry *zend_funcs_traversable    = NULL;
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset, 0) 
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset_value, 0) 
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+
+zend_function_entry zend_funcs_arrayaccess[] = {
+	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_arrayaccess_offset)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetUnset,  arginfo_arrayaccess_offset)
+	{NULL, NULL, NULL}
+};
+
 /* }}} */
 
 #define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
@@ -383,6 +411,8 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 
 	REGISTER_ITERATOR_INTERFACE(iterator, Iterator);
 	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
+	
+	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
 }
 /* }}} */
 
