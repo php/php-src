@@ -113,12 +113,10 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             return $this->raiseError("$command expects one param: the remote package name");
         }
         $r = new PEAR_Remote($this->config);
-        $available = $r->call('package.listAll', true);
-        if (PEAR::isError($available)) {
-            return $this->raiseError($available);
+        $info = $r->call('package.info', $params[0]);
+        if (PEAR::isError($info)) {
+            return $this->raiseError($info);
         }
-        $info = $available[$params[0]];
-        $info["name"] = $params[0];
 
         $reg = new PEAR_Registry($this->config->get('php_dir'));
         $installed = $reg->packageInfo($info['name']);
@@ -202,6 +200,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
                 $info['stable'],
                 $installed['version'],
                 $desc,
+                $info['deps'],
                 );
         }
         $this->ui->outputData($data, $command);
