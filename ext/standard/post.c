@@ -162,7 +162,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 {
 	int var_type;
 	char *ind, *tmp = NULL, *ret = NULL;
-	int var_len;
+	int var_len, val_len;
 	pval *entry;
 	ELS_FETCH();
 	PLS_FETCH();
@@ -176,7 +176,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 			ret = ind;
 		}
 	}
-	if (var_type & GPC_ARRAY) {		/* array (indexed or not */
+	if (var_type & GPC_ARRAY) {		/* array (indexed or not) */
 		tmp = strchr(var, '[');
 		if (tmp) {
 			*tmp = '\0';
@@ -201,7 +201,13 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		}
 	}
 
-	tmp = estrdup(val);
+	val_len = strlen(val);
+	if (PG(magic_quotes_gpc)) {
+		val = _php3_addslashes(val, val_len, NULL, 0);
+	} else {
+		val = estrndup(val, val_len);
+	}
+
 	if (var_type & GPC_ARRAY) {
 		pval *arr1, *arr2;
 		pval **arr_ptr;
@@ -256,23 +262,19 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		entry = (pval *) emalloc(sizeof(pval));
 		entry->refcount=1;
 		entry->is_ref=0;
-		if (PG(magic_quotes_gpc)) {
-			entry->value.str.val = _php3_addslashes(tmp, 0, &entry->value.str.len, 0);
-		} else {
-			entry->value.str.len = strlen(tmp);
-			entry->value.str.val = estrndup(tmp,entry->value.str.len);
-		}
+		entry->value.str.val = val;
+		entry->value.str.len = val_len;
 		entry->type = IS_STRING;
 
 		/* And then insert it */
-		if (ret) {		/* indexed array */
-			if (php3_check_type(ret) == IS_LONG) {
+		if (ret) {		/* array */
+			if (php3_check_type(ret) == IS_LONG) { /* numeric index */
 				_php3_hash_index_update(arr1->value.ht, atol(ret), &entry, sizeof(pval *),NULL);	/* s[ret]=tmp */
 				if (track_vars_array) {
 					_php3_hash_index_update(arr2->value.ht, atol(ret), &entry, sizeof(pval *),NULL);
 					entry->refcount++;
 				}
-			} else {
+			} else { /* associative index */
 				_php3_hash_update(arr1->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);	/* s["ret"]=tmp */
 				if (track_vars_array) {
 					_php3_hash_update(arr2->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);
@@ -291,23 +293,17 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 	} else {			/* we have a normal variable */
 		pval *entry = (pval *) emalloc(sizeof(pval));
 		
-		if (PG(magic_quotes_gpc)) {
-			entry->value.str.val = _php3_addslashes(tmp, 0, &entry->value.str.len, 0);
-		} else {
-			entry->value.str.len = strlen(tmp);
-			entry->value.str.val = estrndup(tmp,entry->value.str.len);
-		}
 		entry->type = IS_STRING;
 		entry->refcount=1;
 		entry->is_ref=0;
+		entry->value.str.val = val;
+		entry->value.str.len = val_len;
 		_php3_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
 		if (track_vars_array) {
-			pval_copy_constructor(entry);
-			_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
+			entry->refcount++;
+			_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *), NULL);
 		}
 	}
-
-	if (tmp) efree(tmp);
 }
 
 
