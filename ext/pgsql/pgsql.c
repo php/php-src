@@ -148,23 +148,25 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 	PGG(num_links)--;
 }
 
-static void _be_quiet(void * arg, const char * message)
+
+static void
+_notice_handler(void *arg, const char *message)
 {
+	PGLS_FETCH();
+
+	if (! PGG(ignore_notices)) {
+		php_log_err(message);
+	}
 }
+
 
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
-	PQnoticeProcessor old_notice_hook;
 
-	/* we set the  PQsetNoticeProcessor to avoid the stupid 
-	 * "NOTICE:  BEGIN: already a transaction in progress"
-	 * message
-	 */ 
-
- 	old_notice_hook = PQsetNoticeProcessor(link, _be_quiet, NULL);
+	PGG(ignore_notices) = 1;
 	PQexec(link,"BEGIN;ROLLBACK;");
-	PQsetNoticeProcessor(link, old_notice_hook, NULL);
+	PGG(ignore_notices) = 0;
 
 	return 0;
 }
@@ -194,6 +196,7 @@ PHP_INI_END()
 static void php_pgsql_init_globals(PGLS_D)
 {
 	PGG(num_persistent) = 0;
+	PGG(ignore_notices) = 0;
 }
 
 PHP_MINIT_FUNCTION(pgsql)
@@ -262,6 +265,8 @@ PHP_MINFO_FUNCTION(pgsql)
 	DISPLAY_INI_ENTRIES();
 
 }
+
+
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
@@ -377,6 +382,8 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 
+ 			PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
+
 			/* hash it up */
 			new_le.type = le_plink;
 			new_le.ptr = pgsql;
@@ -405,6 +412,8 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				}
 			}
 			pgsql = (PGconn *) le->ptr;
+
+ 			PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
 	} else {
@@ -450,6 +459,8 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
+
+		PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
 
 		/* add it to the list */
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_link);
