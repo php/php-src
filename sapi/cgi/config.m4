@@ -8,12 +8,11 @@ if test "$PHP_SAPI" = "cgi"; then
                           running the CGI version with Apache. ])
 
   if test "$PHP_FORCE_CGI_REDIRECT" = "yes"; then
-    AC_DEFINE(FORCE_CGI_REDIRECT, 1, [ ])
     REDIRECT=1
   else
-    AC_DEFINE(FORCE_CGI_REDIRECT, 0, [ ])
     REDIRECT=0
   fi
+  AC_DEFINE_UNQUOTED(FORCE_CGI_REDIRECT,$REDIRECT,[ ])
 
   PHP_ARG_ENABLE(discard-path,whether to discard path_info + path_translated,
 [  --enable-discard-path   If this is enabled, the PHP CGI binary
@@ -22,12 +21,11 @@ if test "$PHP_SAPI" = "cgi"; then
                           to circumvent .htaccess security. ])
 
   if test "$PHP_DISCARD_PATH" = "yes"; then
-    AC_DEFINE(DISCARD_PATH, 1, [ ])
     DISCARD_PATH=1
   else
-    AC_DEFINE(DISCARD_PATH, 0, [ ])
     DISCARD_PATH=0
   fi
+  AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
 
 fi
 
