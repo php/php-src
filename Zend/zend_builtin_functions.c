@@ -25,7 +25,12 @@
 #include "zend_constants.h"
 #include "zend_ini.h"
 
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #undef ZEND_TEST_EXCEPTIONS
 
 static ZEND_FUNCTION(zend_version);
