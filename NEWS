@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added anonymous_function(), which gives the ability to create functions
+  on-the-fly;  Aliased as lambda(), for those familiar with it from other
+  languages (Zeev, Zend Engine)
 - Added support for comparisons of arrays (with arrays) and objects (with
   objects) (Zeev, Zend Engine)
 - Allow all functions that receive user-defined function callbacks to accept
