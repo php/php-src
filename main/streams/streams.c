@@ -1410,7 +1410,18 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 /* API for registering GLOBAL wrappers */
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
+	int i, protocol_len = strlen(protocol);
+
+	for(i = 0; i < protocol_len; i++) {
+		if (!isalnum((int)protocol[i]) &&
+			protocol[i] != '+' &&
+			protocol[i] != '-' &&
+			protocol[i] != '.') {
+			return FAILURE;
+		}
+	}
+
+	return zend_hash_add(&url_stream_wrappers_hash, protocol, protocol_len, wrapper, sizeof(*wrapper), NULL);
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
@@ -1421,6 +1432,17 @@ PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 /* API for registering VOLATILE wrappers */
 PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
+	int i, protocol_len = strlen(protocol);
+
+	for(i = 0; i < protocol_len; i++) {
+		if (!isalnum((int)protocol[i]) &&
+			protocol[i] != '+' &&
+			protocol[i] != '-' &&
+			protocol[i] != '.') {
+			return FAILURE;
+		}
+	}
+
 	if (!FG(stream_wrappers)) {
 		php_stream_wrapper tmpwrapper;
 
@@ -1429,7 +1451,7 @@ PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_w
 		zend_hash_copy(FG(stream_wrappers), &url_stream_wrappers_hash, NULL, &tmpwrapper, sizeof(php_stream_wrapper));
 	}
 
-	return zend_hash_add(FG(stream_wrappers), protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
+	return zend_hash_add(FG(stream_wrappers), protocol, protocol_len, wrapper, sizeof(*wrapper), NULL);
 }
 
 PHPAPI int php_unregister_url_stream_wrapper_volatile(char *protocol TSRMLS_DC)
