@@ -30,16 +30,6 @@
 #ifndef PHP_SESSION_H
 #define PHP_SESSION_H
 
-/* 
- * some relict. ignore it, unless you want to build locking
- * functionality into the session code 
- */
-
-typedef enum {
-	LOCK,
-	UNLOCK
-} ps_lock;
-
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS void **mod_data
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
