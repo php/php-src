@@ -4392,6 +4392,9 @@ int send_getobjbyftquery(int sockfd, char *query, int maxhits, hw_objectID **chi
 		return -1;
 	}
 	if(*ptr++ == 0) {
+		char *cptr, tmp[20];
+		float weight;
+		int j;
 		*count = (*ptr < maxhits) ? *ptr : maxhits;
 		ptr++;
 		if(NULL != (*childIDs = emalloc(*count * sizeof(hw_objectID)))) {
@@ -4399,8 +4402,18 @@ int send_getobjbyftquery(int sockfd, char *query, int maxhits, hw_objectID **chi
 			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
 				ptr2 = *weights;
 				for(i=0; i<*count; i++) {
-					ptr1[i] = *ptr++;
-					ptr2[i] = (float) *ptr++;
+					ptr1[i] = *ptr++; /* Object id */
+					cptr = (char *) ptr;
+					j = 0;
+					while(*cptr != ' ') {
+						tmp[j++] = *cptr++;
+					}
+					cptr++; /* Skip space after weight */
+					tmp[j] = '\0';
+					sscanf(tmp, "%f", &weight);
+					ptr2[i] = weight;
+					ptr = (int *) cptr;
+					ptr++; /* Skip 0-Integer after weight string */
 				}
 				efree(retmsg->buf);
 				efree(retmsg);
@@ -4464,6 +4477,9 @@ int send_getobjbyftqueryobj(int sockfd, char *query, int maxhits, char ***childr
 		return -4;
 	}
 	if(*ptr++ == 0) {
+		char *cptr, tmp[20];
+		float weight;
+		int j;
 		*count = (*ptr < maxhits) ? *ptr : maxhits;
     		ptr++;
 		if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
@@ -4471,8 +4487,18 @@ int send_getobjbyftqueryobj(int sockfd, char *query, int maxhits, char ***childr
 			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
 				ptr2 = *weights;
 				for(i=0; i<*count; i++) {
-					ptr1[i] = *ptr++;
-					ptr2[i] = (float) *ptr++;
+					ptr1[i] = *ptr++; /* Object id */
+					cptr = (char *) ptr;
+					j = 0;
+					while(*cptr != ' ') {
+						tmp[j++] = *cptr++;
+					}
+					cptr++; /* Skip space after weight */
+					tmp[j] = '\0';
+					sscanf(tmp, "%f", &weight);
+					ptr2[i] = weight;
+					ptr = (int *) cptr;
+					ptr++; /* Skip 0-Integer after weight string */
 				}
 				efree(retmsg->buf);
 				efree(retmsg);
@@ -4600,6 +4626,9 @@ int send_getobjbyftquerycoll(int sockfd, hw_objectID collID, char *query, int ma
 		return -1;
 	}
 	if(*ptr++ == 0) {
+		char *cptr, tmp[20];
+		float weight;
+		int j;
 		*count = (*ptr < maxhits) ? *ptr : maxhits;
 		ptr++;
 		if(NULL != (*childIDs = emalloc(*count * sizeof(hw_objectID)))) {
@@ -4607,8 +4636,18 @@ int send_getobjbyftquerycoll(int sockfd, hw_objectID collID, char *query, int ma
 			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
 				ptr2 = *weights;
 				for(i=0; i<*count; i++) {
-					ptr1[i] = *ptr++;
-					ptr2[i] = (float) *ptr++;
+					ptr1[i] = *ptr++; /* Object id */
+					cptr = (char *) ptr;
+					j = 0;
+					while(*cptr != ' ') {
+						tmp[j++] = *cptr++;
+					}
+					cptr++; /* Skip space after weight */
+					tmp[j] = '\0';
+					sscanf(tmp, "%f", &weight);
+					ptr2[i] = weight;
+					ptr = (int *) cptr;
+					ptr++; /* Skip 0-Integer after weight string */
 				}
 			} else {
 				efree(*childIDs);
@@ -4673,6 +4712,9 @@ int send_getobjbyftquerycollobj(int sockfd, hw_objectID collID, char *query, int
 		return -1;
 	}
 	if(*ptr++ == 0) {
+		char *cptr, tmp[20];
+		float weight;
+		int j;
 		*count = (*ptr < maxhits) ? *ptr : maxhits;
 		ptr++;
 		if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
@@ -4680,8 +4722,18 @@ int send_getobjbyftquerycollobj(int sockfd, hw_objectID collID, char *query, int
 			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
 				ptr2 = *weights;
 				for(i=0; i<*count; i++) {
-					ptr1[i] = *ptr++;
-					ptr2[i] = (float) *ptr++;
+					ptr1[i] = *ptr++; /* Object id */
+					cptr = (char *) ptr;
+					j = 0;
+					while(*cptr != ' ') {
+						tmp[j++] = *cptr++;
+					}
+					cptr++; /* Skip space after weight */
+					tmp[j] = '\0';
+					sscanf(tmp, "%f", &weight);
+					ptr2[i] = weight;
+					ptr = (int *) cptr;
+					ptr++; /* Skip 0-Integer after weight string */
 				}
 				efree(retmsg->buf);
 				efree(retmsg);
