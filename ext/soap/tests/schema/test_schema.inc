@@ -62,13 +62,15 @@ EOF;
   $x->test($param);
   $xml = xml_parser_create();
   $req = $x->__getlastrequest();
-  echo $req;
   if ($style == "rpc") {
     $HTTP_RAW_POST_DATA = $req;
     ob_start();
     $y->handle();
     ob_end_clean();
+    echo $req;
     var_dump($val);
+  } else {
+    echo $req;
   }
 }
 ?>
