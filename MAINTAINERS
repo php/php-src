@@ -14,13 +14,37 @@ Status legend
                      should be using that.
 
 --------------------------------------------------------------------------------
+EXTENSION:           apache
+PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           dba
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           fdf
+PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           gd
+PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           hyperwave
+PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
 STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           java
+PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           ldap
+PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
+STATUS:              Odd Fixes
 --------------------------------------------------------------------------------
 EXTENSION:           mcrypt
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
@@ -28,6 +52,10 @@ STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           mhash
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           mssql
+PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           oci8
@@ -43,9 +71,17 @@ EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           pdf
+PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           snmp
+PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
+STATUS:              Odd Fixes
 --------------------------------------------------------------------------------
 EXTENSION:           wddx
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
@@ -57,13 +93,5 @@ STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
-STATUS:              Maintained
---------------------------------------------------------------------------------
-EXTENSION:           mssql
-PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
-STATUS:              Maintained
---------------------------------------------------------------------------------
-EXTENSION:           java
-PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
