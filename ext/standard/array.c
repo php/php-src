@@ -685,8 +685,7 @@ PHP_FUNCTION(min)
 
 	if (argc<=0) {
 		php_error(E_WARNING, "min: must be passed at least 1 value");
-		var_uninit(return_value);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 	if (argc == 1) {
 		pval **arr;
@@ -737,8 +736,7 @@ PHP_FUNCTION(max)
 
 	if (argc<=0) {
 		php_error(E_WARNING, "max: must be passed at least 1 value");
-		var_uninit(return_value);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 	if (argc == 1) {
 		pval **arr;
