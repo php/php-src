@@ -4,9 +4,9 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = phpmysql
-MODULE_DESC = "PHP MySQL Extension"
-VMAJ = 0
-VMIN = 60
+MODULE_DESC = "PHP 4.2.3 - MySQL Extension"
+VMAJ = 2
+VMIN = 0
 VREV = 0
 
 #include the common settings
@@ -47,7 +47,7 @@ ifndef BINARY
 endif
 
 # Compile flags
-C_FLAGS  = -c -maxerrors 25 -msgstyle gcc -wchar_t on -bool on -processor Pentium -align 1
+C_FLAGS += -c -maxerrors 25 -msgstyle gcc -wchar_t on -bool on -processor Pentium
 C_FLAGS += -nostdinc -nosyspath  
 C_FLAGS += -DNETWARE -DZTS -DNEW_LIBC -DUSE_OLD_FUNCTIONS -DCOMPILE_DL=1
 C_FLAGS += -I. -I$(PROJECT_ROOT)/main -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/netware
@@ -73,12 +73,15 @@ endif
 
 
 # Dependencies
-MODULE = LibC    \
-         phplib
+MODULE = LibC   \
+         phplib \
+#         libmysql
+
 IMPORT = @$(SDK_DIR)/imports/libc.imp        \
          @$(SDK_DIR)/imports/ws2nlm.imp      \
          @$(MPK_DIR)/import/mpkOrg.imp       \
-         @$(PROJECT_ROOT)/netware/phplib.imp
+         @$(PROJECT_ROOT)/netware/phplib.imp \
+#         @$(MYSQL_DIR)/lib/libmysql.imp
 
 #EXPORT = mysql_functions    \
 #         mysql_module_entry \
@@ -119,7 +122,8 @@ $(OBJ_DIR)/%.obj: %.c
 	@$(CC) $< $(C_FLAGS) -o $@
 
 
-$(BINARY): $(DEPDS) $(OBJECTS)
+#$(BINARY): $(DEPDS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	@echo Import $(IMPORT) > $(basename $@).def
 ifdef API
 	@echo Import $(API) >> $(basename $@).def
@@ -136,14 +140,21 @@ endif
 	@echo Start _NonAppStart >> $(basename $@).def
 	@echo Exit _NonAppStop >> $(basename $@).def
 
+	$(MPKTOOL) $(XDCFLAGS) $(basename $@).xdc
+	@echo xdcdata $(basename $@).xdc >> $(basename $@).def
+
 	@echo Linking $@...
 	@echo $(LD_FLAGS) -commandfile $(basename $@).def > $(basename $@).link
+
 	@echo $(LIBRARY) $(OBJECTS) >> $(basename $@).link
+##	@echo $(OBJECTS) >> $(basename $@).link
+
 	@$(LINK) @$(basename $@).link
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+#lean: cleand cleanobj cleanbin
+clean: cleanobj cleanbin
 
 .PHONY: cleand
 cleand:

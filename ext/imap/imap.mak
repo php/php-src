@@ -3,9 +3,9 @@
 PROJECT_ROOT = ..\..
 
 # Module details
-MODULE_NAME = php_ldap
-MODULE_DESC = "PHP 4.2.3 - LDAP Extension"
-VMAJ = 2
+MODULE_NAME = php_imap
+MODULE_DESC = "PHP 4.2.3 - IMAP Extension"
+VMAJ = 1
 VMIN = 0
 VREV = 0
 
@@ -17,7 +17,7 @@ include $(PROJECT_ROOT)/netware/common.mif
 .SUFFIXES: .nlm .lib .obj .cpp .c .msg .mlc .mdb .xdc .d
 
 # Source files
-C_SRC = ldap.c \
+C_SRC = php_imap.c \
         start.c 
 
 CPP_SRC_NODIR = $(notdir $(CPP_SRC))
@@ -46,11 +46,12 @@ C_FLAGS += -processor Pentium
 C_FLAGS += -nostdinc -nosyspath
 C_FLAGS += -DNETWARE -DZTS
 C_FLAGS += -DNEW_LIBC
-C_FLAGS += -DCOMPILE_DL_LDAP -DCOMPILE_DL=1
+##C_FLAGS += -DCOMPILE_DL_LDAP -DCOMPILE_DL=1
+C_FLAGS += -DCOMPILE_DL=1
 C_FLAGS += -I. -I$(PROJECT_ROOT)/main -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/netware
 C_FLAGS += -I$(PROJECT_ROOT)/zend -I$(PROJECT_ROOT)/tsrm
 C_FLAGS += -I- -I$(SDK_DIR)/include -I$(MWCIncludes)
-C_FLAGS += -I$(LDAP_DIR)/inc
+##C_FLAGS += -I$(LDAP_DIR)/inc
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
 
 ifndef STACK_SIZE
@@ -74,12 +75,10 @@ endif
 
 # Dependencies
 MODULE = LibC    \
-         ldapsdk \
          phplib
 IMPORT = @$(SDK_DIR)/imports/libc.imp        \
          @$(SDK_DIR)/imports/ws2nlm.imp      \
          @$(MPK_DIR)/import/mpkOrg.imp       \
-         @$(LDAP_DIR)/lib/nlm/Ldapsdk.imp    \
          @$(PROJECT_ROOT)/netware/phplib.imp
 #EXPORT = get_module
 #EXPORT = ldap_functions    \
