@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_LDAP_CHECKS, [
+AC_DEFUN([PHP_LDAP_CHECKS], [
   if test -f $1/include/ldap.h; then
     LDAP_DIR=$1
     LDAP_INCDIR=$1/include

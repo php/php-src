@@ -1,6 +1,6 @@
 # Local macros for automake & autoconf
 
-AC_DEFUN(MYSQL_FUNCTION_CHECKS,[
+AC_DEFUN([MYSQL_FUNCTION_CHECKS],[
 
 # Standard MySQL list
 AC_CHECK_FUNCS(alarm bmove \
@@ -27,7 +27,7 @@ AC_CHECK_FUNCS(strtok_r)
 MYSQL_CHECK_GETHOSTNAME_R
 ])
 
-AC_DEFUN(MYSQL_CHECK_GETHOSTNAME_R,[
+AC_DEFUN([MYSQL_CHECK_GETHOSTNAME_R],[
 # Check definition of gethostbyname_r (glibc2.0.100 is different from Solaris)
 ac_save_CXXFLAGS="$CXXFLAGS"
 AC_CACHE_CHECK([style of gethostname_r routines], mysql_cv_gethostname_style,
@@ -90,7 +90,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_SIGWAIT_STYLE,[
+AC_DEFUN([MYSQL_CHECK_SIGWAIT_STYLE],[
 # Check definition av posix sigwait()
 AC_CACHE_CHECK("style of sigwait", mysql_cv_sigwait,
 AC_TRY_LINK(
@@ -134,7 +134,7 @@ fi
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_READDIR_R_ARGS,[
+AC_DEFUN([MYSQL_CHECK_READDIR_R_ARGS],[
 # Check definition of readdir_r
 AC_CACHE_CHECK("args to readdir_r", mysql_cv_readdir_r,
 AC_TRY_LINK(
@@ -153,7 +153,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_PTHREAD_MUTEX_INIT,[
+AC_DEFUN([MYSQL_CHECK_PTHREAD_MUTEX_INIT],[
   # Check definition of pthread_mutex_init
   AC_CACHE_CHECK("args to pthread_mutex_init", mysql_cv_mutex_init_args,
   AC_TRY_COMPILE(
@@ -173,7 +173,7 @@ mysql_cv_mutex_init_args=POSIX, mysql_cv_mutex_init_args=other))
   fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_PTHREAD_GETSPECIFIC,[
+AC_DEFUN([MYSQL_CHECK_PTHREAD_GETSPECIFIC],[
   # Check definition of pthread_getspecific
   AC_CACHE_CHECK("args to pthread_getspecific", mysql_cv_getspecific_args,
   AC_TRY_COMPILE(
@@ -191,7 +191,7 @@ mysql_cv_getspecific_args=POSIX, mysql_cv_getspecific_args=other))
   fi
 ])
 
-AC_DEFUN(MYSQL_TYPE_ACCEPT,
+AC_DEFUN([MYSQL_TYPE_ACCEPT],
 [ac_save_CXXFLAGS="$CXXFLAGS"
 AC_CACHE_CHECK([base type of last arg to accept], mysql_cv_btype_last_arg_accept,
 AC_LANG_SAVE
@@ -224,7 +224,7 @@ CXXFLAGS="$ac_save_CXXFLAGS"
 ])
 
 dnl Find type of qsort
-AC_DEFUN(MYSQL_TYPE_QSORT,
+AC_DEFUN([MYSQL_TYPE_QSORT],
 [AC_CACHE_CHECK([return type of qsort], mysql_cv_type_qsort,
 [AC_TRY_COMPILE([#include <stdlib.h>
 #ifdef __cplusplus
@@ -243,7 +243,7 @@ fi
 
 
 #---START: Used in for client configure
-AC_DEFUN(MYSQL_CHECK_ULONG,
+AC_DEFUN([MYSQL_CHECK_ULONG],
 [AC_MSG_CHECKING(for type ulong)
 AC_CACHE_VAL(ac_cv_ulong,
 [AC_TRY_RUN([#include <stdio.h>
@@ -261,7 +261,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_UCHAR,
+AC_DEFUN([MYSQL_CHECK_UCHAR],
 [AC_MSG_CHECKING(for type uchar)
 AC_CACHE_VAL(ac_cv_uchar,
 [AC_TRY_RUN([#include <stdio.h>
@@ -279,7 +279,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_UINT,
+AC_DEFUN([MYSQL_CHECK_UINT],
 [AC_MSG_CHECKING(for type uint)
 AC_CACHE_VAL(ac_cv_uint,
 [AC_TRY_RUN([#include <stdio.h>
@@ -297,7 +297,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_USHORT,
+AC_DEFUN([MYSQL_CHECK_USHORT],
 [AC_MSG_CHECKING(for type ushort)
 AC_CACHE_VAL(ac_cv_ushort,
 [AC_TRY_RUN([#include <stdio.h>
@@ -315,7 +315,7 @@ then
 fi
 ])
 
-AC_DEFUN(MYSQL_CHECK_INT_8_16_32,
+AC_DEFUN([MYSQL_CHECK_INT_8_16_32],
 [AC_MSG_CHECKING([for int8])
 AC_CACHE_VAL(ac_cv_int8,
 [AC_TRY_RUN([
@@ -345,7 +345,7 @@ fi
 ])
 
 
-AC_DEFUN(MYSQL_HEADER_CHECKS,[
+AC_DEFUN([MYSQL_HEADER_CHECKS],[
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sgtty.h sys/ioctl.h \
  fcntl.h float.h floatingpoint.h ieeefp.h limits.h \
@@ -356,7 +356,7 @@ AC_CHECK_HEADERS(sgtty.h sys/ioctl.h \
  unistd.h utime.h sys/utime.h termio.h termios.h sched.h crypt.h alloca.h)
 ])
 
-AC_DEFUN(MYSQL_TYPE_CHECKS,[
+AC_DEFUN([MYSQL_TYPE_CHECKS],[
 
 AC_REQUIRE([AC_C_CONST])
 AC_REQUIRE([AC_C_INLINE])

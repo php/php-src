@@ -2,9 +2,6 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_PGSQL_CHECK_FUNCTIONS,[
-])
-
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
 [  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
                           base install directory, defaults to /usr/local/pgsql.])

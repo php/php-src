@@ -1,7 +1,7 @@
 dnl
 dnl $Id$
 dnl
-AC_DEFUN(JAVA_FIND_JAR, [
+AC_DEFUN([JAVA_FIND_JAR], [
  AC_MSG_CHECKING([Java Jar location])
   if test "$PHP_JAVA" = "yes"; then
     if JAVA_JAR=`which jar 2>/dev/null`; then
@@ -31,7 +31,7 @@ AC_DEFUN(JAVA_FIND_JAR, [
   AC_MSG_RESULT([$JAVA_JAR])
 ])
 
-AC_DEFUN(JAVA_FIND_C, [
+AC_DEFUN([JAVA_FIND_C], [
  AC_MSG_CHECKING([Java C location])
  if test "$PHP_JAVA" = "yes"; then
    JAVA_C=`which javac`
@@ -55,7 +55,7 @@ e.g. --with-java=/java expecting /java/bin/ to contain the binaries])
   AC_MSG_RESULT([$JAVA_C])
 ])
 
-AC_DEFUN(JAVA_CHECK_LIB, [
+AC_DEFUN([JAVA_CHECK_LIB], [
  AC_MSG_CHECKING([Checking for libjava])
  if test -d $PHP_JAVA/lib/kaffe; then
    PHP_ADD_LIBPATH($PHP_JAVA/lib)

@@ -4,7 +4,7 @@ dnl
 
 # Checks for libraries.
 # Prefer gdbm, Berkeley DB and ndbm/dbm, in that order
-AC_DEFUN(AC_PREFERRED_DB_LIB,[
+AC_DEFUN([AC_PREFERRED_DB_LIB],[
   AC_CHECK_LIB(gdbm, gdbm_open,[AC_DEFINE(GDBM,1, [Whether you have GDBM]) DBM_TYPE=gdbm; DBM_LIB=-lgdbm],
   [AC_CHECK_LIB(c, dbm_open,[AC_DEFINE(NDBM,1,[ ]) DBM_TYPE=ndbm; DBM_LIB=],
    [AC_CHECK_LIB(dbm, dbm_open,[AC_DEFINE(NDBM,1,[ ]) DBM_TYPE=ndbm; DBM_LIB=-ldbm],
