@@ -164,6 +164,7 @@ void init_executor(TSRMLS_D)
 	EG(main_class_ptr) = &CG(main_class);
 	CG(main_class).static_members = &EG(symbol_table);
 
+	EG(this) = NULL;
 }
 
 
@@ -442,6 +443,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zval function_name_copy;
 	zend_class_entry *current_namespace;
 	zend_class_entry *calling_namespace = NULL;
+	zval *current_this;
 
 	*retval_ptr_ptr = NULL;
 
@@ -542,6 +544,24 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	current_namespace = EG(namespace);
 	EG(namespace) = calling_namespace;
 
+	current_this = EG(this);
+	EG(this) = *object_pp;
+
+	if (EG(this)) {
+		if (!PZVAL_IS_REF(EG(this))) {
+			EG(this)->refcount++; /* For $this pointer */
+		} else {
+			zval *this_ptr;
+
+			ALLOC_ZVAL(this_ptr);
+			*this_ptr = *EG(this);
+			INIT_PZVAL(this_ptr);
+			zval_copy_ctor(this_ptr);
+			EG(this) = this_ptr;
+		}
+	}
+
+
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		if (symbol_table) {
@@ -550,14 +570,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			ALLOC_HASHTABLE(EG(active_symbol_table));
 			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
-		if (object_pp) {
-			zval *dummy, **this_ptr;
-				
-			ALLOC_ZVAL(dummy);
-			INIT_ZVAL(*dummy);	
-			zend_hash_update(EG(active_symbol_table), "this", sizeof("this"), &dummy, sizeof(zval *), (void **) &this_ptr);
-			zend_assign_to_variable_reference(NULL, this_ptr, object_pp, NULL TSRMLS_CC);
-		}
+
 		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
 		EG(return_value_ptr_ptr) = retval_ptr_ptr;
@@ -588,8 +601,12 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
 
+	if (EG(this)) {
+		zval_ptr_dtor(&EG(this));
+	}
 	EG(namespace) = current_namespace;
-
+	EG(this) = current_this;
+	
 	return SUCCESS;
 }
 

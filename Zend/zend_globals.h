@@ -159,6 +159,8 @@ struct _zend_executor_globals {
 	zend_class_entry *namespace;
 	zend_class_entry *main_class_ptr;
 
+	zval *this;
+
 	long precision;
 
 	int ticks_count;
