@@ -3866,23 +3866,23 @@ PHP_MINIT_FUNCTION(ming)
 	le_swfsoundinstancep = zend_register_list_destructors_ex(NULL, NULL, "SWFSoundInstance", module_number);
 #endif
 
-	INIT_CLASS_ENTRY(shape_class_entry, "swfshape", swfshape_functions);
-	INIT_CLASS_ENTRY(fill_class_entry, "swffill", swffill_functions);
-	INIT_CLASS_ENTRY(gradient_class_entry, "swfgradient", swfgradient_functions);
-	INIT_CLASS_ENTRY(bitmap_class_entry, "swfbitmap", swfbitmap_functions);
-	INIT_CLASS_ENTRY(text_class_entry, "swftext", swftext_functions);
-	INIT_CLASS_ENTRY(textfield_class_entry, "swftextfield", swftextfield_functions);
-	INIT_CLASS_ENTRY(font_class_entry, "swffont", swffont_functions);
-	INIT_CLASS_ENTRY(displayitem_class_entry, "swfdisplayitem", swfdisplayitem_functions);
-	INIT_CLASS_ENTRY(movie_class_entry, "swfmovie", swfmovie_functions);
-	INIT_CLASS_ENTRY(button_class_entry, "swfbutton", swfbutton_functions);
-	INIT_CLASS_ENTRY(action_class_entry, "swfaction", swfaction_functions);
-	INIT_CLASS_ENTRY(morph_class_entry, "swfmorph", swfmorph_functions);
-	INIT_CLASS_ENTRY(sprite_class_entry, "swfsprite", swfsprite_functions);
-	INIT_CLASS_ENTRY(sound_class_entry, "swfsound", swfsound_functions);
+	INIT_CLASS_ENTRY(shape_class_entry, "SWFShape", swfshape_functions);
+	INIT_CLASS_ENTRY(fill_class_entry, "SWFFill", swffill_functions);
+	INIT_CLASS_ENTRY(gradient_class_entry, "SWFGradient", swfgradient_functions);
+	INIT_CLASS_ENTRY(bitmap_class_entry, "SWFBitmap", swfbitmap_functions);
+	INIT_CLASS_ENTRY(text_class_entry, "SWFText", swftext_functions);
+	INIT_CLASS_ENTRY(textfield_class_entry, "SWFTextField", swftextfield_functions);
+	INIT_CLASS_ENTRY(font_class_entry, "SWFFont", swffont_functions);
+	INIT_CLASS_ENTRY(displayitem_class_entry, "SWFDisplayItem", swfdisplayitem_functions);
+	INIT_CLASS_ENTRY(movie_class_entry, "SWFMovie", swfmovie_functions);
+	INIT_CLASS_ENTRY(button_class_entry, "SWFButton", swfbutton_functions);
+	INIT_CLASS_ENTRY(action_class_entry, "SWFAction", swfaction_functions);
+	INIT_CLASS_ENTRY(morph_class_entry, "SWFMorph", swfmorph_functions);
+	INIT_CLASS_ENTRY(sprite_class_entry, "SWFSprite", swfsprite_functions);
+	INIT_CLASS_ENTRY(sound_class_entry, "SWFSound", swfsound_functions);
 #ifdef HAVE_NEW_MING
-	INIT_CLASS_ENTRY(fontchar_class_entry, "swffontchar", swffontchar_functions);
-	INIT_CLASS_ENTRY(soundinstance_class_entry, "swfsoundinstance", swfsoundinstance_functions);
+	INIT_CLASS_ENTRY(fontchar_class_entry, "SWFFontChar", swffontchar_functions);
+	INIT_CLASS_ENTRY(soundinstance_class_entry, "SWFSoundInstance", swfsoundinstance_functions);
 #endif
 
 	shape_class_entry_ptr = zend_register_internal_class(&shape_class_entry TSRMLS_CC);
