@@ -520,9 +520,9 @@ INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TS
   
 }
 
-static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
+static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC TSRMLS_CC TSRMLS_CC), "register_variables");
+  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC), "register_variables");
 }
 
 /* this structure is static (as in "it does not change") */
