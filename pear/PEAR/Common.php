@@ -28,8 +28,7 @@ require_once 'System.php';
  * TODO:
  *   - check in inforFromDescFile that the minimal data needed is present
  *     (pack name, version, files, others?)
- *   - perhaps use parser folding to be less restrictive with the format
- *     of the package.xml file
+ *   - inherance of dir attribs to files may fail under certain circumstances
  */
 class PEAR_Common extends PEAR
 {
@@ -137,6 +136,7 @@ class PEAR_Common extends PEAR
         $spos = sizeof($this->element_stack) - 2;
         $this->prev_element = ($spos >= 0) ? $this->element_stack[$spos] : '';
         $this->current_attributes = $attribs;
+        $this->cdata = '';
         switch ($name) {
             case 'dir':
                 if (isset($this->dir_names)) {
@@ -196,73 +196,12 @@ class PEAR_Common extends PEAR
 
     function _element_end($xp, $name)
     {
+        $data = trim($this->cdata);
         switch ($name) {
-            case 'dir':
-                array_pop($this->dir_names);
-                break;
-            case 'file':
-                $path = '';
-                foreach ($this->dir_names as $dir) {
-                    $path .= $dir . DIRECTORY_SEPARATOR;
-                }
-                $path .= $this->current_file;
-                $this->filelist[$path] = $this->current_attributes;
-                // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['baseinstalldir']) &&
-                    isset($this->dir_install))
-                {
-                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
-                }
-                // Set the Role
-                if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
-                    $this->filelist[$path]['role'] = $this->dir_role;
-                }
-                break;
-            case 'libfile':
-                $path = '';
-                foreach ($this->dir_names as $dir) {
-                    $path .= $dir . DIRECTORY_SEPARATOR;
-                }
-                $path .= $this->lib_name;
-                $this->filelist[$path] = $this->lib_atts;
-                // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['baseinstalldir']) &&
-                    isset($this->dir_install))
-                {
-                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
-                }
-                if (isset($this->lib_sources)) {
-                    $this->filelist[$path]['sources'] = $this->lib_sources;
-                }
-                unset($this->lib_atts);
-                unset($this->lib_sources);
-                break;
-            case 'maintainer':
-                $this->m_i++;
-                break;
-            case 'release':
-                if ($this->in_changelog) {
-                    $this->c_i++;
-                }
-                break;
-            case 'changelog':
-                $this->in_changelog = false;
-        }
-        array_pop($this->element_stack);
-        $spos = sizeof($this->element_stack) - 1;
-        $this->current_element = ($spos > 0) ? $this->element_stack[$spos] : '';
-    }
-
-    // }}}
-    // {{{ _pkginfo_cdata()
-
-    function _pkginfo_cdata($xp, $data)
-    {
-        switch ($this->current_element) {
             case 'name':
                 switch ($this->prev_element) {
                     case 'package':
-                        $this->pkginfo['package'] = ereg_replace('[^a-zA-Z0-9._]', '_', trim($data));
+                        $this->pkginfo['package'] = ereg_replace('[^a-zA-Z0-9._]', '_', $data);
                         break;
                     case 'maintainer':
                         $this->current_maintainer['name'] = $data;
@@ -286,7 +225,7 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'version':
-                $data = ereg_replace ('[^a-zA-Z0-9._\-]', '_', trim($data));
+                $data = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $data);
                 if ($this->in_changelog) {
                     $this->current_release['version'] = $data;
                 } else {
@@ -317,23 +256,84 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'license':
-                $this->pkginfo['release_license'] = trim($data);
-                break;
-            case 'file':
-                $this->current_file = trim($data);
-                break;
-            case 'libname':
-                $this->lib_name = trim($data);
+                $this->pkginfo['release_license'] = $data;
                 break;
             case 'sources':
-                $this->lib_sources[] = trim($data);
+                $this->lib_sources[] = $data;
                 break;
             case 'dep':
                 if ($data = trim($data)) {
                     $this->pkginfo['release_deps'][$this->d_i]['name'] = $data;
                 }
                 break;
+            case 'dir':
+                array_pop($this->dir_names);
+                break;
+            case 'file':
+                $this->current_file = $data;
+                $path = '';
+                foreach ($this->dir_names as $dir) {
+                    $path .= $dir . DIRECTORY_SEPARATOR;
+                }
+                $path .= $this->current_file;
+                $this->filelist[$path] = $this->current_attributes;
+                // Set the baseinstalldir only if the file don't have this attrib
+                if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                    isset($this->dir_install))
+                {
+                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                }
+                // Set the Role
+                if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
+                    $this->filelist[$path]['role'] = $this->dir_role;
+                }
+                break;
+            case 'libfile':
+                $this->lib_name = $data;
+                $path = '';
+                foreach ($this->dir_names as $dir) {
+                    $path .= $dir . DIRECTORY_SEPARATOR;
+                }
+                $path .= $this->lib_name;
+                $this->filelist[$path] = $this->lib_atts;
+                // Set the baseinstalldir only if the file don't have this attrib
+                if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                    isset($this->dir_install))
+                {
+                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                }
+                if (isset($this->lib_sources)) {
+                    $this->filelist[$path]['sources'] = $this->lib_sources;
+                }
+                unset($this->lib_atts);
+                unset($this->lib_sources);
+                break;
+            case 'maintainer':
+                $this->m_i++;
+                break;
+            case 'release':
+                if ($this->in_changelog) {
+                    $this->c_i++;
+                }
+                break;
+            case 'changelog':
+                $this->in_changelog = false;
+                break;
+            case 'summary':
+                $this->pkginfo['summary'] = $data;
+                break;
         }
+        array_pop($this->element_stack);
+        $spos = sizeof($this->element_stack) - 1;
+        $this->current_element = ($spos > 0) ? $this->element_stack[$spos] : '';
+    }
+
+    // }}}
+    // {{{ _pkginfo_cdata()
+
+    function _pkginfo_cdata($xp, $data)
+    {
+        $this->cdata .= $data;
     }
 
     // }}}
