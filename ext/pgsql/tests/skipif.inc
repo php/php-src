@@ -17,6 +17,6 @@ if (!extension_loaded("pgsql")) {
 }
 $conn = @pg_connect($conn_str);
 if (!is_resource($conn)) {
-    die("skip\n");
+    die("skip could not connect\n");
 }
 ?>
