@@ -107,8 +107,13 @@ fi
 
 CREATING SOURCE FILES
 
-  [You are currently alone here. There are a lot of existing modules,
-   use a simply module as a starting point and add your own code.]
+  ext_skel can be of great help when creating the common code for all modules
+  in PHP for you and also writing basic function definitions and C code for
+  handling arguments passed to your functions. See README.EXT_SKEL for further
+  information.
+
+  As for the rest, you are currently alone here. There are a lot of existing
+  modules, use a simple module as a starting point and add your own code.
 
 
 CREATING THE SELF-CONTAINED EXTENSION
