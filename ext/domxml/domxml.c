@@ -633,7 +633,8 @@ PHP_FUNCTION(domxml_dumpmem)
 	pval *id, **tmp;
 	int id_to_find;
 	xmlDoc *docp;
-	xmlChar *mem;
+	char *mem;
+//	xmlChar *mem;
 	int size;
 	int type;
 	
@@ -665,7 +666,7 @@ PHP_FUNCTION(domxml_dumpmem)
 	if (!size) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(mem, size, 0);
+	RETURN_STRINGL(mem, size, 1);
 }
 /* }}} */
 
@@ -714,6 +715,8 @@ PHP_FUNCTION(domxml_newchild)
 				RETURN_FALSE;
 			}
 			id_to_find = (*tmp)->value.lval;
+			if(getParameters(ht, 2, &name, &content) == FAILURE)
+				WRONG_PARAM_COUNT;
 		} else {
 			RETURN_FALSE;
 		}
@@ -722,9 +725,9 @@ PHP_FUNCTION(domxml_newchild)
 	} else {
 		convert_to_long(id);
 		id_to_find = id->value.lval;
-		convert_to_string(name);
-		convert_to_string(content);
 	}
+	convert_to_string(name);
+	convert_to_string(content);
 		
 	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
@@ -768,6 +771,8 @@ PHP_FUNCTION(domxml_addroot)
 				RETURN_FALSE;
 			}
 			id_to_find = (*tmp)->value.lval;
+			if (getParameters(ht, 1, &name) == FAILURE)
+				WRONG_PARAM_COUNT;
 		} else {
 			RETURN_FALSE;
 		}
@@ -776,8 +781,8 @@ PHP_FUNCTION(domxml_addroot)
 	} else {
 		convert_to_long(id);
 		id_to_find = id->value.lval;
-		convert_to_string(name);
 	}
+	convert_to_string(name);
 		
 	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
 	if (!docp || type != le_domxmldocp) {
