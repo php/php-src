@@ -22,17 +22,22 @@ AC_ARG_WITH(caudium,
 	else
 		AC_MSG_ERROR(Couldn't find a pike in $withval/bin/)
 	fi
-    tmppike=`ls -l $PIKE | awk -F ' -> ' '{ print $2 }' 2>/dev/null`
-    if test -x "$tmppike"; then
- 	  PIKE=$tmppike
-    fi
-    if $PIKE -e 'float v; int rel;sscanf(version(), "Pike v%f release %d", v, rel);v += rel/10000.0; if(v < 7.0) exit(1); exit(0);'; then
+    if $PIKE -e 'float v; int rel;sscanf(version(), "Pike v%f release %d", v, rel);v += rel/10000.0; if(v < 7.0268) exit(1); exit(0);'; then
 		PIKE_MODULE_DIR="`$PIKE --show-paths 2>&1| grep '^Module' | sed -e 's/.*: //'`"
 	    PIKE_INCLUDE_DIR="`echo $PIKE_MODULE_DIR | sed -e 's,lib/pike/modules,include/pike,' -e 's,lib/modules,include/pike,'`"
 		if test -z "$PIKE_INCLUDE_DIR" -o -z "$PIKE_MODULE_DIR"; then
 			AC_MSG_ERROR(Failed to figure out Pike module and include directories)
 		fi
 		AC_MSG_RESULT(yes)
+        PIKE=`echo $PIKE | pike -e 'int tries=100;
+		   string orig,pike=Stdio.File("stdin")->read()-"\n";
+		   orig=pike;
+		   if(search(orig, "/"))
+		     orig = combine_path(getcwd(), orig);
+		   while(!catch(pike=readlink(pike)) && tries--)
+		     ;
+		   write(combine_path(dirname(orig), pike)); '`
+		AC_ADD_INCLUDE($PIKE_INCLUDE_DIR)
 		if test "$prefix" != "NONE"; then
 		   PIKE_C_INCLUDE=$prefix/include/`basename ${PIKE}`
 		else
@@ -61,7 +66,7 @@ AC_ARG_WITH(caudium,
                       fi
 		      
 		      if test "$PIKE_TEST_VER" = "${PIKE_CMAJOR_VERSION}.${PIKE_CMINOR_VERSION}.${PIKE_CBUILD_VERSION}"; then
-		         PIKE_INCLUDE_DIRS=" $PIKE_INCLUDE_DIRS -I$PIKE_C_INCLUDE"
+		         AC_ADD_INCLUDE($PIKE_C_INCLUDE)
 		         AC_MSG_RESULT(found)
 		      else
 		         AC_MSG_RESULT(version mismatch)
@@ -73,7 +78,6 @@ AC_ARG_WITH(caudium,
 		AC_MSG_ERROR(Caudium PHP4 requires Pike 7.0 or newer)
 	fi
     PIKE_VERSION=`$PIKE -e 'string v; int rel;sscanf(version(), "Pike v%s release %d", v, rel); write(v+"."+rel);'`   
-	AC_ADD_INCLUDE($PIKE_INCLUDE_DIR)
 	AC_DEFINE(HAVE_CAUDIUM,1,[Whether to compile with Caudium support])
 	PHP_SAPI=caudium
 	PHP_BUILD_SHARED
