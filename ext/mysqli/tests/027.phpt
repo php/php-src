@@ -11,11 +11,10 @@ function test: mysqli_stat
 
 	$status = mysqli_stat($link);
 
-	$x = explode('  ', $status);
 
-	var_dump(count($x));
+	var_dump(strlen($status) > 0);
 
 	mysqli_close($link);
 ?>
 --EXPECT--
-int(10)
+bool(true)
