@@ -1574,7 +1574,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				length = php_strnlen(value, length);
 				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, (int *) &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1601,7 +1601,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				/* do not recompute length here */
 				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, (int *) &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1841,7 +1841,7 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
 static void add_assoc_image_info(pval *value, int sub_array, image_info_type *image_info, int section_index TSRMLS_DC)
 {
 	char    buffer[64], *val, *name, uname[64];
-	int     i, ap, l, b, idx=0, done, unknown=0;
+	int     i, ap, l, b, idx=0, unknown=0;
 #ifdef EXIF_DEBUG
 	int     info_tag;
 #endif
@@ -1861,7 +1861,6 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 		}
 
 		for(i=0; i<image_info->info_list[section_index].count; i++) {
-			done       = 0;
 			info_data  = &image_info->info_list[section_index].list[i];
 #ifdef EXIF_DEBUG
 			info_tag   = info_data->tag; /* conversion */
@@ -2735,7 +2734,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			// JPEG does not use absolute pointers instead its pointers are relative to the start
 			// of the TIFF header in APP1 section.
 			*/
-			if (offset_val<0 || offset_val+byte_count>ImageInfo->FileSize || (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II && ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM)) {
+			if (offset_val+byte_count>ImageInfo->FileSize || (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II && ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM)) {
 				if (value_ptr < dir_entry) {
 					/* we can read this if offset_val > 0 */
 					/* some files have their values in other parts of the file */
