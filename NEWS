@@ -3,6 +3,8 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Thies introduced ZEND_FETCH_RESOURCE2 (Danny).
+- Added Informix driver to list of maintained extensions. (Danny).
 - Informix driver : Changed ifx.ec to use the new high-performance
   ZEND API. (Danny)
 - IXF_LIBDIR environment variable specifies alternate Informix library
