@@ -602,7 +602,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->inner.zobject) {
-		RETVAL_ZVAL(intern->inner.zobject, 0, 0);
+		RETVAL_ZVAL(intern->inner.zobject, 1, 0);
 	} else {
 		RETURN_NULL();
 	}
