@@ -123,7 +123,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "iconv"=..\ext\iconv\iconv.dsp - Package Owner=<4>
+Project: "exif"=..\ext\exif\exif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -135,7 +135,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "exif"=..\ext\exif\exif.dsp - Package Owner=<4>
+Project: "fbsql"=..\ext\fbsql\fbsql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -195,7 +195,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ifx"=..\ext\informix\ifx.dsp - Package Owner=<4>
+Project: "hyperwave"=..\ext\hyperwave\hyperwave.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -207,7 +207,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hyperwave"=..\ext\hyperwave\hyperwave.dsp - Package Owner=<4>
+Project: "iconv"=..\ext\iconv\iconv.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ifx"=..\ext\informix\ifx.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -291,18 +303,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ming"=..\ext\ming\ming.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "mcrypt"=..\ext\mcrypt\mcrypt.dsp - Package Owner=<4>
 
 Package=<5>
@@ -316,6 +316,18 @@ Package=<4>
 ###############################################################################
 
 Project: "mhash"=..\ext\mhash\mhash.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ming"=..\ext\ming\ming.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
