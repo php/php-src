@@ -41,11 +41,11 @@
 
 #ifdef HAVE_ICONV
 
-#ifdef HAVE_GICONV_H
-#include <giconv.h>
-#else
-#include <iconv.h>
+#ifndef PHP_ICONV_H_PATH
+#define PHP_ICONV_H_PATH <iconv.h>
 #endif
+
+#include PHP_ICONV_H_PATH
 
 #ifdef HAVE_GLIBC_ICONV
 #include <gnu/libc-version.h>
@@ -54,17 +54,6 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
-
-#ifdef HAVE_LIBICONV
-#define LIBICONV_PLUG
-#define icv_open(a, b) libiconv_open(a, b)
-#define icv_close(a) libiconv_close(a)
-#define icv(a, b, c, d, e) libiconv(a, b, c, d, e)
-#else
-#define icv_open(a, b) iconv_open(a, b)
-#define icv_close(a) iconv_close(a)
-#define icv(a, b, c, d, e) iconv(a, (char **) b, c, d, e)
-#endif
 
 #define _php_iconv_memequal(a, b, c) \
   ((c) == sizeof(unsigned long) ? *((unsigned long *)(a)) == *((unsigned long *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
@@ -254,7 +243,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 			out_p = (d)->c + (d)->len;
 
-			if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+			if (iconv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 				switch (errno) { 
 					case EINVAL:
@@ -291,7 +280,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 			out_p = (d)->c + (d)->len;
 
-			if (icv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)0) {
+			if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)0) {
 				(d)->len += (buf_growth - out_left);
 				break;
 			} else {
@@ -347,7 +336,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 
 	in_size = in_len;
 
-	cd = icv_open(out_charset, in_charset);
+	cd = iconv_open(out_charset, in_charset);
 	
 	if (cd == (iconv_t)(-1)) {
 		return PHP_ICONV_ERR_UNKNOWN;
@@ -356,7 +345,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buffer = (char *) emalloc(out_size + 1);
 	out_p = out_buffer;
 	
-	result = icv(cd, (const char **) &in_p, &in_size, (char **)
+	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
 				&out_p, &out_left);
 	
 	if (result == (size_t)(-1)) {
@@ -369,7 +358,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	}
 
 	/* flush the shift-out sequences */ 
-	result = icv(cd, NULL, NULL, &out_p, &out_left);
+	result = iconv(cd, NULL, NULL, &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
 		efree(out_buffer);
@@ -380,7 +369,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buffer[*out_len] = '\0';
 	*out = out_buffer;
 
-	icv_close(cd);
+	iconv_close(cd);
 
 	return PHP_ICONV_ERR_SUCCESS;
 
@@ -397,7 +386,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	*out = NULL;
 	*out_len = 0;
 
-	cd = icv_open(out_charset, in_charset);
+	cd = iconv_open(out_charset, in_charset);
 
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
@@ -414,7 +403,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_p = out_buf;
 
 	while (in_left > 0) {
-		result = icv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
+		result = iconv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if (result == (size_t)(-1)) {
 			if (errno == E2BIG && in_left > 0) {
@@ -434,7 +423,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	if (result != (size_t)(-1)) {
 		/* flush the shift-out sequences */ 
 		for (;;) {
-		   	result = icv(cd, NULL, NULL, (char **) &out_p, &out_left);
+		   	result = iconv(cd, NULL, NULL, (char **) &out_p, &out_left);
 			out_size = bsz - out_left;
 
 			if (result != (size_t)(-1)) {
@@ -454,7 +443,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 		}
 	}
 
-	icv_close(cd);
+	iconv_close(cd);
 
 	if (result == (size_t)(-1)) {
 		switch (errno) {
@@ -505,7 +494,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 
 	*pretval = (unsigned int)-1;
 
-	cd = icv_open(GENERIC_SUPERSET_NAME, enc);
+	cd = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
@@ -528,7 +517,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 
 		prev_in_left = in_left;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+		if (iconv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 				break;
 			}
@@ -561,7 +550,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 	*pretval = cnt;
 #endif
 
-	icv_close(cd);
+	iconv_close(cd);
 
 	return err;
 }
@@ -605,7 +594,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 	}
 
-	cd1 = icv_open(GENERIC_SUPERSET_NAME, enc);
+	cd1 = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd1 == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
@@ -628,7 +617,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 		prev_in_left = in_left;
 
-		if (icv(cd1, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+		if (iconv(cd1, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 				break;
 			}
@@ -636,7 +625,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 		if (cnt >= (unsigned int)offset) {
 			if (cd2 == NULL) {
-				cd2 = icv_open(enc, GENERIC_SUPERSET_NAME);
+				cd2 = iconv_open(enc, GENERIC_SUPERSET_NAME);
 
 				if (cd2 == (iconv_t)(-1)) {
 					cd2 = NULL;
@@ -685,11 +674,11 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 
 	if (cd1 != NULL) {
-		icv_close(cd1);
+		iconv_close(cd1);
 	}
 
 	if (cd2 != NULL) {
-		icv_close(cd2);
+		iconv_close(cd2);
 	}	
 	return err;
 }
@@ -734,7 +723,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 		return err;
 	}
 
-	cd = icv_open(GENERIC_SUPERSET_NAME, enc);
+	cd = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
@@ -759,7 +748,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
 		prev_in_left = in_left;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+		if (iconv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 #if ICONV_SUPPORTS_ERRNO
 				switch (errno) {
@@ -877,7 +866,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 		efree(ndl_buf);
 	}
 	
-	icv_close(cd);
+	iconv_close(cd);
 
 	return err;
 }
@@ -909,7 +898,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		goto out;
 	}
 
-	cd_pl = icv_open("ASCII", enc);
+	cd_pl = iconv_open("ASCII", enc);
 	if (cd_pl == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
@@ -923,7 +912,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		goto out;
 	}
 
-	cd = icv_open(out_charset, enc);
+	cd = iconv_open(out_charset, enc);
 	if (cd == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
@@ -993,7 +982,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 					out_left = out_size - out_reserved;
 
-					if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+					if (iconv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 						switch (errno) {
 							case EINVAL:
@@ -1025,7 +1014,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 					out_left += out_reserved;
 
-					if (icv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
+					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 						if (errno != E2BIG) {
 							err = PHP_ICONV_ERR_UNKNOWN;
@@ -1041,7 +1030,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						break;
 					}
 
-					if (icv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
+					if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 						err = PHP_ICONV_ERR_UNKNOWN;
 						goto out;
 					}
@@ -1081,7 +1070,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					out_p = buf;
 					out_left = out_size = 1;
 
-					if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+					if (iconv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 						switch (errno) {
 							case EINVAL:
@@ -1141,7 +1130,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
 				char_cnt -= 2;
 
-				if (icv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
+				if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 					err = PHP_ICONV_ERR_UNKNOWN;
 					goto out;
 				}
@@ -1154,10 +1143,10 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 out:
 	if (cd != (iconv_t)(-1)) {
-		icv_close(cd);
+		iconv_close(cd);
 	}
 	if (cd_pl != (iconv_t)(-1)) {
-		icv_close(cd_pl);
+		iconv_close(cd_pl);
 	}
 	if (encoded != NULL) {
 		efree(encoded);
@@ -1186,7 +1175,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 	php_iconv_enc_scheme_t enc_scheme;
 
-	cd_pl = icv_open(enc, "ASCII");
+	cd_pl = iconv_open(enc, "ASCII");
 
 	if (cd_pl == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
@@ -1262,10 +1251,10 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					tmpbuf[csname_len] = '\0';
 
 					if (cd != (iconv_t)(-1)) {
-						icv_close(cd);
+						iconv_close(cd);
 					}
 
-					cd = icv_open(enc, tmpbuf);
+					cd = iconv_open(enc, tmpbuf);
 
 					if (cd == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
@@ -1399,10 +1388,10 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 	smart_str_0(pretval);
 out:
 	if (cd != (iconv_t)(-1)) {
-		icv_close(cd);
+		iconv_close(cd);
 	}
 	if (cd_pl != (iconv_t)(-1)) {
-		icv_close(cd_pl);
+		iconv_close(cd_pl);
 	}
 	return err;
 }
