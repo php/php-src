@@ -1,3 +1,52 @@
+2004-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h:
+      Bump version (as discussed with Andi)
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      - Fix (readd function name which got lost during earlier comit)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Be consistent and use names as keys (found by johannes)
+
+    * ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h:
+      - Bump API version
+
+    * (PHP_5_0)
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h:
+      Bump api after latest changes
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      MFH change zend_object_handlers->get_method()
+
+    * ext/standard/incomplete_class.c:
+      - Update to new API
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Change zend_object_handlers->get_method() to allow aggregation for
+      internal classes
+
+    * ZendEngine2/Makefile.frag:
+      - New architecture needs one more dependency
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_reflection_api.c:
+      - Fix protos
+
 2004-10-29  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_operators.c:

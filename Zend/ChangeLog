@@ -1,3 +1,45 @@
+2004-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h:
+      Bump version (as discussed with Andi)
+
+    * (PHP_5_0)
+      zend_execute.c:
+      - Fix (readd function name which got lost during earlier comit)
+
+    * zend_reflection_api.c:
+      - Be consistent and use names as keys (found by johannes)
+
+    * zend_extensions.h
+      zend_modules.h:
+      - Bump API version
+
+    * (PHP_5_0)
+      zend_extensions.h
+      zend_modules.h:
+      Bump api after latest changes
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      MFH change zend_object_handlers->get_method()
+
+    * zend_execute_API.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Change zend_object_handlers->get_method() to allow aggregation for
+      internal classes
+
+    * Makefile.frag:
+      - New architecture needs one more dependency
+
+    * zend_exceptions.c
+      zend_reflection_api.c:
+      - Fix protos
+
 2004-10-29  Andi Gutmans  <andi@zend.com>
 
     * zend_operators.c:
