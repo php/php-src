@@ -1,3 +1,26 @@
+2000-09-14  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c: Corrected memory leak in read().
+
+2000-09-14  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c:
+    - Use IS_ABSOLUTE_PATH() so that this will work correctly under Windows
+
+    * main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: - Time to remove these two.
+
+2000-09-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/snmp/snmp.c: Fix warnings.
+
+    * ext/pcre/php_pcre.c: Fixed bug #6740.
+    I happen to think that this is php_addslashes() problem, not PCRE's.
+    When 0 is passed for the length of the string to php_addslashes() it
+    assumes that we want to process the whole string and happily runs
+    strlen() on it. That is bad. It should respect the length and return
+    an empty string if it's 0.
+
 2000-09-13  Chris Vandomelen  <chrisv@b0rked.dhs.org>
 
     * ext/sockets/sockets.c:
