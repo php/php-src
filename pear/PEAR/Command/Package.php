@@ -83,16 +83,33 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $caption = 'Contents of ' . basename($params[0]);
                 $this->ui->startTable(array('caption' => $caption,
                                             'border' => true));
-                $this->ui->tableRow(array('Package File', 'Install Destination'),
+                $this->ui->tableRow(array('Package Files', 'Install Destination'),
                                     array('bold' => true));
                 foreach ($list as $file => $att) {
                     if (isset($att['baseinstalldir'])) {
-                        $dest = $att['baseinstalldir'] . '/' . basename($file);
+                        $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
+                                basename($file);
                     } else {
                         $dest = basename($file);
                     }
-                    $dest = preg_replace('!^/+!', '', $dest);
-                    $this->ui->tableRow(array($file, $dest));
+                    switch ($att['role']) {
+                        case 'test':
+                            continue 2;
+                            $dest = '-- will not be installed --';
+                        case 'doc':
+                            $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
+                                    $dest;
+                        case 'php':
+                        default:
+                            $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
+                                    $dest;
+                    }
+                    $dest = preg_replace('!/+!', '/', $dest);
+                    $file = preg_replace('!/+!', '/', $file);
+                    $opts = array(0 => array('wrap' => 23),
+                                  1 => array('wrap' => 45)
+                                 );
+                    $this->ui->tableRow(array($file, $dest), null, $opts);
                 }
                 $this->ui->endTable();
                 break;
@@ -104,6 +121,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     return $info;
                 }
                 unset($info['filelist']);
+                unset($info['changelog']);
                 $keys = array_keys($info);
                 $longtext = array('description', 'summary');
                 foreach ($keys as $key) {
@@ -167,7 +185,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $this->ui->startTable(array('caption' => $caption,
                                             'border' => true));
                 foreach ($info as $key => $value) {
-                    $this->ui->tableRow(array($key, $value));
+                    $this->ui->tableRow(array($key, $value), null, array(1 => array('wrap' => 55)));
                 }
                 $this->ui->endTable();
                 break;
