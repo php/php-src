@@ -774,7 +774,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	assert(data != NULL);
 
 #if HAVE_FLUSHIO
-	if (data->last_op == 'r') {
+	if (!data->is_pipe && data->last_op == 'r') {
 		fseek(data->file, 0, SEEK_CUR);
 	}
 	data->last_op = 'w';
@@ -798,7 +798,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	}
 
 #if HAVE_FLUSHIO
-	if (data->last_op == 'w')
+	if (!data->is_pipe && data->last_op == 'w')
 		fseek(data->file, 0, SEEK_CUR);
 	data->last_op = 'r';
 #endif
@@ -856,7 +856,7 @@ static char *php_stdiop_gets(php_stream *stream, char *buf, size_t size TSRMLS_D
 
 	assert(data != NULL);
 #if HAVE_FLUSHIO
-	if (data->last_op == 'w') {
+	if (!data->is_pipe && data->last_op == 'w') {
 		fseek(data->file, 0, SEEK_CUR);
 	}
 	data->last_op = 'r';
