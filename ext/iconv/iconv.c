@@ -225,7 +225,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	bsz = out_left;
 	out_buf = (char *) emalloc(bsz+1); 
 	out_p = out_buf;
-	result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
+	result = iconv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
 	out_size = bsz - out_left;
 	for (i = 2;in_left > 0 && errno == E2BIG; i++) {
 		/* converted string is longer than out buffer */
@@ -237,7 +237,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 		out_p = tmp_buf;
 		out_p += out_size;
 		out_left = in_len;
-		result = iconv(cd, (char **)&in_p, &in_left, &out_p, &out_left);
+		result = iconv(cd, (const char **)&in_p, &in_left, &out_p, &out_left);
 		out_size += bsz - out_left;
 	}
 	iconv_close(cd);
