@@ -275,7 +275,7 @@ Changes in the Zend Engine 2.0
     * Final methods and classes.
 
       The Zend Engine 2.0 introduces the "final" keyword to declare
-      final methods. Those cannot be overridden by sub-classes.
+      final methods. Those cannot be overridden by sub-classes. 
 
       Example:
 
@@ -339,42 +339,42 @@ Changes in the Zend Engine 2.0
       all of the object's properties. If a __clone() method is
       defined, then it will be responsible to set the necessary
       properties in the created object. For convenience, the engine
-      will supply a function that imports all of the properties from
-      the source object, so that they can start with a by-value
-      replica of the source object, and only override properties that
-      need to be changed.
+      ensures, that the clone will be initialized with all of the 
+      properties from the source object, so that developers can start 
+      with a by-value replica of the source object, and only override 
+      properties that need to be changed.
 
       Example:
-
         <?php
         class MyCloneable {
-            static $id = 0;
+          static $id = 0;
 
-            function MyCloneable() {
-                $this->id = self::$id++;
-            }
+          function MyCloneable() {
+            $this->id = self::$id++;
+          }
 
-            function __clone() {
-                $this->name = $that->name;
-                $this->address = 'New York';
-                $this->id = self::$id++;
-            }
+          function __clone() {
+            $this->address = 'New York';
+            $this->id = self::$id++;
+          }
         }
 
         $obj = new MyCloneable();
 
-        $obj->name    = 'Hello';
+        $obj->name = 'Hello';
         $obj->address = 'Tel-Aviv';
 
-        print $obj->id . "\n";
-
-        $obj = clone $obj;
+        $obj_clone = clone $obj;
 
         print $obj->id . "\n";
         print $obj->name . "\n";
         print $obj->address . "\n";
-        ?>
 
+        print $obj_clone->id . "\n";
+        print $obj_clone->name . "\n";
+        print $obj_clone->address . "\n";
+        ?>
+   
     * Unified Constructors.
 
       The Zend Engine allows developers to declare constructor methods
@@ -488,7 +488,7 @@ Changes in the Zend Engine 2.0
       
       Exceptions can be rethrown in catch blocks. Also it is possible to
       have multiple catch blocks. In that case the caught exception is 
-      compare with the classtype of each catch block from top to bottom
+      compared with the classtype of each catch block from top to bottom
       and the first block that has a 'instanceof' match gets executed.
       When the catch block finishes execution continues at the end of 
       the last catch block. If no catch block has a 'instanceof' match
@@ -535,12 +535,11 @@ Changes in the Zend Engine 2.0
       do so. This is because the internal Exception class can gather a
       lot of information otherwise not available. The PHP code emulation
       code would look something like shown below. The comments show the
-      meaning of each proerty and hence there getter methods. As the code
-      shows it is possible to read any available information by using the
-      getter methods. But since some of the methods are used internally
-      they are marked final. All in all the class is very restrictive 
-      because it must be ensured that anything used internally always
-      works as expected.
+      meaning of each property. As the code shows it is possible to read 
+      any available information by using the getter methods. But since
+      some of the methods are used internally they are marked final. All 
+      in all the class is very restrictive because it must be ensured 
+      that anything used internally always  works as expected.
       
       Emulating class Exception:
 
