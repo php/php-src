@@ -91,9 +91,7 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_STATIC		0x01
 #define ZEND_ACC_ABSTRACT	0x02
 
-/* No visibility is the same as public visibility.
- * For inheritance no visibility means inheriting the visibility.
- */
+/* The order of those must be kept - public < protected < private */
 #define ZEND_ACC_PUBLIC    0x10
 #define ZEND_ACC_PROTECTED 0x20
 #define ZEND_ACC_PRIVATE   0x40
