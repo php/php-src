@@ -70,10 +70,10 @@ class PEAR_Command_Install extends PEAR_Command_Common
         $failmsg = '';
         $opts = array();
         switch ($command) {
-            case 'upgrade': {
+            case 'upgrade':
                 $opts['upgrade'] = true;
                 // fall through
-            case 'install':
+            case 'install': {
                 if (isset($options['f'])) {
                     $opts['force'] = true;
                 }
