@@ -6,6 +6,7 @@
 # Run PCRE tests
 
 cf=diff
+testdata=./testdata
 
 # Select which tests to run; if no selection, run all
 
@@ -29,7 +30,7 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-if [ "" = "" ] ; then
+if [ "-DSUPPORT_UTF8" = "" ] ; then
   if [ $do5 = yes ] ; then
     echo "Can't run test 5 because UFT8 support is not configured"
     exit 1
@@ -46,17 +47,17 @@ if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no -a\
   do2=yes
   do3=yes
   do4=yes
-  if [ "" != "" ] ; then do5=yes; fi
-  if [ "" != "" ] ; then do6=yes; fi
+  if [ "-DSUPPORT_UTF8" != "" ] ; then do5=yes; fi
+  if [ "-DSUPPORT_UTF8" != "" ] ; then do6=yes; fi
 fi
 
 # Primary test, Perl-compatible
 
 if [ $do1 = yes ] ; then
   echo "Testing main functionality (Perl compatible)"
-  ./pcretest testdata/testinput1 testtry
+  ./pcretest $testdata/testinput1 testtry
   if [ $? = 0 ] ; then
-    $cf testtry testdata/testoutput1
+    $cf testtry $testdata/testoutput1
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -66,9 +67,9 @@ fi
 
 if [ $do2 = yes ] ; then
   echo "Testing API and error handling (not Perl compatible)"
-  ./pcretest -i testdata/testinput2 testtry
+  ./pcretest -i $testdata/testinput2 testtry
   if [ $? = 0 ] ; then
-    $cf testtry testdata/testoutput2
+    $cf testtry $testdata/testoutput2
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -78,9 +79,9 @@ fi
 
 if [ $do3 = yes ] ; then
   echo "Testing Perl 5.005 features (Perl 5.005 compatible)"
-  ./pcretest testdata/testinput3 testtry
+  ./pcretest $testdata/testinput3 testtry
   if [ $? = 0 ] ; then
-    $cf testtry testdata/testoutput3
+    $cf testtry $testdata/testoutput3
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -98,9 +99,9 @@ if [ $do4 = yes ] ; then
   locale -a | grep '^fr$' >/dev/null
   if [ $? -eq 0 ] ; then
     echo "Testing locale-specific features (using 'fr' locale)"
-    ./pcretest testdata/testinput4 testtry
+    ./pcretest $testdata/testinput4 testtry
     if [ $? = 0 ] ; then
-      $cf testtry testdata/testoutput4
+      $cf testtry $testdata/testoutput4
       if [ $? != 0 ] ; then 
         echo " "
         echo "Locale test did not run entirely successfully."
@@ -123,9 +124,9 @@ fi
 
 if [ $do5 = yes ] ; then
   echo "Testing experimental, incomplete UTF8 support (Perl compatible)"
-  ./pcretest testdata/testinput5 testtry 
+  ./pcretest $testdata/testinput5 testtry 
   if [ $? = 0 ] ; then
-    $cf testtry testdata/testoutput5
+    $cf testtry $testdata/testoutput5
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi
@@ -135,9 +136,9 @@ fi
 
 if [ $do6 = yes ] ; then
   echo "Testing API and internals for UTF8 support (not Perl compatible)"
-  ./pcretest testdata/testinput6 testtry 
+  ./pcretest $testdata/testinput6 testtry 
   if [ $? = 0 ] ; then
-    $cf testtry testdata/testoutput6
+    $cf testtry $testdata/testoutput6
     if [ $? != 0 ] ; then exit 1; fi
   else exit 1
   fi

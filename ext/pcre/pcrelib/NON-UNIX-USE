@@ -9,7 +9,10 @@ commands to do the following:
 (1) Copy or rename the file config.in as config.h, and change the macros that
 define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
 Unfortunately, because of the way Unix autoconf works, the default setting has
-to be 0.
+to be 0. You may also want to make changes to other macros in config.h. In
+particular, if you want to force a specific value for newline, you can define
+the NEWLINE macro. The default is to use '\n', thereby using whatever value
+your compiler gives to '\n'.
 
 (2) Copy or rename the file pcre.in as pcre.h, and change the macro definitions
 for PCRE_MAJOR, PCRE_MINOR, and PCRE_DATE near its start to the values set in

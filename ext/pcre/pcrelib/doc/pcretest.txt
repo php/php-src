@@ -1,246 +1,319 @@
-The pcretest program
---------------------
+NAME
+     pcretest - a program  for  testing  Perl-compatible  regular
+     expressions.
 
-This program is intended for testing PCRE, but it can also be used for
-experimenting with regular expressions.
 
-If it is given two filename arguments, it reads from the first and writes to
-the second. If it is given only one filename argument, it reads from that file
-and writes to stdout. Otherwise, it reads from stdin and writes to stdout, and
-prompts for each line of input, using "re>" to prompt for regular expressions,
-and "data>" to prompt for data lines.
 
-The program handles any number of sets of input on a single input file. Each
-set starts with a regular expression, and continues with any number of data
-lines to be matched against the pattern. An empty line signals the end of the
-data lines, at which point a new regular expression is read. The regular
-expressions are given enclosed in any non-alphameric delimiters other than
-backslash, for example
+SYNOPSIS
+     pcretest [-d] [-i] [-m] [-o osize] [-p] [-t] [source]  [des-
+     tination]
 
-  /(a|bc)x+yz/
+     pcretest was written as a test program for the PCRE  regular
+     expression  library  itself,  but  it  can  also be used for
+     experimenting  with  regular  expressions.  This  man   page
+     describes  the  features of the test program; for details of
+     the regular expressions themselves, see the pcre man page.
 
-White space before the initial delimiter is ignored. A regular expression may
-be continued over several input lines, in which case the newline characters are
-included within it. See the test input files in the testdata directory for many
-examples. It is possible to include the delimiter within the pattern by
-escaping it, for example
 
-  /abc\/def/
 
-If you do so, the escape and the delimiter form part of the pattern, but since
-delimiters are always non-alphameric, this does not affect its interpretation.
-If the terminating delimiter is immediately followed by a backslash, for
-example,
+OPTIONS
+     -d        Behave as if each regex had the /D  modifier  (see
+               below); the internal form is output after compila-
+               tion.
 
-  /abc/\
+     -i        Behave as if  each  regex  had  the  /I  modifier;
+               information  about  the  compiled pattern is given
+               after compilation.
 
-then a backslash is added to the end of the pattern. This is done to provide a
-way of testing the error condition that arises if a pattern finishes with a
-backslash, because
+     -m        Output the size of each compiled pattern after  it
+               has been compiled. This is equivalent to adding /M
+               to each regular expression. For compatibility with
+               earlier  versions of pcretest, -s is a synonym for
+               -m.
 
-  /abc\/
+     -o osize  Set the number of elements in  the  output  vector
+               that  is  used  when calling PCRE to be osize. The
+               default value is 45, which is enough for  14  cap-
+               turing  subexpressions.  The  vector  size  can be
+               changed for individual matching calls by including
+               \O in the data line (see below).
 
-is interpreted as the first line of a pattern that starts with "abc/", causing
-pcretest to read the next line as a continuation of the regular expression.
+     -p        Behave as if each regex has /P modifier; the POSIX
+               wrapper  API  is  used  to  call PCRE. None of the
+               other options has any effect when -p is set.
+
+     -t        Run each compile, study,  and  match  20000  times
+               with  a  timer, and output resulting time per com-
+               pile or match (in milliseconds).  Do  not  set  -t
+               with -m, because you will then get the size output
+               20000 times and the timing will be distorted.
+
+
+
+DESCRIPTION
+     If pcretest is given two filename arguments, it  reads  from
+     the  first and writes to the second. If it is given only one
+
+
+
+
+SunOS 5.8                 Last change:                          1
+
+
+
+     filename argument, it reads from that  file  and  writes  to
+     stdout. Otherwise, it reads from stdin and writes to stdout,
+     and prompts for each line of input, using  "re>"  to  prompt
+     for  regular  expressions,  and  "data>"  to prompt for data
+     lines.
+
+     The program handles any number of sets of input on a  single
+     input  file.  Each set starts with a regular expression, and
+     continues with any  number  of  data  lines  to  be  matched
+     against  the  pattern.  An empty line signals the end of the
+     data lines, at which point a new regular expression is read.
+     The  regular  expressions  are  given  enclosed  in any non-
+     alphameric delimiters other than backslash, for example
+
+       /(a|bc)x+yz/
+
+     White space before the initial delimiter is ignored. A regu-
+     lar expression may be continued over several input lines, in
+     which case the newline characters are included within it. It
+     is  possible  to include the delimiter within the pattern by
+     escaping it, for example
+
+       /abc\/def/
+
+     If you do so, the escape and the delimiter form part of  the
+     pattern,  but  since  delimiters  are always non-alphameric,
+     this does not affect its interpretation.  If the terminating
+     delimiter  is immediately followed by a backslash, for exam-
+     ple,
+
+       /abc/\
+
+     then a backslash is added to the end of the pattern. This is
+     done  to  provide  a way of testing the error condition that
+     arises if a pattern finishes with a backslash, because
+
+       /abc\/
+
+     is interpreted as the first line of a  pattern  that  starts
+     with  "abc/",  causing  pcretest  to read the next line as a
+     continuation of the regular expression.
+
 
 
 PATTERN MODIFIERS
------------------
+     The pattern may be followed by i, m, s,  or  x  to  set  the
+     PCRE_CASELESS, PCRE_MULTILINE, PCRE_DOTALL, or PCRE_EXTENDED
+     options, respectively. For example:
 
-The pattern may be followed by i, m, s, or x to set the PCRE_CASELESS,
-PCRE_MULTILINE, PCRE_DOTALL, or PCRE_EXTENDED options, respectively. For
-example:
+       /caseless/i
 
-  /caseless/i
+     These modifier letters have the same effect as  they  do  in
+     Perl.  There  are  others which set PCRE options that do not
+     correspond  to  anything  in  Perl:   /A,  /E,  and  /X  set
+     PCRE_ANCHORED,  PCRE_DOLLAR_ENDONLY,  and PCRE_EXTRA respec-
+     tively.
 
-These modifier letters have the same effect as they do in Perl. There are
-others which set PCRE options that do not correspond to anything in Perl: /A,
-/E, and /X set PCRE_ANCHORED, PCRE_DOLLAR_ENDONLY, and PCRE_EXTRA respectively.
+     Searching for  all  possible  matches  within  each  subject
+     string  can  be  requested  by  the /g or /G modifier. After
+     finding  a  match,  PCRE  is  called  again  to  search  the
+     remainder  of  the subject string. The difference between /g
+     and /G is that the former uses the startoffset  argument  to
+     pcre_exec()  to  start  searching  at a new point within the
+     entire string (which is in effect what Perl  does),  whereas
+     the  latter  passes over a shortened substring. This makes a
+     difference to the matching process  if  the  pattern  begins
+     with a lookbehind assertion (including \b or \B).
 
-Searching for all possible matches within each subject string can be requested
-by the /g or /G modifier. After finding a match, PCRE is called again to search
-the remainder of the subject string. The difference between /g and /G is that
-the former uses the startoffset argument to pcre_exec() to start searching at
-a new point within the entire string (which is in effect what Perl does),
-whereas the latter passes over a shortened substring. This makes a difference
-to the matching process if the pattern begins with a lookbehind assertion
-(including \b or \B).
+     If any call to pcre_exec() in a /g or /G sequence matches an
+     empty  string,  the next call is done with the PCRE_NOTEMPTY
+     and PCRE_ANCHORED flags set in order to search for  another,
+     non-empty,  match  at  the same point.  If this second match
+     fails, the start offset is advanced by one, and  the  normal
+     match  is  retried.  This imitates the way Perl handles such
+     cases when using the /g modifier or the split() function.
 
-If any call to pcre_exec() in a /g or /G sequence matches an empty string, the
-next call is done with the PCRE_NOTEMPTY and PCRE_ANCHORED flags set in order
-to search for another, non-empty, match at the same point. If this second match
-fails, the start offset is advanced by one, and the normal match is retried.
-This imitates the way Perl handles such cases when using the /g modifier or the
-split() function.
+     There are a number of other modifiers  for  controlling  the
+     way pcretest operates.
 
-There are a number of other modifiers for controlling the way pcretest
-operates.
+     The /+ modifier requests that as well as outputting the sub-
+     string  that  matched the entire pattern, pcretest should in
+     addition output the remainder of the subject string. This is
+     useful  for tests where the subject contains multiple copies
+     of the same substring.
 
-The /+ modifier requests that as well as outputting the substring that matched
-the entire pattern, pcretest should in addition output the remainder of the
-subject string. This is useful for tests where the subject contains multiple
-copies of the same substring.
+     The /L modifier must be followed directly by the name  of  a
+     locale, for example,
 
-The /L modifier must be followed directly by the name of a locale, for example,
+       /pattern/Lfr
 
-  /pattern/Lfr
+     For this reason, it must be the last  modifier  letter.  The
+     given  locale is set, pcre_maketables() is called to build a
+     set of character tables for the locale,  and  this  is  then
+     passed  to pcre_compile() when compiling the regular expres-
+     sion. Without an /L modifier, NULL is passed as  the  tables
+     pointer; that is, /L applies only to the expression on which
+     it appears.
 
-For this reason, it must be the last modifier letter. The given locale is set,
-pcre_maketables() is called to build a set of character tables for the locale,
-and this is then passed to pcre_compile() when compiling the regular
-expression. Without an /L modifier, NULL is passed as the tables pointer; that
-is, /L applies only to the expression on which it appears.
+     The /I modifier requests that  pcretest  output  information
+     about the compiled expression (whether it is anchored, has a
+     fixed first character, and so on). It does this  by  calling
+     pcre_fullinfo()  after  compiling an expression, and output-
+     ting the information it gets back. If the  pattern  is  stu-
+     died, the results of that are also output.
+     The /D modifier is a  PCRE  debugging  feature,  which  also
+     assumes /I.  It causes the internal form of compiled regular
+     expressions to be output after compilation.
 
-The /I modifier requests that pcretest output information about the compiled
-expression (whether it is anchored, has a fixed first character, and so on). It
-does this by calling pcre_fullinfo() after compiling an expression, and
-outputting the information it gets back. If the pattern is studied, the results
-of that are also output.
+     The /S modifier causes pcre_study() to be called  after  the
+     expression  has been compiled, and the results used when the
+     expression is matched.
 
-The /D modifier is a PCRE debugging feature, which also assumes /I. It causes
-the internal form of compiled regular expressions to be output after
-compilation.
+     The /M modifier causes the size of memory block used to hold
+     the compiled pattern to be output.
 
-The /S modifier causes pcre_study() to be called after the expression has been
-compiled, and the results used when the expression is matched.
+     The /P modifier causes pcretest to call PCRE via  the  POSIX
+     wrapper  API  rather than its native API. When this is done,
+     all other modifiers except  /i,  /m,  and  /+  are  ignored.
+     REG_ICASE is set if /i is present, and REG_NEWLINE is set if
+     /m    is    present.    The    wrapper    functions    force
+     PCRE_DOLLAR_ENDONLY    always,    and   PCRE_DOTALL   unless
+     REG_NEWLINE is set.
 
-The /M modifier causes the size of memory block used to hold the compiled
-pattern to be output.
+     The /8 modifier  causes  pcretest  to  call  PCRE  with  the
+     PCRE_UTF8  option  set.  This turns on the (currently incom-
+     plete) support for UTF-8 character handling  in  PCRE,  pro-
+     vided  that  it was compiled with this support enabled. This
+     modifier also causes any non-printing characters  in  output
+     strings  to  be printed using the \x{hh...} notation if they
+     are valid UTF-8 sequences.
 
-The /P modifier causes pcretest to call PCRE via the POSIX wrapper API rather
-than its native API. When this is done, all other modifiers except /i, /m, and
-/+ are ignored. REG_ICASE is set if /i is present, and REG_NEWLINE is set if /m
-is present. The wrapper functions force PCRE_DOLLAR_ENDONLY always, and
-PCRE_DOTALL unless REG_NEWLINE is set.
-
-The /8 modifier causes pcretest to call PCRE with the PCRE_UTF8 option set.
-This turns on the (currently incomplete) support for UTF-8 character handling
-in PCRE, provided that it was compiled with this support enabled. This modifier
-also causes any non-printing characters in output strings to be printed using
-the \x{hh...} notation if they are valid UTF-8 sequences.
 
 
 DATA LINES
-----------
+     Before each data line is passed to pcre_exec(), leading  and
+     trailing whitespace is removed, and it is then scanned for \
+     escapes. The following are recognized:
 
-Before each data line is passed to pcre_exec(), leading and trailing whitespace
-is removed, and it is then scanned for \ escapes. The following are recognized:
+       \a         alarm (= BEL)
+       \b         backspace
+       \e         escape
+       \f         formfeed
+       \n         newline
+       \r         carriage return
+       \t         tab
+       \v         vertical tab
+       \nnn       octal character (up to 3 octal digits)
+       \xhh       hexadecimal character (up to 2 hex digits)
+       \x{hh...}  hexadecimal UTF-8 character
 
-  \a         alarm (= BEL)
-  \b         backspace
-  \e         escape
-  \f         formfeed
-  \n         newline
-  \r         carriage return
-  \t         tab
-  \v         vertical tab
-  \nnn       octal character (up to 3 octal digits)
-  \xhh       hexadecimal character (up to 2 hex digits)
-  \x{hh...}  hexadecimal UTF-8 character
+       \A         pass the PCRE_ANCHORED option to pcre_exec()
+       \B         pass the PCRE_NOTBOL option to pcre_exec()
+       \Cdd       call pcre_copy_substring() for substring dd
+                     after a successful match (any decimal number
+                     less than 32)
+       \Gdd       call pcre_get_substring() for substring dd
 
-  \A         pass the PCRE_ANCHORED option to pcre_exec()
-  \B         pass the PCRE_NOTBOL option to pcre_exec()
-  \Cdd       call pcre_copy_substring() for substring dd after a successful
-               match (any decimal number less than 32)
-  \Gdd       call pcre_get_substring() for substring dd after a successful
-               match (any decimal number less than 32)
-  \L         call pcre_get_substringlist() after a successful match
-  \N         pass the PCRE_NOTEMPTY option to pcre_exec()
-  \Odd       set the size of the output vector passed to pcre_exec() to dd
-               (any number of decimal digits)
-  \Z         pass the PCRE_NOTEOL option to pcre_exec()
+                     after a successful match (any decimal number
+                     less than 32)
+       \L         call pcre_get_substringlist() after a
+                     successful match
+       \N         pass the PCRE_NOTEMPTY option to pcre_exec()
+       \Odd       set the size of the output vector passed to
+                     pcre_exec() to dd (any number of decimal
+                     digits)
+       \Z         pass the PCRE_NOTEOL option to pcre_exec()
 
-A backslash followed by anything else just escapes the anything else. If the
-very last character is a backslash, it is ignored. This gives a way of passing
-an empty line as data, since a real empty line terminates the data input.
+     When \O is used, it may be higher or lower than the size set
+     by  the  -O  option (or defaulted to 45); \O applies only to
+     the call of pcre_exec() for the line in which it appears.
 
-If /P was present on the regex, causing the POSIX wrapper API to be used, only
-\B, and \Z have any effect, causing REG_NOTBOL and REG_NOTEOL to be passed to
-regexec() respectively.
+     A backslash followed by anything else just escapes the  any-
+     thing else. If the very last character is a backslash, it is
+     ignored. This gives a way of passing an empty line as  data,
+     since a real empty line terminates the data input.
 
-The use of \x{hh...} to represent UTF-8 characters is not dependent on the use
-of the /8 modifier on the pattern. It is recognized always. There may be any
-number of hexadecimal digits inside the braces. The result is from one to six
-bytes, encoded according to the UTF-8 rules.
+     If /P was present on the regex, causing  the  POSIX  wrapper
+     API  to  be  used,  only  B,  and Z have any effect, causing
+     REG_NOTBOL and REG_NOTEOL to be passed to regexec()  respec-
+     tively.
+
+     The use of \x{hh...} to represent UTF-8  characters  is  not
+     dependent  on  the use of the /8 modifier on the pattern. It
+     is recognized always. There may be any number of hexadecimal
+     digits  inside  the  braces.  The  result is from one to six
+     bytes, encoded according to the UTF-8 rules.
+
 
 
 OUTPUT FROM PCRETEST
---------------------
+     When a match succeeds, pcretest outputs the list of captured
+     substrings  that pcre_exec() returns, starting with number 0
+     for the string that matched the whole pattern.  Here  is  an
+     example of an interactive pcretest run.
 
-When a match succeeds, pcretest outputs the list of captured substrings that
-pcre_exec() returns, starting with number 0 for the string that matched the
-whole pattern. Here is an example of an interactive pcretest run.
+       $ pcretest
+       PCRE version 2.06 08-Jun-1999
 
-  $ pcretest
-  PCRE version 2.06 08-Jun-1999
+         re> /^abc(\d+)/
+       data> abc123
+        0: abc123
+        1: 123
+       data> xyz
+       No match
 
-    re> /^abc(\d+)/
-  data> abc123
-   0: abc123
-   1: 123
-  data> xyz
-  No match
+     If the strings contain any non-printing characters, they are
+     output  as  \0x  escapes,  or  as  \x{...} escapes if the /8
+     modifier was present on the pattern. If the pattern has  the
+     /+  modifier, then the output for substring 0 is followed by
+     the the rest of the subject string, identified by "0+"  like
+     this:
 
-If the strings contain any non-printing characters, they are output as \0x
-escapes, or as \x{...} escapes if the /8 modifier was present on the pattern.
-If the pattern has the /+ modifier, then the output for substring 0 is followed
-by the the rest of the subject string, identified by "0+" like this:
+         re> /cat/+
+       data> cataract
+        0: cat
+        0+ aract
 
-    re> /cat/+
-  data> cataract
-   0: cat
-   0+ aract
+     If the pattern has the /g or /G  modifier,  the  results  of
+     successive  matching  attempts  are output in sequence, like
+     this:
 
-If the pattern has the /g or /G modifier, the results of successive matching
-attempts are output in sequence, like this:
+         re> /\Bi(\w\w)/g
+       data> Mississippi
+        0: iss
+        1: ss
+        0: iss
+        1: ss
+        0: ipp
+        1: pp
 
-    re> /\Bi(\w\w)/g
-  data> Mississippi
-   0: iss
-   1: ss
-   0: iss
-   1: ss
-   0: ipp
-   1: pp
+     "No match" is output only if the first match attempt fails.
 
-"No match" is output only if the first match attempt fails.
+     If any of the sequences \C, \G, or \L are present in a  data
+     line  that is successfully matched, the substrings extracted
+     by the convenience functions are output  with  C,  G,  or  L
+     after the string number instead of a colon. This is in addi-
+     tion to the normal full list. The string  length  (that  is,
+     the  return  from  the  extraction  function)  is  given  in
+     parentheses after each string for \C and \G.
 
-If any of \C, \G, or \L are present in a data line that is successfully
-matched, the substrings extracted by the convenience functions are output with
-C, G, or L after the string number instead of a colon. This is in addition to
-the normal full list. The string length (that is, the return from the
-extraction function) is given in parentheses after each string for \C and \G.
-
-Note that while patterns can be continued over several lines (a plain ">"
-prompt is used for continuations), data lines may not. However newlines can be
-included in data by means of the \n escape.
+     Note that while patterns can be continued over several lines
+     (a  plain  ">" prompt is used for continuations), data lines
+     may not. However newlines can be included in data  by  means
+     of the \n escape.
 
 
-COMMAND LINE OPTIONS
---------------------
 
-If the -p option is given to pcretest, it is equivalent to adding /P to each
-regular expression: the POSIX wrapper API is used to call PCRE. None of the
-following flags has any effect in this case.
+AUTHOR
+     Philip Hazel <ph10@cam.ac.uk>
+     University Computing Service,
+     New Museums Site,
+     Cambridge CB2 3QG, England.
+     Phone: +44 1223 334714
 
-If the option -d is given to pcretest, it is equivalent to adding /D to each
-regular expression: the internal form is output after compilation.
-
-If the option -i is given to pcretest, it is equivalent to adding /I to each
-regular expression: information about the compiled pattern is given after
-compilation.
-
-If the option -m is given to pcretest, it outputs the size of each compiled
-pattern after it has been compiled. It is equivalent to adding /M to each
-regular expression. For compatibility with earlier versions of pcretest, -s is
-a synonym for -m.
-
-If the -t option is given, each compile, study, and match is run 20000 times
-while being timed, and the resulting time per compile or match is output in
-milliseconds. Do not set -t with -m, because you will then get the size output
-20000 times and the timing will be distorted. If you want to change the number
-of repetitions used for timing, edit the definition of LOOPREPEAT at the top of
-pcretest.c
-
-Philip Hazel <ph10@cam.ac.uk>
-August 2000
+     Last updated: 15 August 2001
+     Copyright (c) 1997-2001 University of Cambridge.

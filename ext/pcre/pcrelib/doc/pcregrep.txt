@@ -4,7 +4,7 @@ NAME
 
 
 SYNOPSIS
-     pcregrep [-Vchilnsvx] pattern [file] ...
+     pcregrep [-Vcfhilnrsvx] pattern [file] ...
 
 
 
@@ -37,6 +37,14 @@ OPTIONS
                wise have  been  printed.  If  several  files  are
                given, a count is printed for each of them.
 
+     -ffilename
+               Read patterns from the file,  one  per  line,  and
+               match  all  patterns against each line. There is a
+               maximum of 100 patterns. Trailing white  space  is
+               removed,  and  blank  lines  are ignored. An empty
+               file contains no patterns  and  therefore  matches
+               nothing.
+
      -h        Suppress printing of filenames when searching mul-
                tiple files.
 
@@ -44,11 +52,16 @@ OPTIONS
                parisons.
 
      -l        Instead of printing lines  from  the  files,  just
+
                print the names of the files containing lines that
                would have been printed. Each file name is printed
                once, on a separate line.
 
      -n        Precede each line by its line number in the file.
+
+     -r        If any file is a directory, recursively  scan  the
+               files  it  contains.  Without  -r  a  directory is
+               scanned as a normal file.
 
      -s        Work silently, that  is,  display  nothing  except
                error messages.  The exit status indicates whether
@@ -83,5 +96,6 @@ DIAGNOSTICS
 
 AUTHOR
      Philip Hazel <ph10@cam.ac.uk>
-     Copyright (c) 1997-2000 University of Cambridge.
 
+     Last updated: 15 August 2001
+     Copyright (c) 1997-2001 University of Cambridge.

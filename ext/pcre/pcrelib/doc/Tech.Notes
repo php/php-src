@@ -135,7 +135,7 @@ end of each byte.
 Back references
 ---------------
 
-OP_REF is followed by a single byte containing the reference number.
+OP_REF is followed by two bytes containing the reference number.
 
 
 Repeating character classes and back references
@@ -163,10 +163,20 @@ Brackets and alternation
 
 A pair of non-capturing (round) brackets is wrapped round each expression at
 compile time, so alternation always happens in the context of brackets.
+
 Non-capturing brackets use the opcode OP_BRA, while capturing brackets use
 OP_BRA+1, OP_BRA+2, etc. [Note for North Americans: "bracket" to some English
 speakers, including myself, can be round, square, curly, or pointy. Hence this
 usage.]
+
+Originally PCRE was limited to 99 capturing brackets (so as not to use up all
+the opcodes). From release 3.5, there is no limit. What happens is that the
+first ones, up to EXTRACT_BASIC_MAX are handled with separate opcodes, as
+above. If there are more, the opcode is set to EXTRACT_BASIC_MAX+1, and the
+first operation in the bracket is OP_BRANUMBER, followed by a 2-byte bracket
+number. This opcode is ignored while matching, but is fished out when handling
+the bracket itself. (They could have all been done like this, but I was making
+minimal changes.)
 
 A bracket opcode is followed by two bytes which give the offset to the next
 alternative OP_ALT or, if there aren't any branches, to the matching KET
@@ -191,8 +201,8 @@ appropriate.
 A subpattern with a bounded maximum repetition is replicated in a nested
 fashion up to the maximum number of times, with BRAZERO or BRAMINZERO before
 each replication after the minimum, so that, for example, (abc){2,5} is
-compiled as (abc)(abc)((abc)((abc)(abc)?)?)?. The 200-bracket limit does not
-apply to these internally generated brackets.
+compiled as (abc)(abc)((abc)((abc)(abc)?)?)?. The 99 and 200 bracket limits do
+not apply to these internally generated brackets.
 
 
 Assertions
@@ -220,7 +230,7 @@ Conditional subpatterns
 
 These are like other subpatterns, but they start with the opcode OP_COND. If
 the condition is a back reference, this is stored at the start of the
-subpattern using the opcode OP_CREF followed by one byte containing the
+subpattern using the opcode OP_CREF followed by two bytes containing the
 reference number. Otherwise, a conditional subpattern will always start with
 one of the assertions.
 
@@ -240,4 +250,4 @@ the compiled data.
 
 
 Philip Hazel
-August 2000
+August 2001

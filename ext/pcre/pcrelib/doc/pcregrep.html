@@ -22,7 +22,7 @@ pcregrep - a grep with Perl-compatible regular expressions.
 </P>
 <LI><A NAME="SEC2" HREF="#TOC1">SYNOPSIS</A>
 <P>
-<B>pcregrep [-Vchilnsvx] pattern [file] ...</B>
+<B>pcregrep [-Vcfhilnrsvx] pattern [file] ...</B>
 </P>
 <LI><A NAME="SEC3" HREF="#TOC1">DESCRIPTION</A>
 <P>
@@ -55,6 +55,13 @@ lines that would otherwise have been printed. If several files are given, a
 count is printed for each of them.
 </P>
 <P>
+\fB-f<I>filename</I>
+Read patterns from the file, one per line, and match all patterns against each
+line. There is a maximum of 100 patterns. Trailing white space is removed, and
+blank lines are ignored. An empty file contains no patterns and therefore
+matches nothing.
+</P>
+<P>
 <B>-h</B>
 Suppress printing of filenames when searching multiple files.
 </P>
@@ -71,6 +78,11 @@ once, on a separate line.
 <P>
 <B>-n</B>
 Precede each line by its line number in the file.
+</P>
+<P>
+<B>-r</B>
+If any file is a directory, recursively scan the files it contains. Without
+<B>-r</B> a directory is scanned as a normal file.
 </P>
 <P>
 <B>-s</B>
@@ -101,5 +113,8 @@ for syntax errors or inacessible files (even if matches were found).
 <LI><A NAME="SEC7" HREF="#TOC1">AUTHOR</A>
 <P>
 Philip Hazel &#60;ph10@cam.ac.uk&#62;
+</P>
+<P>
+Last updated: 15 August 2001
 <BR>
-Copyright (c) 1997-2000 University of Cambridge.
+Copyright (c) 1997-2001 University of Cambridge.

@@ -74,7 +74,10 @@ DESCRIPTION
      releases.
 
      The functions pcre_compile(), pcre_study(), and  pcre_exec()
-     are used for compiling and matching regular expressions.
+     are  used  for compiling and matching regular expressions. A
+     sample program that demonstrates the simplest way  of  using
+     them  is  given  in the file pcredemo.c. The last section of
+     this man page describes how to run it.
 
      The functions  pcre_copy_substring(),  pcre_get_substring(),
      and  pcre_get_substring_list() are convenience functions for
@@ -104,19 +107,10 @@ DESCRIPTION
 
 
 MULTI-THREADING
-     The  PCRE  functions  can   be   used   in   multi-threading
-
-
-
-
-
-SunOS 5.8                 Last change:                          2
-
-
-
-     applications,  with  the  proviso that the memory management
-     functions pointed to by pcre_malloc and pcre_free are shared
-     by all threads.
+     The PCRE functions can be used in  multi-threading  applica-
+     tions, with the proviso that the memory management functions
+     pointed to by pcre_malloc and pcre_free are  shared  by  all
+     threads.
 
      The compiled form of a regular  expression  is  not  altered
      during  matching, so the same compiled pattern can safely be
@@ -130,11 +124,16 @@ COMPILING A PATTERN
      by a binary zero, and is passed in the argument  pattern.  A
      pointer  to  a  single  block of memory that is obtained via
      pcre_malloc is returned. This contains the compiled code and
-     related data. The pcre type is defined for this for conveni-
-     ence, but in fact pcre is just a typedef for void, since the
-     contents  of  the block are not externally defined. It is up
-     to the caller to free  the  memory  when  it  is  no  longer
-     required.
+     related  data.  The  pcre  type  is defined for the returned
+     block; this is a typedef for a structure whose contents  are
+     not  externally  defined. It is up to the caller to free the
+     memory when it is no longer required.
+
+     Although the compiled code of a PCRE regex  is  relocatable,
+     that is, it does not depend on memory location, the complete
+     pcre data block is not fully relocatable,  because  it  con-
+     tains  a  copy of the tableptr argument, which is an address
+     (see below).
 
      The size of a compiled pattern is  roughly  proportional  to
      the length of the pattern string, except that each character
@@ -168,6 +167,19 @@ COMPILING A PATTERN
      compiled, using the default C  locale.  Otherwise,  tableptr
      must  be  the result of a call to pcre_maketables(). See the
      section on locale support below.
+
+     This code fragment shows a typical straightforward  call  to
+     pcre_compile():
+
+       pcre *re;
+       const char *error;
+       int erroffset;
+       re = pcre_compile(
+         "^A.*Z",          /* the pattern */
+         0,                /* default options */
+         &error,           /* for error message */
+         &erroffset,       /* for error offset */
+         NULL);            /* use default character tables */
 
      The following option bits are defined in the header file:
 
@@ -271,12 +283,12 @@ STUDYING A PATTERN
      When a pattern is going to be  used  several  times,  it  is
      worth  spending  more time analyzing it in order to speed up
      the time taken for matching. The function pcre_study() takes
-
      a  pointer  to a compiled pattern as its first argument, and
-     returns a  pointer  to  a  pcre_extra  block  (another  void
-     typedef)  containing  additional  information about the pat-
-     tern; this can be passed to pcre_exec().  If  no  additional
-     information is available, NULL is returned.
+     returns a pointer to a pcre_extra block (another typedef for
+     a  structure  with  hidden  contents)  containing additional
+     information  about  the  pattern;  this  can  be  passed  to
+     pcre_exec(). If no additional information is available, NULL
+     is returned.
 
      The second argument contains option  bits.  At  present,  no
      options  are  defined  for  pcre_study(),  and this argument
@@ -286,6 +298,14 @@ STUDYING A PATTERN
      message. If studying succeeds (even if no data is returned),
      the variable it points to  is  set  to  NULL.  Otherwise  it
      points to a textual error message.
+
+     This is a typical call to pcre_study():
+
+       pcre_extra *pe;
+       pe = pcre_study(
+         re,             /* result of pcre_compile() */
+         0,              /* no options exist */
+         &error);        /* set to NULL or points to a message */
 
      At present, studying a  pattern  is  useful  only  for  non-
      anchored  patterns  that do not have a single fixed starting
@@ -347,13 +367,24 @@ INFORMATION ABOUT A PATTERN
        PCRE_ERROR_BADMAGIC   the "magic number" was not found
        PCRE_ERROR_BADOPTION  the value of what was invalid
 
+     Here is a typical call of  pcre_fullinfo(),  to  obtain  the
+     length of the compiled pattern:
+
+       int rc;
+       unsigned long int length;
+       rc = pcre_fullinfo(
+         re,               /* result of pcre_compile() */
+         pe,               /* result of pcre_study(), or NULL */
+         PCRE_INFO_SIZE,   /* what is required */
+         &length);         /* where to put the data */
+
      The possible values for the third argument  are  defined  in
      pcre.h, and are as follows:
 
        PCRE_INFO_OPTIONS
 
      Return a copy of the options with which the pattern was com-
-     piled.  The fourth argument should point to au unsigned long
+     piled.  The fourth argument should point to an unsigned long
      int variable. These option bits are those specified  in  the
      call  to  pcre_compile(),  modified  by any top-level option
      settings  within  the   pattern   itself,   and   with   the
@@ -375,9 +406,9 @@ INFORMATION ABOUT A PATTERN
 
        PCRE_INFO_BACKREFMAX
 
-     Return the number of  the  highest  back  reference  in  the
-     pattern.  The  fourth  argument should point to an int vari-
-     able. Zero is returned if there are no back references.
+     Return the number of the highest back reference in the  pat-
+     tern.  The  fourth argument should point to an int variable.
+     Zero is returned if there are no back references.
 
        PCRE_INFO_FIRSTCHAR
 
@@ -440,10 +471,33 @@ INFORMATION ABOUT A PATTERN
 
 MATCHING A PATTERN
      The function pcre_exec() is called to match a subject string
+
+
+
+
+
+SunOS 5.8                 Last change:                          9
+
+
+
      against  a pre-compiled pattern, which is passed in the code
      argument. If the pattern has been studied, the result of the
      study should be passed in the extra argument. Otherwise this
      must be NULL.
+
+     Here is an example of a simple call to pcre_exec():
+
+       int rc;
+       int ovector[30];
+       rc = pcre_exec(
+         re,             /* result of pcre_compile() */
+         NULL,           /* we didn't study the pattern */
+         "some string",  /* the subject string */
+         11,             /* the length of the subject string */
+         0,              /* start at offset 0 in the subject */
+         0,              /* default options */
+         ovector,        /* vector for substring information */
+         30);            /* number of elements in the vector */
 
      The PCRE_ANCHORED option can be passed in the options  argu-
      ment,  whose unused bits must be zero. However, if a pattern
@@ -495,10 +549,10 @@ MATCHING A PATTERN
 
      The subject string is passed as  a  pointer  in  subject,  a
      length  in  length,  and  a  starting offset in startoffset.
-     Unlike the pattern string, it may contain binary zero  char-
-     acters.  When  the starting offset is zero, the search for a
-     match starts at the beginning of the subject, and this is by
-     far the most common case.
+     Unlike the pattern string, the subject  may  contain  binary
+     zero  characters.  When  the  starting  offset  is zero, the
+     search for a match starts at the beginning of  the  subject,
+     and this is by far the most common case.
 
      A non-zero starting offset  is  useful  when  searching  for
      another  match  in  the  same subject by calling pcre_exec()
@@ -634,17 +688,9 @@ MATCHING A PATTERN
 
 
 
+
 EXTRACTING CAPTURED SUBSTRINGS
      Captured substrings can be accessed directly  by  using  the
-
-
-
-
-
-SunOS 5.8                 Last change:                         12
-
-
-
      offsets returned by pcre_exec() in ovector. For convenience,
      the functions  pcre_copy_substring(),  pcre_get_substring(),
      and  pcre_get_substring_list()  are  provided for extracting
@@ -722,10 +768,12 @@ LIMITATIONS
      There are some size limitations in PCRE but it is hoped that
      they will never in practice be relevant.  The maximum length
      of a compiled pattern is 65539 (sic) bytes.  All  values  in
-     repeating  quantifiers must be less than 65536.  The maximum
-     number of capturing subpatterns is 99.  The  maximum  number
-     of  all  parenthesized subpatterns, including capturing sub-
-     patterns, assertions, and other types of subpattern, is 200.
+     repeating  quantifiers  must be less than 65536.  There max-
+     imum number of capturing subpatterns is 65535.  There is  no
+     limit  to  the  number of non-capturing subpatterns, but the
+     maximum depth of nesting of all kinds of parenthesized  sub-
+     pattern,  including  capturing  subpatterns, assertions, and
+     other types of subpattern, is 200.
 
      The maximum length of a subject string is the largest  posi-
      tive number that an integer variable can hold. However, PCRE
@@ -901,6 +949,7 @@ BACKSLASH
      The backslash character has several uses. Firstly, if it  is
      followed  by  a  non-alphameric character, it takes away any
      special  meaning  that  character  may  have.  This  use  of
+
      backslash  as  an  escape  character applies both inside and
      outside character classes.
 
@@ -1061,7 +1110,6 @@ CIRCUMFLEX AND DOLLAR
      Outside a character class, in the default matching mode, the
      circumflex  character  is an assertion which is true only if
      the current matching point is at the start  of  the  subject
-
      string.  If  the startoffset argument of pcre_exec() is non-
      zero, circumflex can never match. Inside a character  class,
      circumflex has an entirely different meaning (see below).
@@ -1105,7 +1153,7 @@ CIRCUMFLEX AND DOLLAR
 
      Note that the sequences \A, \Z, and \z can be used to  match
      the  start  and end of the subject in both modes, and if all
-     branches of a pattern start with \A is it  always  anchored,
+     branches of a pattern start with \A it is  always  anchored,
      whether PCRE_MULTILINE is set or not.
 
 
@@ -1114,7 +1162,6 @@ FULL STOP (PERIOD, DOT)
      Outside a character class, a dot in the pattern matches  any
      one character in the subject, including a non-printing char-
      acter, but not (by default)  newline.   If  the  PCRE_DOTALL
-
      option  is set, dots match newlines as well. The handling of
      dot is entirely independent of the  handling  of  circumflex
      and  dollar,  the  only  relationship  being  that they both
@@ -1233,7 +1280,7 @@ POSIX CHARACTER CLASSES
        [12[:^digit:]]
 
      matches "1", "2", or any non-digit.  PCRE  (and  Perl)  also
-     recogize  the POSIX syntax [.ch.] and [=ch=] where "ch" is a
+     recognize the POSIX syntax [.ch.] and [=ch=] where "ch" is a
      "collating element", but these are  not  supported,  and  an
      error is given if they are encountered.
 
@@ -1352,7 +1399,7 @@ SUBPATTERNS
        the ((red|white) (king|queen))
 
      the captured substrings are "red king", "red",  and  "king",
-     and are numbered 1, 2, and 3.
+     and are numbered 1, 2, and 3, respectively.
 
      The fact that plain parentheses fulfil two functions is  not
      always  helpful.  There are often times when a grouping sub-
@@ -1423,7 +1470,6 @@ REPETITION
      one that does not match the syntax of a quantifier, is taken
      as  a literal character. For example, {,6} is not a quantif-
      ier, but a literal string of four characters.
-
      The quantifier {0} is permitted, causing the  expression  to
      behave  as  if the previous item and the quantifier were not
      present.
@@ -1528,6 +1574,14 @@ REPETITION
 BACK REFERENCES
      Outside a character class, a backslash followed by  a  digit
      greater  than  0  (and  possibly  further  digits) is a back
+
+
+
+
+SunOS 5.8                 Last change:                         30
+
+
+
      reference to a capturing subpattern  earlier  (i.e.  to  its
      left)  in  the  pattern,  provided there have been that many
      previous capturing left parentheses.
@@ -1583,12 +1637,11 @@ BACK REFERENCES
 
      matches any number of "a"s and also "aba", "ababbaa" etc. At
      each iteration of the subpattern, the back reference matches
-     the  character  string   corresponding   to   the   previous
-     iteration.  In  order  for this to work, the pattern must be
-     such that the first iteration does not  need  to  match  the
-     back  reference.  This  can be done using alternation, as in
-     the example above, or by a  quantifier  with  a  minimum  of
-     zero.
+     the character string corresponding to  the  previous  itera-
+     tion.  In  order  for this to work, the pattern must be such
+     that the first iteration does not need  to  match  the  back
+     reference.  This  can  be  done using alternation, as in the
+     example above, or by a quantifier with a minimum of zero.
 
 
 
@@ -1741,9 +1794,9 @@ ONCE-ONLY SUBPATTERNS
 
      This kind of parenthesis "locks up" the  part of the pattern
      it  contains once it has matched, and a failure further into
-     the  pattern  is  prevented  from  backtracking   into   it.
-     Backtracking  past  it  to previous items, however, works as
-     normal.
+     the pattern is prevented from backtracking  into  it.  Back-
+     tracking  past  it to previous items, however, works as nor-
+     mal.
 
      An alternative description is that a subpattern of this type
      matches  the  string  of  characters that an identical stan-
@@ -2051,8 +2104,8 @@ UTF-8 SUPPORT
      Running with PCRE_UTF8 set causes these changes in  the  way
      PCRE works:
 
-     1. In a pattern, the escape sequence \x{...}, where the con-
-     tents  of  the  braces is a string of hexadecimal digits, is
+     1. In a pattern, the  escape  sequence  \x{...},  where  the
+     contents of the braces is a string of hexadecimal digits, is
      interpreted as a UTF-8 character whose code  number  is  the
      given   hexadecimal  number,  for  example:  \x{1234}.  This
      inserts from one to six  literal  bytes  into  the  pattern,
@@ -2106,10 +2159,148 @@ UTF-8 SUPPORT
 
      The following UTF-8 features of  Perl  5.6  are  not  imple-
      mented:
+
      1. The escape sequence \C to match a single byte.
 
      2. The use of Unicode tables and properties and escapes  \p,
      \P, and \X.
+
+
+
+SAMPLE PROGRAM
+     The code below is a simple, complete demonstration  program,
+     to  get  you started with using PCRE. This code is also sup-
+     plied in the file pcredemo.c in the PCRE distribution.
+
+     The program compiles the  regular  expression  that  is  its
+     first argument, and matches it against the subject string in
+     its second argument. No options are set, and default charac-
+     ter  tables are used. If matching succeeds, the program out-
+     puts the portion of the subject that matched, together  with
+     the contents of any captured substrings.
+
+     On a Unix system that has PCRE installed in /usr/local,  you
+     can  compile  the demonstration program using a command like
+     this:
+
+       gcc   -o    pcredemo    pcredemo.c    -I/usr/local/include
+     -L/usr/local/lib -lpcre
+
+     Then you can run simple tests like this:
+
+       ./pcredemo 'cat|dog' 'the cat sat on the mat'
+
+     Note that there is a much more comprehensive  test  program,
+     called  pcretest,  which  supports  many more facilities for
+     testing regular expressions. The pcredemo  program  is  pro-
+     vided as a simple coding example.
+
+     On some operating systems (e.g.  Solaris)  you  may  get  an
+     error like this when you try to run pcredemo:
+
+       ld.so.1: a.out: fatal: libpcre.so.0: open failed: No  such
+     file or directory
+
+     This is caused by the way shared library  support  works  on
+     those systems. You need to add
+
+       -R/usr/local/lib
+
+     to the compile command to get round this problem. Here's the
+     code:
+
+       #include <stdio.h>
+       #include <string.h>
+       #include <pcre.h>
+
+       #define OVECCOUNT 30    /* should be a multiple of 3 */
+
+       int main(int argc, char **argv)
+       {
+       pcre *re;
+       const char *error;
+       int erroffset;
+       int ovector[OVECCOUNT];
+       int rc, i;
+
+       if (argc != 3)
+         {
+         printf("Two arguments required: a regex and a "
+           "subject string\n");
+         return 1;
+         }
+
+       /* Compile the regular expression in the first argument */
+
+       re = pcre_compile(
+         argv[1],     /* the pattern */
+         0,           /* default options */
+         &error,      /* for error message */
+         &erroffset,  /* for error offset */
+         NULL);       /* use default character tables */
+
+       /* Compilation failed: print the error message and exit */
+
+       if (re == NULL)
+         {
+         printf("PCRE compilation failed at offset %d: %s\n",
+           erroffset, error);
+         return 1;
+         }
+
+       /* Compilation succeeded: match the subject in the second
+          argument */
+
+       rc = pcre_exec(
+         re,          /* the compiled pattern */
+         NULL,        /* we didn't study the pattern */
+         argv[2],     /* the subject string */
+         (int)strlen(argv[2]), /* the length of the subject */
+         0,           /* start at offset 0 in the subject */
+         0,           /* default options */
+         ovector,     /* vector for substring information */
+         OVECCOUNT);  /* number of elements in the vector */
+
+       /* Matching failed: handle error cases */
+
+       if (rc < 0)
+         {
+         switch(rc)
+           {
+           case PCRE_ERROR_NOMATCH: printf("No match\n"); break;
+           /*
+           Handle other special cases if you like
+           */
+           default: printf("Matching error %d\n", rc); break;
+           }
+         return 1;
+         }
+
+       /* Match succeded */
+
+       printf("Match succeeded\n");
+
+       /* The output vector wasn't big enough */
+
+       if (rc == 0)
+         {
+         rc = OVECCOUNT/3;
+         printf("ovector only has room for %d captured "
+           substrings\n", rc - 1);
+         }
+
+       /* Show substrings stored in the output vector */
+
+       for (i = 0; i < rc; i++)
+         {
+         char *substring_start = argv[2] + ovector[2*i];
+         int substring_length = ovector[2*i+1] - ovector[2*i];
+         printf("%2d: %.*s\n", i, substring_length,
+           substring_start);
+         }
+
+       return 0;
+       }
 
 
 
@@ -2120,6 +2311,5 @@ AUTHOR
      Cambridge CB2 3QG, England.
      Phone: +44 1223 334714
 
-     Last updated: 28 August 2000,
-       the 250th anniversary of the death of J.S. Bach.
-     Copyright (c) 1997-2000 University of Cambridge.
+     Last updated: 15 August 2001
+     Copyright (c) 1997-2001 University of Cambridge.

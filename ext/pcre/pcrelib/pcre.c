@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2000 University of Cambridge
+           Copyright (c) 1997-2001 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -60,8 +60,11 @@ the external pcre header. */
 #endif
 
 
-/* Number of items on the nested bracket stacks at compile time. This should
-not be set greater than 200. */
+/* Maximum number of items on the nested bracket stacks at compile time. This
+applies to the nesting of all kinds of parentheses. It does not limit
+un-nested, non-capturing parentheses. This number can be made bigger if
+necessary - it is used to dimension one int and one unsigned char vector at
+compile time. */
 
 #define BRASTACK_SIZE 200
 
@@ -95,7 +98,7 @@ static const char *OP_names[] = {
   "class", "Ref", "Recurse",
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",
   "AssertB", "AssertB not", "Reverse", "Once", "Cond", "Cref",
-  "Brazero", "Braminzero", "Bra"
+  "Brazero", "Braminzero", "Branumber", "Bra"
 };
 #endif
 
@@ -111,9 +114,9 @@ static const short int escapes[] = {
     0,      0,      0,      0,      0,      0,      0,      0,   /* H - O */
     0,      0,      0, -ESC_S,      0,      0,      0, -ESC_W,   /* P - W */
     0,      0, -ESC_Z,    '[',   '\\',    ']',    '^',    '_',   /* X - _ */
-  '`',      7, -ESC_b,      0, -ESC_d,     27,   '\f',      0,   /* ` - g */
-    0,      0,      0,      0,      0,      0,   '\n',      0,   /* h - o */
-    0,      0,   '\r', -ESC_s,   '\t',      0,      0, -ESC_w,   /* p - w */
+  '`',      7, -ESC_b,      0, -ESC_d,  ESC_E,  ESC_F,      0,   /* ` - g */
+    0,      0,      0,      0,      0,      0,  ESC_N,      0,   /* h - o */
+    0,      0,  ESC_R, -ESC_s,  ESC_T,      0,      0, -ESC_w,   /* p - w */
     0,      0, -ESC_z                                            /* x - z */
 };
 
@@ -208,12 +211,12 @@ byte-mode, and more complicated ones for UTF-8 characters. */
   if (md->utf8 && (c & 0xc0) == 0xc0) \
     { \
     int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6 - a;                  /* Amount to shift next byte */  \
-    c &= utf8_table3[a];            /* Low order bits from first byte */ \
+    int s = 6*a; \
+    c = (c & utf8_table3[a]) << s; \
     while (a-- > 0) \
       { \
+      s -= 6; \
       c |= (*eptr++ & 0x3f) << s; \
-      s += 6; \
       } \
     }
 
@@ -226,12 +229,12 @@ byte-mode, and more complicated ones for UTF-8 characters. */
     { \
     int i; \
     int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
-    int s = 6 - a;                  /* Amount to shift next byte */  \
-    c &= utf8_table3[a];            /* Low order bits from first byte */ \
+    int s = 6*a; \
+    c = (c & utf8_table3[a]) << s; \
     for (i = 1; i <= a; i++) \
       { \
+      s -= 6; \
       c |= (eptr[i] & 0x3f) << s; \
-      s += 6; \
       } \
     len += a; \
     }
@@ -306,13 +309,13 @@ ord2utf8(int cvalue, uschar *buffer)
 register int i, j;
 for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
   if (cvalue <= utf8_table1[i]) break;
-*buffer++ = utf8_table2[i] | (cvalue & utf8_table3[i]);
-cvalue >>= 6 - i;
-for (j = 0; j < i; j++)
-  {
-  *buffer++ = 0x80 | (cvalue & 0x3f);
-  cvalue >>= 6;
-  }
+buffer += i;
+for (j = i; j > 0; j--)
+ {
+ *buffer-- = 0x80 | (cvalue & 0x3f);
+ cvalue >>= 6;
+ }
+*buffer = utf8_table2[i] | cvalue;
 return i + 1;
 }
 #endif
@@ -814,10 +817,11 @@ for (;;)
     /* Skip over things that don't match chars */
 
     case OP_REVERSE:
+    case OP_BRANUMBER:
+    case OP_CREF:
     cc++;
     /* Fall through */
 
-    case OP_CREF:
     case OP_OPT:
     cc++;
     /* Fall through */
@@ -871,7 +875,7 @@ for (;;)
     /* Check a class for variable quantification */
 
     case OP_CLASS:
-    cc += (*cc == OP_REF)? 2 : 33;
+    cc += 33;
 
     switch (*cc)
       {
@@ -978,7 +982,7 @@ return -1;
 
 Arguments:
   options      the option bits
-  brackets     points to number of brackets used
+  brackets     points to number of extracting brackets used
   code         points to the pointer to the current code point
   ptrptr       points to the current pattern pointer
   errorptr     points to pointer to error message
@@ -1029,7 +1033,7 @@ for (;; ptr++)
   int class_charcount;
   int class_lastchar;
   int newoptions;
-  int condref;
+  int skipbytes;
   int subreqchar;
 
   c = *ptr;
@@ -1040,7 +1044,7 @@ for (;; ptr++)
       {
       /* The space before the ; is to avoid a warning on a silly compiler
       on the Macintosh. */
-      while ((c = *(++ptr)) != 0 && c != '\n') ;
+      while ((c = *(++ptr)) != 0 && c != NEWLINE) ;
       continue;
       }
     }
@@ -1578,7 +1582,7 @@ for (;; ptr++)
       OP_BRAZERO in front of it, and because the group appears once in the
       data, whereas in other cases it appears the minimum number of times. For
       this reason, it is simplest to treat this case separately, as otherwise
-      the code gets far too mess. There are several special subcases when the
+      the code gets far too messy. There are several special subcases when the
       minimum is zero. */
 
       if (repeat_min == 0)
@@ -1729,7 +1733,7 @@ for (;; ptr++)
 
     case '(':
     newoptions = options;
-    condref = -1;
+    skipbytes = 0;
 
     if (*(++ptr) == '?')
       {
@@ -1752,7 +1756,7 @@ for (;; ptr++)
         bravalue = OP_COND;       /* Conditional group */
         if ((cd->ctypes[*(++ptr)] & ctype_digit) != 0)
           {
-          condref = *ptr - '0';
+          int condref = *ptr - '0';
           while (*(++ptr) != ')') condref = condref*10 + *ptr - '0';
           if (condref == 0)
             {
@@ -1760,6 +1764,10 @@ for (;; ptr++)
             goto FAILED;
             }
           ptr++;
+          code[3] = OP_CREF;
+          code[4] = condref >> 8;
+          code[5] = condref & 255;
+          skipbytes = 3;
           }
         else ptr--;
         break;
@@ -1862,16 +1870,21 @@ for (;; ptr++)
         }
       }
 
-    /* Else we have a referencing group; adjust the opcode. */
+    /* Else we have a referencing group; adjust the opcode. If the bracket
+    number is greater than EXTRACT_BASIC_MAX, we set the opcode one higher, and
+    arrange for the true number to follow later, in an OP_BRANUMBER item. */
 
     else
       {
-      if (++(*brackets) > EXTRACT_MAX)
+      if (++(*brackets) > EXTRACT_BASIC_MAX)
         {
-        *errorptr = ERR13;
-        goto FAILED;
+        bravalue = OP_BRA + EXTRACT_BASIC_MAX + 1;
+        code[3] = OP_BRANUMBER;
+        code[4] = *brackets >> 8;
+        code[5] = *brackets & 255;
+        skipbytes = 3;
         }
-      bravalue = OP_BRA + *brackets;
+      else bravalue = OP_BRA + *brackets;
       }
 
     /* Process nested bracketed re. Assertions may not be repeated, but other
@@ -1887,13 +1900,13 @@ for (;; ptr++)
          options | PCRE_INGROUP,       /* Set for all nested groups */
          ((options & PCRE_IMS) != (newoptions & PCRE_IMS))?
            newoptions & PCRE_IMS : -1, /* Pass ims options if changed */
-         brackets,                     /* Bracket level */
+         brackets,                     /* Extracting bracket count */
          &tempcode,                    /* Where to put code (updated) */
          &ptr,                         /* Input pointer (updated) */
          errorptr,                     /* Where to put an error message */
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
-         condref,                      /* Condition reference number */
+         skipbytes,                    /* Skip over OP_COND/OP_BRANUMBER */
          &subreqchar,                  /* For possible last char */
          &subcountlits,                /* For literal count */
          cd))                          /* Tables block */
@@ -1907,7 +1920,7 @@ for (;; ptr++)
     /* If this is a conditional bracket, check that there are no more than
     two branches in the group. */
 
-    if (bravalue == OP_COND)
+    else if (bravalue == OP_COND)
       {
       uschar *tc = code;
       condcount = 0;
@@ -1974,9 +1987,11 @@ for (;; ptr++)
       {
       if (-c >= ESC_REF)
         {
+        int number = -c - ESC_REF;
         previous = code;
         *code++ = OP_REF;
-        *code++ = -c - ESC_REF;
+        *code++ = number >> 8;
+        *code++ = number & 255;
         }
       else
         {
@@ -2011,7 +2026,7 @@ for (;; ptr++)
           {
           /* The space before the ; is to avoid a warning on a silly compiler
           on the Macintosh. */
-          while ((c = *(++ptr)) != 0 && c != '\n') ;
+          while ((c = *(++ptr)) != 0 && c != NEWLINE) ;
           if (c == 0) break;
           continue;
           }
@@ -2100,7 +2115,7 @@ Argument:
   ptrptr      -> the address of the current pattern pointer
   errorptr    -> pointer to error message
   lookbehind  TRUE if this is a lookbehind assertion
-  condref     >= 0 for OPT_CREF setting at start of conditional group
+  skipbytes   skip this many bytes at start (for OP_COND, OP_BRANUMBER)
   reqchar     -> place to put the last required character, or a negative number
   countlits   -> place to put the shortest literal count of any branch
   cd          points to the data block with tables pointers
@@ -2110,7 +2125,7 @@ Returns:      TRUE on success
 
 static BOOL
 compile_regex(int options, int optchanged, int *brackets, uschar **codeptr,
-  const uschar **ptrptr, const char **errorptr, BOOL lookbehind, int condref,
+  const uschar **ptrptr, const char **errorptr, BOOL lookbehind, int skipbytes,
   int *reqchar, int *countlits, compile_data *cd)
 {
 const uschar *ptr = *ptrptr;
@@ -2123,16 +2138,7 @@ int branchreqchar, branchcountlits;
 
 *reqchar = -1;
 *countlits = INT_MAX;
-code += 3;
-
-/* At the start of a reference-based conditional group, insert the reference
-number as an OP_CREF item. */
-
-if (condref >= 0)
-  {
-  *code++ = OP_CREF;
-  *code++ = condref;
-  }
+code += 3 + skipbytes;
 
 /* Loop for each alternative branch */
 
@@ -2284,7 +2290,8 @@ for (;;)
     break;
 
     case OP_CREF:
-    code += 2;
+    case OP_BRANUMBER:
+    code += 3;
     break;
 
     case OP_WORD_BOUNDARY:
@@ -2547,6 +2554,7 @@ while ((c = *(++ptr)) != 0)
   {
   int min, max;
   int class_charcount;
+  int bracket_length;
 
   if ((options & PCRE_EXTENDED) != 0)
     {
@@ -2555,7 +2563,7 @@ while ((c = *(++ptr)) != 0)
       {
       /* The space before the ; is to avoid a warning on a silly compiler
       on the Macintosh. */
-      while ((c = *(++ptr)) != 0 && c != '\n') ;
+      while ((c = *(++ptr)) != 0 && c != NEWLINE) ;
       continue;
       }
     }
@@ -2581,7 +2589,7 @@ while ((c = *(++ptr)) != 0)
       }
     length++;
 
-    /* A back reference needs an additional char, plus either one or 5
+    /* A back reference needs an additional 2 bytes, plus either one or 5
     bytes for a repeat. We also need to keep the value of the highest
     back reference. */
 
@@ -2589,7 +2597,7 @@ while ((c = *(++ptr)) != 0)
       {
       int refnum = -c - ESC_REF;
       if (refnum > top_backref) top_backref = refnum;
-      length++;   /* For single back reference */
+      length += 2;   /* For single back reference */
       if (ptr[1] == '{' && is_counted_repeat(ptr+2, &compile_block))
         {
         ptr = read_repeat_counts(ptr+2, &min, &max, errorptr, &compile_block);
@@ -2687,6 +2695,7 @@ while ((c = *(++ptr)) != 0)
 
     case '(':
     branch_newextra = 0;
+    bracket_length = 3;
 
     /* Handle special forms of bracket, which all start (? */
 
@@ -2754,7 +2763,7 @@ while ((c = *(++ptr)) != 0)
         if ((compile_block.ctypes[ptr[3]] & ctype_digit) != 0)
           {
           ptr += 4;
-          length += 2;
+          length += 3;
           while ((compile_block.ctypes[*ptr] & ctype_digit) != 0) ptr++;
           if (*ptr != ')')
             {
@@ -2881,15 +2890,19 @@ while ((c = *(++ptr)) != 0)
       }
 
     /* Extracting brackets must be counted so we can process escapes in a
-    Perlish way. */
+    Perlish way. If the number exceeds EXTRACT_BASIC_MAX we are going to
+    need an additional 3 bytes of store per extracting bracket. */
 
-    else bracount++;
+    else
+      {
+      bracount++;
+      if (bracount > EXTRACT_BASIC_MAX) bracket_length += 3;
+      }
 
-    /* Non-special forms of bracket. Save length for computing whole length
-    at end if there's a repeat that requires duplication of the group. Also
-    save the current value of branch_extra, and start the new group with
-    the new value. If non-zero, this will either be 2 for a (?imsx: group, or 3
-    for a lookbehind assertion. */
+    /* Save length for computing whole length at end if there's a repeat that
+    requires duplication of the group. Also save the current value of
+    branch_extra, and start the new group with the new value. If non-zero, this
+    will either be 2 for a (?imsx: group, or 3 for a lookbehind assertion. */
 
     if (brastackptr >= sizeof(brastack)/sizeof(int))
       {
@@ -2901,7 +2914,7 @@ while ((c = *(++ptr)) != 0)
     branch_extra = branch_newextra;
 
     brastack[brastackptr++] = length;
-    length += 3;
+    length += bracket_length;
     continue;
 
     /* Handle ket. Look for subsequent max/min; for certain sets of values we
@@ -2981,7 +2994,7 @@ while ((c = *(++ptr)) != 0)
           {
           /* The space before the ; is to avoid a warning on a silly compiler
           on the Macintosh. */
-          while ((c = *(++ptr)) != 0 && c != '\n') ;
+          while ((c = *(++ptr)) != 0 && c != NEWLINE) ;
           continue;
           }
         }
@@ -3062,7 +3075,7 @@ ptr = (const uschar *)pattern;
 code = re->code;
 *code = OP_BRA;
 bracount = 0;
-(void)compile_regex(options, -1, &bracount, &code, &ptr, errorptr, FALSE, -1,
+(void)compile_regex(options, -1, &bracount, &code, &ptr, errorptr, FALSE, 0,
   &reqchar, &countlits, &compile_block);
 re->top_bracket = bracount;
 re->top_backref = top_backref;
@@ -3176,7 +3189,10 @@ while (code < code_end)
 
   if (*code >= OP_BRA)
     {
-    printf("%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
+    if (*code - OP_BRA > EXTRACT_BASIC_MAX)
+      printf("%3d Bra extra", (code[1] << 8) + code[2]);
+    else
+      printf("%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
     code += 2;
     }
 
@@ -3184,16 +3200,6 @@ while (code < code_end)
     {
     case OP_OPT:
     printf(" %.2x %s", code[1], OP_names[*code]);
-    code++;
-    break;
-
-    case OP_COND:
-    printf("%3d Cond", (code[1] << 8) + code[2]);
-    code += 2;
-    break;
-
-    case OP_CREF:
-    printf(" %.2d %s", code[1], OP_names[*code]);
     code++;
     break;
 
@@ -3213,11 +3219,10 @@ while (code < code_end)
     case OP_ASSERTBACK:
     case OP_ASSERTBACK_NOT:
     case OP_ONCE:
-    printf("%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
-    code += 2;
-    break;
-
     case OP_REVERSE:
+    case OP_BRANUMBER:
+    case OP_COND:
+    case OP_CREF:
     printf("%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
     code += 2;
     break;
@@ -3290,8 +3295,8 @@ while (code < code_end)
     break;
 
     case OP_REF:
-    printf("    \\%d", *(++code));
-    code ++;
+    printf("    \\%d", (code[1] << 8) | code[2]);
+    code += 3;
     goto CLASS_REF_REPEAT;
 
     case OP_CLASS:
@@ -3504,8 +3509,14 @@ for (;;)
 
   if (op > OP_BRA)
     {
+    int offset;
     int number = op - OP_BRA;
-    int offset = number << 1;
+
+    /* For extended extraction brackets (large number), we have to fish out the
+    number from a dummy opcode at the start. */
+
+    if (number > EXTRACT_BASIC_MAX) number = (ecode[4] << 8) | ecode[5];
+    offset = number << 1;
 
 #ifdef DEBUG
     printf("start bracket %d subject=", number);
@@ -3535,6 +3546,7 @@ for (;;)
       md->offset_vector[offset] = save_offset1;
       md->offset_vector[offset+1] = save_offset2;
       md->offset_vector[md->offset_end - number] = save_offset3;
+
       return FALSE;
       }
 
@@ -3567,10 +3579,10 @@ for (;;)
     case OP_COND:
     if (ecode[3] == OP_CREF)         /* Condition is extraction test */
       {
-      int offset = ecode[4] << 1;    /* Doubled reference number */
+      int offset = (ecode[4] << 9) | (ecode[5] << 1); /* Doubled ref number */
       return match(eptr,
         ecode + ((offset < offset_top && md->offset_vector[offset] >= 0)?
-          5 : 3 + (ecode[1] << 8) + ecode[2]),
+          6 : 3 + (ecode[1] << 8) + ecode[2]),
         offset_top, md, ims, eptrb, match_isgroup);
       }
 
@@ -3590,10 +3602,12 @@ for (;;)
       }
     /* Control never reaches here */
 
-    /* Skip over conditional reference data if encountered (should not be) */
+    /* Skip over conditional reference or large extraction number data if
+    encountered. */
 
     case OP_CREF:
-    ecode += 2;
+    case OP_BRANUMBER:
+    ecode += 3;
     break;
 
     /* End of the pattern. If PCRE_NOTEMPTY is set, fail if we have matched
@@ -3859,8 +3873,14 @@ for (;;)
 
       if (*prev != OP_COND)
         {
+        int offset;
         int number = *prev - OP_BRA;
-        int offset = number << 1;
+
+        /* For extended extraction brackets (large number), we have to fish out
+        the number from a dummy opcode at the start. */
+
+        if (number > EXTRACT_BASIC_MAX) number = (prev[4] << 8) | prev[5];
+        offset = number << 1;
 
 #ifdef DEBUG
         printf("end bracket %d", number);
@@ -3920,7 +3940,7 @@ for (;;)
     if (md->notbol && eptr == md->start_subject) return FALSE;
     if ((ims & PCRE_MULTILINE) != 0)
       {
-      if (eptr != md->start_subject && eptr[-1] != '\n') return FALSE;
+      if (eptr != md->start_subject && eptr[-1] != NEWLINE) return FALSE;
       ecode++;
       break;
       }
@@ -3939,7 +3959,7 @@ for (;;)
     case OP_DOLL:
     if ((ims & PCRE_MULTILINE) != 0)
       {
-      if (eptr < md->end_subject) { if (*eptr != '\n') return FALSE; }
+      if (eptr < md->end_subject) { if (*eptr != NEWLINE) return FALSE; }
         else { if (md->noteol) return FALSE; }
       ecode++;
       break;
@@ -3950,7 +3970,7 @@ for (;;)
       if (!md->endonly)
         {
         if (eptr < md->end_subject - 1 ||
-           (eptr == md->end_subject - 1 && *eptr != '\n')) return FALSE;
+           (eptr == md->end_subject - 1 && *eptr != NEWLINE)) return FALSE;
 
         ecode++;
         break;
@@ -3969,7 +3989,7 @@ for (;;)
 
     case OP_EODN:
     if (eptr < md->end_subject - 1 ||
-       (eptr == md->end_subject - 1 && *eptr != '\n')) return FALSE;
+       (eptr == md->end_subject - 1 && *eptr != NEWLINE)) return FALSE;
     ecode++;
     break;
 
@@ -3991,7 +4011,7 @@ for (;;)
     /* Match a single character type; inline for speed */
 
     case OP_ANY:
-    if ((ims & PCRE_DOTALL) == 0 && eptr < md->end_subject && *eptr == '\n')
+    if ((ims & PCRE_DOTALL) == 0 && eptr < md->end_subject && *eptr == NEWLINE)
       return FALSE;
     if (eptr++ >= md->end_subject) return FALSE;
 #ifdef SUPPORT_UTF8
@@ -4054,8 +4074,8 @@ for (;;)
     case OP_REF:
       {
       int length;
-      int offset = ecode[1] << 1;                /* Doubled reference number */
-      ecode += 2;                                /* Advance past the item */
+      int offset = (ecode[1] << 9) | (ecode[2] << 1); /* Doubled ref number */
+      ecode += 3;                                     /* Advance past item */
 
       /* If the reference is unset, set the length to be longer than the amount
       of subject left; this ensures that every attempt at a match fails. We
@@ -4599,7 +4619,7 @@ for (;;)
         for (i = 1; i <= min; i++)
           {
           if (eptr >= md->end_subject ||
-             (*eptr++ == '\n' && (ims & PCRE_DOTALL) == 0))
+             (*eptr++ == NEWLINE && (ims & PCRE_DOTALL) == 0))
             return FALSE;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
           }
@@ -4608,7 +4628,7 @@ for (;;)
 #endif
       /* Non-UTF8 can be faster */
       if ((ims & PCRE_DOTALL) == 0)
-        { for (i = 1; i <= min; i++) if (*eptr++ == '\n') return FALSE; }
+        { for (i = 1; i <= min; i++) if (*eptr++ == NEWLINE) return FALSE; }
       else eptr += min;
       break;
 
@@ -4663,7 +4683,7 @@ for (;;)
         switch(ctype)
           {
           case OP_ANY:
-          if ((ims & PCRE_DOTALL) == 0 && c == '\n') return FALSE;
+          if ((ims & PCRE_DOTALL) == 0 && c == NEWLINE) return FALSE;
 #ifdef SUPPORT_UTF8
           if (md->utf8)
             while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
@@ -4718,7 +4738,7 @@ for (;;)
             {
             for (i = min; i < max; i++)
               {
-              if (eptr >= md->end_subject || *eptr++ == '\n') break;
+              if (eptr >= md->end_subject || *eptr++ == NEWLINE) break;
               while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
@@ -4738,7 +4758,7 @@ for (;;)
           {
           for (i = min; i < max; i++)
             {
-            if (eptr >= md->end_subject || *eptr == '\n') break;
+            if (eptr >= md->end_subject || *eptr == NEWLINE) break;
             eptr++;
             }
           }
@@ -4879,14 +4899,17 @@ const uschar *req_char_ptr = start_match - 1;
 const real_pcre *re = (const real_pcre *)external_re;
 const real_pcre_extra *extra = (const real_pcre_extra *)external_extra;
 BOOL using_temporary_offsets = FALSE;
-BOOL anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
-BOOL startline = (re->options & PCRE_STARTLINE) != 0;
+BOOL anchored;
+BOOL startline;
 
 if ((options & ~PUBLIC_EXEC_OPTIONS) != 0) return PCRE_ERROR_BADOPTION;
 
 if (re == NULL || subject == NULL ||
    (offsets == NULL && offsetcount > 0)) return PCRE_ERROR_NULL;
 if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
+
+anchored = ((re->options | options) & PCRE_ANCHORED) != 0;
+startline = (re->options & PCRE_STARTLINE) != 0;
 
 match_block.start_pattern = re->code;
 match_block.start_subject = (const uschar *)subject;
@@ -5016,7 +5039,7 @@ do
     {
     if (start_match > match_block.start_subject + start_offset)
       {
-      while (start_match < end_subject && start_match[-1] != '\n')
+      while (start_match < end_subject && start_match[-1] != NEWLINE)
         start_match++;
       }
     }
@@ -5121,7 +5144,7 @@ do
 
   rc = match_block.offset_overflow? 0 : match_block.end_offset_top/2;
 
-  if (match_block.offset_end < 2) rc = 0; else
+  if (offsetcount < 2) rc = 0; else
     {
     offsets[0] = start_match - match_block.start_subject;
     offsets[1] = match_block.end_match_ptr - match_block.start_subject;

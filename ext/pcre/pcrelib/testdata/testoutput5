@@ -1,4 +1,4 @@
-PCRE version 3.4 22-Aug-2000
+PCRE version 3.9 02-Jan-2002
 
 /-- Because of problems with Perl 5.6 in handling UTF-8 vs non UTF-8 --/
 /-- strings automatically, do not use the \x{} construct except with --/

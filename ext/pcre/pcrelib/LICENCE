@@ -9,7 +9,7 @@ Written by: Philip Hazel <ph10@cam.ac.uk>
 University of Cambridge Computing Service,
 Cambridge, England. Phone: +44 1223 334714.
 
-Copyright (c) 1997-2000 University of Cambridge
+Copyright (c) 1997-2001 University of Cambridge
 
 Permission is granted to anyone to use this software for any purpose on any
 computer system, and to redistribute it freely, subject to the following
@@ -40,7 +40,11 @@ restrictions:
    misrepresented as being the original software.
 
 4. If PCRE is embedded in any software that is released under the GNU
-   General Purpose Licence (GPL), then the terms of that licence shall
-   supersede any condition above with which it is incompatible.
+   General Purpose Licence (GPL), or Lesser General Purpose Licence (LGPL),
+   then the terms of that licence shall supersede any condition above with
+   which it is incompatible.
+
+The documentation for PCRE, supplied in the "doc" directory, is distributed
+under the same terms as the software itself.
 
 End
