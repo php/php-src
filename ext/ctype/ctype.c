@@ -41,17 +41,17 @@ static int le_ctype;
 */
 function_entry ctype_functions[] = {
 	PHP_FE(confirm_ctype_compiled,	NULL)		/* For testing, remove later. */
-	PHP_FE(isalnum,	NULL)
-	PHP_FE(isalpha,	NULL)
-	PHP_FE(iscntrl,	NULL)
-	PHP_FE(isdigit,	NULL)
-	PHP_FE(islower,	NULL)
-	PHP_FE(isgraph,	NULL)
-	PHP_FE(isprint,	NULL)
-	PHP_FE(ispunct,	NULL)
-	PHP_FE(isspace,	NULL)
-	PHP_FE(isupper,	NULL)
-	PHP_FE(isxdigit,	NULL)
+	PHP_FE(ctype_alnum,	NULL)
+	PHP_FE(ctype_alpha,	NULL)
+	PHP_FE(ctype_cntrl,	NULL)
+	PHP_FE(ctype_digit,	NULL)
+	PHP_FE(ctype_lower,	NULL)
+	PHP_FE(ctype_graph,	NULL)
+	PHP_FE(ctype_print,	NULL)
+	PHP_FE(ctype_punct,	NULL)
+	PHP_FE(ctype_space,	NULL)
+	PHP_FE(ctype_upper,	NULL)
+	PHP_FE(ctype_xdigit,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ctype_functions[] */
 };
 
@@ -177,7 +177,7 @@ static int ctype(int (*iswhat)(int),zval **c)
 
 /* {{{ proto bool isalnum(mixed c)
     Check for alphanumeric character(s) */
-PHP_FUNCTION(isalnum)
+PHP_FUNCTION(ctype_alnum)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -195,7 +195,7 @@ PHP_FUNCTION(isalnum)
 
 /* {{{ proto bool isalpha(mixed c)
     Check for alphabetic character(s) */
-PHP_FUNCTION(isalpha)
+PHP_FUNCTION(ctype_alpha)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -213,7 +213,7 @@ PHP_FUNCTION(isalpha)
 
 /* {{{ proto bool iscntrl(mixed c)
     Check for control character(s) */
-PHP_FUNCTION(iscntrl)
+PHP_FUNCTION(ctype_cntrl)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -231,7 +231,7 @@ PHP_FUNCTION(iscntrl)
 
 /* {{{ proto bool isdigit(mixed c)
    Check for numeric character(s) */
-PHP_FUNCTION(isdigit)
+PHP_FUNCTION(ctype_digit)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -249,7 +249,7 @@ PHP_FUNCTION(isdigit)
 
 /* {{{ proto bool islower(mixed c)
    Check for lowercase character(s)  */
-PHP_FUNCTION(islower)
+PHP_FUNCTION(ctype_lower)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -267,7 +267,7 @@ PHP_FUNCTION(islower)
 
 /* {{{ proto bool isgraph(mixed c)
     Check for any printable character(s) except space */
-PHP_FUNCTION(isgraph)
+PHP_FUNCTION(ctype_graph)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -285,7 +285,7 @@ PHP_FUNCTION(isgraph)
 
 /* {{{ proto bool isprint(mixed c)
     Check for printable character(s) */
-PHP_FUNCTION(isprint)
+PHP_FUNCTION(ctype_print)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -303,7 +303,7 @@ PHP_FUNCTION(isprint)
 
 /* {{{ proto bool ispunct(mixed c)
     Check for any printable character which is not a space or an alphanumeric character */
-PHP_FUNCTION(ispunct)
+PHP_FUNCTION(ctype_punct)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -321,7 +321,7 @@ PHP_FUNCTION(ispunct)
 
 /* {{{ proto bool isspace(mixed c)
     Check for whitespace character(s)*/
-PHP_FUNCTION(isspace)
+PHP_FUNCTION(ctype_space)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -339,7 +339,7 @@ PHP_FUNCTION(isspace)
 
 /* {{{ proto bool isupper(mixed c)
     Check for uppercase character(s) */
-PHP_FUNCTION(isupper)
+PHP_FUNCTION(ctype_upper)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
@@ -357,7 +357,7 @@ PHP_FUNCTION(isupper)
 
 /* {{{ proto bool isxdigit(mixed c)
     Check for character(s) representing a hexadecimal digit */
-PHP_FUNCTION(isxdigit)
+PHP_FUNCTION(ctype_xdigit)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
 	zval **c;
