@@ -707,9 +707,9 @@ PHP_FUNCTION(curl_getinfo)
 		switch (opt) {
 			case CURLINFO_EFFECTIVE_URL:
 				{
-					char url[250];
+					char *url;
 	
-					curl_easy_getinfo(curl_handle->cp, opt, url);
+					curl_easy_getinfo(curl_handle->cp, opt, &url);
 	
 					RETURN_STRING(url, 1);
 				}
