@@ -2,6 +2,17 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Add IMG_GIF, IMG_JPG, IMG_JPEG, IMG_PNG and IMG_WBMP constants for
+  imagetypes() function (Rasmus)
+- Add ImageTypes() function which returns a bitfield with the supported
+  image formats.  1=gif, 2=jpeg, 4=png and 8=wbmp (Rasmus)
+- Make it possible to specify an empty string as a thousands-seperator
+  in number_format()
+- Shared module support for LDAP extension (Troels Arvin)
+- Fixed a bug with imap_mail where apache would segfault if the rpath
+  parameter was specified.
+- Use dashes and short day name in cookies since some browsers seem picky
+  about this (Rasmus)
 - Making pspell compile as a shared module
 - Added 3 additional arguments to the user-defined error handler - the file
   name and line number in which the error occured, and the context (local
