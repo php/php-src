@@ -127,6 +127,31 @@ ZEND_API zend_class_entry *zend_exception_get_default(void)
 	return default_exception_ptr;
 }
 
+ZEND_API void zend_throw_exception(char *message, int duplicate TSRMLS_DC)
+{
+	zval *ex;
+	zval *tmp;
+	HashTable *properties;
+
+	MAKE_STD_ZVAL(ex);
+	object_init_ex(ex, default_exception_ptr);
+	properties = Z_OBJPROP_P(ex);
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_STRING(tmp, message, duplicate);
+	zend_hash_update(properties, "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
+	zend_hash_update(properties, "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
+	zend_hash_update(properties, "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+
+	EG(exception) = ex;
+}
+
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_default_exception(TSRMLS_C);
