@@ -155,7 +155,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);
-		efree(op_array->static_variables);
+		FREE_HASHTABLE(op_array->static_variables);
 	}
 
 	if (--(*op_array->refcount)>0) {

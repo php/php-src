@@ -66,13 +66,13 @@ ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
 					zend_hash_destroy(zvalue->value.ht);
-					efree_rel(zvalue->value.ht);
+					FREE_HASHTABLE(zvalue->value.ht);
 				}
 			}
 			break;
 		case IS_OBJECT:
 			zend_hash_destroy(zvalue->value.obj.properties);
-			efree_rel(zvalue->value.obj.properties);
+			FREE_HASHTABLE(zvalue->value.obj.properties);
 			break;
 		case IS_RESOURCE:
 			/* destroy resource */

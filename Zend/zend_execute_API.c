@@ -370,7 +370,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 	*retval_ptr_ptr = NULL;
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
-		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(EG(active_symbol_table));
 		zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (object) {
 			zval *dummy, **this_ptr;
@@ -388,7 +388,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		original_opline_ptr = EG(opline_ptr);
 		zend_execute(EG(active_op_array) ELS_CC);
 		zend_hash_destroy(EG(active_symbol_table));		
-		efree(EG(active_symbol_table));
+		FREE_HASHTABLE(EG(active_symbol_table));
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
 		EG(return_value_ptr_ptr)=original_return_value;

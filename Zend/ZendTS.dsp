@@ -274,7 +274,7 @@ SOURCE=.\zend_variables.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_zval_alloc.h
+SOURCE=.\zend_fast_cache.h
 # End Source File
 # End Group
 # Begin Group "Parsers"

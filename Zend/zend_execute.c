@@ -30,7 +30,7 @@
 #include "zend_operators.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
-#include "zend_zval_alloc.h"
+#include "zend_fast_cache.h"
 
 #if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
 # include <alloca.h>
@@ -481,7 +481,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 			break;
 		case ZEND_FETCH_STATIC:
 			if (!EG(active_op_array)->static_variables) {
-				EG(active_op_array)->static_variables = (HashTable *) emalloc(sizeof(HashTable));
+				ALLOC_HASHTABLE(EG(active_op_array)->static_variables);
 				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 			}
 			target_symbol_table = EG(active_op_array)->static_variables;
@@ -1526,7 +1526,7 @@ do_fcall_common:
 							/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 							function_state.function_symbol_table = *(EG(symtable_cache_ptr)--);
 						} else {
-							function_state.function_symbol_table = (HashTable *) emalloc(sizeof(HashTable));
+							ALLOC_HASHTABLE(function_state.function_symbol_table);
 							zend_hash_init(function_state.function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0);
 							/*printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);*/
 						}
@@ -1561,7 +1561,7 @@ do_fcall_common:
 						EG(return_value_ptr_ptr)=original_return_value;
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
 							zend_hash_destroy(function_state.function_symbol_table);
-							efree(function_state.function_symbol_table);
+							FREE_HASHTABLE(function_state.function_symbol_table);
 						} else {
 							*(++EG(symtable_cache_ptr)) = function_state.function_symbol_table;
 							zend_hash_clean(*EG(symtable_cache_ptr));

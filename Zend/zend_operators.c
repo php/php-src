@@ -29,7 +29,7 @@
 #include "zend_variables.h"
 #include "zend_globals.h"
 #include "zend_list.h"
-#include "zend_zval_alloc.h"
+#include "zend_fast_cache.h"
 
 #if WITH_BCMATH
 #include "functions/number.h"
@@ -348,13 +348,13 @@ static void convert_scalar_to_array(zval *op, int type)
 	
 	switch (type) {
 		case IS_ARRAY:
-			op->value.ht = (HashTable *) emalloc(sizeof(HashTable));
+			ALLOC_HASHTABLE(op->value.ht);
 			zend_hash_init(op->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_index_update(op->value.ht, 0, (void *) &entry, sizeof(zval *), NULL);
 			op->type = IS_ARRAY;
 			break;
 		case IS_OBJECT:
-			op->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+			ALLOC_HASHTABLE(op->value.obj.properties);
 			zend_hash_init(op->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_update(op->value.obj.properties, "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
 			op->value.obj.ce = &zend_standard_class_def;
