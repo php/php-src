@@ -316,7 +316,10 @@ static void php_skip_variable(php_stream * stream)
 	off_t length = ((unsigned int)php_read2(stream));
 
 	length = length-2;
-	if (length) php_stream_seek(stream, (long)length, SEEK_CUR);
+	if (length)
+	{
+		php_stream_seek(stream, (long)length, SEEK_CUR);
+	}
 }
 /* }}} */
 
