@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- nl2br now handles all styles of line-endings in one string. (Boian,
+  Derick)
 - Added mcrypt_generic_deinit to replace mcrypt_generic_end. (Derick)
 - Added apache_setenv() function for injecting variables into Apache's
   subprocess_env table. (Rasmus)
