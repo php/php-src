@@ -80,15 +80,15 @@ ZEND_GET_MODULE(dba)
 typedef struct dba_handler {
 	char *name;
 	int (*open)(dba_info * TSRMLS_DC);
-	void (*close)(dba_info *);
-	char* (*fetch)(dba_info *, char *, int, int, int *);
-	int (*update)(dba_info *, char *, int, char *, int, int);
-	int (*exists)(dba_info *, char *, int);
-	int (*delete)(dba_info *, char *, int);
-	char* (*firstkey)(dba_info *, int *);
-	char* (*nextkey)(dba_info *, int *);
-	int (*optimize)(dba_info *);
-	int (*sync)(dba_info *);
+	void (*close)(dba_info * TSRMLS_DC);
+	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
+	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
+	int (*exists)(dba_info *, char *, int TSRMLS_DC);
+	int (*delete)(dba_info *, char *, int TSRMLS_DC);
+	char* (*firstkey)(dba_info *, int * TSRMLS_DC);
+	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
+	int (*optimize)(dba_info * TSRMLS_DC);
+	int (*sync)(dba_info * TSRMLS_DC);
 } dba_handler;
 
 /* {{{ macromania */
@@ -189,9 +189,9 @@ static int le_pdb;
 
 /* {{{ dba_close 
  */ 
-static void dba_close(dba_info *info)
+static void dba_close(dba_info *info TSRMLS_DC)
 {
-	if(info->hnd) info->hnd->close(info);
+	if(info->hnd) info->hnd->close(info TSRMLS_CC);
 	if(info->path) free(info->path);
 	free(info);
 }
@@ -203,7 +203,7 @@ static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	dba_info *info = (dba_info *)rsrc->ptr;
 
-	dba_close(info);
+	dba_close(info TSRMLS_CC);
 }
 /* }}} */
 
@@ -268,7 +268,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	DBA_WRITE_CHECK;
 	
-	if(info->hnd->update(info, VALLEN(key), VALLEN(val), mode) == SUCCESS)
+	if(info->hnd->update(info, VALLEN(key), VALLEN(val), mode TSRMLS_CC) == SUCCESS)
 		RETURN_TRUE;
 	RETURN_FALSE;
 }
@@ -369,7 +369,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->hnd = NULL;
 
 	if (hptr->open(info TSRMLS_CC) != SUCCESS) {
-		dba_close(info);
+		dba_close(info TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Driver initialization failed for handler: %s", Z_STRVAL_PP(args[2]));
 		FREENOW;
 		RETURN_FALSE;
@@ -428,7 +428,7 @@ PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
 
-	if(info->hnd->exists(info, VALLEN(key)) == SUCCESS) {
+	if(info->hnd->exists(info, VALLEN(key) TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -446,7 +446,7 @@ PHP_FUNCTION(dba_fetch)
 	if (ac==3 && strcmp(info->hnd->name, "cdb")) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter", info->hnd->name);
 	}
-	if((val = info->hnd->fetch(info, VALLEN(key), skip, &len)) != NULL) {
+	if((val = info->hnd->fetch(info, VALLEN(key), skip, &len TSRMLS_CC)) != NULL) {
 		RETURN_STRINGL(val, len, 0);
 	} 
 	RETURN_FALSE;
@@ -461,7 +461,7 @@ PHP_FUNCTION(dba_firstkey)
 	int len;
 	DBA_ID_GET1;
 
-	fkey = info->hnd->firstkey(info, &len);
+	fkey = info->hnd->firstkey(info, &len TSRMLS_CC);
 	if(fkey)
 		RETURN_STRINGL(fkey, len, 0);
 	RETURN_FALSE;
@@ -476,7 +476,7 @@ PHP_FUNCTION(dba_nextkey)
 	int len;
 	DBA_ID_GET1;
 
-	nkey = info->hnd->nextkey(info, &len);
+	nkey = info->hnd->nextkey(info, &len TSRMLS_CC);
 	if(nkey)
 		RETURN_STRINGL(nkey, len, 0);
 	RETURN_FALSE;
@@ -491,7 +491,7 @@ PHP_FUNCTION(dba_delete)
 	
 	DBA_WRITE_CHECK;
 	
-	if(info->hnd->delete(info, VALLEN(key)) == SUCCESS)
+	if(info->hnd->delete(info, VALLEN(key) TSRMLS_CC) == SUCCESS)
 		RETURN_TRUE;
 	RETURN_FALSE;
 }
@@ -520,7 +520,7 @@ PHP_FUNCTION(dba_optimize)
 	DBA_ID_GET1;
 	
 	DBA_WRITE_CHECK;
-	if(info->hnd->optimize(info) == SUCCESS) {
+	if(info->hnd->optimize(info TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -533,7 +533,7 @@ PHP_FUNCTION(dba_sync)
 {
 	DBA_ID_GET1;
 	
-	if(info->hnd->sync(info) == SUCCESS) {
+	if(info->hnd->sync(info TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
