@@ -322,7 +322,7 @@ ZEND_API void convert_to_boolean(zval *op)
 }
 
 
-ZEND_API void convert_to_string(zval *op)
+ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 {
 	long lval;
 	double dval;
@@ -337,7 +337,7 @@ ZEND_API void convert_to_string(zval *op)
 			break;
 		case IS_BOOL:
 			if (op->value.lval) {
-				op->value.str.val = estrndup("1", 1);
+				op->value.str.val = estrndup_rel("1", 1);
 				op->value.str.len = 1;
 			} else {
 				op->value.str.val = empty_string;
@@ -347,24 +347,24 @@ ZEND_API void convert_to_string(zval *op)
 		case IS_LONG:
 			lval = op->value.lval;
 
-			op->value.str.val = (char *) emalloc(MAX_LENGTH_OF_LONG + 1);
+			op->value.str.val = (char *) emalloc_rel(MAX_LENGTH_OF_LONG + 1);
 			op->value.str.len = zend_sprintf(op->value.str.val, "%ld", lval);  /* SAFE */
 			break;
 		case IS_DOUBLE: {
 			dval = op->value.dval;
-			op->value.str.val = (char *) emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+			op->value.str.val = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			op->value.str.len = zend_sprintf(op->value.str.val, "%.*G", (int) EG(precision), dval);  /* SAFE */
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			break;
 		}
 		case IS_ARRAY:
 			zval_dtor(op);
-			op->value.str.val = estrndup("Array",sizeof("Array")-1);
+			op->value.str.val = estrndup_rel("Array",sizeof("Array")-1);
 			op->value.str.len = sizeof("Array")-1;
 			break;
 		case IS_OBJECT:
 			zval_dtor(op);
-			op->value.str.val = estrndup("Object",sizeof("Object")-1);
+			op->value.str.val = estrndup_rel("Object",sizeof("Object")-1);
 			op->value.str.len = sizeof("Object")-1;
 			break;
 		default:

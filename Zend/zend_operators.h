@@ -54,7 +54,7 @@ ZEND_API int decrement_function(zval *op2);
 
 BEGIN_EXTERN_C()
 ZEND_API void convert_scalar_to_number(zval *op);
-ZEND_API void convert_to_string(zval *op);
+ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
@@ -64,6 +64,7 @@ ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
+#define convert_to_string(op)			_convert_to_string((op) ZEND_FILE_LINE_CC)
 END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
