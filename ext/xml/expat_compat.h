@@ -54,8 +54,6 @@ typedef struct _XML_Memory_Handling_Suite {
 typedef struct _XML_Parser {
 	int use_namespace;
 
-	xmlHashTablePtr _ns_map;
-	xmlHashTablePtr _reverse_ns_map;
 	xmlChar *_ns_seperator;
 
 	void *user;
