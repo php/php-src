@@ -70,6 +70,10 @@
 
 typedef unsigned char uchar;
 
+#ifndef safe_emalloc
+# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
+#endif
+
 #ifndef TRUE
 #	define TRUE 1
 #	define FALSE 0
@@ -1329,7 +1333,7 @@ static char *exif_get_sectionlist(int sectionlist TSRMLS_DC)
 	for(i=0; i<SECTION_COUNT; i++) {
 		len += strlen(exif_get_sectionname(i))+2;
 	}
-	sections = emalloc(len+1);
+	sections = safe_emalloc(len, 1, 1);
 	sections[0] = '\0';
 	len = 0;
 	for(i=0; i<SECTION_COUNT; i++) {
@@ -1598,7 +1602,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 			} else
 			if (length>1) {
-				info_value->list = emalloc(length*sizeof(image_info_value));
+				info_value->list = safe_emalloc(length, sizeof(image_info_value), 0);
 			} else {
 				info_value = &info_data->value;
 			}
@@ -1752,7 +1756,7 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 			info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
 			info_data->length = length;
 		} else {
-			info_data->value.s = emalloc(length+1);
+			info_data->value.s = safe_emalloc(length, 1, 1);
 			memcpy(info_data->value.s, value, length);
 			info_data->value.s[length] = 0;
 		}
@@ -2458,7 +2462,7 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
 	 * force end of string.
 	 */
 	if (byte_count) {
-		(*result) = emalloc(byte_count+1);
+		(*result) = safe_emalloc(byte_count, 1, 1);
 		memcpy(*result, value, byte_count);
 		(*result)[byte_count] = '\0';
 		return byte_count+1;
@@ -3737,7 +3741,7 @@ PHP_FUNCTION(exif_read_data)
 
 	if(ac >= 2) {
 		convert_to_string_ex(p_sections_needed);
-		sections_str = emalloc(strlen(Z_STRVAL_PP(p_sections_needed))+3);
+		sections_str = safe_emalloc(strlen(Z_STRVAL_PP(p_sections_needed)), 1, 3);
 		sprintf(sections_str, ",%s,", Z_STRVAL_PP(p_sections_needed));
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
