@@ -237,7 +237,7 @@ esac
 AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
 case $host_alias in
 i?86-*-linux*|i?86-*-freebsd*)
-    if test "${with_pic+set}" != "set"; then
+    if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
       with_pic=no
       AC_MSG_RESULT(yes)
     else
@@ -906,9 +906,10 @@ program|static)
 ;;
 shared)
     enable_static=no
-    if test "${with_pic+set}" != "set"; then
-      standard_libtool_flag='-prefer-pic'
-    fi
+    case $with_pic in
+      yes) standard_libtool_flag='-prefer-pic';;
+      no)  standard_libtool_flag='-prefer-non-pic';;
+    esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
 ;;
 esac
