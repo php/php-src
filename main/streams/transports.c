@@ -78,7 +78,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 					return stream;
 				}
 				/* dead - kill it */
-				php_stream_close(stream);
+				php_stream_pclose(stream);
 				stream = NULL;
 
 				/* fall through */
