@@ -2,8 +2,6 @@
 
 #CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
 
-ZEND_SCANNER = libzend_$(ZEND_SCANNER_TYPE).la
-
 AUTOMAKE_OPTIONS=foreign
 EXTRA_LTLIBRARIES=libzend_cc.la libzend_c.la
 noinst_LTLIBRARIES=$(ZEND_SCANNER) libzend.la
