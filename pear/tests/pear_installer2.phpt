@@ -1,5 +1,5 @@
 --TEST--
-PEAR_Installer test #2
+PEAR_Installer test _installFile()
 --SKIPIF--
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
@@ -304,27 +304,28 @@ if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
 }
 $installer->rollbackFileTransaction();
 
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
-    'Foo' . DIRECTORY_SEPARATOR . 'Mine');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
-    'Foo');
-unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php');
 //cleanup
 chdir($curdir);
-unlink ($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
-unlink ($temp_path . DIRECTORY_SEPARATOR . 'pear.ini');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'php');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'Foo');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'data');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'doc' . DIRECTORY_SEPARATOR . 'Foo');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'doc');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR . 'Foo');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'test');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'script');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'ext');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'tmp');
-rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin');
-rmdir($temp_path);
+cleanall($temp_path);
+
+// ------------------------------------------------------------------------- //
+
+function cleanall($dir)
+{
+    $dp = opendir($dir);
+    while ($ent = readdir($dp)) {
+        if ($ent == '.' || $ent == '..') {
+            continue;
+        }
+        if (is_dir($dir . DIRECTORY_SEPARATOR . $ent)) {
+            cleanall($dir . DIRECTORY_SEPARATOR . $ent);
+        } else {
+            unlink($dir . DIRECTORY_SEPARATOR . $ent);
+        }
+    }
+    closedir($dp);
+    rmdir($dir);
+}
 ?>
 --EXPECT--
 test _installFile():
