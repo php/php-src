@@ -403,7 +403,6 @@ PHPAPI char *_php3_strtoupper(char *s)
 PHP_FUNCTION(strtoupper)
 {
 	pval **arg;
-	char *ret;
 	
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg)) {
 		WRONG_PARAM_COUNT;
