@@ -65,7 +65,7 @@ zend_module_entry shmop_module_entry = {
 	"shmop",
 	shmop_functions,
 	PHP_MINIT(shmop),
-	PHP_MSHUTDOWN(shmop),
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(shmop),
@@ -95,14 +95,6 @@ PHP_MINIT_FUNCTION(shmop)
 {
 	shm_type = zend_register_list_destructors_ex(rsclean, NULL, "shmop", module_number);
 	
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(shmop)
-{
 	return SUCCESS;
 }
 /* }}} */
