@@ -97,7 +97,7 @@ static int		ftp_getresp(ftpbuf_t *ftp);
 static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);
 
 /* opens up a data stream */
-static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
+static databuf_t*	ftp_getdata(ftpbuf_t *ftp TSRMLS_DC);
 
 /* accepts the data connection, returns updated data buffer */
 static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
@@ -106,8 +106,7 @@ static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
 static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
 
 /* generic file lister */
-static char**		ftp_genlist(ftpbuf_t *ftp,
-				const char *cmd, const char *path);
+static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC);
 
 /* IP and port conversion box */
 union ipbox {
@@ -228,12 +227,10 @@ ftp_quit(ftpbuf_t *ftp)
 /* {{{ ftp_login
  */
 int
-ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
+ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 {
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
-	
-	TSRMLS_FETCH();
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -541,18 +538,18 @@ ftp_rmdir(ftpbuf_t *ftp, const char *dir)
 /* {{{ ftp_nlist
  */
 char**
-ftp_nlist(ftpbuf_t *ftp, const char *path)
+ftp_nlist(ftpbuf_t *ftp, const char *path TSRMLS_DC)
 {
-	return ftp_genlist(ftp, "NLST", path);
+	return ftp_genlist(ftp, "NLST", path TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ ftp_list
  */
 char**
-ftp_list(ftpbuf_t *ftp, const char *path, int recursive)
+ftp_list(ftpbuf_t *ftp, const char *path, int recursive TSRMLS_DC)
 {
-	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path);
+	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path TSRMLS_CC);
 }
 /* }}} */
 
@@ -699,7 +696,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp)) == NULL) {
+	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 	
@@ -785,7 +782,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
-	if ((data = ftp_getdata(ftp)) == NULL) {
+	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 	ftp->data = data;	
@@ -1278,7 +1275,7 @@ my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 /* {{{ ftp_getdata
  */
 databuf_t*
-ftp_getdata(ftpbuf_t *ftp)
+ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 {
 	int			fd = -1;
 	databuf_t		*data;
@@ -1500,7 +1497,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 /* {{{ ftp_genlist
  */
 char**
-ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
+ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 {
 	FILE		*tmpfp = NULL;
 	databuf_t	*data = NULL;
@@ -1521,7 +1518,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp)) == NULL) {
+	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 	ftp->data = data;	
@@ -1605,7 +1602,7 @@ bail:
 /* {{{ ftp_nb_get
  */
 int
-ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
+ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1618,7 +1615,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp)) == NULL) {
+	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 
@@ -1730,7 +1727,7 @@ bail:
 /* {{{ ftp_nb_put
  */
 int
-ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
+ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1741,7 +1738,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
-	if ((data = ftp_getdata(ftp)) == NULL) {
+	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 	if (startpos > 0) {
