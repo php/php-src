@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.33 2004-01-08 17:33:29 sniper Exp $
+// $Id: confutils.js,v 1.34 2004-01-08 21:53:48 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -788,16 +788,26 @@ function file_get_contents(filename)
 
 // Add a dependency on another extension, so that
 // the dependencies are built before extname
-function ADD_EXTENSION_DEP(extname, dependson)
+function ADD_EXTENSION_DEP(extname, dependson, optional)
 {
 	var EXT = extname.toUpperCase();
 	var DEP = dependson.toUpperCase();
+
+	if (optional) {
+		var dep_present = eval("PHP_" + DEP);
+
+		if (dep_present == "no")
+			return;
+	}
 
 	var dep_shared = eval("PHP_" + DEP + "_SHARED");
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
 
 	if (dep_shared) {
 		if (!ext_shared) {
+			if (optional) {
+				return;
+			}
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
 		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
