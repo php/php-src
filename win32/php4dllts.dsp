@@ -242,11 +242,11 @@ SOURCE=..\main\strlcpy.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\main\config.w32.h
+SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\aggregation.h
+SOURCE=..\main\config.w32.h
 # End Source File
 # Begin Source File
 
@@ -1799,6 +1799,10 @@ SOURCE=..\ext\standard\url_scanner_ex.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\crypt_win32.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\pwd.c
 # End Source File
 # Begin Source File
@@ -1837,6 +1841,10 @@ SOURCE=..\win32\wsyslog.c
 # Begin Group "Header Files No. 2"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\crypt_win32.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\win32\grp.h
