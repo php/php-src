@@ -5,7 +5,7 @@ GMP functionality test - factorial
 --POST--
 --GET--
 --FILE--
-<? 
+<?php 
 function fact($x) {
   if($x <= 1) 
         return 1;
