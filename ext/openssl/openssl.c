@@ -676,8 +676,8 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 
 /* }}} */
 
-/* {{{ proto openssl_x509_export_to_file(mixed x509, string outfilename[, bool notext = true])
-	Export a cert to file or a var */
+/* {{{ proto openssl_x509_export_to_file(mixed x509, string outfilename [, bool notext = true])
+   Exports a CERT to file or a var */
 PHP_FUNCTION(openssl_x509_export_to_file)
 {
 	X509 * cert;
@@ -718,8 +718,8 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 }
 /* }}} */
 
-/* {{{ proto openssl_x509_export(mixed x509, string &out[, bool notext = true])
-	Export a cert to file or a var */
+/* {{{ proto openssl_x509_export(mixed x509, string &out [, bool notext = true])
+   Exports a CERT to file or a var */
 PHP_FUNCTION(openssl_x509_export)
 {
 	X509 * cert;
@@ -761,7 +761,7 @@ PHP_FUNCTION(openssl_x509_export)
 /* }}} */
 
 /* {{{ proto bool openssl_x509_check_private_key(mixed cert, mixed key)
-	Checks if a private key corresponds to a cert */
+   Checks if a private key corresponds to a CERT */
 PHP_FUNCTION(openssl_x509_check_private_key)
 {
 	zval * zcert, *zkey;
@@ -790,8 +790,8 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 }
 /* }}} */
 
-/* {{{ proto array openssl_x509_parse(mixed x509[, bool shortnames=true])
-	returns an array of the fields/values of the cert */
+/* {{{ proto array openssl_x509_parse(mixed x509 [, bool shortnames=true])
+   Returns an array of the fields/values of the CERT */
 PHP_FUNCTION(openssl_x509_parse)
 {
 	zval * zcert;
@@ -948,8 +948,8 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 }
 /* }}} */
 
-/* {{{ proto int openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo[, string untrustedfile])
-	check the cert to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
+/* {{{ proto int openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo [, string untrustedfile])
+   Checks the CERT to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
 	zval * zcert, * zcainfo = NULL;
@@ -1058,7 +1058,7 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
 /* }}} */
 
 /* {{{ proto resource openssl_x509_read(mixed cert)
-   Read X.509 certificate */
+   Reads X.509 certificates */
 PHP_FUNCTION(openssl_x509_read)
 {
 	zval *cert;
@@ -1078,7 +1078,7 @@ PHP_FUNCTION(openssl_x509_read)
 /* }}} */
 
 /* {{{ proto void openssl_free_x509(resource x509)
-   Free X.509 certificate */
+   Frees X.509 certificates */
 PHP_FUNCTION(openssl_x509_free)
 {
 	zval *x509;
@@ -1285,8 +1285,8 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 }
 /* }}} */
 
-/* {{{ proto openssl_csr_export_to_file(resource csr, string outfilename[, bool notext=true])
-	Exports a CSR to file or a var */
+/* {{{ proto openssl_csr_export_to_file(resource csr, string outfilename [, bool notext=true])
+   Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export_to_file)
 {
 	X509_REQ * csr;
@@ -1326,8 +1326,8 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 
 
 
-/* {{{ proto openssl_csr_export(resource csr, string &out[,bool notext=true])
-	Exports a CSR to file or a var */
+/* {{{ proto openssl_csr_export(resource csr, string &out [, bool notext=true])
+   Exports a CSR to file or a var */
 PHP_FUNCTION(openssl_csr_export)
 {
 	X509_REQ * csr;
@@ -1369,7 +1369,7 @@ PHP_FUNCTION(openssl_csr_export)
 /* }}} */
 
 /* {{{ proto openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days)
-	Sign a cert with another cert */
+   Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
 	zval * zcert = NULL, *zcsr, *zpkey, *args = NULL;
@@ -1496,8 +1496,8 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_csr_new(array dn, resource &privkey, [array extraattribs, array configargs])
-   Generate a privkey + CSR */
+/* {{{ proto bool openssl_csr_new(array dn, resource &privkey [, array extraattribs, array configargs])
+   Generates a privkey and CSR */
 PHP_FUNCTION(openssl_csr_new)
 {
 	struct php_x509_request req;
@@ -1730,7 +1730,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 /* }}} */
 
 /* {{{ proto resource openssl_pkey_new([array configargs])
-	Generate a new private key */
+   Generates a new private key */
 PHP_FUNCTION(openssl_pkey_new)
 {
 	struct php_x509_request req;
@@ -1755,8 +1755,8 @@ PHP_FUNCTION(openssl_pkey_new)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkey_export_to_file(mixed key, string outfilename[, string passphrase, array config_args)
-   Get an exportable representation of a key into a file */
+/* {{{ proto bool openssl_pkey_export_to_file(mixed key, string outfilename [, string passphrase, array config_args)
+   Gets an exportable representation of a key into a file */
 PHP_FUNCTION(openssl_pkey_export_to_file)
 {
 	struct php_x509_request req;
@@ -1807,8 +1807,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkey_export(mixed key, &mixed out[, string passphrase, array config_args)
-   Get an exportable representation of a key into a string or file */
+/* {{{ proto bool openssl_pkey_export(mixed key, &mixed out [, string passphrase [, array config_args]])
+   Gets an exportable representation of a key into a string or file */
 PHP_FUNCTION(openssl_pkey_export)
 {
 	struct php_x509_request req;
@@ -1865,7 +1865,7 @@ PHP_FUNCTION(openssl_pkey_export)
 /* }}} */
 
 /* {{{ proto int openssl_pkey_get_public(mixed cert)
-   Get public key from X.509 certificate */
+   Gets public key from X.509 certificate */
 PHP_FUNCTION(openssl_pkey_get_public)
 {
 	zval *cert;
@@ -1884,7 +1884,7 @@ PHP_FUNCTION(openssl_pkey_get_public)
 /* }}} */
 
 /* {{{ proto void openssl_pkey_free(int key)
-   Free key */
+   Frees a key */
 PHP_FUNCTION(openssl_pkey_free)
 {
 	zval *key;
@@ -1899,7 +1899,7 @@ PHP_FUNCTION(openssl_pkey_free)
 /* }}} */
 
 /* {{{ proto int openssl_pkey_get_private(string key [, string passphrase])
-   Get private key */
+   Gets private keys */
 PHP_FUNCTION(openssl_pkey_get_private)
 {
 	zval *cert;
@@ -1924,9 +1924,8 @@ PHP_FUNCTION(openssl_pkey_get_private)
 
 /* {{{ PKCS7 S/MIME functions */
 
-/* {{{ proto bool openssl_pkcs7_verify(string filename, long flags[, string signerscerts][, array cainfo][, string extracerts])
-	verify that the data block is intact, the signer is who they say they are, and return the certs of the signers
-*/
+/* {{{ proto bool openssl_pkcs7_verify(string filename, long flags [, string signerscerts [, array cainfo [, string extracerts]]])
+   Verifys that the data block is intact, the signer is who they say they are, and returns the CERTs of the signers */
 PHP_FUNCTION(openssl_pkcs7_verify)
 {
 	X509_STORE * store;
@@ -2009,8 +2008,8 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers[, long flags])
-	encrypt the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
+/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers [, long flags])
+   Encrypts the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
 PHP_FUNCTION(openssl_pkcs7_encrypt)
 {
 	zval * zrecipcerts, * zheaders = NULL;
@@ -2129,8 +2128,8 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers[, long flags][, string extracertsfilename])
-	sign the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
+/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers [, long flags [, string extracertsfilename]])
+   Signs the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
 
 PHP_FUNCTION(openssl_pkcs7_sign)
 {
@@ -2232,8 +2231,8 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_decrypt(string infilename, string outfilename, mixed recipcert[, mixed recipkey])
-	decrypt the S/MIME message in the file name infilename and output the results to the file name outfilename.  recipcert is a cert for one of the recipients. recipkey specifies the private key matching recipcert, if recipcert does not include the key */
+/* {{{ proto bool openssl_pkcs7_decrypt(string infilename, string outfilename, mixed recipcert [, mixed recipkey])
+   Decrypts the S/MIME message in the file name infilename and output the results to the file name outfilename.  recipcert is a CERT for one of the recipients. recipkey specifies the private key matching recipcert, if recipcert does not include the key */
 
 PHP_FUNCTION(openssl_pkcs7_decrypt)
 {
@@ -2296,7 +2295,7 @@ clean_exit:
 /* }}} */
 
 /* {{{ proto bool openssl_private_encrypt(string data, string crypted, mixed key [, int padding])
-   Encrypt data with private key */
+   Encrypts data with private key */
 PHP_FUNCTION(openssl_private_encrypt)
 {
 	zval *key, *crypted;
@@ -2352,7 +2351,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 /* }}} */
 
 /* {{{ proto bool openssl_private_decrypt(string data, string crypted, mixed key [, int padding])
-   Decrypt data with private key */
+   Decrypts data with private key */
 PHP_FUNCTION(openssl_private_decrypt)
 {
 	zval *key, *crypted;
@@ -2416,7 +2415,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 /* }}} */
 
 /* {{{ proto bool openssl_public_encrypt(string data, string crypted, mixed key [, int padding])
-   Encrypt data with public key */
+   Encrypts data with public key */
 PHP_FUNCTION(openssl_public_encrypt)
 {
 	zval *key, *crypted;
@@ -2472,7 +2471,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 /* }}} */
 
 /* {{{ proto bool openssl_public_decrypt(string data, string crypted, resource key [, int padding])
-   Decrypt data with public key */
+   Decrypts data with public key */
 PHP_FUNCTION(openssl_public_decrypt)
 {
 	zval *key, *crypted;
@@ -2537,8 +2536,8 @@ PHP_FUNCTION(openssl_public_decrypt)
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_error_string()
-	returns a description of the last error, and alters the index of the error messages. returns false when the are no more messages. */
+/* {{{ proto mixed openssl_error_string(void)
+   Returns a description of the last error, and alters the index of the error messages. Returns false when the are no more messages */
 PHP_FUNCTION(openssl_error_string)
 {
 	char buf[512];
@@ -2561,7 +2560,7 @@ PHP_FUNCTION(openssl_error_string)
 /* }}} */
 
 /* {{{ proto bool openssl_sign(string data, &string signature, mixed key)
-   Sign data */
+   Signs data */
 PHP_FUNCTION(openssl_sign)
 {
 	zval *key, *signature;
@@ -2601,7 +2600,7 @@ PHP_FUNCTION(openssl_sign)
 /* }}} */
 
 /* {{{ proto int openssl_verify(string data, string signature, mixed key)
-   Verify data */
+   Verifys data */
 PHP_FUNCTION(openssl_verify)
 {
 	zval *key;
@@ -2634,7 +2633,7 @@ PHP_FUNCTION(openssl_verify)
 /* }}} */
 
 /* {{{ proto int openssl_seal(string data, &string sealdata, &array ekeys, array pubkeys)
-   Seal data */
+   Seals data */
 PHP_FUNCTION(openssl_seal)
 {
 	zval *pubkeys, **pubkey, *sealdata, *ekeys;
@@ -2763,7 +2762,7 @@ clean_exit:
 /* }}} */
 
 /* {{{ proto bool openssl_open(string data, &string opendata, string ekey, mixed privkey)
-   Open data */
+   Opens data */
 PHP_FUNCTION(openssl_open)
 {
 	zval *privkey, *opendata;
