@@ -5,3 +5,8 @@ ext/standard
 ------------
 	* strpad() (Andrei)
     * advanced sort (Andrei)
+	* make all string functions binary-safe.
+	* on some platforms unimplemented function will just do nothing (eg symlink)
+	  they should print a warning or be not even defined!
+	* add remarks in the documentation which functions are not implemented on win32.
+	* add remarks in the documentation which functions are not binary-safe.
