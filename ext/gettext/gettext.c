@@ -45,6 +45,8 @@ PHP_MINFO_FUNCTION(gettext)
 	php_printf("GNU gettext support active.");
 }
 
+/* {{{ proto string textdomain(string domain)
+   Set the textdomain to "domain". Returns the current domain. */
 PHP_FUNCTION(textdomain)
 {
     pval **domain;
@@ -67,7 +69,10 @@ PHP_FUNCTION(textdomain)
 
     RETURN_STRING(retval, 1);
 }
+/* }}} */
 
+/* {{{ proto string gettext(string msgid)
+   Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist. */
 PHP_FUNCTION(gettext)
 {
     pval **msgid;
@@ -82,7 +87,10 @@ PHP_FUNCTION(gettext)
 
     RETURN_STRING(msgstr, 1);
 }
+/* }}} */
 
+/* {{{ proto string dgettext(string domain_name, string msgid)
+   Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist. */
 PHP_FUNCTION(dgettext)
 {
 	pval **domain_name, **msgid;
@@ -100,7 +108,10 @@ PHP_FUNCTION(dgettext)
 
 	RETURN_STRING(msgstr, 1);
 }
+/* }}} */
 
+/* {{{ proto string dcgettext(string domain_name, string msgid, long category)
+   Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist. */
 PHP_FUNCTION(dcgettext)
 {
 	pval **domain_name, **msgid, **category;
@@ -121,7 +132,10 @@ PHP_FUNCTION(dcgettext)
 
 	RETURN_STRING(msgstr, 1);
 }
+/* }}} */
 
+/* {{{ proto string bindtextdomain(string domain_name, string dir)
+   Bind to the text domain domain_name, looking for translations in dir. Returns the current domain. */
 PHP_FUNCTION(bindtextdomain)
 {
 	pval **domain_name, **dir;
@@ -147,6 +161,7 @@ PHP_FUNCTION(bindtextdomain)
 
 	RETURN_STRING(retval, 1);
 }
+/* }}} */
 
 #endif /* HAVE_LIBINTL */
 
