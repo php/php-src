@@ -1,3 +1,91 @@
+2001-01-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - Added the pg_lolseek function, which allows for arbitrary seeking within
+      a large object, and the pg_lotell call, which can be used to find the
+      current file offset for a large object (Submitted by: Adam Haberlach
+      <adam@newsnipple.com>).
+    - Added the pg_lolseek and pg_lotell functions 
+
+    * ext/standard/string.c:
+    - Fix for bug #8367 (wordwrap not cutting correctly)
+
+2001-01-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/ITX.php:
+    Current version from the PHPLib CVS. Converted Tabs to spaces.
+
+    Error handling must be pearified.
+
+2001-01-18  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sockets/sockets.c: Fix the proto
+
+2001-01-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/IT.php:
+    Ok, now finally - special thanks to the Karmamaker Sascha -
+    this is the current IT version from the PHPLib. Tabs replaced by spaces.
+
+    Error handling has to be pearified and I'm not sure if PHPDoc works with
+    this version.
+
+2001-01-18  Alex Akilov  <akilov@us.ibm.com>
+
+    * ext/java/config.m4:
+    Support AIX/HP shared lib extensions and j2sdk1.3.0 (hotspot)
+
+2001-01-18  Sam Liddicott  <sam@ananova.com>
+
+    * ext/muscat/muscat.c: Some decent credits and such in the phpinfo page
+
+2001-01-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4: Fixed a typo.
+
+2001-01-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/datetime.c:
+    - Fixed 'O' and 'r' flags of date() to have correct sign for timezone
+      offset. 
+
+2001-01-18  Sam Liddicott  <sam@ananova.com>
+
+    * ext/muscat/config
+      ext/muscat/aegis.log:
+    Aghh.  Despite my efforts two files still slipped through
+
+    * ext/muscat/LICENSE
+      ext/muscat/LICENSE.about
+      ext/muscat/Makefile.in
+      ext/muscat/aegis.log
+      ext/muscat/config
+      ext/muscat/config.m4
+      ext/muscat/muscat.c
+      ext/muscat/muscat.php
+      ext/muscat/muscat_handles.h
+      ext/muscat/muscat_net.c
+      ext/muscat/muscat_net.h
+      ext/muscat/php_muscat.h:
+    First checkin of muscat/empower module; been using it here for some time
+    Developing using aegis and just checking in baseline from time to time
+
+    See samjam@php.net for questions
+
+2001-01-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/readline/README.libedit
+      ext/readline/config.m4
+      ext/readline/php_readline.h
+      ext/readline/readline.c: Libedit readline replacement support
+
+2001-01-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: Expand tabs
+
+    * ext/ircg/README.txt: Add a pointer to the homepage at the beginning
+
 2001-01-17  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/datetime.c:
