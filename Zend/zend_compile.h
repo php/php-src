@@ -477,7 +477,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_EXIT					78
 
 
-/* the following 12 opcodes are 5 groups of 3 opcodes each, and must
+/* the following 15 opcodes are 5 groups of 3 opcodes each, and must
  * remain in that order!
  */
 #define ZEND_FETCH_R				79
