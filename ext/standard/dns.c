@@ -548,10 +548,12 @@ PHP_FUNCTION(dns_get_record)
 			case 7: 
 				type_to_fetch = type_param&PHP_DNS_TXT   ? T_TXT   : 0;
 				break;
-#ifdef T_AAAA
 			case 8:
+#ifdef T_AAAA
 				type_to_fetch = type_param&PHP_DNS_AAAA	 ? T_AAAA  : 0;
 				break;
+#else
+				continue;
 #endif
 			case 9:
 				store_results = 0;
