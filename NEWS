@@ -8,7 +8,7 @@ PHP 4                                                                      NEWS
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Fixed bug #23897 (Fixed a check for mbfilter_ru.h). (aleks@m2media.ru, Ilia)
 - Fixed bug #23894 (sprintf() decimal specifiers problem). (Moriyoshi)
-- Fixed bug #23888 (Missing input validation for flags parameter) (Ilia)
+- Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
 
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
