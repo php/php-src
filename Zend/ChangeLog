@@ -1,3 +1,9 @@
+2003-10-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+      - Nuke const in function parameters. I just can't remember why this exists
+      - and it seems no one else remembers either. It has no semantic meaning.
+
 2003-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.h
