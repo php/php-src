@@ -1,3 +1,17 @@
+2004-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZEND_CHANGES:
+      MFH: Add some information about array overloading
+
+    * ZEND_CHANGES:
+      Add some information about array overloading
+
+2004-08-30  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      fix crash #29893
+
 2004-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:

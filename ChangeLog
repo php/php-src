@@ -1,3 +1,64 @@
+2004-08-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/dio/dio.c
+      ext/dio/dio.c:
+      MFH: Added missing input validation to dio_write().
+
+    * ext/dio/dio.c:
+      Added missing input validation to dio_write().
+
+2004-08-30  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/mssql.dsp:
+      Fif for #28047. Set correct debug options for debug_ts build
+
+2004-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/ZEND_CHANGES:
+      MFH: Add some information about array overloading
+
+    * ZendEngine2/ZEND_CHANGES:
+      Add some information about array overloading
+
+2004-08-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/simplexml/simplexml.c:
+      MFH: remove cloning under ze1_compatibility_mode
+       - minor BC break but doesnt work right under compat mode anyways
+
+    * ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/simplexml/simplexml.c:
+      remove cloning under ze1_compatibility_mode
+       - minor BC break but doesnt work right under compat mode anyways
+
+    * ext/xsl/php_xsl.c:
+      remove clone functionality
+
+2004-08-30  Antony Dovgal  <tony2001@phpclub.net>
+
+    * tests/lang/bug29893.phpt:
+        1.1.4;
+      add testcase for bug #29893
+
+2004-08-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      fix crash #29893
+
 2004-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.c:
