@@ -1,3 +1,7 @@
+2002-06-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * RFCs/004.txt: Add RFC on delegation.
+
 2002-06-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_execute.c: Remove unused local variable.
