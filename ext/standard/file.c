@@ -1240,8 +1240,8 @@ PHPAPI PHP_FUNCTION(fwrite)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	if (!arg3 && PG(magic_quotes_runtime)) {
-		buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
+	if (PG(magic_quotes_runtime)) {
+		buffer = estrndup(Z_STRVAL_PP(arg2), num_bytes);
 		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
 	}
 
