@@ -2557,8 +2557,8 @@ PHP_FUNCTION(yaz_ccl_parse)
 }
 /* }}} */
 
-/* {{{ proto int yaz_ccl_parse(int id, string query, array res)
-   Parse a CCL query */
+/* {{{ proto int yaz_database (int id, string databases)
+   Specify the databases within a session */
 
 PHP_FUNCTION(yaz_database)
 {
