@@ -6,6 +6,7 @@ explode() function
 error_reporting=2047
 --FILE--
 <?php
+/* From http://bugs.php.net/19865 */
 echo md5(var_export(explode("\1", "a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE));
 echo "\n";
 var_dump(@explode("", ""));
