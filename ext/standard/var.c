@@ -16,7 +16,7 @@
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
- */
+*/
 
 /* $Id$ */
 
@@ -158,14 +158,21 @@ inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
 	ulong var_no;
 	char id[sizeof(void *)*2+3];
 
-	snprintf(id,sizeof(id)-1,"%p",var);
+	snprintf(id,sizeof(id)-1, "%p", var);
 	id[sizeof(id)-1]='\0';
-	if(var_old && zend_hash_find(var_hash,id,sizeof(void *)*2,var_old) == SUCCESS) {
+
+	if(var_old && zend_hash_find(var_hash, id, sizeof(id), var_old) == SUCCESS) {
+		if(!var->is_ref) {
+			/* we still need to bump up the counter, since non-refs will
+			   be counted separately by unserializer */
+			var_no = -1;
+			zend_hash_next_index_insert(var_hash, &var_no, sizeof(var_no), NULL);
+		}
 		return FAILURE;
 	}
 	
 	var_no = zend_hash_num_elements(var_hash)+1; /* +1 because otherwise hash will think we are trying to store NULL pointer */
-	zend_hash_add(var_hash,id,sizeof(void *)*2,&var_no,sizeof(var_no),NULL);
+	zend_hash_add(var_hash, id, sizeof(id), &var_no, sizeof(var_no), NULL);
 	return SUCCESS;
 }
 
@@ -262,7 +269,7 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 									php_error(E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 									continue;
 								}
-								
+
 								if (zend_hash_find((*struc)->value.obj.properties,(*name)->value.str.val,(*name)->value.str.len+1,(void*)&d) == SUCCESS) {
 									php_var_serialize(buf, name, NULL);
 									php_var_serialize(buf,d,var_hash);	
