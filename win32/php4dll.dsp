@@ -899,6 +899,11 @@ SOURCE=..\ext\wddx\wddx.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\xml\compat.c
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\xml\xml.c
 # End Source File
 # End Group
