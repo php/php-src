@@ -69,6 +69,7 @@ catch(Exception $e)
 
 echo "===REGISTER===\n";
 
+spl_autoload_unregister("spl_autoload");
 spl_autoload_register("TestFunc1");
 spl_autoload_register("TestFunc2");
 spl_autoload_register("TestFunc2"); /* 2nd call ignored */
