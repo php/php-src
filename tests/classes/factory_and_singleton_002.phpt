@@ -19,7 +19,7 @@ class test {
     }
   }
 
-  protected function __construct($x) {
+  function __construct($x) {
     test::$cnt++;
     $this->x = $x;
   }
@@ -28,7 +28,7 @@ class test {
     test::$test = NULL;
   }
 
-  protected function __destruct() {
+  function __destruct() {
   	test::$cnt--;
   }
 

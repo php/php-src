@@ -1,7 +1,5 @@
 --TEST--
 Bug #24399: is_subclass_of() crashes when parent class doesn't exist.
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class dooh {

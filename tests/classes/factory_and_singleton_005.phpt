@@ -16,4 +16,5 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to protected destructor from context '' %sfactory_and_singleton_005.php on line %d
+Warning: Call to protected destructor from context '' in %sfactory_and_singleton_005.php on line %d
+Done
