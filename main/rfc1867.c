@@ -25,7 +25,7 @@
 #include "rfc1867.h"
 
 #ifndef THREAD_SAFE
-int le_uploads;
+extern int le_uploads; /* "borrowed" from file.c */
 extern HashTable list;
 #endif
 

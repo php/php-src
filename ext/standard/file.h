@@ -34,8 +34,8 @@
 #ifndef _FILE_H
 #define _FILE_H
 
-extern php3_module_entry php3_file_module_entry;
-#define php3_file_module_ptr &php3_file_module_entry
+extern zend_module_entry file_module_entry;
+#define file_module_ptr &file_module_entry
 
 extern PHP_MINIT_FUNCTION(file);
 
@@ -70,5 +70,5 @@ PHP_FUNCTION(flock);
 
 PHPAPI int _php3_set_sock_blocking(int socketd, int block);
 
-#define phpext_file_ptr php3_file_module_ptr
+#define phpext_file_ptr file_module_ptr
 #endif /* _FILE_H */

@@ -83,15 +83,12 @@ extern int fclose();
 #define MAP_FAILED ((void *) -1)
 #endif
 
-static void _php3_closesocket(int *);
+static void _file_socket_dtor(int *);
 
-#ifndef THREAD_SAFE
+int le_fopen,le_popen, le_socket, le_uploads;
+
 static int fgetss_state = 0;
-int le_fp,le_pp;
-int wsa_fp; /*to handle reading and writing to windows sockets*/
 static int pclose_ret;
-extern int le_uploads;
-#endif
 
 #ifndef HAVE_TEMPNAM
 /*
@@ -186,7 +183,7 @@ char *tempnam(const char *dir, const char *pfx)
 #endif
 
 
-function_entry php3_file_functions[] = {
+function_entry file_functions[] = {
 	PHP_FE(pclose,				NULL)
 	PHP_FE(popen,				NULL)
 	PHP_FE(readfile,			NULL)
@@ -220,9 +217,9 @@ function_entry php3_file_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry php3_file_module_entry = {
+zend_module_entry file_module_entry = {
 	"File functions",
-	php3_file_functions,
+	file_functions,
 	PHP_MINIT(file),
 	NULL,
 	NULL,
@@ -235,6 +232,7 @@ php3_module_entry php3_file_module_entry = {
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 /* {{{ proto bool flock(int fp, int operation)
+
    portable file locking */
 PHP_FUNCTION(flock)
 {
@@ -253,13 +251,13 @@ PHP_FUNCTION(flock)
     convert_to_long(arg2);
 
     fp = php3_list_find(arg1->value.lval, &type);
-    if (type == wsa_fp){
+    if (type == le_socket){
         issock = 1;
         sock = php3_list_find(arg1->value.lval, &type);
         fd = *sock;
     }
 
-    if ((!fp || (type!=le_fp && type!=le_pp)) && (!fd || type!=wsa_fp)) {
+    if ((!fp || (type!=le_fopen && type!=le_popen)) && (!fd || type!=le_socket)) {
         php_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
         RETURN_FALSE;
     }
@@ -282,6 +280,7 @@ PHP_FUNCTION(flock)
 
     RETURN_TRUE;
 }
+
 /* }}} */
 
 
@@ -474,41 +473,39 @@ PHP_FUNCTION(file)
 /* }}} */
 
 
-static void __pclose(FILE *pipe)
+static void _file_popen_dtor(FILE *pipe)
 {
 	pclose_ret = pclose(pipe);
 }
 
 
-static void _php3_closesocket(int *sock) {
-	if (sock) {
-		SOCK_FCLOSE(*sock);
-#if HAVE_SHUTDOWN
-		shutdown(*sock, 0);
-#endif
-		efree(sock);
-	}
-}
-
-
-static void _php3_unlink_uploaded_file(char *file)
+static void _file_socket_dtor(int *sock) 
 {
-	if(file) {
-		unlink(file);
-	}
+	SOCK_FCLOSE(*sock);
+#if HAVE_SHUTDOWN
+	shutdown(*sock, 0);
+#endif
+	efree(sock);
 }
 
 
-static void php3i_destructor_fclose(FILE *fp) {
-	(void)fclose(fp);
+static void _file_upload_dtor(char *file)
+{
+	unlink(file);
+}
+
+
+static void _file_fopen_dtor(FILE *fp) 
+{
+	fclose(fp);
 }
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_fp = register_list_destructors(php3i_destructor_fclose, NULL);
-	le_pp = register_list_destructors(__pclose, NULL);
-	wsa_fp = register_list_destructors(_php3_closesocket, NULL);
-	le_uploads = register_list_destructors(_php3_unlink_uploaded_file, NULL);
+	le_fopen = register_list_destructors(_file_fopen_dtor, NULL);
+	le_popen = register_list_destructors(_file_popen_dtor, NULL);
+	le_socket = register_list_destructors(_file_socket_dtor, NULL);
+	le_uploads = register_list_destructors(_file_upload_dtor, NULL);
 	return SUCCESS;
 }
 
@@ -590,9 +587,9 @@ PHP_FUNCTION(fopen)
 	if (issock) {
 		sock=emalloc(sizeof(int));
 		*sock=socketd;
-		id = php3_list_insert(sock,wsa_fp);
+		id = php3_list_insert(sock,le_socket);
 	} else {
-		id = php3_list_insert(fp,le_fp);
+		id = php3_list_insert(fp,le_fopen);
 	}
 	efree(p);
 	RETURN_LONG(id);
@@ -614,7 +611,7 @@ PHP_FUNCTION(fclose)
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fp && type!=wsa_fp)) {
+	if (!fp || (type!=le_fopen && type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -673,7 +670,7 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	}
-	id = php3_list_insert(fp,le_pp);
+	id = php3_list_insert(fp,le_popen);
 	efree(p);
 	RETURN_LONG(id);
 }
@@ -695,7 +692,7 @@ PHP_FUNCTION(pclose)
 	id = arg1->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (!fp || type!=le_pp) {
+	if (!fp || type!=le_popen) {
 		php_error(E_WARNING,"Unable to find pipe identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -721,12 +718,12 @@ PHP_FUNCTION(feof)
 	convert_to_long(arg1);
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		/* we're at the eof if the file doesn't exist */
 		RETURN_TRUE;
@@ -787,7 +784,7 @@ PHP_FUNCTION(set_socket_blocking)
 	block = arg2->value.lval;
 	
 	sock = php3_list_find(id,&type);
-	if (type != wsa_fp) {
+	if (type != le_socket) {
 		php_error(E_WARNING,"%d is not a socket id",id);
 		RETURN_FALSE;
 	}
@@ -815,7 +812,7 @@ PHP_FUNCTION(set_socket_timeout)
 	convert_to_long(timeout);
 	
 	sock = php3_list_find(socket->value.lval, &type);
-	if (type!=wsa_fp) {
+	if (type!=le_socket) {
 		php_error(E_WARNING,"%d is not a socket id",socket->value.lval);
 		RETURN_FALSE;
 	}
@@ -849,12 +846,12 @@ PHP_FUNCTION(fgets)
 	len = arg2->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -895,12 +892,12 @@ PHP_FUNCTION(fgetc) {
 	id = arg1->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd = *sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -955,12 +952,12 @@ PHP_FUNCTION(fgetss)
 	len = bytes->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type == wsa_fp){
+	if (type == le_socket){
 		issock = 1;
 		sock = php3_list_find(id, &type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING, "Unable to find file identifier %d", id);
 		RETURN_FALSE;
 	}
@@ -1020,12 +1017,12 @@ PHP_FUNCTION(fwrite)
 	id = arg1->value.lval;	
 
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1076,13 +1073,13 @@ PHP_FUNCTION(set_file_buffer)
 	id = arg1->value.lval;  
 	buff = arg2->value.lval;    
 	fp = php3_list_find(id,&type);
-	if (type == wsa_fp){
+	if (type == le_socket){
 		issock = 1;
 		sock = php3_list_find(id,&type);
 		socketd = *sock;
 	}
-	if ((!fp || (type != le_fp && type != le_pp)) &&
-		(!socketd || type != wsa_fp)) {
+	if ((!fp || (type != le_fopen && type != le_popen)) &&
+		(!socketd || type != le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1112,7 +1109,7 @@ PHP_FUNCTION(rewind)
 	convert_to_long(arg1);
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fp && type!=le_pp)) {
+	if (!fp || (type!=le_fopen && type!=le_popen)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1137,7 +1134,7 @@ PHP_FUNCTION(ftell)
 	convert_to_long(arg1);
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fp && type!=le_pp)) {
+	if (!fp || (type!=le_fopen && type!=le_popen)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1164,7 +1161,7 @@ PHP_FUNCTION(fseek)
 	pos = arg2->value.lval;
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fp && type!=le_pp)) {
+	if (!fp || (type!=le_fopen && type!=le_popen)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1376,12 +1373,12 @@ PHP_FUNCTION(fpassthru)
 	convert_to_long(arg1);
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1505,12 +1502,12 @@ PHP_FUNCTION(fread)
 	len = arg2->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==wsa_fp){
+	if (type==le_socket){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1532,9 +1529,9 @@ PHP_FUNCTION(fread)
 
 
 /* aparently needed for pdf to be compiled as a module under windows */
-PHPAPI int php3i_get_le_fp(void)
+PHPAPI int php3i_get_le_fopen(void)
 {
-	return le_fp;
+	return le_fopen;
 }
 
 /* {{{ proto array fgetcsv(int fp, int length)
@@ -1586,13 +1583,13 @@ PHP_FUNCTION(fgetcsv) {
 	len = bytes->value.lval;
 
 	fp = php3_list_find(id, &type);
-	if (type == wsa_fp){
+	if (type == le_socket){
 		issock = 1;
 		sock = php3_list_find(id,&type);
 		socketd = *sock;
 	}
-	if ((!fp || (type != le_fp && type != le_pp)) &&
-		(!socketd || type != wsa_fp)) {
+	if ((!fp || (type != le_fopen && type != le_popen)) &&
+		(!socketd || type != le_socket)) {
 		php_error(E_WARNING, "Unable to find file identifier %d", id);
 		RETURN_FALSE;
 	}
@@ -1680,5 +1677,6 @@ PHP_FUNCTION(fgetcsv) {
 /*
  * Local variables:
  * tab-width: 4
+ * c-basic-offset: 4
  * End:
  */
