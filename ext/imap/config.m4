@@ -94,7 +94,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
       AC_MSG_ERROR([This c-client library is built with Kerberos support. 
 
-      Add --with-kerberos<=DIR> to your configure line. Check config.log for details.
+      Add --with-kerberos to your configure line. Check config.log for details.
       ])
     ])
   fi
@@ -103,7 +103,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
 
 AC_DEFUN(PHP_IMAP_SSL_CHK, [
   AC_ARG_WITH(imap-ssl,
-  [  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
+  [  --with-imap-ssl=<DIR>     IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
     PHP_IMAP_SSL=$withval
   ],[
     PHP_IMAP_SSL=no
@@ -133,7 +133,7 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
       AC_MSG_RESULT(yes)
       AC_MSG_ERROR([This c-client library is built with SSL support. 
      
-      Add --with-imap-ssl<=DIR> to your configure line. Check config.log for details.
+      Add --with-imap-ssl=<DIR> to your configure line. Check config.log for details.
       ])
     ], $TST_LIBS)
   fi
