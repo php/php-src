@@ -1454,23 +1454,62 @@ PHP_FUNCTION(max)
 
 static pval *php_array_walk_func_name;
 
-
-static int php_array_walk(pval **a)
+static int php_array_walk(HashTable *target_hash, zval **userdata)
 {
-	pval retval;
+	zval **args[3],			/* Arguments to userland function */
+		   retval,			/* Return value - unused */
+		  *key;				/* Entry key */
+	char  *string_key;
+	ulong  num_key;
 	CLS_FETCH();
 
-	call_user_function_ex(CG(function_table), NULL, php_array_walk_func_name, &retval, 1, &a, 0);
+	/* Allocate space for key */
+	MAKE_STD_ZVAL(key);
+	
+	/* Set up known arguments */
+	args[1] = &key;
+	args[2] = userdata;
+
+	/* Iterate through hash */
+	while(zend_hash_get_current_data(target_hash, (void **)&args[0]) == SUCCESS) {
+		/* Set up the key */
+		if (zend_hash_get_current_key(target_hash, &string_key, &num_key) == HASH_KEY_IS_LONG) {
+			key->type = IS_LONG;
+			key->value.lval = num_key;
+		} else {
+			key->type = IS_STRING;
+			key->value.str.val = string_key;
+			key->value.str.len = strlen(string_key);
+		}
+		
+		/* Call the userland function */
+		call_user_function_ex(CG(function_table), NULL, php_array_walk_func_name,
+						   &retval, (*userdata) ? 3 : 2, args, 0);
+		
+		/* Clean up the key */
+		if (zend_hash_get_current_key_type(target_hash) == HASH_KEY_IS_STRING)
+			efree(key->value.str.val);
+		
+		zend_hash_move_forward(target_hash);
+    }
+	efree(key);
+	
 	return 0;
 }
 
-PHP_FUNCTION(array_walk)
-{
-	pval *array, *old_walk_func_name;
+/* {{{ proto array_walk(array input, string funcname [, mixed userdata])
+   Apply a user function to every member of an array */
+PHP_FUNCTION(array_walk) {
+	int   argc;
+	zval *array,
+		 *userdata = NULL,
+		 *old_walk_func_name;
 	HashTable *target_hash;
 
+	argc = ARG_COUNT(ht);
 	old_walk_func_name = php_array_walk_func_name;
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &php_array_walk_func_name) == FAILURE) {
+	if (argc < 2 || argc > 3 ||
+		getParameters(ht, argc, &array, &php_array_walk_func_name, &userdata) == FAILURE) {
 		php_array_walk_func_name = old_walk_func_name;
 		WRONG_PARAM_COUNT;
 	}
@@ -1481,7 +1520,7 @@ PHP_FUNCTION(array_walk)
 		return;
 	}
 	convert_to_string(php_array_walk_func_name);
-	zend_hash_apply(target_hash, (int (*)(void *))php_array_walk);
+	php_array_walk(target_hash, &userdata);
 	php_array_walk_func_name = old_walk_func_name;
 	RETURN_TRUE;
 }
