@@ -218,11 +218,10 @@ AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
   AC_TRY_COMPILE([#include <httpd.h>],[conn_rec *c; int fd = c->client->fd;],[
     ac_cv_php_fd_in_buff=yes],[ac_cv_php_fd_in_buff=no],[ac_cv_php_fd_in_buff=no])
   CPPFLAGS=$save
-],[
-  if test "$ac_cv_php_fd_in_buff" = "yes"; then
-    AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD, 1, [ ])
-  fi
 ])
+if test "$ac_cv_php_fd_in_buff" = "yes"; then
+  AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD,1,[ ])
+fi
 
   
 AC_MSG_CHECKING(for mod_charset compatibility option)
