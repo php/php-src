@@ -63,14 +63,18 @@
 #ifdef ZTS
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
-	static ts_rsrc_id module_name##_globals_id;
+	ts_rsrc_id module_name##_globals_id;
+#define ZEND_EXTERN_MODULE_GLOBALS(module_name)								\
+	extern ts_rsrc_id module_name##_globals_id;
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
 	module_name##_globals_id = ts_allocate_id(sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
 
 #else
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
-	static zend_##module_name##_globals module_name##_globals;
+	zend_##module_name##_globals module_name##_globals;
+#define ZEND_EXTERN_MODULE_GLOBALS(module_name)								\
+	extern zend_##module_name##_globals module_name##_globals;
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
 	globals_ctor(&module_name##_globals);
 
