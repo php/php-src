@@ -437,7 +437,7 @@ PHP_FUNCTION(xslt_set_log)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 	
-	if (Z_TYPE_PP(logfile) == IS_LONG) {
+	if (Z_TYPE_PP(logfile) == IS_LONG || Z_TYPE_PP(logfile) == IS_BOOL || Z_TYPE_PP(logfile) == IS_DOUBLE) {
 		XSLT_LOG(handle).do_log = Z_LVAL_PP(logfile);
 		RETURN_NULL();
 	}
