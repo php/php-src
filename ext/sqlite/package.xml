@@ -35,15 +35,17 @@
 	without running a separate RDBMS process.
 	This extension allows you to access SQLite databases from within PHP.
 
-	Windows binary available from:
-	http://snaps.php.net/win32/PECL_STABLE/php_sqlite.dll
+	Windows binary for PHP 4.3 is available from:
+	http://snaps.php.net/win32/PECL_4_3/php_sqlite.dll
+
+	**Note that this extension is built into PHP 5 by default**
   </description>
   <license>PHP</license>
 
 <release>
 <state>stable</state>
-<version>1.0.2</version>
-<date>2004-07-10</date>
+<version>1.0.3</version>
+<date>2004-07-18</date>
 <notes>
 Upgraded libsqlite to version 2.8.14
 
@@ -143,7 +145,7 @@ this case is to use the new sqlite_exec() function instead. (Stas)
 <version>1.0.2</version>
 <date>2004-01-17</date>
 <notes>
-Upgraded libsqlite to version 2.9.11
+Upgraded libsqlite to version 2.8.11
 Fixed crash bug in module shutdown
 Fixed crash with empty queries
 Fixed column name mangling bug
