@@ -164,7 +164,7 @@ if (php_stream_can_cast(stream, PHP_STREAM_AS_SOCKETD) == SUCCESS)  {
 Please note the difference between php_stream_is and php_stream_can_cast;
 stream_is tells you if the stream is a particular type of stream, whereas
 can_cast tells you if the stream can be forced into the form you request.
-The format doesn't change anything, while the later *might* change some
+The former doesn't change anything, while the later *might* change some
 state in the stream.
 
 Stream Internals
