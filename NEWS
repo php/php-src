@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.3.1
-- Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll)
-  on Windows. (Sebastian, Edin)
+- Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
+  (Sebastian, Edin)
 - Improved dba extension (Marcus)
   . Added support for internal error handling of Berkeley db libraries.
   . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
@@ -12,47 +12,45 @@ PHP 4                                                                      NEWS
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
-- Fixed bug #17868 (more then the <!--include--> directive used to include
-  a PHP file would result in a crash). (Ilia)
-- Fixed bug #21597 (made glob() understand Windows paths). (Edin)
-- Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
-- Fixed bug #21525 (bind_textdomain_codeset() now available on Windows). (Edin)
-- Fixed bug #21511 (config.status warning). (Jani)
-- Fixed bug #21531 (file_exists() and other filestat functions report errors
-  when the requested file/directory does not exists). (Sara)
-- Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
-- Fixed bug #21523 (number_format could cause a memory allocation for a
-  negative memory size in situations where the sprintf implementation of the
-  host system generated less decimal places than were requested). (Wez)
-- Fixed bug #21529 (memory corruption by fsockopen()). (Ilia)
-- Fixed bug #21518 (imagecreatefromstring() crashed when dealing with invalid
-  image files). (Ilia)
-- Fixed bug #20802 (PHP would die silently when memory limit is reached). 
+- Fixed bug #17098 (make Apache2 aware that PHP scripts should not be cached).
   (Ilia)
-- Fixed bug #21498 (mysql_pconnect connection problems). (Georg)
-- Fixed bug #21443 (improper handling of ? surrounded by spaces in
-  get_browser()). (Ilia)
-- Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the
-  the code encounters \r\n). (Ilia)
-- Fixed bug #21453 (improper handling of non-terminated < by strip_tags()).
+- Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes).
   (Ilia)
-- Fixed bug #17098 (make Apache2 aware that PHP scripts represent dynamic data
-  and should not be cached). (Ilia)
-- Fixed bug #21445 (gd unable to open fonts). (Ilia)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
-- Fixed bug #21169 (Compile Failure, and lots of warnings on UnixWare).
-  (Derick)
-- Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
+- Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
+- Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
+- Fixed bug #21169 (Compile Failure and lots of warnings on UnixWare). (Derick)
+- Fixed bug #21226 (parse_url handling of urls without a path). (Ilia)
+- Fixed bug #21228 (broken check for ob_gzhandler and made ob_start() return
+  the correct value). (Ilia)
 - Fixed bug #21229 (missing 3rd argument to php_module_startup). (Ilia)
 - Fixed bug #21267 (opening URLs that result in redirection to a relative
   path was failing). (Ilia)
-- Fixed bug #21226 (parse_url handling of urls without a path). (Ilia)
-- Fixed bug #21228 (broken check for ob_gzhandler) & made ob_start() return
-  the correct value. (Ilia)
 - Fixed bug #21268 (session_decode() returned FALSE on success). (Ilia)
-- Fixed bug #21442 (crash in mail() on Windows when the first parameter
-  is empty). (Edin)
+- Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the
+  the code encounters \r\n). (Ilia)
+- Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
+- Fixed bug #21442 (crash in mail() on Windows when 1st parameter is empty). 
+  (Edin)
+- Fixed bug #21443 (improper handling of ? surrounded by spaces in 
+  get_browser()). (Ilia)
+- Fixed bug #21445 (gd unable to open fonts). (Ilia)
+- Fixed bug #21453 (improper handling of non-terminated < by strip_tags()).
+  (Ilia)
+- Fixed bug #21498 (mysql_pconnect connection problems). (Georg)
+- Fixed bug #21511 (config.status warning). (Jani)
+- Fixed bug #21518 (imagecreatefromstring() crashed with invalid image files).
+  (Ilia)
+- Fixed bug #21523 (number_format() could cause a memory allocation for a
+  negative memory size in situations where the sprintf implementation of the
+  host system generated less decimal places than were requested). (Wez)
+- Fixed bug #21525 (bind_textdomain_codeset() now available on Windows). (Edin)
+- Fixed bug #21529 (memory corruption by fsockopen()). (Ilia)
+- Fixed bug #21531 (file_exists() and other filestat functions report errors
+  when the requested file/directory does not exists). (Sara)
+- Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
+- Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 
 27 Dec 2002, Version 4.3.0
 - If you don't specify building any other SAPI "make install" will install the
