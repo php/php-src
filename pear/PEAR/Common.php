@@ -23,11 +23,15 @@ require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
 require_once 'System.php';
 
-/**
+/*
  * TODO:
  *   - check in inforFromDescFile that the minimal data needed is present
  *     (pack name, version, files, others?)
  *   - inherance of dir attribs to files may fail under certain circumstances
+ */
+
+/**
+ * Class providing common functionality for PEAR adminsitration classes.
  */
 class PEAR_Common extends PEAR
 {
@@ -58,12 +62,17 @@ class PEAR_Common extends PEAR
      * Permitted release states
      * @var array
      */
-    var $releases_states  = array('alpha','beta','stable','snapshot');
+    var $releases_states  = array('alpha','beta','stable','snapshot','devel');
 
     // }}}
 
     // {{{ constructor
 
+    /**
+     * PEAR_Common constructor
+     *
+     * @access public
+     */
     function PEAR_Common()
     {
         $GLOBALS['_PEAR_Common_tempfiles'] = array();
@@ -74,6 +83,11 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ destructor
 
+    /**
+     * PEAR_Common destructor
+     *
+     * @access private
+     */
     function _PEAR_Common()
     {
         // doesn't work due to bug #14744
@@ -93,6 +107,17 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ addTempFile()
 
+    /**
+     * Register a temporary file or directory.  When the destructor is
+     * executed, all registered temporary files and directories are
+     * removed.
+     *
+     * @param string   name of file or directory
+     *
+     * @return void
+     *
+     * @access public
+     */
     function addTempFile($file)
     {
         $this->_tempfiles[] = $file;
@@ -101,6 +126,16 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ mkDirHier()
 
+    /**
+     * Wrapper to System::mkDir(), creates a directory as well as
+     * any necessary parent directories.
+     *
+     * @param string  directory name
+     *
+     * @return bool TRUE on success, or a PEAR error
+     *
+     * @access public
+     */
     function mkDirHier($dir)
     {
         $this->log(2, "+ create dir $dir");
@@ -110,6 +145,17 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ log()
 
+    /**
+     * Logging method.
+     *
+     * @param int    log level (0 is quiet, higher is noisier)
+     *
+     * @param string message to write to the log
+     *
+     * @return void
+     *
+     * @access public
+     */
     function log($level, $msg)
     {
         if ($this->debug >= $level) {
@@ -120,6 +166,13 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ mkTempDir()
 
+    /**
+     * Create and register a temporary directory.
+     * 
+     * @return string name of created directory
+     * 
+     * @access public
+     */
     function mkTempDir()
     {
         if (!$tmpdir = System::mktemp('-d pear')) {
@@ -132,7 +185,77 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ _element_start()
 
+    /**
+     * XML parser callback for starting elements.  Used while package
+     * format version is not yet known.
+     *
+     * @param resource  XML parser resource
+     * @param string    name of starting element
+     * @param array     element attributes, name => value
+     *
+     * @return void
+     *
+     * @access private
+     */
     function _element_start($xp, $name, $attribs)
+    {
+        array_push($this->element_stack, $name);
+        $this->current_element = $name;
+        $spos = sizeof($this->element_stack) - 2;
+        $this->prev_element = ($spos >= 0) ? $this->element_stack[$spos] : '';
+        $this->current_attributes = $attribs;
+        switch ($name) {
+            case 'package': {
+                if (isset($attribs['version'])) {
+                    $vs = preg_replace('/[^0-9a-z]/', '_', $attribs['version']);
+                } else {
+                    $vs = '1_0';
+                }
+                $elem_start = '_element_start_'. $vs;
+                $elem_end = '_element_end_'. $vs;
+                $cdata = '_pkginfo_cdata_'. $vs;
+                xml_set_element_handler($xp, $elem_start, $elem_end);
+                xml_set_character_data_handler($xp, $cdata);
+                break;
+            }
+        }
+    }
+
+    // }}}
+    // {{{ _element_end()
+
+    /**
+     * XML parser callback for ending elements.  Used while package
+     * format version is not yet known.
+     *
+     * @param resource  XML parser resource
+     * @param string    name of ending element
+     *
+     * @return void
+     *
+     * @access private
+     */
+    function _element_end($xp, $name)
+    {
+    }
+    
+    // }}}
+
+    // Support for package DTD v1.0:
+    // {{{ _element_start_1_0()
+
+    /**
+     * XML parser callback for ending elements.  Used for version 1.0
+     * packages.
+     *
+     * @param resource  XML parser resource
+     * @param string    name of ending element
+     *
+     * @return void
+     *
+     * @access private
+     */
+    function _element_start_1_0($xp, $name, $attribs)
     {
         array_push($this->element_stack, $name);
         $this->current_element = $name;
@@ -154,7 +277,7 @@ class PEAR_Common extends PEAR
                 break;
             case 'libfile':
                 $this->lib_atts = $attribs;
-                $this->lib_atts['role'] = 'extension';
+                $this->lib_atts['role'] = 'extsrc';
                 break;
             case 'maintainers':
                 $this->pkginfo['maintainers'] = array();
@@ -181,20 +304,35 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'deps':
-                $this->pkginfo['release_deps'] = array();
+                if (!$this->in_changelog) {
+                    $this->pkginfo['release_deps'] = array();
+                }
                 break;
             case 'dep':
                 // dependencies array index
-                $this->d_i = (isset($this->d_i)) ? $this->d_i + 1 : 0;
-                $this->pkginfo['release_deps'][$this->d_i] = $attribs;
+                if (!$this->in_changelog) {
+                    $this->d_i = (isset($this->d_i)) ? $this->d_i + 1 : 0;
+                    $this->pkginfo['release_deps'][$this->d_i] = $attribs;
+                }
                 break;
         }
     }
 
     // }}}
-    // {{{ _element_end()
+    // {{{ _element_end_1_0()
 
-    function _element_end($xp, $name)
+    /**
+     * XML parser callback for ending elements.  Used for version 1.0
+     * packages.
+     *
+     * @param resource  XML parser resource
+     * @param string    name of ending element
+     *
+     * @return void
+     *
+     * @access private
+     */
+    function _element_end_1_0($xp, $name)
     {
         $data = trim($this->cdata);
         switch ($name) {
@@ -294,7 +432,6 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'libfile':
-                $this->lib_name = $data;
                 $path = '';
                 if (!empty($this->dir_names)) {
                     foreach ($this->dir_names as $dir) {
@@ -310,12 +447,19 @@ class PEAR_Common extends PEAR
                     $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
                 }
                 if (isset($this->lib_sources)) {
-                    $this->filelist[$path]['sources'] = $this->lib_sources;
+                    $this->filelist[$path]['sources'] = implode(' ', $this->lib_sources);
                 }
                 unset($this->lib_atts);
                 unset($this->lib_sources);
+                unset($this->lib_name);
+                break;
+            case 'libname':
+                $this->lib_name = $data;
                 break;
             case 'maintainer':
+                if (empty($this->pkginfo['maintainers'][$this->m_i]['role'])) {
+                    $this->pkginfo['maintainers'][$this->m_i]['role'] = 'lead';
+                }
                 $this->m_i++;
                 break;
             case 'release':
@@ -336,66 +480,39 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
-    // {{{ _pkginfo_cdata()
+    // {{{ _pkginfo_cdata_1_0()
 
-    function _pkginfo_cdata($xp, $data)
+    /**
+     * XML parser callback for character data.  Used for version 1.0
+     * packages.
+     *
+     * @param resource  XML parser resource
+     * @param string    character data
+     *
+     * @return void
+     *
+     * @access private
+     */
+    function _pkginfo_cdata_1_0($xp, $data)
     {
         $this->cdata .= $data;
     }
 
     // }}}
-    // {{{ infoFromDescriptionFile()
 
-    function infoFromDescriptionFile($descfile)
-    {
-        if (!@is_file($descfile) || !is_readable($descfile) ||
-             (!$fp = @fopen($descfile, 'r'))) {
-            return $this->raiseError("Unable to open $descfile");
-        }
-        $xp = @xml_parser_create();
-        if (!$xp) {
-            return $this->raiseError('Unable to create XML parser');
-        }
-        xml_set_object($xp, $this);
-        xml_set_element_handler($xp, '_element_start', '_element_end');
-        xml_set_character_data_handler($xp, '_pkginfo_cdata');
-        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
-
-        $this->element_stack = array();
-        $this->pkginfo = array();
-        $this->current_element = false;
-        $this->destdir = '';
-        $this->pkginfo['filelist'] = array();
-        $this->filelist =& $this->pkginfo['filelist'];
-        $this->dir_names = array();
-        $this->in_changelog = false;
-
-        // read the whole thing so we only get one cdata callback
-        // for each block of cdata
-        $data = fread($fp, filesize($descfile));
-        if (!xml_parse($xp, $data, 1)) {
-            $msg = sprintf("XML error: %s at line %d",
-                           xml_error_string(xml_get_error_code($xp)),
-                           xml_get_current_line_number($xp));
-            xml_parser_free($xp);
-            return $this->raiseError($msg);
-        }
-
-        xml_parser_free($xp);
-
-        foreach ($this->pkginfo as $k => $v) {
-            if (!is_array($v)) {
-                $this->pkginfo[$k] = trim($v);
-            }
-        }
-        return $this->pkginfo;
-    }
-    // }}}
     // {{{ infoFromTgzFile()
 
     /**
-    * Returns info from a tgz pear package
-    */
+     * Returns information about a package file.  Expects the name of
+     * a gzipped tar file as input.
+     *
+     * @param string   name of .tgz file
+     *
+     * @return array   array with package information
+     *
+     * @access public
+     *
+     */
     function infoFromTgzFile($file)
     {
         if (!@is_file($file)) {
@@ -421,8 +538,213 @@ class PEAR_Common extends PEAR
             return $this->raiseError('tgz :: could not extract the package.xml file');
         }
         return $this->infoFromDescriptionFile("$tmpdir/$xml");
+    }
 
     // }}}
+    // {{{ infoFromDescriptionFile()
+
+    /**
+     * Returns information about a package file.  Expects the name of
+     * a package xml file as input.
+     *
+     * @param string   name of package xml file
+     *
+     * @return array   array with package information
+     *
+     * @access public
+     *
+     */
+    function infoFromDescriptionFile($descfile)
+    {
+        if (!@is_file($descfile) || !is_readable($descfile) ||
+             (!$fp = @fopen($descfile, 'r'))) {
+            return $this->raiseError("Unable to open $descfile");
+        }
+
+        // read the whole thing so we only get one cdata callback
+        // for each block of cdata
+        $data = fread($fp, filesize($descfile));
+        return $this->infoFromString($data);
     }
+
+    // }}}
+    // {{{ infoFromString()
+
+    /**
+     * Returns information about a package file.  Expects the contents
+     * of a package xml file as input.
+     *
+     * @param string   name of package xml file
+     *
+     * @return array   array with package information
+     *
+     * @access public
+     *
+     */
+    function infoFromString($data)
+    {
+        $xp = @xml_parser_create();
+        if (!$xp) {
+            return $this->raiseError('Unable to create XML parser');
+        }
+        xml_set_object($xp, $this);
+        xml_set_element_handler($xp, '_element_start', '_element_end');
+        xml_set_character_data_handler($xp, '_pkginfo_cdata');
+        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+
+        $this->element_stack = array();
+        $this->pkginfo = array();
+        $this->current_element = false;
+        $this->destdir = '';
+        $this->pkginfo['filelist'] = array();
+        $this->filelist =& $this->pkginfo['filelist'];
+        $this->dir_names = array();
+        $this->in_changelog = false;
+
+        if (!xml_parse($xp, $data, 1)) {
+            $code = xml_get_error_code($xp);
+            $msg = sprintf("XML error: %s at line %d",
+                           xml_error_string($code),
+                           xml_get_current_line_number($xp));
+            xml_parser_free($xp);
+            return $this->raiseError($msg, $code);
+        }
+
+        xml_parser_free($xp);
+
+        foreach ($this->pkginfo as $k => $v) {
+            if (!is_array($v)) {
+                $this->pkginfo[$k] = trim($v);
+            }
+        }
+        return $this->pkginfo;
+    }
+    // }}}
+    // {{{ xmlFromInfo()
+
+    /**
+     * Return an XML document based on the package info (as returned
+     * by the PEAR_Common::infoFrom* methods).
+     *
+     * @param array package info
+     *
+     * @return string XML data
+     *
+     * @access public
+     */
+    function xmlFromInfo($pkginfo)
+    {
+        static $maint_map = array(
+            "handle" => "user",
+            "name" => "name",
+            "email" => "email",
+            "role" => "role",
+            );
+        $ret = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n";
+        //$ret .= "<!DOCTYPE package SYSTEM \"http://pear.php.net/package10.dtd\">\n";
+        $ret .= "<package version=\"1.0\">
+  <name>$pkginfo[package]</name>
+  <summary>".htmlspecialchars($pkginfo['summary'])."</summary>
+  <description>".htmlspecialchars($pkginfo['description'])."</description>
+  <maintainers>
+";
+        foreach ($pkginfo['maintainers'] as $maint) {
+            $ret .= "    <maintainer>\n";
+            foreach ($maint_map as $idx => $elm) {
+                $ret .= "      <$elm>";
+                $ret .= htmlspecialchars($maint[$idx]);
+                $ret .= "</$elm>\n";
+            }
+            $ret .= "    </maintainer>\n";
+        }
+        $ret .= "  </maintainers>\n";
+        $ret .= $this->_makeReleaseXml($pkginfo);
+        if (@sizeof($pkginfo['changelog']) > 0) {
+            $ret .= "  <changelog>\n";
+            foreach ($pkginfo['changelog'] as $oldrelease) {
+                var_dump($oldrelease);
+                $ret .= $this->_makeReleaseXml($oldrelease, true);
+            }
+            $ret .= "  </changelog>\n";
+        }
+        $ret .= "</package>\n";
+        return $ret;
+    }
+
+    // }}}
+    // {{{ _makeReleaseXml()
+
+    /**
+     * Generate part of an XML description with release information.
+     *
+     * @param array  array with release information
+     * @param bool   whether the result will be in a changelog element
+     *
+     * @return string XML data
+     *
+     * @access private
+     */
+    function _makeReleaseXml($pkginfo, $changelog = false)
+    {
+        $indent = $changelog ? "  " : "";
+        $ret = "$indent  <release>\n";
+        if (!empty($pkginfo['version'])) {
+            $ret .= "$indent    <version>$pkginfo[version]</version>\n";
+        }
+        if (!empty($pkginfo['release_date'])) {
+            $ret .= "$indent    <date>$pkginfo[release_date]</date>\n";
+        }
+        if (!empty($pkginfo['release_license'])) {
+            $ret .= "$indent    <license>$pkginfo[release_license]</license>\n";
+        }
+        if (!empty($pkginfo['release_state'])) {
+            $ret .= "$indent    <state>$pkginfo[release_state]</state>\n";
+        }
+        if (!empty($pkginfo['release_notes'])) {
+            $ret .= "$indent    <notes>$pkginfo[release_notes]</notes>\n";
+        }
+        if (sizeof($pkginfo['release_deps']) > 0) {
+            $ret .= "$indent    <deps>\n";
+            foreach ($pkginfo['release_deps'] as $dep) {
+                $ret .= "$indent      <dep type=\"$dep[type]\" rel=\"$dep[rel]\"";
+                if (isset($dep['version'])) {
+                    $ret .= " version=\"$dep[version]\"";
+                }
+                if (isset($dep['name'])) {
+                    $ret .= ">$dep[name]</dep>\n";
+                } else {
+                    $ret .= "/>\n";
+                }
+            }
+            $ret .= "$indent    </deps>\n";
+        }
+        $ret .= "$indent    <filelist>\n";
+/*
+        ob_start();
+        var_dump($pkginfo['filelist']);
+        $tmp = ob_get_contents();
+        ob_end_clean();
+        $ret .= $tmp;
+*/
+        foreach ($pkginfo['filelist'] as $file => $fa) {
+            if ($fa['role'] == 'extsrc') {
+                $ret .= "$indent      <libfile>\n";
+                $ret .= "$indent        <libname>$file</libname>\n";
+                $ret .= "$indent        <sources>$fa[sources]</sources>\n";
+                $ret .= "$indent      </libfile>\n";
+            } else {
+                $ret .= "$indent      <file role=\"$fa[role]\"";
+                if (isset($fa['baseinstalldir'])) {
+                    $ret .= " baseinstalldir=\"$fa[baseinstalldir]\"";
+                }
+                $ret .= ">$file</file>\n";
+            }
+        }
+        $ret .= "$indent    </filelist>\n";
+        $ret .= "$indent  </release>\n";
+        return $ret;
+    }
+
+    // }}}
 }
 ?>
