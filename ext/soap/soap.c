@@ -441,6 +441,7 @@ PHP_RINIT_FUNCTION(soap)
 	SOAP_GLOBAL(sdl) = NULL;
 	SOAP_GLOBAL(soap_version) = SOAP_1_1;
 	SOAP_GLOBAL(encoding) = NULL;
+	SOAP_GLOBAL(class_map) = NULL;
 	return SUCCESS;
 }
 
@@ -866,6 +867,15 @@ PHP_METHOD(SoapServer, SoapServer)
 	    }
 		}
 
+		if (zend_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_ARRAY) {
+			zval *ztmp;
+
+			ALLOC_HASHTABLE(service->class_map);
+			zend_hash_init(service->class_map, 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(service->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &ztmp, sizeof(zval *));
+		}
+
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
 	}
@@ -1267,6 +1277,7 @@ PHP_METHOD(SoapServer, handle)
 	char *arg = NULL;
 	int arg_len;
 	xmlCharEncodingHandlerPtr old_encoding;
+	HashTable *old_class_map;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1410,6 +1421,8 @@ PHP_METHOD(SoapServer, handle)
 	SOAP_GLOBAL(sdl) = service->sdl;
 	old_encoding = SOAP_GLOBAL(encoding);
 	SOAP_GLOBAL(encoding) = service->encoding;
+	old_class_map = SOAP_GLOBAL(class_map);
+	SOAP_GLOBAL(class_map) = service->class_map;
 	old_soap_version = SOAP_GLOBAL(soap_version);
 	function = deserialize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
 	xmlFreeDoc(doc_request);
@@ -1674,6 +1687,7 @@ fail:
 	SOAP_GLOBAL(soap_version) = old_soap_version;
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
+	SOAP_GLOBAL(class_map) = old_class_map;
 
 	/* Free soap headers */
 	zval_dtor(&retval);
@@ -1986,6 +2000,18 @@ PHP_METHOD(SoapClient, SoapClient)
 				add_property_stringl(this_ptr, "_encoding", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);			
 			}
 		}
+		if (zend_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_ARRAY) {
+			zval *class_map;
+
+			MAKE_STD_ZVAL(class_map);
+			*class_map = **tmp;
+			zval_copy_ctor(class_map);
+#ifdef ZEND_ENGINE_2
+			class_map->refcount--;  /*FIXME*/
+#endif
+			add_property_zval(this_ptr, "_classmap", class_map);
+		}
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode.");
 		return;
@@ -2097,6 +2123,7 @@ static void do_soap_call(zval* this_ptr,
 	int soap_version;
 	zval response;
 	xmlCharEncodingHandlerPtr old_encoding;
+	HashTable *old_class_map;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2127,6 +2154,13 @@ static void do_soap_call(zval* this_ptr,
 		SOAP_GLOBAL(encoding) = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
 	} else {
 		SOAP_GLOBAL(encoding) = NULL;
+	}
+	old_class_map = SOAP_GLOBAL(class_map);
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_classmap", sizeof("_classmap"), (void **) &tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_ARRAY) {
+		SOAP_GLOBAL(class_map) = (*tmp)->value.ht;
+	} else {
+		SOAP_GLOBAL(class_map) = NULL;
 	}
 
  	if (sdl != NULL) {
@@ -2228,6 +2262,7 @@ static void do_soap_call(zval* this_ptr,
   if (SOAP_GLOBAL(encoding) != NULL) {
 		xmlCharEncCloseFunc(SOAP_GLOBAL(encoding));
   }
+  SOAP_GLOBAL(class_map) = old_class_map;
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 	SOAP_CLIENT_END_CODE();
@@ -3979,6 +4014,10 @@ static void delete_service(void *data)
 	}
 	if (service->encoding) {
 		xmlCharEncCloseFunc(service->encoding);
+	}
+	if (service->class_map) {
+		zend_hash_destroy(service->class_map);
+		FREE_HASHTABLE(service->class_map);
 	}
 	efree(service);
 }
