@@ -28,7 +28,7 @@ typedef struct _zend_llist_element {
 } zend_llist_element;
 
 typedef void (*llist_dtor_func_t)(void *);
-typedef int (*llist_compare_func_t)(const zend_llist_element *, const zend_llist_element * TSRMLS_DC);
+typedef int (*llist_compare_func_t)(const zend_llist_element **, const zend_llist_element ** TSRMLS_DC);
 typedef void (*llist_apply_with_args_func_t)(void *data, int num_args, va_list args TSRMLS_DC);
 typedef void (*llist_apply_with_arg_func_t)(void *data, void *arg TSRMLS_DC);
 typedef void (*llist_apply_func_t)(void * TSRMLS_DC);
