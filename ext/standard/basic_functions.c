@@ -266,6 +266,7 @@ function_entry basic_functions[] = {
 #endif
 
 	PHP_FE(microtime,								NULL)
+	PHP_FE(gettimeofday,							NULL)
 	PHP_FE(getrusage,								NULL)
 	
 	PHP_FE(uniqid,									NULL)
