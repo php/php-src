@@ -86,7 +86,7 @@ static const char *php_apache_admin_value_handler(cmd_parms *cmd, void *dummy, c
 static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const char *arg)
 {
 	if (apache2_php_ini_path_override) {
-		return "PHPINIDir is not yet supported in vhost configurations";
+		return "Only first PHPINIDir directive honored per configuration tree - subsequent ones ignored";
 	}
 	apache2_php_ini_path_override = ap_server_root_relative(cmd->pool, arg);
 	return NULL;
