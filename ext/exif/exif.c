@@ -77,11 +77,6 @@ typedef unsigned char uchar;
 	#define FALSE 0
 #endif
 
-#ifndef MB_CUR_MAX
-	#define MB_CUR_MAX 8
-	/* Should be a library constant */
-#endif
-
 #define EXIT_FAILURE  1
 #define EXIT_SUCCESS  0
 
@@ -1219,7 +1214,6 @@ static void exif_extract_thumbnail(image_info_type *ImageInfo, char *offset, uns
 }
 /* }}} */
 
-#ifdef EXIF_DEBUG
 /* {{{ exif_process_string_raw
  * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
 static int exif_process_string_raw(char **result,char *value,size_t byte_count) {
@@ -1236,7 +1230,6 @@ static int exif_process_string_raw(char **result,char *value,size_t byte_count) 
 	return 0;
 }
 /* }}} */
-#endif
 
 /* {{{ exif_process_string
  * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
@@ -1261,8 +1254,7 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
  * Process UserComment in IFD. */
 static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *szValuePtr,int ByteCount)
 {
-	int   a,l;
-	char  mbBuffer[MB_CUR_MAX];
+	int   a;
 
 	*szEncoding = '\0';
 	/* Copy the comment */
@@ -1272,19 +1264,7 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 			strcpy( szEncoding, szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-			l = 0;
-			a = 0;
-			while(((wchar_t*)szValuePtr)[a]) {
-				l += (int)wctomb( mbBuffer, *((wchar_t*)szValuePtr));
-				if (sizeof(wchar_t)*a++ >= ByteCount) break; /* avoiding problems with corrupt headers */
-			}
-			if (l>1) {
-				*pszInfoPtr = emalloc(l+1);
-				wcstombs(*pszInfoPtr, (wchar_t*)(szValuePtr), l+1);
-				(*pszInfoPtr)[l] = '\0';
-				return l+1;
-			}
-			return 0;
+			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 		}
 		if ( !memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
 			strcpy( szEncoding, szValuePtr);
@@ -1303,7 +1283,7 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 	if (a) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
 
 	/* normal text without encoding */
-	return exif_process_string(pszInfoPtr,szValuePtr,ByteCount);
+	return exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
 }
 /* }}} */
 
