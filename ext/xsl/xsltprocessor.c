@@ -128,6 +128,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsltStylesheetPtr sheetp, oldsheetp;
 	xsl_object *intern;
 	node_object *docobj;
+	int prevSubstValue, prevExtDtdValue;
 	
 	DOM_GET_THIS(id);
 	
@@ -140,8 +141,14 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	/* libxslt uses _private, so we must copy the imported 
 	stylesheet document otherwise the node proxies will be a mess */
 	newdoc = xmlCopyDoc(doc, 1);
+	xmlNodeSetBase((xmlNodePtr) newdoc, (xmlChar *)doc->URL);
 
+	prevSubstValue = xmlSubstituteEntitiesDefault(1);
+	prevExtDtdValue = xmlLoadExtDtdDefaultValue;
+	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
 	sheetp = xsltParseStylesheetDoc(newdoc);
+	xmlSubstituteEntitiesDefault(prevSubstValue);
+	xmlLoadExtDtdDefaultValue = prevExtDtdValue;
 
 	if (!sheetp) {
 		xmlFreeDoc(newdoc);
@@ -163,7 +170,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
 
-/* {{{ proto xsl_document xsl_xsltprocessor_transform_to_doc(node doc);
+/* {{{ proto xsl_document xsl_xsltprocessor_transform_to_doc(node doc [,boolean clone]);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -173,7 +180,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret;
+	int ret, clone = 0;
 	char **params = NULL;
 	xsl_object *intern;
 	node_object *docobj;
@@ -182,7 +189,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|l", &docp, &clone) == FAILURE) {
 		RETURN_FALSE;
 	}
 	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
@@ -190,7 +197,14 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
+
+	if (clone == 1) {
+		doc = xmlCopyDoc(doc, 1);
+	}
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**) params);
+	if (clone == 1) {
+		xmlFreeDoc(doc);
+	}
 
 	if (params) {
 		efree(params);
@@ -206,7 +220,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
 
-/* {{{ proto xsl_ xsl_xsltprocessor_transform_to_uri(node doc, string uri);
+/* {{{ proto xsl_ xsl_xsltprocessor_transform_to_uri(node doc, string uri [,boolean clone]);
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
@@ -214,7 +228,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret, uri_len;
+	int ret, uri_len, clone = 0;
 	char **params = NULL, *uri;
 	xsl_object *intern;
 	node_object *docobj;
@@ -223,7 +237,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os", &docp, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &docp, &uri, &uri_len, &clone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -232,7 +246,16 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
+
+	if (clone == 1) {
+		doc = xmlCopyDoc(doc, 1);
+	}
+
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**)params);
+
+	if (clone == 1) {
+		xmlFreeDoc(doc);
+	}
 
 	if (params) {
 		efree(params);
@@ -249,7 +272,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
 
-/* {{{ proto xsl_string xsl_xsltprocessor_transform_to_xml(node doc);
+/* {{{ proto xsl_string xsl_xsltprocessor_transform_to_xml(node doc [,boolean clone]);
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
@@ -257,7 +280,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret;
+	int ret, clone = 0;
 	xmlChar *doc_txt_ptr;
 	int doc_txt_len;
 	char **params = NULL;
@@ -268,7 +291,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|l", &docp, &clone) == FAILURE) {
 		RETURN_FALSE;
 	}
 	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
@@ -276,8 +299,17 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
+
+	if (clone == 1) {
+		doc = xmlCopyDoc(doc, 1);
+	}
+
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**)params);
-	
+
+	if (clone == 1) {
+		xmlFreeDoc(doc);
+	}
+
 	if (params) {
 		efree(params);
 	}
