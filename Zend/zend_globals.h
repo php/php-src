@@ -214,6 +214,8 @@ struct _zend_executor_globals {
 
 	struct _zend_execute_data *current_execute_data;
 
+	zend_property_info std_property_info;
+
 	/* locale stuff */
 	char float_separator[1];
 
