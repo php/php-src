@@ -1,3 +1,86 @@
+2000-06-23  Zeev Suraski  <zeev@php.net>
+
+    * ext/wddx/wddx.c: Fix Win32 compilation
+
+2000-06-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/browscap.c: Added a description to get_browser().
+
+    * ext/session/session.c: Fixed protos.
+
+    * ext/pgsql/pgsql.c: Typos.
+
+2000-06-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/wddx/wddx.c: Make use of incomplete class API
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c: API change: Use zval * instead of zval **
+
+    * ext/standard/Makefile.in
+      ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c:
+    Move the incomplete class stuff into its own file, so that we can
+    make it easier accessible to WDDX.
+
+2000-06-23  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: Fix UdmSearch spelling
+
+2000-06-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/var.c: Change the serialization semantics to:
+
+      * if a certain object is of class INCOMPLETE_CLASS, the serializer will
+        lookup the previously stored original class name of that object, and
+        use that class name to serialize the object.
+
+    Change the deserialization semantics to:
+
+      * if the class of an object, which is to be instantiated, is not found
+        in the current context, the class name will be stored for later
+        retrieval, and the class of that object is changed to INCOMPLETE_CLASS.
+
+    All function calls, property gets, and property sets operating on an
+    object of class INCOMPLETE_CLASS cause the execution to halt and to
+    output an informative error message.
+
+2000-06-23  Andi Gutmans  <andi@php.net>
+
+    * main/SAPI.c: - COMPILE_ERROR should only be used in Zend
+
+2000-06-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/reg.c
+      ext/standard/reg.h: - added spliti() function. 
+
+2000-06-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/url_scanner.c: debug-code removed
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.re:
+    this change should solve all problems regarding trans_sid_id and
+    "empty" href urls like "", "#name", "?param=val" ...
+
+2000-06-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/file.c
+      main/main.c: Remove some unnecessary CLS_FETCH()s.
+
+2000-06-23  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4:
+    Fix spacing and say that --with-oracle uses the oci7 interface
+
 2000-06-22  Andi Gutmans  <andi@php.net>
 
     * win32/php4dllts.dsp: - Make Windows compile. Was missing crc32.c
