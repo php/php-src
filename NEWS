@@ -33,6 +33,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in GD's truecolor TTF handling. (Derick)
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #23093 (highlight_string() crashed with __FUNCTION__). (Jani)
 - Fixed bug #23071 (when DST in effect, date("T") crashed PHP). (Scott MacVicar, Jani)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
 - Fixed bug #23008 (ldap_start_tls() not available on Windows). (Edin)
