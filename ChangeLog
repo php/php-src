@@ -1,3 +1,62 @@
+2001-09-11  Andy Sautins  <asautins@veripost.net>
+
+    * ext/oci8/oci8.c: oops.  Used C++ style comments.  Make C style
+
+    * ext/oci8/oci8.c:
+    Collection fix.  Fix core dump when accessing an element that is
+    not in the collection.
+
+    * ext/oci8/oci8.c:
+    Handle assign/append of NULL values to collections correctly.  Now
+    works consistently with how the rest of the library operates.  If
+    the value passed in is a null string, the value is set to null
+
+2001-09-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: Merge recent socket fixes
+
+2001-09-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    revert last commit.  Guys, discuss such things first, then commit.  Mkay?
+
+2001-09-11  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Add an API function for setting the session id from a session module...
+
+
+2001-09-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xslt/xslt.c: Always return something from non-void function
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Remove some unused variables
+
+    * build/fastgen.sh: Similar to autoconf-2.5x, say who is doing what.
+
+    * build/build2.mk: Ignore "AC_PROG_LEX invoked multiple times"
+
+    * configure.in: Remove obselete message and drop "divert(6)" which caused
+    problems with autoconf 2.5x.
+
+2001-09-11  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/openssl/openssl.c:
+    Fixed some protos. Haven't read the source code, so some protos could be wrong. bool notext=true looks very strange to me.
+
+2001-09-11  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+    Revise the xxx_export api so that exporting to files is comfortable.
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h: Arrrgghh!
+    Fix munched file.
+
 2001-09-10  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/openssl/openssl.c:
