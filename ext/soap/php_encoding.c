@@ -664,7 +664,7 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style)
 	return ret;
 }
 
-static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr data, sdlPtr sdl)
+static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr data, sdlPtr sdl TSRMLS_DC)
 {
 	switch (model->kind) {
 		case XSD_CONTENT_ELEMENT:
@@ -715,12 +715,12 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 
 			zend_hash_internal_pointer_reset(model->u.content);
 			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
-				model_to_zval_object(ret, *tmp, data, sdl);
+				model_to_zval_object(ret, *tmp, data, sdl TSRMLS_CC);
 				zend_hash_move_forward(model->u.content);
 			}
 		}
 		case XSD_CONTENT_GROUP:
-			model_to_zval_object(ret, model->u.group, data, sdl);
+			model_to_zval_object(ret, model->u.group, data, sdl TSRMLS_CC);
 		default:
 		  break;
 	}
@@ -793,7 +793,7 @@ zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			object_init(ret);
 		}
 		if (sdlType->model) {
-			model_to_zval_object(ret, sdlType->model, data, sdl);
+			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
 		}
 		if (sdlType->attributes) {
 			sdlAttributePtr *attr;
