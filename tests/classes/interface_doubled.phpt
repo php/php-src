@@ -13,11 +13,11 @@ interface if_b {
 	abstract function f_b();
 }
 
-interface if_c implements if_a, if_b {
+interface if_c extends if_a, if_b {
 	abstract function f_c();
 }
 
-interface if_d extends if_a implements if_b {
+interface if_d extends if_a, if_b {
 	abstract function f_d();
 }
 
@@ -25,7 +25,7 @@ interface if_e {
 	abstract function f_d();
 }
 
-interface if_f extends if_e implements if_a, if_b, if_c, if_d, if_e {
+interface if_f extends if_e, if_a, if_b, if_c, if_d, if_e {
 }
 
 class base {
