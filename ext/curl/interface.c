@@ -918,6 +918,8 @@ PHP_FUNCTION(curl_setopt)
 
 			if (Z_LVAL_PP(zvalue)) {
 				ch->handlers->write->method = PHP_CURL_RETURN;
+			} else {
+				ch->handlers->write->method = PHP_CURL_STDOUT;
 			}
 			break;
 		case CURLOPT_BINARYTRANSFER:
