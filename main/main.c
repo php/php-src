@@ -234,6 +234,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("docref_root", "http://www.php.net/", PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("xmlrpc_error_number",	"0",		PHP_INI_ALL,		OnUpdateInt,			xmlrpc_error_number,	php_core_globals,	core_globals)
@@ -386,63 +388,71 @@ PHPAPI int php_printf(const char *format, ...)
 /* }}} */
 
 /* {{{ php_verror */
-PHPAPI void php_verror(int type, const char *format, va_list args TSRMLS_DC)
+PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
-	char *buffer = NULL;
+	char *buffer = NULL, *docref_buf = NULL, *p;
 	
-	if (format)
-		vspprintf(&buffer, 0, format, args);
+	vspprintf(&buffer, 0, format, args);
 	if (buffer) {
-		php_error(type, "%s", buffer);
+		if (!docref) {
+			spprintf(&docref_buf, 0, "function.%s%s", get_active_function_name(TSRMLS_C), PG(docref_ext));
+			if (docref_buf) {
+				while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
+				docref = docref_buf;
+			}
+		}
+		if (docref) {
+			if (PG(html_errors) && PG(docref_ext)) {
+				php_error(type, "%s(%s) [<a href='%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, PG(docref_root), docref, docref, buffer);
+			} else {
+				php_error(type, "%s(%s) [%s%s]: %s", get_active_function_name(TSRMLS_C), params, PG(docref_root), docref, buffer);
+			}
+		} else {
+			php_error(type, "%s(%s): %s", get_active_function_name(TSRMLS_C), params, buffer);
+		}
 		efree(buffer);
+		if (docref_buf)
+			efree(docref_buf);
 	} else {
-		php_error(E_ERROR, "%s(): Out of memory", get_active_function_name(TSRMLS_C));
+		php_error(E_ERROR, "%s(%s): Out of memory", get_active_function_name(TSRMLS_C), params);
 	}
 }
 /* }}} */
 
-/* {{{ php_error_func0 */
-PHPAPI void php_error_func0(int type TSRMLS_DC, const char *format, ...)
+/* {{{ php_error_docref */
+PHPAPI void php_error_docref(const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
-	char *message;
 	va_list args;
 	
-	spprintf(&message, 0, "%s(): %s", get_active_function_name(TSRMLS_C), format);
 	va_start(args, format);
-	php_verror(type, message, args TSRMLS_CC);
+	php_verror(docref, "", type, format, args TSRMLS_CC);
 	va_end(args);
-	if (message)
-		efree(message);
 }
 /* }}} */
 
-/* {{{ php_error_func1 */
-PHPAPI void php_error_func1(int type, const char *param1 TSRMLS_DC, const char *format, ...)
+/* {{{ php_error_docref1 */
+PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
 {
-	char *message;
 	va_list args;
 	
-	spprintf(&message, 0, "%s(%s): %s", get_active_function_name(TSRMLS_C), param1, format);
 	va_start(args, format);
-	php_verror(type, message, args TSRMLS_CC);
+	php_verror(docref, param1, type, format, args TSRMLS_CC);
 	va_end(args);
-	if (message)
-		efree(message);
 }
 /* }}} */
 
-/* {{{ php_error_func2 */
-PHPAPI void php_error_func2(int type, const char *param1, const char *param2 TSRMLS_DC, const char *format, ...)
+/* {{{ php_error_docref2 */
+PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
 {
-	char *message;
+	char *params;
 	va_list args;
 	
-	spprintf(&message, 0, "%s(%s,%s): %s", get_active_function_name(TSRMLS_C), param1, param2, format);
+	spprintf(&params, 0, "%s,%s", param1, param2);
 	va_start(args, format);
-	php_verror(type, message, args TSRMLS_CC);
+	php_verror(docref, params ? params : "...", type, format, args TSRMLS_CC);
 	va_end(args);
-	if (message)
-		efree(message);
+	if (params)
+		efree(params);
 }
 /* }}} */
 
