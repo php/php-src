@@ -35,6 +35,12 @@
       <name>Pierre-Alain Joye</name>
       <email>pajoye@pearfr.org</email>
     </maintainer>
+    <maintainer>
+      <user>cellog</user>
+      <role>helper</role>
+      <name>Greg Beaver</name>
+      <email>cellog@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
     <version>1.2.2</version>
@@ -47,6 +53,7 @@
 * Fixed static calls to PEAR error-handling methods in classes (Greg)
 * Added ability to use a static method callback for error-handling, and removed
 use of inadvisable @ in setErrorHandling (Greg)
+* Added dependency on XML_RPC, and optional dependency on xmlrpc extension (Greg)
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
@@ -109,6 +116,8 @@ use of inadvisable @ in setErrorHandling (Greg)
       <dep type="php" rel="ge" version="4.1"/>
       <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+      <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
+      <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
     </deps>
   </release>
   <changelog>
