@@ -27,5 +27,10 @@
 PHPAPI char *php_canonicalize_version(const char *);
 PHPAPI int php_version_compare(const char *, const char *);
 PHP_FUNCTION(version_compare);
+PHP_FUNCTION(version_gt);
+PHP_FUNCTION(version_ge);
+PHP_FUNCTION(version_lt);
+PHP_FUNCTION(version_le);
+PHP_FUNCTION(version_eq);
 
 #endif
