@@ -424,6 +424,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 				{
 				iRet = PIAPI_ERROR;
 				};
+			efree(header_line);
 			break;
 		case PHP_MODE_LINT:
 			iRet = (php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC) == SUCCESS) ?
@@ -437,7 +438,6 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 		efree(SG(request_info).cookie_data);
 	};
 
-	efree(header_line);
 	php_request_shutdown(NULL);
 	return iRet;
 }
