@@ -26,6 +26,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "ext/standard/php_standard.h"
 #include "php_pgsql.h"
 #include "php_globals.h"
@@ -75,7 +76,7 @@ function_entry pgsql_functions[] = {
 };
 
 zend_module_entry pgsql_module_entry = {
-	"PostgreSQL", pgsql_functions, PHP_MINIT(pgsql), NULL, PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"PostgreSQL", pgsql_functions, PHP_MINIT(pgsql), PHP_MSHUTDOWN(pgsql), PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -121,18 +122,16 @@ static void _free_result(pgsql_result_handle *pg_result)
 	efree(pg_result);
 }
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
+	STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
+PHP_INI_END()
+
+
 static void php_pgsql_init_globals(PGLS_D)
 {
 	PGG(num_persistent) = 0;
-	if (cfg_get_long("pgsql.allow_persistent",&PGG(allow_persistent))==FAILURE) {
-		PGG(allow_persistent)=1;
-	}
-	if (cfg_get_long("pgsql.max_persistent",&PGG(max_persistent))==FAILURE) {
-		PGG(max_persistent)=-1;
-	}
-	if (cfg_get_long("pgsql.max_links",&PGG(max_links))==FAILURE) {
-		PGG(max_links)=-1;
-	}
 }
 
 PHP_MINIT_FUNCTION(pgsql)
@@ -142,6 +141,8 @@ PHP_MINIT_FUNCTION(pgsql)
 #else
 	php_pgsql_init_globals(PGLS_C);
 #endif
+
+	REGISTER_INI_ENTRIES();
 	
 	le_link = register_list_destructors(_close_pgsql_link,NULL);
 	le_plink = register_list_destructors(NULL,_close_pgsql_plink);
@@ -154,6 +155,13 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 
+	return SUCCESS;
+}
+
+
+PHP_MSHUTDOWN_FUNCTION(pgsql)
+{
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 

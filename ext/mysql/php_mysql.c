@@ -255,28 +255,6 @@ static PHP_INI_MH(OnMySQLPort)
 }
 
 
-static PHP_INI_DISP(display_link_numbers)
-{
-	char *value;
-
-	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
-	} else if (ini_entry->value) {
-		value = ini_entry->value;
-	} else {
-		value = NULL;
-	}
-
-	if (value) {
-		if (atoi(value)==-1) {
-			PUTS("Unlimited");
-		} else {
-			php_printf("%s", value);
-		}
-	}
-}
-
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals,	display_link_numbers)

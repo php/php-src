@@ -331,6 +331,28 @@ PHP_INI_DISP(php_ini_color_displayer_cb)
 }
 
 
+PHP_INI_DISP(display_link_numbers)
+{
+	char *value;
+
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ini_entry->orig_value;
+	} else if (ini_entry->value) {
+		value = ini_entry->value;
+	} else {
+		value = NULL;
+	}
+
+	if (value) {
+		if (atoi(value)==-1) {
+			PUTS("Unlimited");
+		} else {
+			php_printf("%s", value);
+		}
+	}
+}
+
+
 static int php_ini_displayer(php_ini_entry *ini_entry, int module_number)
 {
 	if (ini_entry->module_number != module_number) {
