@@ -477,11 +477,11 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 "a:" uiv ":" "{" {
 	int elements = parse_iv(start + 2);
 
+	*p = YYCURSOR;
+
 	if (elements < 0) {
 		return 0;
 	}
-
-	*p = YYCURSOR;
 
 	INIT_PZVAL(*rval);
 	Z_TYPE_PP(rval) = IS_ARRAY;
