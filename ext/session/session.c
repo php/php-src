@@ -1127,10 +1127,7 @@ PHP_FUNCTION(session_get_cookie_params)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot initialize return value from session_get_cookie_parameters");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
 	add_assoc_string(return_value, "path", PS(cookie_path), 1);
@@ -1470,7 +1467,7 @@ PHP_FUNCTION(session_decode)
 	convert_to_string_ex(str);
 
 	php_session_decode(Z_STRVAL_PP(str), Z_STRLEN_PP(str) TSRMLS_CC);
-
+	
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1622,6 +1619,7 @@ PHP_MINIT_FUNCTION(session)
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 
+	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
