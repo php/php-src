@@ -91,7 +91,7 @@ typedef struct {
 #endif
 
 
-int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout);
+int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout);
 PHPAPI int php_connect_nonb(int sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 
 #ifdef PHP_WIN32
@@ -128,7 +128,7 @@ extern php_stream_ops php_stream_socket_ops;
 PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC TSRMLS_DC );
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent STREAMS_DC TSRMLS_DC);
+		int socktype, struct timeval *timeout, int persistent STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
 		struct timeval *timeout STREAMS_DC TSRMLS_DC);
 

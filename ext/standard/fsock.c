@@ -194,7 +194,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		else
 #endif
-		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, (int)timeout, persistent);
+		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, &tv, persistent);
 
 #ifdef PHP_WIN32
 		/* Preserve error */
