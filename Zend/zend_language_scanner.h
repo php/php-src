@@ -25,7 +25,7 @@
 typedef struct _zend_lex_state {
 	YY_BUFFER_STATE buffer_state;
 	int state;
-	FILE *in;
+	zend_file_handle *in;
 	uint lineno;
 	char *filename;
 } zend_lex_state;

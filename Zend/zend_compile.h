@@ -198,18 +198,6 @@ typedef struct _list_llist_element {
 	znode value;
 } list_llist_element;
 
-
-typedef struct _zend_file_handle {
-	zend_uchar type;
-	char *filename;
-	char *opened_path;
-	union {
-		int fd;
-		FILE *fp;
-	} handle;
-	zend_bool free_filename;
-} zend_file_handle;
-
 union _temp_variable;
 
 struct _zend_execute_data {
@@ -726,6 +714,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_HANDLE_FP				2
 #define ZEND_HANDLE_STDIOSTREAM		3
 #define ZEND_HANDLE_FSTREAM			4
+#define ZEND_HANDLE_STREAM			5
 
 #define ZEND_FETCH_STANDARD		0
 #define ZEND_FETCH_ADD_LOCK		1

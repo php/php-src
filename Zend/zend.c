@@ -48,6 +48,7 @@ ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
@@ -534,6 +535,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	if (!zend_fopen) {
 		zend_fopen = zend_fopen_wrapper;
 	}
+	zend_stream_open_function = utility_functions->stream_open_function;
 	zend_message_dispatcher_p = utility_functions->message_handler;
 	zend_block_interruptions = utility_functions->block_interruptions;
 	zend_unblock_interruptions = utility_functions->unblock_interruptions;

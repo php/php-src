@@ -2941,21 +2941,10 @@ PHP_FUNCTION(parse_ini_file)
 
 	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	fh.handle.fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
-	if (!fh.handle.fp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' for reading", Z_STRVAL_PP(filename));
-		RETURN_FALSE;
-	}
-	Z_TYPE(fh) = ZEND_HANDLE_FP;
+	memset(&fh, 0, sizeof(fh));
 	fh.filename = Z_STRVAL_PP(filename);
+	Z_TYPE(fh) = ZEND_HANDLE_FILENAME;
+	
 	array_init(return_value);
 	zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value);
 }

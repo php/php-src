@@ -342,6 +342,7 @@ struct _zend_class_entry {
 
 typedef struct _zend_class_entry zend_namespace; /* namespace is the same as class */
 
+#include "zend_stream.h"
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 	int (*printf_function)(const char *format, ...);
@@ -353,6 +354,7 @@ typedef struct _zend_utility_functions {
 	int (*get_configuration_directive)(char *name, uint name_length, zval *contents);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds TSRMLS_DC);
+	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 } zend_utility_functions;
 
 		
@@ -485,6 +487,7 @@ extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
+extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 
 
 ZEND_API void zend_error(int type, const char *format, ...);

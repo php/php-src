@@ -171,9 +171,14 @@ BEGIN_EXTERN_C()
 
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 {
+	TSRMLS_FETCH();
+	
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
+			break;
+		case ZEND_HANDLE_STREAM:
+			fh->handle.stream.closer(fh->handle.stream.handle TSRMLS_CC);
 			break;
 		case ZEND_HANDLE_FILENAME:
 			/* We're only supposed to get here when destructing the used_files hash,
@@ -183,9 +188,11 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 	}
 	if (fh->opened_path) {
 		efree(fh->opened_path);
+		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {
 		efree(fh->filename);
+		fh->filename = NULL;
 	}
 }
 
@@ -198,6 +205,9 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 	switch (fh1->type) {
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp==fh2->handle.fp;
+			break;
+		case ZEND_HANDLE_STREAM:
+			return fh1->handle.stream.handle == fh2->handle.stream.handle;
 			break;
 	}
 	return 0;
@@ -214,27 +224,14 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path=NULL;
 
-	switch (file_handle->type) {
-		case ZEND_HANDLE_FILENAME:
-			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
-			break;
-		case ZEND_HANDLE_FD:
-			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
-			break;
-		case ZEND_HANDLE_FP:
-			file_handle->handle.fp = file_handle->handle.fp;
-			break;
-	}
-	if (!file_handle->handle.fp) {
+	if (FAILURE == zend_stream_fixup(file_handle TSRMLS_CC)) {
 		return FAILURE;
 	}
 
-	file_handle->type = ZEND_HANDLE_FP;
-	if (file_handle->handle.fp != stdin) {
-		zend_llist_add_element(&CG(open_files), file_handle);
-	}
+	zend_llist_add_element(&CG(open_files), file_handle);
+	
 	/* Reset the scanner for scanning the new file */
-	SCNG(yy_in) = file_handle->handle.fp;
+	SCNG(yy_in) = file_handle;
 	yy_switch_to_buffer(yy_create_buffer(SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	BEGIN(INITIAL);
 
@@ -339,7 +336,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 
 
 	retval = zend_compile_file(&file_handle, type TSRMLS_CC);
-	if (retval && file_handle.handle.fp) {
+	if (retval && file_handle.handle.stream.handle) {
 		int dummy = 1;
 
 		if (!file_handle.opened_path) {

@@ -732,6 +732,32 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 /* }}} */
 
+static void stream_closer_for_zend(void *handle TSRMLS_DC)
+{
+	php_stream_close((php_stream*)handle);
+}
+
+static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC)
+{
+	php_stream *stream;
+
+	stream = php_stream_open_wrapper((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, &handle->opened_path);
+
+	if (stream) {
+		handle->type = ZEND_HANDLE_STREAM;
+		handle->filename = (char*)filename;
+		handle->free_filename = 0;
+		handle->handle.stream.handle = stream;
+		handle->handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
+		handle->handle.stream.closer = stream_closer_for_zend;
+		handle->handle.stream.interactive = 0;
+
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+
 /* {{{ php_get_configuration_directive_for_zend
  */
 static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
@@ -1185,6 +1211,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
 	zuf.ticks_function = php_run_ticks;
 	zuf.on_timeout = php_on_timeout;
+	zuf.stream_open_function = php_stream_open_for_zend;
 	zend_startup(&zuf, NULL, 1);
 
 #ifdef ZTS

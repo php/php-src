@@ -370,7 +370,7 @@ int php_init_config()
 	PG(safe_mode) = 0;
 	PG(open_basedir) = NULL;
 
-	fh.handle.fp = NULL;
+	memset(&fh, 0, sizeof(fh));
 	/* Check if php_ini_path_override is a file */
 	if (!sapi_module.php_ini_ignore) {
 		if (sapi_module.php_ini_path_override && sapi_module.php_ini_path_override[0]) {
