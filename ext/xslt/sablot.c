@@ -240,39 +240,39 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		}
 
 		/* Document handlers (document start, document end) */
-		if (strcasecmp(string_key, "document") == 0) {
+		if (!strcmp(string_key, "document")) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
 			                          &XSLT_SAX(handle).doc_end, 
 			                          handler);
 		}
 		/* Element handlers, start of an element, and end of an element */
-		else if (strcasecmp(string_key, "element") == 0) {
+		else if (!strcmp(string_key, "element")) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
 			                          &XSLT_SAX(handle).element_end, 
 			                          handler);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
-		else if (strcasecmp(string_key, "namespace") == 0) {
+		else if (!strcmp(string_key, "namespace")) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
 			                          &XSLT_SAX(handle).namespace_end, 
 			                          handler);
 		}
 		/* Comment handlers, called when a comment is reached */
-		else if (strcasecmp(string_key, "comment") == 0) {
+		else if (!strcmp(string_key, "comment")) {
 			XSLT_SAX(handle).comment = *handler;
 			zval_add_ref(&XSLT_SAX(handle).comment);
 		}
 		/* Processing instructions handler called when processing instructions
 		   (<? ?>) */
-		else if (strcasecmp(string_key, "pi") == 0) {
+		else if (!strcmp(string_key, "pi")) {
 			XSLT_SAX(handle).pi = *handler;
 			zval_add_ref(&XSLT_SAX(handle).pi);
 		}
 		/* Character handler, called when data is found */
-		else if (strcasecmp(string_key, "character") == 0) {
+		else if (!strcmp(string_key, "character")) {
 			XSLT_SAX(handle).characters = *handler;
 			zval_add_ref(&XSLT_SAX(handle).characters);
 		}
@@ -324,23 +324,23 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 		}
 
 		/* Open the URI and return the whole string */
-		if (strcasecmp(string_key, "get_all") == 0) {
+		if (!strcmp(string_key, "get_all")) {
 			assign_handle = &XSLT_SCHEME(handle).get_all;
 		}
 		/* Open the URI and return a handle */
-		else if (strcasecmp(string_key, "open") == 0) {
+		else if (!strcmp(string_key, "open")) {
 			assign_handle = &XSLT_SCHEME(handle).open;
 		}
 		/* Retrieve data from the URI */
-		else if (strcasecmp(string_key, "get") == 0) {
+		else if (!strcmp(string_key, "get")) {
 			assign_handle = &XSLT_SCHEME(handle).get;
 		}
 		/* Save data to the URI */
-		else if (strcasecmp(string_key, "put") == 0) {
+		else if (!strcmp(string_key, "put")) {
 			assign_handle = &XSLT_SCHEME(handle).put;
 		}
 		/* Close the URI */
-		else if (strcasecmp(string_key, "close") == 0) {
+		else if (!strcmp(string_key, "close")) {
 			assign_handle = &XSLT_SCHEME(handle).close;
 		}
 		/* Invalid handler name */
