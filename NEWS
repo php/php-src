@@ -9,7 +9,7 @@ PHP 4                                                                      NEWS
 
         //Enables the ticks modifier for just the lexical block containing
         //"statement".
-        deckare (ticks=1) {
+        declare (ticks=1) {
            statement;
         }
 - Bring strtotime() "next" keyword handling in line with documentation and
