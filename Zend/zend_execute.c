@@ -3575,7 +3575,7 @@ int zend_begin_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_raise_abstract_error_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_error(E_ERROR, "Cannot call abstract method");
+	zend_error(E_ERROR, "Cannot call abstract method %s()", op_array->function_name);
 	NEXT_OPCODE(); /* Never reached */
 }
 
