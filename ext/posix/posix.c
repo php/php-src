@@ -660,9 +660,10 @@ PHP_FUNCTION(posix_access)
 
 	path = expand_filepath(filename, NULL TSRMLS_CC);
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS)))) {
 		efree(path);
-		POSIX_G(last_error) = EACCES;
+		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;
 	}
 
