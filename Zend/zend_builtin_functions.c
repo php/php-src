@@ -588,7 +588,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	}
 	
 	/* TBI!! new object handlers */
-	if(!IS_ZEND_STD_OBJECT(**obj)) {
+	if(!HAS_CLASS_ENTRY(**obj)) {
 		RETURN_FALSE;
 	}
 
@@ -706,7 +706,7 @@ ZEND_FUNCTION(get_class_methods)
 
 	if (Z_TYPE_PP(class) == IS_OBJECT) {
 		/* TBI!! new object handlers */
-		if(!IS_ZEND_STD_OBJECT(**class)) {
+		if(!HAS_CLASS_ENTRY(**class)) {
 			RETURN_FALSE;
 		}
 		ce = Z_OBJCE_PP(class);
@@ -751,7 +751,7 @@ ZEND_FUNCTION(method_exists)
 	}
 
 	/* TBI!! new object handlers */
-	if(!IS_ZEND_STD_OBJECT(**klass)) {
+	if(!HAS_CLASS_ENTRY(**klass)) {
 		RETURN_FALSE;
 	}
 
