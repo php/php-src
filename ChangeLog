@@ -1,3 +1,38 @@
+2002-12-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/file/bug12556.phpt:
+      MFH
+
+    * ext/standard/tests/file/bug12556.phpt:
+      Prevented test failure caused by LF code variety
+
+    * tests/basic/bug20539.phpt:
+      MFH: added a test case for bug #20539
+
+    * tests/basic/bug20539.phpt:
+      
+      Added a test case for bug #20539
+
+2002-12-18  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.c:
+      Fix a crash while using an invalid color with imagesetstyle, see the sample
+      script in the manual to reproduce it :)
+
+2002-12-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      An intuitive attempt to hunt the bug.
+
+    * NEWS:
+      Added entry for the new feature of array_search()
+
+2002-12-18  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      MFH
+
 2002-12-16  Frank M. Kromann  <frank@kromann.info>
 
     * ext/mssql/php_mssql.h:
