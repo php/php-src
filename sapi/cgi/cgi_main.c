@@ -575,6 +575,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							SG(request_info).no_headers = 1;
 						}
 						php_print_info(0xFFFFFFFF TSRMLS_CC);
+						php_end_ob_buffers(1 TSRMLS_CC);
 						exit(1);
 						break;
 
