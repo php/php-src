@@ -97,6 +97,7 @@ int ora_set_param_values(oraCursor *cursor, int isout);
 
 void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
+static int le_conn, le_pconn, le_cursor; 
 
 PHP_FUNCTION(ora_bind);
 PHP_FUNCTION(ora_close);
@@ -283,11 +284,10 @@ static int _close_oracur(oraCursor *cur)
 	return 1;
 }
 
-PHP_MINIT_FUNCTION(oracle)
+#ifdef ZTS
+static void php_ora_init_globals(php_ora_globals *ora_globals)
 {
-
 	ELS_FETCH();
-	ORALS_FETCH();
 
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
@@ -307,15 +307,44 @@ PHP_MINIT_FUNCTION(oracle)
 	
 	ORA(num_persistent) = 0;
 	
-	ORA(le_cursor) =
-		register_list_destructors(_close_oracur, NULL);
-	ORA(le_conn) =
-		register_list_destructors(_close_oraconn, NULL);
-	ORA(le_pconn) =
-		register_list_destructors(NULL, _close_orapconn);
+	ORA(conns) = malloc(sizeof(HashTable));
+	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
+}
+#endif                                                                                                                                     
+PHP_MINIT_FUNCTION(oracle)
+{
+
+	ELS_FETCH();
+
+#ifdef ZTS
+	ora_globals_id = ts_allocate_id(sizeof(php_ora_globals), php_ora_init_globals, NULL);
+#else
+	if (cfg_get_long("oracle.allow_persistent",
+			 &ORA(allow_persistent))
+		== FAILURE) {
+	  ORA(allow_persistent) = -1;
+	}
+	if (cfg_get_long("oracle.max_persistent",
+					 &ORA(max_persistent))
+	    == FAILURE) {
+		ORA(max_persistent) = -1;
+	}
+	if (cfg_get_long("oracle.max_links",
+					 &ORA(max_links))
+	    == FAILURE) {
+		ORA(max_links) = -1;
+	}
+	
+	ORA(num_persistent) = 0;
+	
 
 	ORA(conns) = malloc(sizeof(HashTable));
 	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
+#endif
+
+	le_cursor = register_list_destructors(_close_oracur, NULL);
+	le_conn = register_list_destructors(_close_oraconn, NULL);
+	le_pconn = register_list_destructors(NULL, _close_orapconn);
 
 	REGISTER_LONG_CONSTANT("ORA_BIND_INOUT", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);
@@ -495,9 +524,9 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		
 		db_conn->open = 1;
 		if (persistent){
-			/*new_le.type = ORA(le_pconn);
+			/*new_le.type = le_pconn;
 			  new_le.ptr = db_conn;*/
-			RETVAL_RESOURCE(php3_plist_insert(db_conn, ORA(le_pconn)));
+			RETVAL_RESOURCE(php3_plist_insert(db_conn, le_pconn));
 			new_index_ptr.ptr = (void *) return_value->value.lval;
 #ifdef THREAD_SAFE
 			new_index_ptr.type = _php3_le_index_ptr();
@@ -515,7 +544,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ORA(num_persistent)++;
 		} else {
 			/* non persistent, simply add to list */
-			RETVAL_RESOURCE(php3_list_insert(db_conn, ORA(le_conn)));
+			RETVAL_RESOURCE(php3_list_insert(db_conn, le_conn));
 		}
 		
 		ORA(num_links)++;
@@ -536,8 +565,8 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		id = (int) index_ptr->ptr;
 		db_conn = (oraConnection *)php3_plist_find(id, &type);
     
-		if (db_conn && (type ==  ORA(le_conn) ||
-					type == ORA(le_pconn))){
+		if (db_conn && (type ==  le_conn ||
+					type == le_pconn)){
 			if(!_ora_ping(db_conn)) {
 				/* XXX Reinitialize lda, hda ? */
 #if HAS_OLOG
@@ -588,8 +617,8 @@ PHP_FUNCTION(ora_logoff)
 	ind = (int)arg->value.lval;
 
 	conn = (oraConnection *)php3_list_find(ind, &type);
-	if (!conn || (type != ORA(le_conn) &&
-				  type != ORA(le_pconn))) {
+	if (!conn || (type != le_conn &&
+				  type != le_pconn)) {
 		return;
 	}
 	php3_list_delete(ind);
@@ -1637,11 +1666,11 @@ ora_get_conn(HashTable *list,HashTable *plist,int ind)
 	ORALS_FETCH();
 
 	conn = (oraConnection *)php3_list_find(ind, &type);
-	if (conn && type == ORA(le_conn))
+	if (conn && type == le_conn)
 		return conn;
 
 	conn = (oraConnection *)php3_plist_find(ind, &type);
-	if (conn && type == ORA(le_pconn))
+	if (conn && type == le_pconn)
 		return conn;
 
 	php_error(E_WARNING,"Bad Oracle connection number (%d)", ind);
@@ -1651,7 +1680,7 @@ ora_get_conn(HashTable *list,HashTable *plist,int ind)
 int ora_add_cursor(HashTable *list, oraCursor *cursor)
 {
 	ORALS_FETCH();
-	return php3_list_insert(cursor, ORA(le_cursor));
+	return php3_list_insert(cursor, le_cursor);
 }
 
 static oraCursor *
@@ -1663,7 +1692,7 @@ ora_get_cursor(HashTable *list, int ind)
 	ORALS_FETCH();
 
 	cursor = php3_list_find(ind, &type);
-	if (!cursor || type != ORA(le_cursor)) {
+	if (!cursor || type != le_cursor) {
 		php_error(E_WARNING, "Invalid cursor index %d", ind);
 		return NULL;
 	}
@@ -1683,7 +1712,7 @@ void ora_del_cursor(HashTable *list, int ind)
 	ORALS_FETCH();
   
 	cursor = (oraCursor *) php3_list_find(ind, &type);
-	if (!cursor || type != ORA(le_cursor)) {
+	if (!cursor || type != le_cursor) {
 		php_error(E_WARNING,"Can't find cursor %d",ind);
 		return;
 	}

@@ -296,14 +296,20 @@ static void php_oci_init_globals(php_oci_globals *oci_globals)
 
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
+
+	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
+	OCIHandleAlloc(OCI(pEnv), 
+				   (dvoid **)&OCI(pError),
+				   OCI_HTYPE_ERROR, 
+				   0, 
+				   NULL);
+	
 }
 #endif
 
 PHP_MINIT_FUNCTION(oci)
 {
-	OCILS_FETCH();
 	ELS_FETCH();
-
 #ifdef ZTS
 	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), php_oci_init_globals, NULL);
 #else
@@ -315,6 +321,14 @@ PHP_MINIT_FUNCTION(oci)
 
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
+
+	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
+	OCIHandleAlloc(OCI(pEnv), 
+				   (dvoid **)&OCI(pError),
+				   OCI_HTYPE_ERROR, 
+				   0, 
+				   NULL);
+	
 #endif
 
 	le_conn = register_list_destructors(_oci_close_conn, NULL);
@@ -370,13 +384,6 @@ PHP_MINIT_FUNCTION(oci)
     OCIInitialize(OCI_DEFAULT, NULL, NULL, NULL, NULL);
 #endif
 
-	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
-	OCIHandleAlloc(OCI(pEnv), 
-				   (dvoid **)&OCI(pError),
-				   OCI_HTYPE_ERROR, 
-				   0, 
-				   NULL);
-	
 	return SUCCESS;
 }
 
