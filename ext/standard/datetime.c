@@ -458,7 +458,10 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'B':	/* Swatch Beat a.k.a. Internet Time */
 				beat =  (((((long)the_time)-(((long)the_time) -
 					((((long)the_time) % 86400) + 3600))) * 10) / 864);
-				if (beat > 999) beat = 0;
+				while (beat < 0) {
+					beat += 1000;
+				}
+				beat = beat % 1000;
 				sprintf(tmp_buff, "%03d", beat); /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
