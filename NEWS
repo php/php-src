@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Made eval() and several other runtime-evaluated code portions report the
+  nature and location of errors more accurately (Stas)
 - Added an optional parameter to wordwrap that cuts a string if the length of a
   word is longer than the maximum allowed. (Derick)
 - Added functions pg_put_line and pg_end_copy (Dirk Elmendorf)
@@ -344,7 +346,7 @@ PHP 4.0                                                                    NEWS
   (Patch by daniel.braun@ercom.fr)
 - Added extension YAZ (dickmeiss).
 - Fixed a crash bug triggered by certain cases of class redeclarations
-  (Stanislav & Zeev, Zend Engine)
+  (Stas & Zeev, Zend Engine)
 - Fixed min()/max() segfault. (Andrei)
 - New module for reading EXIF header data from JPEG files.  Most digital
   cameras will embed all sorts of information about a picture inside the
