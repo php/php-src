@@ -494,9 +494,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'O':		/* GMT offset in [+-]HHMM format */
 #if HAVE_TM_GMTOFF				
-				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( ta->tm_gmtoff % 3600));
+				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
-				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs((ta->tm_isdst ? tzone - 3600 : tzone) % 3600));
+				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs(((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60));
 #endif
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
@@ -545,7 +545,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					ta->tm_sec,
 					(ta->tm_gmtoff < 0) ? '-' : '+',
 					abs(ta->tm_gmtoff / 3600),
-					abs( ta->tm_gmtoff % 3600)
+					abs( (ta->tm_gmtoff % 3600) / 60 )
 				);
 #else
 				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
@@ -558,7 +558,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					ta->tm_sec,
 					((ta->tm_isdst ? tzone - 3600 : tzone) > 0) ? '-' : '+',
 					abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600),
-					abs((ta->tm_isdst ? tzone - 3600 : tzone) % 3600)
+					abs( ((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60 )
 				);
 #endif
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
