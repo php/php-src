@@ -1413,6 +1413,13 @@ consult the installation file that came with this distribution, or visit \n\
 				while (c != 10 && c != 13) {
 					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
 				}
+				/* handle situations where line is terminated by \r\n */
+				if (c == 13) {
+					if (fgetc(file_handle.handle.fp) != 10) {
+						long pos = ftell(file_handle.handle.fp);
+						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+					}
+				}
 				CG(start_lineno) = 2;
 			} else {
 				rewind(file_handle.handle.fp);
