@@ -293,7 +293,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 			if (gd2_compressed(fmt)) {
 				chunkLen = chunkMax;
 
-				if (!_gd2ReadChunk(chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, chunkBuf, &chunkLen, in)) {
+				if (!_gd2ReadChunk(chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *) chunkBuf, &chunkLen, in)) {
 					GD2_DBG(php_gd_error("Error reading comproessed chunk\n"));
 					goto fail2;
 				}
@@ -391,9 +391,11 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 	int x, y, ylo, yhi, xlo, xhi;
 	int dstart, dpos;
 	int i;
-	int ch, vers, fmt;
+	/* 2.0.12: unsigned is correct; fixes problems with color munging. Thanks to Steven Brown. */
+	unsigned int ch;
+	int vers, fmt;
 	t_chunk_info *chunkIdx = NULL;
-	char *chunkBuf = NULL;
+	unsigned char *chunkBuf = NULL;
 	int chunkNum;
 	int chunkMax = 0;
 	uLongf chunkLen;
