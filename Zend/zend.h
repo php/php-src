@@ -282,8 +282,6 @@ extern ZEND_API void (*zend_error)(int type, const char *format, ...);
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
-extern ZEND_API void (*zend_message_dispatcher)(long message, void *data);
-extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
  
 void zenderror(char *error);
@@ -299,6 +297,9 @@ END_EXTERN_C()
 
 #define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+
+ZEND_API void zend_message_dispatcher(long message, void *data);
+ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 
 
 /* Messages for applications of Zend */
