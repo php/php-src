@@ -20,7 +20,7 @@ AC_DEFUN(PHP_XSL_CHECK_VERSION,[
 ])
 
 PHP_ARG_WITH(xsl, for XSL support,
-[  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.3).
+[  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.18).
                           DIR is the libxslt install directory.])
 
 if test "$PHP_XSL" != "no"; then
@@ -35,7 +35,7 @@ if test "$PHP_XSL" != "no"; then
 
   if test -z "$XSL_DIR"; then
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.3 distribution)
+    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.18 distribution)
   fi
 
   PHP_XSL_CHECK_VERSION
