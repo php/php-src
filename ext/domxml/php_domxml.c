@@ -2382,7 +2382,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
    Returns element for given id or false if not found */
 PHP_FUNCTION(domxml_doc_get_element_by_id)
 {
-	zval *id, *rv, *contextnode = NULL, *ctxpin = NULL;
+	zval *id, *rv = NULL, *contextnode = NULL, *ctxpin = NULL;
 	xmlXPathContextPtr ctxp ;
 	xmlDocPtr docp;
 
