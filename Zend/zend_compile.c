@@ -508,6 +508,15 @@ void zend_do_if_end(TSRMLS_D)
 }
 
 
+zend_bool zend_variable_buffer_empty(TSRMLS_D)
+{
+	zend_llist *fetch_list_ptr;
+
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+	return !fetch_list_ptr->head;
+}
+
+
 void zend_do_begin_variable_parse(TSRMLS_D)
 {
 	zend_llist fetch_list;
@@ -558,27 +567,6 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	}
 	zend_llist_destroy(fetch_list_ptr);
 	zend_stack_del_top(&CG(bp_stack));
-}
-
-
-static zend_bool is_method_call(TSRMLS_D)
-{
-	zend_llist *fetch_list_ptr;
-	zend_llist_element *cur;
-	zend_op *cur_opline;
-
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-
-	cur = fetch_list_ptr->head;
-	/* There is always at least one node in the list */
-	while (cur->next) {
-		cur = cur->next;
-	}
-	cur_opline = (zend_op *)cur->data;
-	if (cur_opline->opcode == ZEND_FETCH_OBJ_W) {
-		return 1;
-	}
-	return 0;
 }
 
 
@@ -837,31 +825,47 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 }
 
 
+
+void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
+{
+	zend_op *opline;
+	unsigned char *ptr = NULL;
+
+	zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+	zend_do_begin_variable_parse(TSRMLS_C);
+ 
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
+	opline->op1 = *object;
+	opline->op2 = *function_name;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.op_type = IS_VAR;
+ 
+
+	*function_name = opline->result;
+/*
+	if (function_name->op_type == IS_CONST) {
+		zval_copy_ctor(&function_name->u.constant);
+	}
+*/
+
+	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	zend_do_extended_fcall_begin(TSRMLS_C); 
+}
+ 
+ 
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 {
 	unsigned char *ptr = NULL;
-	int last_op_number;
-	zend_op *last_op;
+	zend_op *opline;
 
-	if (function_name->op_type != IS_CONST && is_method_call(TSRMLS_C)) {
-		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
-		last_op_number = get_next_op_number(CG(active_op_array))-1;
-		last_op = &CG(active_op_array)->opcodes[last_op_number];
-		last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
-		last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
-	} else {
-		zend_op *opline;
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+	opline->op2 = *function_name;
+	opline->extended_value = 0;
+	SET_UNUSED(opline->op1);
 
-		if (function_name->op_type != IS_CONST) {
-			zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
-		}
-
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->op2 = *function_name;
-		opline->extended_value = 0;
-		SET_UNUSED(opline->op1);
-	}
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C); 
 }
@@ -941,8 +945,12 @@ void zend_do_pass_param(znode *param, int op, int offset TSRMLS_DC)
 
 	send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)?ZEND_ARG_SEND_BY_REF:0;
 
-	if (op == ZEND_SEND_VAL && param->op_type == IS_VAR) {
-			op = ZEND_SEND_VAR_NO_REF;
+
+	if (op == ZEND_SEND_VAR && zend_variable_buffer_empty(TSRMLS_C)) {
+		/* Method call */
+		op = ZEND_SEND_VAR_NO_REF;
+	} else if (op == ZEND_SEND_VAL && param->op_type == IS_VAR) {
+		op = ZEND_SEND_VAR_NO_REF;
 	}
 
 	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference == ZEND_ARG_SEND_BY_REF) {
@@ -2060,7 +2068,21 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
+	zend_bool is_variable;
+
+	if (variable) {
+		if (zend_variable_buffer_empty(TSRMLS_C)) {
+			is_variable = 0;
+		} else {
+			is_variable = 1;
+		}
+		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+	} else {
+		is_variable = 0;
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	/* Preform array reset */
 	opline->opcode = ZEND_FE_RESET;
@@ -2068,11 +2090,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *array;
 	SET_UNUSED(opline->op2);
-	if (variable) {
-		opline->extended_value = 1;
-	} else {
-		opline->extended_value = 0;
-	}
+	opline->extended_value = is_variable;
 	*open_brackets_token = opline->result;
 
 	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
