@@ -627,6 +627,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 {
 	zval                 *zobject;
 	spl_dual_it_object   *intern;
+	zend_class_entry     *ce;
 
 	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
@@ -664,14 +665,27 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			break;
 		}
 		case DIT_IteratorIterator: {
-			zend_class_entry *ce;
+			zend_class_entry **pce_cast;
+			char * class_name;
+			int class_name_len;
 
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &zobject, ce_inner) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|s", &zobject, ce_inner, &class_name, &class_name_len) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			ce = Z_OBJCE_P(zobject);
 			if (!instanceof_function(ce, zend_ce_iterator TSRMLS_CC)) {
+				if (ZEND_NUM_ARGS() > 1) {
+					if (zend_lookup_class(class_name, class_name_len, &pce_cast TSRMLS_CC) == FAILURE 
+					|| !instanceof_function(ce, *pce_cast TSRMLS_CC)
+					|| !(*pce_cast)->get_iterator
+					) {
+						zend_throw_exception(spl_ce_LogicException, "Class to downcast to not found or not base class or does not implement Traversable", 0 TSRMLS_CC);
+						php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+						return NULL;
+					}
+					ce = *pce_cast;
+				}
 				if (instanceof_function(ce, zend_ce_aggregate TSRMLS_CC)) {
 					zval *retval;
 					zobject = zend_call_method_with_0_params(&zobject, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
@@ -697,7 +711,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 
 	zobject->refcount++;
 	intern->inner.zobject = zobject;
-	intern->inner.ce = Z_OBJCE_P(zobject);
+	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = zend_object_store_get_object(zobject TSRMLS_CC);
 	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject TSRMLS_CC);
 
