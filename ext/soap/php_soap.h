@@ -57,7 +57,6 @@ extern int le_http_socket;
 extern int le_url;
 extern int le_service;
 
-
 struct _soapHeaderHandler {
 	char *ns;
 	int type;
@@ -176,17 +175,11 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
-sdlFunctionPtr get_function(sdlBindingPtr sdl, char *function_name);
+sdlFunctionPtr get_function(sdlPtr sdl, char *function_name);
 
-void delete_sdl(void *handle);
-void delete_binding(void *binding);
-void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body);
-void delete_function(void *function);
-void delete_paramater(void *paramater);
 void delete_service(void *service);
 void delete_http_socket(void *handle);
 void delete_url(void *handle);
-void delete_mapping(void *data);
 
 #ifndef ZEND_ENGINE_2
 void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
@@ -264,20 +257,6 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 3, &p, &p1, &p2) == FAILURE) \
 		WRONG_PARAM_COUNT;
 
-#define FETCH_THIS_PORT(ss) \
-	{ \
-		zval *__thisObj; zval *__port; sdlBindingPtr *__tmp; \
-		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_PORT_PROPERTY(__thisObj, __port) == FAILURE) { \
-			ss = NULL; \
-			php_error(E_ERROR, "Error could find current port"); \
-		} \
-		__tmp = (sdlBindingPtr*)Z_LVAL_P(__port); \
-		ss = *__tmp; \
-	}
-
-#define FIND_PORT_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "port", sizeof("port"), (void **)&tmp)
-
 #define FETCH_THIS_SDL(ss) \
 	{ \
 		zval *__thisObj,**__tmp; \
@@ -305,20 +284,6 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 
 #define FIND_SERVICE_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "service", sizeof("service"), (void **)&tmp)
 #define FETCH_SERVICE_RES(ss,tmp) ss = (soapServicePtr) zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service)
-
-#define FETCH_THIS_URL(ss) \
-	{ \
-		zval *__thisObj,**__tmp; \
-		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_URL_PROPERTY(__thisObj,__tmp) != FAILURE) { \
-			FETCH_URL_RES(ss,__tmp); \
-		} else { \
-			ss = NULL; \
-		} \
-	}
-
-#define FIND_URL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "httpurl", sizeof("httpurl"), (void **)&tmp)
-#define FETCH_URL_RES(ss,tmp) ss = (php_url *) zend_fetch_resource(tmp TSRMLS_CC, -1, "httpurl", NULL, 1, le_url)
 
 #define FETCH_THIS_SOCKET(ss) \
 	{ \

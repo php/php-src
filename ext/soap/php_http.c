@@ -8,19 +8,24 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
-int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_DC)
+int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction TSRMLS_DC)
 {
 	xmlChar *buf;
 	smart_str soap_headers = {0};
-	int buf_size,err,ret;
-	sdlPtr sdl;
+	int buf_size,err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
-	zval **trace;
+	zval **trace, **tmp;
 
-	FETCH_THIS_SOCKET(stream);
-	FETCH_THIS_URL(phpurl);
-	FETCH_THIS_SDL(sdl);
+	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
+		return FALSE;
+	}
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
+		php_stream_from_zval_no_verify(stream,tmp);
+	} else {
+		stream = NULL;
+	}
 
 	xmlDocDumpMemory(doc, &buf, &buf_size);
 	if (!buf) {
@@ -49,33 +54,17 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		}
 	}
 
+	if (location != NULL && location[0] != '\000') {
+		phpurl = php_url_parse(location);
+	}
+	if (phpurl == NULL) {
+		xmlFree(buf);
+		add_soap_fault(this_ptr, "SOAP-ENV:Client", "Unable to parse URL", NULL, NULL TSRMLS_CC);
+		return FALSE;
+	}
+
 	if (!stream) {
-		char *url;
 		int use_ssl;
-
-		if (!sdl) {
-			zval **location;
-			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &location) == FAILURE) {
-				xmlFree(buf);
-				add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error could not find location", NULL, NULL TSRMLS_CC);
-				return FALSE;
-			}
-			url = Z_STRVAL_PP(location);
-		} else {
-			sdlBindingPtr binding;
-			FETCH_THIS_PORT(binding);
-			url = binding->location;
-		}
-
-		if (url[0] != '\000') {
-			phpurl = php_url_parse(url);
-		}
-		if (phpurl == NULL) {
-			xmlFree(buf);
-			add_soap_fault(this_ptr, "SOAP-ENV:Client", "Unable to parse URL", NULL, NULL TSRMLS_CC);
-			return FALSE;
-		}
-
 		use_ssl = strcmp(phpurl->scheme, "https") == 0;
 		if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 			xmlFree(buf);
@@ -119,9 +108,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
-			ret = zend_list_insert(phpurl, le_url);
-			add_property_resource(this_ptr, "httpurl", ret);
-			zend_list_addref(ret);
 		} else {
 			xmlFree(buf);
 			php_url_free(phpurl);
@@ -150,7 +136,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_append_long(&soap_headers, buf_size);
 		smart_str_append_const(&soap_headers, "\r\n"
 			"SOAPAction: \"");
-		/* TODO: need to grab soap action from wsdl....*/
 		smart_str_appends(&soap_headers, soapaction);
 		smart_str_append_const(&soap_headers, "\"\r\n");
 
@@ -203,6 +188,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if (err != soap_headers.len) {
+			php_url_free(phpurl);
 			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
@@ -213,6 +199,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_free(&soap_headers);
 
 	}
+	php_url_free(phpurl);
 	xmlFree(buf);
 	return TRUE;
 }
@@ -221,14 +208,18 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 {
 	char *http_headers, *http_body, *content_type, *http_version, http_status[4], *cookie_itt;
 	int http_header_size, http_body_size, http_close;
-	zval **socket_ref;
 	php_stream *stream;
-	zval **trace;
+	zval **trace, **tmp;
 	char* connection;
 	int http_1_1 = 0;
 
-	if (FIND_SOCKET_PROPERTY(this_ptr, socket_ref) != FAILURE) {
-		FETCH_SOCKET_RES(stream, socket_ref);
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
+		php_stream_from_zval_no_verify(stream,tmp);
+	} else {
+		stream = NULL;
+	}
+	if (stream == NULL) {
+	  return FALSE;
 	}
 
 	if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
@@ -299,9 +290,6 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		add_property_stringl(this_ptr, "__last_response", http_body, http_body_size, 1);
 	}
 
-	/* Close every time right now till i can spend more time on it
-	   it works.. it's just slower??
-	*/
 	/* See if the server requested a close */
 	http_close = TRUE;
 	connection = get_http_header_value(http_headers,"Connection: ");

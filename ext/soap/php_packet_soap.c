@@ -124,7 +124,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		char *name, *ns = NULL;
 		zval* tmp;
 
-		if (fn->bindingType == BINDING_SOAP) {
+		if (fn->binding->bindingType == BINDING_SOAP) {
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
 			int res_count = zend_hash_num_elements(fn->responseParameters);
 
