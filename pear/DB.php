@@ -93,7 +93,6 @@ class DB {
 		// "include" should be replaced with "use" once PHP gets it
 		$pkgname = 'DB/' . $type;
 		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
-			print "${pkgname}.php\n";
 			if (!@include($pkgname . '.php')) {
 				return DB_ERROR_NOT_FOUND;
 			} else {
