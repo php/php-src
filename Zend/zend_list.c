@@ -163,6 +163,7 @@ void list_entry_destructor(void *ptr)
 {
 	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) ptr;
 	zend_rsrc_list_dtors_entry *ld;
+	TSRMLS_FETCH();
 	
 	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
 		switch (ld->type) {
@@ -173,7 +174,7 @@ void list_entry_destructor(void *ptr)
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
 				if (ld->list_dtor_ex) {
-					ld->list_dtor_ex(le);
+					ld->list_dtor_ex(le TSRMLS_CC);
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
@@ -188,6 +189,7 @@ void plist_entry_destructor(void *ptr)
 {
 	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) ptr;
 	zend_rsrc_list_dtors_entry *ld;
+	TSRMLS_FETCH();
 
 	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
 		switch (ld->type) {
@@ -198,7 +200,7 @@ void plist_entry_destructor(void *ptr)
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
 				if (ld->plist_dtor_ex) {
-					ld->plist_dtor_ex(le);
+					ld->plist_dtor_ex(le TSRMLS_CC);
 				}
 				break;
 				EMPTY_SWITCH_DEFAULT_CASE()
