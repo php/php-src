@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_PFPRO_H
-#define _PHP_PFPRO_H
+#ifndef PHP_PFPRO_H
+#define PHP_PFPRO_H
 
 #if HAVE_PFPRO
 
@@ -63,7 +63,7 @@ typedef struct {
 
 #endif
 
-#endif	/* _PHP_PFPRO_H */
+#endif	/* PHP_PFPRO_H */
 
 
 /*
