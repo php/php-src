@@ -1131,27 +1131,27 @@ ZEND_METHOD(reflection, getModifierNames)
 	array_init(return_value);
 
 	if (modifiers & (ZEND_ACC_ABSTRACT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		add_next_index_stringl(return_value, "abstract", sizeof("abstract"), 1);
+		add_next_index_stringl(return_value, "abstract", sizeof("abstract")-1, 1);
 	}
 	if (modifiers & (ZEND_ACC_FINAL | ZEND_ACC_FINAL_CLASS)) {
-		add_next_index_stringl(return_value, "final", sizeof("final"), 1);
+		add_next_index_stringl(return_value, "final", sizeof("final")-1, 1);
 	}
 
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
-			add_next_index_stringl(return_value, "public", sizeof("public"), 1);
+			add_next_index_stringl(return_value, "public", sizeof("public")-1, 1);
 			break;
 		case ZEND_ACC_PRIVATE:
-			add_next_index_stringl(return_value, "private", sizeof("private"), 1);
+			add_next_index_stringl(return_value, "private", sizeof("private")-1, 1);
 			break;
 		case ZEND_ACC_PROTECTED:
-			add_next_index_stringl(return_value, "protected", sizeof("protected"), 1);
+			add_next_index_stringl(return_value, "protected", sizeof("protected")-1, 1);
 			break;
 	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
-		add_next_index_stringl(return_value, "static", sizeof("static"), 1);
+		add_next_index_stringl(return_value, "static", sizeof("static")-1, 1);
 	}
 }
 /* }}} */
