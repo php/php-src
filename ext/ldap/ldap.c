@@ -1613,13 +1613,20 @@ PHP_FUNCTION(ldap_get_option)
 	case LDAP_OPT_MATCHED_DN:
 #endif
 		{
-			char *val;
+			char *val = NULL;
+
 			if (ldap_get_option(ld->link, opt, &val)) {
 				RETURN_FALSE;
 			}
-			zval_dtor(*retval);
-			ZVAL_STRING(*retval, val, 1);
-			ldap_memfree(val);
+			if (val != NULL) {
+				if (*val != '\0') {
+					zval_dtor(*retval);
+					ZVAL_STRING(*retval, val, 1);
+				}
+				ldap_memfree(val);
+			} else {
+				RETURN_FALSE;
+			}
 		} break;
 /* options not implemented
 	case LDAP_OPT_SERVER_CONTROLS:
