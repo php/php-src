@@ -925,11 +925,11 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 		case IS_BOOL:
 		case IS_LONG:
 		case IS_RESOURCE:
-			result->type = (op1->value.lval == op2->value.lval);
+			result->value.lval = (op1->value.lval == op2->value.lval);
 			return SUCCESS;
 			break;
 		case IS_DOUBLE:
-			result->type = (op1->value.dval == op2->value.dval);
+			result->value.lval = (op1->value.dval == op2->value.dval);
 			return SUCCESS;
 			break;
 		case IS_STRING:
