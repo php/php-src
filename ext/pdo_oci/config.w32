@@ -32,6 +32,7 @@ if (PHP_PDO_OCI != "no") {
 		/* probe for some functions not present in older versions */
 		pdo_oci_inc_dir = FSO.GetFolder(pdo_oci_header);
 		CHECK_FUNC_IN_HEADER('oci.h', 'OCIEnvCreate', pdo_oci_inc_dir);
+		CHECK_FUNC_IN_HEADER('oci.h', 'OCIStmtFetch2', pdo_oci_inc_dir);
 		CHECK_FUNC_IN_HEADER('ociap.h', 'OCIEnvNlsCreate', pdo_oci_inc_dir);
 
 	} else {

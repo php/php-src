@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -195,9 +195,18 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
+	ub4 prefetch;
+
+#if HAVE_OCISTMTFETCH2
+	S->exec_type = pdo_attr_lval(driver_options, PDO_ATTR_SCROLL,
+		0 TSRMLS_CC) ? OCI_STMT_SCROLLABLE_READONLY : OCI_DEFAULT;
+#else
+	S->exec_type = OCI_DEFAULT;
+#endif
 
 	S->H = H;
 	
+
 	/* create an OCI statement handle */
 	OCIHandleAlloc(H->env, (dvoid*)&S->stmt, OCI_HTYPE_STMT, 0, NULL);
 
@@ -213,6 +222,18 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 			OCIHandleFree(S->err, OCI_HTYPE_ERROR);
 			efree(S);
 			return 0;
+		}
+
+	}
+
+	prefetch = 1024 * pdo_attr_lval(driver_options, PDO_ATTR_PREFETCH, 100 TSRMLS_CC);
+	if (prefetch) {
+		H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
+			OCI_ATTR_PREFETCH_MEMORY, H->err);
+		if (!H->last_err) {
+			prefetch /= 1024;
+			H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
+				OCI_ATTR_PREFETCH_ROWS, H->err);
 		}
 	}
 

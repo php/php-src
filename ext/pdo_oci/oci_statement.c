@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -109,7 +109,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	STMT_CALL(OCIStmtExecute, (S->H->svc, S->stmt, S->err,
 				S->stmt_type == OCI_STMT_SELECT ? 0 : 1, 0, NULL, NULL,
-				(stmt->dbh->auto_commit && !stmt->dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT));
+				(stmt->dbh->auto_commit && !stmt->dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : S->exec_type));
 
 	if (!stmt->executed) {
 		ub4 colcount;
@@ -284,11 +284,27 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 	return 1;
 }
 
-static int oci_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
+static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
+	long offset TSRMLS_DC)
 {
+#if HAVE_OCISTMTFETCH2
+	ub4 ociori;
+#endif
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
+#if HAVE_OCISTMTFETCH2
+	switch (ori) {
+		case PDO_FETCH_ORI_NEXT:	ociori = OCI_FETCH_NEXT; break;
+		case PDO_FETCH_ORI_PRIOR:	ociori = OCI_FETCH_PRIOR; break;
+		case PDO_FETCH_ORI_FIRST:	ociori = OCI_FETCH_FIRST; break;
+		case PDO_FETCH_ORI_LAST:	ociori = OCI_FETCH_LAST; break;
+		case PDO_FETCH_ORI_ABS:		ociori = OCI_FETCH_ABSOLUTE; break;
+		case PDO_FETCH_ORI_REL:		ociori = OCI_FETCH_RELATIVE; break;
+	}
+	S->last_err = OCIStmtFetch2(S->stmt, S->err, 1, ociori, offset, OCI_DEFAULT);
+#else
 	S->last_err = OCIStmtFetch(S->stmt, S->err, 1, OCI_FETCH_NEXT, OCI_DEFAULT);
+#endif
 
 	if (S->last_err == OCI_NO_DATA) {
 		/* no (more) data */
