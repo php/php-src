@@ -15,6 +15,7 @@
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
+// |                                                                      |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -114,8 +115,11 @@ class PEAR_Packager extends PEAR_Common
 
     // {{{ package()
 
-    function package($pkgfile = 'package.xml')
+    function package($pkgfile = null)
     {
+        if (empty($pkgfile)) {
+            $pkgfile = 'package.xml';
+        }
         $pkginfo = $this->infoFromDescriptionFile($pkgfile);
         if (PEAR::isError($pkginfo)) {
             return $pkginfo;
