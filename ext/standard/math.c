@@ -718,7 +718,7 @@ _php_math_basetozval(zval *arg, int base, zval *ret) {
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg); i >= 0; i--) {
+	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
 
 		digit = (c >= '0' && c <= '9') ? c - '0'
