@@ -42,8 +42,7 @@
 #define DOMXML_IS_TYPE(zval, ce)					(zval && Z_TYPE_P(zval) == IS_OBJECT && Z_OBJCE_P(zval)->refcount == ce->refcount)
 
 #define DOMXML_DOMOBJ_NEW(zval, obj, ret)			if (NULL == (zval = php_domobject_new(obj, ret, zval TSRMLS_CC))) { \
-														php_error(E_WARNING, "%s(): cannot create required DOM object", \
-																  get_active_function_name(TSRMLS_C)); \
+														php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
 														RETURN_FALSE; \
 													}
 
@@ -55,14 +54,12 @@
 													DOMXML_RET_ZVAL(zval);
 
 #define DOMXML_GET_THIS(zval)						if (NULL == (zval = getThis())) { \
-														php_error(E_WARNING, "%s(): underlying object missing", \
-																  get_active_function_name(TSRMLS_C)); \
+														php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing"); \
 														RETURN_FALSE; \
 													}
 
 #define DOMXML_GET_OBJ(ret, zval, le)				if (NULL == (ret = php_dom_get_object(zval, le, 0 TSRMLS_CC))) { \
-														php_error(E_WARNING, "%s(): cannot fetch DOM object", \
-																  get_active_function_name(TSRMLS_C)); \
+														php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot fetch DOM object"); \
 														RETURN_FALSE; \
 													}
 
@@ -70,13 +67,11 @@
 													DOMXML_GET_OBJ(ret, zval, le);
 
 #define DOMXML_NO_ARGS()							if (ZEND_NUM_ARGS() != 0) { \
-														php_error(E_WARNING, "%s(): expects exactly 0 parameters, %d given", \
-																  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS()); \
+														php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expects exactly 0 parameters, %d given", ZEND_NUM_ARGS()); \
 														return; \
 													}
 
-#define DOMXML_NOT_IMPLEMENTED()					php_error(E_WARNING, "%s(): not yet implemented", \
-															  get_active_function_name(TSRMLS_C)); \
+#define DOMXML_NOT_IMPLEMENTED()					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented"); \
 													return;
 
 /* WARNING: The number of parameters is actually the
@@ -766,23 +761,23 @@ void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type
 	int type;
 
 	if (NULL == wrapper) {
-		php_error(E_WARNING, "xsltstylesheet_get_object() invalid wrapper object passed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "xsltstylesheet_get_object() invalid wrapper object passed");
 		return NULL;
 	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wrapper is not an object");
 		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
-		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-		php_error(E_WARNING, "%s(): underlying object missing or of invalid type", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing or of invalid type");
 		return NULL;
 	}
 
@@ -816,23 +811,23 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_
 	int type;
 
 	if (NULL == wrapper) {
-		php_error(E_WARNING, "php_xpath_get_object() invalid wrapper object passed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_xpath_get_object() invalid wrapper object passed");
 		return NULL;
 	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wrapper is not an object");
 		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
-		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-		php_error(E_WARNING, "%s(): underlying object missing or of invalid type", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing or of invalid type");
 		return NULL;
 	}
 
@@ -922,24 +917,24 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS
 	int type;
 
 	if (NULL == wrapper) {
-		php_error(E_WARNING, "php_xpath_get_context() invalid wrapper object passed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_xpath_get_context() invalid wrapper object passed");
 		return NULL;
 	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wrapper is not an object");
 		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==
 		FAILURE) {
-		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-		php_error(E_WARNING, "%s(): underlying object missing or of invalid type", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing or of invalid type");
 		return NULL;
 	}
 
@@ -1087,8 +1082,7 @@ static char **php_xmlparser_make_params(zval *idvars TSRMLS_DC)
 		zend_hash_move_forward(parht)) {
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
-			php_error(E_WARNING, "%s(): Invalid argument or parameter array",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument or parameter array");
 			return NULL;
 		}
 		else {
@@ -1117,17 +1111,17 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 	int type;
 
 	if (NULL == wrapper) {
-		php_error(E_WARNING, "php_dom_get_object() invalid wrapper object passed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_dom_get_object() invalid wrapper object passed");
 		return NULL;
 	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wrapper is not an object");
 		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
-		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		return NULL;
 	}
 
@@ -1135,7 +1129,7 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 
 /* The following test should be replaced with search in all parents */
 	if (!obj) {		/* || ((type != rsrc_type1) && (type != rsrc_type2))) { */
-		php_error(E_WARNING, "%s(): underlying object missing or of invalid type", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing or of invalid type");
 		return NULL;
 	}
 
@@ -1378,7 +1372,7 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 		}
 
 		default:
-			php_error(E_WARNING, "%s(): unsupported node type: %d\n", get_active_function_name(TSRMLS_C), Z_TYPE_P(obj));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d\n", Z_TYPE_P(obj));
 			FREE_ZVAL(wrapper);
 			return NULL;
 	}
@@ -2372,12 +2366,12 @@ PHP_FUNCTION(domxml_node_append_child)
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
 	if (child->type == XML_ATTRIBUTE_NODE) {
-		php_error(E_WARNING, "%s(): can't append attribute node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append attribute node");
 		RETURN_FALSE;
 	}
 	
 	if (!(child->doc == NULL || child->doc == parent->doc)) {
-		php_error_docref("function.domnode-append-child" TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
 		RETURN_FALSE;
 	}
 	
@@ -2388,7 +2382,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	new_child = xmlAddChild(parent, child);
 
 	if (NULL == new_child) {
-		php_error(E_WARNING, "%s(): couldn't append node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
 
@@ -2413,12 +2407,12 @@ PHP_FUNCTION(domxml_node_append_sibling)
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
 	if (child->type == XML_ATTRIBUTE_NODE) {
-		php_error(E_WARNING, "%s(): can't append attribute node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append attribute node");
 		RETURN_FALSE;
 	}
 
 	if (NULL == (new_child = xmlCopyNode(child, 1))) {
-		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to clone node");
 		RETURN_FALSE;
 	}
 
@@ -2426,7 +2420,7 @@ PHP_FUNCTION(domxml_node_append_sibling)
 	child = xmlAddSibling(nodep, new_child);
 
 	if (NULL == child) {
-		php_error(E_WARNING, "%s(): couldn't append node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
 
@@ -2461,7 +2455,7 @@ PHP_FUNCTION(domxml_node_insert_before)
 		
 
 	if (NULL == new_child) {
-		php_error(E_WARNING, "%s(): couldn't add newnode as the previous sibling of refnode", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as the previous sibling of refnode");
 		RETURN_FALSE;
 	}
 
@@ -2788,7 +2782,7 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 
 	attr = xmlSetProp(nodep, name, value);
 	if (!attr) {
-		php_error(E_WARNING, "%s(): no such attribute '%s'", get_active_function_name(TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", name);
 		RETURN_FALSE;
 	}
 
@@ -2856,7 +2850,7 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 	FIXME: The following line doesn't work 
 	newattrp = xmlCopyProp(nodep, attrp);
 	if (!newattrp) {
-		php_error(E_WARNING, "%s(): no such attribute '%s'", get_active_function_name(TSRMLS_C), attrp->name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", attrp->name);
 		RETURN_FALSE;
 	}
 
@@ -2918,7 +2912,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	ctxp->node = contextnodep;
 	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
 	if (str == NULL) {
-		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate memory for string");
 	}
 	sprintf(str ,"//%s",name);
 
@@ -2932,7 +2926,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 
 	if(array_init(rv) != SUCCESS)
 	{
-		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required array");
 		RETURN_FALSE;
 	}
 
@@ -3026,7 +3020,7 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 	MAKE_STD_ZVAL(rv);
 
 	if(array_init(rv) != SUCCESS) {
-		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required array");
 		RETURN_FALSE;
 	}
 
@@ -3699,13 +3693,13 @@ PHP_FUNCTION(domxml_dump_node)
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
 	if (Z_TYPE_P(elementp) == XML_DOCUMENT_NODE || Z_TYPE_P(elementp) == XML_HTML_DOCUMENT_NODE ) {
-		php_error(E_WARNING, "%s(): cannot dump element with a document node", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dump element with a document node");
 		RETURN_FALSE;
 	}
 
 	buf = xmlBufferCreate();
 	if (!buf) {
-		php_error(E_WARNING, "%s(): could fetch buffer", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
 		RETURN_FALSE;
 	}
 
@@ -4128,7 +4122,7 @@ PHP_FUNCTION(domxml_doc_validate)
 	cvp.error    = (xmlValidityErrorFunc) domxml_error_validate;
 	cvp.warning  = (xmlValidityWarningFunc) domxml_error_validate;
 	if (docp->intSubset == NULL) {
-		php_error(E_NOTICE, "%s(): No DTD given in XML-Document", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No DTD given in XML-Document");
 	}
     
 	if (xmlValidateDocument(&cvp, docp)) {
@@ -4231,7 +4225,7 @@ PHP_FUNCTION(domxml_parser_start_element)
 		atts = php_xmlparser_make_params(params TSRMLS_CC);
 	}
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 	startElement(parserp, (xmlChar *) tagname,  (const xmlChar **) atts);
@@ -4252,7 +4246,7 @@ PHP_FUNCTION(domxml_parser_end_element)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &tagname, &tagname_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4274,7 +4268,7 @@ PHP_FUNCTION(domxml_parser_comment)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &commentstring, &commentstring_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4296,7 +4290,7 @@ PHP_FUNCTION(domxml_parser_cdata_section)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &chunk, &chunk_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4318,7 +4312,7 @@ PHP_FUNCTION(domxml_parser_characters)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &charactersstring, &characters_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4340,7 +4334,7 @@ PHP_FUNCTION(domxml_parser_entity_reference)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &referencestring, &reference_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4362,7 +4356,7 @@ PHP_FUNCTION(domxml_parser_processing_instruction)
 	DOMXML_PARAM_FOUR(parserp, id, le_domxmlparserp,"ss", &target, &target_len, &data, &data_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4384,7 +4378,7 @@ PHP_FUNCTION(domxml_parser_namespace_decl)
 	DOMXML_PARAM_FOUR(parserp, id, le_domxmlparserp,"ss", &href, &href_len, &prefix, &prefix_len);
 
 	if (parserp->myDoc == NULL) {
-		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document was not started");
 		RETURN_FALSE;
 	}
 
@@ -4427,7 +4421,7 @@ PHP_FUNCTION(domxml_parser_end)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"|s", &chunk, &chunk_len);
 	error = xmlParseChunk(parserp, chunk, chunk_len, 1);
 	if (error != 0) {
-		php_error(E_ERROR, "%s(): error: %d", get_active_function_name(TSRMLS_C), error);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error: %d", error);
 		RETURN_FALSE;
 	}
 	if (parserp->myDoc != NULL) {
@@ -4725,7 +4719,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
 	if (!ctxp) {
-		php_error(E_WARNING, "%s(): cannot fetch XPATH context", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot fetch XPATH context");
 		RETURN_FALSE;
 	}
 
@@ -4754,7 +4748,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	}
 
 	if (NULL == (rv = php_xpathobject_new(xpathobjp, &ret TSRMLS_CC))) {
-		php_error(E_WARNING, "%s(): cannot create required XPATH objcet", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required XPATH objcet");
 		RETURN_FALSE;
 	}
 	SEPARATE_ZVAL(&rv);
@@ -5060,8 +5054,7 @@ static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 	
 	if (xmlStrchr(string, '"')) {
 		if (xmlStrchr(string, '\'')) {
-			php_error(E_WARNING, "%s(): Cannot create XPath expression (string contains both quote and double-quotes)",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes)");
 			return NULL;
 		}
 		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar) );
@@ -5096,8 +5089,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 		zend_hash_move_forward(parht)) {
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
-			php_error(E_WARNING, "%s(): Invalid argument or parameter array",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument or parameter array");
 			return NULL;
 		}
 		else {
@@ -5147,8 +5139,7 @@ PHP_FUNCTION(domxml_xslt_process)
 
 	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
 	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): underlying object missing",
-			  get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		RETURN_FALSE;
 	}
 
@@ -5187,7 +5178,7 @@ PHP_FUNCTION(domxml_xslt_process)
    output XSLT result to memory */
 PHP_FUNCTION(domxml_xslt_result_dump_mem)
 {
-	zval *rv, *idxsl, *idxml;
+	zval *idxsl, *idxml;
 	xsltStylesheetPtr xsltstp;
 	xmlDocPtr xmldocp;
 	xmlChar *doc_txt_ptr;
@@ -5198,8 +5189,7 @@ PHP_FUNCTION(domxml_xslt_result_dump_mem)
 
 	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
 	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): underlying object missing",
-			  get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		RETURN_FALSE;
 	}
 
@@ -5224,7 +5214,7 @@ PHP_FUNCTION(domxml_xslt_result_dump_mem)
    output XSLT result to File */
 PHP_FUNCTION(domxml_xslt_result_dump_file)
 {
-	zval *rv, *idxsl, *idxml;
+	zval *idxsl, *idxml;
 	xsltStylesheetPtr xsltstp;
 	xmlDocPtr xmldocp;
 	char *filename;
@@ -5235,8 +5225,7 @@ PHP_FUNCTION(domxml_xslt_result_dump_file)
 
 	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
 	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): underlying object missing",
-			  get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 		RETURN_FALSE;
 	}
 
