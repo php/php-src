@@ -475,10 +475,10 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 {
 	char buffer[MAXPATHLEN];
 
+	TSRMLS_FETCH();
+
 	*egdsocket = 0;
 	*seeded = 0;
-	
-	TSRMLS_FETCH();
 	
 #ifdef WINDOWS
 	RAND_screen();
