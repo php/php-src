@@ -1493,7 +1493,7 @@ PHP_FUNCTION(ibase_trans)
 	zval ***args;
 	char tpb[20], *tpbp = NULL;
 	long trans_argl = 0;
-	int tpb_len = 0, argn, link_id, trans_n = 0, i;
+	int tpb_len = 0, argn, link_id = 0, trans_n = 0, i;
 	ibase_db_link *ib_link;
 	ibase_tr_link *ib_trans;
 	
@@ -1528,7 +1528,7 @@ PHP_FUNCTION(ibase_trans)
 		efree(args);
 	}
 
-	if (argn < 2) {
+	if (!link_id) {
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", le_link, le_plink);
 	}
 
