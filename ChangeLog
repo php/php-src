@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- fdf support ported; not completely tested with latest version 4.0 for
+  glibc (Uwe)
 - OCI8 connections are now kept open as long as they are referenced (Thies)
 - Cleaned up Directory-Module (Thies)
 - Small fix in Ora_Close (Thies)
