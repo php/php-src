@@ -540,21 +540,6 @@ class PEAR_Installer extends PEAR_Downloader
     }
 
     // }}}
-    // {{{ _prependPath($path, $prepend)
-
-    function _prependPath($path, $prepend)
-    {
-        if (strlen($prepend) > 0) {
-            if (OS_WINDOWS && preg_match('/^[a-z]:/i', $path)) {
-                $path = $prepend . substr($path, 2);
-            } else {
-                $path = $prepend . $path;
-            }
-        }
-        return $path;
-    }
-
-    // }}}
     // {{{ download()
 
     /**
