@@ -1,20 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Implemented features/changes requested in Bug #16960 (Timm):
-- . Added a new function sybase_unbuffered_query()
-  . Added a new function sybase_fetch_assoc()
-  . Added sybase_set_message_handler() which enables users to handle
-  server messages in a callback function
-  . Added an ini entry for deadlock retries - retrying deadlocks
-  can cause transaction state to break (sybct.deadlock_retry_count,
-  defaults to -1 "forever").
-  . Fixed sybase_fetch_object() not to return objects with numeric
-  members
-  . Fixed issues with identical fieldnames
-  . Made sybase_fetch_*() functions return correct datatypes
-  . Made phpinfo() section more verbose
-  . Made sybase_query() error messages more verbose
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -25,6 +11,20 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Added gd_info() which returns an array of gd support information. (Marcus)
+- Implemented features/changes requested in Bug #16960 (Timm):
+  . Added a new function sybase_unbuffered_query()
+  . Added a new function sybase_fetch_assoc()
+  . Added sybase_set_message_handler() which enables users to handle
+    server messages in a callback function
+  . Added an ini entry for deadlock retries - retrying deadlocks can cause 
+    transaction state to break (sybct.deadlock_retry_count,
+    defaults to -1 "forever").
+  . Fixed sybase_fetch_object() not to return objects with numeric members
+  . Fixed issues with identical fieldnames
+  . Made sybase_fetch_*() functions return correct datatypes
+  . Made phpinfo() section more verbose
+  . Made sybase_query() error messages more verbose
 - Fixed bug #19935 (made OpenSSL file system operations abide by safe_mode
   & open_basedir restrictions). (Ilia)
 - Fixed bug #18868 (improved the check for availability of realpath()). (Ilia)
@@ -44,7 +44,7 @@ PHP 4                                                                      NEWS
     path. The bundled version supports cdb_make that allows writing cdb files.
   . Added optional skip parameter to dba_fetch() to support multiple key-value
     pairs with the same key for cdb handler.
-  . Added locking for those handlers that does not have their own locking.
+  . Added locking for those handlers that do not have their own locking.
   . Added flatfile support what finally makes ext/db deprecated.
 - Added imagerotate() which is available only when bundled libgd is used.
   (Pierre-Alain Joye, Ilia)
