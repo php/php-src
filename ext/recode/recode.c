@@ -30,8 +30,10 @@
 #if HAVE_LIBRECODE
 
 /* For recode 3.5 */
+#if HAVE_BROKEN_RECODE
 extern char *program_name;
 char *program_name = "php";
+#endif
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
