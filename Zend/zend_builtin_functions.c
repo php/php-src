@@ -555,7 +555,7 @@ ZEND_FUNCTION(get_parent_class)
 		}
 		/* then try getting the class entry
 		   if successfull, will fall through to standard ce handling */
-		if(!Z_OBJ_HT_PP(arg)->get_class_entry || !(ce = zend_get_class_entry(*arg))) {
+		if (!Z_OBJ_HT_PP(arg)->get_class_entry || !(ce = zend_get_class_entry(*arg))) {
 			RETURN_FALSE;
 		}
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
@@ -592,7 +592,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	}
 	
 	/* TBI!! new object handlers */
-	if(!HAS_CLASS_ENTRY(**obj)) {
+	if (!HAS_CLASS_ENTRY(**obj)) {
 		RETURN_FALSE;
 	}
 
@@ -682,7 +682,7 @@ ZEND_FUNCTION(get_object_vars)
 	if ((*obj)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
-	if(Z_OBJ_HT_PP(obj)->get_properties == NULL) {
+	if (Z_OBJ_HT_PP(obj)->get_properties == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -710,7 +710,7 @@ ZEND_FUNCTION(get_class_methods)
 
 	if (Z_TYPE_PP(class) == IS_OBJECT) {
 		/* TBI!! new object handlers */
-		if(!HAS_CLASS_ENTRY(**class)) {
+		if (!HAS_CLASS_ENTRY(**class)) {
 			RETURN_FALSE;
 		}
 		ce = Z_OBJCE_PP(class);
@@ -756,7 +756,7 @@ ZEND_FUNCTION(method_exists)
 	}
 
 	/* TBI!! new object handlers */
-	if(!HAS_CLASS_ENTRY(**klass)) {
+	if (!HAS_CLASS_ENTRY(**klass)) {
 		RETURN_FALSE;
 	}
 

@@ -184,7 +184,7 @@ void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC)
 
 static void zend_replace_object_fetch(zend_op *last_op, znode *value TSRMLS_DC)
 {
-	if(value->op_type != IS_VAR) {
+	if (value->op_type != IS_VAR) {
 		last_op->opcode = ZEND_MAKE_VAR;
 		last_op->result.op_type = IS_VAR;
 		last_op->result.u.EA.type = 0;
@@ -205,7 +205,7 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		
 		switch(op) {
 			case ZEND_ASSIGN_ADD:
@@ -380,7 +380,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if(last_op->opcode == ZEND_FETCH_OBJ_W) {
+	if (last_op->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ;
 		opline->op1 = last_op->op1;
 		opline->op2 = last_op->op2;
@@ -523,7 +523,7 @@ void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		opline->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
 		opline->op1 = last_op->op1;
 		opline->op2 = last_op->op2;
@@ -548,7 +548,7 @@ void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		opline->opcode = (op==ZEND_POST_INC)?ZEND_POST_INC_OBJ:ZEND_POST_DEC_OBJ;
 		opline->op1 = last_op->op1;
 		opline->op2 = last_op->op2;

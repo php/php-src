@@ -159,11 +159,11 @@ static inline zval **zend_fetch_property_address_inner(zval *object, znode *op2,
 			break;
 	}
 
-	if(Z_OBJ_HT_P(object)->get_property_ptr != NULL) {
+	if (Z_OBJ_HT_P(object)->get_property_ptr != NULL) {
 		retval = Z_OBJ_HT_P(object)->get_property_ptr(object, prop_ptr TSRMLS_CC);
 	}
 
-	if(retval == NULL) {
+	if (retval == NULL) {
 		zend_error(E_WARNING, "This object doesn't support property references");
 		retval = &EG(error_zval_ptr);
 	}
@@ -357,9 +357,9 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 	/* here property is a string */
 	PZVAL_UNLOCK(value);
 	
-	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+	if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
 			SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
 			have_get_ptr = 1;
@@ -369,14 +369,14 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 		}
 	}
 
-	if(!have_get_ptr) {
+	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		binary_op(z, z, value TSRMLS_CC);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
 		*retval = z;
 		SELECTIVE_PZVAL_LOCK(*retval, result);
-		if(z->refcount <= 1) {
+		if (z->refcount <= 1) {
 			zval_dtor(z);
 		}
 	}
@@ -951,7 +951,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 	}
 
 	
-	if(container->type != IS_OBJECT) {
+	if (container->type != IS_OBJECT) {
 		zend_error(E_NOTICE, "Trying to get property of non-object");
 
 		if (type==BP_VAR_R || type==BP_VAR_IS) {
@@ -1013,9 +1013,9 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 	
 	/* here we are sure we are dealing with an object */
 
-	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+	if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
 			SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
 			have_get_ptr = 1;
@@ -1025,12 +1025,12 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 		}
 	}
 
-	if(!have_get_ptr) {
+	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		incdec_op(z);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		if(z->refcount <= 1) {
+		if (z->refcount <= 1) {
 			zval_dtor(z);
 		}
 	}
@@ -1058,9 +1058,9 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	
 	/* here we are sure we are dealing with an object */
 
-	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+	if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
 			have_get_ptr = 1;
 			SEPARATE_ZVAL_IF_NOT_REF(zptr);
 			
@@ -1072,14 +1072,14 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 		}
 	}
 
-	if(!have_get_ptr) {
+	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		*retval = *z;
 		zendi_zval_copy_ctor(*retval);
 		incdec_op(z);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		if(z->refcount <= 1) {
+		if (z->refcount <= 1) {
 			zval_dtor(z);
 		}
 	}
@@ -1884,7 +1884,7 @@ binary_assign_op_addr_obj:
 					}
 
 					EX(fbc) = EX(fbc_constructor);
-					if(EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
+					if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
 						/*  The scope should be the scope of the class where the constructor
 							was initially declared in */
 						EX(calling_scope) = EX(fbc)->common.scope;
@@ -1937,7 +1937,7 @@ binary_assign_op_addr_obj:
 						EX(object) = this_ptr;
 					}
 
-					if(EX(fbc)->type == ZEND_USER_FUNCTION) {
+					if (EX(fbc)->type == ZEND_USER_FUNCTION) {
 						EX(calling_scope) = EX(fbc)->common.scope;
 					} else {
 						EX(calling_scope) = NULL;
@@ -2150,7 +2150,7 @@ do_fcall_common:
 						ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						INIT_ZVAL(*(EX(Ts)[EX(opline)->result.u.var].var.ptr));
 
-						if(EX(object)) {
+						if (EX(object)) {
 							Z_OBJ_HT_P(EX(object))->call_method(EX(fbc)->common.function_name, EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object), return_value_used TSRMLS_CC);
 						} else {
 							zend_error(E_ERROR, "Cannot call overloaded function for non-object");
@@ -2697,7 +2697,7 @@ send_by_ref:
 								file_handle.free_filename = 0;
 
 								if (file_handle.handle.fp) {
-									if( !opened_path ) {
+									if (!opened_path) {
 										opened_path = file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
 									}	
 								
@@ -2815,11 +2815,11 @@ send_by_ref:
 					if (container) {
 						HashTable *ht;
 
-						if((*container)->type == IS_ARRAY) {
+						if ((*container)->type == IS_ARRAY) {
 							ht = (*container)->value.ht;
 						} else {
 							ht = NULL;
-							if((*container)->type == IS_OBJECT) {
+							if ((*container)->type == IS_OBJECT) {
 								Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
 							}
 						}
@@ -3014,7 +3014,7 @@ send_by_ref:
 
 					if (container) {
 
-						if((*container)->type == IS_ARRAY) {
+						if ((*container)->type == IS_ARRAY) {
 							HashTable *ht;
 							int isset = 0;
 
@@ -3071,7 +3071,7 @@ send_by_ref:
 									break;
 							}
 						} else {
-							if((*container)->type == IS_OBJECT) {
+							if ((*container)->type == IS_OBJECT) {
 								result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 							}
 						}

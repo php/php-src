@@ -590,7 +590,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	}
 	
 	arg->type = IS_OBJECT;
-	if(class_type->create_object == NULL) {
+	if (class_type->create_object == NULL) {
 		arg->value.obj = zend_objects_new(&object, class_type);
 		if (properties) {
 			object->properties = properties;

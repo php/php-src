@@ -26,7 +26,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 	for (i = 1; i < objects->top ; i++) {
 		if (objects->object_buckets[i].valid) {
 			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
-			if(obj->dtor) {
+			if (obj->dtor) {
 				objects->object_buckets[i].destructor_called = 1;
 				obj->dtor(obj->object, i TSRMLS_CC);
 			}
@@ -91,7 +91,7 @@ ZEND_API void zend_objects_store_delete_obj(zval *zobject TSRMLS_DC)
 	}
 
 
-	if(obj->dtor && !EG(objects_store).object_buckets[handle].destructor_called) {
+	if (obj->dtor && !EG(objects_store).object_buckets[handle].destructor_called) {
 		EG(objects_store).object_buckets[handle].destructor_called = 1;
 		obj->dtor(obj->object, handle TSRMLS_CC);
 	}
@@ -115,7 +115,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 	
 	if (--obj->refcount == 0) {
 		if (EG(objects_store).object_buckets[handle].valid) {
-			if(!EG(objects_store).object_buckets[handle].destructor_called) {
+			if (!EG(objects_store).object_buckets[handle].destructor_called) {
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 				if (obj->dtor) {
 					obj->dtor(obj->object, handle TSRMLS_CC);
@@ -149,7 +149,7 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	}
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
-	if(obj->clone == NULL) {
+	if (obj->clone == NULL) {
 		zend_error(E_ERROR, "Trying to clone uncloneable object");
 	}		
 
@@ -222,7 +222,7 @@ ZEND_API void zend_object_proxy_set(zval **property, zval *value TSRMLS_DC)
 {
 	zend_proxy_object *probj = zend_object_store_get_object(*property TSRMLS_CC);
 
-	if(Z_OBJ_HT_P(probj->object) && Z_OBJ_HT_P(probj->object)->write_property) {
+	if (Z_OBJ_HT_P(probj->object) && Z_OBJ_HT_P(probj->object)->write_property) {
 		Z_OBJ_HT_P(probj->object)->write_property(probj->object, probj->property, value TSRMLS_CC);
 	} else {
 		zend_error(E_WARNING, "Cannot write property of object - no write handler defined");
@@ -233,7 +233,7 @@ ZEND_API zval* zend_object_proxy_get(zval *property TSRMLS_DC)
 {
 	zend_proxy_object *probj = zend_object_store_get_object(property TSRMLS_CC);
 
-	if(Z_OBJ_HT_P(probj->object) && Z_OBJ_HT_P(probj->object)->read_property) {
+	if (Z_OBJ_HT_P(probj->object) && Z_OBJ_HT_P(probj->object)->read_property) {
 		return Z_OBJ_HT_P(probj->object)->read_property(probj->object, probj->property, BP_VAR_R TSRMLS_CC);
 	} else {
 		zend_error(E_WARNING, "Cannot read property of object - no read handler defined");
