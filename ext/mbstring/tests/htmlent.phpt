@@ -6,18 +6,19 @@ HTML input/output
 	extension_loaded('mbstring') or die('skip mbstring not available'); 
 ?>
 --INI--
+output_buffering=4096
 output_handler=mb_output_handler
 zlib.output_compression=
-arg_separator.input="x"
+arg_separator.input=x
 error_reporting=0
 mbstring.http_input=HTML-ENTITIES
-mbstring.internal_encoding=UTF8
+mbstring.internal_encoding=UTF-8
 mbstring.http_output=HTML-ENTITIES
 mbstring.encoding_translation=1
 --FILE--
 <?php
 // enable output encoding through output handler
-ob_start("mb_output_handler");
+//ob_start("mb_output_handler");
 // &#64... are must be decoded on input these are not reencoded on output. 
 // If you see &#64;&#65;&#66; on output this means input encoding fails.
 // If you do not see &auml;... on output this means output encoding fails.
@@ -27,9 +28,11 @@ ob_start("mb_output_handler");
 ?>
 <?php echo mb_http_input('l').'>'.mb_internal_encoding().'>'.mb_http_output();?>
 
-<?php mb_parse_str("test=&&;&&#64;&#65;&#66;&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;");
-echo "test='$test'";
+<?php mb_parse_str("test=&#64;&#65;&#66;&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;", $test);
+print_r($test['test']);
 ?>
+===DONE===
 --EXPECT--
 HTML-ENTITIES>UTF-8>HTML-ENTITIES
 test='&&;&@AB&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;'
+===DONE===

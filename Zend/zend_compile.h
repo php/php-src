@@ -840,6 +840,7 @@ END_EXTERN_C()
 #define ZEND_GET_FUNC_NAME          "__get"
 #define ZEND_SET_FUNC_NAME          "__set"
 #define ZEND_CALL_FUNC_NAME         "__call"
+#define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
 #endif /* ZEND_COMPILE_H */
 
