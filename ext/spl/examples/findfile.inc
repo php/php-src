@@ -13,7 +13,16 @@ class FindFile extends FilterIterator
 	function __construct($path, $file)
 	{
 		$this->file = $file;
-		parent::__construct(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
+		$list = split(';', $path);
+		if (count($list) <= 1) {
+			parent::__construct(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
+		} else {
+			$it = new AppendIterator();
+			foreach($list as $path) {
+				$it->append(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
+			}
+			parent::__construct($it);
+		}
 	}
 
 	function accept()
