@@ -377,27 +377,17 @@ class PEAR_Common extends PEAR
         if (!@is_file($file)) {
             return $this->raiseError('no tar file supplied');
         }
-        $tar = new Archive_Tar($file, true);
-        // XXX Fixme Windows
-        $tmpdir = '/tmp' . DIRECTORY_SEPARATOR . $file;
-        if (file_exists($tmpdir)) {
-            return $this->raiseError('Tmpdir: ' . $tmpdir .' already exists',
-                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
-        }
-        if (!mkdir($tmpdir, 0755)) {
-            return $this->raiseError("Unable to create temporary directory $tmpdir.",
-                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
-        }
-        $tar->extract($tmpdir);
         // Assume the decompressed dir name
         if (($pos = strrpos($file, '.')) === false) {
             return $this->raiseError('file doesn\'t follow the package name convention');
         }
         $pkgdir = substr($file, 0, $pos);
+        $xml = $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
 
-        $xml = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR .'package.xml';
+        $tar = new Archive_Tar($file, true);
+        $tar->extractList($xml);
         $info = $this->infoFromDescriptionFile($xml);
-        system("rm -rf $tmpdir"); // XXX FIXME Windows
+        unlink($xml);
         return $info;
     }
 }
