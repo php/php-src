@@ -18,7 +18,7 @@ static void rpc_proxy_unset_property(zval *, zval * TSRMLS_DC);
 static HashTable* rpc_proxy_get_properties(zval * TSRMLS_DC);
 static union _zend_function* rpc_proxy_get_method(zval *, char *, int TSRMLS_DC);
 static union _zend_function* rpc_proxy_get_constructor(zval * TSRMLS_DC);
-static zend_class_entry** rpc_proxy_get_class_entry(zval *object TSRMLS_DC);
+static zend_class_entry* rpc_proxy_get_class_entry(zval *object TSRMLS_DC);
 static int rpc_proxy_get_classname(zval *, char **, zend_uint *, int  TSRMLS_DC);
 static int rpc_proxy_compare(zval *, zval * TSRMLS_DC);
 /**/
@@ -34,6 +34,8 @@ zend_object_handlers rpc_proxy_handlers = {
 	NULL,
 	rpc_proxy_get,
 	rpc_proxy_set,
+	NULL,
+	NULL,
 	rpc_proxy_has_property,
 	rpc_proxy_unset_property,
 	rpc_proxy_get_properties,
@@ -111,7 +113,7 @@ static union _zend_function* rpc_proxy_get_constructor(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static zend_class_entry** rpc_proxy_get_class_entry(zval *object TSRMLS_DC)
+static zend_class_entry* rpc_proxy_get_class_entry(zval *object TSRMLS_DC)
 {
 	return NULL;
 }
