@@ -51,6 +51,8 @@
 #define ZEND_GINIT_FUNCTION(module)      int ZEND_GINIT(module)(GINIT_FUNC_ARGS)
 #define ZEND_GSHUTDOWN_FUNCTION(module)  int ZEND_GSHUTDOWN(module)(void)
 
+#define ZEND_GET_MODULE(name) \
+	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
 	typedef struct _zend_##module_name##_globals {
