@@ -30,6 +30,12 @@
    |          Thies C. Arntzen <thies@digicol.de>                         |
    +----------------------------------------------------------------------+
  */
+
+/* comment out the next line if you're on Oracle 7.x and don't have the olog 
+   call. */
+ 
+#define HAS_OLOG 1
+
 #if defined(COMPILE_DL)
 # if PHP_31
 #  include "../phpdl.h"
@@ -94,13 +100,12 @@ oracle_module php3_oracle_module;
 #define ORA_FETCHINTO_ASSOC (1<<0)
 #define ORA_FETCHINTO_NULLS (1<<1)
 
-static oraConnection *ora_get_conn(HashTable *, int);
+static oraConnection *ora_get_conn(HashTable *,HashTable *, int);
 static int ora_add_cursor(HashTable *, oraCursor *);
 static oraCursor *ora_get_cursor(HashTable *, int);
 static void ora_del_cursor(HashTable *, int);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
-static int _cursors_cleanup(list_entry *le);
 static int _close_oraconn(oraConnection *conn);
 static int _close_orapconn(oraConnection *conn);
 static int _close_oracur(oraCursor *cur);
@@ -186,46 +191,17 @@ static const text *ora_func_tab[] =
 DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
 #endif
 
-#if 0
-static int _cursors_cleanup(list_entry *le)
-{
-  ORACLE_TLS_VARS;
-
-  if (le->type == ORACLE_GLOBAL(php3_oracle_module).le_cursor){
-    oraCursor *curs = ((oraCursor *) le->ptr);
-    oraConnection *conn = curs->conn_ptr;
-
-	if (! conn->open) 
-		return 1;
-
-	/*
-    if ((!(conn->open)) && (curs->open > 0)){
-      oclose(&curs->cda);
-      curs->open = 0;
-    }
-	*/
-
-	return 1;
-  }
-
-  return 0;
-}
-#endif
-
 static int _close_oraconn(oraConnection *conn)
 {
 	ORACLE_TLS_VARS;
 	
 	conn->open = 0;
 
-	/* zeev says, this is a no-no (thies 990430) 
-	_php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_list,
-					 (int (*)(void *))_cursors_cleanup);
-	*/
-	
 	ologof(&conn->lda);
 	ORACLE_GLOBAL(php3_oracle_module).num_links--;
 	efree(conn);
+
+	_php3_hash_del(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&conn,sizeof(void*));
 
 	return 1;
 }
@@ -236,15 +212,12 @@ static int _close_orapconn(oraConnection *conn)
   
 	conn->open = 0;
 
-	/* zeev says, this is a no-no (thies 990430) 
-	_php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_plist,
-					 (int (*)(void *))_cursors_cleanup);
-	*/
-	
 	ologof(&conn->lda);
 	free(conn);
 	ORACLE_GLOBAL(php3_oracle_module).num_links--;
 	ORACLE_GLOBAL(php3_oracle_module).num_persistent--;
+
+	_php3_hash_del(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&conn,sizeof(void*));
 
 	return 1;
 }
@@ -266,6 +239,7 @@ pval_ora_param_destructor(oraParam *param)
 static int _close_oracur(oraCursor *cur)
 {
 	int i;
+	ORACLE_TLS_VARS;
 
 	if (cur){
 		if (cur->query){
@@ -284,10 +258,15 @@ static int _close_oracur(oraCursor *cur)
 			efree(cur->columns);
 			cur->columns = NULL;
 		}
+
 		if (cur->open){
-			oclose(&cur->cda);
-			cur->open = 0;
+			oraConnection *db_conn;
+
+			if (_php3_hash_find(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&(cur->conn_ptr),sizeof(void*),(void **)&db_conn) == SUCCESS) {
+				oclose(&cur->cda);
+			} 
 		}
+
 	   	efree(cur);
 	}
 	
@@ -340,6 +319,9 @@ int php3_minit_oracle(INIT_FUNC_ARGS)
 	ORACLE_GLOBAL(php3_oracle_module).le_pconn =
 		register_list_destructors(NULL, _close_orapconn);
 
+	ORACLE_GLOBAL(php3_oracle_module).conns = malloc(sizeof(HashTable));
+	_php3_hash_init(ORACLE_GLOBAL(php3_oracle_module).conns, 13, NULL, NULL, 1);
+
 	REGISTER_LONG_CONSTANT("ORA_BIND_INOUT", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_OUT",   2, CONST_CS | CONST_PERSISTENT);
@@ -386,8 +368,11 @@ int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS)
 	}
 	PHP3_MUTEX_UNLOCK(oracle_mutex);
 #endif
-	return SUCCESS;
 
+	_php3_hash_destroy(ORACLE_GLOBAL(php3_oracle_module).conns);
+	free(ORACLE_GLOBAL(php3_oracle_module).conns);
+
+	return SUCCESS;
 }
 
 int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS)
@@ -422,7 +407,7 @@ static int _ora_ping(oraConnection *conn)
 
 /* {{{ proto int ora_logon(string user, string password)
    Open an Oracle connection */
-PHP_FUNCTION(Ora_Logon)
+void php3_Ora_Logon(INTERNAL_FUNCTION_PARAMETERS)
 {
 	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -430,7 +415,7 @@ PHP_FUNCTION(Ora_Logon)
 
 /* {{{ proto int ora_plogon(string user, string password)
    Open a persistant Oracle connection */
-PHP_FUNCTION(Ora_PLogon)
+void php3_Ora_PLogon(INTERNAL_FUNCTION_PARAMETERS)
 {
 	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -447,9 +432,6 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_len, len, id;
 	ORACLE_TLS_VARS;
 
-	ORACLE_GLOBAL(php3_oracle_module).resource_list = list;
-	ORACLE_GLOBAL(php3_oracle_module).resource_plist = plist;
-  
 	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -514,8 +496,13 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		
 		memset((void *) db_conn,0,sizeof(oraConnection));	
 
+#if HAS_OLOG
 		if (olog(&db_conn->lda, db_conn->hda, user,
 				 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
+#else
+		if (orlon(&db_conn->lda, db_conn->hda, user,
+				 strlen(user), pwd, strlen(pwd), 0)) {
+#endif
 			php3_error(E_WARNING, "Unable to connect to ORACLE (%s)",
 					   ora_error(&db_conn->lda));
 			if (persistent)
@@ -554,7 +541,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		
 		ORACLE_GLOBAL(php3_oracle_module).num_links++;
-    
+		
 	} else {
 		int type;
     
@@ -575,8 +562,13 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					type == ORACLE_GLOBAL(php3_oracle_module).le_pconn)){
 			if(!_ora_ping(db_conn)) {
 				/* XXX Reinitialize lda, hda ? */
+#if HAS_OLOG
 				if(olog(&db_conn->lda, db_conn->hda, user,
 						 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
+#else
+				if(orlon(&db_conn->lda, db_conn->hda, user,
+						 strlen(user), pwd, strlen(pwd), 0)) {
+#endif
 					php3_error(E_WARNING, "Unable to reconnect to ORACLE (%s)",
 							   ora_error(&db_conn->lda));
 					/* Delete list entry for this connection */
@@ -590,13 +582,21 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			return_value->value.lval = id;
 		}
 	}
+		
+	_php3_hash_add(ORACLE_GLOBAL(php3_oracle_module).conns,
+				   (void*)&db_conn,
+				   sizeof(void*),
+				   (void*)&db_conn,
+				   sizeof(void*),
+				   NULL);
+
 	efree(hashed_details);
 	return_value->type = IS_LONG;
 }
 
 /* {{{ proto int ora_logoff(int connection)
    Close an Oracle connection */
-PHP_FUNCTION(Ora_Logoff)
+void php3_Ora_Logoff(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	int type, ind;
 	oraConnection *conn;
@@ -621,7 +621,7 @@ PHP_FUNCTION(Ora_Logoff)
 
 /* {{{ proto int ora_open(int connection)
    Open an Oracle cursor */
-PHP_FUNCTION(Ora_Open)
+void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn = NULL;
@@ -634,7 +634,7 @@ PHP_FUNCTION(Ora_Open)
 	convert_to_long(arg);
   
 	conn_ind = arg->value.lval;
-	conn = ora_get_conn(list, conn_ind);
+	conn = ora_get_conn(list,plist, conn_ind);
 	if (conn == NULL) {
 		RETURN_FALSE;
 	}
@@ -652,13 +652,14 @@ PHP_FUNCTION(Ora_Open)
 	}
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
+	cursor->conn_id = conn_ind;	
 	RETURN_LONG(ora_add_cursor(list, cursor));
 }
 /* }}} */
 
 /* {{{ proto int ora_close(int cursor)
    Close an Oracle cursor */
-PHP_FUNCTION(Ora_Close)
+void php3_Ora_Close(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 
@@ -675,7 +676,7 @@ PHP_FUNCTION(Ora_Close)
 
 /* {{{ proto int ora_commitoff(int connection)
    Disable automatic commit */
-PHP_FUNCTION(Ora_CommitOff)
+void php3_Ora_CommitOff(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -685,7 +686,7 @@ PHP_FUNCTION(Ora_CommitOff)
 	}
 	convert_to_long(arg);
 
-	conn = ora_get_conn(list, arg->value.lval);
+	conn = ora_get_conn(list,plist, arg->value.lval);
 	if (conn == NULL) {
 		RETURN_FALSE;
 	}
@@ -700,7 +701,7 @@ PHP_FUNCTION(Ora_CommitOff)
 
 /* {{{ proto int ora_commiton(int connection)
    Enable automatic commit */
-PHP_FUNCTION(Ora_CommitOn)
+void php3_Ora_CommitOn(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -710,7 +711,7 @@ PHP_FUNCTION(Ora_CommitOn)
 	}
 	convert_to_long(arg);
 
-	if (!(conn = ora_get_conn(list, arg->value.lval))) {
+	if (!(conn = ora_get_conn(list,plist, arg->value.lval))) {
 		RETURN_FALSE;
 	}
 
@@ -725,7 +726,7 @@ PHP_FUNCTION(Ora_CommitOn)
 
 /* {{{ proto int ora_commit(int connection)
    Commit an Oracle transaction */
-PHP_FUNCTION(Ora_Commit)
+void php3_Ora_Commit(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -735,7 +736,7 @@ PHP_FUNCTION(Ora_Commit)
 	}
 	convert_to_long(arg);
 
-	conn = ora_get_conn(list, arg->value.lval);
+	conn = ora_get_conn(list,plist, arg->value.lval);
 	if (conn == NULL) {
 		RETURN_FALSE;
 	}
@@ -750,7 +751,7 @@ PHP_FUNCTION(Ora_Commit)
 
 /* {{{ proto int ora_rollback(int connection)
    Roll back an Oracle transaction */
-PHP_FUNCTION(Ora_Rollback)
+void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -760,7 +761,7 @@ PHP_FUNCTION(Ora_Rollback)
 	}
 	convert_to_long(arg);
 
-	conn = ora_get_conn(list, arg->value.lval);
+	conn = ora_get_conn(list,plist, arg->value.lval);
 	if (conn == NULL) {
 		RETURN_FALSE;
 	}
@@ -775,7 +776,7 @@ PHP_FUNCTION(Ora_Rollback)
 
 /* {{{ proto int ora_parse(int cursor, string sql_statement [, int defer])
    Parse an Oracle SQL statement */
-PHP_FUNCTION(Ora_Parse)
+void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS)
 {	
      /* cursor_ind, sql_statement [, defer] */
 	int argc;
@@ -805,6 +806,7 @@ PHP_FUNCTION(Ora_Parse)
 		RETURN_FALSE;
 	}
 	if (!(cursor = ora_get_cursor(list, argv[0]->value.lval))){
+		efree(query);
 		RETURN_FALSE;
 	}
 
@@ -831,7 +833,7 @@ PHP_FUNCTION(Ora_Parse)
 
 /* {{{ proto int ora_bind(int cursor, string php_variable_name, string sql_parameter_name, int length [, int type])
    Bind a PHP variable to an Oracle parameter */
-PHP_FUNCTION(Ora_Bind)
+void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
 { /* cursor_ind, php_var_name, sql_var_name, data_len [, inout]*/
 	/* inout: 0 = in/out, 1 = in, 2 = out */
 	int argc;
@@ -848,6 +850,7 @@ PHP_FUNCTION(Ora_Bind)
 	convert_to_string(argv[1]);
 	convert_to_string(argv[2]);
 	convert_to_long(argv[3]);
+
 		
 	cursor = ora_get_cursor(list, argv[0]->value.lval);
 	if (cursor == NULL) {
@@ -933,10 +936,11 @@ PHP_FUNCTION(Ora_Bind)
  */
 /* {{{ proto int ora_exec(int cursor)
    Execute a parsed statement */
-PHP_FUNCTION(Ora_Exec)
+void php3_Ora_Exec(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
+	ELS_FETCH();
 
 	if (getParameters(ht, 1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
@@ -977,7 +981,7 @@ PHP_FUNCTION(Ora_Exec)
 
 /* {{{ proto int ora_numcols(int cursor)
    Returns the numbers of columns in a result */
-PHP_FUNCTION(Ora_NumCols)
+void php3_Ora_NumCols(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
@@ -997,7 +1001,7 @@ PHP_FUNCTION(Ora_NumCols)
 
 /* {{{ proto int ora_numrows(int cursor)
    Returns the number of rows in a result */
-PHP_FUNCTION(Ora_NumRows)
+void php3_Ora_NumRows(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
@@ -1018,7 +1022,7 @@ PHP_FUNCTION(Ora_NumRows)
 /* prepares/executes/fetches 1st row if avail*/
 /* {{{ proto int ora_do(int connection, int cursor)
    Parse and execute a statement and fetch first result row */ 
-PHP_FUNCTION(Ora_Do)
+void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *argv[2];
 	oraConnection *conn = NULL;
@@ -1032,7 +1036,7 @@ PHP_FUNCTION(Ora_Do)
 	convert_to_long(argv[0]);
 	convert_to_string(argv[1]);
 
-	conn = ora_get_conn(list, argv[0]->value.lval);
+	conn = ora_get_conn(list,plist, argv[0]->value.lval);
 	if (conn == NULL) {
 		RETURN_FALSE;
 	}
@@ -1061,6 +1065,7 @@ PHP_FUNCTION(Ora_Do)
 	}
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
+	cursor->conn_id = argv[0]->value.lval;	
 	
 	/* Prepare stmt */
 
@@ -1100,7 +1105,7 @@ PHP_FUNCTION(Ora_Do)
 
 /* {{{ proto int ora_fetch(int cursor)
    Fetch a row of result data from a cursor */
-PHP_FUNCTION(Ora_Fetch)
+void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor;
@@ -1135,11 +1140,10 @@ PHP_FUNCTION(Ora_Fetch)
 
 /* {{{ proto int ora_fetch_into(int cursor, array result [ , int flags ])
    Fetch a row into the specified result array */
-PHP_FUNCTION(Ora_FetchInto)
+void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval     *arg1, *arr, *flg, *tmp;
 	oraCursor *cursor;
-	ub4 ret_len;
 	int i;
 	int flags = 0;
 
@@ -1231,19 +1235,62 @@ PHP_FUNCTION(Ora_FetchInto)
 			switch(cursor->columns[i].dbtype) {
 				case SQLT_LNG:
 				case SQLT_LBI:
-					/* XXX 64k max for LONG and LONG RAW */
-					oflng(&cursor->cda, (sword)(i + 1), cursor->columns[i].buf, DB_SIZE, 1,
-						  &ret_len, 0);
+#if 0
+                    {
+						ub4 ret_len;
+						/* XXX 64k max for LONG and LONG RAW */
+                    	oflng(&cursor->cda, (sword)(i + 1), cursor->columns[i].buf, DB_SIZE, 1,
+                          	&ret_len, 0);
 
-					tmp->value.str.len = ret_len;
+						tmp->value.str.len = ret_len; 
+					}
+#else
+					{ 
+						ub4 ret_len;
+						int offset = cursor->columns[i].col_retlen;
+						sb2 result;
+						
+						if (cursor->columns[i].col_retcode == 1406) { /* truncation -> get the rest! */
+							while (1) {
+								cursor->columns[i].buf = erealloc(cursor->columns[i].buf,offset + DB_SIZE + 1);
+								
+								if (! cursor->columns[i].buf) {
+									offset = 0;
+									break;
+								}
+								
+								result = oflng(&cursor->cda, 
+											   (sword)(i + 1),
+											   cursor->columns[i].buf + offset, 
+											   DB_SIZE, 
+											   1,
+											   &ret_len, 
+											   offset);
+								if (result) {
+									break;
+								}
+								
+								if (ret_len <= 0) {
+									break;
+								}
+								
+								offset += ret_len;
+							}
+						}
+						if (cursor->columns[i].buf && offset) {
+							tmp->value.str.len = offset;
+						} else {
+							tmp->value.str.len = 0;
+						}
+					}
+#endif
 					break;
 				default:
 					tmp->value.str.len = min(cursor->columns[i].col_retlen,
 											 cursor->columns[i].dsize);
 					break;
 			}
-			tmp->value.str.val = estrndup(cursor->columns[i].buf,
-										  tmp->value.str.len);
+			tmp->value.str.val = estrndup(cursor->columns[i].buf,tmp->value.str.len);
 		}
 
 		if (flags&ORA_FETCHINTO_ASSOC){
@@ -1272,7 +1319,7 @@ PHP_FUNCTION(Ora_FetchInto)
 
 /* {{{ proto string ora_columnname(int cursor, int column)
    Get the name of an Oracle result column */
-PHP_FUNCTION(Ora_ColumnName)
+void php3_Ora_ColumnName(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind;
@@ -1313,7 +1360,7 @@ PHP_FUNCTION(Ora_ColumnName)
 
 /* {{{ proto string ora_columntype(int cursor, int column) 
    Get the type of an Oracle result column */
-PHP_FUNCTION(Ora_ColumnType)
+void php3_Ora_ColumnType(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind, colno;
@@ -1386,7 +1433,7 @@ PHP_FUNCTION(Ora_ColumnType)
 
 /* {{{ proto int ora_columnsize(int cursor, int column)
    Return the size of the column */
-PHP_FUNCTION(Ora_ColumnSize)
+void php3_Ora_ColumnSize(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind;
@@ -1426,7 +1473,7 @@ PHP_FUNCTION(Ora_ColumnSize)
 
 /* {{{ proto mixed ora_getcolumn(int cursor, int column)
    Get data from a fetched row */
-PHP_FUNCTION(Ora_GetColumn)
+void php3_Ora_GetColumn(INTERNAL_FUNCTION_PARAMETERS)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int colno;
@@ -1502,13 +1549,54 @@ PHP_FUNCTION(Ora_GetColumn)
 				RETURN_STRINGL(column->buf, min(column->col_retlen, column->dsize), 1);
 			case SQLT_LNG:
 			case SQLT_LBI:
-				{ 
-				ub4 ret_len;
-				/* XXX 64k max for LONG and LONG RAW */
-				oflng(&cursor->cda, (sword)(colno + 1), column->buf, DB_SIZE, 1,
-					  &ret_len, 0);
-				RETURN_STRINGL(column->buf, ret_len, 1);
-				}
+#if 0
+                {
+                ub4 ret_len;
+                /* XXX 64k max for LONG and LONG RAW */
+                oflng(&cursor->cda, (sword)(colno + 1), column->buf, DB_SIZE, 1,
+                      &ret_len, 0);
+                RETURN_STRINGL(column->buf, ret_len, 1);
+                } 
+#else
+					{ 
+						ub4 ret_len;
+						int offset = column->col_retlen;
+						sb2 result;
+						
+						if (column->col_retcode == 1406) { /* truncation -> get the rest! */
+							while (1) {
+								column->buf = erealloc(column->buf,offset + DB_SIZE + 1);
+								
+								if (! column->buf) {
+									offset = 0;
+									break;
+								}
+								
+								result = oflng(&cursor->cda, 
+											   (sword)(colno + 1),
+											   column->buf + offset, 
+											   DB_SIZE, 
+											   1,
+											   &ret_len, 
+											   offset);
+								if (result) {
+									break;
+								}
+								
+								if (ret_len <= 0) {
+									break;
+								}
+								
+								offset += ret_len;
+							}
+						}
+						if (column->buf && offset) {
+							RETURN_STRINGL(column->buf, offset, 1);
+						} else {
+							RETURN_FALSE;
+						}
+					}
+#endif
 			default:
 				php3_error(E_WARNING,
 						   "Ora_GetColumn found invalid type (%d)", type);
@@ -1520,7 +1608,7 @@ PHP_FUNCTION(Ora_GetColumn)
 
 /* {{{ proto string ora_error(int cursor_or_connection)
    Get an Oracle error message */
-PHP_FUNCTION(Ora_Error)
+void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	oraCursor *cursor;
@@ -1535,7 +1623,7 @@ PHP_FUNCTION(Ora_Error)
 		return_value->type = IS_STRING;
 		return_value->value.str.val = estrdup(ora_error(&cursor->cda));
 		return_value->value.str.len = strlen(return_value->value.str.val);
-	} else if ((conn = ora_get_conn(list, arg->value.lval)) != NULL) {
+	} else if ((conn = ora_get_conn(list,plist, arg->value.lval)) != NULL) {
 		return_value->type = IS_STRING;
 		return_value->value.str.val = estrdup(ora_error(&conn->lda));
 		return_value->value.str.len = strlen(return_value->value.str.val);
@@ -1545,7 +1633,7 @@ PHP_FUNCTION(Ora_Error)
 
 /* {{{ proto int ora_errorcode(int cursor_or_connection)
    Get an Oracle error code */
-PHP_FUNCTION(Ora_ErrorCode)
+void php3_Ora_ErrorCode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	oraCursor *cursor;
@@ -1558,7 +1646,7 @@ PHP_FUNCTION(Ora_ErrorCode)
 	convert_to_long(arg);
 	if ((cursor = ora_get_cursor(list, arg->value.lval)) != NULL) {
 		RETVAL_LONG(cursor->cda.rc);
-	} else if ((conn = ora_get_conn(list, arg->value.lval)) != NULL) {
+	} else if ((conn = ora_get_conn(list,plist, arg->value.lval)) != NULL) {
 		RETURN_LONG(conn->lda.rc);
 	}
 }
@@ -1580,14 +1668,11 @@ void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS)
 */
 
 static oraConnection *
-ora_get_conn(HashTable *list, int ind)
+ora_get_conn(HashTable *list,HashTable *plist,int ind)
 {
 	oraConnection *conn = NULL;
 	int type;
-	HashTable *plist;
 	ORACLE_TLS_VARS;
-
-	plist = ORACLE_GLOBAL(php3_oracle_module).resource_plist;
 
 	conn = (oraConnection *)php3_list_find(ind, &type);
 	if (conn && type == ORACLE_GLOBAL(php3_oracle_module).le_conn)
@@ -1611,6 +1696,7 @@ static oraCursor *
 ora_get_cursor(HashTable *list, int ind)
 {
 	oraCursor *cursor;
+	oraConnection *db_conn;
 	int type;
 	ORACLE_TLS_VARS;
 
@@ -1619,6 +1705,12 @@ ora_get_cursor(HashTable *list, int ind)
 		php3_error(E_WARNING, "Invalid cursor index %d", ind);
 		return NULL;
 	}
+
+	if (_php3_hash_find(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&(cursor->conn_ptr),sizeof(void*),(void **)&db_conn) == FAILURE) {
+		php3_error(E_WARNING, "Connection already closed for cursor index %d", ind);
+		return NULL;
+	}
+
 	return cursor;
 }
 
@@ -1752,11 +1844,18 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 {
 	char *paramname;
 	oraParam *param;
+
+#if PHP_API_VERSION < 19990421
 	pval *pdata;
-	int i, len;
+#else
+	pval **pdata;
+#endif
+
+	int i, len, plen;
 #if (WIN32|WINNT)
 	/* see variables.c */
 	HashTable *symbol_table=php3i_get_symbol_table();
+jj
 #endif
 	_php3_hash_internal_pointer_reset(cursor->params);
 
@@ -1812,21 +1911,32 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 #else
 		if(_php3_hash_find(&EG(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
 #endif
-			php3_error(E_WARNING, "Can't find variable for parameter");
+			php3_error(E_WARNING, "Can't find variable for parameter <%s>",paramname);
 			efree(paramname);
 			return 0;
 		}
 #endif
+#if PHP_API_VERSION < 19990421 
 		convert_to_string(pdata);
-		if(param->progvl <= pdata->value.str.len){
+		plen = pdata->value.str.len;
+#else
+		convert_to_string(*pdata);
+		plen = (*pdata)->value.str.len;
+#endif
+		if(param->progvl <= plen){
 			php3_error(E_NOTICE, "Input value will be truncated");
 		}
 
-		len = min(param->progvl - 1, pdata->value.str.len);
+		len = min(param->progvl - 1, plen);
 
+#if PHP_API_VERSION < 19990421 
 		strncpy(param->progv, pdata->value.str.val, len);
+#else
+		strncpy(param->progv, (*pdata)->value.str.val, len);
+#endif
 
 		param->progv[len] = '\0';
+
 		efree(paramname);
 	}
 	return 1;
