@@ -1,3 +1,30 @@
+1999-12-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB/mysql.php: Copy & paste correction.
+
+    * pear/DB/mysql.php: (DB_mysql::fetchInto) new method.
+
+    * ext/xml/xml.c: Fixed #2952.
+
+1999-12-10  Stig Bakken  <ssb@fast.no>
+
+    * makerpm: Added makerpm by Samuel Liddicott <sam@campbellsci.co.uk>
+
+1999-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c: Output information about HTTP headers
+
+    * SAPI.c
+      SAPI.h: Export sapi_free_header()
+
+1999-12-10  Stig Bakken  <ssb@fast.no>
+
+    * NEWS: remove uninteresting NEWS entries
+
+1999-12-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: A few more fixes for php_strtolower().
+
 1999-12-09  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/php_string.h
