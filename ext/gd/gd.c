@@ -58,7 +58,7 @@
 #endif
 
 #ifdef ENABLE_GD_TTF
-static void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
+static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #endif
 
 #ifdef THREAD_SAFE
@@ -143,6 +143,14 @@ DLEXPORT zend_module_entry *get_module(void) { return &gd_module_entry; }
 
 #define PolyMaxPoints 256
 
+static void php_free_gd_font(gdFontPtr fp)
+{
+	if (fp->data) {
+		efree(fp->data);
+	}
+	efree(fp);
+}
+
 
 PHP_MINIT_FUNCTION(gd)
 {
@@ -165,7 +173,7 @@ PHP_MINIT_FUNCTION(gd)
 	}
 #endif
 	GD_GLOBAL(le_gd) = register_list_destructors(gdImageDestroy, NULL);
-	GD_GLOBAL(le_gd_font) = register_list_destructors(php3_free_gd_font, NULL);
+	GD_GLOBAL(le_gd_font) = register_list_destructors(php_free_gd_font, NULL);
 	return SUCCESS;
 }
 
@@ -220,7 +228,8 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 }
 
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
-PHPAPI int phpi_get_le_gd(void){
+PHPAPI int phpi_get_le_gd(void)
+{
 	GD_TLS_VARS;
 	return GD_GLOBAL(le_gd);
 }
@@ -278,14 +287,6 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 }
 
 #endif
-
-void php3_free_gd_font(gdFontPtr fp)
-{
-	if (fp->data) {
-		efree(fp->data);
-	}
-	efree(fp);
-}
 
 /* {{{ proto int imageloadfont(string filename)
    Load a new font */
@@ -396,7 +397,8 @@ PHP_FUNCTION(imagecreate)
 
 /* {{{ proto int imagecreatefrompng(string filename)
    Create a new image from file or URL */
-void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagecreatefrompng)
+{
       pval *file;
       int ind;
       gdImagePtr im;
@@ -430,7 +432,8 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int imagepng(int im [, string filename])
    Output image to browser or file */
-void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepng)
+{
       pval *imgind, *file;
       gdImagePtr im;
       char *fn=NULL;
@@ -1381,7 +1384,7 @@ PHP_FUNCTION(imageinterlace)
 /* arg = 0  normal polygon
    arg = 1  filled polygon */
 /* im, points, num_points, col */
-static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
+static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	pval *IM, *POINTS, *NPOINTS, *COL, **var;
 	gdImagePtr im;
 	gdPoint points[PolyMaxPoints];	
@@ -1469,7 +1472,7 @@ static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
    Draw a polygon */
 PHP_FUNCTION(imagepolygon)
 {
-	_php3_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1477,12 +1480,12 @@ PHP_FUNCTION(imagepolygon)
    Draw a filled polygon */
 PHP_FUNCTION(imagefilledpolygon)
 {
-	_php3_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_imagepolygon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 
-static gdFontPtr _php3_find_gd_font(int size)
+static gdFontPtr php_find_gd_font(int size)
 {
 	gdFontPtr font;
 	int ind_type;
@@ -1524,7 +1527,7 @@ static gdFontPtr _php3_find_gd_font(int size)
  * arg = 0  ImageFontWidth
  * arg = 1  ImageFontHeight
  */
-static void _php3_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
+static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
 	pval *SIZE;
 	gdFontPtr font;
@@ -1533,7 +1536,7 @@ static void _php3_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(SIZE);
-	font = _php3_find_gd_font(SIZE->value.lval);
+	font = php_find_gd_font(SIZE->value.lval);
 	RETURN_LONG(arg ? font->h : font->w);
 }
 
@@ -1542,7 +1545,7 @@ static void _php3_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
    Get font width */
 PHP_FUNCTION(imagefontwidth)
 {
-	_php3_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1550,13 +1553,13 @@ PHP_FUNCTION(imagefontwidth)
 Get font height */
 PHP_FUNCTION(imagefontheight)
 {
-	_php3_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_imagefontsize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 
 /* workaround for a bug in gd 1.2 */
-void _php3_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
+void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
 						 int color)
 {
 	int cx, cy, px, py, fline;
@@ -1584,7 +1587,7 @@ void _php3_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
  * arg = 2  ImageString
  * arg = 3  ImageStringUp
  */
-static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
+static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	pval *IM, *SIZE, *X, *Y, *C, *COL;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
@@ -1627,14 +1630,14 @@ static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		RETURN_FALSE;
 	}
 	
-	font = _php3_find_gd_font(size);
+	font = php_find_gd_font(size);
 
 	switch(mode) {
     	case 0:
 			gdImageChar(im, font, x, y, ch, col);
 			break;
     	case 1:
-			_php3_gdimagecharup(im, font, x, y, ch, col);
+			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
     	case 2:
 			for (i = 0; (i < l); i++) {
@@ -1645,7 +1648,7 @@ static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			break;
     	case 3: {
 			for (i = 0; (i < l); i++) {
-				/* _php3_gdimagecharup(im, font, x, y, (int)string[i], col); */
+				/* php_gdimagecharup(im, font, x, y, (int)string[i], col); */
 				gdImageCharUp(im, font, x, y, (int)string[i], col);
 				y -= font->w;
 			}
@@ -1661,28 +1664,28 @@ static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 /* {{{ proto int imagechar(int im, int font, int x, int y, string c, int col)
    Draw a character */ 
 PHP_FUNCTION(imagechar) {
-	_php3_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 /* {{{ proto int imagecharup(int im, int font, int x, int y, string c, int col)
    Draw a character rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagecharup) {
-	_php3_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 /* {{{ proto int imagestring(int im, int font, int x, int y, string str, int col)
    Draw a string horizontally */
 PHP_FUNCTION(imagestring) {
-	_php3_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
+	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
 /* }}} */
 
 /* {{{ proto int imagestringup(int im, int font, int x, int y, string str, int col)
    Draw a string vertically - rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagestringup) {
-	_php3_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
+	php_imagechar(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
 /* }}} */
 
@@ -1846,7 +1849,7 @@ PHP_FUNCTION(imagesy)
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
-	php3_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX);
 }
 /* }}} */
 
@@ -1854,12 +1857,12 @@ PHP_FUNCTION(imagettfbbox)
    Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
-	php3_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW);
 }
 /* }}} */
 
 static
-void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
+void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	pval *IM, *PTSIZE, *ANGLE, *X, *Y, *C, *FONTNAME, *COL;
 	gdImagePtr im;

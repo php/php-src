@@ -26,7 +26,7 @@
 
 #include <libintl.h>
 
-function_entry php3_gettext_functions[] = {
+function_entry php_gettext_functions[] = {
     PHP_FE(textdomain,								NULL)
     PHP_FE(gettext,									NULL)
     PHP_FALIAS(_,				gettext,			NULL)
@@ -36,8 +36,8 @@ function_entry php3_gettext_functions[] = {
     {NULL, NULL, NULL}
 };
 
-zend_module_entry php3_gettext_module_entry = {
-	"gettext", php3_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
+zend_module_entry php_gettext_module_entry = {
+	"gettext", php_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
 };
 
 PHP_MINFO_FUNCTION(gettext)

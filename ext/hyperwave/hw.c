@@ -42,7 +42,7 @@
 #include "php_ini.h"
 #include "php_hyperwave.h"
 
-//hw_module php3_hw_module;
+//hw_module php_hw_module;
 
 #define HW_ATTR_NONE	1
 #define HW_ATTR_LANG	2
@@ -633,7 +633,7 @@ static int * make_ints_from_array(HashTable *lht) {
 }
 
 #define BUFFERLEN 30
-static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *argv[4];
 	int argc;
@@ -897,7 +897,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
    Connect to the Hyperwave server */
 PHP_FUNCTION(hw_connect)
 {
-	php3_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
@@ -905,7 +905,7 @@ PHP_FUNCTION(hw_connect)
    Connect to the Hyperwave server persistent */
 PHP_FUNCTION(hw_pconnect)
 {
-	php3_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(hw_root)
 }
 /* }}} */
 
-char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
+char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	pval **arg1;
 	int link, type;
 	hw_connection *ptr;
@@ -1126,7 +1126,7 @@ char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 PHP_FUNCTION(hw_stat) {
         char *object;
 
-	object = php3_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, STAT_COMMAND);
+	object = php_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, STAT_COMMAND);
 	if(object == NULL)
 		RETURN_FALSE;
 
@@ -1144,7 +1144,7 @@ PHP_FUNCTION(hw_who) {
 	int i;
 	char *strtok_buf;
 
-	object = php3_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, WHO_COMMAND);
+	object = php_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, WHO_COMMAND);
 	if(object == NULL)
 		RETURN_FALSE;
 
@@ -1813,7 +1813,7 @@ PHP_FUNCTION(hw_modifyobject) {
 #undef BUFFERLEN
 /* }}} */
 
-void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
+void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int link, type, dest=0, from=0, count;
 	HashTable *src_arr;
@@ -1907,14 +1907,14 @@ void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 /* {{{ proto void hw_mv(int link, array objrec, int from, int dest)
    Moves object */
 PHP_FUNCTION(hw_mv) {
-	php3_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, MOVE);
+	php_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, MOVE);
 }
 /* }}} */
 
 /* {{{ proto void hw_cp(int link, array objrec, int dest)
    Copies object */
 PHP_FUNCTION(hw_cp) {
-	php3_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, COPY);
+	php_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, COPY);
 }
 /* }}} */
 

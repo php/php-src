@@ -19,20 +19,21 @@
 
 /* 	$Id$	 */
 
-void _php3_free_ps_font(gd_ps_font *f_ind)
+void php_free_ps_font(gd_ps_font *f_ind)
 {
 	T1_DeleteFont(f_ind->font_id);
 	efree(f_ind);
 }
 
-void _php3_free_ps_enc(char **enc)
+void php_free_ps_enc(char **enc)
 {
 	T1_DeleteEncoding(enc);
 }
 
 /* {{{ proto int imagepsloadfont(string pathname)
 Load a new font from specified file */
-void php3_imagepsloadfont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsloadfont)
+{
 	pval *file;
 	int l_ind;
 	gd_ps_font *f_ind;
@@ -77,7 +78,8 @@ void php3_imagepsloadfont(INTERNAL_FUNCTION_PARAMETERS) {
 proto int imagepscopyfont(int font_index)
 Make a copy of a font for purposes like extending or reenconding */
 /*
-void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepscopyfont)
+{
 	pval *fnt;
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
@@ -130,7 +132,8 @@ void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool imagepsfreefont(int font_index)
 Free memory used by a font */
-void php3_imagepsfreefont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsfreefont)
+{
 	pval *fnt;
 	int type;
 
@@ -154,7 +157,8 @@ void php3_imagepsfreefont(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool imagepsencodefont(int font_index, string filename)
 To change a fonts character encoding vector */
-void php3_imagepsencodefont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsencodefont)
+{
 	pval *fnt, *enc;
 	char **enc_vector;
 	int type;
@@ -192,7 +196,8 @@ void php3_imagepsencodefont(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool imagepsextendfont(int font_index, double extend)
 Extend or or condense (if extend < 1) a font */
-void php3_imagepsextendfont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsextendfont)
+{
 	pval *fnt, *ext;
 	int type;
 	gd_ps_font *f_ind;
@@ -219,7 +224,8 @@ void php3_imagepsextendfont(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool imagepsslantfont(int font_index, double slant)
 Slant a font */
-void php3_imagepsslantfont(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsslantfont)
+{
 	pval *fnt, *slt;
 	int type;
 	gd_ps_font*f_ind;
@@ -245,7 +251,8 @@ void php3_imagepsslantfont(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array imagepstext(int image, string text, int font, int size, int xcoord, int ycoord [, int space, int tightness, double angle, int antialias])
 Rasterize a string over an image */
-void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepstext)
+{
 	pval *img, *str, *fnt, *sz, *fg, *bg, *sp, *px, *py, *aas, *wd, *ang;
 	int i, j, x, y;
 	int space, type;
@@ -413,7 +420,8 @@ void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array imagepsbbox(string text, int font, int size[, int space, int tightness, int angle])
 Return the bounding box needed by a string if rasterized */
-void php3_imagepsbbox(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(imagepsbbox)
+{
 	pval *str, *fnt, *sz, *sp, *wd, *ang;
 	int i, space, add_width, char_width, amount_kern, type;
 	int cur_x, cur_y, dx, dy;
