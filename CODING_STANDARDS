@@ -134,6 +134,8 @@ Syntax and indentation
     style.  This applies to just about everything, starting with
     indentation and comment styles and up to function declaration
     syntax.
+
+    (see also http://www.tuxedo.org/~esr/jargon/html/entry/indent-style.html)
     
 [3] Be generous with whitespace and braces.  Always prefer:
 
