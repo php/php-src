@@ -124,7 +124,7 @@ struct mb_overload_def {
 	int type;
 	char *orig_func;
 	char *ovld_func;
-	zend_function *orig;
+	char *save_func;
 };
 
 #ifdef ZTS
