@@ -136,7 +136,7 @@ char*		ftp_mkdir(ftpbuf_t *ftp, const char *dir);
 int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);
 
 /* Set permissions on a file */
-int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename);
+int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len);
 
 /* returns a NULL-terminated array of filenames in the given path
  * or NULL on error.  the return array must be freed (but don't
