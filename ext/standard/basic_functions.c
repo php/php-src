@@ -329,6 +329,7 @@ function_entry basic_functions[] = {
 	PHP_FE(strstr,															NULL)
 	PHP_FE(stristr,															NULL)
 	PHP_FE(strrchr,															NULL)
+	PHP_FE(str_shuffle,															NULL)
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															NULL)

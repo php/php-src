@@ -82,6 +82,7 @@ PHP_FUNCTION(strnatcasecmp);
 PHP_FUNCTION(substr_count);
 PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
+PHP_FUNCTION(str_shuffle);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
