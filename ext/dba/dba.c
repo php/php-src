@@ -74,7 +74,7 @@ ZEND_GET_MODULE(dba)
 
 typedef struct dba_handler {
 	char *name;
-	int (*open)(dba_info *);
+	int (*open)(dba_info * TSRMLS_DC);
 	void (*close)(dba_info *);
 	char* (*fetch)(dba_info *, char *, int, int *);
 	int (*update)(dba_info *, char *, int, char *, int, int);
@@ -345,7 +345,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = args + 3;
 	info->hnd = NULL;
 
-	if(hptr->open(info) != SUCCESS) {
+	if(hptr->open(info TSRMLS_CC) != SUCCESS) {
 		dba_close(info);
 		php_error(E_WARNING, "driver initialization failed");
 		FREENOW;
