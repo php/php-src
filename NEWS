@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Removed a warning message about a NONEXISTENT character set from
+  mysql_connect(), when the server's default character set != latin1.
+- Add Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
 - Added Udm_Check_Charset function (gluke)
 - New SAPI module for the WebJames server on RISC OS (Alex Waugh)
 - Made ldap_add (and modify) give warning with illegal value arrays.
