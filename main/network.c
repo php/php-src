@@ -130,30 +130,31 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 /* }}} */
 
 /* {{{ php_network_getaddresses
+ * Returns number of addresses, 0 for none/error
  */
 static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 {
 	struct sockaddr **sap;
+	int n;
 
 	if (host == NULL) {
-		return -1;
+		return 0;
 	}
 
 	{
 #ifdef HAVE_GETADDRINFO
 		struct addrinfo hints, *res, *sai;
-		int n;
 
 		memset(&hints, '\0', sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
-			return -1;
+			return 0;
 		}
 
 		sai = res;
-		for (n=2; (sai = sai->ai_next) != NULL; n++);
-		*sal = emalloc(n * sizeof(*sal));
+		for (n = 1; (sai = sai->ai_next) != NULL; n++);
+		*sal = emalloc((n + 1) * sizeof(*sal));
 		sai = res;
 		sap = *sal;
 		do {
@@ -184,7 +185,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 			host_info = gethostbyname(host);
 			if (host_info == NULL) {
 				php_error(E_WARNING, "php_network_getaddresses: gethostbyname failed");
-				return -1;
+				return 0;
 			}
 			in = *((struct in_addr *) host_info->h_addr);
 		}
@@ -195,10 +196,11 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 		(*sap)->sa_family = AF_INET;
 		((struct sockaddr_in *)*sap)->sin_addr = in;
 		sap++;
+		n = 1;
 #endif
 	}
 	*sap = NULL;
-	return 0;
+	return n;
 }
 /* }}} */
 
@@ -286,18 +288,23 @@ ok:
  */
 int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout)
 {	
-	int s;
+	int n, repeatto, s;
 	struct sockaddr **sal, **psal;
 	struct timeval timeoutval;
 	
-	if (php_network_getaddresses(host, &sal))
+	n = php_network_getaddresses(host, &sal);
+
+	if (n == 0)
 		return -1;
 	
-	if (timeout)	{
-		timeoutval.tv_sec = timeout;
-		timeoutval.tv_usec = 0;
+	/* is this a good idea? 5s? */
+	repeatto = timeout / n > 5;
+	if (repeatto) {
+		timeout /= n;
 	}
-	
+	timeoutval.tv_sec = timeout;
+	timeoutval.tv_usec = 0;
+
 	psal = sal;
 	while (*sal != NULL) {
 		s = socket((*sal)->sa_family, socktype, 0);
@@ -334,6 +341,10 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 			close (s);
 		}
 		sal++;
+		if (repeatto) {
+			timeoutval.tv_sec = timeout;
+			timeoutval.tv_usec = 0;
+		}
 	}
 	php_network_freeaddresses(psal);
 	php_error(E_WARNING, "php_hostconnect: connect failed");
@@ -342,6 +353,33 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
  ok:
 	php_network_freeaddresses(psal);
 	return s;
+}
+/* }}} */
+
+/* {{{ php_any_addr
+ * Fills the any (wildcard) address into php_sockaddr_storage
+ */
+void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
+{
+	memset(addr, 0, sizeof(php_sockaddr_storage));
+	switch (family) {
+#ifdef HAVE_IPV6
+	case AF_INET6: {
+		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) addr;
+		sin6->sin6_family = AF_INET6;
+		sin6->sin6_port = htons(port);
+		sin6->sin6_addr = in6addr_any;
+		break;
+	}
+#endif
+	case AF_INET: {
+		struct sockaddr_in *sin = (struct sockaddr_in *) addr;
+		sin->sin_family = AF_INET;
+		sin->sin_port = htons(port);
+		sin->sin_addr.s_addr = INADDR_ANY;
+		break;
+	}
+	}
 }
 /* }}} */
 
