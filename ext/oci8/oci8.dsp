@@ -43,8 +43,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\ZendEngine2" /I "..\..\..\bindlib_w32" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\ZendEngine2" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\oci805\include" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\oci805\include" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -70,8 +70,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\ZendEngine2" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\ZendEngine2" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\include\oci805" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "FTP_EXPORTS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /FR /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\include\oci805" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "FTP_EXPORTS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
