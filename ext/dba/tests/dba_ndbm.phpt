@@ -2,13 +2,13 @@
 DBA NDBM handler test
 --SKIPIF--
 <?php 
+	$handler = 'ndbm';
 	require_once('skipif.inc');
-	if (!in_array('ndbm', dba_handlers())) die('skip NDBM handler not available');
 ?>
 --FILE--
 <?php
-	require_once('test.inc');
 	$handler = 'ndbm';
+	require_once('test.inc');
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--
