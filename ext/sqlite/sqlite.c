@@ -120,6 +120,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
 	PHP_FE(sqlite_fetch_string, NULL)
+	PHP_FE(sqlite_fetch_all, NULL)
 	PHP_FE(sqlite_current, NULL)
 	PHP_FE(sqlite_column, NULL)
 	PHP_FE(sqlite_libversion, NULL)
@@ -1046,40 +1047,31 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 	array_init(return_value);
 
 	for (j = 0; j < res->ncolumns; j++) {
-		char *decoded = NULL;
-		int decoded_len;
+		zval *decoded;
+		MAKE_STD_ZVAL(decoded);
 
 		if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
 			int l = strlen(rowdata[j]);
-			decoded = do_alloca(l);
-			decoded_len = sqlite_decode_binary(rowdata[j]+1, decoded);
+			Z_STRVAL_P(decoded) = emalloc(l);
+			Z_STRLEN_P(decoded) = l = sqlite_decode_binary(rowdata[j]+1, Z_STRVAL_P(decoded));
+			Z_STRVAL_P(decoded)[l] = '\0';
+			Z_TYPE_P(decoded) = IS_STRING;
 		} else {
-			decoded = (char*)rowdata[j];
-			if (decoded) {
-				decoded_len = strlen(decoded);
+			if ((char*)rowdata[j]) {
+				ZVAL_STRING(decoded, (char*)rowdata[j], 1);
 			} else {
-				decoded_len = 0;
-			}
-		}
-		
-		if (mode & PHPSQLITE_NUM) {
-			if (decoded == NULL) {
-				add_index_null(return_value, j);
-			} else {
-				add_index_stringl(return_value, j, decoded, decoded_len, 1);
-			}
-		}
-		if (mode & PHPSQLITE_ASSOC) {
-			/* Lets see if we need to change case of the assoc key */
-			if (decoded == NULL) {
-				add_assoc_null(return_value, (char*)colnames[j]);
-			} else {
-				add_assoc_stringl(return_value, (char*)colnames[j], decoded, decoded_len, 1);
+				ZVAL_NULL(decoded);
 			}
 		}
 
-		if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
-			free_alloca(decoded);
+		if (mode & PHPSQLITE_NUM) {
+			add_index_zval(return_value, j, decoded);
+			if (mode & PHPSQLITE_ASSOC) {
+				ZVAL_ADDREF(decoded);
+				add_assoc_zval(return_value, (char*)colnames[j], decoded);
+			}
+		} else {
+			add_assoc_zval(return_value, (char*)colnames[j], decoded);
 		}
 	}
 
@@ -1150,6 +1142,41 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 
 	if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
 		free_alloca(decoded);
+	}
+}
+/* }}} */
+
+/* {{{ proto array sqlite_fetch_all(resource result [, int result_type, bool decode_binary])
+   Fetches all rows from a result set as an array */
+PHP_FUNCTION(sqlite_fetch_all)
+{
+	zval *zres, *ent;
+	int mode = PHPSQLITE_BOTH;
+	zend_bool decode_binary = 1;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	if (ZEND_NUM_ARGS() < 2) {
+		mode = res->mode;
+	}
+
+	if (res->curr_row >= res->nrows && res->nrows) {
+		if (!res->buffered) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "One or more rowsets were already returned");
+		} else {
+			res->curr_row = 0;
+		}
+	}
+
+	array_init(return_value);
+
+	while (res->curr_row < res->nrows) {
+		MAKE_STD_ZVAL(ent);
+		php_sqlite_fetch_array(res, mode, decode_binary, 1, ent TSRMLS_CC);
+		add_next_index_zval(return_value, ent);
 	}
 }
 /* }}} */
@@ -1445,7 +1472,7 @@ PHP_FUNCTION(sqlite_rewind)
 	}
 	
 	if (!res->nrows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no rows received");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "no rows received");
 		RETURN_FALSE;
 	}
 
