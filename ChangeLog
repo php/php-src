@@ -1,3 +1,227 @@
+2001-09-25  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: no message
+
+2001-09-25  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/xml/xml.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/zlib/zlib.c
+      ext/sockets/sockets.c
+      ext/standard/datetime.c
+      ext/standard/formatted_print.c
+      ext/standard/info.c
+      ext/standard/levenshtein.c
+      ext/standard/mail.c
+      ext/standard/quot_print.c
+      ext/standard/string.c
+      ext/satellite/enum.c
+      ext/satellite/object.c
+      ext/satellite/struct.c
+      ext/snmp/snmp.c
+      ext/snmp/winsnmp.c
+      ext/oracle/oracle.c
+      ext/ovrimos/ovrimos.c
+      ext/pfpro/pfpro.c
+      ext/oci8/oci8.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c
+      ext/mcrypt/mcrypt.c
+      ext/ming/ming.c
+      ext/mnogosearch/php_mnogo.c
+      ext/interbase/interbase.c
+      ext/java/java.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/informix/ifx.ec
+      ext/hyperwave/hw.c
+      ext/fbsql/php_fbsql.c
+      ext/gd/gd.c
+      ext/cpdf/cpdf.c
+      ext/dba/dba.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dbx/dbx.c: 2nd phase in back-substitution those macro's
+
+    I've got pretty much everything now...
+
+    * scripts/conv_z_macros: Should've used my own script... 3rd try.
+
+    * sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/cgi/cgi_main.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/apache/mod_php4.c
+      main/fopen_wrappers.c
+      main/main.c
+      main/output.c
+      main/php_ini.c
+      main/php_variables.c
+      main/rfc1867.c
+      sapi/aolserver/aolserver.c
+      ext/xslt/xslt.c
+      ext/yaz/php_yaz.c
+      ext/zlib/zlib.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/swf/swf.c
+      ext/standard/syslog.c
+      ext/standard/var.c
+      ext/standard/pack.c
+      ext/standard/scanf.c
+      ext/standard/soundex.c
+      ext/standard/string.c
+      ext/standard/filestat.c
+      ext/standard/formatted_print.c
+      ext/standard/html.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/crc32.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/file.c
+      ext/sockets/sockets.c
+      ext/satellite/typecode.c
+      ext/satellite/zval_to_namedvalue.c
+      ext/session/mod_user.c
+      ext/shmop/shmop.c
+      ext/snmp/snmp.c
+      ext/sablot/sablot.c
+      ext/satellite/class.c
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/object.c
+      ext/satellite/php_orbit.c
+      ext/pspell/pspell.c
+      ext/qtdom/qtdom.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/printer/printer.c
+      ext/pfpro/pfpro.c
+      ext/pdf/pdf.c
+      ext/ovrimos/ovrimos.c
+      ext/openssl/openssl.c
+      ext/oracle/oracle.c
+      ext/odbc/velocis.c
+      ext/odbc/php_odbc.c
+      ext/notes/php_notes.c
+      ext/oci8/oci8.c
+      ext/muscat/muscat.c
+      ext/muscat/muscat_net.c
+      ext/mysql/php_mysql.c
+      ext/ming/ming.c
+      ext/mnogosearch/php_mnogo.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mbstring/mbstring.c
+      ext/mcal/php_mcal.c
+      ext/mailparse/mailparse.c
+      ext/ldap/ldap.c
+      ext/java/java.c
+      ext/imap/php_imap.c
+      ext/ingres_ii/ii.c
+      ext/interbase/interbase.c
+      ext/iisfunc/setup.c
+      ext/gd/gdt1.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/ftp/ftp.c
+      ext/gd/gd.c
+      ext/fbsql/php_fbsql.c
+      ext/filepro/filepro.c
+      ext/domxml/php_domxml.c
+      ext/exif/exif.c
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_pgsql.c
+      ext/dbplus/dbplus.c
+      ext/dbplus/php_dbplus.c
+      ext/dbx/dbx.c
+      ext/ctype/ctype.c
+      ext/curl/curl.c
+      ext/dbase/dbase.c
+      ext/cpdf/cpdf.c
+      ext/crack/crack.c
+      ext/calendar/easter.c
+      ext/ccvs/ccvs.c
+      ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/aspell/aspell.c
+      ext/bcmath/bcmath.c
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c:
+    Back-substitute for Z_* macro's. If it breaks some extension (the script isn't optimal, it parses for example var->zval.value incorrect) please let me know.
+
+2001-09-25  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4dllts.dsp: fix release_ts_dbg libpath
+
+    * main/internal_functions_win32.c: nuke VARIANT module
+
+2001-09-25  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/conversion.c: changed flags
+
+2001-09-25  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * scripts/conv_z_macros: Just in case...
+
+    * scripts/conv_z_macros:
+    Enhance to also process objects, and be more verbose
+
+2001-09-25  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/reqclient.h: Added REQ_RANDSTR to support msession_randstr
+
+    * ext/msession/README
+      ext/msession/config.m4:
+    Changed config.m4 to a better default, updated README.
+
+    * ext/msession/msession.c
+      ext/msession/php_msession.h:
+    Added msession_randstr, creates a random string from a single
+    source.
+
+2001-09-25  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/config.m4: add a 7.9 version check
+
 2001-09-24  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/curl/curl.c: fix constant
