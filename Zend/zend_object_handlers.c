@@ -338,7 +338,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
-	zend_error("Cannot use object as array");
+	zend_error(E_ERROR, "Cannot use object as array");
 #if 0
 	zend_printf("Assigning to object:  ");
 	zend_print_zval(object, 0);
