@@ -877,6 +877,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 						replacement[0] = k;
 						replacement[1] = '\0';
 						replacement_len = 1;
+						break;
 
 					case cs_big5:
 					case cs_gb2312:
