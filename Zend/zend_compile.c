@@ -2452,7 +2452,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->line_start = zend_get_compiled_lineno(TSRMLS_C);
 	new_class_entry->ce_flags |= class_token->u.constant.value.lval;
 
-	if (parent_class_name->op_type != IS_UNUSED) {
+	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;
 	}
 
@@ -2541,10 +2541,6 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error(E_COMPILE_ERROR, "Interfaces cannot implement other classes/interfaces");
-	}
 
 	opline->opcode = ZEND_ADD_INTERFACE;
 	opline->op1 = CG(implementing_class);

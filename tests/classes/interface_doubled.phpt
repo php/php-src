@@ -1,5 +1,5 @@
 --TEST--
-ZE2 An interface may both inherit and implement base interfaces
+ZE2 An interface extends base interfaces
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
@@ -25,7 +25,7 @@ interface if_e {
 	abstract function f_d();
 }
 
-interface if_f extends if_e, if_a, if_b, if_c, if_d, if_e {
+interface if_f extends /*if_e,*/ if_a, if_b, if_c, if_d /*, if_e*/ {
 }
 
 class base {
@@ -154,6 +154,7 @@ echo $t->test('if_d');
 echo $t->test('if_e');
 
 ?>
+===DONE===
 --EXPECTF--
 class_a
 is_a(class_a, if_a) yes
@@ -196,4 +197,5 @@ is_a(class_g, if_a) yes
 is_a(class_g, if_b) yes
 is_a(class_g, if_c) yes
 is_a(class_g, if_d) yes
-is_a(class_g, if_e) yes
+is_a(class_g, if_e) no
+===DONE===
