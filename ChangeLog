@@ -1,3 +1,16 @@
+2004-01-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/crack/crack.c:
+      Fixed compile warnings.
+      Fixed crash in crack_closedict();
+      Switched from zend_error() to php_error_docref();
+
+2004-01-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/file/bug26615.phpt:
+      "seq" isn't available for all platforms.
+
 2004-01-03  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_4_3)
