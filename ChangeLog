@@ -1,3 +1,24 @@
+2000-07-07  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gdttf.c:
+    - Restore testing for Unicode charmap to what it was, it was working(?), this
+      shouldn't have any effect on other charmaps.
+    - Remove bogus message about not finding any Unicode mapping table.
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    - Move away from encoding transaction number into link_id and use properly
+      resources instead for both.
+    - Some cleaning.
+
+2000-07-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c:
+    Fix fgets re-allocation (add +1 to accomondate ending \0).
+
+    * ext/posix/posix.c: Fix add_assoc_string functions.
+    add_assoc_string(l) last parameter is "duplicate", not string length.
+
 2000-07-06  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: WDDX now implements __sleep()/__wakeup() functionality.
