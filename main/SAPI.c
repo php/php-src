@@ -823,7 +823,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char *val, unsigned int val_len TSRMLS_DC))
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC))
 {
 	sapi_module.input_filter = input_filter;
 	return SUCCESS;
