@@ -43,6 +43,10 @@ PHP_FUNCTION(shmop_size);
 PHP_FUNCTION(shmop_write);
 PHP_FUNCTION(shmop_delete);
 
+#ifdef PHP_WIN32
+typedef int key_t;
+#endif
+
 struct php_shmop
 {
 	int shmid;
