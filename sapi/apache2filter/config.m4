@@ -52,13 +52,12 @@ AC_ARG_WITH(apxs2,
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
   if test -z `$APXS -q SYSCONFDIR`; then
-    optarg=-a
-  else
     optarg=
+  else
+    optarg=-a
   fi
 
-  INSTALL_IT='$(mkinstalldirs) '"$APXS_LIBEXECDIR && \
-$APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' -i ${optarg}-n php4"
+  INSTALL_IT='$(mkinstalldirs) '"$APXS_LIBEXECDIR && $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' -i ${optarg} -n php4"
 
   case $host_alias in
   *aix*)
