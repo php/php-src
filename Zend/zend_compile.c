@@ -995,14 +995,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
 		int short_class_name_length = CG(active_class_entry)->name_length;
-		zend_uint i;
 
-		for (i=0; i < CG(active_class_entry)->name_length; i++) {
-			if (CG(active_class_entry)->name[i] == ':') {
-				short_class_name = &CG(active_class_entry)->name[i+1];
-				short_class_name_length = strlen(short_class_name);
-			}
-		}
 		if (zend_hash_add(&CG(active_class_entry)->function_table, lcname, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
 			zend_op_array *child_op_array, *parent_op_array;
 			if (CG(active_class_entry)->parent
@@ -1025,12 +1018,18 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 
 		short_class_name = do_alloca(short_class_name_length + 1);
-		if (!CG(active_class_entry)->constructor) {
-			zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
-		}
-		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len)) && !CG(active_class_entry)->constructor) {
+		zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
+		/* Improve after RC: cache the lowercase class name */
+
+		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len))) {
+			if(CG(active_class_entry)->constructor) {
+				zend_error(E_COMPILE_ERROR, "Cannot redefine constructor for class %s", CG(active_class_entry)->name);
+			}
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
+			if(CG(active_class_entry)->constructor) {
+				zend_error(E_COMPILE_ERROR, "Cannot redefine constructor for class %s", CG(active_class_entry)->name);
+			}
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
