@@ -673,7 +673,8 @@ PHP_FUNCTION(fbsql_close)
 {
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
-	int id;
+	int id, i, nument, type;
+	void *ptr;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
@@ -691,6 +692,19 @@ PHP_FUNCTION(fbsql_close)
 			break;
 	}
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+
+	nument = zend_hash_next_free_element(&EG(regular_list));
+	for (i = 1; i < nument; i++) {
+		ptr = zend_list_find(i, &type);
+		if (ptr && (type == le_result)) {
+			PHPFBResult *result;
+
+			result = (PHPFBResult *)ptr;
+			if (result->link == phpLink) {
+				zend_list_delete(i);
+			}
+		}
+	}
 
 	if (id==-1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(fbsql_link_index));
