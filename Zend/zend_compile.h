@@ -539,7 +539,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_DECLARE_INHERITED_CLASS	3
 
 #define ZEND_FETCH_STANDARD		0
-#define ZEND_FETCH_NO_AI_COUNT	1
+#define ZEND_FETCH_ADD_LOCK		1
 
 #define ZEND_MEMBER_FUNC_CALL	1<<0
 #define ZEND_CTOR_CALL			1<<1

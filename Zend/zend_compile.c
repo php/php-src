@@ -1561,7 +1561,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 			if (le == CG(list_llist).tail) {
 				opline->extended_value = ZEND_FETCH_STANDARD;
 			} else {
-				opline->extended_value = ZEND_FETCH_NO_AI_COUNT;
+				opline->extended_value = ZEND_FETCH_ADD_LOCK;
 			}
 			last_container = opline->result;
 			dimension = dimension->next;

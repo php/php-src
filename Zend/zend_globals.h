@@ -196,8 +196,6 @@ struct _zend_executor_globals {
 
 	long precision;
 
-	unsigned int AiCount;
-
 	zend_ptr_stack garbage;
 
 	/* for extended information support */
