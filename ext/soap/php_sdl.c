@@ -136,6 +136,12 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const 
 	smart_str_0(&nscat);
 	if (zend_hash_find(sdl->encoders, nscat.c, nscat.len + 1, (void**)&enc_ptr) == SUCCESS) {
 		enc = *enc_ptr;
+		if (enc->details.ns) {
+			free(enc->details.ns);
+		}
+		if (enc->details.type_str) {
+			free(enc->details.type_str);
+		}
 	} else {
 		enc_ptr = NULL;
 		enc = malloc(sizeof(encode));
