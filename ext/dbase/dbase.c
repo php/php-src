@@ -16,16 +16,20 @@
    +----------------------------------------------------------------------+
  */
 
-#include <stdlib.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "php.h"
 #include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
+
+#include <stdlib.h>
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 #if DBASE
 #include "php_dbase.h"

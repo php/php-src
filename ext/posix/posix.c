@@ -30,6 +30,10 @@
 /* $Id$ */
 
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "ext/standard/info.h"
 #if !defined(PHP_API_VERSION) || PHP_API_VERSION < 19990421

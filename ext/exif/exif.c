@@ -36,6 +36,10 @@
    Matthias Wandel,  Dec 1999 - April 2000
   --------------------------------------------------------------------------
   */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 
 #if HAVE_EXIF

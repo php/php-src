@@ -24,6 +24,10 @@
  * ? Safe mode implementation
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 #include "php_mysql.h"

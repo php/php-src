@@ -22,6 +22,10 @@
 #define HAVE_NOTES 1
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 #include "php_notes.h"

@@ -22,6 +22,10 @@
  * It may not compile or execute correctly on other systems.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+ 
 #include "php.h"
 
 #if HAVE_SYSVSHM
