@@ -1,22 +1,24 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 14 Aug 2003, Version 4.3.3RC4
-- Fixed bug #25093 (Various leaks due to non-freed queries). (Ilia)
-- Fixed bug #25084 (Make refer check not dependant on register_globals). (Ilia)
+- Fixed bug #25093 (ext/pgsql: Various leaks due to non-freed queries). (Ilia)
+- Fixed bug #25084 (ext/session: Fixed session.referer_check to be independent
+  on register_globals). (Ilia)
 - Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields). (Ilia)
 - Fixed bug #25044 (header("Location:") changing HTTP status). (Marcus)
-- Fixed bug #25037 (Possible infinite loop inside SendText()). (Ilia)
+- Fixed bug #25037 (win23 mail(): Possible infinite loop inside SendText()).
+  (Ilia)
 - Fixed bug #25007 (rand() & mt_rand() seed RNG every call). (Jani)
 - Fixed bug #24989 (external libexpat conflicts with bundled libexpat). (Jani)
 - Fixed bug #24980 (array_reduce() uses first element as default running
   total). (Ilia)
-- Fixed bug #24977 (Revert mysql_select_db optimization). (Ilia)
+- Fixed bug #24977 (Reverted mysql_select_db() optimization). (Ilia)
 - Fixed bug #24909 (Bad random numbers with ZTS builds on Solaris). (Ilia)
 - Fixed bug #24951 (ob_flush() needlessly destroys output handler). (Ilia)
 - Fixed bug #24897 (inconsistent behavior of shuffle() & array_multisort()).
   (Ilia, Jani)
 - Fixed bug #24792 (--enable-zend-multibyte causes random segfaults with ZTS).
-  (fujimoto)
+  (Fujimoto)
 - Fixed bug #24224 (ibase_blob_get() overflow). (Ard)
 - Fixed bug #24142 (workaround for a gcc bug affecting round()). (Marcus, Ilia)
 - Fixed bug #24063 (serialize() missing 0 after the . on scientific notation).
@@ -28,18 +30,19 @@ PHP 4                                                                      NEWS
 - Fixed bug #21957 (serialize() mangles objects with __sleep). (Ilia)
 - Fixed bug #21918 (strange behaviour of mixed type in array-keys). (Marcus)
 - Fixed bug #20896 (-s -w modes with php-cli cause php to hang). (Ilia)
-- Fixed bug #18744 (blob_add() has max limit of 64k). (Ard)
+- Fixed bug #18744 (ibase_blob_add() has max limit of 64k). (Ard)
 - Fixed bug #7014 (crash in _php_ibase_error() after request shutdown). (Ard)
 
 07 Aug 2003, Version 4.3.3RC3
-- Fixed bug #24958 (Incorrect handling of 404s). (Ilia, Justin)
+- Fixed bug #24958 (Apache2 SAPIs: Incorrect handling of 404s). (Ilia, Justin)
 - Fixed bug #24936 (ext/fdf not linked properly as shared extension). (Jani)
-- Fixed bug #24883 (variables_order and gpc_order being ignored). (Ilia)
-- Fixed bug #24871 (methods misidentified as constructors). (Ilia)
-- Fixed bug #24177 (Status not set correctly after flush() in Apache 2). (Ilia)
+- Fixed bug #24883 ("variables_order" and "gpc_order" being ignored). (Ilia)
+- Fixed bug #24871 (aggregate(): methods misidentified as constructors). (Ilia)
+- Fixed bug #24177 (Apahce2 SAPIs: status set incorrectly after flush()).
+  (Ilia)
 - Fixed bug #23509 (exit code lost when exit() called from 
   register_shutdown_function()). (Ilia)
-- Fixed bug #23463 (added Dbase2 version check). (Vlad Krupin)
+- Fixed bug #23463 (ext/dbase: added Dbase2 version check). (Vlad Krupin)
 - Fixed bug #23104 (hash position of static arrays not being reset). (Ilia)
 - Fixed bug #22154 (Possible crash when memory_limit is reached and
   output buffering in addition to session.use_trans_sid is used). (Ilia)
