@@ -222,9 +222,8 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
-	size_t read_bytes = 0, tmp;
+	size_t read_bytes = 0;
 	int c;
-	int n;
 
 	c = SIZEOF_UNCONSUMED_BYTES();
 	if (c > 0) {
@@ -251,7 +250,6 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	int xsa_len;
 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC);
@@ -636,8 +634,6 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 	
 	if (hc->contentlength > 0 
 			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
-		int missing = hc->contentlength - SIZEOF_UNCONSUMED_BYTES();
-		
 		hc->read_body_into_mem = 1;
 		return 0;
 	}
