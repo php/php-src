@@ -2365,12 +2365,7 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 				l--;
 			}
 		} else {
-			if (s != t) {
-				*s++ = *t++;
-			} else {
-				s++;
-				t++;
-			}
+			*s++ = *t++;
 			l--;
 		}
 	}
