@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2004 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,28 +16,17 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef SPL_DIRECTORY_H
-#define SPL_DIRECTORY_H
+#ifndef SPL_SXE_H
+#define SPL_SXE_H
 
 #include "php.h"
 #include "php_spl.h"
 
-extern zend_class_entry *spl_ce_DirectoryIterator;
-extern zend_class_entry *spl_ce_RecursiveDirectoryIterator;
+extern zend_class_entry *spl_ce_SimpleXMLIterator;
 
-PHP_MINIT_FUNCTION(spl_directory);
+ZEND_API PHP_MINIT_FUNCTION(spl_sxe);
 
-typedef struct _spl_ce_dir_object {
-	zend_object       std;
-	php_stream        *dirp;
-	php_stream_dirent entry;
-	char              *path;
-	char              *path_name;
-	int               path_name_len;
-	int               index;
-} spl_ce_dir_object;
-
-#endif /* SPL_DIRECTORY_H */
+#endif /* SPL_SXE_H */
 
 /*
  * Local Variables:
