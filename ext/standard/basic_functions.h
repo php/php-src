@@ -77,6 +77,7 @@ PHP_FUNCTION(is_resource);
 PHP_FUNCTION(is_bool);
 PHP_FUNCTION(is_long);
 PHP_FUNCTION(is_double);
+PHP_FUNCTION(is_numeric);
 PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);

@@ -270,6 +270,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(is_float,		is_double,			first_arg_allow_ref)
 	PHP_FE(is_double,								first_arg_allow_ref)
 	PHP_FALIAS(is_real,			is_double,			first_arg_allow_ref)
+	PHP_FE(is_numeric,								NULL)
 	PHP_FE(is_string,								first_arg_allow_ref)
 	PHP_FE(is_array,								first_arg_allow_ref)
 	PHP_FE(is_object,								first_arg_allow_ref)
@@ -1126,6 +1127,38 @@ PHP_FUNCTION(is_object)
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
 
+/* {{{ proto bool is_numeric(mixed value)
+   Returns true if value is a number or a numeric string */
+PHP_FUNCTION(is_numeric)
+{
+	zval **arg;
+	int result;
+	
+	if (ARG_COUNT(ht) !=1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	switch ((*arg)->type) {
+		case IS_LONG:
+		case IS_DOUBLE:
+			RETURN_TRUE;
+			break;
+
+		case IS_STRING:
+			result = is_numeric_string((*arg)->value.str.val, (*arg)->value.str.len, NULL, NULL);
+			if (result == IS_LONG || result == IS_DOUBLE) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+			break;
+
+		default:
+			RETURN_FALSE;
+			break;
+	}
+}
+/* }}} */
 
 /* 
 	1st arg = error message
