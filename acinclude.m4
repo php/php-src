@@ -263,7 +263,8 @@ AC_MSG_RESULT($ext_output)
 dnl
 dnl PHP_ARG_WITH(arg-name, check message, help text[, default-val])
 dnl Sets PHP_ARG_NAME either to the user value or to the default value.
-dnl default-val defaults to no. 
+dnl default-val defaults to no.  This will also set the variable ext_shared,
+dnl and will overwrite any previous variable of that name.
 dnl
 AC_DEFUN(PHP_ARG_WITH,[
 PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_))
@@ -278,7 +279,8 @@ PHP_ARG_ANALYZE($5)
 dnl
 dnl PHP_ARG_ENABLE(arg-name, check message, help text[, default-val])
 dnl Sets PHP_ARG_NAME either to the user value or to the default value.
-dnl default-val defaults to no. 
+dnl default-val defaults to no.  This will also set the variable ext_shared,
+dnl and will overwrite any previous variable of that name.
 dnl
 AC_DEFUN(PHP_ARG_ENABLE,[
 PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
@@ -587,15 +589,19 @@ AC_DEFUN(PHP_BUILD_RPATH,[
 ])
 
 dnl
-dnl PHP_ADD_INCLUDE(path)
+dnl PHP_ADD_INCLUDE(path [,before])
 dnl
-dnl add a include path
+dnl add a include pat, if before is 1, add in front.
 dnl
 AC_DEFUN(PHP_ADD_INCLUDE,[
   if test "$1" != "/usr/include"; then
     PHP_EXPAND_PATH($1, ai_p)
     AC_PHP_ONCE(INCLUDEPATH, $ai_p, [
-      INCLUDES="$INCLUDES -I$ai_p"
+      if test "$2"; then
+        INCLUDES="-I$ai_p $INCLUDES"
+      else
+        INCLUDES="$INCLUDES -I$ai_p"
+      fi
     ])
   fi
 ])
