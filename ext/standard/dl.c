@@ -75,6 +75,9 @@ PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
+#define IS_SLASH(c)	\
+	(((c)=='/') || ((c)=='\\'))
+
 void php_dl(pval *file,int type,pval *return_value)
 {
 	void *handle;
@@ -89,7 +92,11 @@ void php_dl(pval *file,int type,pval *return_value)
 
 		libpath = emalloc(extension_dir_len+file->value.str.len+2);
 
-		sprintf(libpath,"%s/%s",PG(extension_dir),file->value.str.val);
+		if (IS_SLASH(PG(extension_dir)[extension_dir_len-1])) {
+			sprintf(libpath,"%s%s", PG(extension_dir), file->value.str.val); /* SAFE */
+		} else {
+			sprintf(libpath,"%s/%s", PG(extension_dir), file->value.str.val); /* SAFE */
+		}
 	} else {
 		libpath = estrndup(file->value.str.val, file->value.str.len);
 	}
