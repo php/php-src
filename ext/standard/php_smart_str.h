@@ -21,6 +21,9 @@
 
 #include "php_smart_str_public.h"
 
+#include <stdlib.h>
+#include <zend.h>
+
 #define smart_str_0(x) ((x)->c[(x)->len] = '\0')
 
 #define smart_str_alloc(d,n,what) {\

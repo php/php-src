@@ -19,6 +19,8 @@
 #ifndef PHP_SMART_STR_PUBLIC_H
 #define PHP_SMART_STR_PUBLIC_H
 
+#include <sys/types.h>
+
 typedef struct {
 	char *c;
 	size_t len;
