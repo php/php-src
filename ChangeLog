@@ -1,3 +1,112 @@
+2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      MFH fix several property handling issues
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Make internally used properties read-only and fix default properties
+
+2004-09-27  Edin Kadribasic  <edink@emini.dk>
+
+    * win32/pwd.c:
+      MFB: bugfix #30133
+
+    * (PHP_5_0)
+      NEWS
+      win32/pwd.c:
+      Fixed bug #30133
+
+2004-09-27  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      give credits to David
+
+2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_exceptions.c:
+      - Fix memeleak
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Declare properties
+
+2004-09-27  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/README.ZEND_VM:
+      - Document zend_vm_use_old_executor() for Derick.
+
+2004-09-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/filters/basic.phpt:
+      Make test more generic.
+      
+
+    * (PHP_5_0)
+      run-tests.php
+      run-tests2.php:
+      MFH: Fixed bug #30249 (Incorrect timeout check).
+
+    * run-tests.php
+      run-tests2.php:
+      Fixed bug #30249 (Incorrect timeout check).
+
+2004-09-27  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/file.c:
+      removed redundant NEW_LIBC and CLIB_STAT_PATCH checks
+
+    * ext/standard/dl.c
+      ext/standard/http_fopen_wrapper.c:
+      removed redundant NEW_LIBC checks
+
+    * ext/ftp/ftp.c:
+      removed unwanted NEW_LIBC checks
+
+    * ext/ftp/php_ftp.c:
+      removed redundant NEW_LIBC check
+
+    * ext/snmp/snmp.c:
+      removed unwanted NEW_LIBC checks and comments
+
+2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix Reflection_Class to ReflectionClass in docu/messages
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix warning
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_stream.c:
+      - Fix warning
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_reflection_api.c:
+      - Fix warnings
+
+    * ZendEngine2/zend_interfaces.c:
+      Fix warnign
+
+2004-09-27  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h:
+      - Use zval_ctor_func() for wrapper and update the prototype to void
+
+2004-09-27  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      - Hopefully fixed the compilation on Windows that was broken with my
+        foreach-backport.
+
+2004-09-27  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h:
+      - Make zval_copy_ctor() return void like dtor(). No one ever checks the
+      - return value which is SUCCESS always.
+
 2004-09-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend.h

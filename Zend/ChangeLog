@@ -1,3 +1,53 @@
+2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      MFH fix several property handling issues
+
+    * zend_reflection_api.c:
+      - Make internally used properties read-only and fix default properties
+
+    * zend_exceptions.c:
+      - Fix memeleak
+
+    * zend_reflection_api.c:
+      - Declare properties
+
+2004-09-27  Andi Gutmans  <andi@zend.com>
+
+    * README.ZEND_VM:
+      - Document zend_vm_use_old_executor() for Derick.
+
+2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Fix Reflection_Class to ReflectionClass in docu/messages
+
+    * zend_execute_API.c:
+      - Fix warning
+
+    * zend_compile.c
+      zend_stream.c:
+      - Fix warning
+
+    * zend_builtin_functions.c
+      zend_reflection_api.c:
+      - Fix warnings
+
+    * zend_interfaces.c:
+      Fix warnign
+
+2004-09-27  Andi Gutmans  <andi@zend.com>
+
+    * zend_variables.c
+      zend_variables.h:
+      - Use zval_ctor_func() for wrapper and update the prototype to void
+
+    * zend_variables.c
+      zend_variables.h:
+      - Make zval_copy_ctor() return void like dtor(). No one ever checks the
+      - return value which is SUCCESS always.
+
 2004-09-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.h
