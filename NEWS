@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Fix segfault and check for truecolor image in ImageColorAt (Rasmus)
 - nl2br now handles all styles of line-endings in one string. (Boian,
   Derick)
 - Added mcrypt_generic_deinit to replace mcrypt_generic_end. (Derick)
