@@ -2758,7 +2758,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 
 	
 #ifdef USE_GD_IMGSTRTTF
-# if HAVE_LIBGD20 & HAVE_LIBFREETYPE
+# if HAVE_LIBFREETYPE
 
 #if HAVE_GD_STRINGFTEX
 	if (extended)	{
