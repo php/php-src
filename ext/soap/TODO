@@ -17,6 +17,7 @@ SOAP
 - support for SOAP headers
   - actor attribute
   - mustUnderstend attribute
+- root attribute
 - make sure soap 1.1 and 1.2 are supported fully
 
 Encoding
@@ -57,7 +58,6 @@ Encoding
 - references to external resources
 ? support for "nillable" and "nil"
 - default values
-- root attribute
 ? provide schema 1999/2001 support???
 ? make internal refrences for soap encoding (use seralization logic)???
 ? provide user space overriding of serialization certin objects and types???
@@ -75,7 +75,7 @@ WSDL
 - support for style "rpc"/"document" encoding (server part)
   How to get function name from request? May be SoapAction HTTP header?
 + support for "encoded"/"literal" encoding
-? arrayType and "literal" encoding
++ arrayType and "literal" encoding
 - function/method overloading/redeclaration (test(int); test(string))
 - wsdl caching
 - wsdl auto generation

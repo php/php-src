@@ -117,7 +117,6 @@
 #define XSD_NMTOKENS_STRING "NMTOKENS"
 
 #define APACHE_NAMESPACE "http://xml.apache.org/xml-soap"
-#define APACHE_NS_PREFIX "apache"
 #define APACHE_MAP 200
 #define APACHE_MAP_STRING "Map"
 
@@ -182,15 +181,8 @@ zval *to_zval_after_user(encodeTypePtr type, zval *data);
 void whiteSpace_replace(char* str);
 void whiteSpace_collapse(char* str);
 
-zval *to_zval_object(encodeTypePtr type, xmlNodePtr data);
-zval *to_zval_array(encodeTypePtr type, xmlNodePtr data);
-
-xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style);
-xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style);
-
-/* Try and guess for non-wsdl clients and servers */
-zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data);
-xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style);
+xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style);
+zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
 
 #define get_conversion(e) get_conversion_ex(SOAP_GLOBAL(defEncIndex), e)
 #define get_conversion_from_type(n, t) get_conversion_from_type_ex(SOAP_GLOBAL(defEnc), n, t)
@@ -198,7 +190,6 @@ xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style);
 
 void encode_reset_ns();
 smart_str *encode_new_ns();
-void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
 encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, const char *type);
@@ -207,32 +198,5 @@ encodePtr get_conversion_from_href_type_ex(HashTable *encoding, const char *type
 void delete_encoder(void *handle);
 
 extern encode defaultEncoding[];
-
-#define FIND_XML_NULL(xml,zval) \
-	{ \
-		xmlAttrPtr null; \
-		if (!xml) { \
-			ZVAL_NULL(zval); \
-			return zval; \
-		} \
-		if (xml->properties) { \
-			null = get_attribute(xml->properties, "nil"); \
-			if (null) { \
-				ZVAL_NULL(zval); \
-				return zval; \
-			} \
-		} \
-	}
-
-#define FIND_ZVAL_NULL(zval, xml, style) \
-{ \
-	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
-	  if (style == SOAP_ENCODED) {\
-			xmlSetProp(xml, "xsi:nil", "1"); \
-		}\
-		return xml; \
-	} \
-}
-
 
 #endif
