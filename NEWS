@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added ob_get_level, which returns the nesting level of the output buffering
+  mechanism. (Yasuo, Derick)
 - Added ob_flush and ob_clean functions, which flush and clean an
   output buffer without destroying the buffer. (Derick)
 - Added a parameter to mysql_connect to force a new database link to be
