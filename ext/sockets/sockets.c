@@ -543,7 +543,7 @@ PHP_FUNCTION(socket_select)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	struct timeval tv;
-	php_fd_set *rfds, *wfds, *xfds;
+	php_fd_set *rfds = NULL, *wfds = NULL, *xfds = NULL;
 	SOCKET max_fd;
 	int sets = 0;
 
@@ -580,7 +580,10 @@ PHP_FUNCTION(socket_select)
 	tv.tv_sec  = Z_LVAL_PP(arg4);
 	tv.tv_usec = Z_LVAL_PP(arg5);
 
-	RETURN_LONG(select(max_fd+1, &(rfds->set), &(wfds->set), &(xfds->set), &tv));
+	RETURN_LONG(select(max_fd+1, rfds ? &(rfds->set) : NULL,
+				wfds ? &(wfds->set) : NULL,
+				xfds ? &(xfds->set) : NULL,
+				&tv));
 }
 /* }}} */
 
@@ -682,7 +685,8 @@ PHP_FUNCTION(socket_listen)
 		backlog = Z_LVAL_PP(arg2);
 	}
 
-	if (listen(php_sock->bsd_socket, backlog) == 0) {
+	if (listen(php_sock->socket, backlog) != 0) {
+		php_error(E_WARNING, "unable to listen [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	
@@ -1068,7 +1072,7 @@ PHP_FUNCTION(socket_strerror)
 PHP_FUNCTION(socket_bind)
 {
 	zval **arg1, **arg2, **arg3;
-	long retval;
+	long retval = 0;
 	php_sockaddr_storage sa_storage;
 	struct sockaddr *sock_type = (struct sockaddr*) &sa_storage;
 	php_socket *php_sock;
@@ -1119,7 +1123,7 @@ PHP_FUNCTION(socket_bind)
 	}
 	
 	if (retval != 0) {
-		php_error(E_WARNING, "unable to bind address, %i", errno);
+		php_error(E_WARNING, "unable to bind address, [%i] %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
