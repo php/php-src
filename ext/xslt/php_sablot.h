@@ -46,6 +46,7 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_ERRNO(handle)     ((handle)->err->no)
 #define XSLT_ERRSTR(handle)    ((handle)->err->str)
 #define XSLT_LOG(handle)       ((handle)->err->log)
+#define XSLT_BASE_ISSET(handle) ((handle)->base_isset)
 
 #define XSLT_FUNCH_FREE(__var) if (__var) zval_ptr_dtor(&(__var)); 
 #define XSLT_REG_ERRMSG(msg, handle)	if (XSLT_ERRSTR(handle)) efree(XSLT_ERRSTR(handle)); \
@@ -124,6 +125,7 @@ typedef struct {
 	struct xslt_processor  processor;
 	struct xslt_error     *err;
 	zval                  *object;
+	unsigned short         base_isset;
 } php_xslt;
 
 #else
