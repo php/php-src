@@ -311,11 +311,12 @@ class PEAR
 
             case PEAR_ERROR_CALLBACK:
                 $setmode = $mode;
+/*
                 $doSet = false;
                 // function callback
                 if (is_string($options) && function_exists($options)) {
                     $doSet = true;
-                }
+                } */
                 // class/object method callback
                 if (is_callable($options)) {
                     $setoptions = $options;
