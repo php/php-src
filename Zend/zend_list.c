@@ -18,6 +18,8 @@
 */
 
 
+/* resource lists */
+
 #include "zend.h"
 #include "zend_list.h"
 #include "zend_API.h"
@@ -134,6 +136,48 @@ ZEND_API void *zend_plist_find(int id, int *type)
 	ELS_FETCH();
 
 	return zend_list_do_find(&EG(persistent_list), id, type);
+}
+
+
+ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, char *resource_type_name, int resource_type)
+{
+	return zend_fetch_resource_ex(passed_id, default_id, resource_type_name, 1, resource_type);
+}
+
+
+ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *resource_type_name, int num_resource_types, ...)
+{
+	int id;
+	int actual_resource_type;
+	void *resource;
+	va_list resource_types;
+	int i;
+
+	if (default_id==-1) { /* use id */
+		if (passed_id->type != IS_RESOURCE) {
+			zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
+			return NULL;
+		}
+		id = passed_id->value.lval;
+	} else {
+		id = default_id;
+	}
+
+	resource = zend_list_find(id, &actual_resource_type);
+	if (!resource) {
+		zend_error(E_WARNING, "%d is not a valid %s resource", resource_type_name);
+		return NULL;
+	}
+
+	va_start(resource_types, num_resource_types);
+	for (i=0; i<num_resource_types; i++) {
+		if (actual_resource_type == va_arg(resource_types, int)) {
+			va_end(resource_types);
+			return resource;
+		}
+	}
+	va_end(resource_types);
+	return NULL;
 }
 
 
