@@ -22,7 +22,7 @@ if test "$PHP_MYSQLI" != "no"; then
   fi
 
   if test "$PHP_EMBEDDED_MYSQLI" = "yes"; then
-	AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
+    AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
     MYSQL_LIB_CFG='--libmysqld-libs'
   else
     MYSQL_LIB_CFG='--libs'
