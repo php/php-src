@@ -1,3 +1,22 @@
+2004-11-04  Edin Kadribasic  <edink@emini.dk>
+
+    * Zend.dsp
+      ZendTS.dsp:
+      Added zend_strtod.* to the build
+
+    * zend_strtod.c
+      zend_strtod.h:
+      Make zend_strtod compile on windows
+
+2004-11-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      Makefile.am:
+      - MFH: Add entry for zend_strtod.c in belief that this is still active.
+
+    * Makefile.am:
+      - Add entry for zend_strtod.c in belief that this is still active.
+
 2004-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * Zend.m4:
