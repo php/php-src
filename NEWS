@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Improved and moved ActiveScript SAPI to PECL.  (Wez)
 - Fixed bug #29505 (get_class_vars() severely broken when used with arrays).
   (Marcus)
+- Fixed bug #29490 (.Net object instantiation failed). (Michael Sisolak).
 - Fixed bug #29474 (win32: usleep() doesn't work). (Wez)
 - Fixed bug #29449 (win32: feof() hangs on empty tcp stream). (Wez)
 - Fixed bug #29437 (Possible crash inside array_walk_recursive()). (Ilia)
