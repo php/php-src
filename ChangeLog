@@ -1,3 +1,65 @@
+2002-05-03  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: MFH
+
+    * NEWS: Domxml changes go into the 4.2.x branch.
+
+2002-05-03  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c: full MFH as discussed with derick
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    removed the function for domxml_node_add_child and made an alias to
+    domxml_node_append_child for BC
+
+2002-05-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/OS/Guess.php: * switched from static to instance model
+    * added matching method with glob support, some examples:
+        $os->matchSignature('linux');
+        $os->matchSignature('linux-2.4*);
+        $os->matchSignature('linux-*-i?86');
+
+2002-05-03  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: WS fixes
+
+    * ext/domxml/php_domxml.c: one parameter too much
+
+    * ext/domxml/php_domxml.c: added encoding support for domxml_dump_mem()
+
+2002-05-03  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/url_scanner_ex.c: forgot
+
+2002-05-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/session/session.c: Fix ZTS build.
+
+2002-05-03  Thies C. Arntzen  <thies@thieso.net>
+
+    * main/output.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      ext/standard/basic_functions.c
+      ext/session/session.c
+      ext/session/php_session.h:    i have also modified the session module to use this - so it doesn't
+    need to fiddle with the output-system any more
+
+2002-05-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/OS/Guess.php
+      pear/package-pear.xml:
+    * fixed autoconf vs. pear installer replacement issue in scripts/pear.in
+      (pear installer now substitutes "@prefix@/bin" to bin_dir ;-)
+    * added skeleton for OS_Guess class
+
+    * NEWS: * unintentional news entry :-)
+
+    * pear/PEAR/Installer.php: * apply umask when installing files
+
 2002-05-02  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Config.php: * add umask config value
