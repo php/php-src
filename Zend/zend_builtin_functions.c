@@ -46,12 +46,13 @@ static ZEND_FUNCTION(leak);
 #ifdef ZEND_TEST_EXCEPTIONS
 static ZEND_FUNCTION(crash);
 #endif
-static ZEND_FUNCTION(get_used_files);
+static ZEND_FUNCTION(get_required_files);
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
+static ZEND_FUNCTION(user_error);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -80,12 +81,13 @@ static zend_function_entry builtin_functions[] = {
 #ifdef ZEND_TEST_EXCEPTIONS
 	ZEND_FE(crash,				NULL)
 #endif
-	ZEND_FE(get_used_files,		NULL)
+	ZEND_FE(get_required_files,	NULL)
 	ZEND_FE(get_included_files,	NULL)
 	ZEND_FE(is_subclass_of,		NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
+	ZEND_FE(user_error,			NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -672,17 +674,61 @@ static int copy_import_use_file(zend_file_handle *fh, zval *array)
 }
 
 
-ZEND_FUNCTION(get_used_files)
+/* {{{ proto array get_required_files(void)
+   Returns an array with the file names that were require_once()'d */
+ZEND_FUNCTION(get_required_files)
 {
 	CLS_FETCH();
 
 	array_init(return_value);
 	zend_hash_apply_with_argument(&CG(used_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
 }
+/* }}} */
 
 
+/* {{{ proto array get_included_files(void)
+   Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
 {
 	array_init(return_value);
 	zend_hash_apply_with_argument(&EG(included_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
 }
+/* }}} */
+
+
+/* {{{ proto void user_error(string messsage [, int error_type])
+   Generates a user-level error/warning/notice message */
+ZEND_FUNCTION(user_error)
+{
+	int error_type = E_USER_NOTICE;
+	zval **z_error_type, **z_error_message;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &z_error_message)==FAILURE) {
+				ZEND_WRONG_PARAM_COUNT();
+			}
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &z_error_message, &z_error_type)==FAILURE) {
+				ZEND_WRONG_PARAM_COUNT();
+			}
+			convert_to_long_ex(z_error_type);
+			error_type = (*z_error_type)->value.lval;
+			switch (error_type) {
+				case E_USER_ERROR:
+				case E_USER_WARNING:
+				case E_USER_NOTICE:
+					break;
+				default:
+					zend_error(E_WARNING, "Invalid error type specified");
+					RETURN_FALSE;
+					break;
+			}
+			break;
+	}
+	convert_to_string_ex(z_error_message);
+	zend_error(error_type, (*z_error_message)->value.str.val);
+	RETURN_TRUE;
+}
+/* }}} */
