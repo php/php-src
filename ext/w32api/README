@@ -2,48 +2,4 @@ Win 32 API Extension
 ====================
 /* $Revision$ */
 
-This extension is a generic extension api to dll's. This was originally written to allow access to the Win32 API from PHP. Although you can also access other functions exported via other DLL's.
-
-An example of getting the amount of time the system has been running and displaying it in a message box:
-
-========================== Example.php =====================================
-<?php
-
-        dl("php_w32api.dll");
-        
-        w32api_register_function("kernel32.dll", 
-                                 "GetTickCount",
-                                 W32_LONG);
-                                 
-        w32api_register_function("User32.dll",
-                                 "MessageBoxA",
-                                 W32_LONG);
-
-        $ticks = w32api_invoke_function("GetTickCount");
-
-        $secs = floor($ticks / 1000);
-        $mins = floor($secs / 60);
-        $hours = floor($mins / 60);
-
-        $str = sprintf("You have been using your computer for:".
-                        "\r\n %d Milliseconds, or \r\n %d Seconds".
-                        "or \r\n %d mins or\r\n %d hours %d mins.",
-                        $ticks,
-                        $secs,
-                        $mins,
-                        $hours,
-                        $mins - ($hours*60));
-
-        w32api_invoke_function("MessageBoxA", 
-                                NULL, 
-                                $str, 
-                                "Uptime Information", 
-                                MB_OK);
-?>
-============================================================================
-
-Currently supported types are generic PHP types (strings, bools, doubles, longs and null's) others will be added as and when I can figure out the best way of converting between types.
-
-Thanks to Ton Plooy for the base code for the generic calling function.
-
-- James Moore <jmoore@php.net>
+See notes in w32api.c
