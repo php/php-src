@@ -71,7 +71,7 @@ static ProcessPair* process_get(FILE *stream)
 {
 	ProcessPair* ptr;
 	ProcessPair* newptr;
-	TWLS_FETCH();
+	TSRMLS_FETCH();
 	
 	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
 		if (ptr->stream == stream) {
@@ -112,7 +112,7 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	HANDLE in, out;
 	char *cmd;
 	ProcessPair *proc;
-	TWLS_FETCH();
+	TSRMLS_FETCH();
 
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
 	security.bInheritHandle			= TRUE;

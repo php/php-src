@@ -17,6 +17,17 @@
 # include "tsrm_config.h"
 #endif
 
+
+#ifdef TSRM_WIN32
+#	ifdef TSRM_EXPORTS
+#	define TSRM_API __declspec(dllexport)
+#	else
+#	define TSRM_API __declspec(dllimport)
+#	endif
+#else
+#	define TSRM_API
+#endif
+
 /* Only compile multi-threading functions if we're in ZTS mode */
 #ifdef ZTS
 
@@ -35,17 +46,6 @@
 #endif
 
 typedef int ts_rsrc_id;
-
-#ifdef TSRM_WIN32
-#	ifdef TSRM_EXPORTS
-#	define TSRM_API __declspec(dllexport)
-#	else
-#	define TSRM_API __declspec(dllimport)
-#	endif
-#else
-#	define TSRM_API
-#endif
-
 
 /* Define THREAD_T and MUTEX_T */
 #ifdef TSRM_WIN32
@@ -115,8 +115,8 @@ TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(TH
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
-#define TSRMLS_FETCH()			void ***tsrm_ls = ts_resource_ex(0, NULL)
-#define TSRMG(id, type, element)	(((type) (*tsrm_ls)[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMLS_FETCH()			void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
+#define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D	void ***tsrm_ls
 #define TSRMLS_DC	, TSRMLS_D
 #define TSRMLS_C	tsrm_ls
@@ -126,13 +126,13 @@ TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(TH
 }
 #endif
 
-#else
+#else /* non ZTS */
 
+#define TSRMLS_FETCH()
 #define TSRMLS_D
 #define TSRMLS_DC
 #define TSRMLS_C
 #define TSRMLS_CC
-#define TSRMLS_FETCH()
 
 #endif /* ZTS */
 
