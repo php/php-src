@@ -137,6 +137,10 @@
 
 %% /* Rules */
 
+start:
+	top_statement_list { do_return(NULL, 0 CLS_CC); }
+;
+
 top_statement_list:	
 		top_statement_list  { do_extended_info(CLS_C); } top_statement { HANDLE_INTERACTIVE(); }
 	|	/* empty */
