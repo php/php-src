@@ -119,20 +119,6 @@ zend_module_entry sqlite_module_entry = {
 ZEND_GET_MODULE(sqlite)
 #endif
 
-static void short_sleep(void)
-{
-#if HAVE_NANOSLEEP
-	struct timespec req = { 0, 500 * 1000 };
-	nanosleep(&req, NULL);
-#elif HAVE_USLEEP
-	usleep(500 * 1000);
-#elif PHP_WIN32
-	Sleep(500);
-#else
-	php_sleep(1);
-#endif
-}
-
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 {
 	if (rsrc->ptr) {
