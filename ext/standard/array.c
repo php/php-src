@@ -1027,18 +1027,20 @@ PHP_FUNCTION(array_walk) {
 }
 /* }}} */
 
-/* {{{ proto bool in_array(mixed needle, array haystack)
+/* {{{ proto bool in_array(mixed needle, array haystack [, bool strict])
    Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
 	zval **value,				/* value to check for */
 		 **array,				/* array to check in */
-		 **entry_ptr,			/* pointer to array entry */
-		 *entry,				/* actual array entry */
+		 **strict,				/* strict comparison or not */
+		 **entry,				/* pointer to array entry */
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
+	int (*compare_func)(zval *, zval *, zval *) = is_equal_function;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &value, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 2 || ARG_COUNT(ht) > 3 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &value, &array, &strict) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1052,12 +1054,17 @@ PHP_FUNCTION(in_array)
 		RETURN_FALSE;
 	}
 
+	if (ARG_COUNT(ht) == 3) {
+		convert_to_boolean_ex(strict);
+		if (Z_LVAL_PP(strict) == 1)
+			compare_func = is_identical_function;
+	}
+
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset(target_hash);
-	while(zend_hash_get_current_data(target_hash, (void **)&entry_ptr) == SUCCESS) {
-		entry = *entry_ptr;
-     	is_equal_function(&res, *value, entry);
-		if (zval_is_true(&res)) {
+	while(zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
+     	compare_func(&res, *value, *entry);
+		if (Z_LVAL(res) == 1) {
 			RETURN_TRUE;
 		}
 		
