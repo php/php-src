@@ -3,11 +3,21 @@
 
 #if REGEX
 #include "regex/regex.h"
+#ifndef REGEX_H
 #define _REGEX_H 1				/* this should stop Apache from loading the system version of regex.h */
+#endif
+#ifndef REGEX_H_
 #define _REGEX_H_ 1
+#endif
+#ifndef RX_H
 #define _RX_H 1				  	/* Try defining these for Linux to	*/
+#endif
+#ifndef REGEXP_LIBRARY_H
 #define __REGEXP_LIBRARY_H__ 1 	/* avoid Apache including regex.h	*/
+#endif
+#ifndef H_REGEX
 #define _H_REGEX 1              /* This one is for AIX */
+#endif
 #else
 #include <regex.h>
 #endif

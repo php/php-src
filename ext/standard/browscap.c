@@ -19,7 +19,6 @@
 #include "php.h"
 #include "php3_browscap.h"
 #include "php_ini.h"
-#include "php_regex.h"
 
 #include "zend_globals.h"
 
