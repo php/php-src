@@ -330,7 +330,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		case 2: {
 				zval **yyhost, **yyuser;
 				
-				if (zend_get_parameters_ex(ht, 2, &yyhost, &yyuser) == FAILURE) {
+				if (zend_get_parameters_ex(2, &yyhost, &yyuser) == FAILURE) {
 					RETURN_FALSE;
 				}
 				convert_to_string_ex(yyhost);
