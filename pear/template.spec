@@ -4,11 +4,12 @@ Version: @version@
 Release: 1
 License: @release_license@
 Group: Development/Libraries
-Source: http://pear.php.net/get/@package@-%{version}.tgz
+Source: http://@master_server@/get/@package@-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-root
-URL: http://pear.php.net/
+URL: http://@master_server@/
 Prefix: %{_prefix}
-Docdir: %{_docdir}
+Docdir: @doc_dir@/@package@
+BuildArchitectures: @arch@
 @extra_headers@
 
 %description
