@@ -164,11 +164,12 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
-static int php_network_getaddresses(const char *host, struct sockaddr ***sal, char **error_string TSRMLS_DC)
+static int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, char **error_string TSRMLS_DC)
 {
 	struct sockaddr **sap;
 	int n;
 #ifdef HAVE_GETADDRINFO
+	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
 	struct addrinfo hints, *res, *sai;
 #else
 	struct hostent *host_info;
@@ -178,59 +179,59 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal, ch
 	if (host == NULL) {
 		return 0;
 	}
-
 #ifdef HAVE_GETADDRINFO
 	memset(&hints, '\0', sizeof(hints));
-
+		
+	hints.ai_family = AF_INET; /* default to regular inet (see below) */
+	hints.ai_socktype = socktype;
+		
 # ifdef HAVE_IPV6
-	hints.ai_family = AF_UNSPEC;
-# else
-	hints.ai_family = AF_INET;
-# endif
-	
-	if ((n = getaddrinfo(host, NULL, &hints, &res)) || res == NULL) {
-		if (error_string) {
-			spprintf(error_string, 0, "getaddrinfo: %s", (res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n)));
+	/* probe for a working IPv6 stack; even if detected as having v6 at compile
+	 * time, at runtime some stacks are slow to resolve or have other issues
+	 * if they are not correctly configured.
+	 * static variable use is safe here since simple store or fetch operations
+	 * are atomic and because the actual probe process is not in danger of
+	 * collisions or race conditions. */
+	if (ipv6_borked == -1) {
+		int s;
+
+		s = socket(PF_INET6, SOCK_DGRAM, 0);
+		if (s == SOCK_ERR) {
+			ipv6_borked = 1;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", (res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n)));
+			ipv6_borked = 0;
+			closesocket(s);
 		}
+	}
+	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
+# endif
+		
+	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
+		return 0;
+	} else if (res == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
 		return 0;
 	}
 
 	sai = res;
-
-	for (n = 1; (sai = sai->ai_next) != NULL; n++) {
+	for (n = 1; (sai = sai->ai_next) != NULL; n++)
 		;
-	}
-		
+	
 	*sal = safe_emalloc((n + 1), sizeof(*sal), 0);
 	sai = res;
 	sap = *sal;
+	
 	do {
-		switch (sai->ai_family) {
-# if HAVE_IPV6
-			case AF_INET6:
-				*sap = emalloc(sizeof(struct sockaddr_in6));
-				*(struct sockaddr_in6 *)*sap =
-					*((struct sockaddr_in6 *)sai->ai_addr);
-				sap++;
-				break;
-# endif
-			case AF_INET:
-				*sap = emalloc(sizeof(struct sockaddr_in));
-				*(struct sockaddr_in *)*sap =
-					*((struct sockaddr_in *)sai->ai_addr);
-				sap++;
-				break;
-		}
+		*sap = emalloc(sai->ai_addrlen);
+		memcpy(*sap, sai->ai_addr, sai->ai_addrlen);
+		sap++;
 	} while ((sai = sai->ai_next) != NULL);
+	
 	freeaddrinfo(res);
 #else
-
 	if (!inet_aton(host, &in)) {
-		/* XXX NOT THREAD SAFE
-		 * (but it *is* thread safe under win32)
-		 */
+		/* XXX NOT THREAD SAFE (is safe under win32) */
 		host_info = gethostbyname(host);
 		if (host_info == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");
@@ -247,7 +248,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal, ch
 	sap++;
 	n = 1;
 #endif
-	
+
 	*sap = NULL;
 	return n;
 }
@@ -402,7 +403,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 	struct sockaddr **sal, **psal, *sa;
 	socklen_t socklen;
 
-	num_addrs = php_network_getaddresses(host, &psal, error_string TSRMLS_CC);
+	num_addrs = php_network_getaddresses(host, socktype, &psal, error_string TSRMLS_CC);
 
 	if (num_addrs == 0) {
 		/* could not resolve address(es) */
@@ -667,7 +668,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	struct timeval limit_time, time_now;
 #endif
 
-	num_addrs = php_network_getaddresses(host, &psal, error_string TSRMLS_CC);
+	num_addrs = php_network_getaddresses(host, socktype, &psal, error_string TSRMLS_CC);
 
 	if (num_addrs == 0) {
 		/* could not resolve address(es) */
