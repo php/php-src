@@ -140,6 +140,9 @@ static int le_csr;
 static void php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	EVP_PKEY *pkey = (EVP_PKEY *)rsrc->ptr;
+
+	assert(pkey != NULL);
+	
 	EVP_PKEY_free(pkey);
 }
 
@@ -1684,7 +1687,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		X509_free(cert);
 
 	if (key && makeresource && resourceval)	{
-		*resourceval = zend_list_insert(key, le_key);
+		*resourceval = ZEND_REGISTER_RESOURCE(NULL, key, le_key);
 	}
 	return key;
 }
@@ -1911,7 +1914,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 		return;
 
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(&cert, 0, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(&cert, 0, passphrase, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
 		RETURN_FALSE;
