@@ -1004,7 +1004,7 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 		ALLOC_ZVAL(array_ptr);
 		array_init(array_ptr);
 		INIT_PZVAL(array_ptr);
-		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_ENV_VARS"), &array_ptr, sizeof(pval *),NULL);
+		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &array_ptr, sizeof(pval *),NULL);
 	}
 	sapi_module.register_server_variables(array_ptr ELS_CC SLS_CC PLS_CC);
 }

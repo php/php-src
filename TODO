@@ -48,6 +48,7 @@ ext/oci8
 ext/standard
 ------------
     * strpad() (Andrei)
+    * stri_replace() (Andrei)
     * comparing arrays semantically (like Python) (Andrei)
     * NOT binary safe:
         strtok()
