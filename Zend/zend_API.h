@@ -135,6 +135,7 @@ typedef struct _zend_function_entry {
 		class_container.interfaces = NULL;      \
 		class_container.get_iterator = NULL;    \
 		class_container.iterator_funcs.funcs = NULL;  \
+		class_container.module = NULL;          \
 	}
 
 int zend_next_free_module(void);
