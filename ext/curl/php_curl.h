@@ -38,6 +38,20 @@ PHP_FUNCTION (curl_setopt);
 PHP_FUNCTION (curl_exec);
 PHP_FUNCTION (curl_close);
 
+
+typedef struct {
+	int le_curl;
+} php_curl_globals;
+
+#ifdef ZTS
+#define CURLG(v) (curl_globals->v)
+#define CURLLS_FETCH() php_curl_globals *curl_globals = ts_resource(gd_curl_id)
+#else
+#define CURLG(v) (curl_globals.v)
+#define CURLLS_FETCH()
+#endif
+
+
 #else
 #define curl_module_ptr NULL
 #endif /* HAVE_CURL */

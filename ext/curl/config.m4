@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension CURL
 
 PHP_ARG_WITH(curl, for CURL support,
-[  --with-curl[=DIR]        Include CURL support !!CURRENTLY EXPERIMENTAL!!])
+[  --with-curl[=DIR]        Include CURL support])
 
 if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then
