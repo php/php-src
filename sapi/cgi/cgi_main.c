@@ -246,13 +246,13 @@ static void php_cgi_usage(char *argv0)
 				"  -s             Display colour syntax highlighted source.\n"
 				"  -f <file>      Parse <file>.  Implies `-q'\n"
 				"  -v             Version number\n"
-				"  -c<path>       Look for php.ini file in this directory\n"
+				"  -c <path>      Look for php.ini file in this directory\n"
 #if SUPPORT_INTERACTIVE
 				"  -a             Run interactively\n"
 #endif
 				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
 				"  -e             Generate extended information for debugger/profiler\n"
-				"  -z<file>       Load Zend extension <file>.\n"
+				"  -z <file>      Load Zend extension <file>.\n"
 				"  -l             Syntax check only (lint)\n"
 				"  -m             Show compiled in modules\n"
 				"  -i             PHP information\n"
