@@ -120,6 +120,10 @@ function_entry snmp_functions[] = {
 	PHP_FALIAS(snmpwalkoid, snmprealwalk, NULL)
 	PHP_FE(snmp_get_quick_print, NULL)
 	PHP_FE(snmp_set_quick_print, NULL)
+#ifdef HAVE_NET_SNMP
+	PHP_FE(snmp_set_enum_print, NULL)
+	PHP_FE(snmp_set_oid_numeric_print, NULL)
+#endif
 	PHP_FE(snmpset, NULL)
 	PHP_FE(snmpv3get, NULL)
 	PHP_FE(snmpv3walk, NULL)
@@ -524,6 +528,40 @@ PHP_FUNCTION(snmp_set_quick_print)
 #endif
 }
 /* }}} */
+
+#ifdef HAVE_NET_SNMP
+/* {{{ proto void snmp_set_enum_print(int enum_print)
+   Return all values that are enums with their enum value instead of the raw integer */
+PHP_FUNCTION(snmp_set_enum_print)
+{
+	int argc = ZEND_NUM_ARGS();
+	long a1;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
+		return;
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
+} 
+/* }}} */
+
+/* {{{ proto void snmp_set_oid_numeric_print(int oid_numeric_print)
+   Return all objects including their respective object id withing the specified one */
+PHP_FUNCTION(snmp_set_oid_numeric_print)
+{
+	int argc = ZEND_NUM_ARGS();
+	long a1;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
+		return;
+	}
+	if ((int) a1 != 0) {
+		netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+						NETSNMP_OID_OUTPUT_NUMERIC);
+        }
+} 
+/* }}} */
+#endif
 
 /* {{{ proto int snmpset(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
    Set the value of a SNMP object */
