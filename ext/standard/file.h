@@ -78,6 +78,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 #define PHP_FILE_IGNORE_NEW_LINES 2
 #define PHP_FILE_SKIP_EMPTY_LINES 4
 #define PHP_FILE_APPEND 8
+#define PHP_FILE_NO_DEFAULT_CONTEXT 16
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
@@ -110,6 +111,7 @@ typedef struct {
 	long default_socket_timeout;
 	char *user_agent;
 	char *user_stream_current_filename; /* for simple recursion protection */
+	php_stream_context *default_context;
 } php_file_globals;
 
 #ifdef ZTS

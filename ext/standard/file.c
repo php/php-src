@@ -137,10 +137,15 @@ static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 	FG(pclose_ret) = 0;
 	FG(user_stream_current_filename) = NULL;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
+	FG(default_context) = NULL;
 }
 
 static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 {
+	if (FG(default_context)) {
+		/* This is being automagically freed elsewhere */
+		FG(default_context) = NULL;
+	}
 }
 
 
@@ -181,9 +186,9 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_COMPLETED",		PHP_STREAM_NOTIFY_COMPLETED,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_RESOLVE",			PHP_STREAM_NOTIFY_RESOLVE,			CONST_CS | CONST_PERSISTENT);
 	
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  	CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_FILTER_READ",			PHP_STREAM_FILTER_READ,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_FILTER_WRITE",			PHP_STREAM_FILTER_WRITE,			CONST_CS | CONST_PERSISTENT);
@@ -195,10 +200,11 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_SERVER_BIND",			STREAM_XPORT_BIND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SERVER_LISTEN",			STREAM_XPORT_LISTEN,				CONST_CS | CONST_PERSISTENT);
 	
-	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",	PHP_FILE_USE_INCLUDE_PATH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",	PHP_FILE_IGNORE_NEW_LINES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",	PHP_FILE_SKIP_EMPTY_LINES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_APPEND", PHP_FILE_APPEND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",			PHP_FILE_USE_INCLUDE_PATH,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",			PHP_FILE_IGNORE_NEW_LINES,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_APPEND", 					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
 	
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -439,9 +445,7 @@ PHP_FUNCTION(file_get_contents)
 		return;
 	}
 
-	if (zcontext) {
-		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", 
 				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
@@ -486,9 +490,7 @@ PHP_FUNCTION(file_put_contents)
 		return;
 	}
 
-	if (zcontext) {
-		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
+	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", 
 			((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
@@ -533,8 +535,8 @@ PHP_FUNCTION(file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
-	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%l' flag is not supported.", flags);
+	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%d' flag is not supported.", flags);
 		RETURN_FALSE;
 	}
 	
@@ -542,9 +544,7 @@ PHP_FUNCTION(file)
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
-	if (zcontext) {
-		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
+	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (!stream) {
@@ -682,9 +682,8 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 				&mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (zcontext) {
-		ZEND_FETCH_RESOURCE(context, php_stream_context*, &zcontext, -1, "stream-context", le_stream_context);
-	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
 	
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
@@ -1308,9 +1307,7 @@ PHP_FUNCTION(readfile)
 		RETURN_FALSE;
 	}
 
-	if (zcontext) {
-		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream) {
@@ -1419,9 +1416,7 @@ PHP_FUNCTION(unlink)
 		RETURN_FALSE;
 	}
 
-	if (zcontext) {
-		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
 
