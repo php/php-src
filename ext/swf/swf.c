@@ -138,10 +138,20 @@ PHP_MINFO_FUNCTION(swf)
 }
 /* }}} */
 
+/* {{{ _swf_init_globals
+ */
+static void _swf_init_globals(zend_swf_globals *sg)
+{
+	memset(sg, 0, sizeof(zend_swf_globals));
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(swf)
 {
+	ZEND_INIT_MODULE_GLOBALS(swf, _swf_init_globals, NULL);
+
 	REGISTER_LONG_CONSTANT("MOD_COLOR", MOD_COLOR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MOD_MATRIX", MOD_MATRIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("TYPE_PUSHBUTTON", TYPE_PUSHBUTTON, CONST_CS | CONST_PERSISTENT);
@@ -162,6 +172,7 @@ PHP_MINIT_FUNCTION(swf)
 	REGISTER_LONG_CONSTANT("ButtonExit", ButtonExit, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MenuEnter", MenuEnter, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MenuExit", MenuExit, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -262,6 +273,7 @@ PHP_FUNCTION(swf_closefile)
 		fclose(f);
 		
 		VCWD_UNLINK((const char *)SWFG(tmpfile_name));
+		efree(SWFG(tmpfile_name));
 	}
 }
 /* }}} */
