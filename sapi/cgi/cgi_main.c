@@ -150,12 +150,9 @@ static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
 	return 0;
 }
 
-static int extension_name_cmp(const zend_llist_element *a,
-							  const zend_llist_element *b TSRMLS_DC)
+static int extension_name_cmp(const zend_llist_element **f,
+							  const zend_llist_element **s TSRMLS_DC)
 {
-	zend_llist_element *f = *((zend_llist_element **)a);
-	zend_llist_element *s = *((zend_llist_element **)b);
-
 	return strcmp(((zend_extension *)f->data)->name,
 				  ((zend_extension *)s->data)->name);
 }
