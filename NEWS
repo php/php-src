@@ -45,6 +45,7 @@ PHP 4                                                                      NEWS
   get_browser()). (Ilia)
 - Fixed bug #21442 (crash in mail() on Windows when 1st parameter is empty). 
   (Edin)
+- Fixed bug #21378 (COM code crashes after update 4.2.1 to 4.3.0). (Harald)
 - Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the
   the code encounters \r\n). (Ilia)
@@ -59,6 +60,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
+- Fixed bug #20282 (COM memory leak). (Harald)
 - Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes).
   (Ilia)
 - Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
