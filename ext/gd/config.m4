@@ -152,6 +152,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     AC_ADD_INCLUDE($GD_INCLUDE)
     GD_STATIC="libphpext_gd.a"
   else 
+    AC_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
     if test -n "$GD_INCLUDE"; then
       GD_INCLUDES="$GD_INCLUDES -I$GD_INCLUDE"
     fi
