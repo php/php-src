@@ -1,3 +1,86 @@
+2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acinclude.m4
+      ZendEngine2/acconfig.h:
+      support for building asm in the unix buildsys.
+      Also, when ZEND_ACCONFIG_H_NO_C_PROTOS is defined,
+      omit the C prototypes from the configuration header
+      so that it can be included into asm files.
+
+2004-01-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/RFCs/002.txt:
+      this one is declined
+
+    * ext/pgsql/config.m4:
+      Use pg_config if it can be found.
+
+2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_object_handlers.h:
+      must be extern to avoid problems with some compilers
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      export tsrm id for session globals.
+
+    * ext/informix/config.w32:
+      let informix build
+
+2004-01-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/tests/bug26077.phpt:
+      fix expect
+
+2004-01-09  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/informix/ifx.ec:
+      Fix ZTS build
+
+2004-01-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Bug #25816 - disallow arrays in class constants
+
+    * ZendEngine2/tests/bug26077.phpt:
+      add test
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Fix Bug #26077 - memory leak when new() result is not assigned
+      and no constructor defined
+
+2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mhash/config.w32:
+      let mhash build
+
+2004-01-09  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      Remove these initializers as they are unused.
+
+2004-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/sqlite/libsqlite/src/libsqlite.dsp:
+      - Fix build
+
+2004-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      sqlite news
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/mail.c:
+      MFH: Fixed bug #26847 (memory leak in mail() when to/subject contain only
+      spaces).
+
+    * ext/standard/mail.c:
+      Fixed bug #26847 (memory leak in mail() when to/subject contain only
+      spaces)
+
 2004-01-08  Sterling Hughes  <winnie@edwardbear.org>
 
     * ext/simplexml/simplexml.c:
