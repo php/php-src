@@ -52,7 +52,6 @@ install-build:
 SRC_HEADERS = \
 	php.h \
 	php_regex.h \
-	request_info.h \
 	php3_compat.h \
 	safe_mode.h \
 	fopen-wrappers.h \
