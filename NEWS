@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26176 (Fixed handling of numeric keys in INI files). (Ilia)
+- Fixed bug #26168 (shtool availability check in phpize). 
+  (robbat2 at gentoo dot org, Ilia)
 - Fixed bug #26148 (Print the notice before modifying variable on type
   mismatch). (morten-bugs dot php dot net at afdelingp dot dk, Ilia)
 - Fixed bug #26128 (mbstring prints out wrong information on phpinfo()).
