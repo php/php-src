@@ -996,14 +996,14 @@ static int do_event (int *id, int timeout)
 		}
 		else if (p->state == PHP_YAZ_STATE_CONNECTING)
 		{
-			if (FD_ISSET (fd, &input))
+			if (FD_ISSET (fd, &output))
+			{
+				send_init(p);
+			}
+			else if (FD_ISSET (fd, &input))
 			{
 				do_close(p);
 				p->error = PHP_YAZ_ERROR_CONNECT;
-			}
-			else if (FD_ISSET (fd, &output))
-			{
-				send_init(p);
 			}
 		}
 		else if (p->state == PHP_YAZ_STATE_ESTABLISHED)
