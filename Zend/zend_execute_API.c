@@ -836,11 +836,11 @@ ZEND_API void zend_timeout(int dummy)
 {
 	TSRMLS_FETCH();
 
-	/* is there any point in this?  we're terminating the request anyway...
-	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
-	*/
 	zend_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
 			  EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	if (zend_on_timeout) {
+		zend_on_timeout(EG(timeout_seconds) TSRMLS_CC);
+	}
 }
 
 
