@@ -386,7 +386,7 @@ class_statement_list:
 
 
 class_statement:
-		T_VAR class_variable_decleration ';'
+		class_variable_decleration ';'
 	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); }
@@ -400,12 +400,16 @@ is_reference:
 	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
 
 class_variable_decleration:
-		class_variable_decleration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL TSRMLS_CC); }
-	|	class_variable_decleration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5 TSRMLS_CC); }
-	|	T_VARIABLE						{ zend_do_declare_property(&$1, NULL TSRMLS_CC); }
-	|	T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$1, &$3 TSRMLS_CC); }
+		class_variable_decleration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, $1.op_type TSRMLS_CC); }
+	|	class_variable_decleration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5, $1.op_type TSRMLS_CC); }
+	|	class_decleration_type T_VARIABLE						{ $$ = $1; zend_do_declare_property(&$2, NULL, $1.op_type TSRMLS_CC); }
+	|	class_decleration_type T_VARIABLE '=' static_scalar	{ $$ = $1; zend_do_declare_property(&$2, &$4, $1.op_type TSRMLS_CC); }
 ;
 
+class_decleration_type:
+		T_VAR		{ $$.op_type = T_VAR; }
+	|	T_STATIC	{ $$.op_type = T_STATIC; }
+;
 
 echo_expr_list:	
 	|	echo_expr_list ',' expr { zend_do_echo(&$3 TSRMLS_CC); }
