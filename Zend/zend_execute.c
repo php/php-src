@@ -3060,9 +3060,9 @@ int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param TSRMLS_CC);
 		if (PZVAL_IS_REF(*param)) {
-			zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+			zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 		} else {
-			zend_assign_to_variable(&opline->result, &opline->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
+			zend_assign_to_variable(NULL, &opline->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
 		}
 	}
 
@@ -3095,14 +3095,14 @@ int zend_recv_init_handler(ZEND_OPCODE_HANDLER_ARGS)
 			assignment_value = &opline->op2.u.constant;
 		}
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
-		zend_assign_to_variable(&opline->result, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+		zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 	} else {
 		assignment_value = *param;
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
 		if (PZVAL_IS_REF(assignment_value)) {
-			zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+			zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 		} else {
-			zend_assign_to_variable(&opline->result, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+			zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 		}
 	}
 
