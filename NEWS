@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Let array_search() accept objects as a needle under ZendEngine2. (Moriyoshi)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Added imagefilter() function which allows application of various filters.
   This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
