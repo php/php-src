@@ -25,6 +25,8 @@
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
+set_time_limit(0);
+
 ob_implicit_flush();
 
 define('TEST_PASSED', 0);
@@ -43,7 +45,12 @@ if ($opts['help']) {
     exit;
 }
 */
-do_testing($argc, $argv);
+
+if(!isset($_SERVER['argc'])) {
+	echo "\nWARNING: register_argc_argv seems to be set 'off' in php.ini\n\n";
+}	
+
+@do_testing($_SERVER['argc'], $_SERVER['argv']);
 
 exit;
 
@@ -97,7 +104,7 @@ function create_found_tests_4_modules_list() {
 function create_modules_2_test_list() {
     global $compiled_in_modules,$modules_2_test,$modules_available;
     foreach ($compiled_in_modules AS $value)
-        if ($modules_2_test[$value]) $modules_available[]=$value;
+        if (isset($modules_2_test[$value])) $modules_available[]=$value;
 }
 
 
