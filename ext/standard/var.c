@@ -64,11 +64,42 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	return 0;
 }
 
+static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	char *prop_name, *class_name;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+
+	if (hash_key->nKeyLength ==0 ) { /* numeric key */
+		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+	} else { /* string key */
+		zend_unmangle_property_name(hash_key->arKey, &class_name, &prop_name);
+		if (class_name) {
+			php_printf("%*c[\"%s", level + 1, ' ', prop_name);
+			if (class_name[0]=='*') {
+				ZEND_PUTS(":protected");
+			} else {
+				ZEND_PUTS(":private");
+			}
+		} else {
+			php_printf("%*c[\"%s", level + 1, ' ', hash_key->arKey);
+			ZEND_PUTS(":public");
+		}
+		ZEND_PUTS("\"]=>\n");
+	}
+	php_var_dump(zv, level + 2 TSRMLS_CC);
+	return 0;
+}
+
+
 PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht = NULL;
 	char *class_name;
 	zend_uint class_name_len;
+	int (*php_element_dump_func)(zval**, int, va_list, zend_hash_key*);
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -99,6 +130,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 			return;
 		}
 		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
+		php_element_dump_func = php_array_element_dump;
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
@@ -110,9 +142,10 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
 		efree(class_name);
+		php_element_dump_func = php_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		}
 		if (level > 1) {
 			php_printf("%*c", level-1, ' ');
