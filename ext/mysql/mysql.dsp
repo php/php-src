@@ -156,7 +156,7 @@ SOURCE=.\php_mysql.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\php3_mysql.h
+SOURCE=.\php_mysql.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
