@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #26723 (domNode::appendChild() changes child node namespace). (Rob)
 - Fixed bug #26697 (calling class_exists() on a nonexistent class in __autoload
   results in segfault). (Marcus)
+- Fixed bug #26696 (string index in a switch() crashes with multiple matches).
+  (Andi)
 - Fixed bug #26695 (Reflection API does not recognize mixed-case class hints).
   (Marcus)
 - Fixed bug #26690 (make xsltProcessor->transformToUri use streams wrappers).
