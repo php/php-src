@@ -36,6 +36,7 @@
 #include "ext/standard/datetime.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/url_scanner.h"
+#include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 
 #ifdef ZTS
 int ps_globals_id;
