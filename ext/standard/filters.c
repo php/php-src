@@ -1358,7 +1358,7 @@ static zval *strfilter_convert_parse_parameters(const char *param_str)
 						memcpy(buf, node_name, node_name_len);
 						buf[node_name_len] = '\0';
 
-						if (zend_hash_find(Z_ARRVAL_P(node), buf, node_name_len + 1, (void **)&z_tmp) != SUCCESS) {
+						if (zend_hash_find(Z_ARRVAL_P(node), buf, node_name_len + 1, (void **)&z_tmp) != SUCCESS || Z_TYPE_PP(z_tmp) != IS_ARRAY) {
 							zval *new_node;
 						
 							MAKE_STD_ZVAL(new_node);
@@ -1456,10 +1456,14 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 	write_conv_opts = read_conv_opts = NULL;
 
 	if (strcasecmp(dot, "base64-encode") == 0) {
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
 		if (php_convert_filter_ctor(inst,
@@ -1470,10 +1474,14 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 		}	
 		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 	} else if (strcasecmp(dot, "base64-decode") == 0) {
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
 		if (php_convert_filter_ctor(inst,
@@ -1484,7 +1492,9 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 		}	
 		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 	} else if (strcasecmp(dot, "quoted-printable-encode") == 0) {
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
 		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-decode", sizeof("quoted-printable-decode"), (void **)&tmp_zval_pp) == SUCCESS) {
@@ -1498,10 +1508,14 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 		}	
 		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 	} else if (strcasecmp(dot, "quoted-printable-decode") == 0) {
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-decode", sizeof("quoted-printable-decode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-decode", sizeof("quoted-printable-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS) {
+		if (options != NULL &&
+			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
+			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
 			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
 		}
 		if (php_convert_filter_ctor(inst,
