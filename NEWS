@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- The imageloadfont function of the gd extension should be not platform
+  dependent after this fix. (alex@zend.com)
 - Fixed a compatibility problem in some file functions (fgets, fputs, fread,
   fwrite). The ANSI standard says that if a file is opened in read/write
   mode, fseek() should be called before switching from reading to writing
