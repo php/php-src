@@ -291,6 +291,7 @@ installed package.'
                         } else {
                             $pstr = '';
                         }
+                        $i = 0;
                         foreach ($info[$key] as $p) {
                             if ($debug < 2 && $p['type'] != "class") {
                                 continue;
