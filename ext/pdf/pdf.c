@@ -276,8 +276,7 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 		case PDF_SystemError:
 		case PDF_UnknownError:
 		default:
-			if (p !=NULL) PDF_delete(p); /* clean up PDFlib */
-			php_error(E_ERROR,"PDFlib error: %s", shortmsg);
+			php_error(E_WARNING,"PDFlib error: %s", shortmsg);
 		}
 }
 /* }}} */
