@@ -634,9 +634,9 @@ class DB_result
             if ($this->row_counter === null) {
                 $this->row_counter = $this->dbh->limit_from;
                 // For Interbase
-                if ($this->dbh->options['limit'] == false) {
+                if ($this->dbh->features['limit'] == false) {
                     $i = 0;
-                    while ($i++ <= $this->dbh->limit_from) {
+                    while ($i++ < $this->dbh->limit_from) {
                         $this->dbh->fetchInto($this->result, $arr, $fetchmode);
                     }
                 }
@@ -646,9 +646,10 @@ class DB_result
             {
                 return null;
             }
-            if ($this->dbh->options['limit'] == 'emulate') {
+            if ($this->dbh->features['limit'] == 'emulate') {
                 $rownum = $this->row_counter;
             }
+
             $this->row_counter++;
         }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
@@ -686,9 +687,9 @@ class DB_result
             if ($this->row_counter === null) {
                 $this->row_counter = $this->dbh->limit_from;
                 // For Interbase
-                if ($this->dbh->options['limit'] == false) {
+                if ($this->dbh->features['limit'] == false) {
                     $i = 0;
-                    while ($i++ <= $this->dbh->limit_from) {
+                    while ($i++ < $this->dbh->limit_from) {
                         $this->dbh->fetchInto($this->result, $arr, $fetchmode);
                     }
                 }
@@ -698,9 +699,10 @@ class DB_result
             {
                 return null;
             }
-            if ($this->dbh->options['limit'] == 'emulate') {
+            if ($this->dbh->features['limit'] == 'emulate') {
                 $rownum = $this->row_counter;
             }
+
             $this->row_counter++;
         }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
