@@ -964,17 +964,11 @@ ZEND_FUNCTION(set_error_handler)
 	}
 	ALLOC_ZVAL(EG(user_error_handler));
 
-#ifdef JANI_0
-    /*
-     * This part would never be reached unless there is something
-     * wrong with the engine as empty string can not be valid call back.
-     * See bug #23619 for more information why this is left here.
-     * (this only applies to non-debug-builds.)
-     */
-    if (Z_STRLEN_PP(error_handler)==0) { /* unset user-defined handler */
-        zend_error(E_ERROR, "%s(): This should never happen! '%s'", get_active_function_name(TSRMLS_C), error_handler);
-    }
-#endif
+    if (!zend_is_true(*error_handler)) { /* unset user-defined handler */
+		FREE_ZVAL(EG(user_error_handler));
+		EG(user_error_handler) = NULL;
+		RETURN_TRUE;
+	}
 
 	*EG(user_error_handler) = **error_handler;
 	zval_copy_ctor(EG(user_error_handler));
