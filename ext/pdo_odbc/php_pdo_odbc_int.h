@@ -86,6 +86,10 @@
 # include <cli0env.h>
 #endif
 
+#if HAVE_ODBCSDK_H
+# include <odbcsdk.h>
+#endif
+
 /* }}} */
 
 /* {{{ Figure out the type for handles */
