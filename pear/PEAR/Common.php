@@ -871,9 +871,9 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
-    // {{{ validatePackageInfo()
+    // {{{ _infoFromAny()
 
-    function validatePackageInfo($info, &$errors, &$warnings)
+    function _infoFromAny($any)
     {
         if (is_string($info) && file_exists($info)) {
             $tmp = substr($info, -4);
@@ -886,14 +886,25 @@ class PEAR_Common extends PEAR
                 $test = fread($fp, 5);
                 fclose($fp);
                 if ($test == "<?xml") {
-                    $info = $obj->infoFromDescriptionFile($params[0]);
+                    $info = $obj->infoFromDescriptionFile($info);
                 } else {
-                    $info = $obj->infoFromTgzFile($params[0]);
+                    $info = $obj->infoFromTgzFile($info);
                 }
             }
             if (PEAR::isError($info)) {
                 return $this->raiseError($info);
             }
+        }
+        return $info;
+    }
+
+    // }}}
+    // {{{ validatePackageInfo()
+
+    function validatePackageInfo($info, &$errors, &$warnings)
+    {
+        if (PEAR::isError($info = $this->_infoFromAny($info))) {
+            return $this->raiseError($info);
         }
         if (!is_array($info)) {
             return false;
@@ -958,7 +969,7 @@ class PEAR_Common extends PEAR
                 if (empty($d['type'])) {
                     $errors[] = "depenency $i: missing type";
                 } elseif (!in_array($d['type'], $this->dependency_types)) {
-                    $errors[] = "depenency $i: invalid type, should be one of: ".implode(' ', $this->depenency_types);
+                    $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $this->depenency_types);
                 }
                 if (empty($d['rel'])) {
                     $errors[] = "dependency $i: missing relation";
@@ -998,15 +1009,142 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ analyzeSourceCode()
+
+    function analyzeSourceCode($file)
+    {
+        if (!function_exists("token_get_all")) {
+            return false;
+        }
+        if (!$fp = @fopen($file, "r")) {
+            return false;
+        }
+        $contents = fread($fp, filesize($file));
+        $tokens = token_get_all($contents);
+        for ($i = 0; $i < sizeof($tokens); $i++) {
+            list($token, $data) = $tokens[$i];
+            if (is_string($token)) {
+                var_dump($token);
+            } else {
+                print token_name($token) . ' ';
+                var_dump(rtrim($data));
+            }
+        }
+        $look_for = 0;
+        $paren_level = 0;
+        $bracket_level = 0;
+        $brace_level = 0;
+        $lastphpdoc = '';
+        $current_class = '';
+        $current_class_level = -1;
+        $current_function = '';
+        $current_function_level = -1;
+        $declared_classes = array();
+        $declared_functions = array();
+        $declared_methods = array();
+        $used_classes = array();
+        $used_functions = array();
+        for ($i = 0; $i < sizeof($tokens); $i++) {
+            list($token, $data) = $tokens[$i];
+            switch ($token) {
+                case '{':
+                    $brace_level++;
+                    continue 2;
+                case '}':
+                    $brace_level--;
+                    if ($current_class_level == $brace_level) {
+                        $current_class = '';
+                        $current_class_level = -1;
+                    }
+                    if ($current_function_level == $brace_level) {
+                        $current_function = '';
+                        $current_function_level = -1;
+                    }
+                    continue 2;
+                case '[': $bracket_level++; continue 2;
+                case ']': $bracket_level--; continue 2;
+                case '(': $paren_level++;   continue 2;
+                case ')': $paren_level--;   continue 2;
+                case T_CLASS:
+                case T_FUNCTION:
+                case T_NEW:
+                    $look_for = $token;
+                    continue 2;
+                case T_STRING:
+                    if ($look_for == T_CLASS) {
+                        $current_class = $data;
+                        $current_class_level = $brace_level;
+                        $declared_classes[] = $current_class;
+                    } elseif ($look_for == T_FUNCTION) {
+                        if ($current_class) {
+                            $current_function = "$current_class::$data";
+                            $declared_methods[$current_class][] = $data;
+                        } else {
+                            $current_function = $data;
+                        }
+                        $current_function_level = $brace_level;
+                        $declared_functions[] = $current_function;
+                    } elseif ($look_for == T_NEW) {
+                        $used_classes[$data] = true;
+                    }
+                    $look_for = 0;
+                    continue 2;
+                case T_COMMENT:
+                    if (preg_match('!^/\*\*\s!', $data)) {
+                        $lastphpdoc = $data;
+                        //$j = $i;
+                        //while ($tokens[$j][0] == T_WHITESPACE) $j++;
+                        // the declaration that the phpdoc applies to
+                        // is at $tokens[$j] now
+                    }
+                    continue 2;
+                case T_DOUBLE_COLON:
+                    $used_classes[$tokens[$i - 1][1]] = true;
+                    continue 2;
+            }
+        }
+        return array(
+            "declared_classes" => $declared_classes,
+            "declared_methods" => $declared_methods,
+            "declared_functions" => $declared_functions,
+            "used_classes" => array_keys($used_classes),
+            );
+    }
+
+    // }}}
+    // {{{ detectDependencies()
+
+    function detectDependencies($info)
+    {
+        if (!function_exists("token_get_all")) {
+            return false;
+        }
+        if (PEAR::isError($info = $this->_infoFromAny($info))) {
+            return $this->raiseError($info);
+        }
+        if (!is_array($info)) {
+            return false;
+        }
+        $deps = array();
+        foreach ($info['filelist'] as $file => $fa) {
+            
+        }
+    }
+
+    // }}}
+    // {{{ getUserRoles()
+
     /**
-    * Get the valid roles for a PEAR package maintainer
-    *
-    * @static
-    */
+     * Get the valid roles for a PEAR package maintainer
+     *
+     * @static
+     */
     function getUserRoles()
     {
         $common = &new PEAR_Common;
         return $common->maintainer_roles;
     }
+
+    // }}}
 }
 ?>
