@@ -1084,7 +1084,7 @@ PHP_FUNCTION(session_module_name)
 	if (ac == 1) {
 		ps_module *tempmod;
 
-		if (PS(session_status) & (PS_ACTIVE|PS_ERROR)) {
+		if (PS(session_status) == php_session_active) {
 			php_error(E_NOTICE, "%s() cannot set session module name once session is started. "
 					  "Current session save handler (%s)",
 					  get_active_function_name(TSRMLS_C),
@@ -1103,7 +1103,6 @@ PHP_FUNCTION(session_module_name)
 			PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 		PS(mod) = tempmod;
 		PS(mod_data) = NULL;
-		PS(rinit_mod) = 1;
 	}
 
 	old = safe_estrdup(PS(mod)->name);
