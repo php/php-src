@@ -1085,13 +1085,6 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 
 	last_op->opcode = ZEND_INIT_METHOD_CALL;
 
-	if (last_op->op2.op_type == IS_UNUSED && last_op->op2.u.EA.type == ZEND_FETCH_FROM_THIS) {
-		last_op->op2 = last_op->op1;
-		memset(&last_op->op1, 0, sizeof(znode));
-		SET_UNUSED(last_op->op1);
-		last_op->extended_value = ZEND_FETCH_FROM_THIS;
-	}
-
 	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -2182,29 +2175,49 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
 			!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
 			efree(opline_ptr->op1.u.constant.value.str.val);
-			opline_ptr->op1 = *property;
-			SET_UNUSED(opline_ptr->op2);
-			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
+			SET_UNUSED(opline_ptr->op1); /* this means $this for objects */
+			opline_ptr->op2 = *property;
+			/* if it was usual fetch, we change it to object fetch */
+			switch(opline_ptr->opcode) {
+				case ZEND_FETCH_W:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_W;
+					break;
+				case ZEND_FETCH_R:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_R;
+					break;
+				case ZEND_FETCH_RW:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_RW;
+					break;
+				case ZEND_FETCH_IS:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_IS;
+					break;
+				case ZEND_FETCH_UNSET:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_UNSET;
+					break;
+				case ZEND_FETCH_FUNC_ARG:
+					opline_ptr->opcode = ZEND_FETCH_OBJ_FUNC_ARG;
+					break;
+			}
 
 			if (CG(active_class_entry) && (opline_ptr->op1.op_type == IS_CONST)) {
 				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
 					char *priv_name;
 					int priv_name_length;
                                         
-					mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+					mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len);
 
-					STR_FREE(opline_ptr->op1.u.constant.value.str.val);
-					opline_ptr->op1.u.constant.value.str.val = priv_name;
-					opline_ptr->op1.u.constant.value.str.len = priv_name_length;
-				} else if (zend_hash_exists(&CG(active_class_entry)->protected_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+					STR_FREE(opline_ptr->op2.u.constant.value.str.val);
+					opline_ptr->op2.u.constant.value.str.val = priv_name;
+					opline_ptr->op2.u.constant.value.str.len = priv_name_length;
+				} else if (zend_hash_exists(&CG(active_class_entry)->protected_properties, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len+1)) {
 					char *prot_name;
 					int prot_name_length;
                                         
-					mangle_property_name(&prot_name, &prot_name_length, "*", 1, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+					mangle_property_name(&prot_name, &prot_name_length, "*", 1, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len);
 
-					STR_FREE(opline_ptr->op1.u.constant.value.str.val);
-					opline_ptr->op1.u.constant.value.str.val = prot_name;
-					opline_ptr->op1.u.constant.value.str.len = prot_name_length;
+					STR_FREE(opline_ptr->op2.u.constant.value.str.val);
+					opline_ptr->op2.u.constant.value.str.val = prot_name;
+					opline_ptr->op2.u.constant.value.str.len = prot_name_length;
 				}
 			}
 			*result = opline_ptr->result;

@@ -252,6 +252,7 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 
 static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 {
+/* this should modify object only if it's empty */
 	if ((*object_ptr)->type == IS_NULL
 		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
 		|| ((*object_ptr)->type == IS_STRING && (*object_ptr)->value.str.len == 0)) {
@@ -262,16 +263,42 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 		object_init(*object_ptr);
 	}
 }
-	
+
+static inline zval **get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, int type TSRMLS_DC)
+{
+	if(op->op_type == IS_UNUSED) {
+		if(EG(This)) {
+			/* this should actually never be modified, _ptr_ptr is modified only when
+			   the object is empty */
+			return &EG(This);
+		} else {
+			zend_error(E_ERROR, "Using $this when not in object context");
+		}
+	}
+	return get_zval_ptr_ptr(op, Ts, type);
+}
+
+static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, int *freeop, int type TSRMLS_DC)
+{
+	if(op->op_type == IS_UNUSED) {
+		if(EG(This)) {
+			return EG(This);
+		} else {
+			zend_error(E_ERROR, "Using $this when not in object context");
+		}
+	}
+	return get_zval_ptr(op, Ts, freeop, type);
+}
+
 static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts TSRMLS_DC)
 {
-	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval tmp;
 	zval **retval = &Ts[result->u.var].var.ptr;
 
-	make_real_object(object_ptr TSRMLS_CC);
+	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -301,9 +328,10 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 	}
 
 	/* here property is a string */
-	PZVAL_UNLOCK(value);
 	
 	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+
+	PZVAL_UNLOCK(value);
 	if (property == &tmp) {
 		zval_dtor(property);
 	}
@@ -608,13 +636,6 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 		case ZEND_FETCH_STATIC_MEMBER:
 			return Ts[opline->op2.u.var].EA.class_entry->static_members;
 			break;
-		case ZEND_FETCH_FROM_THIS:
-			if (!EG(This)) {
-				zend_error(E_ERROR, "Using $this when not in object context");
-			}
-			/* HACK!! 'this' should be always zend_object */
-			return Z_OBJPROP_P(EG(This));
-			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
@@ -885,7 +906,7 @@ static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1,
 
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC)
 {
-	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
+	zval **container_ptr = get_obj_zval_ptr_ptr(op1, Ts, type);
 	zval *container;
 	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 	
@@ -895,7 +916,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		SELECTIVE_PZVAL_LOCK(**retval, result);
 		return;
 	}
-	
+	/* this should modify object only if it's empty */
 	if (container->type == IS_NULL
 		|| (container->type == IS_BOOL && container->value.lval==0)
 		|| (container->type == IS_STRING && container->value.str.len == 0)) {
@@ -942,7 +963,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 	retval = &Ts[result->u.var].var.ptr;
 	Ts[result->u.var].var.ptr_ptr = retval;
 
-	container = get_zval_ptr(op1, Ts, &EG(free_op1), type);
+	container = get_obj_zval_ptr(op1, Ts, &EG(free_op1), type);
 
 	if (container == EG(error_zval_ptr)) {
 		*retval = EG(error_zval_ptr);
@@ -993,13 +1014,13 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 
 static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
 {
-	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval = &Ts[result->u.var].var.ptr;
 	int have_get_ptr = 0;
 
-	make_real_object(object_ptr TSRMLS_CC);
+	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -1040,13 +1061,13 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 
 static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
 {
-	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *retval = &Ts[result->u.var].tmp_var;
 	int have_get_ptr = 0;
 
-	make_real_object(object_ptr TSRMLS_CC);
+	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -1908,14 +1929,7 @@ binary_assign_op_addr_obj:
 
 					EX(calling_scope) = EG(scope);
 
-					if (EX(opline)->extended_value == ZEND_FETCH_FROM_THIS) {
-						if (!EG(This)) {
-							zend_error(E_ERROR, "Can't fetch $this as not in object context");
-						}
-						EX(object) = EG(This);
-					} else {
-						EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					}
+					EX(object) = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 							
 					if (EX(object) && EX(object)->type == IS_OBJECT) {
 						EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
