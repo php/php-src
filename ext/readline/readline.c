@@ -99,9 +99,11 @@ PHP_FUNCTION(readline)
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(arg);
+	if(ac == 1) {
+		convert_to_string_ex(arg);
+	}
 
-	result = readline((*arg)->value.str.val);
+	result = readline(ac?(*arg)->value.str.val:NULL);
 
 	if (! result) {
 		RETURN_FALSE;
