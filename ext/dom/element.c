@@ -65,7 +65,7 @@ PHP_FUNCTION(dom_element_element)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	int name_len, value_len;
+	int name_len, value_len = 0;
 
 	id = getThis();
 	
