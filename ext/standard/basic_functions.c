@@ -750,6 +750,8 @@ function_entry basic_functions[] = {
 	PHP_FE(ob_clean,														NULL)
 	PHP_FE(ob_end_flush,													NULL)
 	PHP_FE(ob_end_clean,													NULL)
+	PHP_FE(ob_get_flush,													NULL)
+	PHP_FE(ob_get_clean,													NULL)
 	PHP_FE(ob_get_length,													NULL)
 	PHP_FE(ob_get_level,													NULL)
 	PHP_FE(ob_get_status,													NULL)
