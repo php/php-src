@@ -79,6 +79,12 @@ PHP 4                                                                      NEWS
 - Fixed the false logic in ext/session which made SID constant not to be
   defined when cookies are disabled. (Sascha)
 - Fixed possible crash bug in HTTP uploads. (Patch: Lucas Schroeder)
+- Fixed possible NULL-pointer dereferencing in the COM extension which
+  caused 'Error in php_OLECHAR_to_char()' warnings on various places.
+  Also modified the API to consistently return NULL in case of an error.
+  (Alan, Harald)
+- Fixed a bug in the COM extension that caused outproc servers to 'hang'
+  because of a missing Release() call. (Alan, Harald)
 
 22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
