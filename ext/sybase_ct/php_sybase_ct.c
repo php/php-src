@@ -310,7 +310,7 @@ PHP_RINIT_FUNCTION(sybase)
 {
 	sybase_globals.default_link=-1;
 	sybase_globals.num_links = sybase_globals.num_persistent;
-	sybase_globals.appname = estrndup("PHP 3.0",7);
+	sybase_globals.appname = estrndup("PHP 4.0",7);
 	sybase_globals.server_message = NULL;
 	sybase_globals.min_server_severity = sybase_globals.cfg_min_server_severity;
 	sybase_globals.min_client_severity = sybase_globals.cfg_min_client_severity;
