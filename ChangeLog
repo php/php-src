@@ -1,3 +1,127 @@
+2005-03-11  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/config.m4
+      ext/sqlite/config.w32
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c:
+      Implement a PDO driver for sqlite 2
+
+2005-03-11  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/streams/userspace.c:
+      removing redundant CLIB_STAT_PATCH
+
+    * (PHP_5_0)
+      ext/standard/filestat.c:
+      removing redundant NEW_LIBC checks
+      In NetWare statfs f_bavail member is known as f_bfree
+      NetWare LibC has pwd.h
+
+    * (PHP_5_0)
+      ext/standard/file.c:
+      NetWare LibC has pwd.h and removing redundant CLIB_STAT_PATCH
+
+    * (PHP_5_0)
+      TSRM/TSRM.c:
+      NetWare has a proper pthreads support
+
+    * (PHP_5_0)
+      TSRM/TSRM.h:
+      NetWare can make use autoconf generated tsrm_config.h
+
+    * (PHP_5_0)
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      NetWare LibC has lstat
+
+    * (PHP_5_0)
+      TSRM/tsrm_config_common.h:
+      Netware can make use of autoconf generated tsrm_config.h
+
+    * (PHP_5_0)
+      sapi/cli/php_getopt.h:
+      As NetWare LibC has optind and optarg macros defined in unistd.h our local
+      variables were getting mistakenly preprocessed so undeffing optind and
+      optarg
+
+    * (PHP_5_0)
+      configure.in:
+      NetWare don't have sendmail binary so need this sendmail.c smarthost
+      implementation
+
+    * (PHP_5_0)
+      netware/sendmail_nw.h:
+      changing the windows style directory  seperator in netinet\in.h to
+      netinet/in.h
+
+    * (PHP_5_0)
+      win32/sendmail.c:
+      time.h is available in NetWare LibC.
+      path sperator has been changed from \ to / while including
+      netware\sendmail_nw.h
+
+    * (PHP_5_0)
+      ext/standard/datetime.c:
+      removed redundant NEW_LIBC checks for NetWare
+
+    * (PHP_5_0)
+      ext/standard/proc_open.c:
+      In NetWare LibC WTERMSIG is avaliable as WIFTERMSIG
+
+    * (PHP_5_0)
+      ext/standard/link.c
+      main/fopen_wrappers.c:
+      NetWare LibC has pwd.h
+
+    * (PHP_5_0)
+      main/php_open_temporary_file.c:
+      Netware LibC has mkstemp
+
+    * (PHP_5_0)
+      main/network.c:
+      removed NetWare specific NEW_LIBC checks
+
+    * (PHP_5_0)
+      main/php_scandir.c:
+      NetWare LibC does not have search.h
+
+    * (PHP_5_0)
+      ZendEngine2/acconfig.h:
+      NetWare LibC's sys/types.h does not include sys/select.h implicitly as it
+      is the case with Linux LibC
+
+2005-03-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug32252.phpt:
+      - Add new test
+
+    * ZendEngine2/tests/bug27145.phpt
+      ZendEngine2/tests/bug27145.phpt:
+      - Irrelevant
+
+    * (PHP_5_0)
+      NEWS
+      ext/xml/xml.c:
+      - Bugfix #30266
+
+    * ext/xml/xml.c:
+      - Fix #30266
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Don't touch refcount/is_ref
+
+    * ext/standard/tests/serialize/bug31402.phpt:
+      - Times have changed - php 5 relevant version now
+
+    * ext/standard/array.c
+      ext/standard/streamsfuncs.c
+      ext/standard/type.c:
+      - Do not touch return_valu's refcount or is_ref
+
+    * ext/standard/tests/serialize/bug31402.phpt:
+      - Allow to work under php 5
+
 2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/string.c:
