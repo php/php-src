@@ -370,6 +370,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
  * */
 #define STREAM_WILL_CAST	32
 
+/* this flag applies to php_stream_locate_url_wrapper */
+#define STREAM_LOCATE_WRAPPERS_ONLY	64
+
 #ifdef PHP_WIN32
 # define IGNORE_URL_WIN IGNORE_URL
 #else
@@ -381,6 +384,7 @@ int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)
