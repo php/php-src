@@ -754,9 +754,10 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 fetch_string_dim:
 			if (zend_symtable_find(ht, offset_key, offset_key_length+1, (void **) &retval) == FAILURE) {
 				switch (type) {
-					case BP_VAR_R: 
-						zend_error(E_NOTICE,"Undefined index:  %s", offset_key);
+					case BP_VAR_R:
+						zend_error(E_NOTICE, "Undefined index:  %s", offset_key);
 						/* break missing intentionally */
+					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
@@ -786,9 +787,10 @@ fetch_string_dim:
 				}
 				if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 					switch (type) {
-						case BP_VAR_R: 
+						case BP_VAR_R:
 							zend_error(E_NOTICE,"Undefined offset:  %ld", index);
 							/* break missing intentionally */
+						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval_ptr);
 							break;
@@ -808,10 +810,15 @@ fetch_string_dim:
 			break;
 		default: 
 			zend_error(E_WARNING, "Illegal offset type");
-			if (type == BP_VAR_R || type == BP_VAR_IS) {
-				retval = &EG(uninitialized_zval_ptr);
-			} else {
-				retval = &EG(error_zval_ptr);
+			switch (type) {
+				case BP_VAR_R:
+				case BP_VAR_IS:
+				case BP_VAR_UNSET:
+					retval = &EG(uninitialized_zval_ptr);
+					break;
+				default:
+					retval = &EG(error_zval_ptr);
+					break;
 			}
 			break;
 	}
@@ -898,8 +905,15 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 					convert_to_long(&tmp);
 					offset = &tmp;
 				}
-				if (type!=BP_VAR_R && type!=BP_VAR_IS) {
-					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
+				switch (type) {
+					case BP_VAR_R:
+					case BP_VAR_IS:
+					case BP_VAR_UNSET:
+						/* do nothing... */
+						break;
+					default:
+						SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
+						break;
 				}
 				container = *container_ptr;
 				T(result->u.var).str_offset.str = container;
@@ -933,10 +947,18 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			break;
 		default: {
 				get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-				if (type==BP_VAR_R || type==BP_VAR_IS) {
-					*retval = &EG(uninitialized_zval_ptr);
-				} else {
-					*retval = &EG(error_zval_ptr);
+
+				switch (type) {
+					case BP_VAR_UNSET:
+						zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+						/* break missing intentionally */
+					case BP_VAR_R:
+					case BP_VAR_IS:
+						*retval = &EG(uninitialized_zval_ptr);
+						break;
+					default:
+						*retval = &EG(error_zval_ptr);
+						break;
 				}
 				FREE_OP(Ts, op2, EG(free_op2));
 				SELECTIVE_PZVAL_LOCK(**retval, result);
@@ -1970,7 +1992,7 @@ int zend_fetch_dim_unset_handler(ZEND_OPCODE_HANDLER_ARGS)
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	*/
-	zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+	zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
 	if (EX_T(opline->result.u.var).var.ptr_ptr == NULL) {
 		zend_error(E_ERROR, "Cannot unset string offsets");
 	} else {
