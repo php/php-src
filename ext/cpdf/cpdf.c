@@ -1563,7 +1563,9 @@ PHP_FUNCTION(cpdf_setdash)
 		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
 		RETURN_FALSE;
 	}
-
+	if (!pdf->currentMemStream) {
+		RETURN_FALSE;
+	}
 	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) Z_LVAL_P(arg2), (int) Z_LVAL_P(arg3));
 	cpdf_setdash(pdf, buffer);
 
