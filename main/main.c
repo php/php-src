@@ -1147,11 +1147,11 @@ static int php_hash_environment(TSRMLS_D)
 				case 'g':
 				case 'G':
 					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
-					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
 					break;
 				case 'p':
 				case 'P':
 					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
 					break;
 				case 'c':
 				case 'C':
