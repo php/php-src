@@ -759,8 +759,8 @@ PHP_FUNCTION(dom_document_create_element)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Element name is required");
+	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -908,6 +908,11 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 	if (!node) {
 		RETURN_FALSE;
@@ -939,8 +944,8 @@ PHP_FUNCTION(dom_document_create_attribute)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute name is required");
+	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -973,6 +978,11 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
+		RETURN_FALSE;
+	}
 
 	node = xmlNewReference(docp, name);
 	if (!node) {
@@ -1073,23 +1083,22 @@ PHP_FUNCTION(dom_document_create_element_ns)
 		return;
 	}
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Element Name is required");
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
-		nodep = xmlNewDocNode (docp, NULL, localname, NULL);
-		if (nodep != NULL && uri != NULL) {
-			nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
-			if (nsptr == NULL) {
-				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
+		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
+			nodep = xmlNewDocNode (docp, NULL, localname, NULL);
+			if (nodep != NULL && uri != NULL) {
+				nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
+				if (nsptr == NULL) {
+					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
+				}
+				xmlSetNs(nodep, nsptr);
 			}
-			xmlSetNs(nodep, nsptr);
+		} else {
+			errorcode = INVALID_CHARACTER_ERR;
 		}
 	}
 
@@ -1138,24 +1147,23 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		return;
 	}
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Qualified Name is required");
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	root = xmlDocGetRootElement(docp);
 	if (root != NULL) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
-			nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
-			if (nodep != NULL && uri_len > 0) {
-				nsptr = xmlSearchNsByHref (nodep->doc, root, uri);
-				if (nsptr == NULL) {
-					nsptr = dom_get_ns(root, uri, &errorcode, prefix);
+			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
+				nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
+				if (nodep != NULL && uri_len > 0) {
+					nsptr = xmlSearchNsByHref (nodep->doc, root, uri);
+					if (nsptr == NULL) {
+						nsptr = dom_get_ns(root, uri, &errorcode, prefix);
+					}
+					xmlSetNs(nodep, nsptr);
 				}
-				xmlSetNs(nodep, nsptr);
+			} else {
+				errorcode = INVALID_CHARACTER_ERR;
 			}
 		}
 	} else {

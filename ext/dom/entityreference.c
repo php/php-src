@@ -48,7 +48,7 @@ PHP_METHOD(domentityreference, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name;
-	int name_len;
+	int name_len, name_valid;
 
 	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
@@ -57,7 +57,9 @@ PHP_METHOD(domentityreference, __construct)
 	}
 
 	php_std_error_handling();
-	if (name_len == 0) {
+
+	name_valid = xmlValidateName((xmlChar *) name, 0);
+	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}

@@ -1229,26 +1229,52 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 }
 /* }}} end dom_set_old_ns */
 
-int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
-	int errorcode = 0;
+/*
+http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-DocCrElNS
 
-	if (name_len > 0) {
-		*localname = xmlSplitQName2(qname, (xmlChar **) prefix);
-		if (*localname == NULL) {
-			*localname = xmlStrdup(qname);
-			if (*prefix == NULL && uri_len == 0) {
-				return errorcode;
-			}
+NAMESPACE_ERR: Raised if
+
+1. the qualifiedName is a malformed qualified name
+2. the qualifiedName has a prefix and the  namespaceURI is null
+*/
+
+/* {{{ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) */
+int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
+	if (name_len == 0) {
+		return NAMESPACE_ERR;
+	}
+	
+	*localname = xmlSplitQName2(qname, (xmlChar **) prefix);
+	if (*localname == NULL) {
+		*localname = xmlStrdup(qname);
+		if (*prefix == NULL && uri_len == 0) {
+			return 0;
 		}
-		if (uri_len == 0 || *localname == NULL || (xmlStrchr(*localname, (xmlChar) ':') != NULL)) {
-			errorcode = NAMESPACE_ERR;
-		}
-	} else {
-		errorcode = NAMESPACE_ERR;
 	}
 
-	return errorcode;
+	/* 1 */
+	if (xmlValidateQName((xmlChar *) qname, 0) != 0) {
+		return NAMESPACE_ERR;
+	}
+
+	/* 2 */
+	if (*prefix != NULL && uri_len == 0) {
+		return NAMESPACE_ERR;
+	}
+
+	return 0;
 }
+
+
+/*
+http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-DocCrElNS
+
+NAMESPACE_ERR: Raised if
+
+3. the qualifiedName has a prefix that is "xml" and the namespaceURI is different from "http://www.w3.org/XML/1998/namespace" [XML Namespaces]
+4. the qualifiedName or its prefix is "xmlns" and the namespaceURI is different from  "http://www.w3.org/2000/xmlns/"
+5. the namespaceURI is "http://www.w3.org/2000/xmlns/" and neither the	qualifiedName nor its prefix is "xmlns".
+*/
 
 /* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
@@ -1256,7 +1282,9 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 
 	*errorcode = 0;
 
-	if (! (prefix && !strcmp (prefix, "xml") && strcmp(uri, XML_XML_NAMESPACE))) {
+	if (! ((prefix && !strcmp (prefix, "xml"  ) && strcmp(uri, XML_XML_NAMESPACE)) ||
+		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, DOM_XMLNS_NAMESPACE)) ||
+		   (prefix && !strcmp(uri, DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
 		nsptr = xmlNewNs(nodep, uri, prefix);
 	}
 
