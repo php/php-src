@@ -1,3 +1,57 @@
+2000-06-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Fix format strings. cache_expire's type was changed to long.
+
+    * ext/icap/php_icap.c:
+    Somehow I screwed up the find parameters while doing the original change.
+
+    s/global.h/php_global.h/
+
+2000-06-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/mcal/php_mcal.c: Include php_global.h, instead of global.h
+
+2000-06-08  Anthony Whitehead  <anthony.whitehead@rfv.sfa.se>
+
+    * sapi/nsapi/nsapi.c:
+    Added more server variables to the HTTP_SERVER_VARS array, all the
+    variables listed in the structs in nsapi.c should work now. Untested on
+    Windows platform.
+
+2000-06-08  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - Fixed crash in OCIFetchStatement() when trying to read after
+      all data has already been read. 
+
+2000-06-08  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * fopen-wrappers.c
+      fopen-wrappers.h
+      main.c:    so here it finaly is, the more general approach to fopen wrappers
+
+2000-06-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.h: Add PHP_BROKEN_SPRINTF check here.
+
+    Also remove unnecessary #ifdef's for PACKAGE and VERSION.
+
+    * acconfig.h.in
+      acinclude.m4
+      configure.in
+      sapi/apache/config.m4
+      sapi/cgi/config.m4
+      sapi/isapi/config.m4:
+    Wipe out acconfig.h.in and rewrite some checks to use PHP_ARG_ENABLE.
+
+    * Makefile.in:
+    Always define PROGRAM_NAME to avoid problems with Irix's and OpenServer's
+    makes.
+
+    * README.SELF-CONTAINED-EXTENSIONS:
+    Add note about using PHP_ARG_WITH/ENABLE
+
 2000-06-07  Jouni Ahto  <jah@mork.net>
 
     * ext/gd/gd.c
