@@ -400,6 +400,8 @@ CWD_API int virtual_stat(const char *path, struct stat *buf)
 	return retval;
 }
 
+#ifndef ZEND_WIN32
+
 CWD_API int virtual_lstat(const char *path, struct stat *buf)
 {
 	cwd_state new_state;
@@ -414,6 +416,8 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf)
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
+
+#endif
 
 #if 0
 
