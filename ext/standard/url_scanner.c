@@ -37,10 +37,12 @@
 
 PHP_RINIT_FUNCTION(url_scanner) {
 	url_adapt(NULL,0,NULL,NULL);
+	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(url_scanner) {
 	url_adapt(NULL,0,NULL,NULL);
+	return SUCCESS;
 }
 
 
@@ -80,6 +82,15 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 }
 
 #define US BG(url_adapt_state)
+
+char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *val, size_t *newlen)
+{
+	char buf[1024];
+
+	snprintf(buf, sizeof(buf)-1, "%s=%s", name, val);
+
+	return url_adapt(src, srclen, buf, newlen);
+}
 
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen)
 {
