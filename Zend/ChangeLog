@@ -1,3 +1,24 @@
+2002-06-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_execute.h
+      zend_execute_API.c: - Fix bug in class constants
+    - Start centralizing main class lookups. This will help implement
+    - __autload()
+
+    * zend_mm.c
+      zend_mm.h:
+    - Remove debug code which doesn't work anymore and add headers.
+
+    * zend_globals.h
+      zend_mm.c
+      zend_mm.h
+      zend_alloc.c
+      ZendTS.dsp: - Commit an initial version of a home made memory manager.
+    - It's just for seeing if this would be an advantage to PHP in MT
+    - environments. If this is to become production material there is still
+    - a long way to go.
+
 2002-06-15  Andi Gutmans  <andi@zend.com>
 
     * zend_objects.h
