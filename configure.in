@@ -1065,6 +1065,8 @@ if test "$enable_debug" != "yes"; then
   PHP_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
+dnl libtool 1.4.3 needs this.
+PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
 test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
 test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
