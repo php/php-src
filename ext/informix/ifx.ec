@@ -314,7 +314,8 @@ char *a_result_id;
   return;
 }
 
-static PHP_INI_DISP(display_link_numbers)
+
+/* static PHP_INI_DISP(display_link_numbers)
 {
   char *value;
 
@@ -335,7 +336,7 @@ static PHP_INI_DISP(display_link_numbers)
     }
   }
 }
-						
+*/						
 						
 
 
@@ -383,7 +384,7 @@ static void php_ifx_init_globals(php_ifx_globals *ifx_globals)
 
 PHP_MINIT_FUNCTION(ifx)
 {
-   ELS_FETCH();
+   /*ELS_FETCH();*/
    
 #ifdef ZTS
     ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
