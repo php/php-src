@@ -37,6 +37,9 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+#ifdef HAVE_LIBINTL
+# include <libintl.h> /* for LC_MESSAGES */
+#endif
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
