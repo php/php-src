@@ -1055,6 +1055,18 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	}
 }
 
+void do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
+{
+	zend_function tmp_zend_function;
+	zval *tmp;
+
+	/* Perform inheritance */
+	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
+	ce->parent = parent_ce;
+	do_inherit_parent_constructor(ce);
+}
+
 
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time)
 {
@@ -1097,8 +1109,6 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 		case ZEND_DECLARE_INHERITED_CLASS: {
 				zend_class_entry *ce, *parent_ce;
 				char *class_name, *parent_name;
-				zend_function tmp_zend_function;
-				zval *tmp;
 				int found_ce;
 
 				
@@ -1129,12 +1139,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					return FAILURE;
 				}
 
-				/* Perform inheritance */
-				zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
-				zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
-				ce->parent = parent_ce;
-				do_inherit_parent_constructor(ce);
-
+				do_inheritance(ce, parent_ce);
 
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {

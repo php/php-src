@@ -867,6 +867,29 @@ int zend_next_free_module(void)
 	return ++module_count;
 }
 
+/* If parent_ce is not NULL then it inherits from parent_ce
+ * If parent_ce is NULL and parent_name isn't then it looks for the parent and inherits from it
+ * If both parent_ce and parent_name are NULL it does a regular class registration
+ * If parent_name is specified but not found NULL is returned
+ */
+ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name)
+{
+	zend_class_entry *register_class;
+	CLS_FETCH();
+
+	if (!parent_ce && parent_name) {
+			if (zend_hash_find(CG(class_table), parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
+				return NULL;
+			}
+	}
+
+	register_class = zend_register_internal_class(class_entry);
+
+	if (parent_ce) {
+		do_inheritance(register_class, parent_ce);
+	}
+	return register_class;
+}
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry)
 {
