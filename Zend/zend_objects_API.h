@@ -64,7 +64,6 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 
 ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_store_del_ref(zval *object TSRMLS_DC);
-ZEND_API void zend_objects_store_delete_obj(zval *object TSRMLS_DC);
 ZEND_API zend_object_value zend_objects_store_clone_obj(zval *object TSRMLS_DC);
 ZEND_API void *zend_object_store_get_object(zval *object TSRMLS_DC);
 /* See comment in zend_objects_API.c before you use this */
