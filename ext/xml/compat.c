@@ -88,7 +88,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 		for (i = 0; i < nb_attributes; i += 1) {
 
 			if (attributes[y+1] != NULL) {
-				_qualify_namespace(parser, attributes[y] , attributes[2], &qualified_name_attr);
+				_qualify_namespace(parser, attributes[y] , attributes[y + 2], &qualified_name_attr);
 			} else {
 				qualified_name_attr = xmlStrdup(attributes[y]);
 			}
