@@ -575,7 +575,7 @@ PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t)
 	return NULL;
 }
 
-/* {{{ proto string strstr(string haystack, string needle)
+/* {{{ proto string stristr(string haystack, string needle)
    Find first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
@@ -634,6 +634,10 @@ PHP_FUNCTION(strstr)
 		RETVAL_FALSE;
 	}
 }
+/* }}} */
+
+/* {{{ proto string strchr(string haystack, string needle)
+   An alias for strstr */
 /* }}} */
 
 /* {{{ proto int strpos(string haystack, string needle [, int offset])
@@ -961,7 +965,7 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
-/* {{{ proto string(string str)
+/* {{{ proto string ucfirst(string str)
    Make a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
 {
