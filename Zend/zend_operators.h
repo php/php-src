@@ -118,4 +118,12 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 		convert_to_boolean(*ppzv);							\
 	}
 
+#define convert_scalar_to_number_ex(ppzv)							\
+	if ((*ppzv)->type!=IS_LONG && (*ppzv)->type!=IS_DOUBLE) {		\
+		if (!(*ppzv)->is_ref) {										\
+			SEPARATE_ZVAL(ppzv);									\
+		}															\
+		convert_scalar_to_number(*ppzv);							\
+	}
+
 #endif
