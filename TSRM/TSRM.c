@@ -51,8 +51,8 @@ static int					resource_types_table_size;
 static MUTEX_T tsmm_mutex;	/* thread-safe memory manager mutex */
 
 /* New thread handlers */
-static void (*tsrm_new_thread_begin_handler)();
-static void (*tsrm_new_thread_end_handler)();
+static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler;
+static tsrm_thread_end_func_t tsrm_new_thread_end_handler;
 
 /* Debug support */
 int tsrm_error(int level, const char *format, ...);
@@ -254,7 +254,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 #endif
 
 	if (tsrm_new_thread_begin_handler) {
-		tsrm_new_thread_begin_handler(thread_id);
+		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 	for (i=0; i<id_count; i++) {
 		(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
@@ -266,7 +266,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	tsrm_mutex_unlock(tsmm_mutex);
 
 	if (tsrm_new_thread_end_handler) {
-		tsrm_new_thread_end_handler(thread_id);
+		tsrm_new_thread_end_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 }
 
@@ -509,7 +509,7 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 }
 
 
-TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler)(THREAD_T thread_id))
+TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler)
 {
 	void *retval = (void *) tsrm_new_thread_begin_handler;
 
@@ -518,7 +518,7 @@ TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler
 }
 
 
-TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(THREAD_T thread_id))
+TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler)
 {
 	void *retval = (void *) tsrm_new_thread_end_handler;
 
