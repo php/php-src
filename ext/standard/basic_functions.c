@@ -1037,8 +1037,14 @@ PHP_MINIT_FUNCTION(basic)
 {
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
+#ifdef PHP_WIN32
+	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, NULL);
+#endif
 #else
 	basic_globals_ctor(&basic_globals TSRMLS_CC);
+#ifdef PHP_WIN32
+	php_win32_core_globals_ctor(&php_win32_core_globals TSRMLS_CC);
+#endif
 #endif
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
@@ -1125,6 +1131,9 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 {
 #ifdef ZTS
 	ts_free_id(basic_globals_id);
+#ifdef PHP_WIN32
+	ts_free_id(php_win32_core_globals_id);
+#endif
 #else
 	basic_globals_dtor(&basic_globals TSRMLS_CC);
 #endif

@@ -28,6 +28,7 @@
 #include <winbase.h>
 #include <mmsystem.h>
 #include <errno.h>
+#include "php_win32_globals.h"
 
 int getfilesystemtime(struct timeval *time_Info) 
 {
@@ -46,64 +47,61 @@ __int64 ff;
 
 PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 {
-
-	static struct timeval starttime = {0, 0};
-	static __int64 lasttime = 0;
-	static __int64 freq = 0;
 	__int64 timer;
 	LARGE_INTEGER li;
 	BOOL b;
 	double dt;
+	TSRMLS_FETCH();
 
 	/* Get the time, if they want it */
 	if (time_Info != NULL) {
-		if (starttime.tv_sec == 0) {
+		if (PW32G(starttime).tv_sec == 0) {
             b = QueryPerformanceFrequency(&li);
             if (!b) {
-                starttime.tv_sec = -1;
+                PW32G(starttime).tv_sec = -1;
             }
             else {
-                freq = li.QuadPart;
+                PW32G(freq) = li.QuadPart;
                 b = QueryPerformanceCounter(&li);
                 if (!b) {
-                    starttime.tv_sec = -1;
+                    PW32G(starttime).tv_sec = -1;
                 }
                 else {
-                    getfilesystemtime(&starttime);
+                    getfilesystemtime(&PW32G(starttime));
                     timer = li.QuadPart;
-                    dt = (double)timer/freq;
-                    starttime.tv_usec -= (int)((dt-(int)dt)*1000000);
-                    if (starttime.tv_usec < 0) {
-                        starttime.tv_usec += 1000000;
-                        --starttime.tv_sec;
+                    dt = (double)timer/PW32G(freq);
+                    PW32G(starttime).tv_usec -= (int)((dt-(int)dt)*1000000);
+                    if (PW32G(starttime).tv_usec < 0) {
+                        PW32G(starttime).tv_usec += 1000000;
+                        --PW32G(starttime).tv_sec;
                     }
-                    starttime.tv_sec -= (int)dt;
+                    PW32G(starttime).tv_sec -= (int)dt;
                 }
             }
         }
-        if (starttime.tv_sec > 0) {
+        if (PW32G(starttime).tv_sec > 0) {
             b = QueryPerformanceCounter(&li);
             if (!b) {
-                starttime.tv_sec = -1;
+                PW32G(starttime).tv_sec = -1;
             }
             else {
                 timer = li.QuadPart;
-                if (timer < lasttime) {
+                if (timer < PW32G(lasttime)) {
                     getfilesystemtime(time_Info);
-                    dt = (double)timer/freq;
-                    starttime = *time_Info;
-                    starttime.tv_usec -= (int)((dt-(int)dt)*1000000);
-                    if (starttime.tv_usec < 0) {
-                        starttime.tv_usec += 1000000;
-                        --starttime.tv_sec;
+                    dt = (double)timer/PW32G(freq);
+                    PW32G(starttime) = *time_Info;
+                    PW32G(starttime).tv_usec -= (int)((dt-(int)dt)*1000000);
+                    if (PW32G(starttime).tv_usec < 0) {
+                        PW32G(starttime).tv_usec += 1000000;
+                        --PW32G(starttime).tv_sec;
                     }
-                    starttime.tv_sec -= (int)dt;
+                    PW32G(starttime).tv_sec -= (int)dt;
                 }
                 else {
-                    lasttime = timer;
-                    dt = (double)timer/freq;
-                    time_Info->tv_sec = starttime.tv_sec + (int)dt;
-                    time_Info->tv_usec = starttime.tv_usec + (int)((dt-(int)dt)*1000000);
+                    PW32G(lasttime) = timer;
+                    dt = (double)timer/PW32G(freq);
+                    time_Info->tv_sec = PW32G(starttime).tv_sec + (int)dt;
+                    time_Info->tv_usec = PW32G(starttime).tv_usec + (int)((dt-(int)dt)*1000000);
                     if (time_Info->tv_usec > 1000000) {
                         time_Info->tv_usec -= 1000000;
                         ++time_Info->tv_sec;
@@ -111,7 +109,7 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
                 }
             }
         }
-        if (starttime.tv_sec < 0) {
+        if (PW32G(starttime).tv_sec < 0) {
             getfilesystemtime(time_Info);
         }
 
@@ -159,6 +157,7 @@ struct timeval tnow, tthen, t0;
 }
 
 
+#if 0 /* looks pretty ropey in here */
 #ifdef HAVE_SETITIMER
 
 
@@ -240,3 +239,5 @@ PHPAPI int setitimer(int which, const struct itimerval *value, struct itimerval 
 }
 
 #endif
+#endif
+
