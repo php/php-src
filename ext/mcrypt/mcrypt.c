@@ -456,6 +456,11 @@ PHP_FUNCTION(mcrypt_generic_init)
 	max_key_size = mcrypt_enc_get_key_size (td);
 	iv_size = mcrypt_enc_get_iv_size (td);
 
+	if (Z_STRLEN_PP(key) == 0) {
+		php_error (E_WARNING, "key size is 0");
+		RETURN_FALSE;
+	}
+
 	key_s = emalloc (Z_STRLEN_PP(key));
 	memset (key_s, 0, Z_STRLEN_PP(key));
 
