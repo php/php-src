@@ -373,7 +373,7 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, w, flag;
+	int c1, w, flag = 0;
 
 	switch (filter->status) {
 	case 0:
@@ -396,6 +396,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		if ( c1 >= 0x81 && c1 <= 0xa0){
 			w = (c1 - 0x81)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc1_ucs_table_size) {
+				flag = 1;
 				w = uhc1_ucs_table[w];
 			} else {
 				w = 0;
@@ -403,6 +404,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		} else if ( c1 >= 0xa1 && c1 <= 0xc6){
 			w = (c1 - 0xa1)*190 + (c - 0x41);			
 			if (w >= 0 && w < uhc2_ucs_table_size) {
+				flag = 2;
 				w = uhc2_ucs_table[w];
 			} else {
 				w = 0;
@@ -410,6 +412,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		} else if ( c1 >= 0xc7 && c1 <= 0xfe){
 			w = (c1 - 0xc7)*94 + (c - 0xa1);		
 			if (w >= 0 && w < uhc3_ucs_table_size) {
+				flag = 3;
 				w = uhc3_ucs_table[w];
 			} else {
 				w = 0;
