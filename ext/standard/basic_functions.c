@@ -1515,8 +1515,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 		case 1:		/*send an email */
 			{
 #if HAVE_SENDMAIL
-				if (!php_mail
-					(opt, "PHP error_log message", message, headers, NULL)) {
+				if (!php_mail(opt, "PHP error_log message", message, headers, NULL TSRMLS_CC)) {
 					return FAILURE;
 				}
 #else
