@@ -90,6 +90,9 @@ class PEAR_Dependency
      */
     function checkPackage($name, $req = null, $relation = 'has')
     {
+        if (substr($relation, 0, 2) == "v.") {
+            $relation = substr($relation, 2);
+        }
         switch ($relation) {
             case 'has':
                 if (!$this->registry->packageExists($name)) {
