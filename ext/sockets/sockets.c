@@ -1937,7 +1937,7 @@ PHP_FUNCTION(getsockopt)
 	zval **fd, **level, **optname, **optval;
 	struct linger linger_val;
 	int other_val;
-	int optlen;
+	socklen_t optlen;
 	int ret;
 
 	fd = level = optname = optval = NULL;
