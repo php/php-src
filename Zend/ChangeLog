@@ -1,3 +1,13 @@
+2003-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix require() handling - that's an old bug!
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Improve parser handling of 'abstract'
+
 2003-02-10  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
