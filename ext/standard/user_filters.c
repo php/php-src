@@ -28,7 +28,6 @@
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
 #define PHP_STREAM_FILTER_RES_NAME "userfilter.filter"
-#define PHP_STREAM_RES_NAME "userfilter.stream"
 
 struct php_user_filter_data {
 	zend_class_entry *ce;
@@ -40,7 +39,6 @@ struct php_user_filter_data {
 static int le_userfilters;
 static int le_bucket_brigade;
 static int le_bucket;
-static int le_stream;
 
 #define GET_FILTER_FROM_OBJ()	{ \
 	zval **tmp; \
@@ -82,9 +80,10 @@ PHP_MINIT_FUNCTION(user_filters)
 		return FAILURE;
 	}
 
+	/* Filters will dispose of their brigades */
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
+	/* Brigades will dispose of their buckets */
 	le_bucket = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
-	le_stream = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_RES_NAME, module_number);
 	
 	if (le_bucket_brigade == FAILURE) {
 		return FAILURE;
@@ -149,7 +148,7 @@ php_stream_filter_status_t userfilter_filter(
 	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", sizeof("stream"), (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */
 		ALLOC_INIT_ZVAL(zstream);
-		ZEND_REGISTER_RESOURCE(zstream, stream, le_stream);
+		php_stream_to_zval(stream, zstream);
 		add_property_zval(obj, "stream", zstream);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zstream);
@@ -402,7 +401,7 @@ PHP_FUNCTION(stream_bucket_new)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(stream, php_stream *, &zstream, -1, PHP_STREAM_RES_NAME, le_stream);
+	php_stream_from_zval(stream, &zstream);
 
 	if (!(pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream)))) {
 		RETURN_FALSE;
