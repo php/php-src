@@ -13,8 +13,15 @@ $it->seek(4);
 var_dump($it->current());
 $it->seek(-1);
 var_dump($it->current());
-$it->seek(12);
-var_dump($it->current());
+try
+{
+	$it->seek(12);
+	var_dump($it->current());
+}
+catch(Exception $e)
+{
+	echo $e->getMessage() . "\n";
+}
 
 $pos = 0;
 foreach($it as $v)
@@ -31,7 +38,7 @@ int(11)
 int(5)
 int(4)
 int(0)
-NULL
+Seek position 12 is out of range
 int(0)
 int(1)
 int(2)
