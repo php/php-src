@@ -2665,8 +2665,6 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 	buflen = strlen(strtext);	/* will shrink, also we discover if
 								 * strtext */
 	buffer = (unsigned char *) emalloc(buflen);	/* isn't NULL terminated */
-	if (buffer == NULL)
-		return NULL;
 	for (bp = buffer, sp = strtext; *sp != '\0'; bp++, sp++)
 	{
 		switch (state)
@@ -2731,9 +2729,7 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 		}
 	}
 	buffer = erealloc(buffer, buflen+1);
-	buffer[buflen] = 0;
-	if (buffer == NULL)
-		return NULL;
+	buffer[buflen] = '\0';
 
 	*retbuflen = buflen;
 	return buffer;
