@@ -332,7 +332,7 @@ static PHP_METHOD(PDO, getAttribute)
 		RETURN_FALSE;
 	}
 
-	if (!dbh->methods->set_attribute) {
+	if (!dbh->methods->get_attribute) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching attributes");
 		RETURN_FALSE;
 	}
