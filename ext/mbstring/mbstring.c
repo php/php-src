@@ -110,8 +110,6 @@ function_entry mbstring_functions[] = {
 	PHP_FALIAS(mbstrrpos,	mb_strrpos,	NULL)
 	PHP_FALIAS(mbsubstr,	mb_substr,	NULL)
 	PHP_FALIAS(mbstrcut,	mb_strcut,	NULL)
-	PHP_FALIAS(mbstrwidth,	mb_strwidth,	NULL)
-	PHP_FALIAS(mbstrimwidth,	mb_strimwidth,	NULL)
 	PHP_FALIAS(i18n_internal_encoding,	mb_internal_encoding,	NULL)
 	PHP_FALIAS(i18n_http_input,			mb_http_input,		NULL)
 	PHP_FALIAS(i18n_http_output,		mb_http_output,		NULL)
@@ -483,6 +481,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(outconv) = NULL;
 	}
 
+	/* clear http input identification. */
 	MBSTRG(http_input_identify) = mbfl_no_encoding_invalid;
 	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
 	MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
