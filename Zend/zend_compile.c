@@ -1249,7 +1249,6 @@ void do_fetch_constant(znode *result, znode *constant_name, int mode CLS_DC)
 		case ZEND_CT:
 			*result = *constant_name;
 			result->u.constant.type = IS_CONSTANT;
-			printf("Fetching compiletime constant:  '%s'\n", result->u.constant.value.str.val);
 			break;
 		case ZEND_RT: {
 				zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
