@@ -90,9 +90,7 @@ extern int gdSinT[];
 static void gdImageBrushApply(gdImagePtr im, int x, int y);
 static void gdImageTileApply(gdImagePtr im, int x, int y);
 static void gdImageAntiAliasedApply(gdImagePtr im, int x, int y);
-static int gdFullAlphaBlend(int dst, int src);
 static int gdLayerOverlay(int dst, int src);
-static int gdAlphaBlendColor(int b1, int b2, int a1, int a2);
 static int gdAlphaOverlayColor(int src, int dst, int max);
 int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
@@ -737,7 +735,7 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 							im->tpixels[y][x] = gdAlphaBlend(im->tpixels[y][x], color);
 							break;
 						case gdEffectNormal:
-							im->tpixels[y][x] = gdFullAlphaBlend(im->tpixels[y][x], color);
+							im->tpixels[y][x] = gdAlphaBlend(im->tpixels[y][x], color);
 							break;
 						case gdEffectOverlay :
 							im->tpixels[y][x] = gdLayerOverlay(im->tpixels[y][x], color);
@@ -3247,44 +3245,6 @@ void gdImageAntialias (gdImagePtr im, int antialias)
 void gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
 {
 	im->saveAlphaFlag = saveAlphaArg;
-}
-
-static int gdFullAlphaBlend (int dst, int src)
-{
-	int a1, a2;
-	a1 = gdAlphaTransparent - gdTrueColorGetAlpha(src);
-	a2 = gdAlphaTransparent - gdTrueColorGetAlpha(dst);
-
-	return ( ((gdAlphaTransparent - ((a1+a2)-(a1*a2/gdAlphaMax))) << 24) +
-		(gdAlphaBlendColor( gdTrueColorGetRed(src), gdTrueColorGetRed(dst), a1, a2 ) << 16) +
-		(gdAlphaBlendColor( gdTrueColorGetGreen(src), gdTrueColorGetGreen(dst), a1, a2 ) << 8) +
-		(gdAlphaBlendColor( gdTrueColorGetBlue(src), gdTrueColorGetBlue(dst), a1, a2 ))
-		);
-}
-
-static int gdAlphaBlendColor( int b1, int b2, int a1, int a2 )
-{
-	int c;
-	int w;
-
-	/* deal with special cases */
-
-	if( (gdAlphaMax == a1) || (0 == a2) ) {
-		/* the back pixel can't be seen */
-		return b1;
-	} else if(0 == a1) {
-		/* the front pixel can't be seen */
-		return b2;
-	} else if(gdAlphaMax == a2) {
-		/* the back pixel is opaque */
-		return ( a1 * b1 + ( gdAlphaMax - a1 ) * b2 ) / gdAlphaMax;
-	}
-
-	/* the general case */
-	w = ( a1 * ( gdAlphaMax - a2 ) / ( gdAlphaMax - a1 * a2 / gdAlphaMax ) * b1 + \
-	 	  a2 * ( gdAlphaMax - a1 ) / ( gdAlphaMax - a1 * a2 / gdAlphaMax ) * b2 ) / gdAlphaMax;
-	c = (a2 * b2  +  ( gdAlphaMax - a2 ) * w ) / gdAlphaMax;
-	return ( a1 * b1 + ( gdAlphaMax - a1 ) * c ) / gdAlphaMax;
 }
 
 static int gdLayerOverlay (int dst, int src)
