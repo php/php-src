@@ -26,6 +26,10 @@ EXTENSION:           dba
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           dbase
+PRIMARY MAINTAINER:  Jim Winstead <jimw@php.net>
+STATUS:              Odd Fixes
+--------------------------------------------------------------------------------
 EXTENSION:           fdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 STATUS:              Maintained
