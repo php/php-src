@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 11 Oct 2000, Version 4.0.3
+- Fixed a possible crash in -a interactive mode (Zeev, Zend Engine)
 - Added mysql_escape_string() (Peter A. Savitch and & Brian Wang)
 - Fixed many possible crash bugs with improper use of the printf() family of
   functions (Andi)
