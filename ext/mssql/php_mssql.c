@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Frank M. Kromann frank@frontbase.com>                       |
+   | Authors: Frank M. Kromann <frank@frontbase.com>                      |
    +----------------------------------------------------------------------+
  */
 
@@ -76,6 +76,7 @@ function_entry mssql_functions[] = {
  	PHP_FE(mssql_init,					NULL)
  	PHP_FE(mssql_bind,					a3_arg_force_ref)
  	PHP_FE(mssql_execute,				NULL)
+ 	PHP_FE(mssql_guid_string,			NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -775,7 +776,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			result->value.lval = (long) anyintcol(offset);
 			result->type = IS_LONG;
 			break;
-		}
+		} 
 		case SQLCHAR:
 		case SQLVARCHAR:
 		case SQLTEXT: {
@@ -2121,6 +2122,75 @@ PHP_FUNCTION(mssql_execute)
 	}
 	else {
 		ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	}
+}
+/* }}} */
+
+/* {{{ proto string mssql_guid_string(string binary [,int short_format])
+   Converts a 16 byte binary GUID to a string  */
+PHP_FUNCTION(mssql_guid_string)
+{
+	zval **binary, **short_format;
+	int sf = 0;
+	char buffer[32+1];
+	char buffer2[36+1];
+	MSSQLLS_FETCH();
+	
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &binary)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(binary);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &binary, &short_format)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(binary);
+			convert_to_long_ex(short_format);
+			sf = (*short_format)->value.lval;
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	dbconvert(NULL, SQLBINARY, (BYTE*)(*binary)->value.str.val, 16, SQLCHAR, buffer, -1);
+
+	if (sf) {
+		php_strtoupper(buffer, 32);
+		RETURN_STRING(buffer, 1);
+	}
+	else {
+		int i;
+		for (i=0; i<4; i++) {
+			buffer2[2*i] = buffer[6-2*i];
+			buffer2[2*i+1] = buffer[7-2*i];
+		}
+		buffer2[8] = '-';
+		for (i=0; i<2; i++) {
+			buffer2[9+2*i] = buffer[10-2*i];
+			buffer2[10+2*i] = buffer[11-2*i];
+		}
+		buffer2[13] = '-';
+		for (i=0; i<2; i++) {
+			buffer2[14+2*i] = buffer[14-2*i];
+			buffer2[15+2*i] = buffer[15-2*i];
+		}
+		buffer2[18] = '-';
+		for (i=0; i<4; i++) {
+			buffer2[19+i] = buffer[16+i];
+		}
+		buffer2[23] = '-';
+		for (i=0; i<12; i++) {
+			buffer2[24+i] = buffer[20+i];
+		}
+		buffer2[36] = 0;
+
+		php_strtoupper(buffer2, 36);
+		RETURN_STRING(buffer2, 1);
 	}
 }
 /* }}} */
