@@ -534,6 +534,9 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
+	char **outquery, int *outquery_len TSRMLS_DC);
+
 #endif /* PHP_PDO_DRIVER_H */
 /*
  * Local variables:

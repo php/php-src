@@ -64,7 +64,192 @@ static int scan(Scanner *s)
 	*/	
 }
 
-int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery, 
+struct placeholder {
+	char *pos;
+	int len;
+	int bindno;
+	int qlen;		/* quoted length of value */
+	char *quoted;	/* quoted value */
+	int freeq;
+	struct placeholder *next;
+};
+
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
+	char **outquery, int *outquery_len TSRMLS_DC)
+{
+	Scanner s;
+	char *ptr, *newbuffer;
+	int t;
+	int bindno = 0;
+	int ret = 0;
+	int newbuffer_len;
+	int padding;
+	HashTable *params;
+	struct pdo_bound_param_data *param;
+	int query_type = PDO_PLACEHOLDER_NONE;
+	struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
+
+	ptr = *outquery;
+	s.cur = inquery;
+	s.lim = inquery + inquery_len;
+
+	/* phase 1: look for args */
+	while((t = scan(&s)) != PDO_PARSER_EOI) {
+		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
+			if (t == PDO_PARSER_BIND) {
+				query_type |= PDO_PLACEHOLDER_NAMED;
+			} else {
+				query_type |= PDO_PLACEHOLDER_POSITIONAL;
+			}
+
+			plc = emalloc(sizeof(*plc));
+			memset(plc, 0, sizeof(*plc));
+			plc->next = NULL;
+			plc->pos = s.tok;
+			plc->len = s.cur - s.tok;
+			plc->bindno = bindno++;
+
+			if (placetail) {
+				placetail->next = plc;
+			} else {
+				placeholders = plc;
+			}
+			placetail = plc;
+		}
+	}
+
+	if (bindno == 0) {
+		/* nothing to do; good! */
+		return 0;
+	}
+
+	/* did the query make sense to me? */
+	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
+		/* they mixed both types; punt */
+		strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+		return -1;
+	}
+
+	if (stmt->supports_placeholders == query_type) {
+		/* query matches native syntax */
+		ret = 0;
+		goto clean_up;
+	}
+
+	params = stmt->bound_params;
+	
+	/* what are we going to do ? */
+	
+	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
+		/* query generation */
+
+		newbuffer_len = inquery_len;
+
+		/* let's quote all the values */	
+		for (plc = placeholders; plc; plc = plc->next) {
+			if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
+				ret = zend_hash_index_find(params, plc->bindno, (void**) &param);
+			} else {
+				ret = zend_hash_find(params, plc->pos, plc->len, (void**) &param);
+			}
+			if (ret == FAILURE) {
+				/* parameter was not defined */
+				ret = -1;
+				strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+				goto clean_up;
+			}
+			if (stmt->dbh->methods->quoter) {
+				if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
+						Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen TSRMLS_CC)) {
+					/* bork */
+					ret = -1;
+					strcpy(stmt->error_code, stmt->dbh->error_code);
+					goto clean_up;
+				}
+				plc->freeq = 1;
+			} else {
+				plc->quoted = Z_STRVAL_P(param->parameter);
+				plc->qlen = Z_STRLEN_P(param->parameter);
+			}
+			newbuffer_len += plc->qlen;
+		}
+
+rewrite:
+		/* allocate output buffer */
+		newbuffer = emalloc(newbuffer_len + 1);
+		*outquery = newbuffer;
+
+		/* and build the query */
+		plc = placeholders;
+		ptr = inquery;
+
+		do {
+			t = plc->pos - ptr;
+			if (t) {
+				memcpy(newbuffer, ptr, t);
+				newbuffer += t;
+			}
+			memcpy(newbuffer, plc->quoted, plc->qlen);
+			newbuffer += plc->qlen;
+			ptr = plc->pos + plc->len;
+
+			plc = plc->next;
+		} while (plc);
+
+		t = (inquery + inquery_len) - ptr;
+		if (t) {
+			memcpy(newbuffer, ptr, t);
+			newbuffer += t;
+		}
+		*newbuffer = '\0';
+		*outquery_len = newbuffer - *outquery;
+
+		ret = 1;
+		goto clean_up;
+
+	} else if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
+		/* rewrite ? to :pdoX */
+		char idxbuf[32];
+		
+		newbuffer_len = inquery_len;
+
+		for (plc = placeholders; plc; plc = plc->next) {
+			snprintf(idxbuf, sizeof(idxbuf), ":pdo%d", plc->bindno);
+			plc->quoted = estrdup(idxbuf);
+			plc->qlen = strlen(plc->quoted);
+			plc->freeq = 1;
+			newbuffer_len += plc->qlen;
+		}
+				
+		goto rewrite;
+
+	} else {
+		/* rewrite :name to ? */
+
+		/* HARD!.  We need to remember the mapping and bind those positions. */
+		strcpy(stmt->error_code, "IM001"); /* Driver does not support this function */
+
+		ret = -1;
+	}
+
+clean_up:
+
+	while (placeholders) {
+		plc = placeholders;
+		placeholders = plc->next;
+
+		if (plc->freeq) {
+			efree(plc->quoted);
+		}
+
+		efree(plc);
+	}
+
+	return ret;
+}
+
+#if 0
+int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery, 
 		int *outquery_len TSRMLS_DC)
 {
 	Scanner s;
@@ -190,6 +375,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 	*ptr = '\0';
 	return 0;
 }
+#endif
 
 /*
  * Local variables:
