@@ -43,7 +43,7 @@
 #endif
 
 #ifdef ZEND_DEBUG_
-#define IBDEBUG(fmt, ...) php_printf("::: (%4d) " fmt " \n",  __LINE__, ##__VA_ARGS__)
+#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 #endif
 
 #ifndef IBDEBUG
@@ -261,7 +261,7 @@ static void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_
 {
 	int type;
 
-	IBDEBUG("Resource #%ld transaction or database link?",Z_LVAL_PP(link_id));
+	IBDEBUG("Transaction or database link?");
 	if (zend_list_find(Z_LVAL_PP(link_id), &type)) {
 	 	if (type == le_trans) {
 			/* Transaction resource: make sure it refers to one link only, then 
@@ -1634,7 +1634,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
-		IBDEBUG("Query wants XSQLDA with %d field(s) for output",ib_query->out_sqlda->sqld);
+		IBDEBUG("Query wants XSQLDA for output");
 		IB_RESULT = emalloc(sizeof(ibase_result));
 		IB_RESULT->link = ib_query->link;
 		IB_RESULT->trans = ib_query->trans;
@@ -1656,7 +1656,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	}
 
 	if (ib_query->in_sqlda) { /* has placeholders */
-		IBDEBUG("Query wants XSQLDA with %d field(s) for input",ib_query->in_sqlda->sqld);
+		IBDEBUG("Query wants XSQLDA for input");
 		if (ib_query->in_sqlda->sqld != argc) {
 			_php_ibase_module_error("Placeholders (%d) and variables (%d) mismatch" TSRMLS_CC, ib_query->in_sqlda->sqld, argc);
 			goto _php_ibase_exec_error;
@@ -2878,7 +2878,7 @@ PHP_FUNCTION(ibase_execute)
 	
 	/* Have we used this cursor before and it's still open (exec proc has no cursor) ? */
 	if (ib_query->result_res_id != 0 && ib_query->statement_type != isc_info_sql_stmt_exec_procedure) {
-		IBDEBUG("Implicitly closing a cursor for result resource #%d",ib_query->result_res_id);
+		IBDEBUG("Implicitly closing a cursor");
 		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_close)) {
 			_php_ibase_error(TSRMLS_C);
 		}
