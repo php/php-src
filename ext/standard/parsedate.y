@@ -180,8 +180,8 @@ static int	yyRelYear;
 
 %}
 
-/* This grammar has 13 shift/reduce conflicts. */
-%expect 13
+/* This grammar has 14 shift/reduce conflicts. */
+%expect 14
 
 %union {
     int			Number;
