@@ -19,52 +19,90 @@
 // +----------------------------------------------------------------------+
 //
 require_once 'PEAR.php';
+require_once 'PEAR/Config.php';
 require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$options = Console_Getopt::getopt($argv, "h?v:e:p:d:");
+// {{{ config file and option parsing
+
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sS");
 if (PEAR::isError($options)) {
     usage($options);
 }
 
+if (OS_WINDOWS) {
+    $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pearsys.ini';
+    $pear_user_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.ini';
+} else {
+    $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.conf';
+    $pear_user_config = $HTTP_ENV_VARS['HOME'].DIRECTORY_SEPARATOR.'.pearrc';
+}
+
 $opts = $options[0];
+
 foreach ($opts as $opt) {
-    $param = $opt[1];
     switch ($opt[0]) {
-        case 'v':
-            $verbose = $param;
+        case 'c':
+            $pear_user_config = $opt[1];
             break;
-        case 'e':
-            if ($param{0} != DIRECTORY_SEPARATOR) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
-            }
-            $ext_dir = $param;
-            break;
-        case 'p':
-            if ($param{0} != DIRECTORY_SEPARATOR) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
-            }
-            $script_dir = $param;
-            break;
-        case 'd':
-            if ($param{0} != DIRECTORY_SEPARATOR) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
-            }
-            $doc_dir = $param;
+        case 'C':
+            $pear_default_config = $opt[1];
             break;
     }
 }
 
-$verbose    = (isset($verbose)) ? $verbose : 1;
-$script_dir = (isset($script_dir)) ? $script_dir : PEAR_INSTALL_DIR;
-$ext_dir    = (isset($ext_dir)) ? $ext_dir : PEAR_EXTENSION_DIR;
-$doc_dir    = (isset($doc_dir)) ? $doc_dir : '';
+$config = new PEAR_Config($pear_user_config, $pear_default_config);
+$store_user_config = false;
+$store_default_config = false;
 
-PEAR::setErrorHandling(PEAR_ERROR_PRINT);
+foreach ($opts as $opt) {
+    $param = $opt[1];
+    switch ($opt[0]) {
+        case 'd':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value);
+            break;
+        case 'D':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value, true);
+            break;
+        case 's':
+            $store_user_config = true;
+            break;
+        case 'S':
+            $store_default_config = true;
+            break;
+    }
+}
+
+$fallback_config = array(
+    'php_dir' => PEAR_INSTALL_DIR,
+    'ext_dir' => PEAR_EXTENSION_DIR,
+    'doc_dir' => '',
+    'verbose' => true,
+);
+
+foreach ($fallback_config as $key => $value) {
+    if (!$config->isDefined($key)) {
+        $config->set($key, $value);
+    }
+}
+
+$verbose    = $config->get("verbose");
+$script_dir = $config->get("php_dir");
+$ext_dir    = $config->get("ext_dir");
+$doc_dir    = $config->get("doc_dir");
+
+// }}}
+
+PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
+
 $command = $options[1][1];
 switch ($command) {
-    case 'install':
+    // {{{ install
+
+    case 'install': {
         include_once 'PEAR/Installer.php';
         $package = $options[1][2];
         $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
@@ -75,7 +113,12 @@ switch ($command) {
             print "install ok\n";
         }
         break;
-    case 'package':
+    }
+
+    // }}}
+    // {{{ package
+
+    case 'package': {
         include_once 'PEAR/Packager.php';
         $pkginfofile = $options[1][2];
         $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
@@ -86,19 +129,37 @@ switch ($command) {
             print "package ok\n";
         }
         break;
-    default:
-        usage();
+    }
+
+    // }}}
+    // {{{ list-packages
+
+    case 'list-packages': {
+        include_once 'PEAR/Remote.php';
+        $remote = new PEAR_Remote($config);
+    }
+
+    // }}}
+    default: {
+        if (!$store_default_config && !$store_user_config) {
+            usage();
+        }
         break;
+    }
 }
 
-function usage($obj = null)
+// {{{ usage()
+
+function usage($error = null)
 {
     $stderr = fopen('php://stderr', 'w');
-    if ($obj !== null) {
-        fputs($stderr, $obj->getMessage());
+    if (PEAR::isError($obj)) {
+        fputs($stderr, $error->getMessage());
+    } elseif ($obj !== null) {
+        fputs($stderr, $error);
     }
     fputs($stderr,
-          "Usage: pear [-v n] [-h] [-p <dir>] [-e <dir>] [-d <dir>] command <parameters>\n".
+          "Usage: pear [options] command <parameters>\n".
           "Options:\n".
           "     -v        set verbosity level to <n> (0-2, default 1)\n".
           "     -p <dir>  set script install dir (absolute path)\n".
@@ -112,5 +173,7 @@ function usage($obj = null)
     fclose($stderr);
     exit;
 }
+
+// }}}
 
 ?>
