@@ -110,6 +110,7 @@ msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
 install: all
+	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
 	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >nul
 	
