@@ -640,7 +640,7 @@ void php_request_shutdown(void *dummy)
 	PLS_FETCH();
 
 	if (setjmp(EG(bailout))==0) {
-		php_end_ob_buffers(SG(request_info).headers_only?0:1);
+		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
 	}
 
 	if (setjmp(EG(bailout))==0) {
