@@ -3118,8 +3118,8 @@ PHP_FUNCTION(ocisavelob)
 
 			if (offparam == -1) {
 				offset = curloblen;
-			} else if ((ub4) offparam >= curloblen) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset smaller than current LOB-Size - appending");
+			} else if (offparam >= curloblen) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is bigger than current LOB-Size - appending");
 				offset = curloblen;
 			} else {
 				offset = offparam;
@@ -3128,7 +3128,6 @@ PHP_FUNCTION(ocisavelob)
 			WRONG_PARAM_COUNT;
 		}
 
-		offset++;
 		convert_to_string_ex(arg);
 		loblen = Z_STRLEN_PP(arg);
 	
