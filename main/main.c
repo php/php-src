@@ -961,7 +961,7 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 		php_import_environment_variables(ELS_C PLS_CC);
 	}
 
-	while(*p) {
+	while(p && *p) {
 		switch(*p++) {
 			case 'p':
 			case 'P':

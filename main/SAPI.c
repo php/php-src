@@ -57,6 +57,13 @@ SAPI_API int sapi_globals_id;
 sapi_globals_struct sapi_globals;
 #endif
 
+#ifdef ZTS
+static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
+{
+        memset(sapi_globals,0,sizeof(*sapi_globals));
+}
+
+#endif
 
 /* True globals (no need for thread safety) */
 sapi_module_struct sapi_module;
@@ -71,7 +78,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_register_post_entries(supported_post_entries);
 
 #ifdef ZTS
-	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), NULL, NULL);
+	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), sapi_globals_ctor, NULL);
 #endif
 	reentrancy_startup();
 
