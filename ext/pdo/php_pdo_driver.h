@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050206
+#define PDO_DRIVER_API	20050213
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -502,6 +502,8 @@ struct _pdo_stmt_t {
 	/* keep track of bound input parameters.  Some drivers support
 	 * input/output parameters, but you can't rely on that working */
 	HashTable *bound_params;
+	/* When rewriting from named to positional, this maps positions to names */
+	HashTable *bound_param_map;
 	/* keep track of PHP variables bound to named (or positional) columns
 	 * in the result set */
 	HashTable *bound_columns;

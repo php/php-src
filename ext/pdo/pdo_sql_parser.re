@@ -259,10 +259,25 @@ rewrite:
 
 	} else {
 		/* rewrite :name to ? */
+		
+		newbuffer_len = inquery_len;
+	
+		if (stmt->bound_param_map == NULL) {
+			ALLOC_HASHTABLE(stmt->bound_param_map);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+		}
+		
+		for (plc = placeholders; plc; plc = plc->next) {
+			char *name;
+			
+			name = estrndup(plc->pos, plc->len);
+			zend_hash_index_update(stmt->bound_param_map, plc->bindno, name, plc->len + 1, NULL);
+			efree(name);
+			plc->quoted = "?";
+			plc->qlen = 1;
+		}
 
-		/* HARD!.  We need to remember the mapping and bind those positions. */
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "cannot map :name to ? in this version" TSRMLS_CC);
-		ret = -1;
+		goto rewrite;
 	}
 
 clean_up:
