@@ -1,6 +1,22 @@
 dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
+ 
+AC_DEFUN(PHP_CONFIG_NICE,[
+  rm -f $1
+  cat >$1<<EOF
+#! /bin/sh
+#
+# Created by configure
+
+EOF
+
+  for arg in [$]0 "[$]@"; do
+    echo "\"[$]arg\" \\" >> $1
+  done
+  echo '"[$]@"' >> $1
+  chmod +x $1
+])
 
 AC_DEFUN(PHP_TIME_R_TYPE,[
 AC_CACHE_CHECK(for time_r type, ac_cv_time_r_type,[

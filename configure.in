@@ -23,8 +23,9 @@ fi
 
 cwd=`pwd`
 
-CONFIGURE_COMMAND=$0
-for arg in "$@"; do
+PHP_CONFIG_NICE(config.nice)
+
+for arg in $0 "$@"; do
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
 done
 
