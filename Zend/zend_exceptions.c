@@ -230,6 +230,7 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 
 	str = va_arg(args, char**);
 	len = va_arg(args, int*);
+	num = va_arg(args, int*);
 
 	s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 2 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
