@@ -1680,8 +1680,6 @@ PHP_FUNCTION(domxml_test)
  */
 PHP_MINFO_FUNCTION(domxml)
 {
-	char buffer[128];
-	int major, minor, subminor;
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
@@ -1698,6 +1696,10 @@ PHP_MINFO_FUNCTION(domxml)
 	php_info_print_table_row(2, "XPointer Support", "enabled");
 #endif
 #if HAVE_DOMXSLT
+	{
+	char buffer[128];
+	int major, minor, subminor;
+
 	php_info_print_table_row(2, "DOM/XSLT", "enabled");
 /*	php_info_print_table_row(2, "libxslt Version", LIBXSLT_DOTTED_VERSION); */
 	major = xsltLibxsltVersion/10000;
@@ -1710,6 +1712,7 @@ PHP_MINFO_FUNCTION(domxml)
 	subminor = (xsltLibxmlVersion - major * 10000 - minor * 100);
 	snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
 	php_info_print_table_row(2, "libxslt compiled against libxml Version", buffer);
+	}
 #if HAVE_DOMEXSLT
 	php_info_print_table_row(2, "DOM/EXSLT", "enabled");
 	php_info_print_table_row(2, "libexslt Version", LIBEXSLT_DOTTED_VERSION);
