@@ -5,7 +5,7 @@ dnl If your extension references something external, use with:
 
 PHP_ARG_WITH(gmp, for gmp support,
 dnl Make sure that the comment is aligned:
-[  --with-gmp             Include gmp support])
+[  --with-gmp        Include gmp support])
 
 if test "$PHP_GMP" != "no"; then
 

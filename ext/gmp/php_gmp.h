@@ -71,6 +71,10 @@ ZEND_FUNCTION(gmp_xor);
 ZEND_FUNCTION(gmp_random);
 ZEND_FUNCTION(gmp_setbit);
 ZEND_FUNCTION(gmp_clrbit);
+ZEND_FUNCTION(gmp_scan0);
+ZEND_FUNCTION(gmp_scan1);
+ZEND_FUNCTION(gmp_popcount);
+ZEND_FUNCTION(gmp_hamdist);
 
 /* 
   	Declare any global variables you may need between the BEGIN

@@ -1,9 +1,5 @@
 mpz_mul_2exp
 mpz_[ft]div_[qr]_2exp
-mpz_popcount
-mpz_hamdist
-mpz_scan0
-mpz_scan1
 
 V 3:
 mpz_nextprime
