@@ -56,10 +56,10 @@
 8. Classes must be declared before used:
    <?php
    $test = new fubar();
-   $test->echo();
+   $test->barfu();
 
    class fubar {
-       function echo() {
+       function barfu() {
            echo 'fubar';
        }
    }

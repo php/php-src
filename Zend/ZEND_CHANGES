@@ -537,7 +537,7 @@ Changes in the Zend Engine 2.0
       code would look something like shown below. The comments show the
       meaning of each proerty and hence there getter methods. As the code
       shows it is possible to read any available information by using the
-      getter methods. But since some og the methods are used internally
+      getter methods. But since some of the methods are used internally
       they are marked final. All in all the class is very restrictive 
       because it must be ensured that anything used internally always
       works as expected.
@@ -546,7 +546,7 @@ Changes in the Zend Engine 2.0
 
         <?php
         class Exception {
-          function __construct(string $message=NULL, int code=0) {
+          function __construct(string $message=NULL, int $code=0) {
             if (func_num_args()) {
               $this->message = $message;
             }
@@ -853,9 +853,9 @@ Changes in the Zend Engine 2.0
             
             // matches the following 7 lines with the for directive.
             $it = $obj->getIterator();
-            for($it->rewind(); $it->hasMore(); $it->next) {
-                $key = $it->current();
-                $val = $it->key();
+            for($it->rewind(); $it->hasMore(); $it->next()) {
+                $key = $it->key();
+                $val = $it->current();
                 echo "$key = $val\n";
             }
             unset($it);
@@ -900,9 +900,10 @@ Changes in the Zend Engine 2.0
             class Foo {
                 function __toString() {
                     return "What ever";
+                }
             }
 
-            $obj = Foo;
+            $obj = new Foo;
             
             $str = (string) $obj; // call __toString()
             
@@ -933,6 +934,7 @@ Changes in the Zend Engine 2.0
                 public $prop;
                 function Func($name) {
                     echo "Hello $name";
+                }
             }
 
             reflection_class::export('Foo');
