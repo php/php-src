@@ -557,6 +557,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS
 #if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D)
 {
+    zend_op *opline, *end;
 	ELS_FETCH();
 
 	if (!EG(interactive)
@@ -565,6 +566,22 @@ void execute_new_code(CLS_D)
 		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
 		return;
 	}
+
+    opline=CG(active_op_array)->opcodes + CG(active_op_array)->start_op_number;
+	end=opline+CG(active_op_array)->last;
+
+    while (opline<end) {
+        if (opline->op1.op_type==IS_CONST) {
+            opline->op1.u.constant.is_ref = 1;
+            opline->op1.u.constant.refcount = 2; /* Make sure is_ref won't be reset */
+        }
+        if (opline->op2.op_type==IS_CONST) {
+            opline->op2.u.constant.is_ref = 1;
+            opline->op2.u.constant.refcount = 2;
+        }
+        opline++;
+    }
+
 	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;
 	CG(active_op_array)->end_op_number = CG(active_op_array)->last;
 	EG(active_op_array) = CG(active_op_array);
