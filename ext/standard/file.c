@@ -905,10 +905,10 @@ static int parse_context_options(php_stream_context *context, zval *options)
 
 static int parse_context_params(php_stream_context *context, zval *params)
 {
-	int ret = SUCCESS;
+	int ret = FAILURE;
 	zval **tmp;
 
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
+	if ((ret = zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) == SUCCESS) {
 		
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -920,10 +920,14 @@ static int parse_context_params(php_stream_context *context, zval *params)
 		context->notifier->ptr = *tmp;
 		ZVAL_ADDREF(*tmp);
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
+	if ((ret = zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) == SUCCESS) {
 		parse_context_options(context, *tmp);
 	}
-	
+
+	if (ret != SUCCESS) {
+		php_stream_context_free(context);
+	}
+
 	return ret;
 }
 
