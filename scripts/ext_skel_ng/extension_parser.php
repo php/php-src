@@ -302,7 +302,9 @@
     </para>
    </section>
 
+<!-- TODO no configure option support yet
    &reference.{$this->name}.configure;
+-->
 
    <section id='{$this->name}.configuration'>
     &reftitle.runtime;
