@@ -161,15 +161,53 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	module_entry = get_module();
 	if ((module_entry->zend_debug != ZEND_DEBUG) || (module_entry->zts != USING_ZTS)
 		|| (module_entry->zend_api != ZEND_MODULE_API_NO)) {
-		php_error(error_type,
-					"%s: Unable to initialize module\n"
-					"Module compiled with debug=%d, thread-safety=%d module API=%d\n"
-					"PHP compiled with debug=%d, thread-safety=%d module API=%d\n"
-					"These options need to match\n",
-					module_entry->name, module_entry->zend_debug, module_entry->zts, module_entry->zend_api,
-					ZEND_DEBUG, USING_ZTS, ZEND_MODULE_API_NO);
-		DL_UNLOAD(handle);
-		RETURN_FALSE;
+		/* Check for pre-4.1.0 module which has a slightly different module_entry structure :( */
+			struct pre_4_1_0_module_entry {
+				  char *name;
+				  zend_function_entry *functions;
+				  int (*module_startup_func)(INIT_FUNC_ARGS);
+				  int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+				  int (*request_startup_func)(INIT_FUNC_ARGS);
+				  int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+				  void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+				  int (*global_startup_func)(void);
+				  int (*global_shutdown_func)(void);
+				  int globals_id;
+				  int module_started;
+				  unsigned char type;
+				  void *handle;
+				  int module_number;
+				  unsigned char zend_debug;
+				  unsigned char zts;
+				  unsigned int zend_api;
+			};
+
+			char *name;
+			int zend_api;
+			unsigned char zend_debug, zts;
+
+			if((  ((struct pre_4_1_0_module_entry *)module_entry)->zend_api > 20000000)
+			   &&(((struct pre_4_1_0_module_entry *)module_entry)->zend_api < 20010901)) {
+				name       = ((struct pre_4_1_0_module_entry *)module_entry)->name;
+				zend_api   = ((struct pre_4_1_0_module_entry *)module_entry)->zend_api;
+				zend_debug = ((struct pre_4_1_0_module_entry *)module_entry)->zend_debug;
+				zts        = ((struct pre_4_1_0_module_entry *)module_entry)->zts; 
+			} else {			
+				name       = module_entry->name;
+				zend_api   = module_entry->zend_api;
+				zend_debug = module_entry->zend_debug;
+				zts        = module_entry->zts; 
+			}
+
+			php_error(error_type,
+					  "%s: Unable to initialize module\n"
+					  "Module compiled with module API=%d, debug=%d, thread-safety=%d\n"
+					  "PHP    compiled with module API=%d, debug=%d, thread-safety=%d\n"
+					  "These options need to match\n",
+					  name, zend_api, zend_debug, zts,
+					  ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);		
+			DL_UNLOAD(handle);
+			RETURN_FALSE;
 	}
 	Z_TYPE_P(module_entry) = type;
 	module_entry->module_number = zend_next_free_module();
