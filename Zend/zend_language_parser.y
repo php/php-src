@@ -272,7 +272,7 @@ unticked_declaration_statement:
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_CLASS declaration_class_name { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
-	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+	|	T_CLASS declaration_class_name T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
 declaration_class_name:
