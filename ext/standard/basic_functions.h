@@ -91,12 +91,6 @@ PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);
 
-PHP_FUNCTION(get_class);
-PHP_FUNCTION(get_parent_class);
-PHP_FUNCTION(method_exists);
-
-PHP_FUNCTION(leak);
-
 PHP_FUNCTION(error_log);
 
 PHP_FUNCTION(call_user_func);
@@ -117,9 +111,6 @@ PHP_FUNCTION(ini_alter);
 PHP_FUNCTION(ini_restore);
 
 PHP_FUNCTION(print_r);
-
-PHP_FUNCTION(define);
-PHP_FUNCTION(defined);
 
 PHP_FUNCTION(connection_aborted);
 PHP_FUNCTION(connection_timeout);

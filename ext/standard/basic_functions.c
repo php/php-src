@@ -76,8 +76,6 @@ function_entry basic_functions[] = {
 	PHP_FE(intval,									NULL)
 	PHP_FE(doubleval,								NULL)
 	PHP_FE(strval,									NULL)
-	PHP_FE(define,									NULL)
-	PHP_FE(defined,									NULL)
 	PHP_FE(bin2hex, 								NULL)
 	PHP_FE(toggle_short_open_tag,					NULL)
 	PHP_FE(sleep,									NULL)
@@ -284,11 +282,7 @@ function_entry basic_functions[] = {
 	PHP_FE(is_string,								first_arg_allow_ref)
 	PHP_FE(is_array,								first_arg_allow_ref)
 	PHP_FE(is_object,								first_arg_allow_ref)
-	PHP_FE(get_class,								NULL)
-	PHP_FE(get_parent_class,						NULL)
-	PHP_FE(method_exists,							NULL)
 
-	PHP_FE(leak,									NULL)
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
 	PHP_FE(call_user_method,						NULL)
@@ -1613,76 +1607,6 @@ PHP_FUNCTION(is_object)
 	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
 
-/* {{{ proto string get_class(object object)
-     Retrieves the class name ...
-*/
-PHP_FUNCTION(get_class)
-{
-	pval *arg;
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
-		RETURN_FALSE;
-	}
-	if (arg->type != IS_OBJECT) {
-		RETURN_FALSE;
-	}
-	RETURN_STRINGL(arg->value.obj.ce->name,	arg->value.obj.ce->name_length, 1);
-}
-/* }}} */
-
-/* {{{ proto string get_parent_class(object object)
-     Retrieves the parent class name ...
-*/
-PHP_FUNCTION(get_parent_class)
-{
-	pval *arg;
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
-		RETURN_FALSE;
-	}
-	if ((arg->type != IS_OBJECT) || !arg->value.obj.ce->parent) {
-		RETURN_FALSE;
-	}
-	RETURN_STRINGL(arg->value.obj.ce->parent->name,	arg->value.obj.ce->parent->name_length, 1);
-}
-/* }}} */
-
-/* {{{ proto bool method_exists(object object, string method)
-     Checks if the class method exists ...
-*/
-PHP_FUNCTION(method_exists)
-{
-	pval *arg1, *arg2;
-	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
-		RETURN_FALSE;
-	}
-	if (arg1->type != IS_OBJECT) {
-		RETURN_FALSE;
-	}
-	convert_to_string(arg2);
-	if(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-PHP_FUNCTION(leak)
-{
-	int leakbytes=3;
-	pval *leak;
-
-	if (ARG_COUNT(ht)>=1) {
-		if (getParameters(ht, 1, &leak)==SUCCESS) {
-			convert_to_long(leak);
-			leakbytes = leak->value.lval;
-		}
-	}
-	
-	emalloc(leakbytes);
-}
 
 /* 
 	1st arg = error message
@@ -2194,76 +2118,6 @@ PHP_FUNCTION(print_r)
 
 
 /* This should go back to PHP */
-PHP_FUNCTION(define)
-{
-	pval *var, *val, *non_cs;
-	int case_sensitive;
-	zend_constant c;
-	ELS_FETCH();
-	
-	switch(ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &var, &val)==FAILURE) {
-				RETURN_FALSE;
-			}
-			case_sensitive = CONST_CS;
-			break;
-		case 3:
-			if (getParameters(ht, 3, &var, &val, &non_cs)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(non_cs);
-			if (non_cs->value.lval) {
-				case_sensitive = 0;
-			} else {
-				case_sensitive = CONST_CS;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	switch(val->type) {
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_STRING:
-		case IS_BOOL:
-		case IS_RESOURCE:
-			break;
-		default:
-			php_error(E_WARNING,"Constants may only evaluate to scalar values");
-			RETURN_FALSE;
-			break;
-	}
-	convert_to_string(var);
-	
-	c.value = *val;
-	pval_copy_constructor(&c.value);
-	c.flags = case_sensitive | ~CONST_PERSISTENT; /* non persistent */
-	c.name = php3_strndup(var->value.str.val, var->value.str.len);
-	c.name_len = var->value.str.len+1;
-	zend_register_constant(&c ELS_CC);
-	RETURN_TRUE;
-}
-
-
-PHP_FUNCTION(defined)
-{
-	pval *var;
-	pval c;
-		
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &var)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_string(var);
-	if (zend_get_constant(var->value.str.val, var->value.str.len, &c)) {
-		pval_destructor(&c);
-		RETURN_LONG(1);
-	} else {
-		RETURN_LONG(0);
-	}
-}
 
 /* {{{ proto int connection_aborted(void)
    Returns true if client disconnected */
