@@ -2372,6 +2372,7 @@ PHP_FUNCTION(ibase_query)
 						ib_link->handle = db;
 						ib_link->dialect = SQL_DIALECT_CURRENT;
 						ib_link->tr_list = NULL;
+                        ib_link->event_head = NULL;
 						
 						ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
 						zend_list_addref(Z_LVAL_P(return_value));
