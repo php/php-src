@@ -55,10 +55,10 @@ A lot... */
 #define SQL_DIALECT_CURRENT 1
 #endif
 
-/*
 #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
-*/
+/*
 #define IBDEBUG(a)
+*/
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -141,23 +141,21 @@ static void get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, ibase_d
 	IBLS_FETCH();
 
 	IBDEBUG("Transaction or database link?");
-	if (Z_TYPE_PP(link_id) == IS_RESOURCE) {
-		if ((resource = zend_list_find(Z_LVAL_PP(link_id), &type))) {
-			IBDEBUG("Found in list");
-			if (type == IBG(le_trans)) {
-				/* Transaction resource. Fetch it, database link resource
-				   is stored in ib_trans->link_rsrc. */
-				IBDEBUG("Type is le_trans");
-				*trans_id = (Z_LVAL_PP(link_id));
-				ZEND_FETCH_RESOURCE(ib_trans, ibase_tr_link *, link_id, -1, "InterBase transaction", IBG(le_trans));
-				*trans_n = ib_trans->trans_num;
-				ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, link_id, ib_trans->link_rsrc, "InterBase link", IBG(le_link), IBG(le_plink));
-			} else {
-				IBDEBUG("Type is le_[p]link");
-				/* Database link resource, use default transaction (=0). */
-				*trans_n = 0;
-				ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, link_id, -1, "InterBase link", IBG(le_link), IBG(le_plink));
-			}
+	if ((resource = zend_list_find(Z_LVAL_PP(link_id), &type))) {
+		IBDEBUG("Found in list");
+		if (type == IBG(le_trans)) {
+			/* Transaction resource. Fetch it, database link resource
+			   is stored in ib_trans->link_rsrc. */
+			IBDEBUG("Type is le_trans");
+			*trans_id = (Z_LVAL_PP(link_id));
+			ZEND_FETCH_RESOURCE(ib_trans, ibase_tr_link *, link_id, -1, "InterBase transaction", IBG(le_trans));
+			*trans_n = ib_trans->trans_num;
+			ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, link_id, ib_trans->link_rsrc, "InterBase link", IBG(le_link), IBG(le_plink));
+		} else {
+			IBDEBUG("Type is le_[p]link");
+			/* Database link resource, use default transaction (=0). */
+			*trans_n = 0;
+			ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, link_id, -1, "InterBase link", IBG(le_link), IBG(le_plink));
 		}
 	}
 	*ib_link = resource;
@@ -1367,11 +1365,13 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
+		IBDEBUG("Query wants XSQLDA for output");
 		IB_RESULT = emalloc(sizeof(ibase_result));
 		IB_RESULT->link = ib_query->link;
 		IB_RESULT->trans = ib_query->trans;
 		IB_RESULT->stmt = ib_query->stmt; 
 		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
+
 		out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
 		memcpy(out_sqlda,ib_query->out_sqlda,XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
 		_php_ibase_alloc_xsqlda(out_sqlda);
@@ -1385,6 +1385,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	}
 
 	if (ib_query->in_sqlda) { /* has placeholders */
+		IBDEBUG("Query wants XSQLDA for input");
 		if (ib_query->in_sqlda->sqld != argc) {
 			_php_ibase_module_error("placeholders (%d) and variables (%d) mismatch", ib_query->in_sqlda->sqld, argc);
 			goto _php_ibase_exec_error;  /* yes mommy, goto! */
@@ -1409,7 +1410,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 _php_ibase_exec_error:		 /* I'm a bad boy... */
 	
 	if (in_sqlda)
-		efree(in_sqlda);
+		_php_ibase_free_xsqlda(in_sqlda);
 	if (bind_buf)
 		efree(bind_buf);
 
@@ -1419,7 +1420,7 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 			IB_RESULT = NULL;
 		}
 		if (out_sqlda)
-			efree(out_sqlda);
+			_php_ibase_free_xsqlda(out_sqlda);
 	}
 	
 	return rv;
@@ -2870,6 +2871,7 @@ PHP_FUNCTION(ibase_blob_import)
 				RETURN_FALSE;
 			}
 			link_id = IBG(default_link);
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &link_arg, &file_arg) == FAILURE) {
@@ -2883,7 +2885,7 @@ PHP_FUNCTION(ibase_blob_import)
 	}
 	
 	/* open default transaction */
-	if(_php_ibase_def_trans(ib_link, trans_n) == FAILURE){
+	if (_php_ibase_def_trans(ib_link, trans_n) == FAILURE) {
 		RETURN_FALSE;
 	}
 
