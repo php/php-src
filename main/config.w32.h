@@ -61,7 +61,6 @@
    external libraries to compile.  These will be removed from 
    here in a future beta, as these modules will be moved out to dll's 
    ---------------------------------------------------------------*/
-#define HAVE_SNMP 0
 #define HAVE_ERRMSG_H 0 /*needed for mysql 3.21.17 and up*/
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
