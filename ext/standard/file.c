@@ -1634,7 +1634,7 @@ PHP_FUNCTION(readfile)
 /* }}} */
 
 
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 
 /* {{{ proto string mmapfile (string filename [, int bytes_to_read])
    Read a file into a variable with mmap */
