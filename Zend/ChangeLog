@@ -1,3 +1,8 @@
+2002-05-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_multibyte.c:
+    - Add empty zend_multibyte.c to allow build with 4.3.0-dev.
+
 2002-05-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES: Fugbix typo.

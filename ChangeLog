@@ -1,3 +1,98 @@
+2002-05-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php: * un-indent description too
+
+    * pear/PEAR/Common.php:
+    * try being smart about de-indenting release notes from the xml
+
+    * pear/PEAR/WebInstaller.php: * PEAR_Frontend_Web is coming!
+
+2002-05-26  Andi Gutmans  <andi@zend.com>
+
+    * genfiles: - Small fix
+
+2002-05-26  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: I case we ever release 4.2.2.
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c: MFH (fix for exit())
+
+2002-05-26  Andi Gutmans  <andi@zend.com>
+
+    * genfiles: - Update genfiles for new build system
+
+2002-05-26  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: Added "pear -V" (show version information)
+
+2002-05-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in: * another help fix
+
+2002-05-26  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Config.php:
+    Make the error handling work again since the new internal command
+    structure
+
+2002-05-26  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/package-PEAR.xml: * Add /me has helper.
+
+2002-05-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php: * bold column headings
+
+    * pear/package-PEAR.xml: ^t
+
+2002-05-26  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Install.php
+      pear/scripts/pear.in: "Help" fixes
+
+2002-05-26  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/cgi_main.c: Merge from cli.
+
+2002-05-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml: * add package.dtd to the distribution
+
+    * pear/package-PEAR.xml: * roll out 0.10
+
+    * pear/PEAR/Command.php: * focus on the present
+
+    * pear/PEAR/Frontend/Gtk.php: * add @nodep stuff here too
+
+    * pear/PEAR/Remote.php: * be nice to PEAR_Common::detectDepdencencies()
+
+    * pear/PEAR/Common.php: * more work on the dependency detector
+
+    * pear/scripts/pear.in: * Console_Getopt POSIX fix
+
+    * pear/PEAR.php: * phpdoc fixes (un-break the broken)
+
+2002-05-26  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c:
+    Due to the way Zend handles exit() we cannot rely on the return code
+    of php_execute_script.
+
+    * sapi/cli/php_cli.c: Made constants persistent and fixed a memory leak.
+
+2002-05-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/Console/Getopt.php
+      pear/package-Console_Getopt.xml:
+    * POSIX getopt compatibility support (first argv element is the command)
+
+    * pear/install-pear.php: * tidy output a bit
+
+    * ext/standard/versioning.c: Fix segfault in version_compare() 
+
+    * pear/PEAR/Installer.php: * cleaned up error handling in _installFile
+
 2002-05-25  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/PEAR/Command/Package.php:
