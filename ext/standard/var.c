@@ -107,7 +107,7 @@ void php_var_dump(pval **struc, int level)
 							d->type = IS_LONG;
 							d->value.lval = index;
 							php_var_dump(&d, level + 2);
-							efree(d);
+							FREE_ZVAL(d);
 						}
 						break;
 
@@ -120,7 +120,7 @@ void php_var_dump(pval **struc, int level)
 							d->value.str.len = strlen(key);
 							php_var_dump(&d, level + 2);
 							efree(key);
-							efree(d);
+							FREE_ZVAL(d);
 						}
 						break;
 				}
@@ -268,7 +268,7 @@ void php_var_serialize(pval *buf, pval **struc)
 							d->type = IS_LONG;
 							d->value.lval = index;
 							php_var_serialize(buf, &d);
-							efree(d);
+							FREE_ZVAL(d);
 							break;
 						case HASH_KEY_IS_STRING:
 							ALLOC_ZVAL(d);	
@@ -277,7 +277,7 @@ void php_var_serialize(pval *buf, pval **struc)
 							d->value.str.len = strlen(key);
 							php_var_serialize(buf, &d);
 							efree(key);
-							efree(d);
+							FREE_ZVAL(d);
 							break;
 					}
 					php_var_serialize(buf, data);
@@ -392,7 +392,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 
 			if (cur == 'a') {
 				(*rval)->type = IS_ARRAY;
-				(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
+				ALLOC_HASHTABLE((*rval)->value.ht);
 				myht = (*rval)->value.ht;
 			} else {
 				zend_class_entry *ce;
@@ -459,15 +459,15 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				ALLOC_ZVAL(data);
 				if (!php_var_unserialize(&key, p, max)) {
 				  	zval_dtor(key);
-				  	efree(key);
-					efree(data);
+				  	FREE_ZVAL(key);
+					FREE_ZVAL(data);
 					return 0;
 				}
 				if (!php_var_unserialize(&data, p, max)) {
 					zval_dtor(key);
-				    efree(key);
+				    FREE_ZVAL(key);
 					zval_dtor(data);
-					efree(data);
+					FREE_ZVAL(data);
 					return 0;
 				}
 				switch (key->type) {
@@ -478,8 +478,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 						zend_hash_update(myht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
-				pval_destructor(key);
-				efree(key);
+				zval_dtor(key);
+				FREE_ZVAL(key);
 			}
 			return *((*p)++) == '}';
 
