@@ -656,8 +656,9 @@ parse_class_entry:
 
 fully_qualified_class_name:
 		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, NULL, &$2 TSRMLS_CC);  }
 	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
- ;
+;
 
 import_namespace:
 		T_NAMESPACE_NAME { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
