@@ -2,7 +2,7 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1997-2001 University of Cambridge */
+/* Copyright (c) 1997-2003 University of Cambridge */
 
 #ifndef _PCREPOSIX_H
 #define _PCREPOSIX_H
@@ -77,7 +77,7 @@ typedef struct {
 /* The functions */
 
 extern int regcomp(regex_t *, const char *, int);
-extern int regexec(regex_t *, const char *, size_t, regmatch_t *, int);
+extern int regexec(const regex_t *, const char *, size_t, regmatch_t *, int);
 extern size_t regerror(int, const regex_t *, char *, size_t);
 extern void regfree(regex_t *);
 

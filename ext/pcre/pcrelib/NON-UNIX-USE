@@ -1,6 +1,8 @@
 Compiling PCRE on non-Unix systems
 ----------------------------------
 
+See below for comments on Cygwin or MinGW usage.
+
 If you want to compile PCRE for a non-Unix system, note that it consists
 entirely of code written in Standard C, and so should compile successfully
 on any machine with a Standard C compiler and library, using normal compiling
@@ -24,7 +26,7 @@ character tables.
 
 (4) Compile maketables.c, get.c, study.c and pcre.c and link them all
 together into an object library in whichever form your system keeps such
-libraries. This is the pcre library (chartables.c gets included by means of an
+libraries. This is the pcre library (chartables.c is included by means of an
 #include directive).
 
 (5) Similarly, compile pcreposix.c and link it as the pcreposix library.
@@ -34,7 +36,9 @@ pcre and pcreposix libraries when linking.
 
 (7) Run pcretest on the testinput files in the testdata directory, and check
 that the output matches the corresponding testoutput files. You must use the
--i option when checking testinput2.
+-i option when checking testinput2. Note that the supplied files are in Unix
+format, with just LF characters as line terminators. You may need to edit them
+to change this if your system uses a different convention.
 
 If you have a system without "configure" but where you can use a Makefile, edit
 Makefile.in to create Makefile, substituting suitable values for the variables
@@ -50,10 +54,30 @@ contributed by Paul Sokolovsky. These environments are Mingw32
   linked pgrep and pcretest. If you have /bin/sh, run RunTest (three
   main test go ok, locale not supported).
 
+Changes to do MinGW with autoconf 2.50 were supplied by Fred Cox
+<sailorFred@yahoo.com>, who comments as follows:
+
+  If you are using the PCRE DLL, the normal Unix style configure && make &&
+  make check && make install should just work[*]. If you want to statically
+  link against the .a file, you must define PCRE_STATIC before including
+  pcre.h, otherwise the pcre_malloc and pcre_free exported functions will be
+  declared __declspec(dllimport), with hilarious results.  See the configure.in
+  and pcretest.c for how it is done for the static test.
+
+  Also, there will only be a libpcre.la, not a libpcreposix.la, as you
+  would expect from the Unix version. The single DLL includes the pcreposix
+  interface.
+
+[*] But note that the supplied test files are in Unix format, with just LF
+characters as line terminators. You will have to edit them to change to CR LF
+terminators.
+
 A script for building PCRE using Borland's C++ compiler for use with VPASCAL
 was contributed by Alexander Tokarev. It is called makevp.bat.
 
-These are some further comments about Win32 builds from Mark Evans:
+These are some further comments about Win32 builds from Mark Evans. They
+were contributed before Fred Cox's changes were made, so it is possible that
+they may no longer be relevant.
 
 The documentation for Win32 builds is a bit shy.  Under MSVC6 I
 followed their instructions to the letter, but there were still

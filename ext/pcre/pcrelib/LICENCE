@@ -21,7 +21,7 @@ restrictions:
 
 2. The origin of this software must not be misrepresented, either by
    explicit claim or by omission. In practice, this means that if you use
-   PCRE in software which you distribute to others, commercially or
+   PCRE in software that you distribute to others, commercially or
    otherwise, you must put a sentence like this
 
      Regular expression support is provided by the PCRE library package,
@@ -34,7 +34,11 @@ restrictions:
 
      ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
 
-   should also be given in the documentation.
+   should also be given in the documentation. However, this condition is not
+   intended to apply to whole chains of software. If package A includes PCRE,
+   it must acknowledge it, but if package B is software that includes package
+   A, the condition is not imposed on package B (unless it uses PCRE
+   independently).
 
 3. Altered versions must be plainly marked as such, and must not be
    misrepresented as being the original software.

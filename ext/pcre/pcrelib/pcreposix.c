@@ -83,7 +83,7 @@ static int eint[] = {
   REG_ECTYPE,  /* "unknown POSIX class name" */
   REG_BADPAT,  /* "POSIX collating elements are not supported" */
   REG_INVARG,  /* "this version of PCRE is not compiled with PCRE_UTF8 support" */
-  REG_BADPAT,  /* "characters with values > 255 are not yet supported in classes" */
+  REG_BADPAT,  /* "spare error" */
   REG_BADPAT,  /* "character value in \x{...} sequence is too large" */
   REG_BADPAT,  /* "invalid condition (?(0)" */
   REG_BADPAT,  /* "\\C not allowed in lookbehind assertion" */
@@ -236,7 +236,7 @@ block of store on the stack, to reduce the use of malloc/free. The threshold is
 in a macro that can be changed at configure time. */
 
 int
-regexec(regex_t *preg, const char *string, size_t nmatch,
+regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
 int rc;
@@ -248,7 +248,7 @@ BOOL allocated_ovector = FALSE;
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
 
-preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
+((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 
 if (nmatch > 0)
   {

@@ -1,6 +1,44 @@
 News about PCRE releases
 ------------------------
 
+Release 4.0 17-Feb-03
+---------------------
+
+There have been a lot of changes for the 4.0 release, adding additional
+functionality and mending bugs. Below is a list of the highlights of the new
+functionality. For full details of these features, please consult the
+documentation. For a complete list of changes, see the ChangeLog file.
+
+1. Support for Perl's \Q...\E escapes.
+
+2. "Possessive quantifiers" ?+, *+, ++, and {,}+ which come from Sun's Java
+package. They provide some syntactic sugar for simple cases of "atomic
+grouping".
+
+3. Support for the \G assertion. It is true when the current matching position
+is at the start point of the match.
+
+4. A new feature that provides some of the functionality that Perl provides
+with (?{...}). The facility is termed a "callout". The way it is done in PCRE
+is for the caller to provide an optional function, by setting pcre_callout to
+its entry point. To get the function called, the regex must include (?C) at
+appropriate points.
+
+5. Support for recursive calls to individual subpatterns. This makes it really
+easy to get totally confused.
+
+6. Support for named subpatterns. The Python syntax (?P<name>...) is used to
+name a group.
+
+7. Several extensions to UTF-8 support; it is now fairly complete. There is an
+option for pcregrep to make it operate in UTF-8 mode.
+
+8. The single man page has been split into a number of separate man pages.
+These also give rise to individual HTML pages which are put in a separate
+directory. There is an index.html page that lists them all. Some hyperlinking
+between the pages has been installed.
+
+
 Release 3.5 15-Aug-01
 ---------------------
 

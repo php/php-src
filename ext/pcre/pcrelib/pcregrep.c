@@ -19,7 +19,7 @@ directories. */
 
 typedef int BOOL;
 
-#define VERSION "2.2 10-Sep-2003"
+#define VERSION "3.0 14-Jan-2003"
 #define MAX_PATTERN_COUNT 100
 
 
@@ -45,8 +45,8 @@ static BOOL whole_lines = FALSE;
 
 typedef struct option_item {
   int one_char;
-  char *long_name;
-  char *help_text;
+  const char *long_name;
+  const char *help_text;
 } option_item;
 
 static option_item optionlist[] = {
@@ -58,6 +58,7 @@ static option_item optionlist[] = {
   { 'n', "line-number",  "print line number with output lines" },
   { 'r', "recursive",    "recursively scan sub-directories" },
   { 's', "no-messages",  "suppress error messages" },
+  { 'u', "utf-8",        "use UTF-8 mode" },
   { 'V', "version",      "print version information and exit" },
   { 'v', "invert-match", "select non-matching lines" },
   { 'x', "line-regex",   "force PATTERN to match only whole lines" },
@@ -84,7 +85,7 @@ recursion support". */
 
 typedef DIR directory_type;
 
-int
+static int
 isdirectory(char *filename)
 {
 struct stat statbuf;
@@ -93,13 +94,13 @@ if (stat(filename, &statbuf) < 0)
 return ((statbuf.st_mode & S_IFMT) == S_IFDIR)? '/' : 0;
 }
 
-directory_type *
+static directory_type *
 opendirectory(char *filename)
 {
 return opendir(filename);
 }
 
-char *
+static char *
 readdirectory(directory_type *dir)
 {
 for (;;)
@@ -112,7 +113,7 @@ for (;;)
 return NULL;   /* Keep compiler happy; never executed */
 }
 
-void
+static void
 closedirectory(directory_type *dir)
 {
 closedir(dir);
@@ -319,7 +320,7 @@ return rc;
 *************************************************/
 
 static int
-grep_or_recurse(char *filename, BOOL recurse, BOOL show_filenames,
+grep_or_recurse(char *filename, BOOL dir_recurse, BOOL show_filenames,
   BOOL only_one_at_top)
 {
 int rc = 1;
@@ -329,7 +330,7 @@ FILE *in;
 /* If the file is a directory and we are recursing, scan each file within it.
 The scanning code is localized so it can be made system-specific. */
 
-if ((sep = isdirectory(filename)) != 0 && recurse)
+if ((sep = isdirectory(filename)) != 0 && dir_recurse)
   {
   char buffer[1024];
   char *nextfile;
@@ -346,7 +347,7 @@ if ((sep = isdirectory(filename)) != 0 && recurse)
     {
     int frc;
     sprintf(buffer, "%.512s%c%.128s", filename, sep, nextfile);
-    frc = grep_or_recurse(buffer, recurse, TRUE, FALSE);
+    frc = grep_or_recurse(buffer, dir_recurse, TRUE, FALSE);
     if (frc == 0 && rc == 1) rc = 0;
     }
 
@@ -446,6 +447,7 @@ switch(letter)
   case 'n': number = TRUE; break;
   case 'r': recurse = TRUE; break;
   case 's': silent = TRUE; break;
+  case 'u': options |= PCRE_UTF8; break;
   case 'v': invert = TRUE; break;
   case 'x': whole_lines = TRUE; options |= PCRE_ANCHORED; break;
 
