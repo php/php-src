@@ -1339,7 +1339,7 @@ SPL_METHOD(CachingIterator, next)
 } /* }}} */
 
 /* {{{ proto boolean CachingIterator::hasNext()
-   Cehck whether the inner iterator has a valid next element */
+   Check whether the inner iterator has a valid next element */
 SPL_METHOD(CachingIterator, hasNext)
 {
 	spl_dual_it_object   *intern;
@@ -1394,7 +1394,7 @@ SPL_METHOD(CachingRecursiveIterator, __construct)
 } /* }}} */
 
 /* {{{ proto bolean CachingRecursiveIterator::hasChildren()
-   Cehck whether the current element of the inner iterator has children */
+   Check whether the current element of the inner iterator has children */
 SPL_METHOD(CachingRecursiveIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
