@@ -65,7 +65,10 @@ PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char
 PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
 PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
 PHPAPI const char php_sig_jpc[3] = {(char)0xFF, (char)0x4F, (char)0xff};
+PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
+
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
+/* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
 
 /* return info as a struct, to make expansion easier */
 
@@ -92,6 +95,9 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 
 	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
 	result->height = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
+	
+	result->bits     = 0;
+	result->channels = 0;
 
 	return result;
 }
@@ -117,8 +123,10 @@ static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 		in_width  =  (((unsigned long) a[ 4 ]) << 24) + (((unsigned long) a[ 5 ]) << 16) + (((unsigned long) a[ 6 ]) << 8) + ((unsigned long) a[ 7 ]);
 	}
 
-	result->width  = (unsigned int) in_width;
-	result->height = (unsigned int) in_height;
+	result->width    = (unsigned int) in_width;
+	result->height   = (unsigned int) in_height;
+	result->bits     = 0;
+	result->channels = 0;
 
 	return result;
 }
@@ -139,8 +147,10 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 
 	php_stream_read(stream, temp, sizeof(temp));
 	php_stream_read(stream, (char*) &dim, sizeof(dim));
-	result->width = dim.in_width;
-	result->height = dim.in_height;
+	result->width    = dim.in_width;
+	result->height   = dim.in_height;
+	result->bits     = 0;
+	result->channels = 0;
 
 	return result;
 }
@@ -165,7 +175,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 #if HAVE_ZLIB
 /* {{{ php_handle_swc
  */
-static struct gfxinfo *php_handle_swc (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 
@@ -188,6 +198,8 @@ static struct gfxinfo *php_handle_swc (php_stream * stream TSRMLS_DC)
 	result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
 		php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
 	efree (b);
+	result->bits     = 0;
+	result->channels = 0;
 	return result;
 }
 /* }}} */
@@ -210,6 +222,8 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 		php_swf_get_bits (a, 5, bits)) / 20;
 	result->height = (php_swf_get_bits (a, 5 + (3 * bits), bits) -
 		php_swf_get_bits (a, 5 + (2 * bits), bits)) / 20;
+	result->bits     = 0;
+	result->channels = 0;
 	return result;
 }
 /* }}} */
@@ -660,11 +674,58 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 	if ( width && height) {
 		/* not the same when in for-loop */
 		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-		result->height = height;
-		result->width  = width;
+		result->height   = height;
+		result->width    = width;
+		result->bits     = 0;
+		result->channels = 0;
 		return result;
 	}
 	return NULL;
+}
+/* }}} */
+
+/* {{{ php_handle_psd
+ */
+static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
+{
+	struct gfxinfo *result = NULL;
+	unsigned char a[10];
+	int chunkId;
+	int size;
+
+	if (php_stream_read(stream, a, 8) != 8)
+		return NULL;
+	if (strncmp(a+4, "ILBM", 4) && strncmp(a+4, "PBM ", 4))
+		return NULL;
+
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+
+	// loop chunks to find BMHD chunk
+	do {
+		if (php_stream_read(stream, a, 8) != 8) {
+			efree(result);
+			return NULL;
+		}
+		chunkId = php_ifd_get32s(a+0, 1);
+		size    = php_ifd_get32s(a+4, 1);
+		if ((size & 1) == 1) {
+			size++;
+		}
+		if (chunkId == 0x424d4844) { // BMHD chunk
+			if (php_stream_read(stream, a, 9) != 9) {
+				efree(result);
+				return NULL;
+			}
+			result->width    = php_ifd_get16s(a+0, 1);
+			result->height   = php_ifd_get16s(a+2, 1);
+			result->bits     = a[8] & 0xff;
+			result->channels = 0;
+			if (result->width > 0 && result->height > 0 && result->bits > 0 && result->bits < 33)
+				return result;
+		} else {
+			php_stream_seek(stream, size, SEEK_CUR);
+		}
+	} while (1);
 }
 /* }}} */
 
@@ -690,6 +751,8 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			return "image/tiff";
+		case IMAGE_FILETYPE_IFF:
+			return "image/iff";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -738,26 +801,26 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		}
 	} else if (!memcmp(filetype, php_sig_swf, 3)) {
 		return IMAGE_FILETYPE_SWF;
-#if HAVE_ZLIB
 	} else if (!memcmp(filetype, php_sig_swc, 3)) {
 		return IMAGE_FILETYPE_SWC;
-#endif
 	} else if (!memcmp(filetype, php_sig_psd, 3)) {
 		return IMAGE_FILETYPE_PSD;
 	} else if (!memcmp(filetype, php_sig_bmp, 2)) {
 		return IMAGE_FILETYPE_BMP;
 	} else if (!memcmp(filetype, php_sig_jpc, 3)) {
 		return IMAGE_FILETYPE_JPC;
-	} else {
-		php_stream_read(stream, filetype+3, 1);
-		if (!memcmp(filetype, php_sig_tif_ii, 4)) {
-			return IMAGE_FILETYPE_TIFF_II;
-		} else
-		if (!memcmp(filetype, php_sig_tif_mm, 4)) {
-			return IMAGE_FILETYPE_TIFF_MM;
-		}
 	}
-
+	php_stream_read(stream, filetype+3, 1);
+	if (!memcmp(filetype, php_sig_tif_ii, 4)) {
+		return IMAGE_FILETYPE_TIFF_II;
+	} else
+	if (!memcmp(filetype, php_sig_tif_mm, 4)) {
+		return IMAGE_FILETYPE_TIFF_MM;
+	}
+	if (!memcmp(filetype, php_sig_iff, 4)) {
+		return IMAGE_FILETYPE_IFF;
+	}
+    
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
@@ -843,6 +906,8 @@ PHP_FUNCTION(getimagesize)
 		case IMAGE_FILETYPE_JPC:
 			result = php_handle_jpc(stream TSRMLS_CC);
 			break;
+		case IMAGE_FILETYPE_IFF:
+  			result = php_handle_iff(stream TSRMLS_CC);
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
