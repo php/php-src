@@ -955,6 +955,44 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 }
 /* }}} */
 
+/* {{{ proto bool PDOStatement::nextRowset()
+   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeded, false otherwise */
+static PHP_METHOD(PDOStatement, nextRowset)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long colno;
+	struct pdo_column_data *col;
+
+	if (!stmt->methods->next_rowset) {
+		/* TODO: need a better pdo-level error function */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support multiple rowsets");
+		RETURN_FALSE;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+
+	/* un-describe */
+	if (stmt->columns) {
+		int i;
+		struct pdo_column_data *cols = stmt->columns;
+		
+		for (i = 0; i < stmt->column_count; i++) {
+			efree(cols[i].name);
+		}
+		efree(stmt->columns);
+	}
+	stmt->columns = NULL;
+
+	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
+		RETURN_FALSE;
+	}
+
+	pdo_stmt_describe_columns(stmt TSRMLS_CC);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
@@ -971,6 +1009,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, columnCount,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, getColumnMeta,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, setFetchMode,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
