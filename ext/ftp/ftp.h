@@ -120,7 +120,7 @@ char**		ftp_nlist(ftpbuf_t *ftp, const char *path);
  * array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_list(ftpbuf_t *ftp, const char *path);
+char**		ftp_list(ftpbuf_t *ftp, const char *path, int recursive);
 
 /* switches passive mode on or off
  * returns true on success, false on error

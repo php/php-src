@@ -412,9 +412,9 @@ ftp_nlist(ftpbuf_t *ftp, const char *path)
 /* {{{ ftp_list
  */
 char**
-ftp_list(ftpbuf_t *ftp, const char *path)
+ftp_list(ftpbuf_t *ftp, const char *path, int recursive)
 {
-	return ftp_genlist(ftp, "LIST", path);
+	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path);
 }
 /* }}} */
 
@@ -428,7 +428,7 @@ ftp_type(ftpbuf_t *ftp, ftptype_t type)
 	if (ftp == NULL)
 		return 0;
 
-	if (type == Z_TYPE_P(ftp))
+	if (type == ftp->type)
 		return 1;
 
 	if (type == FTPTYPE_ASCII)
@@ -443,7 +443,7 @@ ftp_type(ftpbuf_t *ftp, ftptype_t type)
 	if (!ftp_getresp(ftp) || ftp->resp != 200)
 		return 0;
 
-	Z_TYPE_P(ftp) = type;
+	ftp->type = type;
 
 	return 1;
 }
@@ -1042,7 +1042,7 @@ ftp_getdata(ftpbuf_t *ftp)
 	}
 	data->listener = -1;
 	data->fd = -1;
-	Z_TYPE_P(data) = Z_TYPE_P(ftp);
+	data->type = ftp->type;
 
 	sa = (struct sockaddr *) &ftp->localaddr;
 	/* bind/listen */
