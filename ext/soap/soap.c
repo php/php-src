@@ -423,6 +423,7 @@ PHP_RINIT_FUNCTION(soap)
 	SOAP_GLOBAL(error_object) = NULL;
 	SOAP_GLOBAL(sdl) = NULL;
 	SOAP_GLOBAL(soap_version) = SOAP_1_1;
+	SOAP_GLOBAL(encoding) = NULL;
 	return SUCCESS;
 }
 
@@ -835,6 +836,19 @@ PHP_METHOD(SoapServer, SoapServer)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			service->actor = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 		}
+
+		if (zend_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			xmlCharEncodingHandlerPtr encoding;
+		
+			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
+    	if (encoding == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%s'.", Z_STRVAL_PP(tmp));
+	    } else {
+	      service->encoding = encoding;
+	    }
+		}
+
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
 	}
@@ -1233,6 +1247,7 @@ PHP_METHOD(SoapServer, handle)
 	sdlFunctionPtr function;
 	char *arg = NULL;
 	int arg_len;
+	xmlCharEncodingHandlerPtr old_encoding;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1374,6 +1389,8 @@ PHP_METHOD(SoapServer, handle)
 
 	old_sdl = SOAP_GLOBAL(sdl);
 	SOAP_GLOBAL(sdl) = service->sdl;
+	old_encoding = SOAP_GLOBAL(encoding);
+	SOAP_GLOBAL(encoding) = service->encoding;
 	old_soap_version = SOAP_GLOBAL(soap_version);
 	function = deserialize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
 	xmlFreeDoc(doc_request);
@@ -1636,6 +1653,7 @@ PHP_METHOD(SoapServer, handle)
 
 fail:
 	SOAP_GLOBAL(soap_version) = old_soap_version;
+	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 
 	/* Free soap headers */
@@ -1936,6 +1954,18 @@ PHP_METHOD(SoapClient, SoapClient)
 	      zend_hash_exists(EG(function_table), "gzencode", sizeof("gzencode"))) {
 			add_property_long(this_ptr, "compression", Z_LVAL_PP(tmp));
 		}
+		if (zend_hash_find(ht, "encoding", sizeof("encoding"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			xmlCharEncodingHandlerPtr encoding;
+		
+			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
+    	if (encoding == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'.", Z_STRVAL_PP(tmp));
+	    } else {
+		    xmlCharEncCloseFunc(encoding);
+				add_property_stringl(this_ptr, "_encoding", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);			
+			}
+		}
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode.");
 		return;
@@ -2046,6 +2076,7 @@ static void do_soap_call(zval* this_ptr,
 	int ret = FALSE;
 	int soap_version;
 	zval response;
+	xmlCharEncodingHandlerPtr old_encoding;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2070,6 +2101,14 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_GLOBAL(soap_version) = soap_version;
 	old_sdl = SOAP_GLOBAL(sdl);
 	SOAP_GLOBAL(sdl) = sdl;
+	old_encoding = SOAP_GLOBAL(encoding);
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_encoding", sizeof("_encoding"), (void **) &tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_STRING) {
+		SOAP_GLOBAL(encoding) = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
+	} else {
+		SOAP_GLOBAL(encoding) = NULL;
+	}
+
  	if (sdl != NULL) {
  		fn = get_function(sdl, function);
  		if (fn != NULL) {
@@ -2166,6 +2205,10 @@ static void do_soap_call(zval* this_ptr,
 		zend_throw_exception_object(exception TSRMLS_CC);
 	}
 #endif
+  if (SOAP_GLOBAL(encoding) != NULL) {
+		xmlCharEncCloseFunc(SOAP_GLOBAL(encoding));
+  }
+	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 	SOAP_CLIENT_END_CODE();
 }
@@ -3909,6 +3952,9 @@ static void delete_service(void *data)
 	}
 	if (service->sdl) {
 		delete_sdl(service->sdl);
+	}
+	if (service->encoding) {
+		xmlCharEncCloseFunc(service->encoding);
 	}
 	efree(service);
 }

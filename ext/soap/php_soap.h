@@ -115,6 +115,7 @@ struct _soapService {
 	int        type;
 	char      *actor;
 	char      *uri;
+	xmlCharEncodingHandlerPtr encoding;
 };
 
 #define SOAP_CLASS 1
@@ -158,6 +159,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	zend_bool  cache_enabled;
 	char*      cache_dir;
 	long       cache_ttl;
+	xmlCharEncodingHandlerPtr encoding;
 ZEND_END_MODULE_GLOBALS(soap)
 
 #ifdef PHP_WIN32

@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Fixed bug #29109 (SoapFault exception: [WSDL] Out of memory). (Dmitry)
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
 - Fixed bug #28985 (__getTypes() returning nothing on complex WSDL). (Dmitry)
+- Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
 - Fixed bug #28464 (catch() does not catch exceptions by interfaces). (Marcus)

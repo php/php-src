@@ -31,6 +31,7 @@ static zval *to_zval_bool(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_string(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_stringr(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_stringc(encodeTypePtr type, xmlNodePtr data);
+static zval *to_zval_stringb(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_null(encodeTypePtr type, xmlNodePtr data);
 
@@ -145,8 +146,8 @@ encode defaultEncoding[] = {
 	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gmonth},
 	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_duration},
 
-	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_stringl},
-	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_stringl},
+	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringb, to_xml_stringl},
+	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringb, to_xml_stringl},
 
 	{{XSD_LONG, XSD_LONG_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_INT, XSD_INT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
@@ -460,7 +461,23 @@ static zval *to_zval_string(encodeTypePtr type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			ZVAL_STRING(ret, data->children->content, 1);
+			TSRMLS_FETCH();
+
+			if (SOAP_GLOBAL(encoding) != NULL) {
+				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, strlen(data->children->content));
+				xmlBufferPtr out = xmlBufferCreate();
+				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
+
+				if (n >= 0) {
+					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
+				} else {
+					ZVAL_STRING(ret, data->children->content, 1);
+				}
+				xmlBufferFree(out);
+				xmlBufferFree(in);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, data->children->content, 1);
 		} else {
@@ -479,8 +496,24 @@ static zval *to_zval_stringr(encodeTypePtr type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			TSRMLS_FETCH();
+
 			whiteSpace_replace(data->children->content);
-			ZVAL_STRING(ret, data->children->content, 1);
+			if (SOAP_GLOBAL(encoding) != NULL) {
+				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, strlen(data->children->content));
+				xmlBufferPtr out = xmlBufferCreate();
+				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
+
+				if (n >= 0) {
+					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
+				} else {
+					ZVAL_STRING(ret, data->children->content, 1);
+				}
+				xmlBufferFree(out);
+				xmlBufferFree(in);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, data->children->content, 1);
 		} else {
@@ -493,6 +526,42 @@ static zval *to_zval_stringr(encodeTypePtr type, xmlNodePtr data)
 }
 
 static zval *to_zval_stringc(encodeTypePtr type, xmlNodePtr data)
+{
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	FIND_XML_NULL(data, ret);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			TSRMLS_FETCH();
+
+			whiteSpace_collapse(data->children->content);
+			if (SOAP_GLOBAL(encoding) != NULL) {
+				xmlBufferPtr in  = xmlBufferCreateStatic(data->children->content, strlen(data->children->content));
+				xmlBufferPtr out = xmlBufferCreate();
+				int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
+
+				if (n >= 0) {
+					ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
+				} else {
+					ZVAL_STRING(ret, data->children->content, 1);
+				}
+				xmlBufferFree(out);
+				xmlBufferFree(in);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
+		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
+			ZVAL_STRING(ret, data->children->content, 1);
+		} else {
+			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+		}
+	} else {
+		ZVAL_EMPTY_STRING(ret);
+	}
+	return ret;
+}
+
+static zval *to_zval_stringb(encodeTypePtr type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -532,6 +601,24 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		convert_to_string(&tmp);
 		str = php_escape_html_entities(Z_STRVAL(tmp), Z_STRLEN(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
 		zval_dtor(&tmp);
+	}
+
+	if (SOAP_GLOBAL(encoding) != NULL) {
+		xmlBufferPtr in  = xmlBufferCreateStatic(str, new_len);
+		xmlBufferPtr out = xmlBufferCreate();
+		int n = xmlCharEncInFunc(SOAP_GLOBAL(encoding), out, in);
+
+		if (n >= 0) {
+			efree(str);
+			str = estrdup(xmlBufferContent(out));
+			new_len = n;
+		} else if (!xmlCheckUTF8(str)) {
+			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
+		}
+		xmlBufferFree(out);
+		xmlBufferFree(in);
+	} else if (!xmlCheckUTF8(str)) {
+		soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
 	}
 
 	xmlNodeSetContentLen(ret, str, new_len);
