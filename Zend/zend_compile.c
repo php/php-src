@@ -926,7 +926,8 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 
 	if (last_op->op2.op_type == IS_UNUSED && last_op->op2.u.EA.type == ZEND_FETCH_FROM_THIS) {
 		last_op->op2 = last_op->op1;
-		memset(&last_op->op1, 0, sizeof(znode));  
+		memset(&last_op->op1, 0, sizeof(znode));
+		SET_UNUSED(last_op->op1);
 		last_op->extended_value = ZEND_FETCH_FROM_THIS;
 	}
 
