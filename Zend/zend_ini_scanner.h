@@ -15,9 +15,9 @@ public:
 
 BEGIN_EXTERN_C()
 int zend_ini_scanner_get_lineno(TSRMLS_D);
-char *zend_ini_scanner_get_filename(void);
-int zend_ini_open_file_for_scanning(zend_file_handle *fh);
-void zend_ini_close_file(zend_file_handle *fh);
+char *zend_ini_scanner_get_filename(TSRMLS_D);
+int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC);
+void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC);
 int ini_lex(zval *ini_lval);
 END_EXTERN_C()
 

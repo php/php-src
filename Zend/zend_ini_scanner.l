@@ -63,7 +63,7 @@ int zend_ini_scanner_get_lineno()
 }
 
 
-char *zend_ini_scanner_get_filename()
+char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
 	return ini_filename;
 }
@@ -75,10 +75,8 @@ int zend_ini_scanner_get_lineno(TSRMLS_D)
 	return CG(ini_scanner)->lineno();
 }
 
-char *zend_ini_scanner_get_filename()
+char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return CG(ini_scanner)->filename;
 }
 
@@ -105,10 +103,9 @@ int yyFlexLexer::yylex()
 #endif
 
 
-int zend_ini_open_file_for_scanning(zend_file_handle *fh)
+int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 {
 	FILE *fp;
-	TSRMLS_FETCH();
 
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
@@ -142,7 +139,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 }
 
 
-void zend_ini_close_file(zend_file_handle *fh)
+void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
