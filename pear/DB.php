@@ -225,6 +225,9 @@ class DB {
 			$dsn = $arr[2];
 		}
 
+		if (!$parsed['database'])
+			$dsn = preg_replace('|/+$|', '', $dsn);
+
 		$parsed['hostspec'] = $dsn;
 
 		if (!$parsed['dbsyntax']) {
