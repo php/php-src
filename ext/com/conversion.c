@@ -37,17 +37,17 @@
 
 /* prototypes */
 
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage);
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage);
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC);
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC);
 PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage);
 PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
 PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
-static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage);
-static void comval_to_variant(pval *pval_arg, VARIANT *var_arg);
+static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC);
+static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC);
 
 /* implementations */
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC)
 {
 	int type = VT_EMPTY;	/* default variant type */
 
@@ -100,15 +100,15 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 		type |= VT_BYREF;
 	}
 
-	pval_to_variant_ex(pval_arg, var_arg, type, codepage);
+	pval_to_variant_ex(pval_arg, var_arg, type, codepage TSRMLS_CC);
 }
 
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage)
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC)
 {
-	pval_to_variant_ex(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage);
+	pval_to_variant_ex(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage TSRMLS_CC);
 }
 
-static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage)
+static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
 {
 	OLECHAR *unicode_str;
 
@@ -162,11 +162,11 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 						{
 							if(type)	/* explicit type */
 							{
-								pval_to_variant_ex(*entry, v, type, codepage);		/* Do the required conversion */
+							   pval_to_variant_ex(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
 							}
 							else
 							{
-								php_pval_to_variant(*entry, v, codepage);			/* Do the required conversion */
+								php_pval_to_variant(*entry, v, codepage TSRMLS_CC);                    /* Do the required conversion */
 							}
 						}
 						else
@@ -267,7 +267,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				break;
 
 			case VT_UNKNOWN:
-				comval_to_variant(pval_arg, var_arg);
+			comval_to_variant(pval_arg, var_arg TSRMLS_CC);
 				if(V_VT(var_arg) != VT_DISPATCH)
 				{
 					VariantInit(var_arg);
@@ -280,7 +280,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				break;
 
 			case VT_DISPATCH:
-				comval_to_variant(pval_arg, var_arg);
+				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
 				if(V_VT(var_arg) != VT_DISPATCH)
 				{
 					VariantInit(var_arg);
@@ -355,7 +355,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				break;
 
 			case VT_UNKNOWN|VT_BYREF:
-				comval_to_variant(pval_arg, var_arg);
+				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
 				if(V_VT(var_arg) != VT_DISPATCH)
 				{
 					VariantInit(var_arg);
@@ -368,7 +368,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				break;
 
 			case VT_DISPATCH|VT_BYREF:
-				comval_to_variant(pval_arg, var_arg);
+				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
 				if(V_VT(var_arg) != VT_DISPATCH)
 				{
 					VariantInit(var_arg);
@@ -888,7 +888,7 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int per
 	return C_str;
 }
 
-static void comval_to_variant(pval *pval_arg, VARIANT *var_arg)
+static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC)
 {
 	pval **comval_handle;
 	comval *obj;

@@ -187,6 +187,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
+	TSRMLS_FETCH();
 
 	pval result, **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
@@ -239,6 +240,7 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
+	TSRMLS_FETCH();
 
 	pval **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
@@ -434,14 +436,16 @@ static void php_variant_destructor(zend_rsrc_list_entry *rsrc)
 	FREE_VARIANT(rsrc->ptr);
 }
 
-void php_register_VARIANT_class()
+void php_register_VARIANT_class(void)
 {
+	TSRMLS_FETCH();
+
 	INIT_OVERLOADED_CLASS_ENTRY(VARIANT_class_entry, "VARIANT", NULL,
 								php_VARIANT_call_function_handler,
 								php_VARIANT_get_property_handler,
 								php_VARIANT_set_property_handler);
 
-	zend_register_internal_class(&VARIANT_class_entry);
+	zend_register_internal_class(&VARIANT_class_entry TSRMLS_CC);
 }
 
 #endif /* PHP_WIN32 */

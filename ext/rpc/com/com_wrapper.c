@@ -378,7 +378,6 @@ static PHP_INI_MH(OnTypelibFileChange)
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
 	int interactive;
-	TSRMLS_FETCH();
 	interactive = CG(interactive);
 
 	if(!new_value || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL)
@@ -1199,6 +1198,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	int type;
 	comval *obj, *obj_prop;
 	VARIANT *var_result;
+	TSRMLS_FETCH();
 
 	INIT_ZVAL(return_value);    
 	ZVAL_NULL(&return_value);
@@ -1298,7 +1298,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	comval *obj, *obj_prop;
 	int type;
 	VARIANT *var_result;
-
+	TSRMLS_FETCH();
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &comval_handle);
@@ -1708,11 +1708,11 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 				SysFreeString(bstr_ids);
 				c.name_len = strlen(ids)+1;
 				c.name = ids;
-				if (zend_get_constant(c.name, c.name_len-1, &exists))
+				if (zend_get_constant(c.name, c.name_len-1, &exists TSRMLS_CC))
 				{
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
-					if (!compare_function(&results, &c.value, &exists) && INI_INT("com.autoregister_verbose"))
+					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose"))
 					{
 						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
 					}
@@ -1768,12 +1768,14 @@ PHP_FUNCTION(com_isenum)
 
 void php_register_COM_class()
 {
+	TSRMLS_FETCH();
+
 	INIT_OVERLOADED_CLASS_ENTRY(com_class_entry, "COM", NULL,
 								php_COM_call_function_handler,
 								php_COM_get_property_handler,
 								php_COM_set_property_handler);
 
-	zend_register_internal_class(&com_class_entry);
+	zend_register_internal_class(&com_class_entry TSRMLS_CC);
 }
 
 PHP_MINIT_FUNCTION(COM)
