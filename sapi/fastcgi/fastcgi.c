@@ -363,7 +363,9 @@ int main(int argc, char *argv[])
 	zend_llist global_vars;
 	int max_requests = 500;
 	int requests = 0;
+	int fcgi_fd = 0;
 	int env_size, cgi_env_size;
+	FCGX_Request request;
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
@@ -377,9 +379,29 @@ int main(int argc, char *argv[])
 #endif
 
 	if( FCGX_IsCGI() ) {
-		fprintf( stderr, "The FastCGI version of PHP cannot be "
-			 "run as a CGI application\n" );
-		exit( 1 );
+		/* Did a bind address or port get configured on the command line? */
+		if( argc >= 2 ) {
+			/* Pass on the arg to the FastCGI library, with one exception.
+			 * If just a port is specified, then we prepend a ':' onto the
+			 * path (it's what the fastcgi library expects)
+			 */
+			int port = atoi( argv[ 1 ] );
+			if( port ) {
+				char bindport[ 32 ];
+				snprintf( bindport, 32, ":%s", argv[ 1 ] );
+				fcgi_fd = FCGX_OpenSocket( bindport, 128 );
+			} else {
+				fcgi_fd = FCGX_OpenSocket( argv[ 1 ], 128 );
+			}
+			if( fcgi_fd < 0 ) {
+				fprintf( stderr, "Couldn't create FastCGI listen socket\n" );
+				exit( 1 );
+			}
+		} else {
+			fprintf( stderr, "The FastCGI version of PHP cannot be "
+					 "run as a CGI application\n" );
+			exit( 1 );
+		}
 	}
 
 	/* Calculate environment size */
@@ -449,6 +471,10 @@ int main(int argc, char *argv[])
 			exit( 1 );
 		}
 	}
+
+	/* Initialise FastCGI request structure */
+	FCGX_Init();
+	FCGX_InitRequest( &request, fcgi_fd, 0 );
 
 	if( children ) {
 		int running = 0;
@@ -521,12 +547,16 @@ int main(int argc, char *argv[])
 	fprintf( stderr, "Going into accept loop\n" );
 #endif
 
-	while( FCGX_Accept( &in, &out, &err, &cgi_env ) >= 0 ) {
+	while( FCGX_Accept_r( &request ) >= 0 ) {
 
 #ifdef DEBUG_FASTCGI
 		fprintf( stderr, "Got accept\n" );
 #endif
 
+		in = request.in;
+		out = request.out;
+		err = request.err;
+		cgi_env = request.envp;
 		cgi_env_size = 0;
 		while( cgi_env[ cgi_env_size ] ) { cgi_env_size++; }
 		merge_env = malloc( (env_size+cgi_env_size)*sizeof(char*) );
