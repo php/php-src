@@ -125,6 +125,14 @@ PHP_FUNCTION(dom_document_load);
 PHP_FUNCTION(dom_document_save);
 PHP_FUNCTION(dom_document_loadxml);
 PHP_FUNCTION(dom_document_savexml);
+PHP_FUNCTION(dom_document_validate);
+
+#if defined(LIBXML_HTML_ENABLED)
+PHP_FUNCTION(dom_document_load_html);
+PHP_FUNCTION(dom_document_load_html_file);
+PHP_FUNCTION(dom_document_save_html);
+PHP_FUNCTION(dom_document_save_html_file);
+#endif  /* defined(LIBXML_HTML_ENABLED) */
 
 /* domnode methods */
 PHP_FUNCTION(dom_node_insert_before);
