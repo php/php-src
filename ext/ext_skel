@@ -118,7 +118,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl Write more examples of tests here...
 
   dnl # --with-$extname -> check with-path
-	dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
+  dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
   dnl SEARCH_FOR="/include/$extname.h"  # you most likely want to change this
   dnl if test -r \$PHP_$EXTNAME/$SEARCH_FOR; then # path given as parameter
   dnl   ${EXTNAME}_DIR=\$PHP_$EXTNAME
@@ -143,14 +143,18 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl # --with-$extname -> chech for lib and symbol presence
   dnl LIBNAME=$extname # you may want to change this
   dnl LIBSYMBOL=$extname # you most likely want to change this 
-  dnl old_LIBS=\$LIBS
-  dnl LIBS="\$LIBS -L\$${EXTNAME}_DIR/lib -lm -ldl"
-  dnl AC_CHECK_LIB(\$LIBNAME, \$LIBSYMBOL, [AC_DEFINE(HAVE_${EXTNAME}LIB,1,[ ])],
-	dnl			[AC_MSG_ERROR([wrong $extname lib version or lib not found])])
-  dnl LIBS=\$old_LIBS
+
+  dnl PHP_CHECK_LIBRARY(\$LIBNAME,\$LIBSYMBOL,
+  dnl [
+  dnl   PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, ${EXTNAME}_SHARED_LIBADD)
+  dnl   AC_DEFINE(HAVE_${EXTNAME}LIB,1,[ ])
+  dnl ],[
+  dnl   AC_MSG_ERROR([wrong $extname lib version or lib not found])
+  dnl ],[
+  dnl   -L\$${EXTNAME}_DIR/lib -lm -ldl
+  dnl ])
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
-  dnl PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, ${EXTNAME}_SHARED_LIBADD)
 
   PHP_EXTENSION($extname, \$ext_shared)
 fi
@@ -160,10 +164,10 @@ $ECHO_N " Makefile.in$ECHO_C"
 cat >Makefile.in <<eof
 # \$Id\$
 
-LTLIBRARY_NAME        = lib$extname.la
-LTLIBRARY_SOURCES     = $extname.c
-LTLIBRARY_SHARED_NAME = $extname.la
-LTLIBRARY_SHARED_LIBADD  = \$(${EXTNAME}_SHARED_LIBADD)
+LTLIBRARY_NAME          = lib$extname.la
+LTLIBRARY_SOURCES       = $extname.c
+LTLIBRARY_SHARED_NAME   = $extname.la
+LTLIBRARY_SHARED_LIBADD = \$(${EXTNAME}_SHARED_LIBADD)
 
 include \$(top_srcdir)/build/dynlib.mk
 eof
