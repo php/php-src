@@ -58,8 +58,6 @@
 # include "mod_dav.h"
 #endif
 
-extern zend_module_entry apache_module_entry;
-
 PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
