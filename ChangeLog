@@ -1,3 +1,75 @@
+2003-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/class_final.phpt:
+      Add test case for final classes
+
+2003-06-21  Harrie Hazewinkel  <harrie@lisanza.net>
+
+    * (PHP_4_3)
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      Applying the contributed patch of Johan hanne.
+      The patch enables control on the way the values are returned
+      into the PHP script, instaed of always strings. Also the type
+      of the value is now returned when configured to do so.
+      This enables better management scripts to do more automatic
+      processing and value calculations.
+
+2003-06-21  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * scripts/ext_skel_ng/TODO:
+      TODO revisited
+
+    * scripts/ext_skel_ng/php_global.php
+      scripts/ext_skel_ng/php_ini.php:
+      ini stuff was a bit broken
+
+    * scripts/ext_skel_ng/php_function.php:
+      thoughts about a new proto parser ...
+
+    * scripts/ext_skel_ng/extension_parser.php:
+      test script tags are found but not used yet
+      double quotes in extensions summary line are now escaped in code
+      generation
+
+    * scripts/ext_skel_ng/extension.dtd:
+      typo fixes and test script tags added
+
+    * scripts/ext_skel_ng/BUGS:
+      start to track them bugs
+
+2003-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/class_abstract.phpt:
+      Add test case for abstract classes
+
+    * ext/dba/dba.c:
+      Don't copy the filename when it is not needed
+
+    * ext/dba/dba.c:
+      Store the absolute path of the database file and use that in the external
+      library
+
+    * ext/dba/dba_db4.c:
+      When persistent then we may use threads
+
+2003-06-21  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      new functions (4.1.1): mysql_sqlstate, mysql_stmt_sqlstate
+
+2003-06-21  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/packages/Mail-1.1.0.tar
+      pear/packages/Net_SMTP-1.2.3.tar:
+      - New releases Net_SMTP, Mail, DB will follow asap
+
+    * pear/packages/Mail-1.0.1.tar
+      pear/packages/Net_SMTP-1.0.tar:
+      - Sync release
+
 2003-06-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/exif/exif.c:
