@@ -59,28 +59,28 @@
 #if HAVE_IFX
 
 /* local function prototypes */
-static void php_ifx_set_default_link(int id);
-static long php_intifx_getType(long id, HashTable *list);
+static void php_ifx_set_default_link(int id TSRMLS_DC);
+static long php_intifx_getType(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list);
-static long php_intifx_free_blob(long id, HashTable *list);
-static long php_intifx2_free_blob(long id, HashTable *list);
-static long php_intifx_get_blob(long bid, HashTable *list, char** content);
-static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list);
-static loc_t *php_intifx_get_blobloc(long bid, HashTable *list);
+static long php_intifx_free_blob(long id, HashTable *list TSRMLS_DC);
+static long php_intifx2_free_blob(long id, HashTable *list TSRMLS_DC);
+static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS_DC);
+static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list TSRMLS_DC);
+static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC);
 static char* php_intifx_create_tmpfile(long bid);
-static long php_intifx_copy_blob(long bid, HashTable *list);
+static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC);
 static char* php_intifx_null();
 static long php_intifx_create_char(char* param, long len, HashTable *list);
-static long php_intifx_free_char(long id, HashTable *list);
-static long php_intifx_update_char(long bid, char* param, long len, HashTable *list);
-static long php_intifx_get_char(long bid, HashTable *list, char** content);
+static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
+static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC);
+static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC);
 #if HAVE_IFX_IUS
 static long php_intifxus_create_slob(long create_mode, HashTable *list);
-static long php_intifxus_free_slob(long bid, HashTable *list);
-static long php_intifxus_close_slob(long bid, HashTable *list);
-static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list);
+static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC);
+static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC);
+static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list TSRMLS_DC);
 static long php_intifxus_new_slob(HashTable *list);
-static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list);
+static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC);
 #endif
 
 /* 7.10 on (at least) AIX is missing this */
@@ -225,7 +225,7 @@ EXEC SQL END DECLARE SECTION;
 	char *ifx_err_msg;
 	char c;
 	int errorcode;
-	IFXLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (IFXG(sv_sqlcode) == 0) {
 		errorcode = SQLCODE;
@@ -270,7 +270,7 @@ static void _close_ifx_link(zend_rsrc_list_entry *rsrc)
 EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
 EXEC SQL END DECLARE SECTION;
-	IFXLS_FETCH();
+	TSRMLS_FETCH();
 
 	link=(char *)rsrc->ptr;
 
@@ -288,7 +288,7 @@ static void _close_ifx_plink(zend_rsrc_list_entry *rsrc)
 EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
 EXEC SQL END DECLARE SECTION;
-	IFXLS_FETCH();
+	TSRMLS_FETCH();
 
 	link = (char *)rsrc->ptr;
 
@@ -365,8 +365,6 @@ PHP_MSHUTDOWN_FUNCTION(ifx)
 
 PHP_RINIT_FUNCTION(ifx) 
 {
-	IFXLS_FETCH();
-
 	IFXG(default_link)=-1;
 	IFXG(num_links) = IFXG(num_persistent);
 	return SUCCESS;
@@ -375,7 +373,6 @@ PHP_RINIT_FUNCTION(ifx)
 PHP_MINFO_FUNCTION(ifx)
 {
 	char buf[32];
-	IFXLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Informix support", "enabled");
@@ -390,10 +387,8 @@ PHP_MINFO_FUNCTION(ifx)
 	DISPLAY_INI_ENTRIES();
 }
 
-static void php_ifx_set_default_link(int id) 
+static void php_ifx_set_default_link(int id TSRMLS_DC) 
 {
-	IFXLS_FETCH();
-	
 	if (IFXG(default_link) != -1) {
 		zend_list_delete(IFXG(default_link));
 	}
@@ -420,9 +415,6 @@ EXEC SQL BEGIN DECLARE SECTION;
 	char *user,*passwd,*host;
 	char *ifx;
 EXEC SQL END DECLARE SECTION;
-
-	IFXLS_FETCH();
-	PLS_FETCH();
 
 	if (PG(sql_safe_mode)) {
 		if (ZEND_NUM_ARGS()>0) {
@@ -593,7 +585,7 @@ EXEC SQL END DECLARE SECTION;
 				}
 				zend_list_addref(link);
 				return_value->value.lval = link;
-				php_ifx_set_default_link(link);
+				php_ifx_set_default_link(link TSRMLS_CC);
 				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
@@ -635,7 +627,7 @@ EXEC SQL END DECLARE SECTION;
 		IFXG(num_links)++;
 	}
 	efree(hashed_details);
-	php_ifx_set_default_link(return_value->value.lval);
+	php_ifx_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 
 /* {{{ proto int ifx_connect([string database [, string userid [, string password]]])
@@ -673,8 +665,6 @@ EXEC SQL BEGIN DECLARE SECTION;
 	char *ifx;
 EXEC SQL END DECLARE SECTION;
 
-	IFXLS_FETCH();
-	
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = IFXG(default_link);
@@ -767,8 +757,6 @@ EXEC SQL END DECLARE SECTION;
 	int  cursoryproc;
 	int  argc=ZEND_NUM_ARGS();
 	long ifx_type;
-
-	IFXLS_FETCH();
 
 	if(argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -888,11 +876,11 @@ EXEC SQL END DECLARE SECTION;
 					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
 				}
 
-				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list));
+				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
 				switch(ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list));
+						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
 						if(locator==NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
 							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -908,7 +896,7 @@ EXEC SQL END DECLARE SECTION;
 						break;
 
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp);
+						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
 						indicator=0;
 						if(char_tmp==NULL || len<0) {
 							indicator=-1;
@@ -1036,17 +1024,17 @@ $endif;
 				int bid = 0;
 				if(fieldtype==SQLTEXT) {
 					bid=php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list));
-					locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+					locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
 				}
 				if(fieldtype==SQLBYTES) {
 					if(IFXG(blobinfile)==0) {
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					} else {
 						blobfilename=php_intifx_create_tmpfile(i);
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE, blobfilename,strlen(blobfilename),&EG(regular_list));
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 						locator->loc_oflags=LOC_WONLY;
 					}
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
@@ -1054,7 +1042,7 @@ $endif;
 $ifdef HAVE_IFX_IUS;
 				if(fieldtype==SQLUDTFIXED) {
 					bid=php_intifxus_new_slob(&EG(regular_list));
-					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list));
+					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				}
 $endif;
@@ -1118,7 +1106,6 @@ EXEC SQL END DECLARE SECTION;
 	int  cursoryproc;
 	int  argc=ZEND_NUM_ARGS();
 	long ifx_type;
-	IFXLS_FETCH();
 
 	if(argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1242,11 +1229,11 @@ EXEC SQL END DECLARE SECTION;
 					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
 				}
 				
-				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list));
+				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
 				switch(ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list));
+						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
 						if(locator==NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
 							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1261,7 +1248,7 @@ EXEC SQL END DECLARE SECTION;
 						EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator, TYPE=:loc_t_type; 
 						break;
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp);
+						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
 						
 						indicator=0;
 						if(char_tmp==NULL || len < 0) {
@@ -1372,7 +1359,6 @@ EXEC SQL END DECLARE SECTION;
 
 	int  locind;
 	char *blobfilename;
-	IFXLS_FETCH();
 
 	if(ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result)==FAILURE)) {
 		WRONG_PARAM_COUNT;
@@ -1450,17 +1436,17 @@ $endif;
 				int bid = 0;
 				if(fieldtype==SQLTEXT) {
 					bid=php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list));
-					locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+					locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
 				}
 				if(fieldtype==SQLBYTES) {
 					if(IFXG(blobinfile)==0) {
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					} else {
 						blobfilename=php_intifx_create_tmpfile(i);
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE,blobfilename,strlen(blobfilename),&EG(regular_list));
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list));
+						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 						locator->loc_oflags=LOC_WONLY;
 					}
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
@@ -1468,7 +1454,7 @@ $endif;
 $ifdef HAVE_IFX_IUS;
 				if(fieldtype==SQLUDTFIXED) {
 					bid=php_intifxus_new_slob(&EG(regular_list));
-					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list));
+					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				} 
 $endif;
@@ -1496,7 +1482,6 @@ PHP_FUNCTION(ifx_error)
 {
 	zval **ifx_link;
 	int id;
-	IFXLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1535,7 +1520,6 @@ PHP_FUNCTION(ifx_errormsg)
 	int msglen, maxmsglen;
 	char *ifx_errmsg;
 	char * returnmsg;
-	IFXLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1594,7 +1578,6 @@ PHP_FUNCTION(ifx_affected_rows)
 {
 	zval **result;
 	IFX_RES *Ifx_Result;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result))==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1666,7 +1649,6 @@ EXEC SQL END DECLARE SECTION;
 	char *blobfilename;
 	char *fetch_pos;
 	char *nullstr;
-	IFXLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -1784,8 +1766,8 @@ EXEC SQL END DECLARE SECTION;
 			if(	(IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) || 
 				(IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
 				bid_b=Ifx_Result->res_id[locind];
-				bid=php_intifx_copy_blob(bid_b, &EG(regular_list));
-				php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list));
+				bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
+				php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list) TSRMLS_CC);
 				add_assoc_long(return_value,fieldname,bid);
 				++locind;
 				continue; 
@@ -1897,7 +1879,7 @@ $ifdef HAVE_IFX_IUS;
 				bid_b=Ifx_Result->res_id[locind];
 				add_assoc_long(return_value,fieldname,bid_b);
 				bid=php_intifxus_new_slob(&EG(regular_list));
-				slocator=php_intifxus_get_slobloc(bid,&EG(regular_list));
+				slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 				EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				Ifx_Result->res_id[locind]=bid;
 				++locind;
@@ -1906,7 +1888,7 @@ $endif;
 			case SQLBYTES    :
 			case SQLTEXT     :
 				bid_b=Ifx_Result->res_id[locind];
-				locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list)); 
+				locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list) TSRMLS_CC); 
 				++locind;
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
 				
@@ -1920,8 +1902,8 @@ $endif;
 					if((IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) 
 					|| (IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
 						bid_b=Ifx_Result->res_id[locind];
-						bid=php_intifx_copy_blob(bid_b, &EG(regular_list));
-						php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list));
+						bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
+						php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list) TSRMLS_CC);
 						add_assoc_long(return_value,fieldname,bid);
 						break; 
 					}
@@ -1941,12 +1923,12 @@ $endif;
 				}
 		
 				/* copy blob */
-				bid=php_intifx_copy_blob(bid_b, &EG(regular_list));
+				bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
 
 				/* and generate new tempfile for next row */
 				if(locator_b->loc_loctype==LOCFNAME) {
 					blobfilename=php_intifx_create_tmpfile(bid_b);
-					php_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),&EG(regular_list));
+					php_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),&EG(regular_list) TSRMLS_CC);
 					efree(blobfilename);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator_b;
 				} 
@@ -1963,13 +1945,13 @@ $endif;
 					char *content;
 					long lg;
 			
-					lg=php_intifx_get_blob(bid, &EG(regular_list), &content);
+					lg=php_intifx_get_blob(bid, &EG(regular_list), &content TSRMLS_CC);
 					if(content == NULL || lg < 0) {
 						add_assoc_string(return_value,fieldname,nullstr,DUP);
 					} else {
 						add_assoc_stringl(return_value,fieldname,content,lg,DUP);
 					}
-					php_intifx_free_blob(bid, &EG(regular_list));
+					php_intifx_free_blob(bid, &EG(regular_list) TSRMLS_CC);
 					break;
 				} 
 
@@ -2041,8 +2023,6 @@ EXEC SQL END DECLARE SECTION;
 	int  locind,bid_b;
 	char *table_options;
 	int  moredata;
-
-	IFXLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2251,7 +2231,7 @@ $endif;
 					/* if blobinbfile, too bad                   */
 					bid_b=Ifx_Result->res_id[locind];
 					++locind;
-					locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list)); 
+					locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list) TSRMLS_CC); 
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
 					
 					/* work around for ESQL/C bug with NULL values and BLOBS */                
@@ -2276,7 +2256,7 @@ $endif;
 					}
 
 					/* get blob contents */    
-					lg=php_intifx_get_blob(bid_b, &EG(regular_list), &content);
+					lg=php_intifx_get_blob(bid_b, &EG(regular_list), &content TSRMLS_CC);
 					
 					if(content==NULL || lg<0) {
 						php_printf("<td>%s</td>", nullstr);
@@ -2357,7 +2337,6 @@ EXEC SQL BEGIN DECLARE SECTION;
 EXEC SQL END DECLARE SECTION;
 	int num_fields;
 	char *p;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2516,7 +2495,6 @@ EXEC SQL END DECLARE SECTION;
 	int num_fields;
 	char string_data[256];
 	char *p;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2658,7 +2636,6 @@ PHP_FUNCTION(ifx_num_rows)
 {
 	zval **result;
 	IFX_RES *Ifx_Result;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2685,11 +2662,10 @@ PHP_FUNCTION(ifx_num_rows)
    Returns the sqlerrd[] fields of the sqlca struct for query resultid */
 PHP_FUNCTION(ifx_getsqlca)
 {
-	zval **result;
+	zval **result; 
 	IFX_RES *Ifx_Result;
 	char fieldname[16];
 	int e;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2727,7 +2703,6 @@ PHP_FUNCTION(ifx_num_fields)
 {
 	zval **result;
 	IFX_RES *Ifx_Result;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2765,7 +2740,6 @@ EXEC SQL BEGIN DECLARE SECTION;
 EXEC SQL END DECLARE SECTION;
 
 	int i;    
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2777,7 +2751,7 @@ EXEC SQL END DECLARE SECTION;
 
 	for (i = 0; i < MAX_RESID; ++i) {
 		if (Ifx_Result->res_id[i]>0) {
-			php_intifx2_free_blob(Ifx_Result->res_id[i],&EG(regular_list));
+			php_intifx2_free_blob(Ifx_Result->res_id[i],&EG(regular_list) TSRMLS_CC);
 			Ifx_Result->res_id[i]=-1;
 		}
 	}
@@ -2816,12 +2790,10 @@ EXEC SQL END DECLARE SECTION;
  * return -1 on error otherwise the type: TYPE_BLTEXT, TYPE_BLBYTE, TYPE_SLOB
  * ----------------------------------------------------------------------
 */
-static long php_intifx_getType(long id, HashTable *list) 
+static long php_intifx_getType(long id, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_res;
 	int type;
-
-	IFXLS_FETCH();
 
 	Ifx_res = (IFX_IDRES *) zend_list_find(id,&type);
 	if (type!=le_idresult) {
@@ -2895,7 +2867,6 @@ PHP_FUNCTION(ifx_create_blob)
 static long php_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list) 
 {
 	IFX_IDRES *Ifx_blob;
-	IFXLS_FETCH();
 
 	Ifx_blob=emalloc(sizeof(IFX_IDRES));
 	if(Ifx_blob==NULL) {
@@ -2972,7 +2943,7 @@ PHP_FUNCTION(ifx_copy_blob)
 	}
 	convert_to_long(pbid);
 
-	newid=php_intifx_copy_blob(Z_LVAL_P(pbid),&EG(regular_list)); 
+	newid=php_intifx_copy_blob(Z_LVAL_P(pbid),&EG(regular_list) TSRMLS_CC); 
 	if(newid<0) {
 		RETURN_FALSE;
 	} 
@@ -2991,12 +2962,11 @@ PHP_FUNCTION(ifx_copy_blob)
  * return -1 on error otherwise the new Blob-Object-id
  * ----------------------------------------------------------------------
 */
-static long php_intifx_copy_blob(long bid, HashTable *list) 
+static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_blob, *Ifx_blob_orig;
 	loc_t *locator, *locator_orig;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
@@ -3075,7 +3045,7 @@ PHP_FUNCTION(ifx_free_blob)
 	}
 	convert_to_long(pid);
 
-	ret=php_intifx_free_blob(pid->value.lval,&EG(regular_list)); 
+	ret=php_intifx_free_blob(pid->value.lval,&EG(regular_list) TSRMLS_CC); 
 	if(ret<0) {
 		RETURN_FALSE;
 	} 
@@ -3095,11 +3065,10 @@ PHP_FUNCTION(ifx_free_blob)
  * FREES BYTE-MEMORY WITH EFREE()
  * ----------------------------------------------------------------------
 */
-static long php_intifx_free_blob(long bid, HashTable *list) 
+static long php_intifx_free_blob(long bid, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_blob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
@@ -3134,11 +3103,10 @@ static long php_intifx_free_blob(long bid, HashTable *list)
  * use this for freeing blob-source after select (in ifx_free_result)
  * ----------------------------------------------------------------------
 */
-static long php_intifx2_free_blob(long bid, HashTable *list) 
+static long php_intifx2_free_blob(long bid, HashTable *list TSRMLS_DC) 
 {
-	IFX_IDRES *Ifx_blob;
+	IFX_IDRES *Ifx_blob; 
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
@@ -3188,7 +3156,7 @@ PHP_FUNCTION(ifx_get_blob)
 	}
 	convert_to_long(pbid);
 
-	len=php_intifx_get_blob(pbid->value.lval,&EG(regular_list),&content); 
+	len=php_intifx_get_blob(pbid->value.lval,&EG(regular_list),&content TSRMLS_CC); 
 	if(content==NULL || len<0) {
 		RETURN_STRING(php_intifx_null(),1);
 	}
@@ -3208,11 +3176,10 @@ PHP_FUNCTION(ifx_get_blob)
  * returns the pointer to the content in char** content and the amount of content in bytes
  * ----------------------------------------------------------------------
 */
-static long php_intifx_get_blob(long bid, HashTable *list, char** content) 
+static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_blob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
@@ -3238,11 +3205,10 @@ static long php_intifx_get_blob(long bid, HashTable *list, char** content)
  * return NULL on error or the pointer to the locator-structur
  * ----------------------------------------------------------------------
 */
-static loc_t *php_intifx_get_blobloc(long bid, HashTable *list) 
+static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_blob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
@@ -3276,7 +3242,7 @@ PHP_FUNCTION(ifx_update_blob)
 	convert_to_long(pbid);
 	convert_to_string(pparam);
 
-	if(php_intifx_update_blob(Z_LVAL_P(pbid),Z_STRVAL_P(pparam),Z_STRLEN_P(pparam), &EG(regular_list)) < 0) { 
+	if(php_intifx_update_blob(Z_LVAL_P(pbid),Z_STRVAL_P(pparam),Z_STRLEN_P(pparam), &EG(regular_list) TSRMLS_CC) < 0) { 
 		RETURN_FALSE;
 	} 
 	RETURN_TRUE;
@@ -3295,11 +3261,10 @@ PHP_FUNCTION(ifx_update_blob)
  * return nothing
  * ----------------------------------------------------------------------
 */
-static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list) 
+static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_blob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
@@ -3391,7 +3356,6 @@ static char* php_intifx_create_tmpfile(long bid)
 PHP_FUNCTION(ifx_blobinfile_mode) 
 {
 	zval *pmode;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3418,7 +3382,6 @@ PHP_FUNCTION(ifx_blobinfile_mode)
 PHP_FUNCTION(ifx_textasvarchar) 
 {
 	zval *pmode;
-	IFXLS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3445,7 +3408,6 @@ PHP_FUNCTION(ifx_textasvarchar)
 PHP_FUNCTION(ifx_byteasvarchar) 
 {
 	zval *pmode;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3471,7 +3433,6 @@ PHP_FUNCTION(ifx_byteasvarchar)
 PHP_FUNCTION(ifx_nullformat)
 {
 	zval *pmode;
-	IFXLS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3494,8 +3455,8 @@ PHP_FUNCTION(ifx_nullformat)
 static char* php_intifx_null()
 {
 	char* tmp;
-	IFXLS_FETCH();
-	
+	TSRMLS_FETCH();
+		
 	if(IFXG(nullformat)==0) {
 		tmp=IFXG(nullvalue);
 	} else {
@@ -3548,7 +3509,6 @@ PHP_FUNCTION(ifx_create_char)
 static long php_intifx_create_char(char* param, long len, HashTable *list) 
 {
 	IFX_IDRES *Ifx_char;
-	IFXLS_FETCH();
 
 	Ifx_char=emalloc(sizeof(IFX_IDRES));
 	if(Ifx_char==NULL) {
@@ -3597,7 +3557,7 @@ PHP_FUNCTION(ifx_get_char)
 	}
 	convert_to_long(pbid);
 
-	len=php_intifx_get_char(Z_LVAL_P(pbid),&EG(regular_list),&content); 
+	len=php_intifx_get_char(Z_LVAL_P(pbid),&EG(regular_list),&content TSRMLS_CC); 
 	if(content==NULL || len < 0) {
 		RETURN_STRING("",1);
 	}
@@ -3617,11 +3577,10 @@ PHP_FUNCTION(ifx_get_char)
  * returns the pointer to the content in char** content and the amount of content in bytes
  * ----------------------------------------------------------------------
 */
-static long php_intifx_get_char(long bid, HashTable *list, char** content) 
+static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_char;
 	int type;
-  	IFXLS_FETCH();
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
@@ -3653,7 +3612,7 @@ PHP_FUNCTION(ifx_free_char)
 	}
 	convert_to_long(pid);
 
-	if(php_intifx_free_char(Z_LVAL_P(pid),&EG(regular_list)) < 0) {
+	if(php_intifx_free_char(Z_LVAL_P(pid),&EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3671,11 +3630,10 @@ PHP_FUNCTION(ifx_free_char)
  * return -1 on error otherwise 0
  * ----------------------------------------------------------------------
 */
-static long php_intifx_free_char(long bid, HashTable *list)
+static long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_char;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
@@ -3713,7 +3671,7 @@ PHP_FUNCTION(ifx_update_char)
 	convert_to_long(pbid);
 	convert_to_string(pparam);
  
-	if(php_intifx_update_char(Z_LVAL_P(pbid),Z_STRVAL_P(pparam),Z_STRLEN_P(pparam),&EG(regular_list)) < 0) {
+	if(php_intifx_update_char(Z_LVAL_P(pbid),Z_STRVAL_P(pparam),Z_STRLEN_P(pparam),&EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3732,11 +3690,10 @@ PHP_FUNCTION(ifx_update_char)
  * return nothing
  * ----------------------------------------------------------------------
 */
-static long php_intifx_update_char(long bid, char* param, long len, HashTable *list)
+static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_char;
 	int type;
- 	IFXLS_FETCH();
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
@@ -3870,7 +3827,7 @@ PHP_FUNCTION(ifxus_free_slob)
 	}
 	convert_to_long(pid);
 
-	if(php_intifxus_free_slob(Z_LVAL_P(pid),&EG(regular_list)) < 0) {
+	if(php_intifxus_free_slob(Z_LVAL_P(pid),&EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3888,12 +3845,10 @@ PHP_FUNCTION(ifxus_free_slob)
  * return -1 on error otherwise 0
  * ----------------------------------------------------------------------
 */
-static long php_intifxus_free_slob(long bid, HashTable *list) 
+static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_slob;
 	int type;
-	IFXLS_FETCH();
-	TSRMLS_FETCH();
 	
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
@@ -3901,7 +3856,7 @@ static long php_intifxus_free_slob(long bid, HashTable *list)
 		return -1;
 	}
 	
-	if(php_intifxus_close_slob(bid, &EG(regular_list)) < 0) {
+	if(php_intifxus_close_slob(bid, &EG(regular_list) TSRMLS_CC) < 0) {
 		return -1;
 	}
 
@@ -3933,7 +3888,7 @@ PHP_FUNCTION(ifxus_close_slob)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(pid);
-	if(php_intifxus_close_slob(Z_LVAL_P(pid),&EG(regular_list)) < 0) {
+	if(php_intifxus_close_slob(Z_LVAL_P(pid),&EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3951,11 +3906,10 @@ PHP_FUNCTION(ifxus_close_slob)
  * return -1 on error otherwise 0
  * ----------------------------------------------------------------------
 */
-static long php_intifxus_close_slob(long bid, HashTable *list)
+static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_slob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
@@ -4014,7 +3968,7 @@ PHP_FUNCTION(ifxus_open_slob)
 	if((mode&32) !=0)   
 		create_mode|=LO_NOBUFFER;
 
-	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_P(pbid),create_mode,&EG(regular_list)));
+	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_P(pbid),create_mode,&EG(regular_list) TSRMLS_CC));
 }
 /* }}} */
 
@@ -4029,12 +3983,11 @@ PHP_FUNCTION(ifxus_open_slob)
  * return -1 on error otherwise the new Blob-Object-id
  * ----------------------------------------------------------------------
 */
-static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list)
+static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_slob;
 	int errcode;
 	int type;
- 	IFXLS_FETCH();
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
@@ -4067,7 +4020,6 @@ static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list)
 static long php_intifxus_new_slob(HashTable *list)
 {
 	IFX_IDRES *Ifx_slob;
- 	IFXLS_FETCH();
 
 	Ifx_slob=emalloc(sizeof(IFX_IDRES));
 	if(Ifx_slob==NULL) {
@@ -4090,11 +4042,10 @@ static long php_intifxus_new_slob(HashTable *list)
  * return -1 on error otherwise the new Blob-Object-id
  * ----------------------------------------------------------------------
 */
-static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list) 
+static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_slob;
 	int type;
-	IFXLS_FETCH();
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
 	if (type!=le_idresult  || Ifx_slob->type!=TYPE_SLOB) {
@@ -4123,7 +4074,6 @@ PHP_FUNCTION(ifxus_tell_slob)
 	ifx_int8_t akt_seek_pos;
 	int type;
 	long lakt_seek_pos;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -4170,7 +4120,6 @@ PHP_FUNCTION(ifxus_seek_slob)
 	IFX_IDRES *Ifx_slob;
 	ifx_int8_t akt_seek_pos,offset;
 	int type,mode;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &pbid, &pmode, &poffset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -4227,7 +4176,6 @@ PHP_FUNCTION(ifxus_read_slob)
 	IFX_IDRES *Ifx_slob;
 	int errcode,type;
 	char *buffer;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid, &pnbytes)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -4272,7 +4220,6 @@ PHP_FUNCTION(ifxus_write_slob)
 	IFX_IDRES *Ifx_slob;
 	int errcode,type;
 	char *buffer;
-	IFXLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid, &pcontent)==FAILURE) {
 		WRONG_PARAM_COUNT;

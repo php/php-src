@@ -118,19 +118,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ifx)
 ZEND_END_MODULE_GLOBALS(ifx)
 
 #ifdef ZTS
-# define IFXLS_D	zend_ifx_globals *ifx_globals
-# define IFXLS_DC	, IFXLS_D
-# define IFXLS_C	ifx_globals
-# define IFXLS_CC , IFXLS_C
-# define IFXG(v) (ifx_globals->v)
-# define IFXLS_FETCH()	zend_ifx_globals *ifx_globals = ts_resource(ifx_globals_id)
+# define IFXG(v) TSRMG(ifx_globals_id, zend_ifx_globals *, v)
 #else
-# define IFXLS_D
-# define IFXLS_DC
-# define IFXLS_C
-# define IFXLS_CC
 # define IFXG(v) (ifx_globals.v)
-# define IFXLS_FETCH()
 #endif
 
 #define MAX_RESID          64
