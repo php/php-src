@@ -2,12 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 25 Jun 2000, Version 4.0.1
-- Added the ImageColorClosestHWB, ImageCopyMerge and ImagePaletteCopy 
+- Added the ImageColorClosestHWB(), ImageCopyMerge() and ImagePaletteCopy() 
   functions. (Sterling)
-- Added function ImageCreateFromWBMP. (Jouni)
-- Fixed problems with POST requests under the NSAPI module (Roberto Biancardi)
+- Added ImageCreateFromWBMP() function. (Jouni)
+- Fixed problems with POST requests under the NSAPI module. (Roberto Biancardi)
 - Added spliti() function. (Thies)
-- Fixed serializer behaviour with regards to serializing objects which class
+- Fixed serializer behaviour with regards to serializing objects whose class
   definition was not available in the deserializing context. (Sascha)
 - Improve memory cache performance and increase cache size. (Stas, Zend Engine)
 - Added a crc32 checksum function - used by the UdmSearch search engine
