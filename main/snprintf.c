@@ -361,7 +361,7 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 {
 	int sign, decpt;
 	register char *p1, *p2;
-	register i;
+	register int i;
 	char buf1[NDIG];
 
 	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign, buf1);
