@@ -1,3 +1,34 @@
+1999-10-28  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/odbc/config.h.stub
+      ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    (IBM DB2 Support) Fix stuff to allow IBM DB2 to work with PHP 4.
+                      Tested against DB2 6.1 UDB on Linux (RH-6.0)
+
+1999-10-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.am:
+    Remove set-if-not-set colon, since CPPFLAGS is never set by automake.
+
+1999-10-28  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/pcre/php_pcre.c: Fix bug #2623.
+
+    * NEWS: New function.
+
+1999-10-28  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
+1999-10-28  rubys  <rubys@www>
+
+    * php4dllts.dsp:
+    look for output.c in its new location in the windows build
+
 1999-10-27  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/standard/basic_functions.c
