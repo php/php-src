@@ -10,12 +10,13 @@
 
 */
 
+CREDIT_LINE("ActiveScript", "Wez Furlong");
 CREDIT_LINE("AOLserver", "Sascha Schumann");
 CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Sklar");
 CREDIT_LINE("Apache 2.0", "Sascha Schumann, Aaron Bannert");
 CREDIT_LINE("Caudium / Roxen", "David Hedbor");
 CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
-CREDIT_LINE("CLI", "Rasmus Lerdorf, Stig Bakken, Edin Kadribasic");
+CREDIT_LINE("CLI", "Rasmus Lerdorf, Stig Bakken, Edin Kadribasic, Marcus Boerger");
 CREDIT_LINE("fastcgi", "Ben Mansell");
 CREDIT_LINE("fhttpd", "Alex Belits");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
