@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 
 
@@ -38,16 +39,16 @@ ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static zend_object_handlers mysqli_object_handlers;
 
 /* {{{ php_clear_stmt_bind */
-void php_clear_stmt_bind(STMT *stmt) {
-	int i;
+void php_clear_stmt_bind(STMT *stmt)
+{
+	unsigned int i;
 
-
-	if (stmt->stmt && stmt->stmt->mysql->host)
+	if (stmt->stmt && stmt->stmt->mysql->host) {
 		mysql_stmt_close(stmt->stmt);
+	}
 
 	if (stmt->var_cnt) {
-	
-		for (i=0; i < stmt->var_cnt; i++) {
+		for (i = 0; i < stmt->var_cnt; i++) {
 			if (stmt->type == FETCH_RESULT) {
 				if (stmt->bind[i].type == IS_STRING) {
 					efree(stmt->bind[i].buffer);
@@ -80,16 +81,12 @@ static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_D
 		if (mysql) {
 			mysql_close(mysql);
 		}
-	}
-	/* stmt object */
-	else if (intern->zo.ce == mysqli_stmt_class_entry) {
+	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
 		STMT *stmt = (STMT *)intern->ptr;
 		if (stmt) {
 			php_clear_stmt_bind(stmt);
 		}
-	}
-	/* result object */
-	else if (intern->zo.ce == mysqli_result_class_entry) {
+	} else if (intern->zo.ce == mysqli_result_class_entry) { /* result object */
 		MYSQL_RES *res = (MYSQL_RES *)intern->ptr;
 		if (res) {
 			mysql_free_result(res);
@@ -300,6 +297,9 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
+	MyG(error_msg) = NULL;
+	MyG(error_no) = 0;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -309,6 +309,10 @@ PHP_RINIT_FUNCTION(mysqli)
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
+	if (MyG(error_msg)) {
+		efree(MyG(error_msg));
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -335,7 +339,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 {
 	MYSQL_RES *result;
 	zval *mysql_result;
-	int	fetchtype;
+	int fetchtype;
 	int copyflag, i;
 	MYSQL_FIELD *fields;
 	MYSQL_ROW row;
@@ -355,25 +359,22 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	fields = mysql_fetch_fields(result);
 	row = mysql_fetch_row(result);
 	field_len = mysql_fetch_lengths(result);
 
-	for (i=0; i < mysql_num_fields(result); i++){
+	for (i = 0; i < mysql_num_fields(result); i++) {
 		if (row[i]) {
 			char	*column;
-			int		column_len;
+			int	 column_len;
 			
 			/* check if we need magic quotes */
 			if (PG(magic_quotes_runtime)) {
 				column = php_addslashes(row[i], field_len[i], &column_len, 0 TSRMLS_CC);
 				copyflag = 0;
-			}
-			else {
+			} else {
 				column = row[i];
 				column_len = field_len[i];
 				copyflag = 1;
@@ -385,9 +386,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			if (fetchtype & MYSQLI_ASSOC) {
 				add_assoc_stringl(return_value, fields[i].name, column, column_len, copyflag); 
 			}
-
-		} 
-		else {
+		} else {
 			if (fetchtype & MYSQLI_NUM) {
 				add_index_null(return_value, i);
 			}
@@ -396,6 +395,18 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		}
 	}
+}
+/* }}} */
+
+/* {{{ php_mysqli_set_error
+ */
+PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC)
+{
+	MyG(error_no) = mysql_errno;
+	if (MyG(error_msg)) {
+		efree(MyG(error_msg));
+	}
+	MyG(error_msg) = estrdup(mysql_err);
 }
 /* }}} */
 

@@ -60,8 +60,8 @@ PHP_FUNCTION(mysqli_connect)
 
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,0) == NULL) {
 		/* Save error messages */
-		MyG(error_no) = mysql_errno(mysql);
-		MyG(error_msg) = estrdup(mysql_error(mysql));
+		php_mysqli_set_error(mysql_errno(mysql), mysql_error(mysql) TSRMLS_CC);
+
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
 		/* free mysql structure */
 		mysql_close(mysql);
