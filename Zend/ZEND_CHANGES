@@ -861,10 +861,10 @@ Changes in the Zend Engine 2.0
       The magic method __toString() allows to overload the object to 
       string conversion. This conversion is only done automatically for 
       printing functions (echo, *printf) but not for other functions 
-      that expect strings. Also the function __toStrign is not used in
+      that expect strings. Also the function __toString is not used in
       places where objects are not allowed but strings are like array
       indices. Note that specialized objects maybe converted to a string
-      in any place but without calling __tostring().
+      in any place but without calling __toString().
 
       Example:
 
