@@ -1783,7 +1783,7 @@ PHP_FUNCTION(imagecopymerge)
 	srcY = Z_LVAL_PP(SY);
 	srcH = Z_LVAL_PP(SH);
 	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX)
+	dstX = Z_LVAL_PP(DX);
 	dstY = Z_LVAL_PP(DY);
 	pct  = Z_LVAL_PP(PCT);
 
