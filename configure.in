@@ -1,9 +1,11 @@
 dnl ## $Id$ -*- sh -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
-divert(0)
+divert(1)
 
 AC_INIT(main.c)
+
+PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile) 
 
 dnl Because ``make install'' is often performed by the superuser,
 dnl we create the libs subdirectory as the user who configures PHP.
@@ -25,25 +27,30 @@ CONFIGURE_COMMAND=$0
 for arg in "$@"; do
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
 done
-AC_SUBST(CONFIGURE_COMMAND)
 
-dnl ## Diversion 1 is the initial checking of OS features, programs,
+php_shtool="$srcdir/build/shtool"
+T_MD=`$php_shtool echo -n -e %B`
+T_ME=`$php_shtool echo -n -e %b`
+
+dnl ## Diversion 2 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
 
-dnl ## In diversion 2 we check for compile-time options to the PHP
+dnl ## In diversion 3 we check for compile-time options to the PHP
 dnl ## core and how to deal with different system dependencies.  This
 dnl ## includes what regex library is used and whether debugging or short
 dnl ## tags are enabled, and the default behaviour of php.ini options.
 dnl ## This is also where an SAPI interface is selected (choosing between
 dnl ## Apache module, CGI etc.)
 
-dnl ## In diversion 3 we check which extensions should be compiled.
+dnl ## In diversion 4 we check which extensions should be compiled.
 dnl ## All of these are normally in the extension directories.
 
-dnl ## Diversion 4 is the last one.  Here we generate files and clean up.
+dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 
-divert(1)
+divert(2)
 
+PHP_CONFIGURE_PART(Running system checks)
+	
 dnl ## This is where the version number is changed from now on!
 AM_INIT_AUTOMAKE(php, 4.0b4-dev)
 
@@ -61,10 +68,6 @@ fi
 
 AM_CONFIG_HEADER(php_config.h)
 AM_MAINTAINER_MODE
-
-phplibdir=$libdir/php
-AC_SUBST(phplibdir)
-AC_SUBST(PHP_VERSION)
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
@@ -109,14 +112,13 @@ AC_C_CONST
 if test "$ac_cv_c_const" = "yes" ; then
   LEX_CFLAGS="-DYY_USE_CONST"
 fi
-AC_SUBST(LEX_CFLAGS)
 
 sinclude(Zend/acinclude.m4)
 sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
 
 dnl check for -R, etc. switch
-AC_MSG_CHECKING(if compiler supports -R)
+AC_MSG_CHECKING(whether compiler supports -R)
 AC_CACHE_VAL(php_cv_cc_dashr,[
 	SAVE_LIBS="${LIBS}"
 	LIBS="-R /usr/lib ${LIBS}"
@@ -126,7 +128,7 @@ AC_MSG_RESULT($php_cv_cc_dashr)
 if test $php_cv_cc_dashr = "yes"; then
 	ld_runpath_switch="-R"
 else
-	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+	AC_MSG_CHECKING([whether compiler supports -Wl,-rpath,])
 	AC_CACHE_VAL(php_cv_cc_rpath,[
 		SAVE_LIBS="${LIBS}"
 		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
@@ -157,7 +159,6 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
 fi
 
 INCLUDES="-I\$(top_builddir)/Zend -I\$(top_srcdir)"
-AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
  AC_ADD_LIBRARY(nsl)
@@ -250,48 +251,9 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 
-AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <$ac_cv_struct_tm>], [struct tm tm; tm.tm_gmtoff;],
-  ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no)])
-
-if test "$ac_cv_struct_tm_gmtoff" = yes; then
-  AC_DEFINE(HAVE_TM_GMTOFF)
-fi
-
-AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
-    AC_TRY_COMPILE([
-#include <unistd.h>
-#include <fcntl.h>
-        ],
-        [struct flock x;],
-        [
-          ac_cv_struct_flock=yes
-        ],[
-          ac_cv_struct_flock=no
-        ])
-)
-
-AC_CACHE_CHECK(for socklen_t,ac_cv_socklen_t,
-  AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-],[
-socklen_t x;
-],[
-  ac_cv_socklen_t=yes
-],[
-  ac_cv_socklen_t=no
-]))
-
-  
-if test "$ac_cv_struct_flock" = "yes" ; then
-    AC_DEFINE(HAVE_STRUCT_FLOCK, 1)
-fi
-
-if test "$ac_cv_socklen_t" = "no"; then
-  AC_CHECK_TYPE(socklen_t, unsigned int)
-fi
+PHP_TM_GMTOFF
+PHP_STRUCT_FLOCK
+PHP_SOCKLEN_T
 
 AC_CHECK_SIZEOF(long, 8)
 AC_CHECK_SIZEOF(int, 4)
@@ -307,7 +269,6 @@ if test "`uname -s 2>/dev/null`" != "QNX"; then
 else
     AC_MSG_WARN(warnings level for cc set to 0)
 	WARNING_LEVEL=0
-	AC_SUBST(WARNING_LEVEL)
 fi
 AC_STRUCT_ST_RDEV
 
@@ -395,12 +356,12 @@ if test $ac_cv_type_in_addr_t = no; then
   AC_DEFINE(in_addr_t, u_int)
 fi
 
-divert(2)
+divert(3)
 
+
+	
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
-AC_SUBST(abs_srcdir)
-AC_SUBST(abs_builddir)
 
 AC_MSG_CHECKING(whether to use a configuration file)
 AC_ARG_WITH(config-file-path,
@@ -451,7 +412,6 @@ else
 fi
 
 
-AC_SUBST(DEBUG_CFLAGS)
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 
@@ -606,26 +566,30 @@ if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
-AC_SUBST(PEAR_DIR)
 
 PHP_SAPI=cgi
 PHP_BUILD_PROGRAM
 dnl paths to the targets relative to the build directory
 SAPI_PROGRAM=php
+dnl on HP-UX, the extension is .sl. Need to improve this
 SAPI_SHARED=libs/libphp4.so
 SAPI_STATIC=libs/libphp4.a
 
+PHP_CONFIGURE_PART(Configuring SAPI modules)
+
 esyscmd(./scripts/config-stubs sapi)
 
-divert(3)
+AC_MSG_CHECKING(for chosen SAPI module)
+AC_MSG_RESULT($PHP_SAPI)
+	
+divert(4)
 
-AC_SUBST(EXTRA_LIBS)
-AC_SUBST(EXTRA_LDFLAGS)
-
+PHP_CONFIGURE_PART(Configuring extensions)
+	
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
-PHP_OUTPUT(sapi/$PHP_SAPI/Makefile)
+PHP_FAST_OUTPUT(sapi/$PHP_SAPI/Makefile)
 
 AC_MSG_CHECKING(whether to enable versioning)
 AC_ARG_ENABLE(versioning,
@@ -644,7 +608,7 @@ if test "$PHP_VERSIONING" = "yes"; then
   fi
 fi
 
-divert(4)
+divert(5)
 
 enable_shared=yes
 enable_static=yes
@@ -663,13 +627,6 @@ static)
 ;;
 esac
 
-
-
-AM_PROG_LIBTOOL
-if test "$enable_debug" != "yes"; then
-  AM_SET_LIBTOOL_VARIABLE([--silent])
-fi
-
 PHP_REGEX
 
 case "`uname -s`" in
@@ -679,6 +636,7 @@ esac
 
 CPPFLAGS="$CPPFLAGS -D_REENTRANT"
 
+PHP_CONFIGURE_PART(Configuring Zend)
 LIBZEND_BASIC_CHECKS
 LIBZEND_OTHER_CHECKS
 
@@ -688,7 +646,6 @@ if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
   AC_DEFINE(ZTS)
   INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
   PHP_THREAD_SAFETY=yes
-  PHP_OUTPUT(TSRM/Makefile)
 else
   PHP_THREAD_SAFETY=no
 fi
@@ -699,9 +656,6 @@ if test "$abs_srcdir" != "$abs_builddir"; then
     INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
   fi
 fi
-
-AC_SUBST(TSRM_DIR)
-AC_SUBST(TSRM_LIB)
 
 dnl *** Commented out - generates slow code and consumes a lot of 
 dnl *** resources during compilation - we need to figure out how
@@ -716,47 +670,109 @@ EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 LIBS=""
 LDFLAGS=""
 if test "$PHP_THREAD_SAFETY" = "yes"; then
+  PHP_CONFIGURE_PART(Configuring TSRM)
   TSRM_BASIC_CHECKS
   TSRM_OTHER_CHECKS
   EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
   EXTRA_LIBS="$EXTRA_LIBS $LIBS"
   LDFLAGS=""
   LIBS=""
+  PHP_OUTPUT(TSRM/Makefile)
 fi
 
 
 phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
-AC_SUBST(phplibdir)
-AC_SUBST(phptempdir)
 
 AC_BUILD_RPATH
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
-
-AC_SUBST(CFLAGS)
-AC_SUBST(PROG_SENDMAIL)
-AC_SUBST(PHP_RPATHS)
-AC_SUBST(NATIVE_RPATHS)
-AC_SUBST(PHP_PROGRAM)
 	
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
-AC_SUBST(PHP_BUILD_DATE)
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE")
 PHP_UNAME=`uname -a`
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
-AC_SUBST(PHP_LDFLAGS)
-AC_SUBST(PHP_LIBS)
-AC_SUBST(PHP_SAPI)
-AC_SUBST(INSTALL_IT)
+
 	
+PHP_SUBST(abs_builddir)
+PHP_SUBST(abs_srcdir)
+PHP_SUBST(bindir)
+PHP_SUBST(exec_prefix)
+PHP_SUBST(includedir)
+PHP_SUBST(libdir)
+PHP_SUBST(phplibdir)
+PHP_SUBST(phptempdir)
+PHP_SUBST(prefix)
+
+PHP_SUBST(CC)
+PHP_SUBST(CFLAGS)
+PHP_SUBST(CONFIGURE_COMMAND)
+PHP_SUBST(CPP)
+PHP_SUBST(CPPFLAGS)
+PHP_SUBST(CXX)
+PHP_SUBST(DEBUG_CFLAGS)
+PHP_SUBST(DEFS)
+PHP_SUBST(EXTRA_LDFLAGS)
+PHP_SUBST(EXTRA_LIBS)
+PHP_SUBST(INCLUDES)
+PHP_SUBST(INSTALL_IT)
+PHP_SUBST(LEX)
+PHP_SUBST(LEX_OUTPUT_ROOT)
+PHP_SUBST(LFLAGS)
+PHP_SUBST(LIBTOOL)
+PHP_SUBST(NATIVE_RPATHS)
+PHP_SUBST(PEAR_DIR)
+PHP_SUBST(PHP_BUILD_DATE)
+PHP_SUBST(PHP_COMPILE)
+PHP_SUBST(PHP_LDFLAGS)
+PHP_SUBST(PHP_LIBS)
+PHP_SUBST(PHP_PROGRAM)
+PHP_SUBST(PHP_RPATHS)
+PHP_SUBST(PHP_SAPI)
+PHP_SUBST(PHP_VERSION)
+PHP_SUBST(PROG_SENDMAIL)
+PHP_SUBST(SHELL)
+PHP_SUBST(SHLIBTOOL)
+PHP_SUBST(TSRM_DIR)
+PHP_SUBST(TSRM_LIB)
+PHP_SUBST(WARNING_LEVEL)
+PHP_SUBST(YACC)
+
+PHP_CONFIGURE_PART(Configuring libtool)
+AM_PROG_LIBTOOL
+if test "$enable_debug" != "yes"; then
+  AM_SET_LIBTOOL_VARIABLE([--silent])
+fi
+
+PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
+
+if test "$enable_shared" = "yes"; then
+  SHLIBTOOL='$(LIBTOOL)'
+else
+  if test -n "$EXT_SHARED"; then
+    PHP_CONFIGURE_PART(Configuring shared libtool)
+    $SHELL $srcdir/ltconfig --output=shlibtool --disable-static --srcdir=$srcdir --cache-file=./config.cache $srcdir/ltmain.sh
+    SHLIBTOOL='$(SHELL) $(top_builddir)/shlibtool'
+  else
+    PHP_COMPILE='$(COMPILE) -c $< && touch $@'
+  fi
+fi
+
+test "$prefix" = "NONE" && prefix="/usr/local"
+test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+PHP_CONFIGURE_PART(Generating files)
+
+PHP_FAST_GENERATE
+
 #libphp4.module 
-AC_OUTPUT([Makefile php4.spec Zend/Makefile ext/Makefile sapi/Makefile pear/Makefile
-           $PHP_OUTPUT_FILES
-           scripts/mkextlib build-defs.h], [], [
+AC_OUTPUT([php4.spec Zend/Makefile 
+           scripts/mkextlib build-defs.h
+		   $PHP_OUTPUT_FILES
+		   ], [], [
 
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"
@@ -817,10 +833,7 @@ if true; then
   echo "+--------------------------------------------------------------------+"
 
 fi
-
 ])
-
-divert
 
 dnl ## Local Variables:
 dnl ## tab-width: 4

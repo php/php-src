@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libmcrypt.la
+LTLIBRARY_SOURCES = mcrypt.c
+
+include $(topsrcdir)/build/ltlib.mk

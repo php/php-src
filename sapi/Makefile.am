@@ -1,3 +1,0 @@
-
-SUBDIRS = $(PHP_SAPI)
-

@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libsapi.la
+LTLIBRARY_SOURCES = thttpd.c
+
+include $(topsrcdir)/build/ltlib.mk

@@ -1,0 +1,16 @@
+#! /bin/sh
+
+prefix='@PREFIX@'
+includes='-I@PHPINCLUDEDIR@ -I@PHPINCLUDEDIR@/Zend -I@PHPINCLUDEDIR@/TSRM'
+
+case "$1" in
+--prefix)
+	echo $prefix;;
+--includes)
+	echo $includes;;
+*)
+	echo "Usage: $0 [--prefix|--includes]"
+	exit 1;;
+esac
+
+exit 0

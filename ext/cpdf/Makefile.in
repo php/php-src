@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libcpdf.la
+LTLIBRARY_SOURCES = cpdf.c
+
+include $(topsrcdir)/build/ltlib.mk

@@ -46,7 +46,7 @@ AC_ARG_ENABLE(discard_path,
 fi
 
 if test "$PHP_SAPI" = "cgi" ; then
-  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_PROGRAM \$(bindir)/$SAPI_CGI"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(bindir)/$SAPI_CGI"
 fi
 
 AC_MSG_CHECKING(for fhttpd module support)

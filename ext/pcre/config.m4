@@ -21,7 +21,7 @@ AC_ARG_WITH(pcre-regex,
 			AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
 			AC_MSG_RESULT(yes)
 			PHP_EXTENSION(pcre)
-			PHP_OUTPUT(ext/pcre/pcrelib/Makefile)
+			PHP_FAST_OUTPUT(ext/pcre/pcrelib/Makefile)
 			;;
 		*)
 			if test -f $withval/pcre.h ; then
@@ -56,9 +56,9 @@ AC_ARG_WITH(pcre-regex,
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
   AC_MSG_RESULT(yes)
   PHP_EXTENSION(pcre)
-  PHP_OUTPUT(ext/pcre/pcrelib/Makefile)
+  PHP_FAST_OUTPUT(ext/pcre/pcrelib/Makefile)
 ]) 
-AC_SUBST(PCRE_LIBADD)
-AC_SUBST(PCRE_SUBDIRS)
+PHP_SUBST(PCRE_LIBADD)
+PHP_SUBST(PCRE_SUBDIRS)
 
 AC_CHECK_FUNC(memmove, [], [AC_DEFINE(USE_BCOPY, 1)])

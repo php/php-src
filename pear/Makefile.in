@@ -1,0 +1,89 @@
+
+DEPTH     = ..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+install_targets = install-data-local install-headers install-build
+
+include $(topsrcdir)/build/rules.mk
+
+peardir=$(prefix)/lib/php
+pear_DBdir=$(prefix)/lib/php/DB
+
+
+install-data-local:
+	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) && \
+	$(INSTALL_DATA) $(srcdir)/DB.php $(peardir) && \
+	$(INSTALL_DATA) $(srcdir)/DB/common.php $(pear_DBdir) && \
+	$(INSTALL_DATA) $(srcdir)/DB/odbc.php $(pear_DBdir) && \
+	$(INSTALL_DATA) $(srcdir)/DB/mysql.php $(pear_DBdir)
+
+phpincludedir = $(includedir)/php
+builddir = $(prefix)/lib/php/build
+
+BUILD_FILES = \
+	pear/pear.m4 \
+	build/fastgen.sh \
+	build/library.mk \
+	build/ltlib.mk \
+	build/program.mk \
+	build/rules.mk \
+	build/rules_pear.mk \
+	build/shtool \
+	acinclude.m4
+
+install-build:
+	-@$(mkinstalldirs) $(builddir) $(bindir) && \
+	(cd $(topsrcdir) && cp $(BUILD_FILES) $(builddir)) && \
+	echo "creating phpize" && \
+	sed \
+		-e 's#@PREFIX@#$(prefix)#' \
+		< $(srcdir)/phpize.in > $(bindir)/phpize && \
+	chmod +x $(bindir)/phpize && \
+	echo "creating php-config" && \
+	sed \
+		-e 's#@PREFIX@#$(prefix)#' \
+		-e 's#@PHPINCLUDEDIR@#$(phpincludedir)#g' \
+		< $(srcdir)/php-config.in > $(bindir)/php-config && \
+	chmod +x $(bindir)/php-config
+
+SRC_HEADERS = \
+	php.h \
+	php_regex.h \
+	request_info.h \
+	php3_compat.h \
+	safe_mode.h \
+	fopen-wrappers.h \
+	php_version.h \
+	php_globals.h \
+	php_reentrancy.h \
+	php_ini.h \
+	SAPI.h
+
+BUILD_HEADERS = \
+	php_config.h \
+	Zend/zend_config.h \
+	build-defs.h
+
+STANDARD_HEADERS = \
+	php_output.h
+	
+HEADER_DIRS = \
+	Zend \
+	TSRM \
+	ext/standard \
+	regex
+
+install-headers:
+	-@for i in $(HEADER_DIRS); do \
+		paths="$$paths $(phpincludedir)/$$i"; \
+	done; \
+	$(mkinstalldirs) $$paths && \
+	echo "creating header file hierarchy" && \
+	(cd $(topsrcdir) && cp $(SRC_HEADERS) $(phpincludedir)) && \
+	(cd $(topsrcdir)/ext/standard && cp *.h $(phpincludedir)/ext/standard) && \
+	(cd $(topsrcdir) && cp regex/regex.h regex/regex_extra.h $(phpincludedir)/regex) && \
+	(cd $(topsrcdir) && cp TSRM/TSRM.h $(phpincludedir)/TSRM) && \
+	(cd $(topsrcdir)/Zend && cp *.h $(phpincludedir)/Zend) && \
+	(cd $(DEPTH) && cp $(BUILD_HEADERS) $(phpincludedir))

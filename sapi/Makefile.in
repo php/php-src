@@ -1,0 +1,9 @@
+
+DEPTH     = ..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+SUBDIRS = $(PHP_SAPI)
+
+include $(topsrcdir)/build/rules.mk

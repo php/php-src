@@ -1,6 +1,6 @@
 dnl $Id$ -*- sh -*-
 
-divert(1)
+divert(2)dnl
 
 dnl
 dnl Check for crypt() capabilities
@@ -129,7 +129,7 @@ AC_CHECK_LIB(crypt, crypt, [
 AC_CHECK_FUNCS(getcwd)
 AC_CHECK_FUNCS(getwd)
 
-divert(3)
+divert(4)dnl
 
 AC_ARG_WITH(regex,
 [  --with-regex=TYPE       regex library type: system, apache, php],

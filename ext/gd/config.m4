@@ -187,7 +187,5 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   fi
 fi
 
-AC_SUBST(GD_LFLAGS)
-AC_SUBST(GD_LIBS)
-AC_SUBST(GD_STATIC)
-AC_SUBST(GD_SHARED)
+PHP_SUBST(GD_LFLAGS)
+PHP_SUBST(GD_LIBS)

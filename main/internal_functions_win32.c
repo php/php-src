@@ -49,7 +49,7 @@
 #include "ext/standard/php_output.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
-#include "ext/COM/php_COM.h"
+#include "ext/com/php_COM.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php_odbc.h"

@@ -1,3 +1,0 @@
-
-SUBDIRS = @EXT_SUBDIRS@
-

@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libaspell.la
+LTLIBRARY_SOURCES = aspell.c
+
+include $(topsrcdir)/build/ltlib.mk

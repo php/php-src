@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libsysvshm.la
+LTLIBRARY_SOURCES = sysvshm.c
+
+include $(topsrcdir)/build/ltlib.mk

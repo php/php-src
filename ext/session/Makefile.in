@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libsession.la
+LTLIBRARY_SOURCES = session.c mod_files.c mod_mm.c mod_user.c
+
+include $(topsrcdir)/build/ltlib.mk

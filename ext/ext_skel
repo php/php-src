@@ -46,13 +46,19 @@ PHP_EXTENSION($extname)
 
 eof
 
-$ECHO_N " Makefile.am$ECHO_C"
-cat >Makefile.am <<eof
+$ECHO_N " Makefile.in$ECHO_C"
+cat >Makefile.in <<eof
 # \$Id\$
 
-noinst_LTLIBRARIES=libphpext_$extname.la
-libphpext_${extname}_la_SOURCES=$extname.c
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
 
+LTLIBRARY_NAME    = lib$extname.la
+LTLIBRARY_SOURCES = $extname.c
+
+include \$(topsrcdir)/build/ltlib.mk
 eof
 
 

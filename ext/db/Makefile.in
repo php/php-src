@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libdb.la
+LTLIBRARY_SOURCES = db.c
+
+include $(topsrcdir)/build/ltlib.mk

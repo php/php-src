@@ -14,7 +14,7 @@ AC_ARG_WITH(phttpd,
 	AC_DEFINE(HAVE_PHTTPD,1,[Whether you have phttpd])
 	PHP_SAPI=phttpd
 	PHP_BUILD_SHARED
-	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $PHTTPD_DIR/modules/"
+	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHTTPD_DIR/modules/"
 	RESULT=yes
 ])
 AC_MSG_RESULT($RESULT)

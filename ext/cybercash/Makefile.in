@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libcybercash.la
+LTLIBRARY_SOURCES = cybercash.c
+
+include $(topsrcdir)/build/ltlib.mk

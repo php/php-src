@@ -8,9 +8,13 @@ AC_ARG_WITH(thttpd,
     cp $abs_srcdir/sapi/thttpd/php_thttpd.h $SAPI_STATIC $THTTPD;\
     test -f $THTTPD/php_patched || \
     (cd $THTTPD && patch < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
-  AC_MSG_CHECKING(for thttpd)
-  AC_MSG_RESULT(yes - $THTTPD)
+  PHP_THTTPD="yes, using $THTTPD"
   AC_ADD_INCLUDE($THTTPD)
   PHP_BUILD_STATIC
   PHP_SAPI=thttpd
+],[
+  PHP_THTTPD="no"
 ])
+
+AC_MSG_CHECKING(for thttpd)
+AC_MSG_RESULT($PHP_THTTPD)
