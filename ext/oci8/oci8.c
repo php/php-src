@@ -2610,7 +2610,9 @@ PHP_FUNCTION(ocifreedesc)
 		}
 	}
 
-  RETURN_FALSE;
+	php_error(E_NOTICE, "OCIFreeDesc() should not be called like this. Use $somelob->free() to free a LOB");
+
+  	RETURN_FALSE;
 }
 /* }}} */
 
