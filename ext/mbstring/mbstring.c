@@ -76,6 +76,7 @@ static enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 static int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
 
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
+static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
 #if defined(MBSTR_ENC_TRANS)
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
@@ -94,7 +95,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_http_output,			NULL)
 	PHP_FE(mb_detect_order,			NULL)
 	PHP_FE(mb_substitute_character,	NULL)
-	PHP_FE(mb_parse_str,			second_arg_force_ref)
+	PHP_FE(mb_parse_str,			second_args_force_ref)
 	PHP_FE(mb_output_handler,			NULL)
 	PHP_FE(mb_preferred_mime_name,	NULL)
 	PHP_FE(mb_strlen,					NULL)
@@ -930,6 +931,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator)
 
 }
 
+#if !defined(COMPILE_DL_MBSTRING)
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 {
 	TSRMLS_FETCH();
@@ -942,6 +944,7 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
 	}
 }
+#endif
 
 /* http input processing */
 void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
