@@ -53,9 +53,9 @@ ZEND_API void zend_html_putc(char c)
 }
 
 
-ZEND_API void zend_html_puts(char *s, uint len)
+ZEND_API void zend_html_puts(const char *s, uint len)
 {
-	register char *ptr=s, *end=s+len;
+	const char *ptr=s, *end=s+len;
 	
 	while (ptr<end) {
 		if (*ptr==' '
