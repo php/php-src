@@ -535,7 +535,8 @@ PHP_FUNCTION(mysqli_enable_rpl_parse)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	return (mysql_enable_rpl_parse(mysql));
+	mysql_enable_rpl_parse(mysql);
+	RETURN_TRUE;
 }
 /* }}} */
 
