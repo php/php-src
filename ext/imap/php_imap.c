@@ -386,7 +386,7 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 
 	imap_globals->folderlist_style = FLIST_ARRAY;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-	imap_globals->quota_return = NULL;
+	imap_globals->quota_return = NIL;
 #endif
 }
 /* }}} */
