@@ -65,19 +65,6 @@ static void zend_extension_statement_handler(zend_extension *extension, zend_op_
 static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array);
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
 
-#ifdef ZEND_WIN32
-#define ZEND_CHECK_TIMEOUT()																\
-		{																					\
-			MSG timeout_message;															\
-																							\
-			while (PeekMessage(&timeout_message, EG(timeout_window), 0, 0, PM_REMOVE)) {	\
-				DispatchMessage(&timeout_message);											\
-			}																				\
-		}
-#else
-#define ZEND_CHECK_TIMEOUT()
-#endif
-
 
 #define SEPARATE_ON_READ_OBJECT(obj, _type)	\
 if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT)) { \
@@ -1005,7 +992,11 @@ void execute(zend_op_array *op_array ELS_DC)
 #else
 	while (1) {
 #endif
-		ZEND_CHECK_TIMEOUT();
+#ifdef ZEND_WIN32
+		if (EG(timed_out)) {
+			zend_timeout(0);
+		}
+#endif
 		switch(opline->opcode) {
 			case ZEND_ADD:
 				EG(binary_op) = add_function;
@@ -2374,6 +2365,7 @@ send_by_ref:
 			case ZEND_NOP:
 				NEXT_OPCODE();
 			EMPTY_SWITCH_DEFAULT_CASE()
+
 		}
 	}
 #if SUPPORT_INTERACTIVE

@@ -292,9 +292,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 	}
 	zend_init_rsrc_plist(ELS_C);
 	EG(lambda_count)=0;
-#ifdef ZEND_WIN32
-	zend_create_timeout_window(ELS_C);
-#endif
 }
 
 
@@ -302,9 +299,6 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals)
 {
 	zend_shutdown_constants(ELS_C);
 	zend_destroy_rsrc_plist(ELS_C);
-#ifdef ZEND_WIN32
-	zend_destroy_timeout_window(ELS_C);
-#endif
 }
 
 
@@ -372,10 +366,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zval_used_for_init.refcount = 1;
 	zval_used_for_init.type = IS_NULL;
 
-#ifdef ZEND_WIN32
-	zend_register_timeout_wndclass();
-#endif
-
 #ifdef ZTS
 	global_constants_table = NULL;
 	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
@@ -407,6 +397,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 void zend_shutdown()
 {
+#ifdef ZEND_WIN32
+	zend_shutdown_timeout_thread();
+#endif
 #ifndef ZTS
 	zend_destroy_rsrc_plist();
 #endif
