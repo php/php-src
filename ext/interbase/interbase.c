@@ -43,7 +43,7 @@
 #endif
 
 #ifdef ZEND_DEBUG_
-#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
+#define IBDEBUG(fmt, ...) php_printf("::: (%4d) " fmt " \n",  __LINE__, ##__VA_ARGS__)
 #endif
 
 #ifndef IBDEBUG
@@ -220,6 +220,8 @@ static void _php_ibase_error(TSRMLS_D)
 
 /* {{{ _php_ibase_module_error()
    print php interbase module error and save it for ibase_errmsg() */
+static void _php_ibase_module_error(char * TSRMLS_DC, ...) PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
+
 static void _php_ibase_module_error(char *msg TSRMLS_DC, ...)
 {
 	va_list ap;
@@ -259,7 +261,7 @@ static void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_
 {
 	int type;
 
-	IBDEBUG("Transaction or database link?");
+	IBDEBUG("Resource #%ld transaction or database link?",Z_LVAL_PP(link_id));
 	if (zend_list_find(Z_LVAL_PP(link_id), &type)) {
 	 	if (type == le_trans) {
 			/* Transaction resource: make sure it refers to one link only, then 
@@ -1632,7 +1634,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
-		IBDEBUG("Query wants XSQLDA for output");
+		IBDEBUG("Query wants XSQLDA with %d field(s) for output",ib_query->out_sqlda->sqld);
 		IB_RESULT = emalloc(sizeof(ibase_result));
 		IB_RESULT->link = ib_query->link;
 		IB_RESULT->trans = ib_query->trans;
@@ -1654,7 +1656,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	}
 
 	if (ib_query->in_sqlda) { /* has placeholders */
-		IBDEBUG("Query wants XSQLDA for input");
+		IBDEBUG("Query wants XSQLDA with %d field(s) for input",ib_query->in_sqlda->sqld);
 		if (ib_query->in_sqlda->sqld != argc) {
 			_php_ibase_module_error("Placeholders (%d) and variables (%d) mismatch" TSRMLS_CC, ib_query->in_sqlda->sqld, argc);
 			goto _php_ibase_exec_error;
@@ -2418,7 +2420,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 #if HAVE_STRFTIME
 				j = strftime(string_data, sizeof(string_data), format, &t);
 #else
-				/* FIXME */
+				/* FIXME (will not work for time values) */
 				if (!t.tm_hour && !t.tm_min && !t.tm_sec) {
 					j = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year + 1900);
 				} else {
@@ -2876,7 +2878,7 @@ PHP_FUNCTION(ibase_execute)
 	
 	/* Have we used this cursor before and it's still open (exec proc has no cursor) ? */
 	if (ib_query->result_res_id != 0 && ib_query->statement_type != isc_info_sql_stmt_exec_procedure) {
-		IBDEBUG("Implicitly closing a cursor");
+		IBDEBUG("Implicitly closing a cursor for result resource #%d",ib_query->result_res_id);
 		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_close)) {
 			_php_ibase_error(TSRMLS_C);
 		}
