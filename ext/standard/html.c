@@ -118,7 +118,7 @@ static entity_table_t ent_uni_338_402[] = {
 	/* 376 (0x0178)
 	"Yuml", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, */
 	/* 400 (0x0190)*/
 	NULL, NULL, "fnof"
 };
