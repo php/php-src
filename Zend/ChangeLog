@@ -1,3 +1,7 @@
+2002-07-23  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_hash.c: - Fix WS.
+
 2002-07-21  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_compile.c:
