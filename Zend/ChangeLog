@@ -1,3 +1,8 @@
+2004-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_execute_API.c:
+      No point allocating 0 bytes
+
 2004-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_parser.y
