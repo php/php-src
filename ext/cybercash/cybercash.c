@@ -59,7 +59,7 @@ PHP_FUNCTION(cybercash_encr)
 	unsigned int outAlloc, outLth;
 	long errcode;
   
-	if(ARG_COUNT(ht) != 3 || getParametersEx(3,&wmk,&sk,&inbuff) == FAILURE) {
+	if(ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3,&wmk,&sk,&inbuff) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -105,7 +105,7 @@ PHP_FUNCTION(cybercash_decr)
   long errcode;
   
 
-  if(ARG_COUNT(ht) != 3 || getParametersEx(3,&wmk,&sk,&inbuff) == FAILURE)
+  if(ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3,&wmk,&sk,&inbuff) == FAILURE)
   {
     WRONG_PARAM_COUNT;
   }
@@ -151,7 +151,7 @@ PHP_FUNCTION(cybercash_base64_encode)
   long ret_length;
 
   if(ARG_COUNT(ht) != 1 ||
-     getParametersEx(1,&inbuff) == FAILURE)
+     zend_get_parameters_ex(1,&inbuff) == FAILURE)
   {
     WRONG_PARAM_COUNT;
   }
@@ -177,7 +177,7 @@ PHP_FUNCTION(cybercash_base64_decode)
   long ret_length;
 
   if(ARG_COUNT(ht) != 1 ||
-     getParametersEx(1,&inbuff) == FAILURE)
+     zend_get_parameters_ex(1,&inbuff) == FAILURE)
   {
     WRONG_PARAM_COUNT;
   }

@@ -687,7 +687,7 @@ PHP_FUNCTION(wddx_serialize_value)
 	char *buf;
 	
 	argc = ARG_COUNT(ht);
-	if(argc < 1 || argc > 2 || getParametersEx(argc, &var, &comment) == FAILURE) {
+	if(argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &var, &comment) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -726,7 +726,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	argc = ARG_COUNT(ht);
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -780,7 +780,7 @@ PHP_FUNCTION(wddx_packet_start)
 	comment = NULL;
 	argc = ARG_COUNT(ht);
 
-	if (argc > 1 || (argc == 1 && getParametersEx(1, &comment)==FAILURE)) {
+	if (argc > 1 || (argc == 1 && zend_get_parameters_ex(1, &comment)==FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -811,7 +811,7 @@ PHP_FUNCTION(wddx_packet_end)
 	char *buf;
 	wddx_packet *packet = NULL;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &packet_id)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &packet_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -846,7 +846,7 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -878,7 +878,7 @@ PHP_FUNCTION(wddx_deserialize)
 {
 	zval **packet;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &packet) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &packet) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -60,7 +60,7 @@ void dl(INTERNAL_FUNCTION_PARAMETERS)
 	PLS_FETCH();
 
 	/* obtain arguments */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

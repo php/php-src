@@ -385,7 +385,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	oraConnection *db_conn;
 	ORALS_FETCH();
 
-	if (getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
   
@@ -553,7 +553,7 @@ PHP_FUNCTION(ora_logoff)
 	oraConnection *conn;
 	pval **arg;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -571,7 +571,7 @@ PHP_FUNCTION(ora_open)
 	oraConnection *conn = NULL;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -602,7 +602,7 @@ PHP_FUNCTION(ora_close)
 	pval **arg;
 	oraCursor *cursor;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(cursor, oraCursor *, arg, -1, "Oracle-Cursor", le_cursor);
@@ -620,7 +620,7 @@ PHP_FUNCTION(ora_commitoff)
 	pval **arg;
 	oraConnection *conn;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -641,7 +641,7 @@ PHP_FUNCTION(ora_commiton)
 	pval **arg;
 	oraConnection *conn;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -662,7 +662,7 @@ PHP_FUNCTION(ora_commit)
 	pval **arg;
 	oraConnection *conn;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -683,7 +683,7 @@ PHP_FUNCTION(ora_rollback)
 	pval **arg;
 	oraConnection *conn;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -708,14 +708,14 @@ PHP_FUNCTION(ora_parse)
 
 	switch (ARG_COUNT(ht)) {
 	case 3:
-		getParametersEx(3,&curs,&sql,&def);
+		zend_get_parameters_ex(3,&curs,&sql,&def);
 		convert_to_long_ex(def);
 		if ((*def)->value.lval) {
 			defer = DEFER_PARSE;
 		}
 		break;
 	case 2:
-		getParametersEx(2,&curs,&sql);
+		zend_get_parameters_ex(2,&curs,&sql);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -768,12 +768,12 @@ PHP_FUNCTION(ora_bind)
 
 	switch (ARG_COUNT(ht)) {
 	case 5:
-		getParametersEx(5,&curs,&pvar,&svar,&plen,&ptyp);
+		zend_get_parameters_ex(5,&curs,&pvar,&svar,&plen,&ptyp);
 		convert_to_long_ex(ptyp);
 		inout = (*ptyp)->value.lval;
 		break;
 	case 4:
-		getParametersEx(4,&curs,&pvar,&svar,&plen);
+		zend_get_parameters_ex(4,&curs,&pvar,&svar,&plen);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -866,7 +866,7 @@ PHP_FUNCTION(ora_exec)
 	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if (getParametersEx(1, &arg) == FAILURE)
+	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -908,7 +908,7 @@ PHP_FUNCTION(ora_numcols)
 	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if (getParametersEx(1, &arg) == FAILURE)
+	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -926,7 +926,7 @@ PHP_FUNCTION(ora_numrows)
 	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if(getParametersEx(1, &arg) == FAILURE)
+	if(zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -947,7 +947,7 @@ PHP_FUNCTION(ora_do)
 	oraCursor *cursor = NULL;
 	text *query;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &con,&sql) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &con,&sql) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, con, -1, "Oracle-Connection", le_conn, le_pconn);
@@ -1023,7 +1023,7 @@ PHP_FUNCTION(ora_fetch)
 	pval **arg;
 	oraCursor *cursor;
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1060,11 +1060,11 @@ PHP_FUNCTION(ora_fetch_into)
 
 	switch(ARG_COUNT(ht)){
 	case 2:
-		getParametersEx(2, &curs, &arr);
+		zend_get_parameters_ex(2, &curs, &arr);
 		break;
 		
 	case 3:
-		getParametersEx(3, &curs, &arr, &flg);
+		zend_get_parameters_ex(3, &curs, &arr, &flg);
 		convert_to_long_ex(flg);
 		flags = (*flg)->value.lval;
 		break;
@@ -1200,7 +1200,7 @@ PHP_FUNCTION(ora_columnname)
 	pval **curs, **col;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1238,7 +1238,7 @@ PHP_FUNCTION(ora_columntype)
 	int colno;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1306,7 +1306,7 @@ PHP_FUNCTION(ora_columnsize)
 	pval **curs, **col;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* Find the cursor */
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(ora_getcolumn)
 	int len;
 	sb2 type;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1468,7 +1468,7 @@ PHP_FUNCTION(ora_error)
 	void *res;
 	int what;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
@@ -1494,7 +1494,7 @@ PHP_FUNCTION(ora_errorcode)
 	void *res;
 	int what;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);

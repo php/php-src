@@ -66,7 +66,7 @@ PHP_FUNCTION(bin2hex)
 	char *new;
 	size_t newlen;
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &data) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -88,7 +88,7 @@ PHP_FUNCTION(strspn)
 {
 	zval **s1,**s2;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(s1);
@@ -105,7 +105,7 @@ PHP_FUNCTION(strcspn)
 {
 	zval **s1,**s2;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(s1);
@@ -162,7 +162,7 @@ PHP_FUNCTION(chop)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -181,7 +181,7 @@ PHP_FUNCTION(trim)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -200,7 +200,7 @@ PHP_FUNCTION(ltrim)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -242,7 +242,7 @@ PHP_FUNCTION(explode)
 {
 	pval **str, **delim;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &delim, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &delim, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -311,7 +311,7 @@ PHP_FUNCTION(implode)
 {
 	pval **arg1, **arg2, *delim, *arr;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -346,8 +346,8 @@ PHP_FUNCTION(strtok)
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 1 && getParametersEx(1, &tok) == FAILURE) ||
-		(argc == 2 && getParametersEx(2, &str, &tok) == FAILURE) ||
+	if ((argc == 1 && zend_get_parameters_ex(1, &tok) == FAILURE) ||
+		(argc == 2 && zend_get_parameters_ex(2, &str, &tok) == FAILURE) ||
 		argc < 1 || argc > 2) {
 		WRONG_PARAM_COUNT;
 	}
@@ -412,7 +412,7 @@ PHP_FUNCTION(strtoupper)
 {
 	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg)) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -445,7 +445,7 @@ PHP_FUNCTION(strtolower)
 	pval **str;
 	char *ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str)) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -463,7 +463,7 @@ PHP_FUNCTION(basename)
 	pval **str;
 	char *ret, *c;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str)) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -515,7 +515,7 @@ PHP_FUNCTION(dirname)
 	pval **str;
 	char *ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str)) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -574,7 +574,7 @@ PHP_FUNCTION(stristr)
 	char *found = NULL;
 	char needle_char[2];
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) ==
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -612,7 +612,7 @@ PHP_FUNCTION(strstr)
 	char *found = NULL;
 	char needle_char[2];
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) ==
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -658,12 +658,12 @@ PHP_FUNCTION(strpos)
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &haystack, &needle) == FAILURE) {
+		if (zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (getParametersEx(3, &haystack, &needle, &OFFSET) == FAILURE) {
+		if (zend_get_parameters_ex(3, &haystack, &needle, &OFFSET) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(OFFSET);
@@ -720,7 +720,7 @@ PHP_FUNCTION(strrpos)
 	pval **haystack, **needle;
 	char *found = NULL;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(haystack);
@@ -747,7 +747,7 @@ PHP_FUNCTION(strrchr)
 	pval **haystack, **needle;
 	char *found = NULL;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) ==
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -821,7 +821,7 @@ PHP_FUNCTION(chunk_split)
 	argc = ARG_COUNT(ht);
 
 	if (argc < 1 || argc > 3 ||
-		getParametersEx(argc, &p_str, &p_chunklen, &p_ending) == FAILURE) {
+		zend_get_parameters_ex(argc, &p_str, &p_chunklen, &p_ending) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -863,8 +863,8 @@ PHP_FUNCTION(substr)
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 2 && getParametersEx(2, &string, &from) == FAILURE) ||
-		(argc == 3 && getParametersEx(3, &string, &from, &len) == FAILURE) ||
+	if ((argc == 2 && zend_get_parameters_ex(2, &string, &from) == FAILURE) ||
+		(argc == 3 && zend_get_parameters_ex(3, &string, &from, &len) == FAILURE) ||
 		argc < 2 || argc > 3) {
 		WRONG_PARAM_COUNT;
 	}
@@ -928,8 +928,8 @@ PHP_FUNCTION(substr_replace)
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 3 && getParametersEx(3, &string, &repl, &from) == FAILURE) ||
-		(argc == 4 && getParametersEx(4, &string, &repl, &from, &len) == FAILURE) ||
+	if ((argc == 3 && zend_get_parameters_ex(3, &string, &repl, &from) == FAILURE) ||
+		(argc == 4 && zend_get_parameters_ex(4, &string, &repl, &from, &len) == FAILURE) ||
 		argc < 3 || argc > 4) {
 		WRONG_PARAM_COUNT;
 	}
@@ -996,7 +996,7 @@ PHP_FUNCTION(quotemeta)
 	char *p, *q;
 	char c;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(ord)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(chr)
 	pval **num;
 	char temp[2];
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(num);
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(ucfirst)
 {
 	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -1093,7 +1093,7 @@ PHP_FUNCTION(ucwords)
 	char *r;
 	char *r_end;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1248,7 +1248,7 @@ PHP_FUNCTION(strtr)
 	pval **str, **from, **to;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 2 || ac > 3 || getParametersEx(ac, &str, &from, &to) == FAILURE) {
+	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &str, &from, &to) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(strrev)
 	int i,len;
 	char c;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &str)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &str)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1353,7 +1353,7 @@ PHP_FUNCTION(similar_text)
 	int sim;
 	
 	if (ac < 2 || ac > 3 ||
-		getParametersEx(ac, &t1, &t2, &percent) == FAILURE) {
+		zend_get_parameters_ex(ac, &t1, &t2, &percent) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1439,7 +1439,7 @@ PHP_FUNCTION(addcslashes)
 {
 	pval **str, **what;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &str, &what) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &str, &what) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1455,7 +1455,7 @@ PHP_FUNCTION(addslashes)
 {
 	pval **str;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1470,7 +1470,7 @@ PHP_FUNCTION(stripcslashes)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1487,7 +1487,7 @@ PHP_FUNCTION(stripslashes)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -1790,7 +1790,7 @@ PHP_FUNCTION(str_replace)
 	int len = 0;
 
 	if(ARG_COUNT(ht) != 3 ||
-			getParametersEx(3, &needle, &str, &haystack) == FAILURE) {
+			zend_get_parameters_ex(3, &needle, &str, &haystack) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1839,12 +1839,12 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &str)==FAILURE) {
+			if (zend_get_parameters_ex(1, &str)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (getParametersEx(2, &str, &max_chars_per_line)==FAILURE) {
+			if (zend_get_parameters_ex(2, &str, &max_chars_per_line)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(max_chars_per_line);
@@ -2013,7 +2013,7 @@ PHP_FUNCTION(nl2br)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &str)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &str)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2032,12 +2032,12 @@ PHP_FUNCTION(strip_tags)
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if(getParametersEx(1, &str)==FAILURE) {
+			if(zend_get_parameters_ex(1, &str)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if(getParametersEx(2, &str, &allow)==FAILURE) {
+			if(zend_get_parameters_ex(2, &str, &allow)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(allow);
@@ -2063,7 +2063,7 @@ PHP_FUNCTION(setlocale)
 	char *loc, *retval;
 	BLS_FETCH();
 
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &pcategory, &plocale)==FAILURE)
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &pcategory, &plocale)==FAILURE)
 		WRONG_PARAM_COUNT;
 #ifdef HAVE_SETLOCALE
 	convert_to_string_ex(pcategory);
@@ -2116,7 +2116,7 @@ PHP_FUNCTION(parse_str)
 	PLS_FETCH();
 	SLS_FETCH();
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -2318,7 +2318,7 @@ PHP_FUNCTION(str_repeat)
 	int			  result_len;		/* Length of the resulting string */
 	int			  i;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &input_str, &mult) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &input_str, &mult) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2365,7 +2365,7 @@ PHP_FUNCTION(count_chars)
 	char retstr[256];
 	int retlen=0;
 
-	if (ac < 1 || ac > 2 || getParametersEx(ac, &input, &mode) == FAILURE) {
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &input, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

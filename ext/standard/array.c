@@ -202,7 +202,7 @@ PHP_FUNCTION(krsort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -221,7 +221,7 @@ PHP_FUNCTION(ksort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -241,7 +241,7 @@ PHP_FUNCTION(count)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -310,7 +310,7 @@ PHP_FUNCTION(asort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -329,7 +329,7 @@ PHP_FUNCTION(arsort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -348,7 +348,7 @@ PHP_FUNCTION(sort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -367,7 +367,7 @@ PHP_FUNCTION(rsort)
 	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -414,7 +414,7 @@ PHP_FUNCTION(usort)
 	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
@@ -441,7 +441,7 @@ PHP_FUNCTION(uasort)
 	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
@@ -519,7 +519,7 @@ PHP_FUNCTION(uksort)
 	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
@@ -543,7 +543,7 @@ PHP_FUNCTION(end)
 	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -569,7 +569,7 @@ PHP_FUNCTION(prev)
 	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -595,7 +595,7 @@ PHP_FUNCTION(next)
 	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -621,7 +621,7 @@ PHP_FUNCTION(reset)
 	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -646,7 +646,7 @@ PHP_FUNCTION(current)
 	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -669,7 +669,7 @@ PHP_FUNCTION(key)
 	ulong num_key;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -706,7 +706,7 @@ PHP_FUNCTION(min)
 	if (argc == 1) {
 		pval **arr;
 
-		if (getParametersEx(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
+		if (zend_get_parameters_ex(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
 		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
@@ -721,7 +721,7 @@ PHP_FUNCTION(min)
 		pval **min, result;
 		int i;
 
-		if (getParametersArrayEx(ARG_COUNT(ht), args)==FAILURE) {
+		if (zend_get_parameters_array_ex(ARG_COUNT(ht), args)==FAILURE) {
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
@@ -756,7 +756,7 @@ PHP_FUNCTION(max)
 	if (argc == 1) {
 		pval **arr;
 
-		if (getParametersEx(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
+		if (zend_get_parameters_ex(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
 		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
@@ -771,7 +771,7 @@ PHP_FUNCTION(max)
 		pval **max, result;
 		int i;
 
-		if (getParametersArrayEx(ARG_COUNT(ht), args)==FAILURE) {
+		if (zend_get_parameters_array_ex(ARG_COUNT(ht), args)==FAILURE) {
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
@@ -849,7 +849,7 @@ PHP_FUNCTION(array_walk) {
 	argc = ARG_COUNT(ht);
 	old_walk_func_name = BG(array_walk_func_name);
 	if (argc < 2 || argc > 3 ||
-		getParametersEx(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
+		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
 		BG(array_walk_func_name) = old_walk_func_name;
 		WRONG_PARAM_COUNT;
 	}
@@ -877,7 +877,7 @@ PHP_FUNCTION(in_array)
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &value, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &value, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -947,14 +947,14 @@ PHP_FUNCTION(extract)
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &var_array) == FAILURE) {
+			if (zend_get_parameters_ex(1, &var_array) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			extype = EXTR_OVERWRITE;
 			break;
 
 		case 2:
-			if (getParametersEx(2, &var_array, &etype) == FAILURE) {
+			if (zend_get_parameters_ex(2, &var_array, &etype) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(etype);
@@ -965,7 +965,7 @@ PHP_FUNCTION(extract)
 			break;
 			
 		case 3:
-			if (getParametersEx(3, &var_array, &etype, &prefix) == FAILURE) {
+			if (zend_get_parameters_ex(3, &var_array, &etype, &prefix) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(etype);
@@ -1084,7 +1084,7 @@ PHP_FUNCTION(compact)
 	
 	args = (zval ***)emalloc(ARG_COUNT(ht) * sizeof(zval **));
 	
-	if (getParametersArrayEx(ARG_COUNT(ht), args) == FAILURE) {
+	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(range)
 	zval **zlow, **zhigh;
 	int low, high;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2,&zlow,&zhigh) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2,&zlow,&zhigh) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(zlow);
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(shuffle)
 {
 	zval **array;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	if ((*array)->type != IS_ARRAY) {
@@ -1272,7 +1272,7 @@ PHP_FUNCTION(array_push)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -1308,7 +1308,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	HashTable	*new_hash;		/* New stack */
 	
 	/* Get the arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &stack) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &stack) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1376,7 +1376,7 @@ PHP_FUNCTION(array_unshift)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -1426,7 +1426,7 @@ PHP_FUNCTION(array_splice)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}	
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(array_slice)
 
 	/* Get the arguments and do error-checking */	
 	argc = ARG_COUNT(ht);
-	if (argc < 2 || argc > 3 || getParametersEx(argc, &input, &offset, &length)) {
+	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &input, &offset, &length)) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1597,7 +1597,7 @@ PHP_FUNCTION(array_merge)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -1655,7 +1655,7 @@ PHP_FUNCTION(array_keys)
 	
 	/* Get arguments and do error-checking */
 	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
-		getParametersEx(ARG_COUNT(ht), &input, &search_value) == FAILURE) {
+		zend_get_parameters_ex(ARG_COUNT(ht), &input, &search_value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1711,7 +1711,7 @@ PHP_FUNCTION(array_values)
 			   **entry;		/* An entry in the input array */
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(ARG_COUNT(ht), &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(ARG_COUNT(ht), &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(array_count_values)
 	HashTable   *myht;
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(array_reverse)
 	ulong		 num_key;
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1859,7 +1859,7 @@ PHP_FUNCTION(array_pad)
 	int			  i;
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &input, &pad_size, &pad_value) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &input, &pad_size, &pad_value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1916,7 +1916,7 @@ PHP_FUNCTION(array_flip)
 	char *string_key;
 	ulong num_key;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2009,7 +2009,7 @@ PHP_FUNCTION(array_multisort)
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}

@@ -346,7 +346,7 @@ PHP_FUNCTION(flock)
     int type, fd, act;
 	void *what;
 	
-    if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+    if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 	
@@ -396,12 +396,12 @@ PHP_FUNCTION(get_meta_tags)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1,&filename) == FAILURE) {
+		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -526,12 +526,12 @@ PHP_FUNCTION(file)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1,&filename) == FAILURE) {
+		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
 				WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -588,7 +588,7 @@ PHP_FUNCTION(tempnam)
 	char *t;
 	char p[64];
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
@@ -637,12 +637,12 @@ PHP_FUNCTION(fopen)
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (getParametersEx(3,&arg1,&arg2,&arg3) == FAILURE) {
+		if (zend_get_parameters_ex(3,&arg1,&arg2,&arg3) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg3);
@@ -693,7 +693,7 @@ PHP_FUNCTION(fclose)
 	int type;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -716,7 +716,7 @@ PHP_FUNCTION(popen)
 	char *b, buf[1024];
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
@@ -769,7 +769,7 @@ PHP_FUNCTION(pclose)
 	void *what;
 	FIL_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -792,7 +792,7 @@ PHP_FUNCTION(feof)
 	int socketd=0;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
@@ -850,7 +850,7 @@ PHP_FUNCTION(set_socket_blocking)
 	int socketd = 0;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -915,7 +915,7 @@ PHP_FUNCTION(fgets)
 	void *what;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -958,7 +958,7 @@ PHP_FUNCTION(fgetc) {
 	int socketd=0;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -998,12 +998,12 @@ PHP_FUNCTION(fgetss)
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &fd, &bytes) == FAILURE) {
+		if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
 			RETURN_FALSE;
 		}
 		break;
 	case 3:
-		if (getParametersEx(3, &fd, &bytes, &allow) == FAILURE) {
+		if (zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string_ex(allow);
@@ -1055,14 +1055,14 @@ PHP_FUNCTION(fwrite)
 
 	switch (ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string_ex(arg2);
 		num_bytes = (*arg2)->value.str.len;
 		break;
 	case 3:
-		if (getParametersEx(3, &arg1, &arg2, &arg3)==FAILURE) {
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string_ex(arg2);
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(set_file_buffer)
       
 	switch (ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
 			RETURN_FALSE;
 		} 
 		break;
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(rewind)
 	pval **arg1;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(ftell)
 	pval **arg1;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(fseek)
 	pval **arg1, **arg2;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1204,7 +1204,7 @@ PHP_FUNCTION(mkdir)
 	int ret,mode;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
@@ -1231,7 +1231,7 @@ PHP_FUNCTION(rmdir)
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
@@ -1307,12 +1307,12 @@ PHP_FUNCTION(readfile)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1,&arg1) == FAILURE) {
+		if (zend_get_parameters_ex(1,&arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(umask)
 	if (arg_count == 0) {
 		umask(oldumask);
 	} else {
-		if (arg_count > 1 || getParametersEx(1, &arg1) == FAILURE) {
+		if (arg_count > 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg1);
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(fpassthru)
 	int socketd=0;
 	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(rename)
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &old_arg, &new_arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &old_arg, &new_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1453,7 +1453,7 @@ PHP_FUNCTION(copy)
 	int fd_s,fd_t,read_bytes;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &source, &target) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &source, &target) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(fread)
 	void *what;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1559,13 +1559,13 @@ PHP_FUNCTION(fgetcsv) {
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &fd, &bytes) == FAILURE) {
+		if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 		
 	case 3:
-		if (getParametersEx(3, &fd, &bytes, &p_delim) == FAILURE) {
+		if (zend_get_parameters_ex(3, &fd, &bytes, &p_delim) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(p_delim);
@@ -1686,7 +1686,7 @@ PHP_FUNCTION(fd_set)
                 return;
         }
         else if(ARG_COUNT(ht) == 1) {
-                if(getParametersEx(1, &arg) == FAILURE) {
+                if(zend_get_parameters_ex(1, &arg) == FAILURE) {
                         WRONG_PARAM_COUNT;
                 }
         what = zend_fetch_resource(arg,-1,"select",&type,3,le_fopen,le_socket,le_popen);
@@ -1703,7 +1703,7 @@ PHP_FUNCTION(fd_set)
         else {
                 pval ***args = (pval ***) emalloc(sizeof(pval **) * ARG_COUNT(ht));
                 int i;
-                if(getParametersArrayEx(ARG_COUNT(ht), args) == FAILURE) {
+                if(zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
                         efree(args);
                         WRONG_PARAM_COUNT;
                 }
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(select)
 	pval **timeout;
 	struct timeval tv;
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &timeout) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &timeout) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(fd_isset)
 	void *what;
 	int type, fd;
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &fdarg) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &fdarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -51,10 +51,10 @@ PHP_FUNCTION(metaphone)
 	char *result = 0;
 	int phones = 0;
 
-	if (getParametersEx(2, &pstr, &pphones) == SUCCESS) {
+	if (zend_get_parameters_ex(2, &pstr, &pphones) == SUCCESS) {
 		convert_to_long_ex(pphones);
 		phones = (*pphones)->value.lval;
-	} else if (getParametersEx(1, &pstr) == FAILURE) {
+	} else if (zend_get_parameters_ex(1, &pstr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

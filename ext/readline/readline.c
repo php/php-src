@@ -92,7 +92,7 @@ PHP_FUNCTION(readline)
 	pval **arg;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 0 || ac > 1 || getParametersEx(ac, &arg) == FAILURE) {
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -121,7 +121,7 @@ PHP_FUNCTION(readline_info)
 	char *oldstr;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 0 || ac > 2 || getParametersEx(ac, &what, &value) == FAILURE) {
+	if (ac < 0 || ac > 2 || zend_get_parameters_ex(ac, &what, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -206,7 +206,7 @@ PHP_FUNCTION(readline_add_history)
 	pval **arg;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 1 || ac > 1 || getParametersEx(ac, &arg) == FAILURE) {
+	if (ac < 1 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -265,7 +265,7 @@ PHP_FUNCTION(readline_read_history)
 	char *filename = NULL;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 0 || ac > 1 || getParametersEx(ac, &arg) == FAILURE) {
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -292,7 +292,7 @@ PHP_FUNCTION(readline_write_history)
 	char *filename = NULL;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 0 || ac > 1 || getParametersEx(ac, &arg) == FAILURE) {
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -391,7 +391,7 @@ PHP_FUNCTION(readline_completion_function)
 	pval **arg;
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 0 || ac > 1 || getParametersEx(ac, &arg) == FAILURE) {
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

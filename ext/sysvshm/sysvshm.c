@@ -90,7 +90,7 @@ PHP_FUNCTION(shm_attach)
 	shm_flag = 0666;
 	shm_size = php_sysvshm.init_mem;
 	
-	if(ac < 1 || ac > 3 || getParametersEx(ac, &arg_key, &arg_size, &arg_flag) == FAILURE) {
+	if(ac < 1 || ac > 3 || zend_get_parameters_ex(ac, &arg_key, &arg_size, &arg_flag) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -156,7 +156,7 @@ PHP_FUNCTION(shm_detach)
 	pval **arg_id;
 	long id;
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &arg_id) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -177,7 +177,7 @@ PHP_FUNCTION(shm_remove)
 	long id;
 	key_t key;
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &arg_key) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg_key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -211,7 +211,7 @@ PHP_FUNCTION(shm_put_var)
 	pval shm_var;
 	int ret;	
 
-	if(ARG_COUNT(ht) != 3 || getParametersEx(3, &arg_id, &arg_key,&arg_var) == FAILURE) {
+	if(ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg_id, &arg_key,&arg_var) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 			
@@ -261,7 +261,7 @@ PHP_FUNCTION(shm_get_var)
 	long shm_varpos;
 	sysvshm_chunk *shm_var;
 	
-	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &arg_id, &arg_key) == FAILURE) {
+	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg_id, &arg_key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -304,7 +304,7 @@ PHP_FUNCTION(shm_remove_var)
 	int type;
 	long shm_varpos;
 	
-	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &arg_id, &arg_key) == FAILURE) {
+	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg_id, &arg_key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -378,7 +378,7 @@ php_formatted_print(int ht, int *len)
 	}
 	args = (pval ***)emalloc(argc * sizeof(pval *));
 
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}

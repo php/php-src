@@ -193,7 +193,7 @@ PHP_FUNCTION(srand)
 {
 	pval **arg;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
@@ -216,7 +216,7 @@ PHP_FUNCTION(mt_srand)
 	pval **arg;
 	BLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
@@ -234,7 +234,7 @@ PHP_FUNCTION(rand)
 		case 0:
 			break;
 		case 2:
-			if (getParametersEx(2, &p_min, &p_max)==FAILURE) {
+			if (zend_get_parameters_ex(2, &p_min, &p_max)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(p_min);
@@ -300,7 +300,7 @@ PHP_FUNCTION(mt_rand)
 		case 0:
 			break;
 		case 2:
-			if (getParametersEx(2, &p_min, &p_max)==FAILURE) {
+			if (zend_get_parameters_ex(2, &p_min, &p_max)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(p_min);

@@ -392,7 +392,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			case 1: {
 					pval **yyhost;
 					
-					if (getParametersEx(1, &yyhost)==FAILURE) {
+					if (zend_get_parameters_ex(1, &yyhost)==FAILURE) {
 						RETURN_FALSE;
 					}
 					convert_to_string_ex(yyhost);
@@ -402,7 +402,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			case 2: {
 					pval **yyhost, **yyuser;
 					
-					if (getParametersEx(2, &yyhost, &yyuser)==FAILURE) {
+					if (zend_get_parameters_ex(2, &yyhost, &yyuser)==FAILURE) {
 						RETURN_FALSE;
 					}
 					convert_to_string_ex(yyhost);
@@ -414,7 +414,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			case 3: {
 					pval **yyhost,**yyuser,**yypasswd;
 				
-					if (getParametersEx(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
+					if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
 						RETURN_FALSE;
 					}
 					convert_to_string_ex(yyhost);
@@ -638,7 +638,7 @@ PHP_FUNCTION(mysql_close)
 			id = MySG(default_link);
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -667,14 +667,14 @@ PHP_FUNCTION(mysql_select_db)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &db)==FAILURE) {
+			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
-			if (getParametersEx(2, &db, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -709,14 +709,14 @@ PHP_FUNCTION(mysql_create_db)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &db)==FAILURE) {
+			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
-			if (getParametersEx(2, &db, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -749,14 +749,14 @@ PHP_FUNCTION(mysql_drop_db)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &db)==FAILURE) {
+			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
-			if (getParametersEx(2, &db, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -791,14 +791,14 @@ PHP_FUNCTION(mysql_query)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &query)==FAILURE) {
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
-			if (getParametersEx(2, &query, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(2, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -846,14 +846,14 @@ PHP_FUNCTION(mysql_db_query)
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if (getParametersEx(2, &db, &query)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 3:
-			if (getParametersEx(3, &db, &query, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(3, &db, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -910,7 +910,7 @@ PHP_FUNCTION(mysql_list_dbs)
 			CHECK_LINK(id);
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -943,14 +943,14 @@ PHP_FUNCTION(mysql_list_tables)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &db)==FAILURE) {
+			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
-			if (getParametersEx(2, &db, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -987,14 +987,14 @@ PHP_FUNCTION(mysql_list_fields)
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if (getParametersEx(2, &db, &table)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &table)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 3:
-			if (getParametersEx(3, &db, &table, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(3, &db, &table, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -1037,7 +1037,7 @@ PHP_FUNCTION(mysql_error)
 			}
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -1072,7 +1072,7 @@ PHP_FUNCTION(mysql_errno)
 			}
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(mysql_affected_rows)
 			CHECK_LINK(id);
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(mysql_insert_id)
 			CHECK_LINK(id);
 			break;
 		case 1:
-			if (getParametersEx(1, &mysql_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -1171,12 +1171,12 @@ PHP_FUNCTION(mysql_result)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-			if (getParametersEx(2, &result, &row)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &row)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 3:
-			if (getParametersEx(3, &result, &row, &field)==FAILURE) {
+			if (zend_get_parameters_ex(3, &result, &row, &field)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
@@ -1272,7 +1272,7 @@ PHP_FUNCTION(mysql_num_rows)
 	pval **result;
 	MYSQL_RES *mysql_result;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1291,7 +1291,7 @@ PHP_FUNCTION(mysql_num_fields)
 	pval **result;
 	MYSQL_RES *mysql_result;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1316,7 +1316,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &result)==FAILURE) {
+			if (zend_get_parameters_ex(1, &result)==FAILURE) {
 				RETURN_FALSE;
 			}
 			if (!result_type) {
@@ -1324,7 +1324,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			break;
 		case 2:
-			if (getParametersEx(2, &result, &arg2)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg2);
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(mysql_data_seek)
 	pval **result, **offset;
 	MYSQL_RES *mysql_result;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &result, &offset)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(mysql_fetch_lengths)
 	int i;
 
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1527,12 +1527,12 @@ PHP_FUNCTION(mysql_fetch_field)
 	
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &result)==FAILURE) {
+			if (zend_get_parameters_ex(1, &result)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (getParametersEx(2, &result, &field)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &field)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(field);
@@ -1581,7 +1581,7 @@ PHP_FUNCTION(mysql_field_seek)
 	pval **result, **offset;
 	MYSQL_RES *mysql_result;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &result, &offset)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1613,7 +1613,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	char buf[512];
 	int  len;
 
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &result, &field)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1777,7 +1777,7 @@ PHP_FUNCTION(mysql_free_result)
 	pval **result;
 	MYSQL_RES *mysql_result;
 
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

@@ -39,7 +39,7 @@ PHP_FUNCTION(abs)
 {
 	zval **value;
 	
-	if (ARG_COUNT(ht)!=1||getParametersEx(1,&value)==FAILURE) {
+	if (ARG_COUNT(ht)!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -62,7 +62,7 @@ PHP_FUNCTION(ceil)
 {
 	zval **value;
 	
-	if (ARG_COUNT(ht)!=1||getParametersEx(1,&value)==FAILURE) {
+	if (ARG_COUNT(ht)!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -84,7 +84,7 @@ PHP_FUNCTION(ceil)
 PHP_FUNCTION(floor) {
 	zval **value;
 	
-	if (ARG_COUNT(ht)!=1||getParametersEx(1,&value)==FAILURE) {
+	if (ARG_COUNT(ht)!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -121,7 +121,7 @@ PHP_FUNCTION(round)
 {
 	zval **value;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &value) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -143,7 +143,7 @@ PHP_FUNCTION(sin)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -159,7 +159,7 @@ PHP_FUNCTION(cos)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -173,7 +173,7 @@ PHP_FUNCTION(tan)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -189,7 +189,7 @@ PHP_FUNCTION(asin)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -205,7 +205,7 @@ PHP_FUNCTION(acos)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -221,7 +221,7 @@ PHP_FUNCTION(atan)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -237,7 +237,7 @@ PHP_FUNCTION(atan2)
 {
 	zval **num1, **num2;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &num1, &num2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &num1, &num2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num1);
@@ -264,7 +264,7 @@ PHP_FUNCTION(pow)
 {
 	zval **num1, **num2;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2,&num1,&num2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2,&num1,&num2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num1);
@@ -280,7 +280,7 @@ PHP_FUNCTION(exp)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -296,7 +296,7 @@ PHP_FUNCTION(log)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -312,7 +312,7 @@ PHP_FUNCTION(log10)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -328,7 +328,7 @@ PHP_FUNCTION(sqrt)
 {
 	zval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
@@ -344,7 +344,7 @@ PHP_FUNCTION(deg2rad)
 {
 	zval **deg;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &deg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &deg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(deg);
@@ -359,7 +359,7 @@ PHP_FUNCTION(rad2deg)
 {
 	zval **rad;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &rad) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &rad) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(rad);
@@ -452,7 +452,7 @@ PHP_FUNCTION(bindec)
 	zval **arg;
 	long ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -471,7 +471,7 @@ PHP_FUNCTION(hexdec)
 	zval **arg;
 	long ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -490,7 +490,7 @@ PHP_FUNCTION(octdec)
 	zval **arg;
 	long ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -509,7 +509,7 @@ PHP_FUNCTION(decbin)
 	zval **arg;
 	char *result;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -530,7 +530,7 @@ PHP_FUNCTION(decoct)
 	zval **arg;
 	char *result;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -551,7 +551,7 @@ PHP_FUNCTION(dechex)
 	zval **arg;
 	char *result;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -573,7 +573,7 @@ PHP_FUNCTION(base_convert)
 	zval **number, **frombase, **tobase, temp;
 	char *result;
 
-	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &number, &frombase, &tobase) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &number, &frombase, &tobase) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(number);
@@ -667,14 +667,14 @@ PHP_FUNCTION(number_format)
 	
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1, &num)==FAILURE) {
+		if (zend_get_parameters_ex(1, &num)==FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_double_ex(num);
 		RETURN_STRING(_php_math_number_format((*num)->value.dval,0,dec_point,thousand_sep),0);
 		break;
 	case 2:
-		if (getParametersEx(2, &num, &dec)==FAILURE) {
+		if (zend_get_parameters_ex(2, &num, &dec)==FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_double_ex(num);
@@ -682,7 +682,7 @@ PHP_FUNCTION(number_format)
 		RETURN_STRING(_php_math_number_format((*num)->value.dval,(*dec)->value.lval,dec_point,thousand_sep),0);
 		break;
 	case 4:
-		if (getParametersEx(4, &num, &dec, &d_p, &t_s)==FAILURE) {
+		if (zend_get_parameters_ex(4, &num, &dec, &d_p, &t_s)==FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_double_ex(num);

@@ -193,7 +193,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &regex, &findin) == FAILURE) {
+		if (zend_get_parameters_ex(2, &regex, &findin) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		/* don't bother doing substring matching if we're not going
@@ -201,7 +201,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		copts |= REG_NOSUB;
 		break;
 	case 3:
-		if (getParametersEx(3, &regex, &findin, &array) == FAILURE) {
+		if (zend_get_parameters_ex(3, &regex, &findin, &array) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 3)) {
@@ -445,7 +445,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *replace;
 	char *ret;
 	
-	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -522,12 +522,12 @@ PHP_FUNCTION(split)
 	
 	switch (ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2, &spliton, &str) == FAILURE)
+		if (zend_get_parameters_ex(2, &spliton, &str) == FAILURE)
 			WRONG_PARAM_COUNT;
 		count = -1;
 		break;
 	case 3:
-		if (getParametersEx(3, &spliton, &str, &arg_count) == FAILURE)
+		if (zend_get_parameters_ex(3, &spliton, &str, &arg_count) == FAILURE)
 			WRONG_PARAM_COUNT;
 		convert_to_long_ex(arg_count);
 		count = (*arg_count)->value.lval;
@@ -616,7 +616,7 @@ PHPAPI PHP_FUNCTION(sql_regcase)
 	unsigned char c;
 	register int i, j;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &string)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &string)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

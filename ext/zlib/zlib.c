@@ -287,12 +287,12 @@ PHP_FUNCTION(gzfile) {
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1,&filename) == FAILURE) {
+		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -341,12 +341,12 @@ PHP_FUNCTION(gzopen) {
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (getParametersEx(3,&arg1,&arg2,&arg3) == FAILURE) {
+		if (zend_get_parameters_ex(3,&arg1,&arg2,&arg3) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg3);
@@ -382,7 +382,7 @@ PHP_FUNCTION(gzclose) {
 	pval **arg1;
 	gzFile *zp;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
@@ -397,7 +397,7 @@ PHP_FUNCTION(gzeof) {
 	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
@@ -419,7 +419,7 @@ PHP_FUNCTION(gzgets) {
 	char *buf;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
@@ -454,7 +454,7 @@ PHP_FUNCTION(gzgetc) {
 	int c;
 	char *buf;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -488,12 +488,12 @@ PHP_FUNCTION(gzgetss)
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if(getParametersEx(2, &fd, &bytes) == FAILURE) {
+			if(zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 3:
-			if(getParametersEx(3, &fd, &bytes, &allow) == FAILURE) {
+			if(zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(allow);
@@ -536,14 +536,14 @@ PHP_FUNCTION(gzwrite) {
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-			if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);
 			num_bytes = (*arg2)->value.str.len;
 			break;
 		case 3:
-			if (getParametersEx(3, &arg1, &arg2, &arg3)==FAILURE) {
+			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);
@@ -577,7 +577,7 @@ PHP_FUNCTION(gzrewind) {
 	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -595,7 +595,7 @@ PHP_FUNCTION(gztell) {
 	long pos;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -613,7 +613,7 @@ PHP_FUNCTION(gzseek) {
 	int ret;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
@@ -641,12 +641,12 @@ PHP_FUNCTION(readgzfile) {
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1,&arg1) == FAILURE) {
+		if (zend_get_parameters_ex(1,&arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -687,7 +687,7 @@ PHP_FUNCTION(gzpassthru) {
 	char buf[8192];
 	int size, b;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -713,7 +713,7 @@ PHP_FUNCTION(gzread)
 	int len;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);

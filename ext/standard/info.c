@@ -452,7 +452,7 @@ PHP_FUNCTION(phpinfo)
 			flag = 0xFFFFFFFF;
 			break;
 		case 1:
-			if (getParametersEx(1, &flag_arg)==FAILURE) {
+			if (zend_get_parameters_ex(1, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(flag_arg);
@@ -491,7 +491,7 @@ PHP_FUNCTION(phpcredits)
 			flag = 0xFFFFFFFF;
 			break;
 		case 1:
-			if (getParametersEx(1, &flag_arg)==FAILURE) {
+			if (zend_get_parameters_ex(1, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(flag_arg);

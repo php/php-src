@@ -62,7 +62,7 @@ PHP_FUNCTION(mail)
 	int argc;
 	
 	argc = ARG_COUNT(ht);
-	if (argc < 3 || argc > 4 || getParametersArrayEx(argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 4 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* To: */

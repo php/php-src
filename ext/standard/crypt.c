@@ -129,12 +129,12 @@ PHP_FUNCTION(crypt)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &arg1)==FAILURE) {
+			if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);

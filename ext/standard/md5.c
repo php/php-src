@@ -36,7 +36,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	int i;
 	char *r;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
