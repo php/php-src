@@ -41,7 +41,7 @@ install-sapi: libphp4.la
 	fi
 	$(INSTALL_IT)
 
-install-modules:
+install-modules: build-modules
 	@test -d modules && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR) && \
 	echo "installing shared modules into $(EXTENSION_DIR)" && \
