@@ -330,153 +330,147 @@ fontTest (void *element, void *key)
   return (strcmp (a->fontlist, b->fontlist) == 0);
 }
 
-static void *
-fontFetch (char **error, void *key)
+static void *fontFetch (char **error, void *key)
 {
-  font_t *a;
-  fontkey_t *b = (fontkey_t *) key;
-  int n;
-  int font_found = 0;
-  unsigned short platform, encoding;
-  char *fontsearchpath, *fontlist;
-  char *fullname = NULL;
-  char *name, *path, *dir;
-  char *strtok_ptr;
-  FT_Error err;
-  FT_CharMap found = 0;
-  FT_CharMap charmap;
+	font_t *a;
+	fontkey_t *b = (fontkey_t *) key;
+	int n;
+	int font_found = 0;
+	unsigned short platform, encoding;
+	char *fontsearchpath, *fontlist;
+	char *fullname = NULL;
+	char *name, *path=NULL, *dir;
+	char *strtok_ptr;
+	FT_Error err;
+	FT_CharMap found = 0;
+	FT_CharMap charmap;
 
-  a = (font_t *) gdMalloc (sizeof (font_t));
-  a->fontlist = gdEstrdup (b->fontlist);
-  a->library = b->library;
+	a = (font_t *) gdPMalloc(sizeof(font_t));
+	a->fontlist = gdPEstrdup(b->fontlist);
+	a->library = b->library;
 
-  /*
-   * Search the pathlist for any of a list of font names.
-   */
-  fontsearchpath = getenv ("GDFONTPATH");
-  if (!fontsearchpath)
-    fontsearchpath = DEFAULT_FONTPATH;
-  fontlist = gdEstrdup (a->fontlist);
+	/*
+	 * Search the pathlist for any of a list of font names.
+	 */
+	fontsearchpath = getenv ("GDFONTPATH");
+	if (!fontsearchpath) {
+		fontsearchpath = DEFAULT_FONTPATH;
+	}	
+	fontlist = gdEstrdup(a->fontlist);
 
-  /*
-   * Must use gd_strtok_r else pointer corrupted by strtok in nested loop.
-   */
-  for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name;
-       name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr))
-    {
-
-      /* make a fresh copy each time - strtok corrupts it. */
-      path = gdEstrdup (fontsearchpath);
-      /*
-       * Allocate an oversized buffer that is guaranteed to be
-       * big enough for all paths to be tested.
-       */
-      fullname = gdRealloc (fullname,
-			    strlen (fontsearchpath) + strlen (name) + 6);
-      /* if name is an absolute filename then test directly */
-      if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\')))
-	{
-	  sprintf (fullname, "%s", name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	      break;
-	    }
+	/*
+	 * Must use gd_strtok_r else pointer corrupted by strtok in nested loop.
+	 */
+	for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name; name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr)) {
+		/* make a fresh copy each time - strtok corrupts it. */
+		path = gdEstrdup (fontsearchpath);
+	
+		/*
+		* Allocate an oversized buffer that is guaranteed to be
+		* big enough for all paths to be tested.
+		*/
+		fullname = gdRealloc (fullname, strlen (fontsearchpath) + strlen (name) + 6);
+	
+		/* if name is an absolute filename then test directly */ 
+		if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\'))) {
+			sprintf(fullname, "%s", name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+		}
+		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
+			sprintf(fullname, "%s/%s.ttf", dir, name);
+			if (access (fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			sprintf(fullname, "%s/%s.pfa", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			sprintf (fullname, "%s/%s.pfb", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+		}
+		gdFree(path);
+		if (font_found) {
+			break;
+		}	
 	}
-      for (dir = strtok (path, PATHSEPARATOR); dir;
-	   dir = strtok (0, PATHSEPARATOR))
-	{
-	  sprintf (fullname, "%s/%s.ttf", dir, name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	      break;
-	    }
-          sprintf (fullname, "%s/%s.pfa", dir, name);
-          if (access (fullname, R_OK) == 0)
-            {
-	      font_found++;
-	      break;
+  
+	if (path) {
+		gdFree(path);
 	}
-	  sprintf (fullname, "%s/%s.pfb", dir, name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	break;
-    }
+  
+	gdFree(fontlist);
+  
+	if (!font_found) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		*error = "Could not find/open font";
+		return NULL;
 	}
-  gdFree (path);
-      if (font_found)
-	break;
-  }
-  gdFree (fontlist);
-  if (!font_found)
-    {
-      *error = "Could not find/open font";
-      return NULL;
-    }
 
-  err = FT_New_Face (*b->library, fullname, 0, &a->face);
-  if (err)
-    {
-      *error = "Could not read font";
-      return NULL;
-    }
-  gdFree (fullname);
+	err = FT_New_Face (*b->library, fullname, 0, &a->face);
+	if (err) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		*error = "Could not read font";
+		return NULL;
+	}
+	gdFree(fullname);
 
-/* FIXME - This mapping stuff is imcomplete - where is the spec? */
+	/* FIXME - This mapping stuff is imcomplete - where is the spec? */
 
-  a->have_char_map_unicode = 0;
-  a->have_char_map_big5 = 0;
-  a->have_char_map_sjis = 0;
-  a->have_char_map_apple_roman = 0;
-  for (n = 0; n < a->face->num_charmaps; n++)
-    {
-      charmap = a->face->charmaps[n];
-      platform = charmap->platform_id;
-      encoding = charmap->encoding_id;
-      if ((platform == 3 && encoding == 1)	/* Windows Unicode */
-	  || (platform == 3 && encoding == 0)	/* Windows Symbol */
-	  || (platform == 2 && encoding == 1)	/* ISO Unicode */
-	  || (platform == 0))
-	{			/* Apple Unicode */
-	  a->have_char_map_unicode = 1;
-	  found = charmap;
+	a->have_char_map_unicode = 0;
+	a->have_char_map_big5 = 0;
+	a->have_char_map_sjis = 0;
+	a->have_char_map_apple_roman = 0;
+	for (n = 0; n < a->face->num_charmaps; n++) {
+		charmap = a->face->charmaps[n];
+		platform = charmap->platform_id;
+		encoding = charmap->encoding_id;
+		if ((platform == 3 && encoding == 1)		/* Windows Unicode */
+			|| (platform == 3 && encoding == 0)	/* Windows Symbol */
+			|| (platform == 2 && encoding == 1)	/* ISO Unicode */
+			|| (platform == 0))
+		{						/* Apple Unicode */
+			a->have_char_map_unicode = 1;
+			found = charmap;
+		} else if (platform == 3 && encoding == 4) {	/* Windows Big5 */
+			a->have_char_map_big5 = 1;
+			found = charmap;
+		} else if (platform == 3 && encoding == 2) {	/* Windows Sjis */
+			a->have_char_map_sjis = 1;
+			found = charmap;
+		} else if ((platform == 1 && encoding == 0)	/* Apple Roman */
+			|| (platform == 2 && encoding == 0))
+		{						/* ISO ASCII */
+			a->have_char_map_apple_roman = 1;
+			found = charmap;
+		}
 	}
-      else if (platform == 3 && encoding == 4)
-	{			/* Windows Big5 */
-	  a->have_char_map_big5 = 1;
-	  found = charmap;
+	if (!found) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		*error = "Unable to find a CharMap that I can handle";
+		return NULL;
 	}
-      else if (platform == 3 && encoding == 2)
-	{			/* Windows Sjis */
-	  a->have_char_map_sjis = 1;
-	  found = charmap;
-	}
-      else if ((platform == 1 && encoding == 0)		/* Apple Roman */
-	       || (platform == 2 && encoding == 0))
-	{			/* ISO ASCII */
-	  a->have_char_map_apple_roman = 1;
-	  found = charmap;
-	}
-    }
-  if (!found)
-    {
-      *error = "Unable to find a CharMap that I can handle";
-      return NULL;
-    }
 
-  return (void *) a;
+	return (void *) a;
 }
 
-static void
-fontRelease (void *element)
+static void fontRelease (void *element)
 {
-  font_t *a = (font_t *) element;
+	font_t *a = (font_t *) element;
 
-  FT_Done_Face (a->face);
-  gdFree (a->fontlist);
-  gdFree ((char *) element);
+	FT_Done_Face (a->face);
+	gdPFree(a->fontlist);
+	gdPFree((char *) element);
 }
 
 /********************************************************************/
