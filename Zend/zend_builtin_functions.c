@@ -463,9 +463,9 @@ ZEND_FUNCTION(define)
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
-	  RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
-	  RETURN_FALSE;
+		RETURN_FALSE;
 	}
 }
 /* }}} */
