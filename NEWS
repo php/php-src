@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Virtualize realpath, chmod, chown and utime (Stas)
+- Support content-encoding headers in file upload MIME parts
+  (Ragnar Kjørstad)
 - Fixed warning when shutting down OCINLogon() connections. (Thies)
 - Fixed \n in session variables bug on Win32 (Stas)
 - OCIError() would sometimes not report failed connections. (Thies)
