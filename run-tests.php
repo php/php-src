@@ -407,7 +407,7 @@ function run_test($file) {
     }
     fclose($ofp);
     pclose($cp);
-    $desc = isset($test)?trim($TEST):"";
+    $desc = isset($TEST)?trim($TEST):"";
     $outfile = preg_replace('/\.phpt$/', '.out', $file);
     $expectfile = preg_replace('/\.phpt$/', '.exp', $file);
     $phpfile = preg_replace('/\.phpt$/', '.php', $file);
