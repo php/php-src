@@ -128,6 +128,10 @@ SOURCE=.\php_mbregex.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_unicode.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\html_entities.c
 # End Source File
 # End Group
@@ -169,6 +173,14 @@ SOURCE=.\mbregex.h
 # Begin Source File
 
 SOURCE=.\mbstring.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_unicode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_data.h
 # End Source File
 # Begin Source File
 
