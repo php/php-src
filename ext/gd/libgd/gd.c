@@ -1769,6 +1769,11 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		return;
 	}
 
+	if (im->alphaBlendingFlag) {
+		restoreAlphaBleding = 1;
+		im->alphaBlendingFlag = 0;
+	}
+
 	if (x >= im->sx) {
 		x = im->sx - 1;
 	}
@@ -1784,6 +1789,9 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		leftLimit = i;
 	}
 	if (leftLimit == -1) {
+		if (restoreAlphaBleding) {
+			im->alphaBlendingFlag = 1;
+		}
 		return;
 	}
 	/* Seek right */
@@ -1826,6 +1834,9 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 				lastBorder = 1;
 			}
 		}
+	}
+	if (restoreAlphaBleding) {
+		im->alphaBlendingFlag = 1;
 	}
 }
 
