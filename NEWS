@@ -12,6 +12,10 @@ PHP 4                                                                      NEWS
   . Added support for virtual()
   . Added "nsapi.read_timeout" php.ini option. 
   . Synced $_SERVER variables to be similar to Apache variables
+- Improved the IMAP extension (Ilia)
+  . Added imap_timeout() function. (bug #24161)
+  . Added optional 'charset' parameter to imap_search() and imap_sort().
+    (bug #22505)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
@@ -24,7 +28,6 @@ PHP 4                                                                      NEWS
   (Adam Dickmeiss)
 - Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
-- Fixed bug #24161 (No timeout value for imap functions). (Ilia)
 - Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
   (tom@gksystems.com, Ilia)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
@@ -46,8 +49,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #23733 (Coredump on startup with Oracle 9+). (Edin)
 - Fixed bug #23285 (Potential Stack overflow in zendlex). (Wez)
 - Fixed bug #23038, #23574 (aggregate() related leaks and crashes). (Andrei)
-- Fixed bug #22505 (Allow imap_sort() and imap_search() to specify a charset).
-  (Ilia)
 
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
