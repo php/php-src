@@ -167,6 +167,7 @@ PHP_FUNCTION(domxml_pi_data);
 PHP_FUNCTION(domxml_parser);
 PHP_FUNCTION(domxml_parser_add_chunk);
 PHP_FUNCTION(domxml_parser_end);
+PHP_FUNCTION(domxml_parser_set_keep_blanks);
 
 /* Class XPathContext methods */
 #if defined(LIBXML_XPATH_ENABLED)
