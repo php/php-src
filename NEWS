@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Added 'r' flag to date() which generates an RFC822 formatted date, e.g.
+  "Thu,  9 Nov 2000 16:33:01 -0500" (Colin)
 - In CGI mode, $HTTP_SERVER_VARS now includes all of the environment variables
   as well (Zeev)
 - Allow user to use mysql_use_result in mysql queries (Stas)
