@@ -2133,8 +2133,6 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 {
 	char *s, *t;
 	int l;
-	char escape_char='\\';
-
 
 	if (len != NULL) {
 		l = *len;
@@ -2153,8 +2151,16 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 						(*len)--;
 					l--;
 				}
-			} 
-			*s++ = *t++;
+				*s++ = *t++;
+			} else if (*t=='\\' && l>0 && t[1]=='0') {
+					*s++='\0';
+					t += 2;
+					if (len != NULL) 
+						(*len)--;
+					l--;
+			} else {
+				*s++ = *t++;
+			}
 			l--;
 		}
 		*s = '\0';
@@ -2163,7 +2169,7 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	}
 
 	while (l > 0) {
-		if (*t == escape_char) {
+		if (*t == '\\') {
 			t++;				/* skip the slash */
 			if (len != NULL)
 				(*len)--;
