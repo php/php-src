@@ -5,7 +5,7 @@ PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
 [  --with-pdo-sqlite             Include PDO sqlite 3 support])
 
 if test "$PHP_PDO_SQLITE" != "no"; then
-  SEARCH_PATH="/usr/local /usr"     # you might want to change this
+  SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr"     # you might want to change this
   SEARCH_FOR="/include/sqlite3.h"  # you most likely want to change this
   if test -r $PHP_PDO_SQLITE/$SEARCH_FOR; then # path given as parameter
     PDO_SQLITE_DIR=$PHP_PDO_SQLITE
@@ -35,7 +35,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   ],[
     AC_MSG_ERROR([wrong sqlite lib version or lib not found])
   ],[
-    -L$PDO_SQLITE_DIR/lib -lm -ldl
+    -L$PDO_SQLITE_DIR/lib -lm
   ])
   PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
 
