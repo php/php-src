@@ -1,3 +1,70 @@
+2001-07-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php
+      pear/DB/tests/mysql/005.phpt
+      pear/DB/tests/oci8/005.phpt
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/sequences.inc:
+    (PEAR DB) handle error handlers properly in nextId()
+
+2001-07-21  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+    - The __FILE__ fix and a couple of other NEWS entries which I forgot to
+      commit.
+
+2001-07-21  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/sapi_apache.c: Fix Apache build
+
+2001-07-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/head.c: Left-over outdated comment
+
+2001-07-21  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen_wrappers.c: - Shouldn't be needed anymore
+
+    * sapi/servlet/servlet.c
+      main/fopen_wrappers.h
+      sapi/cgi/cgi_main.c
+      main/fopen_wrappers.c:
+    - Fix __FILE__ in the main script in CGI/command line mode.
+
+2001-07-21  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/isapi/php4isapi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/servlet/servlet.c
+      sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      ext/standard/basic_functions.c
+      main/main.c:
+    Improved bailout mechanism, supports nested bailouts a-la try..catch
+
+    Note:  You may *not* return directly from a catch block
+
+    * ext/standard/head.c: Remove redundant code
+
+2001-07-21  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/pi3web_sapi.c: Updated
+
+2001-07-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_string.h:
+    Drop memchr() in php_memnstr in favor of manual scanning.  This reduces
+    the complexity of the function and is about 20% faster on Linux/x86.
+
+2001-07-21  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/head.c: Clarify and optimize
+
+2001-07-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/head.c: Fix more crashes related to this switch to z_value
+
 2001-07-20  Holger Zimmermann  <zimpel@t-online.de>
 
     * sapi/pi3web/pi3web_sapi.c: Updated
