@@ -4,6 +4,7 @@ PHP 4.0                                                                    NEWS
 25 Jun 2000, Version 4.0.1
 - Added the ImageColorClosestHWB, ImageCopyMerge and ImagePaletteCopy 
   functions. (Sterling)
+- Added function ImageCreateFromWBMP. (Jouni)
 - Fixed problems with POST requests under the NSAPI module (Roberto Biancardi)
 - Added spliti() function. (Thies)
 - Fixed serializer behaviour with regards to serializing objects which class
