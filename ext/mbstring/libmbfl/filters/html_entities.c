@@ -167,6 +167,7 @@ const mbfl_html_entity_entry mbfl_html_entity_list[] = {
   {"Chi",       935},
   {"Psi",       936},
   {"Omega",     937},
+  {"alpha",     945},
   {"beta",      946},
   {"gamma",     947},
   {"delta",     948},

@@ -8,6 +8,11 @@ PHP                                                                        NEWS
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled oniguruma library (used for multibyte regular expression)
   to 3.7.0. (Moriyoshi)
+- Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
+  Fixed bugs:
+  . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
+  . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
+  . bug #30573 (compiler warnings in libmbfl due to invalid type cast)
 - Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
   api function returns -1 (Georg)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
@@ -25,8 +30,6 @@ PHP                                                                        NEWS
 - Fixed bug #31980 (Unicode exif data not available on Windows). (Edin)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
-- Fixed bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes).
-  (Moriyoshi)
 - Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
@@ -105,8 +108,6 @@ PHP                                                                        NEWS
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30725 (PHP segfaults when an exception is thrown in getIterator() 
   within foreach). (Marcus)
-- Fixed bug #30573 (compiler warnings in libmbfl due to invalid type cast).
-  (Moriyoshi)
 - Fixed bug #30549 (incorrect character translations for some ISO8859
   charsets). (Moriyoshi)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
