@@ -86,10 +86,10 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
 			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
-				php_error(E_WARNING, "Unable to access %s", filename);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
 				return 0;
 			} else if (mode == CHECKUID_ALLOW_FILE_NOT_EXISTS) {
-				php_error(E_WARNING, "Unable to access %s", filename);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
 				return 1;
 			}
 			nofile = 1;
@@ -130,7 +130,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		/* check directory */
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
-			php_error(E_WARNING, "Unable to access %s", filename);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
 			return 0;
 		}
 		duid = sb.st_uid;
@@ -165,9 +165,9 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	}
 	
 	if (PG(safe_mode_gid)) {
-		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", php_getuid(), php_getgid(), filename, uid, gid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", php_getuid(), php_getgid(), filename, uid, gid);
 	} else {
-		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", php_getuid(), filename, uid);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", php_getuid(), filename, uid);
 	}			
 	return 0;
 }

@@ -164,10 +164,10 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 		hints.ai_family = AF_INET;
 #  endif
 		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
-			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
 			return 0;
 		} else if (res == NULL) {
-			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
 			return 0;
 		}
 
@@ -203,7 +203,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 			/* XXX NOT THREAD SAFE */
 			host_info = gethostbyname(host);
 			if (host_info == NULL) {
-				php_error(E_WARNING, "php_network_getaddresses: gethostbyname failed");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");
 				return 0;
 			}
 			in = *((struct in_addr *) host_info->h_addr);
@@ -447,7 +447,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 		sal++;
 	}
 	php_network_freeaddresses(psal);
-	php_error(E_WARNING, "php_hostconnect: connect failed");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_hostconnect: connect failed");
 
 #ifdef PHP_WIN32
 	/* Restore the last error */
@@ -649,7 +649,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	  flags = !block;
 	  if (ioctlsocket(socketd, FIONBIO, &flags)==SOCKET_ERROR){
-		  php_error(E_WARNING, "%s", WSAGetLastError());
+		  php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", WSAGetLastError());
 		  ret = FALSE;
       }
 #else
@@ -979,7 +979,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			if (ret)	{
 				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
 				if (TOREAD(sock) > 0)
-					zend_error(E_WARNING, "%s(): %d bytes of buffered data lost during conversion to FILE*!", get_active_function_name(TSRMLS_C), TOREAD(sock));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d bytes of buffered data lost during conversion to FILE*!", TOREAD(sock));
 				*ret = fdopen(sock->socket, stream->mode);
 				if (*ret)
 					return SUCCESS;

@@ -155,7 +155,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 			} else {
 				ip = strchr(ip, ']');
 				if (!ip) {
-					php_error(E_WARNING, "Missing ] in %s variable", var);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing ] in %s variable", var);
 					return;
 				}
 				*ip = 0;

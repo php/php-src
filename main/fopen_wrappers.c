@@ -161,7 +161,7 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
 
 			ptr = end;
 		}
-		php_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File is in wrong directory");
 		efree(pathbuf);
 		errno = EPERM; /* we deny permission to open it */
 		return -1;
@@ -317,7 +317,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		fp = NULL;
 	}
 	if (!fp) {
-		php_error(E_ERROR, "Unable to open %s", filename);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to open %s", filename);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return FAILURE;
 	}
