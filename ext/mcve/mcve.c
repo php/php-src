@@ -71,7 +71,7 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_override,			NULL)
 	PHP_FE(mcve_return,			NULL)
 	PHP_FE(mcve_iscommadelimited,		NULL)
-        PHP_FE(mcve_parsecommadelimited,	NULL)
+	PHP_FE(mcve_parsecommadelimited,	NULL)
 	PHP_FE(mcve_getcommadelimited,		NULL)
 	PHP_FE(mcve_getcell,			NULL)
 	PHP_FE(mcve_getcellbynum,		NULL)
@@ -79,12 +79,12 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_numrows,			NULL)
 	PHP_FE(mcve_getheader,			NULL)
 	PHP_FE(mcve_destroyengine,		NULL)
-        PHP_FE(mcve_settle,		NULL)
-        PHP_FE(mcve_gut,		NULL)
-        PHP_FE(mcve_gl,		NULL)
-        PHP_FE(mcve_gft,		NULL)
-        PHP_FE(mcve_qc,		NULL)
-        PHP_FE(mcve_ub,		NULL)
+	PHP_FE(mcve_settle,		NULL)
+	PHP_FE(mcve_gut,		NULL)
+	PHP_FE(mcve_gl,		NULL)
+	PHP_FE(mcve_gft,		NULL)
+	PHP_FE(mcve_qc,		NULL)
+	PHP_FE(mcve_ub,		NULL)
 	PHP_FE(mcve_chkpwd,		NULL)
 	PHP_FE(mcve_bt,		NULL)
 /* Administrator Functions */
@@ -132,7 +132,7 @@ static void _free_mcve_conn(zend_rsrc_list_entry *rsrc)
 	MCVE_CONN *conn;
 
 	conn = (MCVE_CONN *)rsrc->ptr;
-        MCVE_DestroyConn(conn);  
+	MCVE_DestroyConn(conn);  
 	efree(conn);
 }
 /* }}} */
@@ -229,8 +229,8 @@ PHP_FUNCTION(mcve_initengine)
 	convert_to_string_ex(arg);
 
 	if (mcve_init) {
-          MCVE_DestroyEngine();
-        }
+		MCVE_DestroyEngine();
+	}
 	ret = MCVE_InitEngine(Z_STRVAL_PP(arg));
 	mcve_init = 1;
 
@@ -267,9 +267,9 @@ PHP_FUNCTION(mcve_deleteresponse)
 	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
-
+	
 	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+						le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -647,7 +647,7 @@ PHP_FUNCTION(mcve_transactionauth)
 
 	retval = MCVE_TransactionAuth(conn, Z_LVAL_PP(arg2));
 
-        if (retval == NULL) {
+	if (retval == NULL) {
 	  RETVAL_STRING("",1);
 	} else {
 	  RETVAL_STRING(retval, 1);
@@ -675,7 +675,7 @@ PHP_FUNCTION(mcve_transactiontext)
 	convert_to_long_ex(arg2);
 
 	retval = MCVE_TransactionText(conn, Z_LVAL_PP(arg2));
-        if (retval == NULL) {
+	if (retval == NULL) {
 	  RETVAL_STRING("",1);
 	} else {
 	  RETVAL_STRING(retval, 1);
@@ -1097,7 +1097,7 @@ PHP_FUNCTION(mcve_settle)
 }
 /* }}} */
 
-/* proto int mcve_ub(int conn, string username, string password)
+/* {{{ proto int mcve_ub(int conn, string username, string password)
 
    Get a list of all Unsettled batches
 */
@@ -1144,9 +1144,9 @@ PHP_FUNCTION(mcve_qc)
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
 	convert_to_string_ex(arg4);
-        convert_to_string_ex(arg5);
-        convert_to_string_ex(arg6);
-        convert_to_long_ex(arg7);
+	convert_to_string_ex(arg5);
+	convert_to_string_ex(arg6);
+	convert_to_long_ex(arg7);
 
 
 	retval = MCVE_Qc(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_LVAL_PP(arg7));
@@ -1176,14 +1176,14 @@ PHP_FUNCTION(mcve_gut)
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
-        convert_to_long_ex(arg4);
+	convert_to_long_ex(arg4);
 	convert_to_string_ex(arg5);
-        convert_to_string_ex(arg6);
-        convert_to_string_ex(arg7);
-        convert_to_string_ex(arg8);
-        convert_to_long_ex(arg9);
-        convert_to_string_ex(arg10);
-        convert_to_string_ex(arg11);
+	convert_to_string_ex(arg6);
+	convert_to_string_ex(arg7);
+	convert_to_string_ex(arg8);
+	convert_to_long_ex(arg9);
+	convert_to_string_ex(arg10);
+	convert_to_string_ex(arg11);
 
 	retval = MCVE_Gut(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_STRVAL_PP(arg5),Z_STRVAL_PP(arg6),
                                            Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_LVAL_PP(arg9),Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
@@ -1214,16 +1214,16 @@ PHP_FUNCTION(mcve_gl)
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
-        convert_to_long_ex(arg4);
+	convert_to_long_ex(arg4);
 	convert_to_string_ex(arg5);
-        convert_to_string_ex(arg6);
-        convert_to_string_ex(arg7);
-        convert_to_string_ex(arg8);
-        convert_to_string_ex(arg9);
-        convert_to_long_ex(arg10);
-        convert_to_string_ex(arg11);
-        convert_to_string_ex(arg12);
-
+	convert_to_string_ex(arg6);
+	convert_to_string_ex(arg7);
+	convert_to_string_ex(arg8);
+	convert_to_string_ex(arg9);
+	convert_to_long_ex(arg10);
+	convert_to_string_ex(arg11);
+	convert_to_string_ex(arg12);
+	
 	retval = MCVE_Gl(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_STRVAL_PP(arg5),
                                            Z_STRVAL_PP(arg6),Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_STRVAL_PP(arg9),Z_LVAL_PP(arg10),
                                            Z_STRVAL_PP(arg11),Z_STRVAL_PP(arg12));
@@ -1253,14 +1253,14 @@ PHP_FUNCTION(mcve_gft)
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
-        convert_to_long_ex(arg4);
+	convert_to_long_ex(arg4);
 	convert_to_string_ex(arg5);
-        convert_to_string_ex(arg6);
-        convert_to_string_ex(arg7);
-        convert_to_string_ex(arg8);
-        convert_to_long_ex(arg9);
-        convert_to_string_ex(arg10);
-        convert_to_string_ex(arg11);
+	convert_to_string_ex(arg6);
+	convert_to_string_ex(arg7);
+	convert_to_string_ex(arg8);
+	convert_to_long_ex(arg9);
+	convert_to_string_ex(arg10);
+	convert_to_string_ex(arg11);
 
 	retval = MCVE_Gft(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4),Z_STRVAL_PP(arg5),
                                            Z_STRVAL_PP(arg6),Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_LVAL_PP(arg9),Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
@@ -1348,7 +1348,7 @@ PHP_FUNCTION(mcve_getcell)
 	retval = MCVE_GetCell(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3),
 	    Z_LVAL_PP(arg4));
 
-        if (retval == NULL) {
+	if (retval == NULL) {
 	  RETURN_STRING("", 1);
 	} else {
 	  RETURN_STRING(retval, 1);
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(mcve_getcell)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcell(int conn, int identifier, int column, int row)
+/* {{{ proto string mcve_getcellbynum(int conn, int identifier, int column, int row)
 
    Get a specific cell from a comma delimited response
       by column number
@@ -1843,4 +1843,13 @@ PHP_FUNCTION(mcve_edituser)
 /* }}} */
 
 /* END OF MCVE PHP EXTENSION */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
 
