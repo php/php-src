@@ -595,6 +595,19 @@ SPL_METHOD(dual_it, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_Default);
 }
 
+SPL_METHOD(dual_it, getInnerIterator)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (intern->inner.zobject) {
+		RETVAL_ZVAL(intern->inner.zobject, 0, 0);
+	} else {
+		RETURN_NULL();
+	}
+}
+
 static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
 	if (intern->current.data) {
@@ -840,12 +853,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_filter_it___construct, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_FilterIterator[] = {
-	SPL_ME(dual_it,        __construct,   arginfo_filter_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(FilterIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(FilterIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         __construct,      arginfo_filter_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(FilterIterator,  rewind,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilterIterator,  next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	SPL_ABSTRACT_ME(FilterIterator, accept, NULL)
 	{NULL, NULL, NULL}
 };
@@ -856,10 +870,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_parent_it___construct, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_ParentIterator[] = {
-	SPL_ME(ParentIterator, __construct,   arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
-	SPL_MA(ParentIterator, accept,        ParentIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(ParentIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(ParentIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
+	SPL_MA(ParentIterator,  accept,           ParentIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(ParentIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(ParentIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -992,14 +1007,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_limit_it_seek, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_LimitIterator[] = {
-	SPL_ME(LimitIterator, __construct,   arginfo_limit_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,       key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,       current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, seek,          arginfo_limit_it_seek, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, getPosition,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   __construct,      arginfo_limit_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   rewind,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   seek,             arginfo_limit_it_seek, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   getPosition,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1125,14 +1141,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_caching_it___construct, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_CachingIterator[] = {
-	SPL_ME(CachingIterator, __construct,   arginfo_caching_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, hasNext,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, __toString,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, __construct,      arginfo_caching_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, hasNext,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, __toString,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
