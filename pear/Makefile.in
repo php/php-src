@@ -83,7 +83,7 @@ PEAR_FILES = \
 	System.php \
 	XML/Parser.php 
 
-PEAR_COMMAND_LIBS=\
+PEAR_COMMAND_LIBS = \
 	pearcmd-common.php \
 	pearcmd-help.php \
 	pearcmd-info.php \
@@ -170,9 +170,6 @@ install-headers:
 		(cd $(top_srcdir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
 	done
-
-Makefile: Makefile.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/Makefile CONFIG_HEADERS= $(top_builddir)/config.status)
 
 scripts/pear: scripts/pear.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/pear CONFIG_HEADERS= $(top_builddir)/config.status)
