@@ -47,6 +47,10 @@
 /* #define HAVE_MBSTR_RU 0 */
 /* #define HAVE_MBSTR_TW 0 */ 
 
+/* If you have the .Net SDK in your include path, define this
+ * to compile .Net support into your COM extension. */
+#define HAVE_MSCOREE_H 0
+
 /* Enable / Disable ODBC extension (default: enabled) */
 #define HAVE_UODBC 1
 
