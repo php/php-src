@@ -5,7 +5,7 @@ STD='make -f Makefile.am LEX="flex -L" YACC="bison -y -l" srcdir=.'
 (cd Zend && eval "$STD zend-parser.c zend-scanner.c zend-scanner-cc.cc")
 
 files="Makefile main/Makefile ext/standard/Makefile"
-sh build/fastgen.sh . yes $files
+sh build/fastgen.sh . yes no $files
 touch .deps main/.deps ext/standard/libs.mk
 
 cat > config_vars.mk <<EOF
