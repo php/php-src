@@ -1956,13 +1956,17 @@ PHP_FUNCTION(call_user_func_array)
 	func_params_ht = Z_ARRVAL_PP(params);
 
 	count = zend_hash_num_elements(func_params_ht);
-	func_params = safe_emalloc(sizeof(zval **), count, 0);
+	if (count) {
+		func_params = safe_emalloc(sizeof(zval **), count, 0);
 
-	for (zend_hash_internal_pointer_reset(func_params_ht);
-		 zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
-		 zend_hash_move_forward(func_params_ht)
-		) {
-		current++;
+		for (zend_hash_internal_pointer_reset(func_params_ht);
+				zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
+				zend_hash_move_forward(func_params_ht)
+			) {
+			current++;
+		}
+	} else {
+		func_params = NULL;
 	}
 
 	if (call_user_function_ex(EG(function_table), NULL, *func, &retval_ptr, count, func_params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
@@ -1972,7 +1976,9 @@ PHP_FUNCTION(call_user_func_array)
 	}
 
 	efree(name);
-	efree(func_params);
+	if (func_params) {
+		efree(func_params);
+	}
 }
 /* }}} */
 
