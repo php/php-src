@@ -27,7 +27,10 @@
    |          Jim Winstead (jimw@php.net)                                 |
    +----------------------------------------------------------------------+
 */
+
 /* $Id$ */
+
+/* Synced with php3 revision 1.121 1999-06-18 [ssb] */
 
 #include "php.h"
 #include "php_globals.h"
@@ -108,6 +111,7 @@ struct php3i_sockbuf {
 	char eof;
 	char persistent;
 	char is_blocked;
+	size_t chunk_size;
 };
 
 static struct php3i_sockbuf *phpsockbuf;
@@ -419,6 +423,7 @@ int _php3_sock_eof(int socket)
 	return ret;
 }
 
+#define CHUNK_SIZE 2048
 #define SOCK_DESTROY(sock) \
 		if(sock->readbuf) pefree(sock->readbuf, sock->persistent); \
 		if(sock->prev) sock->prev->next = sock->next; \
@@ -426,6 +431,8 @@ int _php3_sock_eof(int socket)
 		if(sock == phpsockbuf) \
 			phpsockbuf = sock->next; \
 		pefree(sock, sock->persistent)
+
+static size_t def_chunk_size = CHUNK_SIZE;
 
 static void php_cleanup_sockbuf(int persistent)
 {
@@ -472,9 +479,23 @@ static php3i_sockbuf *_php3_sock_create(int socket)
 	}
 	sock->persistent = persistent;
 	sock->is_blocked = 1;
+	sock->chunk_size = def_chunk_size;
 	phpsockbuf = sock;
 
 	return sock;
+}
+
+size_t _php3_sock_set_def_chunk_size(size_t size)
+{
+	size_t old;
+
+	old = def_chunk_size;
+
+	if (size <= CHUNK_SIZE || size > 0) {
+		def_chunk_size = size;
+	}
+
+	return old;
 }
 
 int _php3_sock_destroy(int socket)
@@ -514,24 +535,40 @@ int _php3_sock_close(int socket)
 	return ret;
 }
 
-#define CHUNK_SIZE 2048
 #define MAX_CHUNKS_PER_READ 10
 
+static void _php3_sock_wait_for_data(php3i_sockbuf *sock)
+{
+	fd_set fdr, tfdr;
 
-static size_t _php3_sock_read_limited(php3i_sockbuf *sock, size_t max)
+	FD_ZERO(&fdr);
+	FD_SET(sock->socket, &fdr);
+
+	while (1) {
+		tfdr = fdr;
+		if(select(sock->socket + 1, &tfdr, NULL, NULL, NULL) == 1) {
+			break;
+		}
+	}
+}
+
+static size_t _php3_sock_read_limited(php3i_sockbuf *sock, int maxread)
 {
 	char buf[CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
 
-	if (sock->eof || max > CHUNK_SIZE) {
-		return nr_read;
+	if (sock->eof || TOREAD(sock) >= maxread) {
+		return 0;
+	}
+	if (sock->is_blocked) {
+		_php3_sock_wait_for_data(sock);
 	}
 
-	nr_bytes = recv(sock->socket, buf, max, 0);
+	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
 	if (nr_bytes > 0) {
 		if (sock->writepos + nr_bytes > sock->readbuflen) {
-			sock->readbuflen += CHUNK_SIZE;
+			sock->readbuflen += sock->chunk_size;
 			sock->readbuf = perealloc(sock->readbuf, sock->readbuflen,
                                       sock->persistent);
 		}
@@ -543,32 +580,6 @@ static size_t _php3_sock_read_limited(php3i_sockbuf *sock, size_t max)
 	}
 
 	return nr_read;
-}
-
-#if !defined(MSG_DONTWAIT) && defined(__GLIBC__) && __GLIBC__ == 2
-# define MSG_DONTWAIT 0x40
-#endif
-
-/* only for blocking sockets */
-static size_t _php3_sock_queued_data(php3i_sockbuf *sock)
-{
-	int nr_bytes;
-	char buf[CHUNK_SIZE];
-	int flags = MSG_PEEK;
-
-#ifdef MSG_DONTWAIT
-	flags |= MSG_DONTWAIT;
-#else
-	_php3_set_sock_blocking(sock->socket, 1);
-#endif
-
-	nr_bytes = recv(sock->socket, buf, CHUNK_SIZE, flags);
-
-#ifndef MSG_DONTWAIT
-	_php3_set_sock_blocking(sock->socket, 0);
-#endif
-
-	return (nr_bytes < 0 ? 0 : nr_bytes);
 }
 
 static size_t _php3_sock_read(php3i_sockbuf *sock)
@@ -620,16 +631,13 @@ char *_php3_sock_fgets(char *buf, size_t maxlen, int socket)
 	}
 
 	if (sock->is_blocked) {
-		nr_toread = _php3_sock_queued_data(sock);
-		if (!nr_toread) {
-			nr_toread = 1;
-		}
+		nr_toread = 0;
 		for (nr_read = 1; !sock->eof && nr_read < maxlen; ) {
 			nr_read += _php3_sock_read_limited(sock, nr_toread);
 			if ((p = memchr(READPTR(sock), '\n', TOREAD(sock))) != NULL) {
 				break;
 			}
-			nr_toread = 1;
+			nr_toread = 512;
 		}
 	} else {
 		_php3_sock_read(sock);
@@ -682,7 +690,7 @@ int _php3_sock_fgetc(int socket)
 int _php3_sock_feof(int socket)
 {
 	int ret = 0;
-	SOCK_FIND_AND_READ_MAX(1);
+	SOCK_FIND(sock, socket);
 
 	if (!TOREAD(sock) && sock->eof) {
 		ret = 1;
