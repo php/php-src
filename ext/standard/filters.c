@@ -176,7 +176,7 @@ typedef struct _php_strip_tags_filter {
 static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, int allowed_tags_len, int persistent)
 {
 	if (allowed_tags != NULL) {
-		if (NULL != (inst->allowed_tags = pemalloc(allowed_tags_len, persistent))) {
+		if (NULL == (inst->allowed_tags = pemalloc(allowed_tags_len, persistent))) {
 			return FAILURE;
 		}
 		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
