@@ -82,6 +82,10 @@ function_entry hw_functions[] = {
 	PHP_FE(hw_getobjectbyqueryobj,					NULL)
 	PHP_FE(hw_getobjectbyquerycoll,					NULL)
 	PHP_FE(hw_getobjectbyquerycollobj,				NULL)
+	PHP_FE(hw_getobjectbyftquery,						NULL)
+	PHP_FE(hw_getobjectbyftqueryobj,					NULL)
+	PHP_FE(hw_getobjectbyftquerycoll,					NULL)
+	PHP_FE(hw_getobjectbyftquerycollobj,				NULL)
 	PHP_FE(hw_getchilddoccoll,						NULL)
 	PHP_FE(hw_getchilddoccollobj,					NULL)
 	PHP_FE(hw_getanchors,							NULL)
@@ -2457,7 +2461,7 @@ PHP_FUNCTION(hw_new_document) {
 		free(doc);
 		RETURN_FALSE;
 	}
-        memcpy(doc->data, arg2->value.str.val, arg3->value.lval);
+	memcpy(doc->data, arg2->value.str.val, arg3->value.lval);
 	ptr = doc->data;
 	ptr[arg3->value.lval] = '\0';
 	doc->attributes = strdup(arg1->value.str.val);
@@ -3140,6 +3144,176 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getobjbyquerycollobj(ptr->socket, id, query, maxhits, &childObjRecs, &count))) {
+		php_error(E_WARNING, "send_command (getobjectbyquerycollobj) returned %d\n", ptr->lasterror);
+		RETURN_FALSE;
+	}
+
+	/* create return value and free all memory */
+	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
+		RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array hw_getobjectbyftquery(int link, string query, int maxhits)
+   Search for query as fulltext and return maxhits objids */
+PHP_FUNCTION(hw_getobjectbyftquery) {
+	pval **arg1, **arg2, **arg3;
+	int link, type, maxhits;
+	char *query;
+	int count, i;
+	int  *childIDs = NULL;
+	float *weights;
+	hw_connection *ptr;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	query=(*arg2)->value.str.val;
+	maxhits=(*arg3)->value.lval;
+	if (maxhits < 0) maxhits=0x7FFFFFFF;
+	ptr = zend_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php_error(E_WARNING,"Unable to find file identifier %d",link);
+		RETURN_FALSE;
+	}
+
+	set_swap(ptr->swap_on);
+	if (0 != (ptr->lasterror = send_getobjbyftquery(ptr->socket, query, maxhits, &childIDs, &weights, &count))) {
+		php_error(E_WARNING, "send_command (getobjectbyftquery) returned %d\n", ptr->lasterror);
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		efree(childIDs);
+		RETURN_FALSE;
+	}
+
+	for(i=0; i<count; i++)
+		add_index_long(return_value, i, childIDs[i]);
+	efree(childIDs);
+}
+/* }}} */
+
+/* {{{ proto array hw_getobjectbyftqueryobj(int link, string query, int maxhits)
+   Search for query as fulltext and return maxhits object records */
+PHP_FUNCTION(hw_getobjectbyftqueryobj) {
+	pval **arg1, **arg2, **arg3;
+	int link, type, maxhits;
+	char *query;
+	int count;
+	char  **childObjRecs = NULL;
+	float *weights;
+	hw_connection *ptr;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	query=(*arg2)->value.str.val;
+	maxhits=(*arg3)->value.lval;
+	if (maxhits < 0) maxhits=0x7FFFFFFF;
+	ptr = zend_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php_error(E_WARNING,"Unable to find file identifier %d",link);
+		RETURN_FALSE;
+	}
+
+	set_swap(ptr->swap_on);
+	if (0 != (ptr->lasterror = send_getobjbyftqueryobj(ptr->socket, query, maxhits, &childObjRecs, &weights, &count))) {
+		php_error(E_WARNING, "send_command (getobjectbyftqueryobj) returned %d\n", ptr->lasterror);
+		RETURN_FALSE;
+	}
+
+	/* create return value and free all memory */
+	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
+		RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array hw_getobjectbyftquerycoll(int link, int collid, string query, int maxhits)
+   Search for fulltext query in collection and return maxhits objids */
+PHP_FUNCTION(hw_getobjectbyftquerycoll) {
+	pval **arg1, **arg2, **arg3, **arg4;
+	int link, id, type, maxhits;
+	char *query;
+	int count, i;
+	hw_connection *ptr;
+	int  *childIDs = NULL;
+	float *weights;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
+	query=(*arg3)->value.str.val;
+	maxhits=(*arg4)->value.lval;
+	if (maxhits < 0) maxhits=0x7FFFFFFF;
+	ptr = zend_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	set_swap(ptr->swap_on);
+	if (0 != (ptr->lasterror = send_getobjbyftquerycoll(ptr->socket, id, query, maxhits, &childIDs, &weights, &count))) {
+		php_error(E_WARNING, "send_command (getobjectbyquerycoll) returned %d\n", ptr->lasterror);
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		efree(childIDs);
+		RETURN_FALSE;
+	}
+
+	for(i=0; i<count; i++)
+		add_index_long(return_value, i, childIDs[i]);
+	efree(childIDs);
+}
+/* }}} */
+
+/* {{{ proto array hw_getobjectbyftquerycollobj(int link, int collid, string query, int maxhits)
+   Search for fulltext query in collection and return maxhits object records */
+PHP_FUNCTION(hw_getobjectbyftquerycollobj) {
+	pval **arg1, **arg2, **arg3, **arg4;
+	int link, id, type, maxhits;
+	char *query;
+	int count;
+	hw_connection *ptr;
+	char  **childObjRecs = NULL;
+	float *weights;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
+	query=(*arg3)->value.str.val;
+	maxhits=(*arg4)->value.lval;
+	if (maxhits < 0) maxhits=0x7FFFFFFF;
+	ptr = zend_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	set_swap(ptr->swap_on);
+	if (0 != (ptr->lasterror = send_getobjbyftquerycollobj(ptr->socket, id, query, maxhits, &childObjRecs, &weights, &count))) {
 		php_error(E_WARNING, "send_command (getobjectbyquerycollobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}

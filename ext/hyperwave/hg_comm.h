@@ -68,6 +68,8 @@
 #define UNLOCK_MESSAGE               30
 #define INCOLLECTIONS_MESSAGE        31
 #define INSERTOBJECT_MESSAGE         32
+#define GETOBJBYFTQUERY_MESSAGE      34
+#define GETOBJBYFTQUERYCOLL_MESSAGE  35
 #define PIPEDOCUMENT_MESSAGE         36
 #define DELETEOBJECT_MESSAGE         37
 #define PUTDOCUMENT_MESSAGE          38
@@ -144,6 +146,7 @@ typedef struct {
 
 typedef int hw_objectID;
 typedef char hw_objrec;
+typedef float hw_float;
 
 #ifdef newlist
 void fnDeleteAnchor(void *ptr1);
@@ -204,6 +207,10 @@ extern int send_getobjbyquery(int sockfd, char *query, int maxhits, hw_objectID 
 extern int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec, int *count);
 extern int send_getobjbyquerycoll(int sockfd, hw_objectID collID, char *query, int maxhits, hw_objectID **childIDs, int *count);
 extern int send_getobjbyquerycollobj(int sockfd, hw_objectID collID, char *query, int maxhits, char ***childrec, int *count);
+extern int send_getobjbyftquery(int sockfd, char *query, int maxhits, hw_objectID **childIDs, float **weights, int *count);
+extern int send_getobjbyftqueryobj(int sockfd, char *query, int maxhits, char ***childrec, float **weights, int *count);
+extern int send_getobjbyftquerycoll(int sockfd, hw_objectID collID, char *query, int maxhits, hw_objectID **childIDs, float **weight, int *count);
+extern int send_getobjbyftquerycollobj(int sockfd, hw_objectID collID, char *query, int maxhits, char ***childrec, float **weight, int *count);
 extern int send_identify(int sockfd, char *name, char *passwd, char **userdata);
 extern int send_getparents(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);
 extern int send_children(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);

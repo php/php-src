@@ -4268,6 +4268,421 @@ int send_getobjbyquerycollobj(int sockfd, hw_objectID collID, char *query, int m
 	return(0);
 }
 
+int send_getobjbyftquery(int sockfd, char *query, int maxhits, hw_objectID **childIDs, float **weights, int *count)
+{
+	hg_msg msg, *retmsg;
+	int  length, error;
+	char *tmp;
+	int *ptr, i, *ptr1;
+	float *ptr2;
+
+	length = HEADER_LENGTH + strlen(query) + 1;
+
+	build_msg_header(&msg, length, msgid++, GETOBJBYFTQUERY_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_str(msg.buf, query);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-1);
+	}
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL ) 
+		return(-1);
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -1;
+	}
+	if(*ptr++ == 0) {
+		*count = (*ptr < maxhits) ? *ptr : maxhits;
+		ptr++;
+		if(NULL != (*childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+			ptr1 = *childIDs;
+			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
+				ptr2 = *weights;
+				for(i=0; i<*count; i++) {
+					ptr1[i] = *ptr++;
+					ptr2[i] = (float) *ptr++;
+				}
+				efree(retmsg->buf);
+				efree(retmsg);
+			} else {
+				efree(*childIDs);
+				efree(retmsg->buf);
+				efree(retmsg);
+				lowerror = LE_MALLOC;
+				return(-1);
+			}
+		} else {
+			efree(retmsg->buf);
+			efree(retmsg);
+			lowerror = LE_MALLOC;
+			return(-1);
+		}
+	} else {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
+	}
+	return(0);
+}
+
+int send_getobjbyftqueryobj(int sockfd, char *query, int maxhits, char ***childrec, float **weights, int *count)
+{
+	hg_msg msg, *retmsg;
+	int length, i, error;
+	char *tmp;
+	int *childIDs = NULL;
+	char **objptr;
+	int *ptr, *ptr1;
+	float *ptr2;
+
+	length = HEADER_LENGTH + strlen(query) + 1;
+
+	build_msg_header(&msg, length, msgid++, GETOBJBYFTQUERY_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+/*		perror("send_command"); */
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_str(msg.buf, query);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-2);
+	}
+
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL ) 
+		return(-3);
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -4;
+	}
+	if(*ptr++ == 0) {
+		*count = (*ptr < maxhits) ? *ptr : maxhits;
+    		ptr++;
+		if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+			ptr1 = childIDs;
+			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
+				ptr2 = *weights;
+				for(i=0; i<*count; i++) {
+					ptr1[i] = *ptr++;
+					ptr2[i] = (float) *ptr++;
+				}
+				efree(retmsg->buf);
+				efree(retmsg);
+			} else {
+				efree(childIDs);
+				efree(retmsg->buf);
+				efree(retmsg);
+				lowerror = LE_MALLOC;
+				return(-5);
+			}
+		} else {
+			efree(retmsg->buf);
+			efree(retmsg);
+			lowerror = LE_MALLOC;
+			return(-5);
+		}
+	} else {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
+	}
+
+	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		efree(*weights);
+		return -2;
+	}
+	efree(childIDs);
+#else
+	for(i=0; i<*count; i++) {
+		length = HEADER_LENGTH + sizeof(hw_objectID);
+		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
+
+		if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+			efree(childIDs);
+			efree(*weights);
+			lowerror = LE_MALLOC;
+			return(-6);
+		}
+
+		tmp = build_msg_int(msg.buf, childIDs[i]);
+
+		if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+			efree(msg.buf);
+			efree(childIDs);
+			efree(*weights);
+			return(-7);
+			}
+
+		efree(msg.buf);
+	}
+	efree(childIDs);
+
+	if(NULL == (objptr = (char **) emalloc(*count * sizeof(hw_objrec *)))) {
+		/* if emalloc fails, get at least all remaining  messages from server */
+		for(i=0; i<*count; i++) {
+			retmsg = recv_hg_msg(sockfd);
+			efree(retmsg->buf);
+			efree(retmsg);
+		}
+  		*childrec = NULL;
+		lowerror = LE_MALLOC;
+		return(-8);
+	} else {
+		*childrec = objptr;
+
+		for(i=0; i<*count; i++) {
+			retmsg = recv_hg_msg(sockfd);
+			if ( retmsg != NULL )  {
+				if(0 == (int) *(retmsg->buf)) {
+					*objptr = estrdup(retmsg->buf+sizeof(int));
+					objptr++;
+					efree(retmsg->buf);
+					efree(retmsg);
+				} else {
+					*objptr = NULL;
+					objptr++;
+					efree(retmsg->buf);
+					efree(retmsg);
+				}
+			}
+		}
+	}
+#endif
+	return(0);
+}
+
+int send_getobjbyftquerycoll(int sockfd, hw_objectID collID, char *query, int maxhits, hw_objectID **childIDs, float **weights, int *count)
+{
+	hg_msg msg, *retmsg;
+	int  length, error;
+	char *tmp;
+	int *ptr, i, *ptr1;
+	float *ptr2;
+
+	length = HEADER_LENGTH + strlen(query) + 1 + sizeof(int) + sizeof(collID);
+
+	build_msg_header(&msg, length, msgid++, GETOBJBYFTQUERYCOLL_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_int(msg.buf, 1);
+	tmp = build_msg_int(tmp, collID);
+	tmp = build_msg_str(tmp, query);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-1);
+	}
+
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL ) 
+		return(-1);
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -1;
+	}
+	if(*ptr++ == 0) {
+		*count = (*ptr < maxhits) ? *ptr : maxhits;
+		ptr++;
+		if(NULL != (*childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+			ptr1 = *childIDs;
+			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
+				ptr2 = *weights;
+				for(i=0; i<*count; i++) {
+					ptr1[i] = *ptr++;
+					ptr2[i] = (float) *ptr++;
+				}
+			} else {
+				efree(*childIDs);
+				efree(retmsg->buf);
+				efree(retmsg);
+				lowerror = LE_MALLOC;
+				return(-1);
+			}
+			efree(retmsg->buf);
+			efree(retmsg);
+		} else {
+			efree(retmsg->buf);
+			efree(retmsg);
+			lowerror = LE_MALLOC;
+			return(-1);
+		}
+	} else {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
+	}
+	return(0);
+}
+
+int send_getobjbyftquerycollobj(int sockfd, hw_objectID collID, char *query, int maxhits, char ***childrec, float **weights, int *count)
+{
+	hg_msg msg, *retmsg;
+	int length, i, error;
+	char *tmp;
+	hw_objectID *childIDs = NULL;
+	char **objptr;
+	int *ptr, *ptr1;
+	float *ptr2;
+
+	length = HEADER_LENGTH + strlen(query) + 1 + sizeof(int) + sizeof(hw_objectID);
+
+	build_msg_header(&msg, length, msgid++, GETOBJBYFTQUERYCOLL_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_int(msg.buf, 1);
+	tmp = build_msg_int(tmp, collID);
+	tmp = build_msg_str(tmp, query);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-1);
+	} 
+
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL )
+		return -1;
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -1;
+	}
+	if(*ptr++ == 0) {
+		*count = (*ptr < maxhits) ? *ptr : maxhits;
+		ptr++;
+		if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+			ptr1 = childIDs;
+			if(NULL != (*weights = emalloc(*count * sizeof(float)))) {
+				ptr2 = *weights;
+				for(i=0; i<*count; i++) {
+					ptr1[i] = *ptr++;
+					ptr2[i] = (float) *ptr++;
+				}
+				efree(retmsg->buf);
+				efree(retmsg);
+			} else {
+				efree(childIDs);
+				efree(retmsg->buf);
+				efree(retmsg);
+				lowerror = LE_MALLOC;
+				return(-1);
+			}
+		} else {
+			efree(retmsg->buf);
+			efree(retmsg);
+			lowerror = LE_MALLOC;
+			return(-1);
+		}
+	} else {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
+	}
+
+	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		if(childIDs) efree(childIDs);
+		if(*weights) efree(weights);
+		return -2;
+	}
+	if(childIDs) efree(childIDs);
+#else
+	for(i=0; i<*count; i++) {
+		length = HEADER_LENGTH + sizeof(hw_objectID);
+		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
+
+		if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+/*			perror("send_command"); */
+			efree(childIDs);
+			efree(*weights);
+			lowerror = LE_MALLOC;
+			return(-1);
+		}
+
+		tmp = build_msg_int(msg.buf, childIDs[i]);
+
+		if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+			efree(msg.buf);
+			efree(childIDs);
+			efree(*weights);
+			return(-1);
+			}
+
+		efree(msg.buf);
+	}
+	efree(childIDs);
+
+	if(NULL == (objptr = (char **) emalloc(*count * sizeof(hw_objrec *)))) {
+		/* if emalloc fails, get at least all remaining  messages from server */
+		for(i=0; i<*count; i++) {
+			retmsg = recv_hg_msg(sockfd);
+			efree(retmsg->buf);
+			efree(retmsg);
+		}
+  	*childrec = NULL;
+		lowerror = LE_MALLOC;
+		return(-1);
+	} else {
+  		*childrec = objptr;
+
+		for(i=0; i<*count; i++) {
+			retmsg = recv_hg_msg(sockfd);
+			if ( retmsg != NULL )  {
+				if(0 == (int) *(retmsg->buf)) {
+					*objptr = estrdup(retmsg->buf+sizeof(int));
+					objptr++;
+					efree(retmsg->buf);
+					efree(retmsg);
+				} else {
+					*objptr = NULL;
+					objptr++;
+					efree(retmsg->buf);
+					efree(retmsg);
+				}
+			}
+		}
+	}
+#endif
+	return(0);
+}
+
 int send_getparents(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count)
 {
 	hg_msg msg, *retmsg;
