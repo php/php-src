@@ -1,3 +1,44 @@
+2001-11-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zlib/zlib.c: Show the registered ini entry in phpinfo()
+
+    * ext/standard/var_unserializer.c: Updated file since .re changed.
+
+2001-11-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var_unserializer.re:
+    - Also patch the file from which var_unserializer.c is generated
+
+    * ext/standard/var_unserializer.c
+      main/main.c
+      main/php_globals.h
+      php.ini-dist:
+    - Adding a callback mechanism to the unserializer. (patch by Bernd
+      Roemer <berndr@bonn.edu>)
+
+2001-11-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * main/fopen_wrappers.c
+      main/main.c
+      main/php_ini.c: Z_TYPE(filehandle)?? ok.. whatever... ;)
+
+2001-11-26  Christian Stocker  <chregu@phant.ch>
+
+    * pear/Cache/OutputCompression.php: an usage example
+
+    * pear/Cache/Output.php:
+    printContent() for API-Compatibility with OutputCompression
+
+2001-11-26  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/Passwd.php:
+    * Strip withespace from beginning and end of passwords.
+
+2001-11-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist
+      php.ini-recommended: Nuke ext/sablot entries.
+
 2001-11-25  Zeev Suraski  <zeev@zend.com>
 
     * main/php_version.h
