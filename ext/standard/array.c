@@ -1943,6 +1943,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 	array_init(return_value);
 	
 	for (i=0; i<argc; i++) {
+		SEPARATE_ZVAL(args[i]);
 		convert_to_array_ex(args[i]);
 		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
 	}
