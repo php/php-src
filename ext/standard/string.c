@@ -1154,11 +1154,8 @@ PHP_FUNCTION(ucwords)
 	r=return_value->value.str.val;
 	*r=toupper((unsigned char)*r);
 	for(r_end = r + return_value->value.str.len - 1 ; r < r_end ; ) {
-		if(isspace((int)*r)) {
-			r++;
+		if(isspace((int)*r++)) {
 			*r=toupper((unsigned char)*r);
-		} else {
-			r++;
 		}
 	}
 }
