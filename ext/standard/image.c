@@ -687,7 +687,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 			break;
 		}
 
-		if (box_length <= 1) {
+		if (box_length == 1) {
 			/* We won't handle XLBoxes */
 			return NULL;
 		}
