@@ -220,7 +220,7 @@ string(9) "directory"
 master_server: name of the main PEAR server
 
 #9 testing: getKeys
-bin_dir cache_dir cache_ttl data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state test_dir umask username verbose
+bin_dir cache_dir cache_ttl data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state sig_bin sig_keydir sig_type test_dir umask username verbose
 
 #10 testing: definedBy
 string(7) "default"
@@ -247,6 +247,9 @@ master_server: Internet Access
 password: Maintainers
 php_dir: File Locations
 preferred_state: Advanced
+sig_bin: Maintainers
+sig_keydir: Maintainers
+sig_type: Maintainers
 test_dir: File Locations (Advanced)
 umask: Advanced
 username: Maintainers
@@ -260,7 +263,7 @@ Advanced: cache_ttl, preferred_state, umask, verbose
 File Locations: bin_dir, doc_dir, ext_dir, php_dir
 File Locations (Advanced): cache_dir, data_dir, test_dir
 Internet Access: http_proxy, master_server
-Maintainers: password, username
+Maintainers: password, sig_bin, sig_keydir, sig_type, username
 
 #15 testing: getPrompt
 bin_dir: PEAR executables directory
@@ -274,6 +277,9 @@ master_server: PEAR server
 password: PEAR password (for maintainers)
 php_dir: PEAR directory
 preferred_state: Preferred Package State
+sig_bin: Signature Handling Program
+sig_keydir: Signature Key Directory
+sig_type: Package Signature Type
 test_dir: PEAR test directory
 umask: Unix file mask
 username: PEAR username (for maintainers)
