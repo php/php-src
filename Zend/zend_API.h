@@ -113,6 +113,7 @@ void zend_unregister_functions(zend_function_entry *functions, int count, HashTa
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry);
 ZEND_API zend_module_entry *zend_get_module(int module_number);
+ZEND_API int zend_disable_function(char *function_name, uint function_name_length);
 
 ZEND_API void wrong_param_count(void);
 
