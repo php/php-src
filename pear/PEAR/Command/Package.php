@@ -106,6 +106,36 @@ List all depencies the package has.'
             'doc' => '<package-file>
 Signs a package distribution (.tar or .tgz) file with GnuPG.',
             ),
+        'makerpm' => array(
+            'summary' => 'Builds an RPM package from a PEAR package',
+            'function' => 'doMakeRPM',
+            'shortcut' => 'rpm',
+            'options' => array(
+                'spec-template' => array(
+                    'shortopt' => 't',
+                    'arg' => 'FILE',
+                    'doc' => 'Use FILE as RPM spec file template'
+                    ),
+                'rpm-pkgname' => array(
+                    'shortopt' => 'p',
+                    'arg' => 'FORMAT',
+                    'doc' => 'Use FORMAT as format string for RPM package name, %s is replaced
+by the PEAR package name, defaults to "PEAR::%s".',
+                    ),
+                ),
+            'doc' => '<package-file>
+
+Creates an RPM .spec file for wrapping a PEAR package inside an RPM
+package.  Intended to be used from the SPECS directory, with the PEAR
+package tarball in the SOURCES directory:
+
+$ pear makerpm ../SOURCES/Net_Socket-1.0.tgz
+Wrote RPM spec file PEAR::Net_Geo-1.0.spec
+$ rpm -bb PEAR::Net_Socket-1.0.spec
+...
+Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
+',
+            ),
         );
 
     var $output;
@@ -372,6 +402,93 @@ Signs a package distribution (.tar or .tgz) file with GnuPG.',
             return $this->raiseError("gpg sign failed");
         }
         $tar->addModify("$tmpdir/package.sig", '', $tmpdir);
+        return true;
+    }
+
+    function doMakeRPM($command, $options, $params)
+    {
+        if (sizeof($params) != 1) {
+            return $this->raiseError("bad parameter(s), try \"help $command\"");
+        }
+        if (!file_exists($params[0])) {
+            return $this->raiseError("file does not exist: $params[0]");
+        }
+        include_once "Archive/Tar.php";
+        include_once "PEAR/Installer.php";
+        include_once "System.php";
+        $tar = new Archive_Tar($params[0]);
+        $tmpdir = System::mktemp('-d pear2rpm');
+        $instroot = System::mktemp('-d pear2rpm');
+        $tmp = $this->config->get('verbose');
+        $this->config->set('verbose', 0);
+        $installer = new PEAR_Installer($this->ui);
+        $info = $installer->install($params[0],
+                                    array('installroot' => $instroot,
+                                          'nodeps' => true));
+        $pkgdir = "$info[package]-$info[version]";
+//        print "instroot=$instroot\n";
+//        print_r($info);
+//        return true;
+
+        $info['rpm_xml_dir'] = '/var/lib/pear';
+        $this->config->set('verbose', $tmp);
+        if (!$tar->extractList("$pkgdir/package.xml", $tmpdir, $pkgdir)) {
+            return $this->raiseError("failed to extract $params[0]");
+        }
+        if (!file_exists("$tmpdir/package.xml")) {
+            return $this->raiseError("no package.xml found in $params[0]");
+        }
+//        System::mkdir("-p $instroot$info[rpm_xml_dir]");
+//        if (!@copy("$tmpdir/package.xml", "$instroot$info[rpm_xml_dir]/$info[package].xml")) {
+//            return $this->raiseError("could not copy package.xml file: $php_errormsg");
+//        }
+        if (isset($options['spec-template'])) {
+            $spec_template = $options['spec-template'];
+        } else {
+            $spec_template = $this->config->get('data_dir') .
+                '/PEAR/template.spec';
+        }
+        if (isset($options['rpm-pkgname'])) {
+            $rpm_pkgname_format = $options['rpm-pkgname'];
+        } else {
+            $rpm_pkgname_format = "PEAR::%s";
+        }
+
+        $info['extra_headers'] = '';
+        $info['doc_files'] = '';
+        $info['files'] = '';
+        $info['rpm_package'] = sprintf($rpm_pkgname_format, $info['package']);
+        $srcfiles = 0;
+        foreach ($info['filelist'] as $name => $attr) {
+            if ($attr['role'] == 'doc') {
+                $info['doc_files'] .= " $name";
+            } elseif ($attr['role'] == 'src') {
+                $srcfiles++;
+            }
+            $info['files'] .= "$attr[installed_as]\n";
+        }
+        if ($srcfiles > 0) {
+            include_once "OS/Guess.php";
+            $os = new OS_Guess;
+            $arch = $os->getCpu();
+        } else {
+            $arch = 'noarch';
+        }
+        $fp = @fopen($spec_template, "r");
+        if (!$fp) {
+            return $this->raiseError("could not open RPM spec file template $spec_template: $php_errormsg");
+        }
+        $spec_contents = preg_replace('/@([a-z0-9_-]+)@/e', '$info["\1"]', fread($fp, filesize($spec_template)));
+        fclose($fp);
+        $spec_file = "$info[rpm_package]-$info[version].spec";
+        $wp = fopen($spec_file, "w");
+        if (!$wp) {
+            return $this->raiseError("could not write RPM spec file $spec_file: $php_errormsg");
+        }
+        fwrite($wp, $spec_contents);
+        fclose($wp);
+        $this->ui->outputData("Wrote RPM spec file $spec_file", $command);
+        
         return true;
     }
 }
