@@ -389,7 +389,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	if (had_leaks) {
 		ELS_FETCH();
 
-		if (EG(AiCount)!=0) {
+		if (EG(AiCount)!=0 && !silent) {
 			fprintf(stderr, "AiCount did not zero out:  %d\n", EG(AiCount));
 		}
 	}

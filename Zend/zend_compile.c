@@ -734,6 +734,7 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 	
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *function_name;
+		opline->extended_value = 0;
 		SET_UNUSED(opline->op1);
 	}
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
@@ -749,6 +750,7 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	opline->op1 = *class_name;
 	opline->op2 = *function_name;
+	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
 	zval_copy_ctor(&opline->op2.u.constant);
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
@@ -883,6 +885,7 @@ void do_early_binding(CLS_D)
 	opline->opcode = ZEND_NOP;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
+	//CG(active_op_array)->last--;
 }
 
 
@@ -1297,6 +1300,7 @@ void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	opline->op1 = *result;
 	opline->op2 = *class_name;
+	opline->extended_value = ZEND_MEMBER_FUNC_CALL | ZEND_CTOR_CALL;
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
 

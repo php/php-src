@@ -56,8 +56,8 @@
 #include "zend_llist.h"
 
 
-#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, HashTable *list, HashTable *plist
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist
+#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, HashTable *list, HashTable *plist, zval *this_ptr
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist, this_ptr
 
 /*
  * zval
@@ -121,6 +121,7 @@ struct _zend_class_entry {
 
 	HashTable function_table;
 	HashTable default_properties;
+	zend_function_entry *builtin_functions;
 
 	/* handlers */
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
