@@ -1024,6 +1024,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			fn_flags |= ZEND_ACC_PUBLIC;
 		}
 
+		short_class_name = do_alloca(short_class_name_length + 1);
+		if (!CG(active_class_entry)->constructor) {
+			zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
+		}
 		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len)) && !CG(active_class_entry)->constructor) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
@@ -1039,6 +1043,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
 		}
+		free_alloca(short_class_name);
 
 		efree(lcname);
 	} else {
@@ -2309,10 +2314,10 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_op *opline;
 	int doing_inheritance = 0;
 	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
+	char *lcname = zend_str_tolower_dup(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 
-	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len); 
-
-	if (!(strcmp(class_name->u.constant.value.str.val, "self") && strcmp(class_name->u.constant.value.str.val, "parent"))) {
+	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent"))) {
+		efree(lcname);
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
 	}
 
@@ -2329,10 +2334,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		doing_inheritance = 1;
 	}
 
-	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->op1.op_type = IS_CONST;
-	build_runtime_defined_function_key(&opline->op1.u.constant, new_class_entry->name, new_class_entry->name_length, opline TSRMLS_CC);
+	build_runtime_defined_function_key(&opline->op1.u.constant, lcname, new_class_entry->name_length, opline TSRMLS_CC);
 	
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
@@ -2345,7 +2349,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		opline->opcode = ZEND_DECLARE_CLASS;
 	}
 
-	opline->op2.u.constant.value.str.val = estrndup(new_class_entry->name, new_class_entry->name_length);
+	opline->op2.u.constant.value.str.val = lcname;
 	opline->op2.u.constant.value.str.len = new_class_entry->name_length;
 	
 	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &new_class_entry, sizeof(zend_class_entry *), NULL);
