@@ -1938,7 +1938,7 @@ PHP_FUNCTION(socket_last_error)
 }
 /* }}} */
 
-/* {{{ proto void socket_clear_error(resource socket)
+/* {{{ proto void socket_clear_error([resource socket])
    Clears the error on the socket or the last error code. */
 PHP_FUNCTION(socket_clear_error)
 {
