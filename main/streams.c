@@ -495,7 +495,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					TSRMLS_CC);
 		}
 
-		if (justread > 0) {
+		if (justread != (size_t)-1) {
 			stream->writepos += justread;
 		}
 	}
