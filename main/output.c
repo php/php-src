@@ -108,28 +108,16 @@ PHP_RSHUTDOWN_FUNCTION(output);
 zend_module_entry output_module_entry = {
 	"PHP_output", 
 	php_output_functions, 
-	NULL,                   /* extension-wide startup function */
-	NULL,                   /* extension-wide shutdown function */
-	PHP_RINIT(output),      /* per-request startup function */
-	PHP_RSHUTDOWN(output),  /* per-request shutdown function */
-	NULL,                   /* information function */
-	PHP_GINIT(output),      /* global startup function */
-	NULL,                   /* global shutdown function */
+	NULL,					/* extension-wide startup function */
+	NULL,					/* extension-wide shutdown function */
+	NULL,					/* per-request startup function */
+	NULL,					/* per-request shutdown function */
+	NULL,					/* information function */
+	PHP_GINIT(output),		/* global startup function */
+	NULL,					/* global shutdown function */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-PHP_RINIT_FUNCTION(output)
-{
-	php_output_startup();
-   
-	return SUCCESS;
-}
-
-PHP_RSHUTDOWN_FUNCTION(output)
-{
-	/* XXX needs filling in */
-	return SUCCESS;
-}
 
 /* Start output layer */
 PHPAPI void php_output_startup()
