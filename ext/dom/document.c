@@ -852,13 +852,11 @@ Since:
 PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 {
 	zval *id;
-	xmlXPathContextPtr ctxp;
 	xmlDocPtr docp;
-	xmlXPathObjectPtr xpathobjp;
+	xmlNodePtr elemp;
+	int name_len;
 	dom_object *intern;
-
-	int name_len, ret;
-	char *str,*name;
+	char *name;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
@@ -866,44 +864,10 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 		return;
 	}
 
-	ctxp = xmlXPathNewContext(docp);
+	array_init(return_value);
+	elemp = xmlDocGetRootElement(docp);
 
-	ctxp->node = NULL;
-	str = (char*) safe_emalloc((name_len+3), sizeof(char), 0) ;
-	sprintf(str ,"//%s",name);
-
-	xpathobjp = xmlXPathEval(str, ctxp);
-	efree(str);
-	ctxp->node = NULL;
-
-	if (!xpathobjp) {
-		RETURN_FALSE;
-	}
-
-	if (xpathobjp->type ==  XPATH_NODESET) {
-		int i;
-		xmlNodeSetPtr nodesetp;
-
-		if (NULL == (nodesetp = xpathobjp->nodesetval)) {
-			xmlXPathFreeObject (xpathobjp);
-			xmlXPathFreeContext(ctxp);
-			RETURN_FALSE;
-		}
-
-		array_init(return_value);
-
-		for (i = 0; i < nodesetp->nodeNr; i++) {
-			xmlNodePtr node = nodesetp->nodeTab[i];
-			zval *child;
-			MAKE_STD_ZVAL(child);
-
-			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
-			add_next_index_zval(return_value, child);
-		}
-	}
-
-	xmlXPathFreeObject(xpathobjp);
-	xmlXPathFreeContext(ctxp);
+	dom_get_elements_by_tag_name_ns_raw(elemp, NULL, name, &return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
@@ -1256,11 +1220,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 
 	xmlFreeURI(uri);
 
-	if ((PG(safe_mode) && (!php_checkuid(file_dest, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file_dest TSRMLS_CC)) {
-		return NULL;
-	} else {
-		return file_dest;
-	}
+	return file_dest;
 }
 
 
@@ -1299,11 +1259,16 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
+		
 	} else {
 		ctxt = xmlCreateDocParserCtxt(source);
 	}
 
 	xmlKeepBlanksDefault(keep_blanks);
+	/* xmlIndentTreeOutput default is changed in xmlKeepBlanksDefault
+	reset back to 1 which is default value */
+
+	xmlIndentTreeOutput = 1;
 
 	if (ctxt == NULL) {
 		return(NULL);
@@ -1446,10 +1411,6 @@ PHP_FUNCTION(dom_document_save)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
 		return;
 	}
-	
-	if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
 
 	/* encoding handled by property on doc */
 
@@ -1539,7 +1500,7 @@ PHP_FUNCTION(dom_document_validate)
     
 	cvp.userData = NULL;
 	cvp.error    = (xmlValidityErrorFunc) php_dom_validate_error;
-	cvp.warning  = NULL;
+	cvp.warning  = (xmlValidityErrorFunc) php_dom_validate_error;
 
 	if (xmlValidateDocument(&cvp, docp)) {
 		RETVAL_TRUE;
@@ -1735,9 +1696,6 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (mode == DOM_LOAD_FILE) {
-		if ((PG(safe_mode) && (!php_checkuid(source, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(source TSRMLS_CC)) {
-			RETURN_FALSE;
-		}
 		newdoc = htmlParseFile(source, NULL);
 	} else {
 		newdoc = htmlParseDoc(source, NULL);
@@ -1807,10 +1765,6 @@ PHP_FUNCTION(dom_document_save_html_file)
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
 		return;
-	}
-	
-	if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
-		RETURN_FALSE;
 	}
 
 	/* encoding handled by property on doc */
