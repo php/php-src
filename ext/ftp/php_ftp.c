@@ -624,6 +624,7 @@ PHP_FUNCTION(ftp_get)
 	}
 
 	php_stream_close(outstream);
+	RETURN_TRUE;
 }
 /* }}} */
 
