@@ -653,8 +653,12 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int op
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
-			if ((UChar *)(string + string_len) > pos)
-				smart_str_appendl(&out_buf, pos, (size_t)((UChar *)(string + string_len) - pos));
+			int l = (UChar *)(string + string_len) - pos;
+			if (l > 0) {
+				smart_str_appendl(&out_buf, pos, l);
+			} else {
+				out_buf.len += l;
+			}
 		}
 		php_mb_regex_region_free(regs, 0);
 	}
