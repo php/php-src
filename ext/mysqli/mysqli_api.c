@@ -199,7 +199,7 @@ PHP_FUNCTION(mysqli_bind_param)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_bind_result(object stmt, mixed var, int len [,mixed,int....])
+/* {{{ proto bool mysqli_bind_result(object stmt, mixed var, [,mixed, ...])
    Bind variables to a prepared statement for result storage */
 
 /* TODO:
