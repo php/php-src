@@ -53,7 +53,6 @@
 #include "php_globals.h"
 #include "SAPI.h"
 
-
 #ifdef ZTS
 int basic_globals_id;
 #else

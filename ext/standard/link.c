@@ -158,36 +158,8 @@ PHP_FUNCTION(link)
 }
 /* }}} */
 
-/* {{{ proto int unlink(string filename)
-   Delete a file */
-PHP_FUNCTION(unlink)
-{
-	pval **filename;
-	int ret;
-	PLS_FETCH();
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(filename);
-
-	if (PG(safe_mode) && !php_checkuid((*filename)->value.str.val, NULL, 2)) {
-		RETURN_FALSE;
-	}
-
-	ret = V_UNLINK((*filename)->value.str.val);
-	if (ret == -1) {
-		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
-		RETURN_FALSE;
-	}
-	/* Clear stat cache */
-	PHP_FN(clearstatcache)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	RETURN_TRUE;
-}
-/* }}} */
 
 #endif
-
 
 /*
  * Local variables:

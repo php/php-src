@@ -60,6 +60,7 @@ PHP_FUNCTION(fpassthru);
 PHP_FUNCTION(readfile);
 PHP_FUNCTION(umask);
 PHP_FUNCTION(rename);
+PHP_FUNCTION(unlink);
 PHP_FUNCTION(copy);
 PHP_FUNCTION(file);
 PHP_FUNCTION(set_socket_blocking); /* deprecated */

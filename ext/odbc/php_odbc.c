@@ -1227,7 +1227,7 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
-#ifdef HAVE_SOLID || defined(HAVE_SOLID_35)
+#if defined(HAVE_SOLID) || defined(HAVE_SOLID_35)
 PHP_FUNCTION(solid_fetch_prev)
 {
 	odbc_result *result;
