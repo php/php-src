@@ -80,7 +80,6 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_master_query,							NULL)
 	PHP_FE(mysqli_num_fields,							NULL)
 	PHP_FE(mysqli_num_rows,								NULL)
-	PHP_FE(mysqli_num_warnings,							NULL)
 	PHP_FE(mysqli_options, 								NULL)
 	PHP_FE(mysqli_param_count,							NULL)
 	PHP_FE(mysqli_ping,									NULL)

@@ -186,7 +186,6 @@ PHP_FUNCTION(mysqli_kill);
 PHP_FUNCTION(mysqli_master_query);
 PHP_FUNCTION(mysqli_num_fields);
 PHP_FUNCTION(mysqli_num_rows);
-PHP_FUNCTION(mysqli_num_warnings);
 PHP_FUNCTION(mysqli_options);
 PHP_FUNCTION(mysqli_param_count);
 PHP_FUNCTION(mysqli_ping);
