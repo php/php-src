@@ -355,14 +355,15 @@ static char *php_strerror(int error TSRMLS_DC) {
 #else 
 	{
 		LPTSTR tmp = NULL;
+		buf = NULL;
 
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
-				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL);
-
-		strlcpy(SOCKETS_G(strerror_buf), (char *) tmp, 10000);
-		LocalFree(tmp);
+		if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
+				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL)) {
+			strlcpy(SOCKETS_G(strerror_buf), (char *) tmp, 10000);
+			LocalFree(tmp);
 		
-		buf = SOCKETS_G(strerror_buf);
+			buf = SOCKETS_G(strerror_buf);
+		}
 	}
 #endif
 	
