@@ -42,14 +42,14 @@ Type specifiers
  z	- the actual zval
 
  The following characters also have a meaning in the specifier string:
-     | - indicates that the remaining parameters are optional, they
-		 should be initialized to default values by the extension since they
-		 will not be touched by the parsing function if they are not
-		 passed to it.
-	 / - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
-	 ! - the parameter it follows can be of specified type or NULL (only applies
-	     to 'a', 'o', 'O', 'r', and 'z'). If NULL is passed, the results
-		 pointer is set to NULL as well.
+	| - indicates that the remaining parameters are optional, they
+	    should be initialized to default values by the extension since they
+	    will not be touched by the parsing function if they are not
+	    passed to it.
+	/ - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
+	! - the parameter it follows can be of specified type or NULL (only applies
+	    to 'a', 'o', 'O', 'r', and 'z'). If NULL is passed, the results
+	    pointer is set to NULL as well.
 
 Examples
 --------
