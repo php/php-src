@@ -113,6 +113,8 @@ PHP_RSHUTDOWN_FUNCTION(oracle);
 PHP_MINFO_FUNCTION(oracle);
 /* }}} */
 
+static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+
 /* {{{ oracle_functions[]
  */
 function_entry oracle_functions[] = {
