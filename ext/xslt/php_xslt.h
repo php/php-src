@@ -45,12 +45,12 @@ typedef struct {
 	struct _xslt_argument result;
 } xslt_args;
 
-extern xslt_args *parse_xslt_arguments(char *, char *, char *, char **);
-extern void free_xslt_arguments(xslt_args *to_free);
+extern xslt_args *xslt_parse_arguments(char *, char *, char *, char **);
+extern void xslt_free_arguments(xslt_args *);
 
-extern void assign_xslt_handler(struct xslt_function **, zval **);
-extern void free_xslt_handler(struct xslt_function *);
-extern void call_xslt_function(char *, struct xslt_function *, int, zval **, zval **);
+extern void xslt_assign_handler(struct xslt_function **, zval **);
+extern void xslt_free_handler(struct xslt_function *);
+extern void xslt_call_function(char *, struct xslt_function *, int, zval **, zval **);
 
 extern void xslt_debug(char *, char *, ...);
 
