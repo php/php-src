@@ -15,10 +15,6 @@ over to PHP4.
 - PUT method support (mlemos@acm.org)
 - Fix parameter count problem in odbc_setoption()
 - Really fix implode() this time.  The fix in 3.0.7 was bogus
-- Added more option to the date() function: (Colin Viebrock)
-  'g' - hour, 12-hour format, no leading zeros
-  'G' - hour, 24-hour format, no leading zeros
-  'n' - month, numeric, no leading zeros
 - Make fgetss() slightly smarter
 - Add strip_tags() which uses the fgetss state-machine but acts on a string
 
