@@ -38,7 +38,7 @@
 #include <fcntl.h>
 
 /* functions relating to handlers */
-static void register_sax_handler_pair(zval *, zval *, zval **);
+static void register_sax_handler_pair(zval **, zval **, zval **);
 
 /* Free processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -245,20 +245,20 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 
 		/* Document handlers (document start, document end) */
 		if (strcasecmp(string_key, "document") == 0) {
-			register_sax_handler_pair(XSLT_SAX(handle).doc_start, 
-			                          XSLT_SAX(handle).doc_end, 
+			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
+			                          &XSLT_SAX(handle).doc_end, 
 			                          handler);
 		}
 		/* Element handlers, start of an element, and end of an element */
 		else if (strcasecmp(string_key, "element") == 0) {
-			register_sax_handler_pair(XSLT_SAX(handle).element_start, 
-			                          XSLT_SAX(handle).element_end, 
+			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
+			                          &XSLT_SAX(handle).element_end, 
 			                          handler);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
 		else if (strcasecmp(string_key, "namespace") == 0) {
-			register_sax_handler_pair(XSLT_SAX(handle).namespace_start, 
-			                          XSLT_SAX(handle).namespace_end, 
+			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
+			                          &XSLT_SAX(handle).namespace_end, 
 			                          handler);
 		}
 		/* Comment handlers, called when a comment is reached */
@@ -292,7 +292,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 	zval                   **processor_p,       /* Resource pointer to the php->sablotron handle */
 	                       **scheme_handlers_p, /* Pointer to the scheme handler array */
 	                       **handler;           /* Individual scheme handler */
-	zval                    *assign_handle;     /* The handler to assign to */
+	zval                   **assign_handle;     /* The handler to assign to */
 	HashTable               *scheme_handlers;   /* Scheme handler array */
 	php_xslt                *handle;            /* php->sablotron handle */
 	char                    *string_key;        /* Hash key (string) */
@@ -328,31 +328,31 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 		/* Open the URI and return the whole string */
 		if (strcasecmp(string_key, "get_all") == 0) {
-			assign_handle = XSLT_SCHEME(handle).get_all;
+			assign_handle = &XSLT_SCHEME(handle).get_all;
 		}
 		/* Open the URI and return a handle */
 		else if (strcasecmp(string_key, "open") == 0) {
-			assign_handle = XSLT_SCHEME(handle).open;
+			assign_handle = &XSLT_SCHEME(handle).open;
 		}
 		/* Retrieve data from the URI */
 		else if (strcasecmp(string_key, "get") == 0) {
-			assign_handle = XSLT_SCHEME(handle).get;
+			assign_handle = &XSLT_SCHEME(handle).get;
 		}
 		/* Save data to the URI */
 		else if (strcasecmp(string_key, "put") == 0) {
-			assign_handle = XSLT_SCHEME(handle).put;
+			assign_handle = &XSLT_SCHEME(handle).put;
 		}
 		/* Close the URI */
 		else if (strcasecmp(string_key, "close") == 0) {
-			assign_handle = XSLT_SCHEME(handle).close;
+			assign_handle = &XSLT_SCHEME(handle).close;
 		}
 		/* Invalid handler name */
 		else {
 			php_error(E_WARNING, "Invalid option to xslt_set_scheme_handlers(): %s", string_key);
 		}
 
-		assign_handle = *handler;
-		zval_add_ref(&assign_handle);
+		*assign_handle = *handler;
+		zval_add_ref(assign_handle);
 	}
 }
 /* }}} */
@@ -659,14 +659,14 @@ static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ register_sax_handler_pair()
    Register a pair of sax handlers */
-static void register_sax_handler_pair(zval *handler1, zval *handler2, zval **handler)
+static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **handler)
 {
 	zval **current;   /* The current handler we're grabbing */
 	
 	/* Grab and assign handler 1 */
 	if (zend_hash_index_find(Z_ARRVAL_PP(handler), 0, (void **) &current) == SUCCESS) {
-		handler1 = *current;
-		zval_add_ref(&handler1);
+		*handler1 = *current;
+		zval_add_ref(handler1);
 	}
 	else {
 		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
@@ -675,8 +675,8 @@ static void register_sax_handler_pair(zval *handler1, zval *handler2, zval **han
 	
 	/* Grab and assign handler 2 */
 	if (zend_hash_index_find(Z_ARRVAL_PP(handler), 1, (void **) &current) == SUCCESS) {
-		handler2 = *current;
-		zval_add_ref(&handler2);
+		*handler2 = *current;
+		zval_add_ref(handler2);
 	}
 	else {
 		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
