@@ -3,7 +3,8 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pspell,for PSPELL support,
-[  --with-pspell[=DIR]     Include PSPELL support.])
+[  --with-pspell[=DIR]     Include PSPELL support.
+                          This replaces the old ASPELL extension.])
 
 if test "$PHP_PSPELL" != "no"; then
 	PHP_NEW_EXTENSION(pspell, pspell.c, $ext_shared)
