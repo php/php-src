@@ -85,14 +85,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\alloca.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sprintf.c
-# End Source File
-# Begin Source File
-
 SOURCE=".\zend-parser.c"
 # End Source File
 # Begin Source File
@@ -162,6 +154,10 @@ SOURCE=.\zend_operators.c
 # Begin Source File
 
 SOURCE=.\zend_ptr_stack.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\php4\zend_sprintf.c
 # End Source File
 # Begin Source File
 
