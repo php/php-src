@@ -173,28 +173,6 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-/* {{{ proto actualEncoding	string	
-readonly=no 
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-actualEncoding
-Since: DOM Level 3
-*/
-/* READ ONLY FOR NOW USING ENCODING PROPERTY
-int dom_document_actual_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
-{
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
-	return SUCCESS;
-}
-
-int dom_document_actual_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
-{
-	return SUCCESS;
-}
-*/
-
-/* }}} */
-
 /* {{{ proto encoding	string
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-encoding
 Since: DOM Level 3
