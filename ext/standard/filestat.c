@@ -128,6 +128,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 {
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
+		BG(CurrentStatFile) = NULL;
 	}
 	return SUCCESS;
 }
