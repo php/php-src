@@ -37,6 +37,12 @@ class PEAR_Command_Registry extends PEAR_Command_Common
         switch ($command) {
             case 'list-installed':
                 return array(null, 'List the installed PEAR packages in the system');
+            case 'shell-test':
+                return array('<package name> [<relation>] [<version>]',
+                        "Tests if a package is installed in the system. Will exit(1) if it is not.\n".
+                        "   <relation>   The version comparison operator. One of:\n".
+                        "                <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne\n".
+                        "   <version>    The version to compare with");
         }
     }
 
