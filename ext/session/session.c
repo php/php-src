@@ -611,7 +611,7 @@ static void _php_session_cache_limiter(PSLS_D)
 		int output_start_lineno = php_get_output_start_lineno();
 
 		if (output_start_filename) {
-			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent by (output started at %s:%d)",
+			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)",
 				output_start_filename, output_start_lineno);
 		} else {
 			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
