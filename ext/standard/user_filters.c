@@ -118,6 +118,11 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	zval *retval = NULL;
 	zval **tmp; 
 
+	if (obj == NULL) {
+		/* If there's no object associated then there's nothing to dispose of */
+		return;
+	}
+
 	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1, 0);
 
 	call_user_function_ex(NULL,
@@ -266,19 +271,11 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	ALLOC_INIT_ZVAL(zfilter);
-	ZEND_REGISTER_RESOURCE(zfilter, filter, le_userfilters);
-	
 	/* create the object */
 	ALLOC_ZVAL(obj);
 	object_init_ex(obj, fdat->ce);
 	ZVAL_REFCOUNT(obj) = 1;
 	PZVAL_IS_REF(obj) = 1;
-
-	/* set the filter property */
-	filter->abstract = obj;
-	
-	add_property_zval(obj, "filter", zfilter);
 
 	/* filtername */
 	add_property_string(obj, "filtername", (char*)filtername, 1);
@@ -300,8 +297,30 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			0, NULL,
 			0, NULL TSRMLS_CC);
 
-	if (retval)
+	if (retval) {
+		if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
+			/* User reported filter creation error "return false;" */
+			zval_ptr_dtor(&retval);
+
+			/* Kill the filter (safely) */
+			filter->abstract = NULL;
+			php_stream_filter_free(filter TSRMLS_CC);
+
+			/* Kill the object */
+			zval_ptr_dtor(&obj);
+
+			/* Report failure to filter_alloc */
+			return NULL;
+		}			
 		zval_ptr_dtor(&retval);
+	}
+
+	/* set the filter property, this will be used during cleanup */
+	ALLOC_INIT_ZVAL(zfilter);
+	ZEND_REGISTER_RESOURCE(zfilter, filter, le_userfilters);
+	filter->abstract = obj;
+	add_property_zval(obj, "filter", zfilter);
+
 	return filter;
 }
 
