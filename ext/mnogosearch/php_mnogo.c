@@ -643,6 +643,10 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			
 		case UDM_ISPELL_TYPE_AFFIX: 
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+
+#if UDM_VERSION_ID > 30111
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
+#endif
 			
 			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
 				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load affix file %s",val2);
@@ -654,16 +658,28 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 		case UDM_ISPELL_TYPE_SPELL: 
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
 			
+#if UDM_VERSION_ID > 30111
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
+#endif
+			
 			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
 				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load spell file %s",val2);
 				RETURN_FALSE;
 			}
 			
 			break;
-			
+
+#if UDM_VERSION_ID > 30111
+
 		case UDM_ISPELL_TYPE_SERVER:
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+			Agent->Conf->ispell_mode |=  UDM_ISPELL_MODE_SERVER;
+			
+			Agent->Conf->spellhost = strdup(val1);
 		
 			break;
+			
+#endif
 
 		default:
 			php_error(E_WARNING,"Udm_Load_Ispell_Data: Unknown ispell type parameter");
@@ -702,7 +718,9 @@ DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
 	
-	/* UdmClearIspellData(Agent->Conf); */
+#if UDM_VERSION_ID > 30111
+	UdmFreeIspell(Agent->Conf);
+#endif
 	
 	RETURN_TRUE;
 }
