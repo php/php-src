@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added support for libmcrypt 2.4.4
 - Added strncasecmp function (Andi, Zend Engine)
 - Made foreach() only support variables and array(...) as the array argument
   (Andi, Zend Engine)
