@@ -50,6 +50,7 @@ typedef struct {
 	PGresult                *result;
 	int                     current_row;
 	pdo_pgsql_column        *cols;
+	char *cursor_name;
 } pdo_pgsql_stmt;
 
 typedef struct {
