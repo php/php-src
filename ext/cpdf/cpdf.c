@@ -45,6 +45,8 @@
 # endif
 #endif
 
+#include <cpdflib.h>
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
