@@ -324,7 +324,7 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 }
 
 
-/* {{{ proto xsl_xsltdocucument xsl_xsltprocessor_import_stylesheet(node index);
+/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -457,7 +457,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 
 }
 
-/* {{{ proto xsl_document xsl_xsltprocessor_transform_to_doc(node doc [,boolean clone]);
+/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
 */
@@ -501,7 +501,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
 
-/* {{{ proto xsl_ xsl_xsltprocessor_transform_to_uri(node doc, string uri [,boolean clone]);
+/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri);
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
@@ -545,7 +545,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
 
-/* {{{ proto xsl_string xsl_xsltprocessor_transform_to_xml(node doc [,boolean clone]);
+/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc);
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
@@ -596,7 +596,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 /* }}} end xsl_xsltprocessor_transform_to_xml */
 
 
-/* {{{ proto xsl_ xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
+/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
 */
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
@@ -647,7 +647,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 }
 /* }}} end xsl_xsltprocessor_set_parameter */
 
-/* {{{ proto xsl_ xsl_xsltprocessor_get_parameter(string namespace, string name);
+/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name);
 */
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
@@ -672,7 +672,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 }
 /* }}} end xsl_xsltprocessor_get_parameter */
 
-/* {{{ proto xsl_ xsl_xsltprocessor_remove_parameter(string namespace, string name);
+/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name);
 */
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
@@ -695,7 +695,7 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
 
-/* {{{ proto xsl_xsltprocessor_register_php_functions();
+/* {{{ proto void xsl_xsltprocessor_register_php_functions();
 */
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 {
@@ -711,7 +711,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 }
 /* }}} end xsl_xsltprocessor_register_php_functions(); */
 
-/* {{{ proto xsl_xsltprocessor_has_exslt_support();
+/* {{{ proto bool xsl_xsltprocessor_has_exslt_support();
 */
 PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 {
