@@ -2717,14 +2717,14 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 		}
 		ib_blob->bl_handle = NULL;
 		RETVAL_STRINGL((char *)ib_blob, sizeof(ibase_blob_handle), 1);
-		zend_list_delete(Z_LVAL_P(blob_arg));
+		zend_list_delete(Z_LVAL_PP(blob_arg));
 	} else { /* discard created blob */
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_error(TSRMLS_C);
 			RETURN_FALSE;
 		}
 		ib_blob->bl_handle = NULL;
-		zend_list_delete(Z_LVAL_P(blob_arg));
+		zend_list_delete(Z_LVAL_PP(blob_arg));
 		RETURN_TRUE;
 	}
 }
