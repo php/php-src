@@ -807,7 +807,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 							  char *subject, int subject_len,
 							  zval *replace_val, int is_callable_replace,
-							  int *result_len, int limit TSRMLS_DC)
+							  int *result_len, int limit, int *replace_count TSRMLS_DC)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -887,9 +887,12 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 		piece = subject + start_offset;
 
 		if (count > 0 && (limit == -1 || limit > 0)) {
+			if (replace_count) {
+				++*replace_count;
+			}
 			/* Set the match location in subject */
 			match = subject + offsets[0];
-
+			              
 			new_len = *result_len + offsets[0] - start_offset; /* part before the match */
 			
 			/* If evaluating, do it and add the return string's length */
@@ -1019,7 +1022,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 
 /* {{{ php_replace_in_subject
  */
-static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace TSRMLS_DC)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace, int *replace_count TSRMLS_DC)
 {
 	zval		**regex_entry,
 				**replace_entry = NULL,
@@ -1076,7 +1079,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 										   replace_value,
 										   is_callable_replace,
 										   result_len,
-										   limit TSRMLS_CC)) != NULL) {
+										   limit,
+										   replace_count TSRMLS_CC)) != NULL) {
 				efree(subject_value);
 				subject_value = result;
 				subject_len = *result_len;
@@ -1094,7 +1098,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 								  replace,
 								  is_callable_replace,
 								  result_len,
-								  limit TSRMLS_CC);
+								  limit,
+                                  replace_count TSRMLS_CC);
 		return result;
 	}
 }
@@ -1108,17 +1113,20 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 				   **replace,
 				   **subject,
 				   **limit,
-				   **subject_entry;
+				   **subject_entry,
+                   **zcount;
 	char			*result;
 	int				 result_len;
 	int				 limit_val = -1;
 	char			*string_key;
 	ulong			 num_key;
 	char			*callback_name = NULL;
+    int				replace_count=0;
+    int             *replace_count_ptr=NULL; 
 	
 	/* Get function parameters and do error-checking. */
-	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &replace, &subject, &limit) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 5 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	if (!is_callable_replace && Z_TYPE_PP(replace) == IS_ARRAY && Z_TYPE_PP(regex) != IS_ARRAY) {
@@ -1147,6 +1155,9 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		convert_to_long_ex(limit);
 		limit_val = Z_LVAL_PP(limit);
 	}
+	if (ZEND_NUM_ARGS() > 4) {
+		replace_count_ptr =& replace_count;
+	}
 		
 	if (Z_TYPE_PP(regex) != IS_ARRAY)
 		convert_to_string_ex(regex);
@@ -1160,7 +1171,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
 			SEPARATE_ZVAL(subject_entry);
-			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace TSRMLS_CC)) != NULL) {
+			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
 				/* Add to return array */
 				switch(zend_hash_get_current_key(Z_ARRVAL_PP(subject), &string_key, &num_key, 0))
 				{
@@ -1176,16 +1187,20 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		
 			zend_hash_move_forward(Z_ARRVAL_PP(subject));
 		}
-	}
-	else {	/* if subject is not an array */
-		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val, is_callable_replace TSRMLS_CC)) != NULL) {
+	} else {	/* if subject is not an array */
+		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
 			RETVAL_STRINGL(result, result_len, 0);
 		}
-	}	
+	}
+	if (replace_count_ptr) {
+		zval_dtor(*zcount);
+		ZVAL_LONG(*zcount, replace_count);
+	}
+    	
 }
 /* }}} */
 
-/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit])
+/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
    Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
@@ -1193,7 +1208,7 @@ PHP_FUNCTION(preg_replace)
 }
 /* }}} */
 
-/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit])
+/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, count]])
    Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
 {
