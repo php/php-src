@@ -1126,7 +1126,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
-void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *type_hint, zend_uchar pass_type TSRMLS_DC)
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, zend_uchar pass_type TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1154,16 +1154,14 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 		CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
 		CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
 	}
-	if (type_hint->op_type != IS_UNUSED) {
+
+	if (class_type->op_type != IS_UNUSED) {
 		znode passed_var = opline->result;
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		if (type_hint->op_type == IS_TYPE) {
-			opline->opcode = ZEND_VERIFY_TYPE;
-		} else {
-			opline->opcode = ZEND_VERIFY_INSTANCEOF;
-		}
-		opline->op1 = *type_hint;
+
+		opline->opcode = ZEND_VERIFY_INSTANCEOF;
+		opline->op1 = *class_type;
 		opline->op2 = passed_var;
 		opline->extended_value = offset->u.constant.value.lval;
 	} else {
@@ -1615,21 +1613,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 {
 	zend_function *function;
 
-	if (!ce->parent) {
-		return;
-	}
-    if (!ce->__get) {
-        ce->__get   = ce->parent->__get;
-    }
-    if (!ce->__set) {
-        ce->__set = ce->parent->__set;
-    }
-    if (!ce->__call) {
-        ce->__call = ce->parent->__call;
-    }
-	ce->create_object = ce->parent->create_object;
-
-	if (ce->constructor) {
+	if (!ce->parent || ce->constructor) {
 		return;
 	}
 
@@ -1648,6 +1632,16 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		}
 	}
 	ce->constructor = ce->parent->constructor;
+    if (!ce->__get) {
+        ce->__get   = ce->parent->__get;
+    }
+    if (!ce->__set) {
+        ce->__set = ce->parent->__set;
+    }
+    if (!ce->__call) {
+        ce->__call = ce->parent->__call;
+    }
+	ce->create_object = ce->parent->create_object;
 }
 
 
