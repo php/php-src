@@ -95,9 +95,9 @@ BEGIN_EXTERN_C()
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
 		class_container.create_object = NULL;	 				\
-		class_container.handle_function_call = handle_fcall;	\
-		class_container.handle_property_get = handle_propget;	\
-		class_container.handle_property_set = handle_propset;	\
+		class_container.__call = handle_fcall;	\
+		class_container.__get = handle_propget;	\
+		class_container.__set = handle_propset;	\
 	}
 
 
