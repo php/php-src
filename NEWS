@@ -31,8 +31,6 @@ PHP 4                                                                      NEWS
   . Implemented object signal callback ability by using array($obj, $method)
   . Added a restart parameter to pcntl_signal, which allows you to disable
     the default of system call restarting
-- Added php.ini option "double_buffering" which forces an additional first
-  output buffer and improved handling of buffer sizes. (Marcus)
 - Changed DomNode->next_sibling() and DomNode->previous_sibling() to return
   NULL instead of false (W3C specs). (chregu)
 - Changed DomNode->insert_before() and DomNode->append_child() to conform to
