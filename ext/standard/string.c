@@ -403,23 +403,62 @@ PHP_FUNCTION(strcoll)
 /* }}} */
 #endif
 
-/* {{{ php_trim
+/* {{{ php_charmask
+ * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
+ * it needs to be incrementing.  
  */
-PHPAPI void php_trim(zval *str, zval * return_value, int mode)
+void php_charmask(unsigned char *input, int len, char *mask)
+{
+	unsigned char *end;
+	unsigned char c;
+
+	memset(mask, 0, 256);
+	for (end=input+len; input<end; input++) {
+		c=*input; 
+		if (input+3<end && *(input+1) == '.' && *(input+2) == '.' 
+				&& *(input+3) >= c) {
+			memset(mask+c, 1, *(input+3) - c + 1);
+			input+=3;
+		} else
+			mask[c]=1;
+	}
+}
+/* }}} */
+
+/* {{{ php_trim
+       Compatibility function, ports old-API to new one. (DEPRECATED)
+*/
+void php_trim(zval *str, zval *return_value, int mode)
+{
+	php_trim2(str, NULL, return_value, mode);
+}
+/* }}} */
+
+/* {{{ php_trim2
+ */
+PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode)
 /* mode 1 : trim left
    mode 2 : trim right
    mode 3 : trim left and right
+
+   what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
 */
 {
 	register int i;
 	int len = str->value.str.len;
 	int trimmed = 0;
 	char *c = str->value.str.val;
+	char mask[256];
+
+	if (what) {
+		php_charmask(what->value.str.val, what->value.str.len, mask);
+	} else {
+		php_charmask(" \n\r\t\v\0", 6, mask);
+	}
 
 	if (mode & 1) {
 		for (i = 0; i < len; i++) {
-			if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
-				c[i] == '\t' || c[i] == '\v' || c[i] == '\0') {
+			if (mask[(unsigned char)c[i]]) {
 				trimmed++;
 			} else {
 				break;
@@ -430,8 +469,7 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 	}
 	if (mode & 2) {
 		for (i = len - 1; i >= 0; i--) {
-			if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
-				c[i] == '\t' || c[i] == '\v' || c[i] == '\0') {
+			if (mask[(unsigned char)c[i]]) {
 				len--;
 			} else {
 				break;
@@ -450,18 +488,19 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
    Remove trailing whitespace */
 PHP_FUNCTION(chop)
 {
-	zval **str;
+	zval **str, **what;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	}
+	zend_get_parameters_ex(2, &str, &what);
 	convert_to_string_ex(str);
+	if (ZEND_NUM_ARGS() == 2)
+		convert_to_string_ex(str);
 
-	if ((*str)->type == IS_STRING) {
-		php_trim(*str, return_value, 2);
-		return;
-	}
-	RETURN_FALSE;
+	/* convert_to_string_ex never fails (last line: op->type = IS_STRING),
+	   so, not checking for that. */
+
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 2);
 }
 /* }}} */
 
@@ -469,18 +508,16 @@ PHP_FUNCTION(chop)
    Strip whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
-	zval **str;
+	zval **str, **what;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	}
+	zend_get_parameters_ex(2, &str, &what);
 	convert_to_string_ex(str);
+	if (ZEND_NUM_ARGS() == 2)
+		convert_to_string_ex(str);
 
-	if ((*str)->type == IS_STRING) {
-		php_trim(*str, return_value, 3);
-		return;
-	}
-	RETURN_FALSE;
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 3);
 }
 /* }}} */
 
@@ -488,17 +525,16 @@ PHP_FUNCTION(trim)
    Strip whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
-	zval **str;
+	zval **str, **what;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	}
+	zend_get_parameters_ex(2, &str, &what);
 	convert_to_string_ex(str);
-	if ((*str)->type == IS_STRING) {
-		php_trim(*str, return_value, 1);
-		return;
-	}
-	RETURN_FALSE;
+	if (ZEND_NUM_ARGS() == 2)
+		convert_to_string_ex(str);
+
+	php_trim2(*str, ZEND_NUM_ARGS()==2?*what:NULL, return_value, 1);
 }
 /* }}} */
 
