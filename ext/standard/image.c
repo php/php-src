@@ -636,6 +636,10 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 	dummy_int = php_read4(stream TSRMLS_CC); /* YTOsiz */
 
 	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
+	if (result->channels < 0 || result->channels > 256) {
+		efree(result);
+		return NULL;
+	}
 
 	/* Collect bit depth info */
 	highest_bit_depth = bit_depth = 0;
@@ -683,7 +687,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 			break;
 		}
 
-		if (box_length == 1) {
+		if (box_length <= 1) {
 			/* We won't handle XLBoxes */
 			return NULL;
 		}
@@ -698,7 +702,9 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 		}
 
 		/* Skip over LBox (Which includes both TBox and LBox itself */
-		php_stream_seek(stream, box_length - 8, SEEK_CUR); 
+		if (php_stream_seek(stream, box_length - 8, SEEK_CUR)) {
+			break;
+		}
 	}
 
 	if (result == NULL) {
