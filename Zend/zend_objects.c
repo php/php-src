@@ -24,7 +24,14 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 
-static inline void zend_objects_call_destructor(zend_object *object, zend_object_handle handle TSRMLS_DC)
+static inline void zend_nuke_object(zend_object *object TSRMLS_DC)
+{
+	zend_hash_destroy(object->properties);
+	FREE_HASHTABLE(object->properties);
+	efree(object);
+}
+
+ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	zend_function *destructor = object->ce->destructor;
 
@@ -34,34 +41,40 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 		zval *retval_ptr;
 		HashTable symbol_table;
 		
+		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+				/* Ensure that if we're calling a private function, we're allowed to do so.
+				 */
+				if (object->ce != EG(scope)) {
+					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
+					zend_error(E_ERROR, "Call to private destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+					return;
+				}
+			} else {
+				/* Ensure that if we're calling a protected function, we're allowed to do so.
+				 */
+				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
+					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
+					zend_error(E_ERROR, "Call to protected destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+					return;
+				}
+			}
+		}
+
 		MAKE_STD_ZVAL(obj);
 		obj->type = IS_OBJECT;
 		obj->value.obj.handle = handle;
 		obj->value.obj.handlers = &std_object_handlers;
 		zval_copy_ctor(obj);
 
+		ZEND_INIT_SYMTABLE(&symbol_table);
+		
 		/* FIXME: Optimize this so that we use the old_object->ce->destructor function pointer instead of the name */
 		MAKE_STD_ZVAL(destructor_func_name);
 		destructor_func_name->type = IS_STRING;
 		destructor_func_name->value.str.val = estrndup("__destruct", sizeof("__destruct")-1);
 		destructor_func_name->value.str.len = sizeof("__destruct")-1;
 
-		if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			if (object->ce != EG(scope)) {
-				zend_error(E_ERROR, "Call to private destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
-			}
-		} else if ((destructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			if (!zend_check_protected(destructor->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
-			}
-		}
-
-		ZEND_INIT_SYMTABLE(&symbol_table);
-		
 		call_user_function_ex(NULL, &obj, destructor_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
 
 		zend_hash_destroy(&symbol_table);
@@ -71,16 +84,7 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 			zval_ptr_dtor(&retval_ptr);
 		}
 	}
-}
-
-
-ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
-{
-	zend_objects_call_destructor(object, handle TSRMLS_CC);
-	/* Nuke the object */
-	zend_hash_destroy(object->properties);
-	FREE_HASHTABLE(object->properties);
-	efree(object);
+	zend_nuke_object(object TSRMLS_CC);
 }
 
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
