@@ -1729,7 +1729,7 @@ cleanup:
 
 
 
-/* {{{ proto int fread(int fp, int length)
+/* {{{ proto string fread(int fp, int length)
    Binary-safe file read */
 
 PHP_FUNCTION(fread)
