@@ -1905,6 +1905,10 @@ SOURCE=.\glob.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\globals.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\md5crypt.c
 # End Source File
 # Begin Source File
@@ -1966,6 +1970,10 @@ SOURCE=..\win32\param.h
 # Begin Source File
 
 SOURCE=..\win32\php_registry.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_win32_globals.h
 # End Source File
 # Begin Source File
 
