@@ -1165,8 +1165,6 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	MSSQLLS_FETCH();
 	PLS_FETCH();
 
-	
-
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
@@ -1204,25 +1202,40 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			int data_len;
 			int should_copy;
 
-			if (PG(magic_quotes_runtime) && Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
-				data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &result->data[result->cur_row][i].value.str.len, 1);
-				should_copy = 0;
-			}
-			else
-			{
-				data = Z_STRVAL(result->data[result->cur_row][i]);
-				data_len = Z_STRLEN(result->data[result->cur_row][i]);
-				should_copy = 1;
-			}
+			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
+				if (PG(magic_quotes_runtime)) {
+					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &result->data[result->cur_row][i].value.str.len, 1);
+					should_copy = 0;
+				}
+				else
+				{
+					data = Z_STRVAL(result->data[result->cur_row][i]);
+					data_len = Z_STRLEN(result->data[result->cur_row][i]);
+					should_copy = 1;
+				}
 
-
-			if (result_type & MSSQL_NUM) {
-				add_index_stringl(return_value, i, data, data_len, should_copy);
-				should_copy = 1;
+				if (result_type & MSSQL_NUM) {
+					add_index_stringl(return_value, i, data, data_len, should_copy);
+					should_copy = 1;
+				}
+				
+				if (result_type & MSSQL_ASSOC) {
+					add_assoc_stringl(return_value, result->fields[i].name, data, data_len, should_copy);
+				}
 			}
-			
-			if (result_type & MSSQL_ASSOC) {
-				add_assoc_stringl(return_value, result->fields[i].name, data, data_len, should_copy);
+			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_LONG) {
+				if (result_type & MSSQL_NUM)
+					add_index_long(return_value, i, result->data[result->cur_row][i].value.lval);
+				
+				if (result_type & MSSQL_ASSOC)
+					add_assoc_long(return_value, result->fields[i].name, result->data[result->cur_row][i].value.lval);
+			}
+			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_DOUBLE) {
+				if (result_type & MSSQL_NUM)
+					add_index_double(return_value, i, result->data[result->cur_row][i].value.dval);
+				
+				if (result_type & MSSQL_ASSOC)
+					add_assoc_double(return_value, result->fields[i].name, result->data[result->cur_row][i].value.dval);
 			}
 		}
 		else
