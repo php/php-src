@@ -375,7 +375,7 @@ PHPAPI int php_printf(const char *format, ...)
 		ret = PHPWRITE(buffer, size);
 		efree(buffer);
 	} else {
-		php_error(E_ERROR, "Out of memory");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Out of memory");
 		ret = 0;
 	}
 	va_end(args);
@@ -681,7 +681,7 @@ PHP_FUNCTION(set_time_limit)
 	zval **new_timeout;
 
 	if (PG(safe_mode)) {
-		php_error(E_WARNING, "Cannot set time limit in safe mode");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot set time limit in safe mode");
 		RETURN_FALSE;
 	}
 
@@ -731,17 +731,20 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
 				TSRMLS_FETCH();
 
-				php_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
 				TSRMLS_FETCH();
 
-				php_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
-		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
-			php_error(E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
+		case ZMSG_FAILED_HIGHLIGHT_FOPEN: {
+				TSRMLS_FETCH();
+
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
+			}
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED: {
@@ -1440,7 +1443,7 @@ static int php_hash_environment(TSRMLS_D)
 					INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
 					php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 				} else {
-					php_error(E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
 				}
 				break;
 			case 's':

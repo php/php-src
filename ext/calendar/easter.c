@@ -48,7 +48,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
  
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php_error(E_WARNING, "%s(): This function is only valid for years between 1970 and 2037 inclusive", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
 		RETURN_FALSE;
 	}
 
