@@ -30,7 +30,7 @@ extern php3_module_entry oracle_module_entry;
 
 #ifdef ZTS
 #define ORALS_D php_ora_globals *ora_globals
-#define ORALS_DC , PSLS_D
+#define ORALS_DC , ORACLE_D
 #define ORALS_C ora_globals
 #define ORALS_CC , ORALS_C
 #define ORA(v) (ora_globals->v)

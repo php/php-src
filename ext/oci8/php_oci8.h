@@ -180,7 +180,7 @@ extern php3_module_entry oci8_module_entry;
 
 #ifdef ZTS
 #define OCILS_D php_oci_globals *oci_globals
-#define OCILS_DC , PSLS_D
+#define OCILS_DC , OCILS_D
 #define OCILS_C oci_globals
 #define OCILS_CC , OCILS_C
 #define OCI(v) (oci_globals->v)

@@ -301,8 +301,7 @@ CONST void ocifree(dvoid *ctx, dvoid *ptr)
 /* {{{ startup, shutdown and info functions */
 
 
-#ifdef ZTS
-static void php_oci_init_globals(php_oci_globals *oci_globals)
+static void php_oci_init_globals(OCILS_D)
 { 
    	OCI(user_num)   = 1000;
 	OCI(server_num) = 2000;
@@ -321,32 +320,28 @@ static void php_oci_init_globals(php_oci_globals *oci_globals)
 				   NULL);
 	
 }
-#endif
 
 PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
 	ELS_FETCH();
 
+#ifdef ZTS 
+	#define PHP_OCI_INIT_MODE OCI_THREADED
+#else
+	#define PHP_OCI_INIT_MODE OCI_DEFAULT
+#endif
+
+#if OCI_USE_EMALLOC
+    OCIInitialize(PHP_OCI_INIT_MODE, NULL, ocimalloc, ocirealloc, ocifree);
+#else
+    OCIInitialize(PHP_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
+#endif
+
 #ifdef ZTS
 	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
 #else
-	OCI(user_num)   = 1000;
-	OCI(server_num) = 2000;
-
-	OCI(user) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(user), 13, NULL, NULL, 1);
-
-	OCI(server) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
-
-	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
-	OCIHandleAlloc(OCI(pEnv), 
-				   (dvoid **)&OCI(pError),
-				   OCI_HTYPE_ERROR, 
-				   0, 
-				   NULL);
-	
+	php_oci_init_globals(OCILS_C);
 #endif
 
 	le_stmt = register_list_destructors(_oci_statement_dtor, NULL);
@@ -392,18 +387,6 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_D_FILE",OCI_DTYPE_FILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_D_LOB",OCI_DTYPE_LOB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_D_ROWID",OCI_DTYPE_ROWID, CONST_CS | CONST_PERSISTENT);
-
-#ifdef ZTS 
-	#define PHP_OCI_INIT_MODE OCI_THREADED
-#else
-	#define PHP_OCI_INIT_MODE OCI_DEFAULT
-#endif
-
-#if OCI_USE_EMALLOC
-    OCIInitialize(PHP_OCI_INIT_MODE, NULL, ocimalloc, ocirealloc, ocifree);
-#else
-    OCIInitialize(PHP_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
-#endif
 
 	return SUCCESS;
 }
