@@ -121,7 +121,7 @@ static void _delete_query(zend_rsrc_list_entry *rsrc)
 	m_query *query = (m_query *)rsrc->ptr;
 
 	if(query->result) msqlFreeResult(query->result);
-	efree(rsrc);
+	efree(query);
 }
 
 static m_query *php_msql_query_wrapper(m_result *res, int af_rows)
