@@ -206,7 +206,7 @@ static php_stream_filter_factory strfilter_tolower_factory = {
 };
 /* }}} */
 
-/* {{{ base64 stream filter implementation */
+/* {{{ base64 / quoted_printable stream filter implementation */
 
 typedef enum _php_conv_err_t {
 	PHP_CONV_ERR_SUCCESS = SUCCESS,
@@ -552,68 +552,257 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 }
 /* }}} */
 
-typedef struct _php_base64_filter {
+/* {{{ php_conv_qprint_encode */
+typedef struct _php_conv_qprint_encode {
+	php_conv _super;
+} php_conv_qprint_encode;
+
+static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst);
+static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p);
+
+static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
+{
+	/* do nothing */
+}
+
+static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
+{
+	php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
+	unsigned char *ps, *pd;
+	size_t icnt, ocnt;
+	unsigned int c;
+	static char qp_digits[] = "0123456789ABCDEF";
+
+	if (in_pp == NULL || in_left_p == NULL) {
+		return PHP_CONV_ERR_SUCCESS;
+	}
+
+	ps = (unsigned char *)(*in_pp);
+	icnt = *in_left_p;
+	pd = (unsigned char *)(*out_pp);
+	ocnt = *out_left_p;
+ 
+	for (; icnt > 0; icnt--, ps++) {
+		c = *ps;
+
+		if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
+			if (ocnt < 1) {
+				err = PHP_CONV_ERR_TOO_BIG;
+				break;
+			}
+			*(pd++) = c;
+			ocnt--;
+		} else {
+			if (ocnt < 3) {
+				err = PHP_CONV_ERR_TOO_BIG;
+				break;
+			}
+			*(pd++) = '=';
+			*(pd++) = qp_digits[(c >> 4)];
+			*(pd++) = qp_digits[(c & 0x0f)]; 
+			ocnt -= 3;
+		}
+	}
+
+	*in_pp = (const char *)ps;
+	*in_left_p = icnt;
+	*out_pp = (char *)pd;
+	*out_left_p = ocnt; 
+
+	return err;
+}
+
+static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst)
+{
+	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_encode_convert;
+	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_encode_dtor;
+	return PHP_CONV_ERR_SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_conv_qprint_decode */
+typedef struct _php_conv_qprint_decode {
+	php_conv _super;
+
+	int scan_stat;
+	unsigned int next_char;
+} php_conv_qprint_decode;
+
+static void php_conv_qprint_decode_dtor(php_conv_qprint_decode *inst)
+{
+	/* do nothing */
+}
+
+static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
+{
+	php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
+	size_t icnt, ocnt;
+	unsigned char *ps, *pd;
+	unsigned int scan_stat;
+	unsigned int v;
+
+	if (in_pp == NULL || in_left_p == NULL) {
+		if (inst->scan_stat != 0) {
+			return PHP_CONV_ERR_UNEXPECTED_EOS;
+		}
+		return PHP_CONV_ERR_SUCCESS;
+	}
+
+	ps = (unsigned char *)(*in_pp);
+	icnt = *in_left_p;
+	pd = (unsigned char *)(*out_pp);
+	ocnt = *out_left_p;
+	scan_stat = inst->scan_stat;
+
+	v = 0;
+
+	for (;icnt > 0; icnt--) {
+		switch (scan_stat) {
+			case 0: {
+				if (*ps == '=') {
+					scan_stat = 1;
+				} else {
+					if (ocnt < 1) {
+						err = PHP_CONV_ERR_TOO_BIG;
+						goto out;
+					}
+					*(pd++) = *ps;
+					ocnt--;
+				}
+			} break;
+
+			case 1: case 2: {
+				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
+
+				if (nbl > 15) {
+					return 0;
+				}
+				v = (v << 4) | nbl;
+
+				scan_stat++;
+				if (scan_stat == 3) {
+					if (ocnt < 1) {
+						inst->next_char = v;
+						err = PHP_CONV_ERR_TOO_BIG;
+						goto out;
+					}
+					*(pd++) = v;
+					ocnt--;
+					scan_stat = 0;
+				}
+			} break;
+
+			case 3: {
+				if (ocnt < 1) {
+					err = PHP_CONV_ERR_TOO_BIG;
+					goto out;
+				}
+				*(pd++) = inst->next_char;
+				ocnt--;
+				scan_stat = 0;
+			} break;
+		}
+		ps++;
+	}
+out:
+	*in_pp = (const char *)ps;
+	*in_left_p = icnt;
+	*out_pp = (char *)pd;
+	*out_left_p = ocnt;
+	inst->scan_stat = scan_stat;
+
+	return err;
+}
+static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst)
+{
+	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_decode_convert;
+	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_decode_dtor;
+	inst->scan_stat = 0;
+	inst->next_char = 0;
+
+	return PHP_CONV_ERR_SUCCESS;
+}
+/* }}} */
+
+typedef struct _php_convert_filter {
 	php_conv *write_cd;
 	php_conv *read_cd;
+	int persistent;
+	char *filtername;
 
 	/* ring buffer for read operation */
 	char read_buf[4096];
 	size_t read_buf_left;
-} php_base64_filter;
+} php_convert_filter;
 
-static int php_base64_filter_ctor(php_base64_filter *inst, int write_conv_mode, int read_conv_mode)
+#define PHP_CONV_BASE64_ENCODE 1
+#define PHP_CONV_BASE64_DECODE 2
+#define PHP_CONV_QPRINT_ENCODE 3 
+#define PHP_CONV_QPRINT_DECODE 4
+
+static php_conv *php_conv_open(int conv_mode, int persistent)
+{
+	/* FIXME: I'll have to replace this ugly code by something neat
+	   (factories?) in the near future. */ 
+	php_conv *retval = NULL;
+
+	switch (conv_mode) {
+		case PHP_CONV_BASE64_ENCODE:
+			retval = pemalloc(sizeof(php_conv_base64_encode), persistent);
+			if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval)) {
+				goto out_failure;
+			}
+			break;
+
+		case PHP_CONV_BASE64_DECODE:
+			retval = pemalloc(sizeof(php_conv_base64_decode), persistent);
+			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)retval)) {
+				goto out_failure;
+			}
+			break;
+
+		case PHP_CONV_QPRINT_ENCODE:
+			retval = pemalloc(sizeof(php_conv_qprint_encode), persistent);
+			if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval)) {
+				goto out_failure;
+			}
+			break;
+	
+		case PHP_CONV_QPRINT_DECODE:
+			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
+			if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval)) {
+				goto out_failure;
+			}
+			break;
+
+		default:
+			retval = NULL;
+			break;
+	}
+	return retval;
+
+out_failure:
+	if (retval != NULL) {
+		pefree(retval, persistent);
+	}
+	return NULL;	
+}
+
+static int php_convert_filter_ctor(php_convert_filter *inst, int write_conv_mode, int read_conv_mode, const char *filtername, int persistent)
 {
 	php_conv *write_cd = NULL;
 	php_conv *read_cd = NULL;
 
-	/* FIXME: I'll have to replace this ugly dup'ed code by something neat
-	   (factories?) in the near future. */ 
-	switch (write_conv_mode) {
-		case 1:
-			write_cd = emalloc(sizeof(php_conv_base64_encode));
-			if (php_conv_base64_encode_ctor((php_conv_base64_encode *)write_cd)) {
-				efree(write_cd);
-				write_cd = NULL;
-				goto out_failure;
-			}
-			break;
+	inst->persistent = persistent;
 
-		case 2:
-			write_cd = emalloc(sizeof(php_conv_base64_decode));
-			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)write_cd)) {
-				efree(write_cd);
-				write_cd = NULL;
-				goto out_failure;
-			}
-			break;
+	inst->filtername = pestrdup(filtername, persistent);
 
-		default:
-			write_cd = NULL;
-			break;
+	if ((write_cd = php_conv_open(write_conv_mode, persistent)) == NULL) {
+		goto out_failure;
 	}
 
-	switch (read_conv_mode) {
-		case 1:
-			read_cd = emalloc(sizeof(php_conv_base64_encode));
-			if (php_conv_base64_encode_ctor((php_conv_base64_encode *)read_cd)) {
-				efree(read_cd);
-				read_cd = NULL;
-				goto out_failure;
-			}
-			break;
-
-		case 2:
-			read_cd = emalloc(sizeof(php_conv_base64_decode));
-			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)read_cd)) {
-				efree(read_cd);
-				read_cd = NULL;
-				goto out_failure;
-			}
-			break;
-
-		default:
-			read_cd = NULL;
-			break;
+	if ((read_cd = php_conv_open(read_conv_mode, persistent)) == NULL) {
+		goto out_failure;
 	}
 
 	inst->write_cd = write_cd;
@@ -626,32 +815,36 @@ static int php_base64_filter_ctor(php_base64_filter *inst, int write_conv_mode, 
 out_failure:
 	if (write_cd != NULL) {
 		php_conv_dtor(write_cd);
-		efree(write_cd);
+		pefree(write_cd, persistent);
 	}
 	if (read_cd != NULL) {
 		php_conv_dtor(read_cd);
-		efree(read_cd);
+		pefree(read_cd, persistent);
 	}
 	return FAILURE;
 }
 
-static void php_base64_filter_dtor(php_base64_filter *inst)
+static void php_convert_filter_dtor(php_convert_filter *inst)
 {
 	if (inst->write_cd != NULL) {
 		php_conv_dtor(inst->write_cd);
-		efree(inst->write_cd);
+		pefree(inst->write_cd, inst->persistent);
 	}
 
 	if (inst->read_cd != NULL) {
 		php_conv_dtor(inst->read_cd);
-		efree(inst->read_cd);
+		pefree(inst->read_cd, inst->persistent);
+	}
+
+	if (inst->filtername != NULL) {
+		pefree(inst->filtername, inst->persistent);
 	}
 }
 
-static size_t strfilter_base64_write(php_stream *stream, php_stream_filter *thisfilter,
+static size_t strfilter_convert_write(php_stream *stream, php_stream_filter *thisfilter,
 			const char *buf, size_t count TSRMLS_DC)
 {
-	php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
 
 	if (inst->write_cd != NULL) {
 		char bucket_buf[2048];
@@ -697,10 +890,10 @@ static size_t strfilter_base64_write(php_stream *stream, php_stream_filter *this
 	return php_stream_filter_write_next(stream, thisfilter, buf, count);
 }
 
-static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisfilter,
+static size_t strfilter_convert_read(php_stream *stream, php_stream_filter *thisfilter,
 			char *buf, size_t count TSRMLS_DC)
 {
-	php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
 	size_t retval;
 
 	if (inst->read_cd != NULL) {
@@ -752,10 +945,10 @@ static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisf
 	return retval;
 }
 
-static int strfilter_base64_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
+static int strfilter_convert_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
 {
 	if (closing) {
-		php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+		php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
 
 		if (inst->write_cd != NULL) {
 			php_conv_err_t err;
@@ -786,171 +979,86 @@ static int strfilter_base64_flush(php_stream *stream, php_stream_filter *thisfil
 	return php_stream_filter_flush_next(stream, thisfilter, closing);
 }
 
-static int strfilter_base64_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
+static int strfilter_convert_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
 {
 	return php_stream_filter_eof_next(stream, thisfilter);
 }
 
-static void strfilter_base64_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
 	assert(thisfilter->abstract != NULL);
 
-	php_base64_filter_dtor((php_base64_filter *)thisfilter->abstract);
-	efree(thisfilter->abstract);
+	php_convert_filter_dtor((php_convert_filter *)thisfilter->abstract);
+	pefree(thisfilter->abstract, ((php_convert_filter *)thisfilter->abstract)->persistent);
 }
 
-static php_stream_filter_ops strfilter_base64_encode_ops = {
-	strfilter_base64_write,
-	strfilter_base64_read,
-	strfilter_base64_flush,
-	strfilter_base64_eof,
-	strfilter_base64_dtor,
-	"string.base64.encode"
+static php_stream_filter_ops strfilter_convert_ops = {
+	strfilter_convert_write,
+	strfilter_convert_read,
+	strfilter_convert_flush,
+	strfilter_convert_eof,
+	strfilter_convert_dtor,
+	"convert.*"
 };
 
-static php_stream_filter_ops strfilter_base64_decode_ops = {
-	strfilter_base64_write,
-	strfilter_base64_read,
-	strfilter_base64_flush,
-	strfilter_base64_eof,
-	strfilter_base64_dtor,
-	"string.base64.decode"
-};
-
-static php_stream_filter *strfilter_base64_create(const char *filtername, const char *filterparams,
+static php_stream_filter *strfilter_convert_create(const char *filtername, const char *filterparams,
 		int filterparamslen, int persistent TSRMLS_DC)
 {
-	php_base64_filter *inst;
+	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
+	char *dot;
 
-	inst = emalloc(sizeof(php_base64_filter));
+	if ((dot = strchr(filtername, '.')) == NULL) {
+		return NULL;
+	}
+	++dot;
+
+	inst = pemalloc(sizeof(php_convert_filter), persistent);
 	assert(inst != NULL);
 
-	if (strcasecmp(filtername, strfilter_base64_encode_ops.label) == 0) {
-		if (php_base64_filter_ctor(inst, 1, 2) != SUCCESS) {
-			efree(inst);
+	if (strcasecmp(dot, "base64-encode") == 0) {
+		if (php_convert_filter_ctor(inst,
+				PHP_CONV_BASE64_ENCODE, PHP_CONV_BASE64_DECODE,
+				filtername, persistent) != SUCCESS) {
+			pefree(inst, persistent);
 			return NULL;
 		}	
-		retval = php_stream_filter_alloc(&strfilter_base64_encode_ops, inst, persistent);
-	} else {
-		if (php_base64_filter_ctor(inst, 2, 1) != SUCCESS) {
-			efree(inst);
+		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+	} else if (strcasecmp(dot, "base64-decode") == 0) {
+		if (php_convert_filter_ctor(inst,
+				PHP_CONV_BASE64_DECODE, PHP_CONV_BASE64_ENCODE,
+				filtername, persistent) != SUCCESS) {
+			pefree(inst, persistent);
 			return NULL;
 		}	
-		retval = php_stream_filter_alloc(&strfilter_base64_decode_ops, inst, persistent);
+		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+	} else if (strcasecmp(dot, "quoted-printable-encode") == 0) {
+		if (php_convert_filter_ctor(inst,
+				PHP_CONV_QPRINT_ENCODE, PHP_CONV_QPRINT_DECODE,
+				filtername, persistent) != SUCCESS) {
+			pefree(inst, persistent);
+			return NULL;
+		}	
+		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+	} else if (strcasecmp(dot, "quoted-printable-decode") == 0) {
+		if (php_convert_filter_ctor(inst,
+				PHP_CONV_QPRINT_DECODE, PHP_CONV_QPRINT_ENCODE,
+				filtername, persistent) != SUCCESS) {
+			pefree(inst, persistent);
+			return NULL;
+		}	
+		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 	}
-	
+
+	if (retval == NULL) {
+		pefree(inst, persistent);
+	}
+		
 	return retval;
 }
 
-static php_stream_filter_factory strfilter_base64_factory = {
-	strfilter_base64_create
-};
-/* }}} */
-
-/* {{{ quoted-printable stream filter implementation */
-
-static size_t strfilter_quoted_printable_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
-{
-	char chunk[4096];
-	size_t chunk_len;
-	unsigned char *ps;
-	unsigned int icnt;
-	static char qp_digits[] = "0123456789ABCDEF";
-
-	chunk_len = 0;
-
-	ps = (unsigned char *)buf;
-	for (icnt = count; icnt > 0; icnt--) {
-		unsigned int c = *(ps++);
-
-		if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
-			if (chunk_len >= sizeof(chunk)) {
-				php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
-				chunk_len = 0;
-			}
-			chunk[chunk_len++] = c;
-		} else {
-			if (chunk_len > sizeof(chunk) - 3) {
-				php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
-				chunk_len = 0;
-			}
-			chunk[chunk_len++] = '=';
-			chunk[chunk_len++] = qp_digits[(c >> 4)];
-			chunk[chunk_len++] = qp_digits[(c & 0x0f)]; 
-		}
-	}
-	php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
-
-	return count;
-}
-
-static size_t strfilter_quoted_printable_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	size_t nbytes_decoded;
-	size_t icnt;
-	unsigned char *ps, *pd;
-	unsigned int scan_stat = (unsigned int)thisfilter->abstract;
-	unsigned int v;
-
-	icnt = php_stream_filter_read_next(stream, thisfilter, buf, count);
-	nbytes_decoded = 0; 
-	ps = pd = (unsigned char *)buf;
-	v = 0;
-
-	for (;icnt > 0; icnt--) {
-		switch (scan_stat) {
-			case 0:
-				if (*ps == '=') {
-					scan_stat = 1;
-				} else {
-					*(pd++) = *ps;
-					nbytes_decoded++;
-				}
-				break;
-
-			case 1: case 2: {
-				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
-
-				if (nbl > 15) {
-					php_error(E_WARNING, "stream filter(%s): invalid character sequence", thisfilter->fops->label); 
-					return 0;
-				}
-				v = (v << 4) | nbl;
-
-				scan_stat++;
-				if (scan_stat == 3) {
-					*(pd++) = v;
-					nbytes_decoded++;
-					scan_stat = 0;
-				}
-			}
-		}
-		ps++;
-	}
-	(unsigned int)thisfilter->abstract = scan_stat;
-	return nbytes_decoded;
-}
-
-static php_stream_filter_ops strfilter_quoted_printable_ops = {
-	strfilter_quoted_printable_write,
-	strfilter_quoted_printable_read,
-	commonfilter_nop_flush,
-	commonfilter_nop_eof,
-	NULL,
-	"string.quoted-printable"
-};
-
-static php_stream_filter *strfilter_quoted_printable_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
-{
-	return php_stream_filter_alloc(&strfilter_quoted_printable_ops, 0, persistent);
-}
-
-static php_stream_filter_factory strfilter_quoted_printable_factory = {
-	strfilter_quoted_printable_create
+static php_stream_filter_factory strfilter_convert_factory = {
+	strfilter_convert_create
 };
 /* }}} */
 
@@ -961,9 +1069,7 @@ static const struct {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
-	{ &strfilter_base64_decode_ops, &strfilter_base64_factory },
-	{ &strfilter_base64_encode_ops, &strfilter_base64_factory },
-	{ &strfilter_quoted_printable_ops, &strfilter_quoted_printable_factory },
+	{ &strfilter_convert_ops, &strfilter_convert_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
 };
