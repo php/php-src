@@ -22,6 +22,14 @@ function output_node($node, $level=0) {
       for($i=0; $i<$level; $i++)
         echo "  ";
       echo $node->content;
+      break;
+    case XML_ENTITY_REF_NODE:
+      echo $node->content;
+      break;
+    case XML_COMMENT_NODE:
+      for($i=0; $i<$level; $i++)
+        echo "  ";
+      echo "<!--".$node->content."-->";
       echo "\n";
       break;
   }
@@ -35,10 +43,14 @@ function list_attr($node) {
 }
 
 $xmlstr = "<?xml version='1.0'?>
-<!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'>
+<!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
+[ <!ENTITY sp \"spanish\">
+]>
 <chapter language='en'><title language='en'>Title</title>
 <para language='ge'>
-<informaltable language='sp'>
+&sp;
+<!-- comment -->
+<informaltable language='&sp;kkk'>
 <tgroup cols='3'>
 <tbody>
 <row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
@@ -66,6 +78,11 @@ $dom = xmltree($xmlstr);
 var_dump($dom);
 echo $dom->root->name;
 echo "\n";
+/* xmltree() creates a tree which is readonly. This means that a
+   function like 
+     $dom->root->new_child("TEST", "ljdf");
+   won't work
+*/
 
 /* The following builds a xml document from scratch */
 echo "Test 3: building a xml document from scratch\n";
