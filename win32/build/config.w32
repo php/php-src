@@ -116,12 +116,6 @@ ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
 var php_usual_include_suspects = "..\\php_build\\include;..\\win32build\\include;..\\bindlib_w32";
 var php_usual_lib_suspects = "..\\php_build\\lib;..\\win32build\\lib;..\\bindlib_w32";
 
-if (PHP_DEBUG == "yes") {
-	php_usual_lib_suspects += ";..\\bindlib_w32\\Debug";
-} else {
-	php_usual_lib_suspects += ";..\\bindlib_w32\\Release";
-}
-
 // Poke around for some headers
 function probe_basic_headers()
 {
