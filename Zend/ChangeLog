@@ -1,3 +1,19 @@
+2004-07-30  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_execute_API.c
+      zend_ptr_stack.c
+      zend_ptr_stack.h:
+      - More ptr_stack optimizations and cleanups
+
+    * zend_alloc.c
+      zend_alloc.h
+      zend_execute.c
+      zend_fast_cache.h
+      zend_ptr_stack.h:
+      - Improve performance by inlining zend_ptr_stack_n_push(). var_args can
+        usually not be inlined by compilers.
+
 2004-07-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.c:

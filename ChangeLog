@@ -1,3 +1,71 @@
+2004-07-30  Andi Gutmans  <andi@zend.com>
+
+    * win32/php5dllts.dsp:
+      - Add globals.c
+
+2004-07-30  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/file.h:
+      Adding missing PHPAPI for non ZTS builds
+
+2004-07-30  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h:
+      - More ptr_stack optimizations and cleanups
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_ptr_stack.h:
+      - Improve performance by inlining zend_ptr_stack_n_push(). var_args can
+        usually not be inlined by compilers.
+
+2004-07-30  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      win32/php_win32_globals.h:
+      Add missing header for def. of struct timeval.
+
+    * (PHP_4_3)
+      win32/php4dllts.dsp:
+      Adding new win32 globals to project
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      Add missing header for win32 builds
+
+    * win32/globals.c
+      win32/globals.c
+      win32/php_win32_globals.h
+      win32/php_win32_globals.h:
+      Fix line endings
+
+2004-07-30  Edin Kadribasic  <edink@emini.dk>
+
+    * win32/install.txt:
+      Nuke references to InstallShield
+
+    * win32/install.txt:
+      Update for php5
+
+    * win32/install.txt:
+      s/php.exe/php-cgi.exe
+
+2004-07-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/image.c
+      ext/standard/image.c:
+      MFH: Fixed bug #29443 (Sanity check for wbmp detection).
+
+    * ext/standard/image.c:
+      Fixed bug #29443 (Sanity check for wbmp detection).
+
 2004-07-29  Edin Kadribasic  <edink@emini.dk>
 
     * ext/gettext/gettext.c:
