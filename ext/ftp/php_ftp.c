@@ -116,7 +116,7 @@ PHP_MINFO_FUNCTION(ftp)
 
 #define	FILEP(fp, pval)		ZEND_FETCH_RESOURCE(fp, FILE *, &pval, -1, "File-Handle", php_file_le_fopen());
 
-/* {{{ proto resource ftp_connect(string host [, int port])
+/* {{{ proto resource ftp_connect(string host [, int port [, int timeout)]])
    Opens a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
