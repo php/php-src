@@ -17,14 +17,15 @@ SUBDIRS = libzend TSRM
 
 STAMP = buildmk.stamp
 
-makefile_am_files = Makefile.am libzend/Makefile.am TSRM/Makefile.am $(shell find ext sapi regex pear -name Makefile.am)
+makefile_am_files = Makefile.am libzend/Makefile.am TSRM/Makefile.am \
+	$(shell find ext sapi regex pear -name Makefile.am)
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
 
 config_h_in = php_config.h.in
 
-config_h_files = \
-	$(shell echo ext/*/config.h.stub sapi/*/config.h.stub libzend/acconfig.h TSRM/acconfig.h)
+config_h_files = libzend/acconfig.h TSRM/acconfig.h \
+	$(shell echo ext/*/config.h.stub sapi/*/config.h.stub)
 
 config_m4_files = libzend/libzend.m4 TSRM/tsrm.m4 libzend/acinclude.m4 \
 	$(shell echo ext/*/config.m4 sapi/*/config.m4)
