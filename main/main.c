@@ -1479,6 +1479,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char *old_cwd;
+	char *old_primary_file_path = NULL;
 	int retval = 0;
 
 	EG(exit_status) = 0;
@@ -1509,10 +1510,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			if (VCWD_REALPATH(primary_file->filename, realfile)) {
 				realfile_len =  strlen(realfile);
 				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
-				if (primary_file->opened_path == NULL && strncmp(realfile, primary_file->filename, realfile_len)) {
-					primary_file->opened_path = emalloc(realfile_len+1);
-					memcpy(primary_file->opened_path, realfile, realfile_len);
-					primary_file->opened_path[realfile_len] = '\0';
+				if (strncmp(realfile, primary_file->filename, realfile_len)) {
+					old_primary_file_path = primary_file->filename;
+					primary_file->filename = realfile;
 				}	
 			}
 		}
@@ -1540,6 +1540,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		php_mbstring_set_zend_encoding(TSRMLS_C);
 #endif /* ZEND_MULTIBYTE && HAVE_MBSTRING */
 		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		
+		if (old_primary_file_path) {
+			primary_file->filename = old_primary_file_path;
+		}
+		
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {
