@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Added support for an optional output handler function for output
+  buffering.  This enables transparent rendering of XML through XSL,
+  transparent compression, etc. (Zeev)
 - Added support for user defined 'tick' callback functions. This helps
   emulate background processing. (Andrei)
 - Fixed problem with having $this as the XML parser object. (Andrei)
