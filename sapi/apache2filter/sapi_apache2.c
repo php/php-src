@@ -417,9 +417,43 @@ php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 	php_apache_register_module();
 }
 
+static void php_add_filter(request_rec *r, ap_filter_t *f)
+{
+	int output = (f == r->output_filters);
+
+	/* for those who still have Set*Filter PHP configured */
+	while (f) {
+		if (strcmp(f->frec->name, "PHP") == 0) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO,
+				     0, r->server,
+				     "\"Set%sFilter PHP\" already configured for %s",
+				     output ? "Output" : "Input", r->uri);
+			return;
+		}
+		f = f->next;
+	}
+
+	if (output) {
+		ap_add_output_filter("PHP", NULL, r, r->connection);
+	}
+	else {
+		ap_add_input_filter("PHP", NULL, r, r->connection);
+	}
+}
+
+static void php_insert_filter(request_rec *r)
+{
+	if (r->content_type &&
+	    strcmp(r->content_type, "application/x-httpd-php") == 0) {
+		php_add_filter(r, r->output_filters);
+		php_add_filter(r, r->input_filters);
+	}
+}
+
 static void php_register_hook(apr_pool_t *p)
 {
 	ap_hook_child_init(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_CONTENT);
 	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_CONTENT);
 }
