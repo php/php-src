@@ -1,10 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 13 May 2002, Version 4.2.1
-- Fixed several functions that were evading safe mode -- show_source(),
-  parse_ini_file() and rmdir(). Also fixed security problems with
-  safe_mode_include_dir directive. (Rasmus)
-- 0 byte file uploads are valid, avoid choking on them. (Zeev)
+- Added safe-mode checks to show_source(), parse_ini_file() and rmdir(). Also
+  fixed security problems with safe_mode_include_dir directive. (Rasmus)
+- Changed HTTP upload code to accept 0 byte file uploads. (Zeev)
 - Major update of domxml. New functions, better DOM compliance and bug fixes:
   * Changed the old $node->append_child() to $node->append_sibling() since
     the new append_child() behaves correctly (= W3C standard).
