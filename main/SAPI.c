@@ -27,7 +27,7 @@
 #include "SAPI.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
 #ifdef ZTS
@@ -512,15 +512,16 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				int newlen;
 				char *result, *newheader;
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-				zval *repl_temp;
-				char *ptr = colon_offset+1;
-				int ptr_len=0, result_len = 0;
-#endif
 
 				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-				if(PG(safe_mode)) {
+
+				if(PG(safe_mode)) 
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
+				{
+					zval *repl_temp;
+					char *ptr = colon_offset+1;
+					int ptr_len=0, result_len = 0;
+
 					myuid = php_getuid();
 
 					ptr_len = strlen(ptr);
@@ -571,7 +572,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					efree(repl_temp);
 				} 
 #else
-				if(PG(safe_mode)) {
+				{
 					myuid = php_getuid();
 					result = emalloc(32);
 					newlen = sprintf(result, "WWW-Authenticate: %ld", myuid);	
