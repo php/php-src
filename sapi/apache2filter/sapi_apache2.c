@@ -211,7 +211,14 @@ static void php_apache_sapi_log_message(char *msg)
 	 * line.  Not sure if this is correct, but it mirrors what happens
 	 * with Apache 1.3 -- rbb
 	 */
-	ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP, 0, ctx->r->server, "%s", msg);
+	if (ctx == NULL) { /* we haven't initialized our ctx yet, oh well */
+		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
+					 0, NULL, "%s", msg);
+	}
+	else {
+		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
+					 0, ctx->r->server, "%s", msg);
+	}
 }
 
 static sapi_module_struct apache2_sapi_module = {
