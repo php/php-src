@@ -215,6 +215,26 @@ ZEND_GET_MODULE(mysql)
 void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
+/* {{{ _rollback_mysql_transactions
+ */
+static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_mysql_conn *link;
+	char	query[128];
+
+	/* check if its a persistent link */
+	if (Z_TYPE_P(rsrc) != le_plink) 
+		return 0;
+
+	link = (php_mysql_conn *) rsrc->ptr;
+
+	/* rollback possible transactions */
+	strcpy (query, "ROLLBACK");
+	mysql_real_query(&link->conn, query, strlen(query));
+
+	return 0;	
+}
+/* }}} */
 
 /* {{{ _free_mysql_result
  * This wrapper is required since mysql_free_result() returns an integer, and
@@ -385,6 +405,8 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_mysql_transactions TSRMLS_CC);
+
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
