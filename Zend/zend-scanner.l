@@ -207,7 +207,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 #endif
 	}
 	if (fh->opened_path) {
-		free(fh->opened_path);
+		efree(fh->opened_path);
 	}
 	if (fh->free_filename && fh->filename) {
 		efree(fh->filename);

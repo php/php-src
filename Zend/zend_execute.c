@@ -2000,7 +2000,7 @@ send_by_ref:
 									}
 								}
 								if (opened_path) {
-									free(opened_path);
+									efree(opened_path);
 								}
 								break;
 							}
