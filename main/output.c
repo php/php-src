@@ -211,7 +211,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
 		} else {
-			ADD_CL_HEADER(OG(active_ob_buffer).text_length);
+			if (!OG(active_ob_buffer).erase) /* Set Content-Length only if unerasable */
+				ADD_CL_HEADER(OG(active_ob_buffer).text_length);
 			OG(php_body_write) = php_ub_body_write;
 		}
 	}
