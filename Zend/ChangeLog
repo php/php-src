@@ -1,3 +1,15 @@
+2004-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Refcount must not be set separatley again.
+
+    * zend_reflection_api.c
+      zend_reflection_api.c:
+      Add missing initialization
+
+    * zend_compile.c:
+      
+
 2004-05-28  Andrei Zmievski  <andreiz@gmail.com>
 
     * zend.c:
