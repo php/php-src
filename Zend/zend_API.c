@@ -563,6 +563,91 @@ ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...)
 	return retval;
 }
 
+ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, zend_class_entry *ce, zval **object, ...)
+{
+	void **arg_stack = EG(argument_stack).top_element;
+	va_list va;
+	int retval;
+
+	*object = this_ptr;
+
+	if (!*object) {
+		zval **parameter;
+
+		if (zend_get_parameters_ex(1, &parameter) != SUCCESS) {
+			zend_error(E_WARNING, "%s() expects an object of class %s as first parameter, none was given",
+				get_active_function_name(TSRMLS_C), ce->name);
+
+			return FAILURE;
+		} else {
+			if (!zend_check_class(*parameter, ce)) {
+				zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
+					get_active_function_name(TSRMLS_C), ce->name,
+					zend_zval_type_name(*parameter));
+
+				return FAILURE;
+			} else {
+				*object = *parameter;
+			}
+
+			EG(argument_stack).top_element++;
+		}
+	}
+	
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
+	va_end(va);
+
+	EG(argument_stack).top_element = arg_stack;
+
+	return retval;
+}
+
+ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, zend_class_entry *ce, void **object, ...)
+{
+	void **arg_stack = EG(argument_stack).top_element;
+	va_list va;
+	int retval;
+	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
+
+	*object = this_ptr;
+
+	if (!*object) {
+		zval **parameter;
+
+		if (zend_get_parameters_ex(1, &parameter) != SUCCESS) {
+			if (!quiet) {
+				zend_error(E_WARNING, "%s() expects an object of class %s as first parameter, none was given",
+					get_active_function_name(TSRMLS_C), ce->name);
+			}
+
+			return FAILURE;
+		} else {
+			if (!zend_check_class(*parameter, ce)) {
+				if (!quiet) {
+					zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
+						get_active_function_name(TSRMLS_C), ce->name,
+						zend_zval_type_name(*parameter));
+				}
+
+				return FAILURE;
+			} else {
+				*object = *parameter;
+			}
+
+			EG(argument_stack).top_element++;
+		}
+	}
+	
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
+	va_end(va);
+
+	EG(argument_stack).top_element = arg_stack;
+
+	return retval;
+}
+
 /* Argument parsing API -- andrei */
 
 
