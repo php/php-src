@@ -36,18 +36,6 @@ class PEAR_Packager extends PEAR_Common
 {
     // {{{ properties
 
-    /** XML_Parser object */
-    var $parser;
-
-    /** stack of elements, gives some sort of XML context */
-    var $element_stack;
-
-    /** name of currently parsed XML element */
-    var $current_element;
-
-    /** array of attributes of the currently parsed XML element */
-    var $current_attributes = array();
-
     /** assoc with information about the package */
     var $pkginfo = array();
 
@@ -104,7 +92,7 @@ class PEAR_Packager extends PEAR_Common
                $file = array_shift($this->_tempfiles))
         {
             if (is_dir($file)) {
-                System::rm("-rf $file"); // XXX FIXME Windows
+                System::rm("-rf $file");
             } else {
                 unlink($file);
             }
@@ -180,11 +168,12 @@ class PEAR_Packager extends PEAR_Common
         // TAR the Package -------------------------------------------
         chdir(dirname($this->tmpdir));
         $dest_package = $orig_pwd . DIRECTORY_SEPARATOR . "${pkgver}.tgz";
-        // XXX FIXME Windows and non-GNU tar
-        $cmd = "tar -cvzf $dest_package $pkgver";
-        $this->log(2, "+ launched cmd: $cmd");
-        // XXX TODO: add an extra param where to leave the package?
-        $this->log(1, `$cmd`);
+        $this->log(2, "Attempting to pack {$this->tmpdir} $contents_dir dir in $dest_package");
+        $tar = new Archive_Tar($dest_package, true);
+        $tar->setErrorHandling(PEAR_ERROR_PRINT);
+        if (!$tar->create($pkgver)) {
+            return $this->raiseError('an error ocurred during package creation');
+        }
         $this->log(1, "Package $dest_package done");
         chdir($orig_pwd);
         return $dest_package;
