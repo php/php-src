@@ -749,6 +749,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	php_request_shutdown((void *) 0);
+
 	php_module_shutdown();
 
 	STR_FREE(SG(request_info).path_translated);
@@ -759,7 +760,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
-
 	return exit_status;
 }
 

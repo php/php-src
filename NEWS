@@ -20,9 +20,9 @@ PHP 4.0                                                                    NEWS
   members $obj->Release() and $obj->AddRef() to gain more control over the used
   COM components. (phanto)
 - Added an additional parameter to dotnet_load to specify the codepage (phanto)
-- Added --enable-memory-usage-info. This creates a new Apache 1.x logging
-  directive "{mod_php_memory_usage}n" which will log the peak amount of memory
-  used by the script. (Thies)
+- Added peak memory logging. Use --enable-memory-limit to create a new Apache
+  1.x logging directive "{mod_php_memory_usage}n" which will log the peak
+  amount of memory used by the script. (Thies)
 - Made fstat() and stat() provide identical output by returning a numerical and
   string indexed array. (Jason)
 - Fixed memory leak upon re-registering constants. (Sascha, Zend Engine)
