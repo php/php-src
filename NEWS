@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
+- Fixed bug #27235 (Interbase NUMERIC x.0 field returns empty string on 0).
+  (Ard)
 - Fixed bug #27196 (Missing content_length initialization in apache 2 sapis).
   (Ilia, pdoru at kappa dot ro)
 - Fixed bug #27183 (userland stream wrapper segfaults on stream_write).
