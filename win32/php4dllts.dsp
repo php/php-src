@@ -1847,7 +1847,7 @@ SOURCE=..\ext\standard\html.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\http.h
+SOURCE=..\ext\standard\php_http.h
 # End Source File
 # Begin Source File
 
