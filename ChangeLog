@@ -1,3 +1,134 @@
+2001-12-17  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/isxfunc/.cvsignore
+      ext/isxfunc/CREDITS
+      ext/isxfunc/ixsfunc.cpp
+      ext/isxfunc/ixsfunc.dsp
+      ext/isxfunc/ixsfunc.h
+      ext/isxfunc/setup.c
+      ext/isxfunc/setup.h:
+    Adding new extension used to query Microsift Index Server.
+    Only available on WIn32
+
+2001-12-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: Make it look purty
+
+    * main/main.c: MFH
+
+2001-12-17  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php: Added dependencies check support for Installer
+
+    * pear/PEAR/Common.php:
+    ensure correct package names and versions in the xml parser
+
+    * pear/PEAR/Dependency.php:
+    - Added callCheckMethod() for making easy the integration with
+      the PEAR_installer class
+    - Reverted the logic of the returned value of the check methods.
+      They will return false on no error or the error string on error
+    - Added signOperator() to output the representation of the operator
+      with signs instead of letters ('ge' -> '>=')
+    - Other minor changes
+
+2001-12-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/xml/xml.c: proto fix
+
+2001-12-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: MFH backward compability issues with libmcrypt
+
+    * ext/mcrypt/mcrypt.c:
+    - Try to be a little bit more sane dealing backwards compability
+
+2001-12-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mssql/php_mssql.c: proto fix
+
+2001-12-17  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Mail.php:
+    call PEAR::raiseError() instead of $this->raiseError() in factory()
+
+2001-12-17  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    output encoding translation turn off in mb_output_handler() when non-text (binary) data was sent.(Patched by Kanemoto.)
+
+2001-12-17  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/file.php: - removed the deeper nesting again
+      Sorry for this forth-and-back. I should have metered the default
+      smarty policy before copying it. The change gave a slowdown on
+      fetch() of at least 20% - I didn't expect that.
+
+2001-12-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/pgsql/pgsql.c: yet another proto fix
+
+    * ext/pgsql/pgsql.c: proto fixes
+
+    * ext/pgsql/pgsql.c: proto fix
+
+2001-12-17  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.php: - included PEAR.php
+    - flush(): consistent cache group defaults
+
+    * pear/Cache/Container/file.php:
+    - deeper directory structure, e.g. cache/default/f0/f0xxx to reduce
+    filesystem overhead with for a large number of cache entries
+    - bugfix: Windows does not like '/c:/cache'...
+    - cosmetics
+
+2001-12-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ccvs/ccvs.c: added proto descriptions
+
+2001-12-17  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/dropdb.inc: Actually drop test table.
+
+    * ext/pgsql/tests/config.inc
+      ext/pgsql/tests/skipif.inc: Use database named test for testing
+
+    * ext/mbstring/mbstring.c: Fix compile error
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Funtion rename:
+    Functions are renamed accoding to coding stanard. Some functions has
+    completely different name now.
+    New functions:
+    pg_copy_to()/pg_copy_from() - by Youichi Iwakiri <yiwakiri@st.rim.or.jp>
+    pg_lo_tell()/pg_lo_seek()/pg_result_error()/pg_result_status()
+    pg_escape_string()/pg_escape_bytea() - Only pgsql 7.2 or later.
+    Fixed:
+    Wrong mode when clean up connection resource.
+    Compiler warning for pg_encoding_to_char().
+
+    * ext/pgsql/tests/01createdb.phpt
+      ext/pgsql/tests/02connection.phpt
+      ext/pgsql/tests/03sync_query.phpt
+      ext/pgsql/tests/04async_query.phpt
+      ext/pgsql/tests/05large_object.phpt
+      ext/pgsql/tests/06copy.phpt
+      ext/pgsql/tests/07optional.phpt
+      ext/pgsql/tests/98old_api.phpt
+      ext/pgsql/tests/9999dropdb.phpt
+      ext/pgsql/tests/async_query.inc
+      ext/pgsql/tests/config.inc
+      ext/pgsql/tests/connection.inc
+      ext/pgsql/tests/copy.inc
+      ext/pgsql/tests/createdb.inc
+      ext/pgsql/tests/dropdb.inc
+      ext/pgsql/tests/large_object.inc
+      ext/pgsql/tests/old_api.inc
+      ext/pgsql/tests/optional.inc
+      ext/pgsql/tests/skipif.inc
+      ext/pgsql/tests/sync_query.inc: Added test files
+
 2001-12-16  Stefan Esser  <s.esser@e-matters.de>
 
     * main/SAPI.c: fixed: fix for my broken patch.
