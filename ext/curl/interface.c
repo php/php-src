@@ -620,16 +620,14 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
-	} else {
-		if (Z_TYPE_P(retval) != IS_STRING) {
-			if (Z_STRLEN_P(retval) > buflen) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
-			} else {
-				strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			}
+	} else if (Z_TYPE_P(retval) == IS_STRING) {
+		if (Z_STRLEN_P(retval) > buflen) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string.", Z_STRVAL_P(func));
+			strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string.", Z_STRVAL_P(func));
 	}
 	
 	zval_ptr_dtor(&argv[0]);
