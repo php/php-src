@@ -991,7 +991,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 		}
 
 		/* here we are sure we are dealing with an object */
-		*retval = Z_OBJ_HT_P(container)->read_property(container, offset TSRMLS_CC);
+		*retval = Z_OBJ_HT_P(container)->read_property(container, offset, (zend_bool) ((type==BP_VAR_IS) ? 1 : 0) TSRMLS_CC);
 		if (offset == &tmp) {
 			zval_dtor(offset);
 		}
@@ -1037,7 +1037,7 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property TSRMLS_CC);
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		incdec_op(z);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
@@ -1084,7 +1084,7 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property TSRMLS_CC);
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		*retval = *z;
 		zendi_zval_copy_ctor(*retval);
@@ -1473,7 +1473,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 		}
 
 		if (!have_get_ptr) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property TSRMLS_CC);
+			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
 			binary_op(z, z, value TSRMLS_CC);
 			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
