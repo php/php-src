@@ -1,3 +1,19 @@
+2003-08-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c
+      zend_default_classes.h
+      zend_reflection_api.c:
+      Add function 'zend_throw_exception(char *message, int duplicate
+      TSRMLS_DC);'
+      to provide an easy way to throw exceptions for extension developers.
+
+    * zend_API.c:
+      If ce not given than any object would do
+
+    * zend_API.c:
+      Paramspec 'O' / zend_parse_method_params(): only if given check the class
+      type
+
 2003-08-20  Zeev Suraski  <zeev@zend.com>
 
     * zend_alloc.c:
