@@ -1164,7 +1164,7 @@ PHP_FUNCTION(mb_parse_str)
 			len_list[n] = 0;
 		}
 		n++;
-		var = php_strtok_r(NULL, "&", &strtok_buf);
+		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
 	num = n;
 
