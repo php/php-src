@@ -265,7 +265,7 @@ allow_url_fopen = On                ; Whether to allow the treatment of URLs (li
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
 ;;;;;;;;;;;;;;;;;;;;;;
-; if you wish to have an extension loaded automaticly, use the
+; if you wish to have an extension loaded automatically, use the
 ; following syntax:  extension=modulename.extension
 ; for example, on windows,
 ; extension=msql.dll
@@ -491,7 +491,7 @@ mssql.min_message_severity	=	10	; minimum message severity to display
 mssql.compatability_mode	=  Off	; compatability mode with old versions of PHP 3.0.
 ;mssql.textlimit			= 4096	; valid range 0 - 2147483647 default = 4096
 ;mssql.textsize				= 4096	; valid range 0 - 2147483647 default = 4096
-;mssql.batchsize			=	 0  ; limits the number of records in each bach. 0 = all records in one batch.
+;mssql.batchsize			=	 0  ; limits the number of records in each batch. 0 = all records in one batch.
 
 [Assertion]
 ;assert.active				=	Off	; assert(expr); does nothing by default
