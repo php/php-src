@@ -742,7 +742,7 @@ PHP_FUNCTION(imageloadfont)
 }
 /* }}} */
 
-/* {{{ proto void imagesetstyle(resource im, array styles)
+/* {{{ proto bool imagesetstyle(resource im, array styles)
    Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
 PHP_FUNCTION(imagesetstyle)
 {
@@ -786,7 +786,7 @@ PHP_FUNCTION(imagesetstyle)
 /* }}} */
 
 #if HAVE_LIBGD20
-/* {{{ proto int imagecreatetruecolor(int x_size, int y_size)
+/* {{{ proto resource imagecreatetruecolor(int x_size, int y_size)
    Create a new true color image */
 PHP_FUNCTION(imagecreatetruecolor)
 {
@@ -811,7 +811,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 }
 /* }}} */
 
-/* {{{ proto int imageistruecolor(int im)
+/* {{{ proto bool imageistruecolor(resource im)
    return true if the image uses truecolor */
 PHP_FUNCTION(imageistruecolor)
 {
@@ -851,7 +851,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 /* }}} */
 
 #if HAVE_GD_BUNDLED
-/* {{{ proto void imagecolormatch(resource im1, resource im2)
+/* {{{ proto bool imagecolormatch(resource im1, resource im2)
    Makes the colors of the palette version of an image more closely match the true color version */
 PHP_FUNCTION(imagecolormatch)
 {
@@ -887,7 +887,7 @@ PHP_FUNCTION(imagecolormatch)
 /* }}} */
 #endif
 
-/* {{{ proto void imagesetthickness(resource im, int thickness)
+/* {{{ proto bool imagesetthickness(resource im, int thickness)
    Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
 {
@@ -907,7 +907,7 @@ PHP_FUNCTION(imagesetthickness)
 }
 /* }}} */
 
-/* {{{ proto void imagefilledellipse(resource im, int cx, int cy, int w, int h, int color)
+/* {{{ proto bool imagefilledellipse(resource im, int cx, int cy, int w, int h, int color)
    Draw an ellipse */
 PHP_FUNCTION(imagefilledellipse)
 {
@@ -932,7 +932,7 @@ PHP_FUNCTION(imagefilledellipse)
 }
 /* }}} */
 
-/* {{{ proto int imagefilledarc(int im, int cx, int cy, int w, int h, int s, int e, int col, int style)
+/* {{{ proto bool imagefilledarc(resource im, int cx, int cy, int w, int h, int s, int e, int col, int style)
    Draw a filled partial ellipse */
 PHP_FUNCTION(imagefilledarc)
 {
@@ -971,7 +971,7 @@ PHP_FUNCTION(imagefilledarc)
 }
 /* }}} */
 
-/* {{{ proto void imagealphablending(resource im, bool on)
+/* {{{ proto bool imagealphablending(resource im, bool on)
    Turn alpha blending mode on or off for the given image */
 PHP_FUNCTION(imagealphablending)
 {
@@ -992,7 +992,7 @@ PHP_FUNCTION(imagealphablending)
 /* }}} */
 
 #if HAVE_LIBGD20
-/* {{{ proto void imagesavealpha(resource im, bool on)
+/* {{{ proto bool imagesavealpha(resource im, bool on)
    Include alpha channel to a saved image */
 PHP_FUNCTION(imagesavealpha)
 {
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(imagesavealpha)
 #endif
 
 #if HAVE_GD_BUNDLED
-/* {{{ proto void imagelayereffect(resource im, int effect)
+/* {{{ proto bool imagelayereffect(resource im, int effect)
    Set the alpha blending flag to use the bundled libgd layering effects */
 PHP_FUNCTION(imagelayereffect)
 {
@@ -1118,7 +1118,7 @@ PHP_FUNCTION(imagecolorexactalpha)
 }
 /* }}} */
 
-/* {{{ proto int imagecopyresampled(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
+/* {{{ proto bool imagecopyresampled(resource dst_im, resource src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image using resampling to help ensure clarity */
 PHP_FUNCTION(imagecopyresampled)
 {
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(imagecopyresampled)
 #endif
 
 #ifdef HAVE_GD_BUNDLED
-/* {{{ proto int imagerotate(int src_im, float angle, int bgdcolor)
+/* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor)
    Rotate an image using a custom angle */
 PHP_FUNCTION(imagerotate)
 {
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(imagerotate)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
-/* {{{ proto int imagesettile(resource image, resource tile)
+/* {{{ proto bool imagesettile(resource image, resource tile)
    Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
 PHP_FUNCTION(imagesettile)
 {
@@ -1213,7 +1213,7 @@ PHP_FUNCTION(imagesettile)
 #endif
 
 #if HAVE_GD_IMAGESETBRUSH
-/* {{{ proto int imagesetbrush(resource image, resource brush)
+/* {{{ proto bool imagesetbrush(resource image, resource brush)
    Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
 PHP_FUNCTION(imagesetbrush)
 {
@@ -1234,7 +1234,7 @@ PHP_FUNCTION(imagesetbrush)
 /* }}} */
 #endif
 
-/* {{{ proto int imagecreate(int x_size, int y_size)
+/* {{{ proto resource imagecreate(int x_size, int y_size)
    Create a new image */
 PHP_FUNCTION(imagecreate)
 {
@@ -1369,7 +1369,7 @@ gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioc
 }
 /* }}} */
 
-/* {{{ proto int imagecreatefromstring(string image)
+/* {{{ proto resource imagecreatefromstring(string image)
    Create a new image from the image stream in the string */
 PHP_FUNCTION(imagecreatefromstring)
 {
@@ -1561,7 +1561,7 @@ out_err:
 /* }}} */
 
 #ifdef HAVE_GD_GIF_READ
-/* {{{ proto int imagecreatefromgif(string filename)
+/* {{{ proto resource imagecreatefromgif(string filename)
    Create a new image from GIF file or URL */
 PHP_FUNCTION(imagecreatefromgif)
 {
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(imagecreatefromgif)
 #endif /* HAVE_GD_GIF_READ */
 
 #ifdef HAVE_GD_JPG
-/* {{{ proto int imagecreatefromjpeg(string filename)
+/* {{{ proto resource imagecreatefromjpeg(string filename)
    Create a new image from JPEG file or URL */
 PHP_FUNCTION(imagecreatefromjpeg)
 {
@@ -1581,7 +1581,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 #endif /* HAVE_GD_JPG */
 
 #ifdef HAVE_GD_PNG
-/* {{{ proto int imagecreatefrompng(string filename)
+/* {{{ proto resource imagecreatefrompng(string filename)
    Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefrompng)
 {
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(imagecreatefrompng)
 #endif /* HAVE_GD_PNG */
 
 #ifdef HAVE_GD_XBM
-/* {{{ proto int imagecreatefromxbm(string filename)
+/* {{{ proto resource imagecreatefromxbm(string filename)
    Create a new image from XBM file or URL */
 PHP_FUNCTION(imagecreatefromxbm)
 {
@@ -1601,7 +1601,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 #endif /* HAVE_GD_XBM */
 
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-/* {{{ proto int imagecreatefromxpm(string filename)
+/* {{{ proto resource imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
 {
@@ -1611,7 +1611,7 @@ PHP_FUNCTION(imagecreatefromxpm)
 #endif
 
 #ifdef HAVE_GD_WBMP
-/* {{{ proto int imagecreatefromwbmp(string filename)
+/* {{{ proto resource imagecreatefromwbmp(string filename)
    Create a new image from WBMP file or URL */
 PHP_FUNCTION(imagecreatefromwbmp)
 {
@@ -1620,7 +1620,7 @@ PHP_FUNCTION(imagecreatefromwbmp)
 /* }}} */
 #endif /* HAVE_GD_WBMP */
 
-/* {{{ proto int imagecreatefromgd(string filename)
+/* {{{ proto resource imagecreatefromgd(string filename)
    Create a new image from GD file or URL */
 PHP_FUNCTION(imagecreatefromgd)
 {
@@ -1629,7 +1629,7 @@ PHP_FUNCTION(imagecreatefromgd)
 /* }}} */
 
 #ifdef HAVE_GD_GD2
-/* {{{ proto int imagecreatefromgd2(string filename)
+/* {{{ proto resource imagecreatefromgd2(string filename)
    Create a new image from GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2)
 {
@@ -1637,7 +1637,7 @@ PHP_FUNCTION(imagecreatefromgd2)
 }
 /* }}} */
 
-/* {{{ proto int imagecreatefromgd2part(string filename, int srcX, int srcY, int width, int height)
+/* {{{ proto resource imagecreatefromgd2part(string filename, int srcX, int srcY, int width, int height)
    Create a new image from a given part of GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2part)
 {
@@ -1783,7 +1783,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 /* }}} */
 
 #ifdef HAVE_GD_GIF_CREATE
-/* {{{ proto int imagegif(int im [, string filename])
+/* {{{ proto bool imagegif(resource im [, string filename])
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
@@ -1797,7 +1797,7 @@ PHP_FUNCTION(imagegif)
 #endif /* HAVE_GD_GIF_CREATE */
 
 #ifdef HAVE_GD_PNG
-/* {{{ proto int imagepng(int im [, string filename])
+/* {{{ proto bool imagepng(resource im [, string filename])
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
@@ -1811,7 +1811,7 @@ PHP_FUNCTION(imagepng)
 #endif /* HAVE_GD_PNG */
 
 #ifdef HAVE_GD_JPG
-/* {{{ proto int imagejpeg(int im [, string filename [, int quality]])
+/* {{{ proto bool imagejpeg(resource im [, string filename [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
@@ -1825,7 +1825,7 @@ PHP_FUNCTION(imagejpeg)
 #endif /* HAVE_GD_JPG */
 
 #ifdef HAVE_GD_WBMP
-/* {{{ proto int imagewbmp(int im [, string filename, [, int foreground]])
+/* {{{ proto bool imagewbmp(resource im [, string filename, [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
@@ -1838,7 +1838,7 @@ PHP_FUNCTION(imagewbmp)
 /* }}} */
 #endif /* HAVE_GD_WBMP */
 
-/* {{{ proto int imagegd(int im [, string filename])
+/* {{{ proto bool imagegd(resource im [, string filename])
    Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
@@ -1847,7 +1847,7 @@ PHP_FUNCTION(imagegd)
 /* }}} */
 
 #ifdef HAVE_GD_GD2
-/* {{{ proto int imagegd2(int im [, string filename, [, int chunk_size, [, int type]]])
+/* {{{ proto bool imagegd2(resource im [, string filename, [, int chunk_size, [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
@@ -1856,7 +1856,7 @@ PHP_FUNCTION(imagegd2)
 /* }}} */
 #endif /* HAVE_GD_GD2 */
 
-/* {{{ proto int imagedestroy(int im)
+/* {{{ proto bool imagedestroy(resource im)
    Destroy an image */
 PHP_FUNCTION(imagedestroy)
 {
@@ -1876,7 +1876,7 @@ PHP_FUNCTION(imagedestroy)
 /* }}} */
 
 
-/* {{{ proto int imagecolorallocate(int im, int red, int green, int blue)
+/* {{{ proto int imagecolorallocate(resource im, int red, int green, int blue)
    Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
 {
@@ -1898,7 +1898,7 @@ PHP_FUNCTION(imagecolorallocate)
 /* }}} */
 
 #if HAVE_LIBGD15
-/* {{{ proto int imagepalettecopy(int dst, int src)
+/* {{{ proto void imagepalettecopy(resource dst, resource src)
    Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
 {
@@ -1917,7 +1917,7 @@ PHP_FUNCTION(imagepalettecopy)
 /* }}} */
 #endif
 
-/* {{{ proto int imagecolorat(int im, int x, int y)
+/* {{{ proto int imagecolorat(resource im, int x, int y)
    Get the index of the color of a pixel */
 PHP_FUNCTION(imagecolorat)
 {
@@ -1959,7 +1959,7 @@ PHP_FUNCTION(imagecolorat)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorclosest(int im, int red, int green, int blue)
+/* {{{ proto int imagecolorclosest(resource im, int red, int green, int blue)
    Get the index of the closest color to the specified color */
 PHP_FUNCTION(imagecolorclosest)
 {
@@ -1981,7 +1981,7 @@ PHP_FUNCTION(imagecolorclosest)
 /* }}} */
 
 #if HAVE_COLORCLOSESTHWB
-/* {{{ proto int imagecolorclosesthwb(int im, int red, int green, int blue)
+/* {{{ proto int imagecolorclosesthwb(resource im, int red, int green, int blue)
    Get the index of the color which has the hue, white and blackness nearest to the given color */
 PHP_FUNCTION(imagecolorclosesthwb)
 {
@@ -2003,7 +2003,7 @@ PHP_FUNCTION(imagecolorclosesthwb)
 /* }}} */
 #endif
 
-/* {{{ proto int imagecolordeallocate(int im, int index)
+/* {{{ proto bool imagecolordeallocate(resource im, int index)
    De-allocate a color for an image */
 PHP_FUNCTION(imagecolordeallocate)
 {
@@ -2037,7 +2037,7 @@ PHP_FUNCTION(imagecolordeallocate)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorresolve(int im, int red, int green, int blue)
+/* {{{ proto int imagecolorresolve(resource im, int red, int green, int blue)
    Get the index of the specified color or its closest possible alternative */
 PHP_FUNCTION(imagecolorresolve)
 {
@@ -2058,7 +2058,7 @@ PHP_FUNCTION(imagecolorresolve)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorexact(int im, int red, int green, int blue)
+/* {{{ proto int imagecolorexact(resource im, int red, int green, int blue)
    Get the index of the specified color */
 PHP_FUNCTION(imagecolorexact)
 {
@@ -2079,7 +2079,7 @@ PHP_FUNCTION(imagecolorexact)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorset(int im, int col, int red, int green, int blue)
+/* {{{ proto void imagecolorset(resource im, int col, int red, int green, int blue)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
@@ -2110,7 +2110,7 @@ PHP_FUNCTION(imagecolorset)
 }
 /* }}} */
 
-/* {{{ proto array imagecolorsforindex(int im, int col)
+/* {{{ proto array imagecolorsforindex(resource im, int col)
    Get the colors for an index */
 PHP_FUNCTION(imagecolorsforindex)
 {
@@ -2151,7 +2151,7 @@ PHP_FUNCTION(imagecolorsforindex)
 }
 /* }}} */
 
-/* {{{ proto int imagegammacorrect(int im, float inputgamma, float outputgamma)
+/* {{{ proto bool imagegammacorrect(resource im, float inputgamma, float outputgamma)
    Apply a gamma correction to a GD image */
 PHP_FUNCTION(imagegammacorrect)
 {
@@ -2201,7 +2201,7 @@ PHP_FUNCTION(imagegammacorrect)
 }
 /* }}} */
 
-/* {{{ proto int imagesetpixel(int im, int x, int y, int col)
+/* {{{ proto bool imagesetpixel(resource im, int x, int y, int col)
    Set a single pixel */
 PHP_FUNCTION(imagesetpixel)
 {
@@ -2224,7 +2224,7 @@ PHP_FUNCTION(imagesetpixel)
 }
 /* }}} */
 
-/* {{{ proto int imageline(int im, int x1, int y1, int x2, int y2, int col)
+/* {{{ proto bool imageline(resource im, int x1, int y1, int x2, int y2, int col)
    Draw a line */
 PHP_FUNCTION(imageline)
 {
@@ -2255,7 +2255,7 @@ PHP_FUNCTION(imageline)
 }
 /* }}} */
 
-/* {{{ proto int imagedashedline(int im, int x1, int y1, int x2, int y2, int col)
+/* {{{ proto bool imagedashedline(resource im, int x1, int y1, int x2, int y2, int col)
    Draw a dashed line */
 PHP_FUNCTION(imagedashedline)
 {
@@ -2279,7 +2279,7 @@ PHP_FUNCTION(imagedashedline)
 }
 /* }}} */
 
-/* {{{ proto int imagerectangle(int im, int x1, int y1, int x2, int y2, int col)
+/* {{{ proto bool imagerectangle(resource im, int x1, int y1, int x2, int y2, int col)
    Draw a rectangle */
 PHP_FUNCTION(imagerectangle)
 {
@@ -2303,7 +2303,7 @@ PHP_FUNCTION(imagerectangle)
 }
 /* }}} */
 
-/* {{{ proto int imagefilledrectangle(int im, int x1, int y1, int x2, int y2, int col)
+/* {{{ proto bool imagefilledrectangle(resource im, int x1, int y1, int x2, int y2, int col)
    Draw a filled rectangle */
 PHP_FUNCTION(imagefilledrectangle)
 {
@@ -2327,7 +2327,7 @@ PHP_FUNCTION(imagefilledrectangle)
 }
 /* }}} */
 
-/* {{{ proto int imagearc(int im, int cx, int cy, int w, int h, int s, int e, int col)
+/* {{{ proto bool imagearc(resource im, int cx, int cy, int w, int h, int s, int e, int col)
    Draw a partial ellipse */
 PHP_FUNCTION(imagearc)
 {
@@ -2364,7 +2364,7 @@ PHP_FUNCTION(imagearc)
 }
 /* }}} */
 
-/* {{{ proto void imageellipse(resource im, int cx, int cy, int w, int h, int color)
+/* {{{ proto bool imageellipse(resource im, int cx, int cy, int w, int h, int color)
    Draw an ellipse */
 PHP_FUNCTION(imageellipse)
 {
@@ -2393,7 +2393,7 @@ PHP_FUNCTION(imageellipse)
 }
 /* }}} */
 
-/* {{{ proto int imagefilltoborder(int im, int x, int y, int border, int col)
+/* {{{ proto bool imagefilltoborder(resource im, int x, int y, int border, int col)
    Flood fill to specific color */
 PHP_FUNCTION(imagefilltoborder)
 {
@@ -2416,7 +2416,7 @@ PHP_FUNCTION(imagefilltoborder)
 }
 /* }}} */
 
-/* {{{ proto int imagefill(int im, int x, int y, int col)
+/* {{{ proto bool imagefill(resource im, int x, int y, int col)
    Flood fill */
 PHP_FUNCTION(imagefill)
 {
@@ -2438,7 +2438,7 @@ PHP_FUNCTION(imagefill)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorstotal(int im)
+/* {{{ proto int imagecolorstotal(resource im)
    Find out the number of colors in an image's palette */
 PHP_FUNCTION(imagecolorstotal)
 {
@@ -2455,7 +2455,7 @@ PHP_FUNCTION(imagecolorstotal)
 }
 /* }}} */
 
-/* {{{ proto int imagecolortransparent(int im [, int col])
+/* {{{ proto int imagecolortransparent(resource im [, int col])
    Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
 {
@@ -2488,7 +2488,7 @@ PHP_FUNCTION(imagecolortransparent)
 }
 /* }}} */
 
-/* {{{ proto int imageinterlace(int im [, int interlace])
+/* {{{ proto int imageinterlace(resource im [, int interlace])
    Enable or disable interlace */
 PHP_FUNCTION(imageinterlace)
 {
@@ -2587,7 +2587,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 }
 /* }}} */
 
-/* {{{ proto int imagepolygon(int im, array point, int num_points, int col)
+/* {{{ proto bool imagepolygon(resource im, array point, int num_points, int col)
    Draw a polygon */
 PHP_FUNCTION(imagepolygon)
 {
@@ -2595,7 +2595,7 @@ PHP_FUNCTION(imagepolygon)
 }
 /* }}} */
 
-/* {{{ proto int imagefilledpolygon(int im, array point, int num_points, int col)
+/* {{{ proto bool imagefilledpolygon(resource im, array point, int num_points, int col)
    Draw a filled polygon */
 PHP_FUNCTION(imagefilledpolygon)
 {
@@ -2774,7 +2774,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-/* {{{ proto int imagechar(int im, int font, int x, int y, string c, int col)
+/* {{{ proto bool imagechar(resource im, int font, int x, int y, string c, int col)
    Draw a character */
 PHP_FUNCTION(imagechar)
 {
@@ -2782,7 +2782,7 @@ PHP_FUNCTION(imagechar)
 }
 /* }}} */
 
-/* {{{ proto int imagecharup(int im, int font, int x, int y, string c, int col)
+/* {{{ proto bool imagecharup(resource im, int font, int x, int y, string c, int col)
    Draw a character rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagecharup)
 {
@@ -2790,7 +2790,7 @@ PHP_FUNCTION(imagecharup)
 }
 /* }}} */
 
-/* {{{ proto int imagestring(int im, int font, int x, int y, string str, int col)
+/* {{{ proto bool imagestring(resource im, int font, int x, int y, string str, int col)
    Draw a string horizontally */
 PHP_FUNCTION(imagestring)
 {
@@ -2798,7 +2798,7 @@ PHP_FUNCTION(imagestring)
 }
 /* }}} */
 
-/* {{{ proto int imagestringup(int im, int font, int x, int y, string str, int col)
+/* {{{ proto bool imagestringup(resource im, int font, int x, int y, string str, int col)
    Draw a string vertically - rotated 90 degrees counter-clockwise */
 PHP_FUNCTION(imagestringup)
 {
@@ -2806,7 +2806,7 @@ PHP_FUNCTION(imagestringup)
 }
 /* }}} */
 
-/* {{{ proto int imagecopy(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h)
+/* {{{ proto bool imagecopy(resource dst_im, resource src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h)
    Copy part of an image */
 PHP_FUNCTION(imagecopy)
 {
@@ -2841,7 +2841,7 @@ PHP_FUNCTION(imagecopy)
 /* }}} */
 
 #if HAVE_LIBGD15
-/* {{{ proto int imagecopymerge(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+/* {{{ proto bool imagecopymerge(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
 {
@@ -2877,7 +2877,7 @@ PHP_FUNCTION(imagecopymerge)
 }
 /* }}} */
 
-/* {{{ proto int imagecopymergegray(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+/* {{{ proto bool imagecopymergegray(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymergegray)
 {
@@ -2914,7 +2914,7 @@ PHP_FUNCTION(imagecopymergegray)
 /* }}} */
 #endif
 
-/* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
+/* {{{ proto bool imagecopyresized(resource dst_im, resource src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
 {
@@ -2957,7 +2957,7 @@ PHP_FUNCTION(imagecopyresized)
 }
 /* }}} */
 
-/* {{{ proto int imagesx(int im)
+/* {{{ proto int imagesx(resource im)
    Get image width */
 PHP_FUNCTION(imagesx)
 {
@@ -2974,7 +2974,7 @@ PHP_FUNCTION(imagesx)
 }
 /* }}} */
 
-/* {{{ proto int imagesy(int im)
+/* {{{ proto int imagesy(resource im)
    Get image height */
 PHP_FUNCTION(imagesy)
 {
@@ -3007,7 +3007,7 @@ PHP_FUNCTION(imageftbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagefttext(int im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
+/* {{{ proto array imagefttext(resource im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
    Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
@@ -3024,7 +3024,7 @@ PHP_FUNCTION(imagettfbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagettftext(int im, int size, int angle, int x, int y, int col, string font_file, string text)
+/* {{{ proto array imagettftext(resource im, int size, int angle, int x, int y, int col, string font_file, string text)
    Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
@@ -3187,7 +3187,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto int imagepsloadfont(string pathname)
+/* {{{ proto resource imagepsloadfont(string pathname)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
@@ -3272,7 +3272,7 @@ PHP_FUNCTION(imagepscopyfont)
 */
 /* }}} */
 
-/* {{{ proto bool imagepsfreefont(int font_index)
+/* {{{ proto bool imagepsfreefont(resource font_index)
    Free memory used by a font */
 PHP_FUNCTION(imagepsfreefont)
 {
@@ -3290,7 +3290,7 @@ PHP_FUNCTION(imagepsfreefont)
 }
 /* }}} */
 
-/* {{{ proto bool imagepsencodefont(int font_index, string filename)
+/* {{{ proto bool imagepsencodefont(resource font_index, string filename)
    To change a fonts character encoding vector */
 PHP_FUNCTION(imagepsencodefont)
 {
@@ -3324,7 +3324,7 @@ PHP_FUNCTION(imagepsencodefont)
 }
 /* }}} */
 
-/* {{{ proto bool imagepsextendfont(int font_index, float extend)
+/* {{{ proto bool imagepsextendfont(resource font_index, float extend)
    Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
@@ -3354,7 +3354,7 @@ PHP_FUNCTION(imagepsextendfont)
 }
 /* }}} */
 
-/* {{{ proto bool imagepsslantfont(int font_index, float slant)
+/* {{{ proto bool imagepsslantfont(resource font_index, float slant)
    Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
@@ -3377,7 +3377,7 @@ PHP_FUNCTION(imagepsslantfont)
 }
 /* }}} */
 
-/* {{{ proto array imagepstext(int image, string text, int font, int size, int xcoord, int ycoord [, int space, int tightness, float angle, int antialias])
+/* {{{ proto array imagepstext(resource image, string text, resource font, int size, int xcoord, int ycoord [, int space, int tightness, float angle, int antialias])
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
@@ -3534,7 +3534,7 @@ PHP_FUNCTION(imagepstext)
 }
 /* }}} */
 
-/* {{{ proto array imagepsbbox(string text, int font, int size [, int space, int tightness, int angle])
+/* {{{ proto array imagepsbbox(string text, resource font, int size [, int space, int tightness, int angle])
    Return the bounding box needed by a string if rasterized */
 PHP_FUNCTION(imagepsbbox)
 {
@@ -3643,7 +3643,7 @@ PHP_FUNCTION(imagepsbbox)
 #endif
 
 #ifdef HAVE_GD_WBMP
-/* {{{ proto int image2wbmp(int im [, string filename [, int threshold]])
+/* {{{ proto bool image2wbmp(resource im [, string filename [, int threshold]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(image2wbmp)
 {
@@ -3653,7 +3653,7 @@ PHP_FUNCTION(image2wbmp)
 #endif /* HAVE_GD_WBMP */
 
 #if defined(HAVE_GD_JPG) && defined(HAVE_GD_WBMP)
-/* {{{ proto void jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
 {
@@ -3663,7 +3663,7 @@ PHP_FUNCTION(jpeg2wbmp)
 #endif
 
 #if defined(HAVE_GD_PNG) && defined(HAVE_GD_WBMP)
-/* {{{ proto void png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
 {
@@ -4167,7 +4167,7 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_FALSE;
 }
 
-/* {{{ proto int imagefilter(int src_im, int filtertype, [args] )
+/* {{{ proto bool imagefilter(resource src_im, int filtertype, [args] )
    Applies Filter an image using a custom angle */
 PHP_FUNCTION(imagefilter)
 {
@@ -4201,7 +4201,7 @@ PHP_FUNCTION(imagefilter)
 /* }}} */
 /* End section: Filters */
 
-/* {{{ proto bool imageantialias(int im, bool on)
+/* {{{ proto bool imageantialias(resource im, bool on)
    Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
 {

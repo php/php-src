@@ -182,7 +182,7 @@ PHP_MINFO_FUNCTION(fam)
 /* }}} */
 
 
-/* {{{ proto int fam_open([string appname])
+/* {{{ proto resource fam_open([string appname])
     */
 PHP_FUNCTION(fam_open)
 {
@@ -207,7 +207,7 @@ PHP_FUNCTION(fam_open)
 }
 /* }}} */
 
-/* {{{ proto boolean fam_close(resource id)
+/* {{{ proto void fam_close(resource id)
     */
 PHP_FUNCTION(fam_close)
 {
@@ -221,7 +221,7 @@ PHP_FUNCTION(fam_close)
 }
 /* }}} */
 
-/* {{{ proto int fam_monitor_directory(resource id, string dirname)
+/* {{{ proto resource fam_monitor_directory(resource id, string dirname)
     */
 PHP_FUNCTION(fam_monitor_directory)
 {
@@ -249,7 +249,7 @@ PHP_FUNCTION(fam_monitor_directory)
 }
 /* }}} */
 
-/* {{{ proto int fam_monitor_file(resource id, string filename)
+/* {{{ proto resource fam_monitor_file(resource id, string filename)
     */
 PHP_FUNCTION(fam_monitor_file)
 {
@@ -277,7 +277,7 @@ PHP_FUNCTION(fam_monitor_file)
 }
 /* }}} */
 
-/* {{{ proto int fam_monitor_collection(resource id, string dirname, int depth, string mask)
+/* {{{ proto resource fam_monitor_collection(resource id, string dirname, int depth, string mask)
     */
 PHP_FUNCTION(fam_monitor_collection)
 {
@@ -309,7 +309,7 @@ PHP_FUNCTION(fam_monitor_collection)
 }
 /* }}} */
 
-/* {{{ proto boolean fam_suspend_monitor(resource id, resource monitor_id)
+/* {{{ proto bool fam_suspend_monitor(resource id, resource monitor_id)
     */
 PHP_FUNCTION(fam_suspend_monitor)
 {
@@ -333,7 +333,7 @@ PHP_FUNCTION(fam_suspend_monitor)
 }
 /* }}} */
 
-/* {{{ proto boolean fam_resume_monitor(resource id, resource monitor_id)
+/* {{{ proto bool fam_resume_monitor(resource id, resource monitor_id)
     */
 PHP_FUNCTION(fam_resume_monitor)
 {
@@ -358,7 +358,7 @@ PHP_FUNCTION(fam_resume_monitor)
 }
 /* }}} */
 
-/* {{{ proto boolean fam_cancel_monitor(resource id, resource monitor_id)
+/* {{{ proto bool fam_cancel_monitor(resource id, resource monitor_id)
     */
 PHP_FUNCTION(fam_cancel_monitor)
 {

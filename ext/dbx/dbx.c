@@ -310,7 +310,7 @@ ZEND_FUNCTION(dbx_connect)
 }
 /* }}} */
 
-/* {{{ proto bool dbx_close(dbx_link_object dbx_link)
+/* {{{ proto int dbx_close(dbx_link_object dbx_link)
    Returns success or failure 
 */
 ZEND_FUNCTION(dbx_close)
@@ -515,7 +515,7 @@ ZEND_FUNCTION(dbx_query)
 }
 /* }}} */
 
-/* {{{ proto void dbx_error(dbx_link_object dbx_link)
+/* {{{ proto string dbx_error(dbx_link_object dbx_link)
    Returns success or failure 
 */
 ZEND_FUNCTION(dbx_error)
