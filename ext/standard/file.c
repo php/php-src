@@ -1718,28 +1718,18 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-#ifndef HAVE_MBLEN
-# define _php_mblen(ptr, len) 1
-#else
-# if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
-#  define _php_mblen(ptr, len) ((ptr) == NULL ? mbsinit(&BG(mblen_state)): (int)mbrlen(ptr, len, &BG(mblen_state)))
-# else
-#  define _php_mblen(ptr, len) mblen(ptr, len)
-# endif
-#endif
-
 static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC)
 {
 	int inc_len;
 	unsigned char last_chars[2] = { 0, 0 };
 
 	while (len > 0) {
-		inc_len = (*ptr == '\0' ? 1: _php_mblen(ptr, len));
+		inc_len = (*ptr == '\0' ? 1: php_mblen(ptr, len));
 		switch (inc_len) {
 			case -2:
 			case -1:
 				inc_len = 1;
-				_php_mblen(NULL, 0);
+				php_mblen(NULL, 0);
 				break;
 			case 0:
 				goto quit_loop;
@@ -1839,7 +1829,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 	/* initialize internal state */
-	_php_mblen(NULL, 0);
+	php_mblen(NULL, 0);
 
 	/* Now into new section that parses buf for delimiter/enclosure fields */
 
@@ -1868,12 +1858,12 @@ PHP_FUNCTION(fgetcsv)
 
 		/* 1. Strip any leading space */
 		for (;;) {
-			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
+			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
 			switch (inc_len) {
 				case -2:
 				case -1:
 					inc_len = 1;
-					_php_mblen(NULL, 0);
+					php_mblen(NULL, 0);
 					break;
 				case 0:
 					goto quit_loop_0;
@@ -1897,7 +1887,7 @@ PHP_FUNCTION(fgetcsv)
 
 			/* 2A. handle enclosure delimited field */
 			for (;;) {
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
 				switch (inc_len) {
 					case 0:
 						switch (state) {
@@ -1958,7 +1948,7 @@ PHP_FUNCTION(fgetcsv)
 
 					case -2:
 					case -1:
-						_php_mblen(NULL, 0);
+						php_mblen(NULL, 0);
 						/* break is omitted intentionally */
 					case 1:
 						/* we need to determine if the enclosure is
@@ -2021,7 +2011,7 @@ PHP_FUNCTION(fgetcsv)
 					case -2:
 					case -1:
 						inc_len = 1;
-						_php_mblen(NULL, 0);
+						php_mblen(NULL, 0);
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
@@ -2032,7 +2022,7 @@ PHP_FUNCTION(fgetcsv)
 						break;
 				}
 				bptr += inc_len;
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
 			}
 		quit_loop_3:
 			comp_end = tptr;
@@ -2046,14 +2036,14 @@ PHP_FUNCTION(fgetcsv)
 			hunk_begin = bptr;
 
 			for (;;) {
-				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: php_mblen(bptr, limit - bptr)): 0);
 				switch (inc_len) {
 					case 0:
 						goto quit_loop_4;
 					case -2:
 					case -1:
 						inc_len = 1;
-						_php_mblen(NULL, 0);
+						php_mblen(NULL, 0);
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
