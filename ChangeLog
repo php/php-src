@@ -1,3 +1,106 @@
+2004-09-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      ext/standard/file.c:
+      MFH: avoid potential AT&T libc problems with tempnam()
+
+    * ext/standard/file.c:
+      avoid ANSI stdio when calling tempnam() to avoid limitations of AT&T libc.
+
+2004-09-09  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Defaulted ini variable "sybct.deadlock_retry_count" to 0
+
+2004-09-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests2.php:
+      Fix test script
+
+2004-09-09  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_extensions.h:
+      - Revert API bump
+
+    * ZendEngine2/README.ZEND_VM:
+      - Commit VM explanation.
+
+    * ZendEngine2/zend.c:
+      - Recommit
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c:
+      - Recommit:
+        - Check signature of magic methods
+        - Register __get/__set/__call for internal classes
+
+    * ZendEngine2/zend_extensions.h:
+      - Recommit:
+        - Bump the API number to work around this major breakage.
+
+    * ZendEngine2/ChangeLog
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_opcode.c:
+      - Roll back VM commit
+
+2004-09-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/php_variables.c
+      main/php_variables.c
+      main/php_variables.c:
+      Stop at the index on an unmatched [
+
+2004-09-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      - Drop namespace relict
+
+    * (PHP_5_0)
+      tests/classes/interface_and_extends.phpt:
+      Fix test
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c:
+      MFH signature check/method registration
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c:
+      - Check signature of magic methods
+      - Register __get/__set/__call for internal classes
+
+    * ext/ming/ming.c:
+      Proper #ifdef'ing
+
+2004-09-09  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_extensions.h:
+      - Bump the API number to work around this major breakage.
+
+2004-09-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm.h:
+      We will use CALL dispatch method for compilers other then GCC. It is more
+      safe.
+
+2004-09-09  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      - Fix the fix.
+
 2004-09-08  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_builtin_functions.c:
