@@ -1,3 +1,57 @@
+2000-09-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_version.h: 4.0.3-dev
+
+    * sapi/apache/libphp4.module.in: Add TSRM include dirs
+
+    * ext/session/session.c:
+    Convert some more "complex" expressions manually to Z_* macros.
+
+    * ext/session/mod_files.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    Rename symbols whose first character was an underscore.
+
+    * ext/session/session.c: Convert to Z_* macros
+
+    * scripts/conv_z_macros:
+    A little script for converting source files to the Z_* macros
+
+2000-09-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/assert.c: fix #6552 & #6577
+    thanx to Blake Schwendiman" <blake@intechra.net>
+
+2000-09-06  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/config.w32.h: deleted unnecessary defines
+    i also plan to let windows build with crypt() support
+
+    * ext/gd/gd.dsp: added LIBGD define
+
+    * ext/oracle/oracle.dsp
+      ext/oracle/oracle.dsw: fixed debug build and removed dsw
+
+    * ext/db/db.dsp: fix build
+
+    * ext/dbase/dbase.dsp: little fix for the debug extension
+
+2000-09-06  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_globals.h: Fix ordering
+
+2000-09-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Why make it more complex than necessary?
+
+    These changes should have been committed right after Zeev made the
+    original change to use the PHP_INI system months ago.
+
+    Instead of working around the system, we make proper use of it now.
+
+    This includes using php_alter_ini_entry(), so that we change the values
+    in the php_ps_globals struct indirectly.
+
 2000-09-05  Stanislav Malyshev  <stas@zend.com>
 
     * ext/session/session.c: Now it should not crash, though still leaks
