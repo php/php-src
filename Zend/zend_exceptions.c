@@ -24,7 +24,8 @@
 #include "zend_reflection_api.h"
 #include "zend_builtin_functions.h"
 
-zend_class_entry *default_exception_ptr;
+static zend_class_entry *default_exception_ptr;
+static zend_object_handlers default_exception_handlers;
 
 static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -33,6 +34,7 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 	zval *trace;
 
 	obj.value.obj = zend_objects_new(&object, class_type TSRMLS_CC);
+	obj.value.obj.handlers = &default_exception_handlers;
 
 	ALLOC_HASHTABLE(object->properties);
 	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -356,13 +358,30 @@ static zend_function_entry default_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+void zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+	if (type == IS_STRING) {
+		zval fname, *retval;
+
+		ZVAL_STRING(&fname, "tostring", 0);
+		if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
+			ZVAL_STRING(writeobj, Z_STRVAL_P(retval), 1);
+			zval_ptr_dtor(&retval);
+			return;
+		}
+	}
+	Z_TYPE_P(writeobj) = IS_NULL;
+}
+
 static void zend_register_default_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "exception", default_exception_functions);
 	default_exception_ptr = zend_register_internal_class(&ce TSRMLS_CC);
-	default_exception_ptr->create_object = zend_default_exception_new;
+	default_exception_ptr->create_object = zend_default_exception_new; 
+	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	default_exception_handlers.cast_object = zend_cast_exception;
 
 	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "Unknown exception", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ptr, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
