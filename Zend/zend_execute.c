@@ -169,7 +169,11 @@ static inline void zend_fetch_property_address_inner(zval *object, znode *op2, z
 	}
 
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		T(result->u.var).var.ptr_ptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, prop_ptr TSRMLS_CC);
+		zval **ptr_ptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, prop_ptr TSRMLS_CC);
+		if(NULL == ptr_ptr) {
+			zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
+		}
+		T(result->u.var).var.ptr_ptr = ptr_ptr;
 	} else if (Z_OBJ_HT_P(object)->read_property) {
 		T(result->u.var).var.ptr = Z_OBJ_HT_P(object)->read_property(object, prop_ptr, 0 TSRMLS_CC);
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr;
