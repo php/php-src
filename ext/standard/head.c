@@ -59,17 +59,25 @@ PHP_RINIT_FUNCTION(head)
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header)
+/* {{{ proto void header(string header[, bool replace])
    Send a raw HTTP header */
 PHP_FUNCTION(Header)
 {
-	pval **arg1;
-
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	pval **arg1, **arg2;
+	zend_bool replace = 1;
+	
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(arg1);
-	sapi_add_header(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1);
+	switch (ZEND_NUM_ARGS()) {
+		case 2:
+			convert_to_boolean_ex(arg2);
+			replace = Z_BVAL_PP(arg2);
+		case 1:
+			convert_to_string_ex(arg1);
+	}
+	sapi_add_header_ex(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1, replace);
 }
 /* }}} */
 
