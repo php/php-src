@@ -1,16 +1,31 @@
 <?php
 
 	class php_constant extends php_element {
-		function php_constant($name, $value, $type="string", $desc="") {
-			$this->name = $name;
-			$this->value= $value;
-			$this->type = $type;
+
+		function __construct($attr, $desc) {
+
+			$this->name = $attr["name"];
+			if (!$this->is_name($this->name)) {
+				$this->error[] = "'$attr[name]'is not a valid constant name";
+			}
+
+			$this->type = isset($attr["type"]) ? $this->is_type($attr["type"]) : "string";
+			if (!in_array($this->type, array('int', 'float', 'string'))) {
+				$this->error[] = "'$attr[type]' is not a valid constant type, only int, float and string";
+			} 
+
+			$this->value= $attr["value"];
 			$this->desc = $desc;
 		} 
+
+
+		static function c_code_header($name) {
+			return "";
+		}
 		
 		function c_code() {
-			switch($this->type) {
-			case "integer":
+			switch ($this->type) {
+			case "int":
 				return "REGISTER_LONG_CONSTANT(\"{$this->name}\", {$this->value}, 0);\n";
 			
 			case "float":
@@ -21,6 +36,27 @@
 			}
 		}
 
+		static function c_code_footer() {
+			return "";
+		}
+
+		
+		
+		static function docbook_xml_header($name) {
+"    <table>
+     <title>$name constants</title>
+      <tgroup cols='3'>
+       <thead>
+        <row>
+         <entry>name</entry>
+         <entry>value</entry>
+         <entry>descrpition</entry>
+        </row>
+       </thead>
+      <tbody>
+";
+		}
+			
 		function docbook_xml() {
 			return trim("
 <row>
@@ -32,6 +68,14 @@
  <entry>{$this->desc}</entry>
 </row>
 ")."\n";
+		}
+
+		static function docbook_xml_footer() {
+			return
+"     </tbody>
+    </tgroup>
+   </table>
+";
 		}
 	}
 
