@@ -443,7 +443,7 @@ PHP_FUNCTION(cyrus_bind)
 }
 /* }}} */
 
-/* proto bool cyrus_unbind( resource connection, string trigger_name)
+/* {{{ proto bool cyrus_unbind( resource connection, string trigger_name)
    Unbind ... */
 PHP_FUNCTION(cyrus_unbind)
 {
@@ -465,7 +465,7 @@ PHP_FUNCTION(cyrus_unbind)
 }
 /* }}} */
 
-/* {{{ proto bool cyrus_qzuery( resource connection, string query) 
+/* {{{ proto bool cyrus_query( resource connection, string query) 
    Send a query to a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_query)
 {
