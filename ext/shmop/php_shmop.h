@@ -61,7 +61,7 @@ typedef struct {
 } php_shmop_globals;
 
 #ifdef ZTS
-#define SHMOPG(v) TSRMG(gd_shmop_id, php_shmop_globals *, v)
+#define SHMOPG(v) TSRMG(shmop_globals_id, php_shmop_globals *, v)
 #else
 #define SHMOPG(v) (shmop_globals.v)
 #endif
