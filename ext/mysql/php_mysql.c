@@ -77,7 +77,7 @@ static int le_result, le_link, le_plink;
 #define MYSQL_HAS_TINY
 #endif
 
-#if MYSQL_VERSION_ID > 32200
+#if MYSQL_VERSION_ID >= 32200
 #define MYSQL_HAS_YEAR
 #endif
 
