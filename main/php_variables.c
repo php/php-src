@@ -29,12 +29,17 @@
 #include "zend_globals.h"
 
 
-PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array ELS_DC PLS_DC)
+PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array ELS_DC PLS_DC) {
+	php_register_variable_safe(var, strval, strlen(strval), track_vars_array ELS_CC PLS_CC);
+}
+
+/* binary-safe version */
+PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zval *track_vars_array ELS_DC PLS_DC)
 {
 	zval new_entry;
 
 	/* Prepare value */
-	new_entry.value.str.len = strlen(strval);
+	new_entry.value.str.len = str_len;
 	if (PG(magic_quotes_gpc)) {
 		new_entry.value.str.val = php_addslashes(strval, new_entry.value.str.len, &new_entry.value.str.len, 0);
 	} else {
@@ -198,11 +203,12 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	while (var) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
+			int val_len;
+
 			*val++ = '\0';
-			/* FIXME: XXX: not binary safe, discards returned length */
 			php_url_decode(var, strlen(var));
-			php_url_decode(val, strlen(val));
-			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
+			val_len = php_url_decode(val, strlen(val));
+			php_register_variable_safe(var, val, val_len, array_ptr ELS_CC PLS_CC);
 		}
 		var = php_strtok_r(NULL, "&", &strtok_buf);
 	}
@@ -282,11 +288,12 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 	while (var) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
+			int val_len;
+
 			*val++ = '\0';
-			/* FIXME: XXX: not binary safe, discards returned length */
 			php_url_decode(var, strlen(var));
-			php_url_decode(val, strlen(val));
-			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
+			val_len = php_url_decode(val, strlen(val));
+			php_register_variable_safe(var, val, val_len, array_ptr ELS_CC PLS_CC);
 		}
 		if (arg == PARSE_COOKIE) {
 			var = php_strtok_r(NULL, ";", &strtok_buf);
