@@ -369,7 +369,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			if (!stream) {
 				RETURN_FALSE;
 			}
-			buffer_len = php_stream_copy_to_mem(stream, &tmp, HOWMANY, 0); // 
+			buffer_len = php_stream_copy_to_mem(stream, &tmp, HOWMANY, 0);
 			php_stream_close(stream);
 
 			if (buffer_len == 0) {
