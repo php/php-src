@@ -1,3 +1,32 @@
+2003-11-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      fixed compilation warning. (patched by Joe Orton)
+
+2003-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      sapi/apache2handler/php_functions.c:
+      MFH: Compiler warning fix (patch by Joe Orton).
+
+    * sapi/apache2handler/php_functions.c:
+      Compiler warning fix (patch by Joe Orton).
+
+2003-11-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      MFH(r-1.204): Compiler warning fix (patch by Joe Orton).
+
+    * ext/mbstring/mbstring.c:
+      Compiler warning fix  (patch by Joe Orton)
+
+2003-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Fix ZTS build.
+
 2003-11-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_iterators.c:
