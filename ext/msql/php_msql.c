@@ -267,12 +267,12 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 		
 		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
-			php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), msql_globals.num_links);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		if (msql_globals.max_persistent!=-1 && msql_globals.num_persistent>=msql_globals.max_persistent) {
-			php_error(E_WARNING, "%s(): Too many open persistent links (%d)", get_active_function_name(TSRMLS_C), msql_globals.num_persistent);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", msql_globals.num_persistent);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -306,7 +306,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* still have to find a way to do this nicely with mSQL */
 			if (msql_stat(le->ptr)==NULL) { /* the link died */
 				if (msql_connect(le->ptr,host,user,passwd)==NULL) {
-					php_error(E_WARNING,"mSQL link lost, unable to reconnect");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "mSQL link lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list),hashed_details,hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -343,7 +343,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 		}
 		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
-			php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C),msql_globals.num_links);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)",msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -655,7 +655,7 @@ PHP_FUNCTION(msql_list_dbs)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 
 	if ((msql_result=msqlListDBs(msql))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save mSQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
@@ -696,7 +696,7 @@ PHP_FUNCTION(msql_list_tables)
 		RETURN_FALSE;
 	}
 	if ((msql_result=msqlListTables(msql))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save mSQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
@@ -738,7 +738,7 @@ PHP_FUNCTION(msql_list_fields)
 	}
 	convert_to_string(table);
 	if ((msql_result=msqlListFields(msql,Z_STRVAL_P(table)))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save mSQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
@@ -786,7 +786,7 @@ PHP_FUNCTION(msql_result)
 	
 	convert_to_long(row);
 	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=msqlNumRows(msql_result)) {
-		php_error(E_WARNING, "%s(): Unable to jump to row %d on mSQL query index %d", get_active_function_name(TSRMLS_C),Z_LVAL_P(row),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on mSQL query index %d",Z_LVAL_P(row),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,Z_LVAL_P(row));
@@ -818,7 +818,7 @@ PHP_FUNCTION(msql_result)
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error(E_WARNING, "%s(): %s%s%s not found in mSQL query index %d", get_active_function_name(TSRMLS_C),
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in mSQL query index %d",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_P(result));
 						efree(field_name);
 						if (table_name) {
@@ -836,7 +836,7 @@ PHP_FUNCTION(msql_result)
 				convert_to_long(field);
 				field_offset = Z_LVAL_P(field);
 				if (field_offset<0 || field_offset>=msqlNumFields(msql_result)) {
-					php_error(E_WARNING, "%s(): Bad column offset specified", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
 					RETURN_FALSE;
 				}
 				break;
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(msql_data_seek)
 	if (!msql_result ||
 			Z_LVAL_P(offset)<0 || 
 			Z_LVAL_P(offset)>=msqlNumRows(msql_result)) {
-		php_error(E_WARNING, "%s(): %d is invalid for mSQL query index %d", get_active_function_name(TSRMLS_C),Z_LVAL_P(offset),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is invalid for mSQL query index %d",Z_LVAL_P(offset),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,Z_LVAL_P(offset));
@@ -1087,7 +1087,7 @@ PHP_FUNCTION(msql_fetch_field)
 	
 	if (field) {
 		if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumRows(msql_result)) {
-			php_error(E_NOTICE, "%s(): Bad field offset specified", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Bad field offset specified");
 			RETURN_FALSE;
 		}
 		msqlFieldSeek(msql_result,Z_LVAL_P(field));
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(msql_field_seek)
 		RETURN_FALSE;
 	}
 	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=msqlNumFields(msql_result)) {
-		php_error(E_WARNING,"%s(): Field %d is invalid for mSQL query index %d", get_active_function_name(TSRMLS_C),
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %d is invalid for mSQL query index %d",
 				Z_LVAL_P(offset),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
@@ -1164,7 +1164,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	convert_to_long(field);
 	if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumFields(msql_result)) {
-		php_error(E_WARNING,"%s(): Field %d is invalid for mSQL query index %d", get_active_function_name(TSRMLS_C),Z_LVAL_P(field),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %d is invalid for mSQL query index %d",Z_LVAL_P(field),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlFieldSeek(msql_result,Z_LVAL_P(field));

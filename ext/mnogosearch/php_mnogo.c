@@ -471,7 +471,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 #if UDM_VERSION_ID <= 30207
 				    Env->errcode=1;
 #endif
-				    php_error(E_WARNING,"%s(): Invalid DBAddr", get_active_function_name(TSRMLS_C));
+				    php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invalid DBAddr");
 				    RETURN_FALSE;
 				}
 				
@@ -524,7 +524,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 #if UDM_VERSION_ID <= 30207
 				    Env->errcode=1;
 #endif
-				    php_error(E_WARNING,"%s(): Invalid DBAddr", get_active_function_name(TSRMLS_C));
+				    php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invalid DBAddr");
 				    RETURN_FALSE;
 				}
 				Agent=UdmAgentInit(NULL,Env,0);
@@ -626,7 +626,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 
 					case UDM_MODE_PHRASE: 
 #if UDM_VERSION_ID >= 30200
-    						php_error(E_WARNING,"%s(): Unknown search mode", get_active_function_name(TSRMLS_C));
+    						php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown search mode");
 						RETURN_FALSE;
 #else
 						Agent->search_mode=UDM_MODE_PHRASE;
@@ -639,7 +639,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else
 						Agent->search_mode=UDM_MODE_ALL;
 #endif						
-						php_error(E_WARNING,"%s(): Unknown search mode", get_active_function_name(TSRMLS_C));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown search mode");
 						RETURN_FALSE;
 						break;
 			}
@@ -685,7 +685,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else
 						Agent->word_match=UDM_MATCH_WORD;
 #endif						
-						php_error(E_WARNING,"%s(): Unknown word match mode", get_active_function_name(TSRMLS_C));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown word match mode");
 						RETURN_FALSE;
 						break;
 			}
@@ -720,7 +720,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else									
 					UdmReplaceStrVar(Agent->Conf->vars,"Cache","no",UDM_VARSRC_GLOBAL);
 #endif						
-					php_error(E_WARNING,"%s(): Unknown cache mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown cache mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -758,7 +758,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else
 					UdmReplaceStrVar(Agent->Conf->vars,"TrackQuery","no",UDM_VARSRC_GLOBAL);
 #endif				
-					php_error(E_WARNING,"%s(): Unknown track mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown track mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -777,7 +777,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					php_error(E_WARNING,"%s(): Unknown phrase mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown phrase mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -815,7 +815,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else
 					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
 #endif												
-					php_error(E_WARNING,"%s(): Unknown ispell prefixes mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown ispell prefixes mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -872,7 +872,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 		case UDM_PARAM_SYNONYM:
 			if (UdmSynonymListLoad(Agent->Conf,val)) {
-				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C),Agent->Conf->errstr);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s",Agent->Conf->errstr);
 				RETURN_FALSE;
 #if UDM_VERSION_ID >= 30204
 			} else UdmSynonymListSort(&(Agent->Conf->Synonyms));
@@ -924,7 +924,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #else
 			if (UdmFileLoadStopList(Agent->Conf,val)) {
 #endif
-				php_error(E_WARNING, "%s(): %s", Agent->Conf->errstr, get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", Agent->Conf->errstr);
 				RETURN_FALSE;
 			}
 			break;
@@ -991,7 +991,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					php_error(E_WARNING,"%s(): Unknown crosswords mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown crosswords mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -1040,7 +1040,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					php_error(E_WARNING,"%s(): Unknown groupbysite mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown groupbysite mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -1065,7 +1065,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					php_error(E_WARNING,"%s(): Unknown clones mode", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown clones mode");
 					RETURN_FALSE;
 					break;
 			}
@@ -1074,7 +1074,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #endif
 
 		default:
-			php_error(E_WARNING,"%s(): Unknown agent session parameter", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown agent session parameter");
 			RETURN_FALSE;
 			break;
 	}
@@ -1168,12 +1168,12 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 #endif
 			
 			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
-				php_error(E_WARNING,"%s(): Cannot load affix file %s", get_active_function_name(TSRMLS_C),val2);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load affix file %s",val2);
 				RETURN_FALSE;
 			}
 #else
 			if (UdmImportAffixes(Agent->Conf,val1,charset,val2)) {
-				php_error(E_WARNING,"%s(): Cannot load affix file %s", get_active_function_name(TSRMLS_C),val2);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load affix file %s",val2);
 				RETURN_FALSE;
 			}
     
@@ -1189,12 +1189,12 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 #endif
 			
 			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
-				php_error(E_WARNING,"%s(): Cannot load spell file %s", get_active_function_name(TSRMLS_C),val2);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load spell file %s",val2);
 				RETURN_FALSE;
 			}
 #else
 			if (UdmImportDictionary(Agent->Conf,val1,charset,val2,0,"")) {
-				php_error(E_WARNING,"%s(): Cannot load spell file %s", get_active_function_name(TSRMLS_C),val2);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load spell file %s",val2);
 				RETURN_FALSE;
 			}
 #endif
@@ -1202,7 +1202,7 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 
 
 		default:
-			php_error(E_WARNING,"%s(): Unknown ispell type parameter", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown ispell type parameter");
 			RETURN_FALSE;
 			break;
 	}
@@ -1336,7 +1336,7 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 				Z_TYPE(stl_info)=2;
 				stl_info.t2=(time_t)(atol(edate+1));
 			} else {
-				php_error(E_WARNING,"%s(): Incorrect date limit format", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Incorrect date limit format");
 				RETURN_FALSE;
 			}			
 			
@@ -1346,7 +1346,7 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 #endif
 			break;
 		default:
-			php_error(E_WARNING,"%s(): Unknown search limit parameter", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown search limit parameter");
 			RETURN_FALSE;
 			break;
 	}
@@ -1666,7 +1666,7 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 			RETURN_FALSE;
 		}
 	}else{
-		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"row number too large");
 		RETURN_FALSE;
 	}
 	
@@ -1711,12 +1711,12 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex)
 		Agent->Conf->bcs=UdmGetCharSet(charset);
 	} else if (!strcasecmp(var,"Synonym")) {
 		if (UdmSynonymListLoad(Agent->Conf,val)) {
-			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C),Agent->Conf->errstr);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s",Agent->Conf->errstr);
 			RETURN_FALSE;
 		} else UdmSynonymListSort(&(Agent->Conf->Synonyms));
 	} else if (!strcasecmp(var,"Stopwordfile")) {
 		if (UdmStopListLoad(Agent->Conf,val)) {
-			php_error(E_WARNING, "%s(): %s", Agent->Conf->errstr, get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", Agent->Conf->errstr);
 			RETURN_FALSE;
 		}
 	} else if (!strcasecmp(var,"MinWordLen")) {
@@ -1768,7 +1768,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
 		}
 		RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,field,""),1);
 	} else {
-		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"row number too large");
 		RETURN_FALSE;
 	}
 }
@@ -1984,12 +1984,12 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 #endif
 				
 			default: 
-				php_error(E_WARNING,"%s(): Unknown mnoGoSearch field name", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown mnoGoSearch field name");
 				RETURN_FALSE;
 				break;
 		}
 	}else{
-		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"row number too large");
 		RETURN_FALSE;
 	}
 }
@@ -2106,7 +2106,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			break;
 
 		default:
-			php_error(E_WARNING,"%s(): Unknown mnoGoSearch param name", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown mnoGoSearch param name");
 			RETURN_FALSE;
 			break;
 	}

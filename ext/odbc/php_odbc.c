@@ -588,9 +588,9 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	memcpy(ODBCG(laststate), state, sizeof(state));
 	memcpy(ODBCG(lasterrormsg), errormsg, sizeof(errormsg));
 	if (func) {
-		php_error(E_WARNING, "SQL error: %s, SQL state %s in %s", errormsg, state, func);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQL error: %s, SQL state %s in %s", errormsg, state, func);
 	} else {
-		php_error(E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
 	}
 	/*		
 		} while (SQL_SUCCEEDED(rc));
@@ -635,12 +635,6 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 	SDWORD      displaysize;
 
 	result->values = (odbc_result_value *) emalloc(sizeof(odbc_result_value)*result->numcols);
-
-	if (result->values == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		SQLFreeStmt(result->stmt, SQL_DROP);
-		return 0;
-	}
 
 	result->longreadlen = ODBCG(defaultlrl);
 	result->binmode = ODBCG(defaultbinmode);
@@ -745,17 +739,17 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 
 	if (Z_LVAL_PP(pv_num) > result->numcols) {
-		php_error(E_WARNING, "Field index larger than number of fields");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field index larger than number of fields");
 		RETURN_FALSE;
 	}
 
 	if (Z_LVAL_PP(pv_num) < 1) {
-		php_error(E_WARNING, "Field numbering starts at 1");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 
@@ -850,10 +844,6 @@ PHP_FUNCTION(odbc_prepare)
 	query = Z_STRVAL_PP(pv_query);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	result->numparams = 0;
 	
@@ -968,13 +958,13 @@ PHP_FUNCTION(odbc_execute)
 	
 	/* XXX check for already bound parameters*/
 	if (result->numparams > 0 && numArgs == 1) {
-		php_error(E_WARNING, "No parameters to SQL statement given");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No parameters to SQL statement given");
 		RETURN_FALSE;
 	}
 
 	if (result->numparams > 0) {
 		if ((ne = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr))) < result->numparams) {
-			php_error(E_WARNING,"Not enough parameters (%d should be %d) given", ne, result->numparams);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Not enough parameters (%d should be %d) given", ne, result->numparams);
 			RETURN_FALSE;
 		}
 
@@ -983,7 +973,7 @@ PHP_FUNCTION(odbc_execute)
 		
 		for(i = 1; i <= result->numparams; i++) {
 			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {
-				php_error(E_WARNING,"Error getting parameter");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
 				SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
 				efree(params);
 				RETURN_FALSE;
@@ -992,7 +982,7 @@ PHP_FUNCTION(odbc_execute)
 			otype = (*tmp)->type;
 			convert_to_string(*tmp);
 			if (Z_TYPE_PP(tmp) != IS_STRING) {
-				php_error(E_WARNING,"Error converting parameter");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				efree(params);
 				RETURN_FALSE;
@@ -1025,7 +1015,7 @@ PHP_FUNCTION(odbc_execute)
 				}
 
 				if ((params[i-1].fp = open(filename,O_RDONLY)) == -1) {
-					php_error(E_WARNING,"Can't open file %s", filename);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't open file %s", filename);
 					SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 					for(i = 0; i < result->numparams; i++) {
 						if (params[i].fp != -1) {
@@ -1147,10 +1137,6 @@ PHP_FUNCTION(odbc_cursor)
 	
 	if (max_len > 0) {
 		cursorname = emalloc(max_len + 1);
-		if (cursorname == NULL) {
-			php_error(E_WARNING,"Out of memory");
-			RETURN_FALSE;
-		}
 		rc = SQLGetCursorName(result->stmt,cursorname,(SWORD)max_len,&len);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			char    state[6];     /* Not used */
@@ -1170,7 +1156,7 @@ PHP_FUNCTION(odbc_cursor)
 					RETVAL_STRING(cursorname,1);
 				}
 			} else {
-				php_error(E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQL error: %s, SQL state %s", errormsg, state);
 				RETVAL_FALSE;
 			}
 		} else {
@@ -1200,7 +1186,7 @@ PHP_FUNCTION(odbc_data_source)
 	}
 
 	if (zend_get_parameters_ex(2, &zv_conn, &zv_fetch_type) == FAILURE) {
-		php_error(E_WARNING, "%s(): Unable to get parameters", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to get parameters");
 		RETURN_FALSE;
 	}
 
@@ -1275,10 +1261,6 @@ PHP_FUNCTION(odbc_exec)
 	query = Z_STRVAL_PP(pv_query);
 	
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -1392,7 +1374,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 
@@ -1545,7 +1527,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 	
@@ -1645,7 +1627,7 @@ PHP_FUNCTION(solid_fetch_prev)
 	
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 	rc = SQLFetchPrev(result->stmt);
@@ -1694,7 +1676,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 
@@ -1756,14 +1738,14 @@ PHP_FUNCTION(odbc_result)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if ((result->numcols == 0)) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 	
 	/* get field index if the field parameter was a string */
 	if (field != NULL) {
 		if (result->values == NULL) {
-			php_error(E_WARNING, "Result set contains no data");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set contains no data");
 			RETURN_FALSE;
 		}
 
@@ -1775,13 +1757,13 @@ PHP_FUNCTION(odbc_result)
 		}
 
 		if (field_ind < 0) {
-			php_error(E_WARNING, "Field %s not found", field);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %s not found", field);
 			RETURN_FALSE;
 		}
 	} else {
 		/* check for limits of field_ind if the field parameter was an int */
 		if (field_ind >= result->numcols || field_ind < 0) {
-			php_error(E_WARNING, "Field index is larger than the number of fields");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field index is larger than the number of fields");
 			RETURN_FALSE;
 		}
 	}
@@ -1822,10 +1804,6 @@ PHP_FUNCTION(odbc_result)
 			/* For char data, the length of the returned string will be longreadlen - 1 */
 			fieldsize = (result->longreadlen <= 0) ? 4096 : result->longreadlen;
 			field = emalloc(fieldsize);
-			if (!field) {
-				php_error(E_WARNING, "Out of memory");
-				RETURN_FALSE;
-			}
 
 		/* SQLGetData will truncate CHAR data to fieldsize - 1 bytes and append \0.
 		 * For binary data it is truncated to fieldsize bytes. 
@@ -1866,10 +1844,7 @@ PHP_FUNCTION(odbc_result)
 	
 	/* We emalloc 1 byte more for SQL_C_CHAR (trailing \0) */
 	fieldsize = (sql_c_type == SQL_C_CHAR) ? 4096 : 4095;
-	if ((field = emalloc(fieldsize)) == NULL) {
-		php_error(E_WARNING,"Out of memory");
-		RETURN_FALSE;
-	}
+	field = emalloc(fieldsize);
 	
 	/* Call SQLGetData() until SQL_SUCCESS is returned */
 	while(1) {
@@ -1926,7 +1901,7 @@ PHP_FUNCTION(odbc_result_all)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 #ifdef HAVE_SQL_EXTENDED_FETCH
@@ -2218,11 +2193,6 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	len = strlen(db) + strlen(uid) + strlen(pwd) + sizeof(ODBC_TYPE) + 5;
 	hashed_details = emalloc(len);
 
-	if (hashed_details == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
-
 	hashed_len = sprintf(hashed_details, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
 
 	/* FIXME the idea of checking to see if our connection is already persistent
@@ -2492,17 +2462,17 @@ PHP_FUNCTION(odbc_field_name)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 	
 	if (Z_LVAL_PP(pv_num) > result->numcols) {
-		php_error(E_WARNING, "Field index larger than number of fields");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field index larger than number of fields");
 		RETURN_FALSE;
 	}
 	
 	if (Z_LVAL_PP(pv_num) < 1) {
-		php_error(E_WARNING, "Field numbering starts at 1");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 	
@@ -2528,17 +2498,17 @@ PHP_FUNCTION(odbc_field_type)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 	
 	if (Z_LVAL_PP(pv_num) > result->numcols) {
-		php_error(E_WARNING, "Field index larger than number of fields");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field index larger than number of fields");
 		RETURN_FALSE;
 	}
 
 	if (Z_LVAL_PP(pv_num) < 1) {
-		php_error(E_WARNING, "Field numbering starts at 1");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1");
 		RETURN_FALSE;
 	}
 
@@ -2581,7 +2551,7 @@ PHP_FUNCTION(odbc_field_num)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
 	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 
@@ -2745,7 +2715,7 @@ PHP_FUNCTION(odbc_setoption)
 		case 1:		/* SQLSetConnectOption */
 			ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_handle, -1, "ODBC-Link", le_conn, le_pconn);
 			if (conn->persistent) {
-				php_error(E_WARNING, "Unable to set option for persistent connection");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set option for persistent connection");
 				RETURN_FALSE;
 			}
 			rc = SQLSetConnectOption(conn->hdbc, (unsigned short)(Z_LVAL_PP(pv_opt)), Z_LVAL_PP(pv_val));
@@ -2811,10 +2781,6 @@ PHP_FUNCTION(odbc_tables)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -2899,10 +2865,6 @@ PHP_FUNCTION(odbc_columns)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -2978,10 +2940,6 @@ PHP_FUNCTION(odbc_columnprivileges)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3076,10 +3034,6 @@ PHP_FUNCTION(odbc_foreignkeys)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3155,10 +3109,6 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3227,10 +3177,6 @@ PHP_FUNCTION(odbc_primarykeys)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3309,10 +3255,6 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3391,10 +3333,6 @@ PHP_FUNCTION(odbc_procedures)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3477,10 +3415,6 @@ PHP_FUNCTION(odbc_specialcolumns)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3562,10 +3496,6 @@ PHP_FUNCTION(odbc_statistics)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3640,10 +3570,6 @@ PHP_FUNCTION(odbc_tableprivileges)
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
-	if (result == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {

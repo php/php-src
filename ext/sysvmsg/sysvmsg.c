@@ -315,7 +315,7 @@ PHP_FUNCTION(msg_receive)
 			MAKE_STD_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash TSRMLS_CC)) {
-				zend_error(E_WARNING, "%s(): message corrupted", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "message corrupted");
 				RETVAL_FALSE;
 			}
 			REPLACE_ZVAL_VALUE(&out_message, tmp, 0);
