@@ -48,9 +48,11 @@ static void php_statpage(BLS_D)
 	pstat = sapi_get_stat();
 
 	if (BG(page_uid)==-1) {
-		BG(page_uid)   = pstat->st_uid;
-		BG(page_inode) = pstat->st_ino;
-		BG(page_mtime) = pstat->st_mtime;
+		if(pstat) {
+			BG(page_uid)   = pstat->st_uid;
+			BG(page_inode) = pstat->st_ino;
+			BG(page_mtime) = pstat->st_mtime;
+		} 
 	}
 }
 
