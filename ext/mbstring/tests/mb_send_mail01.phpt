@@ -7,7 +7,7 @@ if (@mb_send_mail() === false || !mb_language("neutral")) {
 }
 ?>
 --INI--
-sendmail_path=cat
+sendmail_path=/usr/cat
 --FILE--
 <?php
 $to = 'example@example.com';
