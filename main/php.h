@@ -303,7 +303,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_CHDIR(path) virtual_chdir(path)
 #define V_CHDIR_FILE(path) virtual_chdir_file(path)
 #define V_GETWD(buf)
-#define V_REALPATH(path,realpath) virtual_realpath(path,realpath)
+#define V_REALPATH(path,real_path) virtual_realpath(path,real_path)
 #define V_STAT(path, buff) virtual_stat(path, buff)
 #ifdef PHP_WIN32
 #define V_LSTAT(path, buff) virtual_stat(path, buff)
@@ -338,7 +338,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_RMDIR(pathname) rmdir(pathname)
 #define V_OPENDIR(pathname) opendir(pathname)
 #define V_POPEN(command, type) popen(command, type)
-#define V_REALPATH(path,realpath) realpath(path,realpath)
+#define V_REALPATH(path,real_path) realpath(path,real_path)
 #if HAVE_UTIME
 #define V_UTIME(path,time) utime(path,time)
 #endif
