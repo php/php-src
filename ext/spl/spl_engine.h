@@ -49,7 +49,7 @@ void spl_unlock_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC);
 
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
-
+int spl_implements(zval **obj, zend_class_entry *ce TSRMLS_DC);
 
 #endif /* SPL_ENGINE_H */
 

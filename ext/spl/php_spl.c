@@ -134,29 +134,29 @@ PHP_MINIT_FUNCTION(spl)
 
 	REGISTER_SPL_INTERFACE(spl, sequence);
 	REGISTER_SPL_INTF_FUNC(spl, sequence, rewind);
-	REGISTER_SPL_PARENT_CE(spl, sequence, forward);
+	REGISTER_SPL_IMPLEMENT(spl, sequence, forward);
 
 	REGISTER_SPL_INTERFACE(spl, assoc);
 	REGISTER_SPL_INTF_FUNC(spl, assoc, key);
 
 	REGISTER_SPL_INTERFACE(spl, forward_assoc);
-	REGISTER_SPL_PARENT_CE(spl, forward_assoc, forward);
 	REGISTER_SPL_IMPLEMENT(spl, forward_assoc, assoc);
+	REGISTER_SPL_IMPLEMENT(spl, forward_assoc, forward);
 
 	REGISTER_SPL_INTERFACE(spl, sequence_assoc);
-	REGISTER_SPL_PARENT_CE(spl, sequence_assoc, sequence);
 	REGISTER_SPL_IMPLEMENT(spl, sequence_assoc, forward_assoc);
+	REGISTER_SPL_IMPLEMENT(spl, sequence_assoc, sequence);
 
 	REGISTER_SPL_INTERFACE(spl, array_read);
 	REGISTER_SPL_INTF_FUNC(spl, array_read, get);
 	REGISTER_SPL_INTF_FUNC(spl, array_read, exists);
 
 	REGISTER_SPL_INTERFACE(spl, array_access);
-	REGISTER_SPL_PARENT_CE(spl, array_access, array_read);
+	REGISTER_SPL_IMPLEMENT(spl, array_access, array_read);
 	REGISTER_SPL_INTF_FUNC(spl, array_access, set);
 
 	REGISTER_SPL_INTERFACE(spl, array_access_ex);
-	REGISTER_SPL_PARENT_CE(spl, array_access_ex, array_access);
+	REGISTER_SPL_IMPLEMENT(spl, array_access_ex, array_access);
 	REGISTER_SPL_INTF_FUNC(spl, array_access_ex, new_writer);
 
 	REGISTER_SPL_INTERFACE(spl, array_writer);
