@@ -141,6 +141,8 @@ typedef struct gdImageStruct {
 		To do that, build your image as a truecolor image,
 		then quantize down to 8 bits. */
 	int alphaBlendingFlag;
+	/* Should antialias functions be used */
+	int antialias;
 	/* Should the alpha channel of the image be saved? This affects
 		PNG at the moment; other future formats may also
 		have that capability. JPEG doesn't. */
@@ -244,6 +246,7 @@ void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 int gdImageGetPixel(gdImagePtr im, int x, int y);
 
 void gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+void gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for much more flexible line drawing. */
@@ -479,6 +482,7 @@ void gdImageSetThickness(gdImagePtr im, int thickness);
 /* On or off (1 or 0) for all three of these. */
 void gdImageInterlace(gdImagePtr im, int interlaceArg);
 void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
+void gdImageAntialias(gdImagePtr im, int antialias);
 void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
 
 /* Macros to access information about images. */
