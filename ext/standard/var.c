@@ -342,6 +342,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 							FREE_ZVAL(d);
 							break;
 					}
+					if (data == struc) return;
 					php_var_serialize(buf, data, var_hash);
 				}
 			}
