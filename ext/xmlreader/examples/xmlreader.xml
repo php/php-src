@@ -1,0 +1,10 @@
+<books>
+ <book num="1">
+  <title>The Grapes of Wrath</title>
+  <author>John Steinbeck</author>
+ </book>
+ <book num="2">
+  <title>The Pearl</title>
+  <author>John Steinbeck</author>
+ </book>
+</books>
