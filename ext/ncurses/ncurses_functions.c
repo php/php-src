@@ -249,7 +249,7 @@ PHP_FUNCTION(ncurses_clrtoeol)
 /* }}} */
 
 /* {{{ proto bool ncurses_def_prog_mode(void)
- */
+  Saves terminals (program) mode */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
 	RETURN_LONG(def_prog_mode());
@@ -257,7 +257,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
 /* }}} */
 
 /* {{{ proto bool ncurses_def_shell_mode(void)
- */
+  Saves terminal (shell) mode*/
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
 	RETURN_LONG(def_shell_mode());
@@ -475,7 +475,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
  */
 
 /* {{{ proto bool ncurses_slk_attr(void)
- */
+   returns current soft label keys attribute */
 PHP_FUNCTION(ncurses_slk_attr)
 {
 	RETURN_LONG(slk_attr());
@@ -483,7 +483,7 @@ PHP_FUNCTION(ncurses_slk_attr)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_clear(void)
- */
+  Clears soft label keys from screen */
 PHP_FUNCTION(ncurses_slk_clear)
 {
 	RETURN_LONG(slk_clear());
@@ -491,7 +491,7 @@ PHP_FUNCTION(ncurses_slk_clear)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_noutrefresh(void)
- */
+  Copies soft label keys to virtual screen */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
 	RETURN_LONG(slk_noutrefresh());
@@ -499,7 +499,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_refresh(void)
- */
+  Copies soft label keys to screen */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
 	RETURN_LONG(slk_refresh());
@@ -507,7 +507,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_restore(void)
- */
+  Restores soft label keys */
 PHP_FUNCTION(ncurses_slk_restore)
 {
 	RETURN_LONG(slk_restore());
@@ -515,14 +515,14 @@ PHP_FUNCTION(ncurses_slk_restore)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_touch(void)
- */
+  Forces output when ncurses_slk_noutrefresh is performed */
 PHP_FUNCTION(ncurses_slk_touch)
 {
 	RETURN_LONG(slk_touch());
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_init(int labelnr, string label, int format)
+/* {{{ proto bool ncurses_slk_set(int labelnr, string label, int format)
   sets function key labels */
 PHP_FUNCTION(ncurses_slk_set)
 {
@@ -768,7 +768,7 @@ PHP_FUNCTION(ncurses_slk_attron)
 PHP_FUNCTION(ncurses_slk_attrset)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -778,7 +778,7 @@ PHP_FUNCTION(ncurses_slk_attrset)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_color(int intarg)
- */
+  Sets color for soft label keys*/
 PHP_FUNCTION(ncurses_slk_color)
 {
 #ifdef HAVE_NCURSES_SLK_COLOR
@@ -797,7 +797,7 @@ PHP_FUNCTION(ncurses_slk_color)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_init(int intarg)
- */
+  Inits soft label keys */
 PHP_FUNCTION(ncurses_slk_init)
 {
 	long intarg;
@@ -1147,7 +1147,7 @@ PHP_FUNCTION(ncurses_mvaddstr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x,&str,&str_len)==FAILURE) {
         return;
 	}
-	
+
 	RETURN_LONG(mvaddstr(y,x,str));
 }
 /* }}} */
