@@ -91,6 +91,7 @@ int php3_init_request_info(void *conf)
 int php3_destroy_request_info(void *conf)
 {
 	/* see above for why we don't want to efree() request_info.filename */
+	STR_FREE(request_info.current_user);
 	return SUCCESS;
 }
 #endif
