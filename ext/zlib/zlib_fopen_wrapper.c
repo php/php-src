@@ -26,26 +26,27 @@
 
 struct php_gz_stream_data_t	{
 	gzFile gz_file;
-	php_stream *stream;
 };
 
 static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-	size_t ret;
+	int read;
 	
-	ret = gzread(self->gz_file, buf, count);
+	read = gzread(self->gz_file, buf, count);
 	
 	if (gzeof(self->gz_file))
 		stream->eof = 1;
 	
-	return ret;
+	return read < 0 ? 0 : read;
 }
 
 static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-	return gzwrite(self->gz_file, (char*)buf, count);
+	int wrote;
+	wrote = gzwrite(self->gz_file, (char*)buf, count);
+	return wrote < 0 ? 0 : wrote;
 }
 
 static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
@@ -58,7 +59,7 @@ static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *n
 	ret = gzseek(self->gz_file, offset, whence);
 	*newoffs = gztell(self->gz_file);
 	
-	return ret;
+	return ret < 0 ? -1 : 0;
 }
 
 static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
@@ -67,9 +68,11 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	int ret = EOF;
 	
 	if (close_handle) {
-		ret = gzclose(self->gz_file);
+		if (self->gz_file) {
+			ret = gzclose(self->gz_file);
+			self->gz_file = NULL;
+		}
 	}
-	php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | (close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0));
 	efree(self);
 
 	return ret;
@@ -95,7 +98,21 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;
-	php_stream *stream = NULL;
+	php_stream *stream = NULL, *innerstream = NULL;
+
+	/* sanity check the stream: it can be either read-only or write-only */
+	if (strchr(mode, '+')) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot open a zlib stream for reading and writing at the same time!");
+		}
+		return NULL;
+	}
+	if (strchr(mode, 'a')) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot append to a zlib stream!");
+		}
+		return NULL;
+	}
 	
 	self = emalloc(sizeof(*self));
 
@@ -104,11 +121,11 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 	else if (strncasecmp("zlib:", path, 5) == 0)
 		path += 5;
 	
-	self->stream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK|options, opened_path);
+	innerstream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK|options|STREAM_WILL_CAST, opened_path);
 	
-	if (self->stream) {
+	if (innerstream) {
 		int fd;
-		if (SUCCESS == php_stream_cast(self->stream, PHP_STREAM_AS_FD, (void**)&fd, REPORT_ERRORS)) {
+		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_RELEASE, (void**)&fd, REPORT_ERRORS)) {
 			self->gz_file = gzdopen(fd, mode);
 			if (self->gz_file)	{
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
@@ -120,12 +137,12 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 			}
 			if (options & REPORT_ERRORS)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "gzopen failed");
+		} else if (innerstream) {
+			php_stream_close(innerstream);
 		}
 	}
 	if (stream)
 		php_stream_close(stream);
-	if (self && self->stream)
-		php_stream_close(self->stream);
 	if (self)
 		efree(self);
 
