@@ -36,8 +36,6 @@
 #ifndef _PHPSTRING_H
 #define _PHPSTRING_H
 
-#include "basic_functions.h"
-
 PHP_FUNCTION(strspn);
 PHP_FUNCTION(strcspn);
 PHP_FUNCTION(str_replace);
