@@ -1,3 +1,32 @@
+2004-07-26  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_interfaces.c:
+      quick fix for #29382
+
+2004-07-26  Georg Richter  <georg@mysql.com>
+
+    * NEWS
+      ext/mysqli/mysqli.c:
+      fixed bug #29335
+
+2004-07-26  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/array.c:
+      proto fix
+      (thanks to dave%php.net for spotting)
+
+2004-07-26  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_prop.c:
+      MFH: fixed bug in mysqli->client_version
+
+    * NEWS
+      ext/mysqli/mysqli_prop.c:
+      fixed bug in mysql->client_version
+      added mysql->client_info property
+
 2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
