@@ -140,6 +140,13 @@ PHP_MINIT_FUNCTION(xsl)
 	exsltRegisterAll();
 #endif
  
+	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_string_php);
+	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_object_php);
+
 	REGISTER_LONG_CONSTANT("XSL_CLONE_AUTO",      0,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSL_CLONE_NEVER",    -1,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSL_CLONE_ALWAYS",    1,     CONST_CS | CONST_PERSISTENT);
@@ -226,6 +233,12 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
 	*/
+
+	xsltUnregisterExtModuleFunction ((const xmlChar *) "functionString",
+				   (const xmlChar *) "http://php.net/xsl");
+	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
+				   (const xmlChar *) "http://php.net/xsl");
+
 	xsltCleanupGlobals();
 
 	return SUCCESS;
