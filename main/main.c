@@ -581,12 +581,21 @@ static void php_message_handler_for_zend(long message, void *data)
 
 					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 						mem_header *t = (mem_header *) data;
+						void *ptr = (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING);
 
-						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING),t->size,t->filename,t->lineno);
+#if WIN32||WINNT
+						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, ptr, t->size, SG(request_info).path_translated);
+#else
+						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, ptr, t->size,t->filename,t->lineno);
+#endif
 					} else {
 						uint leak_count = (uint) data;
 
+#if WIN32||WINNT
+						snprintf(memory_leak_buf, 512, "Last leak repeated %d time%s\n", leak_count, (leak_count>1?"s":""));
+#else
 						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %d time%s\n", SG(request_info).path_translated, leak_count, (leak_count>1?"s":""));
+#endif
 					}
 #	if WIN32||WINNT
 					OutputDebugString(memory_leak_buf);
