@@ -20,7 +20,6 @@ if test -n "$with_apache" && test -n "$with_apxs"; then
 fi
 
 cwd=`pwd`
-for i in $@; do passthru="$passthru \"$i\""; done
 
 CONFIGURE_COMMAND=$0
 for arg in "$@"; do
@@ -643,7 +642,7 @@ if test "$PHP_VERSIONING" = "yes"; then
 fi
 
 if test "$PHP_LOW_MEMORY" = "yes"; then
-  passthru="$passthru --disable-inline"
+  enable_inline=no
 fi
 
 divert(4)
@@ -653,18 +652,15 @@ enable_static=yes
 
 case "$php_build_target" in
 program)
-	enable_shared=no
+    enable_shared=no
     PHP_PROGRAM=php
-	passthru="$passthru --disable-shared"
 ;;
 shared)
-	enable_static=no
-    passthru="$passthru --disable-static"
+    enable_static=no
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version"
 ;;
 static)
-	enable_shared=no
-	passthru="$passthru --disable-shared"
+    enable_shared=no
 ;;
 esac
 
