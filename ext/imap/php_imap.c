@@ -732,6 +732,8 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
  			}
 			efree(hashed_details);
+			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
+			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 			RETURN_FALSE;
 		}
 
@@ -741,6 +743,8 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			node = malloc(sizeof(pils));
 			if (node == NULL) {
 				efree(hashed_details);
+				efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
+				efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 				RETURN_FALSE;
 			}
 
@@ -777,6 +781,8 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			free(headp);
 			efree(hashed_details);
+			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
+			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
  			RETURN_FALSE;
 		}
 
@@ -789,6 +795,8 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		if (imap_stream == NIL) {
 			php_error(E_WARNING, "Couldn't open stream %s\n", (*mailbox)->value.str.val);
+			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
+			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 			RETURN_FALSE;
 		}
 
