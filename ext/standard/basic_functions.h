@@ -141,9 +141,6 @@ typedef struct {
 
 	HashTable sm_protected_env_vars;
 	char *sm_allowed_env_vars;
-
-	/* file.c */
-	char *user_agent;
 	
 	/* pageinfo.c */
 	long page_uid;

@@ -483,6 +483,17 @@ allow_url_fopen = On
 ; Define the user agent for php to send
 ;user_agent="PHP"
 
+; Default timeout for socket based streams (seconds)
+default_socket_timeout = 60
+
+; If your scripts have to deal with files from Macintosh systems,
+; or you are running on a Mac and need to deal with files from
+; unix or win32 systems, setting this flag will cause PHP to
+; automatically detect the EOL character in those files so that
+; fgets() and file() will work regardless of the source of the file.
+; auto_detect_line_endings = Off
+
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
 ;;;;;;;;;;;;;;;;;;;;;;

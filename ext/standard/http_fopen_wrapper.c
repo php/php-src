@@ -203,8 +203,8 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	if (context && 
 	    php_stream_context_get_option(context, "http", "user_agent", &ua_zval) == SUCCESS) {
 		ua_str = Z_STRVAL_PP(ua_zval);
-	} else if (BG(user_agent)) {
-		ua_str = BG(user_agent);
+	} else if (FG(user_agent)) {
+		ua_str = FG(user_agent);
 	}
 
 	if (ua_str) {

@@ -95,6 +95,10 @@ fprintf(stderr, "stream_alloc: %s:%p\n", ops->label, ret);
 	ret->abstract = abstract;
 	ret->is_persistent = persistent;
 	ret->chunk_size = FG(def_chunk_size);
+	
+	if (FG(auto_detect_line_endings))
+		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
+	
 	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, php_file_le_stream());
 	strlcpy(ret->mode, mode, sizeof(ret->mode));
 
@@ -514,7 +518,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			eol = memchr(readptr, '\n', avail);
 		}
 
-		if (eol && ((ptrdiff_t)eol + 1 - (ptrdiff_t)readptr) <= maxlen - 1) {
+		if (eol && (size_t)((ptrdiff_t)eol + 1 - (ptrdiff_t)readptr) <= maxlen - 1) {
 			justread = eol + 1 - readptr;
 		} else {
 			eol = NULL;
