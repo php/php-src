@@ -1,5 +1,9 @@
 <?php
 
+if (!class_exists('DirectoryTreeIterator', false)) {
+	require_once(dirname(__FILE__). '/directorytreeiterator.inc');
+}
+
 /** tree view example
  *
  * Usage: php directorytree.php <path> [<start> [<count>]]
