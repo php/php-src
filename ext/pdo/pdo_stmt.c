@@ -529,6 +529,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
+	int flags = how & PDO_FETCH_FLAGS;
 	zend_class_entry * ce;
 
 	how = how & ~PDO_FETCH_FLAGS;
@@ -648,15 +649,19 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			INIT_PZVAL(&val);
 			fetch_value(stmt, &val, 0 TSRMLS_CC);
 			convert_to_string(&val);
-			if (zend_symtable_find(Z_ARRVAL_P(return_all), Z_STRVAL(val), Z_STRLEN(val)+1, (void**)&pgrp) == FAILURE) {
-				MAKE_STD_ZVAL(grp);
-				array_init(grp);
-				add_assoc_zval(return_all, Z_STRVAL(val), grp);
+			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
+				add_assoc_zval(return_all, Z_STRVAL(val), return_value);
 			} else {
-				grp = *pgrp;
+				if (zend_symtable_find(Z_ARRVAL_P(return_all), Z_STRVAL(val), Z_STRLEN(val)+1, (void**)&pgrp) == FAILURE) {
+					MAKE_STD_ZVAL(grp);
+					array_init(grp);
+					add_assoc_zval(return_all, Z_STRVAL(val), grp);
+				} else {
+					grp = *pgrp;
+				}
+				add_next_index_zval(grp, return_value);
 			}
 			zval_dtor(&val);
-			add_next_index_zval(grp, return_value);
 			i = 1;
 		} else {
 			i = 0;

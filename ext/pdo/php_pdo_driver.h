@@ -83,6 +83,7 @@ enum pdo_fetch_type {
 
 #define PDO_FETCH_FLAGS     0xFFFF0000  /* fetchAll() modes or'd to PDO_FETCH_XYZ */
 #define PDO_FETCH_GROUP     0x00010000  /* fetch into groups */
+#define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
 
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
