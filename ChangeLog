@@ -1,3 +1,86 @@
+2003-10-17  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi-readme.txt:
+      new SunONE server
+
+2003-10-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_iterator.c:
+      fix cruft from previous incarnation of the iterators
+
+    * ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/php_com_dotnet_internal.h
+      win32/php4dllts.dsp:
+      add com iterator support
+
+2003-10-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/ZendTS.dsp:
+      WS
+
+    * ZendEngine2/zend_reflection_api.c:
+      Show if a class/object is iterateable
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_025.phpt:
+      - Make use of engine iterators
+
+    * configure.in
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h:
+      Added c-api for iterators
+
+2003-10-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix bug #25888 (Crash of php.exe when xpath_eval of a namespace)
+      memleak fix in domxml_node_name
+      keep blanks loading document fix
+
+2003-10-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      main/network.c:
+      Fix comment
+
+2003-10-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      The sqlite classes need to be final
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix showing final/abstract for classes
+
+    * ext/sqlite/sqlite.c:
+      pre/hasprev have nothing to do with iteration
+
+2003-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini_parser.y:
+      Fixed formatting issue.
+
+    * ZendEngine2/zend_alloc.c:
+      Fixed if() condition.
+
+    * (PHP_4_3)
+      ext/odbc/php_odbc.c
+      ext/snmp/snmp.c
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed formatting issues (patch by: Joe Orton)
+
+    * ext/odbc/php_odbc.c
+      ext/snmp/snmp.c
+      sapi/cgi/cgi_main.c:
+      Fixed formatting issues (patch by: Joe Orton)
+
 2003-10-16  Pierre-Alain Joye  <paj@pearfr.org>
 
     * pear/PEAR/Remote.php:

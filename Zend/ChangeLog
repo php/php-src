@@ -1,3 +1,31 @@
+2003-10-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendTS.dsp:
+      WS
+
+    * zend_reflection_api.c:
+      Show if a class/object is iterateable
+
+    * ZendTS.dsp
+      zend.h
+      zend_API.h
+      zend_default_classes.c
+      zend_execute.c
+      zend_iterators.c
+      zend_iterators.h:
+      Added c-api for iterators
+
+    * zend_reflection_api.c:
+      Fix showing final/abstract for classes
+
+2003-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y:
+      Fixed formatting issue.
+
+    * zend_alloc.c:
+      Fixed if() condition.
+
 2003-10-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
