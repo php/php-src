@@ -299,9 +299,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	dbh->methods = &mysql_methods;
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = 1;
-	dbh->emulate_prepare = 1;
-	dbh->placeholders_can_be_strings = 1;
+	dbh->supports_placeholders = 0;
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;

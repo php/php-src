@@ -94,7 +94,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	return 1;
 }
 
-static int odbc_handle_doer(pdo_dbh_t *dbh, const char *sql TSRMLS_DC)
+static int odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
@@ -223,11 +223,11 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		return 0;
 	}
 
-	/* TODO: if we want to play nicely, we should check to see if the driver supports ODBC v3 or not */
+	/* TODO: if we want to play nicely, we should check to see if the driver really supports ODBC v3 or not */
 
 	dbh->methods = &odbc_methods;
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = 1;
+	dbh->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	
 	return 1;
 }
