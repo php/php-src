@@ -930,7 +930,7 @@ dnl ---------------------------------------------- External Module
   if test "$2" != "shared" && test "$2" != "yes"; then
 dnl ---------------------------------------------- Static module
     LIB_BUILD($ext_builddir)
-    EXT_LTLIBS="$EXT_LTLIBS $ext_builddir/lib$1.la"
+    EXT_LTLIBS="$EXT_LTLIBS $abs_srcdir/$ext_builddir/lib$1.la"
     EXT_STATIC="$EXT_STATIC $1"
   else 
 dnl ---------------------------------------------- Shared module

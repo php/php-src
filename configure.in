@@ -5,7 +5,7 @@ divert(1)
 
 AC_INIT(README.CVS-RULES)
 
-PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile main/Makefile)
+PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile main/Makefile sapi/cli/Makefile)
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])

@@ -1,5 +1,25 @@
+LTLIBRARY_NAME = libphp4cli.la
+LTLIBRARY_SOURCES = $(top_srcdir)/stub.c php_cli.c getopt.c
 
-LTLIBRARY_NAME    = libsapi.la
-LTLIBRARY_SOURCES = php_cli.c getopt.c
+LTLIBRARY_DEPENDENCIES = \
+		$(top_srcdir)/Zend/libZend.la \
+		$(top_srcdir)/main/libmain.la \
+		$(top_srcdir)/$(REGEX_LIB) \
+		$(EXT_LTLIBS) \
+		$(top_srcdir)/$(TSRM_LIB)
 
-include $(top_srcdir)/build/ltlib.mk
+LTLIBRARY_LDFLAGS = -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS)
+LTLIBRARY_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
+
+
+PROGRAM_NAME         = php
+PROGRAM_SOURCES      = $(top_srcdir)/stub.c
+PROGRAM_LDADD        = libphp4cli.la $(EXT_PROGRAM_LDADD)
+PROGRAM_LDFLAGS      = -export-dynamic
+PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
+
+targets = $(LTLIBRARY_NAME) $(PROGRAM_NAME)
+
+include $(top_srcdir)/build/rules.mk
+include $(top_srcdir)/build/library.mk
+include $(top_srcdir)/build/program.mk

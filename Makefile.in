@@ -1,6 +1,6 @@
 
 ZEND_DIR = $(srcdir)/Zend
-SUBDIRS = Zend main ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
+SUBDIRS = Zend main ext sapi $(TSRM_DIR) $(REGEX_DIR) . sapi/cli $(PEAR_DIR)
 
 LTLIBRARY_NAME = libphp4.la
 LTLIBRARY_SOURCES = stub.c
