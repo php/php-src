@@ -2492,6 +2492,10 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
 {
 	zval *property;
 
+	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
+		zend_error(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
+	}
+	
 	ALLOC_ZVAL(property);
 
 	if (value) {
