@@ -53,7 +53,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_FE(__call, NULL)
 
 	PHP_FE(__parse, NULL)
-#ifdef PHP_DEBUG
+#ifdef SOAP_DEBUG
 	PHP_FE(__getlastrequest, NULL)
 	PHP_FE(__getlastresponse, NULL)
 	PHP_FE(__getfunctions, NULL)
@@ -416,8 +416,9 @@ PHP_FUNCTION(soapfault)
 	int fault_string_len, fault_code_len, fault_actor_len;
 	zval *thisObj, *details = NULL;
 
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", &fault_string, &fault_string_len,
-		&fault_code, &fault_code_len, &details, &fault_actor, &fault_actor_len) == FAILURE)
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs", 
+		&fault_code, &fault_code_len, &fault_string, &fault_string_len,
+		&details, &fault_actor, &fault_actor_len) == FAILURE)
 		php_error(E_ERROR, "Invalid arguments to SoapFault constructor");
 
 	GET_THIS_OBJECT(thisObj);
@@ -1179,18 +1180,18 @@ PHP_FUNCTION(__parse)
 
 PHP_FUNCTION(__call)
 {
-	char *function, *soap_action, *uri;
-	int function_len, soap_action_len, uri_len, i = 0;
-	zval *args;
-	zval **real_args;
-	zval **param;
+	char *function=NULL, *soap_action=NULL, *uri=NULL;
+	int function_len=0, soap_action_len=0, uri_len=0, i = 0;
+	zval *args=NULL;
+	zval **real_args=NULL;
+	zval **param=NULL;
 	xmlDocPtr request = NULL;
-	int num_params, arg_count;
-	zval **ret_params;
+	int num_params=0, arg_count=0;
+	zval **ret_params=NULL;
 
-	char *buffer;
+	char *buffer=NULL;
 
-	int len;
+	int len=0;
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|ss",
 		&function, &function_len, &args, &soap_action, &soap_action_len, &uri, &uri_len) == FAILURE)
@@ -1235,7 +1236,7 @@ PHP_FUNCTION(__isfault)
 
 	GET_THIS_OBJECT(thisObj);
 
-	if(zend_hash_exists(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault")) == SUCCESS)
+	if(zend_hash_exists(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault")))
 		RETURN_TRUE
 	else
 		RETURN_FALSE
@@ -1257,7 +1258,7 @@ PHP_FUNCTION(__getfault)
 	RETURN_NULL();
 }
 
-#ifdef PHP_DEBUG
+#ifdef SOAP_DEBUG
 PHP_FUNCTION(__getfunctions)
 {
 	sdlPtr sdl;
@@ -1469,7 +1470,7 @@ void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 {
 	zval *fault;
 	MAKE_STD_ZVAL(fault);
-	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail);
+	set_soap_fault(fault, fault_code, fault_string, fault_actor, fault_detail);
 	add_property_zval(obj, "__soap_fault", fault);
 }
 
@@ -1912,7 +1913,7 @@ void delete_http_socket(void *handle)
 	TSRMLS_FETCH();
 	php_stream_close(stream);
 #else
-	close(stream);
+	SOCK_CLOSE(stream);
 #endif
 }
 
