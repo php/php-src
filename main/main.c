@@ -1005,7 +1005,7 @@ void php_module_shutdown(TSRMLS_D)
 	ts_free_thread();
 #else
 	zend_ini_shutdown(TSRMLS_C);
-	shutdown_memory_manager(0, 1);
+	shutdown_memory_manager(CG(unclean_shutdown), 1);
 #endif
 
 	module_initialized = 0;
