@@ -4929,7 +4929,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	- test other stuff
 	- check xsltsp->errors ???
 */
-	zval *rv, *idxsl, *idxml, *idparams = NULL;
+	zval *rv = NULL, *idxsl, *idxml, *idparams = NULL;
 	zend_bool xpath_params = 0;
 	xsltStylesheetPtr xsltstp;
 	xmlDocPtr xmldocp;
