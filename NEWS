@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- New ini setting log_errors_max_len controls maximum length for error
+  messages. Set it to 0 for infinite. Default is 1024 (old behaviour) (Marcus)
 - Added __FUNCTION__ and __CLASS__ constants. (Jani, Zend Engine)
 - Added pg_metadate(), pg_convert(), pg_insert(), pg_select(), pg_update()
   and pg_delete(). (Yasuo)
