@@ -27,4 +27,9 @@ void	 thttpd_php_shutdown(void);
 void	 thttpd_php_init(void);
 off_t	 thttpd_php_request(httpd_conn *hc);
 
+void	 thttpd_register_on_close(void (*)(int));
+void	 thttpd_closed_conn(int fd);
+int		 thttpd_get_fd(void);
+void	 thttpd_set_dont_close(void);
+
 #endif
