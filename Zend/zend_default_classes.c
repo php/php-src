@@ -113,7 +113,7 @@ static zend_function_entry default_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static void zend_register_default_exception(TSRMLS_C)
+static void zend_register_default_exception(TSRMLS_D)
 {
 	zend_class_entry default_exception;
 
