@@ -2,9 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed backwards incompatibility with the "new" operator (Andi, libzend)
 - Fixed bugs in uksort() and ksort() sort ordering (Andrey)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
-  string.
+  string (Zeev, libzend)
 - Fixed a problem in inheritence from classes that are defined in include()d
   files (Zeev, libzend)
 - Fixed a problem with the PHP error handler that could result in a crash
