@@ -23,4 +23,4 @@ $o->show();
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Class Tester cannot extend from interfac Test in %sinterface_and_extends.php on line %d
+Fatal error: Class Tester cannot extend from interface Test in %sinterface_and_extends.php on line %d
