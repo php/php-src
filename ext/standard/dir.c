@@ -466,7 +466,7 @@ PHP_FUNCTION(scandir)
 	if (!flags) {
 		n = php_scandir(path, &namelist, 0, php_alphasort);
 	} else {
-		n = php_scandir(path, &namelist, 0, php_alphasortr);
+		n = php_scandir(path, &namelist, 0, (void *) php_alphasortr);
 	}
 
 	if (n < 0) {
