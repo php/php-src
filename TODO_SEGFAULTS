@@ -17,6 +17,8 @@ Fixed:
     xml_parser_create (Moriyoshi)
     ob_start (Sascha)
     imagecreate/-truecolor (Sascha)
+    flock (Sascha)
+	register_shutdown_function (Sascha)
 	
 Open:
 
