@@ -30,7 +30,6 @@
 #include "php_ini.h"
 #include "php_dbx.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 
 /* defines for supported databases */
 #define DBX_UNKNOWN 0
@@ -137,6 +136,8 @@ int switch_dbx_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL
 	/* returns array[0..columncount-1] as strings on success or 0 as long on failure */
 int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
 	/* returns string */
+int switch_dbx_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
+	/* returns escaped string */
 
 /* Every user visible function must have an entry in dbx_functions[].
 */
@@ -145,6 +146,7 @@ function_entry dbx_functions[] = {
 	ZEND_FE(dbx_close,		NULL)
 	ZEND_FE(dbx_query,		NULL)
 	ZEND_FE(dbx_error,		NULL)
+	ZEND_FE(dbx_escape_string,	NULL)
 
 	ZEND_FE(dbx_sort,		NULL)
 	ZEND_FE(dbx_compare,	NULL)
@@ -574,6 +576,40 @@ ZEND_FUNCTION(dbx_error)
 }
 /* }}} */
 
+/* {{{ proto string dbx_esc(dbx_link_object dbx_link, string sz)
+   Returns escaped string or NULL on error
+*/
+ZEND_FUNCTION(dbx_escape_string)
+{
+	int number_of_arguments=2;
+	zval **arguments[2];
+
+	int result;
+	zval **dbx_handle;
+	zval **dbx_module;
+	zval **dbx_database;
+	zval *rv;
+
+	if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
+		zend_error(E_WARNING, "dbx_esc: not a valid dbx_handle-object...");
+		RETURN_NULL();
+	}
+	convert_to_string_ex(arguments[1]);
+
+	MAKE_STD_ZVAL(rv); 
+	ZVAL_LONG(rv, 0);
+	result = switch_dbx_esc(&rv, dbx_handle, arguments[1], INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+	if (!result) { /* this will probably never happen */
+		FREE_ZVAL(rv);
+		RETURN_NULL();
+	}
+	MOVE_RETURNED_TO_RV(&return_value, rv);
+}
+/* }}} */
+
 /*
  *      dbx functions that are database independent... like sorting result_objects!
  */
@@ -847,6 +883,22 @@ int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS,
 		case DBX_SYBASECT: return dbx_sybasect_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 	zend_error(E_WARNING, "dbx_error: not supported in this module");
+	return 0;
+}
+
+int switch_dbx_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module)
+{
+	/* returns escaped string */
+	switch (Z_LVAL_PP(dbx_module)) {
+		case DBX_MYSQL: return dbx_mysql_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_ODBC:  return dbx_odbc_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_PGSQL: return dbx_pgsql_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_MSSQL: return dbx_mssql_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_FBSQL: return dbx_fbsql_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_OCI8:  return dbx_oci8_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_SYBASECT: return dbx_sybasect_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
+	zend_error(E_WARNING, "dbx_esc: not supported in this module");
 	return 0;
 }
 

@@ -49,6 +49,7 @@ ZEND_FUNCTION(dbx_connect);
 ZEND_FUNCTION(dbx_close);
 ZEND_FUNCTION(dbx_query);
 ZEND_FUNCTION(dbx_error);
+ZEND_FUNCTION(dbx_escape_string);
 
 ZEND_FUNCTION(dbx_sort);
 ZEND_FUNCTION(dbx_compare);
