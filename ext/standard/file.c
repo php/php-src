@@ -1904,6 +1904,7 @@ PHP_FUNCTION(fgetcsv) {
                                                 memset(buf,0,len+1);
 						if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
                                                         efree(lineEnd); efree(temp); efree(buf);
+														zval_dtor(return_value);
                                                         RETURN_FALSE;
                                                         }
                                                 bptr = buf;
