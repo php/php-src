@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed resource bug in LDAP extension. (Stig Venaas)
+- Fixed output buffer crash when buffer is over written in callback. (Yasuo)
 - Added output_add_rewrite_var() and output_remove_rewrite_var() to inject
   and remove variables from the URL-Rewriter. (thies)
 - The Windows build can now be configured more comfortably, for example 
