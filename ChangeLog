@@ -1,3 +1,158 @@
+2000-11-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      scripts/credits:
+    added a "DO NOT EDIT!" header and regenerated the credits_*h files
+
+    * ext/ircg/CREDITS: *** empty log message ***
+
+    * sapi/apache/CREDITS: merged ext/apache/CREDITS and sapi/apache/CREDITS
+
+    * scripts/credits: this little scripts will collect the CREDITS files from
+    all the ext/ and sapi/ subdirectories and put them all
+    together into ext/standard/credit_[ext|sapi].h
+
+2000-11-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ftp/php_ftp.c: Run through conv_z_macros
+
+    * ext/db/db.c:
+    Run through conv_z_macros and make use of RETVAL_STRING where useful
+
+    * ext/mhash/mhash.c: Avoid estrdup and a couple of other minor cleanups
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h
+      ext/mhash/mhash.c
+      ext/mcrypt/mcrypt.c: Run through conv_z_macros
+
+    * ext/standard/credits_ext.h: Add ircg
+
+2000-11-22  Zeev Suraski  <zeev@zend.com>
+
+    * ext/bcmath/libbcmath/AUTHORS
+      ext/bcmath/libbcmath/COPYING.LIB
+      ext/bcmath/libbcmath/ChangeLog
+      ext/bcmath/libbcmath/FAQ
+      ext/bcmath/libbcmath/INSTALL
+      ext/bcmath/libbcmath/Makefile.am
+      ext/bcmath/libbcmath/Makefile.in
+      ext/bcmath/libbcmath/NEWS
+      ext/bcmath/libbcmath/README
+      ext/bcmath/libbcmath/acconfig.h
+      ext/bcmath/libbcmath/aclocal.m4
+      ext/bcmath/libbcmath/config.h.in
+      ext/bcmath/libbcmath/configure
+      ext/bcmath/libbcmath/configure.in
+      ext/bcmath/libbcmath/doc/Makefile.am
+      ext/bcmath/libbcmath/doc/Makefile.in
+      ext/bcmath/libbcmath/doc/bcmath.1
+      ext/bcmath/libbcmath/install-sh
+      ext/bcmath/libbcmath/missing
+      ext/bcmath/libbcmath/mkinstalldirs
+      ext/bcmath/libbcmath/src/Makefile.am
+      ext/bcmath/libbcmath/src/Makefile.in
+      ext/bcmath/libbcmath/src/add.c
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/compare.c
+      ext/bcmath/libbcmath/src/config.h
+      ext/bcmath/libbcmath/src/debug.c
+      ext/bcmath/libbcmath/src/div.c
+      ext/bcmath/libbcmath/src/divmod.c
+      ext/bcmath/libbcmath/src/doaddsub.c
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/int2num.c
+      ext/bcmath/libbcmath/src/nearzero.c
+      ext/bcmath/libbcmath/src/neg.c
+      ext/bcmath/libbcmath/src/num2long.c
+      ext/bcmath/libbcmath/src/num2str.c
+      ext/bcmath/libbcmath/src/outofmem.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/private.h
+      ext/bcmath/libbcmath/src/raise.c
+      ext/bcmath/libbcmath/src/raisemod.c
+      ext/bcmath/libbcmath/src/recmul.c
+      ext/bcmath/libbcmath/src/rmzero.c
+      ext/bcmath/libbcmath/src/rt.c
+      ext/bcmath/libbcmath/src/sqrt.c
+      ext/bcmath/libbcmath/src/str2num.c
+      ext/bcmath/libbcmath/src/sub.c
+      ext/bcmath/libbcmath/src/zero.c
+      NEWS
+      ext/bcmath/bcmath.c:
+    At long last, import the bcmath library, by Phil Nelson
+
+2000-11-22  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: Fix memory leaks in cURL.
+    cURL doesn't free strings we pass to him, so let PHP do it.
+
+2000-11-22  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/config.m4:
+    This should remove the BUG#4615, thanks to Eric Veldhuyzen
+    (eric@terra.telemediair.nl) for the assistance on this (aka elegence vs
+    my hack).
+
+    This does not fix BUG#7922 though, which is currently being looked into
+
+2000-11-22  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/curl/curl.c: Hmmm, that wasn't good.
+
+2000-11-22  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed bug in endOfPrevMonth(), endOfNextMonth()
+
+2000-11-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/standard/file.c: tsrm realpath implementation is fixed
+
+2000-11-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/cgi_main.c:
+    Set the exit status from the return value of php_execute_script()
+
+    * main/main.c
+      main/php_main.h: Return the exit status from php_execute_script()
+
+    * ext/standard/string.c: removing '{' was certainly not intended
+
+    * ext/standard/string.c: Don't access opt, if opt was not set.
+
+    * ext/session/session.c: Whitespace fix and initialize ret properly
+
+2000-11-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/CREDITS
+      ext/ctype/EXPERIMENTAL
+      ext/ctype/README: some more info on the ctype extension
+
+    * ext/zziplib/.cvsignore
+      ext/zziplib/CREDITS
+      ext/zziplib/EXPERIMENTAL
+      ext/zziplib/Makefile.in
+      ext/zziplib/README
+      ext/zziplib/config.m4
+      ext/zziplib/php_zziplib.h
+      ext/zziplib/tests/.cvsignore
+      ext/zziplib/tests/001.phpt
+      ext/zziplib/zziplib.c:
+    the very beginning of ZIP file support (read only) using zziplib
+
+    * ext/ctype/.cvsignore
+      ext/ctype/Makefile.in
+      ext/ctype/config.m4
+      ext/ctype/ctype.c
+      ext/ctype/ctype.xml
+      ext/ctype/php_ctype.h
+      ext/ctype/tests/.cvsignore
+      ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt:
+    an experimental extension providing the C ctype function family
+
 2000-11-21  Monte Ohrt  <monte@ispi.net>
 
     * pear/Date/Calc.php: fixed bug in getCalendarMonth
