@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added DomNode->set_namespace(uri[,prefix]) (chregu)
 - Fixed shuffle() to properly generate all possibilities.  (Patch provided by 
   Adam <adam@trachtenberg.com> )
 - Transparent sid support is now disabled by default. (Yasuo) 
