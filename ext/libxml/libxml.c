@@ -109,13 +109,23 @@ int php_libxml_streams_IO_match_wrapper(const char *filename)
 
 void *php_libxml_streams_IO_open_wrapper(const char *filename)
 {
+	char resolved_path[MAXPATHLEN + 1];
+	int file_exist;
+	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
+
 	TSRMLS_FETCH();
+	xmlURIUnescapeString(filename, 0, resolved_path);
+	file_exist = _php_stream_stat_path((char *) resolved_path, &ssbuf TSRMLS_CC);
+	if (file_exist == -1) {
+		return NULL;
+	}
+
 	if (LIBXML(stream_context)) {
 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-		return php_stream_open_wrapper_ex((char *)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+		return php_stream_open_wrapper_ex((char *)resolved_path, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
 	}
-	return php_stream_open_wrapper((char *)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	return php_stream_open_wrapper((char *)resolved_path, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 }
 
 int php_libxml_streams_IO_read(void *context, char *buffer, int len)
