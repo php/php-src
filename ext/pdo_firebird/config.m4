@@ -31,9 +31,19 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     -L$FIREBIRD_LIBDIR
   ])
   
+  if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$prefix/include/php/ext
+  elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=ext
+  else
+   AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+  fi
+				  
   PHP_ADD_LIBRARY_WITH_PATH($FIREBIRD_LIBNAME, $FIREBIRD_LIBDIR, PDO_FIREBIRD_SHARED_LIBADD)
   PHP_ADD_INCLUDE($FIREBIRD_INCDIR)
   AC_DEFINE(HAVE_PDO_FIREBIRD,1,[ ])
-  PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared)
+  PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared,,-I$pdo_inc_path)
   PHP_SUBST(PDO_FIREBIRD_SHARED_LIBADD)
 fi

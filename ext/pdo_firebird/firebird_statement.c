@@ -109,7 +109,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		return 1;
 	} while (0);
 
-	RECORD_ERROR(stmt->dbh);	
+	RECORD_ERROR(stmt);	
 
 	return 0;
 }
@@ -163,6 +163,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 	
 	return 1;
 }
+/* }}} */
 
 /* internal function to override return types of parameters */
 static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) /* {{{ */
@@ -419,6 +420,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				return 1;
 			}
 			return 0;
+		default:
+			;
 	}		
 	return 1;
 }

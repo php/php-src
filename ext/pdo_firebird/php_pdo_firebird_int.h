@@ -31,7 +31,7 @@
 
 #define PDO_FB_DIALECT 3
 
-#define SHORT_MAX (1 << 8*sizeof(short)-1)
+#define SHORT_MAX (1 << (8*sizeof(short)-1))
 
 #if SIZEOF_LONG == 8
 # define LL_MASK l
