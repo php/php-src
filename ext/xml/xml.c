@@ -70,7 +70,7 @@ PHP_MSHUTDOWN_FUNCTION(xml);
 PHP_RSHUTDOWN_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 
-static void xml_destroy_parser(xml_parser *);
+static void xml_parser_dtor(xml_parser *);
 static void xml_set_handler(char **, zval **);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
 inline static char xml_decode_iso_8859_1(unsigned short);
@@ -98,6 +98,7 @@ int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char 
 
 function_entry xml_functions[] = {
     PHP_FE(xml_parser_create, NULL)
+    PHP_FE(xml_set_object, NULL)
     PHP_FE(xml_set_element_handler, NULL)
 	PHP_FE(xml_set_character_data_handler, NULL)
 	PHP_FE(xml_set_processing_instruction_handler, NULL)
@@ -161,7 +162,7 @@ PHP_MINIT_FUNCTION(xml)
 
 	ELS_FETCH();
 
-	le_xml_parser =	register_list_destructors(xml_destroy_parser, NULL);
+	le_xml_parser =	register_list_destructors(xml_parser_dtor, NULL);
 
 #ifdef ZTS
 	xml_globals_id = ts_allocate_id(sizeof(php_xml_globals), php_xml_init_globals, NULL);
@@ -281,11 +282,18 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 
 /* }}} */
 
-/* {{{ xml_destroy_parser() */
+/* {{{ xml_parser_dtor() */
 
 static void
-xml_destroy_parser(xml_parser *parser)
+xml_parser_dtor(xml_parser *parser)
 {
+
+	if (parser->object) {
+/*
+		zval_del_ref(&parser->object);
+*/
+	}
+	
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
 	}
@@ -369,11 +377,7 @@ xml_call_handler(xml_parser *parser, char *funcName, int argc, zval **argv)
 		retval->type = IS_BOOL;
 		retval->value.lval = 0;
 
-		/* We cannot call internal variables from a function module as
-		   it breaks any chance of compiling it as a module on windows.
-		   Instead, we create a callback function. */
-
-		result = call_user_function(EG(function_table), NULL, func, retval, argc, argv);
+		result = call_user_function(EG(function_table), parser->object, func, retval, argc, argv);
 
 		if (result == FAILURE) {
 			php_error(E_WARNING, "Unable to call %s()",funcName);
@@ -1026,10 +1030,50 @@ PHP_FUNCTION(xml_parser_create)
 	parser->parser = XML_ParserCreate(encoding);
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
+	parser->object = NULL;
 	XML_SetUserData(parser->parser, parser);
 
 	ZEND_REGISTER_RESOURCE(return_value,parser,le_xml_parser);
 	parser->index = return_value->value.lval;
+}
+/* }}} */
+
+/* {{{ proto int xml_set_object(int pind,object &obj) 
+   Set up object which should be used for callbacks */
+PHP_FUNCTION(xml_set_object)
+{
+	xml_parser *parser;
+	zval **pind, **mythis;
+
+	if (ARG_COUNT(ht) != 2 ||
+		getParametersEx(2, &pind, &mythis) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if ((*mythis)->type != IS_OBJECT) {
+		php_error(E_WARNING,"arg 2 has wrong type");
+		RETURN_FALSE;
+	}
+
+	if (! ParameterPassedByReference(ht,2)) {
+		php_error(E_WARNING,"arg 2 not passed by reference");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
+
+	if (parser->object) {
+/*
+		zval_del_ref(&parser->object);
+*/
+	}
+	
+	parser->object = *mythis;
+/*
+	zval_add_ref(&parser->object);
+*/
+
+	RETVAL_TRUE;
 }
 /* }}} */
 
