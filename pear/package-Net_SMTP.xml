@@ -22,7 +22,7 @@ Provides an implementation of the SMTP protocol using PEAR's Net_Socket:: class.
     <notes>Initial release as PEAR package</notes>
     <state>stable</state>
     <filelist>
-        <dir name="/Net">
+        <dir name="Net">
             <file name="SMTP.php" role="php"/>
         </dir>
     </filelist>
