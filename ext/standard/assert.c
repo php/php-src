@@ -242,7 +242,7 @@ PHP_FUNCTION(assert)
 }
 
 /* }}} */
-/* {{{ proto mixed assert_options(int what, mixed value)
+/* {{{ proto mixed assert_options(int what [, mixed value])
    Set/get the various assert flags */
 
 PHP_FUNCTION(assert_options)
