@@ -32,7 +32,11 @@ AC_ARG_WITH(apxs,
     else
       AC_MSG_RESULT()
       $APXS
-      AC_MSG_ERROR([Sorry, I cannot run apxs. Either you need to install Perl or you need to pass the absolute path of apxs by using --with-apxs=/absolute/path/to/apxs])
+      AC_MSG_RESULT([Sorry, I was not able to successfully run APXS.  Possible reasons:])
+      AC_MSG_RESULT([1.  Perl is not installed;])
+      AC_MSG_RESULT([2.  Apache was not compiled with DSO support (--enable-module=so);])
+      AC_MSG_RESULT([3.  'apxs' is not in your path.])
+      AC_MSG_ERROR([;]) 
     fi 
 
 	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
