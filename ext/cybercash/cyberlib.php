@@ -65,9 +65,9 @@
  function CCEncrypt($merchant_key,$pairs)
  {
    $session_key=sprintf("%s #%ld",date("D M j H:i:s Y"),getmypid());
-   $enc_msg=mck_encr($merchant_key,$session_key,$pairs);
-   $pairs=mck_base64_encode($enc_msg["outbuff"]);
-   $mac=mck_base64_encode($enc_msg["macbuff"]);
+   $enc_msg=cybercash_encr($merchant_key,$session_key,$pairs);
+   $pairs=cybercash_base64_encode($enc_msg["outbuff"]);
+   $mac=cybercash_base64_encode($enc_msg["macbuff"]);
    
    /* This adds the information needed to decrypt. */
    $encrypted_pairs="message=".urlencode($pairs)."&";
@@ -136,12 +136,12 @@
    
    /* This set of variables is encoded/encrypted. */
    $vars=CCGetVars($message);
-   $vars["message"]=mck_base64_decode($vars["message"]);
-   $vars["mac"]=mck_base64_decode($vars["mac"]);
+   $vars["message"]=cybercash_base64_decode($vars["message"]);
+   $vars["mac"]=cybercash_base64_decode($vars["mac"]);
    
    /* Check for errors with the request/decryption. */
    /* message is base64 and encrypted. */
-   $dec_msg=mck_decr($merchant_key,$vars["session-key"],
+   $dec_msg=cybercash_decr($merchant_key,$vars["session-key"],
                      $vars["message"]);
 
    if($dec_msg["errcode"])

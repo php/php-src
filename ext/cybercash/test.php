@@ -1,5 +1,5 @@
 <?php
- require "cyberlib.php3";
+ require "cyberlib.php";
 
  $merchant=""; /* Your merchant ID goes here. */
  $merchant_key=""; /* Your merchant key goes here. */
