@@ -1,3 +1,21 @@
+2003-07-21  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Fix bug #24499
+
+    * zend_execute.c:
+      Revert fix for #24729, and refix
+
+2003-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Go with a better fix for #24729
+
+2003-07-21  George Schlossnagle  <george@omniti.com>
+
+    * zend_API.h:
+      reverted at Andi's request.  replaced with more generic wrapper.
+
 2003-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
