@@ -746,12 +746,14 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 				case BP_VAR_R:
 				case BP_VAR_IS:
 					*retval = &EG(uninitialized_zval_ptr);
-					return;
+					break;
 				case BP_VAR_W:
 				case BP_VAR_RW:
 					*retval = &EG(error_zval_ptr);
-					return;
+					break;
 			}
+			SELECTIVE_PZVAL_LOCK(**retval, result);
+			return;
 		}
 
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
@@ -822,13 +824,11 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		FREE_OP(op2, free_op2);
 		if (type==BP_VAR_R || type==BP_VAR_IS) {
 			*retval = &EG(uninitialized_zval_ptr);
-			SELECTIVE_PZVAL_LOCK(**retval, result);
-			return;
 		} else {
 			*retval = &EG(error_zval_ptr);
-			SELECTIVE_PZVAL_LOCK(**retval, result);
-			return;
 		}
+		SELECTIVE_PZVAL_LOCK(**retval, result);
+		return;
 	}
 
 
