@@ -34,7 +34,6 @@
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 
 #define PREG_REPLACE_EVAL			(1<<0)
-#define PREG_REPLACE_FUNC			(1<<1)
 
 #ifdef ZTS
 int pcre_globals_id;
@@ -260,7 +259,6 @@ static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 
 			/* Custom preg options */
 			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
-			case 'F':	poptions |= PREG_REPLACE_FUNC;	break;
 			
 			case ' ':
 			case '\n':
@@ -273,12 +271,6 @@ static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 		}
 	}
 
-	if ((poptions & PREG_REPLACE_EVAL) && (poptions & PREG_REPLACE_FUNC)) {
-		zend_error(E_WARNING, "'e' and 'F' modifiers cannot be used together");
-		efree(pattern);
-		return NULL;
-	}
-	
 #if HAVE_SETLOCALE
 	if (strcmp(locale, "C"))
 		tables = pcre_maketables();
@@ -685,7 +677,8 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 char *php_pcre_replace(char *regex,   int regex_len,
 					   char *subject, int subject_len,
-					   zval *replace_val, int *result_len, int limit)
+					   zval *replace_val, int is_callable_replace,
+					   int *result_len, int limit)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -701,8 +694,6 @@ char *php_pcre_replace(char *regex,   int regex_len,
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 eval;				/* If the replacement string should be eval'ed */
-	int				 use_func;			/* If the matches should be run through
-										   a function to get the replacement string */
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	int				 replace_len;		/* Length of replacement string */
@@ -721,19 +712,12 @@ char *php_pcre_replace(char *regex,   int regex_len,
 	if ((re = pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
 		return NULL;
 	}
+
 	eval = preg_options & PREG_REPLACE_EVAL;
-	use_func = preg_options & PREG_REPLACE_FUNC;
-
-	/* Verify and use the replacement value. */
-	if (use_func) {
-		char *callable_name;
-
-		if (!zend_is_callable(replace_val, 0, &callable_name)) {
-			php_error(E_WARNING, "Replacement callback '%s' is invalid or undefined", callable_name);
-			efree(callable_name);
-			result = estrndup(subject, subject_len);
-			*result_len = subject_len;
-			return result;
+	if (is_callable_replace) {
+		if (eval) {
+			php_error(E_WARNING, "/e modifier cannot be used with replacement callback");
+			return NULL;
 		}
 	} else {
 		convert_to_string(replace_val);
@@ -778,7 +762,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				eval_result_len = preg_do_eval(replace, replace_len, subject,
 											   offsets, count, &eval_result);
 				new_len += eval_result_len;
-			} else if (use_func) {
+			} else if (is_callable_replace) {
 				/* Use custom function to get replacement string and its length. */
 				eval_result_len = preg_do_repl_func(replace_val, subject, offsets,
 													count, &eval_result);
@@ -822,7 +806,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 			
 			/* If evaluating or using custom function, copy result to the buffer
 			 * and clean up. */
-			if (eval || use_func) {
+			if (eval || is_callable_replace) {
 				memcpy(walkbuf, eval_result, eval_result_len);
 				*result_len += eval_result_len;
 				STR_FREE(eval_result);
@@ -951,6 +935,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 										   subject_value,
 										   subject_len,
 										   replace_value,
+										   is_callable_replace,
 										   result_len,
 										   limit)) != NULL) {
 				efree(subject_value);
@@ -968,6 +953,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 							      Z_STRVAL_PP(subject),
 								  Z_STRLEN_PP(subject),
 								  replace,
+								  is_callable_replace,
 								  result_len,
 								  limit);
 		return result;
@@ -975,9 +961,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 }
 
 
-/* {{{ proto string preg_replace(string|array regex, string|array replace, string|array subject [, int limit])
-   Perform Perl-style regular expression replacement. */
-PHP_FUNCTION(preg_replace)
+static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_replace)
 {
 	zval		   **regex,
 				   **replace,
@@ -989,7 +973,7 @@ PHP_FUNCTION(preg_replace)
 	int				 limit_val = -1;
 	char			*string_key;
 	ulong			 num_key;
-	zend_bool		 is_callable_replace = 0;
+	char			*callback_name;
 	
 	/* Get function parameters and do error-checking. */
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
@@ -997,8 +981,19 @@ PHP_FUNCTION(preg_replace)
 		WRONG_PARAM_COUNT;
 	}
 
-	SEPARATE_ZVAL(regex);
 	SEPARATE_ZVAL(replace);
+	if (Z_TYPE_PP(replace) != IS_ARRAY)
+		convert_to_string_ex(replace);
+	if (is_callable_replace && !zend_is_callable(*replace, 0, &callback_name)) {
+		php_error(E_WARNING, "%s() requires argument 2, '%s', to be a valid callback",
+				  get_active_function_name(), callback_name);
+		efree(callback_name);
+		*return_value = **subject;
+		zval_copy_ctor(return_value);
+		return;
+	}
+
+	SEPARATE_ZVAL(regex);
 	SEPARATE_ZVAL(subject);
 
 	if (ZEND_NUM_ARGS() > 3) {
@@ -1008,11 +1003,6 @@ PHP_FUNCTION(preg_replace)
 		
 	if (Z_TYPE_PP(regex) != IS_ARRAY)
 		convert_to_string_ex(regex);
-	
-	if (Z_TYPE_PP(replace) != IS_ARRAY) {
-		convert_to_string_ex(replace);
-	} else
-		is_callable_replace = zend_is_callable(*replace, 1, NULL);
 	
 	/* if subject is an array */
 	if (Z_TYPE_PP(subject) == IS_ARRAY) {
@@ -1044,6 +1034,23 @@ PHP_FUNCTION(preg_replace)
 			RETVAL_STRINGL(result, result_len, 0);
 		}
 	}	
+}
+
+
+/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit])
+   Perform Perl-style regular expression replacement. */
+PHP_FUNCTION(preg_replace)
+{
+	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+
+/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit])
+   Perform Perl-style regular expression replacement using replacement callback. */
+PHP_FUNCTION(preg_replace_callback)
+{
+	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -1359,13 +1366,14 @@ PHP_FUNCTION(preg_grep)
 unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 function_entry pcre_functions[] = {
-	PHP_FE(preg_match,		third_arg_force_ref)
-	PHP_FE(preg_match_all,	third_arg_force_ref)
-	PHP_FE(preg_replace,	NULL)
-	PHP_FE(preg_split,		NULL)
-	PHP_FE(preg_quote,		NULL)
-	PHP_FE(preg_grep,		NULL)
-	{NULL, 		NULL, 		NULL}
+	PHP_FE(preg_match,				third_arg_force_ref)
+	PHP_FE(preg_match_all,			third_arg_force_ref)
+	PHP_FE(preg_replace,			NULL)
+	PHP_FE(preg_replace_callback,	NULL)
+	PHP_FE(preg_split,				NULL)
+	PHP_FE(preg_quote,				NULL)
+	PHP_FE(preg_grep,				NULL)
+	{NULL, 		NULL,				NULL}
 };
 
 zend_module_entry pcre_module_entry = {
