@@ -1077,6 +1077,8 @@ PHP_FUNCTION(ftp_close)
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
+	ftp_quit(ftp);
+
 	RETURN_BOOL(zend_list_delete(Z_LVAL_P(z_ftp)) == SUCCESS);
 }
 /* }}} */
