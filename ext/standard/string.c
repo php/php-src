@@ -3742,9 +3742,9 @@ PHP_FUNCTION(sscanf)
 	convert_to_string_ex(args[1]);
 	
 	result = php_sscanf_internal(Z_STRVAL_PP(args[0]),
-								 Z_STRVAL_PP(args[1]),
-								 argc, args,
-								 2, &return_value TSRMLS_CC);
+	                             Z_STRVAL_PP(args[1]),
+	                             argc, args,
+	                             2, &return_value TSRMLS_CC);
 	efree(args);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
