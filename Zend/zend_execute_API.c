@@ -531,7 +531,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zend_class_entry *current_scope;
 	zend_class_entry *calling_scope = NULL;
-	char *function_name_lc;
 	zval *current_this;
 	zend_execute_data execute_data;
 	zval *method_name;
@@ -598,20 +597,50 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				int found = FAILURE;
 
 				if (EG(active_op_array) && strcmp(Z_STRVAL_PP(fci->object_pp), "self") == 0) {
+					if (!EG(active_op_array)->scope) {
+						zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
+					}
 					ce = &(EG(active_op_array)->scope);
 					found = (*ce != NULL?SUCCESS:FAILURE);
-				} else if (strcmp(Z_STRVAL_PP(fci->object_pp), "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+					fci->object_pp = EG(This)?&EG(This):NULL;
+				} else if (strcmp(Z_STRVAL_PP(fci->object_pp), "parent") == 0 && EG(active_op_array)) {
+
+					if (!EG(active_op_array)->scope) {
+						zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+					}
+					if (!EG(active_op_array)->scope->parent) {
+						zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+					}
 					ce = &(EG(active_op_array)->scope->parent);
 					found = (*ce != NULL?SUCCESS:FAILURE);
+					fci->object_pp = EG(This)?&EG(This):NULL;
 				} else {
+					int in_autoload = EG(in_autoload);
+					EG(in_autoload) = 0;
+					zend_class_entry *scope = EG(active_op_array)->scope; 
+
 					found = zend_lookup_class(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
+					if (found == FAILURE) {
+						EG(in_autoload) = in_autoload;
+						zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(fci->object_pp));
+					}
+					EG(in_autoload) = in_autoload;
+					fci->object_pp = NULL;
+					if (EG(This)) {
+						while (scope != NULL) {
+						  if (scope == *ce) {
+								fci->object_pp = &EG(This);
+								break;
+						  }
+						  scope = scope->parent;
+						}
+					}
 				}
 				if (found == FAILURE)
 					return FAILURE;
 
 				fci->function_table = &(*ce)->function_table;
 				calling_scope = *ce;
-				fci->object_pp = NULL;
 			}
 
 			if (fci->function_table == NULL) {
@@ -623,25 +652,38 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			return FAILURE;
 		}
 
-		function_name_lc = zend_str_tolower_dup(fci->function_name->value.str.val, fci->function_name->value.str.len);
+		if (fci->object_pp) {
+			EX(function_state).function = 
+			  Z_OBJ_HT_PP(fci->object_pp)->get_method(*fci->object_pp, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name) TSRMLS_CC);
+		} else if (calling_scope) {
+			char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
 
-		if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+			EX(function_state).function = 
+				zend_std_get_static_method(calling_scope, function_name_lc, Z_STRLEN_P(fci->function_name) TSRMLS_CC);
+			efree(function_name_lc);
+		} else {
+			char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
+
+			if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+			  EX(function_state).function = NULL;
+			}
+			efree(function_name_lc);
+		}
+
+		if (EX(function_state).function == NULL) {			  
 			/* try calling __call */
 			if (calling_scope && calling_scope->__call) {
 				EX(function_state).function = calling_scope->__call;
 				/* prepare params */
 				ALLOC_INIT_ZVAL(method_name);
-				ZVAL_STRINGL(method_name, function_name_lc, fci->function_name->value.str.len, 0);
+				ZVAL_STRINGL(method_name, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name), 0);
 
 				ALLOC_INIT_ZVAL(params_array);
 				array_init(params_array);
 				call_via_handler = 1;
 			} else {
-				efree(function_name_lc);
 				return FAILURE;
 			}
-		} else {
-			efree(function_name_lc);
 		}
 		if (fci_cache) {
 			fci_cache->function_handler = EX(function_state).function;
