@@ -82,7 +82,7 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 
 /* {{{ */
 static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
-{	
+{
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -113,7 +113,7 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 
 /* {{{ */
 static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_DC)
-{	
+{
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -123,16 +123,14 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 	if (ms->data) {
 		efree(ms->data);
 	}
-	ms->data = NULL;
-	ms->fsize = 0;
-	ms->fpos = 0;
+	efree(ms);
 	return 0;
 }
 /* }}} */
 
 
 /* {{{ */
-static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) { 
+static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) {
 	/* nothing to do here */
 	return 0;
 }
@@ -225,7 +223,7 @@ static char *php_stream_memory_gets(php_stream *stream, char *buf, size_t maxlen
 
 /* {{{ */
 static int php_stream_memory_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
-{ 
+{
 	return FAILURE;
 }
 /* }}} */
@@ -278,7 +276,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 
 /* {{{ */
 PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC TSRMLS_DC)
-{ 
+{
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -304,7 +302,7 @@ typedef struct {
 
 /* {{{ */
 static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -329,7 +327,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 
 /* {{{ */
 static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -354,7 +352,7 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 	ret = php_stream_free(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
 
 	efree(ts);
-	
+
 	return ret;
 }
 /* }}} */
@@ -362,7 +360,7 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 /* {{{ */
 static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -376,7 +374,7 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
 
 /* {{{ */
 static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -390,7 +388,7 @@ static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSR
 
 /* {{{ */
 char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -404,7 +402,7 @@ char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_D
 
 /* {{{ */
 static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *ts;
 	php_stream *file;
 	size_t memsize;
@@ -432,17 +430,17 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	if (ret == NULL) {
 		return FAILURE;
 	}
-	
+
 	/* perform the conversion and then pass the request on to the innerstream */
 	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
 	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
-	
+
 	php_stream_close(ts->innerstream);
 	ts->innerstream = file;
 	php_stream_seek(ts->innerstream, pos, SEEK_SET);
-	
+
 	return php_stream_cast(ts->innerstream, castas, ret, 1);
 }
 /* }}} */
@@ -459,7 +457,7 @@ php_stream_ops	php_stream_temp_ops = {
 
 /* {{{ */
 PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
-{ 
+{
 	php_stream_temp_data *self;
 	php_stream *stream;
 
@@ -477,7 +475,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 
 /* {{{ */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
-{ 
+{
 	php_stream *stream;
 	php_stream_temp_data *ms;
 
