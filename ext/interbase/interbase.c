@@ -150,17 +150,6 @@ PHP_IBASE_API php_ibase_globals ibase_globals;
 	}}
 	
 	
-/* get query  */
-/*
-#define GET_QUERY(query_id, ib_query) { \
-	int type; \
-	ib_query = (ibase_query *) zend_list_find(query_id, &type); \
-	if (type!=IBG(le_query)) { \
-		_php_ibase_module_error("%d is not query index",query_id); \
-		RETURN_FALSE; \
-	}}
-*/
-
 #define RESET_ERRMSG { IBG(errmsg)[0] = '\0';}
 
 #define TEST_ERRMSG ( IBG(errmsg)[0] != '\0')
@@ -173,6 +162,9 @@ typedef struct {
 		short sval;
 		float fval;
 		ISC_QUAD qval;
+		ISC_TIMESTAMP tsval;
+		ISC_DATE dtval;
+		ISC_TIME tmval;
 	} val;
 	short sqlind;
 } BIND_BUF;
@@ -219,12 +211,6 @@ typedef struct {
 } IBASE_BLOBINFO;
 
 /* }}} */
-
-/*
-#define IBASE_GLOBAL(a) a
-#define IBASE_TLS_VARS
-ibase_module php_ibase_module;
-*/
 
 /* error handling ---------------------------- */
 
@@ -429,15 +415,17 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, php_ibase_globals, ibase_globals, display_link_numbers)
 	 STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, php_ibase_globals, ibase_globals)
 	 STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, php_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.timestampformat", "%m/%d/%Y %H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timestampformat, php_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.dateformat", "%m/%d/%Y", PHP_INI_ALL, OnUpdateString, cfg_dateformat, php_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, php_ibase_globals, ibase_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(ibase)
 {
 	IBLS_FETCH();
 
-	if (cfg_get_string("ibase.timeformat", &IBG(timeformat)) == FAILURE) {
-		IBG(cfg_timeformat) = "%m/%d/%Y %H:%M:%S";
-	}
+	IBG(timestampformat) = NULL;
+	IBG(dateformat) = NULL;
 	IBG(timeformat) = NULL;
 	IBG(errmsg) = NULL;
 
@@ -453,11 +441,14 @@ PHP_MINIT_FUNCTION(ibase)
 
 	REGISTER_LONG_CONSTANT("IBASE_DEFAULT", PHP_IBASE_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TEXT", PHP_IBASE_TEXT, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_TIMESTAMP", PHP_IBASE_TIMESTAMP, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_UNIXTIME", PHP_IBASE_UNIXTIME, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_READ", PHP_IBASE_READ, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_COMMITTED", PHP_IBASE_COMMITTED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_CONSISTENCY", PHP_IBASE_CONSISTENCY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_NOWAIT", PHP_IBASE_NOWAIT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_TIMESTAMP", PHP_IBASE_TIMESTAMP, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_DATE", PHP_IBASE_DATE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_TIME", PHP_IBASE_TIME, CONST_PERSISTENT);
 	
 	return SUCCESS;
 }
@@ -469,6 +460,14 @@ PHP_RINIT_FUNCTION(ibase)
 
 	IBG(default_link)= -1;
 	IBG(num_links) = IBG(num_persistent);
+
+	if (IBG(timestampformat))
+        DL_FREE(IBG(timestampformat));
+	IBG(timestampformat) = DL_STRDUP(IBG(cfg_timestampformat));
+
+	if (IBG(dateformat))
+        DL_FREE(IBG(dateformat));
+	IBG(dateformat) = DL_STRDUP(IBG(cfg_dateformat));
 
 	if (IBG(timeformat))
         DL_FREE(IBG(timeformat));
@@ -492,6 +491,14 @@ PHP_MSHUTDOWN_FUNCTION(ibase)
 PHP_RSHUTDOWN_FUNCTION(ibase)
 {
     IBLS_FETCH();
+
+	if (IBG(timestampformat))
+	    DL_FREE(IBG(timestampformat));
+	IBG(timestampformat) = NULL;
+
+	if (IBG(dateformat))
+	    DL_FREE(IBG(dateformat));
+	IBG(dateformat) = NULL;
 
 	if (IBG(timeformat))
 	    DL_FREE(IBG(timeformat));
@@ -534,6 +541,8 @@ PHP_MINFO_FUNCTION(ibase)
 	tmp[31]=0;
 	php_info_print_table_row(2, "Total Links", tmp );
 
+	php_info_print_table_row(2, "Timestamp Format", IBG(timestampformat) );
+	php_info_print_table_row(2, "Date Format", IBG(dateformat) );
 	php_info_print_table_row(2, "Time Format", IBG(timeformat) );
 
 	php_info_print_table_end();
@@ -1129,40 +1138,50 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				var->sqllen	 = b_var->value.str.len;
 				var->sqltype = SQL_TEXT;
 				break;
-				/* FIX THESE
+#ifndef SQL_TIMESTAMP
+			case SQL_DATE:
+#else
 			case SQL_TIMESTAMP:
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
+#ifndef HAVE_STRPTIME
+				/*
+				  Once again, InterBase's internal parsing routines
+				  seems to bea good solution... Might change this on
+				  platforms that have strptime()? Code is there and works,
+				  but the functions existence is not yet tested...
+				  ask Sascha?
 				*/
-			case SQL_DATE:
+				convert_to_string(b_var);
+				var->sqldata = (void ISC_FAR *)b_var->value.str.val;
+				var->sqllen	 = b_var->value.str.len;
+				var->sqltype = SQL_TEXT;
+#else
 				{
 					struct tm t;
-					
-					t.tm_year = t.tm_mon = t.tm_mday = t.tm_hour =
-						t.tm_min = t.tm_sec = 0;
-					
+
 					convert_to_string(b_var);
-					
-#if HAVE_STRPTIME /*FIXME: HAVE_STRPTIME ?*/
-					
-					strptime(b_var->value.str.val, IBG(timeformat), &t);
-#else
-					{
-						int n = sscanf(b_var->value.str.val,"%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
-									   &t.tm_mon, &t.tm_mday, &t.tm_year,  &t.tm_hour, &t.tm_min, &t.tm_sec);
-						if (n != 3 && n != 6) {
-							_php_ibase_module_error("invalid date/time format");
-							return FAILURE;
-						}
-					
-						t.tm_year -= 1900;
-						t.tm_mon--;
+					switch (var->sqltype & ~1) {
+						case SQL_TIMESTAMP:
+							strptime(b_var->value.str.val, IBG(timestampformat), &t);
+							isc_encode_timestamp(&t, &buf[i].val.tsval);
+							var->sqldata = (void ISC_FAR *)(&buf[i].val.tsval);
+							break;
+						case SQL_TYPE_DATE:
+							strptime(b_var->value.str.val, IBG(dateformat), &t);
+							isc_encode_sql_date(&t, &buf[i].val.dtval);
+							var->sqldata = (void ISC_FAR *)(&buf[i].val.dtval);
+							break;
+						case SQL_TYPE_TIME:
+							strptime(b_var->value.str.val, IBG(timeformat), &t);
+							isc_encode_sql_time(&t, &buf[i].val.tmval);
+							var->sqldata = (void ISC_FAR *)(&buf[i].val.tmval);
+							break;
 					}
-#endif
-					isc_encode_date(&t, &buf[i].val.qval);
-					var->sqldata = (void ISC_FAR *)(&buf[i].val.qval);
 				}
+#endif
 				break;
+#endif
 			case SQL_BLOB:
 				{
 					ibase_blob_handle *ib_blob_id;
@@ -1588,7 +1607,6 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 {
 	char string_data[255];
 	
-
 	switch(type & ~1) {
 		case SQL_VARYING:
 			len = ((IBASE_VCHAR *) data)->var_len;
@@ -1663,19 +1681,25 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 #endif
 		{
 			struct tm t;
+			char *format = NULL;
 			long timestamp = -1;
-#ifndef SQL_TIMESTAMP_
+
+#ifndef SQL_TIMESTAMP
 			isc_decode_date((ISC_QUAD *) data, &t);
+			format = IBG(timestampformat);
 #else
 			switch (type & ~1) {
 				case SQL_TIMESTAMP:
 					isc_decode_timestamp((ISC_TIMESTAMP *) data, &t);
+					format = IBG(timestampformat);
 					break;
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE *) data, &t);
+					format = IBG(dateformat);
 					break;
 				case SQL_TYPE_TIME:
 					isc_decode_sql_time((ISC_TIME *) data, &t);
+					format = IBG(timeformat);
 					break;
 			}
 #endif
@@ -1688,14 +1712,15 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 #if HAVE_TM_ZONE
 			t.tm_zone = tzname[0];
 #endif
-			if (flag & PHP_IBASE_TIMESTAMP) {
+			if (flag & PHP_IBASE_UNIXTIME) {
 				val->type = IS_LONG;
 				val->value.lval = timestamp;
 			} else {
 				val->type = IS_STRING;
 #if HAVE_STRFTIME
-				val->value.str.len = strftime(string_data, sizeof(string_data), IBG(timeformat), &t);
+				val->value.str.len = strftime(string_data, sizeof(string_data), format, &t);
 #else
+				/* FIXME */
 				if (!t.tm_hour && !t.tm_min && !t.tm_sec)
 					val->value.str.len = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon+1, t.tm_mday, t.tm_year+1900);
 				else
@@ -1839,7 +1864,13 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 #ifdef SQL_INT64
 				case SQL_INT64:
 #endif
+#ifndef SQL_TIMESTAMP
 				case SQL_DATE:
+#else
+				case SQL_TIMESTAMP:
+				case SQL_TYPE_DATE:
+				case SQL_TYPE_TIME:
+#endif
 					_php_ibase_var_pval(tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag);
 					break;
 				case SQL_BLOB:
@@ -2142,25 +2173,56 @@ PHP_FUNCTION(ibase_free_query)
 
 
 /* {{{ proto int ibase_timefmt(string format)
-   Sets the format of datetime columns returned from queries. Still nonfunctional */
+   Sets the format of timestamp, date and time columns returned from queries */
 PHP_FUNCTION(ibase_timefmt)
 {
-	pval *fmt;
+#if HAVE_STRFTIME
+	pval ***args;
+	char *fmt = NULL;
+	int type = PHP_IBASE_TIMESTAMP;
 	IBLS_FETCH();
 	
+	RESET_ERRMSG; /* ??? */
 
-	RESET_ERRMSG;
 
-#if HAVE_STRFTIME
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &fmt)==FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2){
 		WRONG_PARAM_COUNT;
 	}
-    convert_to_string(fmt);
+	
+	args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
+	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	switch (ARG_COUNT(ht)) {
+		case 2:
+			convert_to_long_ex(args[1]);
+			type = (*args[1])->value.lval;
+		case 1:
+			convert_to_string_ex(args[0]);
+			fmt = (*args[0])->value.str.val;
+	}
+
+	switch (type) {
+		case PHP_IBASE_TIMESTAMP:
+			if (IBG(timestampformat))
+				DL_FREE(IBG(timestampformat));
+			IBG(timestampformat) = DL_STRDUP(fmt);
+			break;
+		case PHP_IBASE_DATE:
+			if (IBG(dateformat))
+				DL_FREE(IBG(dateformat));
+			IBG(dateformat) = DL_STRDUP(fmt);
+			break;
+		case PHP_IBASE_TIME:
+			if (IBG(timeformat))
+				DL_FREE(IBG(timeformat));
+			IBG(timeformat) = DL_STRDUP(fmt);
+			break;
+	}
     
-	if (IBG(timeformat))
-	  DL_FREE(IBG(timeformat));
-    IBG(timeformat) = DL_STRDUP(fmt->value.str.val);
-    
+	efree(args);
 	RETURN_TRUE;
 #else
 	_php_ibase_module_error("ibase_timefmt not supported on this platform");
@@ -2266,17 +2328,26 @@ PHP_FUNCTION(ibase_field_info)
 	*/
 
 	switch (var->sqltype & ~1) {
-		case SQL_TEXT:	   s = "TEXT"; break;
-		case SQL_VARYING:  s = "VARYING"; break;
-		case SQL_SHORT:	   s = "SHORT"; break;
-		case SQL_LONG:	   s = "LONG"; break;
-		case SQL_FLOAT:	   s = "FLOAT"; break;
-		case SQL_DOUBLE:   s = "DOUBLE"; break;
-		case SQL_D_FLOAT:  s = "D_FLOAT"; break;
-		case SQL_DATE:	   s = "DATE"; break;
-		case SQL_BLOB:	   s = "BLOB"; break;
-		case SQL_ARRAY:	   s = "ARRAY"; break;
-		case SQL_QUAD:	   s = "QUAD"; break;
+		case SQL_TEXT:	    s = "TEXT"; break;
+		case SQL_VARYING:   s = "VARYING"; break;
+		case SQL_SHORT:	    s = "SHORT"; break;
+		case SQL_LONG:	    s = "LONG"; break;
+		case SQL_FLOAT:	    s = "FLOAT"; break;
+		case SQL_DOUBLE:    s = "DOUBLE"; break;
+		case SQL_D_FLOAT:   s = "D_FLOAT"; break;
+#ifdef SQL_INT64
+		case SQL_INT64:     s = "INT64"; break;
+#endif
+#ifdef SQL_TIMESTAMP
+		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
+		case SQL_TYPE_DATE:	s = "DATE"; break;
+		case SQL_TYPE_TIME:	s = "TIME"; break;
+#else
+		case SQL_DATE:	    s = "DATE"; break;
+#endif
+		case SQL_BLOB:	    s = "BLOB"; break;
+		case SQL_ARRAY:	    s = "ARRAY"; break;
+		case SQL_QUAD:	    s = "QUAD"; break;
 	default:
 		sprintf(buf,"unknown (%d)", var->sqltype & ~1);
 		s = buf;
