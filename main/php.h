@@ -271,6 +271,7 @@ extern char **environ;
 #else	/* NETWARE */
 extern char **environ;
 #define php_sleep sleep
+#define PHP_SLEEP_NON_VOID
 #endif	/*  NETWARE */
 #endif	/* !defined(PHP_WIN32) */
 
