@@ -47,7 +47,7 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 	efree(object);
 }
 
-zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
+ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
 {	
 	zend_object_value retval;
 
@@ -60,13 +60,13 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 	return retval;
 }
 
-ZEND_API zend_object *zend_objects_get_address(zval *zobject)
+ZEND_API ZEND_API zend_object *zend_objects_get_address(zval *zobject)
 {
 	TSRMLS_FETCH();
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
-zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
+ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value retval;
 	zend_object *old_object;
