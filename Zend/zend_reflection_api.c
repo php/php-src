@@ -482,16 +482,6 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	RETURN_BOOL(mptr->common.fn_flags & mask);
 }
 
-/* {{{ proto public string Reflector::toString()
-   Returns a string representation */
-ZEND_METHOD(reflector, tostring)
-{
-	/* FIXME(?): I guess this is needed due to the fact that internal methods
-	 * are not subject to any modifier checks...
-	 */
-	zend_error(E_ERROR, "Cannot call abstract method reflector::tostring()");
-}
-
 /* {{{ proto public static mixed Reflection::export(Reflector r [, bool return])
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection, export)
