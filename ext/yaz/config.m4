@@ -37,5 +37,7 @@ if test "$PHP_YAZ" != "no"; then
     PHP_EVAL_INCLINE($YAZINC)
     PHP_SUBST(YAZ_SHARED_LIBADD)
     PHP_NEW_EXTENSION(yaz, php_yaz.c, $ext_shared)
+  else
+    AC_MSG_ERROR([YAZ not found (missing $yazconfig)])
   fi
 fi
