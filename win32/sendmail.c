@@ -649,12 +649,6 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
 			goto PostHeader_outofmem;
 		}
-		
-len = strlen(header_buffer);
-		if ((len > 4)&&(header_buffer[len-4]=='\r')) {
-			header_buffer[len-2]='\0';
-		}
-
 	}
 
 	if (headers_lc) {
