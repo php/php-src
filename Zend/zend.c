@@ -274,18 +274,31 @@ ZEND_API void zend_print_flat_zval_r(zval *expr)
 	    break;
 	case IS_OBJECT:
 	    {
-		zend_object *object = Z_OBJ_P(expr);
-
-		if (++object->properties->nApplyCount>1) {
-		    ZEND_PUTS(" *RECURSION*");
-		    object->properties->nApplyCount--;
-		    return;
-		}
-		zend_printf("%s Object (", object->ce->name);
-		print_flat_hash(object->properties);
-		ZEND_PUTS(")");
-		object->properties->nApplyCount--;
-		break;
+			HashTable *properties = NULL;
+			char *class_name = NULL;
+			zend_uint clen;
+			
+			if(Z_OBJ_HANDLER_P(expr, get_class_name)) {
+				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
+			}
+			if(class_name == NULL) {
+				class_name = "Unknown Class";
+			}
+			zend_printf("%s Object (", class_name);
+			if(Z_OBJ_HANDLER_P(expr, get_properties)) {
+				properties = Z_OBJPROP_P(expr);
+			}
+			if(properties) {
+				if (++properties->nApplyCount>1) {
+					ZEND_PUTS(" *RECURSION*");
+					properties->nApplyCount--;
+					return;
+				}
+				print_flat_hash(properties);
+				properties->nApplyCount--;
+			}
+			ZEND_PUTS(")");
+			break;
 	    }
 	default:
 	    zend_print_variable(expr);
@@ -314,16 +327,29 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			break;
 		case IS_OBJECT:
 			{
-				zend_object *object = Z_OBJ_P(expr);
-
-				if (++object->properties->nApplyCount>1) {
-					ZEND_PUTS(" *RECURSION*");
-					object->properties->nApplyCount--;
-					return;
+				HashTable *properties = NULL;
+				char *class_name = NULL;
+				zend_uint clen;
+				
+				if(Z_OBJ_HANDLER_P(expr, get_class_name)) {
+					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
-				zend_printf("%s Object\n", object->ce->name);
-				print_hash(object->properties, indent);
-				object->properties->nApplyCount--;
+				if(class_name == NULL) {
+					class_name = "Unknown Class";
+				}
+				zend_printf("%s Object\n", class_name);
+				if(Z_OBJ_HANDLER_P(expr, get_properties)) {
+					properties = Z_OBJPROP_P(expr);
+				}
+				if(properties) {
+					if (++properties->nApplyCount>1) {
+						ZEND_PUTS(" *RECURSION*");
+						properties->nApplyCount--;
+						return;
+					}
+					print_hash(properties, indent);
+					properties->nApplyCount--;
+				}
 				break;
 			}
 		default:
