@@ -438,9 +438,9 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
   int arg_count = ZEND_NUM_ARGS();
   jlong result = 0;
-	zval **arguments = (zval **) emalloc(sizeof(zval *)*arg_count);
+	zval ***arguments = (zval ***) emalloc(sizeof(zval *)*arg_count);
 
-	zend_get_parameters_ex(arg_count, arguments);
+	zend_get_parameters_array_ex(arg_count, arguments);
 
   if (!JG(jenv)) jvm_create(TSRMLS_C);
   if (!JG(jenv)) return;
