@@ -1,3 +1,127 @@
+2003-09-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      MFH: - Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query())
+
+    * ext/informix/ifx.ec:
+      - Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query())
+
+2003-09-11  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Revert f**kup CR/LF endings
+
+    * ext/interbase/interbase.c:
+      Add client library info to phpinfo() function
+      Small inter-op fix for IB6
+
+2003-09-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      fff
+
+2003-09-11  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/array.c:
+      Fixed bug #25494 (array_merge allowing "false" as argument (silent when
+      non-array is passed))
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c:
+      Fixed bug #25494 (array_merge allowing "false" as argument (silent when
+      non-array is passed))
+
+2003-09-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/tests/dtor_scope.phpt:
+      add test
+
+    * ZendEngine2/zend_execute_API.c:
+      ws
+
+    * ZendEngine2/zend_execute_API.c:
+      Use scope from method, not from object
+
+2003-09-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php:
+      verified unit test pear2.phpt works with changes, removing old code
+
+2003-09-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/cpdf/config.m4:
+      MFH: - Fixed bug #25463 (ext/cpdf: compile failure with bundled GD)
+
+    * ext/cpdf/config.m4:
+      - Fixed bug #25463 (ext/cpdf: compile failure with bundled GD)
+
+2003-09-11  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+      "pear -v install" is now more usefull
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Frontend/CLI.php:
+      Be more nice when downloading files
+
+    * pear/PEAR/Installer.php:
+      Fix bug of download tries when a local file is given
+      to install
+
+2003-09-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php:
+      missed one segment to comment out
+
+    * pear/PEAR.php:
+      use is_callable() - what a great function!
+
+2003-09-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Use type instead of constant
+
+2003-09-11  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Changed unsigned ISC_LONG to ISC_LONG
+
+2003-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/streams.c:
+      MFH: Fixed bug #25316 (Possible infinite loop inside _php_stream_write()).
+
+    * main/streams/streams.c:
+      Fixed bug #25316 (Possible infinite loop inside _php_stream_write()).
+
+    * ext/standard/mail.c:
+      Cleanup r1.76 patch
+
+2003-09-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      wtf is w/ZTS? (for users? :)
+
+2003-09-11  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/fdf/fdf.c:
+      check for FDFErcNoValue was in the wrong execution path,
+      should always be treated as 'no error' (should finally fix #22803)
+
 2003-09-10  Stefan Roehrich  <stefan@roehri.ch>
 
     * (PHP_4_3)
