@@ -251,7 +251,7 @@ typedef struct {
 #define ADD_COOKIE(a) sapi_add_header(a, strlen(a), 1);
 
 #define STR_CAT(P,S,I) {\
-	pval *__p = (P);\
+	zval *__p = (P);\
 	size_t __l = (I);\
 	ulong __i = Z_STRLEN_P(__p);\
 	Z_STRLEN_P(__p) += __l;\
@@ -827,8 +827,8 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC)
 
 PHPAPI void php_session_start(TSRMLS_D)
 {
-	pval **ppid;
-	pval **data;
+	zval **ppid;
+	zval **data;
 	char *p;
 	int send_cookie = 1;
 	int module_number = PS(module_number);
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(session_get_cookie_params)
    Return the current session name. If newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
-	pval **p_name;
+	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(session_name)
    Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
-	pval **p_name;
+	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
@@ -1125,7 +1125,7 @@ PHP_FUNCTION(session_set_save_handler)
    Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
-	pval **p_name;
+	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
@@ -1147,7 +1147,7 @@ PHP_FUNCTION(session_save_path)
    Return the current session id. If newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
-	pval **p_name;
+	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
 	char *old = empty_string;
 
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(session_id)
    Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
 PHP_FUNCTION(session_cache_limiter)
 {
-	pval **p_cache_limiter;
+	zval **p_cache_limiter;
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
@@ -1271,7 +1271,7 @@ PHP_FUNCTION(session_register)
    Removes varname from the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_unregister)
 {
-	pval **p_name;
+	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
 
 	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
@@ -1289,8 +1289,8 @@ PHP_FUNCTION(session_unregister)
    Checks if a variable is registered in session */
 PHP_FUNCTION(session_is_registered)
 {
-	pval **p_name;
-	pval *p_var;
+	zval **p_name;
+	zval *p_var;
 	int ac = ZEND_NUM_ARGS();
 
 	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(session_encode)
    Deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
-	pval **str;
+	zval **str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE)
 		WRONG_PARAM_COUNT;
