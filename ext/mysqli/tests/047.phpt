@@ -12,7 +12,7 @@ mysqli_get_metadata
 	mysqli_select_db($link, "test");
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
-	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10))");
+	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10) character set latin1)");
 
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1, 'Zak'),(2, 'Greant')");
 
@@ -31,7 +31,7 @@ mysqli_get_metadata
 --EXPECTF--
 array(2) {
   [0]=>
-  object(stdClass)#%d (9) {
+  object(stdClass)#4 (11) {
     ["name"]=>
     string(3) "foo"
     ["orgname"]=>
@@ -44,6 +44,10 @@ array(2) {
     string(0) ""
     ["max_length"]=>
     int(0)
+    ["length"]=>
+    int(11)
+    ["charsetnr"]=>
+    int(63)
     ["flags"]=>
     int(32768)
     ["type"]=>
@@ -52,7 +56,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object(stdClass)#%d (9) {
+  object(stdClass)#5 (11) {
     ["name"]=>
     string(3) "bar"
     ["orgname"]=>
@@ -65,6 +69,10 @@ array(2) {
     string(0) ""
     ["max_length"]=>
     int(0)
+    ["length"]=>
+    int(10)
+    ["charsetnr"]=>
+    int(8)
     ["flags"]=>
     int(0)
     ["type"]=>
