@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.6 2001-05-28 11:14:47 ssb Exp $
+     $Id: package.dtd,v 1.7 2001-09-02 00:09:52 jmcastagnetto Exp $
 
      This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
@@ -23,103 +23,103 @@
 <!--============== attributes present in all elements ======================-->
 <!ENTITY % global.atts "id		ID	#IMPLIED">
 <!--============== attributes common to several elements ===================-->
-<!ENTITY % role.atts "Role		(php|ext|test|doc) 'php'">
-<!ENTITY % extension.atts "Debug	(on|off) 'off'
-			   ThreadSafe	(on|off) 'off'">
-<!ENTITY % format.atts "Format		CDATA	#IMPLIED">
-<!--=============== ELEMENT: Package =======================================-->
-<!ELEMENT Package (Name, Summary, Maintainer, Release, FileList)>
-<!ATTLIST Package
+<!ENTITY % role.atts "role		(php|ext|test|doc) 'php'">
+<!ENTITY % extension.atts "debug	(on|off) 'off'
+			   threadsafe	(on|off) 'off'">
+<!ENTITY % format.atts "format		CDATA	#IMPLIED">
+<!--=============== ELEMENT: package =======================================-->
+<!ELEMENT package (name, summary, maintainer, release, fileList)>
+<!ATTLIST package
 	%global.atts; 
-	Type (Source | Binary | Empty) "Empty"
+	type (source | binary | empty) "empty"
 >
-<!--=============== ELEMENT: Name ==========================================-->
-<!ELEMENT Name (#PCDATA)>
-<!ATTLIST Name
-	%global.atts; 
->
-<!--=============== ELEMENT: Summary =======================================-->
-<!ELEMENT Summary (#PCDATA)>
-<!ATTLIST Summary
+<!--=============== ELEMENT: name ==========================================-->
+<!ELEMENT name (#PCDATA)>
+<!ATTLIST name
 	%global.atts; 
 >
-<!--=============== ELEMENT: Maintainer ====================================-->
-<!ELEMENT Maintainer (Initials, Name, Email)>
-<!ATTLIST Maintainer
+<!--=============== ELEMENT: summary =======================================-->
+<!ELEMENT summary (#PCDATA)>
+<!ATTLIST summary
 	%global.atts; 
 >
-<!--=============== ELEMENT: Initials ======================================-->
-<!ELEMENT Initials (#PCDATA)>
-<!ATTLIST Initials
+<!--=============== ELEMENT: maintainer ====================================-->
+<!ELEMENT maintainer (initials, name, email)>
+<!ATTLIST maintainer
 	%global.atts; 
 >
-<!--=============== ELEMENT: Email =========================================-->
-<!ELEMENT Email (#PCDATA)>
-<!ATTLIST Email
+<!--=============== ELEMENT: initials ======================================-->
+<!ELEMENT initials (#PCDATA)>
+<!ATTLIST initials
 	%global.atts; 
 >
-<!--=============== ELEMENT: Release =======================================-->
-<!ELEMENT Release (Version, Date, Notes?)>
-<!ATTLIST Release
+<!--=============== ELEMENT: email =========================================-->
+<!ELEMENT email (#PCDATA)>
+<!ATTLIST email
 	%global.atts; 
 >
-<!--=============== ELEMENT: Version =======================================-->
-<!ELEMENT Version (#PCDATA)>
-<!ATTLIST Version
+<!--=============== ELEMENT: release =======================================-->
+<!ELEMENT release (version, date, notes?)>
+<!ATTLIST release
 	%global.atts; 
 >
-<!--=============== ELEMENT: Date =========================================-->
-<!ELEMENT Date (#PCDATA)>
-<!ATTLIST Date
+<!--=============== ELEMENT: version =======================================-->
+<!ELEMENT version (#PCDATA)>
+<!ATTLIST version
 	%global.atts; 
 >
-<!--=============== ELEMENT: Notes =========================================-->
-<!ELEMENT Notes (#PCDATA)>
-<!ATTLIST Notes
+<!--=============== ELEMENT: date =========================================-->
+<!ELEMENT date (#PCDATA)>
+<!ATTLIST date
 	%global.atts; 
 >
-<!--=============== ELEMENT: FileList ======================================-->
-<!ELEMENT FileList (Dir | File | LibFile)*>
-<!ATTLIST FileList
+<!--=============== ELEMENT: notes =========================================-->
+<!ELEMENT notes (#PCDATA)>
+<!ATTLIST notes
 	%global.atts; 
 >
-<!--=============== ELEMENT: Dir ===========================================-->
-<!ELEMENT Dir (#PCDATA)>
-<!ATTLIST Dir
+<!--=============== ELEMENT: fileList ======================================-->
+<!ELEMENT fileList (dir | file | libfile)*>
+<!ATTLIST fileList
 	%global.atts; 
 >
-<!--=============== ELEMENT: File ==========================================-->
-<!ELEMENT File (#PCDATA)>
-<!ATTLIST File
+<!--=============== ELEMENT: dir ===========================================-->
+<!ELEMENT dir (#PCDATA)>
+<!ATTLIST dir
+	%global.atts; 
+>
+<!--=============== ELEMENT: file ==========================================-->
+<!ELEMENT file (#PCDATA)>
+<!ATTLIST file
 	%global.atts; 
 	%role.atts; 
 	%extension.atts; 
 	%format.atts; 
 >
-<!--=============== ELEMENT: LibFile =======================================-->
-<!ELEMENT LibFile (LibName,Sources,Includes?,LibAdd?)>
-<!ATTLIST LibFile
+<!--=============== ELEMENT: libfile =======================================-->
+<!ELEMENT libfile (libname,sources,includes?,libadd?)>
+<!ATTLIST libfile
 	%global.atts; 
 	%role.atts; 
 >
-<!--=============== ELEMENT: LibFile =======================================-->
-<!ELEMENT LibFile (LibName,Sources,Includes?,LibAdd?)>
-<!ATTLIST LibFile
+<!--=============== ELEMENT: libfile =======================================-->
+<!ELEMENT libfile (libname,sources,includes?,libadd?)>
+<!ATTLIST libfile
 	%global.atts; 
 	%role.atts; 
 >
-<!--=============== ELEMENT: LibName =======================================-->
-<!ELEMENT LibName (#PCDATA)>
-<!ATTLIST LibName
+<!--=============== ELEMENT: libname =======================================-->
+<!ELEMENT libname (#PCDATA)>
+<!ATTLIST libname
 	%global.atts; 
 >
-<!--=============== ELEMENT: Sources =======================================-->
-<!ELEMENT Sources (#PCDATA)>
-<!ATTLIST Sources
+<!--=============== ELEMENT: sources =======================================-->
+<!ELEMENT sources (#PCDATA)>
+<!ATTLIST sources
 	%global.atts; 
 >
-<!--=============== ELEMENT: LibAdd ========================================-->
-<!ELEMENT LibAdd (#PCDATA)>
-<!ATTLIST LibAdd
+<!--=============== ELEMENT: libadd ========================================-->
+<!ELEMENT libadd (#PCDATA)>
+<!ATTLIST libadd
 	%global.atts; 
 >
