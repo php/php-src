@@ -183,7 +183,7 @@ static void php_apache_sapi_log_message(char *msg)
 
 	ctx = SG(server_context);
 
-	apr_file_puts(msg, ctx->f->r->server->error_log);
+	aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ctx->f->r->server, "%s", msg);
 }
 
 static sapi_module_struct apache2_sapi_module = {
