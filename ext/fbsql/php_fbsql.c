@@ -269,7 +269,10 @@ void phpfbReleaseResult (PHPFBResult* result)
 
 		if (result->retainCount == 0)
 		{
-			if (result->fetchHandle) fbcdcCancelFetch(result->connection,result->fetchHandle);
+			if (result->fetchHandle) {
+				FBCMetaData *md = fbcdcCancelFetch(result->connection,result->fetchHandle);
+				fbcmdRelease(md);
+			}
 			if (result->rowHandler)  fbcrhRelease(result->rowHandler);
 			if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
 /*			if (result->metaData)    fbcmdRelease(result->metaData);  */
@@ -717,7 +720,7 @@ PHPFBDatabase* phpfbSelectDB
 {
 	PHPFBDatabase* result = NULL;
 	list_entry *lep;
-	unsigned i;
+	unsigned i, port;
 	char name[1024];
 	FBSQLLS_FETCH();
 
@@ -742,8 +745,14 @@ PHPFBDatabase* phpfbSelectDB
 	else
 	{
 		list_entry             le;
-		FBCDatabaseConnection* c = fbcdcConnectToDatabase(databaseName,link->hostName,FB_SQL_G(databasePassword));
+		FBCDatabaseConnection* c;
 		FBCMetaData*           md;
+
+		port = atoi(databaseName);
+		if (port>0 && port<65535)
+			c = fbcdcConnectToDatabaseUsingPort(link->hostName, port,FB_SQL_G(databasePassword));
+		else
+			c = fbcdcConnectToDatabase(databaseName,link->hostName,FB_SQL_G(databasePassword));
 		if (c == NULL)
 		{
 			php_error(E_WARNING, fbcdcClassErrorMessage());
@@ -942,68 +951,85 @@ PHP_FUNCTION(fbsql_rollback)
 /* }}} */
 
 
-/* {{{ proto string fbsql_hostname([string host_name])
+/* {{{ proto string fbsql_hostname(int link_identifier [, string host_name])
 	*/
 PHP_FUNCTION(fbsql_hostname)
 {
 	int		argc = ARG_COUNT(ht);
-	zval	**argv[1];
+	zval	**argv[2];
+	PHPFBLink*     phpLink = NULL;
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	phpfbestrdup(FB_SQL_G(hostName), &return_value->value.str.len, &return_value->value.str.val);
+	convert_to_long_ex(argv[0]);
+	phpLink = phpfbGetLink((*argv[0])->value.lval);    
+	if (phpLink == NULL) RETURN_FALSE;
+
+	phpfbestrdup(phpLink->hostName, &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
-	if (argc >= 1)
+	if (argc == 2)
 	{
-		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(hostName));
-		FB_SQL_G(hostName) = strdup((*argv[0])->value.str.val);
+		convert_to_string_ex(argv[1]);
+		if (phpLink->hostName) free(phpLink->hostName);
+		phpLink->hostName = strdup((*argv[1])->value.str.val);
 	}
 }
 /* }}} */
 
 
-/* {{{ proto string fbsql_database([string database])
+/* {{{ proto string fbsql_database(int link_identifier [, string database])
 	*/
 PHP_FUNCTION(fbsql_database)
 {
 	int  argc = ARG_COUNT(ht);
-	zval	**argv[1];
+	zval	**argv[2];
+	PHPFBLink*     phpLink = NULL;
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	phpfbestrdup(FB_SQL_G(databaseName), &return_value->value.str.len, &return_value->value.str.val);
+	convert_to_long_ex(argv[0]);
+	phpLink = phpfbGetLink((*argv[0])->value.lval);    
+	if (phpLink == NULL) RETURN_FALSE;
+
+	phpfbestrdup(phpLink->currentDatabase->databaseName, &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
-	if (argc >= 1)
+	if (argc == 2)
 	{
-		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(databaseName));
-		FB_SQL_G(databaseName) = strdup((*argv[0])->value.str.val);
+		convert_to_string_ex(argv[1]);
+		if (phpLink->currentDatabase->databaseName) free(phpLink->currentDatabase->databaseName);
+		phpLink->currentDatabase->databaseName = strdup((*argv[1])->value.str.val);
 	}
 }
 /* }}} */
 
 
-/* {{{ proto string fbsql_database_password([string database_password])
+/* {{{ proto string fbsql_database_password(int link_identifier [, string database_password])
 	*/
 PHP_FUNCTION(fbsql_database_password)
 {
 	int  argc = ARG_COUNT(ht);
-	zval	**argv[1];
+	zval	**argv[2];
+	PHPFBLink*     phpLink = NULL;
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1)
+	convert_to_long_ex(argv[0]);
+	phpLink = phpfbGetLink((*argv[0])->value.lval);    
+	if (phpLink == NULL) RETURN_FALSE;
+
+	phpfbestrdup(phpLink->currentDatabase->databasePassword, &return_value->value.str.len, &return_value->value.str.val);
+	return_value->type = IS_STRING;
+	if (argc == 2)
 	{
-		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(databasePassword));
-		FB_SQL_G(databasePassword) = strdup((*argv[0])->value.str.val); 
+		convert_to_string_ex(argv[1]);
+		if (phpLink->currentDatabase->databasePassword) free(phpLink->currentDatabase->databasePassword);
+		phpLink->currentDatabase->databasePassword = strdup((*argv[1])->value.str.val); 
 	}
 }
 /* }}} */
@@ -1102,7 +1128,7 @@ PHP_FUNCTION(fbsql_select_db)
 /* }}} */
 
 
-/* {{{ proto int fbsql_change_user(string user, string password, string [database] , int [link_identifier]);
+/* {{{ proto int fbsql_change_user(string user, string password [, string database [, int link_identifier]]);
 	*/
 PHP_FUNCTION(fbsql_change_user)
 {
@@ -1546,7 +1572,8 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 	}
 	else if ((fh = fbcmdFetchHandle(md)) && (FB_SQL_G(resultCount) == FB_SQL_G(maxResults)))
 	{
-		fbcdcCancelFetch(database->connection,fh);
+		FBCMetaData *md = fbcdcCancelFetch(database->connection,fh);
+		fbcmdRelease(md);
 		php_error(E_WARNING,"FrontBase result set limit %d exceeded",FB_SQL_G(maxResults));
 	}
 	else if (fh || (tp[0] == 'E'))
@@ -2397,7 +2424,10 @@ PHP_FUNCTION(fbsql_next_result)
 
     result->currentResult++;
 	if (result->currentResult < result->selectResults) {
-        if (result->fetchHandle) fbcdcCancelFetch(result->connection, result->fetchHandle);
+        if (result->fetchHandle) {
+			FBCMetaData *md = fbcdcCancelFetch(result->connection, result->fetchHandle);
+			fbcmdRelease(md);
+		}
 		if (result->rowHandler) fbcrhRelease(result->rowHandler);
 		result->metaData    = (FBCMetaData*)fbcmdMetaDataAtIndex(result->ResultmetaData, result->currentResult);
 		result->fetchHandle = fbcmdFetchHandle(result->metaData);
