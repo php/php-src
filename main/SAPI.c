@@ -389,6 +389,7 @@ SAPI_API int sapi_send_headers()
 					sapi_header_struct default_header;
 					int len = SG(sapi_headers).default_content_type_size + sizeof("Content-type: ");
 
+					default_header.header = emalloc(len);
 					strcpy(default_header.header, "Content-type: ");
 					strlcat(default_header.header, SG(sapi_headers).default_content_type, len);
 					default_header.header[len - 1] = '\0';
