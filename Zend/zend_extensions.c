@@ -51,23 +51,23 @@ int zend_load_extension(char *path)
 	/* allow extension to proclaim compatibility with any Zend version */
 	if (extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
 		if (extension_version_info->zend_extension_api_no > ZEND_EXTENSION_API_NO) {
-			fprintf(stderr, "%s requires Zend Engine API version %d\n"
-					"The installed Zend Engine API version is %d\n\n",
+			fprintf(stderr, "%s requires Zend Engine API version %d.\n"
+					"The Zend Engine API version %d which is installed, is outdated.\n\n",
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO);
 			DL_UNLOAD(handle);
 			return FAILURE;
 		} else if (extension_version_info->zend_extension_api_no < ZEND_EXTENSION_API_NO) {
-			fprintf(stderr, "%s designed to be used with the Zend Engine API %d is outdated\n"
-					"It requires a more recent version of the Zend Engine\n"
-					"The installed Zend Engine API version is %d\n"
-					"Contact %s at %s for a later version of this module.\n\n",
+			fprintf(stderr, "%s requires Zend Engine API version %d.\n"
+					"The Zend Engine API version %d which is installed, is newer.\n"
+					"Contact %s at %s for a later version of %s.\n\n",
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO,
 					new_extension->author,
-					new_extension->URL);
+					new_extension->URL,
+					new_extension->name);
 			DL_UNLOAD(handle);
 			return FAILURE;
 		} 
