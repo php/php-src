@@ -343,6 +343,11 @@ foreach($optionals as $dir) {
 	}
 }
 
+// Convert extension names to lowercase
+foreach ($exts_to_test as $key => $val) {
+	$exts_to_test[$key] = strtolower($val);
+}
+
 foreach ($test_dirs as $dir) {
 	find_files("{$cwd}/{$dir}", ($dir == 'ext'));
 }
@@ -358,7 +363,7 @@ function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 	$o = opendir($dir) or error("cannot open directory: $dir");
 	while (($name = readdir($o)) !== FALSE) {
 		if (is_dir("{$dir}/{$name}") && !in_array($name, array('.', '..', 'CVS'))) {
-			$skip_ext = ($is_ext_dir && !in_array($name, $exts_to_test));
+			$skip_ext = ($is_ext_dir && !in_array(strtolower($name), $exts_to_test));
 			if ($skip_ext) {
 				$exts_skipped++;
 			}
