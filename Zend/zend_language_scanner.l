@@ -985,7 +985,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"__METHOD__" {
 	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
-	char *func_name = CG(active_op_array)->function_name;
+	char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
 	size_t len = 0;
 
 	if (class_name) {
