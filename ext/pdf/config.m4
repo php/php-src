@@ -4,11 +4,24 @@ dnl
 
 PHP_ARG_WITH(pdflib,for PDFlib support,
 [  --with-pdflib[=DIR]     Include PDFlib support.])
-remember_ext_shared=$ext_shared
+
+pdflib_ext_shared=$ext_shared
+
+PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
+[  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
+                                     (OPTIONAL for PDFlib v4)])
+
+PHP_ARG_WITH(png-dir, for the location of libpng, 
+[  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
+                                     (OPTIONAL for PDFlib v4)])
+ 
+PHP_ARG_WITH(tiff-dir, for the location of libtiff,
+[  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
+                                     (OPTIONAL for PDFlib v4)])
 
 if test "$PHP_PDFLIB" != "no"; then
 
-  PHP_NEW_EXTENSION(pdf, pdf.c, $ext_shared)
+  PHP_NEW_EXTENSION(pdf, pdf.c, $pdflib_ext_shared)
   PHP_SUBST(PDFLIB_SHARED_LIBADD)
 
   dnl #
@@ -16,11 +29,6 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl #
 
   dnl # libjpeg
-    
-  PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
-  [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
-                                    (OPTIONAL for PDFlib v4)])
-
   if test "$PHP_JPEG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header, 
     [
@@ -35,11 +43,6 @@ if test "$PHP_PDFLIB" != "no"; then
   fi
 
   dnl # libpng
-
-  PHP_ARG_WITH(png-dir, for the location of libpng, 
-  [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
-                                    (OPTIONAL for PDFlib v4)])
- 
   if test "$PHP_PNG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(png,png_create_info_struct, 
     [
@@ -54,11 +57,6 @@ if test "$PHP_PDFLIB" != "no"; then
   fi
 
   dnl # libtiff
-
-  PHP_ARG_WITH(tiff-dir, for the location of libtiff,
-  [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
-                                    (OPTIONAL for PDFlib v4)])
-
   if test "$PHP_TIFF_DIR" != "no"; then
     PHP_CHECK_LIBRARY(tiff,TIFFOpen, 
     [
@@ -73,7 +71,6 @@ if test "$PHP_PDFLIB" != "no"; then
   fi
 
   dnl # zlib
- 
   AC_MSG_CHECKING([for the location of zlib])
   if test "$PHP_ZLIB_DIR" = "no"; then
     AC_MSG_RESULT([no. If configure fails, try --with-zlib-dir=<DIR>])
@@ -82,12 +79,10 @@ if test "$PHP_PDFLIB" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, PDFLIB_SHARED_LIBADD)
   fi
 
-
   dnl #
   dnl # The main PDFlib configure
   dnl #
 
-  ext_shared=$remember_ext_shared
   case $PHP_PDFLIB in
     yes)
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
