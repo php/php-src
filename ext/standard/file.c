@@ -111,8 +111,6 @@ static void _file_upload_dtor(char *file);
 /* sharing globals is *evil* */
 static int le_fopen,le_popen, le_socket, le_uploads; 
 
-static fd_set readfd;
-static int max_fd;
 
 /* }}} */
 /* {{{ tempnam */
@@ -244,9 +242,11 @@ function_entry file_functions[] = {
 #if (0 && defined(HAVE_SYS_TIME_H) && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
 	PHP_FE(set_socket_timeout,	NULL)
 #endif
+#if 0 /* needs to be rethought 991221 thies@digicol.de */
 	PHP_FE(fd_set, NULL)
 	PHP_FE(fd_isset, NULL)
 	PHP_FE(select, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -1674,6 +1674,11 @@ PHP_FUNCTION(fgetcsv) {
 
 /* }}} */
 
+#if 0
+
+static fd_set readfd;
+static int max_fd;
+
 PHP_FUNCTION(fd_set)
 {
         pval **arg;
@@ -1765,3 +1770,5 @@ PHP_FUNCTION(fd_isset)
 	}	
 	RETURN_FALSE;
 }	
+
+#endif
