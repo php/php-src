@@ -766,14 +766,8 @@ class PEAR_Error
             die(sprintf($format, $msg));
         }
         if ($this->mode & PEAR_ERROR_CALLBACK) {
-            if (is_string($this->callback) && strlen($this->callback)) {
+            if (is_callable($this->callback)) {
                 call_user_func($this->callback, $this);
-            } elseif (is_array($this->callback) &&
-                      sizeof($this->callback) == 2 &&
-                      is_object($this->callback[0]) &&
-                      is_string($this->callback[1]) &&
-                      strlen($this->callback[1])) {
-                      call_user_func($this->callback, $this);
             }
         }
         if (PEAR_ZE2 && $this->mode & PEAR_ERROR_EXCEPTION) {
