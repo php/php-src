@@ -1,5 +1,5 @@
 --TEST--
-sqlite-oo: and spl
+sqlite-spl: Iteration
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; 
