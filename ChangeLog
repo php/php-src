@@ -1,3 +1,190 @@
+2002-03-20  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/config.m4: MFH vpopmail 5.2 version compatibility fix
+
+    * ext/vpopmail/php_vpopmail.c: ws fix
+
+    * ext/vpopmail/config.m4:
+    fix version checking - now handle 1.2.3 and 1.2 as well
+
+2002-03-20  Harald Radi  <h.radi@nme.at>
+
+    * main/memory_streams.c: fixed signed/unsigned comparison warnings
+
+2002-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: MFH
+
+2002-03-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * makedist: MFH makedist
+
+    * makedist: - Fix makedist
+
+2002-03-20  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/dbx/dbx.c:
+    Some PHP-info layout fixes (\n will automatically be converted into <br />)
+    and a comment-related fix.
+
+2002-03-20  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/config.m4: fix a missing [
+
+2002-03-20  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/filepro/filepro.c: MFH: filepro fixes
+
+2002-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: - Should work better now..
+
+2002-03-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/vpopmail/config.m4
+      acinclude.m4: - MFH iconv fix
+    - Configure Fix for vpopmail
+
+2002-03-20  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/html.c: MFH of bufferoverflow fix
+
+2002-03-20  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/zlib/zlib.c
+      main/php_streams.h
+      ext/standard/file.h
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/file.c:
+    Make state parameter of php_strip_tags passed by reference.
+    Move state tracking to stream structure.
+
+    * main/php_streams.h
+      main/streams.c
+      main/user_streams.c
+      ext/zlib/zlib.c
+      ext/pgsql/pgsql.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/image.c
+      ext/exif/exif.c: Streams are all tracked as resources now.
+    Add some logic that will help track down leaks
+    when debug is enabled.
+
+    * ext/zlib/zlib.c: Add parameter here too...
+
+2002-03-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global
+      acinclude.m4
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h: Expand the variables in PHP_EXPAND_BUILD_VARS.
+
+    Make HAVE_ICONV/HAVE_LIBICONV available through the more
+    fine-grained approach using a single include file per
+    directive.  This will significantly reduce the price of
+    full dependencies for developers, because basically each
+    file today includes php.h which includes php_config.h.
+
+    If PHP_ATOM_INC is defined, these include files can be used.
+
+    For all PHP_DEFINEs, empty files are created upon configure start.
+
+2002-03-20  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib_fopen_wrapper.c: add forgotten parameter
+
+2002-03-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4: Fix building mysql client library
+    Run client lib specific checks only when clientlib is used
+    Remove second invocation of MYSQL_SOCK
+
+    * acinclude.m4:
+    Avoid duplicate tests and make third parameter truly optional.
+
+2002-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4: - Fixed (hope so :) like Sascha said.
+
+2002-03-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Fix and tweak iconv macro
+
+    * acinclude.m4: Don't quote too much.  Now autoconf-2.13 is happy again.
+
+    * acinclude.m4: Remove autoconf-2.5x specific m4_default macro.
+
+    It is pointless here, because we don't need any "void" statement.
+    There already is a statement and all it will do in the worst case
+    is generate an empty line
+
+2002-03-20  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/safe_mode.c: MFH of safe_mode.c text fix
+
+2002-03-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/vpopmail/php_vpopmail.c: MFH Sascha's fix
+
+2002-03-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/vpopmail/php_vpopmail.c:
+    There should not be any trailing data on an #endif line
+
+    * README.UNIX-BUILD-SYSTEM: add info about build system macros
+
+2002-03-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/metaphone.c: - MFH fix for #16176.
+
+    * ext/standard/metaphone.c: - Fix for #16176.
+
+    * ext/vpopmail/config.m4
+      ext/vpopmail/php_vpopmail.c:
+    - MFH fix for #16120 (this also MFHs the proto fix by Sebastion which
+      I hope is ok).
+
+2002-03-20  Jon Parise  <jon@csh.rit.edu>
+
+    * acinclude.m4:
+    This completely fixes the iconv library detection under FreeBSD (the
+    previous fix was incomplete).  We also set HAVE_ICONV and HAVE_LIBICONV
+    based on the library that was detected.
+
+2002-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/quicktester.inc
+      ext/bz2/tests/with_strings.phpt:
+    - Fixed the bz2 tests. (and changed the usage comment to be correct)
+
+    * ext/gd/config.m4: - This is not needed here
+
+    * ext/openssl/config.m4
+      pear/pear.m4
+      acinclude.m4
+      configure.in:
+    - Make it possible to build ext/openssl as shared extension
+
+    * ext/mysql/config.m4:
+    - Fixed bug: #14147 (partial MFH, the uncompress issue)
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/config.m4:
+    - Fixed bug: #16139 (compile failure with Mysql 4.0.1)
+    - Some tests were only run when compiling with the bundled libs.
+      (caused some compile warnings with external mysql libs)
+    - Another try to fix the zlib issue..(uncompress)
+
+    * ext/fdf/config.m4
+      ext/fdf/php_fdf.h: MFH
+
+    * ext/fdf/config.m4
+      ext/fdf/php_fdf.h: - Fix this without breaking BC
+
 2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
 
     * main/main.c

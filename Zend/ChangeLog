@@ -1,3 +1,11 @@
+2002-03-20  Harald Radi  <h.radi@nme.at>
+
+    * ZendTS.dsp
+      zend.h
+      zend_ts_hash.c
+      zend_ts_hash.h: added thread safe hashtable which allows concurrent
+    reads but only exclusive writes
+
 2002-03-19  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y
