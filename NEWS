@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   when open_basedir is used). (Ilia)
 - Fixed bug #24284 (Fixed memory leak inside pg_ping()). (Ilia)
 - Fixed bug #24028 (Reading raw post message by php://input failed). (Jani)
+- Fixed corruption of multibyte character including 0x5c as second
+  byte in multipart/form-data. (Rui)
 
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
