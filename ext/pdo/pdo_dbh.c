@@ -36,6 +36,74 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 
+void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp TSRMLS_DC)
+{
+	pdo_error_type *pdo_err = &dbh->error_code;
+	char *message = NULL;
+	const char *msg;
+	zval *info = NULL;
+
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+#if 0
+		/* BUG: if user is running in silent mode and hits an error at the driver level
+		 * when they use the PDO methods to call up the error information, they may
+		 * get bogus information */
+		return;
+#endif
+	}
+	
+	if (stmt) {
+		pdo_err = &stmt->error_code;
+	}
+
+	strcpy(*pdo_err, sqlstate);
+
+	/* hash sqlstate to error messages */
+	msg = pdo_sqlstate_state_to_description(*pdo_err);
+	if (!msg) {
+		msg = "<<Unknown error>>";
+	}
+
+	MAKE_STD_ZVAL(info);
+	array_init(info);
+
+	add_next_index_string(info, *pdo_err, 1);
+	add_next_index_long(info, 0);
+		
+	if (supp) {
+		spprintf(&message, 0, "SQLSTATE[%s]: %s: 0 %s", *pdo_err, msg, supp);
+	} else {
+		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
+	}
+
+	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
+
+		if (info) {
+			zval_ptr_dtor(&info);
+		}
+	} else {
+		zval *ex;
+		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+
+		MAKE_STD_ZVAL(ex);
+		object_init_ex(ex, pdo_ex);
+
+		zend_update_property_string(def_ex, ex, "message", sizeof("message")-1, message TSRMLS_CC);
+		zend_update_property_string(def_ex, ex, "code", sizeof("code")-1, *pdo_err TSRMLS_CC);
+		
+		if (info) {
+			zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
+		}
+
+		zend_throw_exception_object(ex TSRMLS_CC);
+	}
+	
+	if (message) {
+		efree(message);
+	}
+}
+
 void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
@@ -495,8 +563,7 @@ fail:
 	if (attr == PDO_ATTR_AUTOCOMMIT) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
 	} else if (!dbh->methods->set_attribute) {
-		/* XXX: do something better here */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support setting attributes");
+		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes" TSRMLS_CC);
 	} else {
 		PDO_HANDLE_DBH_ERR();
 	}
@@ -534,7 +601,7 @@ static PHP_METHOD(PDO, getAttribute)
 	}
 	
 	if (!dbh->methods->get_attribute) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching attributes");
+		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support getting attributes" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -544,9 +611,8 @@ static PHP_METHOD(PDO, getAttribute)
 			RETURN_FALSE;
 
 		case 0:
-			/* XXX: should do something better here */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching %ld attribute", attr);
-			break;
+			pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support that attribute" TSRMLS_CC);
+			RETURN_FALSE;
 
 		default:
 			return;
@@ -594,7 +660,8 @@ static PHP_METHOD(PDO, lastInsertId)
 
 	PDO_DBH_CLEAR_ERR();
 	if (!dbh->methods->last_id) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support last inserted id retrieval.");
+		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
+		RETURN_FALSE;
 	} else {
 		RETURN_LONG(dbh->methods->last_id(dbh TSRMLS_CC));
 	}

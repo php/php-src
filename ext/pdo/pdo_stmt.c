@@ -293,7 +293,7 @@ static PHP_METHOD(PDOStatement, execute)
 			} else {
 				/* we're okay to be zero based here */
 				if (num_index < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter index");
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", NULL TSRMLS_CC);
 					RETURN_FALSE;
 				}
 				param.paramno = num_index;
@@ -646,7 +646,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
 	} else if (!param.name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter number: columns are 1-based");
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
 		return 0;
 	}
 
@@ -737,8 +737,7 @@ static PHP_METHOD(PDOStatement, setAttribute)
 
 fail:
 	if (!stmt->methods->set_attribute) {
-		/* XXX: do something better here */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support setting attributes");
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support setting attributes" TSRMLS_CC);
 	} else {
 		PDO_HANDLE_STMT_ERR();
 	}
@@ -758,7 +757,7 @@ static PHP_METHOD(PDOStatement, getAttribute)
 	}
 
 	if (!stmt->methods->get_attribute) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching attributes");
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support getting attributes" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -770,8 +769,8 @@ static PHP_METHOD(PDOStatement, getAttribute)
 
 		case 0:
 			/* XXX: should do something better here */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching %ld attribute", attr);
-			break;
+			pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support getting that attribute" TSRMLS_CC);
+			RETURN_FALSE;
 
 		default:
 			return;
@@ -804,7 +803,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	}
 
 	if (!stmt->methods->get_column_meta) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support meta data");
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support meta data" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -824,7 +823,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 /* }}} */
 
 /* {{{ proto bool PDOStatement::setFetchMode(int mode [)
-   Returns meta data for a numbered column */
+   changes the default fetch mode for subsequent fetches */
 
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
@@ -833,7 +832,6 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	zval ***args;
 	zend_class_entry **cep;
 	
-	/* TODO: clear up class stuff here */
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_CLASS:
 			if (stmt->fetch.cls.ctor_args) {
@@ -935,7 +933,7 @@ fail_out:
 			break;
 		
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mode is out of range");
+			pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range" TSRMLS_CC);
 			return FAILURE;
 	}
 
@@ -965,8 +963,7 @@ static PHP_METHOD(PDOStatement, nextRowset)
 	struct pdo_column_data *col;
 
 	if (!stmt->methods->next_rowset) {
-		/* TODO: need a better pdo-level error function */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support multiple rowsets");
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
