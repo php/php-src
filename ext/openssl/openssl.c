@@ -105,20 +105,25 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	return SUCCESS;
 }
 
-/* {{{ proto int openssl_get_privatekey(string key)
+/* {{{ proto int openssl_get_privatekey(string key [, string passphrase])
     Get private key */
 PHP_FUNCTION(openssl_get_privatekey)
 {
-	zval **key;
+	zval **key, **passphrase;
 	BIO *b;
 	EVP_PKEY *pkey;
+	int argc;
 	
-	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &key) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	if (argc < 1 || argc > 2 ||
+	    zend_get_parameters_ex(argc, &key, &passphrase) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(key);
-	
+	if (argc == 2) {
+                convert_to_string_ex(passphrase);
+        }
+
 	b = BIO_new_mem_buf(Z_STRVAL_PP(key), Z_STRLEN_PP(key));
         if (b == NULL) {
 		RETURN_FALSE;
@@ -126,7 +131,8 @@ PHP_FUNCTION(openssl_get_privatekey)
 
         pkey = (EVP_PKEY *) PEM_ASN1_read_bio((char *(*)())d2i_PrivateKey,
 					      PEM_STRING_EVP_PKEY, b,
-					      NULL, NULL, NULL);
+					      NULL, NULL, argc == 2 ?
+					      Z_STRVAL_PP(passphrase) : NULL);
 	BIO_free(b);
 
 	if (pkey == NULL) { 
