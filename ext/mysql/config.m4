@@ -53,13 +53,9 @@ if test "$PHP_MYSQL" != "no"; then
 
   AC_MSG_CHECKING(for MySQL UNIX socket location)
   if test "$PHP_MYSQL_SOCK" != "no"; then
-    if test -r $PHP_MYSQL_SOCK; then
       MYSQL_SOCK=$PHP_MYSQL_SOCK
       AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
       AC_MSG_RESULT([$MYSQL_SOCK])
-    else
-      AC_MSG_RESULT([warning: The specified $PHP_MYSQL_SOCK was not found!])
-    fi
   else 
     PHP_MYSQL_SOCKET_SEARCH
   fi
