@@ -51,6 +51,8 @@
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 
 static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static unsigned char arg3to6of6_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE };
+
 static int le_result, le_result_entry, le_ber_entry;
 static int le_link;
 
@@ -95,7 +97,11 @@ function_entry ldap_functions[] = {
 
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
 	PHP_FE(ldap_get_option,		third_argument_force_ref)
-	PHP_FE(ldap_set_option,							NULL)
+	PHP_FE(ldap_set_option,		NULL)
+	PHP_FE(ldap_parse_result,       arg3to6of6_force_ref)
+	PHP_FE(ldap_first_reference,    NULL)
+	PHP_FE(ldap_next_reference,     NULL)
+	PHP_FE(ldap_parse_reference,    third_argument_force_ref)
 #endif
 	
 #ifdef STR_TRANSLATION
@@ -683,13 +689,26 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		efree(ldap_attrs);
 	}
 
-	if (errno != LDAP_SUCCESS && errno != LDAP_SIZELIMIT_EXCEEDED) {
+	if (errno != LDAP_SUCCESS
+	    && errno != LDAP_SIZELIMIT_EXCEEDED
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+	    && errno != LDAP_ADMINLIMIT_EXCEEDED
+#endif
+#ifdef LDAP_REFERRAL
+	    && errno != LDAP_REFERRAL
+#endif
+	    ) {
 		php_error(E_WARNING,"LDAP: Unable to perform the search: %s",ldap_err2string(_get_lderrno(ldap)));
 		RETVAL_FALSE; 
 	} else {
 		if (errno == LDAP_SIZELIMIT_EXCEEDED)  {
 			php_error(E_WARNING,"LDAP: Partial search results returned: Sizelimit exceeded.");
 		}
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+		else if (errno == LDAP_ADMINLIMIT_EXCEEDED) {
+			php_error(E_WARNING,"LDAP: Partial search results returned: Adminlimit exceeded.");
+		}
+#endif
 		RETVAL_LONG(zend_list_insert(ldap_result, le_result));
 	}
 }
@@ -1643,6 +1662,190 @@ PHP_FUNCTION(ldap_set_option) {
 		*/
 	default:
 		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto boolean ldap_parse_result(int link, int result, int errcode,
+                                   string matcheddn, string errmsg,
+				   array referrals)
+   Extract information from result */
+PHP_FUNCTION(ldap_parse_result) {
+	LDAP *ldap;
+	LDAPMessage *ldap_result;
+	int rc, lerrcode;
+	char **lreferrals, **refp;
+	char *lmatcheddn, *lerrmsg;
+	
+	pval **link, **result, **errcode, **matcheddn, **errmsg, **referrals;
+	int myargcount = ZEND_NUM_ARGS();
+  
+	if (myargcount < 3 || myargcount > 6 || zend_get_parameters_ex(myargcount, &link, &result, &errcode, &matcheddn, &errmsg, &referrals) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) {
+		RETURN_FALSE;
+	}
+
+	ldap_result = _get_ldap_result(result);
+	if (ldap_result == NULL) {
+		RETURN_FALSE;
+	}
+
+	rc = ldap_parse_result( ldap, ldap_result, &lerrcode,
+				myargcount > 3 ? &lmatcheddn : NULL,
+				myargcount > 4 ? &lerrmsg : NULL,
+				myargcount > 5 ? &lreferrals : NULL,
+				NULL /* &serverctrls */,
+				0 );
+	if (rc != LDAP_SUCCESS ) {
+		php_error(E_WARNING,"LDAP: Unable to parse result: %s", ldap_err2string(_get_lderrno(ldap)));
+		RETURN_FALSE;
+	}
+
+	zval_dtor(*errcode);
+	ZVAL_LONG(*errcode, lerrcode);
+
+	/* Reverse -> fall through */
+	switch(myargcount) {
+		case 6 :
+			zval_dtor(*referrals);
+			if (array_init(*referrals) == FAILURE) {
+				php_error(E_ERROR, "Cannot initialize return value");
+				ldap_value_free(lreferrals);
+				ldap_memfree(lerrmsg);
+				ldap_memfree(lmatcheddn);
+				RETURN_FALSE;
+			}
+			if (lreferrals != NULL) {
+				refp = lreferrals;
+				while (*refp) {
+					add_next_index_string(*referrals, *refp, 1);
+					refp++;
+				}
+				ldap_value_free(lreferrals);
+			}
+		case 5 :
+			zval_dtor(*errmsg);
+			if (lerrmsg == NULL) {
+				ZVAL_EMPTY_STRING(*errmsg);
+			} else {
+				ZVAL_STRING(*errmsg, lerrmsg, 1);
+				ldap_memfree(lerrmsg);
+			}
+		case 4 : 
+			zval_dtor(*matcheddn);
+			if (lmatcheddn == NULL) {
+				ZVAL_EMPTY_STRING(*matcheddn);
+			} else {
+				ZVAL_STRING(*matcheddn, lmatcheddn, 1);
+				ldap_memfree(lmatcheddn);
+			}
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int ldap_first_reference(int link, int result)
+   Return first reference */
+PHP_FUNCTION(ldap_first_reference)
+{
+	pval **result, **link;
+	LDAP *ldap;
+	LDAPMessage *ldap_result;
+	LDAPMessage *ldap_result_entry;
+	LDAPLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_FALSE;
+
+	ldap_result = _get_ldap_result(result);
+	if (ldap_result == NULL) RETURN_FALSE;
+
+	if ((ldap_result_entry = ldap_first_reference(ldap, ldap_result)) == NULL) {
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(zend_list_insert(ldap_result_entry, le_result_entry));
+	}
+}
+/* }}} */
+
+
+/* {{{ proto int ldap_next_reference(int link, int entry)
+   Get next reference */
+PHP_FUNCTION(ldap_next_reference)
+{
+	pval **result_entry, **link;
+	LDAP *ldap;
+	LDAPMessage *ldap_result_entry, *ldap_result_entry_next;
+	LDAPLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link,&result_entry) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_FALSE;
+
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
+	if (ldap_result_entry == NULL) RETURN_FALSE;
+
+	if ((ldap_result_entry_next = ldap_next_reference(ldap, ldap_result_entry)) == NULL) {
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(zend_list_insert(ldap_result_entry_next, le_result_entry));
+	}
+}
+/* }}} */
+
+
+/* {{{ proto boolean ldap_parse_reference(int link, int entry, array referrals)
+   Extract information from reference entry */
+PHP_FUNCTION(ldap_parse_reference)
+{
+	pval **link, **result_entry, **referrals;
+	LDAP *ldap;
+	LDAPMessage *ldap_result_entry;
+	char **lreferrals, **refp;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result_entry, &referrals) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_FALSE;
+
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
+	if (ldap_result_entry == NULL) RETURN_FALSE;
+
+	if (ldap_parse_reference(ldap, ldap_result_entry, &lreferrals,
+				 NULL /* &serverctrls */,
+				 0) != LDAP_SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	zval_dtor(*referrals);
+	if (array_init(*referrals) == FAILURE) {
+		php_error(E_ERROR, "Cannot initialize return value");
+		ldap_value_free(lreferrals);
+		RETURN_FALSE;
+	}
+	if (lreferrals != NULL) {
+		refp = lreferrals;
+		while (*refp) {
+			add_next_index_string(*referrals, *refp, 1);
+			refp++;
+		}
+		ldap_value_free(lreferrals);
 	}
 	RETURN_TRUE;
 }
