@@ -246,11 +246,16 @@ dnl
 dnl Check for gd 2.0.4 greater availability
 dnl
 
-AC_TRY_COMPILE([
- #include <gd.h>
- #include <stdlib.h>
-], [gdIOCtx *ctx; ctx = malloc(sizeof(gdIOCtx)); ctx->gd_free = 1], 
-	AC_DEFINE(HAVE_LIBGD204, 1, [ ])
+AC_TRY_COMPILE(
+[
+#include <gd.h>
+#include <stdlib.h>
+], [
+gdIOCtx *ctx;
+ctx = malloc(sizeof(gdIOCtx));
+ctx->gd_free = 1;
+], [
+  AC_DEFINE(HAVE_LIBGD204, 1, [ ])
 ])
 
 dnl
