@@ -43,7 +43,7 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_cbc, NULL)
 	PHP_FE(mcrypt_cfb, NULL)
 	PHP_FE(mcrypt_ofb, NULL)
-	PHP_FE(mcrypt_get_algorithms_name, NULL)
+	PHP_FE(mcrypt_get_cipher_name, NULL)
 	PHP_FE(mcrypt_get_block_size, NULL)
 	PHP_FE(mcrypt_get_key_size, NULL)
 	PHP_FE(mcrypt_create_iv, NULL)
@@ -215,9 +215,9 @@ PHP_FUNCTION(mcrypt_create_iv)
 	RETURN_STRINGL(iv, size->value.lval, 0);
 }
 
-/* proto mcrypt_get_algorithms_name(int cipher)
+/* proto mcrypt_get_cipher_name(int cipher)
    get the name of cipher */
-PHP_FUNCTION(mcrypt_get_algorithms_name)
+PHP_FUNCTION(mcrypt_get_cipher_name)
 {
 	pval *cipher;
 	char *str, *nstr;
@@ -322,15 +322,14 @@ PHP_FUNCTION(mcrypt_cbc)
 	}
 	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
-	if(ac > 4 && mode == 0) {
+	if(ac > 4) {
 		MCRYPT_CHECK_IV;
 	}
 	
 	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
 	MCRYPT_CHECK_TD_CPY;
 	
-	/* iv may be only used in encryption */
-	if(ac > 4 && mode == 0) {
+	if(ac > 4) {
 		mcrypt(td, iv->value.str.val);
 	}
 	

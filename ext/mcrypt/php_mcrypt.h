@@ -16,7 +16,7 @@ PHP_FUNCTION(mcrypt_ecb);
 PHP_FUNCTION(mcrypt_cbc);
 PHP_FUNCTION(mcrypt_cfb);
 PHP_FUNCTION(mcrypt_ofb);
-PHP_FUNCTION(mcrypt_get_algorithms_name);
+PHP_FUNCTION(mcrypt_get_cipher_name);
 PHP_FUNCTION(mcrypt_get_block_size);
 PHP_FUNCTION(mcrypt_get_key_size);
 PHP_FUNCTION(mcrypt_create_iv);
