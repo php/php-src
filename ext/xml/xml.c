@@ -1562,7 +1562,8 @@ PHP_FUNCTION(xml_parser_get_option)
 			RETURN_FALSE;
 			break;
 	}
-	RETVAL_FALSE;
+
+	RETVAL_FALSE;	/* never reached */
 }
 /* }}} */
 
