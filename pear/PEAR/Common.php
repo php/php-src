@@ -1044,6 +1044,7 @@ class PEAR_Common extends PEAR
         }
         $contents = fread($fp, filesize($file));
         $tokens = token_get_all($contents);
+/*
         for ($i = 0; $i < sizeof($tokens); $i++) {
             list($token, $data) = $tokens[$i];
             if (is_string($token)) {
@@ -1053,6 +1054,7 @@ class PEAR_Common extends PEAR
                 var_dump(rtrim($data));
             }
         }
+*/
         $look_for = 0;
         $paren_level = 0;
         $bracket_level = 0;
@@ -1067,12 +1069,11 @@ class PEAR_Common extends PEAR
         $declared_methods = array();
         $used_classes = array();
         $used_functions = array();
+        $nodeps = array();
         for ($i = 0; $i < sizeof($tokens); $i++) {
             list($token, $data) = $tokens[$i];
             switch ($token) {
-                case '{':
-                    $brace_level++;
-                    continue 2;
+                case '{': $brace_level++; continue 2;
                 case '}':
                     $brace_level--;
                     if ($current_class_level == $brace_level) {
@@ -1104,25 +1105,31 @@ class PEAR_Common extends PEAR
                             $declared_methods[$current_class][] = $data;
                         } else {
                             $current_function = $data;
+                            $declared_functions[] = $current_function;
                         }
                         $current_function_level = $brace_level;
-                        $declared_functions[] = $current_function;
+                        $m = array();
                     } elseif ($look_for == T_NEW) {
                         $used_classes[$data] = true;
                     }
                     $look_for = 0;
                     continue 2;
+                case T_VARIABLE:
+                    $look_for = 0;
+                    continue 2;
                 case T_COMMENT:
                     if (preg_match('!^/\*\*\s!', $data)) {
                         $lastphpdoc = $data;
-                        //$j = $i;
-                        //while ($tokens[$j][0] == T_WHITESPACE) $j++;
-                        // the declaration that the phpdoc applies to
-                        // is at $tokens[$j] now
+                        if (preg_match_all('/@nodep\s+(\S+)/', $lastphpdoc, $m)) {
+                            $nodeps = array_merge($nodeps, $m[1]);
+                        }
                     }
                     continue 2;
                 case T_DOUBLE_COLON:
-                    $used_classes[$tokens[$i - 1][1]] = true;
+                    $class = $tokens[$i - 1][1];
+                    if (strtolower($class) != 'parent') {
+                        $used_classes[$class] = true;
+                    }
                     continue 2;
             }
         }
@@ -1130,7 +1137,7 @@ class PEAR_Common extends PEAR
             "declared_classes" => $declared_classes,
             "declared_methods" => $declared_methods,
             "declared_functions" => $declared_functions,
-            "used_classes" => array_keys($used_classes),
+            "used_classes" => array_diff(array_keys($used_classes), $nodeps),
             );
     }
 
@@ -1149,18 +1156,23 @@ class PEAR_Common extends PEAR
             return false;
         }
         $deps = array();
-        $used_c = $decl_c = array();
+        $used_c = $decl_c = $decl_f = $decl_m = array();
         foreach ($info['filelist'] as $file => $fa) {
             $tmp = $this->analyzeSourceCode($file);
             $used_c = @array_merge($used_c, $tmp['used_classes']);
             $decl_c = @array_merge($decl_c, $tmp['declared_classes']);
+            $decl_f = @array_merge($decl_f, $tmp['declared_functions']);
+            $decl_m = @array_merge($decl_m, $tmp['declared_methods']);
         }
         $used_c = array_unique($used_c);
         $decl_c = array_unique($decl_c);
         $undecl_c = array_diff($used_c, $decl_c);
         return array('used_classes' => $used_c,
                      'declared_classes' => $decl_c,
-                     'undeclared_classes' => $undecl_c);
+                     'declared_methods' => $decl_m,
+                     'declared_functions' => $decl_f,
+                     'undeclared_classes' => $undecl_c,
+                     );
     }
 
     // }}}
