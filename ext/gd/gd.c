@@ -3806,7 +3806,7 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long brightness, tmp;
 
-	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "zll", &SIM, &tmp, &brightness) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3 TSRMLS_CC, "zll", &SIM, &tmp, &brightness) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}	
 
@@ -3826,7 +3826,7 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long contrast, tmp;
     
-	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "rll", &SIM, &tmp, &contrast) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3 TSRMLS_CC, "rll", &SIM, &tmp, &contrast) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}	
 
@@ -3846,7 +3846,7 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long r,g,b,tmp;
 
-	if (ZEND_NUM_ARGS()!=5 || zend_parse_parameters(5, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=5 || zend_parse_parameters(5 TSRMLS_CC, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}	
 
@@ -3962,7 +3962,7 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	double weight;
 
-	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3, "rld", &SIM, &tmp, &weight) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_parse_parameters(3 TSRMLS_CC, "rld", &SIM, &tmp, &weight) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}	
 
@@ -3999,7 +3999,7 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_smooth
 	};
 
-	if (ZEND_NUM_ARGS()<2 || ZEND_NUM_ARGS()>5 || zend_parse_parameters(2, "rl", &tmp, &filtertype) == FAILURE) {
+	if (ZEND_NUM_ARGS()<2 || ZEND_NUM_ARGS()>5 || zend_parse_parameters(2 TSRMLS_CC, "rl", &tmp, &filtertype) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}	
 
