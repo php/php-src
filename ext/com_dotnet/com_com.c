@@ -373,7 +373,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	int i;
 
 	if (nargs) {
-		vargs = (VARIANT*)emalloc(sizeof(VARIANT) * nargs);
+		vargs = (VARIANT*)safe_emalloc(sizeof(VARIANT), nargs, 0);
 	}
 
 	/* Invoke'd args are in reverse order */

@@ -345,7 +345,7 @@ PHP_FUNCTION(birdstep_exec)
 		efree(res);
 		RETURN_LONG(rows);
 	} else {  /* Was SELECT query */
-		res->values = (VResVal *)emalloc(sizeof(VResVal)*cols);
+		res->values = (VResVal *)safe_emalloc(sizeof(VResVal), cols, 0);
 		res->numcols = cols;
 		for ( i = 0; i < cols; i++ ) {
 			SQLColAttributes(res->hstmt,i+1,SQL_COLUMN_NAME,

@@ -353,7 +353,7 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	nargs = ZEND_NUM_ARGS();
 
 	if (nargs) {
-		args = (zval **)emalloc(sizeof(zval *) * nargs);
+		args = (zval **)safe_emalloc(sizeof(zval *), nargs, 0);
 		zend_get_parameters_array(ht, nargs, args);
 	}
 
