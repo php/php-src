@@ -120,7 +120,7 @@ static void php3i_to64(char *s, long v, int n)	{
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP3_MAX_SALT_LEN+1];
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 
 	salt[0]=salt[PHP3_MAX_SALT_LEN]='\0';
 	/* This will produce suitable results if people depend on DES-encryption
@@ -129,22 +129,22 @@ PHP_FUNCTION(crypt)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &arg1)==FAILURE) {
+			if (getParametersEx(1, &arg1)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
+			if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_string(arg2);
-			memcpy(salt, arg2->value.str.val, MIN(PHP3_MAX_SALT_LEN,arg2->value.str.len));
+			convert_to_string_ex(arg2);
+			memcpy(salt, (*arg2)->value.str.val, MIN(PHP3_MAX_SALT_LEN,(*arg2)->value.str.len));
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	convert_to_string(arg1);
+	convert_to_string_ex(arg1);
 
 	/* The automatic salt generation only covers standard DES and md5-crypt */
 	if(!*salt) {
@@ -171,7 +171,7 @@ PHP_FUNCTION(crypt)
 #endif
 	}
 
-	return_value->value.str.val = (char *) crypt(arg1->value.str.val, salt);
+	return_value->value.str.val = (char *) crypt((*arg1)->value.str.val, salt);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);

@@ -29,21 +29,21 @@
    Calculate the md5 hash of a string */
 PHP_FUNCTION(md5)
 {
-	pval *arg;
+	pval **arg;
 	char md5str[33];
 	PHP3_MD5_CTX context;
 	unsigned char digest[16];
 	int i;
 	char *r;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
 	md5str[0] = '\0';
 	PHP3_MD5Init(&context);
-	PHP3_MD5Update(&context, arg->value.str.val, arg->value.str.len);
+	PHP3_MD5Update(&context, (*arg)->value.str.val, (*arg)->value.str.len);
 	PHP3_MD5Final(digest, &context);
 	for (i = 0, r = md5str; i < 16; i++, r += 2) {
 		sprintf(r, "%02x", digest[i]);

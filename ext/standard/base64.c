@@ -142,15 +142,15 @@ unsigned char *_php3_base64_decode(const unsigned char *string, int length, int 
 /* {{{ proto string base64_encode(string str)
    Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode) {
-	pval *string;
+	pval **string;
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(string);
-	result = _php3_base64_encode(string->value.str.val, string->value.str.len, &ret_length);
+	convert_to_string_ex(string);
+	result = _php3_base64_encode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
 	if (result != NULL) {
 		return_value->value.str.val = result;
 		return_value->value.str.len = ret_length;
@@ -165,15 +165,15 @@ PHP_FUNCTION(base64_encode) {
 /* {{{ proto string base64_decode(string str)
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode) {
-	pval *string;
+	pval **string;
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(string);
-	result = _php3_base64_decode(string->value.str.val, string->value.str.len, &ret_length);
+	convert_to_string_ex(string);
+	result = _php3_base64_decode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
 	if (result != NULL) {
 		return_value->value.str.val = result;
 		return_value->value.str.len = ret_length;

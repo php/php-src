@@ -38,32 +38,34 @@
 #include "php_lcg.h"
 #include "uniqid.h"
 
+#define MORE_ENTROPY (argc == 2 && (*flags)->value.lval)
+
 /* {{{ proto string uniqid(string prefix, [bool more_entropy])
    Generate a unique id */
 PHP_FUNCTION(uniqid)
 {
 #ifdef HAVE_GETTIMEOFDAY
-	pval *prefix, *flags;
+	pval **prefix, **flags;
 	char uniqid[138];
 	int sec, usec, argc;
 	struct timeval tv;
 
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || getParameters(ht, argc, &prefix, &flags)) {
+	if (argc < 1 || argc > 2 || getParametersEx(argc, &prefix, &flags)) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(prefix);
+	convert_to_string_ex(prefix);
 	if (argc == 2) {
-		convert_to_boolean(flags);
+		convert_to_boolean_ex(flags);
 	}
 
 	/* Do some bounds checking since we are using a char array. */
-	if (prefix->value.str.len > 114) {
+	if ((*prefix)->value.str.len > 114) {
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
 #if HAVE_USLEEP && !(WIN32|WINNT)
-	if (argc < 2 || !flags->value.lval) {
+	if (!MORE_ENTROPY) {
 		usleep(1);
 	}
 #endif
@@ -74,10 +76,10 @@ PHP_FUNCTION(uniqid)
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
 	 */
-	if (argc == 2 && flags->value.lval) {
-		sprintf(uniqid, "%s%08x%05x%.8f", prefix->value.str.val, sec, usec, php_combined_lcg() * 10);
+	if (MORE_ENTROPY) {
+		sprintf(uniqid, "%s%08x%05x%.8f", (*prefix)->value.str.val, sec, usec, php_combined_lcg() * 10);
 	} else {
-		sprintf(uniqid, "%s%08x%05x", prefix->value.str.val, sec, usec);
+		sprintf(uniqid, "%s%08x%05x", (*prefix)->value.str.val, sec, usec);
 	}
 
 	RETURN_STRING(uniqid,1);

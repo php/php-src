@@ -53,16 +53,16 @@
 PHP_FUNCTION(readlink)
 {
 #if HAVE_SYMLINK
-	pval *filename;
+	pval **filename;
 	char buff[256];
 	int ret;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	ret = readlink(filename->value.str.val, buff, 255);
+	ret = readlink((*filename)->value.str.val, buff, 255);
 	if (ret == -1) {
 		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -79,16 +79,16 @@ PHP_FUNCTION(readlink)
 PHP_FUNCTION(linkinfo)
 {
 #if HAVE_SYMLINK
-	pval *filename;
+	pval **filename;
 	struct stat sb;
 	int ret;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	ret = lstat(filename->value.str.val, &sb);
+	ret = lstat((*filename)->value.str.val, &sb);
 	if (ret == -1) {
 		php_error(E_WARNING, "LinkInfo failed (%s)", strerror(errno));
 		RETURN_LONG(-1L);
@@ -103,21 +103,21 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 #if HAVE_SYMLINK
-	pval *topath, *frompath;
+	pval **topath, **frompath;
 	int ret;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &topath, &frompath) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(topath);
-	convert_to_string(frompath);
+	convert_to_string_ex(topath);
+	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !_php3_checkuid(topath->value.str.val, 2)) {
+	if (PG(safe_mode) && !_php3_checkuid((*topath)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 
-	ret = symlink(topath->value.str.val, frompath->value.str.val);
+	ret = symlink((*topath)->value.str.val, (*frompath)->value.str.val);
 	if (ret == -1) {
 		php_error(E_WARNING, "SymLink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -132,21 +132,21 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 #if HAVE_LINK
-	pval *topath, *frompath;
+	pval **topath, **frompath;
 	int ret;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &topath, &frompath) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(topath);
-	convert_to_string(frompath);
+	convert_to_string_ex(topath);
+	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !_php3_checkuid(topath->value.str.val, 2)) {
+	if (PG(safe_mode) && !_php3_checkuid((*topath)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 
-	ret = link(topath->value.str.val, frompath->value.str.val);
+	ret = link((*topath)->value.str.val, (*frompath)->value.str.val);
 	if (ret == -1) {
 		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -160,20 +160,20 @@ PHP_FUNCTION(link)
    Delete a file */
 PHP_FUNCTION(unlink)
 {
-	pval *filename;
+	pval **filename;
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) && !_php3_checkuid(filename->value.str.val, 2)) {
+	if (PG(safe_mode) && !_php3_checkuid((*filename)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 
-	ret = unlink(filename->value.str.val);
+	ret = unlink((*filename)->value.str.val);
 	if (ret == -1) {
 		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
