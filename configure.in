@@ -1065,7 +1065,7 @@ dnl
 dnl Libtool creation
 dnl
 
-PHP_CONFIGURE_PART(Configuring Zend)
+PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 AC_PROG_LIBTOOL
