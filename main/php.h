@@ -289,6 +289,8 @@ PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, 
 #define phprestart zendrestart
 #define phpin zendin
 
+#define php_memnstr zend_memnstr
+
 /* functions */
 int php_startup_internal_extensions(void);
 
