@@ -4,6 +4,19 @@ MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE, Session, WDDX and XML support is 
 You don't need to load any additional extensions in order to use these functions.
 
 
+Folders
+-------
+- mibs
+The mibs directory contains support files for SNMP.
+This directory should be moved to DRIVE:\usr\mibs (DRIVE being the drive where PHP is installed.)
+
+- dlls
+Some DLLs that are required for PHP and some extensions. Please copy them to your to your windows/system (Win9.x)
+or winnt/system32 (WinNT, Win2000) directory.
+If you already have these DLLs installed on your system, overwrite them only if something is not working correctly.
+Before overwriting them, it is a good idea to back them or move them to another folder - just in case something goes wrong.
+
+
 Installtion instructions
 ------------------------
 
