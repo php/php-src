@@ -68,6 +68,9 @@ if (!empty($home)) {
     putenv('HOME="'.$temp_path);
 }
 require_once "PEAR/Downloader.php";
+require_once 'PEAR/Installer.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'php_dump.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
 
 // no UI is needed for these tests
 $ui = false;
@@ -90,38 +93,46 @@ function catchit($err)
 }
 
 $config = &PEAR_Config::singleton();
+// initialize fake pear channel
+require_once 'PEAR/ChannelFile.php';
+$chan = new PEAR_ChannelFile;
+$chan->setName('pear');
+$chan->setSummary('PEAR');
+$chan->setServer($server);
+$chan->setDefaultPEARProtocols();
+$reg = new PEAR_Registry($config->get('php_dir'), $chan);
 $options = array();
-$installer = &new PEAR_Downloader($ui, $options, $config);
+$installer = &new test_PEAR_Downloader($ui, $options, $config);
 
 echo "-=-=-=-=-=-=-=-=- Failure Tests -=-=-=-=-=-=-=-=-=-=-\n";
 
 echo "Test invalid package name:\n";
 $packages = array("/invalid+packagename");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
 echo "Test download of a package with no releases:\n";
 $packages = array("noreleases");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
 echo "Test download of a non-existing package version:\n";
 $packages = array("pkg1-1976.9.2");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
 echo "Test download of a non-existing package release state:\n";
 $packages = array("pkg1-snapshot");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
 echo "Test download of invalid release state:\n";
 $packages = array("pkg1-burgerking");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
@@ -129,14 +140,14 @@ $installer->configSet('preferred_state', 'stable');
 
 echo "Test automatic version resolution (stable):\n";
 $packages = array("stabilitytoolow");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages);
 
 echo "Test automatic version resolution (stable) with --force:\n";
 $packages = array("stabilitytoolow");
 $installer->setOptions(array('force' => true));
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages[0]['info']['version']);
 
@@ -144,7 +155,7 @@ $installer->configSet('preferred_state', 'beta');
 
 echo "Test automatic version resolution (beta):\n";
 $packages = array("stabilitytoolow");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages[0]['info']['version']);
 
@@ -152,7 +163,7 @@ $installer->configSet('preferred_state', 'alpha');
 
 echo "Test automatic version resolution (alpha):\n";
 $packages = array("stabilitytoolow");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages[0]['info']['version']);
 
@@ -160,27 +171,27 @@ $installer->configSet('preferred_state', 'devel');
 
 echo "Test automatic version resolution (devel):\n";
 $packages = array("stabilitytoolow");
-$a = $installer->download($packages);
+$a = $installer->doDownload($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages[0]['info']['version']);
 
 echo "Test download attempt if a version is already installed:\n";
 
-require_once 'PEAR/Installer.php';
-$install = &new PEAR_Installer($ui);
+$forinstall = &new PEAR_Installer($ui);
+$forinstall->setOptions(array());
 $installer->setOptions(array());
 
-$installer->download(array('pkg6'));
-$pkgs = $installer->getDownloadedPackages();
-$install->install($pkgs[0]['file']);
-$installer->download(array('pkg6'));
+$forinstall->doDownload(array('pkg6'));
+$pkgs = $forinstall->getDownloadedPackages();
+$forinstall->install($pkgs[0]['file']);
+$installer->doDownload(array('pkg6'));
 var_dump(get_class($a), $installer->getErrorMsgs());
 
 echo "Test download attempt if a version is already installed with --force:\n";
 
 $installer->setOptions(array('force' => true));
 
-$installer->download(array('pkg6'));
+$installer->doDownload(array('pkg6'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $pkgs[0]['info']['version']);
 
@@ -188,7 +199,7 @@ echo "Test download attempt if a version is already installed with upgrade, same
 
 $installer->setOptions(array('upgrade' => true));
 
-$installer->download(array('pkg6'));
+$installer->doDownload(array('pkg6'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
@@ -196,7 +207,7 @@ echo "Test download attempt if a version is already installed with upgrade, less
 
 $installer->setOptions(array('upgrade' => true));
 
-$installer->download(array('pkg6-1.1'));
+$installer->doDownload(array('pkg6-1.1'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
@@ -204,7 +215,7 @@ echo "Test download attempt with --alldeps, but dependency has no releases:\n";
 
 $installer->setOptions(array('alldeps' => true));
 
-$installer->download(array('depnoreleases'));
+$installer->doDownload(array('depnoreleases'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
@@ -212,7 +223,7 @@ echo "Test download attempt with --onlyreqdeps, but dependency has no releases:\
 
 $installer->setOptions(array('onlyreqdeps' => true));
 
-$installer->download(array('depnoreleases'));
+$installer->doDownload(array('depnoreleases'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
@@ -220,7 +231,7 @@ $installer->configSet('preferred_state', 'stable');
 echo "Test download attempt with --alldeps, but dependency is too unstable:\n";
 $installer->setOptions(array('alldeps' => true));
 
-$installer->download(array('depunstable'));
+$installer->doDownload(array('depunstable'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
@@ -228,12 +239,16 @@ echo "Test download attempt with --onlyreqdeps, but dependency is too unstable:\
 
 $installer->setOptions(array('onlyreqdeps' => true));
 
-$installer->download(array('depunstable'));
+$installer->doDownload(array('depunstable'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
 chdir($curdir);
 cleanall($temp_path);
+
+//echo implode("\n", array_values($GLOBALS['totalPHP']));
+
+
 // ------------------------------------------------------------------------- //
 
 function cleanall($dir)
@@ -263,21 +278,21 @@ array(0) {
 array(0) {
 }
 Test download of a package with no releases:
-Caught error: No releases found for package 'noreleases'
+Caught error: No releases found for package 'pear::noreleases'
 string(10) "pear_error"
 array(0) {
 }
 array(0) {
 }
 Test download of a non-existing package version:
-Caught error: No release with version '1976.9.2' found for 'pkg1'
+Caught error: No release with version '1976.9.2' found for 'pear::pkg1'
 string(10) "pear_error"
 array(0) {
 }
 array(0) {
 }
 Test download of a non-existing package release state:
-Caught error: No release with state 'snapshot' found for 'pkg1'
+Caught error: No release with state 'snapshot' found for 'pear::pkg1'
 string(10) "pear_error"
 array(0) {
 }
@@ -291,14 +306,14 @@ array(0) {
 array(0) {
 }
 Test automatic version resolution (stable):
-Caught error: No release with state equal to: 'stable' found for 'stabilitytoolow'
+Caught error: No release with state equal to: 'stable' found for 'pear::stabilitytoolow'
 string(10) "pear_error"
 array(0) {
 }
 array(0) {
 }
 Test automatic version resolution (stable) with --force:
-Warning: stabilitytoolow is state 'devel' which is less stable than state 'stable'
+Warning: pear::stabilitytoolow is state 'devel' which is less stable than state 'stable'
 bool(false)
 array(0) {
 }
@@ -319,7 +334,7 @@ array(0) {
 }
 string(6) "3.0dev"
 Test download attempt if a version is already installed:
-Package 'pkg6' already installed, skipping
+Package 'pear::pkg6' already installed, skipping
 bool(false)
 array(0) {
 }
@@ -329,12 +344,12 @@ array(0) {
 }
 string(5) "2.0b1"
 Test download attempt if a version is already installed with upgrade, same version:
-Package 'pkg6-2.0b1' already installed, skipping
+Package 'pear::pkg6-2.0b1' already installed, skipping
 bool(false)
 array(0) {
 }
 Test download attempt if a version is already installed with upgrade, lesser version:
-Package 'pkg6' version '2.0b1'  is installed and 2.0b1 is > requested '1.1', skipping
+Package 'pear::pkg6' version '2.0b1'  is installed and 2.0b1 is > requested '1.1', skipping
 bool(false)
 array(0) {
 }
@@ -342,23 +357,23 @@ Test download attempt with --alldeps, but dependency has no releases:
 bool(false)
 array(1) {
   [0]=>
-  string(63) "Package 'depnoreleases' dependency 'noreleases' has no releases"
+  string(75) "Package 'pear::depnoreleases' dependency 'pear::noreleases' has no releases"
 }
 Test download attempt with --onlyreqdeps, but dependency has no releases:
 bool(false)
 array(1) {
   [0]=>
-  string(63) "Package 'depnoreleases' dependency 'noreleases' has no releases"
+  string(75) "Package 'pear::depnoreleases' dependency 'pear::noreleases' has no releases"
 }
 Test download attempt with --alldeps, but dependency is too unstable:
 bool(false)
 array(1) {
   [0]=>
-  string(91) "Release for 'depunstable' dependency 'stabilitytoolow' has state 'devel', requires 'stable'"
+  string(103) "Release for 'pear::depunstable' dependency 'pear::stabilitytoolow' has state 'devel', requires 'stable'"
 }
 Test download attempt with --onlyreqdeps, but dependency is too unstable:
 bool(false)
 array(1) {
   [0]=>
-  string(91) "Release for 'depunstable' dependency 'stabilitytoolow' has state 'devel', requires 'stable'"
+  string(103) "Release for 'pear::depunstable' dependency 'pear::stabilitytoolow' has state 'devel', requires 'stable'"
 }

@@ -8,7 +8,10 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 ?>
 --FILE--
 <?php
-
+if (!defined('PATH_SEPARATOR')) {
+    define('PATH_SEPARATOR', (DIRECTORY_SEPARATOR == '/') ? ':' : ';');
+}
+ini_set('include_path', dirname(__FILE__) . PATH_SEPARATOR . ini_get('include_path'));
 $server = 'pear.Chiara';
 //$server = 'test.pear.php.net';
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
@@ -68,10 +71,11 @@ if (!empty($home)) {
     putenv('HOME="'.$temp_path);
 }
 require_once "PEAR/Installer.php";
-
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
+//echo 1;
 // no UI is needed for these tests
 $ui = false;
-$installer = new PEAR_Installer($ui);
+$installer = new test_PEAR_Installer($ui);
 $curdir = getcwd();
 chdir(dirname(__FILE__));
 
@@ -109,6 +113,14 @@ function catchit($err)
 echo "Test simple direct url download:\n";
 
 $config = &PEAR_Config::singleton();
+// initialize fake pear channel
+require_once 'PEAR/ChannelFile.php';
+$chan = new PEAR_ChannelFile;
+$chan->setName('pear');
+$chan->setSummary('PEAR');
+$chan->setServer($server);
+$chan->setDefaultPEARProtocols();
+$reg = new PEAR_Registry($config->get('php_dir'), $chan);
 $packages = array("http://$server/get/pkg6-1.1.tgz");
 $a = $installer->download($packages, array(), &$config, &$installpackages, &$errors);
 var_dump($a, $errors);
@@ -287,6 +299,7 @@ foreach ($installpackages as $package) {
 
 chdir($curdir);
 cleanall($temp_path);
+
 /*
 echo "File exists? ";
 echo (is_file($installpackages[0]['file'])) ? "yes\n" : "no\n";
@@ -334,7 +347,7 @@ array(1) {
       array(0) {
       }
       ["filelist"]=>
-      &array(3) {
+      array(3) {
         ["zoorb.php"]=>
         array(2) {
           ["role"]=>
@@ -366,7 +379,7 @@ array(1) {
       ["maintainers"]=>
       array(1) {
         [0]=>
-        &array(4) {
+        array(4) {
           ["handle"]=>
           string(8) "fakeuser"
           ["name"]=>
@@ -408,7 +421,7 @@ array(1) {
       array(0) {
       }
       ["filelist"]=>
-      &array(3) {
+      array(3) {
         ["zoorb.php"]=>
         array(2) {
           ["role"]=>
@@ -440,7 +453,7 @@ array(1) {
       ["maintainers"]=>
       array(1) {
         [0]=>
-        &array(4) {
+        array(4) {
           ["handle"]=>
           string(8) "fakeuser"
           ["name"]=>
@@ -582,7 +595,7 @@ pkg4-1.1
 pkg5-1.1
 pkg6-2.0b1
 Test preferred_state = alpha:
-skipping Package 'pkg3' optional dependency 'pkg4AndAHalf'
+skipping Package 'pear::pkg3' optional dependency 'pear::pkg4AndAHalf'
 Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class
 NULL
 array(0) {
