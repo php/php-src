@@ -185,12 +185,12 @@ class PEAR
                      is_object($options[0]) && is_string($options[1]))) {
                     $setcallback = $options;
                 } else {
-                    trigger_error(E_USER_WARNING, "invalid error callback");
+                    trigger_error("invalid error callback", E_USER_WARNING);
                 }
                 break;
                     
             default:
-                trigger_error(E_USER_WARNING, "invalid error mode");
+                trigger_error("invalid error mode", E_USER_WARNING);
                 break;
         }
     }
