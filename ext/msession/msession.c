@@ -156,9 +156,9 @@ zend_module_entry msession_module_entry = {
 	"msession",
 	msession_functions,
 	PHP_MINIT(msession),
-	PHP_MSHUTDOWN(msession),
-	PHP_RINIT(msession),
-	PHP_RSHUTDOWN(msession),
+	NULL,
+	NULL,
+	NULL,
 	PHP_MINFO(msession),
 #ifdef PHP_4_1
 	NO_VERSION_YET,
@@ -178,21 +178,6 @@ PHP_MINIT_FUNCTION(msession)
 #ifdef HAVE_PHP_SESSION
 	php_session_register_module(&ps_mod_msession);
 #endif
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(msession)
-{
-	return SUCCESS;
-}
-
-PHP_RINIT_FUNCTION(msession)
-{
-	return SUCCESS;
-}
-
-PHP_RSHUTDOWN_FUNCTION(msession)
-{
 	return SUCCESS;
 }
 

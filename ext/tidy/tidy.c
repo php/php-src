@@ -297,7 +297,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_MINIT(tidy),
 	PHP_MSHUTDOWN(tidy),
 	PHP_RINIT(tidy),
-	PHP_RSHUTDOWN(tidy),
+	NULL,
 	PHP_MINFO(tidy),
 	PHP_TIDY_MODULE_VERSION,
 	STANDARD_MODULE_PROPERTIES
@@ -943,11 +943,6 @@ PHP_RINIT_FUNCTION(tidy)
 		}
 	}
 
-	return SUCCESS;
-}
-
-PHP_RSHUTDOWN_FUNCTION(tidy)
-{
 	return SUCCESS;
 }
 

@@ -66,8 +66,6 @@ extern PHP_HWAPI_API zend_hwapi_globals hwapi_globals;
 #endif
 
 extern PHP_MINIT_FUNCTION(hwapi);
-extern PHP_MSHUTDOWN_FUNCTION(hwapi);
-extern PHP_RINIT_FUNCTION(hwapi);
 PHP_MINFO_FUNCTION(hwapi);
 
 /* HW_API */
