@@ -196,7 +196,7 @@ function_entry sqlite_functions[] = {
 
 function_entry sqlite_funcs_db[] = {
 	PHP_ME_MAPPING(sqlite_db, sqlite_open, NULL)
-	PHP_ME_MAPPING(close, sqlite_close, NULL)
+/*	PHP_ME_MAPPING(close, sqlite_close, NULL)*/
 	PHP_ME_MAPPING(query, sqlite_query, NULL)
 	PHP_ME_MAPPING(array_query, sqlite_array_query, NULL)
 	PHP_ME_MAPPING(unbuffered_query, sqlite_unbuffered_query, NULL)
