@@ -1,3 +1,14 @@
+2003-09-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gd/config.m4:
+      Bundled GD has this function
+
+2003-09-27  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/tests/strings/bug25671.phpt:
+      
+      Test for Bug 25671
+
 2003-09-26  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
