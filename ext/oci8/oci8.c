@@ -243,6 +243,9 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocirollback,      NULL)
     PHP_FE(ocinewdescriptor, NULL)
     PHP_FE(ocisetprefetch,   NULL)
+
+    PHP_FALIAS(ocifreecursor,ocifreestatement,NULL)
+
     {NULL,NULL,NULL}
 };
 
