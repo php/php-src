@@ -1,3 +1,35 @@
+2004-07-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      sapi/apache2handler/sapi_apache2.c:
+      - MFH (sapi_apache2.c: 1.41): request_dtor should be called if a fatal
+      error
+        occurs during activation phase.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      - request_dtor() should be called if a fatal error occurs during activation
+        phase.
+
+2004-07-17  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed paraenthesis warning in mysql_stmt_attr_set/get
+
+2004-07-17  Sara Golemon  <php@alphaweb.net>
+
+    * ext/zlib/config.w32
+      ext/zlib/zlib.dsp:
+      Update windows build files for filter support
+
+    * NEWS
+      ext/zlib/config0.m4
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/zlib_filter.c
+      ext/zlib/tests/zlib_filter_deflate.phpt
+      ext/zlib/tests/zlib_filter_inflate.phpt:
+      Add zlib stream filter support
+
 2004-07-16  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_5_0)
