@@ -150,6 +150,10 @@ LS stands for 'Local Storage', _C stands for Call and _CC stands for Call
 Comma, _D stands for Declaration and _DC stands for Declaration Comma.
 Note that there's NO comma between the last argument and ???LS_DC or ???LS_CC.
 
+If you do not pass the structure as an argument you can always fetch it by
+using the appropriate ???LS_FETCH() macros within a functions variable
+declarations.
+
 In general, every module that makes use of globals should use this approach
 if it plans to be thread safe.
 
