@@ -406,8 +406,6 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
  */
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
-	int   handler_gz, handler_mb, handler_ic;
-
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
