@@ -408,12 +408,13 @@ php_apache_server_shutdown(void *tmp)
 }
 
 static void
-php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
+php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
+                          apr_pool_t *ptemp, server_rec *s)
 {
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
-	apr_pool_cleanup_register(pchild, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
+	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_register_module();
 }
 
@@ -452,7 +453,7 @@ static void php_insert_filter(request_rec *r)
 
 static void php_register_hook(apr_pool_t *p)
 {
-	ap_hook_child_init(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_CONTENT);
 	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_CONTENT);
