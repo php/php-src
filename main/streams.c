@@ -48,7 +48,6 @@
 #endif
 
 #define STREAM_DEBUG 0
-
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
 
 /* {{{ some macros to help track leaks */
@@ -1343,7 +1342,6 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			ret = fclose(data->file);
 		}
 		if (data->temp_file_name) {
-			printf("temp: %s\n", data->temp_file_name);
 			unlink(data->temp_file_name);
 			efree(data->temp_file_name);
 		}
