@@ -575,14 +575,11 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 		class_type->constants_updated = 1;
 	}
 	
-	arg->value.obj = zend_objects_new(&object);
-
-	ALLOC_HASHTABLE_REL(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-	object->ce = class_type;
-
 	arg->type = IS_OBJECT;
+	arg->value.obj = zend_objects_new(&object, class_type);
+
+	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	
 	return SUCCESS;
 }
 

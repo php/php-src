@@ -25,7 +25,7 @@ typedef struct _zend_objects {
 
 void zend_objects_init(zend_objects *objects, zend_uint init_size);
 void zend_objects_destroy(zend_objects *objects);
-zend_object_value zend_objects_new(zend_object **object);
+zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type);
 zend_object *zend_objects_get_address(zend_object_handle handle);
 void zend_objects_add_ref(zend_object_handle handle);
 void zend_objects_del_ref(zend_object_handle handle);

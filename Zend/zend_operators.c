@@ -495,13 +495,14 @@ static void convert_scalar_to_array(zval *op, int type)
 			zend_hash_index_update(op->value.ht, 0, (void *) &entry, sizeof(zval *), NULL);
 			op->type = IS_ARRAY;
 			break;
-/* OBJECTS_FIXME */
 		case IS_OBJECT:
-			ALLOC_HASHTABLE(Z_OBJPROP_P(op));
-			zend_hash_init(Z_OBJPROP_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
-			Z_OBJCE_P(op) = &zend_standard_class_def;
-			Z_TYPE_P(op) = IS_OBJECT;
+			{
+				/* OBJECTS_OPTIMIZE */
+				TSRMLS_FETCH();
+
+				object_init(op);
+				zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
+			}
 			break;
 	}
 }
@@ -533,22 +534,28 @@ ZEND_API void convert_to_array(zval *op)
 ZEND_API void convert_to_object(zval *op)
 {
 	switch(op->type) {
-/* OBJECTS_FIXME */
 		case IS_ARRAY:
-			Z_TYPE_P(op) = IS_OBJECT;
-			Z_OBJPROP_P(op) = op->value.ht;
-			Z_OBJCE_P(op) = &zend_standard_class_def;
-			return;
-			break;
+			{
+				/* OBJECTS_OPTIMIZE */
+				TSRMLS_FETCH();
+
+				object_init(op);
+				zend_hash_destroy(Z_OBJPROP_P(op));
+				FREE_HASHTABLE(Z_OBJPROP_P(op));
+				Z_OBJPROP_P(op) = op->value.ht;
+				return;
+				break;
+			}
 		case IS_OBJECT:
 			return;
-/* OBJECTS_FIXME */
 		case IS_NULL:
-			ALLOC_HASHTABLE(Z_OBJPROP_P(op));
-			zend_hash_init(Z_OBJPROP_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
-			Z_OBJCE_P(op) = &zend_standard_class_def;
-			Z_TYPE_P(op) = IS_OBJECT;
-			break;
+			{
+				/* OBJECTS_OPTIMIZE */
+				TSRMLS_FETCH();
+
+				object_init(op);
+				break;
+			}
 		default:
 			convert_scalar_to_array(op, IS_OBJECT);
 			break;
