@@ -1,3 +1,21 @@
+2004-06-25  Edin Kadribasic  <edink@emini.dk>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      MFB: Memory leak fix (patch by Joe Orton)
+      Fixes #28113. Adapted to php5 by Magnus M‰‰tt‰.
+
+2004-06-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.h:
+      export zend stream functions for zend extensions under windows
+
+2004-06-25  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      sapi/apache2handler/sapi_apache2.c:
+      Memory leak fix (patch by Joe Orton)
+
 2004-06-24  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
