@@ -68,6 +68,7 @@ typedef struct {
 
 typedef struct {
 	Ns_Conn *conn;
+	size_t data_avail;
 } ns_globals_struct;
 
 static void php_ns_config(php_ns_context *ctx);
@@ -147,13 +148,18 @@ php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 static int
 php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
+	uint max_read;
 	uint total_read = 0;
 	NSLS_FETCH();
 
-	total_read = Ns_ConnRead(NSG(conn), buf, count_bytes);
+	max_read = MIN(NSG(data_avail), count_bytes);
+	
+	total_read = Ns_ConnRead(NSG(conn), buf, max_read);
 	
 	if(total_read == NS_ERROR) {
 		total_read = -1;
+	} else {
+		NSG(data_avail) -= total_read;
 	}
 
 	return total_read;
@@ -295,6 +301,8 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 		Ns_SetValue(NSG(conn)->headers, index);
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
+
+	NSG(data_avail) = SG(request_info).content_length;
 }
 
 /*
