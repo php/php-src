@@ -1009,18 +1009,26 @@ ZEND_FUNCTION(restore_error_handler)
 /* }}} */
 
 
-/* {{{ proto string set_exception_handler(string exception_handler)
+/* {{{ proto string set_exception_handler(callable exception_handler)
    Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval **exception_handler;
+	char *exception_handler_name = NULL;
 	zend_bool had_orig_exception_handler=0;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &exception_handler)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	convert_to_string_ex(exception_handler);
+	if (!zend_is_callable(*exception_handler, 0, &exception_handler_name)) {
+		zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
+				   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
+		efree(exception_handler_name);
+		return;
+	}
+	efree(exception_handler_name);
+
 	if (EG(user_exception_handler)) {
 		had_orig_exception_handler = 1;
 		*return_value = *EG(user_exception_handler);
