@@ -43,7 +43,9 @@ static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(leak);
+#ifdef ZEND_TEST_EXCEPTIONS
 static ZEND_FUNCTION(crash);
+#endif
 static ZEND_FUNCTION(get_used_files);
 static ZEND_FUNCTION(get_imported_files);
 static ZEND_FUNCTION(is_subclass_of);
@@ -135,8 +137,8 @@ ZEND_FUNCTION(func_get_arg)
 	}
 	arg_count = (ulong) *p;
 
-	if (requested_offset>arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Only %d arguments passed to function (argument %d requested)", arg_count, requested_offset);
+	if (requested_offset>=arg_count) {
+		zend_error(E_WARNING, "func_get_arg():  Argument %d not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
@@ -537,12 +539,14 @@ ZEND_FUNCTION(leak)
 }
 
 
+#ifdef ZEND_TEST_EXCEPTIONS
 ZEND_FUNCTION(crash)
 {
 	char *nowhere=NULL;
 
 	memcpy(nowhere, "something", sizeof("something"));
 }
+#endif
 
 
 static int copy_import_use_file(zend_file_handle *fh, zval *array)
