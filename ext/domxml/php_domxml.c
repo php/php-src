@@ -3566,7 +3566,7 @@ PHP_FUNCTION(domxml_xslt_process)
 }
 /* }}} */
 
-/* {{{ proto string domxslt_version(void)
+/* {{{ proto string domxml_xslt_version(void)
    Get XSLT library version */
 PHP_FUNCTION(domxml_xslt_version)
 {
