@@ -105,7 +105,7 @@ static void php_reg_init_globals(php_reg_globals *reg_globals)
 static PHP_MINIT_FUNCTION(regex)
 {
 #ifdef ZTS
-	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), php_reg_init_globals, NULL);
+	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), (ts_allocate_ctor) php_reg_init_globals, NULL);
 #else
 	php_reg_init_globals(&reg_globals);
 #endif

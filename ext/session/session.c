@@ -968,8 +968,6 @@ PHP_FUNCTION(session_unset)
 
 static void php_rinit_session_globals(PSLS_D)
 {
-	ELS_FETCH();
-
 	PS(mod) = _php_find_ps_module(INI_STR("session.save_handler") PSLS_CC);
 	PS(serializer) = \
 		_php_find_ps_serializer(INI_STR("session.serialize_handler") PSLS_CC);
@@ -1016,7 +1014,6 @@ void _php_session_auto_start(void *data)
 PHP_RINIT_FUNCTION(session)
 {
 	PSLS_FETCH();
-	PLS_FETCH();
 
 	php_rinit_session_globals(PSLS_C);
 

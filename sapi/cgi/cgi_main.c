@@ -188,7 +188,7 @@ static void init_request_info(SLS_D)
 }
 
 
-void define_command_line_ini_entry(char *arg)
+static void define_command_line_ini_entry(char *arg)
 {
 	char *name, *value;
 

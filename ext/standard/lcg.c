@@ -72,7 +72,7 @@ static void lcg_init_globals(LCGLS_D)
 static int php_minit_lcg(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
-	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), lcg_init_globals, NULL);
+	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
 #else
 	lcg_init_globals();
 #endif

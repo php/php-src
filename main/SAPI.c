@@ -79,7 +79,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	module_global_startup_modules();
 }
 
-SAPI_API void sapi_shutdown()
+SAPI_API void sapi_shutdown(void)
 {
 	module_global_shutdown_modules();
 	zend_hash_destroy(&known_post_content_types);
