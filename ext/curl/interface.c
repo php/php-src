@@ -365,7 +365,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	php_curl       *ch     = (php_curl *) ctx;
 	php_curl_write *t      = ch->handlers->write;
 	size_t          length = size * nmemb;
-	TSRMLS_FETCH();
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_write() called\n");
@@ -385,7 +385,6 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			zval *argv[2];
 			zval *retval;
 			int   error;
-			TSRMLS_FETCH();
 
 			MAKE_STD_ZVAL(argv[0]);
 			MAKE_STD_ZVAL(argv[1]);
@@ -434,7 +433,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			zval *retval;
 			int   length;
 			int   error;
-			TSRMLS_FETCH();
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 			MAKE_STD_ZVAL(argv[0]);
 			MAKE_STD_ZVAL(argv[1]);
@@ -475,7 +474,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 	php_curl       *ch  = (php_curl *) ctx;
 	php_curl_write *t   = ch->handlers->write_header;
 	size_t          length = size * nmemb;
-	TSRMLS_FETCH();
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 	
 	switch (t->method) {
 		case PHP_CURL_STDOUT:
@@ -493,7 +492,6 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			zval *argv[2];
 			zval *retval;
 			int   error;
-			TSRMLS_FETCH();
 
 			MAKE_STD_ZVAL(argv[0]);
 			MAKE_STD_ZVAL(argv[1]);
@@ -533,7 +531,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	zval        *retval = NULL;
 	int          error;
 	int          ret = 0;
-	TSRMLS_FETCH();
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 	MAKE_STD_ZVAL(argv[0]);
 	MAKE_STD_ZVAL(argv[1]);
@@ -663,13 +661,14 @@ PHP_FUNCTION(curl_init)
 	}
 
 	alloc_curl_handle(&ch);
-
+	ch->thread_ctx = TSRMLS_C;
+	
 	ch->cp = curl_easy_init();
 	if (!ch->cp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not initialize a new cURL handle");
 		RETURN_FALSE;
 	}
-
+	
 	ch->handlers->write->method = PHP_CURL_STDOUT;
 	ch->handlers->write->type   = PHP_CURL_ASCII;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
