@@ -14,7 +14,7 @@ Zend
       but don't declare those as const. This makes interaction with other
       interfaces difficult which pass const parameters to us. 
     * add try..catch/throw exception handling
-	* make UNC filenames work with V_CD layer
+    * make UNC filenames work with V_CD layer
 
 global
 ------
