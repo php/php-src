@@ -28,7 +28,6 @@
 #endif
 
 #include "zend_llist.h"
-#define YYSTYPE znode
 #include "zend-parser.h"
 
 #define DEBUG_ZEND 0
