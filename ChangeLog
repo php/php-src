@@ -1,3 +1,86 @@
+2001-02-28  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/attachment.c: function reference: attachments
+
+2001-02-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/README
+      sapi/apache2filter/sapi_apache2.c:
+    httpd-2.0 cvs seems to be busted.  I'm getting very strange backtraces
+    and the header filter still seems to be broken.  Will try later.
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/sapi_apache2.c:
+    Now it actually loads, but it segfaults upon a request.
+
+    * sapi/apache2filter/README
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/config.m4
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Make the module compile again with the latest httpd-2.0 cvs.
+
+2001-02-28  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/CREDITS: PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-02-28  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c
+      ext/midgard/oop.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/pagelink.c
+      ext/midgard/parameter.c
+      ext/midgard/person.c
+      ext/midgard/preferences.c
+      ext/midgard/preparser.c
+      ext/midgard/sitegroup.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c
+      ext/midgard/article.c
+      ext/midgard/attachment.c
+      ext/midgard/calendar.c
+      ext/midgard/element.c
+      ext/midgard/event.c
+      ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/image.c
+      ext/midgard/mail.c
+      ext/midgard/member.c
+      ext/midgard/mgd_article.h
+      ext/midgard/mgd_attachment.h
+      ext/midgard/mgd_calendar.h
+      ext/midgard/mgd_element.h
+      ext/midgard/mgd_event.h
+      ext/midgard/mgd_eventmember.h
+      ext/midgard/mgd_file.h
+      ext/midgard/mgd_group.h
+      ext/midgard/mgd_host.h
+      ext/midgard/mgd_image.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/mgd_mail.h
+      ext/midgard/mgd_member.h
+      ext/midgard/mgd_oop.h
+      ext/midgard/mgd_page.h
+      ext/midgard/mgd_pageelement.h
+      ext/midgard/mgd_pagelink.h
+      ext/midgard/mgd_person.h
+      ext/midgard/mgd_preferences.h
+      ext/midgard/mgd_preparser.h
+      ext/midgard/mgd_sitegroup.h
+      ext/midgard/mgd_snippet.h
+      ext/midgard/mgd_snippetdir.h
+      ext/midgard/mgd_style.h
+      ext/midgard/mgd_topic.h: First step towards automatic documentation
+
 2001-02-27  Andi Gutmans  <andi@zend.com>
 
     * ext/readline/readline.c
