@@ -17,7 +17,8 @@ PHP 4.0                                                                    NEWS
   with all string keys lowercased or uppercased (EdinK)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
   as fatal, and added conversion of Windows quotes to &quot; (Sascha)
-- Added new function pcntl_exec, which behaves similar to execve.
+- Added new function pcntl_exec, which behaves similar to the system
+  execve. (Jason)
 - initial support of mnogosearch-3.2.x has been added. Not all features
   are implemented currently.
 - Fix segfault and check for truecolor image in ImageColorAt (Rasmus)
