@@ -70,6 +70,7 @@
 #  define MY_INPUT input
 #endif
 
+#define YY_FATAL_ERROR zend_fatal_scanner_error
 
 #define HANDLE_NEWLINES(s,l) \
 do { \
@@ -89,6 +90,12 @@ do { \
 	} \
 }
 		
+
+
+void zend_fatal_scanner_error(char *message)
+{
+	zend_error(E_COMPILE_ERROR, message);
+}
 
 BEGIN_EXTERN_C()
 void startup_scanner(CLS_D)
