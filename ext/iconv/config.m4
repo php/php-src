@@ -55,28 +55,57 @@ int main() {
 
     if test -z "$iconv_lib_name"; then
       AC_MSG_CHECKING([if iconv is glibc's])
-      AC_TRY_COMPILE([#include <iconv.h>],[void __gconv(); int main() { __gconv(); }],
+      AC_TRY_LINK([#include <gnu/libc-version.h>],[gnu_get_libc_version();],
       [
         AC_MSG_RESULT(yes)
-        PHP_DEFINE([HAVE_GLIBC_ICONV],1)
-        AC_DEFINE([HAVE_GLIBC_ICONV],1,[glibc's iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"])
-        AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
+        iconv_impl_name="glibc"
       ],[
         AC_MSG_RESULT(no)
       ])
     else
       case "$iconv_lib_name" in
         iconv [)]
-          PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"])
-          AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
+          AC_MSG_CHECKING([if iconv is Konstantin Chugeuv's])
+          AC_TRY_LINK([#include <iconv.h>],[iconv_ccs_init(NULL, NULL);],
+          [
+            AC_MSG_RESULT(yes)
+            iconv_impl_name="bsd"
+          ],[
+            AC_MSG_RESULT(no)
+            iconv_impl_name="gnu_libiconv"
+          ])
           ;;
+
         giconv [)]
-          PHP_DEFINE([PHP_ICONV_IMPL],[\"giconv\"])
-          AC_DEFINE([PHP_ICONV_IMPL],["giconv"],[Which iconv implementation to use])
+          iconv_impl_name="gnu_libiconv"
+          ;;
+
+        biconv [)]
+          iconv_impl_name="bsd"
           ;;
       esac
     fi 
+
+    case "$iconv_impl_name" in
+      gnu_libiconv [)]
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"])
+        AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
+        ;;
+
+      bsd [)]
+        PHP_DEFINE([HAVE_BSD_ICONV],1)
+        AC_DEFINE([HAVE_BSD_ICONV],1,[Konstantin Chugeuv's iconv implementation])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"BSD iconv\"])
+        AC_DEFINE([PHP_ICONV_IMPL],["BSD iconv"],[Which iconv implementation to use])
+        ;;
+
+      glibc [)]
+        PHP_DEFINE([HAVE_GLIBC_ICONV],1)
+        AC_DEFINE([HAVE_GLIBC_ICONV],1,[glibc's iconv implementation])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"])
+        AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
+        ;;
+    esac
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared)
     PHP_SUBST(ICONV_SHARED_LIBADD)
