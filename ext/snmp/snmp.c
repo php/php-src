@@ -54,6 +54,9 @@
 #endif
 #endif
 
+#ifdef HAVE_DEFAULT_STORE_H
+#include "default_store.h"
+#endif
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
