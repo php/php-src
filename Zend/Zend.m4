@@ -148,6 +148,9 @@ AC_MSG_RESULT($ZEND_DEBUG)
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
   echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
+  if test "$CFLAGS" = "-g -O2"; then
+  	CFLAGS=-g
+  fi
   test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
   test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
     DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
