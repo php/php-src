@@ -1,4 +1,5 @@
 #define HAVE_SOLID 0
+#define HAVE_IBMDB2 0
 #define HAVE_IODBC 0
 #define HAVE_ESOOB 0
 #define HAVE_UNIXODBC 0

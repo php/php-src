@@ -62,7 +62,7 @@ static int le_result, le_conn, le_pconn;
 #define SAFE_SQL_NTS(n) ((SQLSMALLINT) ((n)?(SQL_NTS):0))
 
 /*
- * #if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
+ * #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE henv;
 #else
 	HENV henv;
@@ -152,7 +152,7 @@ static void _free_odbc_result(odbc_result *res)
 						(UWORD)SQL_COMMIT);
 #endif
 			SQLFreeStmt(res->stmt,SQL_DROP);
-#if !defined( HAVE_DB2 ) && !defined( HAVE_UNIXODBC )
+#if !defined( HAVE_IBMDB2 ) && !defined( HAVE_UNIXODBC )
 			res->stmt = NULL;
 #endif
 		}
@@ -445,7 +445,7 @@ PHP_MINFO_FUNCTION(odbc)
 	php_printf("</table>\n");
 }	 
 
-#if defined ( HAVE_DB2 ) || defined ( HAVE_UNIXODBC )
+#if defined ( HAVE_IBMDB2 ) || defined ( HAVE_UNIXODBC )
 void ODBC_SQL_ERROR(SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func)
 #else
 void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)

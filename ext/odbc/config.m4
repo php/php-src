@@ -102,6 +102,34 @@ AC_ARG_WITH(solid,
 fi
 
 if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for IBM DB2 support)
+AC_ARG_WITH(ibm-db2,
+[  --with-ibm-db2[=DIR]    Include IBM DB2 support.  DIR is the DB2 base
+                          install directory, defaults to /home/db2inst1/sqllib],
+[
+  if test "$withval" != "no"; then
+    if test "$withval" = "yes"; then
+        ODBC_INCDIR=/home/db2inst1/sqllib/include
+        ODBC_LIBDIR=/home/db2inst1/sqllib/lib
+    else
+        ODBC_INCDIR=$withval/include
+        ODBC_LIBDIR=$withval/lib
+    fi
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+	ODBC_TYPE=db2
+	ODBC_LIBS="-ldb2"
+    AC_DEFINE(HAVE_IBMDB2)
+
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
