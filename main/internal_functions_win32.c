@@ -58,12 +58,6 @@
 #if HAVE_CTYPE
 #include "ext/ctype/php_ctype.h"
 #endif
-#if HAVE_RPC
-#include "ext/rpc/php_rpc.h"
-#if HAVE_COM
-#include "ext/rpc/com/php_com.h"
-#endif
-#endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
 #endif
@@ -109,12 +103,6 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 #if HAVE_CTYPE
 	,phpext_ctype_ptr
-#endif
-#if HAVE_RPC
-	,phpext_rpc_ptr
-#if HAVE_COM
-	,phpext_com_ptr
-#endif
 #endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
