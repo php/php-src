@@ -1862,9 +1862,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
 			int buffer_len;
-			zval outbuf, outbuflen;
+			zval *outbuf = NULL;
+			zval outbuflen;
 
-			INIT_ZVAL(outbuf);
+			ALLOC_INIT_ZVAL(outbuf);
 			INIT_ZVAL(outbuflen);
 
 			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
@@ -1878,12 +1879,13 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			}
 			/* Get output buffer and send as fault detials */
 			if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
-		    php_ob_get_buffer(&outbuf TSRMLS_CC);
+				ALLOC_INIT_ZVAL(outbuf);
+		    php_ob_get_buffer(outbuf TSRMLS_CC);
 			}
 			php_end_ob_buffer(0, 0 TSRMLS_CC);
 
 			INIT_ZVAL(fault_obj);
-			set_soap_fault(&fault_obj, code, buffer, NULL, &outbuf, NULL TSRMLS_CC);
+			set_soap_fault(&fault_obj, code, buffer, NULL, outbuf, NULL TSRMLS_CC);
 			fault = 1;
 		}
 
