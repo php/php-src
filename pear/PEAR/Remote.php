@@ -58,7 +58,7 @@ class PEAR_Remote extends PEAR
         if (!file_exists($cachedir)) {
             System::mkdir('-p '.$cachedir);
         }
-        $filename = $cachedir.'/xmlrpc_cache_'.$id;
+        $filename = $cachedir . DIRECTORY_SEPARATOR . 'xmlrpc_cache_' . $id;
         if (!file_exists($filename)) {
             return null;
         };
@@ -313,16 +313,16 @@ class PEAR_Remote extends PEAR
                 $lastkey = key($php_val);
                 if ($firstkey === 0 && is_int($lastkey) &&
                     ($lastkey + 1) == count($php_val)) {
-                    $is_continous = true;
+                    $is_continuous = true;
                     reset($php_val);
                     $size = count($php_val);
                     for ($expect = 0; $expect < $size; $expect++, next($php_val)) {
                         if (key($php_val) !== $expect) {
-                            $is_continous = false;
+                            $is_continuous = false;
                             break;
                         }
                     }
-                    if ($is_continous) {
+                    if ($is_continuous) {
                         reset($php_val);
                         $arr = array();
                         while (list($k, $v) = each($php_val)) {
@@ -332,7 +332,7 @@ class PEAR_Remote extends PEAR
                         break;
                     }
                 }
-                // fall though if not numerical and continous
+                // fall though if not numerical and continuous
             case "object":
                 $arr = array();
                 while (list($k, $v) = each($php_val)) {
