@@ -151,6 +151,7 @@ PHP_FUNCTION(pdf_open_memory_image);
 PHP_FUNCTION(pdf_open_pdi);
 PHP_FUNCTION(pdf_close_pdi);
 PHP_FUNCTION(pdf_open_pdi_page);
+PHP_FUNCTION(pdf_place_pdi_page);
 PHP_FUNCTION(pdf_close_pdi_page);
 PHP_FUNCTION(pdf_get_pdi_parameter);
 PHP_FUNCTION(pdf_get_pdi_value);
