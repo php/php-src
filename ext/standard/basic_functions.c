@@ -1622,6 +1622,9 @@ PHP_FUNCTION(is_object)
 	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
 
+/* {{{ proto string get_class(object object)
+     Retrieves the class name ...
+*/
 PHP_FUNCTION(get_class)
 {
 	pval *arg;
@@ -1634,7 +1637,11 @@ PHP_FUNCTION(get_class)
 	}
 	RETURN_STRINGL(arg->value.obj.ce->name,	arg->value.obj.ce->name_length, 1);
 }
+/* }}} */
 
+/* {{{ proto string get_parent_class(object object)
+     Retrieves the parent class name ...
+*/
 PHP_FUNCTION(get_parent_class)
 {
 	pval *arg;
@@ -1647,7 +1654,11 @@ PHP_FUNCTION(get_parent_class)
 	}
 	RETURN_STRINGL(arg->value.obj.ce->parent->name,	arg->value.obj.ce->parent->name_length, 1);
 }
+/* }}} */
 
+/* {{{ proto bool method_exists(object object, string method)
+     Checks if the class method exists ...
+*/
 PHP_FUNCTION(method_exists)
 {
 	pval *arg1, *arg2;
@@ -1659,8 +1670,13 @@ PHP_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 	convert_to_string(arg2);
-	RETURN_LONG(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1));
+	if(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
+/* }}} */
 
 PHP_FUNCTION(leak)
 {
@@ -2242,7 +2258,7 @@ PHP_FUNCTION(defined)
 	}
 }
 
-/* {{{ proto int function_exists(string function_name) 
+/* {{{ proto bool function_exists(string function_name) 
    Checks if a given function has been defined */
 PHP_FUNCTION(function_exists)
 {
