@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
 - Fixed bug #17868 (more then the <!--include--> directive used to include
   a PHP file would result in a crash). (Ilia)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
