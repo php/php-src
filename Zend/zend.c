@@ -703,11 +703,11 @@ void zend_shutdown(TSRMLS_D)
 	free(zend_version_info);
 
 	zend_shutdown_constants(TSRMLS_C);
+	free(GLOBAL_FUNCTION_TABLE);
+	free(GLOBAL_CLASS_TABLE);
 #ifdef ZTS
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
-	free(GLOBAL_FUNCTION_TABLE);
-	free(GLOBAL_CLASS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
