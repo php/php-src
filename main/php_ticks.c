@@ -23,7 +23,7 @@
 
 int php_startup_ticks(PLS_D)
 {
-	zend_llist_init(&PG(tick_functions), sizeof(PG(tick_functions)), NULL, 1);
+	zend_llist_init(&PG(tick_functions), sizeof(void(*)(int)), NULL, 1);
 	return SUCCESS;
 }
 
@@ -34,31 +34,33 @@ void php_shutdown_ticks(PLS_D)
 
 static int php_compare_tick_functions(void *elem1, void *elem2)
 {
-	return ((void (*)(int))elem1 == (void (*)(int))elem2);
+	void(*func1)(int);
+	void(*func2)(int);
+	memcpy(&func1, elem1, sizeof(void(*)(int)));
+	memcpy(&func2, elem2, sizeof(void(*)(int)));
+	return (func1 == func2);
 }
 
-PHPAPI int php_add_tick_function(void (*func)(int))
+PHPAPI void php_add_tick_function(void (*func)(int))
 {
 	PLS_FETCH();
 
-	zend_llist_add_element(&PG(tick_functions), func);
-
-	return SUCCESS;
+	zend_llist_add_element(&PG(tick_functions), (void *)&func);
 }
 
-PHPAPI int php_remove_tick_function(void (*func)(int))
+PHPAPI void php_remove_tick_function(void (*func)(int))
 {
 	PLS_FETCH();
 
 	zend_llist_del_element(&PG(tick_functions), func,
 						   (int(*)(void*,void*))php_compare_tick_functions);
-	return SUCCESS;
 }
 
 static void php_tick_iterator(void *data, void *arg)
 {
 	void (*func)(int);
-	func = (void(*)(int))data;
+
+	memcpy(&func, data, sizeof(void(*)(int)));
 	func(*((int *)arg));
 }
 
