@@ -77,13 +77,12 @@ void init_cfg_scanner()
 }
 
 
-<INITIAL>[ ]*("false"|"off"|"no")[ ]* {
+<INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
 	cfglval->value.str.val = zend_strndup("",0);
 	cfglval->value.str.len = 0;
 	cfglval->type = IS_STRING;
 	return CFG_FALSE;
 }
-
 
 <INITIAL>[[][^[]+[\]]([\n]?|"\r\n"?) {
 	/* SECTION */

@@ -21,7 +21,7 @@
 ; Directive names are *case sensitive* - foo=bar is different from FOO=bar.
 ;
 ; The value can be a string, a number, a PHP constant (e.g. E_ALL or M_PI), one
-; of the INI constants (On, Off, True, False, Yes and No) or an expression
+; of the INI constants (On, Off, True, False, Yes, No and None) or an expression
 ; (e.g. E_ALL & ~E_NOTICE), or a quoted string ("foo").
 ;
 ; Expressions in the INI file are limited to bitwise operators and parentheses:
@@ -31,6 +31,13 @@
 ;
 ; Boolean flags can be turned on using the values 1, On, True or Yes.
 ; They can be turned off using the values 0, Off, False or No.
+;
+; An empty string can be denoted by simply not writing anything after the equal
+; sign, or by using the None keyword:
+;
+;   foo =			; sets foo to an empty string
+;	foo = none		; sets foo to an empty string
+;	foo = "none"	; sets foo to the string 'none'
 ;
 ; If you use constants in your value, and these constants belong to a dynamically
 ; loaded extension (either a PHP extension or a Zend extension), you may only
@@ -184,11 +191,11 @@ auto_prepend_file	=
 auto_append_file	=
 
 ; As of 4.0b4, PHP always outputs a character encoding by default in
-; the Content-type: header.  Set default_charset to "none" to disable
-; this.  PHP's built-in default is text/html with the iso-8859-1
-; charset.
-;default_mimetype = "text/html"
-;default_charset = "iso-8859-1"
+; the Content-type: header.  To disable sending of the charset, simply
+; set it to be empty.
+; PHP's built-in default is text/html with the iso-8859-1 charset.
+default_mimetype = "text/html"
+default_charset = "iso-8859-1"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
