@@ -28,6 +28,4 @@ unistd.h \
 limits.h
 )
 
-AC_DEFINE(ZTS,1,[ ])
-
 AC_OUTPUT(Makefile)
