@@ -688,10 +688,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff) TSRMLS_CC)))
 			{
 				if (total_bytes > PG(upload_max_filesize)) {
-					sapi_module.sapi_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize), param);
+					sapi_module.sapi_error(E_WARNING, "upload_max_filesize of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize), param);
 					cancel_upload = UPLOAD_ERROR_A;
 				} else if (max_file_size && (total_bytes > max_file_size)) {
-					sapi_module.sapi_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", max_file_size, param);
+					sapi_module.sapi_error(E_WARNING, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s] not saved", max_file_size, param);
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
 					wlen = fwrite(buff, 1, blen, fp);
@@ -816,9 +816,26 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			{
 				zval file_size, error_type;
 				
-				file_size.value.lval = total_bytes;
-				file_size.type = IS_LONG;
-				
+			/* Add $foo[error] */
+				if (cancel_upload) {
+					error_type.value.lval = cancel_upload;
+					error_type.type = IS_LONG;
+
+					file_size.value.lval = 0;
+					file_size.type = IS_LONG;
+	
+					if(is_arr_upload) {
+						sprintf(lbuf, "%s[error][%s]", abuf, array_index);
+					} else {
+						sprintf(lbuf, "%s[error]", param);
+					}
+					register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
+
+				} else {
+					file_size.value.lval = total_bytes;
+					file_size.type = IS_LONG;
+				}	
+							
 			/* Add $foo_size */
 				if(is_arr_upload) {
 					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
@@ -834,19 +851,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					sprintf(lbuf, "%s[size]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
-
-			/* Add $foo[error] */
-				if (cancel_upload) {
-					error_type.value.lval = cancel_upload;
-					error_type.type = IS_LONG;
-
-					if(is_arr_upload) {
-						sprintf(lbuf, "%s[error][%s]", abuf, array_index);
-					} else {
-						sprintf(lbuf, "%s[error]", param);
-					}
-					register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
-				}
 			}
 		}
 	}
