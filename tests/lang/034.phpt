@@ -4,7 +4,7 @@ Locale settings affecting float parsing
 <?php  # try to activate a german locale
 $status = false;
 foreach(array("de_DE", "de", "german", "ge") as $lang) {
-  if($lang == setlocale(LC_NUMERIC, $lang) {
+  if($lang == setlocale(LC_NUMERIC, $lang)) {
 	  $status = true; 
 	continue;
   }
