@@ -470,7 +470,7 @@ static void php3_timeout(int dummy)
 {
 	PLS_FETCH();
 
-	php3_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STRING("max_execution_time"));
+	php3_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STR("max_execution_time"));
 }
 #endif
 
