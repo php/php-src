@@ -14,7 +14,6 @@ $packages  = array(
 
 // required packages for the web frontend
 "PEAR_Frontend_Web"     =>    "0.4"
-"Pager"                 =>    "1.0.8",
 "HTML_Template_IT"      =>    "1.1",
 "Net_UserAgent_Detect"  =>    "1.0",
 );
