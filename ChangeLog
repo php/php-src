@@ -1,3 +1,44 @@
+2004-10-20  Andi Gutmans  <andi@zend.com>
+
+    * tests/classes/interface_method_private.phpt:
+      - Fix test
+
+2004-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Slight optimization in str_split() when split length is the same or greater
+      then the string length.
+
+2004-10-20  Andi Gutmans  <andi@zend.com>
+
+    * tests/classes/interface_must_be_implemented.phpt:
+      - One more test fix
+
+    * tests/classes/interface_doubled.phpt
+      tests/classes/interface_implemented.phpt
+      tests/classes/interface_instantiate.phpt:
+      - Fix interface tests. Interfaces should not use access modifiers
+
+    * ZendEngine2/zend_operators.c:
+      - If object handles are equal then save the comparison of properties in
+      - the == operator.
+
+2004-10-20  Stanislav Malyshev  <stas@zend.com>
+
+    * main/output.c:
+      MF4: fix double bailout in HEAD when output is attempted from shutdown
+
+    * (PHP_4_3)
+      main/output.c:
+      fix HEAD problem: if some output is attempted in shutdown,
+      it bails out from shutdown sequence, which is bad
+
+2004-10-20  Joe Orton  <jorton@redhat.com>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fix case where php_handle_aborted_connection was called outside a
+      try/end_try block (#25570).
+
 2004-10-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/file.c:
