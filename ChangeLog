@@ -1,3 +1,30 @@
+2002-02-11  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c: Added one more tweak for 4.0.x compatibility.
+    Used "#warning" to inform users of a hard dependency.
+    (If #warning is unaccptable, let me know!)
+
+2002-02-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Fugbix typo.
+
+2002-02-11  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTTP.php: * Fix bug #15423.
+
+2002-02-11  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mime.php
+      pear/Mail/mimeDecode.php
+      pear/Mail/mimePart.php
+      pear/Mail/xmail.dtd
+      pear/Mail/xmail.xsl:
+    * Removed these files as they're now in /pear/Mail_Mime
+
+2002-02-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ldap/ldap.c: - Fix protos.
+
 2002-02-10  Sean Bright  <elixer@erols.com>
 
     * ext/gmp/gmp.c:
