@@ -84,7 +84,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_error, NULL)
 	PHP_FE(odbc_errormsg, NULL)
 	PHP_FE(odbc_exec, NULL)
-#if defined(HAVE_DBMAKER) || defined(PHP_WIN32)
+#ifdef PHP_ODBC_HAVE_FETCH_HASH
 	PHP_FE(odbc_fetch_array, NULL)
 	PHP_FE(odbc_fetch_object, NULL)
 #endif
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-#if defined(HAVE_DBMAKER) || defined(PHP_WIN32)
+#ifdef PHP_ODBC_HAVE_FETCH_HASH
 #define ODBC_NUM  1
 #define ODBC_OBJECT  2
 
@@ -1378,8 +1378,6 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
-
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
 		if (rownum > 0)
@@ -1394,6 +1392,8 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_FALSE;
 	}
 	
+	array_init(return_value);
+	
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (rownum > 0 && result->fetch_abs)
 		result->fetched = rownum;
@@ -1402,8 +1402,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		result->fetched++;
 
 	for(i = 0; i < result->numcols; i++) {
-		ALLOC_ZVAL(tmp);
-		tmp->refcount = 1;
+		ALLOC_INIT_ZVAL(tmp);
 		Z_TYPE_P(tmp) = IS_STRING;
 		Z_STRLEN_P(tmp) = 0;
 		sql_c_type = SQL_C_CHAR;
