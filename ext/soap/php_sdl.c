@@ -390,19 +390,6 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
 			h->name = estrdup(tmp->children->content);
 
-			tmp = get_attribute(part->properties, "type");
-			if (tmp != NULL) {
-				h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
-			} else {
-				tmp = get_attribute(part->properties, "element");
-				if (tmp != NULL) {
-					h->element = get_element(ctx->sdl, part, tmp->children->content);
-					if (h->element) {
-						h->encode = h->element->encode;
-					}
-				}
-			}
-
 			tmp = get_attribute(header->properties, "use");
 			if (tmp && !strncmp(tmp->children->content, "encoded", sizeof("encoded"))) {
 				h->use = SOAP_ENCODED;
@@ -425,6 +412,22 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
 				} else {
 					h->encodingStyle = estrdup(tmp->children->content);
+				}
+			}
+
+			tmp = get_attribute(part->properties, "type");
+			if (tmp != NULL) {
+				h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
+			} else {
+				tmp = get_attribute(part->properties, "element");
+				if (tmp != NULL) {
+					h->element = get_element(ctx->sdl, part, tmp->children->content);
+					if (h->element) {
+						h->encode = h->element->encode;
+						if (!h->ns && h->element->namens) {
+							h->ns = estrdup(h->element->namens);
+						}
+					}
 				}
 			}
 
@@ -874,7 +877,7 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 01
+#define WSDL_CACHE_VERSION 02
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((int)(*buf)[0])|((int)(*buf)[1]<<8)|((int)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
