@@ -49,15 +49,12 @@ typedef unsigned int uint;
 #define vsnprintf _vsnprintf
 #define zend_isinf(a)	0
 
-#ifdef inline
-#undef inline
-#endif
-
 #define zend_sprintf sprintf
 
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary
  */
+#undef inline
 #ifdef ZEND_WIN32_FORCE_INLINE
 # define inline __forceinline
 #else
