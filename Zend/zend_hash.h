@@ -164,7 +164,8 @@ ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 
 /* traversing */
-ZEND_API int zend_hash_has_more_elements_ex(HashTable *ht, HashPosition *pos);
+#define zend_hash_has_more_elements_ex(ht, pos) \
+	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTANT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);

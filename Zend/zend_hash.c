@@ -1005,20 +1005,6 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 }
 
 
-ZEND_API int zend_hash_has_more_elements_ex(HashTable *ht, HashPosition *pos)
-{
-	HashPosition *current = pos ? pos : &ht->pInternalPointer;
-
-	IS_CONSISTENT(ht);
-
-	if (*current) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
-
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
 	HashPosition *current = pos ? pos : &ht->pInternalPointer;
