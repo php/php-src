@@ -1,3 +1,36 @@
+2003-05-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcre/php_pcre.c
+      ext/standard/string.c:
+      Fixed bug #23788 (str|preg_replace clober the array elements).
+      
+
+2003-05-25  Shane Caraveo  <shane@caraveo.com>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      http://bugs.php.net/bug.php?id=14409
+      in the shell, if we get a filename on the commandline, never use stdin.
+      This fixes '\>php nonexistent.php'
+      will MTH once I get 5 building properly
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      http://bugs.php.net/bug.php?id=23800
+      change the default for those who cannot
+      this was actually done a long time ago, but got reverted along the way
+
+2003-05-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/xml/xml.c:
+      Hopefully get correct display of version information.
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      Leftover.
+
 2003-05-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/var_unserializer.c:
