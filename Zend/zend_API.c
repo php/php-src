@@ -1541,7 +1541,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 			if (syntax_only)
 				return 1;
 
-			lcname = zend_str_tolower_copy(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) 
 				retval = 1;
 			efree(lcname);
@@ -1576,7 +1576,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 						if (syntax_only)
 							return 1;
 
-						lcname = zend_str_tolower_copy(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
 						if (zend_lookup_class(lcname, Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}
@@ -1602,7 +1602,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 					}
 
 					if (ce) {
-						lcname = zend_str_tolower_copy(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
+						lcname = zend_str_tolower_dup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
 						if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
 							retval = 1;
 						efree(lcname);

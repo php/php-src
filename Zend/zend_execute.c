@@ -2365,7 +2365,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (class_name->type == IS_OBJECT) {
 			ce = Z_OBJCE_P(class_name);
 		} else {
-			class_name_strval = zend_str_tolower_copy(class_name->value.str.val, class_name->value.str.len);
+			class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
 			class_name_strlen = class_name->value.str.len;
 		}
 	}
@@ -2518,7 +2518,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		function_name_strval = zend_str_tolower_copy(function_name->value.str.val, function_name->value.str.len);
+		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
 		function_name_strlen = function_name->value.str.len;
 	}
 
@@ -2566,7 +2566,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		function_name_strval = zend_str_tolower_copy(function_name->value.str.val, function_name->value.str.len);
+		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
 		function_name_strlen = function_name->value.str.len;
 	}
 	
