@@ -91,8 +91,15 @@ void xsl_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
 			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
 		}
-		/* libxslt uses _private for itself, so turning of the deregistering is maybe a solution 
-		   we copied the doc at import, so it shouldn't be possible to be used from php land */
+		if (intern->document != NULL) {
+			if (--intern->document->refcount == 0) {
+				xmlFreeDoc((xmlDocPtr) intern->document->ptr);
+				efree(intern->document);
+			}
+			((xsltStylesheetPtr) intern->ptr)->doc = NULL;
+			intern->document = NULL;
+		}
+
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
 		intern->ptr = NULL;
 	}

@@ -126,7 +126,6 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL;
 	xsltStylesheetPtr sheetp, oldsheetp;
-	xmlDocPtr newdocp;
 	xsl_object *intern;
 	node_object *docobj;
 	
@@ -135,15 +134,12 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
-	/* copy the doc, so that it's not accessable from outside
-	FIXME: and doubling memory consumption...
-	*/
-	newdocp = xmlCopyDoc(doc, 1);
-	sheetp = xsltParseStylesheetDoc(newdocp);
+
+	sheetp = xsltParseStylesheetDoc(doc);
 
 	if (!sheetp) {
-		xmlFreeDoc(newdocp);
 		RETURN_FALSE;
 	}
 
@@ -154,10 +150,21 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 			efree(((xsltStylesheetPtr) intern->ptr)->_private);
 			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
 		}
-		//FIXME: more non-thread safe stuff
+		if (intern->document != NULL) {
+			if (--intern->document->refcount == 0) {
+				xmlFreeDoc((xmlDocPtr) intern->document->ptr);
+				efree(intern->document);
+			}
+			((xsltStylesheetPtr) intern->ptr)->doc = NULL;
+			intern->document = NULL;
+		}
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
 		intern->ptr = NULL;
-	} 
+	}
+
+	intern->document = docobj->document;
+	intern->document->refcount++;
+
 	php_xsl_set_object(id, sheetp TSRMLS_CC);
 }
 /* }}} end xsl_xsltprocessor_import_stylesheet */
