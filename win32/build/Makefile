@@ -25,7 +25,9 @@ MCFILE=$(BUILD_DIR)\wsyslog.res
 
 all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
-generated_files: $(BUILD_DIR) $(BUILD_DIRS_SUB) Zend\zend_ini_parser.c \
+build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
+
+generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
 	ext\standard\parsedate.c \
