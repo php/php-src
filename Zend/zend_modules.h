@@ -30,7 +30,15 @@
 #define GINIT_FUNC_ARGS		void
 #define GINIT_FUNC_ARGS_PASSTHRU
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
+#include "zend.h"
+
+#ifdef ZTS
+#define USING_ZTS 1
+#else
+#define USING_ZTS 0
+#endif
+
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_DEBUG, USING_ZTS, ZEND_API
 
 #define STANDARD_MODULE_PROPERTIES \
 	NULL, NULL, STANDARD_MODULE_PROPERTIES_EX
@@ -54,6 +62,9 @@ struct _zend_module_entry {
 	unsigned char type;
 	void *handle;
 	int module_number;
+	unsigned char zend_debug;
+	unsigned char zts;
+	unsigned int zend_api;
 };
 
 
