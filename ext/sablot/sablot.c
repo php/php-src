@@ -1215,6 +1215,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         
         memcpy(errors->key, fields[0], idx);
         memcpy(errors->value, fields[0] + idx + 1, len - idx - 1);
+        errors->key[idx] = '\0';
         errors->value[len - idx - 1] = '\0';
         
         errors->next = NULL;
