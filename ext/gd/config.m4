@@ -184,24 +184,24 @@ AC_DEFUN(PHP_GD_TTSTR,[
 ])
 
 AC_DEFUN(PHP_GD_CHECK_VERSION,[
-  PHP_CHECK_LIBRARY(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,             1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,             1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageGif,             [AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP,             1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20,             1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,        1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,         1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFTEx,      [AC_DEFINE(HAVE_GD_STRINGFTEX,       1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])], [], [ -L$GD_LIB ])
-  PHP_CHECK_LIBRARY(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])], [], [ -L$GD_LIB ])
+  PHP_CHECK_LIBRARY(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageGif,             [AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,        1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageStringFTEx,      [AC_DEFINE(HAVE_GD_STRINGFTEX,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 
@@ -214,6 +214,7 @@ if test "$PHP_GD" != "no"; then
   PHP_SUBST(GD_SHARED_LIBADD)
 
 dnl Various checks for GD features
+  PHP_SHLIB_SUFFIX_NAME
   PHP_GD_TTSTR
   PHP_GD_JPEG
   PHP_GD_PNG
