@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added domxml_elem_set_attribute_node() method (bug #17638). (Rob Richards)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
