@@ -11,7 +11,7 @@ libZend_c_la_SOURCES=zend-scanner.c
 
 libZend_la_SOURCES=\
 	zend-parser.y \
-	zend_alloc.c zend_compile.c zend_constants.c \
+	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
