@@ -114,8 +114,18 @@ function_entry wddx_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+PHP_MINIT_FUNCTION(wddx);
+PHP_MINFO_FUNCTION(wddx);
+
 zend_module_entry wddx_module_entry = {
-	"wddx", wddx_functions, php_minit_wddx, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"wddx",
+	wddx_functions,
+	PHP_MINIT(wddx),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(wddx),
+	STANDARD_MODULE_PROPERTIES
 };
 
 /* }}} */
@@ -224,7 +234,7 @@ void php_wddx_destructor(wddx_packet *packet)
 
 
 /* {{{ php_minit_wddx */
-int php_minit_wddx(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(wddx)
 {
 	le_wddx = register_list_destructors(php_wddx_destructor, NULL);
 	
@@ -232,6 +242,12 @@ int php_minit_wddx(INIT_FUNC_ARGS)
 }
 /* }}} */
 
+PHP_MINFO_FUNCTION(wddx)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "WDDX Support", "enabled" );
+	php_info_print_table_end();
+}
 
 /* {{{ php_wddx_add_chunk_ex */
 void php_wddx_add_chunk_ex(wddx_packet *packet, char *str, int length)
