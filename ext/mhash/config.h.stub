@@ -1,0 +1,2 @@
+/* define if you want to use the mhash extension */
+#undef HAVE_LIBMHASH
