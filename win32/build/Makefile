@@ -45,9 +45,15 @@ Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
 ext\standard\parsedate.c ext\standard\parsedate.h: ext\standard\parsedate.y
 	bison --output=ext/standard/parsedate.c -v -d ext/standard/parsedate.y 
 
+PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
-$(BUILD_DIR)\$(PHPDLL): $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS)
-	$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS)
+$(PHPDLL_RES): win32\build\template.rc
+	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
+		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
+		win32\build\template.rc
+
+$(BUILD_DIR)\$(PHPDLL): $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES)
+	$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES)
 	
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 	

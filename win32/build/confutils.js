@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.10 2003-12-03 23:48:02 fmk Exp $
+// $Id: confutils.js,v 1.11 2003-12-04 01:37:52 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -415,10 +415,44 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
+/* emits rule to generate version info for a SAPI
+ * or extension.  Returns the name of the .res file
+ * that will be generated */
+function generate_version_info_resource(makefiletarget, creditspath)
+{
+	var resname = makefiletarget + ".res";
+	var res_desc = "PHP " + makefiletarget;
+	var res_prod_name = res_desc;
+	var credits;
+	var thanks = "";
+
+	if (FSO.FileExists(creditspath + '/CREDITS')) {
+		credits = FSO.OpenTextFile(creditspath + '/CREDITS', 1);
+		res_desc = credits.ReadLine();
+		thanks = credits.ReadLine();
+		if (thanks == null) {
+			thanks = "";
+		} else {
+			thanks = "Thanks to " + thanks;
+		}
+		credits.Close();
+	}
+	
+	MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
+	MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname +
+	   	' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' + makefiletarget +
+	   	'\\"" /d PRODUCT_NAME="\\"' + res_prod_name + '\\"" /d THANKS_GUYS="\\"' +
+		thanks + '\\"" win32\\build\\template.rc');
+	MFO.WriteBlankLines(1);
+	
+	return resname;
+}
+
 function SAPI(sapiname, file_list, makefiletarget, cflags)
 {
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
+	var resname;
 
 	STDOUT.WriteLine("Enabling sapi/" + sapiname);
 
@@ -434,9 +468,13 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
+
+	/* generate a .res file containing version information */
+	resname = generate_version_info_resource(makefiletarget, "sapi/" + sapiname);
+	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
 	MFO.WriteLine("\t@echo SAPI " + sapiname + " build complete");
-	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB)");
+	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
@@ -444,7 +482,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 		ldflags = "$(LDFLAGS)";
 	}
 	
-	MFO.WriteLine("\t$(LD) /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ")");
+	MFO.WriteLine("\t$(LD) /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 
 	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
 	ADD_FLAG("SAPI_TARGETS", makefiletarget);
@@ -492,8 +530,10 @@ function EXTENSION(extname, file_list, shared, cflags)
 
 	if (shared) {
 		dllname = "php_" + extname + ".dll";
-		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB)");
-		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS)");
+		var resname = generate_version_info_resource(makefiletarget, "ext/" + extname);
+	
+		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
 		MFO.WriteBlankLines(1);
 
 		ADD_FLAG("EXT_TARGETS", dllname);
