@@ -46,7 +46,7 @@
    Calculate EZMLM list hash value. */
 PHP_FUNCTION(ezmlm_hash)
 {
-	char *str=NULL;
+	char *str = NULL;
 	unsigned long h = 5381L;
 	int j, str_len;
 	
@@ -55,11 +55,11 @@ PHP_FUNCTION(ezmlm_hash)
 		return;
 	}
 
-	for (j=0; j<str_len; j++) {
-		h = (h + (h<<5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
+	for (j = 0; j < str_len; j++) {
+		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
 	}
 	
-	h = (h%53);
+	h = (h % 53);
 	
 	RETURN_LONG((int) h);
 }
@@ -69,8 +69,10 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
-	int to_len,message_len,headers_len,subject_len,extra_cmd_len,i;
+	char *to=NULL, *message=NULL, *headers=NULL;
+	char *subject=NULL, *extra_cmd=NULL;
+	int to_len, message_len, headers_len;
+	int subject_len, extra_cmd_len, i;
 
 	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.");
@@ -88,25 +90,29 @@ PHP_FUNCTION(mail)
 	}
 
 	if (to_len > 0) {
-		for(;to_len;to_len--) {
-			if(!isspace((unsigned char)to[to_len-1]))break;
-			to[to_len-1]='\0';
+		for (; to_len; to_len--) {
+			if (!isspace((unsigned char) to[to_len - 1])) {
+				break;
+			}
+			to[to_len - 1] = '\0';
 		}
-		for(i=0;to[i];i++) {
-			if (iscntrl((unsigned char)to[i])) {
-				to[i]=' ';
+		for (i = 0; to[i]; i++) {
+			if (iscntrl((unsigned char) to[i])) {
+				to[i] = ' ';
 			}
 		}
 	}
 
 	if (subject_len > 0) {
-		for(;subject_len;subject_len--) {
-			if(!isspace((unsigned char)subject[subject_len-1]))break;
-			subject[subject_len-1]='\0';
+		for (; subject_len; subject_len--) {
+			if (!isspace((unsigned char) subject[subject_len - 1])) {
+				break;
+			}
+			subject[subject_len - 1] = '\0';
 		}
-		for(i=0;subject[i];i++) {
-			if (iscntrl((unsigned char)subject[i])) {
-				subject[i]=' ';
+		for(i = 0; subject[i]; i++) {
+			if (iscntrl((unsigned char) subject[i])) {
+				subject[i] = ' ';
 			}
 		}
 	}
@@ -121,7 +127,9 @@ PHP_FUNCTION(mail)
 		RETVAL_FALSE;
 	}
 
-	if (extra_cmd) efree (extra_cmd);
+	if (extra_cmd) {
+		efree (extra_cmd);
+	}
 }
 /* }}} */
 
