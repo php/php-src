@@ -102,7 +102,8 @@ DLEXPORT php3_module_entry *get_module() { return &xml_module_entry; };
 
 PHPAPI pval *php3i_long_pval(long value)
 {
-	pval *ret = emalloc(sizeof(pval));
+	pval *ret;
+	MAKE_STD_ZVAL(ret);
 
 	ret->type = IS_LONG;
 	ret->value.lval = value;
@@ -114,7 +115,8 @@ PHPAPI pval *php3i_long_pval(long value)
 
 PHPAPI pval *php3i_double_pval(double value)
 {
-	pval *ret = emalloc(sizeof(pval));
+	pval *ret;
+	MAKE_STD_ZVAL(ret);
 
 	ret->type = IS_DOUBLE;
 	ret->value.dval = value;
@@ -126,8 +128,9 @@ PHPAPI pval *php3i_double_pval(double value)
 
 PHPAPI pval *php3i_string_pval(const char *str)
 {
-	pval *ret = emalloc(sizeof(pval));
+	pval *ret;
 	int len = strlen(str);
+	MAKE_STD_ZVAL(ret);
 
 	ret->type = IS_STRING;
 	ret->value.str.len = len;
@@ -703,7 +706,7 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 		if (parser->startElementHandler) {
 			args[0] = php3i_long_pval(parser->index);
 			args[1] = php3i_string_pval(name);
-			args[2] = emalloc(sizeof(pval));
+			MAKE_STD_ZVAL(args[2]);
 			array_init(args[2]);
 			while (attributes && *attributes) {
 				char *key = (char *)attributes[0];
