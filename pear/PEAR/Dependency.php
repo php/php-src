@@ -19,12 +19,6 @@
 //
 // $Id$
 
-/**
-* Methods for dependencies check. Based on Stig's dependencies RFC
-* at http://cvs.php.net/cvs.php/pearweb/rfc
-* (requires php >= 4.1)
-*/
-
 require_once "PEAR.php";
 
 define('PEAR_DEPENDENCY_MISSING',        -1);
@@ -33,12 +27,29 @@ define('PEAR_DEPENDENCY_UPGRADE_MINOR',  -3);
 define('PEAR_DEPENDENCY_UPGRADE_MAJOR',  -4);
 define('PEAR_DEPENDENCY_BAD_DEPENDENCY', -5);
 
+/**
+ * Dependency check for PEAR packages
+ *
+ * The class is based on the dependency RFC that can be found at
+ * http://cvs.php.net/cvs.php/pearweb/rfc. It requires PHP >= 4.1
+ *
+ * @author Tomas V.V.Vox <cox@idecnet.com>
+ * @author Stig Bakken <ssb@php.net>
+ */
 class PEAR_Dependency
 {
+    /**
+     * Constructor
+     *
+     * @access public
+     * @param  object Registry object
+     * @return void
+     */
     function PEAR_Dependency(&$registry)
     {
         $this->registry = &$registry;
     }
+
     /**
     * This method maps the xml dependency definition to the
     * PEAR_dependecy one
@@ -287,7 +298,12 @@ class PEAR_Dependency
 
     /**
      * Converts text comparing operators to them sign equivalents
-     * ex: 'ge' to '>='
+     *
+     * Example: 'ge' to '>='
+     *
+     * @access public
+     * @param  string Operator
+     * @return string Sign equivalent
      */
     function signOperator($operator)
     {
@@ -303,7 +319,15 @@ class PEAR_Dependency
         }
     }
 
-
+    /**
+     * Convert relation into corresponding code
+     *
+     * @access public
+     * @param  string Relation
+     * @param  string Version
+     * @param  string Requirement
+     * @return integer
+     */
     function codeFromRelation($relation, $version, $req)
     {
         $code = PEAR_DEPENDENCY_BAD_DEPENDENCY;
@@ -325,5 +349,4 @@ class PEAR_Dependency
         return $code;
     }
 }
-
 ?>
