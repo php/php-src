@@ -61,8 +61,16 @@
 					if (!$this->is_type($tokens[$n])) return("type name expected instead of '$tokens[$n]'");
 					$params[$param]['type']=$tokens[$n];
 					$n++;
+					if ($tokens[$n] == "&") {
+						$params[$param]['by_ref'] = true;
+						$n++;
+					}
 					if ($this->is_name($tokens[$n])) {
 						$params[$param]['name']=$tokens[$n];
+						$n++;
+					}
+					if ($tokens[$n] == "&") {
+						$params[$param]['by_ref'] = true;
 						$n++;
 					}
 					if ($params[$param]['type'] === "resource" && $this->is_name($tokens[$n])) {
@@ -98,7 +106,7 @@
 			return true;
 		}
 
-		function c_code(&$extension) {
+		function c_code($extension) {
 			$code = "";
 
 			$returns = explode(" ", $this->returns);
@@ -117,6 +125,9 @@
 						$code .= $param['subtype']." ";
 					}
 					if ($param['type'] !== 'void') {
+						if (isset($param['by_ref'])) {
+							$code .= "&";
+						}
 					  $code .= $param['name']; 
           }
 				}
@@ -319,7 +330,11 @@
 					} else {
 						$xml .= "      <methodparam>";
 					}
-					$xml .= "<type>$param[type]</type><parameter>$param[name]</parameter>";
+					$xml .= "<type>$param[type]</type><parameter>";
+					if (isset($param['by_ref'])) {
+						$xml .= "&amp;"; 
+					}
+					$xml .= "$param[name]</parameter>";
 					$xml .= "</methodparam>\n";
 				}
 			}
@@ -337,9 +352,27 @@ $xml .=
    </refsect1>
   </refentry>
 ';
-      $xml .= $this->docbook_editor_footer(4);
+      $xml .= $this->docbook_editor_settings(4);
  
 			return $xml;
+		}
+
+		function write_test($extension) {
+			$fp = fopen("{$extension->name}/tests/{$this->name}.phpt", "w");
+			fputs($fp, 
+"--TEST--
+{$this->name}() function
+--SKIPIF--
+<?php if (!extension_loaded('{$extension->name}')) print 'skip'; ?>
+--POST--
+--GET--
+--FILE--
+<?php 
+	echo 'no test case for {$this->name}() yet';
+?>
+--EXPECT--
+no test case for {$this->name}() yet");
+			fclose($fp);
 		}
 	}
 
