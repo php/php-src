@@ -595,6 +595,7 @@ class PEAR_ErrorStack {
             }
             $ret = new $exception($msg, $code);
             $ret->errorData = $err;
+            return $ret;
         }
         return $err;
     }
