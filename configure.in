@@ -361,6 +361,7 @@ srand48 \
 srandom \
 statfs \
 statvfs \
+std_syslog \
 strcasecmp \
 strdup \
 strerror \
