@@ -49,7 +49,7 @@ class PEAR_Uploader extends PEAR_Common
         if ($infofile === null) {
             $info = $this->infoFromTarBall($pkgfile);
         } else {
-            $info = infoFromDescriptionFile($infofile);
+            $info = $this->infoFromDescriptionFile($infofile);
         }
         if (PEAR::isError($info)) {
             return $info;
