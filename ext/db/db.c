@@ -20,8 +20,6 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
-#if 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -157,14 +155,6 @@ datum flatfile_nextkey(FILE *dbf);
 #include "ext/standard/php_string.h"
 
 static int le_db;
-
-#if THREAD_SAFE
-DWORD DbmTls;
-static int numthreads=0;
-#endif
-
-/*needed for blocking calls in windows*/
-void *dbm_mutex;
 
 /* {{{ php_find_dbm
  */
@@ -447,7 +437,7 @@ PHP_FUNCTION(dbmclose)
 
 /* {{{ php_dbm_close
  */
-int php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+void php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int ret = 0;
 	dbm_info *info = (dbm_info *)rsrc->ptr;
@@ -1161,46 +1151,7 @@ datum flatfile_nextkey(FILE *dbf) {
  */
 PHP_MINIT_FUNCTION(db)
 {
-#if defined(THREAD_SAFE)
-	dbm_global_struct *dbm_globals;
-	PHP_MUTEX_ALLOC(dbm_mutex);
-	PHP_MUTEX_LOCK(dbm_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(DbmTls)){
-			PHP_MUTEX_UNLOCK(dbm_mutex);
-			PHP_MUTEX_FREE(dbm_mutex);
-			return FAILURE;
-		}
-	}
-	PHP_MUTEX_UNLOCK(dbm_mutex);
-	if(!PHP3_TLS_THREAD_INIT(DbmTls, dbm_globals, dbm_global_struct)){
-		PHP_MUTEX_FREE(dbm_mutex);
-		return FAILURE;
-	}
-#endif
-
 	le_db = zend_register_list_destructors_ex(php_dbm_close, NULL, "dbm", module_number);
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-static PHP_MSHUTDOWN_FUNCTION(db)
-{
-#ifdef THREAD_SAFE
-	PHP3_TLS_THREAD_FREE(dbm_globals);
-	PHP_MUTEX_LOCK(dbm_mutex);
-	numthreads--;
-	if (numthreads<1) {
-		PHP3_TLS_PROC_SHUTDOWN(DbmTls);
-		PHP_MUTEX_UNLOCK(dbm_mutex);
-		PHP_MUTEX_FREE(dbm_mutex);
-		return SUCCESS;
-	}
-	PHP_MUTEX_UNLOCK(dbm_mutex);
-#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1234,22 +1185,20 @@ function_entry dbm_functions[] = {
 /* }}} */
 
 zend_module_entry dbm_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"db",
-    dbm_functions,
-    PHP_MINIT(db),
-    PHP_MSHUTDOWN(db),
-    PHP_RINIT(db),
-    NULL,
-    PHP_MINFO(db),
-    NO_VERSION_YET,
-    STANDARD_MODULE_PROPERTIES
+	dbm_functions,
+	PHP_MINIT(db),
+	NULL,
+	PHP_RINIT(db),
+	NULL,
+	PHP_MINFO(db),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_DB
 ZEND_GET_MODULE(dbm)
-#endif
-
 #endif
 
 /*
