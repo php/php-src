@@ -528,7 +528,7 @@ ZEND_FUNCTION(get_class_methods)
 
 	if (zend_hash_find(CG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
 		efree(lcname);
-		RETURN_NULL;
+		RETURN_NULL();
 	} else {
 		efree(lcname);
 		array_init(return_value);
