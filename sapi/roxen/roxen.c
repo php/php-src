@@ -59,6 +59,13 @@
 #include <builtin_functions.h>
 #include <operators.h>
 
+
+/* sp and fp was changed to Pike_?p to avoid conflicts with embedded perl */
+#ifndef sp
+#define sp Pike_sp
+#define fp Pike_fp
+#endif
+
 /* php_roxen_request is per-request object storage */
 
 typedef struct {
