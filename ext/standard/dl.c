@@ -53,33 +53,35 @@ php3_module_entry dl_module_entry = {
 #endif
 
 /* {{{ proto int dl(string extension_filename)
+
    Load a PHP extension at runtime */
 void dl(INTERNAL_FUNCTION_PARAMETERS)
 {
-	pval *file;
+	pval **file;
 	PLS_FETCH();
 
 	/* obtain arguments */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(file);
+	convert_to_string_ex(file);
 
 	if (!PG(enable_dl)) {
 		php_error(E_ERROR, "Dynamically loaded extentions aren't enabled.");
 	} else if (PG(safe_mode)) {
 		php_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
 	} else {
-		php3_dl(file,MODULE_TEMPORARY,return_value);
+		php_dl(*file,MODULE_TEMPORARY,return_value);
 	}
 }
+
 /* }}} */
 
 
 #if HAVE_LIBDL
 
-void php3_dl(pval *file,int type,pval *return_value)
+void php_dl(pval *file,int type,pval *return_value)
 {
 	void *handle;
 	char libpath[MAXPATHLEN + 1];
@@ -165,7 +167,7 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-void php3_dl(pval *file,int type,pval *return_value)
+void php_dl(pval *file,int type,pval *return_value)
 {
 	php_error(E_WARNING,"Cannot dynamically load %s - dynamic modules are not supported",file->value.str.val);
 	RETURN_FALSE;
