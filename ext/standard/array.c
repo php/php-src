@@ -2227,7 +2227,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* If all arrays are empty or have only one entry,
 	   we don't need to do anything. */
-	if (array_size < 1) {
+	if (array_size <= 1) {
 		efree(ARRAYG(multisort_flags));
 		efree(arrays);
 		efree(args);
