@@ -165,7 +165,7 @@ typedef struct {
 	for (zend_hash_internal_pointer_reset(&PS(vars));			\
 			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING; \
 			zend_hash_move_forward(&PS(vars))) {				\
-		if (php_get_session_var(key, strlen(key), &struc PSLS_CC ELS_CC) == SUCCESS) { \
+		if (php_get_session_var(key, strlen(key), &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
 			code;		 										\
 		} 														\
 		efree(key);												\
@@ -196,7 +196,7 @@ static void php_set_session_var(char *name, size_t namelen,
 	}
 }
 
-static int php_get_session_var(char *name, size_t namelen, zval ***state_var PSLS_DC ELS_DC)
+static int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC ELS_DC)
 {
 	HashTable *ht = &EG(symbol_table);
 
