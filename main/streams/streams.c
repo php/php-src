@@ -592,7 +592,8 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		}
 
 		/* just break anyway, to avoid greedy read */
-		break;
+		if (stream->wrapper != &php_plain_files_wrapper)
+			break;
 	}
 
 	if (didread > 0) {
