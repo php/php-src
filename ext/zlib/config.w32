@@ -8,6 +8,10 @@ if (PHP_ZLIB == "yes") {
 	AC_DEFINE("HAVE_ZLIB", 1, "ZLIB support");
 	CHECK_LIB("zlib.lib", "zlib", PHP_ZLIB);
 	CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects);
+	if (!PHP_ZLIB_SHARED) {
+		ADD_DEF_FILE("ext\\zlib\\php_zlib.def");
+	}
+
 }
 
 
