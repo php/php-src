@@ -85,7 +85,11 @@ BEGIN {
 
 	xmlhead = " <reference id=\"ref." extname "\">\n" \
 		"  <title> functions</title>\n" \
-		"  <titleabbrev></titleabbrev>\n\n"
+		"  <titleabbrev></titleabbrev>\n\n" \
+		"  <partintro>\n" 
+    "   <para>\n" \
+    "   </para\n" \
+    "  </partintro>\n\n";
 
 	xmlfoot = " </reference>\n\n" \
 		"<!-- Keep this comment at the end of the file\n" \

@@ -200,7 +200,10 @@ if [ ! -z $no_help ]; then
 fi
 sed -f sedscript <../skeleton/php_skeleton.h > php_$extname.h
 
-rm sedscript
+$ECHO_N " tests/001.phpt$ECHO_C"
+mkdir tests || givup "Cannot create tests directory"
+chmod 755 tests
+sed -f sedscript <../skeleton/tests/001.phpt > tests/001.phpt
 
 if test -z "$stubs" && test -z "$no_help"; then
   $ECHO_N " $extname.php$ECHO_C"
@@ -209,6 +212,8 @@ if test -z "$stubs" && test -z "$no_help"; then
     <../skeleton/skeleton.php \
     > $extname.php
 fi
+
+rm sedscript
 
 if test -n "$proto"; then
   if test -z "$stubs"; then
@@ -226,7 +231,8 @@ in the instructions above.
   fi
 fi
 
-chmod 644 *
+find . -type f | xargs chmod 644 
+find . -type d | xargs chmod 755
 fi
 
 echo " [done]."
