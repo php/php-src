@@ -106,7 +106,7 @@ match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name)
 /* {{{ sxe_property_read()
  */
 static zval *
-sxe_property_read(zval *object, zval *member TSRMLS_DC)
+sxe_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 {
 	zval           *return_value;
 	zval           *value = NULL;
@@ -272,7 +272,7 @@ sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 
 	property_ptr = emalloc(sizeof(zval **));
 
-	property = sxe_property_read(object, member TSRMLS_CC);
+	property = sxe_property_read(object, member, 0 TSRMLS_CC);
 
 	*property_ptr = property;
 	
