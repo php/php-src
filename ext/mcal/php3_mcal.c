@@ -707,7 +707,7 @@ void php3_mcal_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 	    convert_to_long(min);
 	    convert_to_long(sec);
 	    dt_setdate(&mydate,year->value.lval,month->value.lval,day->value.lval);
-	    dt_setdate(&mydate,hour->value.lval,min->value.lval,sec->value.lval);
+	    dt_settime(&mydate,hour->value.lval,min->value.lval,sec->value.lval);
 	  }
 	else
 	  {
