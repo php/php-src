@@ -42,7 +42,6 @@ public class servlet extends HttpServlet {
     /*                          native methods                        */ 
     /******************************************************************/
 
-    static { reflect.loadLibrary("servlet"); }
     public native void startup();
     public native long define(String name);
     public native void send(String requestMethod, String queryString,
@@ -124,7 +123,12 @@ public class servlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
       super.init(config);
-      if (0 == startup_count++) startup();
+
+      // first time in, initialize native code
+      if (0 == startup_count++) {
+        reflect.loadLibrary("servlet");
+        startup();
+      }
 
       // try to find the addHeader method (added in the servlet API 2.2)
       // otherwise settle for the setHeader method
