@@ -179,7 +179,7 @@ static zend_bool OrbitStruct_Initialize(const char * pId, OrbitStruct * pStruct)
 		pStruct->u.mpExceptionType = TypeManager_FindException(pId);
 		if (pStruct->u.mpExceptionType == NULL)
 		{
-			zend_error(E_ERROR, "(Satellite) unknown struct or exception '%s'", pId);
+			zend_error(E_WARNING, "(Satellite) unknown struct or exception '%s'", pId);
 		
 			goto error;	
 		}
@@ -299,7 +299,7 @@ zend_bool  OrbitStruct_PutProperty(OrbitStruct  * pStruct,
 
 	if (!result)
 	{
-		zend_error(E_ERROR, "(Satellite) unknown member '%s' in struct '%s'",
+		zend_error(E_WARNING, "(Satellite) unknown member '%s' in struct '%s'",
 				pPropertyName, OrbitStruct_GetRepositoryId(pStruct));
 	}
 
@@ -313,7 +313,7 @@ zend_bool  OrbitStruct_GetProperty(OrbitStruct  * pStruct,
 
 	if (p_value == NULL)
 	{
-		zend_error(E_ERROR, "(Satellite) unknown member '%s' in struct '%s'",
+		zend_error(E_WARNING, "(Satellite) unknown member '%s' in struct '%s'",
 				pPropertyName, OrbitStruct_GetRepositoryId(pStruct));
 
 		ZVAL_NULL(pReturnValue);

@@ -68,7 +68,7 @@ void orbit_class_function_call(
 		}
 		else
 		{
-			zend_error(E_ERROR, "(Satellite) This class has no constructor");\
+			zend_error(E_WARNING, "(Satellite) This class has no constructor");\
 		}
 	}
 	else
@@ -84,7 +84,7 @@ void orbit_class_function_call(
 				 * this means that the constructor has failed earlier! 
 				 * -- or should NULL be allowed here? 
 				 */
-				php_error(E_ERROR, "(Satellite) Class has no data!");
+				php_error(E_WARNING, "(Satellite) Class has no data!");
 				RETVAL_NULL();
 				goto orbit_class_function_call_exit;
 			}
@@ -95,7 +95,7 @@ void orbit_class_function_call(
 		}
 		else
 		{
-			zend_error(E_ERROR, "(Satellite) Can't call functions in this class");\
+			zend_error(E_WARNING, "(Satellite) Can't call functions in this class");\
 		}
 	}
 
