@@ -1,3 +1,7 @@
+2002-09-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ZEND_CHANGES: - No tabs :)
+
 2002-09-28  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * zend_builtin_functions.c: - Fix for defines...
