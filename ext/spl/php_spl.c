@@ -120,16 +120,6 @@ PHP_MSHUTDOWN_FUNCTION(spl)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO(spl)
- */
-PHP_MINFO_FUNCTION(spl)
-{
-	php_info_print_table_start();
-	php_info_print_table_header(2, "SPL support",        "enabled");
-	php_info_print_table_end();
-}
-/* }}} */
-
 /* {{{ class_parents
  */
 PHP_FUNCTION(class_parents)
@@ -143,7 +133,7 @@ PHP_FUNCTION(class_parents)
 	array_init(return_value);
 	parent_class = Z_OBJCE_P(obj)->parent;
 	while (parent_class) {
-		spl_add_class_name(return_value, parent_class TSRMLS_CC);
+		spl_add_class_name(return_value, parent_class, 0, 0 TSRMLS_CC);
 		parent_class = parent_class->parent;
 	}
 }
@@ -159,33 +149,76 @@ PHP_FUNCTION(class_implements)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	spl_add_interfaces(return_value, Z_OBJCE_P(obj) TSRMLS_CC);
+	spl_add_interfaces(return_value, Z_OBJCE_P(obj), 1, ZEND_ACC_INTERFACE TSRMLS_CC);
 }
 /* }}} */
 
-#define SPL_ADD_CLASS(class_name) \
-	spl_add_classes(&spl_ce_ ## class_name, return_value TSRMLS_CC)
+#define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
+	spl_add_classes(&spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
+
+#define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
+	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(CachingRecursiveIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveIteratorIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
 
 /* {{{ spl_classes */
 PHP_FUNCTION(spl_classes)
 {
 	array_init(return_value);
+	
+	SPL_LIST_CLASSES(return_value, 0, 0, 0)
+}
+/* }}} */
 
-	SPL_ADD_CLASS(ArrayObject);
-	SPL_ADD_CLASS(ArrayIterator);
-	SPL_ADD_CLASS(CachingIterator);
-	SPL_ADD_CLASS(CachingRecursiveIterator);
-	SPL_ADD_CLASS(DirectoryIterator);
-	SPL_ADD_CLASS(FilterIterator);
-	SPL_ADD_CLASS(LimitIterator);
-	SPL_ADD_CLASS(ParentIterator);
-	SPL_ADD_CLASS(RecursiveDirectoryIterator);
-	SPL_ADD_CLASS(RecursiveIterator);
-	SPL_ADD_CLASS(RecursiveIteratorIterator);
-	SPL_ADD_CLASS(SeekableIterator);
-	if (spl_ce_SimpleXMLIterator) {
-	SPL_ADD_CLASS(SimpleXMLIterator);
-	}
+int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC)
+{
+	char *res;
+	
+	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_PP(entry));
+	efree(*list);
+	*list = res;
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+/* {{{ PHP_MINFO(spl)
+ */
+PHP_MINFO_FUNCTION(spl)
+{
+	zval list;
+	char *strg;
+
+	php_info_print_table_start();
+	php_info_print_table_header(2, "SPL support",        "enabled");
+
+	INIT_PZVAL(&list);
+	array_init(&list);
+	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)
+	strg = estrdup("");
+	zend_hash_apply_with_argument(Z_ARRVAL_P(&list), (apply_func_arg_t)spl_build_class_list_string, &strg TSRMLS_CC);
+	zval_dtor(&list);
+	php_info_print_table_row(2, "Interfaces", strg + 2);
+	efree(strg);
+
+	INIT_PZVAL(&list);
+	array_init(&list);
+	SPL_LIST_CLASSES(&list, 0, -1, ZEND_ACC_INTERFACE)
+	strg = estrdup("");
+	zend_hash_apply_with_argument(Z_ARRVAL_P(&list), (apply_func_arg_t)spl_build_class_list_string, &strg TSRMLS_CC);
+	zval_dtor(&list);
+	php_info_print_table_row(2, "Classes", strg + 2);
+	efree(strg);
+
+	php_info_print_table_end();
 }
 /* }}} */
 

@@ -104,39 +104,46 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, zva
 /* }}} */
 
 /* {{{ spl_add_class_name */
-void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC)
+void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
 	size_t len = strlen(pce->name);
 	zval *tmp;
 
-	if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
-		MAKE_STD_ZVAL(tmp);
-		ZVAL_STRING(tmp, pce->name, 1);
-		zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
+	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
+		if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
+			MAKE_STD_ZVAL(tmp);
+			ZVAL_STRING(tmp, pce->name, 1);
+			zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
+		}
 	}
 }
 /* }}} */
 
 /* {{{ spl_add_interfaces */
-void spl_add_interfaces(zval *list, zend_class_entry * pce TSRMLS_DC)
+void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
 	zend_uint num_interfaces;
 
 	for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
-		spl_add_class_name(list, pce->interfaces[num_interfaces] TSRMLS_CC);
+		spl_add_class_name(list, pce->interfaces[num_interfaces], allow, ce_flags TSRMLS_CC);
 	}
 }
 /* }}} */
 
 /* {{{ spl_add_classes */
-int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC)
+int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)
 {
+	if (!ppce) {
+		return 0;
+	}
 	zend_class_entry *pce = *ppce;
-	spl_add_class_name(list, pce TSRMLS_CC);
-	spl_add_interfaces(list, pce TSRMLS_CC);
-	while (pce->parent) {
-		pce = pce->parent;
-		spl_add_classes(&pce, list TSRMLS_CC);
+	spl_add_class_name(list, pce, allow, ce_flags TSRMLS_CC);
+	if (sub) {
+		spl_add_interfaces(list, pce, allow, ce_flags TSRMLS_CC);
+		while (pce->parent) {
+			pce = pce->parent;
+			spl_add_classes(&pce, list, sub, allow, ce_flags TSRMLS_CC);
+		}
 	}
 	return 0;
 }
