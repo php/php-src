@@ -17,7 +17,7 @@ AC_ARG_ENABLE(xml,
 [  --enable-xml            Include XML support using bundled expat lib],[
   PHP_XML=$enableval
 ],[
-  PHP_XML=no
+  PHP_XML=yes
 ])
 AC_MSG_RESULT($PHP_XML)
 
