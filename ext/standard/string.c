@@ -35,6 +35,7 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 #include "basic_functions.h"
+#include "php_smart_str.h"
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -1462,9 +1463,10 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 	zval ctmp;
 	ulong num_key;
 	int minlen = 128*1024;
-	int maxlen = 0, pos, len, newpos, newlen, found;
-	char *newstr, *key;
+	int maxlen = 0, pos, len, found;
+	char *key;
 	HashPosition hpos;
+	smart_str result = {0};
 	
 	zend_hash_internal_pointer_reset_ex(hash, &hpos);
 	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
@@ -1490,11 +1492,9 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 		}
 		zend_hash_move_forward_ex(hash, &hpos);
 	}
-	
+
 	key = emalloc(maxlen+1);
-	newstr = emalloc(8192);
-	newlen = 8192;
-	newpos = pos = 0;
+	pos = 0;
 
 	while (pos < slen) {
 		if ((pos + maxlen) > slen) {
@@ -1523,13 +1523,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 					tlen = (*trans)->value.str.len;
 				}
 
-				if ((newpos + tlen + 1) > newlen) {
-					newlen = newpos + tlen + 1 + 8192;
-					newstr = erealloc(newstr,newlen);
-				}
-				
-				memcpy(newstr+newpos,tval,tlen);
-				newpos += tlen;
+				smart_str_appendl(&result, tval, tlen);
 				pos += len;
 				found = 1;
 
@@ -1541,18 +1535,13 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 		}
 
 		if (! found) {
-			if ((newpos + 1) > newlen) {
-				newlen = newpos + 1 + 8192;
-				newstr = erealloc(newstr,newlen);
-			}
-			
-			newstr[ newpos++ ] = str[ pos++ ];
+			smart_str_appendc(&result, str[pos++]);
 		}
 	}
 
 	efree(key);
-	newstr[ newpos ] = 0;
-	RETURN_STRINGL(newstr,newpos,0);
+	smart_str_0(&result);
+	RETVAL_STRINGL(result.c,result.len,0);
 }
 
 /* {{{ proto string strtr(string str, string from, string to)
@@ -2047,8 +2036,6 @@ PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,zva
 	}
 	*target = 0;
 }
-
-#include "php_smart_str.h"
 
 PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
