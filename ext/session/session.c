@@ -303,7 +303,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			php_var_serialize(buf, struc, &var_hash);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
-			strbuf[0] = (unsigned char) key_length & PS_BIN_UNDEF;
+			strbuf[0] = (unsigned char) (key_length & PS_BIN_UNDEF);
 			memcpy(strbuf + 1, key, key_length);
 			
 			STR_CAT(buf, strbuf, key_length + 1);
