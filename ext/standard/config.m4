@@ -6,7 +6,7 @@ dnl
 dnl Check if flush should be called explicitly after buffered io
 dnl
 AC_DEFUN(AC_FLUSH_IO,[
-  AC_CACHE_CHECK([whether flush should be called explicitly after a bufferered io], ac_cv_flush_io,[
+  AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
   AC_TRY_RUN( [
 #include <stdio.h>
 #include <stdlib.h>
