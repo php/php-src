@@ -17,9 +17,17 @@
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
+// $Id$
 
 require_once 'PEAR.php';
 
+/**
+* TODO:
+*   - check in inforFromDescFile that the minimal data needed is present
+*     (pack name, version, files, others?)
+*   - perhaps use parser folding to be less restrictive with the format
+      of the package.xml file
+*/
 class PEAR_Common extends PEAR
 {
     // {{{ properties
@@ -247,7 +255,10 @@ class PEAR_Common extends PEAR
 
     function infoFromDescriptionFile($descfile)
     {
-        $fp = fopen($descfile, 'r');
+        if (!is_file($descfile) || !is_readable($descfile) ||
+             (!$fp = @fopen($descfile, 'r'))) {
+            return $this->raiseError("Unable to open $descfile");
+        }
         $xp = @xml_parser_create();
         if (!$xp) {
             return $this->raiseError('Unable to create XML parser');
