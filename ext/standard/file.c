@@ -992,7 +992,6 @@ PHP_FUNCTION(stream_context_set_option)
 		/* handle the array syntax */
 		RETVAL_BOOL(parse_context_options(context, options) == SUCCESS);
 	} else {
-		ZVAL_ADDREF(zvalue);
 		php_stream_context_set_option(context, wrappername, optionname, zvalue);
 		RETVAL_TRUE;
 	}
@@ -1111,7 +1110,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 
 	php_stream_to_zval(stream, return_value);
 	if (zcontext) {
-		ZVAL_ADDREF(zcontext);
+		zend_list_addref(Z_RESVAL_P(zcontext));
 	}
 }
 /* }}} */

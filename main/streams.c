@@ -110,6 +110,15 @@ PHPAPI int php_file_le_pstream(void)
 	return le_pstream;
 }
 
+static int _php_stream_release_context(list_entry *le, void *pContext TSRMLS_DC)
+{
+	if (le->ptr == pContext) {
+		return --le->refcount == 0;
+	}
+	return 0;
+}
+
+
 static int forget_persistent_resource_id_numbers(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_stream *stream;
@@ -126,6 +135,9 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 	stream->rsrc_id = FAILURE;
 
 	if (stream->context) {
+		zend_hash_apply_with_argument(&EG(regular_list),
+				(apply_func_arg_t) _php_stream_release_context,
+				stream->context TSRMLS_CC);
 		stream->context = NULL;
 	}
 
@@ -2839,19 +2851,23 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue)
 {
 	zval **wrapperhash;
-	zval *category;
+	zval *category, *copied_val;
 
+	ALLOC_INIT_ZVAL(copied_val);
+	*copied_val = *optionvalue;
+	zval_copy_ctor(copied_val);
+	
 	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		
 		MAKE_STD_ZVAL(category);
 		array_init(category);
+		
 		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL))
 			return FAILURE;
 
-		ZVAL_ADDREF(optionvalue);
 		wrapperhash = &category;
 	}
-	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue, sizeof(zval *), NULL);
+	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);
 }
 
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash()

@@ -281,7 +281,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	if (zcontext) {
-		ZVAL_ADDREF(zcontext);
+		zend_list_addref(Z_RESVAL_P(zcontext));
 	}
 	php_stream_to_zval(stream, return_value);
 }
