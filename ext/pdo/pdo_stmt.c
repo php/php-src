@@ -378,16 +378,6 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 				ZVAL_STRINGL(dest, value, value_len, 1);
 				break;
 			}
-		case PDO_PARAM_INT:
-			if (value) {
-				ZVAL_LONG(dest, *(long*)value);
-				break;
-			}
-		case PDO_PARAM_DBL:
-			if (value) {
-				ZVAL_DOUBLE(dest, *(double*)value);
-				break;
-			}
 		default:
 			ZVAL_NULL(dest);
 	}
@@ -559,16 +549,18 @@ static PHP_METHOD(PDOStatement, fetchAll)
 
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
-	struct pdo_bound_param_data param = PDO_BOUND_PARAM_INIT;
+	struct pdo_bound_param_data param = {0};
 
+	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-			"lz|llz!", &param.paramno, &param.parameter, &param.param_type, &param.max_value_len,
-			&param.driver_params)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!", &param.name,
-				&param.namelen, &param.parameter, &param.param_type, &param.max_value_len, 
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+				ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
+				&param.name, &param.namelen, &param.parameter, &param.param_type,
+				&param.max_value_len,
 				&param.driver_params)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
+					&param.parameter, &param.param_type, &param.max_value_len, &param.driver_params)) {
 			return 0;
 		}	
 	}
