@@ -84,6 +84,9 @@ static int le_result,le_link,le_plink;
 #define mysql_row_length_type unsigned int
 #endif
 
+#define MYSQL_ASSOC		1<<0
+#define MYSQL_NUM		1<<1
+#define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
 
 function_entry mysql_functions[] = {
 	{"mysql_connect",		php3_mysql_connect,			NULL},
@@ -284,6 +287,10 @@ int php3_minit_mysql(INIT_FUNC_ARGS)
 	le_link = register_list_destructors(_close_mysql_link,NULL);
 	le_plink = register_list_destructors(NULL,_close_mysql_plink);
 	mysql_module_entry.type = type;
+	
+	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -1384,62 +1391,9 @@ PHP_FUNCTION(mysql_num_fields)
 /* }}} */
 
 
-/* {{{ proto array mysql_fetch_row(int result)
-   Get a result row as an enumerated array */
-PHP_FUNCTION(mysql_fetch_row)
+static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
-	pval *result;
-	MYSQL_RES *mysql_result;
-	MYSQL_ROW mysql_row;
-	mysql_row_length_type *mysql_row_lengths;
-	int type;
-	int num_fields;
-	int i;
-	PLS_FETCH();
-
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
-	if ((mysql_row=mysql_fetch_row(mysql_result))==NULL 
-		|| (mysql_row_lengths=mysql_fetch_lengths(mysql_result))==NULL) {
-		RETURN_FALSE;
-	}
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
-	num_fields = mysql_num_fields(mysql_result);
-	
-	for (i=0; i<num_fields; i++) {
-		if (mysql_row[i]) {
-			if (PG(magic_quotes_runtime)) {
-				int len;
-				char *tmp=_php3_addslashes(mysql_row[i],mysql_row_lengths[i],&len,0);
-				
-				add_index_stringl(return_value, i, tmp, len, 0);
-			} else {
-				add_index_stringl(return_value, i, mysql_row[i], mysql_row_lengths[i], 1);
-			}
-		} else {
-			/* NULL field, don't set it */
-			/*add_index_stringl(return_value, i, empty_string, 0, 1);*/
-		}
-	}
-}
-/* }}} */
-
-
-static PHP_FUNCTION(mysql_fetch_hash)
-{
-	pval *result;
+	pval *result, *arg2;
 	MYSQL_RES *mysql_result;
 	MYSQL_ROW mysql_row;
 	MYSQL_FIELD *mysql_field;
@@ -1447,12 +1401,27 @@ static PHP_FUNCTION(mysql_fetch_hash)
 	int type;
 	int num_fields;
 	int i;
-	pval *pval_ptr;
 	PLS_FETCH();
 
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch (ARG_COUNT(ht)) {
+		case 1:
+			if (getParameters(ht, 1, &result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			if (!result_type) {
+				result_type = MYSQL_BOTH;
+			}
+			break;
+		case 2:
+			if (getParameters(ht, 2, &result, &arg2)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long(arg2);
+			result_type = arg2->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	
 	convert_to_long(result);
@@ -1475,16 +1444,28 @@ static PHP_FUNCTION(mysql_fetch_hash)
 	
 	mysql_field_seek(mysql_result,0);
 	for (mysql_field=mysql_fetch_field(mysql_result),i=0; mysql_field; mysql_field=mysql_fetch_field(mysql_result),i++) {
+		char *data;
+		int data_len;
+		int should_copy;
+		
 		if (mysql_row[i]) {
 			if (PG(magic_quotes_runtime)) {
-				int len;
-				char *tmp=_php3_addslashes(mysql_row[i],mysql_row_lengths[i],&len,0);
-				
-				add_get_index_stringl(return_value, i, tmp, len, (void **) &pval_ptr, 0);
+				data = _php3_addslashes(mysql_row[i],mysql_row_lengths[i],&data_len,0);
+				should_copy = 0;
 			} else {
-				add_get_index_stringl(return_value, i, mysql_row[i], mysql_row_lengths[i], (void **) &pval_ptr, 1);
+				data = mysql_row[i];
+				data_len = mysql_row_lengths[i];
+				should_copy = 1;
 			}
-			_php3_hash_pointer_update(return_value->value.ht, mysql_field->name, strlen(mysql_field->name)+1, pval_ptr);
+			
+			if (result_type & MYSQL_NUM) {
+				add_index_stringl(return_value, i, data, data_len, should_copy);
+				should_copy = 1;
+			}
+			
+			if (result_type & MYSQL_ASSOC) {
+				add_assoc_stringl(return_value, mysql_field->name, data, data_len, should_copy);
+			}
 		} else {
 			/* NULL field, don't set it */
 			/* add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr); */
@@ -1493,11 +1474,20 @@ static PHP_FUNCTION(mysql_fetch_hash)
 }
 
 
+/* {{{ proto array mysql_fetch_row(int result)
+   Get a result row as an enumerated array */
+PHP_FUNCTION(mysql_fetch_row)
+{
+	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM);
+}
+/* }}} */
+
+
 /* {{{ proto object mysql_fetch_object(int result)
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
 {
-	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
@@ -1511,7 +1501,7 @@ PHP_FUNCTION(mysql_fetch_object)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_array)
 {
-	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
