@@ -1,7 +1,7 @@
 --TEST--
 Session Object Serialization
 --FILE--
-<?
+<?php
 
 class foo {
 	var $bar = "ok";

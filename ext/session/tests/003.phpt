@@ -1,7 +1,7 @@
 --TEST--
 Session Object Deserialization
 --FILE--
-<?
+<?php
 
 class foo {
 	var $bar = "ok";
