@@ -40,6 +40,7 @@ static void tsrm_win32_ctor(tsrm_win32_globals *globals)
 {
 	globals->process = NULL;
 	globals->process_size = 0;
+	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
 }
 
 static void tsrm_win32_dtor(tsrm_win32_globals *globals)
@@ -47,6 +48,7 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 	if (globals->process != NULL) {
 		free(globals->process);
 	}
+	free(globals->comspec);
 }
 
 TSRM_API void tsrm_win32_startup(void)
@@ -102,7 +104,9 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
+	char *cmd;
 	ProcessPair *proc;
+	TWLS_FETCH();
 
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
 	security.bInheritHandle			= TRUE;
@@ -131,10 +135,12 @@ TSRM_API FILE* popen(const char *command, const char *type)
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
 
-
-	if (!CreateProcess(NULL, (LPTSTR)command, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, NULL, NULL, &startup, &process)) {
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+4);
+	sprintf(cmd, "%s /c %s", TWG(comspec), command);
+	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, NULL, NULL, &startup, &process)) {
 		return NULL;
 	}
+	free(cmd);
 
 	CloseHandle(process.hThread);
 	proc = process_get(NULL);
