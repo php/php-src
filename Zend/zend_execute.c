@@ -2033,6 +2033,7 @@ send_by_ref:
 							} else {
 								isset = 0;
 							}
+							zval_ptr_dtor(&Ts[opline->op1.u.var].EA.str);
 						} else {
 							isset = 1;
 						}
