@@ -53,7 +53,7 @@
 
 /* UnixWare and Netware define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
- * file does not use the system call shutdown, it is safe to #undef it.
+ * file does not use the system call shutdown, it is safe to #undef it.K
  */
 #undef shutdown
  
@@ -288,11 +288,18 @@ static void php_apache_sapi_log_message(char *msg)
 	 * with Apache 1.3 -- rbb
 	 */
 	if (ctx == NULL) { /* we haven't initialized our ctx yet, oh well */
-		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
-					 0, NULL, "%s", msg);
+		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, NULL, "%s", msg);
 	} else {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
-					 0, ctx->r, "%s", msg);
+		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, ctx->r, "%s", msg);
+	}
+}
+
+static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+{
+	if (r) {
+		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, r, msg, r->filename);
+	} else {
+		php_apache_sapi_log_message(msg);
 	}
 }
 
@@ -486,14 +493,14 @@ static int php_handler(request_rec *r)
 	}
 
 	if (r->finfo.filetype == 0) {
-		php_apache_sapi_log_message("script not found or unable to stat");
+		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r);
 		zend_try {
 				zend_ini_deactivate(TSRMLS_C);
 		} zend_end_try();
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
-		php_apache_sapi_log_message("attempt to invoke directory as script");
+		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r);
 		zend_try {
 			zend_ini_deactivate(TSRMLS_C);
 		} zend_end_try();
