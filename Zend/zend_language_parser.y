@@ -492,9 +492,15 @@ function_call:
 	|	cvar '(' { zend_do_begin_dynamic_function_call(&$1 CLS_CC); } 
 				function_call_parameter_list 
 				')' { zend_do_end_function_call(&$1, &$$, &$4, 0, 1 CLS_CC); zend_do_extended_fcall_end(CLS_C);}
-	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { zend_do_extended_fcall_begin(CLS_C); zend_do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM method_name '(' { zend_do_extended_fcall_begin(CLS_C); zend_do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
 											function_call_parameter_list 
 											')' { zend_do_end_function_call(&$3, &$$, &$6, 1, 1 CLS_CC); zend_do_extended_fcall_end(CLS_C);}
+;
+
+
+method_name:
+		T_STRING	{ $$ = $1; }
+	|	cvar		{ zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC); $$ = $1; }
 ;
 
 
