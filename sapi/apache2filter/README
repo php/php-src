@@ -18,7 +18,7 @@ DOES IT WORK?
 HOW TO INSTALL
 
     Get the latest Apache 2.0 sources from CVS and install it. This
-    SAPI module is known to work with Apache 2.0.34-dev.
+    SAPI module is known to work with Apache 2.0.35.
 
         $ cd apache-2.x
         $ cd src
@@ -36,10 +36,7 @@ HOW TO INSTALL
    
     At the end of conf/httpd.conf, add:
 
-        <Files *.php>
-        SetOutputFilter PHP
-        SetInputFilter PHP
-        </Files>
+        AddType application/x-httpd-php .php
 
     That's it. Now start bin/httpd.
 
