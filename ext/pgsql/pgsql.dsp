@@ -100,7 +100,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\PostgreSQL\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D "ZTS" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZTS=1 /FD /c
 # SUBTRACT BASE CPP /YX
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D "ZTS" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZEND_DEBUG=0 /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "NDEBUG" /D "ZTS" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZEND_DEBUG=0 /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -111,7 +111,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpqdll.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\..\PostgreSQL\lib" /libpath:"..\..\Release_TS"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpq.lib php4ts.lib /nologo /dll /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"../../Release_TS/php_pgsql.dll" /libpath:"..\..\..\php_build\postgresql\src\interfaces\libpq\Release" /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpq.lib php4ts.lib /nologo /dll /machine:I386 /out:"../../Release_TS/php_pgsql.dll" /libpath:"..\..\..\php_build\postgresql\src\interfaces\libpq\Release" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "pgsql - Win32 Debug_TS"
 
@@ -127,7 +127,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZTS=1 /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "D:\Projects\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D "ZTS" /D ZEND_DEBUG=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "D:\Projects\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D "ZTS" /D ZEND_DEBUG=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -137,7 +137,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libpq.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /nodefaultlib:"libcmtd.lib" /out:"../../Debug_TS/pgsql.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libpq.lib /nologo /dll /debug /machine:I386 /out:"../../Debug_TS/pgsql.dll" /pdbtype:sept
 
 !ENDIF 
 
