@@ -230,7 +230,7 @@ static inline void handle_val(STD_PARA, char quotes, char type)
 #define scdebug(x)
 #endif
 
-static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
+static void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
 {
 	char *end, *q;
 	char *xp;
