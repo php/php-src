@@ -65,13 +65,13 @@ static zend_class_entry *dir_class_entry_ptr;
 	if (ZEND_NUM_ARGS() == 0) { \
 		myself = getThis(); \
 		if (myself) { \
-			if (zend_hash_find(myself->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) { \
+			if (zend_hash_find(Z_OBJPROP_P(myself), "handle", sizeof("handle"), (void **)&tmp) == FAILURE) { \
 				php_error(E_WARNING, "unable to find my handle property"); \
 				RETURN_FALSE; \
 			} \
-			ZEND_FETCH_RESOURCE(dirp,php_dir *,tmp,-1, "Directory", le_dirp); \
+			ZEND_FETCH_RESOURCE(dirp, php_dir *, tmp, -1, "Directory", le_dirp); \
 		} else { \
-			ZEND_FETCH_RESOURCE(dirp,php_dir *,0,DIRG(default_dir), "Directory", le_dirp); \
+			ZEND_FETCH_RESOURCE(dirp, php_dir *, 0, DIRG(default_dir), "Directory", le_dirp); \
 		} \
 	} else if ((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
