@@ -43,6 +43,7 @@ enum pdo_param_type {
 	PDO_PARAM_STR,
 	PDO_PARAM_LOB,
 	PDO_PARAM_STMT, /* hierarchical result set */
+	PDO_PARAM_DBL,
 };
 
 enum pdo_fetch_type {
@@ -330,6 +331,8 @@ struct pdo_bound_param_data {
 	pdo_stmt_t *stmt;	/* for convenience in dtor */
 	int is_param;		/* parameter or column ? */
 };
+
+#define PDO_BOUND_PARAM_INIT { -1, NULL, 0 }
 
 /* represents a prepared statement */
 struct _pdo_stmt_t {
