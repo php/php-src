@@ -5,7 +5,3 @@ LTLIBRARY_SHARED_NAME   = swf.la
 LTLIBRARY_SHARED_LIBADD = $(SWF_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

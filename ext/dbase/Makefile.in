@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libdbase.la
 LTLIBRARY_SOURCES = dbf_head.c dbf_rec.c dbf_misc.c dbf_ndx.c dbase.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

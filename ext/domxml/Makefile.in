@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libdomxml.la
 LTLIBRARY_SOURCES = domxml.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

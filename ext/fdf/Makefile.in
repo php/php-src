@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libfdf.la
 LTLIBRARY_SOURCES = fdf.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

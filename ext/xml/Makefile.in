@@ -9,7 +9,3 @@ LTLIBRARY_SHARED_LIBADD = $(LTLIBRARY_LIBADD)
 SUBDIRS = expat
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libgettext.la
 LTLIBRARY_SOURCES = gettext.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

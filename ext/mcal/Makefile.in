@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libmcal.la
 LTLIBRARY_SOURCES = php_mcal.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libimap.la
 LTLIBRARY_SOURCES = php_imap.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

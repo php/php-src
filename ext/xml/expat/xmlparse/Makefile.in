@@ -5,7 +5,3 @@ LTLIBRARY_SOURCES       = xmlparse.c hashtable.c
 EXTRA_INCLUDES = -I$(srcdir)/../xmltok
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libmhash.la
 LTLIBRARY_SOURCES = mhash.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

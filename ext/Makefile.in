@@ -2,7 +2,3 @@
 SUBDIRS = $(EXT_SUBDIRS)
 
 include $(top_srcdir)/build/rules.mk
-
-
-
-

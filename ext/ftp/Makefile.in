@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libftp.la
 LTLIBRARY_SOURCES = php_ftp.c ftp.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-
