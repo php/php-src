@@ -1,11 +1,12 @@
 <?php
+
 /*********************************************************************
  *    Cyberlib - (C) American Metrocomm Internet Services            *
  *           by Timothy Whitfield <timothy@ametro.net>               *
  *                                                                   *
- *    PHP Cybercash API - This requires that php3_mckcrypt.c be      *
- *    compiled in along with libmckcrypt from the Cybercash          *
- *    MCK 3.2.0.3                                                    *
+ *    PHP Cybercash API - This requires that CyberCash support be    *
+ *    compiled.							     *
+ *								     *
  *                                                                   *
  *    This is an attempt to duplicate the cybercash API for PHP3     *
  *    users.                                                         *
@@ -52,7 +53,7 @@
    $pairs_length=strlen($encrypted_pairs);
  
    $message=sprintf("POST %s/%s HTTP/1.0\r\n",$url["path"],$merchant);
-   $message.=sprintf("User-Agent: CCMCK-%s\r\n","3.2.0.3");
+   $message.=sprintf("User-Agent: CCMCK-%s\r\n","3.2.0.5");
    $message.="Content-type: application/x-www-form-urlencoded\r\n";
    $message.=sprintf("Content-length: %d\r\n",$pairs_length);
    $message.="\r\n";
