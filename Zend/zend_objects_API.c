@@ -153,7 +153,7 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 		zend_error(E_ERROR, "Trying to clone uncloneable object");
 	}		
 
-	obj->clone(&obj->object, &new_object TSRMLS_CC);
+	obj->clone(obj->object, &new_object TSRMLS_CC);
 
 	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->clone TSRMLS_CC);
 	retval.handlers = Z_OBJ_HT_P(zobject);
