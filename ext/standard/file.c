@@ -2190,7 +2190,7 @@ PHP_FUNCTION(fgetcsv)
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
 	int len, buf_len;
-	char *buf, *p, *s, *e, *re;
+	char *buf, *p, *s, *e, *re, *buf2=NULL;
 	php_stream *stream;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -2289,7 +2289,7 @@ no_enclosure:
 			s = p + 1;
 		}
 	} else {
-		char *p2=NULL, *buf2=NULL;
+		char *p2=NULL;
 		int buf2_len=0;
 enclosure:
 		/* handle complete fields before the enclosure */
@@ -2351,9 +2351,7 @@ enclosure:
 			}
 enclosure_done:
 			CSV_ADD_ENTRY(buf2, buf2_len, 0);
-			if (buf2) {
-				efree(buf2);
-			}
+
 			goto done;
 		}
 	}
@@ -2362,6 +2360,9 @@ enclosure_done:
 		CSV_ADD_ENTRY(s, e, s);
 	}
 done:
+	if (buf2) {
+		efree(buf2);
+	}
 	efree(buf);
 }
 /* }}} */
