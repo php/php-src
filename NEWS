@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
 - Fixed bug #29256 (SOAP HTTP Error when envelop size is more than 24345 bytes)
   (Dmitry, Wez)
 - Fixed bug #29522 (accessing properties without connection) (Georg)
