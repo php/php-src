@@ -439,11 +439,12 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 
 
 /* {{{ proto void phpinfo(void)
+
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
 	int flag;
-	zval *flag_arg;
+	zval **flag_arg;
 
 
 	switch (ARG_COUNT(ht)) {
@@ -451,11 +452,11 @@ PHP_FUNCTION(phpinfo)
 			flag = 0xFFFFFFFF;
 			break;
 		case 1:
-			if (getParameters(ht, 1, &flag_arg)==FAILURE) {
+			if (getParametersEx(1, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(flag_arg);
-			flag = flag_arg->value.lval;
+			convert_to_long_ex(flag_arg);
+			flag = (*flag_arg)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -464,6 +465,7 @@ PHP_FUNCTION(phpinfo)
 	php_print_info(flag);
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto string phpversion(void)
@@ -476,11 +478,12 @@ PHP_FUNCTION(phpversion)
 
 
 /* {{{ proto void phpcredits(int)
+
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
 	int flag;
-	zval *flag_arg;
+	zval **flag_arg;
 
 
 	switch (ARG_COUNT(ht)) {
@@ -488,11 +491,11 @@ PHP_FUNCTION(phpcredits)
 			flag = 0xFFFFFFFF;
 			break;
 		case 1:
-			if (getParameters(ht, 1, &flag_arg)==FAILURE) {
+			if (getParametersEx(1, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(flag_arg);
-			flag = flag_arg->value.lval;
+			convert_to_long_ex(flag_arg);
+			flag = (*flag_arg)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -501,6 +504,7 @@ PHP_FUNCTION(phpcredits)
 	php_print_credits(flag);
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /*

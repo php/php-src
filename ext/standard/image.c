@@ -296,7 +296,7 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 /* main function */
 PHP_FUNCTION(getimagesize)
 {
-	pval *arg1,*info = 0;
+	pval **arg1,**info = 0;
 	FILE *fp;
 	int itype = 0;
 	char filetype[3];
@@ -306,14 +306,14 @@ PHP_FUNCTION(getimagesize)
 	
 	switch(ARG_COUNT(ht)){
 	case 1:
-		if (getParameters(ht, 1, &arg1) == FAILURE) {
+		if (getParametersEx(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_string(arg1);
+		convert_to_string_ex(arg1);
 		break;
 
 	case 2:
-		if (getParameters(ht, 2, &arg1, &info) == FAILURE) {
+		if (getParametersEx(2, &arg1, &info) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2)) {
@@ -321,13 +321,13 @@ PHP_FUNCTION(getimagesize)
             RETURN_FALSE;
         }
 
-		pval_destructor(info);
+		zval_dtor(*info);
 
-		if (array_init(info) == FAILURE) {
+		if (array_init(*info) == FAILURE) {
 			return;
 		}
 
-		convert_to_string(arg1);
+		convert_to_string_ex(arg1);
 		break;
 
 	default:
@@ -336,10 +336,10 @@ PHP_FUNCTION(getimagesize)
 	}
 		
 	/* Check open_basedir */
-	if (_php3_check_open_basedir(arg1->value.str.val)) return;
+	if (_php3_check_open_basedir((*arg1)->value.str.val)) return;
 	
-	if ((fp = fopen(arg1->value.str.val,"rb")) == 0) {
-		php_error(E_WARNING, "Unable to open %s", arg1->value.str.val);
+	if ((fp = fopen((*arg1)->value.str.val,"rb")) == 0) {
+		php_error(E_WARNING, "Unable to open %s", (*arg1)->value.str.val);
 		return;
 	}
 	fread(filetype,sizeof(filetype),1,fp);
@@ -347,7 +347,7 @@ PHP_FUNCTION(getimagesize)
 		result = php3_handle_gif (fp);
 		itype = 1;
 	} else if (!memcmp(filetype, php3_sig_jpg, 3)) {
-		result = php3_handle_jpeg(fp,info);
+		result = php3_handle_jpeg(fp,*info);
 		itype = 2;
 	} else if (!memcmp(filetype, php3_sig_png, 3)) {
 		fseek(fp, 0L, SEEK_SET);
