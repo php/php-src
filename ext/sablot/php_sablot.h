@@ -108,14 +108,14 @@ typedef struct {
 
 
 /* Sablotron Globals */
-typedef struct _php_sablot_globals {
+ZEND_BEGIN_MODULE_GLOBALS(sablot)
     zval *errorHandler;
     php_sablot_error *errors;
     php_sablot_error errors_start;
 	char *output_transform_file; /* For output transformations */
 	int last_errno;              /* Global last_errno, if no handle is found */
 	SablotHandle processor;
-} php_sablot_globals;
+ZEND_END_MODULE_GLOBALS(sablot)
 
 
 #ifdef ZTS
