@@ -147,6 +147,35 @@ class PEAR_Dependency
     }
 
     /**
+     * Check package dependencies on uninstall
+     *
+     * @param string $error     The resultant error string
+     * @param string $name      Name of the package to test
+     *
+     * @return bool true if there were errors
+     */
+    function checkPackageUninstall(&$error, $package)
+    {
+        $error = null;
+        $packages = $this->registry->listPackages();
+        foreach ($packages as $pkg) {
+            if ($pkg == $package) {
+                continue;
+            }
+            $deps = $this->registry->packageInfo($pkg, 'release_deps');
+            if (empty($deps)) {
+                continue;
+            }
+            foreach ($deps as $dep) {
+                if ($dep['type'] == 'pkg' && strcasecmp($dep['name'], $package) == 0) {
+                    $error .= "Package '$pkg' depends on '$package'\n";
+                }
+            }
+        }
+        return ($error) ? true : false;
+    }
+
+    /**
      * Extension dependencies check method
      *
      * @param string $name        Name of the extension to test
