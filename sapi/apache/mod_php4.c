@@ -224,7 +224,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	register int i;
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
-	char *script_filename=NULL;
 	zval **path_translated;
 	HashTable *symbol_table;
 
