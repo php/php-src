@@ -272,8 +272,6 @@ AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
 
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
-#elif defined(NAN)
-#define zend_isnan(a) (((a)==NAN)?1:0)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
@@ -346,8 +344,6 @@ AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL = NAN, ac_cv_huge_val_nan,[
 
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
-#elif defined(NAN)
-#define zend_isnan(a) (((a)==NAN)?1:0)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
