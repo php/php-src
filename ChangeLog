@@ -1,3 +1,77 @@
+2002-08-12  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: use of php_error_docref
+
+    * main/main.c
+      main/php.h: fix for extension = ""
+    make php_verror available
+
+    * ext/gd/libgd/gd.c: -wrong fabsf define for MSVC.6
+    -MIN and MAX only if undefined
+
+2002-08-12  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: Point corrected by Markus
+
+    * ext/odbc/php_odbc.c:
+    Umm forgot to clean up the error messages, and add a stop for looping.
+
+    * ext/odbc/php_odbc.c: cleaned up to work with OpenLink iODBC better
+
+2002-08-12  wez  <wez@pb1.pair.com>
+
+    * ext/curl/config.m4
+      ext/curl/curl.c
+      ext/curl/curlstreams.c
+      ext/curl/php_curl.h
+      ext/standard/basic_functions.c: Implement curl based wrappers.
+    Currently read-only, and http is the only thing tested.
+    Because of this, using them can be controlled by configure:
+
+    --with-curlwrappers     Use CURL for url streams
+
+    Not for production use...
+
+    This enables http, https, ftp and ldap protocols as streams.
+
+2002-08-12  helly  <helly@pb1.pair.com>
+
+    * ext/gd/libgd/gd.c: ups wrong include committed
+
+    * main/spprintf.c: increase allocation chunks
+
+    * ext/gd/config.m4
+      ext/gd/libgd/gd.c: check for fabsf and floorf in config.m4
+    msvc.6 needs a define, msvc.net needs special treatment
+
+2002-08-12  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+     - Added $DomDocument->xinclude() for substitution of XIncludes in
+        a DomDocument (chregu)
+
+2002-08-12  helly  <helly@pb1.pair.com>
+
+    * ext/gd/libgd/gd.c: more conversion fixes
+
+2002-08-12  edink  <edink@pb1.pair.com>
+
+    * main/spprintf.c
+      main/spprintf.h:
+    Export spprintf() so that extension can link properly on win32.
+
+2002-08-12  pbannister  <pbannister@pb1.pair.com>
+
+    * main/php_ini.c:
+    Minor cleanups to path building and php*.ini search logic.
+    Made path_seperator string static (which solves the lookup problems Sebastian saw).
+
+2002-08-12  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c:
+    okay confirmation they don't exist in another driver... they're gone
+
 2002-08-11  helly  <helly@pb1.pair.com>
 
     * ext/gd/libgd/gd.c: -quick hack to allow compilation under windows again
