@@ -30,6 +30,27 @@ Package=<4>
 
 ###############################################################################
 
+Project: "fastcgi"=..\sapi\fastcgi\fastcgi.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TSRM
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Zend
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "libmysql"=..\ext\mysql\libmysql\libmysql.dsp - Package Owner=<4>
 
 Package=<5>
