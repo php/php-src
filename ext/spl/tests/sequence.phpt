@@ -52,8 +52,13 @@ class c_iter implements spl_sequence_assoc {
 $t = new c();
 $i = $t->newIterator(); 
 
-$c_info = array(get_class($t) => array('inheits' => class_parents($t), 'implements' => class_implements($t)),
-                get_class($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
+$implements_t = class_implements($t);
+asort($implements_t);
+$implements_i = class_implements($i);
+asort($implements_i);
+
+$c_info = array(get_class($t) => array('inheits' => class_parents($t), 'implements' => $implements_t),
+                get_class($i) => array('inheits' => class_parents($i), 'implements' => $implements_i));
 print_r($c_info);
 
 foreach($i as $w) {
@@ -91,11 +96,11 @@ Array
 
             [implements] => Array
                 (
-                    [spl_sequence_assoc] => spl_sequence_assoc
-                    [spl_forward_assoc] => spl_forward_assoc
                     [spl_assoc] => spl_assoc
                     [spl_forward] => spl_forward
+                    [spl_forward_assoc] => spl_forward_assoc
                     [spl_sequence] => spl_sequence
+                    [spl_sequence_assoc] => spl_sequence_assoc
                 )
 
         )
