@@ -34,6 +34,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #24573 (debug_backtrace() crashes if $this set to null). (Jani)
 - Fixed bug #24560 (parse_url() incorrectly handling certain file:// based 
   schemas). (Ilia)
+- Fixed bug #24557 (make fclose() respect refcount on the resource). 
+  (Wez, Ilia)
 - Fixed bug #24537 (apache2 compile misses some include directories). (Jani)
 - Fixed bug #24535 (ext/mysql: crash when retrieving data from unbuffered
   result after the original connection has been changed). (Ilia)
