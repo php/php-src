@@ -270,29 +270,36 @@ ifx.nullformat			=	0	; NULL's are returned as empty strings, unless this is set 
 						; NULL's are returned as string 'NULL'.
 
 [Session]
-session.save_handler = files        ; handler used to store/retrieve data
-session.save_path = /tmp            ; argument passed to save_handler
+session.save_handler      = files   ; handler used to store/retrieve data
+session.save_path         = /tmp    ; argument passed to save_handler
                                     ; in the case of files, this is the
                                     ; path where data files are stored
-session.use_cookies = 1             ; whether to use cookies
-session.name = PHPSESSID            ; name of the session
+session.use_cookies       = 1       ; whether to use cookies
+session.name              = PHPSESSID  
+                                    ; name of the session
                                     ; is used as cookie name
-session.auto_start = 0              ; initialize session on request startup
-session.cookie_lifetime = 0         ; lifetime in seconds of cookie
+session.auto_start        = 0       ; initialize session on request startup
+session.cookie_lifetime   = 0       ; lifetime in seconds of cookie
                                     ; or if 0, until browser is restarted
-session.cookie_path = /             ; the path the cookie is valid for
-session.cookie_domain =             ; the domain the cookie is valid for
+session.cookie_path       = /       ; the path the cookie is valid for
+session.cookie_domain     =         ; the domain the cookie is valid for
 session.serialize_handler = php     ; handler used to serialize data
                                     ; php is the standard serializer of PHP
-session.gc_probability = 1          ; procentual probability that the 
+session.gc_probability    = 1       ; procentual probability that the 
                                     ; 'garbage collection' process is started
                                     ; on every session initialization
-session.gc_maxlifetime = 1440       ; after this number of seconds, stored
+session.gc_maxlifetime    = 1440    ; after this number of seconds, stored
                                     ; data will be seen as 'garbage' and
                                     ; cleaned up by the gc process
-session.extern_referer_check =      ;
-session.entropy_file =              ;
-session.entropy_length = 0          ;
+session.referer_check     =         ; check HTTP Referer to invalidate 
+                                    ; externally stored URLs containing ids
+session.entropy_length    = 0       ; how many bytes to read from the file
+session.entropy_file      =         ; specified here to create the session id
+; session.entropy_length    = 16
+; session.entropy_file      = /dev/urandom
+session.cache_limiter     = nocache ; set to {nocache,private,public} to
+                                    ; determine HTTP caching aspects
+session.cache_expire      = 180     ; document expires after n minutes
 
 [MSSQL]
 ;extension=php_mssql.dll
