@@ -150,129 +150,16 @@ PHP_MINFO_FUNCTION(zlib)
 	php_info_print_table_end();
 }
 
-static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path);
-
 static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
 {
-	PLS_FETCH();
-	
-	if (options & USE_PATH && PG(include_path) != NULL) {
-		return php_gzopen_with_path(path, mode, PG(include_path), NULL);
-	}
-	else {
-		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, NULL, 1))) {
-			return NULL;
-		}
-		if (php_check_open_basedir(path)) return NULL;
-		return gzopen(path, mode);
-	}
-}
+	FILE *f;
 
-/*
- * Tries to open a .gz-file with a PATH-style list of directories.
- * If the filename starts with "." or "/", the path is ignored.
- */
-static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path)
-{
-	char *pathbuf, *ptr, *end;
-	char trypath[MAXPATHLEN + 1];
-	struct stat sb;
-	gzFile *zp;
-	PLS_FETCH();
-	
-	if (opened_path) {
-		*opened_path = NULL;
-	}
-	
-	/* Relative path open */
-	if (*filename == '.') {
-		if (PG(safe_mode) &&(!php_checkuid(filename, NULL, 2))) {
-			return(NULL);
-		}
-		if (php_check_open_basedir(filename)) return NULL;
-		zp = gzopen(filename, mode);
-		if (zp && opened_path) {
-			*opened_path = expand_filepath(filename);
-		}
-		return zp;
-	}
+	f = php_fopen_wrapper(path, mode, options & ~IGNORE_URL, NULL, NULL, NULL);
 
-	/* Absolute path open - prepend document_root in safe mode */
-#ifdef PHP_WIN32
-	if ((*filename == '\\')||(*filename == '/')||(filename[1] == ':')) {
-#else
-	if (*filename == '/') {
-#endif
-		if (PG(safe_mode)) {
-			if(PG(doc_root)) {
-				snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
-			} else {
-				strlcpy(trypath,filename,sizeof(trypath));
-			}
-			if (!php_checkuid(trypath, NULL, 2)) {
-				return(NULL);
-			}
-			if (php_check_open_basedir(trypath)) return NULL;
-			zp = gzopen(trypath, mode);
-			if (zp && opened_path) {
-				*opened_path = expand_filepath(trypath);
-			}
-			return zp;
-		} else {
-			if (php_check_open_basedir(filename)) return NULL;
-			return gzopen(filename, mode);
-		}
+	if (!f) {
+		return NULL;
 	}
-
-	if (!path || (path && !*path)) {
-		if (PG(safe_mode) &&(!php_checkuid(filename, NULL, 2))) {
-			return(NULL);
-		}
-		if (php_check_open_basedir(filename)) return NULL;
-		zp = gzopen(filename, mode);
-		if (zp && opened_path) {
-			*opened_path = strdup(filename);
-		}
-		return zp;
-	}
-
-	pathbuf = estrdup(path);
-
-	ptr = pathbuf;
-
-	while (ptr && *ptr) {
-#ifdef PHP_WIN32
-		end = strchr(ptr, ';');
-#else
-		end = strchr(ptr, ':');
-#endif
-		if (end != NULL) {
-			*end = '\0';
-			end++;
-		}
-		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
-		if (PG(safe_mode)) {
-			if (V_STAT(trypath,&sb) == 0 &&(!php_checkuid(trypath, NULL, 2))) {
-				efree(pathbuf);
-				return(NULL);
-			}
-		}
-		if ((zp = gzopen(trypath, mode)) != NULL) {
-			if (php_check_open_basedir(trypath)) {
-				gzclose(zp);
-				efree(pathbuf);
-				return NULL;
-			}
-			if (opened_path) {
-				*opened_path = expand_filepath(trypath);
-			}
-			efree(pathbuf);
-			return zp;
-		}
-		ptr = end;
-	}
-	efree(pathbuf);
-	return NULL;
+	return gzdopen(fileno(f), mode);
 }
 
 /* {{{ proto array gzfile(string filename [, int use_include_path])
