@@ -33,8 +33,6 @@
 #include "zend_list.h"
 #include "zend_globals.h"
 #include "zend_API.h"
-#include "zend_variables.h"
-#include "zend_operators.h"
 
 #define YYERROR_VERBOSE
 #define YYSTYPE znode

@@ -23,8 +23,6 @@
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_compile.h"
-#include "zend_variables.h"
-#include "zend_operators.h"
 #include "zend_extensions.h"
 #include "zend_API.h"
 

@@ -21,8 +21,6 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_builtin_functions.h"
-#include "zend_operators.h"
-#include "zend_variables.h"
 #include "zend_constants.h"
 
 #undef ZEND_TEST_EXCEPTIONS
