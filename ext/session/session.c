@@ -249,7 +249,7 @@ typedef struct {
 #define CACHE_LIMITER_FUNC(name) static void CACHE_LIMITER(name)(TSRMLS_D)
 #define CACHE_LIMITER_ENTRY(name) { #name, CACHE_LIMITER(name) },
 
-#define ADD_COOKIE(a) sapi_add_header(a, strlen(a), 1);
+#define ADD_HEADER(a) sapi_add_header(a, strlen(a), 1);
 
 #define MAX_STR 512
 
@@ -742,7 +742,7 @@ static void last_modified(TSRMLS_D)
 #define LAST_MODIFIED "Last-Modified: "
 		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
 		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
-		ADD_COOKIE(buf);
+		ADD_HEADER(buf);
 	}
 }
 
@@ -757,10 +757,10 @@ CACHE_LIMITER_FUNC(public)
 #define EXPIRES "Expires: "
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
-	ADD_COOKIE(buf);
+	ADD_HEADER(buf);
 	
 	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60); /* SAFE */
-	ADD_COOKIE(buf);
+	ADD_HEADER(buf);
 	
 	last_modified(TSRMLS_C);
 }
@@ -770,24 +770,24 @@ CACHE_LIMITER_FUNC(private_no_expire)
 	char buf[MAX_STR + 1];
 	
 	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
-	ADD_COOKIE(buf);
+	ADD_HEADER(buf);
 
 	last_modified(TSRMLS_C);
 }
 
 CACHE_LIMITER_FUNC(private)
 {
-	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+	ADD_HEADER("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 	CACHE_LIMITER(private_no_expire)(TSRMLS_C);
 }
 
 CACHE_LIMITER_FUNC(nocache)
 {
-	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+	ADD_HEADER("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 	/* For HTTP/1.1 conforming clients and the rest (MSIE 5) */
-	ADD_COOKIE("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+	ADD_HEADER("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 	/* For HTTP/1.0 conforming clients */
-	ADD_COOKIE("Pragma: no-cache");
+	ADD_HEADER("Pragma: no-cache");
 }
 
 static php_session_cache_limiter_t php_session_cache_limiters[] = {
@@ -883,7 +883,7 @@ static void php_session_send_cookie(TSRMLS_D)
 
 	smart_str_0(&ncookie);
 	
-	sapi_add_header(ncookie.c, ncookie.len, 0);
+	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0);
 }
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC)
