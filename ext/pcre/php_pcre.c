@@ -627,41 +627,47 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	
 	while (*walk) {
 		/* If found a backreference.. */
-		if (('\\' == *walk || '$' == *walk ) && walk_last != '\\' &&
-			preg_get_backref(walk+1, &backref)) {
-			if (backref < count) {
-				/* Find the corresponding string match and substitute it
-				   in instead of the backref */
-				match = subject + offsets[backref<<1];
-				match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-				if (match_len)
-					esc_match = php_addslashes(match, match_len, &esc_match_len, 0);
-				else {
-					esc_match = match;
-					esc_match_len = 0;
-				}
-			} else {
-				esc_match = empty_string;
-				esc_match_len = 0;
-				match_len = 0;
+		if ('\\' == *walk || '$' == *walk) {
+		  	if (walk_last == '\\') {
+				memmove(walk-1, walk, code_len - (walk - code) + 1);
+				walk_last = 0;
+				continue;
 			}
-			sprintf(backref_buf, "%c%d", *walk, backref);
-			new_code = php_str_to_str(code, code_len,
-									  backref_buf, (backref > 9) ? 3 : 2,
-									  esc_match, esc_match_len, &new_code_len);
-			
-			/* Adjust the walk pointer */
-			walk = new_code + (walk - code) + match_len;
-			
-			/* Clean up and reassign */
-			if (esc_match_len)
-				efree(esc_match);
-			efree(code);
-			code = new_code;
-			code_len = new_code_len;
-		} else {
-			walk++;
+			if (preg_get_backref(walk+1, &backref)) {
+				if (backref < count) {
+					/* Find the corresponding string match and substitute it
+					   in instead of the backref */
+					match = subject + offsets[backref<<1];
+					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+					if (match_len)
+						esc_match = php_addslashes(match, match_len, &esc_match_len, 0);
+					else {
+						esc_match = match;
+						esc_match_len = 0;
+					}
+				} else {
+					esc_match = empty_string;
+					esc_match_len = 0;
+					match_len = 0;
+				}
+				sprintf(backref_buf, "%c%d", *walk, backref);
+				new_code = php_str_to_str(code, code_len,
+										  backref_buf, (backref > 9) ? 3 : 2,
+										  esc_match, esc_match_len, &new_code_len);
+
+				/* Adjust the walk pointer */
+				walk = new_code + (walk - code) + match_len;
+
+				/* Clean up and reassign */
+				if (esc_match_len)
+					efree(esc_match);
+				efree(code);
+				code = new_code;
+				code_len = new_code_len;
+				continue;
+			}
 		}
+		walk++;
 		walk_last = walk[-1];
 	}
 
@@ -779,15 +785,21 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				walk = replace;
 				walk_last = 0;
 				while (walk < replace_end) {
-					if (('\\' == *walk || '$' == *walk) && walk_last != '\\' &&
-						preg_get_backref(walk+1, &backref)) {
-						if (backref < count)
-							new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
-						walk += (backref > 9) ? 3 : 2;
-					} else {
-						new_len++;
-						walk++;
+					if ('\\' == *walk || '$' == *walk) {
+						if (walk_last == '\\') {
+							walk++;
+							walk_last = 0;
+							continue;
+						}
+						if (preg_get_backref(walk+1, &backref)) {
+							if (backref < count)
+								new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+							walk += (backref > 9) ? 3 : 2;
+							continue;
+						}
 					}
+					new_len++;
+					walk++;
 					walk_last = walk[-1];
 				}
 			}
@@ -816,17 +828,23 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				walk = replace;
 				walk_last = 0;
 				while (walk < replace_end) {
-					if (('\\' == *walk || '$' == *walk) && walk_last != '\\' &&
-						preg_get_backref(walk+1, &backref)) {
-						if (backref < count) {
-							match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-							memcpy(walkbuf, subject + offsets[backref<<1], match_len);
-							walkbuf += match_len;
+					if ('\\' == *walk || '$' == *walk) {
+						if (walk_last == '\\') {
+							*(walkbuf-1) = *walk++;
+							walk_last = 0;
+							continue;
 						}
-						walk += (backref > 9) ? 3 : 2;
-					} else {
-						*walkbuf++ = *walk++;
+						if (preg_get_backref(walk+1, &backref)) {
+							if (backref < count) {
+								match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+								memcpy(walkbuf, subject + offsets[backref<<1], match_len);
+								walkbuf += match_len;
+							}
+							walk += (backref > 9) ? 3 : 2;
+							continue;
+						}
 					}
+					*walkbuf++ = *walk++;
 					walk_last = walk[-1];
 				}
 				*walkbuf = '\0';
