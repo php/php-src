@@ -203,8 +203,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset", SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_charset,		sapi_globals_struct,sapi_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_mimetype,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_charset", SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateString,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",		PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,				php_core_globals,	core_globals)
@@ -1103,8 +1103,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	UpdateIniFromRegistry(primary_file->filename);
 #endif
 
-	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0] &&
-		strncmp(PG(auto_prepend_file), "none", 4) != 0) {
+	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		prepend_file.filename = PG(auto_prepend_file);
 		prepend_file.free_filename = 0;
 		prepend_file.type = ZEND_HANDLE_FILENAME;
@@ -1112,8 +1111,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	} else {
 		prepend_file_p = NULL;
 	}
-	if (PG(auto_append_file) && PG(auto_append_file)[0] &&
-		strncmp(PG(auto_append_file), "none", 4) != 0) {
+	if (PG(auto_append_file) && PG(auto_append_file)[0]) {
 		append_file.filename = PG(auto_append_file);
 		append_file.free_filename = 0;
 		append_file.type = ZEND_HANDLE_FILENAME;

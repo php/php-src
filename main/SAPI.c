@@ -184,7 +184,7 @@ SAPI_API char *sapi_get_default_content_type(SLS_D)
 	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
-	if (strncasecmp(mimetype, "text/", 5) == 0 && strcasecmp(charset, "none") != 0) {
+	if (strncasecmp(mimetype, "text/", 5) == 0 && *charset) {
 		int len = strlen(mimetype) + sizeof("; charset=") + strlen(charset);
 		content_type = emalloc(len);
 		snprintf(content_type, len, "%s; charset=%s", mimetype, charset);
@@ -205,13 +205,12 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: "));
 	memcpy(default_header->header+sizeof("Content-type: ")-1, default_content_type, default_content_type_len);
 	default_header->header[default_header->header_len] = 0;
-
 	efree(default_content_type);
 }
 
 /*
  * Add charset on content-type header if the MIME type starts with
- * "text/", the default_charset directive is not set to "none" and
+ * "text/", the default_charset directive is not empty and
  * there is not already a charset option in there.
  *
  * If "mimetype" is non-NULL, it should point to a pointer allocated
@@ -226,7 +225,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC)
 	int newlen;
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
-	if (strcasecmp(charset, "none") != 0 && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
+	if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
 		newlen = len + (sizeof(";charset=")-1) + strlen(charset);
 		newtype = emalloc(newlen + 1);
 		strlcpy(newtype, *mimetype, len);
