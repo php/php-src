@@ -1,14 +1,14 @@
 <?php
 
-/**
- * @brief   This implements a Dba Iterator.
+/** \ingroup Examples
+ * @brief   This implements a DBA Iterator.
  * @author  Marcus Boerger
  * @version 1.0
  */
 class DbaReader implements Iterator
 {
 
-	private $db = NULL;
+	protected $db = NULL;
 	private $key = false;
 	private $val = false;
 

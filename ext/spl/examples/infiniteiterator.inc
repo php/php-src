@@ -1,6 +1,6 @@
 <?php
 
-/**
+/** \ingroup Examples
  * @brief   An infinite Iterator
  * @author  Marcus Boerger
  * @version 1.0
@@ -22,38 +22,57 @@
  */
 class InfiniteIterator implements Iterator
 {
+	/** @internal 
+	 * The inner Iterator. */
 	private $it;
 
+	/** Construct from another Iterator.
+	 * @param $it the inner Iterator.
+	 */
 	function __construct(Iterator $it)
 	{
 		$this->it = $it;
 	}
 
+	/** @return the inner iterator
+	 */
 	function getInnerIterator()
 	{
 		return $this->it;
 	}
 
+	/** Rewind the inner iterator.
+	 * @return void
+	 */
 	function rewind()
 	{
 		$this->it->rewind();
 	}
 
+	/** @return whether the current element is valid
+	 */
 	function valid()
 	{
 		return $this->it->valid();
 	}
 
+	/** @return the current value
+	 */
 	function current()
 	{
 		return $this->it->current();
 	}
 
+	/** @return the current key
+	 */
 	function key()
 	{
 		return $this->it->key();
 	}
 
+	/** Move the inner Iterator forward to its next element or rewind it.
+	 * @return void
+	 */
 	function next()
 	{
 		$this->it->next();
@@ -61,6 +80,13 @@ class InfiniteIterator implements Iterator
 		{
 			$this->it->rewind();
 		}
+	}
+
+	/** Aggregates the inner iterator
+	 */	
+	function __call($func, $params)
+	{
+		return call_user_func_array(array($this->getSubIterator(), $func), $params);
 	}
 }
 

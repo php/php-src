@@ -1,24 +1,48 @@
 <?php
 
+/** \ingroup Examples
+ * @brief   A filtered DirectoryIterator
+ * @author  Marcus Boerger
+ * @version 1.0
+ *
+ * This Iteraotr takes a pathname from which it creates a DirectoryIterator
+ * and makes it recursive. Further more it filters the entries '.' and '..'.
+ */
 class DirectoryFilterDots extends FilterIterator implements RecursiveIterator
 {
-	function __construct($path) {
+	/** Construct from a path.
+	 * @param $path directory to iterate
+	 */
+	function __construct($path)
+	{
 		parent::__construct(new DirectoryIterator($path));
 	}
-	
-	function accept() {
+
+	/** @return whether the current entry is neither '.' nor '..'
+	 */	
+	function accept()
+	{
 		return !$this->it->isDot();
 	}
 	
-	function hasChildren() {
+	/** @return whether the current entry is a directory
+	 */
+	function hasChildren()
+	{
 		return $this->it->hasChildren();
 	}
 
-	function getChildren() {
+	/** @return the current subdirectory as a new DirectoryFilterDots instance.
+	 */
+	function getChildren()
+	{
 		return new DirectoryFilterDots($this->it->getPathname());
 	}
 	
-	function key() {
+	/** @return the current entries path name
+	 */
+	function key()
+	{
 		return $this->it->getPathname();
 	}
 }

@@ -24,15 +24,10 @@ EOF;
 	exit(1);
 }
 
-class RegexFindFile extends FindFile
-{
-	function accept()
-	{
-		return preg_match($this->file, $this->current());
-	}
-}
+if (!class_exists("RegexFindFile")) require_once("regexfindfile.inc");
 
-foreach(new RegexFindFile($argv[1], $argv[2]) as $file) {
+foreach(new RegexFindFile($argv[1], $argv[2]) as $file)
+{
 	echo $file->getPathname()."\n";
 }
 

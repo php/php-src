@@ -1,15 +1,26 @@
 <?php
 
+if (!class_exists("FindFile")) require_once("findfile.inc");
+if (!class_exists("AppendIterator")) require_once("appenditerator.inc");
+
 /**
  * @brief   Base class to find files
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  */
 class FindFile extends FilterIterator
 {
-	protected $file;
+	/** @internal filename to find */
+	private $file;
 
+	/** Construct from path and filename
+	 *
+	 * @param $path the directory to search in
+	 *              If path contains ';' then this parameter is split and every
+	 *              part of it is used as separate directory.
+	 * @param $file the name of the files to search fro
+	 */
 	function __construct($path, $file)
 	{
 		$this->file = $file;
@@ -25,9 +36,20 @@ class FindFile extends FilterIterator
 		}
 	}
 
+	/** @return whether the current file matches the given filename
+	 */
 	function accept()
 	{
 		return !strcmp($this->current(), $this->file);
+	}
+
+	/** @return the filename to search for.
+	 * @note This may be overloaded and contain a regular expression for an
+	 *       extended class that uses regular expressions to search.
+	 */
+	function getSearch()
+	{
+		return $this->file;
 	}
 }
 
