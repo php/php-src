@@ -311,7 +311,7 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 				if (Z_LVAL_P(zval_arg)) {
 					*V_BOOLREF(var_arg) = VT_TRUE;
 				} else {
-					*V_BOOLREF(var_arg) = VT_TRUE;
+					*V_BOOLREF(var_arg) = VT_FALSE;
 				}
 				break;
 
