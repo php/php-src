@@ -752,6 +752,10 @@ _php_math_basetolong(zval *arg, int base) {
 		if (digit >= base) {
 			continue;
 		}
+		if(!mult || digit > LONG_MAX/mult || num > LONG_MAX-mult*digit) {
+			php_error(E_WARNING, "base_to_long: number '%s' is too big to fit in long", s);
+			return LONG_MAX;
+		}
 		num += mult * digit;
 	}
 
