@@ -10,7 +10,7 @@ if(!function_exists('xslt_backend_info')) {
 if(xslt_backend_name() != "Sablotron") {
 	die("skip This test currently only supports Sablotron");
 }
-if("No information available" == xslt_backend_info()) {
+if("No information available." == xslt_backend_info()) {
 	die("skip Information could not be detected.");
 }
 ?>
