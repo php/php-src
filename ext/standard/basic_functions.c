@@ -1247,7 +1247,7 @@ PHP_FUNCTION(ip2long)
 	convert_to_string_ex(str);
 
 	if (Z_STRLEN_PP(str) == 0 || (ip = inet_addr(Z_STRVAL_PP(str))) == INADDR_NONE) {
-		RETURN_LONG(-1);
+		RETURN_FALSE;
 	}
 
 	RETURN_LONG(ntohl(ip));
