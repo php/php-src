@@ -106,7 +106,8 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	xmlAttrPtr      attr;
 	int             counter = 0;
 
-	MAKE_STD_ZVAL(return_value);
+	ALLOC_ZVAL(return_value);
+	return_value->refcount = 0;
 	ZVAL_NULL(return_value);
 
 	name = Z_STRVAL_P(member);
@@ -121,9 +122,9 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_PREV_ELEMENT(counter, value);
 			
 			MAKE_STD_ZVAL(value);
+			value->refcount = 0;
 			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
 			ZVAL_STRING(value, contents, 0);
-
 			APPEND_CUR_ELEMENT(counter, value);
 		}
 		attr = attr->next;
@@ -146,7 +147,8 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			
 			if (match_ns(sxe, node, name)) {
 				MAKE_STD_ZVAL(value);
-				_node_as_zval(sxe, node->parent, value);
+				_node_as_zval(sxe, node->parent, value TSRMLS_CC);
+				value->refcount = 0;
 				APPEND_CUR_ELEMENT(counter, value);
 				goto next_iter;
 			}
@@ -154,9 +156,10 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
-
+ 
 			MAKE_STD_ZVAL(value);
 			_node_as_zval(sxe, node, value TSRMLS_CC);
+			value->refcount = 0;
 
 			APPEND_CUR_ELEMENT(counter, value);
 		}
@@ -167,6 +170,9 @@ next_iter:
 
 	/* Only one value found */
 	if (counter == 1) {
+		SEPARATE_ZVAL(&value);
+		zval_dtor(return_value);
+		FREE_ZVAL(return_value);
 		return_value = value;
 	}
 
@@ -328,7 +334,8 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 	while (attr) {
 		anext = attr->next;
 		if (!xmlStrcmp(attr->name, Z_STRVAL_P(member))) {
-			// free
+			xmlUnlinkNode((xmlNodePtr) attr);
+			xmlFreeProp(attr);
 		}
 		attr = anext;
 	}
@@ -353,7 +360,7 @@ next_iter:
 /* {{{ _get_base_node_value()
  */
 static void
-_get_base_node_value(xmlNodePtr node, zval **value TSRMLS_CC)
+_get_base_node_value(xmlNodePtr node, zval **value TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 	char           *contents;
@@ -364,6 +371,7 @@ _get_base_node_value(xmlNodePtr node, zval **value TSRMLS_CC)
 		contents = xmlNodeListGetString(node->doc, node->children, 1);
 		if (contents) {
 			ZVAL_STRING(*value, contents, 1);
+			xmlFree(contents);
 		}
 	} else {
 		subnode = php_sxe_object_new(TSRMLS_C);
@@ -455,6 +463,7 @@ sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	} else {
 		return !(sxe1->node == sxe2->node);
 	}
+	return 1;
 }
 /* }}} */
 
@@ -525,9 +534,9 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 		 * to the parent node.
 		 */
 		if (result->nodeTab[i]->type == XML_TEXT_NODE) {
-			_node_as_zval(sxe, result->nodeTab[i]->parent, value);
+			_node_as_zval(sxe, result->nodeTab[i]->parent, value TSRMLS_CC);
 		} else {
-			_node_as_zval(sxe, result->nodeTab[i], value);
+			_node_as_zval(sxe, result->nodeTab[i], value TSRMLS_CC);
 		}
 		add_next_index_zval(return_value, value);
 	}
@@ -576,6 +585,7 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	is_valid = xmlSchemaValidateDoc(vptr, (xmlDocPtr) sxe->document->ptr);
 	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
+	xmlSchemaFreeParserCtxt(parser);
 
 	if (is_valid) {
 		RETURN_TRUE;
@@ -683,7 +693,7 @@ static void
 sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	php_sxe_object *sxe;
-	char           *contents;
+	char           *contents = NULL;
 
     sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 	
@@ -699,6 +709,10 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	}
 
 	cast_object(writeobj, type, contents TSRMLS_CC);
+
+	if (contents) {
+		xmlFree(contents);
+	}
 }
 /* }}} */
 
@@ -783,20 +797,25 @@ sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
+	zend_hash_destroy(sxe->zo.properties);
 	FREE_HASHTABLE(sxe->zo.properties);
 
-	if (--sxe->document->refcount > 0) {
-		return;
+	if (sxe->document) {
+		if (--sxe->document->refcount == 0) {
+			if (sxe->document->ptr) {
+				xmlFreeDoc(sxe->document->ptr);
+			}
+			efree(sxe->document);
+			sxe->document = NULL;
+			xmlHashFree(sxe->nsmap, _free_ns_entry);
+		}
 	}
-	xmlFreeDoc(sxe->document->ptr);
-	efree(sxe->document);
-		
+	
 	if (sxe->xpath) {
 		xmlXPathFreeContext(sxe->xpath);
 	}
 
-	xmlHashFree(sxe->nsmap, _free_ns_entry);
-	zend_objects_destroy_object(object, handle TSRMLS_CC);
+	efree(object);
 }
 /* }}} */
 
@@ -811,6 +830,9 @@ php_sxe_object_new(TSRMLS_D)
 	intern->zo.ce = sxe_class_entry;
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
+	intern->document = NULL;
+	intern->nsmap = NULL;
+	intern->xpath = NULL;
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -990,6 +1012,7 @@ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
+	xmlCleanupParser();
 	return SUCCESS;
 }
 /* }}} */
