@@ -138,15 +138,22 @@ dnl to make dynamic libraries as well.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
   EXT_SUBDIRS="$EXT_SUBDIRS $1"
-  _extlib="libphpext_$1.a"
-  EXT_LIBS="$EXT_LIBS $1/$_extlib"
-  EXTINFO_DEPS="$EXTINFO_DEPS ../ext/$1/extinfo.c.stub"
+  if test "$2" != "shared" -a "$2" != "yes"; then
+    _extlib="libphpext_$1.a"
+    EXT_LIBS="$EXT_LIBS $1/$_extlib"
+    EXTINFO_DEPS="$EXTINFO_DEPS ../ext/$1/extinfo.c.stub"
+    EXT_STATIC="$EXT_STATIC $1"
+  else
+    EXT_SHARED="$EXT_SHARED $1"
+  fi
 dnl   EXT_INCLUDE_CODE="\#include \"ext/$1/php3_$1.h\"\\n$EXT_INCLUDE_CODE"
 dnl   EXT_MODULE_PTRS="phpext_$1_ptr, $EXT_MODULE_PTRS"
 dnl "
 ])
 
 AC_SUBST(EXT_SUBDIRS)
+AC_SUBST(EXT_STATIC)
+AC_SUBST(EXT_SHARED)
 AC_SUBST(EXT_LIBS)
 AC_SUBST(EXTINFO_DEPS)
 dnl AC_SUBST(EXT_INCLUDE_CODE)
