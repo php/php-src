@@ -75,7 +75,7 @@ class PEAR_Dependency
                 return $this->checkSAPI($name);
                 break;
             default:
-                return "'{$opts['type']}' dependencie type not supported";
+                return "'{$opts['type']}' dependency type not supported";
         }
     }
 
@@ -90,21 +90,30 @@ class PEAR_Dependency
      */
     function checkPackage($name, $req = null, $relation = 'has')
     {
-        if (!$this->registry->packageExists($name)) {
-            return "'$name' PEAR package is not installed";
+        switch ($relation) {
+            case 'has':
+                if (!$this->registry->packageExists($name)) {
+                    return "requires package `$name'";
+                }
+                return false;
+            case 'not':
+                if (!$this->registry->packageExists($name)) {
+                    return "conflicts with package `$name'";
+                }
+                return false;
+            case 'lt':
+            case 'le':
+            case 'eq':
+            case 'ne':
+            case 'ge':
+            case 'gt':
+                $version = $this->registry->packageInfo($name, 'version');
+                if (!version_compare($version, $req, $relation)) {
+                    return "requires package `$name' " .
+                        $this->signOperator($relation) . " $req";
+                }
         }
-        if (substr($relation, 0, 2) == 'v.') {
-            $pkg_ver = $this->registry->packageInfo($name, 'version');
-            $operator = substr($relation, 2);
-            if (!version_compare($pkg_ver, $req, $operator)) {
-                return "'$name' PEAR package version " .
-                        $this->signOperator($operator) . " $req is required";
-            }
-            return false;
-        } elseif ($relation == 'has') {
-            return false;
-        }
-        return "Relation '$relation' with requirement '$req' is not supported";
+        return "Relation '$relation' with requirement '$req' is not supported (name=$name)";
     }
 
     /**
