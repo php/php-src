@@ -227,7 +227,7 @@ PHP 4                                                                      NEWS
 - Added XsltObject->result_dump_mem($result) for returning xslt-result directly
   into a string and XsltObject->result_dump_file($result,$file[,$compression]) 
   for dumping into a file. (morus.walter@web.de, chregu)
-- Made mime_magic, FriBidi and ZIP extensions available on Windows. (Edin)
+- Made mime_magic and ZIP extensions available on Windows. (Edin)
 - Added xslt_backend_version() and xslt_backend_name() for getting
   information about the processor backend. (chregu)
 - Added php.ini option "allow_webdav_methods" to allow handling of
