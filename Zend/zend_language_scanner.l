@@ -1001,24 +1001,31 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>{LNUM}|{HNUM} {
+<ST_IN_SCRIPTING>{LNUM} {
 	errno = 0;
-	zendlval->value.lval = strtoul(yytext, NULL, 0);
+	zendlval->value.lval = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		if(yytext[0] == 0 && (yytext[1] == 'x' || yytext[1] == 'X') ) {
-			/* strtod for 0x'es returns trash */
-			zendlval->value.lval = LONG_MAX; /* maximal long */
-			zendlval->type = IS_LONG;
-			zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
-		} else {
-			zendlval->value.dval = strtod(yytext,NULL);
-			zendlval->type = IS_DOUBLE;
-		}
+		zendlval->value.dval = strtod(yytext,NULL);
+		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	} else {
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
 	}
+}
+
+<ST_IN_SCRIPTING>{HNUM} {
+	errno = 0;
+	zendlval->value.lval = strtoul(yytext, NULL, 16);
+	if (errno == ERANGE) { /* overflow */
+		/* not trying strtod - it returns trans on 0x-es */
+		zendlval->value.lval = LONG_MAX; /* maximal long */
+		zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
+	} else {
+		zendlval->type = IS_LONG;
+	}
+	zendlval->type = IS_LONG;
+	return T_LNUMBER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
