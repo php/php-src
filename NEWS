@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added dba_handlers() that lists all installed handlers in an array. (marcus)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -12,6 +11,7 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Added dba_handlers() that returns an array of installed handlers. (Marcus)
 - Added Oracle (oci8) support to dbx module. (Marc)
 - Updated FDF extension to work with Adode fdftk 5.0. (Hartmut)
 - Made raw POST data to be available also as "php://input" stream. (Hartmut)
