@@ -1,3 +1,58 @@
+2003-08-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      Restrict scope of inline functions to compile unit
+      
+      Submitted by: Jason Greene <jason@inetgurus.net>
+
+2003-08-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS:
+      It is maintained now by Ard
+
+2003-08-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/dba/config.m4:
+      ws fix
+
+    * ext/db/config.m4
+      ext/dba/config.m4:
+      MFB
+
+    * (PHP_4_3)
+      ext/db/config.m4:
+      fix typo
+
+    * NEWS:
+      group those ibase entries a bit + added ibase_free_event_handler() too
+
+2003-08-15  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added ibase_free_event_handler()
+
+2003-08-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      new functions in ext/interbase
+
+2003-08-15  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/cpdf/cpdf.c:
+      2 proto fixes (Mehdi Achour)
+
+2003-08-15  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Moved TRMLS_FETCH to correct scope
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added ibase_set_event_handler()
+
 2003-08-14  Wez Furlong  <wez.php@thebrainroom.net>
 
     * EXTENSIONS:

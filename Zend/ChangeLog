@@ -1,3 +1,11 @@
+2003-08-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_execute.c
+      zend_object_handlers.c:
+      Restrict scope of inline functions to compile unit
+      
+      Submitted by: Jason Greene <jason@inetgurus.net>
+
 2003-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects_API.c:
