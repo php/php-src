@@ -42,7 +42,7 @@ function list_attr($node) {
   }
 }
 
-$xmlstr = "<?xml version='1.0'?>
+$xmlstr = "<?xml version='1.0' standalone='yes'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
 [ <!ENTITY sp \"spanish\">
 ]>
@@ -72,6 +72,7 @@ if(!$dom = xmldoc($xmlstr)) {
   exit;
 }
 echo "XML Version: ".$dom->version."\n";
+echo "Standalone: ".$dom->standalone."\n";
 $dtd = $dom->dtd();
 $rootnode = $dom->children();
 foreach($rootnode as $root)
@@ -104,4 +105,6 @@ $table->setattr("WIDTH", "100%");
 $table->new_child("TR", " ");
 echo $doc->dumpmem();
 
+$doc = new TestNode($xmlstr);
+var_dump($doc);
 ?>
