@@ -111,18 +111,12 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecopy,								NULL)
 	PHP_FE(imagecopyresized,						NULL)
 	PHP_FE(imagecreate,								NULL)
-#ifdef HAVE_GD_PNG
 	PHP_FE(imagecreatefrompng,						NULL)
 	PHP_FE(imagepng,								NULL)
-#endif
-#ifdef HAVE_GD_GIF
 	PHP_FE(imagecreatefromgif,						NULL)
 	PHP_FE(imagegif,								NULL)
-#endif
-#ifdef HAVE_GD_JPG
 	PHP_FE(imagecreatefromjpeg,						NULL)
 	PHP_FE(imagejpeg,								NULL)
-#endif
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagefill,								NULL)
 	PHP_FE(imagefilledpolygon,						NULL)
@@ -141,11 +135,8 @@ function_entry gd_functions[] = {
 	PHP_FE(imagesx,									NULL)
 	PHP_FE(imagesy,									NULL)
 	PHP_FE(imagedashedline,							NULL)
-#ifdef ENABLE_GD_TTF
 	PHP_FE(imagettfbbox,							NULL)
 	PHP_FE(imagettftext,							NULL)
-#endif
-#if HAVE_LIBT1
 	PHP_FE(imagepsloadfont,							NULL)
 	/*
 	PHP_FE(imagepscopyfont,							NULL)
@@ -156,7 +147,6 @@ function_entry gd_functions[] = {
 	PHP_FE(imagepsslantfont,						NULL)
 	PHP_FE(imagepstext,								NULL)
 	PHP_FE(imagepsbbox,								NULL)
-#endif
 	{NULL, NULL, NULL}
 };
 
@@ -425,12 +415,12 @@ PHP_FUNCTION(imagecreate)
 }
 /* }}} */
 
-#ifdef HAVE_GD_PNG
 
 /* {{{ proto int imagecreatefrompng(string filename)
    Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefrompng)
 {
+#ifdef HAVE_GD_PNG
 	zval **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -463,6 +453,10 @@ PHP_FUNCTION(imagecreatefrompng)
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+#else /* HAVE_GD_PNG */
+	php_error(E_WARNING, "ImageCreateFromPng: No PNG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_PNG */
 }
 /* }}} */
 
@@ -470,6 +464,7 @@ PHP_FUNCTION(imagecreatefrompng)
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
+#ifdef HAVE_GD_PNG
 	zval **imgind, **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -529,17 +524,19 @@ PHP_FUNCTION(imagepng)
         /* the temporary file is automatically deleted */
     }
     RETURN_TRUE;
+#else /* HAVE_GD_PNG */
+	php_error(E_WARNING, "ImagePng: No PNG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_PNG */
 }
 /* }}} */
 
-#endif /* HAVE_GD_PNG */
-
-#ifdef HAVE_GD_GIF
 
 /* {{{ proto int imagecreatefromgif(string filename)
    Create a new image from GIF file or URL */
 PHP_FUNCTION(imagecreatefromgif )
 {
+#ifdef HAVE_GD_GIF
 	zval **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -577,6 +574,10 @@ PHP_FUNCTION(imagecreatefromgif )
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+#else /* HAVE_GD_GIF */
+	php_error(E_WARNING, "ImageCreateFromGif: No GIF support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GIF */
 }
 /* }}} */
 
@@ -584,6 +585,7 @@ PHP_FUNCTION(imagecreatefromgif )
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
+#ifdef HAVE_GD_GIF
 	zval **imgind, **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -651,17 +653,19 @@ PHP_FUNCTION(imagegif)
 	}
 
 	RETURN_TRUE;
+#else /* HAVE_GD_GIF */
+	php_error(E_WARNING, "ImageGif: No GIF support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GIF */
 }
 /* }}} */
 
-#endif /* HAVE_GD_GIF */
-
-#ifdef HAVE_GD_JPG
 
 /* {{{ proto int imagecreatefromjpeg(string filename)
    Create a new image from JPEG file or URL */
 PHP_FUNCTION(imagecreatefromjpeg)
 {
+#ifdef HAVE_GD_JPG
 	zval **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -694,6 +698,10 @@ PHP_FUNCTION(imagecreatefromjpeg)
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+#else /* HAVE_GD_JPG */
+	php_error(E_WARNING, "ImageCreateFromJpeg: No JPG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_JPG */
 }
 /* }}} */
 
@@ -701,6 +709,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
+#ifdef HAVE_GD_JPG
 	zval **imgind, **file, **qual;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -765,10 +774,12 @@ PHP_FUNCTION(imagejpeg)
         /* the temporary file is automatically deleted */
     }
     RETURN_TRUE;
+#else /* HAVE_GD_JPG */
+	php_error(E_WARNING, "ImageJpeg: No JPG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_JPG */
 }
 /* }}} */
-
-#endif
 
 /* {{{ proto int imagedestroy(int im)
    Destroy an image */
@@ -1820,15 +1831,20 @@ PHP_FUNCTION(imagesy)
 /* }}} */
 
 #ifdef ENABLE_GD_TTF
-
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
+#endif
 
 /* {{{ proto array imagettfbbox(int size, int angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
+#ifdef ENABLE_GD_TTF
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX);
+#else 
+	php_error(E_WARNING, "ImageTtfBBox: No TTF support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -1836,10 +1852,16 @@ PHP_FUNCTION(imagettfbbox)
    Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
+#ifdef ENABLE_GD_TTF
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW);
+#else 
+	php_error(E_WARNING, "ImageTtfText: No TTF support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
+#ifdef ENABLE_GD_TTF
 static
 void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
@@ -1918,10 +1940,13 @@ void php_free_ps_enc(char **enc)
 	T1_DeleteEncoding(enc);
 }
 
+#endif
+
 /* {{{ proto int imagepsloadfont(string pathname)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
+#if HAVE_LIBT1
 	zval **file;
 	int f_ind;
 	int *font;
@@ -1957,6 +1982,10 @@ PHP_FUNCTION(imagepsloadfont)
 	font = (int *) emalloc(sizeof(int));
 	*font = f_ind;
 	ZEND_REGISTER_RESOURCE(return_value, font, GDG(le_ps_font));
+#else 
+	php_error(E_WARNING, "ImagePsLoadFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -1966,6 +1995,7 @@ Make a copy of a font for purposes like extending or reenconding */
 /*
 PHP_FUNCTION(imagepscopyfont)
 {
+#if HAVE_LIBT1
 	pval *fnt;
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
@@ -2012,6 +2042,10 @@ PHP_FUNCTION(imagepscopyfont)
 	nf_ind->extend = 1;
 	l_ind = zend_list_insert(nf_ind, GDG(le_ps_font));
 	RETURN_LONG(l_ind);
+#else 
+	php_error(E_WARNING, "ImagePsCopyFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 */
 /* }}} */
@@ -2020,6 +2054,7 @@ PHP_FUNCTION(imagepscopyfont)
    Free memory used by a font */
 PHP_FUNCTION(imagepsfreefont)
 {
+#if HAVE_LIBT1
 	zval **fnt;
 	int *f_ind;
 
@@ -2031,6 +2066,10 @@ PHP_FUNCTION(imagepsfreefont)
 
 	zend_list_delete((*fnt)->value.lval);
 	RETURN_TRUE;
+#else 
+	php_error(E_WARNING, "ImagePsFreeFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
@@ -2038,6 +2077,7 @@ PHP_FUNCTION(imagepsfreefont)
    To change a fonts character encoding vector */
 PHP_FUNCTION(imagepsencodefont)
 {
+#if HAVE_LIBT1
 	zval **fnt, **enc;
 	char **enc_vector;
 	int *f_ind;
@@ -2063,6 +2103,10 @@ PHP_FUNCTION(imagepsencodefont)
 	}
 	zend_list_insert(enc_vector, GDG(le_ps_enc));
 	RETURN_TRUE;
+#else 
+	php_error(E_WARNING, "ImagePsEncodeFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -2070,6 +2114,7 @@ PHP_FUNCTION(imagepsencodefont)
    Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
+#if HAVE_LIBT1
 	zval **fnt, **ext;
 	int *f_ind;
 
@@ -2084,6 +2129,10 @@ PHP_FUNCTION(imagepsextendfont)
 	if (T1_ExtendFont(*f_ind, (*ext)->value.dval) != 0) RETURN_FALSE;
 
 	RETURN_TRUE;
+#else 
+	php_error(E_WARNING, "ImagePsExtendFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -2091,6 +2140,7 @@ PHP_FUNCTION(imagepsextendfont)
    Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
+#if HAVE_LIBT1
 	zval **fnt, **slt;
 	int *f_ind;
 
@@ -2104,6 +2154,10 @@ PHP_FUNCTION(imagepsslantfont)
 
 	if (T1_SlantFont(*f_ind, (*slt)->value.dval) != 0) RETURN_FALSE;
 	RETURN_TRUE;
+#else 
+	php_error(E_WARNING, "ImagePsSlantFont: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -2111,6 +2165,7 @@ PHP_FUNCTION(imagepsslantfont)
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
+#if HAVE_LIBT1
 	zval **img, **str, **fnt, **sz, **fg, **bg, **sp, **px, **py, **aas, **wd, **ang;
 	int i, j, x, y;
 	int space;
@@ -2254,6 +2309,10 @@ PHP_FUNCTION(imagepstext)
 	add_next_index_long(return_value, str_img->metrics.rightSideBearing);
 	add_next_index_long(return_value, str_img->metrics.ascent);
 
+#else 
+	php_error(E_WARNING, "ImagePsText: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
 
@@ -2261,6 +2320,7 @@ PHP_FUNCTION(imagepstext)
    Return the bounding box needed by a string if rasterized */
 PHP_FUNCTION(imagepsbbox)
 {
+#if HAVE_LIBT1
 	zval **str, **fnt, **sz, **sp, **wd, **ang;
 	int i, space, add_width, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
@@ -2361,10 +2421,12 @@ PHP_FUNCTION(imagepsbbox)
 	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*(*sz)->value.lval/1000));
 	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*(*sz)->value.lval/1000));
 	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*(*sz)->value.lval/1000));
+#else 
+	php_error(E_WARNING, "ImagePsBBox: No T1lib support in this PHP build");
+	RETURN_FALSE;
+#endif 
 }
 /* }}} */
-
-#endif	/* HAVE_LIBT1 */
 
 #endif	/* HAVE_LIBGD */
 
