@@ -183,6 +183,33 @@ _notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *sys_i
 }
 
 static void
+_build_comment(const xmlChar *data, int data_len, xmlChar **comment, int *comment_len)
+{
+	*comment_len = data_len + 6;
+	
+	*comment = emalloc(*comment_len + 1);
+	memcpy(*comment, "<--", 3);
+	memcpy(*comment + 3, data, data_len);
+	memcpy(*comment + 3 + data_len, "-->", 3);
+
+	(*comment)[*comment_len] = '\0';
+}
+
+static void
+_comment_handler(void *user, const xmlChar *comment)
+{
+	XML_Parser parser = (XML_Parser) user;
+
+	if (parser->h_default) {
+		xmlChar *d_comment;
+		int      d_comment_len;
+
+		_build_comment(comment, xmlStrlen(comment), &d_comment, &d_comment_len);
+		parser->h_default(parser->user, d_comment, d_comment_len);
+	}
+}
+
+static void
 _external_entity_ref_handler(void *user, const xmlChar *names, int type, const xmlChar *sys_id, const xmlChar *pub_id, xmlChar *content)
 {
 	XML_Parser parser = (XML_Parser) user;
@@ -216,7 +243,7 @@ php_xml_compat_handlers = {
 	_cdata_handler,
 	NULL, /* ignorableWhitespace */
 	_pi_handler,
-	NULL, /* comment */
+	_comment_handler, /* comment */
 	NULL, /* warning */
 	NULL, /* error */
 	NULL /* fatalError */
@@ -273,7 +300,6 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
-		parser->mem_hdlrs.free_fcn(parser->parser);
 		return NULL;
 	}
 	if (encoding != NULL) {
@@ -318,6 +344,12 @@ void
 XML_SetProcessingInstructionHandler(XML_Parser parser, XML_ProcessingInstructionHandler pi)
 {
 	parser->h_pi = pi;
+}
+
+void
+XML_SetCommentHandler(XML_Parser parser, XML_CommentHandler comment)
+{
+	parser->h_comment = comment;
 }
 
 void 

@@ -35,6 +35,7 @@ typedef void (*XML_StartElementHandler)(void *, const XML_Char *, const XML_Char
 typedef void (*XML_EndElementHandler)(void *, const XML_Char *);
 typedef void (*XML_CharacterDataHandler)(void *, const XML_Char *, int);
 typedef void (*XML_ProcessingInstructionHandler)(void *, const XML_Char *, const XML_Char *);
+typedef void (*XML_CommentHandler)(void *, const XML_Char *);
 typedef void (*XML_DefaultHandler)(void *, const XML_Char *, int);
 typedef void (*XML_UnparsedEntityDeclHandler)(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 typedef void (*XML_NotationDeclHandler)(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
@@ -63,6 +64,7 @@ typedef struct _XML_Parser {
 	XML_EndElementHandler            h_end_element;
 	XML_CharacterDataHandler         h_cdata;
 	XML_ProcessingInstructionHandler h_pi;
+	XML_CommentHandler               h_comment;
 	XML_DefaultHandler               h_default;
 	XML_UnparsedEntityDeclHandler    h_unparsed_entity_decl;
 	XML_NotationDeclHandler          h_notation_decl;
