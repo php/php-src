@@ -2,6 +2,8 @@
 bcpow() function
 --SKIP--
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--INI--
+bcmath.scale=0
 --FILE--
 <?php
 echo bcpow("1", "2"),"\n";

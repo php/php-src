@@ -2,6 +2,8 @@
 bccomp() function
 --SKIP--
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--INI--
+bcmath.scale=0
 --FILE--
 <?php
 echo bccomp("-1", "5", 4),"\n";
