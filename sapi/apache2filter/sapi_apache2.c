@@ -145,7 +145,7 @@ static void
 php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	php_struct *ctx = SG(server_context);
-	apr_array_header_t *arr = apr_table_elts(ctx->f->r->subprocess_env);
+	const apr_array_header_t *arr = apr_table_elts(ctx->f->r->subprocess_env);
 	char *key, *val;
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
@@ -419,7 +419,7 @@ static void php_apache_add_version(apr_pool_t *p)
 	}
 }
 
-static void
+static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
 {
@@ -429,6 +429,8 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_register_module();
 	php_apache_add_version(pconf);
+
+	return OK;
 }
 
 static void php_add_filter(request_rec *r, ap_filter_t *f)
