@@ -438,7 +438,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		argc->refcount++;
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
-	} else if (!SG(request_info).argc) {
+	} 
+	if (track_vars_array) {
 		arr->refcount++;
 		argc->refcount++;
 		zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
