@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Changed pg_unescape_bytea() to use the libpq version of PQunescapeBytea if
-  it is available.
 - Moved extensions to PECL:
   . ext/cpdf        (Tony, Derick)
   . ext/dio         (Jani, Derick)
@@ -10,8 +8,6 @@ PHP                                                                        NEWS
   . ext/mnogosearch (Jani, Derick)
   . ext/w32api      (Jani, Derick)
   . ext/yp          (Jani, Derick)
-- Changed pg_copy_from() and pg_copy_to() to use non-deprecated COPY API if
-  it exists. (Christopher)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
