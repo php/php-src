@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- bindir@ ended up becoming '${exec_prefix}' (literally) on my system
-- prefix@ works fine for me here.  If @bindir@ is indeed preferred, the
 - The Windows build can now be configured more comfortably, for example 
   when dealing with built-in extensions. (Sebastian)
 - Added optional 3rd parameter to mysql_select_db() which makes it return
