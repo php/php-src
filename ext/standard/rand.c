@@ -15,6 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Pedro Melo <melo@ip.pt>                                     |
+   |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
    | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
@@ -112,6 +113,7 @@ PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 	   2^31, 2^31, 2^31, ...; 2^30, 2^30, 2^30, ...; 2^29, 2^29 + 2^31,
 	   2^29, 2^29 + 2^31, ..., etc. so I force seed to be odd below.
 
+	   
 	   Even if x_initial is odd, if x_initial is 1 mod 4 then
 
 	     the          lowest bit of x is always 1,
@@ -190,27 +192,35 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 	return y ^ (y >> 18);
 }
 
-/* {{{ proto void srand(int seed)
+#define GENERATE_SEED() (time(0) * getpid() * 1000000 * php_combined_lcg(TSRMLS_C))
+
+/* {{{ proto void srand([int seed])
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	long seed;
+	long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
 		return;
+
+	if (!seed)
+		seed = GENERATE_SEED();
 
 	php_srand(seed);
 }
 /* }}} */
 
-/* {{{ proto void mt_srand(int seed)
+/* {{{ proto void mt_srand([int seed])
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	long seed;
+	long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &seed) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
 		return;
+
+	if (!seed)
+		seed = GENERATE_SEED();
 
 	php_mt_srand(seed TSRMLS_CC);
 }
