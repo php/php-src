@@ -89,7 +89,7 @@ typedef struct _zend_brk_cont_element {
 
 
 struct _zend_op_array {
-	int type;	/* MUST be the first element of this struct! */
+	unsigned char type;	/* MUST be the first element of this struct! */
 
 	unsigned char *arg_types;		/* MUST be the second element of this struct! */
 	char *function_name;			/* MUST be the third element of this struct! */
@@ -122,7 +122,7 @@ struct _zend_op_array {
 
 
 typedef struct _zend_internal_function {
-	int type;	/* MUST be the first element of this struct! */
+	unsigned char type;	/* MUST be the first element of this struct! */
 
 	unsigned char *arg_types;		/* MUST be the second element of this struct */
 	char *function_name;			/* MUST be the third element of this struct */
@@ -132,9 +132,9 @@ typedef struct _zend_internal_function {
 
 
 typedef union _zend_function {
-	int type;	/* MUST be the first element of this struct! */
+	unsigned char type;	/* MUST be the first element of this struct! */
 	struct {
-		int type;  /* never used */
+		unsigned char type;  /* never used */
 		unsigned char *arg_types;
 		char *function_name;
 	} common;
