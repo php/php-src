@@ -54,6 +54,7 @@ char *day_short_names[] =
 
 #if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !defined(HAVE_DECLARED_TIMEZONE)
 extern time_t timezone;
+extern int daylight;
 #endif
 
 static int phpday_tab[2][12] =
@@ -404,9 +405,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'Z':		/* timezone offset in seconds */
 #if HAVE_TM_GMTOFF
-				sprintf(tmp_buff, "%ld", ta->tm_gmtoff );
+				sprintf(tmp_buff, "%ld", ta->tm_isdst ? ta->tm_gmtoff-3600 : ta->tm_gmtoff);
 #else
-				sprintf(tmp_buff, "%ld", timezone);
+				sprintf(tmp_buff, "%ld", daylight ? timezone-3600 : timezone);
 #endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
