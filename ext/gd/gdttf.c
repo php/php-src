@@ -9,7 +9,7 @@
 #else
 #include "php_config.h"
 #endif
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -852,7 +852,7 @@ gdttf(gdImage *im, int *brect, int fg, char *fontname,
     return (char *)NULL;
 }
    
-#endif /* HAVE_LIBTTF */
+#endif /* ENABLE_GD_TTF */
 
 /*
  * Local variables:

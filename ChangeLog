@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Added a check for freetype.h - fixed build on RedHat 6.0 (Zeev)
 - Fixed array_walk() to work in PHP4 (Andrey)
 - Ported all remaining date() format options from PHP3 (Andrey)
 - $php_errormsg now works (Andrey)

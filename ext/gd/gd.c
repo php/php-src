@@ -49,7 +49,7 @@
 #include <gdfontmb.h> /* 3 Medium bold font */
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 # include "gdttf.h"
 #endif
 
@@ -57,7 +57,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 static void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #endif
 
@@ -118,7 +118,7 @@ function_entry gd_functions[] = {
 	{"imagesx",					php3_imagesxfn,				NULL},
 	{"imagesy",					php3_imagesyfn,				NULL},
 	{"imagedashedline",			php3_imagedashedline,  		NULL},
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 	{"imagettfbbox",			php3_imagettfbbox,			NULL},
 	{"imagettftext",			php3_imagettftext,			NULL},
 #endif
@@ -175,7 +175,7 @@ void php3_info_gd(ZEND_MODULE_INFO_FUNC_ARGS)
 #else
 	php3_printf("Version 1.2");
 #endif
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 	php3_printf(" with FreeType support");
 #endif
 }
@@ -1671,7 +1671,7 @@ PHP_FUNCTION(imagesyfn)
 }
 /* }}} */
 
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
