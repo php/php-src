@@ -27,7 +27,7 @@
 #if HAVE_IBASE
 
 #include "php_interbase.h"
-#include "interbase.h"
+#include "php_ibase_includes.h"
 
 void _php_ibase_event_free(char *event_buf, char *result_buf) /* {{{ */
 {
