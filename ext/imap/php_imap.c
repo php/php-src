@@ -343,12 +343,7 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 /* put parsing code here */
 	for(; qlist; qlist = qlist->next) {
 		MAKE_STD_ZVAL(t_map);
-		if (array_init(t_map) == FAILURE) {
-			php_error(E_WARNING, "Unable to allocate t_map memory");
-			FREE_ZVAL(t_map);
-			FREE_ZVAL(IMAPG(quota_return));
-			return;
-		}
+		array_init(t_map);
 		if (strncmp(qlist->name, "STORAGE", 7) == 0)
 		{
 			/* this is to add backwards compatibility */
@@ -859,16 +854,13 @@ PHP_FUNCTION(imap_get_quota)
 	convert_to_string_ex(qroot);
 
 	MAKE_STD_ZVAL(IMAPG(quota_return));
-	if (array_init(IMAPG(quota_return)) == FAILURE) {
-		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
-		FREE_ZVAL(IMAPG(quota_return));
-		RETURN_FALSE;
-	}
+	array_init(IMAPG(quota_return));
 
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if(!imap_getquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot))) {
 		php_error(E_WARNING, "%s(): c-client imap_getquota failed", get_active_function_name(TSRMLS_C));
+		FREE_ZVAL(IMAPG(quota_return));
 		RETURN_FALSE;
 	}
 
@@ -893,16 +885,13 @@ PHP_FUNCTION(imap_get_quotaroot)
 	convert_to_string_ex(mbox);
 
 	MAKE_STD_ZVAL(IMAPG(quota_return));
-	if (array_init(IMAPG(quota_return)) == FAILURE) {
-		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
-		FREE_ZVAL(IMAPG(quota_return));
-		RETURN_FALSE;
-	}
+	array_init(IMAPG(quota_return));
 
 	/* set the callback for the GET_QUOTAROOT function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if(!imap_getquotaroot(imap_le_struct->imap_stream, Z_STRVAL_PP(mbox))) {
 		php_error(E_WARNING, "%s(): c-client imap_getquotaroot failed", get_active_function_name(TSRMLS_C));
+		FREE_ZVAL(IMAPG(quota_return));
 		RETURN_FALSE;
 	}
 
@@ -1028,9 +1017,7 @@ PHP_FUNCTION(imap_headers)
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	/* Initialize return array */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
 		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream, msgno);
@@ -1971,9 +1958,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 	rfc822_parse_adrlist(&env->to, Z_STRVAL_PP(str), Z_STRVAL_PP(defaulthost));
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	addresstmp = env->to;
 
@@ -3493,9 +3478,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 
 	convert_to_string_ex(str);
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	string = Z_STRVAL_PP(str);
 	end = Z_STRLEN_PP(str);
@@ -3901,7 +3884,7 @@ static int build_thread_tree(THREADNODE *top, zval **tree)
 	long numNodes = 0;
 	char buf[25];
 
-	if(array_init(*tree) != SUCCESS) return FAILURE;
+	array_init(*tree);
 	
 	build_thread_tree_helper(top, *tree, &numNodes, buf);
 
