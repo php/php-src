@@ -521,7 +521,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+static inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	if (!ce) {
 		return 0;
