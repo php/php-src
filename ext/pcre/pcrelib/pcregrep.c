@@ -1,6 +1,9 @@
 /*************************************************
-*               PCRE grep program                *
+*               pcregrep program                 *
 *************************************************/
+
+/* This is a grep program that uses the PCRE regular expression library to do
+its pattern matching. */
 
 #include <stdio.h>
 #include <string.h>
@@ -59,7 +62,7 @@ return sys_errlist[n];
 *************************************************/
 
 static int
-pgrep(FILE *in, char *name)
+pcregrep(FILE *in, char *name)
 {
 int rc = 1;
 int linenumber = 0;
@@ -119,7 +122,7 @@ return rc;
 static int
 usage(int rc)
 {
-fprintf(stderr, "Usage: pgrep [-Vchilnsvx] pattern [file] ...\n");
+fprintf(stderr, "Usage: pcregrep [-Vchilnsvx] pattern [file] ...\n");
 return rc;
 }
 
@@ -165,7 +168,7 @@ for (i = 1; i < argc; i++)
       break;
 
       default:
-      fprintf(stderr, "pgrep: unknown option %c\n", s[-1]);
+      fprintf(stderr, "pcregrep: unknown option %c\n", s[-1]);
       return usage(2);
       }
     }
@@ -180,7 +183,7 @@ if (i >= argc) return usage(0);
 pattern = pcre_compile(argv[i++], options, &error, &errptr, NULL);
 if (pattern == NULL)
   {
-  fprintf(stderr, "pgrep: error in regex at offset %d: %s\n", errptr, error);
+  fprintf(stderr, "pcregrep: error in regex at offset %d: %s\n", errptr, error);
   return 2;
   }
 
@@ -189,13 +192,13 @@ if (pattern == NULL)
 hints = pcre_study(pattern, 0, &error);
 if (error != NULL)
   {
-  fprintf(stderr, "pgrep: error while studing regex: %s\n", error);
+  fprintf(stderr, "pcregrep: error while studing regex: %s\n", error);
   return 2;
   }
 
 /* If there are no further arguments, do the business on stdin and exit */
 
-if (i >= argc) return pgrep(stdin, NULL);
+if (i >= argc) return pcregrep(stdin, NULL);
 
 /* Otherwise, work through the remaining arguments as files. If there is only
 one, don't give its name on the output. */
@@ -213,7 +216,7 @@ for (; i < argc; i++)
     }
   else
     {
-    int frc = pgrep(in, filenames? argv[i] : NULL);
+    int frc = pcregrep(in, filenames? argv[i] : NULL);
     if (frc == 0 && rc == 1) rc = 0;
     fclose(in);
     }

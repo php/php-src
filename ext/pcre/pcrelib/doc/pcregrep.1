@@ -1,20 +1,20 @@
-.TH PGREP 1
+.TH PCREGREP 1
 .SH NAME
-pgrep - a grep with Perl-compatible regular expressions.
+pcregrep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
-.B pgrep [-Vchilnsvx] pattern [file] ...
+.B pcregrep [-Vchilnsvx] pattern [file] ...
 
 
 .SH DESCRIPTION
-\fBpgrep\fR searches files for character patterns, in the same way as other
+\fBpcregrep\fR searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
 \fBpcre(3)\fR for a full description of syntax and semantics.
 
-If no files are specified, \fBpgrep\fR reads the standard input. By default,
+If no files are specified, \fBpcregrep\fR reads the standard input. By default,
 each line that matches the pattern is copied to the standard output, and if
 there is more than one file, the file name is printed before each line of
-output. However, there are options that can change how \fBpgrep\fR behaves.
+output. However, there are options that can change how \fBpcregrep\fR behaves.
 
 Lines are limited to BUFSIZ characters. BUFSIZ is defined in \fB<stdio.h>\fR.
 The newline character is removed from the end of each line before it is matched
@@ -73,4 +73,4 @@ for syntax errors or inacessible files (even if matches were found).
 .SH AUTHOR
 Philip Hazel <ph10@cam.ac.uk>
 .br
-Copyright (c) 1997-1999 University of Cambridge.
+Copyright (c) 1997-2000 University of Cambridge.

@@ -77,6 +77,14 @@ to the native function.
 The PCRE_MULTILINE option is set when the expression is passed for compilation
 to the native function.
 
+In the absence of these flags, no options are passed to the native function.
+This means the the regex is compiled with PCRE default semantics. In
+particular, the way it handles newline characters in the subject string is the
+Perl way, not the POSIX way. Note that setting PCRE_MULTILINE has only
+\fIsome\fR of the effects specified for REG_NEWLINE. It does not affect the way
+newlines are matched by . (they aren't) or a negative class such as [^a] (they
+are).
+
 The yield of \fBregcomp()\fR is zero on success, and non-zero otherwise. The
 \fIpreg\fR structure is filled in on success, and one member of the structure
 is publicized: \fIre_nsub\fR contains the number of capturing subpatterns in
@@ -138,4 +146,4 @@ Cambridge CB2 3QG, England.
 .br
 Phone: +44 1223 334714
 
-Copyright (c) 1997-1999 University of Cambridge.
+Copyright (c) 1997-2000 University of Cambridge.

@@ -4,7 +4,7 @@ Basic Installation
    These are generic installation instructions that apply to systems that
 can run the `configure' shell script - Unix systems and any that imitate
 it. They are not specific to PCRE. There are PCRE-specific instructions
-for non-Unix systems in the file NON-UNIX.
+for non-Unix systems in the file NON-UNIX-USE.
 
    The `configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses

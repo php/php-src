@@ -43,6 +43,10 @@ backslash, because
 is interpreted as the first line of a pattern that starts with "abc/", causing
 pcretest to read the next line as a continuation of the regular expression.
 
+
+PATTERN MODIFIERS
+-----------------
+
 The pattern may be followed by i, m, s, or x to set the PCRE_CASELESS,
 PCRE_MULTILINE, PCRE_DOTALL, or PCRE_EXTENDED options, respectively. For
 example:
@@ -103,37 +107,48 @@ compiled, and the results used when the expression is matched.
 The /M modifier causes the size of memory block used to hold the compiled
 pattern to be output.
 
-Finally, the /P modifier causes pcretest to call PCRE via the POSIX wrapper API
-rather than its native API. When this is done, all other modifiers except /i,
-/m, and /+ are ignored. REG_ICASE is set if /i is present, and REG_NEWLINE is
-set if /m is present. The wrapper functions force PCRE_DOLLAR_ENDONLY always,
-and PCRE_DOTALL unless REG_NEWLINE is set.
+The /P modifier causes pcretest to call PCRE via the POSIX wrapper API rather
+than its native API. When this is done, all other modifiers except /i, /m, and
+/+ are ignored. REG_ICASE is set if /i is present, and REG_NEWLINE is set if /m
+is present. The wrapper functions force PCRE_DOLLAR_ENDONLY always, and
+PCRE_DOTALL unless REG_NEWLINE is set.
+
+The /8 modifier causes pcretest to call PCRE with the PCRE_UTF8 option set.
+This turns on the (currently incomplete) support for UTF-8 character handling
+in PCRE, provided that it was compiled with this support enabled. This modifier
+also causes any non-printing characters in output strings to be printed using
+the \x{hh...} notation if they are valid UTF-8 sequences.
+
+
+DATA LINES
+----------
 
 Before each data line is passed to pcre_exec(), leading and trailing whitespace
 is removed, and it is then scanned for \ escapes. The following are recognized:
 
-  \a     alarm (= BEL)
-  \b     backspace
-  \e     escape
-  \f     formfeed
-  \n     newline
-  \r     carriage return
-  \t     tab
-  \v     vertical tab
-  \nnn   octal character (up to 3 octal digits)
-  \xhh   hexadecimal character (up to 2 hex digits)
+  \a         alarm (= BEL)
+  \b         backspace
+  \e         escape
+  \f         formfeed
+  \n         newline
+  \r         carriage return
+  \t         tab
+  \v         vertical tab
+  \nnn       octal character (up to 3 octal digits)
+  \xhh       hexadecimal character (up to 2 hex digits)
+  \x{hh...}  hexadecimal UTF-8 character
 
-  \A     pass the PCRE_ANCHORED option to pcre_exec()
-  \B     pass the PCRE_NOTBOL option to pcre_exec()
-  \Cdd   call pcre_copy_substring() for substring dd after a successful match
-           (any decimal number less than 32)
-  \Gdd   call pcre_get_substring() for substring dd after a successful match
-           (any decimal number less than 32)
-  \L     call pcre_get_substringlist() after a successful match
-  \N     pass the PCRE_NOTEMPTY option to pcre_exec()
-  \Odd   set the size of the output vector passed to pcre_exec() to dd
-           (any number of decimal digits)
-  \Z     pass the PCRE_NOTEOL option to pcre_exec()
+  \A         pass the PCRE_ANCHORED option to pcre_exec()
+  \B         pass the PCRE_NOTBOL option to pcre_exec()
+  \Cdd       call pcre_copy_substring() for substring dd after a successful
+               match (any decimal number less than 32)
+  \Gdd       call pcre_get_substring() for substring dd after a successful
+               match (any decimal number less than 32)
+  \L         call pcre_get_substringlist() after a successful match
+  \N         pass the PCRE_NOTEMPTY option to pcre_exec()
+  \Odd       set the size of the output vector passed to pcre_exec() to dd
+               (any number of decimal digits)
+  \Z         pass the PCRE_NOTEOL option to pcre_exec()
 
 A backslash followed by anything else just escapes the anything else. If the
 very last character is a backslash, it is ignored. This gives a way of passing
@@ -142,6 +157,15 @@ an empty line as data, since a real empty line terminates the data input.
 If /P was present on the regex, causing the POSIX wrapper API to be used, only
 \B, and \Z have any effect, causing REG_NOTBOL and REG_NOTEOL to be passed to
 regexec() respectively.
+
+The use of \x{hh...} to represent UTF-8 characters is not dependent on the use
+of the /8 modifier on the pattern. It is recognized always. There may be any
+number of hexadecimal digits inside the braces. The result is from one to six
+bytes, encoded according to the UTF-8 rules.
+
+
+OUTPUT FROM PCRETEST
+--------------------
 
 When a match succeeds, pcretest outputs the list of captured substrings that
 pcre_exec() returns, starting with number 0 for the string that matched the
@@ -158,8 +182,9 @@ whole pattern. Here is an example of an interactive pcretest run.
   No match
 
 If the strings contain any non-printing characters, they are output as \0x
-escapes. If the pattern has the /+ modifier, then the output for substring 0 is
-followed by the the rest of the subject string, identified by "0+" like this:
+escapes, or as \x{...} escapes if the /8 modifier was present on the pattern.
+If the pattern has the /+ modifier, then the output for substring 0 is followed
+by the the rest of the subject string, identified by "0+" like this:
 
     re> /cat/+
   data> cataract
@@ -190,6 +215,10 @@ Note that while patterns can be continued over several lines (a plain ">"
 prompt is used for continuations), data lines may not. However newlines can be
 included in data by means of the \n escape.
 
+
+COMMAND LINE OPTIONS
+--------------------
+
 If the -p option is given to pcretest, it is equivalent to adding /P to each
 regular expression: the POSIX wrapper API is used to call PCRE. None of the
 following flags has any effect in this case.
@@ -208,10 +237,10 @@ a synonym for -m.
 
 If the -t option is given, each compile, study, and match is run 20000 times
 while being timed, and the resulting time per compile or match is output in
-milliseconds. Do not set -t with -s, because you will then get the size output
+milliseconds. Do not set -t with -m, because you will then get the size output
 20000 times and the timing will be distorted. If you want to change the number
 of repetitions used for timing, edit the definition of LOOPREPEAT at the top of
 pcretest.c
 
 Philip Hazel <ph10@cam.ac.uk>
-January 2000
+August 2000

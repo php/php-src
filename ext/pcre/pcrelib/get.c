@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-1999 University of Cambridge
+           Copyright (c) 1997-2000 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -144,6 +144,25 @@ return 0;
 
 
 /*************************************************
+*   Free store obtained by get_substring_list    *
+*************************************************/
+
+/* This function exists for the benefit of people calling PCRE from non-C
+programs that can call its functions, but not free() or (pcre_free)() directly.
+
+Argument:   the result of a previous pcre_get_substring_list()
+Returns:    nothing
+*/
+
+void
+pcre_free_substring_list(const char **pointer)
+{
+(pcre_free)((void *)pointer);
+}
+
+
+
+/*************************************************
 *      Copy captured string to new store         *
 *************************************************/
 
@@ -184,6 +203,25 @@ memcpy(substring, subject + ovector[stringnumber], yield);
 substring[yield] = 0;
 *stringptr = substring;
 return yield;
+}
+
+
+
+/*************************************************
+*       Free store obtained by get_substring     *
+*************************************************/
+
+/* This function exists for the benefit of people calling PCRE from non-C
+programs that can call its functions, but not free() or (pcre_free)() directly.
+
+Argument:   the result of a previous pcre_get_substring()
+Returns:    nothing
+*/
+
+void
+pcre_free_substring(const char *pointer)
+{
+(pcre_free)((void *)pointer);
 }
 
 /* End of get.c */

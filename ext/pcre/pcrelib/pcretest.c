@@ -38,6 +38,113 @@ static size_t gotten_store;
 
 
 
+static int utf8_table1[] = {
+  0x0000007f, 0x000007ff, 0x0000ffff, 0x001fffff, 0x03ffffff, 0x7fffffff};
+
+static int utf8_table2[] = {
+  0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
+
+static int utf8_table3[] = {
+  0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+
+
+/*************************************************
+*       Convert character value to UTF-8         *
+*************************************************/
+
+/* This function takes an integer value in the range 0 - 0x7fffffff
+and encodes it as a UTF-8 character in 0 to 6 bytes.
+
+Arguments:
+  cvalue     the character value
+  buffer     pointer to buffer for result - at least 6 bytes long
+
+Returns:     number of characters placed in the buffer
+             -1 if input character is negative
+             0 if input character is positive but too big (only when
+             int is longer than 32 bits)
+*/
+
+static int
+ord2utf8(int cvalue, unsigned char *buffer)
+{
+register int i, j;
+for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
+  if (cvalue <= utf8_table1[i]) break;
+if (i >= sizeof(utf8_table1)/sizeof(int)) return 0;
+if (cvalue < 0) return -1;
+*buffer++ = utf8_table2[i] | (cvalue & utf8_table3[i]);
+cvalue >>= 6 - i;
+for (j = 0; j < i; j++)
+  {
+  *buffer++ = 0x80 | (cvalue & 0x3f);
+  cvalue >>= 6;
+  }
+return i + 1;
+}
+
+
+/*************************************************
+*            Convert UTF-8 string to value       *
+*************************************************/
+
+/* This function takes one or more bytes that represents a UTF-8 character,
+and returns the value of the character.
+
+Argument:
+  buffer   a pointer to the byte vector
+  vptr     a pointer to an int to receive the value
+
+Returns:   >  0 => the number of bytes consumed
+           -6 to 0 => malformed UTF-8 character at offset = (-return)
+*/
+
+int
+utf82ord(unsigned char *buffer, int *vptr)
+{
+int c = *buffer++;
+int d = c;
+int i, j, s;
+
+for (i = -1; i < 6; i++)               /* i is number of additional bytes */
+  {
+  if ((d & 0x80) == 0) break;
+  d <<= 1;
+  }
+
+if (i == -1) { *vptr = c; return 1; }  /* ascii character */
+if (i == 0 || i == 6) return 0;        /* invalid UTF-8 */
+
+/* i now has a value in the range 1-5 */
+
+d = c & utf8_table3[i];
+s = 6 - i;
+
+for (j = 0; j < i; j++)
+  {
+  c = *buffer++;
+  if ((c & 0xc0) != 0x80) return -(j+1);
+  d |= (c & 0x3f) << s;
+  s += 6;
+  }
+
+/* Check that encoding was the correct unique one */
+
+for (j = 0; j < sizeof(utf8_table1)/sizeof(int); j++)
+  if (d <= utf8_table1[j]) break;
+if (j != i) return -(i+1);
+
+/* Valid value */
+
+*vptr = d;
+return i+1;
+}
+
+
+
+
+
+
 /* Debugging function to print the internal form of the regex. This is the same
 code as contained in pcre.c under the DEBUG macro. */
 
@@ -265,14 +372,31 @@ for(;;)
 
 
 
-/* Character string printing function. */
+/* Character string printing function. A "normal" and a UTF-8 version. */
 
-static void pchars(unsigned char *p, int length)
+static void pchars(unsigned char *p, int length, int utf8)
 {
 int c;
 while (length-- > 0)
+  {
+  if (utf8)
+    {
+    int rc = utf82ord(p, &c);
+    if (rc > 0)
+      {
+      length -= rc - 1;
+      p += rc;
+      if (c < 256 && isprint(c)) fprintf(outfile, "%c", c);
+        else fprintf(outfile, "\\x{%02x}", c);
+      continue;
+      }
+    }
+
+   /* Not UTF-8, or malformed UTF-8  */
+
   if (isprint(c = *(p++))) fprintf(outfile, "%c", c);
     else fprintf(outfile, "\\x%02x", c);
+  }
 }
 
 
@@ -403,6 +527,7 @@ while (!done)
   int do_g = 0;
   int do_showinfo = showinfo;
   int do_showrest = 0;
+  int utf8 = 0;
   int erroroffset, len, delimiter;
 
   if (infile == stdin) printf("  re> ");
@@ -494,6 +619,7 @@ while (!done)
       case 'S': do_study = 1; break;
       case 'U': options |= PCRE_UNGREEDY; break;
       case 'X': options |= PCRE_EXTRA; break;
+      case '8': options |= PCRE_UTF8; utf8 = 1; break;
 
       case 'L':
       ppp = pp;
@@ -633,7 +759,7 @@ while (!done)
       if (backrefmax > 0)
         fprintf(outfile, "Max back reference = %d\n", backrefmax);
       if (options == 0) fprintf(outfile, "No options\n");
-        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s\n",
+        else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s\n",
           ((options & PCRE_ANCHORED) != 0)? " anchored" : "",
           ((options & PCRE_CASELESS) != 0)? " caseless" : "",
           ((options & PCRE_EXTENDED) != 0)? " extended" : "",
@@ -641,7 +767,8 @@ while (!done)
           ((options & PCRE_DOTALL) != 0)? " dotall" : "",
           ((options & PCRE_DOLLAR_ENDONLY) != 0)? " dollar_endonly" : "",
           ((options & PCRE_EXTRA) != 0)? " extra" : "",
-          ((options & PCRE_UNGREEDY) != 0)? " ungreedy" : "");
+          ((options & PCRE_UNGREEDY) != 0)? " ungreedy" : "",
+          ((options & PCRE_UTF8) != 0)? " utf8" : "");
 
       if (((((real_pcre *)re)->options) & PCRE_ICHANGED) != 0)
         fprintf(outfile, "Case state changes\n");
@@ -796,6 +923,30 @@ while (!done)
         break;
 
         case 'x':
+
+        /* Handle \x{..} specially - new Perl thing for utf8 */
+
+        if (*p == '{')
+          {
+          unsigned char *pt = p;
+          c = 0;
+          while (isxdigit(*(++pt)))
+            c = c * 16 + tolower(*pt) - ((isdigit(*pt))? '0' : 'W');
+          if (*pt == '}')
+            {
+            unsigned char buffer[8];
+            int ii, utn;
+            utn = ord2utf8(c, buffer);
+            for (ii = 0; ii < utn - 1; ii++) *q++ = buffer[ii];
+            c = buffer[ii];   /* Last byte */
+            p = pt + 1;
+            break;
+            }
+          /* Not correct form; fall through */
+          }
+
+        /* Ordinary \x */
+
         c = 0;
         while (i++ < 2 && isxdigit(*p))
           {
@@ -876,12 +1027,12 @@ while (!done)
             {
             fprintf(outfile, "%2d: ", (int)i);
             pchars(dbuffer + pmatch[i].rm_so,
-              pmatch[i].rm_eo - pmatch[i].rm_so);
+              pmatch[i].rm_eo - pmatch[i].rm_so, utf8);
             fprintf(outfile, "\n");
             if (i == 0 && do_showrest)
               {
               fprintf(outfile, " 0+ ");
-              pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo);
+              pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo, utf8);
               fprintf(outfile, "\n");
               }
             }
@@ -931,14 +1082,14 @@ while (!done)
           else
             {
             fprintf(outfile, "%2d: ", i/2);
-            pchars(bptr + offsets[i], offsets[i+1] - offsets[i]);
+            pchars(bptr + offsets[i], offsets[i+1] - offsets[i], utf8);
             fprintf(outfile, "\n");
             if (i == 0)
               {
               if (do_showrest)
                 {
                 fprintf(outfile, " 0+ ");
-                pchars(bptr + offsets[i+1], len - offsets[i+1]);
+                pchars(bptr + offsets[i+1], len - offsets[i+1], utf8);
                 fprintf(outfile, "\n");
                 }
               }
@@ -971,7 +1122,8 @@ while (!done)
             else
               {
               fprintf(outfile, "%2dG %s (%d)\n", i, substring, rc);
-              free((void *)substring);
+              /* free((void *)substring); */
+              pcre_free_substring(substring);
               }
             }
           }
@@ -989,7 +1141,8 @@ while (!done)
               fprintf(outfile, "%2dL %s\n", i, stringlist[i]);
             if (stringlist[i] != NULL)
               fprintf(outfile, "string list not terminated by NULL\n");
-            free((void *)stringlist);
+            /* free((void *)stringlist); */
+            pcre_free_substring_list(stringlist);
             }
           }
         }

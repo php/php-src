@@ -4,14 +4,15 @@
 
 /* Copyright (c) 1997-2000 University of Cambridge */
 
-#ifndef PCRE_H
-#define PCRE_H
+#ifndef _PCRE_H
+#define _PCRE_H
+
+/* The file pcre.h is build by "configure". Do not edit it; instead
+make changes to pcre.in. */
 
 #define PCRE_MAJOR 3
-#define PCRE_MINOR 1
-#define PCRE_DATE  09-Feb-2000
-
-#include "php_compat.h"
+#define PCRE_MINOR 4
+#define PCRE_DATE  22-Aug-2000
 
 /* Win32 uses DLL by default */
 
@@ -28,7 +29,6 @@
 /* Have to include stdlib.h in order to ensure that size_t is defined;
 it is needed here for malloc. */
 
-#include <sys/types.h>
 #include <stdlib.h>
 
 /* Allow for C++ users */
@@ -50,6 +50,7 @@ extern "C" {
 #define PCRE_NOTEOL          0x0100
 #define PCRE_UNGREEDY        0x0200
 #define PCRE_NOTEMPTY        0x0400
+#define PCRE_UTF8            0x0800
 
 /* Exec-time and get-time error codes */
 
@@ -88,14 +89,16 @@ PCRE_DL_IMPORT extern void  (*pcre_free)(void *);
 /* Functions */
 
 extern pcre *pcre_compile(const char *, int, const char **, int *,
-  const unsigned char *);
-extern int pcre_copy_substring(const char *, int *, int, int, char *, int);
-extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
-  int, int, int, int *, int);
-extern int pcre_get_substring(const char *, int *, int, int, const char **);
-extern int pcre_get_substring_list(const char *, int *, int, const char ***);
-extern int pcre_info(const pcre *, int *, int *);
-extern int pcre_fullinfo(const pcre *, const pcre_extra *, int, void *);
+              const unsigned char *);
+extern int  pcre_copy_substring(const char *, int *, int, int, char *, int);
+extern int  pcre_exec(const pcre *, const pcre_extra *, const char *,
+              int, int, int, int *, int);
+extern void pcre_free_substring(const char *);
+extern void pcre_free_substring_list(const char **);
+extern int  pcre_get_substring(const char *, int *, int, int, const char **);
+extern int  pcre_get_substring_list(const char *, int *, int, const char ***);
+extern int  pcre_info(const pcre *, int *, int *);
+extern int  pcre_fullinfo(const pcre *, const pcre_extra *, int, void *);
 extern unsigned const char *pcre_maketables(void);
 extern pcre_extra *pcre_study(const pcre *, int, const char **);
 extern const char *pcre_version(void);

@@ -7,6 +7,15 @@ The latest release of PCRE is always available from
 
 Please read the NEWS file if you are upgrading from a previous release.
 
+PCRE has its own native API, but a set of "wrapper" functions that are based on
+the POSIX API are also supplied in the library libpcreposix. Note that this
+just provides a POSIX calling interface to PCRE: the regular expressions
+themselves still follow Perl syntax and semantics. The header file
+for the POSIX-style functions is called pcreposix.h. The official POSIX name is
+regex.h, but I didn't want to risk possible problems with existing files of
+that name by distributing it that way. To use it with an existing program that
+uses the POSIX API, it will have to be renamed or pointed at by a link.
+
 
 Building PCRE on a Unix system
 ------------------------------
@@ -15,20 +24,29 @@ To build PCRE on a Unix system, run the "configure" command in the PCRE
 distribution directory. This is a standard GNU "autoconf" configuration script,
 for which generic instructions are supplied in INSTALL. On many systems just
 running "./configure" is sufficient, but the usual methods of changing standard
-defaults are available. For example
+defaults are available. For example,
 
 CFLAGS='-O2 -Wall' ./configure --prefix=/opt/local
 
 specifies that the C compiler should be run with the flags '-O2 -Wall' instead
 of the default, and that "make install" should install PCRE under /opt/local
-instead of the default /usr/local. The "configure" script builds thre files:
+instead of the default /usr/local.
+
+If you want to make use of the experimential, incomplete support for UTF-8
+character strings in PCRE, you must add --enable-utf8 to the "configure"
+command. Without it, the code for handling UTF-8 is not included in the
+library. (Even when included, it still has to be enabled by an option at run
+time.)
+
+The "configure" script builds four files:
 
 . Makefile is built by copying Makefile.in and making substitutions.
 . config.h is built by copying config.in and making substitutions.
 . pcre-config is built by copying pcre-config.in and making substitutions.
+. RunTest is a script for running tests
 
 Once "configure" has run, you can run "make". It builds two libraries called
-libpcre and libpcreposix, a test program called pcretest, and the pgrep
+libpcre and libpcreposix, a test program called pcretest, and the pcregrep
 command. You can use "make install" to copy these, and the public header file
 pcre.h, to appropriate live directories on your system, in the normal way.
 
@@ -54,11 +72,11 @@ The default distribution builds PCRE as two shared libraries. This support is
 new and experimental and may not work on all systems. It relies on the
 "libtool" scripts - these are distributed with PCRE. It should build a
 "libtool" script and use this to compile and link shared libraries, which are
-placed in a subdirectory called .libs. The programs pcretest and pgrep are
+placed in a subdirectory called .libs. The programs pcretest and pcregrep are
 built to use these uninstalled libraries by means of wrapper scripts. When you
-use "make install" to install shared libraries, pgrep and pcretest are
+use "make install" to install shared libraries, pcregrep and pcretest are
 automatically re-built to use the newly installed libraries. However, only
-pgrep is installed, as pcretest is really just a test program.
+pcregrep is installed, as pcretest is really just a test program.
 
 To build PCRE using static libraries you must use --disable-shared when
 configuring it. For example
@@ -82,8 +100,8 @@ Testing PCRE
 ------------
 
 To test PCRE on a Unix system, run the RunTest script in the pcre directory.
-(This can also be run by "make runtest" or "make check".) For other systems,
-see the instruction in NON-UNIX-USE.
+(This can also be run by "make runtest", "make check", or "make test".) For
+other systems, see the instruction in NON-UNIX-USE.
 
 The script runs the pcretest test program (which is documented in
 doc/pcretest.txt) on each of the testinput files (in the testdata directory) in
@@ -97,12 +115,24 @@ RunTest, for example:
 The first and third test files can also be fed directly into the perltest
 script to check that Perl gives the same results. The third file requires the
 additional features of release 5.005, which is why it is kept separate from the
-main test input, which needs only Perl 5.004. In the long run, when 5.005 is
-widespread, these two test files may get amalgamated.
+main test input, which needs only Perl 5.004. In the long run, when 5.005 (or
+higher) is widespread, these two test files may get amalgamated.
 
-The second set of tests check pcre_info(), pcre_study(), pcre_copy_substring(),
-pcre_get_substring(), pcre_get_substring_list(), error detection and run-time
-flags that are specific to PCRE, as well as the POSIX wrapper API.
+The second set of tests check pcre_fullinfo(), pcre_info(), pcre_study(),
+pcre_copy_substring(), pcre_get_substring(), pcre_get_substring_list(), error
+detection, and run-time flags that are specific to PCRE, as well as the POSIX
+wrapper API. It also uses the debugging flag to check some of the internals of
+pcre_compile().
+
+If you build PCRE with a locale setting that is not the standard C locale, the
+character tables may be different (see next paragraph). In some cases, this may
+cause failures in the second set of tests. For example, in a locale where the
+isprint() function yields TRUE for characters in the range 128-255, the use of
+[:isascii:] inside a character class defines a different set of characters, and
+this shows up in this test as a difference in the compiled code, which is being
+listed for checking. Where the comparison test output contains [\x00-\x7f] the
+test will contain [\x00-\xff], and similarly in some other cases. This is not a
+bug in PCRE.
 
 The fourth set of tests checks pcre_maketables(), the facility for building a
 set of character tables for a specific locale and using them instead of the
@@ -117,14 +147,10 @@ output to say why. If running this test produces instances of the error
 in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
 
-PCRE has its own native API, but a set of "wrapper" functions that are based on
-the POSIX API are also supplied in the library libpcreposix.a. Note that this
-just provides a POSIX calling interface to PCRE: the regular expressions
-themselves still follow Perl syntax and semantics. The header file
-for the POSIX-style functions is called pcreposix.h. The official POSIX name is
-regex.h, but I didn't want to risk possible problems with existing files of
-that name by distributing it that way. To use it with an existing program that
-uses the POSIX API, it will have to be renamed or pointed at by a link.
+The fifth test checks the experimental, incomplete UTF-8 support. It is not run
+automatically unless PCRE is built with UTF-8 support. This file can be fed
+directly to the perltest8 script, which requires Perl 5.6 or higher. The sixth
+file tests internal UTF-8 features of PCRE that are not relevant to Perl.
 
 
 Character tables
@@ -197,7 +223,7 @@ The distribution should contain the following files:
   NEWS                  important changes in this release
   NON-UNIX-USE          notes on building PCRE on non-Unix systems
   README                this file
-  RunTest               a Unix shell script for running tests
+  RunTest.in            template for a Unix shell script for running tests
   config.guess          ) files used by libtool,
   config.sub            )   used only when building a shared library
   configure             a configuring shell script (built by autoconf)
@@ -211,24 +237,29 @@ The distribution should contain the following files:
   doc/pcreposix.txt     plain text version
   doc/pcretest.txt      documentation of test program
   doc/perltest.txt      documentation of Perl test program
-  doc/pgrep.1           man page source for the pgrep utility
-  doc/pgrep.html        HTML version
-  doc/pgrep.txt         plain text version
+  doc/pcregrep.1        man page source for the pcregrep utility
+  doc/pcregrep.html     HTML version
+  doc/pcregrep.txt      plain text version
   install-sh            a shell script for installing files
   ltconfig              ) files used to build "libtool",
   ltmain.sh             )   used only when building a shared library
   pcretest.c            test program
   perltest              Perl test program
-  pgrep.c               source of a grep utility that uses PCRE
+  perltest8             Perl test program for UTF-8 tests
+  pcregrep.c            source of a grep utility that uses PCRE
   pcre-config.in        source of script which retains PCRE information
   testdata/testinput1   test data, compatible with Perl 5.004 and 5.005
   testdata/testinput2   test data for error messages and non-Perl things
   testdata/testinput3   test data, compatible with Perl 5.005
   testdata/testinput4   test data for locale-specific tests
+  testdata/testinput5   test data for UTF-8 tests compatible with Perl 5.6
+  testdata/testinput6   test data for other UTF-8 tests
   testdata/testoutput1  test results corresponding to testinput1
   testdata/testoutput2  test results corresponding to testinput2
   testdata/testoutput3  test results corresponding to testinput3
   testdata/testoutput4  test results corresponding to testinput4
+  testdata/testoutput5  test results corresponding to testinput5
+  testdata/testoutput6  test results corresponding to testinput6
 
 (C) Auxiliary files for Win32 DLL
 
@@ -236,4 +267,4 @@ The distribution should contain the following files:
   pcre.def
 
 Philip Hazel <ph10@cam.ac.uk>
-February 2000
+August 2000

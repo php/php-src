@@ -1707,4 +1707,18 @@
 /a*/g
     abbab
 
-/ End of test input /       
+/^[a-\d]/
+    abcde
+    -things
+    0digit
+    *** Failers
+    bcdef    
+
+/^[\d-a]/
+    abcde
+    -things
+    0digit
+    *** Failers
+    bcdef    
+
+/ End of testinput3 /       

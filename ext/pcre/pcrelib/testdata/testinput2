@@ -40,8 +40,6 @@
 
 /[\B]/
 
-/[a-\w]/
-
 /[z-a]/
 
 /^*/
@@ -707,4 +705,8 @@
     Ab
     AB        
 
-/ End of test input /
+/[\200-\410]/
+
+/^(?(0)f|b)oo/
+
+/ End of testinput2 /

@@ -37,7 +37,8 @@ conversion went wrong.
 <LI><A NAME="TOC27" HREF="#SEC27">COMMENTS</A>
 <LI><A NAME="TOC28" HREF="#SEC28">RECURSIVE PATTERNS</A>
 <LI><A NAME="TOC29" HREF="#SEC29">PERFORMANCE</A>
-<LI><A NAME="TOC30" HREF="#SEC30">AUTHOR</A>
+<LI><A NAME="TOC30" HREF="#SEC30">UTF-8 SUPPORT</A>
+<LI><A NAME="TOC31" HREF="#SEC31">AUTHOR</A>
 </UL>
 <LI><A NAME="SEC1" HREF="#TOC1">NAME</A>
 <P>
@@ -76,6 +77,12 @@ pcre - Perl-compatible regular expressions.
 <B>int *<I>ovector</I>, int <I>stringcount</I>, const char ***<I>listptr</I>);</B>
 </P>
 <P>
+<B>void pcre_free_substring(const char *<I>stringptr</I>);</B>
+</P>
+<P>
+<B>void pcre_free_substring_list(const char **<I>stringptr</I>);</B>
+</P>
+<P>
 <B>const unsigned char *pcre_maketables(void);</B>
 </P>
 <P>
@@ -100,7 +107,9 @@ pcre - Perl-compatible regular expressions.
 The PCRE library is a set of functions that implement regular expression
 pattern matching using the same syntax and semantics as Perl 5, with just a few
 differences (see below). The current implementation corresponds to Perl 5.005,
-with some additional features from the Perl development release.
+with some additional features from later versions. This includes some
+experimental, incomplete support for UTF-8 encoded strings. Details of exactly
+what is and what is not supported are given below.
 </P>
 <P>
 PCRE has its own native API, which is described in this document. There is also
@@ -117,12 +126,18 @@ use these to include support for different releases.
 </P>
 <P>
 The functions <B>pcre_compile()</B>, <B>pcre_study()</B>, and <B>pcre_exec()</B>
-are used for compiling and matching regular expressions, while
-<B>pcre_copy_substring()</B>, <B>pcre_get_substring()</B>, and
+are used for compiling and matching regular expressions.
+</P>
+<P>
+The functions <B>pcre_copy_substring()</B>, <B>pcre_get_substring()</B>, and
 <B>pcre_get_substring_list()</B> are convenience functions for extracting
-captured substrings from a matched subject string. The function
-<B>pcre_maketables()</B> is used (optionally) to build a set of character tables
-in the current locale for passing to <B>pcre_compile()</B>.
+captured substrings from a matched subject string; <B>pcre_free_substring()</B>
+and <B>pcre_free_substring_list()</B> are also provided, to free the memory used
+for extracted strings.
+</P>
+<P>
+The function <B>pcre_maketables()</B> is used (optionally) to build a set of
+character tables in the current locale for passing to <B>pcre_compile()</B>.
 </P>
 <P>
 The function <B>pcre_fullinfo()</B> is used to find out information about a
@@ -296,6 +311,18 @@ effect.
 This option inverts the "greediness" of the quantifiers so that they are not
 greedy by default, but become greedy if followed by "?". It is not compatible
 with Perl. It can also be set by a (?U) option setting within the pattern.
+</P>
+<P>
+<PRE>
+  PCRE_UTF8
+</PRE>
+</P>
+<P>
+This option causes PCRE to regard both the pattern and the subject as strings
+of UTF-8 characters instead of just byte strings. However, it is available only
+if PCRE has been built to include UTF-8 support. If not, the use of this option
+provokes an error. Support for UTF-8 is new, experimental, and incomplete.
+Details of exactly what it entails are given below.
 </P>
 <LI><A NAME="SEC6" HREF="#TOC1">STUDYING A PATTERN</A>
 <P>
@@ -743,7 +770,7 @@ extract a single substring, whose number is given as <I>stringnumber</I>. A
 value of zero extracts the substring that matched the entire pattern, while
 higher values extract the captured substrings. For <B>pcre_copy_substring()</B>,
 the string is placed in <I>buffer</I>, whose length is given by
-<I>buffersize</I>, while for <B>pcre_get_substring()</B> a new block of store is
+<I>buffersize</I>, while for <B>pcre_get_substring()</B> a new block of memory is
 obtained via <B>pcre_malloc</B>, and its address is returned via
 <I>stringptr</I>. The yield of the function is the length of the string, not
 including the terminating zero, or one of
@@ -788,6 +815,17 @@ subject, but subpattern <I>n</I> has not been used at all, they return an empty
 string. This can be distinguished from a genuine zero-length substring by
 inspecting the appropriate offset in <I>ovector</I>, which is negative for unset
 substrings.
+</P>
+<P>
+The two convenience functions <B>pcre_free_substring()</B> and
+<B>pcre_free_substring_list()</B> can be used to free the memory returned by
+a previous call of <B>pcre_get_substring()</B> or
+<B>pcre_get_substring_list()</B>, respectively. They do nothing more than call
+the function pointed to by <B>pcre_free</B>, which of course could be called
+directly from a C program. However, PCRE is used in some situations where it is
+linked via a special interface to another programming language which cannot use
+<B>pcre_free</B> directly; it is for these cases that the functions are
+provided.
 </P>
 <LI><A NAME="SEC11" HREF="#TOC1">LIMITATIONS</A>
 <P>
@@ -908,8 +946,15 @@ The syntax and semantics of the regular expressions supported by PCRE are
 described below. Regular expressions are also described in the Perl
 documentation and in a number of other books, some of which have copious
 examples. Jeffrey Friedl's "Mastering Regular Expressions", published by
-O'Reilly (ISBN 1-56592-257), covers them in great detail. The description
-here is intended as reference documentation.
+O'Reilly (ISBN 1-56592-257), covers them in great detail.
+</P>
+<P>
+The description here is intended as reference documentation. The basic
+operation of PCRE is on strings of bytes. However, there is the beginnings of
+some support for UTF-8 character strings. To use this support you must
+configure PCRE to include it, and then call <B>pcre_compile()</B> with the
+PCRE_UTF8 option. How this affects the pattern matching is described in the
+final section of this document.
 </P>
 <P>
 A regular expression is a pattern that is matched against a subject string from
@@ -1576,7 +1621,7 @@ to the string
 </PRE>
 </P>
 <P>
-fails, because it matches the entire string due to the greediness of the .*
+fails, because it matches the entire string owing to the greediness of the .*
 item.
 </P>
 <P>
@@ -1718,7 +1763,7 @@ example, the pattern
 </PRE>
 </P>
 <P>
-matches any number of "a"s and also "aba", "ababaa" etc. At each iteration of
+matches any number of "a"s and also "aba", "ababbaa" etc. At each iteration of
 the subpattern, the back reference matches the character string corresponding
 to the previous iteration. In order for this to work, the pattern must be such
 that the first iteration does not need to match the back reference. This can be
@@ -2033,9 +2078,10 @@ subpattern, a compile-time error occurs.
 <P>
 There are two kinds of condition. If the text between the parentheses consists
 of a sequence of digits, the condition is satisfied if the capturing subpattern
-of that number has previously matched. Consider the following pattern, which
-contains non-significant white space to make it more readable (assume the
-PCRE_EXTENDED option) and to divide it into three parts for ease of discussion:
+of that number has previously matched. The number must be greater than zero.
+Consider the following pattern, which contains non-significant white space to
+make it more readable (assume the PCRE_EXTENDED option) and to divide it into
+three parts for ease of discussion:
 </P>
 <P>
 <PRE>
@@ -2240,7 +2286,96 @@ with the pattern above. The former gives a failure almost instantly when
 applied to a whole line of "a" characters, whereas the latter takes an
 appreciable time with strings longer than about 20 characters.
 </P>
-<LI><A NAME="SEC30" HREF="#TOC1">AUTHOR</A>
+<LI><A NAME="SEC30" HREF="#TOC1">UTF-8 SUPPORT</A>
+<P>
+Starting at release 3.3, PCRE has some support for character strings encoded
+in the UTF-8 format. This is incomplete, and is regarded as experimental. In
+order to use it, you must configure PCRE to include UTF-8 support in the code,
+and, in addition, you must call <B>pcre_compile()</B> with the PCRE_UTF8 option
+flag. When you do this, both the pattern and any subject strings that are
+matched against it are treated as UTF-8 strings instead of just strings of
+bytes, but only in the cases that are mentioned below.
+</P>
+<P>
+If you compile PCRE with UTF-8 support, but do not use it at run time, the
+library will be a bit bigger, but the additional run time overhead is limited
+to testing the PCRE_UTF8 flag in several places, so should not be very large.
+</P>
+<P>
+PCRE assumes that the strings it is given contain valid UTF-8 codes. It does
+not diagnose invalid UTF-8 strings. If you pass invalid UTF-8 strings to PCRE,
+the results are undefined.
+</P>
+<P>
+Running with PCRE_UTF8 set causes these changes in the way PCRE works:
+</P>
+<P>
+1. In a pattern, the escape sequence \x{...}, where the contents of the braces
+is a string of hexadecimal digits, is interpreted as a UTF-8 character whose
+code number is the given hexadecimal number, for example: \x{1234}. This
+inserts from one to six literal bytes into the pattern, using the UTF-8
+encoding. If a non-hexadecimal digit appears between the braces, the item is
+not recognized.
+</P>
+<P>
+2. The original hexadecimal escape sequence, \xhh, generates a two-byte UTF-8
+character if its value is greater than 127.
+</P>
+<P>
+3. Repeat quantifiers are NOT correctly handled if they follow a multibyte
+character. For example, \x{100}* and \xc3+ do not work. If you want to
+repeat such characters, you must enclose them in non-capturing parentheses,
+for example (?:\x{100}), at present.
+</P>
+<P>
+4. The dot metacharacter matches one UTF-8 character instead of a single byte.
+</P>
+<P>
+5. Unlike literal UTF-8 characters, the dot metacharacter followed by a
+repeat quantifier does operate correctly on UTF-8 characters instead of
+single bytes.
+</P>
+<P>
+4. Although the \x{...} escape is permitted in a character class, characters
+whose values are greater than 255 cannot be included in a class.
+</P>
+<P>
+5. A class is matched against a UTF-8 character instead of just a single byte,
+but it can match only characters whose values are less than 256. Characters
+with greater values always fail to match a class.
+</P>
+<P>
+6. Repeated classes work correctly on multiple characters.
+</P>
+<P>
+7. Classes containing just a single character whose value is greater than 127
+(but less than 256), for example, [\x80] or [^\x{93}], do not work because
+these are optimized into single byte matches. In the first case, of course,
+the class brackets are just redundant.
+</P>
+<P>
+8. Lookbehind assertions move backwards in the subject by a fixed number of
+characters instead of a fixed number of bytes. Simple cases have been tested
+to work correctly, but there may be hidden gotchas herein.
+</P>
+<P>
+9. The character types such as \d and \w do not work correctly with UTF-8
+characters. They continue to test a single byte.
+</P>
+<P>
+10. Anything not explicitly mentioned here continues to work in bytes rather
+than in characters.
+</P>
+<P>
+The following UTF-8 features of Perl 5.6 are not implemented:
+</P>
+<P>
+1. The escape sequence \C to match a single byte.
+</P>
+<P>
+2. The use of Unicode tables and properties and escapes \p, \P, and \X.
+</P>
+<LI><A NAME="SEC31" HREF="#TOC1">AUTHOR</A>
 <P>
 Philip Hazel &#60;ph10@cam.ac.uk&#62;
 <BR>
@@ -2253,6 +2388,10 @@ Cambridge CB2 3QG, England.
 Phone: +44 1223 334714
 </P>
 <P>
-Last updated: 27 January 2000
+Last updated: 28 August 2000,
 <BR>
+<PRE>
+  the 250th anniversary of the death of J.S. Bach.
+<BR>
+</PRE>
 Copyright (c) 1997-2000 University of Cambridge.

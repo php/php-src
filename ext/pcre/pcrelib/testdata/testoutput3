@@ -1,4 +1,4 @@
-PCRE version 3.2 12-May-2000
+PCRE version 3.4 22-Aug-2000
 
 /(?<!bar)foo/
     foo
@@ -2963,5 +2963,29 @@ No match
  0: 
  0: 
 
-/ End of test input /       
+/^[a-\d]/
+    abcde
+ 0: a
+    -things
+ 0: -
+    0digit
+ 0: 0
+    *** Failers
+No match
+    bcdef    
+No match
+
+/^[\d-a]/
+    abcde
+ 0: a
+    -things
+ 0: -
+    0digit
+ 0: 0
+    *** Failers
+No match
+    bcdef    
+No match
+
+/ End of testinput3 /       
 
