@@ -230,6 +230,18 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 		efree(out_buffer);
 		return PHP_ICONV_ERR_UNKNOWN;
 	}
+
+	if (out_left < 8) {
+		out_buffer = (char *) erealloc(out_buffer, out_size + 8);
+	}
+
+	/* flush the shift-out sequences */ 
+	result = icv(cd, NULL, NULL, &out_p, &out_left);
+
+	if (result == (size_t)(-1)) {
+		efree(out_buffer);
+		return PHP_ICONV_ERR_UNKNOWN;
+	}
 	
 	*out_len = out_size - out_left;
 	out_buffer[*out_len] = '\0';
@@ -288,6 +300,34 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 		}
 		break;
 	}
+
+	if (result != (size_t)(-1)) {
+		/* flush the shift-out sequences */ 
+		for (;;) {
+		   	result = icv(cd, NULL, NULL, (char **) &out_p, &out_left);
+			out_size = bsz - out_left;
+
+			if (result != (size_t)(-1)) {
+				break;
+			}
+
+			if (errno == E2BIG) {
+				bsz += 16;
+				tmp_buf = (char *) erealloc(out_buf, bsz);
+
+				if (tmp_buf == NULL) {
+					break;
+				}
+				
+				out_p = out_buf = tmp_buf;
+				out_p += out_size;
+				out_left = bsz - out_size;
+			} else {
+				break;
+			}
+		}
+	}
+
 	icv_close(cd);
 
 	if (result == (size_t)(-1)) {
@@ -299,6 +339,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 			case EILSEQ:
 				retval = PHP_ICONV_ERR_ILLEGAL_SEQ;
 				break;
+
 			case E2BIG:
 				/* should not happen */
 				retval = PHP_ICONV_ERR_TOO_BIG;
