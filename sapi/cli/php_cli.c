@@ -395,7 +395,7 @@ static void php_cli_usage(char *argv0)
 }
 /* }}} */
 
-static int define_command_line_ini_entry(char *arg TSRMLS_DC)
+static void define_command_line_ini_entry(char *arg TSRMLS_DC)
 {
 	char *name, *value;
 
@@ -413,9 +413,8 @@ static int define_command_line_ini_entry(char *arg TSRMLS_DC)
 		ZVAL_STRING(&extension, value, 0);
 		php_dl(&extension, MODULE_PERSISTENT, &zval TSRMLS_CC);
 	} else {
-		return zend_alter_ini_entry(name, strlen(name)+1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry(name, strlen(name)+1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 	}
-	return SUCCESS;
 }
 
 
@@ -662,10 +661,7 @@ int main(int argc, char *argv[])
 			switch (c) {
 
 			case 'd': /* define ini entries on command line */
-				if (define_command_line_ini_entry(php_optarg TSRMLS_CC) == FAILURE) {
-					zend_printf("Invalid php.ini entry '%s'.\n", php_optarg);
-					goto err;
-				}
+				define_command_line_ini_entry(php_optarg TSRMLS_CC);
 				break;
 
 			case 'h': /* help & quit */
