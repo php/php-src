@@ -97,6 +97,7 @@ PHP_VERSION : " . PHP_VERSION . "
 PHP_OS      : " . PHP_OS . "
 INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "
 INI wanted  : " . realpath('php.ini-dist') . "
+More .INIs  : " . str_replace("\n","", php_ini_scanned_files()) . "
 =====================================================================
 ";
 
