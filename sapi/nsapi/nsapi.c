@@ -160,7 +160,7 @@ PHP_RINIT_FUNCTION(nsapi);
 PHP_RSHUTDOWN_FUNCTION(nsapi);
 PHP_MINFO_FUNCTION(nsapi);
 
-PHP_FUNCTION(virtual);
+PHP_FUNCTION(nsapi_virtual);
 PHP_FUNCTION(nsapi_request_headers);
 PHP_FUNCTION(nsapi_response_headers);
 
@@ -182,7 +182,8 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
  * Every user visible function must have an entry in nsapi_functions[].
  */
 function_entry nsapi_functions[] = {
-	PHP_FE(virtual,	NULL)												/* Make subrequest */
+	PHP_FE(nsapi_virtual,	NULL)										/* Make subrequest */
+	PHP_FALIAS(virtual, nsapi_virtual, NULL)							/* compatibility */
 	PHP_FE(nsapi_request_headers, NULL)									/* get request headers */
 	PHP_FALIAS(getallheaders, nsapi_request_headers, NULL)				/* compatibility */
 	PHP_FALIAS(apache_request_headers, nsapi_request_headers, NULL)		/* compatibility */
@@ -306,7 +307,7 @@ PHP_MINFO_FUNCTION(nsapi)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "NSAPI Module Version", nsapi_module_entry.version);
 	php_info_print_table_row(2, "Server Software", system_version());
-	php_info_print_table_row(2, "Sub-requests with virtual()",
+	php_info_print_table_row(2, "Sub-requests with nsapi_virtual()",
 	 (nsapi_servact_service)?((zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0))?"not supported with zlib.output_compression":"enabled"):"not supported on this platform" );
 	php_info_print_table_end();
 
@@ -314,14 +315,14 @@ PHP_MINFO_FUNCTION(nsapi)
 }
 /* }}} */
 
-/* {{{ proto bool virtual(string filename)
+/* {{{ proto bool nsapi_virtual(string uri)
    Perform an NSAPI sub-request */
 /* This function is equivalent to <!--#include virtual...-->
  * in SSI. It does an NSAPI sub-request. It is useful
  * for including CGI scripts or .shtml files, or anything else
  * that you'd parse through webserver.
  */
-PHP_FUNCTION(virtual)
+PHP_FUNCTION(nsapi_virtual)
 {
 	pval **uri;
 	int rv;
@@ -827,11 +828,11 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 
 	TSRMLS_FETCH();
 
-	/* check if this uri was included in an other PHP script with virtual()
+	/* check if this uri was included in an other PHP script with nsapi_virtual()
 	   by looking for a request context in the current thread */
 	if (SG(server_context)) {
 		/* send 500 internal server error */
-		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot make nesting PHP requests with virtual()");
+		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot make nesting PHP requests with nsapi_virtual()");
 		protocol_status(sn, rq, 500, NULL);
 		return REQ_ABORTED;
 	}
