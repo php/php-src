@@ -34,7 +34,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -42,6 +44,10 @@
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
+
+#if !defined(P_tmpdir)
+#define P_tmpdir ""
 #endif
 
 /* {{{ php_open_temporary_file */

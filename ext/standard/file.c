@@ -50,7 +50,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #endif
 #include "ext/standard/head.h"
 #include "safe_mode.h"
@@ -1947,7 +1949,7 @@ PHP_FUNCTION(fgetcsv) {
 /* }}} */
 
 
-#if !defined(PHP_WIN32) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__)) || defined(ZTS)
 /* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)

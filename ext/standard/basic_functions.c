@@ -34,7 +34,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -233,13 +235,19 @@ function_entry basic_functions[] = {
 	PHP_FE(mt_srand,								NULL)
 	PHP_FE(mt_getrandmax,							NULL)
 	PHP_FE(getservbyname, NULL)
+#if HAVE_GETSERVBYPORT
 	PHP_FE(getservbyport, NULL)
+#endif
+#if HAVE_GETPROTOBYNAME
 	PHP_FE(getprotobyname, NULL)
+#endif
+#if HAVE_GETPROTOBYNUMBER
 	PHP_FE(getprotobynumber, NULL)
+#endif
 	PHP_FE(gethostbyaddr,							NULL)
 	PHP_FE(gethostbyname,							NULL)
 	PHP_FE(gethostbynamel,							NULL)
-#if !defined(PHP_WIN32)||HAVE_BINDLIB
+#if HAVE_BINDLIB && !(defined(__BEOS__)||defined(PHP_WIN32))
 	PHP_FE(checkdnsrr,								NULL)
 	PHP_FE(getmxrr,									second_and_third_args_force_ref)
 #else
@@ -429,7 +437,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(socket_set_timeout, warn_not_available,      NULL)
 #endif
 	PHP_FE(socket_get_status,	NULL)
-#if !defined(PHP_WIN32) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__)) || defined(ZTS)
 	PHP_FE(realpath,			NULL)
 #else
 	PHP_FALIAS(realpath,		warn_not_available,		NULL)
@@ -2196,6 +2204,7 @@ PHP_FUNCTION(getservbyname)
 
 /* {{{ proto string getservbyport(int port, string protocol)
    Returns service name associated with port. Protocol must be "tcp" or "udp". */
+#if HAVE_GETSERVBYPORT
 PHP_FUNCTION(getservbyport)
 {
 	pval **port,**proto;
@@ -2214,11 +2223,13 @@ PHP_FUNCTION(getservbyport)
 
 	RETURN_STRING(serv->s_name,1);
 }
+#endif
 /* }}} */
 
 
 /* {{{ proto int getprotobyname(string name)
    Returns protocol number associated with name as per /etc/protocols */
+#if HAVE_GETPROTOBYNAME
 PHP_FUNCTION(getprotobyname)
 {
 	pval **name;
@@ -2240,11 +2251,13 @@ PHP_FUNCTION(getprotobyname)
 
 	RETURN_LONG(ent->p_proto);
 }
+#endif
 /* }}} */
 
 
 /* {{{ proto string getprotobynumber(int proto)
    Returns protocol name associated with protocol number proto */
+#if HAVE_GETPROTOBYNUMBER
 PHP_FUNCTION(getprotobynumber)
 {
 	pval **proto;
@@ -2263,6 +2276,7 @@ PHP_FUNCTION(getprotobynumber)
 
 	RETURN_STRING(ent->p_name,1);
 }
+#endif
 /* }}} */
 
 

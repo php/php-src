@@ -25,7 +25,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #if !defined(MSDOS) && !defined(__WIN__)
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <netdb.h>
 #ifdef HAVE_SELECT_H
 #  include <select.h>
