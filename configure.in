@@ -1145,7 +1145,7 @@ dnl  else
 dnl      rm -f main/internal_functions.c.old
 dnl  fi
 
-  if test $UNAME = "FreeBSD" && test $PHP_SAPI = "apache2filter" && test $TSRM_PTH != "pth-config" ; then
+  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
     echo "+--------------------------------------------------------------------+"
     echo "|                        *** WARNING ***                             |"
     echo "|                                                                    |"
