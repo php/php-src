@@ -560,13 +560,16 @@ AC_ARG_WITH(apache,
 	else
 	  AC_MSG_RESULT(no)
 	  BINNAME=php
-	  INSTALL_IT="cp $BINNAME \$(bindir)"
 	fi
 ],[
 	AC_MSG_RESULT(no)
 	BINNAME=php
-	INSTALL_IT="cp $BINNAME \$(bindir)"
 ])
+
+if test "$BINNAME" = "php" ; then
+  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $BINNAME \$(bindir)/$BINNAME"
+fi
+
 INCLUDES="$INCLUDES $APACHE_INCLUDE"
 dnl## AC_SUBST(APACHE_INCLUDE)
 AC_SUBST(APACHE_TARGET)
