@@ -59,5 +59,6 @@ void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
 void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
 
 PHP_NAMED_FUNCTION(php_if_md5);
+PHP_NAMED_FUNCTION(php_if_md5_file);
 
 #endif
