@@ -117,6 +117,7 @@ PHP                                                                        NEWS
 - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr stream).
   (chris at ex-parrot dot com)
 - Fixed bug #28041 (SOAP HTTP Digest Access Authentication). (Dmitry)
+- Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on Win32). (Ilia)
 
 15 Dec 2004, PHP 5.0.3
 - Added the %F modifier to *printf to render a non-locale-aware representation
