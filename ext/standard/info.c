@@ -169,7 +169,7 @@ PHPAPI void php_print_info(int flag)
 #endif
 		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 		php_info_print_table_row(2, "ZEND_DEBUG", "true" );
 #else
 		php_info_print_table_row(2, "ZEND_DEBUG", "false" );
