@@ -115,7 +115,7 @@ output_buffering = 4096
 
 ; Normally you won't use an additional first output buffer when using any 
 ; special output handler but you can enforce this since it can help to reduce 
-; memory used by output buffering when huge output chungs and total server 
+; memory used by output buffering when huge output chunks and total server 
 ; troughput are preferred. This value can either be set On in which case the
 ; additional buffer is four times the size of all other output buffers or any
 ; greater size.
