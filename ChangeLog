@@ -1,3 +1,18 @@
+2000-06-20  Zeev Suraski  <zeev@php.net>
+
+    * configure.in
+      ext/mysql/config.m4: Warn about using the built-in MySQL library
+
+    * ext/mysql/Readme_w32.txt: This is no longer needed
+
+2000-06-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * tests/testinclude: bonsai test
+
+2000-06-20  Ben Mansell  <ben@zeus.com>
+
+    * ext/standard/basic_functions.c: Initialise lcg_globals correctly
+
 2000-06-19  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/mcrypt/mcrypt.c:
