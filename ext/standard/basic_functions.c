@@ -526,10 +526,6 @@ PHP_FUNCTION(putenv)
 		putenv_entry pe;
 		PLS_FETCH();
 		
-		if (PG(safe_mode)) {
-			/* check the sm_protected_env_vars table */
-		}
-
 		pe.putenv_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
 		pe.key = (*str)->value.str.val;
 		if ((p=strchr(pe.key,'='))) { /* nullify the '=' if there is one */
