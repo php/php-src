@@ -133,18 +133,21 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 		if (FAILED(hr)) {
 			switch (hr) {
 				case DISP_E_EXCEPTION: {
-						int srclen=0;
-						char *src=estrdup("");
-						int desclen=0;
-						char *desc=estrdup("");
+						
+						char *src=estrdup("Unavailable");
+						int srclen=strlen(src);
+						char *desc=estrdup("Unavailable");
+						int desclen=strlen(desc);
 
 						if (ExceptInfo.bstrSource)
 						{
+							efree(src);
 							src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, codepage TSRMLS_CC);
 							SysFreeString(ExceptInfo.bstrSource);
 						}
 						if (ExceptInfo.bstrDescription)
 						{
+							efree(desc);
 							desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, codepage TSRMLS_CC);
 							SysFreeString(ExceptInfo.bstrDescription);
 						}
@@ -159,6 +162,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 							SysFreeString(ExceptInfo.bstrHelpFile);
 						}
 					}
+					break;
 				case DISP_E_PARAMNOTFOUND:
 				case DISP_E_TYPEMISMATCH:
 					*ErrString = pemalloc(25, 1);
