@@ -59,10 +59,10 @@ if (!@is_dir("dir2{$sep}dir21") || !@is_dir("dir6{$sep}dir61{$sep}dir611")) {
 
 // Create a temporal file with "tst" as filename prefix
 $tmpfile = System::mkTemp('tst');
-$tmpenv = System::tmpDir();
-if (!@is_file($tmpfile) || !ereg("^$tmpenv{$sep}tst", $tmpfile)) {
+$tmpenv = str_replace($sep, $ereg_sep, System::tmpDir());
+if (!@is_file($tmpfile) || !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile)) {
     print "System::mkTemp('tst') failed\n";
-    var_dump(is_file($tmpfile), $tmpfile, "^$tmpenv{$sep}tst", !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile));
+    var_dump(is_file($tmpfile), $tmpfile, "^$tmpenv{$ereg_sep}tst", !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile));
 }
 
 // Create a temporal dir in "dir1" with default prefix "tmp"
