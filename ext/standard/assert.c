@@ -178,7 +178,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(callback)) {
-		zval *args[4];
+		zval *args[3];
 		zval *retval;
 		int i;
 		uint lineno = zend_get_executed_lineno(TSRMLS_C);
