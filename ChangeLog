@@ -1,3 +1,42 @@
+2001-01-27  John Donagher  <john@webmeta.com>
+
+    * configure.in:
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+    Add configure warning message when compiling --with-pfpro
+
+2001-01-27  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mssql/php_mssql.c: Fixed some protos.
+
+    * ext/gd/gd.c: File formats in uppercase characters.
+
+2001-01-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ming/config.m4:
+    This config.m4 was obviously not tested at all before being committed.
+
+    s/withval/PHP_MING/
+
+2001-01-27  James Moore  <James@phpuk.org>
+
+    * ext/ming/EXPERIMENTAL: Adding Ming experimental file
+
+2001-01-27  Dave Hayden  <dave@opaque.net>
+
+    * ext/ming/Makefile.in
+      ext/ming/config.m4
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+    First include of ming (SWF generation) library wrapper
+
+      http://www.opaque.net/ming/
+
+2001-01-27  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c:
 2001-01-26  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/sybase_ct/php_sybase_ct.c: Mostly off by one.
