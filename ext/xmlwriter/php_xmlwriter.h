@@ -51,7 +51,9 @@ PHP_FUNCTION(xmlwriter_start_attribute);
 PHP_FUNCTION(xmlwriter_end_attribute);
 PHP_FUNCTION(xmlwriter_start_attribute_ns);
 PHP_FUNCTION(xmlwriter_write_attribute);
+#if LIBXML_VERSION >= 20617
 PHP_FUNCTION(xmlwriter_write_attribute_ns);
+#endif
 PHP_FUNCTION(xmlwriter_start_element);
 PHP_FUNCTION(xmlwriter_end_element);
 PHP_FUNCTION(xmlwriter_start_element_ns);
@@ -66,8 +68,10 @@ PHP_FUNCTION(xmlwriter_write_cdata);
 PHP_FUNCTION(xmlwriter_text);
 PHP_FUNCTION(xmlwriter_start_document);
 PHP_FUNCTION(xmlwriter_end_document);
+#if LIBXML_VERSION >= 20616
 PHP_FUNCTION(xmlwriter_write_comment);
 PHP_FUNCTION(xmlwriter_start_comment);
+#endif
 PHP_FUNCTION(xmlwriter_end_comment);
 
 PHP_FUNCTION(xmlwriter_start_dtd);
