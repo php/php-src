@@ -375,7 +375,7 @@ static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisf
 
 			if (!(i & 0xc0)) {
 				if (ustat) {
-					php_error(E_WARNING, "stream filter(stream.base64): invalid base64 sequence");
+					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label);
 					return 0;
 				}
 				if (6 <= pack_bcnt) {
@@ -390,7 +390,7 @@ static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisf
 				}
 			} else if (ustat) {
 				if (pack_bcnt == 8 || pack_bcnt == 2) {
-					php_error(E_WARNING, "stream filter(stream.base64): unexpected end of stream");
+					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label);
 					return 0;
 				}
 			}
@@ -547,7 +547,7 @@ static size_t strfilter_quoted_printable_read(php_stream *stream, php_stream_fil
 				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
 
 				if (nbl > 15) {
-					php_error(E_WARNING, "stream filter(stream.quoted-printable): invalid character sequence"); 
+					php_error(E_WARNING, "stream filter(%s): invalid character sequence", thisfilter->fops->label); 
 					return 0;
 				}
 				v = (v << 4) | nbl;
