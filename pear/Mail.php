@@ -29,8 +29,8 @@ require_once 'PEAR.php';
  * @version $Revision$
  * @package Mail
  */
-class Mail extends PEAR {
-
+class Mail extends PEAR
+{
     /**
      * Provides an interface for generating Mail:: objects of various
      * types
@@ -43,13 +43,13 @@ class Mail extends PEAR {
     function factory($driver, $params = array())
     {
         $driver = strtolower($driver);
-        if (@include_once 'Mail/' . $driver . '.php') {
-            $class = 'Mail_' . $driver;
+        @include_once 'Mail/' . $driver . '.php';
+        $class = 'Mail_' . $driver;
+        if (class_exists($class)) {
             return new $class($params);
         } else {
-            return new PEAR_Error('Unable to find class for driver ' . $driver);
+            return $this->raiseError('Unable to find class for driver ' . $driver);
         }
-
     }
 
     /**
