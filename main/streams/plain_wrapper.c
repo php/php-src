@@ -428,7 +428,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 				data->file = NULL;
 			}
 		} else if (data->fd != -1) {
-#ifdef DEBUG
+#ifdef PHP_DEBUG
 			if (data->fd == 2 && 0 == strcmp(sapi_module.name, "cli")) {
 				/* don't close stderr in CLI in DEBUG mode, as we want to see any leaks */
 				ret = 0;
