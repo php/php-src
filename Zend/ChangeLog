@@ -1,3 +1,8 @@
+2002-04-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_alloc.c
+      zend_alloc.h: Revert.
+
 2002-04-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_alloc.c
