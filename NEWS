@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+14 Sep 2004, Version 4.3.9RC3
+- GPC input processing fixes (Rasmus, Stefan)
+
 31 Aug 2004, Version 4.3.9RC2
 - Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
   exhaustion. (Andrei)
