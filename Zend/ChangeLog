@@ -1,3 +1,14 @@
+2004-11-29  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_operators.c:
+      - MF43: Revert Joe's work around a bug in GCC patch as it breaks too many
+      things.
+
+    * zend_operators.c:
+      - MFH: Revert Joe's work around a bug in GCC patch as it breaks too many
+      things.
+
 2004-11-25  Zeev Suraski  <zeev@zend.com>
 
     * (PHP_5_0)
