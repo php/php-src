@@ -55,6 +55,28 @@ static void free_filename(void *p)
 }
 
 
+static void build_runtime_defined_function_key(zval *result, zval *name, zend_op *opline)
+{
+	char lineno_buf[32];
+	uint lineno_len;
+	char *filename;
+
+	lineno_len = zend_sprintf(lineno_buf, "%d", opline->lineno);
+	if (opline->filename) {
+		filename = opline->filename;
+	} else {
+		filename = "-";
+	}
+
+	/* NULL, name length, filename length, line number length */
+	result->value.str.len = 1+name->value.str.len+strlen(filename)+lineno_len+1;
+	result->value.str.val = (char *) emalloc(result->value.str.len+1);
+	sprintf(result->value.str.val, "%c%s%s%s", '\0', name->value.str.val, filename, lineno_buf);
+	result->type = IS_STRING;
+	result->refcount = 1;
+}
+
+
 void init_compiler(CLS_D ELS_DC)
 {
 	zend_stack_init(&CG(bp_stack));
@@ -627,14 +649,14 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 
 		opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 		opline->op1.op_type = IS_CONST;
-		opline->op1.u.constant.type = IS_LONG;
-		opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(function_table));
+		build_runtime_defined_function_key(&opline->op1.u.constant, &function_name->u.constant, opline);
 		opline->op2.op_type = IS_CONST;
 		opline->op2.u.constant.type = IS_STRING;
 		opline->op2.u.constant.value.str.val = estrndup(name, name_len);
 		opline->op2.u.constant.value.str.len = name_len;
+		opline->op2.u.constant.refcount = 1;
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
-		zend_hash_next_index_insert(CG(function_table), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+		zend_hash_update(CG(function_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 	}
 
 	if (CG(extended_info)) {
@@ -897,7 +919,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 		case ZEND_DECLARE_FUNCTION: {
 				zend_function *function;
 
-				zend_hash_index_find(function_table, opline->op1.u.constant.value.lval, (void **) &function);
+				zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &function);
 				(*function->op_array.refcount)++;
 				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
 					if (!compile_time) {
@@ -912,7 +934,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 		case ZEND_DECLARE_CLASS: {
 				zend_class_entry *ce;
 
-				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
+				zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
 					(*ce->refcount)--;
@@ -931,7 +953,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				zend_function tmp_zend_function;
 				zval *tmp;
 
-				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
+				zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
 				(*ce->refcount)++;
 
 				/* Restore base class / derived class names */
@@ -979,18 +1001,21 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 void do_early_binding(CLS_D)
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+	HashTable *table;
 
 	if (do_bind_function_or_class(opline, CG(function_table), CG(class_table), 1)==FAILURE) {
 		return;
 	}
 	switch (opline->extended_value) {
 		case ZEND_DECLARE_FUNCTION:
-			zend_hash_index_del(CG(function_table), opline->op1.u.constant.value.lval);
+			table = CG(function_table);
 			break;
 		case ZEND_DECLARE_CLASS:
-			zend_hash_index_del(CG(class_table), opline->op1.u.constant.value.lval);
+			table = CG(class_table);
 			break;
 	}
+	zend_hash_del(table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len);
+	zval_dtor(&opline->op1.u.constant);
 	zval_dtor(&opline->op2.u.constant);
 	opline->opcode = ZEND_NOP;
 	SET_UNUSED(opline->op1);
@@ -1319,10 +1344,10 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 
 	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 	opline->op1.op_type = IS_CONST;
-	opline->op1.u.constant.type = IS_LONG;
-	opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(class_table));
+	build_runtime_defined_function_key(&opline->op1.u.constant, &class_name->u.constant, opline);
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
+	opline->op2.u.constant.refcount = 1;
 	if (runtime_inheritence) {
 		char *full_class_name;
 
@@ -1344,7 +1369,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 		opline->extended_value = ZEND_DECLARE_CLASS;
 	}
 	
-	zend_hash_next_index_insert(CG(class_table), &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry));
+	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry));
 }
 
 
