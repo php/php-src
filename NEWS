@@ -1,19 +1,19 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- GetImageSize() and exif_read_data() now return mime-type and exif_thumbnail() 
-  optionally returns imagetype. (Marcus)
-- Added image_type_to_mime_type() to convert imagetypes to mime-types. (Marcus)
-- Added a new parameter to the header() function which overrides the HTTP
+- Made getimagesize() and exif_read_data() to return also the mime-type and 
+  exif_thumbnail() to return also the image-type. (Marcus)
+- Added image_type_to_mime_type() which converts image-types to mime-types.
+  (Marcus)
+- Added an optional parameter to the header() function which overrides the HTTP
   response code. (Derick)
-- Change the order of which modules are unloaded to the reverse order of
+- Changed the order of which modules are unloaded to the reverse order of
   which they were loaded. (Derick, Zend Engine)
 - Fixed a crash in ereg_replace() when backreference number was greater
   than the number of subpatterns. (oliver@billix.franken.de)
 - Added preliminary SAX-Input support. It's now possible to build a DomDocument
   with SAX-Events. (chregu)
-- Bundle gd library 2.0.1 with php (ext/gd/libgd) (Rasmus), tweak config.m4 to
-  work with it (Jani), smallers tweaks for Win32. (Markus, Edin)
+- Bundled GD library 2.0.1 with php (ext/gd/libgd) (Rasmus, Jani, Markus, Edin)
 - Fixed bug with Apache which let PHP_AUTH_* variables to be set when
   external basic auth mechanism was used. (Jani)
 - Fixed bzopen() crash in thread-safe mode. (Andrei)
@@ -38,14 +38,13 @@ PHP 4                                                                      NEWS
 - Added pctnl_alarm() function. (Edin)
 - Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - If zlib.output_compression is enabled and a page is compressed 
-  a "Vary: Accept-Encoding" header is added. (Stefan)
+  a "Vary: Accept-Encoding" header is now added. (Stefan)
 - Renamed getallheaders() to apache_request_headers() and kept getallheaders() 
   as an alias to it. Also added apache_response_headers() which returns the 
   current response headers from Apache. (Rasmus)
 - Added missing AddRef() calls in the COM extension. This should fix weird 
   behaviour (in particular with ADODB). (Harald)
-- Fixed some dummy errors. (dets)
-- Fix segfault in version_compare(). (Stig)
+- Fixed segfault in version_compare(). (Stig)
 - Added compressed Flash MX files support to getimagesize(). (Derick)
 - Added ability to capture string offsets in preg_split() results.
   (David Brown, Andrei)
@@ -57,7 +56,7 @@ PHP 4                                                                      NEWS
   Korean encodings into mbstring. (Rui)
 - Misc. Win32 mail() enhancements: support 'From:' header (msisolak@yahoo.com),
   support Bcc header, case-insensitive headers, enhanced error reporting,
-  automatic proper line ending conversion, fix crash with Cc, fix buffer
+  automatic proper line ending conversion, fixed crash with Cc, fixed buffer
   overflows with $header. (Markus)
 - Improved IMAP extension performance. (adam.kauffman@mindspring.com,
   rjs3@andrew.cmu.edu, Jon)
@@ -75,11 +74,11 @@ PHP 4                                                                      NEWS
   the previously selected database name. (Jani)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
-- Made the mbstring extension to be enabled by default. (Yasuo)
+- Changed the mbstring extension to be enabled by default. (Yasuo)
 - Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (Thies)
 - Added php.ini options for EXIF extension to encode and decode Unicode/JIS
   user comments. (Marcus)
-- Changed the "-c" CLI/CGI option to allow both 'filename' and
+- Changed the "-c" CLI/CGI option to allow both 'filename' and 
   'path to php.ini'. (Yasuo)
 - Added version information to the .dll and .exe files created under Windows.
   (jtate)
