@@ -1552,6 +1552,12 @@ PHPAPI int php_handle_special_queries(TSRMLS_D)
 }
 /* }}} */
 
+#ifdef HAVE_BROKEN_GETCWD
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+#endif
+
 /* {{{ php_execute_script
  */
 PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
