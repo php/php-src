@@ -27,6 +27,7 @@ class SOAP_Test {
     var $test_name = NULL;
     var $method_name = NULL;
     var $method_params = NULL;
+    var $cmp_func = NULL;
     var $expect = NULL;
     var $expect_fault = FALSE;
     var $headers = NULL;
@@ -36,7 +37,7 @@ class SOAP_Test {
     var $debug = 0;
     var $encoding = 'UTF-8';
 
-    function SOAP_Test($methodname, $params, $expect = NULL) {
+    function SOAP_Test($methodname, $params, $expect = NULL, $cmp_func = NULL) {
         # XXX we have to do this to make php-soap happy with NULL params
         if (!$params) $params = array();
 
@@ -50,6 +51,9 @@ class SOAP_Test {
         $this->method_params = $params;
         if ($expect !== NULL) {
           $this->expect = $expect;
+        }
+        if ($cmp_func !== NULL) {
+          $this->cmp_func = $cmp_func;
         }
 
         // determine test type
@@ -259,9 +263,9 @@ $soap_tests['base'][] = new SOAP_Test('echoBase64', array('inputBase64' =>
 //***********************************************************
 // Base echoHexBinary
 
-$soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' => '736F61707834'));
+$soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' => '736F61707834'),'736F61707834','hex_compare');
 $soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' =>
-        soap_value('inputHexBinary','736F61707834',XSD_HEXBINARY)));
+        soap_value('inputHexBinary','736F61707834',XSD_HEXBINARY)),'736F61707834','hex_compare');
 
 //***********************************************************
 // Base echoDecimal

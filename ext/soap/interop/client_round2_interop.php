@@ -71,18 +71,18 @@ class Interop_Client
         // set up local endpoint
         $this->localEndpoint['base'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_base.php',
-                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/interop.wsdl.php'
+                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_base.php',
+                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/interop.wsdl.php'
                               );
         $this->localEndpoint['GroupB'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupB.php',
-                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/interopB.wsdl.php'
+                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupB.php',
+                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/interopB.wsdl.php'
                               );
         $this->localEndpoint['GroupC'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupC.php',
-                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/echoheadersvc.wsdl.php'
+                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupC.php',
+                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/echoheadersvc.wsdl.php'
                               );
     }
 
@@ -481,9 +481,14 @@ class Interop_Client
 
             // compare the results with what we sent
 
-            $ok = $this->compareResult($sent_d,$return, $sent->type);
-            if (!$ok && $soap_test->expect) {
+            if ($soap_test->cmp_func !== NULL) {
+              $cmp_func = $soap_test->cmp_func;
+              $ok = $cmp_func($sent_d,$return);
+            } else {
+              $ok = $this->compareResult($sent_d,$return, $sent->type);
+              if (!$ok && $soap_test->expect) {
                 $ok = $this->compareResult($soap_test->expect,$return);
+              }
             }
 
             // save the wire
