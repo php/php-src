@@ -11,6 +11,13 @@
 
 #include "zend.h"
 #include "php_regex.h"
+#include "php_compat.h"
+
+#if HAVE_OPENSSL_EXT
+/* zlib typedefs free_func which causes problems if the SSL includes happen
+ * after zlib.h is included */
+# include <openssl/ssl.h>
+#endif
 
 #include "httpd.h"
 #include "http_config.h"
