@@ -82,7 +82,7 @@ static void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_
 static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, int *use_proxy TSRMLS_DC)
 {
 	php_stream *stream;
-	zval **proxy_host, **proxy_port;
+	zval **proxy_host, **proxy_port, **tmp;
 	char *host;
 #ifdef ZEND_ENGINE_2
 	php_stream_context *context = NULL;
@@ -91,6 +91,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 #endif
 	int port;
 	int old_error_reporting;
+	struct timeval tv;
+	struct timeval *timeout = NULL;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
 	    Z_TYPE_PP(proxy_host) == IS_STRING &&
@@ -102,6 +104,12 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 	} else {
 		host = phpurl->host;
 		port = phpurl->port;
+	}
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_connection_timeout", sizeof("_connection_timeout"), (void **) &tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) > 0) {
+	  tv.tv_sec = Z_LVAL_PP(tmp);
+	  tv.tv_usec = 0;
+		timeout = &tv;
 	}
 
 	old_error_reporting = EG(error_reporting);
@@ -126,12 +134,12 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 		ENFORCE_SAFE_MODE | REPORT_ERRORS,
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
-		NULL /*timeout*/,
+		timeout,
 		context,
 		NULL, NULL);
 	efree(name);
 #else
-	stream = php_stream_sock_open_host(host, port, SOCK_STREAM, NULL, NULL);
+	stream = php_stream_sock_open_host(host, port, SOCK_STREAM, timeout, NULL);
 #endif
 
 	/* SSL & proxy */
