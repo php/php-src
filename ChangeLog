@@ -1,3 +1,12 @@
+2001-12-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * NEWS: added my name for NEWS.
+
+2001-12-24  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    Avoid a segfault when 0 bytes are returned from a website, and RETURNTRANSFER is enabled.
+
 2001-12-23  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Common.php:
