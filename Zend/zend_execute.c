@@ -504,7 +504,7 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 		zval_dtor(varname);
 	}
 	Ts[result->u.var].var.ptr_ptr = retval;
-//	SEPARATE_ON_READ_OBJECT(retval, type);
+	/*	SEPARATE_ON_READ_OBJECT(retval, type); */
 	SELECTIVE_PZVAL_LOCK(*retval, result);
 }
 
@@ -682,7 +682,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
-			//SEPARATE_ON_READ_OBJECT(*retval, type);
+			/* SEPARATE_ON_READ_OBJECT(*retval, type); */
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
 		case IS_NULL:
@@ -873,7 +873,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		zendi_zval_copy_ctor(*container);
 	}
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
-	//SEPARATE_ON_READ_OBJECT(*retval, type);
+	/* SEPARATE_ON_READ_OBJECT(*retval, type); */
 	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
 
