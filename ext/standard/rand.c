@@ -60,6 +60,9 @@ PHPAPI void php_srand(long seed TSRMLS_DC)
 	srand((unsigned int) seed);
 # endif
 #endif
+
+	/* Seed only once */
+	BG(rand_is_seeded) = 1;
 }
 /* }}} */
 
@@ -205,6 +208,9 @@ PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 	
 	for (BG(left) = 0, *s++ = x, j = N; --j;
 		*s++ = (x *= 69069U) & 0xFFFFFFFFU);
+
+	/* Seed only once */
+	BG(mt_rand_is_seeded) = 1;
 }
 /* }}} */
 
@@ -253,12 +259,6 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 }
 /* }}} */
 
-#ifdef PHP_WIN32
-#define GENERATE_SEED() ((long) (time(0) * GetCurrentProcessId() * 1000000 * php_combined_lcg(TSRMLS_C)))
-#else
-#define GENERATE_SEED() ((long) (time(0) * getpid() * 1000000 * php_combined_lcg(TSRMLS_C)))
-#endif
-
 /* {{{ proto void srand([int seed])
    Seeds random number generator */
 PHP_FUNCTION(srand)
@@ -272,7 +272,6 @@ PHP_FUNCTION(srand)
 		seed = GENERATE_SEED();
 
 	php_srand(seed TSRMLS_CC);
-	BG(rand_is_seeded) = 1;
 }
 /* }}} */
 
@@ -289,7 +288,6 @@ PHP_FUNCTION(mt_srand)
 		seed = GENERATE_SEED();
 
 	php_mt_srand(seed TSRMLS_CC);
-	BG(mt_rand_is_seeded) = 1;
 }
 /* }}} */
 
