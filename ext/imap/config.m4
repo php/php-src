@@ -59,7 +59,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
     fi
 
     for i in $SEARCH_PATHS; do
-      if test -f $i/lib/libkrb5.a || test -f $i/lib/libkrb5.$SHLIB_SUFFIX_NAME; then
+      if test -f $i/$PHP_LIBDIR/libkrb5.a || test -f $i/$PHP_LIBDIR/libkrb5.$SHLIB_SUFFIX_NAME; then
         PHP_KERBEROS_DIR=$i
         break
       fi
@@ -72,7 +72,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
       ])
     fi
     AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    PHP_ADD_LIBPATH($PHP_KERBEROS_DIR/lib, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($PHP_KERBEROS_DIR/$PHP_LIBDIR, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(gssapi_krb5, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(krb5, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(k5crypto, 1, IMAP_SHARED_LIBADD)
@@ -104,11 +104,11 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
   AC_MSG_CHECKING([whether SSL libraries are needed for c-client])
 
   if test "$PHP_IMAP_SSL" != "no"; then
-    AC_MSG_RESULT([$PHP_IMAP_SSL/lib])
+    AC_MSG_RESULT([$PHP_IMAP_SSL/$PHP_LIBDIR])
     AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
     PHP_ADD_LIBRARY_DEFER(ssl,    1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY_DEFER(crypto, 1, IMAP_SHARED_LIBADD)
-    PHP_ADD_LIBPATH($PHP_IMAP_SSL/lib, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($PHP_IMAP_SSL/$PHP_LIBDIR, IMAP_SHARED_LIBADD)
   else
     AC_MSG_RESULT(no)
   fi
@@ -166,13 +166,13 @@ if test "$PHP_IMAP" != "no"; then
 
     if test -r "$IMAP_DIR/c-client/c-client.a"; then
       ln -s "$IMAP_DIR/c-client/c-client.a" "$IMAP_DIR/c-client/libc-client.a" >/dev/null 2>&1
-    elif test -r "$IMAP_DIR/lib/c-client.a"; then
-      ln -s "$IMAP_DIR/lib/c-client.a" "$IMAP_DIR/lib/libc-client.a" >/dev/null 2>&1
+    elif test -r "$IMAP_DIR/$PHP_LIBDIR/c-client.a"; then
+      ln -s "$IMAP_DIR/$PHP_LIBDIR/c-client.a" "$IMAP_DIR/$PHP_LIBDIR/libc-client.a" >/dev/null 2>&1
     fi
 
     for lib in c-client4 c-client imap; do
       IMAP_LIB=$lib
-      IMAP_LIB_CHK(lib)
+      IMAP_LIB_CHK($PHP_LIBDIR)
       IMAP_LIB_CHK(c-client)
     done
 

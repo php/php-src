@@ -83,7 +83,7 @@ if test "$PHP_MYSQL" != "no"; then
 Note that the MySQL client library is not bundled anymore.])
   fi
 
-  for i in lib lib/mysql; do
+  for i in $PHP_LIBDIR $PHP_LIBDIR/mysql; do
     MYSQL_LIB_CHK($i)
   done
 
@@ -99,9 +99,9 @@ Note that the MySQL client library is not bundled anymore.])
       PHP_CHECK_LIBRARY(mysqlclient, mysql_error, [], [
         AC_MSG_ERROR([mysql configure failed. Please check config.log for more information.])
       ], [
-        -L$PHP_ZLIB_DIR/lib -L$MYSQL_LIB_DIR 
+        -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$MYSQL_LIB_DIR 
       ])  
-      MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -lz"
+      MYSQL_LIBS="-L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
     else
       PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
       PHP_CHECK_LIBRARY(mysqlclient, mysql_errno, [], [

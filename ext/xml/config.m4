@@ -30,7 +30,7 @@ if test "$PHP_XML" != "no" && test "$PHP_LIBXML" != "no" -o "$PHP_LIBEXPAT_DIR" 
   dnl
   if test "$PHP_LIBEXPAT_DIR" != "no"; then
     for i in $PHP_XML $PHP_LIBEXPAT_DIR; do
-      if test -f "$i/lib/libexpat.a" -o -f "$i/lib/libexpat.$SHLIB_SUFFIX_NAME"; then
+      if test -f "$i/$PHP_LIBDIR/libexpat.a" -o -f "$i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME"; then
         EXPAT_DIR=$i
         break
       fi
@@ -41,7 +41,7 @@ if test "$PHP_XML" != "no" && test "$PHP_LIBXML" != "no" -o "$PHP_LIBEXPAT_DIR" 
     fi
 
     PHP_ADD_INCLUDE($EXPAT_DIR/include)
-    PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, XML_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/$PHP_LIBDIR, XML_SHARED_LIBADD)
     AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
   fi
 

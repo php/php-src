@@ -101,8 +101,8 @@ AC_ARG_WITH(adabas,
   fi
   if test "$withval" != "no"; then
     PHP_ADD_INCLUDE($withval/incl)
-    PHP_ADD_LIBPATH($withval/lib)
-    ODBC_OBJS="$withval/lib/odbclib.a"
+    PHP_ADD_LIBPATH($withval/$PHP_LIBDIR)
+    ODBC_OBJS="$withval/$PHP_LIBDIR/odbclib.a"
     ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
     $srcdir/build/shtool mkdir -f -p ext/odbc
     rm -f "$ODBC_LIB"
@@ -159,7 +159,7 @@ AC_ARG_WITH(solid,
   fi
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
+    ODBC_LIBDIR=$withval/$PHP_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=solid
     if test -f $ODBC_LIBDIR/soc*35.a; then
@@ -192,7 +192,7 @@ AC_ARG_WITH(ibm-db2,
       ODBC_LIBDIR=/home/db2inst1/sqllib/lib
     else
       ODBC_INCDIR=$withval/include
-      ODBC_LIBDIR=$withval/lib
+      ODBC_LIBDIR=$withval/$PHP_LIBDIR
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
@@ -302,7 +302,7 @@ AC_ARG_WITH(birdstep,
         ODBC_LIBDIR=/usr/local/birdstep/lib
     else
         ODBC_INCDIR=$withval/include
-        ODBC_LIBDIR=$withval/lib
+        ODBC_LIBDIR=$withval/$PHP_LIBDIR
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=birdstep
@@ -340,7 +340,7 @@ AC_ARG_WITH(custom-odbc,
   fi
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
+    ODBC_LIBDIR=$withval/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
@@ -370,7 +370,7 @@ AC_ARG_WITH(iodbc,
     PHP_ADD_INCLUDE($withval/include, 1)
     ODBC_TYPE=iodbc
     ODBC_INCLUDE=-I$withval/include
-    ODBC_LFLAGS=-L$withval/lib
+    ODBC_LFLAGS=-L$withval/$PHP_LIBDIR
     ODBC_LIBS=-liodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
     AC_DEFINE(HAVE_ODBC2,1,[ ])
@@ -396,7 +396,7 @@ AC_ARG_WITH(esoob,
   fi
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
+    ODBC_LIBDIR=$withval/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-lesoobclient
@@ -423,7 +423,7 @@ AC_ARG_WITH(unixODBC,
   fi
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
+    ODBC_LIBDIR=$withval/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-lodbc
@@ -472,7 +472,7 @@ AC_ARG_WITH(dbmaker,
 
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
+    ODBC_LIBDIR=$withval/$PHP_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_INCLUDE=-I$ODBC_INCDIR

@@ -34,27 +34,27 @@ if test "$PHP_READLINE" != "no"; then
 
   PHP_CHECK_LIBRARY(readline, readline,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR(readline library not found)
   ], [
-    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
   PHP_CHECK_LIBRARY(readline, rl_callback_read_char,
   [
     AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
   ],[],[
-    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
   PHP_CHECK_LIBRARY(history, add_history,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR(history library required by readline not found)
   ], [
-    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
@@ -85,11 +85,11 @@ elif test "$PHP_LIBEDIT" != "no"; then
 
   PHP_CHECK_LIBRARY(edit, readline,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
+    PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)  
   ], [
     AC_MSG_ERROR(edit library required by readline not found)
   ], [
-    -L$READLINE_DIR/lib 
+    -L$READLINE_DIR/$PHP_LIBDIR 
   ])
 
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)

@@ -21,13 +21,13 @@ if test "$PHP_GMP" != "no"; then
     [],[
       AC_MSG_ERROR([GNU MP Library version 4.1.2 or greater required.])
     ],[
-      -L$GMP_DIR/lib
+      -L$GMP_DIR/$PHP_LIBDIR
     ])
   ],[
-    -L$GMP_DIR/lib
+    -L$GMP_DIR/$PHP_LIBDIR
   ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/lib, GMP_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/$PHP_LIBDIR, GMP_SHARED_LIBADD)
   PHP_ADD_INCLUDE($GMP_DIR/include)
 
   PHP_NEW_EXTENSION(gmp, gmp.c, $ext_shared)

@@ -45,7 +45,7 @@ if test "$PHP_XSL" != "no"; then
         AC_MSG_RESULT(not found)
       else 
         AC_MSG_RESULT(found)
-        PHP_ADD_LIBRARY_WITH_PATH(exslt, $PHP_XSL_EXSL_DIR/lib, XSL_SHARED_LIBADD)
+        PHP_ADD_LIBRARY_WITH_PATH(exslt, $PHP_XSL_EXSL_DIR/$PHP_LIBDIR, XSL_SHARED_LIBADD)
         PHP_ADD_INCLUDE($PHP_XSL_EXSL_DIR/include)
         AC_DEFINE(HAVE_XSL_EXSLT,1,[ ])
       fi

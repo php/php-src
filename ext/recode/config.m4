@@ -12,17 +12,17 @@ if test "$PHP_RECODE" != "no"; then
     if test -f $i/include/recode.h; then
       RECODE_DIR=$i
       RECODE_INC=include
-      RECODE_LIB=lib
+      RECODE_LIB=$PHP_LIBDIR
     fi
     if test -f $i/include/recode/recode.h; then
       RECODE_DIR=$i
       RECODE_INC=include/recode
-      RECODE_LIB=lib/recode
+      RECODE_LIB=$PHP_LIBDIR/recode
     fi
     if test -f $i/recode/include/recode.h; then
       RECODE_DIR=$i/recode
       RECODE_INC=include
-      RECODE_LIB=lib
+      RECODE_LIB=$PHP_LIBDIR
     fi
     test -n "$RECODE_DIR" && break
   done

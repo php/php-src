@@ -40,12 +40,12 @@ if test "$PHP_SQLITE" != "no"; then
 
     PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
     [
-        PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $SQLITE_DIR/lib, SQLITE_SHARED_LIBADD)
+        PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $SQLITE_DIR/$PHP_LIBDIR, SQLITE_SHARED_LIBADD)
         AC_DEFINE(HAVE_SQLITELIB,1,[ ])
     ],[
         AC_MSG_ERROR([wrong sqlite lib version or lib not found])
     ],[
-        -L$SQLITE_DIR/lib -lm
+        -L$SQLITE_DIR/$PHP_LIBDIR -lm
     ])
  
     PHP_SUBST(SQLITE_SHARED_LIBADD)

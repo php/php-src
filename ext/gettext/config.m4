@@ -14,7 +14,7 @@ if test "$PHP_GETTEXT" != "no"; then
     AC_MSG_ERROR(Cannot locate header file libintl.h)
   fi
 
-  GETTEXT_LIBDIR=$GETTEXT_DIR/lib
+  GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
   GETTEXT_INCDIR=$GETTEXT_DIR/include
   
   O_LDFLAGS=$LDFLAGS

@@ -225,11 +225,11 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     fi
 
     PHP_CHECK_LIBRARY(mbfl, mbfl_buffer_converter_new, [
-      PHP_ADD_LIBRARY_WITH_PATH(mbfl, $PHP_LIBMBFL/lib, MBSTRING_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(mbfl, $PHP_LIBMBFL/$PHP_LIBDIR, MBSTRING_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([Problem with libmbfl. Please check config.log for more information.])
     ], [
-      -LPHP_LIBMBFL/lib
+      -LPHP_LIBMBFL/$PHP_LIBDIR
     ])
   fi
 ])
