@@ -31,7 +31,7 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-#define PHP_PDO_SQLITE_MODULE_VERSION	"0.2.2"
+#define PHP_PDO_SQLITE_MODULE_VERSION	"0.3"
 
 /* {{{ pdo_sqlite_functions[] */
 function_entry pdo_sqlite_functions[] = {
