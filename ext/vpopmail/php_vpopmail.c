@@ -857,7 +857,6 @@ PHP_FUNCTION(vpopmail_alias_get)
 	zval **domain;
 	int retval;
 	char *talias;
-	uint index=0;
 
 	if (ZEND_NUM_ARGS() != 2
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &alias, &domain) == FAILURE)
@@ -876,7 +875,7 @@ PHP_FUNCTION(vpopmail_alias_get)
 
 	talias=valias_select(Z_STRVAL_PP(alias), Z_STRVAL_PP(domain));
 	while (talias) {
-		add_index_string(return_value,index++,talias,1);
+		add_next_index_string(return_value,talias,1);
 		talias=valias_select_next();
 	}
 }
@@ -890,7 +889,8 @@ PHP_FUNCTION(vpopmail_alias_get_all)
 	int retval;
 	char *talias;
 	char tpath[1024];
-	uint index=0;
+	char ppath[1024]="";
+	zval *tarr;
 
 	if (ZEND_NUM_ARGS() != 1
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &domain) == FAILURE)
@@ -908,9 +908,16 @@ PHP_FUNCTION(vpopmail_alias_get_all)
 
 	talias=valias_select_all(tpath, Z_STRVAL_PP(domain));
 	while (talias) {
-		strcat(tpath,":");
-		strcat(tpath,talias);
-		add_index_string(return_value,index++,tpath,1);
+		if (strcmp(ppath,tpath)) {
+			MAKE_STD_ZVAL(tarr);
+			if (array_init(tarr)!=SUCCESS) {
+				zend_error(E_ERROR,"unable to create array");
+				RETURN_FALSE;
+			}
+			add_assoc_zval(return_value,tpath,tarr);
+			strcpy(ppath,tpath);
+		}
+		add_next_index_string(tarr,talias,1);
 		talias=valias_select_all_next(tpath);
 	}
 }
