@@ -30,7 +30,6 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	z_stream stream;
 	uLong crc;
 	int ob_gzhandler_status;
-	int ob_gzip_coding;
 	long output_compression;
 	long output_compression_level;
 	char *output_handler;
