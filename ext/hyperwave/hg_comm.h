@@ -36,7 +36,7 @@
 #define F_DISTRIBUTED 0x80000000
 #define F_COMPRESSED  0x40000000
 #define F_VERSION     0x00003fff
-#define HW_VERSION       717L     /* 7.17 */
+#define HW_VERSION    717L     /* 7.17 */
 
 #define HEADER_LENGTH 12
 
