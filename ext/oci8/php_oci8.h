@@ -70,6 +70,7 @@ typedef struct {
 	int num;
 	int persistent;
 	int open;
+	int exclusive;
 	char *hashed_details;
 	oci_server *server;
 	OCISession *pSession;
