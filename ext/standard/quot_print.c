@@ -36,20 +36,16 @@
 */
 static char php_hex2int(int c)
 {
-	if ( isdigit(c) )
-	{
+	if (isdigit(c)) {
 		return c - '0';
 	}
-	else if ( c >= 'A' && c <= 'F' )
-	{
+	else if (c >= 'A' && c <= 'F') {
 		return c - 'A' + 10;
 	}
-    else if ( c >= 'a' && c <= 'f' )
-    {
-        return c - 'a' + 10;
-    }
-	else
-	{
+	else if (c >= 'a' && c <= 'f') {
+		return c - 'a' + 10;
+	}
+	else {
 		return -1;
 	}
 }
@@ -66,69 +62,59 @@ PHP_FUNCTION(quoted_printable_decode)
 	pval **arg1;
 	char *str_in, *str_out;
 	int i = 0, j = 0, k;
-	
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1)==FAILURE) 
-    {
-    	WRONG_PARAM_COUNT;
-    }
-    convert_to_string_ex(arg1);
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(arg1);
     
-	if(Z_STRLEN_PP(arg1) == 0) {
+	if (Z_STRLEN_PP(arg1) == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-    str_in = Z_STRVAL_PP(arg1);
-	str_out = emalloc(Z_STRLEN_PP(arg1)+1);
-    while ( str_in[i] )
-    {
-        switch (str_in[i])
-        {
-        case '=':
-            if (str_in[i+1] && str_in[i+2] && 
-                isxdigit((int)str_in[i+1]) && 
-                isxdigit((int)str_in[i+1]) )
-            {
-                str_out[j++] = (php_hex2int((int)str_in[i+1]) << 4 ) 
-                           + php_hex2int((int)str_in[i+2]);
-                i += 3;
-            }
-            else   /* check for soft line break according to RFC 2045*/
-            {
-                k = 1;
-                while ( str_in[i+k] && ((str_in[i+k] == 32) || (str_in[i+k] == 9)) ) 
-                {
-                   /* Possibly, skip spaces/tabs at the end of line */
-                    k++;
-                }
-                if (!str_in[i+k])
-                {
-                    /* End of line reached */
-                    i += k;
-                }
-                else if ( (str_in[i+k] == 13) && (str_in[i+k+1] == 10))
-                {
-                    /* CRLF */
-                    i += k+2;
-                }
-                else if ( (str_in[i+k] == 13) || (str_in[i+k] == 10) )
-                {
-                    /* CR or LF */
-                    i += k+1;
-                }
-                else
-                {
-            		str_out[j++] = str_in[i++];
-                }
-            }
-            break;
-        default:
-    		str_out[j++] = str_in[i++];
-        }
-    }
-    str_out[j] = '\0';
+	str_in = Z_STRVAL_PP(arg1);
+	str_out = emalloc(Z_STRLEN_PP(arg1) + 1);
+	while (str_in[i]) {
+		switch (str_in[i]) {
+		case '=':
+			if (str_in[i + 1] && str_in[i + 2] && 
+				isxdigit((int) str_in[i + 1]) && 
+				isxdigit((int) str_in[i + 1]))
+			{
+				str_out[j++] = (php_hex2int((int) str_in[i + 1]) << 4) 
+						+ php_hex2int((int) str_in[i + 2]);
+				i += 3;
+			} else  /* check for soft line break according to RFC 2045*/ {
+				k = 1;
+				while (str_in[i + k] && ((str_in[i + k] == 32) || (str_in[i + k] == 9))) {
+					/* Possibly, skip spaces/tabs at the end of line */
+					k++;
+				}
+				if (!str_in[i + k]) {
+					/* End of line reached */
+					i += k;
+				}
+				else if ((str_in[i + k] == 13) && (str_in[i + k + 1] == 10)) {
+					/* CRLF */
+					i += k + 2;
+				}
+				else if ((str_in[i + k] == 13) || (str_in[i + k] == 10)) {
+					/* CR or LF */
+					i += k + 1;
+				}
+				else {
+					str_out[j++] = str_in[i++];
+				}
+			}
+			break;
+		default:
+			str_out[j++] = str_in[i++];
+		}
+	}
+	str_out[j] = '\0';
     
-    RETVAL_STRINGL(str_out, j, 0);
+	RETVAL_STRINGL(str_out, j, 0);
 }
 /* }}} */
 
