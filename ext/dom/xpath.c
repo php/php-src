@@ -92,7 +92,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -115,7 +115,7 @@ PHP_FUNCTION(dom_xpath_query)
 
 	ctxp = (xmlXPathContextPtr) intern->ptr;
 	if (ctxp == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
+		php_error(E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
 	}
 
