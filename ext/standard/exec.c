@@ -602,6 +602,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	WaitForSingleObject(child, INFINITE);
 	GetExitCodeProcess(child, &wstatus);
 	FG(pclose_ret) = wstatus;
+	CloseHandle(child);
 #else
 # if HAVE_SYS_WAIT_H
 	int wstatus;
