@@ -151,7 +151,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<INITIAL>["][^\n\r"]*["] {
+<INITIAL>["][^"]*["] {
 	/* ENCAPSULATED TC_STRING */
 
 	/* eat trailing " */
