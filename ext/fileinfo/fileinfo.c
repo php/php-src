@@ -23,14 +23,6 @@
 #endif
 
 #include <magic.h>
-/* 
- * HOWMANY specifies the maximum offset libmagic will look at
- * this is currently hardcoded in the libmagic source but not exported
- */
-#ifndef HOWMANY
-#define HOWMANY 65536
-#endif
-
 
 #include "php.h"
 #include "php_ini.h"
@@ -216,7 +208,7 @@ zend_module_entry fileinfo_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_FILEINFO
+#ifdef COMPILE_DL_FILENINFO
 ZEND_GET_MODULE(fileinfo)
 #endif
 
@@ -369,7 +361,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			if (!stream) {
 				RETURN_FALSE;
 			}
-			buffer_len = php_stream_copy_to_mem(stream, &tmp, HOWMANY, 0);
+			buffer_len = php_stream_copy_to_mem(stream, &tmp, PHP_STREAM_COPY_ALL, 0);
 			php_stream_close(stream);
 
 			if (buffer_len == 0) {

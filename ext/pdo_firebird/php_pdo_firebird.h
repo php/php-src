@@ -12,44 +12,41 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Ilia Alshanetsky <ilia@php.net>                              |
+  | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef PHP_FILENINFO_H
-#define PHP_FILENINFO_H
+#ifndef PHP_PDO_FIREBIRD_H
+#define PHP_PDO_FIREBIRD_H
 
-extern zend_module_entry fileinfo_module_entry;
-#define phpext_fileinfo_ptr &fileinfo_module_entry
+extern zend_module_entry pdo_firebird_module_entry;
+#define phpext_pdo_firebird_ptr &pdo_firebird_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_FILEINFO_API __declspec(dllexport)
+# ifdef PDO_FIREBIRD_EXPORTS
+#  define PDO_FB_API __declspec(dllexport)
+# elif defined(COMPILE_DL_PDO_FIREBIRD)
+#  define PDO_FB_API __declspec(dllimport)
+# else
+#  define PDO_FB_API
+# endif
 #else
-#define PHP_FILEINFO_API
+# define PDO_FB_API
 #endif
 
 #ifdef ZTS
 #include "TSRM.h"
 #endif
 
-PHP_MINFO_FUNCTION(fileinfo);
+PHP_MINIT_FUNCTION(pdo_firebird);
+PHP_MSHUTDOWN_FUNCTION(pdo_firebird);
+PHP_RINIT_FUNCTION(pdo_firebird);
+PHP_RSHUTDOWN_FUNCTION(pdo_firebird);
+PHP_MINFO_FUNCTION(pdo_firebird);
 
-PHP_FUNCTION(finfo_open);
-PHP_FUNCTION(finfo_close);
-PHP_FUNCTION(finfo_set_flags);
-PHP_FUNCTION(finfo_file);
-PHP_FUNCTION(finfo_buffer);
-
-#ifdef ZTS
-#define FILEINFO_G(v) TSRMG(fileinfo_globals_id, zend_fileinfo_globals *, v)
-#else
-#define FILEINFO_G(v) (fileinfo_globals.v)
-#endif
-
-#endif	/* PHP_FILEINFO_H */
-
+#endif	/* PHP_PDO_FIREBIRD_H */
 
 /*
  * Local variables:

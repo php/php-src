@@ -59,7 +59,6 @@ PHP_FUNCTION(enchant_dict_is_in_session);
 PHP_FUNCTION(enchant_dict_store_replacement);
 PHP_FUNCTION(enchant_dict_get_error);
 PHP_FUNCTION(enchant_dict_describe);
-PHP_FUNCTION(enchant_dict_quick_check);
 
 #ifdef ZTS
 #define ENCHANT_G(v) TSRMG(enchant_globals_id, zend_enchant_globals *, v)

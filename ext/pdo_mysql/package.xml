@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package version="1.0">
- <name>pdo_oci</name>
- <summary>Oracle Call Interface driver for PDO</summary>
+ <name>pdo_mysql</name>
+ <summary>Mysql 3.x/4.0 driver for PDO</summary>
  <maintainers>
   <maintainer>
    <user>gschlossnagle</user>
@@ -12,12 +12,12 @@
   </maintainer>
  </maintainers>
  <description>
-  This extension provides a Mysql 3.x driver for PDO.
+  This extension provides a Mysql 3.x/4.0 driver for PDO.
  </description>
  <license>PHP</license>
  <release>
   <state>alpha</state>
-  <version>0.1dev</version>
+  <version>0.1</version>
   <date>2004-05-18</date>
 
   <notes>
@@ -36,7 +36,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.0"/>
-   <dep type="ext" rel="ge" version="0.1-dev"/>
+   <dep type="ext" name="pdo" rel="ge" version="0.1"/>
   </deps>
  </release>
 </package>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE package SYSTEM "../pear/package.dtd">
+<package version="1.0"><!-- $Id: package.xml,v 1.5 2004-06-23 13:42:06 abies Exp $ -->
+ <name>PDO_FIREBIRD</name>
+ <summary>Firebird/InterBase 6 driver for PDO</summary>
+ <maintainers>
+  <maintainer>
+   <user>abies</user>
+   <name>Ard Biesheuvel</name>
+   <email>abies@php.net</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <configureoptions>
+	 <configureoption name="with-pdo-firebird" prompt="dir"/>
+</configureoptions>
+ <description>
+	 This extension provides a Firebird/InterBase driver for PDO. It supports
+	 all versions of Firebird and InterBase versions 6 and up.
+ </description>
+ <license>PHP</license>
+ <release>
+  <state>alpha</state>
+  <version>0.1</version>
+  <date>2004-06-23</date>
+
+  <notes>
+   To compile and run this module, you will need to have the main PDO module and Firebird's
+   or InterBase's client library installed on your system.
+  </notes>
+
+  <filelist>
+   <file role="doc" name="CREDITS"/>
+
+   <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
+   <file role="src" name="firebird_driver.c"/>
+   <file role="src" name="firebird_statement.c"/>
+   <file role="src" name="pdo_firebird.c"/>
+   <file role="src" name="php_pdo_firebird.h"/>
+   <file role="src" name="php_pdo_firebird_int.h"/>
+
+   <dir name="tests">
+     <file role="test">connect.phpt</file>
+     <file role="test">ddl.phpt</file>
+     <file role="test">execute.phpt</file>
+   </dir>
+
+  </filelist>
+  <deps>
+   <dep type="php" rel="ge" version="5.0.0"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.1"/>
+  </deps>
+ </release>
+</package>

@@ -12,44 +12,70 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Ilia Alshanetsky <ilia@php.net>                              |
+  | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef PHP_FILENINFO_H
-#define PHP_FILENINFO_H
-
-extern zend_module_entry fileinfo_module_entry;
-#define phpext_fileinfo_ptr &fileinfo_module_entry
-
-#ifdef PHP_WIN32
-#define PHP_FILEINFO_API __declspec(dllexport)
-#else
-#define PHP_FILEINFO_API
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
-#ifdef ZTS
-#include "TSRM.h"
+#include "php.h"
+#include "php_ini.h"
+#include "ext/standard/info.h"
+#include "pdo/php_pdo.h"
+#include "pdo/php_pdo_driver.h"
+#include "php_pdo_firebird.h"
+#include "php_pdo_firebird_int.h"
+
+function_entry pdo_firebird_functions[] = { /* {{{ */
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+zend_module_entry pdo_firebird_module_entry = { /* {{{ */
+	STANDARD_MODULE_HEADER,
+	"PDO_Firebird",
+	pdo_firebird_functions,
+	PHP_MINIT(pdo_firebird),
+	PHP_MSHUTDOWN(pdo_firebird),
+	NULL,
+	NULL,
+	PHP_MINFO(pdo_firebird),
+	"0.1",
+	STANDARD_MODULE_PROPERTIES
+};
+/* }}} */
+
+#ifdef COMPILE_DL_PDO_FIREBIRD
+ZEND_GET_MODULE(pdo_firebird)
 #endif
 
-PHP_MINFO_FUNCTION(fileinfo);
+PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
+{
+	php_pdo_register_driver(&pdo_firebird_driver);
 
-PHP_FUNCTION(finfo_open);
-PHP_FUNCTION(finfo_close);
-PHP_FUNCTION(finfo_set_flags);
-PHP_FUNCTION(finfo_file);
-PHP_FUNCTION(finfo_buffer);
+	return SUCCESS;
+}
+/* }}} */
 
-#ifdef ZTS
-#define FILEINFO_G(v) TSRMG(fileinfo_globals_id, zend_fileinfo_globals *, v)
-#else
-#define FILEINFO_G(v) (fileinfo_globals.v)
-#endif
+PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
+{
+	php_pdo_unregister_driver(&pdo_firebird_driver);
 
-#endif	/* PHP_FILEINFO_H */
+	return SUCCESS;
+}
+/* }}} */
 
+PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "PDO Driver for Firebird/InterBase", "enabled");
+	php_info_print_table_end();
+}
+/* }}} */
 
 /*
  * Local variables:

@@ -1,7 +1,0 @@
-.suffixes .c
-CFLAGS=-DHAVE_CONFIG_H -DMBFL_DLL_EXPORT -DWIN32
-INCLUDES=-I. -I..
-LIBS=import32.lib cw32mt.lib c0d32.obj
-LDFLAGS=-c -Tpd -Gn
-.c.obj:
-	bcc32 $(CFLAGS) $(INCLUDES) -c $<

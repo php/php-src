@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "../package.dtd">
+<package>
+ <name>xmlwriter</name>
+ <summary>Provides fast, non-cached, forward-only means to write XML data.</summary>
+ <description>
+  This extension wraps the libxml xmlWriter API. Represents a writer that 
+  provides a non-cached, forward-only means of generating streams or files 
+  containing XML data.
+ </description>
+ <license>PHP License</license>
+ <maintainers>
+  <maintainer>
+   <user>rrichards</user>
+   <name>Rob Richards</name>
+   <email>rrichards@php.net</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <release>
+  <version>0.1</version>
+  <date>2004-07-20</date>
+  <state>alpha</state>
+  <notes>Initial Release </notes>
+  <configureoptions>
+    <configureoption name="with-xmlwriter" default="autodetect" prompt="Include XMLWriter support?"/>
+  </configureoptions>
+  <filelist>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
+   <file role="src" name="php_xmlwriter.c"/>
+   <file role="src" name="php_xmlwriter.h"/>
+  </filelist>
+  <deps>
+   <dep type="php" rel="ge" version="4.3.0" />
+  </deps>
+ </release>
+</package>
