@@ -166,6 +166,8 @@ PHP_FUNCTION(satellite_get_repository_id)
 {
 }
 
+/* {{{ proto bool satellite_caught_exception(void)
+	 See if an exception was caught from the previous function */
 PHP_FUNCTION(satellite_caught_exception)
 {
 	RETURN_BOOL(orbit_caught_exception());
@@ -177,6 +179,7 @@ PHP_FUNCTION(satellite_exception_id)
 	
 	RETURN_STRING(p_id, TRUE);
 }
+/* }}} */
 
 /* real name: php_if_orbit_exception_value */
 PHP_FUNCTION(satellite_exception_value)

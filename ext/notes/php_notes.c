@@ -2225,6 +2225,8 @@ char    ItemText[MAX_ITEM_LEN];     /* Text rendering of item value */
 char    ItemName[MAX_ITEM_NAME_LEN];/* Zero terminated item name */
 
 
+/* {{{ proto bool notes_list_msgs(string db)
+ */
 PHP_FUNCTION(notes_list_msgs)
 {
 
