@@ -1,3 +1,29 @@
+2001-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c:
+    According to Zeev this code is just for showing how to create overloaded classes.
+
+2001-08-29  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: MFH
+
+    * ext/domxml/php_domxml.c: Fix bug #13025.
+
+2001-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c: WS fixes and indenting.
+
+2001-08-29  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/gettext/config.m4
+      ext/gettext/gettext.c
+      ext/gettext/php_gettext.h: fix build
+
+    * ext/mbstring/mbfilter.c: MFH
+
+    * ext/mbstring/mbfilter.c:
+    fix bug# 13017 - patch from tsukada@fminn.nagano.nagano.jp
+
 2001-08-28  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/mbstring/mbfilter.c: MFH
