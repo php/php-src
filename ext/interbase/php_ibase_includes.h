@@ -114,6 +114,7 @@ typedef struct event {
 
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
+	PHP_IBASE_CREATE            = 0,
 	/* fetch flags */
 	PHP_IBASE_FETCH_BLOBS		= 1,
 	PHP_IBASE_FETCH_ARRAYS      = 2,
