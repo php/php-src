@@ -1700,6 +1700,25 @@ PHP_FUNCTION(mysqli_stmt_close)
 }
 /* }}} */
 
+/* {{{ proto mixed mysqli_stmt_num_rows(object stmt)
+   Return the number of rows in statements result set */
+PHP_FUNCTION(mysqli_stmt_num_rows)
+{
+	STMT 			*stmt;
+	zval    		*mysql_stmt;
+	my_ulonglong	rc;
+	PR_STMT			*prstmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
+
+	rc = mysql_stmt_num_rows(stmt->stmt);
+	MYSQLI_RETURN_LONG_LONG(rc)
+}
+/* }}} */
+
 /* {{{ proto string mysqli_select_db(object link, string dbname)
    Select a MySQL database */
 PHP_FUNCTION(mysqli_select_db) 

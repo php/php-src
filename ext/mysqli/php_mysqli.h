@@ -263,6 +263,7 @@ PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
+PHP_FUNCTION(mysqli_stmt_num_rows);
 #if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_stmt_sqlstate);
 #endif
