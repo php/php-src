@@ -1,3 +1,142 @@
+2003-03-07  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/isapi/php4isapi.c:
+      Fixed bug #22473 (ISAPI Secure Server Variables not available)
+
+    * (PHP_4_3)
+      NEWS:
+      Added note about the 64bit fixes
+
+    * NEWS:
+      These will be already in 4.3.x
+
+2003-03-07  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      sapi/nsapi/CREDITS:
+      credits update
+
+2003-03-07  J Smith  <jsmith@tutorbuddy.com>
+
+    * tests/classes/interfaces_001.phpt
+      tests/classes/interfaces_002.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/lang/type_hints_001.phpt:
+      Added tests for interfaces and class type hinting.
+
+2003-03-07  Ben Mansell  <ben@zeus.com>
+
+    * sapi/cgi/cgi_main.c:
+      Fix bug whereby a webserver closing stdout from the CGI/FastCGI binary
+      would cause PHP to get caught in an infinite loop of failing write()
+      syscalls.
+
+2003-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/ldap/ldap.c:
+      Fixed bug #22585 (Do not terminate the script on minor errors).
+
+    * sapi/apache2handler/php_functions.c:
+      OnUpdateInt -> OnUpdateLong.
+
+    * sapi/apache2handler/apache_config.c
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      CS Fixes.
+      Fixed a bug with 404 handling.
+      Added more detailed Apache info for phpinfo().
+      Added the support for last_modified.
+
+2003-03-07  David Hill  <David.Hill@hp.com>
+
+    * (PHP_4_3)
+      ext/bz2/bz2.c
+      ext/dio/dio.c
+      ext/domxml/php_domxml.c
+      ext/fdf/fdf.c
+      ext/ftp/php_ftp.c
+      ext/ldap/ldap.c
+      ext/mcrypt/mcrypt.c
+      ext/mhash/mhash.c
+      ext/openssl/openssl.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/sockets/sockets.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/metaphone.c
+      ext/standard/string.c
+      ext/sysvsem/sysvsem.c
+      ext/zip/zip.c
+      ext/zlib/zlib.c
+      main/output.c:
+      64-bit correction to variables passed to zend_parse_parameters
+
+2003-03-07  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+      Create php_version.h in the correct directory
+
+    * ext/fam/fam.c
+      ext/fbsql/php_fbsql.c
+      ext/hwapi/hwapi.cpp
+      ext/hyperwave/hw.c
+      ext/informix/ifx.ec
+      ext/ingres_ii/ii.c
+      ext/interbase/interbase.c
+      ext/ircg/ircg.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/ncurses/ncurses.c
+      ext/odbc/php_odbc.c
+      ext/pfpro/pfpro.c
+      ext/pgsql/pgsql.c
+      ext/session/session.c
+      ext/skeleton/skeleton.c
+      ext/standard/assert.c
+      ext/standard/file.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/tokenizer/tokenizer.c
+      ext/yaz/php_yaz.c
+      ext/zlib/zlib.c
+      main/main.c
+      netware/phplib.imp
+      sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c
+      scripts/ext_skel_ng/extension_parser.php:
+      Renamed OnUpdateInt -> OnUpdateLong to prevent further misunderstandings.
+
+    * ext/odbc/config.m4:
+      Fixed typo caught by Dave.
+
+    * ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/php_sysvshm.h
+      ext/sysvshm/sysvshm.c:
+      WS & CS fixes
+
+2003-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract.phpt
+      tests/classes/abstract_class.phpt
+      tests/classes/abstract_inherit.phpt
+      tests/classes/abstract_not_declared.phpt
+      tests/classes/abstract_static.phpt:
+      abstract classes must now be declared abstract
+
 2003-03-06  David Hill  <David.Hill@hp.com>
 
     * ext/bz2/bz2.c
