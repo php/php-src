@@ -80,10 +80,8 @@
  * a joint header file when we move virtual_cwd to TSRM */
 #ifdef ZEND_WIN32
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define DEFAULT_SLASH '\\'
 #else
 #define IS_SLASH(c)	((c) == '/')
-#define DEFAULT_SLASH '/'
 #endif
 
 
@@ -319,8 +317,8 @@ PHPAPI FILE *php_fopen_primary_script(void)
 			if (pw && pw->pw_dir) {
 				filename = emalloc(strlen(PG(user_dir)) + strlen(path_info) + strlen(pw->pw_dir) + 4);
 				if (filename) {
-					sprintf(filename, "%s%c%s%c%s", pw->pw_dir, DEFAULT_SLASH,
-								PG(user_dir), DEFAULT_SLASH, s+1); /* Safe */
+					sprintf(filename, "%s%c%s%c%s", pw->pw_dir, PHP_SEPARATOR,
+								PG(user_dir), PHP_SEPARATOR, s+1); /* Safe */
 					STR_FREE(SG(request_info).path_translated);
 					SG(request_info).path_translated = filename;
 				}
@@ -340,7 +338,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 			if (filename) {
 				memcpy(filename, PG(doc_root), length);
 				if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-					filename[length++] = DEFAULT_SLASH;
+					filename[length++] = PHP_SEPARATOR;
 				}
 				if (IS_SLASH(path_info[0])) {
 					length--;
