@@ -1,3 +1,57 @@
+2001-11-02  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/session/session.c:
+    added private_no_expire mode on session patched by Yasuo Ohgaki.
+
+2001-11-02  James Moore  <James@phpuk.org>
+
+    * ext/standard/string.c: WS fix
+
+    * ext/standard/string.c: - Fix behaviour of strtok. Bug 13866 (jmoore)
+
+2001-11-02  Christian Stocker  <chregu@phant.ch>
+
+    * pear/PEAR/WebInstaller.php: typo
+
+2001-11-02  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: MFH
+
+    * NEWS: Missing entry
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h: MFH
+
+    * ext/mysql/php_mysql.c:
+    This was conditionally included if HAVE_MYSQL_REAL_CONNECT was defined.
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h: Make the extension work with MySQL 4.0
+
+    * ext/mysql/config.m4: MFH
+
+    * ext/mysql/config.m4:
+    This propably fixes couple of problems with compiling with external libs.
+
+    * main/php_ini.c: MFH
+
+2001-11-02  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/limit.inc: simplified the logic of the test
+
+    * pear/DB/sybase.php
+      pear/DB/odbc.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/fbsql.php: added features['limit']
+
+    * pear/DB/common.php:
+    do the query transformation, don't use options property and remove the
+    not capable error as always the row limit support is avaible
+
+    * pear/DB.php: use feautres property instead of options
+
 2001-11-01  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/sockets/php_sockets.h: Remove prototype warnings under linux.
