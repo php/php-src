@@ -404,15 +404,20 @@ TEST $file
 
 	$tmp = realpath(dirname($file));
 	$tmp_skipif = $tmp . uniqid('/phpt.');
-	$tmp_file   = $tmp . uniqid('/phpt.');
+	$tmp_file   = ereg_replace('\.phpt$','.php',$file);
 	$tmp_post   = $tmp . uniqid('/phpt.');
 
 	@unlink($tmp_skipif);
 	@unlink($tmp_file);
 	@unlink($tmp_post);
 
-	// Reset environment from any previous test.
+	// unlink old test results	
+	@unlink(ereg_replace('\.phpt$','.diff',$file));
+	@unlink(ereg_replace('\.phpt$','.log',$file));
+	@unlink(ereg_replace('\.phpt$','.exp',$file));
+	@unlink(ereg_replace('\.phpt$','.out',$file));
 
+	// Reset environment from any previous test.
 	putenv("REDIRECT_STATUS=");
 	putenv("QUERY_STRING=");
 	putenv("PATH_TRANSLATED=");
@@ -420,12 +425,6 @@ TEST $file
 	putenv("REQUEST_METHOD=");
 	putenv("CONTENT_TYPE=");
 	putenv("CONTENT_LENGTH=");
-
-	// unlink old test results	
-	@unlink(ereg_replace('\.phpt$','.diff',$file));
-	@unlink(ereg_replace('\.phpt$','.log',$file));
-	@unlink(ereg_replace('\.phpt$','.exp',$file));
-	@unlink(ereg_replace('\.phpt$','.out',$file));
 
 	// Check if test should be skipped.
 	if (array_key_exists('SKIPIF', $section_text)) {
@@ -521,7 +520,6 @@ COMMAND $cmd
 	$out = `$cmd`;
 
 	@unlink($tmp_post);
-	@unlink($tmp_file);
 
 	// Does the output match what is expected?
 	$output = trim($out);
@@ -553,6 +551,7 @@ COMMAND $cmd
 	// compare and leave on success
 		$ok = (0 == strcmp($output,$wanted));
 		if ($ok) {
+			@unlink($tmp_file);
 			echo "PASS $tested\n";
 			return 'PASSED';
 		}
