@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- "none" is now equivalent with "" in Apache config directives (Stig)
 - OCINLogon no longer crashes. (Thies)
 - Fix comparisons of (string) "nan" with (string) "nan". (Thies, Zend library)
 - Switched back to the old $HTTP_*_VARS[] behavior - $HTTP_GET_VARS["foo"]
