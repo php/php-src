@@ -3,4 +3,4 @@
 TODO:
 - Convert to zend_parse_parameters
 - Unify error handling
-- Get rid of libmcrypt 2.2.x compability
+- Implement encryption streams
