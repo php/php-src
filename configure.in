@@ -286,7 +286,7 @@ if test "$ac_cv_struct_flock" = "yes" ; then
 fi
 
 if test "$ac_cv_socklen_t" = "no"; then
-  AC_DEFINE(socklen_t, "unsigned int", [Unix98 specifies to be socklen_t at least unsigned 32-bit])
+  AC_CHECK_TYPE(socklen_t, unsigned int)
 fi
 
 AC_CHECK_SIZEOF(long, 8)
