@@ -205,7 +205,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 
 ZEND_API int zval_ptr_dtor(zval **zval_ptr)
 {
-	int locked = PZVAL_IS_LOCKED(*zval_ptr);
+	int locked = (*zval_ptr)->EA.locks;
 
 #if DEBUG_ZEND>=2
 	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
@@ -497,7 +497,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 
 	if (result && (result->op_type != IS_UNUSED)) {
 		Ts[result->u.var].var = variable_ptr_ptr;
-		PZVAL_LOCK(*variable_ptr_ptr);
+		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
 	}
 }
 

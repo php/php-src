@@ -556,6 +556,7 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define PZVAL_LOCK(z)	(z)->EA.locks++
 #define PZVAL_UNLOCK(z)	(z)->EA.locks--
+#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
 
 #endif /* _COMPILE_H */
