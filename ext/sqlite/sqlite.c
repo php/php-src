@@ -1714,7 +1714,8 @@ PHP_FUNCTION(sqlite_fetch_object)
 
 	php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
 
-	object_and_properties_init(return_value, ce, Z_ARRVAL(dataset));
+	object_and_properties_init(return_value, ce, NULL);
+	zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
 
 	php_std_error_handling(); /* before calling the ctor */
 
