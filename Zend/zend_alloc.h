@@ -113,6 +113,13 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
 
+#define pemalloc_rel(size, persistent) ((persistent)?malloc(size):emalloc_rel(size))
+#define pefree_rel(ptr, persistent)	((persistent)?free(ptr):efree_rel(ptr))
+#define pecalloc_rel(nmemb, size, persistent) ((persistent)?calloc((nmemb), (size)):ecalloc_rel((nmemb), (size)))
+#define perealloc_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_rel((ptr), (size)))
+#define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
+#define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
+
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):(empty_string))
 #define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):(empty_string))
 
