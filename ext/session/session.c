@@ -86,9 +86,9 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
-/*  	if(!PS(mod)) { */
-/*  	  php_error(E_ERROR,"Cannot find save handler %s",new_value); */
-/*  	} */
+	if(!PS(mod)) {
+		php_error(E_ERROR,"Cannot find save handler %s",new_value);
+	}
 	return SUCCESS;
 }
 
