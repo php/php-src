@@ -211,7 +211,8 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("hyperwave.default_port",	"418", PHP_INI_ALL,	OnHyperwavePort)
 PHP_INI_END()
 
-PHP_MINIT_FUNCTION(hw) {
+PHP_MINIT_FUNCTION(hw)
+{
 	ZEND_INIT_MODULE_GLOBALS(hw, php_hw_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();

@@ -83,7 +83,6 @@ static void php_assert_init_globals(php_assert_globals *assert_globals_p TSRMLS_
 
 PHP_MINIT_FUNCTION(assert)
 {
-
 #ifdef ZTS
 	ts_allocate_id(&assert_globals_id, sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
 #else
@@ -160,7 +159,7 @@ PHP_FUNCTION(assert)
 			EG(error_reporting) = 0;
 		}
 
-		compiled_string_description = zend_make_compiled_string_description("assert code");
+		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
 		if (zend_eval_string(myeval, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			zend_error(E_ERROR, "Failure evaluating code:\n%s\n", myeval);

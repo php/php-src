@@ -168,7 +168,7 @@ zend_bool name##_Init(int module_number)	\
 		putproperty		\
 		);	\
 \
-	zend_register_internal_class(&name##_class_entry);\
+	zend_register_internal_class(&name##_class_entry TSRMLS_CC);\
 	return TRUE;\
 }
 

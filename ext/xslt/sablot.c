@@ -149,7 +149,6 @@ static SchemeHandler scheme_handler = {
 PHP_MINIT_FUNCTION(xslt)
 {
 	le_xslt = zend_register_list_destructors_ex(free_processor, NULL, le_xslt_name, module_number);
-
 	return SUCCESS;
 }
 /* }}} */

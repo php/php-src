@@ -232,7 +232,7 @@ static void _close_mssql_link(zend_rsrc_list_entry *rsrc)
 	TSRMLS_FETCH();
 
 	mssql_ptr->valid = 0;
-	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(&EG(regular_list),(apply_func_t) _clean_invalid_results);
 	dbclose(mssql_ptr->link);
 	dbfreelogin(mssql_ptr->login);
 	efree(mssql_ptr);

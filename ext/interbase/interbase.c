@@ -494,8 +494,6 @@ static void php_ibase_init_globals(TSRMLS_D)
 
 PHP_MINIT_FUNCTION(ibase)
 {
-	TSRMLS_FETCH();
-
 	ZEND_INIT_MODULE_GLOBALS(ibase, php_ibase_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();

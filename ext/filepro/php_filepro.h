@@ -40,8 +40,8 @@ PHP_FUNCTION(filepro_fieldwidth);
 PHP_FUNCTION(filepro_fieldcount);
 PHP_FUNCTION(filepro_retrieve);
 
-extern PHP_MINIT_FUNCTION(filepro);
-extern PHP_MSHUTDOWN_FUNCTION(filepro);
+PHP_MINIT_FUNCTION(filepro);
+PHP_MSHUTDOWN_FUNCTION(filepro);
 #else
 #define phpext_filepro_ptr NULL
 #endif

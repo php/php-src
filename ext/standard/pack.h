@@ -21,7 +21,7 @@
 #ifndef PACK_H
 #define PACK_H
 
-extern PHP_MINIT_FUNCTION(pack);
+PHP_MINIT_FUNCTION(pack);
 PHP_FUNCTION(pack);
 PHP_FUNCTION(unpack);
 

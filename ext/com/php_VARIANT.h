@@ -7,8 +7,8 @@
 
 extern int php_VARIANT_get_le_variant();
 
-extern PHP_MINIT_FUNCTION(VARIANT);
-extern PHP_MSHUTDOWN_FUNCTION(VARIANT);
+PHP_MINIT_FUNCTION(VARIANT);
+PHP_MSHUTDOWN_FUNCTION(VARIANT);
 
 extern zend_module_entry VARIANT_module_entry;
 

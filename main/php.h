@@ -221,16 +221,12 @@ char *strerror(int);
 #define PHP_RINIT(module)	php_rinit_##module
 #define PHP_RSHUTDOWN(module)	php_rshutdown_##module
 #define PHP_MINFO(module)	php_info_##module
-#define PHP_GINIT(module)	php_ginit_##module
-#define PHP_GSHUTDOWN(module)	php_gshutdown_##module
 
 #define PHP_MINIT_FUNCTION(module)	int PHP_MINIT(module)(INIT_FUNC_ARGS)
 #define PHP_MSHUTDOWN_FUNCTION(module)	int PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define PHP_RINIT_FUNCTION(module)	int PHP_RINIT(module)(INIT_FUNC_ARGS)
 #define PHP_RSHUTDOWN_FUNCTION(module)	int PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define PHP_MINFO_FUNCTION(module)	void PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
-#define PHP_GINIT_FUNCTION(module)	int PHP_GINIT(module)(GINIT_FUNC_ARGS)
-#define PHP_GSHUTDOWN_FUNCTION(module)	int PHP_GSHUTDOWN(module)(void)
 
 
 /* global variables */

@@ -62,8 +62,8 @@ extern zend_module_entry gd_module_entry;
 
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
-extern PHP_MINIT_FUNCTION(gd);
-extern PHP_MSHUTDOWN_FUNCTION(gd);
+PHP_MINIT_FUNCTION(gd);
+PHP_MSHUTDOWN_FUNCTION(gd);
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
 static int gdImageColorResolve(gdImagePtr, int, int, int);

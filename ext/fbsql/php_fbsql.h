@@ -34,10 +34,10 @@ extern zend_module_entry fbsql_module_entry;
 
 #include <FBCAccess/FBCAccess.h>
 
-extern PHP_MINIT_FUNCTION(fbsql);
-extern PHP_MSHUTDOWN_FUNCTION(fbsql);
-extern PHP_RINIT_FUNCTION(fbsql);
-extern PHP_RSHUTDOWN_FUNCTION(fbsql);
+PHP_MINIT_FUNCTION(fbsql);
+PHP_MSHUTDOWN_FUNCTION(fbsql);
+PHP_RINIT_FUNCTION(fbsql);
+PHP_RSHUTDOWN_FUNCTION(fbsql);
 PHP_MINFO_FUNCTION(fbsql);
 PHP_FUNCTION(fbsql_connect);
 PHP_FUNCTION(fbsql_pconnect);

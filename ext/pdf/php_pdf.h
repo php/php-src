@@ -32,9 +32,9 @@
 extern zend_module_entry pdf_module_entry;
 #define pdf_module_ptr &pdf_module_entry
 
-extern PHP_MINFO_FUNCTION(pdf);
-extern PHP_MINIT_FUNCTION(pdf);
-extern PHP_MSHUTDOWN_FUNCTION(pdf);
+PHP_MINFO_FUNCTION(pdf);
+PHP_MINIT_FUNCTION(pdf);
+PHP_MSHUTDOWN_FUNCTION(pdf);
 PHP_FUNCTION(pdf_new);		/* new function */
 PHP_FUNCTION(pdf_delete);	/* new function */
 PHP_FUNCTION(pdf_open_file);

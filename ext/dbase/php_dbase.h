@@ -24,7 +24,7 @@
 extern zend_module_entry dbase_module_entry;
 #define dbase_module_ptr &dbase_module_entry
 
-extern PHP_MINIT_FUNCTION(dbase);
+PHP_MINIT_FUNCTION(dbase);
 PHP_FUNCTION(dbase_open);
 PHP_FUNCTION(dbase_create);
 PHP_FUNCTION(dbase_close);

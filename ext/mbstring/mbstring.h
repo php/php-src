@@ -58,10 +58,10 @@
 extern zend_module_entry mbstring_module_entry;
 #define mbstring_module_ptr &mbstring_module_entry
 
-extern PHP_MINIT_FUNCTION(mbstring);
-extern PHP_MSHUTDOWN_FUNCTION(mbstring);
-extern PHP_RINIT_FUNCTION(mbstring);
-extern PHP_RSHUTDOWN_FUNCTION(mbstring);
+PHP_MINIT_FUNCTION(mbstring);
+PHP_MSHUTDOWN_FUNCTION(mbstring);
+PHP_RINIT_FUNCTION(mbstring);
+PHP_RSHUTDOWN_FUNCTION(mbstring);
 PHP_MINFO_FUNCTION(mbstring);
 
 /* php function registration */
