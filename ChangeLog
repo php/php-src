@@ -1,3 +1,43 @@
+2001-07-12  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/com.h
+      ext/com/conversion.c
+      ext/com/conversion.h
+      ext/com/php_COM.h
+      ext/com/variant.h: no message
+
+2001-07-12  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing bug when using select unique from <table>
+    The value was not returned to the script
+
+2001-07-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/XML/RPC.php:
+    * Merged in latest changes to XML RPC from www.usefulinc.com
+
+2001-07-12  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/oci8.php
+      pear/DB/odbc.php: removed no longer needed quoteString() method
+
+    * pear/DB/common.php: New features for quoting:
+    - Renamed quoteString() method to quote() (compatibility preserved)
+    - quote() now returns "NULL" when the value is equal
+      to null (php constant) or else an escaped string
+    - quote() now escapes "'" in the ISO SQL 2 way
+    - Added the new placeholder "!" that will left the string unchanged
+
+    * pear/DB/mysql.php: added mysql specific quote method
+
+    * pear/DB.php: added DB_PARAM_MISC constant to use in prepare/execute
+
+2001-07-12  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/PEAR/WebInstaller.php:
+    Added link to directly download the .tgz file
+
 2001-07-11  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/php_smart_str.h:
