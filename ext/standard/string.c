@@ -2553,14 +2553,18 @@ PHP_FUNCTION(str_repeat)
 	convert_to_string_ex(input_str);
 	convert_to_long_ex(mult);
 	
-	if ((*mult)->value.lval < 1) {
-		php_error(E_WARNING, "Second argument to %s() has to be greater than 0",
+	if ((*mult)->value.lval < 0) {
+		php_error(E_WARNING, "Second argument to %s() has to be greater than or equal to 0",
 				  get_active_function_name());
 		return;
 	}
 
 	/* Don't waste our time if it's empty */
 	if ((*input_str)->value.str.len == 0)
+		RETURN_STRINGL(empty_string, 0, 1);
+	
+	/* ... or if the multiplier is zero */
+	if ((*mult)->value.lval == 0)
 		RETURN_STRINGL(empty_string, 0, 1);
 	
 	/* Initialize the result string */	
