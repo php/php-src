@@ -122,7 +122,8 @@ install-headers:
 	for i in $(HEADER_DIRS); do \
 		(cd $(top_srcdir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
-	done
+	done; \
+	cd $(top_srcdir)/sapi/embed && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/main
 
 #$(builddir)/scripts/pear: $(srcdir)/scripts/pear.in $(top_builddir)/config.status
 #	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
