@@ -290,65 +290,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define VIRTUAL_DIR
 #endif
 
+/* Virtual current working directory support */
 #include "tsrm_virtual_cwd.h"
-
-/* Virtual current directory support */
-#ifdef VIRTUAL_DIR
-
-#define V_GETCWD(buff, size) virtual_getcwd(buff,size)
-#define V_FOPEN(path, mode) virtual_fopen(path, mode)
-/* The V_OPEN macro will need to be used as V_OPEN((path, flags, ...)) */
-#define V_OPEN(open_args) virtual_open open_args
-#define V_CREAT(path, mode) virtual_creat(path, mode)
-#define V_CHDIR(path) virtual_chdir(path)
-#define V_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
-#define V_GETWD(buf)
-#define V_REALPATH(path,real_path) virtual_realpath(path,real_path)
-#define V_STAT(path, buff) virtual_stat(path, buff)
-#ifdef PHP_WIN32
-#define V_LSTAT(path, buff) virtual_stat(path, buff)
-#else
-#define V_LSTAT(path, buff) virtual_lstat(path, buff)
-#endif
-#define V_UNLINK(path) virtual_unlink(path)
-#define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
-#define V_RMDIR(pathname) virtual_rmdir(pathname)
-#define V_OPENDIR(pathname) virtual_opendir(pathname)
-#define V_POPEN(command, type) virtual_popen(command, type)
-#if HAVE_UTIME
-#define V_UTIME(path,time) virtual_utime(path,time)
-#endif
-#define V_CHMOD(path,mode) virtual_chmod(path,mode)
-#ifndef PHP_WIN32
-#define V_CHOWN(path,owner,group) virtual_chown(path,owner,group)
-#endif
-
-#else /* !defined(VIRTUAL_DIR) */
-
-#define V_GETCWD(buff, size) getcwd(buff,size)
-#define V_FOPEN(path, mode)  fopen(path, mode)
-#define V_OPEN(open_args) open open_args
-#define V_CREAT(path, mode) creat(path, mode)
-#define V_CHDIR(path) chdir(path)
-#define V_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
-#define V_GETWD(buf) getwd(buf)
-#define V_STAT(path, buff) stat(path, buff)
-#define V_LSTAT(path, buff) lstat(path, buff)
-#define V_UNLINK(path) unlink(path)
-#define V_MKDIR(pathname, mode) mkdir(pathname, mode)
-#define V_RMDIR(pathname) rmdir(pathname)
-#define V_OPENDIR(pathname) opendir(pathname)
-#define V_POPEN(command, type) popen(command, type)
-#define V_REALPATH(path,real_path) realpath(path,real_path)
-#if HAVE_UTIME
-#define V_UTIME(path,time) utime(path,time)
-#endif
-#define V_CHMOD(path,mode) chmod(path,mode)
-#ifndef PHP_WIN32
-#define V_CHOWN(path,owner,group) chown(path,owner,group)
-#endif
-
-#endif /* VIRTUAL_DIR */
 
 #include "zend_constants.h"
 
