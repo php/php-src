@@ -1,3 +1,13 @@
+2003-01-23  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Let the scope propagate to internal functions
+
+2003-01-23  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_execute_API.c:
+      Fixed bug: #14542, register_shutdown_function() timeout problem
+
 2003-01-22  Stanislav Malyshev  <stas@zend.com>
 
     * OBJECTS2_HOWTO:
