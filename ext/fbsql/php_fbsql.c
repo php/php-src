@@ -1031,8 +1031,13 @@ static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(lob_handle);
-	length = fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle));
 
+	if (Z_STRLEN_PP(lob_handle) != 27 || Z_STRVAL_PP(lob_handle)[0] != '@') {
+		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "The handle is invalid");
+		RETURN_FALSE;
+	}
+
+	length = fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle));
 	if (lob_type == 0) 
 		value = estrndup((char *)fbcdcReadBLOB(phpLink->connection, (FBCBlobHandle *)Z_STRVAL_PP(lob_handle)), length);
 	else
