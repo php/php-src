@@ -97,6 +97,8 @@ function_entry cpdf_functions[] = {
 	PHP_FE(cpdf_text, NULL)
 	PHP_FE(cpdf_continue_text, NULL)
 	PHP_FE(cpdf_set_font, NULL)
+	PHP_FE(cpdf_set_font_directories, NULL)
+	PHP_FE(cpdf_set_font_map_file, NULL)
 	PHP_FE(cpdf_set_leading, NULL)
 	PHP_FE(cpdf_set_text_rendering, NULL)
 	PHP_FE(cpdf_set_horiz_scaling, NULL)
@@ -176,6 +178,17 @@ PHP_MINIT_FUNCTION(cpdf)
 {
 	CPDF_GLOBAL(le_outline) = zend_register_list_destructors_ex(_free_outline, NULL, "cpdf outline", module_number);
 	CPDF_GLOBAL(le_cpdf) = zend_register_list_destructors_ex(_free_doc, NULL, "cpdf", module_number);
+
+	REGISTER_LONG_CONSTANT("CPDF_PM_NONE", PM_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PM_OUTLINES", PM_OUTLINES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PM_THUMBS", PM_THUMBS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PM_FULLSCREEN", PM_FULLSCREEN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PL_SINGLE", PL_SINGLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PL_1COLUMN", PL_1COLUMN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PL_2LCOLUMN", PL_2LCOLUMN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CPDF_PL_2RCOLUMN", PL_2RCOLUMN, CONST_CS | CONST_PERSISTENT);
+
+
 	return SUCCESS;
 }
 
@@ -335,32 +348,77 @@ PHP_FUNCTION(cpdf_set_keywords) {
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_viewer_preferences(int pdfdoc, int pagemode)
-   How to show the document by the viewer */
+/* {{{ proto void cpdf_set_viewer_preferences(int pdfdoc, array preferences)
+   How to show the document in the viewer */
 PHP_FUNCTION(cpdf_set_viewer_preferences) {
-	pval *argv[6];
-	int id, type, pagemode;
-	int argc;
+	zval *arg1, *arg2;
+	zval **zvalue;
+
+	int id, type;
+
 	CPDFdoc *pdf;
+	CPDFviewerPrefs vP = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	CPDF_TLS_VARS;
 
-	argc = ZEND_NUM_ARGS();
-	if(argc < 1 || argc > 2)
-		WRONG_PARAM_COUNT;
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if(ZEND_NUM_ARGS() != 2)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
-	convert_to_long(argv[1]);
-	id=argv[0]->value.lval;
-	pagemode=argv[1]->value.lval;
+	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(arg1);
+	convert_to_array(arg2);
+
+	id = Z_LVAL_P (arg1);
+
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
-/*	cpdf_setViewerPreferences(pdf, pagemode, 0, 0, 0, 0, 0, 0, pagemode); */
+	if (zend_hash_find (arg2->value.ht, "pagemode", sizeof ("pagemode"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.pageMode = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "hidetoolbar", sizeof ("hidetoolbar"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.hideToolbar = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "hidemenubar", sizeof ("hidemenubar"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.hideMenubar = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "hidewindowui", sizeof ("hidewindowui"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.hideWindowUI = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "fitwindow", sizeof ("fitwindow"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.fitWindow = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "centerwindow", sizeof ("centerwindow"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.centerWindow = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "pagelayout", sizeof ("pagelayout"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.pageLayout = Z_LVAL_PP (zvalue);
+	}
+	if (zend_hash_find (arg2->value.ht, "nonfspagemode", sizeof ("nonfspagemode"), (void **) &zvalue) == SUCCESS)
+	{
+		convert_to_long_ex (zvalue);
+		vP.nonFSPageMode = Z_LVAL_PP (zvalue);
+	}
+
+	cpdf_setViewerPreferences(pdf, &vP);
 
 	RETURN_TRUE;
 }
@@ -810,6 +868,61 @@ PHP_FUNCTION(cpdf_set_font) {
 	}
 */
 	cpdf_setFont(pdf, arg2->value.str.val, arg4->value.str.val, (float) arg3->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void cpdf_set_font_directories(int pdfdoc, string pfmdir, string pfbdir)
+   Set directories to search when using external fonts. */
+PHP_FUNCTION(cpdf_set_font_directories) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	CPDFdoc *pdf;
+	CPDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_string(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
+		php_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	cpdf_setFontDirectories(pdf, arg2->value.str.val, arg3->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void cpdf_set_font_map_file(int pdfdoc, string filename)
+   Set fontname to filename translation map when using external fonts. */
+PHP_FUNCTION(cpdf_set_font_map_file) {
+	pval *arg1, *arg2;
+	int id, type;
+	CPDFdoc *pdf;
+	CPDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
+		php_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	cpdf_setFontMapFile(pdf, arg2->value.str.val);
 
 	RETURN_TRUE;
 }
