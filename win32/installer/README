@@ -3,16 +3,47 @@ PHP Installer for Win32, by Wez Furlong <wez@thebrainroom.com>
 $Id$
 
 Here are the supporting scripts for building the win32 PHP installer.
+
+Requirements:
+
+    MSI-2-XML from http://msi2xml.sourceforge.net/#Installation
+
+
+Installer Layout:
+
+We have the following features:
+
+    o PHP Core - Always installed.
+                 Includes php4ts.dll, php.ini + common dlls
+                 and config files
+
+    o SAPI
+                 Contains a node for each stable SAPI
+
+    o Extensions
+                 Contains a node for each stable extension
+
+    o Experimental
+        o SAPI          Experimental SAPIs
+        o Extensions    Experimental Extensions
+
+
+
+
+
+
+
+
 You need to have the Super-Pimp Installer from Nullsoft (Open Source).
 It is available here:
-	http://nsis.sourceforge.net/
+    http://nsis.sourceforge.net/
 
 To build an installer, you need:
 
-	o A Source Tree
-	o A win32 snapshot (extracted from the .zip)
+    o A Source Tree
+    o A win32 snapshot (extracted from the .zip)
 
-	(The source tree and snapshot should have matching versions!)
+    (The source tree and snapshot should have matching versions!)
 
 A Script/Batch file.
 I'm using this (in a .bat file):
@@ -55,4 +86,8 @@ While hacking, it's a good idea to comment out the SetCompressor line; it will
 speed up your installer builds...
 Also, switch the logic for the $SYSDIR define at the top to install vital DLLs
 to a fake system dir.
+
+
+
+vim:et:tw=78
 
