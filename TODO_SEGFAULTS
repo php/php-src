@@ -22,6 +22,7 @@ Open:
 
     the dbase extension         (1)
     mb_strcut('', 2147483647);  (2)
+    chunk_split                 (3)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -47,7 +48,10 @@ X
     at /home/sas/src/php4/ext/mbstring/mbfilter.c:8258
 	8258                                    (*encoder->filter_function)(*p++, encoder TSRMLS_CC);
 
-	
+
+(3) integer overflow in php_chunk_split
+
+
 Methodology
 
     1. Use a plain PHP_4_3 tree
