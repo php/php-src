@@ -77,6 +77,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #28086 (crash inside overload() function). (Tony) 
 - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr stream).
   (chris at ex-parrot dot com)
+- Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on Win32). (Ilia)
 - Fixed bug #7782 (Cannot use PATH_INFO fully with php isapi). (Unknown)
 
 15 Dec 2004, Version 4.3.10
