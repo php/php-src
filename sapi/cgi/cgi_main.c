@@ -447,6 +447,19 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
+	if (!cgi) {
+		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
+			switch (c) {
+				case 'c':
+					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
+					break;
+			}
+
+		}
+		ap_php_optind = orig_optind;
+		ap_php_optarg = orig_optarg;
+	}
+
 	if (php_module_startup(&sapi_module)==FAILURE) {
 		return FAILURE;
 	}
@@ -463,9 +476,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	if (!cgi) {
 		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
 			switch (c) {
-				case 'c':
-					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
-					break;
 				case '?':
 					no_headers = 1;
 					php_output_startup();
