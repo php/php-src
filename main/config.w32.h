@@ -192,3 +192,5 @@
 
 /* Win32 support proc_open */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
+
+#define HAVE_MBLEN
