@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
    |          Tom May <tom@go2net.com>                                    |
+   |          Timm Friebe <php_sybase_ct@thekid.de>                       |
    +----------------------------------------------------------------------+
  */
 
@@ -42,32 +43,38 @@ function_entry sybase_functions[] = {
 	PHP_FE(sybase_close,				NULL)
 	PHP_FE(sybase_select_db,			NULL)
 	PHP_FE(sybase_query,				NULL)
+	PHP_FE(sybase_unbuffered_query,		NULL)
 	PHP_FE(sybase_free_result,			NULL)
 	PHP_FE(sybase_get_last_message,		NULL)
 	PHP_FE(sybase_num_rows,				NULL)
 	PHP_FE(sybase_num_fields,			NULL)
 	PHP_FE(sybase_fetch_row,			NULL)
 	PHP_FE(sybase_fetch_array,			NULL)
+	PHP_FE(sybase_fetch_assoc,			NULL)
 	PHP_FE(sybase_fetch_object,			NULL)
 	PHP_FE(sybase_data_seek,			NULL)
 	PHP_FE(sybase_fetch_field,			NULL)
-	PHP_FE(sybase_field_seek,           NULL)
+	PHP_FE(sybase_field_seek,		   NULL)
 	PHP_FE(sybase_result,				NULL)
 	PHP_FE(sybase_affected_rows,		NULL)
 	PHP_FE(sybase_min_client_severity,	NULL)
 	PHP_FE(sybase_min_server_severity,	NULL)
+	PHP_FE(sybase_set_message_handler,	NULL)
+	PHP_FE(sybase_deadlock_retry_count, NULL)
 
 	PHP_FALIAS(mssql_connect,			sybase_connect,			NULL)
 	PHP_FALIAS(mssql_pconnect,			sybase_pconnect,		NULL)
 	PHP_FALIAS(mssql_close,				sybase_close,			NULL)
 	PHP_FALIAS(mssql_select_db,			sybase_select_db,		NULL)
 	PHP_FALIAS(mssql_query,				sybase_query,			NULL)
+	PHP_FALIAS(mssql_unbuffered_query,	sybase_unbuffered_query,NULL)
 	PHP_FALIAS(mssql_free_result,		sybase_free_result,		NULL)
 	PHP_FALIAS(mssql_get_last_message,	sybase_get_last_message,NULL)
 	PHP_FALIAS(mssql_num_rows,			sybase_num_rows,		NULL)
 	PHP_FALIAS(mssql_num_fields,		sybase_num_fields,		NULL)
 	PHP_FALIAS(mssql_fetch_row,			sybase_fetch_row,		NULL)
 	PHP_FALIAS(mssql_fetch_array,		sybase_fetch_array,		NULL)
+	PHP_FALIAS(mssql_fetch_assoc,		sybase_fetch_assoc,		NULL)
 	PHP_FALIAS(mssql_fetch_object,		sybase_fetch_object,	NULL)
 	PHP_FALIAS(mssql_data_seek,			sybase_data_seek,		NULL)
 	PHP_FALIAS(mssql_fetch_field,		sybase_fetch_field,		NULL)
@@ -76,6 +83,8 @@ function_entry sybase_functions[] = {
 	PHP_FALIAS(mssql_affected_rows,		sybase_affected_rows,	NULL)
 	PHP_FALIAS(mssql_min_client_severity,	sybase_min_client_severity,	NULL)
 	PHP_FALIAS(mssql_min_server_severity,	sybase_min_server_severity,	NULL)
+	PHP_FALIAS(mssql_set_message_handler,	sybase_set_message_handler,	NULL)
+	PHP_FALIAS(mssql_deadlock_retry_count,	sybase_deadlock_retry_count, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -114,9 +123,9 @@ static void _free_sybase_result(sybase_result *result)
 	int i, j;
 
 	if (result->data) {
-		for (i=0; i<result->num_rows; i++) {
+		for (i=0; i<(result->store ? result->num_rows : 0); i++) {
 			for (j=0; j<result->num_fields; j++) {
-				pval_destructor(&result->data[i][j]);
+				zval_dtor(&result->data[i][j]);
 			}
 			efree(result->data[i]);
 		}
@@ -221,17 +230,47 @@ static CS_RETCODE CS_PUBLIC _client_message_handler(CS_CONTEXT *context, CS_CONN
 		return CS_FAIL;
 	}
 
-    return CS_SUCCEED;
+	return CS_SUCCEED;
 }
 
 
 static CS_RETCODE CS_PUBLIC _server_message_handler(CS_CONTEXT *context, CS_CONNECTION *connection, CS_SERVERMSG *srvmsg)
 {
+	zval *retval = NULL;
+	zval severity, msgnumber, state, line, text;
+	zval *ptrs[5]= {&msgnumber, &severity, &state, &line, &text};
+	zval **args[5]= {&ptrs[0], &ptrs[1], &ptrs[2], &ptrs[3], &ptrs[4]};
+	int  handled= 0;
+
 	TSRMLS_FETCH();
 
 	if (srvmsg->severity >= SybCtG(min_server_severity)) {
-		php_error(E_WARNING, "Sybase:  Server message:  %s (severity %d, procedure %s)",
+		if (SybCtG(callback_name) != NULL) {
+			INIT_ZVAL(msgnumber);
+			INIT_ZVAL(severity);
+			INIT_ZVAL(state);
+			INIT_ZVAL(line);
+			INIT_ZVAL(text);
+	
+			ZVAL_LONG(&msgnumber, srvmsg->msgnumber);
+			ZVAL_LONG(&severity, srvmsg->severity);
+			ZVAL_LONG(&state, srvmsg->state);
+			ZVAL_LONG(&line, srvmsg->line);
+			ZVAL_STRING(&text, srvmsg->text, 0);
+			
+			if (call_user_function_ex(EG(function_table), NULL, SybCtG(callback_name), &retval, 5, args, 0, NULL TSRMLS_CC)== FAILURE) {
+				php_error(E_WARNING, "Sybase:  Cannot call the messagehandler %s", Z_STRVAL_P(SybCtG(callback_name)));
+			}
+			if (retval) {
+				handled= ((Z_TYPE_P(retval) != IS_BOOL) || (Z_BVAL_P(retval) != 0));
+				zval_ptr_dtor(&retval);
+			}
+		}
+
+		if (!handled) {
+			php_error(E_WARNING, "Sybase:  Server message:  %s (severity %d, procedure %s)",
 					srvmsg->text, srvmsg->severity, ((srvmsg->proclen>0) ? srvmsg->proc : "N/A"));
+		}
 	}
 	STR_FREE(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(srvmsg->text);
@@ -244,14 +283,13 @@ static CS_RETCODE CS_PUBLIC _server_message_handler(CS_CONTEXT *context, CS_CONN
 		sybase_link *sybase;
 
 		if (ct_con_props(connection, CS_GET, CS_USERDATA, &sybase, CS_SIZEOF(sybase), NULL)==CS_SUCCEED) {
-		    sybase->deadlock = 1;
-		}
-		else {
+			sybase->deadlock = 1;
+		} else {
 			/* oh well */
 		}
 	}
 
-    return CS_SUCCEED;
+	return CS_SUCCEED;
 }
 
 
@@ -262,6 +300,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("sybct.min_server_severity",	"10",	PHP_INI_ALL,		OnUpdateInt,		min_server_severity,	zend_sybase_globals,	sybase_globals)
 	STD_PHP_INI_ENTRY("sybct.min_client_severity",	"10",	PHP_INI_ALL,		OnUpdateInt,		min_client_severity,	zend_sybase_globals,	sybase_globals)
 	STD_PHP_INI_ENTRY("sybct.hostname",			NULL,	PHP_INI_ALL,		OnUpdateString,		hostname,		zend_sybase_globals,		sybase_globals)
+	STD_PHP_INI_ENTRY_EX("sybct.deadlock_retry_count",	"-1",	PHP_INI_ALL,		OnUpdateInt,		deadlock_retry_count,	zend_sybase_globals,	sybase_globals, display_link_numbers)
 PHP_INI_END()
 
 
@@ -317,13 +356,14 @@ static void php_sybase_init_globals(zend_sybase_globals *sybase_globals)
 		}
 	}
 	sybase_globals->num_persistent=0;
+	sybase_globals->callback_name = NULL;
 }
 
 
 static void php_sybase_destroy_globals(zend_sybase_globals *sybase_globals)
 {
-    ct_exit(sybase_globals->context, CS_UNUSED);
-    cs_ctx_drop(sybase_globals->context);
+	ct_exit(sybase_globals->context, CS_UNUSED);
+	cs_ctx_drop(sybase_globals->context);
 }
 
 PHP_MINIT_FUNCTION(sybase)
@@ -366,6 +406,10 @@ PHP_MSHUTDOWN_FUNCTION(sybase)
 PHP_RSHUTDOWN_FUNCTION(sybase)
 {
 	efree(SybCtG(appname));
+	if (SybCtG(callback_name)) {
+		zval_dtor(SybCtG(callback_name));
+		SybCtG(callback_name)= NULL;
+	}
 	STR_FREE(SybCtG(server_message));
 	return SUCCESS;
 }
@@ -397,7 +441,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 	}
 	if (appname) {
 		ct_con_props(sybase->connection, CS_SET, CS_APPNAME, appname, CS_NULLTERM, NULL);
-       } else { 
+	} else { 
 		ct_con_props(sybase->connection, CS_SET, CS_APPNAME, SybCtG(appname), CS_NULLTERM, NULL);
 	}
 
@@ -425,6 +469,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 
 	sybase->valid = 1;
 	sybase->dead = 0;
+	sybase->active_result_index = 0;
 
 	/* create the link */
 	if (ct_connect(sybase->connection, host, CS_NULLTERM)!=CS_SUCCEED) {
@@ -459,7 +504,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			strcpy(hashed_details, "sybase_____");
 			break;
 		case 1: {
-				pval *yyhost;
+				zval *yyhost;
 
 				if (getParameters(ht, 1, &yyhost)==FAILURE) {
 					RETURN_FALSE;
@@ -473,7 +518,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 2: {
-				pval *yyhost, *yyuser;
+				zval *yyhost, *yyuser;
 
 				if (getParameters(ht, 2, &yyhost, &yyuser)==FAILURE) {
 					RETURN_FALSE;
@@ -489,7 +534,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 3: {
-				pval *yyhost, *yyuser, *yypasswd;
+				zval *yyhost, *yyuser, *yypasswd;
 
 				if (getParameters(ht, 3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
 					RETURN_FALSE;
@@ -507,7 +552,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 4: {
-				pval *yyhost, *yyuser, *yypasswd, *yycharset;
+				zval *yyhost, *yyuser, *yypasswd, *yycharset;
 
 				if (getParameters(ht, 4, &yyhost, &yyuser, &yypasswd, &yycharset) == FAILURE) {
 					RETURN_FALSE;
@@ -527,7 +572,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 5: {
-				pval *yyhost, *yyuser, *yypasswd, *yycharset, *yyappname;
+				zval *yyhost, *yyuser, *yypasswd, *yycharset, *yyappname;
 
 				if (getParameters(ht, 5, &yyhost, &yyuser, &yypasswd, &yycharset, &yyappname) == FAILURE) {
 					RETURN_FALSE;
@@ -733,7 +778,7 @@ PHP_FUNCTION(sybase_pconnect)
    Close Sybase connection */
 PHP_FUNCTION(sybase_close)
 {
-	pval *sybase_link_index = 0;
+	zval *sybase_link_index = 0;
 	int id;
 	sybase_link *sybase_ptr;
 
@@ -849,7 +894,7 @@ static int exec_cmd(sybase_link *sybase_ptr, char *cmdbuf)
    Select Sybase database */
 PHP_FUNCTION(sybase_select_db)
 {
-	pval *db, *sybase_link_index;
+	zval *db, *sybase_link_index;
 	int id;
 	char *cmdbuf;
 	sybase_link  *sybase_ptr;
@@ -890,176 +935,280 @@ PHP_FUNCTION(sybase_select_db)
 
 /* }}} */
 
-
-static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
+static void php_sybase_finish_results (sybase_result *result) 
 {
-	int num_fields;
-	sybase_result *result;
-	char **tmp_buffer;
-	CS_INT *lengths;
-	CS_SMALLINT *indicators;
-	unsigned char *numerics;
-	CS_INT *types;
-	CS_DATAFMT *datafmt;
-	int i, j, retcode;
-	int blocks_initialized=1;
-
-	/* The following is more or less the equivalent of mysql_store_result().
-	 * fetch all rows from the server into the row buffer, thus:
-	 * 1)  Being able to fire up another query without explicitly reading all rows
-	 * 2)  Having numrows accessible
-	 */
-
-	if (ct_res_info(sybase_ptr->cmd, CS_NUMDATA, &num_fields, CS_UNUSED, NULL)!=CS_SUCCEED) {
-		return NULL;
+	int i;
+	CS_RETCODE retcode;
+	CS_INT restype;
+	
+	efree(result->datafmt);
+	efree(result->lengths);
+	efree(result->indicators);
+	efree(result->numerics);
+	efree(result->types);
+	for (i=0; i<result->num_fields; i++) {
+		efree(result->tmp_buffer[i]);
 	}
+	efree(result->tmp_buffer);
 
-	result = (sybase_result *) emalloc(sizeof(sybase_result));
-	result->data = (pval **) emalloc(sizeof(pval *)*SYBASE_ROWS_BLOCK);
-	result->fields = NULL;
-	result->sybase_ptr = sybase_ptr;
-	result->cur_field=result->cur_row=result->num_rows=0;
-	result->num_fields = num_fields;
+	/* The only restype we should get now is CS_CMD_DONE, possibly
+	 * followed by a CS_STATUS_RESULT/CS_CMD_SUCCEED/CS_CMD_DONE
+	 * sequence if the command was a stored procedure call.  But we
+	 * still need to read and discard unexpected results.  We might
+	 * want to return a failure in this case because the application
+	 * won't be getting all the results it asked for.
+	 */
+	while ((retcode = ct_results(result->sybase_ptr->cmd, &restype))==CS_SUCCEED) {
+		switch ((int) restype) {
+			case CS_CMD_SUCCEED:
+			case CS_CMD_DONE:
+				break;
 
-	tmp_buffer = (char **) emalloc(sizeof(char *)*num_fields);
-	lengths = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
-	indicators = (CS_SMALLINT *) emalloc(sizeof(CS_INT)*num_fields);
-	datafmt = (CS_DATAFMT *) emalloc(sizeof(CS_DATAFMT)*num_fields);
-	numerics = (unsigned char *) emalloc(sizeof(unsigned char)*num_fields);
-	types = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
+			case CS_CMD_FAIL:
+				_free_sybase_result(result);
+				result = NULL;
+				break;
 
+			case CS_COMPUTE_RESULT:
+			case CS_CURSOR_RESULT:
+			case CS_PARAM_RESULT:
+			case CS_ROW_RESULT:
+				/* Unexpected results, cancel them. */
+			case CS_STATUS_RESULT:
+				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_CURRENT);
+				break;
 
-	for (i=0; i<num_fields; i++) {
-		ct_describe(sybase_ptr->cmd, i+1, &datafmt[i]);
-		types[i] = datafmt[i].datatype;
-		switch (datafmt[i].datatype) {
-			case CS_CHAR_TYPE:
-			case CS_VARCHAR_TYPE:
-			case CS_TEXT_TYPE:
-			case CS_IMAGE_TYPE:
-				datafmt[i].maxlength++;
-				numerics[i] = 0;
-				break;
-			case CS_BINARY_TYPE:
-			case CS_VARBINARY_TYPE:
-				datafmt[i].maxlength *= 2;
-				datafmt[i].maxlength++;
-				numerics[i] = 0;
-				break;
-			case CS_BIT_TYPE:
-			case CS_TINYINT_TYPE:
-				datafmt[i].maxlength = 4;
-				numerics[i] = 1;
-				break;
-			case CS_SMALLINT_TYPE:
-				datafmt[i].maxlength = 7;
-				numerics[i] = 1;
-				break;
-			case CS_INT_TYPE:
-				datafmt[i].maxlength = 12;
-				numerics[i] = 1;
-				break;
-			case CS_REAL_TYPE:
-			case CS_FLOAT_TYPE:
-				datafmt[i].maxlength = 24;
-				numerics[i] = 1;
-				break;
-			case CS_MONEY_TYPE:
-			case CS_MONEY4_TYPE:
-				datafmt[i].maxlength = 24;
-				numerics[i] = 0;
-				break;
-			case CS_DATETIME_TYPE:
-			case CS_DATETIME4_TYPE:
-				datafmt[i].maxlength = 30;
-				numerics[i] = 0;
-				break;
-			case CS_NUMERIC_TYPE:
-			case CS_DECIMAL_TYPE:
-				datafmt[i].maxlength = datafmt[i].precision + 3;
-				numerics[i] = 1;
-				break;
 			default:
-				datafmt[i].maxlength++;
-				numerics[i] = 0;
+				ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 				break;
 		}
-		tmp_buffer[i] = (char *)emalloc(datafmt[i].maxlength);
-		datafmt[i].datatype = CS_CHAR_TYPE;
-		datafmt[i].format = CS_FMT_NULLTERM;
-		ct_bind(sybase_ptr->cmd, i+1, &datafmt[i], tmp_buffer[i], &lengths[i], &indicators[i]);
 	}
 
-	while ((retcode=ct_fetch(sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED
+	switch (retcode) {
+		case CS_END_RESULTS:
+			/* Normal. */
+			break;
+
+		case CS_FAIL:
+			/* Hopefully this either cleans up the connection, or the
+			 * connection ends up marked dead so it will be reopened
+			 * if it is persistent.  We may want to do
+			 * ct_close(CS_FORCE_CLOSE) if ct_cancel() fails; see the
+			 * doc for ct_results()==CS_FAIL.
+			 */
+			ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
+			/* Don't take chances with the vagaries of ct-lib.  Mark it
+			 * dead ourselves.
+			 */
+			result->sybase_ptr->dead = 1;
+			
+		case CS_CANCELED:
+		default:
+			_free_sybase_result(result);
+			result = NULL;
+			break;
+	}
+	
+	/* Indicate we have read all rows */
+	result->sybase_ptr->active_result_index= 0;
+}
+
+static int php_sybase_fetch_result_row (sybase_result *result, int numrows) 
+{
+	int i, j;
+	CS_INT retcode;
+	
+	/* We've already fetched everything */
+	if (result->last_retcode == CS_END_DATA) {
+		return CS_END_DATA;
+	}
+	
+	if (numrows!=-1) numrows+= result->num_rows;
+	while ((retcode=ct_fetch(result->sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED
 			|| retcode==CS_ROW_FAIL) {
 		/*
 		if (retcode==CS_ROW_FAIL) {
 			php_error(E_WARNING, "Sybase:  Error reading row %d", result->num_rows);
 		}
 		*/
-		i = result->num_rows++;
-		if (result->num_rows > blocks_initialized*SYBASE_ROWS_BLOCK) {
-			result->data = (pval **) erealloc(result->data, sizeof(pval *)*SYBASE_ROWS_BLOCK*(++blocks_initialized));
+		
+		/* i= result->num_rows++; */
+		result->num_rows++;
+		i= result->store ? result->num_rows- 1 : 0;
+		if (i >= result->blocks_initialized*SYBASE_ROWS_BLOCK) {
+			result->data = (zval **) erealloc(result->data, sizeof(zval *)*SYBASE_ROWS_BLOCK*(++result->blocks_initialized));
 		}
-		result->data[i] = (pval *) emalloc(sizeof(pval)*num_fields);
-		for (j=0; j<num_fields; j++) {
-			if (indicators[j] == -1) { /* null value */
-				ZVAL_FALSE(&result->data[i][j]);
+		if (result->store || 1 == result->num_rows) {
+			result->data[i] = (zval *) emalloc(sizeof(zval)*result->num_fields);
+		}
+
+		for (j=0; j<result->num_fields; j++) {
+			if (result->indicators[j] == -1) { /* null value */
+				ZVAL_NULL(&result->data[i][j]);
 			} else {
-				Z_STRLEN(result->data[i][j]) = lengths[j]-1;  /* we don't need the NULL in the length */
-				Z_STRVAL(result->data[i][j]) = estrndup(tmp_buffer[j], lengths[j]);
+				Z_STRLEN(result->data[i][j]) = result->lengths[j]-1;  /* we don't need the NULL in the length */
+				Z_STRVAL(result->data[i][j]) = estrndup(result->tmp_buffer[j], result->lengths[j]);
 				Z_TYPE(result->data[i][j]) = IS_STRING;
-			}
-		}
-	}
-
-	if (retcode != CS_END_DATA) {
-		_free_sybase_result(result);
-		result = NULL;
-	} else {
-		result->fields = (sybase_field *) emalloc(sizeof(sybase_field)*num_fields);
-		j=0;
-		for (i=0; i<num_fields; i++) {
-			char computed_buf[16];
-
-			if (datafmt[i].namelen>0) {
-				result->fields[i].name = estrndup(datafmt[i].name, datafmt[i].namelen);
-			} else {
-				if (j>0) {
-					snprintf(computed_buf, 16, "computed%d", j);
-				} else {
-					strcpy(computed_buf, "computed");
+				
+				switch (result->numerics[j]) {
+					case 1:
+						convert_to_long(&result->data[i][j]);
+						break;
+					case 2: 
+						convert_to_double(&result->data[i][j]); result->numerics[j]= 1; 
+						break;
 				}
-				result->fields[i].name = estrdup(computed_buf);
-				j++;
 			}
-			result->fields[i].column_source = empty_string;
-			result->fields[i].max_length = datafmt[i].maxlength-1;
-			result->fields[i].numeric = numerics[i];
-			Z_TYPE(result->fields[i]) = types[i];
 		}
+		if (numrows!=-1 && result->num_rows>=numrows) break;
+	}
+	
+	result->last_retcode= retcode;
+	
+	switch (retcode) {
+		case CS_END_DATA:
+			php_sybase_finish_results(result);
+			break;
+			
+		case CS_ROW_FAIL:
+		case CS_SUCCEED:
+			break;
+			
+		default:
+			_free_sybase_result(result);
+			result = NULL;
+			break;
+	}
+	
+	return retcode;
+}
+
+static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int buffered, int store)
+{
+	int num_fields;
+	sybase_result *result;
+	int i, j;
+	CS_INT retcode;
+
+	/* The following (if unbuffered) is more or less the equivalent of mysql_store_result().
+	 * fetch all rows from the server into the row buffer, thus:
+	 * 1)  Being able to fire up another query without explicitly reading all rows
+	 * 2)  Having numrows accessible
+	 */
+	if (ct_res_info(sybase_ptr->cmd, CS_NUMDATA, &num_fields, CS_UNUSED, NULL)!=CS_SUCCEED) {
+		return NULL;
+	}
+	
+	result = (sybase_result *) emalloc(sizeof(sybase_result));
+	result->data = (zval **) emalloc(sizeof(zval *)*SYBASE_ROWS_BLOCK);
+	result->fields = NULL;
+	result->sybase_ptr = sybase_ptr;
+	result->cur_field=result->cur_row=result->num_rows=0;
+	result->num_fields = num_fields;
+	result->last_retcode = 0;
+	result->store= store;
+	result->blocks_initialized= 1;
+	result->tmp_buffer = (char **) emalloc(sizeof(char *)*num_fields);
+	result->lengths = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
+	result->indicators = (CS_SMALLINT *) emalloc(sizeof(CS_INT)*num_fields);
+	result->datafmt = (CS_DATAFMT *) emalloc(sizeof(CS_DATAFMT)*num_fields);
+	result->numerics = (unsigned char *) emalloc(sizeof(unsigned char)*num_fields);
+	result->types = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
+	
+	for (i=0; i<num_fields; i++) {
+		ct_describe(sybase_ptr->cmd, i+1, &result->datafmt[i]);
+		result->types[i] = result->datafmt[i].datatype;
+		switch (result->datafmt[i].datatype) {
+			case CS_CHAR_TYPE:
+			case CS_VARCHAR_TYPE:
+			case CS_TEXT_TYPE:
+			case CS_IMAGE_TYPE:
+				result->datafmt[i].maxlength++;
+				result->numerics[i] = 0;
+				break;
+			case CS_BINARY_TYPE:
+			case CS_VARBINARY_TYPE:
+				result->datafmt[i].maxlength *= 2;
+				result->datafmt[i].maxlength++;
+				result->numerics[i] = 0;
+				break;
+			case CS_BIT_TYPE:
+			case CS_TINYINT_TYPE:
+				result->datafmt[i].maxlength = 4;
+				result->numerics[i] = 1;
+				break;
+			case CS_SMALLINT_TYPE:
+				result->datafmt[i].maxlength = 7;
+				result->numerics[i] = 1;
+				break;
+			case CS_INT_TYPE:
+				result->datafmt[i].maxlength = 12;
+				result->numerics[i] = 1;
+				break;
+			case CS_REAL_TYPE:
+			case CS_FLOAT_TYPE:
+				result->datafmt[i].maxlength = 24;
+				result->numerics[i] = 2;
+				break;
+			case CS_MONEY_TYPE:
+			case CS_MONEY4_TYPE:
+				result->datafmt[i].maxlength = 24;
+				result->numerics[i] = 2;
+				break;
+			case CS_DATETIME_TYPE:
+			case CS_DATETIME4_TYPE:
+				result->datafmt[i].maxlength = 30;
+				result->numerics[i] = 0;
+				break;
+			case CS_NUMERIC_TYPE:
+			case CS_DECIMAL_TYPE:
+				result->datafmt[i].maxlength = result->datafmt[i].precision + 3;
+				/* numeric(10) vs numeric(10, 1) */
+				result->numerics[i] = (result->datafmt[i].scale == 0) ? 1 : 2;
+				break;
+			default:
+				result->datafmt[i].maxlength++;
+				result->numerics[i] = 0;
+				break;
+		}
+		result->tmp_buffer[i] = (char *)emalloc(result->datafmt[i].maxlength);
+		result->datafmt[i].datatype = CS_CHAR_TYPE;
+		result->datafmt[i].format = CS_FMT_NULLTERM;
+		ct_bind(sybase_ptr->cmd, i+1, &result->datafmt[i], result->tmp_buffer[i], &result->lengths[i], &result->indicators[i]);
 	}
 
-	efree(datafmt);
-	efree(lengths);
-	efree(indicators);
-	efree(numerics);
-	efree(types);
+	result->fields = (sybase_field *) emalloc(sizeof(sybase_field)*num_fields);
+	j=0;
 	for (i=0; i<num_fields; i++) {
-		efree(tmp_buffer[i]);
+		char computed_buf[16];
+
+		if (result->datafmt[i].namelen>0) {
+			result->fields[i].name = estrndup(result->datafmt[i].name, result->datafmt[i].namelen);
+		} else {
+			if (j>0) {
+				snprintf(computed_buf, 16, "computed%d", j);
+			} else {
+				strcpy(computed_buf, "computed");
+			}
+			result->fields[i].name = estrdup(computed_buf);
+			j++;
+		}
+		result->fields[i].column_source = empty_string;
+		result->fields[i].max_length = result->datafmt[i].maxlength-1;
+		result->fields[i].numeric = result->numerics[i];
+		Z_TYPE(result->fields[i]) = result->types[i];
 	}
-	efree(tmp_buffer);
+
+	retcode= php_sybase_fetch_result_row(result, buffered ? 1 : -1);
 
 	return result;
 }
 
-
-/* {{{ proto int sybase_query(string query [, int link_id])
-   Send Sybase query */
-PHP_FUNCTION(sybase_query)
+static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 {
-	pval **query, **sybase_link_index=NULL;
-	int id;
+	zval **query, **sybase_link_index=NULL;
+	zval **store_mode= NULL;
+	int id, deadlock_count, store;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;
@@ -1070,6 +1219,7 @@ PHP_FUNCTION(sybase_query)
 		Q_FAILURE,				/* Failure, no results. */
 	} status;
 
+	store= 1;
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
@@ -1083,6 +1233,14 @@ PHP_FUNCTION(sybase_query)
 			}
 			id = -1;
 			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &query, &sybase_link_index, &store_mode)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_long_ex(store_mode);
+			store= (Z_LVAL_PP(store_mode) != 0);
+			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
@@ -1093,13 +1251,23 @@ PHP_FUNCTION(sybase_query)
 	convert_to_string_ex(query);
 
 	/* Fail if we already marked this connection dead. */
-
 	if (sybase_ptr->dead) {
 		RETURN_FALSE;
 	}
+	
+	/* Check to see if a previous sybase_unbuffered_query has read all rows */
+	if (sybase_ptr->active_result_index) {
+		zend_error(E_NOTICE, "Sybase:  Called %s() without first fetching all rows from a previous unbuffered query",
+			get_active_function_name(TSRMLS_C));
+		if (sybase_ptr->cmd) {
+			ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
+		}
+		zend_list_delete(sybase_ptr->active_result_index);
+		sybase_ptr->active_result_index= 0;
+	}
 
 	/* Repeat until we don't deadlock. */
-
+	deadlock_count= 0;
 	for (;;) {
 		result = NULL;
 		sybase_ptr->deadlock = 0;
@@ -1116,12 +1284,14 @@ PHP_FUNCTION(sybase_query)
 			 * CS_BUSY for some reason.
 			 */
 			sybase_ptr->dead = 1;
-		    RETURN_FALSE;
+			zend_error(E_WARNING, "Sybase:  Connection is dead");
+			RETURN_FALSE;
 		}
 
 		if (ct_send(sybase_ptr->cmd)!=CS_SUCCEED) {
 			ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 			sybase_ptr->dead = 1;
+			zend_error(E_WARNING, "Sybase:  Cannot send command");
 			RETURN_FALSE;
 		}
 
@@ -1134,9 +1304,10 @@ PHP_FUNCTION(sybase_query)
 		if (ct_results(sybase_ptr->cmd, &restype)!=CS_SUCCEED) {
 			ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 			sybase_ptr->dead = 1;
+			zend_error(E_WARNING, "Sybase:  Cannot read results");
 			RETURN_FALSE;
 		}
-
+    
 		switch ((int) restype) {
 			case CS_CMD_FAIL:
 			default:
@@ -1154,6 +1325,7 @@ PHP_FUNCTION(sybase_query)
 			case CS_ROWFMT_RESULT:
 			case CS_DESCRIBE_RESULT:
 			case CS_MSG_RESULT:
+				buffered= 0;				/* These queries have no need for buffering */
 				status = Q_SUCCESS;
 				break;
 			case CS_COMPUTE_RESULT:
@@ -1161,7 +1333,7 @@ PHP_FUNCTION(sybase_query)
 			case CS_PARAM_RESULT:
 			case CS_ROW_RESULT:
 			case CS_STATUS_RESULT:
-				result = php_sybase_fetch_result_set(sybase_ptr);
+				result = php_sybase_fetch_result_set(sybase_ptr, buffered, store);
 				if (result == NULL) {
 					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 					sybase_ptr->dead = 1;
@@ -1170,63 +1342,68 @@ PHP_FUNCTION(sybase_query)
 				status = Q_RESULT;
 				break;
 		}
+		
+		/* Check for left-over results */
+		if (!buffered && status != Q_RESULT) {
+			while ((retcode = ct_results(sybase_ptr->cmd, &restype))==CS_SUCCEED) {
+				switch ((int) restype) {
+					case CS_CMD_SUCCEED:
+					case CS_CMD_DONE:
+						break;
 
-		/* The only restype we should get now is CS_CMD_DONE, possibly
-		 * followed by a CS_STATUS_RESULT/CS_CMD_SUCCEED/CS_CMD_DONE
-		 * sequence if the command was a stored procedure call.  But we
-		 * still need to read and discard unexpected results.  We might
-		 * want to return a failure in this case because the application
-		 * won't be getting all the results it asked for.
-		 */
-		while ((retcode = ct_results(sybase_ptr->cmd, &restype))==CS_SUCCEED) {
-			switch ((int) restype) {
-				case CS_CMD_SUCCEED:
-				case CS_CMD_DONE:
+					case CS_CMD_FAIL:
+						status = Q_FAILURE;
+						break;
+
+					case CS_COMPUTE_RESULT:
+					case CS_CURSOR_RESULT:
+					case CS_PARAM_RESULT:
+					case CS_ROW_RESULT:
+						/* Unexpected results, cancel them. */
+					case CS_STATUS_RESULT:
+						ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_CURRENT);
+						break;
+
+					default:
+						status = Q_FAILURE;
+						break;
+				}
+				if (status == Q_FAILURE) {
+					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
+				}
+			}
+
+			switch (retcode) {
+				case CS_END_RESULTS:
+					/* Normal. */
 					break;
 
-				case CS_CMD_FAIL:
-					status = Q_FAILURE;
-					break;
-
-				case CS_COMPUTE_RESULT:
-				case CS_CURSOR_RESULT:
-				case CS_PARAM_RESULT:
-				case CS_ROW_RESULT:
-					/* Unexpected results, cancel them. */
-				case CS_STATUS_RESULT:
-					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_CURRENT);
-					break;
-
+				case CS_FAIL:
+					/* Hopefully this either cleans up the connection, or the
+					 * connection ends up marked dead so it will be reopened
+					 * if it is persistent.  We may want to do
+					 * ct_close(CS_FORCE_CLOSE) if ct_cancel() fails; see the
+					 * doc for ct_results()==CS_FAIL.
+					 */
+					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
+					/* Don't take chances with the vagaries of ct-lib.  Mark it
+					 * dead ourselves.
+					 */
+					sybase_ptr->dead = 1;
+				case CS_CANCELED:
 				default:
 					status = Q_FAILURE;
 					break;
 			}
-			if (status == Q_FAILURE) {
-				ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
-			}
 		}
-
-		switch (retcode) {
-			case CS_END_RESULTS:
-				/* Normal. */
-				break;
-
-			case CS_FAIL:
-				/* Hopefully this either cleans up the connection, or the
-				 * connection ends up marked dead so it will be reopened
-				 * if it is persistent.  We may want to do
-				 * ct_close(CS_FORCE_CLOSE) if ct_cancel() fails; see the
-				 * doc for ct_results()==CS_FAIL.
-				 */
-				ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
-				/* Don't take chances with the vagaries of ct-lib.  Mark it
-				 * dead ourselves.
-				 */
-				sybase_ptr->dead = 1;
-			case CS_CANCELED:
-			default:
-				status = Q_FAILURE;
-				break;
+		
+		/* Retry deadlocks up until deadlock_retry_count times */		
+		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
+			zend_error(E_WARNING, "Sybase:  Retried deadlock %d times [max: %d], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
+			if (result != NULL) {
+				_free_sybase_result(result);
+			}
+			break;
 		}
 
 		/* If query completed without deadlock, break out of the loop.
@@ -1260,16 +1437,32 @@ PHP_FUNCTION(sybase_query)
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	/* Indicate we have data in case of buffered queries */
+    id= ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	sybase_ptr->active_result_index= buffered ? id : 0;
 }
 
+/* {{{ proto int sybase_query(string query [, int link_id])
+   Send Sybase query */
+PHP_FUNCTION(sybase_query)
+{
+	php_sybase_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
 /* }}} */
+
+/* {{{ proto int sybase_unbuffered_query(string query [, int link_id])
+   Send Sybase query */
+PHP_FUNCTION(sybase_unbuffered_query)
+{
+	php_sybase_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+
 
 /* {{{ proto bool sybase_free_result(int result)
    Free result memory */
 PHP_FUNCTION(sybase_free_result)
 {
-	pval *sybase_result_index;
+	zval *sybase_result_index;
 	sybase_result *result;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
@@ -1282,7 +1475,14 @@ PHP_FUNCTION(sybase_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
-
+	
+	/* Did we fetch up until the end? */
+	if (result->last_retcode != CS_END_DATA) {
+		/* zend_error(E_WARNING, "Sybase:  Cancelling the rest of the results\n"); */
+		ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
+		php_sybase_finish_results(result);
+	}
+	
 	zend_list_delete(Z_LVAL_P(sybase_result_index));
 	RETURN_TRUE;
 }
@@ -1301,7 +1501,7 @@ PHP_FUNCTION(sybase_get_last_message)
    Get number of rows in result */
 PHP_FUNCTION(sybase_num_rows)
 {
-	pval *sybase_result_index;
+	zval *sybase_result_index;
 	sybase_result *result;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
@@ -1320,7 +1520,7 @@ PHP_FUNCTION(sybase_num_rows)
    Get number of fields in result */
 PHP_FUNCTION(sybase_num_fields)
 {
-	pval *sybase_result_index;
+	zval *sybase_result_index;
 	sybase_result *result;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
@@ -1339,40 +1539,48 @@ PHP_FUNCTION(sybase_num_fields)
    Get row as enumerated array */
 PHP_FUNCTION(sybase_fetch_row)
 {
-	pval *sybase_result_index;
+	zval *sybase_result_index;
 	int i;
 	sybase_result *result;
-	pval *field_content;
+	zval *field_content;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
+	/* Unbuffered? */
+	if (result->last_retcode != CS_END_DATA) {
+		php_sybase_fetch_result_row(result, 1);
+	}
+	
+	/* At the end? */
 	if (result->cur_row >= result->num_rows) {
+	    result->sybase_ptr->active_result_index= 0;
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	for (i=0; i<result->num_fields; i++) {
 		ALLOC_ZVAL(field_content);
-		*field_content = result->data[result->cur_row][i];
+		*field_content = result->data[result->store ? result->cur_row : 0][i];
 		INIT_PZVAL(field_content);
-		pval_copy_constructor(field_content);
-		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &field_content, sizeof(pval* ), NULL);
+		zval_copy_ctor(field_content);
+		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &field_content, sizeof(zval* ), NULL);
 	}
 	result->cur_row++;
 }
 
 /* }}} */
 
-static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 {
-	pval *sybase_result_index;
+	zval *sybase_result_index;
 	sybase_result *result;
-	int i;
-	pval *tmp;
+	int i, j;
+	zval *tmp;
+	char name[32];
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1380,26 +1588,42 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
+	/* Unbuffered ? Fetch next row */
+	if (result->last_retcode != CS_END_DATA) {
+		php_sybase_fetch_result_row(result, 1);
+	}
+
+	/* At the end? */
 	if (result->cur_row >= result->num_rows) {
+	    result->sybase_ptr->active_result_index= 0;
 		RETURN_FALSE;
 	}
 
 	if (array_init(return_value)==FAILURE) {
 		RETURN_FALSE;
 	}
-
+	
+	j= 1;
 	for (i=0; i<result->num_fields; i++) {
 		ALLOC_ZVAL(tmp);
-		*tmp = result->data[result->cur_row][i];
+		*tmp = result->data[result->store ? result->cur_row : 0][i];
 		INIT_PZVAL(tmp);
 		if (PG(magic_quotes_runtime) && Z_TYPE_P(tmp) == IS_STRING) {
 			Z_STRVAL_P(tmp) = php_addslashes(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &Z_STRLEN_P(tmp), 0 TSRMLS_CC);
 		} else {
-			pval_copy_constructor(tmp);
+			zval_copy_ctor(tmp);
 		}
-		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &tmp, sizeof(pval *), NULL);
+		if (numerics) {
+			zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &tmp, sizeof(zval *), NULL);
+		}
 		tmp->refcount++;
-		zend_hash_update(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
+		
+		if (zend_hash_exists(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1)) {
+			snprintf(name, 32, "%s%d", result->fields[i].name, j);
+			result->fields[i].name= estrdup(name);
+			j++;
+		}
+		zend_hash_update(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(zval *), NULL);
 	}
 	result->cur_row++;
 }
@@ -1409,7 +1633,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
    Fetch row as object */
 PHP_FUNCTION(sybase_fetch_object)
 {
-	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -1420,7 +1644,15 @@ PHP_FUNCTION(sybase_fetch_object)
    Fetch row as array */
 PHP_FUNCTION(sybase_fetch_array)
 {
-	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto array sybase_fetch_assoc(int result)
+   Fetch row as array without numberic indices */
+PHP_FUNCTION(sybase_fetch_assoc)
+{
+	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1428,7 +1660,7 @@ PHP_FUNCTION(sybase_fetch_array)
    Move internal row pointer */
 PHP_FUNCTION(sybase_data_seek)
 {
-	pval *sybase_result_index, *offset;
+	zval *sybase_result_index, *offset;
 	sybase_result *result;
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
@@ -1439,6 +1671,12 @@ PHP_FUNCTION(sybase_data_seek)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long(offset);
+
+	/* Unbuffered ? */
+	if (result->last_retcode != CS_END_DATA && Z_LVAL_P(offset)>=result->num_rows) {
+		php_sybase_fetch_result_row(result, Z_LVAL_P(offset));
+	}
+	
 	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=result->num_rows) {
 		php_error(E_WARNING, "Sybase:  Bad row offset");
 		RETURN_FALSE;
@@ -1497,7 +1735,7 @@ static char *php_sybase_get_field_name(CS_INT type)
    Get field information */
 PHP_FUNCTION(sybase_fetch_field)
 {
-	pval *sybase_result_index, *offset;
+	zval *sybase_result_index, *offset;
 	int field_offset;
 	sybase_result *result;
 
@@ -1550,7 +1788,7 @@ PHP_FUNCTION(sybase_fetch_field)
    Set field offset */
 PHP_FUNCTION(sybase_field_seek)
 {
-	pval *sybase_result_index, *offset;
+	zval *sybase_result_index, *offset;
 	int field_offset;
 	sybase_result *result;
 
@@ -1562,6 +1800,11 @@ PHP_FUNCTION(sybase_field_seek)
 
 	convert_to_long(offset);
 	field_offset = Z_LVAL_P(offset);
+	
+	/* Unbuffered ? */
+	if (result->last_retcode != CS_END_DATA && field_offset>=result->num_rows) {
+		php_sybase_fetch_result_row(result, field_offset);
+	}
 
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		php_error(E_WARNING, "Sybase:  Bad column offset");
@@ -1578,7 +1821,7 @@ PHP_FUNCTION(sybase_field_seek)
    Get result data */
 PHP_FUNCTION(sybase_result)
 {
-	pval *row, *field, *sybase_result_index;
+	zval *row, *field, *sybase_result_index;
 	int field_offset=0;
 	sybase_result *result;
 
@@ -1590,6 +1833,8 @@ PHP_FUNCTION(sybase_result)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long(row);
+	
+
 	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=result->num_rows) {
 		php_error(E_WARNING, "Sybase:  Bad row offset (%d)", Z_LVAL_P(row));
 		RETURN_FALSE;
@@ -1622,7 +1867,7 @@ PHP_FUNCTION(sybase_result)
 	}
 
 	*return_value = result->data[Z_LVAL_P(row)][field_offset];
-	pval_copy_constructor(return_value);
+	zval_copy_ctor(return_value);
 }
 /* }}} */
 
@@ -1631,7 +1876,7 @@ PHP_FUNCTION(sybase_result)
    Get number of affected rows in last query */
 PHP_FUNCTION(sybase_affected_rows)
 {
-	pval *sybase_link_index;
+	zval *sybase_link_index;
 	sybase_link *sybase_ptr;
 	int id;
 
@@ -1668,7 +1913,13 @@ PHP_MINFO_FUNCTION(sybase)
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	sprintf(buf, "%ld", SybCtG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
+	sprintf(buf, "%ld", SybCtG(min_server_severity));
+	php_info_print_table_row(2, "Min server severity", buf);
+	sprintf(buf, "%ld", SybCtG(min_client_severity));
+	php_info_print_table_row(2, "Min client severity", buf);	
 	php_info_print_table_row(2, "Application Name", SybCtG(appname));
+	sprintf(buf, "%ld", SybCtG(deadlock_retry_count));
+	php_info_print_table_row(2, "Deadlock retry count", buf);
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1679,7 +1930,7 @@ PHP_MINFO_FUNCTION(sybase)
    Sets minimum client severity */
 PHP_FUNCTION(sybase_min_client_severity)
 {
-	pval *severity;
+	zval *severity;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1694,13 +1945,77 @@ PHP_FUNCTION(sybase_min_client_severity)
    Sets minimum server severity */
 PHP_FUNCTION(sybase_min_server_severity)
 {
-	pval *severity;
+	zval *severity;
 
 	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(severity);
 	SybCtG(min_server_severity) = Z_LVAL_P(severity);
+}
+/* }}} */
+
+/* {{{ proto void sybase_deadlock_retry_count(int retry_count)
+   Sets deadlock retry count */
+PHP_FUNCTION(sybase_deadlock_retry_count)
+{
+	zval *retry_count;
+
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &retry_count)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(retry_count);
+	SybCtG(deadlock_retry_count) = Z_LVAL_P(retry_count);
+}
+/* }}} */
+
+
+/* {{{ proto bool sybase_set_message_handler(mixed error_func)
+   Set the error handler, to be called when a server message is raised. 
+   If error_func is NULL the handler will be deleted */
+PHP_FUNCTION(sybase_set_message_handler)
+{
+	zval ***params;
+	zval *retval_ptr;
+	char *name;
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc != 1) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	params = emalloc(sizeof(zval **) * argc);
+
+	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
+		efree(params);
+		RETURN_FALSE;
+	}
+
+	if (SybCtG(callback_name)) {
+		zval_dtor(SybCtG(callback_name));
+		SybCtG(callback_name)= NULL;
+	}
+	
+	if (Z_TYPE_PP(params[0]) == IS_NULL) {
+		RETURN_TRUE;
+	}
+
+	if (!zend_is_callable(*params[0], 0, &name)) {
+		zend_error(E_WARNING, "%s(): First argumented is expected to be a valid callback, '%s' was given", get_active_function_name(TSRMLS_C), name);
+		efree(name);
+		efree(params);
+		RETURN_FALSE;
+	}
+	
+	MAKE_STD_ZVAL(SybCtG(callback_name));
+	
+	ALLOC_ZVAL(SybCtG(callback_name));
+	*SybCtG(callback_name) = **params[0];
+	INIT_PZVAL(SybCtG(callback_name));
+	zval_copy_ctor(SybCtG(callback_name));
+	efree(params);
+	efree(name);
+	RETURN_TRUE;
 }
 /* }}} */
 
