@@ -64,6 +64,7 @@ PHP_FUNCTION(gd_info);
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
 PHP_FUNCTION(imagecharup);
+PHP_FUNCTION(imageistruecolor);
 PHP_FUNCTION(imagecolorallocate);
 PHP_FUNCTION(imagepalettecopy);
 PHP_FUNCTION(imagecolorat);

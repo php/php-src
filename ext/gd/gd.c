@@ -156,12 +156,13 @@ function_entry gd_functions[] = {
 	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagechar,								NULL)
 	PHP_FE(imagecharup,								NULL)
+	PHP_FE(imagecolorat,							NULL)
 	PHP_FE(imagecolorallocate,						NULL)
 #if HAVE_LIBGD15
 	PHP_FE(imagepalettecopy,						NULL)
 	PHP_FE(imagecreatefromstring,					NULL)
 #endif
-	PHP_FE(imagecolorat,							NULL)
+	PHP_FE(imageistruecolor,						NULL)
 	PHP_FE(imagecolorclosest,						NULL)
 #if HAVE_COLORCLOSESTHWB
 	PHP_FE(imagecolorclosesthwb,					NULL)
@@ -1747,6 +1748,23 @@ PHP_FUNCTION(imagedestroy)
 	zend_list_delete(Z_LVAL_PP(IM));
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int imagecolorallocate(int im, int red, int green, int blue)
+   Allocate a color for an image */
+PHP_FUNCTION(imageistruecolor)
+{
+	zval **IM;
+	gdImagePtr im;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	RETURN_BOOL(im->trueColor);
 }
 /* }}} */
 
