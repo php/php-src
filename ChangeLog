@@ -1,3 +1,102 @@
+2000-09-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c: Now it should not crash, though still leaks
+
+2000-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c:
+    This fix wasn't quite right and is no longer necessary after the recent php_ini optimizations
+
+    * main/php_ini.c
+      ext/session/session.c: - Fix leak
+    - Remove redundant php_ini code
+
+    * main/main.c: broken logic fixed.  I'm getting old
+
+2000-09-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/mod_files.c
+      ext/session/session.c: Fix crash
+
+2000-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c
+      main/main.c
+      main/network.c
+      main/php_globals.h
+      main/php_network.h
+      main/php_variables.c
+      main/rfc1867.c
+      win32/php4dllts.dsp
+      php.ini-dist
+      php.ini-optimized: - Remove track_vars - it is now always on
+    - Make the various $HTTP_*_VARS[] arrays be defined always,
+      even if they're empty
+    - Fix Win32 build and warnings
+
+2000-09-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c: Try to fix session INI variables handling
+    This should also fix #6538.
+
+    * ext/standard/basic_functions.c: More fixes fo ini_ handling functions
+
+2000-09-05  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/string.c:
+    str_repeat() should be able to handle multipliers of 0 gracefully, IMHO ...
+    Hope no one disagrees. :)
+
+2000-09-05  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: - back out unneeded patch (danny).
+
+2000-09-05  Stig Venaas  <venaas@uninett.no>
+
+    * main/network.c: using emalloc and efree, instead of malloc and free
+
+2000-09-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/exec.h:
+    Add EscapeShellArg() function which turns a b into 'a b' and
+    a'b into 'a'\''b'
+
+2000-09-05  Stig Venaas  <venaas@uninett.no>
+
+    * main/fopen-wrappers.c
+      main/network.c
+      main/php_network.h: renamed hostconnect() to php_hostconnect()
+
+    * main/fopen-wrappers.c: using the new hostconnect() for the http wrapper
+
+    * configure.in: Added check for getaddrinfo()
+
+2000-09-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c: Fix ini_restore variable length
+
+2000-09-05  Stig Venaas  <venaas@uninett.no>
+
+    * main/network.c:
+    hostconnect now supports IPv6 if getaddrinfo exists, and also tries to
+    connect to all addresses of a host before giving up. It should also be
+    thread safe when using getaddrinfo.
+
+2000-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * genfiles: Missed the Zend..fixed.
+
+2000-09-05  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Add:
+    	Support for multiple processors (re-using the old one).
+    	Support for basic functions when a processor is in use.
+
+    * win32/sendmail.c: This should fix the multiple-line problem.
+
 2000-09-04  Zeev Suraski  <zeev@zend.com>
 
     * main/rfc1867.c: Protect arrays as well.
