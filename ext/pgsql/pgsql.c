@@ -75,8 +75,8 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loreadall,	NULL)
 	PHP_FE(pg_loimport,		NULL)
 	PHP_FE(pg_loexport,		NULL)
-	PHP_FE(pg_putline,		NULL)
-	PHP_FE(pg_endcopy,		NULL)
+	PHP_FE(pg_put_line,		NULL)
+	PHP_FE(pg_end_copy,		NULL)
 #if HAVE_PQCLIENTENCODING
 	PHP_FE(pg_clientencoding,	NULL)
 	PHP_FE(pg_setclientencoding,	NULL)
@@ -647,9 +647,9 @@ PHP_FUNCTION(pg_exec)
 	}
 }
 /* }}} */
-/* {{{ proto int pg_endcopy([int connection])
+/* {{{ proto int pg_end_copy([int connection])
    Sync with backend. Completes the Copy command */
-PHP_FUNCTION(pg_endcopy)
+PHP_FUNCTION(pg_end_copy)
 {
 	zval **pgsql_link = NULL;
 	int id = -1;
@@ -684,9 +684,9 @@ PHP_FUNCTION(pg_endcopy)
 }
 /* }}} */
 
-/* {{{ proto int pg_putline([int connection,] string query)
+/* {{{ proto int pg_put_line([int connection,] string query)
    Send null-terminated string to backend server*/
-PHP_FUNCTION(pg_putline)
+PHP_FUNCTION(pg_put_line)
 {
 	zval **query, **pgsql_link = NULL;
 	int id = -1;
