@@ -1,3 +1,45 @@
+2003-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Rename nanosleep() to time_nanosleep().
+
+2003-11-14  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Fix the fix [ibase_trans()]
+
+2003-11-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/file/001.phpt:
+      MFH(r-1.10): ctime (#10) may differ on several filesystems.
+
+    * ext/standard/tests/file/001.phpt:
+      ctime (#10) may differ on several filesystems.
+
+2003-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Adjust to latest conversion cast changes
+
+2003-11-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * scripts/phpize.in:
+      Missing "confdefs.h" in the cleanup-files-list
+
+2003-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/yp/yp.c:
+      MFH: Fixed bug #26235 (yp_first/yp_next do not specify correct key length).
+
+    * ext/yp/yp.c:
+      Fixed bug #26235 (yp_first/yp_next do not specify correct key length).
+
 2003-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/tests/009.phpt:
