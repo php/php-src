@@ -2854,9 +2854,9 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 #define _isblank(c)   (((((unsigned char) c) == ' '  || ((unsigned char) c) == '\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c) == '\n' || ((unsigned char) c) == '\r')) ? 1 : 0)
 
-/* {{{ php_char_to_str
+/* {{{ php_char_to_str_ex
  */
-PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result)
+PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_len, zval *result, int case_sensitivity, int *replace_count)
 {
 	int char_count = 0;
 	int replaced = 0;
@@ -2878,8 +2878,11 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 	Z_TYPE_P(result) = IS_STRING;
 	
 	for (source = str; source < source_end; source++) {
-		if (*source == from) {
+		if ((case_sensitivity && *source == from) || (!case_sensitivity && tolower(*source) == tolower(from))) {
 			replaced = 1;
+			if (replace_count) {
+				*replace_count += 1;
+			}
 			for (tmp = to, tmp_end = tmp+to_len; tmp < tmp_end; tmp++) {
 				*target = *tmp;
 				target++;
@@ -2891,6 +2894,14 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 	}
 	*target = 0;
 	return replaced;
+}
+/* }}} */
+
+/* {{{ php_char_to_str
+ */
+PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result)
+{
+	return php_char_to_str_ex(str, len, from, to, to_len, result, 1, NULL);
 }
 /* }}} */
 
@@ -3089,12 +3100,14 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			}
 			
 			if (Z_STRLEN_PP(search_entry) == 1) {
-				php_char_to_str(Z_STRVAL_P(result),
+				php_char_to_str_ex(Z_STRVAL_P(result),
 								Z_STRLEN_P(result),
 								Z_STRVAL_PP(search_entry)[0],
 								replace_value,
 								replace_len,
-								&temp_result);
+								&temp_result,
+								case_sensitivity,
+								replace_count);
 			} else if (Z_STRLEN_PP(search_entry) > 1) {
 				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
 														   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
@@ -3113,12 +3126,14 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		}
 	} else {
 		if (Z_STRLEN_P(search) == 1) {
-			php_char_to_str(Z_STRVAL_PP(subject),
+			php_char_to_str_ex(Z_STRVAL_PP(subject),
 							Z_STRLEN_PP(subject),
 							Z_STRVAL_P(search)[0],
 							Z_STRVAL_P(replace),
 							Z_STRLEN_P(replace),
-							result);
+							result,
+							case_sensitivity,
+							replace_count);
 		} else if (Z_STRLEN_P(search) > 1) {
 			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
 													Z_STRVAL_P(search), Z_STRLEN_P(search),
