@@ -78,9 +78,9 @@
 #endif
 /* }}} */
 
-/* {{{ php_mbstr_default_identify_list[] */
+/* {{{ php_mb_default_identify_list[] */
 #if defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_utf8,
@@ -90,7 +90,7 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 #if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_cn,
@@ -99,7 +99,7 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 #if defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_tw,
@@ -108,7 +108,7 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 #if defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_kr,
@@ -117,7 +117,7 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 #if defined(HAVE_MBSTR_RU) & !defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_koi8r,
@@ -127,13 +127,13 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 #if !defined(HAVE_MBSTR_RU) & !defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8
 };
 #endif
 
-static const int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
+static const int php_mb_default_identify_list_size = sizeof(php_mb_default_identify_list)/sizeof(enum mbfl_no_encoding);
 /* }}} */
 
 static const unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
@@ -144,7 +144,7 @@ static const unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_N
 
 /* {{{ sapi_post_entry mbstr_post_entries[] */
 static sapi_post_entry mbstr_post_entries[] = {
-	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mbstr_post_handler },
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mb_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
 };
@@ -307,7 +307,7 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 			p1 = p2 + 1;
 			n++;
 		}
-		size = n + php_mbstr_default_identify_list_size;
+		size = n + php_mb_default_identify_list_size;
 		/* make list */
 		list = (int *)pecalloc(size, sizeof(int), persistent);
 		if (list != NULL) {
@@ -335,8 +335,8 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 				if (no_encoding == mbfl_no_encoding_auto) {
 					if (!bauto) {
 						bauto = 1;
-						l = php_mbstr_default_identify_list_size;
-						src = (int*)php_mbstr_default_identify_list;
+						l = php_mb_default_identify_list_size;
+						src = (int*)php_mb_default_identify_list;
 						while (l > 0) {
 							*entry++ = *src++;
 							l--;
@@ -407,7 +407,7 @@ php_mb_parse_encoding_array(zval *array, int **return_list, int *return_size, in
 		target_hash = Z_ARRVAL_P(array);
 		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
-		size = i + php_mbstr_default_identify_list_size;
+		size = i + php_mb_default_identify_list_size;
 		list = (int *)pecalloc(size, sizeof(int), persistent);
 		if (list != NULL) {
 			entry = list;
@@ -422,8 +422,8 @@ php_mb_parse_encoding_array(zval *array, int **return_list, int *return_size, in
 				if (no_encoding == mbfl_no_encoding_auto) {
 					if (!bauto) {
 						bauto = 1;
-						l = php_mbstr_default_identify_list_size;
-						src = (int*)php_mbstr_default_identify_list;
+						l = php_mb_default_identify_list_size;
+						src = (int*)php_mb_default_identify_list;
 						while (l > 0) {
 							*entry++ = *src++;
 							l--;
@@ -836,8 +836,8 @@ PHP_RINIT_FUNCTION(mbstring)
 		n = MBSTRG(detect_order_list_size);
 	}
 	if (n <= 0) {
-		list = (int*)php_mbstr_default_identify_list;
-		n = php_mbstr_default_identify_list_size;
+		list = (int*)php_mb_default_identify_list;
+		n = php_mb_default_identify_list_size;
 	}
 	entry = (int *)emalloc(n*sizeof(int));
 	if (entry != NULL) {
@@ -1283,9 +1283,9 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
-/* {{{ static int php_mbstr_encoding_handler_ex() */
+/* {{{ static int php_mb_encoding_handler_ex() */
 static int
-php_mbstr_encoding_handler_ex(zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC)
+php_mb_encoding_handler_ex(zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC)
 {
 	char *var, *val, *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
@@ -1459,12 +1459,12 @@ out:
 }
 /* }}} */
 
-/* {{{ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler) */
-SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
+/* {{{ SAPI_POST_HANDLER_FUNC(php_mb_post_handler) */
+SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
 
-	php_mbstr_encoding_handler_ex(arg, SG(request_info).post_data, "&", 0, 0 TSRMLS_CC);
+	php_mb_encoding_handler_ex(arg, SG(request_info).post_data, "&", 0, 0 TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
@@ -1564,7 +1564,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		break;
 	}
 
-	php_mbstr_encoding_handler_ex(array_ptr, res, separator, 0, 0 TSRMLS_CC);
+	php_mb_encoding_handler_ex(array_ptr, res, separator, 0, 0 TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		switch(arg){
@@ -1629,7 +1629,7 @@ PHP_FUNCTION(mb_parse_str)
 		RETVAL_FALSE;
 		goto out;
 	}
-	RETVAL_BOOL(php_mbstr_encoding_handler_ex(track_vars_array, encstr, separator, (argc == 1), 1 TSRMLS_CC));
+	RETVAL_BOOL(php_mb_encoding_handler_ex(track_vars_array, encstr, separator, (argc == 1), 1 TSRMLS_CC));
 out:
 	if (encstr != NULL) efree(encstr);
 	if (separator != NULL) efree(separator);
@@ -3002,9 +3002,9 @@ detect_end:
 /* }}} */
 
 /* {{{ HTML numeric entity */
-/* {{{ static void php_mbstr_numericentity_exec() */
+/* {{{ static void php_mb_numericentity_exec() */
 static void
-php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
+php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	pval **arg1, **arg2, **arg3, **hash_entry;
 	HashTable *target_hash;
@@ -3081,7 +3081,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
    Converts specified characters to HTML numeric entities */
 PHP_FUNCTION(mb_encode_numericentity)
 {
-	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -3089,7 +3089,7 @@ PHP_FUNCTION(mb_encode_numericentity)
    Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
 {
-	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 /* }}} */
