@@ -735,12 +735,6 @@ char *php_pcre_replace(char *regex,   int regex_len,
 	
 	alloc_len = 2 * subject_len + 1;
 	result = emalloc(alloc_len * sizeof(char));
-	if (!result) {
-		zend_error(E_WARNING, "Unable to allocate memory in pcre_replace");
-		efree(re);
-		efree(offsets);
-		return NULL;
-	}
 
 	/* Initialize */
 	match = NULL;
