@@ -149,7 +149,7 @@
 	while (isdigit((int)*str)) {        	\
 		num *= 10;                      	\
 		num += NUM(*str++);             	\
-		if (num >= LONG_MAX / 10) {			\
+		if (num >= INT_MAX / 10) {			\
 			while (isdigit((int)*str++));	\
 			break;							\
 		}									\

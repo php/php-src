@@ -471,7 +471,7 @@ void sqliteVdbePrintOp(FILE *pOut, int pc, Op *pOp){
   char *zP3;
   char zPtr[40];
   if( pOp->p3type==P3_POINTER ){
-    sprintf(zPtr, "ptr(%#x)", (int)pOp->p3);
+    sprintf(zPtr, "ptr(%#lx)", (long)pOp->p3);
     zP3 = zPtr;
   }else{
     zP3 = pOp->p3;
@@ -522,7 +522,7 @@ int sqliteVdbeList(
     sprintf(p->zStack[2],"%d", p->aOp[i].p1);
     sprintf(p->zStack[3],"%d", p->aOp[i].p2);
     if( p->aOp[i].p3type==P3_POINTER ){
-      sprintf(p->aStack[4].z, "ptr(%#x)", (int)p->aOp[i].p3);
+      sprintf(p->aStack[4].z, "ptr(%#lx)", (long)p->aOp[i].p3);
       p->zStack[4] = p->aStack[4].z;
     }else{
       p->zStack[4] = p->aOp[i].p3;
