@@ -74,6 +74,7 @@ PEAR_FILES = \
 	PEAR/Command/Config.php \
 	PEAR/Command/Install.php \
 	PEAR/Command/Login.php \
+	PEAR/Command/Package.php \
 	PEAR/CommandResponse.php \
 	PEAR/CommandUI/CLI.php \
 	PEAR/Common.php \
