@@ -2372,27 +2372,107 @@ ZEND_METHOD(reflection_class, getParentClass)
 }
 /* }}} */
 
-/* {{{ proto public bool Reflection_Class::isSubclassOf(Reflection_Class class)
+/* {{{ proto public bool Reflection_Class::isSubclassOf(string|reflection_class class)
    Returns whether this class is a subclass of another class */
 ZEND_METHOD(reflection_class, isSubclassOf)
 {
 	reflection_object *intern, *argument;
-	zend_class_entry *ce;
-	zval *object;
+	zend_class_entry *ce, **pce, *class_ce;
+	zval *class_name;
+	char *class_name_lc;
 
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, reflection_class_ptr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE) {
 		return;
 	}
-
-	argument = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if (argument == NULL || argument->ptr == NULL) {
-		zend_error(E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
-		/* Bails out */
+	
+	switch(class_name->type) {
+		case IS_STRING:
+			class_name_lc = zend_str_tolower_dup(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+			if (zend_lookup_class(class_name_lc, Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
+				efree(class_name_lc);
+				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+						"Interface %s doesn't exist", Z_STRVAL_P(class_name));
+				return;
+			}
+			efree(class_name_lc);
+			class_ce = *pce;
+			break;			
+		case IS_OBJECT:
+			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr TSRMLS_CC)) {
+				argument = (reflection_object *) zend_object_store_get_object(class_name TSRMLS_CC);
+				if (argument == NULL || argument->ptr == NULL) {
+					zend_error(E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
+					/* Bails out */
+				}
+				class_ce = argument->ptr;
+				break;
+			}
+			/* no break */
+		default:
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+					"Parameter one must either be a string or a Reflection_Class object");
+			return;
 	}
-	RETURN_BOOL(instanceof_function(ce, argument->ptr TSRMLS_CC));
+
+
+	RETURN_BOOL(instanceof_function(ce, class_ce TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto public bool Reflection_Class::implementsInterface(string|reflection_class interface_name)
+   Returns whether this class is a subclass of another class */
+ZEND_METHOD(reflection_class, implementsInterface)
+{
+	reflection_object *intern, *argument;
+	zend_class_entry *ce, *interface_ce, **pce;
+	zval *interface;
+	char *interface_lc;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &interface) == FAILURE) {
+		return;
+	}
+	
+	switch(interface->type) {
+		case IS_STRING:
+			interface_lc = zend_str_tolower_dup(Z_STRVAL_P(interface), Z_STRLEN_P(interface));
+			if (zend_lookup_class(interface_lc, Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
+				efree(interface_lc);
+				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+						"Interface %s doesn't exist", Z_STRVAL_P(interface));
+				return;
+			}
+			efree(interface_lc);
+			interface_ce = *pce;
+			break;			
+		case IS_OBJECT:
+			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr TSRMLS_CC)) {
+				argument = (reflection_object *) zend_object_store_get_object(interface TSRMLS_CC);
+				if (argument == NULL || argument->ptr == NULL) {
+					zend_error(E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
+					/* Bails out */
+				}
+				interface_ce = argument->ptr;
+				break;
+			}
+			/* no break */
+		default:
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+					"Parameter one must either be a string or a Reflection_Class object");
+			return;
+	}
+
+	if (!(interface_ce->ce_flags & ZEND_ACC_INTERFACE)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Interface %s is a Class", interface_ce->name);
+		return;
+	}
+	RETURN_BOOL(instanceof_function(ce, interface_ce TSRMLS_CC));
 }
 /* }}} */
 
@@ -2981,6 +3061,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getStaticProperties, NULL, 0)
 	ZEND_ME(reflection_class, getDefaultProperties, NULL, 0)
 	ZEND_ME(reflection_class, isIterateable, NULL, 0)
+	ZEND_ME(reflection_class, implementsInterface, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
