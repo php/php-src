@@ -66,8 +66,6 @@ extern ps_module ps_mod_sqlite;
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
 extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
 
-static unsigned char arg3_force_ref[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-
 static int le_sqlite_db, le_sqlite_result, le_sqlite_pdb;
 
 static inline void php_sqlite_strtoupper(char *s)
@@ -165,8 +163,8 @@ struct php_sqlite_agg_functions {
 enum { PHPSQLITE_ASSOC = 1, PHPSQLITE_NUM = 2, PHPSQLITE_BOTH = PHPSQLITE_ASSOC|PHPSQLITE_NUM };
 
 function_entry sqlite_functions[] = {
-	PHP_FE(sqlite_open, arg3_force_ref)
-	PHP_FE(sqlite_popen, arg3_force_ref)
+	PHP_FE(sqlite_open, third_arg_force_ref)
+	PHP_FE(sqlite_popen, third_arg_force_ref)
 	PHP_FE(sqlite_close, NULL)
 	PHP_FE(sqlite_query, NULL)
 	PHP_FE(sqlite_array_query, NULL)
@@ -197,7 +195,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_unbuffered_query, NULL)
 	PHP_FE(sqlite_create_aggregate, NULL)
 	PHP_FE(sqlite_create_function, NULL)
-	PHP_FE(sqlite_factory, arg3_force_ref)
+	PHP_FE(sqlite_factory, third_arg_force_ref)
 	PHP_FE(sqlite_udf_encode_binary, NULL)
 	PHP_FE(sqlite_udf_decode_binary, NULL)
 	{NULL, NULL, NULL}

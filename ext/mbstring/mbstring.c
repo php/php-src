@@ -144,11 +144,11 @@ static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 static const int php_mb_default_identify_list_size = sizeof(php_mb_default_identify_list)/sizeof(enum mbfl_no_encoding);
 /* }}} */
 
-static const unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
-static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_FORCE };
-#if HAVE_MBREGEX
-static const unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-#endif
+static const
+	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+	ZEND_END_ARG_INFO();
 
 /* {{{ mb_overload_def mb_ovld[] */
 static const struct mb_overload_def mb_ovld[] = {
@@ -197,7 +197,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_http_output,			NULL)
 	PHP_FE(mb_detect_order,			NULL)
 	PHP_FE(mb_substitute_character,	NULL)
-	PHP_FE(mb_parse_str,			(unsigned char *)second_args_force_ref)
+	PHP_FE(mb_parse_str,			(unsigned char *)second_arg_force_ref)
 	PHP_FE(mb_output_handler,		NULL)
 	PHP_FE(mb_preferred_mime_name,	NULL)
 	PHP_FE(mb_strlen,				NULL)

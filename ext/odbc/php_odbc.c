@@ -66,8 +66,6 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
-static unsigned char a3_arg3_and_3_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_ALLOW};
-
 /* {{{ odbc_functions[]
  */
 function_entry odbc_functions[] = {
@@ -91,7 +89,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_fetch_object, NULL)
 #endif
 	PHP_FE(odbc_fetch_row, NULL)
-	PHP_FE(odbc_fetch_into, a3_arg3_and_3_force_ref)
+	PHP_FE(odbc_fetch_into, second_arg_force_ref)
 	PHP_FE(odbc_field_len, NULL)
 	PHP_FE(odbc_field_scale, NULL)
 	PHP_FE(odbc_field_name, NULL)

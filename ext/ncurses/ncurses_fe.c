@@ -25,11 +25,26 @@
 #include "php_ini.h"
 #include "php_ncurses.h"
 
-static unsigned char first_args_force_ref[] = {1, BYREF_FORCE};
-static unsigned char firstandsecond_args_force_ref[] = {2, BYREF_FORCE, BYREF_FORCE};
-static unsigned char second_args_force_ref[] = {2, BYREF_NONE, BYREF_FORCE};
-static unsigned char secondandthird_args_force_ref[] = {3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
-static unsigned char second_thru_fourth_args_force_ref[] = {4, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+static 
+	ZEND_BEGIN_ARG_INFO(firstandsecond_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+static
+	ZEND_BEGIN_ARG_INFO(secondandthird_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+static 
+	ZEND_BEGIN_ARG_INFO(second_thru_fourth_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 /* ncurses_functions[]
  *
@@ -151,7 +166,7 @@ function_entry ncurses_functions[] = {
 	PHP_FE(ncurses_mvinch,			NULL)
 	PHP_FE(ncurses_mvwaddstr,		NULL)
 	PHP_FE(ncurses_insstr,			NULL)
-	PHP_FE(ncurses_instr,			first_args_force_ref)
+	PHP_FE(ncurses_instr,			first_arg_force_ref)
 	PHP_FE(ncurses_mvhline,			NULL)
 	PHP_FE(ncurses_mvcur,			NULL)
 	PHP_FE(ncurses_init_color,		NULL)
@@ -165,8 +180,8 @@ function_entry ncurses_functions[] = {
 	PHP_FE(ncurses_keyok,		NULL)
 	PHP_FE(ncurses_termname,	NULL)
 	PHP_FE(ncurses_longname,	NULL)
-	PHP_FE(ncurses_mousemask,	second_args_force_ref)
-	PHP_FE(ncurses_getmouse,	first_args_force_ref)
+	PHP_FE(ncurses_mousemask,	second_arg_force_ref)
+	PHP_FE(ncurses_getmouse,	first_arg_force_ref)
 	PHP_FE(ncurses_ungetmouse,	NULL)
 	PHP_FE(ncurses_mouse_trafo,	firstandsecond_args_force_ref)
 	PHP_FE(ncurses_wmouse_trafo,	secondandthird_args_force_ref)

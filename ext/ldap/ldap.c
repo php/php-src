@@ -79,8 +79,15 @@ typedef struct {
 
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 
-static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-static unsigned char arg3to6of6_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE };
+static
+	ZEND_BEGIN_ARG_INFO(arg3to6of6_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 static int le_link, le_result, le_result_entry, le_ber_entry;
 
@@ -106,8 +113,8 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_first_entry,							NULL)
 	PHP_FE(ldap_next_entry,								NULL)
 	PHP_FE(ldap_get_entries,							NULL)
-	PHP_FE(ldap_first_attribute,	third_argument_force_ref)
-	PHP_FE(ldap_next_attribute,		third_argument_force_ref)
+	PHP_FE(ldap_first_attribute,	third_arg_force_ref)
+	PHP_FE(ldap_next_attribute,		third_arg_force_ref)
 	PHP_FE(ldap_get_attributes,							NULL)
 	PHP_FE(ldap_get_values,								NULL)
 	PHP_FE(ldap_get_values_len,							NULL)
@@ -131,13 +138,13 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_sort,									NULL)
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP
-	PHP_FE(ldap_get_option,			third_argument_force_ref)
+	PHP_FE(ldap_get_option,			third_arg_force_ref)
 	PHP_FE(ldap_set_option,								NULL)
 	PHP_FE(ldap_parse_result,			arg3to6of6_force_ref)
 	PHP_FE(ldap_first_reference,						NULL)
 	PHP_FE(ldap_next_reference,							NULL)
 #ifdef HAVE_LDAP_PARSE_REFERENCE
-	PHP_FE(ldap_parse_reference,	third_argument_force_ref)
+	PHP_FE(ldap_parse_reference,	third_arg_force_ref)
 #endif
 	PHP_FE(ldap_rename,									NULL)
 #ifdef HAVE_LDAP_START_TLS_S

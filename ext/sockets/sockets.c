@@ -96,23 +96,40 @@ static int le_iov;
 static int le_socket;
 #define le_socket_name "Socket"
 
-static unsigned char first_through_third_args_force_ref[] =
-{3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+static
+	ZEND_BEGIN_ARG_INFO(first_through_third_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
-static unsigned char second_and_third_args_force_ref[] =
-{3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
-
-static unsigned char second_arg_of_four_force_ref[] =
-{4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE};
-
-static unsigned char fourth_arg_force_ref[] =
-{4, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE};
+static
+	ZEND_BEGIN_ARG_INFO(second_and_third_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 static unsigned char second_fifth_and_sixth_args_force_ref[] =
-{6, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
+	ZEND_BEGIN_ARG_INFO(second_fifth_and_sixth_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
-static unsigned char third_through_seventh_args_force_ref[] =
-{7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+static 
+	ZEND_BEGIN_ARG_INFO(third_through_seventh_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 /* {{{ sockets_functions[]
  */
@@ -139,7 +156,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_connect,			NULL)
 	PHP_FE(socket_strerror,			NULL)
 	PHP_FE(socket_bind,				NULL)
-	PHP_FE(socket_recv,				second_arg_of_four_force_ref)
+	PHP_FE(socket_recv,				second_arg_force_ref)
 	PHP_FE(socket_send,				NULL)
 	PHP_FE(socket_recvfrom,			second_fifth_and_sixth_args_force_ref)
 	PHP_FE(socket_sendto,			NULL)

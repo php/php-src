@@ -35,8 +35,6 @@ ZEND_DECLARE_MODULE_GLOBALS(gmp)
 /* True global resources - no need for thread safety here */
 static int le_gmp;
 
-static unsigned char first_of_two_force_ref[] = { 2, BYREF_FORCE, BYREF_NONE };
-
 /* {{{ gmp_functions[]
  */
 function_entry gmp_functions[] = {
@@ -73,8 +71,8 @@ function_entry gmp_functions[] = {
 	ZEND_FE(gmp_or,	NULL)
 	ZEND_FE(gmp_com,	NULL)
 	ZEND_FE(gmp_xor,	NULL)
-	ZEND_FE(gmp_setbit,	first_of_two_force_ref)
-	ZEND_FE(gmp_clrbit,	first_of_two_force_ref)
+	ZEND_FE(gmp_setbit,	first_arg_force_ref)
+	ZEND_FE(gmp_clrbit,	first_arg_force_ref)
 	ZEND_FE(gmp_scan0, NULL)
 	ZEND_FE(gmp_scan1, NULL)
 	ZEND_FE(gmp_popcount, NULL)

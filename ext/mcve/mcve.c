@@ -39,7 +39,6 @@ static int mcve_init;  /* For Safe Memory Deallocation */
 /* }}} */
 
 /* {{{ extension definition structures */
-static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
 function_entry mcve_functions[] = {
 	PHP_FE(mcve_initengine,			NULL)

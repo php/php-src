@@ -489,7 +489,8 @@ sxe_method_get(zval *object, char *name, int len TSRMLS_DC)
 
 	f = emalloc(sizeof(zend_internal_function));
 	f->type = ZEND_OVERLOADED_FUNCTION;
-	f->arg_types = NULL;
+	f->arg_info = NULL;
+	f->num_args = 0;
 	f->scope = sxe_class_entry;
 	f->fn_flags = 0;
 	f->function_name = estrndup(name, len);
@@ -807,6 +808,7 @@ static zend_object_handlers sxe_object_handlers = {
 	sxe_object_set,
 	sxe_property_exists,
 	sxe_property_delete,
+	NULL,
 	sxe_properties_get,
 	sxe_method_get,
 	sxe_call_method,

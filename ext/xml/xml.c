@@ -100,7 +100,13 @@ void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
 /* }}} */
 
 /* {{{ extension definition structures */
-static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+static
+	ZEND_BEGIN_ARG_INFO(third_and_fourth_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 function_entry xml_functions[] = {
 	PHP_FE(xml_parser_create, NULL)

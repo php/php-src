@@ -109,14 +109,11 @@ static Yaz_Association *shared_associations;
 static int order_associations;
 static int le_link;
 
-static unsigned char third_argument_force_ref[] = {	3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-static unsigned char second_argument_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-
 function_entry yaz_functions [] = {
 	PHP_FE(yaz_connect, NULL)
 	PHP_FE(yaz_close, NULL)
 	PHP_FE(yaz_search, NULL)
-	PHP_FE(yaz_wait, second_argument_force_ref)
+	PHP_FE(yaz_wait, second_arg_force_ref)
 	PHP_FE(yaz_errno, NULL)
 	PHP_FE(yaz_error, NULL)
 	PHP_FE(yaz_addinfo, NULL)
@@ -128,10 +125,10 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_itemorder, NULL)
 	PHP_FE(yaz_es_result, NULL)
 	PHP_FE(yaz_scan, NULL)
-	PHP_FE(yaz_scan_result, second_argument_force_ref)
+	PHP_FE(yaz_scan_result, second_arg_force_ref)
 	PHP_FE(yaz_present, NULL)
 	PHP_FE(yaz_ccl_conf, NULL)
-	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
+	PHP_FE(yaz_ccl_parse, third_arg_force_ref)
 	PHP_FE(yaz_database, NULL)
 	PHP_FE(yaz_sort, NULL)
 	PHP_FE(yaz_schema, NULL)
