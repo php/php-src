@@ -160,7 +160,14 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-list
 
             case 'package-list': {
+                // $params[0] -> the PEAR package to list its contents
+                if (sizeof($params) != 1) {
+                    $failmsg = "Command package-list requires a valid PEAR package filename ".
+                               " as the first argument. Try the command \"help package-list\"";
+                    break;
+                }
                 $obj = new PEAR_Common();
+
                 if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
                     return $info;
                 }
@@ -173,9 +180,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 foreach ($list as $file => $att) {
                     if (isset($att['baseinstalldir'])) {
                         $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
-                                basename($file);
+                                $file;
                     } else {
-                        $dest = basename($file);
+                        $dest = $file;
                     }
                     switch ($att['role']) {
                         case 'test':
