@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Fixed bug #31796 (readline completion handler does not handle empty return
   values). (Ilia)
 - Fixed bug #31755 (Cannot create SOAP header in no namespace). (Dmitry)
+- Fixed bug #31754 (dbase_open() fails for mode = 1). (Mehdi, Derick)
 - Fixed bug #31747 (SOAP Digest Authentication doesn't work with 
   "HTTP/1.1 100 Continue" response). (Dmitry)
 - Fixed bug #31732 (mb_get_info() causes segfault when no parameters 

@@ -129,6 +129,11 @@ PHP_FUNCTION(dbase_open)
 	convert_to_string_ex(dbf_name);
 	convert_to_long_ex(options);
 
+	if (Z_LVAL_PP(options) == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open %s in write-only mode", Z_STRVAL_PP(dbf_name));
+		RETURN_FALSE;
+	}
+
 	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(dbf_name), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
