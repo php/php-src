@@ -24,17 +24,28 @@
 
 union _zend_function;
 
+/* The following rule applies to read_property() and read_dimension() implementations:
+   If you return a zval which is not otherwise referenced by the extension or the engine's
+   symbol table, its reference count should be 0.
+*/
 /* Used to fetch property from the object, read-only */
 typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, zend_bool silent TSRMLS_DC);
 
 /* Used to fetch dimension from the object, read-only */
 typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int type TSRMLS_DC);
 
+
+/* The following rule applies to write_property() and write_dimension() implementations:
+   If you receive a value zval in write_property/write_dimension, you may only modify it if
+   its reference count is 1.  Otherwise, you must create a copy of that zval before making
+   any changes.  You should NOT modify the reference count of the value passed to you.
+*/
 /* Used to set property of the object */
 typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value TSRMLS_DC);
 
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value TSRMLS_DC);
+
 
 /* Used to create pointer to the property of the object, for future direct r/w access */
 typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member TSRMLS_DC);
