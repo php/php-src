@@ -7,14 +7,10 @@ AC_MSG_CHECKING(for CLI build)
 AC_ARG_ENABLE(cli,
 [  --disable-cli           Disable building CLI version of PHP.],
 [
-  if test "$enable_cli" != "no"; then
-    PHP_SAPI_CLI=yes
-  else
-    PHP_SAPI_CLI=no
-  fi
-],
-[PHP_SAPI_CLI=yes]
-)
+  PHP_SAPI_CLI=$enableval
+],[
+  PHP_SAPI_CLI=yes
+])
 
 if test "$PHP_SAPI_CLI" != "no"; then
   INSTALL_CLI="\$(INSTALL) -m 0755 sapi/cli/php \$(INSTALL_ROOT)\$(bindir)/php"
