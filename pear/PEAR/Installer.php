@@ -23,6 +23,8 @@ require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
 
+// TODO: remove empty dirs after uninstall
+
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
@@ -157,6 +159,7 @@ class PEAR_Installer extends PEAR_Common
         } else {
             $dest_file = $dest_dir . DIRECTORY_SEPARATOR . $atts['install-as'];
         }
+        $dest_file = preg_replace('!//+!', '/', $dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
                 $this->log(0, "failed to mkdir $dest_dir");
@@ -303,53 +306,49 @@ class PEAR_Installer extends PEAR_Common
             $this->log(1, '...done: ' . number_format($bytes, 0, '', ',') . ' bytes');
         }
 
-        // Decompress pack in tmp dir -------------------------------------
+        if (substr($pkgfile, -4) == '.xml') {
+            $descfile = $pkgfile;
+        } else {
+            // Decompress pack in tmp dir -------------------------------------
 
-        // To allow relative package file calls
-        if (!chdir(dirname($pkgfile))) {
-            return $this->raiseError('unable to chdir to package directory');
+            // To allow relative package file calls
+            if (!chdir(dirname($pkgfile))) {
+                return $this->raiseError('unable to chdir to package directory');
+            }
+            $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
+
+            if (PEAR::isError($tmpdir = $this->mkTempDir())) {
+                chdir($oldcwd);
+                return $tmpdir;
+            }
+            $this->log(2, '+ tmp dir created at ' . $tmpdir);
+
+            $tar = new Archive_Tar($pkgfile, true);
+            if (!@$tar->extract($tmpdir)) {
+                chdir($oldcwd);
+                return $this->raiseError("unable to unpack $pkgfile");
+            }
+
+            // ----- Look for existing package file
+            $descfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
+
+            //  ==> XXX This part should be removed later on
+            $flag_old_format = false;
+            if (!is_file($descfile)) {
+                // ----- Look for old package archive format
+                // In this format the package.xml file was inside the
+                // Package-n.n directory
+                $dp = opendir($tmpdir);
+                do {
+                    $pkgdir = readdir($dp);
+                } while ($pkgdir{0} == '.');
+
+                $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+                $flag_old_format = true;
+                $this->log(0, "warning : you are using an archive with an old format");
+            }
+            // <== XXX This part should be removed later on
         }
-        $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
-
-        if (PEAR::isError($tmpdir = $this->mkTempDir())) {
-            chdir($oldcwd);
-            return $tmpdir;
-        }
-        $this->log(2, '+ tmp dir created at ' . $tmpdir);
-
-        $tar = new Archive_Tar($pkgfile, true);
-        if (!@$tar->extract($tmpdir)) {
-            chdir($oldcwd);
-            return $this->raiseError("unable to unpack $pkgfile");
-        }
-/*
-        $file = basename($pkgfile);
-        // Assume the decompressed dir name
-        if (($pos = strrpos($file, '.')) === false) {
-            chdir($oldcwd);
-            return $this->raiseError("invalid package name");
-        }
-        $pkgdir = substr($file, 0, $pos);
-*/
-
-        // ----- Look for existing package file
-        $descfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
-
-        //  ==> XXX This part should be removed later on
-        $flag_old_format = false;
-        if (!is_file($descfile)) {
-          // ----- Look for old package archive format
-          // In this format the package.xml file was inside the package directory name
-          $dp = opendir($tmpdir);
-          do {
-              $pkgdir = readdir($dp);
-          } while ($pkgdir{0} == '.');
-
-          $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
-          $flag_old_format = true;
-          $this->log(0, "warning : you are using an archive with an old format");
-        }
-        // <== XXX This part should be removed later on
 
         if (!is_file($descfile)) {
             chdir($oldcwd);
@@ -412,7 +411,10 @@ class PEAR_Installer extends PEAR_Common
             // don't want strange characters
             $pkgname    = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkginfo['package']);
             $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
-            $tmp_path = dirname($descfile) . DIRECTORY_SEPARATOR . $pkgname . '-' . $pkgversion;
+            $tmp_path = dirname($descfile);
+            if (substr($pkgfile, -4) != '.xml') {
+                $tmp_path .= DIRECTORY_SEPARATOR . $pkgname . '-' . $pkgversion;
+            }
 
             //  ==> XXX This part should be removed later on
             if ($flag_old_format) {
