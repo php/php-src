@@ -356,7 +356,6 @@ php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
 INLINE static int
 php_caudium_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-  TSRMLS_FETCH();
   struct pike_string *ind;
   struct svalue *s_headermap;
   GET_THIS();

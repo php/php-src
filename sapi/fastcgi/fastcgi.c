@@ -122,7 +122,6 @@ static int sapi_fastcgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	size_t read_bytes = 0, tmp;
 	int c;
 	char *pos = buffer;
-	TSRMLS_FETCH();
 
 	while( count_bytes ) {
 		c = FCGX_GetStr( pos, count_bytes, in );
