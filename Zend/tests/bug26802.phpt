@@ -20,4 +20,5 @@ $static_method();
 ===DONE===
 --EXPECT--
 baz
+baz
 ===DONE===
