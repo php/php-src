@@ -322,11 +322,6 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	INIT_PZVAL(method_args_ptr);
 	array_init(method_args_ptr);
 
-//	method_result_ptr = &method_result;
-//	method_result.is_ref = 0;
-//	method_result.refcount = 1;
-//	ZVAL_NULL(method_result_ptr);
-	
 	for(i=0; i<ZEND_NUM_ARGS(); i++) {
 		zval_add_ref(args[i]);
 		add_next_index_zval(method_args_ptr, *args[i]);
