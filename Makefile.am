@@ -18,7 +18,7 @@ libphp4_la_SOURCES = \
 libphp4_la_LIBADD = \
 		libzend/libzend.la \
 		sapi/$(PHP_SAPI)/libphpsapi_$(PHP_SAPI).la \
-		regex/libregex.la \
+		$(REGEX_LIB) \
 		$(EXT_LTLIBS) \
 		$(TSRM_LIB) \
 		$(EXTRA_LIBS)
@@ -28,7 +28,7 @@ libphp4_la_LDFLAGS = $(BUILDLDFLAGS) $(PHP_RPATHS)
 libphp4_la_DEPENDENCIES = \
 		libzend/libzend.la \
 		sapi/$(PHP_SAPI)/libphpsapi_$(PHP_SAPI).la \
-		regex/libregex.la \
+		$(REGEX_LIB) \
 		$(EXT_LTLIBS) \
 		$(TSRM_LIB)
 	
