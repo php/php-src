@@ -2238,7 +2238,6 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 					zend_hash_update(&CG(active_class_entry)->default_properties, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 					property->refcount++;
 					zend_hash_update(&CG(active_class_entry)->protected_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-
 				}
 				efree(prot_name);
 				break;
