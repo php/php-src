@@ -80,10 +80,10 @@ PHP_FUNCTION(time)
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **arguments[7];
-	struct tm *ta, tmbuf;
-	time_t t;
-	int i, gmadjust, seconds, arg_count = ZEND_NUM_ARGS();
-	int is_dst = -1;
+	struct tm *ta, tmbuf, *t1, *t2;
+	time_t t, seconds;
+	int i, gmadjust, arg_count = ZEND_NUM_ARGS();
+	int is_dst = -1, val, chgsecs = 0;
 
 	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -118,10 +118,10 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	** Now change date values with supplied parameters.
 	*/
 	switch(arg_count) {
-	case 7:
+	case 7: /* daylight saving time flag */
 		ta->tm_isdst = is_dst = Z_LVAL_PP(arguments[6]);
 		/* fall-through */
-	case 6:
+	case 6: /* year */
 		/* special case: 
 		   a zero in year, month and day is considered illegal
 		   as it would be interpreted as 30.11.1999 otherwise
@@ -149,29 +149,64 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			ta->tm_year = Z_LVAL_PP(arguments[5])
 			  - ((Z_LVAL_PP(arguments[5]) > 1000) ? 1900 : 0);
 		/* fall-through */
-	case 5:
-		ta->tm_mday = Z_LVAL_PP(arguments[4]);
-		/* fall-through */
-	case 4:
-		ta->tm_mon = Z_LVAL_PP(arguments[3]) - 1;
-		/* fall-through */
-	case 3:
-		ta->tm_sec = Z_LVAL_PP(arguments[2]);
-		/* fall-through */
-	case 2:
-		ta->tm_min = Z_LVAL_PP(arguments[1]);
-		/* fall-through */
-	case 1:
-		ta->tm_hour = Z_LVAL_PP(arguments[0]);
-		/* fall-through */
-	case 0:
-		break;
+	case 5: /* day in month (1-baesd) */
+ 		val = (*arguments[4])->value.lval; 
+		if (val < 1) { 
+			chgsecs += (1-val) * 60*60*24; 
+			val = 1; 			
+		} 
+		ta->tm_mday = val; 
+		/* fall-through */ 
+	case 4: /* month (zero-based) */
+		val = (*arguments[3])->value.lval - 1; 
+		while (val < 0) { 
+			val += 12; ta->tm_year--; 
+		} 
+		ta->tm_mon = val; 
+		/* fall-through */ 
+	case 3: /* second */
+		val = (*arguments[2])->value.lval; 
+		if (val < 1) { 
+			chgsecs += (1-val); val = 1; 
+		} 
+		ta->tm_sec = val; 
+		/* fall-through */ 
+	case 2: /* minute */
+		val = (*arguments[1])->value.lval; 
+		if (val < 1) { 
+			chgsecs += (1-val) * 60; val = 1; 
+		} 
+		ta->tm_min = val; 
+		/* fall-through */ 
+	case 1: /* hour */
+		val = (*arguments[0])->value.lval; 
+		if (val < 1) { 
+			chgsecs += (1-val) * 60*60; val = 1; 
+		} 
+		ta->tm_hour = val; 
+		/* fall-through */ 
+	case 0: 
+		break; 
+	} 
+	
+	t = mktime(ta); 
+	seconds = t - chgsecs;
+
+
+
+	if (is_dst == -1) {
+		struct tm t1, t2;
+		t1 = *localtime(&t);
+		t2 = *localtime(&seconds);
+
+		if(t1.tm_isdst != t2.tm_isdst) {
+			seconds += (t1.tm_isdst == 1) ? 3600 : -3600;
+			ta = localtime(&seconds);
+		}
+
+		is_dst = ta->tm_isdst; 
 	}
-
-	seconds = mktime(ta);
-	if (is_dst == -1)
-		is_dst = ta->tm_isdst;
-
+	
 	if (gm) {
 #if HAVE_TM_GMTOFF
 	    /*
