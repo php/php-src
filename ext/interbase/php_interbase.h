@@ -97,6 +97,7 @@ typedef struct {
 typedef struct {
 	isc_tr_handle trans[IBASE_TRANS_ON_LINK];
 	isc_db_handle link;
+	int dialect;
 } ibase_db_link;
 
 typedef struct {
@@ -136,9 +137,7 @@ typedef struct _php_ibase_varchar {
 	char var_str[1];
 } IBASE_VCHAR;
 
-/*
-extern ibase_module php_ibase_module;
-*/
+/* extern ibase_module php_ibase_module; */
 
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT = 0,
