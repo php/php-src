@@ -905,11 +905,8 @@ PHP_FUNCTION(ob_gzhandler)
 		|| zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE
 		|| Z_TYPE_PP(data)!=IS_ARRAY
 		|| zend_hash_find(Z_ARRVAL_PP(data), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding)==FAILURE) {
-		/* return the original string */
-		*return_value = **zv_string;
-		zval_copy_ctor(return_value);
 		ZLIBG(ob_gzhandler_status)=-1;
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(a_encoding);
 	if (php_memnstr(Z_STRVAL_PP(a_encoding), "gzip", 4, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
@@ -917,6 +914,7 @@ PHP_FUNCTION(ob_gzhandler)
 	} else if(php_memnstr(Z_STRVAL_PP(a_encoding), "deflate", 7, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
 		coding = CODING_DEFLATE;
 	} else {
+		ZLIBG(ob_gzhandler_status)=-1;
 		RETURN_FALSE;
 	}
 	
