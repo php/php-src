@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Added function entries for strip_tags() and similar_text() (Andrey)
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
   instead of a variable name (Andrey)
 - Ported strtotime() function from PHP3 (Andrey)

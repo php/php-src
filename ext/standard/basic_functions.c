@@ -112,6 +112,7 @@ function_entry basic_functions[] = {
 	{"ltrim",		php3_ltrim,					NULL},
 	{"rtrim",		php3_chop,					NULL},
 	PHP_FE(strip_tags, NULL)
+	PHP_FE(similar_text, NULL)
 	{"pos",			array_current,				first_arg_force_ref},
 
 	{"getimagesize",		php3_getimagesize,	NULL},
