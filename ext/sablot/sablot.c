@@ -209,7 +209,7 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
-static void php_sablot_init_globals(php_sablot_globals *sablot_globals)
+static void php_sablot_init_globals(zend_sablot_globals *sablot_globals TSRMLS_DC)
 {
 	sablot_globals->processor             = NULL;
 	sablot_globals->errors                = NULL;
@@ -222,7 +222,7 @@ static void php_sablot_init_globals(php_sablot_globals *sablot_globals)
 PHP_MINIT_FUNCTION(sablot)
 {
 #ifdef ZTS
-	ts_allocate_id(&sablot_globals_id, sizeof(php_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
+	ts_allocate_id(&sablot_globals_id, sizeof(zend_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
 #else
 	php_sablot_init_globals(&sablot_globals TSRMLS_CC);
 #endif
@@ -231,6 +231,7 @@ PHP_MINIT_FUNCTION(sablot)
 
     return SUCCESS;
 }
+
 
 PHP_MSHUTDOWN_FUNCTION(sablot)
 {
