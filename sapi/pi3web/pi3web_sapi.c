@@ -348,7 +348,7 @@ static void hash_pi3web_variables(ELS_D SLS_DC)
 			return;
 		}
 	}
-	variable = strtok_r(variable_buf, "\r\n", &strtok_buf);
+	variable = php_strtok_r(variable_buf, "\r\n", &strtok_buf);
 	while (variable) {
 		char *colon = strchr(variable, ':');
 
@@ -368,7 +368,7 @@ static void hash_pi3web_variables(ELS_D SLS_DC)
 			zend_hash_add(&EG(symbol_table), variable, strlen(variable)+1, &entry, sizeof(zval *), NULL);
 			*colon = ':';
 		}
-		variable = strtok_r(NULL, "\r\n", &strtok_buf);
+		variable = php_strtok_r(NULL, "\r\n", &strtok_buf);
 	}
 	if (variable_buf!=static_variable_buf) {
 		efree(variable_buf);
