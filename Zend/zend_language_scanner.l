@@ -762,10 +762,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 %option noyywrap
 %%
 
-<ST_IN_SCRIPTING>"goto" {
-	return T_GOTO;
-}
-
 <ST_IN_SCRIPTING>"exit" {
 	return T_EXIT;
 }

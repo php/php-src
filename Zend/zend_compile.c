@@ -3497,42 +3497,6 @@ void zend_do_exit(znode *result, znode *message TSRMLS_DC)
 	result->u.constant.value.lval = 1;
 }
 
-void zend_do_label(znode *label TSRMLS_DC)
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_NOP;
-	SET_UNUSED(opline->result);
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-
-	if (label->op_type == IS_CONST &&
-		label->u.constant.type == IS_STRING) {
-		if (!CG(active_op_array)->labels) {
-			CG(active_op_array)->labels = emalloc(sizeof(HashTable));
-			zend_hash_init(CG(active_op_array)->labels, 16, NULL, NULL, 0);
-		}
-		if (zend_hash_exists(CG(active_op_array)->labels, label->u.constant.value.str.val, label->u.constant.value.str.len + 1)) {
-			zend_error(E_COMPILE_ERROR, "Label cannot be redefined.");
-		} else {
-			/* Point to our newly created NOP instruction */
-			zend_hash_add(CG(active_op_array)->labels, label->u.constant.value.str.val, label->u.constant.value.str.len + 1, &opline, sizeof(zend_op*), NULL);
-		}
-		zval_dtor(&label->u.constant);
-	} else {
-		zend_error(E_COMPILE_ERROR, "Invalid label identifier, expecting T_STRING");
-	}
-}
-void zend_do_goto(znode *label TSRMLS_DC)
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_GOTO;
-	SET_UNUSED(opline->result);
-	opline->op1 = *label;
-	SET_UNUSED(opline->op2);
-}
-
 void zend_do_begin_silence(znode *strudel_token TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
