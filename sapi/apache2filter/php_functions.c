@@ -48,9 +48,9 @@ static request_rec *php_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 	return ap_sub_req_lookup_uri(Z_STRVAL_PP(p1), ctx->f->r, ctx->f->next);
 }
 
-/* {{{ proto bool apache_sub_req(string uri)
+/* {{{ proto bool virtual(string uri)
  Perform an apache sub-request */
-PHP_FUNCTION(apache_sub_req)
+PHP_FUNCTION(virtual)
 {
 	request_rec *rr;
 
@@ -110,9 +110,9 @@ PHP_FUNCTION(apache_lookup_uri)
 	RETURN_FALSE;
 }
 
-/* {{{ proto array get_all_headers(void)
+/* {{{ proto array getallheaders(void)
    Fetch all HTTP request headers */
-PHP_FUNCTION(get_all_headers)
+PHP_FUNCTION(getallheaders)
 {
 	php_struct *ctx;
 	apr_array_header_t *arr;
@@ -138,8 +138,8 @@ PHP_MINFO_FUNCTION(apache)
 
 static function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, NULL)
-	PHP_FE(apache_sub_req, NULL)
-	PHP_FE(get_all_headers, NULL)
+	PHP_FE(virtual, NULL)
+	PHP_FE(getallheaders, NULL)
 	{0}
 };
 
