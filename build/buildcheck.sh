@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.16 2002-03-04 08:28:57 sas Exp $ 
+# $Id: buildcheck.sh,v 1.17 2002-06-26 08:39:39 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -60,8 +60,9 @@ echo "buildconf: automake version $am_version (ok)"
 fi
 
 # libtool 1.4 or newer
-libtool=`which libtool`
-if test ! -f "$libtool"; then libtool=`which glibtool`; fi
+# Prefer glibtool over libtool for Mac OS X compatibility
+libtool=`which glibtool`
+if test ! -f "$libtool"; then libtool=`which libtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
