@@ -73,11 +73,13 @@ DBA_OPEN_FUNC(dbm)
 			fmode = "r";
 			break;
 		case DBA_WRITER:
-			fmode = "a+";
+			fmode = "r+b";
 			break;
 		case DBA_CREAT:
+			fmode = "a+b";
+			break;
 		case DBA_TRUNC:
-			fmode = "w+";
+			fmode = "w+b";
 			break;
 		default:
 			return FAILURE; /* not possible */
