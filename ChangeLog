@@ -1,3 +1,76 @@
+2001-11-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/php_sockets.h: Remove prototype warnings under linux.
+
+2001-11-01  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/TODO: no message
+
+2001-11-01  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c: nuke remaining warnings
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: make this function static
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c
+      ext/sockets/sockets.dsp: - convert to use new zend_parse_parameters API
+    - unify errormessages + add socket_last_error()
+    - fix linklibrary under windows
+    - some streamlining
+
+2001-11-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/limit.inc:
+    use fetchRow/fetchInto instead of the deprecated method fetchRowByLimit
+    (that was never commited) for fetching rows from a limited query
+
+    * pear/DB.php: - Added row limit support for fetchInto and fetchRow
+    - Added getRowCounter method for DB_result to get the row number
+      you are fetching in limited queries
+
+    * pear/DB/oci8.php: Added row limit support for Oracle (untested)
+
+2001-11-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_ini.c: - Applied patch by Yasuo Ohgaki <yasuo_ohgaki@yahoo.com>
+
+2001-11-01  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/bz2/bz2.c: Fix protos
+
+2001-11-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/pgsql/12limit.phpt
+      pear/DB/tests/pgsql/13limit.phpt:
+    * trying to use same number for same test
+
+2001-11-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/oci8.php:
+    support for multiple columns and lines for the emulated numRows()
+        (contributed by Paul Edmondson <paul@yospace.com>)
+
+2001-11-01  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/bz2/tests/.cvsignore
+      ext/bz2/tests/with_strings.phpt:
+    Add (only for strings now) tests for bz2.
+
+
+2001-11-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/bz2/bz2.c: - Whitespace
+
+2001-11-01  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/bz2/bz2.c: Fix infinite loop when trying to decompress empty string.
+
 2001-10-31  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/Mail/RFC822.php:
