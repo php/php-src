@@ -1122,16 +1122,13 @@ PHP_FUNCTION(odbc_cursor)
    Return information about the currently connected data source */
 PHP_FUNCTION(odbc_data_source)
 {
-	zval **zv_conn, *zv_fetch_type;
-	RETCODE rc;
+	zval **zv_fetch_type, **zv_conn;
+	RETCODE rc = 0; /* assume all is good */
 	odbc_connection *conn;
 	int num_args = ZEND_NUM_ARGS();
 	UCHAR server_name[100],
 		  desc[200];
-	/* these don't seem to have any actual use,
-	 * but they are needed to complete the call, go figure
-	 */
-	SQLSMALLINT len1, len2;
+	SQLSMALLINT len1, len2, fetch_type;
 
 	if (num_args != 2) {
 		WRONG_PARAM_COUNT;
@@ -1141,13 +1138,20 @@ PHP_FUNCTION(odbc_data_source)
 		php_error(E_WARNING, "Unable to get parameters");
 	}
 
-	convert_to_long(zv_fetch_type);
+	convert_to_long_ex(zv_fetch_type);
+	fetch_type = Z_LVAL_PP(zv_fetch_type);
+
+	if (!(fetch_type == SQL_FETCH_FIRST ||
+	      fetch_type == SQL_FETCH_NEXT)) {
+		php_error(E_WARNING, "odbc_data_source: Invalid fetch type (%d)", fetch_type);
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, zv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	/* now we have the connection lets call the DataSource object */
-	rc = SQLDataSources(&conn->henv, 
-			(SQLUSMALLINT)Z_LVAL_P(zv_fetch_type),
+	/* now we have the "connection" lets call the DataSource object */
+	rc = SQLDataSources(conn->henv, 
+			fetch_type,
 			server_name,
 			(SQLSMALLINT)sizeof(server_name),
 			&len1,
@@ -1161,11 +1165,10 @@ PHP_FUNCTION(odbc_data_source)
 		RETURN_FALSE;
 	}
 
-/*	MAKE_STD_ZVAL(return_value); */
 	array_init(return_value);
 
-	add_assoc_string(return_value, "server", server_name, 1);
-	add_assoc_string(return_value, "description", desc, 1);
+	add_assoc_stringl_ex(return_value, "server", sizeof("server"), server_name, len1, 1);
+	add_assoc_stringl_ex(return_value, "description", sizeof("description"), desc, len2, 1);
 
 }
 /* }}} */
