@@ -87,6 +87,11 @@ typedef struct {
 
 int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout);
 PHPAPI int php_connect_nonb(int sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
+
+#ifdef PHP_WIN32
+PHPAPI int php_connect_nonb_win32(SOCKET sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
+#endif
+
 void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
 int php_sockaddr_size(php_sockaddr_storage *addr);
 
