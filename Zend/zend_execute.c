@@ -3054,13 +3054,12 @@ int zend_case_handler(ZEND_OPCODE_HANDLER_ARGS)
 	int switch_expr_is_overloaded=0;
 
 	if (EX(opline)->op1.op_type==IS_VAR) {
-		if (EX_T(EX(opline)->op1.u.var).var.ptr_ptr) {
-			PZVAL_LOCK(*EX_T(EX(opline)->op1.u.var).var.ptr_ptr);
+		if (EX_T(EX(opline)->op1.u.var).var.ptr_ptr
+			|| (EX_T(EX(opline)->op1.u.var).var.ptr && EX_T(EX(opline)->op1.u.var).EA.type!=IS_STRING_OFFSET)) {
+			PZVAL_LOCK(EX_T(EX(opline)->op1.u.var).var.ptr);
 		} else {
 			switch_expr_is_overloaded = 1;
-			if (EX_T(EX(opline)->op1.u.var).EA.type==IS_STRING_OFFSET) {
-				EX_T(EX(opline)->op1.u.var).EA.data.str_offset.str->refcount++;
-			}
+			EX_T(EX(opline)->op1.u.var).EA.data.str_offset.str->refcount++;
 		}
 	}
 	is_equal_function(&EX_T(EX(opline)->result.u.var).tmp_var, 
