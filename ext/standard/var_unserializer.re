@@ -54,9 +54,9 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
-static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
+static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = var_hashx->first, *prev = NULL;
+	var_entries *var_hash = var_hashx->first_dtor, *prev = NULL;
 
 	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		prev = var_hash;
@@ -68,12 +68,13 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!var_hashx->first)
-			var_hashx->first = var_hash;
+		if (!var_hashx->first_dtor)
+			var_hashx->first_dtor = var_hash;
 		else
 			prev->next = var_hash;
 	}
 
+	(*rval)->refcount++;
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
