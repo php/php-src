@@ -59,8 +59,12 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_end_cdata,			NULL)
 	PHP_FE(xmlwriter_write_cdata,		NULL)
 	PHP_FE(xmlwriter_text,				NULL)
+#ifdef HAVE_XMLTEXTWRITERSTARTCOMMENT 
 	PHP_FE(xmlwriter_start_document,	NULL)
+#endif
+#ifdef HAVE_XMLTEXTWRITERENDCOMMENT 
 	PHP_FE(xmlwriter_end_document,		NULL)
+#endif
 	PHP_FE(xmlwriter_write_comment,		NULL)
 	PHP_FE(xmlwriter_start_dtd,			NULL)
 	PHP_FE(xmlwriter_end_dtd,			NULL)
@@ -770,6 +774,7 @@ PHP_FUNCTION(xmlwriter_text)
 }
 /* }}} */
 
+#ifdef HAVE_XMLTEXTWRITERSTARTCOMMENT 
 /* {{{ proto bool xmlwriter_start_comment(resource xmlwriter)
 Create start comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_comment)
@@ -796,7 +801,9 @@ PHP_FUNCTION(xmlwriter_start_comment)
 	RETURN_FALSE;
 }
 /* }}} */
+#endif /* HAVE_XMLTEXTWRITERSTARTCOMMENT */
 
+#ifdef HAVE_XMLTEXTWRITERENDCOMMENT 
 /* {{{ proto bool xmlwriter_end_comment(resource xmlwriter)
 Create end comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_comment)
@@ -823,6 +830,7 @@ PHP_FUNCTION(xmlwriter_end_comment)
 	RETURN_FALSE;
 }
 /* }}} */
+#endif /* HAVE_XMLTEXTWRITERENDCOMMENT */
 
 /* {{{ proto bool xmlwriter_write_comment(resource xmlwriter, string content)
 Write full comment tag - returns FALSE on error */
