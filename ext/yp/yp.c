@@ -302,7 +302,7 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 				add_assoc_stringl_ex((zval *) indata, key, inkeylen+1, inval, invallen, 1);
 				efree(key);
 			} else {
-				php_error(E_WARNING, "Can't allocate %d bytes for key buffer in yp_cat()"), inkeylen+1;
+				php_error(E_WARNING, "Can't allocate %d bytes for key buffer in yp_cat()", inkeylen+1);
 			}
 		}
 
