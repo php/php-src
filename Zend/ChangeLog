@@ -1,3 +1,9 @@
+2002-05-20  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.h
+      zend_execute.h
+      zend_list.h: MFZE1 (Expose more C++ APIs)
+
 2002-05-14  Andi Gutmans  <andi@zend.com>
 
     * zend_objects.c
