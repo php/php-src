@@ -1,3 +1,13 @@
+2003-01-28  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix a ticks related crash
+
+    * (PHP_5_0_dev_before_13561_fix)
+      zend_execute.c:
+      Allow methods in parent classes to call protected methods in derived
+      classes
+
 2003-01-27  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c
