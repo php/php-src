@@ -23,7 +23,13 @@
 #ifndef PHP_DOM_H
 #define PHP_DOM_H
 
-#if HAVE_DOM
+extern zend_module_entry dom_module_entry;
+#define dom_module_ptr &dom_module_entry
+
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -49,15 +55,12 @@
    Can be checked with phpversion("dom");
 */
 #define DOM_API_VERSION "20030413"
-        
-extern zend_module_entry dom_module_entry;
-
-#define dom_module_ptr &dom_module_entry
 
 #include "dom_fe.h"
 
 void php_dom_set_object(dom_object *wrapper, void *obj TSRMLS_DC);
 dom_object *dom_object_get_data(xmlNodePtr obj);
+zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
 void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC);
 void node_free_resource(xmlNodePtr node TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
@@ -72,19 +75,31 @@ void php_dom_create_implementation(zval **retval  TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
 
+#define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
+INIT_CLASS_ENTRY(ce, name, funcs); \
+ce.create_object = dom_objects_new; \
+entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+
+#define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	if (!(__ptr = (__prtype)__intern->ptr)) { \
+  		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  		RETURN_NULL();\
+  	} \
+}
+
 #define DOM_NO_ARGS() \
 	if (ZEND_NUM_ARGS() != 0) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expects exactly 0 parameters, %d given", ZEND_NUM_ARGS()); \
 		return; \
 	}
 
+#define DOM_NOT_IMPLEMENTED() \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented"); \
+	return;
+
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);
 PHP_MINFO_FUNCTION(dom);
-#else
-#define dom_module_ptr NULL
-
-#endif /* HAVE_DOM */
-#define phpext_dom_ptr dom_module_ptr
 
 #endif /* _PHP_DIR_H */
