@@ -23,7 +23,9 @@
 
 #if HAVE_DOMXML
 #include <libxml/parser.h>
+#if defined(LIBXML_XPATH_ENABLED)
 #include <libxml/xpath.h>
+#endif
 #if defined(LIBXML_XPTR_ENABLED)
 #include <libxml/xpointer.h>
 #endif
@@ -60,10 +62,12 @@ PHP_FUNCTION(domxml_set_content);
 PHP_FUNCTION(domxml_attrname);
 
 /* Class XPathContext methods */
+#if defined(LIBXML_XPATH_ENABLED)
 PHP_FUNCTION(xpath_init);
 PHP_FUNCTION(xpath_new_context);
 PHP_FUNCTION(xpath_eval);
 PHP_FUNCTION(xpath_eval_expression);
+#endif
 #if defined(LIBXML_XPTR_ENABLED)
 PHP_FUNCTION(xptr_new_context);
 PHP_FUNCTION(xptr_eval);
