@@ -1071,7 +1071,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
      	compare_func(&res, *value, *entry TSRMLS_CC);
-		if (Z_LVAL(res) == 1) {
+		if (Z_LVAL(res)) {
 			if (behavior==0) {	     
 				RETURN_TRUE;
 			} else {
@@ -1090,11 +1090,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
    
-	if (behavior == 0) {
-		RETURN_FALSE;
-	} else { 
-		return;
-	}
+	RETURN_FALSE;
 }
 
 
