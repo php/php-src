@@ -18,8 +18,6 @@
 
 #include "php.h"
 
-#ifdef TRANS_SID
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -422,5 +420,3 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 	free(BG(url_adapt_state_ex).tags);
 	return SUCCESS;
 }
-
-#endif
