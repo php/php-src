@@ -930,6 +930,69 @@ SXE_METHOD(to_xml_file)
 }
 /* }}} */
 
+/* {{{ simplexml_count()
+ */
+SXE_METHOD(count)
+{
+	char       *name;
+	int         name_len;
+	HashTable  *subnodes;
+	zval      **data_ptr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		return;
+	}
+	subnodes = sxe_properties_get(getThis() TSRMLS_CC);
+	if (zend_hash_find(subnodes, name, name_len+1, (void **) &data_ptr) == SUCCESS) {
+		if (Z_TYPE_PP(data_ptr) == IS_ARRAY) {
+		  RETURN_LONG(zend_hash_num_elements(Z_ARRVAL_PP(data_ptr)));
+		} else {
+			RETURN_LONG(1);
+		}
+	} else {
+		RETURN_LONG(0);
+	}
+}
+/* }}} */
+
+/* {{{ simplexml_attributes()
+ */
+SXE_METHOD(attributes)
+{
+	php_sxe_object *sxe;
+	xmlNodePtr      node;
+	xmlAttrPtr      attr;
+	zval           *value = NULL;
+	char           *contents;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		RETURN_FALSE;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	GET_NODE(sxe, node);
+
+	array_init(return_value);
+	if (node) {
+		attr = node->properties;
+		while (attr) {
+			if (attr->name) {
+				MAKE_STD_ZVAL(value);
+				contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
+				ZVAL_STRING(value, contents, 1);
+				if (contents) {
+					xmlFree(contents);
+				}
+				add_assoc_zval_ex(return_value,
+					(char*)attr->name,
+					xmlStrlen(attr->name) + 1, value);
+			}
+			attr = attr->next;
+		}
+	}
+}
+/* }}} */
+
 /* {{{ cast_object()
  */
 static int
@@ -1536,6 +1599,8 @@ static zend_function_entry sxe_functions[] = {
 	SXE_ME(next,                   NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(hasChildren,            NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(getChildren,            NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(count,                  NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
