@@ -114,10 +114,8 @@ PHP_FUNCTION(pg_trace);
 PHP_FUNCTION(pg_untrace);
 
 /* utility functions */
-#if HAVE_PQCLIENTENCODING
 PHP_FUNCTION(pg_client_encoding);
 PHP_FUNCTION(pg_set_client_encoding);
-#endif
 #if HAVE_PQESCAPE
 PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
