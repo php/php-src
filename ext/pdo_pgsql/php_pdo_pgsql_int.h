@@ -42,7 +42,10 @@ typedef struct {
 } pdo_pgsql_db_handle;
 
 typedef struct {
-	char		*def;
+	char         *def;
+	Oid          pgsql_type;
+	long         intval;
+	zend_bool    boolval;
 } pdo_pgsql_column;
 
 typedef struct {
