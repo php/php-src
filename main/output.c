@@ -48,10 +48,6 @@ static void php_output_init_globals(OLS_D)
 {
  	OG(php_body_write) = NULL;
 	OG(php_header_write) = NULL;
-	OG(ob_buffer) = NULL;
-	OG(ob_size) = 0;
-	OG(ob_block_size) = 0;
-	OG(ob_text_length) = 0;
 	OG(implicit_flush) = 0;
 	OG(output_start_filename) = NULL;
 	OG(output_start_lineno) = 0;
@@ -74,9 +70,9 @@ PHPAPI void php_output_startup()
 {
 	OLS_FETCH();
 
-	OG(ob_buffer) = NULL;
 	OG(php_body_write) = php_ub_body_write;
 	OG(php_header_write) = sapi_module.ub_write;
+	OG(nesting_level) = 0;
 }
 
 PHPAPI int php_body_write(const char *str, uint str_length)
@@ -92,7 +88,7 @@ PHPAPI int php_header_write(const char *str, uint str_length)
 }
 
 /* Start output buffering */
-PHPAPI void php_start_ob_buffering()
+PHPAPI void php_start_ob_buffer()
 {
 	OLS_FETCH();
 
@@ -101,24 +97,41 @@ PHPAPI void php_start_ob_buffering()
 }
 
 
-/* End output buffering */
-PHPAPI void php_end_ob_buffering(int send_buffer)
+/* End output buffering (one level) */
+PHPAPI void php_end_ob_buffer(int send_buffer)
 {
 	SLS_FETCH();
 	OLS_FETCH();
 
-	if (!OG(ob_buffer)) {
+	if (OG(nesting_level)==0) {
 		return;
 	}
-	if (SG(headers_sent) && !SG(request_info).headers_only) {
-		OG(php_body_write) = php_ub_body_write_no_header;
-	} else {
-		OG(php_body_write) = php_ub_body_write;
-	}
-	if (send_buffer) {
-		php_ob_send();
+	if (OG(nesting_level)==1) { /* end buffering */
+		if (SG(headers_sent) && !SG(request_info).headers_only) {
+			OG(php_body_write) = php_ub_body_write_no_header;
+		} else {
+			OG(php_body_write) = php_ub_body_write;
+		}
+		if (send_buffer) {
+			php_ob_send();
+		}
+	} else { /* only flush the buffer, if necessary */
+		if (send_buffer) {
+			OG(php_body_write)(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
+		}
 	}
 	php_ob_destroy();
+}
+
+
+/* End output buffering (all buffers) */
+PHPAPI void php_end_ob_buffers(int send_buffer)
+{
+	OLS_FETCH();
+
+	while (OG(nesting_level)!=0) {
+		php_end_ob_buffer(send_buffer);
+	}
 }
 
 
@@ -126,7 +139,7 @@ PHPAPI void php_start_implicit_flush()
 {
 	OLS_FETCH();
 
-	php_end_ob_buffering(1);		/* Switch out of output buffering if we're in it */
+	php_end_ob_buffer(1);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
 }
 
@@ -147,11 +160,12 @@ static inline void php_ob_allocate(void)
 {
 	OLS_FETCH();
 
-	if (OG(ob_size)<OG(ob_text_length)) {
-		while (OG(ob_size) <= OG(ob_text_length))
-			OG(ob_size)+=OG(ob_block_size);
+	if (OG(active_ob_buffer).size<OG(active_ob_buffer).text_length) {
+		while (OG(active_ob_buffer).size <= OG(active_ob_buffer).text_length) {
+			OG(active_ob_buffer).size+=OG(active_ob_buffer).block_size;
+		}
 			
-		OG(ob_buffer) = (char *) erealloc(OG(ob_buffer), OG(ob_size)+1);
+		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, OG(active_ob_buffer).size+1);
 	}
 }
 
@@ -160,13 +174,17 @@ static void php_ob_init(uint initial_size, uint block_size)
 {
 	OLS_FETCH();
 
-	if (OG(ob_buffer)) {
-		return;
+	if (OG(nesting_level)>0) {
+		if (OG(nesting_level)==1) { /* initialize stack */
+			zend_stack_init(&OG(ob_buffers));
+		}
+		zend_stack_push(&OG(ob_buffers), &OG(active_ob_buffer), sizeof(php_ob_buffer));
 	}
-	OG(ob_block_size) = block_size;
-	OG(ob_size) = initial_size;
-	OG(ob_buffer) = (char *) emalloc(initial_size+1);
-	OG(ob_text_length) = 0;
+	OG(nesting_level)++;
+	OG(active_ob_buffer).block_size = block_size;
+	OG(active_ob_buffer).size = initial_size;
+	OG(active_ob_buffer).buffer = (char *) emalloc(initial_size+1);
+	OG(active_ob_buffer).text_length = 0;
 }
 
 
@@ -174,10 +192,20 @@ static void php_ob_destroy()
 {
 	OLS_FETCH();
 
-	if (OG(ob_buffer)) {
-		efree(OG(ob_buffer));
-		OG(ob_buffer) = NULL;
+	if (OG(nesting_level)>0) {
+		efree(OG(active_ob_buffer).buffer);
+		if (OG(nesting_level)>1) { /* restore previous buffer */
+			php_ob_buffer *ob_buffer_p;
+
+			zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
+			OG(active_ob_buffer) = *ob_buffer_p;
+			zend_stack_del_top(&OG(ob_buffers));
+			if (OG(nesting_level)==2) { /* destroy the stack */
+				zend_stack_destroy(&OG(ob_buffers));
+			}
+		} 
 	}
+	OG(nesting_level)--;
 }
 
 
@@ -187,11 +215,11 @@ static void php_ob_append(const char *text, uint text_length)
 	int original_ob_text_length;
 	OLS_FETCH();
 
-	original_ob_text_length=OG(ob_text_length);
+	original_ob_text_length=OG(active_ob_buffer).text_length;
 
-	OG(ob_text_length) += text_length;
+	OG(active_ob_buffer).text_length += text_length;
 	php_ob_allocate();
-	target = OG(ob_buffer)+original_ob_text_length;
+	target = OG(active_ob_buffer).buffer+original_ob_text_length;
 	memcpy(target, text, text_length);
 	target[text_length]=0;
 }
@@ -202,7 +230,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 	char *p, *start;
 	OLS_FETCH();
 
-	OG(ob_text_length) += text_length;
+	OG(active_ob_buffer).text_length += text_length;
 	php_ob_allocate();
 
 	/* php_ob_allocate() may change OG(ob_buffer), so we can't initialize p&start earlier */
@@ -213,7 +241,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 		p[text_length] = *p;
 	}
 	memcpy(OG(ob_buffer), text, text_length);
-	OG(ob_buffer)[OG(ob_text_length)]=0;
+	OG(ob_buffer)[OG(active_ob_buffer).text_length]=0;
 }
 #endif
 
@@ -222,7 +250,7 @@ static inline void php_ob_send()
 	OLS_FETCH();
 
 	/* header_write is a simple, unbuffered output function */
-	OG(php_body_write)(OG(ob_buffer), OG(ob_text_length));
+	OG(php_body_write)(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
 }
 
 
@@ -231,12 +259,12 @@ int php_ob_get_buffer(pval *p)
 {
 	OLS_FETCH();
 
-	if (!OG(ob_buffer)) {
+	if (OG(nesting_level)==0) {
 		return FAILURE;
 	}
 	p->type = IS_STRING;
-	p->value.str.val = estrndup(OG(ob_buffer), OG(ob_text_length));
-	p->value.str.len = OG(ob_text_length);
+	p->value.str.val = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
+	p->value.str.len = OG(active_ob_buffer).text_length;
 	return SUCCESS;
 }
 
@@ -321,7 +349,7 @@ static int php_ub_body_write(const char *str, uint str_length)
    Turn on Output Buffering */
 PHP_FUNCTION(ob_start)
 {
-	php_start_ob_buffering();
+	php_start_ob_buffer();
 }
 /* }}} */
 
@@ -330,7 +358,7 @@ PHP_FUNCTION(ob_start)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
-	php_end_ob_buffering(1);
+	php_end_ob_buffer(1);
 }
 /* }}} */
 
@@ -339,7 +367,7 @@ PHP_FUNCTION(ob_end_flush)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
-	php_end_ob_buffering(0);
+	php_end_ob_buffer(0);
 }
 /* }}} */
 
