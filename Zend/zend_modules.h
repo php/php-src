@@ -36,8 +36,9 @@ extern unsigned char second_arg_force_ref[];
 extern unsigned char second_arg_allow_ref[];
 
 #include "zend.h"
+#include "../TSRM/TSRM.h"
 
-#define ZEND_MODULE_API_NO 20000313
+#define ZEND_MODULE_API_NO 20000401
 
 #ifdef ZTS
 #define USING_ZTS 1
@@ -45,7 +46,7 @@ extern unsigned char second_arg_allow_ref[];
 #define USING_ZTS 0
 #endif
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_DEBUG, USING_ZTS, ZEND_MODULE_API_NO
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0, ZEND_DEBUG, USING_ZTS, ZEND_MODULE_API_NO
 
 #define STANDARD_MODULE_PROPERTIES \
 	NULL, NULL, STANDARD_MODULE_PROPERTIES_EX
@@ -65,6 +66,7 @@ struct _zend_module_entry {
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	int (*global_startup_func)(void);
 	int (*global_shutdown_func)(void);
+	ts_rsrc_id globals_id;
 	int module_started;
 	unsigned char type;
 	void *handle;
