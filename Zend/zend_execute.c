@@ -186,12 +186,9 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 				zend_error(E_NOTICE,"Undefined property:  %s", prop_ptr->value.str.val);
 				/* break missing intentionally */
 			case BP_VAR_W: {
-					zval *new_zval = (zval *) emalloc(sizeof(zval));
+					zval *new_zval = &EG(uninitialized_zval);
 
-					var_uninit(new_zval);
-					new_zval->refcount=1;
-					new_zval->is_ref=0;
-					//zend_hash_update(ht, prop_ptr->value.str.val, prop_ptr->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
+					new_zval->refcount++;
 					zend_hash_update_ptr(ht, prop_ptr->value.str.val, prop_ptr->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
@@ -405,11 +402,9 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 				zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
 				/* break missing intentionally */
 			case BP_VAR_W: {
-					zval *new_zval = (zval *) emalloc(sizeof(zval));
+					zval *new_zval = &EG(uninitialized_zval);
 
-					var_uninit(new_zval);
-					new_zval->refcount=1;
-					new_zval->is_ref=0;
+					new_zval->refcount++;
 					//zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
 					zend_hash_update_ptr(target_symbol_table, varname->value.str.val, varname->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 				}
@@ -450,12 +445,9 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 							zend_error(E_NOTICE,"Undefined index:  %s", dim->value.str.val);
 							/* break missing intentionally */
 						case BP_VAR_W: {
-								zval *new_zval = (zval *) emalloc(sizeof(zval));
+								zval *new_zval = &EG(uninitialized_zval);
 
-								var_uninit(new_zval);
-								new_zval->refcount=1;
-								new_zval->is_ref=0;
-								//zend_hash_update(ht, dim->value.str.val, dim->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
+								new_zval->refcount++;
 								zend_hash_update_ptr(ht, dim->value.str.val, dim->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 							}
 							break;
@@ -476,11 +468,9 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 							zend_error(E_NOTICE,"Undefined offset:  %d", dim->value.lval);
 							/* break missing intentionally */
 						case BP_VAR_W: {
-								zval *new_zval = (zval *) emalloc(sizeof(zval));
+								zval *new_zval = &EG(uninitialized_zval);
 
-								var_uninit(new_zval);
-								new_zval->refcount=1;
-								new_zval->is_ref=0;
+								new_zval->refcount++;
 								zend_hash_index_update(ht, dim->value.lval, &new_zval, sizeof(zval *), (void **) &retval);
 							}
 							break;
@@ -584,11 +574,9 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				zendi_zval_copy_ctor(*container);
 			}
 			if (op2->op_type == IS_UNUSED) {
-				zval *new_zval = (zval *) emalloc(sizeof(zval));
+				zval *new_zval = &EG(uninitialized_zval);
 
-				var_uninit(new_zval);
-				new_zval->refcount = 1;
-				new_zval->is_ref = 0;
+				new_zval->refcount++;
 				zend_hash_next_index_insert_ptr(container->value.ht, new_zval, sizeof(zval *), (void **) retval);
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
