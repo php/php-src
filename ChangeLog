@@ -1,3 +1,209 @@
+2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities2.phpt
+      ext/standard/tests/strings/htmlentities3.phpt
+      ext/standard/tests/strings/htmlentities4.phpt
+      ext/standard/tests/strings/htmlentities5.phpt
+      ext/standard/tests/strings/htmlentities6.phpt
+      ext/standard/tests/strings/htmlentities7.phpt
+      ext/standard/tests/strings/htmlentities8.phpt
+      ext/standard/tests/strings/htmlentities9.phpt
+      ext/standard/tests/strings/htmlentities01.phpt
+      ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities05.phpt
+      ext/standard/tests/strings/htmlentities06.phpt
+      ext/standard/tests/strings/htmlentities07.phpt
+      ext/standard/tests/strings/htmlentities08.phpt
+      ext/standard/tests/strings/htmlentities09.phpt
+      ext/standard/tests/strings/htmlentities1.phpt: Renamed test cases
+
+    * ext/mbstring/tests/bug20087.phpt: Added a test case for bug #20087
+
+2002-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+    This is needed for BSD (FreeBSD, BSDi and possibly others), problem
+    was indentified by Melvyn Sopacua.
+
+    * ext/standard/basic_functions.c: Cleanup (make sterling happy).
+
+2002-10-25  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+    - Add XSLT_REG_ERRMSG macro to register an error on the handle
+    - Rename constants to a bit more appropreate format
+    - Add XSLT_ERR_UNSUPPORTED_SCHEME to be returned for scheme handlers.
+
+
+    * ext/xslt/tests/bug17791.phpt
+      ext/xslt/tests/bug17931.phpt
+      ext/xslt/tests/skipif.inc
+      ext/xslt/tests/xslt-001.phpt
+      ext/xslt/tests/xslt.phpt
+      ext/xslt/tests/xslt_process-001.phpt
+      ext/xslt/tests/xslt_process-002.phpt
+      ext/xslt/tests/xslt_set_object.phpt
+      ext/xslt/tests/xslt_set_scheme_handlers-001.phpt
+      ext/xslt/tests/xslt_setopt.phpt: Tests renamed
+    Remove dl() from skipif, for potential problems accross platforms and
+    versions.
+
+    * ext/xslt/tests/001.phpt
+      ext/xslt/tests/002.phpt
+      ext/xslt/tests/003.phpt
+      ext/xslt/tests/004.phpt
+      ext/xslt/tests/005.phpt
+      ext/xslt/tests/006.phpt
+      ext/xslt/tests/007.phpt
+      ext/xslt/tests/008.phpt
+      ext/xslt/tests/009.phpt: test renaming
+
+2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: Additional fix for #20087
+
+2002-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * README.TESTING: Added note about error reporting in tests.
+
+    * ext/session/tests/008-php4.2.3.phpt:
+    Fixed a bug in the test that would cause it to always fail.
+
+2002-10-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mbstring/mbstring.c:
+    - Fixed bug #20087 (Assertion failure when the value was empty)
+
+2002-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+    The log_errors=1 breaks a number of tests and is useless for our purposes,
+    removing.
+
+2002-10-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c: - Fix build
+
+2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities5.phpt
+      ext/standard/tests/strings/htmlentities6.phpt
+      ext/standard/tests/strings/htmlentities7.phpt
+      ext/standard/tests/strings/htmlentities8.phpt
+      ext/standard/tests/strings/htmlentities9.phpt:
+    Updated the test cases for htmlentities()
+
+    * ext/standard/html.c:
+    Fix build if mbstring is enabled as shared extension.
+
+2002-10-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/iconv/iconv.c: fix ZTS build
+
+2002-10-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/tests/bug8040.phpt
+      ext/mcrypt/tests/001.phpt: - Naming style
+
+2002-10-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.TESTING: update
+
+    * ext/exif/tests/exif005.phpt: README.TESTING examples
+
+    * ext/dba/tests/001.phpt
+      ext/dba/tests/002.phpt
+      ext/dba/tests/003.phpt
+      ext/dba/tests/004.phpt
+      ext/dba/tests/005.phpt
+      ext/dba/tests/006.phpt
+      ext/dba/tests/007.phpt
+      ext/dba/tests/dba001.phpt
+      ext/dba/tests/dba002.phpt
+      ext/dba/tests/dba003.phpt
+      ext/dba/tests/dba004.phpt
+      ext/dba/tests/dba005.phpt
+      ext/dba/tests/dba006.phpt
+      ext/dba/tests/dba007.phpt
+      ext/exif/tests/001.phpt
+      ext/exif/tests/002.phpt
+      ext/exif/tests/003.phpt
+      ext/exif/tests/004.phpt
+      ext/exif/tests/005.phpt
+      ext/exif/tests/exif001.phpt
+      ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt: New naming scheme
+
+    * ext/standard/tests/strings/003.phpt
+      ext/standard/tests/strings/str_shuffle.phpt
+      ext/standard/tests/strings/strtr.phpt: README.TESTING examples
+
+    * ext/standard/tests/strings/strtr.phpt: remove unnecessary sections
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h
+      ext/dba/tests/.cvsignore
+      ext/dba/tests/007.phpt:
+    Implemented dba_list() that returns an array rsrcid=>filename and a test.
+
+    * ext/dba/tests/.cvsignore
+      ext/dba/tests/001.phpt
+      ext/dba/tests/002.phpt
+      ext/dba/tests/003.phpt
+      ext/dba/tests/004.phpt
+      ext/dba/tests/005.phpt
+      ext/dba/tests/006.phpt
+      ext/dba/tests/skipif.inc
+      ext/dba/tests/test.inc: Added some tests for dba extension
+
+2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+    Fixed null value check in php_mb_mbchar_bytes_ex() as it should be
+
+2002-10-25  Jan Lehnardt  <jan@dasmoped.net>
+
+    * sapi/cli/php_cli.c:  - alphabetical output for php -h (cli)
+
+    * sapi/cgi/cgi_main.c:  - alphabetcial output for php -h (cgi)
+     - cosmetics
+
+2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+    Added two new rows to MINFO that describes iconv library info.
+
+    * ext/mbstring/mbstring.c: Adjusted MINFO table style
+
+2002-10-25  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: style
+
+2002-10-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    thttpd initializes contentlength to -1, so we need to transfer that to 0
+    for SAPI/PHP.  Otherwise, SAPI will try to read (unsigned long) -1 bytes
+    from the connection.
+
+2002-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c:
+    Added a mechanism allowing the disabling of the ability to change
+    certain INI options when safe_mode is enabled.
+
+    ATM three options are limited:
+    max_execution_time
+    memory_limit
+    child_terminate
+
+    This patch also fixes bug #17287.
+
 2002-10-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/tests/strings/htmlentities10.phpt
