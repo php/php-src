@@ -76,10 +76,10 @@ AC_SUBST(ZEND_SCANNER)
 AC_DEFUN(LIBZEND_ENABLE_DEBUG,[
 
 AC_ARG_ENABLE(debug,
-[  --disable-debug         Compile without debugging symbols],[
+[  --enable-debug         Compile with debugging symbols],[
   ZEND_DEBUG=$enableval
 ],[
-  ZEND_DEBUG=yes
+  ZEND_DEBUG=no
 ])  
 
 ])
