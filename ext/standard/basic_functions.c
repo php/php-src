@@ -1523,9 +1523,6 @@ PHP_FUNCTION(getopt)
 	/* Disable getopt()'s error messages. */
 	opterr = 0;
 
-	/* reset option parser position */
-	optind = 0;
-
 	/* Invoke getopt(3) on the argument array. */
 #ifdef HARTMUT_0
 	while ((o = getopt_long(argc, argv, options, longopts, &longindex)) != -1) {
