@@ -391,7 +391,7 @@ PHP_MINFO_FUNCTION(mcrypt)
 	php_info_print_table_row(2, "version", "2.2.x");
 #endif
 #if HAVE_LIBMCRYPT24
-	php_info_print_table_row(2, "version", "2.4.x");
+	php_info_print_table_row(2, "version", ">= 2.4.x");
 	php_info_print_table_row(2, "Supported ciphers", tmp1.c);
 	php_info_print_table_row(2, "Supported modes", tmp2.c);
 	smart_str_free (&tmp1);
