@@ -2965,7 +2965,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = Z_STRVAL_PP(argv[4]);
 	}
 
-	if (!err && php_mail(to, subject, message, headers, extra_cmd)) {
+	if (!err && php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
