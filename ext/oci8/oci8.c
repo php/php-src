@@ -1670,7 +1670,14 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 				case SQLT_BIN:
 				default:
 					define_type = SQLT_CHR;
-					if ((outcol->data_type == SQLT_DAT) || (outcol->data_type == SQLT_NUM)) {
+					if ((outcol->data_type == SQLT_DAT) || (outcol->data_type == SQLT_NUM)
+#ifdef SQLT_TIMESTAMP
+						|| (outcol->data_type == SQLT_TIMESTAMP)
+#endif
+#ifdef SQLT_TIMESTAMP_TZ
+						|| (outcol->data_type == SQLT_TIMESTAMP_TZ)
+#endif
+					   ) {
 						outcol->storage_size4 = 512; /* XXX this should fit "most" NLS date-formats and Numbers */
 					} else {
 						outcol->storage_size4++; /* add one for string terminator */
@@ -3735,6 +3742,16 @@ PHP_FUNCTION(ocicolumntype)
 		RETURN_FALSE;
 	}
 	switch (outcol->data_type) {
+#ifdef SQLT_TIMESTAMP
+		case SQLT_TIMESTAMP:
+			RETVAL_STRING("TIMESTAMP",1);
+			break;
+#endif
+#ifdef SQLT_TIMESTAMP_TZ
+		case SQLT_TIMESTAMP_TZ:
+			RETVAL_STRING("TIMESTAMP_TZ",1);
+			break;
+#endif
 		case SQLT_DAT:
 			RETVAL_STRING("DATE",1);
 			break;
