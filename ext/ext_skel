@@ -144,6 +144,7 @@ cat >Makefile.in <<eof
 LTLIBRARY_NAME        = lib$extname.la
 LTLIBRARY_SOURCES     = $extname.c
 LTLIBRARY_SHARED_NAME = $extname.la
+LTLIBRARY_SHARED_LIBADD  = \$(${EXTNAME}_SHARED_LIBADD)
 
 include \$(top_srcdir)/build/dynlib.mk
 eof
