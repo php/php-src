@@ -1,3 +1,11 @@
+2002-05-07  Andi Gutmans  <andi@zend.com>
+
+    * zend.c
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_execute.c:
+    - More debug backtrace work. It still doesn't work very well...
+
 2002-05-02  Andi Gutmans  <andi@zend.com>
 
     * zend.h

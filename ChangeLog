@@ -1,3 +1,30 @@
+2002-05-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php.h:
+    Due to the thread-safety changes and lots of other stuff, the
+    current tree is not backwards compatible anymore.  Bump API no.
+
+2002-05-07  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: MFH BSD fix
+
+    * ext/sockets/sockets.c: Fix 10830, and 17074
+    FreeBSD requires the exact length of the socket type
+
+2002-05-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/spprintf.c: Fixing win32 build.
+
+2002-05-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/snprintf.c
+      main/snprintf.h: use thread-safe functions unconditionally
+
+    * main/snprintf.c
+      main/snprintf.h:
+    Add thread-safety to some conversion functions and sync a bit with
+    APR.
+
 2002-05-06  Jason Greene  <jason@inetgurus.net>
 
     * ext/pcntl/pcntl.c: MFH
