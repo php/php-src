@@ -972,9 +972,15 @@ PHP_FUNCTION(msession_plugin)
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK && g_reqb->req.len)
+	{
 		retval = safe_estrdup(g_reqb->req.datum);
-
-	RETURN_STRING(retval, 0)
+		RETURN_STRING(retval, 0)
+	}
+	else
+	{
+		RETURN_FALSE;
+		
+	}
 }
 
 PS_OPEN_FUNC(msession)
