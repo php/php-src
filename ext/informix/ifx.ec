@@ -284,6 +284,7 @@ static void _close_ifx_link(link)
     IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
+    EXEC SQL close database;
     EXEC SQL DISCONNECT CURRENT;
     efree(link);
     IFXG(num_links)--;
@@ -298,6 +299,7 @@ EXEC SQL END DECLARE SECTION;
     IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
+    EXEC SQL close database;
     EXEC SQL DISCONNECT CURRENT;
 
     free(link);
@@ -723,7 +725,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
              WITH CONCURRENT TRANSACTION;  
         if (ifx_check() == IFX_ERROR) {
             IFXG(sv_sqlcode) = SQLCODE;
-            php_error(E_WARNING,"ifx_pconnect : %s", ifx_error(ifx));
+            php_error(E_WARNING,"ifx_connect : %s", ifx_error(ifx));
             efree(hashed_details);
             efree(ifx);
             RETURN_FALSE;
@@ -820,9 +822,9 @@ EXEC SQL END DECLARE SECTION;
 
     ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "IFX link", IFXL(le_link), IFXL(le_plink));
     
-    EXEC SQL SET CONNECTION :ifx;
-    EXEC SQL close database;
-    EXEC SQL DISCONNECT CURRENT;    
+    /* EXEC SQL SET CONNECTION :ifx; */
+    /* EXEC SQL close database;      */
+    /* EXEC SQL DISCONNECT CURRENT;  */    
 
     zend_list_delete(id);
     RETURN_TRUE;
