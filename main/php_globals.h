@@ -40,6 +40,7 @@ extern ZEND_API struct _php_core_globals core_globals;
 #define TRACK_VARS_SERVER	3
 #define TRACK_VARS_ENV		4
 #define TRACK_VARS_FILES	5
+#define TRACK_VARS_REQUEST	6
 
 struct _php_tick_function_entry;
 
@@ -118,6 +119,7 @@ struct _php_core_globals {
 	zend_bool expose_php;
 
 	zend_bool register_globals;
+	zend_bool register_long_arrays;
 	zend_bool register_argc_argv;
 
 	zend_bool y2k_compliance;
@@ -130,17 +132,13 @@ struct _php_core_globals {
 
 	long xmlrpc_error_number;
 
+	zend_bool activated_auto_globals[8];
 
 	zend_bool modules_activated;
-
 	zend_bool file_uploads;
-
 	zend_bool during_request_startup;
-
 	zend_bool allow_url_fopen;
-
 	zend_bool always_populate_raw_post_data;
-	
 	zend_bool report_zend_debug;
 };
 

@@ -354,6 +354,11 @@ variables_order = "EGPCS"
 ; to possible security problems, if the code is not very well thought of.
 register_globals = Off
 
+; Whether or not to register the old-style input arrays, HTTP_GET_GLOBALS
+; and friends.  If you're not using them, it's recommended to turn them off,
+; for performance reasons.
+register_long_arrays = Off
+
 ; This directive tells PHP whether to declare the argv&argc variables (that
 ; would contain the GET information).  If you don't use these variables, you
 ; should turn it off for increased performance.

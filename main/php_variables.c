@@ -29,6 +29,7 @@
 
 #include "zend_globals.h"
 
+
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr TSRMLS_DC) = _php_import_environment_variables;
@@ -354,6 +355,343 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	}
 }
 
+
+zend_bool php_std_auto_global_callback(char *name, uint name_len TSRMLS_DC)
+{
+	zend_printf("%s\n", name);
+	return 0; /* don't rearm */
+}
+
+/* {{{ php_build_argv
+ */
+static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
+{
+	pval *arr, *argc, *tmp;
+	int count = 0;
+	char *ss, *space;
+	
+	ALLOC_ZVAL(arr);
+	array_init(arr);
+	INIT_PZVAL(arr);
+
+	/* Prepare argv */
+	if (SG(request_info).argc) { /* are we in cli sapi? */
+		int i;
+		for (i=0; i<SG(request_info).argc; i++) {
+			ALLOC_ZVAL(tmp);
+			Z_TYPE_P(tmp) = IS_STRING;
+			Z_STRLEN_P(tmp) = strlen(SG(request_info).argv[i]);
+			Z_STRVAL_P(tmp) = estrndup(SG(request_info).argv[i], Z_STRLEN_P(tmp));
+			INIT_PZVAL(tmp);
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(pval *), NULL)==FAILURE) {
+				if (Z_TYPE_P(tmp) == IS_STRING) {
+					efree(Z_STRVAL_P(tmp));
+				}
+			}
+		}
+	} else 	if (s && *s) {
+		ss = s;
+		while (ss) {
+			space = strchr(ss, '+');
+			if (space) {
+				*space = '\0';
+			}
+			/* auto-type */
+			ALLOC_ZVAL(tmp);
+			Z_TYPE_P(tmp) = IS_STRING;
+			Z_STRLEN_P(tmp) = strlen(ss);
+			Z_STRVAL_P(tmp) = estrndup(ss, Z_STRLEN_P(tmp));
+			INIT_PZVAL(tmp);
+			count++;
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(pval *), NULL)==FAILURE) {
+				if (Z_TYPE_P(tmp) == IS_STRING) {
+					efree(Z_STRVAL_P(tmp));
+				}
+			}
+			if (space) {
+				*space = '+';
+				ss = space + 1;
+			} else {
+				ss = space;
+			}
+		}
+	}
+
+	/* prepare argc */
+	ALLOC_ZVAL(argc);
+	if (SG(request_info).argc) {
+		Z_LVAL_P(argc) = SG(request_info).argc;
+	} else {
+		Z_LVAL_P(argc) = count;
+	}
+	Z_TYPE_P(argc) = IS_LONG;
+	INIT_PZVAL(argc);
+
+	if (PG(register_globals) || SG(request_info).argc) {
+		arr->refcount++;
+		argc->refcount++;
+		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
+		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+	}
+
+	zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+	zend_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+}
+/* }}} */
+
+/* {{{ php_handle_special_queries
+ */
+PHPAPI int php_handle_special_queries(TSRMLS_D)
+{
+	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
+			&& PG(expose_php)) {
+		if (php_info_logos(SG(request_info).query_string+1 TSRMLS_CC)) {
+			return 1;
+		} else if (!strcmp(SG(request_info).query_string+1, PHP_CREDITS_GUID)) {
+			php_print_credits(PHP_CREDITS_ALL);
+			return 1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
+
+
+/* {{{ php_register_server_variables
+ */
+static inline void php_register_server_variables(TSRMLS_D)
+{
+	zval *array_ptr=NULL;
+
+	ALLOC_ZVAL(array_ptr);
+	array_init(array_ptr);
+	INIT_PZVAL(array_ptr);
+	PG(http_globals)[TRACK_VARS_SERVER] = array_ptr;
+
+	/* Server variables */
+	if (sapi_module.register_server_variables) {
+		sapi_module.register_server_variables(array_ptr TSRMLS_CC);
+	}
+
+	/* argv/argc support */
+	if (PG(register_argc_argv)) {
+		php_build_argv(SG(request_info).query_string, array_ptr TSRMLS_CC);
+	}
+
+	/* PHP Authentication support */
+	if (SG(request_info).auth_user) {
+		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, array_ptr TSRMLS_CC);
+	}
+	if (SG(request_info).auth_password) {
+		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr TSRMLS_CC);
+	}
+}
+/* }}} */
+
+
+static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC);
+
+
+/* {{{ php_hash_environment
+ */
+int php_hash_environment(TSRMLS_D)
+{
+	char *p;
+	unsigned char _gpc_flags[3] = {0, 0, 0};
+	zend_bool have_variables_order;
+	zval *dummy_track_vars_array = NULL;
+	zend_bool initialized_dummy_track_vars_array=0;
+	int i;
+	zend_bool jit_initialization = (!PG(register_globals) && !PG(register_long_arrays));
+	char *variables_order;
+	struct auto_global_record {
+		char *name;
+		uint name_len;
+		char *long_name;
+		uint long_name_len;
+		zend_bool jit_initialization;
+	} auto_global_records[] = {
+		{ "_POST", sizeof("_POST"), "HTTP_POST_GLOBALS", sizeof("HTTP_POST_GLOBALS"), 0 },
+		{ "_GET", sizeof("_GET"), "HTTP_GET_GLOBALS", sizeof("HTTP_GET_GLOBALS"), 0 },
+		{ "_COOKIE", sizeof("_COOKIE"), "HTTP_COOKIE_GLOBALS", sizeof("HTTP_COOKIE_GLOBALS"), 0 },
+		{ "_SERVER", sizeof("_SERVER"), "HTTP_SERVER_GLOBALS", sizeof("HTTP_SERVER_GLOBALS"), 1 },
+		{ "_ENV", sizeof("_ENV"), "HTTP_ENV_GLOBALS", sizeof("HTTP_ENV_GLOBALS"), 1 },
+		{ "_FILES", sizeof("_FILES"), "HTTP_FILES_GLOBALS", sizeof("HTTP_FILES_GLOBALS"), 0 },
+	};
+	size_t num_track_vars = sizeof(auto_global_records)/sizeof(struct auto_global_record);
+
+	for (i=0; i<num_track_vars; i++) {
+		PG(http_globals)[i] = NULL;
+	}
+
+	if (PG(variables_order)) {
+		variables_order = PG(variables_order);
+		have_variables_order=1;
+	} else {
+		variables_order = PG(gpc_order);
+		have_variables_order=0;
+		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+		array_init(PG(http_globals)[TRACK_VARS_ENV]);
+		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
+	}
+
+	for (p=variables_order; p && *p; p++) {
+		switch(*p) {
+			case 'p':
+			case 'P':
+				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
+					sapi_module.treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);	/* POST Data */
+					_gpc_flags[0]=1;
+				}
+				break;
+			case 'c':
+			case 'C':
+				if (!_gpc_flags[1]) {
+					sapi_module.treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);	/* Cookie Data */
+					_gpc_flags[1]=1;
+				}
+				break;
+			case 'g':
+			case 'G':
+				if (!_gpc_flags[2]) {
+					sapi_module.treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);	/* GET Data */
+					_gpc_flags[2]=1;
+				}
+				break;
+			case 'e':
+			case 'E':
+				if (!jit_initialization) {
+					if (have_variables_order) {
+						php_auto_globals_create_env("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
+					}
+				}
+				break;
+			case 's':
+			case 'S':
+				if (!jit_initialization) {
+					php_register_server_variables(TSRMLS_C);
+				}
+				break;
+		}
+	}
+
+	if (!jit_initialization) {
+		if (!have_variables_order) {
+			php_register_server_variables(TSRMLS_C);
+		}
+		if (!PG(http_globals)[TRACK_VARS_ENV]) {
+
+		}
+	}
+
+	for (i=0; i<num_track_vars; i++) {
+		if (jit_initialization && auto_global_records[i].jit_initialization) {
+			continue;
+		}
+		if (!PG(http_globals)[i]) {
+			if (!initialized_dummy_track_vars_array) {
+				ALLOC_ZVAL(dummy_track_vars_array);
+				array_init(dummy_track_vars_array);
+				INIT_PZVAL(dummy_track_vars_array);
+				initialized_dummy_track_vars_array = 1;
+			} else {
+				dummy_track_vars_array->refcount++;
+			}
+			PG(http_globals)[i] = dummy_track_vars_array;
+		}
+
+		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
+		PG(http_globals)[i]->refcount++;
+		if (PG(register_long_arrays)) {
+			zend_hash_update(&EG(symbol_table), auto_global_records[i].long_name, auto_global_records[i].long_name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
+			PG(http_globals)[i]->refcount++;
+		}
+	}
+
+	/* Create _REQUEST */
+	{
+		zval *form_variables;
+
+		ALLOC_ZVAL(form_variables);
+		array_init(form_variables);
+		INIT_PZVAL(form_variables);
+
+		for (p=variables_order; p && *p; p++) {
+			switch (*p) {
+				case 'g':
+				case 'G':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+					break;
+				case 'p':
+				case 'P':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+					break;
+				case 'c':
+				case 'C':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+					break;
+			}
+		}
+
+		zend_hash_update(&EG(symbol_table), "_REQUEST", sizeof("_REQUEST"), &form_variables, sizeof(zval *), NULL);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC)
+{
+	php_register_server_variables(TSRMLS_C);
+
+	zend_hash_update(&EG(symbol_table), name, name_len+1, &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
+	PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
+
+	if (PG(register_long_arrays)) {
+		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_GLOBALS", sizeof("HTTP_SERVER_GLOBALS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
+		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
+	}
+
+	return 0; /* don't rearm */
+}
+
+
+static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC)
+{
+	ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+	array_init(PG(http_globals)[TRACK_VARS_ENV]);
+	INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+	php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
+
+	zend_hash_update(&EG(symbol_table), name, name_len+1, &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
+	PG(http_globals)[TRACK_VARS_ENV]->refcount++;
+
+	if (PG(register_long_arrays)) {
+		zend_hash_update(&EG(symbol_table), "HTTP_ENV_GLOBALS", sizeof("HTTP_ENV_GLOBALS"), &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
+		PG(http_globals)[TRACK_VARS_ENV]->refcount++;
+	}
+
+	return 0; /* don't rearm */
+}
+
+
+void php_startup_auto_globals(TSRMLS_D)
+{
+	zend_bool cb = (!PG(register_globals) && !PG(register_long_arrays));
+
+	zend_register_auto_global("_GET", sizeof("_GET")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("_POST", sizeof("_POST")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("_COOKIE", sizeof("_COOKIE")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("_SERVER", sizeof("_SERVER")-1, cb?php_auto_globals_create_server:NULL TSRMLS_CC);
+	zend_register_auto_global("_ENV", sizeof("_ENV")-1, cb?php_auto_globals_create_env:NULL TSRMLS_CC);
+	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1, NULL TSRMLS_CC);
+}
 
 /*
  * Local variables:
