@@ -668,7 +668,7 @@ int php_hash_environment(TSRMLS_D)
 	}
 
 	for (i=0; i<num_track_vars; i++) {
-		if ((jit_initialization && auto_global_records[i].jit_initialization) || _gpc_flags[i]) {
+		if (jit_initialization && auto_global_records[i].jit_initialization) {
 			continue;
 		}
 		if (!PG(http_globals)[i]) {
@@ -684,7 +684,6 @@ int php_hash_environment(TSRMLS_D)
 		}
 
 		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
-		PG(http_globals)[i]->refcount++;
 		if (PG(register_long_arrays)) {
 			zend_hash_update(&EG(symbol_table), auto_global_records[i].long_name, auto_global_records[i].long_name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
 			PG(http_globals)[i]->refcount++;
