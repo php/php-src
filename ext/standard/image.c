@@ -962,7 +962,8 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
     char fline[MAX_XBM_LINE_SIZE];
     char iname[MAX_XBM_LINE_SIZE];
     char *type;
-    int value, width = 0, height = 0;
+    int value;
+    unsigned int width = 0, height = 0;
 
 	if (result) {
 		*result = NULL;
