@@ -322,7 +322,7 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_exhausted)=0;
 #endif
 
-#if ZEND_DEBUG
+#if !ZEND_DEBUG
 	AG(zval_list_head) = NULL;
 #endif
 
