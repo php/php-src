@@ -875,6 +875,7 @@ PHP_FUNCTION(odbc_execute)
 	} params_t;
 	params_t *params = NULL;
 	char *filename;
+	unsigned char otype;
    	SWORD sqltype, ctype, scale;
 	SWORD nullable;
 	UDWORD precision;
@@ -925,6 +926,8 @@ PHP_FUNCTION(odbc_execute)
 				efree(params);
                 RETURN_FALSE;
             }
+
+			otype = (*tmp)->type;
             convert_to_string(*tmp);
 			if (Z_TYPE_PP(tmp) != IS_STRING) {
 				php_error(E_WARNING,"Error converting parameter");
@@ -984,6 +987,10 @@ PHP_FUNCTION(odbc_execute)
 #ifdef HAVE_DBMAKER
                 precision = params[i-1].vallen;
 #endif
+				if (otype == IS_NULL) {
+					params[i-1].vallen = SQL_NULL_DATA;
+				}
+
 				rc = SQLBindParameter(result->stmt, (UWORD)i, SQL_PARAM_INPUT,
 									  ctype, sqltype, precision, scale,
 									  Z_STRVAL_PP(tmp), 0,
