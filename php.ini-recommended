@@ -262,6 +262,10 @@ display_startup_errors = Off
 ; error displaying on production web sites.
 log_errors = On
 
+; Set maximum length of log_errors. In error_log information about the source is
+; added. The default is 1024 and 0 allows to not apply any maximum length at all.
+log_errors_max_len = 1024
+
 ; Do not log repeated messages. Repeated errors must occur in same file on same
 ; line until ignore_repeated_source is set true.
 ignore_repeated_errors = Off

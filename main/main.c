@@ -235,6 +235,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("log_errors_max_len",	 "1024",		PHP_INI_ALL,		OnUpdateInt,			log_errors_max_len,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
@@ -420,15 +421,11 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
  extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	char buffer[ERROR_BUF_LEN];
+	char *buffer;
 	int buffer_len, display;
 	TSRMLS_FETCH();
 
-	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
-	buffer[sizeof(buffer)-1]=0;
-	if(buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
-		buffer_len = sizeof(buffer) - 1;
-	}
+	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
 	if (PG(ignore_repeated_errors)) {
 		if (strncmp(last_error.buf, buffer, sizeof(last_error.buf))
 			|| (!PG(ignore_repeated_source)
@@ -476,15 +473,16 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		}
 
 		if (!module_initialized || PG(log_errors)) {
-			char log_buffer[ERROR_BUF_LEN];
+			char *log_buffer;
 
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
 				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 			}
 #endif
-			snprintf(log_buffer, ERROR_BUF_LEN, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 			php_log_err(log_buffer TSRMLS_CC);
+			efree(log_buffer);
 		}
 		if (module_initialized && PG(display_errors)
 			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
@@ -547,13 +545,17 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_USER_ERROR:
 			if (module_initialized) {
 				zend_bailout();
+				efree(buffer);
 				return;
 			}
 			break;
 	}
 
 	/* Log if necessary */
-	if (!display) return;
+	if (!display) {
+		efree(buffer);
+		return;
+	}
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		pval *tmp;
 
@@ -564,6 +566,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		Z_TYPE_P(tmp) = IS_STRING;
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
+	efree(buffer);
 }
 /* }}} */
 
