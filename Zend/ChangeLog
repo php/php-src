@@ -1,3 +1,9 @@
+2003-03-24  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      Fix {include|require}_once error message - if open
+      fails, don't use tream, use original name.
+
 2003-03-23  Andi Gutmans  <andi@zend.com>
 
     * zend.c:

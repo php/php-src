@@ -1,3 +1,108 @@
+2003-03-24  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      reorder
+
+2003-03-24  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/gettext/gettext.dsp:
+      MFB
+
+    * (PHP_4_3)
+      ext/gettext/gettext.dsp:
+      Patch by Nathan Fredrickson <nathan@silverorange.com>:
+      
+      Remove unneeded library from the link stage and add a couple of missing
+      defines which are part of libintl.
+
+2003-03-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.h
+      ext/standard/html.c:
+      MFH: fixed bug #22834 (compile failure due to ugly implicit casts)
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.h
+      ext/standard/html.c:
+      Fixed bug #22834 (compile failure due to ugly implicit casts)
+
+    * (PHP_4_3)
+      NEWS:
+      NFN
+
+2003-03-24  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      Fix arg list segfault
+
+2003-03-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities16.phpt:
+      oops...
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/htmlentities15.phpt
+      ext/standard/tests/strings/htmlentities16.phpt:
+      MFH(initial): added test cases for new functionality
+
+    * ext/standard/tests/strings/htmlentities15.phpt
+      ext/standard/tests/strings/htmlentities16.phpt:
+      
+      Added test cases for new functionality
+
+    * (PHP_4_3)
+      ext/standard/html.c:
+      MFH(r-1.76): added koi8-r, cp866, and cp1251 support for htmlentities()
+      Patch by Antony Dovgal <tony2001 at phpclub dot net>
+
+    * ext/standard/html.c:
+      Added koi8-r, cp866, and cp1251 support for htmlentities
+
+2003-03-24  James Cox  <james@imajes.info>
+
+    * NEWS:
+      test + remove 4
+
+2003-03-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysql/libmysql/mysys_err.h:
+      Added missing header that prevents successful compilation.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2003-03-24  Jani Taskinen  <sniper@iki.fi>
+
+    * README.EXT_SKEL:
+      fix bug #22841
+
+    * sapi/isapi/php4isapi.c:
+      This is AUTH_TYPE in every other SAPI.
+
+    * (PHP_4_3)
+      NEWS:
+      blah..
+
+2003-03-24  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      PHP_WIN32 included
+
+2003-03-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oci8/config.m4:
+      Fixed bug #18640 properly
+
+2003-03-24  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      changed method name
+
 2003-03-23  Alex Waugh  <alex@alexwaugh.com>
 
     * ext/standard/php_fopen_wrappers.h:
