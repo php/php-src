@@ -8,7 +8,7 @@ PHP_ARG_WITH(swf, for libswf support,
 [  --with-swf[=DIR]        Include swf support])
 
 if test "$PHP_SWF" != "no"; then
-  for i in /usr/local /usr $PHP_SWF; do
+  for i in /usr/local/lib /usr/lib $PHP_SWF; do
     if test -r $i/libswf.a; then
       SWF_DIR=$i
     fi
