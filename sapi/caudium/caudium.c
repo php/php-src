@@ -481,18 +481,8 @@ static zend_module_entry php_caudium_module = {
   STANDARD_MODULE_PROPERTIES
 };
 
-static int php_caudium_startup(sapi_module_struct *sapi_module)
-{
-  if(php_module_startup(sapi_module) == FAILURE
-     || zend_startup_module(&php_caudium_module) == FAILURE) {
-    return FAILURE;
-  } else {
-    return SUCCESS;
-  }
-}
 
 /* this structure is static (as in "it does not change") */
-
 static sapi_module_struct sapi_module = {
   "caudium",
   "Caudium",
@@ -506,10 +496,10 @@ static sapi_module_struct sapi_module = {
   NULL,					/* getenv */
   php_error,				/* error handler */
   php_caudium_sapi_header_handler,	/* header handler */
-  php_caudium_sapi_send_headers,		/* send headers handler */
+  php_caudium_sapi_send_headers,	/* send headers handler */
   NULL,					/* send header handler */
   php_caudium_sapi_read_post,		/* read POST data */
-  php_caudium_sapi_read_cookies,		/* read Cookies */
+  php_caudium_sapi_read_cookies,	/* read cookies */
   NULL,					/* register server variables */
   NULL,					/* Log message */
   NULL,					/* Block interruptions */
@@ -747,8 +737,9 @@ void f_php_caudium_request_handler(INT32 args)
   {
     int fd = fd_from_object(raw_fd->u.object);
     if(fd == -1)
-      error("PHP4.Interpreter->run: my_fd object not open or not an FD.\n");
-    THIS->my_fd = fd;
+      THIS->my_fd = 0; /* Don't send directly to this FD... */
+    else
+      THIS->my_fd = fd;
   } else
     THIS->my_fd = 0;
 #ifdef TEST_NO_THREADS
@@ -779,13 +770,12 @@ static void free_struct(SLS_D)
 void pike_module_init( void )
 {
   if (!caudium_php_initialized) {
-#ifdef ZTS
+    caudium_php_initialized = 1;
     tsrm_startup(1, 1, 0, NULL);
     caudium_globals_id = ts_allocate_id(sizeof(php_caudium_request), NULL, NULL);
-#endif
     sapi_startup(&sapi_module);
-    php_caudium_startup(&sapi_module);
-    caudium_php_initialized = 1;
+    sapi_module.startup(&sapi_module);
+    zend_startup_module(&php_caudium_module);
     PHP_INIT_LOCK();
   }
   start_new_program(); /* Text */
@@ -804,9 +794,7 @@ void pike_module_exit(void)
   caudium_php_initialized = 0;
   sapi_module.shutdown(&sapi_module);
   if(php_program)  free_program(php_program);
-#ifdef ZTS
   tsrm_shutdown();
-#endif
   PHP_DESTROY();
 }
 #endif
