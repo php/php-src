@@ -121,7 +121,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		strcat(cookie, "; secure");
 	}
 
-	return sapi_add_header(cookie, strlen(cookie), 0);
+	return sapi_add_header_ex(cookie, strlen(cookie), 0, 0 TSRMLS_CC);
 }
 
 
