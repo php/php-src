@@ -2587,6 +2587,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 
+	current_this = EG(This);
+	EG(This) = EX(object);
+	current_scope = EG(scope);
+	EG(scope) = EX(calling_scope);
+
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
@@ -2606,11 +2611,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		HashTable *calling_symbol_table;
-
-		current_this = EG(This);
-		EG(This) = EX(object);
-		current_scope = EG(scope);
-		EG(scope) = EX(calling_scope);
 
 		EX_T(EX(opline)->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
@@ -2649,16 +2649,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zend_hash_clean(*EG(symtable_cache_ptr));
 		}
 		EG(active_symbol_table) = calling_symbol_table;
-		if (EG(This)) {
-			zval_ptr_dtor(&EG(This));
-		}
-		EG(This) = current_this;
-		EG(scope) = current_scope;
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
 
-		/* Not sure what should be done here if it's a static method */
+			/* Not sure what should be done here if it's a static method */
 		if (EX(object)) {
 			Z_OBJ_HT_P(EX(object))->call_method(EX(fbc)->common.function_name, EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
 		} else {
@@ -2670,6 +2665,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
 		}
 	}
+	if (EG(This)) {
+		zval_ptr_dtor(&EG(This));
+	}
+	EG(This) = current_this;
+	EG(scope) = current_scope;
 	zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	
 	if(EG(active_namespace) != active_namespace) {
