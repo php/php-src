@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <regex.h>
 
+#define POSIX_MISTAKE
+
 #include "utils.h"
 #include "regex2.h"
 
