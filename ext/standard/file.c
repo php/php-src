@@ -957,7 +957,7 @@ PHPAPI PHP_FUNCTION(feof)
 /* }}} */
 
 /* TODO: move to main/network.c */
-PHPAPI int php_set_sock_blocking(int socketd, int block)
+PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 {
       int ret = SUCCESS;
       int flags;
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(socket_set_blocking)
 			RETURN_FALSE;
 		}
 
-		if (php_set_sock_blocking(socketd, block) == FAILURE)
+		if (php_set_sock_blocking(socketd, block TSRMLS_CC) == FAILURE)
 			RETURN_FALSE;
 
 		php_stream_sock_set_blocking((php_stream*)what, block == 0 ? 0 : 1 TSRMLS_CC);
