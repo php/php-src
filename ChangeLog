@@ -1,3 +1,81 @@
+2001-02-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/typedef_VARIANT.c
+      ext/standard/basic_functions.c: Fix Windows build
+
+2001-02-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/mail.c
+      ext/standard/php_mail.h:
+    - Added a new parameter to mail() which appends aditional command line
+      parameters to the mail program. This is usefull to set the From headers
+      correctly with the -f parameter to sendmail p.e.
+    - Added a new parameter to mail() which appends aditional command line
+      parameters to the mail program. 
+
+2001-02-05  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/CREDITS: Added myself to CREDITS (vlad)
+
+2001-02-05  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c:
+    fixes the problem that php.exe compiled on win2k platform won't run on any other
+
+2001-02-05  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+    now when pspell/pspell.h is included, it will recognize
+    that it has to work in compatibility mode. (The previous fix
+    had the right idea, but was too far down in the source)
+
+2001-02-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/standard/basic_functions.c:
+    Allow calling static methods via call_user_method_* functions.
+
+    * README.CVS-RULES: One more notice about using names with NEWS entries.
+
+2001-02-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/test.php:
+    Added new Udm_Clear_Search_Limits mnogosearch extension function.
+
+2001-02-05  David Croft  <david@infotrek.co.uk>
+
+    * TODO: 2 things to do
+
+2001-02-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Whitespace.
+
+2001-02-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/config.m4: Fixed default search path.
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/test.php:
+    Added new Udm_Add_Search_Limit mnoGoSearch extension function.
+    Some bugfixes and example update.
+
+2001-02-05  James Moore  <James@phpuk.org>
+
+    * ext/standard/credits.c: Adding Sebastian Bergmann to QA team list.
+
+2001-02-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+    Fixed mnogosearch protos. Fixed mnogosearch functions return values.
+    A bug with capital letters break search has been fixed.
+
 2001-02-04  James Moore  <James@phpuk.org>
 
     * ext/standard/tests/time/.cvsignore
