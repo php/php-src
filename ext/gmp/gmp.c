@@ -814,6 +814,11 @@ ZEND_FUNCTION(gmp_powm)
 		WRONG_PARAM_COUNT;
 	}
 
+	convert_to_long_ex(mod_arg);
+	if (!Z_LVAL_PP(mod_arg)) {
+		RETURN_FALSE;
+	}
+
 	FETCH_GMP_ZVAL(gmpnum_base, base_arg);
 	if(Z_TYPE_PP(exp_arg) == IS_LONG && Z_LVAL_PP(exp_arg) >= 0) {
 		use_ui=1;
