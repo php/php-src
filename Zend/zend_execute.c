@@ -1510,9 +1510,21 @@ binary_assign_op_addr: {
 						if (EX(opline)->op1.op_type == IS_VAR) {
 							SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->op1.u.var].var.ptr_ptr, &EX(opline)->op1);
 						}
-						if (EX(opline)->op2.op_type == IS_VAR) {
-							PZVAL_LOCK(*EX(Ts)[EX(opline)->op2.u.var].var.ptr_ptr);
+
+						/* We are not handling overloaded classes right now */
+						EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+						if (!PZVAL_IS_REF(EX(object).ptr)) {
+							EX(object).ptr->refcount++; /* For $this pointer */
+						} else {
+							zval *this_ptr;
+							ALLOC_ZVAL(this_ptr);
+							*this_ptr = *EX(object).ptr;
+							INIT_PZVAL(this_ptr);
+							zval_copy_ctor(this_ptr);
+							EX(object).ptr = this_ptr;
 						}
+						EX(fbc) = Z_OBJCE_P(EX(object).ptr)->constructor;
+						NEXT_OPCODE();
 					}
 					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
@@ -2452,8 +2464,7 @@ send_by_ref:
 					object_zval = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					object = object_zval->value.obj.handlers->get_address(object_zval->value.obj.handle);
 
-					if (!object->ce->handle_function_call
-						&& !zend_hash_exists(&object->ce->function_table, object->ce->name, object->ce->name_length+1)) {
+					if (!object->ce->handle_function_call && !object->ce->constructor) {
 						EX(opline) = op_array->opcodes + EX(opline)->op2.u.opline_num;
 						continue;
 					}
