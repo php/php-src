@@ -17,8 +17,7 @@ DOES IT WORK?
 
 HOW TO INSTALL
 
-    Get the latest Apache 2.0 sources from CVS and install it. This
-    SAPI module is known to work with Apache 2.0.35.
+    This SAPI module is known to work with Apache 2.0.40.
 
         $ cd apache-2.x
         $ cd src
