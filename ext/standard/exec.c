@@ -976,7 +976,7 @@ PHP_FUNCTION(proc_open)
 				fp = fdopen(descriptors[i].parentend, mode_string);
 #endif
 				if (fp) {
-					stream = php_stream_fopen_from_pipe(fp, mode_string);
+					stream = php_stream_fopen_from_file(fp, mode_string);
 					if (stream) {
 						zval *retfp;
 
