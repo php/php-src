@@ -1753,7 +1753,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 
-			if (ptr->object) {
+			if (ptr->object && Z_TYPE_P(ptr->object) == IS_OBJECT) {
 				class_name = Z_OBJCE(*ptr->object)->name;
 				call_type = "->";
 			} else if (ptr->function_state.function->common.scope) {
