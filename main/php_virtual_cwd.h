@@ -1,6 +1,8 @@
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
 
+#include "zend.h"
+
 typedef struct _cwd_state {
 	char *cwd;
 	int cwd_length;
