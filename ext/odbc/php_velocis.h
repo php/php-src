@@ -92,7 +92,7 @@ PHP_FUNCTION(velocis_rollback);
 PHP_FUNCTION(velocis_fieldnum);
 PHP_FUNCTION(velocis_fieldname);
 
-extern velocis_module php3_velocis_module;
+extern velocis_module php_velocis_module;
 
 #else
 

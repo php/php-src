@@ -69,7 +69,7 @@ zend_module_entry velocis_module_entry = {
 zend_module_entry *get_module() { return &velocis_module_entry; }
 #endif
 
-THREAD_LS velocis_module php3_velocis_module;
+THREAD_LS velocis_module php_velocis_module;
 THREAD_LS static HENV henv;
 
 static void _close_velocis_link(VConn *conn)
@@ -97,12 +97,12 @@ static void _free_velocis_result(Vresult *res)
 PHP_MINIT_FUNCTION(velocis)
 {
 	SQLAllocEnv(&henv);
-	if ( cfg_get_long("velocis.max_links",&php3_velocis_module.max_links) == FAILURE ) {
-		php3_velocis_module.max_links = -1;
+	if ( cfg_get_long("velocis.max_links",&php_velocis_module.max_links) == FAILURE ) {
+		php_velocis_module.max_links = -1;
 	}
-	php3_velocis_module.num_links = 0;
-	php3_velocis_module.le_link   = register_list_destructors(_close_velocis_link,NULL);
-	php3_velocis_module.le_result = register_list_destructors(_free_velocis_result,NULL);
+	php_velocis_module.num_links = 0;
+	php_velocis_module.le_link   = register_list_destructors(_close_velocis_link,NULL);
+	php_velocis_module.le_result = register_list_destructors(_free_velocis_result,NULL);
 
 	return SUCCESS;
 }
@@ -131,7 +131,7 @@ velocis_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 {
 	int ind;
 
-	ind = zend_list_insert(conn,php3_velocis_module.le_link);
+	ind = zend_list_insert(conn,php_velocis_module.le_link);
 	conn->hdbc = hdbc;
 	conn->index = ind;
 
@@ -145,7 +145,7 @@ velocis_find_conn(HashTable *list,int ind)
 	int type;
 
 	conn = zend_list_find(ind,&type);
-	if ( !conn || type != php3_velocis_module.le_link ) {
+	if ( !conn || type != php_velocis_module.le_link ) {
 		return(NULL);
 	}
 	return(conn);
@@ -162,7 +162,7 @@ velocis_add_result(HashTable *list,Vresult *res,VConn *conn)
 {
 	int ind;
 
-	ind = zend_list_insert(res,php3_velocis_module.le_result);
+	ind = zend_list_insert(res,php_velocis_module.le_result);
 	res->conn = conn;
 	res->index = ind;
 
@@ -176,7 +176,7 @@ velocis_find_result(HashTable *list,int ind)
 	int type;
 
 	res = zend_list_find(ind,&type);
-	if ( !res || type != php3_velocis_module.le_result ) {
+	if ( !res || type != php_velocis_module.le_result ) {
 		return(NULL);
 	}
 	return(res);
@@ -201,8 +201,8 @@ PHP_FUNCTION(velocis_connect)
 	VConn *new;
 	long ind;
 
-	if ( php3_velocis_module.max_links != -1 && php3_velocis_module.num_links == php3_velocis_module.max_links ) {
-		php_error(E_WARNING,"Velocis: Too many open connections (%d)",php3_velocis_module.num_links);
+	if ( php_velocis_module.max_links != -1 && php_velocis_module.num_links == php_velocis_module.max_links ) {
+		php_error(E_WARNING,"Velocis: Too many open connections (%d)",php_velocis_module.num_links);
 		RETURN_FALSE;
 	}
 	if ( ARG_COUNT(ht) != 3 ||
@@ -233,7 +233,7 @@ PHP_FUNCTION(velocis_connect)
 		RETURN_FALSE;
 	}
 	ind = velocis_add_conn(list,new,hdbc);
-	php3_velocis_module.num_links++;
+	php_velocis_module.num_links++;
 	RETURN_LONG(ind);
 }
 
@@ -254,7 +254,7 @@ PHP_FUNCTION(velocis_close)
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	velocis_del_conn(list,id->value.lval);
-	php3_velocis_module.num_links--;
+	php_velocis_module.num_links--;
 	RETURN_TRUE;
 }
 

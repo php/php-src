@@ -1,1 +1,1 @@
-extern char *php3_win_err(void);
+extern char *php_win_err(void);

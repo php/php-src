@@ -6,7 +6,7 @@
 static char Win_Error_msg[256];
 #endif
 
-char *php3_win_err(void)
+char *php_win_err(void)
 {
 	FormatMessage(
 					 FORMAT_MESSAGE_FROM_SYSTEM,

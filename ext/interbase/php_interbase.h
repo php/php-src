@@ -42,7 +42,7 @@
 #include <ibase.h>
 
 extern zend_module_entry ibase_module_entry;
-#define php3_ibase_module_ptr &ibase_module_entry
+#define php_ibase_module_ptr &ibase_module_entry
 
 extern PHP_MINIT_FUNCTION(ibase);
 extern PHP_RINIT_FUNCTION(ibase);
@@ -72,34 +72,34 @@ typedef struct {
 	char *timeformat;
 } ibase_module;
 
-typedef struct _php3_ibase_result {
+typedef struct _php_ibase_result {
 	isc_stmt_handle result;
 	isc_tr_handle trans;
 	XSQLDA *sqlda;
 	int commitok;
 } ibase_result_handle;
 
-typedef struct _php3_ibase_query {
+typedef struct _php_ibase_query {
 	isc_stmt_handle query;
 	isc_tr_handle trans;
 	XSQLDA *sqlda;
 	int alloced;
 } ibase_query_handle;
 
-typedef struct _php3_ibase_varchar {
+typedef struct _php_ibase_varchar {
     short var_len;
     char var_str[1];
 } IBASE_VCHAR;
 
-extern ibase_module php3_ibase_module;
+extern ibase_module php_ibase_module;
 
 #else
 
-#define php3_ibase_module_ptr NULL
+#define php_ibase_module_ptr NULL
 
 #endif /* HAVE_IBASE */
 
-#define phpext_interbase_ptr php3_ibase_module_ptr
+#define phpext_interbase_ptr php_ibase_module_ptr
 
 #endif /* _PHP3_IBASE_H */
 

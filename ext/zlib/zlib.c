@@ -79,7 +79,7 @@ static php_zlib_globals zlib_globals;
 /* True globals, no need for thread safety */
 static int le_zp;
 
-function_entry php3_zlib_functions[] = {
+function_entry php_zlib_functions[] = {
 	PHP_FE(readgzfile,					NULL)
 	PHP_FE(gzrewind,					NULL)
 	PHP_FE(gzclose,						NULL)
@@ -98,9 +98,9 @@ function_entry php3_zlib_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_module_entry php3_zlib_module_entry = {
+zend_module_entry php_zlib_module_entry = {
 	"zlib",
-	php3_zlib_functions,
+	php_zlib_functions,
 	PHP_MINIT(zlib),
 	PHP_MSHUTDOWN(zlib),
 	NULL,
@@ -149,14 +149,14 @@ PHP_MINFO_FUNCTION(zlib)
 		PUTS(").");
 }
 
-static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path);
+static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path);
 
-static gzFile php3_gzopen_wrapper(char *path, char *mode, int options)
+static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
 {
 	PLS_FETCH();
 	
 	if (options & USE_PATH && PG(include_path) != NULL) {
-		return php3_gzopen_with_path(path, mode, PG(include_path), NULL);
+		return php_gzopen_with_path(path, mode, PG(include_path), NULL);
 	}
 	else {
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path,1))) {
@@ -171,7 +171,7 @@ static gzFile php3_gzopen_wrapper(char *path, char *mode, int options)
  * Tries to open a .gz-file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
  */
-static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path)
+static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char **opened_path)
 {
 	char *pathbuf, *ptr, *end;
 	char trypath[MAXPATHLEN + 1];
@@ -303,7 +303,7 @@ PHP_FUNCTION(gzfile) {
 	}
 	convert_to_string_ex(filename);
 
-	zp = php3_gzopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",(*filename)->value.str.val,strerror(errno));
 		RETURN_FALSE;
@@ -361,9 +361,9 @@ PHP_FUNCTION(gzopen) {
 
 	/*
 	 * We need a better way of returning error messages from
-	 * php3_gzopen_wrapper().
+	 * php_gzopen_wrapper().
 	 */
-	zp = php3_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
 		php_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
 					(*arg1)->value.str.val, p, strerror(errno));
@@ -659,9 +659,9 @@ PHP_FUNCTION(readgzfile) {
 
 	/*
 	 * We need a better way of returning error messages from
-	 * php3_gzopen_wrapper().
+	 * php_gzopen_wrapper().
 	 */
-	zp = php3_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp){
 		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",(*arg1)->value.str.val,strerror(errno));
 		RETURN_FALSE;

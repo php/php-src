@@ -477,7 +477,7 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
     } while ( SQL_SUCCEEDED( ret ));
 }
 
-void php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
+void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_result *result;
 	pval **pv_res, **pv_flag;
@@ -608,7 +608,7 @@ PHP_FUNCTION(odbc_close_all)
    Handle binary column data */
 PHP_FUNCTION(odbc_binmode)
 {
-	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
@@ -616,7 +616,7 @@ PHP_FUNCTION(odbc_binmode)
    Handle LONG columns */
 PHP_FUNCTION(odbc_longreadlen)
 {
-	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
@@ -650,7 +650,7 @@ PHP_FUNCTION(odbc_prepare)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_prepare");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_prepare");
 		RETURN_FALSE;
 	}
 
@@ -889,7 +889,7 @@ PHP_FUNCTION(odbc_cursor)
 						result->stmt, state, &error, errormsg,
 						sizeof(errormsg)-1, &errormsgsize);
 			if (!strncmp(state,"S1015",5)) {
-				sprintf(cursorname,"php3_curs_%d", (int)result->stmt);
+				sprintf(cursorname,"php_curs_%d", (int)result->stmt);
 				if (SQLSetCursorName(result->stmt,cursorname,SQL_NTS) != SQL_SUCCESS) {
 					ODBC_SQL_ERROR(result->conn_ptr->henv, result->conn_ptr->hdbc,
 									result->stmt, "SQLSetCursorName");
@@ -2202,7 +2202,7 @@ PHP_FUNCTION(odbc_tables)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_tables");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_tables");
 		RETURN_FALSE;
 	}
 
@@ -2284,7 +2284,7 @@ PHP_FUNCTION(odbc_columns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_columns");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_columns");
 		RETURN_FALSE;
 	}
 
@@ -2363,7 +2363,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_columnprivileges");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_columnprivileges");
 		RETURN_FALSE;
 	}
 
@@ -2461,7 +2461,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_foreignkeys");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_foreignkeys");
 		RETURN_FALSE;
 	}
 
@@ -2540,7 +2540,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_gettypeinfo");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_gettypeinfo");
 		RETURN_FALSE;
 	}
 
@@ -2612,7 +2612,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_primarykeys");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_primarykeys");
 		RETURN_FALSE;
 	}
 
@@ -2694,7 +2694,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_procedurecolumns");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_procedurecolumns");
 		RETURN_FALSE;
 	}
 
@@ -2776,7 +2776,7 @@ PHP_FUNCTION(odbc_procedures)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_procedures");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_procedures");
 		RETURN_FALSE;
 	}
 
@@ -2862,7 +2862,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_specialcolumns");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_specialcolumns");
 		RETURN_FALSE;
 	}
 
@@ -2947,7 +2947,7 @@ PHP_FUNCTION(odbc_statistics)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_statistics");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_statistics");
 		RETURN_FALSE;
 	}
 
@@ -3025,7 +3025,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_tableprivileges");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_tableprivileges");
 		RETURN_FALSE;
 	}
 
