@@ -407,7 +407,7 @@ int main(int argc, char *argv[])
 				break;
 				
 			case 'f': /* parse file */
-				script_file = estrdup(ap_php_optarg);
+				script_file = ap_php_optarg;
 				no_headers = 1;
 				break;
 				
