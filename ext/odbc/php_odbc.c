@@ -615,6 +615,8 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 			default:
 				rc = SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 									NULL, 0, NULL, &displaysize);
+				displaysize = displaysize <= result->longreadlen ? displaysize : 
+								result->longreadlen;
 				result->values[i].value = (char *)emalloc(displaysize + 1);
 				rc = SQLBindCol(result->stmt, (UWORD)(i+1), SQL_C_CHAR, result->values[i].value,
 							displaysize + 1, &result->values[i].vallen);
