@@ -910,27 +910,27 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 	if(row<Res->num_rows){
 		switch(field){
 			case UDM_FIELD_URL: 		
-				RETURN_STRING((Res->Doc[row].url),1);
+				RETURN_STRING((Res->Doc[row].url)?(Res->Doc[row].url):"",1);
 				break;
 				
 			case UDM_FIELD_CONTENT: 	
-				RETURN_STRING((Res->Doc[row].content_type),1);
+				RETURN_STRING((Res->Doc[row].content_type)?(Res->Doc[row].content_type):"",1);
 				break;
 				
 			case UDM_FIELD_TITLE:		
-				RETURN_STRING((Res->Doc[row].title),1);
+				RETURN_STRING((Res->Doc[row].title)?(Res->Doc[row].title):"",1);
 				break;
 				
 			case UDM_FIELD_KEYWORDS:	
-				RETURN_STRING((Res->Doc[row].keywords),1);
+				RETURN_STRING((Res->Doc[row].keywords)?(Res->Doc[row].keywords):"",1);
 				break;
 				
 			case UDM_FIELD_DESC:		
-				RETURN_STRING((Res->Doc[row].description),1);
+				RETURN_STRING((Res->Doc[row].description)?(Res->Doc[row].description):"",1);
 				break;
 				
 			case UDM_FIELD_TEXT:		
-				RETURN_STRING((Res->Doc[row].text),1);
+				RETURN_STRING((Res->Doc[row].text)?(Res->Doc[row].text):"",1);
 				break;
 				
 			case UDM_FIELD_SIZE:		
@@ -958,7 +958,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				break;
 				
 			case UDM_FIELD_CATEGORY:		
-				RETURN_STRING((Res->Doc[row].category),1);
+				RETURN_STRING((Res->Doc[row].category)?(Res->Doc[row].category):"",1);
 				break;
 				
 			default: 
@@ -1004,7 +1004,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			break;
 		
 		case UDM_PARAM_WORDINFO: 	
-			RETURN_STRING(Res->wordinfo,1);
+			RETURN_STRING((Res->wordinfo)?(Res->wordinfo):"",1);
 			break;
 			
 		case UDM_PARAM_SEARCHTIME: 	
@@ -1116,7 +1116,7 @@ DLEXPORT PHP_FUNCTION(udm_error)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-	RETURN_STRING(UdmDBErrorMsg(Agent->db),1);
+	RETURN_STRING((UdmDBErrorMsg(Agent->db))?(UdmDBErrorMsg(Agent->db)):"",1);
 }
 /* }}} */
 
