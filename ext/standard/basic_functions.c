@@ -548,7 +548,7 @@ function_entry basic_functions[] = {
 	PHP_FE(debug_zval_dump,														NULL)
 	PHP_FE(print_r,															NULL)
 #if MEMORY_LIMIT 
-	PHP_FE(get_memory_usage,												NULL)
+	PHP_FE(memory_get_usage,												NULL)
 #endif
 
 	PHP_FE(register_shutdown_function,										NULL)

@@ -29,7 +29,7 @@ PHP_FUNCTION(debug_zval_dump);
 PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 #if MEMORY_LIMIT 
-PHP_FUNCTION(get_memory_usage);
+PHP_FUNCTION(memory_get_usage);
 #endif
 
 void php_var_dump(zval **struc, int level TSRMLS_DC);
