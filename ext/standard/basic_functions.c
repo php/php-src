@@ -374,7 +374,7 @@ void test_class_startup();
 
 int php3_minit_basic(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
+	ELS_FETCH();
 
 	REGISTER_DOUBLE_CONSTANT("M_PI", M_PI, CONST_CS | CONST_PERSISTENT);
 	test_class_startup();
@@ -2088,6 +2088,7 @@ PHP_FUNCTION(define)
 	pval *var, *val, *non_cs;
 	int case_sensitive;
 	zend_constant c;
+	ELS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -2128,7 +2129,7 @@ PHP_FUNCTION(define)
 	c.flags = case_sensitive | ~CONST_PERSISTENT; /* non persistent */
 	c.name = php3_strndup(var->value.str.val, var->value.str.len);
 	c.name_len = var->value.str.len+1;
-	zend_register_constant(&c);
+	zend_register_constant(&c ELS_CC);
 	RETURN_TRUE;
 }
 

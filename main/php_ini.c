@@ -105,6 +105,9 @@ int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 			php_unregister_ini_entries(module_number);
 			return FAILURE;
 		}
+		if (hashed_ini_entry->on_modify) {
+			hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg);
+		}
 		if ((default_value=cfg_get_entry(p->name, p->name_length))) {
 			if (!hashed_ini_entry->on_modify
 				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg)==SUCCESS) {

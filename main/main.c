@@ -1199,7 +1199,7 @@ static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 	if (setjmp(EG(bailout))!=0) {
 		return;
 	}
-	_php3_hash_environment();
+	_php3_hash_environment(PLS_C);
 
 #if WIN32||WINNT
 	UpdateIniFromRegistry(primary_file->filename);

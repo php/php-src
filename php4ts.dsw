@@ -23,9 +23,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name TSRM
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -40,6 +37,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libzendts
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TSRM
     End Project Dependency
 }}}
 
