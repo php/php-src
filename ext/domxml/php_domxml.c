@@ -386,7 +386,8 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(new_child,				domxml_node_new_child,			NULL)
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
 	PHP_FALIAS(has_attributes,			domxml_node_has_attributes,		NULL)
-	PHP_FALIAS(prefix,					domxml_node_prefix,				NULL)
+	PHP_FALIAS(prefix,				domxml_node_prefix,				NULL)
+	PHP_FALIAS(namespace_uri,			domxml_node_namespace_uri,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
 	PHP_FALIAS(add_child,				domxml_node_append_child,		NULL)
@@ -2183,6 +2184,32 @@ PHP_FUNCTION(domxml_node_prefix)
 	}
 }
 /* }}} */
+
+/* {{{ proto string domxml_node_namespace_uri(void)
+   Returns namespace uri of node */
+PHP_FUNCTION(domxml_node_namespace_uri)
+{
+	zval *id;
+	xmlNode *nodep;
+	xmlNsPtr ns;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	DOMXML_NO_ARGS();
+
+	ns = nodep->ns;
+	if (!ns) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (ns->href) {
+		RETURN_STRING((char *) (ns->href), 1);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+}
+/* }}} */
+
 
 /* {{{ proto object domxml_node_parent(void)
    Returns parent of node */

@@ -138,6 +138,7 @@ PHP_FUNCTION(domxml_node_has_attributes);
 PHP_FUNCTION(domxml_node_has_child_nodes);
 PHP_FUNCTION(domxml_node_parent);
 PHP_FUNCTION(domxml_node_prefix);
+PHP_FUNCTION(domxml_node_namespace_uri);
 PHP_FUNCTION(domxml_node);
 PHP_FUNCTION(domxml_clone_node);
 PHP_FUNCTION(domxml_node_unlink_node);
