@@ -107,6 +107,8 @@ function_entry php_zlib_functions[] = {
 	PHP_FE(gzfile,						NULL)
 	PHP_FE(gzcompress,                  NULL)
 	PHP_FE(gzuncompress,                NULL)
+	PHP_FE(gzdeflate,                   NULL)
+	PHP_FE(gzinflate,                   NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -764,6 +766,154 @@ PHP_FUNCTION(gzuncompress)
 	} else {
 		efree(s2);
 		php_error(E_WARNING,"gzuncompress: %s",zError(status));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string gzdeflate(string data [, int level]) 
+   Gzip-compress a string */
+PHP_FUNCTION(gzdeflate)
+{
+	zval **data, **zlimit = NULL;
+	int level,status;
+	z_stream stream;
+	char *s2;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &data) == FAILURE)
+			WRONG_PARAM_COUNT;
+		level=Z_DEFAULT_COMPRESSION;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		level = (*zlimit)->value.lval;
+		if((level<0)||(level>9)) {
+			php_error(E_WARNING,"gzdeflate: compression level must be whithin 0..9");
+			RETURN_FALSE;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;                                         
+	}
+	convert_to_string_ex(data);
+
+	stream.data_type = Z_ASCII;
+	stream.zalloc = (alloc_func) Z_NULL;
+	stream.zfree  = (free_func) Z_NULL;
+	stream.opaque = (voidpf) Z_NULL;
+
+	stream.next_in = (Bytef*) (*data)->value.str.val;
+	stream.avail_in = (*data)->value.str.len;
+
+	stream.avail_out = stream.avail_in + (stream.avail_in/1000) + 15;
+	s2 = (char *) emalloc(stream.avail_out);
+	if(!s2) RETURN_FALSE;
+	stream.next_out = s2;
+
+    /* init with -MAX_WBITS disables the zlib internal headers */
+	status = deflateInit2(&stream, level, Z_DEFLATED, -MAX_WBITS, MAX_MEM_LEVEL, 0);
+	if (status == Z_OK) {
+
+		status = deflate(&stream, Z_FINISH);
+		if (status != Z_STREAM_END) {
+			deflateEnd(&stream);
+			if (status == Z_OK) {
+				status = Z_BUF_ERROR;
+			}
+		} else {
+			status = deflateEnd(&stream);
+		}
+	}
+
+	if(status==Z_OK) {
+		RETURN_STRINGL(s2, stream.total_out, 0);
+	} else {
+		efree(s2);
+		php_error(E_WARNING,"gzdeflate: %s",zError(status));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string gzinflate(string data, int length) 
+   Unzip a gzip-compressed string */
+PHP_FUNCTION(gzinflate)
+{
+	zval **data, **zlimit = NULL;
+	int status,factor=1,maxfactor=8;
+	unsigned long plength=0,length;
+	char *s1=NULL,*s2=NULL;
+	z_stream stream;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &data) == FAILURE)
+			WRONG_PARAM_COUNT;
+		length=0;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		if((*zlimit)->value.lval<=0) {
+			php_error(E_WARNING,"gzinflate: length must be greater zero");
+			RETURN_FALSE;
+		}
+		plength = (*zlimit)->value.lval;
+		break;
+	default:
+		WRONG_PARAM_COUNT;                                         
+	}
+	convert_to_string_ex(data);
+
+	/*
+	  stream.avail_out wants to know the output data length
+	  if none was given as a parameter
+	  we try from input length * 2 up to input length * 2^8
+	  doubling it whenever it wasn't big enough
+	  that should be enaugh for all real life cases	
+	*/
+	stream.zalloc = (alloc_func) Z_NULL;
+	stream.zfree = (free_func) Z_NULL;
+
+	do {
+		length=plength?plength:(*data)->value.str.len*(1<<factor++);
+		s2 = (char *) erealloc(s1,length);
+		if(! s2) { if(s1) efree(s1); RETURN_FALSE; }
+
+		stream.next_in = (Bytef*) (*data)->value.str.val;
+		stream.avail_in = (uInt) (*data)->value.str.len;
+
+		stream.next_out = s2;
+		stream.avail_out = (uInt) length;
+
+		/* init with -MAX_WBITS disables the zlib internal headers */
+		status = inflateInit2(&stream, -MAX_WBITS);
+		if (status == Z_OK) {
+			status = inflate(&stream, Z_FINISH);
+			if (status != Z_STREAM_END) {
+				inflateEnd(&stream);
+				if (status == Z_OK) {
+					status = Z_BUF_ERROR;
+				}
+			} else {
+				status = inflateEnd(&stream);
+			}
+		}
+		s1=s2;
+		
+	} while((status==Z_BUF_ERROR)&&(!plength)&&(factor<maxfactor));
+
+	if(status==Z_OK) {
+		s2 = erealloc(s2, stream.total_out);
+		RETURN_STRINGL(s2, stream.total_out, 0);
+	} else {
+		efree(s2);
+		php_error(E_WARNING,"gzinflate: %s",zError(status));
 		RETURN_FALSE;
 	}
 }
