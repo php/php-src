@@ -47,10 +47,9 @@ static void convert_browscap_pattern(zval *pattern)
 	register int i, j;
 	char *t;
 
-	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 3);
-	t[0] = '^';
+	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 1);
 
-	for (i=0, j=1; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i=0, j=0; i<Z_STRLEN_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
 			case '?':
 				t[j] = '.';
@@ -73,7 +72,6 @@ static void convert_browscap_pattern(zval *pattern)
 		t[j++] = '*';
 	}
 
-	t[j++]='$';
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
 	Z_STRLEN_P(pattern) = j;
@@ -196,14 +194,9 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 	}
 
 	if (*found_browser_entry) {
-		/* We've already found it, so don't compare to the default browser,
-		   because it will match anything. */
-		if (!strcmp(Z_STRVAL_PP(browser_name), "^.*$")) {
-			return 0;
-		}
 		/* If we've found a possible browser, check it's length. Longer user
 		   agent strings are assumed to be more precise, so use them. */
-		else if (zend_hash_find(Z_ARRVAL_PP(found_browser_entry), "browser_name_regex", sizeof("browser_name_regex"), (void**) &current) == FAILURE) {
+		if (zend_hash_find(Z_ARRVAL_PP(found_browser_entry), "browser_name_regex", sizeof("browser_name_regex"), (void**) &current) == FAILURE) {
 			return 0;
 		}
 		else if (Z_STRLEN_PP(current) > Z_STRLEN_PP(browser_name)) {
