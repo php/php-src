@@ -43,16 +43,20 @@ AC_ARG_WITH(apxs2,
   *aix*)
     APXS_SBINDIR=`$APXS -q SBINDIR`
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
+    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c)
+    INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL" 
     ;;
   *darwin*)
     APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c) 
+    PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c)
+    SAPI_SHARED=libs/libphp4.so
+    INSTALL_IT="$APXS -i -a -n php4 $SAPI_SHARED"
     ;;
   *)
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
+    INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
     ;;
   esac
     
@@ -62,7 +66,6 @@ AC_ARG_WITH(apxs2,
   fi
 
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
-  INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
   PHP_BUILD_THREAD_SAFE
   AC_MSG_RESULT(yes)
 ],[
