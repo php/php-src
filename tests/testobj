@@ -2,7 +2,7 @@
 
 define("endl","\n");
 
-if (1) {
+//if (1) {
 class foobar {
 	function foobar() {
 		$this->initialized = 1;
@@ -12,7 +12,7 @@ class foobar {
 class barbara extends foobar {
 
 };
-}
+//}
 
 $name = "foobar";
 $foo = new $name; // or die("Unable to construct foobar\n");
