@@ -24,6 +24,8 @@
 #include <process.h>
 #include <time.h>
 
+#define TSRM_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "TSRM.h"
 
 #ifdef TSRM_WIN32
@@ -84,6 +86,7 @@ TSRM_API void tsrm_win32_shutdown(void)
 TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 {
 	SHFILEINFO sfi;
+
 	if (mode == 1 /*X_OK*/) {
 		return access(pathname, 0) == 0 && 
 			SHGetFileInfo(pathname, 0, &sfi, sizeof(SHFILEINFO), SHGFI_EXETYPE) != 0 ? 0 : -1;
