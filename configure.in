@@ -109,6 +109,8 @@ case $host_alias in
 *beos*)
 	beos_threads=1
 	LIBS="$LIBS -lbe -lroot";;
+*mips*)
+	CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
 esac
 
 AM_PROG_CC_STDC
@@ -689,7 +691,7 @@ LIBZEND_OTHER_CHECKS
 
 TSRM_LIB='TSRM/libtsrm.la'
 TSRM_DIR=TSRM
-INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
+CPPFLAGS="$CPPFLAGS -I\$(top_builddir)/TSRM"
 
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
