@@ -26,11 +26,26 @@
 #define XSLT_OBJ(__func)       (&(__func)->obj)
 #define XSLT_FUNC(__func)      ((__func)->func)
 
+#define XSLT_IS_FILE 0
+#define XSLT_IS_DATA 1
+
 struct xslt_function {
 	zval *obj;
 	zval *func;
 };
 
+struct _xslt_argument {
+	char *ptr;
+	int type;
+};
+
+typedef struct {
+	struct _xslt_argument xml;
+	struct _xslt_argument xsl;
+	struct _xslt_argument result;
+} xslt_args;
+
+extern xslt_args *parse_xslt_arguments(char *, char *, char *, char **);
 
 extern void assign_xslt_handler(struct xslt_function **, zval **);
 extern void free_xslt_handler(struct xslt_function *);
