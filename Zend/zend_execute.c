@@ -534,28 +534,37 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 	int free_op2;
 	zval *dim = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 	zval **retval;
+	char *offset_key;
+	int offset_key_length;
 
 	switch (dim->type) {
-		case IS_STRING: {
-				if (zend_hash_find(ht, dim->value.str.val, dim->value.str.len+1, (void **) &retval) == FAILURE) {
-					switch (type) {
-						case BP_VAR_R: 
-							zend_error(E_NOTICE,"Undefined index:  %s", dim->value.str.val);
-							/* break missing intentionally */
-						case BP_VAR_IS:
-							retval = &EG(uninitialized_zval_ptr);
-							break;
-						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index:  %s", dim->value.str.val);
-							/* break missing intentionally */
-						case BP_VAR_W: {
-								zval *new_zval = &EG(uninitialized_zval);
+		case IS_UNSET:
+			offset_key = "";
+			offset_key_length = 0;
+			goto fetch_string_dim;
+		case IS_STRING:
+			offset_key = dim->value.str.val;
+			offset_key_length = dim->value.str.len;
 
-								new_zval->refcount++;
-								zend_hash_update_ptr(ht, dim->value.str.val, dim->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
-							}
-							break;
-					}
+fetch_string_dim:
+			if (zend_hash_find(ht, offset_key, offset_key_length+1, (void **) &retval) == FAILURE) {
+				switch (type) {
+					case BP_VAR_R: 
+						zend_error(E_NOTICE,"Undefined index:  %s", offset_key);
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval_ptr);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined index:  %s", offset_key);
+						/* break missing intentionally */
+					case BP_VAR_W: {
+							zval *new_zval = &EG(uninitialized_zval);
+
+							new_zval->refcount++;
+							zend_hash_update_ptr(ht, offset_key, offset_key_length+1, new_zval, sizeof(zval *), (void **) &retval);
+						}
+						break;
 				}
 			}
 			break;
