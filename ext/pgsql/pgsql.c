@@ -3079,7 +3079,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 /* }}} */
 
 #define PGSQL_CONV_CHECK_IGNORE() \
-				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) { \
+				if (!err && Z_TYPE_P(new_val) == IS_STRING && !strcmp(Z_STRVAL_P(new_val), "NULL")) { \
 					/* if value is NULL and has default, remove entry to use default value*/ \
 					if (!(opt & PGSQL_CONV_IGNORE_DEFAULT) && Z_BVAL_PP(has_default)) { \
 						zval_dtor(new_val); \
