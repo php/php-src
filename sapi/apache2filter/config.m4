@@ -52,8 +52,8 @@ AC_ARG_WITH(apxs2filter,
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -le 2000000; then
     AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
-  elif test "$APACHE_VERSION" -lt 2000044; then
-    AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required.])
+  elif test "$APACHE_VERSION" -lt 2000040; then
+    AC_MSG_ERROR([Please note that Apache version >= 2.0.40 is required.])
   fi
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
