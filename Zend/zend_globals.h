@@ -66,7 +66,7 @@ struct _zend_compiler_globals {
 	zend_stack object_stack;
 	zend_stack declare_stack;
 
-	zend_class_entry class_entry, *active_class_entry;
+	zend_class_entry *active_class_entry;
 	zval active_ce_parent_class_name;
 
 	/* variables for list() compilation */

@@ -1484,6 +1484,19 @@ binary_assign_op_addr: {
 					FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 				}
 				NEXT_OPCODE();
+			case ZEND_FETCH_CLASS:
+				{
+					if (EX(opline)->op1.op_type == IS_UNUSED) {
+						if (zend_hash_find(EG(class_table), EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
+						}
+					} else {
+						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
+						}
+					}
+					NEXT_OPCODE();
+				}
 			case ZEND_INIT_FCALL_BY_NAME: {
 					zval *function_name;
 					zend_function *function;
@@ -1510,8 +1523,7 @@ binary_assign_op_addr: {
 					zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 						
 					if (EX(opline)->op1.op_type != IS_UNUSED) {
-						if (EX(opline)->op1.op_type==IS_CONST) { /* used for class_name::function() */
-							zend_class_entry *ce;
+						if (EX(opline)->op1.op_type==IS_CONST) { /* used for class::function() */
 							zval **object_ptr_ptr;
 
 							if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
@@ -1522,10 +1534,7 @@ binary_assign_op_addr: {
 								EX(object).ptr = *object_ptr_ptr;
 								EX(object).ptr->refcount++; /* For this pointer */
 							}
-							if (zend_hash_find(EG(class_table), EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **) &ce)==FAILURE) { /* class doesn't exist */
-								zend_error(E_ERROR, "Undefined class name '%s'", EX(opline)->op1.u.constant.value.str.val);
-							}
-							active_function_table = &ce->function_table;
+							active_function_table = &EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->function_table;
 						} else { /* used for member function calls */
 							EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 							

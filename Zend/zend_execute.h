@@ -44,6 +44,7 @@ typedef union _temp_variable {
 		} data;
 			
 		unsigned char type;
+		zend_class_entry *class_entry;
 	} EA;
 } temp_variable;
 

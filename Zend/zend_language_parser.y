@@ -237,8 +237,8 @@ unticked_declaration_statement:
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_CLASS T_STRING { zend_do_begin_class_declaration(&$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(TSRMLS_C); }
-	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(TSRMLS_C); }
+	|	T_CLASS T_STRING { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, TSRMLS_C); }
+	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, TSRMLS_C); }
 ;
 
 
@@ -391,7 +391,8 @@ class_statement:
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-
+	|	T_CLASS T_STRING { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, TSRMLS_C); }
+	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, TSRMLS_C); }
 ;
 
 is_reference:
@@ -498,7 +499,7 @@ function_call:
 		T_STRING	'(' { $2.u.opline_num = zend_do_begin_function_call(&$1 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string '(' { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); } 
+	|	parse_class_entry T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string '(' { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); } 
 											function_call_parameter_list 
 											')' { zend_do_end_function_call(&$3, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	cvar_without_objects  '(' { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1 TSRMLS_CC); }
@@ -506,6 +507,10 @@ function_call:
 			{ zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 ;
 
+parse_class_entry:
+		parse_class_entry T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
+	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
+;
 
 static_or_variable_string:
 		T_STRING	{ $$ = $1; }

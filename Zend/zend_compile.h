@@ -52,6 +52,7 @@ typedef struct _znode {
 		zend_uint opline_num; /*  Needs to be signed */
 		zend_uint fetch_type;
 		zend_op_array *op_array;
+		zend_class_entry *previously_active_class_entry; /* Used at compile-time */
 		struct {
 			zend_uint var;	/* dummy */
 			zend_uint type;
@@ -271,6 +272,7 @@ void zend_do_receive_arg(int op, znode *var, znode *offset, znode *initializatio
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
+void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_DC);
 void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
@@ -300,8 +302,8 @@ void zend_do_case_before_statement(znode *case_list, znode *case_token, znode *c
 void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC);
 
-void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name TSRMLS_DC);
-void zend_do_end_class_declaration(TSRMLS_D);
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
+void zend_do_end_class_declaration(znode *class_token TSRMLS_DC);
 void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);
@@ -536,7 +538,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_THROW					108
 
 #define ZEND_NAMESPACE				109
-
+#define ZEND_FETCH_CLASS			110
 /* end of block */
 
 
