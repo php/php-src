@@ -288,7 +288,7 @@ PS_WRITE_FUNC(files)
 	 * the existing data set.
 	 */
 	
-	if (vallen <  data->st_size)
+	if (vallen < data->st_size)
 		ftruncate(data->fd, 0);
 
 #ifdef HAVE_PWRITE
