@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Renamed key_exists tp array_key_exists. (Derick)
 - Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
   images. (Rasmus)
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
