@@ -11,13 +11,16 @@
  * the input parameter to foreach() calls which would normally be an 
  * array.
  *
- * The only thing a class has to do is 
+ * The class must implement the function new_iterator which must return 
+ * an object which implements the interface spl_forward.
+ *
+ * \see spl_forward, spl_sequence, spl_forward_assoc, spl_sequence_assoc
  */
 interface spl_iterator {
 	
 	/*! \brief Create a new iterator
 	 *
-	 * used for example in foreach() operator.
+	 * \return an object that implements the interface spl_forward.
 	 */
 	function new_iterator();
 }
@@ -217,7 +220,7 @@ interface spl_array_read {
 
 /*! \brief array read/write access for objects.
  *
- * The following example shows how to use an array_writer:
+ * The following example shows how to use interface array_access:
  * \code 
 	class array_emulation implemets spl_array_access {
 		private $ar = array();
@@ -230,6 +233,9 @@ interface spl_array_read {
 		function set($index, $value) {
 			$this->ar[$index] = $value;
 		}
+		function del($index) {
+			unset($this->ar[$index]);
+		}
 	}
    \endcode
  */
@@ -237,7 +243,68 @@ interface spl_array_access implements spl_array_read {
 
 	/*! Set the value identified by $index to $value.
 	 */
-	function set($value, $index);
+	function set($index, $value);
+
+	/*! Delete (unset) the value identified by $index.
+	 */
+	function del($index);
+}
+
+/*! \brief An array wrapper
+ *
+ * This array wrapper allows to recursively iterate over Arrays and Objects.
+ *
+ * \see spl_array_it
+ */
+class spl_array implements spl_iterator {
+
+	/*! Construct a new array iterator from anything that has a hash table.
+	 * That is any Array or Object.
+	 *
+	 * \param $array the array to use.
+	 */
+	function __construct($array);
+
+	/*! \copydoc spl_iterator::new_iterator
+	 */
+	function new_iterator();
+}
+
+/*! \brief An array iterator
+ *
+ * This iterator allows to unset and modify values and keys while iterating
+ * over Arrays and Objects.
+ *
+ * To use this class you must instanciate spl_array.
+ */
+class spl_array_it implements spl_sequence_assoc {
+
+	/*! Construct a new array iterator from anything that has a hash table.
+	 * That is any Array or Object.
+	 *
+	 * \param $array the array to use.
+	 */
+	private function __construct($array)
+
+	/*! \copydoc spl_sequence::rewind
+	 */
+	function rewind()
+
+	/*! \copydoc spl_forward::current
+	 */
+	function current()
+
+	/*! \copydoc spl_assoc::key
+	 */
+	function key()
+
+	/*! \copydoc spl_forward::next
+	 */
+	function next()
+
+	/*! \copydoc spl_forward::has_more
+	 */
+	function has_more()
 }
 
 ?>

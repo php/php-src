@@ -308,19 +308,24 @@ SPL_CLASS_FUNCTION(array, key);
 SPL_CLASS_FUNCTION(array, next);
 SPL_CLASS_FUNCTION(array, has_more);
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
+	ZEND_ARG_INFO(0, array)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_array_class_functions[] = {
-	SPL_CLASS_FE(array, __construct,   NULL)
-	SPL_CLASS_FE(array, new_iterator,  NULL)
+	SPL_CLASS_FE(array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, new_iterator,  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry spl_array_it_class_functions[] = {
-	SPL_CLASS_FE(array, __construct,   NULL)
-	SPL_CLASS_FE(array, rewind,        NULL)
-	SPL_CLASS_FE(array, current,       NULL)
-	SPL_CLASS_FE(array, key,           NULL)
-	SPL_CLASS_FE(array, next,          NULL)
-	SPL_CLASS_FE(array, has_more,      NULL)
+	SPL_CLASS_FE(array, __construct,   arginfo_array___construct, ZEND_ACC_PRIVATE)
+	SPL_CLASS_FE(array, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, current,       NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, has_more,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -558,8 +563,8 @@ PHP_MINIT_FUNCTION(spl_array)
 }
 /* }}} */
 
-/* {{{ proto void spl_array::__construct(array ar = array())
-       proto void spl_array_it::__construct(array ar = array())
+/* {{{ proto void spl_array::__construct(array|object ar = array())
+       proto void spl_array_it::__construct(array|object ar = array())
  Cronstructs a new array iterator from a path. */
 SPL_CLASS_FUNCTION(array, __construct)
 {
