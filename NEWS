@@ -58,6 +58,7 @@ PHP                                                                        NEWS
 - Fixed bug #30042 (strtotime does not use second param). (Derick)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
   (cfield at affinitysolutions dot com)
+- Fixed bug #29954 (array_reduce segfaults when initial value is array). (Tony)
 - Fixed bug #29801 (Set limit on the size of mmapable data). (Ilia)
 - Fixed bug #29557 (strtotime error). (Derick)
 - Fixed bug #29418 (double free when openssl_csr_new fails).
