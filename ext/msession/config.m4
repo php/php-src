@@ -27,9 +27,5 @@ if test "$PHP_MSESSION" != "no"; then
 	PHP_SUBST(PHOENIX_LIB)
 
   	PHP_EXTENSION(msession, $ext_shared)
-
-	if test "$enable_session" != "no"; then
-		AC_DEFINE(HAVE_PHP_SESSION,1,[ ])
-	fi
 fi
 

@@ -29,4 +29,5 @@ if test "$PHP_SESSION" != "no"; then
   PHP_MISSING_PREAD_DECL
   PHP_EXTENSION(session,$ext_shared)
   PHP_SUBST(SESSION_SHARED_LIBADD)
+  AC_DEFINE(HAVE_PHP_SESSION,1,[ ])
 fi
