@@ -1823,7 +1823,7 @@ PHP_FUNCTION(sqlite_fetch_all)
 PHP_FUNCTION(sqlite_fetch_array)
 {
 	zval *zres;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
 	zval *object = getThis();
