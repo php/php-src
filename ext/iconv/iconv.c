@@ -143,7 +143,7 @@ static int php_iconv_string(char *in_p, unsigned int in_len,
 	  I added 15 extra bytes for safety. <yohgaki@php.net>
 	*/
     out_size = in_len * sizeof(ucs4_t) + 16;
-    out_buffer = (char *) emalloc(out_size);
+    out_buffer = (char *) ecalloc(1, out_size);
 
 	*out = out_buffer;
     out_p = out_buffer;
