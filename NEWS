@@ -21,6 +21,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25703 (openssl configure check failed). (Jani)
 - Fixed bug #25701 (On flush() set headers_sent in apache2handler). (Ilia)
 - Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
+- Fixed bug #25558 (ext/dbase: reverted fix for bug #23463). (Vlad)
 - Fixed bug #18534 (ifx_close() leaves open session). (nobbie@php.net)
 
 29 Sep 2003, Version 4.3.4RC1
