@@ -1,0 +1,28 @@
+// vim:ft=javascript
+// $Id$
+
+ARG_ENABLE('nsapi', 'Build NSAPI for Netscape/iPlanet/SunONE webservers', 'no');
+
+ARG_WITH('nsapi-includes', 'Where to find NSAPI headers', null);
+ARG_WITH('nsapi-libs', 'Where to find NSAPI libraries', null);
+
+if (PHP_NSAPI == "yes") {
+
+	if (!CHECK_HEADER_ADD_INCLUDE("nsapi.h", "CFLAGS_NSAPI", php_usual_include_suspects + ";" + PHP_NSAPI_INCLUDES)) {
+		ERROR("Could not find NSAPI headers");
+	}
+
+	if (!CHECK_LIB("ns-httpd40.lib", "nsapi", php_usual_lib_suspects + ";" + PHP_NSAPI_LIBS)) {
+		if (!CHECK_LIB("ns-httpd36.lib", "nsapi", php_usual_lib_suspects + ";" + PHP_NSAPI_LIBS)) {
+			if (!CHECK_LIB("ns-httpd35.lib", "nsapi", php_usual_lib_suspects + ";" + PHP_NSAPI_LIBS)) {
+				if (!CHECK_LIB("ns-httpd30.lib", "nsapi", php_usual_lib_suspects + ";" + PHP_NSAPI_LIBS)) {
+					ERROR("Could not find NSAPI libraries");
+				}
+			}
+		}
+	}
+	
+	SAPI('nsapi', 'nsapi.c',
+		'php' + PHP_VERSION + 'nsapi.dll',
+		'/D "XP_WIN32" /D "php' + PHP_VERSION + 'nsapi_EXPORTS"');
+}
