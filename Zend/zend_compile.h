@@ -393,6 +393,8 @@ void zend_do_begin_import(TSRMLS_D);
 void zend_do_import(int type, znode *what TSRMLS_DC);
 void zend_do_end_import(znode *import_from TSRMLS_DC);
 
+void zend_do_abstract_method(TSRMLS_C);
+
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
@@ -607,6 +609,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_DECLARE_CLASS				139
 #define ZEND_DECLARE_INHERITED_CLASS	140
 #define ZEND_DECLARE_FUNCTION			141
+
+#define ZEND_RAISE_ABSTRACT_ERROR	142
 
 /* end of block */
 

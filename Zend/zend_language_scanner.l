@@ -726,6 +726,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STATIC;
 }
 
+<ST_IN_SCRIPTING>"abstract" {
+	return T_ABSTRACT;
+}
+
 <ST_IN_SCRIPTING>"private" {
 	return T_PRIVATE;
 }
@@ -737,7 +741,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"public" {
 	return T_VAR;
 }
-
 
 <ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
