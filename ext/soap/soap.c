@@ -1687,7 +1687,6 @@ static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 static void clear_soap_fault(zval *obj TSRMLS_DC)
 {
 	if (obj != NULL && obj->type == IS_OBJECT) {
-/*		zend_hash_del(obj->value.obj.properties, "__soap_fault", sizeof("__soap_fault"));*/
 		zend_hash_del(Z_OBJPROP_P(obj), "__soap_fault", sizeof("__soap_fault"));
 	}
 }
@@ -1945,9 +1944,62 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 		Z_OBJCE_P(ret) == soap_fault_class_entry) {
 		use = SOAP_ENCODED;
 		if (version == SOAP_1_1) {
-			param = seralize_zval(ret, NULL, SOAP_1_1_ENV_NS_PREFIX":Fault", use TSRMLS_CC);
+			HashTable* prop;
+			zval **tmp;
+
+			prop = Z_OBJPROP_P(ret);
+			param = xmlNewNode(NULL, SOAP_1_1_ENV_NS_PREFIX":Fault");
+			if (zend_hash_find(prop, "faultcode", sizeof("faultcode"), (void**)&tmp) == SUCCESS) {
+				int new_len;
+				xmlNodePtr node = xmlNewChild(param, NULL, "faultcode", NULL);
+				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				xmlNodeSetContentLen(node, str, new_len);
+				efree(str);
+			}
+			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
+				int new_len;
+				xmlNodePtr node = xmlNewChild(param, NULL, "faultstring", NULL);
+				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				xmlNodeSetContentLen(node, str, new_len);
+				efree(str);
+			}
+			if (zend_hash_find(prop, "faultactor", sizeof("faultactor"), (void**)&tmp) == SUCCESS) {
+				int new_len;
+				xmlNodePtr node = xmlNewChild(param, NULL, "faultactor", NULL);
+				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				xmlNodeSetContentLen(node, str, new_len);
+				efree(str);
+			}
+			if (zend_hash_find(prop, "detail", sizeof("detail"), (void**)&tmp) == SUCCESS &&
+			    Z_TYPE_PP(tmp) != IS_NULL) {
+				xmlNodePtr node = seralize_zval(*tmp, NULL, "detail", use TSRMLS_CC);
+				xmlAddChild(param,node);
+			}
 		} else {
-			param = seralize_zval(ret, NULL, SOAP_1_2_ENV_NS_PREFIX":Fault", use TSRMLS_CC);
+			HashTable* prop;
+			zval **tmp;
+
+			prop = Z_OBJPROP_P(ret);
+			param = xmlNewNode(NULL, SOAP_1_2_ENV_NS_PREFIX":Fault");
+			if (zend_hash_find(prop, "faultcode", sizeof("faultcode"), (void**)&tmp) == SUCCESS) {
+				int new_len;
+				xmlNodePtr node = xmlNewChild(param, NULL, SOAP_1_2_ENV_NS_PREFIX":Code", NULL);
+				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				xmlNodeSetContentLen(node, str, new_len);
+				efree(str);
+			}
+			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
+				int new_len;
+				xmlNodePtr node = xmlNewChild(param, NULL, SOAP_1_2_ENV_NS_PREFIX":Reason", NULL);
+				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				xmlNodeSetContentLen(node, str, new_len);
+				efree(str);
+			}
+			if (zend_hash_find(prop, "detail", sizeof("detail"), (void**)&tmp) == SUCCESS &&
+			    Z_TYPE_PP(tmp) != IS_NULL) {
+				xmlNodePtr node = seralize_zval(*tmp, NULL, SOAP_1_2_ENV_NS_PREFIX":Detail", use TSRMLS_CC);
+				xmlAddChild(param,node);
+			}
 		}
 		xmlAddChild(body, param);
 	} else {
