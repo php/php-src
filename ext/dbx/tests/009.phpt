@@ -4,6 +4,8 @@ dbx_escape_string
 <?php 
 include_once("skipif.inc");
 ?>
+--INI--
+magic_quotes_runtime=0
 --FILE--
 <?php 
 include_once("dbx_test.p");
