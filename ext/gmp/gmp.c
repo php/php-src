@@ -793,7 +793,7 @@ ZEND_FUNCTION(gmp_sqrt)
 /* }}} */
 
 /* {{{ proto array gmp_sqrtrem(resource a)
-   Takes integer part of square root of a */
+   Square root with remainder */
 ZEND_FUNCTION(gmp_sqrtrem)
 {
 	zval **a_arg;

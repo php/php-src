@@ -130,7 +130,7 @@ zend_module_entry apache_module_entry = {
 };
 
 /* {{{ proto string apache_child_terminate()
-   Get and set Apache request notes */
+   Terminate apache process after this request */
 PHP_FUNCTION(apache_child_terminate)
 {
 #ifndef MULTITHREAD
