@@ -1084,13 +1084,13 @@ PHP_FUNCTION(com_load_typelib)
 {
 	pval *arg_typelib, *arg_cis;
 	ITypeLib *pTL;
-	int mode;
+	int mode = CONST_CS; /* CONST_PERSISTENT|CONST_CS; */
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			zend_get_parameters(ht, 1, &arg_typelib);
-			mode = CONST_CS; /* CONST_PERSISTENT|CONST_CS; */
 			break;
+
 		case 2:
 			zend_get_parameters(ht, 2, &arg_typelib, &arg_cis);
 			convert_to_boolean_ex(&arg_cis);
@@ -1098,6 +1098,7 @@ PHP_FUNCTION(com_load_typelib)
 				mode &= ~CONST_CS;
 			}
 			break;
+
 		default:
 			ZEND_WRONG_PARAM_COUNT();
 	}
@@ -1292,7 +1293,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	int type;
 
 	if (zend_llist_count(property_reference->elements_list)==1
-		&& !strcmp(Z_STRVAL(function_name->element), "com")) { /* constructor */
+		&& !strcmp(Z_STRVAL(function_name->element), "com")) {
+		/* constructor */
 		pval *object_handle;
 
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
