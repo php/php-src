@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
 - Fixed bug #25756 (SimpleXML's validate_schema_file() broken). (Moriyoshi)
+- Fixed bug #25581 (getimagesize () return incorrect values on bitmap (os2) 
+  files) (Marcus)
 - Fixed bug #25494 (array_merge*() allows non-arrays as argument). (Jay)
 - Fixed bug #24766 (strange result array from unpack()). (Moriyoshi)
 - Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
