@@ -504,7 +504,8 @@ class PEAR_Installer extends PEAR_Common
                             $data[3] = dirname($data[3]);
                         }
                     }
-                    if (!count($this->pkginfo['filelist']['dirtree'])) {
+                    if (isset($this->pkginfo['filelist']['dirtree'])
+                          && !count($this->pkginfo['filelist']['dirtree'])) {
                         unset($this->pkginfo['filelist']['dirtree']);
                     }
                     break;
