@@ -261,14 +261,16 @@ ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name 
 	return zend_verify_property_access(property_info, zobj->ce TSRMLS_CC) ? SUCCESS : FAILURE;
 }
 
-zval *zend_std_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
+zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zend_object *zobj;
 	zval tmp_member;
 	zval **retval;
 	zval *rv = NULL;
 	zend_property_info *property_info;
-	
+	int silent;
+
+	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
 
  	if (member->type != IS_STRING) {
