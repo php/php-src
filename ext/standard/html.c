@@ -117,7 +117,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	int mbpos = 0;
 	unsigned short this_char = str[pos++];
 	
-	mbseq[mbpos++] = this_char;
+	mbseq[mbpos++] = (unsigned char)this_char;
 	
 	if (charset == cs_utf_8)	{
 		unsigned long utf = 0;
@@ -142,7 +142,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 						/* last byte in sequence */
 						more = 0;
 						utf |= (this_char & 0x3f);
-						this_char = utf;
+						this_char = (unsigned short)utf;
 						break;
 					case 0x20:	/* 3, 2nd */
 					case 0x31:	/* 4, 3rd */
@@ -196,7 +196,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 			if (more)
 			{
 				this_char = str[pos++];
-				mbseq[mbpos++] = this_char;
+				mbseq[mbpos++] = (unsigned char)this_char;
 			}
 		} while(more);
 	}
@@ -336,7 +336,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 				memcpy(new + len, mbsequence, mbseqlen);
 				len += mbseqlen;
 			} else {
-				new [len++] = this_char;
+				new [len++] = (unsigned char)this_char;
 			}
 		}
 	}
