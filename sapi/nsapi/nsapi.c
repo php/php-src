@@ -933,6 +933,8 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
 	SG(sapi_headers).http_response_code = (error_directive) ? rq->status_num : 200;
 
+	if (!PG(safe_mode)) php_handle_auth_data(pblock_findval("authorization", rq->headers) TSRMLS_CC);
+
 	nsapi_php_ini_entries(NSLS_C TSRMLS_CC);
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
