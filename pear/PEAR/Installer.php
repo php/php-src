@@ -738,6 +738,11 @@ class PEAR_Installer extends PEAR_Common
                                         $possible = array($ver => $inf['state']);
                                     }
                                 }
+                            } else {
+                                return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
+                                                         "' found. The latest is $pkgfile-$ver ({$inf['state']}). Use " .
+                                                         "'pear install $pkgfile-$ver' or set the 'preferred_state' ".
+                                                         "to '{$inf['state']}' for installing this package.");
                             }
                         }
                         if ($possible) {
