@@ -54,6 +54,29 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 	var_hash->data[var_hash->used_slots++] = *rval;
 }
 
+static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
+{
+	var_entries *var_hash = var_hashx->first, *prev = NULL;
+
+	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
+		prev = var_hash;
+		var_hash = var_hash->next;
+	}
+
+	if (!var_hash) {
+		var_hash = emalloc(sizeof(var_entries));
+		var_hash->used_slots = 0;
+		var_hash->next = 0;
+
+		if (!var_hashx->first)
+			var_hashx->first = var_hash;
+		else
+			prev->next = var_hash;
+	}
+
+	var_hash->data[var_hash->used_slots++] = *rval;
+}
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	int i;
@@ -91,9 +114,21 @@ static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
+	int i;
 	var_entries *var_hash = var_hashx->first;
 	
 	while (var_hash) {
+		next = var_hash->next;
+		efree(var_hash);
+		var_hash = next;
+	}
+	
+	var_hash = var_hashx->first_dtor;
+	
+	while (var_hash) {
+		for (i = 0; i < var_hash->used_slots; i++) {
+			zval_ptr_dtor(&var_hash->data[i]);
+		}
 		next = var_hash->next;
 		efree(var_hash);
 		var_hash = next;
@@ -208,14 +243,14 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 
 		switch (Z_TYPE_P(key)) {
 			case IS_LONG:
-				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)) {
-					var_replace(var_hash, old_data, rval);
+				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)==SUCCESS) {
+					var_push_dtor(var_hash, old_data);
 				}
 				zend_hash_index_update(ht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 				break;
 			case IS_STRING:
-				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)) {
-					var_replace(var_hash, old_data, rval);
+				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
+					var_push_dtor(var_hash, old_data);
 				}
 				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
