@@ -1,3 +1,68 @@
+2002-01-25  Marko Karppinen  <karppinen@pobox.com>
+
+    * configure.in:
+    Improve detection of resolv.h on versions of Darwin, FreeBSD and Solaris
+    (this requires post-2.13 autoconf, but 2.13 ignores it gracefully)
+
+    * configure.in: Relying only on host_alias is wrong
+
+2002-01-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: We need mm file for each user.
+
+2002-01-25  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/xmlrpc/config.m4:
+    - Fix for bug #15227: Compiling the CGI binary with xmlrpc fails to
+      build/link expat
+
+    * ext/standard/basic_functions.c:
+    - Fixed highlight_* (make it more robust)
+
+2002-01-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/EXPERIMENTAL: no longer experimental
+
+2002-01-25  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/standard/basic_functions.c:
+    - Added optional parameter to highlight_string and highlight_file which
+      makes these functions return a highlighted string instead of dumping
+      to standard output. (Derick)
+    - Added optional parameter to highlight_string and highlight_file which
+      makes these functions return a highlighted string instead of dumping
+      to standard output. 
+
+2002-01-25  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/array.c:
+    (extraxt) add EXTR_IF_EXISTS and EXTR_PREFIX_IF_EXISTS flags
+
+2002-01-25  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/domxml/php_domxml.c:
+    - Fix for bug #14934: type property not set in comment nodes (domxml)
+
+2002-01-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: Add sapi postfix for mm save path.
+    cli/cgi would not complain about mm save handler with this.
+
+2002-01-25  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c: adjust to ap_get_brigade() API change
+
+2002-01-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * php.ini-recommended
+      php.ini-dist:
+    Added "pgsql.auto_reset_persistent" ini entry to catch broken connection
+    always with pg_pconnect(). (Default Off in source and php.ini-*)
+    This option requires a little overhead for pg_pconnect().
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Added "auto_reset_presistent" ini entry.
+
 2002-01-24  Marko Karppinen  <karppinen@pobox.com>
 
     * build/buildcheck.sh:
