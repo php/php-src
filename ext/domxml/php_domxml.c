@@ -720,7 +720,7 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlDoc *doc = (xmlDoc *) rsrc->ptr;
 
 	if (doc) {
-		node_list_wrapper_dtor(doc->children, 0 TSRMLS_CC);
+		node_list_wrapper_dtor(doc->children, 1 TSRMLS_CC);
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
@@ -736,8 +736,8 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		/* Attribute Nodes ccontain accessible children 
 		attr_list_wrapper_dtor(node->properties); */
 		xmlSetTreeDoc(node, NULL);
-		node_list_wrapper_dtor((xmlNodePtr) node->properties, 0 TSRMLS_CC);
-		node_list_wrapper_dtor(node->children, 0 TSRMLS_CC);
+		node_list_wrapper_dtor((xmlNodePtr) node->properties, 1 TSRMLS_CC);
+		node_list_wrapper_dtor(node->children, 1 TSRMLS_CC);
 		node_wrapper_dtor(node);
 		xmlFreeNode(node);
 	} else {
@@ -750,7 +750,7 @@ static void php_free_xml_attr(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 	if (node->parent == NULL) {
 		/* Attribute Nodes contain accessible children */
-		node_list_wrapper_dtor(node->children, 0 TSRMLS_CC);
+		node_list_wrapper_dtor(node->children, 1 TSRMLS_CC);
 		node_wrapper_dtor(node);
 		xmlFreeProp((xmlAttrPtr) node);
 	} else {
@@ -4340,10 +4340,10 @@ PHP_FUNCTION(domxml_doc_free_doc)
 		RETURN_FALSE;
 	}
 
+	/* No need to do this as php_free_xml_doc will kill the children
 	node_list_wrapper_dtor(docp->children, 1 TSRMLS_CC);
 	node_list_wrapper_dtor((xmlNodePtr) docp->properties, 1 TSRMLS_CC);
-	/* Attribute Nodes ccontain accessible children 
-	attr_list_wrapper_dtor(docp->properties); */
+	*/
 	node_wrapper_free(docp TSRMLS_CC);
 
 	RETURN_TRUE;
