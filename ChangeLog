@@ -1,5 +1,47 @@
 2001-02-06  Jim Jagielski  <jim@jaguNET.com>
 
+    * NEWS
+      ext/standard/array.c
+      ext/standard/crypt.c
+      ext/standard/rand.c:
+    For those lucky systems with both random() and *rand48(), the random()
+    family is the prefered choice. So if both exist, we now choose that.
+
+2001-02-06  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    UDM_FIELD_ORDER and UDM_FIELD_CRC mnoGoSearch result fields has been added.
+    Example updated.
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    UDM_PARAM_WORDINFO mnoGoSearch result parameter has been added.
+    UDM_PARAM_RATING result field has neen added as alias for UDM_PARAM_SCORE.
+    Example updated.
+
+2001-02-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/php_wddx_api.h: Preserve API compatibility.
+
+    * ext/wddx/wddx.c: Don't use Z* macros for non-zvals.
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      NEWS: Cleaned up and optimized WDDX serialization - it's about twice
+    as fast now.
+
+2001-02-06  Stephen van Egmond  <svanegmond@home.com>
+
+    * ext/standard/dns.c:
+    Added tests for arpa/*.h and resolv.h which don't exist on the BeOS.
+    The dns functions on BeOS come from socket.h
+
+    * configure.in:
+    Added tests for arpa/nameser.h and resolv.h, which don't exist on the BeOS.
+
+2001-02-06  Jim Jagielski  <jim@jaguNET.com>
+
     * ext/standard/array.c:
       ext/standard/crypt.c:
       ext/standard/rand.c:
