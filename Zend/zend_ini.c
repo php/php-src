@@ -307,7 +307,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				display_string = ini_entry->orig_value;
 				display_string_length = ini_entry->orig_value_length;
 			} else {
-				if(zend_uv.html_errors) {
+				if (zend_uv.html_errors) {
 					display_string = NO_VALUE_HTML;
 					display_string_length = sizeof(NO_VALUE_HTML)-1;
 				} else {
@@ -319,7 +319,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
 		} else {
-			if(zend_uv.html_errors) {
+			if (zend_uv.html_errors) {
 				display_string = NO_VALUE_HTML;
 				display_string_length = sizeof(NO_VALUE_HTML)-1;
 			} else {

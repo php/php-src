@@ -64,7 +64,7 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 	*/
 	
 
-	if(call_result == FAILURE) {
+	if (call_result == FAILURE) {
 		zend_error(E_ERROR, "Could not call __get handler for class %s", Z_OBJCE_P(object)->name);
 		return NULL;
 	}
@@ -109,7 +109,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	*/
 	
 
-	if(call_result == FAILURE) {
+	if (call_result == FAILURE) {
 		zend_error(E_ERROR, "Could not call __set handler for class %s", Z_OBJCE_P(object)->name);
 		return FAILURE;
 	}
@@ -122,7 +122,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 		ret = FAILURE;
 	}
 
-	if(retval) {
+	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
 	
@@ -150,13 +150,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 #endif			
 	
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &retval) == FAILURE) {
-		if(zobj->ce->__get && !zobj->in_get) {
+		if (zobj->ce->__get && !zobj->in_get) {
 			/* have getter - try with it! */
 			zobj->in_get = 1; /* prevent circular getting */
 			rv = zend_std_call_getter(object, member TSRMLS_CC);
 			zobj->in_get = 0;
 
-			if(rv) {
+			if (rv) {
 				retval = &rv;
 			} else {
 				retval = &EG(uninitialized_zval_ptr);	
@@ -218,9 +218,9 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			}
 		}
 	} else {
-		if(zobj->ce->__set && !zobj->in_set) {
+		if (zobj->ce->__set && !zobj->in_set) {
 			zobj->in_set = 1; /* prevent circular setting */
-			if(zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
+			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
 			}
 			setter_done = 1;
@@ -228,7 +228,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		}
 	}
 
-	if(!setter_done) {
+	if (!setter_done) {
 		value->refcount++;
 		zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL);
 	}
@@ -259,7 +259,7 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &retval) == FAILURE) {
 		zval *new_zval;
 
-		if(!zobj->ce->__get) {
+		if (!zobj->ce->__get) {
 			/* we don't have getter - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
@@ -352,13 +352,13 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	   method_result_ptr is the true result of the called method
 	*/
 	
-	if(method_result_ptr) {
+	if (method_result_ptr) {
 		*return_value = *method_result_ptr;
 		zval_copy_ctor(return_value);
 		zval_ptr_dtor(&method_result_ptr);
 	}
 	
-	if(call_result == FAILURE) {
+	if (call_result == FAILURE) {
 		zend_error(E_ERROR, "Could not call __call handler for class %s", Z_OBJCE_P(this_ptr)->name);
 	}
 
@@ -382,8 +382,8 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 	zend_str_tolower(lc_method_name, method_len);
 		
 	zobj = Z_OBJ_P(object);
-	if(zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&func_method) == FAILURE) {
-		if(zobj->ce->__call != NULL) {
+	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&func_method) == FAILURE) {
+		if (zobj->ce->__call != NULL) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
 			call_user_call->handler = zend_std_call_user_call;
@@ -418,7 +418,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC)
 	zobj1 = Z_OBJ_P(o1);
 	zobj2 = Z_OBJ_P(o2);
 
-	if(zobj1->ce != zobj2->ce) {
+	if (zobj1->ce != zobj2->ce) {
 		return 1; /* different classes */
 	}
 	return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties TSRMLS_CC);
@@ -440,8 +440,8 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 		member = &tmp_member;
 	}
 	
-	if(zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **)&value) == SUCCESS) {
-		if(check_empty) {
+	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **)&value) == SUCCESS) {
+		if (check_empty) {
 			result = zend_is_true(*value);
 		} else {
 			result = (Z_TYPE_PP(value) != IS_NULL);

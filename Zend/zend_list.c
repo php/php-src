@@ -233,7 +233,6 @@ void zend_destroy_rsrc_list(HashTable *ht TSRMLS_DC)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
-
 static int clean_module_resource(zend_rsrc_list_entry *le, int *resource_id TSRMLS_DC)
 {
 	if (le->type == *resource_id) {
@@ -315,7 +314,7 @@ ZEND_API int zend_fetch_list_dtor_id(char *type_name)
 
 	zend_hash_internal_pointer_reset_ex(&list_destructors, &pos);
 	while(zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
-		if(strcmp(type_name, lde->type_name) == 0) {
+		if (strcmp(type_name, lde->type_name) == 0) {
 #if 0
 			printf("Found resource id %d for resource type %s\n", (*lde).resource_id, type_name);
 #endif

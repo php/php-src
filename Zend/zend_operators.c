@@ -514,7 +514,7 @@ ZEND_API void convert_to_array(zval *op)
 
 				ALLOC_HASHTABLE(ht);
 				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-				if(Z_OBJ_HT_P(op)->get_properties) {
+				if (Z_OBJ_HT_P(op)->get_properties) {
 					zend_hash_copy(ht, Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 				}
 				zval_dtor(op);
@@ -1247,7 +1247,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			}
 			break;
 		case IS_OBJECT:
-			if(Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2) && Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
+			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2) && Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
 				result->value.lval = 1;
 			} else {
 				result->value.lval = 0;
@@ -1459,7 +1459,7 @@ ZEND_API int increment_function(zval *op1)
 {
 	switch (op1->type) {
 		case IS_LONG:
-			if(op1->value.lval == LONG_MAX) {
+			if (op1->value.lval == LONG_MAX) {
 				/* switch to double */
 				double d = (double)op1->value.lval;
 				ZVAL_DOUBLE(op1, d+1);
@@ -1481,7 +1481,7 @@ ZEND_API int increment_function(zval *op1)
 
 				switch (is_numeric_string(strval, op1->value.str.len, &lval, &dval, 0)) {
 					case IS_LONG:
-						if(lval == LONG_MAX) {
+						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
 							ZVAL_DOUBLE(op1, d+1);
@@ -1521,7 +1521,7 @@ ZEND_API int decrement_function(zval *op1)
 	
 	switch (op1->type) {
 		case IS_LONG:
-			if(op1->value.lval == LONG_MIN) {
+			if (op1->value.lval == LONG_MIN) {
 				double d = (double)op1->value.lval;
 				ZVAL_DOUBLE(op1, d-1);
 			} else {
@@ -1541,7 +1541,7 @@ ZEND_API int decrement_function(zval *op1)
 			switch(is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, &dval, 0)) {
 				case IS_LONG:
 					STR_FREE(op1->value.str.val);
-					if(lval == LONG_MIN) {
+					if (lval == LONG_MIN) {
 						double d = (double)lval;
 						ZVAL_DOUBLE(op1, d-1);
 					} else {
@@ -1753,8 +1753,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 		return;
 	}
 
-	if(Z_OBJ_HT_P(o1)->compare_objects == NULL) {
-		if(Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
+	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
+		if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
 			result->value.lval = 0;
 		} else {
 			result->value.lval = 1;
