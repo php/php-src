@@ -45,10 +45,11 @@
 * Added support for optional dependencies
 * Made upgrade and uninstall package case insensitive
 * pear makerpm, now works and generates a better system independant spec file
-* pear install|build &lt;pecl-package&gt;, now exposes the compilation progress
+* pear install|build pecl-package, now exposes the compilation progress
 * Installer now checks dependencies on package uninstall
 * Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
-* Added new pear bundle command, which downloads and uncompress a &lt;pecl-package&gt;.
+* Added the command "download-all" (Alex Merz)
+* Added new pear "bundle" command, which downloads and uncompress a PECL package.
 The main purpouse of this command is for easily adding extensions to the PHP sources
 before compiling it.
     </notes>
@@ -72,6 +73,7 @@ before compiling it.
           <file role="php" name="Package.php"/>
           <file role="php" name="Registry.php"/>
           <file role="php" name="Remote.php"/>
+          <file role="php" name="Mirror.php"/>
         </dir>
         <file role="php" name="Common.php"/>
         <file role="php" name="Config.php"/>
