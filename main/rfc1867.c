@@ -779,7 +779,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
-	FILE *fp;
+	int fd=-1;
 	zend_llist header;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
@@ -962,8 +962,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			if (!skip_upload) {
 				/* Handle file */
-				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
-				if (!fp) {
+				fd = php_open_temporary_fd(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+				if (fd==-1) {
 					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
 					cancel_upload = UPLOAD_ERROR_E;
 				}
@@ -990,7 +990,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					sapi_module.sapi_error(E_WARNING, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
-					wlen = fwrite(buff, 1, blen, fp);
+					wlen = write(fd, buff, blen);
 			
 					if (wlen < blen) {
 						sapi_module.sapi_error(E_WARNING, "Only %d bytes were written, expected to write %d", wlen, blen);
@@ -1000,8 +1000,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					}
 				} 
 			} 
-			if (fp) {
-				fclose(fp);
+			if (fd!=-1) {
+				close(fd);
 			}
 
 #ifdef DEBUG_FILE_UPLOAD

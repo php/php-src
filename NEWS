@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   (adam dot greenfield at gmail dot com)
 - Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
   longer then the original string). (Ilia)
+- Fixed bug #32491 (File upload error - unable to create a temporary file).
+  (Uwe Schindler)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
