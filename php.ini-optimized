@@ -148,8 +148,15 @@ memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
 ; error_reporting = E_ALL & ~E_NOTICE						; show all errors, except for notices
 ; error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR	; show only errors
 error_reporting	=	E_ALL & ~E_NOTICE		; Show all errors except for notices
-display_errors	=	On	; Print out errors (as a part of the HTML script)
+display_errors	=	On	; Print out errors (as a part of the output)
+						; For production web sites, you're strongly encouraged
+						; to turn this feature off, and use error logging instead (see below).
+						; Keeping display_errors enabled on a production web site may reveal
+						; security information to end users, such as file paths on your Web server,
+						; your database schema or other information.
 log_errors		=	Off	; Log errors into a log file (server-specific log, stderr, or error_log (below))
+						; As stated above, you're strongly advised to use error logging in place of
+						; error displaying on production web sites.
 track_errors	=	Off	; Store the last error/warning message in $php_errormsg (boolean)
 ;error_prepend_string = "<font color=ff0000>"   ; string to output before an error message
 ;error_append_string = "</font>"                ; string to output after an error message
