@@ -128,7 +128,7 @@ function copy_file_list($source_dir, $dest_dir, $list)
 function copy_text_file($source, $dest)
 {
 	$text = file_get_contents($source);
-	$text = preg_replace("/[^\r]\n$/", "\r\n", $text);
+	$text = preg_replace("/(\r\n?)|\n/", "\r\n", $text);
 	$fp = fopen($dest, "w");
 	fwrite($fp, $text);
 	fclose($fp);
@@ -161,6 +161,7 @@ $text_files = array(
 	"NEWS" => 			"news.txt",
 	"php.ini-dist" => 	"php.ini-dist",
 	"php.ini-recommended" => "php.ini-recommended",
+	"win32/install.txt" => 	"install.txt",
 );
 
 foreach ($text_files as $src => $dest) {
@@ -169,7 +170,6 @@ foreach ($text_files as $src => $dest) {
 
 /* general other files */
 $general_files = array(
-	"win32/install.txt" => 	"install.txt",
 	"php.gif"			=>	"php.gif",
 );
 
