@@ -429,14 +429,11 @@ PHP_FUNCTION(pow)
 		return;
 	}
 
-	/* TODO: handle numeric strings. */
-	if ((Z_TYPE_P(zbase) != IS_LONG && Z_TYPE_P(zbase) != IS_DOUBLE) ||
-		(Z_TYPE_P(zexp ) != IS_LONG && Z_TYPE_P(zexp ) != IS_DOUBLE)) {
-		php_error(E_WARNING, "Invalid argument(s) passed to %s()", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
+	/* make sure we're dealing with numbers */
+	convert_scalar_to_number(zbase TSRMLS_CC);
+	convert_scalar_to_number(zexp TSRMLS_CC);
 
-	/* if both base and exponent were longs, try to get a long out */
+	/* if both base and exponent were longs, we'll try to get a long out */
 	wantlong = Z_TYPE_P(zbase) == IS_LONG 
 	        && Z_TYPE_P(zexp ) == IS_LONG && Z_LVAL_P(zexp) >= 0;
 
