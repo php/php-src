@@ -4,7 +4,6 @@ dnl
 
 PHP_ARG_ENABLE(dom, whether to enable DOM support,
 [  --disable-dom           Disable new DOM support.], yes)
-dom_shared=$ext_shared
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
@@ -25,7 +24,7 @@ if test "$PHP_DOM" != "no" && test "$PHP_LIBXML" != "no"; then
                             domimplementationsource.c entityreference.c \
                             notation.c xpath.c dom_iterators.c \
                             typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c], 
-                            $dom_shared)
+                            $ext_shared)
     PHP_SUBST(DOM_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
