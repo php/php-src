@@ -38,7 +38,7 @@ class reflect {
   //
   // Native methods
   //
-  private static native void setResultFromString(long result, String value);
+  private static native void setResultFromString(long result, byte value[]);
   private static native void setResultFromLong(long result, long value);
   private static native void setResultFromDouble(long result, double value);
   private static native void setResultFromBoolean(long result, boolean value);
@@ -56,7 +56,7 @@ class reflect {
 
     if (value instanceof java.lang.String) {
 
-      setResultFromString(result, (String)value);
+      setResultFromString(result, ((String)value).getBytes());
 
     } else if (value instanceof java.lang.Number) {
 
@@ -155,6 +155,9 @@ class reflect {
             if (!c.isInstance(args[i])) break;
             weight++;
           }
+        } else if (parms[i].isInstance("")) {
+	  if (!(args[i] instanceof byte[]))
+	    weight+=9999;
         } else if (parms[i].isPrimitive()) {
           Class c=parms[i];
 	  if (args[i] instanceof Number) {
@@ -199,7 +202,9 @@ class reflect {
     Object result[] = args;
     for (int i=0; i<args.length; i++) {
       if (parms[i].isInstance(args[i])) continue;
-      if (args[i] instanceof Number && parms[i].isPrimitive()) {
+      if (args[i] instanceof byte[] && parms[i].isInstance("")) {
+        result[i] = new String((byte[])args[i]);
+      } else if (args[i] instanceof Number && parms[i].isPrimitive()) {
         if (result==args) result=(Object[])result.clone();
         Class c = parms[i];
         Number n = (Number)args[i];
