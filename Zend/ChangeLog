@@ -1,3 +1,8 @@
+2004-04-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Fix prototype
+
 2004-04-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:
