@@ -40,7 +40,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
@@ -399,6 +398,14 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_REPEATABLE_READ", FBSQL_ISO_REPEATABLE_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_SERIALIZABLE ", FBSQL_ISO_SERIALIZABLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_VERSIONED", FBSQL_ISO_VERSIONED, CONST_CS | CONST_PERSISTENT);
+
+	/* Register Status constants */
+	REGISTER_LONG_CONSTANT("FBSQL_UNKNOWN", FBUnknownStatus, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_STOPPED", FBStopped, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_STARTING", FBStarting, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_RUNNING", FBRunning, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_STOPPING", FBStopping, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_NOEXEC", FBNoExec, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -819,7 +826,7 @@ PHP_FUNCTION(fbsql_autocommit)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_commit([resource link_identifier])
+/* {{{ proto bool fbsql_commit([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_commit)
 {
@@ -1318,7 +1325,7 @@ PHP_FUNCTION(fbsql_drop_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_start_db(string database_name [, resource link_identifier])
+/* {{{ proto bool fbsql_start_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_start_db)
 {
@@ -1393,7 +1400,7 @@ PHP_FUNCTION(fbsql_start_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_stop_db(string database_name [, resource link_identifier])
+/* {{{ proto bool fbsql_stop_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_stop_db)
 {
@@ -1452,7 +1459,7 @@ PHP_FUNCTION(fbsql_stop_db)
 /* }}} */
 
 /* {{{ proto int fbsql_db_status(string database_name [, resource link_identifier])
-	Get the status (Stoped, Starting, Started, Stopping) for a given database*/
+	Get the status (Stoped, Starting, Running, Stopping) for a given database*/
 PHP_FUNCTION(fbsql_db_status)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1975,8 +1982,6 @@ int phpSizeOfInt (int i)
 }
 /* }}} */
 
-/* {{{ phpfbColumnAsString
- */
 void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* length, char** value)
 {
 	FBCMetaData*               md          = result->metaData;
@@ -2158,7 +2163,6 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 		break;
 	}
 }
-/* }}} */
 
 /* {{{ phpfbSqlResult 
  */
