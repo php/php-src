@@ -52,7 +52,7 @@ install-modules:
 
 install-tester:
 	@echo "Installing regression tester"
-	@$(mkinstalldirs) $(PEAR_INSTALLDIR)
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(PEAR_INSTALLDIR)
 	@$(INSTALL) -m 755 $(srcdir)/run-tests.php $(INSTALL_ROOT)$(PEAR_INSTALLDIR)
 
 install-pear: install-modules
