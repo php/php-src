@@ -42,6 +42,13 @@ echo "====test7====\n";
 $ar = array();
 $ar[$o->__toString()] = "ERROR";
 echo $ar[$o];
+
+echo "====test8====\n";
+var_dump(trim($o));
+var_dump(trim((string)$o));
+
+echo "====test9====\n";
+echo sprintf("%s", $o);
 ?>
 ====DONE!====
 --EXPECTF--
@@ -51,7 +58,7 @@ test1 Object
 )
 
 Notice: Object of class test1 could not be converted to string in %stostring.php on line %d
-string(6) "Object"
+string(12) "Object id #%d"
 object(test1)#%d (0) {
 }
 ====test2====
@@ -80,4 +87,13 @@ Converted
 test2::__toString()
 
 Warning: Illegal offset type in %stostring.php on line %d
+====test8====
+
+Notice: Object of class test2 could not be converted to string in %stostring.php on line %d
+string(6) "Object"
+test2::__toString()
+string(9) "Converted"
+====test9====
+test2::__toString()
+Converted
 ====DONE!====

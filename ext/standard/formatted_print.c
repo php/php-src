@@ -622,15 +622,27 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", format[inpos]));
 			/* now we expect to find a type specifier */
 			switch (format[inpos]) {
-				case 's':
-					convert_to_string_ex(args[argnum]);
+				case 's': {
+					zval *var, var_copy;
+					int use_copy;
+				
+					zend_make_printable_zval(*args[argnum], &var_copy, &use_copy);
+					if (use_copy) {
+						var = &var_copy;
+					} else {
+						var = *args[argnum];
+					}
 					php_sprintf_appendstring(&result, &outpos, &size,
-											 Z_STRVAL_PP(args[argnum]),
+											 Z_STRVAL_P(var),
 											 width, precision, padding,
 											 alignment,
-											 Z_STRLEN_PP(args[argnum]),
+											 Z_STRLEN_P(var),
 											 0, expprec);
+					if (use_copy) {
+						zval_dtor(&var_copy);
+					}
 					break;
+				}
 
 				case 'd':
 					convert_to_long_ex(args[argnum]);
