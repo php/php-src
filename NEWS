@@ -43,7 +43,6 @@ PHP 4                                                                      NEWS
   (Sara, patch by: mikael dot suvi at trigger dot ee)
 - Fixed bug #25504 (pcre_match_all() crashes when passed only 2 parameters).
   (Jani)
-- Fixed bug #25494 (array_merge*() allows non-arrays as argument). (Jay)
 - Fixed bug #23488 (zlib.output_compression overrides Vary header). (Stefan)
 - Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query()). 
   (Jani, patch by: denisov at kubsu dot ru)
