@@ -119,7 +119,7 @@ typedef struct _php_stream_notifier {
 
 struct _php_stream_context {
 	php_stream_notifier *notifier;
-
+	zval *options;	/* hash keyed by wrapper family or specific wrapper */
 };
 
 typedef struct _php_stream_wrapper_options {
@@ -352,6 +352,14 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 /* If you don't need to write to the stream, but really need to
  * be able to seek, use this flag in your options. */
 #define STREAM_MUST_SEEK	16
+/* If you are going to end up casting the stream into a FILE* or
+ * a socket, pass this flag and the streams/wrappers will not use
+ * buffering mechanisms while reading the headers, so that HTTP
+ * wrapped streams will work consistently.
+ * If you omit this flag, streams will use buffering and should end 
+ * up working more optimally.
+ * */
+#define STREAM_WILL_CAST	32
 
 #ifdef PHP_WIN32
 # define IGNORE_URL_WIN IGNORE_URL
@@ -390,6 +398,10 @@ PHPAPI extern php_stream_ops php_stream_userspace_ops;
 
 PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);
+PHPAPI int php_stream_context_get_option(php_stream_context *context,
+		const char *wrappername, const char *optionname, zval **optionvalue);
+PHPAPI int php_stream_context_set_option(php_stream_context *context,
+		const char *wrappername, const char *optionname, zval *optionvalue);
 
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
