@@ -3747,10 +3747,14 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			FREE_OP(Ts, op1, EG(free_op1));
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			NEXT_OPCODE();
+			return 0;
 		}
 	}
 	

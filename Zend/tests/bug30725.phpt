@@ -27,6 +27,6 @@ catch(Exception $e)
 
 ?>
 ===DONE===
----EXPECT---
+--EXPECT--
 Caught
 ===DONE===
