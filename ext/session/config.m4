@@ -3,9 +3,6 @@ dnl $Id$
 PHP_ARG_WITH(mm,for mm support,
 [  --with-mm[=DIR]         Include mm support for session storage])
 
-PHP_ARG_ENABLE(trans-sid,whether to enable transparent session id propagation,
-[  --enable-trans-sid      Enable transparent session id propagation])
-
 PHP_ARG_ENABLE(session, whether to enable session support,
 [  --disable-session       Disable session support], yes)
 
@@ -24,10 +21,6 @@ if test "$PHP_MM" != "no"; then
   PHP_ADD_INCLUDE($MM_DIR/include)
   AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])
   PHP_MODULE_PTR(phpext_ps_mm_ptr)
-fi
-
-if test "$PHP_TRANS_SID" = "yes"; then
-  AC_DEFINE(TRANS_SID, 1, [Whether you want transparent session id propagation])
 fi
 
 if test "$PHP_SESSION" != "no"; then
