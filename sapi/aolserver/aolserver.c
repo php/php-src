@@ -185,12 +185,39 @@ php_ns_sapi_read_cookies(SLS_D)
 	return http_cookie;
 }
 
+static void php_info_aolserver(ZEND_MODULE_INFO_FUNC_ARGS)
+{
+	PUTS("AOLserver SAPI module ($Id$)<br>");
+}
+
+static zend_module_entry php_aolserver_module = {
+	"AOLserver",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	php_info_aolserver,
+	STANDARD_MODULE_PROPERTIES
+};
+
+static int
+php_ns_startup(sapi_module_struct *sapi_module)
+{
+	if(php_module_startup(sapi_module) == FAILURE
+			|| zend_register_module(&php_aolserver_module) == FAILURE) {
+		return FAILURE;
+	} else {
+		return SUCCESS;
+	}
+}
+
 /* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
 	"PHP Language",
 
-	php_module_startup,						/* startup */
+	php_ns_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	php_ns_sapi_ub_write,					/* unbuffered write */
@@ -261,9 +288,12 @@ php_ns_module_main(NSLS_D SLS_DC)
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	
-	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+	if(php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+		return NS_ERROR;
+	}
 	php_ns_hash_environment(NSLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_request_shutdown(NULL);
 
 	return NS_OK;
 }
