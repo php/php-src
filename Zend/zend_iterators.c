@@ -44,7 +44,8 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL, /* get_ce */
 	NULL, /* get class name */
 	NULL, /* compare */
-	NULL  /* cast */
+	NULL, /* cast */
+	NULL  /* count */
 };
 
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)

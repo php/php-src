@@ -93,6 +93,9 @@ typedef int (*zend_object_get_class_name_t)(zval *object, char **class_name, zen
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
 typedef int (*zend_object_cast_t)(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
 
+/* updates *count to hold the number of elements present and returns SUCCESS.
+ * Returns FAILURE if the object does not have any sense of overloaded dimensions */
+typedef int (*zend_object_count_elements_t)(zval *object, long *count TSRMLS_DC);
 
 typedef struct _zend_object_handlers {
 	/* general object functions */
@@ -119,6 +122,7 @@ typedef struct _zend_object_handlers {
 	zend_object_get_class_name_t			get_class_name;
 	zend_object_compare_t					compare_objects;
 	zend_object_cast_t						cast_object;
+	zend_object_count_elements_t			count_elements;
 } zend_object_handlers;
 
 extern ZEND_API zend_object_handlers std_object_handlers;
