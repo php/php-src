@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /* This file is to be included by sockets.c */
 
 REGISTER_LONG_CONSTANT("SOCKET_EINTR", WSAEINTR, CONST_CS | CONST_PERSISTENT);

@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /* This file is to be included by sockets.c */
 
 #ifdef EPERM
