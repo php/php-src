@@ -1,3 +1,49 @@
+2000-07-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    Fixes bug which caused crash, if result_entry wasn't valid.
+
+    * ext/ldap/ldap.c:
+    * ext/ldap/ldap.c:
+    - Made ldap_add(), ldap_modify(), ldap_mod_add(), ldap_mod_replace()
+      binary-safe. Original patch: Terrence Miao <terrence_miao@email.com> 
+
+2000-07-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/README:
+    * PEAR now stands for "PHP Extension and Application Repository"
+
+2000-07-28  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in
+      pear/Net/Socket.php
+      pear/Socket.php:
+    Moving the Socket class to Net/Socket.php, and basing it on code that Stig
+    wrote, with a few extra utility functions from my old class.
+
+    Stig, I mucked with the constructor a bit since it didn't quite make sense
+    exactly as it was - does it still do what was intended?
+
+    Also, are the emacs folding things (// {{{ functionname() ...) a PEAR
+    standard? How do they fit with the javadoc?
+
+2000-07-28  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * sapi/cgi/cgi_main.c
+      main/main.c:
+    added '-l' option to command line / CGI version for 'syntax check only'
+    plus a little cleanup and rearranging in command line option parsing
+
+
+    * win32/sendmail.c: should fix bug #5729
+
+
+2000-07-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    - Fixed bug in ldap_get_values_len() which makes it NULL-safe. 
+      Bug-report and fix submitted by Michel Alexeline <alexel@dr15.cnrs.fr>
+
 2000-07-27  Sam Ruby  <rubys@us.ibm.com>
 
     * ext/java/README:
