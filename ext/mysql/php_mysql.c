@@ -120,6 +120,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_field_len,								NULL)
 	PHP_FE(mysql_field_type,							NULL)
 	PHP_FE(mysql_field_flags,							NULL)
+	PHP_FE(mysql_escape_string,							NULL)
 	 
 	/* for downwards compatability */
 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
@@ -1069,6 +1070,27 @@ PHP_FUNCTION(mysql_affected_rows)
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long) mysql_affected_rows(mysql);
 	return_value->type = IS_LONG;
+}
+/* }}} */
+
+
+/* {{{ proto char mysql_escape_string([char string])
+   Escape string for mysql query */
+PHP_FUNCTION(mysql_escape_string)
+{
+	zval **str;
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	convert_to_string_ex(str);
+	/* assume worst case situation, which is 2x of the original string.
+	 * we don't realloc() down to the real size since it'd most probably not
+	 * be worth it
+	 */
+	Z_STRVAL_P(return_value) = (char *) emalloc(Z_STRLEN_PP(str)*2+1);
+	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+	return_value->type = IS_STRING;
 }
 /* }}} */
 
