@@ -313,7 +313,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected error");
 		RETURN_FALSE;
 	}
-	for (i = 0; i < Z_STRLEN_PP(format); i++) {
+	for (i = 0; i < (int)Z_STRLEN_PP(format); i++) {
 		switch (Z_STRVAL_PP(format)[i]) {
 			case 'r':		/* rfc822 format */
 				size += 31;
@@ -366,7 +366,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				size += 2;
 				break;
 			case '\\':
-				if(i < Z_STRLEN_PP(format)-1) {
+				if(i < ((int)Z_STRLEN_PP(format)) - 1) {
 					i++;
 				}
 				size ++;
@@ -383,10 +383,10 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	Z_STRVAL_P(return_value) = (char *) emalloc(size + 1);
 	Z_STRVAL_P(return_value)[0] = '\0';
 
-	for (i = 0; i < Z_STRLEN_PP(format); i++) {
+	for (i = 0; i < (int)Z_STRLEN_PP(format); i++) {
 		switch (Z_STRVAL_PP(format)[i]) {
 			case '\\':
-				if(i < Z_STRLEN_PP(format)-1) {
+				if(i < (int)(Z_STRLEN_PP(format)) - 1) {
 					char ch[2];
 					ch[0]=Z_STRVAL_PP(format)[i+1];
 					ch[1]='\0';
