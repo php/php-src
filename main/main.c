@@ -472,9 +472,9 @@ static void php3_timeout(int dummy)
 {
 	PLS_FETCH();
 
+	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
 	php_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
 			  php_timeout_seconds, php_timeout_seconds == 1 ? "" : "s");
-	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
 }
 #endif
 
