@@ -1,3 +1,47 @@
+2001-12-30  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses_functions.c:
+    some prototypes changed
+
+2001-12-30  Alex Waugh  <alex@alexwaugh.com>
+
+    * acinclude.m4:
+    Give defaults for pread and pwrite checks when cross compiling
+
+2001-12-30  Zak Greant  <zak@jobvillage.com>
+
+    * ext/standard/dir.c:
+    chdir: corrected proto, converted to zend_parse_parameters
+
+    * ext/mysql/php_mysql.c:
+    Corrected bug in php_mysql_fetch_hash() that prevented columns with NULL values from having both numeric and associative indexes. (Bug 14291)
+
+    * ext/standard/dir.c:
+    chroot: corrected prototype, converted to zend_parse_parameters
+
+    * ext/standard/basic_functions.c:
+    Converted getenv to use zend_parse_parameters
+
+2001-12-30  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/fdf/Makefile.in: added libfdftk for link path to make shared module.
+
+2001-12-30  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ircg/ircg.c: Fixed some protos.
+
+    * ext/ftp/php_ftp.c: Fixed a proto.
+
+    * ext/fbsql/php_fbsql.c
+      ext/dbplus/php_dbplus.c
+      ext/cybermut/cybermut.c: Fixed some protos.
+
+2001-12-30  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c: Fix crash (MFH)
+
+    * ext/session/session.c: Get rid of error message
+
 2001-12-29  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/basic_functions.c
