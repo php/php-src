@@ -477,7 +477,8 @@ class PEAR_Downloader extends PEAR_Common
                 $this->log(0, "Package '{$curinfo['package']}-{$curinfo['version']}' already installed, skipping");
                 return false;
             } elseif (version_compare("$version", "{$curinfo['version']}") < 0) {
-                $this->log(0, "Already got '{$curinfo['package']}-{$curinfo['version']}' greater than requested '$version', skipping");
+                $this->log(0, "Package '{$curinfo['package']}' version '{$curinfo['version']}' " .
+                              " is installed and {$curinfo['version']} is > requested '$version', skipping");
                 return false;
             }
         }
