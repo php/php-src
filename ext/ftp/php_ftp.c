@@ -598,9 +598,19 @@ PHP_FUNCTION(ftp_get)
 		resumepos = 0;
 	}
 
+	if (php_check_open_basedir(local TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	if (ftp->autoseek && resumepos) {
+		if (PG(safe_mode) && (!php_checkuid(local, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
 		outstream = php_stream_fopen(local, "rb+", NULL);
 		if (outstream == NULL) {
+			if (PG(safe_mode) && (!php_checkuid(local, "wb", CHECKUID_CHECK_MODE_PARAM))) {
+				RETURN_FALSE;
+			}
 			outstream = php_stream_fopen(local, "wb", NULL);
 		}
 		if (outstream != NULL) {
@@ -613,6 +623,9 @@ PHP_FUNCTION(ftp_get)
 			}
 		}
 	} else {
+		if (PG(safe_mode) && (!php_checkuid(local, "wb", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
 		outstream = php_stream_fopen(local, "wb", NULL);
 	}
 
@@ -656,9 +669,19 @@ PHP_FUNCTION(ftp_nb_get)
 		resumepos = 0;
 	}
 
+	if (php_check_open_basedir(local TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	if (ftp->autoseek && resumepos) {
+		if (PG(safe_mode) && (!php_checkuid(local, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
 		outstream = php_stream_fopen(local, "rb+", NULL);
 		if (outstream == NULL) {
+			if (PG(safe_mode) && (!php_checkuid(local, "wb", CHECKUID_CHECK_MODE_PARAM))) {
+				RETURN_FALSE;
+			}
 			outstream = php_stream_fopen(local, "wb", NULL);
 		}
 		if (outstream != NULL) {
@@ -671,6 +694,9 @@ PHP_FUNCTION(ftp_nb_get)
 			}
 		}
 	} else {
+		if (PG(safe_mode) && (!php_checkuid(local, "wb", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
 		outstream = php_stream_fopen(local, "wb", NULL);
 	}
 
@@ -852,6 +878,13 @@ PHP_FUNCTION(ftp_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
+	if (php_check_open_basedir(local TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (PG(safe_mode) && (!php_checkuid(local, "rb", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	instream = php_stream_fopen(local, "rb", NULL);
 
 	if (instream == NULL)	{
@@ -906,6 +939,13 @@ PHP_FUNCTION(ftp_nb_put)
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
+
+	if (php_check_open_basedir(local TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (PG(safe_mode) && (!php_checkuid(local, "rb", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	instream = php_stream_fopen(local, "rb", NULL);
 
