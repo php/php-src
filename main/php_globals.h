@@ -37,7 +37,6 @@ struct _php_core_globals {
 	char *safe_mode_exec_dir;
 	long enable_dl;
 
-    long max_execution_time;
     long memory_limit;
 
     long track_errors;

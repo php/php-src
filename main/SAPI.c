@@ -94,7 +94,8 @@ SAPI_API void sapi_activate(SLS_D)
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	if (SG(server_context)) {
-		if (!strcmp(SG(request_info).request_method, "POST")) {
+		if (SG(request_info).request_method 
+			&& !strcmp(SG(request_info).request_method, "POST")) {
 			sapi_read_post_data(SLS_C);
 		} else {
 			SG(request_info).post_data = NULL;

@@ -470,7 +470,7 @@ static void php3_timeout(int dummy)
 {
 	PLS_FETCH();
 
-	php3_error(E_ERROR, "Maximum execution time of %d seconds exceeded", PG(max_execution_time));
+	php3_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STRING("max_execution_time"));
 }
 #endif
 
@@ -602,8 +602,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	PG(unclean_shutdown) = 0;
 
 	zend_output_startup();
-
-	php3_set_timeout(PG(max_execution_time));
 
 #if APACHE
 	/*
