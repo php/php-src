@@ -142,7 +142,7 @@ PS_WRITE_FUNC(sqlite)
 	
 	t = time(NULL);
 
-	binary = emalloc((256 * vallen + 1262) / 253);
+	binary = emalloc(1 + 5 + vallen * (256 / 253));
 	binlen = sqlite_encode_binary((const unsigned char*)val, vallen, binary);
 	
 	rv = sqlite_exec_printf(db, "REPLACE INTO session_data VALUES('%q', '%q', %d)", NULL, NULL, &error, key, binary, t);
@@ -177,7 +177,7 @@ PS_GC_FUNC(sqlite)
 
 	/* because SQLite does not actually clear the deleted data from the database 
 	 * we need to occassionaly do so manually to prevent the sessions database 
-	 * from endlessly growing.
+	 * from growing endlessly.
 	 */
 	if ((int) ((float) PS(gc_divisor) * PS(gc_divisor) * php_combined_lcg(TSRMLS_C)) < PS(gc_probability)) {
 		rv = sqlite_exec_printf(db, "VACUUM", NULL, NULL, NULL);
