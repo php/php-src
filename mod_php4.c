@@ -522,8 +522,8 @@ handler_rec php_handlers[] =
 
 command_rec php_commands[] =
 {
-	{"php4_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
-	{"php4_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
+	{"php_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
+	{"php_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
 	{NULL}
 };
 
