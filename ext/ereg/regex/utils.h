@@ -1,4 +1,7 @@
 /* utility definitions */
+
+#include "regex_extra.h"
+
 #ifdef _POSIX2_RE_DUP_MAX
 #define	DUPMAX	_POSIX2_RE_DUP_MAX
 #else

@@ -16,11 +16,6 @@ AC_ARG_WITH(apxs,
 		XML_INCLUDE="$APXS_INCLUDEDIR/xml"
 	fi
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
-	if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
-		HSREGEX=yes
-	else
-		HSREGEX=no
-	fi
     PHP_EXTENSION(apache)
 	PHP_SAPI=apache
     APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
@@ -64,6 +59,7 @@ AC_ARG_WITH(apache,
 			fi
 		# For Apache 1.3.x
 		elif test -f $withval/src/main/httpd.h; then
+			APACHE_HAS_REGEX=1
 			APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
 			APACHE_TARGET=$withval/src/modules/php4
 			if test ! -d $APACHE_TARGET; then
@@ -90,6 +86,7 @@ AC_ARG_WITH(apache,
 			fi
 		# Also for Apache 1.3.x
 		elif test -f $withval/src/include/httpd.h; then
+			APACHE_HAS_REGEX=1
 			APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
 			APACHE_TARGET=$withval/src/modules/php4
 			if test -d $withval/src/lib/expat-lite ; then
@@ -177,8 +174,21 @@ AC_ARG_WITH(mod_charset,
 	AC_MSG_RESULT(no)
 ])
 
+if test "$with_regex" = "apache" && test -z "$APACHE_HAS_REGEX"; then
+  with_regex=php
+fi
+
+if test -z "$with_regex" && test -n "$APACHE_HAS_REGEX"; then
+  with_regex=apache
+fi
+
 if test -n "$APACHE_MODULE"; then
-  HSREGEX=no
+  if test "$with_regex" = "apache"; then
+    APACHE_WANT_HSREGEX=yes
+  else
+    APACHE_WANT_HSREGEX=no
+  fi
+  AC_SUBST(APACHE_WANT_HSREGEX)
   PHP_EXTENSION(apache)
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
