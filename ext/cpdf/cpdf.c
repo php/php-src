@@ -726,7 +726,7 @@ PHP_FUNCTION(cpdf_set_font)
 	int id, type;
 	CPDFdoc *pdf;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
