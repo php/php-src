@@ -49,6 +49,8 @@
 #undef HAVE_GMTIME_R
 #endif
 
+BEGIN_EXTERN_C()
+
 #if defined(HAVE_POSIX_READDIR_R)
 #define php_readdir_r readdir_r
 #else
@@ -113,6 +115,8 @@ PHPAPI int php_rand_r(unsigned int *seed);
 #else
 #define php_rand_r rand_r
 #endif
+
+END_EXTERN_C()
 
 #if !defined(ZTS)
 #undef PHP_NEED_REENTRANCY
