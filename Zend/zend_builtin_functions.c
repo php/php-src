@@ -43,11 +43,14 @@ static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(leak);
+static ZEND_FUNCTION(crash);
 static ZEND_FUNCTION(get_used_files);
 static ZEND_FUNCTION(get_imported_files);
 static ZEND_FUNCTION(is_subclass_of);
 
 extern unsigned char first_arg_force_ref[];
+
+#undef ZEND_TEST_EXCEPTIONS
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
@@ -68,6 +71,9 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(class_exists,		NULL)
 	ZEND_FE(function_exists,	NULL)
 	ZEND_FE(leak,				NULL)
+#ifdef ZEND_TEST_EXCEPTIONS
+	ZEND_FE(crash,				NULL)
+#endif
 	ZEND_FE(get_used_files,		NULL)
 	ZEND_FE(get_imported_files,	NULL)
 	ZEND_FE(is_subclass_of,		NULL)
@@ -514,6 +520,7 @@ ZEND_FUNCTION(function_exists)
 }
 /* }}} */
 
+
 ZEND_FUNCTION(leak)
 {
 	int leakbytes=3;
@@ -527,6 +534,14 @@ ZEND_FUNCTION(leak)
 	}
 	
 	emalloc(leakbytes);
+}
+
+
+ZEND_FUNCTION(crash)
+{
+	char *nowhere=NULL;
+
+	memcpy(nowhere, "something", sizeof("something"));
 }
 
 
