@@ -19,7 +19,7 @@ CFG=libsqlite - Win32 Debug_TS
 !MESSAGE 
 !MESSAGE "libsqlite - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "libsqlite - Win32 Release_TS" (based on "Win32 (x86) Static Library")
-!MESSAGE "libsqlite - Win32 Release_TS_inline" (based on "Win32 (x86) Static Library")
+!MESSAGE "libsqlite - Win32 Release_TSDbg" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -38,8 +38,8 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug_TS"
-# PROP Intermediate_Dir "Debug_TS"
+# PROP Output_Dir "..\..\Debug_TS"
+# PROP Intermediate_Dir "..\..\Debug_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D THREADSAFE=1 /YX /FD /GZ /c
@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\..\..\..\win32\Debug_TS\libsqlite.lib"
+# ADD LIB32 /nologo
 
 !ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TS"
 
@@ -61,8 +61,8 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS"
-# PROP Intermediate_Dir "Release_TS"
+# PROP Output_Dir "..\..\Release_TS"
+# PROP Intermediate_Dir "..\..\Release_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D THREADSAFE=1 /YX /FD /c
@@ -73,30 +73,30 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\..\..\..\win32\Release_TS\libsqlite.lib"
+# ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TSDbg"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release_TS_inline"
-# PROP BASE Intermediate_Dir "Release_TS_inline"
+# PROP BASE Output_Dir "libsqlite___Win32_Release_TSDbg"
+# PROP BASE Intermediate_Dir "libsqlite___Win32_Release_TSDbg"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS_inline"
-# PROP Intermediate_Dir "Release_TS_inline"
+# PROP Output_Dir "..\..\Release_TSDbg"
+# PROP Intermediate_Dir "..\..\Release_TSDbg"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D THREADSAFE=1 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D THREADSAFE=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D THREADSAFE=1 /YX /FD /c
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
 # ADD RSC /l 0x406 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\Release_TS\libsqlite.lib"
-# ADD LIB32 /nologo /out:"..\..\..\..\win32\Release_TS_inline\libsqlite.lib"
+# ADD BASE LIB32 /nologo /out:"Release_TS\libsqlite.lib"
+# ADD LIB32 /nologo
 
 !ENDIF 
 
@@ -104,7 +104,7 @@ LIB32=link.exe -lib
 
 # Name "libsqlite - Win32 Debug_TS"
 # Name "libsqlite - Win32 Release_TS"
-# Name "libsqlite - Win32 Release_TS_inline"
+# Name "libsqlite - Win32 Release_TSDbg"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -258,7 +258,7 @@ InputPath=config_static.w32.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TSDbg"
 
 # Begin Custom Build
 InputDir=.
@@ -318,7 +318,7 @@ InputPath=sqlite.w32.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "libsqlite - Win32 Release_TSDbg"
 
 # Begin Custom Build
 InputDir=.
