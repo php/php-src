@@ -3042,6 +3042,8 @@ PHP_FUNCTION(ocifetchinto)
 		}
 	}
 
+	zend_hash_internal_pointer_reset(array->value.ht);
+
 #if PHP_API_VERSION < 19990421
 	element = emalloc(sizeof(pval));
 #endif
