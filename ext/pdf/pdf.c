@@ -93,18 +93,13 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_end_page, NULL)
 	PHP_FE(pdf_show, NULL)
 	PHP_FE(pdf_show_xy, NULL)
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
 	PHP_FE(pdf_show_boxed, NULL)
 	PHP_FE(pdf_skew, NULL)
-#endif
 	PHP_FE(pdf_set_font, NULL)
 	PHP_FE(pdf_set_leading, NULL)
 	PHP_FE(pdf_set_text_rendering, NULL)
 	PHP_FE(pdf_set_horiz_scaling, NULL)
 	PHP_FE(pdf_set_text_rise, NULL)
-#if PDFLIB_MAJORVERSION < 3 & PDFLIB_MINORVERSION < 30
-	PHP_FE(pdf_set_text_matrix, NULL)
-#endif
 	PHP_FE(pdf_set_text_pos, NULL)
 	PHP_FE(pdf_set_char_spacing, NULL)
 	PHP_FE(pdf_set_word_spacing, NULL)
@@ -226,13 +221,11 @@ static void pdf_efree(PDF *p, void *mem) {
 	return(efree(mem));
 }
 
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10)
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
 	if(php_header())
 		return(php_write(data, size));
 	return 0;
 }
-#endif
 
 PHP_MINIT_FUNCTION(pdf)
 {
@@ -245,18 +238,11 @@ PHP_MINIT_FUNCTION(pdf)
 PHP_MINFO_FUNCTION(pdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
 	php_printf("pdflib %d.%02d<BR>",  PDF_get_majorversion(), PDF_get_minorversion());
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
 		php_printf("The CJK fonts supported.");
-#endif
 #ifdef PDF_OPEN_MEM_SUPPORTED
 	php_printf("Support for in memory pdf creation.");
 #endif
 
-#if PDFLIB_MAJORVERSION >= 3 | PDFLIB_MINORVERSION > 0
-		php_printf("The function pdf_put_image() and pdf_execute_image() are <B>not</B> available");
-#else
-		php_printf("The function pdf_put_image() and pdf_execute_image() are available");
-#endif
 }
 
 PHP_MSHUTDOWN_FUNCTION(pdf){
@@ -418,45 +404,31 @@ PHP_FUNCTION(pdf_open) {
 	int argc;
 	PDF_TLS_VARS;
 
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10)
 	argc = ARG_COUNT(ht);
 	if(argc > 1)
 		WRONG_PARAM_COUNT;
 	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+#if defined PDF_OPEN_MEM_SUPPORTED
 		fp = NULL;
+#else
+		php3_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
+		WRONG_PARAM_COUNT;
+#endif
 	} else {
 		ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
 		/* XXX should do anzend_list_addref for <fp> here! */
 	}
-#else
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		php3_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
-		WRONG_PARAM_COUNT;
-	}
-
-	ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
-	/* XXX should do anzend_list_addref for <fp> here! */
-#endif
 
 	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
 
-#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10 & defined PDF_OPEN_MEM_SUPPORTED
 	if(fp) {
 		if (0 > PDF_open_fp(pdf, fp))
 			RETURN_FALSE;
 	} else {
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20) & defined PDF_OPEN_MEM_SUPPORTED
-		PDF_open_mem(pdf, pdf_flushwrite);
-#else
 		if (0 > PDF_open_mem(pdf, pdf_flushwrite))
 			RETURN_FALSE;
-#endif
 	}
-#else
-	if (0 > PDF_open_fp(pdf, fp)) {
-		RETURN_FALSE;
-	}
-#endif
+
 	id = zend_list_insert(pdf,PDF_GLOBAL(le_pdf));
 	RETURN_LONG(id);
 }
@@ -603,7 +575,6 @@ PHP_FUNCTION(pdf_show_xy) {
 
 /* {{{ proto void pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
    Output text formated in a boxed */
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
 PHP_FUNCTION(pdf_show_boxed) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
 	int id, type;
@@ -631,7 +602,6 @@ PHP_FUNCTION(pdf_show_boxed) {
 
 	RETURN_TRUE;
 }
-#endif
 /* }}} */
 
 
@@ -664,11 +634,7 @@ PHP_FUNCTION(pdf_set_font) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_double(arg3);
-#if PDFLIB_MAJORVERSION >= 2
 	convert_to_string(arg4);
-#else
-	convert_to_long(arg4);
-#endif
 
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
@@ -677,35 +643,7 @@ PHP_FUNCTION(pdf_set_font) {
 		RETURN_FALSE;
 	}
 
-#if PDFLIB_MAJORVERSION >= 2
 	font = PDF_findfont(pdf, arg2->value.str.val, arg4->value.str.val, embed);
-#else	
-	if((arg4->value.lval > 5) || (arg4->value.lval < 0)) {
-		php_error(E_WARNING,"Font encoding set to 4");
-		arg4->value.lval = 4;
-	}
-
-	switch(arg4->value.lval) {
-		case 0:
-			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", embed);
-			break;
-		case 1:
-			font = PDF_findfont(pdf, arg2->value.str.val, "pdfdoc", embed);
-			break;
-		case 2:
-			font = PDF_findfont(pdf, arg2->value.str.val, "macroman", embed);
-			break;
-		case 3:
-			font = PDF_findfont(pdf, arg2->value.str.val, "macexpert", embed);
-			break;
-		case 4:
-			font = PDF_findfont(pdf, arg2->value.str.val, "winansi", embed);
-			break;
-		default:
-			php_error(E_WARNING,"Encoding out of range, using 0");
-			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", embed);
-	}
-#endif
 	if (font < 0) {
 		php_error(E_WARNING,"Font %s not found", arg2->value.str.val);
 		RETURN_FALSE;
@@ -905,7 +843,7 @@ PHP_FUNCTION(pdf_set_text_rise) {
 }
 /* }}} */
 
-#if PDFLIB_MAJORVERSION < 3 & PDFLIB_MINORVERSION < 30
+#if 0
 /* {{{ proto void pdf_set_text_matrix(int pdfdoc, arry matrix)
    Sets the text matrix */
 PHP_FUNCTION(pdf_set_text_matrix) {
@@ -1233,7 +1171,6 @@ PHP_FUNCTION(pdf_rotate) {
 
 /* {{{ proto void pdf_skew(int pdfdoc, double xangle, double yangle)
    Skew the coordinate system */
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
 PHP_FUNCTION(pdf_skew) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
@@ -1258,7 +1195,6 @@ PHP_FUNCTION(pdf_skew) {
 
 	RETURN_TRUE;
 }
-#endif
 /* }}} */
 
 /* {{{ proto void pdf_setflat(int pdfdoc, double value)
@@ -2338,11 +2274,7 @@ PHP_FUNCTION(pdf_open_memory_image) {
 	}
 
 
-#if PDFLIB_MAJORVERSION < 3 & PDFLIB_MINORVERSION == 0
-		pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
-#else
-		pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
-#endif
+	pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
 	efree(buffer);
 
 	if(-1 == pdf_image) {
@@ -2427,93 +2359,6 @@ PHP_FUNCTION(pdf_place_image) {
 
 	PDF_place_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
 
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto void pdf_put_image(int pdf, int pdfimage)
-   Stores image in the pdf document for later use */
-PHP_FUNCTION(pdf_put_image) {
-#if PDFLIB_MINORVERSION > 0 | PDFLIB_MAJORVERSION > 2
-#else
-	pval *arg1, *arg2;
-	int id, type;
-	int pdf_image;
-	PDF *pdf;
-#endif
-	PDF_TLS_VARS;
-	
-#if PDFLIB_MINORVERSION > 0 | PDFLIB_MAJORVERSION > 2
-	php_error(E_WARNING, "Version 2.01 and higher of pdflib does not need the pdf_put_image() anymore, check the docs!");
-#else
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long(arg1);
-	id=arg1->value.lval;
-	pdf = zend_list_find(id,&type);
-	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-
-	convert_to_long(arg2);
-	id=arg2->value.lval;
-	pdf_image = (int) zend_list_find(id,&type);
-	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-
-	PDF_put_image(pdf, pdf_image);
-#endif
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto void pdf_execute_image(int pdf, int pdfimage, int x, int y, int scale)
-   Places stored image in the pdf document */
-PHP_FUNCTION(pdf_execute_image) {
-#if PDFLIB_MINORVERSION >= 01 | PDFLIB_MAJORVERSION > 2
-#else
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
-	int id, type;
-	int pdf_image;
-	PDF *pdf;
-	PDF_TLS_VARS;
-#endif
-
-#if PDFLIB_MINORVERSION >= 01 | PDFLIB_MAJORVERSION > 2
-	php_error(E_WARNING, "Version 2.01 and higher of pdflib does not need the pdf_execute_image() anymore, check the docs!");
-#else
-	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long(arg1);
-	id=arg1->value.lval;
-	pdf = zend_list_find(id,&type);
-	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-
-	convert_to_long(arg2);
-	id=arg2->value.lval;
-	pdf_image = (int) zend_list_find(id,&type);
-	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-
-	PDF_execute_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
-#endif
 	RETURN_TRUE;
 }
 /* }}} */
