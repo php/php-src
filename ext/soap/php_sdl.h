@@ -20,6 +20,7 @@ struct _sdl {
 	HashTable *types;       /* array of sdlTypesPtr */
 	HashTable *encoders;    /* array of encodePtr */
 	HashTable *bindings;    /* array of sdlBindings (key'd by name) */
+	HashTable *requests;    /* array of sdlFunction (references) */
 	char *target_ns;
 	char *source;
 };

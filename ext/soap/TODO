@@ -64,6 +64,7 @@ Encoding
 + references (id,href)
 + SOAP 1.2 (enc:id,enc:ref)
 - references to external resources
+? support for "nillable" and "nil"
 - default values
 - root attribute
 ? provide schema 1999/2001 support???
@@ -73,13 +74,30 @@ Encoding
 WSDL
 ----
 + wsdl and schema import
++ support for message/part element attribute
++ support for portType operation input/output name attribute
 + support for <opperation> without <input>
+- support for portType operation parameterOrder attribute
+- support for binding operation input/output name attribute
+- support for <opperation> <fault>
 + support for style "rpc"/"document" encoding (client part)
 - support for style "rpc"/"document" encoding (server part)
   How to get function name from request? May be SoapAction HTTP header?
 + support for "encoded"/"literal" encoding
 ? arrayType and "literal" encoding
-? support for "nillable" and "nil"
+- function/method overloading/redeclaration (test(int); test(string))
+- wsdl caching
+- wsdl auto generation
+? SOAP binding
+  - <soap:body> parts attribute
+  - <soap:fault>
+  - <soap:header> and <soap:headerfault>
+- HTTP GET/POST binding
+- MIME binding
+- SOAP 1.2 bindings???
+
+Schema
+------
 - support for user defined simple types
   - restiction
 	  + base
@@ -120,16 +138,6 @@ WSDL
   	- sequence
   	- any ???
   - attribute
-- function/method overloading/redeclaration (test(int); test(string))
-- wsdl caching
-- wsdl auto generation
-? SOAP binding
-  ? <soap:body>
-    - "parts"
-  - <soap:fault>
-  - <soap:header> and <soap:headerfault>
-- HTTP GET/POST binding
-- MIME binding
 
 Error Handling
 --------------

@@ -16,7 +16,7 @@ static void clear_soap_fault(zval *obj TSRMLS_DC);
 static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
-static sdlFunctionPtr get_function(sdlPtr sdl, char *function_name);
+static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
 
 static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[], int *version TSRMLS_DC);
 static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, int version TSRMLS_DC);
@@ -968,7 +968,7 @@ PHP_METHOD(soapserver, handle)
 	soapServicePtr service;
 	xmlDocPtr doc_request, doc_return;
 	zval function_name, **params, **raw_post, *soap_obj, retval, **server_vars;
-	char *fn_name, cont_len[30], *response_name;
+	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status;
 	xmlChar *buf;
 	HashTable *function_table;
@@ -1064,10 +1064,6 @@ PHP_METHOD(soapserver, handle)
 		deseralize_function_call(service->sdl, doc_request, &function_name, &num_params, &params, &soap_version TSRMLS_CC);
 		xmlFreeDoc(doc_request);
 
-		fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
-		response_name = emalloc(Z_STRLEN(function_name) + strlen("Response") + 1);
-		sprintf(response_name,"%sResponse",fn_name);
-
 		if (service->type == SOAP_CLASS) {
 			soap_obj = NULL;
 #if HAVE_PHP_SESSION
@@ -1139,7 +1135,9 @@ PHP_METHOD(soapserver, handle)
 		}
 
 		doc_return = NULL;
-		if (zend_hash_exists(function_table, php_strtolower(Z_STRVAL(function_name), Z_STRLEN(function_name)), Z_STRLEN(function_name) + 1)) {
+
+		fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
+		if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(function_name)), Z_STRLEN(function_name) + 1)) {
  			if (service->type == SOAP_CLASS) {
 				call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
 				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
@@ -1151,14 +1149,22 @@ PHP_METHOD(soapserver, handle)
 		} else {
 			php_error(E_ERROR, "Function (%s) doesn't exist", Z_STRVAL(function_name));
 		}
+		efree(fn_name);
 
 		if (call_status == SUCCESS) {
 			sdlFunctionPtr function;
-			/* TODO: make 'strict' (use the sdl defnintions) */
+			char *response_name;
 			function = get_function(service->sdl, Z_STRVAL(function_name));
+			if (function && function->responseName) {
+				response_name = estrdup(function->responseName);
+			} else {
+				response_name = emalloc(Z_STRLEN(function_name) + strlen("Response") + 1);
+				sprintf(response_name,"%sResponse",Z_STRVAL(function_name));
+			}
 			SOAP_GLOBAL(overrides) = service->mapping;
 			doc_return = seralize_response_call(function, response_name, service->uri, &retval, soap_version TSRMLS_CC);
 			SOAP_GLOBAL(overrides) = NULL;
+			efree(response_name);
 		} else {
 			php_error(E_ERROR, "Function (%s) call failed", Z_STRVAL(function_name));
 		}
@@ -1194,7 +1200,6 @@ PHP_METHOD(soapserver, handle)
 
 		zval_dtor(&function_name);
 		xmlFreeDoc(doc_return);
-		efree(response_name);
 		efree(fn_name);
 
 		php_write(buf, size TSRMLS_CC);
@@ -1422,7 +1427,6 @@ zend_try {
 	old_sdl = SOAP_GLOBAL(sdl);
 	SOAP_GLOBAL(sdl) = sdl;
  	if (sdl != NULL) {
- 		php_strtolower(function, function_len);
  		fn = get_function(sdl, function);
  		if (fn != NULL) {
 			sdlBindingPtr binding = fn->binding;
@@ -1833,15 +1837,19 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 		php_error(E_ERROR,"looks like we got \"Body\" without function call\n");
 	}
 
-	INIT_ZVAL(tmp_function_name);
-	ZVAL_STRING(&tmp_function_name, (char *)func->name, 1);
-
-	(*function_name) = tmp_function_name;
-
-	function = get_function(sdl, php_strtolower((char *)func->name, strlen(func->name)));
+	function = get_function(sdl, func->name);
 	if (sdl != NULL && function == NULL) {
 		php_error(E_ERROR, "Error function \"%s\" doesn't exists for this service", func->name);
 	}
+
+	INIT_ZVAL(tmp_function_name);
+	if (function != NULL) {
+		ZVAL_STRING(&tmp_function_name, (char *)function->functionName, 1);
+	} else{
+		ZVAL_STRING(&tmp_function_name, (char *)func->name, 1);
+	}
+
+	(*function_name) = tmp_function_name;
 
 	if (function != NULL) {
 		sdlParamPtr *param;
@@ -2252,14 +2260,23 @@ static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int inde
 	return NULL;
 }
 
-static sdlFunctionPtr get_function(sdlPtr sdl, char *function_name)
+static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name)
 {
 	sdlFunctionPtr *tmp;
+
+	int len = strlen(function_name);
+	char *str = estrndup(function_name,len);
+	php_strtolower(str,len);
 	if (sdl != NULL) {
-		if (zend_hash_find(&sdl->functions, function_name, strlen(function_name), (void **)&tmp) != FAILURE) {
+		if (zend_hash_find(&sdl->functions, str, len+1, (void **)&tmp) != FAILURE) {
+			efree(str);
+			return (*tmp);
+		} else if (sdl->requests != NULL && zend_hash_find(sdl->requests, str, len+1, (void **)&tmp) != FAILURE) {
+			efree(str);
 			return (*tmp);
 		}
 	}
+	efree(str);
 	return NULL;
 }
 
