@@ -287,9 +287,6 @@ static zend_function_entry soap_server_functions[] = {
 ZEND_BEGIN_ARG_INFO(__call_args, 0)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(1)
 ZEND_END_ARG_INFO()
 #else
 unsigned char __call_args[] = { 5, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
