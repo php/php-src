@@ -1,3 +1,85 @@
+2003-02-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+      - replace @bin_dir@ in pear.bat
+
+2003-02-04  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/bcmath/bcmath.c:
+      FMH(r-1.49/r-1.50)
+
+2003-02-04  Andi Gutmans  <andi@zend.com>
+
+    * ext/bcmath/bcmath.c:
+      - Please follow coding standards (this isn't java :)
+
+2003-02-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/bcmath/bcmath.c:
+      fix ZTS build
+
+2003-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache_hooks/mod_php4.c:
+      Fixed compilation of Apache & Apache Hooks SAPIs.
+
+2003-02-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      remove it then....this forces to put work in man page ...
+
+2003-02-04  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      reorder the bug fixes (reverse #). added missing bug fixing news
+
+2003-02-04  Sara Golemon  <php@alphaweb.net>
+
+    * ext/bcmath/bcmath.c:
+      Bug#13551 bcmath functions should not apply scale to arguments, only to
+      result
+
+2003-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/pgsql/pgsql.c:
+      Made the row parameter in pg_result_seek() non-optional, the current
+      implementation would result in random behavior if the 2nd argument is not
+      passed.
+      Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
+      result due to always seeking to row next to the one requested).
+      Removed dead code from pg_result_seek().
+
+2003-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/aggregation.c
+      sapi/apache/mod_php4.c
+      sapi/apache_hooks/mod_php4.c:
+      Updates reflecting infrastructure changes
+
+2003-02-04  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/pdf/pdf.c:
+      - fixed some prototypes and folding
+
+    * ext/pdf/pdf.c:
+      - fixed prototype of pdf_get_buffer()
+
+2003-02-04  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Added missing bugfix news entry.
+
+    * NEWS:
+      NEWS ordering..
+
 2003-02-03  Hartmut Holzgraefe  <hartmut@six.de>
 
     * main/output.c:

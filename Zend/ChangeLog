@@ -1,3 +1,22 @@
+2003-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Missing update
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_hash.c
+      zend_hash.h
+      zend_object_handlers.c
+      zend_opcode.c
+      zend_ts_hash.c
+      zend_ts_hash.h:
+      Reimplement PPP properties
+
 2003-02-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_API.h:
