@@ -1613,69 +1613,70 @@ PHP_FUNCTION(pg_loclose)
 }
 /* }}} */
 
-/* {{{ proto string pg_loread(int fd, int len)
+/* {{{ proto string pg_loread(int fd[, int len])
    Read a large object */
 PHP_FUNCTION(pg_loread)
 {
   	zval **pgsql_id, **len;
-	int buf_len, nbytes;
+	int buf_len = 1024, nbytes;
 	char *buf;
 	pgLofp *pgsql;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &pgsql_id, &len)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(len);
-			buf_len = Z_LVAL_PP(len);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &pgsql_id, &len) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_long_ex(len);
+		buf_len = Z_LVAL_PP(len);
+	}
+	
 	buf = (char *) emalloc(sizeof(char)*(buf_len+1));
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf, buf_len))<0) {
 		efree(buf);
 		RETURN_FALSE;
 	}
-	return_value->value.str.val = buf;
-	return_value->value.str.len = nbytes;
-	return_value->value.str.val[nbytes] = 0;
-	return_value->type = IS_STRING;
+
+	buf[nbytes] = 0;
+	RETURN_STRINGL(buf, nbytes, 0);
 }
 /* }}} */
 
-/* {{{ proto int pg_lowrite(int fd, string buf)
+/* {{{ proto int pg_lowrite(int fd, string buf[, int len])
    Write a large object */
 PHP_FUNCTION(pg_lowrite)
 {
-  	zval **pgsql_id, **str;
+  	zval **pgsql_id, **str, **z_len;
 	int nbytes;
+	int len;
 	pgLofp *pgsql;
+	int argc = ZEND_NUM_ARGS();
 
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &pgsql_id, &str)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(str);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (argc < 2 || argc > 3 ||
+	    zend_get_parameters_ex(argc, &pgsql_id, &str, &z_len) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(str);
+
+	if (argc > 2) {
+		convert_to_long_ex(z_len);
+		len = Z_LVAL_PP(z_len);
+	}
+	else {
+		len = Z_STRLEN_PP(str);
 	}
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
-	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, Z_STRVAL_PP(str), Z_STRLEN_PP(str))) == -1) {
+	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, Z_STRVAL_PP(str), len)) == -1) {
 		RETURN_FALSE;
 	}
-	return_value->value.lval = nbytes;
-	return_value->type = IS_LONG;
+
+	RETURN_LONG(nbytes);
 }
 /* }}} */
 
