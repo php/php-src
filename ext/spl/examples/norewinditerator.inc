@@ -12,46 +12,16 @@
 /** @ingroup Examples
  * @brief   An Iterator that doesn't call rewind
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  */
-class NoRewindIterator implements OuterIterator
+class NoRewindIterator extends IteratorIterator
 {
-	protected $it;
-	
-	function __construct(Iterator $it)
-	{
-		$this->it = $it;
-	}
-
+	/** Simply prevent execution of inner iterators rewind().
+	 */
 	function rewind()
 	{
 		// nothing to do
-	}
-
-	function valid()
-	{
-		return $this->getInnerIterator()->valid();
-	}
-
-	function current()
-	{
-		return $this->getInnerIterator()->current();
-	}
-
-	function key()
-	{
-		return $this->getInnerIterator()->key();
-	}
-
-	function next()
-	{
-		$this->getInnerIterator()->next();
-	}
-	
-	function getInnerIterator()
-	{
-		return $this->it;
 	}
 }
 
