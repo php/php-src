@@ -28,14 +28,10 @@
    Calculate the soundex key of a string */
 PHP_FUNCTION(soundex)
 {
-	char l, u;
-	char *somestring;
-	int i, j, n;
-	pval *arg;
-
-	/* pad with '0' and terminate with 0 ;-) */
-	char soundex[5] =
-	{'0', '0', '0', '0', 0};
+	char	*somestring;
+	int		i, small, len;
+	pval	*arg;
+	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
 	{0,							/* A */
@@ -64,6 +60,7 @@ PHP_FUNCTION(soundex)
 	 '2',						/* X */
 	 0,							/* Y */
 	 '2'};						/* Z */
+
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -71,48 +68,44 @@ PHP_FUNCTION(soundex)
 	if (arg->value.str.len==0) {
 		RETURN_FALSE;
 	}
-
 	somestring = arg->value.str.val;
-
-	n = arg->value.str.len;
-
-	/* convert chars to upper case and strip non-letter chars */
-	j = 0;
-	for (i = 0; i < n; i++) {
-		u = toupper(somestring[i]);
-		if ((u > 64) && (u < 91)) {
-			somestring[j] = u;
-			j++;
-		}
-	}
-
-	/* null-terminate string */
-	somestring[j] = 0;
-
-	n = strlen(somestring);
-
-	/* prefix soundex string with first valid char */
-	soundex[0] = somestring[0];
-
-	/* remember first char */
-	l = soundex_table[((somestring[0]) - 65)];
-
-	j = 1;
+	len = arg->value.str.len;
 
 	/* build soundex string */
-	for (i = 1; i < n && j < 4; i++) {
-		u = soundex_table[((somestring[i]) - 65)];
-
-		if (u != l) {
-			if (u != 0) {
-				soundex[(int) j++] = u;
+	for (i = 0, small = 0; i < len && small < 4; i++) {
+		/* convert chars to upper case and strip non-letter chars */
+		/* BUG: should also map here accented letters used in non */
+		/* English words or names (also found in English text!): */
+		/* esstsett, thorn, n-tilde, c-cedilla, s-caron, ... */
+		code = toupper(somestring[i]);
+		if (code >= 'A' && code <= 'Z') {
+			if (small == 0) {
+				/* remember first valid char */
+				soundex[small++] = code;
+				last = soundex_table[code - 'A'];
 			}
-			l = u;
+			else {
+				/* ignore sequences of consonants with same soundex */
+				/* code in trail, and vowels unless they separate */
+				/* consonant letters */
+				code = soundex_table[code - 'A'];
+				if (code != last) {
+					if (code != 0) {
+						soundex[small++] = code;
+					}
+					last = code;
+				}
+			}
 		}
 	}
+	/* pad with '0' and terminate with 0 ;-) */
+	while (small < 4) {
+		soundex[small++] = '0';
+	}
+	soundex[small] = '\0';
 
-	return_value->value.str.val = estrndup(soundex, 4);
-	return_value->value.str.len = strlen(soundex);
+	return_value->value.str.val = estrndup(soundex, small);
+	return_value->value.str.len = small;
 	return_value->type = IS_STRING;
 }
 /* }}} */
