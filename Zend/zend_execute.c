@@ -2097,15 +2097,24 @@ int zend_assign_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_assign_dim_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *op_data = opline+1;
-	zval **object_ptr = get_obj_zval_ptr_ptr(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+	zval **object_ptr;
+	
+	if (EX_T(opline->op1.u.var).var.ptr_ptr) {
+		/* not an array offset */
+		object_ptr = get_obj_zval_ptr_ptr(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+	} else {
+		object_ptr = NULL;
+	}
 
-	if ((*object_ptr)->type == IS_OBJECT) {
+	if (object_ptr && (*object_ptr)->type == IS_OBJECT) {
 		zend_assign_to_object(&opline->result, object_ptr, &opline->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
 	} else {
 		zval *value;
 		zend_op *data_opline = opline+1;
 
-		(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
+		if (object_ptr) {
+			(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
 		zend_fetch_dimension_address(&data_opline->op2, &opline->op1, &opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr(&data_opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
