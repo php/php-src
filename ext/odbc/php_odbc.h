@@ -108,6 +108,14 @@ PHP_FUNCTION(solid_fetch_prev);
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
+#ifdef CHAR
+#undef CHAR
+#endif
+
+#ifdef SQLCHAR
+#undef SQLCHAR
+#endif
+
 #define ODBC_TYPE "unixODBC"
 #include <sql.h>
 #include <sqlext.h>
