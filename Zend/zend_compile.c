@@ -3050,8 +3050,10 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 			last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
 			break;
 		case ZEND_FETCH_DIM_IS:
-		case ZEND_FETCH_OBJ_IS:
 			last_op->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
+			break;
+		case ZEND_FETCH_OBJ_IS:
+			last_op->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
 			break;
 	}
 	last_op->result.op_type = IS_TMP_VAR;

@@ -386,6 +386,12 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 }
 
 
+static void zend_std_has_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+{
+	zend_error(E_ERROR, "Cannot use object as array");
+}
+
+
 static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 {
 	zend_object *zobj;
@@ -902,6 +908,7 @@ zend_object_handlers std_object_handlers = {
 	NULL,									/* set */
 	zend_std_has_property,					/* has_property */
 	zend_std_unset_property,				/* unset_property */
+	zend_std_has_dimension,					/* has_dimension */
 	zend_std_unset_dimension,				/* unset_dimension */
 	zend_std_get_properties,				/* get_properties */
 	zend_std_get_method,					/* get_method */

@@ -280,6 +280,8 @@ static zend_object_handlers zend_object_proxy_handlers = {
 	zend_object_proxy_set,		/* set */
 	NULL,						/* has_property */
 	NULL,						/* unset_property */
+	NULL,						/* has_dimension */
+	NULL,						/* unset_dimension */
 	NULL,						/* get_properties */
 	NULL,						/* get_method */
 	NULL,						/* call_method */

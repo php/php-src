@@ -673,6 +673,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ASSIGN_DIM				147
 
+#define ZEND_ISSET_ISEMPTY_PROP_OBJ	148
+
 /* end of block */
 /* END: OPCODES */
 

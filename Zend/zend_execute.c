@@ -3769,7 +3769,7 @@ int zend_isset_isempty_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
+static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **container = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
@@ -3831,7 +3831,11 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 					break;
 			}
 		} else if ((*container)->type == IS_OBJECT) {
-			result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+			if (prop_dim) {
+				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+			} else {
+				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
 			switch (EX(opline)->extended_value) {
 				case ZEND_ISSET:
@@ -3862,6 +3866,18 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 
 	NEXT_OPCODE();
+}
+
+
+int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_isset_isempty_dim_prop_obj_handler(0, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+
+int zend_isset_isempty_prop_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_isset_isempty_dim_prop_obj_handler(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
@@ -4217,6 +4233,7 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_ISSET_ISEMPTY_VAR] = zend_isset_isempty_var_handler;
 	zend_opcode_handlers[ZEND_ISSET_ISEMPTY_DIM_OBJ] = zend_isset_isempty_dim_obj_handler;
+	zend_opcode_handlers[ZEND_ISSET_ISEMPTY_PROP_OBJ] = zend_isset_isempty_prop_obj_handler;
 
 	zend_opcode_handlers[ZEND_PRE_INC_OBJ] = zend_pre_inc_obj_handler;
 	zend_opcode_handlers[ZEND_PRE_DEC_OBJ] = zend_pre_dec_obj_handler;
