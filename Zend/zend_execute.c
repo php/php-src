@@ -2813,29 +2813,44 @@ send_by_ref:
 					zval **object;
 					zend_bool unset_object;
 
-					if (variable->type != IS_STRING) {
-						tmp = *variable;
-						zval_copy_ctor(&tmp);
-						convert_to_string(&tmp);
-						variable = &tmp;
-					}
-
+			
 					unset_object = (EX(opline)->extended_value == ZEND_UNSET_OBJ);
-					
-					if (unset_object) {
-						if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
-							zend_error(E_ERROR, "Cannot delete non-existing object");
+					if (EX(opline)->op2.u.EA.type == ZEND_FETCH_THIS) {
+						if (!EG(This)) {
+							zend_error(E_WARNING, "Using $this in non-object context");
+						} else {
+							object = &EG(This);
+							if(unset_object) {
+								Z_OBJ_HT_PP(object)->delete_obj((*object));
+								zval_ptr_dtor(&EG(This));
+								EG(This) = NULL;
+							} else {
+								zend_error(E_WARNING, "$this cannot be unset");
+							}
 						}
-						if (Z_TYPE_PP(object) != IS_OBJECT) {
+					} else {
+						if (variable->type != IS_STRING) {
+							tmp = *variable;
+							zval_copy_ctor(&tmp);
+							convert_to_string(&tmp);
+							variable = &tmp;
+						}
+
+						if (unset_object) {
+							if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
+								zend_error(E_ERROR, "Cannot delete non-existing object");
+							}
+							if (Z_TYPE_PP(object) != IS_OBJECT) {
 							zend_error(E_ERROR, "Cannot call delete on non-object type");
+							}
+							Z_OBJ_HT_PP(object)->delete_obj((*object));
 						}
-						Z_OBJ_HT_PP(object)->delete_obj((*object));
-					}
 
-					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
+						zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
 
-					if (variable == &tmp) {
-						zval_dtor(&tmp);
+						if (variable == &tmp) {
+							zval_dtor(&tmp);
+						}
 					}
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				}
