@@ -1376,7 +1376,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 
 	new_class_entry.parent = NULL;
 
-	if (zend_hash_update(class_table, name, name_length+1, &new_class_entry, sizeof(zend_class_entry), ce) == FAILURE) {
+	if (zend_hash_update(class_table, new_class_entry.name, name_length+1, &new_class_entry, sizeof(zend_class_entry), ce) == FAILURE) {
 		zend_error(E_ERROR, "Can't create class. Fatal error, please report!");
 	}
 }
