@@ -325,6 +325,30 @@
 
 	// }}} 
 
+	// {{{ Tests
+		function handle_tests_test($attr) {
+		}
+
+		function handle_tests_test_title($attr) {
+		}
+		
+		function handle_tests_test_skipif($attr) {
+		}
+
+		function handle_tests_test_post($attr) {
+		}
+
+		function handle_tests_test_get($attr) {
+		}
+
+		function handle_tests_test_code($attr) {
+		}
+
+		function handle_tests_test_output($attr) {
+		}
+
+  // }}}
+
 	// }}} 
 
 		// {{{ output generation
@@ -532,7 +556,7 @@ zend_module_entry {$name}_module_entry = {
 				foreach ($this->globals as $global) {
           $code .= $global->c_code($this->name);
 				}
-				$code .= php_global::c_code_footer();
+				$code .= php_global::c_code_footer($this->name);
 			}
 
 			return $code;
@@ -836,7 +860,7 @@ PHP_MINFO_FUNCTION({$this->name})
     }
 
    if (isset($this->summary)) {
-     $code .= "  php_printf(\"<p>{$this->summary}</p>\\n\");\n";
+     $code .= "  php_printf(\"<p>".str_replace('"','\\"',$this->summary)."</p>\\n\");\n";
    }
    if (isset($this->release)) {
      $code .= "  php_printf(\"<p>Version {$this->release['version']}{$this->release['state']} ({$this->release['date']})</p>\\n\");\n";
