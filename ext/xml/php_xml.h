@@ -20,9 +20,20 @@
 /* $Id$ */
 
 #ifndef _PHP_XML_H
-# define _PHP_XML_H
+#define _PHP_XML_H
 
-# if HAVE_LIBEXPAT
+#ifdef HAVE_LIBEXPAT
+
+extern zend_module_entry xml_module_entry;
+#define xml_module_ptr &xml_module_entry
+
+#else
+
+#define xml_module_ptr NULL
+
+#endif
+
+#if defined(HAVE_LIBEXPAT) && defined(PHP_XML_INTERNAL)
 
 #include <xmltok.h>
 #include <xmlparse.h>
@@ -35,7 +46,7 @@
 
 
 #ifdef XML_UNICODE
-# error "UTF-16 Unicode support not implemented!"
+#error "UTF-16 Unicode support not implemented!"
 #endif
 
 typedef struct {
@@ -80,9 +91,6 @@ typedef struct {
 } xml_encoding;
 
 
-extern zend_module_entry xml_module_entry;
-# define xml_module_ptr &xml_module_entry
-
 enum php_xml_option {
     PHP_XML_OPTION_CASE_FOLDING = 1,
     PHP_XML_OPTION_TARGET_ENCODING,
@@ -90,7 +98,7 @@ enum php_xml_option {
     PHP_XML_OPTION_SKIP_WHITE
 };
 
-# define RETURN_OUT_OF_MEMORY \
+#define RETURN_OUT_OF_MEMORY \
 	php_error(E_WARNING, "Out of memory");\
 	RETURN_FALSE
 
@@ -122,10 +130,6 @@ PHP_FUNCTION(xml_parse_into_struct);
 
 PHPAPI char *_xml_zval_strdup(zval *val);
 
-#else /* !HAVE_LIBEXPAT */
-
-# define xml_module_ptr NULL
-
 #endif /* HAVE_LIBEXPAT */
 
 #define phpext_xml_ptr xml_module_ptr
@@ -146,7 +150,7 @@ PHPAPI char *_xml_zval_strdup(zval *val);
 #define XMLLS_FETCH()
 #endif
 
-# endif /* _PHP_XML_H */
+#endif /* _PHP_XML_H */
 
 /*
  * Local variables:
