@@ -104,6 +104,7 @@ zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
 	if (!segment) {
 		return 1;
 	}
+/*	fprintf(stderr, "Allocating segment %X\n", segment); */
 	segment->next_segment = heap->segments_list;
 	heap->segments_list = segment;
 
@@ -147,8 +148,10 @@ void zend_mm_shutdown(zend_mm_heap *heap)
 	while (segment) {
 		prev = segment;
 		segment = segment->next_segment;
+/*		fprintf(stderr, "Freeing segment %X\n", prev);*/
 		free(prev);
 	}
+	heap->segments_list = NULL;
 }
 
 void *zend_mm_alloc(zend_mm_heap *heap, size_t size)

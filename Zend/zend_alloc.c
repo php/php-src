@@ -451,8 +451,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
 
 #ifdef ZEND_MM
-	zend_mm_shutdown(&AG(mm_heap));
-	return;
+	if (clean_cache) {
+		zend_mm_shutdown(&AG(mm_heap));
+		return;
+	}
 #elif defined(ZEND_WIN32) && !ZEND_DEBUG
 	if (clean_cache && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
