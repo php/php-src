@@ -306,8 +306,8 @@ void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	cal_expunge (icap_le_struct->icap_stream);
-
+/*	cal_expunge (icap_le_struct->icap_stream);
+*/
 	RETURN_TRUE;
 }
 /* }}} */
@@ -465,6 +465,7 @@ void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+/*
 	if (icap_create(icap_le_struct->icap_stream,calendar->value.str.val)) 
 	  {
 	    RETURN_TRUE;
@@ -473,6 +474,7 @@ void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 	  {
 	    RETURN_FALSE;
 	  }
+*/
 }
 /* }}} */
 
@@ -499,8 +501,10 @@ void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+/*
 	if(icap_rename(icap_le_struct->icap_stream,src_calendar->value.str.val,dest_calendar->value.str.val)) {RETURN_TRUE;}
 	else {RETURN_FALSE; }
+*/
 }
 /* }}} */
 
