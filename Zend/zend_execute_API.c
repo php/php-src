@@ -169,12 +169,12 @@ void init_executor(TSRMLS_D)
 
 	EG(exception) = NULL;
 
-	EG(namespace) = NULL;
+	EG(scope) = NULL;
 
 	EG(main_class_ptr) = &CG(main_class);
 	CG(main_class).static_members = &EG(symbol_table);
 
-	EG(this) = NULL;
+	EG(This) = NULL;
 }
 
 
@@ -453,8 +453,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zval function_name_copy;
-	zend_class_entry *current_namespace;
-	zend_class_entry *calling_namespace = NULL;
+	zend_class_entry *current_scope;
+	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
 
 	*retval_ptr_ptr = NULL;
@@ -487,7 +487,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
 			function_table = &Z_OBJCE_PP(object_pp)->function_table;
-			calling_namespace = Z_OBJCE_PP(object_pp);
+			calling_scope = Z_OBJCE_PP(object_pp);
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry *ce;
 			char *lc_class;
@@ -501,7 +501,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 				return FAILURE;
 
 			function_table = &ce->function_table;
-			calling_namespace = ce;
+			calling_scope = ce;
 			object_pp = NULL;
 		} else
 			return FAILURE;
@@ -560,27 +560,27 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	EG(function_state_ptr) = &function_state;
 
-	current_namespace = EG(namespace);
-	EG(namespace) = calling_namespace;
+	current_scope = EG(scope);
+	EG(scope) = calling_scope;
 
-	current_this = EG(this);
+	current_this = EG(This);
 
 	if (object_pp) {
-		EG(this) = *object_pp;
+		EG(This) = *object_pp;
 
-		if (!PZVAL_IS_REF(EG(this))) {
-			EG(this)->refcount++; /* For $this pointer */
+		if (!PZVAL_IS_REF(EG(This))) {
+			EG(This)->refcount++; /* For $this pointer */
 		} else {
 			zval *this_ptr;
 
 			ALLOC_ZVAL(this_ptr);
-			*this_ptr = *EG(this);
+			*this_ptr = *EG(This);
 			INIT_PZVAL(this_ptr);
 			zval_copy_ctor(this_ptr);
-			EG(this) = this_ptr;
+			EG(This) = this_ptr;
 		}
 	} else {
-		EG(this) = NULL;
+		EG(This) = NULL;
 	}
 
 
@@ -623,11 +623,11 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
 
-	if (EG(this)) {
-		zval_ptr_dtor(&EG(this));
+	if (EG(This)) {
+		zval_ptr_dtor(&EG(This));
 	}
-	EG(namespace) = current_namespace;
-	EG(this) = current_this;
+	EG(scope) = current_scope;
+	EG(This) = current_this;
 	
 	return SUCCESS;
 }
