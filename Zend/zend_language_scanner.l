@@ -19,6 +19,10 @@
    +----------------------------------------------------------------------+
 */
 
+#define yyleng SCNG(yy_leng)
+#define yytext SCNG(yy_text)
+#define yytext_ptr SCNG(yy_text)
+
 %}
 
 %x ST_IN_SCRIPTING
