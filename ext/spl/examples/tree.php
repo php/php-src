@@ -29,9 +29,10 @@ EOF;
 }
 
 if (!class_exists("DirectoryTreeIterator", false)) require_once("directorytreeiterator.inc");
+if (!class_exists("DirectoryGraphIterator", false)) require_once("directorygraphiterator.inc");
 
 echo $argv[1]."\n";
-foreach(new DirectoryTreeIterator($argv[1]) as $file)
+foreach(new DirectoryGraphIterator($argv[1]) as $file)
 {
 	echo $file . "\n";
 }
