@@ -56,10 +56,12 @@ static char *months[] =
    response is ecalloc()d in Ack() itself and efree()d here
    because the content is in *error_message now */
 #define SMTP_ERROR_RESPONSE(response)	{ \
-											if (NULL != (*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)))) { \
-												snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
+											if (response && error_message) { \
+												if (NULL != (*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)))) { \
+													snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
+												} \
+												efree(response); \
 											} \
-											efree(response); \
 										}
 
 #ifndef THREAD_SAFE
@@ -393,7 +395,6 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		return W32_SM_SENDMAIL_FROM_MALFORMED;
 	}
 
-
 	tempMailTo = estrdup(mailTo);
 	/* Send mail to all rcpt's */
 	token = strtok(tempMailTo, ",");
@@ -431,14 +432,11 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
 		{
-			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
-			if ((res = Post(Buffer)) != SUCCESS) {
-				efree(tempMailTo);
+			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS)
 				return (res);
-			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
-				efree(tempMailTo);
 				return (res);
 			}
 			token = strtok(NULL, ",");
@@ -527,6 +525,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 			}
 		}
 	}
+
 	if (mailBcc && *mailBcc) {
 		tempMailTo = estrdup(mailBcc);
 		/* Send mail to all rcpt's */
@@ -695,7 +694,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		}
 	}
 	if(xheaders){
-		if (!addToHeader(&header_buffer, "%s", xheaders)) {
+		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
 			goto PostHeader_outofmem;
 		}
 	}
