@@ -440,21 +440,25 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC
 	}
 
 	/* username */
-	H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
-		   	dbh->username, strlen(dbh->username),
-			OCI_ATTR_USERNAME, H->err);
-	if (H->last_err) {
-		oci_drv_error("OCIAttrSet: OCI_ATTR_USERNAME");
-		goto cleanup;
+	if (dbh->username) {
+		H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+			   	dbh->username, strlen(dbh->username),
+				OCI_ATTR_USERNAME, H->err);
+		if (H->last_err) {
+			oci_drv_error("OCIAttrSet: OCI_ATTR_USERNAME");
+			goto cleanup;
+		}
 	}
 
 	/* password */
-	H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
-		   	dbh->password, strlen(dbh->password),
-			OCI_ATTR_PASSWORD, H->err);
-	if (H->last_err) {
-		oci_drv_error("OCIAttrSet: OCI_ATTR_PASSWORD");
-		goto cleanup;
+	if (dbh->password) {
+		H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
+			   	dbh->password, strlen(dbh->password),
+				OCI_ATTR_PASSWORD, H->err);
+		if (H->last_err) {
+			oci_drv_error("OCIAttrSet: OCI_ATTR_PASSWORD");
+			goto cleanup;
+		}
 	}
 
 	/* Now fire up the session */
