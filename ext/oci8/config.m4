@@ -2,9 +2,11 @@ dnl $Id$
 
 AC_DEFUN(AC_OCI8_VERSION,[
   AC_MSG_CHECKING([Oracle version])
-  if test -f "$OCI8_HOME/lib/libclntsh.so.8.0"; then
+  if test -f "$OCI8_DIR/lib/libclntsh.so.8.0"; then
     OCI8_VERSION=8.1
-  elif test -f "$OCI8_HOME/lib/libclntsh.so.1.0"; then
+  elif test -f "$OCI8_DIR/lib/libclntsh.so.1.0"; then
+    OCI8_VERSION=8.0
+  elif test -f "$OCI8_DIR/lib/libclntsh.a"; then # AIX - XXX is this check still right for 8.1?
     OCI8_VERSION=8.0
   else
   	AC_MSG_ERROR(Oracle-OCI8 needed libraries not found)
@@ -12,102 +14,74 @@ AC_DEFUN(AC_OCI8_VERSION,[
   AC_MSG_RESULT($OCI8_VERSION)
 ])
 
-AC_MSG_CHECKING(for Oracle-OCI8 support)
-AC_ARG_WITH(oci8,
-[  --with-oci8[=DIR]      Include Oracle-OCI8 database support. DIR is Oracle's
-                          home directory, defaults to \$ORACLE_HOME.],
-[
-  case $withval in
-  shared)
- 	shared=yes
-    withval=yes
-    OCI8_HOME=$ORACLE_HOME
-    AC_MSG_RESULT(yes)
-    PHP_EXTENSION(oci8,yes)
-    ;;
-  shared,*)
-   	shared=yes
-   	withval=`echo $withval | sed -e 's/^shared,//'`
-   	AC_EXPAND_PATH($withval, OCI8_HOME)
-   	AC_MSG_RESULT(yes)
-    PHP_EXTENSION(oci8,yes)
-  	;;
-  *)
-  	shared=no
-   	OCI8_HOME=$ORACLE_HOME
-   	AC_MSG_RESULT(yes)
-    PHP_EXTENSION(oci8,no)
-   	;;
+PHP_ARG_WITH(oci8, for Oracle-OCI8 support,
+[  --with-oci8[=DIR]     Include oci8 support. DIR is the ORACLE_HOME.])
+
+if test "$PHP_OCI8" != "no"; then
+  AC_MSG_CHECKING([Oracle Install-Dir])
+  if test "$PHP_OCI8" = "yes"; then
+  	OCI8_DIR="$ORACLE_HOME"
+  else
+  	OCI8_DIR="$PHP_OCI8"
+  fi
+  AC_MSG_RESULT($OCI8_DIR)
+
+  if test -d "$OCI8_DIR/rdbms/public"; then
+  	AC_ADD_INCLUDE($OCI8_DIR/rdbms/public)
+  fi
+  if test -d "$OCI8_DIR/rdbms/demo"; then
+  	AC_ADD_INCLUDE($OCI8_DIR/rdbms/demo)
+  fi
+  if test -d "$OCI8_DIR/network/public"; then
+  	AC_ADD_INCLUDE($OCI8_DIR/network/public)
+  fi
+  if test -d "$OCI8_DIR/plsql/public"; then
+  	AC_ADD_INCLUDE($OCI8_DIR/plsql/public)
+  fi
+
+  if test -f "$OCI8_DIR/lib/sysliblist"; then
+	OCI8_SYSLIB="`cat $OCI8_DIR/lib/sysliblist | sed -e 's/-l//g'`"
+  elif test -f "$OCI8_DIR/rdbms/lib/sysliblist"; then
+	OCI8_SYSLIB="`cat $OCI8_DIR/rdbms/lib/sysliblist | sed -e 's/-l//g'`"
+  fi
+
+  if test -n "$OCI8_SYSLIB"; then
+	for oci8_slib in `echo $OCI8_SYSLIB`; do
+	  AC_ADD_LIBRARY_WITH_PATH($oci8_slib, "", OCI8_SHARED_LIBADD)
+	done
+  fi
+
+  AC_OCI8_VERSION($OCI8_DIR)
+  case $OCI8_VERSION in
+	8.0)
+  	  AC_ADD_LIBRARY_WITH_PATH(nlsrtl3, "", OCI8_SHARED_LIBADD)
+  	  AC_ADD_LIBRARY_WITH_PATH(core4, "", OCI8_SHARED_LIBADD)
+  	  AC_ADD_LIBRARY_WITH_PATH(psa, "", OCI8_SHARED_LIBADD)
+  	  AC_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+	  ;;
+
+	8.1)
+  	  AC_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+	  ;;
+	*)
+      AC_MSG_ERROR(Unsupported Oracle version!)
+	  ;;
   esac
 
-  if test "$OCI8_HOME" != ""; then
-    if test -d "$OCI8_HOME/rdbms/public"; then
-      OCI8_INCLUDE="$OCI8_INCLUDE -I$OCI8_HOME/rdbms/public"
-    fi
-	if test -d "$OCI8_HOME/rdbms/demo"; then
-      OCI8_INCLUDE="$OCI8_INCLUDE -I$OCI8_HOME/rdbms/demo"
-    fi
-    if test -d "$OCI8_HOME/network/public"; then
-      OCI8_INCLUDE="$OCI8_INCLUDE -I$OCI8_HOME/network/public"
-    fi
-    if test -d "$OCI8_HOME/plsql/public"; then
-      OCI8_INCLUDE="$OCI8_INCLUDE -I$OCI8_HOME/plsql/public"
-    fi
+  PHP_EXTENSION(oci8, $ext_shared)
+  AC_DEFINE(HAVE_OCI8,1,[ ])
 
-    # Need to know the version, otherwhise we will mixup nlsrtl
-    AC_OCI8_VERSION($OCI8_HOME)
+  PHP_SUBST(OCI8_SHARED_LIBADD)
+  PHP_SUBST(OCI8_DIR)
+  PHP_SUBST(OCI8_VERSION)
 
-    OCI8_LIBDIR=lib
-    OCI8_LFLAGS="-L$OCI8_HOME/$OCI8_LIBDIR ${ld_runpath_switch}$OCI8INST_TOP/$OCI8_LIBDIR"
-    if test -f "$OCI8_HOME/rdbms/lib/sysliblist"; then
-      ORA_SYSLIB="`cat $OCI8_HOME/rdbms/lib/sysliblist`"
-    else
-      ORA_SYSLIB="-lm"
+  # i have no idea if the following will work! thies@digicol.de 20000508
+  if test "$CC" = "gcc" -a "`uname -sv`" = "AIX 4"; then
+    if test "$ext_shared" = "yes"; then
+	  OCI8_SHARED_LIBADD="$OCI8_SHARED_LIBADD -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
+    else	  
+	  LIBS="$LIBS -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
     fi
-
-    # Oracle shared libs
-    case $OCI8_VERSION in
-      8.0)
-		if test -f $OCI8_HOME/$OCI8_LIBDIR/libclntsh.s? -o \
-	        	-f $OCI8_HOME/$OCI8_LIBDIR/libclntsh.a # AIX
-    	then
-	  	  if test "$CC" = "gcc" -a "`uname -sv`" = "AIX 4"; then
-	        # for Oracle 8 on AIX 4
-	        ORA_SYSLIB="$ORA_SYSLIB -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
-	      fi
-
-    	  OCI8_SHLIBS="-lclntsh -lpsa -lcore4 -lnlsrtl3 -lclntsh $ORA_SYSLIB"
-    	else
-    	  OCI8_SHLIBS="$OCI8_STLIBS"
-    	fi
-        AC_DEFINE(HAVE_OCI8,1,[ ])
-    	;;
-
-      8.1)
-	    OCI8_SHLIBS="-lclntsh $ORA_SYSLIB"
-		AC_DEFINE(HAVE_OCI8,1,[ ])
-		;;
-      *)
-  		OCI8_SHLIBS=
-  		;;
-    esac
-  
-    # only using shared libs right now
-    OCI8_LIBS=$OCI8_SHLIBS
   fi
-],[AC_MSG_RESULT(no)])
 
-if test "$shared" = yes; then
-	OCI8_LIBS="$OCI8_LFLAGS $OCI8_LIBS"
-else
-	EXTRA_LIBS="$EXTRA_LIBS $OCI8_LFLAGS $OCI8_LIBS"
-	INCLUDES="$INCLUDES $OCI8_INCLUDE"
 fi
-
-INCLUDES="$INCLUDES $OCI8_INCLUDE"
-
-PHP_SUBST(OCI8_HOME) 
-PHP_SUBST(OCI8_INCLUDE) 
-PHP_SUBST(OCI8_LFLAGS) 
-PHP_SUBST(OCI8_LIBS)
-
