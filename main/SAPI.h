@@ -148,6 +148,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC);
 
 struct _sapi_module_struct {
 	char *name;
+	char *pretty_name;
 
 	int (*startup)(struct _sapi_module_struct *sapi_module);
 	int (*shutdown)(struct _sapi_module_struct *sapi_module);

@@ -283,7 +283,8 @@ static char *sapi_pi3web_read_cookies(SLS_D)
 
 
 static sapi_module_struct sapi_module = {
-	"PI3WEB",				/* name */
+	"pi3web",				/* name */
+	"PI3WEB",				/* pretty name */
 
 	php_pi3web_startup,			/* startup */
 	php_module_shutdown_wrapper,		/* shutdown */

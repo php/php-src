@@ -383,7 +383,8 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 
 
 static sapi_module_struct sapi_module = {
-	"ISAPI",						/* name */
+	"isapi",						/* name */
+	"ISAPI",						/* pretty name */
 									
 	php_isapi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
@@ -419,7 +420,7 @@ BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pFilterVersion)
 {
 	bFilterLoaded = 1;
 	pFilterVersion->dwFilterVersion = HTTP_FILTER_REVISION;
-	strcpy(pFilterVersion->lpszFilterDesc, sapi_module.name);
+	strcpy(pFilterVersion->lpszFilterDesc, sapi_module.pretty_name);
 	pFilterVersion->dwFlags= (SF_NOTIFY_AUTHENTICATION | SF_NOTIFY_PREPROC_HEADERS);
 	return TRUE;
 }

@@ -199,7 +199,8 @@ static int sapi_cgi_deactivate(SLS_D)
 
 
 static sapi_module_struct sapi_module = {
-	"CGI",							/* name */
+	"cgi",							/* name */
+	"CGI",							/* pretty name */
 									
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */

@@ -332,7 +332,8 @@ static char *php_apache_getenv(char *name, int name_len SLS_DC)
 
 
 static sapi_module_struct sapi_module = {
-	"Apache",						/* name */
+	"apache",						/* name */
+	"Apache",						/* pretty name */
 									
 	php_apache_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
