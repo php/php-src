@@ -63,9 +63,8 @@ print "Removed " . $attr . " attributes.\n";
 echo "--------- attributes of rootnode\n";
 $attrs = $rootnode->attributes;
 print_node_list($attrs);
-var_dump($attrs);
+
 echo "--------- children of an attribute\n";
-var_dump($children = $attrs->item(0));
 $children = $attrs->item(0)->childNodes;
 print_node_list($children);
 
