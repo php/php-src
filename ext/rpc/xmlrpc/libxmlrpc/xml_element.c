@@ -71,7 +71,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   there must be some.
  ******/
  
-
+#ifdef _WIN32
+#include "xmlrpc_win32.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 

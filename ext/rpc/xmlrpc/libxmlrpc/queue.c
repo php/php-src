@@ -97,7 +97,9 @@ static const char rcsid[] = "#(@) $Id$";
  *
  ****************************************************************/
 
-
+#ifdef _WIN32
+#include "xmlrpc_win32.h"
+#endif
 #include <stdlib.h>
 #include "queue.h"
 

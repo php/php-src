@@ -64,7 +64,9 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #include "php_xmlrpc.h"
+#ifndef PHP_WIN32
 #include "php_config.h"
+#endif
 #include "xmlrpc.h"
 
 #define PHP_EXT_VERSION "0.50"
@@ -317,6 +319,8 @@ static int add_pval(pval* list, const char* id, pval** val) {
       if(id) return zend_hash_update(Z_ARRVAL_P(list), (char*)id, strlen(id)+1, (void *) val, sizeof(pval **), NULL);
       else   return zend_hash_next_index_insert(Z_ARRVAL_P(list), (void *) val, sizeof(pval **), NULL); 
    }
+   /* what is the correct return on error? */
+   return 0;
 }
 
 #if ZEND_MODULE_API_NO >= 20001222
