@@ -925,6 +925,150 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, char *url_from, ch
 }
 /* }}} */
 
+/* {{{ php_stream_ftp_mkdir
+ */
+static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_url *resource = NULL;
+	int result, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
+	char tmp_line[512];
+
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL TSRMLS_CC);
+	if (!stream) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to %s", url);
+		}
+		goto mkdir_errexit;
+	}
+
+	if (resource->path == NULL) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path provided in %s", url);
+		}
+		goto mkdir_errexit;
+	}
+
+	if (!recursive) {
+		php_stream_printf(stream TSRMLS_CC, "MKD %s\r\n", resource->path);
+		result = GET_FTP_RESULT(stream);
+    } else {
+        /* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+        char *p, *e, *buf;
+
+        buf = estrdup(resource->path);
+        e = buf + strlen(buf);
+
+        /* find a top level directory we need to create */
+        while ((p = strrchr(buf, '/'))) {
+            *p = '\0';
+			php_stream_printf(stream TSRMLS_CC, "CWD %s\r\n", buf);
+			result = GET_FTP_RESULT(stream);
+			if (result >= 200 && result <= 299) {
+				*p = '/';
+				break;
+			}
+        }
+        if (p == buf) {
+			php_stream_printf(stream TSRMLS_CC, "MKD %s\r\n", resource->path);
+			result = GET_FTP_RESULT(stream);
+        } else {
+			php_stream_printf(stream TSRMLS_CC, "MKD %s\r\n", buf);
+			result = GET_FTP_RESULT(stream);
+			if (result >= 200 && result <= 299) {
+				if (!p) {
+					p = buf;
+				}
+				/* create any needed directories if the creation of the 1st directory worked */
+				while (++p != e) {
+					if (*p == '\0' && *(p + 1) != '\0') {
+						*p = '/';
+						php_stream_printf(stream TSRMLS_CC, "MKD %s\r\n", buf);
+						result = GET_FTP_RESULT(stream);
+						if (result < 200 || result > 299) {
+							if (options & REPORT_ERRORS) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tmp_line);
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+        efree(buf);
+    }
+
+	php_url_free(resource);
+	php_stream_close(stream);
+
+	if (result < 200 || result > 299) {
+		/* Failure */
+		return 0;
+	}
+
+	return 1;
+
+ mkdir_errexit:
+	if (resource) {
+		php_url_free(resource);
+	}
+	if (stream) {
+		php_stream_close(stream);
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ php_stream_ftp_rmdir
+ */
+static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_url *resource = NULL;
+	int result;
+	char tmp_line[512];
+
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL TSRMLS_CC);
+	if (!stream) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to %s", url);
+		}
+		goto rmdir_errexit;
+	}
+
+	if (resource->path == NULL) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path provided in %s", url);
+		}
+		goto rmdir_errexit;
+	}
+
+	php_stream_printf(stream TSRMLS_CC, "RMD %s\r\n", resource->path);
+	result = GET_FTP_RESULT(stream);
+
+	if (result < 200 || result > 299) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tmp_line);
+		}
+		goto rmdir_errexit;
+	}
+
+	php_url_free(resource);
+	php_stream_close(stream);
+
+	return 1;
+
+ rmdir_errexit:
+	if (resource) {
+		php_url_free(resource);
+	}
+	if (stream) {
+		php_stream_close(stream);
+	}
+	return 0;
+}
+/* }}} */
+
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
@@ -933,7 +1077,9 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_opendir, /* opendir */
 	"FTP",
 	php_stream_ftp_unlink, /* unlink */
-	php_stream_ftp_rename  /* rename */
+	php_stream_ftp_rename, /* rename */
+	php_stream_ftp_mkdir,  /* mkdir */
+	php_stream_ftp_rmdir   /* rmdir */
 };
 
 PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{

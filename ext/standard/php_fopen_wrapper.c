@@ -234,7 +234,9 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* opendir */
 	"PHP",
 	NULL, /* unlink */
-	NULL  /* rename */
+	NULL, /* rename */
+	NULL, /* mkdir */
+	NULL  /* rmdir */
 };
 
 php_stream_wrapper php_stream_php_wrapper =	{

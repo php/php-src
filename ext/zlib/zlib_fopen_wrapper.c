@@ -161,7 +161,9 @@ static php_stream_wrapper_ops gzip_stream_wops = {
 	NULL, /* opendir */
 	"ZLIB",
 	NULL, /* unlink */
-	NULL  /* rename */
+	NULL, /* rename */
+	NULL, /* mkdir */
+	NULL  /* rmdir */
 };
 
 php_stream_wrapper php_stream_gzip_wrapper =	{

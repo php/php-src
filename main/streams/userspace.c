@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Wez Furlong <wez@thebrainroom.com>                          |
+   |          Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -35,6 +36,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
@@ -46,7 +49,9 @@ static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opendir,
 	"user-space",
 	user_wrapper_unlink,
-	user_wrapper_rename
+	user_wrapper_rename,
+	user_wrapper_mkdir,
+	user_wrapper_rmdir
 };
 
 
@@ -98,6 +103,8 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_STATURL	"url_stat"
 #define USERSTREAM_UNLINK	"unlink"
 #define USERSTREAM_RENAME	"rename"
+#define USERSTREAM_MKDIR	"mkdir"
+#define USERSTREAM_RMDIR	"rmdir"
 #define USERSTREAM_DIR_OPEN		"dir_opendir"
 #define USERSTREAM_DIR_READ		"dir_readdir"
 #define USERSTREAM_DIR_REWIND	"dir_rewinddir"
@@ -162,6 +169,16 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	}
 
 	function rename(string $from, string $to)
+	{
+		return true / false;
+	}
+
+	function mkdir($dir, $mode, $options)
+	{
+		return true / false;
+	}
+
+	function rmdir($dir, $options)
 	{
 		return true / false;
 	}
@@ -858,6 +875,139 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	zval_ptr_dtor(&zfuncname);
 	zval_ptr_dtor(&zold_name);
 	zval_ptr_dtor(&znew_name);
+
+	return ret;
+}
+
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zval *zfilename, *zmode, *zoptions, *zfuncname, *zretval, *zcontext;
+	zval **args[3];
+	int call_result;
+	zval *object;
+	int ret = 0;
+
+	/* create an instance of our class */
+	ALLOC_ZVAL(object);
+	object_init_ex(object, uwrap->ce);
+	ZVAL_REFCOUNT(object) = 1;
+	PZVAL_IS_REF(object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(object, "context");
+	}
+
+	/* call the unlink method */
+	MAKE_STD_ZVAL(zfilename);
+	ZVAL_STRING(zfilename, url, 1);
+	args[0] = &zfilename;
+
+	MAKE_STD_ZVAL(zmode);
+	ZVAL_LONG(zmode, mode);
+	args[1] = &zmode;
+
+	MAKE_STD_ZVAL(zoptions);
+	ZVAL_LONG(zoptions, options);
+	args[2] = &zoptions;
+
+	MAKE_STD_ZVAL(zfuncname);
+	ZVAL_STRING(zfuncname, USERSTREAM_MKDIR, 1);
+	
+	call_result = call_user_function_ex(NULL,
+			&object,
+			zfuncname,
+			&zretval,
+			3, args,
+			0, NULL	TSRMLS_CC);
+
+	if (call_result == SUCCESS && zretval && Z_TYPE_P(zretval) == IS_BOOL) {
+		ret = Z_LVAL_P(zretval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_MKDIR " is not implemented!", uwrap->classname);
+ 	}
+
+	/* clean up */
+	zval_ptr_dtor(&object);
+	if (zretval) {
+		zval_ptr_dtor(&zretval);
+	}
+	
+	zval_ptr_dtor(&zfuncname);
+	zval_ptr_dtor(&zfilename);
+	zval_ptr_dtor(&zmode);
+	zval_ptr_dtor(&zoptions);
+
+	return ret;
+}
+
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zval *zfilename, *zmode, *zoptions, *zfuncname, *zretval, *zcontext;
+	zval **args[3];
+	int call_result;
+	zval *object;
+	int ret = 0;
+
+	/* create an instance of our class */
+	ALLOC_ZVAL(object);
+	object_init_ex(object, uwrap->ce);
+	ZVAL_REFCOUNT(object) = 1;
+	PZVAL_IS_REF(object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(object, "context");
+	}
+
+	/* call the unlink method */
+	MAKE_STD_ZVAL(zfilename);
+	ZVAL_STRING(zfilename, url, 1);
+	args[0] = &zfilename;
+
+	MAKE_STD_ZVAL(zoptions);
+	ZVAL_LONG(zoptions, options);
+	args[1] = &zoptions;
+
+	MAKE_STD_ZVAL(zfuncname);
+	ZVAL_STRING(zfuncname, USERSTREAM_RMDIR, 1);
+	
+	call_result = call_user_function_ex(NULL,
+			&object,
+			zfuncname,
+			&zretval,
+			2, args,
+			0, NULL	TSRMLS_CC);
+
+	if (call_result == SUCCESS && zretval && Z_TYPE_P(zretval) == IS_BOOL) {
+		ret = Z_LVAL_P(zretval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_RMDIR " is not implemented!", uwrap->classname);
+ 	}
+
+	/* clean up */
+	zval_ptr_dtor(&object);
+	if (zretval) {
+		zval_ptr_dtor(&zretval);
+	}
+	
+	zval_ptr_dtor(&zfuncname);
+	zval_ptr_dtor(&zfilename);
+	zval_ptr_dtor(&zoptions);
 
 	return ret;
 }
