@@ -38,7 +38,7 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 	}
 
 	number = image.ncolors;
-	colors = (int *) gdMalloc (sizeof (int) * number);
+	colors = (int *) safe_emalloc(number, sizeof(int), 0);
 	for (i = 0; i < number; i++) {
 		switch (strlen (image.colorTable[i].c_color)) {
 			case 4:
