@@ -392,14 +392,12 @@ PHP_FUNCTION(mcal_fetch_event)
 		convert_to_long(options);
 	}
 	cal_fetch(mcal_le_struct->mcal_stream,eventid->value.lval,&myevent);
-	if(myevent == NULL)
-	  {
+	if (myevent == NULL) {
 	    RETURN_FALSE;
-	  }
+	}
 	calevent_free(mcal_le_struct->event);
 	mcal_le_struct->event=myevent;
 	make_event_object(return_value,mcal_le_struct->event);
-
 }
 /* }}} */
 
@@ -423,7 +421,6 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 		RETURN_FALSE;
     }
 	make_event_object(return_value,mcal_le_struct->event);
-
 }
 /* }}} */
 
@@ -1249,10 +1246,11 @@ PHP_FUNCTION(mcal_day_of_year)
    Returns <0, 0, >0 if a<b, a==b, a>b respectively */
 PHP_FUNCTION(mcal_date_compare)
 {
-	pval *ayear,*amonth,*aday;
-	pval *byear,*bmonth,*bday;
+	pval *ayear, *amonth, *aday;
+	pval *byear, *bmonth, *bday;
 	int myargc;
-	datetime_t myadate,mybdate;
+	datetime_t myadate, mybdate;
+	
 	myargc=ARG_COUNT(ht);
 	if (myargc !=6 || getParameters(ht,myargc,&ayear,&amonth,&aday,&byear,&bmonth,&bday) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1263,12 +1261,12 @@ PHP_FUNCTION(mcal_date_compare)
 	convert_to_long(byear);
 	convert_to_long(bmonth);
 	convert_to_long(bday);
-       dt_init(&myadate);
-       dt_init(&mybdate);
-       dt_setdate(&myadate,ayear->value.lval,amonth->value.lval, aday->value.lval);
-       dt_setdate(&mybdate,byear->value.lval,bmonth->value.lval, bday->value.lval);
-
-       RETURN_LONG(dt_compare(&myadate,&mybdate));
+	dt_init(&myadate);
+	dt_init(&mybdate);
+	dt_setdate(&myadate, ayear->value.lval, amonth->value.lval, aday->value.lval);
+	dt_setdate(&mybdate, byear->value.lval, bmonth->value.lval, bday->value.lval);
+	
+	RETURN_LONG(dt_compare(&myadate, &mybdate));
 }
 
 
@@ -1279,62 +1277,62 @@ PHP_FUNCTION(mcal_date_compare)
    Returns an object filled with the next date the event occurs, on or after the supplied date.  Returns empty date field if event does not occur or something is invalid. */
 PHP_FUNCTION(mcal_next_recurrence)
 {
-	pval *streamind,*weekstart,*next,*pvalue;
+	pval *streamind, *weekstart, *next, **pvalue;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t mydate;
+	
 	myargc=ARG_COUNT(ht);
 	if (myargc !=3 || getParameters(ht,myargc,&streamind,&weekstart,&next) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_long(streamind);
 	convert_to_long(weekstart);
 	convert_to_array(next);
 	ind = streamind->value.lval;
-
+	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
 	
-	if (zend_hash_find(next->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS) {
-		
-		convert_to_long(pvalue);
-		mydate.year=(pvalue)->value.lval;
+	if (zend_hash_find(next->value.ht,"year",sizeof("year"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.year = (*pvalue)->value.lval;
 	}
-	if(zend_hash_find(next->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-
-		convert_to_long(pvalue);
-		mydate.mon=(pvalue)->value.lval;
+	if (zend_hash_find(next->value.ht,"month",sizeof("month"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.mon = (*pvalue)->value.lval;
 	}
-	if(zend_hash_find(next->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
-
-		convert_to_long(pvalue);
-		mydate.mday=(pvalue)->value.lval;
+	if (zend_hash_find(next->value.ht,"mday",sizeof("mday"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.mday = (*pvalue)->value.lval;
 	}
-	if(zend_hash_find(next->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
-
-		convert_to_long(pvalue);
-		mydate.hour=(pvalue)->value.lval;
+	if (zend_hash_find(next->value.ht,"hour",sizeof("hour"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.hour = (*pvalue)->value.lval;
 	}
-	if(zend_hash_find(next->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
-
-		convert_to_long(pvalue);
-		mydate.min=(pvalue)->value.lval;
+	if (zend_hash_find(next->value.ht,"min",sizeof("min"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.min = (*pvalue)->value.lval;
 	}
-	if(zend_hash_find(next->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
-
-		convert_to_long(pvalue);
-		mydate.sec=(pvalue)->value.lval;
-
+	if (zend_hash_find(next->value.ht,"sec",sizeof("sec"),(void **) &pvalue) == SUCCESS) {
+		SEPARATE_ZVAL(pvalue);
+		convert_to_long(*pvalue);
+		mydate.sec = (*pvalue)->value.lval;
 	}
-
+	
 	calevent_next_recurrence(mcal_le_struct->event,&mydate,weekstart->value.lval);
+	
+	MAKE_STD_ZVAL(return_value);
 	object_init(return_value);
 	if (mydate.has_date) {
 	    add_property_long(return_value,"year",mydate.year);
