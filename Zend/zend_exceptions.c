@@ -33,7 +33,7 @@ ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
 
-void zend_throw_exception_internal(zval *exception TSRMLS_DC)
+ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC)
 {
 	if (exception != NULL) {
 		if (EG(exception)) {
