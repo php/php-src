@@ -103,7 +103,7 @@ class PEAR_Installer extends PEAR_Common
     function mkDirHier($dir)
     {
         $dirstack = array();
-        while (!is_dir($dir) && $dir != DIRECTORY_SEPARATOR) {
+        while (!@is_dir($dir) && $dir != DIRECTORY_SEPARATOR) {
             array_unshift($dirstack, $dir);
             $dir = dirname($dir);
         }
@@ -343,7 +343,6 @@ class PEAR_Installer extends PEAR_Common
         }
 
         xml_parser_free($xp);
-
         return true;
     }
 
@@ -393,6 +392,8 @@ class PEAR_Installer extends PEAR_Common
                 break;
             case "Dir":
                 if (!$this->phpdir) {
+                    return $this->raiseError("No script destination directory found\n",
+                                             null, PEAR_ERROR_DIE);
                     break;
                 }
                 $type = $this->current_attributes["Type"];
@@ -404,21 +405,11 @@ class PEAR_Installer extends PEAR_Common
                     $this->destdir = $dir;
                 }
                 break;
-                /* XXXXX Remove me!
-                if (is_file($d)) {
-                            return $this->raiseError("mkdir $d failed: is a file");
-                }
-                if (is_dir($d)) {
-                    break;
-                }
-                if (!mkdir($d, 0755)) {
-                            return $this->raiseError("mkdir $d failed");
-                    break;
-                }
-                        $this->log(1, "created dir $d");
-                break;*/
+
             case "File":
                 if (!$this->phpdir) {
+                    return $this->raiseError("No script destination directory found\n",
+                                             null, PEAR_ERROR_DIE);
                     break;
                 }
                 $type = strtolower($this->current_attributes["Role"]);
@@ -440,7 +431,7 @@ class PEAR_Installer extends PEAR_Common
                 if (!$d) {
                     break;
                 }
-                if (!is_dir($d)) {
+                if (!@is_dir($d)) {
                     $this->mkDirHier($d);
                 }
                 $bfile = basename($file);
