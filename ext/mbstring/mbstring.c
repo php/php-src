@@ -2792,8 +2792,8 @@ PHP_FUNCTION(mb_convert_variables)
 							}
 						}
 					} else if (Z_TYPE_PP(var) == IS_STRING) {
-						string.val = Z_STRVAL_PP(args[n]);
-						string.len = Z_STRLEN_PP(args[n]);
+						string.val = Z_STRVAL_PP(var);
+						string.len = Z_STRLEN_PP(var);
 						if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
 							goto detect_end;		/* complete detecting */
 						}
