@@ -309,18 +309,42 @@ AC_MSG_CHECKING(whether to use bundled regex library)
 AC_ARG_WITH(system-regex,
 [  --with-system-regex     Do not use the bundled regex library],
 [
-	REGEX_LIB=
-	HSREGEX=no
- 	AC_MSG_RESULT(no)
-	AC_DEFINE(REGEX,0)
+    if test -n "$APXS"; then
+        if test -z "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    else
+        if test "$withval" = "no"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    fi
 ],[
-	REGEX_LIB=regex/libregex.a
-	EXTRA_LIBS="-L$abs_builddir/regex -lregex $EXTRA_LIBS"
-	HSREGEX=yes
- 	AC_MSG_RESULT(yes)
-    AC_DEFINE(HSREGEX)
-	AC_DEFINE(REGEX,1)
+    if test -n "$APXS"; then
+        if test -z "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    else
+        HSREGEX=yes
+    fi
 ])
+AC_MSG_RESULT($HSREGEX)
+
+if test "$HSREGEX" = "yes"; then
+  REGEX_LIB=regex/libregex.a
+  EXTRA_LIBS="-L$abs_builddir/regex -lregex $EXTRA_LIBS"
+  AC_DEFINE(HSREGEX)
+  AC_DEFINE(REGEX,1)
+else
+  REGEX_LIB=
+  AC_DEFINE(REGEX,0)
+fi
+
 AC_SUBST(REGEX_LIB)
 AC_SUBST(HSREGEX)
 
