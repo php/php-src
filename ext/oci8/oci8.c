@@ -491,9 +491,9 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
 #ifndef PHP_WIN32
-	php_info_print_table_row(2, "Oracle Version", PHP_ORACLE_VERSION );
-	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_ORACLE_HOME );
-	php_info_print_table_row(2, "Libraries Used", PHP_ORACLE_LIBS );
+	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_VERSION );
+	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
+	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_SHARED_LIBADD );
 #endif
 	php_info_print_table_end();
 
