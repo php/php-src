@@ -114,12 +114,13 @@ divert(2)
 
 PTHREADS_CHECK
 
+PHP_SHLIB_SUFFIX_NAME
+
 PHP_SAPI=cgi
 PHP_BUILD_PROGRAM
 dnl paths to the targets relative to the build directory
 SAPI_PROGRAM=php
-dnl on HP-UX, the extension is .sl. Need to improve this
-SAPI_SHARED=libs/libphp4.so
+SAPI_SHARED=libs/libphp4.$SHLIB_SUFFIX_NAME
 SAPI_STATIC=libs/libphp4.a
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
@@ -725,6 +726,7 @@ PHP_SUBST(LEX)
 PHP_SUBST(LEX_OUTPUT_ROOT)
 PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
+PHP_SUBST(LN_S)
 PHP_SUBST(NATIVE_RPATHS)
 PHP_SUBST(PEAR_DIR)
 PHP_SUBST(PHP_BUILD_DATE)

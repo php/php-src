@@ -38,8 +38,13 @@ include $(top_srcdir)/build/program.mk
 install-sapi:
 	@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
 	-@$(mkinstalldirs) $(bindir)
-	-@if ! test -r $(phptempdir)/libphp4.so && test -r $(phptempdir)/libphp4.so.0.0; then \
-		$(LN_S) $(phptempdir)/libphp4.so.0.0 $(phptempdir)/libphp4.so; \
+	-@if ! test -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); then \
+		for i in 0.0.0 0.0 0; do \
+			if test -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME).$$i; then \
+				$(LN_S) $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME).$$i $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); \
+				break; \
+			fi; \
+		done; \
 	fi
 	$(INSTALL_IT)
 
