@@ -124,6 +124,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_encode_numericentity,		NULL)
 	PHP_FE(mb_decode_numericentity,		NULL)
 	PHP_FE(mb_send_mail,					NULL)
+	PHP_FE(mb_get_info,					NULL)
 	PHP_FALIAS(mbstrlen,	mb_strlen,	NULL)
 	PHP_FALIAS(mbstrpos,	mb_strpos,	NULL)
 	PHP_FALIAS(mbstrrpos,	mb_strrpos,	NULL)
@@ -429,6 +430,9 @@ PHP_MINIT_FUNCTION(mbstring)
 	sapi_unregister_post_entry(mbstr_post_entries);
 	sapi_register_post_entries(mbstr_post_entries);
 #endif
+
+	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -2685,6 +2689,66 @@ PHP_FUNCTION(mb_send_mail)
 }
 
 #endif	/* HAVE_SENDMAIL */
+
+/* {{{ proto string mb_get_info([string type])
+   Returns the current settings of mbstring. */
+PHP_FUNCTION(mb_get_info)
+{
+	zval **type;
+	char *name;
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(type);
+
+	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding)))
+ != NULL) {
+			add_assoc_string(return_value, "internal_encoding", name, 1);
+		}
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify)))
+ != NULL) {
+			add_assoc_string(return_value, "http_input", name, 1);
+		}
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding)))
+ != NULL) {
+			add_assoc_string(return_value, "http_output", name, 1);
+		}
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload)))
+ != NULL) {
+			add_assoc_string(return_value, "func_overload", name, 1);
+		}
+	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding)))
+ != NULL) {
+			RETVAL_STRING(name, 1);
+		}		
+	} else if (!strcasecmp("http_input", Z_STRVAL_PP(type))) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(http_input_identify)))
+ != NULL) {
+			RETVAL_STRING(name, 1);
+		}		
+	} else if (!strcasecmp("http_output", Z_STRVAL_PP(type))) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_http_output_encoding)))
+ != NULL) {
+			RETVAL_STRING(name, 1);
+		}		
+	} else if (!strcasecmp("func_overload", Z_STRVAL_PP(type))) {
+		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(func_overload)))
+ != NULL) {
+			RETVAL_STRING(name, 1);
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 #endif	/* HAVE_MBSTRING */
 

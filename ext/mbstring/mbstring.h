@@ -90,6 +90,7 @@ PHP_FUNCTION(mb_convert_variables);
 PHP_FUNCTION(mb_encode_numericentity);
 PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
+PHP_FUNCTION(mb_get_info);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
