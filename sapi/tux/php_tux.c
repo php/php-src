@@ -52,7 +52,8 @@ static php_tux_globals tux_globals;
 static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
-	uint sent = 0;	
+	uint sent = 0;
+	int m;
 	
 	/* combine headers and body */
 	if (TG(number_vec)) {
@@ -62,8 +63,12 @@ static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 		vec[n].iov_base = (void *) str;
 		vec[n++].iov_len = str_length;
 		
-		if (writev(TG(req)->sock, vec, n) == -1 && errno == EPIPE)
+		/* XXX: this might need more complete error handling */
+		if ((m = writev(TG(req)->sock, vec, n)) == -1 && errno == EPIPE)
 			php_handle_aborted_connection();
+
+		if (m > 0)
+			TG(req)->bytes_sent += str_length;
 
 		TG(number_vec) = 0;
 		return str_length;
@@ -92,7 +97,7 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 {
 	char buf[1024];
 	struct iovec *vec;
-	int n = 0;
+	int n;
 	int max_headers;
 	zend_llist_position pos;
 	sapi_header_struct *h;
@@ -102,15 +107,18 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 	TSRMLS_FETCH();
 	
 	max_headers = 30;
-	snprintf(buf, 1023, "HTTP/1.1 %d NA\r\n", SG(sapi_headers).http_response_code);
+	n = 1;
 	
 	vec = malloc(sizeof(struct iovec) * max_headers);
+	status_line = malloc(30);
 	
-	vec[n].iov_base = strdup(buf);
-	vec[n++].iov_len = strlen(buf);
+	/* safe sprintf use */
+	len = sprintf(status_line, "HTTP/1.1 %d NA\r\n", SG(sapi_headers).http_response_code);
+	
+	vec[0].iov_base = status_line;
+	vec[0].iov_len = len;
 	
 	TG(req)->http_status = SG(sapi_headers).http_response_code;
-	TG(req)->bytes_sent += len;
 
 	if (TG(tux_action) == TUX_ACTION_FINISH_CLOSE_REQ && TG(req)->http_version == HTTP_1_1)
 		locate_cl = 1;
@@ -296,7 +304,8 @@ static void tux_request_ctor(TSRMLS_D)
 	size_t cwd_len;
 	smart_str s = {0};
 	char *p;
-	
+
+	TG(number_vec) = 0;	
 	TG(header_vec) = NULL;
 	SG(request_info).query_string = strdup(TG(req)->query);
 
@@ -325,8 +334,11 @@ static void tux_request_ctor(TSRMLS_D)
 
 static void tux_request_dtor(TSRMLS_D)
 {
-	if (TG(header_vec))
+	if (TG(header_vec)) {
+		/* free status_line */
+		free(TG(header_vec)[0].iov_base);
 		free(TG(header_vec));
+	}
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);
