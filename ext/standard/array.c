@@ -1428,7 +1428,7 @@ PHP_FUNCTION(range)
 	/* allocate an array for return */
 	array_init(return_value);
 
-	if (Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
+	if (Z_TYPE_PP(zlow) == IS_STRING && Z_TYPE_PP(zhigh) == IS_STRING && Z_STRLEN_PP(zlow) == 1 && Z_STRLEN_PP(zhigh) == 1) {
 		unsigned char low, high;
 		low = *((unsigned char *)Z_STRVAL_PP(zlow));
 		high = *((unsigned char *)Z_STRVAL_PP(zhigh));
