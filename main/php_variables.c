@@ -539,6 +539,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 	ulong num_key;
 	HashPosition pos;
 	int key_type;
+	int globals_check = (PG(register_globals) && (dest == (&EG(symbol_table))));
 
 	zend_hash_internal_pointer_reset_ex(src, &pos);
 	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
@@ -549,7 +550,12 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 			|| Z_TYPE_PP(dest_entry) != IS_ARRAY) {
 			(*src_entry)->refcount++;
 			if (key_type == HASH_KEY_IS_STRING) {
-				zend_hash_update(dest, string_key, strlen(string_key)+1, src_entry, sizeof(zval *), NULL);
+				/* if register_globals is on and working with main symbol table, prevent overwriting of GLOBALS */
+				if (!globals_check || string_key_len != sizeof("GLOBALS") || memcmp(string_key, "GLOBALS", sizeof("GLOBALS") - 1)) {
+					zend_hash_update(dest, string_key, string_key_len, src_entry, sizeof(zval *), NULL);
+				} else {
+					(*src_entry)->refcount--;
+				}
 			} else {
 				zend_hash_index_update(dest, num_key, src_entry, sizeof(zval *), NULL);
 			}
