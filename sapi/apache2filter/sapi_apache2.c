@@ -302,8 +302,8 @@ php_apache_disable_caching(ap_filter_t *f)
 static time_t
 php_apache_sapi_get_request_time(void)
 {
-	php_struct *ctx = SG(server_context);
 	TSRMLS_FETCH();
+	php_struct *ctx = SG(server_context);
 
 	return ctx->r->request_time;
 }
