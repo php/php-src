@@ -84,7 +84,7 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 	if (ht->inconsistent==HT_OK) {
 		return;
 	}
-    switch (ht->inconsistent) {
+	switch (ht->inconsistent) {
 		case HT_IS_DESTROYING:
 			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being destroyed", file, line, ht);
 			break;
@@ -94,7 +94,7 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 		case HT_CLEANING:
 			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being cleaned", file, line, ht);
 			break;
-    }
+	}
 	zend_bailout();
 }
 #define IS_CONSISTENT(a) _zend_is_inconsistent(a, __FILE__, __LINE__);
