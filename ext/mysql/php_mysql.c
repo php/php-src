@@ -283,24 +283,12 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static PHP_INI_MH(OnMySQLPort)
 {
-	if (new_value==NULL) { /* default port */
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-		struct servent *serv_ptr;
-		char *env;
-		
-		MySG(default_port) = MYSQL_PORT;
-		if ((serv_ptr = getservbyname("mysql", "tcp"))) {
-			MySG(default_port) = (uint) ntohs((ushort) serv_ptr->s_port);
-		}
-		if ((env = getenv("MYSQL_TCP_PORT"))) {
-			MySG(default_port) = (uint) atoi(env);
-		}
-#else
-		MySG(default_port) = MYSQL_PORT;
-#endif
-	} else {
+	if (new_value != NULL) { /* default port */
 		MySG(default_port) = atoi(new_value);
+	} else {
+		MySG(default_port) = -1;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -348,7 +336,7 @@ ZEND_MODULE_STARTUP_D(mysql)
 	le_link = zend_register_list_destructors_ex(_close_mysql_link, NULL, "mysql link", module_number);
 	le_plink = zend_register_list_destructors_ex(NULL, _close_mysql_plink, "mysql link persistent", module_number);
 	Z_TYPE(mysql_module_entry) = type;
-	
+
 	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
@@ -476,6 +464,23 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	socket = MySG(default_socket);
 
+	if (MySG(default_port) < 0) {
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+		struct servent *serv_ptr;
+		char *env;
+		
+		MySG(default_port) = MYSQL_PORT;
+		if ((serv_ptr = getservbyname("mysql", "tcp"))) {
+			MySG(default_port) = (uint) ntohs((ushort) serv_ptr->s_port);
+		}
+		if ((env = getenv("MYSQL_TCP_PORT"))) {
+			MySG(default_port) = (uint) atoi(env);
+		}
+#else
+		MySG(default_port) = MYSQL_PORT;
+#endif
+	}
+	
 	if (PG(sql_safe_mode)) {
 		if (ZEND_NUM_ARGS()>0) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
