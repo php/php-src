@@ -2816,7 +2816,7 @@ PHP_FUNCTION(array_sum)
 /* }}} */
 
 /* {{{ proto mixed array_reduce(array input, mixed callback [, int initial])
-   Reduce the array by calling the callback */
+   Iteratively reduce the array to a single value via the callback. */
 PHP_FUNCTION(array_reduce)
 {
 	zval **input, **callback, **initial;
