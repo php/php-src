@@ -70,6 +70,7 @@ if test "$PHP_SQLITE" != "no"; then
         libsqlite/src/where.c libsqlite/src/trigger.c"
     
     PHP_NEW_EXTENSION(sqlite, sqlite.c sess_sqlite.c $sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
+    PHP_ADD_EXTENSION_DEP(sqlite, spl)
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite)
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
     AC_CHECK_SIZEOF(char *,4)

@@ -46,6 +46,7 @@
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
+extern PHPAPI zend_class_entry *spl_ce_Countable;
 #endif
 
 #ifndef safe_emalloc
@@ -64,6 +65,8 @@ extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
 
 #define php_sqlite_encode_binary(in, n, out) sqlite_encode_binary((const unsigned char *)in, n, (unsigned char *)out)
 #define php_sqlite_decode_binary(in, out)    sqlite_decode_binary((const unsigned char *)in, (unsigned char *)out)
+
+static int sqlite_count_elements(zval *object, long *count TSRMLS_DC);
 
 static int le_sqlite_db, le_sqlite_result, le_sqlite_pdb;
 
@@ -90,7 +93,6 @@ STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateLong, assoc_
 PHP_INI_END()
 /* }}} */
 
-
 #define DB_FROM_ZVAL(db, zv)	ZEND_FETCH_RESOURCE2(db, struct php_sqlite_db *, zv, -1, "sqlite database", le_sqlite_db, le_sqlite_pdb)
 
 #define DB_FROM_OBJECT(db, object) \
@@ -112,10 +114,6 @@ PHP_INI_END()
 			RETURN_NULL(); \
 		} \
 	}
-
-#define SQLITE_THROW(message) \
-	PG(suppress_errors) = 0; \
-	EG(exception) = zend_throw_exception(sqlite_ce_exception, message, 0 TSRMLS_CC);
 
 #define PHP_SQLITE_EMPTY_QUERY \
 	if (!sql_len) { \
@@ -234,6 +232,8 @@ function_entry sqlite_funcs_query[] = {
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
 	PHP_ME_MAPPING(valid, sqlite_valid, NULL)
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
+	/* countable */
+	PHP_ME_MAPPING(count, sqlite_num_rows, NULL)
 	/* additional */
 	PHP_ME_MAPPING(prev, sqlite_prev, NULL)
 	PHP_ME_MAPPING(hasPrev, sqlite_has_prev, NULL)
@@ -1009,11 +1009,16 @@ PHP_MINIT_FUNCTION(sqlite)
 #endif 
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
+	sqlite_object_handlers_ub_query.count_elements = sqlite_count_elements;
 
 	sqlite_ce_ub_query->get_iterator = sqlite_get_iterator;
 	sqlite_ce_ub_query->iterator_funcs.funcs = &sqlite_ub_query_iterator_funcs;
 
+#ifdef HAVE_SPL
+	zend_class_implements(sqlite_ce_query TSRMLS_CC, 2, zend_ce_iterator, spl_ce_Countable);
+#else
 	zend_class_implements(sqlite_ce_query TSRMLS_CC, 1, zend_ce_iterator);	
+#endif
 	sqlite_ce_query->get_iterator = sqlite_get_iterator;
 	sqlite_ce_query->iterator_funcs.funcs = &sqlite_query_iterator_funcs;
 
@@ -2397,6 +2402,19 @@ PHP_FUNCTION(sqlite_last_insert_rowid)
 	RETURN_LONG(sqlite_last_insert_rowid(db->db));
 }
 /* }}} */
+
+static int sqlite_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+{
+	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (obj->u.res->buffered) {
+		* count = obj->u.res->nrows;
+		return SUCCESS;
+	} else {
+		zend_throw_exception(sqlite_ce_exception, "Row count is not available for unbuffered queries", 0 TSRMLS_CC);
+		return FAILURE;
+	}
+} /* }}} */
 
 /* {{{ proto int sqlite_num_rows(resource result)
    Returns the number of rows in a buffered result set. */
