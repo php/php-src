@@ -26,7 +26,9 @@
 
 #include "php.h"
 
-#if HAVE_IBASE
+#define FILE_REVISION "$Revision$"
+
+#if HAVE_IBASE && !defined(VERSION_INFO_ONLY)
 
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
@@ -716,7 +718,7 @@ PHP_MINFO_FUNCTION(ibase)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Revision$");
+	php_info_print_table_row(2, "Revision", FILE_REVISION);
 #ifdef COMPILE_DL_INTERBASE
 	php_info_print_table_row(2, "Dynamic Module", "Yes");
 #endif

@@ -1,0 +1,71 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author:  Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>              |
+   +----------------------------------------------------------------------+
+ */
+
+/* $Id$ */
+
+#ifdef APSTUDIO_INVOKED
+#error This file cannot be opened from the Visual Studio IDE
+#endif
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#include "winres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#include "php_version.h"
+
+#ifdef _DEBUG
+# define BUILD_TYPE "Debug"
+#else
+# define BUILD_TYPE "Release"
+#endif
+
+#define VERSION_INFO_ONLY
+#include "interbase.c"
+
+#ifndef _MAC
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION,0
+ PRODUCTVERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION,0
+ FILEFLAGSMASK 0x3fL
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "FileDescription", "PHP Interbase module"
+            VALUE "FileVersion", PHP_VERSION
+            VALUE "File Revision", FILE_REVISION
+            VALUE "LegalCopyright", "1997-2003 The PHP Group"
+            VALUE "ProductName", "PHP"
+            VALUE "ProductVersion", PHP_VERSION
+			VALUE "Build Type", BUILD_TYPE
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
+#endif    // !_MAC

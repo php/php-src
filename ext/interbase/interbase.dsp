@@ -108,6 +108,13 @@ SOURCE=.\php_interbase.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\interbase.rc
+
+# ADD RSC /i "..\.." /i "..\..\main" /i "..\..\win32" /i "..\..\Zend" /i "..\..\TSRM" /d "ZEND_WIN32" /d "WIN32" /d "PHP_WIN32"
+
+# End Source File
 # End Group
 # End Target
 # End Project
