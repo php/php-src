@@ -485,7 +485,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_EXIT					78
 
 
-/* the following 15 opcodes are 5 groups of 3 opcodes each, and must
+/* the following 18 opcodes are 6 groups of 3 opcodes each, and must
  * remain in that order!
  */
 #define ZEND_FETCH_R				79
@@ -503,18 +503,21 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_FETCH_FUNC_ARG			91
 #define ZEND_FETCH_DIM_FUNC_ARG		92
 #define ZEND_FETCH_OBJ_FUNC_ARG		93
+#define ZEND_FETCH_UNSET			94
+#define ZEND_FETCH_DIM_UNSET		95
+#define ZEND_FETCH_OBJ_UNSET		96
 
-#define ZEND_FETCH_DIM_TMP_VAR		94
-#define ZEND_FETCH_CONSTANT			95
+#define ZEND_FETCH_DIM_TMP_VAR		97
+#define ZEND_FETCH_CONSTANT			98
 
-#define ZEND_DECLARE_FUNCTION_OR_CLASS	96
+#define ZEND_DECLARE_FUNCTION_OR_CLASS	99
 
-#define ZEND_EXT_STMT				97
-#define ZEND_EXT_FCALL_BEGIN		98
-#define ZEND_EXT_FCALL_END			99
-#define ZEND_EXT_NOP				100
+#define ZEND_EXT_STMT				100
+#define ZEND_EXT_FCALL_BEGIN		101
+#define ZEND_EXT_FCALL_END			102
+#define ZEND_EXT_NOP				103
 
-#define ZEND_TICKS					101
+#define ZEND_TICKS					104
 
 /* end of block */
 
@@ -533,6 +536,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define BP_VAR_IS			3
 #define BP_VAR_NA			4	/* if not applicable */
 #define BP_VAR_FUNC_ARG		5
+#define BP_VAR_UNSET		6
 
 
 #define ZEND_INTERNAL_FUNCTION		1
