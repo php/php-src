@@ -90,7 +90,7 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 		return;
 	}
 	
-	if (parser->namespace) {
+	if (parser->use_namespace) {
 		_find_namespace_decl(parser, name, attributes);
 		_qualify_namespace(parser, name, &qualified_name);
 	} else {
@@ -112,7 +112,7 @@ _end_element_handler(void *user, const xmlChar *name)
 		return;
 	}
 	
-	if (parser->namespace) {
+	if (parser->use_namespace) {
 		xmlChar *nsname;
 
 		nsname = xmlHashLookup(parser->_reverse_ns_map, name);
@@ -323,7 +323,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 
 	parser = (XML_Parser) memsuite->malloc_fcn(sizeof(struct _XML_Parser));
 	memset(parser, 0, sizeof(struct _XML_Parser));
-	parser->namespace = 0;
+	parser->use_namespace = 0;
 	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
@@ -335,7 +335,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		parser->parser->charset = XML_CHAR_ENCODING_NONE;
 	}
 	if (sep != NULL) {
-		parser->namespace = 1;
+		parser->use_namespace = 1;
 		parser->_ns_map = xmlHashCreate(10);
 		parser->_reverse_ns_map = xmlHashCreate(10);
 	}
@@ -567,7 +567,7 @@ _free_ns_name(void *ptr, xmlChar *name)
 void
 XML_ParserFree(XML_Parser parser)
 {
-	if (parser->namespace) {
+	if (parser->use_namespace) {
 		xmlHashFree(parser->_ns_map,         _free_ns_name);
 		xmlHashFree(parser->_reverse_ns_map, _free_ns_name);
 	}
