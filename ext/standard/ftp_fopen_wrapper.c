@@ -100,9 +100,24 @@ static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
 }
 
 
+static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper,
+		php_stream *stream
+		TSRMLS_DC)
+{
+	php_stream *controlstream = (php_stream *)stream->wrapperdata;
+	
+	if (controlstream) {
+		php_stream_write_string(controlstream, "QUIT\r\n");
+		php_stream_close(controlstream);
+		stream->wrapperdata = NULL;
+	}
+	return 0;
+}
+
+
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
-	NULL, /* stream_close */
+	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,
 	NULL, /* stat_url */
 	NULL  /* opendir */
@@ -373,12 +388,16 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (!use_ssl) {
 		php_stream_write_string(stream, "QUIT\r\n");
 		php_stream_close(stream);
+		stream = NULL;
 	}
 
 	/* open the data channel */
 	datastream = php_stream_sock_open_host(resource->host, portno, SOCK_STREAM, 0, 0);
 	if (datastream == NULL)
 		goto errexit;
+		
+	/* remember control stream */	
+	datastream->wrapperdata = (zval *)stream;
 
 	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
@@ -389,7 +408,6 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		datastream = NULL;
 		goto errexit;
 	}
-
 
 	php_url_free(resource);
 	return datastream;
