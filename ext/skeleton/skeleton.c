@@ -117,7 +117,7 @@ PHP_FUNCTION(confirm_extname_compiled)
 	char string[256];
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(arg);
