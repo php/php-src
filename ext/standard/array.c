@@ -2092,7 +2092,8 @@ PHP_FUNCTION(array_slice)
 	zval	   **input,		/* Input array */
 		   **offset,		/* Offset to get elements from */
 		   **length,		/* How many elements to get */
-		   **entry;		/* An array entry */
+		   **entry,			/* An array entry */
+		   **z_preserve_keys; /* Whether to preserve keys while copying to the new array or not */
 	int	     offset_val,	/* Value of the offset argument */
 		     length_val,	/* Value of the length argument */
 		     num_in,		/* Number of elements in the input array */
@@ -2103,10 +2104,11 @@ PHP_FUNCTION(array_slice)
 	uint string_key_len;
 	ulong num_key;
 	HashPosition hpos;
+	zend_bool	 preserve_keys = 0;
 
 	/* Get the arguments and do error-checking */	
 	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &input, &offset, &length)) {
+	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &input, &offset, &length, &z_preserve_keys)) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2120,11 +2122,16 @@ PHP_FUNCTION(array_slice)
 	   is not passed */
 	convert_to_long_ex(offset);
 	offset_val = Z_LVAL_PP(offset);
-	if (argc == 3) {
+	if (argc >= 3) {
 		convert_to_long_ex(length);
 		length_val = Z_LVAL_PP(length);
 	} else {
 		length_val = zend_hash_num_elements(Z_ARRVAL_PP(input));
+	}
+
+	if (ZEND_NUM_ARGS() > 3) {
+		convert_to_boolean_ex(z_preserve_keys);
+		preserve_keys = Z_BVAL_PP(z_preserve_keys);
 	}
 	
 	/* Initialize returned array */
@@ -2169,8 +2176,12 @@ PHP_FUNCTION(array_slice)
 				break;
 	
 			case HASH_KEY_IS_LONG:
-				zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
-											entry, sizeof(zval *), NULL);
+				if (preserve_keys)
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
+										   entry, sizeof(zval *), NULL);
+				else
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
+												entry, sizeof(zval *), NULL);
 				break;
 		}
 		pos++;
