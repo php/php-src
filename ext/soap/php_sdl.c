@@ -33,7 +33,7 @@ encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
 
-	if (sdl && sdl->types) {
+	if (sdl && sdl->elements) {
 		xmlNsPtr nsptr;
 		char *ns, *cptype;
 		sdlTypePtr *sdl_type;
@@ -48,14 +48,14 @@ encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type
 			smart_str_appends(&nscat, cptype);
 			smart_str_0(&nscat);
 
-			if (zend_hash_find(sdl->types, nscat.c, nscat.len + 1, (void **)&sdl_type) == SUCCESS) {
+			if (zend_hash_find(sdl->elements, nscat.c, nscat.len + 1, (void **)&sdl_type) == SUCCESS) {
 				enc = (*sdl_type)->encode;
-			} else if (zend_hash_find(sdl->types, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
+			} else if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
 				enc = (*sdl_type)->encode;
 			}
 			smart_str_free(&nscat);
 		} else {
-			if (zend_hash_find(sdl->types, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
+			if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
 				enc = (*sdl_type)->encode;
 			}
 		}
@@ -894,6 +894,10 @@ void delete_sdl(void *handle)
 	if (tmp->types) {
 		zend_hash_destroy(tmp->types);
 		free(tmp->types);
+	}
+	if (tmp->elements) {
+		zend_hash_destroy(tmp->elements);
+		free(tmp->elements);
 	}
 	if (tmp->bindings) {
 		zend_hash_destroy(tmp->bindings);

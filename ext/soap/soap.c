@@ -1703,8 +1703,10 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 {
 	zval *fault;
 	MAKE_STD_ZVAL(fault);
-//	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail TSRMLS_CC);
 	set_soap_fault(fault, fault_code, fault_string, fault_actor, fault_detail TSRMLS_CC);
+#ifdef ZEND_ENGINE_2
+	fault->refcount--;  /*FIXME*/
+#endif
 	add_property_zval(obj, "__soap_fault", fault);
 	return fault;
 }
@@ -2203,6 +2205,8 @@ static xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int ind
 	}
 
 	xmlParam = seralize_zval(param_val, param, paramName, style TSRMLS_CC);
+
+	efree(paramName);
 
 	return xmlParam;
 }
