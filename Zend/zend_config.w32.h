@@ -52,7 +52,8 @@ typedef unsigned int uint;
 
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
-#define strncasecmp _memicmp
+#define strcasecmp(s1, s2) stricmp(s1, s2)
+#define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
 #define zend_isinf(a)	0
 #define zend_finite(x)	_finite(x)
 #define zend_isnan(x)	_isnan(x)
