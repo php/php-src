@@ -644,12 +644,6 @@ _oci_conn_list_dtor(oci_connection *connection)
 
 	oci_debug("START _oci_conn_list_dtor: id=%d",connection->id);
 
-	if (connection->session && connection->session->exclusive) {
-		/* exclusive connection created via OCINLogon() close their 
-		   associated session when destructed */
-		zend_list_delete(connection->session->num);
-	}
-
 	if (connection->pServiceContext) {
 		connection->error =
 			OCITransRollback(connection->pServiceContext,
@@ -661,6 +655,12 @@ _oci_conn_list_dtor(oci_connection *connection)
 		}
 
 		OCIHandleFree((dvoid *) connection->pServiceContext, (ub4) OCI_HTYPE_SVCCTX);
+	}
+
+	if (connection->session && connection->session->exclusive) {
+		/* exclusive connection created via OCINLogon() close their 
+		   associated session when destructed */
+		zend_list_delete(connection->session->num);
 	}
 
 	if (connection->pError) {
@@ -1971,7 +1971,7 @@ _oci_close_session(oci_session *session)
 		return;
 	}
 
-	oci_debug("_oci_close_session: logging-off sess=%d",session->num);
+	oci_debug("START _oci_close_session: logging-off sess=%d",session->num);
 
 	if (session->open) {
 		/* Temporary Service Context */
