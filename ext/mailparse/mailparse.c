@@ -30,7 +30,7 @@
 #include "php_mailparse.h"
 #include "mailparse_rfc822.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_output.h"
+#include "main/php_output.h"
 
 /* just in case the config check doesn't enable mbstring automatically */
 #if !HAVE_MBSTRING
