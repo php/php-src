@@ -138,7 +138,7 @@ static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
 	CWD_STATE_FREE(&cwd_globals->cwd);
 }
 
-CWD_API void virtual_cwd_startup()
+CWD_API void virtual_cwd_startup(void)
 {
 	char cwd[1024]; /* Should probably use system define here */
 	char *result;
@@ -163,7 +163,7 @@ CWD_API void virtual_cwd_activate(char *filename)
 	}
 }
 
-CWD_API void virtual_cwd_shutdown()
+CWD_API void virtual_cwd_shutdown(void)
 {
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
