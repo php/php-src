@@ -137,9 +137,11 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				}
 
 				rc = SQLBindParameter(S->stmt, param->paramno+1,
-						SQL_PARAM_INPUT, ctype, sqltype, precision, scale,
-						Z_STRVAL_P(param->parameter), 0, 
-						/* XXX: this has the wrong type for DB2 */
+						param->max_value_len <= 0 ? SQL_PARAM_INPUT : SQL_PARAM_INPUT_OUTPUT,
+						ctype, sqltype, precision, scale,
+						Z_STRVAL_P(param->parameter),
+						param->max_value_len <= 0 ? 0 : param->max_value_len,
+						/* XXX: this has the wrong type for DB2 (should be SQLINTEGER*) */
 						&Z_STRLEN_P(param->parameter)
 						);
 				
