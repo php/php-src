@@ -67,6 +67,7 @@ typedef struct _php_libxml_node_object {
 typedef void * (*php_libxml_export_node) (zval *object TSRMLS_DC);
 
 PHP_FUNCTION(libxml_set_streams_context);
+
 int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC);
 int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC);
 int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC);
@@ -81,6 +82,7 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
+PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC);
 
 #endif /* HAVE_LIBXML */
 
