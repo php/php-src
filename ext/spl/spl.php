@@ -104,11 +104,12 @@ class RecursiveIteratorIterator implements Iterator
 
 /** \brief An Array wrapper
  *
- * This array wrapper allows to recursively iterate over Arrays and Objects.
+ * This array wrapper allows to recursively iterate over Arrays and public 
+ * Object properties.
  *
  * \see ArrayIterator
  */
-class ArrayObject implements IteratorAggregate
+class ArrayObject implements IteratorAggregate, ArrayAccess
 {
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
@@ -117,10 +118,37 @@ class ArrayObject implements IteratorAggregate
 	 */
 	function __construct($array);
 
-	/** Get the iterator which is a ArrayIterator object connected to this 
-	 * object.
+	/** \return the iterator which is an ArrayIterator object connected to
+	 * this object.
 	 */
 	function getIterator();
+
+	/** \param $index offset to inspect
+	 * \return whetehr offset $index esists
+	 */	
+	function offsetExists($index);
+
+	/** \param $index offset to return value for
+	 * \return value at offset $index
+	 */	
+	function offsetGet($index);
+
+	/** \param $index index to set
+	 * \param $newval new value to store at offset $index
+	 */	
+	function offsetSet($index, $newval);
+
+	/** \param $index offset to unset
+	 */	
+	function offsetUnset($index);
+
+	/** \param $value is appended as last element
+	 */	
+	function append($value);
+
+	/** \return a \b copy of the array
+	 */	
+	function getArrayCopy();
 }
 
 /** \brief An Array iterator
@@ -128,18 +156,50 @@ class ArrayObject implements IteratorAggregate
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
  *
- * To use this class you must instanciate ArrayObject.
- * You cannot instanciate an ArrayIterator directly.
+ * When you want to iterate over the same array multiple times you need to 
+ * instanciate ArrayObject and let it create ArrayIterator instances that 
+ * refer to it either by using foreach or by calling its getIterator() 
+ * method manually.
  */
-class ArrayIterator implements Iterator
+class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess
 {
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
 	 * \param $array the array to use.
 	 */
-	private function __construct($array);
-}
+	public function __construct($array);
+
+	/** \param $index offset to inspect
+	 * \return whetehr offset $index esists
+	 */	
+	function offsetExists($index);
+
+	/** \param $index offset to return value for
+	 * \return value at offset $index
+	 */	
+	function offsetGet($index);
+
+	/** \param $index index to set
+	 * \param $newval new value to store at offset $index
+	 */	
+	function offsetSet($index, $newval);
+
+	/** \param $index offset to unset
+	 */	
+	function offsetUnset($index);
+
+	/** \param $value is appended as last element
+	 */	
+	function append($value);
+
+	/** \return a \b copy of the array
+	 */	
+	function getArrayCopy();
+
+	/** \param $position offset to seek to
+	 */
+	function seek($position);
 
 /** Iterator that wrapps around another iterator and only returns selected
  * elements of the inner iterator.
@@ -162,15 +222,23 @@ abstract class FilterIterator implements Iterator
 	function getInnerIterator();
 }
 
+/** This interface is used to optimize LimitIterator functionality. but it 
+ * may also be used for other situations where seeking a specific offset is
+ * required and easily possible.
+ */
 interface SeekableIterator implements Iterator
 {
 	/** Seek to a specific position if available or throw an exception.
+	 * \param $position offset to seek to.
 	 */
 	function seek($position);
 }
 
 /** A class that starts iteration at a certain offset and only iterates over
  * a specified amount of elements.
+ *
+ * This class uses SeekableIterator::seek() if available and rewind() plus
+ * a skip loop otehrwise.
  */
 class LimitIetrator implements Iterator
 {
@@ -232,7 +300,7 @@ class CachingIterator implements Iterator
 	/** \return whether the inner iterator is valid. That is this iterator
 	 * is valid and has one more element.
 	 */
-	function hasNext();
+	function valid();
 
 	/** \return The last value from the inner iterators __toString() or
 	 * (string) conversion. The value is only fetched when the __constructor
@@ -281,6 +349,58 @@ class DirectoryIterator implements Iterator
 	 */
 	function getPathname();	
 
+	/** \return The current entry's permissions.
+	 */
+	function getPerms();
+
+	/** \return The current entry's inode.
+	 */
+	function getInode();
+
+	/** \return The current entry's size in bytes .
+	 */
+	function getSize();
+
+	/** \return The current entry's owner name.
+	 */
+	function getOwner();
+
+	/** \return The current entry's group name.
+	 */
+	function getGroup();
+
+	/** \return The current entry's last access time.
+	 */
+	function getATime();
+
+	/** \return The current entry's last modification time.
+	 */
+	function getMTime();
+
+	/** \return The current entry's creation time.
+	 */
+	function getCTime();
+
+	/** \return The current entry's size in bytes .
+	 */
+	function getType();
+
+	/** \return Whether the current entry is writeable.
+	 */
+	function isWritable();
+
+	/** \return Whether the current entry is readable.
+	 */
+	function isReadable();
+
+	/** \return Whether the current entry is executable.
+	 */
+	function isExecutable();
+
+	/** \return Whether the current entry is .
+	 */
+	function isFile();
+
 	/** \return Whether the current entry is a directory.
 	 */
 	function isDir();	
@@ -288,6 +408,14 @@ class DirectoryIterator implements Iterator
 	/** \return Whether the current entry is either '.' or '..'.
 	 */
 	function isDot();	
+
+	/** \return whether the current entry is a link.
+	 */
+	function isLink();
+
+	/** \return getFilename()
+	 */
+	function __toString();
 }
 
 /** \brief recursive directory iterator
@@ -305,7 +433,7 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 
 /** \brief recursive SimpleXML_Element iterator
  */
-class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
+class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 {
 	/** \return whether the current node has sub nodes.
 	 */
