@@ -52,7 +52,7 @@ ZEND_DECLARE_MODULE_GLOBALS(imap)
 MAILSTREAM DEFAULTPROTO;
 #endif
 
-
+#define CRLF	"\015\012"
 #define PHP_EXPUNGE 32768
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en);
@@ -3161,14 +3161,14 @@ PHP_FUNCTION(imap_mail_compose)
 {
 	zval **envelope, **body;
 	char *key;
-	zval **data, **pvalue;
+	zval **data, **pvalue, **disp_data, **env_data;
 	ulong ind;
 	char *cookie = NIL;
 	ENVELOPE *env;
 	BODY *bod=NULL, *topbod=NULL;
 	PART *mypart=NULL, *toppart=NULL, *part;
-	PARAMETER *param;
-	char tmp[8*MAILTMPLEN], *mystring=NULL, *t, *tempstring;
+	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
+	char tmp[8 * MAILTMPLEN], *mystring=NULL, *t=NULL, *tempstring=NULL, *tempstring_2=NULL;
 	int myargc = ZEND_NUM_ARGS();
 
 	if (myargc != 2 || zend_get_parameters_ex(myargc, &envelope, &body) == FAILURE) {
@@ -3184,8 +3184,8 @@ PHP_FUNCTION(imap_mail_compose)
 		php_error(E_WARNING, "IMAP: Expected Array as body parameter");
 		RETURN_FALSE;
  	}
-                                                                                        	
-	env=mail_newenvelope();
+
+	env = mail_newenvelope();
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "remail", sizeof("remail"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
 		env->remail=cpystr(Z_STRVAL_PP(pvalue));
@@ -3227,13 +3227,28 @@ PHP_FUNCTION(imap_mail_compose)
 		env->message_id=cpystr(Z_STRVAL_PP(pvalue));
 	}
 
+        if (zend_hash_find(Z_ARRVAL_PP(envelope), "custom_headers", sizeof("custom_headers"), (void **) &pvalue)== SUCCESS) {
+		if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
+			custom_headers_param = tmp_param = NULL;
+			while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &env_data) == SUCCESS) {
+				custom_headers_param = mail_newbody_parameter();
+				convert_to_string_ex(env_data);
+				custom_headers_param->value = (char *) fs_get(Z_STRLEN_PP(env_data) + 1);
+				memcpy(custom_headers_param->value, Z_STRVAL_PP(env_data), Z_STRLEN_PP(env_data) + 1);
+				zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+				custom_headers_param->next = tmp_param;
+				tmp_param = custom_headers_param;
+			}
+		}
+	}
+
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(body));
 	zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data);
 	zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind, 0); /* FIXME: is this necessary?  we're not using key/ind */
 
 	if (Z_TYPE_PP(data) == IS_ARRAY) {
-		bod=mail_newbody();
-		topbod=bod;
+		bod = mail_newbody();
+		topbod = bod;
 
 		if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
@@ -3251,9 +3266,35 @@ PHP_FUNCTION(imap_mail_compose)
 			convert_to_string_ex(pvalue);
 			bod->id = cpystr(Z_STRVAL_PP(pvalue));
 		}
+		if (zend_hash_find(Z_ARRVAL_PP(data), "description", sizeof("description"), (void **) &pvalue)== SUCCESS) {
+			convert_to_string_ex(pvalue);
+			bod->description = cpystr(Z_STRVAL_PP(pvalue));
+		}
+		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
+			convert_to_string_ex(pvalue);
+			bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+			memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+		}
+		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
+			if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
+				disp_param = tmp_param = NULL;
+				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
+					disp_param = mail_newbody_parameter();
+					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
+					disp_param->attribute = key;
+					convert_to_string_ex(disp_data);
+					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
+					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
+                		        zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+					disp_param->next = tmp_param;
+					tmp_param = disp_param;
+				}
+				bod->disposition.parameter = disp_param;
+			}
+		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "contents.data", sizeof("contents.data"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
-			bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue));
+			bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 			memcpy(bod->contents.text.data, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 			bod->contents.text.size = Z_STRLEN_PP(pvalue);
 		}
@@ -3273,18 +3314,18 @@ PHP_FUNCTION(imap_mail_compose)
 
  	zend_hash_move_forward(Z_ARRVAL_PP(body));
 
-	while(zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data) == SUCCESS) { 
+	while (zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data) == SUCCESS) {
 		zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind, 0);  /* FIXME: Is this necessary?  We're not using key/ind */
 		if (Z_TYPE_PP(data) == IS_ARRAY) {
 			if (!toppart) {
-				bod->nested.part=mail_newbody_part();
-				mypart=bod->nested.part;
-				toppart=mypart;
+				bod->nested.part = mail_newbody_part();
+				mypart = bod->nested.part;
+				toppart = mypart;
 				bod=&mypart->body;
 			} else {
-				 mypart->next=mail_newbody_part();
-				 mypart=mypart->next;
-				 bod=&mypart->body;
+				 mypart->next = mail_newbody_part();
+				 mypart = mypart->next;
+				 bod = &mypart->body;
 			}
 
 			if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
@@ -3303,10 +3344,36 @@ PHP_FUNCTION(imap_mail_compose)
 				convert_to_string_ex(pvalue);
 				bod->id = cpystr(Z_STRVAL_PP(pvalue));
 			}
+			if (zend_hash_find(Z_ARRVAL_PP(data), "description", sizeof("description"), (void **) &pvalue)== SUCCESS) {
+				convert_to_string_ex(pvalue);
+				bod->description = cpystr(Z_STRVAL_PP(pvalue));
+			}
+			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
+				convert_to_string_ex(pvalue);
+				bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+				memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+			}
+			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
+				if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
+					disp_param = tmp_param = NULL;
+					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
+						disp_param = mail_newbody_parameter();
+						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
+						disp_param->attribute = key;
+						convert_to_string_ex(disp_data);
+						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
+						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
+			                        zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+						disp_param->next = tmp_param;
+						tmp_param = disp_param;
+					}
+					bod->disposition.parameter = disp_param;
+				}
+			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "contents.data", sizeof("contents.data"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
-				bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue));
-				memcpy(bod->contents.text.data, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+				bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+				memcpy(bod->contents.text.data, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue) + 1);
 				bod->contents.text.size = Z_STRLEN_PP(pvalue);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "lines", sizeof("lines"), (void **) &pvalue)== SUCCESS) {
@@ -3327,11 +3394,33 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	rfc822_encode_body_7bit(env, topbod); 
-	rfc822_header (tmp, env, topbod);  
-	mystring=emalloc(strlen(tmp)+1);
-	strcpy(mystring, tmp);
+	rfc822_header (tmp, env, topbod);
 
-	bod=topbod;
+	/* add custom envelope headers */
+	if (custom_headers_param) {
+		/* remove last CRLF from tmp */
+		tmp[strlen(tmp) - 2] = '\0';
+		tempstring = emalloc(strlen(tmp) + 1);
+		strcpy(tempstring, tmp);
+		do {
+			tempstring_2 = emalloc(strlen(tempstring) + strlen(custom_headers_param->value) + strlen(CRLF) + 1);
+			sprintf(tempstring_2, "%s%s%s", tempstring, custom_headers_param->value, CRLF);
+			efree(tempstring);
+			tempstring = emalloc(strlen(tempstring_2) + 1);
+			strcpy(tempstring, tempstring_2);
+			efree(tempstring_2);
+		} while ((custom_headers_param = custom_headers_param->next));
+
+		mystring = emalloc(strlen(tempstring) + strlen(CRLF) + 1);
+		strcpy(mystring, tempstring);
+		strcat(mystring, CRLF);
+		efree(tempstring);
+	} else {
+		mystring = emalloc(strlen(tmp) + 1);
+		strcpy(mystring, tmp);
+	}
+
+	bod = topbod;
 
 	if (bod && bod->type == TYPEMULTIPART) {	
 
@@ -3353,13 +3442,13 @@ PHP_FUNCTION(imap_mail_compose)
 		/* for each part */
 			do {
 			/* build cookie */
-				sprintf (t=tmp, "--%s\015\012", cookie);
+				sprintf (t=tmp, "--%s%s", cookie, CRLF);
 
 			/* append mini-header */
 				rfc822_write_body_header(&t, &part->body);
 
 			/* write terminating blank line */
-				strcat (t, "\015\012");    
+				strcat (t, CRLF);
 
 			/* output cookie, mini-header, and contents */
 				tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
@@ -3370,29 +3459,29 @@ PHP_FUNCTION(imap_mail_compose)
 
 				bod=&part->body;
 
-				tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
+				tempstring=emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
 				strcpy(tempstring,mystring);
 				efree(mystring);
 				mystring=tempstring;
-				strcat(mystring, bod->contents.text.data);
+				sprintf(mystring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
 
 			} while ((part = part->next));/* until done */
             /* output trailing cookie */
 
 			sprintf(tmp, "--%s--", cookie);
-			tempstring=emalloc(strlen(tmp)+strlen(mystring)+1);
+			tempstring=emalloc(strlen(tmp)+strlen(CRLF)+strlen(mystring)+1);
 			strcpy(tempstring,mystring);
 			efree(mystring);
 			mystring=tempstring;
-			strcat(mystring,tmp);
+			sprintf(mystring, "%s%s%s", mystring, tmp, CRLF);
 
-	} else if(bod) {
+	} else if (bod) {
 
-			tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
+			tempstring=emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
 			strcpy(tempstring,mystring);
 			efree(mystring);
 			mystring=tempstring;
-			strcat(mystring, bod->contents.text.data);
+			sprintf(mystring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
 
 	} else {
 		efree(mystring);
