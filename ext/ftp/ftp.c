@@ -846,25 +846,8 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 			 * Everything Else \n
 			 */
 #ifdef PHP_WIN32
-			while ((s = strpbrk(ptr, "\r\n")) && (s < e)) {
-				php_stream_write(outstream, ptr, (s - ptr));
-				php_stream_write(outstream, "\r\n", sizeof("\r\n")-1);
-
-				if (*s == '\r') {
-					s++;
-				}
-				/* for some reason some servers prefix a \r before a \n, 
-				 * resulting in a \r\r\n in the buffer when
-				 * the remote file already has windoze style line endings.
-				 */
-				if (*s == '\r') {
-					s++;
-				}
-				if (*s == '\n') {
-					s++;
-				}
-				ptr = s;
-			}
+			php_stream_write(outstream, ptr, (e - ptr));
+			ptr = e;
 #else
 			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
 				php_stream_write(outstream, ptr, (s - ptr));
