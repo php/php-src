@@ -39,6 +39,7 @@ PHP 4                                                                      NEWS
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #23610 (PATH_TRANSLATED is empty under Apache2). (Moriyoshi)
+- Fixed bug #23606 (Unable to build --with-db4 (db4.1.25)). (Marcus)
 - Fixed bug #23567 (pfsockopen() returns dead connections). (Wez)
 - Fixed bug #23371 (configure falsely detects c-client using SSL). (Jani)
 - Fixed bug #23340 (fopen on multiple URLs causes memory corruption). (Wez)
