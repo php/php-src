@@ -1,4 +1,4 @@
-/* Driver template for the LEMON parser generator.
+/* Driver template for the LEMON parser generator. 
 ** The author disclaims copyright to this source code.
 */
 /* First off, code is include which follows the "include" declaration
