@@ -2702,8 +2702,6 @@ ZEND_METHOD(reflection_property, getModifiers)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	array_init(return_value);
-
 	RETURN_LONG(ref->prop->flags);
 }
 /* }}} */
