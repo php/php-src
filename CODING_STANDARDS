@@ -43,9 +43,9 @@ Exceptions:
     for efficiency and in order for them to be binary-safe.
     Functions that change strings and obtain their new lengths while
     doing so, should return that new length, so it doesn't have to be
-    recalculated with strlen() (e.g. _php3_addslashes())
+    recalculated with strlen() (e.g. php_addslashes())
 
-[5] Use php3_error() to report any errors/warnings during code execution.
+[5] Use php_error() to report any errors/warnings during code execution.
     Use descriptive error messages, and try to avoid using identical
     error strings for different stages of an error.  For example,
     if in order to obtain a URL you have to parse the URL, connect,
@@ -63,12 +63,11 @@ Exceptions:
 Naming Conventions
 ------------------
 
-[1] Function names for user functions implementation should be prefixed with
-    "php3_", and followed by a word or an underscore-delimited list of words,
-    in lowercase letters, that describes the function.
+[1] Function names for user functions should be enclosed with in
+    the PHP_FUNCTION() macro.  
 
-[2] Function names used by user functions implementations should be prefixed
-    with "_php3_", and followed by a word or an underscore-delimited list of
+[2] Function names used by user functions should be prefixed
+    with "_php_", and followed by a word or an underscore-delimited list of
     words, in lowercase letters, that describes the function.  If applicable,
     they should be declared 'static'.
     
@@ -78,7 +77,6 @@ Naming Conventions
 
 [4] Variable names should be in lowercase;  Use underscores to seperate
     between words.
-
 
 
 Syntax and indentation
@@ -123,7 +121,8 @@ function does.  It would look like this:
 
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
-void php3_abs(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(abs)
+{
    ...
 }
 /* }}} */
