@@ -1503,7 +1503,16 @@ binary_assign_op_addr: {
 						} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_MAIN) {
 							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(main_class_ptr);
 							NEXT_OPCODE();
-						}
+						} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_PARENT) {
+							if (!EG(namespace)) {
+								zend_error(E_ERROR, "Cannot fetch parent:: when no class scope is active");
+							}
+							if (!EG(namespace)->parent) {
+								zend_error(E_ERROR, "Cannot fetch parent:: as current class scope has no parent");
+							}
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(namespace)->parent;
+							NEXT_OPCODE();
+						} 
 
 						class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 

@@ -961,6 +961,11 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 		SET_UNUSED(opline->op2);
 		opline->extended_value = ZEND_FETCH_CLASS_SELF;
 		zval_dtor(&class_name->u.constant);
+	} else if ((class_name->u.constant.value.str.len == (sizeof("parent") - 1)) &&
+		!memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent"))) {
+		SET_UNUSED(opline->op2);
+		opline->extended_value = ZEND_FETCH_CLASS_PARENT;
+		zval_dtor(&class_name->u.constant);
 	} else if ((class_name->u.constant.value.str.len == (sizeof("main") - 1)) &&
 		!memcmp(class_name->u.constant.value.str.val, "main", sizeof("main"))) {
 		SET_UNUSED(opline->op2);
@@ -999,16 +1004,6 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-	if ((class_name->u.constant.value.str.len == sizeof("parent")-1)
-		&& !memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent")-1)) {
-		if (!CG(active_ce_parent_class_name).value.str.val) {
-			zend_error(E_COMPILE_ERROR, "No parent class available");
-		}
-		efree(class_name->u.constant.value.str.val);
-		class_name->u.constant.value.str.len = CG(active_ce_parent_class_name).value.str.len;
-		class_name->u.constant.value.str.val = estrndup(CG(active_ce_parent_class_name).value.str.val, class_name->u.constant.value.str.len);
-	}
 	opline->op1 = *class_name;
 	opline->op2 = *function_name;
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL;

@@ -558,7 +558,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
-#define ZEND_FETCH_CLASS_MAIN		2
+#define ZEND_FETCH_CLASS_PARENT		2
+#define ZEND_FETCH_CLASS_MAIN		3
+
 
 /* variable parsing type (compile-time) */
 #define ZEND_PARSED_MEMBER			(1<<0)
