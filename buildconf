@@ -66,8 +66,15 @@ else
 	echo "           to build PHP from CVS."
 	exit 1
     fi
-    
     touch buildconf.stamp
+fi
+
+am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
+lt_prefix=`which libtool | sed -e 's#/[^/]*/[^/]*$##'`
+if test "$am_prefix" != "$lt_prefix"; then
+    echo "buildconf: WARNING: automake and libtool are installed in different"
+    echo "           directories.  This may cause aclocal to fail."
+    echo "buildconf: continuing anyway"
 fi
 
 if test "$supplied_flag" = "--copy"; then
@@ -111,6 +118,15 @@ libtoolize --automake $automake_flags --force
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
+if test "$?" != "0" -a "$am_prefix" != "$lt_prefix"; then
+    echo "buildconf: ERROR: aclocal failed, probably because automake and"
+    echo "           libtool are installed with different prefixes;"
+    echo "           automake is installed in $am_prefix, but libtool in $lt_prefix."
+    echo "           Please re-install automake and/or libtool with a common prefix"
+    echo "           and try again."
+    exit 1
+fi
+
 if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
     echo "buildconf: keeping aclocal.m4"
     mv aclocal.m4.old aclocal.m4
