@@ -28,9 +28,10 @@
 extern "C" {
 #endif
 
-#define PHP_MODE_STANDARD  0
-#define PHP_MODE_HIGHLIGHT 1
-#define PHP_MODE_INDENT    2
+#define PHP_MODE_STANDARD  1
+#define PHP_MODE_HIGHLIGHT 2
+#define PHP_MODE_INDENT    3
+#define PHP_MODE_LINT	   4
 
 //
 // passed to the procedure on a new request
@@ -79,9 +80,9 @@ typedef struct _CONTROL_BLOCK {
 
 } CONTROL_BLOCK, *LPCONTROL_BLOCK;
 
-MODULE_API DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB);
-MODULE_API BOOL PHP4_startup();
-MODULE_API BOOL PHP4_shutdown();
+DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB);
+BOOL PHP4_startup();
+BOOL PHP4_shutdown();
 
 // the following type declaration is for the server side
 typedef DWORD ( * PFN_WRAPPERFUNC )( CONTROL_BLOCK *pCB );
