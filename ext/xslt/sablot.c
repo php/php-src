@@ -128,9 +128,9 @@ static SAXHandler sax_handlers =
 
 /* Error handlers, automatically registered */
 static MessageHandler message_handler = {
-	error_makecode,
-	error_log,
-	error_print
+    error_makecode,
+    error_log,
+    error_print
 };
 
 /* Scheme handlers automatically registered */
@@ -1259,7 +1259,7 @@ static SAX_RETURN sax_enddoc(void *ctx)
    Make the error code */
 static MH_ERROR error_makecode(void *user_data, SablotHandle proc, int severity, unsigned short facility, unsigned short code)
 {
-	return(0);
+	return 0;
 }
 /* }}} */
 
@@ -1281,7 +1281,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 	/* Parse the error array */
 	/* Loop through the error array */
 	if (fields) {
-		while (fields && *fields) {
+		while (*fields) {
 			char *key;  /* Key to for the message */
 			char *val;  /* The message itself */
 			char *ptr;  /* Pointer to the location of the ':' (separator) */
@@ -1301,11 +1301,8 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 			key = emalloc(pos + 1);
 			val = emalloc((len - pos) + 1);
 
-			memcpy(key, *fields, pos);
-			memcpy(val, *fields + pos + 1, len - pos - 1);
-
-			key[pos] = '\0';
-			val[len - pos - 1] = '\0';
+			strlcpy(key, *fields, pos);
+			strlcpy(val, *fields + pos + 1, len - pos - 1);
 
 			/* Check to see whether or not we want to save the data */
 			if (!strcmp(key, "msg")) {
@@ -1370,7 +1367,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 			XSLT_LOG(handle).fd = open(XSLT_LOG(handle).path, 
 			                           O_WRONLY|O_CREAT|O_APPEND,
 			                           S_IRUSR|S_IRGRP|S_IROTH|S_IWUSR);
-			if (XSLT_LOG(handle).fd < 0) {
+			if (XSLT_LOG(handle).fd == -1) {
 				php_error(E_WARNING, "Cannot open log file, %s [%d]: %s",
 				          XSLT_LOG(handle).path, errno, strerror(errno));
 				XSLT_LOG(handle).fd = 0;
@@ -1385,12 +1382,12 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 	
 	/* Write the error to the file */
 	error = write(XSLT_LOG(handle).fd, msgbuf, strlen(msgbuf));
-	if (error < 1) {
+	if (error == -1) {
 		php_error(E_WARNING, "Cannot write data to log file, %s, with fd, %d [%d]: %s",
 		          (XSLT_LOG(handle).path ? XSLT_LOG(handle).path : "stderr"),
 		          XSLT_LOG(handle).fd,
-		          error,
-		          strerror(error));
+		          errno,
+		          strerror(errno));
 		return 0;
 	}
 
@@ -1433,7 +1430,7 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		ZVAL_LONG(argv[2], code);
 
 		if (fields) {
-			while (fields && *fields) {
+			while (*fields) {
 				char *key;  /* Key to for the message */
 				char *val;  /* The message itself */
 				char *ptr;  /* Pointer to the location of the ':' (separator) */
@@ -1453,10 +1450,8 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 				key = emalloc(pos + 1);
 				val = emalloc((len - pos) + 1);
 
-				memcpy(key, *fields, pos);
-				memcpy(val, *fields + pos + 1, len - pos - 1);
-				key[pos] = '\0';
-				val[len - pos - 1] = '\0';
+				strlcpy(key, *fields, pos);
+				strlcpy(val, *fields + pos + 1, len - pos - 1);
 
 				/* Add it */				
 				add_assoc_stringl_ex(argv[3], key, pos, val, len - pos - 1, 1);
@@ -1513,11 +1508,8 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 				key = emalloc(pos + 1);
 				val = emalloc((len - pos) + 1);
 			
-				memcpy(key, *fields, pos);
-				memcpy(val, *fields + pos + 1, len - pos - 1);
-			
-				key[pos] = '\0';
-				val[len - pos - 1] = '\0';
+				strlcpy(key, *fields, pos);
+				strlcpy(val, *fields + pos + 1, len - pos - 1);
 			
 				/* Check to see whether or not we want to save the data */
 				if (!strcmp(key, "msg")) {
