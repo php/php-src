@@ -53,7 +53,7 @@ PHP_ARG_WITH(snmp,for SNMP support,
         PHP_ADD_LIBRARY(ssl,   1, SNMP_SHARED_LIBADD)
         PHP_ADD_LIBRARY(crypto,1, SNMP_SHARED_LIBADD)
       else
-        AC_MSG_ERROR(The UCD-SNMP in this system is build with SSL support. 
+        AC_MSG_ERROR(The UCD-SNMP in this system is built with SSL support. 
 
         Add --with-openssl<=DIR> to your configure line.)
       fi
