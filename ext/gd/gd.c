@@ -3491,7 +3491,7 @@ PHP_FUNCTION(imagepstext)
 #else
 	if (_fg < 0 || _fg > gdImageColorsTotal(bg_img)) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %d out of range", _fg);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %ld out of range", _fg);
 		RETURN_FALSE;
 	}
 
@@ -3500,7 +3500,7 @@ PHP_FUNCTION(imagepstext)
 #else
 	if (_bg < 0 || _bg > gdImageColorsTotal(bg_img)) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %d out of range", _bg);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %ld out of range", _bg);
 		RETURN_FALSE;
 	}
 
@@ -3542,7 +3542,7 @@ PHP_FUNCTION(imagepstext)
 			T1_AASetLevel(T1_AA_HIGH);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %ld as number of steps for antialiasing", aa_steps);
 			RETURN_FALSE;
 	}
 
