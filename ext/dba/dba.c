@@ -44,6 +44,7 @@
 #include "php_cdb.h"
 #include "php_db2.h"
 #include "php_db3.h"
+#include "php_db4.h"
 #include "php_flatfile.h"
 
 /* {{{ dba_functions[]
@@ -195,6 +196,9 @@ static dba_handler handler[] = {
 #endif
 #if DBA_DB3
 	DBA_HND(db3, DBA_LOCK_ALL) /* No lock in lib */
+#endif
+#if DBA_DB4
+	DBA_HND(db4, DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */

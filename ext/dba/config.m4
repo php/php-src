@@ -167,10 +167,45 @@ int main() {
   PHP_DBA_STD_ATTACH
 ])
 
+AC_ARG_WITH(db4,
+[  --with-db4[=DIR]        Include Berkeley DB4 support],[
+  if test "$withval" != "no"; then
+    PHP_DBA_STD_BEGIN
+    for i in $withval /usr/local/BerkeleyDB.4.1 /usr/local/BerkeleyDB.4.0 /usr/local /usr; do
+      if test -f "$i/db4/db.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/db4/db.h
+        break
+      elif test -f "$i/include/db4/db.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/db4/db.h
+        break
+      elif test -f "$i/include/db/db4.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/db/db4.h
+        break
+      elif test -f "$i/include/db4.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/db4.h
+        break
+      elif test -f "$i/include/db.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/db.h
+        break
+      fi
+    done
+    PHP_DBA_DB_CHECK(4, db-4.1 db-4 db4 db, db_create)
+  fi
+])
+AC_DBA_STD_RESULT(db4,Berkeley DB4)
+
 AC_ARG_WITH(db3,
 [  --with-db3[=DIR]        Include Berkeley DB3 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
+    if test "$HAVE_DB4" = "1"; then
+      AC_DBA_STD_RESULT(db3,Berkeley DB3,You cannot combine --with-db3 with --with-db4)
+    fi
     for i in $withval /usr/local/BerkeleyDB.3.3 /usr/local/BerkeleyDB.3.2 /usr/local/BerkeleyDB.3.1 /usr/local/BerkeleyDB.3.0 /usr/local /usr; do
       if test -f "$i/db3/db.h"; then
         THIS_PREFIX=$i
@@ -203,8 +238,8 @@ AC_ARG_WITH(db2,
 [  --with-db2[=DIR]        Include Berkeley DB2 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
-    if test "$HAVE_DB3" = "1"; then
-      AC_DBA_STD_RESULT(db2,Berkeley DB2,You cannot combine --with-db2 with --with-db3)
+    if test "$HAVE_DB3" = "1" -o "$HAVE_DB4" = "1"; then
+      AC_DBA_STD_RESULT(db2,Berkeley DB2,You cannot combine --with-db2 with --with-db3 or --with-db4)
     fi
     for i in $withval $withval/BerkeleyDB /usr/BerkeleyDB /usr/local /usr; do
       if test -f "$i/db2/db.h"; then
@@ -339,7 +374,7 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c $cdb_sources $flat_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c $cdb_sources $flat_sources, $ext_shared)
   PHP_SUBST(DBA_SHARED_LIBADD)
 else
   AC_MSG_RESULT(no)
