@@ -904,3 +904,11 @@ void free_estring(char **str_p)
 {
 	efree(*str_p);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */
