@@ -200,6 +200,38 @@ $installer->download(array('pkg6-1.1'));
 $pkgs = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs());
 
+echo "Test download attempt with --alldeps, but dependency has no releases:\n";
+
+$installer->setOptions(array('alldeps' => true));
+
+$installer->download(array('depnoreleases'));
+$pkgs = $installer->getDownloadedPackages();
+var_dump(get_class($a), $installer->getErrorMsgs());
+
+echo "Test download attempt with --onlyreqdeps, but dependency has no releases:\n";
+
+$installer->setOptions(array('onlyreqdeps' => true));
+
+$installer->download(array('depnoreleases'));
+$pkgs = $installer->getDownloadedPackages();
+var_dump(get_class($a), $installer->getErrorMsgs());
+
+$installer->configSet('preferred_state', 'stable');
+echo "Test download attempt with --alldeps, but dependency is too unstable:\n";
+$installer->setOptions(array('alldeps' => true));
+
+$installer->download(array('depunstable'));
+$pkgs = $installer->getDownloadedPackages();
+var_dump(get_class($a), $installer->getErrorMsgs());
+
+echo "Test download attempt with --onlyreqdeps, but dependency is too unstable:\n";
+
+$installer->setOptions(array('onlyreqdeps' => true));
+
+$installer->download(array('depunstable'));
+$pkgs = $installer->getDownloadedPackages();
+var_dump(get_class($a), $installer->getErrorMsgs());
+
 chdir($curdir);
 cleanall($temp_path);
 // ------------------------------------------------------------------------- //
@@ -307,4 +339,28 @@ Test download attempt if a version is already installed with upgrade, lesser ver
 Package 'pkg6' version '2.0b1'  is installed and 2.0b1 is > requested '1.1', skipping
 bool(false)
 array(0) {
+}
+Test download attempt with --alldeps, but dependency has no releases:
+bool(false)
+array(1) {
+  [0]=>
+  string(63) "Package 'depnoreleases' dependency 'noreleases' has no releases"
+}
+Test download attempt with --onlyreqdeps, but dependency has no releases:
+bool(false)
+array(1) {
+  [0]=>
+  string(63) "Package 'depnoreleases' dependency 'noreleases' has no releases"
+}
+Test download attempt with --alldeps, but dependency is too unstable:
+bool(false)
+array(1) {
+  [0]=>
+  string(91) "Release for 'depunstable' dependency 'stabilitytoolow' has state 'devel', requires 'stable'"
+}
+Test download attempt with --onlyreqdeps, but dependency is too unstable:
+bool(false)
+array(1) {
+  [0]=>
+  string(91) "Release for 'depunstable' dependency 'stabilitytoolow' has state 'devel', requires 'stable'"
 }
