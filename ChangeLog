@@ -1,3 +1,77 @@
+2000-08-29  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      configure.in:
+    Start on 4.0.3-dev. [placeholder] in NEWS is for automated nightly NEWS
+    file update script, it'll be removed after the first entry is there.
+
+2000-08-29  Andi Gutmans  <andi@php.net>
+
+    * ext/ingres_ii/README
+      ext/ingres_ii/config.m4:
+    - To configure with ingres should be --with-ingres and not --with-ii
+    - Changing it for 4.0.2 so that we don't have backwards compatibility
+    - problems later on
+
+    * NEWS: - Close NEWS file for release.
+
+2000-08-29  Zeev Suraski  <zeev@php.net>
+
+    * main/php_version.h
+      configure.in: Go 4.0.2
+
+2000-08-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Set SG(request_info).path_translated to the path of the main script.
+
+2000-08-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c: fix var_dump()s "}"-indention
+
+2000-08-29  Stig Bakken  <ssb@fast.no>
+
+    * main/main.c
+      main/php_ticks.c
+      main/php_ticks.h:    Added PHP API for registering tick functions.  Ticks is a per-instruction
+    callback in Zend that allows us to implement cooperative multitasking
+    within PHP.  Example:
+
+    In extension code:
+
+    php_add_tick_function(my_tick_func);
+
+    void my_tick_func(int count) {
+        php_printf("[tick %d]", count);
+    }
+
+    In PHP code:
+    <?php
+
+    declare(ticks = 1) {
+        print "there should be two ticks here.\n";
+    }
+
+    ?>
+
+    * build/rules.mk
+      build/rules_common.mk
+      configure.in
+      run-tests.php:
+    * Added "test" make target so you can do "make test" in any directory.
+    * Added copyright header to run-test.php
+
+    * pear/.cvsignore
+      pear/Makefile.in
+      pear/tests/DB_Error.phpt
+      pear/tests/DB_factory.phpt
+      pear/tests/DB_parseDSN.phpt: All (three) current DB tests pass.
+
+2000-08-29  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.dsp:
+    Add reflect.java to the list of java classes to be compiled
+
 2000-08-28  Stig Bakken  <ssb@fast.no>
 
     * pear/DB.php
