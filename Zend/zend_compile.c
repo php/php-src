@@ -823,10 +823,19 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 {
 	unsigned char *ptr = NULL;
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
-	if (last_op_number>=0 && CG(active_op_array)->opcodes[last_op_number].opcode == ZEND_FETCH_OBJ_R) {
-		CG(active_op_array)->opcodes[last_op_number].opcode = ZEND_INIT_FCALL_BY_NAME;
-		CG(active_op_array)->opcodes[last_op_number].extended_value = ZEND_MEMBER_FUNC_CALL;
+	if ((last_op_number >= 1) && (last_op->opcode == ZEND_EXT_FCALL_BEGIN) && ((last_op-1)->opcode == ZEND_FETCH_OBJ_R)) {
+		zend_op tmp;
+
+		tmp = *last_op;
+		*last_op = *(last_op-1);
+		*(last_op-1) = tmp;
+		last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
+                last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
+	} else if (last_op_number>=0 && last_op->opcode == ZEND_FETCH_OBJ_R) {
+		last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
+		last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	
