@@ -375,7 +375,7 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 			   In such a case the Position has the value 'invisible' */
 			str = strstr(object, "Position");
 			str += 9;
-			if(0 != strncmp(str, "invisible", 9)) {
+			if((str != 9) && (0 != strncmp(str, "invisible", 9))) {
 				sscanf(str, "0x%X 0x%X", &start, &end);
 		
 				/* Determine ObjectID */
