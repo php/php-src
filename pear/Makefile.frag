@@ -161,6 +161,7 @@ HEADER_DIRS = \
 	ext/xml/expat/xmlparse \
 	ext/xml/expat/xmltok \
 	main \
+	ext/mbstring \
 	regex
 
 install-headers:
