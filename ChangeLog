@@ -1,3 +1,122 @@
+2003-03-13  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/config.m4:
+      Test for libgds needs libcrypt with Firebird to succeed
+
+2003-03-13  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN shortening
+
+    * NEWS:
+      this is in the PHP_4_3 branch...
+
+2003-03-13  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS
+      php.ini-dist
+      php.ini-recommended:
+      Document removal of gd1 support on windows.
+
+    * (PHP_4_3)
+      ext/gd/gd.dsp
+      ext/gd/gd_bundled.dsp:
+      Drop support for php_gd.dll (gd1).
+      The default build (gd.dsp) is now bundled gd2.
+
+    * (PHP_4_3)
+      sapi/apache2filter/php4apache2.dsp:
+      Disable building of apache2filter (obsoleted by handler).
+
+2003-03-13  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Numeric/decimal datatype overflow on Win32
+      Fixed bug #20641
+
+2003-03-13  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_functions.c:
+      Make apache2 handler produce php4apache2.dll which should work as a
+      drop in replacement for the filter. Remove max_request_per_child from
+      minfo() since that function is not exported by win32 version of apache2
+      lib.
+
+2003-03-13  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c:
+      Numeric/decimal datatype overflow on Win32.
+      Fixed bug #20641
+
+2003-03-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * (PHP_4_3)
+      pear/PEAR.php:
+      - Also fix #21845 in the release branch.
+      
+
+2003-03-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c:
+      - Whitespace
+
+2003-03-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR.php:
+      - Fixing bug #21845.
+
+2003-03-13  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      NEWS:
+      BFN
+
+2003-03-13  J Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/tests/time/002.phpt:
+      Solaris knows nothing of "Europe/Amsterdam". Use "US/Eastern" instead.
+
+2003-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/curl/interface.c:
+      Fixed bug #22681 (Crash when reading from invalid file pointer).
+
+2003-03-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sybase_ct/config.m4:
+      Prevent using both --with-sybase and --with-sybase-ct in same build
+
+    * NEWS:
+      hrm
+
+2003-03-13  Sara Golemon  <php@alphaweb.net>
+
+    * ext/gmp/gmp.c:
+      Bug #21534.  Silly typo.
+
+2003-03-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * README.EXT_SKEL:
+      advertising ext_skel_ng ;)
+
+2003-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_io.c
+      ext/gd/libgd/gd_io.h
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_io_file.c
+      ext/gd/libgd/gd_io_ss.c:
+      Cleanup.
+
 2003-03-12  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
