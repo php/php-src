@@ -389,7 +389,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 					break;
 
 				default:
-					if (iscntrl((int)*p) && *p != '\n') {
+					if (iscntrl((int)*p)) {
 						FLUSH_BUF();
 						sprintf(control_buf, WDDX_CHAR, *p);
 						php_wddx_add_chunk(packet, control_buf);
