@@ -43,8 +43,8 @@ extern zend_module_entry php_domxml_module_entry;
 /* directory functions */
 extern PHP_MINIT_FUNCTION(domxml);
 extern PHP_MINFO_FUNCTION(domxml);
-PHP_FUNCTION(getdom);
-PHP_FUNCTION(getdomfile);
+PHP_FUNCTION(xmldoc);
+PHP_FUNCTION(xmldocfile);
 PHP_FUNCTION(xmltree);
 PHP_FUNCTION(domxml_newxmldoc);
 
