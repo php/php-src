@@ -38,9 +38,14 @@ ZEND_API char *undefined_variable_string = "\0";
 /* and empty strings must be evaluated as FALSE */
 ZEND_API inline void var_reset(zval *var)
 {
+#if 0
 	var->type = IS_STRING;
 	var->value.str.val = empty_string;
 	var->value.str.len = 0;
+#else
+	var->type = IS_BOOL;
+	var->value.lval = 0;
+#endif
 }
 
 ZEND_API inline void var_uninit(zval *var)
