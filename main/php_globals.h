@@ -71,6 +71,7 @@ struct _php_core_globals {
 
 	zend_bool track_errors;
 	zend_bool display_errors;
+	zend_bool display_startup_errors;
 	zend_bool log_errors;
 	char *error_log;
 
@@ -113,7 +114,11 @@ struct _php_core_globals {
 
 	zend_bool html_errors;
 
-	zend_bool modules_activated;	
+	zend_bool modules_activated;
+
+	zend_bool file_uploads;
+
+	zend_bool during_request_startup;
 };
 
 

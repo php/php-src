@@ -122,7 +122,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	int new_limit;
 
 	if (new_value) {
-		new_limit = atoi(new_value);
+		new_limit = php_atoi(new_value);
 	} else {
 		new_limit = 1<<30;		/* effectively, no limit */
 	}
@@ -207,6 +207,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference","1",PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,	allow_call_time_pass_reference,	zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			asp_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("display_errors",		"1",		PHP_INI_ALL,		OnUpdateBool,			display_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("error_append_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("error_prepend_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_prepend_string,	php_core_globals,	core_globals)
@@ -240,7 +241,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
 	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	open_basedir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("safe_mode_exec_dir",		"1",		PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_exec_dir,		php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("upload_max_filesize",	"2097152",	PHP_INI_ALL,		OnUpdateInt,			upload_max_filesize,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_ALL,		OnUpdateInt,			upload_max_filesize,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("file_uploads",			"1",		PHP_INI_ALL,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("post_max_size",			"8M",		PHP_INI_SYSTEM,		OnUpdateInt,			post_max_size,			sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("user_dir",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	user_dir,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("variables_order",		NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,		php_core_globals,	core_globals)
@@ -249,7 +252,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("error_reporting",			NULL,		PHP_INI_ALL,		OnUpdateErrorReporting)
 #if MEMORY_LIMIT
-	PHP_INI_ENTRY("memory_limit",				"8388608",	PHP_INI_ALL,		OnChangeMemoryLimit)
+	PHP_INI_ENTRY("memory_limit",				"8M",		PHP_INI_ALL,		OnChangeMemoryLimit)
 #endif
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
@@ -384,7 +387,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 			php_log_err(log_buffer);
 		}
-		if (module_initialized && PG(display_errors)) {
+		if (module_initialized && PG(display_errors)
+			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
 			char *prepend_string = INI_STR("error_prepend_string");
 			char *append_string = INI_STR("error_append_string");
 			char *error_format;
@@ -593,6 +597,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	signal(SIGCHLD,sigchld_handler);
 #endif
 
+	PG(during_request_startup) = 1;
+
 	global_lock();
 	
 	php_output_startup();
@@ -616,7 +622,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	} else if (PG(implicit_flush)) {
 		php_start_implicit_flush();
 	}
-	
+
+	/* We turn this off in php_execute_script() */
+	/* PG(during_request_startup) = 0; */
+
 	return SUCCESS;
 }
 
@@ -825,6 +834,7 @@ int php_module_startup(sapi_module_struct *sf)
 	SG(request_info).headers_only = 0;
 	SG(request_info).argv0 = NULL;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
+	PG(during_request_startup) = 0;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -1158,6 +1168,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 #ifdef PHP_WIN32
 	UpdateIniFromRegistry(primary_file->filename);
 #endif
+
+	PG(during_request_startup) = 0;
 
 	if (primary_file->type == ZEND_HANDLE_FILENAME 
 			&& primary_file->filename) {

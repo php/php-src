@@ -105,7 +105,7 @@ void destroy_uploaded_files_hash(SLS_D)
 /*
  * Split raw mime stream up into appropriate components
  */
-static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr SLS_DC)
+static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr SLS_DC PLS_DC)
 {
 	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *temp_filename;
 	int len, state = 0, Done = 0, rem, urem;
@@ -119,7 +119,6 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 	zend_bool upload_successful;
 	zend_bool magic_quotes_gpc;
 	ELS_FETCH();
-	PLS_FETCH();
 
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
@@ -428,6 +427,12 @@ SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	char *boundary;
 	uint boundary_len;
 	zval *array_ptr = (zval *) arg;
+	PLS_FETCH();
+
+	if (!PG(file_uploads)) {
+		php_error(E_WARNING, "File uploads are disabled");
+		return;
+	}
 
 	boundary = strstr(content_type_dup, "boundary");
 	if (!boundary || !(boundary=strchr(boundary, '='))) {
@@ -438,7 +443,7 @@ SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	boundary_len = strlen(boundary);
 
 	if (SG(request_info).post_data) {
-		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr SLS_CC);
+		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr SLS_CC PLS_CC);
 	}
 }
 

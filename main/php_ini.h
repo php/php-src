@@ -137,6 +137,7 @@ PHPAPI PHP_INI_DISP(display_link_numbers);
 
 pval *cfg_get_entry(char *name, uint name_length);
 
+PHPAPI int php_atoi(const char *str, int str_len);
 
 /* Standard message handlers */
 PHPAPI PHP_INI_MH(OnUpdateBool);
