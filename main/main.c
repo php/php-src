@@ -18,10 +18,10 @@
    +----------------------------------------------------------------------+
 */
 
-
 /* $Id$ */
 
-
+/* {{{ includes
+ */
 #include <stdio.h>
 #include "php.h"
 #ifdef PHP_WIN32
@@ -75,18 +75,20 @@
 #include "php_logos.h"
 
 #include "SAPI.h"
+/* }}} */
 
 #ifndef ZTS
 php_core_globals core_globals;
 #else
 PHPAPI int core_globals_id;
 #endif
- 
 
 static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC);
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnSetPrecision)
 {
 	ELS_FETCH();
@@ -94,9 +96,11 @@ static PHP_INI_MH(OnSetPrecision)
 	EG(precision) = atoi(new_value);
 	return SUCCESS;
 }
-
+/* }}} */
 
 #if MEMORY_LIMIT
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	int new_limit;
@@ -108,9 +112,11 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	}
 	return zend_set_memory_limit(new_limit);
 }
+/* }}} */
 #endif
 
-
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateErrorReporting)
 {
 	ELS_FETCH();
@@ -122,8 +128,10 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_disable_functions
+ */
 static void php_disable_functions()
 {
 	char *func;
@@ -137,8 +145,10 @@ static void php_disable_functions()
 		func = strtok(NULL, ", ");
 	}
 }
+/* }}} */
 
-
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateTimeout)
 {
 	ELS_FETCH();
@@ -152,7 +162,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* Need to convert to strings and make use of:
  * PHP_SAFE_MODE
@@ -174,6 +184,8 @@ static PHP_INI_MH(OnUpdateTimeout)
 #else
 #	define DEFAULT_SENDMAIL_PATH NULL
 #endif
+/* {{{ PHP_INI
+ */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("define_syslog_variables",	"0",				PHP_INI_ALL,	NULL,			php_ini_boolean_displayer_cb)			
 	PHP_INI_ENTRY_EX("highlight.bg",			HL_BG_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
@@ -245,12 +257,13 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("allow_url_fopen",		"1",		PHP_INI_ALL,		OnUpdateBool,			allow_url_fopen,			php_core_globals,	core_globals)
 
 PHP_INI_END()
-
-
+/* }}} */
 
 /* True global (no need for thread safety */
 static int module_initialized = 0;
 
+/* {{{ php_log_err
+ */
 PHPAPI void php_log_err(char *log_message)
 {
 	FILE *log_file;
@@ -285,17 +298,21 @@ PHPAPI void php_log_err(char *log_message)
 		sapi_module.log_message(log_message);
 	}
 }
-
+/* }}} */
 
 /* is 4K big enough? */
 #define PRINTF_BUFFER_SIZE 1024*4
 
-/* wrapper for modules to use PHPWRITE */
+/* {{{ php_write
+   wrapper for modules to use PHPWRITE */
 PHPAPI int php_write(void *buf, uint size)
 {
 	return PHPWRITE(buf, size);
 }
+/* }}} */
 
+/* {{{ php_printf
+ */
 PHPAPI int php_printf(const char *format, ...)
 {
 	va_list args;
@@ -313,9 +330,10 @@ PHPAPI int php_printf(const char *format, ...)
 	
 	return ret;
 }
+/* }}} */
 
-
-/* extended error handling function */
+/* {{{ php_error_cb
+ extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char buffer[1024];
@@ -442,8 +460,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 }
-
-
+/* }}} */
 
 /* {{{ proto void set_time_limit(int seconds)
    Sets the maximum time a script can run */
@@ -467,6 +484,8 @@ PHP_FUNCTION(set_time_limit)
 }
 /* }}} */
 
+/* {{{ php_fopen_wrapper_for_zend
+ */
 static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
 {
 	int issock=0, socketd=0;
@@ -482,8 +501,10 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 	}
 	return retval;
 }
+/* }}} */
 
-
+/* {{{ php_get_configuration_directive_for_zend
+ */
 static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
 {
 	zval *retval = cfg_get_entry(name, name_length);
@@ -495,8 +516,10 @@ static int php_get_configuration_directive_for_zend(char *name, uint name_length
 		return FAILURE;
 	}
 }
+/* }}} */
 
-
+/* {{{ php_message_handler_for_zend
+ */
 static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
@@ -564,19 +587,24 @@ static void php_message_handler_for_zend(long message, void *data)
 			break;
 	}
 }
-
+/* }}} */
 
 #if PHP_SIGCHILD
+/* {{{ sigchld_handler
+ */
 static void sigchld_handler(int apar)
 {
     while (waitpid(-1, NULL, WNOHANG) > 0)
 		;
     signal(SIGCHLD,sigchld_handler);   
 }
+/* }}} */
 #endif
 
 static int php_hash_environment(ELS_D SLS_DC PLS_DC);
 
+/* {{{ php_request_startup
+ */
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 #if PHP_SIGCHILD
@@ -624,16 +652,20 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_request_shutdown_for_exec
+ */
 void php_request_shutdown_for_exec(void *dummy)
 {
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1);
 }
+/* }}} */
 
-
+/* {{{ php_request_shutdown
+ */
 void php_request_shutdown(void *dummy)
 {
 	CLS_FETCH();
@@ -671,29 +703,36 @@ void php_request_shutdown(void *dummy)
 		zend_unset_timeout();
 	}
 }
+/* }}} */
 
- 
+/* {{{ php_config_ini_shutdown
+ */
 static void php_config_ini_shutdown(void)
 {
 	php_shutdown_config();
 }
+/* }}} */
 
-
+/* {{{ php_body_write_wrapper
+ */
 static int php_body_write_wrapper(const char *str, uint str_length)
 {
 	return php_body_write(str, str_length);
 }
-
+/* }}} */
 
 #ifdef ZTS
+/* {{{ core_globals_ctor
+ */
 static void core_globals_ctor(php_core_globals *core_globals)
 {
 	memset(core_globals,0,sizeof(*core_globals));
 }
-
+/* }}} */
 #endif
 
-
+/* {{{ php_startup_extensions
+ */
 int php_startup_extensions(zend_module_entry **ptr, int count)
 {
 	zend_module_entry **end = ptr+count;
@@ -708,7 +747,10 @@ int php_startup_extensions(zend_module_entry **ptr, int count)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ php_global_startup_extensions
+ */
 int php_global_startup_extensions(zend_module_entry **ptr, int count)
 {
 	zend_module_entry **end = ptr+count;
@@ -724,7 +766,10 @@ int php_global_startup_extensions(zend_module_entry **ptr, int count)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ php_global_shutdown_extensions
+ */
 int php_global_shutdown_extensions(zend_module_entry **ptr, int count)
 {
 	zend_module_entry **end = ptr+count;
@@ -740,7 +785,10 @@ int php_global_shutdown_extensions(zend_module_entry **ptr, int count)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ php_module_startup
+ */
 int php_module_startup(sapi_module_struct *sf)
 {
 	zend_utility_functions zuf;
@@ -896,22 +944,24 @@ int php_module_startup(sapi_module_struct *sf)
 	/* we're done */
 	return SUCCESS;
 }
-
-
+/* }}} */
 
 void php_module_shutdown_for_exec()
 {
 	/* used to close fd's in the range 3.255 here, but it's problematic */
 }
 
-
+/* {{{ php_module_shutdown_wrapper
+ */
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 {
 	php_module_shutdown();
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_module_shutdown
+ */
 void php_module_shutdown()
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
@@ -942,8 +992,10 @@ void php_module_shutdown()
 	shutdown_memory_manager(0, 1);
 	module_initialized = 0;
 }
+/* }}} */
 
-
+/* {{{ php_register_server_variables
+ */
 static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 {
 	zval *array_ptr=NULL;
@@ -971,8 +1023,10 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr ELS_CC PLS_CC);
 	}
 }
+/* }}} */
 
-
+/* {{{ php_hash_environment
+ */
 static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 {
 	char *p;
@@ -1077,8 +1131,10 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_build_argv
+ */
 static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 {
 	pval *arr, *argc, *tmp;
@@ -1134,8 +1190,10 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
 	zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 }
+/* }}} */
 
-
+/* {{{ php_handle_special_queries
+ */
 PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 {
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
@@ -1149,7 +1207,10 @@ PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 	}
 	return 0;
 }
+/* }}} */
 
+/* {{{ php_execute_script
+ */
 PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
@@ -1209,7 +1270,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_D
 
 	return EG(exit_status);
 }
+/* }}} */
 
+/* {{{ php_handle_aborted_connection
+ */
 PHPAPI void php_handle_aborted_connection(void)
 {
 	PLS_FETCH();
@@ -1220,7 +1284,10 @@ PHPAPI void php_handle_aborted_connection(void)
 		zend_bailout();
 	}
 }
+/* }}} */
 
+/* {{{ php_handle_auth_data
+ */
 PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 {
 	int ret = -1;
@@ -1249,7 +1316,10 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 
 	return ret;
 }
+/* }}} */
 
+/* {{{ php_lint_script
+ */
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 {
 	zend_op_array *op_array;
@@ -1278,20 +1348,23 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 
 	return retval;
 }
+/* }}} */
 
 #ifdef PHP_WIN32
-/* just so that this symbol gets exported... */
+/* {{{ dummy_indent
+   just so that this symbol gets exported... */
 PHPAPI void dummy_indent()
 {
 	zend_indent();
 }
+/* }}} */
 #endif
-
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -4239,6 +4239,7 @@ PHP_FUNCTION(ocistatementtype)
 			RETVAL_STRING("UNKNOWN",1);
 	}
 }
+/* }}} */
 
 /* {{{ proto int ocirowcount(int stmt)
    Return the row count of an OCI statement */
@@ -4290,8 +4291,7 @@ static oci_collection *oci_get_coll(int ind)
         return (oci_collection *) NULL;
     }
 }
-
-
+/* }}} */
 
 /* {{{ proto string ocifreecollection(object lob)
    Deletes collection object*/
@@ -4922,5 +4922,6 @@ PHP_FUNCTION(ocinewcollection)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */
-

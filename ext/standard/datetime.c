@@ -75,6 +75,8 @@ PHP_FUNCTION(time)
 }
 /* }}} */
 
+/* {{{ php_mktime
+ */
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **arguments[7];
@@ -190,6 +192,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	RETURN_LONG(seconds);
 }
+/* }}} */
 
 /* {{{ proto int mktime(int hour, int min, int sec, int mon, int day, int year)
    Get UNIX timestamp for a date */
@@ -207,6 +210,8 @@ PHP_FUNCTION(gmmktime)
 }
 /* }}} */
 
+/* {{{ php_date
+ */
 static void
 php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
@@ -511,6 +516,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
+/* }}} */
 
 /* {{{ proto string date(string format [, int timestamp])
    Format a local time/date */
@@ -628,7 +634,8 @@ PHP_FUNCTION(getdate)
 }
 /* }}} */
 
-/* Return date string in standard format for http headers */
+/* {{{ php_std_date
+   Return date string in standard format for http headers */
 char *php_std_date(time_t t)
 {
 	struct tm *tm1, tmbuf;
@@ -656,7 +663,7 @@ char *php_std_date(time_t t)
 	str[79]=0;
 	return (str);
 }
-
+/* }}} */
 
 /* {{{ proto bool checkdate(int month, int day, int year)
    Returns true(1) if it is a valid date in gregorian calendar */
@@ -697,6 +704,8 @@ PHP_FUNCTION(checkdate)
 /* }}} */
 
 #if HAVE_STRFTIME
+/* {{{ _php_strftime
+ */
 void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **format_arg, **timestamp_arg;
@@ -753,6 +762,8 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	efree(buf);
 	RETURN_FALSE;
 }
+/* }}} */
+
 /* {{{ proto string strftime(string format [, int timestamp])
    Format a local time/date according to locale settings */
 PHP_FUNCTION(strftime)
@@ -804,5 +815,6 @@ PHP_FUNCTION(strtotime)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

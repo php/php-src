@@ -36,7 +36,8 @@
 #endif /*APACHE*/
 #endif /*_OSD_POSIX*/
 
-
+/* {{{ free_url
+ */
 void free_url(php_url * theurl)
 {
 	if (theurl->scheme)
@@ -55,7 +56,10 @@ void free_url(php_url * theurl)
 		efree(theurl->fragment);
 	efree(theurl);
 }
+/* }}} */
 
+/* {{{ url_parse
+ */
 php_url *url_parse(char *str)
 {
 	regex_t re;
@@ -157,6 +161,7 @@ php_url *url_parse(char *str)
 	regfree(&re);
 	return ret;
 }
+/* }}} */
 
 /* {{{ proto array parse_url(string url)
    Parse a URL and return its components */
@@ -202,6 +207,8 @@ PHP_FUNCTION(parse_url)
 }
 /* }}} */
 
+/* {{{ php_htoi
+ */
 static int php_htoi(char *s)
 {
 	int value;
@@ -219,6 +226,7 @@ static int php_htoi(char *s)
 
 	return (value);
 }
+/* }}} */
 
 /* rfc1738:
 
@@ -235,6 +243,8 @@ static int php_htoi(char *s)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
+/* {{{ php_url_encode
+ */
 char *php_url_encode(char *s, int len)
 {
 	register int x, y;
@@ -266,6 +276,7 @@ char *php_url_encode(char *s, int len)
 	str[y] = '\0';
 	return ((char *) str);
 }
+/* }}} */
 
 /* {{{ proto string urlencode(string str)
    URL-encodes string */
@@ -314,6 +325,8 @@ PHP_FUNCTION(urldecode)
 }
 /* }}} */
 
+/* {{{ php_url_decode
+ */
 int php_url_decode(char *str, int len)
 {
 	char *dest = str;
@@ -338,7 +351,10 @@ int php_url_decode(char *str, int len)
 	*dest = '\0';
 	return dest - str;
 }
+/* }}} */
 
+/* {{{ php_raw_url_encode
+ */
 char *php_raw_url_encode(char *s, int len)
 {
 	register int x, y;
@@ -366,6 +382,7 @@ char *php_raw_url_encode(char *s, int len)
 	str[y] = '\0';
 	return ((char *) str);
 }
+/* }}} */
 
 /* {{{ proto string rawurlencode(string str)
    URL-encodes string */
@@ -411,6 +428,8 @@ PHP_FUNCTION(rawurldecode)
 }
 /* }}} */
 
+/* {{{ php_raw_url_decode
+ */
 int php_raw_url_decode(char *str, int len)
 {
 	char *dest = str;
@@ -433,11 +452,13 @@ int php_raw_url_decode(char *str, int len)
 	*dest = '\0';
 	return dest - str;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

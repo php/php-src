@@ -197,7 +197,8 @@ static int sapi_cgi_deactivate(SLS_D)
 }
 
 
-
+/* {{{ sapi_module_struct cgi_sapi_module
+ */
 static sapi_module_struct cgi_sapi_module = {
 	"cgi",							/* name */
 	"CGI",							/* pretty name */
@@ -230,8 +231,10 @@ static sapi_module_struct cgi_sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
+/* }}} */
 
-
+/* {{{ php_cgi_usage
+ */
 static void php_cgi_usage(char *argv0)
 {
 	char *prog;
@@ -261,8 +264,10 @@ static void php_cgi_usage(char *argv0)
 				"  -i             PHP information\n"
 				"  -h             This help\n", prog);
 }
+/* }}} */
 
-
+/* {{{ init_request_info
+ */.
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
@@ -323,7 +328,7 @@ static void init_request_info(SLS_D)
 	auth = getenv("HTTP_AUTHORIZATION");
 	php_handle_auth_data(auth SLS_CC);
 }
-
+/* }}} */
 
 static void define_command_line_ini_entry(char *arg)
 {
@@ -357,10 +362,9 @@ static void php_register_command_line_global_vars(char **arg)
 	}
 	efree(*arg);
 }
-	
 
-
-
+/* {{{ main
+ */
 int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
@@ -788,10 +792,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	return exit_status;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -58,7 +58,8 @@
 #include "php_version.h"
 /*#include "mod_php4.h"*/
 
-
+/* {{{ apache_php_module_main
+ */
 int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC)
 {
 	zend_file_handle file_handle;
@@ -96,10 +97,13 @@ int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC
 	php_header();			/* Make sure headers have been sent */
 	return (OK);
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -91,6 +91,8 @@ PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
+/* {{{ php_dl
+ */
 void php_dl(pval *file, int type, pval *return_value)
 {
 	void *handle;
@@ -200,7 +202,7 @@ void php_dl(pval *file, int type, pval *return_value)
 	
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 PHP_MINFO_FUNCTION(dl)
 {
@@ -227,5 +229,6 @@ PHP_MINFO_FUNCTION(dl)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

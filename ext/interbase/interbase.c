@@ -134,7 +134,6 @@ ZEND_DECLARE_MODULE_GLOBALS(ibase)
 
 /* }}} */
 
-
 /* {{{ internal macros, functions and structures */
 
 #define IB_STATUS (IBG(status))
@@ -247,7 +246,6 @@ PHP_FUNCTION(ibase_errmsg)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_error() 
     print interbase error and save it for ibase_errmsg() */
 static void _php_ibase_error(void)
@@ -265,7 +263,6 @@ static void _php_ibase_error(void)
 	php_error(E_WARNING, "InterBase: %s", IBG(errmsg));
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_module_error()
 	print php interbase module error and save it for ibase_errmsg() */
@@ -287,7 +284,6 @@ static void _php_ibase_module_error(char *msg, ...)
 
 /* destructors ---------------------- */
 
-
 /* {{{ _php_ibase_free_xsqlda() */
 /* not actual destructor ... */
 static void _php_ibase_free_xsqlda(XSQLDA *sqlda)
@@ -308,7 +304,6 @@ static void _php_ibase_free_xsqlda(XSQLDA *sqlda)
 	}
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_commit_link() */
 static void _php_ibase_commit_link(ibase_db_link *link)
@@ -356,7 +351,6 @@ static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_close_plink() */
 static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc)
 {
@@ -371,7 +365,6 @@ static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc)
 	free(link);
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_free_result() */
 static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc)
@@ -406,7 +399,6 @@ static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc)
 	}
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_free_query() */
 static void _php_ibase_free_query(ibase_query *ib_query)
@@ -459,7 +451,6 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_free_trans()	*/
 static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc)
 {
@@ -482,7 +473,6 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc)
 	efree(ib_trans);
 }
 /* }}} */
-
 
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
@@ -630,7 +620,6 @@ PHP_MINFO_FUNCTION(ibase)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_attach_db() */
 static int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *charset, int buffers, char *role, isc_db_handle *db)
 {
@@ -691,7 +680,6 @@ static int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *c
 	return SUCCESS;
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_connect() */
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
@@ -891,7 +879,6 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_connect(string database [, string username] [, string password] [, string charset] [, int buffers] [, int dialect] [, string role])
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
@@ -900,7 +887,6 @@ PHP_FUNCTION(ibase_connect)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_pconnect(string database [, string username] [, string password] [, string charset] [, int buffers] [, int dialect] [, string role])
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
@@ -908,7 +894,6 @@ PHP_FUNCTION(ibase_pconnect)
 	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_close([int link_identifier])
    Close an InterBase connection */
@@ -1039,7 +1024,6 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_alloc_query() */
 /* allocate and prepare query */
 static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, unsigned short dialect)
@@ -1143,7 +1127,6 @@ _php_ibase_alloc_query_error:
 #undef IB_QUERY
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_bind()
    Bind parameter placeholders in a previously prepared query */
@@ -1313,7 +1296,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_alloc_xsqlda() */
 static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 {
@@ -1371,7 +1353,6 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 	} /* for*/
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_exec() */
 static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int argc, pval **args)
@@ -1449,7 +1430,6 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 #undef IB_RESULT
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_trans([int trans_args [, int link_identifier]])
    Start transaction */
@@ -1542,7 +1522,6 @@ PHP_FUNCTION(ibase_trans)
 }
 /* }}} */
 
-
 /* {{{ _php_ibase_def_trans() */
 /* open default transaction */
 static int _php_ibase_def_trans(ibase_db_link * ib_link, int trans_n)
@@ -1558,7 +1537,6 @@ static int _php_ibase_def_trans(ibase_db_link * ib_link, int trans_n)
 	return SUCCESS;
 }
 /*}}}*/
-
 
 /* {{{ _php_ibase_trans_end() */
 #define COMMIT 1
@@ -1615,7 +1593,6 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_commit([int link_identifier,] int trans_number)
    Commit transaction */
 PHP_FUNCTION(ibase_commit)
@@ -1624,7 +1601,6 @@ PHP_FUNCTION(ibase_commit)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_rollback([int link_identifier,] int trans_number)
    Roolback transaction */
 PHP_FUNCTION(ibase_rollback)
@@ -1632,7 +1608,6 @@ PHP_FUNCTION(ibase_rollback)
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK);
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_query([int link_identifier,] string query [, int bind_args])
    Execute a query */
@@ -1715,7 +1690,6 @@ PHP_FUNCTION(ibase_query)
 	}
 }
 /* }}} */
-
 
 /* {{{ _php_ibase_var_pval() */
 static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int scale, int flag)
@@ -1899,7 +1873,7 @@ static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_arra
 	}
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ _php_ibase_fetch_hash() */
 
@@ -2120,7 +2094,6 @@ break;
 }
 /* }}} */
 
-
 /* {{{ proto array ibase_fetch_row(int result [, int blob_flag])
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_row)
@@ -2129,7 +2102,6 @@ PHP_FUNCTION(ibase_fetch_row)
 }
 /* }}} */
 
-
 /* {{{ proto object ibase_fetch_object(int result [, int blob_flag])
    Fetch a object from the results of a query */
 PHP_FUNCTION(ibase_fetch_object)
@@ -2137,7 +2109,6 @@ PHP_FUNCTION(ibase_fetch_object)
 	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_OBJECT);
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_free_result(int result)
    Free the memory used by a result */
@@ -2158,7 +2129,6 @@ PHP_FUNCTION(ibase_free_result)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_prepare([int link_identifier,] string query)
    Prepare a query for later execution */
@@ -2211,7 +2181,6 @@ PHP_FUNCTION(ibase_prepare)
 
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_execute(int query [, int bind_args [, int ...]])
    Execute a previously prepared query */
@@ -2266,7 +2235,6 @@ PHP_FUNCTION(ibase_execute)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_free_query(int query)
    Free memory used by a query */
 PHP_FUNCTION(ibase_free_query)
@@ -2286,7 +2254,6 @@ PHP_FUNCTION(ibase_free_query)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_timefmt(string format)
    Sets the format of timestamp, date and time columns returned from queries */
@@ -2347,7 +2314,6 @@ PHP_FUNCTION(ibase_timefmt)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_num_fields(int result)
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
@@ -2372,7 +2338,6 @@ PHP_FUNCTION(ibase_num_fields)
 	RETURN_LONG(ib_result->out_sqlda->sqld);
 }
 /* }}} */
-
 
 /* {{{ proto array ibase_field_info(int result, int field_number)
    Get information about a field */
@@ -2453,9 +2418,7 @@ PHP_FUNCTION(ibase_field_info)
 }
 /* }}} */
 
-
 /* blobs ----------------------------------- */
-
 
 /* {{{ _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_info) */
 static int _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_info)
@@ -2513,7 +2476,6 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_inf
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_blob_create([int link_identifier])
    Create blob for adding data */
 PHP_FUNCTION(ibase_blob_create)
@@ -2562,7 +2524,6 @@ PHP_FUNCTION(ibase_blob_create)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_blob_open(string blob_id)
    Open blob for retriving data parts */
 PHP_FUNCTION(ibase_blob_open)
@@ -2600,7 +2561,6 @@ PHP_FUNCTION(ibase_blob_open)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_blob_add(int blob_id, string data)
    Add data into created blob */
 PHP_FUNCTION(ibase_blob_add)
@@ -2626,7 +2586,6 @@ PHP_FUNCTION(ibase_blob_add)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string ibase_blob_get(int blob_id, int len)
    Get len bytes data from open blob */
@@ -2677,7 +2636,6 @@ PHP_FUNCTION(ibase_blob_get)
 }
 /* }}} */
 
-
 #define BLOB_CLOSE 1
 #define BLOB_CANCEL 2
 
@@ -2719,7 +2677,6 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_blob_close(int blob_id)
    Close blob */
 PHP_FUNCTION(ibase_blob_close)
@@ -2728,7 +2685,6 @@ PHP_FUNCTION(ibase_blob_close)
 }
 /* }}} */
 
-
 /* {{{ proto int ibase_blob_cancel(int blob_id)
    Cancel creating blob */
 PHP_FUNCTION(ibase_blob_cancel)
@@ -2736,7 +2692,6 @@ PHP_FUNCTION(ibase_blob_cancel)
 	_php_ibase_blob_end(INTERNAL_FUNCTION_PARAM_PASSTHRU,BLOB_CANCEL);
 }
 /* }}} */
-
 
 /* {{{ proto object ibase_blob_info(string blob_id_str)
    Return blob length and other useful info */
@@ -2811,7 +2766,6 @@ PHP_FUNCTION(ibase_blob_info)
 	*/
 }
 /* }}} */
-
 
 /* {{{ proto int ibase_blob_echo(string blob_id_str)
    Output blob contents to browser */
@@ -2971,5 +2925,6 @@ PHP_FUNCTION(ibase_blob_import)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */
-

@@ -289,7 +289,6 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
-
 /* {{{ proto string jdmonthname(int juliandaycount, int mode)
    Returns name of month for julian day count */
  PHP_FUNCTION(jdmonthname)
@@ -339,3 +338,11 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

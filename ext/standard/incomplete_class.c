@@ -33,6 +33,8 @@
 #define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
 #define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"
 
+/* {{{ incomplete_class_message
+ */
 static void incomplete_class_message(zend_property_reference *ref)
 {
 	char buf[1024];
@@ -49,12 +51,18 @@ static void incomplete_class_message(zend_property_reference *ref)
 
 	php_error(E_ERROR, "%s", buf);
 }
+/* }}} */
 
+/* {{{ incomplete_class_call_func
+ */
 static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	incomplete_class_message(property_reference);
 }
+/* }}} */
 
+/* {{{ incomplete_class_set_property
+ */
 static int incomplete_class_set_property(zend_property_reference *property_reference, zval *value)
 {
 	incomplete_class_message(property_reference);
@@ -62,7 +70,10 @@ static int incomplete_class_set_property(zend_property_reference *property_refer
 	/* does not reach this point */
 	return (0);
 }
+/* }}} */
 
+/* {{{ incomplete_class_get_property
+ */
 static zval incomplete_class_get_property(zend_property_reference *property_reference)
 {
 	zval foo;
@@ -73,7 +84,10 @@ static zval incomplete_class_get_property(zend_property_reference *property_refe
 	memset(&foo, 0, sizeof(zval)); /* shut warnings up */
 	return (foo);
 }
+/* }}} */
 
+/* {{{ php_create_incomplete_class
+ */
 zend_class_entry *php_create_incomplete_class(BLS_D)
 {
 	zend_class_entry incomplete_class;
@@ -87,8 +101,10 @@ zend_class_entry *php_create_incomplete_class(BLS_D)
 
 	return (BG(incomplete_class));
 }
+/* }}} */
 
-
+/* {{{ php_lookup_class_name
+ */
 char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 {
 	zval **val;
@@ -106,7 +122,10 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 
 	return (retval);
 }
+/* }}} */
 
+/* {{{ php_store_class_name
+ */
 void php_store_class_name(zval *object, const char *name, size_t len)
 {
 	zval *val;
@@ -119,11 +138,13 @@ void php_store_class_name(zval *object, const char *name, size_t len)
 
 	zend_hash_update(object->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

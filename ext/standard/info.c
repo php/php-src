@@ -38,6 +38,8 @@
 
 PHPAPI extern char *php_ini_opened_path;
 
+/* {{{ _display_module_info
+ */
 static int _display_module_info(zend_module_entry *module, void *arg)
 {
 	int show_info_func = *((int *) arg);
@@ -53,8 +55,10 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 	}
 	return 0;
 }
+/* }}} */
 
-
+/* {{{ php_print_gpcse_array
+ */
 static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 {
 	zval **data, **tmp, tmp2;
@@ -96,7 +100,10 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ php_info_print_style
+ */
 void php_info_print_style(void)
 {
 	php_printf("<STYLE TYPE=\"text/css\"><!--\n");
@@ -108,8 +115,10 @@ void php_info_print_style(void)
 	php_printf("TH { font-family: arial,helvetica,sans-serif; font-size: 11pt; font-weight: bold; }\n");
 	php_printf("//--></STYLE>\n");
 }
+/* }}} */
 
-
+/* {{{ php_get_uname
+ */
 PHPAPI char *php_get_uname()
 {
 	char *php_uname;
@@ -133,7 +142,10 @@ PHPAPI char *php_get_uname()
 #endif
 	return estrdup(php_uname);
 }
+/* }}} */
 
+/* {{{ php_print_info
+ */
 PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
@@ -324,7 +336,7 @@ PHPAPI void php_print_info(int flag)
 
 	PUTS("</BODY></HTML>");
 }
-
+/* }}} */
 
 
 PHPAPI void php_info_print_table_start()
@@ -364,7 +376,8 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 	php_printf("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=%d>%s</TH></TR>\n", num_cols, header );
 }
 
-
+/* {{{ php_info_print_table_header
+ */
 PHPAPI void php_info_print_table_header(int num_cols, ...)
 {
 	int i;
@@ -385,8 +398,10 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 	va_end(row_elements);
 }
+/* }}} */
 
-
+/* {{{ php_info_print_table_row
+ */
 PHPAPI void php_info_print_table_row(int num_cols, ...)
 {
 	int i;
@@ -414,9 +429,10 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 
 	va_end(row_elements);
 }
+/* }}} */
 
-
-
+/* {{{ register_phpinfo_constants
+ */
 void register_phpinfo_constants(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("INFO_GENERAL", PHP_INFO_GENERAL, CONST_PERSISTENT|CONST_CS);
@@ -436,7 +452,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("CREDITS_QA",	PHP_CREDITS_QA, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("CREDITS_ALL",	PHP_CREDITS_ALL, CONST_PERSISTENT|CONST_CS);
 }
-
+/* }}} */
 
 /* {{{ proto void phpinfo([int what])
    Output a page of useful information about PHP and the current request */
@@ -475,7 +491,6 @@ PHP_FUNCTION(phpversion)
 }
 /* }}} */
 
-
 /* {{{ proto void phpcredits([int flag])
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
@@ -505,7 +520,6 @@ PHP_FUNCTION(phpcredits)
 
 /* }}} */
 
-
 /* {{{ proto string php_logo_guid(void)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_logo_guid)
@@ -521,7 +535,6 @@ PHP_FUNCTION(php_egg_logo_guid)
 	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
 }
 /* }}} */
-
 
 /* {{{ proto string zend_logo_guid(void)
    Return the special ID used to request the Zend logo in phpinfo screens*/
@@ -558,5 +571,6 @@ PHP_FUNCTION(php_uname)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -94,6 +94,8 @@
 
 #define MT_RAND_MAX ((long)(0x7FFFFFFF)) /* (1<<31) - 1 */
 
+/* {{{ seedMT
+ */
 static void seedMT(php_uint32 seed BLS_DC)
 {
     /*
@@ -148,7 +150,7 @@ static void seedMT(php_uint32 seed BLS_DC)
     for(BG(left)=0, *s++=x, j=N; --j;
         *s++ = (x*=69069U) & 0xFFFFFFFFU);
 }
-
+/* }}} */
 
 static php_uint32 reloadMT(BLS_D)
 {
@@ -351,5 +353,6 @@ PHP_FUNCTION(mt_getrandmax)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

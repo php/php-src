@@ -25,7 +25,8 @@
 
 #define LEVENSHTEIN_MAX_LENTH 255
 
-/* reference implementation, only optimized for memory usage, not speed */
+/* {{{ reference_levdist
+ * reference implementation, only optimized for memory usage, not speed */
 static int reference_levdist(const char *s1, int l1, 
 														 const char *s2, int l2, 
 														 int cost_ins, int cost_rep, int cost_del )
@@ -72,8 +73,10 @@ static int reference_levdist(const char *s1, int l1,
 
 	return c0;
 }
+/* }}} */
 
-
+/* {{{ custom_levdist
+ */
 static int custom_levdist(char *str1,char *str2,char *callback_name) 
 {
 		php_error(E_WARNING,"the general Levenshtein support is not there yet");
@@ -81,7 +84,7 @@ static int custom_levdist(char *str1,char *str2,char *callback_name)
 
 		return -1;
 }
-
+/* }}} */
 
 /* {{{ proto int levenshtein(string str1, string str2)
    Calculate Levenshtein distance between two strings */
@@ -148,3 +151,12 @@ PHP_FUNCTION(levenshtein)
 	RETURN_LONG(distance);
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

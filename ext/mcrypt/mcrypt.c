@@ -1341,7 +1341,7 @@ PHP_FUNCTION(mcrypt_encrypt)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_ENCRYPT, return_value);
 }
-
+/* }}} */
 
 /* {{{ proto string mcrypt_decrypt(string cipher, string key, string data, string mode, string iv)
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
@@ -1359,7 +1359,7 @@ PHP_FUNCTION(mcrypt_decrypt)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_DECRYPT, return_value);
 }
-
+/* }}} */
 
 /* {{{ proto string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
    ECB crypt/decrypt data using key key with cipher cipher starting with iv */
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(mcrypt_ecb)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ecb", iv, argc, Z_LVAL_PP(mode), return_value);
 }
-
+/* }}} */
 
 /* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode, string iv)
    CBC crypt/decrypt data using key key with cipher cipher starting with iv */
@@ -1397,7 +1397,7 @@ PHP_FUNCTION(mcrypt_cbc)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cbc", iv, argc, Z_LVAL_PP(mode), return_value);
 }
-
+/* }}} */
 
 /* {{{ proto string mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
    CFB crypt/decrypt data using key key with cipher cipher starting with iv */
@@ -1416,7 +1416,7 @@ PHP_FUNCTION(mcrypt_cfb)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cfb", iv, argc, Z_LVAL_PP(mode), return_value);
 }
-
+/* }}} */
 
 /* {{{ proto string mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
@@ -1435,6 +1435,7 @@ PHP_FUNCTION(mcrypt_ofb)
 
 	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ofb", iv, argc, Z_LVAL_PP(mode), return_value);
 }
+/* }}} */
 
 #endif
 
@@ -1597,7 +1598,6 @@ PHP_FUNCTION(mcrypt_cfb)
 }
 /* }}} */
 
-
 /* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode [, string iv])
    CBC crypt/decrypt data using key key with cipher cipher using optional iv */
 PHP_FUNCTION(mcrypt_cbc)
@@ -1652,3 +1652,12 @@ PHP_FUNCTION(mcrypt_ecb)
 #endif /* MCRYPT_2_2 */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

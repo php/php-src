@@ -39,7 +39,8 @@ static HashTable configuration_hash;
 PHPAPI char *php_ini_opened_path=NULL;
 static php_extension_lists extension_lists;
 
-
+/* {{{ php_ini_displayer_cb
+ */
 static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
 	if (ini_entry->displayer) {
@@ -72,8 +73,10 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		}
 	}
 }
+/* }}} */
 
-
+/* {{{ php_ini_displayer
+ */
 static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number)
 {
 	if (ini_entry->module_number != module_number) {
@@ -90,8 +93,10 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number)
 	PUTS("</TD></TR>\n");
 	return 0;
 }
+/* }}} */
 
-
+/* {{{ display_ini_entries
+ */
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
@@ -107,8 +112,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number);
 	php_info_print_table_end();
 }
-
-
+/* }}} */
 
 /* php.ini support */
 
@@ -126,14 +130,18 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 # endif
 #endif
 
-
+/* {{{ pvalue_config_destructor
+ */
 static void pvalue_config_destructor(zval *pvalue)
 {   
     if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
         free(pvalue->value.str.val);
     }
 }
+/* }}} */
 
+/* {{{ php_config_ini_parser_cb
+ */
 static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
 {
 	switch (callback_type) {
@@ -164,8 +172,10 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			break;
 	}
 }
+/* }}} */
 
-
+/* {{{ php_load_function_extension_cb
+ */
 static void php_load_function_extension_cb(void *arg)
 {
 	zval *extension = (zval *) arg;
@@ -173,14 +183,18 @@ static void php_load_function_extension_cb(void *arg)
 
 	php_dl(extension, MODULE_PERSISTENT, &zval);
 }
+/* }}} */
 
-
+/* {{{ php_load_zend_extension_cb
+ */
 static void php_load_zend_extension_cb(void *arg)
 {
 	zend_load_extension(*((char **) arg));
 }
+/* }}} */
 
-
+/* {{{ php_init_config
+ */
 int php_init_config(char *php_ini_path_override)
 {
 	char *env_location, *php_ini_search_path;
@@ -264,8 +278,10 @@ int php_init_config(char *php_ini_path_override)
 	
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_shutdown_config
+ */
 int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
@@ -274,8 +290,10 @@ int php_shutdown_config(void)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ php_ini_delayed_modules_startup
+ */
 void php_ini_delayed_modules_startup(void)
 {
 	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb);
@@ -284,8 +302,10 @@ void php_ini_delayed_modules_startup(void)
 	zend_llist_destroy(&extension_lists.engine);
 	zend_llist_destroy(&extension_lists.functions);
 }
+/* }}} */
 
-
+/* {{{ cfg_get_entry
+ */
 zval *cfg_get_entry(char *name, uint name_length)
 {
 	zval *tmp;
@@ -296,8 +316,10 @@ zval *cfg_get_entry(char *name, uint name_length)
 		return NULL;
 	}
 }
+/* }}} */
 
-
+/* {{{ cfg_get_long
+ */
 PHPAPI int cfg_get_long(char *varname,long *result)
 {
 	zval *tmp,var;
@@ -312,8 +334,10 @@ PHPAPI int cfg_get_long(char *varname,long *result)
 	*result = var.value.lval;
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ cfg_get_double
+ */
 PHPAPI int cfg_get_double(char *varname,double *result)
 {
 	zval *tmp,var;
@@ -328,8 +352,10 @@ PHPAPI int cfg_get_double(char *varname,double *result)
 	*result = var.value.dval;
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ cfg_get_string
+ */
 PHPAPI int cfg_get_string(char *varname, char **result)
 {
 	zval *tmp;
@@ -341,6 +367,7 @@ PHPAPI int cfg_get_string(char *varname, char **result)
 	*result = tmp->value.str.val;
 	return SUCCESS;
 }
+/* }}} */
 
 /*
  * Local variables:
@@ -348,5 +375,6 @@ PHPAPI int cfg_get_string(char *varname, char **result)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

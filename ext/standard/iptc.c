@@ -73,6 +73,8 @@
 #define M_APP14 0xee
 #define M_APP15 0xef
 
+/* {{{ php_iptc_put1
+ */
 static int php_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoolbuf)
 { 
 	if (spool > 0)
@@ -82,7 +84,10 @@ static int php_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoo
 
   	return c;
 }
+/* }}} */
 
+/* {{{ php_iptc_get1
+ */
 static int php_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf)
 { 	
 	int c;
@@ -101,7 +106,10 @@ static int php_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf)
 
 	return c;
 }
+/* }}} */
 
+/* {{{ php_iptc_read_remaining
+ */
 static int php_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf)
 {
  	int c;
@@ -110,7 +118,10 @@ static int php_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf)
 
 	return M_EOI;
 }
+/* }}} */
 
+/* {{{ php_iptc_skip_variable
+ */
 static int php_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf)
 { 
 	unsigned int  length;
@@ -129,7 +140,10 @@ static int php_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf)
 
 	return 0;
 }
+/* }}} */
 
+/* {{{ php_iptc_next_marker
+ */
 static int php_iptc_next_marker(FILE *fp,int spool,unsigned char **spoolbuf)
 {
     int c;
@@ -157,6 +171,7 @@ static int php_iptc_next_marker(FILE *fp,int spool,unsigned char **spoolbuf)
 
     return (unsigned int) c;
 }
+/* }}} */
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
@@ -375,5 +390,6 @@ PHP_FUNCTION(iptcparse)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

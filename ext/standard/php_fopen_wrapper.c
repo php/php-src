@@ -28,7 +28,8 @@
 #include "php_fopen_wrappers.h"
 
 
-
+/* {{{ php_fopen_url_wrap_php
+ */
 FILE *php_fopen_url_wrap_php(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	const char *res = path + 6;
@@ -45,11 +46,13 @@ FILE *php_fopen_url_wrap_php(char *path, char *mode, int options, int *issock, i
 	
 	return NULL;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

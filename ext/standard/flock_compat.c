@@ -152,15 +152,13 @@ int flock(int fd, int operation)
 #endif /* !defined(HAVE_FLOCK) */
 
 #if !(HAVE_INET_ATON)
-
-/* 
+/* {{{ inet_aton
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
  * Returns 1 if the address is valid, 0 if not.
  * This replaces inet_addr, the return value from which
  * cannot distinguish between failure and a local broadcast address.
  */
-
 int inet_aton(const char *cp, struct in_addr *ap)
 {
     int dots = 0;
@@ -214,7 +212,7 @@ int inet_aton(const char *cp, struct in_addr *ap)
 
     return 1;    
 }
-
+/* }}} */
 #endif /* !HAVE_INET_ATON */
 
 /*
@@ -222,5 +220,6 @@ int inet_aton(const char *cp, struct in_addr *ap)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

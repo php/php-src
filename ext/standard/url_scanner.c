@@ -47,7 +47,8 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 	return SUCCESS;
 }
 
-
+/* {{{ url_attr_addon
+ */
 static char *url_attr_addon(const char *tag,const char *attr,const char *val,const char *buf)
 {
 	int flag = 0;
@@ -83,9 +84,12 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 	} 
 	return NULL;
 }
+/* }}} */
 
 #define US BG(url_adapt_state)
 
+/* {{{ url_adapt_ext
+ */
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *val, size_t *newlen)
 {
 	char buf[1024];
@@ -94,7 +98,10 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 
 	return url_adapt(src, srclen, buf, newlen);
 }
+/* }}} */
 
+/* {{{ url_adapt
+ */
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen)
 {
 	char *out,*outp;
@@ -365,7 +372,7 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 	*outp='\0';
 	return out;
 }
-
+/* }}} */
 #endif
 
 /*
@@ -373,5 +380,6 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -68,6 +68,8 @@
 
 #define HTTP_HEADER_BLOCK_SIZE		128
 
+/* {{{ php_fopen_url_wrap_http
+ */
 FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	FILE *fp=NULL;
@@ -302,11 +304,13 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	}	
 	return (fp);
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

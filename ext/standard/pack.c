@@ -68,7 +68,8 @@ static int machine_endian_long_map[4];
 static int big_endian_long_map[4];
 static int little_endian_long_map[4];
 
-
+/* {{{ php_pack
+ */
 static void php_pack(pval **val, int size, int *map, char *output)
 {
 	int i;
@@ -81,7 +82,7 @@ static void php_pack(pval **val, int size, int *map, char *output)
 		*(output++) = v[map[i]];
 	}
 }
-
+/* }}} */
 
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
  * Implemented formats are A,a,h,H,c,C,s,S,i,I,l,L,n,N,f,d,x,X,@.
@@ -443,7 +444,8 @@ PHP_FUNCTION(pack)
 }
 /* }}} */
 
-
+/* {{{ php_unpack
+ */
 static long php_unpack(char *data, int size, int issigned, int *map)
 {
 	long result;
@@ -458,7 +460,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
 
 	return result;
 }
-
+/* }}} */
 
 /* unpack() is based on Perl's unpack(), but is modified a bit from there.
  * Rather than depending on error-prone ordered lists or syntactically
@@ -791,7 +793,8 @@ PHP_FUNCTION(unpack)
 }
 /* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(pack)
 {
 	int machine_endian_check = 1;
@@ -862,11 +865,13 @@ PHP_MINIT_FUNCTION(pack)
 
 	return SUCCESS;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

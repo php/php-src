@@ -39,7 +39,8 @@ static void browscap_entry_dtor(zval *pvalue)
 	}
 }
 
-
+/* {{{ convert_browscap_pattern
+ */
 static void convert_browscap_pattern(zval *pattern)
 {
 	register int i,j;
@@ -80,8 +81,10 @@ static void convert_browscap_pattern(zval *pattern)
 	pattern->value.str.val = t;
 	pattern->value.str.len = j;
 }
+/* }}} */
 
-
+/* {{{ php_browscap_parser_cb
+ */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
 {
 	switch (callback_type) {
@@ -126,8 +129,10 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 			break;
 	}
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(browscap)
 {
 	char *browscap = INI_STR("browscap");
@@ -151,8 +156,10 @@ PHP_MINIT_FUNCTION(browscap)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(browscap)
 {
 	if (INI_STR("browscap")) {
@@ -160,8 +167,10 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ browser_reg_compare
+ */
 static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
 	zval **browser_name;
@@ -188,6 +197,7 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
 	regfree(&r);
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto object get_browser(string browser_name)
    Get information about the capabilities of a browser */
@@ -253,5 +263,6 @@ PHP_FUNCTION(get_browser)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -421,7 +421,6 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-
 /* {{{ proto bool chmod(string filename, int mode)
    Change file mode */
 PHP_FUNCTION(chmod)
@@ -461,7 +460,6 @@ PHP_FUNCTION(chmod)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto bool touch(string filename [, int time])
    Set modification time of file */
@@ -535,7 +533,6 @@ PHP_FUNCTION(touch)
 }
 /* }}} */
 
-
 /* {{{ proto void clearstatcache(void)
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
@@ -551,6 +548,8 @@ PHP_FUNCTION(clearstatcache)
 
 #define IS_LINK_OPERATION() (type == 8 /* filetype */ || type == 14 /* is_link */ || type == 16 /* lstat */)
 
+/* {{{ php_stat
+ */
 static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value)
 {
 	zval *stat_dev,*stat_ino,*stat_mode,*stat_nlink,*stat_uid,*stat_gid,*stat_rdev,
@@ -761,6 +760,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	php_error(E_WARNING, "didn't understand stat call");
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* another quickie macro to make defining similar functions easier */
 #define FileFunction(name, funcnum) \
@@ -868,5 +868,6 @@ FileFunction(php_if_stat,17)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -103,7 +103,8 @@ static unsigned char second_fifth_and_sixth_args_force_ref[] =
 static unsigned char third_through_seventh_args_force_ref[] =
 {7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
 
-
+/* {{{ sockets_functions[]
+ */
 function_entry sockets_functions[] = {
 	PHP_FE(socket_fd_alloc, 		NULL)
 	PHP_FE(socket_fd_free, 			NULL)
@@ -145,7 +146,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_shutdown,			NULL)
 	{NULL, NULL, NULL}
 };
-
+/* }}} */
 
 zend_module_entry sockets_module_entry = {
 	"sockets",
@@ -243,7 +244,7 @@ static php_socket *accept_connect(php_socket *php_sock, struct sockaddr *la)
 	return retval;
 }
 
-/* php_read -- wrapper around read() so that it only reads to a \r or \n. */
+/* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
 int php_read(int socket, void *buf, int maxlen)
 {
 	int m = 0, n = 0;
@@ -302,8 +303,10 @@ int php_read(int socket, void *buf, int maxlen)
 	 
 	return n;
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(sockets)
 {
 	struct protoent *pe;
@@ -353,16 +356,17 @@ PHP_MINIT_FUNCTION(sockets)
 	
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(sockets)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Sockets Support", "enabled");
 	php_info_print_table_end();
 }
-
-
+/* }}} */
 
 /* {{{ proto resource socket_fd_alloc(void)
    Allocates a new file descriptor set */
@@ -1989,4 +1993,6 @@ PHP_FUNCTION(socket_shutdown)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -41,6 +41,8 @@
 
 #include "ext/standard/basic_functions.h"
 
+/* {{{ php_statpage
+ */
 static void php_statpage(BLS_D)
 {
 	struct stat *pstat;
@@ -55,7 +57,10 @@ static void php_statpage(BLS_D)
 		} 
 	}
 }
+/* }}} */
 
+/* {{{ php_getuid
+ */
 long php_getuid(void)
 {
 	BLS_FETCH();
@@ -63,6 +68,7 @@ long php_getuid(void)
 	php_statpage(BLS_C);
 	return (BG(page_uid));
 }
+/* }}} */
 
 /* {{{ proto int getmyuid(void)
    Get PHP script owner's UID */
@@ -129,5 +135,6 @@ PHP_FUNCTION(getlastmod)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

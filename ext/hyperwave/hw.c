@@ -230,7 +230,8 @@ PHP_MSHUTDOWN_FUNCTION(hw)
 	return SUCCESS;
 }
 
-/* creates an array in return value and frees all memory
+/* {{{ make_return_objrec
+ * creates an array in return value and frees all memory
  * Also adds as an assoc. array at the end of the return array with
  * statistics.
  */
@@ -290,8 +291,9 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 
 	return 0;
 }
+/* }}} */
 
-/*
+/* {{{ make2_return_array_from_objrec
 ** creates an array return value from object record
 */
 int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr) {
@@ -400,7 +402,10 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 
 	return(0);
 }
+/* }}} */
 
+/* {{{ make_return_array_from_objrec
+ */
 int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	char *attrname, *str, *temp, language[3], *title;
 	int iTitle, iDesc, iKeyword, iGroup;
@@ -542,8 +547,11 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	return(0);
 }
+/* }}} */
 
 #define BUFFERLEN 1024
+/* {{{ make_objrec_from_array
+ */
 static char * make_objrec_from_array(HashTable *lht) {
 	int i, count, keytype;
 	ulong length;
@@ -617,8 +625,11 @@ static char * make_objrec_from_array(HashTable *lht) {
 	}
 	return objrec;
 }
+/* }}} */
 #undef BUFFERLEN
 
+/* {{{ make_ints_from_array
+ */
 static int * make_ints_from_array(HashTable *lht) {
 	int i, count;
 	int *objids = NULL;
@@ -646,7 +657,10 @@ static int * make_ints_from_array(HashTable *lht) {
 	}
 	return objids;
 }
+/* }}} */
 
+/* {{{ make_strs_from_array
+ */
 static char **make_strs_from_array(HashTable *arrht) {
 	char **carr = NULL;
 	char **ptr;
@@ -674,8 +688,11 @@ static char **make_strs_from_array(HashTable *arrht) {
 	}
 	return(carr);
 }
+/* }}} */
 
 #define BUFFERLEN 30
+/* {{{ php_hw_do_connect
+ */
 static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval **argv[4];
@@ -933,6 +950,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ptr->username = NULL;
 	efree(userdata);
 }
+/* }}} */
 #undef BUFFERLEN
 
 /* Start of user level functions */
@@ -1319,6 +1337,8 @@ PHP_FUNCTION(hw_root)
 }
 /* }}} */
 
+/* {{{ php_hw_command
+ */
 char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	pval **arg1;
 	int link, type;
@@ -1344,6 +1364,7 @@ char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	return object;
 	}
 }
+/* }}} */
 
 /* {{{ proto string hw_stat(int link)
    Returns status string */
@@ -2037,6 +2058,8 @@ PHP_FUNCTION(hw_modifyobject) {
 #undef BUFFERLEN
 /* }}} */
 
+/* {{{ php_hw_mvcp
+ */
 void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int link, type, dest=0, from=0, count;
@@ -2127,6 +2150,7 @@ void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 
 	RETURN_LONG(docIDcount + collIDcount);
 }
+/* }}} */
 
 /* {{{ proto void hw_mv(int link, array objrec, int from, int dest)
    Moves object */
@@ -4445,4 +4469,6 @@ void print_msg(hg_msg *msg, char *str, int txt)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

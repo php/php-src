@@ -18,6 +18,8 @@
  */
 /* $Id$ */
 
+/* {{{ includes
+ */
 #include "php.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -78,6 +80,7 @@
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #endif
+/* }}} */
 
 typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int *, char **) ;
 
@@ -88,6 +91,8 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path);
 
 HashTable fopen_url_wrappers_hash;
 
+/* {{{ php_register_url_wrapper
+ */
 PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path))
 {
 	PLS_FETCH();
@@ -98,7 +103,10 @@ PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path
 		return FAILURE;
 	}
 }
+/* }}} */
 
+/* {{{ php_unregister_url_wrapper
+ */
 PHPAPI int php_unregister_url_wrapper(char *protocol)
 {
 	PLS_FETCH();
@@ -109,7 +117,10 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
 		return SUCCESS;
  	}
 }
+/* }}} */
 
+/* {{{ php_init_fopen_wrappers
+ */
 int php_init_fopen_wrappers(void) 
 {
 	PLS_FETCH();
@@ -119,7 +130,10 @@ int php_init_fopen_wrappers(void)
 	
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ php_shutdown_fopen_wrappers
+ */
 int php_shutdown_fopen_wrappers(void) 
 {
 	PLS_FETCH();
@@ -130,9 +144,9 @@ int php_shutdown_fopen_wrappers(void)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
-/*
+/* {{{ php_check_specific_open_basedir
 	When open_basedir is not NULL, check if the given filename is located in
 	open_basedir. Returns -1 if error or not in the open_basedir, else 0
 	
@@ -182,7 +196,10 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 		return -1;
 	}
 }
+/* }}} */
 
+/* {{{ php_check_open_basedir
+ */
 PHPAPI int php_check_open_basedir(char *path)
 {
 	PLS_FETCH();
@@ -224,7 +241,10 @@ PHPAPI int php_check_open_basedir(char *path)
 	/* Nothing to check... */
 	return 0;
 }
+/* }}} */
 
+/* {{{ php_fopen_and_set_opened_path
+ */
 static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
 {
 		FILE *fp;
@@ -238,7 +258,10 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 		}
 		return fp;
 }
+/* }}} */
 
+/* {{{ php_fopen_wrapper
+ */
 PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	PLS_FETCH();
@@ -265,8 +288,10 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 		return php_fopen_and_set_opened_path(path, mode, opened_path);
 	}
 }
+/* }}} */
 
-
+/* {{{ php_fopen_primary_script
+ */
 PHPAPI FILE *php_fopen_primary_script(void)
 {
 	FILE *fp;
@@ -355,9 +380,9 @@ PHPAPI FILE *php_fopen_primary_script(void)
 
 	return fp;
 }
+/* }}} */
 
-
-/*
+/* {{{ php_fopen_with_path
  * Tries to open a file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
  */
@@ -421,9 +446,10 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	efree(pathbuf);
 	return NULL;
 }
-
+/* }}} */
  
-
+/* {{{ php_fopen_url_wrapper
+ */
 static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	FILE *fp = NULL;
@@ -481,7 +507,10 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 	php_error(E_WARNING, "Invalid URL specified, %s", path);
 	return NULL;
 }
+/* }}} */
 
+/* {{{ php_strip_url_passwd
+ */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
 	register char *p = url, *url_start;
@@ -512,8 +541,10 @@ PHPAPI char *php_strip_url_passwd(char *url)
 	}
 	return url;
 }
+/* }}} */
 
-
+/* {{{ expand_filepath
+ */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	cwd_state new_state;
@@ -544,11 +575,13 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 
 	return real_path;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

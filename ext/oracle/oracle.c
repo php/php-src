@@ -20,6 +20,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 /* comment out the next line if you're on Oracle 7.x and don't have the olog 
    call. */
  
@@ -78,6 +80,8 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 static int le_conn, le_pconn, le_cursor; 
 
+/* {{{ prototypes
+ */
 PHP_FUNCTION(ora_bind);
 PHP_FUNCTION(ora_close);
 PHP_FUNCTION(ora_commit);
@@ -107,7 +111,10 @@ PHP_RINIT_FUNCTION(oracle);
 PHP_MSHUTDOWN_FUNCTION(oracle);
 PHP_RSHUTDOWN_FUNCTION(oracle);
 PHP_MINFO_FUNCTION(oracle);
+/* }}} */
 
+/* {{{ oracle_functions[]
+ */
 function_entry oracle_functions[] = {
 	PHP_FE(ora_bind,								NULL)
 	PHP_FE(ora_close,								NULL)
@@ -134,7 +141,10 @@ function_entry oracle_functions[] = {
 	PHP_FE(ora_rollback,							NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ oracle_module_entry
+ */
 zend_module_entry oracle_module_entry = {
 	"oracle",
 	oracle_functions,
@@ -145,7 +155,10 @@ zend_module_entry oracle_module_entry = {
     PHP_MINFO(oracle),
     STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
+/* {{{ ora_func_tab[]
+ */
 static const text *ora_func_tab[] =
 {(text *) "unused",
 /*  1, 2  */ (text *) "unused", (text *) "OSQL",
@@ -180,11 +193,14 @@ static const text *ora_func_tab[] =
 /* 59, 60 */ (text *) "unused", (text *) "ODESCR",
 /* 61, 62 */ (text *) "unused", (text *) "OBNDRA"
 };
+/* }}} */
 
 #ifdef COMPILE_DL_ORACLE
 ZEND_GET_MODULE(oracle)
 #endif
 
+/* {{{ _close_oraconn
+ */
 static int _close_oraconn(zend_rsrc_list_entry *rsrc)
 {
 	oraConnection *conn = (oraConnection *)rsrc->ptr;
@@ -206,7 +222,10 @@ static int _close_oraconn(zend_rsrc_list_entry *rsrc)
 
 	return 1;
 }
+/* }}} */
 
+/* {{{ pval_ora_param_destructor
+ */
 static void
 pval_ora_param_destructor(oraParam *param)
 {
@@ -214,8 +233,10 @@ pval_ora_param_destructor(oraParam *param)
 		efree(param->progv);
 	}
 }
+/* }}} */
 
-
+/* {{{ _close_oracur
+ */
 static int _close_oracur(oraCursor *cur)
 {
 	int i;
@@ -252,13 +273,19 @@ static int _close_oracur(oraCursor *cur)
 	
 	return 1;
 }
+/* }}} */
 
+/* {{{ php_close_ora_cursor
+ */
 static void php_close_ora_cursor(zend_rsrc_list_entry *rsrc)
 {
 	oraCursor *cur = (oraCursor *)rsrc->ptr;
 	_close_oracur(cur);
 }
+/* }}} */
 
+/* {{{ php_ora_init_globals
+ */
 static void php_ora_init_globals(ORALS_D)
 {
 	if (cfg_get_long("oracle.allow_persistent",
@@ -284,7 +311,10 @@ static void php_ora_init_globals(ORALS_D)
 	
 	memset((void*) &ORA(db_err_conn),0,sizeof(ORA(db_err_conn)));
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(oracle)
 {
 
@@ -311,7 +341,10 @@ PHP_MINIT_FUNCTION(oracle)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(oracle)
 {
 	ORALS_FETCH();
@@ -325,8 +358,10 @@ PHP_RINIT_FUNCTION(oracle)
 	*/
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(oracle)
 {
 	ORALS_FETCH();
@@ -336,13 +371,18 @@ PHP_MSHUTDOWN_FUNCTION(oracle)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
 PHP_RSHUTDOWN_FUNCTION(oracle)
 {
 	return SUCCESS;
-
 }
+/* }}} */
 
+/* {{{ _ora_ping
+ */
 static int _ora_ping(oraConnection *conn)
 {
 	Cda_Def cda;
@@ -360,6 +400,7 @@ static int _ora_ping(oraConnection *conn)
 	return 1;
 
 }
+/* }}} */
 
 /*
    ** PHP functions
@@ -381,6 +422,8 @@ PHP_FUNCTION(ora_plogon)
 }
 /* }}} */
 
+/* {{{ ora_do_logon
+ */
 void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user,*passwd;
@@ -553,6 +596,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	efree(hashed_details);
 }
+/* }}} */
 
 /* {{{ proto int ora_logoff(int connection)
    Close an Oracle connection */
@@ -1528,6 +1572,8 @@ PHP_FUNCTION(ora_errorcode)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(oracle)
 {
 
@@ -1540,12 +1586,14 @@ PHP_MINFO_FUNCTION(oracle)
 #endif
 	php_info_print_table_end();
 }
-
+/* }}} */
 
 /*
 ** Functions internal to this module.
 */
 
+/* {{{ ora_get_cursor
+ */
 static oraCursor *
 ora_get_cursor(HashTable *list, pval **ind)
 {
@@ -1565,7 +1613,10 @@ ora_get_cursor(HashTable *list, pval **ind)
 
 	return cursor;
 }
+/* }}} */
 
+/* {{{ ora_error
+ */
 static char *
 ora_error(Cda_Def * cda)
 {
@@ -1586,7 +1637,10 @@ ora_error(Cda_Def * cda)
 	}
 	return (char *) errmsg;
 }
+/* }}} */
 
+/* {{{ ora_describe_define
+ */
 static sword
 ora_describe_define(oraCursor * cursor)
 {
@@ -1677,7 +1731,10 @@ ora_describe_define(oraCursor * cursor)
 	}
 	return 1;
 }
+/* }}} */
 
+/* {{{ ora_set_param_values
+ */
 int ora_set_param_values(oraCursor *cursor, int isout)
 {
 	char *paramname;
@@ -1732,6 +1789,7 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 
 	return 1;
 }
+/* }}} */
 
 #endif							/* HAVE_ORACLE */
 
@@ -1740,4 +1798,6 @@ int ora_set_param_values(oraCursor *cursor, int isout)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

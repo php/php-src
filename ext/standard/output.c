@@ -102,7 +102,8 @@ PHPAPI int php_header_write(const char *str, uint str_length)
 	return OG(php_header_write)(str, str_length);
 }
 
-/* Start output buffering */
+/* {{{ php_start_ob_buffer
+ * Start output buffering */
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 {
 	OLS_FETCH();
@@ -118,9 +119,10 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
 }
+/* }}} */
 
-
-/* End output buffering (one level) */
+/* {{{ php_end_ob_buffer
+ * End output buffering (one level) */
 PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 {
 	char *final_buffer=NULL;
@@ -243,9 +245,10 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		efree(to_be_destroyed_handled_output[1]);
 	}
 }
+/* }}} */
 
-
-/* End output buffering (all buffers) */
+/* {{{ php_end_ob_buffers
+ * End output buffering (all buffers) */
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
 {
 	OLS_FETCH();
@@ -254,8 +257,10 @@ PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
 		php_end_ob_buffer(send_buffer, 0);
 	}
 }
+/* }}} */
 
-
+/* {{{ php_start_implicit_flush
+ */
 PHPAPI void php_start_implicit_flush()
 {
 	OLS_FETCH();
@@ -263,16 +268,20 @@ PHPAPI void php_start_implicit_flush()
 	php_end_ob_buffer(1, 0);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
 }
+/* }}} */
 
-
+/* {{{ php_end_implicit_flush
+ */
 PHPAPI void php_end_implicit_flush()
 {
 	OLS_FETCH();
 
 	OG(implicit_flush)=0;
 }
+/* }}} */
 
-
+/* {{{ php_ob_set_internal_handler
+ */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size)
 {
 	OLS_FETCH();
@@ -285,12 +294,14 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 	OG(active_ob_buffer).internal_output_handler_buffer = (char *) emalloc(buffer_size);
 	OG(active_ob_buffer).internal_output_handler_buffer_size = buffer_size;
 }
-
+/* }}} */
 
 /*
  * Output buffering - implementation
  */
 
+/* {{{ php_ob_allocate
+ */
 static inline void php_ob_allocate(void)
 {
 	OLS_FETCH();
@@ -303,8 +314,10 @@ static inline void php_ob_allocate(void)
 		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, OG(active_ob_buffer).size+1);
 	}
 }
+/* }}} */
 
-
+/* {{{ php_ob_init
+ */
 static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size)
 {
 	OLS_FETCH();
@@ -325,8 +338,10 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
 }
+/* }}} */
 
-
+/* {{{ php_ob_append
+ */
 static void php_ob_append(const char *text, uint text_length)
 {
 	char *target;
@@ -352,6 +367,7 @@ static void php_ob_append(const char *text, uint text_length)
 		return;
 	}
 }
+/* }}} */
 
 #if 0
 static void php_ob_prepend(const char *text, uint text_length)
@@ -375,7 +391,8 @@ static void php_ob_prepend(const char *text, uint text_length)
 #endif
 
 
-/* Return the current output buffer */
+/* {{{ php_ob_get_buffer
+ * Return the current output buffer */
 int php_ob_get_buffer(pval *p)
 {
 	OLS_FETCH();
@@ -388,9 +405,10 @@ int php_ob_get_buffer(pval *p)
 	p->value.str.len = OG(active_ob_buffer).text_length;
 	return SUCCESS;
 }
+/* }}} */
 
-
-/* Return the size of the current output buffer */
+/* {{{ php_ob_get_length
+ * Return the size of the current output buffer */
 int php_ob_get_length(pval *p)
 {
 	OLS_FETCH();
@@ -402,6 +420,7 @@ int php_ob_get_length(pval *p)
 	p->value.lval = OG(active_ob_buffer).text_length;
 	return SUCCESS;
 }
+/* }}} */
 
 /*
  * Wrapper functions - implementation
@@ -415,7 +434,8 @@ static int php_b_body_write(const char *str, uint str_length)
 	return str_length;
 }
 
-
+/* {{{ php_ub_body_write_no_header
+ */
 static int php_ub_body_write_no_header(const char *str, uint str_length)
 {
 	char *newstr = NULL;
@@ -441,8 +461,10 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 
 	return result;
 }
+/* }}} */
 
-
+/* {{{ php_ub_body_write
+ */
 static int php_ub_body_write(const char *str, uint str_length)
 {
 	int result = 0;
@@ -472,12 +494,11 @@ static int php_ub_body_write(const char *str, uint str_length)
 
 	return result;
 }
-
+/* }}} */
 
 /*
  * HEAD support
  */
-
 
 /* {{{ proto void ob_start([ string user_function [, int chunk_size]])
    Turn on Output Buffering (specifying an optional output handler). */
@@ -526,7 +547,6 @@ PHP_FUNCTION(ob_start)
 }
 /* }}} */
 
-
 /* {{{ proto void ob_end_flush(void)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
@@ -535,7 +555,6 @@ PHP_FUNCTION(ob_end_flush)
 }
 /* }}} */
 
-
 /* {{{ proto void ob_end_clean(void)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
@@ -543,7 +562,6 @@ PHP_FUNCTION(ob_end_clean)
 	php_end_ob_buffer(0, 0);
 }
 /* }}} */
-
 
 /* {{{ proto string ob_get_contents(void)
    Return the contents of the output buffer */
@@ -555,7 +573,6 @@ PHP_FUNCTION(ob_get_contents)
 }
 /* }}} */
 
-
 /* {{{ proto string ob_get_length(void)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
@@ -565,7 +582,6 @@ PHP_FUNCTION(ob_get_length)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto void ob_implicit_flush([int flag])
    Turn implicit flush on/off and is equivalent to calling flush() after every output call */
@@ -597,7 +613,6 @@ PHP_FUNCTION(ob_implicit_flush)
 }
 /* }}} */
 
-
 PHPAPI char *php_get_output_start_filename()
 {
 	OLS_FETCH();
@@ -618,5 +633,6 @@ PHPAPI int php_get_output_start_lineno()
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

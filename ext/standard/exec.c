@@ -35,7 +35,7 @@
 #include <signal.h>
 #endif
 
-/*
+/* {{{ php_Exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
  * If type==2, all lines will be saved to given array (exec with &$array)
@@ -234,6 +234,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 	efree(buf);
 	return FG(pclose_ret);
 }
+/* }}} */
 
 /* {{{ proto string exec(string command [, array output [, int return_value]])
    Execute an external program */
@@ -326,6 +327,8 @@ PHP_FUNCTION(passthru)
 }
 /* }}} */
 
+/* {{{ php_get_index
+ */
 static int php_get_index(char *s, char c)
 {
 	register int x;
@@ -336,8 +339,10 @@ static int php_get_index(char *s, char c)
 
 	return -1;
 }
+/* }}} */
 
-/* Escape all chars that could possibly be used to
+/* {{{ php_escape_shell_cmd
+   Escape all chars that could possibly be used to
    break out of a shell command
 
    This function emalloc's a string and returns the pointer.
@@ -363,7 +368,10 @@ char * php_escape_shell_cmd(char *str) {
 	}
 	return cmd;
 }
+/* }}} */
 
+/* {{{ php_escape_shell_arg
+ */
 char * php_escape_shell_arg(char *str) {
 	register int x, y, l;
 	char *cmd;
@@ -389,6 +397,7 @@ char * php_escape_shell_arg(char *str) {
 	cmd[l] = '\0';
 	return cmd;
 }
+/* }}} */
 
 /* {{{ proto string escapeshellcmd(string command)
    Escape shell metacharacters */
@@ -480,5 +489,6 @@ PHP_FUNCTION(shell_exec)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

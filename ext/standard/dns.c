@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+/* {{{ includes
+ */
 #include "php.h"
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -59,6 +61,7 @@
 #endif
 
 #include "dns.h"
+/* }}} */
 
 char *php_gethostbyaddr(char *ip);
 char *php_gethostbyname(char *name);
@@ -78,7 +81,8 @@ PHP_FUNCTION(gethostbyaddr)
 }
 /* }}} */
 
-
+/* {{{ php_gethostbyaddr
+ */
 char *php_gethostbyaddr(char *ip)
 {
 	struct in_addr addr;
@@ -100,6 +104,7 @@ char *php_gethostbyaddr(char *ip)
 	}
 	return estrdup(hp->h_name);
 }
+/* }}} */
 
 /* {{{ proto string gethostbyname(string hostname)
    Get the IP address corresponding to a given Internet host name */
@@ -151,6 +156,8 @@ PHP_FUNCTION(gethostbynamel)
 }
 /* }}} */
 
+/* {{{ php_gethostbyname
+ */
 char *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
@@ -166,6 +173,7 @@ char *php_gethostbyname(char *name)
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
 	return estrdup(inet_ntoa(in));
 }
+/* }}} */
 
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32))
 
@@ -324,5 +332,6 @@ PHP_FUNCTION(getmxrr)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

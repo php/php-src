@@ -47,6 +47,8 @@
 #define PHP_PATHINFO_BASENAME 	1
 #define PHP_PATHINFO_EXTENSION 	2
 
+/* {{{ register_string_constants
+ */
 void register_string_constants(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_CS | CONST_PERSISTENT);
@@ -80,6 +82,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 #endif
 	
 }
+/* }}} */
 
 int php_tag_find(char *tag, int len, char *set);
 
@@ -91,6 +94,8 @@ static char hexconvtab[] = "0123456789abcdef";
 static MUTEX_T locale_mutex = NULL;
 #endif
 
+/* {{{ php_bin2hex
+ */
 static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
 	unsigned char *result = NULL;
@@ -111,6 +116,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 
 	return result;
 }
+/* }}} */
 
 #ifdef HAVE_LOCALECONV
 /* {{{ localeconv_r
@@ -3360,5 +3366,6 @@ PHP_FUNCTION(sscanf)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -389,8 +389,7 @@ php_sprintf_getnumber(char *buffer, int *pos)
 	return num;
 }
 
-
-/*
+/* {{{ php_formatted_print
  * New sprintf implementation for PHP.
  *
  * Modifiers:
@@ -629,6 +628,7 @@ php_formatted_print(int ht, int *len)
 	*len = outpos;	
 	return result;
 }
+/* }}} */
 
 /* {{{ proto string sprintf(string format [, mixed arg1 [, mixed ...]])
    Return a formatted string */
@@ -665,5 +665,6 @@ PHP_FUNCTION(user_printf)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

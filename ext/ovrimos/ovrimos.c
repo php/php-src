@@ -5,17 +5,19 @@
    | Copyright (c) 1997-2001 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,	  |
-   | that is bundled with this package in the file LICENSE, and is	  |
+   | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to	  |
+   | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dimitris Souflis <dsouflis@acm.org>, <dsouflis@ovrimos.com> |
    |       integrated to php by Nikos Mavroyanopoulos <nmav@altera.gr>    |
    +----------------------------------------------------------------------+
 */
+
+/* $Id$ */
 
 #include <php.h>
 #include <php_globals.h>
@@ -319,6 +321,8 @@ PHP_FUNCTION(ovrimos_exec)
 
 /* }}} */
 
+/* {{{ column_to_string
+ */
 static void column_to_string(SQLS stmt, int i, char *buffer, int *len)
 {
 	const char *bf = sqlColValue(stmt, i, 0);
@@ -446,6 +450,7 @@ static void column_to_string(SQLS stmt, int i, char *buffer, int *len)
 		break;
 	}
 }
+/* }}} */
 
 /* {{{ proto int ovrimos_fetch_into(int result_id, array result_array [, string how, [int rownumber]])
    Fetch one result row into an array
@@ -1039,6 +1044,8 @@ PHP_FUNCTION(ovrimos_setoption)
 /* }}} */
 #endif
 
+/* {{{ ovrimos_functions[]
+ */
 function_entry ovrimos_functions[] = {
 /*     PHP_FE(ovrimos_setoption, NULL)*/
 /*     PHP_FE(ovrimos_autocommit, NULL)*/
@@ -1066,6 +1073,7 @@ function_entry ovrimos_functions[] = {
 	    PHP_FE(ovrimos_longreadlen, NULL)
 	PHP_FALIAS(ovrimos_do, ovrimos_exec, NULL) {NULL, NULL, NULL}
 };
+/* }}} */
 
 zend_module_entry ovrimos_module_entry = {
 	"Ovrimos",
@@ -1082,3 +1090,12 @@ DLEXPORT zend_module_entry *get_module()
 {
 	return &ovrimos_module_entry;
 };
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */
