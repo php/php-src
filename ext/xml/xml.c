@@ -699,7 +699,7 @@ void _xml_startElementHandler(void *userData, const char *name, const char **att
 				zend_hash_add(Z_ARRVAL_P(tag),"attributes",sizeof("attributes"),&atr,sizeof(zval*),NULL);
 			} else {
 				zval_dtor(atr);
-				efree(atr);
+				FREE_ZVAL(atr);
 			}
 
 			zend_hash_next_index_insert(Z_ARRVAL_P(parser->data),&tag,sizeof(zval*),(void *) &parser->ctag);
