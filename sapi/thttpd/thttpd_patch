@@ -1,6 +1,6 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/Makefile.in	Mon Jun 16 21:08:05 2003
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -40,7 +40,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/config.h	Mon Jun 16 21:08:05 2003
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -64,7 +64,7 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
 --- thttpd-2.21b/configure	Sat Apr 21 02:07:14 2001
-+++ thttpd-2.21b-cool/configure	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/configure	Mon Jun 16 21:08:05 2003
 @@ -1021,7 +1021,7 @@
  fi
  echo "$ac_t""$CPP" 1>&6
@@ -76,7 +76,7 @@ diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
  echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
 diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
 --- thttpd-2.21b/configure.in	Sat Apr 21 02:06:23 2001
-+++ thttpd-2.21b-cool/configure.in	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/configure.in	Mon Jun 16 21:08:05 2003
 @@ -64,7 +64,7 @@
  	AC_MSG_RESULT(no)   
  fi
@@ -88,7 +88,7 @@ diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
  
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/fdwatch.c	Mon Jun 16 21:08:05 2003
 @@ -419,6 +419,7 @@
      if ( pollfds == (struct pollfd*) 0 || poll_fdidx == (int*) 0 ||
  	 poll_rfdidx == (int*) 0 )
@@ -119,7 +119,7 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/libhttpd.c	Mon Jun 16 21:09:31 2003
 @@ -56,6 +56,10 @@
  #include <unistd.h>
  #include <stdarg.h>
@@ -641,9 +641,9 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 -httpd_close_conn( httpd_conn* hc, struct timeval* nowP )
 -    {
 -    make_log_entry( hc, nowP );
-+httpd_complete_request( httpd_conn* hc, struct timeval* nowP, int logit )
++httpd_complete_request( httpd_conn* hc, struct timeval* nowP)
 +{
-+	if (logit)
++	if (hc->method != METHOD_UNKNOWN)
 +		make_log_entry( hc, nowP );
  
 -    if ( hc->file_address != (char*) 0 )
@@ -964,7 +964,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	str[0] = '?';
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/libhttpd.h	Mon Jun 16 21:09:00 2003
 @@ -69,6 +69,8 @@
      char* server_hostname;
      int port;
@@ -1019,14 +1019,14 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  ** If you don't have a current timeval handy just pass in 0.
  */
  extern void httpd_close_conn( httpd_conn* hc, struct timeval* nowP );
-+void httpd_complete_request( httpd_conn* hc, struct timeval* nowP, int logit );
++void httpd_complete_request( httpd_conn* hc, struct timeval* nowP);
 +int httpd_request_reset(httpd_conn* hc,int );
  
  /* Call this to de-initialize a connection struct and *really* free the
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/mime_encodings.txt	Mon Jun 16 21:08:05 2003
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -1038,7 +1038,7 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/mime_types.txt	Mon Jun 16 21:08:05 2003
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -1289,7 +1289,7 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
 --- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
-+++ thttpd-2.21b-cool/mmc.c	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/mmc.c	Mon Jun 16 21:08:05 2003
 @@ -70,6 +70,9 @@
      unsigned int hash;
      int hash_idx;
@@ -1392,7 +1392,7 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
 --- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
-+++ thttpd-2.21b-cool/mmc.h	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/mmc.h	Mon Jun 16 21:08:05 2003
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -1406,7 +1406,7 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Wed Jun  4 07:26:01 2003
++++ thttpd-2.21b-cool/thttpd.c	Mon Jun 16 21:09:56 2003
 @@ -53,6 +53,10 @@
  #endif
  #include <unistd.h>
@@ -1683,7 +1683,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	{
 -	if ( connects[cnum].conn_state != CNST_FREE )
 +	if ( connects[cnum].conn_state != CNST_FREE ) {
-+	    httpd_complete_request( connects[cnum].hc, &tv, 1 );
++	    httpd_complete_request( connects[cnum].hc, &tv );
  	    httpd_close_conn( connects[cnum].hc, &tv );
 +	}
  	if ( connects[cnum].hc != (httpd_conn*) 0 )
@@ -2177,7 +2177,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +	c->numtnums = 0;
 +	c->keep_alive = 1;
 +
-+	httpd_complete_request( c->hc, tvP, 1 );
++	httpd_complete_request( c->hc, tvP );
 +
  	fdwatch_del_fd( c->hc->conn_fd );
  	fdwatch_add_fd( c->hc->conn_fd, c, FDW_READ );
@@ -2204,7 +2204,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    exit( 1 );
  	    }
 +
-+    	httpd_complete_request( c->hc, tvP, 1 );
++    	httpd_complete_request( c->hc, tvP );
 +
 +	fdwatch_del_fd( c->hc->conn_fd );
 +	fdwatch_add_fd( c->hc->conn_fd, c, FDW_READ );
@@ -2214,7 +2214,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 -    else
 +     else  
 +        {
-+    	httpd_complete_request( c->hc, tvP, !c->keep_alive );
++    	httpd_complete_request( c->hc, tvP );
  	really_clear_connection( c, tvP );
 +	}
      }
@@ -2356,7 +2356,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +
 diff -ur thttpd-2.21b/version.h thttpd-2.21b-cool/version.h
 --- thttpd-2.21b/version.h	Tue Apr 24 04:05:23 2001
-+++ thttpd-2.21b-cool/version.h	Wed Jun  4 07:14:36 2003
++++ thttpd-2.21b-cool/version.h	Mon Jun 16 21:08:05 2003
 @@ -3,7 +3,7 @@
  #ifndef _VERSION_H_
  #define _VERSION_H_
