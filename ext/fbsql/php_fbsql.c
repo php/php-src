@@ -63,7 +63,7 @@
 #include "php_fbsql.h"
 #include <signal.h>
 
-static int le_result, le_link, le_plink, le_lob;
+static int le_result, le_link, le_plink;
 
 struct PHPFBResult;
 typedef struct PHPFBResult PHPFBResult;
@@ -252,7 +252,6 @@ ZEND_GET_MODULE(fbsql)
 static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
-static void phpfbReleaseLOB (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -315,16 +314,6 @@ static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		free(link);
 		FB_SQL_G(linkCount)--;
 		FB_SQL_G(persistantCount)--;
-	}
-}
-
-static void phpfbReleaseLOB(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	FBCBlobHandle *lobHandle = (FBCBlobHandle *)rsrc->ptr;
-
-	if (lobHandle)
-	{
-		fbcbhRelease(lobHandle);
 	}
 }
 
@@ -395,7 +384,6 @@ PHP_MINIT_FUNCTION(fbsql)
 	le_result	= zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
 	le_link		= zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
 	le_plink	= zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
-	le_lob		= zend_register_list_destructors_ex(phpfbReleaseLOB, NULL, "fbsql lob handle", module_number);
 	Z_TYPE(fbsql_module_entry) = type;
 
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
@@ -950,10 +938,15 @@ static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 				lobHandle = fbcdcWriteCLOB(phpLink->connection, Z_STRVAL_PP(lob_data));
 			break;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, lobHandle, le_lob);
+	if (lobHandle) {
+		RETURN_STRING(fbcbhDescription(lobHandle), 1);
+		fbcbhRelease(lobHandle);
+	}
+	else
+		RETURN_FALSE;
 }
 
-/* {{{ proto resource fbsql_create_blob(string blob_data [, resource link_identifier])
+/* {{{ proto string fbsql_create_blob(string blob_data [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_create_blob)
 {
@@ -961,7 +954,7 @@ PHP_FUNCTION(fbsql_create_blob)
 }
 /* }}} */
 
-/* {{{ proto resource fbsql_create_clob(string clob_data [, resource link_identifier])
+/* {{{ proto string fbsql_create_clob(string clob_data [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_create_clob)
 {
