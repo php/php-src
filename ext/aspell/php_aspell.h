@@ -38,7 +38,6 @@ extern zend_module_entry aspell_module_entry;
 
 extern PHP_MINIT_FUNCTION(aspell);
 extern PHP_MINFO_FUNCTION(aspell);
-extern void php3_aspell_close();
 
 PHP_FUNCTION(aspell_new);
 PHP_FUNCTION(aspell_check);

@@ -982,7 +982,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 		tmp = result->data[result->cur_row][i];
 		pval_copy_constructor(&tmp);
 		if (PG(magic_quotes_runtime) && tmp.type == IS_STRING) {
-			tmp.value.str.val = _php3_addslashes(tmp.value.str.val,tmp.value.str.len,&tmp.value.str.len,1);
+			tmp.value.str.val = php_addslashes(tmp.value.str.val,tmp.value.str.len,&tmp.value.str.len,1);
 		}
 		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval), (void **) &pvalue_ptr);
 		zend_hash_pointer_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, pvalue_ptr);
