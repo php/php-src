@@ -491,8 +491,16 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 
 static int sapi_cgi_get_fd(int *fd TSRMLS_DC)
 {
+#if PHP_FASTCGI
+	FCGX_Request *request = (FCGX_Request *)SG(server_context);
+	
+	*fd = request->ipcFd;
+	if (*fd >= 0) return SUCCESS;
+	return FAILURE;
+#else
 	*fd = STDOUT_FILENO;
 	return SUCCESS;
+#endif
 }
 
 static int sapi_cgi_force_http_10(TSRMLS_D)
