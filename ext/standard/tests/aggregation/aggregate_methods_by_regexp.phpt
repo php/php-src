@@ -1,5 +1,7 @@
 --TEST--
 aggregating methods matching regular expression
+--SKIPIF--
+<?php if (!function_exists('aggregate_properties_by_regexp')) print "skip"; ?>
 --POST--
 --GET--
 --FILE--
