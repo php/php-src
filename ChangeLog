@@ -1,3 +1,131 @@
+2000-12-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/exec.c: Rollback bogus patch
+
+    * ext/standard/exec.c: That slipped in :(
+
+2000-12-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c
+      ext/standard/tests/general_functions/003.phpt:
+    levenshtein() fixed, regression tests added (bug id #6562 and #7368)
+
+2000-12-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/var.c: MFH - call_user_function() object fix
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/var.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c:
+    Fix call_user_function() with objects - it could leak under certain circumstances
+
+2000-12-13  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c: - Bodytag is insertet by fnInsAnchors()
+    - several small bugs which might cause a segm fault
+
+2000-12-13  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    (Zeus) Re-added some server variables that will be used.
+    Also added DOCUMENT_ROOT, was missing before for non-Win32
+
+2000-12-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/tests/001.phpt
+      ext/gmp/tests/002.phpt: Add GMP tests
+
+2000-12-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/MAINTAINERS
+      pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/pgsql.php
+      pear/DB/tests/fetchmodes.inc
+      pear/DB/tests/mysql/001.phpt
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/005.phpt
+      pear/DB/tests/mysql/009.phpt
+      pear/DB/tests/mysql/connect.inc
+      pear/DB/tests/mysql/mktable.inc
+      pear/DB/tests/numrows.inc
+      pear/DB/tests/pgsql/.cvsignore
+      pear/DB/tests/pgsql/001.phpt
+      pear/DB/tests/pgsql/002.phpt
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/pgsql/009.phpt
+      pear/DB/tests/pgsql/connect.inc
+      pear/DB/tests/pgsql/mktable.inc
+      pear/DB/tests/sequences.inc:
+    * added {mysql,pgsql}RaiseError() methods to DB_{mysql,pgsql} for more
+      consistent behaviour
+    * fixed DB_{pgsql,mysql}::numRows bug (returned an error on 0 rows), added
+      test for it
+    * added sequence support to DB_pgsql, and dropSequence() to pgsql/mysql
+      with some fixes by Alexey Borzov
+    * fixed a bug in DB_pgsql::fetchInto
+    * improved fetchmode tests
+
+    * run-tests.php:
+    * rename write* to dowrite* to avoid clash with ext/sockets
+    * sapi/cgi seems to ignore command-line options when running in "real"
+      CGI mode, need to find a way to pass include_path to it...
+
+    * build/rules.mk: * PEAR: don't require "make install" before "make test"
+
+2000-12-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c:
+    Add apache_child_terminate() and INI setting apache.child_terminate
+    which defaults to 0.
+
+    Submitted by: Sam Liddicott <sam.liddicott@ananova.com>
+
+2000-12-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c: use true globals, and proper naming cheme
+
+2000-12-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c:
+    Don't increase the refcount of id, if we already have increased the refcount
+    of the same id before.
+
+    PR: #8225
+
+    * NEWS: Move cracklib entry to 4.0.5
+
+2000-12-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/domxml/domxml.dsp:
+    link against msvcrt(d).lib, ignoring it isn't a good idea
+
+2000-12-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/TESTERS: * added list of testers so far
+
+2000-12-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/curl/curl.c: MFH
+
+    * ext/standard/string.c: Fix crash when first argument to strtr is empty
+
+    * ext/curl/curl.c: Kill warning
+
+2000-12-13  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Added a missing note.
+
 2000-12-12  Sterling Hughes  <Sterling.Hughes@pentap.net>
 
     * ext/sockets/php_sockets.h: MFH
