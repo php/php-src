@@ -35,6 +35,7 @@ php_apache_info_struct php_apache_info;
 #define SECTION(name)  PUTS("<h2>" name "</h2>\n")
 
 extern module *top_module;
+extern module **ap_loaded_modules;
 
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
@@ -44,6 +45,8 @@ PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
 PHP_FUNCTION(apache_child_terminate);
 PHP_FUNCTION(apache_setenv);
+PHP_FUNCTION(apache_get_version);
+PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(apache);
 
@@ -55,6 +58,8 @@ function_entry apache_functions[] = {
 	PHP_FE(apache_child_terminate,					NULL)
 	PHP_FE(apache_setenv,							NULL)
 	PHP_FE(apache_response_headers,					NULL)
+	PHP_FE(apache_get_version,					NULL)
+	PHP_FE(apache_get_modules,					NULL)
 	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
 	{NULL, NULL, NULL}
 };
@@ -497,6 +502,34 @@ PHP_FUNCTION(apache_exec_uri)
 	ap_destroy_sub_req(rr);
 }
 #endif
+
+/* {{{ proto string apache_get_version(void)
+   Fetch Apache version */
+PHP_FUNCTION(apache_get_version)
+{
+	RETURN_STRING(SERVER_VERSION, 1);
+}
+/* }}} */
+
+/* {{{ proto array apache_get_modules(void)
+   Get a list of loaded Apache modules */
+PHP_FUNCTION(apache_get_modules)
+{
+	int n;
+	char *p;
+	
+	array_init(return_value);
+	
+	for (n = 0; ap_loaded_modules[n]; ++n) {
+		char *s = (char *) ap_loaded_modules[n]->name;
+		if ((p = strchr(s, '.'))) {
+			add_next_index_stringl(return_value, s, (p - s), 1);
+		} else {
+			add_next_index_string(return_value, s, 1);
+		}	
+	}
+}
+/* }}} */
 
 /*
  * Local variables:
