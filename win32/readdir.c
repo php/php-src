@@ -141,3 +141,83 @@ int rewinddir(DIR *dp)
 
 return 0;
 }
+
+int alphasort(const struct dirent **a, const struct dirent **b)
+{
+	return strcoll((*a)->d_name,(*b)->d_name);
+}
+
+int scandir(const char *dirname,
+			struct dirent **namelist[],
+			int (*selector) (const struct dirent *entry),
+			int (*compare) (const struct dirent **a, const struct dirent **b))
+{
+	DIR *dirp = NULL;
+	struct dirent **vector = NULL;
+	struct dirent *dp = NULL;
+	int vector_size = 0;
+
+	int nfiles = 0;
+	int fail = 0;
+
+	if (namelist == NULL)
+		return -1;
+
+	dirp = opendir(dirname);
+	if (dirp == NULL)
+		return -1;
+
+	for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp))
+	{
+		int dsize = 0;
+		struct dirent *newdp = NULL;
+
+		if (selector && (*selector)(dp) == 0)
+			continue;
+
+		if (nfiles == vector_size)
+		{
+			struct dirent **newv;
+			if (vector_size == 0)
+				vector_size = 10;
+			else
+				vector_size *= 2;
+
+			newv = (struct dirent **) realloc (vector, vector_size * sizeof (struct dirent *));
+			if (newv == NULL)
+			{
+				fail = 1;
+				break;
+			}
+			vector = newv;
+		}
+
+		dsize = sizeof (struct dirent) + ((strlen(dp->d_name) + 1) * sizeof(char));
+		newdp = (struct dirent *) malloc(dsize);
+
+		if (newdp == NULL)
+		{
+			fail = 1;
+			break;
+		}
+
+		vector[nfiles++] = (struct dirent *) memcpy(newdp, dp, dsize);
+	}
+
+	closedir(dirp);
+
+	if (fail)
+	{
+		while (nfiles-- > 0) free(vector[nfiles]);
+		free(vector);
+		return -1;
+	}
+
+
+	*namelist = vector;
+
+	if (compare)
+		qsort (*namelist,nfiles,sizeof (struct dirent *),compare);
+
+	return nfiles;
+}
