@@ -481,8 +481,8 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 	zend_object *zobj;
 	zobj = Z_OBJ_P(object);
 
-	if(parent) {
-		if(!zobj->ce->parent) {
+	if (parent) {
+		if (!zobj->ce->parent) {
 			return FAILURE;
 		}
 		*class_name = zobj->ce->parent->name;

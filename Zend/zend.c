@@ -278,17 +278,17 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 			char *class_name = NULL;
 			zend_uint clen;
 			
-			if(Z_OBJ_HANDLER_P(expr, get_class_name)) {
+			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 			}
-			if(class_name == NULL) {
+			if (class_name == NULL) {
 				class_name = "Unknown Class";
 			}
 			zend_printf("%s Object (", class_name);
-			if(Z_OBJ_HANDLER_P(expr, get_properties)) {
+			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
 			}
-			if(properties) {
+			if (properties) {
 				if (++properties->nApplyCount>1) {
 					ZEND_PUTS(" *RECURSION*");
 					properties->nApplyCount--;
@@ -331,17 +331,17 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				char *class_name = NULL;
 				zend_uint clen;
 				
-				if(Z_OBJ_HANDLER_P(expr, get_class_name)) {
+				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
-				if(class_name == NULL) {
+				if (class_name == NULL) {
 					class_name = "Unknown Class";
 				}
 				zend_printf("%s Object\n", class_name);
-				if(Z_OBJ_HANDLER_P(expr, get_properties)) {
+				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 					properties = Z_OBJPROP_P(expr);
 				}
-				if(properties) {
+				if (properties) {
 					if (++properties->nApplyCount>1) {
 						ZEND_PUTS(" *RECURSION*");
 						properties->nApplyCount--;
