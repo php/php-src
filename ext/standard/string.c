@@ -30,6 +30,9 @@
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif
+#ifdef HAVE_ICONV
+# include <iconv.h>
+#endif
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -2986,6 +2989,56 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
+#ifdef HAVE_ICONV
+/* {{{ proto iconv(string in_charset, string out_charset, string str)
+       Returns str converted to the out_charset character set.
+*/
+PHP_FUNCTION(iconv)
+{
+    zval **in_charset, **out_charset, **in_buffer;
+    unsigned int in_size, out_size;
+    char *out_buffer, *in_p, *out_p;
+    iconv_t cd;
+    size_t result;
+    typedef unsigned int ucs4_t;
+
+    if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &in_charset, &out_charset, &in_buffer) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    convert_to_string_ex(in_charset);
+    convert_to_string_ex(out_charset);
+    convert_to_string_ex(in_buffer);
+
+    in_size  = Z_STRLEN_PP(in_buffer) * sizeof(char) + 1;
+    out_size = Z_STRLEN_PP(in_buffer) * sizeof(ucs4_t) + 1;
+
+    out_buffer = (char *) emalloc(out_size);
+
+    in_p = Z_STRVAL_PP(in_buffer);
+    out_p = out_buffer;
+
+    cd = iconv_open(Z_STRVAL_PP(out_charset), Z_STRVAL_PP(in_charset));
+
+    if (cd == (iconv_t)(-1)) {
+        php_error(E_WARNING, "iconv: cannot convert from `%s' to `%s'",
+                  Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset));
+        efree(out_buffer);
+        RETURN_FALSE;
+    }
+
+    result = iconv(cd, (const char **) &in_p, &in_size, (char **)
+                   &out_p, &out_size);
+
+    if (result == (size_t)(-1)) {
+        sprintf(out_buffer, "???") ;
+    }
+
+    iconv_close(cd);
+
+    RETVAL_STRING(out_buffer, 0);
+}
+#endif
 
 /*
  * Local variables:
