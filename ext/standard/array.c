@@ -3629,6 +3629,7 @@ PHP_FUNCTION(array_key_exists)
 {
 	zval **key,					/* key to check for */
 		 **array;				/* array to check in */
+	long   lvalue;
 
 	if (ZEND_NUM_ARGS() != 2 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &key, &array) == FAILURE) {
@@ -3642,11 +3643,14 @@ PHP_FUNCTION(array_key_exists)
 
 	switch (Z_TYPE_PP(key)) {
 		case IS_STRING:
-			if (zend_hash_exists(HASH_OF(*array), Z_STRVAL_PP(key), Z_STRLEN_PP(key)+1)) {
+			if (zend_is_numeric_key(*key, &lvalue)) {
+				if (zend_hash_index_exists(HASH_OF(*array), lvalue)) {
+					RETURN_TRUE;
+				}
+			} else if (zend_hash_exists(HASH_OF(*array), Z_STRVAL_PP(key), Z_STRLEN_PP(key)+1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
-
 		case IS_LONG:
 			if (zend_hash_index_exists(HASH_OF(*array), Z_LVAL_PP(key))) {
 				RETURN_TRUE;
