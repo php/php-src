@@ -444,7 +444,7 @@ void zend_register_default_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "exception", default_exception_functions);
+	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	default_exception_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	default_exception_ce->create_object = zend_default_exception_new; 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
