@@ -960,6 +960,8 @@ PHP_FUNCTION(ldap_get_entries)
 		add_assoc_string(tmp1, "dn", dn, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(dn);
+#else
+		free(dn);
 #endif
 
 		zend_hash_index_update(return_value->value.ht, num_entries, (void *) &tmp1, sizeof(pval *), NULL);
@@ -1194,6 +1196,8 @@ PHP_FUNCTION(ldap_get_dn)
 		RETVAL_STRING(text,1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(text);
+#else
+		free(text);
 #endif
 	} else {
 		RETURN_FALSE;
