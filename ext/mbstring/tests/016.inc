@@ -1,0 +1,90 @@
+<?php
+// TODO: Add more tests
+//$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
+ini_set('include_path','.');
+include_once('common.php');
+
+// SJIS string (BASE64 encoded)
+$sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
+// JIS string (BASE64 encoded)
+$jis = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==');
+// EUC-JP string
+$euc_jp = '日本語テキストです。01234５６７８９。';
+
+// Test with sigle "form encoding"
+// Note: For some reason it complains, results are differ. Not reserched.
+echo "== BASIC TEST ==\n";
+$s = $sjis;
+$s = mb_convert_encoding($s, 'EUC-JP', 'SJIS');
+print("EUC-JP: $s\n"); // EUC-JP
+
+$s = $jis;
+$s = mb_convert_encoding($s, 'EUC-JP', 'JIS');
+print("EUC-JP: $s\n"); // EUC-JP
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'SJIS', 'EUC-JP');
+print("SJIS: ".base64_encode($s)."\n"); // SJIS
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'JIS', 'EUC-JP');
+print("JIS: ".base64_encode($s)."\n"); // JIS
+
+
+
+// Using Encoding List Array 
+echo "== ARRAY ENCODING LIST ==\n";
+
+$a = array(0=>'UTF-8',1=>'EUC-JP', 2=>'SJIS', 3=>'JIS');
+
+$s = $jis;
+$s = mb_convert_encoding($s, 'EUC-JP', $a);
+print("EUC-JP: $s\n"); // EUC-JP
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'SJIS', $a);
+print("SJIS: ".base64_encode($s)."\n");  // SJIS
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'JIS', $a);
+print("JIS: ".base64_encode($s)."\n"); // JIS
+
+
+// Using Detect Order 
+echo "== DETECT ORDER ==\n";
+
+mb_detect_order('auto');
+
+
+$s = $jis;
+$s = mb_convert_encoding($s, 'EUC-JP');
+print("EUC-JP: $s\n"); // EUC-JP
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'SJIS');
+print("SJIS: ".base64_encode($s)."\n");  // SJIS
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'JIS');
+print("JIS: ".base64_encode($s)."\n"); // JIS
+
+
+// Invalid(?) Parameters
+echo "== INVALID PARAMETER ==\n";
+
+$s = mb_convert_encoding(1234, 'EUC-JP');
+print("INT: $s\n"); // EUC-JP
+
+$s = mb_convert_encoding('', 'EUC-JP');
+print("EUC-JP: $s\n");  // SJIS
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s, 'BAD');
+print("BAD: $s\n"); // BAD
+
+$s = $euc_jp;
+$s = mb_convert_encoding($s);
+print("MP: $s\n"); // Missing parameter
+
+
+?>
