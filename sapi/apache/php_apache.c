@@ -26,6 +26,14 @@
 #include <stddef.h>
 #endif
 
+#ifdef NETWARE
+#ifdef NEW_LIBC /* Works fine for both Winsock and Berkeley sockets */
+#include <netinet/in.h>
+#else
+#include <sys/socket.h>
+#endif
+#endif	/* NETWARE */
+
 #include "php.h"
 #include "ext/standard/head.h"
 #include "php_globals.h"
@@ -51,7 +59,7 @@ int php_apache_info_id;
 php_apache_info_struct php_apache_info;
 #endif
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)
 #include "zend.h"
 #include "ap_compat.h"
 #else
@@ -101,7 +109,7 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRML
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
+	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (void (*)(void *, void ***))php_apache_globals_ctor, NULL);	/* Type-casting done due to NetWare */
 #else
 	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
 #endif
@@ -133,6 +141,9 @@ zend_module_entry apache_module_entry = {
    Terminate apache process after this request */
 PHP_FUNCTION(apache_child_terminate)
 {
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 #ifndef MULTITHREAD
 	if (AP(terminate_child)) {
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
@@ -141,6 +152,9 @@ PHP_FUNCTION(apache_child_terminate)
 	}
 #else
 		php_error(E_WARNING, "apache_child_terminate() is not supported in this build");
+#endif
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
 #endif
 }
 /* }}} */
@@ -153,6 +167,9 @@ PHP_FUNCTION(apache_note)
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (arg_count<1 || arg_count>2 ||
 		zend_get_parameters_ex(arg_count, &arg_name, &arg_val) ==FAILURE ) {
 		WRONG_PARAM_COUNT;
@@ -166,6 +183,9 @@ PHP_FUNCTION(apache_note)
 		table_set(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val, (*arg_val)->value.str.val);
 	}
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	if (note_val) {
 		RETURN_STRING(note_val, 1);
 	} else {
@@ -180,7 +200,7 @@ PHP_MINFO_FUNCTION(apache)
 {
 	module *modp = NULL;
 	char output_buf[128];
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT)	/* This seems to be working for NetWare */
 	char name[64];
 	char modulenames[1024];
 	char *p;
@@ -192,6 +212,9 @@ PHP_MINFO_FUNCTION(apache)
 	extern gid_t group_id;
 	extern int max_requests_per_child;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	serv = ((request_rec *) SG(server_context))->server;
 
 
@@ -199,6 +222,10 @@ PHP_MINFO_FUNCTION(apache)
 
 #ifdef PHP_WIN32
 	php_info_print_table_row(1, "Apache for Windows 95/NT");
+	php_info_print_table_end();
+	php_info_print_table_start();
+#elif defined(NETWARE)
+	php_info_print_table_row(1, "Apache for NetWare");
 	php_info_print_table_end();
 	php_info_print_table_start();
 #else
@@ -216,7 +243,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Apache API Version", output_buf);
 	sprintf(output_buf, "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", output_buf);
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT)	/* This seems to be working for NetWare */
 	sprintf(output_buf, "%s(%d)/%d", user_name, (int)user_id, (int)group_id);
 	php_info_print_table_row(2, "User/Group", output_buf);
 	sprintf(output_buf, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests_per_child, serv->keep_alive ? "on":"off", serv->keep_alive_max);
@@ -224,7 +251,7 @@ PHP_MINFO_FUNCTION(apache)
 #endif
 	sprintf(output_buf, "Connection: %d - Keep-Alive: %d", serv->timeout, serv->keep_alive_timeout);
 	php_info_print_table_row(2, "Timeouts", output_buf);
-#if !defined(WIN32) && !defined(WINNT)
+#if !defined(WIN32) && !defined(WINNT)	/* This seems to be working for NetWare */
 	php_info_print_table_row(2, "Server Root", server_root);
 
 	strcpy(modulenames, "");
@@ -238,6 +265,7 @@ PHP_MINFO_FUNCTION(apache)
 			strcat(modulenames, ", ");
 		}
 	}
+	/* But here for NetWare, it seems to be showing all modules instead of just the loaded ones */
 	php_info_print_table_row(2, "Loaded Modules", modulenames);
 #endif
 
@@ -292,6 +320,9 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		php_info_print_table_end();
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -310,6 +341,9 @@ PHP_FUNCTION(virtual)
 	pval **filename;
 	request_rec *rr = NULL;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -318,12 +352,18 @@ PHP_FUNCTION(virtual)
 	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
 		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
 		php_error(E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		RETURN_FALSE;
 	}
 
@@ -333,9 +373,15 @@ PHP_FUNCTION(virtual)
 	if (run_sub_req(rr)) {
 		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		RETURN_FALSE;
 	} else {
 		if (rr) destroy_sub_req (rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		RETURN_TRUE;
 	}
 }
@@ -348,8 +394,14 @@ PHP_FUNCTION(getallheaders)
     array_header *env_arr;
     table_entry *tenv;
     int i;
-	
+
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
     if (array_init(return_value) == FAILURE) {
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		RETURN_FALSE;
     }
     env_arr = table_elts(((request_rec *) SG(server_context))->headers_in);
@@ -361,9 +413,15 @@ PHP_FUNCTION(getallheaders)
 			continue;
 		}
 		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+			ExitClib();
+#endif
 			RETURN_FALSE;
 		}
     }
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -384,7 +442,13 @@ PHP_FUNCTION(apache_setenv)
 		else break;
 	}
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	ap_table_setn(r->subprocess_env, ap_pstrndup(r->pool, var, var_len), ap_pstrndup(r->pool, val, val_len));
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -396,6 +460,9 @@ PHP_FUNCTION(apache_lookup_uri)
 	pval **filename;
 	request_rec *rr=NULL;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -458,6 +525,9 @@ PHP_FUNCTION(apache_lookup_uri)
 	}
 
 	destroy_sub_req(rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -471,6 +541,9 @@ PHP_FUNCTION(apache_exec_uri)
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -482,6 +555,9 @@ PHP_FUNCTION(apache_exec_uri)
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));
 	ap_destroy_sub_req(rr);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 #endif
 

@@ -27,6 +27,14 @@
 #include <stddef.h>
 #endif
 
+#ifdef NETWARE
+#ifdef NEW_LIBC /* Works fine for both Winsock and Berkeley sockets */
+#include <netinet/in.h>
+#else
+#include <sys/socket.h>
+#endif
+#endif	/* NETWARE */
+
 #include "php.h"
 
 #include "httpd.h"

@@ -33,6 +33,18 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#include <sys/timeval.h>
+#else
+#include "netware/time_nw.h"
+#endif
+/*#include "netware/signal_nw.h"*/
+/*#include "netware/env.h"*/    /* Temporary */
+/*#include <process.h>*/
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#endif
 #else
 #include "build-defs.h"
 #endif
@@ -362,6 +374,15 @@ int main(int argc, char *argv[])
 
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cli_sapi_module)==FAILURE) {
+#ifdef NETWARE
+		/*	Without the below two functions, it will leak memory!!
+			Don't know why they were not there in the first place.
+		*/
+		sapi_shutdown();
+#ifdef ZTS
+		tsrm_shutdown();
+#endif
+#endif
 		return FAILURE;
 	}
 
@@ -643,6 +664,13 @@ int main(int argc, char *argv[])
 	} zend_end_try();
 
 	php_module_shutdown(TSRMLS_C);
+
+#ifdef NETWARE
+		/*	Without the below function, it will leak memory!!
+			Don't know why it was not there in the first place.
+		*/
+		sapi_shutdown();
+#endif
 
 #ifdef ZTS
 	tsrm_shutdown();

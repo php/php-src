@@ -43,7 +43,11 @@
 #include "ap_mpm.h"
 
 #include "php_apache.h"
- 
+
+#ifdef NETWARE
+#undef shutdown /* To avoid Winsock confusion */
+#endif
+
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
