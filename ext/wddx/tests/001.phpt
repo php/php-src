@@ -1,5 +1,5 @@
 --TEST--
-wddz deserialization test
+wddx deserialization test
 --FILE--
 <?php
 	$path = dirname(__FILE__);
@@ -16,7 +16,7 @@ array(11) {
   ["aDateTime"]=>
   int(897600732)
   ["aDateTime2"]=>
-  string(19) "1930-06-12T04:32:12"
+  int(329607132)
   ["aDateTime3"]=>
   string(19) "2040-06-12T04:32:12"
   ["aBoolean"]=>
