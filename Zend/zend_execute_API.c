@@ -430,7 +430,8 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 				zendi_zval_copy_ctor(*value_ptr);
 			}
 			value_ptr->refcount = 1;
-			INIT_PZVAL(value_ptr);
+			value_ptr->EA.is_ref = 1;
+			value_ptr->EA.locks = 0;
 		}
 
 		*variable_ptr_ptr = value_ptr;
