@@ -56,6 +56,8 @@ static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(restore_error_handler);
+static ZEND_FUNCTION(set_exception_handler);
+static ZEND_FUNCTION(restore_exception_handler);
 static ZEND_FUNCTION(get_declared_classes);
 static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
@@ -108,6 +110,8 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FALIAS(user_error,		trigger_error,		NULL)
 	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(restore_error_handler,	NULL)
+	ZEND_FE(set_exception_handler,		NULL)
+	ZEND_FE(restore_exception_handler,	NULL)
 	ZEND_FE(get_declared_classes, NULL)
 	ZEND_FE(get_defined_functions, NULL)
 	ZEND_FE(get_defined_vars,	NULL)
@@ -958,6 +962,59 @@ ZEND_FUNCTION(restore_error_handler)
 /* }}} */
 
 
+/* {{{ proto string set_exception_handler(string exception_handler)
+   Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
+ZEND_FUNCTION(set_exception_handler)
+{
+	zval **exception_handler;
+	zend_bool had_orig_exception_handler=0;
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &exception_handler)==FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	convert_to_string_ex(exception_handler);
+	if (EG(user_exception_handler)) {
+		had_orig_exception_handler = 1;
+		*return_value = *EG(user_exception_handler);
+		zval_copy_ctor(return_value);
+		zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
+	}
+	ALLOC_ZVAL(EG(user_exception_handler));
+
+	if (Z_STRLEN_PP(exception_handler)==0) { /* unset user-defined handler */
+		FREE_ZVAL(EG(user_exception_handler));
+		EG(user_exception_handler) = NULL;
+		RETURN_TRUE;
+	}
+
+	*EG(user_exception_handler) = **exception_handler;
+	zval_copy_ctor(EG(user_exception_handler));
+
+	if (!had_orig_exception_handler) {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+
+/* {{{ proto void restore_exception_handler(void)
+   Restores the previously defined exception handler function */
+ZEND_FUNCTION(restore_exception_handler)
+{
+	if (EG(user_exception_handler)) {
+		zval_ptr_dtor(&EG(user_exception_handler));
+	}
+	if (zend_ptr_stack_num_elements(&EG(user_exception_handlers))==0) {
+		EG(user_exception_handler) = NULL;
+	} else {
+		EG(user_exception_handler) = zend_ptr_stack_pop(&EG(user_exception_handlers));
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *array = va_arg(args, zval *);
@@ -1199,7 +1256,6 @@ ZEND_FUNCTION(debug_backtrace)
 	char *function_name;
 	char *filename;
 	char *class_name;
-	zend_uint class_name_length;
 	zval *stack_frame;
 
 	ptr = EG(current_execute_data);
@@ -1217,7 +1273,6 @@ ZEND_FUNCTION(debug_backtrace)
 
 		if (ptr->object) {
 			class_name = Z_OBJCE(*ptr->object)->name;
-			class_name_length = Z_OBJCE(*ptr->object)->name_length;
 		}
 		if (ptr->function_state.function->common.scope) {
 			class_name = ptr->function_state.function->common.scope->name;
@@ -1294,3 +1349,11 @@ ZEND_FUNCTION(get_extension_funcs)
 	}
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

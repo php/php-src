@@ -45,6 +45,7 @@ BOOL WINAPI IsDebuggerPresent(VOID);
 
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
+ZEND_API zend_class_entry *zend_exception_class_def = NULL;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
@@ -271,6 +272,33 @@ static void register_standard_class(void)
 }
 
 
+static void register_exception_class(void)
+{
+	zend_exception_class_def = malloc(sizeof(zend_class_entry));
+	
+	zend_exception_class_def->type = ZEND_INTERNAL_CLASS;
+	zend_exception_class_def->name_length = sizeof("Exception") - 1;
+	zend_exception_class_def->name = zend_strndup("Exception", zend_exception_class_def->name_length);
+	zend_exception_class_def->parent = NULL;
+	zend_hash_init_ex(&zend_exception_class_def->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_exception_class_def->private_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_exception_class_def->protected_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_exception_class_def->static_members = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init_ex(zend_exception_class_def->static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_exception_class_def->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_exception_class_def->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_exception_class_def->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_exception_class_def->constructor = NULL;
+	zend_exception_class_def->destructor = NULL;
+	zend_exception_class_def->clone = NULL;
+	zend_exception_class_def->handle_function_call = NULL;
+	zend_exception_class_def->handle_property_get = NULL;
+	zend_exception_class_def->handle_property_set = NULL;
+	zend_exception_class_def->refcount = 1;
+	zend_hash_add(GLOBAL_CLASS_TABLE, "exception", sizeof("exception"), &zend_exception_class_def, sizeof(zend_class_entry *), NULL);
+}
+
+
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
 	/* default compile-time values */
@@ -331,6 +359,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	zend_init_rsrc_plist(TSRMLS_C);
 	EG(lambda_count)=0;
 	EG(user_error_handler) = NULL;
+	EG(user_exception_handler) = NULL;
 	EG(in_execution) = 0;
 }
 
@@ -443,8 +472,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
 
 	register_standard_class();
+	register_exception_class();
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
 	zend_init_rsrc_list_dtors();
+
 
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
 	zval_used_for_init.is_ref = 0;
@@ -471,6 +502,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_startup_constants();
 	zend_set_default_compile_time_values(TSRMLS_C);
 	EG(user_error_handler) = NULL;
+	EG(user_exception_handler) = NULL;
 #endif
 	zend_register_standard_constants(TSRMLS_C);
 
@@ -828,8 +860,32 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
+#if 1 /* support set_exception_handler() */
+				if (EG(user_exception_handler)) {
+					zval *orig_user_exception_handler;
+					zval ***params, *retval2;
+					params = (zval ***)emalloc(sizeof(zval **));
+					params[0] = &EG(exception);
+					orig_user_exception_handler = EG(user_exception_handler);
+					if (call_user_function_ex(CG(function_table), NULL, orig_user_exception_handler, &retval2, 1, params, 1, NULL TSRMLS_CC) == SUCCESS) {
+						zval_ptr_dtor(&retval2);
+					}
+                                        efree(params);
+					zval_ptr_dtor(&EG(exception));
+					EG(exception) = NULL;
+				} else {
+					zval_ptr_dtor(&EG(exception));
+					EG(exception) = NULL;
+					zend_error(E_ERROR, "Uncaught exception!");
+				}
+                                if (!retval) {
+                                    zval_ptr_dtor(EG(return_value_ptr_ptr));
+                                    local_retval = NULL;
+                                }
+#else
 				zval_ptr_dtor(&EG(exception));
 				zend_error(E_ERROR, "Uncaught exception!");
+#endif
 			} else if (!retval) {
 				zval_ptr_dtor(EG(return_value_ptr_ptr));
 				local_retval = NULL;

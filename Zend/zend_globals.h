@@ -193,7 +193,9 @@ struct _zend_executor_globals {
 	int garbage_ptr;
 
 	zval *user_error_handler;
+	zval *user_exception_handler;
 	zend_ptr_stack user_error_handlers;
+	zend_ptr_stack user_exception_handlers;
 
 	/* timeout support */
 	int timeout_seconds;
