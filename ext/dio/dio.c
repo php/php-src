@@ -94,7 +94,9 @@ PHP_MINIT_FUNCTION(dio)
 #ifdef O_SYNC
 	RDIOC(O_SYNC);
 #endif
+#ifdef O_ASYNC
 	RDIOC(O_ASYNC);
+#endif
 	RDIOC(O_NOCTTY);
 	RDIOC(S_IRWXU);
 	RDIOC(S_IRUSR);
