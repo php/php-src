@@ -18,7 +18,7 @@
 //
 // $Id$
 
-require_once "Cache/Error.php";
+require_once 'Cache/Error.php';
 
 /**
 * Cache is a base class for cache implementations.
@@ -39,18 +39,18 @@ require_once "Cache/Error.php";
 *
 * Usage example of the generic data cache:
 *
-* require_once("Cache.php");
+* require_once('Cache.php');
 *
-* $cache = new Cache("file", array("cache_dir" => "cache/") );
-* $id = $cache->generateID("testentry");
+* $cache = new Cache('file', array('cache_dir' => 'cache/') );
+* $id = $cache->generateID('testentry');
 *
 * if ($data = $cache->get($id)) {
 *    print "Cache hit.<br>Data: $data";
 *
 * } else {
-*   $data = "data of any kind";
+*   $data = 'data of any kind';
 *   $cache->save($id, $data);
-*   print "Cache miss.<br>";
+*   print 'Cache miss.<br>';
 * }
 *
 * WARNING: No File/DB-Table-Row locking is implemented yet,
@@ -124,7 +124,7 @@ class Cache extends PEAR {
     * @param    string  Name of storage container class
     * @param    array   Array with storage class dependend config options
     */
-    function Cache($storage_driver, $storage_options = "")
+    function Cache($storage_driver, $storage_options = '')
     {
         $this->PEAR();
         $storage_driver = strtolower($storage_driver);
@@ -171,9 +171,9 @@ class Cache extends PEAR {
     * @return   mixed   cached data or NULL on failure
     * @access   public
     */
-    function get($id, $group = "default") {
+    function get($id, $group = 'default') {
         if (!$this->caching)
-            return "";
+            return '';
 
         if ($this->isCached($id, $group) && !$this->isExpired($id, $group))
             return $this->load($id, $group);
@@ -191,11 +191,11 @@ class Cache extends PEAR {
     * @return   boolean
     * @access   public
     */
-    function save($id, $data, $expires = 0, $group = "default") {
+    function save($id, $data, $expires = 0, $group = 'default') {
         if (!$this->caching)
             return true;
 
-        return $this->extSave($id, $data, "",$expires, $group);
+        return $this->extSave($id, $data, '',$expires, $group);
     } // end func save
 
     /**
@@ -211,7 +211,7 @@ class Cache extends PEAR {
     * @access   public
     * @see      getUserdata()
     */
-    function extSave($id, $cachedata, $userdata, $expires = 0, $group = "default") {
+    function extSave($id, $cachedata, $userdata, $expires = 0, $group = 'default') {
         if (!$this->caching)
             return true;
 
@@ -226,9 +226,9 @@ class Cache extends PEAR {
     * @return   mixed   cached data or NULL on failure
     * @access   public
     */
-    function load($id, $group = "default") {
+    function load($id, $group = 'default') {
         if (!$this->caching)
-            return "";
+            return '';
 
         return $this->container->load($id, $group);
     } // end func load
@@ -242,9 +242,9 @@ class Cache extends PEAR {
     * @access   public
     * @see      extSave()
     */
-    function getUserdata($id, $group = "default") {
+    function getUserdata($id, $group = 'default') {
         if (!$this->caching)
-            return "";
+            return '';
 
         return $this->container->getUserdata($id, $group);
     } // end func getUserdata
@@ -257,7 +257,7 @@ class Cache extends PEAR {
     * @return   boolean
     * @access   public
     */
-    function delete($id, $group = "default") {
+    function delete($id, $group = 'default') {
         if (!$this->caching)
             return true;
 
@@ -270,7 +270,7 @@ class Cache extends PEAR {
     * @param    string  cache group, if empty all groups will be flashed
     * @return   integer number of removed datasets
     */
-    function flush($group = "") {
+    function flush($group = '') {
         if (!$this->caching)
             return true;
 
@@ -287,7 +287,7 @@ class Cache extends PEAR {
     * @return   boolean
     * @access   public
     */
-    function isCached($id, $group = "default") {
+    function isCached($id, $group = 'default') {
         if (!$this->caching)
             return false;
 
@@ -308,7 +308,7 @@ class Cache extends PEAR {
     * @return   boolean
     * @access   public
     */
-    function isExpired($id, $group = "default", $max_age = 0) {
+    function isExpired($id, $group = 'default', $max_age = 0) {
         if (!$this->caching)
             return true;
 
