@@ -276,7 +276,8 @@ PHP_FUNCTION(urlencode)
 	convert_to_string(arg);
 
 	if (!arg->value.str.len) {
-		RETURN_FALSE;
+		var_reset(return_value);
+		return;
 	}
 	str = _php3_urlencode(arg->value.str.val, arg->value.str.len);
 	RETVAL_STRING(str, 1);
@@ -297,7 +298,8 @@ PHP_FUNCTION(urldecode)
 	convert_to_string(arg);
 
 	if (!arg->value.str.len) {
-		RETURN_FALSE;
+		var_reset(return_value);
+		return;
 	}
 	len = _php3_urldecode(arg->value.str.val, arg->value.str.len);
 
