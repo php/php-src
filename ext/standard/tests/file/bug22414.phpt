@@ -5,10 +5,6 @@ Bug #22414: passthru() does not read data correctly
 	if (ini_get("safe_mode")) {
 		die('skip this test cannot be run under safe-mode');
 	}
-	$cat_path = @shell_exec("which cat");
-	if (empty($cat_path)) {
-		die('skip cat binary needed for this test is not avaliable');	
-	}
 ?>
 --POST--
 --GET--
@@ -25,7 +21,8 @@ Bug #22414: passthru() does not read data correctly
 	/* Binary Data Test */
 	@unlink($pwd . '/passthru_test');
 	
-	$cmd = $php . ' -r \' passthru("cat ' . $php . '"); \' > ' . $pwd . '/passthru_test';
+	$cmd = "sapi/cli/php -r \\\" readfile(@getenv(TEST_PHP_EXECUTABLE)); \\\"";
+	$cmd = $php . ' -r \' passthru("'.$cmd.'"); \' > ' . $pwd . '/passthru_test';
 	exec($cmd);
 	
 	if (md5_file($php) == md5_file($pwd . '/passthru_test')) {
