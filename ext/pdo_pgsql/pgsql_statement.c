@@ -221,7 +221,6 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 
 			case PDO_PARAM_INT:
 				intval = atol(*ptr);
- 				printf ("Here %d %s\n", intval, *ptr);
 				*ptr = &intval;
 				*len = sizeof(long);
 				break;
