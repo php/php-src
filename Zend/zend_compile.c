@@ -191,7 +191,10 @@ void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2
 		FOLD_CASE(ZEND_BOOL_XOR, boolean_xor_function)
 		case ZEND_BW_NOT:
 			bitwise_not_function(&result->u.constant, &op1->u.constant TSRMLS_CC);
-			break;
+			return;
+		default:
+			zend_error(E_COMPILE_ERROR, "Unknown binary op opcode %d", op);
+			return;
 	}
 
 	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant TSRMLS_CC);
