@@ -1983,7 +1983,7 @@ PHP_FUNCTION(ini_get)
 
 	convert_to_string_ex(varname);
 
-	str = php_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
+	str = zend_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
 
 	if (!str) {
 		RETURN_FALSE;
@@ -2080,7 +2080,7 @@ PHP_FUNCTION(ini_set)
 	convert_to_string_ex(varname);
 	convert_to_string_ex(new_value);
 
-	old_value = php_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
+	old_value = zend_ini_string(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, 0);
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
