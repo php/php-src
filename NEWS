@@ -16,6 +16,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #26446 (domxml_open_file() returns an empty error-Array). (Rob)
 - Fixed bug #26440 (MFH missing context options). (Ilia)
 - Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
+- Fixed bug #26391 (parse_url() destroys strings that contain a character 
+  in range of \x80-\xff)). (Moriyoshi)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
 - Fixed bug #26384 (crash in domxslt->process()). (Christian)
