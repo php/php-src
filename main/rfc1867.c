@@ -7,6 +7,9 @@ SAPI_POST_READER_FUNC(rfc1867_post_reader)
 	char input_buffer[FILE_UPLOAD_INPUT_BUFFER_SIZE];
 	uint read_bytes;
 
+	sapi_module.sapi_error(E_COMPILE_ERROR, "File upload is not yet supported");
+	return;
+
 	boundary = strstr(content_type_dup, "boundary");
 	if (!boundary || !(boundary=strchr(boundary, '='))) {
 		sapi_module.sapi_error(E_COMPILE_ERROR, "Missing boundary in multipart/form-data POST data");

@@ -74,6 +74,12 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 }
 
 
+SAPI_API void sapi_shutdown()
+{
+	zend_hash_destroy(&known_post_content_types);
+}
+
+
 static void sapi_free_header(sapi_header_struct *sapi_header)
 {
 	efree(sapi_header->header);
@@ -167,6 +173,9 @@ SAPI_API void sapi_activate(SLS_D)
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
+			if (!SG(request_info).content_type) {
+				sapi_module.sapi_error(E_COMPILE_ERROR, "No content-type in POST request");
+			}
 			sapi_read_post_data(SLS_C);
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
