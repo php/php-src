@@ -362,8 +362,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	unsigned int	default_port;
 	char			*default_host;
 	char			*default_user;
-	char			*default_pw;
 	char			*default_socket;
+    char            *default_pw;
+	int				reconnect;
 	long			error_no;
 	char			*error_msg;
 	int				report_mode;
