@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Made ldap_add(), ldap_modify(), ldap_mod_add(), ldap_mod_replace()
+- binary-safe. Original patch: Terrence Miao <terrence_miao@email.com> (Jani)
+- CGI aka. command line version has now an option '-l' for syntax check
+  without execution (Hartmut)
+- Fixed bug in ldap_get_values_len() which makes it NULL-safe. (Jani)
+- Bug-report and fix submitted by Michel Alexeline <alexel@dr15.cnrs.fr>
 - Make ext_skel create a Makefile.in set up to handle shared extension
   support automatically (Rasmus)
 - Fix php_realpath not to die on non-existing files (needed for touch()) (Stas and china@thewrittenword.com)
