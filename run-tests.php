@@ -247,7 +247,7 @@ Synopsis:
 Options:
     -l <file>   Read the testfiles to be executed from <file>. After the test 
                 has finished all failed tests are written to the same <file>. 
-                If the list is empty and now further test is specified then
+                If the list is empty and no further test is specified then
                 all tests are executed.
 
     -r <file>   Read the testfiles to be executed from <file>.
@@ -641,7 +641,7 @@ TEST $file
 
 	// Load the sections of the test file.
 	$section_text = array(
-		'TEST'   => '(unnamed test)',
+		'TEST'   => '',
 		'SKIPIF' => '',
 		'GET'    => '',
 		'ARGS'   => '',
@@ -649,7 +649,17 @@ TEST $file
 
 	$fp = @fopen($file, "r") or error("Cannot open test file: $file");
 
-	$section = '';
+	if (!feof($fp)) {
+		$line = fgets($fp);
+	} else {
+		echo "BORK empty test [$file]\n";
+		return 'BORKED';
+	}
+	if (!ereg('^--TEST--',$line,$r)) {
+		echo "BORK tests must start with --TEST-- [$file]\n";
+		return 'BORKED';
+	}
+	$section = 'TEST';
 	while (!feof($fp)) {
 		$line = fgets($fp);
 
@@ -662,6 +672,14 @@ TEST $file
 		
 		// Add to the section text.
 		$section_text[$section] .= $line;
+	}
+	if (!@count($section_text['FILE'])) {
+		echo "BORK missing section --FILE-- [$file]\n";
+		return 'BORKED';
+	}
+	if (!(@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX']))) {
+		echo "BORK missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]\n";
+		return 'BORKED';
 	}
 	fclose($fp);
 
@@ -868,7 +886,7 @@ COMMAND $cmd
 	if ($warn) {
 		echo "WARN $tested$info\n";
 	} else {
-		echo "FAIL $tested\n";
+		echo "FAIL $tested$info\n";
 	}
 
 	$PHP_FAILED_TESTS[] = array(
@@ -933,7 +951,7 @@ function generate_diff($wanted,$wanted_re,$output)
 		$r = explode("\n", $wanted_re);
 		for($idx = 0; $idx < min(count($o),count($r)); $idx++) {
 			if (preg_match('/^'.$r[$idx].'$/s', $o[$idx])) {
-				$w[$idx] = $o[$idx];  
+				$w[$idx] = $o[$idx];
 			}
 		}
 	}
@@ -945,6 +963,8 @@ function generate_diff($wanted,$wanted_re,$output)
 	foreach($o1 as $idx => $val) $o2[sprintf("%03d>",$idx)] = sprintf("%03d+ ", $idx+1).$val;
 	$diff = array_merge($w2, $o2);
 	ksort($diff);
+	$r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
+	$diff = generate_array_diff($r,$o,!is_null($wanted_re),$w);
 	return implode("\r\n", $diff);
 }
 
@@ -987,7 +1007,7 @@ function compute_summary()
 	$n_total = count($test_results);
 	$n_total += $ignored_by_ext;
 	
-	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
+	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0, 'BORKED'=>0);
 	foreach ($test_results as $v) {
 		$sum_results[$v]++;
 	}
@@ -1014,7 +1034,12 @@ Exts tested     : " . sprintf("%4d",$exts_tested) . "
 ";
 	}
 	$summary .= "
-Number of tests : " . sprintf("%4d",$n_total) . "
+Number of tests : " . sprintf("%4d",$n_total);
+	if ($sum_results['BORKED']) {
+	$summary .= "
+Tests borked    : " . sprintf("%4d (%2.1f%%)",$sum_results['BORKED'],$percent_results['BORKED']);
+	}
+	$summary .= "
 Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
 Tests warned    : " . sprintf("%4d (%2.1f%%)",$sum_results['WARNED'],$percent_results['WARNED']) . "
 Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
