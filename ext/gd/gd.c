@@ -371,13 +371,15 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 
 #endif
 
+#define FLIPWORD(a) (((a & 0xff000000) >> 24) | ((a & 0x00ff0000) >> 8) | ((a & 0x0000ff00) << 8) | ((a & 0x000000ff) << 24))
+
 /* {{{ proto int imageloadfont(string filename)
    Load a new font */
 PHP_FUNCTION(imageloadfont) 
 {
 	zval **file;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
-	int ind, body_size, n=0, b;
+	int ind, body_size, n=0, b, i, body_size_check;
 	gdFontPtr font;
 	FILE *fp;
 	int issock=0, socketd=0;
@@ -425,7 +427,23 @@ PHP_FUNCTION(imageloadfont)
 		}
 		RETURN_FALSE;
 	}
+	i = ftell(fp);
+	fseek(fp, 0, SEEK_END);
+	body_size_check = ftell(fp) - hdr_size;
+	fseek(fp, i, SEEK_SET);
 	body_size = font->w * font->h * font->nchars;
+	if (body_size != body_size_check) {
+		font->w = FLIPWORD(font->w);
+		font->h = FLIPWORD(font->h);
+		font->nchars = FLIPWORD(font->nchars);
+		body_size = font->w * font->h * font->nchars;
+	}
+	if (body_size != body_size_check) {
+		php_error(E_WARNING, "ImageFontLoad: error reading font");
+		efree(font);
+		RETURN_FALSE;
+	}
+
 	font->data = emalloc(body_size);
 	b = 0;
 	while (b < body_size && (n = fread(&font->data[b], 1, body_size - b, fp)))
