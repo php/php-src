@@ -118,7 +118,7 @@ foreach ($keys as $key) {
 }
 
 
-// 
+//
 
 print "done\n";
 
@@ -220,7 +220,7 @@ string(9) "directory"
 master_server: name of the main PEAR server
 
 #9 testing: getKeys
-bin_dir data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state test_dir umask username verbose
+bin_dir cache_dir cache_ttl data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state test_dir umask username verbose
 
 #10 testing: definedBy
 string(7) "default"
@@ -237,6 +237,8 @@ bool(false)
 
 #12 testing: getGroup
 bin_dir: File Locations
+cache_dir: File Locations (Advanced)
+cache_ttl: Advanced
 data_dir: File Locations (Advanced)
 doc_dir: File Locations
 ext_dir: File Locations
@@ -254,24 +256,26 @@ verbose: Advanced
 Advanced, File Locations, File Locations (Advanced), Internet Access, Maintainers
 
 #14 testing: getGroupKeys
-Advanced: preferred_state, umask, verbose
+Advanced: cache_ttl, preferred_state, umask, verbose
 File Locations: bin_dir, doc_dir, ext_dir, php_dir
-File Locations (Advanced): data_dir, test_dir
+File Locations (Advanced): cache_dir, data_dir, test_dir
 Internet Access: http_proxy, master_server
 Maintainers: password, username
 
 #15 testing: getPrompt
 bin_dir: PEAR executables directory
+cache_dir: PEAR Installer cache directory
+cache_ttl: Cache TimeToLive
 data_dir: PEAR data directory
 doc_dir: PEAR documentation directory
 ext_dir: PHP extension directory
 http_proxy: HTTP Proxy Server Address
 master_server: PEAR server
-password: PEAR password (for package maintainers)
+password: PEAR password (for maintainers)
 php_dir: PEAR directory
 preferred_state: Preferred Package State
 test_dir: PEAR test directory
 umask: Unix file mask
-username: PEAR username (for package maintainers)
+username: PEAR username (for maintainers)
 verbose: Debug Log Level
 done
