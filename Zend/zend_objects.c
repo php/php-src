@@ -46,7 +46,9 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 		zend_hash_destroy(&symbol_table);
 		zval_ptr_dtor(&obj);
 		zval_ptr_dtor(&destructor_func_name);
-		zval_ptr_dtor(&retval_ptr);
+		if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
 	}
 }
 
