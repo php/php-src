@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "php_virtual_cwd.h"
+
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
@@ -20,7 +22,7 @@
 #endif
 
 #ifdef PHP_WIN32
-typedef unsigned int uint;
+typedef unsigned int int;
 #define strtok_r(a,b,c) strtok((a),(b))
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
@@ -31,7 +33,7 @@ typedef unsigned int uint;
 
 #define COPY_WHEN_ABSOLUTE 2
 	
-static int php_check_dots(const char *element, uint n) 
+static int php_check_dots(const char *element, int n) 
 {
 	while (n-- > 0) if (element[n] != '.') break;
 
@@ -80,13 +82,6 @@ static int php_check_dots(const char *element, uint n)
 #define IS_DIR_OK(state) (php_is_dir_ok(state) == 0)
 #endif
 	
-typedef struct _cwd_state {
-	char *cwd;
-	uint cwd_length;
-} cwd_state;
-
-typedef int (*verify_path_func)(const cwd_state *);
-
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
@@ -107,9 +102,18 @@ static int php_is_file_ok(const cwd_state *state)
 	return (1);
 }
 
-
-char *virtual_getcwd_ex(cwd_state *state, uint *length)
+void virtual_cwd_init()
 {
+	/* Initialize the true global cwd */
+}
+
+char *virtual_getcwd_ex(int *length)
+{
+	cwd_state *state;
+	CWDLS_FETCH();
+
+	state = &CWDG(cwd);
+
 	if (state->cwd_length == 0) {
 		char *retval;
 
@@ -141,11 +145,10 @@ char *virtual_getcwd_ex(cwd_state *state, uint *length)
 /* Same semantics as UNIX getcwd() */
 char *virtual_getcwd(char *buf, size_t size)
 {
-	cwd_state state; /* Needs to be a ZTS var such as PG(), just included it so that this will compile */
-	uint length;
+	int length;
 	char *cwd;
 
-	cwd = virtual_getcwd_ex(&state, &length);
+	cwd = virtual_getcwd_ex(&length);
 
 	if (buf == NULL) {
 		return cwd;
@@ -164,13 +167,13 @@ char *virtual_getcwd(char *buf, size_t size)
 /* returns 0 for ok, 1 for error */
 int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 {
-	uint path_length = strlen(path);
+	int path_length = strlen(path);
 	char *ptr = path;
 	char *tok = NULL;
-	uint ptr_length;
+	int ptr_length;
 	cwd_state *old_state;
 	int ret = 0;
-	uint copy_amount = -1;
+	int copy_amount = -1;
 
 	if (path_length == 0) 
 		return (0);
@@ -237,37 +240,46 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 		*state = *old_state;
 
 		ret = 1;
-	} else
+	} else {
 		free(old_state->cwd);
+	}
 	
 	free(old_state);
 	
 	return (ret);
 }
 
-int virtual_chdir(cwd_state *state, char *path)
+int virtual_chdir(char *path)
 {
-	return virtual_file_ex(state, path, NULL); /* Use NULL right now instead of php_is_dir_ok */
+	CWDLS_FETCH();
+
+	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok);
 }
 
-int virtual_filepath(cwd_state *state, char *path, char **filepath)
+int virtual_filepath(char *path, char **filepath)
 {
-	cwd_state new_state = *state;
+	cwd_state new_state;
 	int retval;
+	CWDLS_FETCH();
 
-	new_state.cwd = strdup(state->cwd);
+	new_state = CWDG(cwd);
+	new_state.cwd = strdup(CWDG(cwd).cwd);
+
 	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
 	*filepath = new_state.cwd;
 	return retval;
 }
 
-FILE *virtual_fopen(cwd_state *state, char *path, const char *mode)
+FILE *virtual_fopen(char *path, const char *mode)
 {
-	cwd_state new_state = *state;
+	cwd_state new_state;
 	FILE *f;
 	int retval;
+	CWDLS_FETCH();
 
-	new_state.cwd = strdup(state->cwd);
+	new_state = CWDG(cwd);
+	new_state.cwd = strdup(CWDG(cwd).cwd);
+
 	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
 
 	if (retval) {
@@ -278,10 +290,12 @@ FILE *virtual_fopen(cwd_state *state, char *path, const char *mode)
 	return f;
 }
 
+#if 0
+
 main(void)
 {
 	cwd_state state;
-	uint length;
+	int length;
 
 #ifndef PHP_WIN32
 	state.cwd = malloc(PATH_MAX + 1);
@@ -315,3 +329,5 @@ main(void)
 
 	return 0;
 }
+
+#endif
