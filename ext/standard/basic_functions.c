@@ -1338,7 +1338,7 @@ PHP_FUNCTION(ini_set)
 
 	old_value = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
 
-	if (php_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER)==FAILURE) {
+	if (php_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if (old_value) {
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(ini_restore)
 
 	convert_to_string_ex(varname);
 
-	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len);
+	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len, PHP_INI_STAGE_RUNTIME);
 }
 
 

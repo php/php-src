@@ -27,7 +27,7 @@
 
 typedef struct _php_ini_entry php_ini_entry;
 
-#define PHP_INI_MH(name) int name(php_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3)
+#define PHP_INI_MH(name) int name(php_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
 #define PHP_INI_DISP(name) void name(php_ini_entry *ini_entry, int type)
 
 struct _php_ini_entry {
@@ -57,9 +57,9 @@ int php_ini_rshutdown(void);
 
 PHPAPI int php_register_ini_entries(php_ini_entry *ini_entry, int module_number);
 PHPAPI void php_unregister_ini_entries(int module_number);
-PHPAPI void php_ini_refresh_caches(void);
-PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type);
-PHPAPI int php_restore_ini_entry(char *name, uint name_length);
+PHPAPI void php_ini_refresh_caches(int stage);
+PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
+PHPAPI int php_restore_ini_entry(char *name, uint name_length, int stage);
 PHPAPI void display_ini_entries(zend_module_entry *module);
 
 PHPAPI long php_ini_long(char *name, uint name_length, int orig);
@@ -146,5 +146,11 @@ PHPAPI PHP_INI_MH(OnUpdateStringUnempty);
 
 #define PHP_INI_DISPLAY_ORIG	1
 #define PHP_INI_DISPLAY_ACTIVE	2
+
+#define PHP_INI_STAGE_STARTUP		(1<<0)
+#define PHP_INI_STAGE_SHUTDOWN		(1<<1)
+#define PHP_INI_STAGE_ACTIVATE		(1<<2)
+#define PHP_INI_STAGE_DEACTIVATE	(1<<3)
+#define PHP_INI_STAGE_RUNTIME		(1<<4)
 
 #endif /* _PHP_INI_H */

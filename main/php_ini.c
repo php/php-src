@@ -41,11 +41,11 @@ static int php_remove_ini_entries(php_ini_entry *ini_entry, int *module_number)
 }
 
 
-static int php_restore_ini_entry_cb(php_ini_entry *ini_entry)
+static int php_restore_ini_entry_cb(php_ini_entry *ini_entry, int stage)
 {
 	if (ini_entry->modified) {
 		if (ini_entry->on_modify) {
-			ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3);
+			ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage);
 		}
 		efree(ini_entry->value);
 		ini_entry->value = ini_entry->orig_value;
@@ -78,7 +78,7 @@ int php_ini_mshutdown()
 
 int php_ini_rshutdown()
 {
-	zend_hash_apply(&known_directives, (int (*)(void *)) php_restore_ini_entry_cb);
+	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_restore_ini_entry_cb, (void *) PHP_INI_STAGE_DEACTIVATE);
 	return SUCCESS;
 }
 
@@ -99,17 +99,17 @@ PHPAPI int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 			return FAILURE;
 		}
 		if (hashed_ini_entry->on_modify) {
-			hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3);
+			hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, PHP_INI_STAGE_STARTUP);
 		}
 		if ((default_value=cfg_get_entry(p->name, p->name_length))) {
 			if (!hashed_ini_entry->on_modify
-				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3)==SUCCESS) {
+				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, PHP_INI_STAGE_STARTUP)==SUCCESS) {
 				hashed_ini_entry->value = default_value->value.str.val;
 				hashed_ini_entry->value_length = default_value->value.str.len;
 			}
 		} else {
 			if (hashed_ini_entry->on_modify) {
-				hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3);
+				hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, PHP_INI_STAGE_STARTUP);
 			}
 		}
 		hashed_ini_entry->modified = 0;
@@ -125,22 +125,22 @@ PHPAPI void php_unregister_ini_entries(int module_number)
 }
 
 
-static int php_ini_refresh_cache(php_ini_entry *p)
+static int php_ini_refresh_cache(php_ini_entry *p, int stage)
 {
 	if (p->on_modify) {
-		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3);
+		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage);
 	}
 	return 0;
 }
 
 
-PHPAPI void php_ini_refresh_caches()
+PHPAPI void php_ini_refresh_caches(int stage)
 {
-	zend_hash_apply(&known_directives, (int (*)(void *)) php_ini_refresh_cache);
+	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_ini_refresh_cache, (void *) stage);
 }
 
 
-PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
+PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage)
 {
 	php_ini_entry *ini_entry;
 	char *duplicate;
@@ -156,7 +156,7 @@ PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, ui
 	duplicate = estrndup(new_value, new_value_length);
 	
 	if (!ini_entry->on_modify
-		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3)==SUCCESS) {
+		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage)==SUCCESS) {
 		if (!ini_entry->modified) {
 			ini_entry->orig_value = ini_entry->value;
 			ini_entry->orig_value_length = ini_entry->value_length;
@@ -174,7 +174,7 @@ PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, ui
 }
 
 
-PHPAPI int php_restore_ini_entry(char *name, uint name_length)
+PHPAPI int php_restore_ini_entry(char *name, uint name_length, int stage)
 {
 	php_ini_entry *ini_entry;
 
@@ -182,7 +182,7 @@ PHPAPI int php_restore_ini_entry(char *name, uint name_length)
 		return FAILURE;
 	}
 
-	php_restore_ini_entry_cb(ini_entry);
+	php_restore_ini_entry_cb(ini_entry, stage);
 	return SUCCESS;
 }
 
