@@ -1,3 +1,159 @@
+2003-12-18  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Nuke C++ comment
+
+    * ZendEngine2/zend_execute.c:
+      - Revert patch 1.566
+
+2003-12-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/tests/array/array_sum.phpt:
+      test case for array_sum
+
+2003-12-18  Stig Bakken  <ssb@trd.overture.com>
+
+    * pear/scripts/pearcmd.php:
+      - PHP 4 fix for the E_STRICT check
+
+2003-12-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_026.phpt
+      ext/sqlite/tests/sqlite_oo_028.phpt:
+      Added sqlite_fetch_column_types() function.
+
+2003-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/php_qdbm.h:
+      Add this file too
+
+    * NEWS
+      ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_qdbm.c
+      ext/dba/tests/dba_qdbm.phpt:
+      dded qdbm handler (http://qdbm.sourceforge.net).
+
+    * ext/dba/dba.c
+      ext/dba/dba_flatfile.c
+      ext/dba/php_dba.h
+      ext/dba/libinifile/inifile.c:
+      Centralize ability to drop APPEND flag. This probably fixes some ini file
+      issues.
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_db4.phpt
+      ext/dba/tests/dba_dbm.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/dba_inifile.phpt
+      ext/dba/tests/dba_ndbm.phpt:
+      Improve dba tests: check in both modes external and database locking.
+
+    * NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      Fixed bug #24837 Incorrect behaviour of PPP using foreach.
+
+2003-12-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      "a"
+
+2003-12-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Downloader.php:
+      fix #449: XML_SVG and VFS fail to install properly using PEAR command
+      fix #455: PEAR_Downloader does not set $ui
+
+    * pear/scripts/pearcmd.php:
+      remove retarded use of numbers (REALLY bad idea) for error handling, add
+      check for E_STRICT and ignore all of those errors
+
+2003-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/016.phpt:
+      Update tests to see where they fail now exactly
+
+2003-12-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/017.phpt
+      ext/simplexml/tests/018.phpt:
+      two new methods were added
+        $node->count($subnode_name) - returns count of subnodes with specified
+      name
+        $node->attributes() - returns array of attributes
+
+2003-12-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/winutil.c:
+      make it totally safe again
+
+    * main/php_network.h:
+      Counteract brain-death in Apache headers
+      (they #define strtoul to something that will break compilation,
+      and it successfully breaks the win32 IPv6 headers)
+
+    * ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fix use of the CorRuntimeHost; once it has been stopped for a process, it
+      cannot be restarted, so we keep it alive for the duration of the process,
+      and instead close down the application domain in
+      request shutdown.
+
+    * NEWS:
+      add news about tidy
+
+    * win32/winutil.c:
+      make sure this is initialized to NULL as we don't check the return
+      value of the FormatMessage function; we could end up using a stale
+      pointer.
+
+2003-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * win32/winutil.c:
+      Leak for b3 and find a better solution until RC1
+
+2003-12-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/bug26639.phpt:
+      MFH(r-1.206): Fixed bug #26639 (mb_convert_variables() clutters variables
+      beyond the references)
+
+    * ext/mbstring/tests/bug26639.phpt:
+      
+      Fix bug #26639 (mb_convert_variables() clutters variables beyond the
+      references)
+
+    * ext/mbstring/mbstring.c:
+      Fix bug #26639 (mb_convert_variables() clutters variables beyond the
+      references)
+
+2003-12-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/gd/gd.c:
+      Fix remaining gd build issue
+
+2003-12-18  John Coggeshall  <john@coggeshall.org>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Adding the tidy.default_config and tidy.clean_output options to the .ini
+      files
+
 2003-12-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/gd/libgd/gdft.c:
