@@ -1,3 +1,22 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2002 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
 #include <stdlib.h>
 #include "zend_mm.h"
 
@@ -223,98 +242,3 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 	zend_mm_free(heap, p);
 	return ptr;
 }
-
-/* Debug functions & Test */
-#if 0
-
-int zend_mm_num_blocks()
-{
-	zend_mm_block *mm_block=free_list;
-	int i=0;
-
-	while (mm_block) {
-		i++;
-		mm_block = mm_block->next_free_block;
-	}
-	return i;
-}
-
-
-static void zend_mm_display_blocks(char *str)
-{
-#if 0
-	int i=0;
-	zend_mm_block *mm_block;
-	zend_mm_block *end_block=NULL;
-
-	printf("%s:  free_list -> ", str);
-	for (mm_block=free_list; mm_block; mm_block=mm_block->next_free_block) {
-		// printf("0x%0.8X -> ", mm_block);
-		printf("%d -> ", mm_block->size);
-		end_block = mm_block;
-	}
-	printf("NULL\n");
-
-	printf("%s:  ", str);
-	for (mm_block=end_block; mm_block; mm_block=mm_block->prev_free_block) {
-		printf("0x%0.8X -> ", mm_block);
-	}
-	printf("NULL\n");
-#endif
-}
-
-
-#define NUM_CHUNKS	5
-#define CHUNK_SIZE	1048576
-#define ALLOCS		100
-
-int main()
-{
-	void *chunks[NUM_CHUNKS];
-	size_t chunk_sizes[NUM_CHUNKS];
-	int i, j;
-	void *p[ALLOCS];
-	size_t allocated_sizes[ALLOCS];
-	int num_blocks=0;
-	int size_allocated;
-
-	srand(time(NULL));
-	for (i=0; i<NUM_CHUNKS; i++) {
-		chunks[i] = malloc(CHUNK_SIZE);
-		chunk_sizes[i] = CHUNK_SIZE;
-	}
-
-	zend_mm_startup(chunks, chunk_sizes, NUM_CHUNKS);
-	
-	memset(p, 0, sizeof(p));
-
-	for (j=0; j<1000; j++) {
-		size_allocated = 0;
-		for (i=0; i<ALLOCS; i++) {
-			allocated_sizes[i] = 1+(int) (128000.0*rand()/(RAND_MAX+1.0));
-
-			p[i] = zend_mm_alloc(allocated_sizes[i]);
-			if (p[i]) {
-				num_blocks++;
-				size_allocated += allocated_sizes[i];
-//				printf("%d) %d bytes - 0x%0.8X\n", i, allocated_sizes[i], p[i]);
-			}
-		}
-		printf("Managed to allocate %d bytes in %d blocks\n", size_allocated, num_blocks);
-		zend_mm_num_blocks("After allocating");
-		while (num_blocks>0) {
-			i = rand()%ALLOCS;
-			if (p[i]) {
-//				printf("Freeing block %d: %d bytes - 0x%0.8X\n", i, allocated_sizes[i], p[i]);
-				zend_mm_free(p[i]);
-				p[i] = NULL;
-				num_blocks--;
-			}
-		}
-		zend_mm_num_blocks("After freeing");
-	}
-
-	return 0;
-}
-
-#endif
