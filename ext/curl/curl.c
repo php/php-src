@@ -391,7 +391,9 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 	switch (t->method) {
 	case PHP_CURL_DIRECT:
-		length = fread(data, size, nmemb, t->fp);
+		if (t->fp) {
+			length = fread(data, size, nmemb, t->fp);
+		}
 		break;
 	case PHP_CURL_USER: {
 		zval *argv[3];
