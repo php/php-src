@@ -442,21 +442,13 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	char *scratch;
 	unsigned char *tmp;
 
-	char tmp_line[513];
-	char location[513];
-	int chptr = 0;
+	char tmp_line[512];
+	char location[512];
+	char hdr_line[8192];
 	char *tpath, *ttpath;
 	int body = 0;
 	int reqok = 0;
-	int lineone = 1;
 	int i;
-	char buf[2];
-
-	char oldch1 = 0;
-	char oldch2 = 0;
-	char oldch3 = 0;
-	char oldch4 = 0;
-	char oldch5 = 0;
 
 	FILE *fp = NULL;
 	struct sockaddr_in server;
@@ -509,20 +501,22 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 #endif
 #endif							/*win32 */
 
+		strcpy(hdr_line, "GET ");
 		/* tell remote http which file to get */
-		SOCK_WRITE("GET ", *socketd);
 		if (resource->path != NULL) {
-			SOCK_WRITE(resource->path, *socketd);
+			strncat(hdr_line, resource->path, sizeof(hdr_line));
 		} else {
-			SOCK_WRITE("/", *socketd);
+			strncat(hdr_line, "/", sizeof(hdr_line));
 		}
 
 		/* append the query string, if any */
 		if (resource->query != NULL) {
-			SOCK_WRITE("?", *socketd);
-			SOCK_WRITE(resource->query, *socketd);
+			strncat(hdr_line, "?", sizeof(hdr_line));
+			strncat(hdr_line, resource->query, sizeof(hdr_line));
 		}
-		SOCK_WRITE(" HTTP/1.0\n", *socketd);
+		strncat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line));
+		hdr_line[sizeof(hdr_line)-1] = '\0';
+		SOCK_WRITE(hdr_line, *socketd);
 
 		/* send authorization header if we have user/pass */
 		if (resource->user != NULL && resource->pass != NULL) {
@@ -536,77 +530,74 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			strcat(scratch, resource->pass);
 			tmp = _php3_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
 
-			SOCK_WRITE("Authorization: Basic ", *socketd);
+			strcpy(hdr_line, "Authorization: Basic ");
 			/* output "user:pass" as base64-encoded string */
-			SOCK_WRITE((char *)tmp, *socketd);
-			SOCK_WRITE("\n", *socketd);
+			strncat(hdr_line, (char *)tmp, sizeof(hdr_line));
+			strncat(hdr_line, "\r\n", sizeof(hdr_line));
+			hdr_line[sizeof(hdr_line)-1] = '\0';
+			SOCK_WRITE(hdr_line, *socketd);
 			efree(scratch);
 			efree(tmp);
 		}
 		/* if the user has configured who they are, send a From: line */
 		if (cfg_get_string("from", &scratch) == SUCCESS) {
-			SOCK_WRITE("From: ", *socketd);
-			SOCK_WRITE(scratch, *socketd);
-			SOCK_WRITE("\n", *socketd);
+			strcpy(hdr_line, "From: ");
+			strncat(hdr_line, scratch, sizeof(hdr_line));
+			strncat(hdr_line, "\r\n", sizeof(hdr_line));
+			hdr_line[sizeof(hdr_line)-1] = '\0';
+			SOCK_WRITE(hdr_line, *socketd);
+
 		}
 		/* send a Host: header so name-based virtual hosts work */
-		SOCK_WRITE("Host: ", *socketd);
-		SOCK_WRITE(resource->host, *socketd);
-		if(resource->port!=80) {
-			sprintf(tmp_line,"%i",resource->port);
-			SOCK_WRITE(":", *socketd);
-			SOCK_WRITE(tmp_line, *socketd);
+		strcpy(hdr_line, "Host: ");
+		strncat(hdr_line, resource->host, sizeof(hdr_line));
+		if (resource->port != 80) {
+			sprintf(tmp_line, "%i", resource->port);
+			strncat(hdr_line, ":", sizeof(hdr_line));
+			strncat(hdr_line, tmp_line, sizeof(hdr_line));
 		}
-		SOCK_WRITE("\n", *socketd);
+		strncat(hdr_line, "\r\n", sizeof(hdr_line));
+		hdr_line[sizeof(hdr_line)-1] = '\0';
+		SOCK_WRITE(hdr_line, *socketd);
 
-		/* identify ourselves */
-		SOCK_WRITE("User-Agent: PHP/", *socketd);
-		SOCK_WRITE(PHP_VERSION, *socketd);
-		SOCK_WRITE("\n", *socketd);
+		/* identify ourselves and end the headers */
+		strcpy(hdr_line, "User-Agent: PHP/");
+		strncat(hdr_line, PHP_VERSION, sizeof(hdr_line));
+		strncat(hdr_line, "\r\n\r\n", sizeof(hdr_line));
+		hdr_line[sizeof(hdr_line)-1] = '\0';
+		SOCK_WRITE(hdr_line, *socketd);
 
-		/* end the headers */
-		SOCK_WRITE("\n", *socketd);
-
-		/* Read past http header */
 		body = 0;
 		location[0] = '\0';
-		while (!body && !SOCK_FEOF(*socketd)) {
-			if ((buf[0] = SOCK_FGETC(*socketd)) == EOF) {
-				SOCK_FCLOSE(*socketd);
-				*socketd = 0;
-				free_url(resource);
-				return NULL;
-			}
-			oldch5 = oldch4;
-			oldch4 = oldch3;
-			oldch3 = oldch2;
-			oldch2 = oldch1;
-			oldch1 = *buf;
-
-			tmp_line[chptr++] = *buf;
-			if (*buf == 10 || *buf == 13) {
-				tmp_line[chptr] = '\0';
-				chptr = 0;
-				if (!strncasecmp(tmp_line, "Location: ", 10)) {
-					tpath = tmp_line + 10;
-					strcpy(location, tpath);
+		if (!SOCK_FEOF(*socketd)) {
+			/* get response header */
+			if (SOCK_FGETS(tmp_line, sizeof(tmp_line), *socketd) != NULL) {
+				if (!strncmp(tmp_line + 8, " 200 ", 4)) {
+					reqok = 1;
 				}
 			}
-			if (lineone && (*buf == 10 || *buf == 13)) {
-				lineone = 0;
-			}
-			if (lineone && oldch5 == ' ' && oldch4 == '2' && oldch3 == '0' &&
-				oldch2 == '0' && oldch1 == ' ') {
-				reqok = 1;
-			}
-			if (oldch4 == 13 && oldch3 == 10 && oldch2 == 13 && oldch1 == 10) {
-				body = 1;
-			}
-			if (oldch2 == 10 && oldch1 == 10) {
-				body = 1;
-			}
-			if (oldch2 == 13 && oldch1 == 13) {
-				body = 1;
+		}
+		/* Read past HTTP headers */
+		while (!body && !SOCK_FEOF(*socketd)) {
+			if (SOCK_FGETS(tmp_line, sizeof(tmp_line), *socketd) != NULL) {
+				char *p = tmp_line;
+
+				tmp_line[sizeof(tmp_line)-1] = '\0';
+
+				while (*p) {
+					if (*p == '\n' || *p == '\r') {
+						*p = '\0';
+					}
+					p++;
+				}
+
+				if (!strncasecmp(tmp_line, "Location: ", 10)) {
+					strcpy(location, tmp_line + 10);
+				}
+
+				if (tmp_line[0] == '\0') {
+					body = 1;
+				}
 			}
 		}
 		if (!reqok) {
