@@ -56,8 +56,7 @@ PHP_INI_END()
 /*
  * functions in module
  */
-static function_entry satellite_functions[] = 
-{
+static function_entry satellite_functions[] = {
 	PHP_FE(satellite_load_idl,					NULL)
 	PHP_FE(satellite_get_repository_id, NULL)
 	PHP_FE(satellite_caught_exception, 	NULL)
