@@ -2913,7 +2913,7 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 	znode result;
 
 	ALLOC_ZVAL(tmp);
-	convert_to_string(&varname->u.constant);
+
 	if (static_assignment) {
 		*tmp = static_assignment->u.constant;
 	} else {
@@ -3227,8 +3227,6 @@ void zend_do_declare_begin(TSRMLS_D)
 
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 {
-	convert_to_string(&var->u.constant);
-
 	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
