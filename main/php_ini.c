@@ -189,9 +189,9 @@ long php_ini_long(char *name, uint name_length, int orig)
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->orig_value) {
-			return (long) atoi(ini_entry->orig_value);
-		} else {
-			return (long) atoi(ini_entry->value);
+			return strtol(ini_entry->orig_value, NULL, 0);
+		} else if (ini_entry->value) {
+			return strtol(ini_entry->value, NULL, 0);
 		}
 	}
 
@@ -206,7 +206,7 @@ double php_ini_double(char *name, uint name_length, int orig)
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->orig_value) {
 			return (double) strtod(ini_entry->orig_value, NULL);
-		} else {
+		} else if (ini_entry->value) {
 			return (double) strtod(ini_entry->value, NULL);
 		}
 	}
@@ -222,7 +222,7 @@ char *php_ini_string(char *name, uint name_length, int orig)
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->orig_value) {
 			return ini_entry->orig_value;
-		} else {
+		} else if (ini_entry->value) {
 			return ini_entry->value;
 		}
 	}
