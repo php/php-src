@@ -420,6 +420,14 @@ AC_DEFUN(PHP_BUILD_THREAD_SAFE,[
   fi
 ])
 
+AC_DEFUN(PHP_REQUIRE_CXX,[
+  if test -z "$php_cxx_done"; then
+    AC_PROG_CXX
+    AC_PROG_CXXCPP
+    php_cxx_done=yes
+  fi
+])
+
 dnl
 dnl PHP_BUILD_SHARED
 dnl
