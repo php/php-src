@@ -30,12 +30,17 @@ AC_ARG_WITH(xml,
       test -d /usr/include/xml && XML_INCLUDE="/usr/include/xml"
       test -d /usr/local/include/xml && XML_INCLUDE="/usr/local/include/xml"
       test -d /usr/include/xmltok && XML_INCLUDE="/usr/include/xmltok"
+      if test -n "$APXS" ; then
+        dir=`$APXS -q INCLUDEDIR`
+        test -d $dir/xml && XML_INCLUDE="$dir/xml"
+      else
       AC_CHECK_LIB(expat, main, XML_LIBS="-lexpat", 
 	AC_CHECK_LIB(xmltok, main,
 	  AC_CHECK_LIB(xmlparse, main, XML_LIBS="-lxmlparse -lxmltok", 
 	    AC_MSG_ERROR(No expat library found for the xml module),"-lxmltok"),
 	  AC_MSG_ERROR(No expart library found for the xml module))
       )
+      fi
     else
       XML_LIBS="-L$withval/lib -lexpat"
       if test -d $withval/include/xml; then
