@@ -62,16 +62,16 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				display_string_length = ini_entry->orig_value_length;
 				esc_html=1;
 			} else {
-				display_string = "<i>no value</i>";
-				display_string_length = sizeof("<i>no value</i>")-1;
+				display_string = (PG(html_errors))?"<i>no value</i>":"no value";
+				display_string_length = sizeof((PG(html_errors))?"<i>no value</i>":"no value")-1;
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
 			esc_html=1;
 		} else {
-			display_string = "<i>no value</i>";
-			display_string_length = sizeof("<i>no value</i>")-1;
+			display_string = (PG(html_errors))?"<i>no value</i>":"no value";
+			display_string_length = sizeof((PG(html_errors))?"<i>no value</i>":"no value")-1;
 		}
 		if(esc_html) {
 			php_html_puts(display_string, display_string_length TSRMLS_CC);
@@ -89,15 +89,23 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 	if (ini_entry->module_number != module_number) {
 		return 0;
 	}
-
-	PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-	PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
-	PHPWRITE(ini_entry->name, ini_entry->name_length-1);
-	PUTS("</b><br /></td><td align=\"center\">");
-	php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-	PUTS("</td><td align=\"center\">");
-	php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-	PUTS("</td></tr>\n");
+	if (PG(html_errors)) {
+		PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+		PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+		PHPWRITE(ini_entry->name, ini_entry->name_length-1);
+		PUTS("</b><br /></td><td align=\"center\">");
+		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+		PUTS("</td><td align=\"center\">");
+		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+		PUTS("</td></tr>\n");
+	} else {
+		PHPWRITE(ini_entry->name, ini_entry->name_length-1);
+		PUTS(" => ");
+		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+		PUTS(" => ");
+		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+		PUTS("\n");
+	}	
 	return 0;
 }
 /* }}} */
