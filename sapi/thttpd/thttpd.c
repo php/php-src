@@ -441,7 +441,7 @@ static void *worker_thread(void *dummy)
 
 		thread_atomic_dec(nr_free_threads);
 
-		thttpd_real_php_request(hc TSRMLS_CC TSRMLS_CC);
+		thttpd_real_php_request(hc TSRMLS_CC);
 		shutdown(hc->conn_fd, 0);
 		destroy_conn(hc);
 		free(hc);
@@ -480,7 +480,7 @@ static void remove_dead_conn(int fd)
 
 #endif
 
-static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC TSRMLS_DC)
+static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 {
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
