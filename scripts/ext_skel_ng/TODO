@@ -1,14 +1,20 @@
 - *more* input checking
+  - use of reserved names
+  - duplicate names
+  - needed attributes given 
+  - ...
+  - ...
+  - ...
 - config.m4 support for
   - header checks
   - ...
-- class implementation support
-- more documentation stuff
-  - classes
-  - requirements (see also confing.m4)  
+- class implementation and documentation support
 - protos
   - object type specification (as in resources)
-  - pass by reference
+	- default values (supported by DocBook?)
+  - code generation for 'pass by refecence'
+  - ? option for 'old style' parameter parsing code generation ?
+    (less readable but faster and more flexible)?
 - more licenses
   - GPL (with exception to allow linking against PHP)
   - QPL
@@ -16,4 +22,5 @@
   - Artistic
   - ...
   - dual/multiple licensing?
-- generate CREDITS and EXPERIMENTAL (for alpha, beta, gamma versions)
+- full support for stream wrappers and filters
+- DTD support for creating custom tests
