@@ -1219,7 +1219,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
 				if (PG(magic_quotes_runtime)) {
-					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &Z_STRLEN(result->data[result->cur_row][i]), 1 TSRMLS_CC);
+					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &data_len, 0 TSRMLS_CC);
 					should_copy = 0;
 				}
 				else
