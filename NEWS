@@ -1,5 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+22 July 2002, Version 4.2.2
+- Fixed a security problem in the file upload code, which allows remote parties
+  too crash the webserver child. On the sparc architecture this can be used to
+  run arbitrary code. (Stefan)
+- Fixed the build system for Solaris users. (Sascha)
+
 13 May 2002, Version 4.2.1
 - Added safe-mode checks to show_source(), parse_ini_file() and rmdir(). Also
   fixed security problems with safe_mode_include_dir directive. (Rasmus)
