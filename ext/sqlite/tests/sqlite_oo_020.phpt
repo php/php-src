@@ -41,11 +41,13 @@ while ($r->hasMore()) {
 	var_dump($r->current(SQLITE_NUM));
 	$r->next();
 }
+$r = null;
+$db = null;
 echo "DONE!\n";
 ?>
 --EXPECTF--
 Message: sqlite_factory() expects at least 1 parameter, 0 given
-File: %s/sqlite_oo_020.php
+File: %ssqlite_oo_020.php
 array(2) {
   [0]=>
   string(3) "one"

@@ -2,7 +2,7 @@
 COM: General variant tests
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("com_dotnet")) print "skip"; ?>
+if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
 --FILE--
 <?php // $Id$
 error_reporting(E_ALL);
@@ -30,8 +30,6 @@ foreach ($values as $t => $val) {
 		}
 	}
 }
-$a = new VARIANT('10.0', VT_DECIMAL);
-var_dump($a);
 
 echo "OK!";
 ?>

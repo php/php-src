@@ -24,7 +24,7 @@ foreach ($data as $str) {
 $res = sqlite_array_query("SELECT a from strings", $db, SQLITE_NUM);
 var_dump($res);
 
-sqlite_close($db);
+$db = null;
 
 echo "DONE!\n";
 ?>

@@ -1,5 +1,7 @@
 --TEST--
 Bug #24098 (pathinfo() crash)
+--SKIPIF--
+<?php if (DIRECTORY_SEPARATOR == '\\') die("skip directory separator won't match expected output"); ?>
 --FILE--
 <?php
 	var_dump(pathinfo("/dsds.asa"));

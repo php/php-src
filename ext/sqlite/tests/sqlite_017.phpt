@@ -22,8 +22,6 @@ foreach ($data as $item) {
 	}
 }
 
-sqlite_close($db);
-
 echo "OK!\n";
 
 ?>
