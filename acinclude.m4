@@ -401,7 +401,9 @@ dnl add a library to the link line
 dnl
 AC_DEFUN(AC_ADD_LIBRARY,[
   AC_PHP_ONCE(LIBRARY, $1, [
-    ifelse($#, 1, LIBS="-l$1 $LIBS", LIBS="$LIBS -l$1")
+    if test "$1" != "c"; then
+      ifelse($#, 1, LIBS="-l$1 $LIBS", LIBS="$LIBS -l$1")
+    fi
   ])
 ])
 
