@@ -243,7 +243,7 @@ PHP_MINIT_FUNCTION(browscap)
 			return FAILURE;
 		}
 
-		cfgin = PHP_FOPEN(browscap, "r");
+		cfgin = V_FOPEN(browscap, "r");
 		if (!cfgin) {
 			php_error(E_WARNING,"Cannot open '%s' for reading", browscap);
 			return FAILURE;
@@ -272,7 +272,7 @@ PHP_FUNCTION(parse_ini_file)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
-	cfgin = PHP_FOPEN((*filename)->value.str.val, "r");
+	cfgin = V_FOPEN((*filename)->value.str.val, "r");
 	if (!cfgin) {
 		php_error(E_WARNING,"Cannot open '%s' for reading", (*filename)->value.str.val);
 		return;
