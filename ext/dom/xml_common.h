@@ -25,6 +25,7 @@
 typedef struct _dom_ref_obj {
 	void *ptr;
 	int   refcount;
+	int stricterror;
 } dom_ref_obj;
 
 typedef struct _node_ptr {
@@ -87,13 +88,13 @@ PHP_DOM_EXPORT(void) dom_write_property(zval *object, zval *member, zval *value 
 
 #define DOM_RET_OBJ(zval, obj, ret, domobject) \
 	if (NULL == (zval = php_dom_create_object(obj, ret, zval, return_value, domobject TSRMLS_CC))) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
+		php_error(E_WARNING, "Cannot create required DOM object"); \
 		RETURN_FALSE; \
 	}
 
 #define DOM_GET_THIS(zval) \
 	if (NULL == (zval = getThis())) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing"); \
+		php_error(E_WARNING, "Underlying object missing"); \
 		RETURN_FALSE; \
 	}
 
