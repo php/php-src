@@ -889,7 +889,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 static ZEND_FUNCTION(display_disabled_function)
 {
-	zend_error(E_WARNING, "%s() has been disabled for security reasons.", get_active_function_name());
+	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name());
 }
 
 
