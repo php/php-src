@@ -190,8 +190,10 @@ static int zend_ub_body_write_no_header(const char *str, uint str_length)
 
 static int zend_ub_body_write(const char *str, uint str_length)
 {
+#ifdef TRANS_SID
 	char *newstr = NULL;
 	uint new_length;
+#endif
 	int result = 0;
 	SLS_FETCH();
 
@@ -199,19 +201,23 @@ static int zend_ub_body_write(const char *str, uint str_length)
 		zend_bailout();
 	}
 	if (php3_header()) {
+#ifdef TRANS_SID
 		session_adapt_uris(str, str_length, &newstr, &new_length);
 		
 		if (newstr) {
 			str = newstr;
 			str_length = new_length;
 		}
-		
+#endif
+
 		zend_body_write = zend_ub_body_write_no_header;
 		result = zend_header_write(str, str_length);
-		
+
+#ifdef TRANS_SID
 		if (newstr) {
 			free(newstr);
 		}
+#endif
 	}
 
 	return result;
