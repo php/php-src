@@ -369,8 +369,13 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(f->r->headers_out, "Expires");
 	apr_table_unset(f->r->headers_out, "ETag");
 	apr_table_unset(f->r->headers_in, "Connection");
-	auth = apr_table_get(f->r->headers_in, "Authorization");
-	php_handle_auth_data(auth TSRMLS_CC);
+	if (!PG(safe_mode)) {
+		auth = apr_table_get(f->r->headers_in, "Authorization");
+		php_handle_auth_data(auth TSRMLS_CC);
+	} else {
+		SG(request_info).auth_user = NULL;
+		SG(request_info).auth_password = NULL;
+	}
 
 	php_request_startup(TSRMLS_C);
 }
