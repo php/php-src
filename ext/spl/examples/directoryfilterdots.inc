@@ -12,12 +12,12 @@
 /** @ingroup Examples
  * @brief   A filtered DirectoryIterator
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  * This Iteraotr takes a pathname from which it creates a DirectoryIterator
  * and makes it recursive. Further more it filters the entries '.' and '..'.
  */
-class DirectoryFilterDots extends FilterIterator implements RecursiveIterator
+class DirectoryFilterDots extends RecursiveFilterIterator
 {
 	/** Construct from a path.
 	 * @param $path directory to iterate
@@ -33,21 +33,7 @@ class DirectoryFilterDots extends FilterIterator implements RecursiveIterator
 	{
 		return !$this->getInnerIterator()->isDot();
 	}
-	
-	/** @return whether the current entry is a directory
-	 */
-	function hasChildren()
-	{
-		return $this->getInnerIterator()->hasChildren();
-	}
 
-	/** @return the current subdirectory as a new DirectoryFilterDots instance.
-	 */
-	function getChildren()
-	{
-		return new DirectoryFilterDots($this->getInnerIterator()->getPathname());
-	}
-	
 	/** @return the current entries path name
 	 */
 	function key()
