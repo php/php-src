@@ -127,7 +127,7 @@ static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $"
 #define IEEE_LITTLE_ENDIAN
 #endif
 
-#if defined(__sparc__) || defined(__ppc__)
+#if defined(__sparc__) || defined(__ppc__) || defined(__sun__)
 #ifndef __linux__
 #define u_int32_t uint32_t
 #endif
