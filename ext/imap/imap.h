@@ -63,7 +63,7 @@ PHP_FUNCTION(imap_status);
 PHP_FUNCTION(imap_bodystruct);
 PHP_FUNCTION(imap_fetch_overview);
 PHP_FUNCTION(imap_mail_compose);
-
+PHP_FUNCTION(imap_search);
 #else
 #define imap_module_ptr NULL
 #endif /* HAVE_IMAP */
