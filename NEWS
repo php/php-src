@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- Made array_intersect and array_diff not alter order (Stig Venaas)
 - Made ldap_connect() accept URL in host parameter when using OpenLDAP
   2.x. To use SSL, use ldaps://host/ as URL. (Stig Venaas)
 - Made resource type names visible, e.g. var_dump() and
