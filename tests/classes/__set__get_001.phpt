@@ -46,7 +46,7 @@ $foo->z++;
 var_dump($foo);
         
 ?>
---EXPECT--
+--EXPECTF--
 Setting [a] to 100
 OK!
 Getting [a]
@@ -57,7 +57,7 @@ Getting [z]
 Nothing!
 Setting [z] to 1
 Not OK!
-object(setter)(2) {
+object(setter)#%d (2) {
   ["n"]=>
   int(1)
   ["x"]=>
