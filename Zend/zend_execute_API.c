@@ -225,6 +225,9 @@ ZEND_API inline int i_zend_is_true(zval *op)
 	int result;
 
 	switch (op->type) {
+		case IS_UNSET:
+			result = 0;
+			break;
 		case IS_LONG:
 		case IS_BOOL:
 		case IS_RESOURCE:

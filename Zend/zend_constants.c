@@ -118,22 +118,21 @@ void zend_register_standard_constants(ELS_D)
 		c.flags = CONST_PERSISTENT;
 		c.module_number = 0;
 
-		c.name = zend_strndup("TRUE",4);
-		c.name_len = 5;
+		c.name = zend_strndup(ZEND_STRL("TRUE"));
+		c.name_len = sizeof("TRUE");
 		c.value.value.lval = 1;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c ELS_CC);
 		
-		c.name = zend_strndup("FALSE",5);
-		c.name_len = 6;
+		c.name = zend_strndup(ZEND_STRL("FALSE"));
+		c.name_len = sizeof("FALSE");
 		c.value.value.lval = 0;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c ELS_CC);
 
-		c.name = zend_strndup("SQL_NULL",8);
-		c.name_len = 9;
-		c.value.value.lval = 0;
-		c.value.type = IS_LONG;
+		c.name = zend_strndup(ZEND_STRL("NULL"));
+		c.name_len = sizeof("NULL");
+		c.value.type = IS_UNSET;
 		zend_register_constant(&c ELS_CC);
 	}
 }

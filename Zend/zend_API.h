@@ -98,6 +98,7 @@ ZEND_API int object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
 ZEND_API int add_assoc_long(zval *arg, char *key, long n);
+ZEND_API int add_assoc_unset(zval *arg, char *key);
 ZEND_API int add_assoc_bool(zval *arg, char *key, int b);
 ZEND_API int add_assoc_resource(zval *arg, char *key, int r);
 ZEND_API int add_assoc_double(zval *arg, char *key, double d);
@@ -105,6 +106,7 @@ ZEND_API int add_assoc_string(zval *arg, char *key, char *str, int duplicate);
 ZEND_API int add_assoc_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
 
 ZEND_API int add_index_long(zval *arg, uint idx, long n);
+ZEND_API int add_index_unset(zval *arg, uint idx);
 ZEND_API int add_index_bool(zval *arg, uint idx, int b);
 ZEND_API int add_index_resource(zval *arg, uint idx, int r);
 ZEND_API int add_index_double(zval *arg, uint idx, double d);
@@ -112,6 +114,7 @@ ZEND_API int add_index_string(zval *arg, uint idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, uint idx, char *str, uint length, int duplicate);
 
 ZEND_API int add_next_index_long(zval *arg, long n);
+ZEND_API int add_next_index_unset(zval *arg);
 ZEND_API int add_next_index_bool(zval *arg, int b);
 ZEND_API int add_next_index_resource(zval *arg, int r);
 ZEND_API int add_next_index_double(zval *arg, double d);
@@ -146,6 +149,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define RETVAL_BOOL(b) {				\
 		return_value->type = IS_BOOL;	\
 		return_value->value.lval = b;	\
+	}
+#define RETVAL_UNSET() {				\
+		return_value->type = IS_UNSET;	\
 	}
 #define RETVAL_LONG(l) {				\
 		return_value->type = IS_LONG;	\
@@ -183,6 +189,11 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return;							\
 	}
 
+#define RETURN_UNSET() {				\
+		return_value->type = IS_UNSET;	\
+		return;							\
+	}
+
 #define RETURN_LONG(l) {				\
 		return_value->type = IS_LONG;	\
 		return_value->value.lval = l;	\
@@ -210,10 +221,6 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define RETURN_FALSE  { RETVAL_FALSE; return; }
 #define RETURN_TRUE   { RETVAL_TRUE; return; }
-
-#define RETURN_SQLNULL RETURN_LONG(0)
-#define RETVAL_SQLNULL RETVAL_LONG(0)
-#define IS_SQLNULL(p) ((p)->type==IS_LONG && ((p)->value.lval == 0))
 
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\

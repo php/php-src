@@ -67,7 +67,7 @@
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
-%right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST '@'
+%right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
 %nonassoc T_NEW
 %token T_EXIT
@@ -294,12 +294,10 @@ non_empty_parameter_list:
 	|	'&' T_VARIABLE					{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE CLS_CC); }
 	|	T_CONST T_VARIABLE 			{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	T_VARIABLE '=' static_scalar		{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$3, BYREF_NONE CLS_CC); }
-	|	T_VARIABLE '=' T_UNSET 		{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' T_VARIABLE 						{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' '&' T_VARIABLE					{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE CLS_CC); }
 	|	non_empty_parameter_list ',' T_CONST T_VARIABLE			{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' T_VARIABLE '=' static_scalar 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$5, BYREF_NONE CLS_CC); }
-	|	non_empty_parameter_list ',' T_VARIABLE '=' T_UNSET	 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 ;
 
 
@@ -444,6 +442,7 @@ expr_without_variable:
 	|	T_ARRAY_CAST expr 	{ do_cast(&$$, &$2, IS_ARRAY CLS_CC); }
 	|	T_OBJECT_CAST expr 	{ do_cast(&$$, &$2, IS_OBJECT CLS_CC); }
 	|	T_BOOL_CAST expr	{ do_cast(&$$, &$2, IS_BOOL CLS_CC); }
+	|	T_UNSET_CAST expr	{ do_cast(&$$, &$2, IS_UNSET CLS_CC); }
 	|	T_EXIT exit_expr	{ do_exit(&$$, &$2 CLS_CC); }
 	|	'@' { do_begin_silence(&$1 CLS_CC); } expr { do_end_silence(&$1 CLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
