@@ -1,3 +1,34 @@
+1999-10-27  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php3_string.h
+      ext/standard/string.c: (PHP str_repeat) New function.
+
+1999-10-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.h
+      ext/standard/output.c
+      ext/standard/php_output.h
+      Makefile.am
+      ext/standard/Makefile.am
+      ext/standard/basic_functions.c
+      internal_functions.c.in
+      internal_functions_win32.c
+      output.c
+      output.h
+      php.h: moved output.c into ext/standart and made it thread-safe.
+    moved output-buffering related functions from basic_functions to output.c
+    Win32 project need to be updated to reflect new position.
+
+    * ext/oci8/oci8.c:
+1999-10-27  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c: Forgot to remove function entry.
+
+1999-10-27  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-26  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/file.c: eliminated warinigs
