@@ -1,0 +1,11 @@
+# $Id$
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libcalendar.la
+LTLIBRARY_SOURCES = calendar.c dow.c french.c gregor.c jewish.c julian.c easter.c
+
+include $(topsrcdir)/build/ltlib.mk
