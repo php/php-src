@@ -1,5 +1,5 @@
 --TEST--
-mysqli_prepare_result
+mysqli_get_metadata
 --FILE--
 <?php
 	include "connect.inc";
@@ -16,7 +16,7 @@ mysqli_prepare_result
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_affected");
 	mysqli_execute($stmt);
-	$result = mysqli_prepare_result($stmt);
+	$result = mysqli_get_metadata($stmt);
 
 	$fields = mysqli_fetch_fields($result);
 	mysqli_free_result($result);

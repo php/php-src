@@ -1,5 +1,5 @@
 --TEST--
-mysqli_prepare_result
+mysqli_get_metadata
 --FILE--
 <?php
 	include "connect.inc";
@@ -26,7 +26,7 @@ mysqli_prepare_result
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_store_result");
 	mysqli_execute($stmt);
-	$result1 = mysqli_prepare_result($stmt);
+	$result1 = mysqli_get_metadata($stmt);
 	mysqli_stmt_store_result($stmt);
 
 	printf ("Rows: %d\n", mysqli_stmt_affected_rows($stmt));
