@@ -331,7 +331,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.buf, xparam->inputs.buflen,
 							flags,
 							xparam->inputs.addr,
-							xparam->inputs.addrlen);
+							xparam->inputs.addrlen TSRMLS_CC);
 					if (xparam->outputs.returncode == -1) {
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING,
