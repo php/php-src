@@ -64,7 +64,6 @@
 #include "php3_crypt.h"
 #include "head.h"
 #include "post.h"
-#include "mime.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 

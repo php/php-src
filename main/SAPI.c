@@ -31,7 +31,7 @@
 #endif
 
 
-static SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
+SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -130,7 +130,7 @@ static void sapi_read_post_data(SLS_D)
 }
 
 
-static SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
+SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	int read_bytes, total_read_bytes=0;
 	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;

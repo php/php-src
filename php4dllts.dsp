@@ -351,10 +351,6 @@ SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\mime.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\session\mod_files.c
 # End Source File
 # Begin Source File
@@ -472,10 +468,6 @@ SOURCE=.\ext\standard\html.h
 # Begin Source File
 
 SOURCE=.\ext\standard\md5.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\mime.h
 # End Source File
 # Begin Source File
 
