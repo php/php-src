@@ -88,6 +88,11 @@ PRIMARY MAINTAINER:  Jim Winstead <jimw@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           dbx
+PRIMARY MAINTAINER:  Marc Boeren <M.Boeren@guidance.nl>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           filepro
 MAINTENANCE:         Unknown
 STATUS:              Unknown
