@@ -18,6 +18,9 @@
 * -----------------
 *
 * $Log$
+* Revision 1.1  1999/07/19 18:58:44  andrey
+* Moving dlist stuff into core.
+*
 * Revision 1.2  1999/05/11 00:01:42  zeev
 * * Get Apache to work.  POST doesn't work yet.
 * * There are now -I directives for the absolute path of php4, php4/libzend and the builddir for
@@ -61,7 +64,7 @@
 #endif
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <signal.h>
 #include "dlist.h"
 
