@@ -1429,7 +1429,6 @@ PHP_FUNCTION(mb_parse_str)
    Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
 {
-/* 	pval **arg_string, **arg_status; */
 	char *arg_string;
 	size_t arg_string_len;
 	long arg_status;
