@@ -20,10 +20,13 @@ PHP_MINIT_FUNCTION(rpc);
 PHP_MSHUTDOWN_FUNCTION(rpc);
 PHP_MINFO_FUNCTION(rpc);
 
+ZEND_FUNCTION(rpc_load);
+ZEND_FUNCTION(rpc_call);
+ZEND_FUNCTION(rpc_set);
+ZEND_FUNCTION(rpc_get);
+
 ZEND_BEGIN_MODULE_GLOBALS(rpc)
-	zend_object_handle handle;
-	HashTable *instance;
-	HashTable *handlers;
+	int dummy;
 ZEND_END_MODULE_GLOBALS(rpc)
 
 #ifdef ZTS
@@ -31,5 +34,7 @@ ZEND_END_MODULE_GLOBALS(rpc)
 #else
 #define RPC_G(v) (rpc_globals.v)
 #endif
+	
+#define phpext_rpc_ptr &rpc_module_entry
 
 #endif	/* PHP_RPC_H */
