@@ -3131,7 +3131,7 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_INTERFACE) {
 			class_type = "interface";
 		} else {
-			class_type = "abstract_class";
+			class_type = "abstract class";
 		}
 		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
 	}
