@@ -28,7 +28,7 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "php_typedef_VARIANT.h"
+#include "php_VARIANT.h"
 #include "conversion.h"
 #include "ext/standard/info.h"
 
