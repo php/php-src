@@ -1,10 +1,21 @@
 --TEST--
 mysqli autocommit/commit/rollback 
+--SKIPIF--
+<?php	
+	include "connect.inc";
+	$link = mysqli_connect("localhost", $user, $passwd);
+	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
+	$row = mysqli_fetch_row($result);
+	mysqli_free_result($result);
+	mysqli_close($link);
+	
+	if ($row[1] == "NO") {
+		printf ("skip innodb support not installed.");
+	}
+?>
 --FILE--
 <?php
 	include "connect.inc";
-	
-	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect("localhost", $user, $passwd);
 
 	mysqli_select_db($link, "test");
@@ -17,7 +28,6 @@ mysqli autocommit/commit/rollback
 
 	mysqli_query($link, "INSERT INTO ac_01 VALUES (1, 'foobar')");
 	mysqli_autocommit($link, FALSE);
-
 	mysqli_query($link, "DELETE FROM ac_01");
 	mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')");
 
