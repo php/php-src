@@ -108,7 +108,7 @@ function parse_package_file($file)
 	$xp = xml_parser_create();
 	xml_set_element_handler($xp, "start_handler", "end_handler");
 	xml_set_character_data_handler($xp, "cdata_handler");
-	xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, true);
+	xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
 	
 	$fp = @fopen($file, "r");
 	if (!is_resource($fp)) {
@@ -128,9 +128,9 @@ function start_handler($xp, $elem, $attrs)
 	global $cdata, $in_file, $curelem, $curfile, $filerole;
 	global $baseinstalldir, $currinstalldir;
 	switch ($elem) {
-		case "FILE": {
+		case "file": {
 			$curfile = '';
-			$filerole = $attrs['ROLE'];
+			$filerole = $attrs['role'];
 			switch ($filerole) {
 				case "ext": {
 					$in_file = true;
@@ -143,21 +143,21 @@ function start_handler($xp, $elem, $attrs)
 			}
 			break;
 		}
-		case "DIR": {
+		case "dir": {
 			$cdir = $currinstalldir[sizeof($currinstalldir)-1];
 			$bdir = $baseinstalldir[sizeof($baseinstalldir)-1];
-			array_push($currinstalldir, "$cdir/{$attrs[NAME]}");
-			if (isset($attrs["BASEINSTALLDIR"])) {
-				array_push($baseinstalldir, "$bdir/{$attrs[BASEINSTALLDIR]}");
+			array_push($currinstalldir, "$cdir/{$attrs[name]}");
+			if (isset($attrs["baseinstalldir"])) {
+				array_push($baseinstalldir, "$bdir/{$attrs[baseinstalldir]}");
 			} else {
 				array_push($baseinstalldir, $bdir);
 			}
 			break;
 		}
-		case "INCLUDES":
-		case "LIBNAME":
-		case "LIBADD":
-		case "SOURCES": {
+		case "includes":
+		case "libname":
+		case "libadd":
+		case "sources": {
 			$curelem = $elem;
 			break;
 		}
@@ -172,19 +172,19 @@ function end_handler($xp, $elem)
 	global $in_file, $curlib, $curelem, $libdata, $cdata;
 	global $baseinstalldir, $currinstalldir;
 	switch ($elem) {
-		case "FILE": {
+		case "file": {
 			if ($in_file === true) {
-				$libname = trim($cdata['LIBNAME']);
+				$libname = trim($cdata['libname']);
 				$libdata[$libname] = array(
-					"sources" => trim($cdata['SOURCES']),
-					"includes" => trim($cdata['INCLUDES']),
-					"libadd" => trim($cdata['LIBADD']),
+					"sources" => trim($cdata['sources']),
+					"includes" => trim($cdata['includes']),
+					"libadd" => trim($cdata['libadd']),
 				);
 				$in_file = false;
 			}
 			break;
 		}
-		case "DIR": {
+		case "dir": {
 			array_pop($currinstalldir);
 			array_pop($baseinstalldir);
 			break;
@@ -199,14 +199,14 @@ function cdata_handler($xp, $data)
 {
 	global $curelem, $cdata, $curfile;
 	switch ($curelem) {
-		case "FILE": {
+		case "file": {
 			$curfile .= $data;
 			break;
 		}
-		case "INCLUDES":
-		case "LIBADD":
-		case "LIBNAME":
-		case "SOURCES": {
+		case "includes":
+		case "libadd":
+		case "libname":
+		case "sources": {
 			$cdata[$curelem] .= $data;
 			break;
 		}
