@@ -101,6 +101,7 @@
 #define	mbfl_pfree		free
 
 /* unicode table */
+extern const unsigned short cp1252_ucs_table[];
 extern const unsigned short iso8859_2_ucs_table[];
 extern const unsigned short iso8859_3_ucs_table[];
 extern const unsigned short iso8859_4_ucs_table[];
@@ -558,6 +559,17 @@ static mbfl_encoding mbfl_encoding_2022jp = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
 
+static const char *mbfl_encoding_cp1252_aliases[] = {"cp1252", NULL};
+
+static mbfl_encoding mbfl_encoding_cp1252 = {
+	mbfl_no_encoding_cp1252,
+	"Windows-1252",
+	"Windows-1252",
+	&mbfl_encoding_cp1252_aliases,
+	NULL,
+	MBFL_ENCTYPE_SBCS
+};
+
 static const char *mbfl_encoding_8859_1_aliases[] = {"ISO_8859-1", "latin1", NULL};
 
 static mbfl_encoding mbfl_encoding_8859_1 = {
@@ -736,6 +748,7 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_sjis_win,
 	&mbfl_encoding_jis,
 	&mbfl_encoding_2022jp,
+	&mbfl_encoding_cp1252,
 	&mbfl_encoding_8859_1,
 	&mbfl_encoding_8859_2,
 	&mbfl_encoding_8859_3,
@@ -800,6 +813,8 @@ static int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter);
 
+static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter);
+static int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_8859_2_wchar(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_8859_2(int c, mbfl_convert_filter *filter);
@@ -836,6 +851,7 @@ static int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_sjiswin(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_jis(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter);
 static int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
@@ -1323,6 +1339,23 @@ static struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
 	mbfl_filt_conv_wchar_sjiswin,
 	mbfl_filt_conv_common_flush };
 
+static struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
+	mbfl_no_encoding_cp1252,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_cp1252_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_cp1252 = {
+	mbfl_no_encoding_cp1252,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_cp1252,
+	mbfl_filt_conv_common_flush };
+
+
 static struct mbfl_convert_vtbl vtbl_8859_1_wchar = {
 	mbfl_no_encoding_8859_1,
 	mbfl_no_encoding_wchar,
@@ -1547,6 +1580,8 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_eucjpwin,
 	&vtbl_sjiswin_wchar,
 	&vtbl_wchar_sjiswin,
+	&vtbl_cp1252_wchar,
+	&vtbl_wchar_cp1252,
 	&vtbl_ascii_wchar,
 	&vtbl_wchar_ascii,
 	&vtbl_8859_1_wchar,
@@ -1678,6 +1713,12 @@ static struct mbfl_identify_vtbl vtbl_identify_2022jp = {
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022jp };
 
+static struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
+	mbfl_no_encoding_cp1252,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_cp1252 };
+
 static struct mbfl_identify_vtbl vtbl_identify_8859_1 = {
 	mbfl_no_encoding_8859_1,
 	mbfl_filt_ident_common_ctor,
@@ -1772,6 +1813,7 @@ static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_sjiswin,
 	&vtbl_identify_jis,
 	&vtbl_identify_2022jp,
+	&vtbl_identify_cp1252,
 	&vtbl_identify_8859_1,
 	&vtbl_identify_8859_2,
 	&vtbl_identify_8859_3,
@@ -4070,6 +4112,68 @@ mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
+/*
+ * wchar => cp1252
+ */
+static int
+mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
+{
+	int s, n;
+
+	if (c >= 0x100)	{
+		/* look it up from the cp1252 table */
+		s = -1;
+		n = 30;
+		while (n >= 0) {
+			if (c == cp1252_ucs_table[n]) {
+				s = 0x80 + n;
+				break;
+			}
+			n--;
+		}
+		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_8859_1)
+		{
+			s = c & MBFL_WCSPLANE_MASK;
+		}
+	}
+	else if (c >= 0 && c < 0x100) {
+		s = c;
+	}
+	if (s >= 0) {
+		CK((*filter->output_function)(s, filter->data));
+	} else {
+		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			CK(mbfl_filt_conv_illegal_output(c, filter));
+		}
+	}
+	return c;
+}
+
+/*
+ * cp1252 => wchar
+ */
+static int
+mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
+{
+	int s;
+
+	if (c >= 0x80 && c < 0xa0) {
+		s = cp1252_ucs_table[c - 0x80];
+		if (s <= 0) {
+			s = c;
+			s &= MBFL_WCSPLANE_MASK;
+			s |= MBFL_WCSPLANE_8859_1;
+		}
+	} else {
+		s = c;
+		s &= MBFL_WCSGROUP_MASK;
+		s |= MBFL_WCSGROUP_THROUGH;
+	}
+
+	CK((*filter->output_function)(s, filter->data));
+
+	return c;
+}
 
 /*
  * wchar => ISO-8859-1
@@ -5192,6 +5296,22 @@ retry:
 	}
 
 	return c;
+}
+
+/* We only distinguish the MS extensions to ISO-8859-1.
+ * Actually, this is pretty much a NO-OP, since the identification
+ * system doesn't allow us to discriminate between a positive match,
+ * a possible match and a definite non-match.
+ * The problem here is that cp1252 looks like SJIS for certain chars.
+ * */
+static int
+mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter)
+{
+	if (c >= 0x80 && c < 0xa0)
+		filter->flag = 0;
+	else
+		filter->flag = 1; /* not it */
+	return c;	
 }
 
 static int
@@ -8146,6 +8266,20 @@ mbfl_html_numeric_entity(
 /*
  * Unicode table
  */
+
+
+/* Windows CodePage 1252 - it's the same as iso-8859-1 but
+ * defines extra symbols in the range 0x80-0x9f.
+ * This table differs from the rest of the unicode tables below
+ * as it only covers this range, while the rest cover 0xa0 onwards */
+static const unsigned short cp1252_ucs_table[] = {
+ 0xfffe,0xfffe,0x201a,0x0192,0x201e,0x2026,0x2020,0x2021,
+ 0x02c6,0x2030,0x0160,0x2039,0x0152,0xfffe,0xfffe,0xfffe,
+ 0xfffe,0x2018,0x2019,0x201c,0x201d,0x2022,0x2013,0x02dc,
+ 0x2122,0x0161,0x203a,0x0153,0xfffe,0xfffe,0x0178
+};
+
+
 static const unsigned short iso8859_2_ucs_table[] = {
  0x00A0,0x0104,0x02D8,0x0141,0x00A4,0x013D,0x015A,0x00A7,
  0x00A8,0x0160,0x015E,0x0164,0x0179,0x00AD,0x017D,0x017B,
