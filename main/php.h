@@ -314,10 +314,10 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #include "output.h"
 #define PHPWRITE(str, str_len)		zend_body_write((str), (str_len))
 #define PUTS(str)					zend_body_write((str), strlen((str)))
-#define PUTC(c)						zend_body_write(&(c), 1), (c)
+#define PUTC(c)						zend_body_write(&(c), 1)
 #define PHPWRITE_H(str, str_len)	zend_header_write((str), (str_len))
 #define PUTS_H(str)					zend_header_write((str), strlen((str)))
-#define PUTC_H(c)					zend_header_write(&(c), 1), (c)
+#define PUTC_H(c)					zend_header_write(&(c), 1)
 
 
 #include "zend_operators.h"

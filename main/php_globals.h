@@ -44,24 +44,24 @@ extern ZEND_API php_core_globals core_globals;
 
 
 struct _php_core_globals {
-	long magic_quotes_gpc;
-	long magic_quotes_runtime;
-	long magic_quotes_sybase;
+	zend_bool magic_quotes_gpc;
+	zend_bool magic_quotes_runtime;
+	zend_bool magic_quotes_sybase;
 
-	long asp_tags;
-	long short_tags;
-	long output_buffering;
+	zend_bool asp_tags;
+	zend_bool short_tags;
+	zend_bool output_buffering;
 
-	long safe_mode;
-	long sql_safe_mode;
+	zend_bool safe_mode;
+	zend_bool sql_safe_mode;
 	char *safe_mode_exec_dir;
-	long enable_dl;
+	zend_bool enable_dl;
 
 	long memory_limit;
 
-	long track_errors;
-	long display_errors;
-	long log_errors;
+	zend_bool track_errors;
+	zend_bool display_errors;
+	zend_bool log_errors;
 	char *error_log;
 
 	char *doc_root;
@@ -79,9 +79,9 @@ struct _php_core_globals {
 	char *arg_separator;
 	char *gpc_order;
 
-	long track_vars;
+	zend_bool track_vars;
 
-	long y2k_compliance;
+	zend_bool y2k_compliance;
 
 	short connection_status;
 	short ignore_user_abort;
