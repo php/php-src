@@ -1,3 +1,61 @@
+2001-01-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/datetime.c:
+    - Changed 'Z' flag to date() to always return timezone offset with
+      negative sign if it's west of UTC. 
+
+2001-01-17  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/php_string.h
+      ext/standard/basic_functions.c:
+    Put these back where they belong.  They weren't necessary unless ZTS and
+    HAVE_LOCALECONV were both defined.
+
+2001-01-17  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * pear/HTML/Processor.php:
+     Add the HTML_Processor class which provides common functions for processing HTML.
+     
+
+2001-01-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/PHPDoc/prepend.php
+      pear/HTML/IT.php
+      pear/HTML/ITX.php: Move IT[x] to HTML/.
+
+2001-01-17  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c:
+    Fix (well it works) the error display with sablotron.
+
+2001-01-17  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Making parallel search allow different filter for each link
+
+2001-01-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix vpath builds on freebsd
+
+2001-01-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/sablot.c: Make sablot compile again. Typo?
+
+2001-01-17  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c
+      main/network.c: Kill a couple of warnings
+
+2001-01-17  Sean Bright  <elixer@erols.com>
+
+    * configure.in: Updated configure.in to look for strcoll()
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    Added string comparison function strcoll().  It uses the current locale to
+    do the comparisons.
+
 2001-01-16  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gd/gd.c: Fixed bug #8733
