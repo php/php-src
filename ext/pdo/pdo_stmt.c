@@ -169,6 +169,7 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value TSRMLS_DC)
 		Z_TYPE(stmt->lazy_object_ref) = IS_OBJECT;
 		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, NULL, pdo_row_free_storage, NULL TSRMLS_CC);
 		Z_OBJ_HT(stmt->lazy_object_ref) = &pdo_row_object_handlers;
+		stmt->refcount++;
 	}
 	Z_TYPE_P(return_value) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(return_value) = Z_OBJ_HANDLE(stmt->lazy_object_ref);
@@ -788,10 +789,8 @@ zend_object_handlers pdo_dbstmt_object_handlers = {
 	NULL
 };
 
-void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
+static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
-
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt TSRMLS_CC);
 	}
@@ -821,12 +820,16 @@ void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 	}
 	
 	zend_objects_store_del_ref(&stmt->database_object_handle TSRMLS_CC);
-/* XXX: Does not appear to be needed and causes problems according to valgrind
-	if (&stmt->lazy_object_ref) {
-		zend_objects_store_del_ref(&stmt->lazy_object_ref TSRMLS_CC);
-	}
-*/
 	efree(stmt);
+}
+
+void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
+
+	if (--stmt->refcount == 0) {
+		free_statement(stmt TSRMLS_CC);
+	}
 }
 
 zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
@@ -1010,7 +1013,11 @@ void pdo_row_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
 
-	/* nothing to do here */
+	ZVAL_NULL(&stmt->lazy_object_ref);
+	
+	if (--stmt->refcount == 0) {
+		free_statement(stmt TSRMLS_CC);
+	}
 }
 
 zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC)
