@@ -47,8 +47,8 @@ zend_module_entry pdo_sqlite_module_entry = {
 	pdo_sqlite_functions,
 	PHP_MINIT(pdo_sqlite),
 	PHP_MSHUTDOWN(pdo_sqlite),
-	PHP_RINIT(pdo_sqlite),
-	PHP_RSHUTDOWN(pdo_sqlite),
+	NULL,
+	NULL,
 	PHP_MINFO(pdo_sqlite),
 	PHP_PDO_SQLITE_MODULE_VERSION,
 	STANDARD_MODULE_PROPERTIES
@@ -62,38 +62,12 @@ ZEND_GET_MODULE(pdo_sqlite)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
-	/* If you have INI entries, uncomment these lines 
-	ZEND_INIT_MODULE_GLOBALS(pdo_sqlite, php_pdo_sqlite_init_globals, NULL);
-	REGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(pdo_sqlite)
-{
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(pdo_sqlite)
-{
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
 /* }}} */
 
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(pdo_sqlite)
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
+PHP_MSHUTDOWN_FUNCTION(pdo_sqlite)
 {
 	php_pdo_unregister_driver(&pdo_sqlite_driver);
 	return SUCCESS;
