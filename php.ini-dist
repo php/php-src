@@ -366,7 +366,7 @@ default_mimetype = "text/html"
 ; cgi.force_redirect configuration below
 doc_root =
 
-; The directory under which PHP opens the script using /~usernamem used only
+; The directory under which PHP opens the script using /~username used only
 ; if nonempty.
 user_dir =
 
