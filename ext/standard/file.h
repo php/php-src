@@ -49,6 +49,7 @@ PHP_FUNCTION(fgets);
 PHP_FUNCTION(fgetss);
 PHP_FUNCTION(fgetcsv);
 PHP_FUNCTION(fwrite);
+PHP_FUNCTION(fflush);
 PHP_FUNCTION(rewind);
 PHP_FUNCTION(ftell);
 PHP_FUNCTION(fseek);
