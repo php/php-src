@@ -549,12 +549,12 @@ static void php_session_initialize(TSRMLS_D)
 	char *val;
 	int vallen;
 	
-	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
+	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
 		php_error(E_ERROR, "Failed to initialize session module");
 		return;
 	}
 	php_session_track_init(TSRMLS_C);
-	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
+	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
 	}
@@ -586,10 +586,10 @@ static void php_session_save_current_state(TSRMLS_D)
 	if (PS(mod_data)) {
 		val = php_session_encode(&vallen TSRMLS_CC);
 		if (val) {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
+			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 			efree(val);
 		} else {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
+			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
 		}
 	}
 	
@@ -602,7 +602,7 @@ static void php_session_save_current_state(TSRMLS_D)
 	
 	
 	if (PS(mod_data))
-		PS(mod)->close(&PS(mod_data));
+		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 }
 
 static char *month_names[] = {
@@ -955,7 +955,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 		nrand = (int) (100.0*php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
-			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0
 			if (nrdels != -1)
 				php_error(E_NOTICE, "purged %d expired session objects\n", nrdels);
@@ -973,7 +973,7 @@ static zend_bool php_session_destroy(TSRMLS_D)
 		return FAILURE;
 	}
 
-	if (PS(mod)->destroy(&PS(mod_data), PS(id)) == FAILURE) {
+	if (PS(mod)->destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 		retval = FAILURE;
 		php_error(E_WARNING, "Session object destruction failed");
 	}
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(session_module_name)
 		tempmod = _php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC);
 		if (tempmod) {
 			if (PS(mod_data))
-				PS(mod)->close(&PS(mod_data));
+				PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 			PS(mod) = tempmod;
 			PS(mod_data) = NULL;
 		} else {
@@ -1414,7 +1414,7 @@ static void php_rinit_session_globals(TSRMLS_D)
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
 	if (PS(mod_data)) {
-		PS(mod)->close(&PS(mod_data));
+		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 	}
 	if (PS(id)) {
 		efree(PS(id));
