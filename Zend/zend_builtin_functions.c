@@ -1321,10 +1321,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	int lineno;
 	char *function_name;
 	char *filename;
-	char *class_name;
+	char *class_name = NULL;
 	char *call_type;
 	char *include_filename = NULL;
-	zval *arg_array;
+	zval *arg_array = NULL;
 	void **cur_arg_pos = EG(argument_stack).top_element;
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
@@ -1425,8 +1425,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 			ZEND_PUTS(call_type);
 		}
 		zend_printf("%s(", function_name?function_name:"main");
-		debug_print_backtrace_args(arg_array);
-		ZVAL_DELREF(arg_array);
+		if (arg_array) {
+			debug_print_backtrace_args(arg_array);
+			zval_ptr_dtor(&arg_array);
+		}
 		zend_printf(") called at [%s:%d]\n", filename, lineno);
 		include_filename = filename;
 		ptr = ptr->prev_execute_data;
