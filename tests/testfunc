@@ -10,7 +10,6 @@ function foo()
 	}
 }
 
-
 function bar()
 {
 	foo();
