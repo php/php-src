@@ -6,7 +6,8 @@ PHP                                                                        NEWS
 - Added pty support to proc_open(). (Wez)
 - Added possibility to check in which extension an internal class was defined 
   in using reflection API. (Marcus)
-- Changed tidy error handling to no longer use exceptions. (John)
+- Changed tidy error handling to no longer use exceptions and 
+  renamed the "error_buf" property to errorBuffer. (John)
 - Changed class and method names to use studlyCaps convention. (Marcus)
 - Changed language parser to throw errors when a non-empty signature is used in
   a destructor definition. (Marcus)
