@@ -132,7 +132,17 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 
 /* {{{ pcre_get_compiled_regex
  */
-PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC) {
+PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
+{
+	int compile_options;
+	return pcre_get_compiled_regex_ex(regex, extra, preg_options, &compile_options);
+}
+/* }}} */
+
+/* {{{ pcre_get_compiled_regex_ex
+ */
+PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
+{
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
 	int				 	 soptions = 0;
@@ -162,6 +172,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 #endif
 			*extra = pce->extra;
 			*preg_options = pce->preg_options;
+			*compile_options = pce->compile_options;
 			return pce->re;
 #if HAVE_SETLOCALE
 		}
@@ -236,7 +247,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 
 	/* Clear out preg options */
 	*preg_options = 0;
-	
+
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */	
 	while (*pp != 0) {
@@ -297,13 +308,15 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 	}
 
 	*preg_options = poptions;
-	
+	*compile_options = coptions;
+
 	efree(pattern);
 
 	/* Store the compiled pattern and extra info in the cache. */
 	new_entry.re = re;
 	new_entry.extra = *extra;
 	new_entry.preg_options = poptions;
+	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
 	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
@@ -1168,11 +1181,14 @@ PHP_FUNCTION(preg_split)
 				   **limit,				/* Number of pieces to return */
 				   **flags;
 	pcre			*re = NULL;			/* Compiled regular expression */
+	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int				 exoptions = 0;		/* Execution options */
 	int			 	 preg_options = 0;	/* Custom preg options */
+	int 			 coptions = 0;		/* Custom preg options */
 	int				 argc;				/* Argument count */
 	int				 limit_val = -1;	/* Integer value of limit */
 	int				 no_empty = 0;		/* If NO_EMPTY flag is set */
@@ -1210,7 +1226,7 @@ PHP_FUNCTION(preg_split)
 	convert_to_string_ex(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options TSRMLS_CC)) == NULL) {
+	if ((re = pcre_get_compiled_regex_ex(Z_STRVAL_PP(regex), &extra, &preg_options, &coptions TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -1284,8 +1300,26 @@ PHP_FUNCTION(preg_split)
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < Z_STRLEN_PP(subject)) {
-				offsets[0] = start_offset;
-				offsets[1] = start_offset + 1;
+				if (coptions & PCRE_UTF8) {
+					if (re_bump == NULL) {
+						int dummy;
+
+						if ((re_bump = pcre_get_compiled_regex("/./u", &extra_bump, &dummy TSRMLS_CC)) == NULL) {
+							RETURN_FALSE;
+						}
+					}
+					count = pcre_exec(re_bump, extra_bump, Z_STRVAL_PP(subject),
+							  Z_STRLEN_PP(subject), start_offset,
+							  exoptions, offsets, size_offsets);
+					if (count < 1) {
+						php_error_docref(NULL TSRMLS_CC,E_NOTICE, "Unknown error");
+						offsets[0] = start_offset;
+						offsets[1] = start_offset + 1;
+					}
+				} else {
+					offsets[0] = start_offset;
+					offsets[1] = start_offset + 1;
+				}
 			} else
 				break;
 		}
