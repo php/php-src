@@ -1,3 +1,34 @@
+2004-01-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Command/Package.php:
+      make pear run-tests work with PEAR core tests, allow it to work for Windows
+      users as well
+
+2004-01-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+      - Fix bug #27103 (preg_split('//u') incorrectly splits UTF-8 strings into
+      octets).
+
+    * ext/pcre/php_pcre.c:
+      - POSIX / ISOX compliancy.  This is needed to correctly handle UTF-8
+      characters.
+
+2004-01-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Throw an exception in case a reflection object cannot be found and do not
+      override the exception from constructors in static method calls.
+
+2004-01-31  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      Corrected binding:
+        if column has type DECIMAL it will converted to string now.
+        Thanks to Brian Aker for pointing this out.
+
 2004-01-30  Georg Richter  <phpinfo@t-online.de>
 
     * ext/mysqli/mysqli_prop.c:
