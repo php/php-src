@@ -97,6 +97,8 @@ PHP_FUNCTION(pg_field_size);
 PHP_FUNCTION(pg_field_type);
 PHP_FUNCTION(pg_field_prtlen);
 PHP_FUNCTION(pg_field_is_null);
+/* async message functions */
+PHP_FUNCTION(pg_get_notify);
 /* error message functions */
 PHP_FUNCTION(pg_result_error);
 PHP_FUNCTION(pg_last_error);

@@ -114,6 +114,8 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_field_type,	NULL)
 	PHP_FE(pg_field_prtlen,	NULL)
 	PHP_FE(pg_field_is_null,NULL)
+	/* async message function */
+	PHP_FE(pg_get_notify,   NULL)
 	/* error message functions */
 	PHP_FE(pg_result_error, NULL)
 	PHP_FE(pg_last_error,   NULL)
@@ -3004,6 +3006,44 @@ PHP_FUNCTION(pg_result_status)
 	}
 }
 /* }}} */
+
+
+/* {{{ proto resource pg_get_notify([resource connection[, result_type]])
+   Get asynchronous notification */
+PHP_FUNCTION(pg_get_notify)
+{
+	zval *pgsql_link;
+	int id = -1, result_type = PGSQL_ASSOC;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+	PGnotify *pgsql_notify;
+	pgsql_result_handle *pg_result;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
+								 &pgsql_link) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	PQconsumeInput(pgsql);
+	pgsql_notify = PQnotifies(pgsql);
+	if (!pgsql_notify) {
+		/* no notify message */
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+	if (result_type & (PGSQL_NUM|PGSQL_BOTH)) {
+		add_index_string(return_value, 0, pgsql_notify->relname, 1);
+		add_index_long(return_value, 1, pgsql_notify->be_pid);
+	}
+	if (result_type & (PGSQL_ASSOC|PGSQL_BOTH)) {
+		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
+		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+	}
+}
+/* }}} */
+
 
 /* {{{ php_pgsql_meta_data
  * TODO: Add meta_data cache for better performance
