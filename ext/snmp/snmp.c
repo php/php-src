@@ -203,7 +203,7 @@ PHP_MINIT_FUNCTION(snmp)
  */
 PHP_MSHUTDOWN_FUNCTION(snmp)
 {
-	snmp_shutdown("php");
+	snmp_shutdown("snmpapp");
 
 	return SUCCESS;
 }
