@@ -304,6 +304,12 @@ class PEAR_Frontend_CLI extends PEAR
         }
         for ($i = 0; $i < sizeof($table_data); $i++) {
             extract($table_data[$i]);
+            if (!is_array($rowparams)) {
+                $rowparams = array();
+            }
+            if (!is_array($colparams)) {
+                $colparams = array();
+            }
             $rowlines = array();
             if ($height > 1) {
                 for ($c = 0; $c < sizeof($data); $c++) {
