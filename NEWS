@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added array_merge_recursive() that will recursively merge values
+  under the same keys. (Andrei)
+- fixed crash in OCIParse when parsing invalid SQL. (Thies)
 - Fixed a bug in mysql_connect() that made it ignore the socket argument, in
   case of non-persistent connects (Zeev)
 - Added disable_functions php.ini directive, to allow administrators to disable
