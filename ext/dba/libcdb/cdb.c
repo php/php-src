@@ -73,7 +73,7 @@ static uint32 cdb_hashadd(uint32 h, unsigned char c)
 /* }}} */
 
 /* {{{ cdb_hash */
-PHPAPI uint32 cdb_hash(char *buf, unsigned int len)
+uint32 cdb_hash(char *buf, unsigned int len)
 {
 	uint32 h;
 
@@ -87,20 +87,20 @@ PHPAPI uint32 cdb_hash(char *buf, unsigned int len)
 /* }}} */
 
 /* {{{ cdb_free */
-PHPAPI void cdb_free(struct cdb *c TSRMLS_DC)
+void cdb_free(struct cdb *c TSRMLS_DC)
 {
 }
 /* }}} */
 
 /* {{{ cdb_findstart */
-PHPAPI void cdb_findstart(struct cdb *c TSRMLS_DC)
+void cdb_findstart(struct cdb *c TSRMLS_DC)
 {
 	c->loop = 0;
 }
 /* }}} */
 
 /* {{{ cdb_init */
-PHPAPI void cdb_init(struct cdb *c, php_stream *fp TSRMLS_DC)
+void cdb_init(struct cdb *c, php_stream *fp TSRMLS_DC)
 {
 	cdb_free(c TSRMLS_CC);
 	cdb_findstart(c TSRMLS_CC);
@@ -109,7 +109,7 @@ PHPAPI void cdb_init(struct cdb *c, php_stream *fp TSRMLS_DC)
 /* }}} */
 
 /* {{{ cdb_read */
-PHPAPI int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos TSRMLS_DC)
+int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos TSRMLS_DC)
 {
 	if (php_stream_seek(c->fp, pos, SEEK_SET) == -1) {
 		errno = EPROTO;
@@ -134,7 +134,7 @@ PHPAPI int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos TSRML
 /* }}} */
 
 /* {{{ cdb_findnext */
-PHPAPI int cdb_findnext(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
+int cdb_findnext(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
 {
 	char buf[8];
 	uint32 pos;
@@ -187,7 +187,7 @@ PHPAPI int cdb_findnext(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
 /* }}} */
 
 /* {{{ cdb_find */
-PHPAPI int cdb_find(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
+int cdb_find(struct cdb *c, char *key, unsigned int len TSRMLS_DC)
 {
 	cdb_findstart(c TSRMLS_CC);
 	return cdb_findnext(c, key, len TSRMLS_CC);
