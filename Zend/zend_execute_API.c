@@ -480,16 +480,16 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	if (object_pp) {
 		/* TBI!! new object handlers */
-		if(!IS_ZEND_STD_OBJECT(**object_pp)) {
-			zend_error(E_WARNING, "Cannot use call_user_function on overloaded objects");
-			return FAILURE;
-		}
-
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
+			if(!IS_ZEND_STD_OBJECT(**object_pp)) {
+				zend_error(E_WARNING, "Cannot use call_user_function on overloaded objects");
+				return FAILURE;
+			}
+
 			function_table = &Z_OBJCE_PP(object_pp)->function_table;
 			calling_scope = Z_OBJCE_PP(object_pp);
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
-			zend_class_entry *ce;
+			zend_class_entry **ce;
 			char *lc_class;
 			int found;
 
@@ -500,8 +500,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			if (found == FAILURE)
 				return FAILURE;
 
-			function_table = &ce->function_table;
-			calling_scope = ce;
+			function_table = &(*ce)->function_table;
+			calling_scope = *ce;
 			object_pp = NULL;
 		} else
 			return FAILURE;
