@@ -363,11 +363,19 @@ static int _php3_putenv_destructor(putenv_entry *pe)
 
 void test_class_startup(void);
 
+static void basic_globals_ctor(BLS_D)
+{
+	BG(next) = NULL;
+	BG(left) = -1;
+}
+
 PHP_MINIT_FUNCTION(basic)
 {
 	ELS_FETCH();
 #ifdef ZTS
-	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), NULL, NULL);
+	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, NULL);
+#else
+	basic_globals_ctor(BLS_C);
 #endif
 	
 	REGISTER_DOUBLE_CONSTANT("M_PI", M_PI, CONST_CS | CONST_PERSISTENT);
