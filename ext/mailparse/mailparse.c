@@ -314,9 +314,6 @@ PHP_FUNCTION(mailparse_stream_encode)
 				);
 		RETURN_FALSE;
 	}
-	
-	convert_to_long_ex(encod);
-	enc = Z_LVAL_PP(encod);
 
 	buf = emalloc(bufsize);
 	RETVAL_TRUE;
