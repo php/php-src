@@ -678,7 +678,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	php_header();			/* Make sure headers have been sent */
 	
 	STR_FREE(SG(request_info).path_translated);
-	
+	SG(request_info).path_translated = NULL;
+
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
 #ifdef ZTS
