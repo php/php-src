@@ -1944,7 +1944,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				/* Explicitly copy the default value from the parent (if it has one) */
 				zval **pvalue;
 	
-				if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue)==SUCCESS) {
+				if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue) == SUCCESS) {
 					(*pvalue)->refcount++;
 					zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
 					zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
