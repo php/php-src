@@ -1230,7 +1230,7 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 	}
 }
 
-ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, int length)
+ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint length)
 {
 	int retval;
 	
