@@ -1,3 +1,13 @@
+2003-01-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y:
+      MFZE2
+
+2003-01-13  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects_API.c:
+      - Don't check if the handle is bogus. We should crash.
+
 2003-01-12  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * zend_modules.h:
