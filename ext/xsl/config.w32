@@ -20,6 +20,10 @@ if (PHP_XSL != "no") {
 			AC_DEFINE("HAVE_XSL", 1, "Define if xsl extension is enabled");
 			if (! PHP_XSL_SHARED) {
 				ADD_FLAG("CFLAGS_XSL", "/D DOM_EXPORTS /D LIBXML_STATIC");
+			} else {
+				if (PHP_DEBUG == "yes") {
+					ADD_FLAG("LDFLAGS_XSL", "/nodefaultlib:msvcrt");
+				}
 			}
 		} else {
 			WARNING("xsl not enabled; libraries and headers not found");
