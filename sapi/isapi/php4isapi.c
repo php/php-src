@@ -232,9 +232,6 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
 
 	efree(combined_headers);
-	if (SG(sapi_headers).http_status_line) {
-		efree(SG(sapi_headers).http_status_line);
-	}
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
