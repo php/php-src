@@ -1379,7 +1379,7 @@ PHP_FUNCTION(shuffle)
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort((*array)->value.ht, (sort_func_t)mergesort, array_data_shuffle, 1) == FAILURE) {
+	if (zend_hash_sort((*array)->value.ht, (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2767,7 +2767,7 @@ PHP_FUNCTION(array_rand)
 	}  
 
 	if (num_req_val == num_avail) {
-		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)mergesort, array_data_shuffle, 1) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
