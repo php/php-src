@@ -3321,8 +3321,12 @@ for (;;)
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
       {
-      BOOL prev_is_word = (eptr != md->start_subject) &&
-        ((md->ctypes[eptr[-1]] & ctype_word) != 0);
+      /* Modified the next line to check previous character
+	 in case we're not at the beginning of the whole string
+	 (Andrey Zmievski) */
+      BOOL prev_is_word = (eptr != md->start_subject) ?
+        ((md->ctypes[eptr[-1]] & ctype_word) != 0) :
+		((md->ctypes[md->regprev] & ctype_word) != 0);
       BOOL cur_is_word = (eptr < md->end_subject) &&
         ((md->ctypes[*eptr] & ctype_word) != 0);
       if ((*ecode++ == OP_WORD_BOUNDARY)?
@@ -4125,7 +4129,8 @@ Returns:          > 0 => success; value is the number of elements filled in
 
 int
 pcre_exec(const pcre *external_re, const pcre_extra *external_extra,
-  const char *subject, int length, int options, int *offsets, int offsetcount, int minlen)
+  const char *subject, int length, const char *strbeg, int options,
+  int *offsets, int offsetcount, int minlen)
 {
 int resetcount, ocount;
 int first_char = -1;
@@ -4159,6 +4164,15 @@ match_block.errorcode = PCRE_ERROR_NOMATCH;     /* Default error */
 
 match_block.lcc = re->tables + lcc_offset;
 match_block.ctypes = re->tables + ctypes_offset;
+
+/* Setup previous character (Andrey Zmievski) */
+if (subject == strbeg)
+	match_block.regprev = '\n';
+else {
+	match_block.regprev = subject[-1];
+	if (!(re->options & PCRE_MULTILINE) && match_block.regprev == '\n')
+		match_block.regprev = '\0';
+}
 
 /* The ims options can vary during the matching as a result of the presence
 of (?ims) items in the pattern. They are kept in a local variable so that
