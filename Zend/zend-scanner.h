@@ -30,7 +30,7 @@ public:
 
 
 #ifndef ZTS
-typedef struct {
+typedef struct _zend_lex_state {
 	YY_BUFFER_STATE buffer_state;
 	int state;
 	uint return_offset;
@@ -39,7 +39,7 @@ typedef struct {
 	char *filename;
 } zend_lex_state;
 #else
-typedef struct {
+typedef struct _zend_lex_state {
 	ZendFlexLexer *ZFL;
 	istream *input_file;
 } zend_lex_state;

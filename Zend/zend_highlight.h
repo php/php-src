@@ -25,7 +25,7 @@
 #define HL_KEYWORD_COLOR     "#007700"    /* green */
 
 
-typedef struct {
+typedef struct _zend_syntax_highlighter_ini {
 	char *highlight_html;
 	char *highlight_comment;
 	char *highlight_default;

@@ -22,13 +22,13 @@
 
 extern HashTable list_destructors;
 
-typedef struct {
+typedef struct _list_entry {
 	void *ptr;
 	int type;
 	int refcount;
 } list_entry;
 
-typedef struct {
+typedef struct _list_destructors_entry {
 	void (*list_destructor)(void *);
 	void (*plist_destructor)(void *);
 	int module_number;

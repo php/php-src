@@ -25,7 +25,7 @@ typedef struct _zend_llist_element {
 	char data[1]; /* Needs to always be last in the struct */
 } zend_llist_element;
 
-typedef struct {
+typedef struct _zend_llist {
 	zend_llist_element *head;
 	zend_llist_element *tail;
 	size_t size;

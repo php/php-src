@@ -1041,6 +1041,9 @@ binary_assign_op_addr: {
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				break;
 			case ZEND_FETCH_DIM_R:
+				if (opline->extended_value == ZEND_FETCH_NO_AI_COUNT) {
+					EG(AiCount)++;
+				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				break;
 			case ZEND_FETCH_DIM_W:
