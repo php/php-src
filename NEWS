@@ -1,10 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- You can now disable logging of repeated error messages with two new ini settings ignore_repeated_errors, ignore_repeated_source. @(Marcus)
-- Make pg_last_notice() work as it is designed. It returns notice message PostgreSQL connection resource specified.
-  Added "pgsql.ignore_notice" ini entry.
-  Added "pgsql.log_notice" ini entry.
+- Added "ignore_repeated_errors" and "ignore_repeated_source" php.ini options
+  which can be used to disable logging of repeated error messages. (Marcus)
+- Made pg_last_notice() work correctly. (Yasuo)
+- Added "pgsql.ignore_notice" and "pgsql.log_notice" php.ini options. (Yasuo)
 - Added "zlib.output_compression_level" php.ini option. (Stig)
 - Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
 - Added support for dynamically loaded extensions on OS X / Darwin. 
