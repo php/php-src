@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added preliminary SAX-Input support. It's now possible to build a DomDocument
+  with SAX-Events (added domxml_parser_start_document(), domxml_parser_end_document(),
+  domxml_parser_start_element(tagname[,attributes]), domxml_parser_end_element(tagname),
+  domxml_parser_characters(characters), domxml_parser_cdata_block(cdata),
+  domxml_parser_comment(comment), domxml_parser_get_document(). (chregu)
 - Bundle gd library 2.0.1 with php (ext/gd/libgd) (Rasmus), tweak config.m4 to
   work with it (Jani), smallers tweaks for Win32 (Markus, Edin)
 - Fixed bug with Apache which let PHP_AUTH_* variables to be set when
