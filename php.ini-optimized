@@ -508,6 +508,13 @@ sockets.use_system_read		=	Off	; Use the system read() function instead of
 [Printer]
 ;printer.default_printer = ""
 
+[mbstring]
+;mbstring.internal_encoding = EUC-JP
+;mbstring.http_input = auto
+;mbstring.http_output = SJIS
+;mbstring.detect_order = auto
+;mbstring.substitute_character = none;
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
