@@ -82,7 +82,7 @@ function_entry icap_functions[] = {
 	PHP_FE(icap_popen,				NULL)
 	PHP_FE(icap_reopen,				NULL)
 	PHP_FE(icap_fetch_event,		NULL)
-	PHP_FE(icap_list_event,			NULL)
+	PHP_FE(icap_list_events,		NULL)
 	PHP_FE(icap_list_alarms,		NULL)
 	PHP_FE(icap_create_calendar,	NULL)
 	PHP_FE(icap_rename_calendar,	NULL)
