@@ -532,24 +532,27 @@ static void php_sockwait_for_data(php_sockbuf *sock)
 {
 	fd_set fdr, tfdr;
 	int retval;
-	struct timeval timeout;
+	struct timeval timeout, *ptimeout;
 
 	FD_ZERO(&fdr);
 	FD_SET(sock->socket, &fdr);
 	sock->timeout_event = 0;
 
+	if (timeout.tv_sec == -1) 
+		ptimeout = NULL;
+	else
+		ptimeout = &timeout;
+
 	while(1) {
 		tfdr = fdr;
 		timeout = sock->timeout;
-		if (timeout.tv_sec == -1)
-			retval = select(sock->socket + 1, &tfdr, NULL, NULL, NULL);
-		else {
-			retval = select(sock->socket + 1, &tfdr, NULL, NULL, &timeout);
-			if (retval == 0)
-				sock->timeout_event = 1;
-		}
 
-		if(retval == 1 || retval == 0)
+		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
+		
+		if (retval == 0)
+			sock->timeout_event = 1;
+
+		if (retval >= 0)
 			break;
 	}
 }
