@@ -236,7 +236,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_root", "http://www.php.net/", PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_ALL,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("xmlrpc_error_number",	"0",		PHP_INI_ALL,		OnUpdateInt,			xmlrpc_error_number,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
@@ -334,7 +334,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		log_file = VCWD_FOPEN(PG(error_log), "a");
 		if (log_file != NULL) {
 			time(&error_time);
-			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
+			strftime(error_time_str, sizeof(error_time_str), "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
 			fprintf(log_file, "[%s] ", error_time_str);
 			fprintf(log_file, "%s", log_message);
 			fprintf(log_file, "\n");
@@ -350,9 +350,6 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	}
 }
 /* }}} */
-
-/* is 4K big enough? */
-#define PRINTF_BUFFER_SIZE 1024*4
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
@@ -388,6 +385,11 @@ PHPAPI int php_printf(const char *format, ...)
 /* }}} */
 
 /* {{{ php_verror */
+/* php_verror is called from php_error_docref<n> functions.
+ * Its purpose is to unify error messages and automatically generate clickable
+ * html error messages if correcponding ini setting (html_errors) is activated.
+ * See: CODING_STANDARDS for details.
+ */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
 	char *buffer = NULL, *docref_buf = NULL, *ref = NULL, *target = NULL;
@@ -461,6 +463,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 /* }}} */
 
 /* {{{ php_error_docref */
+/* See: CODING_STANDARDS for details. */
 PHPAPI void php_error_docref(const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
 	va_list args;
@@ -472,6 +475,7 @@ PHPAPI void php_error_docref(const char *docref TSRMLS_DC, int type, const char 
 /* }}} */
 
 /* {{{ php_error_docref1 */
+/* See: CODING_STANDARDS for details. */
 PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
 {
 	va_list args;
@@ -483,6 +487,7 @@ PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, 
 /* }}} */
 
 /* {{{ php_error_docref2 */
+/* See: CODING_STANDARDS for details. */
 PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
 {
 	char *params;
