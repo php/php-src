@@ -49,6 +49,9 @@ typedef struct {
 	int seen_cn;
 } php_thttpd_globals;
 
+#ifdef PREMIUM_THTTPD
+# define do_keep_alive persistent
+#endif
 
 #ifdef ZTS
 static int thttpd_globals_id;
@@ -632,7 +635,7 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 	if (hc->method == METHOD_POST)
 		hc->should_linger = 1;
 	
-	if (hc->contentlength > 0 
+	if (hc->contentlength != -1
 			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
 		hc->read_body_into_mem = 1;
 		return 0;
@@ -644,7 +647,7 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 
 	/* disable kl, if no content-length was seen or Connection: was set */
 	if (TG(seen_cl) == 0 || TG(seen_cn) == 1) {
-		TG(hc)->do_keep_alive = TG(hc)->keep_alive = 0;
+		TG(hc)->do_keep_alive = 0;
 	}
 	
 	if (TG(sbuf).c != 0) {
@@ -695,7 +698,9 @@ int thttpd_get_fd(void)
 void thttpd_set_dont_close(void)
 {
 	TSRMLS_FETCH();
+#ifndef PREMIUM_THTTPD
 	TG(hc)->file_address = (char *) 1;
+#endif
 }
 
 
