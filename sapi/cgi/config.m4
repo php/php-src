@@ -29,9 +29,18 @@ if test "$PHP_SAPI" = "cgi"; then
 
 fi
 
+# Always build and install the CGI binary
+INSTALL_CGI="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(INSTALL_ROOT)\$(bindir)/$SAPI_CGI"
 if test "$PHP_SAPI" = "cgi" ; then
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(INSTALL_ROOT)\$(bindir)/$SAPI_CGI"
+  CGI_DIR=""
+  CGI_LDADD=""
+  INSTALL_IT=""
+else
+  CGI_DIR="cgi"
+  CGI_LDADD="sapi/cgi/libsapi.la"
 fi
+PHP_SUBST(CGI_DIR)
+PHP_SUBST(CGI_LDADD)
 
 AC_MSG_CHECKING(for fhttpd module support)
 AC_ARG_WITH(fhttpd,

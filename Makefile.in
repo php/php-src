@@ -18,7 +18,7 @@ LTLIBRARY_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
 
 PROGRAM_NAME         = php
 PROGRAM_SOURCES      = stub.c
-PROGRAM_LDADD        = libphp4.la $(EXT_PROGRAM_LDADD)
+PROGRAM_LDADD        = $(CGI_LDADD) libphp4.la $(EXT_PROGRAM_LDADD)
 PROGRAM_LDFLAGS      = -export-dynamic	
 PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
 
@@ -41,6 +41,7 @@ install-sapi:
 			fi; \
 		done; \
 	fi
+	$(INSTALL_CGI)
 	$(INSTALL_IT)
 
 install-modules:
@@ -50,7 +51,13 @@ install-modules:
 	rm -f modules/*.la && \
 	cp modules/* $(INSTALL_ROOT)$(moduledir) >/dev/null 2>&1 || true
 
-install-su: install-modules
+install-tester:
+	-$(mkinstalldirs) $(bindir)
+	$(INSTALL) -m 755 $(srcdir)/run-tests.php $(PEAR_INSTALLDIR)/.
+
+install-pear: install-modules
 	(cd pear && $(MAKE) install)
+
+install-su: install-pear install-tester
 
 .NOEXPORT:
