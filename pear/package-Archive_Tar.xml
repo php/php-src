@@ -24,9 +24,11 @@ loaded.
     </maintainer>
   </maintainers>
   <release>
-    <version>0.5</version>
+    <version>0.9</version>
     <date>2002-05-27</date>
-    <notes>Less dependant on the zlib extension</notes>
+    <notes>
+      * Auto-detect gzip'ed files
+    </notes>
     <state>stable</state>
     <filelist>
       <dir name="Archive">
