@@ -33,6 +33,10 @@
 #include <sys/socket.h>
 #endif
 
+#ifndef _FCNTL_H
+#include <fcntl.h>
+#endif
+
 #ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
