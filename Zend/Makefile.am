@@ -27,10 +27,10 @@ libzend_la_LDFLAGS = @EXTRA_LIBS@
 zend-scanner.l: zend-parser.h
 
 zend-scanner.c: zend-scanner.l
-	$(LEX) -Pzend -o$@ -i $<
+	$(LEX) -Pzend -o$@ -i zend-scanner.l
 
 zend-scanner-cc.cc: zend-scanner.l
-	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ $<
+	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ zend-scanner.l
 
 zend-parser.h: zend-parser.c
 zend-parser.c: zend-parser.y
