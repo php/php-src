@@ -1167,15 +1167,16 @@ PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 	return 0;
 }
 
-PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
+PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char *old_cwd;
 	SLS_FETCH();
 
+	EG(exit_status) = 0;
 	if (php_handle_special_queries(SLS_C PLS_CC))
-		return;
+		return 0;
 #define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
@@ -1184,7 +1185,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		if (old_cwd[0] != '\0')
 			V_CHDIR(old_cwd);
 		free_alloca(old_cwd);
-		return;
+		return EG(exit_status);
 	}
 
 #ifdef PHP_WIN32
@@ -1222,6 +1223,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (old_cwd[0] != '\0')
 		V_CHDIR(old_cwd);
 	free_alloca(old_cwd);
+
+	return EG(exit_status);
 }
 
 PHPAPI void php_handle_aborted_connection(void)
