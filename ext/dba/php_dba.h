@@ -37,7 +37,7 @@ typedef struct dba_info {
 	dba_mode_t mode;
 	/* arg[cv] are only available when the dba_open handler is called! */
 	int argc;
-	pval ***argv;
+	zval ***argv;
 	/* private */
 	struct dba_handler *hnd;
 } dba_info;
