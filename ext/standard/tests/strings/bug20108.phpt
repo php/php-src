@@ -2,6 +2,11 @@
 Segfault on printf statement bug #20108
 --SKIPIF--
 --FILE--
-<?php $a = "boo"; printf("%580.58s\n", $a); ?>
+<?php
+	$a = "boo";
+	$z = sprintf("%580.58s\n", $a);
+	var_dump($z);
+?>
 --EXPECT--
-I have no idea yet :)
+string(581) "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 boo
+"
