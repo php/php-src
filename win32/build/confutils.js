@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.2 2003-12-03 00:15:10 wez Exp $
+// $Id: confutils.js,v 1.3 2003-12-03 00:56:14 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -88,6 +88,10 @@ function analyze_arg(argval)
 
 function word_wrap_and_indent(indent, text, line_suffix, indent_char)
 {
+	if (text == null) {
+		return "";
+	}
+	
 	var words = text.split(new RegExp("\\s+", "g"));
 	var i = 0;
 	var ret_text = "";
