@@ -512,7 +512,7 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
 PHP_MINFO_FUNCTION(ibase)
 {
 
-	char tmp[128];
+	char tmp[32];
 
 	IBLS_FETCH();
 
@@ -525,17 +525,19 @@ PHP_MINFO_FUNCTION(ibase)
 	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent)?"Yes":"No") );
 
 	if (IBG(max_persistent) == -1) {
-		snprintf(tmp, 128, "%d/unlimited", IBG(num_persistent));
+		snprintf(tmp, 31, "%d/unlimited", IBG(num_persistent));
 	} else {
-		snprintf(tmp, 128, "%d/%ld", IBG(num_persistent), IBG(max_persistent));
+		snprintf(tmp, 31, "%d/%ld", IBG(num_persistent), IBG(max_persistent));
 	}
+	tmp[31]=0;
 	php_info_print_table_row(2, "Persistent Links", tmp );
 
 	if (IBG(max_links) == -1) {
-		snprintf(tmp, 128, "%d/unlimited", IBG(num_links));
+		snprintf(tmp, 31, "%d/unlimited", IBG(num_links));
 	} else {
-		snprintf(tmp, 128, "%d/%ld", IBG(num_links), IBG(max_links));
+		snprintf(tmp, 31, "%d/%ld", IBG(num_links), IBG(max_links));
 	}
+	tmp[31]=0;
 	php_info_print_table_row(2, "Total Links", tmp );
 
 	php_info_print_table_row(2, "Time Format", IBG(timeformat) );

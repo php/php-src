@@ -435,10 +435,8 @@ PHP_MINFO_FUNCTION(odbc)
 	char buf[32];
 	ODBCLS_FETCH();
 
-	DISPLAY_INI_ENTRIES();
-
-	php_printf("<table border=5 width=\"600\">");
-	php_info_print_table_header(2, "Key", "Value");
+	php_info_print_table_start();
+	php_info_print_table_header(2, "ODBC Support", "enabled");
 	sprintf(buf, "%ld", ODBCG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	sprintf(buf, "%ld", ODBCG(num_links));
@@ -449,7 +447,10 @@ PHP_MINFO_FUNCTION(odbc)
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
 	php_info_print_table_row(2, "ODBC_LIBS", PHP_ODBC_LIBS);
 #endif
-	php_printf("</table>\n");
+	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
+
 }	 
 
 #if defined ( HAVE_IBMDB2 ) || defined ( HAVE_UNIXODBC )

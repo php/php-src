@@ -38,6 +38,8 @@
 #include "php_oracle.h"
 #define HASH_DTOR (void (*)(void *))
 
+#include "ext/standard/info.h"
+
 #ifdef WIN32
 # include "variables.h"
 #else
@@ -1511,12 +1513,16 @@ PHP_FUNCTION(ora_errorcode)
 
 PHP_MINFO_FUNCTION(oracle)
 {
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Oracle Support", "enabled");
+
 #ifndef PHP_WIN32
-	php_printf("Oracle version: %s<br>\n"
-			    "Compile-time ORACLE_HOME: %s<br>\n"
-			    "Libraries used: %s",
-			    PHP_ORACLE_VERSION, PHP_ORACLE_HOME, PHP_ORACLE_LIBS);
+	php_info_print_table_row(2, "Oracle Version", PHP_ORACLE_VERSION );
+	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_ORACLE_HOME );
+	php_info_print_table_row(2, "Libraries Used", PHP_ORACLE_LIBS );
 #endif
+	php_info_print_table_end();
 }
 
 

@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_sybase_ct.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "php_globals.h"
 
 #if HAVE_SYBASE_CT
@@ -1512,30 +1513,30 @@ PHP_FUNCTION(sybase_affected_rows)
 
 PHP_MINFO_FUNCTION(sybase)
 {
-	char maxp[16],maxl[16];
+	char maxp[32],maxl[32];
 	
 	if (sybase_globals.max_persistent==-1) {
-		strcpy(maxp,"Unlimited");
+		snprintf(maxp, 31, "%d/unlimited", sybase_globals.num_persistent);
 	} else {
-		snprintf(maxp,15,"%ld",sybase_globals.max_persistent);
-		maxp[15]=0;
+		snprintf(maxp, 31, "%d/%ld", sybase_globals.num_persistent, sybase_globals.max_persistent);
 	}
+	maxp[31]=0;
+
 	if (sybase_globals.max_links==-1) {
-		strcpy(maxl,"Unlimited");
+		snprintf(maxl, 31, "%d/unlimited", sybase_globals.num_links);
 	} else {
-		snprintf(maxl,15,"%ld",sybase_globals.max_links);
-		maxl[15]=0;
+		snprintf(maxl, 31, "%d/%ld", sybase_globals.num_links, sybase_globals.max_links);
 	}
-	php_printf("<table cellpadding=5>"
-				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Application name:</td><td>%s</td></tr>\n"
-				"</table>\n",
-				(sybase_globals.allow_persistent?"Yes":"No"),
-				sybase_globals.num_persistent,maxp,
-				sybase_globals.num_links,maxl,
-				sybase_globals.appname);
+	maxl[31]=0;
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Sybase_CT Support", "enabled" );
+	php_info_print_table_row(2, "Allow Persistent Links", (sybase_globals.allow_persistent?"yes":"no") );
+	php_info_print_table_row(2, "Persistent Links", maxp );
+	php_info_print_table_row(2, "Total Links", maxl );
+	php_info_print_table_row(2, "Application Name", sybase_globals.appname );
+	php_info_print_table_end();
+
 }
 
 
