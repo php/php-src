@@ -29,7 +29,8 @@
 #include <fcntl.h>
 
 #ifdef ZEND_WIN32
-#include "win95nt.h"
+/* mode_t isn't defined on Windows */
+typedef int mode_t;
 #include <sys/utime.h>
 #endif
 
@@ -722,70 +723,6 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 
 #endif
 
-#if 0
-/* taken from Apache 1.3 */
-
-CWD_API void virtual_real_chdir_file(const char *file)
-{
-    const char *x;
-    char buf[4096];
-
-    x = strrchr(file, '/');
-    if (x == NULL) {
-	chdir(file);
-    }
-    else if (x - file < sizeof(buf) - 1) {
-	memcpy(buf, file, x - file);
-	buf[x - file] = '\0';
-	chdir(buf);
-    }
-    /* XXX: well, this is a silly function, no method of reporting an
-     * error... ah well. */
-}
-
-#endif
-
-#if 0
-
-main(void)
-{
-	cwd_state state;
-	int length;
-
-#ifndef ZEND_WIN32
-	state.cwd = malloc(PATH_MAX + 1);
-	state.cwd_length = PATH_MAX;
-
-	while (getcwd(state.cwd, state.cwd_length) == NULL && errno == ERANGE) { 
-		state.cwd_length <<= 1;
-		state.cwd = realloc(state.cwd, state.cwd_length + 1);
-	}
-#else
-	state.cwd = strdup("d:\\foo\\bar");
-#endif
-	state.cwd_length = strlen(state.cwd);
-
-#define T(a) \
-	printf("[%s] $ cd %s\n", virtual_getcwd_ex(&state, &length), a); \
-	virtual_chdir(&state, strdup(a)); \
-	printf("new path is %s\n", virtual_getcwd_ex(&state, &length));
-	
-	T("..")
-	T("...")
-	T("foo")
-	T("../bar")
-	T(".../slash/../dot")
-	T("//baz")
-	T("andi/././././././///bar")
-	T("../andi/../bar")
-	T("...foo")
-	T("D:/flash/zone")
-	T("../foo/bar/../baz")
-
-	return 0;
-}
-
-#endif
 
 /*
  * Local variables:
