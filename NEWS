@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added domxml_doc_create_document_fragment() and
+  domxml_document_fragment_open_mem(string) method (Christian)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
