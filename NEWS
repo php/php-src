@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22072 (Apache2 sapis do not detect aborted connections). (Ilia)
 - Fixed bug #21611 (version_compare() does not support "p" as suffix).
   (Stefan Walk)
+- Fixed bug #18291 (escapeshellcmd() can now handle quoted arguments). (Ilia)
 - Fixed bug #17414 (pthreads bug workaround). (timo.teras[at]iki.fi)
 
 30 Jul 2003, Version 4.3.3RC2

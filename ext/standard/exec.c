@@ -401,18 +401,28 @@ PHP_FUNCTION(passthru)
 char *php_escape_shell_cmd(char *str) {
 	register int x, y, l;
 	char *cmd;
+	char *p = NULL;
 
 	l = strlen(str);
 	cmd = emalloc(2 * l + 1);
 	
 	for (x = 0, y = 0; x < l; x++) {
 		switch (str[x]) {
+			case '"':
+			case '\'':
+				if (!p && (p = memchr(str + x + 1, str[x], l - x - 1))) {
+					/* noop */
+				} else if (p && *p == str[x]) {
+					p = NULL;
+				} else {
+					cmd[y++] = '\\';
+				}
+				cmd[y++] = str[x];
+				break;
 			case '#': /* This is character-set independent */
 			case '&':
 			case ';':
 			case '`':
-			case '\'':
-			case '"':
 			case '|':
 			case '*':
 			case '?':
