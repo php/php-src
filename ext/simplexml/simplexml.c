@@ -1445,11 +1445,11 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 }
 
 
+#ifdef HAVE_DOM
 /* {{{ proto simplemxml_element simplexml_import_dom(domNode node [, string class_name])
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(simplexml_import_dom)
 {
-#ifdef HAVE_DOM
 	php_sxe_object *sxe;
 	zval *node;
 	php_libxml_node_object *object;
@@ -1495,17 +1495,16 @@ PHP_FUNCTION(simplexml_import_dom)
 		php_error(E_WARNING, "Invalid Nodetype to import");
 		RETVAL_NULL();
 	}
-#else
-	php_error(E_WARNING, "DOM support is not enabled");
-	return;
-#endif
 }
 /* }}} */
+#endif
 
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
+#ifdef HAVE_DOM
 	PHP_FE(simplexml_import_dom, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
