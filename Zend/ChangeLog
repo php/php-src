@@ -1,3 +1,12 @@
+2004-04-07  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+      - Hopefully fix the debug_backtrace() code.
+
+    * zend_builtin_functions.c:
+      - Fix crash bug in zend_debug_backtrace(). No idea how come this survived
+      - for so long....
+
 2004-04-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_objects_API.c:
