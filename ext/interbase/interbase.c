@@ -2201,6 +2201,20 @@ PHP_FUNCTION(ibase_affected_rows)
    Returns the number of rows in a result */
 PHP_FUNCTION(ibase_num_rows) 
 {
+	/**
+	 * This function relies on the InterBase API function isc_dsql_sql_info()
+	 * which has a couple of limitations (which I hope will be fixed in
+	 * future releases of Firebird):
+	 * - row count is always zero before the first fetch;
+	 * - row count for SELECT ... FOR UPDATE is broken -> never returns a
+	 *   higher number than the number of records fetched so far;
+	 * - row count for other statements is merely a lower bound on the number
+	 *   of records => calling ibase_num_rows() again after a couple of fetches
+	 *   will most likely return a new (higher) figure for large result sets.
+	 *
+	 * 12-aug-2003 Ard Biesheuvel
+	 */
+	
 	zval **result_arg;
 	ibase_result *ib_result;
 	char info_count[] = {isc_info_sql_records}, result[64];
