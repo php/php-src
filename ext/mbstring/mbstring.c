@@ -564,7 +564,7 @@ PHP_MINFO_FUNCTION(mbstring)
 
 
 /* {{{ proto string mb_language([string language])
-   Sets the current language or Returns the current language as a string. */
+   Sets the current language or Returns the current language as a string */
 PHP_FUNCTION(mb_language)
 {
 	pval **arg1;
@@ -597,7 +597,7 @@ PHP_FUNCTION(mb_language)
 
 
 /* {{{ proto string mb_internal_encoding([string encoding])
-   Sets the current internal encoding or Returns the current internal encoding as a string. */
+   Sets the current internal encoding or Returns the current internal encoding as a string */
 PHP_FUNCTION(mb_internal_encoding)
 {
 	pval **arg1;
@@ -629,7 +629,7 @@ PHP_FUNCTION(mb_internal_encoding)
 
 
 /* {{{ proto string mb_http_input([string type])
-   Returns the input encoding. */
+   Returns the input encoding */
 PHP_FUNCTION(mb_http_input)
 {
 	pval **arg1;
@@ -696,7 +696,7 @@ PHP_FUNCTION(mb_http_input)
 
 
 /* {{{ proto string mb_http_output([string encoding])
-   Sets the current output_encoding or Returns the current output_encoding as a string. */
+   Sets the current output_encoding or returns the current output_encoding as a string */
 PHP_FUNCTION(mb_http_output)
 {
 	pval **arg1;
@@ -728,7 +728,7 @@ PHP_FUNCTION(mb_http_output)
 
 
 /* {{{ proto array mb_detect_order([mixed encoding-list])
-   Sets the current detect_order or Return the current detect_order as a array. */
+   Sets the current detect_order or Return the current detect_order as a array */
 PHP_FUNCTION(mb_detect_order)
 {
 	pval **arg1;
@@ -779,7 +779,7 @@ PHP_FUNCTION(mb_detect_order)
 
 
 /* {{{ proto mixed mb_substitute_character([mixed substchar])
-   Sets the current substitute_character or Returns the current substitute_character. */
+   Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
 {
 	pval **arg1;
@@ -820,7 +820,7 @@ PHP_FUNCTION(mb_substitute_character)
 
 
 /* {{{ proto string mb_preferred_mime_name(string encoding)
-   Return the preferred MIME name (charset) as a string. */
+   Return the preferred MIME name (charset) as a string */
 PHP_FUNCTION(mb_preferred_mime_name)
 {
 	pval **arg1;
@@ -1109,7 +1109,7 @@ void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 }
 #endif
 
-/* {{{ proto bool mb_parse_str(string encoded_string, [array result])
+/* {{{ proto bool mb_parse_str(string encoded_string [, array result])
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
@@ -1376,7 +1376,7 @@ PHP_FUNCTION(mb_output_handler)
 
 
 
-/* {{{ proto int mb_strlen(string str, [string encoding])
+/* {{{ proto int mb_strlen(string str [, string encoding])
    Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
@@ -1553,7 +1553,7 @@ PHP_FUNCTION(mb_strrpos)
 
 
 /* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
-   Return part of a string */
+   Returns part of a string */
 PHP_FUNCTION(mb_substr)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(mb_substr)
 
 
 /* {{{ proto string mb_strcut(string str, int start [, int length [, string encoding]])
-   Return part of a string */
+   Returns part of a string */
 PHP_FUNCTION(mb_strcut)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
@@ -1724,8 +1724,8 @@ PHP_FUNCTION(mb_strcut)
 
 
 
-/* {{{ proto int mb_strwidth(string str, [string encoding])
-   Get terminal width of a string */
+/* {{{ proto int mb_strwidth(string str [, string encoding])
+   Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
 {
 	pval **arg1, **arg2;
@@ -1932,7 +1932,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 
 /* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
-    Encoding of the given string is returned (as a string) */
+   Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
 	pval **arg_str, **arg_list;
@@ -1998,7 +1998,7 @@ PHP_FUNCTION(mb_detect_encoding)
 
 
 /* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
-    Convert the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
+   Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
 PHP_FUNCTION(mb_encode_mimeheader)
 {
 	pval **argv[4];
@@ -2069,7 +2069,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 
 
 /* {{{ proto string mb_decode_mimeheader(string string)
-    Decodes the MIME "encoded-word" in the string */
+   Decodes the MIME "encoded-word" in the string */
 PHP_FUNCTION(mb_decode_mimeheader)
 {
 	pval **arg_str;
@@ -2096,7 +2096,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 
 
 
-/* {{{ proto string mb_convert_kana(string str [,string option] [, string encoding])
+/* {{{ proto string mb_convert_kana(string str [, string option] [, string encoding])
    Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
@@ -2518,7 +2518,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 
 /* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding])
-   Convert specified characters to HTML numeric entities */
+   Converts specified characters to HTML numeric entities */
 PHP_FUNCTION(mb_encode_numericentity)
 {
 	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -2691,7 +2691,7 @@ PHP_FUNCTION(mb_send_mail)
 #endif	/* HAVE_SENDMAIL */
 
 /* {{{ proto string mb_get_info([string type])
-   Returns the current settings of mbstring. */
+   Returns the current settings of mbstring */
 PHP_FUNCTION(mb_get_info)
 {
 	zval **type;
