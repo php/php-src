@@ -1,3 +1,8 @@
+<!-- 
+    $Source$
+    $Id$ 
+-->
+
 <html>
 <body>
 
@@ -23,14 +28,13 @@
 
 	$page_size=10;
 	$page_number=0;
-	$search_mode=UDM_MODE_BOOL;
-	$first=$page_size*$page_number+1;
-
+	
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PAGE_SIZE,$page_size);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PAGE_NUM,$page_number);
-	Udm_Set_Agent_Param($udm,UDM_PARAM_SEARCH_MODE,$search_mode);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_SEARCH_MODE,UDM_MODE_BOOL);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_CACHE_MODE,UDM_PARAM_CACHE_DISABLED);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_TRACK_MODE,UDM_TRACK_DISABLED);
 	
-
 // Stage 3: perform search 
 
 	$res=Udm_Find($udm,$q);	
@@ -42,7 +46,8 @@
 		// Display error message
 		printf("Error #%d: '%s'\n",$errno,Udm_Error($udm));
 	}else{
-
+		$first=$page_size*$page_number+1;
+		
 		// Get result parameters
 		$total=Udm_Get_Res_Param($res,UDM_PARAM_FOUND);
 		$rows=Udm_Get_Res_Param($res,UDM_PARAM_NUM_ROWS);

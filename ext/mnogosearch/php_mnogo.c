@@ -1,3 +1,6 @@
+/* $Source$ */
+/* $Id$ */
+
 /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
@@ -18,8 +21,6 @@
    |  Further development by  Sergey Kartashoff <gluke@biosys.net>        |
    +----------------------------------------------------------------------+
  */
- 
-/* $Id: php_mnogo.c,v 0.3 2001/01/27 15:30:00 */
 
 #include "php.h"
 #include "php_mnogo.h"
@@ -40,12 +41,19 @@
 #define UDM_FIELD_SCORE		256
 #define UDM_FIELD_MODIFIED	512
 
+/* udm_set_agent_param constants */
 #define UDM_PARAM_PAGE_SIZE	1
 #define UDM_PARAM_PAGE_NUM	2
-#define UDM_PARAM_SEARCH_MODE	4
-#define UDM_PARAM_CHARSET	8
-#define UDM_PARAM_NUM_ROWS	16
-#define UDM_PARAM_FOUND		32
+#define UDM_PARAM_SEARCH_MODE	3
+#define UDM_PARAM_CACHE_MODE	4
+#define UDM_PARAM_TRACK_MODE	5
+
+#define UDM_TRACK_ENABLED	1
+#define UDM_TRACK_DISABLED	0
+
+/* udm_get_res_param constants */
+#define UDM_PARAM_NUM_ROWS	256
+#define UDM_PARAM_FOUND		257
 
 /* True globals, no need for thread safety */
 static int le_link,le_res;
@@ -112,17 +120,29 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_FIELD_SCORE",	UDM_FIELD_SCORE,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_MODIFIED",UDM_FIELD_MODIFIED,CONST_CS | CONST_PERSISTENT);
 
+	/* udm_set_agent_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_SIZE",UDM_PARAM_PAGE_SIZE,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_NUM",UDM_PARAM_PAGE_NUM,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCH_MODE",UDM_PARAM_SEARCH_MODE,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PARAM_CHARSET",UDM_PARAM_CHARSET,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCH_MODE",UDM_PARAM_SEARCH_MODE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_CACHE_MODE",UDM_PARAM_CACHE_MODE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_TRACK_MODE",UDM_PARAM_TRACK_MODE,CONST_CS | CONST_PERSISTENT);	
+	
+	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_NUM_ROWS",UDM_PARAM_NUM_ROWS,CONST_CS | CONST_PERSISTENT);
 
-
+	/* search modes */
 	REGISTER_LONG_CONSTANT("UDM_MODE_ALL",UDM_MODE_ALL,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_MODE_ANY",UDM_MODE_ANY,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_MODE_BOOL",UDM_MODE_BOOL,CONST_CS | CONST_PERSISTENT);
+
+	/* search cache params */
+	REGISTER_LONG_CONSTANT("UDM_CACHE_ENABLED",UDM_CACHE_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CACHE_DISABLED",UDM_CACHE_DISABLED,CONST_CS | CONST_PERSISTENT);
+	
+	/* track mode params */
+	REGISTER_LONG_CONSTANT("UDM_TRACK_ENABLED",UDM_TRACK_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_TRACK_DISABLED",UDM_TRACK_DISABLED,CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -246,8 +266,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				if(Agent->page_number<0)Agent->page_number=0;
 			}
 			break;
-		case UDM_PARAM_SEARCH_MODE: {
-				switch (atoi(val)){
+		case UDM_PARAM_SEARCH_MODE:
+			switch (atoi(val)){
 					case UDM_MODE_ALL:
 						Agent->search_mode=UDM_MODE_ALL;
 						break;
@@ -260,7 +280,33 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					default:
 						RETURN_STRING("<Udm_Set_Agent_Param: Unknown search mode>",1);
 						break;
-				}
+			}
+			break;
+		case UDM_PARAM_CACHE_MODE: 
+			switch (atoi(val)){
+				case UDM_CACHE_ENABLED:
+					Agent->cache_mode=UDM_CACHE_ENABLED;
+					break;
+				case UDM_CACHE_DISABLED:
+					Agent->cache_mode=UDM_CACHE_DISABLED;
+					break;
+				default:
+					Agent->cache_mode=UDM_CACHE_DISABLED;
+					RETURN_STRING("<Udm_Set_Agent_Param: Unknown cache mode>",1);
+					break;
+			}
+			break;
+		case UDM_PARAM_TRACK_MODE: 
+			switch (atoi(val)){
+				case UDM_TRACK_ENABLED:
+					Agent->track_mode|=UDM_TRACK_QUERIES;
+					break;
+				case UDM_TRACK_DISABLED:
+					Agent->track_mode &= ~(UDM_TRACK_QUERIES);    
+					break;
+				default:
+					RETURN_STRING("<Udm_Set_Agent_Param: Unknown track_mode>",1);
+					break;
 			}
 			break;
 		default:
