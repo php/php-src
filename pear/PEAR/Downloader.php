@@ -468,7 +468,7 @@ class PEAR_Downloader extends PEAR_Common
                                          "' found for '$pkgfile'");
             } elseif ($version == 0) {
                 $this->log(0, "Warning: $pkgfile is state '$inf[state]' which is less stable " .
-                              "than state '$state'");
+                              "than state '$this->_preferredState'");
             }
         }
         // Check if we haven't already the version
