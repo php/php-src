@@ -430,7 +430,7 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 static void _property_string(string *str, zend_property_info *prop, char* indent TSRMLS_DC)
 {
 	string_printf(str, "%sProperty [ %s", indent,
-				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) ? "<dynamic> " : "<default> ");
+				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) ? "<implicit> " : "<default> ");
 
 	/* These are mutually exclusive */
 	switch (prop->flags & ZEND_ACC_PPP_MASK) {
