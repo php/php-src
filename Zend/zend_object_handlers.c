@@ -668,6 +668,8 @@ zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int p
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
+	} else {
+		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
 
 	return retval;
