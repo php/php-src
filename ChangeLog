@@ -1,3 +1,77 @@
+2000-08-31  Andi Gutmans  <andi@php.net>
+
+    * configure.in:
+    - Always include TSRM in PHP build. This will enable us to move virtual
+    - cwd to TSRM.
+    - BTW, if I comile with --enable-experimental-zts not from php4/ but from
+    - php4/cgi (ran ../configure there) then the build doesn't work also b4
+    - this patch.
+
+    * NEWS
+      main/configuration-parser.y
+      main/fopen-wrappers.c:
+    - Use emalloc() for opened_path now. This was a potential leak before.
+    - This patch has potential to break stuff but I tested it as much as I
+    - could. Fixes should be easy.
+
+2000-08-31  Stig Bakken  <ssb@fast.no>
+
+    * NEWS
+      ext/standard/tests/file/001.phpt
+      ext/standard/tests/reg/003.phpt
+      ext/standard/tests/reg/007.phpt
+      run-tests.php
+      tests/classes/class_example.phpt
+      tests/lang/023.phpt
+      tests/lang/024.phpt
+      tests/lang/028.phpt:
+    * all tests should pass now (expect for the interbase stuff that I haven't
+      had the chance to test)
+
+2000-08-31  Andi Gutmans  <andi@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/standard/dl.c
+      main/config.w32.h
+      main/fopen-wrappers.c: - Remove redundant IS_SLASH
+    - Reverse config.w32.h patches
+    - Use IS_ABSOLUTE_PATH() in one place in fopen-wrappers.c
+
+2000-08-31  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c:
+    Attemt to fix a lot of bug reports (5582,5614,5633,60,6181,6202) on crashes with php and mssql server.
+
+2000-08-31  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/config.m4: Added detection of Netscape LDAP SDK 4.1
+
+2000-08-31  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c: Make main.c compile again
+
+2000-08-31  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    removed some NSLDAP #if's giving more detailed error reporting
+
+2000-08-31  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c:
+    Safer shutdown process.  Continue to shut down even if we bail out in the middle of a certain part.
+
+2000-08-31  Hénot David  <henot@iie.cnam.fr>
+
+    * ext/ingres_ii/config.m4:
+    Made ingres extension use --with--ingres instead of --with-ii.
+    Andi actualy changed only the help line.
+
+2000-08-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/xml/xml.c:
+    - Fixed problem with having $this as the XML parser object. 
+
 2000-08-30  Daniel Beulshausen  <daniel@php4win.de>
 
     * php_modules.dsw: updated with db and mhash
