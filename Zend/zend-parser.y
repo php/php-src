@@ -491,9 +491,9 @@ static_array_pair_list:
 
 non_empty_static_array_pair_list:
 		non_empty_static_array_pair_list ',' static_scalar T_DOUBLE_ARROW static_scalar	{ do_add_static_array_element(&$$, &$3, &$5); }
-	|	non_empty_static_array_pair_list ',' static_scalar		{ do_add_static_array_element(&$$, &$3, NULL); }
+	|	non_empty_static_array_pair_list ',' static_scalar		{ do_add_static_array_element(&$$, NULL, &$3); }
 	|	static_scalar T_DOUBLE_ARROW static_scalar	{ $$.op_type = IS_CONST; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; array_init(&$$.u.constant); do_add_static_array_element(&$$, &$1, &$3); }
-	|	static_scalar 									{ $$.op_type = IS_CONST; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; array_init(&$$.u.constant); do_add_static_array_element(&$$, &$1, NULL); }
+	|	static_scalar 									{ $$.op_type = IS_CONST; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; array_init(&$$.u.constant); do_add_static_array_element(&$$, NULL, &$1); }
 ;
 
 expr:
