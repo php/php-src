@@ -2157,7 +2157,7 @@ void test_class_startup()
 {
 	zend_class_entry test_class_entry;
 
-	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry, "TestClass", NULL,
+	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry, "OverloadedTestClass", NULL,
 								test_class_call_function,
 								test_class_get_property,
 								test_class_set_property);
