@@ -72,6 +72,7 @@
 #include "ext/sysvsem/php3_sysvsem.h"
 #include "ext/sysvshm/php3_sysvshm.h"
 #include "ext/dav/php3_dav.h"
+#include "ext/mcrypt/php_mcrypt.h"
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -86,6 +87,7 @@ zend_module_entry *php3_builtin_modules[] =
 	php3_filestat_module_ptr,
 	php3_file_module_ptr,
 	php3_header_module_ptr,
+	mcrypt_module_ptr,
 	mail_module_ptr,
 	syslog_module_ptr,
 	mysql_module_ptr,
