@@ -410,6 +410,10 @@ SOURCE=..\regex\regfree.c
 # PROP Default_Filter ".c"
 # Begin Source File
 
+SOURCE=..\ext\overload\overload.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\wddx\wddx.c
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
