@@ -91,17 +91,11 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 		return FAILURE;
 	}
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
-/*
- * Following lines are commented out to prevent bogus error message at
- * start up. i.e. Save handler modules are not initilzied before Session
- * module.
- */
 
-#if 0
-	if(!PS(mod)) {
+	if (PG(modules_activated) && !PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find save handler %s", new_value);
 	}
-#endif
+
 	return SUCCESS;
 }
 
@@ -112,17 +106,11 @@ static PHP_INI_MH(OnUpdateSerializer)
 		return FAILURE;
 	}
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
-/*
- * Following lines are commented out to prevent bogus error message at
- * start up. i.e. Serializer modules are not initilzied before Session
- * module.
- */
 
-#if 0
-	if(!PS(serializer)) {
+	if (PG(modules_activated) && !PS(serializer)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find serialization handler %s", new_value);
 	}
-#endif
+
 	return SUCCESS;
 }
 
@@ -1651,26 +1639,28 @@ PHP_MSHUTDOWN_FUNCTION(session)
 PHP_MINFO_FUNCTION(session)
 {
 	ps_module **mod;
+	ps_serializer *ser;
 	smart_str handlers = {0};
 	int i;
 	
 	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++) {
 		if (*mod && (*mod)->s_name) {
-			smart_str_appends(&handlers, (*mod)->s_name);
-			smart_str_appendc(&handlers, ' ');
+			smart_str_appends(&save_handlers, (*mod)->s_name);
+			smart_str_appendc(&save_handlers, ' ');
 		}
 	}
-	
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Session Support", "enabled" );
 
-	if (handlers.c) {
+	if (save_handlers.c) {
 		smart_str_0(&handlers);
 		php_info_print_table_row(2, "Registered save handlers", handlers.c);
 		smart_str_free(&handlers);
 	} else {
 		php_info_print_table_row(2, "Registered save handlers", "none");
 	}
+
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
