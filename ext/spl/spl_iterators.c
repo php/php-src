@@ -221,19 +221,6 @@ next_step:
 				ce = object->iterators[object->level].ce;
 				zobject = object->iterators[object->level].zobject;
 				zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
-#if 0||MBO_0
-				fprintf(stderr, "Access\n");
-				{
-					spl_dual_it_object *parent;
-					spl_ce_dir_object *dir;
-					fprintf(stderr, "Value:%p, %d = %s\n", child, child->value.obj.handle, Z_OBJCE_P(child)->name);
-					parent = (spl_dual_it_object*)zend_object_store_get_object(child TSRMLS_CC);
-					fprintf(stderr, "Parent:%p", parent->inner.zobject);
-					fprintf(stderr, ", %d\n", parent->inner.zobject->value.obj.handle);
-					dir = (spl_ce_dir_object*)zend_object_store_get_object(parent->inner.zobject TSRMLS_CC);
-					fprintf(stderr, "PATH:%s\n", dir->path);
-				}
-#endif
 				ce = Z_OBJCE_P(child);
 				if (!ce || !instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC)) {
 					zend_throw_exception(zend_exception_get_default(), "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
@@ -643,17 +630,6 @@ SPL_METHOD(ParentIterator, getChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	spl_instantiate_arg_ex1(spl_ce_ParentIterator, &return_value, 0, retval TSRMLS_CC);
-#if 0||MBO_0
-	{
-		spl_dual_it_object *parent;
-		spl_ce_dir_object *dir;
-		fprintf(stderr, "Value:%p, %d\n", return_value, return_value->value.obj.handle);
-		parent = (spl_dual_it_object*)zend_object_store_get_object(return_value TSRMLS_CC);
-		fprintf(stderr, "Parent:%p, %d\n", parent->inner.zobject, parent->inner.zobject->value.obj.handle);
-		dir = (spl_ce_dir_object*)zend_object_store_get_object(parent->inner.zobject TSRMLS_CC);
-		fprintf(stderr, "PATH:%s\n", dir->path);
-	}
-#endif
 	zval_ptr_dtor(&retval);
 }
 
