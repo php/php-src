@@ -921,6 +921,13 @@ static void php_rshutdown_session_globals(PSLS_D)
 	zend_hash_destroy(&PS(vars));
 }
 
+void _php_session_auto_start(void *data)
+{
+	PSLS_FETCH();
+
+	_php_session_start(PSLS_C);
+}
+
 PHP_RINIT_FUNCTION(session)
 {
 	PSLS_FETCH();
@@ -934,15 +941,8 @@ PHP_RINIT_FUNCTION(session)
 	}
 
 	if(INI_INT("session.auto_start")) {
-		php_error(E_ERROR, "session.auto_start is not available in this version. Disable it in your configuration.");
-		return FAILURE;
+		php_register_post_request_startup(_php_session_auto_start, NULL);
 	}
-	
-#if 0
-	if(INI_INT("session.auto_start")) {
-		_php_session_start(PSLS_C);
-	}
-#endif
 
 	return SUCCESS;
 }
