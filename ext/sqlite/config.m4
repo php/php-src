@@ -67,8 +67,6 @@ if test "$PHP_SQLITE" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
     AC_CHECK_SIZEOF(char *,4)
     AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
-    AC_DEFINE(OS_UNIX, 1, [if this is unix])
-    AC_DEFINE(OS_WIN, 0, [if this is windows])
     dnl use latin 1 for now; the utf-8 handling in funcs.c uses assert(),
     dnl which is a bit silly and something we want to avoid
     SQLITE_ENCODING="ISO8859"
