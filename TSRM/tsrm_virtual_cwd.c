@@ -33,6 +33,7 @@
 
 #ifdef TSRM_WIN32
 #include <io.h>
+#include "tsrm_win32.h"
 #endif
 
 #define VIRTUAL_CWD_DEBUG 0
@@ -738,11 +739,8 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 	*ptr++ = ' ';
 
 	memcpy(ptr, command, command_length+1);
-#ifdef TSRM_WIN32
-	retval = _popen(command_line, type);
-#else
 	retval = popen(command_line, type);
-#endif
+
 	free(command_line);
 	return retval;
 }
@@ -769,7 +767,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 #endif
 
 	chdir(CWDG(cwd).cwd);
-	retval = _popen(command, type);
+	retval = popen(command, type);
 	chdir(prev_cwd);
 
 #ifdef ZTS

@@ -18,8 +18,6 @@ typedef char * caddr_t;
 #define S_IFIFO		_IFIFO
 #define S_IFBLK		_IFBLK
 #define	S_IFLNK		_IFLNK
-#define pclose(a)		_pclose(a)
-#define popen(a, b)		_popen(a, b)
 #define chdir(path) SetCurrentDirectory(path)
 #define mkdir(a,b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)

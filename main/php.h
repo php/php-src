@@ -42,6 +42,7 @@
 #endif
 
 #ifdef PHP_WIN32
+#include "tsrm_win32.h"
 #include "win95nt.h"
 #	ifdef PHP_EXPORTS
 #	define PHPAPI __declspec(dllexport)
