@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Add DIRECTORY_SEPARATOR constant ('/' on UNIX, '\' on Windows) (Stig)
 - Added small change to php_odbc module, to check for failed SQLDisconnects
   and to close any outstanding transactions if the call fails, then disconnect
   again (lurcher)
