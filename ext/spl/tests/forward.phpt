@@ -36,6 +36,13 @@ $i = new c();
 
 $c_info = array(class_name($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
 print_r($c_info);
+$methods = get_class_methods("spl::forward_assoc");
+sort($methods);
+print_r($methods);
+$methods = get_class_methods($i);
+sort($methods);
+print_r($methods);
+
 
 echo "1st try\n";
 foreach($i as $w) {
@@ -75,6 +82,20 @@ Array
 
         )
 
+)
+Array
+(
+    [0] => current
+    [1] => has_more
+    [2] => key
+    [3] => next
+)
+Array
+(
+    [0] => current
+    [1] => has_more
+    [2] => key
+    [3] => next
 )
 1st try
 c::has_more

@@ -131,7 +131,7 @@ PHP_MINIT_FUNCTION(spl)
 	REGISTER_SPL_INTERFACE(spl, forward);
 	REGISTER_SPL_INTF_FUNC(spl, forward, current);
 	REGISTER_SPL_INTF_FUNC(spl, forward, next);
-	REGISTER_SPL_INTF_FUNC(spl, forward, more);
+	REGISTER_SPL_INTF_FUNC(spl, forward, has_more);
 
 	REGISTER_SPL_INTERFACE(spl, sequence);
 	REGISTER_SPL_INTF_FUNC(spl, sequence, rewind);

@@ -106,6 +106,7 @@ void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * i
 	zend_uint num_interfaces = ++class_entry->num_interfaces;
 	class_entry->interfaces = (zend_class_entry **) realloc(class_entry->interfaces, sizeof(zend_class_entry *) * num_interfaces);
 	class_entry->interfaces[num_interfaces-1] = interface_entry;
+	zend_hash_copy(&class_entry->function_table, &interface_entry->function_table, NULL, NULL, sizeof(zend_function));
 }
 /* }}} */
 
