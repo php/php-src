@@ -315,12 +315,20 @@ ZEND_API extern char *empty_string;
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API zend_write_func_t zend_write;
-extern ZEND_API void (*zend_error)(int type, const char *format, ...);
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
- 
+
+#define ZEND_NEW_ERROR_HANDLING 0
+
+#if ZEND_NEW_ERROR_HANDLING
+ZEND_API void zend_error(int type, const char *format, ...);
+#else
+#define zend_error zend_error_cb
+ZEND_API void (*zend_error_cb)(int type, const char *format, ...);
+#endif
+
 void zenderror(char *error);
 
 extern ZEND_API zend_class_entry zend_standard_class_def;

@@ -40,13 +40,18 @@
 ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
-ZEND_API void (*zend_error)(int type, const char *format, ...);
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
 static void (*zend_message_dispatcher_p)(long message, void *data);
 static int (*zend_get_ini_entry_p)(char *name, uint name_length, zval *contents);
+
+#if ZEND_NEW_ERROR_HANDLING
+static void (*zend_error_cb)(int type, const char *format, ...);
+#else
+ZEND_API void (*zend_error_cb)(int type, const char *format, ...);
+#endif
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -306,7 +311,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 
 	/* Set up utility functions and values */
-	zend_error = utility_functions->error_function;
+	zend_error_cb = utility_functions->error_function;
 	zend_printf = utility_functions->printf_function;
 	zend_write = (zend_write_func_t) utility_functions->write_function;
 	zend_fopen = utility_functions->fopen_function;
@@ -483,3 +488,67 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents)
 		return FAILURE;
 	}
 }
+
+
+
+#if ZEND_NEW_ERROR_HANDLING
+
+#define ZEND_ERROR_BUFFER_SIZE 1024
+
+ZEND_API void zend_error(int type, const char *format, ...)
+{
+	va_list args;
+	zval **params;
+	zval retval;
+	zval error_type, error_message;
+	ELS_FETCH();
+	CLS_FETCH();
+
+	INIT_PZVAL(&error_message);
+	error_message.value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
+
+	va_start(args, format);
+/*	error_message.value.str.len = vsnprintf(error_message->value.str.val, error_message->value.str.len-1, format, args); */
+	error_message.value.str.len = vsprintf(error_message.value.str.val, format, args);
+	error_message.type = IS_STRING;
+	va_end(args);
+
+	/* if we don't have a user defined error handler */
+	if (!EG(user_error_handler)) {
+		zend_error_cb(type, error_message.value.str.val);
+		efree(error_message.value.str.val);
+		return;
+	}
+
+	/* or the error may not be safe to handle in user-space */
+	switch (type) {
+		case E_ERROR:
+		case E_PARSE:
+		case E_CORE_ERROR:
+		case E_CORE_WARNING:
+		case E_COMPILE_ERROR:
+		case E_COMPILE_WARNING:
+			zend_error_cb(type, error_message.value.str.val);
+			efree(error_message.value.str.val);
+			return;
+	}
+
+	/* Handle the error in user space */
+
+	error_type.value.lval = type;
+	error_type.type = IS_LONG;
+
+	params = (zval **) emalloc(sizeof(zval *)*2);
+	params[0] = &error_type;
+	params[1] = &error_message;
+
+	if (call_user_function(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params)==SUCCESS) {
+	} else {
+		/* The user error handler failed, use built-in error handler */
+		zend_error_cb(type, error_message.value.str.val);
+	}
+	efree(params);
+	efree(error_message.value.str.val);
+}
+
+#endif
