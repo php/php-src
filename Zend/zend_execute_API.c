@@ -881,7 +881,6 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 	int result;
 	zval *exception = EG(exception);
 
-
 	if (handle_exceptions) {
 		EG(exception) = NULL;
 	}
