@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added ability to use Perl-style ${n} subpattern references in the
+  replacement string for preg_replace(). Takes care of bug #18442. (Andrei)
 - Fixed array_merge_recursive() to avoid problems with merging cyclical
   arrays (bug #16064). (Andrei)
 - Made function_exists() work properly with disabled functions. (Andrei)
