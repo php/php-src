@@ -558,7 +558,7 @@ PHP_FUNCTION(unpack)
 			}
 
 			case 'h': case 'H': {
-				size = arg/2;
+				size = (arg>0)?arg/2:arg;
 				arg = 1;
 				break;
 			}
