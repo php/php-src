@@ -405,7 +405,7 @@ PHP_FUNCTION(getimagesize)
 	if (result) {
 		if (array_init(return_value) == FAILURE) {
 			php_error(E_ERROR, "Unable to initialize array");
-			if (result) efree(result);
+			efree(result);
 			return;
 		}
 		add_index_long(return_value, 0, result->width);
@@ -420,7 +420,6 @@ PHP_FUNCTION(getimagesize)
 		if (result->channels != 0) {
 			add_assoc_long(return_value,"channels",result->channels);
 		} 
-		
 		efree(result);
 	}
 }
