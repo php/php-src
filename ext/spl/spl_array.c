@@ -301,12 +301,12 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_UNSET_DIM_OBJ)
 /* }}} */
 
 SPL_CLASS_FUNCTION(array, __construct);
-SPL_CLASS_FUNCTION(array, newiterator);
+SPL_CLASS_FUNCTION(array, newIterator);
 SPL_CLASS_FUNCTION(array, rewind);
 SPL_CLASS_FUNCTION(array, current);
 SPL_CLASS_FUNCTION(array, key);
 SPL_CLASS_FUNCTION(array, next);
-SPL_CLASS_FUNCTION(array, hasmore);
+SPL_CLASS_FUNCTION(array, hasMore);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
@@ -315,7 +315,7 @@ ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_array_class_functions[] = {
 	SPL_CLASS_FE(array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
-	SPL_CLASS_FE(array, newiterator,   NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, newIterator,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -325,7 +325,7 @@ static zend_function_entry spl_array_it_class_functions[] = {
 	SPL_CLASS_FE(array, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_CLASS_FE(array, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_CLASS_FE(array, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_CLASS_FE(array, hasmore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(array, hasMore,       NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -600,7 +600,7 @@ SPL_CLASS_FUNCTION(array, __construct)
 
 /* {{{ proto spl_array_it|NULL spl_array::newIterator()
    Create a new iterator from a spl_array instance */
-SPL_CLASS_FUNCTION(array, newiterator)
+SPL_CLASS_FUNCTION(array, newIterator)
 {
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -742,7 +742,7 @@ SPL_CLASS_FUNCTION(array, next)
 
 /* {{{ proto bool spl_array_it::hasMore()
    Check whether array contains more entries */
-SPL_CLASS_FUNCTION(array, hasmore)
+SPL_CLASS_FUNCTION(array, hasMore)
 {
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);

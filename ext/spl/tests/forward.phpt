@@ -86,51 +86,51 @@ Array
 Array
 (
     [0] => current
-    [1] => hasmore
+    [1] => hasMore
     [2] => key
     [3] => next
 )
 Array
 (
     [0] => current
-    [1] => hasmore
+    [1] => hasMore
     [2] => key
     [3] => next
 )
 1st try
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:0
 c::next
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:1
 c::next
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:2
 c::next
-c::hasmore
+c::hasMore
 2nd try
-c::hasmore
+c::hasMore
 3rd try
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:1st=>0
 c::next
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:2nd=>1
 c::next
-c::hasmore
+c::hasMore
 c::current
 c::key
 object:3rd=>2
 c::next
-c::hasmore
+c::hasMore
 Done

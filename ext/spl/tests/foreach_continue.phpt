@@ -64,38 +64,38 @@ foreach($t as $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 continue outer
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 double:1:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 continue inner
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 break inner
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 double:2:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 continue inner
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 break inner
 break outer

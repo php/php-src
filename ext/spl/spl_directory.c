@@ -40,8 +40,8 @@ SPL_CLASS_FUNCTION(dir, __construct);
 SPL_CLASS_FUNCTION(dir, rewind);
 SPL_CLASS_FUNCTION(dir, current);
 SPL_CLASS_FUNCTION(dir, next);
-SPL_CLASS_FUNCTION(dir, hasmore);
-SPL_CLASS_FUNCTION(dir, getpath);
+SPL_CLASS_FUNCTION(dir, hasMore);
+SPL_CLASS_FUNCTION(dir, getPath);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0)
@@ -53,8 +53,8 @@ static zend_function_entry spl_dir_class_functions[] = {
 	SPL_CLASS_FE(dir, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_CLASS_FE(dir, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_CLASS_FE(dir, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_CLASS_FE(dir, hasmore,       NULL, ZEND_ACC_PUBLIC)
-	SPL_CLASS_FE(dir, getpath,       NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, getPath,       NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -245,7 +245,7 @@ SPL_CLASS_FUNCTION(dir, next)
 
 /* {{{ proto string hasMore()
    Check whether dir contains more entries */
-SPL_CLASS_FUNCTION(dir, hasmore)
+SPL_CLASS_FUNCTION(dir, hasMore)
 {
 	zval *object = getThis();
 	spl_dir_object *intern = (spl_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -256,7 +256,7 @@ SPL_CLASS_FUNCTION(dir, hasmore)
 
 /* {{{ proto string getPath()
    Return directory path */
-SPL_CLASS_FUNCTION(dir, getpath)
+SPL_CLASS_FUNCTION(dir, getPath)
 {
 	zval *object = getThis();
 	spl_dir_object *intern = (spl_dir_object*)zend_object_store_get_object(object TSRMLS_CC);

@@ -117,14 +117,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_two_params, 0)
 ZEND_END_ARG_INFO();
 
 function_entry spl_funcs_iterator[] = {
-	SPL_ABSTRACT_FE(iterator, newiterator, NULL)
+	SPL_ABSTRACT_FE(iterator, newIterator, NULL)
 	{NULL, NULL, NULL}
 };
 
 function_entry spl_funcs_forward[] = {
 	SPL_ABSTRACT_FE(forward, current,  NULL)
 	SPL_ABSTRACT_FE(forward, next,     NULL)
-	SPL_ABSTRACT_FE(forward, hasmore,  NULL)
+	SPL_ABSTRACT_FE(forward, hasMore,  NULL)
 	{NULL, NULL, NULL}
 };
 

@@ -130,9 +130,9 @@ Notice: spl_array_it::next(): Array was modified outside object and internal pos
 
 Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: spl_array_it::hasmore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
 Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: spl_array_it::hasmore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: spl_array_it::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 Done
