@@ -1,3 +1,53 @@
+2003-03-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/extension_parser.php:
+      protect string from CVS keyword expansionCVS:
+      ----------------------------------------------------------------------
+
+2003-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysqli/mysqli_profiler.c:
+      missing TSRMLS_FETCH
+
+    * ext/dba/dba.c:
+      CS
+
+2003-03-20  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.c:
+      fix for bug #22786 ("Crash when trying to call DomAttribute's set_namespace
+      method")
+
+2003-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c:
+      WS & CS fixes..
+
+2003-03-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      Fix for persistent stream shutdown under debug builds
+
+2003-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c:
+      CS fix
+
+2003-03-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix for persistent stream shutdown in debug builds.
+
+2003-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/dio/dio.c
+      ext/gd/gd.c:
+      WS & CS fixes
+
 2003-03-19  Jani Taskinen  <sniper@iki.fi>
 
     * ext/mysqli/config.m4:
