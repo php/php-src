@@ -110,10 +110,10 @@ function initialize()
 
     // XXX Should support HTML output as well.
     $term = getenv("TERM");
-    if (preg_match('/^(xterm|vt220)/', $term)) {
+    if (ereg('^(xterm|vt220)', $term)) {
         $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
         $term_norm = sprintf("%c%c%c", 27, 91, 109);
-    } elseif (preg_match('/^vt100/', $term)) {
+    } elseif (ereg('^vt100', $term)) {
         $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
         $term_norm = sprintf("%c%c%c", 27, 91, 109);
     } else {
@@ -163,7 +163,7 @@ function &parse_options(&$argc, &$argv)
         if ($arg == "--") {
             return $options;
         }
-        if (preg_match('/^--([^=]+)=(.*)$/', $opt, $matches)) {
+        if (ereg('^--([^=]+)=(.*)$', $opt, $matches)) {
             $opt = $matches[1];
             $arg = $matches[2];
         } else {
@@ -413,7 +413,7 @@ function run_test($file)
 
 
     while ($line = fgets($fp, 4096)) {
-        if (preg_match('/^--([A-Z]+)--/', $line, $matches)) {
+        if (ereg('^--([A-Z]+)--', $line, $matches)) {
             $var = $matches[1];
             if (isset($tmpfile[$var]) && $tmpfile[$var]) {
                 $fps[$var] = @fopen($tmpfile[$var], "w");
@@ -478,14 +478,14 @@ function run_test($file)
     }
     if (isset($fps["POST"])) {
         if(!$windows_p) {
-            $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
+            $cmd = "2>&1 $php -q $tmpfile[FILE] < $tmpfile[POST]";
         }
         else {
             $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE] < $tmpfile[POST]";
         }
     } else {
         if(!$windows_p) {
-            $cmd = "$php -q $tmpfile[FILE]";
+            $cmd = "2>&1 $php -q $tmpfile[FILE]";
         }
         else {
             $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE]";;
@@ -511,9 +511,9 @@ function run_test($file)
     fclose($ofp);
     pclose($cp);
     $desc = isset($TEST)?trim($TEST):"";
-    $outfile = preg_replace('/\.phpt$/', '.out', $file);
-    $expectfile = preg_replace('/\.phpt$/', '.exp', $file);
-    $phpfile = preg_replace('/\.phpt$/', '.php', $file);
+    $outfile = ereg_replace('\.phpt$', '.out', $file);
+    $expectfile = ereg_replace('\.phpt$', '.exp', $file);
+    $phpfile = ereg_replace('\.phpt$', '.php', $file);
     if (compare_results($tmpfile["OUTPUT"], $tmpfile["EXPECT"])) {
         $status = TEST_PASSED;
         $text = "passed";
