@@ -1,3 +1,29 @@
+2004-04-03  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+      Patch by Timm Friebe:
+      It changes
+      set_exception_handler() to accept the pseudo-type "callable" (instead of
+      a string referring to a global function).
+      
+      
+      Examples:
+        set_exception_handler('function_name');
+        set_exception_handler(array('class_name', 'static_method'));
+        set_exception_handler(array($instance, 'instance_method'));
+      
+      
+      This also makes set_exception_handler() more consistent with all the
+      other callback functionality, e.g. set_error_handler().
+
+    * zend_operators.c:
+      - Nuke more old junk
+
+    * zend.h
+      zend_operators.c
+      zend_operators.h:
+      - Nuke code which hasn't been in use for ages.
+
 2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:

@@ -1,3 +1,131 @@
+2004-04-03  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Patch by Timm Friebe:
+      It changes
+      set_exception_handler() to accept the pseudo-type "callable" (instead of
+      a string referring to a global function).
+      
+      
+      Examples:
+        set_exception_handler('function_name');
+        set_exception_handler(array('class_name', 'static_method'));
+        set_exception_handler(array($instance, 'instance_method'));
+      
+      
+      This also makes set_exception_handler() more consistent with all the
+      other callback functionality, e.g. set_error_handler().
+
+2004-04-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mbstring/config.m4:
+      - MFB: Fixed bug #27849 (configure craps out on trivial syntax error).
+
+    * (PHP_4_3)
+      NEWS
+      ext/mbstring/config.m4:
+      - Fixed bug #27849 (configure craps out on trivial syntax error).
+
+2004-04-03  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - Nuke more old junk
+
+2004-04-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/standard/config.m4:
+      That should do it
+
+2004-04-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/PEAR/Command/Remote.php:
+      MFH
+      fixed #534 for real (remove notice if state=stable doesn't exist, and use
+      "none" for stable version number)
+
+    * pear/PEAR/Command/Remote.php:
+      fixed #534 for real (remove notice if state=stable doesn't exist, and use
+      "none" for stable version number)
+
+2004-04-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/tests/008.phpt:
+      Skip on Windows
+
+    * ext/interbase/tests/interbase.inc:
+      Don't rely on OS-based authentication (as it is not supported under Win32)
+
+2004-04-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_014.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt:
+      Increase severity level and use a more precise error message.
+
+2004-04-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/standard/config.m4:
+      2nd try for glibc2.2/sparc64
+
+2004-04-03  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      - Nuke code which hasn't been in use for ages.
+
+2004-04-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/tests/004.phpt:
+      fclose() tempfile so unlink() doesn't choke on Win32
+
+    * ext/interbase/interbase.c:
+      Change definition of ISC_LONG_[MIN|MAX] to please MSVC.
+
+    * ext/standard/config.m4:
+      MFB: more elaborate HUGE_VAL test
+
+2004-04-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c:
+      Initialize to 0 to prevent valgrind warnings
+
+2004-04-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/standard/config.m4:
+      Changed test to include returning HUGE_VAL as well (intended to resolve
+      #27830)
+
+2004-04-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/PEAR.php
+      pear/package-PEAR.xml:
+      MFH
+      fix Bug #937 throwError() treats every call as static
+      fix Bug #964 PEAR_ERROR_EXCEPTION causes fatal error
+
+    * pear/PEAR.php
+      pear/package-PEAR.xml:
+      fix Bug #937 throwError() treats every call as static
+      fix Bug #964 PEAR_ERROR_EXCEPTION causes fatal error
+
+    * (PHP_4_3)
+      pear/package-PEAR.xml
+      pear/PEAR/Command/Remote.php:
+      MFH fix #534: pear search doesn't list unstable releases
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Command/Remote.php:
+      fix #534: pear search doesn't list unstable releases
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      not devel any more
+
 2004-04-02  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/parsedate.y:
