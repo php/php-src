@@ -138,6 +138,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 			zend_list_delete(op->value.lval);
 			op->type = IS_LONG;
 			break;
+		case IS_OBJECT:
+			convert_to_long_base(op, 10);
+			break;
 		case IS_NULL:
 			op->type = IS_LONG;
 			op->value.lval = 0;
@@ -180,6 +183,11 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).type = IS_LONG;									\
 				(op) = &(holder);											\
 				break;														\
+			case IS_OBJECT:													\
+				(holder) = (*(op));											\
+				zval_copy_ctor(&(holder));									\
+				convert_to_long_base(&(holder), 10);						\
+				break;														\
 		}																	\
 	}
 
@@ -206,7 +214,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 			case IS_OBJECT:											\
 				(holder) = (*(op));									\
 				zval_copy_ctor(&(holder));							\
-				convert_to_long(&(holder));							\
+				convert_to_long_base(&(holder), 10);				\
 				break;												\
 			case IS_BOOL:											\
 			case IS_RESOURCE:										\
@@ -262,6 +270,27 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	}
 
 
+#define convert_object_to_type(op, ctype, conv_func)											\
+	if (Z_OBJ_HT_P(op)->cast_object) {														\
+		if (Z_OBJ_HT_P(op)->cast_object(op, op, ctype, 1 TSRMLS_CC) == SUCCESS) {			\
+			op->type = ctype;																\
+			return;																			\
+		}																					\
+	} else {																				\
+		if(Z_OBJ_HT_P(op)->get) {															\
+			zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);								\
+			if(Z_TYPE_P(newop) != IS_OBJECT) {												\
+				/* for safety - avoid loop */												\
+				zval_dtor(op);																\
+				*op = *newop;																\
+				FREE_ZVAL(newop);															\
+				conv_func(op);																\
+				return;																		\
+			}																				\
+		}																					\
+	}
+
+
 ZEND_API void convert_to_long(zval *op)
 {
 	convert_to_long_base(op, 10);
@@ -301,27 +330,22 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			break;
 		case IS_OBJECT:
 			{
+				int retval = 1;
 				TSRMLS_FETCH();
 
-				if (Z_OBJ_HT_P(op)->cast_object) {
-					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
-						break;
+				convert_object_to_type(op, IS_LONG, convert_to_long);
+					
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1:0);
 					}
 				} else {
-					int retval = 1;
-					
-					if (EG(ze1_compatibility_mode)) {
-						HashTable *ht = Z_OBJPROP_P(op);
-						if (ht) {
-							retval = (zend_hash_num_elements(ht)?1:0);
-						}
-					} else {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to integer", Z_OBJCE_P(op)->name);
-					}
-
-					zval_dtor(op);
-					ZVAL_LONG(op, retval);
+					zend_error(E_NOTICE, "Object of class %s could not be converted to integer", Z_OBJCE_P(op)->name);
 				}
+				
+				zval_dtor(op);
+				ZVAL_LONG(op, retval);
 				break;
 			}
 		default:
@@ -369,28 +393,22 @@ ZEND_API void convert_to_double(zval *op)
 			break;
 		case IS_OBJECT:
 			{
+				double retval = 1.0;
 				TSRMLS_FETCH();
+				
+				convert_object_to_type(op, IS_DOUBLE, convert_to_double);
 
-				if (Z_OBJ_HT_P(op)->cast_object) {
-					TSRMLS_FETCH();
-					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
-						break;
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1.0:0.0);
 					}
 				} else {
-					double retval = 1.0;
-					
-					if (EG(ze1_compatibility_mode)) {
-						HashTable *ht = Z_OBJPROP_P(op);
-						if (ht) {
-							retval = (zend_hash_num_elements(ht)?1.0:0.0);
-						}
-					} else {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
-					}
-
-					zval_dtor(op);
-					ZVAL_DOUBLE(op, retval);
+					zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
 				}
+
+				zval_dtor(op);
+				ZVAL_DOUBLE(op, retval);
 				break;
 			}	
 		default:
@@ -460,25 +478,20 @@ ZEND_API void convert_to_boolean(zval *op)
 			break;
 		case IS_OBJECT:
 			{
+				zend_bool retval = 1;
 				TSRMLS_FETCH();
 
-				if (Z_OBJ_HT_P(op)->cast_object) {
-					if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-				} else {
-					zend_bool retval = 1;
+				convert_object_to_type(op, IS_BOOL, convert_to_double);
 					
-					if (EG(ze1_compatibility_mode)) {
-						HashTable *ht = Z_OBJPROP_P(op);
-						if (ht) {
-							retval = (zend_hash_num_elements(ht)?1:0);
-						}
+				if (EG(ze1_compatibility_mode)) {
+					HashTable *ht = Z_OBJPROP_P(op);
+					if (ht) {
+						retval = (zend_hash_num_elements(ht)?1:0);
 					}
-
-					zval_dtor(op);
-					ZVAL_BOOL(op, retval);
 				}
+				
+				zval_dtor(op);
+				ZVAL_BOOL(op, retval);
 				break;
 			}
 		default:
@@ -488,7 +501,6 @@ ZEND_API void convert_to_boolean(zval *op)
 	}
 	op->type = IS_BOOL;
 }
-
 
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 {
@@ -542,14 +554,10 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		case IS_OBJECT: {
 			TSRMLS_FETCH();
-			if (Z_OBJ_HT_P(op)->cast_object) {
-				if (Z_OBJ_HT_P(op)->cast_object(op, op, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
-					break;
-				}
-				zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name);
-			} else {
-				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
-			}
+			
+			convert_object_to_type(op, IS_STRING, convert_to_string);
+
+			zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
 			zval_dtor(op);
 			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
 			op->value.str.len = sizeof("Object")-1;
@@ -609,7 +617,12 @@ ZEND_API void convert_to_array(zval *op)
 				ALLOC_HASHTABLE(ht);
 				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 				if (Z_OBJ_HT_P(op)->get_properties) {
-					zend_hash_copy(ht, Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
+					if(obj_ht) {
+						zend_hash_copy(ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+					}
+				} else {
+					convert_object_to_type(op, IS_ARRAY, convert_to_array);
 				}
 				zval_dtor(op);
 				op->type = IS_ARRAY;
