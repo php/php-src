@@ -49,7 +49,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 
-
+static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static int le_result, le_result_entry, le_ber_entry;
 static int le_link;
 
@@ -71,8 +71,8 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_first_entry,						NULL)
 	PHP_FE(ldap_next_entry,							NULL)
 	PHP_FE(ldap_get_entries,						NULL)
-	PHP_FE(ldap_first_attribute,					NULL)
-	PHP_FE(ldap_next_attribute,						NULL)
+	PHP_FE(ldap_first_attribute,					third_argument_force_ref)
+	PHP_FE(ldap_next_attribute,						third_argument_force_ref)
 	PHP_FE(ldap_get_attributes,						NULL)
 	PHP_FE(ldap_get_values,							NULL)
 	PHP_FE(ldap_get_values_len,						NULL)
@@ -806,7 +806,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	char *attribute;
 	LDAPLS_FETCH();
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link,&result,&berp) == FAILURE || ParameterPassedByReference(ht,3)==0 ) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link,&result,&berp) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -852,11 +852,17 @@ PHP_FUNCTION(ldap_next_attribute)
 	ldap_result_entry = _get_ldap_result_entry(result);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
-	ber = _get_ber_entry(berp);
+	if((ber = _get_ber_entry(berp)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if ((attribute = ldap_next_attribute(ldap, ldap_result_entry, ber)) == NULL) {
 		RETURN_FALSE;
 	} else {
+		/* brep is passed by ref so we do not have to account for memory */
+		(*berp)->type=IS_LONG;
+		(*berp)->value.lval=zend_list_insert(ber,le_ber_entry);
+
 		RETVAL_STRING(attribute,1);
 #ifdef WINDOWS
 		ldap_memfree(attribute);
