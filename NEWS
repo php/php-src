@@ -2,8 +2,6 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 25 Jun 2000, Version 4.0.1
-- Added the ImageCopyMerge, ImagePaletteCopy and ImageColorClosestHWB functions. (Sterling)
-- Added function imagecreatefromwbmp(). (Jouni)
 - Added the ImageColorClosestHWB, ImageCopyMerge and ImagePaletteCopy 
   functions. (Sterling)
 - Added function ImageCreateFromWBMP. (Jouni)
