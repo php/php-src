@@ -163,7 +163,9 @@ static void php_startup_loaded_extension_cb(void *arg){
 
 int php_startup_loaded_extensions(void)
 {
-	zend_llist_apply(php_load_extension_list, php_startup_loaded_extension_cb);
+	if(php_load_extension_list) {
+		zend_llist_apply(php_load_extension_list, php_startup_loaded_extension_cb);
+	}
 	return SUCCESS;
 }
 
