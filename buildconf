@@ -114,7 +114,9 @@ fi
 
 ./scripts/preconfig
 
+rm -f ltmain.sh
 libtoolize --automake $automake_flags --force
+patch < patch-ltmain.sh
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
@@ -136,10 +138,10 @@ fi
 
 autoheader
 
-# suppress stupid automake warning
+# find all Makefile.ams
 files=`find . -name Makefile.am | sed 's#\.am##' | tr '\n' ' '`
 
-
+# suppress stupid automake warning
 automake --add-missing --include-deps $automake_flags $files  2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
 
 
