@@ -151,6 +151,7 @@ PHP_MINIT_FUNCTION(swf)
 PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
+	char *na;
 	if (ARG_COUNT(ht) != 7 ||
 	    zend_get_parameters_ex(7, &name, &sizeX, &sizeY, &frameRate, &r, &g, &b) == FAILURE) {
 	    WRONG_PARAM_COUNT;
@@ -164,7 +165,9 @@ PHP_FUNCTION(swf_openfile)
 	convert_to_double_ex(g);
 	convert_to_double_ex(b);
 	
-	swf_openfile((*name)->value.str.val,
+	na = (*name)->value.str.val;
+	
+	swf_openfile((strcasecmp("php://stdout", na)==0) ? stdout : na,
 			 (float)(*sizeX)->value.dval, (float)(*sizeY)->value.dval,
       		 	 (float)(*frameRate)->value.dval, (float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval);
 }
