@@ -327,7 +327,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						*variable_ptr = *value;
 						zval_copy_ctor(variable_ptr);
 						variable_ptr->refcount=1;
-						variable_ptr->EA.locks = previous_lock_count;
+						variable_ptr->EA.locks = 0;
 						break;
 					}
 					*variable_ptr_ptr = value;
