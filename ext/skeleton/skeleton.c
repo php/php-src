@@ -9,11 +9,7 @@
 */
 #if HAVE_EXTNAME
 
-#ifdef ZTS
-int extname_globals_id;
-#else
-php_extname_globals extname_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(extname)
 
 /* Every user visible function must have an entry in extname_functions[].
 */
