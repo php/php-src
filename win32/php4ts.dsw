@@ -123,6 +123,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "php4pi3web"="..\sapi\pi3web\php4pi3web.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "php4ts"=".\php4ts.dsp" - Package Owner=<4>
 
 Package=<5>
