@@ -352,6 +352,10 @@ struct _pdo_stmt_t {
 
 	/* the cursor specific error code. */
 	enum pdo_error_type error_code;
+
+	/* for lazy fetches, we always return the same lazy object handle.
+	 * Let's keep it here. */
+	zval lazy_object_ref;
 };
 
 /* call this in MINIT to register your PDO driver */

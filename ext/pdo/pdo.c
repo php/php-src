@@ -51,7 +51,7 @@ PDO_API zend_class_entry *php_pdo_get_exception(void)
 	return pdo_exception_ce;
 }
 
-zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce;
+zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* {{{ pdo_functions[] */
 function_entry pdo_functions[] = {
@@ -258,6 +258,9 @@ PHP_MINIT_FUNCTION(pdo)
 	ce.create_object = pdo_dbstmt_new;
 	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
 
+	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
+	ce.create_object = pdo_row_new;
+	pdo_row_ce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	return SUCCESS;
 }
