@@ -515,12 +515,26 @@ PHP_FUNCTION(pdf_show_xy) {
 /* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, int encoding)
    Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font) {
-	pval *arg1, *arg2, *arg3, *arg4;
-	int id, type, font;
+	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	int id, type, font, embed;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	switch (ARG_COUNT(ht)) {
+	case 4:
+		if (getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		embed = 0;
+		break;
+	case 5:
+		if (getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long(arg5);
+		embed = arg5->value.lval;
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
@@ -542,23 +556,23 @@ PHP_FUNCTION(pdf_set_font) {
 
 	switch(arg4->value.lval) {
 		case 0:
-			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", embed);
 			break;
 		case 1:
-			font = PDF_findfont(pdf, arg2->value.str.val, "pdfdoc", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "pdfdoc", embed);
 			break;
 		case 2:
-			font = PDF_findfont(pdf, arg2->value.str.val, "macroman", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "macroman", embed);
 			break;
 		case 3:
-			font = PDF_findfont(pdf, arg2->value.str.val, "macexpert", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "macexpert", embed);
 			break;
 		case 4:
-			font = PDF_findfont(pdf, arg2->value.str.val, "winansi", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "winansi", embed);
 			break;
 		default:
 			php3_error(E_WARNING,"Encoding out of range, using 0");
-			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", 1);
+			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", embed);
 	}
 
 	if (font < 0) {
