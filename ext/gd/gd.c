@@ -562,7 +562,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 }
 /* }}} */
 
-/* {{{ void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
+/* {{{ proto void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
    Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
 {
@@ -2883,10 +2883,9 @@ PHP_FUNCTION(imagepsloadfont)
 }
 /* }}} */
 
-/* {{{ The function in t1lib which this function uses seem to be buggy...
-proto int imagepscopyfont(int font_index)
-Make a copy of a font for purposes like extending or reenconding */
-/*
+/* {{{ proto int imagepscopyfont(int font_index)
+   Make a copy of a font for purposes like extending or reenconding */
+/* The function in t1lib which this function uses seem to be buggy...
 PHP_FUNCTION(imagepscopyfont)
 {
 #if HAVE_LIBT1
