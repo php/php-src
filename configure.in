@@ -119,7 +119,7 @@ PHP_BUILD_PROGRAM
 dnl paths to the targets relative to the build directory
 SAPI_PROGRAM=php
 dnl on HP-UX, the extension is .sl. Need to improve this
-SAPI_SHARED=libs/libphp4.s*
+SAPI_SHARED=libs/libphp4.so
 SAPI_STATIC=libs/libphp4.a
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
