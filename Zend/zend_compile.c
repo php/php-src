@@ -169,39 +169,33 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 
 void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
-	int (*do_op)(zval *, zval *, zval *);
+	int (*do_op)(zval *, zval *, zval * TSRMLS_DC);
 	zend_op *opline;
 
-	if (op == ZEND_SL) {
-		do_op = shift_left_function;
-	} else if (op == ZEND_SR) {
-		do_op = shift_right_function;
-	} else if (op == ZEND_BW_OR) {
-		do_op = bitwise_or_function;
-	} else if (op == ZEND_BW_AND) {
-		do_op = bitwise_and_function;
-	} else if (op == ZEND_BW_XOR) {
-		do_op = bitwise_xor_function;
-	} else if (op == ZEND_CONCAT) {
-		do_op = concat_function;
-	} else if (op == ZEND_ADD) {
-		do_op = add_function;
-	} else if (op == ZEND_SUB) {
-		do_op = sub_function;
-	} else if (op == ZEND_MUL) {
-		do_op = mul_function;
-	} else if (op == ZEND_DIV) {
-		do_op = div_function;
-	} else if (op == ZEND_MOD) {
-		do_op = mod_function;
-	} else if (op == ZEND_BW_NOT) {
-		bitwise_not_function(&result->u.constant, &op1->u.constant TSRMLS_CC);
-		return;
-	} else if (op == ZEND_BOOL_XOR) {
-		do_op = boolean_xor_function;
+#define FOLD_CASE(val, func)  \
+	case val: \
+		do_op = func; \
+		break;
+
+	switch (op) {
+		FOLD_CASE(ZEND_SL, shift_left_function)
+		FOLD_CASE(ZEND_SR, shift_right_function)
+		FOLD_CASE(ZEND_BW_OR, bitwise_or_function)
+		FOLD_CASE(ZEND_BW_AND, bitwise_and_function)
+		FOLD_CASE(ZEND_BW_XOR, bitwise_xor_function)
+		FOLD_CASE(ZEND_CONCAT, concat_function)
+		FOLD_CASE(ZEND_ADD, add_function)
+		FOLD_CASE(ZEND_SUB, sub_function)
+		FOLD_CASE(ZEND_MUL, mul_function)
+		FOLD_CASE(ZEND_DIV, div_function)
+		FOLD_CASE(ZEND_MOD, mod_function)
+		FOLD_CASE(ZEND_BOOL_XOR, boolean_xor_function)
+		case ZEND_BW_NOT:
+			bitwise_not_function(&result->u.constant, &op1->u.constant TSRMLS_CC);
+			break;
 	}
 
-	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant);
+	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant TSRMLS_CC);
 }
 
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
