@@ -447,6 +447,7 @@ memmove \
 mkstemp \
 mmap \
 nl_langinfo \
+poll \
 putenv \
 realpath \
 random \
