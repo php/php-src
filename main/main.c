@@ -85,6 +85,28 @@ PHPAPI int core_globals_id;
 
 static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC);
 
+
+static char *short_track_vars_names[] = {
+	"_POST",
+	"_GET",
+	"_COOKIE",
+	"_SERVER",
+	"_ENV",
+	"_FILES",
+	NULL
+};
+
+static int short_track_vars_names_length[] = {
+	sizeof("_POST"),
+	sizeof("_GET"),
+	sizeof("_COOKIE"),
+	sizeof("_SERVER"),
+	sizeof("_ENV"),
+	sizeof("_FILES")
+};
+
+
+
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 /* {{{ PHP_INI_MH
@@ -760,6 +782,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
 	char *php_os;
+	int i;
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
@@ -868,6 +891,9 @@ int php_module_startup(sapi_module_struct *sf)
 	}
 
 	zuv.import_use_extension = ".php";
+	for (i=0; i<6; i++) {
+		zend_register_auto_global(short_track_vars_names[i], short_track_vars_names_length[i]-1 TSRMLS_CC);
+	}
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
 
@@ -1103,6 +1129,8 @@ static int php_hash_environment(TSRMLS_D)
 			PG(http_globals)[i] = dummy_track_vars_array;
 		}
 		zend_hash_update(&EG(symbol_table), track_vars_names[i], track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
+		PG(http_globals)[i]->refcount++;
+		zend_hash_update(&EG(symbol_table), short_track_vars_names[i], short_track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
 	}
 	return SUCCESS;
 }
