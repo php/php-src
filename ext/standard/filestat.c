@@ -862,7 +862,7 @@ FileFunction(php_if_lstat, FS_LSTAT)
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat, FS_SIZE)
+FileFunction(php_if_stat, FS_STAT)
 /* }}} */
 
 /*
