@@ -105,7 +105,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	int in_string=0;
 
 	zend_printf("<code>");
-	zend_printf("<font color=\"%s\">\n", last_color);
+	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
 	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
@@ -149,11 +149,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		if (last_color != next_color) {
 			if (last_color != syntax_highlighter_ini->highlight_html) {
-				zend_printf("</font>");
+				zend_printf("</span>");
 			}
 			last_color = next_color;
 			if (last_color != syntax_highlighter_ini->highlight_html) {
-				zend_printf("<font color=\"%s\">", last_color);
+				zend_printf("<span style=\"color: %s\">", last_color);
 			}
 		}
 		switch (token_type) {
@@ -184,9 +184,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		token.type = 0;
 	}
 	if (last_color != syntax_highlighter_ini->highlight_html) {
-		zend_printf("</font>\n");
+		zend_printf("</span>\n");
 	}
-	zend_printf("</font>\n");
+	zend_printf("</span>\n");
 	zend_printf("</code>");
 }
 
