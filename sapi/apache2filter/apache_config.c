@@ -62,12 +62,12 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	
 	str_len = strlen(name);
 	
-	if (zend_hash_find(&d->config, name, str_len + 1, (void **) &pe) == SUCCESS) {
+	if (zend_hash_find(&d->config, (char *) name, str_len + 1, (void **) &pe) == SUCCESS) {
 		if (pe->status > status)
 			return NULL;
 	}
 	
-	zend_hash_update(&d->config, name, strlen(name) + 1, &e, sizeof(e),
+	zend_hash_update(&d->config, (char *) name, strlen(name) + 1, &e, sizeof(e),
 			NULL);
 	return NULL;
 }

@@ -21,7 +21,7 @@
 
 typedef struct php_struct {
 	int state;
-	ap_bucket_brigade *bb;
+	apr_bucket_brigade *bb;
 	ap_filter_t *f;
 	/* Length of post_data buffer */
 	int post_len;
