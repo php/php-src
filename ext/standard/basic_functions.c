@@ -73,7 +73,7 @@
 # include <sys/mman.h>
 #endif
 
-#ifdef HAVE_GETOPT_LONG
+#ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 

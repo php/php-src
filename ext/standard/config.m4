@@ -225,6 +225,8 @@ AC_ARG_WITH(regex,
 
 AC_FUNC_FNMATCH	
 
+AC_CHECK_HEADERS(getopt.h)
+
 AC_CHECK_FUNCS(glob strfmon getopt_long getopt_long_only)
 
 if test "$PHP_SAPI" = "cgi"; then
