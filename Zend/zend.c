@@ -730,3 +730,29 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
 	return SUCCESS;
 }
 
+#define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
+
+ZEND_API char *zend_make_compiled_string_description(char *name)
+{
+	char *cur_filename;
+	int cur_lineno;
+	char *compiled_string_description;
+	CLS_FETCH();
+	ELS_FETCH();
+
+	if (zend_is_compiling()) {
+		cur_filename = zend_get_compiled_filename(CLS_C);
+		cur_lineno = zend_get_compiled_lineno(CLS_C);
+	} else if (zend_is_executing()) {
+		cur_filename = zend_get_executed_filename(ELS_C);
+		cur_lineno = zend_get_executed_lineno(ELS_C);
+	} else {
+		cur_filename = "Unknown";
+		cur_lineno = 0;
+	}
+
+	compiled_string_description = emalloc(sizeof(COMPILED_STRING_DESCRIPTION_FORMAT)+strlen(name)+strlen(cur_filename)+MAX_LENGTH_OF_LONG);
+	sprintf(compiled_string_description, COMPILED_STRING_DESCRIPTION_FORMAT, cur_filename, cur_lineno, name);
+	return compiled_string_description;
+}
+
