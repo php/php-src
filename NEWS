@@ -19,6 +19,7 @@ PHP 4                                                                      NEWS
 - Fixed certificate version and allowed setting of the serial number in
   openssl_csr_sign(). (Stefan Roehrich)
 - Fixed each() to be binary safe for keys. (Zeev)
+- Fixed bug #24873 (incorrect handling of / inside open_basedir). (Ilia)
 - Fixed bug #24827 (ob_gzhandler overrides Vary header). (Ilia)
 - Fixed bug #24783 (foreach($ar as $key => $val), $key not binary safe). (Zeev)
 - Fixed bug #24760 (non-default SNMP port number not working). (Jani)
