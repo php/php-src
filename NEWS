@@ -1,8 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-26 Nov 2001, Version 4.1.0
-- Fixed a bug which caused set_time_limit() to affect all requests to an
-  Apache child. (Zeev)
+10 Dec 2001, Version 4.1.0
+- Worked around a bug in the MySQL client library that could cause PHP to hang
+  when using unbuffered queries. (Zeev)
+- Fixed a bug which caused set_time_limit() to affect all subsequent requests
+  to running Apache child process. (Zeev)
 - Removed the sablotron extension in favor of the new XSLT extension.
   (Sterling)
 - Fixed a bug in WDDX deserialization that would sometimes corrupt the root
