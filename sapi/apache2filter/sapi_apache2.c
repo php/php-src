@@ -248,6 +248,10 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 	apr_status_t rv;
 	TSRMLS_FETCH();
 
+	if (f->r->proxyreq) {
+		return ap_get_brigade(f->next, bb, mode, readbytes);
+	}
+
 	ctx = SG(server_context);
 
 	INIT_CTX;
