@@ -26,8 +26,11 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/php_standard.h"
 #include "php_odbc.h"
+#include "php_globals.h"
 
 #if HAVE_UODBC
 
@@ -129,14 +132,6 @@ ZEND_API php_odbc_globals odbc_globals;
 DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; };
 #endif
 
-static int _odbc_stmt_cleanup(list_entry *le)
-{
-	if(le->type == le_result){
-		return 1;
-	}
-	return 0;
-}
-
 static void _free_odbc_result(odbc_result *res)
 {
 	int i;
@@ -156,9 +151,10 @@ static void _free_odbc_result(odbc_result *res)
 						(UWORD)SQL_COMMIT);
 #endif
 			SQLFreeStmt(res->stmt,SQL_DROP);
-#if !defined( HAVE_IBMDB2 ) && !defined( HAVE_UNIXODBC )
-			res->stmt = NULL;
-#endif
+			/* We don't want the connection to be closed after the last statment has been closed
+			 * Connections will be closed on shutdown
+			 * zend_list_delete(res->conn_ptr->id);
+			 */
 		}
 		efree(res);
 	}
@@ -184,7 +180,6 @@ static void _close_odbc_pconn(odbc_connection *conn)
 {
 	ODBCLS_FETCH();
 	
-	conn->open = 0;
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	SQLFreeEnv(conn->henv);
@@ -410,32 +405,12 @@ PHP_MINIT_FUNCTION(odbc)
 }
 
 
-#if 0
-static void _php_odbc_shutdown(void *data)
-{
-	ELS_FETCH();
-	
-	/* Close all statements before connection */
-	
-	/* this is not the nice way of doing it - we should use reference counting
-	   of the parent handles */
-
-	zend_hash_apply(&EG(regular_list), (int (*)(void *)) _odbc_stmt_cleanup);
-}
-#endif
-
-
 PHP_RINIT_FUNCTION(odbc)
 {
 	ODBCLS_FETCH();
 	
 	ODBCG(defConn) = -1;
 	ODBCG(num_links) = ODBCG(num_persistent);
-
-	/* This should no longer be necessary, as hash_apply() is reentrant
-	 * php_register_pre_request_shutdown(_php_odbc_shutdown, NULL);
-	 */
-
 	return SUCCESS;
 }
 
@@ -449,7 +424,6 @@ PHP_MSHUTDOWN_FUNCTION(odbc)
 	ODBCLS_FETCH();
 
 	UNREGISTER_INI_ENTRIES();
-	/*SQLFreeEnv(henv);*/
 	return SUCCESS;
 }
 
@@ -615,6 +589,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 
 /* Main User Functions */
+/* XXX This one needs rework, it won't work if there are active statements */
 /* {{{ proto void odbc_close_all(void)
    Close all ODBC connections */
 PHP_FUNCTION(odbc_close_all)
@@ -705,9 +680,11 @@ PHP_FUNCTION(odbc_prepare)
 	} else {
 		result->values = NULL;
 	}
+	result->id = zend_list_insert(result, le_result);	
+	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	RETURN_RESOURCE(result->id);
 }
 /* }}} */
 
@@ -1032,9 +1009,12 @@ PHP_FUNCTION(odbc_exec)
 	} else {
 		result->values = NULL;
 	}
+	result->id = zend_list_insert(result, le_result);
+	zend_list_addref(conn->id);
 	result->conn_ptr = conn;
 	result->fetched = 0;
-	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	
+	RETURN_RESOURCE(result->id);
 }
 /* }}} */
 
@@ -1571,7 +1551,7 @@ PHP_FUNCTION(odbc_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
-	zend_list_delete((*pv_res)->value.lval);
+	zend_list_delete(result->id);
 	
 	RETURN_TRUE;
 }
@@ -1662,7 +1642,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		pefree((*conn), persistent);
 		return FALSE;
 	}
-	(*conn)->open = 1;
+/*	(*conn)->open = 1;*/
 	return TRUE;
 }
 /* Persistent connections: two list-types le_pconn, le_conn and a plist
@@ -1786,6 +1766,7 @@ try_and_get_another_connection:
 			}
 			ODBCG(num_persistent)++;
 			ODBCG(num_links)++;
+			db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
 		} else { /* found connection */
 			if (le->type != le_pconn) {
 				RETURN_FALSE;
@@ -1815,7 +1796,7 @@ try_and_get_another_connection:
 				}
 			}
 		}
-		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
+		/* db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn); */
 	} else { /* non persistent */
 		list_entry *index_ptr, new_index_ptr;
 		
@@ -1848,13 +1829,14 @@ try_and_get_another_connection:
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_conn);
+		db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_conn);
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_len + 1, (void *) &new_index_ptr,
 				   sizeof(list_entry), NULL) == FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
+			/* XXX Free Connection */
 		}
 		ODBCG(num_links)++;
 	}

@@ -35,10 +35,10 @@
 
 #if HAVE_UODBC
 
-#ifndef MSVC5
+/*#ifndef MSVC5
 #define FAR
 #endif
-
+*/
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -214,7 +214,8 @@ typedef struct odbc_connection {
 	HENV henv;
 	HDBC hdbc;
 #endif
-	int open;
+/*	int open;*/
+	int id;
 	int persistent;
 } odbc_connection;
 
@@ -231,6 +232,7 @@ typedef struct odbc_result {
 #else
 	HSTMT stmt;
 #endif
+	int id;
 	odbc_result_value *values;
 	SWORD numcols;
 	SWORD numparams;
