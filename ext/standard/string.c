@@ -837,7 +837,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 										 (void **) &tmp,
 										 &pos) == SUCCESS) {
 		SEPARATE_ZVAL(tmp);
-		convert_to_string(&tmp);
+		convert_to_string(*tmp);
 
 		smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 		if (++i != numelems) {
