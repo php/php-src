@@ -443,7 +443,9 @@ static sdlPtr load_wsdl(char *struri)
 				} else if (address->ns && !strcmp(address->ns->href, WSDL_SOAP12_NAMESPACE)) {
 					wsdl_soap_namespace = WSDL_SOAP12_NAMESPACE;
 					tmpbinding->bindingType = BINDING_SOAP;
-				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP_NAMESPACE)) {
+				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP11_NAMESPACE)) {
+					tmpbinding->bindingType = BINDING_HTTP;
+				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP12_NAMESPACE)) {
 					tmpbinding->bindingType = BINDING_HTTP;
 				} else {
 					if (address->ns) {
