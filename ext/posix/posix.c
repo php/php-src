@@ -852,7 +852,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 /* {{{ posix_addlimit
  */
-static int posix_addlimit(int limit, char *name, zval *return_value) {
+static int posix_addlimit(int limit, char *name, zval *return_value TSRMLS_DC) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -956,7 +956,7 @@ PHP_FUNCTION(posix_getrlimit)
 	}
 
 	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE)
+		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE)
 			RETURN_FALSE;
 	}
 }
