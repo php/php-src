@@ -284,7 +284,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
-	zval *zfilename, *zoptions, *zretval = NULL, *zfuncname;
+	zval *zfilename, *zoptions, *zretval = NULL, *zfuncname, *zcontext;
 	zval **args[2];	
 	int call_result;
 	php_stream *stream = NULL;
@@ -304,6 +304,17 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	object_init_ex(us->object, uwrap->ce);
 	ZVAL_REFCOUNT(us->object) = 1;
 	PZVAL_IS_REF(us->object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(us->object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(us->object, "context");
+	}
 	
 	/* call it's dir_open method - set up params first */
 	MAKE_STD_ZVAL(zfilename);
@@ -722,7 +733,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSR
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
-	zval *zfilename, *zfuncname, *zretval;
+	zval *zfilename, *zfuncname, *zretval, *zcontext;
 	zval **args[1];
 	int call_result;
 	zval *object;
@@ -733,6 +744,17 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	object_init_ex(object, uwrap->ce);
 	ZVAL_REFCOUNT(object) = 1;
 	PZVAL_IS_REF(object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(object, "context");
+	}
 
 	/* call the unlink method */
 	MAKE_STD_ZVAL(zfilename);
@@ -769,7 +791,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
-	zval *zfilename, *zfuncname, *zretval, *zflags;
+	zval *zfilename, *zfuncname, *zretval, *zflags, *zcontext;
 	zval **args[2];	
 	int call_result;
 	zval *object;
@@ -780,6 +802,17 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int fla
 	object_init_ex(object, uwrap->ce);
 	ZVAL_REFCOUNT(object) = 1;
 	PZVAL_IS_REF(object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(object, "context");
+	}
 
 	/* call the stat_url method */
 	
