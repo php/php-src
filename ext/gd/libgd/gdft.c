@@ -768,318 +768,279 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 }
 
 char *
-gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
-		 double ptsize, double angle, int x, int y, char *string,
-		gdFTStringExtraPtr strex)
+gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsize, double angle, int x, int y, char *string, gdFTStringExtraPtr strex)
 {
-  FT_BBox bbox, glyph_bbox;
-  FT_Matrix matrix;
-  FT_Vector pen, delta, penf;
-  FT_Face face;
-  FT_Glyph image;
-  FT_GlyphSlot slot;
-  FT_Error err;
-  FT_Bool use_kerning;
-  FT_UInt glyph_index, previous;
-  double sin_a = sin (angle);
-  double cos_a = cos (angle);
-  int len, i = 0, ch;
-  int x1 = 0, y1 = 0;
-  font_t *font;
-  fontkey_t fontkey;
-  char *next;
-  char *tmpstr = 0;
-  int render = (im && (im->trueColor || (fg <= 255 && fg >= -255)));
-  FT_BitmapGlyph bm;
-  int render_mode = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
-  /* Now tuneable thanks to Wez Furlong */
-  double linespace = LINESPACE;
-  /* 2.0.6: put this declaration with the other declarations! */
-  /*
-   *   make a new tweenColorCache on every call
-   *   because caching colormappings between calls
-   *   is not safe. If the im-pointer points to a
-   *   brand new image, the cache gives out bogus
-   *   colorindexes.          -- 27.06.2001 <krisku@arrak.fi>
-   */
-  gdCache_head_t  *tc_cache;
+	FT_BBox bbox, glyph_bbox;
+	FT_Matrix matrix;
+	FT_Vector pen, delta, penf;
+	FT_Face face;
+	FT_Glyph image;
+	FT_GlyphSlot slot;
+	FT_Bool use_kerning;
+	FT_UInt glyph_index, previous;
+	double sin_a = sin (angle);
+	double cos_a = cos (angle);
+	int len, i = 0, ch;
+	int x1 = 0, y1 = 0;
+	font_t *font;
+	fontkey_t fontkey;
+	char *next;
+	char *tmpstr = NULL;
+	int render = (im && (im->trueColor || (fg <= 255 && fg >= -255)));
+	FT_BitmapGlyph bm;
+	int render_mode = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+	/* Now tuneable thanks to Wez Furlong */
+	double linespace = LINESPACE;
+	/* 2.0.6: put this declaration with the other declarations! */
+	/*
+	*   make a new tweenColorCache on every call
+	*   because caching colormappings between calls
+	*   is not safe. If the im-pointer points to a
+	*   brand new image, the cache gives out bogus
+	*   colorindexes.          -- 27.06.2001 <krisku@arrak.fi>
+	*/
+	gdCache_head_t  *tc_cache;
 
-  if (strex) {
-    if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE) {
-      linespace = strex->linespacing;
-    }
-  }
-  tc_cache = gdCacheCreate( TWEENCOLORCACHESIZE,
-               tweenColorTest, tweenColorFetch, tweenColorRelease );
-
-/***** initialize font library and font cache on first call ******/
-
-  if (!fontCache)
-    {
-      if (FT_Init_FreeType (&library))
-	{
-	  gdCacheDelete( tc_cache );
-	  return "Failure to initialize font library";
+	if (strex && ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)) {
+		linespace = strex->linespacing;
 	}
-      fontCache = gdCacheCreate (FONTCACHESIZE,
-				 fontTest, fontFetch, fontRelease);
-    }
-/*****/
+	tc_cache = gdCacheCreate(TWEENCOLORCACHESIZE, tweenColorTest, tweenColorFetch, tweenColorRelease);
 
-  /* get the font (via font cache) */
-  fontkey.fontlist = fontlist;
-  fontkey.library = &library;
-  font = (font_t *) gdCacheGet (fontCache, &fontkey);
-  if (!font)
-    {
-      gdCacheDelete( tc_cache );
-      return fontCache->error;
-    }
-  face = font->face;		/* shortcut */
-  slot = face->glyph;		/* shortcut */
+	/***** initialize font library and font cache on first call ******/
 
-  if (FT_Set_Char_Size (face, 0, (FT_F26Dot6) (ptsize * 64),
-			GD_RESOLUTION, GD_RESOLUTION))
-    {
-      gdCacheDelete( tc_cache );
-      return "Could not set character size";
-    }
+	if (!fontCache) {
+		if (FT_Init_FreeType (&library)) {
+			gdCacheDelete( tc_cache );
+			return "Failure to initialize font library";
+		}
+		fontCache = gdCacheCreate(FONTCACHESIZE, fontTest, fontFetch, fontRelease);
+	}
+	/*****/
 
-  matrix.xx = (FT_Fixed) (cos_a * (1 << 16));
-  matrix.yx = (FT_Fixed) (sin_a * (1 << 16));
-  matrix.xy = -matrix.yx;
-  matrix.yy = matrix.xx;
+	/* get the font (via font cache) */
+	fontkey.fontlist = fontlist;
+	fontkey.library = &library;
+	font = (font_t *) gdCacheGet (fontCache, &fontkey);
+	if (!font) {
+		gdCacheDelete(tc_cache);
+		return fontCache->error;
+	}
+	face = font->face;		/* shortcut */
+	slot = face->glyph;		/* shortcut */
 
-  penf.x = penf.y = 0;		/* running position of non-rotated string */
-  pen.x = pen.y = 0;		/* running position of rotated string */
-  bbox.xMin = bbox.xMax = bbox.yMin = bbox.yMax = 0;
+	if (FT_Set_Char_Size (face, 0, (FT_F26Dot6) (ptsize * 64), GD_RESOLUTION, GD_RESOLUTION)) {
+		gdCacheDelete(tc_cache);
+		return "Could not set character size";
+	}
 
-  use_kerning = FT_HAS_KERNING (face);
-  previous = 0;
-  if (fg < 0)
-    {
-      render_mode |= FT_LOAD_MONOCHROME;
-    }
+	matrix.xx = (FT_Fixed) (cos_a * (1 << 16));
+	matrix.yx = (FT_Fixed) (sin_a * (1 << 16));
+	matrix.xy = -matrix.yx;
+	matrix.yy = matrix.xx;
+
+	penf.x = penf.y = 0;		/* running position of non-rotated string */
+	pen.x = pen.y = 0;		/* running position of rotated string */
+	bbox.xMin = bbox.xMax = bbox.yMin = bbox.yMax = 0;
+
+	use_kerning = FT_HAS_KERNING (face);
+	previous = 0;
+	if (fg < 0) {
+		render_mode |= FT_LOAD_MONOCHROME;
+	}
 
 #ifndef JISX0208
-  if (font->have_char_map_sjis)
-    {
+	if (!font->have_char_map_sjis) {
+		next = string;
+	} else
 #endif
-      if ((tmpstr = (char *) gdMalloc (BUFSIZ)))
-	{
-	  any2eucjp (tmpstr, string, BUFSIZ);
-	  next = tmpstr;
-	}
-      else
-	{
-	  next = string;
-	}
-#ifndef JISX0208
-    }
-  else
-    {
-      next = string;
-    }
-#endif
-  while (*next)
-    {
-      ch = *next;
+		tmpstr = (char *) gdMalloc (BUFSIZ);
 
-      /* carriage returns */
-      if (ch == '\r')
-	{
-	  penf.x = 0;
-	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
-	  pen.x = pen.y = 0;
-	  previous = 0;		/* clear kerning flag */
-	  next++;
-	  continue;
-	}
-      /* newlines */
-      if (ch == '\n')
-	{
-	  penf.y -= (long)(face->size->metrics.height * linespace);
-	  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
-	  pen.x = pen.y = 0;
-	  previous = 0;		/* clear kerning flag */
-	  next++;
-	  continue;
-	}
+	while (*next) {
+		ch = *next;
 
-      if (font->have_char_map_unicode)
-	{
-	  /* use UTF-8 mapping from ASCII */
-	  len = gdTcl_UtfToUniChar (next, &ch);
-	  next += len;
-	}
-      else if (font->have_char_map_sjis)
-	{
-	  unsigned char c;
-	  int jiscode;
+		/* carriage returns */
+		if (ch == '\r') {
+			penf.x = 0;
+			x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+			y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+			pen.x = pen.y = 0;
+			previous = 0;		/* clear kerning flag */
+			next++;
+			continue;
+		}
+		/* newlines */
+		if (ch == '\n') {
+			  penf.y -= (long)(face->size->metrics.height * linespace);
+			  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
+			  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+			  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+			  pen.x = pen.y = 0;
+			  previous = 0;		/* clear kerning flag */
+			  next++;
+			  continue;
+		}
 
-	  c = *next;
-	  if (0xA1 <= c && c <= 0xFE)
-	    {
-	      next++;
-	      jiscode = 0x100 * (c & 0x7F) + ((*next) & 0x7F);
+		if (font->have_char_map_unicode) {
+			/* use UTF-8 mapping from ASCII */
+			len = gdTcl_UtfToUniChar (next, &ch);
+			next += len;
+		} else if (font->have_char_map_sjis) {
+			unsigned char c;
+			int jiscode;
 
-	      ch = (jiscode >> 8) & 0xFF;
-	      jiscode &= 0xFF;
+			c = *next;
+			if (0xA1 <= c && c <= 0xFE) {
+				next++;
+				jiscode = 0x100 * (c & 0x7F) + ((*next) & 0x7F);
 
-	      if (ch & 1)
-		jiscode += 0x40 - 0x21;
-	      else
-		jiscode += 0x9E - 0x21;
+				ch = (jiscode >> 8) & 0xFF;
+				jiscode &= 0xFF;
 
-	      if (jiscode >= 0x7F)
-		jiscode++;
-	      ch = (ch - 0x21) / 2 + 0x81;
-	      if (ch >= 0xA0)
-		ch += 0x40;
+				if (ch & 1) {
+					jiscode += 0x40 - 0x21;
+				} else {
+					jiscode += 0x9E - 0x21;
+				}
 
-	      ch = (ch << 8) + jiscode;
-	    }
-	  else
-	    {
-	      ch = c & 0xFF;	/* don't extend sign */
-	    }
-	  next++;
-	}
-      else
-	{
-	  /*
-	   * Big 5 mapping:
-	   * use "JIS-8 half-width katakana" coding from 8-bit characters. Ref:
-	   * ftp://ftp.ora.com/pub/examples/nutshell/ujip/doc/japan.inf-032092.sjs
-	   */
-	  ch = (*next) & 0xFF;	/* don't extend sign */
-	  next++;
-	  if (ch >= 161		/* first code of JIS-8 pair */
-	      && *next)
-	    {			/* don't advance past '\0' */
-	      /* TBB: Fix from Kwok Wah On: & 255 needed */
-	      ch = (ch * 256) + ((*next) & 255);
-	      next++;
-	    }
-	}
-      /* set rotation transform */
-      FT_Set_Transform(face, &matrix, NULL);
-      /* Convert character code to glyph index */
-      glyph_index = FT_Get_Char_Index (face, ch);
+				if (jiscode >= 0x7F) {
+					jiscode++;
+				}
+				ch = (ch - 0x21) / 2 + 0x81;
+				if (ch >= 0xA0) {
+					ch += 0x40;
+				}
 
-      /* retrieve kerning distance and move pen position */
-      if (use_kerning && previous && glyph_index)
-	{
-	  FT_Get_Kerning (face, previous, glyph_index,
-			  ft_kerning_default, &delta);
-	  pen.x += delta.x;
-	}
+				ch = (ch << 8) + jiscode;
+			} else {
+				ch = c & 0xFF;	/* don't extend sign */
+			}
+			next++;
+		} else {
+			/*
+			 * Big 5 mapping:
+			 * use "JIS-8 half-width katakana" coding from 8-bit characters. Ref:
+			 * ftp://ftp.ora.com/pub/examples/nutshell/ujip/doc/japan.inf-032092.sjs
+			 */
+			ch = (*next) & 0xFF;	/* don't extend sign */
+			next++;
+			/* first code of JIS-8 pair */
+			if (ch >= 161 && *next) { /* don't advance past '\0' */
+				/* TBB: Fix from Kwok Wah On: & 255 needed */
+				ch = (ch * 256) + ((*next) & 255);
+				next++;
+			}
+		}
+		/* set rotation transform */
+		FT_Set_Transform(face, &matrix, NULL);
+		/* Convert character code to glyph index */
+		glyph_index = FT_Get_Char_Index(face, ch);
 
-      /* load glyph image into the slot (erase previous one) */
-      err = FT_Load_Glyph (face, glyph_index, render_mode);
-      if (err)
-	{
-	  gdCacheDelete( tc_cache );
-	return "Problem loading glyph";
-	}
+		/* retrieve kerning distance and move pen position */
+		if (use_kerning && previous && glyph_index) {
+			FT_Get_Kerning(face, previous, glyph_index, ft_kerning_default, &delta);
+			pen.x += delta.x;
+			penf.x += delta.x;
+		}
 
-      /* transform glyph image */
-      FT_Get_Glyph (slot, &image);
-      if (brect)
-	{			/* only if need brect */
-	  FT_Glyph_Get_CBox (image, ft_glyph_bbox_gridfit, &glyph_bbox);
-	  glyph_bbox.xMin += penf.x;
-	  glyph_bbox.yMin += penf.y;
-	  glyph_bbox.xMax += penf.x;
-	  glyph_bbox.yMax += penf.y;
-	  if (ch == ' ')   /* special case for trailing space */
-             glyph_bbox.xMax += slot->metrics.horiAdvance;
-          if (!i)
-	     {                   /* if first character, init BB corner values */
-	        bbox.xMin = glyph_bbox.xMin;
-		bbox.yMin = glyph_bbox.yMin;
-		bbox.xMax = glyph_bbox.xMax;
-		bbox.yMax = glyph_bbox.yMax;
-	     }
-	   else
-	     {
-	  if (bbox.xMin > glyph_bbox.xMin)
-	    bbox.xMin = glyph_bbox.xMin;
-	  if (bbox.yMin > glyph_bbox.yMin)
-	    bbox.yMin = glyph_bbox.yMin;
-	  if (bbox.xMax < glyph_bbox.xMax)
-	    bbox.xMax = glyph_bbox.xMax;
-	  if (bbox.yMax < glyph_bbox.yMax)
-	    bbox.yMax = glyph_bbox.yMax;
-	     }
-	  i++;
-	}
+		/* load glyph image into the slot (erase previous one) */
+		if (FT_Load_Glyph(face, glyph_index, render_mode)) {
+			if (tmpstr) {
+				gdFree(tmpstr);
+			}
+			gdCacheDelete(tc_cache);
+			return "Problem loading glyph";
+		}
 
-      if (render)
-	{
-	  if (image->format != ft_glyph_format_bitmap)
-	    {
-	      err = FT_Glyph_To_Bitmap (&image, ft_render_mode_normal, 0, 1);
-	      if (err)
-		{
-		  gdCacheDelete( tc_cache );
-		return "Problem rendering glyph";
-	    }
-	    }
+		/* transform glyph image */
+		FT_Get_Glyph(slot, &image);
+		if (brect) { /* only if need brect */
+			FT_Glyph_Get_CBox(image, ft_glyph_bbox_gridfit, &glyph_bbox);
+			glyph_bbox.xMin += penf.x;
+			glyph_bbox.yMin += penf.y;
+			glyph_bbox.xMax += penf.x;
+			glyph_bbox.yMax += penf.y;
+			if (ch == ' ') { /* special case for trailing space */
+				glyph_bbox.xMax += slot->metrics.horiAdvance;
+			}
+			if (!i) { /* if first character, init BB corner values */
+				bbox.xMin = glyph_bbox.xMin;
+				bbox.yMin = glyph_bbox.yMin;
+				bbox.xMax = glyph_bbox.xMax;
+				bbox.yMax = glyph_bbox.yMax;
+			} else {
+				if (bbox.xMin > glyph_bbox.xMin) {
+					bbox.xMin = glyph_bbox.xMin;
+				}
+				if (bbox.yMin > glyph_bbox.yMin) {
+					bbox.yMin = glyph_bbox.yMin;
+				}
+				if (bbox.xMax < glyph_bbox.xMax) {
+					bbox.xMax = glyph_bbox.xMax;
+				}
+				if (bbox.yMax < glyph_bbox.yMax) {
+					bbox.yMax = glyph_bbox.yMax;
+				}
+			}
+			i++;
+		}
 
-	  /* now, draw to our target surface */
-	  bm = (FT_BitmapGlyph) image;
-	  gdft_draw_bitmap (tc_cache, im, fg, bm->bitmap,
-			    x + x1 + ((pen.x + 31) >> 6) + bm->left,
-			    y - y1 + ((pen.y + 31) >> 6) - bm->top);
+		if (render) {
+			if (image->format != ft_glyph_format_bitmap && FT_Glyph_To_Bitmap(&image, ft_render_mode_normal, 0, 1)) {
+				if (tmpstr) {
+					gdFree(tmpstr);
+				}
+				gdCacheDelete(tc_cache);
+				return "Problem rendering glyph";
+			}
+
+			/* now, draw to our target surface */
+			bm = (FT_BitmapGlyph) image;
+			gdft_draw_bitmap(tc_cache, im, fg, bm->bitmap, x + x1 + ((pen.x + 31) >> 6) + bm->left, y - y1 + ((pen.y + 31) >> 6) - bm->top);
+		}
+
+		/* record current glyph index for kerning */
+		previous = glyph_index;
+
+		/* increment pen position */
+		pen.x += image->advance.x >> 10;
+		pen.y -= image->advance.y >> 10;
+
+		penf.x += slot->metrics.horiAdvance;
+
+		FT_Done_Glyph(image);
 	}
 
-      /* record current glyph index for kerning */
-      previous = glyph_index;
+	if (brect) { /* only if need brect */
+		/* For perfect rounding, must get sin(a + pi/4) and sin(a - pi/4). */
+		double d1 = sin (angle + 0.78539816339744830962);
+		double d2 = sin (angle - 0.78539816339744830962);
 
-      /* increment pen position */
-      pen.x += image->advance.x >> 10;
-      pen.y -= image->advance.y >> 10;
+		/* rotate bounding rectangle */
+		brect[0] = (int) (bbox.xMin * cos_a - bbox.yMin * sin_a);
+		brect[1] = (int) (bbox.xMin * sin_a + bbox.yMin * cos_a);
+		brect[2] = (int) (bbox.xMax * cos_a - bbox.yMin * sin_a);
+		brect[3] = (int) (bbox.xMax * sin_a + bbox.yMin * cos_a);
+		brect[4] = (int) (bbox.xMax * cos_a - bbox.yMax * sin_a);
+		brect[5] = (int) (bbox.xMax * sin_a + bbox.yMax * cos_a);
+		brect[6] = (int) (bbox.xMin * cos_a - bbox.yMax * sin_a);
+		brect[7] = (int) (bbox.xMin * sin_a + bbox.yMax * cos_a);
 
-      penf.x += slot->metrics.horiAdvance;
+		/* scale, round and offset brect */
+		brect[0] = x + gdroundupdown(brect[0], d2 > 0);
+		brect[1] = y - gdroundupdown(brect[1], d1 < 0);
+		brect[2] = x + gdroundupdown(brect[2], d1 > 0);
+		brect[3] = y - gdroundupdown(brect[3], d2 > 0);
+		brect[4] = x + gdroundupdown(brect[4], d2 < 0);
+		brect[5] = y - gdroundupdown(brect[5], d1 > 0);
+		brect[6] = x + gdroundupdown(brect[6], d1 < 0);
+		brect[7] = y - gdroundupdown(brect[7], d2 < 0);
+	}
 
-      FT_Done_Glyph (image);
-    }
-
-  if (brect)
-    {				/* only if need brect */
-      /* For perfect rounding, must get sin(a + pi/4) and sin(a - pi/4). */
-      double d1 = sin (angle + 0.78539816339744830962);
-      double d2 = sin (angle - 0.78539816339744830962);
-
-      /* rotate bounding rectangle */
-      brect[0] = (int) (bbox.xMin * cos_a - bbox.yMin * sin_a);
-      brect[1] = (int) (bbox.xMin * sin_a + bbox.yMin * cos_a);
-      brect[2] = (int) (bbox.xMax * cos_a - bbox.yMin * sin_a);
-      brect[3] = (int) (bbox.xMax * sin_a + bbox.yMin * cos_a);
-      brect[4] = (int) (bbox.xMax * cos_a - bbox.yMax * sin_a);
-      brect[5] = (int) (bbox.xMax * sin_a + bbox.yMax * cos_a);
-      brect[6] = (int) (bbox.xMin * cos_a - bbox.yMax * sin_a);
-      brect[7] = (int) (bbox.xMin * sin_a + bbox.yMax * cos_a);
-
-      /* scale, round and offset brect */
-      brect[0] = x + gdroundupdown (brect[0], d2 > 0);
-      brect[1] = y - gdroundupdown (brect[1], d1 < 0);
-      brect[2] = x + gdroundupdown (brect[2], d1 > 0);
-      brect[3] = y - gdroundupdown (brect[3], d2 > 0);
-      brect[4] = x + gdroundupdown (brect[4], d2 < 0);
-      brect[5] = y - gdroundupdown (brect[5], d1 > 0);
-      brect[6] = x + gdroundupdown (brect[6], d1 < 0);
-      brect[7] = y - gdroundupdown (brect[7], d2 < 0);
-    }
-
-  if (tmpstr)
-    gdFree (tmpstr);
-  gdCacheDelete( tc_cache );
-  return (char *) NULL;
+	if (tmpstr) {
+		gdFree(tmpstr);
+	}
+	gdCacheDelete(tc_cache);
+	return (char *) NULL;
 }
 
 #endif /* HAVE_LIBFREETYPE */
