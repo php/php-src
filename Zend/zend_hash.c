@@ -1098,9 +1098,8 @@ ZEND_API int zend_hash_get_current_data(HashTable *ht, void **pData)
 }
 
 
-ZEND_API int zend_hash_sort(HashTable *ht,
-                            void (*sort_func)(void *, size_t, size_t, compare_func_t),
-                            compare_func_t compar, int renumber)
+ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
+							compare_func_t compar, int renumber)
 {
 	Bucket **arTmp;
 	Bucket *p;
