@@ -823,7 +823,7 @@ PHP_FUNCTION(ldap_get_entries)
 			}	
 			ldap_value_free(ldap_value);
 
-			zend_hash_update(tmp1->value.ht, _php3_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
+			zend_hash_update(tmp1->value.ht, php_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
 			add_index_string(tmp1, attr_count, attribute, 1);
 
 			attr_count++;
