@@ -171,15 +171,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		fd = dup(STDOUT_FILENO);
 	} else if (!strcasecmp(path, "stderr")) {
 		fd = dup(STDERR_FILENO);
-	}
-
-	if (fd)	{
-		stream = php_stream_fopen_from_fd(fd, mode);
-		if (stream == NULL)
-			close(fd);
-	}
-
-	if (!strncasecmp(path, "filter/", 7)) {
+	} else if (!strncasecmp(path, "filter/", 7)) {
 		/* Save time/memory when chain isn't specified */
 		if (strchr(mode, 'r') || strchr(mode, '+')) {
 			mode_rw |= PHP_STREAM_FILTER_READ;
@@ -213,7 +205,23 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			p = php_strtok_r(NULL, "/", &token);
 		}
 		efree(pathdup);
- 	}
+
+		return stream;
+ 	} else {
+		/* invalid php://thingy */
+		return NULL;
+	}
+	
+	/* must be stdin, stderr or stdout */
+	if (fd == -1)	{
+		/* failed to dup */
+		return NULL;
+	}
+	
+	stream = php_stream_fopen_from_fd(fd, mode);
+	if (stream == NULL) {
+		close(fd);
+	}
  
 	return stream;
 }
