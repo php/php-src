@@ -2655,8 +2655,12 @@ PHP_FUNCTION(imagesy)
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
 {
-#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+#if HAVE_LIBGD20 && HAVE_LIBFREETYPE
+# if HAVE_GD_STRINGFTEX
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 1);
+# else
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 0);
+# endif
 #else 
 	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
@@ -2668,8 +2672,12 @@ PHP_FUNCTION(imageftbbox)
    Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
-#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+#if HAVE_LIBGD20 && HAVE_LIBFREETYPE
+# if HAVE_GD_STRINGFTEX
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
+# else
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 0);
+# endif
 #else 
 	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
