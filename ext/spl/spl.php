@@ -13,6 +13,9 @@
  *
  * SPL - Standard PHP Library
  *
+ * You can download this documentation as a chm file 
+ * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
+ *
  * (c) Marcus Boerger, 2003 - 2004
  */
 
@@ -358,8 +361,8 @@ class LimitIetrator implements Iterator
 	
 	/** Seek to a specific position if available or throw an exception.
 	 * If the inner iterator is an instance of SeekableIterator its seek()
-	 * method will be used. Otherwise the iterator will be rewinded if
-	 * necessary and then manually forwared element by element.
+	 * method will be used. Otherwise the iterator will be rewound if
+	 * necessary and then manually advanced element by element.
 	 *
 	 * \param $position index to seek to.
 	 */
