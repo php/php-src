@@ -26,10 +26,10 @@ mysqli_prepare_result
 	mysqli_stmt_close($stmt);	
 	mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  object(stdClass)(9) {
+  object(stdClass)#%d (9) {
     ["name"]=>
     string(3) "foo"
     ["orgname"]=>
@@ -50,7 +50,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object(stdClass)(9) {
+  object(stdClass)#%d (9) {
     ["name"]=>
     string(3) "bar"
     ["orgname"]=>
