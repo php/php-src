@@ -559,17 +559,24 @@ COMMAND $cmd
 	$output = trim($out);
 	$output = preg_replace('/\r\n/',"\n",$output);
 
-	if (isset($section_text['EXPECTF'])) {
-		$wanted = trim($section_text['EXPECTF']);
+	if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
+		if (isset($section_text['EXPECTF'])) {
+			$wanted = trim($section_text['EXPECTF']);
+		} else {
+			$wanted = trim($section_text['EXPECTREGEX']);
+		}
 		$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
-		$wanted_re = preg_quote($wanted_re, '/');
-		// Stick to basics
-		$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
-		$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
-		$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
-		$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-		$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*", $wanted_re);
-		// %f allows two points "-.0.0" but that is the best *simple* expression
+		if (isset($section_text['EXPECTF'])) {
+			$wanted_re = preg_quote($wanted_re, '/');
+			// Stick to basics
+			$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
+			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
+			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
+			$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
+			$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*", $wanted_re);
+			$wanted_re = str_replace("%c", ".", $wanted_re);
+			// %f allows two points "-.0.0" but that is the best *simple* expression
+		}
 /* DEBUG YOUR REGEX HERE
 		var_dump($wanted);
 		print(str_repeat('=', 80) . "\n");
