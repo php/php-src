@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef NETWARE
-#include <winsock.h>
+#include <winsock2.h>
 #else	/* NETWARE */
 #include <netware\sendmail_nw.h>
 #endif	/* NETWARE */

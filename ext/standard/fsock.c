@@ -46,7 +46,7 @@
 #include <sys/socket.h>
 #endif
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #elif defined(NETWARE)
 #ifdef NEW_LIBC
 #ifdef USE_WINSOCK

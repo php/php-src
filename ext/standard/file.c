@@ -44,7 +44,7 @@
 #include <fcntl.h>
 #ifdef PHP_WIN32
 #include <windows.h>
-#include <winsock.h>
+#include <winsock2.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
@@ -821,6 +821,160 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+/* Win32 select() will only work with sockets, so we roll our own implementation that will
+ * get the OS file handle from regular fd's and sockets and then use WaitForMultipleObjects().
+ * This implementation is not as feature-full as posix select, but it works for our purposes
+ */
+static int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+{
+	HANDLE *handles;
+	DWORD ms, waitret;
+	DWORD ms_total;
+	int i, f, s, fd_count = 0, sock_count = 0;
+	int retval;
+	fd_set ard, awr, aex; /* active fd sets */
+	long sock_events;
+
+	for (i = 0; i < max_fd; i++) {
+		if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
+			if (_get_osfhandle(i) == 0xffffffff) {
+				/* it is a socket */
+				sock_count++;
+			} else {
+				fd_count++;
+			}
+		}
+	}
+
+	if (fd_count + sock_count == 0) {
+		return 0;
+	}
+
+	handles = (HANDLE*)emalloc((fd_count + sock_count) * sizeof(HANDLE));
+
+	/* populate the events and handles arrays */
+	f = 0;
+	s = 0;
+	for (i = 0; i < max_fd; i++) {
+		if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
+			long h = _get_osfhandle(i);
+			if (h == 0xFFFFFFFF) {
+				HANDLE evt;
+				long evt_flags = 0;
+
+				if (FD_ISSET(i, rfds)) {
+					evt_flags |= FD_READ|FD_CONNECT|FD_ACCEPT|FD_CLOSE;
+				}
+				if (FD_ISSET(i, wfds)) {
+					evt_flags |= FD_WRITE;
+				}
+				if (FD_ISSET(i, efds)) {
+					evt_flags |= FD_OOB;
+				}
+
+				evt = WSACreateEvent();
+				WSAEventSelect(i, evt, evt_flags); 
+
+				handles[fd_count + s] = evt;
+				s++;
+			} else {
+				handles[f++] = (HANDLE)h;
+			}
+		}
+	}
+
+	/* calculate how long we need to wait in milliseconds */
+	if (tv == NULL) {
+		ms_total = INFINITE;
+	} else {
+		ms_total = tv->tv_sec * 1000;
+		ms_total += tv->tv_usec / 1000;
+	}
+
+	waitret = MsgWaitForMultipleObjects(fd_count + sock_count, handles, FALSE, ms_total, QS_ALLEVENTS);
+
+	if (waitret == WAIT_TIMEOUT) {
+		retval = 0;
+	} else if (waitret == 0xFFFFFFFF) {
+		retval = -1;
+	} else {
+
+		FD_ZERO(&ard);
+		FD_ZERO(&awr);
+		FD_ZERO(&aex);
+
+		f = 0;
+		retval = 0;
+		for (i = 0; i < max_fd; i++) {
+			if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
+				if (f >= fd_count) {
+					/* socket event */
+					HANDLE evt = handles[f];
+
+					if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
+						/* check for various signal states */
+						if (FD_ISSET(i, rfds)) {
+							WSAEventSelect(i, evt, FD_READ|FD_CONNECT|FD_ACCEPT|FD_CLOSE);
+							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
+								FD_SET(i, &ard);
+							}
+						}
+						if (FD_ISSET(i, wfds)) {
+							WSAEventSelect(i, evt, FD_WRITE);
+							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
+								FD_SET(i, &awr);
+							}
+						}
+						if (FD_ISSET(i, efds)) {
+							WSAEventSelect(i, evt, FD_OOB);
+							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
+								FD_SET(i, &aex);
+							}
+						}
+						retval++;
+					}
+
+					WSACloseEvent(evt);
+
+				} else {
+					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[f], 0)) {
+						if (FD_ISSET(i, rfds)) {
+							FD_SET(i, &ard);
+						}
+						if (FD_ISSET(i, wfds)) {
+							FD_SET(i, &awr);
+						}
+						if (FD_ISSET(i, efds)) {
+							FD_SET(i, &aex);
+						}
+						retval++;
+					}
+
+				}
+				f++;
+			}
+		}
+
+		if (rfds) {
+			*rfds = ard;
+		}
+		if (wfds) {
+			*wfds = awr;
+		}
+		if (efds) {
+			*efds = aex;
+		}
+	}
+
+	efree(handles);
+
+	return retval;
+}
+#else
+#define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+#endif
+
 /* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
@@ -867,11 +1021,11 @@ PHP_FUNCTION(stream_select)
 		}
 	}
 	
-	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s",
-				errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+				errno, strerror(errno), max_fd);
 		RETURN_FALSE;
 	}
 

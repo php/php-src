@@ -50,7 +50,7 @@
 #include <signal.h>
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #include <stdlib.h>
 #include "win32/sendmail.h"
 MAILSTREAM DEFAULTPROTO;

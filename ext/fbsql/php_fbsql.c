@@ -43,7 +43,7 @@
 #include "ext/standard/php_string.h"
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #else
 #include <php_config.h>
 
