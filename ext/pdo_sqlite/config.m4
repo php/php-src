@@ -92,7 +92,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 	      cat $ext_srcdir/sqlite/src/parse.h $ext_srcdir/sqlite/src/vdbe.c | awk -f $ext_srcdir/sqlite/mkopcodeh.awk > $ext_srcdir/sqlite/src/opcodes.h
         sort -n +2 $ext_srcdir/sqlite/src/opcodes.h | awk -f $ext_srcdir/sqlite/mkopcodec.awk > $ext_srcdir/sqlite/src/opcodes.c
         $CC -o $ext_srcdir/sqlite/tool/mkkeywordhash $ext_srcdir/sqlite/tool/mkkeywordhash.c
-        $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/keywordhash.h
+        $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/sqlite/src/keywordhash.h
       fi
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
