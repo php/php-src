@@ -766,6 +766,7 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 
 void do_end_function_declaration(znode *function_token CLS_DC)
 {
+	do_extended_info(CLS_C);
 	do_return(NULL, 0 CLS_CC);
 	pass_two(CG(active_op_array));
 	CG(active_op_array) = function_token->u.op_array;
