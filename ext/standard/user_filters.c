@@ -525,7 +525,6 @@ PHP_FUNCTION(stream_filter_register)
 
 	fdat = ecalloc(1, sizeof(*fdat) + classname_len);
 	memcpy(fdat->classname, classname, classname_len);
-	zend_str_tolower(fdat->classname, classname_len);
 
 	if (zend_hash_add(BG(user_filter_map), filtername, filtername_len, (void*)fdat,
 				sizeof(*fdat) + classname_len, NULL) == SUCCESS &&
