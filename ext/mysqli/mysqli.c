@@ -29,6 +29,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_mysqli.h"
+#include "zend_default_classes.h"
 
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 1
@@ -371,7 +372,7 @@ PHP_MINFO_FUNCTION(mysqli)
 
 /* {{{ php_mysqli_fetch_into_hash
  */
-void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags)
+void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags, int into_object)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
@@ -383,17 +384,38 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	unsigned long	*field_len;
 	PR_RESULT		*prresult;
 	PR_COMMAND		*prcommand;
+	zval            *ctor_params = NULL;
+	zend_class_entry *ce = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
-		return;
-	}
+	if (into_object) {
+		char *class_name;
+		int class_name_len;
 
-	if (ZEND_NUM_ARGS() < 2 && !override_flags) {
-		fetchtype = MYSQLI_BOTH;
-	}
-
-	if (override_flags) {
-		fetchtype = override_flags;
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+			return;
+		}
+		if (ZEND_NUM_ARGS() < (getThis() ? 1 : 2)) {
+			ce = zend_standard_class_def;
+		} else {
+			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		}
+		if (!ce) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
+			return;
+		}
+		fetchtype = MYSQLI_ASSOC;
+	} else {
+		if (override_flags) {
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
+				return;
+			}
+			fetchtype = override_flags;
+		} else {
+			fetchtype = MYSQLI_NUM;
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
+				return;
+			}
+		}
 	}
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, prresult, PR_RESULT *, &mysql_result, "mysqli_result"); 
@@ -436,6 +458,70 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			if (fetchtype & MYSQLI_ASSOC) {
 				add_assoc_null(return_value, fields[i].name);
 			}
+		}
+	}
+
+	if (into_object) {
+		zval dataset = *return_value;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr; 
+	
+		object_and_properties_init(return_value, ce, NULL);
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
+	
+		if (ce->constructor) {
+			fci.size = sizeof(fci);
+			fci.function_table = &ce->function_table;
+			fci.function_name = NULL;
+			fci.symbol_table = NULL;
+			fci.object_pp = &return_value;
+			fci.retval_ptr_ptr = &retval_ptr;
+			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
+					HashTable *ht = Z_ARRVAL_P(ctor_params);
+					Bucket *p;
+	
+					fci.param_count = 0;
+					fci.params = emalloc(sizeof(zval*) * ht->nNumOfElements);
+					p = ht->pListHead;
+					while (p != NULL) {
+						fci.params[fci.param_count++] = (zval**)p->pData;
+						p = p->pListNext;
+					}
+				} else {
+					/* Two problems why we throw exceptions here: PHP is typeless
+					 * and hence passing one argument that's not an array could be
+					 * by mistake and the other way round is possible, too. The 
+					 * single value is an array. Also we'd have to make that one
+					 * argument passed by reference.
+					 */
+					zend_throw_exception(zend_exception_get_default(), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+					return;
+				}
+			} else {
+				fci.param_count = 0;
+				fci.params = NULL;
+			}
+			fci.no_separation = 1;
+
+			fcc.initialized = 1;
+			fcc.function_handler = ce->constructor;
+			fcc.calling_scope = EG(scope);
+			fcc.object_pp = &return_value;
+		
+			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+				zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+			} else {
+				if (retval_ptr) {
+					zval_ptr_dtor(&retval_ptr);
+				}
+			}
+			if (fci.params) {
+				efree(fci.params);
+			}
+		} else if (ctor_params) {
+			zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
 		}
 	}
 
