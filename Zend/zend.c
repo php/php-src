@@ -400,7 +400,7 @@ static void register_standard_class(TSRMLS_D)
 	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
-	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
+	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass")-1, &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
 
 #ifdef ZTS
