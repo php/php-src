@@ -170,7 +170,7 @@ echo '/__function_entries_here__/D'  >> sedscript
 echo '/__function_stubs_here__/D'  >> sedscript
 echo '/__header_here__/D'  >> sedscript
 echo '/__footer_here__/D'  >> sedscript
-if [ ! -z $no_help ]; then
+if [ ! -z "$no_help" ]; then
     echo "/confirm_$extname_compiled/D" >> sedscript
     echo '/Remove the following/,/^\*\//D' >> sedscript
     echo 's/[[:space:]]\/\*.\+\*\///' >> sedscript
@@ -190,7 +190,7 @@ echo '/__footer_here__/r ../../footer'  >> sedscript
 echo '/__function_declarations_here__/D' >> sedscript
 echo '/__header_here__/D'  >> sedscript
 echo '/__footer_here__/D'  >> sedscript
-if [ ! -z $no_help ]; then
+if [ ! -z "$no_help" ]; then
     echo "/confirm_$extname_compiled/D" >> sedscript
     echo 's/[[:space:]]\/\*.\+\*\///' >> sedscript
     echo 's/^\/\*.*\*\/$//' >> sedscript
