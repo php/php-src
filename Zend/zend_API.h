@@ -377,6 +377,21 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 		(z)->type = IS_STRING;		    \
 	}
 
+#define ZVAL_ZVAL(z, zv, copy, dtor) {  \
+		int is_ref, refcount;           \
+		is_ref = (z)->is_ref;           \
+		refcount = (z)->refcount;       \
+		*(z) = *(zv);                   \
+		if (copy) {                     \
+			zval_copy_ctor(z);          \
+	    }                               \
+		if (dtor) {                     \
+			zval_ptr_dtor(zv);          \
+	    }                               \
+		(z)->is_ref = is_ref;           \
+		(z)->refcount = refcount;       \
+	}
+
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
 #define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
 
@@ -388,6 +403,7 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 #define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
+#define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
 
@@ -399,6 +415,7 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 #define RETURN_STRING(s, duplicate) 	{ RETVAL_STRING(s, duplicate); return; }
 #define RETURN_STRINGL(s, l, duplicate) { RETVAL_STRINGL(s, l, duplicate); return; }
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
+#define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 
