@@ -42,10 +42,8 @@ class OO {
         return true;
     }
 
-    function __call()
+    function __call($method, $args)
     {
-        $args = func_get_args();
-        $method = array_shift($args);
         print '-- OO::' . $method . "() was called.--\n";
         return call_user_func_array(array(&$this, 'my_' . $method), $args);
     }
