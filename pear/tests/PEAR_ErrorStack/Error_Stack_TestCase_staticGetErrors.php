@@ -142,7 +142,7 @@ class Error_Stack_TestCase_staticGetErrors extends PHPUnit_TestCase
         $this->stack->push(2, 'warning');
         for($i=0;$i<10000;$i++);
         PEAR_ErrorStack::staticPush('fronk', 3, 'foo');
-        $ret = PEAR_ErrorStack::staticGetErrors(true, true);
+        $ret = PEAR_ErrorStack::staticGetErrors(true, false, true);
         for ($i= 0; $i < 3; $i++) {
             unset($ret[$i]['time']);
             unset($ret[$i]['context']);
@@ -193,7 +193,7 @@ class Error_Stack_TestCase_staticGetErrors extends PHPUnit_TestCase
         for($i=0;$i<10000;$i++);
         PEAR_ErrorStack::staticPush('fronk', 3, 'foo');
         $this->wasCalled = false;
-        $ret = PEAR_ErrorStack::staticGetErrors(true, true, array(&$this, '_sortErrorsRev'));
+        $ret = PEAR_ErrorStack::staticGetErrors(true, false, true, array(&$this, '_sortErrorsRev'));
         $this->assertTrue($this->wasCalled, '_sortErrorsRev not called!');
         for ($i= 0; $i < 3; $i++) {
             unset($ret[$i]['time']);
