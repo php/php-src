@@ -1,3 +1,119 @@
+2000-05-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c:
+    Updates for changed WDDX API.
+
+    * ext/wddx/wddx.c:
+    Got rid of infinite recursion when serializing $GLOBALS[].
+
+    * TODO: Done.
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+    . Reworked string serialization
+    . <, >, and & in strings are now properly escaped
+    . Removed a lot of unnecessary calls to strlen()
+
+
+2000-05-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * genfiles: Generate missing files
+
+2000-05-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * makedist: Typo.
+
+2000-05-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/fastgen.sh
+      build/rules.mk
+      build/rules_pear.mk:
+    `.deps' are sourced only by Makefiles created by fastgen.sh, so it makes
+    sense to create empty .deps there.
+
+    * makedist:
+    Don't distribute ChangeLog. You can download it from lxr.php.net
+
+    * acinclude.m4
+      build/fastgen.sh: Remove trailing slash(es) from pathnames
+
+2000-05-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Some formatting.
+
+2000-05-04  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c:
+    Fix (?) #4314.
+
+2000-05-04  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      sapi/cgi/cgi_main.c: - Add -z and -g switches to the CGI
+
+2000-05-04  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c:
+    If using a persistent connection, check if it's still there and reopen if
+    needed.
+
+2000-05-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Install extensions in different directories, so that users can have
+    various PHP installations with different parameters.
+
+    * php_virtual_cwd.c: s/strtok_r/php_strtok_r/
+
+    * reentrancy.c: Missed localtime_r/ctime_r. Prefix them with php
+
+    * ext/session/session.c
+      ext/standard/datetime.c
+      ext/standard/info.c
+      ext/standard/parsedate.y
+      sapi/isapi/php4isapi.c
+      win32/registry.c
+      ext/calendar/cal_unix.c
+      ext/filepro/filepro.c
+      ext/ftp/ftp.c
+      ext/hyperwave/hw.c
+      acinclude.m4
+      configure.in
+      main.c
+      php_reentrancy.h
+      php_variables.c
+      reentrancy.c: Change reentrancy API to always use the php prefix.
+
+    Check for the declaration of reentrant functions, so that we can use
+    them in non-ZTS mode on all platforms.
+
+    * configure.in
+      ext/db/config.m4
+      ext/informix/config.m4
+      ext/standard/config.m4
+      acinclude.m4: Determine first whether we will use ZTS mode or not.
+
+    This is important, because the system checks will yield different
+    results depending on whether POSIX threads are enabled or not.
+
+    We also use PTHREADS_CFLAGS only in ZTS mode now. Using these flags
+    in non-ZTS mode causes complete build failures on some platforms
+    (i.e. FreeBSD 2.2.x). This will cause harmless warnings on some
+    platforms (i.e. Solaris 2).
+
+2000-05-04  Shane Caraveo  <shane@php.net>
+
+    * sapi/apache/apachephp4.dsp
+      sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c:
+    more apachewin32 work.  much better now, but still crashing in zend_execute.  At least it's getting the file open now though.
+
+2000-05-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: .
+
+    * TODO: have to work now - maybe iÄll do it tonight
+
 2000-05-03  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/assert.c:
