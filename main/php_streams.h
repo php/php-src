@@ -359,8 +359,10 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0 TSRMLS_CC)
 
-PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC);
-#define php_stream_gets(stream, buf, maxlen)	_php_stream_gets((stream), (buf), (maxlen) TSRMLS_CC)
+PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len TSRMLS_DC);
+#define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
+
+#define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);

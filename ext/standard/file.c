@@ -1239,6 +1239,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	int len;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
+	size_t line_len = 0;
 	php_stream *stream;
 
 	if (argc<1 || argc>2 || zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
@@ -1249,7 +1250,7 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
-		buf = php_stream_gets(stream, NULL, 0);
+		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL)
 			goto exit_failed;
 	} else if (argc > 1) {
@@ -1262,19 +1263,19 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 
 		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_gets(stream, buf, len) == NULL)
+		if (php_stream_get_line(stream, buf, len, &line_len) == NULL)
 			goto exit_failed;
 	}
 	
 	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(buf, 0, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+		Z_STRVAL_P(return_value) = php_addslashes(buf, line_len, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
-		ZVAL_STRING(return_value, buf, 0);
+		ZVAL_STRINGL(return_value, buf, line_len, 0);
 		/* resize buffer if it's much larger than the result.
 		 * Only needed if the user requested a buffer size. */
 		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
-			Z_STRVAL_P(return_value) = erealloc(buf, Z_STRLEN_P(return_value) + 1);
+			Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
 		}
 	}
 	return;
