@@ -19,7 +19,7 @@ directories. */
 
 typedef int BOOL;
 
-#define VERSION "2.2 10-Sep-2002"
+#define VERSION "2.2 10-Sep-2003"
 #define MAX_PATTERN_COUNT 100
 
 
