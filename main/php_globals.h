@@ -66,6 +66,8 @@ struct _php_core_globals {
 
 	char *output_handler;
 
+	char *unserialize_callback_func;
+
 	char *safe_mode_exec_dir;
 
 	long memory_limit;
