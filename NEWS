@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.0.4
 - Fixed bug #31111 (Compile failure of zend_strtod.c). (Derick)
 - Fixed bug #31110 (PHP 4.3.10 does not compile on Tru64 UNIX 5.1B). (Derick)
+- Fixed bug #31107 (Complile failure on Solaris 9 (Intel) and gcc 3.4.3). (Derick)
 - Fixed bug #31056 (php_std_date() returns invalid formatted date if 
   y2k_compliance is On). (Ilia)
 
