@@ -1114,41 +1114,6 @@ PHP_FUNCTION(socket_set_timeout)
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
 
-
-/* {{{ proto array socket_get_status(resource socket_descriptor)
-   Return an array describing socket status */
-PHP_FUNCTION(socket_get_status)
-{
-	zval **socket;
-	php_stream *stream;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	php_stream_from_zval(stream, socket);
-	
-
-	array_init(return_value);
-
-	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
-
-		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
-
-		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
-		add_assoc_bool(return_value, "blocked", sock->is_blocked);
-		add_assoc_bool(return_value, "eof", sock->eof);
-		add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
-
-	}
-	else	{
-		RETURN_FALSE;
-	}
-
-}
-/* }}} */
-
-
 /* {{{ proto string fgets(resource fp[, int length])
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
