@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Amitay Isaacs <amitay@w-o-i.com>                            |
    |          Eric Warnke   <ericw@albany.edu>                            |
+   |          Jani Taskinen <sniper@iki.fi>                               |
    +----------------------------------------------------------------------+
 */
 
@@ -75,6 +76,8 @@ PHP_FUNCTION(ldap_mod_del);
 PHP_FUNCTION(ldap_errno);
 PHP_FUNCTION(ldap_err2str);
 PHP_FUNCTION(ldap_error);
+
+PHP_FUNCTION(ldap_compare);
 
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	long default_link;

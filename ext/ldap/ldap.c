@@ -90,6 +90,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_errno,								NULL)
 	PHP_FE(ldap_err2str,							NULL)
 	PHP_FE(ldap_error,								NULL)
+	PHP_FE(ldap_compare,							NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1367,3 +1368,47 @@ PHP_FUNCTION(ldap_error) {
 	RETURN_STRING(ldap_err2string(ld_errno), 1);
 }
 /* }}} */
+
+
+/* {{{ proto int ldap_compare(int link, string dn, string attr, string value)
+	Determine if an entry has a specific value for one of its attributes. */
+PHP_FUNCTION(ldap_compare) {
+	pval **link, **dn, **attr, **value;
+	char *ldap_dn, *ldap_attr, *ldap_value;
+	LDAP *ldap;
+	int errno;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &link, &dn, &attr, &value) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(link);
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_LONG(-1);
+
+	convert_to_string_ex(dn);
+	convert_to_string_ex(attr);
+	convert_to_string_ex(value);
+
+	ldap_dn = (*dn)->value.str.val;
+	ldap_attr = (*attr)->value.str.val;
+	ldap_value = (*value)->value.str.val;
+
+	errno = ldap_compare_s(ldap, ldap_dn, ldap_attr, ldap_value);
+
+	switch(errno) {
+		case LDAP_COMPARE_TRUE :
+			RETURN_TRUE;
+		break;
+
+		case LDAP_COMPARE_FALSE :
+			RETURN_FALSE;
+		break;
+	}
+	
+	php_error(E_WARNING, "LDAP: Compare operation could not be completed: %s", ldap_err2string(errno));
+	RETURN_LONG(-1);
+
+}
+/* }}} */
+  
