@@ -3,6 +3,8 @@
 # do some version checking for the tools we use
 if test "$1" = "--force"; then
     shift
+elif test buildconf.stamp -nt buildconf ; then 
+    :
 else
     echo "buildconf: checking installation..."
 
@@ -61,9 +63,8 @@ else
 	echo "           to build PHP from CVS."
 	exit 1
     fi
-
-    # The stuff from libtool we need is in CVS right now, so it is
-    # not required to run buildconf.
+    
+    touch buildconf.stamp
 fi
 
 if test "$1" = "--copy"; then
