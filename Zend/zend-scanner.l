@@ -39,9 +39,9 @@
 #endif
 
 #include <errno.h>
-
 #include "zend.h"
 #include "zend_alloc.h"
+#include "zend-parser.h"
 #include "zend_compile.h"
 #include "zend-scanner.h"
 #include "zend_highlight.h"

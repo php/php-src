@@ -28,7 +28,6 @@
 #endif
 
 #include "zend_llist.h"
-#include "zend-parser.h"
 
 #define DEBUG_ZEND 0
 

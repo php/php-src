@@ -18,6 +18,7 @@
 */
 
 
+#include "zend-parser.h"
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_llist.h"
