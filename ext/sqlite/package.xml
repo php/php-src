@@ -13,7 +13,7 @@
     <maintainer>
       <user>tal</user>
       <name>Tal Peer</name>
-      <email>tal@php.net</name>
+      <email>tal@php.net</email>
       <role>developer</role>
     </maintainer>
   </maintainers>
@@ -54,6 +54,8 @@
       <file role="test" name="tests/sqlite_002.phpt"/>
       <file role="test" name="tests/sqlite_003.phpt"/>
       <file role="test" name="tests/sqlite_004.phpt"/>
+      <file role="test" name="tests/sqlite_005.phpt"/>
+      <file role="test" name="tests/sqlite_006.phpt"/>
       <file role="test" name="tests/blankdb.inc"/>
 
 	  <dir name="libsqlite">
