@@ -43,6 +43,11 @@ static HashTable pdo_driver_hash;
 /* we use persistent resources for the driver connection stuff */
 static int le_ppdo;
 
+int php_pdo_list_entry(void)
+{
+	return le_ppdo;
+}
+
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
@@ -94,7 +99,8 @@ static void php_pdo_init_globals(zend_pdo_globals *pdo_globals)
 PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 {
 	if (driver->api_version != PDO_DRIVER_API) {
-		zend_error(E_ERROR, "failed api version check");
+		zend_error(E_ERROR, "PDO: driver %s requires PDO API version %d; this is PDO version %d",
+			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}
 	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
@@ -204,6 +210,9 @@ PHP_MINIT_FUNCTION(pdo)
 
 	zend_hash_init(&pdo_driver_hash, 0, NULL, NULL, 1);
 
+	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
+		"PDO persistent database", module_number);
+
 	REGISTER_LONG_CONSTANT("PDO_PARAM_NULL", (long)PDO_PARAM_NULL,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_PARAM_INT",  (long)PDO_PARAM_INT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_PARAM_STR",  (long)PDO_PARAM_STR,	CONST_CS|CONST_PERSISTENT);
@@ -230,6 +239,7 @@ PHP_MINIT_FUNCTION(pdo)
 	REGISTER_LONG_CONSTANT("PDO_ATTR_CURSOR_NAME", 	(long)PDO_ATTR_CURSOR_NAME,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_ATTR_CURSOR",	 	(long)PDO_ATTR_CURSOR,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_ATTR_ORACLE_NULLS",	(long)PDO_ATTR_ORACLE_NULLS,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_ATTR_PERSISTENT",	(long)PDO_ATTR_PERSISTENT,		CONST_CS|CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("PDO_ERRMODE_SILENT",	(long)PDO_ERRMODE_SILENT,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_ERRMODE_WARNING",	(long)PDO_ERRMODE_WARNING,		CONST_CS|CONST_PERSISTENT);
@@ -249,6 +259,7 @@ PHP_MINIT_FUNCTION(pdo)
 	REGISTER_LONG_CONSTANT("PDO_ERR_MISMATCH", 			(long)PDO_ERR_MISMATCH,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_ERR_TRUNCATED", 		(long)PDO_ERR_TRUNCATED,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_ERR_DISCONNECTED", 		(long)PDO_ERR_DISCONNECTED,		CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_ERR_NO_PERM",			(long)PDO_ERR_NO_PERM,			CONST_CS|CONST_PERSISTENT);
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
 	pdo_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);

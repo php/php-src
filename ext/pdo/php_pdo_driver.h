@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20040513
+#define PDO_DRIVER_API	20040923
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -69,6 +69,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_CURSOR_NAME,		/* name a cursor for use in "WHERE CURRENT OF <name>" */
 	PDO_ATTR_CURSOR,			/* cursor type */
 	PDO_ATTR_ORACLE_NULLS,		/* convert empty strings to NULL */
+	PDO_ATTR_PERSISTENT,		/* pconnect style connection */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -175,6 +176,9 @@ typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *
 /* fetching of attributes */
 typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
 
+/* checking/pinging persistent connections */
+typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh TSRMLS_DC);
+
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
 	pdo_dbh_prepare_func	preparer;
@@ -187,6 +191,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_last_id_func		last_id;
 	pdo_dbh_fetch_error_func	fetch_err;
 	pdo_dbh_get_attr_func   	get_attribute;
+	pdo_dbh_check_liveness_func	check_liveness;
 };
 
 /* }}} */
@@ -313,12 +318,10 @@ struct _pdo_dbh_t {
 
 	enum pdo_case_conversion native_case, desired_case;
 
-#if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
-	/* and the list id associated with it */
-	int persistent_rsrc_id;
-#endif
+	int persistent_id_len;
+	unsigned int refcount;
 };
 
 /* describes a column */
