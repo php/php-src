@@ -4,9 +4,12 @@
 ARG_WITH("fbsql", "FrontBase support", "no");
 
 if (PHP_FBSQL == "yes") {
-	EXTENSION("fbsql", "php_fbsql.c");
-	CHECK_LIB("FBCAccess.lib", "fbsql", "\\usr\\FrontBase\\lib");
-	CHECK_HEADER_ADD_INCLUDE("FBCAccess\\FBCAccess.h", "CFLAGS", "\\usr\\FrontBase\\include");
-	AC_DEFINE('WinNT', 1, '');
-	AC_DEFINE('HAVE_FBSQL', 1, 'Have FrontBase support');
+	if (CHECK_LIB("FBCAccess.lib", "fbsql", "\\usr\\FrontBase\\lib") &&
+			CHECK_HEADER_ADD_INCLUDE("FBCAccess\\FBCAccess.h", "CFLAGS", "\\usr\\FrontBase\\include")) {
+		EXTENSION("fbsql", "php_fbsql.c");
+		AC_DEFINE('WinNT', 1, '');
+		AC_DEFINE('HAVE_FBSQL', 1, 'Have FrontBase support');
+	} else {
+		WARNING("fbsql not enabled; libraries and headers not found");
+	}
 }
