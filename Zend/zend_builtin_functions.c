@@ -492,7 +492,7 @@ ZEND_FUNCTION(get_class)
 {
 	zval **arg;
 	char *name;
-	int name_len;
+	zend_uint name_len;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();

@@ -221,7 +221,7 @@ typedef union _zvalue_value {
 	double dval;				/* double value */
 	struct {
 		char *val;
-		int len;
+		zend_uint len;
 	} str;
 	HashTable *ht;				/* hash table value */
 /*	struct {
@@ -272,7 +272,7 @@ union _zend_function;
 struct _zend_class_entry {
 	char type;
 	char *name;
-	uint name_length;
+	zend_uint name_length;
 	struct _zend_class_entry *parent; 
 	int refcount;
 	zend_bool constants_updated;

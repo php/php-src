@@ -252,7 +252,7 @@ ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zva
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
-                                  int is_ref, int num_symbol_tables, ...);
+                                  zend_bool is_ref, int num_symbol_tables, ...);
 
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 

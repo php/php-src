@@ -156,7 +156,7 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 }
 
 
-void zend_do_binary_op(int op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -169,7 +169,7 @@ void zend_do_binary_op(int op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 }
 
 
-void zend_do_unary_op(int op, znode *result, znode *op1 TSRMLS_DC)
+void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -200,7 +200,7 @@ static void zend_replace_object_fetch(zend_op *last_op, znode *value TSRMLS_DC)
 	}
 }
 
-void zend_do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
+void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
@@ -264,7 +264,7 @@ void zend_do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 TSRM
 }
 
 
-void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRMLS_DC)
+void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC)
 {
 	zend_op opline;
 	zend_op *opline_ptr;
@@ -518,7 +518,7 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
 }
 
 
-void zend_do_pre_incdec(znode *result, znode *op1, int op TSRMLS_DC)
+void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
@@ -543,7 +543,7 @@ void zend_do_pre_incdec(znode *result, znode *op1, int op TSRMLS_DC)
 }
 
 
-void zend_do_post_incdec(znode *result, znode *op1, int op TSRMLS_DC)
+void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
@@ -990,7 +990,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
-void zend_do_receive_arg(int op, znode *var, znode *offset, znode *initialization, unsigned char pass_type TSRMLS_DC)
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, zend_uchar pass_type TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1224,7 +1224,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 }
 
 
-void zend_do_pass_param(znode *param, int op, int offset TSRMLS_DC)
+void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 {
 	zend_op *opline;
 	unsigned char *arg_types;
@@ -1828,7 +1828,7 @@ void zend_do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr
 }
 
 
-void zend_do_brk_cont(int op, znode *expr TSRMLS_DC)
+void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2363,7 +2363,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 
 
 
-void zend_do_init_array(znode *result, znode *expr, znode *offset, int is_ref TSRMLS_DC)
+void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2386,7 +2386,7 @@ void zend_do_init_array(znode *result, znode *expr, znode *offset, int is_ref TS
 }
 
 
-void zend_do_add_array_element(znode *result, znode *expr, znode *offset, int is_ref TSRMLS_DC)
+void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 

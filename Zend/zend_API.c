@@ -1272,7 +1272,7 @@ ZEND_API zend_module_entry *zend_get_module(int module_number)
 }
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
-                                  int is_ref, int num_symbol_tables, ...)
+                                  zend_bool is_ref, int num_symbol_tables, ...)
 {
     HashTable  *symbol_table;
     va_list     symbol_table_list;
@@ -1320,7 +1320,7 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
 {
 	char *lcname;
-	int retval = 0;
+	zend_bool retval = 0;
 	TSRMLS_FETCH();
 
 	switch (Z_TYPE_P(callable)) {
@@ -1343,7 +1343,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 				zval **method;
 				zval **obj;
 				zend_class_entry *ce = NULL, **pce;
-				char callable_name_len;
+				zend_uint callable_name_len;
 				
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2 &&
 					zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
