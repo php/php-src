@@ -25,7 +25,9 @@
 #include "SAPI.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
+#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -375,7 +377,6 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	int retval, free_header = 0;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
-	int result_len = 0;
 	long myuid = 0L;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
@@ -446,11 +447,16 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					SG(sapi_headers).http_response_code = 302;
 				   }
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
+				int newlen;
+				char *result, *newheader;
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 				zval *repl_temp;
-				char *result, *newheader, *ptr = colon_offset+1;
-				int newlen, ptr_len=0;
+				char *ptr = colon_offset+1;
+				int ptr_len=0, result_len = 0;
+#endif
 
 				SG(sapi_headers).http_response_code = 401; /* authentication-required */
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 				if(PG(safe_mode)) {
 					myuid = php_getuid();
 
@@ -499,6 +505,18 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					efree(Z_STRVAL_P(repl_temp));
 					efree(repl_temp);
 				}
+#else
+				if(PG(safe_mode)) {
+					myuid = php_getuid();
+					result = emalloc(32);
+					newlen = sprintf(result, "WWW-Authenticate: %ld", myuid);	
+					newheader = estrndup(result,newlen);
+					efree(header_line);
+					sapi_header.header = newheader;
+					sapi_header.header_len = newlen;
+					efree(result);
+				}
+#endif
 			}
 			*colon_offset = ':';
 		}
