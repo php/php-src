@@ -176,6 +176,7 @@ PHPAPI int php_restore_ini_entry(char *name, uint name_length)
 	}
 
 	if (ini_entry->orig_value) {
+		STR_FREE(ini_entry->value);
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->value_length = ini_entry->orig_value_length;
 	}
