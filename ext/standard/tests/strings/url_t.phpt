@@ -61,7 +61,9 @@ $sample_urls = array (
 'zlib:filename.txt',
 'zlib:/path/to/my/file/file.txt',
 'foo://foo@bar',
-'mailto:me@mydomain.com'
+'mailto:me@mydomain.com',
+'/foo.php?a=b&c=d',
+'foo.php?a=b&c=d'
 );
 
     foreach ($sample_urls as $url) {
@@ -181,7 +183,7 @@ array(3) {
 }
 array(1) {
   ["path"]=>
-  string(13) "www.php.net/?"
+  string(12) "www.php.net/"
 }
 array(3) {
   ["host"]=>
@@ -586,4 +588,16 @@ array(2) {
   string(6) "mailto"
   ["path"]=>
   string(15) "me@mydomain.com"
+}
+array(2) {
+  ["path"]=>
+  string(8) "/foo.php"
+  ["query"]=>
+  string(7) "a=b&c=d"
+}
+array(2) {
+  ["path"]=>
+  string(7) "foo.php"
+  ["query"]=>
+  string(7) "a=b&c=d"
 }
