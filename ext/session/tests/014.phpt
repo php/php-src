@@ -1,5 +1,5 @@
 --TEST--
-A script should not be able to modify session.use_trans_sid
+a script should not be able to modify session.use_trans_sid
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -1,5 +1,5 @@
 --TEST--
-There should not be any warning with regard to redefining SID
+redefining SID should not cause warnings
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

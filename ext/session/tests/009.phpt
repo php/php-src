@@ -1,5 +1,5 @@
 --TEST--
-unset($_SESSION["name"]); works with register_globals=off
+unset($_SESSION["name"]); should work with register_globals=off
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -10,7 +10,7 @@ session.bug_compat_42=1
 session.bug_compat_warn=0
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
 
 session_id("abtest");
 
