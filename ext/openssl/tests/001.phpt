@@ -9,6 +9,15 @@ include('skipif.inc'); ?>
 <?php
 echo "Creating private key\n";
 
+/* stack up some entropy; performance is not critical,
+ * and being slow will most likely even help the test.
+ */
+for ($z = "", $i = 0; $i < 1024; $i++) {
+	$z .= $i * $i;
+	if (function_exists("usleep"))
+		usleep($i);
+}
+
 $privkey = openssl_pkey_new();
 
 if ($privkey === false)
