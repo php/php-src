@@ -1800,7 +1800,7 @@ void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 }
 
 
-void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
+void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC)
 {
 	if (value) {
 		zval *property;
@@ -1808,7 +1808,11 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 		ALLOC_ZVAL(property);
 
 		*property = value->u.constant;
-		zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		if (declaration_type == T_VAR) {
+			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		} else {
+			zend_hash_update(&CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		}
 	}
 	FREE_PNODE(var_name);
 }
