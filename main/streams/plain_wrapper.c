@@ -882,6 +882,16 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
+	char *filename = path;
+	if (!strncasecmp(filename, "file:", sizeof("file:")-1)) {
+		filename += 6;
+		while (*(++filename)=='/');
+#ifdef PHP_WIN32
+		if (*(filename + 1) != ':')
+#endif
+			filename--;
+	}
+
 	if ((options & USE_PATH) && PG(include_path) != NULL) {
 		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path, options);
 	}

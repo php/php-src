@@ -1415,14 +1415,20 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	}
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
-		if (protocol && path[n+1] == '/' && path[n+2] == '/')	{
+		if (protocol && path[n+1] == '/' && path[n+2] == '/' && path[n+3] != '/')	{
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "remote host file access not supported, %s", path);
 			}
 			return NULL;
 		}
 		if (protocol && path_for_open) {
+			/* skip past protocol and :/, but handle windows correctly */
 			*path_for_open = (char*)path + n + 1;
+			while (*(++*path_for_open)=='/');
+#ifdef PHP_WIN32
+			if (*(*path_for_open + 1) != ':')
+#endif
+				*path_for_open--;
 		}
 		
 		/* fall back on regular file access */
