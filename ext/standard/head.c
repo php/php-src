@@ -236,17 +236,17 @@ PHPAPI int php3_header(void)
 #if APACHE || defined(USE_SAPI) || FHTTPD
 	char *tempstr;
 #endif
-TLS_VARS;
+	PLS_FETCH();
 
-	if (GLOBAL(header_is_being_sent)) {
+	if (PG(header_is_being_sent)) {
 		return 0;
 	} else {
-		GLOBAL(header_is_being_sent) = 1;
+		PG(header_is_being_sent) = 1;
 	}
 
 #if APACHE
 	if (!GLOBAL(php3_rqst)) {  /* we're not in a request, allow output */
-		GLOBAL(header_is_being_sent) = 0;
+		PG(header_is_being_sent) = 0;
 		return 1;
 	}
 	if ((GLOBAL(php3_PrintHeader) && !GLOBAL(php3_HeaderPrinted)) || (GLOBAL(php3_PrintHeader) && GLOBAL(php3_HeaderPrinted) == 2)) {
@@ -324,7 +324,7 @@ TLS_VARS;
 		send_http_header(GLOBAL(php3_rqst));
 		if (GLOBAL(php3_rqst)->header_only) {
 			set_header_request(1);
-			GLOBAL(header_is_being_sent) = 0;
+			PG(header_is_being_sent) = 0;
 			return(0);
 		}
 	}
@@ -382,7 +382,7 @@ TLS_VARS;
 		GLOBAL(header_called) = 1;
 	}
 #endif
-	GLOBAL(header_is_being_sent) = 0;
+	PG(header_is_being_sent) = 0;
 	return(1);
 }
 

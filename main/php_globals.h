@@ -63,6 +63,8 @@ struct _php_core_globals {
     long track_vars;
 
     long y2k_compliance;
+
+	unsigned char header_is_being_sent;
 };
 
 

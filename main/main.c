@@ -250,7 +250,6 @@ PHP_INI_END()
  */
 int initialized;				/* keep track of which resources were successfully initialized */
 static int module_initialized = 0;
-unsigned char header_is_being_sent;
 
 #if WIN32|WINNT
 unsigned int wintimer;
@@ -648,7 +647,7 @@ int php3_request_startup(CLS_D ELS_DC PLS_DC)
 
 	/* initialize global variables */
 	{
-		GLOBAL(header_is_being_sent) = 0;
+		PG(header_is_being_sent)=0;
 	}
 
 	if (php3_init_request_info(NULL)) {
