@@ -314,22 +314,56 @@ static zval *dom_object_get_data(void *obj) {
 	return((zval *) (((xmlNodePtr) obj)->_private));
 }
 
+static inline void node_wrapper_dtor(xmlNodePtr node)
+{
+	zval *wrapper;
+
+	if (!node || node->type == XML_DTD_NODE)
+		return;
+
+	wrapper = dom_object_get_data(node);
+	if (wrapper)
+		zval_ptr_dtor(&wrapper);
+}
+
+static inline void attr_list_wrapper_dtor(xmlAttrPtr attr)
+{
+	while (attr != NULL) {
+		node_wrapper_dtor((xmlNodePtr) attr);
+		attr = attr->next;
+	}
+}
+
+static inline void node_list_wrapper_dtor(xmlNodePtr node)
+{
+	while (node != NULL) {
+		node_list_wrapper_dtor(node->children);
+		attr_list_wrapper_dtor(node->properties);
+		node_wrapper_dtor(node);
+		node = node->next;
+	}
+}
+
 static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
 {
 	xmlDoc *doc = (xmlDoc *)rsrc->ptr;
-/*	fprintf(stderr, "Freeing document: %s\n", doc->name); */
 
 	if (doc) {
-		zval *wrapper = dom_object_get_data(doc);
-		if (wrapper)
-			zval_ptr_dtor(&wrapper);
+		node_list_wrapper_dtor(doc->children);
+		
+		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
 }
 
-void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
+static void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
-/*	fprintf(stderr, "Freeing node: %s\n", node->name); */
+	
+	if (node) {
+		zval *wrapper = dom_object_get_data(node);
+		if (wrapper)
+			zval_ptr_dtor(&wrapper);
+	}
 }
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -688,7 +722,8 @@ PHP_MINIT_FUNCTION(domxml)
 	   Therefore nodes, attributes etc. may not be freed seperately.
 	*/
 	le_domxmlnodep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domnode", module_number);
-	le_domxmlattrp = zend_register_list_destructors_ex(NULL, NULL, "domattribute", module_number);
+	le_domxmlattrp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domattribute", module_number);
+	le_domxmlelementp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domelement", module_number);
 #if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpathcontext", module_number);
 	le_xpathobjectp = zend_register_list_destructors_ex(php_free_xpath_object, NULL, "xpathobject", module_number);
@@ -938,6 +973,9 @@ PHP_FUNCTION(domxml_node)
 		RETURN_FALSE;
 	}
 	rv = php_domobject_new(node, &ret);
+	if (!rv) {
+		RETURN_FALSE;
+	}
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1401,7 +1439,7 @@ PHP_FUNCTION(domxml_node_set_name)
    Returns list of attributes of node */
 PHP_FUNCTION(domxml_node_attributes)
 {
-	zval *id;
+	zval *id, *attrs;
 	xmlNode *nodep;
 #ifdef oldstyle_for_libxml_1_8_7
 	xmlAttr *attr;
@@ -1410,8 +1448,11 @@ PHP_FUNCTION(domxml_node_attributes)
 	id = getThis();
 	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
 
-	if(0 > node_attributes(&return_value, nodep))
+	if(node_attributes(&attrs, nodep) < 0)
 		RETURN_FALSE;
+
+	*return_value = *attrs;
+	FREE_ZVAL(attrs);
 
 #ifdef oldstyle_for_libxml_1_8_7
 	attr = nodep->properties;
@@ -2181,6 +2222,9 @@ PHP_FUNCTION(domxml_new_xmldoc)
 		RETURN_FALSE;
 	}
 	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	if (!rv) {
+		RETURN_FALSE;
+	}
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2237,16 +2281,12 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	if(nodep->type != XML_ELEMENT_NODE)
 		return -1;
 	attr = nodep->properties;
-	if (!attr) {
+	if (!attr)
 		return -1;
-	}
-/*	MAKE_STD_ZVAL(*attributes); */ /* could be a problem when node_attribute() is called from domxml_attributes */ 
 
 	/* create an php array for the children */
-/*	MAKE_STD_ZVAL(*attributes); *//* Don't do this if *attributes are the return_value */
-	if (array_init(*attributes) == FAILURE) {
-		return -1;
-	}
+	MAKE_STD_ZVAL(*attributes);
+	array_init(*attributes);
 
 	while(attr) {
 		zval *pattr;
@@ -2282,9 +2322,7 @@ static int node_children(zval **children, xmlNode *nodep)
 
 	/* create an php array for the children */
 	MAKE_STD_ZVAL(*children);
-	if (array_init(*children) == FAILURE) {
-		return -1;
-	}
+	array_init(*children);
 
 	while(last) {
 		zval *child;
@@ -2299,12 +2337,11 @@ static int node_children(zval **children, xmlNode *nodep)
 */
 
 		/* Get the attributes of the current node and add it as a property */
-		MAKE_STD_ZVAL(attributes);
-		if(0 <= node_attributes(&attributes, last))
+		if(node_attributes(&attributes, last) >= 0)
 			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
 		/* Get recursively the children of the current node and add it as a property */
-		if(0 <= node_children(&mchildren, last->children))
+		if(node_children(&mchildren, last->children) >= 0)
 			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 		count++;
 		last = last->next;
@@ -2332,9 +2369,6 @@ PHP_FUNCTION(xmltree)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
-	SEPARATE_ZVAL(&rv);
-	*return_value = *rv;
 
 	/* get the root and add as a property to the document */
 	root = docp->children;
@@ -2343,13 +2377,21 @@ PHP_FUNCTION(xmltree)
 		RETURN_FALSE;
 	}
 
+	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	if (!rv) {
+		RETURN_FALSE;
+	}
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+
 	/* The root itself maybe an array. Though you may not have two Elements
 	   as root, you may have a comment, pi and and element as root.
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
-	if(0 <= node_children(&children, root)) {
-		zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
-
+	if (node_children(&children, root) >= 0) {
+		zend_hash_update(return_value->value.obj.properties, "children",
+						 sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 	}
 /*	xmlFreeDoc(docp); */
 }
