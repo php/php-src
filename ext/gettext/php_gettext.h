@@ -45,6 +45,9 @@ PHP_FUNCTION(dngettext);
 #if HAVE_DCNGETTEXT
 PHP_FUNCTION(dcngettext);
 #endif
+#if HAVE_BIND_TEXTDOMAIN_CODESET
+PHP_FUNCTION(bind_textdomain_codeset);
+#endif
 
 #else
 #define gettext_module_ptr NULL
