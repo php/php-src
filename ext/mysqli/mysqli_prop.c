@@ -129,7 +129,7 @@ static int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property link_affected_rows_read */
-int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
@@ -225,7 +225,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_R
 /* statement properties */
 
 /* {{{ property stmt_id_read */
-int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_STMT *p;
 
@@ -244,7 +244,7 @@ int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property stmt_affected_rows_read */
-int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_STMT *stmt;
 	my_ulonglong rc;

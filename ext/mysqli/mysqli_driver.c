@@ -30,7 +30,7 @@
 
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 { \
 	ALLOC_ZVAL(*retval); \
 	ZVAL_BOOL(*retval, MyG(value)); \
@@ -38,14 +38,14 @@ int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 } \
 
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
-int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 { \
 	MyG(value) = Z_LVAL_P(value) > 0; \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 { \
 	ALLOC_ZVAL(*retval); \
 	ZVAL_LONG(*retval, MyG(value)); \
@@ -53,14 +53,14 @@ int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
-int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 { \
 	MyG(value) = Z_LVAL_P(value); \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
+static int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 { \
 	ALLOC_ZVAL(*retval); \
 	ZVAL_STRING(*retval, MyG(value), 1); \
@@ -68,14 +68,14 @@ int name(mysqli_object *obj, zval **retval TSRMLS_DC) \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
-int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 { \
 	MyG(value) = Z_STRVAL_P(value); \
 	return SUCCESS; \
 } \
 
 /* {{{ property driver_report_write */
-int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
+static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
 	php_set_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, 
@@ -85,7 +85,7 @@ int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_embedded_read */
-int driver_embedded_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int driver_embedded_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 #ifdef HAVE_EMBEDDED_MYSQLI
@@ -98,7 +98,7 @@ int driver_embedded_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 	ZVAL_LONG(*retval, MYSQL_VERSION_ID);
@@ -107,7 +107,7 @@ int driver_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
@@ -116,7 +116,7 @@ int driver_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-int driver_driver_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+static int driver_driver_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
 	ZVAL_LONG(*retval, MYSQLI_VERSION_ID);
