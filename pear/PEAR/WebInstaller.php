@@ -247,6 +247,10 @@ class PEAR_WebInstaller extends PEAR
         print "<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=1>";
         print "<TR><TD BGCOLOR=\"#000000\">\n";
         print "<TABLE CELLSPACING=1 BORDER=0 CELLPADDING=3 width=\"100%\">\n";
+        print "<tr bgcolor=\"f0f0f0\">";
+        print "<td COLSPAN=\"6\" ><input type=\"submit\" value=\"Install\"></td>";
+        print "</tr>";
+
         print " <TR BGCOLOR=\"#e0e0e0\" >\n";
         print "  <TH>Inst.</TH>\n";
         print "  <TH>Package</TH>\n";
@@ -277,7 +281,7 @@ class PEAR_WebInstaller extends PEAR
             print "</TD>\n";
 
             print "  <TD BGCOLOR=\"$bg1\">";
-            print $this->printCell ($package[name],"http://pear.php.net/pkginfo.php?package=$package[name]");
+            print $this->printCell ($package["name"],"http://pear.php.net/pkginfo.php?package=$package[name]");
             print "</TD>\n";
 
             print "<TD BGCOLOR=\"$bg2\">";
@@ -293,7 +297,7 @@ class PEAR_WebInstaller extends PEAR
             print "</TD>\n";
 
             print "<TD BGCOLOR=\"$bg2\">";
-            $this->printCell ($package["release_notes"]);
+            $this->printCell (nl2br($package["release_notes"]));
             print "</TD>\n";
             print " </TR>\n";
 
@@ -604,7 +608,6 @@ class PEAR_WebInstaller extends PEAR
         $this->loggerEnd();
         print "From the WebInstaller.php introduction: <p>";
 
-        //        $file = implode("",file(__FILE__));
         $file = file(__FILE__);
         foreach($file as $line)
         {
@@ -613,12 +616,13 @@ class PEAR_WebInstaller extends PEAR
             }
             $help .= $line;
         }
+
         highlight_string($help);
         print "<p>";
         if ($Full != 2) {
             print "<a href=\"$PHP_SELF?help=2\">See the full source</a><p>\n";
         }
-        
+
         print "<a href=\"$PHP_SELF\">Back to the packages overview</A>\n";
     }
 
