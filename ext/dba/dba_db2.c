@@ -75,7 +75,7 @@ DBA_OPEN_FUNC(db2)
 		return FAILURE;
 	}
 
-	info->dbf = calloc(sizeof(dba_db2_data), 1);
+	info->dbf = ecalloc(sizeof(dba_db2_data), 1);
 	((dba_db2_data *) info->dbf)->dbp = dbp;
 	return SUCCESS;
 }
@@ -87,7 +87,7 @@ DBA_CLOSE_FUNC(db2)
 	if (dba->cursor) 
 		dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
-	free(dba);
+	efree(dba);
 }
 
 DBA_FETCH_FUNC(db2)

@@ -77,7 +77,7 @@ DBA_OPEN_FUNC(db3)
 			dbp->open(dbp, info->path, NULL, type, gmode, filemode) == 0) {
 		dba_db3_data *data;
 
-		data = malloc(sizeof(*data));
+		data = emalloc(sizeof(*data));
 		data->dbp = dbp;
 		data->cursor = NULL;
 		info->dbf = data;
@@ -96,7 +96,7 @@ DBA_CLOSE_FUNC(db3)
 	
 	if (dba->cursor) dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
-	free(dba);
+	efree(dba);
 }
 
 DBA_FETCH_FUNC(db3)

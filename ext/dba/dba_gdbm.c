@@ -59,8 +59,7 @@ DBA_OPEN_FUNC(gdbm)
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
 	
 	if(dbf) {
-		info->dbf = malloc(sizeof(dba_gdbm_data));
-		memset(info->dbf, 0, sizeof(dba_gdbm_data));
+		info->dbf = ecalloc(sizeof(dba_gdbm_data), 1);
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
@@ -73,7 +72,7 @@ DBA_CLOSE_FUNC(gdbm)
 	
 	if(dba->nextkey.dptr) free(dba->nextkey.dptr);
 	gdbm_close(dba->dbf);
-	free(dba);
+	efree(dba);
 }
 
 DBA_FETCH_FUNC(gdbm)
