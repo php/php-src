@@ -1,3 +1,79 @@
+2001-01-19  Jason Greene  <jason@inetgurus.net>
+
+    * TODO: Desired functionality can be achieved with array_sum/array_count.
+
+2001-01-19  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/rfc822.php:
+    remove a change that broke things, and removing an unused function.
+
+2001-01-19  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/rfc822.php:
+    If extended format is in use and there are no groups, all the addresses are
+    now added to an empty group. Also changed the format of the output, an
+    array was being used unnecessarily.
+
+2001-01-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/image.c:
+    - Added URL support for getimagesize() function 
+
+2001-01-19  Sam Liddicott  <sam@ananova.com>
+
+    * EXTENSIONS: Added muscat to EXTENSIONS as it should be there all along
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php.h: Bump PHP_API_VERSION
+
+2001-01-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Added a notice about the wordwrap function fix
+
+2001-01-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/rfc1867.c: Make the code match the comment.
+
+    Prior to this change, the upload code tried to add mangled names to
+    the global HTTP_POST_FILES array, resulting in all kind of weird behaviour.
+
+    After this change, multi-dimensional form elements are treated correctly
+    and consistently.
+
+2001-01-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sockets/EXPERIMENTAL
+      ext/vpopmail/EXPERIMENTAL
+      ext/qtdom/EXPERIMENTAL
+      ext/sablot/EXPERIMENTAL
+      ext/satellite/EXPERIMENTAL
+      ext/ingres_ii/EXPERIMENTAL
+      ext/openssl/EXPERIMENTAL
+      EXTENSIONS
+      ext/bz2/EXPERIMENTAL
+      ext/crack/CREDITS
+      ext/crack/EXPERIMENTAL
+      ext/domxml/EXPERIMENTAL
+      ext/dotnet/EXPERIMENTAL:
+    Added some missing EXPERIMENTAL files plus some missing extensions
+    into EXTENSIONS file.
+
+2001-01-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/HTML/IT.php
+      pear/HTML/ITX.php: Whitespace only.
+
+2001-01-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    - Added xslt_set_scheme_handler() function (carmelo@akooe.com)
+
 2001-01-18  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/pgsql/pgsql.c
