@@ -849,6 +849,8 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	fd_set wrfds, efds;
+	int n;
 
 	if (close_handle) {
 #if HAVE_OPENSSL_EXT
@@ -862,7 +864,18 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 #endif
 
-		/* shutdown(sock->socket, 0); */
+		/* prevent more data from coming in */
+		shutdown(sock->socket, SHUT_RD);
+
+		/* make sure that the OS sends all data before we close the connection */
+		do {
+			FD_ZERO(&wrfds);
+			FD_SET(sock->socket, &wrfds);
+			efds = wrfds;
+		
+			n = select(sock->socket + 1, NULL, &wrfds, &efds, NULL);
+		} while (n == -1 && php_socket_errno() == EINTR);
+		
 		closesocket(sock->socket);
 
 	}
