@@ -3,12 +3,9 @@
 prefix="@prefix@"
 version="@PHP_VERSION@"
 includedir="@includedir@/php"
-includes="-I$includedir -I$includedir/main -I$includedir/Zend"
+includes="-I$includedir -I$includedir/main -I$includedir/TSRM -I$includedir/Zend"
 ldflags="@PHP_LDFLAGS@"
 libs="@EXTRA_LIBS@"
-if test '@TSRM_DIR@' != ''; then
-    includes="$includes -I$includedir/TSRM"
-fi
 extension_dir='@EXTENSION_DIR@'
 
 case "$1" in
