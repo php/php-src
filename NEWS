@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- phpinfo() support for CLI (jan)
+- Made EXIF (digital camera) extension enabled by default. (Marcus)
+- socket_recvfrom is now binary safe (Jason)
 - Changed mail() to use escape_shell_cmd() to allow multiple extra parameters 
   to the invocation of the mailer as used in the fifth parameter. (Derick)
 - Changed cURL extension to require cURL version 7.9.8 (Derick)
