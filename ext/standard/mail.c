@@ -111,8 +111,9 @@ PHP_FUNCTION(mail)
 		}
 	}
 
-	if(extra_cmd)
-		extra_cmd = php_escape_shell_arg(extra_cmd);
+	if (extra_cmd) {
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
+	}
 	
 	if (php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
