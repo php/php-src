@@ -62,6 +62,9 @@
 #endif
 
 
+/* True globals, no need for thread safety */
+int le_result,le_link,le_plink;
+
 #include "php_ini.h"
 
 #if HAVE_MYSQL
@@ -299,17 +302,26 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
+#ifdef ZTS
+static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
+{
+	MySG(num_persistent) = 0;
+}
+#endif
+
+
 int php3_minit_mysql(INIT_FUNC_ARGS)
 {
-	REGISTER_INI_ENTRIES();
+#ifdef ZTS
+	mysql_globals_id = tsrm_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
+#else
 	MySG(num_persistent)=0;
-	MySG(le_result) = register_list_destructors(_free_mysql_result,NULL);
-	MySG(le_link) = register_list_destructors(_close_mysql_link,NULL);
-	MySG(le_plink) = register_list_destructors(NULL,_close_mysql_plink);
-
-#if 0
-	printf("Registered:  %d,%d,%d\n",MySG(le_result),MySG(le_link),MySG(le_plink));
 #endif
+
+	REGISTER_INI_ENTRIES();
+	le_result = register_list_destructors(_free_mysql_result,NULL);
+	le_link = register_list_destructors(_close_mysql_link,NULL);
+	le_plink = register_list_destructors(NULL,_close_mysql_plink);
 	mysql_module_entry.type = type;
 
 	return SUCCESS;
@@ -321,6 +333,7 @@ int php3_mshutdown_mysql(SHUTDOWN_FUNC_ARGS)
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
+
 
 int php3_rinit_mysql(INIT_FUNC_ARGS)
 {
@@ -495,7 +508,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			
 			/* hash it up */
-			new_le.type = MySG(le_plink);
+			new_le.type = le_plink;
 			new_le.ptr = mysql;
 			if (_php3_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(mysql);
@@ -505,7 +518,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			MySG(num_persistent)++;
 			MySG(num_links)++;
 		} else {  /* we do */
-			if (le->type != MySG(le_plink)) {
+			if (le->type != le_plink) {
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
@@ -537,7 +550,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #endif
 			mysql = (MYSQL *) le->ptr;
 		}
-		return_value->value.lval = php3_list_insert(mysql,MySG(le_plink));
+		return_value->value.lval = php3_list_insert(mysql,le_plink);
 		return_value->type = IS_RESOURCE;
 	} else { /* non persistent */
 		list_entry *index_ptr,new_index_ptr;
@@ -560,7 +573,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			link = (int) index_ptr->ptr;
 			ptr = php3_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==MySG(le_link) || type==MySG(le_plink))) {
+			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
 				return_value->value.lval = link;
 				php_mysql_set_default_link(link);
@@ -591,7 +604,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 
 		/* add it to the list */
-		return_value->value.lval = php3_list_insert(mysql,MySG(le_link));
+		return_value->value.lval = php3_list_insert(mysql,le_link);
 		return_value->type = IS_RESOURCE;
 
 		/* add it to the hash */
@@ -662,7 +675,7 @@ void php3_mysql_close(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -703,7 +716,7 @@ void php3_mysql_select_db(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -749,7 +762,7 @@ void php3_mysql_create_db(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -794,7 +807,7 @@ void php3_mysql_drop_db(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -838,7 +851,7 @@ void php3_mysql_query(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -860,7 +873,7 @@ void php3_mysql_query(INTERNAL_FUNCTION_PARAMETERS)
 		*/
 		RETURN_TRUE;
 	}
-	return_value->value.lval = php3_list_insert(mysql_result,MySG(le_result));
+	return_value->value.lval = php3_list_insert(mysql_result,le_result);
 	return_value->type = IS_RESOURCE;
 }
 /* }}} */
@@ -897,7 +910,7 @@ void php3_mysql_db_query(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -925,7 +938,7 @@ void php3_mysql_db_query(INTERNAL_FUNCTION_PARAMETERS)
 		*/
 		RETURN_TRUE;
 	}
-	return_value->value.lval = php3_list_insert(mysql_result,MySG(le_result));
+	return_value->value.lval = php3_list_insert(mysql_result,le_result);
 	return_value->type = IS_RESOURCE;
 }
 /* }}} */
@@ -959,7 +972,7 @@ void php3_mysql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -967,7 +980,7 @@ void php3_mysql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING,"Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
-	return_value->value.lval = php3_list_insert(mysql_result,MySG(le_result));
+	return_value->value.lval = php3_list_insert(mysql_result,le_result);
 	return_value->type = IS_RESOURCE;
 }
 /* }}} */
@@ -1004,7 +1017,7 @@ void php3_mysql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1017,7 +1030,7 @@ void php3_mysql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING,"Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
-	return_value->value.lval = php3_list_insert(mysql_result,MySG(le_result));
+	return_value->value.lval = php3_list_insert(mysql_result,le_result);
 	return_value->type = IS_RESOURCE;
 }
 /* }}} */
@@ -1054,7 +1067,7 @@ void php3_mysql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
 	CHECK_LINK(id);
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1068,7 +1081,7 @@ void php3_mysql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING,"Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
-	return_value->value.lval = php3_list_insert(mysql_result,MySG(le_result));
+	return_value->value.lval = php3_list_insert(mysql_result,le_result);
 	return_value->type = IS_RESOURCE;
 }
 /* }}} */
@@ -1102,7 +1115,7 @@ void php3_mysql_error(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1141,7 +1154,7 @@ void php3_mysql_errno(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1177,7 +1190,7 @@ void php3_mysql_affected_rows(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1214,7 +1227,7 @@ void php3_mysql_insert_id(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=MySG(le_link) && type!=MySG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php3_error(E_WARNING,"%d is not a MySQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1255,7 +1268,7 @@ void php3_mysql_result(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1353,7 +1366,7 @@ void php3_mysql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1380,7 +1393,7 @@ void php3_mysql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1411,7 +1424,7 @@ void php3_mysql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1463,7 +1476,7 @@ static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1532,7 +1545,7 @@ void php3_mysql_data_seek(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1565,7 +1578,7 @@ void php3_mysql_fetch_lengths(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1660,7 +1673,7 @@ void php3_mysql_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1710,7 +1723,7 @@ void php3_mysql_field_seek(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1746,7 +1759,7 @@ static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	convert_to_long(result);
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1915,7 +1928,7 @@ void php3_mysql_free_result(INTERNAL_FUNCTION_PARAMETERS)
 	
 	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=MySG(le_result)) {
+	if (type!=le_result) {
 		php3_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
