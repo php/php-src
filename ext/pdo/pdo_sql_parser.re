@@ -138,6 +138,13 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 
 	params = stmt->bound_params;
 	
+	/* Do we have placeholders but no bound params */
+	if (bindno && !params) {
+		strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+		ret = -1;
+		goto clean_up;
+	}
+	
 	/* what are we going to do ? */
 	
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
