@@ -22,7 +22,8 @@ libphp4_la_LIBADD = \
 		$(EXT_LTLIBS) \
 		$(TSRM_LIB) \
 		$(EXTRA_LIBS)
-libphp4_la_LDFLAGS = -avoid-version $(BUILDLDFLAGS) $(PHP_RPATHS)		
+
+libphp4_la_LDFLAGS = $(BUILDLDFLAGS) $(PHP_RPATHS)		
 
 libphp4_la_DEPENDENCIES = \
 		libzend/libzend.la \
