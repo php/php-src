@@ -2647,7 +2647,7 @@ PHP_FUNCTION(domxml_dump_mem_file)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dump_node([object doc_handle],object node_handle)
+/* {{{ proto string domxml_dump_node([object doc_handle],object node_handle[,int format[,int level]])
    Dumps node into string */
 PHP_FUNCTION(domxml_dump_node)
 {
@@ -2659,7 +2659,7 @@ PHP_FUNCTION(domxml_dump_node)
     int level = 0;
     int format = 0;    
     
-    DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"o",&nodep);
+    DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"o|ll",&nodep,&format,&level);
         
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
@@ -2676,10 +2676,11 @@ PHP_FUNCTION(domxml_dump_node)
     }
     
     xmlNodeDump(buf, docp, elementp,level,format);
-	
+
     mem = xmlBufferContent(buf);
 
 	if (!mem) {
+        xmlBufferFree(buf);
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(mem,  1);
