@@ -24,19 +24,21 @@
 
 
 #if HAVE_MSSQL
-#include "sqlfront.h"
-#include "sqldb.h"
-
 #ifdef PHP_WIN32
 #define PHP_MSSQL_API __declspec(dllexport)
 #else
 #define PHP_MSSQL_API
 #endif
 
+
 #if MSSQL65
 #define MSSQL_VERSION "6.5"
+#include "../../../php_build/mssql-65/include/sqlfront.h"
+#include "../../../php_build/mssql-65/include/sqldb.h"
 #elif MSSQL70
 #define MSSQL_VERSION "7.0"
+#include "../../../php_build/mssql-70/include/sqlfront.h"
+#include "../../../php_build/mssql-70/include/sqldb.h"
 #else
 #define MSSQL_VERSION "Unknown"
 #endif
