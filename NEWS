@@ -1,31 +1,55 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
-- Added option for returning XMLRPC fault packets (Matt Allen, Sascha Schumann)
-- Improved range() function to support range('a','z') and range(9,0) types 
-  of ranges.  (Rasmus)
-- Add getmygid() and safe_mode_gid ini directive to allow safe mode to do
+- Added option for returning XMLRPC fault packets (Matt Allen, Sascha Schumann).
+- Improved range() function to support range('a','z') and range(9,0) types of
+  ranges. (Rasmus)
+- Added getmygid() and safe_mode_gid ini directive to allow safe mode to do
   a gid check instead of a uid check. (James E. Flemer, Rasmus)
-- Assigning to a string offset beyond the end of the string now automatically
-  increases the string length by padding it with spaces, and performs the
-  assignment (Zeev, Zend Engine)
-- Added warnings in case an uninitialized string offset is read (Zeev, Zend
-  Engine)
-- Fixed a couple of overflow bugs in case of very large negative integer
-  numbers (Zeev, Zend Engine)
-- Added new experimental module pcntl (Process Control) (Jason)
-- References between session-variables are now possible. (Thies)
-- Fixed a crash bug in the string-offsets implementation (Zeev, Zend Engine)
-- Improved the implementation of parent::method_name() for classes which use
-  run-time inheritence (Zeev, Zend Engine)
-- added 'W' flag to date() function to return week number of year using 
-  ISO 8601 standard (Colin)
-- Allow the PostgreSQL driver to do internal row counting when iterating
-  through result sets. (gvz@2scale.net)
-- Updated ext/mysql/libmysql to version 3.23.39; Portability fixes, minor
-  bug fixes. (tim@mysql.com)
+- Made assert() accept the array(&$obj, 'methodname') syntax. (Thies)
+- Made sure that OCI8 outbound variables are always zero-terminated. (Thies)
+- Fixed a bug that allowed users to spawn processes while using the 5th
+  parameter to mail(). (Derick)
+- Added nl_langinfo() (when OS provides it) that returns locale.
+- Fixed a major memory corruption bug in the thread safe version. (Zeev)
+- Fixed a crash when using the CURLOPT_WRITEHEADER option. (Sterling)
+- Added optional suffix removal parameter to basename(). (Hartmut)
+- Added new parameter UDM_PARAM_VARDIR ha in Udm_Set_Agent_Param() function to
+  support alternative search data directory.  This requires mnogoSearch 3.1.13
+  or later.
+- Fixed references in sessions. This doesn't work when using the WDDX
+  session-serializer. Also improved speed of sessions. (Thies)
+- Added new experimental module pcntl (Process Control). (Jason)
+- Fixed a bug when com.allow_dcom is set to false. (phanto)
+- Added a further parameter to the constructor to load typelibs from file when
+  instantiating components (e.g. DCOM Components without local registration).
+  (phanto)
+- Added the possibility to specify typelibs by full name in the typelib file
+  (Alan Brown)
+- Renamed the ZZiplib extension to the Zip extension, function names have also
+  changed accordingly, functionality, has stayed constant. (Sterling)
+- Made the length argument (argument 2) to pg_loread() optional, if not
+  specified data will be read in 1kb chunks. (Sterling)
+- Added a third argument to pg_lowrite() which is the length of the data to
+  write. (Sterling)
 - Added the CONNECTION_ABORTED, CONNECTION_TIMEOUT and CONNECTION_NORMAL
   constants. (Zak)
+- Assigning to a string offset beyond the end of the string now automatically
+  increases the string length by padding it with spaces, and performs the
+  assignment. (Zeev, Zend Engine)
+- Added warnings in case an uninitialized string offset is read. (Zeev, Zend
+  Engine)
+- Fixed a couple of overflow bugs in case of very large negative integer
+  numbers. (Zeev, Zend Engine)
+- Fixed a crash bug in the string-offsets implementation (Zeev, Zend Engine)
+- Improved the implementation of parent::method_name() for classes which use
+  run-time inheritance. (Zeev, Zend Engine)
+- Added 'W' flag to date() function to return week number of year using ISO
+  8601 standard. (Colin)
+- Made the PostgreSQL driver do internal row counting when iterating through
+  result sets. (gvz@2scale.net)
+- Updated ext/mysql/libmysql to version 3.23.39; Portability fixes, minor
+  bug fixes. (tim@mysql.com)
 - Added get_defined_constants() function to return an associative array of
   constants mapped to their values. (Sean)
 - New mailparse extension for parsing and manipulating MIME mail. (Wez)
