@@ -1,3 +1,8 @@
+2003-02-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_stream.c:
+      Fix stupid mistake that only affected interactive mode.
+
 2003-02-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * zend_stream.c:
