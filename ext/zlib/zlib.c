@@ -23,6 +23,7 @@
 
 #if HAVE_FOPENCOOKIE 
 #define _GNU_SOURCE
+#define __USE_GNU
 #include "libio.h"
 #endif 
 
@@ -84,7 +85,7 @@ static php_zlib_globals zlib_globals;
 #endif
 
 #if HAVE_FOPENCOOKIE 
-static FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
+static FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
 #endif 
 
 /* True globals, no need for thread safety */
@@ -139,6 +140,8 @@ static void php_zlib_init_globals(ZLIBLS_D)
 
 PHP_MINIT_FUNCTION(zlib)
 {
+	PLS_FETCH();
+
 #ifdef ZTS
         zlib_globals_id = ts_allocate_id(sizeof(php_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #else
@@ -147,7 +150,10 @@ PHP_MINIT_FUNCTION(zlib)
 	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL);
 
 #if HAVE_FOPENCOOKIE
-	php_register_url_wrapper("zlib",zlib_fopen_wrapper);
+
+	if(PG(allow_url_fopen)) {
+		php_register_url_wrapper("zlib",zlib_fopen_wrapper);
+	}
 #endif
 
 	return SUCCESS;
@@ -156,7 +162,11 @@ PHP_MINIT_FUNCTION(zlib)
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 #if HAVE_FOPENCOOKIE
-	php_unregister_url_wrapper("zlib"); 
+	PLS_FETCH();
+
+	if(PG(allow_url_fopen)) {
+	    php_unregister_url_wrapper("zlib"); 
+    }
 #endif
 	
 	return SUCCESS;
@@ -769,15 +779,15 @@ static ssize_t gz_reader(void *cookie, char *buffer, size_t size)
 	return gzread(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
 }
 
-static ssize_t gz_writer(void *cookie, char *buffer, size_t size) {
-	return gzwrite(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
+static ssize_t gz_writer(void *cookie, const char *buffer, size_t size) {
+	return gzwrite(((struct gz_cookie *)cookie)->gz_file,(char *)buffer,size); 
 }
 
-static int gz_seeker(void *cookie,fpos_t *position, int whence) {
-	return (*position=gzseek(((struct gz_cookie *)cookie)->gz_file,*position,whence)); 
+static int gz_seeker(void *cookie,fpos_t position, int whence) {
+	return gzseek(((struct gz_cookie *)cookie)->gz_file,position,whence); 
 }
 
-static int gz_cleaner(void *cookie) {
+static int gz_closer(void *cookie) {
 	gzclose(((struct gz_cookie *)cookie)->gz_file);
 	efree(cookie);
 	cookie=NULL;  
@@ -788,12 +798,14 @@ static cookie_io_functions_t gz_cookie_functions =
 { gz_reader 
 , gz_writer
 , gz_seeker
-, gz_cleaner
+, gz_closer
 };
 
-static FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+static FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	struct gz_cookie *gc = NULL;
+	FILE *fp;
+    int fissock=0, fsocketd=0;
 
 	gc = (struct gz_cookie *)emalloc(sizeof(struct gz_cookie));
 
@@ -805,8 +817,15 @@ static FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *
 		
 		path++;
 
-		gc->gz_file = gzopen(path,mode);
+		fp = php_fopen_wrapper(path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL);
 		
+		if (!fp) {
+			efree(gc);
+			return NULL;
+		}
+		
+		gc->gz_file = gzdopen(fileno(fp), mode);
+                
 		if(gc->gz_file) {
 			return fopencookie(gc,mode,gz_cookie_functions);		
 		} else {

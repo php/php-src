@@ -7,7 +7,8 @@ LTLIBRARY_SOURCES=\
 	link.c mail.c math.c md5.c metaphone.c microtime.c pack.c pageinfo.c \
         parsedate.c quot_print.c rand.c reg.c soundex.c string.c scanf.c \
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c output.c assert.c \
-	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c
+	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c \
+	ftp_fopen_wrapper.c http_fopen_wrapper.c php_fopen_wrapper.c
 
 include $(top_srcdir)/build/dynlib.mk
 

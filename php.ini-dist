@@ -245,6 +245,12 @@ file_uploads	= On				; Whether to allow HTTP file uploads
 upload_max_filesize = 2M		    ; Maximum allowed size for uploaded files
 
 
+;;;;;;;;;;;;;;;;;;
+; Fopen wrappers ;
+;;;;;;;;;;;;;;;;;;
+allow_url_fopen = On                ; Wheter to allow trating URLs like http:... or ftp:... like files
+
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
 ;;;;;;;;;;;;;;;;;;;;;;

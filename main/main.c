@@ -260,6 +260,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
+
+	STD_PHP_INI_ENTRY("allow_url_fopen",		"1",		PHP_INI_ALL,		OnUpdateBool,			allow_url_fopen,			php_core_globals,	core_globals)
+
 PHP_INI_END()
 
 
@@ -855,16 +858,16 @@ int php_module_startup(sapi_module_struct *sf)
 
 	php_ini_mstartup();
 
-	if (php_init_fopen_wrappers() == FAILURE) {
-		php_printf("PHP:  Unable to initialize fopen url wrappers.\n");
-		return FAILURE;
-	}
-
 	if (php_config_ini_startup() == FAILURE) {
 		return FAILURE;
 	}
 
 	REGISTER_INI_ENTRIES();
+
+	if (php_init_fopen_wrappers() == FAILURE) {
+		php_printf("PHP:  Unable to initialize fopen url wrappers.\n");
+		return FAILURE;
+	}
 
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
