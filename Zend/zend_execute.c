@@ -530,33 +530,37 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 				}
 			}
 			break;
+		case IS_DOUBLE:
 		case IS_LONG: {
-				if (zend_hash_index_find(ht, dim->value.lval, (void **) &retval) == FAILURE) {
+				long index;
+
+				if(dim->type == IS_LONG) {
+					index = dim->value.lval;
+				} else {
+					index = (long)dim->value.dval;
+				}
+				if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 					switch (type) {
 						case BP_VAR_R: 
-							zend_error(E_NOTICE,"Undefined offset:  %d", dim->value.lval);
+							zend_error(E_NOTICE,"Undefined offset:  %d", index);
 							/* break missing intentionally */
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval_ptr);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined offset:  %d", dim->value.lval);
+							zend_error(E_NOTICE,"Undefined offset:  %d", index);
 							/* break missing intentionally */
 						case BP_VAR_W: {
 								zval *new_zval = &EG(uninitialized_zval);
 
 								new_zval->refcount++;
-								zend_hash_index_update(ht, dim->value.lval, &new_zval, sizeof(zval *), (void **) &retval);
+								zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
 							}
 							break;
 					}
 				}
 			}
 			break;
-		/* we need to do implement this nicely somehow ZA
-		case IS_DOUBLE:
-			break;
-		*/
 		default: 
 			zend_error(E_WARNING, "Illegal offset type");
 			if (type == BP_VAR_R || type == BP_VAR_IS) {
