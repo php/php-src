@@ -552,7 +552,7 @@ PHP_FUNCTION(curl_exec)
 		ret_data = emalloc(stat_sb.st_size+1);
 		
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
-			memcpy(&(ret_data[pos]), buf, b);
+			memcpy(ret_data + pos, buf, b);
 			pos += b;
 		}
 		ret_data[stat_sb.st_size - 1] = '\0';
