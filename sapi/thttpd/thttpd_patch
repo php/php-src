@@ -1,5 +1,5 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
---- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
+--- thttpd-2.21b/Makefile.in	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/Makefile.in	Wed Apr 16 11:11:08 2003
 @@ -46,13 +46,15 @@
  
@@ -39,7 +39,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS) $(NETLIBS)
  
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
---- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
+--- thttpd-2.21b/config.h	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/config.h	Wed Apr 16 09:24:09 2003
 @@ -82,6 +82,11 @@
  */
@@ -63,7 +63,7 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
---- thttpd-2.21b/configure	Sat Apr 21 02:07:14 2001
+--- thttpd-2.21b/configure	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/configure	Wed Apr 16 09:24:09 2003
 @@ -1021,7 +1021,7 @@
  fi
@@ -75,7 +75,7 @@ diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
  ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
  echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
 diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
---- thttpd-2.21b/configure.in	Sat Apr 21 02:06:23 2001
+--- thttpd-2.21b/configure.in	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/configure.in	Wed Apr 16 09:24:09 2003
 @@ -64,7 +64,7 @@
  	AC_MSG_RESULT(no)   
@@ -87,9 +87,17 @@ diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
  AC_HEADER_DIRENT
  
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
---- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Wed Apr 16 09:24:09 2003
-@@ -460,7 +460,7 @@
+--- thttpd-2.21b/fdwatch.c	Wed Apr 16 15:42:14 2003
++++ thttpd-2.21b-cool/fdwatch.c	Wed Apr 16 14:32:09 2003
+@@ -419,6 +419,7 @@
+     if ( pollfds == (struct pollfd*) 0 || poll_fdidx == (int*) 0 ||
+ 	 poll_rfdidx == (int*) 0 )
+ 	return -1;
++	memset(pollfds, 0, sizeof(struct pollfd) * nfiles);
+     return 0;
+     }
+ 
+@@ -460,7 +461,7 @@
  
      ridx = 0;
      for ( i = 0; i < npollfds; ++i )
@@ -98,7 +106,7 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	    poll_rfdidx[ridx++] = pollfds[i].fd;
  
      return r;
-@@ -472,8 +472,8 @@
+@@ -472,8 +473,8 @@
      {
      switch ( fd_rw[fd] )
  	{
@@ -110,8 +118,8 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	}
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
---- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Wed Apr 16 11:09:35 2003
+--- thttpd-2.21b/libhttpd.c	Wed Apr 16 15:42:14 2003
++++ thttpd-2.21b-cool/libhttpd.c	Wed Apr 16 14:49:50 2003
 @@ -56,6 +56,10 @@
  #include <unistd.h>
  #include <stdarg.h>
@@ -383,6 +391,15 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      for (;;)
  	{
  	r = fread( buf, 1, sizeof(buf) - 1, fp );
+@@ -1436,7 +1515,7 @@
+     restlen = strlen( path );
+     httpd_realloc_str( &rest, &maxrest, restlen );
+     (void) strcpy( rest, path );
+-    if ( rest[restlen - 1] == '/' )
++    if ( restlen > 0 && rest[restlen - 1] == '/' )
+ 	rest[--restlen] = '\0';         /* trim trailing slash */
+     if ( ! tildemapped )
+ 	/* Remove any leading slashes. */
 @@ -1603,6 +1682,70 @@
  
  
@@ -946,7 +963,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	{
  	str[0] = '?';
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
---- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
+--- thttpd-2.21b/libhttpd.h	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/libhttpd.h	Wed Apr 16 10:29:08 2003
 @@ -69,6 +69,8 @@
      char* server_hostname;
@@ -1008,7 +1025,7 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  /* Call this to de-initialize a connection struct and *really* free the
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
---- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
+--- thttpd-2.21b/mime_encodings.txt	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/mime_encodings.txt	Wed Apr 16 09:24:09 2003
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
@@ -1020,7 +1037,7 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 +gz	gzip
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
---- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
+--- thttpd-2.21b/mime_types.txt	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/mime_types.txt	Wed Apr 16 09:24:09 2003
 @@ -1,135 +1,138 @@
 -# mime_types.txt
@@ -1271,7 +1288,7 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
---- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
+--- thttpd-2.21b/mmc.c	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/mmc.c	Wed Apr 16 10:49:00 2003
 @@ -70,6 +70,9 @@
      unsigned int hash;
@@ -1374,7 +1391,7 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	    m->reftime = nowP->tv_sec;
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
---- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
+--- thttpd-2.21b/mmc.h	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/mmc.h	Wed Apr 16 10:49:15 2003
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
@@ -1387,8 +1404,16 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  
  /* Done with an mmap()ed area that was returned by mmc_map().
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
+diff -ur thttpd-2.21b/php_makefile thttpd-2.21b-cool/php_makefile
+--- thttpd-2.21b/php_makefile	Wed Apr 16 14:53:42 2003
++++ thttpd-2.21b-cool/php_makefile	Wed Apr 16 09:24:09 2003
+@@ -1,3 +1,3 @@
+ PHP_LIBS = -L. -lphp4  -lcrypt -lcrypt -lresolv -lm -ldl -lnsl -lcrypt -lcrypt
+ PHP_LDFLAGS =  -rdynamic
+-PHP_CFLAGS = -DPHP_ATOM_INC -I/home/sas/opt-th/php/include -I/home/sas/opt-th/php/main -I/home/sas/src/php4 -I/home/sas/opt-th/thttpd-2.21b -I/home/sas/opt-th/php/Zend -I/home/sas/src/php4/main -I/home/sas/src/php4/Zend -I/home/sas/src/php4/TSRM  -I/home/sas/opt-th/php/TSRM  -O0 -g -I/home/sas/opt-th/php/TSRM 
++PHP_CFLAGS = -DPHP_ATOM_INC -I/home/sas/opt-th/php/include -I/home/sas/opt-th/php/main -I/home/sas/src/php4 -I/home/sas/opt-th/thttpd-2.21b -I/home/sas/opt-th/php/Zend -I/home/sas/src/php4/main -I/home/sas/src/php4/Zend -I/home/sas/src/php4/TSRM  -I/home/sas/opt-th/php/TSRM  -O2 -march=i586 -I/home/sas/opt-th/php/TSRM 
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
---- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
+--- thttpd-2.21b/thttpd.c	Wed Apr 16 15:42:14 2003
 +++ thttpd-2.21b-cool/thttpd.c	Wed Apr 16 10:31:16 2003
 @@ -53,6 +53,10 @@
  #endif
