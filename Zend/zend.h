@@ -139,6 +139,7 @@ typedef struct _zend_utility_functions {
 	void (*message_handler)(long message, void *data);
 	void (*block_interruptions)();
 	void (*unblock_interruptions)();
+	int (*get_ini_entry)(char *name, uint name_length, zval *contents);
 } zend_utility_functions;
 
 		
@@ -203,6 +204,7 @@ extern FILE *(*zend_fopen)(const char *filename);
 extern void (*zend_block_interruptions)();
 extern void (*zend_unblock_interruptions)();
 extern void (*zend_message_dispatcher)(long message, void *data);
+extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 END_EXTERN_C()
 
 
