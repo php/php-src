@@ -67,6 +67,7 @@ PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_end_flush);
 PHP_FUNCTION(ob_end_clean);
 PHP_FUNCTION(ob_get_contents);
+PHP_FUNCTION(ob_implicit_flush);
 
 
 static void php_output_init_globals(OLS_D)
@@ -97,6 +98,7 @@ static zend_function_entry php_output_functions[] = {
 	PHP_FE(ob_end_flush,				NULL)
 	PHP_FE(ob_end_clean,				NULL)
 	PHP_FE(ob_get_contents,				NULL)
+	PHP_FE(ob_implicit_flush,			NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -184,13 +186,18 @@ PHPAPI void php_end_ob_buffering(int send_buffer)
 
 PHPAPI void php_start_implicit_flush()
 {
-	php_end_ob_buffering(1);		/* Switch out of output buffering if we're in it */
+	OLS_FETCH();
 
+	php_end_ob_buffering(1);		/* Switch out of output buffering if we're in it */
+	OG(implicit_flush)=1;
 }
 
 
 PHPAPI void php_end_implicit_flush()
 {
+	OLS_FETCH();
+
+	OG(implicit_flush)=0;
 }
 
 
@@ -329,6 +336,9 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 		free(newstr);
 	}
 
+	if (OG(implicit_flush)) {
+		sapi_flush();
+	}
 
 	return result;
 }
@@ -399,6 +409,11 @@ PHP_FUNCTION(ob_implicit_flush)
 			convert_to_long_ex(zv_flag);
 			flag = (*zv_flag)->value.lval;
 			break;
+	}
+	if (flag) {
+		php_start_implicit_flush();
+	} else {
+		php_end_implicit_flush();
 	}
 }
 
