@@ -2724,6 +2724,28 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 }
 
 
+void zend_do_is_type(znode *result, znode *expr, znode *class, int type TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_IS_TYPE;
+	opline->result.op_type = IS_TMP_VAR;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->op1 = *expr;
+
+	if (class) {
+		opline->op2 = *class;
+		opline->extended_value = 1;
+	} else {
+		opline->op2.u.constant.value.lval = type;
+		SET_UNUSED(opline->op2);
+		opline->extended_value = 0;
+	}
+
+	*result = opline->result;
+}
+
+
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC)
 {
 	zend_op *opline;
