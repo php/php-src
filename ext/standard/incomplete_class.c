@@ -97,9 +97,7 @@ zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 			incomplete_class_get_property,
 			incomplete_class_set_property);
 
-	BG(incomplete_class) = zend_register_internal_class(&incomplete_class TSRMLS_CC);
-
-	return (BG(incomplete_class));
+	return zend_register_internal_class(&incomplete_class TSRMLS_CC);
 }
 /* }}} */
 

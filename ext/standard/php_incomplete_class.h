@@ -26,10 +26,6 @@
 #define PHP_IC_ENTRY \
 	BG(incomplete_class)
 
-#define PHP_IC_ENTRY_READ \
-	(PHP_IC_ENTRY ? PHP_IC_ENTRY : php_create_incomplete_class(TSRMLS_C))
-
-
 #define PHP_SET_CLASS_ATTRIBUTES(struc) 								\
 	/* OBJECTS_FIXME: Fix for new object model */						\
 	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {						\

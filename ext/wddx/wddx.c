@@ -836,7 +836,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 						if (zend_hash_find(EG(class_table), Z_STRVAL_P(ent1->data),
 										   Z_STRLEN_P(ent1->data)+1, (void **) &ce)==FAILURE) {
 							incomplete_class = 1;
-							ce = PHP_IC_ENTRY_READ;
+							ce = PHP_IC_ENTRY;
 						}
 
 						/* Initialize target object */
