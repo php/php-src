@@ -289,6 +289,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 
 /* Virtual current directory support */
 #ifdef VIRTUAL_DIR
+
 #define V_GETCWD(buff, size) virtual_getcwd(buff,size)
 #define V_FOPEN(path, mode) virtual_fopen(path, mode)
 /* The V_OPEN macro will need to be used as V_OPEN((path, flags, ...)) */
@@ -307,8 +308,15 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
 #define V_RMDIR(pathname) virtual_rmdir(pathname)
 #define V_OPENDIR(pathname) virtual_opendir(pathname)
-#define V_POPEN(command, type) virtual_popen(command, type)
+#ifdef PHP_WIN32
+/* Under Windows the "cd /cwd ; command" trick doesn't work */
+#define V_POPEN(command, type) popen(command, type)
 #else
+#define V_POPEN(command, type) virtual_popen(command, type)
+#endif
+
+#else
+
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
 #define V_OPEN(open_args) open open_args
@@ -323,6 +331,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_RMDIR(pathname) rmdir(pathname)
 #define V_OPENDIR(pathname) opendir(pathname)
 #define V_POPEN(command, type) popen(command, type)
+
 #endif
 
 #include "zend_constants.h"

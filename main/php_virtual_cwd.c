@@ -570,7 +570,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 		return NULL;
 	}
 	memcpy(ptr, "cd ", sizeof("cd ")-1);
-	ptr += sizeof("cd ");
+	ptr += sizeof("cd ")-1;
 
 	if (CWDG(cwd).cwd_length == 0) {
 		*ptr++ = DEFAULT_SLASH;

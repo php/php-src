@@ -713,7 +713,7 @@ PHP_FUNCTION(popen)
 		}
 
 		tmp = php_escape_shell_cmd(buf);
-		fp = popen(tmp,p);
+		fp = V_POPEN(tmp,p);
 		efree(tmp);
 
 		if (!fp) {
@@ -721,7 +721,7 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	} else {
-		fp = popen((*arg1)->value.str.val,p);
+		fp = V_POPEN((*arg1)->value.str.val,p);
 		if (!fp) {
 			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",(*arg1)->value.str.val,p,strerror(errno));
 			efree(p);

@@ -87,9 +87,9 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		efree(d);
 		d = tmp;
 #ifdef PHP_WIN32
-		fp = popen(d, "rb");
+		fp = V_POPEN(d, "rb");
 #else
-		fp = popen(d, "r");
+		fp = V_POPEN(d, "r");
 #endif
 		if (!fp) {
 			php_error(E_WARNING, "Unable to fork [%s]", d);
@@ -99,9 +99,9 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		}
 	} else { /* not safe_mode */
 #ifdef PHP_WIN32
-		fp = popen(cmd, "rb");
+		fp = V_POPEN(cmd, "rb");
 #else
-		fp = popen(cmd, "r");
+		fp = V_POPEN(cmd, "r");
 #endif
 		if (!fp) {
 			php_error(E_WARNING, "Unable to fork [%s]", cmd);
@@ -364,9 +364,9 @@ PHP_FUNCTION(shell_exec)
 
 	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
-	if ((in=popen((*cmd)->value.str.val,"rt"))==NULL) {
+	if ((in=V_POPEN((*cmd)->value.str.val,"rt"))==NULL) {
 #else
-	if ((in=popen((*cmd)->value.str.val,"r"))==NULL) {
+	if ((in=V_POPEN((*cmd)->value.str.val,"r"))==NULL) {
 #endif
 		php_error(E_WARNING,"Unable to execute '%s'",(*cmd)->value.str.val);
 	}
