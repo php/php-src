@@ -147,7 +147,7 @@ ZEND_METHOD(exception, __construct)
 /* }}} */
 
 
-/* {{{ proto ErrorException::__construct(string message, int code)
+/* {{{ proto ErrorException::__construct(string message, int code, int severity)
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
@@ -245,7 +245,7 @@ ZEND_METHOD(exception, getTrace)
 /* }}} */
 
 
-/* {{{ proto int Exception::getSeverity()
+/* {{{ proto int ErrorException::getSeverity()
    Get the exception severity */
 ZEND_METHOD(error_exception, getSeverity)
 {
