@@ -69,7 +69,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loopen,		NULL)
 	PHP_FE(pg_loclose,		NULL)
 	PHP_FE(pg_loread,		NULL)
-	PHP_FE(pg_write,		NULL)
+	PHP_FE(pg_lowrite,		NULL)
 	PHP_FE(pg_loreadall,	NULL)
 	{NULL, NULL, NULL}
 };
