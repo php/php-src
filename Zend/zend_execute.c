@@ -882,7 +882,7 @@ void execute(zend_op_array *op_array ELS_DC)
 	zend_function_state function_state;
 	HashTable *calling_symbol_table;
 	zend_function *function_being_called=NULL;
-	object_info object;
+	object_info object = {NULL, NULL};
 #if !defined (__GNUC__) || __GNUC__ < 2
 	temp_variable *Ts = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
 #else
@@ -896,7 +896,6 @@ void execute(zend_op_array *op_array ELS_DC)
 	}
 #endif
 
-	object.ptr = NULL;
 	EG(opline_ptr) = &opline;
 
 	function_state.function = (zend_function *) op_array;
