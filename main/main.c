@@ -359,6 +359,46 @@ PHPAPI int php_printf(const char *format, ...)
 }
 /* }}} */
 
+/* {{{ php_html_puts */
+#include "ext/standard/php_smart_str.h"
+
+PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
+{
+	const char *estr;
+	smart_str s = {0};
+
+	for (estr = str + size; str < estr; str++) {
+		switch (*str) {
+			case '\n':
+				smart_str_appendl(&s, "<br />", sizeof("<br />")-1);
+				break;
+			case '<':
+				smart_str_appends(&s, "&lt;");
+				break;
+			case '>':
+				smart_str_appends(&s, "&gt;");
+				break;
+			case '&':
+				smart_str_appends(&s, "&amp;");
+				break;
+			case ' ':
+				smart_str_appendl(&s, "&nbsp;", sizeof("&nbsp;")-1);
+				break;
+			case '\t':
+				smart_str_appends(&s, "&nbsp;&nbsp;&nbsp;&nbsp;");
+				break;
+			default:
+				smart_str_appendc(&s, *str);
+		}
+	}
+
+	if (s.c) {
+		PHPWRITE(s.c, s.len);
+		smart_str_free(&s);
+	}
+}
+/* }}} */
+
 /* {{{ php_error_cb
  extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)

@@ -49,6 +49,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 	} else {
 		char *display_string;
 		uint display_string_length, esc_html=0;
+		TSRMLS_FETCH();
 
 		if (type==ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value && ini_entry->orig_value[0]) {
@@ -68,9 +69,8 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			display_string_length = sizeof("<i>no value</i>")-1;
 		}
 		if(esc_html) {
-			zend_html_puts(display_string, display_string_length);
+			php_html_puts(display_string, display_string_length TSRMLS_CC);
 		} else {
-			TSRMLS_FETCH();
 			PHPWRITE(display_string, display_string_length);
 		}
 	}
