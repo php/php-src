@@ -1708,7 +1708,7 @@ gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 		return -3; /* the images are meant to be the same dimensions */
 	}
 
-	buf = (unsigned long *)malloc( sizeof(unsigned long) * 5 * im2->colorsTotal );
+	buf = (unsigned long *)gdMalloc( sizeof(unsigned long) * 5 * im2->colorsTotal );
 	memset( buf, 0, sizeof(unsigned long) * 5 * im2->colorsTotal );
 
 	for( x=0; x<im1->sx; x++ ) {
@@ -1735,6 +1735,6 @@ gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 			bp += 4;
 		}
 	}
-	free(buf);
+	gdFree(buf);
 	return 0;
 }

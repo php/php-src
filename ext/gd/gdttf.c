@@ -334,15 +334,16 @@ fontFetch ( char **error, void *key )
 	short			platform, encoding;
 	TSRMLS_FETCH();
 
-	a = (font_t *)malloc(sizeof(font_t));
+	a = (font_t *)pemalloc(sizeof(font_t), 1);
 #ifdef VIRTUAL_DIR
 	/* a->fontname will be freed in fontRelease() later on */
 	if (virtual_filepath(b->fontname, &a->fontname TSRMLS_CC)) {
 		*error = "Could not find/open font";
+		pefree(a, 1);
 		return NULL;
 	}
 #else
-	a->fontname = (char *)malloc(strlen(b->fontname) + 1);
+	a->fontname = (char *)pemalloc(strlen(b->fontname) + 1, 1);
 	strcpy(a->fontname, b->fontname);
 #endif
 	a->ptsize = b->ptsize;
@@ -357,6 +358,7 @@ fontFetch ( char **error, void *key )
 		else {
 			*error = "Could not read font";
 		}
+		pefree(a, 1);
 		return NULL;
 	}
 	/* get face properties and allocate preload arrays */
@@ -365,20 +367,19 @@ fontFetch ( char **error, void *key )
 	/* create instance */
 	if (TT_New_Instance(a->face, &a->instance)) {
 		*error = "Could not create face instance";
+		pefree(a, 1);
 		return NULL;
 	}
 	
 	if (TT_Set_Instance_Resolutions(a->instance, RESOLUTION, RESOLUTION)) {
 		*error = "Could not set device resolutions";
+		pefree(a, 1);
 		return NULL;
-map_found = 0;
-a->have_char_map_Unicode = 0;
-a->have_char_map_Big5 = 0;
-a->have_char_map_Roman = 0;
 	}
 
 	if (TT_Set_Instance_CharSize(a->instance, (TT_F26Dot6)(a->ptsize*64))) {
 		*error = "Could not set character size";
+		pefree(a, 1);
 		return NULL;
 	}
 
@@ -403,13 +404,14 @@ a->have_char_map_Roman = 0;
 			TT_Get_CharMap(a->face, i, &a->char_map_Roman);
 			a->have_char_map_Roman = 1;
 			map_found++;
-        }
+        	}
 	}
 
 	if (! map_found) {
 		*error = "Unable to find a CharMap that I can handle";
-        return NULL;
-    }
+		pefree(a, 1);
+	        return NULL;
+	}
 
 	a->matrix.xx = (TT_Fixed) (a->cos_a * (1<<16));
 	a->matrix.yx = (TT_Fixed) (a->sin_a * (1<<16));
@@ -430,8 +432,8 @@ fontRelease( void *element )
 	gdCacheDelete(a->glyphCache);
 	TT_Done_Instance(a->instance);
 	TT_Close_Face(a->face);
-	free(a->fontname);
-	free( (char *)element );
+	pefree(a->fontname, 1);
+	pefree((char *)element, 1);
 }
 
 /********************************************************************/
@@ -458,7 +460,7 @@ glyphFetch ( char **error, void *key )
 	int					crect[8], xmin, xmax, ymin, ymax;
 	double				cos_a, sin_a;
 
-	a = (glyph_t *)malloc(sizeof(glyph_t));
+	a = (glyph_t *)pemalloc(sizeof(glyph_t), 1);
 	a->character = b->character;
 	a->hinting = b->hinting;
 	a->gray_render = b->gray_render;
@@ -467,6 +469,7 @@ glyphFetch ( char **error, void *key )
 	/* create glyph container */
 	if ((TT_New_Glyph(b->font->face, &a->glyph))) {
 		*error = "Could not create glyph container";
+		pefree(a, 1);
 		return NULL;
 	}
 
@@ -483,6 +486,7 @@ glyphFetch ( char **error, void *key )
 	}
 	if ((err=TT_Load_Glyph(b->font->instance, a->glyph, glyph_code, flags))) {
 		*error = "TT_Load_Glyph problem";
+		pefree(a, 1);
 		return NULL;
 	}
 
@@ -540,7 +544,7 @@ glyphRelease( void *element )
 
 	gdCacheDelete(a->bitmapCache);
 	TT_Done_Glyph( a->glyph );
-	free( (char *)element );
+	pefree ((char *)element, 1);
 }
 
 /********************************************************************/
@@ -565,11 +569,11 @@ bitmapFetch ( char **error, void *key )
 	bitmap_t			*a;
 	bitmapkey_t			*b=(bitmapkey_t *)key;
 
-	a = (bitmap_t *)malloc(sizeof(bitmap_t));
+	a = (bitmap_t *)pemalloc(sizeof(bitmap_t), 1);
 	a->xoffset = b->xoffset;
 	a->yoffset = b->yoffset;
 
-	b->glyph->Bit.bitmap = a->bitmap = (char *)malloc(b->glyph->Bit.size);
+	b->glyph->Bit.bitmap = a->bitmap = (char *)pemalloc(b->glyph->Bit.size, 1);
 	memset(a->bitmap, 0, b->glyph->Bit.size);
 	/* render glyph */
 	if (b->glyph->gray_render) {
@@ -588,8 +592,8 @@ bitmapRelease( void *element )
 {
 	bitmap_t *a=(bitmap_t *)element;
 
-	free( a->bitmap );
-	free( (char *)element );
+	pefree (a->bitmap, 1);
+	pefree ((char *)element, 1);
 }
 
 /********************************************************************/
@@ -615,7 +619,7 @@ tweenColorFetch (char **error, void *key)
 	int pixel, npixel, bg, fg;
 	gdImagePtr im;
    
-    a = (tweencolor_t *)malloc(sizeof(tweencolor_t));
+    a = (tweencolor_t *)pemalloc(sizeof(tweencolor_t), 1);
 	pixel = a->pixel = b->pixel;
 	bg = a->bgcolor = b->bgcolor;
 	fg = a->fgcolor = b->fgcolor;
@@ -638,7 +642,7 @@ tweenColorFetch (char **error, void *key)
 static void
 tweenColorRelease(void *element)
 {   
-    free((char *)element);
+    pefree((char *)element, 1);
 }   
 
 /********************************************************************/
