@@ -45,3 +45,7 @@
    is used, thus both // and /* */ are resolved as the T_COMMENT constant.
    However the PHPDoc style comments /** */ ,which starting PHP5 are parsed
    by PHP, are recongnized as T_DOC_COMMENT.
+
+7. $argv and $argc are populated always in CLI mode. On the other hand
+   $_SERVER['argc'] and $_SERVER['argv'] will be available if "S" is contained
+   in the "variables_order" php.ini setting.
