@@ -4,8 +4,8 @@ Check for exif_thumbnail
 <?php if (!extension_loaded("exif")) print "skip";?>
 --INI--
 magic_quotes_runtime=0
-output_handler = 
-zlib.output_compression = Off 
+output_handler= 
+zlib.output_compression=0 
 --FILE--
 <?php
 /*
