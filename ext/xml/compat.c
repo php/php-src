@@ -17,7 +17,7 @@
  */
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_XML
+#if defined(HAVE_LIBXML) && defined(HAVE_XML) && !defined(HAVE_LIBEXPAT)
 #include "expat_compat.h"
 
 typedef struct _php_xml_ns {
@@ -412,7 +412,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	} else {
 		parser->parser->charset = XML_CHAR_ENCODING_NONE;
 	}
-	parser->parser->replaceEntities=1;
+	xmlCtxtUseOptions(parser->parser, XML_PARSE_NO_ENT);
 	if (sep != NULL) {
 		parser->use_namespace = 1;
 		parser->_ns_map = xmlHashCreate(10);

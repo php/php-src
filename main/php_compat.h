@@ -48,7 +48,7 @@
 #define hashTableIterInit	php_hashTableIterInit
 #define hashTableIterNext	php_hashTableIterNext
 
-#if defined(HAVE_LIBXML) && defined(HAVE_XML)
+#if defined(HAVE_LIBXML) && defined(HAVE_XML) && !defined(HAVE_LIBEXPAT)
 #define XML_DefaultCurrent php_XML_DefaultCurrent
 #define XML_ErrorString php_XML_ErrorString
 #define XML_ExpatVersion php_XML_ExpatVersion
