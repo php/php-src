@@ -4,7 +4,7 @@ Bug #24403 (scope doesn't properly propagate into internal functions)
 <?php
 class a
 {
-	var $a = array();
+	public $a = array();
 
 	function a()
 	{

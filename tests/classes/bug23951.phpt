@@ -8,13 +8,13 @@ define('FOO2', 2);
 
 class A {
     
-    var $a_var = array(FOO1=>'foo1_value', FOO2=>'foo2_value');
+    public $a_var = array(FOO1=>'foo1_value', FOO2=>'foo2_value');
     
 }
 
 class B extends A {
  
-    var $b_var = 'foo';   
+    public $b_var = 'foo';   
             
 }
 

@@ -15,7 +15,7 @@ interface if_b extends if_a {
 
 class base {
 	function _is_a($sub) {
-		echo 'is_a('.get_class($this).', '.$sub.') = '.(is_a($this, $sub) ? 'yes' : 'no')."\n";
+		echo 'is_a('.get_class($this).', '.$sub.') = '.(($this instanceof $sub) ? 'yes' : 'no')."\n";
 	}
 	function test() {
 		echo $this->_is_a('base');

@@ -18,8 +18,8 @@ fopencookie detected and working (or cast mechanism works)
  */
 
 class userstream {
-	var $position = 0;
-	var $data = "If you can read this, it worked";
+	public $position = 0;
+	public $data = "If you can read this, it worked";
 	
 	function stream_open($path, $mode, $options, &$opened_path)
 	{

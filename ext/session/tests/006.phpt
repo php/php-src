@@ -15,11 +15,11 @@ session_id("abtest");
 session_start();
 
 class a {
-    var $test = "hallo";
+    public $test = "hallo";
 }
  
 class b {
-    var $a;
+    public $a;
     function b(&$a) {
         $this->a = &$a;
     }

@@ -4,7 +4,7 @@ Bug #21957 (serialize() mangles objects with __sleep)
 <?php 
 class test
 {
-	var $a, $b;
+	public $a, $b;
 
 	function test()
 	{

@@ -4,7 +4,7 @@ Bug #22367 (weird zval allocation problem)
 <?php
 class foo
 {
-	var $test = array(0, 1, 2, 3, 4); 
+	public $test = array(0, 1, 2, 3, 4); 
 
 	function a($arg) {
 		var_dump(array_key_exists($arg, $this->test));
@@ -31,8 +31,8 @@ class foo
 
 class bar extends foo
 {
-	var $i = 0;
-	var $idx;
+	public $i = 0;
+	public $idx;
 
 	function bar($idx) {
 		$this->idx = $idx;

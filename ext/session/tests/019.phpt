@@ -13,7 +13,7 @@ session.serialize_handler=php
 error_reporting(E_ALL);
 
 class TFoo {
-	var $c;
+	public $c;
 	function TFoo($c) {
 		$this->c = $c;
 	}

@@ -12,7 +12,7 @@ session.serialize_handler=php
 error_reporting(E_ALL);
 
 class foo {
-	var $bar = "ok";
+	public $bar = "ok";
 
 	function method() { $this->yes = "done"; }
 }

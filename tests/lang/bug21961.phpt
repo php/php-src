@@ -7,7 +7,7 @@ Bug #21961 (get_parent_class() segfault)
 
 class man
 {
-	var $name, $bars;
+	public $name, $bars;
 	function man()
 	{
 		$this->name = 'Mr. X';
@@ -27,7 +27,7 @@ class man
 
 class bar extends man
 {
-	var $name;
+	public $name;
 
 	function bar($w)
 	{

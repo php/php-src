@@ -4,7 +4,7 @@ Bug #22510 (segfault among complex references)
 <?php
 class foo 
 {
-	var $list = array();
+	public $list = array();
 
 	function finalize() {
 		print __CLASS__."::".__FUNCTION__."\n";

@@ -6,7 +6,7 @@ ZE2 object references
 <?php
 
 class Foo {
-	var $name;
+	public $name;
     
 	function Foo() {
 		$this->name = "I'm Foo!\n";

@@ -8,7 +8,7 @@ Bug #25652 (Calling Global functions dynamically fails from Class scope)
 	}
 	
 	class foo {
-		var $arr = array('testfunc');
+		public $arr = array('testfunc');
 		function bar () {
 			$this->arr[0]('testvalue');
 		}
