@@ -330,7 +330,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
 		}
-		zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL);
+		zend_hash_update(zobj->properties, property_info->name, property_info->name_length+1, &value, sizeof(zval *), NULL);
 	}
 	if (member == &tmp_member) {
 		zval_dtor(member);
