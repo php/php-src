@@ -214,6 +214,7 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 	next_op->lineno = CG(zend_lineno);
 	next_op->filename = zend_get_compiled_filename();
 	next_op->result.op_type = IS_UNUSED;
+	next_op->extended_value = 0;
 
 	return next_op;
 }
