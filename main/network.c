@@ -746,6 +746,8 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL context");
 			return FAILURE;
 		}
+	
+		SSL_CTX_set_options(ctx, SSL_OP_ALL);
 
 		sock->ssl_handle = php_SSL_new_from_context(ctx, stream TSRMLS_CC);
 
@@ -846,6 +848,30 @@ static void php_ERR_error_string_n(int code, char *buf, size_t size)
 	}
 }
 
+/* it doesn't matter that we do some hash traversal here, since it is done only
+ * in an error condition arising from a network connection problem */
+static int is_http_stream_talking_to_iis(php_stream *stream TSRMLS_DC)
+{
+	if (stream->wrapperdata && stream->wrapper && strcmp(stream->wrapper->wops->label, "HTTP") == 0) {
+		/* the wrapperdata is an array zval containing the headers */
+		zval **tmp;
+
+#define SERVER_MICROSOFT_IIS	"Server: Microsoft-IIS"
+		
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream->wrapperdata));
+		while (SUCCESS == zend_hash_get_current_data(Z_ARRVAL_P(stream->wrapperdata), (void**)&tmp)) {
+
+			if (strncasecmp(Z_STRVAL_PP(tmp), SERVER_MICROSOFT_IIS, sizeof(SERVER_MICROSOFT_IIS)-1) == 0) {
+				return 1;
+			}
+			
+			zend_hash_move_forward(Z_ARRVAL_P(stream->wrapperdata));
+		}
+	}
+	return 0;
+}
+
+
 static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -870,8 +896,11 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
 				if (nr_bytes == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							"SSL: fatal protocol error");
+					if (!is_http_stream_talking_to_iis(stream TSRMLS_CC)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,
+								"SSL: fatal protocol error");
+					}
+					SSL_set_shutdown(sock->ssl_handle, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
 					stream->eof = 1;
 					retry = 0;
 				} else {
