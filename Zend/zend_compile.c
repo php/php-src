@@ -508,7 +508,6 @@ void do_end_variable_parse(int type, int arg_offset CLS_DC)
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr;
-	int last_temp_var=-1;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
