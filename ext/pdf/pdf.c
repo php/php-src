@@ -438,8 +438,9 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 
 /* }}} */
 
-/* {{{ proto int pdf_open(int filedesc)
-   Opens a new pdf document */
+/* {{{ proto int pdf_open([int filedesc])
+
+   Opens a new pdf document. If filedesc is NULL, document is created in memory. This is not yet fully supported.*/
 PHP_FUNCTION(pdf_open) {
 	pval **file;
 	int id;
@@ -475,9 +476,11 @@ PHP_FUNCTION(pdf_open) {
 	id = zend_list_insert(pdf,PDF_GLOBAL(le_pdf));
 	RETURN_LONG(id);
 }
+
 /* }}} */
 
 /* {{{ proto void pdf_close(int pdfdoc)
+
    Closes the pdf document */
 PHP_FUNCTION(pdf_close) {
 	pval *arg1;
@@ -501,6 +504,7 @@ PHP_FUNCTION(pdf_close) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto void pdf_begin_page(int pdfdoc, double width, double height)
