@@ -317,7 +317,7 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
-/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator $it)
+/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator it, int flags)
    Creates a RecursiveIteratorIterator from a RecursiveIterator. */
 SPL_METHOD(RecursiveIteratorIterator, __construct)
 {
