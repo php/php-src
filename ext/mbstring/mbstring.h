@@ -65,15 +65,15 @@ extern PHP_RSHUTDOWN_FUNCTION(mbstring);
 PHP_MINFO_FUNCTION(mbstring);
 
 /* php function registration */
-PHP_FUNCTION(mbstr_language);
-PHP_FUNCTION(mbstr_internal_encoding);
-PHP_FUNCTION(mbstr_http_input);
-PHP_FUNCTION(mbstr_http_output);
-PHP_FUNCTION(mbstr_detect_order);
-PHP_FUNCTION(mbstr_substitute_character);
-PHP_FUNCTION(mbstr_preferred_mime_name);
-PHP_FUNCTION(mbstr_gpc_handler);
-PHP_FUNCTION(mbstr_output_handler);
+PHP_FUNCTION(mb_language);
+PHP_FUNCTION(mb_internal_encoding);
+PHP_FUNCTION(mb_http_input);
+PHP_FUNCTION(mb_http_output);
+PHP_FUNCTION(mb_detect_order);
+PHP_FUNCTION(mb_substitute_character);
+PHP_FUNCTION(mb_preferred_mime_name);
+PHP_FUNCTION(mb_gpc_handler);
+PHP_FUNCTION(mb_output_handler);
 PHP_FUNCTION(mb_strlen);
 PHP_FUNCTION(mb_strpos);
 PHP_FUNCTION(mb_strrpos);
@@ -81,15 +81,15 @@ PHP_FUNCTION(mb_substr);
 PHP_FUNCTION(mb_strcut);
 PHP_FUNCTION(mb_strwidth);
 PHP_FUNCTION(mb_strimwidth);
-PHP_FUNCTION(mbstr_convert_encoding);
-PHP_FUNCTION(mbstr_detect_encoding);
-PHP_FUNCTION(mbstr_convert_kana);
-PHP_FUNCTION(mbstr_encode_mimeheader);
-PHP_FUNCTION(mbstr_decode_mimeheader);
-PHP_FUNCTION(mbstr_convert_variables);
-PHP_FUNCTION(mbstr_encode_numericentity);
-PHP_FUNCTION(mbstr_decode_numericentity);
-PHP_FUNCTION(mbstr_send_mail);
+PHP_FUNCTION(mb_convert_encoding);
+PHP_FUNCTION(mb_detect_encoding);
+PHP_FUNCTION(mb_convert_kana);
+PHP_FUNCTION(mb_encode_mimeheader);
+PHP_FUNCTION(mb_decode_mimeheader);
+PHP_FUNCTION(mb_convert_variables);
+PHP_FUNCTION(mb_encode_numericentity);
+PHP_FUNCTION(mb_decode_numericentity);
+PHP_FUNCTION(mb_send_mail);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
@@ -102,6 +102,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int http_input_identify_get;
 	int http_input_identify_post;
 	int http_input_identify_cookie;
+	int http_input_identify_string;
 	int *http_input_list;
 	int http_input_list_size;
 	int *detect_order_list;
