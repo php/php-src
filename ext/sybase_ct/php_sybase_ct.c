@@ -1262,8 +1262,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	if (sybase_ptr->active_result_index) {
 		zval *tmp = NULL;
 		
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Called %s() without first fetching all rows from a previous unbuffered query",
-			get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "called without first fetching all rows from a previous unbuffered query");
 		if (sybase_ptr->cmd) {
 			ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 		}
@@ -2058,7 +2057,7 @@ PHP_FUNCTION(sybase_set_message_handler)
 	}
 
 	if (!zend_is_callable(*params[0], 0, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s(): First argumented is expected to be a valid callback, '%s' was given", get_active_function_name(TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%s' was given", name);
 		efree(name);
 		efree(params);
 		RETURN_FALSE;
