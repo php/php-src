@@ -1,15 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3
-- Fixed bug #30685 (Malformed SOAPClient http header reequest). (Dmitry)
-- Fixed bug #30645 (def. multi result set support for mysql_connect). (Georg)
 - Fixed error handling in mysqli_multi_query. (Georg)
 - Fixed a problem with SPL iterators aggregating the innner iterator. (Marcus)
 - Extended the functionality of is_subclass_of() to accept either a class name
   or an object as first parameter. (Andrey) 
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30685 (Malformed SOAPClient http header reequest). (Dmitry)
+- Fixed bug #30672 (Problem handling exif data in jpeg images at unusual 
+  places). (Marcus)
 - Fixed bug #30658 (Ensure that temporary files created by GD are removed).
   (Ilia)
+- Fixed bug #30645 (def. multi result set support for mysql_connect). (Georg)
 - Fixed bug #30572 (crash when comparing SimpleXML attribute to a boolean).
   (Andi)
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
