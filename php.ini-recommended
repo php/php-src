@@ -306,7 +306,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 
 ; error_reporting is a bit-field.  Or each number up to get desired error
 ; reporting level
-; E_ALL             - All errors and warnings
+; E_ALL             - All errors and warnings (doesn't include E_STRICT)
 ; E_ERROR           - fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
 ; E_PARSE           - compile-time parse errors
