@@ -108,7 +108,7 @@ static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRM
 
 /* IP and port conversion box */
 union ipbox {
-	unsigned long	l[2];
+	struct in_addr	ia[2];
 	unsigned short	s[4];
 	unsigned char	c[8];
 };
@@ -638,9 +638,8 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 
 	sin = (struct sockaddr_in *) sa;
 	sin->sin_family = AF_INET;
-	memcpy(&(sin->sin_addr.s_addr), &(ipbox.c[0]), 4);
+	sin->sin_addr = ipbox.ia[0];
 	sin->sin_port = ipbox.s[2];
-
 	ftp->pasv = 2;
 
 	return 1;
@@ -1328,7 +1327,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 #endif
 
 	/* send the PORT */
-	memcpy(&(ipbox.c[0]), &(((struct sockaddr_in*) sa)->sin_addr.s_addr), 4);
+	ipbox.ia[0] = ((struct sockaddr_in*) sa)->sin_addr;
 	ipbox.s[2] = ((struct sockaddr_in*) &addr)->sin_port;
 	sprintf(arg, "%u,%u,%u,%u,%u,%u",
 		ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3],
