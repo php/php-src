@@ -590,7 +590,7 @@ AC_DEFUN([PHP_MODULE_PTR],[
 ])
  
 AC_DEFUN([PHP_CONFIG_NICE],[
-  mv $1 $1.old
+  test -f $1 && mv $1 $1.old
   rm -f $1.old
   cat >$1<<EOF
 #! /bin/sh
