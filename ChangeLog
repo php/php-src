@@ -1,3 +1,303 @@
+2003-02-09  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi.c:
+      MFH (ws fixes, but merged to ease any fix patch merging)
+
+    * sapi/nsapi/nsapi.c:
+      style, ws
+
+    * sapi/nsapi/nsapi.c:
+      Some compilers puke on these..
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi.c:
+      MFH: Fixed _SERVER[] variables, memleaks
+
+2003-02-09  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/rpc.c:
+      fix a memleak
+
+2003-02-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c:
+      ZTS fix
+
+2003-02-09  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      We move, fix, change or add stuff
+
+    * (PHP_4_3)
+      NEWS:
+      sex with punctuation mark..
+
+2003-02-09  Kai Schröder  <mail@kaischroeder.net>
+
+    * ext/standard/datetime.c
+      ext/standard/datetime.c:
+      fix for #17928
+
+2003-02-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/com_wrapper.c
+      ext/rpc/com/variant.h:
+      Fix various little leaks and segfaults.
+      Fix scripts like this:
+      $obj = new COM('Foo');
+      $obj2 = $obj->get_object();
+      $obj2->method();  // <-- would segfault here
+
+    * ext/rpc/handler.h
+      ext/rpc/rpc.c:
+      Add get_class_name handler so that the current var_dump implementation does
+      not segfault.
+      Add a generic rpc_object_from_data() function for generating rpc objects
+      from C code (as discussed with Harald).
+
+    * ext/rpc/rpc_proxy.c:
+      Fix some warnings
+
+2003-02-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.c
+      sapi/apache/mod_php4.c
+      sapi/thttpd/thttpd.c:
+      use SUCCESS/FAILURE instead of 0/-1
+
+2003-02-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * NEWS:
+      New features.
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      main/php_streams.h
+      main/streams.c:
+      Added feature request #9173 (added stream_get_line(), this function will
+      read either the specified number of bytes or until the ending string is
+      found).
+
+    * ext/standard/file.c:
+      Added feature request #17983 (optional parameter to mkdir() that makes
+      directory creation recursive).
+      Fixed prototype for file() function.
+
+2003-02-09  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      order, style..
+
+2003-02-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      Added feature request #14097 (option allowing file() command not to include
+      line endings in it's output. As well as another option, which allows blank
+      lines to be excluded from the output).
+
+2003-02-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dba/config.m4:
+      break: First one not needed, second missing.
+
+2003-02-09  Shane Caraveo  <shane@caraveo.com>
+
+    * NEWS:
+      news entry for previous commit
+
+2003-02-09  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/mime_magic/mime_magic.c
+      ext/standard/aggregation.c
+      ext/standard/basic_functions.c
+      ext/standard/image.c
+      main/SAPI.c
+      main/output.c:
+      MFH: fixed compile failures when ZLIB/PCRE are compiled as shared in same
+      build.
+
+    * ext/mime_magic/mime_magic.c
+      ext/standard/aggregation.c
+      ext/standard/basic_functions.c
+      ext/standard/image.c
+      main/SAPI.c
+      main/output.c:
+      Fixed compile failures when ZLIB / PCRE are compiled as shared
+      extensions in same build.
+
+    * ext/standard/aggregation.c:
+      Let this compile even if PCRE is compiled as shared in same build.
+
+    * ext/pcre/config.m4:
+      Fixed bug #22131, enable use of shared lib with pcre.
+
+2003-02-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gd.c:
+      Kill some warnings
+
+    * ext/gd/gd_bundled.dsp:
+      XBM for win
+
+2003-02-09  Kai Schröder  <mail@kaischroeder.net>
+
+    * ext/standard/tests/file/003-win32.phpt:
+      shane added is_executable() for windows last night
+
+    * ext/standard/tests/file/003.phpt:
+      reverting to version 1.5; shane added is_executable() for windows last
+      night
+
+    * ext/standard/tests/general_functions/007.phpt
+      ext/standard/tests/general_functions/007.phpt:
+      newlines changed
+
+    * ext/standard/tests/general_functions/getopt.phpt
+      ext/standard/tests/general_functions/getopt.phpt:
+      getopt() is currently not available on Windows
+
+    * (PHP_4_3)
+      ext/standard/tests/file/001-win32.phpt
+      ext/standard/tests/file/001.phpt:
+      there are no symlinks on Windows
+
+    * ext/standard/tests/file/001-win32.phpt
+      ext/standard/tests/file/001.phpt:
+      
+      there are no symlinks on Windows
+
+    * ext/standard/tests/file/003-win32.phpt
+      ext/standard/tests/file/003.phpt:
+      is_executable() does not exist on Windows
+
+    * ext/standard/tests/file/003-win32.phpt
+      ext/standard/tests/file/003-win32.phpt
+      ext/standard/tests/file/003.phpt:
+      
+      file 003-win32.phpt was initially added on branch PHP_4_3.
+
+    * ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/002.phpt:
+      die() to skip second message
+
+    * ext/standard/datetime.c
+      ext/standard/datetime.c:
+      MSVC's mktime() does not examine the existence of a daylight-saving-time
+      zone
+
+    * ext/standard/tests/time/003.phpt
+      ext/standard/tests/time/003.phpt:
+      Windows doesn't know timezone CET
+
+    * ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/002.phpt:
+      skip for Windows (does not support dates prior to midnight, January 1,
+      1970)
+
+    * ext/standard/tests/time/002-win32.phpt:
+      Windows does not support dates prior to midnight, January 1, 1970
+
+    * ext/standard/tests/time/mktime.phpt:
+      test for mktime()
+
+2003-02-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      - Whitespace fixes
+
+2003-02-09  Kai Schröder  <mail@kaischroeder.net>
+
+    * ext/standard/tests/time/mktime.phpt
+      ext/standard/tests/time/mktime.phpt:
+      
+      file mktime.phpt was initially added on branch PHP_4_3.
+
+    * ext/standard/tests/time/002-win32.phpt
+      ext/standard/tests/time/002-win32.phpt:
+      
+      file 002-win32.phpt was initially added on branch PHP_4_3.
+
+2003-02-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      cleanup variable initializations
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      Fixing coredump when no php.ini file is used
+
+    * ext/mssql/config.m4
+      ext/mssql/php_mssql.h:
+      MFB
+
+2003-02-09  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      Fixed one more improper row offset handling.
+
+2003-02-09  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.h:
+      DBFLT4 is not defined in FreeTDS. Needed for real data types
+
+    * (PHP_4_3)
+      ext/mssql/config.m4:
+      Fixing autodetect of FreeTDS
+
+2003-02-09  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      Fixed improper result offset handling.
+      Prevent error when connection is broken. (optional)
+
+2003-02-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.h:
+      Bug #21707 problem with real
+
+    * ext/gd/gd.dsp
+      ext/gd/gd_bundled.dsp:
+      Syncronize with branch
+
+    * (PHP_4_3)
+      ext/gd/gd.dsp:
+      Fixing build with GD 2.0.11
+
+    * (PHP_4_3)
+      ext/gd/gd_bundled.dsp:
+      Adding missing HAVE_GD_STRINGFTEX define
+
+    * (PHP_4_3)
+      ext/gd/gd.dsp
+      ext/gd/gd_bundled.dsp:
+      Adding some missing defines to enable functions.
+      Fixing bug #22130
+
+2003-02-09  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+      is_executable() now available on win32
+      stats can now get information provided by access()
+
+    * run-tests2.php:
+      whitespace changes
+
 2003-02-08  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/gettext/gettext.c:

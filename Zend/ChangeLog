@@ -1,3 +1,8 @@
+2003-02-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix the array() problem (and probably some other problems too)
+
 2003-02-08  Georg Richter  <georg.richter@phpev.de>
 
     * zend_API.c
