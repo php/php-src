@@ -6,7 +6,7 @@ PHP_ARG_WITH(recode,for recode support,
 [  --with-recode[=DIR]     Include recode support.])
 
 if test "$PHP_RECODE" != "no"; then
-  RECODE_LIST="$PHP_RECODE /usr /usr/local /opt"
+  RECODE_LIST="$PHP_RECODE /usr/local /usr /opt"
 
   for i in $RECODE_LIST; do
     if test -f $i/include/recode.h; then
@@ -24,6 +24,7 @@ if test "$PHP_RECODE" != "no"; then
       RECODE_INC=include
       RECODE_LIB=lib
     fi
+    test -n "$RECODE_DIR" && break
   done
 
   if test -z "$RECODE_DIR"; then

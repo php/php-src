@@ -44,10 +44,11 @@ if test "$PHP_XSLT" != "no"; then
     XSLT_DIR=$XSLT_CHECK_DIR
   else
     AC_MSG_CHECKING(for $XSLT_BACKEND_NAME libraries in the default path)
-    for i in /usr /usr/local; do
+    for i in /usr/local /usr; do
       condition="$i$XSLT_TEST_FILE"
       if test -r $condition; then
         XSLT_DIR=$i
+        break
       fi
     done
     AC_MSG_RESULT(found in $XSLT_DIR)
@@ -126,6 +127,7 @@ int main ()
       for i in $PHP_SABLOT_JS /usr/local /usr; do
         if test -f $i/lib/libjs.a -o -f $i/lib/libjs.$SHLIB_SUFFIX_NAME; then
           PHP_SABLOT_JS_DIR=$i
+          break
         fi
       done
 

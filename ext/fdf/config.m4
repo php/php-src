@@ -23,7 +23,7 @@ if test "$PHP_FDFTK" != "no"; then
   esac
 
   if test "$PHP_FDFTK" = "yes"; then 
-    PHP_FDFTK="/usr /usr/local ../FDFToolkitForUNIX ext/fdf/FDFToolkitForUNIX ../fdftk ext/fdf/fdftk"
+    PHP_FDFTK="/usr/local /usr ../FDFToolkitForUNIX ext/fdf/FDFToolkitForUNIX ../fdftk ext/fdf/fdftk"
   fi
 
   for dir in $PHP_FDFTK; do

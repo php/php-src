@@ -7,9 +7,7 @@ PHP_ARG_WITH(mcrypt, for mcrypt support,
 
 if test "$PHP_MCRYPT" != "no"; then
   for i in $PHP_MCRYPT /usr/local /usr; do
-    if test -f $i/include/mcrypt.h; then
-      MCRYPT_DIR=$i
-    fi
+    test -f $i/include/mcrypt.h && MCRYPT_DIR=$i && break
   done
 
   if test -z "$MCRYPT_DIR"; then
@@ -57,8 +55,8 @@ if test "$PHP_MCRYPT" != "no"; then
 
   PHP_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MCRYPT_DIR/include)
-  AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 
-  PHP_SUBST(MCRYPT_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mcrypt, mcrypt.c, $ext_shared)
+  PHP_SUBST(MCRYPT_SHARED_LIBADD)
+  AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 fi
