@@ -1,3 +1,34 @@
+2004-07-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      ext/mysqli/mysqli.c:
+      - Bugfix: #29019 Database not closing
+
+2004-07-05  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_mm.h:
+      - Disable zend_mm for 5.0.0
+
+2004-07-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      NEWS:
+      add
+
+    * sapi/cgi/cgi_main.c:
+      - revert to proper behaviour
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      - revert to proper behaviour. The environment variable PHP_FCGI_CHILDREN
+        must be explicitly set to != 0 to make the fastcgi-enabled binary
+        act as a standalone fcgi server.
+
+2004-07-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/serialize/bug28325.phpt:
+      - Add test for bug #28325.
+
 2004-07-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/interbase/ibase_query.c:
