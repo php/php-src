@@ -474,8 +474,8 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto string file_put_contents(string file, string data[, int flags[, resource context]])
-   Write/Create a file with contents data */
+/* {{{ proto int file_put_contents(string file, string data[, int flags[, resource context]])
+   Write/Create a file with contents data and returns the number */
 PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
@@ -506,7 +506,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 	
-	RETURN_TRUE;
+	RETURN_LONG(numbytes);
 }
 /* }}} */
 
