@@ -1,3 +1,14 @@
+2003-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_alloc.c:
+      MFZE2
+
+2003-01-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Automatically register constructor, destructor, and clone function when
+      class methods are registered.
+
 2003-01-09  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
