@@ -1325,9 +1325,9 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array array_init(int start_key, int num, mixed val)
+/* {{{ proto array array_fill(int start_key, int num, mixed val)
    Create an array containing num elements starting with index start_key each initialized to val */
-PHP_FUNCTION(array_init)
+PHP_FUNCTION(array_fill)
 {
 	zval **start_key, **num, **val, *newval;
 	long i;
