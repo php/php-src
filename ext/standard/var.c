@@ -273,7 +273,7 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 		php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
 	case IS_STRING:
-		tmp_str = php_addslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0 TSRMLS_CC);
+		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
 		PUTS ("'");
 		PHPWRITE(tmp_str, tmp_len);
 		PUTS ("'");
