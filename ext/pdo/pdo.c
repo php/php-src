@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -257,6 +257,13 @@ PHP_MINIT_FUNCTION(pdo)
 	REGISTER_LONG_CONSTANT("PDO_CASE_UPPER",	(long)PDO_CASE_UPPER,		CONST_CS|CONST_PERSISTENT);
 		
 	REGISTER_STRING_CONSTANT("PDO_ERR_NONE",	PDO_ERR_NONE,		CONST_CS|CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_NEXT", (long)PDO_FETCH_ORI_NEXT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_PRIOR", (long)PDO_FETCH_ORI_PRIOR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_FIRST", (long)PDO_FETCH_ORI_FIRST, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_LAST", (long)PDO_FETCH_ORI_LAST, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_ABS", (long)PDO_FETCH_ORI_ABS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_ORI_REL", (long)PDO_FETCH_ORI_REL, CONST_CS|CONST_PERSISTENT);
 
 #if 0
 	REGISTER_LONG_CONSTANT("PDO_ERR_CANT_MAP", 			(long)PDO_ERR_CANT_MAP,		CONST_CS|CONST_PERSISTENT);
