@@ -30,7 +30,7 @@ object(domexception)#3 (7) {
 }
 --- Don't catch exception with try/catch
 
-Fatal error: Uncaught exception 'domexception' with message 'Hierarchy Request Error' in %s/dom003.php:%d
+Fatal error: Uncaught exception 'domexception' with message 'Hierarchy Request Error' in %sdom003.php:%d
 Stack trace:
 #0 {main}
-  thrown in %s/dom003.php on line %d
+  thrown in %sdom003.php on line %d
