@@ -4,10 +4,10 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.0 of the PHP license,       |
+   | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_0.txt.                                  |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -49,7 +49,7 @@
 
 #include "TSRM.h"
 
-/* Only need mutex for popen() in Windows and NetWare because it doesn't chdir() on UNIX */
+/* Only need mutex for popen() in Windows and NetWare, because it doesn't chdir() on UNIX */
 #if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
 MUTEX_T cwd_mutex;
 #endif
@@ -210,7 +210,7 @@ CWD_API void virtual_cwd_startup(void)
 	cwd_globals_ctor(&cwd_globals TSRMLS_CC);
 #endif
 
-#if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
+#if defined(TSRM_WIN32) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -220,7 +220,7 @@ CWD_API void virtual_cwd_shutdown(void)
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals TSRMLS_CC);
 #endif
-#if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
+#if defined(TSRM_WIN32) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
@@ -343,6 +343,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
         copy_amount = COPY_WHEN_ABSOLUTE(path_copy);
 		is_absolute = 1;
 #ifdef TSRM_WIN32
+	} else if (IS_UNC_PATH(path_copy, path_length)) {
+		copy_amount = 2;
+		is_absolute = 1;
 	} else if (IS_SLASH(path_copy[0])) {
 		copy_amount = 2;
 #endif
@@ -483,23 +486,19 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC)
 {
 	cwd_state new_state;
-	char *retval;
+	int retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	retval = virtual_file_ex(&new_state, path, NULL, 1);
 	
-	if (virtual_file_ex(&new_state, path, NULL, 1)==0) {
+	if (!retval) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
-
 		memcpy(real_path, new_state.cwd, len);
 		real_path[len] = '\0';
-		retval = real_path;
-	} else {
-		retval = NULL;
+		return real_path;
 	}
 
-	CWD_STATE_FREE(&new_state);
-
-	return retval;
+	return NULL;
 }
 
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path TSRMLS_DC)
@@ -539,6 +538,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC)
 	return f;
 }
 
+#if !defined(TSRM_WIN32)
 CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC)
 {
 	cwd_state new_state;
@@ -547,16 +547,13 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC)
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, pathname, NULL, 1);
 
-#if defined(TSRM_WIN32)
-	ret = tsrm_win32_access(new_state.cwd, mode);
-#else
 	ret = access(new_state.cwd, mode);
-#endif
 	
 	CWD_STATE_FREE(&new_state);
 	
 	return ret;
 }
+#endif
 
 
 #if HAVE_UTIME
