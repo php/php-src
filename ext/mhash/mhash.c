@@ -37,6 +37,8 @@
 
 function_entry mhash_functions[] = {
 	PHP_FE(mhash_get_block_size, NULL)
+	PHP_FE(mhash_get_hash_name, NULL)
+	PHP_FE(mhash_count, NULL)
 	PHP_FE(mhash, NULL)
 	{0},
 };
@@ -52,24 +54,31 @@ zend_module_entry mhash_module_entry = {
 	STANDARD_MODULE_PROPERTIES,
 };
 
-#define MHASH_FAILED "mhash initialization failed"
-
-#define MHASH_ENTRY(a) REGISTER_LONG_CONSTANT("MHASH_" #a, a, 0)
+#define MHASH_FAILED_MSG "mhash initialization failed"
 
 static int php_minit_mhash(INIT_FUNC_ARGS)
 {
-	/* hashes */
-	MHASH_ENTRY(CRC32);
-	MHASH_ENTRY(MD5);
-	MHASH_ENTRY(SHA1);
-	MHASH_ENTRY(HAVAL);
-	MHASH_ENTRY(RIPEMD128);
-	MHASH_ENTRY(RIPEMD160);
-	MHASH_ENTRY(TIGER);
-	MHASH_ENTRY(SNEFRU);
-	MHASH_ENTRY(GOST);
+	int i;
+	char *name;
+	char buf[128];
+
+	for(i = 0; i <= mhash_count(); i++) {
+		name = mhash_get_hash_name(i);
+		if(name) {
+			snprintf(buf, 127, "MHASH_%s", name);
+			REGISTER_LONG_CONSTANT(buf, i, 0);
+			free(name);
+		}
+	}
 	
 	return SUCCESS;
+}
+
+/* proto mhash_count()
+   get the number of available hashes */
+PHP_FUNCTION(mhash_count)
+{
+	RETURN_LONG(mhash_count());
 }
 
 /* proto mhash_get_block_size(int hash)
@@ -87,12 +96,34 @@ PHP_FUNCTION(mhash_get_block_size)
 	RETURN_LONG(mhash_get_block_size(hash->value.lval));
 }
 
+/* proto mhash_get_hash_name(int hash)
+   get the name of hash */
+PHP_FUNCTION(mhash_get_hash_name)
+{
+	pval *hash;
+	char *name;
+
+	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &hash) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(hash);
+
+	name = mhash_get_hash_name(hash->value.lval);
+	if(name) {
+		RETVAL_STRING(name, 1);
+		free(name);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+
 /* proto mhash(int hash, string data)
    hash data with hash */
 PHP_FUNCTION(mhash)
 {
 	pval *hash, *data;
-	int td;
+	MHASH td;
 	int bsize;
 	unsigned char *hash_data;
 	int i;
@@ -105,15 +136,15 @@ PHP_FUNCTION(mhash)
 	convert_to_string(data);
 
 	bsize = mhash_get_block_size(hash->value.lval);
-	td = init_mhash(hash->value.lval);
-	if(td == -1) {
-		php3_error(E_WARNING, MHASH_FAILED);
+	td = mhash_init(hash->value.lval);
+	if(td == MHASH_FAILED) {
+		php3_error(E_WARNING, MHASH_FAILED_MSG);
 		RETURN_FALSE;
 	}
 
 	mhash(td, data->value.str.val, data->value.str.len);
 
-	hash_data = (char *) end_mhash(td);
+	hash_data = (unsigned char *) mhash_end(td);
 	
 	RETVAL_STRINGL(hash_data, bsize, 1);
 	
