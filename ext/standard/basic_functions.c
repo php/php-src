@@ -419,6 +419,12 @@ function_entry basic_functions[] = {
 	PHP_FE(base_convert,													NULL)
 	PHP_FE(number_format,													NULL)
 	PHP_FE(fmod,															NULL)
+#ifdef HAVE_INET_NTOP
+	PHP_FE(inet_ntop,														NULL)
+#endif
+#ifdef HAVE_INET_PTON
+	PHP_FE(inet_pton,														NULL)
+#endif
 	PHP_FE(ip2long,															NULL)
 	PHP_FE(long2ip,															NULL)
 
@@ -1272,6 +1278,79 @@ PHP_FUNCTION(constant)
 	}
 }
 /* }}} */
+
+#ifdef HAVE_INET_NTOP
+/* {{{ proto string inet_ntop(string in_addr)
+   Converts a packed inet address to a human readable IP address string */
+PHP_FUNCTION(inet_ntop)
+{
+	char *address;
+	int address_len, af = AF_INET;
+	char buffer[40];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &address, &address_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+#ifdef HAVE_IPV6
+	if (address_len == 16) {
+		af = AF_INET6;
+	} else
+#endif
+	if (address_len != 4) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid in_addr value");
+		RETURN_FALSE;
+	}
+
+	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occured");
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(buffer, 1);
+}
+/* }}} */
+#endif /* HAVE_INET_NTOP */
+
+#ifdef HAVE_INET_PTON
+/* {{{ proto string inet_pton(string ip_address)
+   Converts a human readable IP address to a packed binary string */
+PHP_FUNCTION(inet_pton)
+{
+	int ret, af = AF_INET;
+	char *address;
+	int address_len;
+	char buffer[17];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &address, &address_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	memset(buffer, 0, sizeof(buffer));
+
+#ifdef HAVE_IPV6
+	if (strchr(address, ':')) {
+		af = AF_INET6;
+	} else 
+#endif
+	if (!strchr(address, '.')) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized address %s", address);
+		RETURN_FALSE;
+	}
+
+	ret = inet_pton(af, address, buffer);
+
+	if (ret <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized address %s", address);
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(buffer, 1);
+}
+/* }}} */
+#endif /* HAVE_INET_PTON */
+
+
 
 /* {{{ proto int ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
