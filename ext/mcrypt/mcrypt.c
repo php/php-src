@@ -81,7 +81,7 @@ static mcrypt_global_struct mcryptg;
 	convert_to_string_ex(key)
 
 #define MCRYPT_SIZE 											\
-	bsize = get_block_size((*cipher)->value.lval); 				\
+	bsize = mcrypt_get_block_size((*cipher)->value.lval); 		\
 	nr = ((*data)->value.str.len + bsize - 1) / bsize; 			\
 	nsize = nr * bsize
 
@@ -110,7 +110,9 @@ static mcrypt_global_struct mcryptg;
 #define MCRYPT_IV_WRONG_SIZE "The IV paramater must be as long as the blocksize"
 #define MCRYPT_FAILED "mcrypt initialization failed"
 
-#define MCRYPT_ENTRY(a) REGISTER_LONG_CONSTANT("MCRYPT_" #a, a, CONST_PERSISTENT)
+#define MCRYPT_ENTRY_NAMED(a,b) REGISTER_LONG_CONSTANT("MCRYPT_" #a, b, CONST_PERSISTENT)
+#define MCRYPT_ENTRY2(a) MCRYPT_ENTRY_NAMED(a, MCRYPT_##a)
+#define MCRYPT_ENTRY(a) MCRYPT_ENTRY_NAMED(a, a)
 
 static PHP_MINIT_FUNCTION(mcrypt)
 {
@@ -124,34 +126,41 @@ static PHP_MINIT_FUNCTION(mcrypt)
 	REGISTER_LONG_CONSTANT("MCRYPT_RAND", 2, CONST_PERSISTENT);
 	
 	/* ciphers */
-	MCRYPT_ENTRY(BLOWFISH);
-	MCRYPT_ENTRY(DES);
-	MCRYPT_ENTRY(TripleDES);
-	MCRYPT_ENTRY(ThreeWAY);
-	MCRYPT_ENTRY(GOST);
-#ifdef CRYPT
-	MCRYPT_ENTRY(CRYPT);
-#endif
-#ifdef DES_COMPAT
-	MCRYPT_ENTRY(DES_COMPAT);
-#endif
-	MCRYPT_ENTRY(SAFER64);
-	MCRYPT_ENTRY(SAFER128);
-	MCRYPT_ENTRY(CAST128);
-	MCRYPT_ENTRY(TEAN);
-	MCRYPT_ENTRY(RC2);
-#ifdef TWOFISH
-	MCRYPT_ENTRY(TWOFISH);
-#elif defined(TWOFISH128)
-	MCRYPT_ENTRY(TWOFISH128);
-	MCRYPT_ENTRY(TWOFISH192);
-	MCRYPT_ENTRY(TWOFISH256);
-#endif
-#ifdef RC6
-	MCRYPT_ENTRY(RC6);
-#endif
-#ifdef IDEA
-	MCRYPT_ENTRY(IDEA);
+#if defined(MCRYPT_API_VERSION) && MCRYPT_API_VERSION == 19991015
+	MCRYPT_ENTRY2(BLOWFISH_448);
+	MCRYPT_ENTRY2(DES);
+	MCRYPT_ENTRY2(3DES);
+	MCRYPT_ENTRY2(3WAY);
+	MCRYPT_ENTRY2(GOST);
+	MCRYPT_ENTRY2(SAFER_64);
+	MCRYPT_ENTRY2(SAFER_128);
+	MCRYPT_ENTRY2(CAST_128);
+	MCRYPT_ENTRY2(XTEA);
+	MCRYPT_ENTRY2(RC2_1024);
+	MCRYPT_ENTRY2(TWOFISH_128);
+	MCRYPT_ENTRY2(TWOFISH_192);
+	MCRYPT_ENTRY2(TWOFISH_256);
+	MCRYPT_ENTRY2(BLOWFISH_128);
+	MCRYPT_ENTRY2(BLOWFISH_192);
+	MCRYPT_ENTRY2(BLOWFISH_256);
+	MCRYPT_ENTRY2(CAST_256);
+	MCRYPT_ENTRY2(SAFERPLUS);
+	MCRYPT_ENTRY2(LOKI97);
+	MCRYPT_ENTRY2(SERPENT_128);
+	MCRYPT_ENTRY2(SERPENT_192);
+	MCRYPT_ENTRY2(SERPENT_256);
+	MCRYPT_ENTRY2(RIJNDAEL_128);
+	MCRYPT_ENTRY2(RIJNDAEL_192);
+	MCRYPT_ENTRY2(RIJNDAEL_256);
+	MCRYPT_ENTRY2(RC2_256);
+	MCRYPT_ENTRY2(RC2_128);
+	MCRYPT_ENTRY2(RC6_256);
+	MCRYPT_ENTRY2(IDEA);
+	MCRYPT_ENTRY2(RC6_128);
+	MCRYPT_ENTRY2(RC6_192);
+	MCRYPT_ENTRY2(RC4);
+#else
+#error Please update your mcrypt library
 #endif
 	
 	return SUCCESS;
@@ -224,11 +233,14 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 
 	convert_to_long_ex(cipher);
 
-	str = get_algorithms_name((*cipher)->value.lval);
-	nstr = estrdup(str);
-	free(str);
-
-	RETURN_STRING(nstr, 0);
+	str = mcrypt_get_algorithms_name((*cipher)->value.lval);
+	if (str) {
+		nstr = estrdup(str);
+		free(str);
+		RETURN_STRING(nstr, 0);
+	}
+	
+	RETURN_FALSE;
 }
 
 /* proto mcrypt_get_key_size(int cipher)
@@ -243,7 +255,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 
 	convert_to_long_ex(cipher);
 
-	RETURN_LONG(get_key_size((*cipher)->value.lval));
+	RETURN_LONG(mcrypt_get_key_size((*cipher)->value.lval));
 }
 
 /* proto mcrypt_get_block_size(int cipher)
@@ -258,7 +270,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 
 	convert_to_long_ex(cipher);
 
-	RETURN_LONG(get_block_size((*cipher)->value.lval));
+	RETURN_LONG(mcrypt_get_block_size((*cipher)->value.lval));
 }
 
 /* proto mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
