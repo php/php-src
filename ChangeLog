@@ -1,3 +1,26 @@
+2001-10-16  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Adding new functions to retreive LOB data.
+
+    fbsql_set_lob_mode() is used to switch from FBSQL_LOB_DIRECT to FBSQL_LOB_HANDLE
+
+    when LOBS are retreived as FBSQL_LOB_HANDLE the user must call fbsql_read_blob() or fbsql_read_clob() to get the data.
+
+2001-10-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c: fixed proto
+
+2001-10-16  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Meged fix for bug #13083 into the release branch.
+
+2001-10-16  Stig Bakken  <ssb@fast.no>
+
+    * configure.in
+      main/php_version.h: * fix version number
+
 2001-10-15  Edin Kadribasic  <edink@proventum.net>
 
     * ext/standard/http_fopen_wrapper.c:
