@@ -21,7 +21,6 @@ AC_ARG_WITH(gd,
         AC_ADD_LIBRARY(gd)
       fi
         old_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$GD_LIB"
 		old_LIBS=$LIBS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
 		LIBS="$LIBS -lpng -lz"
