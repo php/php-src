@@ -52,6 +52,8 @@ PHP_FUNCTION(domxml_doc_create_text_node);
 PHP_FUNCTION(domxml_doc_create_comment);
 PHP_FUNCTION(domxml_doc_create_processing_instruction);
 PHP_FUNCTION(domxml_doc_create_attribute);
+PHP_FUNCTION(domxml_doc_create_cdata_section);
+PHP_FUNCTION(domxml_doc_create_entity_reference);
 PHP_FUNCTION(domxml_doc_imported_node);
 PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
@@ -85,13 +87,16 @@ PHP_FUNCTION(domxml_node_has_child_nodes);
 PHP_FUNCTION(domxml_node_parent);
 PHP_FUNCTION(domxml_node_prefix);
 PHP_FUNCTION(domxml_node);
+PHP_FUNCTION(domxml_clone_node);
 PHP_FUNCTION(domxml_node_unlink_node);
 PHP_FUNCTION(domxml_node_new_child);
 PHP_FUNCTION(domxml_node_set_content);
 PHP_FUNCTION(domxml_node_text_concat);
 PHP_FUNCTION(domxml_node_set_name);
 PHP_FUNCTION(domxml_node_name);
+PHP_FUNCTION(domxml_node_type);
 PHP_FUNCTION(domxml_node_value);
+PHP_FUNCTION(domxml_is_blank_node);
 
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attr_name);

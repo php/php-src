@@ -128,15 +128,14 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_text_node,		domxml_doc_create_text_node,	NULL)
 	PHP_FALIAS(create_comment,			domxml_doc_create_comment,		NULL)
 	PHP_FALIAS(create_attribute,		domxml_doc_create_attribute,	NULL)
+	PHP_FALIAS(create_cdata_section,	domxml_doc_create_cdata_section,	NULL)
+	PHP_FALIAS(create_entity_reference,	domxml_doc_create_entity_reference,	NULL)
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
 	PHP_FALIAS(children,				domxml_node_children,			NULL)
 	PHP_FALIAS(add_root,				domxml_add_root,				NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dumpmem,					NULL)
-/*	
-	PHP_FALIAS(create_cdata_section,	domxml_create_cdata_section,	NULL)
-*/
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
@@ -185,7 +184,10 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
 	PHP_FALIAS(set_name,				domxml_node_set_name,			NULL)
 	PHP_FALIAS(node_name,				domxml_node_name,				NULL)
+	PHP_FALIAS(node_type,				domxml_node_type,				NULL)
 	PHP_FALIAS(node_value,				domxml_node_value,				NULL)
+	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
+	PHP_FALIAS(is_blank_node,				domxml_is_blank_node,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -718,8 +720,6 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			rsrc_type = le_domxmlentityrefp;
 			content = xmlNodeGetContent(nodep);
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
-			if (content)
-				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
 			break;
 		}
 
@@ -785,6 +785,19 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 				add_property_string(wrapper, "systemId", (char *) dtd->SystemID, 1);
 			if (dtd->name)
 				add_property_string(wrapper, "name", (char *) dtd->name, 1);
+			break;
+		}
+
+		case XML_CDATA_SECTION_NODE:
+		{
+			xmlNodePtr nodep = obj;
+			object_init_ex(wrapper, domxmlcdata_class_entry);
+			rsrc_type = le_domxmlcdatap;
+			content = xmlNodeGetContent(nodep);
+			if (content) {
+				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
+				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+			}
 			break;
 		}
 
@@ -1135,7 +1148,11 @@ PHP_FUNCTION(domxml_node_name)
 			break;
 	}
 
-	RETURN_STRING((char *) str, 1);
+	if(str != NULL) {
+		RETURN_STRING((char *) str, 1);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -1164,7 +1181,33 @@ PHP_FUNCTION(domxml_node_value)
 			str = NULL;
 			break;
 	}
-	RETURN_STRING(str, 1);
+	if(str != NULL) {
+		RETURN_STRING((char *) str, 1);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+}
+/* }}} */
+
+/* {{{ proto bool domxml_is_blank_node()
+   Returns true if node is blank */
+PHP_FUNCTION(domxml_is_blank_node)
+{
+	zval *id;
+	xmlNode *n;
+
+	id = getThis();
+	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
+
+	if (!n) {
+		RETURN_FALSE;
+	}
+
+	if(xmlIsBlankNode(n)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1182,6 +1225,43 @@ PHP_FUNCTION(domxml_node_type)
 		RETURN_FALSE;
 	}
 	RETURN_LONG(Z_TYPE_P(n));
+}
+/* }}} */
+
+/* {{{ proto bool domxml_clone_node()
+   clones a node */
+PHP_FUNCTION(domxml_clone_node)
+{
+	zval *arg, *rv;
+	zval *id;
+	xmlNode *n, *node;
+	int ret;
+
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(arg);
+
+	id = getThis();
+	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
+
+	if (!n) {
+		RETURN_FALSE;
+	}
+
+	node = xmlCopyNode(n, Z_LVAL_P(arg));
+	if (!node) {
+		RETURN_FALSE;
+	}
+
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
+	if (!rv) {
+		RETURN_FALSE;
+	}
+
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1487,7 +1567,7 @@ PHP_FUNCTION(domxml_node_append_child)
 		RETURN_FALSE;
 	}
 
-	child = xmlAddSibling(nodep, child);
+	child = xmlAddChildList(nodep, child);
 	rv = php_domobject_new(child, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
@@ -2096,6 +2176,70 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	node->doc = docp;
 
 	rv = php_domobject_new((xmlNodePtr) node, &ret TSRMLS_CC);
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto object domxml_doc_create_cdata_section(string name)
+   Creates new cdata node */
+PHP_FUNCTION(domxml_doc_create_cdata_section)
+{
+	zval *arg, *id, *rv;
+	xmlNode *node;
+	xmlDocPtr docp;
+	int ret;
+
+	id = getThis();
+	if (NULL ==	(docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	node = xmlNewCDataBlock(docp, Z_STRVAL_P(arg), strlen(Z_STRVAL_P(arg)));
+	if (!node) {
+		RETURN_FALSE;
+	}
+	node->doc = docp;
+
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto object domxml_doc_create_entity_reference(string name)
+   Creates new cdata node */
+PHP_FUNCTION(domxml_doc_create_entity_reference)
+{
+	zval *arg, *id, *rv;
+	xmlNode *node;
+	xmlDocPtr docp;
+	int ret;
+
+	id = getThis();
+	if (NULL ==	(docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	node = xmlNewReference(docp, Z_STRVAL_P(arg));
+	if (!node) {
+		RETURN_FALSE;
+	}
+	node->doc = docp;
+
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
