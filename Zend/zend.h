@@ -140,6 +140,14 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+#ifndef LONG_MAX
+#define LONG_MAX 2147483647L
+#endif
+
+#ifndef LONG_MIN
+#define LONG_MIN (- LONG_MAX - 1)
+#endif
+
 #undef SUCCESS
 #undef FAILURE
 #define SUCCESS 0
