@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2 
+- Fixed a bug in preg_replace() that would truncate subject string if the
+  first argument was en empty array. (Andrei)
+- Added ob_get_length function (Stig)
 - Fixed a bug that did not respect limit parameter in preg_replace() when
   using /e modifier. (Andrei)
 - Added ability for each xml_set_*_handler() function to take the
