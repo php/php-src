@@ -65,6 +65,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "php_unicode.h"
+#include "TSRM.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
@@ -74,6 +75,10 @@
 
 #if HAVE_MBREGEX
 #include "mbregex.h"
+#endif
+
+#ifdef ZTS
+MUTEX_T mbregex_locale_mutex = NULL;
 #endif
 
 #if defined(HAVE_MBSTR_JA)
@@ -699,10 +704,18 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 #endif
 }
 
+static void
+mbstring_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
+{
+#if HAVE_MBREGEX
+	zend_hash_destroy(&MBSTRG(ht_rc));
+#endif
+}
+
 PHP_MINIT_FUNCTION(mbstring)
 {
 #ifdef ZTS
-	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals), (ts_allocate_ctor) php_mbstring_init_globals, NULL);
+	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals), (ts_allocate_ctor) php_mbstring_init_globals, (ts_allocate_dtor) mbstring_globals_dtor);
 #else
 	php_mbstring_init_globals(&mbstring_globals TSRMLS_CC);
 #endif
@@ -723,6 +736,12 @@ PHP_MINIT_FUNCTION(mbstring)
 	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
+
+#if HAVE_MBREGEX
+# ifdef ZTS
+	mbregex_locale_mutex = tsrm_mutex_alloc();
+# endif
+#endif
 	return SUCCESS;
 }
 
@@ -748,7 +767,17 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 	}
 
 #if HAVE_MBREGEX
-	zend_hash_destroy(&MBSTRG(ht_rc));
+# ifdef ZTS
+	if (mbregex_locale_mutex != NULL) {
+		tsrm_mutex_free(mbregex_locale_mutex);
+	}
+# endif
+#endif
+
+#ifdef ZTS
+	ts_free_id(mbstring_globals_id);
+#else
+	mbstring_globals_dtor(&mbstring_globals TSRMLS_CC);
 #endif
 
 	return SUCCESS;
