@@ -840,7 +840,7 @@ LookupWord (lvalp,buff)
   return tID;
 }
 
-yylex (YYSTYPE *lvalp, void *parm)
+int yylex (YYSTYPE *lvalp, void *parm)
 {
   register unsigned char c;
   register char *p;
