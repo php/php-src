@@ -199,9 +199,9 @@ static PHP_MSHUTDOWN_FUNCTION(dba)
 static PHP_MINFO_FUNCTION(dba)
 {
 	/* could be prettier (cmv) */
-	php_info_print_box_start();
 	dba_handler *hptr;
 	
+	php_info_print_box_start(0);
 	PUTS("V1 ($Id$)");
 	for(hptr = handler; hptr->name; hptr++) {
 		PUTS(" ");
