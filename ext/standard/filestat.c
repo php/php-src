@@ -450,8 +450,12 @@ PHP_FUNCTION(clearstatcache)
 
 static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value)
 {
+	zval *stat_dev,*stat_ino,*stat_mode,*stat_nlink,*stat_uid,*stat_gid,*stat_rdev,
+	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	struct stat *stat_sb;
 	int rmask=S_IROTH,wmask=S_IWOTH,xmask=S_IXOTH; /* access rights defaults to other */
+	char *stat_sb_names[13]={"dev","ino","mode","nlink","uid","gid","rdev",
+			      "size","atime","mtime","ctime","blksize","blocks"};
 	BLS_FETCH();
 
 	stat_sb = &BG(sb);
@@ -593,54 +597,61 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		add_next_index_long(return_value, stat_sb->st_dev);
-		add_next_index_long(return_value, stat_sb->st_ino);
-		add_next_index_long(return_value, stat_sb->st_mode);
-		add_next_index_long(return_value, stat_sb->st_nlink);
-		add_next_index_long(return_value, stat_sb->st_uid);
-		add_next_index_long(return_value, stat_sb->st_gid);
+	
+		MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
+		MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
+		MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
+		MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_sb->st_nlink);
+		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
+		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		add_next_index_long(return_value, stat_sb->st_rdev);
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev); 
 #else
-		add_next_index_long(return_value, -1);
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
-		add_next_index_long(return_value, stat_sb->st_size);
-		add_next_index_long(return_value, stat_sb->st_atime);
-		add_next_index_long(return_value, stat_sb->st_mtime);
-		add_next_index_long(return_value, stat_sb->st_ctime);
+		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
+		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-		add_next_index_long(return_value, stat_sb->st_blksize);
+		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize); 
 #else
-		add_next_index_long(return_value, -1);
+		MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		add_next_index_long(return_value, stat_sb->st_blocks);
+		MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_sb->st_blocks);
 #else
-		add_next_index_long(return_value, -1);
+		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
 #endif
-		/* Support string references as well as numerical*/
-		add_assoc_long ( return_value , "dev" , stat_sb->st_dev );
-		add_assoc_long ( return_value , "ino" , stat_sb->st_ino );
-		add_assoc_long ( return_value , "mode" , stat_sb->st_mode );
-		add_assoc_long ( return_value , "nlink" , stat_sb->st_nlink );
-		add_assoc_long ( return_value , "uid" , stat_sb->st_uid );
-		add_assoc_long ( return_value , "gid" , stat_sb->st_gid );
+		/* Store numeric indexes in propper order */
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_dev, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ino, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mode, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_nlink, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_uid, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_gid, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_rdev, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_size, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_atime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mtime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ctime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blksize, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blocks, sizeof(zval *), NULL);
 
-#ifdef HAVE_ST_RDEV
-		add_assoc_long ( return_value, "rdev" , stat_sb->st_rdev );
-#endif
-#ifdef HAVE_ST_BLKSIZE
-		add_assoc_long ( return_value , "blksize" , stat_sb->st_blksize );
-#endif
-
-		add_assoc_long ( return_value , "size" , stat_sb->st_size );
-		add_assoc_long ( return_value , "atime" , stat_sb->st_atime );
-		add_assoc_long ( return_value , "mtime" , stat_sb->st_mtime );
-		add_assoc_long ( return_value , "ctime" , stat_sb->st_ctime );
-
-#ifdef HAVE_ST_BLOCKS
-		add_assoc_long ( return_value , "blocks" , stat_sb->st_blocks );
-#endif
+		/* Store string indexes referencing the same zval*/
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[0],strlen(stat_sb_names[0])+1,(void *)&stat_dev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[1],strlen(stat_sb_names[1])+1,(void *)&stat_ino, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[2],strlen(stat_sb_names[2])+1,(void *)&stat_mode, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[3],strlen(stat_sb_names[3])+1,(void *)&stat_nlink, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[4],strlen(stat_sb_names[4])+1,(void *)&stat_uid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[5],strlen(stat_sb_names[5])+1,(void *)&stat_gid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[6],strlen(stat_sb_names[6])+1,(void *)&stat_rdev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[7],strlen(stat_sb_names[7])+1,(void *)&stat_size, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[8],strlen(stat_sb_names[8])+1,(void *)&stat_atime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[9],strlen(stat_sb_names[9])+1,(void *)&stat_mtime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[10],strlen(stat_sb_names[10])+1,(void *)&stat_ctime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[11],strlen(stat_sb_names[11])+1,(void *)&stat_blksize, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value),stat_sb_names[12],strlen(stat_sb_names[12])+1,(void *)&stat_blocks, sizeof(zval *), NULL);
 
 		return;
 	}

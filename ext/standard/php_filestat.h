@@ -50,4 +50,9 @@ PHP_FUNCTION(chmod);
 PHP_FUNCTION(touch);
 PHP_FUNCTION(clearstatcache);
 
+#define MAKE_LONG_ZVAL_INCREF(name, val)\
+	MAKE_STD_ZVAL(name); \
+	ZVAL_LONG(name,val); \
+	name->refcount++; 
+
 #endif /* PHP_FILESTAT_H */
