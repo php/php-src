@@ -500,7 +500,7 @@ PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
 	char *filename;
-	size_t filename_len;
+	int filename_len;
 	zval *data;
 	int numbytes = 0;
 	long flags = 0;
@@ -1287,7 +1287,8 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
 PHP_FUNCTION(mkdir)
 {
 	zval *zcontext = NULL;
-	long dir_len, mode = 0777;
+	long mode = 0777;
+	int dir_len;
 	zend_bool recursive = 0;
 	char *dir;
 	php_stream_context *context;
@@ -1307,9 +1308,9 @@ PHP_FUNCTION(mkdir)
 PHP_FUNCTION(rmdir)
 {
 	char *dir;
-	long dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context;
+	int dir_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
@@ -1325,8 +1326,8 @@ PHP_FUNCTION(rmdir)
    Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
-	int size = 0;
 	char *filename;
+	int size = 0;
 	int filename_len;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;

@@ -46,7 +46,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 PHP_FUNCTION(stream_socket_client)
 {
 	char *host;
-	long host_len;
+	int host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout = FG(default_socket_timeout);
 	unsigned long conv;
@@ -133,7 +133,7 @@ PHP_FUNCTION(stream_socket_client)
 PHP_FUNCTION(stream_socket_server)
 {
 	char *host;
-	long host_len;
+	int host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	php_stream *stream = NULL;
 	int err = 0;
@@ -274,7 +274,7 @@ PHP_FUNCTION(stream_socket_sendto)
 	zval *zstream;
 	long flags = 0;
 	char *data, *target_addr = NULL;
-	long datalen, target_addr_len = 0;
+	int datalen, target_addr_len = 0;
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
 	
