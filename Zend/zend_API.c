@@ -1185,7 +1185,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
-		if (!internal_function->handler) {
+		if (!internal_function->handler && !(ptr->flags&ZEND_ACC_ABSTRACT)) {
 			zend_error(error_type, "Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 			return FAILURE;

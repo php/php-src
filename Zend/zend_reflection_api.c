@@ -2171,7 +2171,7 @@ static zend_function_entry reflection_functions[] = {
 };
 
 static zend_function_entry reflector_functions[] = {
-	ZEND_NAMED_FE(tostring, ZEND_FN(reflector_tostring), NULL)
+	ZEND_ABSTRACT_ME(reflector, tostring, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -2266,7 +2266,6 @@ static zend_function_entry reflection_extension_functions[] = {
 
 ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	zend_class_entry _reflection_entry;
-	zend_function *mptr;
 
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
@@ -2276,11 +2275,6 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	INIT_CLASS_ENTRY(_reflection_entry, "reflector", reflector_functions);
 	reflector_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflector_ptr->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
-
-	/* Ugly... is there a better way to introduce an abstract method to a class? */
-	if (zend_hash_find(&reflector_ptr->function_table, "tostring", sizeof("tostring"), (void **) &mptr) == SUCCESS) {
-		mptr->common.fn_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_PUBLIC;
-	}
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection_function", reflection_function_functions);
 	_reflection_entry.create_object = reflection_objects_new;
