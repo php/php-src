@@ -632,9 +632,9 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 		Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
 		Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
 		Z_TYPE_P(output_handler) = IS_STRING;
-		php_start_ob_buffer(output_handler);
+		php_start_ob_buffer(output_handler, 0);
 	} else if (PG(output_buffering)) {
-		php_start_ob_buffer(NULL);
+		php_start_ob_buffer(NULL, 0);
 	} else if (PG(implicit_flush)) {
 		php_start_implicit_flush();
 	}
