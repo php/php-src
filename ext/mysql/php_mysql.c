@@ -2298,7 +2298,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **field;
 	MYSQL_RES *mysql_result;
-	MYSQL_FIELD *mysql_field;
+	MYSQL_FIELD *mysql_field = {0};
 	char buf[512];
 	int  len;
 

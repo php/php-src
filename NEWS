@@ -86,6 +86,8 @@ PHP                                                                        NEWS
 - Fixed bug #31139 (XML Parser Functions seem to drop &amp; when parsing). (Rob)
 - Fixed bug #31398 (When magic_guotes_gpc are enabled filenames with ' get cutoff).
   (Ilia)
+- Fixed bug #31288 (Possible crash in mysql_fetch_field(), if mysql_list_fields() 
+  was not called previously). (Ilia)
 - Fixed bug #31107, #31110, #31111, #31249 (Compile failure of zend_strtod.c).
   (Jani)
 - Fixed bug #31110 (PHP 4.3.10 does not compile on Tru64 UNIX 5.1B). (Derick)
