@@ -47,6 +47,7 @@
 #define UDM_PARAM_SEARCH_MODE	3
 #define UDM_PARAM_CACHE_MODE	4
 #define UDM_PARAM_TRACK_MODE	5
+#define UDM_PARAM_CHARSET	6
 
 #define UDM_TRACK_ENABLED	1
 #define UDM_TRACK_DISABLED	0
@@ -126,6 +127,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCH_MODE",UDM_PARAM_SEARCH_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CACHE_MODE",UDM_PARAM_CACHE_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_TRACK_MODE",UDM_PARAM_TRACK_MODE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_CHARSET",UDM_PARAM_CHARSET,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
@@ -238,16 +240,16 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 
 	switch(ZEND_NUM_ARGS()){
 	
-		case 3: {
-				if(zend_get_parameters_ex(3,&yyagent,&yyvar,&yyval)==FAILURE){
-					RETURN_FALSE;
-				}
-				convert_to_long_ex(yyvar);
-				convert_to_string_ex(yyval);
-				ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-				var = (*yyvar)->value.lval;
-				val = (*yyval)->value.str.val;
+		case 3: 		
+			if(zend_get_parameters_ex(3,&yyagent,&yyvar,&yyval)==FAILURE){
+				RETURN_FALSE;
 			}
+			convert_to_long_ex(yyvar);
+			convert_to_string_ex(yyval);
+			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+			var = (*yyvar)->value.lval;
+			val = (*yyval)->value.str.val;
+			
 			break;
 			
 		default:
@@ -256,59 +258,80 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 	}
 	
 	switch(var){
-		case UDM_PARAM_PAGE_SIZE: {
-				Agent->page_size=atoi(val);
-				if(Agent->page_size<1)Agent->page_size=20;
-			}
+		case UDM_PARAM_PAGE_SIZE: 
+			Agent->page_size=atoi(val);
+			if(Agent->page_size<1)Agent->page_size=20;
+			
 			break;
-		case UDM_PARAM_PAGE_NUM: {
-				Agent->page_number=atoi(val);
-				if(Agent->page_number<0)Agent->page_number=0;
-			}
+			
+		case UDM_PARAM_PAGE_NUM: 
+			Agent->page_number=atoi(val);
+			if(Agent->page_number<0)Agent->page_number=0;
+			
 			break;
+			
 		case UDM_PARAM_SEARCH_MODE:
 			switch (atoi(val)){
 					case UDM_MODE_ALL:
 						Agent->search_mode=UDM_MODE_ALL;
 						break;
+						
 					case UDM_MODE_ANY:
 						Agent->search_mode=UDM_MODE_ANY;
 						break;
+						
 					case UDM_MODE_BOOL: 
 						Agent->search_mode=UDM_MODE_BOOL;
 						break;
+						
 					default:
 						RETURN_STRING("<Udm_Set_Agent_Param: Unknown search mode>",1);
 						break;
 			}
+			
 			break;
+			
 		case UDM_PARAM_CACHE_MODE: 
 			switch (atoi(val)){
 				case UDM_CACHE_ENABLED:
 					Agent->cache_mode=UDM_CACHE_ENABLED;
 					break;
+					
 				case UDM_CACHE_DISABLED:
 					Agent->cache_mode=UDM_CACHE_DISABLED;
 					break;
+					
 				default:
 					Agent->cache_mode=UDM_CACHE_DISABLED;
 					RETURN_STRING("<Udm_Set_Agent_Param: Unknown cache mode>",1);
 					break;
 			}
+			
 			break;
+			
 		case UDM_PARAM_TRACK_MODE: 
 			switch (atoi(val)){
 				case UDM_TRACK_ENABLED:
 					Agent->track_mode|=UDM_TRACK_QUERIES;
 					break;
+					
 				case UDM_TRACK_DISABLED:
 					Agent->track_mode &= ~(UDM_TRACK_QUERIES);    
 					break;
+					
 				default:
 					RETURN_STRING("<Udm_Set_Agent_Param: Unknown track_mode>",1);
 					break;
 			}
+			
 			break;
+			
+		case UDM_PARAM_CHARSET:
+			Agent->Conf->local_charset=UdmGetCharset(val);
+			Agent->charset=Agent->Conf->local_charset;
+
+			break;
+			
 		default:
 			RETURN_STRING("<Udm_Set_Agent_Param: Unknown agent parameter>",1);
 			break;
