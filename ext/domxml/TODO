@@ -9,3 +9,11 @@
 	it ought to be.
 7) Fix the many, many memory leaks.
 8) Modify new_child to allow creation of attribute, cdata, dtd, etc nodes.
+9) implement schema support (libxml2 has it)
+10) implement scheme handlers (like in ext/xslt), should be possible with xmlRegisterInputCallbacks
+11) implement real sax support
+	- input (building of dom-tree with sax-events) is almost finished
+	- started with generating of sax-events from file/string (chregu)
+	- generating sax-events from dom-tree is a more tricky one (see mailinglist of libxml2)
+
+
