@@ -285,7 +285,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 	/* check that class_type is traversable at c-level or implements at least one of 'aggregate' and 'Iterator' */
 	int i;
 
-	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator) {
+	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
 	}	
 	for (i = 0; i < class_type->num_interfaces; i++) {
