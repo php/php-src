@@ -164,8 +164,8 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-/* this should be mutex'ed */
-volatile int inet_ntoa_lock = 0;
+/* inet_ntop should be used instead of inet_ntoa */
+int inet_ntoa_lock = 0;
 
 static void destroy_fd_sets(zend_rsrc_list_entry *rsrc)
 {
