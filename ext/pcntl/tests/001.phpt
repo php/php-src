@@ -15,7 +15,7 @@ function test_exit_waits(){
 		exit(-1);
 	} else {
 		$options=0;
-		pcntl_waitpid($pid, &$status, $options);
+		pcntl_waitpid($pid, $status, $options);
 		if ( pcntl_wifexited($status) ) print "\nExited With: ". pcntl_wexitstatus($status);
 	}
 }
@@ -31,7 +31,7 @@ function test_exit_signal(){
 	} else {
 		$options=0;
 		posix_kill($pid, SIGTERM);
-		pcntl_waitpid($pid, &$status, $options);
+		pcntl_waitpid($pid, $status, $options);
 		if ( pcntl_wifsignaled($status) ) {
 			$signal_print=pcntl_wtermsig($status);
 			if ($signal_print==SIGTERM) $signal_print="SIGTERM";
@@ -53,7 +53,7 @@ function test_stop_signal(){
 	} else {
 		$options=WUNTRACED;
 		posix_kill($pid, SIGSTOP);
-		pcntl_waitpid($pid, &$status, $options);
+		pcntl_waitpid($pid, $status, $options);
 		if ( pcntl_wifstopped($status) ) {
 			$signal_print=pcntl_wstopsig($status);
 			if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
