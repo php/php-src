@@ -87,7 +87,7 @@ class PEAR_Remote extends PEAR
                     return $this->raiseError("PEAR_Remote: authorization required, please log in first", 401);
                 }
             default:
-                return $this->raiseError("PEAR_Remote: unexpected HTTP response: $matches[1] $matches[2]", (int)$matches[1]);
+                return $this->raiseError("PEAR_Remote: unexpected HTTP response", (int)$matches[1], null, null, "$matches[1] $matches[2]");
         }
         while (trim(fgets($fp, 2048)) != ''); // skip rest of headers
         while ($chunk = fread($fp, 10240)) {

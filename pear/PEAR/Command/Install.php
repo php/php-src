@@ -66,6 +66,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
                                          $this->config->get('ext_dir'),
                                          $this->config->get('doc_dir'));
         $installer->debug = $this->config->get('verbose');
+
         $failmsg = '';
         $opts = array();
         switch ($command) {

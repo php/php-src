@@ -70,13 +70,14 @@ PEAR_FILES = \
 	PEAR.php \
 	PEAR/Autoloader.php \
 	PEAR/Command.php \
+	PEAR/Command/Auth.php \
 	PEAR/Command/Common.php \
 	PEAR/Command/Config.php \
 	PEAR/Command/Install.php \
-	PEAR/Command/Login.php \
 	PEAR/Command/Package.php \
+	PEAR/Command/Registry.php \
 	PEAR/CommandResponse.php \
-	PEAR/CommandUI/CLI.php \
+	PEAR/Frontend/CLI.php \
 	PEAR/Common.php \
 	PEAR/Config.php \
 	PEAR/Dependency.php \

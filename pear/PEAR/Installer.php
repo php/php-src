@@ -68,9 +68,7 @@ class PEAR_Installer extends PEAR_Common
 
     // {{{ constructor
 
-    function PEAR_Installer($phpdir = PEAR_INSTALL_DIR,
-                            $extdir = PEAR_EXTENSION_DIR,
-                            $docdir = null)
+    function PEAR_Installer(&$config)
     {
         $this->PEAR();
         $this->phpdir = $phpdir;

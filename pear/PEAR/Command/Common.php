@@ -45,8 +45,8 @@ class PEAR_Command_Common extends PEAR
     function PEAR_Command_Common(&$ui, &$config)
     {
         parent::PEAR();
-        $this->config =& $config;
-        $this->ui = $ui;
+        $this->config = &$config;
+        $this->ui = &$ui;
     }
 
     function getOptions()
