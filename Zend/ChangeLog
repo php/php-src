@@ -1,3 +1,12 @@
+2002-06-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_hash.h
+      zend.h: - This should improve performance on Windows
+
+    * zend_hash.h:
+    - Add a loop unrolled version of the hash function and a bit of an
+    - explanation about our hash function (Ralf S. Engelschall)
+
 2002-06-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * RFCs/004.txt: Add RFC on delegation.
