@@ -26,6 +26,14 @@ extern zend_class_entry *spl_ce_DirectoryIterator;
 
 PHP_MINIT_FUNCTION(spl_directory);
 
+typedef struct _spl_ce_dir_object {
+	zend_object       std;
+	php_stream        *dirp;
+	php_stream_dirent entry;
+	char              *path;
+	int               index;
+} spl_ce_dir_object;
+
 #endif /* SPL_DIRECTORY_H */
 
 /*
