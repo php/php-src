@@ -1032,7 +1032,7 @@ oci8_parse(oci8_connection *connection, char *query, int len, HashTable *list)
 		}
 	}
 
-#if 0 /* testing */
+#if 1 /* testing */
 	{ 
 		ub4   prefetch = 512*1024;
 
@@ -1041,7 +1041,7 @@ oci8_parse(oci8_connection *connection, char *query, int len, HashTable *list)
 					   "OCIAttrSet OCI_ATTR_PREFETCH_MEMORY",
 					   OCIAttrSet(statement->pStmt,
 								  OCI_HTYPE_STMT,
-								  512*1024, //&prefetch,
+								  &prefetch,
 								  0, 
 								  OCI_ATTR_PREFETCH_MEMORY,
 								  statement->pError));
@@ -3170,6 +3170,8 @@ PHP_FUNCTION(oci8_fetchinto)
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 #if PHP_API_VERSION >= 19990421
+			element->is_ref = 0;
+			element->refcount = 1;
 			_php3_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
 #else
 			_php3_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
