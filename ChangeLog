@@ -1,3 +1,30 @@
+2003-09-25  Georg Richter  <phpinfo@t-online.de>
+
+    * ZendEngine2/zend_alloc.c:
+      fixed compiler warning
+      removed dead code
+
+    * ZendEngine2/zend_hash.h:
+      changed ulong to long to avoid compiler warnings (comparison between signed
+      and unsigned)
+
+2003-09-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/session/mod_files.c:
+      This is only needed for Windows.
+
+2003-09-25  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/057.phpt:
+      mysqli_prepare_result -> mysqli_get_metadata
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      mysql_prepare_result -> mysqli_get_metadata
+      This function was renamed in libmysql (changeset 1.607 by monty)
+
 2003-09-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

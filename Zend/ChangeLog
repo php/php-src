@@ -1,3 +1,13 @@
+2003-09-25  Georg Richter  <phpinfo@t-online.de>
+
+    * zend_alloc.c:
+      fixed compiler warning
+      removed dead code
+
+    * zend_hash.h:
+      changed ulong to long to avoid compiler warnings (comparison between signed
+      and unsigned)
+
 2003-09-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend.c
