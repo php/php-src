@@ -203,9 +203,9 @@ static unsigned char third_args_force_ref[]  = { 3, BYREF_NONE, BYREF_NONE, BYRE
 static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_version,												NULL)
 	PHP_FE(xmldoc,														third_args_force_ref)
-	PHP_FALIAS(domxml_open_mem,				xmldoc,	NULL)
+	PHP_FALIAS(domxml_open_mem,				xmldoc,	third_args_force_ref)
 	PHP_FE(xmldocfile,														third_args_force_ref)
-	PHP_FALIAS(domxml_open_file,				xmldocfile,	NULL)
+	PHP_FALIAS(domxml_open_file,				xmldocfile,	third_args_force_ref)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FE(html_doc,													NULL)
 	PHP_FE(html_doc_file,												NULL)
@@ -1418,7 +1418,9 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 			// do error handling here
 		} 
 		if (ctxt->parser != NULL) {
-			add_assoc_string(errormessages,"nodename",ctxt->parser->name,1); 
+			if (ctxt->parser->name) {
+				add_assoc_string(errormessages,"nodename",ctxt->parser->name,1); 
+			}
 
 			if (ctxt->parser->input != NULL) {
 			add_assoc_long(errormessages,"line",ctxt->parser->input->line);
