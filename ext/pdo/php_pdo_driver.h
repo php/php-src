@@ -101,7 +101,7 @@ typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_le
 typedef int (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql TSRMLS_DC);
 
 /* quote a string */
-typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, char **quoted, int *quotedlen TSRMLS_DC);
+typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC);
 
 /* transaction related */
 typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
