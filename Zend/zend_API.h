@@ -243,9 +243,12 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
-if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s)",(z)->value.str.val);
+	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val);
+#define CHECK_ZVAL_STRING_REL(z) \
+	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC);
 #else
 #define CHECK_ZVAL_STRING(z)
+#define CHECK_ZVAL_STRING_REL(z)
 #endif
 
 #define ZVAL_RESOURCE(z,l) {			\
@@ -284,7 +287,6 @@ if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "Str
 		(z)->value.str.len = __l;	    \
 		(z)->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
 		(z)->type = IS_STRING;		    \
-		CHECK_ZVAL_STRING(z); 			\
 	}
 
 #define ZVAL_EMPTY_STRING(z) {	        \

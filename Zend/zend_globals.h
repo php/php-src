@@ -78,6 +78,7 @@ struct _zend_compiler_globals {
 	/* variables for list() compilation */
 	zend_llist list_llist;
 	zend_llist dimension_llist;
+	zend_stack list_stack;
 
 	zend_stack function_call_stack;
 

@@ -40,7 +40,7 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 	switch(zvalue->type) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			CHECK_ZVAL_STRING(zvalue);
+			CHECK_ZVAL_STRING_REL(zvalue);
 			STR_FREE_REL(zvalue->value.str.val);
 			break;
 		case IS_ARRAY:
@@ -96,7 +96,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 					return SUCCESS;
 				}
 			}
-			CHECK_ZVAL_STRING(zvalue);
+			CHECK_ZVAL_STRING_REL(zvalue);
 			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
 			break;
 		case IS_ARRAY:
