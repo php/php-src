@@ -164,7 +164,7 @@ change_node_zval(xmlNodePtr node, zval *value)
 		case IS_NULL:
 			convert_to_string(value);
 		case IS_STRING:
-			node->xmlChildrenNode->content = xmlStrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
+			xmlNodeSetContentLen(node->xmlChildrenNode, Z_STRVAL_P(value), Z_STRLEN_P(value));
 			break;
 		default:
 			php_error(E_WARNING, "It is not yet possible to assign complex types to attributes");
