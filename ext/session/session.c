@@ -1374,13 +1374,15 @@ PHP_FUNCTION(session_unset)
 	
 	if (PS(session_status) == php_session_none)
 		RETURN_FALSE;
-	
-	for (zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &variable, &num_key, 0) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&PS(vars))) {
-		if (zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
-				== SUCCESS)
-			zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
+
+	if (PG(register_globals)) {
+		for (zend_hash_internal_pointer_reset(&PS(vars));
+				zend_hash_get_current_key(&PS(vars), &variable, &num_key, 0) == HASH_KEY_IS_STRING;
+				zend_hash_move_forward(&PS(vars))) {
+			if (zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
+					== SUCCESS)
+				zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
+		}
 	}
 
 	/* Clean $HTTP_SESSION_VARS. */
