@@ -1,3 +1,42 @@
+2005-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Added notes about ignore_user_abort to php.ini*
+
+2005-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Add support for methods dynamically added through object handlers
+
+2005-02-28  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      reorder
+
+    * (PHP_5_0)
+      NEWS:
+      typo
+
+2005-02-28  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/var_unserializer.re:
+      This way around for correct error messages
+
+    * ext/standard/var_unserializer.re:
+      Drop invalid arrays
+
+2005-02-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * scripts/Makefile.frag:
+      Let's install the mbstring headers.
+      Fixes PECL #3516
+
+2005-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * acinclude.m4:
+      - Fix typo
+
 2005-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/simplexml/tests/016a.phpt

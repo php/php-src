@@ -1,3 +1,8 @@
+2005-02-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Add support for methods dynamically added through object handlers
+
 2005-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_object_handlers.c:
