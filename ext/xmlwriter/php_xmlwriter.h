@@ -81,6 +81,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_element);
 PHP_FUNCTION(xmlwriter_open_uri);
 PHP_FUNCTION(xmlwriter_open_memory);
 PHP_FUNCTION(xmlwriter_output_memory);
+PHP_FUNCTION(xmlwriter_flush);
 
 #ifdef ZTS
 #define XMLWRITER_G(v) TSRMG(xmlwriter_globals_id, zend_xmlwriter_globals *, v)
