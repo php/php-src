@@ -45,7 +45,7 @@ typedef struct _zend_constant {
 #define REGISTER_MAIN_STRINGL_CONSTANT(name,str,len,flags)  zend_register_stringl_constant((name),sizeof(name),(str),(len),(flags),0 ELS_CC)
 
 void clean_module_constants(int module_number);
-int free_zend_constant(zend_constant *c);
+void free_zend_constant(zend_constant *c);
 int zend_startup_constants(ELS_D);
 int zend_shutdown_constants(ELS_D);
 void zend_register_standard_constants(ELS_D);
@@ -59,6 +59,6 @@ ZEND_API void zend_register_constant(zend_constant *c ELS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
 
-#define ZEND_CONSTANT_DTOR (int (*)(void *)) free_zend_constant
+#define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant
 
 #endif

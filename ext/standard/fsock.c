@@ -752,17 +752,16 @@ size_t php_sock_fread(char *ptr, size_t size, int socket)
 /* {{{ module start/shutdown functions */
 
 	/* {{{ php_msock_destroy */
-int php_msock_destroy(int *data)
+void php_msock_destroy(int *data)
 {
 	close(*data);
-	return 1;
 }
 /* }}} */
 
 static void fsock_globals_ctor(FLS_D)
 {
 	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
-	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (int (*)(void *))php_msock_destroy, 1);
+	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (void (*)(void *))php_msock_destroy, 1);
 	FG(def_chunk_size) = CHUNK_SIZE;
 	FG(phpsockbuf) = NULL;
 }

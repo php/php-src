@@ -52,10 +52,10 @@ ZEND_API inline void var_uninit(zval *var)
 }
 		
 
-ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type==IS_LONG) {
-		return 1;
+		return;
 	}
 	switch(zvalue->type) {
 		case IS_STRING:
@@ -84,10 +84,9 @@ ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_BOOL:
 		case IS_NULL:
 		default:
-			return 1;
+			return;
 			break;
 	}
-	return 1;
 }
 
 
@@ -169,14 +168,14 @@ ZEND_API int _zval_copy_ctor_wrapper(zval *zvalue)
 }
 
 
-ZEND_API int _zval_dtor_wrapper(zval *zvalue)
+ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 {
-	return zval_dtor(zvalue);
+	zval_dtor(zvalue);
 }
 
 
 
-ZEND_API int _zval_ptr_dtor_wrapper(zval **zval_ptr)
+ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr)
 {
 	return zval_ptr_dtor(zval_ptr);
 }
