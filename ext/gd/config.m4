@@ -21,7 +21,7 @@ AC_DEFUN(PHP_GD_JPEG,[
       -L$PHP_JPEG_DIR/lib
     ])
   else 
-    AC_MSG_RESULT(not set. If configure fails try --with-jpeg-dir=<DIR>)
+    AC_MSG_RESULT(If configure fails try --with-jpeg-dir=<DIR>)
   fi
 ])
 
