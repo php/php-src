@@ -34,7 +34,7 @@
 #include <stdarg.h>
 #include "mcal.h"
 #include "php_mcal.h"
-#include "modules.h"
+#include "zend_modules.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #ifdef PHP_WIN32

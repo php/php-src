@@ -22,7 +22,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
-#include "modules.h"
+#include "zend_modules.h"
 
 #include "SAPI.h"
 

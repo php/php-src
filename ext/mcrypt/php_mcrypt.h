@@ -9,7 +9,7 @@
 
 #if PHP_API_VERSION < 19990421
 #define  zend_module_entry zend_module_entry
-#include "modules.h"
+#include "zend_modules.h"
 #include "internal_functions.h"
 #endif
 

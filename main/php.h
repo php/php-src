@@ -55,11 +55,6 @@
 #define PHP_DIR_SEPARATOR '/'
 #endif
 
-PHPAPI extern unsigned char first_arg_force_ref[];
-PHPAPI extern unsigned char first_arg_allow_ref[];
-PHPAPI extern unsigned char second_arg_force_ref[];
-PHPAPI extern unsigned char second_arg_allow_ref[];
-
 #include "php_regex.h"
 
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */

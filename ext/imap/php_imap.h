@@ -15,7 +15,7 @@
  #include "rfc822.h" 
 #endif
 
-#include "modules.h"
+#include "zend_modules.h"
 
 extern zend_module_entry imap_module_entry;
 #define imap_module_ptr &imap_module_entry

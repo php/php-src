@@ -699,7 +699,7 @@ else
   PART2=non-zts
 fi
 
-ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
 
 EXTENSION_DIR="$prefix/lib/php/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
 

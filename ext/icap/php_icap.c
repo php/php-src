@@ -45,7 +45,7 @@
 #include <stdarg.h>
 #include "cal.h"
 #include "php_icap.h"
-#include "modules.h"
+#include "zend_modules.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #ifdef PHP_WIN32
