@@ -899,6 +899,10 @@ PHP_FUNCTION(implode)
 	}
 
 	php_implode(delim, arr, return_value);
+	zval_ptr_dtor(arg1);
+	if (arg2) {
+		zval_ptr_dtor(arg2);
+	}
 }
 /* }}} */
 
