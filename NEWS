@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Removed Windows FAR* in php_odbc.c (lurcher)
 - Fix bug in number_format (Jon Forsberg)
 - Make error_prepend_string and error_append_string work
 - array_walk() now automatically resets the array. (Andrei)

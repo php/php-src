@@ -847,10 +847,10 @@ PHP_FUNCTION(odbc_execute)
 		char buf[4096];
 		int fp, nbytes;
 		while(rc == SQL_NEED_DATA) {
-			rc = SQLParamData(result->stmt, (PTR FAR *)&fp);
+			rc = SQLParamData(result->stmt, (void*)&fp);
 			if (rc == SQL_NEED_DATA) {
 				while((nbytes = read(fp, &buf, 4096)) > 0)
-					SQLPutData(result->stmt,(UCHAR FAR*) &buf, nbytes);
+					SQLPutData(result->stmt, (void*)&buf, nbytes);
 			}
 		}
 	} else {
