@@ -59,6 +59,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_SCROLL,		/* ask for a scrollable cursor (when you prepare()) */
 	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
 	PDO_ATTR_TIMEOUT,		/* connection timeout in seconds */
+	PDO_ATTR_ERRMODE,		/* control how errors are handled */
 	PDO_ATTR_SERVER_VERSION,	/* database server version */
 	PDO_ATTR_CLIENT_VERSION,	/* client library version */
 	PDO_ATTR_SERVER_INFO,		/* server information */
@@ -79,6 +80,12 @@ enum pdo_error_type {
 	PDO_ERR_MISMATCH,
 	PDO_ERR_TRUNCATED,
 	PDO_ERR_DISCONNECTED,
+};
+
+enum pdo_error_mode {
+	PDO_ERRMODE_SILENT,		/* just set error codes */
+	PDO_ERRMODE_WARNING,	/* raise E_WARNING */
+	PDO_ERRMODE_EXCEPTION,	/* throw exceptions */
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -257,6 +264,8 @@ struct _pdo_dbh_t {
 
 	/* the global error code. */
 	enum pdo_error_type error_code;
+
+	enum pdo_error_mode error_mode;
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;

@@ -40,8 +40,12 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	const char *msg = "<<Unknown>>";
 	char *supp = NULL;
 	long native_code = 0;
+	char *message = NULL;
+	zval *info = NULL;
 
-	/* TODO: if the dbh->error_mode is set to "silent" mode, just return */
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+		return;
+	}
 	
 	if (stmt) {
 		pdo_err = &stmt->error_code;
@@ -62,35 +66,58 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (dbh->methods->fetch_err) {
-		zval *info;
 		
 		MAKE_STD_ZVAL(info);
 		array_init(info);
 
+		add_next_index_long(info, *pdo_err);
+		
 		if (dbh->methods->fetch_err(dbh, stmt, info TSRMLS_CC)) {
 			zval **item;
 
-			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 0, (void**)&item)) {
+			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 1, (void**)&item)) {
 				native_code = Z_LVAL_PP(item);
 			}
 			
-			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 1, (void**)&item)) {
+			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 2, (void**)&item)) {
 				supp = estrndup(Z_STRVAL_PP(item), Z_STRLEN_PP(item));
 			}
-
 		}
-		FREE_ZVAL(info);
 	}
 
-	/* TODO: if the dbh->error_mode is set to exception mode, set up an
-	 * exception instead */
-	
 	if (supp && *pdo_err == PDO_ERR_CANT_MAP) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld %s", native_code, supp);
+		spprintf(&message, 0, "%ld %s", native_code, supp);
 	} else if (supp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %ld %s", msg, native_code, supp);
+		spprintf(&message, 0, "%s: %ld %s", msg, native_code, supp);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
+		spprintf(&message, 0, "%s", msg);
+	}
+
+	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, message);
+
+		if (info) {
+			FREE_ZVAL(info);
+		}
+	} else {
+		zval *ex;
+		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+
+		MAKE_STD_ZVAL(ex);
+		object_init_ex(ex, pdo_ex);
+
+		zend_update_property_string(def_ex, ex, "message", sizeof("message")-1, message TSRMLS_CC);
+		zend_update_property_long(def_ex, ex, "code", sizeof("code")-1, *pdo_err TSRMLS_CC);
+		
+		if (info) {
+			zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
+		}
+
+		zend_throw_exception_object(ex TSRMLS_CC);
+	}
+	
+	if (message) {
+		efree(message);
 	}
 
 	if (supp) {
@@ -302,6 +329,24 @@ static PHP_METHOD(PDO, setAttribute)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
 		RETURN_FALSE;
+	}
+
+	switch (attr) {
+		case PDO_ATTR_ERRMODE:
+			convert_to_long(value);
+			switch (Z_LVAL_P(value)) {
+				case PDO_ERRMODE_SILENT:
+				case PDO_ERRMODE_WARNING:
+				case PDO_ERRMODE_EXCEPTION:
+					dbh->error_mode = Z_LVAL_P(value);
+					RETURN_TRUE;
+				default:
+					zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "Error mode %d is invalid", Z_LVAL_P(value));
+			}
+			RETURN_FALSE;
+			
+		default:
+			;
 	}
 
 	if (!dbh->methods->set_attribute) {
