@@ -3,7 +3,7 @@ dnl config.m4 for extension dbplus
 
 
 PHP_ARG_WITH(dbplus, for dbplus support,
-[  --with-dbplus             Include dbplus support])
+[  --with-dbplus           Include dbplus support])
 
 if test "$PHP_DBPLUS" != "no"; then
   # --with-dbplus -> check with-path
