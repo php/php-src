@@ -687,7 +687,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 {
-	int ret;
+	int ret = 0;
 	
 	if (stream->filterhead)
 		stream->filterhead->fops->flush(stream, stream->filterhead, closing TSRMLS_CC);
