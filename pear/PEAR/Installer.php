@@ -192,6 +192,9 @@ class PEAR_Installer extends PEAR_Common
                     $pkgfile = "http://" . $config->get('master_server') .
                          "/get/$pkgfile";
                 }
+                if (!extension_loaded("zlib")) {
+                    $pkgfile .= '?uncompress=yes';
+                }
                 $need_download = true;
             } else {
                 return $this->raiseError("could not open the package file: $pkgfile");
