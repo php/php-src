@@ -596,6 +596,8 @@ PHP_FUNCTION(dio_tcsetattr)
 			RETURN_FALSE;
 	}   
 
+	memset(&newtio, 0, sizeof(newtio));
+	tcgetattr(f->fd, &newtio);
 	newtio.c_cflag = BAUD | CRTSCTS | DATABITS | STOPBITS | PARITYON | PARITY | CLOCAL | CREAD;
 	newtio.c_iflag = IGNPAR;
 	newtio.c_oflag = 0;
