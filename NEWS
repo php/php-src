@@ -1,4 +1,4 @@
-PHP 4                                                                      NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
 - Fixed bug #22386 (Using browscap causes segfault). This fix
