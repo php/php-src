@@ -1,3 +1,9 @@
+2002-05-30  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * zend.h
+      zend_config.nw.h
+      acconfig.h: NetWare changes
+
 2002-05-26  Andi Gutmans  <andi@zend.com>
 
     * zend_multibyte.c:
