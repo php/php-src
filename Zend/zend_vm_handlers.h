@@ -1217,6 +1217,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, int type)
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_GLOBAL:
 			case ZEND_FETCH_LOCAL:
 				FREE_OP1();
 				break;
@@ -2614,8 +2615,14 @@ ZEND_VM_HANDLER(ZEND_RECV)
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		char *space;
 		char *class_name = get_active_class_name(&space TSRMLS_CC);
+		zend_execute_data *ptr = EX(prev_execute_data);
+
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
-		zend_error(E_WARNING, "Missing argument %ld for %s%s%s()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
+		if(ptr && ptr->op_array) {
+			zend_error(E_WARNING, "Missing argument %ld for %s%s%s(), called in %s on line %d and defined", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
+		} else {
+			zend_error(E_WARNING, "Missing argument %ld for %s%s%s()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
+		}
 		if (opline->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK_FREE(*EX_T(opline->result.u.var).var.ptr_ptr);
 		}
@@ -3287,7 +3294,7 @@ ZEND_VM_HANDLER(ZEND_FE_RESET)
 	if (opline->extended_value) {
 		array_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
 		if (array_ptr_ptr == NULL) {
-			MAKE_STD_ZVAL(array_ptr);
+			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
