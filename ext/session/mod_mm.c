@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP version 4.0                                                      |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2001 The PHP Group                                |
+   | Copyright (c) 1997-2002 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 
 #ifdef HAVE_LIBMM
 
+#include <unistd.h>
 #include <mm.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -30,12 +31,13 @@
 
 #include "php_session.h"
 #include "mod_mm.h"
+#include "SAPI.h"
 
 #ifdef ZTS
 # error mm is not thread-safe
 #endif
 
-#define PS_MM_PATH "/tmp/session_mm"
+#define PS_MM_FILE "session_mm_"
 
 /* For php_uint32 */
 #include "ext/standard/basic_functions.h"
@@ -247,8 +249,36 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
+	int save_path_len = strlen(PS(save_path));
+	int mod_name_len = strlen(sapi_module.name);
+	char *ps_mm_path, euid[30];
+	int ret;
+
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-	if (ps_mm_initialize(ps_mm_instance, PS_MM_PATH) != SUCCESS) {
+   	if (!ps_mm_instance)
+		return FAILURE;
+
+	if (!sprintf(euid,"%d", geteuid())) 
+		return FAILURE;
+		
+    /* Directory + '/' + File + Module Name + Effective UID + \0 */	
+	ps_mm_path = do_alloca(save_path_len+1+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
+	
+	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
+	if (save_path_len > 0 && ps_mm_path[save_path_len - 1] != DEFAULT_SLASH) {
+		ps_mm_path[save_path_len] = DEFAULT_SLASH;
+		ps_mm_path[save_path_len+1] = '\0';
+	}
+	strcat(ps_mm_path, PS_MM_FILE);
+	strcat(ps_mm_path, sapi_module.name);
+	strcat(ps_mm_path, euid);
+	
+	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
+		
+	free_alloca(ps_mm_path);
+   
+	if (ret != SUCCESS) {
+		free(ps_mm_instance);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
@@ -289,7 +319,6 @@ PS_READ_FUNC(mm)
 {
 	PS_MM_DATA;
 	ps_sd *sd;
-	int ret = FAILURE;
 
 	mm_lock(data->mm, MM_LOCK_RD);
 	
@@ -299,12 +328,13 @@ PS_READ_FUNC(mm)
 		*val = emalloc(sd->datalen + 1);
 		memcpy(*val, sd->data, sd->datalen);
 		(*val)[sd->datalen] = '\0';
-		ret = SUCCESS;
 	}
-
+	else {
+		*val = estrdup("");
+	}
 	mm_unlock(data->mm);
 	
-	return ret;
+ 	return SUCCESS;
 }
 
 PS_WRITE_FUNC(mm)
@@ -411,6 +441,6 @@ zend_module_entry php_session_mm_module = {
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */
