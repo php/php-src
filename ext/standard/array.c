@@ -891,7 +891,7 @@ static int _valid_var_name(char *varname)
 PHP_FUNCTION(extract)
 {
 	zval **var_array, **etype, **prefix;
-	zval **entry, *exist, *data;
+	zval **entry, *data;
 	char *varname, *finalname;
 	ulong lkey;
 	int res, extype;
@@ -947,15 +947,14 @@ PHP_FUNCTION(extract)
 			if (_valid_var_name(varname)) {
 				finalname = NULL;
 
-				res = zend_hash_find(EG(active_symbol_table),
-									 varname, strlen(varname)+1, (void**)&exist);
+				res = zend_hash_exists(EG(active_symbol_table), varname, strlen(varname)+1);
 				switch (extype) {
 					case EXTR_OVERWRITE:
 						finalname = estrdup(varname);
 						break;
 
 					case EXTR_PREFIX_SAME:
-						if (res != SUCCESS)
+						if (!res)
 							finalname = estrdup(varname);
 						/* break omitted intentionally */
 
@@ -969,7 +968,7 @@ PHP_FUNCTION(extract)
 						break;
 
 					default:
-						if (res != SUCCESS)
+						if (!res)
 							finalname = estrdup(varname);
 						break;
 				}
