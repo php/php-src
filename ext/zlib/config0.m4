@@ -9,7 +9,7 @@ PHP_ARG_WITH(zlib,for ZLIB support,
 [  --with-zlib[=DIR]       Include ZLIB support (requires zlib >= 1.0.9).])
 
 if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
-  PHP_NEW_EXTENSION(zlib, zlib_fopen_wrapper.c, $ext_shared)
+  PHP_NEW_EXTENSION(zlib, zlib.c zlib_fopen_wrapper.c, $ext_shared)
   PHP_SUBST(ZLIB_SHARED_LIBADD)
   
   if test "$PHP_ZLIB" != "yes" -a "$PHP_ZLIB" != "no"; then 
