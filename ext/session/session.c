@@ -929,8 +929,10 @@ static void php_session_start(PSLS_D)
 		nrand = (int) (100.0*rand()/RAND_MAX);
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+#if 0
 			if (nrdels != -1)
 				php_error(E_NOTICE, "purged %d expired session objects\n", nrdels);
+#endif
 		}
 	}
 }
