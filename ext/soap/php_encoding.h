@@ -107,6 +107,8 @@
 #define XSD_ANYTYPE_STRING "anyType"
 #define XSD_UR_TYPE 144
 #define XSD_UR_TYPE_STRING "ur-type"
+#define XSD_NMTOKENS 145
+#define XSD_NMTOKENS_STRING "NMTOKENS"
 
 #define APACHE_NAMESPACE "http://xml.apache.org/xml-soap"
 #define APACHE_NS_PREFIX "apache"
