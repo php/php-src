@@ -36,8 +36,12 @@
 #define HAVE_ASCTIME 1
 #define HAVE_CTIME 1
 
+#if defined(PHP_IRIX_TIME_R)
+#undef HAVE_ASCTIME_R
+#undef HAVE_CTIME_R
+#endif
 
-#ifdef PHP_HPUX_TIME_R
+#if defined(PHP_HPUX_TIME_R)
 #undef HAVE_LOCALTIME_R
 #undef HAVE_ASCTIME_R
 #undef HAVE_CTIME_R
