@@ -81,6 +81,15 @@ class OS_Guess
 
     function OS_Guess($uname = null)
     {
+        list($this->sysname,
+             $this->release,
+             $this->cpu,
+             $this->extra,
+             $this->nodename) = $this->parseSignature($uname);
+    }
+
+    function parseSignature($uname = null)
+    {
         static $sysmap = array(
             'HP-UX' => 'hpux',
             'IRIX64' => 'irix',
@@ -96,36 +105,37 @@ class OS_Guess
         $parts = preg_split('/\s+/', trim($uname));
         $n = count($parts);
 
-        $this->release = $this->machine = $this->cpu = '';
-
-        $this->sysname = $parts[0];
+        $release = $machine = $cpu = '';
+        $sysname = $parts[0];
         $nodename = $parts[1];
-        $this->cpu = $parts[$n-1];
-        if ($this->cpu == 'unknown') {
-            $this->cpu = $parts[$n-2];
+        $cpu = $parts[$n-1];
+        if ($cpu == 'unknown') {
+            $cpu = $parts[$n-2];
         }
 
-        switch ($this->sysname) {
+        switch ($sysname) {
             case 'AIX':
-                $this->release = "$parts[3].$parts[2]";
+                $release = "$parts[3].$parts[2]";
                 break;
             case 'Windows':
-                $this->release = $parts[3];
+                $release = $parts[3];
                 break;
             default:
-                $this->release = preg_replace('/-.*/', '', $parts[2]);
+                $release = preg_replace('/-.*/', '', $parts[2]);
                 break;
         }
 
 
-        if (isset($sysmap[$this->sysname])) {
-            $this->sysname = $sysmap[$this->sysname];
+        if (isset($sysmap[$sysname])) {
+            $sysname = $sysmap[$sysname];
         } else {
-            $this->sysname = strtolower($this->sysname);
+            $sysname = strtolower($sysname);
         }
-        if (isset($cpumap[$this->cpu])) {
-            $this->cpu = $cpumap[$this->cpu];
+        if (isset($cpumap[$cpu])) {
+            $cpu = $cpumap[$cpu];
         }
+        $extra = '';
+        return array($sysname, $release, $cpu, $extra, $nodename);
     }
 
     function getSignature()
@@ -160,7 +170,11 @@ class OS_Guess
 
     function matchSignature($match)
     {
-        $fragments = explode('-', $match);
+        if (is_array($match)) {
+            $fragments = $match;
+        } else {
+            $fragments = explode('-', $match);
+        }
         $n = count($fragments);
         $matches = 0;
         if ($n > 0) {
