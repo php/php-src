@@ -18,10 +18,6 @@
 
 /* $Id$ */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "php.h"
 
 #if HAVE_YAZ
@@ -78,14 +74,16 @@ struct Yaz_AssociationInfo {
 	char **databaseNames;
 	char *local_databases;
 	COMSTACK cs;
-	char *cookie;
-	char *auth_open;
+	char *cookie_in;
+	char *cookie_out;
 	char *user;
 	char *group;
 	char *pass;
+	char *proxy;
 	int error;
 	char *addinfo;
 	Yaz_ResultSet resultSets;
+	int persistent;
 	int order;
 	int state;
 	int mask_select;
@@ -117,11 +115,12 @@ static Yaz_Association yaz_association_mk ()
 	p->databaseNames = 0;
 	p->local_databases = 0;
 	p->cs = 0;
-	p->cookie = 0;
-	p->auth_open = 0;
+	p->cookie_in = 0;
+	p->cookie_out = 0;
 	p->user = 0;
 	p->group = 0;
 	p->pass = 0;
+	p->proxy = 0;
 	p->error = 0;
 	p->addinfo = 0;
 	p->resultSets = 0;
@@ -161,11 +160,12 @@ static void yaz_association_destroy (Yaz_Association p)
 	xfree (p->databaseNames);
 	if (p->cs)
 		cs_close (p->cs);
-	xfree (p->cookie);
-	xfree (p->auth_open);
+	xfree (p->cookie_in);
+	xfree (p->cookie_out);
 	xfree (p->user);
 	xfree (p->group);
 	xfree (p->pass);
+	xfree (p->proxy);
 	xfree (p->addinfo);
 	odr_destroy (p->odr_in);
 	odr_destroy (p->odr_out);
@@ -286,13 +286,10 @@ static void do_connect (Yaz_Association p)
 	p->reconnect_flag = 0;
 	p->cs = cs_create (tcpip_type, 0, PROTO_Z3950);
 
-	/* see if the host_port is prefixed by proxy. */
-	cp = strchr (p->host_port, ',');
-	if (cp)
-		*cp = '\0';	
-	addr = tcpip_strtoaddr (p->host_port);
-	if (cp)
-		*cp = ',';
+	if (p->proxy)
+		addr = tcpip_strtoaddr (p->proxy);
+	else
+		addr = tcpip_strtoaddr (p->host_port);
 	if (!addr)
 	{
 		do_close(p);
@@ -363,6 +360,19 @@ static long *array_lookup_long(HashTable *ht, const char *idx)
 	return 0;
 }
 
+static long *array_lookup_bool(HashTable *ht, const char *idx)
+{
+	pval **pvalue;
+
+	if (ht && zend_hash_find(ht, (char*) idx, strlen(idx)+1,
+							 (void**) &pvalue) == SUCCESS)
+	{
+		SEPARATE_ZVAL(pvalue);
+		convert_to_boolean(*pvalue);
+		return &(*pvalue)->value.lval;
+	}
+	return 0;
+}
 
 static int send_present (Yaz_Association t);
 
@@ -527,8 +537,8 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 										  VAL_COOKIE, 1, 0);
 			if (cookie)
 			{
-				xfree(t->cookie);
-				t->cookie = xstrdup(cookie);
+				xfree(t->cookie_in);
+				t->cookie_in = xstrdup(cookie);
 			}
 			if (t->action)
 				(*t->action) (t);
@@ -656,11 +666,11 @@ static int encode_APDU(Yaz_Association t, Z_APDU *a, ODR out)
 #if 0
 	php_error (E_WARNING, str);
 #endif
-	if (t->cookie)
+	if (t->cookie_out)
 	{
 		Z_OtherInformation **oi;
 		yaz_oi_APDU(a, &oi);
-		yaz_oi_set_string_oidval(oi, out, VAL_COOKIE, 1, t->cookie);
+		yaz_oi_set_string_oidval(oi, out, VAL_COOKIE, 1, t->cookie_out);
 	}
 /* from ZAP */
 #if 0
@@ -865,12 +875,9 @@ static int send_present (Yaz_Association t)
 static void send_init(Yaz_Association t)
 {
 	char *cp;
-	int i = 0;
 	Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_initRequest);
 	Z_InitRequest *ireq = apdu->u.initRequest;
-	Z_IdPass *pass = odr_malloc(t->odr_out, sizeof(*pass));
 	Z_IdAuthentication *auth = odr_malloc(t->odr_out, sizeof(*auth));
-	const char *auth_open = t->auth_open;
 	const char *auth_groupId = t->group;
 	const char *auth_userId = t->user;
 	const char *auth_password = t->pass;
@@ -889,47 +896,49 @@ static void send_init(Yaz_Association t)
 	
 	*ireq->maximumRecordSize = 1024*1024;
 	*ireq->preferredMessageSize = 1024*1024;
-	
-	if (auth_open && *auth_open)
+
+	if (auth_groupId || auth_password)
+	{
+
+		Z_IdPass *pass = odr_malloc(t->odr_out, sizeof(*pass));
+		int i = 0;
+		pass->groupId = 0;
+		if (auth_groupId && *auth_groupId)
+		{
+			pass->groupId = odr_malloc(t->odr_out, strlen(auth_groupId)+1);
+			strcpy(pass->groupId, auth_groupId);
+			i++;
+		}
+		pass->userId = 0;
+		if (auth_userId && *auth_userId)
+		{
+			pass->userId = odr_malloc(t->odr_out, strlen(auth_userId)+1);
+			strcpy(pass->userId, auth_userId);
+			i++;
+		}
+		pass->password = 0;
+		if (auth_password && *auth_password)
+		{
+			pass->password = odr_malloc(t->odr_out, strlen(auth_password)+1);
+			strcpy(pass->password, auth_password);
+			i++;
+		}
+		if (i)
+		{
+			auth->which = Z_IdAuthentication_idPass;
+			auth->u.idPass = pass;
+			ireq->idAuthentication = auth;
+		}
+	}
+	else if (auth_userId)
 	{
 		auth->which = Z_IdAuthentication_open;
-		auth->u.open = odr_malloc(t->odr_out, strlen(auth_open)+1);
-		strcpy(auth->u.open, auth_open);
+		auth->u.open = odr_malloc(t->odr_out, strlen(auth_userId)+1);
+		strcpy(auth->u.open, auth_userId);
 		ireq->idAuthentication = auth;
 	}
-	pass->groupId = 0;
-	if (auth_groupId && *auth_groupId)
-	{
-		pass->groupId = odr_malloc(t->odr_out, strlen(auth_groupId)+1);
-		strcpy(pass->groupId, auth_groupId);
-		i++;
-	}
-	pass->userId = 0;
-	if (auth_userId && *auth_userId)
-	{
-		pass->userId = odr_malloc(t->odr_out, strlen(auth_userId)+1);
-		strcpy(pass->userId, auth_userId);
-		i++;
-	}
-	pass->password = 0;
-	if (auth_password && *auth_password)
-	{
-		pass->password = odr_malloc(t->odr_out, strlen(auth_password)+1);
-		strcpy(pass->password, auth_password);
-		i++;
-	}
-	if(i)
-	{
-		auth->which = Z_IdAuthentication_idPass;
-		auth->u.idPass = pass;
-		ireq->idAuthentication = auth;
-	}
-
-	/* see if proxy has been specified ... */
-	cp = strchr (t->host_port, ',');
-	if (cp && cp[1])
-		yaz_oi_set_string_oidval(&ireq->otherInfo, t->odr_out,
-					 VAL_PROXY, 1, cp+1);
+	yaz_oi_set_string_oidval(&ireq->otherInfo, t->odr_out,
+							 VAL_PROXY, 1, t->host_port);
 	send_APDU (t, apdu);
 }
 
@@ -1025,13 +1034,25 @@ static int do_event (int *id, int timeout)
 	return no;
 }
 
-/* {{{ proto int yaz_connect(string zurl [, string user [, string group, string pass]])
+static int strcmp_null(const char *s1, const char *s2)
+{
+	if (s1 == 0 && s2 == 0)
+		return 0;
+	if (s1 == 0 || s2 == 0)
+		return -1;
+	return strcmp(s1, s2);
+}
+
+/* {{{ proto int yaz_connect(string zurl [ array options])
    Create target with given zurl. Returns positive id if successful. */
 PHP_FUNCTION(yaz_connect)
 {
 	int i;
 	char *cp;
-	char *zurl_str, *user_str = 0, *group_str = 0, *pass_str = 0;
+	char *zurl_str;
+	const char *user_str = 0, *group_str = 0, *pass_str = 0;
+	const char *cookie_str = 0, *proxy_str = 0;
+	int persistent = 1;
 	pval **zurl, **user = 0, **group = 0, **pass = 0;
 	if (ZEND_NUM_ARGS() == 1)
 	{
@@ -1042,19 +1063,25 @@ PHP_FUNCTION(yaz_connect)
 	{
 		if (zend_get_parameters_ex (2, &zurl, &user) == FAILURE)
 			WRONG_PARAM_COUNT;
-		convert_to_string_ex (user);
-		user_str = (*user)->value.str.val;
-	}
-	else if (ZEND_NUM_ARGS() == 4)
-	{
-		if (zend_get_parameters_ex (4, &zurl, &user, &group, &pass) == FAILURE)
-			WRONG_PARAM_COUNT;
-		convert_to_string_ex (user);
-		user_str = (*user)->value.str.val;
-		convert_to_string_ex (group);
-		group_str = (*group)->value.str.val;
-		convert_to_string_ex (pass);
-		pass_str = (*pass)->value.str.val;
+
+		if (Z_TYPE_PP(user) == IS_ARRAY)
+		{
+			long *persistent_val;
+			HashTable *ht = Z_ARRVAL_PP(user);
+			user_str = array_lookup_string(ht, "user");
+			group_str = array_lookup_string(ht, "group");
+			pass_str = array_lookup_string(ht, "password");
+			cookie_str = array_lookup_string(ht, "cookie");
+			proxy_str = array_lookup_string(ht, "proxy");
+			persistent_val = array_lookup_bool(ht, "persistent");
+			if (persistent_val)
+				persistent = *persistent_val;
+		}
+		else
+		{
+			convert_to_string_ex (user);
+			user_str = (*user)->value.str.val;
+		}
 	}
 	else
 	{
@@ -1072,10 +1099,17 @@ PHP_FUNCTION(yaz_connect)
 	tsrm_mutex_lock (yaz_mutex);
 #endif
 	for (i = 0; i<MAX_ASSOC; i++)
-		if (shared_associations[i] && shared_associations[i]->host_port &&
-			shared_associations[i]->order != order_associations &&
-			!strcmp (shared_associations[i]->host_port, zurl_str))
+	{
+		Yaz_Association as = shared_associations[i];
+		if (persistent && as && as->order != order_associations &&
+			!strcmp_null (as->host_port, zurl_str) &&
+			!strcmp_null (as->user, user_str) &&
+			!strcmp_null (as->group, group_str) &&
+			!strcmp_null (as->pass, pass_str) &&
+			!strcmp_null (as->proxy, proxy_str) &&
+			!strcmp_null (as->cookie_out, cookie_str))
 			break;
+	}
 	if (i == MAX_ASSOC)
 	{
 		/* we didn't have it (or already in use) */
@@ -1104,19 +1138,22 @@ PHP_FUNCTION(yaz_connect)
 		}
 		shared_associations[i] = yaz_association_mk ();
 		shared_associations[i]->host_port = xstrdup (zurl_str);
+		if (cookie_str)
+			shared_associations[i]->cookie_out = xstrdup (cookie_str);
+		if (user_str)
+			shared_associations[i]->user = xstrdup (user_str);
+		if (group_str)
+			shared_associations[i]->group = xstrdup (group_str);
+		if (pass_str)
+			shared_associations[i]->pass = xstrdup (pass_str);
+		if (proxy_str)
+			shared_associations[i]->proxy = xstrdup (proxy_str);	
 	}
+	shared_associations[i]->persistent = persistent;
 	shared_associations[i]->order = order_associations;
 	shared_associations[i]->error = 0;
 	shared_associations[i]->numberOfRecordsRequested = 10;
 	shared_associations[i]->resultSetStartPoint = 1;
-	if (user && !group && !pass)
-		shared_associations[i]->auth_open = xstrdup (user_str);
-	if (user && group && pass)
-	{
-		shared_associations[i]->user = xstrdup (user_str);
-		shared_associations[i]->group = xstrdup (group_str);
-		shared_associations[i]->pass = xstrdup (pass_str);
-	}
 	xfree (shared_associations[i]->local_databases);
 	shared_associations[i]->local_databases = 0;
 #ifdef ZTS
@@ -2407,9 +2444,7 @@ PHP_RSHUTDOWN_FUNCTION(yaz)
 	{
 		for (i = 0; i<MAX_ASSOC; i++)
 			/* destroy those where password has been used */
-			if (shared_associations[i] &&
-				(shared_associations[i]->user ||
-				 shared_associations[i]->auth_open))
+			if (shared_associations[i] && !shared_associations[i]->persistent)
 			{
 				yaz_association_destroy(shared_associations[i]);
 				shared_associations[i] = 0;
