@@ -1220,6 +1220,7 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 {
 	size_t bcount = 0;
 	int ready = 0;
+	char buf[8192];
 	
 #ifdef HAVE_MMAP 
 	if(!issock) {
@@ -1230,23 +1231,23 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 		size_t len;
 
 		fd = fileno(fp);
-		off = ftell(fp);
 		fstat(fd, &sbuf);
 	
-		len = sbuf.st_size - off;
-		
-		p = mmap(0, len, PROT_READ, MAP_PRIVATE, fd, off);
-		if(p!=MAP_FAILED) {
-			PHPWRITE(p, len);
-			munmap(p, len);
-			bcount += len;
-			ready = 1;
+		if(sbuf.st_size > sizeof(buf)) {
+			off = ftell(fp);
+			len = sbuf.st_size - off;
+			p = mmap(0, len, PROT_READ, MAP_PRIVATE, fd, off);
+			if(p!=MAP_FAILED) {
+				PHPWRITE(p, len);
+				munmap(p, len);
+				bcount += len;
+				ready = 1;
+			}
 		}
 	}
 #endif
 
 	if(!ready) {
-		char buf[8192];
 		int b;
 
 		while ((b = FP_FREAD(buf, sizeof(buf), socketd, fp, issock)) > 0) {
