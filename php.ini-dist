@@ -49,7 +49,7 @@ engine			=	On	; Enable the PHP scripting language engine under Apache
 short_open_tag	=	On	; allow the <? tag.  otherwise, only <?php and <script> tags are recognized.
 asp_tags		=	Off ; allow ASP-style <% %> tags
 precision		=	14	; number of significant digits displayed in floating point numbers
-y2k_compliance	=	Off	; whether to be year 2000 compliant (will cause problems with non y2k compliant browsers)
+y2k_compliance	=	On	; now on by default, as we do have y2k...
 output_buffering	= Off	; Output buffering allows you to send header lines (including cookies)
 							; even after you send body content, in the price of slowing PHP's
 							; output layer a bit.
