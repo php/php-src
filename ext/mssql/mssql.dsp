@@ -46,7 +46,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-65" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL65=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=0 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-65" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL65=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=0 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -73,7 +73,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL65=1 /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL65=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=1 /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL65=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -83,7 +83,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS" /libpath:"mssql-70"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Debug_TS/php_mssql.dll" /libpath:"..\..\Debug_TS" /libpath:"mssql-70"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Debug_TS/php_mssql.dll" /libpath:"..\..\Debug_TS" /libpath:"mssql-70"
 
 !ELSEIF  "$(CFG)" == "mssql - Win32 MSSQL 70 Release_TS"
 
@@ -100,7 +100,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL70=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=0 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL70=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=0 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -127,7 +127,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL70=1 /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL70=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=1 /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL" /D "DBNTWIN32" /D ZTS=1 /D MSSQL70=1 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D ZEND_DEBUG=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -137,7 +137,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS" /libpath:"mssql-70"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_70_Debug_TS/php_mssql.dll" /libpath:"..\..\Debug_TS" /libpath:"mssql-70"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_70_Debug_TS/php_mssql.dll" /libpath:"..\..\Debug_TS" /libpath:"mssql-70"
 
 !ENDIF 
 
