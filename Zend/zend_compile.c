@@ -2563,7 +2563,10 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
-		do_verify_abstract_class(TSRMLS_C);
+		zend_verify_abstract_class(ce TSRMLS_CC);
+		if (ce->parent || ce->num_interfaces) {
+			do_verify_abstract_class(TSRMLS_C);
+		}
 	}
 	CG(active_class_entry) = NULL;
 }
