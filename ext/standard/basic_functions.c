@@ -1615,7 +1615,7 @@ PHP_FUNCTION(call_user_method)
 	SEPARATE_ZVAL(params[0]);
 	SEPARATE_ZVAL(params[1]);
 	convert_to_string(*params[0]);
-	if (call_user_function_ex(CG(function_table), *params[1], *params[0], &retval_ptr, arg_count-2, params+2, 1, NULL)==SUCCESS
+	if (call_user_function_ex(CG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 1, NULL)==SUCCESS
 		&& retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {

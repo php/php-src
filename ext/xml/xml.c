@@ -358,7 +358,7 @@ xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 		retval->type = IS_BOOL;
 		retval->value.lval = 0;
 
-		result = call_user_function(EG(function_table), parser->object, handler, retval, argc, argv);
+		result = call_user_function(EG(function_table), &parser->object, handler, retval, argc, argv);
 
 		if (result == FAILURE) {
 			zval **method;
