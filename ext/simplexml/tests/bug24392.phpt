@@ -2,9 +2,6 @@
 Bug #24392 (empty namespaces causing confusion)
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip simplexml extension is not loaded"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php 
 $s = simplexml_load_file(dirname(__FILE__).'/bug24392.xml');
