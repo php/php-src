@@ -1,5 +1,5 @@
 --TEST--
-Bug #19566 (memleaks)
+Bug #19943 (memleaks)
 --FILE--
 <?php
 	$ar = array();
