@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added --disable-all configure option. (Jani)
 - Backported debug_backtrace() from ZendEngine2. (Thies)
 - Added html-free phpinfo() output for CLI. (Jan)
 - Fixed socket_recvfrom() to be binary safe. (Jason)
