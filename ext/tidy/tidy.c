@@ -178,7 +178,7 @@ static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
 	g->used = 0;
 }
 
-static void *php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type)
+static void *php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type TSRMLS_DC)
 {
 	*type = tidyOptGetType(opt);
 
@@ -483,7 +483,7 @@ PHP_MINFO_FUNCTION(tidy)
 	while (itOpt) {
 		TidyOption opt = tidyGetNextOption(TG(tdoc)->doc, &itOpt);
 
-		opt_value = php_tidy_get_opt_val(opt, &optt);
+		opt_value = php_tidy_get_opt_val(opt, &optt TSRMLS_CC);
 		switch (optt) {
 			case TidyString:
 				php_info_print_table_row(2, (char *)tidyOptGetName(opt), (char*)opt_value);
@@ -689,7 +689,7 @@ PHP_FUNCTION(tidy_get_config)
 		TidyOption opt = tidyGetNextOption(TG(tdoc)->doc, &itOpt);
 
 		opt_name = (char *)tidyOptGetName(opt);
-		opt_value = php_tidy_get_opt_val(opt, &optt);
+		opt_value = php_tidy_get_opt_val(opt, &optt TSRMLS_CC);
 		switch (optt) {
 			case TidyString:
 				add_assoc_string(return_value, opt_name, (char*)opt_value, 0);
@@ -983,7 +983,7 @@ PHP_FUNCTION(tidy_getopt)
 		RETURN_FALSE;
 	}
 	    
-	optval = php_tidy_get_opt_val(opt, &optt);
+	optval = php_tidy_get_opt_val(opt, &optt TSRMLS_CC);
 	switch (optt) {
 		case TidyString:
 			RETVAL_STRING((char *)optval, 0);
