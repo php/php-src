@@ -721,65 +721,67 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			zend_hash_del(&EG(regular_list), hash, sizeof(hash));
 		}
 	}		
+
 	/* ... or a persistent one */
-	if (SUCCESS == zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
+	switch (zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
 		static char info[] = { isc_info_base_level, isc_info_end };
 		char result[8];
 		ISC_STATUS status[20];
+
+	case SUCCESS:
 
 		if (Z_TYPE_P(le) != le_plink) {
 			RETURN_FALSE;
 		}
 		/* check if connection has timed out */
 		ib_link = (ibase_db_link *) le->ptr;
-		if (isc_database_info(status, &ib_link->handle, sizeof(info), info, sizeof(result), result)) {
-			zend_hash_del(&EG(persistent_list), hash, sizeof(hash));
-		} else {
+		if (!isc_database_info(status, &ib_link->handle, sizeof(info), info, sizeof(result), result)) {
 			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
-			goto register_link_resource;
+			break;
 		}
-	}
+		zend_hash_del(&EG(persistent_list), hash, sizeof(hash));
+	
+	default:
 
-	/* no link found, so we have to open one */
-
-	if (IBG(max_links) != -1 && IBG(num_links) >= IBG(max_links)) {
-		_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
-		RETURN_FALSE;
-	}
-
-	/* create the ib_link */
-	if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	/* use non-persistent if allowed number of persistent links is exceeded */
-	if (!persistent || (IBG(max_persistent) != -1 && IBG(num_persistent) >= IBG(max_persistent))) {
-		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
-		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
-	} else {
-		list_entry new_le;
-		
-		ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
-
-		/* hash it up */
-		Z_TYPE(new_le) = le_plink;
-		new_le.ptr = ib_link;
-		if (FAILURE == zend_hash_update(&EG(persistent_list), hash, sizeof(hash),
-				(void *) &new_le, sizeof(list_entry), NULL)) {
-			free(ib_link);
+		/* no link found, so we have to open one */
+	
+		if (IBG(max_links) != -1 && IBG(num_links) >= IBG(max_links)) {
+			_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
 			RETURN_FALSE;
 		}
-		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
-		++IBG(num_persistent);
+	
+		/* create the ib_link */
+		if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+	
+		/* use non-persistent if allowed number of persistent links is exceeded */
+		if (!persistent || (IBG(max_persistent) != -1 && IBG(num_persistent) >= IBG(max_persistent))) {
+			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
+			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
+		} else {
+			list_entry new_le;
+			
+			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
+	
+			/* hash it up */
+			Z_TYPE(new_le) = le_plink;
+			new_le.ptr = ib_link;
+			if (FAILURE == zend_hash_update(&EG(persistent_list), hash, sizeof(hash),
+					(void *) &new_le, sizeof(list_entry), NULL)) {
+				free(ib_link);
+				RETURN_FALSE;
+			}
+			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
+			++IBG(num_persistent);
+		}
+		ib_link->handle = db_handle;
+		ib_link->dialect = largs[DLECT] ? (unsigned short)largs[DLECT] : SQL_DIALECT_CURRENT;
+		ib_link->tr_list = NULL;
+		ib_link->event_head = NULL;
+	
+		++IBG(num_links);
 	}
-	ib_link->handle = db_handle;
-	ib_link->dialect = largs[DLECT] ? (unsigned short)largs[DLECT] : SQL_DIALECT_CURRENT;
-	ib_link->tr_list = NULL;
-	ib_link->event_head = NULL;
-
-	++IBG(num_links);
-
-register_link_resource:
 
 	/* add it to the hash */
 	new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
@@ -1082,6 +1084,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 
 		ibase_db_link *ib_link;
 		zval **arg;
+		int type;
 
 		case 0:
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", 
@@ -1099,11 +1102,12 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 				RETURN_FALSE;
 			}
 			/* one id was passed, could be db or trans id */
-			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, arg, &ib_link, &trans);
-			if (trans != NULL) {			
+			if (zend_list_find(Z_LVAL_PP(arg), &type) && type == le_trans) {			
+				ZEND_FETCH_RESOURCE(trans, ibase_trans *, arg, -1, "InterBase transaction", 
+				    le_trans);
+
 				convert_to_long_ex(arg);
 				res_id = Z_LVAL_PP(arg);
-
 			} else {
 				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, arg, -1, "InterBase link", 
 					le_link, le_plink);
