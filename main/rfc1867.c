@@ -254,7 +254,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 				} else if ((loc - ptr - 4) <= 0) {
 					fn = "none";
 				} else {
-					fp = fopen(fn, "wb");
+					fp = PHP_FOPEN(fn, "wb");
 					if (!fp) {
 						php_error(E_WARNING, "File Upload Error - Unable to open temporary file [%s]", fn);
 						SAFE_RETURN;

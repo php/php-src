@@ -204,7 +204,7 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 			return NULL;
 		}
 		if (php_check_open_basedir(path)) return NULL;
-		return fopen(path, mode);
+		return PHP_FOPEN(path, mode);
 	}
 }
 
@@ -282,7 +282,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		SG(request_info).path_translated = NULL;
 		return NULL;
 	}
-	fp = fopen(fn, "r");
+	fp = PHP_FOPEN(fn, "r");
 
 	/* refuse to open anything that is not a regular file */
 	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
@@ -331,7 +331,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			return NULL;
 		}
 		if (php_check_open_basedir(filename)) return NULL;
-		fp = fopen(filename, mode);
+		fp = PHP_FOPEN(filename, mode);
 		if (fp && opened_path) {
 			*opened_path = expand_filepath(filename);
 		}
@@ -353,14 +353,14 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 			if (php_check_open_basedir(trypath)) return NULL;
-			fp = fopen(trypath, mode);
+			fp = PHP_FOPEN(trypath, mode);
 			if (fp && opened_path) {
 				*opened_path = expand_filepath(trypath);
 			}
 			return fp;
 		} else {
 			if (php_check_open_basedir(filename)) return NULL;
-			return fopen(filename, mode);
+			return PHP_FOPEN(filename, mode);
 		}
 	}
 	if (!path || (path && !*path)) {
@@ -368,7 +368,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			return NULL;
 		}
 		if (php_check_open_basedir(filename)) return NULL;
-		fp = fopen(filename, mode);
+		fp = PHP_FOPEN(filename, mode);
 		if (fp && opened_path) {
 			*opened_path = strdup(filename);
 		}
@@ -395,7 +395,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 		}
-		if ((fp = fopen(trypath, mode)) != NULL) {
+		if ((fp = PHP_FOPEN(trypath, mode)) != NULL) {
 			if (php_check_open_basedir(trypath)) {
 				fclose(fp);
 				efree(pathbuf);
@@ -898,7 +898,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 				if (php_check_open_basedir((char *) path)) {
 					fp = NULL;
 				} else {
-					fp = fopen(path, mode);
+					fp = PHP_FOPEN(path, mode);
 				}
 			}
 		}
