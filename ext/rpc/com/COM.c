@@ -318,52 +318,53 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			var_uninit(pval_arg);
 			break;
 		case VT_UI1:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.lval = (long) var_arg->bVal;
-			else
+			} else {
 				pval_arg->value.lval = (long)*(var_arg->pbVal);
+			}
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_I2:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.lval = (long) var_arg->iVal;
-			else
+			} else {
 				pval_arg->value.lval = (long )*(var_arg->piVal);
+			}
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_I4:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.lval = var_arg->lVal;
-			else
+			} else {
 				pval_arg->value.lval = *(var_arg->plVal);
+			}
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_R4:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.dval = (double) var_arg->fltVal;
-			else
+			} else {
 				pval_arg->value.dval = (double)*(var_arg->pfltVal);
-
+			}
 			pval_arg->type = IS_DOUBLE;
 			break;
 		case VT_R8:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.dval = var_arg->dblVal;
-			else
+			} else {
 				pval_arg->value.dval = *(var_arg->pdblVal);
+			}
 			pval_arg->type = IS_DOUBLE;
 			break;
 		case VT_BOOL:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
-			{
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				if (var_arg->boolVal & 0xFFFF) {
 					pval_arg->value.lval = 1;
 				} else {
 					pval_arg->value.lval = 0;
 				}
-			}
-			else
-			{
+			} else {
 				if (*(var_arg->pboolVal) & 0xFFFF) {
 					pval_arg->value.lval = 1;
 				} else {
@@ -373,57 +374,52 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			pval_arg->type = IS_BOOL;
 			break;
 		case VT_BSTR:
-			if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF)
-			{
+			if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent);
 				SysFreeString(var_arg->bstrVal);
-			}
-			else
-			{
+			} else {
 				pval_arg->value.str.val = php_OLECHAR_to_char(*(var_arg->pbstrVal), &pval_arg->value.str.len, persistent);
 				SysFreeString(*(var_arg->pbstrVal));
 				efree(var_arg->pbstrVal);
 			}
 			pval_arg->type = IS_STRING;
 			break;
-		case VT_DATE:
-			{
-			SYSTEMTIME wintime;
-			struct tm phptime;
+		case VT_DATE: {
+				SYSTEMTIME wintime;
+				struct tm phptime;
 
-			VariantTimeToSystemTime(var_arg->date, &wintime);
-			phptime.tm_year = wintime.wYear-1900;
-			phptime.tm_mon  = wintime.wMonth-1;
-			phptime.tm_mday = wintime.wDay;
-			phptime.tm_hour = wintime.wHour;
-			phptime.tm_min  = wintime.wMinute;
-			phptime.tm_sec  = wintime.wSecond;
-			phptime.tm_isdst= -1;
+				VariantTimeToSystemTime(var_arg->date, &wintime);
+				phptime.tm_year = wintime.wYear-1900;
+				phptime.tm_mon  = wintime.wMonth-1;
+				phptime.tm_mday = wintime.wDay;
+				phptime.tm_hour = wintime.wHour;
+				phptime.tm_min  = wintime.wMinute;
+				phptime.tm_sec  = wintime.wSecond;
+				phptime.tm_isdst= -1;
 
-			tzset();
-			pval_arg->value.lval = mktime(&phptime);
-			pval_arg->type = IS_LONG;
-			break;
+				tzset();
+				pval_arg->value.lval = mktime(&phptime);
+				pval_arg->type = IS_LONG;
 			}
-		case VT_DISPATCH:
-			{
-			pval *handle;
-
-			pval_arg->type=IS_OBJECT;
-			pval_arg->value.obj.ce=&com_class_entry;
-			pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-			pval_arg->is_ref=1;
-			pval_arg->refcount=1;
-			zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-			ALLOC_ZVAL(handle);
-			handle->type = IS_LONG;
-			handle->value.lval = zend_list_insert(var_arg->pdispVal, le_idispatch);
-			pval_copy_constructor(handle);
-			INIT_PZVAL(handle);
-			zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
 			break;
+		case VT_DISPATCH: {
+				pval *handle;
+
+				pval_arg->type=IS_OBJECT;
+				pval_arg->value.obj.ce=&com_class_entry;
+				pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+				pval_arg->is_ref=1;
+				pval_arg->refcount=1;
+				zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+				ALLOC_ZVAL(handle);
+				handle->type = IS_LONG;
+				handle->value.lval = zend_list_insert(var_arg->pdispVal, le_idispatch);
+				pval_copy_constructor(handle);
+				INIT_PZVAL(handle);
+				zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
 			}
+			break;
 		case VT_UNKNOWN:
 			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
 			/* fallthru */
@@ -446,13 +442,10 @@ static void php_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 		break;
 	case IS_LONG:
 	case IS_BOOL:
-		if (pval_arg->is_ref == 0)
-		{
+		if (pval_arg->is_ref == 0) {
 			var_arg->vt = VT_I4;	// assuming 32-bit platform
 			var_arg->lVal = pval_arg->value.lval;
-		}
-		else
-		{
+		} else {
 			var_arg->vt = VT_I4 | VT_BYREF; // assuming 32-bit platform
 			var_arg->plVal = &(pval_arg->value.lval);
 		}
@@ -463,13 +456,10 @@ static void php_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 		break;
 	case IS_STRING:
 		unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
-		if (pval_arg->is_ref == 0)
-		{
+		if (pval_arg->is_ref == 0) {
 			var_arg->bstrVal = SysAllocString(unicode_str);
 			var_arg->vt = VT_BSTR;
-		}
-		else
-		{
+		} else {
 			var_arg->pbstrVal = (BSTR *)emalloc(sizeof(BSTR *));
 			*(var_arg->pbstrVal) = SysAllocString(unicode_str);
 			var_arg->vt = VT_BSTR | VT_BYREF;
