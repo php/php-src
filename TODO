@@ -84,7 +84,8 @@ documentation
       on win32. 
     * Add remarks in the documentation which functions are not binary-safe.
     * Update curl documentation (DONE?)
-    * Add developer documentation
+    * Add developer documentation.
+    * Add detailed documentation for Java extension.
 
 ext/curl
 --------
