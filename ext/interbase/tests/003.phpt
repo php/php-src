@@ -31,7 +31,7 @@ InterBase: misc sql types (may take a while)
 
 	/* should fail, but gracefully */
 	@ibase_query("insert into test3 (iter) values (?)", null);
-	
+
     /* if timefmt is not supported, suppress error here */
     @ibase_timefmt("%m/%d/%Y %H:%M:%S");
 
@@ -41,7 +41,7 @@ InterBase: misc sql types (may take a while)
     	$v_date = rand_datetime();
     	$v_decimal4_2 = rand_number(4,2);
     	$v_decimal4_0 = rand_number(4,0);
-    	$v_decimal7_2 = rand_number(7,2); 
+    	$v_decimal7_2 = rand_number(7,2);
     	$v_decimal7_0 = rand_number(7,0);
     	$v_numeric15_15 = rand_number(15,15);
     	$v_numeric15_0 = $iter ? rand_number(15,0) : 0;
@@ -96,7 +96,7 @@ InterBase: misc sql types (may take a while)
             echo " in:  $v_numeric15_0\n";
             echo " out: $row->V_NUMERIC15_0\n";
         }
-        
+
         if(abs($row->V_DOUBLE - $v_double) > abs($v_double / 1E15)){
             echo " DOUBLE fail\n";
             echo " in:  $v_double\n";
@@ -117,13 +117,13 @@ InterBase: misc sql types (may take a while)
             echo " in:  $v_smallint\n";
             echo " out: $row->V_SMALLINT\n";
         }
-    	 
-		  if(substr($row->V_VARCHAR,0,strlen($v_varchar)) != $v_varchar){
+
+	  if(substr($row->V_VARCHAR,0,strlen($v_varchar)) != $v_varchar){
         	echo " VARCHAR fail:\n";
             echo " in:  $v_varchar\n";
             echo " out: $row->V_VARCHAR\n";
         }
-      
+
         ibase_free_result($sel);
     } /* for($iter) */
 
