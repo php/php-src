@@ -1727,7 +1727,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	zval *pgsql_link = NULL;
 	long oid_long;
 	char *oid_string, *end_ptr;
-	size_t oid_strlen;
+	int oid_strlen;
 	PGconn *pgsql;
 	Oid oid;
 	int id = -1;
@@ -1794,7 +1794,7 @@ PHP_FUNCTION(pg_lo_open)
 	zval *pgsql_link = NULL;
 	long oid_long;
 	char *oid_string, *end_ptr, *mode_string;
-	size_t oid_strlen, mode_strlen;
+	int oid_strlen, mode_strlen;
 	PGconn *pgsql;
 	Oid oid;
 	int id = -1, pgsql_mode=0, pgsql_lofd;
@@ -2099,7 +2099,7 @@ PHP_FUNCTION(pg_lo_export)
 {
 	zval *pgsql_link = NULL;
 	char *file_out, *oid_string, *end_ptr;
-	size_t oid_strlen;
+	int oid_strlen;
 	int id = -1, name_len;
 	long oid_long;
 	Oid oid;
@@ -2599,8 +2599,8 @@ PHP_FUNCTION(pg_copy_from)
 PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
-	size_t to_len;
-	long from_len;
+	int to_len;
+	int from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -2618,7 +2618,7 @@ PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
 	size_t to_len;
-	long from_len;
+	int from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -2740,7 +2740,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 {
 	char *from = NULL, *to = NULL;
 	size_t to_len;
-	long from_len;
+	int from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -3077,7 +3077,7 @@ PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *me
 	PGresult *pg_result;
 	char *tmp_name;
 	smart_str querystr = {0};
-	size_t new_len;
+	int new_len;
 	int i, num_rows;
 	zval *elem;
 	
@@ -3969,7 +3969,8 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 	char buf[256];
 	char *fld;
 	smart_str querystr = {0};
-	int key_type, fld_len, ret = FAILURE;
+	int key_type, ret = FAILURE;
+	uint fld_len;
 	ulong num_idx;
 	HashPosition pos;
 
@@ -4099,7 +4100,7 @@ PHP_FUNCTION(pg_insert)
 static inline int build_assignment_string(smart_str *querystr, HashTable *ht, const char *pad, int pad_len TSRMLS_DC)
 {
 	HashPosition pos;
-	size_t fld_len;
+	uint fld_len;
 	int key_type;
 	ulong num_idx;
 	char *fld;
