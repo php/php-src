@@ -23,15 +23,12 @@
 #include "php.h"
 
 PHPAPI void php_output_startup();
+PHPAPI int  php_body_write(const char *str, uint str_length);
+PHPAPI int  php_header_write(const char *str, uint str_length);
+PHPAPI void php_start_ob_buffering();
+PHPAPI void php_end_ob_buffering(int send_buffer);
 
-/* exported output functions */
-PHPAPI int (*php_body_write)(const char *str, uint str_length);		/* string output */
-PHPAPI int (*php_header_write)(const char *str, uint str_length);	/* unbuffer string output */
-void php_start_ob_buffering();
-void php_end_ob_buffering(int send_buffer);
-int php_ob_get_buffer(pval *p);
-
-/* HEAD support */
-void set_header_request(int value);
+extern zend_module_entry output_module_entry;
+#define phpext_output_ptr &output_module_entry
 
 #endif /* _OUTPUT_BUFFER */
