@@ -80,6 +80,8 @@ Please refer to libpq manual or source for details.
 These functions are *NOT* supposed to be documented, yet.
 API may be changed.
 
+NOTE: These functions are added in PHP 4.2.0 unless they are mentioned.
+
 -------------------------------------------------------------------
 bool pg_send_query(resource connection, string query) 
 
@@ -168,6 +170,9 @@ string pg_last_notice(resource connection)
 Returns the last notice set by the backend 
 Currently pg_last_notice() does not return notice message associated
 with the connection.
+
+NOTE: Added in PHP 4.0.6, but there is bug in notice message handling
+in PHP 4.0.6. Do no use 4.0.6 with pgsql module!!
 
 --------------------------------------------------------------------
 
