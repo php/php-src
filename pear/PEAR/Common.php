@@ -636,7 +636,7 @@ class PEAR_Common extends PEAR
     function infoFromTgzFile($file)
     {
         if (!@is_file($file)) {
-            return $this->raiseError('tgz :: could not open file');
+            return $this->raiseError("tgz :: could not open file \"$file\"");
         }
         if (substr($file, -4) == '.tar') {
             $compress = false;
@@ -646,7 +646,7 @@ class PEAR_Common extends PEAR
         $tar = new Archive_Tar($file, $compress);
         $content = $tar->listContent();
         if (!is_array($content)) {
-            return $this->raiseError('tgz :: could not get contents of package');
+            return $this->raiseError("tgz :: could not get contents of package \"$file\"");
         }
         $xml = null;
         foreach ($content as $file) {
