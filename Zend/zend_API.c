@@ -700,7 +700,6 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 
 	if (!class_type->constants_updated) {
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
-		zend_hash_apply_with_argument(class_type->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 		class_type->constants_updated = 1;
 	}
 	
