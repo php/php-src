@@ -346,7 +346,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			variable_ptr->is_ref = 1;
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
-				
+				value->refcount--;
 			}
 		}
 	} else {
