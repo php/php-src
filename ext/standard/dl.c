@@ -160,8 +160,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	}
 	zend_register_module(module_entry);
 
-
-	if (module_entry->request_startup_func) {
+	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number ELS_CC)) {
 			php_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
 			DL_UNLOAD(handle);
