@@ -82,15 +82,15 @@ AC_ARG_WITH(ndbm,
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/db1/ndbm.h" ; then
         THIS_PREFIX="$i"
-        NDBM_EXTRA="NDBM_DB1_NDBM_H"
+        NDBM_EXTRA="db1/ndbm.h"
       elif test -f "$i/include/ndbm.h" ; then
         THIS_PREFIX="$i"
-        NDBM_EXTRA="NDBM_NDBM_H"
+        NDBM_EXTRA="ndbm.h"
       fi
 	done
     
     if test "$NDBM_EXTRA" != ""; then
-      eval "AC_DEFINE($NDBM_EXTRA, 1)"
+      AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$NDBM_EXTRA", [ ])
     fi
 
     for LIB in db1 ndbm c; do
@@ -116,26 +116,26 @@ AC_ARG_WITH(db2,
         DB2_EXTRA="db2"
       elif test -f "$i/include/db2/db.h"; then
         THIS_PREFIX="$i"
-        DB2_EXTRA="DB2_DB2_DB_H"
+        DB2_EXTRA="db2/db.h"
       elif test -f "$i/include/db/db2.h"; then
         THIS_PREFIX="$i"
-        DB2_EXTRA="DB2_DB_DB2_H"
+        DB2_EXTRA="db/db2.h"
       elif test -f "$i/include/db2.h"; then
         THIS_PREFIX="$i"
-        DB2_EXTRA="DB2_DB2_H"
+        DB2_EXTRA="db2.h"
       elif test -f "$i/include/db.h" ; then
         THIS_PREFIX="$i"
-        DB2_EXTRA="DB2_DB_H"
+        DB2_EXTRA="db.h"
       fi
 	done
 
     if test "$DB2_EXTRA" = "db2" ; then
       DBA_INCLUDE="$DBA_INCLUDE -I$THIS_PREFIX/db2"
-      DB2_EXTRA="DB2_DB_H"
+      DB2_EXTRA="db.h"
     fi
     
     if test -n "$DB2_EXTRA"; then
-      eval "AC_DEFINE($DB2_EXTRA, 1)"
+      AC_DEFINE_UNQUOTED(DB2_INCLUDE_FILE, "$DB2_EXTRA", [ ])
     fi
 
     for LIB in db db2 c; do
@@ -158,12 +158,12 @@ AC_ARG_WITH(db3,
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/db.h" ; then
         THIS_PREFIX="$i"
-        DB3_EXTRA="DB3_DB_H"
+        DB3_EXTRA="db.h"
       fi
 	done
 
     if test -n "$DB3_EXTRA"; then
-      eval "AC_DEFINE($DB3_EXTRA, 1)"
+      AC_DEFINE_UNQUOTED(DB3_INCLUDE_FILE, "$DB3_EXTRA", [ ])
     fi
 
     for LIB in db; do
