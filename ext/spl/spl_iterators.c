@@ -628,7 +628,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	zval                 *zobject;
 	spl_dual_it_object   *intern;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -692,6 +692,8 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			}
 			break;
 	}
+
+	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 
 	zobject->refcount++;
 	intern->inner.zobject = zobject;
