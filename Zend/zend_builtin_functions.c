@@ -756,6 +756,8 @@ ZEND_FUNCTION(trigger_error)
 					break;
 			}
 			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();	
 	}
 	convert_to_string_ex(z_error_message);
 	zend_error(error_type, (*z_error_message)->value.str.val);
