@@ -616,11 +616,12 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	} else {
 		if (only_subclass) {
 			instance_ce = Z_OBJCE_PP(obj)->parent;
-			if (!instance_ce) {
-				RETURN_FALSE;
-			}
 		} else {
 			instance_ce = Z_OBJCE_PP(obj);
+		}
+
+		if (!instance_ce) {
+			RETURN_FALSE;
 		}
 
 		if (instanceof_function(instance_ce, *ce TSRMLS_CC)) {
