@@ -42,6 +42,11 @@ if (getenv('TEST_PHP_SRCDIR')) {
 	@chdir(getenv('TEST_PHP_SRCDIR'));
 }
 
+// Delete some security related environment variables
+putenv('SSH_CLIENT=deleted');
+putenv('SSH_AUTH_SOCK=deleted');
+putenv('SSH_TTY=deleted');
+
 $cwd = getcwd();
 set_time_limit(0);
 while(ob_get_level()) {
