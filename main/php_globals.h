@@ -120,6 +120,9 @@ struct _php_core_globals {
 
 	zend_bool y2k_compliance;
 
+	char *docref_root;
+	char *docref_ext;
+
 	zend_bool html_errors;
 	zend_bool xmlrpc_errors;
 
