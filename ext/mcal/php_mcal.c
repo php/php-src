@@ -1314,6 +1314,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
+	
 	myargc = ARG_COUNT(ht);
 	if (myargc != 1 || getParameters(ht, myargc, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1322,9 +1323,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 	convert_to_long(streamind);
 	
 	ind = streamind->value.lval;
-	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1334,95 +1333,87 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_daily(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval
+/* {{{ proto string mcal_event_set_recur_daily(int stream_id, int year, int month, int day, int interval)
    Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_daily)
 {
-	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
+	pval *streamind,*year,*month,*day,*interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
+	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=8 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec,&interval) == FAILURE) {
+	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_long(streamind);
 	convert_to_long(year);
 	convert_to_long(month);
 	convert_to_long(day);
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
 	convert_to_long(interval);
-
 	ind = streamind->value.lval;
 
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	dt_settime(&endtime,hour->value.lval,min->value.lval,sec->value.lval);
 	calevent_recur_daily(mcal_le_struct->event, &endtime,
 						 interval->value.lval);
-
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_weekly(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval, int weekdays)
+/* {{{ proto string mcal_event_set_recur_weekly(int stream_id, int year, int month, int day, int interval, int weekdays)
    Create a weekly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_weekly)
 {
-	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval,*weekdays;
+	pval *streamind,*year,*month,*day,*interval,*weekdays;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
+	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=4 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec,&interval,&weekdays) == FAILURE) {
+	if (myargc != 6 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval,&weekdays) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_long(streamind);
 	convert_to_long(year);
 	convert_to_long(month);
 	convert_to_long(day);
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
 	convert_to_long(interval);
 	convert_to_long(weekdays);
 	ind = streamind->value.lval;
-
+	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	dt_settime(&endtime,hour->value.lval,min->value.lval,sec->value.lval);
 	calevent_recur_weekly(mcal_le_struct->event, &endtime,
 						  interval->value.lval,weekdays->value.lval);
-
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+/* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id, int year, int month, int day, int interval)
    Create a monthly by day recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 {
-	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
+	pval *streamind,*year,*month,*day,*interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
+	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=8 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec,&interval) == FAILURE) {
+	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1430,77 +1421,67 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 	convert_to_long(year);
 	convert_to_long(month);
 	convert_to_long(day);
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
 	convert_to_long(interval);
-
+	
 	ind = streamind->value.lval;
-
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	dt_settime(&endtime,hour->value.lval,min->value.lval,sec->value.lval);
 	calevent_recur_monthly_mday(mcal_le_struct->event, &endtime,
 								interval->value.lval);
-
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+/* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int interval)
    Create a monthy by week recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
-	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
+	pval *streamind,*year,*month,*day,*interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
+	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=8 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec,&interval) == FAILURE) {
+	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_long(streamind);
 	convert_to_long(year);
 	convert_to_long(month);
 	convert_to_long(day);
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
 	convert_to_long(interval);
-
+	
 	ind = streamind->value.lval;
-
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	dt_settime(&endtime,hour->value.lval,min->value.lval,sec->value.lval);
 	calevent_recur_monthly_wday(mcal_le_struct->event, &endtime,
 								interval->value.lval);
-
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_yearly(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+/* {{{ proto string mcal_event_set_recur_yearly(int stream_id, int year, int month, int day, int interval)
    Create a yearly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_yearly)
 {
-	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
+	pval *streamind,*year,*month,*day,*interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
+	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=8 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec,&interval) == FAILURE) {
+	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1508,24 +1489,18 @@ PHP_FUNCTION(mcal_event_set_recur_yearly)
 	convert_to_long(year);
 	convert_to_long(month);
 	convert_to_long(day);
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
 	convert_to_long(interval);
 	
 	ind = streamind->value.lval;
-	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	
 	if (!mcal_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	dt_settime(&endtime,hour->value.lval,min->value.lval,sec->value.lval);
 	calevent_recur_yearly(mcal_le_struct->event, &endtime,
 						  interval->value.lval);
-
 }
 /* }}} */
 
