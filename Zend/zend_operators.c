@@ -339,7 +339,7 @@ ZEND_API void convert_to_string(zval *op)
 
 static void convert_scalar_to_array(zval *op, int type)
 {
-	zval *entry = (zval *) emalloc(sizeof(zval));
+	zval *entry = ALLOC_ZVAL();
 	
 	*entry = *op;
 	INIT_PZVAL(entry);

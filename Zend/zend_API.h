@@ -212,7 +212,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\
-									zval *var = (zval *) emalloc(sizeof(zval));								\
+									zval *var = ALLOC_ZVAL();								\
 									char *str=(v); /* prevent 'v' from being evaluated more than once */	\
 																											\
 									var->value.str.val = (str);												\
@@ -224,7 +224,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_STRINGL(n,v,l)	{														\
 									{													\
-										zval *var = (zval *) emalloc(sizeof(zval));		\
+										zval *var = ALLOC_ZVAL();		\
 																						\
 										var->value.str.val = (v);						\
 										var->value.str.len = (l);						\
@@ -235,7 +235,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_LONG(n,v)	{															\
 								{														\
-									zval *var = (zval *) emalloc(sizeof(zval));			\
+									zval *var = ALLOC_ZVAL();			\
 																						\
 									var->value.lval = (v);								\
 									var->type = IS_LONG;								\
@@ -245,7 +245,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_DOUBLE(n,v)	{															\
 								{														\
-									zval *var = (zval *) emalloc(sizeof(zval));			\
+									zval *var = ALLOC_ZVAL();			\
 																						\
 									var->value.dval = (v);								\
 									var->type = IS_DOUBLE;								\
@@ -275,7 +275,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
-			efree(var);																					\
+			FREE_ZVAL(var);																					\
 		} else {																						\
 			(var)->is_ref = _is_ref;																	\
 			if (_refcount) {																			\

@@ -581,9 +581,9 @@ int zendlex(znode *zendlval CLS_DC);
 								EG(garbage)[EG(garbage_ptr)++] = (z);		\
 								if (EG(garbage_ptr) == 4) {					\
 									zval_dtor(EG(garbage)[0]);				\
-									efree(EG(garbage)[0]);					\
+									FREE_ZVAL(EG(garbage)[0]);					\
 									zval_dtor(EG(garbage)[1]);				\
-									efree(EG(garbage)[1]);					\
+									FREE_ZVAL(EG(garbage)[1]);					\
 									EG(garbage)[0] = EG(garbage)[2];		\
 									EG(garbage)[1] = EG(garbage)[3];		\
 									EG(garbage_ptr) -= 2;					\

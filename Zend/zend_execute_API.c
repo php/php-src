@@ -145,7 +145,7 @@ void shutdown_executor(ELS_D)
 #endif
 	while (EG(garbage_ptr)--) {
 		zval_dtor(EG(garbage)[EG(garbage_ptr)]);
-		efree(EG(garbage)[EG(garbage_ptr)]);
+		FREE_ZVAL(EG(garbage)[EG(garbage_ptr)]);
 	}
 
 	zend_hash_destroy(&EG(imported_files));
@@ -201,7 +201,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 	ELS_FETCH();
 
 	if (p!=EG(uninitialized_zval_ptr)) {
-		efree(p);
+		FREE_ZVAL(p);
 	}
 }
 
@@ -344,7 +344,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 				if (no_separation) {
 					return FAILURE;
 				}
-				new_zval = (zval *) emalloc(sizeof(zval));
+				new_zval = ALLOC_ZVAL();
 				*new_zval = **params[i];
 				zval_copy_ctor(new_zval);
 				new_zval->refcount = 1;
@@ -358,7 +358,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			(*params[i])->refcount++;
 			param = *params[i];
 		} else {
-			param = (zval *) emalloc(sizeof(zval));
+			param = ALLOC_ZVAL();
 			*param = **(params[i]);
 			INIT_PZVAL(param);
 		}
@@ -373,7 +373,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
 		zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (object) {
-			zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
+			zval *dummy = ALLOC_ZVAL(), **this_ptr;
 
 			INIT_ZVAL(*dummy);
 			
@@ -487,14 +487,14 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 		variable_ptr->refcount--;
 		if (variable_ptr->refcount==0) {
 			zendi_zval_dtor(*variable_ptr);
-			efree(variable_ptr);
+			FREE_ZVAL(variable_ptr);
 		}
 
 		if (!PZVAL_IS_REF(value_ptr)) {
 			/* break it away */
 			value_ptr->refcount--;
 			if (value_ptr->refcount>0) {
-				*value_ptr_ptr = (zval *) emalloc(sizeof(zval));
+				*value_ptr_ptr = ALLOC_ZVAL();
 				**value_ptr_ptr = *value_ptr;
 				value_ptr = *value_ptr_ptr;
 				zendi_zval_copy_ctor(*value_ptr);
