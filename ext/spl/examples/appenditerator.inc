@@ -28,6 +28,10 @@ class AppendIterator implements Iterator
 	function rewind()
 	{
 		$this->iterators->rewind();
+		if ($this->iterators->valid())
+		{
+			$this->iterators->rewind();
+		}
 	}
 
 	function valid()
@@ -37,20 +41,36 @@ class AppendIterator implements Iterator
 
 	function current()
 	{
-		return $this->getInnerIterator()->current();
+		/* Using $this->valid() would be exactly the same; it would omit
+		 * the access to a non valid element in the inner iterator. Since
+		 * the user didn't respect the valid() return value false this
+		 * must be intended hence we go on. */
+		return $this->iterators->valid() ? $this->getInnerIterator()->current() : NULL;
 	}
 
 	function key()
 	{
-		return $this->getInnerIterator()->key();
+		return $this->iterators->valid() ? $this->getInnerIterator()->key() : NULL;
 	}
 	
 	function next()
 	{
-		while($this->iterators->valid()) {
-			$this->getInnerIterator()->next();
-			if ($this->valid()) {
-				return;
+		if (!$this->iterators->valid())
+		{
+			return; /* done all */
+		}
+		$this->getInnerIterator()->next();
+		if ($this->getInnerIterator()->valid())
+		{
+			return; /* found valid element in current inner iterator */
+		}
+		$this->iterators->next();
+		while ($this->iterators->valid())
+		{
+			$this->getInnerIterator()->rewind();
+			if ($this->getInnerIterator()->valid())
+			{
+				return; /* found element as first elemet in another iterator */
 			}
 			$this->iterators->next();
 		}
