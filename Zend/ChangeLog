@@ -1,3 +1,8 @@
+2003-10-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES:
+      Make this clear
+
 2003-10-20  Andi Gutmans  <andi@zend.com>
 
     * ZEND_CHANGES:
