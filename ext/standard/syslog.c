@@ -203,7 +203,7 @@ PHP_FUNCTION(define_syslog_variables)
 }
 /* }}} */
 
-/* {{{ proto int openlog(string ident, int option, int facility)
+/* {{{ proto bool openlog(string ident, int option, int facility)
    Open connection to system logger */
 /*
    ** OpenLog("nettopp", $LOG_PID, $LOG_LOCAL1);
@@ -229,7 +229,7 @@ PHP_FUNCTION(openlog)
 }
 /* }}} */
 
-/* {{{ proto int closelog(void)
+/* {{{ proto bool closelog(void)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
@@ -248,7 +248,7 @@ PHP_FUNCTION(closelog)
 }
 /* }}} */
 
-/* {{{ proto int syslog(int priority, string message)
+/* {{{ proto bool syslog(int priority, string message)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
