@@ -58,15 +58,14 @@ The next few rules are more of a technical nature.
 
 The format of the commit messages is pretty simple.
 
-If a line begins with #, it is taken to be a comment and will not appear
-in the ChangeLog.  If the line begins with @, it will be redirected to the
-NEWS file. Everything else goes into the ChangeLog.
+If a line begins with #, it is taken to be a comment and will not appear in
+the ChangeLog. Everything else goes into the ChangeLog.
 
-It is important to note that if your comment or news logline spans multiple
-lines, you have to put # or @ at the beginning of _every_ such line. Every 
-entry in NEWS has to have a name after it, so if you did it with someone's 
-help, put both your names there. Your name WILL NOT be automatically put
-at the end of the NEWS entry - so, please provide it yourself.
+It is important to note that if your comment spans multiple lines, you have
+to put # at the beginning of _every_ such line. Every entry in NEWS has to
+have a name after it, so if you did it with someone's help, put both your
+names there.  Your name WILL NOT be automatically put at the end of the NEWS
+entry - so, please provide it yourself.
 
 Example. Say you modified two files, datetime.c and string.c. In datetime.c
 you added a new format option for date() function, and in string.c you fixed
@@ -78,17 +77,13 @@ For datetime.c:
 
 (PHP date) Added new 'K' format modifier for printing out number of
            days until New Year's Eve.
-@- Added new 'K' format modifier that will output the number of days
-@  until New Year's Eve. (Bob)
 
 For string.c:
 (php_trim) Fixed a memory leak resulting from improper use of zval_dtor().
 # Man, that thing was leaking all over the place!
-@- Fixed memory leak in trim(). (Bob)
 
-The lines above marked with @ will go into NEWS file automagically, and the
-# lines will be omitted from the ChangeLog. Alternatively, you might want
-to modify NEWS file directly and not use the @ lines.
+The lines above marked with # will be omitted from the ChangeLog.
+Alternatively, you might want to add lines to the NEWS file directly.
 
 If you fix some bugs, you should note the bug ID numbers in your
 commit message. Bug ID should be prefixed by "#" for easier access to
@@ -97,12 +92,10 @@ bug report when developers are browsing CVS via. LXR or Bonsai.
 Example:
 
 Fixed pgsql notice handler double free crash bug. Bug #14016
-@ Fixed pgsql notice handler double free crash bug. Bug #14016
 
-If you don't see your messages in ChangeLog and NEWS right away, don't worry!
-These files are updated once a day, so your stuff will not show up until
-somewhat later. Don't go adding stuff to NEWS by hand if you already put @
-lines in the commit message.
+If you don't see your messages in ChangeLog right away, don't worry!  These
+files are updated once a day, so your stuff will not show up until somewhat
+later. Please add an appropriate line in the NEWS file yourself.
 
 You can use LXR (http://lxr.php.net/) and Bonsai (http://bonsai.php.net/)
 to look at PHP CVS repository in various ways.
