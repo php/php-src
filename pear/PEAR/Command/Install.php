@@ -246,10 +246,10 @@ specified at once.
         foreach ($params as $pkg) {
             if ($this->installer->uninstall($pkg, $options)) {
                 if ($this->config->get('verbose') > 0) {
-                    $this->ui->outputData("uninstall $pkg ok", $command);
+                    $this->ui->outputData("uninstall ok: $pkg", $command);
                 }
             } else {
-                return $this->raiseError("uninstall $pkg failed");
+                return $this->raiseError("uninstall failed: $pkg");
             }
         }
         return true;
