@@ -2194,10 +2194,6 @@ specified to indicate that we do not want any cutoff date.  */
 
 
 
-/* {{{ proto string notes_list(string database_name)
-   Returns the notes from a selected database_name 
-   */
-
 STATUS LNPUBLIC ReadSummaryData (     /* called for every document */
             VOID far *,
             SEARCH_MATCH far *,
