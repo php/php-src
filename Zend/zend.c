@@ -335,7 +335,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 		fpsetmask(mask & ~FP_X_IMP);
 	} 
 #endif
-		
+
+	zend_startup_extensions_mechanism();
+
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
 	zend_printf = utility_functions->printf_function;
