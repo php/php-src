@@ -160,6 +160,10 @@ PHP_MINFO_FUNCTION(xslt)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "XSLT support", "enabled");
+	php_info_print_table_row(2, "Backend", "Sablotron");
+#ifdef SAB_VERSION
+	php_info_print_table_row(2, "Sablotron Version", SAB_VERSION);
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
