@@ -3,7 +3,9 @@ PHP                                                                        NEWS
 ?? Oct 2003, PHP 5 Beta 3
 - Dropped Windows 95 support. (Andi)
 - Moved extensions to PECL:
+  . ext/crack (Jani, Derick)
   . ext/db (Jani, Derick)
+  . ext/mcal (Jani, Derick)
   . ext/qtdom (Jani, Derick)
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
