@@ -108,9 +108,9 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
   if test "$PHP_IMAP_SSL" != "no"; then
     AC_MSG_RESULT([$PHP_IMAP_SSL/lib])
     AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
-    PHP_ADD_LIBPATH($PHP_IMAP_SSL/lib, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY_DEFER(ssl,, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY_DEFER(crypto,, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($PHP_IMAP_SSL/lib, IMAP_SHARED_LIBADD)
   else
     TST_LIBS="-L$IMAP_LIBDIR -l$IMAP_LIB"
     if test $PHP_KERBEROS != "no"; then
@@ -187,16 +187,18 @@ if test "$PHP_IMAP" != "no"; then
     fi
 
     PHP_ADD_INCLUDE($IMAP_INC_DIR)
-    PHP_ADD_LIBPATH($IMAP_LIBDIR, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY_DEFER($IMAP_LIB,, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($IMAP_LIBDIR, IMAP_SHARED_LIBADD)
     PHP_IMAP_KRB_CHK
     PHP_IMAP_SSL_CHK
-    
+
     dnl Test the build in the end
+    TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD"
     AC_MSG_CHECKING(whether IMAP works)
     PHP_IMAP_TEST_BUILD([
       AC_MSG_RESULT(yes)
     ], [
+      AC_MSG_RESULT(no)
       AC_MSG_ERROR([build test failed. Please check the config.log for details.])
-    ], $DLIBS)
+    ], $TST_LIBS)
 fi
