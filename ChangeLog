@@ -1,3 +1,92 @@
+2004-03-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/url_scanner_ex.c:
+      Pending touch
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/math/bug27646.phpt:
+      -Make NAN and INF more portable (atof() doesn't work on MSVC.6 for example)
+      -Change test to use constants without prior conversion
+
+    * ext/ming/ming.c:
+      Really use studlyCaps here
+
+2004-03-25  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      main/rfc1867.c:
+      - Stopped file uploads from throwing E_WARNINGs and E_NOTICEs which can not
+      be
+        hidden from within scripts (and a result value in the $_FILES global can
+      be
+        used to see the real failure anyway).
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Remove old and deprecated <?php_track_vars?> scanner token.
+
+2004-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/package.xml:
+      Corrected package file.
+
+2004-03-25  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/shmop/package.xml:
+      another package description
+
+2004-03-25  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Update NEWS
+
+    * ZendEngine2/zend_compile.c:
+      - If __construct() is defined then it will always take precedence over
+      - old style constructors.
+
+2004-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2004-03-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      no need to use result for RECV's - as in PHP4
+
+2004-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with 4.3.5
+
+2004-03-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Use get/set handlers for increment.decrement ops on objects
+
+2004-03-25  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+          /* The compiler is not-reentrant. Make sure we __autoload() only during
+      run-time
+           * (doesn't impact fuctionality of __autoload()
+           */
+
+2004-03-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      main/SAPI.c:
+      Fixed bug #27687 (Bug Adding Default Charset to 'text/*' Content-Type
+      Header
+
+2004-03-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      Using ALLOC_HASHTABLE/FREE_HASHTABLE instead of emalloc/free.
+
 2004-03-24  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * ext/dbx/package.xml
