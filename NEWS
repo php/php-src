@@ -59,7 +59,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
 - Fixed bug #23685 (fake values returned when OID value is an empty string).
   (Jani)
-- Fixed bug #22836 (memory corruption with references to NULL). (Ilia)
 - Fixed bug #22690 (ob_start() did not work with create_function() callbacks).
   (Marcus)
 - Fixed bug #21855 (Threading issue on HP-UX). (Roshan Naik, Andi, Moriyoshi)
