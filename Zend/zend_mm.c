@@ -89,6 +89,34 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_fre
 	}
 }
 
+static inline void zend_mm_create_new_free_block(zend_mm_heap *heap, zend_mm_block *mm_block, size_t true_size)
+{
+	int remaining_size;
+	zend_mm_free_block *new_free_block;
+
+	/* calculate sizes */
+	remaining_size = mm_block->size - true_size;
+
+	if (remaining_size < ZEND_MM_ALIGNED_FREE_HEADER_SIZE) {
+		/* keep best_fit->size as is, it'll include this extra space */
+		return;
+	}
+
+	/* prepare new free block */
+	mm_block->size = true_size;
+	new_free_block = (zend_mm_free_block *) ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
+
+	new_free_block->type = ZEND_MM_FREE_BLOCK;
+	new_free_block->size = remaining_size;
+	new_free_block->prev_size = true_size;
+
+	/* update the next block's prev_size */
+	ZEND_MM_BLOCK_AT(new_free_block, new_free_block->size)->prev_size = new_free_block->size;
+
+	/* add the new free block to the free list */
+	zend_mm_add_to_free_list(heap, new_free_block);
+	return;
+}
 
 zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
 {
@@ -157,8 +185,7 @@ void zend_mm_shutdown(zend_mm_heap *heap)
 void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 {
 	size_t true_size;
-	zend_mm_free_block *p, *best_fit=NULL, *new_free_block;
-	size_t remaining_size;
+	zend_mm_free_block *p, *best_fit=NULL;
 
 	/* The max() can probably be optimized with an if() which checks more specific cases */
 	true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
@@ -187,27 +214,7 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 	/* remove from free list */
 	zend_mm_remove_from_free_list(heap, best_fit);
 
-	/* calculate sizes */
-	remaining_size = best_fit->size - true_size;
-
-	if (remaining_size < ZEND_MM_ALIGNED_FREE_HEADER_SIZE) {
-		/* keep best_fit->size as is, it'll include this extra space */
-		return ZEND_MM_DATA_OF(best_fit);
-	}
-
-	/* prepare new free block */
-	best_fit->size = true_size;
-	new_free_block = (zend_mm_free_block *) ZEND_MM_BLOCK_AT(best_fit, best_fit->size);
-
-	new_free_block->type = ZEND_MM_FREE_BLOCK;
-	new_free_block->size = remaining_size;
-	new_free_block->prev_size = true_size;
-
-	/* update the next block's prev_size */
-	ZEND_MM_BLOCK_AT(new_free_block, new_free_block->size)->prev_size = new_free_block->size;
-
-	/* add the new free block to the free list */
-	zend_mm_add_to_free_list(heap, new_free_block);
+	zend_mm_create_new_free_block(heap, (zend_mm_block *) best_fit, true_size);
 
 	return ZEND_MM_DATA_OF(best_fit);
 }
@@ -249,18 +256,35 @@ void zend_mm_free(zend_mm_heap *heap, void *p)
 	}
 }
 
-/* This still needs optimizing to truely resize when possible */
 void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 {
-	void *ptr;
 	zend_mm_block *mm_block = ZEND_MM_HEADER_OF(p);
+	zend_mm_block *next_block;
 	size_t true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 
 	if (true_size <= mm_block->size) {
+		zend_mm_create_new_free_block(heap, mm_block, true_size);
+		/* We don't yet merge this free block with the following one */
+
 		return p;
 	}
-	ptr = zend_mm_alloc(heap, size);
-	memcpy(ptr, p, mm_block->size - ZEND_MM_ALIGNED_HEADER_SIZE);
-	zend_mm_free(heap, p);
-	return ptr;
+
+	next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
+
+	if (next_block->type != ZEND_MM_FREE_BLOCK || (mm_block->size + next_block->size < true_size)) {
+		void *ptr;
+	
+		ptr = zend_mm_alloc(heap, size);
+		memcpy(ptr, p, mm_block->size - ZEND_MM_ALIGNED_HEADER_SIZE);
+		zend_mm_free(heap, p);
+		return ptr;
+	}
+
+	zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
+	mm_block->size += next_block->size;
+	
+	zend_mm_create_new_free_block(heap, mm_block, true_size);
+	/* We don't yet merge this free block with the following one */
+
+	return p;
 }
