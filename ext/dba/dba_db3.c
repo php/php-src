@@ -74,9 +74,13 @@ DBA_OPEN_FUNC(db3)
 	}
 
 	if (db_create(&dbp, NULL, 0) == 0 &&
+#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
+			dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode) == 0) {
+#else
 			dbp->open(dbp, info->path, NULL, type, gmode, filemode) == 0) {
+#endif
 		dba_db3_data *data;
-
+ 
 		data = emalloc(sizeof(*data));
 		data->dbp = dbp;
 		data->cursor = NULL;
