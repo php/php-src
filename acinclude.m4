@@ -4,6 +4,17 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+AC_DEFUN(PHP_REMOVE_USR_LIB,[
+  ac_new_flags=""
+  for i in [$]$1; do
+    case [$]i in
+    -L/usr/lib|-L/usr/lib/) ;;
+    *) ac_new_flags="[$]ac_new_flags [$]i" ;;
+    esac
+  done
+  $1=[$]ac_new_flags
+])
+    
 AC_DEFUN(PHP_SETUP_OPENSSL,[
   if test "$PHP_OPENSSL" = "no"; then
     PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
