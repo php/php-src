@@ -845,9 +845,11 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	if (Z_STRLEN_PP(format_arg)==0) {
 		RETURN_FALSE;
 	}
+#ifdef PHP_WIN32
 	if (timestamp < 0) {
 		RETURN_FALSE;
 	}
+#endif
 	format = Z_STRVAL_PP(format_arg);
 	if (gm) {
 		ta = php_gmtime_r(&timestamp, &tmbuf);
