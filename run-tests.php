@@ -73,7 +73,11 @@ if(!@is_executable($php)) {
 
 // Check whether a detailed log is wanted.
 
-define('DETAILED',0 + $_ENV['TEST_PHP_DETAILED']);
+if(isset($_ENV['TEST_PHP_DETAILED'])) {
+	define('DETAILED', $_ENV['TEST_PHP_DETAILED']);
+} else {
+	define('DETAILED', 0);
+}
 
 // Write test context information.
 
