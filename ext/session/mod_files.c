@@ -199,7 +199,7 @@ PS_OPEN_FUNC(files)
 	PS_SET_MOD_DATA(data);
 
 	data->fd = -1;
-	if ((p = strchr(save_path, ':'))) {
+	if ((p = strchr(save_path, ';'))) {
 		data->dirdepth = strtol(save_path, NULL, 10);
 		save_path = p + 1;
 	}
