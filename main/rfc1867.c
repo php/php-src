@@ -23,6 +23,7 @@
 #include "ext/standard/file.h" /* for php_file_le_uploads() */
 #include "zend_globals.h"
 #include "php_globals.h"
+#include "php_gpce.h"
 #include "rfc1867.h"
 
 

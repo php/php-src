@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include "php.h"
 #include "reg.h"
-#include "post.h"
 #include "php_string.h"
+#include "php_gpce.h"
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif

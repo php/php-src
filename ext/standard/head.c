@@ -23,7 +23,6 @@
 #include "SAPI.h"
 #include "main.h"
 #include "head.h"
-#include "post.h"
 #include "SAPI.h"
 #ifdef TM_IN_SYS_TIME
 #include <sys/time.h>
