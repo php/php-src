@@ -146,14 +146,13 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunctio
 	/* Uses ecalloc() so that Bucket* == NULL */
 	if (persistent) {
 		ht->arBuckets = (Bucket **) calloc(ht->nTableSize, sizeof(Bucket *));
+		if (!ht->arBuckets) {
+			return FAILURE;
+		}
 	} else {
 		ht->arBuckets = (Bucket **) ecalloc_rel(ht->nTableSize, sizeof(Bucket *));
 	}
 	
-	if (!ht->arBuckets) {
-		return FAILURE;
-	}
-
 	ht->pDestructor = pDestructor;
 	ht->pListHead = NULL;
 	ht->pListTail = NULL;
