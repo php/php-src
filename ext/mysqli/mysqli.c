@@ -132,7 +132,7 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 	FREE_HASHTABLE(intern->zo.properties);
 
 	/* link object */
-	if (intern->zo.ce == mysqli_link_class_entry) {
+	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
 		if (my_res && my_res->ptr) {
 			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
 		
