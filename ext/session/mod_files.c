@@ -39,11 +39,9 @@ typedef struct {
 	int dirdepth;
 } ps_files;
 
-
 ps_module ps_mod_files = {
 	PS_MOD(files)
 };
-
 
 #define PS_FILES_DATA ps_files *data = *mod_data
 
@@ -93,8 +91,14 @@ static void _ps_files_open(ps_files *data, const char *key)
 	int keylen;
 
 	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
-		if(data->lastkey) efree(data->lastkey);
-		if(data->fd > -1) close(data->fd);
+		if(data->lastkey) {
+			efree(data->lastkey);
+			data->lastkey = NULL;
+		}
+		if(data->fd != -1) {
+			close(data->fd);
+			data->fd = -1;
+		}
 
 		keylen = strlen(key);
 		if(keylen <= data->dirdepth || MAXPATHLEN < 
@@ -111,10 +115,11 @@ static void _ps_files_open(ps_files *data, const char *key)
 		data->lastkey = estrdup(key);
 		
 #ifdef O_EXCL
-		data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
-		/* -1, if file exists and access failed due to O_EXCL|O_CREAT */
+		/* in the common case, the file already exists */
+		data->fd = open(buf, O_EXCL | O_RDWR);
 		if(data->fd == -1) {
-			data->fd = open(buf, O_EXCL | O_RDWR);
+			/* create it, if necessary */
+			data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
 		}
 #else
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
@@ -132,8 +137,9 @@ PS_READ_FUNC(files)
 	PS_FILES_DATA;
 
 	_ps_files_open(data, key);
-	if(data->fd < 0)
+	if(data->fd < 0) {
 		return FAILURE;
+	}
 	
 	if(fstat(data->fd, &sbuf)) {
 		return FAILURE;
@@ -158,8 +164,9 @@ PS_WRITE_FUNC(files)
 	PS_FILES_DATA;
 
 	_ps_files_open(data, key);
-	if(data->fd < 0) 
+	if(data->fd < 0) {
 		return FAILURE;
+	}
 
 	ftruncate(data->fd, 0);
 	lseek(data->fd, 0, SEEK_SET);
