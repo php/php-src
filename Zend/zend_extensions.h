@@ -89,9 +89,10 @@ struct _zend_extension {
 	int resource_number;
 };
 
-
+BEGIN_EXTERN_C()
 ZEND_API int zend_get_resource_handle(zend_extension *extension);
 ZEND_API void zend_extension_dispatch_message(int message, void *arg);
+END_EXTERN_C()
 
 #define ZEND_EXTMSG_NEW_EXTENSION		1
 
@@ -106,13 +107,16 @@ ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 ZEND_API extern zend_llist zend_extensions;
 
 void zend_extension_dtor(zend_extension *extension);
-ZEND_API int zend_load_extension(char *path);
-ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 void zend_append_version_info(zend_extension *extension);
 int zend_startup_extensions_mechanism(void);
 int zend_startup_extensions(void);
 void zend_shutdown_extensions(TSRMLS_D);
+
+BEGIN_EXTERN_C()
+ZEND_API int zend_load_extension(char *path);
+ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(char *extension_name);
+END_EXTERN_C()
 
 #endif /* ZEND_EXTENSIONS_H */
 

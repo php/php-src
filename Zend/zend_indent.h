@@ -22,7 +22,9 @@
 #ifndef ZEND_INDENT_H
 #define ZEND_INDENT_H
 
+BEGIN_EXTERN_C()
 ZEND_API void zend_indent(void);
+END_EXTERN_C()
 
 #endif /* ZEND_INDENT_H */
 

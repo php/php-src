@@ -54,6 +54,7 @@ typedef struct _zend_objects_store {
 } zend_objects_store;
 
 /* Global store handling functions */
+BEGIN_EXTERN_C()
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size);
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC);
 ZEND_API void zend_objects_store_destroy(zend_objects_store *objects);
@@ -73,6 +74,8 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers();
+END_EXTERN_C()
+
 #endif /* ZEND_OBJECTS_H */
 
 /*
