@@ -119,7 +119,7 @@ void php_base64_init()
 		ch += 16;
 	}
 	sprintf(sp, "};");
-	php_error(E_NOTICE,"reverse_table:\n%s", s);
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Reverse_table:\n%s", s);
 	efree(s);
 }
 */
@@ -140,7 +140,7 @@ unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_
 	}
 
 	/* run through the whole string, converting as we go */
-	while ((ch = *current++) != '\0') {
+	while ((ch = *current++) != '\0' && length-- > 0) {
 		if (ch == base64_pad) break;
 
 	    /* When Base64 gets POSTed, all pluses are interpreted as spaces.
