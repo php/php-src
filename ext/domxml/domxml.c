@@ -144,6 +144,132 @@ PHP_MINIT_FUNCTION(domxml)
 	return SUCCESS;
 }
 
+#ifdef 0
+/* {{{ Node Class */
+pval domxmlnode_class_get_property(zend_property_reference *property_reference)
+{
+	pval result;
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+
+	printf("Reading a property from a OverloadedTestClass object:\n");
+
+	for (element=property_reference->elements_list.head; element; element=element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+		switch (overloaded_property->type) {
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+		}
+		switch (overloaded_property->element.type) {
+			case IS_LONG:
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
+				break;
+			case IS_STRING:
+				printf("'%s'\n", overloaded_property->element.value.str.val);
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+		
+	result.value.str.val = estrndup("testing", 7);
+	result.value.str.len = 7;
+	result.type = IS_STRING;
+	return result;
+}
+
+
+int domxmlnode_class_set_property(zend_property_reference *property_reference, pval *value)
+{
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+	printf("Writing to a property from a OverloadedTestClass object:\n");
+	printf("Writing '");
+	zend_print_variable(value);
+	printf("'\n");
+
+	for (element=property_reference->elements_list.head; element; element=element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+		switch (overloaded_property->type) {
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+		}
+		switch (overloaded_property->element.type) {
+			case IS_LONG:
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
+				break;
+			case IS_STRING:
+				printf("'%s'\n", overloaded_property->element.value.str.val);
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+		
+	return 0;
+}
+
+void domxmlnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+{
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+
+	printf("Invoking a method on OverloadedTestClass object:\n");
+
+	for (element=property_reference->elements_list.head; element; element=element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+		switch (overloaded_property->type) {
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+			case OE_IS_METHOD:
+				printf("Overloaded method:  ");
+		}
+		switch (overloaded_property->element.type) {
+			case IS_LONG:
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
+				break;
+			case IS_STRING:
+				printf("'%s'\n", overloaded_property->element.value.str.val);
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+		
+	printf("%d arguments\n", ARG_COUNT(ht));
+	return_value->value.str.val = estrndup("testing", 7);
+	return_value->value.str.len = 7;
+	return_value->type = IS_STRING;
+}
+
+
+void domxmlnode_class_startup()
+{
+	zend_class_entry domxmlnode_class_entry;
+
+	INIT_OVERLOADED_CLASS_ENTRY(dcomxmlnode_class_entry, "Dom Node",
+	              php_domxmlnode_class_functions,
+								domxmlnode_class_call_function,
+								domxmlnode_class_get_property,
+								domxmlnode_class_set_property);
+
+	register_internal_class(&domxmlnode_class_entry);
+}
+/* }}} */
+#endif
+
 PHP_MINFO_FUNCTION(domxml)
 {
 		PUTS("DOM/XML support active (compiled with libxml ");
