@@ -173,6 +173,67 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("</code>");
 }
 
+
+
+ZEND_API void zend_strip(TSRMLS_D)
+{
+	zval token;
+	int token_type;
+
+	token.type = 0;
+	while ((token_type=lex_scan(&token TSRMLS_CC))) {
+		switch (token_type) {
+			case T_COMMENT:
+				token.type = 0;
+				break;
+
+			case T_WHITESPACE:
+				if (token.type) {
+					putchar(' ');
+					token.type = 0;
+				}
+				continue;
+		}
+
+		switch (token_type) {
+			case 349:
+				break;
+
+			default: {
+					char c, *ptr=LANG_SCNG(yy_text), *end=LANG_SCNG(yy_text)+LANG_SCNG(yy_leng);
+					while (ptr<end) {
+						c = *ptr++;
+						putchar(c);
+					}
+				}
+				break;
+		}
+
+		if (token.type == IS_STRING) {
+			switch (token_type) {
+				case T_OPEN_TAG:
+				case T_OPEN_TAG_WITH_ECHO:
+				case T_CLOSE_TAG:
+				case T_WHITESPACE:
+				case T_COMMENT:
+					break;
+
+				default:
+					efree(token.value.str.val);
+					break;
+			}
+		} else if (token_type == T_END_HEREDOC) {
+			zend_bool has_semicolon=(strchr(token.value.str.val, ';')?1:0);
+
+			efree(token.value.str.val);
+			if (has_semicolon) {
+				/* the following semicolon was unput(), ignore it */
+				lex_scan(&token TSRMLS_CC);
+			}
+		}
+		token.type = 0;
+	}
+}
 /*
  * Local variables:
  * tab-width: 4

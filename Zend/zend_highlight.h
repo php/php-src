@@ -40,6 +40,7 @@ typedef struct _zend_syntax_highlighter_ini {
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC);
+ZEND_API void zend_strip(TSRMLS_D);
 ZEND_API int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC);
 ZEND_API int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, char *str_name TSRMLS_DC);
 ZEND_API void zend_html_putc(char c);
