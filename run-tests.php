@@ -740,7 +740,7 @@ COMMAND $cmd
 */
 		if (preg_match("/^$wanted_re\$/s", $output)) {
 			@unlink($tmp_file);
-			echo "PASS $tested\n";
+			echo "PASS $tested$info\n";
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
@@ -754,7 +754,7 @@ COMMAND $cmd
 		$ok = (0 == strcmp($output,$wanted));
 		if ($ok) {
 			@unlink($tmp_file);
-			echo "PASS $tested\n";
+			echo "PASS $tested$info\n";
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
@@ -766,7 +766,7 @@ COMMAND $cmd
 	if ($warn) {
 		echo "WARN $tested$info\n";
 	} else {
-		echo "FAIL $tested\n";
+		echo "FAIL $tested$info\n";
 	}
 
 	$GLOBALS['__PHP_FAILED_TESTS__'][] = array(
