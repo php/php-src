@@ -50,17 +50,21 @@
 * Fixed #25131 - OS_Guess warnings on empty lines from
   popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
 * Fixed #25117 - MD5 checksum should be case-insensitive
-* Fixed static calls to PEAR error-handling methods in classes (Greg)
+* Fixed static calls to PEAR error-handling methods in classes
 * Added ability to use a static method callback for error-handling, and removed
-use of inadvisable @ in setErrorHandling (Greg)
-* Added dependency on XML_RPC, and optional dependency on xmlrpc extension (Greg)
-* Added --alldeps and --onlyreqdeps options to pear install/pear upgrade (Greg)
+use of inadvisable @ in setErrorHandling
+* Added dependency on XML_RPC, and optional dependency on xmlrpc extension
+* Added --alldeps and --onlyreqdeps options to pear install/pear upgrade
 * Sorting of installation/uninstallation so package order on the command-line is
-  insignificant (fixes upgrade-all if every package is installed) (Greg)
+  insignificant (fixes upgrade-all if every package is installed)
 * pear upgrade will now install if the package is not installed (necessary for
   pear upgrade --alldeps, as installation is often necessary for new
-  dependencies) (Greg)
+  dependencies)
 * fixed pear.bat if PHP is installed in a path like C:\Program Files\php (Greg)
+* Add ability to specify pear install DB-1.2, or pear install DB-stable, or
+  pear install DB-1.2.tar to download as uncompressed tar
+* Fix #25008 - unhelpful error message
+* Fixed optional dependencies in Dependency.php
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
