@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Improved performance of switch. (Dmitry)
+- Removed garbage manager in Zend Engine which results in more agressive
+  freeing of data. (Dmitry, Andi)
 - Implemented access to INI variables from within .ini file. (Andrei)
 - PHP will now respect extension dependencies when initializing. (Wez)
 - Added SAPI hook to get the current request time. (Rasmus)
