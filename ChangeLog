@@ -1,3 +1,80 @@
+2004-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.c
+      Zend/zend_hash.c
+      Zend/zend_variables.c:
+      MFHZE2: Better stability during premature shutdown of request startup
+
+2004-07-12  Timm Friebe  <thekid@thekid.de>
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed bug #29064 (Exact numeric/decimal/money datatypes lose precision)
+      - Fixed bug #27843 (sybase_query() triggers (spurious?) notices when
+        query is a stored procedure)
+      - Fixed multiple memory leaks with sybase_unbuffered_query()
+      - Changed sybase_query() to ignore store_results = false in  buffering
+        mode, it would yield unpredictable results
+      - Fixed sybase_unbuffered_query() when used with store_results = false
+      - Changed sybase_fetch_object() to ignore second argument when passed
+        as NULL
+      - Made sybase_data_seek() error message more verbose
+      - Fixed memory leak in shutdown when not all rows where selected in an
+        unbuffered query
+      CVS ----------------------------------------------------------------------
+
+2004-07-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      Fix file_get_contents() bug...
+
+2004-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0RC4)
+      ext/standard/exec.c:
+      Missing patch.
+
+    * (php_5_0_0RC4)
+      NEWS:
+      Fixed bug #28999 (fixed behaviour of exec() to work as it did in 4.X).
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFZE2: Fixed bug #29086 & #28064 (PHP crashes on extremly long scripts).
+
+    * (php_5_0_0RC4)
+      ZendEngine2/zend_execute.c:
+      Fixed bug #29086 & #28064 (PHP crashes on extremly long scripts).
+
+    * (php_5_0_0RC4)
+      ext/sqlite/libsqlite/src/parse.c:
+      Touch the file so that build system does not try to rebuild it.
+
+2004-07-12  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC4)
+      ZendEngine2/zend.c:
+      - Convert zend_class_entry -> zend_class_entry *
+
+2004-07-12  Christian Stocker  <chregu@phant.ch>
+
+    * (php_5_0_0RC4)
+      ext/xsl/php_xsl.c:
+      implement the clone code for the XSLTProcessor object and fix #29108
+      "xslt segfaults when ze1_compatibility_mode is on" (By Rob Richards)
+
+2004-07-12  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/oci8/oci8.c:
+      MFH: fix #28978 (multiple OCIBindByName on the same placeholder eats
+      memory)
+
+    * (php_5_0_0RC4)
+      ext/oci8/oci8.c:
+      fix #28978 (multiple OCIBindByName on the same placeholder eats memory)
+
 2004-07-11  Andrey Hristov  <php@hristov.com>
 
     * NEWS:

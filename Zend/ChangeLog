@@ -1,3 +1,15 @@
+2004-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0RC4)
+      zend_execute.c:
+      Fixed bug #29086 & #28064 (PHP crashes on extremly long scripts).
+
+2004-07-12  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC4)
+      zend.c:
+      - Convert zend_class_entry -> zend_class_entry *
+
 2004-07-10  Jon Parise  <jon+php@csh.rit.edu>
 
     * zend.c:
