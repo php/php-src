@@ -1354,6 +1354,8 @@ ZEND_API void zend_unregister_functions(zend_function_entry *functions, int coun
 
 ZEND_API int zend_register_module(zend_module_entry *module)
 {
+	int retval, name_len;
+	char *lcname;
 	TSRMLS_FETCH();
 
 #if 0
@@ -1364,7 +1366,11 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 		return FAILURE;
 	}
 	module->module_started=1;
-	return zend_hash_add(&module_registry, module->name, strlen(module->name)+1, (void *)module, sizeof(zend_module_entry), NULL);
+	name_len = strlen(module->name);
+	lcname = zend_str_tolower_dup(module->name, name_len);
+	retval = zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), NULL);
+	efree(lcname);
+	return retval;
 }
 
 
