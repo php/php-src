@@ -1,4 +1,5 @@
 <?php
+// $Id$
 // $Horde: horde/lib/Log.php,v 1.15 2000/06/29 23:39:45 jon Exp $
 
 /**
@@ -52,9 +53,8 @@ class Log {
      */
     function factory ($log_type, $log_name = '', $ident = '', $conf = array()) {
         $log_type = strtolower($log_type);
-        $classfile = dirname(__FILE__) . '/Log/' . $log_type . '.php';
-        if (@is_readable($classfile)) {
-            include_once $classfile;
+        $classfile = 'Log/' . $log_type . '.php';
+	if (@include_once $classfile) {
             $class = 'Log_' . $log_type;
             return new $class($log_name, $ident, $conf);
         } else {
