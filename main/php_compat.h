@@ -3,6 +3,8 @@
 
 #ifdef PHP_WIN32
 #include "config.w32.h"
+#elif defined(NETWARE)
+#include "config.nw.h"
 #else
 #include "php_config.h"
 #endif

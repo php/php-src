@@ -5,6 +5,10 @@
 #include <stddef.h>
 #endif
 
+#ifdef NETWARE
+#include <netinet/in.h>
+#endif
+
 #include "zend.h"
 #include "php_regex.h"
 
