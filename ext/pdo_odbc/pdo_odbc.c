@@ -121,7 +121,6 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
 	php_pdo_unregister_driver(&pdo_odbc_driver);
-	pdo_odbc_fini_error_table();
 	return SUCCESS;
 }
 /* }}} */
