@@ -29,6 +29,7 @@
 #include "ext/standard/php_string.h"
 #include "zend_list.h"
 
+
 #ifdef HAVE_BROKEN_RECODE
 extern char *program_name;
 char *program_name = "php";
@@ -110,7 +111,7 @@ PHP_FUNCTION(recode_string)
 	char *r = NULL;
 	pval **str;
 	pval **req;
-	int success;
+	bool success;
 	
 	ReSLS_FETCH();
 	if (ZEND_NUM_ARGS() != 2

@@ -45,7 +45,12 @@
  */
 #define HAVE_BROKEN_RECODE
 
-#include <stdbool.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+  typedef enum {false = 0, true = 1} bool;
+#endif
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <recode.h>
