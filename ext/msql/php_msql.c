@@ -19,10 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#ifdef COMPILE_DL_MSQL
-#include "dl/phpdl.h"
-#include "functions/dl.h"
-#endif
 #include "php_msql.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
