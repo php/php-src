@@ -322,6 +322,7 @@ dnl are usually in libnsl
 dnl Also, uClibc will bark at linking with glibc's libnsl.
 
 PHP_CHECK_FUNC(socket, socket)
+PHP_CHECK_FUNC(socketpair, socket)
 PHP_CHECK_FUNC(htonl, socket)
 PHP_CHECK_FUNC(gethostname, nsl)
 PHP_CHECK_FUNC(gethostbyaddr, nsl)
