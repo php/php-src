@@ -23,6 +23,7 @@
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
+require_once 'PEAR/Downloader.php';
 require_once 'System.php';
 
 define('PEAR_INSTALLER_OK',       1);
@@ -43,8 +44,9 @@ define('PEAR_INSTALLER_ERROR_NO_PREF_STATE', 2);
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@php.net>
  * @author Martin Jansen <mj@php.net>
+ * @author Greg Beaver <cellog@php.net>
  */
-class PEAR_Installer extends PEAR_Common
+class PEAR_Installer extends PEAR_Downloader
 {
     // {{{ properties
 
@@ -550,6 +552,36 @@ class PEAR_Installer extends PEAR_Common
             }
         }
         return $path;
+    }
+
+    // }}}
+    // {{{ download()
+
+    /**
+     * Download any files and their dependencies, if necessary
+     *
+     * @param array a mixed list of package names, local files, or package.xml
+     * @param PEAR_Config
+     * @param array options from the command line
+     * @param array this is the array that will be populated with packages to
+     *              install.  Format of each entry:
+     *
+     * <code>
+     * array('pkg' => 'package_name', 'file' => '/path/to/local/file',
+     *    'info' => array() // parsed package.xml
+     * );
+     * </code>
+     * @param array this will be populated with any error messages
+     * @param false private recursion variable
+     * @param false private recursion variable
+     * @param false private recursion variable
+     */
+    function download($packages, $options, &$config, &$installpackages,
+                      &$errors, $installed = false, $willinstall = false, $state = false)
+    {
+        // trickiness: initialize here
+        parent::PEAR_Downloader($this->ui, $options, $config);
+        return parent::download($packages);
     }
 
     // }}}
