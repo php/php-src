@@ -1281,14 +1281,21 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 		switch (scan_stat) {
 			case 0:
-				if (*p1 == '\r') {
-					scan_stat = 7;
-				} else if (*p1 == '\n') {
-					scan_stat = 8;	
-				} else if (*p1 == '=') {
-					scan_stat = 1;
-				} else {
-					_php_iconv_appendc(pretval, *p1, cd_pl);
+				switch (*p1) {
+					case '\r':
+						scan_stat = 7;
+						break;
+
+					case '\n':
+						scan_stat = 8;	
+						break;
+					
+					case '=':
+						scan_stat = 1;
+						break;
+					
+					default:
+						_php_iconv_appendc(pretval, *p1, cd_pl);
 				}
 				break;
 
@@ -1302,7 +1309,16 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				break;
 			
 			case 2: /* charset name */
-				if (*p1 == '?') {
+				switch (*p1) {
+					case '?':
+						scan_stat = 3;
+						break;
+
+					case '*':
+						scan_stat = 10;
+						break;
+				} 
+				if (scan_stat != 2) {
 					char tmpbuf[80];
 
 					if (csname == NULL) {
@@ -1338,8 +1354,6 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 #endif
 						goto out;
 					}
-
-					scan_stat = 3;
 				}
 				break;
 
@@ -1436,6 +1450,12 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				} else if (*p1 != ' ' && *p1 != '\t') {
 					err = PHP_ICONV_ERR_MALFORMED;
 					goto out;
+				}
+				break;
+
+			case 10: /* language spec */
+				if (*p1 == '?') {
+					scan_stat = 3;
 				}
 				break;
 		}
