@@ -32,8 +32,8 @@
 #if HAVE_MSSQL
 #define SAFE_STRING(s) ((s)?(s):"")
 
-static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,pval *result, int column_type);
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,pval *result, int column_type);
+static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type);
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type);
 
 function_entry mssql_functions[] = {
 	PHP_FE(mssql_connect, NULL)
@@ -159,7 +159,7 @@ static void _free_mssql_result(mssql_result *result)
 	if (result->data) {
 		for (i=0; i<result->num_rows; i++) {
 			for (j=0; j<result->num_fields; j++) {
-				pval_destructor(&result->data[i][j]);
+				zval_dtor(&result->data[i][j]);
 			}
 			efree(result->data[i]);
 		}
@@ -310,7 +310,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			host=user=passwd=NULL;
 			break;
 		case 1: {
-				pval **yyhost;
+				zval **yyhost;
 				
 				if (zend_get_parameters_ex(1, &yyhost)==FAILURE) {
 					WRONG_PARAM_COUNT;
@@ -321,7 +321,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 2: {
-				pval **yyhost,**yyuser;
+				zval **yyhost,**yyuser;
 				
 				if (zend_get_parameters_ex(2, &yyhost, &yyuser)==FAILURE) {
 					WRONG_PARAM_COUNT;
@@ -334,7 +334,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			break;
 		case 3: {
-				pval **yyhost,**yyuser,**yypasswd;
+				zval **yyhost,**yyuser,**yypasswd;
 			
 				if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
 					WRONG_PARAM_COUNT;
@@ -591,7 +591,7 @@ PHP_FUNCTION(mssql_pconnect)
 
 PHP_FUNCTION(mssql_close)
 {
-	pval **mssql_link_index;
+	zval **mssql_link_index;
 	int id;
 	mssql_link *mssql_ptr;
 	MSSQLLS_FETCH();
@@ -620,7 +620,7 @@ PHP_FUNCTION(mssql_close)
 
 PHP_FUNCTION(mssql_select_db)
 {
-	pval **db, **mssql_link_index;
+	zval **db, **mssql_link_index;
 	int id;
 	mssql_link  *mssql_ptr;
 	MSSQLLS_FETCH();
@@ -657,7 +657,7 @@ PHP_FUNCTION(mssql_select_db)
 	}
 }
 
-static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,pval *result, int column_type)
+static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		var_reset(result);
@@ -715,7 +715,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 	}
 }
 
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,pval *result, int column_type)
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		var_reset(result);
@@ -740,7 +740,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 
 PHP_FUNCTION(mssql_query)
 {
-	pval **query, **mssql_link_index;
+	zval **query, **mssql_link_index;
 	int retvalue;
 	mssql_link *mssql_ptr;
 	mssql_result *result;
@@ -802,7 +802,7 @@ PHP_FUNCTION(mssql_query)
 	}
 	
 	result = (mssql_result *) emalloc(sizeof(mssql_result));
-	result->data = (pval **) emalloc(sizeof(pval *)*MSSQL_ROWS_BLOCK);
+	result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
 	result->mssql_ptr = mssql_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
 	result->num_fields = num_fields;
@@ -811,9 +811,9 @@ PHP_FUNCTION(mssql_query)
 	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
 		result->num_rows++;
 		if (result->num_rows > blocks_initialized*MSSQL_ROWS_BLOCK) {
-			result->data = (pval **) erealloc(result->data,sizeof(pval *)*MSSQL_ROWS_BLOCK*(++blocks_initialized));
+			result->data = (zval **) erealloc(result->data,sizeof(zval *)*MSSQL_ROWS_BLOCK*(++blocks_initialized));
 		}
-		result->data[i] = (pval *) emalloc(sizeof(pval)*num_fields);
+		result->data[i] = (zval *) emalloc(sizeof(zval)*num_fields);
 		for (j=1; j<=num_fields; j++) {
 			MS_SQL_G(get_column_content(mssql_ptr, j, &result->data[i][j-1], column_types[j-1]));
 		}
@@ -871,7 +871,7 @@ PHP_FUNCTION(mssql_query)
 
 PHP_FUNCTION(mssql_free_result)
 {
-	pval **mssql_result_index;
+	zval **mssql_result_index;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
@@ -894,7 +894,7 @@ PHP_FUNCTION(mssql_get_last_message)
 
 PHP_FUNCTION(mssql_num_rows)
 {
-	pval **mssql_result_index;
+	zval **mssql_result_index;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
@@ -911,7 +911,7 @@ PHP_FUNCTION(mssql_num_rows)
 
 PHP_FUNCTION(mssql_num_fields)
 {
-	pval **mssql_result_index;
+	zval **mssql_result_index;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
@@ -928,10 +928,10 @@ PHP_FUNCTION(mssql_num_fields)
 
 PHP_FUNCTION(mssql_fetch_row)
 {
-	pval **mssql_result_index;
+	zval **mssql_result_index;
 	int i;
 	mssql_result *result;
-	pval *field_content;
+	zval *field_content;
 	MSSQLLS_FETCH();
 
 	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
@@ -948,18 +948,18 @@ PHP_FUNCTION(mssql_fetch_row)
 	for (i=0; i<result->num_fields; i++) {
 		MAKE_STD_ZVAL(field_content);
 		*field_content = result->data[result->cur_row][i];
-		pval_copy_constructor(field_content);
-		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval), NULL);
+		zval_copy_ctor(field_content);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(zval *), NULL);
 	}
 	result->cur_row++;
 }
 
 static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 {
-	pval **mssql_result_index;
+	zval **mssql_result_index;
 	mssql_result *result;
 	int i;
-	pval *pvalue_ptr,tmp;
+	zval *zvalue_ptr, *tmp;
 	MSSQLLS_FETCH();
 	PLS_FETCH();
 
@@ -979,13 +979,15 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	for (i=0; i<result->num_fields; i++) {
-		tmp = result->data[result->cur_row][i];
-		pval_copy_constructor(&tmp);
-		if (PG(magic_quotes_runtime) && tmp.type == IS_STRING) {
-			tmp.value.str.val = php_addslashes(tmp.value.str.val,tmp.value.str.len,&tmp.value.str.len,1);
+		ALLOC_ZVAL(tmp);
+		*tmp = result->data[result->cur_row][i];
+		INIT_PZVAL(tmp);
+		zval_copy_ctor(tmp);
+		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
+			tmp->value.str.val = php_addslashes(tmp->value.str.val, tmp->value.str.len, &tmp->value.str.len,1);
 		}
-		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval), (void **) &pvalue_ptr);
-		zend_hash_pointer_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, pvalue_ptr);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(zval *), NULL);
+		zend_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(zval *), NULL);
 	}
 	result->cur_row++;
 }
@@ -1005,7 +1007,7 @@ PHP_FUNCTION(mssql_fetch_array)
 
 PHP_FUNCTION(mssql_data_seek)
 {
-	pval *mssql_result_index, *offset;
+	zval *mssql_result_index, *offset;
 	int type,id;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1086,7 +1088,7 @@ static char *php_mssql_get_field_name(int type)
 
 PHP_FUNCTION(mssql_fetch_field)
 {
-	pval *mssql_result_index,*offset;
+	zval *mssql_result_index,*offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1144,7 +1146,7 @@ PHP_FUNCTION(mssql_fetch_field)
 
 PHP_FUNCTION(mssql_field_length)
 {
-	pval *mssql_result_index,*offset;
+	zval *mssql_result_index,*offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1196,7 +1198,7 @@ PHP_FUNCTION(mssql_field_length)
 
 PHP_FUNCTION(mssql_field_name)
 {
-	pval *mssql_result_index,*offset;
+	zval *mssql_result_index,*offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1249,7 +1251,7 @@ PHP_FUNCTION(mssql_field_name)
 
 PHP_FUNCTION(mssql_field_type)
 {
-	pval *mssql_result_index,*offset;
+	zval *mssql_result_index,*offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1302,7 +1304,7 @@ PHP_FUNCTION(mssql_field_type)
 
 PHP_FUNCTION(mssql_field_seek)
 {
-	pval *mssql_result_index,*offset;
+	zval *mssql_result_index,*offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1335,7 +1337,7 @@ PHP_FUNCTION(mssql_field_seek)
 
 PHP_FUNCTION(mssql_result)
 {
-	pval *row, *field, *mssql_result_index;
+	zval *row, *field, *mssql_result_index;
 	int id,type,field_offset=0;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1387,12 +1389,12 @@ PHP_FUNCTION(mssql_result)
 	}
 
 	*return_value = result->data[row->value.lval][field_offset];
-	pval_copy_constructor(return_value);
+	zval_copy_ctor(return_value);
 }
 
 PHP_FUNCTION(mssql_min_error_severity)
 {
-	pval *severity;
+	zval *severity;
 	MSSQLLS_FETCH();
 
 	
@@ -1405,7 +1407,7 @@ PHP_FUNCTION(mssql_min_error_severity)
 
 PHP_FUNCTION(mssql_min_message_severity)
 {
-	pval *severity;
+	zval *severity;
 	MSSQLLS_FETCH();
 
 	

@@ -955,10 +955,12 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 			php_register_var(value PSLS_CC PLS_CC);
 			zend_hash_move_forward((*entry)->value.ht);
 		}
-	} else if (!PG(track_vars) || strcmp((*entry)->value.str.val, "HTTP_STATE_VARS") != 0) {
+	} else {
 		convert_to_string_ex(entry);
-		
-		PS_ADD_VARL((*entry)->value.str.val, (*entry)->value.str.len);
+
+		if (!PG(track_vars) || strcmp((*entry)->value.str.val, "HTTP_STATE_VARS") != 0) {
+			PS_ADD_VARL((*entry)->value.str.val, (*entry)->value.str.len);
+		}
 	}
 }
 /* }}} */
