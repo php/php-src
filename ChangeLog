@@ -1,3 +1,42 @@
+2000-08-18  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c: - Centralize more fopen-wrappers functionality.
+
+2000-08-18  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/mssql.dsp
+      ext/mssql/mssql_win32_howto.txt: Adding howto file for MS SQL
+
+2000-08-18  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    use estrndup and efree to hopefully avoid both munging of arguments and
+    leaking memory.
+
+2000-08-18  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    REQUEST_URI is a handy server variable, lets pass it onto ISAPI/PHP
+
+2000-08-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner.c: Add necessary *_FETCH() macros
+
+2000-08-18  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/standard/string.c:
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: Purely cosmetic.
+
+    * ext/standard/string.c: Fix #6234
+
+2000-08-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/array.c:
+    typo fix in array_diff error message, fixes bug #6236
+
+    * ext/standard/array.c: minor typo fix in proto
+
 2000-08-17  Sam Ruby  <rubys@us.ibm.com>
 
     * sapi/servlet/servlet.c:
