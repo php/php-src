@@ -50,6 +50,8 @@
 #include "http_request.h"
 #include "build-defs.h"
 
+#define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")
+
 extern module *top_module;
 
 PHP_FUNCTION(virtual);
