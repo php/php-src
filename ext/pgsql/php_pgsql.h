@@ -24,8 +24,6 @@
 
 #if HAVE_PGSQL
 
-#define PHP_PGSQL_API 20020419
-
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
