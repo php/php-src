@@ -4,7 +4,7 @@
 
 Fixed:
 
-    i18n_convert/mb_convert_encoding (Moriyoshi Koizumi)
+    mb_convert_encoding (Moriyoshi Koizumi)
     socket_iovec_alloc (Rasmus)
     exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
