@@ -10,6 +10,8 @@ global
       current directory
     * on some platforms unimplemented function will just do nothing (eg symlink)
       they should print a warning or be not even defined!
+	* banish the legacy of php3_ prefixes
+	* implement javadoc based function docs template system
 
 documentation
 -------------
