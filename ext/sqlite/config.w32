@@ -3,7 +3,7 @@
 
 ARG_WITH("sqlite", "SQLite support", "yes");
 
-if (PHP_SQLITE == "yes") {
+if (PHP_SQLITE != "no") {
 	copy_and_subst(configure_module_dirname + "\\libsqlite\\src\\sqlite.h.in",
 		configure_module_dirname + "\\libsqlite\\src\\sqlite.h", new Array(
 			"--VERS--", file_get_contents(configure_module_dirname + "\\libsqlite\\VERSION").replace(new RegExp("[\r\n]+", "g"), ""),
