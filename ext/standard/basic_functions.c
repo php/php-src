@@ -573,6 +573,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_values,							NULL)
 	PHP_FE(array_count_values,		 			  	NULL)
 	PHP_FE(array_reverse,							NULL)
+	PHP_FE(array_reduce,							NULL)
 	PHP_FE(array_pad,								NULL)
 	PHP_FE(array_flip,								NULL)
 	PHP_FE(array_rand,								NULL)

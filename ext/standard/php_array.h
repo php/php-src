@@ -67,6 +67,7 @@ PHP_FUNCTION(array_keys);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
 PHP_FUNCTION(array_reverse);
+PHP_FUNCTION(array_reduce);
 PHP_FUNCTION(array_pad);
 PHP_FUNCTION(array_flip);
 PHP_FUNCTION(array_rand);
