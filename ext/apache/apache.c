@@ -165,6 +165,51 @@ PHP_MINFO_FUNCTION(apache)
 
 	serv = ((request_rec *) SG(server_context))->server;
 
+    PUTS("<table border=5 width=\"600\">\n");
+    php_info_print_table_header(2, "Entry", "Value");
+#if WIN32|WINNT
+	PUTS("Apache for Windows 95/NT<br>");
+#else
+	php_info_print_table_row(2, "APACHE_INCLUDE", PHP_APACHE_INCLUDE);
+	php_info_print_table_row(2, "APACHE_TARGET", PHP_APACHE_TARGET);
+#endif
+	php_info_print_table_row(2, "Apache Version", SERVER_VERSION);
+#ifdef APACHE_RELEASE
+	sprintf(output_buf, "%d", APACHE_RELEASE);
+	php_info_print_table_row(2, "Apache Release", output_buf);
+#endif
+	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
+	php_info_print_table_row(2, "Apache API Version", output_buf);
+	sprintf(output_buf, "%s:%u", serv->server_hostname,serv->port);
+	php_info_print_table_row(2, "Hostname/Port", output_buf);
+#if !defined(WIN32) && !defined(WINNT)
+	sprintf(output_buf, "%s(%d)/%d", user_name,(int)user_id,(int)group_id);
+	php_info_print_table_row(2, "User/Group", output_buf);
+	sprintf(output_buf, "per child: %d<br>keep alive: %s<br>max per connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	php_info_print_table_row(2, "Max Requests", output_buf);
+#endif
+	sprintf(output_buf, "connection: %d<br>keep-alive: %d",serv->timeout,serv->keep_alive_timeout);
+	php_info_print_table_row(2, "Timeouts", output_buf);
+#if !defined(WIN32) && !defined(WINNT)
+	php_info_print_table_row(2, "Server Root", server_root);
+
+	
+	PUTS("<tr><td valign=\"top\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">Loaded modules</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+	for(modp = top_module; modp; modp = modp->next) {
+		strncpy(name, modp->name, sizeof(name) - 1);
+		if ((p = strrchr(name, '.'))) {
+			*p='\0'; /* Cut off ugly .c extensions on module names */
+		}
+		PUTS(name);
+		if (modp->next) {
+			PUTS(", ");
+		}
+	}
+#endif
+	PUTS("</td></tr>\n");
+	PUTS("</table>\n");
+
+
 	{
 		register int i;
 		array_header *arr;
@@ -215,49 +260,6 @@ PHP_MINFO_FUNCTION(apache)
 		PUTS("</table>\n\n");
 	}
 
-    PUTS("<table border=5 width=\"600\">\n");
-    php_info_print_table_header(2, "Entry", "Value");
-#if WIN32|WINNT
-	PUTS("Apache for Windows 95/NT<br>");
-#else
-	php_info_print_table_row(2, "APACHE_INCLUDE", PHP_APACHE_INCLUDE);
-	php_info_print_table_row(2, "APACHE_TARGET", PHP_APACHE_TARGET);
-#endif
-	php_info_print_table_row(2, "Apache Version", SERVER_VERSION);
-#ifdef APACHE_RELEASE
-	sprintf(output_buf, "%d", APACHE_RELEASE);
-	php_info_print_table_row(2, "Apache Release", output_buf);
-#endif
-	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
-	php_info_print_table_row(2, "Apache API Version", output_buf);
-	sprintf(output_buf, "%s:%u", serv->server_hostname,serv->port);
-	php_info_print_table_row(2, "Hostname/Port", output_buf);
-#if !defined(WIN32) && !defined(WINNT)
-	sprintf(output_buf, "%s(%d)/%d", user_name,(int)user_id,(int)group_id);
-	php_info_print_table_row(2, "User/Group", output_buf);
-	sprintf(output_buf, "per child: %d<br>keep alive: %s<br>max per connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
-	php_info_print_table_row(2, "Max Requests", output_buf);
-#endif
-	sprintf(output_buf, "connection: %d<br>keep-alive: %d",serv->timeout,serv->keep_alive_timeout);
-	php_info_print_table_row(2, "Timeouts", output_buf);
-#if !defined(WIN32) && !defined(WINNT)
-	php_info_print_table_row(2, "Server Root", server_root);
-
-	
-	PUTS("<tr><td valign=\"top\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">Loaded modules</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-	for(modp = top_module; modp; modp = modp->next) {
-		strncpy(name, modp->name, sizeof(name) - 1);
-		if ((p = strrchr(name, '.'))) {
-			*p='\0'; /* Cut off ugly .c extensions on module names */
-		}
-		PUTS(name);
-		if (modp->next) {
-			PUTS(", ");
-		}
-	}
-#endif
-	PUTS("</td></tr>\n");
-	PUTS("</table>\n");
 }
 
 /* This function is equivalent to <!--#include virtual...-->
