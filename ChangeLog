@@ -1,3 +1,38 @@
+2000-07-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/string.c: Eliminated a typo.
+
+2000-07-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    - Updated str_pad() to be able to pad on left/right/both sides. 
+
+2000-07-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/info.c: Uncomplete proto.
+
+    * ext/sockets/sockets.c: Aren't there some function names conflicts?
+
+2000-07-08  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README
+      ext/java/except.php
+      ext/java/java.c
+      ext/java/reflect.java:
+    Add experimental APIs to get and clear the last exception
+
+2000-07-08  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: * php4/ext/sockets.c, php4/ext/php_sockets.h:
+    	Numerous changes. Many prototypes changed to be more like the
+    	appropriate *NIX counterparts. Many new prototypes defining many
+    	more advanced socket routines. Better AF_UNIX socket support.
+    	bind() now recognizes the socket type and acts appropriately,
+    	instead of needing the AF_* for the socket passed in.
+
 2000-07-07  Jouni Ahto  <jah@mork.net>
 
     * ext/gd/gdttf.c:
