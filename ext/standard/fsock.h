@@ -27,28 +27,9 @@
 
 #include "file.h"
 
-#ifdef PHP_WIN32
-# ifndef WINNT
-#  define WINNT 1
-# endif
-# undef FD_SETSIZE
-# include "arpa/inet.h"
-# define socklen_t unsigned int
-#endif
-
-#ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
-#endif
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-
 #define PHP_FSOCK_CHUNK_SIZE 8192
+
+#include "php_network.h"
 
 #if HAVE_PHP_STREAM
 extern php_stream_ops php_stream_socket_ops;
