@@ -25,7 +25,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
@@ -68,6 +67,8 @@ php_array_globals array_globals;
 #define CASE_LOWER          0
 #define CASE_UPPER          1
 
+#define COUNT_NORMAL		0
+#define COUNT_RECURSIVE		1
 
 PHP_MINIT_FUNCTION(array)
 {
@@ -90,6 +91,9 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("COUNT_NORMAL", COUNT_NORMAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", COUNT_RECURSIVE, CONST_CS | CONST_PERSISTENT);
+	
 	return SUCCESS;
 }
 
@@ -223,26 +227,45 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-/* {{{ proto int count(mixed var)
+
+int php_count_recursive(zval *array, long mode)
+{
+	long cnt = 0, i;
+	zval **element;
+	
+	HashTable *target_hash;
+	target_hash = HASH_OF(array);
+
+	if (Z_TYPE_P(array) == IS_ARRAY)
+	{
+		cnt += zend_hash_num_elements(target_hash);
+		if (mode == COUNT_RECURSIVE) {
+			for(i = 0; i < zend_hash_num_elements(target_hash); i++) {
+				if (zend_hash_index_find (Z_ARRVAL_P(array), i, (void **) &element) == SUCCESS) {
+					cnt += php_count_recursive(*element, COUNT_RECURSIVE);
+				}
+			}
+		}
+	}
+	return cnt;
+}
+
+/* {{{ proto int count(mixed var [, int mode])
    Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
-	pval **array;
-	HashTable *target_hash;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	zval *array;
+	long mode = COUNT_NORMAL;
+	
+	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE)
+		return;
+	
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+		RETURN_LONG (php_count_recursive (array, mode));
+	} else {
+		/* return 1 for non-array arguments */
+		RETURN_LONG(1);
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		if (Z_TYPE_PP(array) == IS_NULL) {
-			RETURN_LONG(0);
-		} else {
-			RETURN_LONG(1);
-		}
-	}
-
-	RETURN_LONG(zend_hash_num_elements(target_hash));
 }
 /* }}} */
 
