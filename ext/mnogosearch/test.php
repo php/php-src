@@ -43,6 +43,8 @@
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_TAG,"01");
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_CAT,"01");
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_LANG,"en");
+
+//      Udm_Clear_Search_Limits($udm);
 	
 // Stage 4: perform search 
 
