@@ -29,13 +29,13 @@ foreach ($data as $str) {
 
 echo "====class24====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
-while ($res->has_more()) {
+while ($res->hasMore()) {
 	var_dump($res->fetch_object('class24'));
 }
 
 echo "====stdclass====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
-while ($res->has_more()) {
+while ($res->hasMore()) {
 	var_dump($res->fetch_object());
 }
 
