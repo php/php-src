@@ -712,6 +712,8 @@ PHP_MINFO_FUNCTION(basic)
 	PHP_MINFO(assert)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 
+/* {{{ proto int ip2long(string ip_address)
+   Converts a string containing an (Ipv4) Internet Protocol dotted address into a proper address.  */
 PHP_FUNCTION(ip2long)
 {
 	zval **str;
@@ -722,10 +724,12 @@ PHP_FUNCTION(ip2long)
 
 	convert_to_string_ex(str);
 
-	RETURN_LONG ( inet_addr ( ( *str ) -> value.str.val ) );
+	RETURN_LONG(inet_addr((*str)->value.str.val));
 }
+/* }}} */
 
-
+/* {{{ proto string long2ip(int proper_address)
+   Converts an (Ipv4) Internet network address into a string in Internet standard dotted format. */
 PHP_FUNCTION(long2ip)
 {
 	zval **num;
@@ -736,17 +740,19 @@ PHP_FUNCTION(long2ip)
 	}
 	
 	convert_to_long_ex(num);
-	myaddr.s_addr = (*num) -> value.lval;
+	myaddr.s_addr = (*num)->value.lval;
 
-	RETURN_STRING ( inet_ntoa ( myaddr ) , 1 );
+	RETURN_STRING (inet_ntoa(myaddr), 1);
 }
-
+/* }}} */
 
 
 /********************
  * System Functions *
  ********************/
 
+/* {{{ proto string getenv(string varname)
+   Get the value of an environment variable */
 PHP_FUNCTION(getenv)
 {
 	pval **str;
@@ -772,9 +778,12 @@ PHP_FUNCTION(getenv)
 	}
 	RETURN_FALSE;
 }
-
+/* }}} */
 
 #ifdef HAVE_PUTENV
+
+/* {{{ proto void putenv(string setting)
+   Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
 	pval **str;
@@ -852,13 +861,15 @@ PHP_FUNCTION(putenv)
 		}
 	}
 }
+/* }}} */
 #endif
 
 
 /*******************
  * Basic Functions *
  *******************/
-
+/* {{{ proto int intval(mixed var [, int base])
+   Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
 	pval **num, **arg_base;
@@ -885,8 +896,10 @@ PHP_FUNCTION(intval)
 	zval_copy_ctor(return_value);
 	convert_to_long_base(return_value,base);
 }
+/* }}} */
 
-
+/* {{{ proto double doubleval(mixed var)
+   Get the double-precision value of a variable */
 PHP_FUNCTION(doubleval)
 {
 	pval **num;
@@ -898,8 +911,10 @@ PHP_FUNCTION(doubleval)
 	zval_copy_ctor(return_value);
 	convert_to_double(return_value);
 }
+/* }}} */
 
- 
+/* {{{ proto string strval(mixed var) 
+   Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
 	pval **num;
@@ -911,14 +926,18 @@ PHP_FUNCTION(strval)
 	zval_copy_ctor(return_value);
 	convert_to_string(return_value);
 }
+/* }}} */
 
-
+/* {{{ proto void flush(void)
+   Flush the output buffer */
 PHP_FUNCTION(flush)
 {
 	sapi_flush();
 }
+/* }}} */
 
-
+/* {{{ proto void sleep(int seconds)
+   Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
 	pval **num;
@@ -929,7 +948,10 @@ PHP_FUNCTION(sleep)
 	convert_to_long_ex(num);
 	php_sleep((*num)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void usleep(int micro_seconds)
+   Delay for a given number of micro seconds */
 PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
@@ -942,7 +964,10 @@ PHP_FUNCTION(usleep)
 	usleep((*num)->value.lval);
 #endif
 }
+/* }}} */
 
+/* {{{ proto string gettype(mixed var)
+   Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
 	pval **arg;
@@ -991,8 +1016,10 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("unknown type",1);
 	}
 }
+/* }}} */
 
-
+/* {{{ proto int settype(string var, string type)
+   Set the type of the variable */
 PHP_FUNCTION(settype)
 {
 	pval **var, **type;
@@ -1025,14 +1052,18 @@ PHP_FUNCTION(settype)
 	}
 	RETVAL_TRUE;
 }
+/* }}} */
 
-
+/* {{{ proto string get_current_user(void)
+   Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
 	RETURN_STRING(php_get_current_user(),1);
 }
+/* }}} */
 
-
+/* {{{ proto string get_cfg_var(string option_name)
+   Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
 	pval **varname;
@@ -1049,7 +1080,11 @@ PHP_FUNCTION(get_cfg_var)
 	}
 	RETURN_STRING(value,1);
 }
+/* }}} */
 
+
+/* {{{ proto int set_magic_quotes_runtime(int new_setting)
+   Set the current active configuration setting of magic_quotes_runtime and return previous */
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
 	pval **new_setting;
@@ -1063,20 +1098,27 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	PG(magic_quotes_runtime) = (zend_bool) (*new_setting)->value.lval;
 	RETURN_TRUE;
 }
-	
+/* }}} */
+
+/* {{{ proto int get_magic_quotes_runtime(void)
+   Get the current active configuration setting of magic_quotes_runtime */	
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
 	PLS_FETCH();
 
 	RETURN_LONG(PG(magic_quotes_runtime));
 }
+/* }}} */
 
+/* {{{ proto int get_magic_quotes_gpc(void)
+   Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
 	PLS_FETCH();
 
 	RETURN_LONG(PG(magic_quotes_gpc));
 }
+/* }}} */
 
 
 void php_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
@@ -1093,41 +1135,61 @@ void php_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 	}
 }
 
-
+/* {{{ proto bool is_resource(mixed var)
+   Returns true if variable is a resource */ 
 PHP_FUNCTION(is_resource) 
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
 }
+/* }}} */
 
+/* {{{ proto bool is_bool(mixed var)
+   Returns true if variable is a boolean */
 PHP_FUNCTION(is_bool) 
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BOOL);
 }
+/* }}} */
 
+/* {{{ proto bool is_long(mixed var)
+   Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long) 
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
+/* }}} */
 
+/* {{{ proto bool is_double(mixed var)
+   Returns true if variable is a double */
 PHP_FUNCTION(is_double)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
 }
+/* }}} */
 
+/* {{{ proto bool is_string(mixed var)
+   Returns true if variable is a string */
 PHP_FUNCTION(is_string)
 { 
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
 }
+/* }}} */
 
+/* {{{ proto bool is_array(mixed var)
+   Returns true if variable is an array */
 PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
 }
+/* }}} */
 
+/* {{{ proto bool is_object(mixed var)
+   Returns true if variable is an object */
 PHP_FUNCTION(is_object)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
+/* }}} */
 
 /* {{{ proto bool is_numeric(mixed value)
    Returns true if value is a number or a numeric string */
@@ -1175,6 +1237,8 @@ PHP_FUNCTION(is_numeric)
 	3 = save to file in 3rd parameter
 */
 
+/* {{{ proto int error_log(string message, int message_type [, string destination] [, string extra_headers])
+   Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
 	pval **string, **erropt = NULL, **option = NULL, **emailhead = NULL;
@@ -1237,6 +1301,7 @@ PHP_FUNCTION(error_log)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	FILE *logfile;
@@ -1275,7 +1340,8 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	return SUCCESS;
 }
 
-
+/* {{{ proto mixed call_user_func(mixed params)
+   Call user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
 	pval ***params;
@@ -1302,8 +1368,10 @@ PHP_FUNCTION(call_user_func)
 	}
 	efree(params);
 }
+/* }}} */
 
-
+/* {{{ proto mixed call_user_method(mixed params)
+   Call a user method, on a specific object where the first argument is the method name, the second argument is the object and the subsequent arguments are the parameters */
 PHP_FUNCTION(call_user_method)
 {
 	pval ***params;
@@ -1336,7 +1404,7 @@ PHP_FUNCTION(call_user_method)
 	}
 	efree(params);
 }
-
+/* }}} */
 
 void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry)
 {
@@ -1597,7 +1665,8 @@ void test_class_startup()
 	register_internal_class(&test_class_entry);
 }
 
-
+/* {{{ proto string ini_get(string varname)
+   Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
 	pval **varname;
@@ -1618,8 +1687,10 @@ PHP_FUNCTION(ini_get)
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);
 }
+/* }}} */
 
-
+/* {{{ proto string ini_set(string varname, string newvalue)
+   Set a configuration option, returns false on error and the old value of the configuration option on failure */
 PHP_FUNCTION(ini_set)
 {
 	pval **varname, **new_value;
@@ -1643,9 +1714,10 @@ PHP_FUNCTION(ini_set)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-
-
+/* {{{ proto string ini_restore(string varname)
+   Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
 {
 	pval **varname;
@@ -1658,8 +1730,10 @@ PHP_FUNCTION(ini_restore)
 
 	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len, PHP_INI_STAGE_RUNTIME);
 }
+/* }}} */
 
-
+/* {{{ proto string print_r(mixed var)
+   Prints out information about the specified variable */
 PHP_FUNCTION(print_r)
 {
 	pval **expr;
@@ -1672,6 +1746,7 @@ PHP_FUNCTION(print_r)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 
 /* This should go back to PHP */
