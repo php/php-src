@@ -381,7 +381,16 @@ AC_DEFUN(PHP_DOES_PWRITE_WORK,[
 #include <fcntl.h>
 #include <unistd.h>
 $1
-    main() { return !(pwrite(open("conftest_in", O_WRONLY|O_CREAT, 0600), "hi", 2, 0) == 2); }
+    main() {
+    int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
+
+    if (fd < 0) exit(1);
+    if (pwrite(fd, "text", 4, 0) != 4) exit(1);
+    /* Linux glibc breakage until 2.2.5 */
+    if (pwrite(fd, "text", 4, -1) != -1) exit(1);
+    exit(0);
+    }
+
   ],[
     ac_cv_pwrite=yes
   ],[
@@ -399,7 +408,15 @@ AC_DEFUN(PHP_DOES_PREAD_WORK,[
 #include <fcntl.h>
 #include <unistd.h>
 $1
-    main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
+    main() {
+    char buf[3]; 
+    int fd = open("conftest_in", O_RDONLY);
+    if (fd < 0) exit(1);
+    if (pread(fd, buf, 2, 0) != 2) exit(1);
+    /* Linux glibc breakage until 2.2.5 */
+    if (pread(fd, buf, 2, -1) != -1) exit(1);
+    exit(0);
+    }
   ],[
     ac_cv_pread=yes
   ],[
@@ -421,10 +438,12 @@ AC_DEFUN(PHP_PWRITE_TEST,[
     fi
   ])
 
-  case $ac_cv_pwrite in
-  no) ac_cv_func_pwrite=no;;
-  64) AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default]);;
-  esac
+  if test "$ac_cv_pwrite" != "no"; then
+    AC_DEFINE(HAVE_PWRITE, 1, [ ])
+    if test "$ac_cv_pwrite" = "64"; then
+      AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default])
+    fi
+  fi  
 ])
 
 AC_DEFUN(PHP_PREAD_TEST,[
@@ -438,10 +457,12 @@ AC_DEFUN(PHP_PREAD_TEST,[
     fi
   ])
 
-  case $ac_cv_pread in
-  no) ac_cv_func_pread=no;;
-  64) AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default]);;
-  esac
+  if test "$ac_cv_pread" != "no"; then
+    AC_DEFINE(HAVE_PREAD, 1, [ ])
+    if test "$ac_cv_pread" = "64"; then
+      AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default])
+    fi
+  fi  
 ])
 
 AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
