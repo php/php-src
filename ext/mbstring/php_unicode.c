@@ -236,7 +236,7 @@ PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen
 	char *unicode, *newstr;
 	size_t unicode_len;
 	unsigned long *unicode_ptr;
-	int i;
+	size_t i;
 
 	unicode = php_mb_convert_encoding(srcstr, srclen, NATIVE_UNICODE_ENCODING, src_encoding, &unicode_len TSRMLS_CC);
 	if (unicode == NULL)
