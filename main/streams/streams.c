@@ -254,7 +254,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 
 static int _php_stream_free_persistent(list_entry *le, void *pStream TSRMLS_DC)
 {
-	return le->ptr == pStream;
+	return (le->ptr == pStream && !((php_stream *)pStream)->in_free);
 }
 
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
@@ -336,8 +336,6 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
-		int was_persistent = stream->is_persistent;
-		
 		while (stream->readfilters.head) {
 			php_stream_filter_remove(stream->readfilters.head, 1 TSRMLS_CC);
 		}
@@ -359,7 +357,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			pefree(stream->readbuf, stream->is_persistent);
 			stream->readbuf = NULL;
 		}
-		
+
+		if (stream->is_persistent) {
+			/* we don't work with *stream but need its value for comparison */
+			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
+		}
 #if ZEND_DEBUG
 		if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) && (stream->__exposed == 0) && (EG(error_reporting) & E_WARNING)) {
 			/* it leaked: Lets deliberately NOT pefree it so that the memory manager shows it
@@ -389,10 +391,6 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 #else
 		pefree(stream, stream->is_persistent);
 #endif
-		if (was_persistent) {
-			/* we don't work with *stream but need its value for comparison */
-			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
-		}
 	}
 
 	return ret;
