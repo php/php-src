@@ -24,11 +24,18 @@
 #if HAVE_DBA
 
 typedef enum { 
+	/* do not allow 0 here */
 	DBA_READER = 1,
 	DBA_WRITER,
 	DBA_TRUNC,
 	DBA_CREAT
 } dba_mode_t;
+
+typedef struct dba_lock {
+	php_stream *fp;
+	int fd;
+	char *name;
+} dba_lock;
 
 typedef struct dba_info {
 	/* public */
@@ -40,7 +47,17 @@ typedef struct dba_info {
 	zval ***argv;
 	/* private */
 	struct dba_handler *hnd;
+	dba_lock lock;
 } dba_info;
+
+#define DBA_LOCK_READER  (1)
+#define DBA_LOCK_WRITER  (2)
+#define DBA_LOCK_CREAT   (4)
+#define DBA_LOCK_TRUNC   (8)
+
+#define DBA_LOCK_EXT     (0)
+#define DBA_LOCK_ALL     (DBA_LOCK_READER|DBA_LOCK_WRITER|DBA_LOCK_CREAT|DBA_LOCK_TRUNC)
+#define DBA_LOCK_WCT     (DBA_LOCK_WRITER|DBA_LOCK_CREAT|DBA_LOCK_TRUNC)
 
 extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry

@@ -26,6 +26,13 @@
 
 #if HAVE_DBA
 
+#include "ext/standard/flock_compat.h" 
+#include <stdio.h> 
+#include <fcntl.h>
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
+ 
 #include "php_dba.h"
 #include "ext/standard/info.h"
 
@@ -79,7 +86,8 @@ ZEND_GET_MODULE(dba)
 #endif
 
 typedef struct dba_handler {
-	char *name;
+	char *name; /* handler name */
+	int lock; /* whether and how dba does locking */
 	int (*open)(dba_info *, char **error TSRMLS_DC);
 	void (*close)(dba_info * TSRMLS_DC);
 	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
@@ -144,14 +152,14 @@ typedef struct dba_handler {
 
 /* a DBA handler must have specific routines */
 
-#define DBA_NAMED_HND(name, x) \
+#define DBA_NAMED_HND(name, x, lock) \
 {\
-	#name, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
+	#name, lock, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
 	dba_exists_##x, dba_delete_##x, dba_firstkey_##x, dba_nextkey_##x, \
 	dba_optimize_##x, dba_sync_##x \
 },
 
-#define DBA_HND(x) DBA_NAMED_HND(x, x)
+#define DBA_HND(x, lock) DBA_NAMED_HND(x, x, lock)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
@@ -166,30 +174,30 @@ typedef struct dba_handler {
 
 static dba_handler handler[] = {
 #if DBA_GDBM
-	DBA_HND(gdbm)
+	DBA_HND(gdbm, DBA_LOCK_EXT)
 #endif
 #if DBA_DBM
-	DBA_HND(dbm)
+	DBA_HND(dbm, DBA_LOCK_EXT)
 #endif
 #if DBA_NDBM
-	DBA_HND(ndbm)
+	DBA_HND(ndbm, DBA_LOCK_EXT)
 #endif
 #if DBA_CDB
-	DBA_HND(cdb)
+	DBA_HND(cdb, DBA_LOCK_ALL)
 #endif
 #if DBA_CDB_BUILTIN
-    DBA_NAMED_HND(cdb_make, cdb)
+    DBA_NAMED_HND(cdb_make, cdb, DBA_LOCK_ALL)
 #endif
 #if DBA_DB2
-	DBA_HND(db2)
+	DBA_HND(db2, DBA_LOCK_EXT)
 #endif
 #if DBA_DB3
-	DBA_HND(db3)
+	DBA_HND(db3, DBA_LOCK_EXT)
 #endif
 #if DBA_FLATFILE
-	DBA_HND(flatfile)
+	DBA_HND(flatfile, DBA_LOCK_ALL)
 #endif
-	{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 static int le_db;
@@ -200,8 +208,15 @@ static int le_pdb;
  */ 
 static void dba_close(dba_info *info TSRMLS_DC)
 {
-	if(info->hnd) info->hnd->close(info TSRMLS_CC);
-	if(info->path) efree(info->path);
+	if (info->hnd) info->hnd->close(info TSRMLS_CC);
+	if (info->path) efree(info->path);
+	if (info->lock.fd) {
+		flock(info->lock.fd, LOCK_UN);
+		close(info->lock.fd);
+		info->lock.fd = 0;
+	}
+	if (info->lock.fp) php_stream_close(info->lock.fp);
+	if (info->lock.name) efree(info->lock.name);
 	efree(info);
 }
 /* }}} */
@@ -297,6 +312,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *key = NULL, *error = NULL;
 	int keylen = 0;
 	int i;
+	int lock;
+	char mode[4], *pmode;
 	
 	if(ac < 3) {
 		WRONG_PARAM_COUNT;
@@ -350,23 +367,39 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		RETURN_FALSE;
 	}
 
-	switch (Z_STRVAL_PP(args[1])[0]) {
-		case 'c': 
-			modenr = DBA_CREAT; 
+	strlcpy(mode, Z_STRVAL_PP(args[1]), sizeof(mode));
+	pmode = &mode[0];
+	switch (*pmode++) {
+		case 'r': 
+			modenr = DBA_READER; 
+			lock = (hptr->lock & DBA_LOCK_READER) ? LOCK_SH : 0;
 			break;
 		case 'w': 
 			modenr = DBA_WRITER; 
-			break;
-		case 'r': 
-			modenr = DBA_READER; 
+			lock = (hptr->lock & DBA_LOCK_WRITER) ? LOCK_EX : 0;
 			break;
 		case 'n':
 			modenr = DBA_TRUNC;
+			lock = (hptr->lock & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
+			break;
+		case 'c': 
+			modenr = DBA_CREAT; 
+			lock = (hptr->lock & DBA_LOCK_CREAT) ? LOCK_EX : 0;
 			break;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
-			FREENOW;
-			RETURN_FALSE;
+			lock = 0;
+			modenr = 0;
+	}
+	if (*pmode=='t') {
+		pmode++;
+		lock |= LOCK_NB; /* test =: non blocking */
+	} else if (*pmode=='b') {
+		pmode++; /* default is blocking */
+	}
+	if (*pmode || !modenr) {
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
+		FREENOW;
+		RETURN_FALSE;
 	}
 			
 	info = emalloc(sizeof(dba_info));
@@ -376,7 +409,21 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argc = ac - 3;
 	info->argv = args + 3;
 
-	if (hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
+	if (lock) {
+		spprintf(&info->lock.name, 0, "%s.lck", info->path);
+		info->lock.fp = php_stream_open_wrapper(info->lock.name, "a+b", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		if (info->lock.fp && php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE)	{
+			dba_close(info TSRMLS_CC);
+			/* stream operation already wrote an error message */
+			FREENOW;
+			RETURN_FALSE;
+		}
+		if (!info->lock.fp || flock(info->lock.fd, lock)) {
+			error = "Unable to establish lock"; /* force failure exit */
+		}
+	}
+
+	if (error || hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
 		dba_close(info TSRMLS_CC);
 		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", Z_STRVAL_PP(args[2]), error?": ":"", error?error:"");
 		FREENOW;
