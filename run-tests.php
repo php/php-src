@@ -304,7 +304,7 @@ function run_tests_in_dir($dir = '.')
         else $skipped_extensions[$mod_name]=TRUE;
     }
 
-    if ($ext_found!==FALSE) {
+    if (!isset($ext_found) or $ext_found!==FALSE) {
         dowriteln("%bRunning tests in $dir%B");
         dowriteln("=================".str_repeat("=", strlen($dir)));
         sort($testfiles);
