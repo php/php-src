@@ -68,6 +68,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_CASE,				/* control case folding for portability */
 	PDO_ATTR_CURSOR_NAME,		/* name a cursor for use in "WHERE CURRENT OF <name>" */
 	PDO_ATTR_CURSOR,			/* cursor type */
+	PDO_ATTR_ORACLE_NULLS,		/* convert empty strings to NULL */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -283,9 +284,12 @@ struct _pdo_dbh_t {
 	/* max length a single character can become after correct quoting */
 	unsigned max_escaped_char_length:3;
 
+	/* when set, convert empty strings to NULL */
+	unsigned oracle_nulls:1;
+
 	/* the sum of the number of bits here and the bit fields preceeding should
 	 * equal 32 */
-	unsigned _reserved_flags:22;
+	unsigned _reserved_flags:21;
 
 	/* data source string used to open this handle */
 	const char *data_source;
