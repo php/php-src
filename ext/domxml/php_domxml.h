@@ -24,8 +24,8 @@
 #if HAVE_DOMXML
 #include <libxml/parser.h>
 
-extern zend_module_entry php_domxml_module_entry;
-#define php_domxml_module_ptr &php_domxml_module_entry
+extern zend_module_entry domxml_module_entry;
+#define domxml_module_ptr &domxml_module_entry
 
 /* directory functions */
 extern PHP_MINIT_FUNCTION(domxml);
@@ -56,8 +56,8 @@ PHP_FUNCTION(domxml_attrname);
 
 PHP_FUNCTION(domxml_test);
 #else
-#define php_domxml_module_ptr NULL
+#define domxml_module_ptr NULL
 #endif /* HAVE_DOMXML */
-#define phpext_domxml_ptr php_domxml_module_ptr
+#define phpext_domxml_ptr domxml_module_ptr
 
 #endif /* _PHP_DIR_H */

@@ -41,7 +41,7 @@ static zend_class_entry *domxmltestnode_class_entry_ptr;
 static int node_attributes(zval **attributes, xmlNode *nodep);
 static int node_children(zval **children, xmlNode *nodep);
 
-static zend_function_entry php_domxml_functions[] = {
+static zend_function_entry domxml_functions[] = {
 	PHP_FE(xmldoc,	NULL)
 	PHP_FE(xmldocfile,	NULL)
 	PHP_FE(xmltree,	NULL)
@@ -103,12 +103,12 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 void domxmltestnode_class_startup();
 #endif
 
-zend_module_entry php_domxml_module_entry = {
-	"domxml", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
+zend_module_entry domxml_module_entry = {
+	"domxml", domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_DOMXML
-ZEND_GET_MODULE(php_domxml)
+ZEND_GET_MODULE(domxml)
 #endif
 
 void _free_node(xmlNode *tmp) {
