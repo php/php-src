@@ -130,6 +130,7 @@ function_entry xml_functions[] = {
 };
 
 zend_module_entry xml_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"xml",                /* extension name */
 	xml_functions,        /* extension function list */
 	PHP_MINIT(xml),       /* extension-wide startup function */
@@ -137,6 +138,7 @@ zend_module_entry xml_module_entry = {
 	PHP_RINIT(xml),       /* per-request startup function */
 	PHP_RSHUTDOWN(xml),   /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

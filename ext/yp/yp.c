@@ -56,6 +56,7 @@ function_entry yp_functions[] = {
 };
 
 zend_module_entry yp_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"yp",
 	yp_functions,
 	PHP_MINIT(yp),
@@ -63,6 +64,7 @@ zend_module_entry yp_module_entry = {
 	PHP_RINIT(yp),
 	NULL,
 	PHP_MINFO(yp),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

@@ -44,13 +44,15 @@ function_entry bcmath_functions[] = {
 };
 
 zend_module_entry bcmath_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"bcmath",
-    bcmath_functions,
+	bcmath_functions,
 	PHP_MINIT(bcmath),
 	PHP_MSHUTDOWN(bcmath),
 	PHP_RINIT(bcmath),
 	NULL,
 	PHP_MINFO(bcmath),
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

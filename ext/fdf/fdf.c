@@ -68,6 +68,7 @@ function_entry fdf_functions[] = {
 /* }}} */
 
 zend_module_entry fdf_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"fdf", 
 	fdf_functions, 
 	PHP_MINIT(fdf), 
@@ -75,6 +76,7 @@ zend_module_entry fdf_module_entry = {
 	NULL, 
 	NULL,
 	PHP_MINFO(fdf), 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

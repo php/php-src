@@ -267,6 +267,7 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 };
 
 zend_module_entry domxml_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"domxml",
 	domxml_functions,
 	PHP_MINIT(domxml),
@@ -274,6 +275,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_RINIT(domxml),
 	NULL,
 	PHP_MINFO(domxml),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

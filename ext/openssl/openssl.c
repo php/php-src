@@ -115,6 +115,7 @@ function_entry openssl_functions[] = {
 /* {{{ openssl_module_entry
  */
 zend_module_entry openssl_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"openssl",
 	openssl_functions,
 	PHP_MINIT(openssl),
@@ -122,6 +123,7 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(openssl),
+        NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

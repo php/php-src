@@ -91,11 +91,13 @@ static PHP_MINIT_FUNCTION(mcrypt);
 static PHP_MSHUTDOWN_FUNCTION(mcrypt);
 
 zend_module_entry mcrypt_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"mcrypt", 
 	mcrypt_functions,
 	PHP_MINIT(mcrypt), PHP_MSHUTDOWN(mcrypt),
 	NULL, NULL,
 	PHP_MINFO(mcrypt),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES,
 };
 

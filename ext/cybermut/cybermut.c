@@ -48,6 +48,7 @@ function_entry cybermut_functions[] = {
 /* {{{ cybermut_module_entry
  */
 zend_module_entry cybermut_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"cybermut",
 	cybermut_functions,
 	PHP_MINIT(cybermut),
@@ -55,6 +56,7 @@ zend_module_entry cybermut_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(cybermut),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

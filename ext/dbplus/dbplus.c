@@ -118,6 +118,7 @@ function_entry dbplus_functions[] = {
 /* {{{ module entry */
 
 zend_module_entry dbplus_module_entry = {
+    STANDARD_MODULE_HEADER,
     "dbplus",
     dbplus_functions,
     PHP_MINIT(dbplus),
@@ -125,6 +126,7 @@ zend_module_entry dbplus_module_entry = {
     PHP_RINIT(dbplus),      /* Replace with NULL if there's nothing to do at request start */
     PHP_RSHUTDOWN(dbplus),  /* Replace with NULL if there's nothing to do at request end */
     PHP_MINFO(dbplus),
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 

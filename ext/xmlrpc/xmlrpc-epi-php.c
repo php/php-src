@@ -57,6 +57,8 @@
 #include "php_xmlrpc.h"
 #include "xmlrpc.h"
 
+#define PHP_EXT_VERSION "0.41"
+
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
 */
@@ -88,6 +90,7 @@ function_entry xmlrpc_functions[] = {
 };
 
 zend_module_entry xmlrpc_module_entry = {
+   STANDARD_MODULE_HEADER,
    "xmlrpc",
    xmlrpc_functions,
    PHP_MINIT(xmlrpc),
@@ -95,6 +98,7 @@ zend_module_entry xmlrpc_module_entry = {
    PHP_RINIT(xmlrpc),      /* Replace with NULL if there's nothing to do at request start */
    PHP_RSHUTDOWN(xmlrpc),  /* Replace with NULL if there's nothing to do at request end */
    PHP_MINFO(xmlrpc),
+   PHP_EXT_VERSION,
    STANDARD_MODULE_PROPERTIES
 };
 
@@ -134,8 +138,6 @@ typedef struct _xmlrpc_callback_data {
    xmlrpc_server_data* server;
    char php_executed;
 } xmlrpc_callback_data;
-
-#define PHP_EXT_VERSION "0.41"
 
 // output options
 #define OUTPUT_TYPE_KEY "output_type"

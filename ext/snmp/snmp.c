@@ -96,6 +96,7 @@ function_entry snmp_functions[] = {
 /* {{{ snmp_module_entry
  */
 zend_module_entry snmp_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"snmp",
 	snmp_functions,
 	PHP_MINIT(snmp),
@@ -103,6 +104,7 @@ zend_module_entry snmp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(snmp),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

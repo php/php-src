@@ -46,11 +46,13 @@ function_entry mhash_functions[] = {
 static PHP_MINIT_FUNCTION(mhash);
 
 zend_module_entry mhash_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"mhash",
 	mhash_functions,
 	PHP_MINIT(mhash), NULL,
 	NULL, NULL,
 	NULL,
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES,
 };
 

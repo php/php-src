@@ -45,6 +45,7 @@ function_entry cybercash_functions[] = {
 /* {{{ cybercash_module_entry
  */
 zend_module_entry cybercash_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"cybercash",
 	cybercash_functions,
 	NULL,
@@ -52,6 +53,7 @@ zend_module_entry cybercash_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(cybercash),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES,
 };
 /* }}} */

@@ -62,6 +62,7 @@ function_entry ctype_functions[] = {
 /* {{{ ctype_mpodule_entry
  */
 zend_module_entry ctype_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"ctype",
 	ctype_functions,
 	NULL,
@@ -69,6 +70,7 @@ zend_module_entry ctype_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ctype),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -61,6 +61,7 @@ function_entry shmop_functions[] = {
 /* {{{ shmop_module_entry
  */
 zend_module_entry shmop_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"shmop",
 	shmop_functions,
 	PHP_MINIT(shmop),
@@ -68,6 +69,7 @@ zend_module_entry shmop_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(shmop),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
