@@ -406,8 +406,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *buffer = NULL, *docref_buf = NULL, *ref = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *function, *p;
+    int buffer_len = 0;
 	
-	vspprintf(&buffer, 0, format, args);
+	buffer_len = vspprintf(&buffer, 0, format, args);
 	if (buffer) {
 		if (docref && docref[0] == '#') {
 			docref_target = strchr(docref, '#');
@@ -464,9 +465,19 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 				docref = "Unknown";
 			php_error(type, "%s(%s): %s", docref, params, buffer);
 		}
+        if (PG(track_errors) && EG(active_symbol_table)) {
+            pval *tmp;
+            ALLOC_ZVAL(tmp);
+            INIT_PZVAL(tmp);
+            Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
+            Z_STRLEN_P(tmp) = buffer_len;
+            Z_TYPE_P(tmp) = IS_STRING;
+            zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
+        }
 		efree(buffer);
-		if (docref_buf)
+		if (docref_buf) {
 			efree(docref_buf);
+        }
 	} else {
 		php_error(E_ERROR, "%s(%s): Out of memory", get_active_function_name(TSRMLS_C), params);
 	}
