@@ -49,6 +49,100 @@ ps_module ps_mod_files = {
 	PS_MOD(files)
 };
 
+#if WIN32|WINNT
+#define DIR_DELIMITER '\\'
+#else
+#define DIR_DELIMITER '/'
+#endif
+
+static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
+{
+	int keylen;
+	const char *p;
+	int i;
+	int n;
+	
+	keylen = strlen(key);
+	if(keylen <= data->dirdepth || buflen < 
+			(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
+		return NULL;
+	p = key;
+	n = sprintf(buf, "%s/", data->basedir);
+	for(i = 0; i < data->dirdepth; i++) {
+		buf[n++] = *p++;
+		buf[n++] = DIR_DELIMITER;
+	}
+	strcat(buf, FILE_PREFIX);
+	strcat(buf, p);
+	
+	return buf;
+}
+
+static void _ps_files_open(ps_files *data, const char *key)
+{
+	char buf[MAXPATHLEN];
+
+	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
+		if(data->lastkey) {
+			efree(data->lastkey);
+			data->lastkey = NULL;
+		}
+		if(data->fd != -1) {
+			close(data->fd);
+			data->fd = -1;
+		}
+		
+		if(!_ps_files_path_create(buf, sizeof(buf), data, key))
+			return;
+		
+		data->lastkey = estrdup(key);
+		
+#ifdef O_EXCL
+		/* in the common case, the file already exists */
+		data->fd = open(buf, O_EXCL | O_RDWR);
+		if(data->fd == -1) {
+			/* create it, if necessary */
+			data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
+		}
+#else
+		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
+		if(data->fd != -1) {
+			flock(data->fd, LOCK_EX);
+		}
+#endif
+	}
+}
+
+static void _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
+{
+	DIR *dir;
+	struct dirent *entry;
+	struct stat sbuf;
+	char buf[MAXPATHLEN];
+	time_t now;
+
+	dir = opendir(dirname);
+	if(!dir) return;
+
+	time(&now);
+
+	while((entry = readdir(dir))) {
+		/* does the file start with our prefix? */
+		if(!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
+				/* create full path */
+				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, DIR_DELIMITER,
+					entry->d_name) > 0 &&
+				/* stat the directory entry */
+				stat(buf, &sbuf) == 0 &&
+				/* is it expired? */
+				(now - sbuf.st_atime) > maxlifetime) {
+			unlink(buf);
+		}
+	}
+
+	closedir(dir);
+}
+
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
 
 PS_OPEN_FUNC(files)
@@ -80,61 +174,6 @@ PS_CLOSE_FUNC(files)
 	*mod_data = NULL;
 
 	return SUCCESS;
-}
-
-#if WIN32|WINNT
-#define DIR_DELIMITER '\\'
-#else
-#define DIR_DELIMITER '/'
-#endif
-
-static void _ps_files_open(ps_files *data, const char *key)
-{
-	char buf[MAXPATHLEN];
-	const char *p;
-	int i;
-	int n;
-	int keylen;
-
-	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
-		if(data->lastkey) {
-			efree(data->lastkey);
-			data->lastkey = NULL;
-		}
-		if(data->fd != -1) {
-			close(data->fd);
-			data->fd = -1;
-		}
-
-		keylen = strlen(key);
-		if(keylen <= data->dirdepth || MAXPATHLEN < 
-				(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
-			return;
-		p = key;
-		n = sprintf(buf, "%s/", data->basedir);
-		for(i = 0; i < data->dirdepth; i++) {
-			buf[n++] = *p++;
-			buf[n++] = DIR_DELIMITER;
-		}
-		strcat(buf, FILE_PREFIX);
-		strcat(buf, p);
-		
-		data->lastkey = estrdup(key);
-		
-#ifdef O_EXCL
-		/* in the common case, the file already exists */
-		data->fd = open(buf, O_EXCL | O_RDWR);
-		if(data->fd == -1) {
-			/* create it, if necessary */
-			data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
-		}
-#else
-		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
-		if(data->fd != -1) {
-			flock(data->fd, LOCK_EX);
-		}
-#endif
-	}
 }
 
 PS_READ_FUNC(files)
@@ -187,40 +226,12 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	snprintf(buf, MAXPATHLEN, "%s/%s", data->basedir, key);
+	if(!_ps_files_path_create(buf, sizeof(buf), data, key))
+		return FAILURE;
+	
 	unlink(buf);
 
 	return SUCCESS;
-}
-
-static void ps_files_cleanup_dir(const char *dirname, int maxlifetime)
-{
-	DIR *dir;
-	struct dirent *entry;
-	struct stat sbuf;
-	char buf[MAXPATHLEN];
-	time_t now;
-
-	dir = opendir(dirname);
-	if(!dir) return;
-
-	time(&now);
-
-	while((entry = readdir(dir))) {
-		/* does the file start with our prefix? */
-		if(!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
-				/* create full path */
-				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, DIR_DELIMITER,
-					entry->d_name) > 0 &&
-				/* stat the directory entry */
-				stat(buf, &sbuf) == 0 &&
-				/* is it expired? */
-				(now - sbuf.st_atime) > maxlifetime) {
-			unlink(buf);
-		}
-	}
-
-	closedir(dir);
 }
 
 PS_GC_FUNC(files) 
@@ -235,7 +246,7 @@ PS_GC_FUNC(files)
 		return SUCCESS;
 	}
 
-	ps_files_cleanup_dir(data->basedir, maxlifetime);
+	_ps_files_cleanup_dir(data->basedir, maxlifetime);
 	
 	return SUCCESS;
 }
