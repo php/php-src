@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.48 2004-11-10 23:52:56 fmk Exp $
+// $Id: confutils.js,v 1.49 2004-11-15 23:59:22 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1115,7 +1115,7 @@ function ADD_SOURCES(dir, file_list, target)
 
 	if (PHP_ONE_SHOT == "yes") {
 		MFO.WriteLine(objs_line + ": " + srcs_line);
-		MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") -c " + srcs_line);
+		MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + " $(" + bd_flags_name + ") /c " + srcs_line);
 	}
 
 	DEFINE(sym, tv);
