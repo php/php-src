@@ -1,3 +1,191 @@
+2005-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #31142 (crash, memory leak and data loss by
+      imap_mail_compose).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #31142 (crash, memory leak and data loss by imap_mail_compose).
+
+2005-01-18  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.h:
+      Set the MSSQL_VERSION to FreeTDS when that lib is used
+
+    * ext/mssql/config.w32:
+      Rename php_freetds.dll to php_dblib.dll (still using the freetds libs).
+      Allow the build of both versions in the same process
+
+2005-01-18  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/odbc/config.m4
+      ext/odbc/config.m4:
+      MFH: add checks for libs & headers required by IBM DB2
+
+    * ext/odbc/config.m4:
+      add checks for libs & headers required by IBM DB2
+
+2005-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #31480 (Possible infinite loop in imap_mail_compose()).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #31480 (Possible infinite loop in imap_mail_compose()).
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c:
+      MFH: Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen >
+      strlen).
+
+    * ext/standard/string.c:
+      Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen > strlen).
+
+2005-01-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/session/mod_files.c
+      ext/session/mod_files.c:
+      MFH: - Use FD_CLOEXEC with fcntl() and make sure it is always defined
+
+    * ext/session/mod_files.c:
+      - Make sure FD_CLOEXEC is always defined.
+
+2005-01-18  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c:
+      MFH: fix bug #30430 (odbc_next_result() doesn't bind values and that
+      results in segfault)
+      fix protos
+
+    * ext/odbc/php_odbc.c:
+      fix bug #30430 (odbc_next_result() doesn't bind values and that results in
+      segfault)
+      fix protos
+
+2005-01-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fixed patch for bug #31478 (SegFault/Memory Leak with empty())
+
+2005-01-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/lang/bug30726.phpt:
+      - Sanitize output
+
+    * ext/standard/tests/serialize/bug31402.phpt:
+        1.1.4;
+      Add test for bug #31402
+
+2005-01-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      changed title of the bugreport
+
+2005-01-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      - Files generated with re2c 0.9.2
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/url_scanner_ex.re:
+      MFH: - Move hash table destruction to proper location
+
+    * (PHP_5_0)
+      ext/standard/var_unserializer.c:
+      Touch generated file.
+
+    * ext/standard/var_unserializer.c:
+      Touch the generated file.
+
+2005-01-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug31190.phpt:
+      Fixed bug #31190 (exceptions in call_user_func_array())
+
+    * ext/standard/tests/general_functions/bug31190.phpt
+      ext/standard/tests/general_functions/bug31190.phpt:
+      
+      file bug31190.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fixed bug #31190 (iexceptions in call_user_func_array())
+
+2005-01-18  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * (PHP_4_3)
+      tests/lang/bug30726.phpt
+      tests/lang/bug30726.phpt:
+      Add test case for bug #30726.
+
+    * tests/lang/bug30726.phpt:
+        1.1.4;
+      Add test case for bug #30726.
+
+2005-01-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fixed bug #28444 (Cannot access undefined property for object with
+      overloaded property access).
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c:
+      Fixed bug #28444 (Cannot access undefined property for object with
+      overloaded property access). (Dmitry)
+
+2005-01-18  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/config.w32:
+      use the static dblib.lib to avoid the need for extra dll's
+
+    * ext/mssql/config.w32:
+      add --with-freetds option to win32 build.
+      TODO make it work when both mssql and freetds is included or bail out with
+      an error
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      make the mssql extension work with freetds on win32
+
+2005-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      Zend/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      MFH: Fixed bug #30726 (-.1 like numbers are not being handled correctly).
+
+    * ZendEngine2/zend_operators.h:
+      Fixed bug #30726 (-.1 like numbers are not being handled correctly).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      Fixed bug #31580 (fgetcsv() problematic with "" escape sequences).
+
 2005-01-17  Antony Dovgal  <tony2001@phpclub.net>
 
     * ext/odbc/php_odbc.c:
