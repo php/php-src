@@ -51,29 +51,40 @@
 #define MICRO_IN_SEC 1000000.00
 #define SEC_IN_MIN 60
 
-/* {{{ proto string microtime(void)
-   Returns a string containing the current time in seconds and microseconds */
 #ifdef HAVE_GETTIMEOFDAY
+/* {{{ proto string microtime([bool get_as_float])
+   Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
 	struct timeval tp;
 	long sec = 0L;
 	double msec = 0.0;
-	char ret[100];
-	
+	zend_bool get_as_float = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
+		return;
+	}
+                
 	if (gettimeofday((struct timeval *) &tp, (NUL)) == 0) {
 		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
 		sec = tp.tv_sec;
 	
 		if (msec >= 1.0) msec -= (long) msec;
-		snprintf(ret, 100, "%.8f %ld", msec, sec);
-		RETVAL_STRING(ret,1);
+		if (get_as_float == 0) {
+			char ret[100];
+		
+			snprintf(ret, 100, "%.8f %ld", msec, sec);
+			RETURN_STRING(ret,1);
+		} else {
+			RETURN_DOUBLE((double) (sec + msec));
+		}
 	} else {
 		RETURN_FALSE;
 	}
+
 }
-#endif
 /* }}} */
+#endif
 
 /* {{{ proto array gettimeofday(void)
    Returns the current time as array */
