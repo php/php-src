@@ -998,14 +998,15 @@ ZEND_METHOD(reflection_function, __construct)
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup(name_str, name_len);
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len+1);
 	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
-		efree(lcname);
+		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Function %s() does not exist", Z_STRVAL_P(name));
 		return;
 	}
-	efree(lcname);
+	free_alloca(lcname);
 	intern->ptr = fptr;
 	intern->free_ptr = 0;
 }
@@ -1276,14 +1277,15 @@ ZEND_METHOD(reflection_parameter, __construct)
 		  		char *lcname;
 
 				convert_to_string_ex(&reference);
-				lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(reference), (int) Z_STRLEN_P(reference));
+				lcname = do_alloca(Z_STRLEN_P(reference) + 1);
+				zend_str_tolower_copy(lcname, Z_STRVAL_P(reference), Z_STRLEN_P(reference) + 1);
 				if (zend_hash_find(EG(function_table), lcname, (int) Z_STRLEN_P(reference) + 1, (void**) &fptr) == FAILURE) {
-					efree(lcname);
+					free_alloca(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Function %s() does not exist", Z_STRVAL_P(reference));
 					return;
 				}
-				efree(lcname);
+				free_alloca(lcname);
 			}
 			break;
 
@@ -1304,7 +1306,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 					ce = Z_OBJCE_PP(classref);
 				} else {
 					convert_to_string_ex(classref);
-					lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(classref), (int) Z_STRLEN_PP(classref));
+					lcname = do_alloca(Z_STRLEN_PP(classref) + 1);
+					zend_str_tolower_copy(lcname, Z_STRVAL_PP(classref), Z_STRLEN_PP(classref) + 1);
 					if (zend_hash_find(EG(class_table), lcname, (int) Z_STRLEN_PP(classref) + 1, (void **) &pce) == FAILURE) {
 						zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 							"Class %s does not exist", Z_STRVAL_PP(classref));
@@ -1312,18 +1315,19 @@ ZEND_METHOD(reflection_parameter, __construct)
 					}
 					
 					ce = *pce;
-					efree(lcname);
+					free_alloca(lcname);
 				}
 				
 				convert_to_string_ex(method);
-				lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(method), (int) Z_STRLEN_PP(method));
+				lcname = do_alloca(Z_STRLEN_PP(method) + 1);
+				zend_str_tolower_copy(lcname, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
 				if (zend_hash_find(&ce->function_table, lcname, (int)(Z_STRLEN_PP(method) + 1), (void **) &fptr) == FAILURE) {
-					efree(lcname);
+					free_alloca(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Method %s::%s() does not exist", Z_STRVAL_PP(classref), Z_STRVAL_PP(method));
 					return;
 				}
-				efree(lcname);
+				free_alloca(lcname);
 			}
 			break;
 			
@@ -1487,15 +1491,16 @@ ZEND_METHOD(reflection_method, __construct)
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
 			convert_to_string_ex(&classname);
-			lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(classname), (int) Z_STRLEN_P(classname));
+			lcname = do_alloca(name_len + 1);
+			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname) + 1);
 			if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(classname) + 1), (void **) &pce) == FAILURE) {
-				efree(lcname);
+				free_alloca(lcname);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 					"Class %s does not exist", Z_STRVAL_P(classname));
 				return;
 			}
 			ce = *pce;
-			efree(lcname);
+			free_alloca(lcname);
 			break;
 
 		case IS_OBJECT:
@@ -1514,15 +1519,16 @@ ZEND_METHOD(reflection_method, __construct)
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup(name_str, name_len);
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len+1);
 
 	if (zend_hash_find(&ce->function_table, lcname, name_len + 1, (void **) &mptr) == FAILURE) {
-		efree(lcname);
+		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Method %s::%s() does not exist", ce->name, name_str);
 		return;
 	}
-	efree(lcname);
+	free_alloca(lcname);
 	intern->ptr = mptr;
 	intern->free_ptr = 0;
 }
@@ -1793,14 +1799,15 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		convert_to_string_ex(&argument);
 		zval_add_ref(&argument);
 		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &argument, sizeof(zval *), NULL);
-		lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(argument), (int) Z_STRLEN_P(argument));
+		lcname = do_alloca(Z_STRLEN_P(argument) + 1);
+		zend_str_tolower_copy(lcname, Z_STRVAL_P(argument), Z_STRLEN_P(argument)+1);
 		if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(argument) + 1), (void **)&ce) == FAILURE) {
-			efree(lcname);
+			free_alloca(lcname);
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Class %s does not exist", Z_STRVAL_P(argument));
 			return;
 		}
-		efree(lcname);
+		free_alloca(lcname);
 		intern->ptr = *ce;
 	}
 	intern->free_ptr = 0;
@@ -2390,14 +2397,15 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	
 	switch(class_name->type) {
 		case IS_STRING:
-			class_name_lc = zend_str_tolower_dup(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+			class_name_lc = do_alloca(Z_STRLEN_P(class_name) + 1);
+			zend_str_tolower_copy(class_name_lc, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name)+ 1);
 			if (zend_lookup_class(class_name_lc, Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
-				efree(class_name_lc);
+				free_alloca(class_name_lc);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Interface %s doesn't exist", Z_STRVAL_P(class_name));
 				return;
 			}
-			efree(class_name_lc);
+			free_alloca(class_name_lc);
 			class_ce = *pce;
 			break;			
 		case IS_OBJECT:
@@ -2440,14 +2448,15 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	
 	switch(interface->type) {
 		case IS_STRING:
-			interface_lc = zend_str_tolower_dup(Z_STRVAL_P(interface), Z_STRLEN_P(interface));
+			interface_lc = do_alloca(Z_STRLEN_P(interface) + 1);
+			zend_str_tolower_copy(interface_lc, Z_STRVAL_P(interface), Z_STRLEN_P(interface));
 			if (zend_lookup_class(interface_lc, Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
-				efree(interface_lc);
+				free_alloca(interface_lc);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Interface %s doesn't exist", Z_STRVAL_P(interface));
 				return;
 			}
-			efree(interface_lc);
+			free_alloca(interface_lc);
 			interface_ce = *pce;
 			break;			
 		case IS_OBJECT:
@@ -2543,15 +2552,16 @@ ZEND_METHOD(reflection_property, __construct)
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
 			convert_to_string_ex(&classname);
-			lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(classname), (int) Z_STRLEN_P(classname));
+			lcname = do_alloca(Z_STRLEN_P(classname) + 1);
+			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname) + 1);
 			if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(classname) + 1), (void **) &pce) == FAILURE) {
-				efree(lcname);
+				free_alloca(lcname);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 					"Class %s does not exist", Z_STRVAL_P(classname));
 				return;
 			}
 			ce = *pce;
-			efree(lcname);
+			free_alloca(lcname);
 			break;
 
 		case IS_OBJECT:
@@ -2563,10 +2573,11 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	lcname = zend_str_tolower_dup(name_str, name_len);
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len + 1);
 
 	if (zend_hash_find(&ce->properties_info, lcname, name_len + 1, (void **) &property_info) == FAILURE) {
-		efree(lcname);
+		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Property %s::$%s does not exist", ce->name, name_str);
 		return;
@@ -2584,7 +2595,7 @@ ZEND_METHOD(reflection_property, __construct)
 		}
 	}
 
-	efree(lcname);
+	free_alloca(lcname);
 
 	MAKE_STD_ZVAL(classname);
 	ZVAL_STRING(classname, ce->name, 1);
@@ -2823,14 +2834,15 @@ ZEND_METHOD(reflection_extension, __construct)
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup(name_str, name_len);
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len+1);
 	if (zend_hash_find(&module_registry, lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&module) == FAILURE) {
-		efree(lcname);
+		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Extension %s does not exist", name_len);
 		return;
 	}
-	efree(lcname);
+	free_alloca(lcname);
 	intern->ptr = module;
 	intern->free_ptr = 0;
 }
