@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added php.ini option "double_buffering" that forces an additional first
+  output buffer and improved handling of buffer sizes. (Marcus)
 - Changed DomNode->next_sibling and DomNode->previous_sibling to return NULL
   instead of false (W3C specs). (chregu)
 - Changed DomNode->insert_before() and DomNode->append_child() to conform to
