@@ -1740,6 +1740,7 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 {
 	zend_op_array *op_array;
+	zend_bool retval = FAILURE;
 
 	zend_try {
 		op_array = zend_compile_file(file, ZEND_INCLUDE TSRMLS_CC);
@@ -1748,13 +1749,11 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 		if (op_array) {
 			destroy_op_array(op_array TSRMLS_CC);
 			efree(op_array);
-			return SUCCESS;
-		} else {
-			return FAILURE;
+			retval = SUCCESS;
 		}
 	} zend_end_try();
 
-	return FAILURE;
+	return retval;
 }
 /* }}} */
 
