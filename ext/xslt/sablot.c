@@ -230,32 +230,32 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 
 		/* Document handlers (document start, document end) */
 		if (strcasecmp(string_key, "document") == 0) {
-			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
-			                          &XSLT_SAX(handle).doc_end, 
+			register_sax_handler_pair(XSLT_SAX(handle).doc_start, 
+			                          XSLT_SAX(handle).doc_end, 
 			                          handler);
 		}
 		/* Element handlers, start of an element, and end of an element */
 		else if (strcasecmp(string_key, "element") == 0) {
-			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
-			                          &XSLT_SAX(handle).element_end, 
+			register_sax_handler_pair(XSLT_SAX(handle).element_start, 
+			                          XSLT_SAX(handle).element_end, 
 			                          handler);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
 		else if (strcasecmp(string_key, "namespace") == 0) {
-			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
-			                          &XSLT_SAX(handle).namespace_end, 
+			register_sax_handler_pair(XSLT_SAX(handle).namespace_start, 
+			                          XSLT_SAX(handle).namespace_end, 
 			                          handler);
 		}
 		/* Comment handlers, called when a comment is reached */
 		else if (strcasecmp(string_key, "comment") == 0) {
 			XSLT_SAX(handle).comment = *handler;
-			zval_add_ref(XSLT_SAX(handle).comment);
+			zval_add_ref(&XSLT_SAX(handle).comment);
 		}
 		/* Processing instructions handler called when processing instructions
 		   (<? ?>) */
 		else if (strcasecmp(string_key, "pi") == 0) {
 			XSLT_SAX(handle).pi = *handler;
-			zval_add_ref(XSLT_SAX(handle).pi);
+			zval_add_ref(&XSLT_SAX(handle).pi);
 		}
 		/* Character handler, called when data is found */
 		else if (strcasecmp(string_key, "character") == 0) {
@@ -268,7 +268,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		}
 	}
 }
-/* }}} */
+/* }}} *
 
 /* {{{ proto void xslt_set_scheme_handlers(resource processor, array handlers)
    Set the scheme handlers for the XSLT processor */
