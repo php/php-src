@@ -25,12 +25,12 @@ Fixed:
     mb_strcut('', [number greater than the length of first arg]) (Moriyoshi)
     ext/exif, ext/dba (Marcus)
     php_base64_encode (Moriyoshi)
+    pack (Ilia)
 	
 Open:
 
     the dbase extension         (1)
     socket_select               (2)
-    pack                        (3)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -69,8 +69,6 @@ Methodology
         the script like this:
 
         echo dbase_open | php do_crash.txt
-
-(3) multiple integer overflows, ex. pack("d4294967297", 2);
 
 Amendment 1.
 
