@@ -35,10 +35,10 @@ for ($idx = -1; $idx < 4; $idx++) {
 }
 echo "====DONE!====\n";
 ?>
---EXPECT--
+--EXPECTF--
 ====SEEK:-1====
 
-Warning: sqlite_seek(): row -1 out of range in /usr/src/php5/ext/sqlite/tests/sqlite_022.php on line 19
+Warning: sqlite_seek(): row -1 out of range in %ssqlite_022.php on line %d
 array(1) {
   [0]=>
   string(3) "one"
@@ -60,7 +60,7 @@ array(1) {
 }
 ====SEEK:3====
 
-Warning: sqlite_seek(): row 3 out of range in /usr/src/php5/ext/sqlite/tests/sqlite_022.php on line 19
+Warning: sqlite_seek(): row 3 out of range in %ssqlite_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
@@ -68,7 +68,7 @@ array(1) {
 ====AGAIN====
 ====SEEK:-1====
 
-Warning: sqlite_seek(): row -1 out of range in /usr/src/php5/ext/sqlite/tests/sqlite_022.php on line 25
+Warning: sqlite_seek(): row -1 out of range in %ssqlite_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
@@ -90,7 +90,7 @@ array(1) {
 }
 ====SEEK:3====
 
-Warning: sqlite_seek(): row 3 out of range in /usr/src/php5/ext/sqlite/tests/sqlite_022.php on line 25
+Warning: sqlite_seek(): row 3 out of range in %ssqlite_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
