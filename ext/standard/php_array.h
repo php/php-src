@@ -102,17 +102,4 @@ HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
 int multisort_compare(const void *a, const void *b TSRMLS_DC);
 
-typedef struct {
-	int *multisort_flags[2];
-	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-} php_array_globals;
-
-#ifdef ZTS
-#define ARRAYG(v) TSRMG(array_globals_id, php_array_globals *, v)
-extern int array_globals_id;
-#else
-#define ARRAYG(v) (array_globals.v)
-extern php_array_globals array_globals;
-#endif
-
 #endif /* PHP_ARRAY_H */

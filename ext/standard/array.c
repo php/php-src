@@ -95,11 +95,31 @@ php_array_globals array_globals;
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
 
+ZEND_BEGIN_MODULE_GLOBALS(array) 
+	int *multisort_flags[2];
+	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+	zend_class_entry *php_ce_countable;
+ZEND_END_MODULE_GLOBALS(array) 
+
+ZEND_DECLARE_MODULE_GLOBALS(array)
+
+#ifdef ZTS
+#define ARRAYG(v) TSRMG(array_globals_id, zend_array_globals *, v)
+#else
+#define ARRAYG(v) (array_globals.v)
+#endif
+
+/* {{{ php_extname_init_globals
+ */
+static void php_array_init_globals(zend_array_globals *array_globals)
+{
+	memset(array_globals, 0, sizeof(array_globals));
+}
+/* }}} */
+
 PHP_MINIT_FUNCTION(array)
 {
-#ifdef ZTS
-	ts_allocate_id(&array_globals_id, sizeof(php_array_globals), NULL, NULL);
-#endif
+	ZEND_INIT_MODULE_GLOBALS(array, php_array_init_globals, NULL); 
 
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
@@ -304,10 +324,15 @@ PHP_FUNCTION(count)
 			break;
 		case IS_OBJECT: {
 #if HAVE_SPL
-			zend_class_entry **pce = NULL;
 			zval *retval;
+			zend_class_entry **pce;
 
-			if (zend_lookup_class("countable", sizeof("countable")-1, &pce TSRMLS_CC) == SUCCESS) {
+			if (!ARRAYG(php_ce_countable)) {
+				if (zend_lookup_class("countable", sizeof("countable")-1, &pce TSRMLS_CC) == SUCCESS) {
+					ARRAYG(php_ce_countable) = *pce;
+				}
+			}
+			if (ARRAYG(php_ce_countable) && instanceof_function(Z_OBJCE_P(array), ARRAYG(php_ce_countable) TSRMLS_CC)) {
 				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
 				RETVAL_LONG(Z_LVAL_P(retval));
 				zval_ptr_dtor(&retval);
