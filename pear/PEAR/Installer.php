@@ -155,7 +155,14 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ _installFile()
 
-    function _installFile($file, $atts, $tmp_path)
+    /**
+     * @param string filename
+     * @param array attributes from <file> tag in package.xml
+     * @param string path to install the file in
+     * @param array options from command-line
+     * @access private
+     */
+    function _installFile($file, $atts, $tmp_path, $options)
     {
         static $os;
         if (isset($atts['platform'])) {
@@ -284,6 +291,7 @@ class PEAR_Installer extends PEAR_Common
             if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
                 $this->log(3, "md5sum ok: $final_dest_file");
             } else {
+                var_dump($options);
                 if (empty($options['force'])) {
                     return $this->raiseError("bad md5sum for file $final_dest_file",
                                              PEAR_INSTALLER_FAILED);
@@ -928,7 +936,7 @@ class PEAR_Installer extends PEAR_Common
 
             foreach ($pkginfo['filelist'] as $file => $atts) {
                 $this->expectError(PEAR_INSTALLER_FAILED);
-                $res = $this->_installFile($file, $atts, $tmp_path);
+                $res = $this->_installFile($file, $atts, $tmp_path, $options);
                 $this->popExpect();
                 if (PEAR::isError($res)) {
                     if (empty($options['ignore-errors'])) {
