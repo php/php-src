@@ -42,4 +42,4 @@ shared:
 		$(MAKE) 'LIBTOOL=$(SHLIBTOOL)' $(LTLIBRARY_SHARED_NAME); \
 	else \
 		$(MAKE) $(LTLIBRARY_SHARED_NAME); \
-	fi; \
+	fi
