@@ -264,7 +264,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	regfree(&re);
 }
 
-/* {{{ proto int ereg(string pattern, string replacement, string string)
+/* {{{ proto int ereg(string pattern, string string [, array registers])
    Regular expression match */
 PHP_FUNCTION(ereg)
 {
@@ -272,7 +272,7 @@ PHP_FUNCTION(ereg)
 }
 /* }}} */
 
-/* {{{ proto int eregi(string pattern, string replacement, string string)
+/* {{{ proto int eregi(string pattern, string string [, array registers])
    Case-insensitive regular expression match */
 PHP_FUNCTION(eregi)
 {
@@ -476,7 +476,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	STR_FREE(pattern);
 }
 
-/* {{{ proto string ereg_replace(string pattern, string string [, array registers])
+/* {{{ proto string ereg_replace(string pattern, string replacement, string string)
    Replace regular expression */
 PHP_FUNCTION(ereg_replace)
 {
@@ -484,7 +484,7 @@ PHP_FUNCTION(ereg_replace)
 }
 /* }}} */
 
-/* {{{ proto string eregi_replace(string pattern, string string [, array registers])
+/* {{{ proto string eregi_replace(string pattern, string replacement, string string])
    Case insensitive replace regular expression */
 PHP_FUNCTION(eregi_replace)
 {
