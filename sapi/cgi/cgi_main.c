@@ -265,6 +265,10 @@ static void php_cgi_usage(char *argv0)
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
+
+#if 0
+/* SG(request_info).path_translated is always set to NULL at the end of this function
+   call so why the hell did this code exist in the first place? Am I missing something? */
 	char *script_filename;
 
 
@@ -298,6 +302,8 @@ static void init_request_info(SLS_D)
 		SG(request_info).path_translated = NULL;
 	}
 #endif
+
+#endif /* 0 */
 
 	SG(request_info).request_method = getenv("REQUEST_METHOD");
 	SG(request_info).query_string = getenv("QUERY_STRING");
@@ -359,7 +365,6 @@ int main(int argc, char *argv[])
 	int cgi_started=0;
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
-	int free_path_translated=0;
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
 	char *argv0=NULL;
@@ -498,7 +503,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					cgi_started=1;
 					SG(request_info).path_translated = estrdup(ap_php_optarg);
-					free_path_translated=1;
 					/* break missing intentionally */
 				case 'q':
 					no_headers = 1;
@@ -550,8 +554,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					CG(extended_info) = 1;
 					break;
 				case 'h':
-			        case '?':
-				        no_headers = 1;  
+			    case '?':
+				    no_headers = 1;  
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
@@ -561,7 +565,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case 'd':
 					define_command_line_ini_entry(ap_php_optarg);
 					break;
-				case 'g': {
+				case 'g':
+					{
 						char *arg = estrdup(ap_php_optarg);
 
 						zend_llist_add_element(&global_vars, &arg);
@@ -612,16 +617,15 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			SG(request_info).query_string = s;
 		}
 		if (!SG(request_info).path_translated && argc > ap_php_optind)
-			SG(request_info).path_translated = argv[ap_php_optind];
-	}
+			SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
+	} else if (cgi) {
 	/* If for some reason the CGI interface is not setting the
 	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
 	   We still call php_fopen_primary_script, because if you set doc_root
 	   or user_dir configuration directives, PATH_INFO is used to construct
 	   the filename as a side effect of php_fopen_primary_script.
 	 */
-	if(cgi) {
-		SG(request_info).path_translated = getenv("PATH_TRANSLATED");
+		SG(request_info).path_translated = estrdup(getenv("PATH_TRANSLATED"));
 	}
 	if (cgi || SG(request_info).path_translated) {
 		file_handle.handle.fp = php_fopen_primary_script();
@@ -681,8 +685,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	php_header();			/* Make sure headers have been sent */
-	if (free_path_translated)
-		efree(SG(request_info).path_translated);
+	
+	STR_FREE(SG(request_info).path_translated);
+	
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
 #ifdef ZTS
