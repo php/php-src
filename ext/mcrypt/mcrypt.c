@@ -177,7 +177,7 @@ typedef enum {
 } iv_source;
 
 /* {{{ proto string mcrypt_create_iv(int size, int source)
-   Create an initializing vector (IV) */
+   Create an initializing vector (iv) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	pval **size, **psource;
@@ -282,7 +282,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 /* }}} */
 
 /* {{{ proto string mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
-   OFB crypt/decrypt data using key key with cipher cipher starting with IV */
+   OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_ofb)
 {
 	MCRYPT_ARGS;
@@ -304,7 +304,7 @@ PHP_FUNCTION(mcrypt_ofb)
 /* }}} */
 
 /* {{{ proto string mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
-   CFB crypt/decrypt data using key key with cipher cipher starting with IV */
+   CFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_cfb)
 {
 	MCRYPT_ARGS;
@@ -327,7 +327,7 @@ PHP_FUNCTION(mcrypt_cfb)
 
 
 /* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode [, string iv])
-   CBC crypt/decrypt data using key key with cipher cipher using optional IV */
+   CBC crypt/decrypt data using key key with cipher cipher using optional iv */
 PHP_FUNCTION(mcrypt_cbc)
 {
 	MCRYPT_ARGS;
