@@ -654,7 +654,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 		scriptname = emalloc(5*sizeof(char *));
 		if (zend_hash_find(&EG(symbol_table), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &script_name)==FAILURE)
 			for(i=0; i<5; i++)
-				scriptname[i] = (char *) &emptystring;
+				scriptname[i] = &emptystring;
 		else {
 			convert_to_string_ex(script_name);
 			for(i=0; i<5; i++)
