@@ -192,7 +192,7 @@ PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
 	char *na, *tmpna;
-	zend_bool free_na;
+	zend_bool free_na = 0;
 	
 	if (ZEND_NUM_ARGS() != 7 ||
 	    zend_get_parameters_ex(7, &name, &sizeX, &sizeY, &frameRate, &r, &g, &b) == FAILURE) {
