@@ -3,94 +3,129 @@ parenthesis means that person has taken on this project.
 
 Zend
 ----
-    * allow foreach ($array as $k => &$val) syntax. right now we cannot 
+    For PHP 4.3.0:
+    * Allow foreach ($array as $k => &$val) syntax. right now we cannot 
       traverse an array without copying each element.
-    * allow foreach ($array as $k => list($a, $b)) syntax for multi
+    * Allow foreach ($array as $k => list($a, $b)) syntax for multi
       dimensional arrays.
-    * look at replacing c-lib call tolower().
-    * make hash API functions work with HASH_OF() to save time.
-    * native large number support (probably with GNU GMP)
-    * Const'ify APIs. Right now, many functions leave parameters untouched,
-      but don't declare those as const. This makes interaction with other
-      interfaces difficult which pass const parameters to us. 
-    * add try..catch/throw exception handling
+    * Look at replacing c-lib call tolower().
+    * Make hash API functions work with HASH_OF() to save time.
+    * Allow to set a default value for call-by-reference-parameters. 
+      eg: function hello (&$pallo = NULL) {} 
+    * Disallow function(method) redefinition in class.
     * Add configure test to determine if dlsym() requires underscore and set
       DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
-      for example.
+      for example. (DONE?)
+
+    For PHP 5.0.0:
+    * Native large number support (probably with GNU GMP)
+    * Const'ify APIs. Right now, many functions leave parameters untouched,
+      but don't declare those as const. This makes interaction with other
+      interfaces difficult which pass const parameters to us.
+    * Add try..catch/throw exception handling.
+    * Fix Zend shallow copy issues with objects and arrays.
+
 
 global
 ------
-    * make everything on the language-level independent of your locale setings.
-    * make sure all source files have the "right" copyright.
-    * make sure that all ZTS globals get destructed. Most ts_allocate_id()
+    For PHP 4.3.0:
+    * Add aliases to functions to conform to new naming conventions, e.g.
+      str_to_upper().
+    * Make all extensions thread-safe.
+    * Make everything on the language-level independent of your locale 
+      settings.
+    * Change PHP error messages, so that they point to pages or sections 
+      in the PHP Manual.
+    * Make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
-    * activate all extensions by default that don't rely on external
-      dependices. (eg ftp)
+    * Activate all extensions by default that don't rely on external
+      dependencies. (eg ftp) (DONE?)
+    * on some platforms unimplemented function will just do nothing 
+      (e.g. symlink) they should print a warning or not even be defined!
+      (DONE ?)
+    * Finish PHP streams abstraction, nuke all that issock stuff, implement SSL
+      socket support. (wez)
+        - ext/ftp/ -> all FILEs to streams
+        - ext/bz2/ -> convert to stream impl.
+    * Use arg_separator.input to implode args in the CGI sapi extension
+      and arg_separator.input to explode in php_build_argv(). (DONE?)
+    * Change the odbc_fetch_into() function to require ALWAYS the first two
+      parameters ($conn_id and $array), and make the third (row) be optional.
+    * Remove --with-openlink configure option (--with-iodbc replaces it).
+    * Implement flush feature suitable for nested output buffers.
+
+    For PHP 5.0.0
+    * bundle and use curl lib for fopen wrapper.
     * --enable-all in configure. (--enable-shared=max ...)
     * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
       reentrancy-safe functions (DONE?).
-    * on some platforms unimplemented function will just do nothing (e.g. symlink)
-      they should print a warning or not even be defined!
-    * implement javadoc based function docs template system.
-    * use thread-safe resolver functions (either require BIND 8 or adns).
-    * provide optional IPv6 support.
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
       of compliance.
+    * see what functions might need to be changed to use HashPosition, so
+      that the internal array pointer is not affected.
+    * Move most extensions and PEAR packages out of the PHP CVS tree,
+      include them again during release packaging.
+
+
+    Other
+    * use thread-safe resolver functions (either require BIND 8 or adns).
+    * implement javadoc based function docs template system.
+    * provide optional IPv6 support.
     * find a better way to implement script timeouts. SIGVTALRM is used
       by some POSIX threads implementations (i.e. OpenBSD) and is not
       available in ZTS mode.
-    * add aliases to functions to conform to new naming conventions, e.g.
-      str_to_upper().
-    * see what functions might need to be changed to use HashPosition, so
-      that the internal array pointer is not affected.
+
 
 documentation
 -------------
-    * add remarks in the documentation which functions are not implemented on win32.
-    * add remarks in the documentation which functions are not binary-safe.
-    * improve documentation for the sablotron extension
-    * update curl documentation
-    * write documentation for the bzip2 extension
-    * write documentation for the zziplib extension
+    * Add remarks in the documentation which functions are not implemented 
+      on win32. 
+    * Add remarks in the documentation which functions are not binary-safe.
+    * Update curl documentation (DONE?)
+    * Add developer documentation
 
 ext/curl
 --------
-    * Use the cURL write handler to save data for use when returning data or outputting
-      data.
+    * Use the cURL write handler to save data for use when returning data or 
+      outputting data.
     * Have a warning scheme for when people use unsupported features.
-
-ext/dav
---------
-    * rewrite.
 
 ext/oci8
 --------
-    * all OCIFetch*() functions should return 0 for no more data and false on error.
-    * have a flag that trims trailing spaces from CHAR fields on retrieval.
-    * make allow_call_time_pass_reference=Off working.
-    * for additional todo information, see oci8.c, in ext/oci8
+    * All OCIFetch*() functions should return 0 for no more data and false on 
+      error.
+    * Have a flag that trims trailing spaces from CHAR fields on retrieval.
+    * Make allow_call_time_pass_reference=Off working.
+    * For additional todo information, see oci8.c, in ext/oci8
 
 ext/pcre
 --------
     * Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time, maybe
-    * add option to preg_grep() to return entries that _don't_ match
+    * Add option to preg_grep() to return entries that _don't_ match
 
-ext/sablot
-----------
-    * Re-write the error handling and reporting interface
-    * Cleanup the underlying code a bit
-    * Add proper support for the message handlers
+ext/pgsql
+---------
+    For PHP 4.3.0:
+    * Add pg_metadata() with metadata cache feature.
+    * Add pg_convert() to check and convert array value for query.
+    * Add pg_insert/pg_update/pg_delete/pg_select for simple query.
 
 ext/session
 -----------
-    * maybe implement finer-grained session variables that could be 
+    For PHP 4.3.0:
+    * session_abort() to abort session. ie: Do not save session data.
+    * Allow unset($_SESSION) or unset($HTTP_SESSION_VARS) to unset
+      session vars regardless of register_globals setting.
+
+    Other:
+    * Maybe implement finer-grained session variables that could be 
       locked individually.
-    * write a network-transparent storage back-end with fallover
+    * Write a network-transparent storage back-end with fallover
       facilities
-    * provide a callback facility which is executed upon encountering
-      an unknown classname during deserialization
+    * Provide a callback facility which is executed upon encountering
+      an unknown class name during deserialization
 
 ext/sockets
 -----------
@@ -99,13 +134,13 @@ ext/sockets
 
 ext/standard
 ------------
-    * add a version number to data serialized via serialize().
+    * Add a version number to data serialized via serialize().
     * array_add(). (Andrei)
-    * possibly modify parsing of GPC data to automatically create arrays if
+    * Possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
-    * implement regex-cache for url-functions.
+    * Implement regex-cache for url-functions.
     * stri_replace(). (Andrei)
-    * move socket related functions to fsock.c.
+    * Move socket related functions to fsock.c.
     * NOT binary safe:
         strtok()
         basename()
@@ -113,16 +148,16 @@ ext/standard
         strrpos()
         strrchr()
         strip_tags()
-    * rewrite win32 SMTP code to be useable for *ix to, maybe as a (default)
+    * Rewrite win32 SMTP code to be usable for *ix to, maybe as a (default)
       module of its own (Hartmut)
 
 ext/zziplib
 ------------
-    * more fully support the zziplib api
+    * More fully support the zziplib API
 
 ext/wddx
 --------
-    * See if we can support the remaining datatypes:
+    * See if we can support the remaining data types:
         dateTime
         binary
         recordset
