@@ -32,17 +32,24 @@ static int le_domxmldocp;
 static int le_domxmldtdp;
 static int le_domxmlnodep;
 static int le_domxmlattrp;
-static int le_domxmlnsp;
+/* static int le_domxmlnsp; */
+
+#if defined(LIBXML_XPATH_ENABLED)
 static int le_xpathctxp;
 static int le_xpathobjectp;
+static zend_class_entry *xpathctx_class_entry_ptr;
+static zend_class_entry *xpathobject_class_entry_ptr;
+#endif
+
 static zend_class_entry *domxmldoc_class_entry_ptr;
 static zend_class_entry *domxmldtd_class_entry_ptr;
 static zend_class_entry *domxmlnode_class_entry_ptr;
 static zend_class_entry *domxmlattr_class_entry_ptr;
 static zend_class_entry *domxmlns_class_entry_ptr;
+
+#ifdef newcode
 static zend_class_entry *domxmltestnode_class_entry_ptr;
-static zend_class_entry *xpathctx_class_entry_ptr;
-static zend_class_entry *xpathobject_class_entry_ptr;
+#endif
 
 static int node_attributes(zval **attributes, xmlNode *nodep);
 static int node_children(zval **children, xmlNode *nodep);
@@ -63,11 +70,15 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_set_content,	NULL)
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
+#if defined(LIBXML_XPATH_ENABLED)
 	PHP_FE(xpath_new_context, NULL)
 	PHP_FE(xpath_eval, NULL)
 	PHP_FE(xpath_eval_expression, NULL)
+#endif
+#if defined(LIBXML_XPTR_ENABLED)
 	PHP_FE(xptr_new_context, NULL)
 	PHP_FE(xptr_eval, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -78,9 +89,11 @@ static zend_function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(add_root,	domxml_add_root,	NULL)
 	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
+#if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init, xpath_init, NULL)
 	PHP_FALIAS(xpath_new_context, xpath_new_context, NULL)
 	PHP_FALIAS(xptr_new_context, xpath_new_context, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -101,6 +114,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#if defined(LIBXML_XPATH_ENABLED)
 static zend_function_entry php_xpathctx_class_functions[] = {
 	{NULL, NULL, NULL}
 };
@@ -108,11 +122,14 @@ static zend_function_entry php_xpathctx_class_functions[] = {
 static zend_function_entry php_xpathobject_class_functions[] = {
 	{NULL, NULL, NULL}
 };
+#endif
 
+#ifdef newcode
 static zend_function_entry php_domxmltestnode_class_functions[] = {
 	PHP_FE(domxml_test,	NULL)
 	{NULL, NULL, NULL}
 };
+#endif
 
 static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(name,	domxml_attrname,	NULL)
@@ -145,6 +162,7 @@ void _free_node(zend_rsrc_list_entry *rsrc) {
 /*fprintf(stderr, "Freeing node: %s\n", tmp->name);*/
 }
 
+#if defined(LIBXML_XPATH_ENABLED)
 static void php_free_xpath_context(zend_rsrc_list_entry *rsrc)
 {
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr)rsrc->ptr;
@@ -156,6 +174,7 @@ static void php_free_xpath_object(zend_rsrc_list_entry *rsrc)
 	xmlXPathObjectPtr obj = (xmlXPathObjectPtr)rsrc->ptr;
 	xmlXPathFreeObject(obj);
 }
+#endif
 
 PHP_MINIT_FUNCTION(domxml)
 {
@@ -164,8 +183,10 @@ PHP_MINIT_FUNCTION(domxml)
 	zend_class_entry domxmlnode_class_entry;
 	zend_class_entry domxmlattr_class_entry;
 	zend_class_entry domxmlns_class_entry;
+#if defined(LIBXML_XPATH_ENABLED)
 	zend_class_entry xpathctx_class_entry;
 	zend_class_entry xpathobject_class_entry;
+#endif
 
 #ifdef newcode
   domxmltestnode_class_startup();
@@ -177,8 +198,11 @@ PHP_MINIT_FUNCTION(domxml)
 	*/
 	le_domxmlnodep = zend_register_list_destructors_ex(_free_node, NULL, "domxml node", module_number);
 	le_domxmlattrp = zend_register_list_destructors_ex(NULL, NULL, "domxml attribute", module_number);
+#if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpath context", module_number);
 	le_xpathobjectp = zend_register_list_destructors_ex(php_free_xpath_object, NULL, "xpath object", module_number);
+#endif
+
 /*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
 
 	INIT_CLASS_ENTRY(domxmldoc_class_entry, "DomDocument", php_domxmldoc_class_functions);
@@ -186,16 +210,20 @@ PHP_MINIT_FUNCTION(domxml)
 	INIT_CLASS_ENTRY(domxmlnode_class_entry, "DomNode", php_domxmlnode_class_functions);
 	INIT_CLASS_ENTRY(domxmlattr_class_entry, "DomAttribute", php_domxmlattr_class_functions);
 	INIT_CLASS_ENTRY(domxmlns_class_entry, "DomNamespace", php_domxmlns_class_functions);
+#if defined(LIBXML_XPATH_ENABLED)
 	INIT_CLASS_ENTRY(xpathctx_class_entry, "XPathContext", php_xpathctx_class_functions);
 	INIT_CLASS_ENTRY(xpathobject_class_entry, "XPathObject", php_xpathobject_class_functions);
+#endif
 
 	domxmldoc_class_entry_ptr = zend_register_internal_class(&domxmldoc_class_entry);
 	domxmldtd_class_entry_ptr = zend_register_internal_class(&domxmldtd_class_entry);
 	domxmlnode_class_entry_ptr = zend_register_internal_class(&domxmlnode_class_entry);
 	domxmlattr_class_entry_ptr = zend_register_internal_class(&domxmlattr_class_entry);
 	domxmlns_class_entry_ptr = zend_register_internal_class(&domxmlns_class_entry);
+#if defined(LIBXML_XPATH_ENABLED)
 	xpathctx_class_entry_ptr = zend_register_internal_class(&xpathctx_class_entry);
 	xpathobject_class_entry_ptr = zend_register_internal_class(&xpathobject_class_entry);
+#endif
 
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE", XML_ELEMENT_NODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NODE", XML_ATTRIBUTE_NODE, CONST_CS | CONST_PERSISTENT);
@@ -230,6 +258,7 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_ENUMERATION", XML_ATTRIBUTE_ENUMERATION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NOTATION", XML_ATTRIBUTE_NOTATION, CONST_CS | CONST_PERSISTENT);
 
+#if defined(LIBXML_XPATH_ENABLED)
 	REGISTER_LONG_CONSTANT("XPATH_UNDEFINED", XPATH_UNDEFINED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XPATH_NODESET", XPATH_NODESET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XPATH_BOOLEAN", XPATH_BOOLEAN, CONST_CS | CONST_PERSISTENT);
@@ -239,6 +268,7 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("XPATH_RANGE", XPATH_RANGE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XPATH_LOCATIONSET", XPATH_LOCATIONSET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XPATH_USERS", XPATH_USERS, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	return SUCCESS;
 }
@@ -401,9 +431,15 @@ PHP_FUNCTION(domxml_test)
 PHP_MINFO_FUNCTION(domxml)
 {
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
-	php_info_print_table_start();
-	php_info_print_table_row(2, "DOM/XML, XPath, XPointer Support", "enabled");
+	php_info_print_table_start();	
+	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "libmxl Version", LIBXML_DOTTED_VERSION );
+#if defined(LIBXML_XPATH_ENABLED)
+	php_info_print_table_row(2, "XPath Support", "enabled");
+#endif
+#if defined(LIBXML_XPTR_ENABLED)
+	php_info_print_table_row(2, "XPointer Support", "enabled");
+#endif
 	php_info_print_table_end();
 }
 
@@ -412,10 +448,8 @@ PHP_MINFO_FUNCTION(domxml)
 PHP_FUNCTION(domxml_attrname)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlNodePtr nodep;
 	xmlAttr *attr;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -500,10 +534,8 @@ PHP_FUNCTION(domxml_node)
 PHP_FUNCTION(domxml_lastchild)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlNode *nodep, *last;
 	xmlChar *content;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -550,10 +582,8 @@ PHP_FUNCTION(domxml_lastchild)
 PHP_FUNCTION(domxml_parent)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlNode *nodep, *last;
 	xmlChar *content;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -600,9 +630,8 @@ PHP_FUNCTION(domxml_parent)
 PHP_FUNCTION(domxml_children)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlNode *nodep, *last;
-	int type;
+	xmlDoc *docp;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -612,10 +641,12 @@ PHP_FUNCTION(domxml_children)
 				if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
 					php_error(E_WARNING, "unable to find my handle property");
 					RETURN_FALSE;
-				} else 
-					ZEND_FETCH_RESOURCE(nodep,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
-			 } else 
+				} else {
+					ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
+				}
+			} else {
 				ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
+			}
 		} else {
 			RETURN_FALSE;
 		}
@@ -671,10 +702,8 @@ PHP_FUNCTION(domxml_children)
 PHP_FUNCTION(domxml_getattr)
 {
 	zval *id, *arg1, **tmp;
-	int id_to_find;
 	xmlNode *nodep;
 	char *value;
-	int type;
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
@@ -713,10 +742,8 @@ PHP_FUNCTION(domxml_getattr)
 PHP_FUNCTION(domxml_setattr)
 {
 	zval *id, *arg1, *arg2, **tmp;
-	int id_to_find;
 	xmlNode *nodep;
 	xmlAttr *attr;
-	int type;
 
 	if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
 		id = getThis();
@@ -756,10 +783,10 @@ PHP_FUNCTION(domxml_setattr)
 PHP_FUNCTION(domxml_attributes)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlNode *nodep;
+#ifdef oldstyle_for_libxml_1_8_7
 	xmlAttr *attr;
-	int type;
+#endif
 	
 	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
@@ -814,10 +841,8 @@ fprintf(stderr, "ATTRNAME = %s\n", attr->name);
 PHP_FUNCTION(domxml_rootnew)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlDoc *docp;
 	xmlNode *last;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -876,10 +901,8 @@ PHP_FUNCTION(domxml_rootnew)
 PHP_FUNCTION(domxml_root)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlDoc *docp;
 	xmlNode *node;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -934,10 +957,8 @@ PHP_FUNCTION(domxml_root)
 PHP_FUNCTION(domxml_intdtd)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlDoc *docp;
 	xmlDtd *dtd;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 0) {
@@ -983,12 +1004,9 @@ PHP_FUNCTION(domxml_intdtd)
 PHP_FUNCTION(domxml_dumpmem)
 {
 	zval *id, **tmp;
-	int id_to_find;
 	xmlDoc *docp;
-/*	char *mem; */
 	xmlChar *mem;
 	int size;
-	int type;
 	
 	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
@@ -1091,9 +1109,7 @@ PHP_FUNCTION(xmldocfile)
 PHP_FUNCTION(domxml_new_child)
 {
 	zval *id, *name, *content, **tmp;
-	int id_to_find;
 	xmlNode *child, *nodep;
-	int type;
 	int ret;
 
 	if (ZEND_NUM_ARGS() == 2) {
@@ -1146,10 +1162,7 @@ PHP_FUNCTION(domxml_new_child)
 PHP_FUNCTION(domxml_set_content)
 {
 	zval *id, *content, **tmp;
-	int id_to_find;
 	xmlNode *nodep;
-	int type;
-	int ret;
 
 	if (ZEND_NUM_ARGS() == 1) {
 		id = getThis();
@@ -1191,11 +1204,9 @@ PHP_FUNCTION(domxml_set_content)
 PHP_FUNCTION(domxml_add_root)
 {
 	zval *id, *name, **tmp;
-	int id_to_find;
 	xmlDoc *docp;
 	xmlNode *node;
 	xmlChar *content;
-	int type;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 1) {
@@ -1271,6 +1282,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
+#ifdef newcode
 /* {{{ proto int node_namespace([int node])
    Returns list of namespaces */
 static int node_namespace(zval **attributes, xmlNode *nodep)
@@ -1307,6 +1319,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 	}
 	return 0;
 }
+#endif
 
 /* {{{ proto int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
@@ -1352,7 +1365,8 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
    Returns list of children nodes */
 static int node_children(zval **children, xmlNode *nodep)
 {
-	zval *mchildren, *attributes, *namespace;
+	zval *mchildren, *attributes;
+	/* zval *namespace; */
 	xmlNode *last;
 	int count = 0;
 
@@ -1416,8 +1430,7 @@ static int node_children(zval **children, xmlNode *nodep)
    Create a tree of PHP objects from an XML document */
 PHP_FUNCTION(xmltree)
 {
-	zval *arg;
-	zval *proot, *children, *attributes;
+	zval *arg, *children;
 	xmlDoc *docp;
 	xmlNode *root;
 	
@@ -1489,6 +1502,7 @@ PHP_FUNCTION(xmltree)
 }
 /* }}} */
 
+#if defined(LIBXML_XPATH_ENABLED)
 /* {{{ proto bool xpath_init(void)
    Initializing XPath environment */
 PHP_FUNCTION(xpath_init)
@@ -1691,6 +1705,7 @@ PHP_FUNCTION(xpath_eval_expression) {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 1);
 }
 /* }}} */
+#endif /* defined(LIBXML_XPATH_ENABLED) */
 
 #if defined(LIBXML_XPTR_ENABLED)
 /* {{{ proto int xptr_eval([int xpathctx_handle,] string str)
