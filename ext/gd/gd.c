@@ -545,7 +545,6 @@ PHP_FUNCTION(imageloadfont)
 	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b)))
 		b += n;
 	if (!n) {
-		php_stream_close(stream);
 		efree(font->data);
 		efree(font);
 		if (php_stream_eof(stream)) {
@@ -553,6 +552,7 @@ PHP_FUNCTION(imageloadfont)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading body");
 		}
+		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 	php_stream_close(stream);
