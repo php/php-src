@@ -363,8 +363,7 @@ PHP_FUNCTION(snmp_set_quick_print) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(a1);
-	int set_val = (*a1)->value.lval;
-	snmp_set_quick_print(set_val);
+	snmp_set_quick_print((int)(*a1)->value.lval);
 }
 /* }}} */
 
