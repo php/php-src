@@ -19,7 +19,7 @@
 package net.php;
 
 import java.lang.reflect.*;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.beans.*;
 
 class reflect {
@@ -115,28 +115,110 @@ class reflect {
   }
 
   //
+  // Select the best match from a list of methods
+  //
+  private static Method select(Vector methods, Object args[]) {
+    if (methods.size() == 1) return (Method) methods.firstElement();
+
+    Method selected = null;
+    int best = Integer.MAX_VALUE;
+
+    for (Enumeration e = methods.elements(); e.hasMoreElements(); ) {
+      Method method = (Method)e.nextElement();
+      int weight=0;
+      Class parms[] = method.getParameterTypes();
+      for (int i=0; i<parms.length; i++) {
+        if (parms[i].isInstance(args[i])) {
+	  for (Class c=parms[i]; (c=c.getSuperclass()) != null; ) {
+            if (!c.isInstance(args[i])) break;
+            weight++;
+          }
+        } else if (parms[i].isPrimitive()) {
+          Class c=parms[i];
+	  if (args[i] instanceof Number) {
+            if (c==Boolean.TYPE) weight+=5;
+            if (c==Character.TYPE) weight+=4;
+            if (c==Byte.TYPE) weight+=3;
+            if (c==Short.TYPE) weight+=2;
+            if (c==Integer.TYPE) weight++;
+            if (c==Float.TYPE) weight++;
+          } else if (args[i] instanceof Boolean) {
+            if (c!=Boolean.TYPE) weight+=9999;
+          } else if (args[i] instanceof String) {
+            if (c== Character.TYPE || ((String)args[i]).length()>0)
+              weight+=((String)args[i]).length();
+            else
+              weight+=9999;
+          } else {
+	    weight+=9999;
+          }
+        } else {
+	  weight+=9999;
+        }
+      } 
+
+      if (weight < best) {
+        if (weight == 0) return method;
+        best = weight;
+        selected = method;
+      }
+    }
+
+    return selected;
+  }
+
+  //
+  // Select the best match from a list of methods
+  //
+  private static Object[] coerce(Method method, Object args[]) {
+    Object result[] = args;
+    Class parms[] = method.getParameterTypes();
+    for (int i=0; i<args.length; i++) {
+      if (parms[i].isInstance(args[i])) continue;
+      if (args[i] instanceof Number && parms[i].isPrimitive()) {
+        if (result==args) result=(Object[])result.clone();
+        Class c = parms[i];
+        Number n = (Number)args[i];
+        if (c == Boolean.TYPE) result[i]=new Boolean(0.0!=n.floatValue());
+        if (c == Byte.TYPE)    result[i]=new Byte(n.byteValue());
+        if (c == Short.TYPE)   result[i]=new Short(n.shortValue());
+        if (c == Integer.TYPE) result[i]=new Integer(n.intValue());
+        if (c == Float.TYPE)   result[i]=new Float(n.floatValue());
+        if (c == Long.TYPE && !(n instanceof Long)) 
+          result[i]=new Long(n.longValue());
+      }
+    }
+    return result;
+  }
+
+  //
   // Invoke a method on a given object
   //
   public static void Invoke
     (Object object, String method, Object args[], long result)
   {
     try {
+      Vector matches = new Vector();
 
+      // gather
       for (Class jclass = object.getClass();;jclass=(Class)object) {
         Method methods[] = jclass.getMethods();
         for (int i=0; i<methods.length; i++) {
           if (methods[i].getName().equalsIgnoreCase(method) &&
               methods[i].getParameterTypes().length == args.length) {
-            setResult(result, methods[i].invoke(object, args));
-            return;
+            matches.addElement(methods[i]);
           }
         }
 
         // try a second time with the object itself, if it is of type Class
-        if (!(jclass instanceof Class) || (jclass==object)) break;
+        if (!(object instanceof Class) || (jclass==object)) break;
       }
 
-      throw new NoSuchMethodException(method);
+      Method selected = select(matches, args);
+      if (selected == null) throw new NoSuchMethodException(method);
+
+      Object coercedArgs[] = coerce(selected, args);
+      setResult(result, selected.invoke(object, coercedArgs));
 
     } catch (Exception e) {
       setException(result, e);
@@ -180,7 +262,7 @@ class reflect {
         }
 
         // try a second time with the object itself, if it is of type Class
-        if (!(jclass instanceof Class) || (jclass==object)) break;
+        if (!(object instanceof Class) || (jclass==object)) break;
       }
 
     } catch (Exception e) {
