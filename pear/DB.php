@@ -31,28 +31,29 @@ require_once "PEAR.php";
  * If you add an error code here, make sure you also add a textual
  * version of it in DB::errorMessage().
  */
-define("DB_OK",                    	 0);
-define("DB_ERROR",                 	-1);
-define("DB_ERROR_SYNTAX",          	-2);
-define("DB_ERROR_CONSTRAINT",      	-3);
-define("DB_ERROR_NOT_FOUND",       	-4);
-define("DB_ERROR_ALREADY_EXISTS",  	-5);
-define("DB_ERROR_UNSUPPORTED",     	-6);
-define("DB_ERROR_MISMATCH",        	-7);
-define("DB_ERROR_INVALID",         	-8);
-define("DB_ERROR_NOT_CAPABLE",     	-9);
-define("DB_ERROR_TRUNCATED",       -10);
-define("DB_ERROR_INVALID_NUMBER",  -11);
-define("DB_ERROR_INVALID_DATE",    -12);
-define("DB_ERROR_DIVZERO",         -13);
-define("DB_ERROR_NODBSELECTED",    -14);
-define("DB_ERROR_CANNOT_CREATE",   -15);
-define("DB_ERROR_CANNOT_DELETE",   -16);
-define("DB_ERROR_CANNOT_DROP",     -17);
-define("DB_ERROR_NOSUCHTABLE",     -18);
-define("DB_ERROR_NOSUCHFIELD",     -19);
-define("DB_ERROR_NEED_MORE_DATA",  -20);
-define("DB_ERROR_NOT_LOCKED",      -21);
+define("DB_OK",                      	0);
+define("DB_ERROR",                     -1);
+define("DB_ERROR_SYNTAX",              -2);
+define("DB_ERROR_CONSTRAINT",          -3);
+define("DB_ERROR_NOT_FOUND",           -4);
+define("DB_ERROR_ALREADY_EXISTS",      -5);
+define("DB_ERROR_UNSUPPORTED",         -6);
+define("DB_ERROR_MISMATCH",            -7);
+define("DB_ERROR_INVALID",             -8);
+define("DB_ERROR_NOT_CAPABLE",         -9);
+define("DB_ERROR_TRUNCATED",          -10);
+define("DB_ERROR_INVALID_NUMBER",     -11);
+define("DB_ERROR_INVALID_DATE",       -12);
+define("DB_ERROR_DIVZERO",            -13);
+define("DB_ERROR_NODBSELECTED",       -14);
+define("DB_ERROR_CANNOT_CREATE",      -15);
+define("DB_ERROR_CANNOT_DELETE",      -16);
+define("DB_ERROR_CANNOT_DROP",        -17);
+define("DB_ERROR_NOSUCHTABLE",        -18);
+define("DB_ERROR_NOSUCHFIELD",        -19);
+define("DB_ERROR_NEED_MORE_DATA",     -20);
+define("DB_ERROR_NOT_LOCKED",         -21);
+define("DB_ERROR_VALUE_COUNT_ON_ROW", -22);
 
 
 /*
@@ -243,28 +244,29 @@ class DB {
 	function errorMessage($value) {
 		if (!isset($errorMessages)) {
 			$errorMessages = array(
-				DB_ERROR                => "unknown error",
-				DB_ERROR_ALREADY_EXISTS => "already exists",
-				DB_ERROR_CANNOT_CREATE  => "can not create",
-				DB_ERROR_CANNOT_DELETE  => "can not delete",
-				DB_ERROR_CANNOT_DROP    => "can not drop",
-				DB_ERROR_CONSTRAINT     => "constraint violation",
-				DB_ERROR_DIVZERO        => "division by zero",
-				DB_ERROR_INVALID        => "invalid",
-				DB_ERROR_INVALID_DATE   => "invalid date or time",
-				DB_ERROR_INVALID_NUMBER => "invalid number",
-				DB_ERROR_MISMATCH       => "mismatch",
-				DB_ERROR_NODBSELECTED   => "no database selected",
-				DB_ERROR_NOSUCHFIELD    => "no such field",
-				DB_ERROR_NOSUCHTABLE    => "no such table",
-				DB_ERROR_NOT_CAPABLE    => "DB backend not capable",
-				DB_ERROR_NOT_FOUND      => "not found",
-				DB_ERROR_NOT_LOCKED     => "not locked",
-				DB_ERROR_SYNTAX         => "syntax error",
-				DB_ERROR_UNSUPPORTED    => "not supported",
-				DB_OK                   => "no error",
-				DB_WARNING              => "unknown warning",
-				DB_WARNING_READ_ONLY    => "read only"
+				DB_ERROR                    => "unknown error",
+				DB_ERROR_ALREADY_EXISTS     => "already exists",
+				DB_ERROR_CANNOT_CREATE      => "can not create",
+				DB_ERROR_CANNOT_DELETE      => "can not delete",
+				DB_ERROR_CANNOT_DROP        => "can not drop",
+				DB_ERROR_CONSTRAINT         => "constraint violation",
+				DB_ERROR_DIVZERO            => "division by zero",
+				DB_ERROR_INVALID            => "invalid",
+				DB_ERROR_INVALID_DATE       => "invalid date or time",
+				DB_ERROR_INVALID_NUMBER     => "invalid number",
+				DB_ERROR_MISMATCH           => "mismatch",
+				DB_ERROR_NODBSELECTED       => "no database selected",
+				DB_ERROR_NOSUCHFIELD        => "no such field",
+				DB_ERROR_NOSUCHTABLE        => "no such table",
+				DB_ERROR_NOT_CAPABLE        => "DB backend not capable",
+				DB_ERROR_NOT_FOUND          => "not found",
+				DB_ERROR_NOT_LOCKED         => "not locked",
+				DB_ERROR_SYNTAX             => "syntax error",
+				DB_ERROR_UNSUPPORTED        => "not supported",
+				DB_ERROR_VALUE_COUNT_ON_ROW => "value count on row",
+				DB_OK                       => "no error",
+				DB_WARNING                  => "unknown warning",
+				DB_WARNING_READ_ONLY        => "read only"
 			);
 		}
 		if (DB::isError($value)) {
