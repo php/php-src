@@ -28,7 +28,7 @@ enum {
 	NUMBER_OF_LOCKS
 };
 
-#if defined(ZTS)
+#if defined(PHP_NEED_REENTRANCY)
 
 #include <TSRM.h>
 
