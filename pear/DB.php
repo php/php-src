@@ -534,7 +534,9 @@ class DB
                 }
                 foreach ($opts as $opt) {
                     list($key, $value) = explode('=', $opt);
-                    $parsed[$key] = urldecode($value);
+                    if (!isset($parsed[$key])) { // don't allow params overwrite
+                        $parsed[$key] = urldecode($value);
+                    }
                 }
             }
         }
