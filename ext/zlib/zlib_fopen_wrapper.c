@@ -107,12 +107,6 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 		}
 		return NULL;
 	}
-	if (strchr(mode, 'a')) {
-		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot append to a zlib stream!");
-		}
-		return NULL;
-	}
 	
 	self = emalloc(sizeof(*self));
 
