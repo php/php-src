@@ -168,6 +168,18 @@
 #define PHP_MIME_MAGIC_FILE_PATH PHP_PREFIX "\\magic.mime"
 #endif
 
+#define BYTE	1
+#define SHORT	2
+#define LONG	4
+#define STRING	5
+#define DATE	6
+#define BESHORT	7
+#define BELONG	8
+#define BEDATE	9
+#define LESHORT	10
+#define LELONG	11
+#define LEDATE	12
+
 static int apprentice(void);
 static int ascmagic(unsigned char *, int);
 static int is_tar(unsigned char *, int);
