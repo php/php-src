@@ -1924,6 +1924,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
   zval   func;
 	zval  *params[4];
 	zval **trace;
+	zval **fault;
 
 	INIT_ZVAL(*response);
 
@@ -1959,6 +1960,9 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		add_property_stringl(this_ptr, "__last_response", Z_STRVAL_P(response), Z_STRLEN_P(response), 1);
 	}
 	xmlFree(buf);
+	if (ret && zend_hash_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
+	  return FALSE;
+	}	  
   return ret;
 }
 
