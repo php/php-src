@@ -831,6 +831,7 @@ PHP_FUNCTION(mssql_query)
 		}
 		result->data[i] = (zval *) emalloc(sizeof(zval)*num_fields);
 		for (j=1; j<=num_fields; j++) {
+			INIT_PZVAL(&result->data[i][j-1]);
 			MS_SQL_G(get_column_content(mssql_ptr, j, &result->data[i][j-1], column_types[j-1]));
 		}
 		retvalue=dbnextrow(mssql_ptr->link);
@@ -988,7 +989,7 @@ PHP_FUNCTION(mssql_fetch_row)
 	for (i=0; i<result->num_fields; i++) {
 		MAKE_STD_ZVAL(field_content);
 		*field_content = result->data[result->cur_row][i];
-		zval_copy_ctor(field_content);
+		ZVAL_COPY_CTOR(field_content);
 		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(zval *), NULL);
 	}
 	result->cur_row++;
@@ -1021,10 +1022,9 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	for (i=0; i<result->num_fields; i++) {
-		ALLOC_ZVAL(tmp);
+		MAKE_STD_ZVAL(tmp);
 		*tmp = result->data[result->cur_row][i];
-		INIT_PZVAL(tmp);
-		zval_copy_ctor(tmp);
+		ZVAL_COPY_CTOR(tmp);
 		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
 			tmp->value.str.val = php_addslashes(tmp->value.str.val, tmp->value.str.len, &tmp->value.str.len,1);
 		}
@@ -1466,7 +1466,7 @@ PHP_FUNCTION(mssql_result)
 	}
 
 	*return_value = result->data[(*row)->value.lval][field_offset];
-	zval_copy_ctor(return_value);
+	ZVAL_COPY_CTOR(return_value);
 }
 
 /* }}} */
