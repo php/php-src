@@ -100,12 +100,15 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 	return obj.value.obj;
 }
 
+
 ZEND_METHOD(exception, __clone)
 {
 	/* Should never be executable */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0 TSRMLS_CC);
 }
 
+/* {{{ proto Exception::__construct()
+   Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
 	char  *message = NULL;
@@ -127,6 +130,7 @@ ZEND_METHOD(exception, __construct)
 		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 }
+/* }}} */
 
 #define DEFAULT_0_PARAMS \
 	if (ZEND_NUM_ARGS() > 0) { \
@@ -143,40 +147,61 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 	zval_copy_ctor(return_value);
 }
 
+
+/* {{{ proto Exception::getFile()
+   Obtain the file name in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto Exception::getLine()
+   Obtain the line number in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto Exception::getMessage()
+   Obtain the exception message */
 ZEND_METHOD(exception, getMessage)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto Exception::getCode()
+   Obtain the user-defined exception code */
 ZEND_METHOD(exception, getCode)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto Exception::getTrace()
+   Obtain a stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
 }
+/* }}} */
+
 
 /* {{{ ZEND_METHOD(exception, gettraceasstring) */
 #define TRACE_APPEND_CHR(chr)                                            \
