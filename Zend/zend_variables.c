@@ -54,9 +54,14 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_OBJECT:
-			Z_OBJ_HT_P(zvalue)->del_ref(zvalue);
+			{
+				TSRMLS_FETCH();
+
+				Z_OBJ_HT_P(zvalue)->del_ref(zvalue TSRMLS_CC);
+			}
 			break;
-		case IS_RESOURCE:	{
+		case IS_RESOURCE:
+			{
 				TSRMLS_FETCH();
 
 				/* destroy resource */
@@ -119,11 +124,14 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_OBJECT:
+			{
+				TSRMLS_FETCH();
 #if 0
-			zvalue->value.obj = zvalue->value.obj.handlers->clone_obj(zvalue->value.obj.handle);
+				zvalue->value.obj = zvalue->value.obj.handlers->clone_obj(zvalue->value.obj.handle);
 #else
-			Z_OBJ_HT_P(zvalue)->add_ref(zvalue);
+				Z_OBJ_HT_P(zvalue)->add_ref(zvalue TSRMLS_CC);
 #endif
+			}
 			break;
 	}
 	return SUCCESS;

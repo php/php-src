@@ -121,10 +121,9 @@ zend_object *zend_objects_get_address(zval *zobject)
 	return &EG(objects).object_buckets[handle].bucket.obj.object;
 }
 
-void zend_objects_add_ref(zval *object)
+void zend_objects_add_ref(zval *object TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
-	TSRMLS_FETCH();
 
 	if (!EG(objects).object_buckets[handle].valid) {
 		zend_error(E_ERROR, "Trying to add reference to invalid object");
@@ -136,11 +135,10 @@ void zend_objects_add_ref(zval *object)
 #endif
 }
 
-void zend_objects_delete_obj(zval *zobject)
+void zend_objects_delete_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object *object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-	TSRMLS_FETCH();
 
 	if (!EG(objects).object_buckets[handle].valid) {
 		zend_error(E_ERROR, "Trying to delete invalid object");
@@ -166,10 +164,9 @@ void zend_objects_delete_obj(zval *zobject)
 			EG(objects).free_list_head = handle;													\
 			EG(objects).object_buckets[handle].valid = 0;
 
-void zend_objects_del_ref(zval *zobject)
+void zend_objects_del_ref(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-	TSRMLS_FETCH();
 
 	if (--EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
 		zend_object *object;
@@ -199,14 +196,13 @@ void zend_objects_del_ref(zval *zobject)
 #endif
 }
 
-zend_object_value zend_objects_clone_obj(zval *zobject)
+zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value retval;
 	zend_object *old_object;
 	zend_object *new_object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	TSRMLS_FETCH();
 
 	if (!EG(objects).object_buckets[handle].valid) {
 		zend_error(E_ERROR, "Trying to clone invalid object");

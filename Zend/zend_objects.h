@@ -31,10 +31,10 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 
 zend_object *zend_objects_get_address(zval *object);
 
-void zend_objects_add_ref(zval *object);
-void zend_objects_del_ref(zval *object);
-void zend_objects_delete_obj(zval *object);
-zend_object_value zend_objects_clone_obj(zval *object);
+void zend_objects_add_ref(zval *object TSRMLS_DC);
+void zend_objects_del_ref(zval *object TSRMLS_DC);
+void zend_objects_delete_obj(zval *object TSRMLS_DC);
+zend_object_value zend_objects_clone_obj(zval *object TSRMLS_DC);
 
 #define Z_GET_OBJ(object_zval) zend_objects_get_address(object_zval)
 

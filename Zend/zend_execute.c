@@ -2538,7 +2538,7 @@ send_by_ref:
 
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 					ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
-					EX(Ts)[EX(opline)->result.u.var].var.ptr->value.obj = Z_OBJ_HT_P(obj)->clone_obj(obj);
+					EX(Ts)[EX(opline)->result.u.var].var.ptr->value.obj = Z_OBJ_HT_P(obj)->clone_obj(obj TSRMLS_CC);
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->type = IS_OBJECT;
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount=1;
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref=1;
@@ -2819,7 +2819,7 @@ send_by_ref:
 						if (Z_TYPE_PP(object) != IS_OBJECT) {
 						zend_error(E_ERROR, "Cannot call delete on non-object type");
 						}
-						Z_OBJ_HT_PP(object)->delete_obj((*object));
+						Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 					}
 
 					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
@@ -2871,7 +2871,7 @@ send_by_ref:
 											if (Z_TYPE_PP(object) != IS_OBJECT) {
 												zend_error(E_ERROR, "Cannot call delete on non-object type");
 											}
-											Z_OBJ_HT_PP(object)->delete_obj(*object);
+											Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 										}
 					
 										zend_hash_index_del(ht, index);
@@ -2885,7 +2885,7 @@ send_by_ref:
 										if (Z_TYPE_PP(object) != IS_OBJECT) {
 											zend_error(E_ERROR, "Cannot call delete on non-object type");
 										}
-										Z_OBJ_HT_PP(object)->delete_obj(*object);
+										Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 									}
 
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
@@ -2898,7 +2898,7 @@ send_by_ref:
 										if (Z_TYPE_PP(object) != IS_OBJECT) {
 											zend_error(E_ERROR, "Cannot call delete on non-object type");
 										}
-										Z_OBJ_HT_PP(object)->delete_obj(*object);
+										Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 									}
 
 									zend_hash_del(ht, "", sizeof(""));
