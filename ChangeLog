@@ -1,3 +1,58 @@
+2002-02-23  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/xslt/sablot.c:
+    - Fix info output (Peter Neuman <neuman_peter@hotmail.com>).
+
+2002-02-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package.dtd:
+    DTD corrections (make it require minimal data for installer)
+
+2002-02-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command.php
+      pear/PEAR/CommandResponse.php
+      pear/PEAR/Packager.php:
+    * started implementing new "cross-environment" command API
+
+2002-02-23  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/pi3web_sapi.h
+      sapi/pi3web/pi3web_sapi.c:
+    Fixed functionality to read in server variables.
+
+2002-02-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * pear/DB/MAINTAINERS
+      pear/DB/pgsql.php: updated message format for PostgreSQL 7.2.
+
+2002-02-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/README: Point readers to pear web
+
+    * pear/TODO: outdated TODO not needed for the moment
+
+2002-02-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * NEWS: NEWS updated.
+
+    * ext/mbstring/mbstring.c
+      ext/gd/config.m4
+      ext/fdf/Makefile.in:
+    - fixed configuration problem as shared extension for fdf.
+    - fixed configuration problem as shared extension for gd with freetype1.
+    - default output encoding of mbstring changed to pass to fix initialization problem.
+
+    * ext/gd/config.m4: fixed configure error with freetype1.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c:
+    fixed a comment and default output encoding changed to pass.
+
+    * ext/mbstring/mbfilter.c: php.h included.
+
 2002-02-22  Christian Stocker  <chregu@phant.ch>
 
     * pear/HTML/ITX.php: E_ALL fix
