@@ -100,15 +100,6 @@ output_buffering = Off
 ; and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
 output_handler =
 
-; The unserialize callback function will called (with the undefind class'
-; name as parameter), if the unserializer finds an undefined class
-; which should be instanciated.
-; A warning appears if the specified function is not defined, or if the
-; function doesn't include/implement the missing class.
-; So only set this entry, if you really want to implement such a 
-; callback-function.
-unserialize_callback_func=
-
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
@@ -123,6 +114,15 @@ zlib.output_compression = Off
 ; and every HTML block.  Turning this option on has serious performance
 ; implications and is generally recommended for debugging purposes only.
 implicit_flush = Off
+
+; The unserialize callback function will called (with the undefind class'
+; name as parameter), if the unserializer finds an undefined class
+; which should be instanciated.
+; A warning appears if the specified function is not defined, or if the
+; function doesn't include/implement the missing class.
+; So only set this entry, if you really want to implement such a 
+; callback-function.
+unserialize_callback_func=
 
 ; Whether to enable the ability to force arguments to be passed by reference
 ; at function call time.  This method is deprecated and is likely to be
