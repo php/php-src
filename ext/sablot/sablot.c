@@ -31,8 +31,7 @@
 #include "ext/standard/php_output.h"
 #include "php_sablot.h"
 
-static int le_sablot;
-static SablotHandle processor;
+static int          le_sablot;
 
 /* Functions related to PHP's list handling */
 static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc);
@@ -68,37 +67,37 @@ static zval *_php_sablot_resource_zval(long);
 
 /* ERROR Macros */
 
-#define SABLOT_FREE_ERROR_HANDLE(__handle) \
-    if ((__handle).errors) { \
+#define SABLOT_FREE_ERROR_HANDLE(__handle)                \
+    if ((__handle).errors) {                              \
         (__handle).errors = (__handle).errors_start.next; \
-        while ((__handle).errors) { \
-            S_FREE((__handle).errors->key); \
-            S_FREE((__handle).errors->value); \
-            (__handle).errors = (__handle).errors->next; \
-        } \
-        S_FREE((__handle).errors); \
+        while ((__handle).errors) {                       \
+            S_FREE((__handle).errors->key);               \
+            S_FREE((__handle).errors->value);             \
+            (__handle).errors = (__handle).errors->next;  \
+        }                                                 \
+        S_FREE((__handle).errors);                        \
     }
 
 
 /* Sablotron Basic Api macro's */
-#define SABLOT_BASIC_CREATE_PROCESSOR() \
-    if (processor == NULL) { \
-        int ret = 0; \
-        \
-        ret = SablotCreateProcessor(&processor); \
-        if (ret) { \
-            SABLOTG(last_errno) = ret; \
-            return; \
-        } \
-        \
-        ret = SablotRegHandler(processor, HLR_MESSAGE, (void *)&mh, (void *)NULL); \
-        if (ret) { \
-            SABLOTG(last_errno) = ret; \
-            return; \
-        } \
+#define SABLOT_BASIC_CREATE_PROCESSOR()                                                     \
+    if (SABLOTG(processor) == NULL) {                                                       \
+        int ret = 0;                                                                        \
+                                                                                            \
+        ret = SablotCreateProcessor(&SABLOTG(processor));                                   \
+        if (ret) {                                                                          \
+            SABLOTG(last_errno) = (int) ret;                                                \
+            return;                                                                         \
+        }                                                                                   \
+                                                                                            \
+        ret = SablotRegHandler(SABLOTG(processor), HLR_MESSAGE, (void *)&mh, (void *)NULL); \
+        if (ret) {                                                                          \
+            SABLOTG(last_errno) = (int) ret;                                                \
+            return;                                                                         \
+        }                                                                                   \
     }
 
-#define SABLOT_BASIC_HANDLE processor
+#define SABLOT_BASIC_HANDLE SABLOTG(processor)
 
 /**
  * SAX Handler structure, this defines the different functions to be
@@ -161,9 +160,9 @@ zend_module_entry sablot_module_entry = {
     "sablot",
     sablot_functions,
     PHP_MINIT(sablot),
-	PHP_MSHUTDOWN(sablot),
+    PHP_MSHUTDOWN(sablot),
     NULL,
-    NULL,
+    PHP_RSHUTDOWN(sablot),
     PHP_MINFO(sablot),
     STANDARD_MODULE_PROPERTIES
 };
@@ -172,24 +171,46 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
+static void php_sablot_init_globals(SABLOTLS_D)
+{
+	SABLOTG(processor)    = NULL;
+	SABLOTG(errors)       = NULL;
+	SABLOTG(errorHandler) = NULL;
+}
+
 
 /* MINIT and MINFO Functions */
 PHP_MINIT_FUNCTION(sablot)
 {
+#ifdef ZTS
+	sablot_globals_id = ts_allocate_id(sizeof(php_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
+#else
+	php_sablot_init_globals(SABLOTLS_C);
+#endif
+
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
-	processor = NULL;
 
     return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(sablot)
 {
-	if (processor) {
-		SablotUnregHandler(processor, HLR_MESSAGE, NULL, NULL);
-		SablotDestroyProcessor(processor);
+	SABLOTLS_FETCH();
+	if (SABLOTG(processor)) {
+		SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
+		SablotDestroyProcessor(SABLOTG(processor));
 	}
 
     return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(sablot)
+{
+	SABLOTLS_FETCH();
+
+	SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
+
+	return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(sablot)
@@ -785,7 +806,6 @@ PHP_FUNCTION(xslt_set_sax_handler)
             RETURN_FALSE;
         }
         
-        
         if (!strcasecmp("document", string_key)) {
             _php_sablot_handler_pair(handle, 
                                      &handle->startDocHandler, &handle->endDocHandler,
@@ -1173,11 +1193,12 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     
     int isAdvanced = 0,
         argc = 0,
+		i,
         idx,
         len;
 
     SABLOTLS_FETCH();
-    
+   
     if (userData == NULL) {
         SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
         
@@ -1271,6 +1292,10 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 
         zval_dtor(retval);
         efree(retval);
+
+		for (i = 1; i < argc; i++) {
+			zval_del_ref(&argv[i]);
+		}
     } else {
     	if (level == MH_LEVEL_CRITICAL ||
     	    level == MH_LEVEL_ERROR    ||
@@ -1280,7 +1305,6 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     }
 
     return(0);
-
 }
 /* }}} */
 
