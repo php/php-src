@@ -24,6 +24,7 @@
 #include "config.h"
 #endif
 
+#include <ctype.h>
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -174,6 +175,10 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 				++n_matches;
 				break;
 			}
+		}
+
+		while (i < data_source_len && isspace(data_source[i])) {
+			i++;
 		}
 
 		optstart = i;
