@@ -387,6 +387,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	char *key;
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
+	CLS_FETCH();
 
 	MAKE_STD_ZVAL(fname);
 	ZVAL_STRING(fname, "__sleep", 1);
@@ -462,7 +463,8 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	ulong idx;
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
-	int ind = 0,type;
+	ulong ind = 0;
+	int type;
 
 	target_hash = HASH_OF(arr);
 
