@@ -31,8 +31,8 @@
  */
 
 
-#ifndef _PHP_IFX_H
-#define _PHP_IFX_H
+#ifndef PHP_INFORMIX_H
+#define PHP_INFORMIX_H
 
 #ifdef PHP_WIN32
 #define PHP_IFX_API __declspec(dllexport)
@@ -222,4 +222,4 @@ typedef struct _IFX_IDRES {
 
 #define phpext_informix_ptr ifx_module_ptr
 
-#endif /* _PHP_IFX_H */
+#endif /* PHP_INFORMIX_H */

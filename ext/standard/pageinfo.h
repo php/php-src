@@ -1,5 +1,5 @@
-#ifndef _PROCESS_H
-#define _PROCESS_H
+#ifndef PAGEINFO_H
+#define PAGEINFO_H
 
 PHP_FUNCTION(getmyuid);
 PHP_FUNCTION(getmypid);

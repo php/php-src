@@ -29,8 +29,8 @@
 
 /* $Id$ */
 
-#ifndef _GETTEXT_H
-#define _GETTEXT_H
+#ifndef PHP_GETTEXT_H
+#define PHP_GETTEXT_H
 
 #if HAVE_LIBINTL
 #ifndef INIT_FUNC_ARGS
@@ -54,4 +54,4 @@ PHP_FUNCTION(bindtextdomain);
 
 #define phpext_gettext_ptr gettext_module_ptr
 
-#endif /* _GETTEXT_H */
+#endif /* PHP_GETTEXT_H */

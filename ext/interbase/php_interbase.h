@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_IBASE_H
-#define _PHP_IBASE_H
+#ifndef PHP_INTERBASE_H
+#define PHP_INTERBASE_H
 
 #if HAVE_IBASE
 #include <ibase.h>
@@ -171,7 +171,7 @@ extern PHP_IBASE_API php_ibase_globals ibase_globals;
 
 #endif /* HAVE_IBASE */
 
-#endif /* _PHP_IBASE_H */
+#endif /* PHP_INTERBASE_H */
 
 /*
  * Local variables:

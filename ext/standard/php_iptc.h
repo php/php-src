@@ -30,10 +30,10 @@
 
 /* $Id$ */
 
-#ifndef _PHPIPTC_H
-#define _PHPIPTC_H
+#ifndef PHP_IPTC_H
+#define PHP_IPTC_H
 
 PHP_FUNCTION(iptcparse);
 PHP_FUNCTION(iptcembed);
 
-#endif /* _PHPIPTC_H */
+#endif /* PHP_IPTC_H */

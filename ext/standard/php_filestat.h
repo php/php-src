@@ -29,8 +29,8 @@
 
 /* $Id$ */
 
-#ifndef _FILESTAT_H
-#define _FILESTAT_H
+#ifndef PHP_FILESTAT_H
+#define PHP_FILESTAT_H
 
 PHP_RINIT_FUNCTION(filestat);
 PHP_RSHUTDOWN_FUNCTION(filestat);
@@ -61,4 +61,4 @@ PHP_FUNCTION(chmod);
 PHP_FUNCTION(touch);
 PHP_FUNCTION(clearstatcache);
 
-#endif /* _FILESTAT_H */
+#endif /* PHP_FILESTAT_H */

@@ -15,8 +15,8 @@
    | Authors: clayton collie <clcollie@mindspring.com>                    |
    +----------------------------------------------------------------------+
  */
-#ifndef  _SCAN_H_
-#define  _SCAN_H_
+#ifndef  SCANF_H
+#define  SCANF_H
 
 
 #define SCAN_MAX_ARGS   0xFF    /* Maximum number of variable which can be      */
@@ -45,4 +45,4 @@ PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval ***ar
 inline void scan_set_error_return(int numVars,pval **return_value);
 
 
-#endif /* ifndef _SCAN_PHP_ */
+#endif /* SCANF_H */

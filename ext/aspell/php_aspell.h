@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _ASPELL_H
-#define _ASPELL_H
+#ifndef PHP_ASPELL_H
+#define PHP_ASPELL_H
 #if HAVE_ASPELL
 extern zend_module_entry aspell_module_entry;
 #define aspell_module_ptr &aspell_module_entry
@@ -50,4 +50,4 @@ PHP_FUNCTION(aspell_suggest);
 
 #define phpext_aspell_ptr aspell_module_ptr
 
-#endif /* _ASPELL_H */
+#endif /* PHP_ASPELL_H */

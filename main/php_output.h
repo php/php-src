@@ -17,8 +17,8 @@
 */
 
 
-#ifndef _OUTPUT_BUFFER
-#define _OUTPUT_BUFFER
+#ifndef PHP_OUTPUT_H
+#define PHP_OUTPUT_H
 
 #include "php.h"
 
@@ -69,4 +69,4 @@ ZEND_API extern php_output_globals output_globals;
 #endif
 
 
-#endif /* _OUTPUT_BUFFER */
+#endif /* PHP_OUTPUT_H */
