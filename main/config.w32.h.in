@@ -162,3 +162,4 @@
 #define HAVE_STRFTIME 1
 #define SIZEOF_INT 4
 #define HAVE_GLOB
+#define SHLIB_SUFFIX_NAME "dll"
