@@ -52,7 +52,7 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const char *type)
 		int ns_len = strlen(nsptr->href);
 		int type_len = strlen(cptype);
 		int len = ns_len + type_len + 1;
-		char *nscat = do_alloca(len + 1);
+		char *nscat = emalloc(len + 1);
 
 		memcpy(nscat, nsptr->href, ns_len);
 		nscat[ns_len] = ':';
@@ -63,7 +63,7 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const char *type)
 		if (enc == NULL) {
 			enc = get_encoder_ex(sdl, type, type_len);
 		}
-		free_alloca(nscat);
+		efree(nscat);
 	} else {
 		enc = get_encoder_ex(sdl, type, strlen(type));
 	}
@@ -88,7 +88,7 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 			int ns_len = strlen(nsptr->href);
 			int type_len = strlen(cptype);
 			int len = ns_len + type_len + 1;
-			char *nscat = do_alloca(len + 1);
+			char *nscat = emalloc(len + 1);
 
 			memcpy(nscat, nsptr->href, ns_len);
 			nscat[ns_len] = ':';
@@ -100,7 +100,7 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 			} else if (zend_hash_find(sdl->elements, (char*)type, type_len + 1, (void **)&sdl_type) == SUCCESS) {
 				ret = *sdl_type;
 			}
-			free_alloca(nscat);
+			efree(nscat);
 		} else {
 			if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
 				ret = *sdl_type;
@@ -121,7 +121,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	int type_len = strlen(type);
 	int len = ns_len + type_len + 1;
 
-	nscat = do_alloca(len + 1);
+	nscat = emalloc(len + 1);
 	memcpy(nscat, ns, ns_len);
 	nscat[ns_len] = ':';
 	memcpy(nscat+ns_len+1, type, type_len);
@@ -129,7 +129,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 
 	enc = get_encoder_ex(sdl, nscat, len);
 
-	free_alloca(nscat);
+	efree(nscat);
 	return enc;
 }
 
@@ -2190,7 +2190,7 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 			PHP_MD5Update(&context, fn, strlen(fn));
 			PHP_MD5Final(digest, &context);
 			make_digest(md5str, digest);
-			key = do_alloca(len+sizeof("/wsdl-")-1+sizeof(md5str));
+			key = emalloc(len+sizeof("/wsdl-")-1+sizeof(md5str));
 			memcpy(key,SOAP_GLOBAL(cache_dir),len);
 			memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 			memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
@@ -2201,7 +2201,7 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 					add_sdl_to_cache(key, fn, t, sdl);
 				}
 			}
-			free_alloca(key);
+			efree(key);
 		}
 	} else {
 		sdl = load_wsdl(uri);
