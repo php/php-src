@@ -390,11 +390,9 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 * Clean up
 		 */
 		
-		FREESTRING(SG(request_info).request_method);
 		FREESTRING(SG(request_info).query_string);
 		FREESTRING(SG(request_info).request_uri);
 		FREESTRING(SG(request_info).path_translated);
-		FREESTRING(SG(request_info).content_type);
 		FREESTRING(((servlet_request*)SG(server_context))->cookies);    
 		efree(SG(server_context));
 		SG(server_context)=0;
