@@ -63,9 +63,13 @@ static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_
 static pval *user_compare_func_name;
 static HashTable *user_shutdown_function_names;
 
+typedef struct _php_shutdown_function_entry {
+	zval **arguments;
+	int arg_count;
+} php_shutdown_function_entry;
+
 /* some prototypes for local functions */
-int user_shutdown_function_dtor(pval *user_shutdown_function_name);
-int user_shutdown_function_executor(pval *user_shutdown_function_name);
+int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 void php3_call_shutdown_functions(void);
 
 function_entry basic_functions[] = {
@@ -866,17 +870,17 @@ static int array_user_compare(const void *a, const void *b)
 {
 	Bucket *f;
 	Bucket *s;
-	pval *args[2];
+	pval **args[2];
 	pval retval;
 	CLS_FETCH();
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
-	args[0] = (pval *) f->pData;
-	args[1] = (pval *) s->pData;
+	args[0] = (pval **) f->pData;
+	args[1] = (pval **) s->pData;
 
-	if (call_user_function(CG(function_table), NULL, user_compare_func_name, &retval, 2, args)==SUCCESS) {
+	if (call_user_function_ex(CG(function_table), NULL, user_compare_func_name, &retval, 2, args, 0)==SUCCESS) {
 		convert_to_long(&retval);
 		return retval.value.lval;
 	} else {
@@ -950,6 +954,8 @@ static int array_user_key_compare(const void *a, const void *b)
 
 	args[0] = &key1;
 	args[1] = &key2;
+	INIT_PZVAL(&key1);
+	INIT_PZVAL(&key2);
 	
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -1446,17 +1452,15 @@ PHP_FUNCTION(max)
 	}
 }
 
-static pval *php3_array_walk_func_name;
+static pval *php_array_walk_func_name;
 
-static int _php3_array_walk(const void *a)
+
+static int php_array_walk(pval **a)
 {
-	pval *args[1];
 	pval retval;
 	CLS_FETCH();
 
-	args[0] = *((pval **)a);
-	
-	call_user_function(CG(function_table), NULL, php3_array_walk_func_name, &retval, 1, args);
+	call_user_function_ex(CG(function_table), NULL, php_array_walk_func_name, &retval, 1, &a, 0);
 	return 0;
 }
 
@@ -1464,20 +1468,20 @@ PHP_FUNCTION(array_walk) {
 	pval *array, *old_walk_func_name;
 	HashTable *target_hash;
 
-	old_walk_func_name = php3_array_walk_func_name;
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &php3_array_walk_func_name) == FAILURE) {
-		php3_array_walk_func_name = old_walk_func_name;
+	old_walk_func_name = php_array_walk_func_name;
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &php_array_walk_func_name) == FAILURE) {
+		php_array_walk_func_name = old_walk_func_name;
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in array_walk() call");
-		php3_array_walk_func_name = old_walk_func_name;
+		php_array_walk_func_name = old_walk_func_name;
 		return;
 	}
-	convert_to_string(php3_array_walk_func_name);
-	zend_hash_apply(target_hash, (int (*)(void *))_php3_array_walk);
-	php3_array_walk_func_name = old_walk_func_name;
+	convert_to_string(php_array_walk_func_name);
+	zend_hash_apply(target_hash, (int (*)(void *))php_array_walk);
+	php_array_walk_func_name = old_walk_func_name;
 	RETURN_TRUE;
 }
 
@@ -1828,7 +1832,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 
 PHP_FUNCTION(call_user_func)
 {
-	pval **params;
+	pval ***params;
 	pval retval;
 	int arg_count=ARG_COUNT(ht);
 	CLS_FETCH();
@@ -1836,17 +1840,18 @@ PHP_FUNCTION(call_user_func)
 	if (arg_count<1) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (pval **) emalloc(sizeof(pval)*arg_count);
+	params = (pval ***) emalloc(sizeof(pval **)*arg_count);
 	
-	if (getParametersArray(ht, arg_count, params)==FAILURE) {
+	if (getParametersArrayEx(arg_count, params)==FAILURE) {
 		efree(params);
 		RETURN_FALSE;
 	}
-	convert_to_string(params[0]);
-	if (call_user_function(CG(function_table), NULL, params[0], &retval, arg_count-1, params+1)==SUCCESS) {
+	SEPARATE_ZVAL(params[0]);
+	convert_to_string(*params[0]);
+	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval, arg_count-1, params+1, 1)==SUCCESS) {
 		*return_value = retval;
 	} else {
-		php_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
+		php_error(E_WARNING,"Unable to call %s() - function does not exist", (*params[0])->value.str.val);
 	}
 	efree(params);
 }
@@ -1854,7 +1859,7 @@ PHP_FUNCTION(call_user_func)
 
 PHP_FUNCTION(call_user_method)
 {
-	pval **params;
+	pval ***params;
 	pval retval;
 	int arg_count=ARG_COUNT(ht);
 	CLS_FETCH();
@@ -1862,36 +1867,42 @@ PHP_FUNCTION(call_user_method)
 	if (arg_count<2) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (pval **) emalloc(sizeof(pval)*arg_count);
+	params = (pval ***) emalloc(sizeof(pval **)*arg_count);
 	
-	if (getParametersArray(ht, arg_count, params)==FAILURE) {
+	if (getParametersArrayEx(arg_count, params)==FAILURE) {
 		efree(params);
 		RETURN_FALSE;
 	}
-	if (params[1]->type != IS_OBJECT) {
+	if ((*params[1])->type != IS_OBJECT) {
 		php_error(E_WARNING,"2nd argument is not an object\n");
 		efree(params);
 		RETURN_FALSE;
 	}
-	convert_to_string(params[0]);
-	if (call_user_function(CG(function_table), params[1], params[0], &retval, arg_count-2, params+2)==SUCCESS) {
+	SEPARATE_ZVAL(params[0]);
+	SEPARATE_ZVAL(params[1]);
+	convert_to_string(*params[0]);
+	if (call_user_function_ex(CG(function_table), *params[1], *params[0], &retval, arg_count-2, params+2, 1)==SUCCESS) {
 		*return_value = retval;
 	} else {
-		php_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
+		php_error(E_WARNING,"Unable to call %s() - function does not exist", (*params[0])->value.str.val);
 	}
 	efree(params);
 }
 
 
-int user_shutdown_function_dtor(pval *user_shutdown_function_name)
+int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry)
 {
 	pval retval;
+	int i;
 	CLS_FETCH();
 
-	if (call_user_function(CG(function_table), NULL, user_shutdown_function_name, &retval, 0, NULL)==SUCCESS) {
+	if (call_user_function(CG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
 		pval_destructor(&retval);
 	}
-	pval_destructor(user_shutdown_function_name);
+	for (i=0; i<shutdown_function_entry->arg_count; i++) {
+		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
+	}
+	efree(shutdown_function_entry->arguments);
 	return 1;
 }
 
@@ -1908,22 +1919,29 @@ void php3_call_shutdown_functions(void)
    Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
 {
-	pval *arg, shutdown_function_name;
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+	php_shutdown_function_entry shutdown_function_entry;
+	int i;
+
+	shutdown_function_entry.arg_count = ARG_COUNT(ht);
+
+	if (shutdown_function_entry.arg_count<1) {
 		WRONG_PARAM_COUNT;
 	}
-	
-	convert_to_string(arg);
+	shutdown_function_entry.arguments = (pval **) emalloc(sizeof(pval *)*shutdown_function_entry.arg_count);
+
+	if (getParametersArray(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments)==FAILURE) {
+		RETURN_FALSE;
+	}	
+	convert_to_string(shutdown_function_entry.arguments[0]);
 	if (!user_shutdown_function_names) {
 		user_shutdown_function_names = (HashTable *) emalloc(sizeof(HashTable));
 		zend_hash_init(user_shutdown_function_names, 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
 	}
-	
-	shutdown_function_name = *arg;
-	pval_copy_constructor(&shutdown_function_name);
-	
-	zend_hash_next_index_insert(user_shutdown_function_names, &shutdown_function_name, sizeof(pval), NULL);
+
+	for (i=0; i<shutdown_function_entry.arg_count; i++) {
+		shutdown_function_entry.arguments[i]->refcount++;
+	}
+	zend_hash_next_index_insert(user_shutdown_function_names, &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 }
 /* }}} */
 
