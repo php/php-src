@@ -31,9 +31,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-
-char *_php_math_number_format(double, int, char , char);
-
 /* {{{ proto int abs(int number)
 
    Return the absolute value of the number */
@@ -977,7 +974,7 @@ PHP_FUNCTION(base_convert)
 /* }}} */
 /* {{{ _php_math_number_format */
 
-char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
+PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
 	char *tmpbuf, *resbuf;
 	char *s, *t;  /* source, target */
