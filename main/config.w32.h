@@ -113,7 +113,7 @@
    DONT TOUCH!!!!!  Unless you realy know what your messing with!
    ---------------------------------------------------------------*/
 
-#define DISCARD_PATH 1
+#define DISCARD_PATH 0
 #undef HAVE_SETITIMER
 #undef HAVE_IODBC
 #define HAVE_UODBC 1
