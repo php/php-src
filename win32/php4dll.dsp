@@ -240,8 +240,10 @@ SOURCE=..\main\config.w32.h.in
 # Begin Custom Build
 InputPath=..\main\config.w32.h.in
 
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist ..\main\config.w32.h (
+	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+	)
 
 # End Custom Build
 
@@ -250,8 +252,10 @@ InputPath=..\main\config.w32.h.in
 # Begin Custom Build
 InputPath=..\main\config.w32.h.in
 
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist ..\main\config.w32.h (
+	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+	)
 
 # End Custom Build
 
@@ -260,8 +264,10 @@ InputPath=..\main\config.w32.h.in
 # Begin Custom Build
 InputPath=..\main\config.w32.h.in
 
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist ..\main\config.w32.h (
+	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+	)
 
 # End Custom Build
 
@@ -270,8 +276,10 @@ InputPath=..\main\config.w32.h.in
 # Begin Custom Build
 InputPath=..\main\config.w32.h.in
 
-"..\main\config.w32..inh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist ..\main\config.w32.h (
+	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+	)
 
 # End Custom Build
 
