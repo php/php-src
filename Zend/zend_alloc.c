@@ -200,9 +200,9 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size)
 
 
 #if ZEND_DEBUG
-ZEND_API void *_erealloc(void *ptr, size_t size, char *filename, uint lineno)
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure, char *filename, uint lineno)
 #else
-ZEND_API void *_erealloc(void *ptr, size_t size)
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 #endif
 {
 	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
@@ -220,10 +220,12 @@ ZEND_API void *_erealloc(void *ptr, size_t size)
 	REMOVE_POINTER_FROM_LIST(p);
 	p = (mem_header *) realloc(p,sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size)+END_MAGIC_SIZE);
 	if (!p) {
-		fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-		zend_bailout();
+		if (!allow_failure) {
+			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
+			exit(1);
+		}
 		ADD_POINTER_TO_LIST(orig);
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)NULL;
 	}
 	ADD_POINTER_TO_LIST(p);

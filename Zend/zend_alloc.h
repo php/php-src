@@ -55,41 +55,44 @@ ZEND_API char *zend_strndup(const char *s, unsigned int length);
 BEGIN_EXTERN_C()
 
 #if ZEND_DEBUG
-ZEND_API void *_emalloc(size_t size,char *filename,uint lineno);
-ZEND_API void _efree(void *ptr,char *filename,uint lineno);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size,char *filename,uint lineno);
-ZEND_API void *_erealloc(void *ptr, size_t size,char *filename,uint lineno);
-ZEND_API char *_estrdup(const char *s,char *filename,uint lineno);
-ZEND_API char *_estrndup(const char *s, unsigned int length,char *filename,uint lineno);
+ZEND_API void *_emalloc(size_t size, char *filename, uint lineno);
+ZEND_API void _efree(void *ptr, char *filename, uint lineno);
+ZEND_API void *_ecalloc(size_t nmemb, size_t size, char *filename, uint lineno);
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure, char *filename, uint lineno);
+ZEND_API char *_estrdup(const char *s, char *filename, uint lineno);
+ZEND_API char *_estrndup(const char *s, unsigned int length, char *filename, uint lineno);
 ZEND_API void _persist_alloc(void *ptr, char *filename, uint lineno);
-#define emalloc(size)			_emalloc((size),__FILE__,__LINE__)
-#define efree(ptr)				_efree((ptr),__FILE__,__LINE__)
-#define ecalloc(nmemb,size)		_ecalloc((nmemb),(size),__FILE__,__LINE__)
-#define erealloc(ptr,size)		_erealloc((ptr),(size),__FILE__,__LINE__)
-#define estrdup(s)				_estrdup((s),__FILE__,__LINE__)
-#define estrndup(s,length)		_estrndup((s),(length),__FILE__,__LINE__)
-#define persist_alloc(p)		_persist_alloc((p),__FILE__,__LINE__)
+#define emalloc(size)					_emalloc((size),__FILE__,__LINE__)
+#define efree(ptr)						_efree((ptr),__FILE__,__LINE__)
+#define ecalloc(nmemb,size)				_ecalloc((nmemb),(size),__FILE__,__LINE__)
+#define erealloc(ptr,size)				_erealloc((ptr),(size),0,__FILE__,__LINE__)
+#define erealloc_recoverable(ptr,size)	_erealloc((ptr),(size),1,__FILE__,__LINE__)
+#define estrdup(s)						_estrdup((s),__FILE__,__LINE__)
+#define estrndup(s,length)				_estrndup((s),(length),__FILE__,__LINE__)
+#define persist_alloc(p)				_persist_alloc((p),__FILE__,__LINE__)
 #else
 ZEND_API void *_emalloc(size_t size);
 ZEND_API void _efree(void *ptr);
 ZEND_API void *_ecalloc(size_t nmemb, size_t size);
-ZEND_API void *_erealloc(void *ptr, size_t size);
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure);
 ZEND_API char *_estrdup(const char *s);
 ZEND_API char *_estrndup(const char *s, unsigned int length);
 ZEND_API void _persist_alloc(void *ptr);
-#define emalloc(size)			_emalloc((size))
-#define efree(ptr)				_efree((ptr))
-#define ecalloc(nmemb,size)		_ecalloc((nmemb),(size))
-#define erealloc(ptr,size)		_erealloc((ptr),(size))
-#define estrdup(s)				_estrdup((s))
-#define estrndup(s,length)		_estrndup((s),(length))
-#define persist_alloc(p)		_persist_alloc((p))
+#define emalloc(size)						_emalloc((size))
+#define efree(ptr)							_efree((ptr))
+#define ecalloc(nmemb,size)					_ecalloc((nmemb),(size))
+#define erealloc(ptr,size)					_erealloc((ptr),(size),0)
+#define erealloc_recoverable(ptr,size)		_erealloc((ptr),(size),1)
+#define estrdup(s)							_estrdup((s))
+#define estrndup(s,length)					_estrndup((s),(length))
+#define persist_alloc(p)					_persist_alloc((p))
 #endif
 
 #define pemalloc(size,persistent) ((persistent)?malloc(size):emalloc(size))
 #define pefree(ptr,persistent)  ((persistent)?free(ptr):efree(ptr))
 #define pecalloc(nmemb,size,persistent) ((persistent)?calloc((nmemb),(size)):ecalloc((nmemb),(size)))
 #define perealloc(ptr,size,persistent) ((persistent)?realloc((ptr),(size)):erealloc((ptr),(size)))
+#define perealloc_recoverable(ptr,size,persistent) ((persistent)?realloc((ptr),(size)):erealloc_recoverable((ptr),(size)))
 #define pestrdup(s,persistent) ((persistent)?strdup(s):estrdup(s))
 
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):(empty_string))

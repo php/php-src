@@ -631,7 +631,7 @@ static int if_full_do_resize(HashTable *ht)
 
 	if ((ht->nNumOfElements > ht->nTableSize) && (ht->nHashSizeIndex < nNumPrimeNumbers - 1)) {		/* Let's double the table
 																									   size */
-		t = (Bucket **) perealloc(ht->arBuckets, PrimeNumbers[ht->nHashSizeIndex + 1] * sizeof(Bucket *),ht->persistent);
+		t = (Bucket **) perealloc_recoverable(ht->arBuckets, PrimeNumbers[ht->nHashSizeIndex + 1] * sizeof(Bucket *),ht->persistent);
 		if (t) {
 			HANDLE_BLOCK_INTERRUPTIONS();
 			ht->arBuckets = t;
