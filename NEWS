@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Major change of the php pdf api. It could break some functions though
+  backwards compatibility was tried to maintain. Adding some still
+  missing functions as well. (Uwe)
 - mnoGoSearch extension module initial version has been added.
   This module currently at the alpha state, but it can be used already.
 - Allow url encoding in DB usernames and passwords (Stig, PEAR)
