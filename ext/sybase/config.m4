@@ -21,4 +21,8 @@ if test "$PHP_SYBASE" != "no"; then
         AC_DEFINE(HAVE_LIBDNET_STUB,1,[ ])
      ])
   AC_DEFINE(HAVE_SYBASE,1,[ ])
+  AC_CHECK_LIB(sybdb, tdsdbopen, 
+     [ AC_DEFINE(PHP_SYBASE_DBOPEN,tdsdbopen,[ ])
+       AC_DEFINE(DBMFIX,1,[ ]) ],
+     [ AC_DEFINE(PHP_SYBASE_DBOPEN,dbopen,[ ]) ])
 fi
