@@ -13,8 +13,8 @@
 #endif
 
 /* Functions accessable to PHP */
-extern php3_module_entry php3_imap_module_entry;
-#define php3_imap_module_ptr &php3_imap_module_entry
+extern zend_module_entry imap_module_entry;
+#define imap_module_ptr &imap_module_entry
 
 extern PHP_MINIT_FUNCTION(imap);
 PHP_MINFO_FUNCTION(imap);
@@ -65,7 +65,7 @@ PHP_FUNCTION(imap_fetch_overview);
 PHP_FUNCTION(imap_mail_compose);
 
 #else
-#define php3_imap_module_ptr NULL
+#define imap_module_ptr NULL
 #endif /* HAVE_IMAP */
 
 #endif
@@ -75,7 +75,7 @@ PHP_FUNCTION(imap_mail_compose);
 
 
 
-#define phpext_imap_ptr php3_imap_module_ptr
+#define phpext_imap_ptr imap_module_ptr
 
 
 
