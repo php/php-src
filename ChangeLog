@@ -1,3 +1,107 @@
+2000-09-12  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    updated some functions'name using obsolete name convention.
+
+2000-09-12  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-dist: Thanks, Adam
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.h:
+    - Made the Sybase CT module thread safe 
+
+    * ext/pcre/php_pcre.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      NEWS
+      php.ini-dist:
+    - Made eval() and several other runtime-evaluated code portions report the
+      nature and location of errors more accurately (Stas)
+
+2000-09-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Forgot to update proto.
+
+    * ext/standard/array.c:
+    - Added second argument to array_reverse() that indicatese whether
+      the original array keys should be preserved. 
+
+2000-09-12  Daniel Beckham  <danbeck@dealnews.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/string.c:
+    reversed chomp alias addition as per Andi Gutmans' request
+
+2000-09-12  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/html.c:
+    * ext/standard/html.c
+      ext/standard/html.h:
+    Clean up htmlspecialchars/htmlentities inconsistencies.
+
+2000-09-12  Daniel Beckham  <danbeck@dealnews.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/string.c:
+    added chomp() alias for chop() for us Perl purists.
+
+2000-09-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix notice.
+
+2000-09-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c:
+    Make parse_str always register globals with 1 argument and never -
+    with 2 arguments
+
+    * ext/standard/string.c:
+    A quick attempt to make parse_str($str,$arr) not register globals.
+
+2000-09-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php: DB_common::getAssoc() bug fix
+
+2000-09-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Fix contribution
+
+2000-09-12  Andi Gutmans  <andi@zend.com>
+
+    * ext/swf/swf.c:
+    - Always use V_* macros even if logic seems to be only using fullpath.
+
+    * ext/standard/file.c: - Fix bug #5997
+
+2000-09-12  Jouni Ahto  <jah@mork.net>
+
+    * NEWS:
+    - Fix the function names here too.
+
+2000-09-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/sybase.php
+      pear/DB/tests/fetchmodes.inc
+      pear/DB/tests/mysql/001.phpt
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/mktable.inc
+      pear/DB/tests/mysql/skipif.inc
+      pear/TODO:
+    PEAR: renamed DB_GETMODE_* to DB_FETCHMODE_*, added setFetchMode()
+          in DB_common to set the default mode, added some MySQL tests 
+
 2000-09-11  Jouni Ahto  <jah@mork.net>
 
     * ext/pgsql/pgsql.c
