@@ -1,3 +1,82 @@
+2004-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_list.c:
+      MFB: - Fix bug #26753 (zend_fetch_list_dtor_id() does not check NULL
+      strings)
+
+2004-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c:
+      MFH: Fixed bug #27293 (two crashes inside image2wbmp()).
+
+    * ext/gd/gd.c:
+      Fixed bug #27293 (two crashes inside image2wbmp()).
+
+2004-02-17  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Really disallow persistent connections if ini option is set
+
+2004-02-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      add dtor to cleanup iterator related data
+
+2004-02-17  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h
+      ext/interbase/tests/004.phpt:
+      Fixed unregistered bugs in event handling
+      Cleaned up some of the code
+      Removed ISC_QUAD from static initializers because it looks different on
+      	some platforms
+
+    * ext/interbase/tests/004.phpt
+      ext/interbase/tests/008.phpt:
+      Added event handling test
+      CS
+
+2004-02-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/gettext/config.w32:
+      Fix:
+
+2004-02-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_iterators.c
+      ext/dom/namednodemap.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/xpath.c:
+      implement clone functionality to fix segfault
+      DomNode->clone() creates new doc proxy if document is cloned
+      remove printf from xpath
+      fix remaining invalid object state issues
+
+2004-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_list.c:
+      - Fixed bug #26753 (zend_fetch_list_dtor_id() does not check NULL strings).
+
+2004-02-17  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/tests/027.phpt:
+      changed output
+
+2004-02-17  Stig Bakken  <ssb@trd.overture.com>
+
+    * pear/PEAR/Frontend/CLI.php:
+      - apply bold escape codes only if output is going to a terminal/tty
+
 2004-02-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * .gdbinit:
