@@ -790,7 +790,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	zval *id, *rv = NULL;
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
-	xmlNsPtr nsptr;
+	xmlNsPtr nsptr = NULL;
 	int ret, uri_len = 0, name_len = 0;
 	char *uri, *name;
 	char *localname = NULL, *prefix = NULL;

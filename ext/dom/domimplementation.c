@@ -152,6 +152,8 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "DocumentType: Wrong Document");
 			RETURN_FALSE;
 		}
+	} else {
+		doctobj = NULL;
 	}
 
 	if (name_len > 0) {
@@ -216,7 +218,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) docp, &ret, NULL);
 
-	if (doctype != NULL) {
+	if (doctobj != NULL) {
 		doctobj->document = ((dom_object *)((node_ptr *)docp->_private)->_private)->document;
 		increment_document_reference(doctobj, docp TSRMLS_CC);
 	}
