@@ -35,14 +35,6 @@
 # include <alloca.h>
 #endif
 
-#define AI_USE_PTR(ai) \
-	if ((ai).ptr_ptr) { \
-		(ai).ptr = *((ai).ptr_ptr); \
-		(ai).ptr_ptr = &((ai).ptr); \
-	} else { \
-		(ai).ptr = NULL; \
-	}
-
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
 
@@ -334,6 +326,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (variable_ptr->refcount==0) {
 			switch (type) {
 				case IS_VAR:
+					/*
 					if (PZVAL_IS_LOCKED(value)) {
 						zval *orig_value = value;
 
@@ -343,6 +336,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						value->EA.locks = 0;
 						zval_copy_ctor(value);
 					}
+					*/
 					/* break missing intentionally */
 				case IS_CONST:
 					if (variable_ptr==value) {
@@ -375,6 +369,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		} else { /* we need to split */
 			switch (type) {
 				case IS_VAR:
+					/*
 					if (PZVAL_IS_LOCKED(value)) {
 						zval *orig_value = value;
 
@@ -384,6 +379,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						value->EA.locks = 0;
 						zval_copy_ctor(value);
 					}
+					*/
 					/* break missing intentionally */
 				case IS_CONST:
 					if (PZVAL_IS_REF(value)) {
