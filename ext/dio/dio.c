@@ -31,6 +31,15 @@
 #include <fcntl.h>
 #include <termios.h>
 
+/* e.g. IRIX does not have CRTSCTS */
+#ifndef CRTSCTS
+# ifdef CNEW_RTSCTS
+#  define CRTSCTS CNEW_RTSCTS
+# else
+#  define CRTSCTS 0
+# endif /* CNEW_RTSCTS */
+#endif /* !CRTSCTS */
+
 #define le_fd_name "Direct I/O File Descriptor"
 static int le_fd;
 
