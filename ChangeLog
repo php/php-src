@@ -1,3 +1,65 @@
+2001-05-13  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: renamed *typedef_VARIANT.* to *VARIANT.*
+
+    * main/internal_functions_win32.c:
+    changed php_typedef_VARIANT.h to php_VARIANT.h
+
+    * ext/com/VARIANT.c: renamed
+
+2001-05-13  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Image/Remote.php:
+    * Fixed a typo in example usage.
+
+2001-05-13  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/VARIANT.c
+      ext/com/com.h
+      ext/com/conversion.c: modified because of the changes in com.c
+
+    * ext/com/COM.c:    also changed the return values of the internal functions from VARIANT
+    to pval, so there's no need to convert the returned value after each function
+    call and the real hashtable entry is returned and not only a copy of it.
+
+2001-05-13  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Image/Remote.php:
+    * Added error handling via PEAR_Error.
+
+2001-05-13  Harald Radi  <h.radi@nme.at>
+
+    * ext/dotnet/dotnet.cpp:
+    added an additional parameter to dotnet_load to specify the codepage (phanto)
+
+2001-05-13  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mbstring/mbfilter.c:
+    Removed redundant (and incorrect) '0' from "begin" string for uudecode.
+
+2001-05-13  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c: MFH
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c: Safer detection of recursive PHP invocations
+
+    * win32/php4dllts.dsp: Fix broken XML build
+
+2001-05-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/session/session.c: Nuke some warnings.
+
+2001-05-13  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp:
+    Nuke HAVE_LIBEXPAT2. We define HAVE_LIBEXPAT in config.w32.h, and that does the trick.
+
 2001-05-12  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/mbstring/mbfilter.c:
