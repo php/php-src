@@ -1464,11 +1464,11 @@ PHPAPI int _php_stream_mkdir(char *path, int mode, int options, php_stream_conte
 	php_stream_wrapper *wrapper = NULL;
 
 	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
-	if (!wrapper || !wrapper->wops || !wrapper->wops->mkdir) {
+	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_mkdir) {
 		return 0;
 	}
 
-	return wrapper->wops->mkdir(wrapper, path, mode, options, context TSRMLS_CC);
+	return wrapper->wops->stream_mkdir(wrapper, path, mode, options, context TSRMLS_CC);
 }
 /* }}} */
 
@@ -1479,11 +1479,11 @@ PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *contex
 	php_stream_wrapper *wrapper = NULL;
 
 	wrapper = php_stream_locate_url_wrapper(path, NULL, ENFORCE_SAFE_MODE TSRMLS_CC);
-	if (!wrapper || !wrapper->wops || !wrapper->wops->rmdir) {
+	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_rmdir) {
 		return 0;
 	}
 
-	return wrapper->wops->rmdir(wrapper, path, options, context TSRMLS_CC);
+	return wrapper->wops->stream_rmdir(wrapper, path, options, context TSRMLS_CC);
 }
 /* }}} */
 
