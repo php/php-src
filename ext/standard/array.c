@@ -2465,15 +2465,15 @@ PHP_FUNCTION(array_multisort)
 	}
 
 	/* Here we go through the input arguments and parse them. Each one can
-	   be either an array or a sort order flag which follows an array. If
-	   not specified, the sort order flag defaults to SORT_ASC. There can't
-	   be two sort order flags in a row, and the very first argument has
-	   to be an array.
+	   be either an array or a sort flag which follows an array. If not
+	   specified, the sort flags defaults to SORT_ASC and SORT_REGULAR
+	   accordingly. There can't be two sort flags of the same type after an
+	   array, and the very first argument has to be an array.
 	 */
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_ARRAY) {
-			/* We see the next array so update the sort order of
-			   the previous array and reset the sort order */
+			/* We see the next array, so we update the sort flags of
+			   the previous array and reset the sort flags. */
 			if (i > 0) {
 				ARRAYG(multisort_flags)[MULTISORT_ORDER][num_arrays-1] = sort_order;
 				ARRAYG(multisort_flags)[MULTISORT_TYPE][num_arrays-1] = sort_type;
@@ -2482,7 +2482,7 @@ PHP_FUNCTION(array_multisort)
 			}
 			arrays[num_arrays++] = args[i];
 
-			/* next one may be array or sort flag */
+			/* Next one may be an array or a list of sort flags. */
 			for (k = 0; k < MULTISORT_LAST; k++)
 				parse_state[k] = 1;
 		} else if (Z_TYPE_PP(args[i]) == IS_LONG) {
@@ -2530,7 +2530,7 @@ PHP_FUNCTION(array_multisort)
 	ARRAYG(multisort_flags)[MULTISORT_ORDER][num_arrays-1] = sort_order;
 	ARRAYG(multisort_flags)[MULTISORT_TYPE][num_arrays-1] = sort_type;
 	
-	/* Make sure the arrays are of the same size */
+	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_PP(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_PP(arrays[i])) != array_size) {
@@ -2571,7 +2571,7 @@ PHP_FUNCTION(array_multisort)
 	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
 	
 	/* Restructure the arrays based on sorted indirect - this is mostly
-	   take from zend_hash_sort() function. */
+	   taken from zend_hash_sort() function. */
 	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < num_arrays; i++) {
 		hash = (*arrays[i])->value.ht;
@@ -2600,7 +2600,7 @@ PHP_FUNCTION(array_multisort)
 	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 		
-	/* Clean up */	
+	/* Clean up. */	
 	for (i = 0; i < array_size; i++)
 		efree(indirect[i]);
 	efree(indirect);
