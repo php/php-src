@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Enable strcoll() on win32. (Markus)
 - Added html-free phpinfo() output for CLI. (Jan)
 - Fixed socket_recvfrom() to be binary safe. (Jason)
 - Changed mail() to use escape_shell_cmd() to allow multiple extra parameters 
