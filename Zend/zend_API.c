@@ -395,7 +395,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
 
 				if (Z_TYPE_PP(arg) == IS_OBJECT &&
-						instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC)) {
+						(!ce || instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC))) {
 					*p = *arg;
 				} else {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
@@ -584,6 +584,10 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 		object = va_arg(va, zval **);
 		ce = va_arg(va, zend_class_entry *);
 		*object = this_ptr;
+		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {
+			zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+				ce->name, get_active_function_name(TSRMLS_C), Z_OBJCE_P(this_ptr)->name, get_active_function_name(TSRMLS_C));
+		}
 
 		retval = zend_parse_va_args(num_args, p, &va, 0 TSRMLS_CC);
 		va_end(va);
