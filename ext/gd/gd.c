@@ -277,14 +277,17 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_GIF
 	php_info_print_table_row(2, "GIF Support", "enabled");
 #endif
-#ifdef HAVE_GD_PNG
-	php_info_print_table_row(2, "PNG Support", "enabled");
-#endif
 #ifdef HAVE_GD_JPG
 	php_info_print_table_row(2, "JPG Support", "enabled");
 #endif
+#ifdef HAVE_GD_PNG
+	php_info_print_table_row(2, "PNG Support", "enabled");
+#endif
 #ifdef HAVE_GD_WBMP
 	php_info_print_table_row(2, "WBMP Support", "enabled");
+#endif
+#ifdef HAVE_GD_XBM
+	php_info_print_table_row(2, "XBM Support", "enabled");
 #endif
 	php_info_print_table_end();
 }
