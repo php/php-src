@@ -66,6 +66,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
                     'arg' => 'DIR',
                     'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
                     ),
+                'ignore-errors' => array(
+                    'doc' => 'force install even if there were errors',
+                    ),
                 ),
             'doc' => '<package> ...
 Installs one or more PEAR packages.  You can specify a package to
@@ -117,6 +120,9 @@ four ways of specifying packages.
                     'arg' => 'DIR',
                     'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
                     ),
+                'ignore-errors' => array(
+                    'doc' => 'force install even if there were errors',
+                    ),
                 ),
             'doc' => '<package> ...
 Upgrades one or more PEAR packages.  See documentation for the
@@ -154,6 +160,9 @@ More than one package may be specified at once.
                     'arg' => 'DIR',
                     'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
                     ),
+                'ignore-errors' => array(
+                    'doc' => 'force install even if there were errors',
+                    ),
                 ),
             'doc' => '
 Upgrades all packages that have a newer release available.  Upgrades are
@@ -178,6 +187,9 @@ more stable.
                     'shortopt' => 'R',
                     'arg' => 'DIR',
                     'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
+                    ),
+                'ignore-errors' => array(
+                    'doc' => 'force install even if there were errors',
                     ),
                 ),
             'doc' => '<package> ...
