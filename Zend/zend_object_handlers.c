@@ -207,14 +207,17 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &variable_ptr) == SUCCESS) {
-		if (*variable_ptr == EG(error_zval_ptr) || member == EG(error_zval_ptr)) {
-			/* variable_ptr = EG(uninitialized_zval_ptr); */
-/*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-		} else if (*variable_ptr != value) {
-			(*variable_ptr)->refcount--;
-			if ((*variable_ptr)->refcount == 0) {
-				zendi_zval_dtor(**variable_ptr);
-				FREE_ZVAL(*variable_ptr);
+		if(*variable_ptr == value) {
+			/* if we already have this value there, we don't actually need to do anything */
+			setter_done = 1;
+		} else {
+			/* if we are assigning reference, we shouldn't move it, but instead assign variable
+			   to the same pointer */
+			if (PZVAL_IS_REF(*variable_ptr)) {
+				(*variable_ptr)->type = value->type;
+				(*variable_ptr)->value = value->value;
+				zval_copy_ctor(*variable_ptr);
+				setter_done = 1;
 			}
 		}
 	} else {
@@ -229,7 +232,12 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 
 	if (!setter_done) {
-		value->refcount++;
+		/* if we assign referenced variable, we should separate it */
+		if (PZVAL_IS_REF(value)) {
+			SEPARATE_ZVAL(&value);
+		} else {
+			value->refcount++;
+		}
 		zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL);
 	}
 	if (member == &tmp_member) {
