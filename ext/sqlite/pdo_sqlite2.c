@@ -1,3 +1,22 @@
+/*
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2005 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.0 of the PHP license,       |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_0.txt.                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: Wez Furlong <wez@php.net>                                    |
+  +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -29,7 +48,7 @@ typedef struct {
 	pdo_sqlite2_db_handle 	*H;
 	sqlite_vm *vm;
 	const char **rowdata, **colnames;
-  int ncols;
+	int ncols;
 	unsigned pre_fetched:1;
 	unsigned done:1;
 	pdo_sqlite2_error_info einfo;
@@ -46,16 +65,16 @@ static int pdo_sqlite2_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_sqlite2_stmt *S = (pdo_sqlite2_stmt*)stmt->driver_data;
 
 	if (S->vm) {
-    char *errmsg = NULL;
+		char *errmsg = NULL;
 		sqlite_finalize(S->vm, &errmsg);
-    if (errmsg) {
-      sqlite_freemem(errmsg);
-    }
+		if (errmsg) {
+			sqlite_freemem(errmsg);
+		}
 		S->vm = NULL;
 	}
-  if (S->einfo.errmsg) {
-    pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
-  }
+	if (S->einfo.errmsg) {
+		pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
+	}
 	efree(S);
 	return 1;
 }
@@ -63,25 +82,25 @@ static int pdo_sqlite2_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_sqlite2_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_sqlite2_stmt *S = (pdo_sqlite2_stmt*)stmt->driver_data;
-  char *errmsg = NULL;
-  const char *tail;
+	char *errmsg = NULL;
+	const char *tail;
 
 	if (stmt->executed && !S->done) {
 		sqlite_finalize(S->vm, &errmsg);
-    pdo_sqlite2_error_stmt(errmsg, stmt);
-    errmsg = NULL;
-    S->vm = NULL;
+		pdo_sqlite2_error_stmt(errmsg, stmt);
+		errmsg = NULL;
+		S->vm = NULL;
 	}
 
-  S->einfo.errcode = sqlite_compile(S->H->db, stmt->active_query_string, &tail, &S->vm, &errmsg);
-  if (S->einfo.errcode != SQLITE_OK) {
-    fprintf(stderr, "SQL:%s\n", stmt->active_query_string);
-    pdo_sqlite2_error_stmt(errmsg, stmt);
-    return 0;
-  }
+	S->einfo.errcode = sqlite_compile(S->H->db, stmt->active_query_string, &tail, &S->vm, &errmsg);
+	if (S->einfo.errcode != SQLITE_OK) {
+		fprintf(stderr, "SQL:%s\n", stmt->active_query_string);
+		pdo_sqlite2_error_stmt(errmsg, stmt);
+		return 0;
+	}
 
 	S->done = 0;
-  S->einfo.errcode = sqlite_step(S->vm, &S->ncols, &S->rowdata, &S->colnames);
+	S->einfo.errcode = sqlite_step(S->vm, &S->ncols, &S->rowdata, &S->colnames);
 	switch (S->einfo.errcode) {
 		case SQLITE_ROW:
 			S->pre_fetched = 1;
@@ -90,11 +109,11 @@ static int pdo_sqlite2_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 		case SQLITE_DONE:
 			stmt->column_count = S->ncols;
-      stmt->row_count = sqlite_changes(S->H->db);
+			stmt->row_count = sqlite_changes(S->H->db);
 			S->einfo.errcode = sqlite_reset(S->vm, &errmsg);
-      if (S->einfo.errcode != SQLITE_OK) {
-        pdo_sqlite2_error_stmt(errmsg, stmt);
-      }
+			if (S->einfo.errcode != SQLITE_OK) {
+				pdo_sqlite2_error_stmt(errmsg, stmt);
+			}
 			S->done = 1;
 			return 1;
 
@@ -110,14 +129,14 @@ static int pdo_sqlite2_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_sqlite2_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
-  return 1;
+	return 1;
 }
 
 static int pdo_sqlite2_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_sqlite2_stmt *S = (pdo_sqlite2_stmt*)stmt->driver_data;
-  char *errmsg = NULL;
+	char *errmsg = NULL;
 
 	if (!S->vm) {
 		return 0;	
@@ -139,9 +158,9 @@ static int pdo_sqlite2_stmt_fetch(pdo_stmt_t *stmt,
 			S->done = 1;
 			S->einfo.errcode = sqlite_reset(S->vm, &errmsg);
 			if (S->einfo.errcode != SQLITE_OK) {
-        pdo_sqlite2_error_stmt(errmsg, stmt);
-        errmsg = NULL;
-      }
+				pdo_sqlite2_error_stmt(errmsg, stmt);
+				errmsg = NULL;
+			}
 			return 0;
 
 		default:
@@ -164,8 +183,8 @@ static int pdo_sqlite2_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	stmt->columns[colno].namelen = strlen(stmt->columns[colno].name);
 	stmt->columns[colno].maxlen = 0xffffffff;
 	stmt->columns[colno].precision = 0;
-  stmt->columns[colno].param_type = PDO_PARAM_STR;
-	
+	stmt->columns[colno].param_type = PDO_PARAM_STR;
+
 	return 1;
 }
 
@@ -180,22 +199,22 @@ static int pdo_sqlite2_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, uns
 		pdo_sqlite2_error_stmt(NULL, stmt);
 		return 0;
 	}
-  if (S->rowdata[colno]) {
-    if (S->rowdata[colno][0] == '\x01') {
-      /* encoded */
-      *caller_frees = 1;
-      *ptr = emalloc(strlen(S->rowdata[colno]));
-      *len = php_sqlite_decode_binary(S->rowdata[colno]+1, *ptr);
-      (*(char**)ptr)[*len] = '\0';
-    } else {
-      *ptr = (char*)S->rowdata[colno];
-      *len = strlen(*ptr);
-    }
-  } else {
-    *ptr = NULL;
-    *len = 0;
-  }
-  return 1;
+	if (S->rowdata[colno]) {
+		if (S->rowdata[colno][0] == '\x01') {
+			/* encoded */
+			*caller_frees = 1;
+			*ptr = emalloc(strlen(S->rowdata[colno]));
+			*len = php_sqlite_decode_binary(S->rowdata[colno]+1, *ptr);
+			(*(char**)ptr)[*len] = '\0';
+		} else {
+			*ptr = (char*)S->rowdata[colno];
+			*len = strlen(*ptr);
+		}
+	} else {
+		*ptr = NULL;
+		*len = 0;
+	}
+	return 1;
 }
 
 struct pdo_stmt_methods sqlite2_stmt_methods = {
@@ -216,28 +235,28 @@ int _pdo_sqlite2_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *errmsg, const cha
 	pdo_sqlite2_db_handle *H = (pdo_sqlite2_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_sqlite2_error_info *einfo = &H->einfo;
-  pdo_sqlite2_stmt *S;
-  
-  if (stmt) {
-    S = stmt->driver_data;
-    einfo = &S->einfo;
-  }
+	pdo_sqlite2_stmt *S;
+
+	if (stmt) {
+		S = stmt->driver_data;
+		einfo = &S->einfo;
+	}
 
 	einfo->file = file;
 	einfo->line = line;
 
-  if (einfo->errmsg) {
-    pefree(einfo->errmsg, dbh->is_persistent);
-    einfo->errmsg = NULL;
-  }
+	if (einfo->errmsg) {
+		pefree(einfo->errmsg, dbh->is_persistent);
+		einfo->errmsg = NULL;
+	}
 
 	if (einfo->errcode != SQLITE_OK) {
-    if (errmsg) {
-      einfo->errmsg = pestrdup(errmsg, dbh->is_persistent);
-      sqlite_freemem(errmsg);
-    } else {
-      einfo->errmsg = pestrdup(sqlite_error_string(einfo->errcode), dbh->is_persistent);
-    }
+		if (errmsg) {
+			einfo->errmsg = pestrdup(errmsg, dbh->is_persistent);
+			sqlite_freemem(errmsg);
+		} else {
+			einfo->errmsg = pestrdup(sqlite_error_string(einfo->errcode), dbh->is_persistent);
+		}
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
@@ -258,7 +277,7 @@ int _pdo_sqlite2_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *errmsg, const cha
 		case SQLITE_TOOBIG:
 			strcpy(*pdo_err, "22001");
 			break;
-	
+
 		case SQLITE_CONSTRAINT:
 			strcpy(*pdo_err, "23000");
 			break;
@@ -273,7 +292,7 @@ int _pdo_sqlite2_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *errmsg, const cha
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
-	
+
 	return einfo->errcode;
 }
 /* }}} */
@@ -282,12 +301,12 @@ static int pdo_sqlite2_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *
 {
 	pdo_sqlite2_db_handle *H = (pdo_sqlite2_db_handle *)dbh->driver_data;
 	pdo_sqlite2_error_info *einfo = &H->einfo;
-  pdo_sqlite2_stmt *S;
-  
-  if (stmt) {
-    S = stmt->driver_data;
-    einfo = &S->einfo;
-  }
+	pdo_sqlite2_stmt *S;
+
+	if (stmt) {
+		S = stmt->driver_data;
+		einfo = &S->einfo;
+	}
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
@@ -357,35 +376,35 @@ static char *pdo_sqlite2_last_insert_id(pdo_dbh_t *dbh, const char *name, unsign
 
 static int sqlite2_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
-  char *ret;
+	char *ret;
 
-  if (unquotedlen && (unquoted[0] == '\x01' || memchr(unquoted, '\0', unquotedlen) != NULL)) {
-    /* binary string */
-    int len;
- 		ret = safe_emalloc(1 + unquotedlen / 254, 257, 5);
+	if (unquotedlen && (unquoted[0] == '\x01' || memchr(unquoted, '\0', unquotedlen) != NULL)) {
+		/* binary string */
+		int len;
+		ret = safe_emalloc(1 + unquotedlen / 254, 257, 5);
 		ret[0] = '\'';
 		ret[1] = '\x01';
 		len = php_sqlite_encode_binary(unquoted, unquotedlen, ret+2);
-    ret[len + 2] = '\'';
-    ret[len + 3] = '\0';
-    *quoted = ret;
-    *quotedlen = len + 3;
-    //fprintf(stderr, "Quoting:%d:%.*s:\n", *quotedlen, *quotedlen, *quoted);
-    return 1;
-  } else if (unquotedlen) {
-    ret = sqlite_mprintf("'%q'", unquoted);
-    if (ret) {
-      *quoted = estrdup(ret);
-      *quotedlen = strlen(ret);
-      sqlite_freemem(ret);
-      return 1;
-    }
-    return 0;
-  } else {
-    *quoted = estrdup("''");
-    *quotedlen = 2;
-    return 1;
-  }
+		ret[len + 2] = '\'';
+		ret[len + 3] = '\0';
+		*quoted = ret;
+		*quotedlen = len + 3;
+		//fprintf(stderr, "Quoting:%d:%.*s:\n", *quotedlen, *quotedlen, *quoted);
+		return 1;
+	} else if (unquotedlen) {
+		ret = sqlite_mprintf("'%q'", unquoted);
+		if (ret) {
+			*quoted = estrdup(ret);
+			*quotedlen = strlen(ret);
+			sqlite_freemem(ret);
+			return 1;
+		}
+		return 0;
+	} else {
+		*quoted = estrdup("''");
+		*quotedlen = 2;
+		return 1;
+	}
 }
 
 static int sqlite2_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
@@ -545,10 +564,10 @@ static int pdo_sqlite2_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRML
 	int i, ret = 0;
 	long timeout = 60;
 	char *filename;
-  char *errmsg = NULL;
+	char *errmsg = NULL;
 
 	H = pecalloc(1, sizeof(pdo_sqlite2_db_handle), dbh->is_persistent);
-	
+
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 	dbh->driver_data = H;
@@ -557,8 +576,8 @@ static int pdo_sqlite2_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRML
 
 	if (!filename) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"safe_mode/open_basedir prohibits opening %s",
-			dbh->data_source);
+				"safe_mode/open_basedir prohibits opening %s",
+				dbh->data_source);
 		goto cleanup;
 	}
 
@@ -581,10 +600,10 @@ static int pdo_sqlite2_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRML
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;
-	
+
 cleanup:
 	dbh->methods = &sqlite2_methods;
-	
+
 	return ret;
 }
 /* }}} */
@@ -598,3 +617,12 @@ pdo_driver_t pdo_sqlite2_driver = {
 
 #endif
 
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
