@@ -22,33 +22,39 @@ $compare_function_5 = "cmp_description_txt_id";
 $compare_function_6 = "cmp_description_number_id";
 $dlo = dbx_connect($module, $host, $database, $username, $password);
 function cmp_description_id($a, $b) {
-    $rv = dbx_compare($a, $b, "description");
-    if (!$rv) $rv = dbx_compare($a, $b, "id");
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"));
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"));
     return $rv;
     }
 function cmp_description_desc_id($a, $b) {
-    $rv = dbx_compare($a, $b, "description", DBX_CMP_DESC);
-    if (!$rv) $rv = dbx_compare($a, $b, "id");
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"), DBX_CMP_DESC);
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"));
     return $rv;
     }
 function cmp_description_id_desc($a, $b) {
-    $rv = dbx_compare($a, $b, "description");
-    if (!$rv) $rv = dbx_compare($a, $b, "id", DBX_CMP_DESC);
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"));
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"), DBX_CMP_DESC);
     return $rv;
     }
 function cmp_description_desc_id_desc($a, $b) {
-    $rv = dbx_compare($a, $b, "description", DBX_CMP_DESC);
-    if (!$rv) $rv = dbx_compare($a, $b, "id", DBX_CMP_DESC);
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"), DBX_CMP_DESC);
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"), DBX_CMP_DESC);
     return $rv;
     }
 function cmp_description_txt_id($a, $b) {
-    $rv = dbx_compare($a, $b, "description", DBX_CMP_TEXT);
-    if (!$rv) $rv = dbx_compare($a, $b, "id");
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"), DBX_CMP_TEXT);
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"));
     return $rv;
     }
 function cmp_description_number_id($a, $b) {
-    $rv = dbx_compare($a, $b, "description", DBX_CMP_NUMBER);
-    if (!$rv) $rv = dbx_compare($a, $b, "id");
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"), DBX_CMP_NUMBER);
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"));
     return $rv;
     }
 if (!$dlo) {
@@ -60,42 +66,42 @@ else {
         print('this won\'t work'."\n");
         }
     for ($i=0; $i<$dro->rows; ++$i) {
-        print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+        print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
         }
     if (dbx_sort($dro, $compare_function_1)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (dbx_sort($dro, $compare_function_2)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (dbx_sort($dro, $compare_function_3)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (dbx_sort($dro, $compare_function_4)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (dbx_sort($dro, $compare_function_5)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (dbx_sort($dro, $compare_function_6)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
-    if (!@dbx_compare($a, $b, "fieldname")) {
+    if (!@dbx_compare($a, $b, $fieldname_case_function("fieldname"))) {
         print('wrong parameters: dbx_compare failure works ok'."\n");
         }
-    if (!@dbx_compare($a, $b, "fieldname", DBX_CMP_NATIVE, "12many")) {
+    if (!@dbx_compare($a, $b, $fieldname_case_function("fieldname"), DBX_CMP_NATIVE, "12many")) {
         print('too many parameters: dbx_compare failure works ok'."\n");
         }
     if (!@dbx_compare($a, $b)) {
