@@ -3255,9 +3255,9 @@ PHP_FUNCTION(ocicolumnisnull)
 
 /* }}} */
 
-/* {{{ proto void ocidebug(int onoff)
-   Toggle internal debugging output for the OCI extension */
 
+/* {{{ proto void ociinternaldebug(int onoff)
+   Toggle internal debugging output for the OCI extension */
 /* Disables or enables the internal debug output.
  * By default it is disabled.
  */
