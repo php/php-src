@@ -30,7 +30,7 @@
 
 #ifdef PHP_WIN32
 
-#include <iostream.h>
+#include <iostream>
 #include <math.h>
 #include <comdef.h>
 
