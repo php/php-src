@@ -409,8 +409,8 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 		switch(Z_TYPE_P(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
-			result = FAILURE;
-			break;
+			zval_ptr_dtor(&retval);
+			return FAILURE;
 		case IS_STRING:
 			*buffer = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*buf_len = Z_STRLEN_P(retval);
