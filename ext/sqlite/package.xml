@@ -70,6 +70,14 @@
       <file role="test" name="tests/sqlite_004.phpt"/>
       <file role="test" name="tests/sqlite_005.phpt"/>
       <file role="test" name="tests/sqlite_006.phpt"/>
+      <file role="test" name="tests/sqlite_007.phpt"/>
+      <file role="test" name="tests/sqlite_008.phpt"/>
+      <file role="test" name="tests/sqlite_009.phpt"/>
+      <file role="test" name="tests/sqlite_010.phpt"/>
+      <file role="test" name="tests/sqlite_011.phpt"/>
+      <file role="test" name="tests/sqlite_012.phpt"/>
+      <file role="test" name="tests/sqlite_013.phpt"/>
+      <file role="test" name="tests/sqlite_014.phpt"/>
       <file role="test" name="tests/blankdb.inc"/>
 
 	  <dir name="libsqlite">
