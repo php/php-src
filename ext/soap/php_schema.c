@@ -2135,6 +2135,9 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 			if (zend_hash_find(ctx->sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
 				type->encode = (*tmp)->encode;
 				/* TODO: nillable */
+				if ((*tmp)->nillable) {
+				  type->nillable = 1;
+				}
 			} else {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unresolved element 'ref' attribute");
 			}
