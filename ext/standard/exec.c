@@ -118,6 +118,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	int overflow_limit, lcmd, ldir;
 	char *b, *c, *d=NULL;
 	php_stream *stream = NULL;
+	int pclose_return = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif
@@ -283,13 +284,8 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		}
 	}
 
-	FG(pclose_ret) = php_stream_close(stream); 
+	pclose_return = php_stream_close(stream); 
 
-#if HAVE_SYS_WAIT_H
-	if (WIFEXITED(FG(pclose_ret))) {
-		FG(pclose_ret) = WEXITSTATUS(FG(pclose_ret));
-	}
-#endif
 #if PHP_SIGCHILD
 	signal (SIGCHLD, sig_handler);
 #endif
@@ -297,7 +293,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		efree(d);
 	}
 	efree(buf);
-	return FG(pclose_ret);
+	return pclose_return;
 }
 /* }}} */
 
@@ -586,8 +582,12 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	
 	if (wait_pid == -1)
 		FG(pclose_ret) = -1;
-	else
+	else {
+		if (WIFEXITED(wstatus))
+			wstatus = WEXITSTATUS(wstatus);
 		FG(pclose_ret) = wstatus;
+	}
+	
 # else
 	FG(pclose_ret) = -1;
 # endif
@@ -976,7 +976,7 @@ PHP_FUNCTION(proc_open)
 				fp = fdopen(descriptors[i].parentend, mode_string);
 #endif
 				if (fp) {
-					stream = php_stream_fopen_from_file(fp, mode_string);
+					stream = php_stream_fopen_from_pipe(fp, mode_string);
 					if (stream) {
 						zval *retfp;
 

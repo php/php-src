@@ -32,6 +32,9 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #include <stddef.h>
 
@@ -1317,6 +1320,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	php_stdio_stream_data *self;
+	php_stream *stream;
 
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
@@ -1325,7 +1329,9 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->fd = fileno(file);
 	self->temp_file_name = NULL;
 
-	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+	stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+	return stream;
 }
 
 static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
@@ -1385,11 +1391,18 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
-
+	
 	if (close_handle) {
 		if (data->file) {
 			if (data->is_process_pipe) {
+				errno = 0;
 				ret = pclose(data->file);
+
+#if HAVE_SYS_WAIT_H
+				if (WIFEXITED(ret)) {
+					ret = WEXITSTATUS(ret);
+				}
+#endif
 			} else {
 				ret = fclose(data->file);
 			}
