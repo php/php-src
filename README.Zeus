@@ -86,6 +86,21 @@ the 'configure' program to set up PHP; LDFLAGS and EXTRA_LIBS. Make
 sure that you also export these variables to the build process.
 (Type 'export LDFLAGS EXTRA_LIBS' in the shell to do this.)
 
+If you are using 3rd party tools and libraries which are installed
+in non-standard locations, you may need to set the environment
+variable LD_LIBRARY_PATH to point to the library's location, prior
+to running the Zeus Web Server. For example, if you have compiled
+external MySQL support, and mysql is installed in /usr/local/mysql,
+you should set LD_LIBRARY_PATH to '/usr/local/mysql/lib/mysql'
+and then 'export LD_LIBRARY_PATH'. For convenience, you should add
+this to the 'start-zeus' script provided.
+
+On Linux, you can also tell the dynamic linker where to find the
+libraries, by adding '/usr/local/mysql/lib/mysql' to the file 
+/etc/ld.so.conf - after editting this file, run 'ldconfig' as root,
+to use the changes.
+
+
 Specific examples:
 
 Solaris + gcc:
@@ -93,10 +108,39 @@ Ensure you run ./configure with the `--enable-libgcc' parameter. You
 may need to set LDFLAGS to '-L/usr/local/egcs/lib' (path depends on
 your gcc installation)
 
-FreeBSD 4.0:
+FreeBSD 4:
 Some people may find they need to run ./configure with the
 '--enable-libgcc' compile option too.
 
 
+Performance issues
+==================
+
+To make PHP run fast under Zeus, check the following points:
+
+1) Run PHP as an ISAPI module, not a CGI - compile it with the --with-zeus=...
+   flag!
+
+2) Tune the ISAPI runner to your required workload. There are several
+   tuneables that can be given. These are set by adding the appropriate
+   lines to the $ZEUSHOME/web/global.cfg file. Changes to this file will only
+   be picked up after the web server is restarted (run stop-zeus ; start-zeus)
+
+   tuning!modules!isapi!external!maxthreads xxx
+
+   - Sets the maximum number of threads that the ISAPI runner will spawn. If
+     further PHP page requests arrive, they will be queued until a current
+     page is finished. For busy websites, we suggest increasing this value
+     (defaults to 16). Replace the 'xxx' in the above line with the required
+     number of threads. Note that the threads are equally shared between
+     ISAPI extensions and filters, so if you want to handle 100 concurrent
+     PHP page requests, set this tuneable to 200.
+
+   tuning!modules!isapi!external!minthreads xxx
+
+   - Sets the minimum number of threads. Idle threads will be kept in a pool,
+     which avoids costly thread creation/deletion.
+
+
 For more information and help with Zeus, please visit our website:
-http://www.zeus.com
+http://support.zeus.com
