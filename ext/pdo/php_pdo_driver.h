@@ -99,7 +99,7 @@ typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh TSRMLS_DC);
 typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC);
 
 /* execute a statement (that does not return a result set) */
-typedef int (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql TSRMLS_DC);
+typedef int (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, int sql_len TSRMLS_DC);
 
 /* quote a string */
 typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC);
