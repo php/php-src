@@ -1844,6 +1844,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 
 void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type CLS_DC)
 {
+	int opline_num = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	znode lval;
 
@@ -1874,8 +1875,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 	}
 	fetch_simple_variable(&lval, varname, 0 CLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
 
-
-	do_assign_ref(NULL, &lval, &opline->result CLS_CC);
+	do_assign_ref(NULL, &lval, &CG(active_op_array)->opcodes[opline_num].result CLS_CC);
 	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 }
 
