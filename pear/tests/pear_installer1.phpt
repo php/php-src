@@ -1,7 +1,11 @@
 --TEST--
 PEAR_Installer test #1
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 
@@ -12,8 +16,9 @@ $ui = false;
 $installer = new PEAR_Installer($ui);
 echo "test extractDownloadFileName:\n";
 echo 'existing file: ';
-echo $installer->extractDownloadFileName($temp_path . DIRECTORY_SEPARATOR . 'user.conf',
-    $ui);
+echo ($temp_path . DIRECTORY_SEPARATOR . 'user.conf' ==
+     $installer->extractDownloadFileName($temp_path . DIRECTORY_SEPARATOR . 'user.conf',
+    $ui)) ? "yes\n" : "no\n";
 var_dump($ui);
 echo 'invalid match: ';
 echo $installer->extractDownloadFileName('27',
@@ -70,7 +75,8 @@ var_dump($res);
 --POST--
 --EXPECT--
 test extractDownloadFileName:
-existing file: c:\web pages\chiara\testinstallertemp\user.confbool(false)
+existing file: yes
+bool(false)
 invalid match: 27
 NULL
 valid match, no version: Testpackage
