@@ -2306,8 +2306,8 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_class_entry **pce;
 	zend_class_entry *ce = NULL;
 	zend_bool is_const;
-	char *class_name_strval;
-	zend_uint class_name_strlen;						
+	char *class_name_strval = NULL;
+	zend_uint class_name_strlen = 0;
 	zval *class_name;					
 	zval tmp;
 	int retval;
@@ -2337,10 +2337,8 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	is_const = (EX(opline)->op2.op_type == IS_CONST);
 
 	if (is_const) {
-{
-			class_name_strval = EX(opline)->op2.u.constant.value.str.val;
-			class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-		}
+		class_name_strval = EX(opline)->op2.u.constant.value.str.val;
+		class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
 	} else {
 		class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
@@ -4019,8 +4017,6 @@ int zend_verify_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_verify_abstract_class(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-	zend_bool declared_abstract = ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS;
-	zend_bool detected_abstract = ce->ce_flags & ZEND_ACC_ABSTRACT;
 
 	if ((ce->ce_flags & ZEND_ACC_ABSTRACT)
 		&& !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)) {

@@ -2248,7 +2248,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 }
 
 
-static do_verify_abstract_class(TSRMLS_D)
+static void do_verify_abstract_class(TSRMLS_D)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
