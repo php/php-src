@@ -87,7 +87,9 @@ void php3_dl(pval *file,int type,pval *return_value)
 	php3_module_entry *(*get_module)(void);
 	PLS_FETCH();
 	
-	if (cfg_get_string("extension_dir",&PG(extension_dir))==SUCCESS && PG(extension_dir)){
+	if (cfg_get_string("extension_dir",&PG(extension_dir))==SUCCESS
+		&& PG(extension_dir)
+		&& PG(extension_dir)[0]){
 		int extension_dir_len = strlen(PG(extension_dir));
 
 		if (PG(extension_dir)[extension_dir_len-1]=='/' || PG(extension_dir)[extension_dir_len-1]=='\\') {

@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed thread-safety issues in the MySQL module (Zeev)
+- Fixed thread-safe support for dynamic modules (Zeev)
 - Fixed Sybase CT build process (Zeev)
 
 August 9 1999, Version 4.0 Beta 2

@@ -125,6 +125,21 @@ PHPAPI void php_unregister_ini_entries(int module_number)
 }
 
 
+static int php_ini_refresh_cache(php_ini_entry *p)
+{
+	if (p->on_modify) {
+		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3);
+	}
+	return 0;
+}
+
+
+PHPAPI void php_ini_refresh_caches()
+{
+	zend_hash_apply(&known_directives, (int (*)(void *)) php_ini_refresh_cache);
+}
+
+
 PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
 {
 	php_ini_entry *ini_entry;

@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /machine:I386 /out:"Release/php_mysql.dll" /libpath:"..\..\..\MySQL\lib\opt" /libpath:"..\..\Release"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /machine:I386 /out:"Release/php_mysql.dll" /libpath:"..\..\..\MySQL\libmysql\Release" /libpath:"..\..\Release"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Debug"
 
@@ -70,8 +70,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\..\TSRM" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D ZEND_DEBUG=1 /FR /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\TSRM" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D ZEND_DEBUG=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\lib\debug" /libpath:"..\..\Debug"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\libmysql\Debug" /libpath:"..\..\Debug"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Debug_TS"
 
@@ -96,8 +96,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /FR /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D "ZTS" /FR /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D "ZTS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\lib\debug" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\libmysql\Debug" /libpath:"..\..\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Release_TS"
 
@@ -123,7 +123,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D "ZTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\libzend" /I "..\..\..\bindlib_w32" /I "..\..\..\MySQL\include" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MYSQL_EXPORTS" /D "COMPILE_DL" /D HAVE_MYSQL=1 /D "ZTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -133,7 +133,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /machine:I386 /out:"Release_TS/php_mysql.dll" /libpath:"..\..\..\MySQL\lib\opt" /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /machine:I386 /out:"Release_TS/php_mysql.dll" /libpath:"..\..\..\MySQL\libmysql\Release" /libpath:"..\..\Release_TS"
 
 !ENDIF 
 
