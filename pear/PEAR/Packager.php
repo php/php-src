@@ -106,6 +106,12 @@ class PEAR_Packager extends PEAR_Common
         if (PEAR::isError($pkginfo)) {
             return $pkginfo;
         }
+        // XXX This needs to be checked in infoFromDescriptionFile
+        //     or at least a helper method to do the proper checks
+        if (empty($pkginfo['version'])) {
+            return $this->raiseError("No version information found in $pkgfile",
+                                     null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
+        }
         // TMP DIR -------------------------------------------------
         // We allow calls like "pear package /home/user/mypack/package.xml"
         if (!@chdir(dirname($pkgfile))) {
