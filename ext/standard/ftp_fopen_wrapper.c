@@ -769,12 +769,58 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 		ssb->sb.st_size = atoi(tmp_line + 4);
 	}
 
+	php_stream_write_string(stream, "MDTM ");
+	if (resource->path != NULL) {
+		php_stream_write_string(stream, resource->path);
+	} else {
+		php_stream_write_string(stream, "/");
+	}
+	php_stream_write_string(stream, "\r\n");
+	result = GET_FTP_RESULT(stream);
+	if (result == 213) {
+		char *p = tmp_line + 4;
+		int n;
+		struct tm tm, tmbuf, *gmt;
+		time_t stamp;
+
+		while (p - tmp_line < sizeof(tmp_line) && !isdigit(*p)) {
+			p++;
+		}
+
+		if (p - tmp_line > sizeof(tmp_line)) {
+			goto mdtm_error;
+		}
+
+		n = sscanf(p, "%4u%2u%2u%2u%2u%2u", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
+		if (n != 6) {
+			goto mdtm_error;
+		}
+
+		tm.tm_year -= 1900;
+		tm.tm_mon--;
+		tm.tm_isdst = -1;
+
+		/* figure out the GMT offset */
+		stamp = time(NULL);
+		gmt = php_gmtime_r(&stamp, &tmbuf);
+		gmt->tm_isdst = -1;
+
+		/* apply the GMT offset */
+		tm.tm_sec += stamp - mktime(gmt);
+		tm.tm_isdst = gmt->tm_isdst;
+
+		ssb->sb.st_mtime = mktime(&tm);
+	} else {
+		/* error or unsupported command */
+ mdtm_error:
+		ssb->sb.st_mtime = -1;
+	}
+
 	ssb->sb.st_ino = 0;						/* Unknown values */
 	ssb->sb.st_dev = 0;
 	ssb->sb.st_uid = 0;
 	ssb->sb.st_gid = 0;
 	ssb->sb.st_atime = -1;
-	ssb->sb.st_mtime = -1;
 	ssb->sb.st_ctime = -1;
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
