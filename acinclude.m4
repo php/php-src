@@ -100,9 +100,11 @@ dnl used directly.
 dnl 
 AC_DEFUN(PHP_ADD_SOURCES_X,[
 dnl relative to source- or build-directory?
+dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
-  /*[)] ac_srcdir=`echo $ac_n "$1$ac_c"|cut -c 2-`; ac_bdir=$ac_srcdir ;;
-  *[)] ac_srcdir="$abs_srcdir/$1"; ac_bdir=$1 ;;
+  "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
+  /*[)] ac_srcdir=`echo $ac_n "$1$ac_c"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
   
 dnl how to build .. shared or static?
@@ -118,18 +120,18 @@ dnl remove the suffix
       ac_obj=[$]1
       IFS=$old_IFS
       
-dnl append to the array which has been dynamically chosen
-      $4="[$]$4 [$]ac_bdir/[$]ac_obj.lo"
+dnl append to the array which has been dynamically chosen at m4 time
+      $4="[$]$4 [$]ac_bdir[$]ac_obj.lo"
 
 dnl choose the right compiler/flags/etc. for the source-file
       case $ac_src in
-	  *.c[)] ac_comp="$b_c_pre $3 -I$abs_srcdir/$ac_bdir -I$abs_builddir/$ac_bdir $b_c_meta -c $ac_srcdir/$ac_src -o $ac_bdir/$ac_obj.$b_lo $6$b_c_post" ;;
-	  *.cpp[)] ac_comp="$b_cxx_pre $3 -I$abs_srcdir/$ac_bdir -I$abs_builddir/$ac_bdir $b_cxx_meta -c $ac_srcdir/$ac_src -o $ac_bdir/$ac_obj.$b_lo $6$b_cxx_post" ;;
+	  *.c[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+	  *.cpp[)] ac_comp="$b_cxx_pre $3 $ac_inc $b_cxx_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_cxx_post" ;;
       esac
 
 dnl create a rule for the object/source combo
 	  cat >>Makefile.objects<<EOF
-$ac_bdir/[$]ac_obj.lo: $ac_srcdir/[$]ac_src
+$ac_bdir[$]ac_obj.lo: $ac_srcdir[$]ac_src
 	$ac_comp
 EOF
   done
@@ -1152,7 +1154,7 @@ AC_DEFUN(PHP_NEW_EXTENSION,[
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
 
-    PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,)
+    PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
     EXT_STATIC="$EXT_STATIC $1"
     if test "$3" != "nocli"; then
       EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
@@ -1161,7 +1163,7 @@ dnl ---------------------------------------------- Static module
   else
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
-      PHP_ADD_SOURCES_X($ext_builddir,$2,$ac_extra,shared_objects_$1,yes)
+      PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
       PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
     fi
@@ -1170,10 +1172,10 @@ dnl ---------------------------------------------- Shared module
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" = "cli"; then
 dnl ---------------------------------------------- CLI static module
     if test "$PHP_SAPI" = "cgi"; then
-      PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,)
+      PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
       EXT_STATIC="$EXT_STATIC $1"
     else
-      PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,cli)
+      PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
     fi
     EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1"

@@ -28,6 +28,7 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
 ])
 dnl
 AC_DEFUN(PHP_EXT_BUILDDIR,[.])dnl
+AC_DEFUN(PHP_EXT_DIR,[""])dnl
 AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir])dnl
 AC_DEFUN(PHP_ALWAYS_SHARED,[
   ext_output="yes, shared"
