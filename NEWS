@@ -1,27 +1,24 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- DomNode->insert_before behaves now according to W3C spec
+- Fixed DomNode->insert_before() to behave according to W3C spec
   ie. new_child is moved, not copied. (chregu)
 - Added some namespace support with DomNode->add_namespace(uri, prefix)
-- and DomDocument->create_element_ns(uri, nodename) (chregu)
-- DomElement->node_name() takes optional boolean argument for retrieving
-  full qualified name (ie namespace prefix) (chregu)
-- DomNode->child_nodes() returns empty array instead of false, if no
-  child nodes are found (chregu)
-- Fix a bug where PHP doesn't handle the Expect header properly. (Patch 
-  submitted by Ilia <ilia@prohost.org>)
-- Fix a bug in ODBC where closing the module would crash the Windows 
-  executable.  (kalowsky)
-- Various memory leak fixes in the pack/unpack commands, patch submitted by
-  Ilia <ilia@prohost.org>. (kalowsky)
-- Added a default timeout to PHP streams. (kalowsky, Ilia A <ilia@prohost.org>)
-- Added clickable error messages that direct to a page describing the
-  error or function causing the error in detail. (Derick, Wez, Marcus)
+  and DomDocument->create_element_ns(uri, nodename) (chregu)
+- Added optional parameter to DomElement->node_name() for retrieving fully 
+  qualified name (ie. namespace prefix). (chregu)
+- Changed DomNode->child_nodes() to return empty array instead of false if no
+  child nodes are found. (chregu)
+- Fixed a bug with handling the Expect header. (Patch by ilia@prohost.org)
+- Fixed a bug in ODBC where closing the module caused a crash in the Windows 
+  executable. (kalowsky)
+- Fixed memory leaks in pack() and unpack(). (Patch by ilia@prohost.org)
+- Added a default timeout to PHP streams. (kalowsky, ilia@prohost.org)
+- Added URLs to error messages which direct to a page describing the error or 
+  function in question. (Derick, Wez, Marcus)
 - Added odbc_data_source() functionality to identify DB ServerName, and a 
   description of it gathered from the DSN. (kalowsky)
-- Added $DomDocument->xinclude() for substitution of XIncludes in
-- Copy() fixed to return 1 on 0 byte files. (Patch by Ilia A <ilia@prohost.org>)
+- Fixed copy() to return TRUE with 0 byte files. (Patch by ilia@prohost.org)
 - Added ob_list_handlers() which returns an array of all active output
   handlers. (Marcus)
 - Added mbstring encoding/decoding "HTML-ENTITIES". (Marcus)
@@ -38,8 +35,8 @@ PHP 4                                                                      NEWS
         declare (ticks=1) {
            statement;
         }
-- Bring strtotime() "next" keyword handling in line with documentation and
-  its glibc cousin.  (Rasmus)
+- Brought strtotime() "next" keyword handling in line with documentation and
+  its glibc cousin. (Rasmus)
 - Fixed str_rot13() to not mangle source string. (Rasmus)
 - Fixed imap_get_quota() to work with multiple returned resources as per
   the RFC 2087 and bug #14673. (kalowsky, Sander Steffann)
