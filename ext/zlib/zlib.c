@@ -598,7 +598,6 @@ PHP_FUNCTION(gzpassthru) {
 /* }}} */
 
 /* {{{ proto string gzread(int zp, int length)
-
    Binary-safe file read */
 PHP_FUNCTION(gzread)
 {
@@ -630,8 +629,8 @@ PHP_FUNCTION(gzread)
 /* }}} */
 	
 
-/* {{{ proto string gzcompress(string data [,int level]) 
-   gzip-compress a string */
+/* {{{ proto string gzcompress(string data [, int level]) 
+   Gzip-compress a string */
 PHP_FUNCTION(gzcompress)
 {
 	zval **data, **zlimit = NULL;
@@ -681,7 +680,7 @@ PHP_FUNCTION(gzcompress)
 /* }}} */
 
 /* {{{ proto string gzuncompress(string data ,int length) 
-   unzip a gzip-compressed string */
+   Unzip a gzip-compressed string */
 PHP_FUNCTION(gzuncompress)
 {
 	zval **data, **zlimit = NULL;
