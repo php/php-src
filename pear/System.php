@@ -292,8 +292,7 @@ class System
                 System::raiseError("Could not open $file");
                 continue;
             }
-            while(!feof($fd)) {
-                $cont = fread($fd, 2048);
+            while ($cont = fread($fd, 2048)) {
                 if (isset($outputfd)) {
                     fwrite($outputfd, $cont);
                 } else {
