@@ -28,6 +28,12 @@ require_once "PEAR.php";
 $GLOBALS['_PEAR_Command_commandlist'] = array();
 
 /**
+ * Array of command objects
+ * @var array class => object
+ */
+$GLOBALS['_PEAR_Command_objects'] = array();
+
+/**
  * Which user interface class is being used.
  * @var string class name
  */
@@ -38,12 +44,6 @@ $GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_Frontend_CLI';
  * @var object
  */
 $GLOBALS['_PEAR_Command_uiobject'] = null;
-
-/**
-* The options accepted by the commands
-* @var string the options
-*/
-$GLOBALS['_PEAR_Command_commandopts'] = '';
 
 /**
  * PEAR command class, a simple factory class for administrative
@@ -81,8 +81,8 @@ $GLOBALS['_PEAR_Command_commandopts'] = '';
  * - DON'T OUTPUT ANYTHING! Return text for output instead.
  *
  * - DON'T USE HTML! The text you return will be used from both Gtk,
- *   web and command-line interfaces, so for now keep everything to
- *   plain text.
+ *   web and command-line interfaces, so for now, keep everything to
+ *   plain text.  There may be a common (XML) markup format later.
  *
  * - DON'T USE EXIT OR DIE! Always use pear errors.  From static
  *   classes do PEAR::raiseError(), from other classes do
@@ -93,8 +93,8 @@ class PEAR_Command
     /**
      * Get the right object for executing a command.
      *
-     * @param object Instance of PEAR_Config object
-     * @param string The name of the command
+     * @param string $command The name of the command
+     * @param object $config  Instance of PEAR_Config object
      *
      * @return object the command object or a PEAR error
      *
@@ -105,12 +105,13 @@ class PEAR_Command
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
         }
-        if (isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
-            $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
-            $obj = &new $class(PEAR_Command::getFrontendObject(), $config);
-            return $obj;
+        $class = @$GLOBALS['_PEAR_Command_commandlist'][$command];
+        if (empty($class)) {
+            return PEAR::raiseError("unknown command `$command'");
         }
-        return PEAR::raiseError("unknown command `$command'");
+        $ui = PEAR_Command::getFrontendObject();
+        $obj = &new $class($ui, $config);
+        return $obj;
     }
 
     /**
@@ -120,34 +121,44 @@ class PEAR_Command
      */
     function &getFrontendObject()
     {
-        global $_PEAR_Command_uiclass, $_PEAR_Command_uiobject;
-        if (empty($_PEAR_Command_uiobject)) {
-            $_PEAR_Command_uiobject = &new $_PEAR_Command_uiclass;
+        if (empty($GLOBALS['_PEAR_Command_uiobject'])) {
+            $GLOBALS['_PEAR_Command_uiobject'] = &new $GLOBALS['_PEAR_Command_uiclass'];
         }
-        return $_PEAR_Command_uiobject;
+        return $GLOBALS['_PEAR_Command_uiobject'];
     }
 
     /**
      * Load current frontend class.
      *
-     * @param  string  Name of the frontend
+     * @param string $uiclass Name of class implementing the frontend
      *
-     * @return boolean TRUE if the frontend exists, otherwise FALSE.
+     * @return object the frontend object, or a PEAR error
      */
-    function setFrontendClass($uiclass)
+    function &setFrontendClass($uiclass)
     {
-        $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
-        $file = str_replace("_", "/", $uiclass) . '.php';
-        include_once $file;
-        return class_exists(strtolower($uiclass));
+        $file = str_replace('_', '/', $uiclass) . '.php';
+        @include_once $file;
+        if (class_exists(strtolower($uiclass))) {
+            $obj = &new $uiclass;
+            // quick test to see if this class implements a few of the most
+            // important frontend methods
+            if (method_exists($obj, 'displayLine') && method_exists($obj, 'userConfirm')) {
+                $GLOBALS['_PEAR_Command_uiobject'] = &$obj;
+                $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
+                return $obj;
+            } else {
+                return PEAR::raiseError("not a frontend class: $uiclass");
+            }
+        }
+        return PEAR::raiseError("no such class: $uiclass");
     }
 
     /**
      * Set current frontend.
      *
-     * @param  string  Name of the frontend type
+     * @param string $uitype Name of the frontend type (for example "CLI")
      *
-     * @return boolean TRUE if the frontend exists, otherwise FALSE.
+     * @return object the frontend object, or a PEAR error
      */
     function setFrontendType($uitype)
     {
@@ -179,32 +190,28 @@ class PEAR_Command
         }
         $dp = @opendir($dir);
         if (empty($dp)) {
-            return PEAR::raiseError("PEAR_Command::registerCommands: ".
-                                    "opendir($dir) failed");
+            return PEAR::raiseError("registerCommands: opendir($dir) failed");
         }
         if (!$merge) {
             $GLOBALS['_PEAR_Command_commandlist'] = array();
         }
-        $cmdopts = array();
         while ($entry = readdir($dp)) {
-            if ($entry{0} == '.' || substr($entry, -4) != '.php' ||
-                $entry == 'Common.php')
-            {
+            if ($entry{0} == '.' || substr($entry, -4) != '.php' || $entry == 'Common.php') {
                 continue;
             }
             $class = "PEAR_Command_".substr($entry, 0, -4);
             $file = "$dir/$entry";
             include_once $file;
             // List of commands
-            $implements = call_user_func(array($class, "getCommands"));
+            if (empty($GLOBALS['_PEAR_Command_objects'][$class])) {
+                $GLOBALS['_PEAR_Command_objects'][$class] = &new $class($ui, $config);
+            }
+            $implements = $GLOBALS['_PEAR_Command_objects'][$class]->getCommands();
             foreach ($implements as $command => $desc) {
                 $GLOBALS['_PEAR_Command_commandlist'][$command] = $class;
                 $GLOBALS['_PEAR_Command_commanddesc'][$command] = $desc;
             }
-            // List of options accepted
-            $cmdopts = array_merge($cmdopts, call_user_func(array($class, "getOptions")));
         }
-        $GLOBALS['_PEAR_Command_commandopts'] = implode('', $cmdopts);
         return true;
     }
 
@@ -225,19 +232,27 @@ class PEAR_Command
     }
 
     /**
-     * Get the list of currently supported options, and what
-     * classes implement them.
+     * Compiles arguments for getopt.
      *
-     * @return array array option => implementing class
+     * @param string $command     command to get optstring for
+     * @param string $short_args  (reference) short getopt format
+     * @param array  $long_args   (reference) long getopt format
+     *
+     * @return void
      *
      * @access public
      */
-    function getOptions()
+    function getGetoptArgs($command, &$short_args, &$long_args)
     {
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
         }
-        return $GLOBALS['_PEAR_Command_commandopts'];
+        $class = @$GLOBALS['_PEAR_Command_commandlist'][$command];
+        if (empty($class)) {
+            return null;
+        }
+        $obj = &$GLOBALS['_PEAR_Command_objects'][$class];
+        return $obj->getGetoptArgs($command, $short_args, $long_args);
     }
 
     /**
@@ -257,8 +272,7 @@ class PEAR_Command
     /**
      * Get help for command.
      *
-     * @param  string Name of the command for which help should be
-     *                called.
+     * @param string $command Name of the command to return help for
      *
      * @access public
      */
@@ -266,7 +280,8 @@ class PEAR_Command
     {
         $cmds = PEAR_Command::getCommands();
         if (isset($cmds[$command])) {
-            return call_user_func(array($cmds[$command], 'getHelp'), $command);
+            $class = $cmds[$command];
+            return $GLOBALS['_PEAR_Command_objects'][$class]->getHelp($command);
         }
         return false;
     }

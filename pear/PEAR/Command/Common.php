@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@fast.no>                                    |
+// | Author: Stig Sæther Bakken <ssb@fast.no>                             |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -22,6 +22,8 @@ require_once "PEAR.php";
 
 class PEAR_Command_Common extends PEAR
 {
+    // {{{ properties
+
     /**
      * PEAR_Config object used to pass user system and configuration
      * on when executing commands
@@ -36,6 +38,9 @@ class PEAR_Command_Common extends PEAR
      */
     var $ui;
 
+    // }}}
+    // {{{ constructor
+
     /**
      * PEAR_Command_Common constructor.
      *
@@ -48,15 +53,59 @@ class PEAR_Command_Common extends PEAR
         $this->ui = &$ui;
     }
 
-    function getOptions()
-    {
-        return array();
-    }
+    // }}}
+
+    // {{{ getHelp()
 
     function getHelp($command)
     {
         return array(null, 'No help avaible yet');
     }
+
+    // }}}
+    // {{{ getGetoptArgs()
+
+    function getGetoptArgs($command, &$short_args, &$long_args)
+    {
+        $short_args = "";
+        $long_args = array();
+        if (empty($this->commands[$command])) {
+            return;
+        }
+        reset($this->commands[$command]);
+        while (list($option, $info) = each($this->commands[$command]['options'])) {
+            $larg = $sarg = '';
+            if (isset($info['arg'])) {
+                if ($info['arg']{0} == '(') {
+                    $larg = '==';
+                    $sarg = '::';
+                    $arg = substr($info['arg'], 1, -1);
+                } else {
+                    $larg = '=';
+                    $sarg = ':';
+                    $arg = $info['arg'];
+                }
+            }
+            if (isset($info['shortopt'])) {
+                $short_args .= $info['shortopt'] . $sarg;
+            }
+            $long_args[] = $option . $larg;
+        }
+    }
+
+    // }}}
+    // {{{ run()
+
+    function run($command, $options, $params)
+    {
+        $func = @$this->commands[$command]['function'];
+        if (empty($func)) {
+            return $this->raiseError("unknown command `$command'");
+        }
+        return $this->$func($command, $options, $params);
+    }
+
+    // }}}
 }
 
 ?>

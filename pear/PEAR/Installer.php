@@ -271,13 +271,13 @@ class PEAR_Installer extends PEAR_Common
      *
      * @param $pkgfile path to the package file
      *
-     * @return bool true if successful, false if not
+     * @return array package info if successful, null if not
      */
 
     function install($pkgfile, $options = array())
     {
         // recognized options:
-        // - register_only : update registry but don't install files
+        // - register-only : update registry but don't install files
         // - upgrade       : upgrade existing install
         // - soft          : fail silently
         //
@@ -379,7 +379,7 @@ class PEAR_Installer extends PEAR_Common
                 if (empty($options['soft'])) {
                     $this->log(0, $error);
                 }
-                return $this->raiseError('Dependencies failed');
+                return $this->raiseError("$pkgname: dependencies failed");
             }
         }
 
@@ -399,7 +399,7 @@ class PEAR_Installer extends PEAR_Common
             if (empty($options['force']) && !version_compare($v2, $v1, 'gt')) {
                 return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
             }
-            if (empty($options['register_only'])) {
+            if (empty($options['register-only'])) {
                 // when upgrading, remove old release's files first:
                 if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
                     return $this->raiseError($err);
@@ -411,7 +411,7 @@ class PEAR_Installer extends PEAR_Common
 
         // info from the package it self we want to access from _installFile
         $this->pkginfo = $pkginfo;
-        if (empty($options['register_only'])) {
+        if (empty($options['register-only'])) {
             if (!is_dir($this->config->get('php_dir'))) {
                 return $this->raiseError("no script destination directory\n",
                                          null, PEAR_ERROR_DIE);
@@ -446,7 +446,10 @@ class PEAR_Installer extends PEAR_Common
         } else {
             $ret = $this->registry->updatePackage($pkgname, $this->pkginfo, false);
         }
-        return $ret;
+        if (!$ret) {
+            return null;
+        }
+        return $pkginfo;
     }
 
     // }}}
