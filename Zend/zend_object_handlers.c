@@ -652,7 +652,7 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
 
-	if (ce->type == ZEND_NAMESPACE) {
+	if (ce->type == ZEND_USER_NAMESPACE || ce->type == ZEND_INTERNAL_NAMESPACE) {
 		zend_hash_find(ce->static_members, property_name, property_name_len+1, (void **) &retval);
 	} else {
 		if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {

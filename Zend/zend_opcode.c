@@ -175,7 +175,8 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->class_table);
 			free(ce);
 			break;
-		case ZEND_NAMESPACE:
+		case ZEND_USER_NAMESPACE:
+		case ZEND_INTERNAL_NAMESPACE:
 			destroy_zend_namespace(pce);
 			break;
 	}
@@ -184,16 +185,30 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 ZEND_API void destroy_zend_namespace(zend_namespace **pns)
 {
 	zend_namespace *ns = *pns;
-	zend_hash_destroy(&ns->function_table);
-	zend_hash_destroy(&ns->class_table);
-	zend_hash_destroy(&ns->constants_table);
-	zend_hash_destroy(ns->static_members);
-	FREE_HASHTABLE(ns->static_members);
-	if (ns->doc_comment) {
-		efree(ns->doc_comment);
+	switch (ns->type) {
+		case ZEND_USER_NAMESPACE:
+			zend_hash_destroy(&ns->function_table);
+			zend_hash_destroy(&ns->class_table);
+			zend_hash_destroy(&ns->constants_table);
+			zend_hash_destroy(ns->static_members);
+			FREE_HASHTABLE(ns->static_members);
+			if (ns->doc_comment) {
+				efree(ns->doc_comment);
+			}
+			efree(ns->name);
+			efree(ns);
+			break;
+
+		case ZEND_INTERNAL_NAMESPACE:
+			zend_hash_destroy(&ns->function_table);
+			zend_hash_destroy(&ns->class_table);
+			zend_hash_destroy(&ns->constants_table);
+			zend_hash_destroy(ns->static_members);
+			free(ns->static_members);
+			free(ns->name);
+			free(ns);
+			break;
 	}
-	efree(ns->name);
-	efree(ns);
 }
 
 void zend_class_add_ref(zend_class_entry **ce)
