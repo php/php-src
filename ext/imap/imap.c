@@ -180,7 +180,7 @@ MAILSTREAM *mail_close_it (pils *imap_le_struct)
 	return ret;
 }
 
-inline int add_assoc_object(pval *arg, char *key, pval tmp)
+inline int add_assoc_object(pval *arg, char *key, pval *tmp)
 {
 	return _php3_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
 }
