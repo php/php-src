@@ -33,6 +33,11 @@
 
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
 
+#ifdef ZEND_WIN32
+/* true global */
+static WNDCLASS wc;
+#endif
+
 
 #if ZEND_DEBUG
 static void (*original_sigsegv_handler)(int);
@@ -523,3 +528,107 @@ void execute_new_code(CLS_D)
 #endif
 
 
+#if defined(HAVE_SETITIMER) || defined(ZEND_WIN32)
+static void zend_timeout(int dummy)
+{
+	ELS_FETCH();
+
+	/* is there any point in this?  we're terminating the request anyway...
+	PLS_FETCH();
+
+	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
+	*/
+	zend_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
+			  EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+}
+#endif
+
+
+static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	switch (message) {
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+		case WM_TIMER:
+			zend_timeout(0);
+			return 0;
+		default:
+			return DefWindowProc(hWnd,message,wParam,lParam);
+	}
+}
+
+
+#ifdef ZEND_WIN32
+void zend_register_timeout_wndclass()
+{
+	wc.style=0;
+	wc.lpfnWndProc = zend_timeout_WndProc;
+	wc.cbClsExtra=0;
+	wc.cbWndExtra=0;
+	wc.hInstance=NULL;
+	wc.hIcon=NULL;
+	wc.hCursor=NULL;
+	wc.hbrBackground=(HBRUSH)(COLOR_BACKGROUND + 5);
+	wc.lpszMenuName=NULL;
+	wc.lpszClassName = "Zend Timeout Window";
+	if(!RegisterClass(&wc)) {
+		return;
+	}
+}
+
+
+void zend_create_timeout_window(ELS_D)
+{
+	EG(timeout_window) = CreateWindow(wc.lpszClassName, wc.lpszClassName, 0, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, NULL, NULL);
+}
+
+
+void zend_destroy_timeout_window(ELS_D)
+{
+	DestroyWindow(EG(timeout_window));
+}
+#endif
+
+/* This one doesn't exists on QNX */
+#ifndef SIGPROF
+#define SIGPROF 27
+#endif
+
+void zend_set_timeout(long seconds)
+{
+	ELS_FETCH();
+
+	EG(timeout_seconds) = seconds;
+#ifdef ZEND_WIN32
+	SetTimer(EG(timeout_window), 1, seconds*1000, NULL);
+#else
+#	ifdef HAVE_SETITIMER
+	struct itimerval t_r;		/* timeout requested */
+
+	t_r.it_value.tv_sec = seconds;
+	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+
+	setitimer(ITIMER_PROF, &t_r, NULL);
+	signal(SIGPROF, zend_timeout);
+#	endif
+#endif
+}
+
+
+void zend_unset_timeout(void)
+{
+	ELS_FETCH();
+
+#ifdef ZEND_WIN32
+	KillTimer(EG(timeout_window), 1);
+#else
+#	ifdef HAVE_SETITIMER
+	struct itimerval no_timeout;
+
+	no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
+
+	setitimer(ITIMER_PROF, &no_timeout, NULL);
+#	endif
+#endif
+}

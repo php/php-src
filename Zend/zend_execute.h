@@ -155,6 +155,14 @@ ZEND_API char *zend_get_executed_filename(ELS_D);
 ZEND_API uint zend_get_executed_lineno(ELS_D);
 ZEND_API zend_bool zend_is_executing(void);
 
+void zend_set_timeout(long seconds);
+void zend_unset_timeout(void);
+#ifdef ZEND_WIN32
+void zend_register_timeout_wndclass(void);
+void zend_create_timeout_window(ELS_D);
+void zend_destroy_timeout_window(ELS_D);
+#endif
+
 #define zendi_zval_copy_ctor(p) zval_copy_ctor(&(p))
 #define zendi_zval_dtor(p) zval_dtor(&(p))
 

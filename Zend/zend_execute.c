@@ -955,6 +955,9 @@ void execute(zend_op_array *op_array ELS_DC)
 	temp_variable Ts[op_array->T];
 #endif
 	zend_bool original_in_execution=EG(in_execution);
+#ifdef ZEND_WIN32
+	MSG timeout_message;
+#endif
 
 	EG(in_execution) = 1;
 #if SUPPORT_INTERACTIVE
@@ -992,6 +995,11 @@ void execute(zend_op_array *op_array ELS_DC)
 	while (opline<end) {
 #else
 	while (1) {
+#endif
+#ifdef ZEND_WIN32
+		while (PeekMessage(&timeout_message, EG(timeout_window), 0, 0, PM_REMOVE)) {
+			DispatchMessage(&timeout_message);
+		}
 #endif
 		switch(opline->opcode) {
 			case ZEND_ADD:
