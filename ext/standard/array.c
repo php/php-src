@@ -2758,6 +2758,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	}
 
 	old_compare_func = BG(user_compare_func_name);
+	/* clear FCI cache otherwise : for example the same or other array with 
+	   (partly) the same key values has been sorted with uasort() or
+	   other sorting function the comparison is cached, however the the name
+	   of the function for comparison is not respected. see bug #28739
+	*/
+	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 
 	if (behavior == INTERSECT_NORMAL) {
 		intersect_key_compare_func = array_key_compare;
@@ -2785,7 +2791,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				return;
 			}
 			efree(callback_name);
-			
+
 			BG(user_compare_func_name) = args[arr_argc];
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
@@ -3106,6 +3112,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	}
 
 	old_compare_func = BG(user_compare_func_name);
+	/* clear FCI cache otherwise : for example the same or other array with 
+	   (partly) the same key values has been sorted with uasort() or
+	   other sorting function the comparison is cached, however the the name
+	   of the function for comparison is not respected. see bug #28739
+	*/
+	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 
 	if (behavior == DIFF_NORMAL) {
 		diff_key_compare_func = array_key_compare;
