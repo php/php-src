@@ -3,14 +3,14 @@ PHP 4                                                                      NEWS
 ?? Feb 2002, Version 4.1.2
 - Fixed start up failure when mm save handler is used and there is multiple 
   SAPIs are working at the same time. (Yasuo)
-- Roxen SAPI fix
-- RFC-1867 file upload buffer overflow fixes
-- session crash bug fix
-- pspell crash bug fix
-- fixed configuration problem as shared extension for fdf.(Rui)
-- fixed configuration problem as shared extension for gd with freetype1.(Rui)
-- default output encoding of mbstring changed to 'pass' to fix 
-  initialization problem.(Rui)
+- Fixed the Roxen SAPI (Yasuo)
+- Fixed a buffer overflow in the RFC-1867 file upload code (Stefan)
+- Fixed a crash in the session module (Yasuo)
+- Fixed a crash in the pspell module (Yasuo)
+- Fixed configuration problem as shared extension for fdf (Rui)
+- Fixed configuration problem as shared extension for gd with freetype1.(Rui)
+- Changed the default output encoding of mbstring 'pass' to fix 
+  initialization problem (Rui)
 
 26 Dec 2001, Version 4.1.1
 - Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
