@@ -2,10 +2,10 @@
 class xml_stream_parser  {
     var $parser;
 
-    function xml_stream_parser($stream)
+    function __construct($stream)
     {
-			if(!is_resource($stream)) die("not a stream");
-			if(get_resource_type($stream) != "stream") die("not a stream");
+			if (!is_resource($stream)) die("not a stream");
+			if (get_resource_type($stream) != "stream") die("not a stream");
 
 			$this->parser = xml_parser_create();
 			
@@ -14,7 +14,7 @@ class xml_stream_parser  {
 			xml_set_character_data_handler($this->parser, "cdata");
 			xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, false);
 		
-			while(!feof($stream)) {
+			while (!feof($stream)) {
 				xml_parse($this->parser, fgets($stream), feof($stream));
 			}	
 			xml_parser_free($this->parser);
@@ -35,7 +35,19 @@ class xml_stream_parser  {
         var_dump($parser, $tag);
     }
 
-		function error($msg) {
+		function error($msg) 
+    {
+			if (is_array($msg)) {
+				if (count($msg)==1) {
+					$msg = current($msg);
+				} else {
+					foreach ($msg as $text) {
+						echo "$text\n";
+					}
+					$msg = "...";
+				}
+			} 
+			
 			die("$msg on line ".xml_get_current_line_number($this->parser));
 		}
 } // end of class xml
