@@ -519,7 +519,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 	switch(var){
 		case UDM_PARAM_PAGE_SIZE: 
 #if UDM_VERSION_ID >= 30204
-			UdmVarListAddInt(&Agent->Conf->Vars,"ps",atoi(val));
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"ps",val);
 #else
 			Agent->page_size=atoi(val);
 			if(Agent->page_size<1)Agent->page_size=20;
@@ -528,7 +528,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 		case UDM_PARAM_PAGE_NUM: 
 #if UDM_VERSION_ID >= 30204
-			UdmVarListAddInt(&Agent->Conf->Vars,"np",atoi(val));
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"np",val);
 #else
 			Agent->page_number=atoi(val);
 			if(Agent->page_number<0)Agent->page_number=0;
@@ -726,6 +726,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				case UDM_PREFIXES_ENABLED:
 #if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"IspellUsePrefixes","1");
 #else
 					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
 #endif								
@@ -734,6 +736,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				case UDM_PREFIXES_DISABLED:
 #if UDM_VERSION_ID < 30200												
 					Agent->Conf->ispell_mode &= ~UDM_ISPELL_USE_PREFIXES;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"IspellUsePrefixes","0");
 #else
 					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);						
 #endif																	
@@ -743,6 +747,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				default:
 #if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"IspellUsePrefixes","0");
 #else
 					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
 #endif												
@@ -758,6 +764,12 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #if UDM_VERSION_ID < 30200						
 			Agent->Conf->local_charset=UdmGetCharset(val);
 			Agent->charset=Agent->Conf->local_charset;
+#elif UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"LocalCharset",val);
+			{
+			    const char * charset=UdmVarListFindStr(&Agent->Conf->Vars,"LocalCharset","iso-8859-1");
+			    Agent->Conf->lcs=UdmGetCharSet(charset);
+			}
 #else
 			Agent->Conf->local_charset=strdup(val);
 			UdmReplaceStrVar(Agent->Conf->vars,"LocalCharset",val,UDM_VARSRC_GLOBAL);
@@ -767,29 +779,47 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 #if UDM_VERSION_ID >= 30200
 		case UDM_PARAM_BROWSER_CHARSET:
+#if UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"BrowserCharset",val);
+			{
+			    const char * charset=UdmVarListFindStr(&Agent->Conf->Vars,"BrowserCharset","iso-8859-1");
+			    Agent->Conf->lcs=UdmGetCharSet(charset);
+			}
+#else
 			Agent->Conf->browser_charset=strdup(val);
 			UdmReplaceStrVar(Agent->Conf->vars,"BrowserCharset",val,UDM_VARSRC_GLOBAL);
-			
+#endif			
 			break;
 
 		case UDM_PARAM_HLBEG:
+#if UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"HlBeg",val);
+#else
 			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
-			
+#endif			
 			break;
 
 		case UDM_PARAM_HLEND:
-			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
-			
+#if UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"HlEnd",val);
+#else
+			UdmReplaceStrVar(Agent->Conf->vars,"HlEnd",val,UDM_VARSRC_GLOBAL);
+#endif			
 			break;
 			
 		case UDM_PARAM_SYNONYM:
 			if (UdmSynonymListLoad(Agent->Conf,val)) {
 				php_error(E_WARNING,Agent->Conf->errstr);
 				RETURN_FALSE;
+#if UDM_VERSION_ID >= 30204
+			} else UdmSynonymListSort(&(Agent->Conf->Synonyms));
+#else
 			} else UdmSynonymListSort(&(Agent->Conf->SynList));
+#endif			
 			break;
 			
 		case UDM_PARAM_SEARCHD:
+#if UDM_VERSION_ID <= 30203
 			UdmSDCLientListAdd(&(Agent->Conf->sdcl),val);
 			{
 				size_t i;
@@ -797,17 +827,23 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					UdmSDCLientListAdd(&Agent->sdcl,Agent->Conf->sdcl.Clients[i].addr);
 				}
 			}
-			
+#endif			
 			break;
 
 		case UDM_PARAM_QSTRING:
+#if UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"QUERY_STRING",val);
+#else
 			UdmReplaceStrVar(Agent->Conf->vars,"QUERY_STRING",val,UDM_VARSRC_GLOBAL);
-			
+#endif			
 			break;
 
 		case UDM_PARAM_REMOTE_ADDR:
+#if UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"IP",val);
+#else
 			UdmReplaceStrVar(Agent->Conf->vars,"IP",val,UDM_VARSRC_GLOBAL);
-			
+#endif			
 			break;			
 #endif
 			
@@ -828,6 +864,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		case UDM_PARAM_WEIGHT_FACTOR: 
 #if UDM_VERSION_ID < 30200										
 			Agent->weight_factor=strdup(val);
+#elif UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"wf",val);
 #else
 			UdmReplaceStrVar(Agent->Conf->vars,"wf",val,UDM_VARSRC_GLOBAL);
 			{
@@ -851,23 +889,37 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 			
 		case UDM_PARAM_MIN_WORD_LEN: 
+#if UDM_VERSION_ID >= 30204
+			Agent->Conf->WordParam.min_word_len=atoi(val);
+#else
 			Agent->Conf->min_word_len=atoi(val);
-			    
+#endif			    
 			break;
 			
 		case UDM_PARAM_MAX_WORD_LEN: 
+#if UDM_VERSION_ID >= 30204
+			Agent->Conf->WordParam.max_word_len=atoi(val);
+#else
 			Agent->Conf->max_word_len=atoi(val);
-			    
+#endif			    
 			break;
 			
 		case UDM_PARAM_CROSS_WORDS: 
 			switch (atoi(val)){
 				case UDM_CROSS_WORDS_ENABLED:
+#if UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"CrossWords","yes");
+#else
 					Agent->Conf->use_crossword=UDM_CROSS_WORDS_ENABLED;
+#endif
 					break;
 					
 				case UDM_CROSS_WORDS_DISABLED:
+#if UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"CrossWords","no");
+#else
 					Agent->Conf->use_crossword=UDM_CROSS_WORDS_DISABLED;
+#endif
 					break;
 					
 				default:
@@ -883,14 +935,14 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		case UDM_PARAM_VARDIR:
 #if UDM_VERSION_ID < 30200
 			udm_snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
+#elif UDM_VERSION_ID >= 30204
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"Vardir",val);
+			snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
 #else			
 			snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
 #endif			
-
 			break;
-			
 #endif
-			
 		default:
 			php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown agent session parameter");
 			RETURN_FALSE;
