@@ -513,7 +513,7 @@ static TABLE const OtherTable[] = {
     { "today",		tDAY_UNIT,	0 },
     { "now",		tDAY_UNIT,	0 },
     { "last",		tUNUMBER,	-1 },
-    { "this",		tMINUTE_UNIT,	0 },
+    { "this",		tUNUMBER,	0 },
     { "next",		tUNUMBER,	2 },
     { "first",		tUNUMBER,	1 },
 /*  { "second",		tUNUMBER,	2 }, */
