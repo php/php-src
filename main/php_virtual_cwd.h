@@ -78,7 +78,7 @@ CWD_API char *virtual_getcwd_ex(int *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API int virtual_chdir(char *path);
 CWD_API int virtual_chdir_file(char *path);
-CWD_API int virtual_real_chdir_file(char *path);
+CWD_API void virtual_real_chdir_file(const char *path);
 CWD_API int virtual_filepath(char *path, char **filepath);
 CWD_API char *virtual_realpath(char *path, char *real_path);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
