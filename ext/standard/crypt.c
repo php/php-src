@@ -128,31 +128,22 @@ static void php_to64(char *s, long v, int n)
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN+1];
-	pval **arg1, **arg2;
+	char *str, *salt_in = NULL;
+	int str_len, salt_in_len;
 
 	salt[0]=salt[PHP_MAX_SALT_LEN]='\0';
 	/* This will produce suitable results if people depend on DES-encryption
 	   available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN-1);
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg2);
-			memcpy(salt, Z_STRVAL_PP(arg2), MIN(PHP_MAX_SALT_LEN, Z_STRLEN_PP(arg2)));
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len,
+							  &salt_in, &salt_in_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg1);
+
+	if (salt_in) {
+		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
+	}
 
 	/* The automatic salt generation only covers standard DES and md5-crypt */
 	if(!*salt) {
@@ -167,7 +158,7 @@ PHP_FUNCTION(crypt)
 #endif
 	}
 
-	RETVAL_STRING(crypt(Z_STRVAL_PP(arg1), salt), 1);
+	RETVAL_STRING(crypt(str, salt), 1);
 }
 /* }}} */
 #endif
