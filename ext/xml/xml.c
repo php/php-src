@@ -694,7 +694,7 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 												&decoded_len,
 												parser->target_encoding);
 				
-				add_assoc_string(args[2], key, decoded_value, 0);
+				add_assoc_stringl(args[2], key, decoded_value, decoded_len, 0);
 				if (parser->case_folding) {
 					efree(key);
 				}
