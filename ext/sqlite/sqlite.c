@@ -1112,7 +1112,7 @@ PHP_FUNCTION(sqlite_open)
 	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		php_std_error_handling();
 		return;
 	}
 	if (errmsg) {
@@ -1124,7 +1124,7 @@ PHP_FUNCTION(sqlite_open)
 		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 	
 		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			php_std_error_handling();
 			efree(fullpath);
 			if (object) {
 				RETURN_NULL();
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(sqlite_open)
 		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			php_std_error_handling();
 			efree(fullpath);
 			if (object) {
 				RETURN_NULL();
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(sqlite_open)
 	if (fullpath) {
 		efree(fullpath);
 	}
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	php_std_error_handling();
 }
 /* }}} */
 
