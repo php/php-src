@@ -1085,7 +1085,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
-void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, zend_uchar pass_type TSRMLS_DC)
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, zend_uchar pass_type TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1112,6 +1112,19 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 		CG(active_op_array)->arg_types = (unsigned char *) erealloc(CG(active_op_array)->arg_types, sizeof(unsigned char)*(offset->u.constant.value.lval+1));
 		CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
 		CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
+	}
+
+	if (class_type->op_type != IS_UNUSED) {
+		znode passed_var = opline->result;
+
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		opline->opcode = ZEND_VERIFY_CE;
+		opline->op1 = *class_type;
+		opline->op2 = passed_var;
+		opline->extended_value = offset->u.constant.value.lval;
+	} else {
+		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 	}
 }
 
