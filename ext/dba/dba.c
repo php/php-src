@@ -206,19 +206,23 @@ static PHP_MSHUTDOWN_FUNCTION(dba)
 	return SUCCESS;
 }
 
+
 static PHP_MINFO_FUNCTION(dba)
 {
-	/* could be prettier (cmv) */
 	dba_handler *hptr;
-	
-	php_info_print_box_start(0);
-	PUTS("V1 ($Id$)");
+	static char handlers[80], tmp[5];
+
 	for(hptr = handler; hptr->name; hptr++) {
-		PUTS(" ");
-		PUTS(hptr->name);
-	}
-	php_info_print_box_end();
+		sprintf(tmp, "%s ", hptr->name);
+		strcat(handlers, tmp);
+ 	}
+
+	php_info_print_table_start();
+ 	php_info_print_table_row(2, "DBA support", "enabled");
+	php_info_print_table_row(2, "Supported handlers", handlers);
+	php_info_print_table_end();
 }
+                                
 
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
