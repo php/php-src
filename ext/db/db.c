@@ -122,7 +122,7 @@ static int php_dbm_key_exists(DBM *dbf, datum key_datum) {
 #define DBM_CREATE_MODE "a+b"
 #define DBM_NEW_MODE "w+b"
 #define DBM_DEFAULT_MODE "r"
-#define DBM_OPEN(filename, mode) fopen(filename, mode)
+#define DBM_OPEN(filename, mode) PHP_FOPEN(filename, mode)
 #define DBM_CLOSE(dbf) fclose(dbf)
 #define DBM_STORE(dbf, key, value, mode) flatfile_store(dbf, key, value, mode)
 #define DBM_FETCH(dbf, key) flatfile_fetch(dbf, key)

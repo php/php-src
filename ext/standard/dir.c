@@ -210,7 +210,7 @@ PHP_FUNCTION(chdir)
 	}
 	convert_to_string_ex(arg);
 
-	ret = chdir((*arg)->value.str.val);
+	ret = PHP_CHDIR((*arg)->value.str.val);
 	
 	if (ret < 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
@@ -234,9 +234,9 @@ PHP_FUNCTION(getcwd)
 	}
 
 #if HAVE_GETCWD
-	ret = getcwd(path,MAXPATHLEN-1);
+	ret = PHP_GETCWD(path,MAXPATHLEN-1);
 #elif HAVE_GETWD
-	ret = getwd(path);
+	ret = PHP_GETWD(path);
 /*
  * #warning is not ANSI C
  * #else

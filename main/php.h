@@ -289,10 +289,12 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PHP_GETCWD(buff, size) virtual_getcwd(buff,size)
 #define PHP_FOPEN(path, mode) virtual_fopen(path, mode)
 #define PHP_CHDIR(path) virtual_chdir(path)
+#define PHP_GETWD(buf)
 #else
 #define PHP_GETCWD(buff, size) getcwd(buff,size)
 #define PHP_FOPEN(path, mode)  fopen(path, mode)
 #define PHP_CHDIR(path) chdir(path)
+#define PHP_GETWD(buf) getwd(buf)
 #endif
 
 #include "zend_constants.h"

@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
@@ -52,7 +52,7 @@
 #include "fopen-wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_dir.h"
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
 #include "win32/syslog.h"

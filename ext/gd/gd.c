@@ -331,8 +331,8 @@ PHP_FUNCTION(imageloadfont) {
 
 	convert_to_string_ex(file);
 
-#if WIN32|WINNT
-	fp = fopen((*file)->value.str.val, "rb");
+#ifdef PHP_WIN32
+	fp = PHP_FOPEN((*file)->value.str.val, "rb");
 #else
 	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -434,8 +434,8 @@ PHP_FUNCTION(imagecreatefrompng)
 	}
 	convert_to_string_ex(file);
 	fn = (*file)->value.str.val;
-#if WIN32|WINNT
-	fp = fopen((*file)->value.str.val, "rb");
+#ifdef PHP_WIN32
+	fp = PHP_FOPEN((*file)->value.str.val, "rb");
 #else
 	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -481,7 +481,7 @@ PHP_FUNCTION(imagepng)
 	}
 
 	if (argc == 2) {
-		fp = fopen(fn, "wb");
+		fp = PHP_FOPEN(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
 			RETURN_FALSE;
@@ -542,8 +542,8 @@ PHP_FUNCTION(imagecreatefromgif )
 
 	fn = (*file)->value.str.val;
 
-#if WIN32|WINNT
-	fp = fopen((*file)->value.str.val, "rb");
+#ifdef PHP_WIN32
+	fp = PHP_FOPEN((*file)->value.str.val, "rb");
 #else
 	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -592,7 +592,7 @@ PHP_FUNCTION(imagegif)
 	}
 
 	if (argc == 2) {
-		fp = fopen(fn, "wb");
+		fp = PHP_FOPEN(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
 			RETURN_FALSE;
@@ -657,8 +657,8 @@ PHP_FUNCTION(imagecreatefromjpeg)
 	}
 	convert_to_string_ex(file);
 	fn = (*file)->value.str.val;
-#if WIN32|WINNT
-	fp = fopen((*file)->value.str.val, "rb");
+#ifdef PHP_WIN32
+	fp = PHP_FOPEN((*file)->value.str.val, "rb");
 #else
 	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -709,7 +709,7 @@ PHP_FUNCTION(imagejpeg)
 	}
 
 	if (argc > 1 && fn && strlen(fn)) {
-		fp = fopen(fn, "wb");
+		fp = PHP_FOPEN(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "ImageJpeg: unable to open %s for writing", fn);
 			RETURN_FALSE;
