@@ -65,16 +65,6 @@
 #endif
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-/*
- * This is obtained using uname(2) on Unix and assigned in the case of Windows;
- * we'll do it this way at least for now.
- */
-#define PHP_OS      PHP_UNAME
-#endif
-
 #include "php_regex.h"
 
 #if HAVE_ASSERT_H
