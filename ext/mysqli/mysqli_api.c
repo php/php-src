@@ -60,7 +60,7 @@ PHP_FUNCTION(mysqli_autocommit)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	RETURN_BOOL(mysql_autocommit(mysql, automode));
+	RETURN_BOOL((long) mysql_autocommit(mysql, automode));
 }
 /* }}} */
 
@@ -440,7 +440,7 @@ PHP_FUNCTION(mysqli_debug)
 	}
 	
 	mysql_debug(debug);
-	return;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -455,7 +455,8 @@ PHP_FUNCTION(mysqli_disable_reads_from_master)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
-	return (mysql_disable_reads_from_master(mysql));
+	mysql_disable_reads_from_master(mysql);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -470,7 +471,8 @@ PHP_FUNCTION(mysqli_disable_rpl_parse)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
-	return (mysql_disable_rpl_parse(mysql));
+	mysql_disable_rpl_parse(mysql);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -505,7 +507,8 @@ PHP_FUNCTION(mysqli_enable_reads_from_master)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	return (mysql_enable_reads_from_master(mysql));
+	mysql_enable_reads_from_master(mysql);
+	RETURN_TRUE;
 }
 /* }}} */
 
