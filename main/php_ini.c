@@ -153,7 +153,7 @@ PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, ui
 	
 	if (!ini_entry->on_modify
 		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3)==SUCCESS) {
-		if (!ini_entry->orig_value) {
+		if (!ini_entry->modified) {
 			ini_entry->orig_value = ini_entry->value;
 			ini_entry->orig_value_length = ini_entry->value_length;
 		} else { /* we already changed the value, free the changed value */
@@ -178,9 +178,7 @@ PHPAPI int php_restore_ini_entry(char *name, uint name_length)
 		return FAILURE;
 	}
 
-	if (ini_entry->orig_value) {
-		php_restore_ini_entry_cb(ini_entry);
-	}
+	php_restore_ini_entry_cb(ini_entry);
 	return SUCCESS;
 }
 
@@ -208,8 +206,8 @@ PHPAPI long php_ini_long(char *name, uint name_length, int orig)
 	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
-		if (orig && ini_entry->orig_value) {
-			return strtol(ini_entry->orig_value, NULL, 0);
+		if (orig && ini_entry->modified) {
+			return (ini_entry->orig_value ? strtol(ini_entry->orig_value, NULL, 0) : 0);
 		} else if (ini_entry->value) {
 			return strtol(ini_entry->value, NULL, 0);
 		}
@@ -224,8 +222,8 @@ PHPAPI double php_ini_double(char *name, uint name_length, int orig)
 	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
-		if (orig && ini_entry->orig_value) {
-			return (double) strtod(ini_entry->orig_value, NULL);
+		if (orig && ini_entry->modified) {
+			return (double) (ini_entry->orig_value ? strtod(ini_entry->orig_value, NULL) : 0.0);
 		} else if (ini_entry->value) {
 			return (double) strtod(ini_entry->value, NULL);
 		}
@@ -240,7 +238,7 @@ PHPAPI char *php_ini_string(char *name, uint name_length, int orig)
 	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
-		if (orig && ini_entry->orig_value) {
+		if (orig && ini_entry->modified) {
 			return ini_entry->orig_value;
 		} else {
 			return ini_entry->value;
@@ -260,9 +258,14 @@ static void php_ini_displayer_cb(php_ini_entry *ini_entry, int type)
 		char *display_string;
 		uint display_string_length;
 
-		if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
-			display_string = ini_entry->orig_value;
-			display_string_length = ini_entry->orig_value_length;
+		if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+			if (ini_entry->orig_value) {
+				display_string = ini_entry->orig_value;
+				display_string_length = ini_entry->orig_value_length;
+			} else {
+				display_string = "<i>no value</i>";
+				display_string_length = sizeof("<i>no value</i>")-1;
+			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
@@ -279,8 +282,8 @@ PHP_INI_DISP(php_ini_boolean_displayer_cb)
 {
 	int value;
 
-	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
-		value = atoi(ini_entry->orig_value);
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = (ini_entry->orig_value ? atoi(ini_entry->orig_value) : 0);
 	} else if (ini_entry->value) {
 		value = atoi(ini_entry->value);
 	} else {
@@ -298,7 +301,7 @@ PHP_INI_DISP(php_ini_color_displayer_cb)
 {
 	char *value;
 
-	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;
 	} else if (ini_entry->value) {
 		value = ini_entry->value;
