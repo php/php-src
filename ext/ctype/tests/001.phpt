@@ -6,7 +6,7 @@ ctype on integers
 --GET--
 --FILE--
 <?php 
-  setlocale("LC_ALL","C"); 
+  setlocale(LC_ALL,"C"); 
 
   function ctype_test_001($function) {
     $n=0; 	
