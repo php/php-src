@@ -1,3 +1,19 @@
+2001-01-25  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/msql/msql.dsp
+      ext/msql/php_msql.c
+      ext/msql/php_msql.h
+      win32/php_modules.dsw: make msql build under win32
+
+2001-01-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/gd/gd.c:
+    gd didn't work if no WBMP was available after rev 1.107 -> fixed
+
+2001-01-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gd/gd.c: Fix crash in stdout image output
+
 2001-01-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ext/mysql/libmysql/libmysql.dsp
