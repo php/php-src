@@ -1,3 +1,62 @@
+2001-10-04  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php: Minor bugfix
+
+2001-10-04  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gd.dsp: fix gd2 preprocessor definitions
+
+    * ext/informix/ifx.ec: undo last changes
+
+    * ext/sablot/sablot.c: fix macro
+
+    * ext/openssl/openssl.c: use maxpathlen instead of path_max
+
+2001-10-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+    added method phpVersionIs() to find if a PHP version is minor, greater
+    or both (see in-line doc for more info)
+
+2001-10-04  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c
+      ext/com/conversion.h: no message
+
+2001-10-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - 'Fix' for bug #13543
+
+2001-10-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: update
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re:
+    Replace non-standard Windows code page 1252 characters with
+    a portable entity.
+
+2001-10-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/domxml/config.m4: MFH
+
+2001-10-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/ldap/ldap.c: MFH
+
+2001-10-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c: - Fix build
+
+2001-10-04  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB.php:
+    Search for the '@' symbol in the DSN from the right instead of the left.
+    That will allow the password element to include a '@' symbol without
+    confusing the DSN parser.
+
+    Submitted by: Alex L <admin@networkessence.net>
+
 2001-10-03  Stanislav Malyshev  <stas@zend.com>
 
     * php.ini-recommended
