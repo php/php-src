@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- include and require now work with remote files under win32. (Wez)
 - Added php.ini option "auto_detect_line_endings" which enables PHP to detect
   Macintosh, Unix and Dos end-of-line characters in fgets() and file().
   Fixes Bug #16521. (Wez)
