@@ -98,6 +98,10 @@ echo "goompness/oggbrzitzkee.php exists? ";
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
     . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
+
+echo "Test conflicting files:\n";
+$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'conflictpackage.xml');
+
 echo "After uninstall:\n";
 $installer->uninstall('pkg6');
 var_dump($reg->listPackages());
@@ -216,6 +220,11 @@ array(1) {
 zoorb.php exists? yes
 goompness/Mopreeb.php exists? yes
 goompness/oggbrzitzkee.php exists? yes
+Test conflicting files:
+Caught error: pkg6conflict: conflicting files found:
+groob\goompness\oggbrzitzkee.php (pkg6)
+     groob\goompness\Mopreeb.php (pkg6)
+
 After uninstall:
 array(0) {
 }
