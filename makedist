@@ -9,7 +9,7 @@
 # where <package> is the package name and the CVS module
 # and <version> s the version number with underscores instead of dots.
 #
-# For example: cvs tag php_3_0a1
+# For example: cvs tag php_5_0_1
 #
 # The distribution ends up in a .tar.gz file that contains the distribution
 # in a directory called <package>-<version>.  The distribution contains all
@@ -45,10 +45,7 @@ fi
 IFS="$old_IFS"
 
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
-ZENDROOT=:pserver:cvsread@cvs.php.net:/repository
-PHPMOD=php4
-ZENDMOD=Zend
-TSRMMOD=TSRM
+PHPMOD=php5
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
 
 if echo '\c' | grep -s c >/dev/null 2>&1
@@ -79,27 +76,27 @@ fi
 CVSVER=`echo $VER | sed -e 's/[\.\-]/_/g'`
 
 # CVS release tag
-CVSTAG=${PKG}_$CVSVER
+if test "$VER" != "HEAD"; then
+  CVSTAG=${PKG}_$CVSVER
+else
+  CVSTAG=HEAD
+fi
 
 if test ! -d $DIRPATH; then
     mkdir -p $DIRPATH || exit 2
 fi
-
-#cd $DIRPATH || exit 3
 
 # Export PHP
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$PHPMOD'...$ECHO_C"
 cvs -z 9 -d $PHPROOT export -d $DIR -r $CVSTAG $PHPMOD || exit 4
 echo ""
 
-# Export the other modules inside the PHP directory
-cd $DIR || exit 5
-
 # remove CVS stuff...
+cd $DIR || exit 5
 find . \( \( -name CVS -type d \) -o -name .cvsignore \) -exec rm -rf {} \;
 
 # The full ChangeLog is available separately from lxr.php.net
-rm ChangeLog*
+rm -f ChangeLog*
 
 # hide away our own versions of libtool-generated files
 for i in $LT_TARGETS; do
