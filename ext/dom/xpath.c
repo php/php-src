@@ -49,7 +49,7 @@ PHP_FUNCTION(dom_xpath_xpath)
 	dom_object *docobj, *intern;
 	xmlXPathContextPtr ctx, oldctx;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo", &id, dom_xpath_class_entry, &doc) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &id, dom_xpath_class_entry, &doc, dom_document_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -106,17 +106,15 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	dom_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	DOM_GET_THIS(id);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_xpath_class_entry, &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+		return;
+	}
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	ctxp = (xmlXPathContextPtr) intern->ptr;
 	if (ctxp == NULL) {
 		php_error(E_WARNING, "Invalid XPath Context");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -149,7 +147,10 @@ PHP_FUNCTION(dom_xpath_query)
 	xmlDoc *docp = NULL;
 	xmlNsPtr *ns;
 
-	DOM_GET_THIS(id);
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry) == FAILURE) {
+		return;
+	}
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
@@ -162,10 +163,6 @@ PHP_FUNCTION(dom_xpath_query)
 	docp = (xmlDocPtr) ctxp->doc;
 	if (docp == NULL) {
 		php_error(E_WARNING, "Invalid XPath Document Pointer");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|o", &expr, &expr_len, &context) == FAILURE) {
 		RETURN_FALSE;
 	}
 
