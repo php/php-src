@@ -35,7 +35,7 @@ ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array);
 ZEND_API int getParametersEx(int param_count,...);
 ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array);
 
-ZEND_API int getThis(zval **this);
+ZEND_API int getThis(zval **this_ptr);
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
 int zend_register_functions(zend_function_entry *functions);
