@@ -386,7 +386,7 @@ MYSQLI_PROPERTY(my_prop_link_host);
 #define my_estrdup(x) (x) ? estrdup(x) : NULL
 #define my_efree(x) if (x) efree(x)
 
-ZEND_EXTERN_MODULE_GLOBALS(mysqli);
+ZEND_EXTERN_MODULE_GLOBALS(mysqli)
 
 #endif	/* PHP_MYSQLI.H */
 

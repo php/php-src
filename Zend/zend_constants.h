@@ -62,7 +62,7 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant
 
