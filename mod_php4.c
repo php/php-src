@@ -391,18 +391,6 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 #define CONST_PREFIX
 #endif
 
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
-{
-	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
-}
-
-
-CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
-{
-	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
-}
-
-
 CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	php_per_dir_entry per_dir_entry;
@@ -430,15 +418,15 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 }
 
 
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
-	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
 }
 
 
-CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
-	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
 }
 
 
@@ -455,6 +443,20 @@ CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, c
 	
 	return php_apache_value_handler_ex(cmd, conf, arg1, bool_val, mode);
 }
+
+
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+}
+
+
+CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+}
+
+
 
 
 int php_xbithack_handler(request_rec * r)
