@@ -2,14 +2,20 @@
 
 srand((double)microtime()*1000000);
 
+$user = 'SYSDBA';
+$password = 'masterkey';
+ini_set('ibase.default_user',$user);
+ini_set('ibase.default_password',$password);
+
 /* we need just the generated name, not the file itself */
 unlink($test_base = tempnam('/tmp',"php_ibase_test"));
 
 function init_db()
 {
-	global $test_base;
+	global $test_base, $user, $password;
 
-	$test_db = ibase_query("CREATE DATABASE \"$test_base\"");
+	$test_db = ibase_query(sprintf("CREATE DATABASE '%s' USER '%s' PASSWORD '%s'",
+		$test_base, $user, $password));
 	$tr = ibase_trans($test_db);
 	ibase_query($tr,"create table test1 (i integer, c varchar(100))");
 	ibase_commit_ret($tr);
