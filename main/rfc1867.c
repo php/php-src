@@ -354,6 +354,8 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value[cur_len + prev_len] = '\0';
 
 			entry.key = estrdup(prev_entry.key);
+		} else {
+			continue;
 		}
 
 		zend_llist_add_element(header, &entry);
@@ -706,15 +708,21 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			/* If file_uploads=off, skip the file part */
 			if (!PG(file_uploads)) {
-				efree(filename);
-				if (param) efree(param);
+				if (filename) {
+					efree(filename);
+				}
+				if (param) {
+					efree(param);
+				}
 				continue;
 			}
 
 			/* Return with an error if the posted data is garbled */
 			if (!param) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
-				efree(filename);
+				if (filename) {
+					efree(filename);
+				}
 				SAFE_RETURN;
 			}
 
@@ -824,7 +832,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			s = NULL;
 	
 			/* Possible Content-Type: */
-			if (!(cd = php_mime_get_hdr_value(header, "Content-Type")) || filename == "") {
+			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
 				cd = "";
 			} else { 
 				/* fix for Opera 6.01 */
