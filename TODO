@@ -23,9 +23,6 @@ global
     * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
       reentrant-save functions
-    * there is only one current directory per process; to make
-      chdir() etc. thread-safe, we must introduce a per-thread
-      current directory
     * on some platforms unimplemented function will just do nothing (eg symlink)
       they should print a warning or be not even defined!
     * banish the legacy of php3_ prefixes
@@ -36,6 +33,9 @@ global
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
       of compliance.
+    * find a better way to implement script timeouts. SIGVTALRM is used
+      by some POSIX threads implementations (i.e. OpenBSD) and is not
+      available in ZTS mode.
 
 documentation
 -------------
