@@ -1,12 +1,12 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-1999 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version 1.4.7 (24-Dec-1999)
+##  Version 1.4.9 (16-Apr-2000)
 ##  Ingredients: 3/17 available modules
 ##
 
@@ -44,14 +44,14 @@
 ##
 ##  Not available commands (because module was not built-in):
 ##    mdate      Pretty-print modification time of a file or dir
-##    table      Pretty print a field-separated list as a table
+##    table      Pretty-print a field-separated list as a table
 ##    prop       Display progress with a running propeller
-##    move       Move files with simultan substitution
+##    move       Move files with simultaneous substitution
 ##    mkln       Make link with calculation of relative paths
-##    mkshadow   Make a shadow tree
+##    mkshadow   Make a shadow tree through symbolic links
 ##    fixperm    Fix file permissions inside a source tree
 ##    tarball    Roll distribution tarballs
-##    guessos    Simple OS/platform guesser
+##    guessos    Simple operating system guesser
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
@@ -65,8 +65,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.4.7 (24-Dec-1999)"
-    echo "Copyright (c) 1994-1999 Ralf S. Engelschall <rse@engelschall.com>"
+    echo "This is GNU shtool, version 1.4.9 (16-Apr-2000)"
+    echo "Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
     echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]" 
@@ -94,9 +94,9 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '           <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]'
     echo '  guessos  '
     echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
-    echo '  slo      -- -L<dir> -l<lib> [ -L<dir> -l<lib> ... ]'
-    echo '  scpp     [-v] [-p] [-o<ofile>] [-t<tfile>] [-M<mark>] [-D<dname>]'
-    echo '           [-C<cname>] <file> [<file> ...]'
+    echo '  slo      [-p<str>] -- -L<dir> -l<lib> [-L<dir> -l<lib> ...]'
+    echo '  scpp     [-v] [-p] [-f<filter>] [-o<ofile>] [-t<tfile>] [-M<mark>]'
+    echo '           [-D<dname>] [-C<cname>] <file> [<file> ...]'
     echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-i<knob>]'
     echo '           [-d<type>] <file>'
     echo '  path     [-s] [-r] [-d] [-b] [-m] [-p<path>] <str> [<str> ...]'
@@ -104,7 +104,7 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.4.7 (24-Dec-1999)"
+    echo "GNU shtool 1.4.9 (16-Apr-2000)"
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -136,13 +136,20 @@ case $tool in
         str_tool="echo"
         str_usage="[-n] [-e] [<str> ...]"
         arg_spec="0+"
-        opt_spec="ne"
+        opt_spec="n.e."
+        opt_n=no
+        opt_e=no
         ;;
     install )
         str_tool="install"
         str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<ext>] <file> <path>"
-        arg_spec="2"
-        opt_spec="vtcCsm:o:g:e:"
+        arg_spec="2="
+        opt_spec="v.t.c.C.s.m:o:g:e:"
+        opt_v=no
+        opt_t=no
+        opt_c=no
+        opt_C=no
+        opt_s=no
         opt_m=""
         opt_o=""
         opt_g=""
@@ -152,8 +159,16 @@ case $tool in
         str_tool="mkdir"
         str_usage="[-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]"
         arg_spec="1+"
-        opt_spec="tfpm:"
+        opt_spec="t.f.p.m:"
+        opt_t=no
+        opt_f=no
+        opt_p=no
         opt_m=""
+        ;;
+    -* )
+        echo "$0:Error: unknown option \`$tool'" 2>&1
+        echo "$0:Hint:  run \`$0 -h' for usage" 2>&1
+        exit 1
         ;;
     * )
         echo "$0:Error: unknown command \`$tool'" 2>&1
@@ -168,30 +183,24 @@ esac
 
 #   determine name of tool
 if [ ".$tool" != . ]; then
-    #   inside shtool
+    #   used inside shtool script
     toolcmd="$0 $tool"
     toolcmdhelp="shtool $tool"
     msgprefix="shtool:$tool"
 else
-    #   standalone
+    #   used as standalone script
     toolcmd="$0"
-    toolcmdhelp="sh.$tool"
+    toolcmdhelp="sh $0"
     msgprefix="$str_tool"
 fi
 
 #   parse argument specification string
-eval `echo $arg_spec | sed -e 's/^\([0-9]*\)\(.*\)/arg_NUMS="\1"; arg_MODE="\2"/'`
-test ".$arg_MODE" = . && arg_MODE="="
+eval `echo $arg_spec |\
+      sed -e 's/^\([0-9]*\)\([+=]\)/arg_NUMS=\1; arg_MODE=\2/'`
 
 #   parse option specification string
-for opt in `echo "h$opt_spec" | sed -e 's/\([a-zA-Z0-9][:+]*\)/\1 /g'`; do
-    opt_MODE="."
-    eval `echo $opt |\
-          sed -e 's/^\([a-zA-Z0-9]\)/opt_THIS="\1";/' \
-              -e 's/";\([:+]\)/"; opt_MODE="\1";/'`
-    eval "opt_MODE_${opt_THIS}=${opt_MODE}"
-    test "$opt_MODE" = . && eval "opt_${opt_THIS}=no"
-done
+eval `echo h.$opt_spec |\
+      sed -e 's/\([a-zA-Z0-9]\)\([.:+]\)/opt_MODE_\1=\2;/g'`
 
 #   interate over argument line
 opt_PREV=''
@@ -209,7 +218,7 @@ while [ $# -gt 0 ]; do
         opt_OPT="$opt_PREV"
         opt_ARG="$1"
         opt_ARG_OK=yes
-        opt_PREV=""
+        opt_PREV=''
     else
         #   split argument into option and argument
         case "$1" in
@@ -219,8 +228,7 @@ while [ $# -gt 0 ]; do
                           -e 's/";\(.*\)$/"; opt_ARG="\1"/'`
                 ;;
             -[a-zA-Z0-9])
-                opt_OPT=`awk 'BEGIN { printf("%s", substr(OPT, 2)); }' \
-                         "OPT=$1" </dev/null"`
+                opt_OPT=`echo "x$1" | cut -c3-`
                 opt_ARG=''
                 ;;
             *)
@@ -243,15 +251,15 @@ while [ $# -gt 0 ]; do
 
     #   process option
     case $opt_MODE in
-        "." )
+        '.' )
             #   boolean option
             eval "opt_${opt_OPT}=yes"
             ;;
-        ":" )
+        ':' )
             #   option with argument (multiple occurances override)
             eval "opt_${opt_OPT}=\"\$opt_ARG\""
             ;;
-        "+" )
+        '+' )
             #   option with argument (multiple occurances append)
             eval "opt_${opt_OPT}=\"\$opt_${opt_OPT} \$opt_ARG\""
             ;;
@@ -276,14 +284,14 @@ fi
 
 #   complain about incorrect number of arguments
 case $arg_MODE in
-    "=" )
+    '=' )
         if [ $# -ne $arg_NUMS ]; then
             echo "$msgprefix:Error: invalid number of arguments (exactly $arg_NUMS expected)" 1>&2
             echo "$msgprefix:Hint:  run \`$toolcmd -h' or \`man shtool' for details" 1>&2
             exit 1
         fi
         ;;
-    "+" )
+    '+' )
         if [ $# -lt $arg_NUMS ]; then
             echo "$msgprefix:Error: invalid number of arguments (at least $arg_NUMS expected)" 1>&2
             echo "$msgprefix:Hint:  run \`$toolcmd -h' or \`man shtool' for details" 1>&2
@@ -294,13 +302,12 @@ esac
 
 #   establish a temporary file on request
 if [ ".$gen_tmpfile" = .yes ]; then
-    tmpdir="/tmp"
     if [ ".$TMPDIR" != . ]; then
         tmpdir="$TMPDIR"
+    elif [ ".$TEMPDIR" != . ]; then
+        tmpdir="$TEMPDIR"
     else
-        if [ ".$TEMPDIR" != . ]; then
-            tmpdir="$TEMPDIR"
-        fi
+        tmpdir="/tmp"
     fi
     tmpfile="$tmpdir/.shtool.$$"
     rm -f $tmpfile >/dev/null 2>&1
@@ -316,7 +323,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-1999 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2000 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for WML as buildinfo
     ##
     
@@ -343,8 +350,8 @@ echo )
     term_bold='' 
     term_norm=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[Bb]'`" != . ]; then
-        #   the most important terminals we directly know
         case $TERM in
+            #   for the most important terminal types we directly know the sequences
             xterm|xterm*|vt220|vt220*)
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c", 27, 91, 49, 109); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c", 27, 91, 109); }' </dev/null 2>/dev/null`
@@ -353,35 +360,37 @@ echo )
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c%c%c", 27, 91, 49, 109, 0, 0); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c%c%c", 27, 91, 109, 0, 0); }' </dev/null 2>/dev/null`
                 ;;
-        esac
-        #   then try a possibly existing "tput" or "tcout" utility
-        paths=`echo $PATH | sed -e 's/:/ /g'`
-        for tool in tput tcout; do
-            for dir in $paths; do
-                if [ -r "$dir/$tool" ]; then
-                    for seq in bold md smso; do # smso is last
-                        bold="`$dir/$tool $seq 2>/dev/null`"
-                        if [ ".$bold" != . ]; then
-                            term_bold="$bold"
+            #   for all others, we try to use a possibly existing `tput' or `tcout' utility
+            * )
+                paths=`echo $PATH | sed -e 's/:/ /g'`
+                for tool in tput tcout; do
+                    for dir in $paths; do
+                        if [ -r "$dir/$tool" ]; then
+                            for seq in bold md smso; do # 'smso' is last
+                                bold="`$dir/$tool $seq 2>/dev/null`"
+                                if [ ".$bold" != . ]; then
+                                    term_bold="$bold"
+                                    break
+                                fi
+                            done
+                            if [ ".$term_bold" != . ]; then
+                                for seq in sgr0 me rmso reset; do # 'reset' is last
+                                    norm="`$dir/$tool $seq 2>/dev/null`"
+                                    if [ ".$norm" != . ]; then
+                                        term_norm="$norm"
+                                        break
+                                    fi
+                                done
+                            fi
                             break
                         fi
                     done
-                    if [ ".$term_bold" != . ]; then
-                        for seq in sgr0 me rmso reset; do # 'reset' is last
-                            norm="`$dir/$tool $seq 2>/dev/null`"
-                            if [ ".$norm" != . ]; then
-                                term_norm="$norm"
-                                break
-                            fi
-                        done
+                    if [ ".$term_bold" != . -a ".$term_norm" != . ]; then
+                        break;
                     fi
-                    break
-                fi
-            done
-            if [ ".$term_bold" != . -a ".$term_norm" != . ]; then
-                break;
-            fi
-        done
+                done
+                ;;
+        esac
         if [ ".$term_bold" = . -o ".$term_norm" = . ]; then
             echo "$msgprefix:Warning: unable to determine terminal sequence for bold mode" 1>&2
         fi
@@ -525,7 +534,7 @@ echo )
         echo $seo "$text"
     else
         #   the harder part: echo -n is best, because
-        #   awk complains about some \xx sequences.
+        #   awk may complain about some \xx sequences.
         if [ ".$minusn" != . ]; then
             echo $seo $minusn "$text"
         else
@@ -537,7 +546,7 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-1999 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2000 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for shtool
     ##
     
@@ -644,24 +653,24 @@ install )
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-1999 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2000 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for public domain by Noah Friedman <friedman@prep.ai.mit.edu>
     ##  Cleaned up and enhanced for shtool
     ##
     
     errstatus=0
     for p in ${1+"$@"}; do
-        #   when the directory already exists...
+        #   if the directory already exists...
         if [ -d "$p" ]; then
-            if [ ".$opt_f" = .no ]; then
-                echo "$msgprefix:Error: file exists: $p" 1>&2
+            if [ ".$opt_f" = .no ] && [ ".$opt_p" = .no ]; then
+                echo "$msgprefix:Error: directory already exists: $p" 1>&2
                 errstatus=1
                 break
             else
                 continue
             fi
         fi
-        #   when the directory has to be created
+        #   if the directory has to be created...
         if [ ".$opt_p" = .no ]; then
             if [ ".$opt_t" = .yes ]; then
                 echo "mkdir $p" 1>&2
@@ -675,7 +684,7 @@ mkdir )
                            -e 's/\// /g' \
                            -e 's/^%/\//'`
             shift
-            pathcomp=
+            pathcomp=''
             for d in ${1+"$@"}; do
                 pathcomp="$pathcomp$d"
                 case "$pathcomp" in
