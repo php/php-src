@@ -106,6 +106,10 @@ AC_CHECK_LIB(c, dlopen, [
   LIBS="-ldl $LIBS"
   AC_DEFINE(HAVE_LIBDL) ], []) ])
 
+AC_CHECK_LIB(pam, pam_start, [
+  EXTRA_LIBS="$EXTRA_LIBS -lpam"
+  AC_DEFINE(HAVE_LIBPAM) ], []) 
+
 AC_CRYPT_CAP
 
 divert(3)
