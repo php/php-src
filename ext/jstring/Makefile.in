@@ -1,0 +1,7 @@
+# $Id$
+
+LTLIBRARY_NAME        = libjstring.la
+LTLIBRARY_SOURCES     = mbfilter_ja.c mbfilter.c jstring.c
+LTLIBRARY_SHARED_NAME = jstring.la
+
+include $(top_srcdir)/build/dynlib.mk
