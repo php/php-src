@@ -142,6 +142,12 @@ class PEAR_Common extends PEAR
      * @access private
      */
     var $_validPackageFile;
+    /**
+     * Temporary variable used in sorting packages by dependency in {@link sortPkgDeps()}
+     * @var array
+     * @access private
+     */
+    var $_packageSortTree;
 
     // }}}
 
@@ -1812,9 +1818,11 @@ class PEAR_Common extends PEAR
                 $newret[] = $p;
             }
         }
+        $this->_packageSortTree = $this->_getPkgDepTree($newret);
 
         $func = $uninstall ? '_sortPkgDepsRev' : '_sortPkgDeps';
-        usort($newret, array('PEAR_Common', $func));
+        usort($newret, array(&$this, $func));
+        $this->_packageSortTree = null;
         $packages = $newret;
     }
 
@@ -1835,8 +1843,8 @@ class PEAR_Common extends PEAR
     {
         $p1name = $p1['info']['package'];
         $p2name = $p2['info']['package'];
-        $p1deps = PEAR_Common::_getPkgDeps($p1);
-        $p2deps = PEAR_Common::_getPkgDeps($p2);
+        $p1deps = $this->_getPkgDeps($p1);
+        $p2deps = $this->_getPkgDeps($p2);
         if (!count($p1deps) && !count($p2deps)) {
             return 0; // order makes no difference
         }
@@ -1844,14 +1852,20 @@ class PEAR_Common extends PEAR
             return -1; // package 2 has dependencies, package 1 doesn't
         }
         if (!count($p2deps)) {
-            return 1; // package 2 has dependencies, package 1 doesn't
+            return 1; // package 1 has dependencies, package 2 doesn't
         }
         // both have dependencies
         if (in_array($p1name, $p2deps)) {
-            return -1; // put package 1 first
+            return -1; // put package 1 first: package 2 depends on package 1
         }
         if (in_array($p2name, $p1deps)) {
-            return 1; // put package 2 first
+            return 1; // put package 2 first: package 1 depends on package 2
+        }
+        if ($this->_removedDependency($p1name, $p2name)) {
+            return -1; // put package 1 first: package 2 depends on packages that depend on package 1
+        }
+        if ($this->_removedDependency($p2name, $p1name)) {
+            return 1; // put package 2 first: package 1 depends on packages that depend on package 2
         }
         // doesn't really matter if neither depends on the other
         return 0;
@@ -1874,8 +1888,8 @@ class PEAR_Common extends PEAR
     {
         $p1name = $p1['info']['package'];
         $p2name = $p2['info']['package'];
-        $p1deps = PEAR_Common::_getRevPkgDeps($p1);
-        $p2deps = PEAR_Common::_getRevPkgDeps($p2);
+        $p1deps = $this->_getRevPkgDeps($p1);
+        $p2deps = $this->_getRevPkgDeps($p2);
         if (!count($p1deps) && !count($p2deps)) {
             return 0; // order makes no difference
         }
@@ -1892,6 +1906,12 @@ class PEAR_Common extends PEAR
         if (in_array($p2name, $p1deps)) {
             return -1; // put package 2 last
         }
+        if ($this->_removedDependency($p1name, $p2name)) {
+            return 1; // put package 1 last: package 2 depends on packages that depend on package 1
+        }
+        if ($this->_removedDependency($p2name, $p1name)) {
+            return -1; // put package 2 last: package 1 depends on packages that depend on package 2
+        }
         // doesn't really matter if neither depends on the other
         return 0;
     }
@@ -1901,12 +1921,14 @@ class PEAR_Common extends PEAR
 
     /**
      * get an array of package dependency names
+     * @param array
+     * @return array
      * @access private
      */
     function _getPkgDeps($p)
     {
         if (!isset($p['info']['releases'])) {
-            return array();
+            return $this->_getRevPkgDeps($p);
         }
         $rel = array_shift($p['info']['releases']);
         if (!isset($rel['deps'])) {
@@ -1922,10 +1944,57 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ _getPkgDeps()
+
+    /**
+     * get an array representation of the package dependency tree
+     * @return array
+     * @access private
+     */
+    function _getPkgDepTree($packages)
+    {
+        $tree = array();
+        foreach ($packages as $p) {
+            $package = $p['info']['package'];
+            $deps = $this->_getPkgDeps($p);
+            $tree[$package] = $deps;
+        }
+        return $tree;
+    }
+
+    // }}}
+    // {{{ _removedDependency($p1, $p2)
+
+    /**
+     * get an array of package dependency names for uninstall
+     * @param string package 1 name
+     * @param string package 2 name
+     * @return bool
+     * @access private
+     */
+    function _removedDependency($p1, $p2)
+    {
+        if (empty($this->_packageSortTree[$p2])) {
+            return false;
+        }
+        if (!in_array($p1, $this->_packageSortTree[$p2])) {
+            foreach ($this->_packageSortTree[$p2] as $potential) {
+                if ($this->_removedDependency($p1, $potential)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // }}}
     // {{{ _getRevPkgDeps()
 
     /**
      * get an array of package dependency names for uninstall
+     * @param array
+     * @return array
      * @access private
      */
     function _getRevPkgDeps($p)
