@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Add pdf_set_parameter(), pdf_skew(), pdf_show_boxed() (Uwe)
 - Fixed comparison of (string) "inf" with (string) "inf", which was erroneously
   returning false (Zeev)
 - Implemented default_charset and default_mimetype config directives (Stig)
