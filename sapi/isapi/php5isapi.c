@@ -354,7 +354,7 @@ static char *sapi_isapi_read_cookies(TSRMLS_D)
 			efree(tmp_variable_buf);
 		}
 	}
-	return "";
+	return estrndup("", sizeof("")-1);
 }
 
 
