@@ -1,14 +1,15 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added support for --with-apxs build on Mac OS X / Darwin (markonen)
-- Support for dynamically loaded extensions on OS X / Darwin (dank, markonen)
+- Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
+- Added support for dynamically loaded extensions on OS X / Darwin. 
+  (dank, markonen)
   NOTE: Due to the Mach object handling in current version of OS X, the
   dynamically loaded extensions do not work on the apxs build. To get
   reliable extensions support, build --with-apache.
-- Fixed CR/LF processing for Windows/OS2 in quoted_printable_decode (kir)
-- Made crack extension available to Win32. Cracklib libraries for Win32 are 
-  available from http://www.jtatesoftware.com/cracklib/. (jtate)
+- Fixed CR/LF processing in quoted_printable_decode() on Win32. (kir)
+- Made crack extension available on Win32. Cracklib libraries for Win32 are
+  available at http://www.jtatesoftware.com/cracklib/. (jtate)
 - Added mysql_info() function. (Jan)
 - Added mysql_list_processes() and mysql_stat() functions. (Georg)
 - Added file_get_contents($filename), which returns the contents of a file
