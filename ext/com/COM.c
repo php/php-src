@@ -511,6 +511,12 @@ PHP_FUNCTION(com_load)
 		/* @todo if (server_name) */
 
 		if (!server_name) {
+			/* @todo shouldn't the bind context be fetched on module startup and kept as a global shared instance ?
+			 * all calls to BindToObject would deliver the same instance then (as desired)
+			 * IBindCtx::RegisterObjectBound() should be called then after  mkparsedisplayname()
+			 *
+			 * @todo use mkparsedisplaynameex() ?
+			 */ 
 			if (SUCCEEDED(hr = CreateBindCtx(0, &pBindCtx))) {
 				if (SUCCEEDED(hr = MkParseDisplayName(pBindCtx, ProgID, &ulEaten, &pMoniker))) {
 					hr = pMoniker->lpVtbl->BindToObject(pMoniker, pBindCtx, NULL, &IID_IDispatch, (LPVOID *) &C_DISPATCH(obj));
@@ -742,7 +748,11 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 
 		efree(funcname);
 		for (current_arg=0;current_arg<arg_count;current_arg++) {
-			VariantClear(&variant_args[current_arg]);
+			/* don't release IDispatch pointers as they are used afterwards */
+			if (V_VT(&variant_args[current_arg]) != VT_DISPATCH) {
+				/* @todo review this: what happens to an array of IDispatchs or a VARIANT->IDispatch */
+				VariantClear(&variant_args[current_arg]);
+			}
 		}
 		efree(variant_args);
 
