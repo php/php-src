@@ -557,7 +557,6 @@ default_socket_timeout = 60
 ;Note that ODBC support is built in, so no dll is needed for it.
 ;
 
-;extension=php_tidy.dll
 ;extension=php_bz2.dll
 ;extension=php_cpdf.dll
 ;extension=php_curl.dll
@@ -593,6 +592,7 @@ default_socket_timeout = 60
 ;extension=php_snmp.dll
 ;extension=php_sockets.dll
 ;extension=php_sybase_ct.dll
+;extension=php_tidy.dll
 ;extension=php_w32api.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
@@ -603,15 +603,6 @@ default_socket_timeout = 60
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
-
-[Tidy]
-; The path to a default tidy configuration file to use when using tidy
-;tidy.default_config = /usr/local/lib/php/default.tcfg
-
-; Should tidy clean and repair output automatically?
-; WARNING: Do not use this option if you are generating non-html content
-; such as dynamic images
-tidy.clean_output = Off
 
 [Syslog]
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
@@ -1180,6 +1171,15 @@ sockets.use_system_read = On
 ;exif.encode_jis =
 ;exif.decode_jis_motorola = JIS
 ;exif.decode_jis_intel    = JIS
+
+[Tidy]
+; The path to a default tidy configuration file to use when using tidy
+;tidy.default_config = /usr/local/lib/php/default.tcfg
+
+; Should tidy clean and repair output automatically?
+; WARNING: Do not use this option if you are generating non-html content
+; such as dynamic images
+tidy.clean_output = Off
 
 ; Local Variables:
 ; tab-width: 4
