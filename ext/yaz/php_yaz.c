@@ -1208,6 +1208,7 @@ PHP_FUNCTION(yaz_connect)
 	char *zurl_str;
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
+	const char *charset_str = 0;
     const char *client_IP = 0;
     const char *otherInfo[3];
 	int persistent = 1;
@@ -1236,6 +1237,7 @@ PHP_FUNCTION(yaz_connect)
 			pass_str = array_lookup_string(ht, "password");
 			cookie_str = array_lookup_string(ht, "cookie");
 			proxy_str = array_lookup_string(ht, "proxy");
+			charset_str = array_lookup_string(ht, "charset");
 			persistent_val = array_lookup_bool(ht, "persistent");
 			if (persistent_val)
 				persistent = *persistent_val;
@@ -1277,7 +1279,8 @@ PHP_FUNCTION(yaz_connect)
 			!strcmp_null(option_get(as, "user"), user_str) &&
 			!strcmp_null(option_get(as, "group"), group_str) &&
 			!strcmp_null(option_get(as, "pass"), pass_str) &&
-			!strcmp_null(option_get(as, "cookie"), cookie_str))
+			!strcmp_null(option_get(as, "cookie"), cookie_str) &&
+			!strcmp_null(option_get(as, "charset"), charset_str))
 		{
             option_set (as, "clientIP", client_IP);
             option_set (as, "otherInfo0", otherInfo[0]);
@@ -1285,6 +1288,7 @@ PHP_FUNCTION(yaz_connect)
             option_set (as, "otherInfo2", otherInfo[2]);
             option_set (as, "proxy", proxy_str);
             option_set (as, "piggyback", piggyback ? "1" : "0");
+            option_set (as, "charset", charset_str);
 			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
 		}
@@ -1340,6 +1344,7 @@ PHP_FUNCTION(yaz_connect)
         option_set (as, "otherInfo2", otherInfo[2]);
         option_set (as, "proxy", proxy_str);
         option_set (as, "piggyback", piggyback ? "1" : "0");
+        option_set (as, "charset", charset_str);
         
 		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 #else
