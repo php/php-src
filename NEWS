@@ -7,6 +7,7 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26604 (Apache2 SAPIs implicitly disable Keep-Alive). (Ilia)
 - Fixed bug #26565 (strtotime("this month") resolving to the wrong month).
   (Jani)
 - Fixed bug #26564 (ncurses5 has headers in PREFIX/include/ncurses/). (Jani)
