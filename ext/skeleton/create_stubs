@@ -151,6 +151,7 @@ BEGIN {
 	maxargs[num_funcs] = args_max
 	minargs[num_funcs] = args_min
 	specs[num_funcs]   = spec_str
+	spec_opts[num_funcs] = spec_opt
 
 	num_funcs++
 }
@@ -178,7 +179,7 @@ END {
 			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
 		fetchargs = "\tif (zend_parse_parameters("
-		if (spec_opt) {
+		if (spec_opts[i]) {
 			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
 			fetchargs = fetchargs "argc"
 		} else
