@@ -94,6 +94,7 @@ PHP_FUNCTION(dba_exists);
 PHP_FUNCTION(dba_fetch);
 PHP_FUNCTION(dba_optimize);
 PHP_FUNCTION(dba_sync);
+PHP_FUNCTION(dba_handlers);
 
 #else
 #define dba_module_ptr NULL

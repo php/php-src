@@ -51,6 +51,7 @@ function_entry dba_functions[] = {
 	PHP_FE(dba_nextkey, NULL)
 	PHP_FE(dba_optimize, NULL)
 	PHP_FE(dba_sync, NULL)
+	PHP_FE(dba_handlers, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -509,6 +510,27 @@ PHP_FUNCTION(dba_sync)
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array dba_list()
+   List configured databases */
+PHP_FUNCTION(dba_handlers)
+{
+	dba_handler *hptr;
+
+	if (ZEND_NUM_ARGS()!=0) {
+		ZEND_WRONG_PARAM_COUNT();
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
+		RETURN_FALSE;
+	}
+	for(hptr = handler; hptr->name; hptr++) {
+		add_next_index_string(return_value, hptr->name, 1);
+ 	}
 }
 /* }}} */
 
