@@ -1758,8 +1758,16 @@ do_fcall_common:
 				EG(exception) = NULL;
 				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
-				fprintf(stderr, "Namespace '%s'\n", opline->op1.u.constant.value.str.val);
-				NEXT_OPCODE();
+				{
+					Namespace *namespace_ptr;
+
+					if (zend_hash_find(EG(namespaces), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len + 1, (void **) &namespace_ptr) == FAILURE) {
+						zend_error(E_ERROR, "Internal namespaces error. Please report this!");
+					}
+					EG(function_table) = namespace_ptr->function_table;
+					EG(class_table) = namespace_ptr->class_table;
+					NEXT_OPCODE();
+				}
 			case ZEND_SEND_VAL: 
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
 					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
