@@ -27,8 +27,7 @@ $GLOBALS['USED_PACKAGES']['HTTP'] = true;
 
 class HTTP {
     /**
-     * Format a date according to RFC-XXXX (can't remember the HTTP
-     * RFC number off-hand anymore, shame on me).  This function
+     * Format a RFC compliant HTTP header.  This function
      * honors the "y2k_compliance" php.ini directive.
      *
      * @param $time int UNIX timestamp
@@ -36,10 +35,18 @@ class HTTP {
      * @return HTTP date string, or false for an invalid timestamp.
      *
      * @author Stig Bakken <ssb@fast.no>
+     * @author Sterling Hughes <sterling@php.net>
      */
     function Date($time) {
-	$y = ini_get("y2k_compliance") ? "Y" : "y";
-	return gmdate("D, d M $y H:i:s", $time);
+        /* If we're y2k compliant, use the newer, reccomended RFC 822
+           format */
+        if (ini_get("y2k_compliance") == true) {
+            return gmdate("D, d M Y H:i:s \G\M\T", $time);
+        }
+        /* Use RFC-850 which supports two character year numbers */
+        else {
+            return gmdate("F, d-D-y H:i:s \G\M\T", $time);
+        }
     }
 
     /**
