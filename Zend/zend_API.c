@@ -318,6 +318,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 					case IS_OBJECT: {
 						if (Z_OBJ_HANDLER_PP(arg, cast_object)
 							&& Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+							SEPARATE_ZVAL_IF_NOT_REF(arg);
 							*pl = Z_STRLEN_PP(arg);
 							*p = Z_STRVAL_PP(arg);
 							break;
