@@ -613,6 +613,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	tsrm_ls = ts_resource_ex(0, NULL);
 
 	compiler_globals_dtor(compiler_globals TSRMLS_CC);
+	compiler_globals->in_compilation = 0;
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 
