@@ -44,7 +44,19 @@ extern php3_module_entry pgsql_module_entry;
 
 
 #include <libpq-fe.h>
+
+#if (WIN32||WINNT)
+#define INV_WRITE            0x00020000
+#define INV_READ             0x00040000
+#else
 #include <libpq/libpq-fs.h>
+#endif
+
+#if WIN32||WINNT
+#define PHP_PGSQL_API __declspec(dllexport)
+#else
+#define PHP_PGSQL_API
+#endif
 
 extern int php3_minit_pgsql(INIT_FUNC_ARGS);
 extern int php3_rinit_pgsql(INIT_FUNC_ARGS);
@@ -106,9 +118,26 @@ typedef struct {
 	long max_links,max_persistent;
 	long allow_persistent;
 	int le_link,le_plink,le_result,le_lofp,le_string;
-} pgsql_module;
+} php_pgsql_globals;
 
-extern pgsql_module php3_pgsql_module;
+/* extern pgsql_module php3_pgsql_module; */
+
+#ifdef ZTS
+# define PGLS_D	php_pgsql_globals *pgsql_globals
+# define PGLS_DC	, PGLS_D
+# define PGLS_C	pgsql_globals
+# define PGLS_CC , PGLS_C
+# define PGG(v) (pgsql_globals->v)
+# define PGLS_FETCH()	php_pgsql_globals *pgsql_globals = ts_resource(pgsql_globals_id)
+#else
+# define PGLS_D
+# define PGLS_DC
+# define PGLS_C
+# define PGLS_CC
+# define PGG(v) (pgsql_globals.v)
+# define PGLS_FETCH()
+extern PHP_PGSQL_API php_pgsql_globals pgsql_globals;
+#endif
 
 #else
 
