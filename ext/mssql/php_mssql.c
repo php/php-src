@@ -2101,12 +2101,12 @@ PHP_FUNCTION(mssql_execute)
 				result = (mssql_result *) emalloc(sizeof(mssql_result));
 				result->batchsize = batchsize;
 				result->blocks_initialized = 1;
-				result->data = (zval **) safe_emalloc(sizeof(zval *), MSSQL_ROWS_BLOCK);
+				result->data = (zval **) safe_emalloc(sizeof(zval *), MSSQL_ROWS_BLOCK, 0);
 				result->mssql_ptr = mssql_ptr;
 				result->cur_field=result->cur_row=result->num_rows=0;
 				result->num_fields = num_fields;
 
-				result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), num_fields);
+				result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), num_fields, 0);
 				result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 				result->statement = statement;
 			}
