@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension ingres_ii
 
 PHP_ARG_WITH(ii, for Ingres II support,
-[  --with-ii[=DIR]         Include Ingres II support. DIR is the Ingres
+[  --with-ingres[=DIR]     Include Ingres II support. DIR is the Ingres
                           base directory (default $II_SYSTEM/II/ingres)],
 no)
 
