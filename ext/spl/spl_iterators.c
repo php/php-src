@@ -865,7 +865,7 @@ static zend_function_entry spl_funcs_ParentIterator[] = {
 
 static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS_DC)
 {
-	zval  zpos;
+	zval  *zpos;
 
 	spl_dual_it_free(intern TSRMLS_CC);
 	if (pos < intern->u.limit.offset) {
@@ -877,9 +877,10 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 		return;
 	}
 	if (instanceof_function(intern->inner.ce, spl_ce_SeekableIterator TSRMLS_CC)) {
-		INIT_PZVAL(&zpos);
-		ZVAL_LONG(&zpos, pos);
-		zend_call_method_with_1_params(&intern->inner.zobject, intern->inner.ce, NULL, "seek", NULL, &zpos);
+		MAKE_STD_ZVAL(zpos);
+		ZVAL_LONG(zpos, pos);
+		zend_call_method_with_1_params(&intern->inner.zobject, intern->inner.ce, NULL, "seek", NULL, zpos);
+		zval_ptr_dtor(&zpos);
 		spl_dual_it_free(intern TSRMLS_CC);
 		zend_user_it_free_current(intern->inner.iterator TSRMLS_CC);
 		spl_dual_it_fetch(intern, 1 TSRMLS_CC);
