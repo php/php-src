@@ -93,7 +93,7 @@ maintainer-clean-depend-recursive:
 
 # CGI binary or fhttpd module
 php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@ @TSRM_LIB@
-	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS) @TSRM_LIB@
+	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS) @TSRM_LIBS@
 
 # Apache modules
 libphp4.a libmodphp4.a: all-recursive $(OBJS) @REGEX_LIB@
@@ -115,8 +115,8 @@ libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
 	-@test -f ./mod_php4.c || test -h ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
 	$(APXS) $(INCLUDE) -c -o libphp4.so @VERSION_SCRIPT@ @RPATHS@ ./mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
 
-php4_aol.so: libmodphp4-so.a
-	g++ $(LDFLAGS) aolserver.o -rdynamic -shared -o $@ libmodphp4-so.a $(LIBS) @TSRM_LIB@
+php4_aol.so: libmodphp4-so.a @TSRM_LIB@
+	g++ $(LDFLAGS) -shared aolserver.o -o php4_aol.la libmodphp4-so.a $(LIBS) @TSRM_LIBS@
 	
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
