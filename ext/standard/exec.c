@@ -421,8 +421,7 @@ PHP_FUNCTION(shell_exec)
 	allocated_space = EXEC_INPUT_BUF;
 	ret = (char *) emalloc(allocated_space);
 	while (1) {
-//		readbytes = fread(ret+total_readbytes,1,EXEC_INPUT_BUF,in);
-		readbytes = fread(ret+total_readbytes,1,5,in);
+		readbytes = fread(ret+total_readbytes,1,EXEC_INPUT_BUF,in);
 		if (readbytes<=0) {
 			break;
 		}
