@@ -1,3 +1,47 @@
+2000-12-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: - Get the MySQL module a bit uptodate.
+    - Fix a bug in mysql_do_connect() - it would corrupt the host argument, if it contained a port
+      (or could corrupt the INI value, so that the port argument would work only the first time
+      around)
+
+2000-12-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/shmop/shmop.c
+      main/php.h
+      configure.in: Merge changes from HEAD
+
+    * ext/shmop/shmop.c:
+    Include <ext/standard/info.h> for php_info-related functions.
+
+    * main/php.h: Noone defines PACKAGE/VERSION anymore.
+
+    * configure.in:
+    Use the hardly-documented third parameter of AM_INIT_AUTOMAKE to suppress
+    defining PACKAGE/VERSION.
+
+2000-12-02  Alexander Feldman  <alex@zend.com>
+
+    * ext/crack/.cvsignore
+      ext/crack/Makefile.in
+      ext/crack/config.m4
+      ext/crack/crack.c
+      ext/crack/php_crack.h
+      ext/crack/tests/001.phpt:
+    - Added extension for the cracklib library. (Alexander Feldman)
+
+2000-12-02  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c: First attempt at fixing 8036
+
+2000-12-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      main/php_version.h: Branched off 4.0.4. This trunk becomes 4.0.5-dev.
+
+    * main/php_version.h
+      configure.in: 4.0.4RC3 is coming.
+
 2000-12-01  David Hedbor  <david@hedbor.org>
 
     * sapi/caudium/config.m4: Minor cosmetic changes.
