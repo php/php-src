@@ -337,8 +337,6 @@ void ts_free_thread(void)
 
 	while (thread_resources) {
 		if (thread_resources->thread_id == thread_id) {
-			tsrm_mutex_unlock(tsmm_mutex);
-
 			for (i=0; i<thread_resources->count; i++) {
 				if (resource_types_table[i].dtor) {
 					resource_types_table[i].dtor(thread_resources->storage[i]);
@@ -347,7 +345,6 @@ void ts_free_thread(void)
 			for (i=0; i<thread_resources->count; i++) {
 				free(thread_resources->storage[i]);
 			}
-			tsrm_mutex_lock(tsmm_mutex);
 			free(thread_resources->storage);
 			if (last) {
 				last->next = thread_resources->next;
