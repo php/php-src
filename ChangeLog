@@ -1,3 +1,64 @@
+2001-02-02  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: typo
+
+2001-02-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/sockets/sockets.c: Revert bogus patch and fix it properly.
+
+2001-02-02  Colin Viebrock  <colin@easydns.com>
+
+    * ext/sockets/sockets.c: Fix for http://bugs.php.net/bugs.php?id=9082
+
+    I know switch() is expensive, so someone rewrite this "properly" if you
+    want.
+
+2001-02-02  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/smtp.php: fix silly cut-n-paste bug (#9081)
+
+2001-02-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/pspell/pspell.c: pspell .12 fix
+
+2001-02-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/dotnet/dotnet.cpp: correct phpinfo() output
+
+2001-02-02  Colin Viebrock  <colin@easydns.com>
+
+    * pear/DB.php: I think this should've been changed as well, right?
+
+2001-02-02  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mnogosearch/php_mnogo.c: Fixed protos.
+
+2001-02-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/iisfunc/.cvsignore
+      ext/iisfunc/setup.c
+      ext/dotnet/dotnet.cpp
+      ext/com/typedef_VARIANT.c: correct phpinfo() output
+
+2001-02-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/string.c: Fix strip_tags to not strip a lone > character
+
+2001-02-02  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    Added new UDM_PARAM_STOPTABLE and UDM_PARAM_STOPFILE parameters
+    for Udm_Set_Agent_Params mnoGoSearch module. Now it can use stopwords
+    stored either in database or in the plain text files. Added php warnings.
+    Test example updated.
+
+2001-02-02  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB.php:
+    make sure to include subclasses before trying to instantiate them.
+
 2001-02-01  Colin Viebrock  <colin@easydns.com>
 
     * pear/DB/common.php: fix here too
