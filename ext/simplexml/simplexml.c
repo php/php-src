@@ -264,6 +264,15 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sxe_properties_get()
+ */
+static HashTable *
+sxe_properties_get(zval *object TSRMLS_DC)
+{
+	return NULL;
+}
+/* }}} */
+
 /* {{{ sxe_objects_compare()
  */
 static int
@@ -318,6 +327,17 @@ sxe_class_entry_get(zval *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sxe_class_name_get()
+ */
+static int
+sxe_class_name_get(zval *object, char** class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+{
+	*class_name = estrdup("simplexml_element");
+	*class_name_len = sizeof("simplexml_element");
+	return 0;
+}
+/* }}} */
+
 
 static zend_object_handlers sxe_object_handlers[] = {
 	ZEND_OBJECTS_STORE_HANDLERS,
@@ -329,12 +349,12 @@ static zend_object_handlers sxe_object_handlers[] = {
 	NULL,
 	sxe_property_exists,
 	sxe_property_delete,
-	NULL,
+	sxe_properties_get,
 	sxe_method_get,
 	sxe_call_method,
 	sxe_constructor_get,
 	sxe_class_entry_get,
-	NULL,
+	sxe_class_name_get,
 	sxe_objects_compare
 };
 
