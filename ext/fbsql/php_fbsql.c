@@ -1005,22 +1005,18 @@ PHP_FUNCTION(fbsql_database)
 PHP_FUNCTION(fbsql_database_password)
 {
 	int  argc = ARG_COUNT(ht);
-	zval	**argv[2];
+	zval	**argv[1];
 	PHPFBLink*     phpLink = NULL;
 	FBSQLLS_FETCH();
 
-	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-	convert_to_long_ex(argv[0]);
-	phpLink = phpfbGetLink((*argv[0])->value.lval);    
-	if (phpLink == NULL) RETURN_FALSE;
-
-	if (argc == 2)
+	if (argc >= 1)
 	{
-		convert_to_string_ex(argv[1]);
+		convert_to_string_ex(argv[0]);
 		if (FB_SQL_G(databasePassword)) free(FB_SQL_G(databasePassword));
-		FB_SQL_G(databasePassword) = estrdup((*argv[1])->value.str.val); 
+		FB_SQL_G(databasePassword) = estrdup((*argv[0])->value.str.val); 
 	}
 	phpfbestrdup(phpLink->currentDatabase->databasePassword, &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
@@ -1039,19 +1035,19 @@ PHP_FUNCTION(fbsql_username)
 	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(argc, &argv[0])==FAILURE) RETURN_FALSE;
 
-	phpfbestrdup(FB_SQL_G(userName), &return_value->value.str.len, &return_value->value.str.val);
-	return_value->type = IS_STRING;
 	if (argc >= 1)
 	{
 		convert_to_string_ex(argv[0]);
 		if (FB_SQL_G(userName)) free(FB_SQL_G(userName));
 		FB_SQL_G(userName) = strdup((*argv[0])->value.str.val); 
 	}
+	phpfbestrdup(FB_SQL_G(userName), &return_value->value.str.len, &return_value->value.str.val);
+	return_value->type = IS_STRING;
 }
 /* }}} */
 
 
-/* {{{ proto string fbsql_password([string password])
+/* {{{ proto fbsql_password([string password])
 	*/
 PHP_FUNCTION(fbsql_password)
 {   
