@@ -32,14 +32,9 @@ acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
 
 targets = $(TOUCH_FILES) configure $(config_h_in)
 
-ifeq ($(SHOW_WARNINGS), no)
-	SUPPRESS_WARNINGS = 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
-else
-	debug_target = debugging
-endif
+SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
 
-
-all: $(targets) $(debug_target)
+all: $(targets)
 
 acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
@@ -63,6 +58,3 @@ configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
 	autoconf $(SUPPRESS_WARNINGS)
 
-debugging:
-	@libtoolize=`./build/shtool path glibtoolize libtoolize`; \
-	$$libtoolize
