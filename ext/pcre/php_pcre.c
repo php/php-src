@@ -544,6 +544,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	int			 esc_match_len;		/* Length of the quote-escaped match */
 	int			 result_len;		/* Length of the result of the evaluation */
 	int			 backref;			/* Current backref */
+	char        *compiled_string_description;
 	CLS_FETCH();
 	ELS_FETCH();
 	
@@ -578,11 +579,14 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 		}
 	}
 
+	compiled_string_description = zend_make_compiled_string_description("regexp code");
 	/* Run the code */
-	if (zend_eval_string(code, &retval CLS_CC ELS_CC) == FAILURE) {
+	if (zend_eval_string(code, &retval, compiled_string_description CLS_CC ELS_CC) == FAILURE) {
+		efree(compiled_string_description);
 		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
 		/* zend_error() does not return in this case */
 	}
+	efree(compiled_string_description);
 	convert_to_string(&retval);
 	
 	/* Save the return value and its length */

@@ -185,7 +185,14 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
+<<<<<<< php.ini-dist
+track_vars			=	On		; enable the $HTTP_*_VARS[] arrays, where * is one of
+								; ENV, POST, GET, COOKIE or SERVER.
+								; This is the preferred way of accessing form variables,
+								; and prevents common security bugs many developers tend to make.
+=======
 ; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
+>>>>>>> 1.47
 variables_order		=	"EGPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & S respectively, often referred to as EGPCS or GPC).

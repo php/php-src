@@ -1691,6 +1691,7 @@ PHP_FUNCTION(highlight_string)
 {
 	pval **expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
+	char *hicompiled_string_description;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &expr)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1699,10 +1700,14 @@ PHP_FUNCTION(highlight_string)
 	convert_to_string_ex(expr);
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
+	
+	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
 
-	if (highlight_string(*expr, &syntax_highlighter_ini)==FAILURE) {
+	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description)==FAILURE) {
+		efree(hicompiled_string_description);
 		RETURN_FALSE;
 	}
+	efree(hicompiled_string_description);
 	RETURN_TRUE;
 }
 /* }}} */
