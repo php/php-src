@@ -89,7 +89,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				PUTS(&tmp2.value.str.val);
+				PUTS(tmp2.value.str.val);
 				zval_dtor(&tmp2);
 			} else {
 				PUTS((*tmp)->value.str.val);
