@@ -14,6 +14,7 @@ if test "$PHP_BZ2" != "no"; then
       if test -r $i/include/bzlib.h; then
         BZIP_DIR=$i
         AC_MSG_RESULT(found in $i)
+        break
       fi
     done
   fi
