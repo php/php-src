@@ -1,3 +1,51 @@
+2001-04-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php:
+    * ini_restore called before any returns (thanks to Markus Fischer)
+
+2001-04-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4
+      ext/ircg/ircg.c: Make it possible to build ircg without thttpd
+
+2001-04-14  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    - myslRaiseError now fills the native error parm of DB_Error obj
+    - style: replace " with '
+
+2001-04-14  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/dbx/dbx_pgsql.c
+      ext/pgsql/pgsql.c: deleted warning output in dbx/pgsql.
+
+2001-04-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * TODO-4.1.txt: .
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c
+      ext/oci8/oci8.dsp: enable temporary LOBs when we detect oracle 8.1
+    enabled by default in Win32 project!
+
+    * ext/oci8/CREDITS
+      ext/oci8/oci8.c:
+    - Added temporary LOB support in OCI8 (Patch by David Benson)
+
+    * ext/oci8/CREDITS:
+    the collections stuff s worth mentioning in the credits!
+
+2001-04-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php: typo
+
+2001-04-14  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS: Added news about gd and openssl changes.
+
+    * ext/gd/config.m4:
+    When using freetype2, turn off libttf and turn on native gd ttf.
+
 2001-04-13  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * TODO-4.1.txt: - Added the note about function names
