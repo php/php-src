@@ -1,0 +1,203 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH SQLITE 1 "Mon Apr 15 23:49:17 2002"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+sqlite \- A command line interface for SQLite
+.SH SYNOPSIS
+.B sqlite
+.RI [ options ] " filename " [ SQL ]
+.SS SUMMARY
+.PP
+sqlite is a terminal-based front-end to the SQLite library. It enables
+you to type in queries interactively, issue them to SQLite and see the
+results. Alternatively, you can specify SQL code on the command-line. In
+addition it provides a number of meta-commands.
+
+.SH DESCRIPTION
+This manual page documents briefly the
+.B sqlite
+command.
+This manual page was written for the Debian GNU/Linux distribution
+because the original program does not have a manual page.
+.SS GETTING STARTED
+.PP
+To start the sqlite program, just type "sqlite" followed by the name
+the file that holds the SQLite database. If the file does not exist, a
+new one is created automatically. The sqlite program will then prompt
+you to enter SQL. Type in SQL statements (terminated by a semicolon),
+press "Enter" and the SQL will be executed.
+
+For example, to create a new SQLite database named "ex1" with a single
+table named "tbl1", you might do this:
+.sp
+.nf
+$ sqlite ex1
+SQLite version 2.0.0
+Enter ".help" for instructions
+sqlite> create table tbl1(one varchar(10), two smallint);
+sqlite> insert into tbl1 values('hello!',10);
+sqlite> insert into tbl1 values('goodbye', 20);
+sqlite> select * from tbl1;
+hello!|10
+goodbye|20
+sqlite>
+.sp
+.fi
+
+.SS SQLITE META-COMMANDS
+.PP
+Most of the time, sqlite just reads lines of input and passes them on
+to the SQLite library for execution. But if an input line begins with
+a dot ("."), then that line is intercepted and interpreted by the
+sqlite program itself. These "dot commands" are typically used to
+change the output format of queries, or to execute certain prepackaged
+query statements.
+
+For a listing of the available dot commands, you can enter ".help" at
+any time. For example:
+.sp
+.nf
+.cc |
+sqlite> .help
+.dump ?TABLE? ...      Dump the database in an text format
+.echo ON|OFF           Turn command echo on or off
+.exit                  Exit this program
+.explain ON|OFF        Turn output mode suitable for EXPLAIN on or off.
+                       "off" will revert to the output mode that was
+                       previously in effect
+.header(s) ON|OFF      Turn display of headers on or off
+.help                  Show this message
+.indices TABLE         Show names of all indices on TABLE
+.mode MODE             Set mode to one of "line(s)", "column(s)",
+                       "insert", "list", or "html"
+.mode insert TABLE     Generate SQL insert statements for TABLE
+.nullvalue STRING      Print STRING instead of nothing for NULL data
+.output FILENAME       Send output to FILENAME
+.output stdout         Send output to the screen
+.prompt MAIN CONTINUE  Replace the standard prompts
+                       "sqlite > " and "   ...> "
+                       with the strings MAIN and CONTINUE
+                       CONTINUE is optional.
+.quit                  Exit this program
+.read FILENAME         Execute SQL in FILENAME
+.reindex ?TABLE?       Rebuild indices
+.schema ?TABLE?        Show the CREATE statements
+.separator STRING      Change separator string for "list" mode
+.show                  Show the current values for the following:
+                       .echo
+                       .explain
+                       .mode
+                       .nullvalue
+                       .output
+                       .separator
+                       .width
+.tables ?PATTERN?      List names of tables matching a pattern
+.timeout MS            Try opening locked tables for MS milliseconds
+.width NUM NUM ...     Set column widths for "column" mode
+sqlite>
+|cc .
+.sp
+.fi
+
+.SH OPTIONS
+The program has the following options:
+.TP
+.BI \-init\ file
+Read in and process 'file', which contains "dot commands".
+You can use this file to initialize display settings.
+.TP
+.B \-html
+Set output mode to HTML.
+.TP
+.B \-list
+Set output mode to 'list'.
+.TP
+.B \-line
+Set output mode to 'line'.
+.TP
+.B \-column
+Set output mode to 'column'.
+.TP
+.BI \-separator\  separator
+Specify which output field separator for 'list' mode to use.
+Default is '|'.
+.TP
+.BI \-nullvalue\  string
+When a null is encountered, print 'string'. Default is no string.
+.TP
+.B \-[no]header
+Turn headers on or off. Default is off.
+.TP
+.B \-echo
+Print commands before execution.
+
+
+.SH OUTPUT MODE
+The SQLite program has different output modes, which define the way
+the output (from queries) is formatted.
+
+In 'list' mode, which is the default, one record per line is output,
+each field separated by the separator specified with the
+\fB-separator\fP option or \fB.separator\fP command.
+
+In 'line' mode, each column is output on its own line, records are
+separated by blank lines.
+
+In HTML mode, an XHTML table is generated.
+
+In 'column' mode, one record per line is output, aligned neatly in colums.
+
+.SH INIT FILE
+sqlite can be initialized using resource files. These can be combined with
+command line arguments to set up sqlite exactly the way you want it.
+Initialization proceeds as follows:
+
+o The defaults of
+
+.sp
+.nf
+.cc |
+mode            = LIST
+separator       = "|"
+main prompt     = "sqlite> "
+continue prompt = "   ...> "
+|cc .
+.sp
+.fi
+
+are established.
+
+o If a file .sqliterc can be found in the user's home directory, it is
+read and processed. It should only contain "dot commands".  If the
+file is not found or cannot be read, processing continues without
+notification.
+
+o If a file is specified on the command line with the -init option, it
+is processed in the same manner as .sqliterc
+
+o All other command line options are processed
+
+o The database is opened and you are now ready to begin.
+
+.SH SEE ALSO
+http://www.hwaci.com/sw/sqlite/
+.br
+The sqlite-doc package
+.SH AUTHOR
+This manual page was originally written by Andreas Rottmann
+<rotty@debian.org>, for the Debian GNU/Linux system (but may be used
+by others).

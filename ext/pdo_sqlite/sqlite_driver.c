@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-	enum pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
+	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_sqlite_error_info *einfo = &H->einfo;
 
 	einfo->errcode = sqlite3_errcode(H->db);
@@ -44,42 +44,39 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 	if (einfo->errcode != SQLITE_OK) {
 		einfo->errmsg = (char*)sqlite3_errmsg(H->db);
 	} else { /* no error */
-		*pdo_err = PDO_ERR_NONE;
+		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
 	}
 	switch (einfo->errcode) {
 		case SQLITE_NOTFOUND:
-			*pdo_err = PDO_ERR_NOT_FOUND;
+			strcpy(*pdo_err, "42S02");
 			break;	
 
 		case SQLITE_INTERRUPT:
-			*pdo_err = PDO_ERR_DISCONNECTED;
+			strcpy(*pdo_err, "01002");
 			break;
 
 		case SQLITE_NOLFS:
-			*pdo_err = PDO_ERR_NOT_IMPLEMENTED;
+			strcpy(*pdo_err, "HYC00");
 			break;
 
 		case SQLITE_TOOBIG:
-			*pdo_err = PDO_ERR_TRUNCATED;
+			strcpy(*pdo_err, "22001");
 			break;
 	
 		case SQLITE_CONSTRAINT:
-			*pdo_err = PDO_ERR_CONSTRAINT;
+			strcpy(*pdo_err, "23000");
 			break;
 
-		case SQLITE_ERROR: /* empty query */
-			*pdo_err = PDO_ERR_SYNTAX;
-			break;
-
+		case SQLITE_ERROR:
 		default:
-			*pdo_err = PDO_ERR_CANT_MAP;
+			strcpy(*pdo_err, "HY000");
 			break;
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "[%d] %s",
-				einfo->errcode, einfo->errmsg);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 	
 	return einfo->errcode;
@@ -228,6 +225,27 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 	return 1;
 }
 
+static PHP_FUNCTION(sqlite_create_function)
+{
+	/* TODO: implement this stuff */
+}
+
+static function_entry dbh_methods[] = {
+	PHP_FE(sqlite_create_function, NULL)
+	{NULL, NULL, NULL}
+};
+
+static function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+{
+	switch (kind) {
+		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
+			return dbh_methods;
+
+		default:
+			return NULL;
+	}
+}
+
 static struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
@@ -240,7 +258,8 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_last_insert_id,
 	pdo_sqlite_fetch_error_func,
 	pdo_sqlite_get_attribute,
-	NULL	/* check_liveness: not needed */
+	NULL,	/* check_liveness: not needed */
+	get_driver_methods
 };
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
@@ -309,7 +328,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 	filename = make_filename_safe(dbh->data_source TSRMLS_CC);
 
 	if (!filename) {
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NO_PERM TSRMLS_CC,
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
 			"safe_mode/open_basedir prohibits opening %s",
 			dbh->data_source);
 		goto cleanup;
