@@ -28,7 +28,7 @@
 
 #define FILE_REVISION "$Revision$"
 
-#if HAVE_IBASE && !defined(VERSION_INFO_ONLY)
+#if HAVE_IBASE
 
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
@@ -71,6 +71,8 @@ typedef unsigned long long ISC_UINT64;
 #define LL_LIT(lit) lit ## I64
 #ifdef FB_SQLDA
 #pragma comment(lib, "fbclient_ms.lib")
+#else
+#pragma comment(lib, "gds32_ms.lib")
 #endif
 #else
 #define LL_MASK "ll"
