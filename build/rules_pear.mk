@@ -43,7 +43,7 @@ install-p: $(targets) $(install_targets)
 distclean-p depend-p clean-p:
 
 depend: depend-recursive
-	@echo $(top_srcdir) $(top_builddir) $(srcdir) $(CPP) $(INCLUDES) $(EXTRA_INCLUDES) $(DEFS) $(CPPFLAGS) $(srcdir)/*.c *.c | awk -f $(top_srcdir)/build/mkdep.awk > $(builddir)/.deps || true
+	@echo $(top_srcdir) $(top_builddir) $(srcdir) $(CPP) $(INCLUDES) $(EXTRA_INCLUDES) $(DEFS) $(CPPFLAGS) $(srcdir)/*.c *.c | $(AWK) -f $(top_srcdir)/build/mkdep.awk > $(builddir)/.deps || true
 
 clean: clean-recursive clean-x
 
