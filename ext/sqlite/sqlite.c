@@ -111,8 +111,7 @@ static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
 	efree(res);
 }
 
-/* PHP Function interface */
-
+/* {{{ PHP Function interface */
 static void php_sqlite_function_callback(sqlite_func *func, int argc, const char **argv)
 {
 	zval *retval = NULL;
@@ -192,9 +191,9 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 		efree(zargs);
 	}
 }
+/* }}} */
 
-/* Authorization Callback */
-
+/* {{{ Authorization Callback */
 static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4)
 {
 	switch (access_type) {
@@ -216,6 +215,7 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 			return SQLITE_OK;
 	}
 }
+/* }}} */
 
 PHP_MINIT_FUNCTION(sqlite)
 {
