@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added krsort() function (Thies)
 - Added func_num_args(), func_get_arg() and func_get_args() for standard
   access to variable number of arguments functions (Zeev)
 - Added FTP support (Andrew Skalski)

@@ -51,6 +51,7 @@ PHP_FUNCTION(toggle_short_open_tag);
 PHP_FUNCTION(sleep);
 PHP_FUNCTION(usleep);
 PHP_FUNCTION(ksort);
+PHP_FUNCTION(krsort);
 PHP_FUNCTION(asort);
 PHP_FUNCTION(arsort);
 PHP_FUNCTION(sort);
