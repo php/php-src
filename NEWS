@@ -1,9 +1,16 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
-- Fixed bug #20442 (upgraded bunbled expat to 1.95.5). (Ilia)
+- Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Added imagefilter() function which allows application of various filters.
-  This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)  
+  This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
+- Added imageistruecolor(), only available with GD2+(Pierre-Alain Joye)
+- Added antialiased drawing support (Pierre-Alain Joye, Ilia), available only
+  with bundled GD:
+   . imageantialias($im, $flag) to (de)active antialias
+   . imageline antialias support
+   . imagepolygon antialias support
+
 
 ? ? ??? 2002, Version 4.3.0
 - Fixed a security bug in the bundled MySQL library. (Georg, Stefan)
