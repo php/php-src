@@ -46,7 +46,7 @@
 static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos TSRMLS_DC)
 {
 	char buf[32];
-	int n;
+	unsigned int n;
 
 	while (len > 0) {
 		n = sizeof(buf);
