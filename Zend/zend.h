@@ -104,6 +104,8 @@ const char *zend_mh_bundle_error(void);
 
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
+# elif defined(RTLD_DEEPBIND)
+#  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL | RTLD_DEEPBIND)
 # else
 #  define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
 # endif
