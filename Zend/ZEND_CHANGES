@@ -534,6 +534,8 @@ Changes in the Zend Engine 2.0
 
     * __autoload(). TBD.
 
+    * __call(), __get(), __set(). TBD.
+
 Changes in the Zend Engine 1.0
 
   The Zend Engine was designed from the ground up for increased speed,
