@@ -638,7 +638,6 @@ AC_ARG_WITH(aolserver,
   AC_DEFINE(HAVE_AOLSERVER)
   BINNAME=php4_aol.so
   INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $BINNAME $NS_DIR/root/bin/$BINNAME"
-  CFLAGS="$CFLAGS -rdynamic"
   RESULT=yes
 ])
 AC_MSG_RESULT($RESULT)
@@ -873,6 +872,21 @@ AC_ARG_ENABLE(thread-safety,
 AC_SUBST(TSRM_DIR)
 AC_SUBST(TSRM_LIB)
 
+AC_MSG_CHECKING(whether to enable runpaths)
+AC_ARG_ENABLE(rpath,
+[  --disable-rpath         Disable passing additional runtime library
+                          search paths],
+[
+  if test "$enableval" = "no"; then
+    enable_rpath=no
+  else
+    enable_rpath=yes
+  fi
+],[
+  enable_rpath=yes
+])
+AC_MSG_RESULT($enable_rpath)
+
 dnl AC_MSG_CHECKING(whether to enable PHP RPC support)
 dnl AC_ARG_ENABLE(php-rpc,
 dnl [  --enable-php-rpc        Compile with PHP RPC support.],
@@ -1003,6 +1017,8 @@ dnl test -n "$GCC" && CFLAGS="$CFLAGS -fpic"
 
 dnl add -fPIC option on Solaris if we are building dynamic extensions
 PHP_SOLARIS_PIC_WEIRDNESS
+
+AC_BUILD_RPATH
 
 AC_SUBST(CFLAGS)
 AC_SUBST(PROG_SENDMAIL)
