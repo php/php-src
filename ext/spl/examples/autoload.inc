@@ -33,7 +33,10 @@ function __load_class($classname, $dir)
  */
 function __autoload($classname) {
 	$classname = strtolower($classname);
-	foreach(split(':', ini_get('include_path')) as $dir)
+	$inc = split(':', ini_get('include_path'));
+	$inc[] = '.';
+	$inc[] = dirname($_SERVER['PATH_TRANSLATED']);
+	foreach($inc as $dir)
 	{
 		if (__load_class($classname, $dir))
 		{
@@ -41,10 +44,7 @@ function __autoload($classname) {
 			return;
 		}
 	}
-	if (!__load_class($classname, '.'))
-	if (!__load_class($classname, dirname($_SERVER['PATH_TRANSLATED'])))
 	fprintf(STDERR, 'Class not found ('.$classname.")\n");
-	return;
 }
 
 ?>
