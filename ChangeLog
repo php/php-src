@@ -1,3 +1,29 @@
+2001-11-21  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/winutil.c
+      win32/winutil.h: Allow php_win_err() to be called from extenstions
+
+2001-11-21  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h: Added ldap_sort() function
+
+2001-11-21  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - add functions clone_node(), is_blank_node(), create_entity_reference()
+    - fixed bug in node_name()
+    - fixed behavior of append_child(), it now adds a child a not a sibling
+
+2001-11-21  Sean Bright  <elixer@erols.com>
+
+    * NEWS: Fix typo.
+
+2001-11-21  Harald Radi  <h.radi@nme.at>
+
+    * NEWS: added blabla
+
 2001-11-20  Adam Daniel  <adaniel2@cinci.rr.com>
 
     * pear/HTML/Table.php:
