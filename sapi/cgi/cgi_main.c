@@ -76,6 +76,41 @@
 
 #include "php_getopt.h"
 
+#ifdef PHP_FASTCGI
+#include "fcgi_config.h"
+#include "fcgiapp.h"
+FCGX_Stream *in, *out, *err;
+FCGX_ParamArray envp;
+
+/* Our original environment from when the FastCGI first started */
+char **orig_env;
+
+/* The environment given by the FastCGI */
+char **cgi_env;
+
+/* The manufactured environment, from merging the base environ with
+ * the parameters set by the per-connection environment
+ */
+char **merge_env;
+
+/**
+ * Number of child processes that will get created to service requests
+ */
+static int children = 8;
+
+/**
+ * Set to non-zero if we are the parent process
+ */
+static int parent = 1;
+
+/**
+ * Process group
+ */
+static pid_t pgroup;
+
+
+#endif
+
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
@@ -107,13 +142,20 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length)
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
+#else
+	size_t ret;
+#endif
 
+#ifdef PHP_FASTCGI
+	if (!FCGX_IsCGI()) {
+		return FCGX_PutStr( str, str_length, out );
+	}
+#endif
+#ifdef PHP_WRITE_STDOUT
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
 	return ret;
 #else
-	size_t ret;
-
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
 	return ret;
 #endif
@@ -141,6 +183,13 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cgibin_flush(void *server_context)
 {
+#ifdef PHP_FASTCGI
+	if (!FCGX_IsCGI()) {
+		if( FCGX_FFlush( out ) == -1 ) {
+			php_handle_aborted_connection();
+		}
+	} else
+#endif
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();
 	}
@@ -159,10 +208,20 @@ static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_c
 static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
+#ifdef PHP_FASTCGI
+	char *pos = buffer;
+#endif
 
 	count_bytes = MIN(count_bytes, (uint)SG(request_info).content_length-SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
-		tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
+#ifdef PHP_FASTCGI
+		if (!FCGX_IsCGI()) {
+			tmp_read_bytes = FCGX_GetStr( pos, count_bytes-read_bytes, in );
+			pos += tmp_read_bytes;
+		} else
+#endif
+			tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
+
 		if (tmp_read_bytes<=0) {
 			break;
 		}
@@ -213,8 +272,12 @@ static int sapi_cgi_deactivate(TSRMLS_D)
  */
 static sapi_module_struct cgi_sapi_module = {
 	"cgi",							/* name */
+#ifdef PHP_FASTCGI
+	"CGI/FastCGI",					/* pretty name */
+#else
 	"CGI",							/* pretty name */
-									
+#endif
+	
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -405,6 +468,28 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
+#ifdef PHP_FASTCGI
+	int env_size, cgi_env_size;
+	int max_requests = 500;
+	int requests = 0;
+	int fastcgi = !FCGX_IsCGI();
+
+	if (fastcgi) { 
+		/* Calculate environment size */
+		env_size = 0;
+		while( environ[ env_size ] ) { env_size++; }
+		/* Also include the final NULL pointer */
+		env_size++;
+
+		/* Allocate for our environment */
+		orig_env = malloc( env_size * sizeof( char *));
+		if( !orig_env ) {
+			perror( "Can't malloc environment" );
+			exit( 1 );
+		}
+		memcpy( orig_env, environ, env_size * sizeof( char *));
+	}
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -446,7 +531,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!cgi) {
+	if (!cgi
+#ifdef PHP_FASTCGI
+		/* allow ini override for fastcgi */
+#endif
+		) {
 		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 			switch (c) {
 				case 'c':
@@ -523,9 +612,102 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 	}
 #endif							/* FORCE_CGI_REDIRECT */
 
+#ifdef PHP_FASTCGI
+	/* How many times to run PHP scripts before dying */
+	if( getenv( "PHP_FCGI_MAX_REQUESTS" )) {
+		max_requests = atoi( getenv( "PHP_FCGI_MAX_REQUESTS" ));
+		if( !max_requests ) {
+			fprintf( stderr,
+				 "PHP_FCGI_MAX_REQUESTS is not valid\n" );
+			exit( 1 );
+		}
+	}
+
+#ifndef PHP_WIN32
+	/* Pre-fork, if required */
+	if( getenv( "PHP_FCGI_CHILDREN" )) {
+		children = atoi( getenv( "PHP_FCGI_CHILDREN" ));
+		if( !children ) {
+			fprintf( stderr,
+				 "PHP_FCGI_CHILDREN is not valid\n" );
+			exit( 1 );
+		}
+	}
+
+	if( children ) {
+		int running = 0;
+		int i;
+		pid_t pid;
+
+		/* Create a process group for ourself & children */
+		setsid();
+		pgroup = getpgrp();
+#ifdef DEBUG_FASTCGI
+		fprintf( stderr, "Process group %d\n", pgroup );
+#endif
+
+		/* Set up handler to kill children upon exit */
+		act.sa_flags = 0;
+		act.sa_handler = fastcgi_cleanup;
+		if( sigaction( SIGTERM, &act, &old_term ) ||
+		    sigaction( SIGINT, &act, &old_int ) ||
+		    sigaction( SIGQUIT, &act, &old_quit )) {
+			perror( "Can't set signals" );
+			exit( 1 );
+		}
+
+		while( parent ) {
+			do {
+#ifdef DEBUG_FASTCGI
+				fprintf( stderr, "Forking, %d running\n",
+					 running );
+#endif
+				pid = fork();
+				switch( pid ) {
+				case 0:
+					/* One of the children.
+					 * Make sure we don't go round the
+					 * fork loop any more
+					 */
+					parent = 0;
+
+					/* don't catch our signals */
+					sigaction( SIGTERM, &old_term, 0 );
+					sigaction( SIGQUIT, &old_quit, 0 );
+					sigaction( SIGINT, &old_int, 0 );
+					break;
+				case -1:
+					perror( "php (pre-forking)" );
+					exit( 1 );
+					break;
+				default:
+					/* Fine */
+					running++;
+					break;
+				}
+			} while( parent && ( running < children ));
+
+			if( parent ) {
+#ifdef DEBUG_FASTCGI
+				fprintf( stderr, "Wait for kids, pid %d\n",
+					 getpid() );
+#endif
+				wait( &status );
+				running--;
+			}
+		}
+	}
+
+#endif /* WIN32 */
+
+#endif
 
 	zend_first_try {
-		if (!cgi) {
+		if (!cgi
+#ifdef PHP_FASTCGI
+			&& !fastcgi
+#endif
+			) {
 			while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 				switch (c) {
 					case '?':
@@ -543,6 +725,27 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 			ap_php_optarg = orig_optarg;
 		}
 
+#ifdef PHP_FASTCGI
+		/* start of FAST CGI loop */
+		while (!fastcgi
+			|| FCGX_Accept( &in, &out, &err, &cgi_env ) >= 0) {
+
+			if (fastcgi) {
+				/* set up environment */
+				cgi_env_size = 0;
+				while( cgi_env[ cgi_env_size ] ) { cgi_env_size++; }
+				merge_env = malloc( (env_size+cgi_env_size)*sizeof(char*) );
+				if( !merge_env ) {
+				   perror( "Can't malloc environment" );
+				   exit( 1 );
+				}
+				memcpy( merge_env, orig_env, (env_size-1)*sizeof(char *) );
+				memcpy( merge_env + env_size - 1,
+					cgi_env, (cgi_env_size+1)*sizeof(char *) );
+				environ = merge_env;
+			}
+#endif
+
 		init_request_info(TSRMLS_C);
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 
@@ -550,7 +753,11 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
-		if (!cgi) {					/* never execute the arguments if you are a CGI */
+		if (!cgi
+#ifdef PHP_FASTCGI
+			&& !fastcgi
+#endif
+			) {					/* never execute the arguments if you are a CGI */
 			if (SG(request_info).argv0) {
 				free(SG(request_info).argv0);
 				SG(request_info).argv0 = NULL;
@@ -676,7 +883,11 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 
 		CG(interactive) = interactive;
 
-		if (!cgi) {
+		if (!cgi
+#ifdef PHP_FASTCGI
+			&& !fastcgi
+#endif
+			) {
 			if (!SG(request_info).query_string) {
 				len = 0;
 				if (script_file) {
@@ -716,9 +927,18 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 		}
-		file_handle.filename = "-";
-		file_handle.type = ZEND_HANDLE_FP;
-		file_handle.handle.fp = stdin;
+#ifdef PHP_FASTCGI
+		if (fastcgi) {
+			file_handle.type = ZEND_HANDLE_FILENAME;
+			file_handle.filename = SG(request_info).path_translated;
+		} else {
+#endif
+			file_handle.filename = "-";
+			file_handle.type = ZEND_HANDLE_FP;
+			file_handle.handle.fp = stdin;
+#ifdef PHP_FASTCGI
+		}
+#endif
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 
@@ -726,7 +946,11 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
 		zend_llist_destroy(&global_vars);
 
-		if (!cgi) {
+		if (!cgi
+#ifdef PHP_FASTCGI
+			&& !fastcgi
+#endif
+			) {
 			if (!SG(request_info).path_translated && argc > ap_php_optind) {
 				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
 			}
@@ -835,10 +1059,28 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 
 		STR_FREE(SG(request_info).path_translated);
 
+#ifdef PHP_FASTCGI
+			if (!fastcgi) break;
+			/* only fastcgi will get here */
+
+			/* TODO: We should free our environment here, but
+			 * some platforms are unhappy if they've altered our
+			 * existing environment and we then free() the new
+			 * environ pointer
+			 */
+
+			requests++;
+			if( max_requests && ( requests == max_requests )) {
+				FCGX_Finish();
+				break;
+			}
+		/* end of fastcgi loop */
+		}
+#endif
+
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
 		}
-
 	} zend_catch {
 		exit_status = 255;
 	} zend_end_try();
