@@ -1,3 +1,20 @@
+2001-02-04  James Moore  <James@phpuk.org>
+
+    * ext/standard/tests/time/.cvsignore
+      ext/standard/tests/time/001.phpt: Adding microtime() tests
+
+    * ext/standard/microtime.c:
+    Always return a value even if HAVE_GETTIMEOFDAY is not set
+
+    * win32/time.c:
+    Fix for time.c under win32. Patch By: "Vanhanen, Reijo" <Reijo.Vanhanen@helsoft.fi>
+
+
+2001-02-04  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * TODO:
+    * TODO: Add a bunch of stuff..
+
 2001-02-03  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS
