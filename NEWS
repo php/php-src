@@ -1,5 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, Version 4.3.11
+
 15 Dec 2004, Version 4.3.10
 - Added the %F modifier to *printf to render a non-locale-aware representation
   of a float with the . as decimal separator. (Derick)
