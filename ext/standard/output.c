@@ -161,15 +161,12 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		CLS_FETCH();
 
 		ALLOC_INIT_ZVAL(orig_buffer);
-		orig_buffer->value.str.val = OG(active_ob_buffer).buffer;
-		orig_buffer->value.str.len = OG(active_ob_buffer).text_length;
-		orig_buffer->type = IS_STRING;
+		ZVAL_STRINGL(orig_buffer,OG(active_ob_buffer).buffer,OG(active_ob_buffer).text_length,0);
 		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
 		orig_buffer->is_ref=1;
 
 		ALLOC_INIT_ZVAL(z_status);
-		Z_TYPE_P(z_status) = IS_LONG;
-		Z_LVAL_P(z_status) = status;
+		ZVAL_LONG(z_status,status);
 
 		params[0] = &orig_buffer;
 		params[1] = &z_status;
@@ -407,9 +404,7 @@ int php_ob_get_buffer(pval *p)
 	if (OG(nesting_level)==0) {
 		return FAILURE;
 	}
-	p->type = IS_STRING;
-	p->value.str.val = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
-	p->value.str.len = OG(active_ob_buffer).text_length;
+	ZVAL_STRINGL(p,OG(active_ob_buffer).buffer,OG(active_ob_buffer).text_length,1);
 	return SUCCESS;
 }
 /* }}} */
@@ -423,8 +418,7 @@ int php_ob_get_length(pval *p)
 	if (OG(nesting_level) == 0) {
 		return FAILURE;
 	}
-	p->type = IS_LONG;
-	p->value.lval = OG(active_ob_buffer).text_length;
+	ZVAL_LONG(p,OG(active_ob_buffer).text_length);
 	return SUCCESS;
 }
 /* }}} */
