@@ -242,6 +242,13 @@ PHP_FUNCTION(chroot)
 		RETURN_FALSE;
 	}
 
+	ret = chdir("/");
+	
+	if (ret != 0) {
+		php_error(E_WARNING, "chdir: %s (errno %d)", strerror(errno), errno);
+		RETURN_FALSE;
+	}
+
 	RETURN_TRUE;
 }
 
