@@ -2714,7 +2714,7 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 					memcpy(buf, sp-2, 3);
 					buf[3] = '\0';
 					start = buf;
- 					*bp = (unsigned char)strtoul(start, &end, 8);
+ 					*bp = (unsigned char)strtoul(start, (char **)&end, 8);
 					buflen -= 3;
 					state = 0;
 				}
