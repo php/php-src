@@ -65,7 +65,7 @@ PHP_FUNCTION(dl)
 	pval **file;
 
 #ifdef ZTS
-	if ((strcmp(sapi_module.name, "cgi")!=0) && (strcmp(sapi_module.name, "cli")!=0)) {
+	if ((strncmp(sapi_module.name, "cgi", 3)!=0) && (strcmp(sapi_module.name, "cli")!=0)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension statements in your php.ini");
 		RETURN_FALSE;
 	}
