@@ -67,10 +67,9 @@
   #define HASH_DTOR (int (*)(void *))
 #endif
 
+#if HAVE_OCI8
 
 #include "php3_oci8.h"
-
-#if HAVE_OCI8
 
 /*  XXXXXXXXXXXXXXXXXXXXXXXx
   this is needed due to a brain-dead change in the ocidfn.h header 
@@ -84,7 +83,6 @@
 #ifndef SQLT_CFILEE
   #define SQLT_CFILEE 115
 #endif
-
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -203,38 +201,38 @@ static sb4 oci8_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo
 /* }}} */
 /* {{{ extension function prototypes */
 
-PHP_FUNCTION(oci8_bindbyname);
-PHP_FUNCTION(oci8_definebyname);
-PHP_FUNCTION(oci8_columnisnull);
-PHP_FUNCTION(oci8_columnname);
-PHP_FUNCTION(oci8_columnsize);
-PHP_FUNCTION(oci8_columntype);
-PHP_FUNCTION(oci8_execute);
-PHP_FUNCTION(oci8_fetch);
-PHP_FUNCTION(oci8_cancel);
-PHP_FUNCTION(oci8_fetchinto);
-PHP_FUNCTION(oci8_fetchstatement);
-PHP_FUNCTION(oci8_freestatement);
-PHP_FUNCTION(oci8_internaldebug);
-PHP_FUNCTION(oci8_logout);
-PHP_FUNCTION(oci8_logon);
-PHP_FUNCTION(oci8_nlogon);
-PHP_FUNCTION(oci8_plogon);
-PHP_FUNCTION(oci8_error);
-PHP_FUNCTION(oci8_freedesc);
-PHP_FUNCTION(oci8_savedesc);
-PHP_FUNCTION(oci8_loaddesc);
-PHP_FUNCTION(oci8_commit);
-PHP_FUNCTION(oci8_rollback);
-PHP_FUNCTION(oci8_newdescriptor);
-PHP_FUNCTION(oci8_numcols);
-PHP_FUNCTION(oci8_parse);
-PHP_FUNCTION(oci8_newcursor);
-PHP_FUNCTION(oci8_result);
-PHP_FUNCTION(oci8_serverversion);
-PHP_FUNCTION(oci8_statementtype);
-PHP_FUNCTION(oci8_rowcount);
-PHP_FUNCTION(oci8_setprefetch);
+PHP_FUNCTION(ocibindbyname);
+PHP_FUNCTION(ocidefinebyname);
+PHP_FUNCTION(ocicolumnisnull);
+PHP_FUNCTION(ocicolumnname);
+PHP_FUNCTION(ocicolumnsize);
+PHP_FUNCTION(ocicolumntype);
+PHP_FUNCTION(ociexecute);
+PHP_FUNCTION(ocifetch);
+PHP_FUNCTION(ocicancel);
+PHP_FUNCTION(ocifetchinto);
+PHP_FUNCTION(ocifetchstatement);
+PHP_FUNCTION(ocifreestatement);
+PHP_FUNCTION(ociinternaldebug);
+PHP_FUNCTION(ocilogoff);
+PHP_FUNCTION(ocilogon);
+PHP_FUNCTION(ocinlogon);
+PHP_FUNCTION(ociplogon);
+PHP_FUNCTION(ocierror);
+PHP_FUNCTION(ocifreedescriptor);
+PHP_FUNCTION(ocisavedesc);
+PHP_FUNCTION(ociloaddesc);
+PHP_FUNCTION(ocicommit);
+PHP_FUNCTION(ocirollback);
+PHP_FUNCTION(ocinewdescriptor);
+PHP_FUNCTION(ocinumcols);
+PHP_FUNCTION(ociparse);
+PHP_FUNCTION(ocinewcursor);
+PHP_FUNCTION(ociresult);
+PHP_FUNCTION(ociserverversion);
+PHP_FUNCTION(ocistatementtype);
+PHP_FUNCTION(ocirowcount);
+PHP_FUNCTION(ocisetprefetch);
 
 /* }}} */
 /* {{{ extension definition structures */
@@ -249,46 +247,45 @@ PHP_FUNCTION(oci8_setprefetch);
 static unsigned char a3_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char a2_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
-function_entry oci8_functions[] = {
-	{"ocidefinebyname",  php3_oci8_definebyname,  a3_arg_force_ref},
-	{"ocibindbyname",    php3_oci8_bindbyname,    a3_arg_force_ref},
-	{"ocicolumnisnull",  php3_oci8_columnisnull,  NULL},
-	{"ocicolumnname",    php3_oci8_columnname,    NULL},
-	{"ocicolumnsize",    php3_oci8_columnsize,    NULL},
-	{"ocicolumntype",    php3_oci8_columntype,    NULL},
-	{"ociexecute",       php3_oci8_execute,       NULL},
-	{"ocicancel",        php3_oci8_cancel,         NULL},
-	{"ocifetch",         php3_oci8_fetch,         NULL},
-	{"ocifetchinto",     php3_oci8_fetchinto,     a2_arg_force_ref},
-	{"ocifetchstatement",php3_oci8_fetchstatement,a2_arg_force_ref},
-	{"ocifreestatement", php3_oci8_freestatement, NULL},
-	{"ocifreecursor",    php3_oci8_freestatement, NULL},
-	{"ociinternaldebug", php3_oci8_internaldebug, NULL},
-	{"ocinumcols",       php3_oci8_numcols,       NULL},
-	{"ociparse",         php3_oci8_parse,         NULL},
-	{"ocinewcursor",     php3_oci8_newcursor,     NULL},
-	{"ociresult",        php3_oci8_result,        NULL},
-	{"ociserverversion", php3_oci8_serverversion, NULL},
-	{"ocistatementtype", php3_oci8_statementtype, NULL},
-	{"ocirowcount", 	 php3_oci8_rowcount, 	  NULL},
-    {"ocilogoff",        php3_oci8_logout,        NULL},
-    {"ocilogon",         php3_oci8_logon,         NULL},
-    {"ocinlogon",        php3_oci8_nlogon,        NULL},
-    {"ociplogon",        php3_oci8_plogon,        NULL},
-    {"ocierror",         php3_oci8_error,         NULL},
-    {"ocifreedescriptor",php3_oci8_freedesc,      NULL},
-    {"ocisavedesc",      php3_oci8_savedesc,      NULL},
-    {"ociloaddesc",      php3_oci8_loaddesc,      NULL},
-    {"ocicommit",        php3_oci8_commit,        NULL},
-    {"ocirollback",      php3_oci8_rollback,      NULL},
-    {"ocinewdescriptor", php3_oci8_newdescriptor, NULL},
-    {"ocisetprefetch",   php3_oci8_setprefetch,   NULL},
-    {NULL,               NULL,                    NULL}
+static zend_function_entry php_oci_functions[] = {
+	PHP_FE(ocidefinebyname,  a3_arg_force_ref)
+	PHP_FE(ocibindbyname,    a3_arg_force_ref)
+	PHP_FE(ocicolumnisnull,  NULL)
+	PHP_FE(ocicolumnname,    NULL)
+	PHP_FE(ocicolumnsize,    NULL)
+	PHP_FE(ocicolumntype,    NULL)
+	PHP_FE(ociexecute,       NULL)
+	PHP_FE(ocicancel,        NULL)
+	PHP_FE(ocifetch,         NULL)
+	PHP_FE(ocifetchinto,     a2_arg_force_ref)
+	PHP_FE(ocifetchstatement,a2_arg_force_ref)
+	PHP_FE(ocifreestatement, NULL)
+	PHP_FE(ociinternaldebug, NULL)
+	PHP_FE(ocinumcols,       NULL)
+	PHP_FE(ociparse,         NULL)
+	PHP_FE(ocinewcursor,     NULL)
+	PHP_FE(ociresult,        NULL)
+	PHP_FE(ociserverversion, NULL)
+	PHP_FE(ocistatementtype, NULL)
+	PHP_FE(ocirowcount, 	 NULL)
+    PHP_FE(ocilogoff,        NULL)
+    PHP_FE(ocilogon,         NULL)
+    PHP_FE(ocinlogon,        NULL)
+    PHP_FE(ociplogon,        NULL)
+    PHP_FE(ocierror,         NULL)
+    PHP_FE(ocifreedescriptor,NULL)
+    PHP_FE(ocisavedesc,      NULL)
+    PHP_FE(ociloaddesc,      NULL)
+    PHP_FE(ocicommit,        NULL)
+    PHP_FE(ocirollback,      NULL)
+    PHP_FE(ocinewdescriptor, NULL)
+    PHP_FE(ocisetprefetch,   NULL)
+    {NULL,NULL,NULL}
 };
 
 php3_module_entry oci8_module_entry = {
     "OCI8",                /* extension name */
-    oci8_functions,        /* extension function list */
+    php_oci_functions,     /* extension function list */
     PHP_MINIT(oci8),       /* extension-wide startup function */
     PHP_MSHUTDOWN(oci8),   /* extension-wide shutdown function */
     PHP_RINIT(oci8),       /* per-request startup function */
@@ -879,10 +876,6 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 			oci8_debug("oci8_make_pval: %16s,retlen = %4d,cb_retlen = %d,storage_size4 = %4d,indicator %4d, retcode = %4d",
 					   column->name,column->retlen,column->cb_retlen,column->storage_size4,column->indicator,column->retcode);
 
-/*
-	memset(value,0,sizeof(pval));
-*/
-
 	if (column->indicator == -1) { /* column is NULL */
 		var_reset(value); /* XXX we NEED to make sure that there's no data attached to this yet!!! */
 		return 0;
@@ -910,6 +903,7 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 				var_reset(value);
 			}
 		} else { /* return the locator */
+#if 0
 			object_init(value);
 
 			add_property_long(value, "connection", statement->conn->id);
@@ -922,6 +916,7 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 				add_method(value, "load", php3_oci8_loaddesc);
 			}
 			/* there is NO free call here, 'cause the memory gets deallocated together with the statement! */
+#endif
 		}
 	} else {
 		switch (column->retcode) {
@@ -950,6 +945,7 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 }
 
 /* }}} */
+/* {{{ oci8_setprefetch() */
 
 static int
 oci8_setprefetch(oci8_statement *statement,int size)
@@ -980,7 +976,9 @@ oci8_setprefetch(oci8_statement *statement,int size)
 	return 1;
 }
 
+/* }}} */
 /* {{{ oci8_parse() */
+
 static int
 oci8_parse(oci8_connection *connection, char *query, int len, HashTable *list)
 {
@@ -2311,7 +2309,7 @@ static void oci8_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int excl
   if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
  */
 
-PHP_FUNCTION(oci8_definebyname)
+PHP_FUNCTION(ocidefinebyname)
 {
 	pval *stmt, *name, *var, *type;
 	oci8_statement *statement;
@@ -2374,7 +2372,7 @@ PHP_FUNCTION(oci8_definebyname)
   if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
 
-PHP_FUNCTION(oci8_bindbyname)
+PHP_FUNCTION(ocibindbyname)
 {
 	pval *stmt, *name, *var, *maxlen, *tmp,*type;
 	oci8_statement *statement;
@@ -2517,7 +2515,7 @@ PHP_FUNCTION(oci8_bindbyname)
 /* {{{ proto string ocifreedesc(object lob)
  */
 
-PHP_FUNCTION(oci8_freedesc)
+PHP_FUNCTION(ocifreedescriptor)
 {
 	pval *id, *conn, *desc;
 	oci8_connection *connection;
@@ -2557,7 +2555,7 @@ PHP_FUNCTION(oci8_freedesc)
 /* {{{ proto string ocisavedesc(object lob)
  */
 
-PHP_FUNCTION(oci8_savedesc)
+PHP_FUNCTION(ocisavedesc)
 {
 	pval *id, *tmp, *conn, *arg;
 	OCILobLocator *mylob;
@@ -2641,7 +2639,7 @@ PHP_FUNCTION(oci8_savedesc)
 /* {{{ proto string ociloaddesc(object lob)
  */
 
-PHP_FUNCTION(oci8_loaddesc)
+PHP_FUNCTION(ociloaddesc)
 {
 	pval *id, *tmp, *conn;
 	oci8_connection *connection;
@@ -2690,7 +2688,7 @@ PHP_FUNCTION(oci8_loaddesc)
   initialize a new empty descriptor LOB/FILE (LOB is default)
  */
 
-PHP_FUNCTION(oci8_newdescriptor)
+PHP_FUNCTION(ocinewdescriptor)
 {
 	pval *conn, *type;
 	oci8_connection *connection;
@@ -2744,6 +2742,7 @@ PHP_FUNCTION(oci8_newdescriptor)
 	oci8_debug("OCINewDescriptor: new descriptor for %d -> %x",mylob,descr.ocidescr);
 	
 	object_init(return_value);
+#if 0
 	add_property_long(return_value, "descriptor", (long) mylob);
 	add_property_long(return_value, "connection", conn->value.lval);
 	add_method(return_value, "free", php3_oci8_freedesc);
@@ -2759,6 +2758,7 @@ PHP_FUNCTION(oci8_newdescriptor)
 	}
 
 	add_method(return_value, "free", php3_oci8_freedesc);
+#endif
 }
 
 /* }}} */
@@ -2766,7 +2766,7 @@ PHP_FUNCTION(oci8_newdescriptor)
   rollback the current context
  */
 
-PHP_FUNCTION(oci8_rollback)
+PHP_FUNCTION(ocirollback)
 {
 	pval *conn;
 	oci8_connection *connection;
@@ -2800,7 +2800,7 @@ PHP_FUNCTION(oci8_rollback)
   commit the current context
  */
 
-PHP_FUNCTION(oci8_commit)
+PHP_FUNCTION(ocicommit)
 {
 	pval *conn;
 	oci8_connection *connection;
@@ -2834,7 +2834,7 @@ PHP_FUNCTION(oci8_commit)
   Tell the name of a column.
  */
 
-PHP_FUNCTION(oci8_columnname)
+PHP_FUNCTION(ocicolumnname)
 {
 	pval *stmt, *col;
 	oci8_statement *statement;
@@ -2862,7 +2862,7 @@ PHP_FUNCTION(oci8_columnname)
   Tell the maximum data size of a column.
  */
 
-PHP_FUNCTION(oci8_columnsize)
+PHP_FUNCTION(ocicolumnsize)
 {
 	pval *stmt, *col;
 	oci8_statement *statement;
@@ -2889,7 +2889,7 @@ PHP_FUNCTION(oci8_columnsize)
   Tell the data type of a column.
  */
 
-PHP_FUNCTION(oci8_columntype)
+PHP_FUNCTION(ocicolumntype)
 {
 	pval *stmt, *col;
 	oci8_statement *statement;
@@ -2955,7 +2955,7 @@ PHP_FUNCTION(oci8_columntype)
   Tell whether a column is NULL.
  */
 
-PHP_FUNCTION(oci8_columnisnull)
+PHP_FUNCTION(ocicolumnisnull)
 {
 	pval *stmt, *col;
 	oci8_statement *statement;
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(oci8_columnisnull)
 /* Disables or enables the internal debug output.
  * By default it is disabled.
  */
-PHP_FUNCTION(oci8_internaldebug)
+PHP_FUNCTION(ociinternaldebug)
 {
 	pval *arg;
 	OCI8_TLS_VARS;
@@ -3007,7 +3007,7 @@ PHP_FUNCTION(oci8_internaldebug)
   Execute a parsed statement.
  */
 
-PHP_FUNCTION(oci8_execute)
+PHP_FUNCTION(ociexecute)
 {
 	pval *stmt,*mode;
 	oci8_statement *statement;
@@ -3041,7 +3041,7 @@ PHP_FUNCTION(oci8_execute)
   Prepare a new row of data for reading.
  */
 
-PHP_FUNCTION(oci8_cancel)
+PHP_FUNCTION(ocicancel)
 {
 	pval *stmt;
 	oci8_statement *statement;
@@ -3068,7 +3068,7 @@ PHP_FUNCTION(oci8_cancel)
   Prepare a new row of data for reading.
  */
 
-PHP_FUNCTION(oci8_fetch)
+PHP_FUNCTION(ocifetch)
 {
 	pval *stmt;
 	oci8_statement *statement;
@@ -3096,7 +3096,7 @@ PHP_FUNCTION(oci8_fetch)
   Fetch a row of result data into an array.
  */
 
-PHP_FUNCTION(oci8_fetchinto)
+PHP_FUNCTION(ocifetchinto)
 {
 	pval *stmt, *array, *element, *fmode;
 	oci8_statement *statement;
@@ -3197,7 +3197,7 @@ PHP_FUNCTION(oci8_fetchinto)
   Fetch all rows of result data into an array.
  */
 
-PHP_FUNCTION(oci8_fetchstatement)
+PHP_FUNCTION(ocifetchstatement)
 {
 	pval *stmt, *array, *element, *fmode, *tmp;
 	oci8_statement *statement;
@@ -3303,7 +3303,7 @@ PHP_FUNCTION(oci8_fetchstatement)
   Free all resources associated with a statement.
  */
 
-PHP_FUNCTION(oci8_freestatement)
+PHP_FUNCTION(ocifreestatement)
 {
 	pval *stmt;
 	oci8_statement *statement;
@@ -3330,7 +3330,7 @@ PHP_FUNCTION(oci8_freestatement)
 
 /* Logs off and disconnects.
  */
-PHP_FUNCTION(oci8_logout)
+PHP_FUNCTION(ocilogoff)
 {
 	oci8_connection *connection;
 	pval *arg;
@@ -3375,7 +3375,7 @@ PHP_FUNCTION(oci8_logout)
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(oci8_nlogon)
+PHP_FUNCTION(ocinlogon)
 {
 	oci8_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0,1);
 }
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(oci8_nlogon)
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(oci8_logon)
+PHP_FUNCTION(ocilogon)
 {
 	oci8_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0,0);
 }
@@ -3403,7 +3403,7 @@ PHP_FUNCTION(oci8_logon)
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(oci8_plogon)
+PHP_FUNCTION(ociplogon)
 {
 	oci8_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1,0);
 }
@@ -3413,7 +3413,7 @@ PHP_FUNCTION(oci8_plogon)
   Return the last error of stmt|conn|global. If no error happened returns false.
  */
 
-PHP_FUNCTION(oci8_error)
+PHP_FUNCTION(ocierror)
 {
 	pval *mixed;
 	oci8_statement *statement;
@@ -3469,7 +3469,7 @@ PHP_FUNCTION(oci8_error)
   Return the number of result columns in a statement.
  */
 
-PHP_FUNCTION(oci8_numcols)
+PHP_FUNCTION(ocinumcols)
 {
 	pval *stmt;
 	oci8_statement *statement;
@@ -3491,7 +3491,7 @@ PHP_FUNCTION(oci8_numcols)
   Parse a query and return a statement.
  */
 
-PHP_FUNCTION(oci8_parse)
+PHP_FUNCTION(ociparse)
 {
 	pval *conn, *query;
 	oci8_connection *connection;
@@ -3520,7 +3520,7 @@ PHP_FUNCTION(oci8_parse)
   Parse a query and return a statement.
  */
 
-PHP_FUNCTION(oci8_setprefetch)
+PHP_FUNCTION(ocisetprefetch)
 {
 	pval *stmt, *size;
 	oci8_statement *statement;
@@ -3549,7 +3549,7 @@ PHP_FUNCTION(oci8_setprefetch)
  
  */
 
-PHP_FUNCTION(oci8_newcursor)
+PHP_FUNCTION(ocinewcursor)
 {
 	pval *conn;
 	oci8_connection *connection;
@@ -3577,7 +3577,7 @@ PHP_FUNCTION(oci8_newcursor)
   Return a single column of result data.
  */
 
-PHP_FUNCTION(oci8_result)
+PHP_FUNCTION(ociresult)
 {
 	pval *stmt, *col;
 	oci8_statement *statement;
@@ -3610,7 +3610,7 @@ PHP_FUNCTION(oci8_result)
   Return a string containing server version information.
  */
 
-PHP_FUNCTION(oci8_serverversion)
+PHP_FUNCTION(ociserverversion)
 {
 	oci8_connection *connection;
 	pval *arg;
@@ -3647,7 +3647,7 @@ PHP_FUNCTION(oci8_serverversion)
  
 /* XXX it would be better with a general interface to OCIAttrGet() */
 
-PHP_FUNCTION(oci8_statementtype)
+PHP_FUNCTION(ocistatementtype)
 {
 	pval *stmt;
 	oci8_statement *statement;
@@ -3708,7 +3708,7 @@ PHP_FUNCTION(oci8_statementtype)
 	}
 }
 
-PHP_FUNCTION(oci8_rowcount)
+PHP_FUNCTION(ocirowcount)
 {
 	pval *stmt;
 	oci8_statement *statement;
