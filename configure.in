@@ -1338,12 +1338,12 @@ fi
 #
 
 test -d TSRM || $php_shtool mkdir TSRM
-echo '#include "../main/php_config.h"' > TSRM/tsrm_config.h
+echo '#include <../main/php_config.h>' > TSRM/tsrm_config.h
 
 test -d Zend || $php_shtool mkdir Zend
 
 cat >Zend/zend_config.h <<FEO
-#include "../main/php_config.h"
+#include <../main/php_config.h>
 #if defined(APACHE) && defined(PHP_API_VERSION)
 #undef HAVE_DLFCN_H
 #endif

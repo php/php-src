@@ -39,7 +39,7 @@
 #  define PHPAPI __declspec(dllimport) 
 # endif
 #else
-# include "php_config.h"
+# include <php_config.h>
 # define PHPAPI
 # define THREAD_LS
 #endif
