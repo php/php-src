@@ -8,8 +8,7 @@ AC_ARG_WITH(aolserver,
 	if test ! -d $withval ; then
 		AC_MSG_ERROR(You did not specify a directory)
 	fi
-	enable_thread_safety=yes
-	passthru="$passthru --enable-thread-safety"
+	PHP_BUILD_THREAD_SAFE
 	NS_DIR=$withval
 	AC_ADD_INCLUDE($NS_DIR/include)
 	AC_DEFINE(HAVE_AOLSERVER)

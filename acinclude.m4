@@ -13,6 +13,14 @@ AC_DEFUN(PHP_SET_SYM_FILE,
 ])
 
 dnl
+dnl PHP_BUILD_THREAD_SAFE
+dbl
+AC_DEFUN(PHP_BUILD_THREAD_SAFE,[
+  enable_thread_safety=yes
+  passthru="$passthru --enable-thread-safety"
+])
+
+dnl
 dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN(PHP_BUILD_SHARED,[
