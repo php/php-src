@@ -256,22 +256,25 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					if (T->EA.str->type == IS_STRING
 						&& (T->EA.offset < T->EA.str->value.str.len)) {
 						zval tmp;
+						zval *final_value = value;
 
 						if (value->type!=IS_STRING) {
 							tmp = *value;
-							zval_copy_ctor(&tmp);
+							if (op2 && op2->op_type == IS_VAR) {
+								zval_copy_ctor(&tmp);
+							}
 							convert_to_string(&tmp);
-							value = &tmp;
+							final_value = &tmp;
 						}
 
-						T->EA.str->value.str.val[T->EA.offset] = value->value.str.val[0];
+						T->EA.str->value.str.val[T->EA.offset] = final_value->value.str.val[0];
 						if (op2
 							&& op2->op_type == IS_VAR
 							&& value==&Ts[op2->u.var].tmp_var) {
 							efree(value->value.str.val);
 						}
-						if (value == &tmp) {
-							zval_dtor(value);
+						if (final_value == &tmp) {
+							zval_dtor(final_value);
 						}
 						/*
 						 * the value of an assignment to a string offset is undefined
