@@ -203,7 +203,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);				\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = 1; /* TBI!! */				\
+				(holder) = (*(op));									\
+				zval_copy_ctor(&(holder));							\
+				convert_to_long(&(holder));							\
 				break;												\
 			case IS_BOOL:											\
 			case IS_RESOURCE:										\
@@ -246,7 +248,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = 1; /* TBI!! */				\
+				(holder) = (*(op));									\
+				zval_copy_ctor(&(holder));							\
+				convert_to_boolean(&(holder));						\
 				break;												\
 			default:												\
 				(holder).value.lval = 0;							\
