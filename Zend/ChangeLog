@@ -1,3 +1,9 @@
+2005-03-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_execute.c:
+      Consolidate: call _get_zval_ptr_var() for IS_VAR case in
+      _get_zval_ptr().
+
 2005-03-21  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
