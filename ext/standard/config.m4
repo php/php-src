@@ -67,6 +67,10 @@ AC_DEFUN(AC_CRYPT_CAP,[
   
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -94,6 +98,10 @@ main() {
 
   AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -121,6 +129,10 @@ main() {
 
   AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
   AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -160,6 +172,10 @@ main() {
 
   AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
   AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
