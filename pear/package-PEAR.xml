@@ -55,6 +55,7 @@ though it claimed to be.  This version finally is self-hosting
 * lots of minor fixes
 </notes>
     <filelist>
+      <file role="data" name="package.dtd"/>
       <file role="php" name="PEAR.php"/>
       <file role="php" name="System.php"/>
       <dir name="PEAR">
