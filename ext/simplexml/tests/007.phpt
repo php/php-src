@@ -23,7 +23,11 @@ unset($sxe['id']);
 var_dump($sxe['id']);
 unset($sxe->elem1['attr1']);
 var_dump($sxe->elem1['attr1']);
-
+echo "===Misc.===\n";
+$a = 4;
+var_dump($a);
+$dummy = $sxe->elem1[$a];
+var_dump($a);
 ?>
 ===Done===
 --EXPECT--
@@ -39,4 +43,7 @@ string(2) "12"
 ===Unset===
 NULL
 NULL
+===Misc.===
+int(4)
+int(4)
 ===Done===
