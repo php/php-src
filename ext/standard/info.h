@@ -52,9 +52,14 @@
 #define PHP_CREDITS_FULLPAGE		(1<<3)
 #define PHP_CREDITS_ALL				0xFFFFFFFF
 
+#define PHP_LOGO_GUID	"PHPE9568F34-D428-11d2-A769-00AA001ACF42"
+#define ZEND_LOGO_GUID	"PHPE9568F35-D428-11d2-A769-00AA001ACF42"
+
 PHP_FUNCTION(phpversion);
 PHP_FUNCTION(phpinfo);
 PHP_FUNCTION(phpcredits);
+PHP_FUNCTION(php_logo_guid);
+PHP_FUNCTION(zend_logo_guid);
 PHPAPI void php_print_info(int flag);
 PHPAPI void php_print_credits(int flag);
 
