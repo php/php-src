@@ -11,12 +11,12 @@ function Add($x,$y) {
 }
 
 $server = new soapserver("http://testuri.org");
-$server->bind("test.wsdl");
+$server->bind(dirname(__FILE__)."/test.wsdl");
 ob_start();
 $server->handle();
 $wsdl = ob_get_contents();
 ob_end_clean();
-if ($wsdl == file_get_contents("test.wsdl")) {
+if ($wsdl == file_get_contents(dirname(__FILE__)."/test.wsdl")) {
   echo "ok\n";
 } else {
 	echo "fail\n";
