@@ -1,3 +1,24 @@
+2003-03-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/calendar/jewish.c:
+      MFH(r-1.5): fixed win32 build with non-SBCS locale settings.
+
+    * ext/calendar/jewish.c:
+      Fixed win32 build, which fails with non-SBCS-compatible locale settings.
+
+2003-03-22  Shane Caraveo  <shane@caraveo.com>
+
+    * main/php_ini.c:
+      Fix PHPRC overriding other ini files.  This is how PHPRC worked prior to
+      4.3.x, and is usefull for applications that execute PHP and want to
+      emulate CGI and define alternate INI files (ie. cannot use -c).
+
+2003-03-22  David Croft  <david@infotrek.co.uk>
+
+    * ChangeLog:
+      
+
 2003-03-21  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/standard/file.c:
