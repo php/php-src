@@ -908,10 +908,8 @@ PHP_FUNCTION(swf_getfontinfo)
 {
 	float A_height, x_height;
 	swf_getfontinfo(&A_height, &x_height);
-	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Cannot initialize return value from swf_getfontinfo");
-		RETURN_FALSE;
-	}
+	
+	array_init(return_value);
 	add_assoc_double(return_value, "Aheight", A_height);
 	add_assoc_double(return_value, "xheight", x_height);
 }
@@ -978,10 +976,8 @@ PHP_FUNCTION(swf_getbitmapinfo)
 	convert_to_long_ex(bitmapid);
 	
 	size = swf_getbitmapinfo(Z_LVAL_PP(bitmapid), &width, &height);
-	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Cannot initialize return value from swf_getbitmapinfo");
-		RETURN_FALSE;
-	}
+	
+	array_init(return_value);
 	
 	add_assoc_long(return_value, "size", size);
 	add_assoc_long(return_value, "width", width);
