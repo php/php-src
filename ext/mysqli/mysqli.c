@@ -171,6 +171,8 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 }
 /* }}} */
 
+MYSQL *p;
+
 /* {{{ mysqli_read_property */
 zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
@@ -201,7 +203,8 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	}
 	if (ret == SUCCESS) {
 		/* check if connection is still valid */
- 		if (!obj->ptr) {
+ 		if (!obj->ptr ||
+		    !((MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql)->thread_id) {
 			retval = EG(uninitialized_zval_ptr);
 			return(retval);
 		}
