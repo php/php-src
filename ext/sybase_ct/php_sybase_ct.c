@@ -1059,7 +1059,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 						convert_to_long(&result->data[i][j]);
 						break;
 					case 2: 
-						convert_to_double(&result->data[i][j]); result->numerics[j]= 1; 
+						convert_to_double(&result->data[i][j]);
 						break;
 				}
 			}
