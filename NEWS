@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added temporary LOB support in OCI8 (Patch by David Benson)
 - Fixed crash in pathinfo()
 - OCI8 now supports binding of collections
   (Patch by Andy Sautins <asautins@veripost.net>)
