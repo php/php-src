@@ -133,6 +133,10 @@ PHP_MINIT_FUNCTION(xsl)
 	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	
 	REGISTER_XSL_CLASS(ce, "xsltprocessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
+#if HAVE_XSL_EXSLT
+	exsltRegisterAll();
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -244,12 +248,11 @@ PHP_RSHUTDOWN_FUNCTION(xsl)
 PHP_MINFO_FUNCTION(xsl)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "XML/XSLT", "enabled");
 	{
 		char buffer[128];
 		int major, minor, subminor;
 
-		php_info_print_table_row(2, "DOM/XSLT", "enabled");
+		php_info_print_table_row(2, "XSL", "enabled");
 		major = xsltLibxsltVersion/10000;
 		minor = (xsltLibxsltVersion - major * 10000) / 100;
 		subminor = (xsltLibxsltVersion - major * 10000 - minor * 100);
@@ -261,6 +264,10 @@ PHP_MINFO_FUNCTION(xsl)
 		snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
 		php_info_print_table_row(2, "libxslt compiled against libxml Version", buffer);
 	}
+#if HAVE_XSL_EXSLT
+		php_info_print_table_row(2, "EXSLT", "enabled");
+		php_info_print_table_row(2, "libexslt Version", LIBEXSLT_DOTTED_VERSION);
+#endif
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
