@@ -473,29 +473,33 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 {
-	if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
+	zend_class_entry *ce_exception = Z_OBJCE_P(exception);
+	if (instanceof_function(ce_exception, default_exception_ptr TSRMLS_CC)) {
 		zval *str, *file, *line;
 		zval *old_exception = EG(exception);
-		zend_object_handlers *handler = Z_OBJ_HT_P(exception);
 
 		EG(exception) = NULL;
 		
-		MAKE_STD_ZVAL(str);
-		if (handler->cast_object(exception, str, IS_STRING, 0 TSRMLS_CC) != FAILURE) {
-			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, EG(exception) ? Z_OBJCE_P(exception)->name : Z_STRVAL_P(str) TSRMLS_CC);
+		zend_call_method_with_0_params(&exception, ce_exception, NULL, "__tostring", &str);
+		if (!EG(exception)) {
+			if (Z_TYPE_P(str) != IS_STRING) {
+				zend_error(E_WARNING, "%s::__toString() must return a string", ce_exception->name);
+			} else {
+				zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name : Z_STRVAL_P(str) TSRMLS_CC);
+			}
 		}
 		zval_ptr_dtor(&str);
 	
 		if (EG(exception)) {
 			/* do the best we can to inform about the inner exception */
-			if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
+			if (instanceof_function(ce_exception, default_exception_ptr TSRMLS_CC)) {
 				file = zend_read_property(default_exception_ptr, EG(exception), "file", sizeof("file")-1, 1 TSRMLS_CC);
 				line = zend_read_property(default_exception_ptr, EG(exception), "line", sizeof("line")-1, 1 TSRMLS_CC);
 			} else {
 				file = NULL;
 				line = NULL;
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, Z_OBJCE_P(exception)->name);
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
 		}
 
 		str = zend_read_property(default_exception_ptr, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
@@ -506,7 +510,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 
 		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
-		zend_error(E_ERROR, "Uncaught exception '%s'", Z_OBJCE_P(exception)->name);
+		zend_error(E_ERROR, "Uncaught exception '%s'", ce_exception->name);
 	}
 }
 
