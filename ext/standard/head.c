@@ -132,7 +132,7 @@ PHP_FUNCTION(setcookie)
 		len += Z_STRLEN_PP(z_domain);
 	}
 	cookie = emalloc(len + 100);
-	if (z_value && (!Z_STRVAL_PP(z_value) || (Z_STRVAL_PP(z_value) && !Z_STRVAL_PP(z_value)[0]))) {
+	if (z_value && Z_STRLEN_PP(z_value)==0) {
 		/* 
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
