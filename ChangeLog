@@ -1,3 +1,43 @@
+2005-03-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      sapi/cli/php.1.in:
+      typofix
+
+2005-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/tests/bug32001.phpt
+      ext/xml/tests/bug32001.phpt:
+      
+      - Add testcases for bug #32001
+
+2005-03-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      Fixed bug #31033 (php:function(string, nodeset) with xsl:key crashes PHP)
+       - only in 5.1 branch for now due to significance of change
+
+2005-03-02  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/exif/exif.c:
+      Fixed possible bufferoverflow
+
+2005-03-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: Fixed bug #32001 (xml_parse_into_struct() exceeds maximum execution
+      time)
+
+    * ext/xml/compat.c:
+      Fixed bug #32001 (xml_parse_into_struct() exceeds maximum execution time)
+
 2005-03-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_interfaces.c:
