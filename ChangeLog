@@ -1,3 +1,50 @@
+2003-06-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      - Errors, warnings and notices start with a capital letter.
+      - Show sorcode info when debugging exif.
+
+2003-06-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/main.c:
+      Fixed bug #24253 (missing variables when register_globals is on)
+      Fixed a memory leak when more then 1 E|S flag is passed to gpc_order.
+      Fixed a memory leak when variables_order is not set and gpc_order has S|s
+      flag.
+      Optimized out duplicate parsing of the variables order string.
+
+2003-06-20  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      MFH (r-1.391) When skipping blank searchvals we should advance the
+      corresponding replace hash as well
+
+    * ext/standard/string.c:
+      When skipping blank searchvals we should advance the corresponding replace
+      hash as well
+
+2003-06-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.h
+      ext/dom/xml_common.h:
+      cleanup common code
+
+    * ext/xsl/php_xsl.c:
+      fix mem leak
+      remove unused code
+
+2003-06-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_global.php:
+      - package.xml genartion fixed, <configureoptions> and <license> added
+      - shutdown code for globals added
+
+    * scripts/ext_skel_ng/php_function.php:
+      typo fix
+
 2003-06-19  Edin Kadribasic  <edink@proventum.net>
 
     * ext/curl/.cvsignore:
