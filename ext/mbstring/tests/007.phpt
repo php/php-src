@@ -7,5 +7,4 @@ mb_output_handler() (EUC-JP)
 --FILE--
 <?php include('007.inc'); ?>
 --EXPECT--
-テスト用日本語文字列。このモジュールはPHPにマルチバイト関数を提供します。
-
+string(73) "テスト用日本語文字列。このモジュールはPHPにマルチバイト関数を提供します。"
