@@ -37,6 +37,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 {
 	char *ptr, *loc, *loc2, *s, *name, *filename, *u, *fn;
 	int len, state = 0, Done = 0, rem, urem;
+	int eolsize;
 	long bytes, max_file_size = 0;
 	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL;
 	FILE *fp;
@@ -64,8 +65,13 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 					if (!strncmp(loc, boundary, len)) {
 
 						state = 1;
-						rem -= (loc - ptr) + len + 2;
-						ptr = loc + len + 2;
+
+						eolsize = 2;
+						if(*(loc+len)==0x0a)
+							eolsize = 1;
+
+						rem -= (loc - ptr) + len + eolsize;
+						ptr = loc + len + eolsize;
 					} else {
 						rem -= (loc - ptr) + 1;
 						ptr = loc + 1;
