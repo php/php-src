@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed bug #27535 (Problem with object freeing mechanism). (Dmitry)
 - Fixed bug #27504 (Visibility bugs in call_user_function()). (Dmitry)
 - Fixed bug #27338 (memory leak inside tsrm_virtual_cwd.c on win32). (Ilia)
+- Fixed bug #27291 (get_browser matches browscap.ini patterns incorrectly). 
+  (Jay)
 - Fixed bug #27287 (wddx segfaults during deserialization). (Moriyoshi)
 - Fixed bug #27263 (session extension crashes when unserializing referenced
   values / objects). (Moriyoshi)
