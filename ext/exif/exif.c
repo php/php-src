@@ -1137,7 +1137,7 @@ PHP_FUNCTION(read_exif_data)
 
 	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name), readall);
 
-	if (array_init(return_value) == FAILURE) {
+	if (ret==FALSE || array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	add_assoc_string(return_value,"FileName",ImageInfo.FileName,1);
