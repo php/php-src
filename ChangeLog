@@ -1,3 +1,91 @@
+2001-01-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2filter/php_functions.c: Make Apache 2.0 filter build again
+
+    * ext/standard/string.c: WS fix
+
+    * ext/standard/string.c: Fix ZTS build (broken by iconv-related changes).
+
+2001-01-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    Changed extract() to check that prefixed name is a valid one.
+    Optimized extract() a bit too.
+
+
+2001-01-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/crypt.c:
+    - Fix for bug #8535 - floating point exception on FreeBSD while initializing
+      crypt random numbers
+
+2001-01-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Changed extract() to return the number of variables extracted. 
+
+2001-01-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/browscap.c:
+    Optimize it a bit - no need to dup empty string (which can be pretty common for .ini)
+
+    * ext/standard/browscap.c:
+    Duplicate property value, otherwise parser would free it and we're in bad shape.
+
+    * ext/standard/browscap.c: Fix undefind filehandle type on INI parsing.
+
+2001-01-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ldap/ldap.c: Corrected some protos.
+
+2001-01-08  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Added ldap_rename(). Currently requires API with ldap_rename().
+
+    * NEWS: *** empty log message ***
+
+2001-01-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/exec.c: Use platform's dir separator
+
+2001-01-08  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: Test ACL commit
+
+2001-01-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php: * display a notice when downloading
+
+    * pear/DB/TESTERS
+      pear/DB/odbc.php
+      pear/PEAR/Installer.php
+      pear/DB/STATUS
+      pear/pear.in: * updated DB status
+    * updated the "pear" script, it can install basic packages now
+
+2001-01-08  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    added iconv_set_encoding() to change the encoding setting.
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    added a output handler function ob_iconv_handler which tranforms output encoding using iconv().
+
+2001-01-08  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/stresstest.cpp: ignore blank lines
+
+    * sapi/isapi/stresstest/notes.txt
+      sapi/isapi/stresstest/stresstest.cpp: add notes on this program
+
 2001-01-07  Shane Caraveo  <shane@php.net>
 
     * sapi/isapi/stresstest/stresstest.cpp

@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Changed extract() to check that prefixed name is a valid one. (Andrei)
+- Changed extract() to return the number of variables extracted. (Andrei)
+- Added ldap_rename() function (Stig Venaas)
 - Made ldap_set_option() support controls (Stig Venaas)
 - Changed ldap_search() and added functions ldap_parse_result(),
   ldap_first_reference(), ldap_next_reference() and ldap_parse_reference()
