@@ -14,7 +14,7 @@ on *why* the test failed on your special setup. Thank you :-)
  The easiest way to test your PHP build is to run "make test" from the
 command line after successfully compiling. This will run the complete
 tests for all enabled functionalities and extensions using the PHP
-CLI binary (
+CLI binary.
  To execute test scripts, you must build PHP with some SAPI, then you
 type "make test" to execute all or some test scripts saved under
 "tests" directory under source root directory.
