@@ -55,6 +55,7 @@ PHP_FUNCTION(php_logo_guid);
 PHP_FUNCTION(zend_logo_guid);
 PHP_FUNCTION(php_egg_logo_guid);
 PHP_FUNCTION(php_sapi_name);
+PHP_FUNCTION(php_uname);
 PHPAPI void php_print_info(int flag);
 PHPAPI void php_print_credits(int flag);
 PHPAPI void php_print_style(void);
