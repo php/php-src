@@ -1,3 +1,59 @@
+2004-11-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/imagefilter.phpt
+      ext/standard/tests/filters/bug22538.phpt
+      ext/standard/tests/filters/bug22538.phpt:
+      Test was fixed.
+
+2004-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS:
+      RC1 release date.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      tagging 4.3.10RC1
+
+2004-11-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      ext/iconv/php_iconv.h
+      scripts/Makefile.frag:
+      - MFH: We need to install these headers too
+
+    * ext/iconv/php_iconv.h
+      scripts/Makefile.frag:
+      - We need to install the headers too.
+
+2004-11-23  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/iconv/iconv.dsp
+      ext/iconv/php_iconv.h:
+      (Sort of) MFH: export PHP iconv symbols using the old build too
+
+    * ext/iconv/config.w32
+      ext/iconv/php_iconv.h:
+      Only dllexport during the compilation of iconv.c
+
+2004-11-23  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      - Export "php_iconv_string()".
+
+    * ext/standard/tests/time/bug28599.phpt:
+        1.1.4;
+      - Added test for bug #28599
+
 2004-11-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sysvshm/sysvshm.c:
