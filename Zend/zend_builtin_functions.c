@@ -89,7 +89,6 @@ ZEND_FUNCTION(func_num_args)
 {
 	void **p;
 	int arg_count;
-	ELS_FETCH();
 
 	p = EG(argument_stack).top_element-1;
 	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
@@ -111,7 +110,6 @@ ZEND_FUNCTION(func_get_arg)
 	zval **z_requested_offset;
 	zval *arg;
 	long requested_offset;
-	ELS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &z_requested_offset)==FAILURE) {
 		RETURN_FALSE;
@@ -145,7 +143,6 @@ ZEND_FUNCTION(func_get_args)
 	void **p;
 	int arg_count;
 	int i;
-	ELS_FETCH();
 
 	p = EG(argument_stack).top_element-1;
 	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_num_args(); */
@@ -269,7 +266,6 @@ ZEND_FUNCTION(error_reporting)
 {
 	zval **arg;
 	int old_error_reporting;
-	ELS_FETCH();
 
 	old_error_reporting = EG(error_reporting);
 	switch (ZEND_NUM_ARGS()) {
@@ -295,7 +291,6 @@ ZEND_FUNCTION(define)
 	zval **var, **val, **non_cs;
 	int case_sensitive;
 	zend_constant c;
-	ELS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
@@ -486,7 +481,6 @@ ZEND_FUNCTION(function_exists)
 	zval **function_name;
 	char *lcname;
 	int retval;
-	ELS_FETCH();
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -549,8 +543,6 @@ ZEND_FUNCTION(get_used_files)
 
 ZEND_FUNCTION(get_imported_files)
 {
-	ELS_FETCH();
-
 	array_init(return_value);
 	zend_hash_apply_with_argument(&EG(imported_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
 }
