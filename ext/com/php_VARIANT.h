@@ -8,7 +8,7 @@ BEGIN_EXTERN_C()
 #include "conversion.h"
 #include "variant.h"
 
-void php_VARIANT_init(int module_number, TSRMLS_D);
+void php_VARIANT_init(int module_number TSRMLS_DC);
 
 PHPAPI int php_VARIANT_get_le_variant();
 

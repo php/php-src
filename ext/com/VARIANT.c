@@ -45,7 +45,7 @@ static int codepage;
 static zend_class_entry VARIANT_class_entry;
 
 
-void php_VARIANT_init(int module_number, TSRMLS_D)
+void php_VARIANT_init(int module_number TSRMLS_DC)
 {
 	le_variant = zend_register_list_destructors_ex(php_VARIANT_destructor, NULL, "VARIANT", module_number);
 
