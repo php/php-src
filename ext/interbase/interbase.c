@@ -1678,7 +1678,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_commit([resource link_identifier [, int trans_number]])
+/* {{{ proto bool ibase_commit(resource link_identifier)
    Commit transaction */
 PHP_FUNCTION(ibase_commit)
 {
@@ -1686,8 +1686,8 @@ PHP_FUNCTION(ibase_commit)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_rollback([resource link_identifier [, int trans_number]])
-   Roolback transaction */
+/* {{{ proto bool ibase_rollback(resource link_identifier)
+   Rollback transaction */
 PHP_FUNCTION(ibase_rollback)
 {
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK);
