@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050105
+#define PDO_DRIVER_API	20050111
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -58,6 +58,16 @@ enum pdo_fetch_type {
 	PDO_FETCH_CLASS,	/* create an instance of named class, call ctor and set properties */
 	PDO_FETCH_INTO,		/* fetch row into an existing object */
 	PDO_FETCH__MAX /* must be last */
+};
+
+/* fetch orientation for scrollable cursors */
+enum pdo_fetch_orientation {
+	PDO_FETCH_ORI_NEXT,		/* default: fetch the next available row */
+	PDO_FETCH_ORI_PRIOR,	/* scroll back to prior row and fetch that */
+	PDO_FETCH_ORI_FIRST,	/* scroll to the first row and fetch that */
+	PDO_FETCH_ORI_LAST,		/* scroll to the last row and fetch that */
+	PDO_FETCH_ORI_ABS,		/* scroll to an absolute numbered row and fetch that */
+	PDO_FETCH_ORI_REL,		/* scroll relative to the current row, and fetch that */
 };
 
 enum pdo_attribute_type {
@@ -254,8 +264,10 @@ typedef int (*pdo_stmt_dtor_func)(pdo_stmt_t *stmt TSRMLS_DC);
 typedef int (*pdo_stmt_execute_func)(pdo_stmt_t *stmt TSRMLS_DC);
 
 /* causes the next row in the set to be fetched; indicates if there are no
- * more rows */
-typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt TSRMLS_DC);
+ * more rows.  The ori and offset params modify which row should be returned,
+ * if the stmt represents a scrollable cursor */
+typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt, 
+	enum pdo_fetch_orientation ori, long offset TSRMLS_DC);
 
 /* queries information about the type of a column, by index (0 based).
  * Driver should populate stmt->columns[colno] with appropriate info */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -403,13 +403,14 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 	}
 }
 
-static int do_fetch_common(pdo_stmt_t *stmt, int do_bind TSRMLS_DC)
+static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
+	long offset, int do_bind TSRMLS_DC)
 {
 	if (!dispatch_param_event(stmt, PDO_PARAM_EVT_FETCH_PRE TSRMLS_CC)) {
 		return 0;
 	}
 
-	if (!stmt->methods->fetcher(stmt TSRMLS_CC)) {
+	if (!stmt->methods->fetcher(stmt, ori, offset TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -452,7 +453,8 @@ static int do_fetch_common(pdo_stmt_t *stmt, int do_bind TSRMLS_DC)
 
 /* perform a fetch.  If do_bind is true, update any bound columns.
  * If return_value is not null, store values into it according to HOW. */
-static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how TSRMLS_DC)
+static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
+	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	enum pdo_fetch_type really_how = how;
 
@@ -460,7 +462,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 		really_how = how = stmt->default_fetch_type;
 	}
 
-	if (!do_fetch_common(stmt, do_bind TSRMLS_CC)) {
+	if (!do_fetch_common(stmt, ori, offset, do_bind TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -551,19 +553,22 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 	return 1;
 }
 
-/* {{{ proto mixed PDOStatement::fetch([int $how = PDO_FETCH_BOTH])
+/* {{{ proto mixed PDOStatement::fetch([int $how = PDO_FETCH_BOTH [, int $orientation [, int $offset]]])
    Fetches the next row and returns it, or false if there are no more rows */
 static PHP_METHOD(PDOStatement, fetch)
 {
 	long how = PDO_FETCH_USE_DEFAULT;
+	long ori = PDO_FETCH_ORI_NEXT;
+	long off = 0;
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &how)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lll", &how,
+			&ori, &off)) {
 		RETURN_FALSE;
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	if (!do_fetch(stmt, TRUE, return_value, how TSRMLS_CC)) {
+	if (!do_fetch(stmt, TRUE, return_value, how, ori, off TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -581,7 +586,7 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 	}
 
 	PDO_STMT_CLEAR_ERR();
-	if (!do_fetch_common(stmt, TRUE TSRMLS_CC)) {
+	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0, TRUE TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -604,7 +609,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	
 	PDO_STMT_CLEAR_ERR();
 	MAKE_STD_ZVAL(data);
-	if (!do_fetch(stmt, TRUE, data, how TSRMLS_CC)) {
+	if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
 		FREE_ZVAL(data);
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
@@ -614,7 +619,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	do {
 		add_next_index_zval(return_value, data);
 		MAKE_STD_ZVAL(data);
-	} while (do_fetch(stmt, TRUE, data, how TSRMLS_CC));
+	} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC));
 	FREE_ZVAL(data);
 }
 /* }}} */
@@ -1257,7 +1262,8 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 
 	MAKE_STD_ZVAL(I->fetch_ahead);
 
-	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT TSRMLS_CC)) {
+	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+			PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
 		pdo_stmt_t *stmt = I->stmt; /* for PDO_HANDLE_STMT_ERR() */
 
 		PDO_HANDLE_STMT_ERR();
@@ -1292,7 +1298,8 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object TSRML
 	stmt->refcount++;
 
 	MAKE_STD_ZVAL(I->fetch_ahead);
-	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT TSRMLS_CC)) {
+	if (!do_fetch(I->stmt, TRUE, I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+			PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (ulong)-1;
 		FREE_ZVAL(I->fetch_ahead);
