@@ -67,7 +67,7 @@ ldap_module php3_ldap_module;
 
 function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,							NULL)
-	PHP_FE(ldap_close,								NULL)
+	PHP_FALIAS(ldap_close,		ldap_unbind,		NULL)
 	PHP_FE(ldap_bind,								NULL)
 	PHP_FE(ldap_unbind,								NULL)
 	PHP_FE(ldap_read,								NULL)
