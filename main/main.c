@@ -1459,11 +1459,15 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
+	/* Register internal Zend classes */
+	zend_register_default_classes(TSRMLS_C);
+
 	/* startup extensions staticly compiled in */
 	if (php_startup_internal_extensions() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
+
 	/* start additional PHP extensions */
 	php_startup_extensions(&additional_modules, num_additional_modules);
 

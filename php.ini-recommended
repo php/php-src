@@ -80,7 +80,10 @@
 ; Enable the PHP scripting language engine under Apache.
 engine = On
 
-; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.  
+; Enable compatibility mode with Zend Engine 1 (PHP 4.x)
+zend.ze1_compatibility_mode = Off
+
+; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
 ; NOTE: Using short tags should be avoided when developing applications or
 ; libraries that are meant for redistribution, or deployment on PHP
 ; servers which are not under your control, because short tags may not
@@ -112,19 +115,19 @@ output_buffering = 4096
 ; Setting any output handler automatically turns on output buffering.
 ; Note: People who wrote portable scripts should not depend on this ini
 ;       directive. Instead, explicitly set the output handler using ob_start().
-;       Using this ini directive may cause problems unless you know what script 
+;       Using this ini directive may cause problems unless you know what script
 ;       is doing.
 ; Note: You cannot use both "mb_output_handler" with "ob_iconv_handler"
-;       and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
+;       and you cannot use both "ob_gzhandler" and "zlib.output_compression".
 ;output_handler =
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
-; Note: Resulting chunk size may vary due to nature of compression. PHP 
-;       outputs chunks that are few handreds bytes each as a result of compression. 
-;       If you want larger chunk size for better performence, enable output_buffering 
-;       also. 
+; Note: Resulting chunk size may vary due to nature of compression. PHP
+;       outputs chunks that are few handreds bytes each as a result of compression.
+;       If you want larger chunk size for better performence, enable output_buffering
+;       also.
 ; Note: output_handler must be empty if this is set 'On' !!!!
 ;       Instead you must use zlib.output_handler.
 zlib.output_compression = Off
@@ -146,7 +149,7 @@ implicit_flush = Off
 ; which should be instanciated.
 ; A warning appears if the specified function is not defined, or if the
 ; function doesn't include/implement the missing class.
-; So only set this entry, if you really want to implement such a 
+; So only set this entry, if you really want to implement such a
 ; callback-function.
 unserialize_callback_func=
 
@@ -180,7 +183,7 @@ safe_mode_gid = Off
 ; including files from this directory and its subdirectories.
 ; (directory must also be in include_path or full path must
 ; be used when including)
-safe_mode_include_dir =								
+safe_mode_include_dir =
 
 ; When safe_mode is on, only executables located in the safe_mode_exec_dir
 ; will be allowed to be executed via the exec family of functions.
@@ -316,13 +319,13 @@ log_errors_max_len = 1024
 ; line until ignore_repeated_source is set true.
 ignore_repeated_errors = Off
 
-; Ignore source of message when ignoring repeated messages. When this setting 
+; Ignore source of message when ignoring repeated messages. When this setting
 ; is On you will not log errors with repeated messages from different files or
 ; sourcelines.
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This has only effect in a debug compile, and if 
+; stdout or in the log). This has only effect in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
 report_memleaks = On
 
@@ -333,16 +336,16 @@ track_errors = Off
 ; Note: Never use this feature for production boxes.
 ;html_errors = Off
 
-; If html_errors is set On PHP produces clickable error messages that direct 
+; If html_errors is set On PHP produces clickable error messages that direct
 ; to a page describing the error or function causing the error in detail.
-; You can download a copy of the PHP manual from http://www.php.net/docs.php 
+; You can download a copy of the PHP manual from http://www.php.net/docs.php
 ; and change docref_root to the base URL of your local copy including the
-; leading '/'. You must also specify the file extension being used including 
+; leading '/'. You must also specify the file extension being used including
 ; the dot.
 ; Note: Never use this feature for production boxes.
 ;docref_root = "/phpmanual/"
 ;docref_ext = .html
-  
+
 ; String to output before an error message.
 ;error_prepend_string = "<font color=ff0000>"
 
@@ -363,11 +366,11 @@ track_errors = Off
 ; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
 
 ; The separator used in PHP generated URLs to separate arguments.
-; Default is "&". 
+; Default is "&".
 ;arg_separator.output = "&amp;"
 
 ; List of separator(s) used by PHP to parse input URLs into variables.
-; Default is "&". 
+; Default is "&".
 ; NOTE: Every character in this directive is considered as separator!
 ;arg_separator.input = ";&"
 
@@ -408,7 +411,7 @@ post_max_size = 8M
 magic_quotes_gpc = Off
 
 ; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-magic_quotes_runtime = Off    
+magic_quotes_runtime = Off
 
 ; Use Sybase-style magic quotes (escape ' with '' instead of \').
 magic_quotes_sybase = Off
@@ -425,7 +428,7 @@ auto_append_file =
 default_mimetype = "text/html"
 ;default_charset = "iso-8859-1"
 
-; Always populate the $HTTP_RAW_POST_DATA variable.                               
+; Always populate the $HTTP_RAW_POST_DATA variable.
 ;always_populate_raw_post_data = On
 
 
@@ -433,7 +436,7 @@ default_mimetype = "text/html"
 ; Paths and Directories ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; UNIX: "/path1:/path2"  
+; UNIX: "/path1:/path2"
 ;include_path = ".:/php/includes"
 ;
 ; Windows: "\path1;\path2"
@@ -468,7 +471,7 @@ enable_dl = On
 ; every request.
 ; cgi.nph = 1
 
-; if cgi.force_redirect is turned on, and you are not running under Apache or Netscape 
+; if cgi.force_redirect is turned on, and you are not running under Apache or Netscape
 ; (iPlanet) web servers, you MAY need to set an environment variable name that PHP
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
@@ -486,7 +489,7 @@ enable_dl = On
 ; is supported by Apache. When this option is set to 1 PHP will send
 ; RFC2616 compliant header.
 ; Default is zero.
-;cgi.rfc2616_headers = 0 
+;cgi.rfc2616_headers = 0
 
 
 ;;;;;;;;;;;;;;;;
@@ -545,7 +548,7 @@ default_socket_timeout = 60
 ;
 ;   extension=msql.so
 ;
-; Note that it should be the name of the module only; no directory information 
+; Note that it should be the name of the module only; no directory information
 ; needs to go here.  Specify the location of the extension with the
 ; extension_dir directive above.
 
@@ -625,9 +628,9 @@ SMTP = localhost
 ;sendmail_path =
 
 ; Force the addition of the specified parameters to be passed as extra parameters
-; to the sendmail binary. These parameters will always replace the value of 
+; to the sendmail binary. These parameters will always replace the value of
 ; the 5th parameter to mail(), even in safe mode.
-;mail.force_extra_paramaters = 
+;mail.force_extra_paramaters =
 
 [SQL]
 sql.safe_mode = Off
@@ -647,16 +650,16 @@ odbc.check_persistent = On
 odbc.max_persistent = -1
 
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-odbc.max_links = -1  
+odbc.max_links = -1
 
 ; Handling of LONG fields.  Returns number of bytes to variables.  0 means
 ; passthru.
-odbc.defaultlrl = 4096  
+odbc.defaultlrl = 4096
 
 ; Handling of binary data.  0 means passthru, 1 return as is, 2 convert to char.
 ; See the documentation on odbc_binmode and odbc_longreadlen for an explanation
 ; of uodbc.defaultlrl and uodbc.defaultbinmode
-odbc.defaultbinmode = 1  
+odbc.defaultbinmode = 1
 
 [MySQL]
 ; Allow or prevent persistent links.
@@ -712,7 +715,7 @@ msql.max_links = -1
 ; Allow or prevent persistent links.
 pgsql.allow_persistent = On
 
-; Detect broken persistent links always with pg_pconnect(). 
+; Detect broken persistent links always with pg_pconnect().
 ; Auto reset feature requires a little overheads.
 pgsql.auto_reset_persistent = Off
 
@@ -860,7 +863,7 @@ session.save_path = "/tmp"
 ; Whether to use cookies.
 session.use_cookies = 1
 
-; This option enables administrators to make their users invulnerable to 
+; This option enables administrators to make their users invulnerable to
 ; attacks which involve passing session ids in URLs; defaults to 0.
 ; session.use_only_cookies = 1
 
@@ -932,7 +935,7 @@ session.cache_expire = 180
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
 ; - URL that contains active session ID may be stored
-;   in publically accessible computer. 
+;   in publically accessible computer.
 ; - User may access your site with the same session ID
 ;   always using URL stored in browser's history or bookmarks.
 session.use_trans_sid = 0
@@ -1066,7 +1069,7 @@ sockets.use_system_read = On
 
 [com]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
-;com.typelib_file = 
+;com.typelib_file =
 ; allow Distributed-COM calls
 ;com.allow_dcom = true
 ; autoregister constants of a components typlib on com_load()
@@ -1092,7 +1095,7 @@ sockets.use_system_read = On
 ; registered as output buffer to function
 ;mbstring.http_output = SJIS
 
-; enable automatic encoding translation accoding to 
+; enable automatic encoding translation accoding to
 ; mbstring.internal_encoding setting. Input chars are
 ; converted to internal encoding by setting this to On.
 ; Note: Do _not_ use automatic encoding translation for
@@ -1100,7 +1103,7 @@ sockets.use_system_read = On
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; auto means 
+; auto means
 ;mbstring.detect_order = auto
 
 ; substitute_character used when character cannot be converted
@@ -1120,7 +1123,7 @@ sockets.use_system_read = On
 [FrontBase]
 ;fbsql.allow_persistent = On
 ;fbsql.autocommit = On
-;fbsql.default_database = 
+;fbsql.default_database =
 ;fbsql.default_database_password =
 ;fbsql.default_host =
 ;fbsql.default_password =
@@ -1133,15 +1136,15 @@ sockets.use_system_read = On
 ;fbsql.batchSize = 1000
 
 [exif]
-; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS. 
+; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
 ; With mbstring support this will automatically be converted into the encoding
-; given by corresponding encode setting. When empty mbstring.internal_encoding 
-; is used. For the decode settings you can distinguish between motorola and 
+; given by corresponding encode setting. When empty mbstring.internal_encoding
+; is used. For the decode settings you can distinguish between motorola and
 ; intel byte order. A decode setting cannot be empty.
 ;exif.encode_unicode = ISO-8859-15
 ;exif.decode_unicode_motorola = UCS-2BE
 ;exif.decode_unicode_intel    = UCS-2LE
-;exif.encode_jis = 
+;exif.encode_jis =
 ;exif.decode_jis_motorola = JIS
 ;exif.decode_jis_intel    = JIS
 
