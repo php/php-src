@@ -132,7 +132,7 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 	pdo_firebird_db_handle *H = S->H;
 
 	if (!stmt->executed) {
-		stmt->error_code = PDO_ERR_CANT_MAP;
+		strcpy(stmt->error_code, "HY000");
 		H->last_app_error = "Cannot fetch from a closed cursor";
 	} else if (!S->exhausted) {
 
@@ -482,7 +482,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}
 
 	if (!sqlda || param->paramno >= sqlda->sqld) {
-		stmt->error_code = PDO_ERR_NOT_FOUND;
+		strcpy(stmt->error_code, "HY093");
 		S->H->last_app_error = "Invalid parameter index";
 		return 0;
 	}
@@ -508,7 +508,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				}
 			}
 			if (i >= sqlda->sqld) {
-				stmt->error_code = PDO_ERR_NOT_FOUND;
+				strcpy(stmt->error_code, "HY093");
 				S->H->last_app_error = "Invalid parameter name";
 				return 0;
 			}
@@ -538,7 +538,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 			switch (var->sqltype & ~1) {
 				case SQL_ARRAY:
-					stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
+					strcpy(stmt->error_code, "HY000");
 					S->H->last_app_error = "Cannot bind to array field";
 					return 0;
 	
@@ -585,14 +585,14 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				case IS_NULL:
 					/* complain if this field doesn't allow NULL values */
 					if (~var->sqltype & 1) {
-						stmt->error_code = PDO_ERR_CONSTRAINT;
+						strcpy(stmt->error_code, "HY105");
 						S->H->last_app_error = "Parameter requires non-null value";
 						return 0;
 					}
 					*var->sqlind = -1;
 					break;
 				default:
-					stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
+					strcpy(stmt->error_code, "HY105");
 					S->H->last_app_error = "Binding arrays/objects is not supported";
 					return 0;
 			}
