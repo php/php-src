@@ -1,3 +1,27 @@
+2003-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.h:
+      Fixed extra byte allocation for TRUE/FALSE/ZEND_THREAD_SAFE/NULL constants.
+
+2003-12-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      Bugfix: #26591 [NEW]: "__autoload threw an exception" during an uncaught
+      Exception
+
+2003-12-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Refix bug #24773
+
+2003-12-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_object_handlers.c:
+      Handle getter failure and allow to bypass thrown exceptions.
+
+    * zend_execute.c:
+      read_dimension() handler might return 0, handle this.
+
 2003-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:

@@ -1,3 +1,126 @@
+2003-12-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Dependency.php
+      pear/PEAR/Command/Package.php:
+      MFB
+
+    * (PHP_4_3)
+      pear/PEAR/Dependency.php:
+      fix error message, it shouldn't attempt to display a version if none is
+      installed
+
+    * (PHP_4_3)
+      pear/PEAR/Command/Package.php:
+      remove obsolete parameters to constructor
+
+2003-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c:
+      Fixed extra byte allocation for STD* constants and replace magic numbers
+      with sizeof().
+
+    * ZendEngine2/zend.h:
+      Fixed extra byte allocation for TRUE/FALSE/ZEND_THREAD_SAFE/NULL constants.
+
+2003-12-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      add missing not relation
+
+2003-12-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      reword
+
+2003-12-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * pear/package-Console_Getopt.xml
+      pear/Console/Getopt.php:
+      MFB
+
+    * (PHP_4_3)
+      pear/package-Console_Getopt.xml
+      pear/Console/Getopt.php:
+      Implement getopt2() method and keep BC for getopt().
+
+2003-12-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      Bugfix: #26591 [NEW]: "__autoload threw an exception" during an uncaught
+      Exception
+
+2003-12-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/System.php:
+      fix #391, PHP 5 reference fix
+
+    * pear/tests/pear_packager.phpt:
+      add failure test for non-existing file
+
+    * pear/tests/pear_packager.phpt:
+      new unit test for PEAR_Packager
+
+2003-12-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/dom/tests/dom003.phpt:
+      Dir seaparator "\" was removed.
+
+2003-12-11  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS:
+      Mention new pgsql libs
+
+    * ext/pgsql/pgsql.dsp:
+      MFB: Use standard header locations
+
+2003-12-11  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Refix bug #24773
+
+2003-12-11  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.dsp:
+      Standard header file locations
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      Nuke unused local vars
+
+2003-12-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Handle getter failure and allow to bypass thrown exceptions.
+
+    * ZendEngine2/zend_execute.c:
+      read_dimension() handler might return 0, handle this.
+
+2003-12-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/System.php
+      pear/package-Console_Getopt.xml
+      pear/package-PEAR.xml
+      pear/Console/Getopt.php
+      pear/scripts/pearcmd.php:
+      since nobody has taken any action, fix Console_Getopt to be BC, and update
+      the PEAR core to take advantage of the new way.  Use 1.2 to avoid any
+      problems with versioning.
+      
+      The core passes all unit tests with these changes, so they should work.
+      
+      Andrei: feel free to change anything you don't like, this is just a make
+      it work fix.
+
+    * pear/tests/pear_downloader_new.phpt
+      pear/tests/pear_downloader_old.phpt:
+      update test cases for new error messages
+
+    * pear/tests/pear_installer5.phpt:
+      new test case for directory tree deletion on uninstall
+
 2003-12-10  Christian Stocker  <chregu@phant.ch>
 
     * ext/xsl/php_xsl.c:
