@@ -63,7 +63,7 @@ PHP_FUNCTION(uniqid)
 		return;
 	}
 #if HAVE_USLEEP && !(WIN32|WINNT)
-	if (argc == 2 && !flags->value.lval) {
+	if (argc < 2 || !flags->value.lval) {
 		usleep(1);
 	}
 #endif
