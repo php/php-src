@@ -307,8 +307,9 @@ PHP_FUNCTION(implode)
 		arr = *arg1;
 		delim = *arg2;
 	} else if ((*arg2)->type == IS_ARRAY) {
-		convert_to_string_ex(arg1);
+		SEPARATE_ZVAL(arg2)
 		arr = *arg2;
+		convert_to_string_ex(arg1);
 		delim = *arg1;
 	} else {
 		php_error(E_WARNING, "Bad arguments to %s()",
