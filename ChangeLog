@@ -2,6 +2,11 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Improved register_shutdown_function() - you may now supply arguments that
+  will be passed to the shutdown function (Zeev)
+- Improved call_user_func() and call_user_method() - they now support passing
+  arguments by reference (Zeev)
+- Fixed usort() and uksort() (Zeev)
 - Fixed md5() in the Apache module (Thies)
 - Introduced build process for dynamic modules (Stig)
 - Improved ISAPI module to supprt large server variables (Zeev)
