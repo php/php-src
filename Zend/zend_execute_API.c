@@ -1229,13 +1229,15 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 		memset(&ai, 0, sizeof(ai));
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);
-		
-		zend_error(E_ERROR, "Class %s contains %d abstract methods and must therefore be declared abstract (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")", 
-			ce->name, ai.cnt, 
-			DISPLAY_ABSTRACT_FN(0),
-			DISPLAY_ABSTRACT_FN(1),
-			DISPLAY_ABSTRACT_FN(2)
-			);
+
+		if (ai.cnt) {		
+			zend_error(E_ERROR, "Class %s contains %d abstract methods and must therefore be declared abstract (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")", 
+				ce->name, ai.cnt, 
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
+				);
+		}
 	}
 }
 
