@@ -385,15 +385,15 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-static zval * pdo_stmt_instantiate(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {
 	if (ctor_args) {
 		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Parameter ctor_args must be an array");
+			pdo_raise_impl_error(dbh, NULL, "HY000", "constructor arguments must be passed as an array" TSRMLS_CC);
 			return NULL;
 		}
 		if (!dbstmt_ce->constructor) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Statement object's constructor does not take any arguments", dbstmt_ce->name);
+			pdo_raise_impl_error(dbh, NULL, "HY000", "user-supplied statement does not accept constructor arguments" TSRMLS_CC);
 			return NULL;
 		}
 	}
@@ -479,21 +479,33 @@ static PHP_METHOD(PDO, prepare)
 			|| Z_TYPE_PP(item) != IS_STRING
 			|| zend_lookup_class(Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args) and classname must be a string specifying an existing class");
+			pdo_raise_impl_error(dbh, NULL, "HY000", 
+				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
+				"the classname must be a string specifying an existing class"
+				TSRMLS_CC);
+			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
 		dbstmt_ce = *pce;
 		if (!instanceof_function(dbstmt_ce, pdo_dbstmt_ce TSRMLS_CC)) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class must be derived from %s", pdo_dbstmt_ce->name);
+			pdo_raise_impl_error(dbh, NULL, "HY000", 
+				"user-supplied statement class must be derived from PDOStatement" TSRMLS_CC);
+			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
 		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class %s must not have a protected or public constructor", dbstmt_ce->name);
+			pdo_raise_impl_error(dbh, NULL, "HY000", 
+				"user-supplied statement class must have a public constructor" TSRMLS_CC);
+			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 1, (void**)&item) == SUCCESS) {
 			if (Z_TYPE_PP(item) != IS_ARRAY) {
-				zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args) and ctor args must be an array");
+				pdo_raise_impl_error(dbh, NULL, "HY000", 
+					"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
+					"ctor_args must be an array"
+				TSRMLS_CC);
+				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
 			}
 			ctor_args = *item;
@@ -505,9 +517,12 @@ static PHP_METHOD(PDO, prepare)
 		ctor_args = NULL;
 	}
 
-	if (!pdo_stmt_instantiate(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instantiate statement class %s", dbstmt_ce->name);
-		return;
+	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
+		pdo_raise_impl_error(dbh, NULL, "HY000", 
+			"failed to instantiate user-supplied statement class"
+			TSRMLS_CC);
+		PDO_HANDLE_DBH_ERR();
+		RETURN_FALSE;
 	}
 	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);
 	
@@ -628,7 +643,9 @@ static PHP_METHOD(PDO, setAttribute)
 					dbh->error_mode = Z_LVAL_P(value);
 					RETURN_TRUE;
 				default:
-					zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Error mode %d is invalid", Z_LVAL_P(value));
+					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid error mode" TSRMLS_CC);
+					PDO_HANDLE_DBH_ERR();
+					RETURN_FALSE;
 			}
 			RETURN_FALSE;
 
@@ -641,7 +658,9 @@ static PHP_METHOD(PDO, setAttribute)
 					dbh->desired_case = Z_LVAL_P(value);
 					RETURN_TRUE;
 				default:
-					zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Case folding mode %d is invalid", Z_LVAL_P(value));
+					pdo_raise_impl_error(dbh, NULL, "HY000", "invalid case folding mode" TSRMLS_CC);
+					PDO_HANDLE_DBH_ERR();
+					RETURN_FALSE;
 			}
 			RETURN_FALSE;
 
@@ -829,8 +848,8 @@ static PHP_METHOD(PDO, query)
 	
 	PDO_DBH_CLEAR_ERR();
 
-	if (!pdo_stmt_instantiate(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instantiate statement class %s", pdo_dbstmt_ce->name);
+	if (!pdo_stmt_instantiate(dbh, return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
+		pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class" TSRMLS_CC);
 		return;
 	}
 	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);

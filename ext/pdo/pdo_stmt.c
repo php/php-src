@@ -571,7 +571,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		fcc->calling_scope = EG(scope);
 		return 1;
 	} else if (stmt->fetch.cls.ctor_args) {
-		zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", ce->name);
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not have a constructor, use NULL for the ctor_params parameter, or simply omit it" TSRMLS_CC);
 		return 0;
 	} else {
 		return 1; /* no ctor no args is also ok */
@@ -579,7 +579,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int make_callable_ex(zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
+static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
 {
 	zval **object = NULL, **method;
 	char *fname, *cname;
@@ -588,7 +588,7 @@ static int make_callable_ex(zval *callable, zend_fcall_info * fci, zend_fcall_in
 	
 	if (Z_TYPE_P(callable) == IS_ARRAY) {
 		if (Z_ARRVAL_P(callable)->nNumOfElements < 2) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function must be a valid function name or an array specifying object or class and method name");
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 			return 0;
 		}
 		object = (zval**)Z_ARRVAL_P(callable)->pListHead->pData;
@@ -599,17 +599,18 @@ static int make_callable_ex(zval *callable, zend_fcall_info * fci, zend_fcall_in
 		} else if (Z_TYPE_PP(object) == IS_OBJECT) { /* object call */
 			ce = Z_OBJCE_PP(object);
 		} else {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function may be an array but the provided array did neither contain a class name nor an object as first member");
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback; bogus object/class name" TSRMLS_CC);
 			return 0;
 		}
 		
 		if (Z_TYPE_PP(method) != IS_STRING) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function may be an array but the provided array did not contain a method name as second member");
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback; bogus method name" TSRMLS_CC);
+			return 0;
 		}
 	}
 	
 	if (!zend_is_callable(callable, 0, &fname)) {
-		zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function must contain something callable");
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 		return 0;
 	}
 	
@@ -624,12 +625,14 @@ static int make_callable_ex(zval *callable, zend_fcall_info * fci, zend_fcall_in
 	}
 	if (cname) {
 		if (zend_lookup_class(cname, strlen(cname), &pce TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function references non existing class %s", cname);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not exist" TSRMLS_CC);
+			return 0;
 		} else {
 			if (ce) {
 				/* pce must be base of ce or ce itself */
 				if (ce != *pce && !instanceof_function(ce, *pce TSRMLS_CC)) {
-					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function would result in calling %s::%s but class %s is not base of %s", (*pce)->name, fname, (*pce)->name, ce->name);
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class has bogus lineage" TSRMLS_CC);
+					return 0;
 				}
 			}
 			ce = *pce;
@@ -638,8 +641,7 @@ static int make_callable_ex(zval *callable, zend_fcall_info * fci, zend_fcall_in
 	
 	fci->function_table = ce ? &ce->function_table : EG(function_table);
 	if (zend_hash_find(fci->function_table, fname, strlen(fname)+1, (void **)&function_handler) == FAILURE) {
-		zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Argument function '%s%s%s' not found", cname ? cname : "", cname ? "::" : "", fname);
-		efree(cname ? cname : fname);
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function does not exist" TSRMLS_CC);
 		return 0;
 	}
 	efree(cname ? cname : fname);
@@ -665,7 +667,7 @@ static int do_fetch_func_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	zend_fcall_info * fci = &stmt->fetch.cls.fci;
 	zend_fcall_info_cache * fcc = &stmt->fetch.cls.fcc;
 
-	if (!make_callable_ex(stmt->fetch.func.function, fci, fcc, stmt->column_count TSRMLS_CC)) {
+	if (!make_callable_ex(stmt, stmt->fetch.func.function, fci, fcc, stmt->column_count TSRMLS_CC)) {
 		return 0;
 	} else {
 		stmt->fetch.func.values = safe_emalloc(sizeof(zval*), stmt->column_count, 0);
@@ -860,7 +862,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 
 						PHP_VAR_UNSERIALIZE_INIT(var_hash);
 						if (php_var_unserialize(&return_value, (const unsigned char**)&Z_STRVAL_P(val), Z_STRVAL_P(val)+Z_STRLEN_P(val), NULL TSRMLS_CC) == FAILURE) {
-							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Cannot unserialize data");
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize data" TSRMLS_CC);
 							PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 							return 0;
 						}
@@ -868,12 +870,13 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 #endif
 #if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
 						if (!ce->unserialize) {
-							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s cannot be unserialized", ce->name);
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							return 0;
 						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
-							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s cannot be unserialized", ce->name);
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							zval_dtor(return_value);
 							ZVAL_NULL(return_value);
+							return 0;
 						}
 #endif
 					}
@@ -898,7 +901,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					stmt->fetch.cls.fci.object_pp = &return_value;
 					stmt->fetch.cls.fcc.object_pp = &return_value;
 					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
-						zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor" TSRMLS_CC);
 						return 0;
 					} else {
 						if (stmt->fetch.cls.retval_ptr) {
@@ -918,7 +921,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				stmt->fetch.func.fci.param_count = idx;
 				stmt->fetch.func.fci.retval_ptr_ptr = &retval;
 				if (zend_call_function(&stmt->fetch.func.fci, &stmt->fetch.func.fcc TSRMLS_CC) == FAILURE) {
-					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s%s%s()", ce->name, ce->constructor->common.function_name);
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function" TSRMLS_CC);
 					return 0;
 				} else {
 					if (return_all) {
@@ -974,7 +977,7 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
 	if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-		zend_throw_exception(pdo_exception_ce, "Fetch flag PDO_FETCH_SERIALIZE only allowed in PHP version 5.1 and higher", 0 TSRMLS_CC);
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO_FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
 		return 0;
 	}
 #endif
@@ -982,22 +985,22 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 	switch(mode) {
 	case PDO_FETCH_FUNC:
 		if (!fetch_all) {
-			zend_throw_exception(pdo_exception_ce, "Fetch mode PDO_FETCH_FUNC is only allowed in PDOStatement::fetchAll()", 0 TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_FUNC is only allowed in PDOStatement::fetchAll()" TSRMLS_CC);
 			return 0;
 		}
 		return 1;
 	
 	default:
 		if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode flag PDO_FETCH_SERIALIZE requires mode PDO_FETCH_CLASS", mode);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_SERIALIZE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode flag PDO_FETCH_CLASSTYPE requires mode PDO_FETCH_CLASS", mode);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_FETCH_CLASSTYPE can only be used together with PDO_FETCH_CLASS" TSRMLS_CC);
 			return 0;
 		}
 		if (mode >= PDO_FETCH__MAX) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode %d is invalid", mode);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode" TSRMLS_CC);
 			return 0;
 		}
 		/* no break; */
@@ -1073,7 +1076,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 		break;
 	case 2:
 		if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
-			zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array" TSRMLS_CC);
 			error = 1;
 			break;
 		}
@@ -1089,7 +1092,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 		stmt->fetch.cls.ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 
 		if (!stmt->fetch.cls.ce) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Could not find user-supplied class" TSRMLS_CC);
 			error = 1;
 			break;
 		}
@@ -1097,6 +1100,8 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off, 0 TSRMLS_CC)) {
 		error = 1;
+	}
+	if (error) {
 		PDO_HANDLE_STMT_ERR();
 	}
 	do_fetch_opt_finish(stmt, 1 TSRMLS_CC);
@@ -1166,7 +1171,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			break;
 		case 3:
 			if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
-				zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array" TSRMLS_CC);
 				error = 1;
 				break;
 			}
@@ -1177,19 +1182,21 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		case 2:
 			stmt->fetch.cls.ctor_args = ctor_args; /* we're not going to free these */
 			if (Z_TYPE_P(arg2) != IS_STRING) {
-				zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "In fetch mode PDO_FETCH_CLASS the 2nd parameter must be a class name string", Z_TYPE_P(arg2));
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid class name (should be a string)" TSRMLS_CC);
 				error = 1;
 				break;
 			} else {
 				stmt->fetch.cls.ce = zend_fetch_class(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 				if (!stmt->fetch.cls.ce) {
-					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not find class '%s'", Z_TYPE_P(arg2));
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class" TSRMLS_CC);
 					error = 1;
 					break;
 				}
 			}
 		}
-		do_fetch_class_prepare(stmt TSRMLS_CC);
+		if (!error) {
+			do_fetch_class_prepare(stmt TSRMLS_CC);
+		}
 		break;
 
 	case PDO_FETCH_FUNC:
@@ -1216,14 +1223,14 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			stmt->fetch.column = Z_LVAL_P(arg2);
 			break;
 		case 3:
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Third parameter not allowed for specified fetch mode");
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO_FETCH_COLUMN" TSRMLS_CC);
 			error = 1;
 		}
 		break;
 
 	default:
 		if (ZEND_NUM_ARGS() > 1) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Additional parameters not allowed for specified fetch mode");
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Extraneous additional parameters" TSRMLS_CC);
 			error = 1;
 		}
 	}
@@ -1239,7 +1246,6 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 		if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC)) {
 			FREE_ZVAL(data);
-			PDO_HANDLE_STMT_ERR();
 			zval_dtor(return_value);
 			error = 1;
 		}
@@ -1266,6 +1272,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 	
 	if (error) {
+		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 }
@@ -1547,12 +1554,13 @@ fail_out:
 			stmt->fetch.cls.ctor_args = NULL;
 
 			if (stmt->dbh->is_persistent) {
+				/* TODO: CRITICAL for final release */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
 			}
 			
 			if (argc == 3) {
 				if (Z_TYPE_PP(args[skip+2]) != IS_NULL && Z_TYPE_PP(args[skip+2]) != IS_ARRAY) {
-					zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array" TSRMLS_CC);
 				} else if (Z_TYPE_PP(args[skip+2]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_PP(args[skip+2]))) {
 					ALLOC_ZVAL(stmt->fetch.cls.ctor_args);
 					*stmt->fetch.cls.ctor_args = **args[skip+2];
