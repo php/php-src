@@ -207,27 +207,6 @@ char *strerror(int);
 # endif
 #endif
 
-#define PHP_FN(name) php_if_##name
-#define PHP_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
-#define PHP_FUNCTION(name) PHP_NAMED_FUNCTION(PHP_FN(name))
-
-#define PHP_NAMED_FE(php_name, name, arg_types) { #php_name, name, arg_types },
-#define PHP_FE(name, arg_types) PHP_NAMED_FE(name, PHP_FN(name), arg_types)
-#define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, PHP_FN(alias), arg_types)
-#define PHP_STATIC_FE(php_name, func_name, arg_types) { php_name, func_name, arg_types },
-
-#define PHP_MINIT(module)	php_minit_##module
-#define PHP_MSHUTDOWN(module)	php_mshutdown_##module
-#define PHP_RINIT(module)	php_rinit_##module
-#define PHP_RSHUTDOWN(module)	php_rshutdown_##module
-#define PHP_MINFO(module)	php_info_##module
-
-#define PHP_MINIT_FUNCTION(module)	int PHP_MINIT(module)(INIT_FUNC_ARGS)
-#define PHP_MSHUTDOWN_FUNCTION(module)	int PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
-#define PHP_RINIT_FUNCTION(module)	int PHP_RINIT(module)(INIT_FUNC_ARGS)
-#define PHP_RSHUTDOWN_FUNCTION(module)	int PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
-#define PHP_MINFO_FUNCTION(module)	void PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
-
 /* global variables */
 extern pval *data;
 #if !defined(PHP_WIN32)
