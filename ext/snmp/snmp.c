@@ -15,6 +15,7 @@
 | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
 |          Mike Jackson <mhjack@tscnet.com>                            |
 |          Steven Lawrance <slawrance@technologist.com>                |
+|          Harrie Hazewinkel <harrie@lisanza.net>                      |
 +----------------------------------------------------------------------+
 */
 /* $Id$ */
@@ -84,10 +85,17 @@
 #include "snmp_client.h"
 #include "snmp_impl.h"
 #include "snmp.h"
+#include "snmpv3.h"
+#include "keytools.h"
 #include "parse.h"
 #include "mib.h"
 #include "version.h"
+#include "transform_oids.h"
 #endif
+/* Ugly macro, since the length of OIDs in UCD-SNMP and NET-SNMP
+ * is different and this way the code is not full of 'ifdef's.
+ */
+#define OIDSIZE(p) (sizeof(p)/sizeof(oid))
 
 /* For really old ucd-snmp versions.. */
 #ifndef HAVE_SNMP_PARSE_OID
@@ -113,6 +121,11 @@ function_entry snmp_functions[] = {
 	PHP_FE(snmp_get_quick_print, NULL)
 	PHP_FE(snmp_set_quick_print, NULL)
 	PHP_FE(snmpset, NULL)
+	PHP_FE(snmpv3get, NULL)
+	PHP_FE(snmpv3walk, NULL)
+	PHP_FE(snmpv3realwalk, NULL)
+	PHP_FALIAS(snmpv3walkoid, snmpv3realwalk, NULL)
+	PHP_FE(snmpv3set, NULL)
 	{NULL,NULL,NULL}
 };
 /* }}} */
@@ -143,7 +156,7 @@ ZEND_GET_MODULE(snmp)
  */
 PHP_MINIT_FUNCTION(snmp)
 {
-	init_mib();
+	init_snmp("snmpapp");
 	return SUCCESS;
 }
 /* }}} */
@@ -164,9 +177,9 @@ PHP_MINFO_FUNCTION(snmp)
 }
 /* }}} */
 
-/* {{{ php_snmp
+/* {{{ php_snmp_internal
 *
-* Generic SNMP object fetcher
+* Generic SNMP object fetcher (for both v3 and v1)
 *
 * st=1   snmpget()  - query an agent and return a single value.
 * st=2   snmpwalk() - walk the mib and return a single dimensional array 
@@ -177,28 +190,209 @@ PHP_MINFO_FUNCTION(snmp)
 * st=11  snmpset()  - query an agent and set a single value
 *
 */
-static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) 
+static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS,
+		int st,
+		struct snmp_session *session,
+		char *objid) 
 {
-	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
-	struct snmp_session session, *ss;
+	struct snmp_session *ss;
 	struct snmp_pdu *pdu=NULL, *response;
 	struct variable_list *vars;
-	char *objid;
 	oid name[MAX_NAME_LEN];
 	int name_length;
-	int status, count,rootlen=0,gotroot=0;
 	oid root[MAX_NAME_LEN];
+	int rootlen = 0;
+	int gotroot = 0;
+	int status, count;
 	char buf[2048];
 	char buf2[2048];
 	int keepwalking=1;
+	char type = (char) 0;
+	char *value = (char *) 0;
+	char *err;
+
+	if (st >= 2) { /* walk */
+		rootlen = MAX_NAME_LEN;
+		if (strlen(objid)) { /* on a walk, an empty string means top of tree - no error */
+			if (read_objid(objid, root, &rootlen)) {
+				gotroot = 1;
+			} else {
+				php_error(E_WARNING,"Invalid object identifier: %s", objid);
+			}
+		}
+
+		if (!gotroot) {
+			memmove((char *) root, (char *) objid_mib, sizeof(objid_mib));
+			rootlen = sizeof(objid_mib) / sizeof(oid);
+			gotroot = 1;
+		}
+	}
+
+	if ((ss = snmp_open(session)) == NULL) {
+		snmp_error(session, NULL, NULL, &err);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open snmp connection: %s", err);
+		free(err);
+		RETURN_FALSE;
+	}
+
+	if (st >= 2) {
+		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
+		name_length = rootlen;
+		switch(st) {
+			case 2:
+			case 3:
+				array_init(return_value);
+				break;
+			default:
+				RETVAL_TRUE;
+				break;
+		}
+	}
+
+	while (keepwalking) {
+		keepwalking = 0;
+		if (st == 1) {
+			pdu = snmp_pdu_create(SNMP_MSG_GET);
+			name_length = MAX_OID_LEN;
+			if (!snmp_parse_oid(objid, name, &name_length)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid);
+				snmp_close(ss);
+				RETURN_FALSE;
+			}
+			snmp_add_null_var(pdu, name, name_length);
+		} else if (st == 11) {
+			pdu = snmp_pdu_create(SNMP_MSG_SET);
+			if (snmp_add_var(pdu, name, name_length, type, value)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s", name);
+				snmp_close(ss);
+				RETURN_FALSE;
+			}
+		} else if (st >= 2) {
+			pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+			snmp_add_null_var(pdu, name, name_length);
+		}
+
+retry:
+		status = snmp_synch_response(ss, pdu, &response);
+		if (status == STAT_SUCCESS) {
+			if (response->errstat == SNMP_ERR_NOERROR) {
+				for (vars = response->variables; vars; vars = vars->next_variable) {
+					if (st >= 2 && st != 11 && 
+						(vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid)))) {
+						continue;       /* not part of this subtree */
+					}
+
+					if (st != 11) {
+#ifdef HAVE_NET_SNMP
+						snprint_value(buf, sizeof(buf), vars->name, vars->name_length, vars);
+#else
+						sprint_value(buf,vars->name, vars->name_length, vars);
+#endif
+					}
+
+					if (st == 1) {
+						RETVAL_STRING(buf,1);
+					} else if (st == 2) {
+						add_next_index_string(return_value,buf,1); /* Add to returned array */
+					} else if (st == 3)  {
+#ifdef HAVE_NET_SNMP
+						snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
+#else
+						sprint_objid(buf2, vars->name, vars->name_length);
+#endif
+						add_assoc_string(return_value,buf2,buf,1);
+					}
+					if (st >= 2 && st != 11) {
+						if (vars->type != SNMP_ENDOFMIBVIEW && 
+							vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
+							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
+							name_length = vars->name_length;
+							keepwalking = 1;
+						}
+					}
+				}	
+			} else {
+				if (st != 2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in packet: %s", snmp_errstring(response->errstat));
+					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
+						for (count=1, vars = response->variables; vars && count != response->errindex;
+						vars = vars->next_variable, count++);
+						if (vars) {
+#ifdef HAVE_NET_SNMP
+							snprint_objid(buf, sizeof(buf), vars->name, vars->name_length);
+#else
+							sprint_objid(buf,vars->name, vars->name_length);
+#endif
+						}
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "This name does not exist: %s",buf);
+					}
+					if (st == 1) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
+							goto retry;
+						}
+					} else if (st == 11) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
+							goto retry;
+						}
+					} else if (st >= 2) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
+							goto retry;
+						}
+					}
+					snmp_close(ss);
+					RETURN_FALSE;
+				}
+			}
+		} else if (status == STAT_TIMEOUT) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Response from %s", session->peername);
+			if (st == 2 || st == 3) {
+				zval_dtor(return_value);
+			}
+			snmp_close(ss);
+			RETURN_FALSE;
+		} else {    /* status == STAT_ERROR */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred, Quitting.");
+			if (st == 2 || st == 3) {
+				zval_dtor(return_value);
+			}
+			snmp_close(ss);
+			RETURN_FALSE;
+		}
+		if (response) {
+			snmp_free_pdu(response);
+		}
+	} /* keepwalking */
+	snmp_close(ss);
+}
+/* }}} */
+
+/* {{{ php_snmp
+*
+* Generic SNMPv1 handler
+* This function makes use of the internal SNMP object fetcher.
+* The object fetcher is shared with SNMPv3.
+*
+* st=1   snmpget() - query an agent and return a single value.
+* st=2   snmpwalk() - walk the mib and return a single dimensional array 
+*          containing the values.
+* st=3 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+*          array of oid,value pairs.
+* st=5-8 ** Reserved **
+* st=11  snmpset() - query an agent and set a single value
+*
+*/
+static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) 
+{
+	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
+	struct snmp_session session;
 	long timeout=SNMP_DEFAULT_TIMEOUT;
 	long retries=SNMP_DEFAULT_RETRIES;
 	int myargc = ZEND_NUM_ARGS();
-	char type = (char) 0;
-	char *value = (char *) 0;
+    char type = (char) 0;
+    char *value = (char *) 0;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
-	char *pptr, *err;
+	char *pptr;
 
 	if (myargc < 3 || myargc > 7 ||
 		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7) == FAILURE) {
@@ -241,27 +435,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 		}
 	}
 
-	objid = Z_STRVAL_PP(a3);
-	
-	if (st >= 2) { /* walk */
-		rootlen = MAX_NAME_LEN;
-		if (strlen(objid)) { /* on a walk, an empty string means top of tree - no error */
-			if (read_objid(objid, root, &rootlen)) {
-				gotroot = 1;
-			} else {
-				php_error(E_WARNING,"Invalid object identifier: %s", objid);
-			}
-		}
-
-		if (!gotroot) {
-			memmove((char *) root, (char *) objid_mib, sizeof(objid_mib));
-			rootlen = sizeof(objid_mib) / sizeof(oid);
-			gotroot = 1;
-		}
-	}
-	
-	memset(&session, 0, sizeof(struct snmp_session));
-
+	snmp_sess_init(&session);
 	strcpy (hostname, Z_STRVAL_PP(a1));
 	if ((pptr = strchr (hostname, ':'))) {
 		remote_port = strtol (pptr + 1, NULL, 0);
@@ -285,147 +459,10 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	session.community_len = Z_STRLEN_PP(a2);
 	session.retries = retries;
 	session.timeout = timeout;
+	
 	session.authenticator = NULL;
 
-#ifndef HAVE_NET_SNMP
-	snmp_synch_setup(&session);
-#endif
-
-	if ((ss = snmp_open(&session)) == NULL) {
-		snmp_error(&session, NULL, NULL, &err);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open snmp connection: %s", err);
-		free(err);
-		RETURN_FALSE;
-	}
-
-	if (st >= 2) {
-		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
-		name_length = rootlen;
-		switch(st) {
-			case 2:
-			case 3:
-				array_init(return_value);
-				break;
-			default:
-				RETVAL_TRUE;
-				break;
-		}
-	}
-
-	while (keepwalking) {
-		keepwalking = 0;
-		if (st == 1) {
-			pdu = snmp_pdu_create(SNMP_MSG_GET);
-			name_length = MAX_OID_LEN;
-			if (!snmp_parse_oid(objid, name, &name_length)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid);
-				snmp_close(ss);
-				RETURN_FALSE;
-			}
-			snmp_add_null_var(pdu, name, name_length);
-		} else if (st == 11) {
-			pdu = snmp_pdu_create(SNMP_MSG_SET);
-			if (snmp_add_var(pdu, name, name_length, type, value)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s", name);
-				snmp_close(ss);
-				RETURN_FALSE;
-			}
-		} else if (st >= 2) {
-			pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-			snmp_add_null_var(pdu, name, name_length);
-		}
-		
-retry:
-		status = snmp_synch_response(ss, pdu, &response);
-		if (status == STAT_SUCCESS) {
-			if (response->errstat == SNMP_ERR_NOERROR) {
-				for (vars = response->variables; vars; vars = vars->next_variable) {
-					if (st >= 2 && st != 11 && 
-						(vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid)))) {
-						continue;       /* not part of this subtree */
-					}
-
-					if (st != 11) {
-#ifdef HAVE_NET_SNMP
-						snprint_value(buf, sizeof(buf), vars->name, vars->name_length, vars);
-#else
-						sprint_value((struct sbuf *) buf,vars->name, vars->name_length, vars);
-#endif
-					}
-
-					if (st == 1) {
-						RETVAL_STRING(buf,1);
-					} else if (st == 2) {
-						add_next_index_string(return_value,buf,1); /* Add to returned array */
-					} else if (st == 3)  {
-#ifdef HAVE_NET_SNMP
-						snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
-#else
-						sprint_objid((struct sbuf *)buf2, vars->name, vars->name_length);
-#endif
-						add_assoc_string(return_value,buf2,buf,1);
-					}
-					if (st >= 2 && st != 11) {
-						if (vars->type != SNMP_ENDOFMIBVIEW && 
-							vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
-							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
-							name_length = vars->name_length;
-							keepwalking = 1;
-						}
-					}
-				}	
-			} else {
-				if (st != 2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in packet: %s", snmp_errstring(response->errstat));
-					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
-						for (count=1, vars = response->variables; vars && count != response->errindex;
-						vars = vars->next_variable, count++);
-						if (vars) {
-#ifdef HAVE_NET_SNMP
-							snprint_objid(buf, sizeof(buf), vars->name, vars->name_length);
-#else
-							sprint_objid((struct sbuf *)buf,vars->name, vars->name_length);
-#endif
-						}
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "This name does not exist: %s",buf);
-					}
-					if (st == 1) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
-							goto retry;
-						}
-					} else if (st == 11) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
-							goto retry;
-						}
-					} else if (st >= 2) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
-							goto retry;
-						}
-					}
-					snmp_close(ss);
-					RETURN_FALSE;
-				}
-			}
-		} else if (status == STAT_TIMEOUT) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Response from %s", Z_STRVAL_PP(a1));
-			if (st == 2 || st == 3) {
-				zval_dtor(return_value);
-			}
-			snmp_close(ss);
-			RETURN_FALSE;
-		} else {    /* status == STAT_ERROR */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred, Quitting.");
-			if (st == 2 || st == 3) {
-				zval_dtor(return_value);
-			}
-			snmp_close(ss);
-			RETURN_FALSE;
-		}
-		if (response) {
-			snmp_free_pdu(response);
-		}
-	} /* keepwalking */
-	snmp_close(ss);
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a3));
 }
 /* }}} */
 
@@ -493,6 +530,337 @@ PHP_FUNCTION(snmp_set_quick_print)
 PHP_FUNCTION(snmpset)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
+    Set the security name in the snmpv3 session */
+static int
+netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
+{
+    if ((s) && (name)) {     
+        s->securityName = strdup(name);
+        s->securityNameLen = strlen(s->securityName);
+        return (0);
+    }        
+    return (-1);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
+    Set the security level in the snmpv3 session */
+static int
+netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
+{
+    if ((s) && (level)) {
+        if (!strcasecmp(level, "noAuthNoPriv") || !strcasecmp(level, "nanp")) {
+            s->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+            return (0);
+        } else if (!strcasecmp(level, "authNoPriv") || !strcasecmp(level, "anp")) {
+            s->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+            return (0);
+        } else if (!strcasecmp(level, "authPriv") || !strcasecmp(level, "ap")) {
+            s->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+            return (0);
+        }
+        fprintf(stderr, "Invalid security level: %s\n",
+                level);
+    }
+    return (-1);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
+    Set the authentication protocol in the snmpv3 session */
+static int
+netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
+{
+    if ((s) && (prot)) {
+        if (!strcasecmp(prot, "MD5")) {
+            s->securityAuthProto = usmHMACMD5AuthProtocol;
+            s->securityAuthProtoLen = OIDSIZE(usmHMACMD5AuthProtocol);
+            return (0);
+        } else if (!strcasecmp(prot, "SHA")) {
+            s->securityAuthProto = usmHMACSHA1AuthProtocol;
+            s->securityAuthProtoLen = OIDSIZE(usmHMACSHA1AuthProtocol);
+            return (0);
+        } else if (strlen(prot)) {
+            fprintf(stderr,
+                    "Invalid authentication protocol: %s\n",
+                    prot);
+        }
+    }
+    return (-1);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
+    Set the security protocol in the snmpv3 session */
+static int
+netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
+{
+    if ((s) && (prot)) {
+        if (!strcasecmp(prot, "DES")) {
+            s->securityPrivProto = usmDESPrivProtocol;
+            s->securityPrivProtoLen = OIDSIZE(usmDESPrivProtocol);
+            return (0);
+#ifdef HAVE_AES
+        } else if (!strcasecmp(prot, "AES128")) {
+            s->securityPrivProto = usmAES128PrivProtocol;
+            s->securityPrivProtoLen = OIDSIZE(usmAES128PrivProtocol);
+            return (0);
+        } else if (!strcasecmp(prot, "AES192")) {
+            s->securityPrivProto = usmAES192PrivProtocol;
+            s->securityPrivProtoLen = OIDSIZE(usmAES192PrivProtocol);
+            return (0);
+        } else if (!strcasecmp(prot, "AES256")) {
+            s->securityPrivProto = usmAES256PrivProtocol;
+            s->securityPrivProtoLen = OIDSIZE(usmAES256PrivProtocol);
+            return (0);
+#endif
+        } else if (strlen(prot)) {
+            fprintf(stderr,
+                    "Invalid privacy protocol: %s\n",
+                    prot);
+        }
+    }
+    return (-1);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
+    make key from pass phrase in the snmpv3 session */
+static int
+netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
+{
+    /*
+     * make master key from pass phrases 
+     */
+    if ((s) && (pass) && strlen(pass)) {
+        s->securityAuthKeyLen = USM_AUTH_KU_LEN;
+        if (s->securityAuthProto == NULL) {
+            /* get .conf set default */
+            const oid *def = get_default_authtype(&(s->securityAuthProtoLen));
+            s->securityAuthProto = snmp_duplicate_objid(def, s->securityAuthProtoLen);
+        }
+        if (s->securityAuthProto == NULL) {
+            /* assume MD5 */
+            s->securityAuthProto =
+                snmp_duplicate_objid(usmHMACMD5AuthProtocol,
+                                     OIDSIZE(usmHMACMD5AuthProtocol));
+            s->securityAuthProtoLen = OIDSIZE(usmHMACMD5AuthProtocol);
+        }
+        if (generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
+                        (u_char *) pass, strlen(pass),
+                        s->securityAuthKey, &(s->securityAuthKeyLen)) != SNMPERR_SUCCESS) {
+            fprintf(stderr,
+                    "Error generating a key for authentication pass phrase.\n");
+            return (-2);
+        }
+        return (0);
+    }
+    return (-1);
+}
+/* }}} */
+
+/* {{{ proto int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
+   make key from pass phrase in the snmpv3 session */
+static int
+netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
+{
+    if ((s) && (pass) && strlen(pass)) {
+        s->securityPrivKeyLen = USM_PRIV_KU_LEN;
+        if (s->securityPrivProto == NULL) {
+            /* get .conf set default */
+            const oid *def = get_default_privtype(&(s->securityPrivProtoLen));
+            s->securityPrivProto = snmp_duplicate_objid(def, s->securityPrivProtoLen);
+        }
+        if (s->securityPrivProto == NULL) {
+            /* assume DES */
+            s->securityPrivProto = snmp_duplicate_objid(usmDESPrivProtocol,
+                                     OIDSIZE(usmDESPrivProtocol));
+            s->securityPrivProtoLen = OIDSIZE(usmDESPrivProtocol);
+        }
+        if (generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
+                        pass, strlen(pass),
+                        s->securityPrivKey, &(s->securityPrivKeyLen)) != SNMPERR_SUCCESS) {
+            fprintf(stderr,
+                    "Error generating a key for privacy pass phrase.\n");
+            return (-2);
+        }
+        return (0);
+    }
+    return (-1);
+}
+/* }}} */
+
+
+/* {{{ proto void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
+*
+* Generic SNMPv3 object fetcher
+* From here is passed on the the common internal object fetcher.
+*
+* st=1   snmpv3get() - query an agent and return a single value.
+* st=2   snmpv3walk() - walk the mib and return a single dimensional array 
+*          containing the values.
+* st=3   snmpv3realwalk() and snmpv3walkoid() - walk the mib and return an 
+*          array of oid,value pairs.
+* st=11  snmpv3set() - query an agent and set a single value
+*
+*/
+void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
+	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7, **a8, **a9, **a10, **a11, **a12;
+	struct snmp_session session;
+	long timeout=SNMP_DEFAULT_TIMEOUT;
+	long retries=SNMP_DEFAULT_RETRIES;
+	int myargc = ZEND_NUM_ARGS();
+	char type = (char) 0;
+	char *value = (char *) 0;
+	char hostname[MAX_NAME_LEN];
+	int remote_port = 161;
+	char *pptr;
+
+	if (myargc < 8 || myargc > 12 ||
+		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, &a10, &a11, &a12) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	snmp_sess_init(&session);
+        /* This is all SNMPv3 */
+	session.version = SNMP_VERSION_3;
+
+        /* Reading the hostname and its optional non-default port number */
+	convert_to_string_ex(a1);
+	strcpy(hostname, Z_STRVAL_PP(a1));
+	if ((pptr = strchr (hostname, ':'))) {
+		remote_port = strtol (pptr + 1, NULL, 0);
+		*pptr = 0;
+	}
+	session.peername = hostname;
+	session.remote_port = remote_port;
+
+        /* Setting the security name. */
+	convert_to_string_ex(a2);
+        if (netsnmp_session_set_sec_name(&session, Z_STRVAL_PP(a2))) {
+		php_error(E_WARNING,"Could net set security name: %s\n", Z_STRVAL_PP(a2));
+		RETURN_FALSE;
+	}
+
+        /* Setting the security level. */
+        convert_to_string_ex(a3);
+	if (netsnmp_session_set_sec_level(&session, Z_STRVAL_PP(a3))) {
+            php_error(E_WARNING,"Invalid security level: %s\n", a3);
+            RETURN_FALSE;
+        }
+
+        /* Setting the authentication protocol. */
+        convert_to_string_ex(a4);
+	if (netsnmp_session_set_auth_protocol(&session, Z_STRVAL_PP(a4))) {
+            php_error(E_WARNING,"Invalid authentication protocol: %s\n", Z_STRVAL_PP(a4));
+            RETURN_FALSE;
+        }
+        /* Setting the authentication passphrase. */
+        convert_to_string_ex(a5);
+        if (netsnmp_session_gen_auth_key(&session, Z_STRVAL_PP(a5))) {
+            php_error(E_WARNING,"Could not generate key for authentication pass phrase: %s\n", Z_STRVAL_PP(a4));
+            RETURN_FALSE;
+        }
+
+        /* Setting the security protocol. */
+        convert_to_string_ex(a6);
+	if (netsnmp_session_set_sec_protocol(&session, Z_STRVAL_PP(a6)) &&
+                                                       (0 != strlen(Z_STRVAL_PP(a6)))) {
+            php_error(E_WARNING,"Invalid security protocol: %s\n", Z_STRVAL_PP(a6));
+            RETURN_FALSE;
+        }
+        /* Setting the security protocol passphrase. */
+        convert_to_string_ex(a7);
+	if (netsnmp_session_gen_sec_key(&session, Z_STRVAL_PP(a7)) &&
+							(0 != strlen(Z_STRVAL_PP(a7)))) {
+            php_error(E_WARNING,"Could not generate key for security pass phrase: %s\n", Z_STRVAL_PP(a7));
+            RETURN_FALSE;
+        }
+
+	if (st == 11) {
+		if (myargc < 10) {
+			WRONG_PARAM_COUNT;
+		}
+		if (myargc > 10) {
+			convert_to_long_ex(a11);
+			timeout = Z_LVAL_PP(a11);
+		}
+		if (myargc > 11) {
+			convert_to_long_ex(a12);
+			retries = Z_LVAL_PP(a12);
+		}
+		convert_to_string_ex(a9);
+		convert_to_string_ex(a10);
+                type = Z_STRVAL_PP(a9)[0];
+                value = Z_STRVAL_PP(a10);
+	} else {
+		if (myargc > 8) {
+			convert_to_long_ex(a9);
+			timeout = Z_LVAL_PP(a9);
+		}
+		if (myargc > 9) {
+			convert_to_long_ex(a10);
+			retries = Z_LVAL_PP(a10);
+		}
+	}
+
+	session.retries = retries;
+	session.timeout = timeout;
+
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a8));
+}
+/* }}} */
+
+/* {{{ proto int snmpv3get(string host,
+                                 string sec_name, string sec_level,
+                                 string auth_protocol, string auth_passphrase,
+                                 string priv_protocol, string priv_passphrase,
+                                 string object_id [, int timeout [, int retries]])
+   Fetch the value of a SNMP object */
+PHP_FUNCTION(snmpv3get)
+{
+        php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+}
+/* }}} */
+
+
+/* {{{ proto int snmpv3walk(string host,
+                                 string sec_name, string sec_level,
+                                 string auth_protocol, string auth_passphrase,
+                                 string priv_protocol, string priv_passphrase,
+                                 tring object_id [, int timeout [, int retries]])
+   Fetch the value of a SNMP object */
+PHP_FUNCTION(snmpv3walk)
+{
+        php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+}
+/* }}} */
+
+/* {{{ proto int snmpv3realwalk(string host,
+                                 string sec_name, string sec_level,
+                                 string auth_protocol, string auth_passphrase,
+                                 string priv_protocol, string priv_passphrase,
+                                 string object_id [, int timeout [, int retries]])
+   Fetch the value of a SNMP object */
+PHP_FUNCTION(snmpv3realwalk)
+{
+        php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
+}
+/* }}} */
+
+/* {{{ proto int snmpv3set(string host,
+                                 string sec_name, string sec_level,
+                                 string auth_protocol, string auth_passphrase,
+                                 string priv_protocol, string priv_passphrase,
+                                 string object_id, string type, mixed value [, int timeout [, int retries]])
+   Fetch the value of a SNMP object */
+PHP_FUNCTION(snmpv3set)
+{
+        php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
 }
 /* }}} */
 
