@@ -1,3 +1,12 @@
+2002-02-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c: *** empty log message ***
+
+2002-02-09  Stig Bakken  <ssb@fast.no>
+
+    * ext/tokenizer/tokenizer.c: * ZTS fix
+
 2002-02-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ext/tokenizer/.cvsignore
