@@ -1177,12 +1177,6 @@ static void php_rshutdown_session_globals(PSLS_D)
 	zend_hash_destroy(&PS(vars));
 }
 
-void _php_session_auto_start(void *data)
-{
-	PSLS_FETCH();
-
-	_php_session_start(PSLS_C);
-}
 
 void _php_session_shutdown(void *data)
 {
@@ -1207,9 +1201,7 @@ PHP_RINIT_FUNCTION(session)
 		return SUCCESS;
 	}
 
-	if (INI_INT("session.auto_start")) {
-		php_register_post_request_startup(_php_session_auto_start, NULL);
-	}
+	_php_session_start(PSLS_C);
 
 	php_register_pre_request_shutdown(_php_session_shutdown, NULL);
 
