@@ -23,6 +23,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #26878 (problem with multiple references to the same variable 
   with different types). (Ilia)
 - Fixed bug #26896 (ext/ftp does not work as shared extension). (Jani)
+- Fixed bug #26814 (On parse error include included file, terminate
+  execution script). (Ilia)
 - Fixed bug #26772, #26967 (file operations return NULL instead of FALSE).
   (Wez, Ilia)
 - Fixed bug #26381 (rand() without srand() doesn't work with certain php.ini).
