@@ -218,7 +218,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	pval **format, **timestamp;
 	time_t the_time;
 	struct tm *ta, tmbuf;
-	int i, size = 0, length, h, beat;
+	int i, size = 0, length, h, beat, fd, wd, yd, wk;
 	char tmp_buff[32];
 
 	switch(ZEND_NUM_ARGS()) {
@@ -299,6 +299,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'a':		/* am/pm */
 			case 'S':		/* standard english suffix for the day of the month (e.g. 3rd, 2nd, etc) */
 			case 't':		/* days in current month */
+			case 'W':		/* ISO-8601 week number of year, weeks starting on Monday */
 				size += 2;
 				break;
 			case '\\':
@@ -503,6 +504,17 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600)
 				);
 #endif
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'W':		/* ISO-8601 week number of year, weeks starting on Monday */
+				wd = ta->tm_wday==0 ? 7 : ta->tm_wday;
+				yd = ta->tm_yday + 1;
+				fd = (7 + (wd - yd) % 7 ) % 7;
+				wk = ( (yd + fd - 1) / 7 ) + 1;
+				if (fd>3) {
+					wk--;
+				}
+				sprintf(tmp_buff, "%d", wk);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 
