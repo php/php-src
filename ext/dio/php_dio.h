@@ -44,6 +44,7 @@ PHP_FUNCTION(dio_read);
 PHP_FUNCTION(dio_write);
 PHP_FUNCTION(dio_fcntl);
 PHP_FUNCTION(dio_close);
+PHP_FUNCTION(dio_tcsetattr);
 
 typedef struct {
 	int fd;
