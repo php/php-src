@@ -1863,6 +1863,7 @@ void do_require(znode *filename CLS_DC)
 	if (filename->op_type==IS_CONST
 		&& filename->u.constant.type==IS_STRING) {
 		require_filename(filename->u.constant.value.str.val CLS_CC);
+		zval_dtor(&filename->u.constant);
 	} else {
 		znode result;
 
