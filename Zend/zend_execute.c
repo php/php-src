@@ -81,7 +81,6 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 																		\
 					if ((ptr_ptr = (s))									\
 						&& ((*ptr_ptr)->type == IS_OBJECT)				\
-						&& (!(*ptr_ptr)->value.obj.ce->handle_function_call) \
 						&& (!(*ptr_ptr)->is_ref)						\
 						&& ((*ptr_ptr)->refcount>2)) { /* 2 because it's also locked */ \
 						zval *ptr = *ptr_ptr;							\
