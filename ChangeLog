@@ -1,3 +1,105 @@
+2000-07-10  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c: - PS_* constants changed to PSPELL_*
+    - zval is used instead of pval
+    (as Andrei Zmievski suggested)
+
+    Modified Files:
+     	ext/pspell/pspell.c
+
+    * ext/pspell/.cvsignore
+      ext/pspell/Makefile.in
+      ext/pspell/README
+      ext/pspell/config.m4
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+    Initial release. Includes:
+    - Functionality of aspell
+    - 3 modes of spellchecking (fast, normal, bad_spellers)
+    - support for run-together words
+
+2000-07-10  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/sysvshm/sysvshm.c: Changed the descriptions.
+
+    * ext/sysvshm/php_sysvshm.h
+      ext/sysvshm/sysvshm.c:
+    Changed some protos and the authors email address.
+
+2000-07-10  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - Fix the case of NULL BYTE and TEXT columns. (Danny).
+      ESQL/C (sometimes ?) does not set the indicator variable,
+      but the locator->loc_indicator instead.
+
+2000-07-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * INSTALL: php.ini install docs from David Croft <david@infotrek.co.uk>
+
+2000-07-10  Jouni Ahto  <jah@mork.net>
+
+    * win32/sendmail.c:
+    - Oops, missed two GLOBAL()'s.
+
+    * win32/sendmail.c:
+    - Another attempt to sync with PHP3 and handle multiple recipients.
+    - Change all \'s to \r\n.
+    - It's now PHP 4.0 WIN32 -mailer.
+
+
+2000-07-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Lift the add-once limit for libraries, because there are valid reasons
+    against it. When dealing with static libraries, the link order is
+    important and it might be necessary to add a library multiple times to
+    satisfy mutual symbol requirements.
+
+    * sapi/thttpd/README
+      ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dba/php_dba.h
+      ext/mcrypt/mcrypt.c
+      ext/session/mod_files.c
+      ext/session/mod_files.h
+      ext/session/mod_mm.c
+      ext/session/mod_mm.h
+      ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/flock_compat.c
+      ext/standard/lcg.c
+      ext/standard/php_lcg.h
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: Unify use of my email address
+
+    * sapi/apache/mod_php4.c:
+    Fix prototype of apache_child_exit_handler and remove popen-related
+    preprocessor directives/macros.
+
+    * configure.in:
+    Substitute CXX_PHP_COMPILE. Compiling C++ source files works now.
+
+    * build/rules.mk: Make the cxx suffix easily adjustable
+
+    * ext/session/session.c:
+    Also output the name of the save_handler when reporting a failed write
+    attempt.
+
+2000-07-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: masquarading as sascha;-)
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c: - Fixed closing
+
 2000-07-09  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4
