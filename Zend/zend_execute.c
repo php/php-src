@@ -635,22 +635,6 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			/* HACK!! 'this' should be always zend_object */
 			return Z_OBJPROP_P(EG(This));
 			break;
-		case ZEND_FETCH_THIS:
-			{
-				if (!EG(This)) {
-					zend_error(E_ERROR, "Using $this when not in object context");
-				}
-				/* FIXME: Put this error back.
-				//if (type == BP_VAR_RW || type == BP_VAR_W) {
-				//	zend_error(E_ERROR, "Can't overwrite $this");
-				//}
-				*/
-				Ts[opline->result.u.var].var.ptr_ptr = &EG(This);
-				SELECTIVE_PZVAL_LOCK(EG(This), &opline->result);
-				AI_USE_PTR(Ts[opline->result.u.var].var);
-				return NULL;
-				break;
-			}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
@@ -1177,6 +1161,13 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 		EX(opline) = op_array->start_op;
 	} else {
 		EX(opline) = op_array->opcodes;
+	}
+
+	if (op_array->uses_this && EG(This)) {
+		EG(This)->refcount++; /* For $this pointer */
+		if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
+			EG(This)->refcount--;
+		}
 	}
 
 	EG(opline_ptr) = &EX(opline);
@@ -2815,42 +2806,27 @@ send_by_ref:
 
 			
 					unset_object = (EX(opline)->extended_value == ZEND_UNSET_OBJ);
-					if (EX(opline)->op2.u.EA.type == ZEND_FETCH_THIS) {
-						if (!EG(This)) {
-							zend_error(E_WARNING, "Using $this in non-object context");
-						} else {
-							object = &EG(This);
-							if(unset_object) {
-								Z_OBJ_HT_PP(object)->delete_obj((*object));
-								zval_ptr_dtor(&EG(This));
-								EG(This) = NULL;
-							} else {
-								zend_error(E_WARNING, "$this cannot be unset");
-							}
-						}
-					} else {
-						if (variable->type != IS_STRING) {
-							tmp = *variable;
-							zval_copy_ctor(&tmp);
-							convert_to_string(&tmp);
-							variable = &tmp;
-						}
+					if (variable->type != IS_STRING) {
+						tmp = *variable;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						variable = &tmp;
+					}
 
-						if (unset_object) {
-							if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
-								zend_error(E_ERROR, "Cannot delete non-existing object");
-							}
-							if (Z_TYPE_PP(object) != IS_OBJECT) {
-							zend_error(E_ERROR, "Cannot call delete on non-object type");
-							}
-							Z_OBJ_HT_PP(object)->delete_obj((*object));
+					if (unset_object) {
+						if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
+							zend_error(E_ERROR, "Cannot delete non-existing object");
 						}
-
-						zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
-
-						if (variable == &tmp) {
-							zval_dtor(&tmp);
+						if (Z_TYPE_PP(object) != IS_OBJECT) {
+						zend_error(E_ERROR, "Cannot call delete on non-object type");
 						}
+						Z_OBJ_HT_PP(object)->delete_obj((*object));
+					}
+
+					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
+
+					if (variable == &tmp) {
+						zval_dtor(&tmp);
 					}
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				}
@@ -3048,28 +3024,19 @@ send_by_ref:
 					zend_bool isset = 1;
 					HashTable *target_symbol_table;
 		
-					if (EX(opline)->op2.u.EA.type == ZEND_FETCH_THIS) {
-						if (!EG(This)) {
-							isset = 0;
-						} else {
-							isset = 1;
-							value = &EG(This);
-						}
-					} else {
-						target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
 
-						if (variable->type != IS_STRING) {
-							tmp = *variable;
-							zval_copy_ctor(&tmp);
-							convert_to_string(&tmp);
-							variable = &tmp;
-						}
-						
-						if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
-							isset = 0;
-						}
+					if (variable->type != IS_STRING) {
+						tmp = *variable;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						variable = &tmp;
 					}
-						
+					
+					if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					}
+					
 					EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_BOOL;
 
 					switch (EX(opline)->extended_value) {

@@ -285,14 +285,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRM
 	*result = opline_ptr->result;
 	SET_UNUSED(opline_ptr->op2);
 
-	if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
-		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
-		opline_ptr->op2.u.EA.type = ZEND_FETCH_THIS;
-		efree(varname->u.constant.value.str.val);
-		memset(&opline_ptr->op1, 0, sizeof(znode));
-		SET_UNUSED(opline_ptr->op1);
-	} else if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING
+	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING
 		&& zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 		opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 	} else {
@@ -722,6 +715,7 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr;
+	int num_of_created_opcodes = 0;
 
 	/*
 	if (zend_variable_buffer_empty(TSRMLS_C) && (type == BP_VAR_W || type == BP_VAR_RW)) {
@@ -763,7 +757,17 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 				break;
 		}
 		le = le->next;
+		num_of_created_opcodes++;
 	}
+
+	if (num_of_created_opcodes == 1) {
+		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
+		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
+		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+			CG(active_op_array)->uses_this = 1;
+		}
+	}
+
 	zend_llist_destroy(fetch_list_ptr);
 	zend_stack_del_top(&CG(bp_stack));
 }
@@ -2202,7 +2206,10 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 
 		le = fetch_list_ptr->head;
 		opline_ptr = (zend_op *) le->data;
-		if (opline_ptr->op1.op_type == IS_UNUSED && opline_ptr->op2.u.EA.type == ZEND_FETCH_THIS) {
+		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
+		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
+		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+			efree(opline_ptr->op1.u.constant.value.str.val);
 			opline_ptr->op1 = *property;
 			SET_UNUSED(opline_ptr->op2);
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;

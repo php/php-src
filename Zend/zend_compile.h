@@ -103,6 +103,7 @@ struct _zend_op_array {
 
 	zend_bool return_reference;
 	zend_bool done_pass_two;
+	zend_bool uses_this;
 
 	char *filename;
 
@@ -589,7 +590,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
 #define ZEND_FETCH_FROM_THIS		4
-#define ZEND_FETCH_THIS				5
 
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
