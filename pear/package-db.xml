@@ -5,18 +5,23 @@
   <summary>Database Abstraction Layer</summary>
   <description>
 DB is a database abstraction layer providing:
- * an OO-style query API
- * a DSN (data source name) format for specifying database servers
- * prepare/execute (bind) emulation for databases that don't support
-   it natively
- * a result object for each query response
- * portable error codes
- * sequence emulation
- * table information interface
+* an OO-style query API
+* a DSN (data source name) format for specifying database servers
+* prepare/execute (bind) emulation for databases that don't support it natively
+* a result object for each query response
+* portable error codes
+* sequence emulation
+* sequential and non sequential row fetching as well as bulk fetching
+* ordered array, associative array and object formats supported for the fetched rows
+* row limit support
+* transactions support
+* table information interface
+* DocBook and PHPDoc API documentation
 
 DB layers itself on top of PHP's existing database extensions.  The
 currently supported extensions are: dbase, fbsql, interbase, informix,
-msql, mssql, mysql, oci8, odbc, pgsql and sybase.
+msql, mssql, mysql, oci8, odbc, pgsql and sybase (a DB style interface
+to LDAP servers is also avaible from a separate package).
 </description>
   <license>PHP License</license>
   <maintainers>
@@ -34,7 +39,7 @@ msql, mssql, mysql, oci8, odbc, pgsql and sybase.
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0</version>
+    <version>2.0</version>
     <state>stable</state>
     <date>2002-04-07</date>
     <notes>First packaged release.</notes>
