@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Onn Ben-Zvi <onn@zend.com>                                   |
+   | Author: Onn Ben-Zvi <onn@zend.com>, onnb@mercury.co.il               |
    +----------------------------------------------------------------------+
  */
 
