@@ -1,48 +1,34 @@
 
 if test "$PHP_SAPI" = "cgi"; then
-AC_MSG_CHECKING(whether to force Apache CGI redirect)
-AC_ARG_ENABLE(force-cgi-redirect,
+
+  PHP_ARG_ENABLE(force-cgi-redirect,whether to force Apache CGI redirect,
 [  --enable-force-cgi-redirect
                           Enable the security check for internal server
                           redirects.  You should use this if you are
-                          running the CGI version with Apache. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(FORCE_CGI_REDIRECT, 1)
-    AC_MSG_RESULT(yes)
+                          running the CGI version with Apache. ])
+
+  if test "$PHP_FORCE_CGI_REDIRECT" = "yes"; then
+    AC_DEFINE(FORCE_CGI_REDIRECT, 1, [ ])
     REDIRECT=1
   else
-    AC_DEFINE(FORCE_CGI_REDIRECT, 0)
-    AC_MSG_RESULT(no)
+    AC_DEFINE(FORCE_CGI_REDIRECT, 0, [ ])
     REDIRECT=0
   fi
-],[
-  AC_DEFINE(FORCE_CGI_REDIRECT, 0)
-  AC_MSG_RESULT(no)
-  REDIRECT=0
-]) 
 
-AC_MSG_CHECKING(whether to discard path_info + path_translated)
-AC_ARG_ENABLE(discard_path,
+  PHP_ARG_ENABLE(discard-path,whether to discard path_info + path_translated,
 [  --enable-discard-path   If this is enabled, the PHP CGI binary
                           can safely be placed outside of the
                           web tree and people will not be able
-                          to circumvent .htaccess security. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(DISCARD_PATH, 1)
-    AC_MSG_RESULT(yes)
+                          to circumvent .htaccess security. ])
+
+  if test "$PHP_DISCARD_PATH" = "yes"; then
+    AC_DEFINE(DISCARD_PATH, 1, [ ])
     DISCARD_PATH=1
   else
-    AC_DEFINE(DISCARD_PATH, 0)
-    AC_MSG_RESULT(no)
+    AC_DEFINE(DISCARD_PATH, 0, [ ])
     DISCARD_PATH=0
   fi
-],[
-  AC_DEFINE(DISCARD_PATH, 0)
-  AC_MSG_RESULT(no)
-  DISCARD_PATH=0
-]) 
+
 fi
 
 if test "$PHP_SAPI" = "cgi" ; then
@@ -66,7 +52,7 @@ AC_ARG_WITH(fhttpd,
         FHTTPD_TARGET=$withval/
         PHP_BUILD_STATIC
 		PHP_SAPI=cgi
-        AC_DEFINE(FHTTPD)
+        AC_DEFINE(FHTTPD,1,[ ])
         AC_MSG_RESULT(yes - fhttpd 0.3.x)
       else
         AC_MSG_RESULT(no)

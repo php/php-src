@@ -193,7 +193,7 @@ INCLUDES="$INCLUDES -I\$(top_builddir)/Zend -I\$(top_srcdir)"
 
 AC_CHECK_LIB(socket, socket, [
  AC_ADD_LIBRARY(socket)
- AC_DEFINE(HAVE_LIBSOCKET) ], [
+ AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
   AC_CHECK_LIB(socket, htonl, [
    AC_ADD_LIBRARY(socket)
    ])])
@@ -211,10 +211,10 @@ if test "$php_no_nsl_checks" != "yes"; then
 
 AC_CHECK_LIB(nsl, gethostname, [
  AC_ADD_LIBRARY(nsl)
- AC_DEFINE(HAVE_LIBNSL) ],[
+ AC_DEFINE(HAVE_LIBNSL,1,[ ]) ],[
  AC_CHECK_LIB(nsl, gethostbyaddr, [
   AC_ADD_LIBRARY(nsl)
-  AC_DEFINE(HAVE_LIBNSL) ], [])
+  AC_DEFINE(HAVE_LIBNSL,1,[ ]) ], [])
 ])
 
 fi
@@ -231,7 +231,7 @@ AC_CHECK_LIB(m, sin)
 
 AC_CHECK_LIB(bind, inet_aton, [
   AC_ADD_LIBRARY(bind)
-  AC_DEFINE(HAVE_LIBBIND) ], []) 
+  AC_DEFINE(HAVE_LIBBIND,1,[Whether you have bind]) ], []) 
 
 AC_CHECK_LIB(resolv, inet_aton)
 
@@ -242,10 +242,10 @@ AC_CHECK_LIB(socket, res_search, [
  AC_CHECK_LIB(resolv, dn_skipname)
  AC_CHECK_LIB(resolv, __dn_skipname)
  LIBS="$LIBS -lsocket"
- AC_DEFINE(HAVE_LIBSOCKET) ], [
+ AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
  AC_CHECK_LIB(resolv, res_search, [
   LIBS="$LIBS -lresolv"
-  AC_DEFINE(HAVE_LIBRESOLV) 
+  AC_DEFINE(HAVE_LIBRESOLV,1,[ ]) 
  ], [
   AC_CHECK_LIB(resolv, dn_skipname)
   AC_CHECK_LIB(resolv, __dn_skipname)
@@ -401,7 +401,7 @@ changequote([,]), [#include <sys/types.h>
 
 dnl AC_MSG_RESULT($ac_cv_type_in_addr_t)
 if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int)
+  AC_DEFINE(in_addr_t, u_int, [ ])
 fi
 
 divert(4)
@@ -421,11 +421,11 @@ if test "$PHP_CONFIG_FILE_PATH" = "yes"; then
 fi
 
 if test "$PHP_CONFIG_FILE_PATH" != "no"; then
-  AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "$PHP_CONFIG_FILE_PATH")
-  AC_DEFINE(USE_CONFIG_FILE, 1)
+  AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "$PHP_CONFIG_FILE_PATH",[ ])
+  AC_DEFINE(USE_CONFIG_FILE, 1, [ ])
 else
-  AC_DEFINE(CONFIGURATION_FILE_PATH, 0)
-  AC_DEFINE(USE_CONFIG_FILE, 0)
+  AC_DEFINE(CONFIGURATION_FILE_PATH, 0, [ ])
+  AC_DEFINE(USE_CONFIG_FILE, 0, [ ])
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
@@ -446,9 +446,9 @@ PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
 [  --enable-safe-mode      Enable safe mode by default.])
 
 if test "$PHP_SAFE_MODE" = "yes"; then
-  AC_DEFINE(PHP_SAFE_MODE, 1)
+  AC_DEFINE(PHP_SAFE_MODE,1,[ ])
 else
-  AC_DEFINE(PHP_SAFE_MODE, 0)
+  AC_DEFINE(PHP_SAFE_MODE,0,[ ])
 fi
 
 AC_MSG_CHECKING(for safe mode exec dir)
@@ -458,18 +458,18 @@ AC_ARG_WITH(exec-dir,
 [
   if test "$withval" != "no"; then
   	if test "$withval" = "yes"; then
-		AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin")
+		AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
     	AC_MSG_RESULT(/usr/local/php/bin)
    	else
-		AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR,"$withval")
+		AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR,"$withval", [ ])
     	AC_MSG_RESULT($withval)
    	fi
   else
-	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin")
+	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
    	AC_MSG_RESULT(/usr/local/php/bin)
   fi
 ],[
-	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin")
+	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
    	AC_MSG_RESULT(/usr/local/php/bin)
 ])
 
@@ -477,27 +477,27 @@ PHP_ARG_ENABLE(sigchild,whether to enable PHP's own SIGCHLD handler,
 [  --enable-sigchild       Enable PHP's own SIGCHLD handler.],no)
 
 if test "$PHP_SIGCHILD" = "yes"; then
-  AC_DEFINE(PHP_SIGCHILD, 1)
+  AC_DEFINE(PHP_SIGCHILD, 1, [ ])
 else
-  AC_DEFINE(PHP_SIGCHILD, 0)
+  AC_DEFINE(PHP_SIGCHILD, 0, [ ])
 fi
 
 PHP_ARG_ENABLE(track-vars,whether to enable track_vars variables by default,
 [  --enable-track-vars     Enable GET/POST/Cookie track variables by default.],yes)
 
 if test "$PHP_TRACK_VARS" = "yes"; then
-  AC_DEFINE(PHP_TRACK_VARS, 1)
+  AC_DEFINE(PHP_TRACK_VARS, 1, [ ])
 else
-  AC_DEFINE(PHP_TRACK_VARS, 0)
+  AC_DEFINE(PHP_TRACK_VARS, 0, [ ])
 fi
 
 PHP_ARG_ENABLE(magic-quotes,whether to enable magic quotes by default,
 [  --enable-magic-quotes   Enable magic quotes by default.])
 
 if test "$PHP_MAGIC_QUOTES" = "yes"; then
-  AC_DEFINE(MAGIC_QUOTES, 1)
+  AC_DEFINE(MAGIC_QUOTES, 1, [ ])
 else
-  AC_DEFINE(MAGIC_QUOTES, 0)
+  AC_DEFINE(MAGIC_QUOTES, 0, [ ])
 fi
 
 PHP_ARG_ENABLE(rpath, whether to enable runpaths,
@@ -516,78 +516,51 @@ if test "$PHP_LIBGCC" = "yes"; then
   AC_ADD_LIBRARY(gcc, yes)
 fi
 
-AC_MSG_CHECKING(whether to enable short tags by default)
-AC_ARG_ENABLE(short-tags,
-[  --disable-short-tags    Disable the short-form <? start tag by default.],
-[
-  if test "$enableval" = "no"; then
-    AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, 0)
-    AC_MSG_RESULT(no)
-  else
-    AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, 1)
-    AC_MSG_RESULT(yes)
-  fi
-],[
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, 1)
-  AC_MSG_RESULT(yes)
-]) 
+PHP_ARG_ENABLE(short-tags,whether to enable short tags by default,
+[  --disable-short-tags    Disable the short-form <? start tag by default.],yes)
 
-AC_MSG_CHECKING(whether to enable the URL-aware fopen wrapper)
-AC_ARG_ENABLE(url-fopen-wrapper,
+if test "$PHP_SHORT_TAGS" = "yes"; then
+  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,1,[ ])
+else
+  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,0,[ ])
+fi
+
+PHP_ARG_ENABLE(url-fopen-wrapper,whether to enable the URL-aware fopen wrapper,
 [  --disable-url-fopen-wrapper 
                           Disable the URL-aware fopen wrapper that allows
-                          accessing files via http or ftp.],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(PHP_URL_FOPEN, 1)
-    AC_MSG_RESULT(yes)
-  else
-    AC_DEFINE(PHP_URL_FOPEN, 0)
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_DEFINE(PHP_URL_FOPEN, 1)
-  AC_MSG_RESULT(yes)
-])
+                          accessing files via http or ftp.], yes)
 
-AC_MSG_CHECKING(whether to enable PIC for shared objects)
-AC_ARG_ENABLE(pic,
-[  --disable-pic           Disable PIC for shared objects],[
-  PHP_PIC=$enableval
-],[
-  PHP_PIC=yes
-])
-AC_MSG_RESULT($PHP_PIC)
+if test "$PHP_URL_FOPEN_WRAPPER" = "yes"; then
+  AC_DEFINE(PHP_URL_FOPEN, 1, [ ])
+else
+  AC_DEFINE(PHP_URL_FOPEN, 0, [ ])
+fi
 
-DMALLOC_RESULT=no
-AC_MSG_CHECKING(whether to enable dmalloc)
-AC_ARG_ENABLE(dmalloc,
-[  --enable-dmalloc        Enable dmalloc],
-[
-  if test "$enableval" = "yes" ; then
-    AC_DEFINE(HAVE_DMALLOC, 1)
-    AC_ADD_LIBRARY(dmalloc)
-    CFLAGS="$CFLAGS -DDMALLOC_FUNC_CHECK"
-    DMALLOC_RESULT=yes
-  fi
-])
-AC_MSG_RESULT($DMALLOC_RESULT)
+PHP_ARG_ENABLE(pic,whether to enable PIC for shared objects,
+[  --disable-pic           Disable PIC for shared objects], yes)
 
-AC_ARG_ENABLE(pear,
-[  --disable-pear          Do not install PEAR],[
-  PHP_PEAR=$enableval
-],[
-  PHP_PEAR=yes
-])
 
-AC_MSG_CHECKING(whether to install PEAR)
-AC_MSG_RESULT($PHP_PEAR)
+PHP_ARG_ENABLE(dmalloc,whether to enable dmalloc,
+[  --enable-dmalloc        Enable dmalloc])
+
+if test "$PHP_DMALLOC" = "yes"; then
+  AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
+  AC_ADD_LIBRARY(dmalloc)
+  CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
+fi
+
+
+PHP_ARG_ENABLE(pear,whether to install PEAR,
+[  --disable-pear          Do not install PEAR],yes)
 
 if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
-	
+
+
+
+
 divert(5)
 
 PHP_CONFIGURE_PART(Configuring extensions)
@@ -645,7 +618,7 @@ LIBZEND_OTHER_CHECKS
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
   TSRM_LIB='TSRM/libtsrm.la'
   TSRM_DIR=TSRM
-  AC_DEFINE(ZTS)
+  AC_DEFINE(ZTS,1,[ ])
   INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
   PHP_THREAD_SAFETY=yes
 else
@@ -704,11 +677,11 @@ AC_BUILD_RPATH
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
-AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE")
+AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 PHP_UNAME=`uname -a`
-AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
+AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname`
-AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
+AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
 
 	

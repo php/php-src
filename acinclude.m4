@@ -236,7 +236,7 @@ exit(1);
 ])
 ])
 if test "$ac_cv_time_r_type" = "hpux"; then
-  AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-SUX 10.x])
+  AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x])
 fi
 ])
 
@@ -279,7 +279,7 @@ AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
   ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no)])
 
 if test "$ac_cv_struct_tm_gmtoff" = yes; then
-  AC_DEFINE(HAVE_TM_GMTOFF)
+  AC_DEFINE(HAVE_TM_GMTOFF,1,[whether you have tm_gmtoff in struct tm])
 fi
 ])
 
@@ -293,7 +293,7 @@ AC_DEFUN(PHP_CONFIGURE_PART,[
 AC_DEFUN(PHP_PROG_SENDMAIL,[
 AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH:/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib)
 if test -n "$PROG_SENDMAIL"; then
-  AC_DEFINE(HAVE_SENDMAIL)
+  AC_DEFINE(HAVE_SENDMAIL,1,[whether you have sendmail])
 fi
 ])
 
@@ -339,7 +339,7 @@ AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
         ])
 )
 if test "$ac_cv_struct_flock" = "yes" ; then
-    AC_DEFINE(HAVE_STRUCT_FLOCK, 1)
+    AC_DEFINE(HAVE_STRUCT_FLOCK, 1,[whether you have struct flock])
 fi
 ])
 
@@ -590,11 +590,11 @@ AC_DEFUN(PHP_REGEX,[
 if test "$REGEX_TYPE" = "php"; then
   REGEX_LIB=regex/libregex.la
   REGEX_DIR=regex
-  AC_DEFINE(HSREGEX)
-  AC_DEFINE(REGEX,1)
+  AC_DEFINE(HSREGEX,1,[ ])
+  AC_DEFINE(REGEX,1,[ ])
   PHP_FAST_OUTPUT(regex/Makefile)
 elif test "$REGEX_TYPE" = "system"; then
-  AC_DEFINE(REGEX,0)
+  AC_DEFINE(REGEX,0,[ ])
 fi
 
 AC_MSG_CHECKING(which regex library to use)
@@ -611,10 +611,10 @@ dnl
 AC_DEFUN(AC_MISSING_FCLOSE_DECL,[
   AC_MSG_CHECKING([for fclose declaration])
   AC_TRY_COMPILE([#include <stdio.h>],[int (*func)() = fclose],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,0)
+    AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
     AC_MSG_RESULT(ok)
   ],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,1)
+    AC_DEFINE(MISSING_FCLOSE_DECL,1,[ ])
     AC_MSG_RESULT(missing)
   ])
 ])
@@ -633,9 +633,9 @@ AC_DEFUN(AC_BROKEN_SPRINTF,[
     ])
   ])
   if test "$ac_cv_broken_sprintf" = "yes"; then
-    AC_DEFINE(BROKEN_SPRINTF, 1)
+    AC_DEFINE(PHP_BROKEN_SPRINTF, 1, [ ])
   else
-    AC_DEFINE(BROKEN_SPRINTF, 0)
+    AC_DEFINE(PHP_BROKEN_SPRINTF, 0, [ ])
   fi
 ])
 
@@ -780,7 +780,7 @@ AC_DEFUN(AC_SOCKADDR_SA_LEN,[
 #include <sys/socket.h>],
     [struct sockaddr s; s.sa_len;],
     [ac_cv_sockaddr_sa_len=yes
-     AC_DEFINE(HAVE_SOCKADDR_SA_LEN)],
+     AC_DEFINE(HAVE_SOCKADDR_SA_LEN,1,[ ])],
     [ac_cv_sockaddr_sa_len=no])
   ])
 ])
@@ -827,7 +827,7 @@ int main(void) {
   ac_cv_ebcdic="no"
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(CHARSET_EBCDIC,, [Define if system uses EBCDIC])
+    AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
   fi
 ])
 
