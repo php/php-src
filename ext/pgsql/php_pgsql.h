@@ -64,6 +64,7 @@ PHP_FUNCTION(pg_exec);
 PHP_FUNCTION(pg_numrows);
 PHP_FUNCTION(pg_numfields);
 PHP_FUNCTION(pg_cmdtuples);
+PHP_FUNCTION(pg_last_notice);
 PHP_FUNCTION(pg_fieldname);
 PHP_FUNCTION(pg_fieldsize);
 PHP_FUNCTION(pg_fieldtype);
@@ -120,6 +121,7 @@ typedef struct {
 	long allow_persistent;
 	int le_lofp,le_string;
 	int ignore_notices;
+	char *last_notice;
 } php_pgsql_globals;
 
 

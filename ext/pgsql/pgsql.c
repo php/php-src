@@ -46,6 +46,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_pconnect,		NULL)
 	PHP_FE(pg_close,		NULL)
 	PHP_FE(pg_cmdtuples,	NULL)
+	PHP_FE(pg_last_notice,  NULL)
 	PHP_FE(pg_dbname,		NULL)
 	PHP_FE(pg_errormessage,	NULL)
 	PHP_FE(pg_trace,		NULL)
@@ -145,6 +146,9 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 	PQfinish(link);
 	PGG(num_persistent)--;
 	PGG(num_links)--;
+	if(PGG(last_notice) != NULL) {
+		efree(PGG(last_notice));
+	}
 }
 
 
@@ -155,9 +159,12 @@ _notice_handler(void *arg, const char *message)
 
 	if (! PGG(ignore_notices)) {
 		php_log_err(message);
+		if (PGG(last_notice) != NULL) {
+			efree(PGG(last_notice));
+		}
+		PGG(last_notice) = estrdup(message);
 	}
 }
-
 
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 {
@@ -197,6 +204,7 @@ static void php_pgsql_init_globals(PGLS_D)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
+	PGG(last_notice) = NULL;
 }
 
 PHP_MINIT_FUNCTION(pgsql)
@@ -866,6 +874,16 @@ PHP_FUNCTION(pg_cmdtuples)
 }
 /* }}} */
 
+/* {{{ proto int pg_last_notice(int connection)
+    Returns the last notice set by the backend */
+PHP_FUNCTION(pg_last_notice) {
+	if (PGG(last_notice) == NULL) {
+		RETURN_FALSE;
+	} else {       
+		RETURN_STRING(PGG(last_notice),0);
+	}
+}
+/* }}} */
 
 char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
