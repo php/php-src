@@ -386,7 +386,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 					pval **var_handle;
 
 					/* fetch the VARIANT structure */
-					zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &var_handle);
+					zend_hash_index_find(Z_OBJPROP_P(pval_arg), 0, (void **) &var_handle);
 
 					V_VT(var_arg) = VT_VARIANT|VT_BYREF;
 					V_VARIANTREF(var_arg) = (VARIANT FAR*) zend_list_find(Z_LVAL_P(*var_handle), &tp);
@@ -900,8 +900,8 @@ static void comval_to_variant(pval *pval_arg, VARIANT *var_arg)
 	int type;
 
 	/* fetch the comval structure */
-	zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &comval_handle);
-	obj = (comval *)zend_list_find(Z_LVAL_P(*comval_handle), &type);
+	zend_hash_index_find(Z_OBJPROP_P(pval_arg), 0, (void **) &comval_handle);
+	obj = (comval *) zend_list_find(Z_LVAL_P(*comval_handle), &type);
 	if(!obj || (type != IS_COM) || !C_ISREFD(obj))
 	{
 		VariantInit(var_arg);
