@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Changed php.ini directive 'safe_mode_include_dir' to accept a
+  (semi)colon separated path (like 'include_path') rather than
+  a single directory. (jflemer)
 - Added is_a() function that can be used to test whether object is of a certain
   class or is derived from it. (Andrei, Zend Engine)
 - Added optional parameter to highlight_string and highlight_file which
