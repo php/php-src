@@ -105,7 +105,7 @@ DBA_UPDATE_FUNC(gdbm)
 	if(gdbm_store(dba->dbf, gkey, gval, 
 				mode == 1 ? GDBM_INSERT : GDBM_REPLACE) == 0)
 		return SUCCESS;
-	printf("XXX %s\n", gdbm_strerror(gdbm_errno));
+	php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
 	return FAILURE;
 }
 
