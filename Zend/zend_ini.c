@@ -60,7 +60,7 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage)
 /*
  * Startup / shutdown
  */
-int zend_ini_startup(ELS_D)
+ZEND_API int zend_ini_startup(ELS_D)
 {
 	registered_zend_ini_directives = &EG(ini_directives);
 	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, NULL, 1, 0)==FAILURE) {
@@ -70,21 +70,21 @@ int zend_ini_startup(ELS_D)
 }
 
 
-int zend_ini_shutdown(ELS_D)
+ZEND_API int zend_ini_shutdown(ELS_D)
 {
 	zend_hash_destroy(&EG(ini_directives));
 	return SUCCESS;
 }
 
 
-int zend_ini_deactivate(ELS_D)
+ZEND_API int zend_ini_deactivate(ELS_D)
 {
 	zend_hash_apply_with_argument(&EG(ini_directives), (int (*)(void *, void *)) zend_restore_ini_entry_cb, (void *) ZEND_INI_STAGE_DEACTIVATE);
 	return SUCCESS;
 }
 
 
-int zend_copy_ini_directives(ELS_D)
+ZEND_API int zend_copy_ini_directives(ELS_D)
 {
 	zend_ini_entry ini_entry;
 
@@ -117,7 +117,7 @@ static int ini_key_compare(const void *a, const void *b)
 }
 
 
-void zend_ini_sort_entries(ELS_D)
+ZEND_API void zend_ini_sort_entries(ELS_D)
 {
 	zend_hash_sort(&EG(ini_directives), qsort, ini_key_compare, 0);
 }
@@ -132,6 +132,7 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 	zend_ini_entry *hashed_ini_entry;
 	zval *default_value;
 
+#if 0
 	while (p->name) {
 		p->module_number = module_number;
 		if (zend_hash_add(registered_zend_ini_directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
@@ -151,6 +152,7 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 		}
 		p++;
 	}
+#endif
 	return SUCCESS;
 }
 

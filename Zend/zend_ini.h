@@ -52,13 +52,13 @@ struct _zend_ini_entry {
 };
 
 
-int zend_ini_startup(ELS_D);
-int zend_ini_shutdown(ELS_D);
-int zend_ini_deactivate(ELS_D);
+ZEND_API int zend_ini_startup(ELS_D);
+ZEND_API int zend_ini_shutdown(ELS_D);
+ZEND_API int zend_ini_deactivate(ELS_D);
 
-int zend_copy_ini_directives(ELS_D);
+ZEND_API int zend_copy_ini_directives(ELS_D);
 
-void zend_ini_sort_entries(ELS_D);
+ZEND_API void zend_ini_sort_entries(ELS_D);
 
 ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number);
 ZEND_API void zend_unregister_ini_entries(int module_number);
