@@ -62,7 +62,6 @@ build instructions:
 php.ini:
 
    [java]
-   java.library=/usr/lib/kaffe/libkaffevm.so
    java.library.path=/usr/lib/kaffe:/home/rubys/php4/modules
    java.class.path=/usr/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
@@ -79,7 +78,6 @@ build instructions:
 php.ini:
 
    [java]
-   java.library=/usr/local/lib/libkaffevm.so
    java.library.path=/usr/local/lib/kaffe:/home/rubys/php4/modules
    java.class.path=/usr/local/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
@@ -96,7 +94,6 @@ build instructions:
 php.ini:
 
    [java]
-   java.library=/home/jdk118/lib/linux/native_threads/libjava.so
    java.class.path=/home/jdk118/lib/classes.zip:/home/rubys/php4/modules/php_java.jar
    extension_dir=/home/rubys/php4/modules
    extension=libphp_java.so
@@ -112,7 +109,6 @@ build instructions:
 php.ini:
 
    [java]
-   java.library=/usr/local/lib/jdk1.2/jre/lib/i386/libjava.so
    java.library.path=/usr/local/lib/jdk1.2/jre/lib/i386/classic:/usr/local/lib/jdk1.2/jre/lib/i386/native_threads:/usr/local/lib/jdk1.2/jre/lib/i386:/var/tmp/work/php4/modules
    java.class.path=/usr/local/lib/jdk1.2/jre/lib/rt.jar:/usr/local/lib/jdk1.2/jre/lib/i18n.jar:/var/tmp/work/php4/modules/php_java.jar
    extension_dir=/var/tmp/work/php4/modules
