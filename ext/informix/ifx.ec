@@ -3242,7 +3242,7 @@ static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC)
 	if (Ifx_blob->BLOB.mode == BLMODE_INMEM) {
 		char *content;
 		if (locator_orig->loc_bufsize >= 0 && locator_orig->loc_buffer != NULL) {
-			if ((content = emalloc(locator_orig->loc_size)) == NULL) {
+			if ((content = emalloc(locator_orig->loc_bufsize)) == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 				return -1;
 			}
