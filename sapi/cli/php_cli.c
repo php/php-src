@@ -87,7 +87,7 @@
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aB:Cc:d:E:eF:f:g:hilmnqRH:r:sw?vz"
+#define OPTSTRING "aB:Cc:d:E:eF:f:g:hilmnqR:Hr:sw?vz"
 
 static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
