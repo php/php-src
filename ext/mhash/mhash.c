@@ -225,7 +225,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	password = Z_STRVAL_PP(input_password);
 	password_len = Z_STRLEN_PP(input_password);
 
-	salt_len = Z_STRLEN_PP(input_salt);
+	salt_len = MIN(Z_STRLEN_PP(input_salt), SALT_SIZE);
 
 	if (salt_len > mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED)) {
 		sprintf( error, "The specified salt [%d] is more bytes than the required by the algorithm [%d]\n", salt_len, mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED));
@@ -233,8 +233,9 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		php_error(E_WARNING, error);
 	}
 
-	memset( salt, 0, SALT_SIZE);
-	memcpy( salt, Z_STRVAL_PP(input_salt), salt_len);
+	memcpy(salt, Z_STRVAL_PP(input_salt), salt_len);
+	if (salt_len < SALT_SIZE)
+		memset(salt + salt_len, 0, SALT_SIZE - salt_len);
 	salt_len=SALT_SIZE;
 	
 /*	if (salt_len==0) {
