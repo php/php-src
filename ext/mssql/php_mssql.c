@@ -101,7 +101,7 @@ ZEND_DECLARE_MODULE_GLOBALS(mssql)
 ZEND_GET_MODULE(mssql)
 #endif
 
-#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MS SQL:  A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "%s(): A link to the server could not be established", get_active_function_name(TSRMLS_C)); RETURN_FALSE; } }
 
 static PHP_INI_DISP(display_text_size)
 {
@@ -146,7 +146,7 @@ static int php_mssql_error_handler(DBPROCESS *dbproc, int severity, int dberr, i
 	TSRMLS_FETCH();
 
 	if (severity >= MS_SQL_G(min_error_severity)) {
-		php_error(E_WARNING,"MS SQL error:  %s (severity %d)", dberrstr, severity);
+		php_error(E_WARNING,"%s(): %s (severity %d)", get_active_function_name(TSRMLS_C), dberrstr, severity);
 	}
 	return INT_CANCEL;  
 }
@@ -157,7 +157,7 @@ static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate
 	TSRMLS_FETCH();
 
 	if (severity >= MS_SQL_G(min_message_severity)) {
-		php_error(E_WARNING,"MS SQL message:  %s (severity %d)", msgtext, severity);
+		php_error(E_WARNING,"%s(): message: %s (severity %d)", get_active_function_name(TSRMLS_C), msgtext, severity);
 	}
 	if (MS_SQL_G(server_message)) {
 		STR_FREE(MS_SQL_G(server_message));
@@ -432,13 +432,13 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (hashed_details == NULL) {
-		php_error(E_WARNING, "Out of memory");
+		php_error(E_WARNING, "%s(): Out of memory", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	/* set a DBLOGIN record */	
 	if ((mssql.login = dblogin()) == NULL) {
-		php_error(E_WARNING,"MS SQL:  Unable to allocate login record");
+		php_error(E_WARNING,"%s(): Unable to allocate login record", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -473,20 +473,20 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
-				php_error(E_WARNING,"MS SQL:  Too many open links (%d)",MS_SQL_G(num_links));
+				php_error(E_WARNING,"%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), MS_SQL_G(num_links));
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
 			}
 			if (MS_SQL_G(max_persistent) != -1 && MS_SQL_G(num_persistent) >= MS_SQL_G(max_persistent)) {
-				php_error(E_WARNING,"MS SQL:  Too many open persistent links (%d)",MS_SQL_G(num_persistent));
+				php_error(E_WARNING,"%s(): Too many open persistent links (%d)", get_active_function_name(TSRMLS_C), MS_SQL_G(num_persistent));
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
 			}
 			/* create the link */
 			if ((mssql.link = dbopen(mssql.login, host)) == FAIL) {
-				php_error(E_WARNING,"MS SQL:  Unable to connect to server:  %s", host);
+				php_error(E_WARNING,"%s(): Unable to connect to server:  %s", get_active_function_name(TSRMLS_C), host);
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
@@ -532,7 +532,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if BROKEN_MSSQL_PCONNECTS
 				log_error("PHP/MS SQL:  Hashed persistent link is not a MS SQL link!",php_rqst->server);
 #endif
-				php_error(E_WARNING,"MS SQL:  Hashed persistent link is not a MS SQL link!");
+				php_error(E_WARNING, "%s(): Hashed persistent link is not a MS SQL link!", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 			
@@ -546,7 +546,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if BROKEN_MSSQL_PCONNECTS
 					log_error("PHP/MS SQL:  Unable to reconnect!",php_rqst->server);
 #endif
-					php_error(E_WARNING,"MS SQL:  Link to server lost, unable to reconnect");
+					php_error(E_WARNING, "%s(): Link to server lost, unable to reconnect", get_active_function_name(TSRMLS_C));
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -594,13 +594,13 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
-			php_error(E_WARNING,"MS SQL:  Too many open links (%d)",MS_SQL_G(num_links));
+			php_error(E_WARNING,"%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), MS_SQL_G(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		
 		if ((mssql.link=dbopen(mssql.login, host))==NULL) {
-			php_error(E_WARNING,"MS SQL:  Unable to connect to server:  %s", host);
+			php_error(E_WARNING,"%s(): Unable to connect to server:  %s", get_active_function_name(TSRMLS_C), host);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -740,7 +740,7 @@ PHP_FUNCTION(mssql_select_db)
 	convert_to_string_ex(db);
 	
 	if (dbuse(mssql_ptr->link, Z_STRVAL_PP(db))==FAIL) {
-		php_error(E_WARNING,"MS SQL:  Unable to select database:  %s", Z_STRVAL_PP(db));
+		php_error(E_WARNING, "%s(): Unable to select database:  %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(db));
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -831,7 +831,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				Z_STRLEN_P(result) = res_length;
 				Z_TYPE_P(result) = IS_STRING;
 			} else {
-				php_error(E_WARNING,"MS SQL:  column %d has unknown data type (%d)", offset, coltype(offset));
+				php_error(E_WARNING, "%s(): column %d has unknown data type (%d)", get_active_function_name(TSRMLS_C), offset, coltype(offset));
 				ZVAL_FALSE(result);
 			}
 		}
@@ -885,7 +885,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		Z_STRLEN_P(result) = res_length;
 		Z_TYPE_P(result) = IS_STRING;
 	} else {
-		php_error(E_WARNING,"MS SQL:  column %d has unknown data type (%d)", offset, coltype(offset));
+		php_error(E_WARNING, "%s(): column %d has unknown data type (%d)", get_active_function_name(TSRMLS_C), offset, coltype(offset));
 		ZVAL_FALSE(result);
 	}
 }
@@ -1036,11 +1036,11 @@ PHP_FUNCTION(mssql_query)
 	convert_to_string_ex(query);
 	
 	if (dbcmd(mssql_ptr->link, Z_STRVAL_PP(query))==FAIL) {
-		php_error(E_WARNING,"MS SQL:  Unable to set query");
+		php_error(E_WARNING, "%s(): Unable to set query", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	if (dbsqlexec(mssql_ptr->link)==FAIL || dbresults(mssql_ptr->link)==FAIL) {
-		php_error(E_WARNING,"MS SQL:  Query failed");
+		php_error(E_WARNING, "%s(): Query failed", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -1318,7 +1318,7 @@ PHP_FUNCTION(mssql_data_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=result->num_rows) {
-		php_error(E_WARNING,"MS SQL:  Bad row offset");
+		php_error(E_WARNING, "%s(): Bad row offset", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(mssql_fetch_field)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
-			php_error(E_WARNING,"MS SQL:  Bad column offset");
+			php_error(E_WARNING, "%s(): Bad column offset", get_active_function_name(TSRMLS_C));
 		}
 		RETURN_FALSE;
 	}
@@ -1467,7 +1467,7 @@ PHP_FUNCTION(mssql_field_length)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
-			php_error(E_WARNING,"MS SQL:  Bad column offset");
+			php_error(E_WARNING, "%s(): Bad column offset", get_active_function_name(TSRMLS_C));
 		}
 		RETURN_FALSE;
 	}
@@ -1514,7 +1514,7 @@ PHP_FUNCTION(mssql_field_name)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
-			php_error(E_WARNING,"MS SQL:  Bad column offset");
+			php_error(E_WARNING, "%s(): Bad column offset", get_active_function_name(TSRMLS_C));
 		}
 		RETURN_FALSE;
 	}
@@ -1562,7 +1562,7 @@ PHP_FUNCTION(mssql_field_type)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
-			php_error(E_WARNING,"MS SQL:  Bad column offset");
+			php_error(E_WARNING, "%s(): Bad column offset", get_active_function_name(TSRMLS_C));
 		}
 		RETURN_FALSE;
 	}
@@ -1592,7 +1592,7 @@ PHP_FUNCTION(mssql_field_seek)
 	field_offset = Z_LVAL_PP(offset);
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		php_error(E_WARNING,"MS SQL:  Bad column offset");
+		php_error(E_WARNING, "%s(): Bad column offset", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -1618,7 +1618,7 @@ PHP_FUNCTION(mssql_result)
 	
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= result->num_rows) {
-		php_error(E_WARNING,"MS SQL:  Bad row offset (%d)", Z_LVAL_PP(row));
+		php_error(E_WARNING, "%s(): Bad row offset (%d)", get_active_function_name(TSRMLS_C), Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 
@@ -1633,7 +1633,7 @@ PHP_FUNCTION(mssql_result)
 				}
 			}
 			if (i>=result->num_fields) { /* no match found */
-				php_error(E_WARNING,"MS SQL:  %s field not found in result", Z_STRVAL_PP(field));
+				php_error(E_WARNING,"%s(): %s field not found in result", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(field));
 				RETURN_FALSE;
 			}
 			break;
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(mssql_result)
 			convert_to_long_ex(field);
 			field_offset = Z_LVAL_PP(field);
 			if (field_offset<0 || field_offset>=result->num_fields) {
-				php_error(E_WARNING,"MS SQL:  Bad column offset specified");
+				php_error(E_WARNING, "%s(): Bad column offset specified", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 			break;
@@ -1753,7 +1753,7 @@ PHP_FUNCTION(mssql_init)
 	convert_to_string_ex(sp_name);
 	
 	if (dbrpcinit(mssql_ptr->link, Z_STRVAL_PP(sp_name),0)==FAIL) {
-		php_error(E_WARNING,"MS SQL:  unable to init stored procedure");
+		php_error(E_WARNING, "%s(): unable to init stored procedure", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -1765,7 +1765,7 @@ PHP_FUNCTION(mssql_init)
 		statement->executed=FALSE;
 	}
 	else {
-		php_error(E_WARNING,"mssql_init: unable to allocate statement");
+		php_error(E_WARNING, "%s(): unable to allocate statement", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -1902,7 +1902,7 @@ PHP_FUNCTION(mssql_bind)
 				break;
 
 			default:
-				php_error(E_WARNING,"mssql_bind: unsupported type");
+				php_error(E_WARNING, "%s(): unsupported type", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 				break;
 		}
@@ -1928,7 +1928,7 @@ PHP_FUNCTION(mssql_bind)
 	/* no call to dbrpcparam if RETVAL */
 	if ( strcmp("RETVAL",Z_STRVAL_PP(param_name))!=0 ) {						
 		if (dbrpcparam(mssql_ptr->link, Z_STRVAL_PP(param_name), (BYTE)status, type, maxlen, datalen, (LPCBYTE)value)==FAIL) {
-			php_error(E_WARNING,"MS SQL:  Unable to set parameter");
+			php_error(E_WARNING, "%s(): Unable to set parameter", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	}
@@ -1964,14 +1964,14 @@ PHP_FUNCTION(mssql_execute)
 	mssql_ptr=statement->link;
 
 	if (dbrpcexec(mssql_ptr->link)==FAIL || dbsqlok(mssql_ptr->link)==FAIL) {
-		php_error(E_WARNING,"MS SQL:  stored procedure execution failed.");
+		php_error(E_WARNING, "%s(): stored procedure execution failed.", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	retval_results=dbresults(mssql_ptr->link);
 
 	if (retval_results==FAIL) {
-		php_error(E_WARNING,"MS SQL:  could not retrieve results");
+		php_error(E_WARNING, "%s(): could not retrieve results", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -2004,7 +2004,7 @@ PHP_FUNCTION(mssql_execute)
 	}
 	
 	if (retval_results==SUCCEED) {
-		php_error(E_WARNING,"mssql_execute:  multiple recordsets from a stored procedure not supported yet! (Skipping...)");
+		php_error(E_WARNING, "%s(): multiple recordsets from a stored procedure not supported yet! (Skipping...)", get_active_function_name(TSRMLS_C));
 		retval_results=dbresults(mssql_ptr->link);
 		
 		while (retval_results==SUCCEED) {
@@ -2048,7 +2048,7 @@ PHP_FUNCTION(mssql_execute)
 						}
 					}
 					else {
-						php_error(E_WARNING,"mssql_execute: an output parameter variable was not provided");
+						php_error(E_WARNING, "%s(): an output parameter variable was not provided", get_active_function_name(TSRMLS_C));
 					}
 				}
 			}
@@ -2061,7 +2061,7 @@ PHP_FUNCTION(mssql_execute)
 					Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
 				}
 				else {
-					php_error(E_WARNING,"mssql_execute: stored procedure has no return value. Nothing was returned into RETVAL");
+					php_error(E_WARNING, "%s(): stored procedure has no return value. Nothing was returned into RETVAL", get_active_function_name(TSRMLS_C));
 				}
 			}
 		}
