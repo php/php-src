@@ -187,7 +187,7 @@ _build_comment(const xmlChar *data, int data_len, xmlChar **comment, int *commen
 {
 	*comment_len = data_len + 6;
 	
-	*comment = emalloc(*comment_len + 1);
+	*comment = xmlMalloc(*comment_len + 1);
 	memcpy(*comment, "<--", 3);
 	memcpy(*comment + 3, data, data_len);
 	memcpy(*comment + 3 + data_len, "-->", 3);
