@@ -33,6 +33,10 @@
 
 #if HAVE_PDFLIB
 
+/* with version 2.20 of pdflib PDF_open_mem isn't available unless
+   the following define isn't there.
+   #define PDF_OPEN_MEM_SUPPORTED
+*/
 #include <pdflib.h>
 
 extern int le_fp;

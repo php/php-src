@@ -40,6 +40,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "ext/standard/head.h"
 
 #include <math.h>
 
@@ -224,6 +225,7 @@ static void pdf_efree(PDF *p, void *mem) {
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
 	if(php_header())
 		return(php_write(data, size));
+	return 0;
 }
 #endif
 
@@ -238,6 +240,13 @@ PHP_MINIT_FUNCTION(pdf)
 PHP_MINFO_FUNCTION(pdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
 	php_printf("pdflib %d.%02d<BR>",  PDF_get_majorversion(), PDF_get_minorversion());
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
+		php_printf("The CJK fonts supported.");
+#endif
+#ifdef PDF_OPEN_MEM_SUPPORTED
+	php_printf("Support for in memory pdf creation.");
+#endif
+
 #if PDFLIB_MINORVERSION > 0
 		php_printf("The function pdf_put_image() and pdf_execute_image() are <B>not</B> available");
 #else
@@ -415,9 +424,7 @@ PHP_FUNCTION(pdf_open) {
 		WRONG_PARAM_COUNT;
 	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		fp = NULL;
-		php3_printf("No File\n");
 	} else {
-		php3_printf("With File\n");
 		ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
 		/* XXX should do anzend_list_addref for <fp> here! */
 	}
@@ -437,13 +444,17 @@ PHP_FUNCTION(pdf_open) {
 	pdf = PDF_new();
 #endif
 
-#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10
+#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10 & defined PDF_OPEN_MEM_SUPPORTED
 	if(fp) {
 		if (0 > PDF_open_fp(pdf, fp))
 			RETURN_FALSE;
 	} else {
+#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20) & defined PDF_OPEN_MEM_SUPPORTED
+		PDF_open_mem(pdf, pdf_flushwrite);
+#else
 		if (0 > PDF_open_mem(pdf, pdf_flushwrite))
 			RETURN_FALSE;
+#endif
 	}
 #else
 	if (0 > PDF_open_fp(pdf, fp)) {
@@ -623,14 +634,22 @@ PHP_FUNCTION(pdf_set_font) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_double(arg3);
+#if PDFLIB_MAJORVERSION >= 2
+	convert_to_string(arg4);
+#else
 	convert_to_long(arg4);
+#endif
+
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
-	
+
+#if PDFLIB_MAJORVERSION >= 2
+	font = PDF_findfont(pdf, arg2->value.str.val, arg4->value.str.val, embed);
+#else	
 	if((arg4->value.lval > 5) || (arg4->value.lval < 0)) {
 		php_error(E_WARNING,"Font encoding set to 4");
 		arg4->value.lval = 4;
@@ -656,7 +675,7 @@ PHP_FUNCTION(pdf_set_font) {
 			php_error(E_WARNING,"Encoding out of range, using 0");
 			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", embed);
 	}
-
+#endif
 	if (font < 0) {
 		php_error(E_WARNING,"Font %s not found", arg2->value.str.val);
 		RETURN_FALSE;
