@@ -3205,7 +3205,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 		return PG_TIME;
 	if (!strcmp(type_name, "timestamp") || !strcmp(type_name, "time with time zone"))
 		return PG_TIME_WITH_TIMEZONE;
-	if (!strcmp(type_name, "timestamp with time zone"))
+	if (!strcmp(type_name, "timestamp with time zone") || !strcmp(type_name, "timestamptz"))
 		return PG_TIMESTAMP_WITH_TIMEZONE;
 	if (!strcmp(type_name, "interval"))
 		return PG_INTERVAL;
@@ -3665,7 +3665,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})([ \\t]+(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1 TSRMLS_CC) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})([ \\t]+(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}(\\.[0-9]+){0,1}([ \\t]*([+-][0-9]{1,2}(:[0-9]{1,2}){0,1}|[a-zA-Z]{1,5})){0,1})){0,1}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
