@@ -47,7 +47,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				 */
 				if (object->ce != EG(scope)) {
 					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
-					zend_error(E_ERROR, "Call to private destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+					/* this is a E_ERROR in real but we can't do that right now because of problems in shutdown */
+					zend_error(E_WARNING, "Call to private destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
 					return;
 				}
 			} else {
@@ -55,7 +56,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				 */
 				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
 					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
-					zend_error(E_ERROR, "Call to protected destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+					zend_error(E_WARNING, "Call to protected destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
 					return;
 				}
 			}
