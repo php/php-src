@@ -558,11 +558,11 @@ class PEAR_Config extends PEAR
      *
      * @access public.
      */
-    function writeConfigFile($file = null, $layer = 'user')
+    function writeConfigFile($file = null, $layer = 'user', $data = null)
     {
         if ($layer == 'both' || $layer == 'all') {
             foreach ($this->files as $type => $file) {
-                $err = $this->writeConfigFile($file, $type);
+                $err = $this->writeConfigFile($file, $type, $data);
                 if (PEAR::isError($err)) {
                     return $err;
                 }
@@ -575,7 +575,7 @@ class PEAR_Config extends PEAR
         if ($file === null) {
             $file = $this->files[$layer];
         }
-        $data = $this->configuration[$layer];
+        $data = ($data === null) ? $this->configuration[$layer] : $data;
         $this->_encodeOutput($data);
         if (!@System::mkDir("-p " . dirname($file))) {
             return $this->raiseError("could not create directory: " . dirname($file));
@@ -639,6 +639,19 @@ class PEAR_Config extends PEAR
             return $this->raiseError("$file: unknown version `$version'");
         }
         return $data;
+    }
+
+    // }}}
+    // {{{ getConfFile(layer)
+    /**
+    * Gets the file used for storing the config for a layer
+    *
+    * @param string $layer 'user' or 'system'
+    */
+
+    function getConfFile($layer)
+    {
+        return $this->files[$layer];
     }
 
     // }}}
@@ -1008,8 +1021,7 @@ class PEAR_Config extends PEAR
     function removeLayer($layer)
     {
         if (isset($this->configuration[$layer])) {
-            unset($this->configuration[$layer]);
-            $this->layers = array_keys($this->configuration);
+            $this->configuration[$layer] = array();
             return true;
         }
         return false;
@@ -1027,9 +1039,9 @@ class PEAR_Config extends PEAR
      *
      * @access public
      */
-    function store($layer = 'user')
+    function store($layer = 'user', $data = null)
     {
-        return $this->writeConfigFile(null, $layer);
+        return $this->writeConfigFile(null, $layer, $data);
     }
 
     // }}}
