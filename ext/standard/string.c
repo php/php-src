@@ -112,10 +112,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (char *) emalloc(oldlen * 2 * sizeof(char) + 1);
-	if (!result) {
-		return result;
-	}
+	result = safe_emalloc(sizeof(char), oldlen * 2, 1);
 	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
@@ -676,6 +673,9 @@ PHP_FUNCTION(wordwrap)
 		} else {
 			chk = textlen;
 			alloced = textlen * (breakcharlen + 1) + 1;
+		}
+		if (alloced <= 0) {
+			RETURN_FALSE;
 		}
 		newtext = emalloc(alloced);
 
@@ -1553,7 +1553,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	dest = emalloc((srclen + (chunks + 1) * endlen + 1) * sizeof(char));
+	dest = safe_emalloc(sizeof(char), (srclen + (chunks + 1) * endlen + 1), 0);
 
 	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
@@ -1773,7 +1773,7 @@ PHP_FUNCTION(quotemeta)
 		RETURN_FALSE;
 	}
 	
-	str = emalloc(2 * Z_STRLEN_PP(arg) + 1);
+	str = safe_emalloc(2, Z_STRLEN_PP(arg), 1);
 	
 	for (p = old, q = str; p != old_end; p++) {
 		c = *p;
@@ -2997,7 +2997,10 @@ PHP_FUNCTION(nl2br)
 		RETURN_STRINGL(Z_STRVAL_PP(zstr), Z_STRLEN_PP(zstr), 1);
 	}
 
-	new_length = Z_STRLEN_PP(zstr) + repl_cnt * (sizeof("<br />") - 1);
+	if ((new_length = Z_STRLEN_PP(zstr) + repl_cnt * (sizeof("<br />") - 1)) < 0) {
+		RETURN_FALSE;
+	}
+	
 	tmp = target = emalloc(new_length + 1);
 
 	str = Z_STRVAL_PP(zstr);
@@ -3070,7 +3073,7 @@ PHP_FUNCTION(strip_tags)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	pval ***args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
+	pval ***args = (pval ***) safe_emalloc(sizeof(pval **), ZEND_NUM_ARGS(), 0);
 	zval **pcategory, **plocale;
 	int i, cat, n_args=ZEND_NUM_ARGS();
 	char *loc, *retval;
@@ -3534,7 +3537,7 @@ PHP_FUNCTION(str_repeat)
 	
 	/* Initialize the result string */	
 	result_len = Z_STRLEN_PP(input_str) * Z_LVAL_PP(mult);
-	if (result_len < 1 || result_len > 2147483647) {
+	if (result_len < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer then 2147483647 bytes");
 		RETURN_FALSE;
 	}
@@ -3913,7 +3916,7 @@ PHP_FUNCTION(sscanf)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (zval ***) emalloc(argc * sizeof(zval **));
+	args = (zval ***) safe_emalloc(sizeof(zval **), argc, 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
