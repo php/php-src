@@ -2249,12 +2249,12 @@ try_and_get_another_connection:
 			list_entry new_le;
 			
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-				php_error_docref1("odbc-exec" TSRMLS_CC, E_WARNING, "Too many open links (%d)", ODBCG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", ODBCG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (ODBCG(max_persistent) != -1 && ODBCG(num_persistent) >= ODBCG(max_persistent)) {
-				php_error_docref1(NULL TSRMLS_CC, E_WARNING,"Too many open persistent links (%d)", ODBCG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Too many open persistent links (%d)", ODBCG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
