@@ -50,13 +50,8 @@ dlfcn.h)
 AC_TYPE_SIZE_T
 AC_TYPE_SIGNAL
 
-AC_CHECK_LIB(c, dlopen, [
- # fake it
- AC_DEFINE(HAVE_LIBDL) ], [
- AC_CHECK_LIB(dl, dlopen, [
-  LIBS="-ldl $LIBS"
-  AC_DEFINE(HAVE_LIBDL) ], []) ])
-
+AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
+AC_CHECK_FUNC(dlopen,[AC_DEFINE(HAVE_LIBDL, 1,[ ])])
 
 dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
