@@ -26,8 +26,9 @@
 #include "zend_interfaces.h"
 
 
-ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+ZEND_API void zend_objects_destroy_object(void *_object, zend_object_handle handle TSRMLS_DC)
 {
+	zend_object *object = (zend_object*)_object;
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
@@ -86,8 +87,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	}
 }
 
-ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
+ZEND_API void zend_objects_free_object_storage(void *_object TSRMLS_DC)
 {
+	zend_object *object = (zend_object*)_object;
+
 	zend_hash_destroy(object->properties);
 	FREE_HASHTABLE(object->properties);
 	efree(object);
