@@ -54,7 +54,9 @@
 #endif
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
+#if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
+#endif
 #include "ext/session/php_session.h"
 #if HAVE_LIBEXPAT
 #include "ext/xml/php_xml.h"
@@ -86,7 +88,9 @@ zend_module_entry *php_builtin_extensions[] = {
 	phpext_mbstring_ptr,
 #endif
 	phpext_mysql_ptr,
+#if HAVE_UODBC
 	phpext_odbc_ptr,
+#endif
 #if HAVE_OVERLOAD
   phpext_overload_ptr,
 #endif
