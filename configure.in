@@ -356,6 +356,7 @@ crypt \
 ctime_r \
 cuserid \
 flock \
+gai_strerror \
 gcvt \
 getlogin \
 gethostbyaddr \
