@@ -48,6 +48,7 @@ Windows Manual installation from zip binary distribution
   Personal Web Server 3 and 4 or newer
   Internet Information Server 3 and 4 or newer
   Apache 1.3.x
+  Apache 2.0.x  (experimental)
   OmniHTTPd 2.0b1 and up
   Oreilly Website Pro
   Xitami
@@ -201,6 +202,22 @@ Web server configuration
 ========================
 
  Installing PHP on Windows with Apache 1.3.x
+
+ ------------------------------------------------------------
+ ATTENTION: Apache 2 Users
+
+   At this time, support for Apache 2 is experimental.  It's
+   highly recommended you use PHP with Apache 1.3.x and not
+   Apache 2.  Documentation for installing Apache 2 on windows 
+   can be seen here:
+
+      http://www.php.net/manual/en/install.apache2.php
+
+   With the basic difference being that when installing as a 
+   module you'll use php4apache2.dll instead of php4apache.dll
+   Both files are included within this release.
+  ------------------------------------------------------------
+
 
   There are two ways to set up PHP to work with Apache 1.3.x
   on Windows. One is to use the CGI binary (php-cgi.exe),
