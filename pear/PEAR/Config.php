@@ -24,7 +24,7 @@ require_once 'PEAR.php';
 /**
  * This is a class for storing simple configuration values keeping
  * track of which are system-defined (defaulted) and which are
- * user-defined.  By default, only used-defined settings are stored
+ * user-defined.  By default, only user-defined settings are stored
  * back to the user's configuration file.
  *
  * Configuration member is a simple associative array.  Used keys:
