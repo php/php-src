@@ -75,7 +75,11 @@ void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_
 	*ppce = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
-	(*ppce)->create_object = obj_ctor;
+	if (obj_ctor) {
+		(*ppce)->create_object = obj_ctor;
+	} else {
+		(*ppce)->create_object = parent_ce->create_object;
+	}
 }
 /* }}} */
 
