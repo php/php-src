@@ -39,7 +39,6 @@ ZEND_DECLARE_MODULE_GLOBALS(spl)
  */
 function_entry spl_functions[] = {
 	PHP_FE(spl_classes,             NULL)
-	PHP_FE(class_name,              NULL)
 	PHP_FE(class_parents,           NULL)
 	PHP_FE(class_implements,        NULL)
 	{NULL, NULL, NULL}
@@ -122,47 +121,47 @@ PHP_MINIT_FUNCTION(spl)
 {
 	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
 
-	REGISTER_SPL_INTERFACE(spl, iterator);
-	REGISTER_SPL_INTF_FUNC(spl, iterator, new_iterator);
+	REGISTER_SPL_INTERFACE(iterator);
+	REGISTER_SPL_INTF_FUNC(iterator, new_iterator);
 
-	REGISTER_SPL_INTERFACE(spl, forward);
-	REGISTER_SPL_INTF_FUNC(spl, forward, current);
-	REGISTER_SPL_INTF_FUNC(spl, forward, next);
-	REGISTER_SPL_INTF_FUNC(spl, forward, has_more);
+	REGISTER_SPL_INTERFACE(forward);
+	REGISTER_SPL_INTF_FUNC(forward, current);
+	REGISTER_SPL_INTF_FUNC(forward, next);
+	REGISTER_SPL_INTF_FUNC(forward, has_more);
 
-	REGISTER_SPL_INTERFACE(spl, sequence);
-	REGISTER_SPL_INTF_FUNC(spl, sequence, rewind);
-	REGISTER_SPL_IMPLEMENT(spl, sequence, forward);
+	REGISTER_SPL_INTERFACE(sequence);
+	REGISTER_SPL_INTF_FUNC(sequence, rewind);
+	REGISTER_SPL_IMPLEMENT(sequence, forward);
 
-	REGISTER_SPL_INTERFACE(spl, assoc);
-	REGISTER_SPL_INTF_FUNC(spl, assoc, key);
+	REGISTER_SPL_INTERFACE(assoc);
+	REGISTER_SPL_INTF_FUNC(assoc, key);
 
-	REGISTER_SPL_INTERFACE(spl, forward_assoc);
-	REGISTER_SPL_IMPLEMENT(spl, forward_assoc, assoc);
-	REGISTER_SPL_IMPLEMENT(spl, forward_assoc, forward);
+	REGISTER_SPL_INTERFACE(forward_assoc);
+	REGISTER_SPL_IMPLEMENT(forward_assoc, assoc);
+	REGISTER_SPL_IMPLEMENT(forward_assoc, forward);
 
-	REGISTER_SPL_INTERFACE(spl, sequence_assoc);
-	REGISTER_SPL_IMPLEMENT(spl, sequence_assoc, forward_assoc);
-	REGISTER_SPL_IMPLEMENT(spl, sequence_assoc, sequence);
+	REGISTER_SPL_INTERFACE(sequence_assoc);
+	REGISTER_SPL_IMPLEMENT(sequence_assoc, forward_assoc);
+	REGISTER_SPL_IMPLEMENT(sequence_assoc, sequence);
 
-	REGISTER_SPL_INTERFACE(spl, array_read);
-	REGISTER_SPL_INTF_FUNC(spl, array_read, get);
-	REGISTER_SPL_INTF_FUNC(spl, array_read, exists);
+	REGISTER_SPL_INTERFACE(array_read);
+	REGISTER_SPL_INTF_FUNC(array_read, get);
+	REGISTER_SPL_INTF_FUNC(array_read, exists);
 
-	REGISTER_SPL_INTERFACE(spl, array_access);
-	REGISTER_SPL_IMPLEMENT(spl, array_access, array_read);
-	REGISTER_SPL_INTF_FUNC(spl, array_access, set);
+	REGISTER_SPL_INTERFACE(array_access);
+	REGISTER_SPL_IMPLEMENT(array_access, array_read);
+	REGISTER_SPL_INTF_FUNC(array_access, set);
 
-	REGISTER_SPL_INTERFACE(spl, array_access_ex);
-	REGISTER_SPL_IMPLEMENT(spl, array_access_ex, array_access);
-	REGISTER_SPL_INTF_FUNC(spl, array_access_ex, new_writer);
+	REGISTER_SPL_INTERFACE(array_access_ex);
+	REGISTER_SPL_IMPLEMENT(array_access_ex, array_access);
+	REGISTER_SPL_INTF_FUNC(array_access_ex, new_writer);
 
-	REGISTER_SPL_INTERFACE(spl, array_writer);
-	REGISTER_SPL_INTF_FUNC(spl, array_writer, set); 
+	REGISTER_SPL_INTERFACE(array_writer);
+	REGISTER_SPL_INTF_FUNC(array_writer, set); 
 
 #ifdef SPL_ARRAY_WRITE
-	REGISTER_SPL_STD_CLASS(spl, array_writer_default, spl_array_writer_default_create);
-	REGISTER_SPL_FUNCTIONS(spl, array_writer_default, spl_array_writer_funcs);
+	REGISTER_SPL_STD_CLASS(array_writer_default, spl_array_writer_default_create);
+	REGISTER_SPL_FUNCTIONS(array_writer_default, spl_array_writer_funcs);
 #endif
 
 	return SUCCESS;
@@ -244,19 +243,6 @@ PHP_MINFO_FUNCTION(spl)
 	php_info_print_table_row(2,    "array_access_ex",    array_write);
 	php_info_print_table_row(2,    "array_writer",       array_write);
 	php_info_print_table_end();
-}
-/* }}} */
-
-/* {{{ proto string class_name(object)
-       Retrieve  */
-PHP_FUNCTION(class_name)
-{
-	zval *obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
-		RETURN_FALSE;
-	}
-	RETURN_STRING(spl_make_fully_qualyfied_name(Z_OBJCE_P(obj) TSRMLS_CC), 0);
 }
 /* }}} */
 

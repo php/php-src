@@ -63,40 +63,27 @@ static inline int spl_begin_method_call_arg(zval **ce, zend_class_entry *obj_ce,
 }
 /* }}} */
 
-/* {{{ spl_begin_method_call_this */
-static inline int spl_begin_method_call_this(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval TSRMLS_DC)
+/* {{{ spl_begin_method_call_no_retval */
+static inline int spl_begin_method_call_no_retval(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len TSRMLS_DC)
 {
-	zval *local_retval;
-	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 0);
-	if (local_retval) {
-		COPY_PZVAL_TO_ZVAL(*retval, local_retval);
-	} else {
-		INIT_ZVAL(*retval);
+	zval *retval;
+	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &retval, NULL TSRMLS_CC, 0);
+	if (retval) {
+		zval_dtor(retval);
+		FREE_ZVAL(retval);
 	}
 	return ret;
 }
 /* }}} */
 
-/* {{{ spl_begin_method_call_ex */
-static inline int spl_begin_method_call_ex(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval TSRMLS_DC)
-{
-	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0);
-}
-/* }}} */
+#define spl_begin_method_call_ex(ce, obj_ce, fn_proxy, function_name, fname_len, retval) \
+	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0)
 
-/* {{{ spl_begin_method_call_arg_ex1 */
-static inline int spl_begin_method_call_arg_ex1(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1 TSRMLS_DC)
-{
-	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1);
-}
-/* }}} */
+#define spl_begin_method_call_arg_ex1(ce, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
+	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1)
 
-/* {{{ spl_begin_method_call_arg_ex2 */
-static inline int spl_begin_method_call_arg_ex2(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1, zval *arg2 TSRMLS_DC)
-{
-	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2);
-}
-/* }}} */
+#define spl_begin_method_call_arg_ex2(ce, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
+	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2)
 
 void spl_instanciate(zend_class_entry *pce, zval **object TSRMLS_DC);
 int spl_instanciate_arg_ex2(zend_class_entry *pce, zval **retval, zval *arg1, zval *arg2, HashTable *symbol_table TSRMLS_DC);

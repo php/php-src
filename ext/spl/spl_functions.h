@@ -23,22 +23,22 @@
 
 typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
 
-#define REGISTER_SPL_STD_CLASS(namespace_name, class_name, obj_ctor) \
+#define REGISTER_SPL_STD_CLASS(class_name, obj_ctor) \
 	spl_register_std_class(&spl_ce_ ## class_name, "spl_" # class_name, obj_ctor TSRMLS_CC);
 
-#define REGISTER_SPL_INTERFACE(namespace_name, class_name) \
+#define REGISTER_SPL_INTERFACE(class_name) \
 	spl_register_interface(&spl_ce_ ## class_name, "spl_" # class_name TSRMLS_CC);
 
-#define REGISTER_SPL_INTF_FUNC(namespace_name, class_name, function_name) \
+#define REGISTER_SPL_INTF_FUNC(class_name, function_name) \
 	spl_register_interface_function(spl_ce_ ## class_name, # function_name TSRMLS_CC);
 
-#define REGISTER_SPL_PARENT_CE(namespace_name, class_name, parent_class) \
+#define REGISTER_SPL_PARENT_CE(class_name, parent_class) \
 	spl_register_parent_ce(spl_ce_ ## class_name, spl_ce_ ## parent_class TSRMLS_CC);
 
-#define REGISTER_SPL_IMPLEMENT(namespace_name, class_name, interface_name) \
+#define REGISTER_SPL_IMPLEMENT(class_name, interface_name) \
 	spl_register_implement(spl_ce_ ## class_name, spl_ce_ ## interface_name TSRMLS_CC);
 
-#define REGISTER_SPL_FUNCTIONS(namespace_name, class_name, function_list) \
+#define REGISTER_SPL_FUNCTIONS(class_name, function_list) \
 	spl_register_functions(spl_ce_ ## class_name, function_list TSRMLS_CC);
 
 void spl_destroy_class(zend_class_entry ** ppce);
@@ -52,7 +52,6 @@ void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * p
 void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * interface_entry TSRMLS_DC);
 void spl_register_functions(zend_class_entry * class_entry, function_entry * function_list TSRMLS_DC);
 
-char * spl_make_fully_qualyfied_name(zend_class_entry * pce TSRMLS_DC);
 void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC);
 void spl_add_interfaces(zval * list, zend_class_entry * pce TSRMLS_DC);
 int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);

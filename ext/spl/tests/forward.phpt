@@ -34,7 +34,7 @@ class c implements spl_forward_assoc {
 
 $i = new c();
 
-$c_info = array(class_name($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
+$c_info = array(get_class($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
 print_r($c_info);
 $methods = get_class_methods("spl_forward_assoc");
 sort($methods);
