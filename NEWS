@@ -1,13 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.2
-- SoapClient->__call() is renamed to SoapClinet->__soap_call(). (Dmitry)
-- Add interface_exists() and make class_exists() only return true for real
+- Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
+  them sort based on the current locale. (Derick)
+- Added interface_exists() and make class_exists() only return true for real
   classes. (Andrey)
-- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
-  exhaustion. (Andrei)
 - Added PHP_EOL constant that contains the OS way of representing newlines.
   (Paul Hudson, Derick)
+- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
+  exhaustion. (Andrei)
+- Renamed SoapClient->__call() to SoapClinet->__soap_call(). (Dmitry)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29985 (unserialize()/ __PHP_Incomplete_class does not report 
