@@ -48,7 +48,9 @@ PHP_FUNCTION(dom_documentfragment_documentfragment)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	id = getThis();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_documentfragment_class_entry) == FAILURE) {
+		return;
+	}
 
 	nodep = xmlNewDocFragment(NULL);
 
