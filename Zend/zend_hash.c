@@ -30,30 +30,52 @@
 # include <limits.h>
 #endif
 
-#define HANDLE_NUMERIC(key, length, func) { \
-	register char *tmp=key; \
-\
-	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */ \
-		char *end=tmp+length-1; \
-		ulong idx; \
-		\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */ \
-			break; \
-		} \
-		while (tmp<end) { \
-			if (!(*tmp>='0' && *tmp<='9')) { \
-				break; \
-			} \
-			tmp++; \
-		} \
-		if (tmp==end && *tmp=='\0') { /* a numeric index */ \
-			idx = strtol(key,NULL,10); \
-			if (idx!=LONG_MAX) { \
-				return func; \
-			} \
-		} \
-	} while(0); \
+#define HANDLE_NUMERIC(key, length, func) {												\
+	register char *tmp=key;																\
+																						\
+	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
+		char *end=tmp+length-1;															\
+		ulong idx;																		\
+																						\
+		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
+			break;																		\
+		}																				\
+		while (tmp<end) {																\
+			if (!(*tmp>='0' && *tmp<='9')) {											\
+				break;																	\
+			}																			\
+			tmp++;																		\
+		}																				\
+		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
+			idx = strtol(key, NULL, 10);													\
+			if (idx!=LONG_MAX) {														\
+				return func;															\
+			}																			\
+		}																				\
+	} while(0);																			\
 }
+
+
+#define CONNECT_TO_BUCKET_DLLIST(element, list_head)		\
+	(element)->pNext = (list_head);							\
+	(element)->pLast = NULL;								\
+	if ((element)->pNext) {									\
+		(element)->pNext->pLast = (element);				\
+	}
+
+#define CONNECT_TO_GLOBAL_DLLIST(element, ht)				\
+	(element)->pListLast = (ht)->pListTail;					\
+	(ht)->pListTail = (element);							\
+	(element)->pListNext = NULL;							\
+	if ((element)->pListLast != NULL) {						\
+		(element)->pListLast->pListNext = (element);		\
+	}														\
+	if (!(ht)->pListHead) {									\
+		(ht)->pListHead = (element);						\
+	}														\
+	if ((ht)->pInternalPointer == NULL) {					\
+		(ht)->pInternalPointer = (element);					\
+	}
 
 #if ZEND_DEBUG
 #define HT_IS_DESTROYING	1
@@ -86,7 +108,7 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 static uint PrimeNumbers[] =
 {5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793, 2097397, 4194103, 8388857, 16777447, 33554201, 67108961, 134217487, 268435697, 536870683, 1073741621, 2147483399};
 
-static int if_full_do_resize(HashTable *ht);
+static int zend_hash_if_full_do_resize(HashTable *ht);
 
 static uint nNumPrimeNumbers = sizeof(PrimeNumbers) / sizeof(ulong);
 
@@ -227,34 +249,18 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 		p->pDataPtr=NULL;
 	}
 	p->h = h;
-	p->pNext = ht->arBuckets[nIndex];
-	p->pLast = NULL;
-	if (p->pNext) {
-		p->pNext->pLast = p;
-	}
+	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 	if (pDest) {
 		*pDest = p->pData;
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
-	if (ht->pInternalPointer == NULL) {
-		ht->pInternalPointer = p;
-	}
+	CONNECT_TO_GLOBAL_DLLIST(p, ht);
 	ht->arBuckets[nIndex] = p;
-
-	/* Setup the double linked list */
-	p->pListLast = ht->pListTail;
-	ht->pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ht->pListHead) {
-		ht->pListHead = p;
-	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();
+
 	ht->nNumOfElements++;
-	if_full_do_resize(ht);		/* If the Hash table is full, resize it */
+	zend_hash_if_full_do_resize(ht);		/* If the Hash table is full, resize it */
 	return SUCCESS;
 }
 
@@ -337,34 +343,20 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 		p->pDataPtr=NULL;
 	}
 	p->h = h;
-	p->pNext = ht->arBuckets[nIndex];
-	p->pLast = NULL;
-	if (p->pNext) {
-		p->pNext->pLast = p;
-	}
+	
+	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
+
 	if (pDest) {
 		*pDest = p->pData;
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
-	if (ht->pInternalPointer == NULL) {
-		ht->pInternalPointer = p;
-	}
 	ht->arBuckets[nIndex] = p;
-
-	/* Setup the double linked list */
-	p->pListLast = ht->pListTail;
-	ht->pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ht->pListHead) {
-		ht->pListHead = p;
-	}
+	CONNECT_TO_GLOBAL_DLLIST(p, ht);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
+
 	ht->nNumOfElements++;
-	if_full_do_resize(ht);		/* If the Hash table is full, resize it */
+	zend_hash_if_full_do_resize(ht);		/* If the Hash table is full, resize it */
 	return SUCCESS;
 }
 
@@ -445,33 +437,18 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 		*pDest = p->pData;
 	}
 
-	p->pNext = ht->arBuckets[nIndex];
-	p->pLast = NULL;
-	if (p->pNext) {
-		p->pNext->pLast = p;
-	}
-	HANDLE_BLOCK_INTERRUPTIONS();
-	if (ht->pInternalPointer == NULL) {
-		ht->pInternalPointer = p;
-	}
-	ht->arBuckets[nIndex] = p;
+	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 
-	/* Setup the double linked list */
-	p->pListLast = ht->pListTail;
-	ht->pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ht->pListHead) {
-		ht->pListHead = p;
-	}
+	HANDLE_BLOCK_INTERRUPTIONS();
+	ht->arBuckets[nIndex] = p;
+	CONNECT_TO_GLOBAL_DLLIST(p, ht);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
+
 	if (h >= ht->nNextFreeElement) {
 		ht->nNextFreeElement = h + 1;
 	}
 	ht->nNumOfElements++;
-	if_full_do_resize(ht);
+	zend_hash_if_full_do_resize(ht);
 	return SUCCESS;
 }
 
@@ -490,14 +467,14 @@ ZEND_API int zend_hash_pointer_index_update_or_next_insert(HashTable *ht, ulong 
 }
 
 
-static int if_full_do_resize(HashTable *ht)
+static int zend_hash_if_full_do_resize(HashTable *ht)
 {
 	Bucket **t;
 
 	IS_CONSISTENT(ht);
 
-	if ((ht->nNumOfElements > ht->nTableSize) && (ht->nHashSizeIndex < nNumPrimeNumbers - 1)) {		/* Let's double the table
-																									   size */
+	if ((ht->nNumOfElements > ht->nTableSize)
+		&& (ht->nHashSizeIndex < nNumPrimeNumbers - 1)) {		/* Let's double the table size */
 		t = (Bucket **) perealloc_recoverable(ht->arBuckets, PrimeNumbers[ht->nHashSizeIndex + 1] * sizeof(Bucket *), ht->persistent);
 		if (t) {
 			HANDLE_BLOCK_INTERRUPTIONS();
@@ -524,11 +501,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	p = ht->pListHead;
 	while (p != NULL) {
 		nIndex = p->h % ht->nTableSize;
-		p->pNext = ht->arBuckets[nIndex];
-		p->pLast = NULL;
-		if (p->pNext) {
-			p->pNext->pLast = p;
-		}
+		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 		ht->arBuckets[nIndex] = p;
 		p = p->pListNext;
 	}
@@ -543,7 +516,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 	IS_CONSISTENT(ht);
 
 	if (flag == HASH_DEL_KEY) {
-		HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_del_key_or_index(ht, arKey, nKeyLength, idx,HASH_DEL_INDEX));
+		HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_del_key_or_index(ht, arKey, nKeyLength, idx, HASH_DEL_INDEX));
 		h = ht->pHashFunction(arKey, nKeyLength);
 	}
 	nIndex = h % ht->nTableSize;
