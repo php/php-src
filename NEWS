@@ -106,6 +106,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
 - Fixed bug #20282 (COM memory leak). (Harald)
+- Fixed bug #19919 (crash in sapi_apache_header_handler under heavy load).
+  (George)
 - Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes).
   (Ilia)
 - Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
