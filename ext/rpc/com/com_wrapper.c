@@ -109,53 +109,75 @@ PHPAPI int php_COM_check_ref(i_dispatch *obj)
 
 PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult)
 {
-	php_COM_check_ref(obj);
+	HRESULT hr;
 
-/* TODO: doesn't work
-	if(obj->typelib) {
-		return obj->i.typeinfo->lpVtbl->Invoke(obj->i.typeinfo, obj->i.dispatch, dispIdMember,
-											   wFlags, pDispParams, pVarResult, NULL, NULL);
-	} else {
+	if(obj->referenced)
+	{
+		if(obj->typelib) {
+			hr = obj->i.typeinfo->lpVtbl->Invoke(obj->i.typeinfo, obj->i.dispatch, dispIdMember,
+												   wFlags, pDispParams, pVarResult, NULL, NULL);
+			if(!FAILED(hr))
+			{
+				return hr;
+			}
+		}
 		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
-											   wFlags, pDispParams, pVarResult, NULL, NULL);
-	}*/
-
-	return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
-										   wFlags, pDispParams, pVarResult, NULL, NULL);
+												   wFlags, pDispParams, pVarResult, NULL, NULL);
+	}
+	else
+	{
+		return DISP_E_UNKNOWNINTERFACE;
+	}
 }
 
 PHPAPI HRESULT php_COM_get_ids_of_names(i_dispatch *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId)
 {
-	php_COM_check_ref(obj);
+	HRESULT hr;
 
-/* TODO: doesn't work
-	if(obj->typelib) {
-		return obj->i.typeinfo->lpVtbl->GetIDsOfNames(obj->i.typeinfo, rgszNames, 1, rgDispId);
-	} else {
+	if(obj->referenced)
+	{
+		if(obj->typelib) {
+			hr = obj->i.typeinfo->lpVtbl->GetIDsOfNames(obj->i.typeinfo, rgszNames, 1, rgDispId);
+			if(!FAILED(hr))
+			{
+				return hr;
+			}
+		}
 		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
-	}*/
-
-	return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+	}
+	else
+	{
+		return DISP_E_UNKNOWNINTERFACE;
+	}
 }
 
 PHPAPI HRESULT php_COM_release(i_dispatch *obj)
 {
-	HRESULT hr = 0;
-
-	if(obj->referenced)
+	if(obj->referenced > 1)
 	{
-		hr = obj->i.dispatch->lpVtbl->Release(obj->i.dispatch);
+		obj->referenced--;
+	}
+	else if(obj->referenced == 1)
+	{
+		if(obj->typelib)
+		{
+			obj->i.typeinfo->lpVtbl->Release(obj->i.typeinfo);
+		}
+		obj->i.dispatch->lpVtbl->Release(obj->i.dispatch);
 		obj->referenced--;
 	}
 
-	return hr;
+	return obj->referenced;
 }
 
 PHPAPI HRESULT php_COM_addref(i_dispatch *obj)
 {
-	obj->referenced++;
+	if(obj->referenced)
+	{
+		obj->referenced++;
+	}
 
-	return obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
+	return obj->referenced;
 }
 
 PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
@@ -164,6 +186,7 @@ PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
 
 	obj->i.dispatch = pDisp;
 	obj->referenced = 1;
+	
 	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
 
 	if(!cleanup)
@@ -191,6 +214,10 @@ PHPAPI HRESULT php_COM_clone(i_dispatch *obj, i_dispatch *clone, int cleanup)
 	}
 	else
 	{
+		if(obj->typelib)
+		{
+			obj->i.typeinfo->lpVtbl->AddRef(obj->i.typeinfo);
+		}
 		hr = obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
 		obj->referenced = 1;
 	}
@@ -387,7 +414,6 @@ PHP_FUNCTION(com_load)
 	if(!server_name)
 	{
 		hr = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &(obj->i.dispatch));
-		php_COM_set(obj, obj->i.dispatch, TRUE);
 	}
 	else
 	{
@@ -407,7 +433,6 @@ PHP_FUNCTION(com_load)
 		{
 			hr = pResults.hr;
 			obj->i.dispatch = (IDispatch *) pResults.pItf;
-			php_COM_set(obj, obj->i.dispatch, TRUE);
 		}
 		efree(server_info.pwszName);
 	}
@@ -422,6 +447,8 @@ PHP_FUNCTION(com_load)
 		efree(obj);
 		RETURN_FALSE;
 	}
+
+	php_COM_set(obj, obj->i.dispatch, TRUE);
 
 	RETURN_LONG(zend_list_insert(obj, le_idispatch));
 }
@@ -1001,6 +1028,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if(!zend_is_true(return_value))
 		{
+			pval_destructor(&function_name->element);
 			var_reset(object);
 			return;
 		}
@@ -1015,6 +1043,15 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	}
 
 	property = php_COM_get_property_handler(property_reference);
+	if(property.type == IS_NULL)
+	{
+		if(property.refcount == 1)
+		{
+			pval_destructor(&property);
+		}
+		pval_destructor(&function_name->element);
+		return;
+	}
 	zend_hash_index_find(property.value.obj.properties, 0, (void **) &handle);
 	obj = (i_dispatch *)zend_list_find((*handle)->value.lval,&type);
 
