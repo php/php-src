@@ -1,32 +1,55 @@
 /**********************************************************************
-
   mktable.c
-
-  Copyright (C) 2004  K.Kosako (kosako@sofnec.co.jp)
-
 **********************************************************************/
+/*-
+ * Copyright (c) 2002-2004  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #include <stdio.h>
 
 #define NOT_RUBY
 #include "regenc.h"
 
-#define ISO_8859_1     0
-#define ISO_8859_2     1
-#define ISO_8859_3     2
-#define ISO_8859_4     3
-#define ISO_8859_5     4
-#define ISO_8859_6     5
-#define ISO_8859_7     6
-#define ISO_8859_8     7
-#define ISO_8859_9     8
-#define ISO_8859_10    9
-#define ISO_8859_11   10
-#define ISO_8859_13   11
-#define ISO_8859_14   12
-#define ISO_8859_15   13
-#define ISO_8859_16   14
-#define KOI8          15
-#define KOI8_R        16
+#define UNICODE_ISO_8859_1     0
+#define ISO_8859_1     1
+#define ISO_8859_2     2
+#define ISO_8859_3     3
+#define ISO_8859_4     4
+#define ISO_8859_5     5
+#define ISO_8859_6     6
+#define ISO_8859_7     7
+#define ISO_8859_8     8
+#define ISO_8859_9     9
+#define ISO_8859_10   10
+#define ISO_8859_11   11
+#define ISO_8859_13   12
+#define ISO_8859_14   13
+#define ISO_8859_15   14
+#define ISO_8859_16   15
+#define KOI8          16
+#define KOI8_R        17
 
 typedef struct {
   int   num;
@@ -34,6 +57,7 @@ typedef struct {
 } ENC_INFO;
 
 static ENC_INFO Info[] = {
+  { UNICODE_ISO_8859_1,  "UNICODE_ISO_8859_1"  },
   { ISO_8859_1,  "ISO_8859_1"  },
   { ISO_8859_2,  "ISO_8859_2"  },
   { ISO_8859_3,  "ISO_8859_3"  },
@@ -60,6 +84,7 @@ static int IsAlpha(int enc, int c)
   if (c >= 0x61 && c <= 0x7a) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_9:
     if (c == 0xaa) return 1;
@@ -232,6 +257,7 @@ static int IsBlank(int enc, int c)
   if (c == 0x09	|| c == 0x20) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_2:
   case ISO_8859_3:
@@ -267,6 +293,9 @@ static int IsCntrl(int enc, int c)
   if (c >= 0x00	&& c <= 0x1F) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
+    if (c == 0xad) return 1;
+    /* fall */
   case ISO_8859_1:
   case ISO_8859_2:
   case ISO_8859_3:
@@ -285,6 +314,7 @@ static int IsCntrl(int enc, int c)
   case KOI8:
     if (c >= 0x7f && c <= 0x9F) return 1;
     break;
+
 
   case KOI8_R:
     if (c == 0x7f) return 1;
@@ -308,6 +338,7 @@ static int IsGraph(int enc, int c)
   if (c >= 0x21 && c <= 0x7e) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_2:
   case ISO_8859_4:
@@ -376,6 +407,7 @@ static int IsLower(int enc, int c)
   if (c >= 0x61 && c <= 0x7a) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_9:
     if (c == 0xaa) return 1;
@@ -504,6 +536,10 @@ static int IsPrint(int enc, int c)
   if (c >= 0x20 && c <= 0x7e) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
+    if (c >= 0x09 && c <= 0x0d) return 1;
+    if (c == 0x85) return 1;
+    /* fall */
   case ISO_8859_1:
   case ISO_8859_2:
   case ISO_8859_4:
@@ -572,11 +608,11 @@ static int IsPrint(int enc, int c)
 
 static int IsPunct(int enc, int c)
 {
-#ifndef BY_UNICODE_PROPERTY
-  if (c == 0x24 || c == 0x2b || c == 0x5e || c == 0x60 ||
-      c == 0x7c || c == 0x7e) return 1;
-  if (c >= 0x3c && c <= 0x3e) return 1;
-#endif
+  if (enc == UNICODE_ISO_8859_1) {
+    if (c == 0x24 || c == 0x2b || c == 0x5e || c == 0x60 ||
+        c == 0x7c || c == 0x7e) return 1;
+    if (c >= 0x3c && c <= 0x3e) return 1;
+  }
 
   if (c >= 0x21 && c <= 0x23) return 1;
   if (c >= 0x25 && c <= 0x2a) return 1;
@@ -592,9 +628,11 @@ static int IsPunct(int enc, int c)
   case ISO_8859_1:
   case ISO_8859_9:
   case ISO_8859_15:
+    if (c == 0xad) return 1;
+    /* fall */
+  case UNICODE_ISO_8859_1:
     if (c == 0xa1) return 1;
     if (c == 0xab) return 1;
-    if (c == 0xad) return 1;
     if (c == 0xb7) return 1;
     if (c == 0xbb) return 1;
     if (c == 0xbf) return 1;
@@ -675,6 +713,9 @@ static int IsSpace(int enc, int c)
   if (c == 0x20) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
+    if (c == 0x85) return 1;
+    /* fall */
   case ISO_8859_1:
   case ISO_8859_2:
   case ISO_8859_3:
@@ -710,6 +751,7 @@ static int IsUpper(int enc, int c)
   if (c >= 0x41 && c <= 0x5a) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_9:
     if (c >= 0xc0 && c <= 0xd6) return 1;
@@ -844,6 +886,7 @@ static int IsWord(int enc, int c)
   if (c >= 0x61 && c <= 0x7a) return 1;
 
   switch (enc) {
+  case UNICODE_ISO_8859_1:
   case ISO_8859_1:
   case ISO_8859_9:
     if (c == 0xaa) return 1;
@@ -1019,6 +1062,12 @@ static int IsAscii(int enc, int c)
   return 0;
 }
 
+static int IsNewline(int enc, int c)
+{
+  if (c == 0x0a) return 1;
+  return 0;
+}
+
 static int exec(FILE* fp, ENC_INFO* einfo)
 {
 #define NCOL  8
@@ -1032,19 +1081,20 @@ static int exec(FILE* fp, ENC_INFO* einfo)
 
   for (c = 0; c < 256; c++) {
     val = 0;
-    if (IsAlpha (enc, c))  val |= ONIGENC_CTYPE_ALPHA;
-    if (IsBlank (enc, c))  val |= ONIGENC_CTYPE_BLANK;
-    if (IsCntrl (enc, c))  val |= ONIGENC_CTYPE_CNTRL;
-    if (IsDigit (enc, c))  val |= ONIGENC_CTYPE_DIGIT;
-    if (IsGraph (enc, c))  val |= ONIGENC_CTYPE_GRAPH;
-    if (IsLower (enc, c))  val |= ONIGENC_CTYPE_LOWER;
-    if (IsPrint (enc, c))  val |= ONIGENC_CTYPE_PRINT;
-    if (IsPunct (enc, c))  val |= ONIGENC_CTYPE_PUNCT;
-    if (IsSpace (enc, c))  val |= ONIGENC_CTYPE_SPACE;
-    if (IsUpper (enc, c))  val |= ONIGENC_CTYPE_UPPER;
-    if (IsXDigit(enc, c))  val |= ONIGENC_CTYPE_XDIGIT;
-    if (IsWord  (enc, c))  val |= ONIGENC_CTYPE_WORD;
-    if (IsAscii (enc, c))  val |= ONIGENC_CTYPE_ASCII;
+    if (IsNewline(enc, c))  val |= ONIGENC_CTYPE_NEWLINE;
+    if (IsAlpha (enc, c))   val |= ONIGENC_CTYPE_ALPHA;
+    if (IsBlank (enc, c))   val |= ONIGENC_CTYPE_BLANK;
+    if (IsCntrl (enc, c))   val |= ONIGENC_CTYPE_CNTRL;
+    if (IsDigit (enc, c))   val |= ONIGENC_CTYPE_DIGIT;
+    if (IsGraph (enc, c))   val |= ONIGENC_CTYPE_GRAPH;
+    if (IsLower (enc, c))   val |= ONIGENC_CTYPE_LOWER;
+    if (IsPrint (enc, c))   val |= ONIGENC_CTYPE_PRINT;
+    if (IsPunct (enc, c))   val |= ONIGENC_CTYPE_PUNCT;
+    if (IsSpace (enc, c))   val |= ONIGENC_CTYPE_SPACE;
+    if (IsUpper (enc, c))   val |= ONIGENC_CTYPE_UPPER;
+    if (IsXDigit(enc, c))   val |= ONIGENC_CTYPE_XDIGIT;
+    if (IsWord  (enc, c))   val |= ONIGENC_CTYPE_WORD;
+    if (IsAscii (enc, c))   val |= ONIGENC_CTYPE_ASCII;
 
     if (c % NCOL == 0) fputs("  ", fp);
     fprintf(fp, "0x%04x", val);

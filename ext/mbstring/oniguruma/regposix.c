@@ -1,10 +1,31 @@
 /**********************************************************************
-
   regposix.c - Oniguruma (regular expression library)
-
-  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
-
 **********************************************************************/
+/*-
+ * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 
 #define regex_t   onig_regex_t
 #include "regint.h"
@@ -14,16 +35,17 @@
 #define ONIG_C(reg)    ((onig_regex_t* )((reg)->onig))
 #define PONIG_C(reg)   ((onig_regex_t** )(&(reg)->onig))
 
-#if 1
+/* #define ENC_STRING_LEN(enc,s,len)    len = strlen(s) */
 #define ENC_STRING_LEN(enc,s,len) do { \
-  UChar* tmps = (UChar* )(s); \
-  /* while (*tmps != 0) tmps += enc_len(enc,*tmps); */ \
-  while (*tmps != 0) tmps++; /* OK for UTF-8, EUC-JP, Shift_JIS */ \
-  len = tmps - (UChar* )(s); \
+  if (ONIGENC_MBC_MINLEN(enc) == 1) { \
+    UChar* tmps = (UChar* )(s); \
+    while (*tmps != 0) tmps++; \
+    len = tmps - (UChar* )(s); \
+  } \
+  else { \
+    len = onigenc_str_bytelen_null(enc, (UChar* )s); \
+  } \
 } while(0)
-#else
-#define ENC_STRING_LEN(enc,s,len)    len = strlen(s)
-#endif
 
 typedef struct {
   int onig_err;
@@ -50,7 +72,7 @@ onig2posix_error_code(int code)
     { ONIGERR_END_PATTERN_AT_LEFT_BRACKET,                REG_EBRACK  },
     { ONIGERR_EMPTY_CHAR_CLASS,                           REG_ECTYPE  },
     { ONIGERR_PREMATURE_END_OF_CHAR_CLASS,                REG_ECTYPE  },
-    { ONIGERR_END_PATTERN_AT_BACKSLASH,                   REG_EESCAPE },
+    { ONIGERR_END_PATTERN_AT_ESCAPE,                      REG_EESCAPE },
     { ONIGERR_END_PATTERN_AT_META,                        REG_EESCAPE },
     { ONIGERR_END_PATTERN_AT_CONTROL,                     REG_EESCAPE },
     { ONIGERR_META_CODE_SYNTAX,                           REG_BADPAT  },
@@ -91,6 +113,7 @@ onig2posix_error_code(int code)
     { ONIGERR_NEVER_ENDING_RECURSION,                     REG_BADPAT },
     { ONIGERR_GROUP_NUMBER_OVER_FOR_CAPTURE_HISTORY,      REG_BADPAT },
     { ONIGERR_INVALID_CHAR_PROPERTY_NAME,                 REG_BADPAT },
+    { ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION,         REG_EONIG_BADARG },
     { ONIGERR_OVER_THREAD_PASS_LIMIT_COUNT,               REG_EONIG_THREAD }
 
   };
@@ -145,24 +168,37 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
 {
   int r, i, len;
   UChar* end;
+  regmatch_t* pm;
   OnigOptionType options;
 
   options = ONIG_OPTION_POSIX_REGION;
   if ((posix_options & REG_NOTBOL) != 0) options |= ONIG_OPTION_NOTBOL;
   if ((posix_options & REG_NOTEOL) != 0) options |= ONIG_OPTION_NOTEOL;
 
-  if ((reg->comp_options & REG_NOSUB) != 0) {
-    pmatch = (regmatch_t* )NULL;
+  if (nmatch == 0 || (reg->comp_options & REG_NOSUB) != 0) {
+    pm = (regmatch_t* )NULL;
     nmatch = 0;
   }
+  else if ((int )nmatch < ONIG_C(reg)->num_mem + 1) {
+    pm = (regmatch_t* )xmalloc(sizeof(regmatch_t)
+                               * (ONIG_C(reg)->num_mem + 1));
+    if (pm == NULL)
+      return REG_ESPACE;
+  }
+  else {
+    pm = pmatch;
+  }
 
-  ENC_STRING_LEN(ONIG_C(reg)->code,str,len);
+  ENC_STRING_LEN(ONIG_C(reg)->enc, str, len);
   end = (UChar* )(str + len);
   r = onig_search(ONIG_C(reg), (UChar* )str, end, (UChar* )str, end,
 		  (OnigRegion* )pmatch, options);
 
   if (r >= 0) {
     r = 0; /* Match */
+    if (pm != pmatch && pm != NULL) {
+      xmemcpy(pmatch, pm, sizeof(regmatch_t) * nmatch);
+    }
   }
   else if (r == ONIG_MISMATCH) {
     r = REG_NOMATCH;
@@ -172,6 +208,9 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
   else {
     r = onig2posix_error_code(r);
   }
+
+  if (pm != pmatch && pm != NULL)
+    xfree(pm);
 
   return r;
 }
@@ -201,6 +240,13 @@ reg_set_encoding(int mb_code)
   case REG_POSIX_ENCODING_UTF8:
     enc = ONIG_ENCODING_UTF8;
     break;
+  case REG_POSIX_ENCODING_UTF16_BE:
+    enc = ONIG_ENCODING_UTF16_BE;
+    break;
+  case REG_POSIX_ENCODING_UTF16_LE:
+    enc = ONIG_ENCODING_UTF16_LE;
+    break;
+
   default:
     return ;
     break;
@@ -211,18 +257,18 @@ reg_set_encoding(int mb_code)
 
 extern int
 reg_name_to_group_numbers(regex_t* reg,
-		  unsigned char* name, unsigned char* name_end, int** nums)
+  const unsigned char* name, const unsigned char* name_end, int** nums)
 {
   return onig_name_to_group_numbers(ONIG_C(reg), name, name_end, nums);
 }
 
 typedef struct {
-  int (*func)(unsigned char*,unsigned char*,int,int*,regex_t*,void*);
+  int (*func)(const unsigned char*, const unsigned char*,int,int*,regex_t*,void*);
   regex_t* reg;
   void* arg;
 } i_wrap;
 
-static int i_wrapper(unsigned char* name, unsigned char* name_end,
+static int i_wrapper(const unsigned char* name, const unsigned char* name_end,
 		     int ng, int* gs,
 		     onig_regex_t* reg, void* arg)
 {
@@ -233,8 +279,8 @@ static int i_wrapper(unsigned char* name, unsigned char* name_end,
 
 extern int
 reg_foreach_name(regex_t* reg,
-	 int (*func)(unsigned char*,unsigned char*,int,int*,regex_t*,void*),
-	 void* arg)
+ int (*func)(const unsigned char*, const unsigned char*,int,int*,regex_t*,void*),
+ void* arg)
 {
   i_wrap warg;
 

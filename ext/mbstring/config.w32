@@ -24,13 +24,14 @@ if (PHP_MBSTRING == "yes") {
 		mbfilter_euc_jp.c mbfilter_euc_jp_win.c mbfilter_euc_kr.c \
 		mbfilter_euc_tw.c mbfilter_htmlent.c mbfilter_hz.c mbfilter_iso2022_kr.c \
 		mbfilter_iso8859_1.c mbfilter_iso8859_10.c mbfilter_iso8859_13.c \
-		mbfilter_iso8859_14.c mbfilter_iso8859_15.c mbfilter_iso8859_2.c \
-		mbfilter_iso8859_3.c mbfilter_iso8859_4.c mbfilter_iso8859_5.c \
-		mbfilter_iso8859_6.c mbfilter_iso8859_7.c mbfilter_iso8859_8.c \
-		mbfilter_iso8859_9.c mbfilter_jis.c mbfilter_koi8r.c mbfilter_qprint.c \
-		mbfilter_sjis.c mbfilter_ucs2.c mbfilter_ucs4.c mbfilter_uhc.c \
-		mbfilter_utf16.c mbfilter_utf32.c mbfilter_utf7.c mbfilter_utf7imap.c \
-		mbfilter_utf8.c mbfilter_uuencode.c", "mbstring");
+		mbfilter_iso8859_14.c mbfilter_iso8859_15.c mbfilter_iso8859_16.c \
+		mbfilter_iso8859_2.c mbfilter_iso8859_3.c mbfilter_iso8859_4.c \
+		mbfilter_iso8859_5.c mbfilter_iso8859_6.c mbfilter_iso8859_7.c \
+		mbfilter_iso8859_8.c mbfilter_iso8859_9.c mbfilter_jis.c \
+		mbfilter_koi8r.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
+		mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
+		mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
+		mbfilter_uuencode.c", "mbstring");
 
 	ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \
 		mbfilter_pass.c mbfilter_wchar.c mbfl_convert.c mbfl_encoding.c \
@@ -51,13 +52,15 @@ if (PHP_MBSTRING == "yes") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		AC_DEFINE('HAVE_MBREGEX', 1);
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
-			regenc.c regexec.c reggnu.c regparse.c regposerr.c", "mbstring");
+			regenc.c regexec.c reggnu.c regparse.c regposerr.c \
+			regext.c regsyntax.c regtrav.c regversion.c st.c", "mbstring");
 		ADD_SOURCES("ext/mbstring/oniguruma/enc", "ascii.c big5.c \
 			euc_jp.c euc_kr.c euc_tw.c iso8859_1.c iso8859_2.c \
 			iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c \
 			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
 			iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c \
-			koi8.c koi8_r.c sjis.c utf8.c", "mbstring");
+			koi8.c koi8_r.c sjis.c utf8.c unicode.c utf16_be.c utf16_le.c \
+			utf32_be.c utf32_le.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 	}
 }

@@ -1345,7 +1345,6 @@ mbfl_strcut(
 }
 
 
-#include <stdio.h>
 /*
  *  strwidth
  */
@@ -1435,6 +1434,7 @@ collector_strimwidth(int c, void* data)
 	default:
 		if (pc->outchar >= pc->from) {
 			pc->outwidth += (is_fullwidth(c) ? 2: 1);
+
 			if (pc->outwidth > pc->width) {
 				if (pc->status == 0) {
 					pc->endpos = pc->device.pos;
