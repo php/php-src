@@ -385,6 +385,11 @@ static int sapi_extract_response_code(const char *header_line)
 	return code;
 }
 
+static int sapi_find_matching_header(void *element1, void *element2)
+{
+	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, strlen((char*)element2)) == 0;
+}
+
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
@@ -551,6 +556,19 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		zend_llist_clean(&SG(sapi_headers).headers);
 	}
 	if (retval & SAPI_HEADER_ADD) {
+		/* in replace mode first remove the header if it already exists in the headers llist */
+		if (replace) {
+			colon_offset = strchr(header_line, ':');
+			if (colon_offset) {
+				char sav;
+				colon_offset++;
+				sav = *colon_offset;
+				*colon_offset = 0;
+				zend_llist_del_element(&SG(sapi_headers).headers, header_line, (int(*)(void*, void*))sapi_find_matching_header);
+				*colon_offset = sav;
+			}
+		}
+
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
 	}
 	if (free_header) {
