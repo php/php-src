@@ -925,9 +925,6 @@ PHP_FUNCTION(curl_setopt)
 #endif
 		case CURLOPT_UNRESTRICTED_AUTH:
 		case CURLOPT_PORT:
-		case CURL_TIMECOND_IFMODSINCE:
-		case CURL_TIMECOND_IFUNMODSINCE:
-		case CURL_TIMECOND_LASTMOD:
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
