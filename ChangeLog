@@ -1,3 +1,95 @@
+1999-11-29  Sander Steffann  <steffann@nederland.net>
+
+    * ext/gd/gd.c: Show some extra info for GD with phpinfo()
+
+1999-11-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Clean up code
+
+1999-11-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/isapi/config.m4: ISAPI wants to run in ZTS
+
+1999-11-29  Sander Steffann  <steffann@nederland.net>
+
+    * ext/gd/config.m4: Oops, forgot to check for GIF support. Fixed.
+
+1999-11-29  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: Typo
+
+1999-11-29  Andrei Zmievski  <zmievski@ispi.net>
+
+    * pear/DB.php: Modified to use preg_* functions.
+
+1999-11-29  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/.cvsignore: add .cvsignore
+
+    * sapi/servlet/Makefile.am
+      sapi/servlet/README
+      sapi/servlet/config.h.stub
+      sapi/servlet/config.m4
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.dsp
+      sapi/servlet/servlet.java
+      sapi/servlet/web.xml
+      ext/standard/info.c
+      ext/java/java.dsp
+      ext/java/reflect.java
+      ext/java/Makefile.am
+      ext/java/config.m4
+      ext/java/java.c:
+    Initial alpha-level of sapi/servlet.  See README for details.
+
+1999-11-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.am
+      pear/README: more PECL -> PEAR renaming
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php
+      pear/.cvsignore
+      pear/DB.php: - DB classes now inherit DB_common
+    - Added DB_ERROR_NODBSELECTED
+    - Added DB::connect($dsn[, $persistent] which creates a DB object and connects
+      $dsn is a "data source name" in a format specific to DB:
+        phptype(dbsyntax)://username:password@protocol+hostspec/database
+      Don't worry, such a dsn can be as short as "mysql"
+    - Added mysql support
+
+1999-11-29  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+    * NEWS: Name update.
+
+1999-11-29  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/parsedate.y:
+    Use thread-safe versions of localtime and gmtime on Win32 too
+
+1999-11-29  Stig Bakken  <ssb@fast.no>
+
+    * buildcheck.sh
+      buildconf:
+    Remove some more redundant checks.  buildconf is not but a simple wrapper
+    for build.mk & co.
+
+1999-11-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    Revert last patch (leak in libzend is fixed now)
+
+1999-11-29  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/config.h.stub
+      ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/setup.stub:    Added DBMaker support (patch by Pax Tsai <paxtsai@lion.syscom.com.tw>)
+
 1999-11-28  Stig Bakken  <ssb@fast.no>
 
     * Makefile.am
