@@ -12,17 +12,21 @@ AC_ARG_WITH(pcre-regex,
     	AC_MSG_RESULT(no) ;;
     yes)
         EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
-    	INCLUDES="-Ipcrelib $INCLUDES"
+  dnl  	INCLUDES="-Iext/pcre/pcrelib $INCLUDES"
         PCRE_SUBDIR="pcrelib"
-    	AC_DEFINE(HAVE_LIBPCRE, 1)
+    	AC_DEFINE(HAVE_PCRE, 1)
+        AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
     	AC_MSG_RESULT(yes)
-    	PHP_EXTENSION(pcre) ;;
+        PHP_EXTENSION(pcre) ;;
     *)
-        test -f $withval/pcre.h && INCLUDES="-I$withval $INCLUDES"
-        test -f $withval/libpcre.a && EXTRA_LIBS="-L$withval -lpcre $EXTRA_LIBS"
+        test -f $withval/pcre.h && PCRE_INCLUDE="-I$withval"
+        test -f $withval/libpcre.a && PCRE_LIB="-L$withval -lpcre"
 	
         if test -n "$PCRE_INCLUDE" && test -n "$PCRE_LIB" ; then
-          AC_DEFINE(HAVE_LIBPCRE, 1)
+          INCLUDES="$PCRE_INCLUDE $INCLUDES"
+          EXTRA_LIBS="$PCRE_LIB $EXTRA_LIBS"
+          AC_DEFINE(HAVE_PCRE, 1)
+          AC_DEFINE(HAVE_BUNDLED_PCRE, 0)
           PCRE_SUBDIR=
           AC_MSG_RESULT(yes)
           PHP_EXTENSION(pcre)
@@ -32,9 +36,10 @@ AC_ARG_WITH(pcre-regex,
   esac
 ],[
   EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
-  INCLUDES="-Ipcrelib $INCLUDES"
+dnl  INCLUDES="-Iext/pcre/pcrelib $INCLUDES"
   PCRE_SUBDIR="pcrelib"
-  AC_DEFINE(HAVE_LIBPCRE, 1)
+  AC_DEFINE(HAVE_PCRE, 1)
+  AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
   AC_MSG_RESULT(yes)
   PHP_EXTENSION(pcre)
 ]) 
