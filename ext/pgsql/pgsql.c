@@ -26,8 +26,8 @@
 #endif
 
 #include "php.h"
-#include "php_pgsql.h"
 #include "ext/standard/php_standard.h"
+#include "php_pgsql.h"
 #include "php_globals.h"
 
 #if HAVE_PGSQL
@@ -137,8 +137,6 @@ static void php_pgsql_init_globals(PGLS_D)
 
 PHP_MINIT_FUNCTION(pgsql)
 {
-	ELS_FETCH();
-
 #ifdef ZTS
 	pgsql_globals_id = ts_allocate_id(sizeof(php_pgsql_globals), (ts_allocate_ctor) php_pgsql_init_globals, NULL);
 #else
@@ -259,7 +257,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
@@ -288,7 +286,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* hash it up */
 			new_le.type = le_plink;
 			new_le.ptr = pgsql;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -307,7 +305,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				}
 				if (le->ptr==NULL || PQstatus(le->ptr)==CONNECTION_BAD) {
 					php_error(E_WARNING,"PostgresSQL link lost, unable to reconnect");
-					zend_hash_del(plist,hashed_details,hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list),hashed_details,hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -324,7 +322,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new pgsql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -339,7 +337,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 		if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
@@ -365,7 +363,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -783,7 +781,7 @@ void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			return_value->type = IS_LONG;
 			break;
 		case PHP_PG_FIELD_TYPE:
-			return_value->value.str.val = get_field_name(pg_result->conn,PQftype(pgsql_result,field->value.lval),list);
+			return_value->value.str.val = get_field_name(pg_result->conn,PQftype(pgsql_result,field->value.lval),&EG(regular_list));
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
 			break;
