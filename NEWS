@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Added new command line parameters -B, -F, -R and -E which allow to process 
   stdin line by line (See 'php -h' or 'man php' for more). (Marcus)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
+- Fixed bug #23898 (Proper handling of NULLs in odbc_result, odbc_fetch_into
+  and odbc_result_all). (Ilia)
 - Fixed bug #23897 (Fixed a check for mbfilter_ru.h). (aleks@m2media.ru, Ilia)
 - Fixed bug #23894 (sprintf() decimal specifiers problem). (Moriyoshi)
 - Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
