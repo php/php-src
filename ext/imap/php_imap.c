@@ -1482,11 +1482,19 @@ PHP_FUNCTION(imap_headerinfo)
 	convert_to_long_ex(msgno);
 	if (myargc >= 3) {
 		convert_to_long_ex(fromlength); 
+		if (Z_LVAL_PP(fromlength) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "From length has to be greater than or equal to 0");
+			RETURN_FALSE;
+		}
 	} else {
 		fromlength = 0x00;
 	}
 	if (myargc >= 4) {
 		convert_to_long_ex(subjectlength);
+		if (Z_LVAL_PP(subjectlength) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject length has to be greater than or equal to 0");
+			RETURN_FALSE;
+		}
 	} else {
 		subjectlength = 0x00;
 	}
@@ -1757,7 +1765,7 @@ PHP_FUNCTION(imap_fetchstructure)
 }
 /* }}} */
 
-/* {{{ proto string imap_fetchbody(resource stream_id, int msg_no, int section [, int options])
+/* {{{ proto string imap_fetchbody(resource stream_id, int msg_no, string section [, int options])
    Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
 {
@@ -2581,7 +2589,7 @@ PHP_FUNCTION(imap_status)
 }
 /* }}} */
 
-/* {{{ proto object imap_bodystruct(resource stream_id, int msg_no, int section)
+/* {{{ proto object imap_bodystruct(resource stream_id, int msg_no, string section)
    Read the structure of a specified body section of a specific message */
 PHP_FUNCTION(imap_bodystruct)
 {
