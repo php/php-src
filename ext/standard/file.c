@@ -501,7 +501,7 @@ PHP_FUNCTION(file)
  			p++;
  			parse_eol:
  			if (PG(magic_quotes_runtime)) {
- 				// s is in target_buf which is freed at the end of the function
+ 				/* s is in target_buf which is freed at the end of the function */
  				slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
  				add_index_stringl(return_value, i++, slashed, len, 0);
  			} else {
