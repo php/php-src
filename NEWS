@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2002, Version 4.1.2
+- Fixed start up failure when mm save handler is used and there is multiple 
+  SAPIs are working at the same time. (Yasuo)
 - Roxen SAPI fix
 - RFC-1867 file upload buffer overflow fixes
 - session crash bug fix
