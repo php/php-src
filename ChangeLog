@@ -1,3 +1,45 @@
+2001-11-04  Alex Waugh  <alex@alexwaugh.com>
+
+    * sapi/cgi/cgi_main.c: Convert PATH_TRANSLATED for RISC OS
+
+    * ext/standard/fsock.c: Undefine AF_UNIX when compiled for RISC OS
+
+    * ext/mysql/libmysql/global.h:
+    Make sure uint et al are undefined before typedefing them
+
+    * ext/ftp/ftp.c
+      main/network.c: Included header files needed by RISC OS
+
+2001-11-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/PEAR.php
+      pear/tests/pear_error.phpt:
+    * expectError() now accepts "*" as a catch-all
+    * updated tests
+
+2001-11-04  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php:
+    * ext/mnogosearch/index.php:
+    - mnoGoSearch extension example updated to support words hilighting (gluke)
+
+2001-11-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/exec.c: ws fix
+
+    * pear/XML/tests/001.phpt
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/004.phpt
+      pear/XML/tests/005.phpt: Skip if XML module is not available.
+
+    * ext/cybermut/tests/.cvsignore
+      ext/dbx/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore: missing cvsignore
+
 2001-11-03  Sergey Kartashoff  <gluke@biosys.net>
 
     * ext/mnogosearch/index.php:
