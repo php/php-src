@@ -114,6 +114,7 @@ PHP_FUNCTION(stream_bucket_prepend);
 PHP_FUNCTION(stream_bucket_append);
 PHP_FUNCTION(stream_bucket_new);
 PHP_MINIT_FUNCTION(user_filters);
+PHP_RSHUTDOWN_FUNCTION(user_filters);
 
 #ifdef PHP_WIN32
 typedef unsigned int php_stat_len;

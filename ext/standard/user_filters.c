@@ -100,6 +100,17 @@ PHP_MINIT_FUNCTION(user_filters)
 	return SUCCESS;
 }
 
+PHP_RSHUTDOWN_FUNCTION(user_filters)
+{
+	if (BG(user_filter_map)) {
+		zend_hash_destroy(BG(user_filter_map));
+		efree(BG(user_filter_map));
+		BG(user_filter_map) = NULL;
+	}
+
+	return SUCCESS;
+}
+
 static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
 	zval *obj = (zval*)thisfilter->abstract;
