@@ -58,7 +58,8 @@
    $message.=sprintf("Content-length: %d\r\n",$pairs_length);
    $message.="\r\n";
    $message.=$encrypted_pairs."\r\n";
-   $response=CCSocketSend($merchant_key,$url["host"],$url["port"],$message);
+
+$response=CCSocketSend($merchant_key,$url["host"],isset($url["port"])?$url["port"]:"",$message);
    return $response;
  }
 
