@@ -22,7 +22,7 @@ PHP 4                                                                      NEWS
   (Rasmus)
 - Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set.
   (Adam Dickmeiss)
-- Fixed a bug in bundled libmysql (mysql bug #564)
+- Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
