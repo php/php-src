@@ -77,7 +77,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
         $ret[1] = "{$ret[1]}\n" .
                   "   -f    forces the installation of the package\n".
                   "         when it is already installed\n".
-                  "   -n    do not take care package dependencies";
+                  "   -n    do not take care of package dependencies";
         return $ret;
     }
 
