@@ -92,7 +92,7 @@ AC_REPLACE_FUNCS(getopt)
 
 AC_MSG_CHECKING(whether to include debugging symbols)
 AC_ARG_ENABLE(debug,
-[  --enable-debug          Compile with debugging symbols],
+[  --disable-debug         Compile without debugging symbols],
 [
   if test "$enableval" = "yes"; then
     AC_MSG_RESULT(yes)
@@ -107,9 +107,9 @@ AC_ARG_ENABLE(debug,
     DEBUG_CFLAGS=""
   fi
 ],[
-  AC_MSG_RESULT(no)
-  AC_DEFINE(ZEND_DEBUG,0)
-  DEBUG_CFLAGS=""
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(ZEND_DEBUG,1)
+  DEBUG_CFLAGS="-g"
 ]) 
 AC_SUBST(DEBUG_CFLAGS)
 CFLAGS="$CFLAGS $DEBUG_CFLAGS"
