@@ -45,7 +45,7 @@ int output_globals_id;
 php_output_globals output_globals;
 #endif
 
-static int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
+static inline int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
 	return str_len;
@@ -579,7 +579,7 @@ PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 
 /* {{{ php_ob_append
  */
-static void php_ob_append(const char *text, uint text_length TSRMLS_DC)
+static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 {
 	char *target;
 	int original_ob_text_length;
@@ -612,7 +612,7 @@ static void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 /* }}} */
 
 #if 0
-static void php_ob_prepend(const char *text, uint text_length)
+static inline void php_ob_prepend(const char *text, uint text_length)
 {
 	char *p, *start;
 	TSRMLS_FETCH();
@@ -635,7 +635,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 
 /* {{{ php_ob_get_buffer
  * Return the current output buffer */
-int php_ob_get_buffer(zval *p TSRMLS_DC)
+static int php_ob_get_buffer(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
@@ -647,7 +647,7 @@ int php_ob_get_buffer(zval *p TSRMLS_DC)
 
 /* {{{ php_ob_get_length
  * Return the size of the current output buffer */
-int php_ob_get_length(zval *p TSRMLS_DC)
+static int php_ob_get_length(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
