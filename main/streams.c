@@ -1397,7 +1397,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	
 	if (stream) {
 		if (self->is_pipe) {
-			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->flags |= PHP_STREAM_FLAG_NO_SEEK | PHP_STREAM_FLAG_AVOID_BLOCKING;
 		} else {
 			stream->position = ftell(file);
 		}
@@ -1419,7 +1419,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->temp_file_name = NULL;
 
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
-	stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+	stream->flags |= PHP_STREAM_FLAG_NO_SEEK | PHP_STREAM_FLAG_AVOID_BLOCKING;
 	return stream;
 }
 
@@ -2041,7 +2041,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 
 	if (stream) {
 		if (self->is_pipe) {
-			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->flags |= PHP_STREAM_FLAG_NO_SEEK | PHP_STREAM_FLAG_AVOID_BLOCKING;
 		} else {
 			stream->position = lseek(self->fd, 0, SEEK_CUR);
 		}
