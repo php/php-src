@@ -1,9 +1,7 @@
 --TEST--
 mb_strlen()
 --SKIPIF--
-<?php include('skipif.inc'); ?>
---POST--
---GET--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 // TODO: Add more encodings

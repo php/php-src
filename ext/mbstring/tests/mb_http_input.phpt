@@ -2,7 +2,7 @@
 mb_http_input() 
 --SKIPIF--
 <?php
-include('skipif.inc');
+extension_loaded('mbstring') or die('skip mbstring not available');
 (php_sapi_name()=='cgi') or die("skip sapi is not a cgi version");
 ?>
 --POST--

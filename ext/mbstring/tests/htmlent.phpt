@@ -3,7 +3,7 @@ HTML input/output
 --SKIPIF--
 <?php 
 	ini_set('include_path','.'); 
-	include('skipif.inc'); 
+	extension_loaded('mbstring') or die('skip mbstring not available'); 
 ?>
 --INI--
 output_handler=mb_output_handler

@@ -1,9 +1,7 @@
 --TEST--
 Bug #20087 (Assertion failure)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
---POST--
---GET--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 ini_set('include_path','.');
