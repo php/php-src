@@ -2791,7 +2791,11 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_UNSET_VAR:
 				{
-					zval tmp, *variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					zval tmp, *variable;
+					HashTable *target_symbol_table;
+		
+					variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
 
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
@@ -2800,7 +2804,7 @@ send_by_ref:
 						variable = &tmp;
 					}
 
-					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
+					zend_hash_del(target_symbol_table, variable->value.str.val, variable->value.str.len+1);
 
 					if (variable == &tmp) {
 						zval_dtor(&tmp);
