@@ -21,9 +21,10 @@ Changes in the Zend Engine 2.0
 
     * Private and Protected Members.
 
-      The Zend Engine 2.0 introduces private and protected member variables. 
-      Note that for performance reasons no error message is emitted in
-      case of an illegal access to a private or protectecd member variable.
+      The Zend Engine 2.0 introduces private and protected member 
+      variables. Note that for performance reasons no error message is 
+      emitted in case of an illegal access to a private or protectecd 
+      member variable.
 
       Example:
 
@@ -34,9 +35,9 @@ Changes in the Zend Engine 2.0
             protected $Foo = "Hello, Bar!\n";
 
             function printHello() {
-                print "MyClass::printHello() ".$this->Hello;
-                print "MyClass::printHello() ".$this->Bar;
-                print "MyClass::printHello() ".$this->Foo;
+                print "MyClass::printHello() " . $this->Hello;
+                print "MyClass::printHello() " . $this->Bar;
+                print "MyClass::printHello() " . $this->Foo;
             }
         }
 
@@ -44,10 +45,10 @@ Changes in the Zend Engine 2.0
             protected $Foo;
             
             function printHello() {
-                MyClass::printHello(); /* Should print */
-                print "MyClass2::printHello() ".$this->Hello;    /* Shouldn't print out anything */
-                print "MyClass2::printHello() ".$this->Bar;      /* Shouldn't print (not declared)*/
-                print "MyClass2::printHello() ".$this->Foo;      /* Should print */
+                MyClass::printHello();                          /* Should print */
+                print "MyClass2::printHello() " . $this->Hello; /* Shouldn't print out anything */
+                print "MyClass2::printHello() " . $this->Bar;   /* Shouldn't print (not declared)*/
+                print "MyClass2::printHello() " . $this->Foo;   /* Should print */
             }
         }
 
@@ -64,13 +65,15 @@ Changes in the Zend Engine 2.0
         $obj->printHello();
         ?>
         
-      Protected member variables can be accessed in classes extending the class
-      they are declared in, whereas private member variables can only be accessed
-      by the class they belong to.
-      
-      Note: Protected member variables have to be declared in every class they 
-      are used!
+      Protected member variables can be accessed in classes extending the 
+      class they are declared in, whereas private member variables can 
+      only be accessed by the class they belong to.
+
+      Note: Protected member variables have to be declared in every class 
+            they are used!
         
+    * Private and protected methods. (TBD)
+
     * Object Cloning.
 
       The Zend Engine 1.0 offered no way a user could decide what copy
@@ -489,12 +492,13 @@ Changes in the Zend Engine 2.0
         print foo::$my_static;
         ?>
 
-    * Static methods (TBD)
+    * Static methods. (TBD)
 
-	* Abstract methods (TBD)
+	  * Abstract methods. (TBD)
 
-    * static function variables
-      statics are now treated at compile-time which allows developers
+    * Static function variables.
+
+      Statics are now treated at compile-time which allows developers
       to assign variables to statics by reference. This change also
       greatly improves their performance but means that indirect
       references to statics will not work anymore.
@@ -509,36 +513,6 @@ Changes in the Zend Engine 2.0
              if ($var === null) {
                  die('$var needs to have a value');
              }
-        }
-        ?>
-
-    * Built-In Backtracing.
-
-      Example:
-
-        <?php
-        $backtrace = debug_backtrace();
-
-        foreach ($backtrace as $step) {
-            if (!empty($step['args'])) {
-                foreach ($step['args'] as $arg) {
-                    $args  = isset($args) ? $args . ', ' : '';
-                    $args .= var_export($arg, true);
-                }
-            } else {
-                $args = '';
-            }
-
-            $args = str_replace(array("\n", ',)'), array('', ')'), $args);
-
-            printf(
-              "%s%s(%s) [%s:%s]\n",
-              isset($step['class']) ? $step['class'] . '::' : '',
-              $step['function'],
-              $args,
-              $step['file'],
-              $step['line']
-            );
         }
         ?>
 
