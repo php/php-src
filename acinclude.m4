@@ -2,12 +2,31 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
+dnl
+dnl PHP_LIBGCC_LIBPATH(gcc)
+dnl Stores the location of libgcc in libgcc_libpath
+dnl
+AC_DEFUN(PHP_LIBGCC_LIBPATH,[
+  ac_data="`$1 -v 2>&1|grep specs|sed 's/Reading specs from //'`"
+  libgcc_libpath="`dirname $ac_data`"
+])
+
+dnl
+dnl PHP_ARG_WITH(arg-name, check message, help text[, default-val])
+dnl Sets PHP_ARG_NAME either to the user value or to the default value.
+dnl default-val defaults to no. 
+dnl
 AC_DEFUN(PHP_ARG_WITH,[
 AC_MSG_CHECKING($2)
 AC_ARG_WITH($1,[$3],PHP_[]translit($1,a-z-,A-Z_)=[$]withval,PHP_[]translit($1,a-z-,A-Z_)=ifelse($4,,no,$4))
 AC_MSG_RESULT([$]PHP_[]translit($1,a-z-,A-Z_))
 ])
 
+dnl
+dnl PHP_ARG_ENABLE(arg-name, check message, help text[, default-val])
+dnl Sets PHP_ARG_NAME either to the user value or to the default value.
+dnl default-val defaults to no. 
+dnl
 AC_DEFUN(PHP_ARG_ENABLE,[
 AC_MSG_CHECKING($2)
 AC_ARG_ENABLE($1,[$3],PHP_[]translit($1,a-z-,A-Z_)=[$]enableval,PHP_[]translit($1,a-z-,A-Z_)=ifelse($4,,no,$4))
@@ -272,14 +291,14 @@ dnl
 dnl builds RPATH from PHP_RPATHS
 dnl
 AC_DEFUN(AC_BUILD_RPATH,[
-  if test "$enable_rpath" = "yes" && test -n "$PHP_RPATHS"; then
+  if test "$PHP_RPATH" = "yes" && test -n "$PHP_RPATHS"; then
     OLD_RPATHS="$PHP_RPATHS"
-	PHP_RPATHS=""
-	for i in $OLD_RPATHS; do
-        PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
-        PHP_RPATHS="$PHP_RPATHS -R $i"
-        NATIVE_RPATHS="$NATIVE_RPATHS ${ld_runpath_switch}$i"
-	  done
+    PHP_RPATHS=""
+    for i in $OLD_RPATHS; do
+      PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
+      PHP_RPATHS="$PHP_RPATHS -R $i"
+      NATIVE_RPATHS="$NATIVE_RPATHS ${ld_runpath_switch}$i"
+    done
   fi
 ])
 

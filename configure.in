@@ -367,43 +367,25 @@ divert(3)
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
 
-AC_MSG_CHECKING(whether to use a configuration file)
-AC_ARG_WITH(config-file-path,
+PHP_ARG_WITH(config-file-path,whether to use a configuration file,
 [  --with-config-file-path=PATH  
                           Sets the path in which to look for php.ini.
-                          defaults to /usr/local/lib],
-[
-  if test "$withval" = "yes"; then
-    AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "/usr/local/lib")
-    AC_DEFINE(USE_CONFIG_FILE, 1)
-    AC_MSG_RESULT(yes)
-  else
-    if test "$withval" != "no"; then
-      AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "$withval")
-      AC_DEFINE(USE_CONFIG_FILE, 1)
-      AC_MSG_RESULT(yes)
-    else
-      AC_DEFINE(CONFIGURATION_FILE_PATH, 0)
-      AC_DEFINE(USE_CONFIG_FILE, 0)
-      AC_MSG_RESULT(no)
-    fi
-  fi
-],[
-  AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "/usr/local/lib")
+                          defaults to /usr/local/lib], yes)
+
+if test "$PHP_CONFIG_FILE_PATH" = "yes"; then
+  PHP_CONFIG_FILE_PATH="/usr/local/lib"
+fi
+
+if test "$PHP_CONFIG_FILE_PATH" != "no"; then
+  AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "$PHP_CONFIG_FILE_PATH")
   AC_DEFINE(USE_CONFIG_FILE, 1)
-  AC_MSG_RESULT(yes)
-]) 
+else
+  AC_DEFINE(CONFIGURATION_FILE_PATH, 0)
+  AC_DEFINE(USE_CONFIG_FILE, 0)
+fi
 
-
-AC_ARG_ENABLE(debug,
-[  --disable-debug         Compile without debugging symbols], [
-  PHP_DEBUG=$enableval
-],[
-  PHP_DEBUG=yes
-])
-
-AC_MSG_CHECKING(whether to include debugging symbols)
-AC_MSG_RESULT($PHP_DEBUG)
+PHP_ARG_ENABLE(debug, whether to include debugging symbols,
+[  --disable-debug         Compile without debugging symbols.], yes)
 
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
@@ -416,23 +398,14 @@ fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
+PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
+[  --enable-safe-mode      Enable safe mode by default.])
 
-AC_MSG_CHECKING(whether to enable safe mode by default)
-AC_ARG_ENABLE(safe-mode,
-[  --enable-safe-mode      Enable safe mode by default.],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(PHP_SAFE_MODE, 1)
-    AC_MSG_RESULT(yes)
-  else
-    AC_DEFINE(PHP_SAFE_MODE, 0)
-    AC_MSG_RESULT(no)
-  fi
-],[
-    AC_DEFINE(PHP_SAFE_MODE, 0)
-    AC_MSG_RESULT(no)
-]) 
-
+if test "$PHP_SAFE_MODE" = "yes"; then
+  AC_DEFINE(PHP_SAFE_MODE, 1)
+else
+  AC_DEFINE(PHP_SAFE_MODE, 0)
+fi
 
 AC_MSG_CHECKING(for safe mode exec dir)
 AC_ARG_WITH(exec-dir,
@@ -456,55 +429,39 @@ AC_ARG_WITH(exec-dir,
    	AC_MSG_RESULT(/usr/local/php/bin)
 ])
 
+PHP_ARG_ENABLE(track-vars,whether to enable track_vars variables by default,
+[  --enable-track-vars     Enable GET/POST/Cookie track variables by default.],yes)
 
-AC_MSG_CHECKING(whether to enable track_vars variables by default)
-AC_ARG_ENABLE(track-vars,
-[  --enable-track-vars     Enable GET/POST/Cookie track variables by default.],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(PHP_TRACK_VARS, 1)
-    AC_MSG_RESULT(yes)
-  else
-    AC_DEFINE(PHP_TRACK_VARS, 0)
-    AC_MSG_RESULT(no)
-  fi
-],[
-    AC_DEFINE(PHP_TRACK_VARS, 0)
-    AC_MSG_RESULT(no)
-]) 
+if test "$PHP_TRACK_VARS" = "yes"; then
+  AC_DEFINE(PHP_TRACK_VARS, 1)
+else
+  AC_DEFINE(PHP_TRACK_VARS, 0)
+fi
 
+PHP_ARG_ENABLE(magic-quotes,whether to enable magic quotes by default,
+[  --enable-magic-quotes   Enable magic quotes by default.])
 
-AC_MSG_CHECKING(whether to enable magic quotes by default)
-AC_ARG_ENABLE(magic-quotes,
-[  --enable-magic-quotes   Enable magic quotes by default.],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(MAGIC_QUOTES, 1)
-    AC_MSG_RESULT(yes)
-  else
-    AC_DEFINE(MAGIC_QUOTES, 0)
-    AC_MSG_RESULT(no)
-  fi
-],[
-    AC_DEFINE(MAGIC_QUOTES, 0)
-    AC_MSG_RESULT(no)
-]) 
+if test "$PHP_MAGIC_QUOTES" = "yes"; then
+  AC_DEFINE(MAGIC_QUOTES, 1)
+else
+  AC_DEFINE(MAGIC_QUOTES, 0)
+fi
 
-
-AC_MSG_CHECKING(whether to enable runpaths)
-AC_ARG_ENABLE(rpath,
+PHP_ARG_ENABLE(rpath, whether to enable runpaths,
 [  --disable-rpath         Disable passing additional runtime library
-                          search paths],
-[
-  if test "$enableval" = "no"; then
-    enable_rpath=no
-  else
-    enable_rpath=yes
+                          search paths], yes)
+
+PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
+[  --enable-libgcc         Enable explicitly linking against libgcc])
+
+if test "$PHP_LIBGCC" = "yes"; then
+  PHP_LIBGCC_LIBPATH(gcc)
+  if test -z "$libgcc_libpath"; then
+    AC_MSG_ERROR(Cannot locate libgcc. Make sure that gcc is in your path)
   fi
-],[
-  enable_rpath=yes
-])
-AC_MSG_RESULT($enable_rpath)
+  AC_ADD_LIBPATH($libgcc_libpath)
+  AC_ADD_LIBRARY(gcc, yes)
+fi
 
 AC_MSG_CHECKING(whether to enable short tags by default)
 AC_ARG_ENABLE(short-tags,
