@@ -988,7 +988,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
 	convert_to_double(&op1_copy);
 	convert_to_double(&op2_copy);
 
-	result->value.lval = NORMALIZE_BOOL(op2_copy.value.dval-op1_copy.value.dval);
+	result->value.lval = NORMALIZE_BOOL(op1_copy.value.dval-op2_copy.value.dval);
 	result->type = IS_LONG;
 
 	return SUCCESS;
