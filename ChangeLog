@@ -1,3 +1,33 @@
+2001-04-01  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/CREDITS
+      ext/openssl/README
+      ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+    Added whole bunch of PKCS7 (S/MIME) functions and made the key/cert params
+    a bit more friendly to use.  See the README for more info.
+
+2001-04-01  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: YARC
+
+2001-04-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS: Fixed some glitches in NEWS. (Yes, you may call me pedantic :-)
+
+2001-04-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+    According to GD documentation the macros should be used instead..
+
+    * ext/informix/ifx.ec: Fixed bug #10095.
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/php_gd.h: Fixed bug #8137 and killed some compile warnings.
+
 2001-03-31  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/output.c: MFH - header handling with output buffering
