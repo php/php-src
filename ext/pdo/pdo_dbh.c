@@ -201,7 +201,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC)
 	return dsn;
 }
 
-/* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array driver_opts])
+/* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array options])
    */
 static PHP_FUNCTION(dbh_constructor)
 {
@@ -214,11 +214,11 @@ static PHP_FUNCTION(dbh_constructor)
 	char *username=NULL, *password=NULL;
 	int usernamelen, passwordlen;
 	pdo_driver_t *driver = NULL;
-	zval *driver_options = NULL;
+	zval *options = NULL;
 	char alt_dsn[512];
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ssa!", &data_source, &data_source_len,
-				&username, &usernamelen, &password, &passwordlen, &driver_options)) {
+				&username, &usernamelen, &password, &passwordlen, &options)) {
 		ZVAL_NULL(object);
 		return;
 	}
@@ -276,14 +276,14 @@ static PHP_FUNCTION(dbh_constructor)
 	dbh = (pdo_dbh_t *) zend_object_store_get_object(object TSRMLS_CC);
 
 	/* is this supposed to be a persistent connection ? */
-	if (driver_options) {
+	if (options) {
 		zval **v;
 		int plen;
 		char *hashkey = NULL;
 		list_entry *le;
 		pdo_dbh_t *pdbh = NULL;
 
-		if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PERSISTENT, (void**)&v)) {
+		if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT, (void**)&v)) {
 			if (Z_TYPE_PP(v) == IS_STRING) {
 				/* user specified key */
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
@@ -351,13 +351,13 @@ static PHP_FUNCTION(dbh_constructor)
 	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
 	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
 
-	dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
+	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
 	
-	if (driver->db_handle_factory(dbh, driver_options TSRMLS_CC)) {
+	if (driver->db_handle_factory(dbh, options TSRMLS_CC)) {
 		/* all set */
 
 		if (is_persistent) {
@@ -453,48 +453,53 @@ static zval * pdo_instanciate_stmt(zval *object, zend_class_entry *dbstmt_ce, zv
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, array driver_options [, string classname ]])
+/* {{{ proto object PDO::prepare(string statment [, array options])
    Prepares a statement for execution and returns a statement object */
 static PHP_METHOD(PDO, prepare)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
-	char *statement, *class_name = NULL;
-	int statement_len, class_name_len;
-	zval *driver_options = NULL, *ctor_args = NULL;
+	char *statement;
+	int statement_len;
+	zval *options = NULL, **opt, **item, *ctor_args;
 	zend_class_entry *dbstmt_ce, **pce;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|asz", &statement,
-			&statement_len, &driver_options, &class_name, &class_name_len, &ctor_args)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &statement,
+			&statement_len, &options)) {
 		RETURN_FALSE;
 	}
 	
 	PDO_DBH_CLEAR_ERR();
 
-	switch(ZEND_NUM_ARGS()) {
-	case 4:
-	case 3:
-		if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == FAILURE) {
-			RETURN_FALSE;
-		}
-		if (!instanceof_function(*pce, pdo_dbstmt_ce TSRMLS_CC)) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class must be derived from %s", pdo_dbstmt_ce->name);
+	if (ZEND_NUM_ARGS() > 1 && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS, (void**)&opt)) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 0, (void**)&item) == FAILURE
+			|| Z_TYPE_PP(item) != IS_STRING
+			|| zend_lookup_class(Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
+		) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args) and classname must be a string specifying an existing class");
 			RETURN_FALSE;
 		}
 		dbstmt_ce = *pce;
+		if (!instanceof_function(dbstmt_ce, pdo_dbstmt_ce TSRMLS_CC)) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class must be derived from %s", pdo_dbstmt_ce->name);
+			RETURN_FALSE;
+		}
 		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class %s must not have a protected or public constructor", dbstmt_ce->name);
 			RETURN_FALSE;
 		}
-		break;
-
-	case 2:
-	case 1:
-	case 0:
+		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 1, (void**)&item) == SUCCESS) {
+			if (Z_TYPE_PP(item) != IS_ARRAY) {
+				zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args) and ctor args must be an array");
+				RETURN_FALSE;
+			}
+			ctor_args = *item;
+		}
+	} else {
 		dbstmt_ce = pdo_dbstmt_ce;
-		break;
+		ctor_args = NULL;
 	}
-	
+
 	if (!pdo_instanciate_stmt(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", dbstmt_ce->name);
 		return;
@@ -512,7 +517,7 @@ static PHP_METHOD(PDO, prepare)
 	/* we haven't created a lazy object yet */
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options TSRMLS_CC)) {
 
 		return;
 	}
@@ -803,7 +808,6 @@ static PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	char *statement;
 	int statement_len;
-	zval *driver_options = NULL;
 
 	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &statement,
 			&statement_len)) {
@@ -831,7 +835,7 @@ static PHP_METHOD(PDO, query)
 	/* we haven't created a lazy object yet */
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL TSRMLS_CC)) {
 		if (1) {//ZEND_NUM_ARGS() > 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
 			PDO_STMT_CLEAR_ERR();
 
