@@ -604,7 +604,7 @@ class DB_result
             $fetchmode = $this->dbh->fetchmode;
         }
 
-        $res = $this->dbh->fetchInto($arr, $fetchmode, $rownum);
+        $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
         if ($res !== DB_OK) {
             return $res;
         }
