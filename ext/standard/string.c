@@ -4027,6 +4027,80 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
+/* {{{ proto void word_count(string str, [int format])
+   	Counts the number of words inside a string. If format of 1 is specified,
+   	then the function will return an array containing all the words
+   	found inside the string. If format of 2 is specified, then the function
+   	will return an associated array where the position of the word is the key
+   	and the word itself is the value.
+   	
+   	For the purpose of this function, 'word' is defined as a locale dependent
+   	string containing alphabetic characters, which also may contain, but not start
+   	with "'" and "-" characters.
+*/
+PHP_FUNCTION(word_count)
+{
+	zval **str, **o_format;
+	char *s, *e, *p, *buf;
+	int word_count = 0;
+	int type = 0;
+	int n_args = ZEND_NUM_ARGS();
+
+	if( n_args > 2 || n_args < 1 || zend_get_parameters_ex(n_args, &str, &o_format) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (n_args == 2) {
+		convert_to_long_ex(o_format);
+		type = Z_LVAL_PP(o_format);
+		
+		if (type != 1 && type != 2) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified format parameter, '%d' is invalid.", type);
+			RETURN_FALSE;
+		}
+	}
+
+	convert_to_string_ex(str);
+	
+	p = s = Z_STRVAL_PP(str);
+	e = Z_STRVAL_PP(str) + Z_STRLEN_PP(str);
+		
+	if (type == 1 || type == 2) {
+		array_init(return_value);
+	}
+	
+	while (p < e) {
+		if (isalpha(*p++)) {
+			s = p - 1;
+			while (isalpha(*p) || *p == '\'' || (*p == '-' && isalpha(*(p+1)))) {
+				p++;
+			}
+			
+			switch (type)
+			{
+				case 1:
+					buf = estrndup(s, (p-s));
+					add_next_index_stringl(return_value, buf, (p-s), 1);
+					efree(buf);
+					break;
+				case 2:
+					buf = estrndup(s, (p-s));
+					add_index_stringl(return_value, (s - Z_STRVAL_PP(str)), buf, p-s, 1);
+					efree(buf);
+					break;
+				default:
+					word_count++;
+					break;		
+			}
+		}	
+	}
+	
+	if (!type) {
+		RETURN_LONG(word_count);		
+	}
+}
+
+/* }}} */
 
 #if HAVE_STRFMON
 /* {{{ proto string money_format(string format , float value)
