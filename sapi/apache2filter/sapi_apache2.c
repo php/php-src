@@ -323,6 +323,10 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		return ap_pass_brigade(f->next, bb);
 	}
 
+	/* setup standard CGI variables */
+	ap_add_common_vars(f->r);
+	ap_add_cgi_vars(f->r);
+
 	ctx = SG(server_context);
 	INIT_CTX;
 
