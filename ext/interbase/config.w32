@@ -10,6 +10,7 @@ if (PHP_INTERBASE != "no") {
 			 CHECK_LIB("gds32_ms.lib", "interbase", PHP_PHP_BUILD + "\\interbase\\lib_ms;" + PHP_INTERBASE))) {
 		EXTENSION("interbase", "interbase.c ibase_service.c ibase_events.c ibase_blobs.c");
 		AC_DEFINE('HAVE_IBASE', 1, 'Have interbase library');
+		AC_DEFINE('HAVE_IBASE6_API', 1, 'Have interbase version 6 API library');
 	} else {
 		WARNING("interbase not enabled; libraries and headers not found");
 	}
