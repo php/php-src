@@ -2021,7 +2021,9 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 	int stat_ok;
 
 	stat_ok = fd >= 0 && fstat(fd, &sb) == 0;
+#endif
 
+#if defined(S_ISSOCK)
 	if (stat_ok && S_ISSOCK(sb.st_mode)) {
 		return _php_stream_sock_open_from_socket(fd, persistent_id STREAMS_CC TSRMLS_CC);
 	}
