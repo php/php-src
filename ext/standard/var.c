@@ -207,7 +207,7 @@ void php_var_serialize(pval *buf, pval **struc)
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__sleep",1);
 
-				res =  call_user_function_ex(CG(function_table), *struc, fname, &retval_ptr, 0, 0, 1);
+				res =  call_user_function_ex(CG(function_table), *struc, fname, &retval_ptr, 0, 0, 1, NULL);
 
 				if ((res == SUCCESS)) {
 					if (retval_ptr && HASH_OF(retval_ptr)) {
@@ -515,7 +515,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__wakeup",1);
 
-				call_user_function_ex(CG(function_table), *rval, fname, &retval_ptr, 0, 0, 1);
+				call_user_function_ex(CG(function_table), *rval, fname, &retval_ptr, 0, 0, 1, NULL);
 
 				zval_dtor(fname);
 				FREE_ZVAL(fname);

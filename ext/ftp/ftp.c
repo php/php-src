@@ -464,7 +464,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 		return 0;
 
 	for (n=0; n<6; n++)
-		ipbox.c[n] = b[n];
+		ipbox.c[n] = (unsigned char) b[n];
 
 	memset(&ftp->pasvaddr, 0, sizeof(ftp->pasvaddr));
 	ftp->pasvaddr.sin_family = AF_INET;

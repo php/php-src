@@ -151,7 +151,7 @@ PHP_FUNCTION(ftp_connect)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long(arg2);
-		port = arg2->value.lval;
+		port = (short) arg2->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;

@@ -452,9 +452,11 @@ o_merid	: /* NULL */
 
 time_t get_date (const char *p, const time_t *now);
 
-extern struct tm	*gmtime ();
-extern struct tm	*localtime ();
-extern time_t		mktime ();
+#ifndef PHP_WIN32
+extern struct tm	*gmtime();
+extern struct tm	*localtime();
+extern time_t		mktime();
+#endif
 
 /* Month and day table. */
 static TABLE const MonthDayTable[] = {

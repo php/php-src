@@ -2126,7 +2126,7 @@ PHP_FUNCTION(setlocale)
 		cat = LC_COLLATE;
 	else if (!strcasecmp ("LC_CTYPE", category->value.str.val))
 		cat = LC_CTYPE;
-#ifndef PHP_WIN32
+#ifdef LC_MESSAGES
 	else if (!strcasecmp ("LC_MESSAGES", category->value.str.val))
 		cat = LC_MESSAGES;
 #endif
