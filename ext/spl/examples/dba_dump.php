@@ -15,10 +15,10 @@
 require_once("dba_reader.inc");
 require_once("key_filter.inc");
 
-$db = new dba_reader($argv[1], $argv[2]);
+$db = new DbaReader($argv[1], $argv[2]);
 
 if ($argc>3) {
-	$db = new key_filter($db, $argv[3]);
+	$db = new keyFilter($db, $argv[3]);
 }
 
 foreach($db as $key => $val) {

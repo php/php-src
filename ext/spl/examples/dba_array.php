@@ -12,7 +12,7 @@
  * (c) Marcus Boerger
  */
 
-class dba_array implements spl_array_access {
+class DbaArray implements ArrayAccess {
 	private $db;
 
 	function __construct($file, $handler)
@@ -35,7 +35,8 @@ class dba_array implements spl_array_access {
 			if (ini_get('magic_quotes_runtime')) {
 				$data = stripslashes($data);
 			}
-			return unserialize($data);
+			//return unserialize($data);
+			return $data;
 		}
 		else 
 		{
@@ -45,7 +46,8 @@ class dba_array implements spl_array_access {
 
 	function set($name, $value)
 	{
-		dba_replace($name, serialize($value), $this->db);
+		//dba_replace($name, serialize($value), $this->db);
+		dba_replace($name, $value, $this->db);
 		return $value;
 	}
 
@@ -53,18 +55,23 @@ class dba_array implements spl_array_access {
 	{
 		return dba_exists($name, $this->db);
 	}
+
+	function del($name)
+	{
+		return dba_delete($name, $this->db);
+	}
 }
 
 try {
 	if ($argc > 2) {
-		$dba = new dba_array($argv[1], $argv[2]);
+		$dba = new DbaArray($argv[1], $argv[2]);
 		if ($dba && $argc > 3) {
 			if ($argc > 4) {
 				$dba[$argv[3]] = $argv[4];
 			}
 			var_dump(array('Index' => $argv[3], 'Value' => $dba[$argv[3]]));
 		}
-		$dba = NULL;
+		unset($dba);
 	}
 	else
 	{

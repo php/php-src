@@ -10,7 +10,7 @@
  * and the instance will only return elements which match the given regular 
  * expression.
  */
-class key_filter implements spl_forward_assoc
+class KeyFilter implements Iterator
 {
 	protected $it;
 	protected $regex;
@@ -25,13 +25,17 @@ class key_filter implements spl_forward_assoc
 	 * @param it     Object that implements at least spl_forward
 	 * @patam regex  Regular expression used as a filter.
 	 */
-	function __construct(spl_forward $it, $regex) {
-		if ($it instanceof spl_sequence) {
-			$it->rewind();
-		}
+	function __construct(Iterator $it, $regex) {
 		$this->it = $it;
 		$this->regex = $regex;
 		$this->fetch();
+	}
+
+	/**
+	 * Rewind input iterator
+	 */
+	function rewind() {
+		$this->it->rewind();
 	}
 	
 	/**

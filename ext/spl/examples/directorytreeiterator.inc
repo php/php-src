@@ -10,11 +10,16 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 	function current()
 	{
 		$tree = '';
-		for ($l=0; $l < $this->getLevel(); $l++) {
+		for ($l=0; $l < $this->getDepth(); $l++) {
 			$tree .= $this->getSubIterator($l)->hasNext() ? '| ' : '  ';
 		}
 		return $tree . ($this->getSubIterator($l)->hasNext() ? '|-' : '\-') 
 		       . $this->getSubIterator($l);
+	}
+	
+	function __call($func, $params)
+	{
+		return call_user_func_array(array($this->getSubIterator(), $func), $params);
 	}
 }
 

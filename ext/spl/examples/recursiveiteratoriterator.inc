@@ -11,44 +11,50 @@ class RecursiveIteratorIterator implements Iterator
 	protected $ait = array();
 	protected $count = 0;
 
-	function __construct(RecursiveIterator $it) {
-		$this->count = 1;
+	function __construct(RecursiveIterator $it)
+	{
 		$this->ait[0] = $it;
 	}
 
 
-	function rewind() {
-		while ($this->count > 1) {
-			unset($this->ait[--$this->count]);
+	function rewind()
+	{
+		while ($this->count) {
+			unset($this->ait[$this->count--]);
 		}
 		$this->ait[0]->rewind();
 		$this->ait[0]->recursed = false;
 	}
 	
-	function hasMore() {
+	function hasMore()
+	{
 		$count = $this->count;
-		while ($count--) {
+		while ($count) {
 			$it = $this->ait[$count];
-			if ($it->hasMore()) {// || (!$it->recursed && $it->isRecursive())) {
+			if ($it->hasMore()) {
 				return true;
 			}
+			$count--;
 		}
 		return false;
 	}
 	
-	function key() {
-		$it = $this->ait[$this->count-1];
+	function key()
+	{
+		$it = $this->ait[$this->count];
 		return $it->key();
 	}
 	
-	function current() {
-		$it = $this->ait[$this->count-1];
+	function current()
+	{
+		$it = $this->ait[$this->count];
 		return $it->current();
 	}
 	
-	function next() {
+	function next()
+	{
 		while ($this->count) {
-			$it = $this->ait[$this->count-1];
+			$it = $this->ait[$this->count];
 			if ($it->hasMore()) {
 				if (!$it->recursed && $it->hasChildren()) {
 					$it->recursed = true;
@@ -56,8 +62,8 @@ class RecursiveIteratorIterator implements Iterator
 					$sub->recursed = false;
 					$sub->rewind();
 					if ($sub->hasMore()) {
-						$this->ait[$this->count++] = $sub;
-						if (!is_a($sub, 'RecursiveIterator')) {
+						$this->ait[++$this->count] = $sub;
+						if (!$sub instanceof RecursiveIterator)) {
 							throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
 						} 
 						return;
@@ -71,16 +77,24 @@ class RecursiveIteratorIterator implements Iterator
 				}
 				$it->recursed = false;
 			}
-			if ($this->count <= 1) {
-				return;
+			if ($this->count) {
+				unset($this->ait[$this->count--]);
+				$it = $this->ait[$this->count];
 			}
-			unset($this->ait[--$this->count]);
-			$it = $this->ait[$this->count-1];
 		}
 	}
 	
-	function getCurrentIterator() {
-		return $this->ait[$this->count-1];
+	function getSubIterator($level = NULL)
+	{
+		if (is_null($level)) {
+			$level = $this->count;
+		}
+		return @$this->ait[$level];
+	}
+
+	function getDepth()
+	{
+		return $this->level;
 	}
 }
 

@@ -6,7 +6,7 @@ class FindFile extends SearchIterator
 
 	function __construct($path, $file) {
 		$this->file = $file;
-		parent::__construct(new DirectoryTree($path));
+		parent::__construct(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
 	}
 	function accept() {
 		return !strcmp($this->it->current(), $this->file);

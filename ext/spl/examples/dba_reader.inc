@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @brief   This implements an dba iterator.
+ * @brief   This implements a Dba Iterator.
  * @author  Marcus Boerger
  * @version 1.0
  */
-class dba_reader implements spl_sequence_assoc
+class DbaReader implements Iterator
 {
 
 	private $db = NULL;

@@ -4,23 +4,25 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 {
 	protected $hasChildren;
 	protected $getChildren;
-	protected $catch_get_child_exceptions;
+	protected $catch_get_child;
 
-	function __construct(RecursiveIterator $it, $catch_get_child_exceptions = false) {
-		$this->catch_get_child_exceptions = $catch_get_child_exceptions;
+	function __construct(RecursiveIterator $it, $catch_get_child = false)
+	{
+		$this->catch_get_child = $catch_get_child;
 		parent::__construct($it);
 	}
 	
-	function next() {
+	function next()
+	{
 		if ($this->hasChildren = $this->it->hasChildren()) {
 			try {
-				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->catch_get_child_exceptions);
+				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->catch_get_child);
 				// workaround memleaks...
 				$child = $this->it->getChildren();
-				$this->getChildren = new CachingRecursiveIterator($child, $this->catch_get_child_exceptions);
+				$this->getChildren = new CachingRecursiveIterator($child, $this->catch_get_child);
 			}
 			catch(Exception $e) {
-				if (!$this->catch_get_child_exceptions) {
+				if (!$this->catch_get_child) {
 					throw $e;
 				}
 				$this->hasChildren = false;
@@ -32,11 +34,13 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 		parent::next();
 	}
 
-	function hasChildren() {
+	function hasChildren()
+	{
 		return $this->hasChildren;
 	}
 
-	function getChildren() {
+	function getChildren()
+	{
 		return $this->getChildren;
 	}
 }
