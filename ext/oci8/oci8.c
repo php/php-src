@@ -49,6 +49,9 @@
  * - delay OCIInitialize() as far as we can.
  * - add PHP Array <-> OCICollection conversion
  * - add Collection iterator object for INDEX BY tables
+ * - make auto-rollabck only happen if we have an outstanding transaction
+ * - implement ocidisconnect
+ * - add bind patch
  */
 
 /* {{{ includes & stuff */
@@ -1407,7 +1410,6 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 	text *colname;
 	ub4 counter;
 	ub2 define_type;
-	ub2 stmttype;
 	ub4 iters;
 	ub4 colcount;
 	ub2 dynamic;
@@ -1417,21 +1419,24 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 	sword error;
 	TSRMLS_FETCH();
 
-	CALL_OCI_RETURN(error, OCIAttrGet(
-				(dvoid *)statement->pStmt,
-	 			OCI_HTYPE_STMT,
-				(ub2 *)&stmttype,
-				(ub4 *)0,
-				OCI_ATTR_STMT_TYPE,
-				statement->pError));
+	if (! statement->stmttype) {
+		CALL_OCI_RETURN(error, OCIAttrGet(
+					(dvoid *)statement->pStmt,
+					OCI_HTYPE_STMT,
+					(ub2 *)&statement->stmttype,
+					(ub4 *)0,
+					OCI_ATTR_STMT_TYPE,
+					statement->pError));
 
-	statement->error = oci_error(statement->pError, "OCIAttrGet OCI_HTYPE_STMT/OCI_ATTR_STMT_TYPE", error);
-	if (statement->error) {
-		oci_handle_error(statement->conn, statement->error);
-		return 0;
+		statement->error = oci_error(statement->pError, "OCIAttrGet OCI_HTYPE_STMT/OCI_ATTR_STMT_TYPE", error);
+
+		if (statement->error) {
+			oci_handle_error(statement->conn, statement->error);
+			return 0;
+		}
 	}
 
-	if (stmttype == OCI_STMT_SELECT) {
+	if (statement->stmttype == OCI_STMT_SELECT) {
 		iters = 0;
 	} else {
 		iters = 1;
@@ -1467,9 +1472,9 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		}
 	}
 
-	if (stmttype == OCI_STMT_SELECT && (statement->executed == 0)) {
+	if ((statement->stmttype == OCI_STMT_SELECT) && (statement->executed == 0)) {
 		/* we only need to do the define step is this very statement is executed the first time! */
-		statement->executed++;
+		statement->executed = 1;
 		
 		ALLOC_HASHTABLE(statement->columns);
 		zend_hash_init(statement->columns, 13, NULL, _oci_column_hash_dtor, 0);
@@ -1728,6 +1733,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 		zend_hash_apply(statement->columns, (apply_func_t) _oci_column_pre_fetch TSRMLS_CC);
 	}
 
+
 	CALL_OCI_RETURN(statement->error, OCIStmtFetch(
 				statement->pStmt, 
 				statement->pError, 
@@ -1736,14 +1742,16 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 				OCI_DEFAULT));
 
 	if ((statement->error == OCI_NO_DATA) || (nrows == 0)) {
-		/* XXX this is needed for REFCURSORS! */
-		if (statement->columns) {
-			zend_hash_destroy(statement->columns);
-			efree(statement->columns);
-			statement->columns = 0;
-			statement->ncolumns = 0;
+		if (statement->last_query == 0) {
+			/* reset define-list for refcursosrs */
+			if (statement->columns) {
+				zend_hash_destroy(statement->columns);
+				efree(statement->columns);
+				statement->columns = 0;
+				statement->ncolumns = 0;
+			}
+			statement->executed = 0;
 		}
-		statement->executed = 0;
 
 		statement->error = 0; /* OCI_NO_DATA is NO error for us!!! */
 
