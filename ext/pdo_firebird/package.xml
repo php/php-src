@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package version="1.0"><!-- $Id: package.xml,v 1.3 2004-06-12 16:58:20 abies Exp $ -->
+<package version="1.0"><!-- $Id: package.xml,v 1.4 2004-06-23 13:26:08 abies Exp $ -->
  <name>PDO_Firebird</name>
  <summary>Firebird/InterBase support for PDO</summary>
  <maintainers>
@@ -16,17 +16,17 @@
 </configureoptions>
  <description>
 	 This extension provides a Firebird/InterBase driver for PDO. It supports
-	 InterBase versions 6.x/7.x and Firebird 1.x.
+	 all versions of Firebird and InterBase versions 6 and up.
  </description>
  <license>PHP</license>
  <release>
   <state>alpha</state>
   <version>0.1</version>
-  <date>2004-06-12</date>
+  <date>2004-06-23</date>
 
   <notes>
    To compile and run this module, you will need to have the main PDO module and Firebird's
-   client library installed on your system. (InterBase 6 or higher should work as well)
+   or InterBase's client library installed on your system.
   </notes>
 
   <filelist>
@@ -48,7 +48,7 @@
 
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0RC3"/>
+   <dep type="php" rel="ge" version="5.0.0"/>
    <dep type="ext" rel="ge" name="pdo" version="0.1"/>
   </deps>
  </release>
