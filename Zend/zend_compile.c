@@ -1711,13 +1711,17 @@ static void do_inherit_method(zend_function *function)
 }
 
 
-static zend_bool zend_do_perform_implementation_check(zend_function *fe)
+static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_function *proto)
 {
 	zend_uint i;
-	zend_function *proto = fe->common.prototype;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but we still need to do the arg number checks.  We are only willing to ignore this for internal functions because extensions don't always define arg_info. */
 	if (!proto || (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION)) {
+		return 1;
+	}
+
+	/* No implementation checks for constructors */
+	if (fe->common.fn_flags & ZEND_ACC_CTOR) {
 		return 1;
 	}
 
@@ -1818,15 +1822,21 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		}
 	}
 
-	child->common.prototype = parent;
 	if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
+		child->common.prototype = parent;
+	} else {
+		child->common.prototype = parent->common.prototype;
 	}
 
-	/* Check E_STRICT before the check so that we save some time */
-	if(EG(error_reporting) & E_STRICT) {
-		if (!(child->common.fn_flags & ZEND_ACC_CTOR) && !zend_do_perform_implementation_check(child)) {
-			zend_error(E_STRICT, "Declaration of %s::%s() must be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
+	
+	if (child->common.prototype) {
+		if (!zend_do_perform_implementation_check(child, child->common.prototype)) {
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
+		}
+	} else if (EG(error_reporting) & E_STRICT) { /* Check E_STRICT before the check so that we save some time */
+		if (!zend_do_perform_implementation_check(child, parent)) {
+			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(parent), parent->common.function_name);
 		}
 	}
 
