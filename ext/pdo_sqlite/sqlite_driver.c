@@ -307,7 +307,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 	filename = make_filename_safe(dbh->data_source TSRMLS_CC);
 
 	if (!filename) {
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_CANT_MAP TSRMLS_CC,
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NO_PERM TSRMLS_CC,
 			"safe_mode/open_basedir prohibits opening %s",
 			dbh->data_source);
 		goto cleanup;
