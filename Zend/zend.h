@@ -37,7 +37,9 @@
  * general definitions
  */
 
-#if (defined(WINNT) && WINNT) || (defined(WIN32) && WIN32)
+#define ZEND_WIN32 ((defined(WINNT) && WINNT) || (defined(WIN32) && WIN32))
+
+#if ZEND_WIN32
 # include "zend_config.w32.h"
 #else
 # include "zend_config.h"
@@ -63,7 +65,7 @@
 # define DL_FETCH_SYMBOL			dlsym
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1
-#elif (WIN32||WINNT)
+#elif (ZEND_WIN32)
 # define DL_LOAD(libname)			LoadLibrary(libname)
 # define DL_FETCH_SYMBOL			GetProcAddress
 # define DL_UNLOAD					FreeLibrary
@@ -350,7 +352,7 @@ END_EXTERN_C()
 
 #define ZEND_MAX_RESERVED_RESOURCES	1
 
-#if (WINNT|WIN32)
+#if (ZEND_WIN32)
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #define EMPTY_SWITCH_DEFAULT_CASE() \
