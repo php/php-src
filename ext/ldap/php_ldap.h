@@ -88,6 +88,10 @@ PHP_FUNCTION(ldap_parse_reference);
 PHP_FUNCTION(ldap_rename);
 #endif
 
+#if LDAP_API_VERSION > 2000
+PHP_FUNCTION(ldap_start_tls);
+#endif
+
 #ifdef STR_TRANSLATION
 PHP_FUNCTION(ldap_t61_to_8859);
 PHP_FUNCTION(ldap_8859_to_t61);
