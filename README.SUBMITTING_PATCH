@@ -1,0 +1,116 @@
+Submitting Patch for PHP
+========================
+
+This document describes how to submit a patch for PHP. Since you are
+reading this document, you are willing to submit a patch for PHP.
+Please keep reading! Submitting a patch for PHP is easy.
+
+How to create patch?  
+-------------------- 
+We are working with CVS. You need to get CVS source to create a patch
+that we accept.  Visit http://www.php.net/anoncvs.php to get CVS
+source. You can check out older versions, but make sure you get
+the default branch (i.e. Do not use -r option when you check out the 
+CVS source)
+
+Read CODING_STANDARDS file before you start working.
+
+Now you are ready to create a patch. Modify source to fix a bug in PHP or
+add a new feature to PHP. After you finished editing, please test your
+patch. Read README.TESTING for testing.
+
+After you finish testing your patch, take diff file using 
+"cvs diff > your.patch" command.
+
+Read README.TESTING for submitting a test script for your patch. This is
+not strictly required, but it is preferred to submit a test script along
+with your patch. Making new test script is very easy. It also helps us
+to understand what you have been fixed or added to PHP.
+
+
+Tips for creating patch 
+----------------------- 
+If you would like to fix multiple bugs. It is easier for us if you
+could create 1 patch for 1 bug, but this is not strictly required.
+
+If you would like change/add many lines, it is better to ask module
+maintainer and/or php-dev@lists.php.net, or pear-dev@lists.php.net if
+you are patching PEAR. Official module maintainers can be found in
+EXTENSIONS file in PHP source.
+
+If you are new to CVS (Concurrent Versions System), visit 
+http://cvshome.org/ for details.
+
+
+Recommended CVS client settings for creating patch file
+------------------------------------------------------
+Recommended ~/.cvsrc file setting is:
+------
+cvs -z3
+update -d -P
+checkout -P
+diff -u -b -w -B
+------
+diff -u -b -w -B means:
+ -b     Ignore changes in amount of white space.
+ -B     Ignore changes that just insert or delete blank lines.
+ -u     Use the unified output format.
+ -w     Ignore white space when comparing lines.
+
+With this CVS setting, you don't have to worry about adding/deleting
+newlines and spaces.
+
+
+Check list for submitting patch
+-------------------------------
+ - Did you run "make test" to check if your patch didn't break
+   other features?
+ - Did you compile PHP with --enable-debug and check php/webserver 
+   error logs when you test your patch?
+ - Did you build PHP for multi-threaded web servers. (Optional)
+ - Did you create test script for "make test"? (Recommended)
+ - Did you check your patch is unified format and it does not 
+   contain white space changes? (If you are not using recommended 
+   cvs setting)
+ - Did you update CVS source before you take final patch?
+ - Did you read the patch again?
+
+
+Where to send your patch?
+-------------------------
+If you are patching C source, send the patch to php-dev@lists.php.net. 
+If you are patching a module, you should also send the patch to the 
+maintainer. Official module maintainers are listed in EXTENSION file 
+in source.
+
+If you are pachting PEAR, send the patch to pear-dev@lists.php.net.
+
+Make sure you add "[PATCH]" prefix to mail subject. Please make sure
+attach the patch file even if the patch is really short one. If you 
+create a test script for your patch, attach it to the same mail. 
+Finally, explain what has been fixed/added/changed by your patch.
+
+If you know bug ID that can be closed by your patch, please note the
+bug ID number also.
+
+
+How long it will take to get response?
+-------------------------------------- 
+Since we are volunteers, it may take more than a few days to get
+response. If you didn't get any response in a few days, please let us
+know you have been submitted the patch, but you didn't get any
+response.
+
+
+What happens when your patch is applied?
+---------------------------------------- 
+When your patch is applied, it will be noted that the patch is
+submitted by you. You may see your email address in ChangeLog file. If
+your patch is important to be noted in NEWS file, your patch
+description and email address will be noted.
+
+If you would not like to be noted in ChangeLog and NEWS file, please
+let us know when you submit your patch.
+
+
+Thank you for submitting patch for PHP!
