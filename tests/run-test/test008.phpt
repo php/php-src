@@ -2,7 +2,7 @@
 Error message handling (with ZendOptimizer)
 --SKIPIF--
 <?php
-extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is not loaded");
 ?>
 --FILE--
 <?php
