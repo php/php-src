@@ -32,7 +32,7 @@
 #endif
 
 #ifndef ZTS
-zend_alloc_globals alloc_globals;
+ZEND_API zend_alloc_globals alloc_globals;
 #endif
 
 
