@@ -88,7 +88,7 @@
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 char *
- ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register int *len)
 {
 	register char *p = buf_end;
@@ -147,17 +147,19 @@ char *
 	register char *s = buf;
 	register char *p;
 	int decimal_point;
+	char buf1[NDIG];
 
 	if (format == 'f')
-		p = ap_php_fcvt(num, precision, &decimal_point, is_negative);
+		p = ap_php_fcvt(num, precision, &decimal_point, is_negative, buf1);
 	else						/* either e or E format */
-		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative);
+		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative, buf1);
 
 	/*
 	 * Check for Infinity and NaN
 	 */
 	if (isalpha((int)*p)) {
-		*len = strlen(strcpy(buf, p));
+		*len = strlen(p);
+		memcpy(buf, p, *len + 1);
 		*is_negative = FALSE;
 		return (buf);
 	}
@@ -274,12 +276,11 @@ char *
 #define	NDIG	80
 
 char *
- ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
+ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 {
 	register int r2;
 	double fi, fj;
 	register char *p, *p1;
-	static char buf[NDIG];
 
 	if (ndigits >= NDIG - 1)
 		ndigits = NDIG - 2;
@@ -319,8 +320,7 @@ char *
 		return (buf);
 	}
 	while (p <= p1 && p < &buf[NDIG]) {
-		arg *= 10;
-		arg = modf(arg, &fj);
+		arg = modf(arg * 10, &fj);
 		*p++ = (int) fj + '0';
 	}
 	if (p1 >= &buf[NDIG]) {
@@ -348,15 +348,15 @@ char *
 }
 
 char *
- ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign)
+ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
-	return (ap_php_cvt(arg, ndigits, decpt, sign, 1));
+	return (ap_php_cvt(arg, ndigits, decpt, sign, 1, buf));
 }
 
 char *
- ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign)
+ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
-	return (ap_php_cvt(arg, ndigits, decpt, sign, 0));
+	return (ap_php_cvt(arg, ndigits, decpt, sign, 0, buf));
 }
 
 /*
@@ -365,13 +365,14 @@ char *
  */
 
 char *
- ap_php_gcvt(double number, int ndigit, char *buf)
+ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 {
 	int sign, decpt;
 	register char *p1, *p2;
 	register i;
+	char buf1[NDIG];
 
-	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign);
+	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign, buf1);
 	p2 = buf;
 	if (sign)
 		*p2++ = '-';
@@ -415,7 +416,7 @@ char *
 			*p2++ = '.';
 		}
 	}
-	if (p2[-1] == '.')
+	if (p2[-1] == '.' && !altform)
 		p2--;
 	*p2 = '\0';
 	return (buf);
@@ -762,7 +763,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1]);
+					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1],
+							alternate_form);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
