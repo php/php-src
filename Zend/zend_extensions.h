@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_EXTENSIONS_H
-#define _ZEND_EXTENSIONS_H
+#ifndef ZEND_EXTENSIONS_H
+#define ZEND_EXTENSIONS_H
 
 #include "zend_compile.h"
 
@@ -94,4 +94,4 @@ void zend_append_version_info(zend_extension *extension);
 int zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
 
-#endif /* _ZEND_EXTENSIONS_H */
+#endif /* ZEND_EXTENSIONS_H */

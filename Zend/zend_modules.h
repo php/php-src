@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _MODULES_H
-#define _MODULES_H
+#ifndef MODULES_H
+#define MODULES_H
 
 #define INIT_FUNC_ARGS		int type, int module_number ELS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number ELS_CC

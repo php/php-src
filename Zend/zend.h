@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_H
-#define _ZEND_H
+#ifndef ZEND_H
+#define ZEND_H
 
 #define ZEND_VERSION "1.0.1"
 
@@ -428,7 +428,7 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 #define EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 
-#endif /* _ZEND_H */
+#endif /* ZEND_H */
 
 /*
  * Local variables:

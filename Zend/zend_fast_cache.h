@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_FAST_CACHE_H
-#define _ZEND_FAST_CACHE_H
+#ifndef ZEND_FAST_CACHE_H
+#define ZEND_FAST_CACHE_H
 
 #ifndef ZEND_ENABLE_FAST_CACHE
 # if ZEND_DEBUG
@@ -130,7 +130,7 @@ typedef struct _zend_fast_cache_list_entry {
 #define FREE_HASHTABLE_REL(ht)	\
 	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
 
-#endif /* _ZEND_FAST_CACHE_H */
+#endif /* ZEND_FAST_CACHE_H */
 
 /*
  * Local variables:

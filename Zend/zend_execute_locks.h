@@ -1,5 +1,5 @@
-#ifndef _ZEND_EXECUTE_LOCKS_H
-#define _ZEND_EXECUTE_LOCKS_H
+#ifndef ZEND_EXECUTE_LOCKS_H
+#define ZEND_EXECUTE_LOCKS_H
 
 #define PZVAL_LOCK(z)	((z)->refcount++)
 #define PZVAL_UNLOCK(z)	{ ((z)->refcount--);								\
@@ -19,4 +19,4 @@
 
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
-#endif /* _ZEND_EXECUTE_LOCKS_H */
+#endif /* ZEND_EXECUTE_LOCKS_H */

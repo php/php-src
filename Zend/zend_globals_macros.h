@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_GLOBALS_MACROS_H
-#define _ZEND_GLOBALS_MACROS_H
+#ifndef ZEND_GLOBALS_MACROS_H
+#define ZEND_GLOBALS_MACROS_H
 
 typedef struct _zend_compiler_globals zend_compiler_globals;
 typedef struct _zend_executor_globals zend_executor_globals;
@@ -85,5 +85,5 @@ extern ZEND_API zend_executor_globals executor_globals;
 extern ZEND_API zend_alloc_globals alloc_globals;
 #endif
 
-#endif /* _ZEND_GLOBALS_MACROS_H */
+#endif /* ZEND_GLOBALS_MACROS_H */
 

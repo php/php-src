@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_STACK_H
-#define _ZEND_STACK_H
+#ifndef ZEND_STACK_H
+#define ZEND_STACK_H
 
 typedef struct _zend_stack {
 	int top, max;
@@ -44,4 +44,4 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 #define ZEND_STACK_APPLY_TOPDOWN	1
 #define ZEND_STACK_APPLY_BOTTOMUP	2
 
-#endif /* _ZEND_STACK_H */
+#endif /* ZEND_STACK_H */
