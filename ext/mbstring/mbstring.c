@@ -728,11 +728,11 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 
 /* {{{ php.ini directive registration */
 PHP_INI_BEGIN()
-	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
+	 PHP_INI_ENTRY("mbstring.language", "none", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
 	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	 PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
-	 PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
-	 PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
+	 PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
+	 PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
+	 PHP_INI_ENTRY("mbstring.internal_encoding", "none", PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
 #ifdef ZEND_MULTIBYTE
 	 PHP_INI_ENTRY("mbstring.script_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_script_encoding)
 #endif /* ZEND_MULTIBYTE */
@@ -750,10 +750,10 @@ PHP_INI_END()
 static void
 php_mb_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
-	MBSTRG(language) = mbfl_no_language_english;
-	MBSTRG(current_language) = mbfl_no_language_english;
-	MBSTRG(internal_encoding) = mbfl_no_encoding_8859_1;
-	MBSTRG(current_internal_encoding) = mbfl_no_encoding_8859_1;
+	MBSTRG(language) = mbfl_no_language_uni;
+	MBSTRG(current_language) = MBSTRG(language);
+	MBSTRG(internal_encoding) = mbfl_no_encoding_pass;
+	MBSTRG(current_internal_encoding) = MBSTRG(internal_encoding);
 #ifdef ZEND_MULTIBYTE
 	MBSTRG(script_encoding_list) = NULL;
 	MBSTRG(script_encoding_list_size) = 0;
