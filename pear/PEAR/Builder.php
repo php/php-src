@@ -206,7 +206,7 @@ class PEAR_Builder extends PEAR_Common
             return $this->raiseError("`phpize' failed");
         }
 
-        // start of interactive part
+        // {{{ start of interactive part
         $configure_command = "$dir/configure";
         if (isset($info['configure_options'])) {
             foreach ($info['configure_options'] as $o) {
@@ -222,9 +222,9 @@ class PEAR_Builder extends PEAR_Common
                 }
             }
         }
-        // end of interactive part
+        // }}} end of interactive part
 
-        // make configurable
+        // FIXME make configurable
         if(!$user=getenv('USER')){
             $user='defaultuser';
         }

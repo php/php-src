@@ -39,12 +39,17 @@ require_once 'PEAR/Dependency.php';
 
 class PEAR_DependencyDB extends PEAR
 {
+    // {{{ properties
+
     var $pear_reg = false;
     var $pear_dep = false;
     var $depdb_file = false;
     var $lockfile = false;
     var $lock_fp = false;
     var $depdb_version = '1.0';
+
+    // }}}
+    // {{{ & singleton()
 
     function &singleton($depdb_file, $reg_file)
     {
@@ -58,6 +63,9 @@ class PEAR_DependencyDB extends PEAR
         return $obj;
     }
 
+    // }}}
+    // {{{ assertDepsDB()
+
     function assertDepsDB()
     {
         if (!is_file($this->depdb_file)) {
@@ -70,6 +78,9 @@ class PEAR_DependencyDB extends PEAR
             }
         }
     }
+
+    // }}}
+    // {{{ _lock()
 
     function _lock($mode = LOCK_EX)
     {
@@ -116,6 +127,7 @@ class PEAR_DependencyDB extends PEAR
         return $ret;
     }
 
+    // }}}
     // {{{ rebuildDepsFile()
 
     function rebuildDB()
@@ -134,6 +146,9 @@ class PEAR_DependencyDB extends PEAR
         return true;
     }
 
+    // }}}
+    // {{{ & _getDepDB()
+
     function &_getDepDB()
     {
         if (!$fp = fopen($this->depdb_file, 'r')) {
@@ -143,6 +158,9 @@ class PEAR_DependencyDB extends PEAR
         fclose($fp);
         return unserialize($data);
     }
+
+    // }}}
+    // {{{ _writeDepDB()
 
     function _writeDepDB(&$deps)
     {
@@ -158,7 +176,10 @@ class PEAR_DependencyDB extends PEAR
         $this->_unlock();
         return true;
     }
+
+    // }}}
     /*
+    // {{{ removePackageDep()
     function removePackageDep($package)
     {
         $data = &$this->_depGetDepDB();
@@ -184,7 +205,10 @@ class PEAR_DependencyDB extends PEAR
         }
         return $this->_depWriteDepDB();
     }
+    // }}}
     */
+
+    // {{{ checkAction()
 
     function checkAction($action, $package, $new_version = null)
     {
@@ -229,10 +253,16 @@ class PEAR_DependencyDB extends PEAR
         }
     }
 
+    // }}}
+    // {{{ commitAction()
+
     function commitAction($action, $package)
     {
 
     }
+
+    // }}}
+    // {{{ setPackageDep()
 
     /**
     * Update or insert a the dependencies of a package, prechecking
