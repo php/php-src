@@ -157,8 +157,7 @@ static void _free_mcve_conn(zend_rsrc_list_entry *rsrc)
 PHP_MINIT_FUNCTION(mcve)
 {
 	/* register the MCVE_CONN destructor */
-	le_conn = zend_register_list_destructors_ex(_free_mcve_conn, NULL,
-	    "mcve connection", module_number);
+	le_conn = zend_register_list_destructors_ex(_free_mcve_conn, NULL, "mcve connection", module_number);
 
 	/* Key definitions for Transaction Parameters */
 	REGISTER_LONG_CONSTANT("MC_TRANTYPE", MC_TRANTYPE, MCVE_CONST);
@@ -356,12 +355,10 @@ PHP_FUNCTION(mcve_deleteresponse)
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-						le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -378,8 +375,7 @@ PHP_FUNCTION(mcve_deletetrans)
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
@@ -403,8 +399,7 @@ PHP_FUNCTION(mcve_destroyconn)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	MCVE_DestroyConn(conn);
 
@@ -420,12 +415,10 @@ PHP_FUNCTION(mcve_setdropfile)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 
@@ -443,12 +436,10 @@ PHP_FUNCTION(mcve_setip)
 	int retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 ||
-	    zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_long_ex(arg3);
@@ -467,12 +458,10 @@ PHP_FUNCTION(mcve_setssl)
 	int retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 ||
-	    zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_long_ex(arg3);
@@ -484,7 +473,7 @@ PHP_FUNCTION(mcve_setssl)
 /* }}} */
 
 /* {{{ proto int mcve_settimeout(resource conn, int seconds)
-    Set maximum transaction time (per trans)
+   Set maximum transaction time (per trans)
 */
 PHP_FUNCTION(mcve_settimeout)
 {
@@ -492,12 +481,10 @@ PHP_FUNCTION(mcve_settimeout)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -508,7 +495,7 @@ PHP_FUNCTION(mcve_settimeout)
 /* }}} */
 
 /* {{{ proto int mcve_setblocking(resource conn, int tf)
-    Set blocking/non-blocking mode for connection
+   Set blocking/non-blocking mode for connection
 */
 PHP_FUNCTION(mcve_setblocking)
 {
@@ -516,12 +503,10 @@ PHP_FUNCTION(mcve_setblocking)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -532,19 +517,17 @@ PHP_FUNCTION(mcve_setblocking)
 /* }}} */
 
 /* {{{ proto bool mcve_verifyconnection(resource conn, int tf)
-    Set whether or not to PING upon connect to verify connection
+   Set whether or not to PING upon connect to verify connection
 */
 PHP_FUNCTION(mcve_verifyconnection)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -555,19 +538,17 @@ PHP_FUNCTION(mcve_verifyconnection)
 /* }}} */
 
 /* {{{ proto bool mcve_verifysslcert(resource conn, int tf)
-    Set whether or not to verify the server ssl certificate
+   Set whether or not to verify the server ssl certificate
 */
 PHP_FUNCTION(mcve_verifysslcert)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -578,19 +559,17 @@ PHP_FUNCTION(mcve_verifysslcert)
 /* }}} */
 
 /* {{{ proto bool mcve_maxconntimeout(resource conn, int secs)
-    The maximum amount of time the API will attempt a connection to MCVE
+   The maximum amount of time the API will attempt a connection to MCVE
 */
 PHP_FUNCTION(mcve_maxconntimeout)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -611,8 +590,7 @@ PHP_FUNCTION(mcve_connect)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_Connect(conn);
 
@@ -631,15 +609,14 @@ PHP_FUNCTION(mcve_connectionerror)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_ConnectionError(conn);
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -655,8 +632,7 @@ PHP_FUNCTION(mcve_transactionssent)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_TransactionsSent(conn);
 
@@ -675,8 +651,7 @@ PHP_FUNCTION(mcve_ping)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_Ping(conn);
 
@@ -695,8 +670,7 @@ PHP_FUNCTION(mcve_transnew)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_TransNew(conn);
 
@@ -730,8 +704,7 @@ PHP_FUNCTION(mcve_transparam)
 	if (key == MC_CUSTOM && ZEND_NUM_ARGS() != 5)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -777,8 +750,7 @@ PHP_FUNCTION(mcve_transsend)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -800,8 +772,7 @@ PHP_FUNCTION(mcve_responseparam)
 		zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -809,9 +780,9 @@ PHP_FUNCTION(mcve_responseparam)
 	retval = MCVE_ResponseParam(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -828,8 +799,7 @@ PHP_FUNCTION(mcve_getuserparam)
 		zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 	convert_to_long_ex(arg3);
@@ -837,9 +807,9 @@ PHP_FUNCTION(mcve_getuserparam)
 	retval = MCVE_GetUserParam(conn, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -852,12 +822,10 @@ PHP_FUNCTION(mcve_returnstatus)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -875,12 +843,10 @@ PHP_FUNCTION(mcve_returncode)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -891,19 +857,17 @@ PHP_FUNCTION(mcve_returncode)
 /* }}} */
 
 /* {{{ proto int mcve_transactionitem(resource conn, int identifier)
-    Get the ITEM number in the associated batch for this transaction */
+   Get the ITEM number in the associated batch for this transaction */
 PHP_FUNCTION(mcve_transactionitem)
 {
 	MCVE_CONN *conn;
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -921,12 +885,10 @@ PHP_FUNCTION(mcve_transactionavs)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -938,19 +900,17 @@ PHP_FUNCTION(mcve_transactionavs)
 
 
 /* {{{ proto int mcve_transactioncv(resource conn, int identifier)
-    Get the CVC2/CVV2/CID return status */
+   Get the CVC2/CVV2/CID return status */
 PHP_FUNCTION(mcve_transactioncv)
 {
 	MCVE_CONN *conn;
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -961,19 +921,17 @@ PHP_FUNCTION(mcve_transactioncv)
 /* }}} */
 
 /* {{{ proto int mcve_transactionbatch(resource conn, int identifier)
-    Get the batch number associated with the transaction */
+   Get the batch number associated with the transaction */
 PHP_FUNCTION(mcve_transactionbatch)
 {
 	MCVE_CONN *conn;
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -984,7 +942,7 @@ PHP_FUNCTION(mcve_transactionbatch)
 /* }}} */
 
 /* {{{ proto int mcve_transactionid(resource conn, int identifier)
-    Get the unique system id for the transaction
+   Get the unique system id for the transaction
 */
 PHP_FUNCTION(mcve_transactionid)
 {
@@ -992,12 +950,10 @@ PHP_FUNCTION(mcve_transactionid)
 	int retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1015,21 +971,19 @@ PHP_FUNCTION(mcve_transactionauth)
 	char *retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
 	retval = MCVE_TransactionAuth(conn, Z_LVAL_PP(arg2));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -1042,20 +996,18 @@ PHP_FUNCTION(mcve_transactiontext)
 	char *retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
 	retval = MCVE_TransactionText(conn, Z_LVAL_PP(arg2));
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -1071,8 +1023,7 @@ PHP_FUNCTION(mcve_monitor)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_Monitor(conn);
 
@@ -1091,8 +1042,7 @@ PHP_FUNCTION(mcve_transinqueue)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection", le_conn);
 
 	retval = MCVE_TransInQueue(conn);
 
@@ -1108,12 +1058,10 @@ PHP_FUNCTION(mcve_checkstatus)
 	long retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1123,9 +1071,8 @@ PHP_FUNCTION(mcve_checkstatus)
 }
 /* }}} */
 
-
 /* {{{ proto int mcve_completeauthorizations(resource conn, int &array)
-    Number of complete authorizations in queue, returning an array of their identifiers */
+   Number of complete authorizations in queue, returning an array of their identifiers */
 PHP_FUNCTION(mcve_completeauthorizations)
 {
 	MCVE_CONN *conn;
@@ -1135,8 +1082,7 @@ PHP_FUNCTION(mcve_completeauthorizations)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2))
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	listnum = MCVE_CompleteAuthorizations(conn, &list);
 
@@ -1163,12 +1109,11 @@ PHP_FUNCTION(mcve_sale)
 	zval **arg9, **arg10, **arg11, **arg12, **arg13, **arg14;
 
 	if (ZEND_NUM_ARGS() != 14 || zend_get_parameters_ex(14, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
-	    &arg12, &arg13, &arg14) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
+		&arg12, &arg13, &arg14) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1185,10 +1130,10 @@ PHP_FUNCTION(mcve_sale)
 	convert_to_long_ex(arg14);
 
 	retval = MCVE_Sale(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
-	    Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
-	    Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
-	    Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
+		Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
+		Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
+		Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
 
 	RETURN_LONG(retval);
 }
@@ -1204,12 +1149,11 @@ PHP_FUNCTION(mcve_preauth)
 	zval **arg9, **arg10, **arg11, **arg12, **arg13, **arg14;
 
 	if (ZEND_NUM_ARGS() != 14 || zend_get_parameters_ex(14, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
-	    &arg12, &arg13, &arg14) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
+		&arg12, &arg13, &arg14) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1226,10 +1170,10 @@ PHP_FUNCTION(mcve_preauth)
 	convert_to_long_ex(arg14);
 
 	retval = MCVE_PreAuth(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
-	    Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
-	    Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
-	    Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
+		Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
+		Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
+		Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
 
 	RETURN_LONG(retval);
 }
@@ -1245,12 +1189,11 @@ PHP_FUNCTION(mcve_override)
 	zval **arg9, **arg10, **arg11, **arg12, **arg13, **arg14;
 
 	if (ZEND_NUM_ARGS() != 14 || zend_get_parameters_ex(14, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
-	    &arg12, &arg13, &arg14) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
+		&arg12, &arg13, &arg14) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1267,10 +1210,10 @@ PHP_FUNCTION(mcve_override)
 	convert_to_long_ex(arg14);
 
 	retval = MCVE_Override(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
-	    Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
-	    Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
-	    Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
+		Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
+		Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12),
+		Z_STRVAL_PP(arg13), Z_LVAL_PP(arg14));
 
 	RETURN_LONG(retval);
 }
@@ -1284,20 +1227,18 @@ PHP_FUNCTION(mcve_void)
 	long retval;
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,
-	    &arg3, &arg4, &arg5) == FAILURE)
+	if (ZEND_NUM_ARGS() != 5 ||
+		zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
 	convert_to_long_ex(arg4);
 	convert_to_long_ex(arg5);
 
-	retval = MCVE_Void(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_LVAL_PP(arg4), Z_LVAL_PP(arg5));
+	retval = MCVE_Void(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_LVAL_PP(arg5));
 
 	RETURN_LONG(retval);
 }
@@ -1311,12 +1252,11 @@ PHP_FUNCTION(mcve_preauthcompletion)
 	long retval;
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6) == FAILURE)
+	if (ZEND_NUM_ARGS() != 6 ||
+		zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1325,8 +1265,7 @@ PHP_FUNCTION(mcve_preauthcompletion)
 	convert_to_long_ex(arg6);
 
 	retval = MCVE_PreAuthCompletion(conn, Z_STRVAL_PP(arg2),
-	    Z_STRVAL_PP(arg3), Z_DVAL_PP(arg4), Z_LVAL_PP(arg5),
-	    Z_LVAL_PP(arg6));
+		Z_STRVAL_PP(arg3), Z_DVAL_PP(arg4), Z_LVAL_PP(arg5), Z_LVAL_PP(arg6));
 
 	RETURN_LONG(retval);
 }
@@ -1342,12 +1281,10 @@ PHP_FUNCTION(mcve_force)
 	zval **arg9, **arg10, **arg11, **arg12;
 
 	if (ZEND_NUM_ARGS() != 12 || zend_get_parameters_ex(12, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11,
-	    &arg12) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11, &arg12) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1362,9 +1299,9 @@ PHP_FUNCTION(mcve_force)
 	convert_to_long_ex(arg12);
 
 	retval = MCVE_Force(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
-	    Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
-	    Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_LVAL_PP(arg12));
+		Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
+		Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_LVAL_PP(arg12));
 
 	RETURN_LONG(retval);
 }
@@ -1380,11 +1317,10 @@ PHP_FUNCTION(mcve_return)
 	zval **arg9, **arg10, **arg11;
 
 	if (ZEND_NUM_ARGS() != 11 || zend_get_parameters_ex(11, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1398,9 +1334,9 @@ PHP_FUNCTION(mcve_return)
 	convert_to_long_ex(arg11);
 
 	retval = MCVE_Return(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
-	    Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
-	    Z_STRVAL_PP(arg10), Z_LVAL_PP(arg11));
+		Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6),
+		Z_DVAL_PP(arg7), Z_STRVAL_PP(arg8), Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10), Z_LVAL_PP(arg11));
 
 	RETURN_LONG(retval);
 }
@@ -1415,12 +1351,10 @@ PHP_FUNCTION(mcve_settle)
 	long retval;
 	zval **arg1, **arg2, **arg3, **arg4;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,
-	    &arg3, &arg4) == FAILURE)
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1440,12 +1374,10 @@ PHP_FUNCTION(mcve_ub)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1464,12 +1396,11 @@ PHP_FUNCTION(mcve_qc)
 	long retval;
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 
-	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE)
+	if (ZEND_NUM_ARGS() != 7 ||
+		zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1478,15 +1409,15 @@ PHP_FUNCTION(mcve_qc)
 	convert_to_string_ex(arg6);
 	convert_to_long_ex(arg7);
 
-
-	retval = MCVE_Qc(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_LVAL_PP(arg7));
+	retval = MCVE_Qc(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_STRVAL_PP(arg4),
+		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_LVAL_PP(arg7));
 
 	RETURN_LONG(retval);
 }
 /* }}} */
 
 /* {{{ proto int mcve_gut(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
-    Audit MCVE for Unsettled Transactions */
+   Audit MCVE for Unsettled Transactions */
 PHP_FUNCTION(mcve_gut)
 {
 	MCVE_CONN *conn;
@@ -1494,11 +1425,10 @@ PHP_FUNCTION(mcve_gut)
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10, **arg11;
 
 	if (ZEND_NUM_ARGS() != 11 || zend_get_parameters_ex(11, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1511,16 +1441,16 @@ PHP_FUNCTION(mcve_gut)
 	convert_to_string_ex(arg10);
 	convert_to_string_ex(arg11);
 
-	retval = MCVE_Gut(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_STRVAL_PP(arg5),Z_STRVAL_PP(arg6),
-                                           Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_LVAL_PP(arg9),Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
+	retval = MCVE_Gut(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4),
+		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_STRVAL_PP(arg7), Z_STRVAL_PP(arg8),
+		Z_LVAL_PP(arg9), Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
 
 	RETURN_LONG(retval);
 }
 /* }}} */
 
-
 /* {{{ proto int mcve_gl(int conn, string username, string password, int type, string account, string batch, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
-    Audit MCVE for settled transactions */
+   Audit MCVE for settled transactions */
 PHP_FUNCTION(mcve_gl)
 {
 	MCVE_CONN *conn;
@@ -1528,11 +1458,10 @@ PHP_FUNCTION(mcve_gl)
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10, **arg11, **arg12;
 
 	if (ZEND_NUM_ARGS() != 12 || zend_get_parameters_ex(12, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11, &arg12) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11, &arg12) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1546,16 +1475,16 @@ PHP_FUNCTION(mcve_gl)
 	convert_to_string_ex(arg11);
 	convert_to_string_ex(arg12);
 	
-	retval = MCVE_Gl(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_STRVAL_PP(arg5),
-                                           Z_STRVAL_PP(arg6),Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_STRVAL_PP(arg9),Z_LVAL_PP(arg10),
-                                           Z_STRVAL_PP(arg11),Z_STRVAL_PP(arg12));
+	retval = MCVE_Gl(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), 
+		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_STRVAL_PP(arg7), Z_STRVAL_PP(arg8),
+		Z_STRVAL_PP(arg9), Z_LVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12));
 
 	RETURN_LONG(retval);
 }
 /* }}} */
 
 /* {{{ proto int mcve_gft(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
-    Audit MCVE for Failed transactions
+   Audit MCVE for Failed transactions
 */
 PHP_FUNCTION(mcve_gft)
 {
@@ -1564,11 +1493,10 @@ PHP_FUNCTION(mcve_gft)
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10, **arg11;
 
 	if (ZEND_NUM_ARGS() != 11 || zend_get_parameters_ex(11, &arg1, &arg2,
-	    &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
+		&arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1581,27 +1509,26 @@ PHP_FUNCTION(mcve_gft)
 	convert_to_string_ex(arg10);
 	convert_to_string_ex(arg11);
 
-	retval = MCVE_Gft(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4),Z_STRVAL_PP(arg5),
-                                           Z_STRVAL_PP(arg6),Z_STRVAL_PP(arg7),Z_STRVAL_PP(arg8),Z_LVAL_PP(arg9),Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
+	retval = MCVE_Gft(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4),
+		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_STRVAL_PP(arg7), Z_STRVAL_PP(arg8),
+		Z_LVAL_PP(arg9), Z_STRVAL_PP(arg10), Z_STRVAL_PP(arg11));
 
 	RETURN_LONG(retval);
 }
 /* }}} */
 
 /* {{{ proto int mcve_chkpwd(resource conn, string username, string password)
-    Verify Password */
+   Verify Password */
 PHP_FUNCTION(mcve_chkpwd)
 {
 	MCVE_CONN *conn;
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,	&arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1613,19 +1540,17 @@ PHP_FUNCTION(mcve_chkpwd)
 /* }}} */
 
 /* {{{ proto int mcve_bt(resource conn, string username, string password)
-    Get unsettled batch totals */
+   Get unsettled batch totals */
 PHP_FUNCTION(mcve_bt)
 {
 	MCVE_CONN *conn;
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1636,7 +1561,6 @@ PHP_FUNCTION(mcve_bt)
 }
 /* }}} */
 
-
 /* {{{ proto string mcve_getcell(resource conn, int identifier, string column, int row)
    Get a specific cell from a comma delimited response by column name */
 PHP_FUNCTION(mcve_getcell)
@@ -1645,24 +1569,21 @@ PHP_FUNCTION(mcve_getcell)
 	char *retval;
 	zval **arg1, **arg2, **arg3, **arg4;
 
-	if (ZEND_NUM_ARGS() != 4 ||
-	    zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 	convert_to_string_ex(arg3);
 	convert_to_long_ex(arg4);
 
-	retval = MCVE_GetCell(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3),
-	    Z_LVAL_PP(arg4));
+	retval = MCVE_GetCell(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4));
 
 	if (retval == NULL) {
-	  RETURN_STRING("", 1);
+		RETURN_STRING("", 1);
 	} else {
-	  RETURN_STRING(retval, 1);
+		RETURN_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -1675,28 +1596,24 @@ PHP_FUNCTION(mcve_getcellbynum)
 	char *retval;
 	zval **arg1, **arg2, **arg3, **arg4;
 
-	if (ZEND_NUM_ARGS() != 4 ||
-	    zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 	convert_to_long_ex(arg3);
 	convert_to_long_ex(arg4);
 
-	retval = MCVE_GetCellByNum(conn, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3),
-	    Z_LVAL_PP(arg4));
+	retval = MCVE_GetCellByNum(conn, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), Z_LVAL_PP(arg4));
 
 	if (retval == NULL) {
-	  RETURN_STRING("", 1);
+		RETURN_STRING("", 1);
 	} else {
-	  RETURN_STRING(retval, 1);
+		RETURN_STRING(retval, 1);
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int mcve_numcolumns(resource conn, int identifier)
    Number of columns returned in a comma delimited response */
@@ -1706,12 +1623,10 @@ PHP_FUNCTION(mcve_numcolumns)
 	long retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1729,12 +1644,10 @@ PHP_FUNCTION(mcve_numrows)
 	long retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1752,12 +1665,10 @@ PHP_FUNCTION(mcve_iscommadelimited)
 	long retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1775,12 +1686,10 @@ PHP_FUNCTION(mcve_parsecommadelimited)
 	long retval;
 	zval **arg1, **arg2;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 
@@ -1800,9 +1709,13 @@ PHP_FUNCTION(mcve_getcommadelimited)
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
+
 	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+
 	convert_to_long_ex(arg2);
+
 	retval = MCVE_GetCommaDelimited(conn, Z_LVAL_PP(arg2));
+
 	RETURN_STRING(retval, 1);
 }
 /* }}} */
@@ -1815,12 +1728,10 @@ PHP_FUNCTION(mcve_getheader)
 	char *retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 ||
-	    zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_long_ex(arg2);
 	convert_to_long_ex(arg3);
@@ -1848,12 +1759,10 @@ PHP_FUNCTION(mcve_chngpwd)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1875,8 +1784,7 @@ PHP_FUNCTION(mcve_listusers)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 
@@ -1894,12 +1802,10 @@ PHP_FUNCTION(mcve_enableuser)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1918,12 +1824,10 @@ PHP_FUNCTION(mcve_disableuser)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1935,19 +1839,17 @@ PHP_FUNCTION(mcve_disableuser)
 /* }}} */
 
 /* {{{ proto int mcve_deluser(resource conn, string admin_password, string username)
-    Delete an MCVE user account */
+   Delete an MCVE user account */
 PHP_FUNCTION(mcve_deluser)
 {
 	MCVE_CONN *conn;
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -1969,8 +1871,7 @@ PHP_FUNCTION(mcve_liststats)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
 
 	convert_to_string_ex(arg2);
 
@@ -2004,8 +1905,7 @@ PHP_FUNCTION(mcve_deleteusersetup)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg, -1, "mcve user setup",
-	    le_user);
+	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg, -1, "mcve user setup", le_user);
 
 	MCVE_DeleteUserSetup(usersetup);
 	efree(usersetup);
@@ -2022,12 +1922,10 @@ PHP_FUNCTION(mcve_adduserarg)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg1, -1, "mcve user setup",
-	    le_user);
+	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg1, -1, "mcve user setup", le_user);
 
 	convert_to_long_ex(arg2);
 	convert_to_string_ex(arg3);
@@ -2049,8 +1947,7 @@ PHP_FUNCTION(mcve_getuserarg)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg1, -1, "mcve user setup",
-	    le_user);
+	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg1, -1, "mcve user setup", le_user);
 
 	convert_to_long_ex(arg2);
 
@@ -2069,14 +1966,11 @@ PHP_FUNCTION(mcve_adduser)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
-	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg3, -1, "mcve user setup",
-	    le_user);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg3, -1, "mcve user setup", le_user);
 
 	convert_to_string_ex(arg2);
 
@@ -2095,14 +1989,11 @@ PHP_FUNCTION(mcve_edituser)
 	long retval;
 	zval **arg1, **arg2, **arg3;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2,
-	    &arg3) == FAILURE)
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
-	    le_conn);
-	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg3, -1, "mcve user setup",
-	    le_user);
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+	ZEND_FETCH_RESOURCE(usersetup, MCVE_UserSetup *, arg3, -1, "mcve user setup", le_user);
 
 	convert_to_string_ex(arg2);
 
@@ -2146,9 +2037,9 @@ PHP_FUNCTION(mcve_text_code)
 	retval = MCVE_TEXT_AVS(Z_LVAL_PP(arg));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -2168,9 +2059,9 @@ PHP_FUNCTION(mcve_text_avs)
 	retval = MCVE_TEXT_AVS(Z_LVAL_PP(arg));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
@@ -2190,9 +2081,9 @@ PHP_FUNCTION(mcve_text_cv)
 	retval = MCVE_TEXT_CV(Z_LVAL_PP(arg));
 
 	if (retval == NULL) {
-	  RETVAL_STRING("",1);
+		RETVAL_STRING("",1);
 	} else {
-	  RETVAL_STRING(retval, 1);
+		RETVAL_STRING(retval, 1);
 	}
 }
 /* }}} */
