@@ -48,6 +48,12 @@
 #if HAVE_SETLOCALE
 #include <locale.h>
 #endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
@@ -59,10 +65,6 @@
 #include <io.h>
 #include <fcntl.h>
 #include "win32/php_registry.h"
-#endif
-
-#if HAVE_SIGNAL_H
-#include <signal.h>
 #endif
 
 #ifdef __riscos__
@@ -271,7 +273,11 @@ static void sapi_cgibin_flush(void *server_context)
 #if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)server_context;
-		if (!parent && (!request || FCGX_FFlush(request->out) == -1)) {
+		if (
+#ifdef PHP_WIN32
+		!parent && 
+#endif
+		(!request || FCGX_FFlush(request->out) == -1)) {
 			php_handle_aborted_connection();
 		}
 		return;
@@ -1177,7 +1183,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 	if( children ) {
 		int running = 0;
-		int i;
 		pid_t pid;
 
 		/* Create a process group for ourself & children */
