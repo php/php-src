@@ -233,15 +233,15 @@ PHP_FUNCTION(ltrim)
 /* }}} */
 
 
-/* {{{ proto string wordwrap(string str [, int width [, string break]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, int cut]]])
    Wrap buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
-	pval **ptext, **plinelength, **pbreakchar;
-	long i=0, l=0, pgr=0, linelength=0, last=0, breakcharlen;
+	pval **ptext, **plinelength, **pbreakchar, **cut;
+	long i=0, l=0, pgr=0, linelength=0, last=0, breakcharlen, docut=0;
 	char *text, *breakchar, *newtext;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &ptext, &plinelength, &pbreakchar) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &ptext, &plinelength, &pbreakchar, &cut) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -266,16 +266,21 @@ PHP_FUNCTION(wordwrap)
 		breakcharlen = 1;
 	}
 
+	if (ZEND_NUM_ARGS() > 3) {
+		convert_to_long_ex(cut);
+		docut = (*cut)->value.lval;
+	}
+
 	/* Special case for a single-character break as it needs no
 	   additional storage space */
 
-	if (breakcharlen == 1) {
-
-		while (text[i] != '\0') {
+	if (breakcharlen == 1 && docut == 0) {
+		newtext = estrdup (text);
+		while (newtext[i] != '\0') {
 			/* prescan line to see if it is greater than linelength */
 			l = 0;
-			while (text[i+l] != breakchar[0]) {
-				if (text[i+l] == '\0') {
+			while (newtext[i+l] != breakchar[0]) {
+				if (newtext[i+l] == '\0') {
 					l --;
 					break;
 				}
@@ -286,8 +291,8 @@ PHP_FUNCTION(wordwrap)
 				l = linelength;
 				/* needs breaking; work backwards to find previous word */
 				while (l >= 0) {
-					if (text[i+l] == ' ') {
-						text[i+l] = breakchar[0];
+					if (newtext[i+l] == ' ') {
+						newtext[i+l] = breakchar[0];
 						break;
 					}
 					l --;
@@ -296,8 +301,8 @@ PHP_FUNCTION(wordwrap)
 					/* couldn't break is backwards, try looking forwards */
 					l = linelength;
 					while (l <= pgr) {
-						if(text[i+l] == ' ') {
-							text[i+l] = breakchar[0];
+						if(newtext[i+l] == ' ') {
+							newtext[i+l] = breakchar[0];
 							break;
 						}
 						l ++;
@@ -306,11 +311,11 @@ PHP_FUNCTION(wordwrap)
 			}
 			i += l+1;
 		}
-		RETVAL_STRINGL(text, strlen(text), 1);
+		RETVAL_STRINGL(newtext, strlen(newtext), 1);
+		efree(newtext);
 	}
 	else {
 		/* Multiple character line break */
-
 		newtext = emalloc((*ptext)->value.str.len * (breakcharlen+1));
 		newtext[0] = '\0';
 
@@ -343,11 +348,23 @@ PHP_FUNCTION(wordwrap)
 					/* couldn't break it backwards, try looking forwards */
 					l = linelength;
 					while (l <= pgr) {
-						if (text[i+l] == ' ') {
-							strncat(newtext, text+last, i+l-last);
-							strcat(newtext, breakchar);
-							last = i + l + 1;
-							break;
+						if (docut == 0)
+						{
+							if (text[i+l] == ' ') {
+								strncat(newtext, text+last, i+l-last);
+								strcat(newtext, breakchar);
+								last = i + l + 1;
+								break;
+							}
+						}
+						if (docut == 1)
+						{
+							if (text[i+l] == ' ' || l > i-last) {
+								strncat(newtext, text+last, i+l-last);
+								strcat(newtext, breakchar);
+								last = i + l;
+								break;
+							}
 						}
 						l ++;
 					}
