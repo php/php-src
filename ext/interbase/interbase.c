@@ -696,6 +696,25 @@ PHP_RINIT_FUNCTION(ibase)
 
 PHP_MSHUTDOWN_FUNCTION(ibase)
 {
+#ifndef PHP_WIN32
+	/**
+	 * When the Interbase client API library libgds.so is first loaded, it registers a call to 
+	 * gds__cleanup() with atexit(), in order to clean up after itself when the process exits.
+	 * This means that the library is called at process shutdown, and cannot be unloaded beforehand.
+	 * PHP tries to unload modules after every request [dl()'ed modules], and right before the 
+	 * process shuts down [modules loaded from php.ini]. This results in a segfault for this module.
+	 * By NULLing the dlopen() handle in the module entry, Zend omits the call to dlclose(),
+	 * ensuring that the module will remain present until the process exits. However, the functions
+	 * and classes exported by the module will not be available until the module is 'reloaded'. 
+	 * When reloaded, dlopen() will return the handle of the already loaded module. The module will
+	 * be unloaded automatically when the process exits.
+	 */
+	zend_module_entry *ibase_entry;
+	if (SUCCESS == zend_hash_find(&module_registry, ibase_module_entry.name, strlen(ibase_module_entry.name) +1, (void*) &ibase_entry))
+	{
+		ibase_entry->handle = NULL;
+	}
+#endif
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
