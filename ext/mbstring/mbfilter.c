@@ -104,6 +104,9 @@
 #if defined(HAVE_MBSTR_KR)
 #include "mbfilter_kr.h"
 #endif
+#if defined(HAVE_MBSTR_KR)
+#include "mbfilter_ru.h"
+#endif
 
 #include "zend.h"
 
@@ -185,6 +188,16 @@ static mbfl_language mbfl_language_traditional_chinese = {
 	mbfl_no_encoding_7bit
 };
 
+static mbfl_language mbfl_language_russian = {
+	mbfl_no_language_russian,
+	"Russian",
+	"ru",
+	NULL,
+	mbfl_no_encoding_koi8r,
+	mbfl_no_encoding_qprint,
+	mbfl_no_encoding_8bit
+};
+
 static mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_uni,
 	&mbfl_language_japanese,
@@ -192,6 +205,7 @@ static mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_simplified_chinese,
 	&mbfl_language_traditional_chinese,
 	&mbfl_language_english,
+	&mbfl_language_russian,
 	NULL
 };
 
@@ -788,15 +802,6 @@ static mbfl_encoding mbfl_encoding_uhc = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static mbfl_encoding mbfl_encoding_2022kr = {
-	mbfl_no_encoding_2022kr,
-	"ISO-2022-KR",
-	"ISO-2022-KR",
-	NULL,
-	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
-};
-
 #endif /* HAVE_MBSTR_KR */
 
 static const char *mbfl_encoding_cp1252_aliases[] = {"cp1252", NULL};
@@ -953,6 +958,41 @@ static mbfl_encoding mbfl_encoding_8859_15 = {
 	MBFL_ENCTYPE_SBCS
 };
 
+#if defined(HAVE_MBSTR_KR)
+static const char *mbfl_encoding_cp1251_aliases[] = {"CP1251", "CP-1251", "WINDOWS-1251", NULL};
+
+static mbfl_encoding mbfl_encoding_cp1251 = {
+	mbfl_no_encoding_cp1251,
+	"Windows-1251",
+	"Windows-1251",
+	&mbfl_encoding_cp1251_aliases,
+	NULL,
+	MBFL_ENCTYPE_SBCS
+};
+
+static const char *mbfl_encoding_cp866_aliases[] = {"CP866", "CP-866", "IBM-866", NULL};
+
+static mbfl_encoding mbfl_encoding_cp866 = {
+	mbfl_no_encoding_cp866,
+	"CP866",
+	"CP866",
+	&mbfl_encoding_cp866_aliases,
+	NULL,
+	MBFL_ENCTYPE_SBCS
+};
+
+static const char *mbfl_encoding_koi8r_aliases[] = {"KOI8-R", "KOI8R", NULL};
+
+static mbfl_encoding mbfl_encoding_koi8r = {
+	mbfl_no_encoding_koi8r,
+	"KOI8-R",
+	"KOI8-R",
+	&mbfl_encoding_koi8r_aliases,
+	NULL,
+	MBFL_ENCTYPE_SBCS
+};
+#endif
+
 static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_pass,
 	&mbfl_encoding_auto,
@@ -1016,7 +1056,11 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 #if defined(HAVE_MBSTR_KR)
 	&mbfl_encoding_euc_kr,
 	&mbfl_encoding_uhc,
-	&mbfl_encoding_2022kr,
+#endif
+#if defined(HAVE_MBSTR_RU)
+	&mbfl_encoding_cp1251,
+	&mbfl_encoding_cp866,
+	&mbfl_encoding_koi8r,
 #endif
 	NULL
 };
@@ -1125,8 +1169,13 @@ static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter TSRMLS_DC);
 #if defined(HAVE_MBSTR_KR)
 static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter TSRMLS_DC);
-static int mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter TSRMLS_DC);
 #endif /* HAVE_MBSTR_KR */
+
+#if defined(HAVE_MBSTR_RU)
+static int mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#endif /* HAVE_MBSTR_RU */
 
 static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter TSRMLS_DC);
@@ -1734,24 +1783,58 @@ static struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_uhc,
 	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_KR */
 
-static struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_2022kr,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_2022kr,
-	mbfl_filt_conv_any_2022kr_flush };
-
-static struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
-	mbfl_no_encoding_2022kr,
+#if defined(HAVE_MBSTR_RU)
+static struct mbfl_convert_vtbl vtbl_wchar_cp1251 = {
+	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_2022kr_wchar,
+	mbfl_filt_conv_wchar_cp1251,
 	mbfl_filt_conv_common_flush };
 
-#endif /* HAVE_MBSTR_KR */
+static struct mbfl_convert_vtbl vtbl_cp1251_wchar = {
+	mbfl_no_encoding_cp1251,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_cp1251_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
+	mbfl_no_encoding_cp866,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_cp866,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_cp866_wchar = {
+	mbfl_no_encoding_cp866,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_cp866_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_koi8r,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_koi8r,
+	mbfl_filt_conv_common_flush };
+
+
+static struct mbfl_convert_vtbl vtbl_koi8r_wchar = {
+	mbfl_no_encoding_koi8r,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_koi8r_wchar,
+	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_RU */
 
 static struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
 	mbfl_no_encoding_cp1252,
@@ -2015,8 +2098,14 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_euckr,
 	&vtbl_uhc_wchar,
 	&vtbl_wchar_uhc,
-	&vtbl_2022kr_wchar,
-	&vtbl_wchar_2022kr,
+#endif
+#if defined(HAVE_MBSTR_RU)
+	&vtbl_cp1251_wchar,
+	&vtbl_wchar_cp1251,
+	&vtbl_cp866_wchar,
+	&vtbl_wchar_cp866,
+	&vtbl_koi8r_wchar,
+	&vtbl_wchar_koi8r,
 #endif
 	&vtbl_cp1252_wchar,
 	&vtbl_wchar_cp1252,
@@ -2200,14 +2289,27 @@ static struct mbfl_identify_vtbl vtbl_identify_uhc = {
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_uhc };
+#endif /* HAVE_MBSTR_KR */
 
-static struct mbfl_identify_vtbl vtbl_identify_2022kr = {
-	mbfl_no_encoding_2022kr,
+#if defined(HAVE_MBSTR_RU)
+static struct mbfl_identify_vtbl vtbl_identify_cp1251 = {
+	mbfl_no_encoding_cp1251,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_2022kr };
+	mbfl_filt_ident_cp1251 };
 
-#endif /* HAVE_MBSTR_KR */
+static struct mbfl_identify_vtbl vtbl_identify_cp866 = {
+	mbfl_no_encoding_cp866,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_cp866 };
+
+static struct mbfl_identify_vtbl vtbl_identify_koi8r = {
+	mbfl_no_encoding_koi8r,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_koi8r };
+#endif /* HAVE_MBSTR_RU */
 
 static struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
 	mbfl_no_encoding_cp1252,
@@ -2323,7 +2425,11 @@ static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 #if defined(HAVE_MBSTR_KR)
 	&vtbl_identify_euckr,
 	&vtbl_identify_uhc,
-	&vtbl_identify_2022kr,
+#endif
+#if defined(HAVE_MBSTR_RU)
+	&vtbl_identify_cp1251,
+	&vtbl_identify_cp866,
+	&vtbl_identify_koi8r,
 #endif
 	&vtbl_identify_cp1252,
 	&vtbl_identify_8859_1,
@@ -6049,77 +6155,6 @@ mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter TSRMLS_DC)
 	return c;
 }
 
-static int
-mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter TSRMLS_DC)
-{
-retry:
-	switch (filter->status & 0xf) {
-/*	case 0x00:	 ASCII */
-/*	case 0x10:	 KSC5601 mode */
-/*	case 0x20:	 KSC5601 DBCS */
-/*	case 0x40:	 KSC5601 SBCS */
-	case 0:
-		if (!(filter->status & 0x10)) {
-			if (c == 0x1b)
-				filter->status += 2;
-		} else if (filter->status == 0x20 && c > 0x20 && c < 0x7f) {		/* kanji first char */
-			filter->status += 1;
-		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
-			;
-		} else {
-			filter->flag = 1;	/* bad */
-		}
-		break;
-
-/*	case 0x21:	 KSC5601 second char */
-	case 1:
-		filter->status &= ~0xf;
-		if (c < 0x21 || c > 0x7e) {		/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	/* ESC */
-	case 2:
-		if (c == 0x24) {		/* '$' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $ */
-	case 3:
-		if (c == 0x29) {		/* ')' */
-			filter->status++;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	/* ESC $) */
-	case 5:
-		if (c == 0x43) {		/* 'C' */
-			filter->status = 0x10;
-		} else {
-			filter->flag = 1;	/* bad */
-			filter->status &= ~0xf;
-			goto retry;
-		}
-		break;
-
-	default:
-		filter->status = 0;
-		break;
-	}
-
-	return c;
-}
-
 #endif /* HAVE_MBSTR_KR */
 
 
@@ -6138,6 +6173,39 @@ mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC)
 		filter->flag = 1; /* not it */
 	return c;	
 }
+
+#if defined(HAVE_MBSTR_RU)
+// all of this is so ugly now!
+static int
+mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter)
+{
+	if (c >= 0x80 && c < 0xff)
+		filter->flag = 0;
+	else
+		filter->flag = 1; /* not it */
+	return c;	
+}
+
+static int
+mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
+{
+	if (c >= 0x80 && c < 0xff)
+		filter->flag = 0;
+	else
+		filter->flag = 1; /* not it */
+	return c;	
+}
+
+static int
+mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter)
+{
+	if (c >= 0x80 && c < 0xff)
+		filter->flag = 0;
+	else
+		filter->flag = 1; /* not it */
+	return c;	
+}
+#endif /* HAVE_MBSTR_RU */
 
 static int
 mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter TSRMLS_DC)
