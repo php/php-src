@@ -25,7 +25,6 @@ ext/standard
 ------------
     * strpad() (Andrei)
 	* NOT binary safe:
-		strcspn()
 		strtok()
 		basename()
 		dirname()

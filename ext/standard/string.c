@@ -86,14 +86,16 @@ PHP_FUNCTION(bin2hex)
    Find length of initial segment consisting entirely of characters found in mask */
 PHP_FUNCTION(strspn)
 {
-	pval **s1,**s2;
+	zval **s1,**s2;
 	
 	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
-	RETURN_LONG(strspn((*s1)->value.str.val,(*s2)->value.str.val));
+	RETURN_LONG(php_strspn((*s1)->value.str.val, (*s2)->value.str.val,
+                           (*s1)->value.str.val + (*s1)->value.str.len,
+						   (*s2)->value.str.val + (*s2)->value.str.len));
 }
 /* }}} */
 
@@ -108,7 +110,9 @@ PHP_FUNCTION(strcspn)
 	}
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
-	RETURN_LONG(strcspn((*s1)->value.str.val,(*s2)->value.str.val));
+	RETURN_LONG(php_strcspn((*s1)->value.str.val, (*s2)->value.str.val,
+				            (*s1)->value.str.val + (*s1)->value.str.len,
+							(*s2)->value.str.val + (*s2)->value.str.len));
 }
 /* }}} */
 
@@ -530,6 +534,36 @@ PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
 	php_strtolower(s, s_len);
 	php_strtolower(t, t_len);
 	return php_memnstr(s, t, t_len, s + s_len);
+}
+
+PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
+{
+	register const char *p = s1, *spanp;
+	register char c = *p;
+
+cont:
+	for (spanp = s2; p != s1_end && spanp != s2_end;)
+		if (*spanp++ == c) {
+			c = *(++p);
+			goto cont;
+		}
+	return (p - s1);
+}
+
+PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
+{
+	register const char *p, *spanp;
+	register char c = *s1;
+
+	for (p = s1;;) {
+		spanp = s2;
+		do {
+			if (*spanp == c || p == s1_end)
+				return (p - s1);
+		} while (spanp++ < s2_end);
+		c = *(++p);
+	}
+	/* NOTREACHED */
 }
 
 /* {{{ proto string stristr(string haystack, string needle)

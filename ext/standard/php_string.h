@@ -102,6 +102,8 @@ extern PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int
 
 extern PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value);
 extern PHPAPI void php_explode(pval *delim, pval *str, pval *return_value);
-PHPAPI inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
+extern PHPAPI inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
+extern PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
+extern PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 
 #endif /* _PHPSTRING_H */
