@@ -7,7 +7,7 @@
 <body>
 
 <form method=post>
-<input type=text size=30 name=q value="<? echo $q; ?>">
+<input type=text size=30 name=q value="<? echo htmlspecialchars(stripslashes($q)); ?>">
 <input type=submit value=" Search ! ">
 </form>
 
@@ -39,6 +39,9 @@
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPFILE,"stop.txt");
 	Udm_Set_Agent_Param($udm,UDM_PARAM_WEIGHT_FACTOR,"F9421");
 	Udm_Set_Agent_Param($udm,UDM_PARAM_WORD_MATCH,UDM_MATCH_SUBSTR);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_PHRASE_MODE,UDM_PHRASE_DISABLED);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_MIN_WORD_LEN,2);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_MAX_WORD_LEN,5);
 
 // Stage 3: add search limits
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_URL,"http://www.mydomain.com/%");
