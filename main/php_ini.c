@@ -396,13 +396,15 @@ int php_init_config()
 
 	/* If the config_file_scan_dir is set at compile-time, go and scan this directory and
 	 * parse any .ini files found in this directory. */
-	if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+	if (strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
 		dirp = VCWD_OPENDIR(PHP_CONFIG_FILE_SCAN_DIR);
 		if (dirp) {
 			fh.type = ZEND_HANDLE_FP;
 			while ((dir_entry = readdir(dirp)) != NULL) {
 				/* check for a .ini extension */
-				if ((p = strrchr(dir_entry->d_name,'.')) && strcmp(p,".ini")) continue;
+				if ((p = strrchr(dir_entry->d_name,'.')) && strcmp(p,".ini")) {
+					continue;
+				}
 				snprintf(ini_file, MAXPATHLEN, "%s%c%s", PHP_CONFIG_FILE_SCAN_DIR, DEFAULT_SLASH, dir_entry->d_name);
 				if (VCWD_STAT(ini_file, &sb) == 0) {
 					if (S_ISREG(sb.st_mode)) {
