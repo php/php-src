@@ -2098,7 +2098,7 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 
 /* Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *use_last_char, int *last_char, char **data, int *datalen) {
-	int ch;
+	int ch, compliment;
 	char buff[META_DEF_BUFSIZE + 1];
 
 	memset((void *)buff,0,META_DEF_BUFSIZE + 1);
@@ -2126,9 +2126,11 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
         case '/':
             return TOK_SLASH;
             break;
+        case '\'':
         case '"':
+            compliment = ch;
             *datalen = 0;
-            while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && ch != '"') {
+            while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && ch != compliment) {
 				buff[(*datalen)++] = ch;
 
 				if (*datalen == META_DEF_BUFSIZE)
