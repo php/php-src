@@ -3,8 +3,9 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(mime-magic, whether to include mime_magic support,
-[  --with-mime-magic[=FILE]  Include mime_magic support. FILE is the optional
-                            pathname to the magic.mime file.])
+[  --with-mime-magic[=FILE]  
+                          Include mime_magic support. FILE is the optional
+                          pathname to the magic.mime file.])
 
 if test "$PHP_MIME_MAGIC" != "no"; then
 

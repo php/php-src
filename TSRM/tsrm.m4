@@ -95,14 +95,15 @@ dnl For the thread implementations, we always use --with-*
 dnl to maintain consistency
 
 AC_ARG_WITH(tsrm-pth,
-[  --with-tsrm-pth[=pth-config]    Use GNU Pth.],[
+[  --with-tsrm-pth[=pth-config]
+                          Use GNU Pth.],[
   TSRM_PTH=$withval
 ],[
   TSRM_PTH=no
 ])
 
 AC_ARG_WITH(tsrm-st,
-[  --with-tsrm-st],[
+[  --with-tsrm-st          Use SGI's State Threads],[
   TSRM_ST=$withval
 ],[
   TSRM_ST=no

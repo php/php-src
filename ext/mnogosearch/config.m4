@@ -6,8 +6,7 @@ dnl
 PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 [  --with-mnogosearch[=DIR]
                           Include mnoGoSearch support.  DIR is the mnoGoSearch 
-                          base install directory, defaults to 
-                          /usr/local/mnogosearch.])
+                          base install directory, defaults to /usr/local/mnogosearch.])
 
   if test "$PHP_MNOGOSEARCH" != "no"; then
   

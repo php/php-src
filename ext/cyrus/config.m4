@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(cyrus, for cyrus imap support,
-[  --with-cyrus[=dir]      Include Cyrus IMAP support])
+[  --with-cyrus[=DIR]      Include Cyrus IMAP support])
 
 if test "$PHP_CYRUS" != "no"; then
   found_cyrus=no

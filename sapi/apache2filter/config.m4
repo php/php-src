@@ -4,7 +4,8 @@ dnl
 
 AC_MSG_CHECKING(for Apache 2.0 filter-module support via DSO through APXS)
 AC_ARG_WITH(apxs2filter,
-[  --with-apxs2filter[=FILE]   EXPERIMENTAL: Build shared Apache 2.0 module. FILE is the optional
+[  --with-apxs2filter[=FILE]   
+                          EXPERIMENTAL: Build shared Apache 2.0 module. FILE is the optional
                           pathname to the Apache apxs tool; defaults to "apxs".],[
   if test "$withval" = "yes"; then
     APXS=apxs

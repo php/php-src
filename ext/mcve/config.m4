@@ -14,7 +14,7 @@ if test "$PHP_MCVE" != "no"; then
       AC_MSG_ERROR([MCVE: OpenSSL check failed. Please check config.log for more information.])
     ])
   else
-    AC_MSG_RESULT([If configure fails, try adding --with-openssl-dir=DIR])
+    AC_MSG_RESULT([If configure fails, try adding --with-openssl-dir=<DIR>])
   fi
 
   case "$PHP_MCVE" in

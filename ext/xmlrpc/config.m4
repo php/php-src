@@ -11,10 +11,10 @@ PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
 [  --with-xmlrpc[=DIR]     Include XMLRPC-EPI support.])
 
 PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
-[  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.],yes,no)
+[  --with-expat-dir=<DIR>    XMLRPC-EPI: libexpat dir for XMLRPC-EPI.],yes,no)
 
 PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
-[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI.],yes,no)
+[  --with-iconv-dir=<DIR>    XMLRPC-EPI: iconv dir for XMLRPC-EPI.],yes,no)
 
 if test "$PHP_XMLRPC" != "no"; then
 

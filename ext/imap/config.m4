@@ -103,7 +103,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
 
 AC_DEFUN(PHP_IMAP_SSL_CHK, [
   AC_ARG_WITH(imap-ssl,
-  [  --with-imap-ssl=<DIR>   IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
+  [  --with-imap-ssl=<DIR>     IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
     PHP_IMAP_SSL=$withval
   ],[
     PHP_IMAP_SSL=no

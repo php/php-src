@@ -14,7 +14,7 @@ PHP_ARG_ENABLE(xml,whether to enable XML support,
 [  --disable-xml           Disable XML support using bundled expat lib], yes)
 
 PHP_ARG_WITH(expat-dir, external libexpat install dir,
-[  --with-expat-dir=DIR    XML: external libexpat install dir], no, no)
+[  --with-expat-dir=<DIR>    XML: external libexpat install dir], no, no)
 
 if test "$PHP_XML" = "yes"; then
   AC_DEFINE(HAVE_LIBEXPAT,  1, [ ])
