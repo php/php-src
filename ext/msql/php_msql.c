@@ -315,7 +315,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==msql_globals.le_link || type==msql_globals.le_plink)) {
 				return_value->value.lval = msql_globals.default_link = link;
-				return_value->type = IS_LONG;
+				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
