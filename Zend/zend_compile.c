@@ -412,9 +412,8 @@ void do_for_cond(znode *expr, znode *second_semicolon_token CLS_DC)
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_JMPZNZ;
-	opline->result = *expr;  /* the conditional expression */
+	opline->op1 = *expr;  /* the conditional expression */
 	second_semicolon_token->u.opline_num = for_cond_op_number;
-	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
 
@@ -425,7 +424,7 @@ void do_for_before_statement(znode *cond_start, znode *second_semicolon_token CL
 
 	opline->opcode = ZEND_JMP;
 	opline->op1.u.opline_num = cond_start->u.opline_num;
-	CG(active_op_array)->opcodes[second_semicolon_token->u.opline_num].op1.u.opline_num = get_next_op_number(CG(active_op_array));
+	CG(active_op_array)->opcodes[second_semicolon_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 
@@ -441,7 +440,7 @@ void do_for_end(znode *second_semicolon_token CLS_DC)
 
 	opline->opcode = ZEND_JMP;
 	opline->op1.u.opline_num = second_semicolon_token->u.opline_num+1;
-	CG(active_op_array)->opcodes[second_semicolon_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	CG(active_op_array)->opcodes[second_semicolon_token->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 
