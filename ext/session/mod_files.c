@@ -73,9 +73,11 @@ static int ps_files_valid_key(const char *key)
 
 	for (p = key; (c = *p); p++) {
 		/* valid characters are a..z,A..Z,0..9 */
-		if (!((c >= 'a' && c <= 'z') ||
-				(c >= 'A' && c <= 'Z') ||
-				(c >= '0' && c <= '9'))) {
+		if (!((c >= 'a' && c <= 'z')
+				|| (c >= 'A' && c <= 'Z')
+				|| (c >= '0' && c <= '9')
+				|| c == ','
+				|| c == '-')) {
 			ret = 0;
 			break;
 		}
@@ -142,7 +144,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		ps_files_close(data);
 		
 		if (!ps_files_valid_key(key)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are only a-z, A-Z and 0-9");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			return;
 		}
 		if (!ps_files_path_create(buf, sizeof(buf), data, key))

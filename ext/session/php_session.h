@@ -120,6 +120,7 @@ typedef struct _php_ps_globals {
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
 
 	long hash_func;
+	long hash_bits_per_character;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

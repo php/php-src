@@ -153,6 +153,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateInt,    cache_expire,       php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   use_trans_sid,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.hash_function",      "0",         PHP_INI_ALL, OnUpdateInt,    hash_func,          php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.hash_bits_per_character",      "4",         PHP_INI_ALL, OnUpdateInt,    hash_bits_per_character,          php_ps_globals,    ps_globals)
+
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
@@ -536,12 +538,57 @@ static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 	}
 }
 
-static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/*
+ * Note that we cannot use the BASE64 alphabet here, because
+ * it contains "/" and "+": both are unacceptable for simple inclusion
+ * into URLs.
+ */
+
+static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
 enum {
 	PS_HASH_FUNC_MD5,
 	PS_HASH_FUNC_SHA1
 };
+
+/* returns a pointer to the byte after the last valid character in out */
+static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits)
+{
+	unsigned char *p, *q;
+	unsigned short w;
+	int mask;
+	int have;
+	
+	p = in;
+	q = in + inlen;
+
+	w = 0;
+	have = 0;
+	mask = (1 << nbits) - 1;
+	
+	while (1) {
+		if (have < nbits) {
+			if (p < q) {
+				w |= *p++ << have;
+				have += 8;
+			} else {
+				/* consumed everything? */
+				if (have == 0) break;
+				/* No? We need a final round */
+				have = nbits;
+			}
+		}
+
+		/* consume nbits */
+		*out++ = hexconvtab[w & mask];
+		w >>= nbits;
+		have -= nbits;
+	}
+	
+	*out = '\0';
+	return out;
+}
 
 char *php_session_create_id(PS_CREATE_SID_ARGS)
 {
@@ -549,12 +596,9 @@ char *php_session_create_id(PS_CREATE_SID_ARGS)
 	PHP_SHA1_CTX sha1_context;
 	unsigned char digest[21];
 	int digest_len;
+	int j;
 	char *buf;
 	struct timeval tv;
-	int i;
-	int j = 0;
-	unsigned char c;
-	unsigned int w;
 	zval **array;
 	zval **token;
 	char *remote_addr = NULL;
@@ -628,33 +672,13 @@ char *php_session_create_id(PS_CREATE_SID_ARGS)
 		break;
 	}
 
-	if (digest_len == 16) {
-		for (i = 0; i < digest_len; i++) {
-			c = digest[i];
+	if (PS(hash_bits_per_character) < 4
+			|| PS(hash_bits_per_character) > 6) {
+		PS(hash_bits_per_character) = 4;
 
-			buf[j++] = hexconvtab[c >> 4];
-			buf[j++] = hexconvtab[c & 15];
-		}
-	} else {
-		int bit_offset, off2, off3;
-
-		/* take 5 bits from the bit stream per iteration */
-		
-		/* ensure that there is a NUL byte at the end */
-		digest[digest_len] = 0;
-		for (i = 0; i < digest_len * 8 / 5; i++) {
-			bit_offset = i * 5;
-			off2 = bit_offset >> 3;
-			off3 = bit_offset & 7;
-
-			w = digest[off2] + (digest[off2+1] << 8);
-			
-			w = (w >> off3) & 31;
-
-			buf[j++] = hexconvtab[w];
-		}
+		php_error(E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	buf[j] = '\0';
+	j = bin_to_readable(digest, digest_len, buf, PS(hash_bits_per_character)) - buf;
 	
 	if (newlen) 
 		*newlen = j;
