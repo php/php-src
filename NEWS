@@ -69,10 +69,8 @@ PHP 4                                                                      NEWS
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
 - Added XBM support for bundled GD library. (Marcus)
-- Added imagesavealpha() function. (Jukka Holappa, Pierre-Alain Joye)
 - Added imagefilter() function. Allows application of various filters.
   Only available with bundled GD. (Pierre-Alain Joye, Ilia)
-- Added imageistruecolor(). Only available with GD2. (Pierre-Alain Joye)
 - Added antialiased drawing support to bundled GD. (Pierre-Alain Joye, Ilia)
    . imageantialias($im, $flag) to (de)active antialias
    . imageline antialias support
