@@ -19,39 +19,58 @@ Changes in the Zend Engine 2.0
       the box or after a very small amount of modifications would be
       high.
 
-    * Private Members.
+    * Private and Protected Members.
 
-      The Zend Engine 2.0 introduces private member variables. Note
-      that for performance reasons no error message is emitted in
-      case of an illegal access to a private member variable.
+      The Zend Engine 2.0 introduces private and protected member variables. 
+      Note that for performance reasons no error message is emitted in
+      case of an illegal access to a private or protectecd member variable.
 
       Example:
 
         <?php
         class MyClass {
             private $Hello = "Hello, World!\n";
+            protected $Bar = "Hello, Foo!\n";
+            protected $Foo = "Hello, Bar!\n";
 
             function printHello() {
-                print $this->Hello;
+                print "MyClass::printHello() ".$this->Hello;
+                print "MyClass::printHello() ".$this->Bar;
+                print "MyClass::printHello() ".$this->Foo;
             }
         }
 
         class MyClass2 extends MyClass {
+            protected $Foo;
+            
             function printHello() {
                 MyClass::printHello(); /* Should print */
-                print $this->Hello;    /* Shouldn't print out anything */
+                print "MyClass2::printHello() ".$this->Hello;    /* Shouldn't print out anything */
+                print "MyClass2::printHello() ".$this->Bar;      /* Shouldn't print (not declared)*/
+                print "MyClass2::printHello() ".$this->Foo;      /* Should print */
             }
         }
 
         $obj = new MyClass();
         print $obj->Hello;  /* Shouldn't print out anything */
+        print $obj->Bar;    /* Shouldn't print out anything */
+        print $obj->Foo;    /* Shouldn't print out anything */
         $obj->printHello(); /* Should print */
 
         $obj = new MyClass2();
         print $obj->Hello;  /* Shouldn't print out anything */
+        print $obj->Bar;    /* Shouldn't print out anything */
+        print $obj->Foo;    /* Shouldn't print out anything */
         $obj->printHello();
         ?>
-
+        
+      Protected member variables can be accessed in classes extending the class
+      they are declared in, whereas private member variables can only be accessed
+      by the class they belong to.
+      
+      Note: Protected member variables have to be declared in every class they 
+      are used!
+        
     * Object Cloning.
 
       The Zend Engine 1.0 offered no way a user could decide what copy

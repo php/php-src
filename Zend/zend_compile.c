@@ -34,7 +34,6 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-
 static void build_runtime_defined_function_key(zval *result, zval *name, zend_op *opline TSRMLS_DC)
 {
 	char lineno_buf[32];
@@ -1151,6 +1150,7 @@ void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_na
 	if (!case_sensitive) {
 		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	}
+
 	length = 1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
 	result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
 	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], ":", sizeof(":")-1);
@@ -1499,6 +1499,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 
 	/* Perform inheritance */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+
 	/* STATIC_MEMBERS_FIXME */
 	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
@@ -1531,6 +1532,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry->private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry->protected_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(new_class_entry->static_members);
 	zend_hash_init(new_class_entry->static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
@@ -1651,7 +1653,6 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				char *class_name, *parent_name;
 				int found_ce;
 
-				
 				found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce);
 
 				/* Restore base class / derived class names */
@@ -1693,6 +1694,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
 					zend_hash_destroy(&ce->private_properties);
+					zend_hash_destroy(&ce->protected_properties);
 					zend_hash_destroy(ce->static_members);
 					zend_hash_destroy(&ce->constants_table);
 					return FAILURE;
@@ -2029,6 +2031,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry->private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry->protected_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(new_class_entry->static_members);
 	zend_hash_init(new_class_entry->static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
@@ -2139,19 +2142,19 @@ void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 	}
 }
 
-void mangle_private_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
+void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
 {
-	char *priv_name;
-	int priv_name_length;
+	char *prop_name;
+	int prop_name_length;
+        
+	prop_name_length = 1 + src1_length + 1 + src2_length;
+	prop_name = emalloc(prop_name_length+1);
+	prop_name[0] = '\0';
+	memcpy(prop_name + 1, src1, src1_length+1);
+	memcpy(prop_name + 1 + src1_length + 1, src2, src2_length+1);
 
-	priv_name_length = 1 + src1_length + 1 + src2_length;
-	priv_name = emalloc(priv_name_length+1);
-	priv_name[0] = '\0';
-	memcpy(priv_name + 1, src1, src1_length+1);
-	memcpy(priv_name + 1 + src1_length + 1, src2, src2_length+1);
-
-	*dest = priv_name;
-	*dest_length = priv_name_length;
+	*dest = prop_name;
+	*dest_length = prop_name_length;
 }
 
 void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC)
@@ -2172,13 +2175,41 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 			{
 				char *priv_name;
 				int priv_name_length;
-
-				mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
+                                
+				mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
 				zend_hash_update(&CG(active_class_entry)->default_properties, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
 				efree(priv_name);
 
 				property->refcount++;
+                                
 				zend_hash_update(&CG(active_class_entry)->private_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				break;
+			}
+		case T_PROTECTED:
+			{
+				char *prot_name;
+				int prot_name_length;
+				zval **found = NULL;
+                                
+				if (CG(active_class_entry)->parent) {
+					zend_hash_find(&CG(active_class_entry)->parent->protected_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &found);
+				}
+
+				mangle_property_name(&prot_name, &prot_name_length, "*", 1, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
+				/* If we don't have a value and it exists in our parent then use the parent's value */
+				if (!value && found) {
+					(*found)->refcount++;
+					zend_hash_update(&CG(active_class_entry)->default_properties, prot_name, prot_name_length+1, found, sizeof(zval *), NULL);
+					(*found)->refcount++;
+					zend_hash_update(&CG(active_class_entry)->protected_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, found, sizeof(zval *), NULL);
+					zval_ptr_dtor(&property);
+				} else {
+					zend_hash_update(&CG(active_class_entry)->default_properties, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
+					property->refcount++;
+					zend_hash_update(&CG(active_class_entry)->protected_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+
+				}
+				efree(prot_name);
 				break;
 			}
 		case T_VAR:
@@ -2194,20 +2225,20 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 	FREE_PNODE(var_name);
 }
 
-
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC)
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
-	
+        
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-
+        
 	if (fetch_list_ptr->count == 1) {
 		zend_llist_element *le;
 		zend_op *opline_ptr;
 
 		le = fetch_list_ptr->head;
 		opline_ptr = (zend_op *) le->data;
+                
 		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
 		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
 		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
@@ -2215,17 +2246,26 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			opline_ptr->op1 = *property;
 			SET_UNUSED(opline_ptr->op2);
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
-
-			if (CG(active_class_entry)) {
-				if ((opline_ptr->op1.op_type == IS_CONST) && zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+                        
+			if (CG(active_class_entry) && (opline_ptr->op1.op_type == IS_CONST)) {
+				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
 					char *priv_name;
 					int priv_name_length;
-
-					mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+                                        
+					mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
 
 					STR_FREE(opline_ptr->op1.u.constant.value.str.val);
 					opline_ptr->op1.u.constant.value.str.val = priv_name;
 					opline_ptr->op1.u.constant.value.str.len = priv_name_length;
+				} else if (zend_hash_exists(&CG(active_class_entry)->protected_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+					char *prot_name;
+					int prot_name_length;
+                                        
+					mangle_property_name(&prot_name, &prot_name_length, "*", 1, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+
+					STR_FREE(opline_ptr->op1.u.constant.value.str.val);
+					opline_ptr->op1.u.constant.value.str.val = prot_name;
+					opline_ptr->op1.u.constant.value.str.len = prot_name_length;
 				}
 			}
 			*result = opline_ptr->result;
@@ -2239,7 +2279,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 	opline.result.u.EA.type = 0;
 	opline.result.u.var = get_temporary_variable(CG(active_op_array));
 	opline.op1 = *object;
-	opline. op2 = *property;
+	opline.op2 = *property;
 	*result = opline.result;
 
 	zend_llist_add_element(fetch_list_ptr, &opline);

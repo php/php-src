@@ -112,6 +112,7 @@
 %token T_GLOBAL
 %token T_STATIC
 %token T_PRIVATE
+%token T_PROTECTED
 %token T_VAR
 %token T_UNSET
 %token T_ISSET
@@ -451,6 +452,7 @@ class_declaration_type:
 		T_VAR		{ $$.op_type = T_VAR; }
 	|	T_STATIC	{ $$.op_type = T_STATIC; }
 	|	T_PRIVATE	{ $$.op_type = T_PRIVATE; }
+	|	T_PROTECTED	{ $$.op_type = T_PROTECTED; }
 ;
 
 class_constant_declaration:
