@@ -22,6 +22,7 @@
 #include "zend_language_parser.h"
 #include "zend.h"
 #include "zend_compile.h"
+#include "zend_constants.h"
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_fast_cache.h"
@@ -194,7 +195,7 @@ void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2
 	} else if (op == ZEND_MOD) {
 		do_op = mod_function;
 	} else if (op == ZEND_BW_NOT) {
-		bitwise_not_function(&result->u.constant, &op1->u.constant);
+		bitwise_not_function(&result->u.constant, &op1->u.constant TSRMLS_CC);
 		return;
 	} else if (op == ZEND_BOOL_XOR) {
 		do_op = boolean_xor_function;
@@ -2561,7 +2562,7 @@ void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
 	
 	if (zend_hash_find(&CG(active_class_entry)->constants_table, constant_name->u.constant.value.str.val,
 	                   constant_name->u.constant.value.str.len+1, (void **) &zresult) != SUCCESS) {
-		if (zend_get_constant(constant_name->u.constant.value.str.val, constant_name->u.constant.value.str.len, &result->u.constant)) {
+		if (zend_get_constant(constant_name->u.constant.value.str.val, constant_name->u.constant.value.str.len, &result->u.constant TSRMLS_CC)) {
 			return;
 		} else {
 			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s\n", 
