@@ -141,7 +141,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	if (retval)
 		zval_ptr_dtor(&retval);
 
-	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(obj), "filter", 6, (void**)&tmp)) { 
+	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(obj), "filter", sizeof("filter"), (void**)&tmp)) { 
 		zend_list_delete(Z_LVAL_PP(tmp));
 		FREE_ZVAL(*tmp);
 	} 
@@ -167,21 +167,23 @@ php_stream_filter_status_t userfilter_filter(
 	zval *zclosing, *zconsumed, *zin, *zout, *zstream;
 	int call_result;
 
-	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", 7, (void**)&zstream)) {
+	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", sizeof("stream"), (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */
-		ALLOC_ZVAL(zstream);
+		ALLOC_INIT_ZVAL(zstream);
 		ZEND_REGISTER_RESOURCE(zstream, stream, le_stream);
 		add_property_zval(obj, "stream", zstream);
+		/* add_property_zval increments the refcount which is unwanted here */
+		zval_ptr_dtor(&zstream);
 	}
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1, 0);
 
 	/* Setup calling arguments */
-	ALLOC_ZVAL(zin);
+	ALLOC_INIT_ZVAL(zin);
 	ZEND_REGISTER_RESOURCE(zin, buckets_in, le_bucket_brigade);
 	args[0] = &zin;
 
-	ALLOC_ZVAL(zout);
+	ALLOC_INIT_ZVAL(zout);
 	ZEND_REGISTER_RESOURCE(zout, buckets_out, le_bucket_brigade);
 	args[1] = &zout;
 
@@ -343,6 +345,8 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
 		object_init(return_value);
 		add_property_zval(return_value, "bucket", zbucket);
+		/* add_property_zval increments the refcount which is unwanted here */
+		zval_ptr_dtor(&zbucket);
 		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
 		add_property_long(return_value, "datalen", bucket->buflen);
 	}
