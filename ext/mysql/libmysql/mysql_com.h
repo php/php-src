@@ -20,7 +20,7 @@ extern "C" {
 #define LOCAL_HOST_NAMEDPIPE "."
 
 #define MYSQL_PORT	3306		/* Alloced by ISI for MySQL */
-#define MYSQL_UNIX_ADDR "/var/tmp/mysql.sock"
+#define MYSQL_UNIX_ADDR "/tmp/mysql.sock"
 #if defined(__EMX__) || defined(__OS2__)
 #undef MYSQL_UNIX_ADDR
 #define MYSQL_OS2_ADDR "\\socket\\MySQL"
