@@ -473,8 +473,7 @@ static zend_module_entry php_roxen_module = {
 
 static int php_roxen_startup(sapi_module_struct *sapi_module)
 {
-  if(php_module_startup(sapi_module) == FAILURE
-     || zend_startup_module(&php_roxen_module) == FAILURE) {
+  if(php_module_startup(sapi_module, &php_roxen_module) == FAILURE) {
     return FAILURE;
   } else {
     return SUCCESS;
@@ -486,7 +485,7 @@ static int php_roxen_startup(sapi_module_struct *sapi_module)
 static sapi_module_struct roxen_sapi_module = {
   "roxen",
   "Roxen",
-  php_module_startup,			/* startup */
+  php_roxen_startup,			/* startup */
   php_module_shutdown_wrapper,		/* shutdown */
   NULL,					/* activate */
   NULL,					/* deactivate */
@@ -698,7 +697,7 @@ void pike_module_init( void )
 #endif	 
 #endif
     sapi_startup(&roxen_sapi_module);
-    php_roxen_startup(&roxen_sapi_module);
+    /*php_roxen_startup(&roxen_sapi_module); removed - should be called from SAPI activation*/
     roxen_php_initialized = 1;
     PHP_INIT_LOCK();
   }

@@ -966,7 +966,7 @@ int php_startup_extensions(zend_module_entry **ptr, int count)
 
 /* {{{ php_module_startup
  */
-int php_module_startup(sapi_module_struct *sf)
+int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
@@ -1118,6 +1118,9 @@ int php_module_startup(sapi_module_struct *sf)
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
+	/* start additional PHP extensions */
+	php_startup_extensions(&additional_modules, num_additional_modules);
+
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
@@ -1131,6 +1134,7 @@ int php_module_startup(sapi_module_struct *sf)
 	/* disable certain functions as requested by php.ini */
 	php_disable_functions(TSRMLS_C);
 
+	/* start Zend extensions */
 	zend_startup_extensions();
 
 #ifdef ZTS

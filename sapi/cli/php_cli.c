@@ -200,13 +200,23 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 	PHPWRITE_H("\r\n", 2);
 }
 
+
+static int php_cli_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
 /* {{{ sapi_module_struct cli_sapi_module
  */
 static sapi_module_struct cli_sapi_module = {
 	"cli",							/* name */
 	"Command Line Interface",    	/* pretty name */
 
-	php_module_startup,				/* startup */
+	php_cli_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	NULL,							/* activate */
@@ -421,7 +431,7 @@ int main(int argc, char *argv[])
 	cli_sapi_module.executable_location = argv[0];
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cli_sapi_module)==FAILURE) {
+	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
 		return FAILURE;
 	}
 

@@ -215,8 +215,7 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 static int php_pi3web_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module)==FAILURE
-		|| zend_register_module(&php_pi3web_module)==FAILURE) {
+	if (php_module_startup(sapi_module, &php_pi3web_module, 1)==FAILURE) {
 		return FAILURE;
 	} else {
 		return SUCCESS;

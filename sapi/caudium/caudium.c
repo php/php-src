@@ -520,11 +520,21 @@ static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)
   THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC), "register_variables");
 }
 
+
+static int php_caudium_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, &php_caudium_module, 1)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
 /* this structure is static (as in "it does not change") */
 static sapi_module_struct caudium_sapi_module = {
   "caudium",
   "Caudium",
-  php_module_startup,			/* startup */
+  php_caudium_startup,			/* startup */
   php_module_shutdown_wrapper,		/* shutdown */
   NULL,					/* activate */
   NULL,					/* deactivate */
@@ -762,7 +772,6 @@ void pike_module_init( void )
     ts_allocate_id(&caudium_globals_id, sizeof(php_caudium_request), NULL, NULL);
     sapi_startup(&caudium_sapi_module);
     sapi_module.startup(&caudium_sapi_module);
-    zend_startup_module(&php_caudium_module);
   }
   start_new_program(); /* Text */
   pike_add_function("run", f_php_caudium_request_handler,

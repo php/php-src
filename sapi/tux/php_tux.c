@@ -252,11 +252,21 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 #endif
 }
 
+
+static int php_tux_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+		return FAILURE;
+	} else {
+		return SUCCESS;
+	}
+}
+
 static sapi_module_struct tux_sapi_module = {
 	"tux",
 	"tux",
 	
-	php_module_startup,
+	php_tux_startup,
 	php_module_shutdown_wrapper,
 	
 	NULL,									/* activate */

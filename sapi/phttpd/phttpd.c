@@ -43,13 +43,9 @@ static int ph_globals_id;
 static int
 php_phttpd_startup(sapi_module_struct *sapi_module)
 {
-/*
-    if(php_module_startup(sapi_module) == FAILURE
-            || zend_startup_module(&php_aolserver_module) == FAILURE) {
-*/
 	fprintf(stderr,"***php_phttpd_startup\n");
 
-    if (php_module_startup(sapi_module)) {
+    if (php_module_startup(sapi_module, NULL, 0)) {
         return FAILURE;
     } else {
         return SUCCESS;

@@ -296,6 +296,15 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 }
 
 
+static int php_cgi_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
@@ -306,7 +315,7 @@ static sapi_module_struct cgi_sapi_module = {
 	"CGI",							/* pretty name */
 #endif
 	
-	php_module_startup,				/* startup */
+	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	NULL,							/* activate */
@@ -591,7 +600,7 @@ int main(int argc, char *argv[])
 	cgi_sapi_module.executable_location = argv[0];
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
+	if (php_module_startup(&cgi_sapi_module, NULL, 0)==FAILURE) {
 #ifdef ZTS
 		tsrm_shutdown();
 #endif

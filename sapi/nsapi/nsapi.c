@@ -342,11 +342,20 @@ nsapi_log_message(char *message)
 }
 
 
+static int php_nsapi_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
 static sapi_module_struct nsapi_sapi_module = {
 	"nsapi",				/* name */
 	"NSAPI",				/* pretty name */
 
-	php_module_startup,			/* startup */
+	php_nsapi_startup,			/* startup */
 	php_module_shutdown_wrapper,		/* shutdown */
 
 	NULL,					/* activate */

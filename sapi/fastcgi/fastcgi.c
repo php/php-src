@@ -174,11 +174,20 @@ static void sapi_fastcgi_log_message(char *message)
 }
 
 
+static int php_fastcgi_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
 static sapi_module_struct fastcgi_sapi_module = {
 	"fastcgi",
 	"FastCGI",
 	
-	php_module_startup,
+	php_fastcgi_startup,
 	php_module_shutdown_wrapper,
 	
 	NULL,									/* activate */
@@ -444,7 +453,7 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-	if (php_module_startup(&fastcgi_sapi_module)==FAILURE) {
+	if (php_module_startup(&fastcgi_sapi_module, NULL, 0)==FAILURE) {
 		return FAILURE;
 	}
 #ifdef ZTS
