@@ -46,21 +46,29 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 
 	if(!strcasecmp(tag,"a")&&!strcasecmp(attr,"href")) {
 		flag = 1;
-	} else if(!strcasecmp(tag,"area")&&!strcasecmp(attr,"href")) {
+	} else if(!strcasecmp(tag,"area" ) && !strcasecmp(attr,"href"   )) {
 		flag = 1;
-	} else if(!strcasecmp(tag,"form")&&!strcasecmp(attr,"action")) {
+	} else if(!strcasecmp(tag,"form" ) && !strcasecmp(attr,"action" )) {
 		flag = 1;
-	} else if(!strcasecmp(tag,"frame")&&!strcasecmp(attr,"source")) {
+	} else if(!strcasecmp(tag,"frame") && !strcasecmp(attr,"source" )) {
 		flag = 1;
-	} else if(!strcasecmp(tag,"img")&&!strcasecmp(attr,"action")) {
+	} else if(!strcasecmp(tag,"img"  ) && !strcasecmp(attr,"action" )) {
 		flag = 1;
 	}
 	if(flag) {
 		if(!strstr(val,buf))
 			{
-				char *p = (char *)emalloc(strlen(buf)+2);
-				*p=strchr(val,'?')?'&':'?';
-				strcpy(p+1,buf);
+				char *p = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator))+1);
+				int n;
+
+				if(strchr(val,'?')) {
+					strcpy(p,PG(arg_separator));
+					n=strlen(PG(arg_separator));
+				} else {
+					*p='?';
+					n=1;
+				}
+				strcpy(p+n,buf);
 				return p;
 			}
 	} 
