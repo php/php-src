@@ -690,7 +690,7 @@ PHP_FUNCTION(checkdate)
 	}
 
 	if((*year)->type == IS_STRING) {
-		res = is_numeric_string((*year)->value.str.val, (*year)->value.str.len, NULL, NULL);
+		res = is_numeric_string((*year)->value.str.val, (*year)->value.str.len, NULL, NULL, 0);
 		if(res!=IS_LONG && res !=IS_DOUBLE) {
 			RETURN_FALSE;	
 		}
