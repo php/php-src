@@ -55,13 +55,13 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 	}
 	switch (ht->inconsistent) {
 		case HT_IS_DESTROYING:
-			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being destroyed", file, line, ht);
+			zend_output_debug_string(1, "%s(%d) : ht=%p is being destroyed", file, line, ht);
 			break;
 		case HT_DESTROYED:
-			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is already destroyed", file, line, ht);
+			zend_output_debug_string(1, "%s(%d) : ht=%p is already destroyed", file, line, ht);
 			break;
 		case HT_CLEANING:
-			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being cleaned", file, line, ht);
+			zend_output_debug_string(1, "%s(%d) : ht=%p is being cleaned", file, line, ht);
 			break;
 	}
 	zend_bailout();
@@ -1300,14 +1300,14 @@ void zend_hash_display(HashTable *ht)
 	for (i = 0; i < ht->nTableSize; i++) {
 		p = ht->arBuckets[i];
 		while (p != NULL) {
-			zend_output_debug_string(0, "%s <==> 0x%X\n", p->arKey, p->h);
+			zend_output_debug_string(0, "%s <==> 0x%lX\n", p->arKey, p->h);
 			p = p->pNext;
 		}
 	}
 
 	p = ht->pListTail;
 	while (p != NULL) {
-		zend_output_debug_string(0, "%s <==> 0x%X\n", p->arKey, p->h);
+		zend_output_debug_string(0, "%s <==> 0x%lX\n", p->arKey, p->h);
 		p = p->pListLast;
 	}
 }
