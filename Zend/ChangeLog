@@ -1,3 +1,8 @@
+2003-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      Fixed bug #20933 (isset/empty didn't work when used on string offsets).
+
 2003-01-15  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
