@@ -292,7 +292,12 @@ ZEND_API int zval_update_constant(zval **pp)
 
 	if (p->type == IS_CONSTANT) {
 		zval c;
-		int refcount = p->refcount;
+		int refcount;
+
+		SEPARATE_ZVAL(pp);
+		p = *pp;
+
+		refcount = p->refcount;
 
 		if (!zend_get_constant(p->value.str.val, p->value.str.len, &c)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
@@ -306,6 +311,8 @@ ZEND_API int zval_update_constant(zval **pp)
 		INIT_PZVAL(p);
 		p->refcount = refcount;
 	} else if (p->type == IS_ARRAY) {
+		SEPARATE_ZVAL(pp);
+		p = *pp;
 		zend_hash_apply(p->value.ht, (int (*)(void *)) zval_update_constant);
 	}
 	return 0;
