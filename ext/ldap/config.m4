@@ -50,6 +50,9 @@ if test "$PHP_LDAP" != "no"; then
     AC_ADD_LIBRARY_WITH_PATH(lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 
+  elif test -f $LDAP_LIBDIR/libldap.so.3; then
+    AC_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+
   elif test -f $LDAP_LIBDIR/libldapssl41.so -o -f $LDAP_LIBDIR/libldapssl41.sl; then
     if test -n "$LDAP_PTHREAD"; then 
       AC_ADD_LIBRARY($LDAP_PTHREAD)
