@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /I "libmbfl" /I "libmbfl\mbfl" /D ZEND_DEBUG=0 /D "_MBCS" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /D MBFL_DLL_EXPORT=1 /D "LIBMBFL_EXPORTS" /D "HAVE_STRICMP" /D "HAVE_CONFIG_H" /D "HAVE_STDLIB_H"  /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /I "libmbfl" /I "libmbfl\mbfl" /I "mbregex" /D ZEND_DEBUG=0 /D "_MBCS" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM"  /I "libmbfl" /I "libmbfl\mbfl" /D ZEND_DEBUG=1 /D "MBSTRING_EXPORTS" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /D MBFL_DLL_EXPORT=1 /D "LIBMBFL_EXPORTS" /D "HAVE_STRICMP" /D "HAVE_CONFIG_H" /D "HAVE_STDLIB_H"  /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /I "libmbfl" /I "libmbfl\mbfl" /I "mbregex" /D ZEND_DEBUG=1 /D "MBSTRING_EXPORTS" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -92,6 +92,48 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\mbregex\mbregex.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbstring.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_mbregex.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_unicode.c
+# End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\mbregex\mbregex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbstring.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_unicode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_data.h
+# End Source File
+# End Group
+# Begin Group "libmbfl"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 1"
+
+# PROP Default_Filter ""
+# Begin Source File
 
 SOURCE=.\libmbfl\filters\html_entities.c
 # End Source File
@@ -356,30 +398,14 @@ SOURCE=.\libmbfl\nls\nls_uni.c
 SOURCE=.\libmbfl\nls\nls_zh.c
 # End Source File
 # End Group
-
-SOURCE=.\mbregx\mbregex.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\mbstring.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\php_mbregex.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\php_unicode.c
-# End Source File
-# End Group
-# Begin Group "Header Files"
+# Begin Group "Header Files No. 1"
 
 # PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\libmbfl\config.h.vc6
 
-!IF  "$(CFG)" == "mbstring - Win32 Release_TS MBSTRING"
+!IF  "$(CFG)" == "mbstring - Win32 Release_TS"
 
 # Begin Custom Build
 InputDir=.\libmbfl
@@ -390,7 +416,7 @@ InputPath=.\libmbfl\config.h.vc6
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "mbstring - Win32 Debug_TS MBSTRING"
+!ELSEIF  "$(CFG)" == "mbstring - Win32 Debug_TS"
 
 # Begin Custom Build
 InputDir=.\libmbfl
@@ -770,20 +796,9 @@ SOURCE=.\libmbfl\filters\unicode_table_koi8r.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbregex.h
+SOURCE=.\libmbfl\filters\unicode_table_uhc.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\mbstring.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\php_unicode.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\unicode_data.h
-# End Source File
+# End Group
 # End Group
 # End Target
 # End Project
