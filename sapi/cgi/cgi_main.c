@@ -119,8 +119,8 @@ static pid_t pgroup;
 #define PHP_MODE_LINT		4
 #define PHP_MODE_STRIP		5
 
-static char *optarg = NULL;
-static int optind = 1;
+static char *php_optarg = NULL;
+static int php_optind = 1;
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -960,8 +960,8 @@ int main(int argc, char *argv[])
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
-	int orig_optind=optind;
-	char *orig_optarg=optarg;
+	int orig_optind=php_optind;
+	char *orig_optarg=php_optarg;
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
@@ -1039,10 +1039,10 @@ int main(int argc, char *argv[])
 		/* allow ini override for fastcgi */
 #endif
 		) {
-		while ((c=php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0))!=-1) {
+		while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
 			switch (c) {
 				case 'c':
-					cgi_sapi_module.php_ini_path_override = strdup(optarg);
+					cgi_sapi_module.php_ini_path_override = strdup(php_optarg);
 					break;
 				case 'n':
 					cgi_sapi_module.php_ini_ignore = 1;
@@ -1054,7 +1054,7 @@ int main(int argc, char *argv[])
 				   server by accepting a bindpath parameter. */
 				case 'b':
 					if (!fastcgi) {
-						bindpath = strdup(optarg);
+						bindpath = strdup(php_optarg);
 					}
 					break;
 #endif
@@ -1062,8 +1062,8 @@ int main(int argc, char *argv[])
 			}
 
 		}
-		optind = orig_optind;
-		optarg = orig_optarg;
+		php_optind = orig_optind;
+		php_optarg = orig_optarg;
 	}
 
 #ifdef ZTS
@@ -1269,7 +1269,7 @@ consult the installation file that came with this distribution, or visit \n\
 			&& !fastcgi
 #endif
 			) {
-			while ((c=php_getopt(argc, argv, OPTIONS, &optarg, &optind, 1))!=-1) {
+			while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1))!=-1) {
 				switch (c) {
 					case 'h':
 					case '?':
@@ -1283,8 +1283,8 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 				}
 			}
-			optind = orig_optind;
-			optarg = orig_optarg;
+			php_optind = orig_optind;
+			php_optarg = orig_optarg;
 		}
 
 #if PHP_FASTCGI
@@ -1334,7 +1334,7 @@ consult the installation file that came with this distribution, or visit \n\
 				exit(1);
 			}
 		
-			while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
+			while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 				switch (c) {
 					
   				case 'a':	/* interactive mode */
@@ -1346,7 +1346,7 @@ consult the installation file that came with this distribution, or visit \n\
 						SG(options) |= SAPI_OPTION_NO_CHDIR;
 						break;
 				case 'd': /* define ini entries on command line */
-						define_command_line_ini_entry(optarg);
+						define_command_line_ini_entry(php_optarg);
 						break;
 						
   				case 'e': /* enable extended info output */
@@ -1354,16 +1354,16 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 
   				case 'f': /* parse file */
-						script_file = estrdup(optarg);
+						script_file = estrdup(php_optarg);
 						no_headers = 1;
 						/* arguments after the file are considered script args */
-						SG(request_info).argc = argc - (optind-1);
-						SG(request_info).argv = &argv[optind-1];
+						SG(request_info).argc = argc - (php_optind-1);
+						SG(request_info).argv = &argv[php_optind-1];
 						break;
 
   				case 'g': /* define global variables on command line */
 						{
-							char *arg = estrdup(optarg);
+							char *arg = estrdup(php_optarg);
 
 							zend_llist_add_element(&global_vars, &arg);
 						}
@@ -1439,7 +1439,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 
 				case 'z': /* load extension file */
-						zend_load_extension(optarg);
+						zend_load_extension(php_optarg);
 						break;
 
 					default:
@@ -1460,12 +1460,12 @@ consult the installation file that came with this distribution, or visit \n\
 				SG(request_info).no_headers = 1;
 			}
 
-			if (!SG(request_info).path_translated && argc > optind) {
+			if (!SG(request_info).path_translated && argc > php_optind) {
 				/* arguments after the file are considered script args */
-				SG(request_info).argc = argc - optind;
-				SG(request_info).argv = &argv[optind];
+				SG(request_info).argc = argc - php_optind;
+				SG(request_info).argv = &argv[php_optind];
 				/* file is on command line, but not in -f opt */
-				SG(request_info).path_translated = estrdup(argv[optind++]);
+				SG(request_info).path_translated = estrdup(argv[php_optind++]);
 			}
 
 			/* all remaining arguments are part of the query string
@@ -1477,15 +1477,15 @@ consult the installation file that came with this distribution, or visit \n\
 			   test.php "v1=test&v2=hello world!"
 			   test.php v1=test "v2=hello world!"
 			*/
-			if (!SG(request_info).query_string && argc > optind) {
+			if (!SG(request_info).query_string && argc > php_optind) {
 				len = 0;
-				for (i = optind; i < argc; i++) {
+				for (i = php_optind; i < argc; i++) {
 					len += strlen(argv[i]) + 1;
 				}
 
 				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
 				*s = '\0';			/* we are pretending it came from the environment  */
-				for (i = optind, len = 0; i < argc; i++) {
+				for (i = php_optind, len = 0; i < argc; i++) {
 					strcat(s, argv[i]);
 					if (i < (argc - 1)) {
 						strcat(s, PG(arg_separator).input);
