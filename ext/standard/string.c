@@ -1165,7 +1165,7 @@ PHP_FUNCTION(similar_text)
 	
 
 /* be careful, this edits the string in-place */
-PHPAPI void _php3_stripslashes(char *string, int *len)
+PHPAPI void php_stripslashes(char *string, int *len)
 {
 	char *s, *t;
 	int l;
@@ -1223,7 +1223,7 @@ PHP_FUNCTION(addslashes)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(str);
-	return_value->value.str.val = _php3_addslashes(str->value.str.val,str->value.str.len,&return_value->value.str.len,0);
+	return_value->value.str.val = php_addslashes(str->value.str.val,str->value.str.len,&return_value->value.str.len,0);
 	return_value->type = IS_STRING;
 }
 /* }}} */
@@ -1241,7 +1241,7 @@ PHP_FUNCTION(stripslashes)
 
 	/* let RETVAL do the estrdup() */
 	RETVAL_STRING(str->value.str.val,1);
-	_php3_stripslashes(return_value->value.str.val,&return_value->value.str.len);
+	php_stripslashes(return_value->value.str.val,&return_value->value.str.len);
 }
 /* }}} */
 
@@ -1263,7 +1263,7 @@ char *strerror(int errnum)
 #endif
 
 
-PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should_free)
+PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free)
 {
 	/* maximum string length, worst case situation */
 	char *new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1); 

@@ -196,7 +196,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	if (PG(magic_quotes_runtime) && type!=3) {
 		int len;
 		
-		tmp = _php3_addslashes(buf, 0, &len, 0);
+		tmp = php_addslashes(buf, 0, &len, 0);
 		RETVAL_STRINGL(tmp,len,0);
 	} else {
 		RETVAL_STRING(buf,1);

@@ -485,8 +485,8 @@ int _php3_dbminsert(dbm_info *info, char *key, char *value) {
 	int ret;
 	DBM_TYPE dbf;
 
-	_php3_stripslashes(key,NULL);
-	_php3_stripslashes(value,NULL);
+	php_stripslashes(key,NULL);
+	php_stripslashes(value,NULL);
 
 	value_datum.dptr = estrdup(value);
 	value_datum.dsize = strlen(value);
@@ -540,8 +540,8 @@ int _php3_dbmreplace(dbm_info *info, char *key, char *value) {
 	PLS_FETCH();
 
 	if (PG(magic_quotes_runtime)) {
-		_php3_stripslashes(key,NULL);
-		_php3_stripslashes(value,NULL);
+		php_stripslashes(key,NULL);
+		php_stripslashes(value,NULL);
 	}
 
 	value_datum.dptr = estrdup(value);
@@ -632,7 +632,7 @@ char *_php3_dbmfetch(dbm_info *info, char *key) {
 		ret = NULL;
 
 	if (ret && PG(magic_quotes_runtime)) {
-		ret = _php3_addslashes(ret, value_datum.dsize, NULL, 1);
+		ret = php_addslashes(ret, value_datum.dsize, NULL, 1);
 	}
 	return(ret);
 }
@@ -847,7 +847,7 @@ char *_php3_dbmnextkey(dbm_info *info, char *key) {
 	else ret=NULL;
 
 	if (ret && PG(magic_quotes_runtime)) {
-		ret = _php3_addslashes(ret, ret_datum.dsize, NULL, 1);
+		ret = php_addslashes(ret, ret_datum.dsize, NULL, 1);
 	}
 	return(ret);
 }

@@ -1257,7 +1257,7 @@ PHP_FUNCTION(mysql_result)
 
 	if (sql_row[field_offset]) {
 		if (PG(magic_quotes_runtime)) {
-			return_value->value.str.val = _php3_addslashes(sql_row[field_offset],sql_row_lengths[field_offset],&return_value->value.str.len,0);
+			return_value->value.str.val = php_addslashes(sql_row[field_offset],sql_row_lengths[field_offset],&return_value->value.str.len,0);
 		} else {	
 			return_value->value.str.len = sql_row_lengths[field_offset];
 			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
@@ -1364,7 +1364,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			int should_copy;
 
 			if (PG(magic_quotes_runtime)) {
-				data = _php3_addslashes(mysql_row[i],mysql_row_lengths[i],&data_len,0);
+				data = php_addslashes(mysql_row[i],mysql_row_lengths[i],&data_len,0);
 				should_copy = 0;
 			} else {
 				data = mysql_row[i];

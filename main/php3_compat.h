@@ -86,4 +86,7 @@
 
 #define function_entry		zend_function_entry
 
+#define _php3_addslashes	php_addslashes
+#define _php3_stripslashes	php_stripslashes
+
 #endif							/* _PHP3_COMPAT_H */

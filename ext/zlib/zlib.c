@@ -360,7 +360,7 @@ PHP_FUNCTION(gzfile) {
 		if (PG(magic_quotes_runtime)) {
 			int len;
 			
-			slashed = _php3_addslashes(buf,0,&len,0); /* 0 = don't free source string */
+			slashed = php_addslashes(buf,0,&len,0); /* 0 = don't free source string */
             add_index_stringl(return_value, i++, slashed, len, 0);
 		} else {
 			add_index_string(return_value, i++, buf, 1);
@@ -498,7 +498,7 @@ PHP_FUNCTION(gzgets) {
 		RETVAL_FALSE;
 	} else {
 		if (PG(magic_quotes_runtime)) {
-			return_value->value.str.val = _php3_addslashes(buf,0,&return_value->value.str.len,1);
+			return_value->value.str.val = php_addslashes(buf,0,&return_value->value.str.len,1);
 		} else {
 			return_value->value.str.val = buf;
 			return_value->value.str.len = strlen(return_value->value.str.val);
@@ -703,7 +703,7 @@ PHP_FUNCTION(gzwrite) {
 
 	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
-		_php3_stripslashes(arg2->value.str.val,&num_bytes);
+		php_stripslashes(arg2->value.str.val,&num_bytes);
 	}
 
 	ret = gzwrite(zp, arg2->value.str.val,num_bytes);
@@ -901,7 +901,7 @@ PHP_FUNCTION(gzread)
 	return_value->value.str.val[return_value->value.str.len] = 0;
 
 	if (PG(magic_quotes_runtime)) {
-		return_value->value.str.val = _php3_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1);
+		return_value->value.str.val = php_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1);
 	}
 	return_value->type = IS_STRING;
 }

@@ -774,7 +774,7 @@ PHP_FUNCTION(ibase_fetch_row)
 						collen = sprintf(char_data, "%*.*s", len, len, ibase_result->sqlda->sqlvar[i].sqldata);
 						if (PG(magic_quotes_runtime)) {
 							int newlen;
-							char *tmp = _php3_addslashes(char_data, collen, &newlen, 0);
+							char *tmp = php_addslashes(char_data, collen, &newlen, 0);
 							add_get_index_stringl(return_value, i, tmp, newlen, (void **) &pval_ptr, 0);
 						} else {
 							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
@@ -790,7 +790,7 @@ PHP_FUNCTION(ibase_fetch_row)
 						collen = sprintf(char_data, "%*.*s", vchar->var_len, vchar->var_len, vchar->var_str);
 						if (PG(magic_quotes_runtime)) {
 							int newlen;
-							char *tmp = _php3_addslashes(char_data, collen, &newlen, 0);
+							char *tmp = php_addslashes(char_data, collen, &newlen, 0);
 							add_get_index_stringl(return_value, i, tmp, newlen, (void **) &pval_ptr, 0);
 						} else {
 							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
