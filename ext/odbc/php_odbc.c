@@ -609,19 +609,24 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		WRONG_PARAM_COUNT;
 
 	convert_to_long_ex(pv_flag);
+	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
-	if (Z_LVAL_PP(pv_res)) {
-		ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
+	/* if (Z_LVAL_PP(pv_res)) { */
         if (mode)
             result->longreadlen = Z_LVAL_PP(pv_flag);	
         else
             result->binmode = Z_LVAL_PP(pv_flag);
+/*
+ * According to the documentation there is no possible way for you to run these functions 
+ * without having a result set.  
+ *
 	} else {
         if (mode)
             ODBCG(defaultlrl) = Z_LVAL_PP(pv_flag);
         else
             ODBCG(defaultbinmode) = Z_LVAL_PP(pv_flag);
 	}
+*/
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1825,7 +1830,7 @@ PHP_FUNCTION(odbc_result)
 					   			NULL, 0, NULL, &fieldsize);
 			}
 			/* For char data, the length of the returned string will be longreadlen - 1 */
-			fieldsize = (result->longreadlen <= 0) ? 4096 : result->longreadlen;
+			fieldsize = (result->longreadlen <= 0) ? ODBCG(defaultlrl) : result->longreadlen;
 			field = emalloc(fieldsize);
 			if (!field) {
 				php_error(E_WARNING, "Out of memory");
@@ -1870,7 +1875,7 @@ PHP_FUNCTION(odbc_result)
 /* If we come here, output unbound LONG and/or BINARY column data to the client */
 	
 	/* We emalloc 1 byte more for SQL_C_CHAR (trailing \0) */
-	fieldsize = (sql_c_type == SQL_C_CHAR) ? 4096 : 4095;
+	fieldsize = (sql_c_type == SQL_C_CHAR) ? ODBCG(defaultlrl)+1: ODBCG(defaultlrl);
 	if ((field = emalloc(fieldsize)) == NULL) {
 		php_error(E_WARNING,"Out of memory");
 		RETURN_FALSE;
@@ -1892,7 +1897,7 @@ PHP_FUNCTION(odbc_result)
 			RETURN_FALSE;
 		}
 		/* chop the trailing \0 by outputing only 4095 bytes */
-		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? 4095 :
+		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? ODBCG(defaultlrl) :
 						   result->values[field_ind].vallen);
 
 		if (rc == SQL_SUCCESS) { /* no more data avail */
