@@ -135,4 +135,6 @@ struct _sapi_module_struct {
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(char *content_type_dup SLS_DC)
 
+SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
+
 #endif /* _NEW_SAPI_H */
