@@ -44,6 +44,9 @@ PHP_FUNCTION(mysqli_affected_rows)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
 	rc = mysql_affected_rows(mysql->mysql);
+	if (rc == (my_ulonglong) -1) {
+		RETURN_LONG(-1);
+	}
 	MYSQLI_RETURN_LONG_LONG(rc);
 }
 /* }}} */
@@ -1445,6 +1448,9 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt");
 
 	rc = mysql_stmt_affected_rows(stmt->stmt);
+	if (rc == (my_ulonglong) -1) {
+		RETURN_LONG(-1);
+	}
 	MYSQLI_RETURN_LONG_LONG(rc)
 }
 /* }}} */

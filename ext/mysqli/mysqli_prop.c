@@ -128,9 +128,36 @@ int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ property link_affected_rows_read */
+int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	MY_MYSQL *mysql;
+	my_ulonglong rc;
+
+	ALLOC_ZVAL(*retval); 
+	CHECK_OBJECT();
+
+ 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	rc = mysql_affected_rows(mysql->mysql);
+
+	if (rc == (my_ulonglong)-1) {
+		ZVAL_LONG(*retval, -1);
+		return SUCCESS;
+	} 
+
+	if (rc < LONG_MAX) {
+		ZVAL_LONG(*retval, rc);
+	} else {
+		char ret[40];
+		sprintf(ret, "%llu", (my_ulonglong) rc);
+		ZVAL_STRING(*retval, ret, 1);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
 
 /* link properties */
-MYSQLI_MAP_PROPERTY_FUNC_LONG(link_affected_rows_read, mysql_affected_rows, MYSQLI_GET_MYSQL(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_errno_read, mysql_errno, MYSQLI_GET_MYSQL(), ulong);
 MYSQLI_MAP_PROPERTY_FUNC_STRING(link_error_read, mysql_error, MYSQLI_GET_MYSQL());
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_field_count_read, mysql_field_count, MYSQLI_GET_MYSQL(), ulong);
@@ -216,7 +243,35 @@ int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 }
 /* }}} */
 
-MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_affected_rows_read, mysql_stmt_affected_rows, MYSQLI_GET_STMT(), my_ulonglong);
+/* {{{ property stmt_affected_rows_read */
+int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	MY_STMT *stmt;
+	my_ulonglong rc;
+
+	ALLOC_ZVAL(*retval); 
+	CHECK_OBJECT();
+
+ 	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	rc = mysql_stmt_affected_rows(stmt->stmt);
+
+	if (rc == (my_ulonglong)-1) {
+		ZVAL_LONG(*retval, -1);
+		return SUCCESS;
+	} 
+
+	if (rc < LONG_MAX) {
+		ZVAL_LONG(*retval, rc);
+	} else {
+		char ret[40];
+		sprintf(ret, "%llu", (my_ulonglong) rc);
+		ZVAL_STRING(*retval, ret, 1);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_param_count_read, mysql_stmt_param_count, MYSQLI_GET_STMT(), ulong);
