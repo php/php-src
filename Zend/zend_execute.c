@@ -68,7 +68,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
 
-static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_free TSRMLS_DC)
+static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC)
 {
 	switch(node->op_type) {
 		case IS_CONST:
@@ -76,8 +76,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 			return &node->u.constant;
 			break;
 		case IS_TMP_VAR:
-			*should_free = 1;
-			return &Ts[node->u.var].tmp_var;
+			return *should_free = &Ts[node->u.var].tmp_var;
 			break;
 		case IS_VAR:
 			if (Ts[node->u.var].var.ptr) {
@@ -85,7 +84,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 				*should_free = 0;
 				return Ts[node->u.var].var.ptr;
 			} else {
-				*should_free = 1;
+				*should_free = &Ts[node->u.var].tmp_var;
 
 				switch (Ts[node->u.var].EA.type) {
 					case IS_STRING_OFFSET: {
@@ -113,10 +112,6 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 						break;
 				}
 			}
-			break;
-		case IS_UNUSED:
-			*should_free = 0;
-			return NULL;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
@@ -278,7 +273,7 @@ static inline zval **get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, int type
 	return get_zval_ptr_ptr(op, Ts, type);
 }
 
-static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, int *freeop, int type TSRMLS_DC)
+static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, zval **freeop, int type TSRMLS_DC)
 {
 	if(op->op_type == IS_UNUSED) {
 		if(EG(This)) {
@@ -663,7 +658,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 
 static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
 {
-	int free_op1;
+	zval *free_op1;
 	zval *varname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 	zval **retval;
 	zval tmp_varname;
@@ -910,7 +905,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 
 static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts TSRMLS_DC)
 {
-	int free_op1;
+	zval *free_op1;
 	zval *container = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
 
 	if (container->type != IS_ARRAY) {
