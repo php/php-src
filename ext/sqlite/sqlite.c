@@ -860,7 +860,7 @@ PHP_FUNCTION(sqlite_query)
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb) && 
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &sql, &sql_len, &zdb)) {
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zdb, &sql, &sql_len)) {
 		return;
 	}
 
