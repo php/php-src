@@ -238,7 +238,7 @@ class PEAR_Installer extends PEAR_Common
         // - soft          : fail silently
         //
         if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry($this->config->get('php_dir'));
+            $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
         }
         $oldcwd = getcwd();
         $need_download = false;
@@ -453,7 +453,7 @@ class PEAR_Installer extends PEAR_Common
 
     function checkDeps(&$pkginfo)
     {
-        $deps = new PEAR_Dependency;
+        $deps = &new PEAR_Dependency($this->registry);
         $errors = null;
         if (is_array($pkginfo['release_deps'])) {
             foreach($pkginfo['release_deps'] as $dep) {

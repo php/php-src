@@ -29,7 +29,10 @@ require_once "PEAR.php";
 
 class PEAR_Dependency
 {
-
+    function PEAR_Dependency(&$registry)
+    {
+        $this->registry = &$registry;
+    }
     /**
     * This method maps the xml dependency definition to the
     * PEAR_dependecy one
@@ -87,9 +90,6 @@ class PEAR_Dependency
      */
     function checkPackage($name, $req = null, $relation = 'has')
     {
-        if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry;
-        }
         if (!$this->registry->packageExists($name)) {
             return "'$name' PEAR package is not installed";
         }
