@@ -34,7 +34,7 @@
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
 #if SIZEOF_LONG == 8
-# define LL_MASK l
+# define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
 # ifdef PHP_WIN32
