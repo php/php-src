@@ -863,6 +863,16 @@ static zend_function_entry spl_funcs_ParentIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+static INLINE int spl_limit_it_has_more(spl_dual_it_object *intern TSRMLS_DC)
+{
+	/* FAILURE / SUCCESS */
+	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {
+		return FAILURE;
+	} else {
+		return spl_dual_it_has_more(intern TSRMLS_CC);
+	}
+}
+
 static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS_DC)
 {
 	zval  *zpos;
@@ -883,8 +893,10 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 		zval_ptr_dtor(&zpos);
 		spl_dual_it_free(intern TSRMLS_CC);
 		zend_user_it_free_current(intern->inner.iterator TSRMLS_CC);
-		spl_dual_it_fetch(intern, 1 TSRMLS_CC);
 		intern->current.pos = pos;
+		if (spl_limit_it_has_more(intern TSRMLS_CC) == SUCCESS) {
+			spl_dual_it_fetch(intern, 0 TSRMLS_CC);
+		}
 	} else {
 		/* emulate the forward seek, by next() calls */
 		/* a back ward seek is done by a previous rewind() */
@@ -920,7 +932,20 @@ SPL_METHOD(LimitIterator, hasMore)
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
+/*	RETURN_BOOL(spl_limit_it_has_more(intern TSRMLS_CC) == SUCCESS);*/
 	RETURN_BOOL((intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) && intern->current.data);
+}
+
+SPL_METHOD(LimitIterator, next)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_dual_it_next(intern, 1 TSRMLS_CC);
+	if (intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) {
+		spl_dual_it_fetch(intern, 1 TSRMLS_CC);
+	}
 }
 
 SPL_METHOD(LimitIterator, seek)
@@ -972,7 +997,7 @@ static zend_function_entry spl_funcs_LimitIterator[] = {
 	SPL_ME(LimitIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,       key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,       current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,       next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator, seek,          arginfo_limit_it_seek, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator, getPosition,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
