@@ -2960,7 +2960,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 	ImageInfo->motorola_intel = 0;
 
 	#ifdef HAVE_PHP_STREAM
-	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", IGNORE_PATH|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 	#else
 	ImageInfo->infile = VCWD_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
 	#endif
@@ -3264,7 +3264,7 @@ PHP_FUNCTION(exif_imagetype)
 	if (zend_get_parameters_ex(1, &arg1) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL TSRMLS_CC);
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
 	if (stream == NULL)	{
 		RETURN_FALSE;

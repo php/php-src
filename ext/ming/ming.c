@@ -1157,7 +1157,7 @@ PHP_FUNCTION(swffont_init)
     php_stream * stream;
 	FILE * file;
 	
-    stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+    stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 
     if(stream == NULL) {
 		RETURN_FALSE;
@@ -1602,7 +1602,7 @@ PHP_FUNCTION(swfmovie_save)
 
   convert_to_string_ex(x);
 
-  stream = php_stream_open_wrapper(Z_STRVAL_PP(x), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+  stream = php_stream_open_wrapper(Z_STRVAL_PP(x), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 
   if (stream == NULL)
 	  RETURN_FALSE;

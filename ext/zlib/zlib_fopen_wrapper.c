@@ -80,7 +80,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL, "ZLIB"
 };
 
-php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
+php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL;
@@ -90,7 +90,7 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	if (strncmp("zlib:", path, 5) == 0)
 		path += 5;
 	
-	self->stream = php_stream_open_wrapper(path, mode, options, opened_path TSRMLS_CC);
+	self->stream = php_stream_open_wrapper(path, mode, options, opened_path);
 	
 	if (self->stream) {
 		int fd;

@@ -42,14 +42,35 @@
 #include "build-defs.h"
 #endif
 
+#if ZEND_DEBUG
+/* some macros to help track leaks */
+#define emalloc_rel_orig(size)	\
+		( __php_stream_call_depth == 0 \
+		? _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) \
+		: _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) )
+
+#define erealloc_rel_orig(ptr, size)	\
+		( __php_stream_call_depth == 0 \
+		? _erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) \
+		: _erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) )
+
+
+#define pemalloc_rel_orig(size, persistent)	((persistent) ? malloc((size)) : emalloc_rel_orig((size)))
+#define perealloc_rel_orig(ptr, size, persistent)	((persistent) ? realloc((ptr), (size)) : erealloc_rel_orig((ptr), (size)))
+#else
+# define pemalloc_rel_orig(size, persistent)				pemalloc((size), (persistent))
+# define perealloc_rel_orig(ptr, size, persistent)			perealloc((ptr), (size), (persistent))
+# define emalloc_rel_orig(size)								emalloc((size))
+#endif
+
 static HashTable url_stream_wrappers_hash;
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char *mode) /* {{{ */
+PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char *mode STREAMS_DC) /* {{{ */
 {
 	php_stream *ret;
-
-	ret = (php_stream*) pemalloc(sizeof(php_stream), persistent);
+	
+	ret = (php_stream*) pemalloc_rel_orig(sizeof(php_stream), persistent);
 
 	memset(ret, 0, sizeof(php_stream));
 
@@ -232,7 +253,7 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 	return -1;
 }
 
-PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent)
+PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC)
 {
 	size_t ret = 0;
 	char *ptr;
@@ -272,7 +293,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
 
-				*buf = pemalloc(persistent, maxlen);
+				*buf = pemalloc_rel_orig(persistent, maxlen);
 
 				if (*buf)	{
 					memcpy(*buf, srcfile, maxlen);
@@ -287,19 +308,19 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 	}
 #endif
 
-	ptr = *buf = pemalloc(persistent, step);
+	ptr = *buf = pemalloc_rel_orig(persistent, step);
 	max_len = step;
 
 	while((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			*buf = perealloc(*buf, max_len + step, persistent);
+			*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
 			max_len += step;
 			ptr = *buf + len;
 		}
 	}
 	if (len) {
-		*buf = perealloc(*buf, len, persistent);
+		*buf = perealloc_rel_orig(*buf, len, persistent);
 	} else {
 		pefree(*buf, persistent);
 		*buf = NULL;
@@ -406,12 +427,12 @@ typedef struct {
 #endif
 } php_stdio_stream_data;
 
-PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC)
 {
 	FILE *fp = php_open_temporary_file(dir, pfx, opened_path TSRMLS_CC);
 
 	if (fp)	{
-		php_stream *stream = php_stream_fopen_from_file(fp, "wb");
+		php_stream *stream = php_stream_fopen_from_file_rel(fp, "wb");
 		if (stream) {
 			return stream;
 		}
@@ -424,7 +445,7 @@ PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *
 	return NULL;
 }
 
-PHPAPI php_stream *php_stream_fopen_tmpfile(void)
+PHPAPI php_stream *_php_stream_fopen_tmpfile(STREAMS_D)
 {
 	FILE *fp;
 	php_stream *stream;
@@ -434,7 +455,7 @@ PHPAPI php_stream *php_stream_fopen_tmpfile(void)
 		zend_error(E_WARNING, "tmpfile(): %s", strerror(errno));
 		return NULL;
 	}
-	stream = php_stream_fopen_from_file(fp, "r+");
+	stream = php_stream_fopen_from_file_rel(fp, "r+");
 	if (stream == NULL)	{
 		zend_error(E_WARNING, "tmpfile(): %s", strerror(errno));
 		fclose(fp);
@@ -445,24 +466,24 @@ PHPAPI php_stream *php_stream_fopen_tmpfile(void)
 
 
 
-PHPAPI php_stream *php_stream_fopen_from_file(FILE *file, const char *mode)
+PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC)
 {
 	php_stdio_stream_data *self;
 
-	self = emalloc(sizeof(*self));
+	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 0;
-	return php_stream_alloc(&php_stream_stdio_ops, self, 0, mode);
+	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 
-PHPAPI php_stream *php_stream_fopen_from_pipe(FILE *file, const char *mode)
+PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC)
 {
 	php_stdio_stream_data *self;
 
-	self = emalloc(sizeof(*self));
+	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 1;
-	return php_stream_alloc(&php_stream_stdio_ops, self, 0, mode);
+	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
 {
@@ -595,7 +616,7 @@ php_stream_ops	php_stream_stdio_ops = {
 	"STDIO"
 };
 
-PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC) /* {{{ */
+PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC) /* {{{ */
 {
 	/* code ripped off from fopen_wrappers.c */
 	char *pathbuf, *ptr, *end;
@@ -622,7 +643,7 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_stream_fopen(filename, mode, opened_path TSRMLS_CC);
+		return php_stream_fopen_rel(filename, mode, opened_path TSRMLS_CC);
 	}
 
 	/*
@@ -634,19 +655,19 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
 		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
 			/* filename is in safe_mode_include_dir (or subdir) */
-			return php_stream_fopen(filename, mode, opened_path TSRMLS_CC);
+			return php_stream_fopen_rel(filename, mode, opened_path);
 
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM)))
 			return NULL;
 
-		return php_stream_fopen(filename, mode, opened_path TSRMLS_CC);
+		return php_stream_fopen_rel(filename, mode, opened_path);
 	}
 
 	if (!path || (path && !*path)) {
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_stream_fopen(filename, mode, opened_path TSRMLS_CC);
+		return php_stream_fopen_rel(filename, mode, opened_path);
 	}
 
 	/* check in provided path */
@@ -689,7 +710,7 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
 						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
 					/* UID ok, or trypath is in safe_mode_include_dir */
-					stream = php_stream_fopen(trypath, mode, opened_path TSRMLS_CC);
+					stream = php_stream_fopen_rel(trypath, mode, opened_path);
 				} else {
 					stream = NULL;
 				}
@@ -698,7 +719,7 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 				return stream;
 			}
 		}
-		stream = php_stream_fopen(trypath, mode, opened_path TSRMLS_CC);
+		stream = php_stream_fopen_rel(trypath, mode, opened_path);
 		if (stream) {
 			efree(pathbuf);
 			return stream;
@@ -712,7 +733,7 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 }
 /* }}} */
 
-PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char **opened_path TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC)
 {
 	FILE *fp;
 	char *realpath = NULL;
@@ -722,7 +743,7 @@ PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char
 	fp = fopen(realpath, mode);
 
 	if (fp)	{
-		php_stream *ret = php_stream_fopen_from_file(fp, mode);
+		php_stream *ret = php_stream_fopen_from_file_rel(fp, mode);
 
 		if (ret)	{
 			if (opened_path)	{
@@ -860,34 +881,34 @@ exit_success:
 
 } /* }}} */
 
-int php_init_stream_wrappers(TSRMLS_D)
+int php_init_stream_wrappers(void)
 {
 	if (PG(allow_url_fopen))
 		return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
 	return SUCCESS;
 }
 
-int php_shutdown_stream_wrappers(TSRMLS_D)
+int php_shutdown_stream_wrappers(void)
 {
 	if (PG(allow_url_fopen))
 		zend_hash_destroy(&url_stream_wrappers_hash);
 	return SUCCESS;
 }
 
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
+PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper)
 {
 	if (PG(allow_url_fopen))
 		return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
 	return FAILURE;
 }
-PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
+PHPAPI int php_unregister_url_stream_wrapper(char *protocol)
 {
 	if (PG(allow_url_fopen))
 		return zend_hash_del(&url_stream_wrappers_hash, protocol, strlen(protocol));
 	return SUCCESS;
 }
 
-static php_stream *php_stream_open_url(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
+static php_stream *php_stream_open_url(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	php_stream_wrapper *wrapper;
 	const char *p, *protocol = NULL;
@@ -907,7 +928,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 			protocol = NULL;
 		}
 		if (wrapper)	{
-			php_stream *stream = wrapper->create(path, mode, options, opened_path TSRMLS_CC);
+			php_stream *stream = wrapper->create(path, mode, options, opened_path STREAMS_REL_CC);
 			if (stream)
 				stream->wrapper = wrapper;
 			return stream;
@@ -923,15 +944,16 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 			path += n + 1;
 
 		/* fall back on regular file access */
-		return php_stream_open_wrapper(path, mode, (options & ~REPORT_ERRORS) | IGNORE_URL,
-				opened_path TSRMLS_CC);
+		return php_stream_open_wrapper_rel(path, mode, (options & ~REPORT_ERRORS) | IGNORE_URL,
+				opened_path);
 	}
 	return NULL;
 }
 
-PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
+PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	php_stream *stream = NULL;
+	TSRMLS_FETCH();
 
 	if (opened_path)
 		*opened_path = NULL;
@@ -940,24 +962,24 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 		return NULL;
 
 	if (PG(allow_url_fopen) && !(options & IGNORE_URL))	{
-		stream = php_stream_open_url(path, mode, options, opened_path TSRMLS_CC);
+		stream = php_stream_open_url(path, mode, options, opened_path STREAMS_REL_CC);
 		goto out;
 	}
 
 	if ((options & USE_PATH) && PG(include_path) != NULL) {
-		stream = php_stream_fopen_with_path(path, mode, PG(include_path), opened_path TSRMLS_CC);
+		stream = php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path);
 		goto out;
 	}
 
 	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
 		return NULL;
 
-	stream = php_stream_fopen(path, mode, opened_path TSRMLS_CC);
+	stream = php_stream_fopen_rel(path, mode, opened_path);
 out:
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
 
-		switch(php_stream_make_seekable(stream, &newstream)) {
+		switch(php_stream_make_seekable_rel(stream, &newstream)) {
 			case PHP_STREAM_UNCHANGED:
 				return stream;
 			case PHP_STREAM_RELEASED:
@@ -985,7 +1007,7 @@ out:
 	return stream;
 }
 
-PHPAPI int php_stream_make_seekable(php_stream *origstream, php_stream **newstream)
+PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream STREAMS_DC)
 {
 	assert(newstream != NULL);
 
