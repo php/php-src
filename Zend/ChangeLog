@@ -1,3 +1,40 @@
+2003-08-05  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_execute_API.c:
+      Fix the build
+
+2003-08-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.h
+      zend_execute_API.c
+      zend_reflection_api.c:
+      Try to put an end to the endless number of call_user_function variants.
+      zend_call_function() now takes a structure that should contain all of the
+      necessary information.  If further information is necessary in the future,
+      then we'll be able to add it without having to introduce a new function.
+      
+      As for caching - the 2nd, optional argument is a struct that can hold all
+      of the information that's necessary to invoke the function, including its
+      handler, scope and object it operates on (if any).  Note that you may only
+      use a cache if the arguments you provide to zend_call_function() are
+      identical to the ones of the last call, except for the argument and return
+      value information.
+      
+      
+      The recently introduced fast_call_user_function() was removed
+      
+      I fixed most of the places that used fast_call_user_function() to use
+      caching
+      but there are still some that need to be fixed (XML and reflection)
+
+2003-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/bug24699.phpt:
+      fix syntax
+
+    * zend_execute_API.c:
+      remove stack clean - it makes trouble
+
 2003-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
