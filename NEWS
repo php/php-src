@@ -7,7 +7,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #17825 (ob_start() chunk size option didn't work well). (Yasuo)
 - Fixed output buffering implicit flush. (Yasuo) 
 - Added getopt() for parsing command line options and arguments. (Jon)
-- Added pg_fetch_assoc(), pg_fetch_all(), pg_meta_data(), pg_convert(), 
+- Added pg_fetch_assoc(), pg_fetch_all(), pg_ping(), pg_meta_data(), pg_convert(), 
   pg_insert(), pg_select(), pg_update() and pg_delete(). (Yasuo)
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).

@@ -88,6 +88,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_port,			NULL)
 	PHP_FE(pg_tty,			NULL)
 	PHP_FE(pg_options,		NULL)
+	PHP_FE(pg_ping,			NULL)
 	/* query functions */
 	PHP_FE(pg_query,		NULL)
 	PHP_FE(pg_send_query,	NULL)
@@ -146,7 +147,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_set_client_encoding,	NULL)
 #endif
 	/* misc function */
-	PHP_FE(pg_meta_data,     NULL)
+	PHP_FE(pg_meta_data,	NULL)
 	PHP_FE(pg_convert,      NULL)
 	PHP_FE(pg_insert,       NULL)
 	PHP_FE(pg_update,       NULL)
@@ -837,6 +838,37 @@ PHP_FUNCTION(pg_tty)
 PHP_FUNCTION(pg_host)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_HOST);
+}
+/* }}} */
+
+/* {{{ proto bool pg_ping([resource connection])
+   Ping database. If connection is bad, try to reconnect. */
+PHP_FUNCTION(pg_ping)
+{
+	zval *pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r",
+								 &pgsql_link) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	/* ping connection */
+	PQexec(pgsql, "SELECT 1;");
+
+	/* check status. */
+	if (PQstatus(pgsql) == CONNECTION_OK)
+		RETURN_TRUE;
+
+	/* reset connection if it's broken */
+	PQreset(pgsql);
+	if (PQstatus(pgsql) == CONNECTION_OK) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 

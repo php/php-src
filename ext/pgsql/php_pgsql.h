@@ -71,6 +71,7 @@ PHP_FUNCTION(pg_dbname);
 PHP_FUNCTION(pg_port);
 PHP_FUNCTION(pg_tty);
 PHP_FUNCTION(pg_options);
+PHP_FUNCTION(pg_ping);
 /* query functions */
 PHP_FUNCTION(pg_query);
 PHP_FUNCTION(pg_send_query);
