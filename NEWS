@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3
+- Fixed error handling in mysqli_multi_query. (Georg)
 - Fixed a problem with SPL iterators aggregating the innner iterator. (Marcus)
 - Extended the functionality of is_subclass_of() to accept either a class name
   or an object as first parameter. (Andrey) 
