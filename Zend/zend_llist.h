@@ -42,7 +42,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *data), unsigned char persistent);
 ZEND_API void zend_llist_add_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element);
-ZEND_API void zend_llist_del_element(zend_llist *l, void *element);
+ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2));
 ZEND_API void zend_llist_destroy(zend_llist *l);
 ZEND_API void zend_llist_clean(zend_llist *l);
 ZEND_API void zend_llist_remove_tail(zend_llist *l);
