@@ -923,6 +923,7 @@ PHP_FUNCTION(strtok)
 	char *token_end;
 	char *p;
 	char *pe;
+	int skipped = 0;
 	
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
 	    zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE)
@@ -963,12 +964,15 @@ PHP_FUNCTION(strtok)
 
 	/* Skip leading delimiters */
 	while (STRTOK_TABLE(p))
+	{
 		if (++p >= pe) {
 			/* no other chars left */
 			BG(strtok_last) = NULL;
 			RETVAL_FALSE;
 			goto restore;
 		}
+		skipped++;
+	}
 	
 	/* We know at this place that *p is no delimiter, so skip it */	
 	while (++p < pe)
@@ -977,7 +981,7 @@ PHP_FUNCTION(strtok)
 
 	if (p - BG(strtok_last)) {
 return_token:
-		RETVAL_STRINGL(BG(strtok_last), p - BG(strtok_last), 1);
+	RETVAL_STRINGL(BG(strtok_last) + skipped, (p - BG(strtok_last)) - skipped, 1);
 		BG(strtok_last) = p + 1;
 	} else {
 		RETVAL_FALSE;
