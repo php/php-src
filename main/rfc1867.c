@@ -195,30 +195,33 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					}
 
 					state = 3;
+					s = "";
 					if ((loc2 - loc) > 2) {
 						if (!strncasecmp(loc + 1, "Content-Type:", 13)) {
 							*(loc2 - 1) = '\0';
-
-							/* Add $foo_type */
-                            if (is_arr_upload) {
-                                sprintf(lbuf, "%s_type[%s]", abuf, arr_index);
-                            } else {
-                                sprintf(lbuf, "%s_type", namebuf);
-                            }
-							php_register_variable(lbuf, loc+15, NULL ELS_CC PLS_CC);
-
-							/* Add $foo[type] */
-                            if (is_arr_upload) {
-                                sprintf(lbuf, "%s[type][%s]", abuf, arr_index);
-                            } else {
-								sprintf(lbuf, "%s[type]", namebuf);
-							}
-							register_http_post_files_variable(lbuf, loc+15, http_post_files ELS_CC PLS_CC);
-
-							*(loc2 - 1) = '\n';
+							s = loc+15;
 						}
 						rem -= 2;
 						ptr += 2;
+					}
+
+					/* Add $foo_type */
+					if (is_arr_upload) {
+						sprintf(lbuf, "%s_type[%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s_type", namebuf);
+					}
+					php_register_variable(lbuf, s, NULL ELS_CC PLS_CC);
+					
+					/* Add $foo[type] */
+					if (is_arr_upload) {
+						sprintf(lbuf, "%s[type][%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s[type]", namebuf);
+					}
+					register_http_post_files_variable(lbuf, s, http_post_files ELS_CC PLS_CC);
+					if(*s != '\0') {
+						*(loc2 - 1) = '\n';
 					}
 				}
 				break;
