@@ -1,3 +1,10 @@
+2003-10-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_execute.c
+      zend_language_parser.y:
+      Allow foo::$bar()
+
 2003-10-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * Zend.m4:
