@@ -63,12 +63,12 @@ output_node($rootnode);
 
 $doc = newxmldoc("1.0");
 $root = $doc->addroot("HTML");
-$root->newchild("TITLE", "Hier der Titel");
+$head = $root->newchild("HEAD", "");
+$head->newchild("TITLE", "Hier der Titel");
 $body = $root->newchild("BODY", "");
 $table = $body->newchild("TABLE", "");
 $table->setattr("WIDTH", "100%");
 $table->newchild("TR", " ");
 echo $doc->dumpmem();
 
-echo {$root->children()}[0];
 ?>
