@@ -250,7 +250,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	}
 	if (symbol_table
 		&& !zend_hash_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
-		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)) {
+		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)=SUCCESS) {
 		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array ELS_CC PLS_CC);
 	}
 
