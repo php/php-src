@@ -68,7 +68,6 @@ PHP 4                                                                      NEWS
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
-- Added XBM support for bundled GD library. (Marcus)
 - Added imagefilter() function. Allows application of various filters.
   Only available with bundled GD. (Pierre-Alain Joye, Ilia)
 - Added antialiased drawing support to bundled GD. (Pierre-Alain Joye, Ilia)
