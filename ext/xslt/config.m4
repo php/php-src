@@ -133,6 +133,12 @@ int main ()
       -L$XSLT_DIR/lib
     ])
 
+    dnl SablotSetOptions implemented in Sablotron CVS > 2002/10/31
+    AC_CHECK_LIB(sablot, SablotGetOptions,
+    [
+      AC_DEFINE(HAVE_SABLOT_GET_OPTIONS, 1, [Whether Sablotron supports SablotGetOptions])
+    ])
+
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
   fi
 

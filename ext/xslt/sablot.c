@@ -91,6 +91,9 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_free,                NULL)
 	PHP_FE(xslt_set_object,          second_args_force_ref)
 	PHP_FE(xslt_setopt,              NULL)
+#ifdef HAVE_SABLOT_GET_OPTIONS
+	PHP_FE(xslt_getopt,              NULL)
+#endif
 	PHP_FE(xslt_backend_version,     NULL)
 	PHP_FE(xslt_backend_name,     	 NULL)
 	{NULL, NULL, NULL}
@@ -167,6 +170,9 @@ PHP_MINIT_FUNCTION(xslt)
 	REGISTER_LONG_CONSTANT("XSLT_SABOPT_DISABLE_ADDING_META", SAB_DISABLE_ADDING_META, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSLT_SABOPT_DISABLE_STRIPPING", SAB_DISABLE_STRIPPING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSLT_SABOPT_IGNORE_DOC_NOT_FOUND", SAB_IGNORE_DOC_NOT_FOUND, CONST_CS | CONST_PERSISTENT);
+#ifdef SAB_FILES_TO_HANDLER
+	REGISTER_LONG_CONSTANT("XSLT_SABOPT_FILES_TO_HANDLER", SAB_FILES_TO_HANDLER, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	return SUCCESS;
 }
@@ -669,7 +675,7 @@ PHP_FUNCTION(xslt_set_object)
 }
 /* }}} */
 
-/* {{{ proto int xslt_setopt(resource processor, int bitmask)
+/* {{{ proto int xslt_setopt(resource processor, int newmask)
    Set options on a given xsl processor */
 PHP_FUNCTION(xslt_setopt)
 {
@@ -677,7 +683,10 @@ PHP_FUNCTION(xslt_setopt)
 	zval      **zbitmask;    /* A bitmask created by through processor specific constants */
 	php_xslt  *handle;       /* A PHP-XSLT processor */
 	int       error;         /* Error return codes */
-	int       bitmask;
+	int       newmask;       /* New mask */
+#ifdef HAVE_SABLOT_GET_OPTIONS
+	int       prevmask;      /* Previous mask */
+#endif
 
 	if (ZEND_NUM_ARGS() != 2 ||
 		zend_get_parameters_ex(2, &processor_p, &zbitmask) == FAILURE) {
@@ -687,35 +696,50 @@ PHP_FUNCTION(xslt_setopt)
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 	convert_to_long_ex(zbitmask);
 
-	bitmask = Z_LVAL_PP(zbitmask);
-	if (bitmask < 0) {
-		php_error_docref("function.xslt-setopt" TSRMLS_CC, E_WARNING, "Invalid bitmask: %i", bitmask);
+	newmask = Z_LVAL_PP(zbitmask);
+	if (newmask < 0) {
+		php_error_docref("function.xslt-setopt" TSRMLS_CC, E_WARNING, "Invalid bitmask: %i", newmask);
 		RETURN_FALSE;
 	}
 
-	error = SablotSetOptions(XSLT_SITUATION(handle), bitmask);
+#ifdef HAVE_SABLOT_GET_OPTIONS
+	prevmask = SablotGetOptions(XSLT_SITUATION(handle));
+#endif
+	error = SablotSetOptions(XSLT_SITUATION(handle), newmask);
 	if (error) {
 		/* FIXME: Need to analyze the return code to give a more verbose error description */
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to set options");
 	}
 
-	/* FIXME:
-		now returning TRUE/FALSE, but should return the previous bitmask, so users can
-		temporarily set a certain option and restore the old value.
-		However - there's no API function in Sablotron to retrieve the current option set.
-		If that becomes available, the second argument should become optional, and if not 
-		specified the function should return the current value.
-		This would allow for:
-		<?php
-		$current_settings = xslt_setopt($xh);
-		// Add public entity support, retaining any options set at present
-		xslt_setopt($xh, $current_settings & XSLT_SAB_PARSE_PUBLIC_ENTITIES);
-		?>
-	*/
+#ifdef HAVE_SABLOT_GET_OPTIONS
+	RETURN_LONG(prevmask);
+#else
 	RETURN_TRUE;
+#endif
 }
 
 /* }}} */
+
+#ifdef HAVE_SABLOT_GET_OPTIONS
+/* {{{ proto int xslt_getopt(resource processor)
+   Get options on a given xsl processor */
+PHP_FUNCTION(xslt_getopt)
+{
+	zval      **processor_p; /* Resource pointer to a PHP-XSLT processor */
+	php_xslt  *handle;       /* A PHP-XSLT processor */
+
+	if (ZEND_NUM_ARGS() != 1 ||
+		zend_get_parameters_ex(1, &processor_p) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
+
+	RETURN_LONG(SablotGetOptions(XSLT_SITUATION(handle)));
+}
+
+/* }}} */
+#endif
 
 /* {{{ proto void xslt_backend_version()
    Returns the version number of Sablotron (if available) */
