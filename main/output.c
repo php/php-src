@@ -45,13 +45,15 @@ int output_globals_id;
 php_output_globals output_globals;
 #endif
 
+/* {{{ php_default_output_func */
 static inline int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
 	return str_len;
 }
+/* }}} */
 
-
+/* {{{ php_output_init_globals */
 static void php_output_init_globals(php_output_globals *output_globals_p TSRMLS_DC)
 {
  	OG(php_body_write) = php_default_output_func;
@@ -60,9 +62,11 @@ static void php_output_init_globals(php_output_globals *output_globals_p TSRMLS_
 	OG(output_start_filename) = NULL;
 	OG(output_start_lineno) = 0;
 }
+/* }}} */
 
 
-/* Start output layer */
+/* {{{ php_output_startup
+   Start output layer */
 PHPAPI void php_output_startup(void)
 {
 #ifdef ZTS
@@ -71,8 +75,11 @@ PHPAPI void php_output_startup(void)
 	php_output_init_globals(&output_globals TSRMLS_CC);
 #endif
 }
+/* }}} */
 
 
+/* {{{ php_output_activate
+   Initilize output global for activation */
 PHPAPI void php_output_activate(TSRMLS_D)
 {
 	OG(php_body_write) = php_ub_body_write;
@@ -83,27 +90,37 @@ PHPAPI void php_output_activate(TSRMLS_D)
 	OG(output_start_filename) = NULL;
 	OG(output_start_lineno) = 0;
 }
+/* }}} */
 
 
+/* {{{ php_output_set_status
+   Toggle output status */
 PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
 {
 	OG(disable_output) = !status;
 }
+/* }}} */
 
-
+/* {{{ php_output_register_constants */
 void php_output_register_constants(TSRMLS_D)
 {
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_START", PHP_OUTPUT_HANDLER_START, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_CONT", PHP_OUTPUT_HANDLER_CONT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_END", PHP_OUTPUT_HANDLER_END, CONST_CS | CONST_PERSISTENT);
 }
+/* }}} */
 
 
+/* {{{ php_body_wirte
+ * Write body part */
 PHPAPI int php_body_write(const char *str, uint str_length TSRMLS_DC)
 {
 	return OG(php_body_write)(str, str_length TSRMLS_CC);	
 }
+/* }}} */
 
+/* {{{ php_header_wirte
+ * Write HTTP header */
 PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	if (OG(disable_output)) {
@@ -112,6 +129,7 @@ PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
 		return OG(php_header_write)(str, str_length TSRMLS_CC);
 	}
 }
+/* }}} */
 
 /* {{{ php_start_ob_buffer
  * Start output buffering */
@@ -888,6 +906,7 @@ PHP_FUNCTION(ob_get_length)
 }
 /* }}} */
 
+/* {{{ int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) */
 static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) 
 {
 	zval *elem;
@@ -916,6 +935,7 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 
 	return SUCCESS;
 }
+/* }}} */
 
 
 /* {{{ proto false|array ob_get_status([bool full_status])
@@ -986,17 +1006,27 @@ PHP_FUNCTION(ob_implicit_flush)
 }
 /* }}} */
 
+
+/* {{{ char *php_get_output_start_filename(TSRMLS_D)
+   Return filename start output something */
 PHPAPI char *php_get_output_start_filename(TSRMLS_D)
 {
 	return OG(output_start_filename);
 }
+/* }}} */
 
 
+/* {{{ char *php_get_output_start_lineno(TSRMLS_D)
+   Return line number start output something */
 PHPAPI int php_get_output_start_lineno(TSRMLS_D)
 {
 	return OG(output_start_lineno);
 }
+/* }}} */
 
+
+/* {{{ proto bool output_reset_rewrite_vars(void)
+   Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
 	if (php_url_scanner_reset_vars(TSRMLS_C) == SUCCESS) {
@@ -1005,7 +1035,11 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+
+/* {{{ proto bool output_add_rewrite_var(string name, string value)
+   Add URL rewriter values */
 PHP_FUNCTION(output_add_rewrite_var)
 {
 	char *name, *value;
@@ -1021,6 +1055,7 @@ PHP_FUNCTION(output_add_rewrite_var)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
