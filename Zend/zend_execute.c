@@ -3140,19 +3140,21 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} 
 
 	ce = Z_OBJCE_P(obj);
-	clone = ce->clone;
+	clone = ce ? ce->clone : NULL;
 
-	if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		/* Ensure that if we're calling a private function, we're allowed to do so.
-		 */
-		if (ce != EG(scope)) {
-			zend_error(E_ERROR, "Call to private __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
-		}
-	} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
-		/* Ensure that if we're calling a protected function, we're allowed to do so.
-		 */
-		if (!zend_check_protected(clone->common.scope, EG(scope))) {
-			zend_error(E_ERROR, "Call to protected __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+	if (ce && clone) {
+		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (ce != EG(scope)) {
+				zend_error(E_ERROR, "Call to private __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(clone->common.scope, EG(scope))) {
+				zend_error(E_ERROR, "Call to protected __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
 		}
 	}
 
