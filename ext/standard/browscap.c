@@ -27,9 +27,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "php3_browscap.h"
 #include "php_ini.h"

@@ -27,9 +27,6 @@
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/flock_compat.h"

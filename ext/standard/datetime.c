@@ -33,9 +33,6 @@
 /* $Id$ */
 
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "zend_operators.h"
 #include "datetime.h"

@@ -8,9 +8,6 @@
 
 #if HAVE_IMAP
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #ifndef MSVC5
 #include "build-defs.h"
 #endif

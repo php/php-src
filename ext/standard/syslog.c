@@ -28,9 +28,7 @@
  */
 
 /* $Id$ */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
+
 #include "php.h"
 #include "php_ini.h"
 #include "zend_globals.h"

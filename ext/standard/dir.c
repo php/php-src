@@ -29,9 +29,6 @@
 
 /* $Id$ */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "fopen-wrappers.h"
 

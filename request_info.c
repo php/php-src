@@ -27,9 +27,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 
 #ifndef THREAD_SAFE

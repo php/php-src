@@ -30,9 +30,6 @@
 /* $Id$ */
 
 #include <math.h>				/* modf() */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "ext/standard/head.h"
 #include "php3_string.h"

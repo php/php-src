@@ -36,9 +36,6 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #include "microtime.h"
 #include "snprintf.h"

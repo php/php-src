@@ -101,12 +101,6 @@ Changes 12.11.1998 (danny.heijl@cevi.be)
 #if defined(COMPILE_DL)
 #include "dl/phpdl.h"
 #endif
-#if defined(THREAD_SAFE)
-#include "tls.h"
-DWORD InformixTls;
-static int numthreads=0;
-void *ifx_mutex;
-#endif
 
 #if WIN32|WINNT
 #include <winsock.h>

@@ -34,9 +34,6 @@
 #include <sys/types.h>
 
 /* php.h includes the correct regex.h */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 
 #include "url.h"

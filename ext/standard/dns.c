@@ -30,9 +30,6 @@
 
 /* $Id$ */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

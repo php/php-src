@@ -36,9 +36,6 @@
 #undef SHUTDOWN_DEBUG
 #define SHUTDOWN_DEBUG(resource)
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include <stdio.h>
 #include "php.h"
 #ifdef MSVC5

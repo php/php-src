@@ -23,9 +23,6 @@
    much useful things under MS-DOS, but using them avoids many "#ifdef
    MSDOS" in ported UN*X code ...  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"				/*php specific */
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

@@ -33,9 +33,7 @@
   web site at http://www.fileproplus.com/
 
  */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
+
 #include "php.h"
 #include "safe_mode.h"
 #include "fopen-wrappers.h"

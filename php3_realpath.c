@@ -27,10 +27,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
-
 #include "php.h"
 
 #if HAVE_UNISTD_H

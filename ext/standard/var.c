@@ -27,9 +27,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

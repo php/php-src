@@ -30,10 +30,6 @@
  */
 /* $Id$ */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#include "php.h"
-#else
 #include "httpd.h"
 #include "http_config.h"
 #if MODULE_MAGIC_NUMBER > 19980712
@@ -48,7 +44,6 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "http_log.h"
-#endif
 
 
 /* These are taken out of php_ini.h
