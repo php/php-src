@@ -1096,6 +1096,7 @@ PHP_METHOD(soapserver, handle)
 		if(service->type == SOAP_CLASS)
 		{
 			soap_obj = NULL;
+#if HAVE_PHP_SESSION
 			/* If persistent then set soap_obj from from the previous created session (if available) */
 			if(service->soap_class.persistance == SOAP_PERSISTENCE_SESSION)
 			{
@@ -1111,7 +1112,7 @@ PHP_METHOD(soapserver, handle)
 					soap_obj = *tmp_soap;
 				}
 			}
-
+#endif
 			/* If new session or something wierd happned */
 			if(soap_obj == NULL)
 			{
@@ -1132,7 +1133,7 @@ PHP_METHOD(soapserver, handle)
 					zval_dtor(&constructor);
 					zval_dtor(&c_ret);
 				}
-
+#if HAVE_PHP_SESSION
 				/* If session then update session hash with new object */
 				if(service->soap_class.persistance == SOAP_PERSISTENCE_SESSION)
 				{
@@ -1141,6 +1142,7 @@ PHP_METHOD(soapserver, handle)
 						soap_obj = *tmp_soap_pp;
 				}
 				else
+#endif
 					soap_obj = tmp_soap;
 			}
 /* 			function_table = &(soap_obj->value.obj.ce->function_table);*/
