@@ -101,13 +101,6 @@ distclean: distclean-recursive clean-x
 	rm -f config.cache config.log config.status config_vars.mk libtool \
 	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
 
-install-modules:
-	@test -d modules && \
-	$(mkinstalldirs) $(moduledir) && \
-	echo "installing shared modules into $(moduledir)" && \
-	rm -f modules/*.la && \
-	cp modules/* $(moduledir) || true
-
 include $(builddir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \

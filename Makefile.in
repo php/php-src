@@ -40,6 +40,13 @@ install-local:
 	-@$(mkinstalldirs) $(bindir)
 	$(INSTALL_IT)
 
+install-modules:
+	@test -d modules && \
+	$(mkinstalldirs) $(moduledir) && \
+	echo "installing shared modules into $(moduledir)" && \
+	rm -f modules/*.la && \
+	cp modules/* $(moduledir) || true
+
 configuration-parser.h configuration-parser.c: $(srcdir)/configuration-parser.y
 	$(YACC) -p cfg -v -d $< -o configuration-parser.c
 
