@@ -1,20 +1,22 @@
 #!/bin/sh
 # $Id$
 
-supplied_flag=$1
+while test $# -gt 0; do
+    if test "$1" = "--copy"; then
+        automake_flags=--copy
+    fi
 
-if test "$supplied_flag" = "--copy"; then
-    automake_flags=--copy
-fi
+    if test "$1" = "--ZendEngine2"; then
+        ZENDDIR=ZendEngine2
+        echo "Using Zend Engine 2 code"
+    fi
 
-if test "$supplied_flag" = "--ZendEngine2"; then
-    ZENDDIR=ZendEngine2
-    echo "Using Zend Engine 2 code"
-fi
+    shift
+done
 
-if test "$ZENDDIR" = ""; then
+if test -z "$ZENDDIR"; then
     ZENDDIR=Zend
-    echo "using Zend Engine 1 code"
+    echo "using default Zend directory"
 fi
  
 ## build.mk does not check aclocal exit status yet
@@ -30,17 +32,6 @@ fi
 #    exit 1
 #fi
 
-if test "$supplied_flag" = "--local"; then
-  subdirs='SUBDIRS='
-else
-  subdirs=''
-fi
-
 rm -f generated_lists
-
-case "`uname`" in
-*BSD/OS*)
-    ./build/bsd_makefile;;
-esac
 
 ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
