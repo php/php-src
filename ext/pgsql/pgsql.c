@@ -1343,7 +1343,7 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(resource result [, int row [, int result_type]])
+/* {{{ proto object pg_fetch_object(resource result [, int row])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
