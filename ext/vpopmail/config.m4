@@ -53,7 +53,7 @@ Use ./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
 	dnl check for valias functions in the -lvpopmail
 	PHP_CHECK_LIBRARY(vpopmail, valias_select, [
 		AC_DEFINE(HAVE_VPOPMAIL_VALIAS,1,[Whether vpopmail has valias support])
-	],[],
+	],[],[
 		-L$VPOPMAIL_LIB_DIR 
 	])
 
