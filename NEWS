@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- References between session-variables are now possible. (Thies)
 - Fixed a crash bug in the string-offsets implementation (Zeev, Zend Engine)
 - Improved the implementation of parent::method_name() for classes which use
   run-time inheritence (Zeev, Zend Engine)
