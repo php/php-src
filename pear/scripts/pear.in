@@ -128,7 +128,8 @@ $fallback_config = array(
     'master_server' => 'pear.php.net',
     'php_dir'       => PEAR_INSTALL_DIR,
     'ext_dir'       => PEAR_EXTENSION_DIR,
-    'doc_dir'       => '',
+    'doc_dir'       => PHP_DATADIR . DIRECTORY_SEPARATOR . 'pear' .
+                       DIRECTORY_SEPARATOR . 'doc',
     'verbose'       => true,
 );
 $fallback_done = array();
