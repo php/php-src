@@ -803,7 +803,7 @@ PHP_FUNCTION(ldap_get_entries)
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
 
-		tmp1 = (pval *) emalloc(sizeof(pval));
+		MAKE_STD_ZVAL(tmp1);
 		array_init(tmp1);
 
 		attr_count = 0;
@@ -812,7 +812,7 @@ PHP_FUNCTION(ldap_get_entries)
 			ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
 			num_values = ldap_count_values(ldap_value);
 
-			tmp2 = (pval *) emalloc(sizeof(pval));
+			MAKE_STD_ZVAL(tmp2);
 			array_init(tmp2);
 			add_assoc_long(tmp2, "count", num_values);
 			for(i=0; i<num_values; i++) {
@@ -949,7 +949,7 @@ PHP_FUNCTION(ldap_get_attributes)
 		ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
 		num_values = ldap_count_values(ldap_value);
 
-		tmp = (pval *) emalloc(sizeof(pval));
+		MAKE_STD_ZVAL(tmp);
 		array_init(tmp);
 		add_assoc_long(tmp, "count", num_values);
 		for(i=0; i<num_values; i++) {
