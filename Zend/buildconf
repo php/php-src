@@ -1,5 +1,14 @@
 #!/bin/sh
 
+case "$1" in
+--copy)
+	automake_flags=--copy
+	shift
+;;
+esac
+
+libtoolize --force --automake $automake_flags
+
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
 if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
@@ -11,7 +20,7 @@ fi
 
 autoheader
 
-automake --add-missing --include-deps
+automake --add-missing --include-deps $automake_flags
 
 mv configure configure.old 2>/dev/null
 autoconf

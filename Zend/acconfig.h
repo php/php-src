@@ -80,10 +80,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 # define zend_sprintf sprintf
 #endif
 
-#if ZEND_DEBUG
-# define inline
-#endif
-
 /*
  * Local variables:
  * tab-width: 4
