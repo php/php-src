@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
 - Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
 - Fixed bug #28464 (catch() does not catch exceptions by interfaces). (Marcus)
+- Fixed ReflectionClass::getMethod() and ReflectionClass::getProperty() to
+  raise an ReflectionException instead of returning NULL on failure.
+  (Sebastian)
 - Fixed convert.* filters to consume remaining buckets_in on flush. (Sara)
 
 13 Jul 2004, PHP 5.0.0
