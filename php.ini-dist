@@ -578,6 +578,15 @@ default_socket_timeout = 60
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
 
+[Tidy]
+; The path to a default tidy configuration file to use when using tidy
+;tidy.default_config = /usr/local/lib/php/default.tcfg
+
+; Should tidy clean and repair output automatically?
+; WARNING: Do not use this option if you are generating non-html content
+; such as dynamic images
+tidy.clean_output = Off
+
 [Syslog]
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
 ; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
