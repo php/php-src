@@ -634,12 +634,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	int retval;
 	php_per_dir_config *per_dir_conf;
 	TSRMLS_FETCH();
-
-	per_dir_conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
-	if (per_dir_conf) {
-		zend_hash_apply((HashTable *) per_dir_conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
-	}
-
 	if (AP(in_request)) {
 		zend_file_handle fh;
 
@@ -661,6 +655,11 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		/* Make sure file exists */
 		if (filename == NULL && r->finfo.st_mode == 0) {
 			return DECLINED;
+		}
+
+		per_dir_conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+		if (per_dir_conf) {
+			zend_hash_apply((HashTable *) per_dir_conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
 
 		/* If PHP parser engine has been turned off with an "engine off"
