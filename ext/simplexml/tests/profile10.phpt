@@ -11,8 +11,8 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-$rsattr = $root->child->attributes('reserved');
-$spattr = $root->child->attributes('special');
+$rsattr = $root->child->attributes('reserved-ns');
+$spattr = $root->child->attributes('special-ns');
 
 echo $rsattr['attribute'];
 echo "\n";

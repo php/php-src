@@ -11,7 +11,7 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-$attr = $root->child->attributes('reserved');
+$attr = $root->child->attributes('reserved-ns');
 echo $attr['attribute'];
 echo "\n---Done---\n";
 ?>

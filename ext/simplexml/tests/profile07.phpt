@@ -11,10 +11,8 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-$root->register_ns('myns', 'reserved-ns');
-
 $rsattr = $root->child->attributes('reserved');
-$myattr = $root->child->attributes('myns');
+$myattr = $root->child->attributes('reserved-ns');
 
 echo $rsattr['attribute'];
 echo $myattr['attribute'];
