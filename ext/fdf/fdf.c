@@ -188,7 +188,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 }
 
 /* {{{ proto int fdf_open(string filename)
-   Opens a new fdf document */
+   Opens a new FDF document */
 PHP_FUNCTION(fdf_open) {
 	pval **file;
 	int id;
@@ -214,7 +214,7 @@ PHP_FUNCTION(fdf_open) {
 } /* }}} */
 
 /* {{{ proto boolean fdf_close(int fdfdoc)
-   Closes the fdf document */
+   Closes the FDF document */
 PHP_FUNCTION(fdf_close) {
 	pval **arg1;
 	int id, type;
@@ -240,7 +240,7 @@ PHP_FUNCTION(fdf_close) {
 } /* }}} */
 
 /* {{{ proto int fdf_create(void)
-   Creates a new fdf document */
+   Creates a new FDF document */
 PHP_FUNCTION(fdf_create) {
 	int id;
 	FDFDoc fdf;
@@ -301,7 +301,7 @@ PHP_FUNCTION(fdf_get_value) {
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_value(int fdfdoc, string fieldname, string value, int isName)
+/* {{{ proto boolean fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
    Sets the value of a field */
 PHP_FUNCTION(fdf_set_value) {
 	pval **arg1, **arg2, **arg3, **arg4;
@@ -431,7 +431,7 @@ PHP_FUNCTION(fdf_set_ap) {
 /* }}} */
 
 /* {{{ proto boolean fdf_set_status(int fdfdoc, string status)
-   Sets the value in the /Status key. */
+   Sets the value in the /Status key */
 PHP_FUNCTION(fdf_set_status) {
 	pval **arg1, **arg2;
 	int id, type;
@@ -461,7 +461,7 @@ PHP_FUNCTION(fdf_set_status) {
 /* }}} */
 
 /* {{{ proto string fdf_get_status(int fdfdoc)
-   Gets the value in the /Status key. */
+   Gets the value in the /Status key */
 PHP_FUNCTION(fdf_get_status) {
 	pval **arg1;
 	int id, type;
@@ -528,7 +528,7 @@ PHP_FUNCTION(fdf_set_file) {
 /* }}} */
 
 /* {{{ proto string fdf_get_file(int fdfdoc)
-   Gets the value in the /F key. */
+   Gets the value in the /F key */
 PHP_FUNCTION(fdf_get_file) {
 	pval **arg1;
 	int id, type;
@@ -565,7 +565,7 @@ PHP_FUNCTION(fdf_get_file) {
 /* }}} */
 
 /* {{{ proto boolean fdf_save(int fdfdoc, string filename)
-   Writes out an FDF file. */
+   Writes out an FDF file */
 PHP_FUNCTION(fdf_save) {
 	pval **arg1, **arg2;
 	int id, type;
@@ -594,7 +594,7 @@ PHP_FUNCTION(fdf_save) {
 } /* }}} */
 
 /* {{{ proto boolean fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
-   Adds a template to the FDF*/
+   Adds a template to the FDF */
 PHP_FUNCTION(fdf_add_template) {
 	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
@@ -635,8 +635,8 @@ PHP_FUNCTION(fdf_add_template) {
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_flags(int fdfdoc, string fieldname, int whichFlags, int newFlags)
-   modifies a flag for a field in the fdf*/
+/* {{{ proto boolean fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
+   Modifies a flag for a field in the FDF */
 PHP_FUNCTION(fdf_set_flags) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
@@ -668,7 +668,7 @@ PHP_FUNCTION(fdf_set_flags) {
 /* }}} */
 
 /* {{{ proto boolean fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
-   Sets a value in the opt array for a field in the FDF*/
+   Sets a value in the opt array for a field in the FDF */
 PHP_FUNCTION(fdf_set_opt) {
 	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
@@ -700,8 +700,8 @@ PHP_FUNCTION(fdf_set_opt) {
 }
 /* }}} */
 
-/* {{{ proto booelan fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichTrigger, string url, int flags)
-   sets the submit form action for a field in the fdf*/
+/* {{{ proto booelan fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
+   Sets the submit form action for a field in the FDF */
 PHP_FUNCTION(fdf_set_submit_form_action) {
 	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
@@ -731,8 +731,8 @@ PHP_FUNCTION(fdf_set_submit_form_action) {
 	RETURN_TRUE;
 }
 
-/* {{{ proto boolean fdf_set_javascript_action(int fdfdoc, string fieldname, int whichTrigger, string script)
-   sets the javascript action for a field in the fdf*/
+/* {{{ proto boolean fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
+   Sets the javascript action for a field in the FDF */
 PHP_FUNCTION(fdf_set_javascript_action) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
