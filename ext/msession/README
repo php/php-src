@@ -8,13 +8,10 @@ Requirements:
 Mohawk Software's Phoenix library.
 Mohawk Software's msession daemon.
 
-
 Building:
-I (regretfully) have not invested the time to make all 
-this stuff automatic.
-
 In the config.m4 file you will need to specify the include 
 and library directories for Phoenix. The setting in config.m4
 is probably wrong.
 
-
+You will need phoenix installed and built to compile this
+module.
