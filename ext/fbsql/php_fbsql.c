@@ -1895,9 +1895,12 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			md = meta;
 
 		tp = fbcmdStatementType(md);
-
-		if ((tp[0] == 'C') || (tp[0] == 'R'))
-		{
+		if (tp == NULL) {
+			fbcmdRelease(meta);
+			ZVAL_BOOL(return_value, 0)
+		}
+		else if ((tp[0] == 'C') || (tp[0] == 'R'))
+			{
 			if (sR == 1 && md) fbcmdRelease(md);
 			ZVAL_BOOL(return_value, 1)
 		}
