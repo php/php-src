@@ -597,7 +597,6 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 			return SUCCESS;
 		}
 		if (result != op1) {
-			/* $a += $b */
 			*result = *op1;
 			zval_copy_ctor(result);
 		}
