@@ -2,7 +2,7 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
  <name>filepro</name>
- <summary>filePor database access functions/summary>
+ <summary>filePro database access functions</summary>
  <maintainers>
   <maintainer>
    <user>???</user>
