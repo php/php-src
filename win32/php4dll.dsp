@@ -124,10 +124,6 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\ext\standard\aggregation.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\css.c
 # End Source File
 # Begin Source File
@@ -246,10 +242,6 @@ SOURCE=..\main\strlcpy.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\standard\aggregation.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\ext\standard\config.w32.h
