@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30750 (Meaningful error message when upload directory is not 
+  accessible). (Ilia)
 - Fixed bug #30672 (Problem handling exif data in jpeg images at unusual 
   places). (Marcus)
 - Fixed bug #30658 (Ensure that temporary files created by GD are removed).

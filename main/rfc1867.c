@@ -126,6 +126,7 @@ void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int 
 #define UPLOAD_ERROR_B    2  /* Uploaded file exceeded MAX_FILE_SIZE */
 #define UPLOAD_ERROR_C    3  /* Partially uploaded */
 #define UPLOAD_ERROR_D    4  /* No file uploaded */
+#define UPLOAD_ERROR_E    6  /* Missing /tmp or similar directory */
 
 void php_rfc1867_register_constants(TSRMLS_D)
 {
@@ -134,6 +135,7 @@ void php_rfc1867_register_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_FORM_SIZE",  UPLOAD_ERROR_B,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_PARTIAL",    UPLOAD_ERROR_C,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_FILE",    UPLOAD_ERROR_D,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_TMP_DIR", UPLOAD_ERROR_E,  CONST_CS | CONST_PERSISTENT);
 }
 
 static void normalize_protected_variable(char *varname TSRMLS_DC)
@@ -956,12 +958,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 			}
 
+			total_bytes = cancel_upload = 0;
+
 			if (!skip_upload) {
 				/* Handle file */
 				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
 				if (!fp) {
 					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
-					skip_upload = 1;
+					cancel_upload = UPLOAD_ERROR_E;
 				}
 			}
 			if (skip_upload) {
@@ -969,9 +973,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				efree(filename);
 				continue;
 			}	
-
-			total_bytes = 0;
-			cancel_upload = 0;
 
 			if(strlen(filename) == 0) {
 #ifdef DEBUG_FILE_UPLOAD
@@ -999,10 +1000,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					}
 				} 
 			} 
-			fclose(fp);
+			if (fp) {
+				fclose(fp);
+			}
 
 #ifdef DEBUG_FILE_UPLOAD
-			if(strlen(filename) > 0 && total_bytes == 0) {
+			if(strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
 				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
 				cancel_upload = 5;
 			}
@@ -1010,7 +1013,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			if (cancel_upload) {
 				if (temp_filename) {
-					unlink(temp_filename);
+					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
+						unlink(temp_filename);
+					}
 					efree(temp_filename);
 				}
 				temp_filename="";
