@@ -945,6 +945,10 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 #	define free_alloca(p)	efree(p)
 #endif
 
+#define NEXT_OPCODE()	\
+	opline++;			\
+	continue;
+
 typedef struct _object_info {
 	zval *ptr;
 } object_info;
@@ -1058,15 +1062,14 @@ binary_op_addr:
 							 get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) );
 				FREE_OP(&opline->op1, EG(free_op1));
 				FREE_OP(&opline->op2, EG(free_op2));
-				break;
+				NEXT_OPCODE();
 			case ZEND_BW_NOT:
 			case ZEND_BOOL_NOT:
 				EG(unary_op) = get_unary_op(opline->opcode);
 				EG(unary_op)(&Ts[opline->result.u.var].tmp_var,
 							get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) );
 				FREE_OP(&opline->op1, EG(free_op1));
-				break;
-
+				NEXT_OPCODE();
 			case ZEND_ASSIGN_ADD:
 				EG(binary_op) = add_function;
 				goto binary_assign_op_addr;
@@ -1130,7 +1133,7 @@ binary_assign_op_addr: {
 					FREE_OP(&opline->op2, EG(free_op2));
 					AI_USE_PTR(Ts[opline->result.u.var].var);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_PRE_INC:
 			case ZEND_PRE_DEC:
 			case ZEND_POST_INC:
@@ -1179,27 +1182,27 @@ binary_assign_op_addr: {
 							break;
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_PRINT:
 				zend_print_variable(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 				Ts[opline->result.u.var].tmp_var.value.lval = 1;
 				Ts[opline->result.u.var].tmp_var.type = IS_LONG;
 				FREE_OP(&opline->op1, EG(free_op1));
-				break;
+				NEXT_OPCODE();
 			case ZEND_ECHO:
 				zend_print_variable(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 				FREE_OP(&opline->op1, EG(free_op1));
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_R:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_W:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_RW:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_RW ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_W */
@@ -1209,28 +1212,28 @@ binary_assign_op_addr: {
 					zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 					AI_USE_PTR(Ts[opline->result.u.var].var);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_IS:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_R:
 				if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
 					PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_W:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_RW:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_RW ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_IS:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_DIM_W */
@@ -1240,21 +1243,21 @@ binary_assign_op_addr: {
 					zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 					AI_USE_PTR(Ts[opline->result.u.var].var);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_R:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_W:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_RW:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_RW ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_IS:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_OBJ_W */
@@ -1263,11 +1266,11 @@ binary_assign_op_addr: {
 					zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 					AI_USE_PTR(Ts[opline->result.u.var].var);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&opline->result, &opline->op1, &opline->op2, Ts ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_ASSIGN: {
 					zval *value;
 					SUSPEND_GARBAGE();
@@ -1277,12 +1280,12 @@ binary_assign_op_addr: {
 					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (EG(free_op2)?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_ASSIGN_REF:
 				SUSPEND_GARBAGE();
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
 				RESUME_GARBAGE();
-				break;
+				NEXT_OPCODE();
 			case ZEND_JMP:
 #if DEBUG_ZEND>=2
 				printf("Jumping to %d\n", opline->op1.u.opline_num);
@@ -1303,7 +1306,7 @@ binary_assign_op_addr: {
 					}
 					FREE_OP(op1, EG(free_op1));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_JMPNZ: {
 					znode *op1 = &opline->op1;
 					
@@ -1317,7 +1320,7 @@ binary_assign_op_addr: {
 					}
 					FREE_OP(op1, EG(free_op1));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_JMPZNZ: {
 					znode *res = &opline->result;
 					
@@ -1354,7 +1357,7 @@ binary_assign_op_addr: {
 					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
 					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_JMPNZ_EX: {
 					zend_op *original_opline = opline;
 					int retval = zend_is_true(get_zval_ptr(&original_opline->op1, Ts, &EG(free_op1), BP_VAR_R));
@@ -1373,28 +1376,28 @@ binary_assign_op_addr: {
 					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
 					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FREE:
 				zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
-				break;
+				NEXT_OPCODE();
 			case ZEND_INIT_STRING:
 				Ts[opline->result.u.var].tmp_var.value.str.val = emalloc(1);
 				Ts[opline->result.u.var].tmp_var.value.str.val[0] = 0;
 				Ts[opline->result.u.var].tmp_var.value.str.len = 0;
 				Ts[opline->result.u.var].tmp_var.refcount = 1;
-				break;
+				NEXT_OPCODE();
 			case ZEND_ADD_CHAR:
 				add_char_to_string(	&Ts[opline->result.u.var].tmp_var,
 									get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_NA),
 									&opline->op2.u.constant);
 				/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-				break;
+				NEXT_OPCODE();
 			case ZEND_ADD_STRING:
 				add_string_to_string(	&Ts[opline->result.u.var].tmp_var,
 										get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_NA),
 										&opline->op2.u.constant);
 				/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-				break;
+				NEXT_OPCODE();
 			case ZEND_ADD_VAR: {
 					zval *var = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 					zval var_copy;
@@ -1418,7 +1421,7 @@ binary_assign_op_addr: {
 					 */
 					FREE_OP(&opline->op2, EG(free_op2));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_INIT_FCALL_BY_NAME: {
 					zval *function_name;
 					zend_function *function;
@@ -1506,7 +1509,7 @@ binary_assign_op_addr: {
 overloaded_function_call_cont:
 					FREE_OP(&opline->op2, EG(free_op2));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_DO_FCALL_BY_NAME:
 				function_state.function = fbc;
 				goto do_fcall_common;
@@ -1608,7 +1611,7 @@ do_fcall_common:
 					EG(function_state_ptr) = &function_state;
 					zend_ptr_stack_clear_multiple(ELS_C);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_RETURN: {
 					zval *retval_ptr;
 					zval **retval_ptr_ptr;
@@ -1668,7 +1671,7 @@ do_fcall_common:
 					INIT_PZVAL(valptr);
 					zend_ptr_stack_push(&EG(argument_stack), valptr);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_SEND_VAR:
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
 					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
@@ -1697,7 +1700,7 @@ do_fcall_common:
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
 					FREE_OP(&opline->op1, EG(free_op1));  /* for string offsets */
 				}
-				break;
+				NEXT_OPCODE();
 send_by_ref:
 			case ZEND_SEND_REF: {
 					zval **varptr_ptr;
@@ -1724,7 +1727,7 @@ send_by_ref:
 					varptr->refcount++;
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_RECV: {
 					zval **param;
 
@@ -1739,7 +1742,7 @@ send_by_ref:
 						zend_assign_to_variable(NULL, &opline->result, NULL, *param, IS_VAR, Ts ELS_CC);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_RECV_INIT: {
 					zval **param, *assignment_value;
 
@@ -1774,13 +1777,13 @@ send_by_ref:
 						zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, Ts ELS_CC);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_BOOL:
 				/* PHP 3.0 returned "" for false and 1 for true, here we use 0 and 1 for now */
 				Ts[opline->result.u.var].tmp_var.value.lval = zend_is_true(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 				Ts[opline->result.u.var].tmp_var.type = IS_LONG;
 				FREE_OP(&opline->op1, EG(free_op1));
-				break;
+				NEXT_OPCODE();
 			case ZEND_BRK:
 			case ZEND_CONT: {
 					zval *nest_levels_zval = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
@@ -1826,7 +1829,7 @@ send_by_ref:
 					FREE_OP(&opline->op2, EG(free_op2));
 					continue;
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_CASE: {
 					int switch_expr_is_overloaded=0;
 
@@ -1856,10 +1859,10 @@ send_by_ref:
 						AI_USE_PTR(Ts[opline->op1.u.var].var);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_SWITCH_FREE:
 				zend_switch_free(opline, Ts ELS_CC);
-				break;
+				NEXT_OPCODE();
 			case ZEND_NEW: {
 					zval *tmp = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval class_name;
@@ -1879,7 +1882,7 @@ send_by_ref:
 					zval_dtor(&class_name);
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FETCH_CONSTANT:
 				if (!zend_get_constant(opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &Ts[opline->result.u.var].tmp_var)) {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
@@ -1888,7 +1891,7 @@ send_by_ref:
 					Ts[opline->result.u.var].tmp_var = opline->op1.u.constant;
 					zval_copy_ctor(&Ts[opline->result.u.var].tmp_var);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT: {
 					zval *array_ptr = &Ts[opline->result.u.var].tmp_var;
@@ -1957,7 +1960,7 @@ send_by_ref:
 						zend_hash_next_index_insert(array_ptr->value.ht, &expr_ptr, sizeof(zval *), NULL);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_CAST: {
 					zval *expr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval *result = &Ts[opline->result.u.var].tmp_var;
@@ -1990,7 +1993,7 @@ send_by_ref:
 							break;
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_INCLUDE_OR_EVAL: {
 					zend_op_array *new_op_array=NULL;
 					zval **original_return_value = EG(return_value_ptr_ptr);
@@ -2045,7 +2048,7 @@ send_by_ref:
 					}
 					EG(return_value_ptr_ptr) = original_return_value;
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_UNSET_VAR: {
 					zval tmp, *variable = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
@@ -2063,7 +2066,7 @@ send_by_ref:
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_UNSET_DIM_OBJ: {
 					zval **container = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 					zval *offset = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
@@ -2097,7 +2100,7 @@ send_by_ref:
 					}
 					FREE_OP(&opline->op2, EG(free_op2));
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FE_RESET: {
 					zval *array = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
@@ -2122,7 +2125,7 @@ send_by_ref:
 						/* JMP to the end of foreach - TBD */
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_FE_FETCH: {
 					zval *array = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval *result = &Ts[opline->result.u.var].tmp_var;
@@ -2163,7 +2166,7 @@ send_by_ref:
 					zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 					zend_hash_move_forward(array->value.ht);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_JMP_NO_CTOR: {
 					zval *object;
 
@@ -2178,7 +2181,7 @@ send_by_ref:
 						continue;
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_ISSET_ISEMPTY: {
 					zval **var = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_IS);
 					int isset;
@@ -2222,22 +2225,22 @@ send_by_ref:
 					}
 					Ts[opline->result.u.var].tmp_var.type = IS_BOOL;
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_EXIT:
 				if (opline->op1.op_type != IS_UNUSED) {
 					zend_print_variable(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
 				zend_bailout();
-				break;
+				NEXT_OPCODE();
 			case ZEND_BEGIN_SILENCE:
 				Ts[opline->result.u.var].tmp_var.value.lval = EG(error_reporting);
 				Ts[opline->result.u.var].tmp_var.type = IS_LONG;  /* shouldn't be necessary */
 				EG(error_reporting) = 0;
-				break;
+				NEXT_OPCODE();
 			case ZEND_END_SILENCE:
 				EG(error_reporting) = Ts[opline->op1.u.var].tmp_var.value.lval;
-				break;
+				NEXT_OPCODE();
 			case ZEND_QM_ASSIGN: {
 					zval *value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
@@ -2246,25 +2249,25 @@ send_by_ref:
 						zval_copy_ctor(&Ts[opline->result.u.var].tmp_var);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_EXT_STMT: 
 				if (!EG(no_extensions)) {
 					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_statement_handler, op_array);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_EXT_FCALL_BEGIN:
 				if (!EG(no_extensions)) {
 					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_begin_handler, op_array);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_EXT_FCALL_END:
 				if (!EG(no_extensions)) {
 					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_end_handler, op_array);
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_DECLARE_FUNCTION_OR_CLASS:
 				do_bind_function_or_class(opline, EG(function_table), EG(class_table), 0);
-				break;
+				NEXT_OPCODE();
 			case ZEND_TICKS:
 				if (++EG(ticks_count)==opline->op1.u.constant.value.lval) {
 					EG(ticks_count)=0;
@@ -2272,18 +2275,17 @@ send_by_ref:
 						zend_ticks_function(opline->op1.u.constant.value.lval);
 					}
 				}
-				break;
+				NEXT_OPCODE();
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
-				break;
+				NEXT_OPCODE();
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
-		opline++;
 	}
 #if SUPPORT_INTERACTIVE
 	op_array->last_executed_op_number = opline-op_array->opcodes;
 	free_alloca(Ts);
 #else
-	php_error(E_ERROR,"Arrived at end of main loop which shouldn't happen");
+	zend_error(E_ERROR,"Arrived at end of main loop which shouldn't happen");
 #endif
 }
