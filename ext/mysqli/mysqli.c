@@ -43,9 +43,11 @@ void php_clear_stmt_bind(STMT *stmt)
 {
 	unsigned int i;
 
-	if (stmt->stmt && stmt->stmt->mysql->host) {
-		mysql_stmt_close(stmt->stmt);
-	}
+	/* 
+	 * we don't need to call mysql_stmt_close here.
+	 * in case mysqli_stmt_close wasn't called, all
+	 * statements will be freed via mysql_close
+	 */
 
 	if (stmt->var_cnt) {
 		for (i = 0; i < stmt->var_cnt; i++) {
@@ -79,6 +81,13 @@ static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_D
 	if (intern->zo.ce == mysqli_link_class_entry) {
 		MYSQL	*mysql = (MYSQL *)intern->ptr;
 		if (mysql) {
+			/*
+			 * Don't free mysql if there exist
+			 * non closed statements
+			 */
+			if (mysql->stmts) {
+				mysql->free_me = 0;
+			}
 			mysql_close(mysql);
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
@@ -92,7 +101,6 @@ static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_D
 			mysql_free_result(res);
 		}
 	}
-
 	zend_objects_destroy_object(object, handle TSRMLS_CC);
 }
 /* }}} */
