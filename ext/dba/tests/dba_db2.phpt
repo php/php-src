@@ -16,7 +16,7 @@ database handler: db2
 3NYNYY
 Content String 2
 Content 2 replaced
-Read during write permitted
+Read during write: not allowed
 Content 2 replaced 2nd time
 The 6th value
 array(3) {

@@ -35,6 +35,7 @@ typedef struct dba_lock {
 	php_stream *fp;
 	int fd;
 	char *name;
+	int mode; /* LOCK_EX,LOCK_SH */
 } dba_lock;
 
 typedef struct dba_info {
@@ -47,6 +48,7 @@ typedef struct dba_info {
 	int argc;
 	zval ***argv;
 	/* private */
+	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;	
 	dba_lock lock;
 } dba_info;

@@ -11,13 +11,15 @@ DBA GDBM handler test
 	$handler = 'gdbm';
 	$lock_flag = ''; // lock in library
 	require_once('dba_handler.inc');
+	
+	// Read during write is system dependant. Important is that there is no deadlock
 ?>
---EXPECT--
+--EXPECTF--
 database handler: gdbm
 3NYNYY
 Content String 2
 Content 2 replaced
-Read during write permitted
+Read during write:%sallowed
 Content 2 replaced 2nd time
 The 6th value
 array(3) {

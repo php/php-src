@@ -28,9 +28,9 @@
 	}
 	$db_writer = dba_open($db_filename, 'w'.$lock_flag, $handler);
 	if (($dba_reader = @dba_open($db_filename, 'r'.$lock_flag.($lock_flag ? 't' : ''), $handler))===false) {
-		echo "Cannot read during write operation\n";
+		echo "Read during write: not allowed\n";
 	} else {
-		echo "Read during write permitted\n";
+		echo "Read during write: allowed\n";
 	}
 	if ($db_writer!==FALSE) {
 		dba_insert("key number 6", "The 6th value", $db_writer);
