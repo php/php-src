@@ -106,6 +106,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument or parameter array");
+			efree(params);
 			return NULL;
 		} else {
 			if (Z_TYPE_PP(value) != IS_STRING) {
