@@ -244,12 +244,12 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
-	/* keep in mind that c->name_len already contains the '\0' */
-	lowercase_name = do_alloca(c->name_len);
-
 	if (!(c->flags & CONST_CS)) {
+		/* keep in mind that c->name_len already contains the '\0' */
+		lowercase_name = do_alloca(c->name_len);
 		zend_str_tolower_copy(lowercase_name, c->name, c->name_len - 1);
 	} else {
+		lowercase_name = do_alloca(c->name_len + 1);
 		memcpy(lowercase_name, c->name, c->name_len);
 		lowercase_name[c->name_len] = '\0';
 	}
