@@ -198,7 +198,7 @@ int dbx_sybasect_getcolumnname(zval **rv, zval **result_handle, long column_inde
 	zval_ptr_dtor(zv_name); 
 
 	FREE_ZVAL(zval_column_index);
-//	MOVE_RETURNED_TO_RV(rv, returned_zval);
+/*	MOVE_RETURNED_TO_RV(rv, returned_zval); */
 	return 1;
 }
 
@@ -235,7 +235,7 @@ int dbx_sybasect_getcolumntype(zval **rv, zval **result_handle, long column_inde
 	zval_ptr_dtor(zv_type); 
 
 	FREE_ZVAL(zval_column_index);
-//	MOVE_RETURNED_TO_RV(rv, returned_zval);
+/*	MOVE_RETURNED_TO_RV(rv, returned_zval); */
 	return 1;
 }
 
