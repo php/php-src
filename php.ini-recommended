@@ -551,7 +551,6 @@ default_socket_timeout = 60
 ;extension=php_fbsql.dll
 ;extension=php_fdf.dll
 ;extension=php_filepro.dll
-;extension=php_gd.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
 ;extension=php_hyperwave.dll
