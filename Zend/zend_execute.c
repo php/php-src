@@ -121,7 +121,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 								T->tmp_var.value.str.val = estrndup(&c, 1);
 								T->tmp_var.value.str.len = 1;
 							}
-							zval_ptr_dtor(&str);
+							PZVAL_UNLOCK(str);
 							T->tmp_var.refcount=1;
 							T->tmp_var.is_ref=1;
 							T->tmp_var.type = IS_STRING;
@@ -146,31 +146,34 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 
 static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
 {
-        switch(node->op_type) {
-                case IS_TMP_VAR:
-                        *should_free = 1;
-                        return &Ts[node->u.var].tmp_var;
-                        break;
-                case IS_VAR:
-                        if (Ts[node->u.var].var.ptr) {
-                                PZVAL_UNLOCK(Ts[node->u.var].var.ptr);
-                                *should_free = 0;
-                                return Ts[node->u.var].var.ptr;
-                        } else {
-                                *should_free = 1;
-                                return NULL;
-                        }
-                        break;
-                case IS_UNUSED:
-                        return NULL;
-                        break;
+	switch(node->op_type) {
+		case IS_TMP_VAR:
+			*should_free = 1;
+			return &Ts[node->u.var].tmp_var;
+			break;
+		case IS_VAR:
+			if (Ts[node->u.var].var.ptr) {
+				PZVAL_UNLOCK(Ts[node->u.var].var.ptr);
+				*should_free = 0;
+				return Ts[node->u.var].var.ptr;
+			} else {
+				if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
+					PZVAL_UNLOCK(Ts[node->u.var].EA.str);
+				}
+				*should_free = 1;
+				return NULL;
+			}
+			break;
+		case IS_UNUSED:
+			return NULL;
+			break;
 #if DEBUG_ZEND
-                default:
-                        zend_error(E_ERROR, "Unknown temporary variable type");
-                        break;
+		default:
+			zend_error(E_ERROR, "Unknown temporary variable type");
+			break;
 #endif
-        }
-        return NULL;
+	}
+	return NULL;
 }
 
 
@@ -180,6 +183,8 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 		case IS_VAR:
 			if (Ts[node->u.var].var.ptr_ptr) {
 				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
+			} else if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
+				PZVAL_UNLOCK(Ts[node->u.var].EA.str);
 			}
 			return Ts[node->u.var].var.ptr_ptr;
 			break;
@@ -689,7 +694,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 						offset = &tmp;
 					}
 					Ts[result->u.var].EA.str = container;
-					container->refcount++;
+					PZVAL_LOCK(container);
 					Ts[result->u.var].EA.offset = offset->value.lval;
 					Ts[result->u.var].EA.type = IS_STRING_OFFSET;
 					FREE_OP(op2, free_op2);
@@ -1404,8 +1409,8 @@ binary_assign_op_addr: {
 						} else { /* used for member function calls */
 							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1) ELS_CC);
 							
-							if (!object.ptr
-								|| ((object.ptr->type==IS_OBJECT) && (object.ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
+							if ((!object.ptr && Ts[opline->op1.u.var].EA.type==IS_OVERLOADED_OBJECT)								
+								|| ((object.ptr && object.ptr->type==IS_OBJECT) && (object.ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
 								zend_property_reference *property_reference;
 
@@ -1428,7 +1433,7 @@ binary_assign_op_addr: {
 								goto overloaded_function_call_cont;
 							}
 
-							if (object.ptr->type != IS_OBJECT) {
+							if (!object.ptr || object.ptr->type != IS_OBJECT) {
 								zend_error(E_ERROR, "Call to a member function on a non-object");
 							}
 							object.ptr->refcount++; /* For this pointer */
