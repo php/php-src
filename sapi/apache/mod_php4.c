@@ -65,7 +65,7 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 module MODULE_VAR_EXPORT php4_module;
 
 int saved_umask;
-static unsigned char apache_php_initialized=0;
+static unsigned char apache_php_initialized;
 
 typedef struct _php_per_dir_entry {
 	char *key;

@@ -4,15 +4,17 @@ config.m4: just like for extensions, this file contains
 autoconf/automake directives that end up in the configure script.  The
 only difference is that the sapi config.m4 files are read in diversion
 (output block) 2 instead of 3.  The sapi config.m4 files should set
-two variables: PHP_SAPI (which sapi backend to choose) and SAPI_TARGET
-(the name of the resulting library or program, previously BINNAME).
-If they are not specified, they will default to "cgi" and "php",
-respectively.
+two variables: PHP_SAPI (which sapi backend to choose) and INSTALL_IT
+(the actions performed when "make install" is executed).  If they are
+not specified, they will default to "cgi" and "do nothing,"
+respectively.  Additionally, the following m4 macros can be used to
+influence what is created during "make":
 
-Makefile.inc: has to exist, has to define "INSTALL_IT" to the command
-used to install the final target (or ":" for no operation).  It also
-has to define a plain Makefile rule (without autoconf substitutions)
-to build $(SAPI_TARGET)
+PHP_BUILD_SHARED    -- build shared target      libs/php_lib.so
+PHP_BUILD_STATIC    -- build static target      libs/php_lib.a
+PHP_BUILD_PROGRAM   -- build executable         php
+
+(paths relative to top build dir)
 
 Makefile.am: just what you think.  Make sure your target is called
-"libphpsapi_NNN.a", where NNN is the value of PHP_SAPI.
+"libphpsapi_NNN.la", where NNN is the value of PHP_SAPI.

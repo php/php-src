@@ -139,7 +139,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   PHP_EXTENSION(gd, $shared)
   if test "$shared" != "yes"; then
     AC_ADD_INCLUDE($GD_INCLUDE)
-    GD_STATIC="libphpext_gd.a"
+    GD_STATIC="libphpext_gd.la"
   else 
     AC_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
     if test -n "$GD_INCLUDE"; then

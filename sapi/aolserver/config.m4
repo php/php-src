@@ -8,15 +8,14 @@ AC_ARG_WITH(aolserver,
 	if test ! -d $withval ; then
 		AC_MSG_ERROR(You did not specify a directory)
 	fi
-	if test "$enable_thread_safety" != "yes"; then
-		AC_MSG_ERROR(AOLserver must be compiled using --enable-thread-safety)
-	fi
+	enable_thread_safety=yes
+	passthru="$passthru --enable-thread-safety"
 	NS_DIR=$withval
 	AC_ADD_INCLUDE($NS_DIR/include)
 	AC_DEFINE(HAVE_AOLSERVER)
 	PHP_SAPI=nsapi
-	SAPI_TARGET=php4_nsapi.so
-	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_TARGET $NS_DIR/root/bin/$SAPI_TARGET"
+	PHP_BUILD_SHARED
+	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 libs/libphp4.so $NS_DIR/root/bin/libphp4.so"
 	RESULT=yes
 ])
 AC_MSG_RESULT($RESULT)

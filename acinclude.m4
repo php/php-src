@@ -3,6 +3,27 @@ dnl
 dnl This file contains local autoconf functions.
 
 dnl
+dnl PHP_BUILD_SHARED
+dnl
+AC_DEFUN(PHP_BUILD_SHARED,[
+  php_build_target=shared
+])
+
+dnl
+dnl PHP_BUILD_STATIC
+dnl
+AC_DEFUN(PHP_BUILD_STATIC,[
+  php_build_target=static
+])
+
+dnl
+dnl PHP_BUILD_PROGRAM
+dnl
+AC_DEFUN(PHP_BUILD_PROGRAM,[
+  php_build_target=program
+])
+
+dnl
 dnl AC_PHP_ONCE(namespace, variable, code)
 dnl
 dnl execute code, if variable is not set in namespace
@@ -51,15 +72,12 @@ dnl builds RPATH from PHP_RPATHS
 dnl
 AC_DEFUN(AC_BUILD_RPATH,[
   if test "$enable_rpath" = "yes" && test -n "$PHP_RPATHS"; then
-    if test -n "$APXS"; then
-      for i in $PHP_RPATHS; do
-        RPATHS="$RPATHS ${apxs_runpath_switch}$i'"
-      done
-    else
-      for i in $PHP_RPATHS; do
-        RPATHS="$RPATHS ${ld_runpath_switch}$i"
-      done
-    fi
+    OLD_RPATHS="$PHP_RPATHS"
+	PHP_RPATHS=""
+	for i in $OLD_RPATHS; do
+	    PHP_RPATHS="$PHP_RPATHS -R $i"
+        NATIVE_RPATHS="$NATIVE_RPATHS ${ld_runpath_switch}$i"
+	  done
   fi
 ])
 
@@ -172,7 +190,8 @@ AC_DEFUN(PHP_EXTENSION,[
     EXT_SUBDIRS="$EXT_SUBDIRS $1"
     if test "$2" != "shared" -a "$2" != "yes"; then
       _extlib="libphpext_$1.a"
-      EXT_LIBS="$EXT_LIBS $1/$_extlib"
+      EXT_LTLIBS="$EXT_LTLIBS ext/$1/libphpext_$1.la"
+	  EXT_LIBS="$EXT_LIBS $1/$_extlib"
       EXT_STATIC="$EXT_STATIC $1"
     else
       EXT_SHARED="$EXT_SHARED $1"
@@ -185,6 +204,7 @@ AC_SUBST(EXT_SUBDIRS)
 AC_SUBST(EXT_STATIC)
 AC_SUBST(EXT_SHARED)
 AC_SUBST(EXT_LIBS)
+AC_SUBST(EXT_LTLIBS)
 
 dnl
 dnl Solaris requires main code to be position independent in order

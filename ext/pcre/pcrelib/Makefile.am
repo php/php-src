@@ -1,2 +1,2 @@
-noinst_LIBRARIES = libpcre.a
-libpcre_a_SOURCES = maketables.c get.c study.c pcre.c
+noinst_LTLIBRARIES = libpcre.la
+libpcre_la_SOURCES = maketables.c get.c study.c pcre.c

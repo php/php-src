@@ -150,6 +150,6 @@ else
 fi
 
 if test "$supplied_flag" != "--local"; then
-  (cd libzend; ./buildconf libzend/)
-  (cd TSRM; ./buildconf TSRM/)
+  (cd libzend; ./buildconf $automake_flags libzend/)
+  (cd TSRM; ./buildconf $automake_flags TSRM/)
 fi
