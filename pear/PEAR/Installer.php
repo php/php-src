@@ -563,7 +563,7 @@ class PEAR_Installer extends PEAR_Common
 
             if ($this->source_files > 0 && empty($options['nobuild'])) {
                 $this->log(1, "$this->source_files source files, building");
-                $bob = &new PEAR_Builder($this->ui); // Malin loves Bob the Builder
+                $bob = &new PEAR_Builder($this->ui);
                 $bob->debug = $this->debug;
                 $built = $bob->build($descfile, array(&$this, '_buildCallback'));
                 if (PEAR::isError($built)) {
@@ -574,8 +574,7 @@ class PEAR_Installer extends PEAR_Common
                     $this->log(2, "installing $bn");
                     $dest = $this->config->get('ext_dir') . DIRECTORY_SEPARATOR . $bn;
                     $this->log(3, "+ cp $ext[file] ext_dir");
-                    //$copyto = $dest->_prependPath($dest, $this->installroot);
-                    $copyto = $dest;
+                    $copyto = $this->_prependPath($dest, $this->installroot);
                     if (!@copy($ext['file'], $copyto)) {
                         return $this->raiseError("failed to copy $bn to $copyto");
                     }
