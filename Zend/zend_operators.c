@@ -83,7 +83,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		}															\
 		(op) = &(holder);											\
 	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) {	\
-		(holder) = *(op);											\
+		(holder).value.lval = (op)->value.lval;						\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
 	}
@@ -93,11 +93,12 @@ ZEND_API void convert_scalar_to_number(zval *op)
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op==result) {												\
 		convert_to_long(op);										\
+	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) {	\
+		(holder).value.lval = (op)->value.lval;						\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
 	} else if ((op)->type != IS_LONG) {								\
 		switch ((op)->type) {										\
-			case IS_RESOURCE:										\
-			case IS_BOOL:											\
-				break;												\
 			case IS_DOUBLE:											\
 				(holder).value.lval = (long) (op)->value.dval;		\
 				break;												\
