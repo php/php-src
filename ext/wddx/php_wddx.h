@@ -34,7 +34,11 @@
 
 #if HAVE_WDDX
 
+#ifdef HAVE_LIBEXPAT2
+#include <expat.h>
+#else
 #include "xmlparse.h"
+#endif
 
 extern zend_module_entry wddx_module_entry;
 #define wddx_module_ptr &wddx_module_entry
