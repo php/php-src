@@ -89,6 +89,7 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_error,               NULL)
 	PHP_FE(xslt_errno,               NULL)
 	PHP_FE(xslt_free,                NULL)
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
