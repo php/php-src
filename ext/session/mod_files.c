@@ -48,7 +48,7 @@ typedef struct {
 	char *lastkey;
 	char *basedir;
 	size_t basedir_len;
-	int dirdepth;
+	size_t dirdepth;
 	size_t st_size;
 } ps_files;
 
@@ -220,7 +220,7 @@ PS_OPEN_FUNC(files)
 
 	data->fd = -1;
 	if ((p = strchr(save_path, ';'))) {
-		data->dirdepth = strtol(save_path, NULL, 10);
+		data->dirdepth = (size_t) strtol(save_path, NULL, 10);
 		save_path = p + 1;
 	}
 	data->basedir_len = strlen(save_path);
