@@ -1,3 +1,138 @@
+2003-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/crack/config.m4
+      ext/gd/config.m4
+      ext/gettext/config.m4
+      ext/gmp/config.m4
+      ext/imap/config.m4
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/ovrimos/config.m4
+      ext/pfpro/config.m4
+      ext/readline/config.m4
+      ext/session/config.m4
+      ext/xmlrpc/config.m4
+      ext/xslt/config.m4:
+      MFH: Always prefer user specified paths over the default /usr /usr/local.
+
+    * ext/crack/config.m4
+      ext/gd/config.m4
+      ext/gettext/config.m4
+      ext/gmp/config.m4
+      ext/imap/config.m4
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/ovrimos/config.m4
+      ext/pfpro/config.m4
+      ext/readline/config.m4
+      ext/session/config.m4
+      ext/xmlrpc/config.m4:
+      Always prefer user specified paths over the default /usr /usr/local.
+      This may fix compilation problems with on systems with multiple copies of
+      the same library.
+
+2003-09-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      acinclude.m4:
+      MFH: Fixed bug #25703 (openssl checks failed)
+
+    * acinclude.m4:
+      Fixed bug #25703 (openssl checks failed)
+
+2003-09-30  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Remote.php:
+      Give more info about release states in list-upgrades
+
+2003-09-30  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_diff_1.phpt:
+      Move the test to new file.
+
+    * ext/standard/tests/array/007.phpt:
+      fix
+
+    * ext/standard/array.c:
+      smash a segmentation fault
+
+    * ext/standard/array.c:
+      Memory leak fixed (no need of MFH since this is code specific to PHP5)
+
+2003-09-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      MF4: allow realpath() for win32 non-ZTS
+
+    * TSRM/tsrm_config.w32.h:
+      MF4: Have realpath now
+
+    * TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      MF4: add realpath function for win32
+
+2003-09-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      Move entry to the right place
+
+2003-09-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      better fix for #45.
+      Now, it will install the newest version that is preferred_state or
+      stabler.
+      to request a specific state, append -state like pear install Net_NNTP-beta
+
+2003-09-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/tests/bug25666.phpt:
+      Add regression test for bug #25666
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      regex/cclass.h
+      regex/debug.c
+      regex/engine.c
+      regex/engine.ih
+      regex/regcomp.c
+      regex/regcomp.ih
+      regex/regex2.h
+      regex/regexec.c:
+      MFH: Fixed bug #25669 (eregi() with non-ascii characters)
+
+2003-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2003-09-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_compile.c:
+      Remove redundant '\n'
+
+    * regex/cclass.h
+      regex/debug.c
+      regex/engine.c
+      regex/engine.ih
+      regex/regcomp.c
+      regex/regcomp.ih
+      regex/regex2.h
+      regex/regexec.c:
+      Fixed bug #25669 (eregi() with non-ascii characters)
+
 2003-09-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
