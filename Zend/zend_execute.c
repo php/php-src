@@ -173,8 +173,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 
 static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
-	int free_op2;
-	zval *prop_ptr = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+	zval *prop_ptr = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval;
 	zval tmp;
 
@@ -219,7 +218,7 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 	if (prop_ptr == &tmp) {
 		zval_dtor(prop_ptr);
 	}
-	FREE_OP(op2, free_op2);
+	FREE_OP(op2, EG(free_op2));
 	return retval;
 }
 
@@ -502,8 +501,7 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 
 static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
-	int free_op2;
-	zval *dim = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+	zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval;
 	char *offset_key;
 	int offset_key_length;
@@ -581,52 +579,58 @@ fetch_string_dim:
 			}
 			break;
 	}
-	FREE_OP(op2, free_op2);
+	FREE_OP(op2, EG(free_op2));
 	return retval;
+}
+
+static void fetch_overloaded_element(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type, zval ***retval, int overloaded_element_type ELS_DC)
+{
+	zend_overloaded_element overloaded_element;
+
+	if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
+		zval_ptr_dtor(&Ts[op1->u.var].EA.data.str_offset.str);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				*retval = &EG(uninitialized_zval_ptr);
+				break;
+			case BP_VAR_W:
+			case BP_VAR_RW:
+				*retval = &EG(error_zval_ptr);
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+		SELECTIVE_PZVAL_LOCK(**retval, result);
+		return;
+	}
+
+	overloaded_element.element = *get_zval_ptr(op2, Ts, &EG(free_op2), type);
+	overloaded_element.type = overloaded_element_type;
+	if (!EG(free_op2)) {
+		zval_copy_ctor(&overloaded_element.element);
+	}
+
+	Ts[result->u.var].EA = Ts[op1->u.var].EA;
+	zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
+
+	Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
+	*retval = NULL;
+	return;
 }
 
 
 static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
-	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
 	zval *container;
 	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 
 
 	if (container_ptr == NULL) {
-		zend_overloaded_element overloaded_element;
-
-		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
-			switch (type) {
-				case BP_VAR_R:
-				case BP_VAR_IS:
-					*retval = &EG(uninitialized_zval_ptr);
-					break;
-				case BP_VAR_W:
-				case BP_VAR_RW:
-					*retval = &EG(error_zval_ptr);
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-			SELECTIVE_PZVAL_LOCK(**retval, result);
-			return;
-		}
-
-		/* prepare the new element */
-		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
-		overloaded_element.type = OE_IS_ARRAY;
-		if (!free_op2) {
-			zval_copy_ctor(&overloaded_element.element);
-		}
-
-		Ts[result->u.var].EA = Ts[op1->u.var].EA;
-		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
-
-		Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
-		*retval = NULL;
+		fetch_overloaded_element(result, op1, op2, Ts, type, retval, OE_IS_ARRAY ELS_CC);
 		return;
 	}
+
 	container = *container_ptr;
 
 	if (container == EG(error_zval_ptr)) {
@@ -668,10 +672,10 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			break;
 		case IS_NULL:
 			/* for read-mode only */
-			get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+			get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 			*retval = &EG(uninitialized_zval_ptr);
 			SELECTIVE_PZVAL_LOCK(**retval, result);
-			FREE_OP(op2, free_op2);
+			FREE_OP(op2, EG(free_op2));
 			if (type==BP_VAR_W || type==BP_VAR_RW) {
 				zend_error(E_WARNING, "Cannot use a NULL value as an array");
 			}
@@ -684,7 +688,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 					zend_error(E_ERROR, "[] operator not supported for strings");
 				}
 
-				offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+				offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 
 				if (offset->type != IS_LONG) {
 					tmp = *offset;
@@ -700,7 +704,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				PZVAL_LOCK(container);
 				Ts[result->u.var].EA.data.str_offset.offset = offset->value.lval;
 				Ts[result->u.var].EA.type = IS_STRING_OFFSET;
-				FREE_OP(op2, free_op2);
+				FREE_OP(op2, EG(free_op2));
 				*retval = NULL;
 				return;
 			}
@@ -708,13 +712,13 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 		default: {
 				zval *offset;
 
-				offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
+				offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 				if (type==BP_VAR_R || type==BP_VAR_IS) {
 					*retval = &EG(uninitialized_zval_ptr);
 				} else {
 					*retval = &EG(error_zval_ptr);
 				}
-				FREE_OP(op2, free_op2);
+				FREE_OP(op2, EG(free_op2));
 				SELECTIVE_PZVAL_LOCK(**retval, result);
 				if (type==BP_VAR_W || type==BP_VAR_RW) {
 					zend_error(E_WARNING, "Cannot use a scalar value as an array");
@@ -743,43 +747,13 @@ static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1,
 
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
-	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
 	zval *container;
 	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 
 
 	if (container_ptr == NULL) {
-		zend_overloaded_element overloaded_element;
-
-		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
-			zval_ptr_dtor(&Ts[op1->u.var].EA.data.str_offset.str);
-			switch (type) {
-				case BP_VAR_R:
-				case BP_VAR_IS:
-					*retval = &EG(uninitialized_zval_ptr);
-					break;
-				case BP_VAR_W:
-				case BP_VAR_RW:
-					*retval = &EG(error_zval_ptr);
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-			SELECTIVE_PZVAL_LOCK(**retval, result);
-			return;
-		}
-
-		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
-		overloaded_element.type = OE_IS_OBJECT;
-		if (!free_op2) {
-			zval_copy_ctor(&overloaded_element.element);
-		}
-
-		Ts[result->u.var].EA = Ts[op1->u.var].EA;
-		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
-
-		Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
-		*retval = NULL;
+		fetch_overloaded_element(result, op1, op2, Ts, type, retval, OE_IS_OBJECT ELS_CC);
 		return;
 	}
 
@@ -798,9 +772,9 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		Ts[result->u.var].EA.data.overloaded_element.type = type;
 		Ts[result->u.var].EA.data.overloaded_element.elements_list = (zend_llist *) emalloc(sizeof(zend_llist));
 		zend_llist_init(Ts[result->u.var].EA.data.overloaded_element.elements_list, sizeof(zend_overloaded_element), NULL, 0);
-		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
+		overloaded_element.element = *get_zval_ptr(op2, Ts, &EG(free_op2), type);
 		overloaded_element.type = OE_IS_OBJECT;
-		if (!free_op2) {
+		if (!EG(free_op2)) {
 			zval_copy_ctor(&overloaded_element.element);
 		}
 		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
@@ -828,8 +802,8 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 	if (container->type != IS_OBJECT) {
 		zval *offset;
 
-		offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
-		FREE_OP(op2, free_op2);
+		offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+		FREE_OP(op2, EG(free_op2));
 		if (type==BP_VAR_R || type==BP_VAR_IS) {
 			*retval = &EG(uninitialized_zval_ptr);
 		} else {
