@@ -45,7 +45,7 @@ fi
 IFS="$old_IFS"
 
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
-PHPMOD=php5
+PHPMOD=php-src
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
 
 if echo '\c' | grep -s c >/dev/null 2>&1
