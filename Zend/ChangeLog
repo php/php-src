@@ -1,3 +1,13 @@
+2004-02-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ZEND_CHANGES:
+      - Clearify clone behavior, fixed clone example (Patch by Jan Lehnardt)
+
+2004-02-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Bugfix #27227 Mixed case class names causes Fatal Error in Constructor call
+
 2004-02-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_iterators.c:

@@ -1,3 +1,129 @@
+2004-02-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * .gdbinit:
+      - Add "zbacktrace" user-defined command.
+
+2004-02-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/strings/bug27278.phpt:
+      shorten the description a bit
+
+    * (PHP_4_3)
+      NEWS:
+      typofix :)
+
+2004-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/formatted_print.c:
+      MFH: Fixed bug #27278 (*printf() functions treat arguments as if passed by
+      reference).
+
+    * ext/standard/formatted_print.c:
+      Fixed bug #27278 (*printf() functions treat arguments as if passed by
+      reference).
+
+2004-02-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/strings/bug27278.phpt:
+      
+      nuke copypaste rubbish
+
+    * ext/standard/tests/strings/bug27278.phpt:
+      test for bug #27278
+
+2004-02-16  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c:
+      - A fix to make UDM_LIMIT_DATE work was applied. Thanks to
+        d.rousseau at nnx.com
+
+    * ext/mnogosearch/php_mnogo.c:
+      - A fix to make UDM_LIMIT_DATE work was applied. Thanx to
+        d.rousseau at nnx.com
+
+2004-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with RC3
+
+2004-02-16  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/045.phpt:
+      fixed some tests
+      added skip section for prepared statements when using SHOW command
+
+2004-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/gmp/gmp.c:
+      Better gmp fix.
+
+2004-02-16  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      - Update news too
+
+    * (PHP_4_3)
+      main/php_ini.c:
+      - MFH: Fixed zero bytes memory allocation when no extra ini files are found
+      in
+        the --with-config-file-scan-dir specified directory. (Eric Colinet,
+      Derick)
+
+2004-02-16  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/attr.c
+      ext/dom/characterdata.c
+      ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/node.c
+      ext/dom/notation.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c:
+      issue warning if object is in invalid state when dealing with properties
+
+2004-02-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/ZEND_CHANGES:
+      - Clearify clone behavior, fixed clone example (Patch by Jan Lehnardt)
+
+2004-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c:
+      ce is not used, don't get it
+
+2004-02-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/assert/assert.phpt:
+      - fix test
+
+2004-02-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_compile.c:
+      Bugfix #27227 Mixed case class names causes Fatal Error in Constructor call
+
 2004-02-15  Pierre-Alain Joye  <paj@pearfr.org>
 
     * (PHP_4_3)
