@@ -1084,7 +1084,9 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 
 			/* Call the userland function */
 			if (zend_call_function(&fci, &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
-				zval_ptr_dtor(&retval_ptr);
+				if (retval_ptr) {
+					zval_ptr_dtor(&retval_ptr);
+				}
 			} else {
 				char *func_name;
 
