@@ -1267,6 +1267,8 @@ PHP_FUNCTION(mb_output_handler)
 {
 	pval **arg_string, **arg_status;
 	mbfl_string string, result, *ret;
+	const char *mimetype, *charset;
+	mbfl_memory_device device;
 	SLS_FETCH();
 	MBSTRLS_FETCH();
 
@@ -1277,13 +1279,35 @@ PHP_FUNCTION(mb_output_handler)
 	convert_to_string_ex(arg_string);
 	convert_to_long_ex(arg_status);
 
+	if ( SG(sapi_headers).send_default_content_type && ! SG(headers_sent) &&
+	     MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass &&
+	     (Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_START) != 0) {
+		mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+		charset = mbfl_no2preferred_mime_name(MBSTRG(current_http_output_encoding));
+		if ( charset != NULL && (*mimetype == '\0' || strncasecmp(mimetype, "text/", 5) == 0) ) {
+			mbfl_memory_device_init(&device, 0, 0);
+			mbfl_memory_device_strcat(&device, "Content-Type: ");
+			if (*mimetype == '\0') {
+				mbfl_memory_device_strcat(&device, "text/html");
+			} else {
+				mbfl_memory_device_strcat(&device, mimetype);
+			}
+			mbfl_memory_device_strcat(&device, ";charset=");
+			mbfl_memory_device_strcat(&device, charset);
+			ret = mbfl_memory_device_result(&device, &result);
+			if (ret != NULL) {
+				if (sapi_add_header(ret->val, ret->len, 0) != FAILURE) {
+					SG(sapi_headers).send_default_content_type = 0;
+				}
+			}
+		}
+	}
+
 	ret = NULL;
-	if (SG(sapi_headers).send_default_content_type && 
-		MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && 
-		MBSTRG(outconv) == NULL) {
+	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) == NULL) {
 		MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), MBSTRG(current_http_output_encoding), 0);
 	}
-	if (SG(sapi_headers).send_default_content_type && MBSTRG(outconv) != NULL) {
+	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) != NULL) {
 		mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
 		mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
 		mbfl_string_init(&string);
