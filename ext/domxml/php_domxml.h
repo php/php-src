@@ -37,6 +37,7 @@ extern zend_module_entry domxml_module_entry;
 extern PHP_MINIT_FUNCTION(domxml);
 extern PHP_RINIT_FUNCTION(domxml);
 extern PHP_MINFO_FUNCTION(domxml);
+PHP_FUNCTION(domxml_version);
 PHP_FUNCTION(xmldoc);
 PHP_FUNCTION(xmldocfile);
 PHP_FUNCTION(xmltree);
