@@ -1,3 +1,81 @@
+2001-01-05  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/odbc/php_odbc.c:
+    Adding hack to allow odbc_tables to work on Access databases
+
+2001-01-05  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/File/Passwd.php
+      pear/Makefile.in:
+    add File/Passwd.php to the install rules, and change the class name to
+    File_Passwd to match our standard.
+
+    * pear/Mail.php: revert Jon's patch, leaving only the correct one.
+
+2001-01-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * pear/File/Passwd.php:
+    A quick little class I tossed together to manipulate passwd files with
+    Will clean it up soonish...
+
+2001-01-05  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Mail.php:
+    $from_arr is a two-dimensional array here.  Treat it as such.
+
+    Submitted by: Max Kalika <max@the-triumvirate.net>
+
+2001-01-05  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail.php:
+    make sure we get back a flat array from parseAddressList().
+
+2001-01-05  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in:
+    Fix the substitution of PEAR_INSTALLDIR. (@PEAR_INSTALLDIR@ in pear/PEAR.php.in)
+
+2001-01-05  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/xml/xml.c: remove stupid ifdef's
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: finally remove -S option from bison
+
+    * ext/standard/datetime.c:
+    fixed date not allocating enough buffer, bug 7963
+
+    * ext/xml/xml.c: include config.w32.h under win32
+
+    * sapi/apache/php_apache.c: make threaded apache module build again
+
+2001-01-05  Andi Gutmans  <andi@zend.com>
+
+    * ext/domxml/php_domxml.c: - Get rid of C++ comments
+
+2001-01-05  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c:
+    - fixed potential segmfault in xmldoc() and xmldocfile()
+
+2001-01-05  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+    Added missing ieeefp.h. (This is needed e.g. by nsapi on some systems)
+
+2001-01-05  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/xml/Makefile.in
+      ext/xml/config.m4
+      ext/xml/php_xml.h
+      ext/xml/xml.c:
+    added libxml-1.95 support and some new functions related to namespace support. changed config.m4 to support xml extension as shared module.
+
+2001-01-05  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/CODING_STANDARDS:
+    initial coding standards doc for all to argue over.
+
 2001-01-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * pear/Benchmark/Iterate.php
