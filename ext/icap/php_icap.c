@@ -137,7 +137,7 @@ PHP_MINFO_FUNCTION(icap)
 PHP_MINIT_FUNCTION(icap)
 {
 
-    le_icap = register_list_destructors(cal_close_it,NULL,"icap");
+    le_icap = zend_register_list_destructors_ex(cal_close_it, NULL, "icap", module_number);
 
     return SUCCESS;
 }

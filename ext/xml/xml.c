@@ -159,7 +159,7 @@ static void php_xml_init_globals(php_xml_globals *xml_globals)
 
 PHP_MINIT_FUNCTION(xml)
 {
-	le_xml_parser =	register_list_destructors(xml_parser_dtor, NULL, "xml");
+	le_xml_parser =	zend_register_list_destructors_ex(xml_parser_dtor, NULL, "xml", module_number);
 
 #ifdef ZTS
 	xml_globals_id = ts_allocate_id(sizeof(php_xml_globals), (ts_allocate_ctor) php_xml_init_globals, NULL);

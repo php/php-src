@@ -613,7 +613,7 @@ PHP_MINIT_FUNCTION(java) {
 
   zend_register_internal_class(&java_class_entry);
 
-  le_jobject = register_list_destructors(_php_java_destructor,NULL,"java");
+  le_jobject = zend_register_list_destructors_ex(_php_java_destructor, NULL, "java", module_number);
 
   REGISTER_INI_ENTRIES();
 

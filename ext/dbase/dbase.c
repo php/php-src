@@ -82,7 +82,7 @@ PHP_MINIT_FUNCTION(dbase)
 	TlsSetValue(DbaseTls, (void *) dbase_globals);
 #endif
 	DBase_GLOBAL(le_dbhead) =
-		register_list_destructors(_close_dbase,NULL,"dbase");
+		zend_register_list_destructors_ex(_close_dbase, NULL, "dbase", module_number);
 	return SUCCESS;
 }
 

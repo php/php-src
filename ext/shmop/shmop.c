@@ -69,7 +69,7 @@ static void rsclean(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(shmop)
 {
-	shm_type = register_list_destructors(rsclean, NULL, "shmop");
+	shm_type = zend_register_list_destructors_ex(rsclean, NULL, "shmop", module_number);
 	
 	return SUCCESS;
 }

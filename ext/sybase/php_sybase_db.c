@@ -223,9 +223,9 @@ PHP_MINIT_FUNCTION(sybase)
 	}
 	
 	php_sybase_module.num_persistent=0;
-	php_sybase_module.le_link = register_list_destructors(_close_sybase_link,NULL, "sybase-db link");
-	php_sybase_module.le_plink = register_list_destructors(NULL,_close_sybase_plink, "sybase-db link persistent");
-	php_sybase_module.le_result = register_list_destructors(_free_sybase_result,NULL, "sybase-db result");
+	php_sybase_module.le_link = zend_register_list_destructors_ex(_close_sybase_link, NULL, "sybase-db link", module_number);
+	php_sybase_module.le_plink = zend_register_list_destructors_ex(NULL, _close_sybase_plink, "sybase-db link persistent", module_number);
+	php_sybase_module.le_result = zend_register_list_destructors_ex(_free_sybase_result, NULL, "sybase-db result", module_number);
 	
 	return SUCCESS;
 }

@@ -592,11 +592,11 @@ PHP_MINIT_FUNCTION(imap)
 	ENCOTHER                unknown
 	*/
 
-    le_imap = register_list_destructors(mail_close_it,NULL,"imap");
+    le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 #ifdef OP_RELOGIN
     /* AJS: destructors for persistent connections */
-    le_pimap = register_list_destructors(mail_userlogout_it, NULL, "imap persistent");
-    le_pimapchain = register_list_destructors(NULL, mail_nuke_chain, "imap chain persistent");
+    le_pimap = zend_register_list_destructors_ex(mail_userlogout_it, NULL, "imap persistent", module_number);
+    le_pimapchain = zend_register_list_destructors_ex(NULL, mail_nuke_chain, "imap chain persistent", module_number);
 #endif
 	return SUCCESS;
 }

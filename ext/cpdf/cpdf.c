@@ -174,8 +174,8 @@ static void _free_doc(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(cpdf)
 {
-	CPDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL,"cpdf outline");
-	CPDF_GLOBAL(le_cpdf) = register_list_destructors(_free_doc, NULL,"cpdf");
+	CPDF_GLOBAL(le_outline) = zend_register_list_destructors_ex(_free_outline, NULL, "cpdf outline", module_number);
+	CPDF_GLOBAL(le_cpdf) = zend_register_list_destructors_ex(_free_doc, NULL, "cpdf", module_number);
 	return SUCCESS;
 }
 

@@ -168,9 +168,9 @@ static void php_file_init_globals(php_file_globals *file_globals)
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_fopen = register_list_destructors(_file_fopen_dtor, NULL, "file");
-	le_popen = register_list_destructors(_file_popen_dtor, NULL, "pipe");
-	le_socket = register_list_destructors(_file_socket_dtor, NULL, "socket");
+	le_fopen = zend_register_list_destructors_ex(_file_fopen_dtor, NULL, "file", module_number);
+	le_popen = zend_register_list_destructors_ex(_file_popen_dtor, NULL, "pipe", module_number);
+	le_socket = zend_register_list_destructors_ex(_file_socket_dtor, NULL, "socket", module_number);
 
 #ifdef ZTS
 	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) php_file_init_globals, NULL);

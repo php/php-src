@@ -61,7 +61,7 @@ static void php_aspell_close(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(aspell)
 {
-    le_aspell = register_list_destructors(php_aspell_close,NULL,"aspell");
+    le_aspell = zend_register_list_destructors_ex(php_aspell_close, NULL, "aspell", module_number);
 	return SUCCESS;
 
 }

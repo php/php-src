@@ -134,7 +134,7 @@ PHP_MINFO_FUNCTION(curl)
 
 PHP_MINIT_FUNCTION(curl)
 {
-	le_curl = register_list_destructors(_php_curl_close, NULL, "curl");
+	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	
 	/* Constants for curl_setopt() */
 	REGISTER_LONG_CONSTANT("CURLOPT_PORT", CURLOPT_PORT, CONST_CS | CONST_PERSISTENT);

@@ -140,7 +140,7 @@ ZEND_GET_MODULE(sablot)
 PHP_MINIT_FUNCTION(sablot)
 {
 	SABLOTLS_FETCH();
-	SABLOTG(le_sablot) = register_list_destructors(_php_sablot_free_processor, NULL, "sablotron");
+	SABLOTG(le_sablot) = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "sablotron", module_number);
 	return SUCCESS;
 }
 

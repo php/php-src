@@ -67,7 +67,7 @@ static void php_release_sysvshm(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(sysvshm)
 {    
-	php_sysvshm.le_shm = register_list_destructors(php_release_sysvshm, NULL, "sysvshm");
+	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, "sysvshm", module_number);
 	if (cfg_get_long("sysvshm.init_mem",
                       &php_sysvshm.init_mem)==FAILURE) {
 		php_sysvshm.init_mem=10000;

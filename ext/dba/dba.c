@@ -190,8 +190,8 @@ static void dba_close(zend_rsrc_list_entry *rsrc)
 static PHP_MINIT_FUNCTION(dba)
 {
 	zend_hash_init(&ht_keys, 0, NULL, NULL, 1);
-	GLOBAL(le_db) = register_list_destructors(dba_close, NULL,"dba");
-	GLOBAL(le_pdb) = register_list_destructors(NULL, dba_close,"dba persistent");
+	GLOBAL(le_db) = zend_register_list_destructors_ex(dba_close, NULL, "dba", module_number);
+	GLOBAL(le_pdb) = zend_register_list_destructors_ex(NULL, dba_close, "dba persistent", module_number);
 	return SUCCESS;
 }
 

@@ -118,7 +118,7 @@ static sapi_post_entry supported_post_entries[] = {
 PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
-	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL, "fdf");
+	FDF_GLOBAL(le_fdf) = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
 	/* add handler for Acrobat FDF form post requests */
 	sapi_add_post_entry("application/vnd.fdf",	php_default_post_reader, fdf_post_handler);

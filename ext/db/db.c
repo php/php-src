@@ -1122,7 +1122,7 @@ PHP_MINIT_FUNCTION(db)
 	}
 #endif
 
-	le_db = register_list_destructors(php_dbm_close,NULL,"dbm");
+	le_db = zend_register_list_destructors_ex(php_dbm_close, NULL, "dbm", module_number);
 	return SUCCESS;
 }
 

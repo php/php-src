@@ -200,8 +200,8 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(sockets)
 {
 	SOCKETSLS_FETCH();
-	SOCKETSG(le_destroy) = register_list_destructors(destroy_fd_sets, NULL, "sockets file descriptor set");
-	SOCKETSG(le_iov)     = register_list_destructors(destroy_iovec,   NULL, "sockets i/o vector");
+	SOCKETSG(le_destroy) = zend_register_list_destructors_ex(destroy_fd_sets, NULL, "sockets file descriptor set", module_number);
+	SOCKETSG(le_iov)     = zend_register_list_destructors_ex(destroy_iovec, NULL, "sockets i/o vector", module_number);
 
 	REGISTER_INI_ENTRIES();
 

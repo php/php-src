@@ -362,11 +362,11 @@ PHP_MINIT_FUNCTION(oci)
 	php_oci_init_globals(OCILS_C);
 #endif
 
-	le_stmt = register_list_destructors(_oci_stmt_list_dtor, NULL, "oci8 statement");
-	le_conn = register_list_destructors(php_oci_free_conn_list, NULL, "oci8 connection");
-	le_desc = register_list_destructors(_oci_descriptor_list_dtor, NULL, "oci8 descriptor");
-	le_server = register_list_destructors(_oci_server_list_dtor, NULL, "oci8 server");
-	le_session = register_list_destructors(_oci_session_list_dtor, NULL, "oci8 session");
+	le_stmt = zend_register_list_destructors_ex(_oci_stmt_list_dtor, NULL, "oci8 statement", module_number);
+	le_conn = zend_register_list_destructors_ex(php_oci_free_conn_list, NULL, "oci8 connection", module_number);
+	le_desc = zend_register_list_destructors_ex(_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
+	le_server = zend_register_list_destructors_ex(_oci_server_list_dtor, NULL, "oci8 server", module_number);
+	le_session = zend_register_list_destructors_ex(_oci_session_list_dtor, NULL, "oci8 session", module_number);
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
 

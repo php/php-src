@@ -92,7 +92,7 @@ static void ftp_destructor_ftpbuf(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(ftp)
 {
-	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL, "ftp");
+	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, "ftp", module_number);
 	REGISTER_MAIN_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII,
 		CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE,

@@ -179,12 +179,12 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	REGISTER_INI_ENTRIES();
 	
-	le_link = register_list_destructors(_close_pgsql_link,NULL, "pgsql link");
-	le_plink = register_list_destructors(NULL,_close_pgsql_plink, "pgsql link persistent");
+	le_link = zend_register_list_destructors_ex(_close_pgsql_link, NULL, "pgsql link", module_number);
+	le_plink = zend_register_list_destructors_ex(NULL, _close_pgsql_plink, "pgsql link persistent", module_number);
 	/*	PGG(le_result = register_list_destructors(PQclear,NULL); */
-	le_result = register_list_destructors(_free_result,NULL, "pgsql result");
-	le_lofp = register_list_destructors(_free_ptr,NULL, "pgsql large object");
-	le_string = register_list_destructors(_free_ptr,NULL, "pgsql string");
+	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
+	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
+	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
 
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);

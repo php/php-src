@@ -322,9 +322,9 @@ PHP_MINIT_FUNCTION(sybase)
 
 	REGISTER_INI_ENTRIES();
 
-	le_link = register_list_destructors(_close_sybase_link,NULL, "sybase-ct link");
-	le_plink = register_list_destructors(NULL,_close_sybase_plink, "sybase-ct link persistent");
-	le_result = register_list_destructors(php_free_sybase_result,NULL, "sybase-ct result");
+	le_link = zend_register_list_destructors_ex(_close_sybase_link, NULL, "sybase-ct link", module_number);
+	le_plink = zend_register_list_destructors_ex(NULL, _close_sybase_plink, "sybase-ct link persistent", module_number);
+	le_result = zend_register_list_destructors_ex(php_free_sybase_result, NULL, "sybase-ct result", module_number);
 
 	return SUCCESS;
 }
