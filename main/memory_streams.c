@@ -89,14 +89,6 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 	ms = stream->abstract;
 	assert(ms != NULL);
 
-	if (buf == NULL && count == 0)	{
-		/* check for EOF condition */
-		if (ms->fpos >= ms->fsize)	{
-			return EOF;
-		}
-		return 0;
-	}
-
 	if (ms->fpos + count > ms->fsize) {
 		count = ms->fsize - ms->fpos;
 	}
@@ -105,6 +97,8 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 		assert(buf!= NULL);
 		memcpy(buf, ms->data+ms->fpos, count);
 		ms->fpos += count;
+	} else {
+		stream->eof = 1;
 	}
 	return count;
 }

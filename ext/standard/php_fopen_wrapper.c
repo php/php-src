@@ -39,6 +39,7 @@ static size_t php_stream_output_write(php_stream *stream, const char *buf, size_
 
 static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
+	stream->eof = 1;
 	return 0;
 }
 

@@ -269,6 +269,8 @@ struct _php_stream  {
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
 
+	int eof;
+
 }; /* php_stream */
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0

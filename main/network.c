@@ -767,32 +767,6 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	size_t nr_bytes = 0;
 
-	if (buf == NULL && count == 0) {
-		/* check for EOF condition */
-		
-DUMP_SOCK_STATE("check for EOF", sock);
-		
-		if (sock->eof)
-			return EOF;
-
-		/* no data in the buffer - lets examine the socket */
-#if HAVE_SYS_POLL_H && HAVE_POLL
-		{
-			struct pollfd topoll;
-			
-			topoll.fd = sock->socket;
-			topoll.events = POLLIN;
-			topoll.revents = 0;
-			
-			if (poll(&topoll, 1, 0) == 1) {
-				return topoll.revents & POLLHUP ? EOF : 0;
-			}
-		}
-#endif
-		/* presume that we are not yet at the eof */
-		return 0;
-	}
-
 	if(sock->is_blocked) {
 		php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
 		if (sock->timeout_event)
@@ -811,7 +785,7 @@ DUMP_SOCK_STATE("check for EOF", sock);
 	php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 
 	if(nr_bytes == 0 || (nr_bytes < 0 && streams_socket_errno != EWOULDBLOCK)) {
-		sock->eof = 1;
+		stream->eof = 1;
 	}
 
 	return nr_bytes;
