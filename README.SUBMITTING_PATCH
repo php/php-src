@@ -90,7 +90,7 @@ Please add the prefix "[PATCH]" to your email subject and make sure
 to include the patch as a MIME attachment even if it is short. 
 
 NOTE: only MIME attachments of type 'text/*' are accepted. The
-      easiest way to acclomplish this, is to make the extension
+      easiest way to accomplish this, is to make the extension
       '.txt'.
 
 Test scripts should be included in the same email.
@@ -100,7 +100,7 @@ Finally, add the bug Id(s) which can be closed by your patch, if any.
 
 
 What happens after you submit your patch
--------------------------------------- 
+---------------------------------------- 
 If your patch is easy to review and has obviously no side-effects,
 it might take up to a few hours until someone commits it.
 
