@@ -629,7 +629,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				return -1;
 			}
 
-			if ((int) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
+			if ((long) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
 				return 0;
 			}
 
