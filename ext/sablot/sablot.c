@@ -895,6 +895,8 @@ PHP_FUNCTION(xslt_set_error_handler)
     zval **arg1, **arg2;
     php_sablot *handle;
     int argc = ZEND_NUM_ARGS();
+
+	SABLOTLS_FETCH();
     
     if (argc > 2 || argc < 1 ||
         zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
@@ -1175,6 +1177,8 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         argc = 0,
         idx,
         len;
+
+	SABLOTLS_FETCH();
     
     if (userData == NULL) {
         SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
