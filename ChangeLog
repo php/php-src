@@ -1,3 +1,37 @@
+2002-01-07  James Cox  <james@awpimajes.com>
+
+    * win32/install.txt:
+    browscap url fix, plus removed ^M references. it should look nice on any os.
+
+    * win32/install.txt:
+    changed the instructions for php with win32 + apache. Recommending using sapi
+    over cgi binary, since cgi binary and apache don't mix well security wise.
+
+2002-01-07  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c: MFH
+
+    * NEWS: New PostgreSQL functions
+
+2002-01-07  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mbstring/mbstring.c: Fixed some protos.
+
+2002-01-07  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    added mb_get_info() to get internal settings of mbstring.
+
+2002-01-07  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c:
+    - Fix domxml_node_unlink_node() proto and return value.
+
+2002-01-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/HTTP.php: ws
+
 2002-01-06  Stig Venaas  <venaas@uninett.no>
 
     * ext/ftp/ftp.c
