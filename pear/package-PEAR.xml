@@ -31,7 +31,7 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11</version>
+    <version>0.90</version>
     <state>beta</state>
     <date>2002-05-28</date>
     <notes>
@@ -43,6 +43,11 @@
 * fix: config-set did not work with "set" parameters
 * disable magic_quotes_runtime
 * "install" now builds and installs C extensions
+* added PEAR::delExpect()
+* System class no longer inherits PEAR
+* grouped PEAR_Config parameters
+* add --nobuild option to install/upgrade commands
+* new and more generic Frontend API
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
