@@ -8,7 +8,7 @@ class test {
 	public $p1 = 1;
 	public $p2 = 2;
 	public $p3;
-	public __clone() {
+	public function __clone() {
 	}
 };
 
