@@ -1,3 +1,11 @@
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c:
+      ecalloc doesn't return NULL
+
+    * zend.c:
+      Bugfix #24182: va_arg macro error in Zend/zend.c
+
 2003-06-10  Jani Taskinen  <sniper@iki.fi>
 
     * zend_multiply.h:
