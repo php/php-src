@@ -139,6 +139,7 @@ typedef struct _zend_function_entry {
 
 int zend_next_free_module(void);
 
+BEGIN_EXTERN_C()
 ZEND_API int zend_get_parameters(int ht, int param_count, ...);
 ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument_array TSRMLS_DC);
 ZEND_API int zend_get_parameters_ex(int param_count, ...);
@@ -296,6 +297,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
+END_EXTERN_C()
 
 typedef struct _zend_fcall_info {
 	size_t size;
@@ -316,6 +318,7 @@ typedef struct _zend_fcall_info_cache {
 	zval **object_pp;
 } zend_fcall_info_cache;
 
+BEGIN_EXTERN_C()
 ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
 
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
@@ -328,6 +331,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);
+END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \

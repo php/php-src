@@ -460,8 +460,9 @@ void zend_exec_finished(TSRMLS_D);
 
 ZEND_API extern char *empty_string;
 
+BEGIN_EXTERN_C()
 ZEND_API void free_estring(char **str_p);
-
+END_EXTERN_C()
 
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string) { efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string) { efree_rel(ptr); }
@@ -513,9 +514,9 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data);
-END_EXTERN_C()
 
 ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents);
+END_EXTERN_C()
 
 
 /* Messages for applications of Zend */

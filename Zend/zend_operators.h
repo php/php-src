@@ -37,6 +37,7 @@
 #define MAX_LENGTH_OF_LONG 18
 #define MAX_LENGTH_OF_DOUBLE 32
 
+BEGIN_EXTERN_C()
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -61,6 +62,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 
 ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC);
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
+END_EXTERN_C()
 
 static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {
@@ -169,10 +171,11 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+
+BEGIN_EXTERN_C()
 ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
-BEGIN_EXTERN_C()
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC);
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
@@ -190,7 +193,6 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
 #define convert_to_string(op)			_convert_to_string((op) ZEND_FILE_LINE_CC)
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
-END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -199,6 +201,7 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
+END_EXTERN_C()
 
 static inline char *
 zend_str_tolower_dup(const char *source, unsigned int length)
@@ -206,6 +209,7 @@ zend_str_tolower_dup(const char *source, unsigned int length)
 	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
 }
 
+BEGIN_EXTERN_C()
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
@@ -223,7 +227,7 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC);
 ZEND_API int zend_atoi(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-
+END_EXTERN_C()
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
 	if ((*ppzv)->type!=IS_##upper_type) {					\
 		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
