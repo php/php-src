@@ -56,7 +56,7 @@ extern php3_module_entry ifx_module_entry;
 extern int php3_minit_ifx(INIT_FUNC_ARGS);
 extern int php3_rinit_ifx(INIT_FUNC_ARGS);
 extern int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_ifx(void);
+extern void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_ifx_connect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_ifx_pconnect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_ifx_close(INTERNAL_FUNCTION_PARAMETERS);

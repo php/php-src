@@ -76,7 +76,7 @@ char *_php3_dbmnextkey(dbm_info *info, char *key);
 /* db file functions */
 extern int php3_minit_db(INIT_FUNC_ARGS);
 extern int php3_rinit_db(INIT_FUNC_ARGS);
-extern void php3_info_db(void);
+extern void php3_info_db(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_dblist(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_dbmopen(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_dbmclose(INTERNAL_FUNCTION_PARAMETERS);

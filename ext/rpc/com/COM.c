@@ -74,8 +74,15 @@ function_entry COM_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+
+static void php_info_COM(ZEND_MODULE_INFO_FUNC_ARGS)
+{
+	DISPLAY_INI_ENTRIES();
+}
+
+
 php3_module_entry COM_module_entry = {
-	"Win32 COM", COM_functions, php3_minit_COM, php3_mshutdown_COM, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"Win32 COM", COM_functions, php3_minit_COM, php3_mshutdown_COM, NULL, NULL, php_info_COM, STANDARD_MODULE_PROPERTIES
 };
 
 void php_register_COM_class();
@@ -213,7 +220,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1("allow_dcom",			"0",		PHP_INI_SYSTEM,		NULL,					NULL)
+	PHP_INI_ENTRY1_EX("allow_dcom",		"0",		PHP_INI_SYSTEM,		NULL,					NULL,	php_ini_boolean_displayer_cb)
 	PHP_INI_ENTRY1("typelib_file",		NULL,		PHP_INI_SYSTEM,		OnTypelibFileChange,	NULL)
 PHP_INI_END()
 

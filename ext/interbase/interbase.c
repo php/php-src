@@ -214,7 +214,7 @@ int php3_rfinish_ibase(void)
 }
 */
 
-void php3_info_ibase(void)
+void php3_info_ibase(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	/* TODO */
 }

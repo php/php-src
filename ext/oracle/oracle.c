@@ -1564,7 +1564,7 @@ void php3_Ora_ErrorCode(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-void php3_info_oracle()
+void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 #if !(WIN32|WINNT)
 	php3_printf("Oracle version: %s<br>\n"

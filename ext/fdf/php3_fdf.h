@@ -44,7 +44,7 @@ extern php3_module_entry fdf_module_entry;
 
 extern int php3_minit_fdf(INIT_FUNC_ARGS);
 extern int php3_mend_fdf(void);
-extern void php3_info_fdf(void);
+extern void php3_info_fdf(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_fdf_open(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fdf_close(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fdf_create(INTERNAL_FUNCTION_PARAMETERS);

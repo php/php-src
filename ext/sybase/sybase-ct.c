@@ -1596,7 +1596,7 @@ void php3_sybct_affected_rows(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_info_sybct(void)
+void php3_info_sybct(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	char maxp[16],maxl[16];
 	

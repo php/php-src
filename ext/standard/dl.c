@@ -160,7 +160,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 }
 
 
-void php3_info_dl(void)
+void php3_info_dl(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	PUTS("Dynamic Library support enabled.\n");
 }

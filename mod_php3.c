@@ -64,6 +64,8 @@ void php_module_shutdown();
 void php_module_shutdown_for_exec();
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
+int php3_error(int type, const char *format, ...);
+
 #include "util_script.h"
 
 #include "php_version.h"
@@ -118,6 +120,56 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 }
 
 
+char *sapi_apache_read_post(SLS_D)
+{
+	return NULL;
+}
+
+
+char *sapi_apache_read_cookies(SLS_D)
+{
+	return table_get(r->subprocess_env, "HTTP_COOKIE");
+}
+
+
+int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
+{
+	char *header_name, *header_content, *p;
+	request_rec *r = (request_rec *) SG(server_context);
+
+	header_name = sapi_header->header;
+
+	header_content = p = strchr(header_name, ':');
+	if (!p) {
+		return 0;
+	}
+
+	*p = 0;
+	do {
+		header_content++
+	} while (*header_content==' ');
+
+	if (!strcasecmp(header_name, "Content-Type")) {
+		r->content_type = pstrdup(header_content);
+	} else if (!strcasecmp(header_name, "Location")) {
+		r->status = REDIRECT;
+	} else {
+		table_set(r->headers_out, header_name, header_content);
+	}
+
+	*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
+
+	return 0;  /* don't use the default SAPI mechanism, Apache duplicates this functionality */
+}
+
+
+void sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+{
+	send_http_header((request_rec *) SG(server_context));
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
+}
+
+
 sapi_module_struct sapi_module = {
 	"PHP Language",					/* name */
 									
@@ -125,6 +177,15 @@ sapi_module_struct sapi_module = {
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	zend_apache_ub_write,			/* unbuffered write */
+
+	php3_error,						/* error handler */
+
+	sapi_apache_header_handler,		/* header handler */
+	sapi_apache_send_headers,		/* send headers handler */
+	NULL,							/* send header handler */
+
+	sapi_apache_read_post,			/* read POST data */
+	sapi_apache_read_cookies		/* read Cookies */
 };
 
 

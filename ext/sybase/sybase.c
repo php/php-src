@@ -1186,7 +1186,7 @@ void php3_sybase_result(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_info_sybase(void)
+void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	char maxp[16],maxl[16];
 	

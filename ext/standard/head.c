@@ -76,7 +76,7 @@ PHPAPI void php3_noheader(void)
 }
 
 
-#ifdef APACHE
+#if 0
 /* Adds header information */
 void php4i_add_header_information(char *header_information, uint header_length)
 {
@@ -229,7 +229,7 @@ void php3_Header(INTERNAL_FUNCTION_PARAMETERS)
 
 
 
-#ifdef APACHE
+#if 0
 /*
  * php3_header() flushes the header info built up using calls to
  * the Header() function.  If type is 1, a redirect to str is done.
@@ -438,15 +438,10 @@ CookieList *php3_PopCookieList(void)
 /* php3_SetCookie(name,value,expires,path,domain,secure) */
 void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS)
 {
-#if !APACHE
-	char *tempstr;
-#if FHTTPD
-	char *tempstr1;
-#endif
-	int len=0;
+	char *cookie;
+	int len=sizeof("Set-Cookie: ");
 	time_t t;
 	char *r, *dt;
-#endif
 	char *name = NULL, *value = NULL, *path = NULL, *domain = NULL;
 	time_t expires = 0;
 	int secure = 0;
@@ -465,100 +460,107 @@ void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS)
 		case 6:
 			convert_to_boolean(arg[5]);
 			secure = arg[5]->value.lval;
+			/* break missing intentionally */
 		case 5:
 			convert_to_string(arg[4]);
 			domain = estrndup(arg[4]->value.str.val,arg[4]->value.str.len);
+			/* break missing intentionally */
 		case 4:
 			convert_to_string(arg[3]);
 			path = estrndup(arg[3]->value.str.val,arg[3]->value.str.len);
+			/* break missing intentionally */
 		case 3:
 			convert_to_long(arg[2]);
 			expires = arg[2]->value.lval;
+			/* break missing intentionally */
 		case 2:
 			convert_to_string(arg[1]);
 			value = estrndup(arg[1]->value.str.val,arg[1]->value.str.len);
+			/* break missing intentionally */
 		case 1:
 			convert_to_string(arg[0]);
 			name = estrndup(arg[0]->value.str.val,arg[0]->value.str.len);
+			break;
 	}
-#if APACHE
+#if 0
 	php3_PushCookieList(name, value, expires, path, domain, secure);
 #else
-	if (name) len += strlen(name);
-	if (value) len += strlen(value);
-	if (path) len += strlen(path);
-	if (domain) len += strlen(domain);
-	tempstr = emalloc(len + 100);
+	if (name) {
+		len += strlen(name);
+	}
+	if (value) {
+		len += strlen(value);
+	}
+	if (path) {
+		len += strlen(path);
+	}
+	if (domain) {
+		len += strlen(domain);
+	}
+	cookie = emalloc(len + 100);
 	if (!value || (value && !*value)) {
 		/* 
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date 1 year and 1 second in the past
 		 */
-		sprintf(tempstr, "%s=deleted", name);
-		strcat(tempstr, "; expires=");
+		sprintf(cookie, "Set-Cookie: %s=deleted", name);
+		strcat(cookie, "; expires=");
 		t = time(NULL) - 31536001;
 		dt = php3_std_date(t);
-		strcat(tempstr, dt);
+		strcat(cookie, dt);
 		efree(dt);
 	} else {
 		/* FIXME: XXX: this is not binary data safe */
 		r = _php3_urlencode(value, strlen (value));
-		sprintf(tempstr, "%s=%s", name, value ? r : "");
+		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? r : "");
 		if (r) efree(r);
 		if (value) efree(value);
 		value=NULL;
 		if (name) efree(name);
 		name=NULL;
 		if (expires > 0) {
-			strcat(tempstr, "; expires=");
+			strcat(cookie, "; expires=");
 			dt = php3_std_date(expires);
-			strcat(tempstr, dt);
+			strcat(cookie, dt);
 			efree(dt);
 		}
 	}
 	if (path && strlen(path)) {
-		strcat(tempstr, "; path=");
-		strcat(tempstr, path);
+		strcat(cookie, "; path=");
+		strcat(cookie, path);
 		efree(path);
 		path=NULL;
 	}
 	if (domain && strlen(domain)) {
-		strcat(tempstr, "; domain=");
-		strcat(tempstr, domain);
+		strcat(cookie, "; domain=");
+		strcat(cookie, domain);
 		efree(domain);
 		domain=NULL;
 	}
 	if (secure) {
-		strcat(tempstr, "; secure");
+		strcat(cookie, "; secure");
 	}
-#if USE_SAPI
-	{
-	char *tempstr2=emalloc(strlen(tempstr)+14);
-	sprintf(tempstr2,"Set-Cookie: %s\015\012",tempstr);
-	sapi_rqst->header(sapi_rqst->scid,tempstr2);
-	efree(tempstr2);
+
+
+	if (sapi_add_header(cookie, strlen(cookie))==SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
 	}
-#elif FHTTPD
-	tempstr1 = emalloc(strlen(tempstr)
-					  + sizeof("Set-Cookie: ") + 2);
-	if(tempstr1) {
-		strcpy(tempstr1, "Set-Cookie: ");
-		strcpy(tempstr1 + sizeof("Set-Cookie: ") - 1, tempstr);
-		strcat(tempstr1, "\r\n");
-		php3_fhttpd_puts_header(tempstr1);
-		efree(tempstr1);
+
+	if (domain) {
+		efree(domain);
 	}
-#else
-	PUTS_H("Set-Cookie: ");
-	PUTS_H(tempstr);
-	PUTS_H("\015\012");
-#endif
-	if (domain) efree(domain);
-	if (path) efree(path);
-	if (name) efree(name);
-	if (value) efree(value);
-	efree(tempstr);
+	if (path) {
+		efree(path);
+	}
+	if (name) {
+		efree(name);
+	}
+	if (value) {
+		efree(value);
+	}
 #endif
 }
 

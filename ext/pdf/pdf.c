@@ -161,7 +161,7 @@ int php3_minit_pdf(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_info_pdf(void) {
+void php3_info_pdf(ZEND_MODULE_INFO_FUNC_ARGS) {
 	/* need to use a PHPAPI function here because it is external module in windows */
 	php3_printf("%s. AFM files in %s", PDFLIB_VERSION, PDF_DEFAULT_FONT_PATH);
 }

@@ -178,7 +178,7 @@ int php3_minit_gd(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_info_gd(void) {
+void php3_info_gd(ZEND_MODULE_INFO_FUNC_ARGS) {
 	/* need to use a PHPAPI function here because it is external module in windows */
 #if HAVE_LIBGD13
 	php3_printf("Version 1.3");

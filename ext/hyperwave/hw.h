@@ -109,7 +109,7 @@ extern void php3_hw_document_content(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_hw_objrec2array(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_hw_array2objrec(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_hw_connection_info(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_info_hw(void);
+extern void php3_info_hw(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_hw_getsrcbydestobj(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_hw_getrellink(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_hw_dummy(INTERNAL_FUNCTION_PARAMETERS);

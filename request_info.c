@@ -37,17 +37,11 @@ PHPAPI php3_request_info request_info;
 #if CGI_BINARY
 int php3_init_request_info(void *conf)
 {
-	char *buf;	/* temporary buffers */
 	SLS_FETCH();
 
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
-	request_info.request_method = getenv("REQUEST_METHOD");
 	request_info.script_name = getenv("SCRIPT_NAME");
-	buf = getenv("CONTENT_LENGTH");
-	request_info.content_length = (buf ? atoi(buf) : 0);
-	request_info.content_type = getenv("CONTENT_TYPE");
-	request_info.cookies = getenv("HTTP_COOKIE");
 	request_info.script_filename = getenv("SCRIPT_FILENAME");
 	/* Hack for annoying servers that do not set SCRIPT_FILENAME for us */
 	if (!request_info.script_filename) {
@@ -110,13 +104,11 @@ int php3_init_request_info(void *conf)
 	request_info.current_user_length = 0;
 
 	request_info.filename = r->filename;
-	request_info.request_method = r->method;
+	SG(request_info).request_method = r->method;
 	request_info.content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
 
 	buf = table_get(r->subprocess_env, "CONTENT_LENGTH");
-	request_info.content_length = (buf ? atoi(buf) : 0);
-
-	request_info.cookies = table_get(r->subprocess_env, "HTTP_COOKIE");
+	SG(request_info).content_length = (buf ? atoi(buf) : 0);
 
 	return SUCCESS;
 }

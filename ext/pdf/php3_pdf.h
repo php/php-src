@@ -40,7 +40,7 @@ extern int le_fp;
 extern php3_module_entry pdf_module_entry;
 #define pdf_module_ptr &pdf_module_entry
 
-extern void php3_info_pdf(void);
+extern void php3_info_pdf(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php3_minit_pdf(INIT_FUNC_ARGS);
 extern int php3_mend_pdf(void);
 extern void php3_pdf_get_info(INTERNAL_FUNCTION_PARAMETERS);

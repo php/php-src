@@ -260,7 +260,7 @@ int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS) {
 	return SUCCESS;
 }
 
-void php3_info_ldap(void)
+void php3_info_ldap(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	char maxl[16];
 #if HAVE_NSLDAP

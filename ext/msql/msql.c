@@ -275,7 +275,7 @@ DLEXPORT int php3_rinit_msql(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-DLEXPORT void php3_info_msql(void)
+DLEXPORT void php3_info_msql(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	char maxp[16],maxl[16];
 	MSQL_TLS_VARS;

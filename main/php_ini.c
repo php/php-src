@@ -34,6 +34,10 @@
 #include "php_ini.h"
 #include "zend_alloc.h"
 #include "php_globals.h"
+#include "ext/standard/info.h"
+
+#define ENTRY_NAME_COLOR "#999999"
+#define CONTENTS_COLOR "#DDDDDD"
 
 static HashTable known_directives;
 
@@ -93,7 +97,7 @@ int php_ini_rshutdown()
  * Registration / unregistration
  */
 
-int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
+PHPAPI int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 {
 	php_ini_entry *p = ini_entry;
 	php_ini_entry *hashed_ini_entry;
@@ -126,13 +130,13 @@ int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 }
 
 
-void php_unregister_ini_entries(int module_number)
+PHPAPI void php_unregister_ini_entries(int module_number)
 {
 	_php3_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_remove_ini_entries, (void *) &module_number);
 }
 
 
-int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
+PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
 {
 	php_ini_entry *ini_entry;
 	char *duplicate;
@@ -166,7 +170,7 @@ int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_
 }
 
 
-int php_restore_ini_entry(char *name, uint name_length)
+PHPAPI int php_restore_ini_entry(char *name, uint name_length)
 {
 	php_ini_entry *ini_entry;
 
@@ -182,11 +186,25 @@ int php_restore_ini_entry(char *name, uint name_length)
 }
 
 
+PHPAPI int php_ini_register_displayer(char *name, uint name_length, void (*displayer)(php_ini_entry *ini_entry, int type))
+{
+	php_ini_entry *ini_entry;
+
+	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==FAILURE) {
+		return FAILURE;
+	}
+
+	ini_entry->displayer = displayer;
+	return SUCCESS;
+}
+
+
+
 /*
  * Data retrieval
  */
 
-long php_ini_long(char *name, uint name_length, int orig)
+PHPAPI long php_ini_long(char *name, uint name_length, int orig)
 {
 	php_ini_entry *ini_entry;
 
@@ -202,7 +220,7 @@ long php_ini_long(char *name, uint name_length, int orig)
 }
 
 
-double php_ini_double(char *name, uint name_length, int orig)
+PHPAPI double php_ini_double(char *name, uint name_length, int orig)
 {
 	php_ini_entry *ini_entry;
 
@@ -218,7 +236,7 @@ double php_ini_double(char *name, uint name_length, int orig)
 }
 
 
-char *php_ini_string(char *name, uint name_length, int orig)
+PHPAPI char *php_ini_string(char *name, uint name_length, int orig)
 {
 	php_ini_entry *ini_entry;
 
@@ -235,7 +253,101 @@ char *php_ini_string(char *name, uint name_length, int orig)
 
 
 
-/* Standard message handlers for core_globals */
+static void php_ini_displayer_cb(php_ini_entry *ini_entry, int type)
+{
+	if (ini_entry->displayer) {
+		ini_entry->displayer(ini_entry, type);
+	} else {
+		char *display_string;
+		uint display_string_length;
+
+		if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
+			display_string = ini_entry->orig_value;
+			display_string_length = ini_entry->orig_value_length;
+		} else if (ini_entry->value && ini_entry->value[0]) {
+			display_string = ini_entry->value;
+			display_string_length = ini_entry->value_length;
+		} else {
+			display_string = "<i>no value</i>";
+			display_string_length = sizeof("<i>no value</i>")-1;
+		}
+		PHPWRITE(display_string, display_string_length);
+	}
+}
+
+
+PHP_INI_DISP(php_ini_boolean_displayer_cb)
+{
+	int value;
+
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
+		value = atoi(ini_entry->orig_value);
+	} else if (ini_entry->value) {
+		value = atoi(ini_entry->value);
+	} else {
+		value = 0;
+	}
+	if (value) {
+		PUTS("On");
+	} else {
+		PUTS("Off");
+	}
+}
+
+
+PHP_INI_DISP(php_ini_color_displayer_cb)
+{
+	char *value;
+
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) {
+		value = ini_entry->orig_value;
+	} else if (ini_entry->value) {
+		value = ini_entry->value;
+	} else {
+		value = NULL;
+	}
+	if (value) {
+		php3_printf("<font color=\"%s\">%s</font>", value, value);
+	} else {
+		PUTS("<i>no value</i>;");
+	}
+}
+
+
+static int php_ini_displayer(php_ini_entry *ini_entry, int module_number)
+{
+	if (ini_entry->module_number != module_number) {
+		return 0;
+	}
+
+	PUTS("<tr><td align=\"center\" bgcolor=\"" ENTRY_NAME_COLOR "\">");
+	PHPWRITE(ini_entry->name, ini_entry->name_length-1);
+	PUTS("<td align=\"center\" bgcolor=\"" CONTENTS_COLOR "\">");
+	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ACTIVE);
+	PUTS("</td><td align=\"center\" bgcolor=\"" CONTENTS_COLOR "\">");
+	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ORIG);
+	PUTS("</td></tr>\n");
+	return 0;
+}
+
+
+PHPAPI void display_ini_entries(zend_module_entry *module)
+{
+	int module_number;
+
+	if (module) {
+		module_number = module->module_number;
+	} else {
+		module_number = 0;
+	}
+	PUTS("<table border=5 width=\"600\">\n");
+	php_info_print_table_header(3, "Directive", "Master Value", "Local Value");
+	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_ini_displayer, (void *) module_number);
+	PUTS("</table>\n");
+}
+
+
+/* Standard message handlers */
 
 PHP_INI_MH(OnUpdateInt)
 {

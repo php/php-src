@@ -85,6 +85,29 @@ static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_c
 }
 
 
+static char *sapi_cgi_read_post(SLS_D)
+{
+	uint read_bytes=0, tmp_read_bytes;
+	char *result = (char *) emalloc(SG(request_info).content_length+1);
+
+	while (read_bytes < SG(request_info).content_length) {
+		tmp_read_bytes = read(0, result+read_bytes, SG(request_info).content_length-read_bytes);
+		if (tmp_read_bytes<=0) {
+			break;
+		}
+		read_bytes += tmp_read_bytes;
+	}
+	result[read_bytes]=0;
+	return result;
+}
+
+
+static char *sapi_cgi_read_cookies(SLS_D)
+{
+	return getenv("HTTP_COOKIE");
+}
+
+
 static sapi_module_struct sapi_module = {
 	"PHP Language",					/* name */
 									
@@ -98,6 +121,9 @@ static sapi_module_struct sapi_module = {
 	NULL,							/* header handler */
 	NULL,							/* send headers handler */
 	sapi_cgi_send_header,			/* send header handler */
+
+	sapi_cgi_read_post,				/* read POST data */
+	sapi_cgi_read_cookies			/* read Cookies */
 };
 
 
@@ -132,15 +158,19 @@ static void php_cgi_usage(char *argv0)
 
 static void init_request_info(SLS_D)
 {
-	char *request_method = getenv("REQUEST_METHOD");
+	char *content_length = getenv("CONTENT_LENGTH");
 
+	SG(request_info).request_method = getenv("REQUEST_METHOD");
 	SG(request_info).query_string = getenv("QUERY_STRING");
 	SG(request_info).request_uri = getenv("PATH_INFO");
-	if (request_method && !strcmp(request_method, "HEAD")) {
+	SG(request_info).path_translated = NULL; /* we have to update it later, when we have that information */
+	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
 	} else {
 		SG(request_info).headers_only = 0;
 	}
+	SG(request_info).content_type = getenv("CONTENT_TYPE");
+	SG(request_info).content_length = (content_length?atoi(content_length):0);
 }
 
 
@@ -229,6 +259,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	sapi_globals = ts_resource(sapi_globals_id);
 #endif
 
+	init_request_info(SLS_C);
+	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 	CG(extended_info) = 0;
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
@@ -322,7 +354,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	php3_TreatHeaders();
 
-	init_request_info(SLS_C);
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {

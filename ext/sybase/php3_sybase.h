@@ -47,7 +47,7 @@ extern int php3_minit_sybase(INIT_FUNC_ARGS);
 extern int php3_rinit_sybase(INIT_FUNC_ARGS);
 extern int php3_mshutdown_sybase(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_sybase(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_sybase(void);
+extern void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_sybase_connect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_sybase_pconnect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_sybase_close(INTERNAL_FUNCTION_PARAMETERS);

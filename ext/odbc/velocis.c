@@ -111,7 +111,7 @@ int php3_rinit_velocis(INIT_FUNC_ARGS)
 }
 
 
-void php3_info_velocis(void)
+void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php3_printf("RAIMA Velocis Support Active");
 }
