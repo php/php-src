@@ -78,6 +78,10 @@ zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_FTP
+ZEND_GET_MODULE(php_ftp)
+#endif
+
 static void ftp_destructor_ftpbuf(ftpbuf_t *ftp)
 {
 	ftp_close(ftp);
