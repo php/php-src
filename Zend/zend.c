@@ -463,6 +463,8 @@ void zend_activate_modules()
 
 void zend_deactivate(CLS_D ELS_DC)
 {
+	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 	shutdown_scanner(CLS_C);
 	shutdown_executor(ELS_C);
