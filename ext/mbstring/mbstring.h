@@ -49,6 +49,8 @@
 #ifdef COMPILE_DL_MBSTRING
 #undef HAVE_MBSTRING
 #define HAVE_MBSTRING 1
+#undef PHPAPI
+#define PHPAPI
 #endif
 
 #if HAVE_MBSTRING
