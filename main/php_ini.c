@@ -236,7 +236,7 @@ int php_init_config()
 	int safe_mode_state;
 	char *open_basedir;
 	int free_ini_search_path=0;
-	zend_file_handle fh;
+	zend_file_handle fh = {0};
 	struct stat sb;
 	char ini_file[MAXPATHLEN];
 	char *p;
@@ -347,7 +347,6 @@ int php_init_config()
 	PG(safe_mode) = 0;
 	PG(open_basedir) = NULL;
 
-	memset(&fh, 0, sizeof(fh));
 	/* Check if php_ini_path_override is a file */
 	if (!sapi_module.php_ini_ignore) {
 		if (sapi_module.php_ini_path_override && sapi_module.php_ini_path_override[0]) {
