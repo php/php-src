@@ -18,3 +18,8 @@ AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
     AC_MSG_RESULT(cannot check, guessing ok)
   ])
 ])
+
+AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
+  LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
+])
+
