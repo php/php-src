@@ -467,7 +467,7 @@ php_roxen_sapi_read_cookies(SLS_D)
 
 static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 {
-  //  char buf[512];
+  /*  char buf[512]; */
 	
   PUTS("<table border=5 width=600>\n");
   php_info_print_table_row(2, "SAPI module version", "$Id$");
