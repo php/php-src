@@ -766,6 +766,15 @@ session.save_handler = files
 ; Argument passed to save_handler.  In the case of files, this is the path
 ; where data files are stored. Note: Windows users have to change this 
 ; variable in order to use PHP's session functions.
+; As of PHP 4.2.3, you can define the path as:
+;     session.save_path = "N;/path"
+; where N is an integer.  Instead of storing all the session files in 
+; /path, what this will do is create subdirectories N-levels deep, and 
+; store the session data in those directories.  This is useful if you 
+; or your OS have problems with lots of files in one directory, and is 
+; a more efficient layout for servers that handle lots of sessions.
+; (Note: see the section on garbage collection below if you choose to
+; use subdirectories for session storage)
 session.save_path = /tmp
 
 ; Whether to use cookies.
@@ -807,6 +816,14 @@ session.gc_dividend    = 100
 ;          not.  So, see session_set_save_handler() and write your own
 ;          session handler with a different mechanism for cleaning up sessions.
 session.gc_maxlifetime = 1440
+
+; NOTE: If you are using the subdirectory option for storing session files
+;       (see session.save_path above), then garbage collection does *not*
+;       happen automatically.  You will need to do your own garbage 
+;       collection through a shell script, cron entry, or some other method. 
+;       For example, the following script would is the equivalent of
+;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
+;          cd /path/to/sessions; find -cmin +24 | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope, albeit register_globals
