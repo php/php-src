@@ -215,6 +215,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			   to the same pointer */
 			if (PZVAL_IS_REF(*variable_ptr)) {
 				zval_dtor(*variable_ptr); /* old value should be destroyed */
+				/* To check: can't *variable_ptr be some system variable like error_zval here? */
 				(*variable_ptr)->type = value->type;
 				(*variable_ptr)->value = value->value;
 				zval_copy_ctor(*variable_ptr);
