@@ -6,12 +6,14 @@ AC_DEFUN(PHP_GD_JPEG,[
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
   [  --with-jpeg-dir=DIR       GD: Set the path to libjpeg install prefix.])
 
-  if test "$PHP_JPEG_DIR" != "no" -a "$PHP_JPEG_DIR"; then
+  if test "$PHP_JPEG_DIR" != "no"; then
+
     if test "$PHP_JPEG_DIR" = "yes"; then
       PHP_JPEG_DIR=/usr/local
     fi
 
-    AC_CHECK_LIB(jpeg,jpeg_read_header,[
+    AC_CHECK_LIB(jpeg,jpeg_read_header,
+    [
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR(libjpeg not found!)
@@ -27,12 +29,18 @@ AC_DEFUN(PHP_GD_PNG,[
   PHP_ARG_WITH(png-dir, for the location of libpng,
   [  --with-png-dir=DIR        GD: Set the path to libpng install prefix.])
 
-  if test "$PHP_PNG_DIR" != "no" -a "$PHP_PNG_DIR"; then
+  if test "$PHP_PNG_DIR" != "no"; then
+
     if test "$PHP_PNG_DIR" = "yes"; then
       PHP_PNG_DIR=/usr/local
     fi
 
-    AC_CHECK_LIB(png,png_info_init,[
+    if test "$PHP_ZLIB_DIR" = "no"; then
+      AC_MSG_ERROR(PNG support requires ZLIB. Use --with-zlib-dir=<DIR>)
+    fi
+    
+    AC_CHECK_LIB(png,png_info_init,
+    [
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -41,7 +49,7 @@ AC_DEFUN(PHP_GD_PNG,[
       -L$PHP_ZLIB_DIR/lib -lz -L$PHP_PNG_DIR/lib
     ])
   else 
-    AC_MSG_RESULT(If configure fails try --with-png-dir=<DIR>)
+    AC_MSG_RESULT(If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>)
   fi
 ])
 
@@ -49,12 +57,13 @@ AC_DEFUN(PHP_GD_XPM,[
   PHP_ARG_WITH(xpm-dir, for the location of libXpm,
   [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
 
-  if test "$PHP_XPM_DIR" != "no" -a "$PHP_XPM_DIR"; then
+  if test "$PHP_XPM_DIR" != "no"; then
     if test "$PHP_XPM_DIR" = "yes"; then
       PHP_XPM_DIR=/usr/local
     fi
 
-    AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [
+    AC_CHECK_LIB(Xpm,XpmFreeXpmImage, 
+    [
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -136,7 +145,8 @@ AC_DEFUN(PHP_GD_T1LIB,[
     done
 
     if test "$T1_DIR" != "no"; then
-      AC_CHECK_LIB(t1, T1_GetExtend, [
+      AC_CHECK_LIB(t1, T1_GetExtend, 
+      [
         AC_DEFINE(HAVE_LIBT1,1,[ ])
         PHP_ADD_INCLUDE("$T1_DIR/include")
         PHP_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib", GD_SHARED_LIBADD)

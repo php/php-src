@@ -55,21 +55,11 @@ if test "$PHP_DOM" != "no"; then
   PHP_SUBST(DOMXML_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
 
-  if test "$PHP_ZLIB" = "no"; then
-    AC_MSG_CHECKING([for zlib (needed by DOM support)])
-
-    AC_CHECK_LIB(z,deflate, [
-      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, DOMXML_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR(libz.(a|so) not found! Try with --with-zlib-dir=<DIR>)
-    ],[
-      -L$PHP_ZLIB_DIR/lib
-    ])
-
-  else
-    echo "checking for libz needed by libxml ... already zlib support"
-    PHP_ADD_LIBRARY(z,, DOMXML_SHARED_LIBADD)
+  if test "$PHP_ZLIB_DIR" = "no"; then
+    AC_MSG_ERROR(DOMXML requires ZLIB. Use --with-zlib-dir=<DIR>)
   fi
+
+  PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, DOMXML_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_DOMXML,1,[ ])
   PHP_EXTENSION(domxml, $ext_shared)
