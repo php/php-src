@@ -33,15 +33,14 @@ HashTable phpinfo_logo_hash;
 
 PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned char *data, int size)
 {
-	php_info_logo *info_logo = (php_info_logo *)malloc(sizeof(php_info_logo));
+	php_info_logo info_logo;
 
-	if(!info_logo) return FAILURE;
-	info_logo->mimetype = mimetype;
-	info_logo->mimelen  = strlen(mimetype);
-	info_logo->data     = data;
-	info_logo->size     = size;
+	info_logo.mimetype = mimetype;
+	info_logo.mimelen  = strlen(mimetype);
+	info_logo.data     = data;
+	info_logo.size     = size;
 
-	return zend_hash_add(&phpinfo_logo_hash, logo_string, strlen(logo_string), info_logo, sizeof(php_info_logo), NULL);
+	return zend_hash_add(&phpinfo_logo_hash, logo_string, strlen(logo_string), &info_logo, sizeof(php_info_logo), NULL);
 }
 
 PHPAPI int php_unregister_info_logos(char *logo_string)
