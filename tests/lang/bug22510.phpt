@@ -89,6 +89,7 @@ $bar->instance->finalize();
 print "I'm alive!\n";
 ?>
 --EXPECTF--
+Strict Standards: Assigning the return value of new by reference is deprecated in %s on line %d
 ok1
 bar::run1
 foo::method1
