@@ -39,7 +39,7 @@ Release: PRELEASE
 Group: Networking/Daemons
 Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
 Copyright: PHP License
-BuildRoot: /tmp/php4-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: webserver
 
 %description
@@ -90,15 +90,15 @@ mv php.keepme sapi/cgi/php
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/lib/apache
-install -m 755 .libs/libphp4.so $RPM_BUILD_ROOT/usr/lib/apache
-mkdir -p $RPM_BUILD_ROOT/usr/bin
-install -m 0755 sapi/cli/php $RPM_BUILD_ROOT/usr/bin
-install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT/usr/bin/php_cgi
-mkdir -p $RPM_BUILD_ROOT/man/man1
-install -m 0755 sapi/cli/php.1 $RPM_BUILD_ROOT/man/man1
-mkdir -p $RPM_BUILD_ROOT/etc
-install -m 0755 php.ini-recommended $RPM_BUILD_ROOT/etc/php.ini
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/apache
+install -m 0755 .libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/apache
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+install -m 0755 sapi/cli/php $RPM_BUILD_ROOT%{_bindir}
+install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT%{_bindir}/php_cgi
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+install -m 0755 sapi/cli/php.1 $RPM_BUILD_ROOT%{_mandir}/man1
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
+install -m 0755 php.ini-recommended $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -144,11 +144,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/usr/lib/apache/libphp4.so
-/usr/bin/php
-/usr/bin/php_cgi
-/man/man1/php.1*
-/etc/php.ini
+%{_libdir}/apache/libphp4.so
+%{_bindir}/php
+%{_bindir}/php_cgi
+%{_mandir}/man1/php.1*
+%{_sysconfdir}/php.ini
 
 %doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE NEWS
 EOF
