@@ -132,7 +132,7 @@ void shutdown_executor(ELS_D)
 
 	zend_hash_destroy(&EG(symbol_table));
 
-	destroy_resource_list(); /* must be destroyed after the main symbol table is destroyed */
+	destroy_resource_list(ELS_C); /* must be destroyed after the main symbol table is destroyed */
 
 	zend_ptr_stack_destroy(&EG(argument_stack));
 	if (EG(main_op_array)) {

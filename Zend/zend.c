@@ -283,7 +283,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 static void executor_globals_dtor(zend_executor_globals *executor_globals)
 {
 	zend_shutdown_constants(ELS_C);
-	destroy_resource_plist();
+	destroy_resource_plist(ELS_C);
 }
 
 
@@ -381,7 +381,7 @@ void zend_shutdown()
 	zend_shutdown_extensions();
 	free(zend_version_info);
 #ifndef ZTS
-	zend_shutdown_constants(ELS_C);
+	zend_shutdown_constants();
 #endif
 }
 
