@@ -66,9 +66,13 @@ static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_o
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
 
 #ifdef ZEND_WIN32
-#define ZEND_CHECK_TIMEOUT()													\
-		while (PeekMessage(&timeout_message, EG(timeout_window), 0, 0, PM_REMOVE)) {	\
-			DispatchMessage(&timeout_message);											\
+#define ZEND_CHECK_TIMEOUT()																\
+		{																					\
+			MSG timeout_message;															\
+																							\
+			while (PeekMessage(&timeout_message, EG(timeout_window), 0, 0, PM_REMOVE)) {	\
+				DispatchMessage(&timeout_message);											\
+			}																				\
 		}
 #else
 #define ZEND_CHECK_TIMEOUT()
@@ -963,9 +967,6 @@ void execute(zend_op_array *op_array ELS_DC)
 	temp_variable Ts[op_array->T];
 #endif
 	zend_bool original_in_execution=EG(in_execution);
-#ifdef ZEND_WIN32
-	MSG timeout_message;
-#endif
 
 	EG(in_execution) = 1;
 #if SUPPORT_INTERACTIVE
