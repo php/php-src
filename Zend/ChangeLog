@@ -1,3 +1,9 @@
+2003-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_scanner.l:
+      Add pseudo constant __METHOD__ to easily report namespace::class::method.
+      
+
 2003-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.h:

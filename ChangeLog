@@ -1,3 +1,72 @@
+2003-05-26  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/cgi_main.c:
+      MFB: nuked php_header() call from the sapi_cgi_log_message()
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      Nuke the php_header() call here. Fixes the rest of #14409.
+
+2003-05-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/htmlentities02.phpt:
+      MFH(r-1.8): changed the test so it would not fail on some old platforms.
+
+    * ext/standard/tests/strings/htmlentities02.phpt:
+      Changed the test so it would not fail on some old platforms.
+
+2003-05-26  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      Make LC_MESSAGES available, for platforms that don't have it natively,
+      when gettext is compiled in.
+
+2003-05-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Plug a leak - noticed by Ilia.
+
+2003-05-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php_cli.c:
+      - MFB
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cli/php_cli.c:
+      - Fixed a bug in reporting start-up errors with the CLI: No HTTP header
+      shall
+        be shown.
+
+    * sapi/apache2handler/php_functions.c:
+      - Fix typo
+
+2003-05-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/array/bug23788.phpt:
+      
+      Added regression test for bug #23788
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-05-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c
+      ext/standard/string.c:
+      MFB
+
+2003-05-26  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c:
+      http://bugs.php.net/bug.php?id=14409
+      move from PHP_4_3
+
 2003-05-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pcre/php_pcre.c
