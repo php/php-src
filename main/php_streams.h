@@ -27,8 +27,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+BEGIN_EXTERN_C()
 PHPAPI int php_file_le_stream(void);
 PHPAPI int php_file_le_pstream(void);
+END_EXTERN_C()
 
 /* {{{ Streams memory debugging stuff */
 
@@ -226,8 +228,10 @@ struct _php_stream  {
 #define PHP_STREAM_FCLOSE_FOPENCOOKIE 2
 
 /* allocate a new stream for a particular ops */
+BEGIN_EXTERN_C()
 PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 		const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC);
+END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
 
@@ -247,6 +251,7 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 #define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
+BEGIN_EXTERN_C()
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
 #define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
 #define PHP_STREAM_PERSISTENT_FAILURE	1 /* id exists but is not a stream! */
@@ -260,6 +265,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 #define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
+
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_free(stream, close_options)	_php_stream_free((stream), (close_options) TSRMLS_CC)
 #define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
@@ -337,6 +343,9 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL TSRMLS_CC)
 
+END_EXTERN_C()
+
+
 /* Flags for mkdir method in wrapper ops */
 #define PHP_STREAM_MKDIR_RECURSIVE	1
 /* define REPORT ERRORS 8 (below) */
@@ -384,8 +393,10 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 
 #define php_stream_truncate_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SUPPORTED, NULL TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
+BEGIN_EXTERN_C()
 PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRMLS_DC);
 #define php_stream_truncate_set_size(stream, size)	_php_stream_truncate_set_size((stream), (size) TSRMLS_CC)
+END_EXTERN_C()
 
 #define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add meta data information */
 #define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
@@ -401,6 +412,7 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRM
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
 #define PHP_STREAM_COPY_ALL		-1
+BEGIN_EXTERN_C()
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC);
 #define php_stream_copy_to_stream(src, dest, maxlen)	_php_stream_copy_to_stream((src), (dest), (maxlen) STREAMS_CC TSRMLS_CC)
 
@@ -414,6 +426,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 /* output all data from a stream */
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC TSRMLS_CC)
+END_EXTERN_C()
 
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
@@ -435,7 +448,9 @@ PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define PHP_STREAM_CAST_RELEASE		0x40000000	/* stream becomes invalid on success */
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
+BEGIN_EXTERN_C()
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC);
+END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0 TSRMLS_CC)
 #define php_stream_cast(stream, as, ret, show_err)	_php_stream_cast((stream), (as), (ret), (show_err) TSRMLS_CC)
@@ -491,6 +506,7 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC);
 int php_shutdown_stream_wrappers(int module_number TSRMLS_DC);
 PHP_RSHUTDOWN_FUNCTION(streams);
 
+BEGIN_EXTERN_C()
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -524,6 +540,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash();
 PHPAPI HashTable *php_get_stream_filters_hash();
+END_EXTERN_C()
 #endif
 
 /*

@@ -62,7 +62,9 @@
 /* like strerror, but caller must efree the returned string,
  * unless buf is not NULL.
  * Also works sensibly for win32 */
+BEGIN_EXTERN_C()
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
+END_EXTERN_C()
 
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
@@ -120,6 +122,7 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
+BEGIN_EXTERN_C()
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
 		int *error_code
@@ -163,7 +166,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
 PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr);
-
+END_EXTERN_C()
 
 struct _php_netstream_data_t	{
 	php_socket_t socket;
@@ -177,6 +180,7 @@ PHPAPI extern php_stream_ops php_stream_socket_ops;
 extern php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
+BEGIN_EXTERN_C()
 PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const char *persistent_id STREAMS_DC TSRMLS_DC );
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
@@ -193,6 +197,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
+END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC TSRMLS_CC)

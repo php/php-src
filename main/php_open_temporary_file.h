@@ -21,7 +21,9 @@
 #ifndef PHP_OPEN_TEMPORARY_FILE_H
 #define PHP_OPEN_TEMPORARY_FILE_H
 
+BEGIN_EXTERN_C()
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC);
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC);
+END_EXTERN_C()
 
 #endif /* PHP_OPEN_TEMPORARY_FILE_H */

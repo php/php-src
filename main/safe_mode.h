@@ -32,8 +32,10 @@
 /* flags for php_checkuid_ex() */
 #define CHECKUID_NO_ERRORS	0x01
 
-extern PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode);
-extern PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int flags);
-extern PHPAPI char *php_get_current_user(void);
+BEGIN_EXTERN_C()
+PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode);
+PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int flags);
+PHPAPI char *php_get_current_user(void);
+END_EXTERN_C()
 
 #endif
