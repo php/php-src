@@ -27,6 +27,14 @@
    +----------------------------------------------------------------------+
  */
 
+/*
+ * TODO:
+ * - improve session id creation to avoid collisions
+ *   (make use of mersenne twister, other data such as IP, browser etc.)
+ * - improve files handler for better scaling
+ * - add complete support for objects (partially implemented)
+ * - complete ZTS support (currently only useable as non-ZTS)
+ */
 
 #include <sys/time.h>
 
