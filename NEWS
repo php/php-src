@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added support for comparisons of arrays (with arrays) and objects (with
+  objects) (Zeev, Zend Engine)
 - Allow all functions that receive user-defined function callbacks to accept
   an array that contains an object and a method name, in place of a function
   name, e.g. usort($array, array($obj, "ObjSort")) (Zeev, Zend Engine)
