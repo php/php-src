@@ -286,7 +286,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
 					case IS_DOUBLE:
 					case IS_BOOL:
 						convert_to_double_ex(arg);
-						*p = Z_LVAL_PP(arg);
+						*p = Z_DVAL_PP(arg);
 						break;
 
 					case IS_ARRAY:
