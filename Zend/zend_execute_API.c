@@ -382,7 +382,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(return_value)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
-		((zend_internal_function *) function_state.function)->handler(param_count, retval, &EG(regular_list), &EG(persistent_list), object);
+		((zend_internal_function *) function_state.function)->handler(param_count, retval, &EG(regular_list), &EG(persistent_list), object, 1);
 	}
 	zend_ptr_stack_clear_multiple(ELS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
