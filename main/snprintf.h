@@ -63,17 +63,17 @@ Example:
 #define SNPRINTF_H
 
 #if !defined(HAVE_SNPRINTF) || PHP_BROKEN_SNPRINTF
-extern int ap_php_snprintf(char *, size_t, const char *, ...);
+int ap_php_snprintf(char *, size_t, const char *, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #define snprintf ap_php_snprintf
 #endif
 
 #if !defined(HAVE_VSNPRINTF) || PHP_BROKEN_VSNPRINTF
-extern int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
+int ap_php_vsnprintf(char *, size_t, const char *, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 #define vsnprintf ap_php_vsnprintf
 #endif
 
 #if PHP_BROKEN_SPRINTF
-int php_sprintf (char* s, const char* format, ...);
+int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 #define sprintf php_sprintf
 #endif
 
