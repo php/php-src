@@ -453,20 +453,6 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 }
 
 
-ZEND_API int zend_hash_pointer_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData)
-{
-	zend_error(E_ERROR, "zend_hash_pointer_*() functions are no longer supported");
-	return FAILURE;
-}
-
-
-ZEND_API int zend_hash_pointer_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, int flag)
-{
-	zend_error(E_ERROR, "zend_hash_pointer_*() functions are no longer supported");
-	return FAILURE;
-}
-
-
 static int zend_hash_if_full_do_resize(HashTable *ht)
 {
 	Bucket **t;
