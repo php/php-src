@@ -1921,7 +1921,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
   int    ret = TRUE;
   char  *buf;
   int    buf_size;
-  zval   func;
+  zval   func, param0, param1, param2, param3;
 	zval  *params[4];
 	zval **trace;
 	zval **fault;
@@ -1941,13 +1941,17 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 	INIT_ZVAL(func);
 	ZVAL_STRINGL(&func,"__doRequest",sizeof("__doRequest")-1,0);
-	ALLOC_INIT_ZVAL(params[0]);
+	INIT_ZVAL(param0);
+	params[0] = &param0;
 	ZVAL_STRINGL(params[0], buf, buf_size, 0);
-	ALLOC_INIT_ZVAL(params[1]);
+	INIT_ZVAL(param1);
+	params[1] = &param1;
 	ZVAL_STRING(params[1], location, 0);
-	ALLOC_INIT_ZVAL(params[2]);
+	INIT_ZVAL(param2);
+	params[2] = &param2;
 	ZVAL_STRING(params[2], action, 0);
-	ALLOC_INIT_ZVAL(params[3]);
+	INIT_ZVAL(param3);
+	params[3] = &param3;
 	ZVAL_LONG(params[3], version);
 
 	if (call_user_function(NULL, &this_ptr, &func, response, 4, params TSRMLS_CC) != SUCCESS) {
