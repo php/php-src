@@ -3,12 +3,10 @@ Copyright (c) 1998, 1999 Thai Open Source Software Center Ltd
 See the file COPYING for copying permission.
 */
 
-#if 0
+#include "php_compat.h"
+
 static char RCSId[]
   = "$Header$";
-#endif
-  
-#include "php_compat.h"
 
 #ifdef COMPILED_FROM_DSP
 #  include "winconfig.h"

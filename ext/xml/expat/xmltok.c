@@ -3,11 +3,6 @@ Copyright (c) 1998, 1999 Thai Open Source Software Center Ltd
 See the file COPYING for copying permission.
 */
 
-#if 0
-static char RCSId[]
-  = "$Header$";
-#endif
-  
 #include "php_compat.h"
 
 #ifdef COMPILED_FROM_DSP
@@ -1504,6 +1499,7 @@ int initScan(const ENCODING **encodingTable,
       if (ptr + 2 == end)
 	return XML_TOK_PARTIAL;
       if ((unsigned char)ptr[2] == 0xBF) {
+	*nextTokPtr = ptr + 3;
 	*encPtr = encodingTable[UTF_8_ENC];
 	return XML_TOK_BOM;
       }

@@ -1,3 +1,15 @@
+Release 1.95.2 Fri Jul 27 2001
+	- Nore changes to make MSVC happy with the build; add a single
+	  workspace to support both the library and xmlwf applicatiion.
+	- Added a Windows installer for Windows users; includes
+	  xmlwf.exe.
+	- Added compile-time constants that can be used to determine the
+	  Expat version
+	- Removed a lot of GNU-specific dependencies to aide portability
+	  among the various Unix flavors.
+	- Fix the UTF-8 BOM bug.
+	- Cleaned up warning messages for several compilers.
+	- Added the -Wall, -Wstrict-prototypes options for GCC.
 Release 1.95.1 Sun Oct 22 15:11:36 EDT 2000
 	- Changes to get expat to build under Microsoft compiler
 	- Removed all aborts and instead return an UNEXPECTED_STATE error.
