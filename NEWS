@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Add the Sablotron extension for XSL parsing. (Sterling)
+- Fixed a bug in checkdate() which caused < 1 years to be valid (Jani)
 - Added support for an optional output handler function for output
   buffering.  This enables transparent rendering of XML through XSL,
   transparent compression, etc. (Zeev)
