@@ -3,7 +3,7 @@
 /*
    * io.c
    *
-   * Implements the imple I/O 'helper' routines.
+   * Implements the simple I/O 'helper' routines.
    *
    * Not really essential, but these routines were used extensively in GD,
    * so they were moved here. They also make IOCtx calls look better...

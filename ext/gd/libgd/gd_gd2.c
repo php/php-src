@@ -539,7 +539,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 							}
 						} else {
 							ch = gdGetC(in);
-							if (ch == EOF) {
+							if ((int)ch == EOF) {
 								ch = 0;
 							}
 						}

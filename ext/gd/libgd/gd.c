@@ -94,7 +94,7 @@ static int gdFullAlphaBlend(int dst, int src);
 static int gdLayerOverlay(int dst, int src);
 static int gdAlphaBlendColor(int b1, int b2, int a1, int a2);
 static int gdAlphaOverlayColor(int src, int dst, int max);
-static int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
+int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
 void php_gd_error_ex(int type, const char *format, ...) 
 {
@@ -751,7 +751,7 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 	}
 }
 
-static int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
+int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y)
 {
 	int p = gdImageGetPixel(im, x, y);
 
@@ -2255,20 +2255,12 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	sty = (int *) gdMalloc (sizeof (int) * srcH);
 	accum = 0;
 	
+	/* Fixed by Mao Morimoto 2.0.16 */
 	for (i = 0; (i < srcW); i++) {
-		int got;
-		accum += (double) dstW / (double) srcW;
-		got = (int) floor (accum);
-		stx[i] = got;
-		accum -= got;
+		stx[i] = dstW * (i+1) / srcW - dstW * i / srcW ;
 	}
-	accum = 0;
 	for (i = 0; (i < srcH); i++) {
-		int got;
-		accum += (double) dstH / (double) srcH;
-		got = (int) floor (accum);
-		sty[i] = got;
-		accum -= got;
+		sty[i] = dstH * (i+1) / srcH - dstH * i / srcH ;
 	}
 	for (i = 0; (i < gdMaxColors); i++) {
 		colorMap[i] = (-1);
@@ -3019,6 +3011,15 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 			maxy = p[i].y;
 		}
 	}
+
+	/* 2.0.16: Optimization by Ilia Chipitsine -- don't waste time offscreen */
+	if (miny < 0) {
+		miny = 0;
+	}
+	if (maxy >= gdImageSY(im)) {
+		maxy = gdImageSY(im) - 1;
+	} 
+
 	/* Fix in 1.3: count a vertex only once */
 	for (y = miny; y <= maxy; y++) {
 		/*1.4           int interLast = 0; */
