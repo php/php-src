@@ -31,6 +31,8 @@
 #include "SAPI.h"
 #include "php_main.h"
 
+#include "dirent.h"
+
 #ifndef S_ISREG
 #define S_ISREG(mode)   (((mode) & S_IFMT) == S_IFREG)
 #endif
@@ -230,8 +232,6 @@ int php_init_config()
 	char *open_basedir;
 	int free_ini_search_path=0;
 	zend_file_handle fh;
-	DIR *dirp = NULL;
-	struct dirent *dir_entry;
 	struct stat sb;
 	char ini_file[MAXPATHLEN];
 	char *p;
@@ -397,13 +397,17 @@ int php_init_config()
 	/* If the config_file_scan_dir is set at compile-time, go and scan this directory and
 	 * parse any .ini files found in this directory. */
 	if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
-		dirp = VCWD_OPENDIR(PHP_CONFIG_FILE_SCAN_DIR);
-		if (dirp) {
-			fh.type = ZEND_HANDLE_FP;
-			while ((dir_entry = readdir(dirp)) != NULL) {
-				/* check for a .ini extension */
-				if ((p = strrchr(dir_entry->d_name,'.')) && strcmp(p,".ini")) continue;
-				snprintf(ini_file, MAXPATHLEN, "%s%c%s", PHP_CONFIG_FILE_SCAN_DIR, DEFAULT_SLASH, dir_entry->d_name);
+ 		struct dirent **namelist;
+ 		int ndir, i;
+ 
+ 		if ((ndir = scandir(PHP_CONFIG_FILE_SCAN_DIR, &namelist, 0, alphasort)) > 0) {
+ 			for (i = 0; i < ndir; i++) {
+  				/* check for a .ini extension */
+ 				if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
+ 					free(namelist[i]);
+  					continue;
+  				}
+ 				snprintf(ini_file, MAXPATHLEN, "%s%c%s", PHP_CONFIG_FILE_SCAN_DIR, DEFAULT_SLASH, namelist[i]->d_name);
 				if (VCWD_STAT(ini_file, &sb) == 0) {
 					if (S_ISREG(sb.st_mode)) {
 						if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
@@ -417,8 +421,10 @@ int php_init_config()
 						}
 					}
 				}
+				free(namelist[i]);
 			}
-			closedir(dirp);
+			free(namelist);
+
 			/* 
 			 * Don't need an extra byte for the \0 in this malloc as the last
 			 * element will not get a trailing , which gives us the byte for the \0
