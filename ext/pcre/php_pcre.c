@@ -111,57 +111,16 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 #define PCRE_CACHE_SIZE 4096
 
 /* {{{ static pcre_clean_cache */
-static void pcre_clean_cache(TSRMLS_D)
+static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 {
-	HashTable *ht = &PCRE_G(pcre_cache);
-	Bucket *p = NULL;
-	int clean_size = PCRE_CACHE_SIZE / 8;
+	int *num_clean = (int *)arg;
 
-	HANDLE_BLOCK_INTERRUPTIONS();
-
-	do {
-		p = ht->pListHead;
-
-		if (ht->pDestructor) {
-			ht->pDestructor(p->pData);
-		}
-		if (!p->pDataPtr) {
-			pefree(p->pData, ht->persistent);
-		}
-
-		if (p->pLast) {
-			p->pLast->pNext = p->pNext;
-		} else {
-			uint nIndex;
-
-			nIndex = p->h & ht->nTableMask;
-			ht->arBuckets[nIndex] = p->pNext;
-		}
-		if (p->pNext) {
-			p->pNext->pLast = p->pLast;
-		} else {
-			/* Nothing to do as this list doesn't have a tail */
-		}
-
-		if (p->pListLast != NULL) {
-			p->pListLast->pListNext = p->pListNext;
-		} else {
-			/* Deleting the head of the list */
-			ht->pListHead = p->pListNext;
-		}
-		if (p->pListNext != NULL) {
-			p->pListNext->pListLast = p->pListLast;
-		} else {
-			ht->pListTail = p->pListLast;
-		}
-		if (ht->pInternalPointer == p) {
-			ht->pInternalPointer = p->pListNext;
-		}
-		pefree(p, ht->persistent);
-		ht->nNumOfElements--;
-	} while (ht->nNumOfElements > PCRE_CACHE_SIZE - clean_size);
-
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	if (*num_clean > 0) {
+		(*num_clean)--;
+		return 1;
+	} else {
+		return 0;
+	}
 }
 /* }}} */
 
@@ -353,7 +312,8 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 	 * ones).
 	 */
 	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
-		pcre_clean_cache(TSRMLS_C);
+		int num_clean = PCRE_CACHE_SIZE / 8;
+		zend_hash_apply_with_argument(&PCRE_G(pcre_cache), pcre_clean_cache, &num_clean TSRMLS_CC);
 	}
 
 	/* Store the compiled pattern and extra info in the cache. */
