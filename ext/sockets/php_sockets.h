@@ -80,9 +80,7 @@ typedef struct php_iovec {
 } php_iovec_t;
 
 typedef struct {
-	int le_destroy;
-	int le_iov;
-	int use_system_read;
+	zend_bool use_system_read;
 } php_sockets_globals;
 
 
