@@ -1,3 +1,15 @@
+2004-08-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+      - MFH: Fixed bug #29873 (No defines around pcntl_*priority definitions).
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+      - Fixed bug #29873 (No defines around pcntl_*priority definitions).
+
 2004-08-27  Christian Stocker  <chregu@phant.ch>
 
     * (PHP_5_0)
