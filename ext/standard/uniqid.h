@@ -21,6 +21,8 @@
 #ifndef UNIQID_H
 #define UNIQID_H
 
+#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(uniqid);
+#endif
 
 #endif /* UNIQID_H */
