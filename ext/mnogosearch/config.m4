@@ -3,14 +3,14 @@ dnl $Id$
 
 PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 [  --with-mnogosearch[=DIR]       Include mnoGoSearch support.  DIR is the mnoGoSearch base
-                          install directory, defaults to /usr/local/udmsearch.])
+                          install directory, defaults to /usr/local/mnogosearch.])
 
   if test "$PHP_MNOGOSEARCH" != "no"; then
   
     if test "$PHP_MNOGOSEARCH" = "yes"; then
-      MNOGOSEARCH_BINDIR=/usr/local/udmsearch/bin
-      MNOGOSEARCH_INCDIR=/usr/local/udmsearch/include
-      MNOGOSEARCH_LIBDIR=/usr/local/udmsearch/lib
+      MNOGOSEARCH_BINDIR=/usr/local/mnogosearch/bin
+      MNOGOSEARCH_INCDIR=/usr/local/mnogosearch/include
+      MNOGOSEARCH_LIBDIR=/usr/local/mnogosearch/lib
     else
       MNOGOSEARCH_BINDIR=$PHP_MNOGOSEARCH/bin
       MNOGOSEARCH_INCDIR=$PHP_MNOGOSEARCH/include
