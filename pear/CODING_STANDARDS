@@ -17,7 +17,10 @@ need to ensure that it is called when you are editing php files):
   (setq tab-width 4
         c-basic-offset 4
         c-hanging-comment-ender-p nil
-        indent-tabs-mode nil))
+  	indent-tabs-mode
+	(not
+	 (and (string-match "/\\(PEAR\\|pear\\)/" (buffer-file-name))
+	      (string-match "\.php$" (buffer-file-name))))))
 
 Here are vim rules for the same thing:
 
