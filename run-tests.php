@@ -295,9 +295,9 @@ TEST $file
     $tested = trim($section_text['TEST']).' ('.basename($file).')';
 
     $tmp = realpath(dirname($file));
-	$tmp_skipif = "$tmp/_SKIPIF";
-	$tmp_file   = "$tmp/_FILE";
-	$tmp_post   = "$tmp/_POST";
+	$tmp_skipif = $tmp.uniqid('/phpt.');
+	$tmp_file   = $tmp.uniqid('/phpt.');
+	$tmp_post   = $tmp.uniqid('/phpt.');
     
 	@unlink($tmp_skipif);
 	@unlink($tmp_file);
@@ -369,7 +369,7 @@ COMMAND $cmd
 ";
     
     $out = `$cmd`;
-    
+
     @unlink($tmp_post);
     @unlink($tmp_file);
     
@@ -380,7 +380,7 @@ COMMAND $cmd
     
     $output = preg_replace('/\r\n/',"\n",$output);
     $wanted = preg_replace('/\r\n/',"\n",$wanted);
-
+	
     $ok = (0 == strcmp($output,$wanted));
     if ($ok) {
         echo "PASS $tested\n";
