@@ -1437,7 +1437,7 @@ PHP_FUNCTION(ignore_user_abort)
 /* }}} */
 
 /* {{{ proto int getservbyname(string service, string protocol)
-   Returns port associated with service. protocol must be "tcp" or "udp". */
+   Returns port associated with service. Protocol must be "tcp" or "udp". */
 PHP_FUNCTION(getservbyname)
 {
 	pval **name,**proto;  
@@ -1483,7 +1483,7 @@ PHP_FUNCTION(getservbyport)
 
 
 /* {{{ proto int getprotobyname(string name)
-   Returns protocol number associated with name as per /etc/protocols. */
+   Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
 	pval **name;
@@ -1509,7 +1509,7 @@ PHP_FUNCTION(getprotobyname)
 		
 
 /* {{{ proto string getprotobynumber(int proto)
-   Returns protocol name associated with protocol number proto. */
+   Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
 	pval **proto;
