@@ -56,6 +56,7 @@
 #include "ext/standard/php3_syslog.h"
 #include "ext/standard/php3_standard.h"
 #include "ext/COM/php3_COM.h"
+#include "ext/standard/reg.h"
 
 /* SNMP has to be moved to ext */
 /* #include "dl/snmp/php3_snmp.h" */
@@ -79,7 +80,8 @@ zend_module_entry *php3_builtin_modules[] = {
     phpext_syslog_ptr,
 	phpext_bcmath_ptr,
 	phpext_standard_ptr,
-	COM_module_ptr
+	COM_module_ptr,
+	phpext_regex_ptr
 };
 
 	
