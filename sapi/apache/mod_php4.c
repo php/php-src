@@ -759,6 +759,7 @@ int php_xbithack_handler(request_rec * r)
 {
 	php_apache_info_struct *conf;
 	HashTable *per_dir_conf;
+	TSRMLS_FETCH();
 
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		r->allowed |= (1 << METHODS) - 1;
