@@ -3189,7 +3189,9 @@ gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
 void
 gdImageAntialias (gdImagePtr im, int antialias)
 {
-	im->antialias = antialias;
+	if (im->trueColor){
+		im->antialias = antialias;
+	}
 }
 
 void
