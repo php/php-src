@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Upgraded regex library to alpha3.8 (Sascha)
+- Fixed selecting nested-tables in OCI8. (Thies)
 - RFC-854 fix for internal FTP-Code. Commands have to end in "\r\n" (Thies)
 - Fix OpenLink ODBC support (Stig)
 - Fix min/max behaviour (Thies)
