@@ -33,6 +33,8 @@
 #define DBX_RESULT_INFO      1
 #define DBX_RESULT_INDEX    2
 #define DBX_RESULT_ASSOC   4
+#define DBX_CMP_TEXT          0
+#define DBX_CMP_NUMBER      1
 
 #define MOVE_RETURNED_TO_RV(rv, returned_zval) { **rv = *returned_zval; zval_copy_ctor(*rv); zval_ptr_dtor(&returned_zval); }
 
