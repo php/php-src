@@ -331,6 +331,9 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'file':
+                if ($this->in_changelog) {
+                    break;
+                }
                 if (isset($attribs['name'])) {
                     $path = '';
                     if (count($this->dir_names)) {
@@ -488,6 +491,9 @@ class PEAR_Common extends PEAR
                 array_pop($this->dir_names);
                 break;
             case 'file':
+                if ($this->in_changelog) {
+                    break;
+                }
                 if ($data) {
                     $path = '';
                     if (count($this->dir_names)) {
