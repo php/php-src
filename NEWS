@@ -2,7 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
-- Fix crash bug in highlight_string() (Rasmus)
+- Fixed the Apache module to overwrite PATH_TRANSLATED with SCRIPT_FILENAME,
+  only if PATH_TRANSLATED is not previously set (Zeev)
+- Fixed crash bug in highlight_string() (Rasmus)
 - Added URL support for getimagesize() function (Jani)
 - Added xslt_set_scheme_handler() function (carmelo@akooe.com)
 - Added the pg_lolseek and pg_lotell functions (Derick)
@@ -11,7 +13,7 @@ PHP 4.0                                                                    NEWS
   offset. (Andrei)
 - Changed 'Z' flag to date() to always return timezone offset with
   negative sign if it's west of UTC. (Andrei)
-- Add the HTML_Processor class which provides common functions for processing HTML.
+- Added the HTML_Processor class which provides common functions for processing HTML.
   (Sterling)
 - Added localeconv() and strcoll() functions for localization. (Sean)
 - Added the xslt_set_base function. (Sterling)
@@ -26,7 +28,7 @@ PHP 4.0                                                                    NEWS
 - Made fopen() of HTTP URL follow redirects, $http_response_header will
   contain all headers with empty string as delimiter (Stig Venaas)
 - Added Console_Getopt class for parsing command-line args. (Andrei, PEAR)
-- Add an experimental version of the ZZipLib extension which provides the
+- Added an experimental version of the ZZipLib extension which provides the
   ability to read zip files. (Sterling)
 - Allow access to uploaded files in safe_mode. Beware that you can only
   read the file. If you copy it to new location the copy will not have the
@@ -38,7 +40,7 @@ PHP 4.0                                                                    NEWS
 - Changed ldap_search() and added functions ldap_parse_result(),
   ldap_first_reference(), ldap_next_reference() and ldap_parse_reference()
   to cope with LDAPv3 stuff like referrals and references. (Stig Venaas)
-- Fix date('r') overflow
+- Fixed date('r') overflow
 - Made the php.ini path reported in phpinfo() always point to the absolute
   path that was opened (Zeev)
 - Made the INI mechanism thread safe (Zeev, Zend engine)
