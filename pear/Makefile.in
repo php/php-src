@@ -98,7 +98,7 @@ PEAR_FILES = \
 	PEAR/Common.php \
 	PEAR/Installer.php \
 	PEAR/Packager.php \
-	PEAR/Updater.php \
+	PEAR/Uploader.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
 	XML/Parser.php \
