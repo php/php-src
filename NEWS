@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- is_executable now works on windows
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Added get_headers() function, it can be used to retrieve headers sent
