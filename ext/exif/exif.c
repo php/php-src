@@ -95,13 +95,15 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
+static unsigned char exif_thumbnail_force_ref[] = {2, BYREF_NONE, BYREF_FORCE_REST};
+
 /* {{{ exif_functions[]
  */
 function_entry exif_functions[] = {
 	PHP_FE(exif_read_data, NULL)
 	PHP_FALIAS(read_exif_data, exif_read_data, NULL)
 	PHP_FE(exif_tagname, NULL)
-	PHP_FE(exif_thumbnail, NULL)
+	PHP_FE(exif_thumbnail, exif_thumbnail_force_ref)
 	PHP_FE(exif_imagetype, NULL)
 	{NULL, NULL, NULL}
 };
@@ -812,10 +814,10 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case TAG_FMT_SINGLE:
 			php_error(E_NOTICE, "%s(): Found value of type single", get_active_function_name(TSRMLS_C));
-			return *(float *)value;
+			return (size_t)*(float *)value;
 		case TAG_FMT_DOUBLE:
 			php_error(E_NOTICE, "%s(): Found value of type double", get_active_function_name(TSRMLS_C));
-			return *(double *)value;
+			return (size_t)*(double *)value;
 	}
 	return 0;
 }
@@ -1118,7 +1120,7 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, int motorola_intel TSRMLS_DC)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, int motorola_intel TSRMLS_DC)
 {
 	int index;
 	image_info_value *info_value;
@@ -1247,7 +1249,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 
 					case TAG_FMT_SINGLE:
 						php_error(E_WARNING, "%s(): Found value of type single", get_active_function_name(TSRMLS_C));
-						info_value->f = (double)*(float *)value;
+						info_value->f = *(float *)value;
 
 					case TAG_FMT_DOUBLE:
 						php_error(E_WARNING, "%s(): Found value of type double", get_active_function_name(TSRMLS_C));
@@ -1264,7 +1266,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 /* {{{ exif_iif_add_tag
  Add a tag from IFD to image_info
 */
-static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value TSRMLS_DC)
+static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value TSRMLS_DC)
 {
 	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, image_info->motorola_intel TSRMLS_CC);
 }
@@ -1707,19 +1709,19 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
    We want to print out the marker contents as legible text;
    we must guard against random junk and varying newline representations.
 */
-static void exif_process_COM (image_info_type *image_info, uchar *value, int length TSRMLS_DC)
+static void exif_process_COM (image_info_type *image_info, uchar *value, size_t length TSRMLS_DC)
 {
 	exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2 TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ exif_process_COM
-   Process a COM marker.
+/* {{{ exif_process_CME
+   Process a CME marker.
    We want to print out the marker contents as legible text;
    we must guard against random junk and varying newline representations.
 */
 #ifdef EXIF_JPEG2000
-static void exif_process_CME (image_info_type *image_info, uchar *value, int length TSRMLS_DC)
+static void exif_process_CME (image_info_type *image_info, uchar *value, size_t length TSRMLS_DC)
 {
 	if (length>3) {
 		switch(value[2]) {
@@ -2221,7 +2223,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
  * Process one of the nested IFDs directories. */
 static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, int section_index, int ReadNextIFD TSRMLS_DC)
 {
-	int l;
+	size_t length;
 	int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
 	size_t byte_count, offset_val, fpos, fgot;
@@ -2346,16 +2348,16 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		switch(tag) {
 			case TAG_COPYRIGHT:
 				/* check for "<photographer> NUL <editor> NUL" */
-				if (byte_count>1 && (l=php_strnlen(value_ptr, byte_count)) > 0) {
-					if (l<byte_count-1) {
+				if (byte_count>1 && (length=php_strnlen(value_ptr, byte_count)) > 0) {
+					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
-						ImageInfo->CopyrightEditor        = estrdup(value_ptr+l+1);
-						ImageInfo->Copyright              = emalloc(strlen(value_ptr)+strlen(value_ptr+l+1)+3);
+						ImageInfo->CopyrightEditor        = estrdup(value_ptr+length+1);
+						ImageInfo->Copyright              = emalloc(strlen(value_ptr)+strlen(value_ptr+length+1)+3);
 						if (!ImageInfo->Copyright) {
 							EXIF_ERRLOG_EALLOC
 						} else {
-							sprintf(ImageInfo->Copyright, "%s, %s", value_ptr, value_ptr+l+1);
+							sprintf(ImageInfo->Copyright, "%s, %s", value_ptr, value_ptr+length+1);
 						}
 						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
 						/* but we are not supposed to change this                   */
@@ -2364,7 +2366,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						ImageInfo->Copyright = estrdup(value_ptr);
 					}
 				}
-				break;
+				break;   
 
 			case TAG_USERCOMMENT:
 				ImageInfo->UserCommentLength = exif_process_user_comment(ImageInfo, &(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count TSRMLS_CC);
@@ -2615,9 +2617,9 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, unsigne
 /* {{{ exif_process_APP12
    Process an JPEG APP12 block marker used by OLYMPUS
 */
-static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigned int length TSRMLS_DC)
+static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t length TSRMLS_DC)
 {
-	int l1, l2=0;
+	size_t l1, l2=0;
 
 	if ((l1 = php_strnlen(buffer+2, length-2)) > 0) {
 		exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2 TSRMLS_CC);
