@@ -19,6 +19,7 @@ PEAR_SUBDIRS = \
 	HTML \
 	Log \
 	Mail \
+	Math \
 	Net \
 	Payment \
 	PEAR \
@@ -55,6 +56,8 @@ PEAR_FILES = \
 	Mail.php \
 	Mail/sendmail.php \
 	Mail/smtp.php \
+	Math/Fraction.php \
+	Math/Util.php \
 	Net/SMTP.php \
 	Net/Socket.php \
 	PEAR/Installer.php \
