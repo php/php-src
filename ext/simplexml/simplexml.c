@@ -50,7 +50,7 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 	char *contents;
 
 	contents = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1);
-	if (!xmlIsBlankNode(node->xmlChildrenNode) && contents) {
+	if (!xmlIsBlankNode(node->xmlChildrenNode) && contents && node->properties == NULL) {
 		ZVAL_STRING(value, contents, 1);
 		xmlFree(contents);
 	} else {
@@ -75,7 +75,9 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	zval           *value;
 	php_sxe_object *sxe;
 	char           *name;
+	char           *contents;
 	xmlNodePtr      node;
+	xmlAttrPtr      attr;
 	int             counter = 0;
 
 	MAKE_STD_ZVAL(return_value);
@@ -85,10 +87,40 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
+	if (!strcmp(name, "__content")) {
+		contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
+		if (contents != NULL) {
+			RETVAL_STRING(contents, 1);
+			xmlFree(contents);
+		}
+
+		return return_value;
+	}
+	
 	if (sxe->node == NULL) {
 		sxe->node = node = xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
 	} else {
 		node = sxe->node->xmlChildrenNode;
+	}
+
+	attr = sxe->node->properties;
+	while (attr) {
+		if (!xmlStrcmp(attr->name, name)) {
+			if (counter == 1) {
+				array_init(return_value);
+				add_next_index_zval(return_value, value);
+			}
+
+			MAKE_STD_ZVAL(value);
+			contents = xmlNodeListGetString(sxe->document, attr->children, 1);
+			ZVAL_STRING(value, contents, 1);
+			xmlFree(contents);
+
+			if (++counter > 1) {
+				add_next_index_zval(return_value, value);
+			}
+		}
+		attr = attr->next;
 	}
 
 	while (node) {
@@ -123,6 +155,16 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 static void
 sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
+}
+/* }}} */
+
+/* {{{ sxe_property_get_ptr()
+ */
+static zval **
+sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
+{
+	/* XXX: Return NULL till I figure this out */
+	return NULL;
 }
 /* }}} */
 
@@ -202,7 +244,7 @@ static zend_object_handlers sxe_object_handlers[] = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	sxe_property_read,
 	sxe_property_write,
-	NULL,
+	sxe_property_get_ptr,
 	NULL,
 	NULL,
 	NULL,
