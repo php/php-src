@@ -770,7 +770,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 			/* exclude standard entries given to "Service" which should not go into ini entries */
 			ok=1;
 			for (j=0; nsapi_exclude_from_ini_entries[j]; j++) {
-				ok&=(!strcasecmp(entry->param->name, nsapi_exclude_from_ini_entries[j]));
+				ok&=(strcasecmp(entry->param->name, nsapi_exclude_from_ini_entries[j])!=0);
 			}
 
 			if (ok) {
