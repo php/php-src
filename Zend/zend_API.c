@@ -900,12 +900,13 @@ ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
 
-	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
-	free(lowercase_name);
-	
+
 	if (class_entry->builtin_functions) {
 		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table);
 	}
+
+	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
+	free(lowercase_name);
 	return register_class;
 }
 
