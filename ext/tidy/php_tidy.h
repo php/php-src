@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,8 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: John Coggeshall  <john@php.net>                              |
-  |         Ilia Alshanetsky <ilia@php.net>				 |
+  | Author: John Coggeshall <john@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
@@ -21,6 +20,10 @@
 
 #ifndef PHP_TIDY_H
 #define PHP_TIDY_H
+
+#include "tidyenum.h"
+#include "tidy.h"
+#include "buffio.h"
 
 extern zend_module_entry tidy_module_entry;
 #define phpext_tidy_ptr &tidy_module_entry
@@ -35,47 +38,31 @@ extern zend_module_entry tidy_module_entry;
 #include "TSRM.h"
 #endif
 
-#include "tidyenum.h"
-#include "tidy.h"
-#include "buffio.h"
-
-#ifdef ZTS
-#define TG(v) TSRMG(tidy_globals_id, zend_tidy_globals *, v)
-#else
-#define TG(v) (tidy_globals.v)
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
-
-#define TIDY_RV_FALSE(__t) __t->type = IS_BOOL; __t->value.lval = FALSE
-#define TIDY_RV_TRUE(__t) __t->type = IS_BOOL; __t->value.lval = TRUE
+#define PHP_TIDY_MODULE_VERSION	"2.0-dev"
 
 #define REMOVE_NEWLINE(_z) _z->value.str.val[_z->value.str.len-1] = '\0'; _z->value.str.len--;
 
-#define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
-#define TIDY_ATTR_CONST(attr) REGISTER_LONG_CONSTANT("TIDY_ATTR_" #attr, TidyAttr_##attr, CONST_CS | CONST_PERSISTENT)
-#define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
+#define TIDYDOC_FROM_OBJECT(tdoc, object) \
+	{ \
+		PHPTidyObj *obj = (PHPTidyObj*) zend_object_store_get_object(object TSRMLS_CC); \
+		tdoc = obj->ptdoc; \
+	}
 
-#define PHP_ME_MAPPING(name, func_name, arg_types) \
+#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
+
+#define TIDY_METHOD_MAP(name, func_name, arg_types) \
 	ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
 
-#define PHP_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)
-#define PHP_ATTR_METHOD(name)    PHP_FUNCTION(tam_ ##name)
-#define PHP_NODE_ME(name, param)      PHP_ME_MAPPING(name, tnm_ ##name, param)
-#define PHP_ATTR_ME(name, param)      PHP_ME_MAPPING(name, tam_ ##name, param)
+#define TIDY_THROW(message) \
+	PG(suppress_errors) = 0; \
+	EG(exception) = zend_throw_exception(tidy_ce_exception, message, 0 TSRMLS_CC);
 
-
-
-#define TIDY_REGISTER_OBJECT(_type, _object, _ptr) \
-	{ \
-		tidy_object *obj; \
-		obj = (tidy_object*)zend_object_store_get_object(_object TSRMLS_CC); \
-		obj->type = is_ ## _type; \
-		obj->u._type = _ptr; \
-	}
+#define TIDY_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)
+#define TIDY_NODE_ME(name, param)      TIDY_METHOD_MAP(name, tnm_ ##name, param)
+#define TIDY_DOC_METHOD(name)     PHP_FUNCTION(tdm_ ##name)
+#define TIDY_DOC_ME(name, param)  TIDY_METHOD_MAP(name, tdm_ ##name, param)
+#define TIDY_ATTR_METHOD(name)    PHP_FUNCTION(tam_ ##name)
+#define TIDY_ATTR_ME(name, param) TIDY_METHOD_MAP(name, tam_ ##name, param)
 
 #define REGISTER_TIDY_CLASS(name, parent) \
 	{ \
@@ -88,62 +75,122 @@ extern zend_module_entry tidy_module_entry;
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
     }
 
-#define GET_THIS_CONTAINER() \
-    PHPTidyObj *obj; \
-    { \
-        zval *object = getThis(); \
-        obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC); \
-    }
+#define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
+#define TIDY_ATTR_CONST(attr) REGISTER_LONG_CONSTANT("TIDY_ATTR_" #attr, TidyAttr_##attr, CONST_CS | CONST_PERSISTENT)
+#define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
 
-#define INSTANCIATE_NODE(_zval, _container, _node) \
-	tidy_instanciate(tidy_ce_node, _zval TSRMLS_CC); \
-	_container = (PHPTidyObj *) zend_object_store_get_object(_zval TSRMLS_CC); \
-	_container->node = _node; \
-	_container->attr = NULL; \
-	_container->type = is_node; \
-	tidy_add_default_properities(_container, is_node TSRMLS_CC);
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif
 
-#define INSTANCIATE_ATTR(_zval, _container, _attr) \
-	tidy_instanciate(tidy_ce_attr, _zval TSRMLS_CC); \
-	_container = (PHPTidyObj *) zend_object_store_get_object(_zval TSRMLS_CC); \
-	_container->node = NULL; \
-	_container->attr = _attr; \
-	_container->type = is_attr; \
-	tidy_add_default_properities(_container, is_attr TSRMLS_CC);
+#define ADD_PROPERITY_STRING(_table, _key, _string) \
+	{ \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		if(_string) { \
+			ZVAL_STRING(tmp, (char *)_string, 1); \
+		} else { \
+			ZVAL_EMPTY_STRING(tmp); \
+		} \
+		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+	}
 
-#define PHP_NODE_METHOD_IS_TYPE(_type, _const) \
-PHP_NODE_METHOD(is_ ##_type) \
-{ \
-	GET_THIS_CONTAINER(); \
-	if(tidyNodeGetType(obj->node) == _const) {\
-		RETURN_TRUE; \
-	} else { \
-		RETURN_FALSE; \
-	} \
+#define ADD_PROPERITY_LONG(_table, _key, _long) \
+	{ \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		ZVAL_LONG(tmp, _long); \
+		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+	}
+
+#define ADD_PROPERITY_NULL(_table, _key) \
+	{ \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		ZVAL_NULL(tmp); \
+		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+	}
+
+#define TIDY_PARSED_CHECK(_obj) \
+if(!_obj->ptdoc->parsed) { \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function."); \
+	RETURN_FALSE; \
+} 
+
+#define TIDY_PARSED_REPAIR_CHECK(_obj) \
+TIDY_PARSED_CHECK(_obj); \
+if(!_obj->ptdoc->repaired) { \
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must clean and repair the document before executing this function."); \
+    RETURN_FALSE; \
 }
 
-typedef enum {
-    is_node,
-    is_attr
-} tidy_obj_type;
+#define TIDY_SAFE_MODE_CHECK(filename) \
+if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) { \
+	RETURN_FALSE; \
+} \
 
-struct _PHPTidyDoc {
-    
-    TidyDoc     doc;
-    TidyBuffer  *errbuf;
-    zend_bool   parsed;
-};
+#define TIDY_SET_DEFAULT_CONFIG(_doc) \
+	if (TG(default_config) && TG(default_config)[0]) { \
+		if (tidyLoadConfig(_doc, TG(default_config)) < 0) { \
+			zend_error(E_ERROR, "Unable to load Tidy configuration file at '%s'.", TG(default_config)); \
+		} \
+	}
 
 typedef struct _PHPTidyDoc PHPTidyDoc;
 typedef struct _PHPTidyObj PHPTidyObj;
+
+typedef enum {
+    is_node,
+    is_attr,
+    is_doc,
+    is_exception
+} tidy_obj_type;
+
+typedef enum {
+    is_root_node,
+    is_html_node,
+    is_head_node,
+    is_body_node
+} tidy_base_nodetypes;
+
+struct _PHPTidyDoc {
+    TidyDoc     doc;
+    TidyBuffer  *errbuf;
+    zend_bool   parsed;
+    zend_bool   repaired;
+    unsigned int ref_count;
+};
 
 struct _PHPTidyObj {
     zend_object         std;
     TidyNode            node;
     TidyAttr            attr;
     tidy_obj_type       type;
+    
+    PHPTidyDoc          *ptdoc;
 };
 
+static char *php_tidy_file_to_mem(char *, zend_bool TSRMLS_DC);
+static void tidy_object_dtor(void *, zend_object_handle  TSRMLS_DC);
+static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
+static zend_object_value tidy_object_new_attr(zend_class_entry * TSRMLS_DC);
+static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
+static zend_object_value tidy_object_new_exception(zend_class_entry * TSRMLS_DC);
+static zend_class_entry *tidy_get_ce_node(zval * TSRMLS_DC);
+static zend_class_entry *tidy_get_ce_attr(zval * TSRMLS_DC);
+static zend_class_entry *tidy_get_ce_doc(zval * TSRMLS_DC);
+static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
+static int tidy_doc_cast_handler(zval *, zval *, int, int TSRMLS_DC);
+static int tidy_node_cast_handler(zval *, zval *, int, int TSRMLS_DC);
+static void tidy_doc_update_properties(PHPTidyObj * TSRMLS_DC);
+static void tidy_add_default_properities(PHPTidyObj *, tidy_obj_type TSRMLS_DC);
+static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType * TSRMLS_DC);
+static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
+
+void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
+void _php_tidy_register_tags(INIT_FUNC_ARGS);
+void _php_tidy_register_attributes(INIT_FUNC_ARGS);
 
 PHP_MINIT_FUNCTION(tidy);
 PHP_MSHUTDOWN_FUNCTION(tidy);
@@ -151,6 +198,9 @@ PHP_RINIT_FUNCTION(tidy);
 PHP_RSHUTDOWN_FUNCTION(tidy);
 PHP_MINFO_FUNCTION(tidy);
 
+PHP_FUNCTION(tidy_reset_config);
+PHP_FUNCTION(tidy_restore_config);
+PHP_FUNCTION(tidy_snapshot_config);
 PHP_FUNCTION(tidy_setopt);
 PHP_FUNCTION(tidy_getopt);
 PHP_FUNCTION(tidy_parse_string);
@@ -177,42 +227,28 @@ PHP_FUNCTION(tidy_load_config_enc);
 PHP_FUNCTION(tidy_set_encoding);
 PHP_FUNCTION(tidy_save_config);
 
+PHP_FUNCTION(ob_tidyhandler);
+
 PHP_FUNCTION(tidy_get_root);
 PHP_FUNCTION(tidy_get_html);
 PHP_FUNCTION(tidy_get_head);
 PHP_FUNCTION(tidy_get_body);
 
-PHP_NODE_METHOD(__construct);
-PHP_NODE_METHOD(attributes);
-PHP_NODE_METHOD(children);
+TIDY_ATTR_METHOD(__construct);
 
-PHP_NODE_METHOD(has_children);
-PHP_NODE_METHOD(has_siblings);
-PHP_NODE_METHOD(is_comment);
-PHP_NODE_METHOD(is_html);
-PHP_NODE_METHOD(is_xhtml);
-PHP_NODE_METHOD(is_xml);
-PHP_NODE_METHOD(is_text);
-PHP_NODE_METHOD(is_jste);
-PHP_NODE_METHOD(is_asp);
-PHP_NODE_METHOD(is_php);
-
-PHP_NODE_METHOD(next);
-PHP_NODE_METHOD(prev);
-PHP_NODE_METHOD(get_attr);
-PHP_NODE_METHOD(get_nodes);
-
-/* resource dtor */
-void dtor_TidyDoc(zend_rsrc_list_entry * TSRMLS_DC);
-
-/* constant register helpers */
-void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
-void _php_tidy_register_tags(INIT_FUNC_ARGS);
-void _php_tidy_register_attributes(INIT_FUNC_ARGS);
+TIDY_NODE_METHOD(__construct);
+TIDY_NODE_METHOD(has_children);
+TIDY_NODE_METHOD(has_siblings);
+TIDY_NODE_METHOD(is_comment);
+TIDY_NODE_METHOD(is_html);
+TIDY_NODE_METHOD(is_xhtml);
+TIDY_NODE_METHOD(is_xml);
+TIDY_NODE_METHOD(is_text);
+TIDY_NODE_METHOD(is_jste);
+TIDY_NODE_METHOD(is_asp);
+TIDY_NODE_METHOD(is_php);
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
-	PHPTidyDoc *tdoc;
-	zend_bool used;
 	char *default_config;
 ZEND_END_MODULE_GLOBALS(tidy)
 
@@ -221,9 +257,6 @@ ZEND_END_MODULE_GLOBALS(tidy)
 #else
 #define TG(v) (tidy_globals.v)
 #endif
-
-
-
 
 #endif
 
