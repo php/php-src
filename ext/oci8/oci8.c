@@ -442,7 +442,8 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_collection_trim,         NULL)
 	PHP_FE(oci_new_collection,          NULL)
 #endif
-
+	
+	PHP_FALIAS(oci_free_cursor,     oci_free_statement,       NULL)
 	PHP_FALIAS(ocifreecursor,       oci_free_statement,       NULL)
 	PHP_FALIAS(ocibindbyname,       oci_bind_by_name,       third_arg_force_ref)
 	PHP_FALIAS(ocidefinebyname,     oci_define_by_name,     third_arg_force_ref)
