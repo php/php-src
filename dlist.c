@@ -18,6 +18,12 @@
 * -----------------
 *
 * $Log$
+* Revision 1.2  1999/05/11 00:01:42  zeev
+* * Get Apache to work.  POST doesn't work yet.
+* * There are now -I directives for the absolute path of php4, php4/libzend and the builddir for
+*   the Apache module, so we can #include any php/Zend header.
+* * Rename config.h to php_config.h
+*
 * Revision 1.1  1999/04/21 23:11:20  ssb
 * moved apache, com and hyperwave into ext/
 *
@@ -54,13 +60,13 @@
 #include "php_config.h"
 #endif
 
-#if HYPERWAVE
-
 #include <stdio.h>
 #include <malloc.h>
 #include <signal.h>
-#include "debug.h"
-#include "DList.h"
+#include "dlist.h"
+
+#define PUBLIC
+#define PRIVATE static
 
 PUBLIC void *dlst_newnode(int size)
 /****************************************************************************
@@ -76,15 +82,15 @@ PUBLIC void *dlst_newnode(int size)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*node;
+	PHP_DLST_BUCKET	*node;
 
-	if ( !(node = (DLST_BUCKET*)malloc(size + sizeof(DLST_BUCKET))) ) {
+	if ( !(node = (PHP_DLST_BUCKET*)malloc(size + sizeof(PHP_DLST_BUCKET))) ) {
 		fprintf(stderr,"Not enough memory to allocate list node.\n");
 /*		raise(SIGABRT);*/
 		return NULL;
 		}
 
-	return DLST_USERSPACE(node);		/* Return pointer to user space */
+	return PHP_DLST_USERSPACE(node);		/* Return pointer to user space */
 }
 
 PUBLIC void dlst_freenode(void *node)
@@ -97,7 +103,7 @@ PUBLIC void dlst_freenode(void *node)
 *
 ****************************************************************************/
 {
-	free(DLST_HEADER(node));
+	free(PHP_DLST_HEADER(node));
 }
 
 PUBLIC DLIST *dlst_init(void)
@@ -148,13 +154,13 @@ PUBLIC void dlst_kill(DLIST *l,void (*freeNode)(void *node))
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n,*p;
+	PHP_DLST_BUCKET	*n,*p;
 
 	n = l->head->next;
 	while (n != l->z) {			/* Free all nodes in list				*/
 		p = n;
 		n = n->next;
-		(*freeNode)(DLST_USERSPACE(p));
+		(*freeNode)(PHP_DLST_USERSPACE(p));
 		}
 	free(l);					/* Free the list itself					*/
 }
@@ -169,13 +175,13 @@ PUBLIC void dlst_insertafter(DLIST *l,void *node,void *after)
 *
 * Description:	Inserts a new node into the list after the node 'after'. To
 *				insert a new node at the beginning of the list, user the
-*				macro DLST_HEAD in place of 'after'. ie:
+*				macro PHP_DLST_HEAD in place of 'after'. ie:
 *
-*					dlst_insertafter(mylist,node,DLST_HEAD(mylist));
+*					dlst_insertafter(mylist,node,PHP_DLST_HEAD(mylist));
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n = DLST_HEADER(node),*a = DLST_HEADER(after);
+	PHP_DLST_BUCKET	*n = PHP_DLST_HEADER(node),*a = PHP_DLST_HEADER(after);
 
 	n->next = a->next;
 	a->next = n;
@@ -196,9 +202,9 @@ PUBLIC void *dlst_deletenext(DLIST *l,void *node)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n = DLST_HEADER(node);
+	PHP_DLST_BUCKET	*n = PHP_DLST_HEADER(node);
 
-	node = DLST_USERSPACE(n->next);
+	node = PHP_DLST_USERSPACE(n->next);
 	n->next->next->prev = n;
 	n->next = n->next->next;
 	l->count--;
@@ -217,10 +223,10 @@ PUBLIC void *dlst_first(DLIST *l)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n;
+	PHP_DLST_BUCKET	*n;
 
 	n = l->head->next;
-	return (n == l->z ? NULL : DLST_USERSPACE(n));
+	return (n == l->z ? NULL : PHP_DLST_USERSPACE(n));
 }
 
 PUBLIC void *dlst_last(DLIST *l)
@@ -235,10 +241,10 @@ PUBLIC void *dlst_last(DLIST *l)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n;
+	PHP_DLST_BUCKET	*n;
 
 	n = l->z->prev;
-	return (n == l->head ? NULL : DLST_USERSPACE(n));
+	return (n == l->head ? NULL : PHP_DLST_USERSPACE(n));
 }
 
 PUBLIC void *dlst_next(void *prev)
@@ -261,10 +267,10 @@ PUBLIC void *dlst_next(void *prev)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n = DLST_HEADER(prev);
+	PHP_DLST_BUCKET	*n = PHP_DLST_HEADER(prev);
 
 	n = n->next;
-	return (n == n->next ? NULL : DLST_USERSPACE(n));
+	return (n == n->next ? NULL : PHP_DLST_USERSPACE(n));
 }
 
 PUBLIC void *dlst_prev(void *next)
@@ -287,18 +293,18 @@ PUBLIC void *dlst_prev(void *next)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*n = DLST_HEADER(next);
+	PHP_DLST_BUCKET	*n = PHP_DLST_HEADER(next);
 
 	n = n->prev;
-	return (n == n->prev ? NULL : DLST_USERSPACE(n));
+	return (n == n->prev ? NULL : PHP_DLST_USERSPACE(n));
 }
 
 /* Static globals required by merge()	*/
 
-static DLST_BUCKET	*z;
+static PHP_DLST_BUCKET	*z;
 static int 			(*cmp)(void*,void*);
 
-PRIVATE DLST_BUCKET *merge(DLST_BUCKET *a,DLST_BUCKET *b,DLST_BUCKET **end)
+PRIVATE PHP_DLST_BUCKET *merge(PHP_DLST_BUCKET *a,PHP_DLST_BUCKET *b,PHP_DLST_BUCKET **end)
 /****************************************************************************
 *
 * Function:		merge
@@ -310,13 +316,13 @@ PRIVATE DLST_BUCKET *merge(DLST_BUCKET *a,DLST_BUCKET *b,DLST_BUCKET **end)
 *
 ****************************************************************************/
 {
-	DLST_BUCKET	*c;
+	PHP_DLST_BUCKET	*c;
 
 	/* Go through the lists, merging them together in sorted order	*/
 
 	c = z;
 	while (a != z && b != z) {
-		if ((*cmp)(DLST_USERSPACE(a),DLST_USERSPACE(b)) <= 0) {
+		if ((*cmp)(PHP_DLST_USERSPACE(a),PHP_DLST_USERSPACE(b)) <= 0) {
 			c->next = a; c = a; a = a->next;
 			}
 		else {
@@ -362,11 +368,11 @@ PUBLIC void dlst_mergesort(DLIST *l,int (*cmp_func)(void*,void*))
 ****************************************************************************/
 {
 	int			i,N;
-	DLST_BUCKET	*a,*b;		/* Pointers to sublists to merge			*/
-	DLST_BUCKET	*c;			/* Pointer to end of sorted sublists		*/
-	DLST_BUCKET	*head;		/* Pointer to dummy head node for list		*/
-	DLST_BUCKET	*todo;		/* Pointer to sublists yet to be sorted		*/
-	DLST_BUCKET	*t;			/* Temporary								*/
+	PHP_DLST_BUCKET	*a,*b;		/* Pointers to sublists to merge			*/
+	PHP_DLST_BUCKET	*c;			/* Pointer to end of sorted sublists		*/
+	PHP_DLST_BUCKET	*head;		/* Pointer to dummy head node for list		*/
+	PHP_DLST_BUCKET	*todo;		/* Pointer to sublists yet to be sorted		*/
+	PHP_DLST_BUCKET	*t;			/* Temporary								*/
 
 	/* Set up globals required by merge() and pointer to head	*/
 
@@ -410,4 +416,3 @@ PUBLIC void dlst_mergesort(DLIST *l,int (*cmp_func)(void*,void*))
 		}
 }
 
-#endif

@@ -50,7 +50,7 @@
 #include <errno.h>
 #include <alloc.h>
 #include "hg_comm.h"
-#include "DList.h"
+#include "dlist.h"
 #include "php.h"
 #include "head.h"
 
