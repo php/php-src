@@ -1095,11 +1095,12 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
 }
 /* }}} */
 
-/* {{{ proto string read_exif_data(string filename)
+/* {{{ proto string read_exif_data(string filename [, int readall])
    Reads the EXIF header data from a JPEG file */ 
-PHP_FUNCTION(read_exif_data) {
-    pval **p_name;
-    int ac = ZEND_NUM_ARGS(), ret;
+PHP_FUNCTION(read_exif_data) 
+{
+    pval **p_name, **p_readall;
+    int ac = ZEND_NUM_ARGS(), ret, readall=1;
 	ImageInfoType ImageInfo;
 	char tmp[64];
 
@@ -1107,12 +1108,18 @@ PHP_FUNCTION(read_exif_data) {
 	ImageInfo.ThumbnailSize = 0;
 	*/
 
-    if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+    if ((ac < 1 || ac > 2) || zend_get_parameters_ex(ac, &p_name, &p_readall) == FAILURE) {
 		WRONG_PARAM_COUNT;
-
+	}
+	
 	convert_to_string_ex(p_name);
 
-	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name),1);
+	if(ac == 2) {
+		convert_to_long_ex(p_readall);
+		readall = Z_LVAL_PP(p_readall);
+	}
+
+	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name), readall);
 
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
