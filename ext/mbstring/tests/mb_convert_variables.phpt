@@ -72,9 +72,9 @@ print("{$aa[0]}{$aa[1]}{$aa[2]}\n"); // Converted to EUC-JP
 echo "== OBJECT TEST ==\n";
 class foo 
 {
-	var $s1;
-	var $s2;
-	var $s3;
+	public $s1;
+	public $s2;
+	public $s3;
 
 	function foo() 
 	{
@@ -88,9 +88,9 @@ class foo
 
 class bar 
 {
-	var $s1;
-	var $s2;
-	var $s3;
+	public $s1;
+	public $s2;
+	public $s3;
 
 	function bar() 
 	{
