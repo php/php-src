@@ -221,6 +221,8 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ void _close_odbc_pcon
+ */
 static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
@@ -233,7 +235,10 @@ static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	ODBCG(num_links)--;
 	ODBCG(num_persistent)--;
 }
+/* }}} */
 
+/* {{{ PHP_INI_DISP(display_link_nums)
+ */
 static PHP_INI_DISP(display_link_nums)
 {
 	char *value;
@@ -255,7 +260,10 @@ static PHP_INI_DISP(display_link_nums)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ PHP_INI_DISP(display_defPW)
+ */
 static PHP_INI_DISP(display_defPW)
 {
 	char *value;
@@ -279,7 +287,10 @@ static PHP_INI_DISP(display_defPW)
 		PUTS("<i>no value</i>");
 	}
 }
+/* }}} */
 
+/* {{{ PHP_INI_DISP(display_binmode)
+ */
 static PHP_INI_DISP(display_binmode)
 {
 	char *value;
@@ -307,7 +318,10 @@ static PHP_INI_DISP(display_binmode)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ PHP_INI_DISP(display_lrl)
+ */
 static PHP_INI_DISP(display_lrl)
 {
 	char *value;
@@ -329,7 +343,10 @@ static PHP_INI_DISP(display_lrl)
 		}
 	}
 }
+/* }}} */
 
+/* {{{ PHP_INI_BEGIN 
+ */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt,
 			allow_persistent, php_odbc_globals, odbc_globals)
@@ -350,6 +367,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt,
 			check_persistent, php_odbc_globals, odbc_globals)
 PHP_INI_END()
+/* }}} */
 
 #ifdef ZTS
 static void php_odbc_init_globals(php_odbc_globals *odbc_globals_p TSRMLS_DC)
@@ -358,6 +376,7 @@ static void php_odbc_init_globals(php_odbc_globals *odbc_globals_p TSRMLS_DC)
 }
 #endif
 
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(odbc)
 {
 #ifdef SQLANY_BUG
@@ -457,8 +476,9 @@ PHP_MINIT_FUNCTION(odbc)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(odbc)
 {
 	ODBCG(defConn) = -1;
@@ -467,18 +487,24 @@ PHP_RINIT_FUNCTION(odbc)
 	memset(ODBCG(lasterrormsg), '\0', SQL_MAX_MESSAGE_LENGTH);
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(odbc)
 {
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(odbc)
 {
 	char buf[32];
@@ -500,7 +526,9 @@ PHP_MINFO_FUNCTION(odbc)
 	DISPLAY_INI_ENTRIES();
 
 }	 
+/* }}} */
 
+/* {{{ odbc_sql_error */
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 {
 	char	state[6];
@@ -542,7 +570,9 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	}
 	*/
 }
+/* }}} */
 
+/* {{{ php_odbc_fetch_attribs */
 void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_result *result;
@@ -567,8 +597,9 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
-
+/* {{{ odbc_bindcols */
 int odbc_bindcols(odbc_result *result TSRMLS_DC)
 {
 	RETCODE rc;
@@ -625,7 +656,9 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 	}
 	return 1;
 }
+/* }}} */
 
+/* {{{ odbc_transact */
 void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_connection *conn;
@@ -646,7 +679,9 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ _close_pconn_with_id */
 static int _close_pconn_with_id(list_entry *le, int *id TSRMLS_DC)
 {
 	if(Z_TYPE_P(le) == le_pconn && (((odbc_connection *)(le->ptr))->id == *id)){
@@ -655,7 +690,9 @@ static int _close_pconn_with_id(list_entry *le, int *id TSRMLS_DC)
 		return 0;
 	}
 }
+/* }}} */
 
+/* {{{ odbc_column_lengths */
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
@@ -701,6 +738,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	RETURN_LONG(len);
 }
+/* }}} */
 
 /* Main User Functions */
 
@@ -761,7 +799,6 @@ PHP_FUNCTION(odbc_longreadlen)
 	php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto int odbc_prepare(int connection_id, string query)
    Prepares a statement for execution */
@@ -862,6 +899,7 @@ PHP_FUNCTION(odbc_prepare)
 /*
  * Execute prepared SQL statement. Supports only input parameters.
  */
+
 /* {{{ proto int odbc_execute(int result_id [, array parameters_array])
    Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
@@ -1284,6 +1322,7 @@ PHP_FUNCTION(odbc_exec)
 #define ODBC_NUM  1
 #define ODBC_OBJECT  2
 
+/* {{{ php_odbc_fetch_hash */
 static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	int i;
@@ -1415,6 +1454,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 	if (buf) efree(buf);
 }
+/* }}} */
 
 
 /* {{{ proto object odbc_fetch_object(int result [, int rownumber])
@@ -1568,6 +1608,7 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
+/* {{{ solid_fetch_prev */
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
 PHP_FUNCTION(solid_fetch_prev)
 {
@@ -1595,6 +1636,7 @@ PHP_FUNCTION(solid_fetch_prev)
 	RETURN_TRUE;
 }
 #endif
+/* }}} */
 
 /* {{{ proto int odbc_fetch_row(int result_id [, int row_number])
    Fetch a row */
@@ -2002,6 +2044,7 @@ PHP_FUNCTION(odbc_pconnect)
 }
 /* }}} */
 
+/* {{{ odbc_sqlconnect */
 int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int cur_opt, int persistent TSRMLS_DC)
 {
 	RETCODE rc;
@@ -2079,6 +2122,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 /*	(*conn)->open = 1;*/
 	return TRUE;
 }
+/* }}} */
+
 /* Persistent connections: two list-types le_pconn, le_conn and a plist
  * where hashed connection info is stored together with index pointer to
  * the actual link of type le_pconn in the list. Only persistent 
@@ -2092,6 +2137,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
  * "globals" in this module should actualy be per-connection variables.  I
  * simply fixed things to get them working for now.  Shane
  */
+/* {{{ odbc_do_connect */
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char    *db = NULL;
@@ -2279,6 +2325,7 @@ try_and_get_another_connection:
 	}
 	efree(hashed_details);
 }
+/* }}} */
 
 /* {{{ proto void odbc_close(int connection_id)
    Close an ODBC connection */
@@ -2594,6 +2641,7 @@ PHP_FUNCTION(odbc_rollback)
 }
 /* }}} */
 
+/* {{{ php_odbc_lasterror */
 static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
@@ -2629,6 +2677,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 	RETVAL_STRING(ptr, 0);
 }
+/* }}} */
 
 /* {{{ proto string odbc_error([int connection_id])
    Get the last error code */
