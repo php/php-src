@@ -500,14 +500,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
 		
-		/* We don't accept OPTIONS requests, but take everything else */
-		if (!PG(allow_webdav_methods)) {
-				if (r->method_number == M_OPTIONS) {
-					r->allowed |= (1 << METHODS) - 1;
-				return DECLINED;
-			}
-		}
-
 		/* If PHP parser engine has been turned off with an "engine off"
 		 * directive, then decline to handle this request
 		 */
