@@ -231,6 +231,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
+					zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
 				} else if (expr->value.obj.handlers->cast_object(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 					break;
 				}
