@@ -414,8 +414,28 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	}
 	efree(tempMailTo);
 
+	if (mailCc && *mailCc) {
+		tempMailTo = estrdup(mailCc);
+		/* Send mail to all rcpt's */
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(tempMailTo);
+				return (res);
+			}
+			if ((res = Ack(&server_response)) != SUCCESS) {
+				SMTP_ERROR_RESPONSE(server_response);
+				efree(tempMailTo);
+				return (res);
+			}
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
+	}
 	/* Send mail to all Cc rcpt's */
-	if (headers && (pos1 = strstr(headers_lc, "cc:"))) {
+	else if (headers && (pos1 = strstr(headers_lc, "cc:"))) {
 		/* Real offset is memaddress from the original headers + difference of
 		 * string found in the lowercase headrs + 3 characters to jump over
 		 * the cc: */
@@ -444,8 +464,11 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		efree(tempMailTo);
 	}
 
-	if (mailCc && *mailCc) {
-		tempMailTo = estrdup(mailCc);
+	/* Send mail to all Bcc rcpt's
+	   This is basically a rip of the Cc code above.
+	   Just don't forget to remove the Bcc: from the header afterwards. */
+	if (mailBcc && *mailBcc) {
+		tempMailTo = estrdup(mailBcc);
 		/* Send mail to all rcpt's */
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
@@ -464,11 +487,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		}
 		efree(tempMailTo);
 	}
-
-	/* Send mail to all Bcc rcpt's
-	   This is basically a rip of the Cc code above.
-	   Just don't forget to remove the Bcc: from the header afterwards. */
-	if (headers) {
+	else if (headers) {
 		if (pos1 = strstr(headers_lc, "bcc:")) {
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headrs + 4 characters to jump over
@@ -524,27 +543,6 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 				return OUT_OF_MEMORY;
 			}
 		}
-	}
-
-	if (mailBcc && *mailBcc) {
-		tempMailTo = estrdup(mailBcc);
-		/* Send mail to all rcpt's */
-		token = strtok(tempMailTo, ",");
-		while(token != NULL)
-		{
-			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
-			if ((res = Post(Buffer)) != SUCCESS) {
-				efree(tempMailTo);
-				return (res);
-			}
-			if ((res = Ack(&server_response)) != SUCCESS) {
-				SMTP_ERROR_RESPONSE(server_response);
-				efree(tempMailTo);
-				return (res);
-			}
-			token = strtok(NULL, ",");
-		}
-		efree(tempMailTo);
 	}
 
 	if ((res = Post("DATA\r\n")) != SUCCESS) {
