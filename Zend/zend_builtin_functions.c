@@ -1092,7 +1092,7 @@ ZEND_FUNCTION(get_declared_interfaces)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) zend_copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
