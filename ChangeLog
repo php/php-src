@@ -1,3 +1,68 @@
+2002-01-05  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c:
+    - Refuse attribute nodes on add_child() and add list destructor for PI
+      nodes. (Christian Stocker)
+    - Fix append_child() according to add_child().
+    - Fix some protos, minor code and warning message cosmetics.
+
+2002-01-05  jim winstead  <jimw@apache.org>
+
+    * ext/standard/tests/strings/wordwrap.phpt
+      ext/standard/string.c:
+    More tweaking of wordwrap() with the cut parameter set. It was being a
+    little too aggressive and cutting words without breaking at spaces
+    first. (A couple of tests were incorrect.)
+
+    * ext/standard/tests/strings/wordwrap.phpt
+      ext/standard/string.c:
+    New memcpy()-based wordwrap() implementation. The simple case
+    (single-character break, no forced break) appears to be about 60%
+    faster, and there's simply no comparison for non-simple cases with
+    non-trivial amounts of text. The old algorithm was O(n^2) (with an
+    unfortunately large constant factor) because of the use of strncat(),
+    the new one is O(n). Added some more tests, too.
+
+2002-01-05  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear-get.in
+      pear/scripts/pear.in: Added check for $argv avaible
+    (thanks Michael Härtl <mhaertl@pressline.de>)
+
+2002-01-05  jim winstead  <jimw@apache.org>
+
+    * ext/standard/math.c: Fix the Win32 compile.
+
+2002-01-05  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/math.c
+      ext/standard/basic_functions.c: Fixed some protos.
+
+2002-01-05  jim winstead  <jimw@apache.org>
+
+    * ext/standard/math.c:
+    Apparently multi_convert_to_double_ex() didn't quite do what I
+    thought. Still need to handle numeric strings.
+
+    * ext/standard/tests/math/pow.phpt
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h:
+    Fixed pow(), and added finite(), isinf(), and isnan(). Also fixed
+    pow() tests.
+
+    * ext/standard/tests/math/pow.phpt:
+    good grief, positive powers of 0 are well-defined. (code fix coming.)
+
+    * ext/standard/reg.c:
+    Be more aggressive in making sure that substring matches are valid in
+    ereg_replace before trying to use them.
+
+2002-01-05  Zak Greant  <zak@jobvillage.com>
+
+    * ext/standard/tests/array/array_data.txt:
+    Surprising how tests can fail when they don't have any supporting data :) Thanks for the catch Jan and Jim
+
 2002-01-04  Jon Parise  <jon@csh.rit.edu>
 
     * main/rfc1867.c: Nuke unused variable warning (end_arr).
