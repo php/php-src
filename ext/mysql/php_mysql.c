@@ -425,7 +425,6 @@ PHP_RINIT_FUNCTION(mysql)
 	/* Reset connect error/errno on every request */
 	MySG(connect_error) = NULL;
 	MySG(connect_errno) =0;
-	MySG(trace_mode) = 0;
 	MySG(result_allocated) = 0;
 	return SUCCESS;
 }
