@@ -182,7 +182,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-INCLUDES="-I\$(top_builddir)/Zend -I\$(top_srcdir)"
+INCLUDES="$INCLUDES -I\$(top_builddir)/Zend -I\$(top_srcdir)"
 
 AC_CHECK_LIB(nsl, gethostname, [
  AC_ADD_LIBRARY(nsl)
