@@ -4012,17 +4012,9 @@ PHP_FUNCTION(exif_thumbnail)
 	}
 
 	convert_to_string_ex(p_name);
-	if (arg_c >= 3) {
-		zval_dtor(*p_width);
-		zval_dtor(*p_height);
-	}
-	if (arg_c >= 4) {
-		zval_dtor(*p_imagetype);
-	}
 
 	ret = exif_read_file(&ImageInfo, Z_STRVAL_PP(p_name), 1, 0 TSRMLS_CC);
 	if (ret==FALSE) {
-		exif_discard_imageinfo(&ImageInfo);
 		RETURN_FALSE;
 	}
 
@@ -4043,10 +4035,13 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo TSRMLS_CC);
 		}
+		zval_dtor(*p_width);
+		zval_dtor(*p_height);
 		ZVAL_LONG(*p_width,  ImageInfo.Thumbnail.width);
 		ZVAL_LONG(*p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
+		zval_dtor(*p_imagetype);
 		ZVAL_LONG(*p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
@@ -4076,6 +4071,7 @@ PHP_FUNCTION(exif_imagetype)
 	if (zend_get_parameters_ex(1, &arg1) == FAILURE)
 		WRONG_PARAM_COUNT;
 
+	convert_to_string_ex(arg1);
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
 	if (stream == NULL) {
