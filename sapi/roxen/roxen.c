@@ -112,7 +112,7 @@ static unsigned char roxen_php_initialized;
 } while(0)
 
 /* Toggle debug printouts, for now... */
-//#define MUCH_DEBUG
+/* #define MUCH_DEBUG */
 #ifndef MUCH_DEBUG
 void no_fprintf(){}
 #define fprintf no_fprintf
@@ -204,7 +204,6 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
   safe_apply(MY_FD, "write", 1);
   if(sp[-1].type == PIKE_T_INT)
     sent_bytes = sp[-1].u.integer;
-  //free_string(to_write);
   pop_stack();
   if(sent_bytes != str_length) {
     /* This means the connection is closed. Dead. Gone. *sniff*  */
@@ -376,7 +375,6 @@ php_roxen_sapi_read_cookies(SLS_D)
 static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 {
   char buf[512];
-  //  int uptime = Ns_InfoUptime();
 	
   PUTS("<table border=5 width=600>\n");
   php_info_print_table_row(2, "SAPI module version", "$Id$");
@@ -495,12 +493,14 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
     free_array(indices);
   }
   
-  //  MAKE_STD_ZVAL(pval);
-  //  pval->type = IS_LONG;
-  //  pval->value.lval = Ns_InfoBootTime();
-  //  zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
+  /*
+    MAKE_STD_ZVAL(pval);
+    pval->type = IS_LONG;
+    pval->value.lval = Ns_InfoBootTime();
+    zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
   
-  //  fprintf(stderr, "Set up header environment.\n");
+    fprintf(stderr, "Set up header environment.\n");
+  */
 }
 
 /*
@@ -553,7 +553,7 @@ void f_php_roxen_request_handler(INT32 args)
   current_thread = th_self();
   GET_THIS();
   SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);;
-  SG(server_context) = (void *)1; // avoid server_context == NULL
+  SG(server_context) = (void *)1; /* avoid server_context == NULL */
   /* path_translated is the absolute path to the file */
   SG(request_info).path_translated =
     lookup_string_header("PATH_TRANSLATED", NULL);
@@ -601,11 +601,6 @@ void pike_module_init()
   pike_add_function("run", f_php_roxen_request_handler,
 		    "function(string,mapping,object,function:int)", 0);
   add_program_constant("Interpretor", (php_program = end_program()), 0);
-  
-  /* TSRM is used to allocate a per-thread structure */
-  /* read the configuration */
-  //php_roxen_config(ctx);
-
 }
 
 /*
