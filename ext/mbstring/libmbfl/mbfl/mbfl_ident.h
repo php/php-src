@@ -31,6 +31,7 @@
 #ifndef MBFL_IDENT_H
 #define MBFL_IDENT_H
 
+#include "mbfl_defs.h"
 #include "mbfl_encoding.h"
 
 /*
@@ -55,17 +56,17 @@ struct mbfl_identify_vtbl {
 	int (*filter_function)(int c, mbfl_identify_filter *filter);
 };
 
-void mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, const struct mbfl_identify_vtbl *vtbl);
-const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding);
-void mbfl_identify_filter_select_vtbl(mbfl_identify_filter *filter);
-mbfl_identify_filter * mbfl_identify_filter_new(enum mbfl_no_encoding encoding);
-void mbfl_identify_filter_delete(mbfl_identify_filter *filter);
+MBFLAPI extern void mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, const struct mbfl_identify_vtbl *vtbl);
+MBFLAPI extern const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding);
+MBFLAPI extern void mbfl_identify_filter_select_vtbl(mbfl_identify_filter *filter);
+MBFLAPI extern mbfl_identify_filter * mbfl_identify_filter_new(enum mbfl_no_encoding encoding);
+MBFLAPI extern void mbfl_identify_filter_delete(mbfl_identify_filter *filter);
 
-void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter);
-void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter);
-void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter);
+MBFLAPI extern void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter);
+MBFLAPI extern void mbfl_filt_ident_common_dtor(mbfl_identify_filter *filter);
+MBFLAPI extern void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter);
 
-int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter);
-int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
+MBFLAPI extern int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter);
+MBFLAPI extern int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter);
 
 #endif /* MBFL_IDENT_H */

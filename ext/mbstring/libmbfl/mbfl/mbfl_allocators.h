@@ -31,6 +31,8 @@
 #ifndef MBFL_ALLOCATORS_H
 #define MBFL_ALLOCATORS_H
 
+#include "mbfl_defs.h"
+
 typedef struct _mbfl_allocators {
 	void *(*malloc)(unsigned int);
 	void *(*realloc)(void *, unsigned int);
@@ -41,7 +43,7 @@ typedef struct _mbfl_allocators {
 	void (*pfree)(void *);
 } mbfl_allocators;
 
-extern mbfl_allocators *__mbfl_allocators; 
+MBFLAPI extern mbfl_allocators *__mbfl_allocators; 
 
 #define mbfl_malloc __mbfl_allocators->malloc
 #define mbfl_realloc __mbfl_allocators->realloc

@@ -22,20 +22,31 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
- * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ * The source code included in this files was separated from mbfilter.h
+ * by Moriyoshi Koizumi <moriyoshi@php.net> on 20 Dec 2002. The file
+ * mbfilter.h is included in this package .
+ *
  */
 
-#ifndef MBFL_MBFILTER_PASS_H
-#define MBFL_MBFILTER_PASS_H
+#ifndef MBFL_DEFS_H
+#define MBFL_DEFS_H
 
-#include "mbfl_defs.h"
-#include "mbfilter.h"
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL (0L)
+#else
+#define NULL (void *)(0L)
+#endif
+#endif 
 
-MBFLAPI extern const mbfl_encoding mbfl_encoding_pass; 
-MBFLAPI extern const struct mbfl_convert_vtbl vtbl_pass;
+#ifdef WIN32
+#ifdef MBFL_DLL_EXPORT
+#define MBFLAPI __declspec(dllexport)
+#else
+#define MBFLAPI __declspec(dllimport)
+#endif
+#else
+#define MBFLAPI
+#endif
 
-MBFLAPI extern int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter);
-
-#endif /* MBFL_MBFILTER_PASS_H */
+#endif /* MBFL_DEFS_H */

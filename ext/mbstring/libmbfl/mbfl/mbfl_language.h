@@ -31,6 +31,7 @@
 #ifndef MBFL_LANGUAGE_H
 #define MBFL_LANGUAGE_H
 
+#include "mbfl_defs.h"
 #include "mbfl_encoding.h"
 
 enum mbfl_no_language {
@@ -74,10 +75,10 @@ typedef struct _mbfl_language {
 	enum mbfl_no_encoding mail_body_encoding;
 } mbfl_language;
 
-const mbfl_language * mbfl_name2language(const char *name);
-const mbfl_language * mbfl_no2language(enum mbfl_no_language no_language);
-enum mbfl_no_language mbfl_name2no_language(const char *name);
-const char * mbfl_no_language2name(enum mbfl_no_language no_language);
+MBFLAPI extern const mbfl_language * mbfl_name2language(const char *name);
+MBFLAPI extern const mbfl_language * mbfl_no2language(enum mbfl_no_language no_language);
+MBFLAPI extern enum mbfl_no_language mbfl_name2no_language(const char *name);
+MBFLAPI extern const char * mbfl_no_language2name(enum mbfl_no_language no_language);
 
 
 #endif /* MBFL_LANGUAGE_H */

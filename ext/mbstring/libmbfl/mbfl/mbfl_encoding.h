@@ -31,6 +31,8 @@
 #ifndef MBFL_ENCODING_H
 #define MBFL_ENCODING_H
 
+#include "mbfl_defs.h"
+
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
 	mbfl_no_encoding_pass,
@@ -112,12 +114,12 @@ typedef struct _mbfl_encoding {
 	unsigned int flag;
 } mbfl_encoding;
 
-const mbfl_encoding * mbfl_name2encoding(const char *name);
-const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
-enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
-const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
-const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
-int mbfl_is_support_encoding(const char *name);
+MBFLAPI extern const mbfl_encoding * mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
+MBFLAPI extern const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern int mbfl_is_support_encoding(const char *name);
 
 
 #endif /* MBFL_ENCODING_H */
