@@ -288,7 +288,10 @@ int main()
   LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ]) 
-], [], [])
+], [], [
+  dnl cross-compile needs something here
+  LIBZEND_MM_ALIGN=8
+])
 
 AC_MSG_RESULT(done)
 
