@@ -19,7 +19,8 @@ class TestY {
 
   function __construct() {
     $this->A[1] = new TestX(1);
-    $this->A[2] = new TestX(2);
+    $this->A[2] = & new TestX(2);
+    $this->A[3] = & $this->A[2];
     $this->B = $this->A[1];
   }
 }
@@ -31,17 +32,23 @@ $after = unserialize($ser);
 var_dump($before, $after);
 
 ?>
+===DONE===
 --EXPECTF--
 object(TestY)#%d (2) {
   ["A"]=>
-  array(2) {
+  array(3) {
     [1]=>
     object(TestX)#%d (1) {
       ["i"]=>
       int(1)
     }
     [2]=>
-    object(TestX)#%d (1) {
+    &object(TestX)#%d (1) {
+      ["i"]=>
+      int(2)
+    }
+    [3]=>
+    &object(TestX)#%d (1) {
       ["i"]=>
       int(2)
     }
@@ -54,21 +61,27 @@ object(TestY)#%d (2) {
 }
 object(TestY)#%d (2) {
   ["A"]=>
-  array(2) {
+  array(3) {
     [1]=>
-    &object(TestX)#%d (1) {
+    object(TestX)#%d (1) {
       ["i"]=>
       int(1)
     }
     [2]=>
-    object(TestX)#%d (1) {
+    &object(TestX)#%d (1) {
+      ["i"]=>
+      int(2)
+    }
+    [3]=>
+    &object(TestX)#%d (1) {
       ["i"]=>
       int(2)
     }
   }
   ["B"]=>
-  &object(TestX)#%d (1) {
+  object(TestX)#%d (1) {
     ["i"]=>
     int(1)
   }
 }
+===DONE===
