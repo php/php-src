@@ -7,6 +7,7 @@ DBA Insert/Fetch Test
 --FILE--
 <?php
 	require_once('test.inc');
+	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
 		dba_insert("key1", "This is a test insert", $db_file);
 		echo dba_fetch("key1", $db_file);
@@ -15,5 +16,6 @@ DBA Insert/Fetch Test
 		echo "Error creating database\n";
 	}
 ?>
---EXPECT--
+--EXPECTF--
+database handler: %s
 This is a test insert

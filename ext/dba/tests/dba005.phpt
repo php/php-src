@@ -7,6 +7,7 @@ DBA FirstKey/NextKey Loop Test With 5 Items
 --FILE--
 <?php
 	require_once('test.inc');
+	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
 		dba_insert("key2", "Content String 2", $db_file);
@@ -28,5 +29,6 @@ DBA FirstKey/NextKey Loop Test With 5 Items
 		echo "Error creating database\n";
 	}
 ?>
---EXPECT--
+--EXPECTF--
+database handler: %s
 5YYYYY
