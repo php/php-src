@@ -145,13 +145,6 @@ gdFreeDynamicCtx (struct gdIOCtx *ctx)
 
   gdFree (ctx);
 
-  /* clean up the data block and return it */
-  if (dp->data != NULL)
-    {
-      gdFree (dp->data);
-      dp->data = NULL;
-    }
-
   dp->realSize = 0;
   dp->logicalSize = 0;
 
