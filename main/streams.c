@@ -785,8 +785,8 @@ static int stream_cookie_seeker(void *cookie, off_t position, int whence) {
 }
 
 static int stream_cookie_closer(void *cookie) {
-	TSRMLS_FETCH();
 	php_stream *stream = (php_stream*)cookie;
+	TSRMLS_FETCH();
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 	return php_stream_close(stream);
