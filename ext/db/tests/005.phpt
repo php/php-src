@@ -1,5 +1,7 @@
 --TEST--
 DBM FirstKey/NextKey Loop Test With 5 Items
+--SKIPIF--
+<?php if (!extension_loaded("db")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--

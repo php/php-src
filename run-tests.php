@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
  */
 
+ob_implicit_flush();
 
 define('TEST_PASSED', 0);
 define('TEST_FAILED', -1);
@@ -191,7 +192,7 @@ function find_testdirs($dir = '.', $first_pass = true) {
     }
     while ($ent = readdir($dp)) {
 	$path = "$dir/$ent";
-	if ($skip[$ent] || substr($ent, 0, 1) == "." || !is_dir($path)) {
+	if ((isset($skip[$ent]) && $skip[$ent]) || substr($ent, 0, 1) == "." || !is_dir($path)) {
 	    continue;
 	}
 	if (strstr("/$path/", "/tests/")) {
@@ -211,14 +212,14 @@ function run_tests_in_dir($dir = '.') {
     }
     $testfiles = array();
     while ($ent = readdir($dp)) {
-	if ($skip[$ent] || substr($ent, 0, 1) == "." || substr($ent, -5) != ".phpt") {
+	if ((isset($skip[$ent]) && $skip[$ent]) || substr($ent, 0, 1) == "." || substr($ent, -5) != ".phpt") {
 	    continue;
 	}
 	$testfiles[] = "$dir/$ent";
-	$tests_in_dir[$dir]++;
+	if(isset($tests_in_dir[$dir]))	$tests_in_dir[$dir]++; else $tests_in_dir[$dir]=1;
     }
     closedir($dp);
-    if ($tests_in_dir[$dir] == 0) {
+    if (isset($tests_in_dir[$dir]) && ($tests_in_dir[$dir] == 0)) {
 	return true;
     }
     $oskipped = $skipped;
@@ -240,7 +241,7 @@ function run_tests_in_dir($dir = '.') {
 	}
 	$total++;
     }
-    if ($oskipped + $tests_in_dir[$dir] == $skipped) {
+    if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
 	writeln("(all skipped)");
     }
     writeln("");
@@ -275,6 +276,7 @@ function delete_tmpfiles() {
  * @return bool whether the files were "equal"
  */
 function compare_results($file1, $file2) {
+	$data1 = $data2 = "";
     if (!($fp1 = @fopen($file1, "r")) || !($fp2 = @fopen($file2, "r"))) {
 	return false;
     }
@@ -318,17 +320,17 @@ function run_test($file) {
     while ($line = fgets($fp, 4096)) {
 	if (preg_match('/^--([A-Z]+)--$/', $line, $matches)) {
 	    $var = $matches[1];
-	    if ($tmpfile[$var]) {
+	    if (isset($tmpfile[$var]) && $tmpfile[$var]) {
 		$fps[$var] = @fopen($tmpfile[$var], "w");
 	    } else {
 		$$var = '';
 	    }
 	} else {
-	    if ($var) {
+	    if (isset($var) && $var) {
 		if ($var == "POST") {
 		    $line = trim($line);
 		}
-		if ($fps[$var]) {
+		if (isset($fps[$var]) && $fps[$var]) {
 		    fwrite($fps[$var], $line);
 		} else {
 		    $$var .= $line;
@@ -336,16 +338,18 @@ function run_test($file) {
 	    }
 	}
     }
-    reset($fps);
-    while (list($k, $v) = each($fps)) {
-	if (is_resource($v)) {
-	    fclose($v);
-	}
+		if(isset($fps) && is_array($fps)) {
+			reset($fps);
+			while (list($k, $v) = each($fps)) {
+				if (is_resource($v)) {
+					fclose($v);
+				}
+			}
     }
     putenv("PHP_TEST=1");
     putenv("REDIRECT_STATUS=1");
     putenv("CONTENT_LENGTH=");
-    putenv("QUERY_STRING=$GET");
+    putenv("QUERY_STRING=".(isset($GET)?$GET:""));
     if (isset($fps["SKIPIF"])) {
 	$tmpfile["SKIPIF_OUTPUT"] = tempnam($tmpdir, $tmpfix);
 	putenv("REQUEST_METHOD=GET");
@@ -403,7 +407,7 @@ function run_test($file) {
     }
     fclose($ofp);
     pclose($cp);
-    $desc = trim($TEST);
+    $desc = isset($test)?trim($TEST):"";
     $outfile = preg_replace('/\.phpt$/', '.out', $file);
     $expectfile = preg_replace('/\.phpt$/', '.exp', $file);
     $phpfile = preg_replace('/\.phpt$/', '.php', $file);
