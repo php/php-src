@@ -448,7 +448,9 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 		return OK;
 	}
 	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-	zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
+	if (per_dir_conf) {
+		zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
+	}
 
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
