@@ -432,7 +432,8 @@ class DB_Error extends PEAR_Error
      */
 
     function DB_Error($code = DB_ERROR, $mode = PEAR_ERROR_RETURN,
-		      $level = E_USER_NOTICE, $debuginfo = null) {
+		      $level = E_USER_NOTICE, $debuginfo = null)
+    {
 	if (is_int($code)) {
 	    $this->PEAR_Error("DB Error: " . DB::errorMessage( $code ), $code, $mode, $level, $debuginfo);
 	} else {
@@ -463,7 +464,8 @@ class DB_Warning extends PEAR_Error
      */
 
     function DB_Warning($code = DB_WARNING, $mode = PEAR_ERROR_RETURN,
-			$level = E_USER_NOTICE, $debuginfo = null) {
+			$level = E_USER_NOTICE, $debuginfo = null)
+    {
       if (is_int($code)) {
 	  $this->PEAR_Error("DB Warning: " . DB::errorMessage( $code ), $code, $mode, $level, $debuginfo);
       } else {
@@ -491,7 +493,8 @@ class DB_result
      * @param   $result result resource id
      */
 
-    function DB_result(&$dbh, $result) {
+    function DB_result(&$dbh, $result)
+    {
 	$this->dbh = &$dbh;
 	$this->result = $result;
     }
@@ -500,7 +503,8 @@ class DB_result
      * Fetch and return a row of data.
      * @return  array   a row of data, or false on error
      */
-    function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT) {
+    function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT)
+    {
 	if ($fetchmode == DB_FETCHMODE_DEFAULT) {
 	    $fetchmode = $this->dbh->fetchmode;
 	}
@@ -513,7 +517,8 @@ class DB_result
      * @param   $arr    reference to data array
      * @return  int     error code
      */
-    function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT) {
+    function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT)
+    {
 	if ($fetchmode == DB_FETCHMODE_DEFAULT) {
 	    $fetchmode = $this->dbh->fetchmode;
 	}
@@ -523,17 +528,29 @@ class DB_result
     /**
      * Get the the number of columns in a result set.
      *
-     * @return int the number of columns, or a DB error code
+     * @return int the number of columns, or a DB error
      */
-    function numCols() {
+    function numCols()
+    {
 	return $this->dbh->numCols($this->result);
+    }
+
+    /**
+     * Get the number of rows in a result set.
+     *
+     * @return int the number of rows, or a DB error
+     */
+    function numRows()
+    {
+        return $this->dbh->numRows($this->result);
     }
 
     /**
      * Frees the resources allocated for this result set.
      * @return  int     error code
      */
-    function free() {
+    function free()
+    {
 	$err = $this->dbh->freeResult($this->result);
 	if(DB::isError($err)) {
 	    return $err;
