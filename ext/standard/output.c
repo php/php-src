@@ -37,29 +37,9 @@ static void php_ob_prepend(const char *text, uint text_length);
 static inline void php_ob_send(void);
 
 
-typedef struct {
-	int (*php_body_write)(const char *str, uint str_length);		/* string output */
-	int (*php_header_write)(const char *str, uint str_length);	/* unbuffer string output */
-	char *ob_buffer;
-	uint ob_size;
-	uint ob_block_size;
-	uint ob_text_length;
-	unsigned char implicit_flush;
-	char *output_start_filename;
-	int output_start_lineno;
-} php_output_globals;
-
 #ifdef ZTS
-#define OLS_D php_output_globals *output_globals
-#define OLS_C output_globals
-#define OG(v) (output_globals->v)
-#define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
 int output_globals_id;
 #else
-#define OLS_D void
-#define OLS_C
-#define OG(v) (output_globals.v)
-#define OLS_FETCH()
 php_output_globals output_globals;
 #endif
 

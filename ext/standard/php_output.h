@@ -41,4 +41,32 @@ PHP_FUNCTION(ob_implicit_flush);
 
 PHP_GINIT_FUNCTION(output);
 
+typedef struct {
+	int (*php_body_write)(const char *str, uint str_length);		/* string output */
+	int (*php_header_write)(const char *str, uint str_length);	/* unbuffer string output */
+	char *ob_buffer;
+	uint ob_size;
+	uint ob_block_size;
+	uint ob_text_length;
+	unsigned char implicit_flush;
+	char *output_start_filename;
+	int output_start_lineno;
+} php_output_globals;
+
+
+#ifdef ZTS
+#define OLS_D php_output_globals *output_globals
+#define OLS_C output_globals
+#define OG(v) (output_globals->v)
+#define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
+ZEND_API extern int output_globals_id;
+#else
+#define OLS_D void
+#define OLS_C
+#define OG(v) (output_globals.v)
+#define OLS_FETCH()
+ZEND_API extern php_output_globals output_globals;
+#endif
+
+
 #endif /* _OUTPUT_BUFFER */

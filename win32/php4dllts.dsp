@@ -389,6 +389,10 @@ SOURCE=..\ext\standard\image.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\incomplete_class.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\info.c
 # End Source File
 # Begin Source File
@@ -631,6 +635,10 @@ SOURCE=..\ext\mysql\php_mysql.h
 # Begin Source File
 
 SOURCE=..\ext\odbc\php_odbc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_output.h
 # End Source File
 # Begin Source File
 

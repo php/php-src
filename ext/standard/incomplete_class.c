@@ -70,6 +70,7 @@ static zval incomplete_class_get_property(zend_property_reference *property_refe
 	incomplete_class_message(property_reference);
 
 	/* does not reach this point */
+	memset(&foo, 0, sizeof(zval)); /* shut warnings up */
 	return (foo);
 }
 
