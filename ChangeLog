@@ -1,3 +1,176 @@
+2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/installer/setini.php:
+      Some additional sanity.
+
+    * win32/php4dllts.dsp:
+      Add the sunfuncs to the .dsp file for Moshe.
+
+    * win32/php4dllts.dsp:
+      Update win32 project for streams juggling.
+
+    * ext/standard/file.c:
+      Remove unused vars
+
+2003-02-16  Moshe Doron  <mosdoron@netvision.net.il>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/php_standard.h
+      ext/standard/sunfuncs.c
+      ext/standard/sunfuncs.h
+      ext/standard/tests/general_functions/sunfuncts.phpt
+      ext/standard/tests/time/idate.phpt:
+      
+
+2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in
+      main/memory_streams.c
+      main/streams.c
+      main/user_streams.c
+      main/streams/.cvsignore
+      main/streams/cast.c
+      main/streams/filter.c
+      main/streams/memory.c
+      main/streams/php_streams_int.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Move streams files around a bit, to ease maintenance.
+      I will update the win32 .dsp in a moment.
+
+2003-02-16  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/047.phpt:
+      fixed output
+
+2003-02-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_api.c:
+      Reverted lld -> lld patch and added explanation as to why it should not be
+      done.
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/php_mysqli.h:
+      Moved longlong conversion to a macro.
+
+    * ext/mysqli/tests/014.phpt:
+      better skip condition.
+
+2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/bug21131.phpt:
+      Remove bogus test.
+      Append mode always causes written data to go to the end of the file,
+      regardless of the current seek position.
+
+    * ext/standard/proc_open.c
+      ext/standard/proc_open.h:
+      Integrate Shanes patch that allows specifying the cwd and environment
+      for the child process created by proc_open().
+
+2003-02-16  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3_1)
+      NEWS:
+      BFN
+
+2003-02-16  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/047.phpt:
+      test for mysqli_prepare_result
+
+2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/bcmath/libbcmath/src/config.h:
+      Fix bcmath build under win32.
+
+2003-02-16  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/046.phpt:
+      test for mysqli_stmt_affected_rows (delete command)
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      added new function mysqli_stmt_affected_rows
+      added bigint support for mysqli_affected_rows
+      fixed memleak in mysqli_prepare (stmt->is_null)
+      fixed return type for mysqli_connect
+
+2003-02-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * run-tests.php
+      ext/curl/interface.c
+      ext/curl/streams.c
+      ext/fbsql/php_fbsql.c
+      ext/ftp/ftp.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/imap/php_imap.c
+      ext/ldap/ldap.c
+      ext/mcal/php_mcal.c
+      ext/mysql/php_mysql.c
+      ext/odbc/php_odbc.c
+      ext/rpc/com/com_wrapper.c
+      ext/snmp/snmp.c
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/pack.c
+      ext/zlib/zlib.c
+      main/fopen_wrappers.c
+      main/mergesort.c
+      main/network.c
+      main/php.h
+      main/php_open_temporary_file.c
+      main/streams.c
+      win32/php4dllts.dsp
+      win32/sendmail.c
+      win32/time.h:
+      A add much more useful select(2) implementation than is provided by
+      windows sockets.  The winsock implementation will only work with sockets;
+      our implementation works with sockets and file descriptors.
+      By association, stream_select() will now operate correctly with files,
+      pipes and sockets.
+      
+      This change required linking against the winsock2 library.  In terms of
+      compatibility, only older versions of windows 95 do not have winsock2
+      installed by default.  It is available as a redistributable file, and is
+      most likely installed by any OS patches (eg: Internet Explorer) applied by
+      the user.
+      
+      Also, add a win32 compatible pipe test when opening a stream from a pipe. 
+      This test will only work on NT, win2k and XP platforms.  Without this
+      test, interleaved fread() and select() calls would cause the read buffer
+      to be clobbered.  I will be working on a fix for this issue for win9x.
+
+2003-02-16  Anil Madhavapeddy  <anil@recoil.org>
+
+    * pear/PEAR/Command/Package.php:
+      fix error msg typo
+
+2003-02-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/cli/getopt.c
+      sapi/cli/php.1.in
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h:
+      - Allow long option names
+      - Update CLI's manpage
+      
+      
+
 2003-02-15  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3_1)

@@ -1,3 +1,75 @@
+2003-02-16  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix complex cases of self-assignments (bugs #21600, #22231)
+
+    * zend_execute.c:
+      Make EG(This) and EG(scope) available to internal methods
+
+    * zend_execute.c:
+      Revert patches - they weren't ready yet!
+
+    * zend.c:
+      Fix initialization
+
+2003-02-16  Georg Richter  <georg.richter@phpev.de>
+
+    * zend_execute.c:
+      fixed compiler warning
+
+    * zend_execute.c:
+      tested patch from Zeev (fixes oo-bug in ext/mysqli)
+
+2003-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_language_parser.y:
+      add support for ::foo syntax meaning "global one"
+
+    * zend_compile.c:
+      remove debug prints
+
+2003-02-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c
+      zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c:
+      ZTS fixes
+
+2003-02-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c:
+      namespace patch - static variable access
+
+    * zend.c
+      zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+      Namespace patch. Big changes:
+      1. Nested classes are gone.
+      2. New syntax for namespaces:
+      namespace foo {
+      	class X { ... }
+      	function bar { ... }
+      	var x = 1;
+      	const ZZ = 2;
+      }
+      3. Namespaced symbol access: $x = new foo::X; - etc.
+      For now, namespaces are case insensitive, just like classes.
+      Also, there can be no global class and namespace with the same name
+      (to avoid ambiguities in :: resolution).
+
 2003-02-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini_scanner.l:
