@@ -945,13 +945,13 @@ PHPAPI void php_session_start(TSRMLS_D)
 	if (define_sid) {
 		smart_str var = {0};
 
-		smart_str_appends(&var, PS(session_name));
+		smart_str_appendl(&var, PS(session_name), lensess);
 		smart_str_appendc(&var, '=');
 		smart_str_appends(&var, PS(id));
 		smart_str_0(&var);
-		REGISTER_STRING_CONSTANT("SID", var.c, 0);
+		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
 	} else {
-		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
+		REGISTER_STRINGL_CONSTANT("SID", empty_string, 0, 0);
 	}
 
 	PS(session_status) = php_session_active;
