@@ -1,6 +1,14 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- DomNode->insert_before behaves now according to W3C spec
+  ie. new_child is moved, not copied. (chregu)
+- Added some namespace support with DomNode->add_namespace(uri, prefix)
+- and DomDocument->create_element_ns(uri, nodename) (chregu)
+- DomElement->node_name() takes optional boolean argument for retrieving
+  full qualified name (ie namespace prefix) (chregu)
+- DomNode->child_nodes() returns empty array instead of false, if no
+  child nodes are found (chregu)
 - Fix a bug where PHP doesn't handle the Expect header properly. (Patch 
   submitted by Ilia <ilia@prohost.org>)
 - Fix a bug in ODBC where closing the module would crash the Windows 
