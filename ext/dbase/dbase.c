@@ -793,13 +793,13 @@ PHP_FUNCTION(dbase_get_header_info)
 		add_assoc_long(row, "length", cur_f->db_flen);
 		
 		/* number of decimals in field */
-		add_assoc_long(row, "decimal places", cur_f->db_fdc);
+		add_assoc_long(row, "precision", cur_f->db_fdc);
 
 		/* format for printing %s etc */
-		add_assoc_string(row, "printf format", cur_f->db_format, 1);
+		add_assoc_string(row, "format", cur_f->db_format, 1);
 		
 		/* offset within record */
-		add_assoc_long(row, "record offset", cur_f->db_foffset);
+		add_assoc_long(row, "offset", cur_f->db_foffset);
 	}
 }
 /* }}} */
