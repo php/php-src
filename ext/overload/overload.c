@@ -146,7 +146,7 @@ PHP_RSHUTDOWN_FUNCTION(overload)
 PHP_MINFO_FUNCTION(overload)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "User-space object overloading support", "enabled");
+	php_info_print_table_row(2, "User-space object overloading support", "enabled");
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
