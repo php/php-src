@@ -936,7 +936,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
 
-	if (f->arKey) {
+	if (f->nKeyLength) {
 		key1.value.str.val = estrndup(f->arKey, f->nKeyLength);
 		key1.value.str.len = f->nKeyLength;
 		key1.type = IS_STRING;
@@ -944,7 +944,7 @@ static int array_user_key_compare(const void *a, const void *b)
 		key1.value.lval = f->h;
 		key1.type = IS_LONG;
 	}
-	if (s->arKey) {
+	if (s->nKeyLength) {
 		key2.value.str.val = estrndup(s->arKey, s->nKeyLength);
 		key2.value.str.len = s->nKeyLength;
 		key2.type = IS_STRING;
