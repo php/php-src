@@ -1,3 +1,15 @@
+2004-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/sqlite/sqlite.c:
+      Added sqlite_fetch_column_types() 3rd argument for arrays.
+
+2004-10-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Allow to omit object/classname in get_parent_class() which makes it
+        compatible with the signature and behavior of get_class()
+
 2004-10-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
