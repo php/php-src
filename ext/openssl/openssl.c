@@ -342,11 +342,11 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC)
 }
 
 #define PHP_SSL_REQ_INIT(req)		memset(req, 0, sizeof(*req))
-#define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req TSRMLS_C)
-#define PHP_SSL_REQ_PARSE(req, zval)	php_openssl_parse_config(req, zval TSRMLS_C)
+#define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req TSRMLS_CC)
+#define PHP_SSL_REQ_PARSE(req, zval)	php_openssl_parse_config(req, zval TSRMLS_CC)
 
 #define PHP_SSL_CONFIG_SYNTAX_CHECK(var) if (req->var && php_openssl_config_check_syntax(#var, \
-			req->config_filename, req->var, req->req_config TSRMLS_C) == FAILURE) return FAILURE
+			req->config_filename, req->var, req->req_config TSRMLS_CC) == FAILURE) return FAILURE
 
 #define SET_OPTIONAL_STRING_ARG(key, varname, defval)	\
 	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
@@ -389,7 +389,7 @@ static int php_openssl_parse_config(
 			BIO_free(oid_bio);
 		}
 	}
-	if (add_oid_section(req TSRMLS_C) == FAILURE)
+	if (add_oid_section(req TSRMLS_CC) == FAILURE)
 		return FAILURE;
 
 	SET_OPTIONAL_STRING_ARG("digest_alg", req->digest_name,
@@ -1744,7 +1744,7 @@ PHP_FUNCTION(openssl_pkey_new)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS)
 	{
-		if (php_openssl_generate_private_key(&req TSRMLS_C))	{
+		if (php_openssl_generate_private_key(&req TSRMLS_CC))	{
 			/* pass back a key resource */
 			RETVAL_RESOURCE(zend_list_insert(req.priv_key, le_key));
 			/* make sure the cleanup code doesn't zap it! */
@@ -1773,7 +1773,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 	RETVAL_FALSE;
 
-	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_C);
+	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
 	if (key == NULL)	{
 		zend_error(E_WARNING, "cannot get key from parameter 1");
@@ -1824,7 +1824,7 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	RETVAL_FALSE;
 
-	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_C);
+	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
 	if (key == NULL)	{
 		zend_error(E_WARNING, "cannot get key from parameter 1");
