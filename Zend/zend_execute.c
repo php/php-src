@@ -175,7 +175,7 @@ static inline void zend_fetch_property_address_inner(zval *object, znode *op2, z
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, prop_ptr TSRMLS_CC);
 		if(NULL == ptr_ptr) {
-			zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
+			zend_error(E_ERROR, "Cannot access undefined property %s::$%s for object with overloaded property access", Z_OBJCE_P(object)->name, Z_STRVAL_P(prop_ptr));
 		}
 		T(result->u.var).var.ptr_ptr = ptr_ptr;
 	} else if (Z_OBJ_HT_P(object)->read_property) {
