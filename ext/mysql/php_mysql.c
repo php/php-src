@@ -1932,26 +1932,25 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	mysql_field_seek(mysql_result, 0);
 	for (mysql_field=mysql_fetch_field(mysql_result), i=0; mysql_field; mysql_field=mysql_fetch_field(mysql_result), i++) {
 		if (mysql_row[i]) {
-			char *data;
-			int data_len;
-			int should_copy;
+			zval *data;
+
+			MAKE_STD_ZVAL(data);
 
 			if (PG(magic_quotes_runtime)) {
-				data = php_addslashes(mysql_row[i], mysql_row_lengths[i],&data_len, 0 TSRMLS_CC);
-				should_copy = 0;
+				Z_TYPE_P(data) = IS_STRING;
+				Z_STRVAL_P(data) = php_addslashes(mysql_row[i], mysql_row_lengths[i], &Z_STRLEN_P(data), 0 TSRMLS_CC);
 			} else {
-				data = mysql_row[i];
-				data_len = mysql_row_lengths[i];
-				should_copy = 1;
+				ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
 			}
-			
+
 			if (result_type & MYSQL_NUM) {
-				add_index_stringl(return_value, i, data, data_len, should_copy);
-				should_copy = 1;
+				add_index_zval(return_value, i, data);
 			}
-			
 			if (result_type & MYSQL_ASSOC) {
-				add_assoc_stringl(return_value, mysql_field->name, data, data_len, should_copy);
+				if (result_type & MYSQL_NUM) {
+					ZVAL_ADDREF(data);
+				}
+				add_assoc_zval(return_value, mysql_field->name, data);
 			}
 		} else {
 			/* NULL value. */
