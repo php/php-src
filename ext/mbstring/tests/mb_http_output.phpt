@@ -1,9 +1,7 @@
 --TEST--
 mb_http_output()  
 --SKIPIF--
-<?php include('skipif.inc'); ?>
---POST--
---GET--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 //TODO: Add more encoding. Wrong paramter type test.

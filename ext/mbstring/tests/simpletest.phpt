@@ -1,9 +1,7 @@
 --TEST--
 Simple multi-byte print test (EUC-JP)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
---POST--
---GET--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 /*

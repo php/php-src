@@ -1,10 +1,10 @@
 --TEST--
 mb_split()
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_split') or die("SKIP");
---POST--
---GET--
+?>
 --FILE--
 <?php
 	mb_regex_set_options( '' );
