@@ -1,3 +1,123 @@
+2004-03-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/table.c
+      ext/sqlite/libsqlite/src/vdbeaux.c
+      ext/standard/datetime.c
+      ext/standard/var.c
+      main/spprintf.c
+      main/streams/userspace.c
+      main/streams/xp_socket.c:
+      More wordsize fixes
+
+    * ext/xmlrpc/libxmlrpc/encodings.c:
+      Fix warning
+
+2004-03-08  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      - Added mb_list_encoding() to return an array with all mbstring supported
+        encodings.
+
+2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_saproxy.c:
+      Rename hasMore() to valid() as discussed. (Part V)
+
+    * ext/dom/dom_iterators.c:
+      Rename hasMore() to valid() as discussed. (Part IV)
+
+2004-03-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/xmlrpc/libxmlrpc/encodings.c:
+      MFB fix #27408
+
+2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Rename hasMore() to valid() as discussed. (Part III)
+
+2004-03-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/xmlrpc/libxmlrpc/encodings.c:
+      Possible fix for #27408 (wordsize/alignment issue)
+
+2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_iterators.h
+      ext/simplexml/simplexml.c
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_010.phpt
+      ext/sqlite/tests/sqlite_013.phpt
+      ext/sqlite/tests/sqlite_016.phpt
+      ext/sqlite/tests/sqlite_023.phpt
+      ext/sqlite/tests/sqlite_024.phpt:
+      Rename hasMore() to valid() as discussed. (Part II)
+
+    * ZendEngine2/zend_interfaces.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt
+      ext/sqlite/tests/sqlite_oo_026.phpt
+      ext/sqlite/tests/sqlite_oo_031.phpt
+      tests/classes/iterators_001.phpt
+      tests/classes/iterators_002.phpt
+      tests/classes/iterators_003.phpt
+      tests/classes/iterators_004.phpt
+      tests/classes/iterators_006.phpt:
+      Rename hasMore() to valid() as discussed. (Part I)
+
+    * ZendEngine2/zend_execute_API.c:
+      Check count.
+
+2004-03-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Merged some more odd fixes from my own branch
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h:
+      Cleaned up array handling and optimize for the case where no array fields
+      are used
+      Fix timestamp binding for Win32 (which doesn't have gmtime_r())
+      CS
+
+2004-03-08  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/tokenizer/tokenizer.c:
+      - Fixed bug #24550 (tokenizing with __METHOD__ crash) (Patch by Greg
+      Beaver)
+
+2004-03-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #27424 (headers missing on flush() in apache 2 SAPIs).
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #27424 (headers missing on flush() in apache 2 SAPIs).
+
+    * ext/standard/var.c:
+      Fixed compiler warnings.
+
+2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add another missing conversion
+
 2004-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/dba/config.m4:
