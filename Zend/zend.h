@@ -386,13 +386,14 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 
 
 /* data types */
+/* All data types <= IS_BOOL have their constructor/destructors skipped */
 #define IS_NULL		0
 #define IS_LONG		1
 #define IS_DOUBLE	2
-#define IS_STRING	3
+#define IS_BOOL		3
 #define IS_ARRAY	4
 #define IS_OBJECT	5
-#define IS_BOOL		6
+#define IS_STRING	6
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9

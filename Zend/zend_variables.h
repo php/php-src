@@ -23,11 +23,30 @@
 #define ZEND_VARIABLES_H
 
 
-
 BEGIN_EXTERN_C()
+
+ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC);
+
+static inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+        if (zvalue->type <= IS_BOOL) {
+                return;
+        }
+	_zval_dtor_func(zvalue ZEND_FILE_LINE_CC);
+}
+
+ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
+
+static inline int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+        if (zvalue->type <= IS_BOOL) {
+                return;
+        }
+	_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_CC);
+}
+
+
 ZEND_API int zend_print_variable(zval *var);
-ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval **zvalue ZEND_FILE_LINE_DC);
