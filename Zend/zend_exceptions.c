@@ -375,21 +375,6 @@ static zend_function_entry default_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-int zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
-{
-	if (type == IS_STRING) {
-		zval fname, *retval;
-
-		ZVAL_STRING(&fname, "__tostring", 0);
-		if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
-			ZVAL_STRING(writeobj, Z_STRVAL_P(retval), 1);
-			zval_ptr_dtor(&retval);
-			return SUCCESS;
-		}
-	}
-	return FAILURE;
-}
-
 static void zend_register_default_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
@@ -399,7 +384,6 @@ static void zend_register_default_exception(TSRMLS_D)
 	default_exception_ptr->create_object = zend_default_exception_new; 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
-	default_exception_handlers.cast_object = zend_cast_exception;
 
 	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "Unknown exception", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ptr, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
@@ -490,34 +474,17 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 {
 	if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
-		zend_fcall_info fci;
-		zval fname;
 		zval *str, *file, *line;
 		zval *old_exception = EG(exception);
+		zend_object_handlers *handler = Z_OBJ_HT_P(exception);
 
 		EG(exception) = NULL;
 		
-		ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 0);
-	
-		fci.size = sizeof(fci);
-		fci.function_table = &Z_OBJCE_P(exception)->function_table;
-		fci.function_name = &fname;
-		fci.symbol_table = NULL;
-		fci.object_pp = &exception;
-		fci.retval_ptr_ptr = &str;
-		fci.param_count = 0;
-		fci.params = NULL;
-		fci.no_separation = 1;
+		MAKE_STD_ZVAL(str);
+		handler->cast_object(exception, str, IS_STRING, 0 TSRMLS_CC);
 
-		zend_call_function(&fci, NULL TSRMLS_CC);
-
-		if (str) {
-			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, Z_STRVAL_P(str) TSRMLS_CC);
-			zval_ptr_dtor(&str);
-		} else if (EG(exception)) {
-			/* no result because of exception __tostring(), so at least return the class_name */
-			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, Z_OBJCE_P(exception)->name TSRMLS_CC);
-		}
+		zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, EG(exception) ? Z_OBJCE_P(exception)->name : Z_STRVAL_P(str) TSRMLS_CC);
+		zval_ptr_dtor(&str);
 	
 		if (EG(exception)) {
 			/* do the best we can to inform about the inner exception */
