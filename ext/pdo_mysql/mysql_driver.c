@@ -213,7 +213,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_D
 		/* ignore if the new value equals the old one */			
 		if (dbh->auto_commit ^ Z_BVAL_P(val)) {
 			dbh->auto_commit = Z_BVAL_P(val);
-			mysql_handle_autocommit(dbh);
+			mysql_handle_autocommit(dbh TSRMLS_CC);
 		}
 		return 1;
 		
@@ -320,7 +320,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		}
 	}
 	
-	mysql_handle_autocommit(dbh);
+	mysql_handle_autocommit(dbh TSRMLS_CC);
 
 #ifndef PHP_WIN32
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
