@@ -1,3 +1,13 @@
+2003-03-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Initialize the namespace when registering functions.
+
+2003-03-12  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix a crash bug in the implicit public declaration
+
 2003-03-11  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c
