@@ -93,6 +93,9 @@ Ensure you run ./configure with the `--enable-libgcc' parameter. You
 may need to set LDFLAGS to '-L/usr/local/egcs/lib' (path depends on
 your gcc installation)
 
+FreeBSD 4.0:
+Some people may find they need to run ./configure with the
+'--enable-libgcc' compile option too.
 
 
 For more information and help with Zeus, please visit our website:
