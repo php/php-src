@@ -9,7 +9,7 @@ AC_ARG_WITH(hyperwave,
   if test "$withval" != "no"; then
     AC_DEFINE(HYPERWAVE,1,[ ])
     AC_MSG_RESULT(yes)
-    PHP_EXTENSION(hyperwave)
+    PHP_NEW_EXTENSION(hyperwave, hw.c hg_comm.c)
   else
     AC_DEFINE(HYPERWAVE,0,[ ])
     AC_MSG_RESULT(no)

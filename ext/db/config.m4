@@ -54,5 +54,5 @@ if test "$PHP_DB" != "no"; then
     EXTRA_LIBS="$EXTRA_LIBS $DBM_LIB"
   fi
 
-  PHP_EXTENSION(db)
+  PHP_EXTENSION(db, db.c)
 fi
