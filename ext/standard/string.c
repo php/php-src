@@ -4782,6 +4782,11 @@ PHP_FUNCTION(str_split)
 
 	array_init(return_value);
 
+	if (split_length >= str_len) {
+		add_next_index_stringl(return_value, str, str_len, 1);
+		return;
+	}
+
 	n_reg_segments = floor(str_len / split_length);
 	p = str;
 
