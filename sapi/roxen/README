@@ -1,0 +1,9 @@
+Roxen PHP support. Very early version. Don't expect to be able to get
+it to work. Requires a very late Pike 0.7 and Roxen 1.4. Anything else will be
+futile, and even that might be. Beware! It is not thread safe yet. As
+a matter of fact it doesn't work when threads are enabled when
+compiling PHP
+
+- The Author, David Hedbor <neotron@php.net>
+
+
