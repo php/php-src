@@ -47,6 +47,7 @@ AC_DEFUN(PHP_GD_JPEG,[
 
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
     [
+      PHP_ADD_INCLUDE($GD_JPEG_DIR/include)
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([Problem with libjpeg.(a|so). Please check config.log for more information.]) 
@@ -75,6 +76,7 @@ AC_DEFUN(PHP_GD_PNG,[
     
     PHP_CHECK_LIBRARY(png,png_write_image,
     [
+      PHP_ADD_INCLUDE($GD_PNG_DIR/include)
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(png, $GD_PNG_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -101,6 +103,7 @@ AC_DEFUN(PHP_GD_XPM,[
 
     PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage, 
     [
+      PHP_ADD_INCLUDE($GD_XPM_DIR/include)
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -144,10 +147,11 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
 
 AC_DEFUN(PHP_GD_FREETYPE2,[
   if test "$PHP_FREETYPE_DIR" != "no"; then
+
     for i in /usr /usr/local $PHP_FREETYPE_DIR; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
         FREETYPE2_DIR=$i
-        FREETYPE2_INC_DIR=$i/include/freetype2/freetype
+        FREETYPE2_INC_DIR=$i/include/freetype2
       fi
     done
     
@@ -178,7 +182,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
     PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
     [
       AC_DEFINE(HAVE_LIBT1,1,[ ])
-      PHP_ADD_INCLUDE("$GD_T1_DIR/include")
+      PHP_ADD_INCLUDE($GD_T1_DIR/include)
       PHP_ADD_LIBRARY_WITH_PATH(t1, "$GD_T1_DIR/lib", GD_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([Problem with libt1.(a|so). Please check config.log for more information.]) 
@@ -228,7 +232,7 @@ if test "$PHP_GD" = "php"; then
 		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
 
-  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
+  PHP_NEW_EXTENSION(gd, gd.c gdt1.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
   PHP_ADD_INCLUDE($ext_srcdir/libgd)
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
