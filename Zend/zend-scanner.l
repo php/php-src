@@ -249,10 +249,10 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	if (!file_handle->handle.fp) {
 		return FAILURE;
 	}
+	file_handle->type = ZEND_HANDLE_FP;	
 	if (file_handle->handle.fp != stdin) {
 		zend_llist_add_element(&CG(open_files), file_handle);
 	}
-	file_handle->type = ZEND_HANDLE_FP;	
 	/* Reset the scanner for scanning the new file */
 	yyin = file_handle->handle.fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
