@@ -1,5 +1,6 @@
 <?php
 
+require_once "PEAR/Common.php";
 $parser = new PEAR_Common;
 $parser->setErrorHandling(PEAR_ERROR_DIE, "pear info: %s\n");
 $info = $parser->infoFromTgzFile($cmdargs[0]);
