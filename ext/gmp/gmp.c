@@ -830,8 +830,7 @@ ZEND_FUNCTION(gmp_powm)
 	}
 	FETCH_GMP_ZVAL(gmpnum_mod, mod_arg);
 
-	convert_to_long_ex(mod_arg);
-	if (!Z_LVAL_PP(mod_arg)) {
+	if (!mpz_cmp_ui(*gmpnum_mod, 0)) {
 		RETURN_FALSE;
 	}
 
