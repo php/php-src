@@ -460,6 +460,7 @@ static void php_info_caudium(ZEND_MODULE_INFO_FUNC_ARGS)
 }
 
 static zend_module_entry php_caudium_module = {
+  STANDARD_MODULE_HEADER,
   "Caudium",
   NULL,
   NULL,
@@ -467,6 +468,7 @@ static zend_module_entry php_caudium_module = {
   NULL,
   NULL,
   php_info_caudium,
+  NULL,
   STANDARD_MODULE_PROPERTIES
 };
 

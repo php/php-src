@@ -135,6 +135,7 @@ static function_entry apache_functions[] = {
 };
 
 static zend_module_entry php_apache_module = {
+	STANDARD_MODULE_HEADER,
 	"Apache 2.0",
 	apache_functions,
 	NULL,
@@ -142,6 +143,7 @@ static zend_module_entry php_apache_module = {
 	NULL,
 	NULL,
 	PHP_MINFO(apache),
+	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
 

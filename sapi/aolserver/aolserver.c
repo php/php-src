@@ -246,6 +246,7 @@ static function_entry aolserver_functions[] = {
 };
 
 static zend_module_entry php_aolserver_module = {
+	STANDARD_MODULE_HEADER,
 	"AOLserver",
 	aolserver_functions,
 	NULL,
@@ -253,6 +254,7 @@ static zend_module_entry php_aolserver_module = {
 	NULL,
 	NULL,
 	php_info_aolserver,
+	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
 
