@@ -97,10 +97,6 @@ typedef struct {
 	int		error;
 } php_socket;
 
-typedef struct {
-	zend_bool	use_system_read;
-} php_sockets_globals;
-
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
 	char *strerror_buf;
