@@ -42,7 +42,6 @@
 #endif
 
 #ifdef NETWARE
-#include "netware/pipe.h"    /* For popen(), pclose() */
 #include "netware/sysexits.h"   /* For exit status codes like EX_OK */
 #endif
 
