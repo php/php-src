@@ -47,9 +47,6 @@
 /* #define HAVE_MBSTR_RU 0 */
 /* #define HAVE_MBSTR_TW 0 */ 
 
-/* Enable / Disable MySQL extension (default: disabled) */
-#define HAVE_MYSQL 0
-
 /* Enable / Disable ODBC extension (default: enabled) */
 #define HAVE_UODBC 1
 
