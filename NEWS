@@ -1,10 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-01 Apr 2004, Version 4.3.6RC1
-- Synchronized bundled GD library with GD 2.0.22. (Ilia)
+05 Apr 2004, Version 4.3.6RC2
 - Fixed a bug that prevented building of the GD extension against external GD
   lib 1.X. (Ilia, Nick Talbott).
 - Fixed bug #27849 (configure craps out on trivial syntax error). (Derick)
+
+01 Apr 2004, Version 4.3.6RC1
+- Synchronized bundled GD library with GD 2.0.22. (Ilia)
 - Fixed bug #27822 (is_resource() returns TRUE for closed resources). (Derick)
 - Fixed bug #27819 (problems returning reference to a reference parameter).
   (Ilia)
