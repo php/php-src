@@ -43,7 +43,7 @@ encode defaultEncoding[] = {
 	//support some of the 1999 data types
 	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
-	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_string},
+	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_string},
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_string},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_string},
 	{{XSD_LONG, XSD_LONG_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
@@ -109,16 +109,16 @@ encode defaultEncoding[] = {
 */
 };
 
-xmlNodePtr master_to_xml(encodePtr encode, zval *data)
+xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style)
 {
 	xmlNodePtr node;
 
 	if(encode->to_xml_before)
 		data = encode->to_xml_before(encode->details, data);
 	if(encode->to_xml)
-		node = encode->to_xml(encode->details, data);
+		node = encode->to_xml(encode->details, data, style);
 	if(encode->to_xml_after)
-		node = encode->to_xml_after(encode->details, node);
+		node = encode->to_xml_after(encode->details, node, style);
 
 	return node;
 }
@@ -129,7 +129,7 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 
 	data = check_and_resolve_href(data);
 	if(encode->to_zval_before)
-		data = encode->to_zval_before(encode->details, data);
+		data = encode->to_zval_before(encode->details, data, 0);
 	if(encode->to_zval)
 		ret = encode->to_zval(encode->details, data);
 	if(encode->to_zval_after)
@@ -151,7 +151,7 @@ zval *to_xml_before_user(encodeType type, zval *data)
 	return data;
 }
 
-xmlNodePtr to_xml_user(encodeType type, zval *data)
+xmlNodePtr to_xml_user(encodeType type, zval *data, int style)
 {
 	zval *ret, **addr;
 	xmlNodePtr node;
@@ -177,7 +177,7 @@ xmlNodePtr to_xml_user(encodeType type, zval *data)
 	return node;
 }
 
-xmlNodePtr to_xml_after_user(encodeType type, xmlNodePtr node)
+xmlNodePtr to_xml_after_user(encodeType type, xmlNodePtr node, int style)
 {
 	zval *ret, *param, **addr;
 	int found;
@@ -202,7 +202,7 @@ xmlNodePtr to_xml_after_user(encodeType type, xmlNodePtr node)
 	return node;
 }
 
-xmlNodePtr to_zval_before_user(encodeType type, xmlNodePtr node)
+xmlNodePtr to_zval_before_user(encodeType type, xmlNodePtr node, int style)
 {
 	zval *ret, *param, **addr;
 	int found;
@@ -283,7 +283,7 @@ zval *to_zval_stringl(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_string(encodeType type, zval *data)
+xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	char *str;
@@ -295,11 +295,13 @@ xmlNodePtr to_xml_string(encodeType type, zval *data)
 	convert_to_string(data);
 	str = php_escape_html_entities(Z_STRVAL_P(data), Z_STRLEN_P(data), &new_len, 0, 0, NULL);
 	xmlNodeSetContentLen(ret, str, new_len);
-	set_ns_and_type(ret, type);
+
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(ret, type);
 	return ret;
 }
 
-xmlNodePtr to_xml_stringl(encodeType type, zval *data)
+xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
@@ -308,7 +310,9 @@ xmlNodePtr to_xml_stringl(encodeType type, zval *data)
 
 	convert_to_string(data);
 	xmlNodeSetContentLen(ret, estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data)), Z_STRLEN_P(data));
-	set_ns_and_type(ret, type);
+
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(ret, type);
 	return ret;
 }
 
@@ -332,7 +336,7 @@ zval *to_zval_long(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_long(encodeType type, zval *data)
+xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
@@ -342,7 +346,9 @@ xmlNodePtr to_xml_long(encodeType type, zval *data)
 	convert_to_long(data);
 	convert_to_string(data);
 	xmlNodeSetContentLen(ret, Z_STRVAL_P(data), Z_STRLEN_P(data));
-	set_ns_and_type(ret, type);
+	
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(ret, type);
 	return ret;
 }
 
@@ -365,7 +371,7 @@ zval *to_zval_bool(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_bool(encodeType type, zval *data)
+xmlNodePtr to_xml_bool(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
@@ -378,7 +384,8 @@ xmlNodePtr to_xml_bool(encodeType type, zval *data)
 	else
 		xmlNodeSetContent(ret, "0");
 
-	set_ns_and_type(ret, type);
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(ret, type);
 	return ret;
 }
 
@@ -391,14 +398,15 @@ zval *to_zval_null(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_null(encodeType type, zval *data)
+xmlNodePtr to_xml_null(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret);
-	xmlSetProp(ret, "xsi:null", "1");
-
+	
+	if(style == SOAP_ENCODED)
+		xmlSetProp(ret, "xsi:null", "1");
 	return ret;
 }
 
@@ -432,7 +440,7 @@ zval *to_zval_object(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_object(encodeType type, zval *data)
+xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
 	HashTable *prop;
@@ -442,7 +450,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data)
 	//Special handling of class SoapVar
 	if(data && Z_TYPE_P(data) == IS_OBJECT && !strcmp(Z_OBJCE_P(data)->name, soap_var_class_entry.name))
 	{
-		zval **ztype, **zdata, **zns, **zstype;
+		zval **ztype, **zdata, **zns, **zstype, **zname, **znamens;
 		encodePtr enc;
 
 		if(zend_hash_find(Z_OBJPROP_P(data), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE)
@@ -451,7 +459,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data)
 			php_error(E_ERROR, "error encoding SoapVar");
 
 		enc = get_conversion(Z_LVAL_P(*ztype));
-		xmlParam = master_to_xml(enc, *zdata);
+		xmlParam = master_to_xml(enc, *zdata, style);
 
 		if(zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS)
 		{
@@ -459,6 +467,20 @@ xmlNodePtr to_xml_object(encodeType type, zval *data)
 				set_ns_and_type_ex(xmlParam, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
 			else
 				set_ns_and_type_ex(xmlParam, NULL, Z_STRVAL_PP(zstype));
+		}
+
+		if(zend_hash_find(Z_OBJPROP_P(data), "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS)
+			xmlNodeSetName(xmlParam, Z_STRVAL_PP(zname));
+		if(zend_hash_find(Z_OBJPROP_P(data), "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS)
+		{
+			smart_str *ns;
+			xmlNsPtr nsp;
+
+			ns = encode_new_ns();
+			nsp = xmlNewNs(xmlParam, Z_STRVAL_PP(znamens), ns->c);
+			xmlSetNs(xmlParam, nsp);
+			smart_str_free(ns);
+			efree(ns);
 		}
 	}
 	else
@@ -468,35 +490,37 @@ xmlNodePtr to_xml_object(encodeType type, zval *data)
 
 		if(Z_TYPE_P(data) == IS_OBJECT)
 		{
-		prop = Z_OBJPROP_P(data);
-		i = zend_hash_num_elements(prop);
-		zend_hash_internal_pointer_reset(prop);
+			prop = Z_OBJPROP_P(data);
+			i = zend_hash_num_elements(prop);
+			zend_hash_internal_pointer_reset(prop);
 
-		for(;i > 0;i--)
-		{
-			xmlNodePtr property;
-			encodePtr enc;
-			zval **zprop;
-			char *str_key;
+			for(;i > 0;i--)
+			{
+				xmlNodePtr property;
+				encodePtr enc;
+				zval **zprop;
+				char *str_key;
 
-			zend_hash_get_current_key(prop, &str_key, NULL, FALSE);
-			zend_hash_get_current_data(prop, (void **)&zprop);
+				zend_hash_get_current_key(prop, &str_key, NULL, FALSE);
+				zend_hash_get_current_data(prop, (void **)&zprop);
 
-			enc = get_conversion((*zprop)->type);
-			property = master_to_xml(enc, (*zprop));
+				enc = get_conversion((*zprop)->type);
+				property = master_to_xml(enc, (*zprop), style);
 
-			xmlNodeSetName(property, str_key);
-			xmlAddChild(xmlParam, property);
-			zend_hash_move_forward(prop);
+				xmlNodeSetName(property, str_key);
+				xmlAddChild(xmlParam, property);
+				zend_hash_move_forward(prop);
+			}
 		}
-		}
-		set_ns_and_type(xmlParam, type);
+		
+		if(style == SOAP_ENCODED)
+			set_ns_and_type(xmlParam, type);
 	}
 	return xmlParam;
 }
 
 //Array encode/decode
-xmlNodePtr guess_array_map(encodeType type, zval *data)
+xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 {
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
@@ -514,10 +538,10 @@ xmlNodePtr guess_array_map(encodeType type, zval *data)
 	if(!enc)
 		enc = get_conversion(IS_NULL);
 
-	return master_to_xml(enc, data);
+	return master_to_xml(enc, data, style);
 }
 
-xmlNodePtr to_xml_array(encodeType type, zval *data)
+xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 {
 	smart_str array_type_and_size = {0}, array_type = {0};
 	int i;
@@ -531,17 +555,21 @@ xmlNodePtr to_xml_array(encodeType type, zval *data)
 	if(Z_TYPE_P(data) == IS_ARRAY)
 	{
 		i = zend_hash_num_elements(Z_ARRVAL_P(data));
-		get_array_type(data, &array_type);
-		smart_str_append(&array_type_and_size, &array_type);
-		smart_str_appendc(&array_type_and_size, '[');
-		smart_str_append_long(&array_type_and_size, i);
-		smart_str_appendc(&array_type_and_size, ']');
-		smart_str_0(&array_type_and_size);
 
-		xmlSetProp(xmlParam, "SOAP-ENC:arrayType", array_type_and_size.c);
+		if(style == SOAP_ENCODED)
+		{
+			get_array_type(data, &array_type);
+			smart_str_append(&array_type_and_size, &array_type);
+			smart_str_appendc(&array_type_and_size, '[');
+			smart_str_append_long(&array_type_and_size, i);
+			smart_str_appendc(&array_type_and_size, ']');
+			smart_str_0(&array_type_and_size);
 
-		smart_str_free(&array_type_and_size);
-		smart_str_free(&array_type);
+			xmlSetProp(xmlParam, "SOAP-ENC:arrayType", array_type_and_size.c);
+
+			smart_str_free(&array_type_and_size);
+			smart_str_free(&array_type);
+		}
 
 		zend_hash_internal_pointer_reset(data->value.ht);
 		for(;i > 0;i--)
@@ -552,14 +580,19 @@ xmlNodePtr to_xml_array(encodeType type, zval *data)
 			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
 
 			enc = get_conversion((*zdata)->type);
-			xparam = master_to_xml(enc, (*zdata));
+			xparam = master_to_xml(enc, (*zdata), style);
 
-			xmlNodeSetName(xparam, "val");
+			if(style == SOAP_LITERAL)
+				xmlNodeSetName(xparam, enc->details.type_str);
+			else
+				xmlNodeSetName(xparam, "val");
+
 			xmlAddChild(xmlParam, xparam);
 			zend_hash_move_forward(data->value.ht);
 		}
 	}
-	set_ns_and_type(xmlParam, type);
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(xmlParam, type);
 	return xmlParam;
 }
 
@@ -592,7 +625,7 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 }
 
 //Map encode/decode
-xmlNodePtr to_xml_map(encodeType type, zval *data)
+xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
 	int i;
@@ -603,54 +636,57 @@ xmlNodePtr to_xml_map(encodeType type, zval *data)
 
 	if(Z_TYPE_P(data) == IS_ARRAY)
 	{
-	i = zend_hash_num_elements(Z_ARRVAL_P(data));
-	//TODO: Register namespace...???
-	xmlSetProp(xmlParam, "xmlns:apache", "http://xml.apache.org/xml-soap");
-	zend_hash_internal_pointer_reset(data->value.ht);
-	for(;i > 0;i--)
-	{
-		xmlNodePtr xparam, item;
-		xmlNodePtr key;
-		zval **temp_data;
-		char *key_val;
-		int int_val;
-		encodePtr enc;
+		i = zend_hash_num_elements(Z_ARRVAL_P(data));
+		//TODO: Register namespace...???
+		xmlSetProp(xmlParam, "xmlns:apache", "http://xml.apache.org/xml-soap");
+		zend_hash_internal_pointer_reset(data->value.ht);
+		for(;i > 0;i--)
+		{
+			xmlNodePtr xparam, item;
+			xmlNodePtr key;
+			zval **temp_data;
+			char *key_val;
+			int int_val;
+			encodePtr enc;
 
 			zend_hash_get_current_data(data->value.ht, (void **)&temp_data);
 			if(Z_TYPE_PP(temp_data) != IS_NULL)
 			{
-		item = xmlNewNode(NULL, "item");
-		key = xmlNewNode(NULL, "key");
-		if(zend_hash_get_current_key(data->value.ht, &key_val, (long *)&int_val, FALSE) == HASH_KEY_IS_STRING)
-		{
-			xmlSetProp(key, "xsi:type", "xsd:string");
-			xmlNodeSetContent(key, key_val);
-		}
-		else
-		{
-			smart_str tmp = {0};
-			smart_str_append_long(&tmp, int_val);
-			smart_str_0(&tmp);
+				item = xmlNewNode(NULL, "item");
+				key = xmlNewNode(NULL, "key");
+				if(zend_hash_get_current_key(data->value.ht, &key_val, (long *)&int_val, FALSE) == HASH_KEY_IS_STRING)
+				{
+					if(style == SOAP_ENCODED)
+						xmlSetProp(key, "xsi:type", "xsd:string");
+					xmlNodeSetContent(key, key_val);
+				}
+				else
+				{
+					smart_str tmp = {0};
+					smart_str_append_long(&tmp, int_val);
+					smart_str_0(&tmp);
 
-			xmlSetProp(key, "xsi:type", "xsd:int");
-			xmlNodeSetContentLen(key, tmp.c, tmp.len);
+					if(style == SOAP_ENCODED)
+						xmlSetProp(key, "xsi:type", "xsd:int");
+					xmlNodeSetContentLen(key, tmp.c, tmp.len);
 
-			smart_str_free(&tmp);
-		}
+					smart_str_free(&tmp);
+				}
 
 
-		enc = get_conversion((*temp_data)->type);
-		xparam = master_to_xml(enc, (*temp_data));
+				enc = get_conversion((*temp_data)->type);
+				xparam = master_to_xml(enc, (*temp_data), style);
 
-		xmlNodeSetName(xparam, "value");
-		xmlAddChild(item, key);
-		xmlAddChild(item, xparam);
-		xmlAddChild(xmlParam, item);
+				xmlNodeSetName(xparam, "value");
+				xmlAddChild(item, key);
+				xmlAddChild(item, xparam);
+				xmlAddChild(xmlParam, item);
 			}
-		zend_hash_move_forward(data->value.ht);
+			zend_hash_move_forward(data->value.ht);
+		}
 	}
-	}
-	set_ns_and_type(xmlParam, type);
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(xmlParam, type);
 
 	return xmlParam;
 }
@@ -696,7 +732,7 @@ zval *to_zval_map(encodeType type, xmlNodePtr data)
 }
 
 //Unknown encode/decode
-xmlNodePtr guess_xml_convert(encodeType type, zval *data)
+xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style)
 {
 	encodePtr enc;
 	TSRMLS_FETCH();
@@ -705,7 +741,7 @@ xmlNodePtr guess_xml_convert(encodeType type, zval *data)
 		enc = get_conversion(data->type);
 	else
 		enc = get_conversion(IS_NULL);
-	return master_to_xml(enc, data);
+	return master_to_xml(enc, data, style);
 }
 
 zval *guess_zval_convert(encodeType type, xmlNodePtr data)
@@ -756,7 +792,7 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data)
 }
 
 //Time encode/decode
-xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format)
+xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style)
 {
 	//logic hacked from ext/standard/datetime.c
 	struct tm *ta, tmbuf;
@@ -784,48 +820,50 @@ xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format)
 
 	xmlNodeSetContent(xmlParam, buf);
 	efree(buf);
-	set_ns_and_type(xmlParam, type);
+
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(xmlParam, type);
 	return xmlParam;
 }
 
-xmlNodePtr to_xml_datetime(encodeType type, zval *data)
+xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S");
+	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S", style);
 }
 
-xmlNodePtr to_xml_time(encodeType type, zval *data)
+xmlNodePtr to_xml_time(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%H:%M:%S");
+	return to_xml_datetime_ex(type, data, "%H:%M:%S", style);
 }
 
-xmlNodePtr to_xml_date(encodeType type, zval *data)
+xmlNodePtr to_xml_date(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m-%d");
+	return to_xml_datetime_ex(type, data, "%Y-%m-%d", style);
 }
 
-xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data)
+xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m");
+	return to_xml_datetime_ex(type, data, "%Y-%m", style);
 }
 
-xmlNodePtr to_xml_gyear(encodeType type, zval *data)
+xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%Y");
+	return to_xml_datetime_ex(type, data, "%Y", style);
 }
 
-xmlNodePtr to_xml_gmonthday(encodeType type, zval *data)
+xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "--%m-%d");
+	return to_xml_datetime_ex(type, data, "--%m-%d", style);
 }
 
-xmlNodePtr to_xml_gday(encodeType type, zval *data)
+xmlNodePtr to_xml_gday(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%d");
+	return to_xml_datetime_ex(type, data, "%d", style);
 }
 
-xmlNodePtr to_xml_gmonth(encodeType type, zval *data)
+xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%m");
+	return to_xml_datetime_ex(type, data, "%m", style);
 }
 
 void set_ns_and_type(xmlNodePtr node, encodeType type)
@@ -936,7 +974,7 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, char
 	encodePtr *enc = NULL;
 	xmlNsPtr nsptr;
 	char *ns, *cptype;
-	char *nscat;
+	smart_str nscat = {0};
 
 	if(encoding == NULL)
 		return NULL;
@@ -945,15 +983,17 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, char
 	nsptr = xmlSearchNs(node->doc, node, ns);
 	if(nsptr != NULL)
 	{
-		nscat = emalloc(strlen(nsptr->href) + strlen(cptype) + 2);
-		sprintf(nscat, "%s:%s", nsptr->href, cptype);
+		smart_str_appends(&nscat, nsptr->href);
+		smart_str_appendc(&nscat, ':');
+		smart_str_appends(&nscat, cptype);
+		smart_str_0(&nscat);
 
-		if(zend_hash_find(encoding, nscat, strlen(nscat), (void **)&enc) == FAILURE)
+		if(zend_hash_find(encoding, nscat.c, nscat.len + 1, (void **)&enc) == FAILURE)
 		{
 			if(zend_hash_find(encoding, type, strlen(type) + 1, (void **)&enc) == FAILURE)
 				enc = NULL;
 		}
-		efree(nscat);
+		smart_str_free(&nscat);
 	}
 	else
 	{
@@ -1064,7 +1104,7 @@ smart_str *build_soap_action(zval *this_ptr, char *soapaction)
 		php_error(E_ERROR, "Error finding uri");
 
 	smart_str_appendl(tmp, Z_STRVAL_PP(uri), Z_STRLEN_PP(uri));
-	smart_str_appends(tmp, "/#");
+	smart_str_appends(tmp, "#");
 	smart_str_appendl(tmp, soapaction, strlen(soapaction));
 	smart_str_0(tmp);
 

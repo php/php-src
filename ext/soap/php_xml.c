@@ -106,7 +106,7 @@ xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns)
 
 xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns)
 {
-	xmlNodePtr trav = node, cur;
+	xmlNodePtr trav = node, cur = NULL;
 	xmlAttrPtr attr;
 
 	if(node == NULL) return NULL;

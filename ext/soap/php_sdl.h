@@ -5,16 +5,66 @@
 #define XSD_WHITESPACE_PRESERVE 1
 #define XSD_WHITESPACE_REPLACE 1
 
+#define BINDING_SOAP 1
+#define BINDING_HTTP 2
+
+#define SOAP_RPC 1
+#define SOAP_DOCUMENT 2
+
+#define SOAP_ENCODED 1
+#define SOAP_LITERAL 2
+
 struct _sdl
 {
-	xmlDocPtr doc;
-	HashTable *functions;	//array of SoapFunctionsPtr
+	xmlDocPtr doc;			//pointer to the parsed xml file
 	HashTable *types;		//array of sdlTypesPtr
 	HashTable *encoders;	//array of encodePtr
-	char *location;
+	HashTable *bindings;	//array of sdlBindings (key'd by name)
 	char *target_ns;
 	char *source;
 };
+
+struct _sdlBinding
+{
+	char *name;
+	HashTable *functions;
+	char *location;
+	int bindingType;
+	void *bindingAttributes;
+};
+
+//Soap Binding Specfic stuff
+struct _sdlSoapBinding
+{
+	char *transport;
+	int style;
+};
+
+struct _sdlSoapBindingFunctionBody
+{
+	char *ns;
+	int use;
+	char *parts;			//not implemented yet
+	char *encodingStyle;	//not implemented yet
+};
+
+struct _sdlSoapBindingFunction
+{
+	char *soapAction;
+	int style;
+
+	sdlSoapBindingFunctionBody input;
+	sdlSoapBindingFunctionBody output;
+	sdlSoapBindingFunctionBody falut;
+};
+
+//HTTP Binding Specfic stuff
+/*********** not implemented yet ************
+struct _sdlHttpBinding
+{
+	int holder;
+};
+*********************************************/
 
 struct _sdlRestrictionInt
 {
@@ -68,13 +118,13 @@ struct _sdlParam
 
 struct _sdlFunction
 {
-	int enabled;
 	char *functionName;
 	char *requestName;
 	char *responseName;
 	HashTable *requestParameters;		//array of sdlParamPtr
 	HashTable *responseParameters;		//array of sdlParamPtr (this should only be one)
-	char *soapAction;
+	int bindingType;
+	void *bindingAttributes;
 };
 
 struct _sdlAttribute
@@ -87,11 +137,11 @@ struct _sdlAttribute
 	char *ref;
 	char *type;
 	char *use;
-	HashTable *extraAttributes;
+	HashTable *extraAttributes;			//array of xmlNodePtr
 };
 
 sdlPtr get_sdl(char *uri);
-sdlPtr load_wsdl(char *struri);
+sdlPtr load_wsdl(char *struri, sdlPtr parent);
 int load_sdl(char *struri, int force_load);
 int load_ms_sdl(char *struri, int force_load);
 
@@ -101,12 +151,16 @@ encodePtr get_encoder_ex(sdlPtr sdl, char *nscat);
 encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type);
 encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type);
 
-xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval* data);
+sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
+sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
-xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data);
-xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data);
+xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval* data, int style);
+
+xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style);
+xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style);
 
 void delete_type(void *type);
 void delete_attribute(void *attribute);
 #endif
+
 

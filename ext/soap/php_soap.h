@@ -22,8 +22,6 @@
 # define PHP_STREAMS
 #endif
 
-#define SOAP_DEBUG 1
-
 #ifdef PHP_WIN32
 # ifdef PHP_STREAMS
 #  define SOAP_STREAM php_stream *
@@ -53,6 +51,10 @@ typedef struct _sdlType sdlType, *sdlTypePtr;
 typedef struct _sdlParam sdlParam, *sdlParamPtr;
 typedef struct _sdlFunction sdlFunction, *sdlFunctionPtr;
 typedef struct _sdlAttribute sdlAttribute, *sdlAttributePtr;
+typedef struct _sdlBinding sdlBinding, *sdlBindingPtr;
+typedef struct _sdlSoapBinding sdlSoapBinding, *sdlSoapBindingPtr;
+typedef struct _sdlSoapBindingFunction sdlSoapBindingFunction, *sdlSoapBindingFunctionPtr;
+typedef struct _sdlSoapBindingFunctionBody sdlSoapBindingFunctionBody, *sdlSoapBindingFunctionBodyPtr;
 
 typedef struct _soapMapping soapMapping, *soapMappingPtr;
 typedef struct _soapService soapService, *soapServicePtr;
@@ -68,6 +70,24 @@ extern int le_sdl;
 extern int le_http_socket;
 extern int le_url;
 extern int le_service;
+
+
+struct _soapHeaderHandler
+{
+	char *ns;
+	int type;
+
+	struct _function_handler
+	{
+		char *functionName;
+		char *type;
+	} function_handler;
+
+	struct _class_handler
+	{
+		zend_class_entry *ce;
+	} class_handler;
+};
 
 struct _soapMapping
 {
@@ -185,16 +205,20 @@ PHP_FUNCTION(map);
 
 //Client Functions
 PHP_FUNCTION(soapobject);
+PHP_FUNCTION(__use);
+PHP_FUNCTION(__style);
 PHP_FUNCTION(__isfault);
 PHP_FUNCTION(__getfault);
 PHP_FUNCTION(__call);
 PHP_FUNCTION(__parse);
-#ifdef PHP_DEBUG
+PHP_FUNCTION(__generate);
+PHP_FUNCTION(__trace);
 PHP_FUNCTION(__getfunctions);
 PHP_FUNCTION(__gettypes);
 PHP_FUNCTION(__getlastresponse);
 PHP_FUNCTION(__getlastrequest);
-#endif
+PHP_FUNCTION(__headerclass);
+PHP_FUNCTION(__headerfunction);
 
 //SoapVar Functions
 PHP_FUNCTION(soapvar);
@@ -224,8 +248,11 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 
 sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
-sdlFunctionPtr get_function(sdlPtr sdl, char *function_name);
+sdlFunctionPtr get_function(sdlBindingPtr sdl, char *function_name);
+
 void delete_sdl(void *handle);
+void delete_binding(void *binding);
+void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body);
 void delete_function(void *function);
 void delete_paramater(void *paramater);
 void delete_service(void *service);
@@ -240,9 +267,9 @@ void soap_destructor(void *jobject);
 
 void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[]);
 xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret);
-xmlDocPtr seralize_function_call(sdlFunctionPtr function, char *urn, char *function_name, zval **arguments, int arg_count);
-xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name);
-xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName);
+xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count);
+xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style);
+xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style);
 zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param);
 
 void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -304,6 +331,20 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 #define THREE_PARAM(p,p1,p2) \
 	if(ZEND_NUM_ARGS() != 1 || getParameters(ht, 3, &p, &p1, &p2) == FAILURE) \
 		WRONG_PARAM_COUNT;
+
+#define FETCH_THIS_PORT(ss) \
+	{ \
+		zval *__thisObj; zval *__port; sdlBindingPtr *__tmp; \
+		GET_THIS_OBJECT(__thisObj) \
+		if(FIND_PORT_PROPERTY(__thisObj, __port) == FAILURE) { \
+			ss = NULL; \
+			php_error(E_ERROR, "Error could find current port"); \
+		} \
+		__tmp = (sdlBindingPtr*)Z_LVAL_P(__port); \
+		ss = *__tmp; \
+	}
+
+#define FIND_PORT_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "port", sizeof("port"), (void **)&tmp)
 
 #define FETCH_THIS_SDL(ss) \
 	{ \

@@ -10,6 +10,8 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
 
+	(*num_params) = 0;
+
 	trav = response->children;
 	FOREACHNODE(trav,"Envelope",env)
 	{
@@ -60,11 +62,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 							xmlNodePtr val;
 
 							zend_hash_internal_pointer_reset(fn->responseParameters);
-							if(zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) != SUCCESS)
-							{
-								(*num_params) = 0;
-							}
-							else
+							if(zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS)
 							{
 								param = (*h_param);
 								val = get_node(cur->children, param->paramName);

@@ -63,14 +63,16 @@ encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *ty
 
 encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type)
 {
-	char *nscat;
+	smart_str nscat = {0};
 	encodePtr enc;
 
 	enc = malloc(sizeof(encode));
 	memset(enc, 0, sizeof(encode));
 
-	nscat = emalloc(strlen(ns) + strlen(type) + 2);
-	sprintf(nscat, "%s:%s", ns, type);
+	smart_str_appends(&nscat, ns);
+	smart_str_appendc(&nscat, ':');
+	smart_str_appends(&nscat, type);
+	smart_str_0(&nscat);
 
 	enc->details.ns = strdup(ns);
 	enc->details.type_str = strdup(type);
@@ -83,12 +85,12 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type)
 		sdl->encoders = malloc(sizeof(HashTable));
 		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
 	}
-	zend_hash_add(sdl->encoders, nscat, strlen(nscat), &enc, sizeof(encodePtr), NULL);
-	efree(nscat);
+	zend_hash_add(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
+	smart_str_free(&nscat);
 	return enc;
 }
  
-xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data)
+xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 {
 	sdlTypePtr type;
 	xmlNodePtr ret;
@@ -99,26 +101,26 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data)
 	if(type->encode->details.type == IS_ARRAY ||
 		type->encode->details.type == SOAP_ENC_ARRAY)
 	{
-		ret = sdl_to_xml_array(type, data);
+		ret = sdl_to_xml_array(type, data, style);
 	}
 	else if(type->encode != NULL)
 	{
-		ret = master_to_xml(type->encode, data);
+		ret = master_to_xml(type->encode, data, style);
 	}
 	else if(type->elements != NULL)
 	{
-		ret = sdl_to_xml_object(type, data);
+		ret = sdl_to_xml_object(type, data, style);
 	}
 	else
 	{
-		ret = guess_xml_convert(enc, data);
+		ret = guess_xml_convert(enc, data, style);
 	}
 
 	//set_ns_and_type(ret, enc);
 	return ret;
 }
 
-xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data)
+xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	sdlTypePtr *t, tmp;
@@ -139,7 +141,7 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data)
 		{
 			xmlNodePtr newNode;
 
-			newNode = master_to_xml(tmp->encode, (*prop));
+			newNode = master_to_xml(tmp->encode, (*prop), style);
 			xmlNodeSetName(newNode, tmp->name);
 			xmlAddChild(ret, newNode);
 		}
@@ -149,7 +151,7 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data)
 	return ret;
 }
 
-xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data)
+xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 {
 	smart_str array_type_and_size = {0}, array_type = {0};
 	int i;
@@ -212,7 +214,7 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data)
 			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
 
 			enc = get_conversion((*zdata)->type);
-			xparam = master_to_xml(enc, (*zdata));
+			xparam = master_to_xml(enc, (*zdata), style);
 
 			xmlNodeSetName(xparam, "val");
 			xmlAddChild(xmlParam, xparam);
@@ -258,13 +260,42 @@ sdlPtr get_sdl(char *uri)
 	hndl = NULL;
 	if(zend_hash_find(SOAP_GLOBAL(sdls), uri, strlen(uri), (void **)&hndl) == FAILURE)
 	{
-		tmp = load_wsdl(uri);
+		tmp = load_wsdl(uri, NULL);
 		zend_hash_add(SOAP_GLOBAL(sdls), uri, strlen(uri), &tmp, sizeof(sdlPtr), NULL);
 	}
 	else
 		tmp = *hndl;
 
 	return tmp;
+}
+
+sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type)
+{
+	sdlBindingPtr *binding;
+
+	for(zend_hash_internal_pointer_reset(sdl->bindings);
+		zend_hash_get_current_data(sdl->bindings, (void **) &binding) == SUCCESS;
+		zend_hash_move_forward(sdl->bindings))
+	{
+		if((*binding)->bindingType == type)
+			return *binding;
+	}
+	return NULL;
+}
+
+sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns)
+{
+	sdlBindingPtr binding = NULL;
+	smart_str key = {0};
+
+	smart_str_appends(&key, ns);
+	smart_str_appendc(&key, ':');
+	smart_str_appends(&key, name);
+
+	zend_hash_find(sdl->bindings, key.c, key.len, (void **)&binding);
+
+	smart_str_free(&key);
+	return binding;
 }
 
 int load_php_sdl()
@@ -441,37 +472,39 @@ int write_php_sdl()
 	return TRUE;
 }
 
-sdlPtr load_wsdl(char *struri)
+sdlPtr load_wsdl(char *struri, sdlPtr parent)
 {
 	xmlDocPtr wsdl;
-	xmlNodePtr root, definitions, types, binding, schema, service;
+	xmlNodePtr root, definitions, types, binding, schema, service, import;
 	xmlNodePtr trav, trav2, trav3;
 	xmlAttrPtr targetNamespace;
 	sdlPtr tmpsdl;
 	TSRMLS_FETCH();
 
-	tmpsdl = malloc(sizeof(sdl));
-	memset(tmpsdl, 0, sizeof(sdl));
-
-	tmpsdl->source = strdup(struri);
+	if(!parent)
+	{
+		tmpsdl = malloc(sizeof(sdl));
+		memset(tmpsdl, 0, sizeof(sdl));
+		tmpsdl->source = strdup(struri);
+	}
+	else
+		tmpsdl = parent;
 
 	wsdl = xmlParseFile(struri);
 	xmlCleanupParser();
 
 	if(!wsdl)
-		php_error(E_ERROR, "Error parsing wsdl file");
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Could't load");
 
 	tmpsdl->doc = wsdl;
 	root = wsdl->children;
 	definitions = get_node(root, "definitions");
 	if(!definitions)
-		php_error(E_ERROR, "Error parsing wsdl file");
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Could't find definitions");
 
 	targetNamespace = get_attribute(definitions->properties, "targetNamespace");
 	if(targetNamespace)
-	{
 		tmpsdl->target_ns = strdup(targetNamespace->children->content);
-	}
 
 	types = get_node(definitions->children, "types");
 	if(types)
@@ -483,6 +516,15 @@ sdlPtr load_wsdl(char *struri)
 		}
 		ENDFOREACH(trav);
 	}
+	
+	trav = definitions->children;
+	FOREACHNODE(trav, "import", import)
+	{
+		xmlAttrPtr tmp = get_attribute(import->properties, "location");
+		if(tmp)
+			load_wsdl(tmp->children->content, tmpsdl);
+	}
+	ENDFOREACH(trav);
 
 	service = get_node(definitions->children, "service");
 	if(service != NULL)
@@ -491,216 +533,343 @@ sdlPtr load_wsdl(char *struri)
 		xmlNodePtr trav, port;
 
 		name = get_attribute(service->properties, "name");
-		if(name == NULL)
-			php_error(E_ERROR, "Error parsing wsdl (\"No name associated with service\")");
+		if(!name)
+			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No name associated with service");
 
 		trav = service->children;
 		FOREACHNODE(trav, "port", port)
 		{
-			xmlAttrPtr name, binding, location;
+			xmlAttrPtr type, name, bindingAttr, location;
+			xmlNodePtr portType, operation;
 			xmlNodePtr address;
+			char *ns, *ctype;
+			sdlBindingPtr tmpbinding;
+
+			tmpbinding = malloc(sizeof(sdlBinding));
+			memset(tmpbinding, 0, sizeof(sdlBinding));
 
 			name = get_attribute(port->properties, "name");
-			if(name == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (\"No name associated with port\")");
+			if(!name)
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No name associated with port");
 
-			binding = get_attribute(port->properties, "binding");
-			if(binding == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (\"No binding associated with port\")");
+			bindingAttr = get_attribute(port->properties, "binding");
+			if(bindingAttr == NULL)
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding associated with port");
 
-			//TODO: validate this is "soap" namespace
+			//find address and figure out binding type
 			address = get_node(port->children, "address");
-			if(address == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (\"No soap:address associated with port\")");
+			if(!address)
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No address associated with port");
 
 			location = get_attribute(address->properties, "location");
-			if(location == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (\"No location associated with soap:address\")");
+			if(!location)
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No location associated with port");
 
-			tmpsdl->location = strdup(location->children->content);
+			tmpbinding->location = strdup(location->children->content);
+
+			if(address->ns && !strcmp(address->ns->href, WSDL_SOAP_NAMESPACE))
+				tmpbinding->bindingType = BINDING_SOAP;
+			else if(address->ns && !strcmp(address->ns->href, WSDL_HTTP_NAMESPACE))
+				tmpbinding->bindingType = BINDING_HTTP;
+
+			parse_namespace(bindingAttr->children->content, &ctype, &ns);
+			binding = get_node_with_attribute(definitions->children, "binding", "name", ctype);
+			if(ns) efree(ns); if(ctype) efree(ctype);
+
+			if(!binding)
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding");
+
+			if(tmpbinding->bindingType == BINDING_SOAP)
+			{
+				sdlSoapBindingPtr soapBinding;
+				xmlNodePtr soapBindingNode;
+				xmlAttrPtr tmp;
+				
+				soapBinding = malloc(sizeof(sdlSoapBinding));
+				memset(soapBinding, 0, sizeof(sdlSoapBinding));
+
+				soapBindingNode = get_node_ex(binding->children, "binding", WSDL_SOAP_NAMESPACE);
+				if(soapBindingNode)
+				{
+					tmp = get_attribute(soapBindingNode->properties, "style");
+					if(tmp && !strcmp(tmp->children->content, "document"))
+						soapBinding->style = SOAP_DOCUMENT;
+					else
+						soapBinding->style = SOAP_RPC;
+
+					tmp = get_attribute(soapBindingNode->properties, "transport");
+					if(tmp)
+					{
+						if(strcmp(tmp->children->content, WSDL_HTTP_TRANSPORT))
+							php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: PHP-SOAP doesn't support transport '%s'", tmp->children->content);
+							
+						soapBinding->transport = strdup(tmp->children->content);
+					}
+					tmpbinding->bindingAttributes = (void *)soapBinding;
+				}
+			}
+
+			name = get_attribute(binding->properties, "name");
+			if(name == NULL)
+				php_error(E_ERROR, "Error parsing wsdl (Missing \"name\" attribute for \"binding\")");
+
+			tmpbinding->name = strdup(name->children->content);
+
+			type = get_attribute(binding->properties, "type");
+			if(type == NULL)
+				php_error(E_ERROR, "Error parsing wsdl (Missing \"type\" attribute for \"binding\")");
+
+			parse_namespace(type->children->content, &ctype, &ns);
+			portType = get_node_with_attribute(definitions->children, "portType", "name", ctype);
+			if(portType == NULL)
+				php_error(E_ERROR, "Error parsing wsdl (Missing \"portType\" with name \"%s\")", name->children->content);
+			if(ctype) efree(ctype);	if(ns) efree(ns);
+
+			trav2 = binding->children;
+			FOREACHNODE(trav2, "operation", operation)
+			{
+				sdlFunctionPtr function;
+				xmlNodePtr input, output, fault, portTypeOperation, portTypeInput, msgInput, msgOutput;
+				xmlAttrPtr op_name, paramOrder;
+
+				op_name = get_attribute(operation->properties, "name");
+				if(op_name == NULL)
+					php_error(E_ERROR, "Error parsing wsdl (Missing \"name\" attribute for \"operation\")");
+
+				portTypeOperation = get_node_with_attribute(portType->children, "operation", "name", op_name->children->content);
+				if(portTypeOperation == NULL)
+					php_error(E_ERROR, "Error parsing wsdl (Missing \"portType/operation\" with name \"%s\")", op_name->children->content);
+
+				function = malloc(sizeof(sdlFunction));
+				function->functionName = strdup(op_name->children->content);
+				function->requestParameters = NULL;
+				function->responseParameters = NULL;
+				function->responseName = NULL;
+				function->bindingAttributes = NULL;
+				function->bindingType = tmpbinding->bindingType;
+
+				if(tmpbinding->bindingType == BINDING_SOAP)
+				{
+					sdlSoapBindingFunctionPtr soapFunctionBinding;
+					sdlSoapBindingPtr soapBinding;
+					xmlNodePtr soapOperation;
+					xmlAttrPtr tmp;
+
+					soapFunctionBinding = malloc(sizeof(sdlSoapBindingFunction));
+					memset(soapFunctionBinding, 0, sizeof(sdlSoapBindingFunction));
+					soapBinding = (sdlSoapBindingPtr)tmpbinding->bindingAttributes;
+					soapFunctionBinding->style = soapBinding->style;
+
+					soapOperation = get_node_ex(operation->children, "operation", WSDL_SOAP_NAMESPACE);
+					if(soapOperation)
+					{
+						tmp = get_attribute(soapOperation->properties, "soapAction");
+						if(tmp)
+							soapFunctionBinding->soapAction = strdup(tmp->children->content);
+
+						tmp = get_attribute(soapOperation->properties, "style");
+						if(tmp && !strcmp(tmp->children->content, "rpc"))
+							soapFunctionBinding->style = SOAP_RPC;
+						else if(!soapBinding->style)
+							soapFunctionBinding->style = SOAP_DOCUMENT;
+					}
+
+					function->bindingAttributes = (void *)soapFunctionBinding;
+				}
+
+				input = get_node(operation->children, "input");
+				if(input != NULL)
+				{
+					xmlAttrPtr message;
+					xmlNodePtr part;
+					char *ns, *ctype;
+
+					portTypeInput = get_node(portTypeOperation->children, "input");
+					message = get_attribute(portTypeInput->properties, "message");
+					if(message == NULL)
+						php_error(E_ERROR, "Error parsing wsdl (Missing name for \"input\" of \"%s\")", op_name->children->content);
+
+					function->requestName = strdup(function->functionName);
+					function->requestParameters = malloc(sizeof(HashTable));
+					zend_hash_init(function->requestParameters, 0, NULL, delete_paramater, 1);
+
+					parse_namespace(message->children->content, &ctype, &ns);
+					msgInput = get_node_with_attribute(definitions->children, "message", "name", ctype);
+					if(msgInput == NULL)
+						php_error(E_ERROR, "Error parsing wsdl (Missing \"message\" with name \"%s\")", message->children->content);
+					if(ctype) efree(ctype);	if(ns) efree(ns);
+
+					if(tmpbinding->bindingType == BINDING_SOAP)
+					{
+						sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
+						xmlNodePtr body;
+						xmlAttrPtr tmp;
+
+						body = get_node_ex(input->children, "body", WSDL_SOAP_NAMESPACE);
+						if(body)
+						{
+							tmp = get_attribute(body->properties, "use");
+							if(tmp && !strcmp(tmp->children->content, "literal"))
+								soapFunctionBinding->input.use = SOAP_LITERAL;
+							else
+								soapFunctionBinding->input.use = SOAP_ENCODED;
+
+							tmp = get_attribute(body->properties, "namespace");
+							if(tmp)
+								soapFunctionBinding->input.ns = strdup(tmp->children->content);
+
+							tmp = get_attribute(body->properties, "parts");
+							if(tmp)
+								soapFunctionBinding->input.parts = strdup(tmp->children->content);
+
+							tmp = get_attribute(body->properties, "encodingStyle");
+							if(tmp)
+								soapFunctionBinding->input.encodingStyle = strdup(tmp->children->content);
+						}
+					}
+
+					trav3 = msgInput->children;
+					FOREACHNODE(trav3, "part", part)
+					{
+						xmlAttrPtr element, type, name;
+						sdlParamPtr param;
+
+						param = malloc(sizeof(sdlParam));
+						param->order = 0;
+
+						name = get_attribute(part->properties, "name");
+						if(name == NULL)
+							php_error(E_ERROR, "Error parsing wsdl (No name associated with part \"%s\")", msgInput->name);
+
+						param->paramName = strdup(name->children->content);
+
+						element = get_attribute(part->properties, "element");
+						if(element != NULL)
+							param->encode = get_encoder_from_prefix(tmpsdl, part, element->children->content);
+
+						type = get_attribute(part->properties, "type");
+						if(type != NULL)
+							param->encode = get_encoder_from_prefix(tmpsdl, part, type->children->content);
+
+						zend_hash_next_index_insert(function->requestParameters, &param, sizeof(sdlParamPtr), NULL);
+					}
+					ENDFOREACH(trav3);
+				}
+
+				paramOrder = get_attribute(portTypeOperation->properties, "parameterOrder");
+				if(paramOrder)
+				{
+
+				}
+
+				output = get_node(portTypeOperation->children, "output");
+				if(output != NULL)
+				{
+					xmlAttrPtr message;
+					xmlNodePtr part;
+					char *ns, *ctype;
+
+
+					function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
+					sprintf(function->responseName, "%sResponse\0", function->functionName);
+					function->responseParameters = malloc(sizeof(HashTable));
+					zend_hash_init(function->responseParameters, 0, NULL, delete_paramater, 1);
+
+					message = get_attribute(output->properties, "message");
+					if(message == NULL)
+						php_error(E_ERROR, "Error parsing wsdl (Missing name for \"output\" of \"%s\")", op_name->children->content);
+
+					parse_namespace(message->children->content, &ctype, &ns);
+					msgOutput = get_node_with_attribute(definitions->children, "message", "name", ctype);
+					if(msgOutput == NULL)
+						php_error(E_ERROR, "Error parsing wsdl (Missing \"message\" with name \"%s\")", message->children->content);
+					if(ctype) efree(ctype); if(ns) efree(ns);
+
+					if(tmpbinding->bindingType == BINDING_SOAP)
+					{
+						sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
+						xmlNodePtr body;
+						xmlAttrPtr tmp;
+
+						body = get_node_ex(output->children, "body", WSDL_SOAP_NAMESPACE);
+						if(body)
+						{
+							tmp = get_attribute(body->properties, "use");
+							if(tmp && !strcmp(tmp->children->content, "literal"))
+								soapFunctionBinding->output.use = SOAP_LITERAL;
+							else
+								soapFunctionBinding->output.use = SOAP_ENCODED;
+
+							tmp = get_attribute(body->properties, "namespace");
+							if(tmp)
+								soapFunctionBinding->output.ns = strdup(tmp->children->content);
+
+							tmp = get_attribute(body->properties, "parts");
+							if(tmp)
+								soapFunctionBinding->output.parts = strdup(tmp->children->content);
+
+							tmp = get_attribute(body->properties, "encodingStyle");
+							if(tmp)
+								soapFunctionBinding->output.encodingStyle = strdup(tmp->children->content);
+						}
+					}
+
+					trav3 = msgOutput->children;
+					FOREACHNODE(trav3, "part", part)
+					{
+						sdlParamPtr param;
+						xmlAttrPtr element, type, name;
+
+						param = malloc(sizeof(sdlParam));
+						param->order = 0;
+
+						name = get_attribute(part->properties, "name");
+						if(name == NULL)
+							php_error(E_ERROR, "Error parsing wsdl (No name associated with part \"%s\")", msgOutput->name);
+
+						param->paramName = strdup(name->children->content);
+
+						element = get_attribute(part->properties, "element");
+						if(element)
+							param->encode = get_encoder_from_prefix(tmpsdl, part, element->children->content);
+
+						type = get_attribute(part->properties, "type");
+						if(type)
+							param->encode = get_encoder_from_prefix(tmpsdl, part, type->children->content);
+
+						zend_hash_next_index_insert(function->responseParameters, &param, sizeof(sdlParamPtr), NULL);
+					}
+					ENDFOREACH(trav3);
+				}
+
+				fault = get_node(operation->children, "fault");
+				if(!fault)
+				{
+				}
+
+				if(!tmpbinding->functions)
+				{
+					tmpbinding->functions = malloc(sizeof(HashTable));
+					zend_hash_init(tmpbinding->functions, 0, NULL, delete_function, 1);
+				}
+
+				zend_hash_add(tmpbinding->functions, php_strtolower(function->functionName, strlen(function->functionName)), strlen(function->functionName), &function, sizeof(sdlFunctionPtr), NULL);
+			}
+			ENDFOREACH(trav2);
+
+			if(!tmpsdl->bindings)
+			{
+				tmpsdl->bindings = malloc(sizeof(HashTable));
+				zend_hash_init(tmpsdl->bindings, 0, NULL, delete_binding, 1);
+			}
+
+			zend_hash_add(tmpsdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
 		}
 		ENDFOREACH(trav);
 
 	}
 	else
 		php_error(E_ERROR, "Error parsing wsdl (\"Couldn't bind to service\")");
-
-	trav = definitions->children;
-	FOREACHNODE(trav, "binding", binding)
-	{
-		xmlAttrPtr name, type;
-		xmlNodePtr portType, operation;
-		char *ns, *ctype;
-
-		name = get_attribute(binding->properties, "name");
-		if(name == NULL)
-			php_error(E_ERROR, "Error parsing wsdl (Missing \"name\" attribute for \"binding\")");
-
-		type = get_attribute(binding->properties, "type");
-		if(type == NULL)
-			php_error(E_ERROR, "Error parsing wsdl (Missing \"type\" attribute for \"binding\")");
-
-		parse_namespace(type->children->content, &ctype, &ns);
-		portType = get_node_with_attribute(definitions->children, "portType", "name", ctype);
-		if(portType == NULL)
-			php_error(E_ERROR, "Error parsing wsdl (Missing \"portType\" with name \"%s\")", name->children->content);
-		if(ctype) efree(ctype);
-		if(ns) efree(ns);
-
-		trav2 = binding->children;
-		FOREACHNODE(trav2, "operation", operation)
-		{
-			sdlFunctionPtr function;
-			xmlNodePtr input, output, fault, portTypeOperation, msgInput, msgOutput, soapOperation;
-			xmlAttrPtr op_name, paramOrder;
-
-			op_name = get_attribute(operation->properties, "name");
-			if(op_name == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (Missing \"name\" attribute for \"operation\")");
-
-			portTypeOperation = get_node_with_attribute(portType->children, "operation", "name", op_name->children->content);
-			if(portTypeOperation == NULL)
-				php_error(E_ERROR, "Error parsing wsdl (Missing \"portType/operation\" with name \"%s\")", op_name->children->content);
-
-			if(tmpsdl->functions == NULL)
-			{
-				tmpsdl->functions = malloc(sizeof(HashTable));
-				zend_hash_init(tmpsdl->functions, 0, NULL, delete_function, 1);
-			}
-
-			function = malloc(sizeof(sdlFunction));
-			function->functionName = strdup(op_name->children->content);
-			function->requestParameters = NULL;
-			function->responseParameters = NULL;
-			function->responseName = NULL;
-			function->soapAction = NULL;
-
-			soapOperation = get_node(operation->children, "operation");
-			if(soapOperation)
-			{
-				xmlAttrPtr action = get_attribute(soapOperation->properties, "soapAction");
-				if(action)
-					function->soapAction = strdup(action->children->content);
-			}
-
-			input = get_node(portTypeOperation->children, "input");
-			if(input != NULL)
-			{
-				xmlAttrPtr message;
-				xmlNodePtr part;
-				char *ns, *ctype;
-
-				message = get_attribute(input->properties, "message");
-				if(message == NULL)
-					php_error(E_ERROR, "Error parsing wsdl (Missing name for \"input\" of \"%s\")", op_name->children->content);
-
-				function->requestName = strdup(function->functionName);
-				function->requestParameters = malloc(sizeof(HashTable));
-				zend_hash_init(function->requestParameters, 0, NULL, delete_paramater, 1);
-
-				parse_namespace(message->children->content, &ctype, &ns);
-				msgInput = get_node_with_attribute(definitions->children, "message", "name", ctype);
-				if(msgInput == NULL)
-					php_error(E_ERROR, "Error parsing wsdl (Missing \"message\" with name \"%s\")", message->children->content);
-				if(ctype) efree(ctype);
-				if(ns) efree(ns);
-
-				trav3 = msgInput->children;
-				FOREACHNODE(trav3, "part", part)
-				{
-					xmlAttrPtr element, type, name;
-					sdlParamPtr param;
-
-					param = malloc(sizeof(sdlParam));
-					param->order = 0;
-
-					name = get_attribute(part->properties, "name");
-					if(name == NULL)
-						php_error(E_ERROR, "Error parsing wsdl (No name associated with part \"%s\")", msgInput->name);
-
-					param->paramName = strdup(name->children->content);
-
-					element = get_attribute(part->properties, "element");
-					if(element != NULL)
-						param->encode = get_encoder_from_prefix(tmpsdl, part, element->children->content);
-
-					type = get_attribute(part->properties, "type");
-					if(type != NULL)
-						param->encode = get_encoder_from_prefix(tmpsdl, part, type->children->content);
-
-					zend_hash_next_index_insert(function->requestParameters, &param, sizeof(sdlParamPtr), NULL);
-				}
-				ENDFOREACH(trav3);
-			}
-
-			paramOrder = get_attribute(portTypeOperation->properties, "parameterOrder");
-			if(paramOrder)
-			{
-
-			}
-
-			output = get_node(portTypeOperation->children, "output");
-			if(output != NULL)
-			{
-				xmlAttrPtr message;
-				xmlNodePtr part;
-				char *ns, *ctype;
-
-
-				function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
-				sprintf(function->responseName, "%sResponse\0", function->functionName);
-				function->responseParameters = malloc(sizeof(HashTable));
-				zend_hash_init(function->responseParameters, 0, NULL, delete_paramater, 1);
-
-				message = get_attribute(output->properties, "message");
-				if(message == NULL)
-					php_error(E_ERROR, "Error parsing wsdl (Missing name for \"output\" of \"%s\")", op_name->children->content);
-
-				parse_namespace(message->children->content, &ctype, &ns);
-				msgOutput = get_node_with_attribute(definitions->children, "message", "name", ctype);
-				if(msgOutput == NULL)
-					php_error(E_ERROR, "Error parsing wsdl (Missing \"message\" with name \"%s\")", message->children->content);
-				if(ctype) efree(ctype);
-				if(ns) efree(ns);
-
-				trav3 = msgOutput->children;
-				FOREACHNODE(trav3, "part", part)
-				{
-					sdlParamPtr param;
-					xmlAttrPtr element, type, name;
-
-					param = malloc(sizeof(sdlParam));
-					param->order = 0;
-
-					name = get_attribute(part->properties, "name");
-					if(name == NULL)
-						php_error(E_ERROR, "Error parsing wsdl (No name associated with part \"%s\")", msgOutput->name);
-
-					param->paramName = strdup(name->children->content);
-
-					element = get_attribute(part->properties, "element");
-					if(element)
-						param->encode = get_encoder_from_prefix(tmpsdl, part, element->children->content);
-
-					type = get_attribute(part->properties, "type");
-					if(type)
-						param->encode = get_encoder_from_prefix(tmpsdl, part, type->children->content);
-
-					zend_hash_next_index_insert(function->responseParameters, &param, sizeof(sdlParamPtr), NULL);
-				}
-				ENDFOREACH(trav3);
-			}
-
-			fault = get_node(operation->children, "fault");
-			if(fault != NULL)
-			{
-			}
-
-			zend_hash_add(tmpsdl->functions, php_strtolower(function->functionName, strlen(function->functionName)), strlen(function->functionName), &function, sizeof(sdlFunctionPtr), NULL);
-		}
-		ENDFOREACH(trav2);
-	}
-	ENDFOREACH(trav);
 
 	return tmpsdl;
 }

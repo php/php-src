@@ -8,10 +8,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	sdlPtr sdl;
 	php_url *phpurl = NULL;
 	SOAP_STREAM stream;
-
-#ifdef SOAP_DEBUG
-	zval *raw_request;
-#endif
+	zval **trace;
 
 	TSRMLS_FETCH();
 
@@ -21,17 +18,18 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 
 	xmlDocDumpMemory(doc, &buf, &buf_size);
 
-#ifdef SOAP_DEBUG
-	MAKE_STD_ZVAL(raw_request);
-	ZVAL_STRINGL(raw_request, buf, buf_size, 1);
-	add_property_zval(this_ptr, "__last_request", raw_request);
-#endif
+	if(!buf)
+		php_error(E_ERROR, "Error build soap request");
+
+	if(zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
+		&& Z_LVAL_PP(trace) > 0)
+		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 
 	if(!stream)
 	{
 		char *url;
 
-		if(sdl == NULL)
+		if(!sdl)
 		{
 			zval **location;
 			if(zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &location) == FAILURE)
@@ -39,7 +37,11 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			url = Z_STRVAL_PP(location);
 		}
 		else
-			url = sdl->location;
+		{
+			sdlBindingPtr binding;
+			FETCH_THIS_PORT(binding);
+			url = binding->location;
+		}
 
 		phpurl = php_url_parse(url);
 
@@ -60,19 +62,19 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 		}
 		else
 			php_error(E_ERROR,"Could not connect to host");
-		/*php_url_free(phpurl);*/
+		//php_url_free(phpurl);
 	}
 
 	if(stream)
 	{
 		zval **cookies;
-		char *header = "POST %s HTTP/1.0\r\nConnection: close\r\nAccept: text/html; text/xml; text/plain\r\nUser-Agent: PHP SOAP 0.1\r\nHost: %s\r\nContent-Type: text/xml\r\nContent-Length: %d\r\nSOAPAction: \"%s\"\r\n";
+		char *header = "POST %s HTTP/1.1\r\nConnection: close\r\nAccept: text/html; text/xml; text/plain\r\nUser-Agent: PHP SOAP 0.1\r\nHost: %s\r\nContent-Type: text/xml\r\nContent-Length: %d\r\nSOAPAction: \"%s\"\r\n";
 		int size = strlen(header) + strlen(phpurl->host) + strlen(phpurl->path) + 10;
 
-		/* TODO: Add authication */
+		// TODO: Add authication
 		if(sdl != NULL)
 		{
-			/* TODO: need to grab soap action from wsdl.... */
+			// TODO: need to grab soap action from wsdl....
 			soap_headers = emalloc(size + strlen(soapaction));
 			sprintf(soap_headers, header, phpurl->path, phpurl->host, buf_size, soapaction);
 		}
@@ -90,7 +92,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 		if(err != (int)strlen(soap_headers))
 			php_error(E_ERROR,"Failed Sending HTTP Headers");
 
-		/* Send cookies along with request */
+		// Send cookies along with request
 		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS)
 		{
 			smart_str cookie_str = {0};
@@ -149,15 +151,12 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 
 void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 {
-	char *http_headers, *http_body, *content_type, *http_version, http_status[4], *cookie_itt, *connection;
+	char *http_headers, *http_body, *content_type, *http_version, http_status[4], *cookie_itt;
 	int http_header_size, http_body_size, http_close;
 	sdlPtr sdl;
 	zval **socket_ref;
 	SOAP_STREAM stream;
-
-#ifdef SOAP_DEBUG
-	zval *raw_response;
-#endif
+	zval **trace;
 
 	TSRMLS_FETCH();
 
@@ -220,17 +219,13 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 	if(!get_http_body(stream, http_headers, &http_body, &http_body_size))
 		php_error(E_ERROR, "Error Fetching http body");
 
-#ifdef SOAP_DEBUG
-	MAKE_STD_ZVAL(raw_response);
-	ZVAL_STRINGL(raw_response, http_body, http_body_size, 1);
-	add_property_zval(this_ptr, "__last_response", raw_response);
-#endif
+	if(zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
+		&& Z_LVAL_PP(trace) > 0)
+		add_property_stringl(this_ptr, "__last_response", http_body, http_body_size, 1);
 
-	/*
-	 * Close every time right now till i can spend more time on it
-	 *  it works.. it's just slower??
-	 * See if the server requested a close
-	 */
+	// Close every time right now till i can spend more time on it
+	//  it works.. it's just slower??
+	//See if the server requested a close
 	http_close = TRUE;
 	/*
 	connection = get_http_header_value(http_headers,"Connection: ");
@@ -258,7 +253,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", strlen("httpsocket") + 1);
 	}
 
-	/* Check and see if the server even sent a xml document */
+	//Check and see if the server even sent a xml document
 	content_type = get_http_header_value(http_headers,"Content-Type: ");
 	if(content_type)
 	{
@@ -285,12 +280,10 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 		efree(content_type);
 	}
 
-	/*
-	Grab and send back every cookie
-	Not going to worry about Path: because
-	we shouldn't be changing urls so path dont
-	matter too much
-	*/
+	//Grab and send back every cookie
+	//Not going to worry about Path: because
+	//we shouldn't be changing urls so path dont
+	//matter too much
 	cookie_itt = strstr(http_headers,"Set-Cookie: ");
 	while(cookie_itt)
 	{
@@ -363,10 +356,8 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 	trans_enc = get_http_header_value(headers, "Transfer-Encoding: ");
 	content_length = get_http_header_value(headers, "Content-Length: ");
 
-	/*
-	 this is temp...
-	 netscape enterprise server sends in lowercase???
-	*/
+	//this is temp...
+	// netscape enterprise server sends in lowercase???
 	if(content_length == NULL)
 		content_length = get_http_header_value(headers, "Content-length: ");
 
@@ -402,7 +393,7 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 #ifdef PHP_STREAMS
 				php_stream_getc(stream);php_stream_getc(stream);
 #else
-				/* Eat up '\r' '\n' */
+				//Eat up '\r' '\n'
 				php_sock_fgetc(stream);php_sock_fgetc(stream);
 #endif
 			}
