@@ -732,7 +732,7 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 	char		*data;
 
 	/* build the output buffer */
-	if (args) {
+	if (args && args[0]) {
 		/* "cmd args\r\n\0" */
 		if (strlen(cmd) + strlen(args) + 4 > FTP_BUFSIZE)
 			return 0;
