@@ -420,7 +420,7 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [[, bool use_include_path], resource context])
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
