@@ -1224,7 +1224,6 @@ PHP_FUNCTION(putenv)
 	convert_to_string_ex(str);
 
 	if (Z_STRVAL_PP(str) && *(Z_STRVAL_PP(str))) {
-		int ret;
 		char *p, **env;
 		putenv_entry pe;
 
