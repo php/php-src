@@ -149,7 +149,6 @@ PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 }
 
 
-#ifdef ZTS
 static void file_globals_ctor(FLS_D)
 {
 	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
@@ -159,13 +158,15 @@ static void file_globals_ctor(FLS_D)
 	FG(fgetss_state) = 0;
 	FG(pclose_ret) = 0;
 }
+
+
 static void file_globals_dtor(FLS_D)
 {
 	zend_hash_destroy(&FG(ht_fsock_socks));
 	zend_hash_destroy(&FG(ht_fsock_keys));
 	php_cleanup_sockbuf(1 FLS_CC);
 }
-#endif
+
 
 PHP_MINIT_FUNCTION(file)
 {
@@ -191,6 +192,19 @@ PHP_MINIT_FUNCTION(file)
 }
 
 /* }}} */
+
+PHP_MSHUTDOWN_FUNCTION(file)
+{
+#ifndef ZTS
+	FLS_FETCH();
+
+	file_globals_dtor(FLS_C);
+#endif
+	return SUCCESS;
+}
+
+
+
 /* {{{ proto bool flock(int fp, int operation [, int wouldblock])
    Portable file locking */
 

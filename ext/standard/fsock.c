@@ -715,19 +715,6 @@ void php_msock_destroy(int *data)
 /* }}} */
 
 
-PHP_MINIT_FUNCTION(fsock)
-{
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(fsock)
-{
-#ifndef ZTS
-	fsock_globals_dtor(FLS_C);
-#endif
-	return SUCCESS;
-}
-
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
 	FLS_FETCH();

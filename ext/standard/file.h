@@ -23,7 +23,8 @@
 #ifndef FILE_H
 #define FILE_H
 
-extern PHP_MINIT_FUNCTION(file);
+PHP_MINIT_FUNCTION(file);
+PHP_MSHUTDOWN_FUNCTION(file);
 
 PHP_FUNCTION(tempnam);
 PHP_NAMED_FUNCTION(php_if_tmpfile);
