@@ -162,7 +162,7 @@ static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
 #ifdef ZTS
 		tsrm_mutex_unlock (yaz_mutex);
 #endif
-		php_error(E_WARNING, "Invalid YAZ handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid YAZ handle");
 	}
 }
 
@@ -518,7 +518,7 @@ PHP_FUNCTION(yaz_wait)
 		}
 		if (Z_TYPE_PP(pval_options) != IS_ARRAY)
 		{
-			php_error(E_WARNING, "yaz_wait: Expected array parameter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array parameter");
 			RETURN_FALSE;
 		}
 		options_ht = Z_ARRVAL_PP(pval_options);
@@ -827,10 +827,7 @@ static void retval_grs1 (zval *return_value, Z_GenericRecord *p)
 	int eno[20];
 	int level = 0;
 
-	if (array_init(return_value) == FAILURE)
-	{
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	eno[level] = 0;
 	grs[level] = p;
 	while (level >= 0)
@@ -1201,7 +1198,7 @@ PHP_FUNCTION(yaz_itemorder)
 	}
 	if (Z_TYPE_PP(pval_package) != IS_ARRAY)
 	{
-		php_error(E_WARNING, "yaz_itemorder: Expected array parameter");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array parameter");
 		RETURN_FALSE;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
@@ -1247,7 +1244,7 @@ PHP_FUNCTION(yaz_scan)
 		}
 		if (Z_TYPE_PP(pval_flags) != IS_ARRAY)
 		{
-			php_error(E_WARNING, "yaz_scan: Bad flags parameter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad flags parameter");
 			RETURN_FALSE;
 		}
 		flags_ht = Z_ARRVAL_PP(pval_flags);
@@ -1290,10 +1287,7 @@ PHP_FUNCTION(yaz_es_result)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	if (array_init(return_value) == FAILURE)
-	{
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
     if (p && p->zoom_package)
     {
@@ -1331,10 +1325,7 @@ PHP_FUNCTION(yaz_scan_result)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	if (array_init(return_value) == FAILURE)
-	{
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	if (pval_opt && array_init(*pval_opt) == FAILURE)
 	{
 		RETURN_FALSE;
@@ -1404,7 +1395,7 @@ PHP_FUNCTION(yaz_ccl_conf)
 	}
 	if (Z_TYPE_PP(pval_package) != IS_ARRAY)
 	{
-		php_error(E_WARNING, "yaz_ccl_conf: Expected array parameter");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array parameter");
 		RETURN_FALSE;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
@@ -1453,11 +1444,7 @@ PHP_FUNCTION(yaz_ccl_parse)
 	}
 	
 	pval_destructor(*pval_res);
-	if (array_init(*pval_res) == FAILURE)
-	{
-		php_error(E_WARNING, "cannot initialize array");
-		RETURN_FALSE;
-	}
+	array_init(*pval_res);
 	convert_to_string_ex (pval_query);
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
