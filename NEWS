@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Beta 4
+- Added checks for invalid characters in a cookie name or cookie data 
+  from setrawcookie. (Brian)
+- Added new pspell functions to set the dict-dir and data-dir options. (Brian)
 - Added support for ++ and += (and similar) to SimpleXML. (Andi, Zeev)
 - Added infrastructure for ++ and += (and similar) to object overloading
   modules. (Andi, Zeev)
