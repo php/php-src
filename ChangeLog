@@ -1,3 +1,69 @@
+2002-03-30  Stig Bakken  <ssb@fast.no>
+
+    * configure.in: * added sys/utsname.h test
+
+2002-03-30  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: MFH. 6.5.3 libpq build fix.
+
+2002-03-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt: - corrected test-image
+
+    * ext/exif/tests/test2.jpg: MFH - corrected test-image
+
+    * ext/exif/exif.c: -memory leaks
+
+2002-03-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * README.EXT_SKEL:
+    Looks like mawk can't handle create_stubs - if someone is keen it would be
+    nice to fix that, but for now just make a note that gawk may be needed.
+
+2002-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    - Proper use of underscores (s/createsid/create_sid/)
+    - Bump the API date and remove extra cpp macro
+    - Pass TSRMLS appropiately to the create_sid function
+
+2002-03-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -compiler warnings
+
+2002-03-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pspell/tests/.cvsignore: New file.
+
+    * ext/pspell/tests/.cvsignore: another missing .cvsignore
+
+2002-03-30  Marko Karppinen  <karppinen@pobox.com>
+
+    * sapi/apache/config.m4
+      Makefile.global
+      acinclude.m4:
+    Enable --with-apxs build on Mac OS X. We build an MH_BUNDLE instead of
+    an MH_DYLIB. As all PPC code is relocatable, we don't use the libtool
+    based shared build but go a static route. Goodbye libtool!
+
+2002-03-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/exif/tests/.cvsignore: missing .cvsignore
+
+    * ext/xmlrpc/libxmlrpc/.cvsignore: missing entry (still needed here..)
+
+    * ext/ming/config.m4: MFH
+
+    * main/rfc1867.c:
+    Fixed a bug with file_uploads=off -> normal post variables not set.
+
+2002-03-30  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ftp/php_ftp.c: - MFH fix for #16348.
+
+    * ext/ftp/php_ftp.c: - Fix #16348.
+
 2002-03-29  Marko Karppinen  <karppinen@pobox.com>
 
     * .cvsignore:
