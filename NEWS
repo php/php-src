@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Updated natural comparison/sorting algorithm by Martin Pool
+  <mbp@humbug.org.au>. (Andrei)
 - Fixed a crash in array_multisort() that happened when empty arrays
   were passed to it. (Andrei)
 - Added substr_count() from Peter Kovacs. (Andrei)
