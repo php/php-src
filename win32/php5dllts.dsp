@@ -1520,6 +1520,10 @@ SOURCE=..\ext\zlib\zlib.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\zlib\zlib_filter.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\zlib\zlib_fopen_wrapper.c
 # End Source File
 # End Group
