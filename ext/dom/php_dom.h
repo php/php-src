@@ -91,6 +91,7 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #endif
 int dom_get_strict_error(php_libxml_ref_obj *document);
 void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC);
+void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
