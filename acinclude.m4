@@ -248,6 +248,16 @@ AC_DEFUN(AC_ADD_LIBRARY,[
 ])
 
 dnl
+dnl AC_ADD_LIBRARY_DEFER(library[, append])
+dnl
+dnl add a library to the link line (defferred)
+AC_DEFUN(AC_ADD_LIBRARY_DEFER,[
+  AC_PHP_ONCE(LIBRARY, $1, [
+    ifelse($#, 1, DLIBS="-l$1 $DLIBS", DLIBS="$DLIBS -l$1")
+  ])
+])
+
+dnl
 dnl AC_ADD_LIBRARY_WITH_PATH(library, path)
 dnl
 dnl add a library to the link line and path to linkpath/runpath
@@ -359,7 +369,7 @@ AC_DEFUN(PHP_EXTENSION,[
       EXT_LIBS="$EXT_LIBS $1/$_extlib"
       EXT_STATIC="$EXT_STATIC $1"
     else
-      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z,A-Z), 1, Whether to build $1 as dynamic module)
+      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
       EXT_SHARED="$EXT_SHARED $1"
     fi
     PHP_FAST_OUTPUT(ext/$1/Makefile)
