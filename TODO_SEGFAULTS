@@ -29,11 +29,8 @@ Fixed:
 Open:
 
     the dbase extension         (1)
-    chunk_split                 (2)
-    socket_select               (3)
-    php_imagepolygon            (4)
-    imagesetstyle               (5)
-    pack                        (6)
+    socket_select               (2)
+    pack                        (3)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -53,9 +50,7 @@ dbase_numrecords
 dbase_open
 X 
 
-(2) integer overflow in php_chunk_split
-
-(3) heap corruption, dies in efree()/execute()
+(2) heap corruption, dies in efree()/execute()
 
 Methodology
 
@@ -75,15 +70,7 @@ Methodology
 
         echo dbase_open | php do_crash.txt
 
-(4) integer overflow inside php_imagepolygon and possible subsequent 
-    integer overflows inside gdlib's gdImageFilledPolygon().
-
-(5) integer overflow if the number of elements in the array passed as
-    second argument * sizeof(int) result in an overflow.
-    gdImageSetStyle function called by this php wrapper can die for the
-    same reason.  
-
-(6) multiple integer overflows, ex. pack("d4294967297", 2);
+(3) multiple integer overflows, ex. pack("d4294967297", 2);
 
 Amendment 1.
 
