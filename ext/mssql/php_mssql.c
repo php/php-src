@@ -878,7 +878,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 
 		column_types[i] = coltype(i+1);
 
-		result->Z_TYPE(fields[i]) = column_types[i];
+		Z_TYPE(result->fields[i]) = column_types[i];
 		/* set numeric flag */
 		switch (column_types[i]) {
 			case SQLINT1:
@@ -1166,7 +1166,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
 				if (PG(magic_quotes_runtime)) {
-					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &result->data[result->Z_STRLEN(cur_row][i]), 1 TSRMLS_CC);
+					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &Z_STRLEN(result->data[result->cur_row][i]), 1 TSRMLS_CC);
 					should_copy = 0;
 				}
 				else
@@ -1187,17 +1187,17 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_LONG) {
 				if (result_type & MSSQL_NUM)
-					add_index_long(return_value, i, result->data[result->Z_LVAL(cur_row][i]));
+					add_index_long(return_value, i, Z_LVAL(result->data[result->cur_row][i]));
 				
 				if (result_type & MSSQL_ASSOC)
-					add_assoc_long(return_value, result->fields[i].name, result->data[result->Z_LVAL(cur_row][i]));
+					add_assoc_long(return_value, result->fields[i].name, Z_LVAL(result->data[result->cur_row][i]));
 			}
 			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_DOUBLE) {
 				if (result_type & MSSQL_NUM)
-					add_index_double(return_value, i, result->data[result->Z_DVAL(cur_row][i]));
+					add_index_double(return_value, i, Z_DVAL(result->data[result->cur_row][i]));
 				
 				if (result_type & MSSQL_ASSOC)
-					add_assoc_double(return_value, result->fields[i].name, result->data[result->Z_DVAL(cur_row][i]));
+					add_assoc_double(return_value, result->fields[i].name, Z_DVAL(result->data[result->cur_row][i]));
 			}
 		}
 		else
@@ -1365,7 +1365,7 @@ PHP_FUNCTION(mssql_fetch_field)
 	add_property_long(return_value, "max_length",result->fields[field_offset].max_length);
 	add_property_string(return_value, "column_source",result->fields[field_offset].column_source, 1);
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
-	add_property_string(return_value, "type", php_mssql_get_field_name(result->Z_TYPE(fields[field_offset])), 1);
+	add_property_string(return_value, "type", php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])), 1);
 }
 
 /* }}} */
@@ -1506,8 +1506,8 @@ PHP_FUNCTION(mssql_field_type)
 		RETURN_FALSE;
 	}
 
-	Z_STRVAL_P(return_value) = estrdup(php_mssql_get_field_name(result->Z_TYPE(fields[field_offset])));
-	Z_STRLEN_P(return_value) = strlen(php_mssql_get_field_name(result->Z_TYPE(fields[field_offset])));
+	Z_STRVAL_P(return_value) = estrdup(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])));
+	Z_STRLEN_P(return_value) = strlen(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])));
 	Z_TYPE_P(return_value) = IS_STRING;
 }
 
@@ -1967,20 +1967,20 @@ PHP_FUNCTION(mssql_execute)
 							case SQLINT2:
 							case SQLINT4:
 								convert_to_long_ex(&bind->zval);
-								bind->Z_LVAL_P(zval)=*((int *)(dbretdata(mssql_ptr->link,i)));
+								Z_LVAL_P(bind->zval)=*((int *)(dbretdata(mssql_ptr->link,i)));
 								break;
 				
 							case SQLFLT8:
 								convert_to_double_ex(&bind->zval);
-								bind->Z_DVAL_P(zval)=*((double *)(dbretdata(mssql_ptr->link,i)));
+								Z_DVAL_P(bind->zval)=*((double *)(dbretdata(mssql_ptr->link,i)));
 								break;
 
 							case SQLCHAR:
 							case SQLVARCHAR:
 							case SQLTEXT:
 								convert_to_string_ex(&bind->zval);
-								bind->Z_STRLEN_P(zval)=dbretlen(mssql_ptr->link,i);
-								bind->Z_STRVAL_P(zval) = estrndup(dbretdata(mssql_ptr->link,i),bind->Z_STRLEN_P(zval));
+								Z_STRLEN_P(bind->zval)=dbretlen(mssql_ptr->link,i);
+								Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
 								break;
 						}
 					}
@@ -1995,7 +1995,7 @@ PHP_FUNCTION(mssql_execute)
 			if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
 				if (dbhasretstat(mssql_ptr->link)) {
 					convert_to_long_ex(&bind->zval);
-					bind->Z_LVAL_P(zval)=dbretstatus(mssql_ptr->link);
+					Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
 				}
 				else {
 					php_error(E_WARNING,"mssql_execute: stored procedure has no return value. Nothing was returned into RETVAL");
