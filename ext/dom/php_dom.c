@@ -680,7 +680,7 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
 /*  xmlMemoryDump();*/
-
+xmlMemoryDump();
 	return SUCCESS;
 }
 
@@ -1190,51 +1190,36 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 }
 /* }}} end dom_set_old_ns */
 
+int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
+	int errorcode = 0;
 
-/* {{{ xmlNsPtr dom_get_ns(char *uri, char *qName, int uri_len, int qName_len, int *errorcode, char *localname) */
-xmlNsPtr dom_get_ns(char *uri, char *qName, int uri_len, int qName_len, int *errorcode, char **localname) {
-	xmlNsPtr nsptr = NULL;
-	xmlURIPtr uristruct;
-	char *prefix = NULL;
-
-	*localname = NULL;
-	*errorcode = 0;
-
-	if (uri_len > 0 || qName_len > 0) {
-		if (qName_len == 0 && uri_len > 0) {
-			*errorcode = NAMESPACE_ERR;
-			return nsptr;
+	if (uri_len > 0 && name_len > 0) {
+		*localname = xmlSplitQName2(qname, (xmlChar **) prefix);
+		if (*localname == NULL) {
+			*localname = xmlStrdup(qname);
 		}
-		if (qName_len > 0 && *errorcode == 0) {
-			uristruct = xmlParseURI(qName);
-			if (uristruct->opaque != NULL) {
-				prefix = xmlStrdup(uristruct->scheme);
-				*localname = xmlStrdup(uristruct->opaque);
-				if (xmlStrchr(*localname, (xmlChar) ':') != NULL) {
-					*errorcode = NAMESPACE_ERR;
-				} else if (!strcmp (prefix, "xml") && strcmp(uri, XML_XML_NAMESPACE)) {
-					*errorcode = NAMESPACE_ERR;
-				}
-			}
-
-			/* TODO: Test that localname has no invalid chars 
-			php_dom_throw_error(INVALID_CHARACTER_ERR, TSRMLS_CC);
-			*/
-
-			xmlFreeURI(uristruct);
-			
-			if (*errorcode == 0) {
-				if (uri_len > 0 && prefix == NULL) {
-					*errorcode = NAMESPACE_ERR;
-				} else if (*localname != NULL) {
-					nsptr = xmlNewNs(NULL, uri, prefix);
-				}
-			}
+		if (*localname == NULL || (xmlStrchr(*localname, (xmlChar) ':') != NULL)) {
+			errorcode = NAMESPACE_ERR;
 		}
+	} else {
+		errorcode = NAMESPACE_ERR;
 	}
 
-	if (prefix != NULL) {
-		xmlFree(prefix);
+	return errorcode;
+}
+
+/* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
+xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
+	xmlNsPtr nsptr = NULL;
+
+	*errorcode = 0;
+
+	if (! (prefix && !strcmp (prefix, "xml") && strcmp(uri, XML_XML_NAMESPACE))) {
+		nsptr = xmlNewNs(nodep, uri, prefix);
+	}
+
+	if (nsptr == NULL) {
+		*errorcode = NAMESPACE_ERR;
 	}
 
 	return nsptr;

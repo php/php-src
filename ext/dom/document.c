@@ -793,7 +793,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	xmlNsPtr nsptr;
 	int ret, uri_len = 0, name_len = 0;
 	char *uri, *name;
-	xmlChar *localname = NULL;
+	char *localname = NULL, *prefix = NULL;
 	int errorcode;
 	dom_object *intern;
 
@@ -803,20 +803,28 @@ PHP_FUNCTION(dom_document_create_element_ns)
 		return;
 	}
 
-	nsptr = dom_get_ns(uri, name, uri_len, name_len, &errorcode, (char **) &localname);
+	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+
 	if (errorcode == 0) {
-		if (nsptr != NULL) {
-			dom_set_old_ns(docp, nsptr);
-			nodep = xmlNewDocNode (docp, nsptr, localname, NULL);
-		} else {
-			nodep = xmlNewDocNode (docp, NULL, name, NULL);
+		nodep = xmlNewDocNode (docp, NULL, localname, NULL);
+		if (nodep != NULL) {
+			nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
+			if (nsptr == NULL) {
+				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
+			}
+			xmlSetNs(nodep, nsptr);
 		}
 	}
-	if (localname != NULL) {
-		xmlFree(localname);
+
+	xmlFree(localname);
+	if (prefix != NULL) {
+		xmlFree(prefix);
 	}
 
 	if (errorcode != 0) {
+		if (nodep != NULL) {
+			xmlFreeNode(nodep);
+		}
 		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
 		RETURN_FALSE;
@@ -825,6 +833,9 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
+
+	
+	nodep->ns = nsptr;
 
 	DOM_RET_OBJ(rv, nodep, &ret, intern);
 }
@@ -839,11 +850,11 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 {
 	zval *id, *rv = NULL;
 	xmlDocPtr docp;
-	xmlNodePtr nodep = NULL;
+	xmlNodePtr nodep = NULL, root;
 	xmlNsPtr nsptr;
 	int ret, uri_len = 0, name_len = 0;
 	char *uri, *name;
-	xmlChar *localname = NULL;
+	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode;
 
@@ -853,23 +864,33 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		return;
 	}
 
-	nsptr = dom_get_ns(uri, name, uri_len, name_len, &errorcode, (char **) &localname);
-	if (errorcode == 0) {
-		if (nsptr != NULL) {
+	root = xmlDocGetRootElement(docp);
+	if (root != NULL) {
+		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+		if (errorcode == 0) {
 			nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
-			dom_set_old_ns(docp, nsptr);
 			if (nodep != NULL) {
+				nsptr = xmlSearchNsByHref (nodep->doc, root, uri);
+				if (nsptr == NULL) {
+					nsptr = dom_get_ns(root, uri, &errorcode, prefix);
+				}
 				xmlSetNs(nodep, nsptr);
 			}
-		} else {
-			nodep = (xmlNodePtr) xmlNewDocProp(docp, name, NULL);
 		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document Missing Root Element");
+		RETURN_FALSE;
 	}
-	if (localname != NULL) {
-		xmlFree(localname);
+
+	xmlFree(localname);
+	if (prefix != NULL) {
+		xmlFree(prefix);
 	}
 
 	if (errorcode != 0) {
+		if (nodep != NULL) {
+			xmlFreeProp((xmlAttrPtr) nodep);
+		}
 		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
 		RETURN_FALSE;

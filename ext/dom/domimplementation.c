@@ -132,10 +132,9 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0;
+	int ret, uri_len = 0, name_len = 0, errorcode = 0;
 	char *uri, *name;
-	xmlChar *prefix = NULL, *localname = NULL;
-	xmlURIPtr uristruct;
+	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sso", &uri, &uri_len, &name, &name_len, &node) == FAILURE) {
@@ -155,58 +154,24 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 		}
 	}
 
-	if (uri_len > 0 || name_len > 0 || doctype != NULL) {
-		if (name_len == 0 && uri_len > 0) {
-			php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+	if (name_len > 0) {
+		errorcode = dom_check_qname(name, &localname, &prefix, 1, name_len);
+		if (errorcode == 0 && uri_len > 0 && ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL)) {
+			errorcode = NAMESPACE_ERR;
 		}
-		if (name_len > 0) {
-			uristruct = xmlParseURI(name);
-			if (uristruct->opaque != NULL) {
-				prefix = xmlStrdup(uristruct->scheme);
-				localname = xmlStrdup(uristruct->opaque);
-				if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
-					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-					xmlFreeURI(uristruct);
-					xmlFree(prefix);
-					xmlFree(localname);
-					RETURN_FALSE;
-				}
-				if (!strcmp (prefix, "xml") && strcmp(uri, XML_XML_NAMESPACE)) {
-					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-					xmlFreeURI(uristruct);
-					xmlFree(prefix);
-					xmlFree(localname);
-					RETURN_FALSE;
-				}
-			} else {
-				localname = xmlStrdup(name);
-			}
+	}
 
-			/* TODO: Test that localname has no invalid chars 
-			php_dom_throw_error(INVALID_CHARACTER_ERR, TSRMLS_CC);
-			*/
+	if (prefix != NULL) {
+		xmlFree(prefix);
+	}
 
-			xmlFreeURI(uristruct);
-
-			if (uri_len > 0) {
-				if ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL) {
-					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-					if (prefix != NULL) {
-						xmlFree(prefix);
-					}
-					xmlFree(localname);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-					RETURN_FALSE;	
-				}
-
-			}
-			if (prefix != NULL) {
-				xmlFree(prefix);
-			}
+	if (errorcode != 0) {
+		if (localname != NULL) {
+			xmlFree(localname);
 		}
+		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+		RETURN_FALSE;
 	}
 
 	/* currently letting libxml2 set the version string */

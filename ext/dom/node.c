@@ -543,10 +543,8 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
 			ns = nodep->ns;
-			if (ns != NULL) {
-				if (ns->prefix) {
-					str = (char *) ns->prefix;
-				}
+			if (ns != NULL && ns->prefix) {
+				str = (char *) ns->prefix;
 			}
 			break;
 		default:
@@ -578,42 +576,40 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
-			ns = nodep->ns;
-			strURI = NULL;
-			if (nodep->ns != NULL) {
-				strURI = (char *) nodep->ns->href;
-			}
 			prefix = Z_STRVAL_P(newval);
-			if (strURI == NULL || 
-				(!strcmp (prefix, "xml") && strcmp(strURI, XML_XML_NAMESPACE)) ||
-				(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (prefix, "xmlns") &&
-				 strcmp (strURI, DOM_XMLNS_NAMESPACE)) ||
-				(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (nodep->name, "xmlns"))) {
+			if (nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
+				strURI = (char *) nodep->ns->href;
+				if (strURI == NULL || 
+					(!strcmp (prefix, "xml") && strcmp(strURI, XML_XML_NAMESPACE)) ||
+					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (prefix, "xmlns") &&
+					 strcmp (strURI, DOM_XMLNS_NAMESPACE)) ||
+					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (nodep->name, "xmlns"))) {
 
-				/* TODO: throw error - find out how to without a return_value
-				php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC); */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-				return FAILURE;	
-			}
-			ns = xmlNewNs(NULL, nodep->ns->href, (xmlChar *)prefix);
-			if (nodep->doc != NULL) {
-				doc = nodep->doc;
-				if (doc->oldNs == NULL) {
-					doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
-					memset(doc->oldNs, 0, sizeof(xmlNs));
-					doc->oldNs->type = XML_LOCAL_NAMESPACE;
-					doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE); 
-					doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml"); 
+					/* TODO: throw error - find out how to without a return_value
+					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC); */
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+					return FAILURE;	
+				}
+				ns = xmlNewNs(NULL, nodep->ns->href, (xmlChar *)prefix);
+				if (nodep->doc != NULL) {
+					doc = nodep->doc;
+					if (doc->oldNs == NULL) {
+						doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
+						memset(doc->oldNs, 0, sizeof(xmlNs));
+						doc->oldNs->type = XML_LOCAL_NAMESPACE;
+						doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE); 
+						doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml"); 
+					}
+
+					curns = doc->oldNs;
+					while (curns->next != NULL) {
+						curns = curns->next;
+					}
+					curns->next = ns;
 				}
 
-				curns = doc->oldNs;
-				while (curns->next != NULL) {
-					curns = curns->next;
-				}
-				curns->next = ns;
+				nodep->ns = curns;
 			}
-
-			nodep->ns = curns;
 			break;
 		default:
 			break;
@@ -1002,6 +998,7 @@ PHP_FUNCTION(dom_node_append_child)
 	zval *id, *node, *rv = NULL;
 	xmlNodePtr child, nodep, new_child = NULL;
 	dom_object *intern, *childobj;
+	xmlNsPtr nsptr;
 	int ret;
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
@@ -1088,6 +1085,15 @@ PHP_FUNCTION(dom_node_append_child)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
+
+    if (new_child->nsDef != NULL && new_child->type == XML_ELEMENT_NODE && new_child->nsDef->href != NULL) {
+		if((nsptr = xmlSearchNsByHref(nodep->doc, new_child->parent, new_child->nsDef->href)) && 
+			(new_child->nsDef->prefix == NULL || xmlStrEqual(nsptr->prefix, new_child->nsDef->prefix))) {
+			dom_set_old_ns(nodep->doc, new_child->ns);
+			new_child->nsDef = NULL;
+			new_child->ns = nsptr;
+		}
+    }
 
 	DOM_RET_OBJ(rv, new_child, &ret, intern);
 }
@@ -1263,7 +1269,47 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_lookup_prefix)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id;
+	xmlNodePtr nodep, lookupp = NULL;
+	dom_object *intern;
+	xmlNsPtr nsptr;
+	int uri_len = 0;
+	char *uri;
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &uri, &uri_len) == FAILURE) {
+		return;
+	}
+	
+	if (uri_len > 0) {
+		switch (nodep->type) { 
+			case XML_ELEMENT_NODE:
+				lookupp = nodep;
+				break; 
+			case XML_DOCUMENT_NODE:
+			case XML_HTML_DOCUMENT_NODE:
+				lookupp = xmlDocGetRootElement((xmlDocPtr) nodep);
+				break;
+			case XML_ENTITY_NODE : 
+			case XML_NOTATION_NODE: 
+			case XML_DOCUMENT_FRAG_NODE: 
+			case XML_DOCUMENT_TYPE_NODE:
+			case XML_DTD_NODE:
+				RETURN_NULL();
+				break;
+			default:
+				lookupp =  nodep->parent;
+		} 
+
+		if (lookupp != NULL && (nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, uri))) {
+			if (nsptr->prefix != NULL) {
+				RETURN_STRING((char *) nsptr->prefix, 1);
+			}
+		}
+	}
+		
+	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_prefix */
 
@@ -1285,7 +1331,27 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_lookup_namespace_uri)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id;
+	xmlNodePtr nodep;
+	dom_object *intern;
+	xmlNsPtr nsptr;
+	int prefix_len = 0;
+	char *prefix;
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prefix, &prefix_len) == FAILURE) {
+		return;
+	}
+	
+	if (prefix_len > 0) {
+		nsptr = xmlSearchNs(nodep->doc, nodep, prefix);
+		if (nsptr && nsptr->href != NULL) {
+			RETURN_STRING((char *) nsptr->href, 1);
+		}
+	}
+		
+	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
 

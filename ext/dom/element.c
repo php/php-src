@@ -497,7 +497,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	xmlNsPtr nsptr;
 	int ret, uri_len = 0, name_len = 0;
 	char *uri, *name;
-	xmlChar *localname = NULL;
+	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode = 0;
 
@@ -512,22 +512,33 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 		RETURN_FALSE;
 	}
 
-	nsptr = xmlSearchNsByHref (elemp->doc, elemp, uri);
-	if (nsptr == NULL) {
-		nsptr = dom_get_ns(uri, name, uri_len, name_len, &errorcode, (char **) &localname);
-		if (nsptr != NULL) {
-			dom_set_old_ns(elemp->doc, nsptr);
-		}
-	}
+	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+
 	if (errorcode == 0) {
-		if (nsptr != NULL) {
+		nodep = (xmlNodePtr) xmlHasNsProp(elemp, localname, uri);
+		if (nodep != NULL) {
+			node_list_unlink(nodep->children TSRMLS_CC);
+		}
+		nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
+		while (nsptr && nsptr->prefix == NULL) {
+			nsptr = nsptr->next;
+		}
+		if (nsptr == NULL) {
+			if (prefix == NULL) {
+				errorcode = NAMESPACE_ERR;
+			} else {
+				nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
+			}
+		}
+
+		if (errorcode == 0) {
 			nodep = (xmlNodePtr) xmlSetNsProp(elemp, nsptr, localname, NULL);
-		} else {
-			nodep = (xmlNodePtr) xmlSetProp(elemp, name, NULL);
 		}
 	}
-	if (localname != NULL) {
-		xmlFree(localname);
+
+	xmlFree(localname);
+	if (prefix != NULL) {
+		xmlFree(prefix);
 	}
 
 	if (errorcode != 0) {
@@ -687,9 +698,6 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	if (existattrp == NULL) {
-		xmlReconciliateNs(nodep->doc, nodep);
-	}
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
