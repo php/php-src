@@ -319,7 +319,7 @@ class PEAR_Dependency
             return false;
         }
         if ($relation == 'not') {
-            $errmsg = "Invalid dependency - 'not' is allowed when specifying PHP, you must run PHP in PHP"
+            $errmsg = "Invalid dependency - 'not' is allowed when specifying PHP, you must run PHP in PHP";
             return PEAR_DEPENDENCY_BAD_DEPENDENCY;
         }
         if (substr($req, 0, 2) == 'v.') {
