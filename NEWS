@@ -33,6 +33,8 @@ PHP 4                                                                      NEWS
   non-existent object ref). (Tony)
 - Fixed bug #31444 (Memory leak in zend_language_scanner.c).
   (hexer at studentcenter dot org)
+- Fixed bug #31440 ($GLOBALS can be overwritten via GPC when 
+  register_globals is enabled). (Ilia)
 - Fixed bug #31413 (curl POSTFIELDS crashes on 64-bit platforms). (Joe)
 - Fixed bug #31396 (compile fails with gd 2.0.33 without freetype). (Jani)
 - Fixed bug #31371 (highlight_file() trims new line after heredoc). (Ilia)
