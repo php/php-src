@@ -252,6 +252,8 @@ class BadMethodCallException extends BadFunctionCallException
  *
  * This kind of exception should be used to inform about domain erors in 
  * mathematical sense.
+ *
+ * @see RangeException
  */
 class DomainException extends LogicException
 {
@@ -260,6 +262,8 @@ class DomainException extends LogicException
 /** @ingroup SPL
  * @brief Exception that denotes invalid arguments were passed.
  * @since PHP 5.1
+ *
+ * @see UnexpectedValueException
  */
 class InvalidArgumentException extends LogicException
 {
@@ -321,16 +325,33 @@ class OverflowException extends RuntimeException
  * @since PHP 5.1
  *
  * Normally this means there was an arithmetic error other than under/overflow.
+ * This is the runtime version of DomainException.
+ *
+ * @see DomainException
  */
 class RangeException extends RuntimeException
 {
 }
 
 /** @ingroup SPL
- * @brief Exception Exception thrown to indicate arithmetic/buffer underflow.
+ * @brief Exception thrown to indicate arithmetic/buffer underflow.
  * @since PHP 5.1
  */
 class UnderflowException extends RuntimeException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown to indicate an unexpected value.
+ * @since PHP 5.1
+ *
+ * Typically this happens when a function calls another function and espects
+ * the return value to be of a certain type or value not including arithmetic
+ * or buffer related errors. 
+ *
+ * @see InvalidArgumentException
+ */
+class UnexpectedValueException extends RuntimeException
 {
 }
 
