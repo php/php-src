@@ -84,12 +84,15 @@ typedef struct {
 	char name[32];
 	
 	/* the type of statement that was issued */
-	char statement_type;
+	char statement_type:8;
 	
 	/* whether EOF was reached for this statement */
 	unsigned exhausted:1;
 
 	unsigned _reserved:23;
+
+	/* the named params that were converted to ?'s by the driver */
+	HashTable *named_params;
 	
 	/* allocated space to convert fields values to other types */
 	char **fetch_buf;

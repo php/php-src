@@ -194,10 +194,12 @@ static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) 
 		case SQL_BLOB:
 			*param_type = PDO_PARAM_STR;
 			break;
+#if abies_0
 		case SQL_FLOAT:
 		case SQL_DOUBLE:
 			*param_type = PDO_PARAM_DBL;
 			break;
+#endif
 	}
 }
 /* }}} */
@@ -212,7 +214,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 	isc_blob_handle blobh = NULL;
-	static char bl_items[] = {isc_info_blob_total_length};
+	static char const bl_items[] = { isc_info_blob_total_length };
 	char bl_info[20];
 	unsigned short i;
 	int result = *len = 0;
@@ -222,7 +224,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 		return 0;
 	}
 
-	if (isc_blob_info(H->isc_status, &blobh, sizeof(bl_items), bl_items,
+	if (isc_blob_info(H->isc_status, &blobh, sizeof(bl_items), const_cast(bl_items),
 			sizeof(bl_info), bl_info)) {
 		RECORD_ERROR(stmt);
 		goto fetch_blob_end;
@@ -441,7 +443,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLDA *sqlda = param->is_param ? S->in_sqlda : &S->out_sqlda;
-	XSQLVAR *var = &sqlda->sqlvar[param->paramno];
+	XSQLVAR *var;
 
 	if (event_type == PDO_PARAM_EVT_FREE) { /* not used */
 		return 1;
@@ -452,7 +454,37 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 		S->H->last_app_error = "Invalid parameter index";
 		return 0;
 	}
+	if (param->is_param && param->paramno == -1) {
+		long *index;
 
+		/* try to determine the index by looking in the named_params hash */
+		if (SUCCESS == zend_hash_find(S->named_params, param->name, param->namelen+1, &index)) {
+			param->paramno = *index;
+		} else {
+			/* ... or by looking in the input descriptor */
+			int i;
+
+			for (i = 0; i < sqlda->sqld; ++i) {
+				XSQLVAR *var = &sqlda->sqlvar[i];
+
+				if ((var->aliasname_length && !strncasecmp(param->name, var->aliasname, 
+						min(param->namelen, var->aliasname_length))) 
+						|| (var->sqlname_length && !strncasecmp(param->name, var->sqlname,
+						min(param->namelen, var->sqlname_length)))) {
+					param->paramno = i;
+					break;
+				}
+			}
+			if (i >= sqlda->sqld) {
+				stmt->error_code = PDO_ERR_NOT_FOUND;
+				S->H->last_app_error = "Invalid parameter name";
+				return 0;
+			}
+		}
+	}
+
+	var = &sqlda->sqlvar[param->paramno];
+	
 	switch (event_type) {
 		char *value;
 		unsigned long value_len;
@@ -550,11 +582,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							ZVAL_LONG(param->parameter, *(long*)value);
 							break;
 						}
+#if abies_0
 					case PDO_PARAM_DBL:
 						if (value) {
 							ZVAL_DOUBLE(param->parameter, *(double*)value);
 							break;
 						}
+#endif
 					default:
 						ZVAL_NULL(param->parameter);
 				}
