@@ -250,7 +250,7 @@ void do_pre_incdec(znode *result, znode *op1, int op CLS_DC);
 void do_post_incdec(znode *result, znode *op1, int op CLS_DC);
 
 void do_begin_variable_parse(CLS_D);
-void do_end_variable_parse(int type CLS_DC);
+void do_end_variable_parse(int type, int arg_offset CLS_DC);
 
 void do_free(znode *op1 CLS_DC);
 
@@ -475,7 +475,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_EXIT					77
 
 
-/* the following 12 opcodes are 4 groups of 3 opcodes each, and must
+/* the following 12 opcodes are 5 groups of 3 opcodes each, and must
  * remain in that order!
  */
 #define ZEND_FETCH_R				78
@@ -490,16 +490,19 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_FETCH_IS				87
 #define ZEND_FETCH_DIM_IS			88
 #define ZEND_FETCH_OBJ_IS			89
+#define ZEND_FETCH_FUNC_ARG			90
+#define ZEND_FETCH_DIM_FUNC_ARG		91
+#define ZEND_FETCH_OBJ_FUNC_ARG		92
 
-#define ZEND_FETCH_DIM_TMP_VAR		90
-#define ZEND_FETCH_CONSTANT			91
+#define ZEND_FETCH_DIM_TMP_VAR		93
+#define ZEND_FETCH_CONSTANT			94
 
-#define ZEND_DECLARE_FUNCTION_OR_CLASS	92
+#define ZEND_DECLARE_FUNCTION_OR_CLASS	95
 
-#define ZEND_EXT_STMT				93
-#define ZEND_EXT_FCALL_BEGIN		94
-#define ZEND_EXT_FCALL_END			95
-#define ZEND_EXT_NOP				96
+#define ZEND_EXT_STMT				96
+#define ZEND_EXT_FCALL_BEGIN		97
+#define ZEND_EXT_FCALL_END			98
+#define ZEND_EXT_NOP				99
 
 /* end of block */
 
@@ -512,11 +515,12 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_FETCH_STATIC	2
 
 /* var status for backpatching */
-#define BP_VAR_R	0
-#define BP_VAR_W	1
-#define BP_VAR_RW	2
-#define BP_VAR_IS	3
-#define BP_VAR_NA	4	/* if not applicable */
+#define BP_VAR_R			0
+#define BP_VAR_W			1
+#define BP_VAR_RW			2
+#define BP_VAR_IS			3
+#define BP_VAR_NA			4	/* if not applicable */
+#define BP_VAR_FUNC_ARG		5
 
 
 #define ZEND_INTERNAL_FUNCTION		1
