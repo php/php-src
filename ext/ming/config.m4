@@ -7,13 +7,13 @@ PHP_ARG_WITH(ming, for MING support,
 
 if test "$PHP_MING" != "no"; then
   for i in $PHP_MING /usr/local /usr; do
-    if test -r $i/lib/libming.so; then
+    if test -f $i/lib/libming.$SHLIB_SUFFIX_NAME -o -f $i/lib/libming.a; then
       MING_DIR=$i
     fi
   done
 
   if test -z "$MING_DIR"; then
-    AC_MSG_ERROR(Please reinstall libming.so - I cannot find libming.so)
+    AC_MSG_ERROR(Please reinstall ming distribution. libming.(a|so) not found.)
   fi
 
   PHP_CHECK_LIBRARY(ming, Ming_useSWFVersion, [
