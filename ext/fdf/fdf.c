@@ -382,13 +382,12 @@ PHP_FUNCTION(fdf_get_value)
 			} 
 			which++;
 		} while (err == FDFErcOK);
-		if(err == FDFErcNoValue) err = FDFErcOK;
 		efree(buffer); 
 		buffer = NULL;
 #endif
 	}
 
-	if(err != FDFErcOK) {
+	if ((err != FDFErcOK) && (err != FDFErcNoValue)) {
 		if(buffer) efree(buffer);
 		FDF_FAILURE(err);
 	}
