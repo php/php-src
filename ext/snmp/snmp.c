@@ -19,10 +19,6 @@
 */
 /* $Id$ */
 
-#ifdef PIC
-# define COMPILE_DL 1
-#endif
-
 #include "php.h"
 #if defined(COMPILE_DL)
 #include "dl/phpdl.h"
