@@ -74,21 +74,17 @@ mbfl_filt_conv_wchar_cp1251(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
 	int s, n;
 
-	if (c >= 0 && c < cp1251_ucs_table_min) {
-		s = c;
-	} else {
-		s = -1;
-		n = cp1251_ucs_table_len-1;
-		while (n >= 0) {
-			if (c == cp1251_ucs_table[n]) {
-				s = cp1251_ucs_table_min + n;
-				break;
-			}
-			n--;
+	s = -1;
+	n = cp1251_ucs_table_len-1;
+	while (n >= 0) {
+		if (c == cp1251_ucs_table[n]) {
+			s = cp1251_ucs_table_min + n;
+			break;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_CP1251) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
+		n--;
+	}
+	if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_CP1251) {
+		s = c & MBFL_WCSPLANE_MASK;
 	}
 
 	if (s >= 0) {
@@ -138,21 +134,17 @@ mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
 	int s, n;
 
-	if (c >= 0 && c < cp866_ucs_table_min) {
-		s = c;
-	} else {
-		s = -1;
-		n = cp866_ucs_table_len-1;
-		while (n >= 0) {
-			if (c == cp866_ucs_table[n]) {
-				s = cp866_ucs_table_min + n;
-				break;
-			}
-			n--;
+	s = -1;
+	n = cp866_ucs_table_len-1;
+	while (n >= 0) {
+		if (c == cp866_ucs_table[n]) {
+			s = cp866_ucs_table_min + n;
+			break;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_CP866) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
+		n--;
+	}
+	if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_CP866) {
+		s = c & MBFL_WCSPLANE_MASK;
 	}
 
 	if (s >= 0) {
@@ -202,21 +194,17 @@ mbfl_filt_conv_wchar_koi8r(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
 	int s, n;
 
-	if (c >= 0 && c < koi8r_ucs_table_min) {
-		s = c;
-	} else {
-		s = -1;
-		n = koi8r_ucs_table_len-1;
-		while (n >= 0) {
-			if (c == koi8r_ucs_table[n]) {
-				s = koi8r_ucs_table_min + n;
-				break;
-			}
-			n--;
+	s = -1;
+	n = koi8r_ucs_table_len-1;
+	while (n >= 0) {
+		if (c == koi8r_ucs_table[n]) {
+			s = koi8r_ucs_table_min + n;
+			break;
 		}
-		if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_KOI8R) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
+		n--;
+	}
+	if (s <= 0 && (c & ~MBFL_WCSPLANE_MASK) == MBFL_WCSPLANE_KOI8R) {
+		s = c & MBFL_WCSPLANE_MASK;
 	}
 
 	if (s >= 0) {
@@ -230,7 +218,7 @@ mbfl_filt_conv_wchar_koi8r(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	return c;
 }
 
-#endif /* HAVE_MBSTR_TW */
+#endif /* HAVE_MBSTR_RU */
 
 /*
  * Local variables:
