@@ -1504,8 +1504,8 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 	array_init(return_value);
 
 	for (i = 0; i < ib_result->out_sqlda->sqld; ++i) {
-		char alias[METADATALENGTH+4];
 		XSQLVAR *var = &ib_result->out_sqlda->sqlvar[i];
+		char buf[METADATALENGTH+4], *alias = var->aliasname;
 		
 		if (! (fetch_type & FETCH_ROW)) {
 			int i = 0;
@@ -1515,17 +1515,18 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 			* Ensure no two columns have identical names: 
 			* keep generating new names until we find one that is unique.
 			*/
-			switch (*var->aliasname) {
+			switch (*alias) {
 				void *p;
 				
 				default:
 					i = 1;
-					strcpy(alias, base = var->aliasname);
+					base = alias;
 					
-					while (SUCCESS == zend_symtable_find(Z_ARRVAL_P(return_value),alias,strlen(alias)+1,&p)) {
+					while (SUCCESS == zend_symtable_find(
+							Z_ARRVAL_P(return_value),alias,strlen(alias)+1,&p)) {
 				
 				case '\0':
-						sprintf(alias, "%s_%02d", base, i++);
+						sprintf(alias = buf, "%s_%02d", base, i++);
 					}
 			}
 		}

@@ -125,8 +125,59 @@ InterBase: misc sql types (may take a while)
         ibase_free_result($sel);
     } /* for($iter) */
 
+	/* check for correct handling of duplicate field names */
+	$q = ibase_query('SELECT 1 AS id, 2 AS id, 3 AS id, 4 AS id, 5 AS id, 6 AS id, 7 AS id, 8 AS id, 9 AS id,
+		10 AS id, 11 AS id, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 FROM rdb$database');
+	var_dump(ibase_fetch_assoc($q));
+	
     ibase_close();
     echo "end of test\n";
 ?>
 --EXPECT--
+array(22) {
+  ["ID"]=>
+  int(1)
+  ["ID_01"]=>
+  int(2)
+  ["ID_02"]=>
+  int(3)
+  ["ID_03"]=>
+  int(4)
+  ["ID_04"]=>
+  int(5)
+  ["ID_05"]=>
+  int(6)
+  ["ID_06"]=>
+  int(7)
+  ["ID_07"]=>
+  int(8)
+  ["ID_08"]=>
+  int(9)
+  ["ID_09"]=>
+  int(10)
+  ["ID_10"]=>
+  int(11)
+  ["FIELD_00"]=>
+  int(12)
+  ["FIELD_01"]=>
+  int(13)
+  ["FIELD_02"]=>
+  int(14)
+  ["FIELD_03"]=>
+  int(15)
+  ["FIELD_04"]=>
+  int(16)
+  ["FIELD_05"]=>
+  int(17)
+  ["FIELD_06"]=>
+  int(18)
+  ["FIELD_07"]=>
+  int(19)
+  ["FIELD_08"]=>
+  int(20)
+  ["FIELD_09"]=>
+  int(21)
+  ["FIELD_10"]=>
+  int(22)
+}
 end of test
