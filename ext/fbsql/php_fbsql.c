@@ -206,6 +206,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_field_len,		NULL)
 	PHP_FE(fbsql_field_type,	NULL)
 	PHP_FE(fbsql_field_flags,	NULL) 
+	PHP_FE(fbsql_table_name,	NULL) 
 
 /*	Fontbase additions:  */
 	PHP_FE(fbsql_set_transaction,	NULL)
@@ -233,6 +234,7 @@ function_entry fbsql_functions[] = {
 
 /*	Aliases:  */
 	PHP_FALIAS(fbsql, fbsql_db_query, NULL)
+	PHP_FALIAS(fbsql_tablename, fbsql_table_name, NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -3365,7 +3367,50 @@ PHP_FUNCTION(fbsql_field_flags)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_free_result(int result)
+/* {{{ proto string fbsql_table_name(resource result, int index)
+   Retreive the table name for index after a call to fbsql_list_tables() */
+PHP_FUNCTION(fbsql_table_name)
+{
+	PHPFBResult* result = NULL;
+	zval	**fbsql_result_index = NULL, **table_index;
+	unsigned index;
+	char*        value;	
+	unsigned int length;
+	void** row;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &fbsql_result_index, &table_index)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(table_index);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(result, PHPFBResult *, fbsql_result_index, -1, "FrontBase-Result", le_result);
+
+	index = Z_LVAL_PP(table_index);
+	if (index < 0)
+	{
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Illegal index (%i)", index);
+		RETURN_FALSE;
+	}
+
+	if (result->rowCount == 0x7fffffff) phpfbFetchRow(result, index);
+	if (index > result->rowCount) RETURN_FALSE;
+	result->rowIndex = index;
+	result->columnIndex = 0;
+
+	row = fbcrhRowAtIndex(result->rowHandler, index);
+	phpfbColumnAsString(result, 0, row[0], &length, &value);
+	RETURN_STRINGL(value, length, 1);
+}
+/* }}} */
+
+/* {{{ proto bool fbsql_free_result(resource result)
    free the memory used to store a result */
 PHP_FUNCTION(fbsql_free_result)
 {
