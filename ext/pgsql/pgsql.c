@@ -298,12 +298,12 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			list_entry new_le;
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
-				php_error(E_WARNING,"PostgresSQL:  Too many open links (%d)",PGG(num_links));
+				php_error(E_WARNING,"PostgreSQL:  Too many open links (%d)",PGG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (PGG(max_persistent)!=-1 && PGG(num_persistent)>=PGG(max_persistent)) {
-				php_error(E_WARNING,"PostgresSQL:  Too many open persistent links (%d)",PGG(num_persistent));
+				php_error(E_WARNING,"PostgreSQL:  Too many open persistent links (%d)",PGG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -315,7 +315,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				pgsql=PQsetdb(host,port,options,tty,dbname);
 			}
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				php_error(E_WARNING,"Unable to connect to PostgresSQL server:  %s",PQerrorMessage(pgsql));
+				php_error(E_WARNING,"Unable to connect to PostgreSQL server:  %s",PQerrorMessage(pgsql));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -341,7 +341,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 					le->ptr=PQsetdb(host,port,options,tty,dbname);
 				}
 				if (le->ptr==NULL || PQstatus(le->ptr)==CONNECTION_BAD) {
-					php_error(E_WARNING,"PostgresSQL link lost, unable to reconnect");
+					php_error(E_WARNING,"PostgreSQL link lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list),hashed_details,hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -378,7 +378,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 		}
 		if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
-			php_error(E_WARNING,"PostgresSQL:  Too many open links (%d)",PGG(num_links));
+			php_error(E_WARNING,"PostgreSQL:  Too many open links (%d)",PGG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -388,7 +388,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			pgsql = PQsetdb(host,port,options,tty,dbname);
 		}
 		if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-			php_error(E_WARNING,"Unable to connect to PostgresSQL server:  %s",PQerrorMessage(pgsql));
+			php_error(E_WARNING,"Unable to connect to PostgreSQL server:  %s",PQerrorMessage(pgsql));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
