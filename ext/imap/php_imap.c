@@ -61,7 +61,8 @@ MAILSTREAM DEFAULTPROTO;
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
-static void _php_imap_parse_address(ADDRESS *addresslist, char *fulladdress, zval *paddress TSRMLS_DC);
+static void _php_imap_parse_address(ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC);
+static int _php_imap_address_size(ADDRESS *addresslist);
 
 /* These function declarations are missing from the IMAP header files... */
 void rfc822_date(char *date);
@@ -286,15 +287,21 @@ FOBJECTLIST *mail_newfolderobjectlist(void)
  * Accepts: pointer to FOBJECTLIST pointer
  * Author: CJH
  */
-void mail_free_foblist(FOBJECTLIST **foblist)
+void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail)
 {
-	if (*foblist) {		/* only free if exists */
-		if ((*foblist)->text.data) {
-			fs_give ((void **) &(*foblist)->text.data);
-		}
-		mail_free_foblist (&(*foblist)->next);
-		fs_give ((void **) foblist);	/* return string to free storage */
-	}
+    FOBJECTLIST *cur, *next;
+    
+    for(cur=*foblist, next=cur->next; cur; cur=next) {
+	next = cur->next;
+
+	if(cur->text.data)
+	    fs_give((void **)&(cur->text.data));
+
+	fs_give((void **)&cur);
+    }
+
+    *tail = NIL;
+    *foblist = NIL;
 }
 /* }}} */
 
@@ -387,14 +394,21 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 {
 	imap_globals->imap_user = NIL;
 	imap_globals->imap_password = NIL;
-	imap_globals->imap_folders = NIL;
-	imap_globals->imap_sfolders = NIL;
+
 	imap_globals->imap_alertstack = NIL;
 	imap_globals->imap_errorstack = NIL;
+
+	imap_globals->imap_folders = NIL;
+	imap_globals->imap_folders_tail = NIL;
+	imap_globals->imap_sfolders = NIL;
+	imap_globals->imap_sfolders_tail = NIL;
 	imap_globals->imap_messages = NIL;
 	imap_globals->imap_messages_tail = NIL;
 	imap_globals->imap_folder_objects = NIL;
+	imap_globals->imap_folder_objects_tail = NIL;
 	imap_globals->imap_sfolder_objects = NIL;
+	imap_globals->imap_sfolder_objects_tail = NIL;
+
 	imap_globals->folderlist_style = FLIST_ARRAY;
 }
 /* }}} */
@@ -640,6 +654,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 			}
 		}
 		mail_free_stringlist(&IMAPG(imap_alertstack));
+		IMAPG(imap_alertstack) = NIL;
 	}
 	return SUCCESS;
 }
@@ -651,7 +666,6 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "IMAP Support", "enabled" );
 #if HAVE_IMAP2001
 	php_info_print_table_row(2, "IMAP c-Client Version", "2001");               
 #elif HAVE_IMAP2000
@@ -1381,7 +1395,7 @@ PHP_FUNCTION(imap_list)
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 	
-	IMAPG(imap_folders) = NIL;
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 	mail_list(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_folders) == NIL) {
 		RETURN_FALSE;
@@ -1394,6 +1408,7 @@ PHP_FUNCTION(imap_list)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
 /* }}} */
@@ -1420,7 +1435,7 @@ PHP_FUNCTION(imap_list_full)
 	/* set flag for new, improved array of objects mailbox list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	IMAPG(imap_folder_objects) = NIL;
+	IMAPG(imap_folder_objects) = IMAPG(imap_folder_objects_tail) = NIL;
 	mail_list(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_folder_objects) == NIL) {
 		RETURN_FALSE;
@@ -1444,7 +1459,7 @@ PHP_FUNCTION(imap_list_full)
 		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
-	mail_free_foblist(&IMAPG(imap_folder_objects));
+	mail_free_foblist(&IMAPG(imap_folder_objects), &IMAPG(imap_folder_objects_tail));
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY;		/* reset to default */
 }
@@ -1481,6 +1496,7 @@ PHP_FUNCTION(imap_listscan)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
 /* }}} */
@@ -1571,10 +1587,9 @@ PHP_FUNCTION(imap_headerinfo)
 {
 	zval **streamind, **msgno, **fromlength, **subjectlength, **defaulthost;
 	pils *imap_le_struct;
-	unsigned long length;
 	MESSAGECACHE *cache;
 	ENVELOPE *en;
-	char *mystring, dummy[2000], fulladdress[MAILTMPLEN];
+	char dummy[2000], fulladdress[MAILTMPLEN];
 	int myargc = ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &msgno, &fromlength, &subjectlength, &defaulthost) == FAILURE) {
@@ -1609,13 +1624,8 @@ PHP_FUNCTION(imap_headerinfo)
 		RETURN_FALSE;
 	}
 	
-	mystring = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &length, NIL);
-	if (myargc == 5) {
-		rfc822_parse_msg(&en, NULL, mystring, length, NULL, Z_STRVAL_PP(defaulthost), NIL);
-	} else {
-		rfc822_parse_msg(&en, NULL, mystring, length, NULL, "UNKNOWN", NIL);
-	}
-	
+	en = mail_fetchenvelope(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
+
 	/* call a function to parse all the text, so that we can use the
 	   same function to parse text from other sources */
 	_php_make_header_object(return_value, en TSRMLS_CC);
@@ -1650,7 +1660,6 @@ PHP_FUNCTION(imap_headerinfo)
 		mail_fetchsubject(fulladdress, imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_LVAL_PP(subjectlength));
 		add_property_string(return_value, "fetchsubject", fulladdress, 1);
 	}
-	mail_free_envelope(&en);
 }
 /* }}} */
 
@@ -1719,6 +1728,7 @@ PHP_FUNCTION(imap_lsub)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_sfolders));
+	IMAPG(imap_sfolders) = IMAPG(imap_sfolders_tail) = NIL;
 }
 /* }}} */
 
@@ -1746,7 +1756,7 @@ PHP_FUNCTION(imap_lsub_full)
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	IMAPG(imap_sfolder_objects) = NIL;
+	IMAPG(imap_sfolder_objects) = IMAPG(imap_sfolder_objects_tail) = NIL;
 	mail_lsub(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_sfolder_objects) == NIL) {
 		RETURN_FALSE;
@@ -1769,7 +1779,7 @@ PHP_FUNCTION(imap_lsub_full)
 		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
-	mail_free_foblist (&IMAPG(imap_sfolder_objects));
+	mail_free_foblist (&IMAPG(imap_sfolder_objects), &IMAPG(imap_sfolder_objects_tail));
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY; /* reset to default */
 }
@@ -2191,7 +2201,6 @@ PHP_FUNCTION(imap_utf7_decode)
 	zval **arg;
 	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
-	unsigned char c;
 	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
@@ -2293,15 +2302,13 @@ PHP_FUNCTION(imap_utf7_decode)
 				break;
 			case ST_DECODE1:
 				outp[1] = UNB64(*inp);
-				c = outp[1] >> 4;
-				*outp++ |= c;
+				*outp++ |= outp[1] >> 4;
 				*outp <<= 4;
 				state = ST_DECODE2;
 				break;
 			case ST_DECODE2:
 				outp[1] = UNB64(*inp);
-				c = outp[1] >> 2;
-				*outp++ |= c;
+				*outp++ |= outp[1] >> 2;
 				*outp <<= 6;
 				state = ST_DECODE3;
 				break;
@@ -2335,7 +2342,6 @@ PHP_FUNCTION(imap_utf7_encode)
 	zval **arg;
 	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
-	unsigned char c;
 	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
@@ -2419,14 +2425,12 @@ PHP_FUNCTION(imap_utf7_encode)
 					state = ST_ENCODE1;
 					break;
 				case ST_ENCODE1:
-					c = B64(*outp | *inp >> 4);
-					*outp++ = c;
+					*outp++ = B64(*outp | *inp >> 4);
 					*outp = *inp++ << 2;
 					state = ST_ENCODE2;
 					break;
 				case ST_ENCODE2:
-					c = B64(*outp | *inp >> 6);
-					*outp++ = c;
+					*outp++ = B64(*outp | *inp >> 6);
 					*outp++ = B64(*inp++);
 					state = ST_ENCODE0;
 				case ST_NORMAL:
@@ -2713,8 +2717,8 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	
 	body=mail_body(imap_le_struct->imap_stream, Z_LVAL_PP(msg), Z_STRVAL_PP(section));
-	if (Z_TYPE_P(body) <= TYPEMAX) {
-		add_property_long(return_value, "type", Z_TYPE_P(body));
+	if (body->type <= TYPEMAX) {
+		add_property_long(return_value, "type", body->type);
 	}
 	if (body->encoding <= ENCMAX) {
 		add_property_long(return_value, "encoding", body->encoding);
@@ -2748,9 +2752,9 @@ PHP_FUNCTION(imap_bodystruct)
 		add_property_long(return_value, "bytes", body->size.bytes);
 	}
 #ifdef IMAP41
-	if (Z_TYPE(body->disposition)) {
+	if (body->disposition.type) {
 		add_property_long(return_value, "ifdisposition", 1);
-		add_property_string(return_value, "disposition", Z_TYPE(body->disposition), 1);
+		add_property_string(return_value, "disposition", body->disposition.type, 1);
 	} else {
 		add_property_long(return_value, "ifdisposition", 0);
 	}
@@ -2862,6 +2866,9 @@ PHP_FUNCTION(imap_fetch_overview)
 				}
 				if (env->references) {
 					add_property_string(myoverview, "references", env->references, 1);
+				}
+				if (env->in_reply_to) {
+					add_property_string(myoverview, "in_reply_to", env->in_reply_to, 1);
 				}
 				add_property_long(myoverview, "size", elt->rfc822_size);
 				add_property_long(myoverview, "uid", mail_uid(imap_le_struct->imap_stream, i));
@@ -2979,7 +2986,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 		if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
-			Z_TYPE_P(bod) = (short) Z_LVAL_PP(pvalue);
+			bod->type = (short) Z_LVAL_PP(pvalue);
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "encoding", sizeof("encoding"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
@@ -3005,10 +3012,10 @@ PHP_FUNCTION(imap_mail_compose)
 			convert_to_string_ex(pvalue);
 			bod->description = cpystr(Z_STRVAL_PP(pvalue));
 		}
-		if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
-			Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-			memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+			bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+			memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 			if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3065,7 +3072,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 			if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
 				convert_to_long_ex(pvalue);
-				Z_TYPE_P(bod) = (short) Z_LVAL_PP(pvalue);
+				bod->type = (short) Z_LVAL_PP(pvalue);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "encoding", sizeof("encoding"), (void **) &pvalue)== SUCCESS) {
 				convert_to_long_ex(pvalue);
@@ -3091,10 +3098,10 @@ PHP_FUNCTION(imap_mail_compose)
 				convert_to_string_ex(pvalue);
 				bod->description = cpystr(Z_STRVAL_PP(pvalue));
 			}
-			if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
+			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
-				Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-				memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+				bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+				memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 				if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3160,7 +3167,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 	bod = topbod;
 
-	if (bod && Z_TYPE_P(bod) == TYPEMULTIPART) {	
+	if (bod && bod->type == TYPEMULTIPART) {	
 
 		/* first body part */
 			part = bod->nested.part;	
@@ -3577,33 +3584,47 @@ PHP_FUNCTION(imap_mime_header_decode)
 
 
 /* Support Functions */
+/* {{{ _php_imap_get_address_size
+ */
+static int _php_imap_address_size (ADDRESS *addresslist)
+{
+	ADDRESS *tmp;
+	int ret=0;
+
+	tmp = addresslist;
+
+	if (tmp) do {
+		ret += (tmp->personal) ? strlen(tmp->personal) : 0;
+		ret += (tmp->adl)      ? strlen(tmp->adl)      : 0;
+		ret += (tmp->mailbox)  ? strlen(tmp->mailbox)  : 0;
+		ret += (tmp->host)     ? strlen(tmp->host)     : 0;
+	} while ((tmp = tmp->next));
+
+	/* rfc822_write_address_full() needs some extra space for '<>,', etc. */
+	ret += (ret) ? MAILTMPLEN : 0;
+
+	return ret;
+}
+
+/* }}} */
+
+
 /* {{{ _php_imap_parse_address
  */
-static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *paddress TSRMLS_DC)
+static void _php_imap_parse_address (ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC)
 {
-	ADDRESS *addresstmp, *addresstmp2;
-	char tempaddress[MAILTMPLEN];
+	ADDRESS *addresstmp;
 	zval *tmpvals;
-	int ok = 1;
-	
+	char *tmpstr;
+	int len=0;
+		
 	addresstmp = addresslist;
-	fulladdress[0] = 0x00;
-	while (ok && addresstmp) {                                    /* while length < 1000 and we are not at the end of the list */
-		addresstmp2 = addresstmp->next;                           /* save the pointer to the next address */
-		addresstmp->next = NULL;                                  /* make this address the only one now. */
-		tempaddress[0] = '\0';                                    /* reset tempaddress buffer */
-		rfc822_write_address(tempaddress, addresstmp);            /* ok, write the address into tempaddress string */
-		if ((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
-			if (strlen(fulladdress)) {
-				strcat(fulladdress, ",");	                      /* put in a comma */ 
-			}
-			strcat(fulladdress, tempaddress);                     /* put in the new address */
-		} else {                                                  /* no */
-			ok = 0;                                               /* stop looping */
-			strcat(fulladdress, ", ..."); 
-		}		/* DO NOT optimize this out - changing it breaks things */
-		addresstmp->next = addresstmp2; /* reset the pointer to the next address first! */
-		addresstmp = addresstmp->next; 
+
+	if ((len = _php_imap_address_size(addresstmp))) {
+		tmpstr = (char *) malloc (len);
+		tmpstr[0] = '\0';
+		rfc822_write_address(tmpstr, addresstmp);
+		*fulladdress = tmpstr;
 	}
 	
 	addresstmp = addresslist;
@@ -3624,7 +3645,7 @@ static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zv
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 {
 	zval *paddress;
-	char fulladdress[MAILTMPLEN];
+	char *fulladdress=NULL;
 	
 	object_init(myzvalue);
 	
@@ -3642,59 +3663,79 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->to, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "toaddress", fulladdress, 1);
+		_php_imap_parse_address(en->to, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "toaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "to", paddress);
 	}
 	
 	if (en->from) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->from, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "fromaddress", fulladdress, 1);
+		_php_imap_parse_address(en->from, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "fromaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "from", paddress);
 	}
 	
 	if (en->cc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->cc, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "ccaddress", fulladdress, 1);
+		_php_imap_parse_address(en->cc, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "ccaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "cc", paddress);
 	}
 	
 	if (en->bcc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->bcc, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "bccaddress", fulladdress, 1);
+		_php_imap_parse_address(en->bcc, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "bccaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "bcc", paddress);
 	}
 	
 	if (en->reply_to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->reply_to, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "reply_toaddress", fulladdress, 1);
+		_php_imap_parse_address(en->reply_to, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "reply_toaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "reply_to", paddress);
 	}
 
 	if (en->sender) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->sender, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "senderaddress", fulladdress, 1);
+		_php_imap_parse_address(en->sender, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "senderaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "sender", paddress);
 	}
 
 	if (en->return_path) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->return_path, fulladdress, paddress TSRMLS_CC);
-		if (fulladdress) add_property_string(myzvalue, "return_pathaddress", fulladdress, 1);
+		_php_imap_parse_address(en->return_path, &fulladdress, paddress TSRMLS_CC);
+		if (fulladdress) {
+			add_property_string(myzvalue, "return_pathaddress", fulladdress, 1);
+			free(fulladdress);
+		}
 		add_assoc_object(myzvalue, "return_path", paddress);
 	}
-	
 }
 /* }}} */
 
@@ -3706,8 +3747,8 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	PARAMETER *par, *dpar;
 	PART *part;
 	
-	if (Z_TYPE_P(body) <= TYPEMAX) {
-		add_property_long(arg, "type", Z_TYPE_P(body));
+	if (body->type <= TYPEMAX) {
+		add_property_long(arg, "type", body->type);
 	}
 
 	if (body->encoding <= ENCMAX) {
@@ -3744,9 +3785,9 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 
 #ifdef IMAP41
-	if (Z_TYPE(body->disposition)) {
+	if (body->disposition.type) {
 		add_property_long(arg, "ifdisposition", 1);
-		add_property_string(arg, "disposition", Z_TYPE(body->disposition), 1);
+		add_property_string(arg, "disposition", body->disposition.type, 1);
 	} else {
 		add_property_long(arg, "ifdisposition", 0);
 	}
@@ -3794,7 +3835,7 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	add_assoc_object(arg, "parameters", parametres);
 
 	/* multipart message ? */
-	if (Z_TYPE_P(body) == TYPEMULTIPART) {
+	if (body->type == TYPEMULTIPART) {
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
 		for (part = body->CONTENT_PART; part; part = part->next) {
@@ -3807,7 +3848,7 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 	
 	/* encapsulated message ? */
-	if ((Z_TYPE_P(body) == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
+	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
 		body = body->CONTENT_MSG_BODY;
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
@@ -3982,17 +4023,16 @@ void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_folder_objects)->delimiter = delimiter;
 			IMAPG(imap_folder_objects)->attributes = attributes;
 			IMAPG(imap_folder_objects)->next = NIL;
+			IMAPG(imap_folder_objects_tail) = IMAPG(imap_folder_objects);
 		} else {
-			ocur=IMAPG(imap_folder_objects);
-			while (ocur->next != NIL) {
-				ocur=ocur->next;
-			}
+			ocur=IMAPG(imap_folder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
 			ocur->LSIZE = strlen(ocur->LTEXT = cpystr(mailbox));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
+			IMAPG(imap_folder_objects_tail) = ocur;
 		}
 		
 	} else {
@@ -4002,15 +4042,14 @@ void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 				IMAPG(imap_folders)=mail_newstringlist();
 				IMAPG(imap_folders)->LSIZE=strlen(IMAPG(imap_folders)->LTEXT=cpystr(mailbox));
 				IMAPG(imap_folders)->next=NIL; 
+				IMAPG(imap_folders_tail) = IMAPG(imap_folders);
 			} else {
-				cur=IMAPG(imap_folders);
-				while (cur->next != NIL) {
-					cur=cur->next;
-				}
+				cur=IMAPG(imap_folders_tail);
 				cur->next=mail_newstringlist ();
 				cur=cur->next;
 				cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
 				cur->next = NIL;
+				IMAPG(imap_folders_tail) = cur;
 			}
 		}
 	}
@@ -4031,17 +4070,16 @@ void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_sfolder_objects)->delimiter = delimiter;
 			IMAPG(imap_sfolder_objects)->attributes = attributes;
 			IMAPG(imap_sfolder_objects)->next = NIL;
+			IMAPG(imap_sfolder_objects_tail) = IMAPG(imap_sfolder_objects);
 		} else {
-			ocur=IMAPG(imap_sfolder_objects);
-			while (ocur->next != NIL) {
-				ocur=ocur->next;
-			}
+			ocur=IMAPG(imap_sfolder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
 			ocur->LSIZE=strlen(ocur->LTEXT = cpystr(mailbox));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
+			IMAPG(imap_sfolder_objects_tail) = ocur;
 		}
 	} else {
 		/* build the old simple array for imap_listsubscribed() */
@@ -4049,15 +4087,14 @@ void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_sfolders)=mail_newstringlist();
 			IMAPG(imap_sfolders)->LSIZE=strlen(IMAPG(imap_sfolders)->LTEXT=cpystr(mailbox));
 			IMAPG(imap_sfolders)->next=NIL; 
+			IMAPG(imap_sfolders_tail) = IMAPG(imap_sfolders);
 		} else {
-			cur=IMAPG(imap_sfolders);
-			while (cur->next != NIL) {
-				cur=cur->next;
-			}
+			cur=IMAPG(imap_sfolders_tail);
 			cur->next=mail_newstringlist ();
 			cur=cur->next;
 			cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
 			cur->next = NIL;
+			IMAPG(imap_sfolders_tail) = cur;
 		}
 	}
 }
