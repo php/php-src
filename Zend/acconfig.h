@@ -68,8 +68,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #ifndef zend_isnan
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
-#elif defined(NAN)
-#define zend_isnan(a) (((a)==NAN)?1:0)
 #elif defined(HAVE_FPCLASS)
 #define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
