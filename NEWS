@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Restored the PHP_VERSION and PHP_OS constants (Zeev)
 - Added get_loaded_extensions(), extension_loaded(), and
   get_extension_funcs() functions. (Andrei)
 - Added date/time stamping to PHP error log file. (Andrei, Joey)
