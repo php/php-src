@@ -69,8 +69,8 @@ DBA_OPEN_FUNC(ndbm)
 	}
 
 	if(info->argc > 0) {
-		convert_to_long(info->argv[0]);
-		filemode = info->argv[0]->value.lval;
+		convert_to_long_ex(info->argv[0]);
+		filemode = (*info->argv[0])->value.lval;
 	}
 
 	dbf = dbm_open(info->path, gmode, filemode);
