@@ -102,6 +102,7 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_send_long_data,						NULL)
 	PHP_FE(mysqli_send_query,							NULL)
 	PHP_FALIAS(mysqli_set_opt, 		mysqli_options, 	NULL)
+	PHP_FE(mysqli_set_profiler_opt,						NULL)
 	PHP_FE(mysqli_slave_query,							NULL)
 	PHP_FE(mysqli_ssl_set,								NULL)
 	PHP_FE(mysqli_stat,									NULL)

@@ -176,6 +176,7 @@ static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
 	mysqli_globals->default_user = NULL;
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
+	memset(&mysqli_globals->profiler, '\0', sizeof(PROFILER));
 }
 /* }}} */
 

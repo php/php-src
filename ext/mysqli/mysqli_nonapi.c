@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2002 The PHP Group                                |
+  | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -121,8 +121,20 @@ PHP_FUNCTION(mysqli_query) {
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	if (mysql_real_query(mysql, query, query_len)) {
-		RETURN_FALSE;
+	/* profiler reports */
+	if (MyG(profiler.active)) {
+		MYSQLI_PROFILER_HEADER(query);	
+		MYSQLI_PROFILER_EXPLAIN(mysql,query);	
+		MYSQLI_PROFILER_GETTIME;
+		if (mysql_real_query(mysql, query, query_len)){
+			RETURN_FALSE;
+		}
+		MYSQLI_PROFILER_REPORTTIME;
+	}
+	else {
+		if (mysql_real_query(mysql, query, query_len)) {
+			RETURN_FALSE;
+		}
 	}
 
 	if (!mysql_field_count(mysql)) {
@@ -133,6 +145,9 @@ PHP_FUNCTION(mysqli_query) {
 	if (!result) {
 		RETURN_FALSE;
 	}	
+	if (MyG(profiler.active)) {
+		MYSQLI_PROFILER_REPORT_RESULT(result);
+	}
 	MYSQLI_RETURN_RESOURCE(result, mysqli_result_class_entry);
 }
 /* }}} */
