@@ -630,6 +630,146 @@ PHP_FUNCTION(date)
 }
 /* }}} */
 
+
+/* {{{ idate */
+int idate(char format, int timestamp, int gm)
+{
+	time_t the_time;
+	struct tm *ta, tmbuf;
+	int h, beat, fd, wd, yd, wk;
+#if !HAVE_TM_GMTOFF
+	long tzone;
+	char *tname[2]= {"GMT Standard Time", "BST"};
+#endif
+	
+	the_time = timestamp;
+
+	if (gm) {
+		ta = php_gmtime_r(&the_time, &tmbuf);
+#if !HAVE_TM_GMTOFF
+		tzone = 0;
+#endif
+	} else {
+		ta = php_localtime_r(&the_time, &tmbuf);
+#if !HAVE_TM_GMTOFF
+#ifdef __CYGWIN__
+		tzone = _timezone;
+#else
+		tzone = timezone;
+#endif
+		tname[0] = tzname[0];
+#endif
+	}
+	
+	switch (format) {
+		case 'U':		/* seconds since the epoch */
+			return (long)the_time;
+		case 'Y':		/* year, numeric, 4 digits */
+			return  ta->tm_year + YEAR_BASE;
+		case 'z':		/* day (of the year) */
+			return ta->tm_yday;
+		case 'y':		/* year, numeric, 2 digits */
+			return (ta->tm_year)%100;
+		case 'm':		/* month, numeric */
+		case 'n':
+			return ta->tm_mon + 1;
+		case 'd':		/* day of the month, numeric */
+		case 'j':
+			return ta->tm_mday;
+		case 'H':		/* hour, numeric, 24 hour format */
+		case 'G':
+			return ta->tm_hour;
+		case 'h':		/* hour, numeric, 12 hour format */
+		case 'g':
+			h = ta->tm_hour % 12; if (h==0) h = 12;
+			return h;
+		case 'i':		/* minutes, numeric */
+			return ta->tm_min;
+		case 's':		/* seconds, numeric */
+			return  ta->tm_sec;
+		case 't':		/* days in current month */
+			return phpday_tab[isleap((ta->tm_year+YEAR_BASE))][ta->tm_mon];
+		case 'w':		/* day of the week, numeric EXTENSION */
+			return ta->tm_wday;
+		case 'Z':		/* timezone offset in seconds */
+#if HAVE_TM_GMTOFF
+			return ta->tm_gmtoff;
+#else
+			return ta->tm_isdst ? -(tzone- 3600) : -tzone;
+#endif
+		case 'L':		/* boolean for leapyear */
+				return isleap(ta->tm_year+YEAR_BASE)?1:0;
+		case 'B':	/* Swatch Beat a.k.a. Internet Time */
+			beat =  (((((long)the_time)-(((long)the_time) -
+				((((long)the_time) % 86400) + 3600))) * 10) / 864);
+			while (beat < 0) {
+				beat += 1000;
+			}
+			beat = beat % 1000;
+			return beat;
+		case 'I':
+			return ta->tm_isdst;
+		case 'W':		/* ISO-8601 week number of year, weeks starting on Monday */
+			wd = ta->tm_wday==0 ? 6 : ta->tm_wday-1;/* weekday */
+			yd = ta->tm_yday + 1;					/* days since January 1st */
+			fd = (7 + wd - yd % 7+ 1) % 7;			/* weekday (1st January) */					/* week is a last year week (52 or 53) */
+			if ((yd <= 7 - fd) && fd > 3){			
+				wk = (fd == 4 || (fd == 5 && isleap((ta->tm_year + YEAR_BASE - 1)))) ? 53 : 52;
+			}
+			/* week is a next year week (1) */
+			else if (isleap((ta->tm_year+YEAR_BASE)) + 365 - yd < 3 - wd){
+				wk = 1;
+			}
+			/* normal week */
+			else {
+				wk = (yd + 6 - wd + fd) / 7 - (fd > 3);
+			}
+			return wk;
+			break;
+		default:
+			return 0;
+	}
+	
+}
+/* }}} */
+
+/* {{{ proto int idate(string format [, int timestamp])
+   Format a local time/date as integer */
+PHP_FUNCTION(idate)
+{
+	pval **format, **timestamp;
+	int t, ret;
+
+	switch(ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &format) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		t = time(NULL);
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &format, &timestamp) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(timestamp);
+		t = Z_LVAL_PP(timestamp);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(format);
+	
+	if (Z_STRLEN_PP(format) != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "idate format is one char");
+		RETURN_FALSE;
+	}
+
+	ret = idate(Z_STRVAL_PP(format)[0], t, 0);
+	RETURN_LONG(ret);
+}
+/* }}} */
+
+
 /* {{{ proto string gmdate(string format [, int timestamp])
    Format a GMT/UTC date/time */
 PHP_FUNCTION(gmdate)
