@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- IMPORTANT: removed /F modifier handling from preg_replace(). Instead
+  one should use new preg_replace_callback() function. (Andrei)
 - Added mysql_unbuffered_query(), which is useful for very large result sets
   (Zeev)
 
