@@ -128,54 +128,28 @@ class PEAR_Packager extends PEAR_Common
         $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
         $pkgver = $pkgname . '-' . $pkgversion;
 
-        $tmpdir = $pwd . DIRECTORY_SEPARATOR . $pkgver;
-        if (file_exists($tmpdir)) {
-            return $this->raiseError('Tmpdir: ' . $tmpdir .' already exists',
-                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
-        }
-        if (!mkdir($tmpdir, 0700)) {
-            return $this->raiseError("Unable to create temporary directory $tmpdir.",
-                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
-        } else {
-            $this->log(2, "+ tmp dir created at: " . $tmpdir);
-        }
-        $this->addTempFile($tmpdir);
+        // ----- Create the package file list
+        $filelist = array();
+        $i = 0;
+
+        // ----- Add the package XML file
+        $filelist[$i++] = $pkgfile;
 
         // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
-            $file = $tmpdir . DIRECTORY_SEPARATOR . $fname;
-            $dir = dirname($file);
-            if (!@is_dir($dir)) {
-                if (!$this->mkDirHier($dir)) {
-                    return $this->raiseError("could not mkdir $dir");
-                }
-            }
-            //Maintain original file perms
-            $orig_perms = @fileperms($fname);
-            if (!@copy($fname, $file)) {
-                $this->log(0, "could not copy $fname to $file");
+            if (!file_exists($fname)) {
+                return $this->raiseError("File $fname does not exists");
             } else {
-                $this->log(2, "+ copying $fname to $file");
-                @chmod($file, $orig_perms);
+                $filelist[$i++] = $fname;
             }
         }
         // XXX TODO: Rebuild the package file as the old method did?
 
-        // This allows build packages from different pear pack def files
-        $dest_pkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
-        $this->log(2, "+ copying package $pkgfile to $dest_pkgfile");
-        if (!@copy($pkgfile, $dest_pkgfile)) {
-            return $this->raiseError("could not copy $pkgfile to $dest_pkgfile");
-        }
-        @chmod($dest_pkgfile, 0644);
-
         // TAR the Package -------------------------------------------
-        chdir(dirname($tmpdir));
         $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . "{$pkgver}.tgz";
-        $this->log(2, "Attempting to pack $tmpdir dir in $dest_package");
         $tar = new Archive_Tar($dest_package, true);
         $tar->setErrorHandling(PEAR_ERROR_PRINT);
-        if (!$tar->create($pkgver)) {
+        if (!$tar->createModify($filelist, $pkgver)) {
             return $this->raiseError('an error ocurred during package creation');
         }
         $this->log(1, "Package $dest_package done");
