@@ -553,7 +553,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...)
 		va_list arg;
 
 		va_start(arg, flags);
-		mode = va_arg(arg, mode_t);
+		mode = (mode_t) va_arg(arg, int);
 		va_end(arg);
 
 		f = open(new_state.cwd, flags, mode);
