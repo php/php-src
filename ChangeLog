@@ -1,3 +1,13 @@
+2001-03-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/ifx.php:
+    * changed DB_ifx::errorCode to take a parameter, moved the error code
+      map into the constructor
+
+    * pear/DB/STATUS:
+    wrapped to 80 columns, replaced a few "-" with "n" for ifx (some
+    features are emulated through DB_common)
+
 2001-03-24  Jon Parise  <jon@csh.rit.edu>
 
     * pear/Makefile.in: Install the Informix database implementation.
