@@ -25,6 +25,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "SAPI.h"
+#include "build-defs.h"
 
 #if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 #include <stdlib.h>
