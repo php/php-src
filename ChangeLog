@@ -1,3 +1,52 @@
+2000-02-29  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c:
+    Fix Bug #3632 - sanity check to not access a message that doesn't exist.
+
+2000-02-29  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c:
+    (image(createfrom?)png) Fix a typo & remove unused variable.
+
+2000-02-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/config.m4:
+    Automatically try to symlink c-client.a to libc-client.a, so people
+    can avoid changing things.
+
+    * ext/imap/config.m4:
+    Rewrite IMAP checks. This should solve the problems people had with
+    shared imap libs
+
+    * acinclude.m4
+      configure.in:
+    AD_ADD_LIBRARY_DEFER allows people to add libraries in a deferred way
+    (needed for imap and recode)
+
+2000-02-29  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/File/Find.php: Added common usages and trailing ?>
+
+    * pear/File/Find.php:
+    A class that will search/map directory trees, see the descriptions in
+    the comments and at the very bottom.
+
+2000-02-29  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/html.h
+      ext/standard/html.c:
+    Made php_escape_html_entities() as a separate function for export.
+
+2000-02-29  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c:
+    Fixed a compilation problem with roxen.c due to a change in Pike to fix a
+    conflict with embedded Perl.
+
+    * sapi/roxen/roxen.c: roxen.c
+
+    * sapi/roxen/config.m4: Removed warning about ZTS since it works fine now.
+
 2000-02-28  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/imap/imap.c:
