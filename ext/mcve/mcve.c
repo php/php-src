@@ -215,9 +215,7 @@ PHP_MINFO_FUNCTION(mcve)
 
 
 /* {{{ proto int mcve_initengine(char *location)
-
-   Ready the client for IP/SSL Communication
-*/
+   Ready the client for IP/SSL Communication */
 PHP_FUNCTION(mcve_initengine)
 {
 	int ret;
@@ -238,10 +236,8 @@ PHP_FUNCTION(mcve_initengine)
 }
 /* }}} */
 
-/* {{{ proto int mcve_initconn()
-
-   create and initialize an MCVE_CONN structure
-*/
+/* {{{ proto resource mcve_initconn(void)
+   Create and initialize an MCVE_CONN structure */
 PHP_FUNCTION(mcve_initconn)
 {
 	MCVE_CONN *conn;
@@ -255,10 +251,8 @@ PHP_FUNCTION(mcve_initconn)
 /* }}} */
 
 
-/* {{{ proto int mcve_deleteresponse(int conn, int identifier)
-
-    Delete specified transaction from MCVE_CONN structure
-*/
+/* {{{ proto bool mcve_deleteresponse(resource conn, int identifier)
+   Delete specified transaction from MCVE_CONN structure */
 PHP_FUNCTION(mcve_deleteresponse)
 {
 	MCVE_CONN *conn;
@@ -279,10 +273,8 @@ PHP_FUNCTION(mcve_deleteresponse)
 }
 /* }}} */
 
-/* {{{ proto void mcve_destroyconn(int conn);
-
-    Destroy the connection and MCVE_CONN structure
-*/
+/* {{{ proto void mcve_destroyconn(resource conn)
+   Destroy the connection and MCVE_CONN structure */
 PHP_FUNCTION(mcve_destroyconn)
 {
 	MCVE_CONN *conn;
@@ -300,10 +292,8 @@ PHP_FUNCTION(mcve_destroyconn)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setdropfile(int conn, string directory)
-
-   Set the connection method to Drop-File
-*/
+/* {{{ proto int mcve_setdropfile(resource conn, string directory)
+   Set the connection method to Drop-File */
 PHP_FUNCTION(mcve_setdropfile)
 {
 	MCVE_CONN *conn;
@@ -325,10 +315,8 @@ PHP_FUNCTION(mcve_setdropfile)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setip(int conn, string host, int port)
-
-   Set the connection method to IP
-*/
+/* {{{ proto int mcve_setip(resource conn, string host, int port)
+   Set the connection method to IP */
 PHP_FUNCTION(mcve_setip)
 {
 	MCVE_CONN *conn;
@@ -351,10 +339,8 @@ PHP_FUNCTION(mcve_setip)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setssl(int conn, string host, int port)
-
-   Set the connection method to SSL
-*/
+/* {{{ proto int mcve_setssl(resource conn, string host, int port)
+   Set the connection method to SSL */
 PHP_FUNCTION(mcve_setssl)
 {
 #ifdef ENABLE_SSL
@@ -381,8 +367,7 @@ PHP_FUNCTION(mcve_setssl)
 }
 /* }}} */
 
-/* {{{ proto int mcve_settimeout(int conn, int seconds)
-
+/* {{{ proto int mcve_settimeout(resource conn, int seconds)
     Set maximum transaction time (per trans)
 */
 PHP_FUNCTION(mcve_settimeout)
@@ -406,10 +391,8 @@ PHP_FUNCTION(mcve_settimeout)
 }
 /* }}} */
 
-/* {{{ proto int mcve_connect(int conn)
-
-   Establish the connection to MCVE
-*/
+/* {{{ proto int mcve_connect(resource conn)
+   Establish the connection to MCVE */
 PHP_FUNCTION(mcve_connect)
 {
 	MCVE_CONN *conn;
@@ -428,10 +411,8 @@ PHP_FUNCTION(mcve_connect)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionssent(int conn)
-
-    Check to see if outgoing buffer is clear
-*/
+/* {{{ proto int mcve_transactionssent(resource conn)
+   Check to see if outgoing buffer is clear */
 PHP_FUNCTION(mcve_transactionssent)
 {
 	MCVE_CONN *conn;
@@ -450,10 +431,8 @@ PHP_FUNCTION(mcve_transactionssent)
 }
 /* }}} */
 
-/* {{{ proto int mcve_returnstatus(int conn, int identifier)
-
-   Check to see if the transaction was successful
-*/
+/* {{{ proto int mcve_returnstatus(resource conn, int identifier)
+   Check to see if the transaction was successful */
 PHP_FUNCTION(mcve_returnstatus)
 {
 	MCVE_CONN *conn;
@@ -475,10 +454,8 @@ PHP_FUNCTION(mcve_returnstatus)
 }
 /* }}} */
 
-/* {{{ proto int mcve_returncode(int conn, int identifier)
-
-   Grab the exact return code from the transaction
-*/
+/* {{{ proto int mcve_returncode(resource conn, int identifier)
+   Grab the exact return code from the transaction */
 PHP_FUNCTION(mcve_returncode)
 {
 	MCVE_CONN *conn;
@@ -500,10 +477,8 @@ PHP_FUNCTION(mcve_returncode)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionitem(int conn, int identifier)
-
-    Get the ITEM number in the associated batch for this transaction
-*/
+/* {{{ proto int mcve_transactionitem(resource conn, int identifier)
+    Get the ITEM number in the associated batch for this transaction */
 PHP_FUNCTION(mcve_transactionitem)
 {
 	MCVE_CONN *conn;
@@ -525,10 +500,8 @@ PHP_FUNCTION(mcve_transactionitem)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionavs(int conn, int identifier)
-
-   Get the Address Verification return status
-*/
+/* {{{ proto int mcve_transactionavs(resource conn, int identifier)
+   Get the Address Verification return status */
 PHP_FUNCTION(mcve_transactionavs)
 {
 	MCVE_CONN *conn;
@@ -551,10 +524,8 @@ PHP_FUNCTION(mcve_transactionavs)
 /* }}} */
 
 
-/* {{{ proto int mcve_transactioncv(int conn, int identifier)
-
-    Get the CVC2/CVV2/CID return status
-*/
+/* {{{ proto int mcve_transactioncv(resource conn, int identifier)
+    Get the CVC2/CVV2/CID return status */
 PHP_FUNCTION(mcve_transactioncv)
 {
 	MCVE_CONN *conn;
@@ -576,10 +547,8 @@ PHP_FUNCTION(mcve_transactioncv)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionbatch(int conn, int identifier)
-
-    Get the batch number associated with the transaction
-*/
+/* {{{ proto int mcve_transactionbatch(resource conn, int identifier)
+    Get the batch number associated with the transaction */
 PHP_FUNCTION(mcve_transactionbatch)
 {
 	MCVE_CONN *conn;
@@ -601,8 +570,7 @@ PHP_FUNCTION(mcve_transactionbatch)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionid(int conn, int identifier)
-
+/* {{{ proto int mcve_transactionid(resource conn, int identifier)
     Get the unique system id for the transaction
 */
 PHP_FUNCTION(mcve_transactionid)
@@ -626,10 +594,8 @@ PHP_FUNCTION(mcve_transactionid)
 }
 /* }}} */
 
-/* {{{ proto string mcve_transactionauth(int conn, int identifier)
-
-   Get the authorization number returned for the transaction (alpha-numeric)
-*/
+/* {{{ proto string mcve_transactionauth(resource conn, int identifier)
+   Get the authorization number returned for the transaction (alpha-numeric) */
 PHP_FUNCTION(mcve_transactionauth)
 {
 	MCVE_CONN *conn;
@@ -655,10 +621,8 @@ PHP_FUNCTION(mcve_transactionauth)
 }
 /* }}} */
 
-/* {{{ proto string mcve_transactiontext(int conn, int identifier)
-
-   Get verbiage (text) return from MCVE or processing institution
-*/
+/* {{{ proto string mcve_transactiontext(resource conn, int identifier)
+   Get verbiage (text) return from MCVE or processing institution */
 PHP_FUNCTION(mcve_transactiontext)
 {
 	MCVE_CONN *conn;
@@ -683,10 +647,8 @@ PHP_FUNCTION(mcve_transactiontext)
 }
 /* }}} */
 
-/* {{{ proto int mcve_monitor(int conn)
-
-   Perform communication with MCVE (send/receive data)   Non-blocking
-*/
+/* {{{ proto int mcve_monitor(resource conn)
+   Perform communication with MCVE (send/receive data)   Non-blocking */
 PHP_FUNCTION(mcve_monitor)
 {
 	MCVE_CONN *conn;
@@ -705,10 +667,8 @@ PHP_FUNCTION(mcve_monitor)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transinqueue(int conn)
-
-    Number of transactions in client-queue
-*/
+/* {{{ proto int mcve_transinqueue(resource conn)
+   Number of transactions in client-queue */
 PHP_FUNCTION(mcve_transinqueue)
 {
 	MCVE_CONN *conn;
@@ -727,10 +687,8 @@ PHP_FUNCTION(mcve_transinqueue)
 }
 /* }}} */
 
-/* {{{ proto int mcve_checkstatus(int conn, int identifier)
-
-   Check to see if a transaction has completed
-*/
+/* {{{ proto int mcve_checkstatus(resource conn, int identifier)
+   Check to see if a transaction has completed */
 PHP_FUNCTION(mcve_checkstatus)
 {
 	MCVE_CONN *conn;
@@ -753,11 +711,8 @@ PHP_FUNCTION(mcve_checkstatus)
 /* }}} */
 
 
-/* {{{ proto int mcve_completeauthorizations(int conn, int &array)
-
-    Number of complete authorizations in queue, returning an
-    array of their identifiers
-*/
+/* {{{ proto int mcve_completeauthorizations(resource conn, int &array)
+    Number of complete authorizations in queue, returning an array of their identifiers */
 PHP_FUNCTION(mcve_completeauthorizations)
 {
 	MCVE_CONN *conn;
@@ -785,13 +740,8 @@ PHP_FUNCTION(mcve_completeauthorizations)
 }
 /* }}} */
 
-/* {{{ proto int mcve_sale(int conn, string username, string password, 
-	string trackdata, string account, string expdate, double amount,
-	string street, string zip, string cv, string comments, 
-	string clerkid, string stationid, int ptrannum)
-
-   Send a SALE to MCVE
-*/
+/* {{{ proto int mcve_sale(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
+   Send a SALE to MCVE */
 PHP_FUNCTION(mcve_sale)
 {
 	MCVE_CONN *conn;
@@ -831,13 +781,8 @@ PHP_FUNCTION(mcve_sale)
 }
 /* }}} */
 
-/* {{{ proto int mcve_preauth(int conn, string username, string password,
-	string trackdata, string account, string expdate, double amount,
-	string street, string zip, string cv, string comments,
-	string clerkid, string stationid, int ptrannum)
-
-    Send a PREAUTHORIZATION to MCVE
-*/
+/* {{{ proto int mcve_preauth(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments,	string clerkid, string stationid, int ptrannum)
+   Send a PREAUTHORIZATION to MCVE */
 PHP_FUNCTION(mcve_preauth)
 {
 	MCVE_CONN *conn;
@@ -877,13 +822,8 @@ PHP_FUNCTION(mcve_preauth)
 }
 /* }}} */
 
-/* {{{ proto int mcve_override(int conn, string username, string password,
-	string trackdata, string account, string expdate, double amount,
-	string street, string zip, string cv, string comments, string clerkid,
-	string stationid, int ptrannum)
-
-    Send an OVERRIDE to MCVE
-*/
+/* {{{ proto int mcve_override(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
+   Send an OVERRIDE to MCVE */
 PHP_FUNCTION(mcve_override)
 {
 	MCVE_CONN *conn;
@@ -923,11 +863,8 @@ PHP_FUNCTION(mcve_override)
 }
 /* }}} */
 
-/* {{{ proto int mcve_void(int conn, string username, string password,
-	int sid, int ptrannum)
-
-   VOID a transaction in the settlement queue
-*/
+/* {{{ proto int mcve_void(resource conn, string username, string password, int sid, int ptrannum)
+   VOID a transaction in the settlement queue */
 PHP_FUNCTION(mcve_void)
 {
 	MCVE_CONN *conn;
@@ -953,11 +890,8 @@ PHP_FUNCTION(mcve_void)
 }
 /* }}} */
 
-/* {{{ proto int mcve_preauthcompletion(int conn, string username,
-	string password, double finalamount, int sid, int ptrannum)
-
-   Complete a PREAUTHORIZATION... Ready it for settlement
-*/
+/* {{{ proto int mcve_preauthcompletion(resource conn, string username, string password, float finalamount, int sid, int ptrannum)
+   Complete a PREAUTHORIZATION... Ready it for settlement */
 PHP_FUNCTION(mcve_preauthcompletion)
 {
 	MCVE_CONN *conn;
@@ -985,13 +919,8 @@ PHP_FUNCTION(mcve_preauthcompletion)
 }
 /* }}} */
 
-/* {{{ proto int mcve_force(int conn, string username, string password,
-	string trackdata, string account, string expdate, double amount,
-	string authcode, string comments, string clerkid, string stationid,
-	int ptrannum)
-
-   Send a FORCE to MCVE.  (typically, a phone-authorization)
-*/
+/* {{{ proto int mcve_force(resiurce conn, string username, string password, string trackdata, string account, string expdate, float amount, string authcode, string comments, string clerkid, string stationid, int ptrannum)
+   Send a FORCE to MCVE.  (typically, a phone-authorization) */
 PHP_FUNCTION(mcve_force)
 {
 	MCVE_CONN *conn;
@@ -1028,12 +957,8 @@ PHP_FUNCTION(mcve_force)
 }
 /* }}} */
 
-/* {{{ proto int mcve_return(int conn, string username, string password,
-	string trackdata, string account, string expdate, double amount,
-	string comments, string clerkid, string stationid, int ptrannum)
-
-   Issue a RETURN or CREDIT to MCVE
-*/
+/* {{{ proto int mcve_return(int conn, string username, string password, string trackdata, string account, string expdate, float amount, string comments, string clerkid, string stationid, int ptrannum)
+   Issue a RETURN or CREDIT to MCVE */
 PHP_FUNCTION(mcve_return)
 {
 	MCVE_CONN *conn;
@@ -1069,11 +994,8 @@ PHP_FUNCTION(mcve_return)
 /* }}} */
 
 
-/* {{{ proto int mcve_settle(int conn, string username, string password,
-	 string batch)
-
-   Issue a settlement command to do a batch deposit
-*/
+/* {{{ proto int mcve_settle(resource conn, string username, string password, string batch)
+   Issue a settlement command to do a batch deposit */
 PHP_FUNCTION(mcve_settle)
 {
 	MCVE_CONN *conn;
@@ -1097,10 +1019,8 @@ PHP_FUNCTION(mcve_settle)
 }
 /* }}} */
 
-/* {{{ proto int mcve_ub(int conn, string username, string password)
-
-   Get a list of all Unsettled batches
-*/
+/* {{{ proto int mcve_ub(resource conn, string username, string password)
+   Get a list of all Unsettled batches */
 PHP_FUNCTION(mcve_ub)
 {
 	MCVE_CONN *conn;
@@ -1123,11 +1043,8 @@ PHP_FUNCTION(mcve_ub)
 }
 /* }}} */
 
-/* {{{ proto int mcve_qc(int conn, string username, string password,
-	string clerkid, string stationid, string comments, int ptrannum)
-
-   Audit MCVE for a list of transactions in the outgoing queue
-*/
+/* {{{ proto int mcve_qc(resource conn, string username, string password, string clerkid, string stationid, string comments, int ptrannum)
+   Audit MCVE for a list of transactions in the outgoing queue */
 PHP_FUNCTION(mcve_qc)
 {
 	MCVE_CONN *conn;
@@ -1155,12 +1072,8 @@ PHP_FUNCTION(mcve_qc)
 }
 /* }}} */
 
-/* {{{ proto int mcve_gut(int conn, string username, string password, int type,
-	string account, string clerkid, string stationid, string comments,
-	int ptrannum, string startdate, string enddate)
-
-    Audit MCVE for Unsettled Transactions
-*/
+/* {{{ proto int mcve_gut(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
+    Audit MCVE for Unsettled Transactions */
 PHP_FUNCTION(mcve_gut)
 {
 	MCVE_CONN *conn;
@@ -1193,12 +1106,8 @@ PHP_FUNCTION(mcve_gut)
 /* }}} */
 
 
-/* {{{ proto int mcve_gl(int conn, string username, string password, int type,
-	string account, string batch, string clerkid, string stationid,
-	string comments, int ptrannum, string startdate, string enddate)
-
-    Audit MCVE for settled transactions
-*/
+/* {{{ proto int mcve_gl(int conn, string username, string password, int type, string account, string batch, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
+    Audit MCVE for settled transactions */
 PHP_FUNCTION(mcve_gl)
 {
 	MCVE_CONN *conn;
@@ -1232,10 +1141,7 @@ PHP_FUNCTION(mcve_gl)
 }
 /* }}} */
 
-/* {{{ proto int mcve_gft(int conn, string username, string password, int type,
-	string account, string clerkid, string stationid, string comments,
-	int ptrannum, string startdate, string enddate)
-
+/* {{{ proto int mcve_gft(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
     Audit MCVE for Failed transactions
 */
 PHP_FUNCTION(mcve_gft)
@@ -1269,10 +1175,8 @@ PHP_FUNCTION(mcve_gft)
 }
 /* }}} */
 
-/* {{{ proto int mcve_chkpwd(int conn, string username, string password)
-
-    Verify Password
-*/
+/* {{{ proto int mcve_chkpwd(resource conn, string username, string password)
+    Verify Password */
 PHP_FUNCTION(mcve_chkpwd)
 {
 	MCVE_CONN *conn;
@@ -1295,10 +1199,8 @@ PHP_FUNCTION(mcve_chkpwd)
 }
 /* }}} */
 
-/* {{{ proto int mcve_bt(int conn, string username, string password)
-
-    Get unsettled batch totals
-*/
+/* {{{ proto int mcve_bt(resource conn, string username, string password)
+    Get unsettled batch totals */
 PHP_FUNCTION(mcve_bt)
 {
 	MCVE_CONN *conn;
@@ -1322,12 +1224,8 @@ PHP_FUNCTION(mcve_bt)
 /* }}} */
 
 
-/* {{{ proto string mcve_getcell(int conn, int identifier, string column,
-	int row)
-
-   Get a specific cell from a comma delimited response
-      by column name
-*/
+/* {{{ proto string mcve_getcell(resource conn, int identifier, string column, int row)
+   Get a specific cell from a comma delimited response by column name */
 PHP_FUNCTION(mcve_getcell)
 {
 	MCVE_CONN *conn;
@@ -1356,11 +1254,8 @@ PHP_FUNCTION(mcve_getcell)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcellbynum(int conn, int identifier, int column, int row)
-
-   Get a specific cell from a comma delimited response
-      by column number
-*/
+/* {{{ proto string mcve_getcellbynum(resource conn, int identifier, int column, int row)
+   Get a specific cell from a comma delimited response by column number */
 PHP_FUNCTION(mcve_getcellbynum)
 {
 	MCVE_CONN *conn;
@@ -1390,10 +1285,8 @@ PHP_FUNCTION(mcve_getcellbynum)
 /* }}} */
 
 
-/* {{{ proto int mcve_numcolumns(int conn, int identifier)
-
-   Number of columns returned in a comma delimited response
-*/
+/* {{{ proto int mcve_numcolumns(resource conn, int identifier)
+   Number of columns returned in a comma delimited response */
 PHP_FUNCTION(mcve_numcolumns)
 {
 	MCVE_CONN *conn;
@@ -1415,10 +1308,8 @@ PHP_FUNCTION(mcve_numcolumns)
 }
 /* }}} */
 
-/* {{{ proto int mcve_numrows(int conn, int identifier)
-
-    Number of rows returned in a comma delimited response
-*/
+/* {{{ proto int mcve_numrows(resource conn, int identifier)
+   Number of rows returned in a comma delimited response */
 PHP_FUNCTION(mcve_numrows)
 {
 	MCVE_CONN *conn;
@@ -1440,10 +1331,8 @@ PHP_FUNCTION(mcve_numrows)
 }
 /* }}} */
 
-/* {{{ proto int mcve_iscommadelimited(int conn, int identifier)
-
-   Checks to see if response is comma delimited
-*/
+/* {{{ proto int mcve_iscommadelimited(resource conn, int identifier)
+   Checks to see if response is comma delimited */
 PHP_FUNCTION(mcve_iscommadelimited)
 {
 	MCVE_CONN *conn;
@@ -1465,10 +1354,8 @@ PHP_FUNCTION(mcve_iscommadelimited)
 }
 /* }}} */
 
-/* {{{ proto int mcve_parsecommadelimited(int conn, int identifier)
-
-   Parse the comma delimited response so mcve_getcell, etc will work
-*/
+/* {{{ proto int mcve_parsecommadelimited(resource conn, int identifier)
+   Parse the comma delimited response so mcve_getcell, etc will work */
 PHP_FUNCTION(mcve_parsecommadelimited)
 {
 	MCVE_CONN *conn;
@@ -1490,10 +1377,8 @@ PHP_FUNCTION(mcve_parsecommadelimited)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcommadelimited(int conn, int identifier)
-
-   Get the RAW comma delimited data returned from MCVE
-*/
+/* {{{ proto string mcve_getcommadelimited(resource conn, int identifier)
+   Get the RAW comma delimited data returned from MCVE */
 PHP_FUNCTION(mcve_getcommadelimited)
 {
 	MCVE_CONN *conn;
@@ -1509,10 +1394,8 @@ PHP_FUNCTION(mcve_getcommadelimited)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getheader(int conn, int identifier, int column_num)
-
-   Get the name of the column in a comma-delimited response
-*/
+/* {{{ proto string mcve_getheader(resource conn, int identifier, int column_num)
+   Get the name of the column in a comma-delimited response */
 PHP_FUNCTION(mcve_getheader)
 {
 	MCVE_CONN *conn;
@@ -1535,10 +1418,8 @@ PHP_FUNCTION(mcve_getheader)
 }
 /* }}} */
 
-/* {{{ proto void mcve_destroyengine()
-
-   Free memory associated with IP/SSL connectivity
-*/
+/* {{{ proto void mcve_destroyengine(void)
+   Free memory associated with IP/SSL connectivity */
 PHP_FUNCTION(mcve_destroyengine)
 {
 	MCVE_DestroyEngine();
@@ -1546,10 +1427,8 @@ PHP_FUNCTION(mcve_destroyengine)
 }
 /* }}} */
 
-/* {{{ proto int mcve_chngpwd(int conn, string admin_password, string new_password)
-
-   Change the system administrator's password
-*/
+/* {{{ proto int mcve_chngpwd(resource conn, string admin_password, string new_password)
+   Change the system administrator's password */
 PHP_FUNCTION(mcve_chngpwd)
 {
 	MCVE_CONN *conn;
@@ -1572,10 +1451,8 @@ PHP_FUNCTION(mcve_chngpwd)
 }
 /* }}} */
 
-/* {{{ proto int mcve_listusers(int conn, string admin_password)
-
-   List all users on MCVE system
-*/
+/* {{{ proto int mcve_listusers(resource conn, string admin_password)
+   List all users on MCVE system */
 PHP_FUNCTION(mcve_listusers)
 {
 	MCVE_CONN *conn;
@@ -1596,10 +1473,8 @@ PHP_FUNCTION(mcve_listusers)
 }
 /* }}} */
 
-/* {{{ proto int mcve_enableuser(int conn, string admin_password, string username)
-
-   Enable an inactive MCVE user account
-*/
+/* {{{ proto int mcve_enableuser(resource conn, string admin_password, string username)
+   Enable an inactive MCVE user account */
 PHP_FUNCTION(mcve_enableuser)
 {
 	MCVE_CONN *conn;
@@ -1622,10 +1497,8 @@ PHP_FUNCTION(mcve_enableuser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_disableuser(int conn, string admin_password, string username)
-
-   Disable an active MCVE user account
-*/
+/* {{{ proto int mcve_disableuser(resource conn, string admin_password, string username)
+   Disable an active MCVE user account */
 PHP_FUNCTION(mcve_disableuser)
 {
 	MCVE_CONN *conn;
@@ -1648,10 +1521,8 @@ PHP_FUNCTION(mcve_disableuser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_deluser(int conn, string admin_password, string username)
-
-    Delete an MCVE user account
-*/
+/* {{{ proto int mcve_deluser(resource conn, string admin_password, string username)
+    Delete an MCVE user account */
 PHP_FUNCTION(mcve_deluser)
 {
 	MCVE_CONN *conn;
@@ -1674,10 +1545,8 @@ PHP_FUNCTION(mcve_deluser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_liststats(int conn, string admin_password)
-
-   List statistics for all users on MCVE system
-*/
+/* {{{ proto int mcve_liststats(resource conn, string admin_password)
+   List statistics for all users on MCVE system */
 PHP_FUNCTION(mcve_liststats)
 {
 	MCVE_CONN *conn;
@@ -1786,10 +1655,8 @@ PHP_FUNCTION(mcve_getuserarg)
 }
 /* }}} */
 
-/* {{{ proto int mcve_adduser(int conn, string admin_password, int usersetup)
-
-   Add an MCVE user using usersetup structure
-*/
+/* {{{ proto int mcve_adduser(resource conn, string admin_password, int usersetup)
+   Add an MCVE user using usersetup structure */
 PHP_FUNCTION(mcve_adduser)
 {
 	MCVE_CONN *conn;
@@ -1814,10 +1681,8 @@ PHP_FUNCTION(mcve_adduser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_edituser(int conn, string admin_password, int usersetup)
-
-   Edit MCVE user using usersetup structure
-*/
+/* {{{ proto int mcve_edituser(resource conn, string admin_password, int usersetup)
+   Edit MCVE user using usersetup structure */
 PHP_FUNCTION(mcve_edituser)
 {
 	MCVE_CONN *conn;
