@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.20 2003-12-19 12:50:11 wez Exp $
+// $Id: confutils.js,v 1.21 2003-12-19 16:55:59 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -779,11 +779,19 @@ function generate_internal_functions()
 	indata = infile.ReadAll();
 	infile.Close();
 	
-	outfile = FSO.CreateTextFile(WshShell.CurrentDirectory + "/main/internal_functions.c", true);
-
 	indata = indata.replace("@EXT_INCLUDE_CODE@", extension_include_code);
 	indata = indata.replace("@EXT_MODULE_PTRS@", extension_module_ptrs);
 
+	if (FSO.FileExists("main/internal_functions.c")) {
+		var origdata = file_get_contents("main/internal_functions.c");
+
+		if (origdata == indata) {
+			STDOUT.WriteLine("\t[content unchanged; skipping]");
+			return;
+		}
+	}
+
+	outfile = FSO.CreateTextFile(WshShell.CurrentDirectory + "/main/internal_functions.c", true);
 	outfile.Write(indata);
 	outfile.Close();
 }
