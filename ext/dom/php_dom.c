@@ -692,7 +692,7 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
 /*  xmlMemoryDump();*/
-xmlMemoryDump();
+
 	return SUCCESS;
 }
 
