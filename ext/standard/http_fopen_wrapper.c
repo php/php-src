@@ -82,8 +82,10 @@
 #include "php_fopen_wrappers.h"
 
 #define HTTP_HEADER_BLOCK_SIZE		1024
+#define PHP_URL_REDIRECT_MAX		20
 
-php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+
+php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -102,14 +104,25 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect;
 
-	if (strchr(mode, 'a') || strchr(mode, '+') || strchr(mode, 'w')) {
+ 	if (redirect_max < 1) {
+ 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
+ 		return NULL;
+ 	}
+
+	if (strpbrk(mode, "aw+")) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
 		return NULL;
 	}
 
 	resource = php_url_parse(path);
-	if (resource == NULL)
+	if (resource == NULL) {
 		return NULL;
+	}
+
+ 	if (strncasecmp(resource->scheme, "http", sizeof("http")) && strncasecmp(resource->scheme, "https", sizeof("https"))) {
+ 		php_url_free(resource);
+ 		return php_stream_open_wrapper_ex(path, mode, ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+ 	}
 	
 	use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
 
@@ -350,7 +363,11 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 			char loc_path[HTTP_HEADER_BLOCK_SIZE];
 
 			*new_path='\0';
-			if (strlen(location)<8 || (strncasecmp(location, "http://", sizeof("http://")-1) && strncasecmp(location, "https://", sizeof("https://")-1))) {
+			if (strlen(location)<8 || (strncasecmp(location, "http://", sizeof("http://")-1) && 
+							strncasecmp(location, "https://", sizeof("https://")-1) && 
+							strncasecmp(location, "ftp://", sizeof("ftp://")-1) && 
+							strncasecmp(location, "ftps://", sizeof("ftps://")-1))) 
+			{
 				if (*location != '/') {
 					if (*(location+1) != '\0' && resource->path) {		
 						char *s = strrchr(resource->path, '/');
@@ -378,7 +395,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 			} else {
 				strlcpy(new_path, location, sizeof(new_path));
 			}
-			stream = php_stream_url_wrap_http(NULL, new_path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
+			stream = php_stream_url_wrap_http_ex(NULL, new_path, mode, options, opened_path, context, --redirect_max STREAMS_CC TSRMLS_CC);
 			if (stream && stream->wrapperdata)	{
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
@@ -434,6 +451,11 @@ out:
 	}
 	
 	return stream;
+}
+
+php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX STREAMS_CC TSRMLS_CC);
 }
 
 static int php_stream_http_stream_stat(php_stream_wrapper *wrapper,
