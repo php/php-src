@@ -317,7 +317,12 @@ class PEAR
                     $doSet = true;
                 }
                 // class/object method callback
-                if (is_array($options)) {
+                if (is_callable($options)) {
+                    $setoptions = $options;
+                } else {
+                    trigger_error("invalid error callback", E_USER_WARNING);
+                }
+/*                if (is_array($options)) {
                     if (isset($options[0]) && isset($options[1])) {
                         $options = array(&$options[0], $options[1]);
                         if (is_string($options[1])) {
@@ -343,7 +348,7 @@ class PEAR
                     $setoptions = $options;
                 } else {
                     trigger_error("invalid error callback", E_USER_WARNING);
-                }
+                } */
                 break;
 
             default:
