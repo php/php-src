@@ -363,8 +363,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function outputData($data, $command = '_default')
     {
-        switch ($command)
-        {
+        switch ($command) {
             case 'install':
             case 'upgrade':
             case 'upgrade-all':
@@ -377,13 +376,14 @@ class PEAR_Frontend_CLI extends PEAR
                     $this->_tableRow(array($data['release_warnings']), null, array(1 => array('wrap' => 55)));
                     $this->_endTable();
                     $this->_displayLine('');
-                };
+                }
                 $this->_displayLine($data['data']);
                 break;
             case 'search':
                 $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline']))
+                if (isset($data['headline']) && is_array($data['headline'])) {
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                }
 
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
@@ -394,8 +394,9 @@ class PEAR_Frontend_CLI extends PEAR
                 break;
             case 'list-all':
                 $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline']))
+                if (isset($data['headline']) && is_array($data['headline'])) {
                     $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                }
 
                 foreach($data['data'] as $category) {
                     foreach($category as $pkg) {
@@ -442,8 +443,7 @@ class PEAR_Frontend_CLI extends PEAR
                         ),
                     );
             default: {
-                if (is_array($data))
-                {
+                if (is_array($data)) {
                     $this->_startTable($data);
                     $count = count($data['data'][0]);
                     if ($count == 2) {
