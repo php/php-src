@@ -662,18 +662,7 @@ static void init_request_info(TSRMLS_D)
 {
 	char *env_script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME",0 TSRMLS_CC);
 	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
-	char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME", 0 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
-
-	/*
-	 * CGI/1.1, as documented at: http://cgi-spec.golux.com/
-	 * mentions SCRIPT_NAME but not SCRIPT_FILENAME.
-	 */
-	if (!script_path_translated && env_script_name && *env_script_name == '/')  {
-		env_script_filename = _sapi_cgibin_putenv("SCRIPT_FILENAME",(env_script_name + 1) TSRMLS_CC);
-
-		script_path_translated = env_script_filename;
-	}
 
 #if !DISCARD_PATH
 	/* some broken servers do not have script_filename or argv0
@@ -702,6 +691,7 @@ static void init_request_info(TSRMLS_D)
 		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH",0 TSRMLS_CC);
 		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE",0 TSRMLS_CC);
 		char *env_path_info = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
+		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 #if ENABLE_PATHINFO_CHECK
 		struct stat st;
 		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL",0 TSRMLS_CC);
