@@ -1,3 +1,88 @@
+2002-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: (PHP) Add ircg_eval_ecmascript_params
+
+    This function turns a flat ecmascript parameter string, including escapes
+    back into an array.  5-10 times speedup when compared to user implementation.
+
+2002-09-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/ftp_fopen_wrapper.c: - Fix ZTS build
+
+2002-09-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: news about various strip_tags() fixes.
+
+    * ext/standard/tests/strings/strip_tags.phpt:
+    Added a test script for strip_tags() function.
+
+    * ext/standard/string.c:
+    Fixed bug #7472 as well as many other bugs with strip_tags implementation.
+
+2002-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Immediately unmap /nocache/ entries, so that the mmc cache does not get
+    polluted too much.
+
+2002-09-21  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c: ws fixes.
+
+2002-09-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/mod_php4.c:
+    Fixed bug #15038, original patch by: phpman@toowards.com
+
+    * ext/standard/datetime.c: Fixed bug #12934
+    locatime() now returns an error message when passed a negative value.
+
+2002-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/formatted_print.c: Add '+' modifier.
+
+           +      A sign (+ or -) always be placed  before  a  number
+                  produced by a signed conversion.  By default a sign
+                  is used only for negative numbers. A + overrides  a
+                  space if both are used.
+
+2002-09-21  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c: - Forgot to add an extra space.
+
+2002-09-21  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/tests/array/008.phpt:
+    Test case for array_intersect() and array_intersect_assoc()
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/array.c:
+    New function added - array_intersect_assoc() similar to array_intersect()
+    but the keys are also used in the comparison. So the result is a subset of
+    the result of array_intersect().
+    Test will be committed too.
+
+2002-09-21  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/fribidi.c:
+    Changed version from NO_VERSION_YET to 0.1
+
+2002-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Because track vars are always initialized, get_session_var failed
+    to work in the register_globals=1 case.
+
+    It is now possible again to store session variables in global vars.
+
+2002-09-21  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c: Fix double initialization
+
 2002-09-20  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * win32/php4ts_cli.rc
