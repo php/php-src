@@ -69,39 +69,71 @@ class Exception
 
 	/** Prevent clone
 	 */
-    final private function __clone();
+    final private function __clone() {}
 
-	/**
+	/** Construct an exception
+	 *
+	 * @param $message Some text describing the exception
+	 * @param $code    Some code describing the exception
 	 */
-	public function __construct($message, $code);
+	function __construct($message = NULL, $code = 0) {
+		if (func_num_args()) {
+			$this->message = $message;
+		}
+		$this->code = $code;
+		$this->file = __FILE__; // of throw clause
+		$this->line = __LINE__; // of throw clause
+		$this->trace = debug_backtrace();
+		$this->string = StringFormat($this);
+	} 
 
 	/** @return the message passed to the constructor
 	 */
-    final public function getMessage();
+    final public function getMessage()
+    {
+    	return $this->message;
+    }
 
 	/** @return the code passed to the constructor
 	 */
-    final public function getCode();
+    final public function getCode()
+    {
+    	return $this->code;
+    }
 
 	/** @return the name of the file where the exception was thrown
 	 */
-    final public function getFile();
+    final public function getFile()
+    {
+    	return $this->file;
+    }
 
 	/** @return the line number where the exception was thrown
 	 */
-    final public function getLine();
+    final public function getLine()
+    {
+    	return $this->line;
+    }
 
 	/** @return the stack trace as array
 	 */
-    final public function getTrace();
+    final public function getTrace()
+    {
+    	return $this->trace;
+    }
 
 	/** @return the stack trace as string
 	 */
-    final public function getTraceAsString();
+    final public function getTraceAsString()
+    {
+    }
 
 	/** @return string represenation of exception
 	 */
-    public function __toString();
+    public function __toString()
+    {
+    	return $this->string;
+    }
 }
 
 /** @ingroup SPL
@@ -165,7 +197,7 @@ class RuntimeException extends Exception
  *
  * @see OutOfRangeException
  */
-class OutOfBoundsException extends LogicException
+class OutOfBoundsException extends RuntimeException
 {
 }
 
