@@ -853,7 +853,7 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	packet_id = args[0];
 
-	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", le_wddx);
+	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", NULL, 1, le_wddx);
 	if (!packet)
 	{
 		efree(args);
