@@ -52,13 +52,13 @@ php_pcre_globals pcre_globals;
 
 static void *php_pcre_malloc(size_t size)
 {
-	return emalloc(size);
+	return pemalloc(size, 1);
 }
 
 
 static void php_pcre_free(void *ptr)
 {
-	efree(ptr);
+	pefree(ptr, 1);
 }
 
 
