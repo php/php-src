@@ -505,7 +505,9 @@ void zend_deactivate_modules()
 
 void zend_deactivate(CLS_D ELS_DC)
 {
-	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+	/* we're no longer executing anything */
+	EG(opline_ptr) = NULL; 
+	EG(active_symbol_table) = NULL;
 
 	shutdown_scanner(CLS_C);
 	shutdown_executor(ELS_C);
