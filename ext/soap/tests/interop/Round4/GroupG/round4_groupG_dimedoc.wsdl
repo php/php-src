@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="SOAPBuilders" xmlns="http://soapinterop.org/attachments/wsdl" xmlns:types="http://soapinterop.org/attachments/xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:dime="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/" xmlns:content="http://schemas.xmlsoap.org/ws/2002/04/content-type/" xmlns:ref="http://schemas.xmlsoap.org/ws/2002/04/reference/" targetNamespace="http://soapinterop.org/attachments/wsdl">
+	<wsdl:types>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://soapinterop.org/attachments/xsd" elementFormDefault="qualified" attributeFormDefault="qualified">
+			<import namespace="http://schemas.xmlsoap.org/ws/2002/04/reference/"/>
+			<import namespace="http://schemas.xmlsoap.org/ws/2002/04/content-type/"/>
+			<complexType name="ReferencedBinary">
+				<simpleContent>
+					<restriction base="xsd:base64Binary">
+						<annotation>
+							<appinfo>
+								<content:mediaType value="application/octetstream"/>
+							</appinfo>
+						</annotation>
+						<attribute ref="ref:location" use="optional"/>
+					</restriction>
+				</simpleContent>
+			</complexType>
+			<complexType name="ReferencedText">
+				<simpleContent>
+					<restriction base="xsd:base64Binary">
+						<annotation>
+							<appinfo>
+								<content:mediaType value="text/plain"/>
+							</appinfo>
+						</annotation>
+						<attribute ref="ref:location" use="optional"/>
+					</restriction>
+				</simpleContent>
+			</complexType>
+			<element name="EchoAttachment" type="types:EchoAttachment"/>
+			<element name="EchoAttachmentResponse" type="types:EchoAttachmentResponse"/>
+			<complexType name="EchoAttachment">
+				<sequence>
+					<element name="In" type="types:ReferencedBinary"/>
+				</sequence>
+			</complexType>
+			<complexType name="EchoAttachmentResponse">
+				<sequence>
+					<element name="Out" type="types:ReferencedBinary"/>
+				</sequence>
+			</complexType>
+			<element name="EchoAttachments" type="types:Attachments"/>
+			<element name="EchoAttachmentsResponse" type="types:Attachments"/>
+			<complexType name="Attachments">
+				<sequence>
+					<element name="Item" minOccurs="0" maxOccurs="unbounded" type="types:ReferencedBinary"/>
+				</sequence>
+			</complexType>
+			<element name="EchoAttachmentAsBase64" type="types:EchoAttachment"/>
+			<element name="EchoAttachmentAsBase64Response" type="types:base64Out"/>
+			<element name="EchoBase64AsAttachment" type="types:base64In"/>
+			<element name="EchoBase64AsAttachmentResponse" type="types:EchoAttachmentResponse"/>
+			<complexType name="base64In">
+				<sequence>
+					<element name="In" type="xsd:base64Binary"/>
+				</sequence>
+			</complexType>
+			<complexType name="base64Out">
+				<sequence>
+					<element name="Out" type="xsd:base64Binary"/>
+				</sequence>
+			</complexType>
+			<element name="EchoUnrefAttachments" type="types:emptyType"/>
+			<element name="EchoUnrefAttachmentsResponse" type="types:emptyType"/>
+			<complexType name="emptyType">
+				<sequence/>
+			</complexType>
+			<element name="EchoAttachmentAsString" type="types:EchoAttachmentAsString"/>
+			<element name="EchoAttachmentAsStringResponse" type="types:EchoAttachmentAsStringResponse"/>
+			<complexType name="EchoAttachmentAsString">
+				<sequence>
+					<element name="In" type="types:ReferencedText"/>
+				</sequence>
+			</complexType>
+			<complexType name="EchoAttachmentAsStringResponse">
+				<sequence>
+					<element name="Out" type="xsd:string"/>
+				</sequence>
+			</complexType>
+		</schema>
+	</wsdl:types>
+	<wsdl:message name="EchoAttachmentIn">
+		<wsdl:part name="In" element="types:EchoAttachment"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentOut">
+		<wsdl:part name="Out" element="types:EchoAttachmentResponse"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentsIn">
+		<wsdl:part name="In" element="types:EchoAttachments"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentsOut">
+		<wsdl:part name="Out" element="types:EchoAttachmentsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsBase64In">
+		<wsdl:part name="In" element="types:EchoAttachmentAsBase64"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsBase64Out">
+		<wsdl:part name="Out" element="types:EchoAttachmentAsBase64Response"/>
+	</wsdl:message>
+	<wsdl:message name="EchoBase64AsAttachmentIn">
+		<wsdl:part name="In" element="types:EchoBase64AsAttachment"/>
+	</wsdl:message>
+	<wsdl:message name="EchoBase64AsAttachmentOut">
+		<wsdl:part name="Out" element="types:EchoBase64AsAttachmentResponse"/>
+	</wsdl:message>
+	<wsdl:message name="EchoUnrefAttachmentsIn">
+		<wsdl:part name="In" element="types:EchoUnrefAttachments"/>
+	</wsdl:message>
+	<wsdl:message name="EchoUnrefAttachmentsOut">
+		<wsdl:part name="Out" element="types:EchoUnrefAttachmentsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsStringIn">
+		<wsdl:part name="In" element="types:EchoAttachmentAsString"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsStringOut">
+		<wsdl:part name="Out" element="types:EchoAttachmentAsStringResponse"/>
+	</wsdl:message>
+	<wsdl:portType name="AttachmentsPortType">
+		<wsdl:operation name="EchoAttachment">
+			<wsdl:input name="EchoAttachmentInput" message="EchoAttachmentIn"/>
+			<wsdl:output name="EchoAttachmentOutput" message="EchoAttachmentOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachments">
+			<wsdl:input name="EchoAttachmentsInput" message="EchoAttachmentsIn"/>
+			<wsdl:output name="EchoAttachmentsOutput" message="EchoAttachmentsOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsBase64">
+			<wsdl:input name="EchoAttachmentAsBase64Input" message="EchoAttachmentAsBase64In"/>
+			<wsdl:output name="EchoAttachmentAsBase64Output" message="EchoAttachmentAsBase64Out"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoBase64AsAttachment">
+			<wsdl:input name="EchoBase64AsAttachmentInput" message="EchoBase64AsAttachmentIn"/>
+			<wsdl:output name="EchoBase64AsAttachmentOutput" message="EchoBase64AsAttachmentOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoUnrefAttachments">
+			<wsdl:input name="EchoUnrefAttachmentsInput" message="EchoUnrefAttachmentsIn"/>
+			<wsdl:output name="EchoUnrefAttachmentsOutput" message="EchoUnrefAttachmentsOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsString">
+			<wsdl:input name="EchoAttachmentAsStringInput" message="EchoAttachmentAsStringIn"/>
+			<wsdl:output name="EchoAttachmentAsStringOutput" message="EchoAttachmentAsStringOut"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="AttachmentsBinding" type="AttachmentsPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="EchoAttachment">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachments">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentsInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentsOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsBase64">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentAsBase64Input">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentAsBase64Output">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoBase64AsAttachment">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoBase64AsAttachmentInput">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoBase64AsAttachmentOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoUnrefAttachments">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoUnrefAttachmentsInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/open-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoUnrefAttachmentsOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/open-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsString">
+			<soap:operation soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentAsStringInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentAsStringOutput">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+  <wsdl:service name="Round4DIMEDOC">
+    <wsdl:port name="Round4DIMEDOCTestSoap" binding="AttachmentsBinding">
+      <soap:address location="test://" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
