@@ -249,156 +249,150 @@ ZEND_GET_MODULE(fbsql)
 #endif
 
 
-void phpfbReleaseResult   ( PHPFBResult*   result );
-void phpfbReleaseDatabase ( PHPFBDatabase* database );
-void phpfbReleaseLink     ( PHPFBLink*     link );
+void phpfbReleaseResult   (PHPFBResult*   result);
+void phpfbReleaseDatabase (PHPFBDatabase* database);
+void phpfbReleaseLink     (PHPFBLink*     link);
 
-PHPFBResult* phpfbRetainResult ( PHPFBResult* result )
+PHPFBResult* phpfbRetainResult (PHPFBResult* result)
 {
 	if (result) result->retainCount++;
 	return result;
 }
 
-void phpfbReleaseResult ( PHPFBResult* result )
+void phpfbReleaseResult (PHPFBResult* result)
 {
 	unsigned int i;
 	FBSQLLS_FETCH();
 	if (result)
-    {
+	{
 		result->retainCount--;
-/*	printf("Release result   %x %d %d\n",result,result->index,result->retainCount); */
 
-      if (result->retainCount == 0)
-       {
-         if (result->fetchHandle) fbcdcCancelFetch(result->connection,result->fetchHandle);
-         if (result->rowHandler)  fbcrhRelease(result->rowHandler);
-         if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
+		if (result->retainCount == 0)
+		{
+			if (result->fetchHandle) fbcdcCancelFetch(result->connection,result->fetchHandle);
+			if (result->rowHandler)  fbcrhRelease(result->rowHandler);
+			if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
 /*			if (result->metaData)    fbcmdRelease(result->metaData);  */
-         if (result->list)        fbcplRelease(result->list);
-         if (result->array)       fbaRelease(result->array);
-         if ( result->database)
-          {
-            for (i=0; i < result->database->resultCount; i++)
-             {
-               if (result->database->results[i] == result)
-                {
-                  result->database->results[i] = NULL;
-                  break;
-                }
-             }
-            phpfbReleaseDatabase(result->database);
-          }
-         if (result->link)
-          {
-            for (i=0; i < result->link->resultCount; i++)
-             {
-               if (result->link->results[i] == result)
-                {
-                  result->link->results[i] = NULL;
-                  break;
-                }
-             }
-            phpfbReleaseLink(result->link);
-          }
-         result->link        = 0;
-         result->database    = 0;
-         result->connection  = NULL;
-         result->fetchHandle = NULL;
-         result->metaData    = NULL;
-         result->rowHandler  = NULL;
-         result->batchSize   = 0;
-         result->rowCount    = -1;
-         result->rowIndex    = 0;
-         result->columnIndex = 0;
-         result->row         = NULL;
-         result->array       = NULL;
-         result->list        = NULL;
-         free(result);
-       }
-    }
+			if (result->list)        fbcplRelease(result->list);
+			if (result->array)       fbaRelease(result->array);
+			if (result->database)
+			{
+				for (i=0; i < result->database->resultCount; i++)
+				{
+					if (result->database->results[i] == result)
+					{
+						result->database->results[i] = NULL;
+						break;
+					}
+				}
+				phpfbReleaseDatabase(result->database);
+			}
+			if (result->link)
+			{
+				for (i=0; i < result->link->resultCount; i++)
+				{
+					if (result->link->results[i] == result)
+					{
+						result->link->results[i] = NULL;
+						break;
+					}
+				}
+				phpfbReleaseLink(result->link);
+			}
+			result->link        = 0;
+			result->database    = 0;
+			result->connection  = NULL;
+			result->fetchHandle = NULL;
+			result->metaData    = NULL;
+			result->rowHandler  = NULL;
+			result->batchSize   = 0;
+			result->rowCount    = -1;
+			result->rowIndex    = 0;
+			result->columnIndex = 0;
+			result->row         = NULL;
+			result->array       = NULL;
+			result->list        = NULL;
+			free(result);
+		}
+	}
 }
 
-PHPFBDatabase* phpfbRetainDatabase ( PHPFBDatabase* database )
+PHPFBDatabase* phpfbRetainDatabase (PHPFBDatabase* database)
 {
-   if (database) database->retainCount++;
-   return database;
+	if (database) database->retainCount++;
+	return database;
 }
 
-void phpfbReleaseDatabase ( PHPFBDatabase* database )
+void phpfbReleaseDatabase (PHPFBDatabase* database)
 {
-   if (database)
-    {
-      database->retainCount--;
-/*printf("Release database %x %d %d\n", database, database->index, database->retainCount); */
-      if (database->retainCount == 0)
-       {
-         unsigned int i;
-/*         if (FB_SQL_G(databaseIndex == database->index) FB_SQL_G(databaseIndex = 0; */
-         if (database->link)
-          {
-            for (i=0; i < database->link->databaseCount; i++)
-             {
-               if (database->link->databases[i] == database)
-                {
-                  database->link->databases[i] = NULL;
-                  break;
-                }
-             }
-            phpfbReleaseLink(database->link);
-          }
-         fbcdcClose(database->connection);
-         fbcdcRelease(database->connection);
-         free(database->databaseName);
-         free(database->databasePassword);
-         free(database->results);
-         free(database);
-       }
-    }
+	if (database)
+	{
+		database->retainCount--;
+		if (database->retainCount == 0)
+		{
+			unsigned int i;
+			if (database->link)
+			{
+				for (i=0; i < database->link->databaseCount; i++)
+				{
+					if (database->link->databases[i] == database)
+					{
+						database->link->databases[i] = NULL;
+						break;
+					}
+				}
+				phpfbReleaseLink(database->link);
+			}
+			fbcdcClose(database->connection);
+			fbcdcRelease(database->connection);
+			free(database->databaseName);
+			free(database->databasePassword);
+			free(database->results);
+			free(database);
+		}
+	}
 }
 
-PHPFBLink* phpfbRetainLink ( PHPFBLink* link)
+PHPFBLink* phpfbRetainLink (PHPFBLink* link)
 {
-  if (link) link->retainCount++;
-  return link;
+	if (link) link->retainCount++;
+	return link;
 }
 
-void phpfbReleaseLink ( PHPFBLink* link)
+void phpfbReleaseLink (PHPFBLink* link)
 {
-/*  printf("Release %x %d %d\n",link,link->index,link->retainCount); */
-  if (link)
-   {
-     link->retainCount--;
-/*printf("Release link     %x %d %d\n", link, link->index, link->retainCount); */
-     if (link->retainCount == 0)
-      {
-/*        if (link->index == FB_SQL_G(linkIndex) FB_SQL_G(linkIndex = 0; */
-        free(link->hostName);
-        free(link->userName);
-        free(link->userPassword);
-        if (link->results) free(link->results);
-        if (link->databases) free(link->databases);
-        free(link);
-      }
-   }
+	if (link)
+	{
+		link->retainCount--;
+		if (link->retainCount == 0)
+		{
+/*			if (link->index == FB_SQL_G(linkIndex) FB_SQL_G(linkIndex = 0; */
+			free(link->hostName);
+			free(link->userName);
+			free(link->userPassword);
+			if (link->results) free(link->results);
+			if (link->databases) free(link->databases);
+			free(link);
+		}
+	}
 }
 
 PHPFBResult* phpfbQuery (INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* database);
 
 PHP_INI_BEGIN()
-  STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistant",  "1" , PHP_INI_SYSTEM, OnUpdateInt,    allowPersistent,  zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings", "0",  PHP_INI_SYSTEM, OnUpdateInt,    generateWarnings, zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",		   "1",  PHP_INI_SYSTEM, OnUpdateInt,    autoCommit,	   zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",   "-1",  PHP_INI_SYSTEM, OnUpdateInt,    maxPersistant,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
-  STD_PHP_INI_ENTRY_EX ("fbsql.max_links",        "128", PHP_INI_SYSTEM, OnUpdateInt,    maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
-  STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",  "128", PHP_INI_SYSTEM, OnUpdateInt,    maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
-  STD_PHP_INI_ENTRY_EX ("fbsql.max_results",      "128", PHP_INI_SYSTEM, OnUpdateInt,    maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
-  STD_PHP_INI_ENTRY_EX ("fbsql.mbatchSize",      "1000", PHP_INI_SYSTEM, OnUpdateInt,    batchSize,		   zend_fbsql_globals, fbsql_globals, display_link_numbers)
-  STD_PHP_INI_ENTRY    ("fbsql.default_host",     NULL,  PHP_INI_SYSTEM, OnUpdateString, hostName,         zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_ENTRY    ("fbsql.default_user",     "_SYSTEM",  PHP_INI_SYSTEM, OnUpdateString, userName,         zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_ENTRY    ("fbsql.default_password", "",         PHP_INI_SYSTEM, OnUpdateString, userPassword,     zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_ENTRY    ("fbsql.default_database", "",         PHP_INI_SYSTEM, OnUpdateString, databaseName,     zend_fbsql_globals, fbsql_globals)
-  STD_PHP_INI_ENTRY    ("fbsql.default_database_password",
-                                                  "",         PHP_INI_SYSTEM, OnUpdateString, databasePassword, zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistant",				"1",		PHP_INI_SYSTEM, OnUpdateInt,    allowPersistent,  zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings",			"0",		PHP_INI_SYSTEM, OnUpdateInt,    generateWarnings, zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",					"1",		PHP_INI_SYSTEM, OnUpdateInt,    autoCommit,	      zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",				"-1",		PHP_INI_SYSTEM, OnUpdateInt,    maxPersistant,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.max_results",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.mbatchSize",					"1000",		PHP_INI_SYSTEM, OnUpdateInt,    batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY    ("fbsql.default_host",					NULL,		PHP_INI_SYSTEM, OnUpdateString, hostName,         zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_ENTRY    ("fbsql.default_user",					"_SYSTEM",	PHP_INI_SYSTEM, OnUpdateString, userName,         zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_ENTRY    ("fbsql.default_password",				"",         PHP_INI_SYSTEM, OnUpdateString, userPassword,     zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_ENTRY    ("fbsql.default_database",				"",         PHP_INI_SYSTEM, OnUpdateString, databaseName,     zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_ENTRY    ("fbsql.default_database_password",	"",         PHP_INI_SYSTEM, OnUpdateString, databasePassword, zend_fbsql_globals, fbsql_globals)
 PHP_INI_END()
       
 
@@ -447,8 +441,8 @@ PHP_MINIT_FUNCTION(fbsql)
 
 PHP_MSHUTDOWN_FUNCTION(fbsql)
 {
-  UNREGISTER_INI_ENTRIES();
-  return SUCCESS;
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(fbsql)
@@ -463,7 +457,7 @@ PHP_MINFO_FUNCTION(fbsql)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "FrontBase support", "enabled");
 
-	php_info_print_table_row(2, "Client API version", "2.20" );
+	php_info_print_table_row(2, "Client API version", "2.20");
 
 	if (FB_SQL_G(allowPersistent))
 	{
@@ -481,14 +475,7 @@ PHP_MINFO_FUNCTION(fbsql)
 	DISPLAY_INI_ENTRIES();
 }
 
-PHPFBLink* phpfbConnect
-(
-	INTERNAL_FUNCTION_PARAMETERS,
-	char*        hostName,
-	char*        userName,
-	char*        userPassword,
-	int          persistant 
- )
+PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *userName, char *userPassword, int persistant)
 {
 /*	Ref count databases and links!!
 	Search for the database/link in the hash plist and in the hashed list
@@ -507,23 +494,19 @@ PHPFBLink* phpfbConnect
 	if (userName     == NULL) userName     = FB_SQL_G(userName);
 	if (userPassword == NULL) userPassword = FB_SQL_G(userPassword);
 
-/*	printf("Connection %s %s\n",hostName,userName); */
 	sprintf(name,"fbsql_%s_%s",hostName,userName);
-/*	printf("Hash find '%s'",name); */
 	if(zend_hash_find(&EG(persistent_list), name, strlen(name), (void **) &lep) == SUCCESS)
 	{
 		PHPFBLink* lnk;
 		result = lep->ptr;
 		lnk = zend_list_find(result->index,&type);
 		if (lnk != result) result->index = zend_list_insert(result, le_link);
-/*	printf(" Persistant %x %d \n",result,result->index); */
 	}
-	else if(zend_hash_find (&EG(regular_list),name,strlen(name),(void **)&lep) == SUCCESS)
+	else if(zend_hash_find(&EG(regular_list),name,strlen(name),(void **)&lep) == SUCCESS)
 	{
 		result = lep->ptr;
-/*	printf(" Non persistant %x %d \n",result,result->index); */
 	}
-	else if ( FB_SQL_G(linkCount) == FB_SQL_G(maxLinks))
+	else if (FB_SQL_G(linkCount) == FB_SQL_G(maxLinks))
 	{
 		php_error(E_WARNING,"FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
 		return NULL;
@@ -562,14 +545,14 @@ PHPFBLink* phpfbConnect
         }
 		result->index = zend_list_insert (phpfbRetainLink(result), le_link);
 		FB_SQL_G(linkCount)++;
-/* printf(" new %x %d \n",result,result->index); */
-/* printf("Ny connection %x %x\n",result,result->execHandler); */
+/*		printf(" new %x %d \n",result,result->index); */
+/*		printf("Ny connection %x %x\n",result,result->execHandler); */
 	}
 	return result;
 }
 
 
-int phpfbFetchRow ( PHPFBResult* result, int row)
+int phpfbFetchRow (PHPFBResult* result, int row)
 {
 	if (result->rowHandler == NULL)
 	{
@@ -582,7 +565,7 @@ int phpfbFetchRow ( PHPFBResult* result, int row)
 	for (;;)
 	{
 		void *rawData; 
-		if ( row >=  result->rowCount) return 0;
+		if (row >=  result->rowCount) return 0;
 		if (fbcrhRowCount(result->rowHandler) > (unsigned int)row) return 1;
 		rawData = fbcdcFetch(result->connection,result->batchSize,result->fetchHandle);
 		if (!fbcrhAddBatch(result->rowHandler,rawData)) result->rowCount = fbcrhRowCount(result->rowHandler);
@@ -590,33 +573,32 @@ int phpfbFetchRow ( PHPFBResult* result, int row)
 	return 0;
 }
 
-/* int fbsql_connect(string [hostname] , string [username] , string [password] ); */
 void phpfbDoConnect(INTERNAL_FUNCTION_PARAMETERS,int persistant)
 {
 	PHPFBLink* result; 
-	char*  hostName     = NULL;
-	char*  userName     = NULL;
-	char*  userPassword = NULL;
-	int    argc         = ARG_COUNT(ht);
-	pval* argv[3];
+	char	*hostName     = NULL;
+	char	*userName     = NULL;
+	char	*userPassword = NULL;
+	int		argc         = ARG_COUNT(ht);
+	zval	**argv[3];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 3)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 3)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
-		hostName = argv[0]->value.str.val;
+		convert_to_string_ex(argv[0]);
+		hostName = (*argv[0])->value.str.val;
 	}
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_string(argv[1]);
-		userName =  argv[1]->value.str.val;
+		convert_to_string_ex(argv[1]);
+		userName =  (*argv[1])->value.str.val;
 	}   
-	if (argc == 3 )
+	if (argc == 3)
 	{
-		convert_to_string(argv[2]);
-		userPassword =  argv[2]->value.str.val;
+		convert_to_string_ex(argv[2]);
+		userPassword =  (*argv[2])->value.str.val;
 	}
 	result = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,hostName,userName,userPassword,persistant);
 	if (result == NULL) RETURN_FALSE;
@@ -625,7 +607,7 @@ void phpfbDoConnect(INTERNAL_FUNCTION_PARAMETERS,int persistant)
 	return_value->type       = IS_LONG;
 }
 
-/* {{{ proto int fbsql_connect(string [hostname] , string [username] , string [password] );
+/* {{{ proto int fbsql_connect([string hostname [, string username [, string [password]]]);
 	*/
 PHP_FUNCTION(fbsql_connect)
 {
@@ -634,7 +616,7 @@ PHP_FUNCTION(fbsql_connect)
 /* }}} */
 
 
-/* {{{ proto int fbsql_pconnect(string [hostname] , string [username] , string [password] );
+/* {{{ proto int fbsql_pconnect([string hostname [, string username [, string [password]]]);
 	*/
 PHP_FUNCTION(fbsql_pconnect)
 {
@@ -649,11 +631,11 @@ PHPFBLink* phpfbGetLink(int id)
 	PHPFBLink* phpLink = NULL;
 	FBSQLLS_FETCH();
 
-	if (id  == 0 )
+	if (id  == 0)
 	{
 		php_error(E_WARNING,"FrontBase has no default connection");
 	}
-	else if ((!(phpLink = (PHPFBLink*) zend_list_find (id,&type))) || (( type != le_link)))
+	else if ((!(phpLink = (PHPFBLink*) zend_list_find (id,&type))) || ((type != le_link)))
 	{
 		php_error(E_WARNING,"%d is not a FBSQL link index",id);
 		phpLink = NULL;
@@ -667,10 +649,10 @@ PHPFBResult* phpfbGetResult(int id)
 	PHPFBResult* result = NULL;
 	FBSQLLS_FETCH();
 
-	if (id  == 0 ) {
+	if (id  == 0) {
 		php_error(E_WARNING,"FBSQL no default result");
 	}
-	else if ((!(result = (PHPFBResult*) zend_list_find (id,&type))) || (( type != le_result))) {
+	else if ((!(result = (PHPFBResult*) zend_list_find (id,&type))) || ((type != le_result))) {
 		php_error(E_WARNING,"%d is not a FBSQL result index",id);
 		result = NULL;
 	}
@@ -686,15 +668,15 @@ PHP_FUNCTION(fbsql_close)
 	unsigned   i,j;
 	char  name[1024];
 	PHPFBLink* phpLink = NULL;
-	pval*       argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 	if (argc == 1)
 	{
-		convert_to_long(argv[0]);
-		phpLink = phpfbGetLink(argv[0]->value.lval);
+		convert_to_long_ex(argv[0]);
+		phpLink = phpfbGetLink((*argv[0])->value.lval);
 	}
 	else if (FB_SQL_G(linkIndex) != 0)
 	{
@@ -733,7 +715,7 @@ PHPFBDatabase* phpfbSelectDB
 	char*        databaseName,
 	char*        databasePassword,
 	PHPFBLink*   link
- )
+)
 {
 	PHPFBDatabase* result = NULL;
 	list_entry *lep;
@@ -806,7 +788,7 @@ PHPFBDatabase* phpfbSelectDB
 			fbcdcClose(c);
 			fbcdcRelease(c);
 			free(result);
-/*printf("Returning Null\n"); */
+/*			printf("Returning Null\n"); */
 			return NULL;
 		}
 		result->retainCount      = 2;
@@ -831,7 +813,7 @@ PHPFBDatabase* phpfbSelectDB
 		link->databases[i] = result;
 
 		FB_SQL_G(databaseCount)++;
-/*   printf("Return database %x %x\n",result,c); */
+/*		printf("Return database %x %x\n",result,c); */
 	}
 	link->currentDatabase     = result;
 	return_value->value.lval  = result->index;
@@ -842,7 +824,7 @@ PHPFBDatabase* phpfbSelectDB
 }
 /* }}} */
 
-void phpfbestrdup (const char * s, int* length, char** value )
+void phpfbestrdup (const char * s, int* length, char** value)
 {
 	int   l = s?strlen(s):0;
 	if (value)
@@ -861,25 +843,25 @@ void phpfbestrdup (const char * s, int* length, char** value )
 	*/
 PHP_FUNCTION(fbsql_autocommit)
 {
-	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	int		argc = ARG_COUNT(ht);
+	zval	**argv[2];
 	PHPFBLink*     phpLink = NULL;
 	FBCMetaData* md;
 	zend_bool OnOff;
 	FBSQLLS_FETCH();
 
-	if ((argc < 1 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	convert_to_long(argv[0]);
-	phpLink = phpfbGetLink(argv[0]->value.lval);    
+	convert_to_long_ex(argv[0]);
+	phpLink = phpfbGetLink((*argv[0])->value.lval);    
 
-	if (argc == 2 )
+	if (argc == 2)
 	{
-		convert_to_boolean(argv[1]);
-		OnOff = Z_BVAL_P(argv[1]);
+		convert_to_boolean_ex(argv[1]);
+		OnOff = Z_BVAL_PP(argv[1]);
 		if (OnOff)
-			md = fbcdcExecuteDirectSQL(phpLink->currentDatabase->connection , "SET COMMIT TRUE;");
+			md = fbcdcExecuteDirectSQL(phpLink->currentDatabase->connection, "SET COMMIT TRUE;");
 		else
 			md = fbcdcExecuteDirectSQL(phpLink->currentDatabase->connection, "SET COMMIT FALSE;");
 		fbcmdRelease(md);
@@ -895,8 +877,8 @@ PHP_FUNCTION(fbsql_autocommit)
 	*/
 PHP_FUNCTION(fbsql_commit)
 {
-	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	int		argc    = ARG_COUNT(ht);
+	zval	**argv[1];
 	PHPFBLink*     phpLink = NULL;
 	FBCMetaData* md;
 	int link;
@@ -904,13 +886,13 @@ PHP_FUNCTION(fbsql_commit)
 
 	link = FB_SQL_G(linkIndex);
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc == 1 )
+	if (argc == 1)
 	{
-		convert_to_long(argv[0]);
-		link = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		link = (*argv[0])->value.lval;
 	}
 
 	phpLink = phpfbGetLink(link);
@@ -931,8 +913,8 @@ PHP_FUNCTION(fbsql_commit)
 	*/
 PHP_FUNCTION(fbsql_rollback)
 {
-	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	int		argc    = ARG_COUNT(ht);
+	zval	**argv[1];
 	PHPFBLink*     phpLink = NULL;
 	FBCMetaData* md;
 	int link;
@@ -940,13 +922,13 @@ PHP_FUNCTION(fbsql_rollback)
 
 	link = FB_SQL_G(linkIndex);
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc == 1 )
+	if (argc == 1)
 	{
-		convert_to_long(argv[0]);
-		link = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		link = (*argv[0])->value.lval;
 	}
 
 	phpLink = phpfbGetLink(link);
@@ -968,20 +950,20 @@ PHP_FUNCTION(fbsql_rollback)
 	*/
 PHP_FUNCTION(fbsql_hostname)
 {
-	int  argc = ARG_COUNT(ht);
-	pval* argv[1];
+	int		argc = ARG_COUNT(ht);
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 
 	phpfbestrdup(FB_SQL_G(hostName), &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
+		convert_to_string_ex(argv[0]);
 		free(FB_SQL_G(hostName));
-		FB_SQL_G(hostName) = strdup(argv[0]->value.str.val);
+		FB_SQL_G(hostName) = strdup((*argv[0])->value.str.val);
 	}
 }
 /* }}} */
@@ -992,19 +974,19 @@ PHP_FUNCTION(fbsql_hostname)
 PHP_FUNCTION(fbsql_database)
 {
 	int  argc = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 
 	phpfbestrdup(FB_SQL_G(databaseName), &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
+		convert_to_string_ex(argv[0]);
 		free(FB_SQL_G(databaseName));
-		FB_SQL_G(databaseName) = strdup(argv[0]->value.str.val);
+		FB_SQL_G(databaseName) = strdup((*argv[0])->value.str.val);
 	}
 }
 /* }}} */
@@ -1015,17 +997,17 @@ PHP_FUNCTION(fbsql_database)
 PHP_FUNCTION(fbsql_database_password)
 {
 	int  argc = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
+		convert_to_string_ex(argv[0]);
 		free(FB_SQL_G(hostName));
-		FB_SQL_G(databasePassword) = strdup(argv[0]->value.str.val); 
+		FB_SQL_G(databasePassword) = strdup((*argv[0])->value.str.val); 
 	}
 }
 /* }}} */
@@ -1036,19 +1018,19 @@ PHP_FUNCTION(fbsql_database_password)
 PHP_FUNCTION(fbsql_username)
 {
 	int  argc = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 
 	phpfbestrdup(FB_SQL_G(userName), &return_value->value.str.len, &return_value->value.str.val);
 	return_value->type = IS_STRING;
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
+		convert_to_string_ex(argv[0]);
 		free(FB_SQL_G(userName));
-		FB_SQL_G(userName) = strdup(argv[0]->value.str.val); 
+		FB_SQL_G(userName) = strdup((*argv[0])->value.str.val); 
 	}
 }
 /* }}} */
@@ -1059,16 +1041,16 @@ PHP_FUNCTION(fbsql_username)
 PHP_FUNCTION(fbsql_password)
 {   
 	int  argc = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
+		convert_to_string_ex(argv[0]);
 		free(FB_SQL_G(userPassword));
-		FB_SQL_G(userPassword) = strdup(argv[0]->value.str.val); 
+		FB_SQL_G(userPassword) = strdup((*argv[0])->value.str.val); 
 	}
 }
 /* }}} */
@@ -1079,7 +1061,7 @@ PHP_FUNCTION(fbsql_password)
 PHP_FUNCTION(fbsql_select_db)
 {
 	int  argc = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	char* name;
 	PHPFBLink*     phpLink = NULL;
 	PHPFBDatabase* database = NULL;
@@ -1087,21 +1069,21 @@ PHP_FUNCTION(fbsql_select_db)
 
 	name = FB_SQL_G(databaseName);
 
-	if ((argc < 1) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
-		name = argv[0]->value.str.val;
+		convert_to_string_ex(argv[0]);
+		name = (*argv[0])->value.str.val;
 	}
 
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		phpLink = phpfbGetLink(argv[1]->value.lval);    
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink((*argv[1])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1110,7 +1092,7 @@ PHP_FUNCTION(fbsql_select_db)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-/*printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
+/*	printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 
 	database = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,name,"",phpLink);
 	if (database == NULL) RETURN_FALSE;
@@ -1124,12 +1106,12 @@ PHP_FUNCTION(fbsql_select_db)
 /* }}} */
 
 
-/* {{{ proto int fbsql_change_user(string user, string password, string [database] , int [link_identifier] );
+/* {{{ proto int fbsql_change_user(string user, string password, string [database] , int [link_identifier]);
 	*/
 PHP_FUNCTION(fbsql_change_user)
 {
 	int             argc     = ARG_COUNT(ht);
-	pval*           argv[4];
+	zval	**          argv[4];
 	int             link;
 	PHPFBLink*      phpLink;
 	PHPFBDatabase * phpDatabase;
@@ -1142,23 +1124,23 @@ PHP_FUNCTION(fbsql_change_user)
 	databaseName = FB_SQL_G(databaseName);
 
 	if ((argc < 2) || (argc > 4)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2],&argv[3])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2],&argv[3])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	userName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	userName = (*argv[0])->value.str.val;
 
-	convert_to_string(argv[1]);
-	userPassword = argv[1]->value.str.val;
+	convert_to_string_ex(argv[1]);
+	userPassword = (*argv[1])->value.str.val;
 
 	if (argc >= 3)
 	{
-		convert_to_string(argv[2]);
-		databaseName = argv[2]->value.str.val;
+		convert_to_string_ex(argv[2]);
+		databaseName = (*argv[2])->value.str.val;
 	}
 	if (argc >= 4)
 	{
-		convert_to_long(argv[3]);
-		link = argv[3]->value.lval;
+		convert_to_long_ex(argv[3]);
+		link = (*argv[3])->value.lval;
 	}
 	if ((phpLink = phpfbGetLink(link))==NULL) RETURN_FALSE;
 	if ((phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,databaseName,"",phpLink)) == NULL) RETURN_FALSE;
@@ -1184,7 +1166,7 @@ PHP_FUNCTION(fbsql_create_db)
 	PHPFBLink* phpLink = NULL;
 	int   i;
 	int   argc = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int   link;
 	char* databaseName;
 	char* hostName;
@@ -1195,15 +1177,15 @@ PHP_FUNCTION(fbsql_create_db)
 	hostName = FB_SQL_G(hostName);
 
 	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	databaseName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
 
-	if (argc == 2 )
+	if (argc == 2)
 	{
-		convert_to_long(argv[1]);
-		link = argv[1]->value.lval;
+		convert_to_long_ex(argv[1]);
+		link = (*argv[1])->value.lval;
 		phpLink = phpfbGetLink(link);
 		if (phpLink == NULL) RETURN_FALSE;
 	}
@@ -1217,11 +1199,11 @@ PHP_FUNCTION(fbsql_create_db)
 	if (status != FBUnknownStatus)
 	{
 		char* txt = "Unknown status";
-		if      ( status == FBStopped  ) txt = "stopped";
-		else if ( status == FBStarting ) txt = "starting";
-		else if ( status == FBRunning  ) txt = "running";
-		else if ( status == FBStopping ) txt = "stopping";
-		else if ( status == FBNoExec   ) txt = "no exec";
+		if      (status == FBStopped ) txt = "stopped";
+		else if (status == FBStarting) txt = "starting";
+		else if (status == FBRunning ) txt = "running";
+		else if (status == FBStopping) txt = "stopping";
+		else if (status == FBNoExec  ) txt = "no exec";
 		php_error(E_WARNING, "Could not create %s@%s, database is %s",databaseName,hostName,txt);
 		RETURN_FALSE;
 	}
@@ -1258,22 +1240,22 @@ PHP_FUNCTION(fbsql_drop_db)
 {
 	char* databaseName;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	PHPFBLink* phpLink;
 	FBDatabaseStatus status;
 	int   i;
 	FBSQLLS_FETCH();
 
 	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	databaseName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
 
 	if (argc == 2)
 	{
-		convert_to_long(argv[1]);
-		phpLink = phpfbGetLink(argv[1]->value.lval);
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink((*argv[1])->value.lval);
 		if (phpLink == NULL) RETURN_FALSE;
 	}
 	else
@@ -1290,12 +1272,12 @@ PHP_FUNCTION(fbsql_drop_db)
 	if (status != FBStopped)
 	{
 		char* txt = "Unknown status";
-		if      ( status == FBStopped       ) txt = "stopped";
-		else if ( status == FBUnknownStatus ) txt = "nonexisting";
-		else if ( status == FBStarting      ) txt = "starting";
-		else if ( status == FBRunning       ) txt = "running";
-		else if ( status == FBStopping      ) txt = "stopping";
-		else if ( status == FBNoExec        ) txt = "no exec";
+		if      (status == FBStopped      ) txt = "stopped";
+		else if (status == FBUnknownStatus) txt = "nonexisting";
+		else if (status == FBStarting     ) txt = "starting";
+		else if (status == FBRunning      ) txt = "running";
+		else if (status == FBStopping     ) txt = "stopping";
+		else if (status == FBNoExec       ) txt = "no exec";
 		php_error(E_WARNING, "Could not drop %s@%s, database is %s.",databaseName,phpLink->hostName,txt);
 		RETURN_FALSE;
 	}
@@ -1335,7 +1317,7 @@ PHP_FUNCTION(fbsql_stop_db)
 	char*            databaseName;
 
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int   link;
 	unsigned   i;
 	char  name[1024];
@@ -1344,15 +1326,15 @@ PHP_FUNCTION(fbsql_stop_db)
 	link = FB_SQL_G(linkIndex);
 
 	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	databaseName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
 
 	if (argc == 2)
 	{
-		convert_to_long(argv[1]);
-		link = argv[1]->value.lval;
+		convert_to_long_ex(argv[1]);
+		link = (*argv[1])->value.lval;
 		phpLink = phpfbGetLink(link);
 		if (phpLink == NULL) RETURN_FALSE;
 	}
@@ -1410,7 +1392,7 @@ PHP_FUNCTION(fbsql_start_db)
 	PHPFBLink* phpLink = NULL;
 	int   i;
 	int   argc = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	char* databaseName;
 	char* hostName;
 	FBDatabaseStatus status;
@@ -1419,17 +1401,17 @@ PHP_FUNCTION(fbsql_start_db)
 	hostName = FB_SQL_G(hostName);
 
 	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	databaseName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
 
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		phpLink = phpfbGetLink(argv[1]->value.lval);    
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink((*argv[1])->value.lval);    
 	}
-	else if ( FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1438,16 +1420,16 @@ PHP_FUNCTION(fbsql_start_db)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
     }
 	if (phpLink == NULL) RETURN_FALSE;
-/*printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
+/*	printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
-	if ((status != FBStopped) && (status != FBRunning) && ( status != FBStarting))
+	if ((status != FBStopped) && (status != FBRunning) && (status != FBStarting))
 	{
 		char* txt = "Unknown status";
-		if      ( status == FBStopped  ) txt = "stopped";
-		else if ( status == FBStarting ) txt = "starting";
-		else if ( status == FBRunning  ) txt = "running";
-		else if ( status == FBStopping ) txt = "stopping";
-		else if ( status == FBNoExec   ) txt = "no exec";
+		if      (status == FBStopped ) txt = "stopped";
+		else if (status == FBStarting) txt = "starting";
+		else if (status == FBRunning ) txt = "running";
+		else if (status == FBStopping) txt = "stopping";
+		else if (status == FBNoExec  ) txt = "no exec";
 		php_error(E_WARNING, "Could not start %s@%s, as database is %s.",databaseName,hostName,txt);
 		RETURN_FALSE;
 	}
@@ -1482,7 +1464,7 @@ PHP_FUNCTION(fbsql_start_db)
 /* }}} */
 
 
-int mdOk(PHPFBDatabase* database, FBCMetaData* md )
+int mdOk(PHPFBDatabase* database, FBCMetaData* md)
 {
 	FBCDatabaseConnection* c = database->connection;
 	int result = 1;
@@ -1520,7 +1502,7 @@ int mdOk(PHPFBDatabase* database, FBCMetaData* md )
 	return result;
 }
 
-PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* database )
+PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* database)
 {
 	PHPFBLink*    link   = database->link;
 	PHPFBResult*  result = NULL;
@@ -1596,7 +1578,7 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 		result->currentResult = cR;
 		FB_SQL_G(resultCount)++;
 		for (i=0; i < database->resultCount; i++) if (database->results[i] == NULL) break;
-		if (i == database->resultCount )
+		if (i == database->resultCount)
 		{
 			unsigned j;
 			database->resultCount += 5;
@@ -1616,7 +1598,7 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 		else 
 		{
 			char* r = fbcmdMessage(result->metaData);
-			if (( result->list = fbcplParse(r)))
+			if ((result->list = fbcplParse(r)))
 			{
 				result->rowCount    = fbcplCount(result->list);
 				result->columnCount = 7;
@@ -1637,21 +1619,21 @@ PHP_FUNCTION(fbsql_query)
 	PHPFBResult*    phpResult; 
 	char* sql;
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	FBSQLLS_FETCH();
 
 	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	sql = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	sql = (*argv[0])->value.str.val;
 
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		phpLink = phpfbGetLink(argv[1]->value.lval);    
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink((*argv[1])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1660,7 +1642,7 @@ PHP_FUNCTION(fbsql_query)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-/*printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
+/*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 
 	phpDatabase = phpLink->currentDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
@@ -1685,24 +1667,24 @@ PHP_FUNCTION(fbsql_db_query)
 	char* sql;
 	char* databaseName;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[3];
+	zval	**argv[3];
 	FBSQLLS_FETCH();
 
 	if ((argc < 2) || (argc > 3)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 
-	convert_to_string(argv[0]);
-	databaseName = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
 
-	convert_to_string(argv[1]);
-	sql = argv[1]->value.str.val;
+	convert_to_string_ex(argv[1]);
+	sql = (*argv[1])->value.str.val;
 
-	if (argc >= 3 )
+	if (argc >= 3)
 	{
-		convert_to_long(argv[2]);
-		phpLink = phpfbGetLink(argv[2]->value.lval);    
+		convert_to_long_ex(argv[2]);
+		phpLink = phpfbGetLink((*argv[2])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1713,7 +1695,7 @@ PHP_FUNCTION(fbsql_db_query)
 	if (phpLink == NULL) RETURN_FALSE;
 /*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
-	if ( phpDatabase == NULL) RETURN_FALSE;
+	if (phpDatabase == NULL) RETURN_FALSE;
  
 	phpResult = phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU,sql,phpDatabase);
 	if (return_value->value.lval)
@@ -1733,17 +1715,17 @@ PHP_FUNCTION(fbsql_list_dbs)
 	PHPFBResult*    phpResult;
 	unsigned   i;
 	int   argc = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
-	if (argc == 1 )
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if (argc == 1)
 	{
-		convert_to_long(argv[0]);
-		phpLink = phpfbGetLink(argv[0]->value.lval);    
+		convert_to_long_ex(argv[0]);
+		phpLink = phpfbGetLink((*argv[0])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1776,11 +1758,11 @@ PHP_FUNCTION(fbsql_list_dbs)
 	phpResult->list        = NULL;
 	FB_SQL_G(resultCount)++;
 	for (i=0; i < phpLink->resultCount; i++) if (phpLink->results[i] == NULL) break;
-	if (i == phpLink->resultCount )
+	if (i == phpLink->resultCount)
 	{
 		unsigned j;
 		phpLink->resultCount += 5;
-		phpLink->results     = realloc( phpLink->results,sizeof(PHPFBResult*)* phpLink->resultCount);
+		phpLink->results     = realloc(phpLink->results,sizeof(PHPFBResult*)* phpLink->resultCount);
 		for (j=i; j < phpLink->resultCount ; j++)phpLink->results[j] = NULL;
 	}
 	phpLink->results[i]     = phpResult;
@@ -1792,7 +1774,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 /* }}} */
 
 
-/* {{{ proto int fbsql_list_tables(string database, int [link_identifier] );
+/* {{{ proto int fbsql_list_tables(string database, int [link_identifier]);
 	*/
 PHP_FUNCTION(fbsql_list_tables)
 {
@@ -1802,24 +1784,24 @@ PHP_FUNCTION(fbsql_list_tables)
 	char* sql = "select t0.\"table_name\"from information_schema.tables t0, information_schema.SCHEMATA t1 where t0.schema_pk = t1.schema_pk and t1.\"schema_name\" = current_schema;";
 	char* databaseName  = NULL;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	FBSQLLS_FETCH();
 
 	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if ( argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
-		databaseName = argv[0]->value.str.val;
+		convert_to_string_ex(argv[0]);
+		databaseName = (*argv[0])->value.str.val;
 	} 
 
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		phpLink = phpfbGetLink(argv[1]->value.lval);    
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink((*argv[1])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1829,7 +1811,7 @@ PHP_FUNCTION(fbsql_list_tables)
 	}
 	if (phpLink == NULL) RETURN_FALSE;
   
-	if ( databaseName == NULL )
+	if (databaseName == NULL)
 	{
 		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),"",phpLink);
 	}
@@ -1862,30 +1844,30 @@ PHP_FUNCTION(fbsql_list_fields)
 	char* databaseName = NULL;
 	char* tableName    = NULL;
 	int   argc         = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	FBSQLLS_FETCH();
 
 	if ((argc < 2) || (argc > 3)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if ( argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_string(argv[0]);
-		databaseName = argv[0]->value.str.val;
+		convert_to_string_ex(argv[0]);
+		databaseName = (*argv[0])->value.str.val;
 	} 
 
-	if ( argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_string(argv[1]);
-		tableName = argv[1]->value.str.val;
+		convert_to_string_ex(argv[1]);
+		tableName = (*argv[1])->value.str.val;
 	} 
 
-	if (argc >= 3 )
+	if (argc >= 3)
 	{
-		convert_to_long(argv[2]);
-		phpLink = phpfbGetLink(argv[2]->value.lval);    
+		convert_to_long_ex(argv[2]);
+		phpLink = phpfbGetLink((*argv[2])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -1918,17 +1900,17 @@ PHP_FUNCTION(fbsql_error)
 	PHPFBLink*     phpLink = NULL;
 	PHPFBDatabase* phpDatabase;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		phpLink = phpfbGetLink(argv[0]->value.lval);    
+		convert_to_long_ex(argv[0]);
+		phpLink = phpfbGetLink((*argv[0])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) != 0 )
+	else if (FB_SQL_G(linkIndex) != 0)
 	{
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
@@ -1949,17 +1931,17 @@ PHP_FUNCTION(fbsql_errno)
 	PHPFBLink*     phpLink = NULL;
 	PHPFBDatabase* phpDatabase;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		phpLink = phpfbGetLink(argv[0]->value.lval);    
+		convert_to_long_ex(argv[0]);
+		phpLink = phpfbGetLink((*argv[0])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) != 0 )
+	else if (FB_SQL_G(linkIndex) != 0)
 	{
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
@@ -1973,22 +1955,22 @@ PHP_FUNCTION(fbsql_errno)
 /* }}} */
 
 
-/* {{{ proto int fbsql_generate_warnings( [int flag]);
+/* {{{ proto int fbsql_generate_warnings([int flag]);
 	*/
 PHP_FUNCTION(fbsql_warnings)
 {
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 	return_value->value.lval = FB_SQL_G(generateWarnings);
 	return_value->type       = IS_LONG;
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		FB_SQL_G(generateWarnings) = argv[0]->value.lval != 0;
+		convert_to_long_ex(argv[0]);
+		FB_SQL_G(generateWarnings) = (*argv[0])->value.lval != 0;
 	}
 }
 /* }}} */
@@ -2000,19 +1982,19 @@ PHP_FUNCTION(fbsql_affected_rows)
 {
 	PHPFBLink*      phpLink;
 	int   argc       = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	int   link;
 	FBSQLLS_FETCH();
 
 	link = FB_SQL_G(linkIndex);
 
 	if (argc > 1) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-	if (argc == 1 )
+	if (argc == 1)
 	{
-		convert_to_string(argv[0]);
-		link = argv[0]->value.lval;
+		convert_to_string_ex(argv[0]);
+		link = (*argv[0])->value.lval;
 	}
 	phpLink = phpfbGetLink(link);
 	if (phpLink == NULL) RETURN_FALSE;
@@ -2029,17 +2011,17 @@ PHP_FUNCTION(fbsql_insert_id)
 	PHPFBLink* phpLink;
 	PHPFBDatabase* phpDatabase;
 	int   argc     = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	FBSQLLS_FETCH();
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
-	if (argc == 1 )
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc, &argv[0])==FAILURE) RETURN_FALSE;
+	if (argc == 1)
 	{
-		convert_to_long(argv[0]);
-		phpLink = phpfbGetLink(argv[0]->value.lval);    
+		convert_to_long_ex(argv[0]);
+		phpLink = phpfbGetLink((*argv[0])->value.lval);    
 	}
-	else if (FB_SQL_G(linkIndex) == 0 )
+	else if (FB_SQL_G(linkIndex) == 0)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
 	}
@@ -2049,7 +2031,7 @@ PHP_FUNCTION(fbsql_insert_id)
 	}
 	if (phpLink == NULL) RETURN_FALSE;
 
-	if ( phpLink->currentDatabase == NULL)
+	if (phpLink->currentDatabase == NULL)
 	{
 		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),"",phpLink);
 	}
@@ -2063,10 +2045,10 @@ PHP_FUNCTION(fbsql_insert_id)
 /* }}} */
 
 
-int phpSizeOfInt ( int i )
+int phpSizeOfInt (int i)
 {
 	int s = 1;
-	if ( i < 0 )
+	if (i < 0)
 	{
 		s++;
 		i = -i;
@@ -2075,7 +2057,7 @@ int phpSizeOfInt ( int i )
 	return s;
 }
 
-void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* length, char** value)
+void phpfbColumnAsString (PHPFBResult* result, int column, void* data ,int* length, char** value)
 {
 	FBCMetaData*               md          = result->metaData;
 	const FBCDatatypeMetaData* dtmd        = fbcmdDatatypeMetaDataAtIndex(md, column);
@@ -2087,7 +2069,7 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 			unsigned char v = *((unsigned char*)(data));
 			if (v == 255)
 				phpfbestrdup("Unknown",length,value);
-			else if (v == 0 )
+			else if (v == 0)
 				phpfbestrdup("False",length,value);
 			else
 				phpfbestrdup("True",length,value);
@@ -2147,7 +2129,7 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 			unsigned nBits = ptr->nBytes * 8;
 
 			if (dtc == FB_Bit) nBits = fbcdmdLength(fbccmdDatatype(clmd));
-			if (nBits %8 == 0 )
+			if (nBits %8 == 0)
 			{
 				unsigned i;
 				unsigned int l = nBits / 8;
@@ -2157,7 +2139,7 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 					char*        r = emalloc(l*2+3+1);
 					r[0] = 'X';
 					r[1] = '\'';
-					for ( i = 0; i < nBits / 8; i++)
+					for (i = 0; i < nBits / 8; i++)
 					{
 						char c[4];
 						sprintf(c,"%02x",ptr->bytes[i]);
@@ -2179,7 +2161,7 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 					char*        r = emalloc(l*2+3+1);
 					r[0] = 'B';
 					r[1] = '\'';
-					for ( i = 0; i < nBits; i++)
+					for (i = 0; i < nBits; i++)
 					{
 						int bit = 0;
 						if (i/8 < ptr->nBytes) bit = ptr->bytes[i/8] & (1<<(7-(i%8)));
@@ -2257,32 +2239,32 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 	}
 }
 
-void phpfbSqlResult ( INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int  columnIndex )
+void phpfbSqlResult (INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int  columnIndex)
 {
 	void** row;
 	if (result->list)
 	{
 		FBCPList* columns = (FBCPList*)fbcplValueForKey(result->list,"COLUMNS");
 		FBCPList* column  = (FBCPList*)fbcplValueAtIndex(columns,result->rowIndex);
-		if ( columnIndex == 0 )  
+		if (columnIndex == 0)  
 		{ /* Name */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"NAME");
 			return_value->type = IS_STRING;
-			phpfbestrdup(fbcplString(( FBCPList*)name), &return_value->value.str.len, &return_value->value.str.val);
+			phpfbestrdup(fbcplString((FBCPList*)name), &return_value->value.str.len, &return_value->value.str.val);
 		}
-		else if ( columnIndex == 2 )
+		else if (columnIndex == 2)
 		{ /* Length */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"WIDTH");
 			return_value->type = IS_STRING;
 			phpfbestrdup((const char*)fbcplString(name), &return_value->value.str.len, &return_value->value.str.val);
 		}
-		else if ( columnIndex == 1 )
+		else if (columnIndex == 1)
 		{ /* Type */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"DATATYPE");
 			return_value->type = IS_STRING;
 			phpfbestrdup((const char*)fbcplString(name), &return_value->value.str.len, &return_value->value.str.val);
 		}
-		else if ( columnIndex == 3 )
+		else if (columnIndex == 3)
 		{ /* Flags */
 			return_value->type = IS_STRING;
 			phpfbestrdup("", &return_value->value.str.len, &return_value->value.str.val);
@@ -2332,7 +2314,7 @@ void phpfbSqlResult ( INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int row
 PHP_FUNCTION(fbsql_result)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[3];
+	zval	**argv[3];
 	PHPFBResult*       result;
 	int                 resultIndex;
 	int                 rowIndex;
@@ -2341,13 +2323,13 @@ PHP_FUNCTION(fbsql_result)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0) || (argc > 3 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 3)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
@@ -2355,28 +2337,28 @@ PHP_FUNCTION(fbsql_result)
 	rowIndex = result->rowIndex;
 	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		rowIndex = argv[1]->value.lval;
+		convert_to_long_ex(argv[1]);
+		rowIndex = (*argv[1])->value.lval;
 	}
 
 	columnIndex  = result->columnIndex;
 	if (argc == 3)
 	{
-		if ((argv[2]->type == IS_STRING) && (result->metaData))
+		if (((*argv[2])->type == IS_STRING) && (result->metaData))
 		{
 			for (columnIndex =0; columnIndex < result->columnCount; columnIndex ++)
 			{
 				const FBCColumnMetaData* cmd = fbcmdColumnMetaDataAtIndex(result->metaData, columnIndex);
 				const char*              lbl = fbccmdLabelName(cmd);
-				if (strcmp((char*)lbl, argv[2]->value.str.val) == 0 ) break;
+				if (strcmp((char*)lbl, (*argv[2])->value.str.val) == 0) break;
 			}
 			if (columnIndex == result->columnCount) RETURN_FALSE;
 		}
 		else
 		{
-			convert_to_long(argv[2]);
-			columnIndex = argv[2]->value.lval;
-			if ( columnIndex < 0 )
+			convert_to_long_ex(argv[2]);
+			columnIndex = (*argv[2])->value.lval;
+			if (columnIndex < 0)
 			{
 				php_error(E_WARNING,"Illegal column index - %d",columnIndex);
 				RETURN_FALSE;
@@ -2402,18 +2384,18 @@ PHP_FUNCTION(fbsql_result)
 PHP_FUNCTION(fbsql_next_result)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	PHPFBResult*       result;
 	int                 resultIndex;
 	FBSQLLS_FETCH();
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-    convert_to_long(argv[0]);
-	result = phpfbGetResult(argv[0]->value.lval);
+    convert_to_long_ex(argv[0]);
+	result = phpfbGetResult((*argv[0])->value.lval);
 	if (result == NULL) RETURN_FALSE;
 
     result->currentResult++;
@@ -2448,7 +2430,7 @@ PHP_FUNCTION(fbsql_next_result)
 PHP_FUNCTION(fbsql_num_rows)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 rowCount;
@@ -2456,19 +2438,19 @@ PHP_FUNCTION(fbsql_num_rows)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	rowCount = fbcmdRowCount (result->metaData);
-	if (rowCount == -1 )
+	if (rowCount == -1)
 	{
 		phpfbFetchRow(result,0x7fffffff);
 		rowCount = result->rowCount;
@@ -2484,20 +2466,20 @@ PHP_FUNCTION(fbsql_num_rows)
 PHP_FUNCTION(fbsql_num_fields)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	int   resultIndex;
 	PHPFBResult* result;
 	FBSQLLS_FETCH();
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
@@ -2530,7 +2512,7 @@ PHP_FUNCTION(fbsql_fetch_object)
 PHP_FUNCTION(fbsql_fetch_row)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 i;
 	int                 resultIndex;
 	PHPFBResult*       result;
@@ -2540,12 +2522,12 @@ PHP_FUNCTION(fbsql_fetch_row)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0) || (argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 ) {
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+	if (argc >= 1) {
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
@@ -2593,7 +2575,7 @@ PHP_FUNCTION(fbsql_fetch_row)
 PHP_FUNCTION(fbsql_fetch_array)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 i;
 	int                 resultIndex;
 	PHPFBResult* result;
@@ -2604,22 +2586,22 @@ PHP_FUNCTION(fbsql_fetch_array)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
 	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	rowIndex = result->rowIndex;
-	if (argc == 2 )
+	if (argc == 2)
 	{
-		convert_to_long(argv[1]);
-		result_type = argv[1]->value.lval;
+		convert_to_long_ex(argv[1]);
+		result_type = (*argv[1])->value.lval;
 		if (((result_type & FBSQL_NUM) != FBSQL_NUM) && ((result_type & FBSQL_ASSOC) != FBSQL_ASSOC))
 		{
 			php_error(E_WARNING,"Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH.");
@@ -2691,23 +2673,23 @@ PHP_FUNCTION(fbsql_fetch_array)
 PHP_FUNCTION(fbsql_data_seek)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult*       result;
 	int                 rowIndex;
 	FBSQLLS_FETCH();
 
-	if (argc != 2 ) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if (argc != 2) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	convert_to_long(argv[0]);
-	resultIndex = argv[0]->value.lval;
+	convert_to_long_ex(argv[0]);
+	resultIndex = (*argv[0])->value.lval;
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
-	convert_to_long(argv[1]);
-	rowIndex = argv[1]->value.lval;
-	if (rowIndex < 0 )
+	convert_to_long_ex(argv[1]);
+	rowIndex = (*argv[1])->value.lval;
+	if (rowIndex < 0)
 	{
 		php_error(E_WARNING,"Illegal index",resultIndex+1);
 		RETURN_FALSE;
@@ -2727,7 +2709,7 @@ PHP_FUNCTION(fbsql_data_seek)
 PHP_FUNCTION(fbsql_fetch_lengths)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 i;
 	int                 resultIndex;
 	PHPFBResult* result;
@@ -2735,13 +2717,13 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0) || ( argc > 1 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
@@ -2765,7 +2747,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 PHP_FUNCTION(fbsql_fetch_field)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -2773,23 +2755,23 @@ PHP_FUNCTION(fbsql_fetch_field)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -2827,7 +2809,7 @@ PHP_FUNCTION(fbsql_fetch_field)
 PHP_FUNCTION(fbsql_field_seek)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -2835,13 +2817,13 @@ PHP_FUNCTION(fbsql_field_seek)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || ( argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
@@ -2849,10 +2831,10 @@ PHP_FUNCTION(fbsql_field_seek)
 	column = result->columnIndex;
 	if (argc>=2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
 	}
-	if (column < 0 )
+	if (column < 0)
 	{
 		php_error(E_WARNING,"Illegal column index %d",column);
 		RETURN_FALSE;
@@ -2875,7 +2857,7 @@ PHP_FUNCTION(fbsql_field_seek)
 PHP_FUNCTION(fbsql_field_name)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -2883,23 +2865,23 @@ PHP_FUNCTION(fbsql_field_name)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -2932,7 +2914,7 @@ PHP_FUNCTION(fbsql_field_name)
 PHP_FUNCTION(fbsql_field_table)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -2940,23 +2922,23 @@ PHP_FUNCTION(fbsql_field_table)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -2980,7 +2962,7 @@ PHP_FUNCTION(fbsql_field_table)
 PHP_FUNCTION(fbsql_field_len)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -2988,23 +2970,23 @@ PHP_FUNCTION(fbsql_field_len)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -3042,7 +3024,7 @@ PHP_FUNCTION(fbsql_field_len)
 PHP_FUNCTION(fbsql_field_type)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -3050,23 +3032,23 @@ PHP_FUNCTION(fbsql_field_type)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -3101,7 +3083,7 @@ PHP_FUNCTION(fbsql_field_type)
 PHP_FUNCTION(fbsql_field_flags)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[2];
+	zval	**argv[2];
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
@@ -3109,23 +3091,23 @@ PHP_FUNCTION(fbsql_field_flags)
 
 	resultIndex = FB_SQL_G(resultIndex);
 
-	if ((argc < 0 ) || (argc > 2 )) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(ht,argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 )
+	if (argc >= 1)
 	{
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
 	column = result->columnIndex;
-	if (argc >= 2 )
+	if (argc >= 2)
 	{
-		convert_to_long(argv[1]);
-		column = argv[1]->value.lval;
-		if (column < 0 )
+		convert_to_long_ex(argv[1]);
+		column = (*argv[1])->value.lval;
+		if (column < 0)
 		{
 			php_error(E_WARNING,"Illegal index",resultIndex+1);
 			RETURN_FALSE;
@@ -3151,7 +3133,7 @@ PHP_FUNCTION(fbsql_field_flags)
 PHP_FUNCTION(fbsql_free_result)
 {
 	int   argc    = ARG_COUNT(ht);
-	pval* argv[1];
+	zval	**argv[1];
 	int           resultIndex;
 	PHPFBResult* result;
 	FBSQLLS_FETCH();
@@ -3159,11 +3141,11 @@ PHP_FUNCTION(fbsql_free_result)
 	resultIndex = FB_SQL_G(resultIndex);
 
 	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
+	if (zend_get_parameters_ex(ht,argc,&argv[0])==FAILURE) RETURN_FALSE;
 
-	if (argc >= 1 ) {
-		convert_to_long(argv[0]);
-		resultIndex = argv[0]->value.lval;
+	if (argc >= 1) {
+		convert_to_long_ex(argv[0]);
+		resultIndex = (*argv[0])->value.lval;
 	}
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
