@@ -1,3 +1,45 @@
+2001-04-08  Stig Bakken  <ssb@fast.no>
+
+    * main/build-defs.h.in
+      pear/PEAR.php.in
+      sapi/Makefile.in
+      sapi/cgi/config.m4
+      Makefile.in
+      configure.in: * CGI version is always installed!
+    * replaced --disable-pear with --with-pear=DIR (or --without-pear),
+      is backwards compatible
+    * use --datadir, --libdir and --sysconfdir configure options to determine
+      where PEAR files, shared extensions and php.ini goes
+    * simplified the extension version directory name
+
+    * ext/standard/dir.c:
+    Add DIRECTORY_SEPARATOR constant ('/' on UNIX, '\' on Windows) 
+
+2001-04-08  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/php4pi3web.dsp:
+    Contribute the MSVC project file. Someone could add this to the php4ts workspace.
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/pi3web/pi3web_sapi.h: Reorganized the #define's in the header.
+
+    * sapi/pi3web/pi3web_sapi.c:
+    Updated copyright agreement regarding move of Pi3Web to sourceforge.
+
+2001-04-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/RPC.php: * globals fixes
+
+    * pear/XML/Parser.php: * indentation and inline doc fixes
+
+    * pear/HTML/Processor.php:
+    * using GLOBALS to set global variable (in case the file is included
+      from within a function)
+
+2001-04-08  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/imap/php_imap.c: Use tabs instead of spaces.
+
 2001-04-07  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/file.c: ws pollution removed.
