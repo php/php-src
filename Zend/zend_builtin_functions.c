@@ -1079,6 +1079,7 @@ ZEND_FUNCTION(get_declared_classes)
 			ZEND_WRONG_PARAM_COUNT();
 		} else {
 			global_ns = 0;
+			convert_to_string_ex(namespace_name);
 		}
 	}
 
@@ -1087,7 +1088,6 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 	
 	if(!global_ns) {
-		convert_to_string_ex(namespace_name);
 		zend_str_tolower(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
 		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name)+1, (void **)&pns) == FAILURE) {
 			zend_error(E_WARNING, "Namespace '%s' is not defined!", Z_STRVAL_PP(namespace_name));
