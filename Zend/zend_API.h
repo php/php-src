@@ -56,10 +56,10 @@
 
 int zend_next_free_module(void);
 
-ZEND_API int getParameters(int ht, int param_count,...);
-ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array);
-ZEND_API int getParametersEx(int param_count,...);
-ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array);
+ZEND_API int zend_get_parameters(int ht, int param_count,...);
+ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_array);
+ZEND_API int zend_get_parameters_ex(int param_count,...);
+ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_array);
 
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
@@ -75,7 +75,8 @@ ZEND_API void wrong_param_count(void);
 
 #define WRONG_PARAM_COUNT { wrong_param_count(); return; }
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret) { wrong_param_count(); return ret; }
-#define ARG_COUNT(ht) (ht)
+#define ARG_COUNT(dummy)	(num_args)
+#define ZEND_NUM_ARGS()		(num_args)
 
 #define BYREF_NONE 0
 #define BYREF_FORCE 1
