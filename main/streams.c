@@ -708,11 +708,10 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 				break;
 			}
 		} else {
+			/* XXX: Should be fine to always read chunk_size */
 			size_t toread = maxlen - 1;
 			if (toread > stream->chunk_size)
 				toread = stream->chunk_size;
-			else if (toread < stream->chunk_size)
-				stream->chunk_size = toread;
 
 			/* XXX: Should not the loop end, if the stream op fails? */
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
