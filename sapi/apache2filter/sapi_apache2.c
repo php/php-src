@@ -40,6 +40,7 @@
 #include "http_main.h"
 #include "util_script.h"
 #include "http_core.h"                         
+#include "ap_mpm.h"
 
 #include "php_apache.h"
  
@@ -94,7 +95,10 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	val = strchr(sapi_header->header, ':');
 
-	if (!val) return 0;
+	if (!val) {
+		sapi_free_header(sapi_header);
+		return 0;
+	}
 
 	*val = '\0';
 	
@@ -425,7 +429,9 @@ php_apache_server_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
 	sapi_shutdown();
+#ifdef ZTS
 	tsrm_shutdown();
+#endif
 	return APR_SUCCESS;
 }
 
@@ -439,6 +445,15 @@ static void php_apache_add_version(apr_pool_t *p)
 
 static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp)
 {
+#ifndef ZTS
+	int threaded_mpm;
+
+	ap_mpm_query(AP_MPMQ_IS_THREADED, &threaded_mpm);
+	if(threaded_mpm) {
+		ap_log_error(APLOG_MARK, APLOG_CRIT, 0, 0, "Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.");
+		return DONE;
+	}
+#endif
     /* When this is NULL, apache won't override the hard-coded default
      * php.ini path setting. */
     apache2_php_ini_path_override = NULL;
@@ -470,8 +485,9 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	if (apache2_php_ini_path_override) {
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
-
+#ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
+#endif
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
@@ -548,8 +564,8 @@ static void php_register_hook(apr_pool_t *p)
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_RESOURCE);
-	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_RESOURCE);
+	ap_register_output_filter("PHP", php_output_filter, NULL, AP_FTYPE_RESOURCE);
+	ap_register_input_filter("PHP", php_input_filter, NULL, AP_FTYPE_RESOURCE);
 }
 
 AP_MODULE_DECLARE_DATA module php4_module = {
