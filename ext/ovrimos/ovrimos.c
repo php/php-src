@@ -699,12 +699,6 @@ PHP_FUNCTION(ovrimos_fetch_into)
 		}
 	}
 
-	if (!ParameterPassedByReference(ht, 2)) {	/* 1-based?... */
-		php_error(E_WARNING,
-			  "Array not passed by reference in call to ovrimos_fetch_into()");
-		RETURN_FALSE;
-	}
-
 	if (arr->type != IS_ARRAY) {
 		if (array_init(arr) == FAILURE) {
 			php_error(E_WARNING,
@@ -1287,7 +1281,7 @@ function_entry ovrimos_functions[] = {
 	    PHP_FE(ovrimos_prepare, NULL)
 	    PHP_FE(ovrimos_execute, NULL)
 	    PHP_FE(ovrimos_fetch_row, NULL)
-	    PHP_FE(ovrimos_fetch_into, NULL)
+	    PHP_FE(ovrimos_fetch_into, second_arg_force_ref)
 	    PHP_FE(ovrimos_field_len, NULL)
 	    PHP_FE(ovrimos_field_name, NULL)
 	    PHP_FE(ovrimos_field_type, NULL)

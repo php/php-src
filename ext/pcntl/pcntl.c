@@ -40,7 +40,7 @@ static int pcntl_zend_extension_active;
 
 function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,	NULL)	
-	PHP_FE(pcntl_waitpid,	NULL)	
+	PHP_FE(pcntl_waitpid,	second_arg_force_ref)	
 	PHP_FE(pcntl_signal,	NULL)
 	PHP_FE(pcntl_wifexited, NULL)
 	PHP_FE(pcntl_wifstopped, NULL)
@@ -212,13 +212,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	}
 
 	convert_to_long_ex(pid);
-	convert_to_long_ex(options);
-   
-	if (!ParameterPassedByReference(ht, 2)) {
-		php_error(E_WARNING, "Status not passed by reference in %s", get_active_function_name());
-		RETURN_FALSE;
-	}
-   
+	convert_to_long_ex(options);   
 	convert_to_long_ex(status);
 
         if (ZEND_NUM_ARGS()==2) temp_options=0;

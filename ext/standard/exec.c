@@ -251,18 +251,9 @@ PHP_FUNCTION(exec)
 			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
-			if (!ParameterPassedByReference(ht,2)) {
-				php_error(E_WARNING,"Array argument to exec() not passed by reference");
-			}
 			ret = php_Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value);
 			break;
 		case 3:
-			if (!ParameterPassedByReference(ht,2)) {
-				php_error(E_WARNING,"Array argument to exec() not passed by reference");
-			}
-			if (!ParameterPassedByReference(ht,3)) {
-				php_error(E_WARNING,"return_status argument to exec() not passed by reference");
-			}
 			ret = php_Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value);
 			Z_TYPE_PP(arg3) = IS_LONG;
 			Z_LVAL_PP(arg3)=ret;
@@ -288,9 +279,6 @@ PHP_FUNCTION(system)
 			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
-			if (!ParameterPassedByReference(ht,2)) {
-				php_error(E_WARNING,"return_status argument to system() not passed by reference");
-			}
 			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
@@ -315,9 +303,6 @@ PHP_FUNCTION(passthru)
 			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
-			if (!ParameterPassedByReference(ht,2)) {
-				php_error(E_WARNING,"return_status argument to system() not passed by reference");
-			}
 			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
