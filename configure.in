@@ -1288,12 +1288,16 @@ cat<<X
 | If you do not agree with the terms of this license, you must abort |
 | the installation process at this point.                            |
 +--------------------------------------------------------------------+
-|                              *** WARNING ***                       |
+|                          *** NOTE ***                              |
+|            The default for register_globals is now OFF!            |
 |                                                                    |
-| Remember to enable register_globals in your PHP.INI file, if your  |
-| software depends on it.                                            |
+| If your application relies on register_globals being ON, you       |
+| should explicitly set it to on in your php.ini file.               |
+| Note that you are strongly encouraged to read                      |
+| http://www.php.net/manual/en/security.registerglobals.php          |
+| about the implications of having register_globals set to on, and   |
+| avoid using it if possible.                                        |
 +--------------------------------------------------------------------+
-
 
 
 Thank you for using PHP.
