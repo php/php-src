@@ -112,11 +112,53 @@ class PEAR_Command_Common extends PEAR
 
     // }}}
     // {{{ getHelp()
-
+    /**
+    * Returns the help message for the given command
+    *
+    * @param string $command The command
+    * @return mixed A fail string if the command does not have help or
+    *               a two elements array containing [0]=>help string,
+    *               [1]=> help string for the accepted cmd args
+    */
     function getHelp($command)
     {
-        $help = preg_replace('/{config\s+([^\}]+)}/e', "\$config->get('\1')", @$this->commands[$command]['doc']);
-        return $help;
+        $config = &PEAR_Config::singleton();
+        $help = @$this->commands[$command]['doc'];
+        if (empty($help)) {
+            // XXX (cox) Fallback to summary if there is no doc (show both?)
+            if (!$help = @$this->commands[$command]['summary']) {
+                return "No help for command \"$command\"";
+            }
+        }
+        if (preg_match_all('/{config\s+([^\}]+)}/e', $help, $matches)) {
+            foreach($matches[0] as $k => $v) {
+                $help = preg_replace("/$v/", $config->get($matches[1][$k]), $help);
+            }
+        }
+        return array($help, $this->getHelpArgs($command));
+    }
+
+    // }}}
+    // {{{ getHelpArgs()
+    /**
+    * Returns the help for the accepted arguments of a command
+    *
+    * @param  string $command
+    * @return string The help string
+    */
+    function getHelpArgs($command)
+    {
+        if (isset($this->commands[$command]['options']) &&
+            count($this->commands[$command]['options']))
+        {
+            $help = "Accepted options:\n";
+            // XXX Add long options
+            foreach ($this->commands[$command]['options'] as $k => $v) {
+                $help .= "   -" . $v['shortopt'] . "   " . $v['doc'] . "\n";
+            }
+            return $help;
+        }
+        return null;
     }
 
     // }}}
