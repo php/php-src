@@ -40,6 +40,9 @@
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
+#elif defined(__riscos__)
+# include "zend_config.h"
+# define ZEND_PATHS_SEPARATOR		';'
 #else
 # include "zend_config.h"
 # define ZEND_PATHS_SEPARATOR		':'
