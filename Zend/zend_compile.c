@@ -1587,24 +1587,11 @@ static zend_bool do_inherit_method_check(zend_function *child, zend_function *pa
 			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		}
 	}
+
 	/* Disallow making an inherited method abstract.
-	 * Also check the visibility and copy it if needed. This must be done last
-	 * since we may change the child flags here.
-	 * Again first detect more than one error to make normal operation faster.
 	 */
-	if ((child_flags & (ZEND_FN_PPP_MASK|ZEND_ACC_ABSTRACT)) != (parent_flags & ZEND_FN_PPP_MASK)) {
-		if (child_flags & ZEND_ACC_ABSTRACT) {
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
-		}
-		if (!(child_flags & ZEND_FN_PPP_MASK) || (((child_flags|parent_flags) & ZEND_FN_PPP_MASK) == ZEND_ACC_PUBLIC)) {
-			/* this is no error since we copy visibility here */
-			/* child->common.fn_flags &= ~ZEND_FN_PPP_MASK; do not clear added public */
-			child->common.fn_flags |= parent_flags & ZEND_FN_PPP_MASK;
-		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s %s::%s() as %s %s::%s()", 
-				zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), parent->common.function_name, 
-				zend_visibility_string(child_flags),  ZEND_FN_SCOPE_NAME(child),  child->common.function_name);
-		}
+	if ((child_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
+		zend_error(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 	}
 	return SUCCESS;
 }
