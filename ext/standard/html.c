@@ -45,7 +45,11 @@ static char EntTable[][7] =
 	"uuml","yacute","thorn","yuml"
 };
 
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all)
+#define ENT_COMPAT			1
+#define ENT_QUOTES			2
+#define ENT_NOQUOTES		4
+
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style)
 {
 	int i, maxlen, len;
 	char *new;
@@ -63,8 +67,11 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		if (38 == *old) {
 			memcpy (new + len, "&amp;", 5);
 			len += 5;
-		} else if (34 == *old) {
+		} else if (34 == *old && !(quote_style&ENT_NOQUOTES)) {
 			memcpy (new + len, "&quot;", 6);
+			len += 6;
+		} else if (39 == *old && (quote_style&ENT_QUOTES)) {
+			memcpy (new + len, "&#039;", 6);
 			len += 6;
 		} else if (60 == *old) {
 			memcpy (new + len, "&lt;", 4);
@@ -90,17 +97,22 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-    zval **arg;
-    int len;
+    zval **arg, **quotes;
+    int len, quote_style = ENT_COMPAT;
+	int ac = ZEND_NUM_ARGS();
 	char *new;
 
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &arg, &quotes) == FAILURE) {
+        WRONG_PARAM_COUNT;
     }
 
     convert_to_string_ex(arg);
+	if(ac==2) {
+		convert_to_long_ex(quotes);
+		quote_style = (*quotes)->value.lval;
+	}
 
-	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all);
+	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all, quote_style);
     RETVAL_STRINGL(new,len,0);
 }
 
@@ -111,6 +123,9 @@ void register_html_constants(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_COMPAT", ENT_COMPAT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
 }
 
 /* {{{ proto string htmlspecialchars(string string)
@@ -129,23 +144,27 @@ PHP_FUNCTION(htmlentities)
 }
 /* }}} */
 
-/* {{{ proto array get_html_translation_table([int whichone])
+/* {{{ proto array get_html_translation_table([int table [, int quote_style]])
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	zval **whichone;
-	int which = 0;
+	zval **whichone, **quotes;
+	int which = 0, quote_style = ENT_COMPAT;
 	int ac = ZEND_NUM_ARGS();
 	int inx;
 	char ind[ 2 ];
 
-	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &whichone) == FAILURE) {
+	if (ac < 0 || ac > 2 || zend_get_parameters_ex(ac, &whichone, &quotes) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
-	if (ac == 1) {
+	if (ac > 0) {
 		convert_to_long_ex(whichone);
 		which = (*whichone)->value.lval;
+	} 
+	if (ac == 2) {
+		convert_to_long_ex(quotes);
+		quote_style = (*quotes)->value.lval;
 	}
 
 	array_init(return_value);
@@ -164,7 +183,8 @@ PHP_FUNCTION(get_html_translation_table)
 
 		case HTML_SPECIALCHARS:
 			ind[0]=38; add_assoc_string(return_value,ind,"&amp;",1);
-			ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1);
+			if(quote_style&ENT_QUOTES) ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1);
+			if(!(quote_style&ENT_NOQUOTES)) ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1);
 			ind[0]=60; add_assoc_string(return_value,ind,"&lt;",1);
 			ind[0]=62; add_assoc_string(return_value,ind,"&gt;",1);
 			break;
