@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP HTML Embedded Scripting Language Version 3.0                     |
+   | PHP HTML Embedded Scripting Language Version 4.0                     |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
@@ -31,6 +31,10 @@
 #endif
 
 #include <stdlib.h>
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 #include "php.h"
 #include "safe_mode.h"
@@ -416,6 +420,7 @@ PHP_FUNCTION(dbase_get_record) {
 	int dbh_type;
 	dbfield_t *dbf, *cur_f;
 	char *data, *fnp, *str_value;
+	size_t cursize = 0;
 	DBase_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
@@ -441,11 +446,16 @@ PHP_FUNCTION(dbase_get_record) {
 		RETURN_FALSE;
 	}
 
-        fnp = (char *)emalloc(dbh->db_rlen);
+        fnp = NULL;
         for (cur_f = dbf; cur_f < &dbf[dbh->db_nfields]; cur_f++) {
 		/* get the value */
 		str_value = (char *)emalloc(cur_f->db_flen + 1);
-                sprintf(str_value, cur_f->db_format, get_field_val(data, cur_f, fnp));
+
+		if(cursize <= cur_f->db_flen) {
+			cursize = cur_f->db_flen + 1;
+			fnp = erealloc(fnp, cursize);
+		}
+                snprintf(str_value, cursize, cur_f->db_format, get_field_val(data, cur_f, fnp));
 
 		/* now convert it to the right php internal type */
 	        switch (cur_f->db_type) {
