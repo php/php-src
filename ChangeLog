@@ -1,3 +1,27 @@
+2004-07-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      BFN
+
+    * ext/standard/var.c:
+      - Bugfix #28325 (circular reference serialisation).
+
+2004-07-03  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug28984.phpt
+      ext/gd/tests/bug28984.phpt:
+      - Fix #28984, using full transparent segfauls in imagefill
+        (NB: imagefill is broken in HEAD, same code)
+      - Add testcase
+
+2004-07-03  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c:
+      - Should fix mem leak with ZEND_MM. I made this change a while ago and
+      - rolled it back but I don't remember why. Please test!
+
 2004-07-02  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_4_3)
