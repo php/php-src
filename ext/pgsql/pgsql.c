@@ -25,6 +25,8 @@
 #include "dl/phpdl.h"
 #endif
 
+#define PHP_PGSQL_PRIVATE 1
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
