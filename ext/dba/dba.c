@@ -829,7 +829,7 @@ PHP_FUNCTION(dba_close)
 }
 /* }}} */
 
-/* {{{ proto bool dba_exists(string key, int handle)
+/* {{{ proto bool dba_exists(string key, resource handle)
    Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
@@ -844,7 +844,7 @@ PHP_FUNCTION(dba_exists)
 }
 /* }}} */
 
-/* {{{ proto string dba_fetch(string key, [int skip ,] int handle)
+/* {{{ proto string dba_fetch(string key, [int skip ,] resource handle)
    Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
@@ -888,7 +888,7 @@ PHP_FUNCTION(dba_fetch)
 }
 /* }}} */
 
-/* {{{ proto string dba_firstkey(int handle)
+/* {{{ proto string dba_firstkey(resource handle)
    Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
 {
@@ -903,7 +903,7 @@ PHP_FUNCTION(dba_firstkey)
 }
 /* }}} */
 
-/* {{{ proto string dba_nextkey(int handle)
+/* {{{ proto string dba_nextkey(resource handle)
    Returns the next key */
 PHP_FUNCTION(dba_nextkey)
 {
@@ -918,7 +918,7 @@ PHP_FUNCTION(dba_nextkey)
 }
 /* }}} */
 
-/* {{{ proto bool dba_delete(string key, int handle)
+/* {{{ proto bool dba_delete(string key, resource handle)
    Deletes the entry associated with key
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
@@ -937,7 +937,7 @@ PHP_FUNCTION(dba_delete)
 }
 /* }}} */
 
-/* {{{ proto bool dba_insert(string key, string value, int handle)
+/* {{{ proto bool dba_insert(string key, string value, resource handle)
    If not inifile: Insert value as key, return false, if key exists already 
    If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
@@ -946,7 +946,7 @@ PHP_FUNCTION(dba_insert)
 }
 /* }}} */
 
-/* {{{ proto bool dba_replace(string key, string value, int handle)
+/* {{{ proto bool dba_replace(string key, string value, resource handle)
    Inserts value as key, replaces key, if key exists already
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_replace)
@@ -955,7 +955,7 @@ PHP_FUNCTION(dba_replace)
 }
 /* }}} */
 
-/* {{{ proto bool dba_optimize(int handle)
+/* {{{ proto bool dba_optimize(resource handle)
    Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
 {
@@ -969,7 +969,7 @@ PHP_FUNCTION(dba_optimize)
 }
 /* }}} */
 
-/* {{{ proto bool dba_sync(int handle)
+/* {{{ proto bool dba_sync(resource handle)
    Synchronizes database */
 PHP_FUNCTION(dba_sync)
 {
