@@ -1,5 +1,5 @@
 --TEST--
-invoke with non object or null value
+invoke() with non object or null value
 --FILE--
 <?php
 
