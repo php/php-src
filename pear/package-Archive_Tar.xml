@@ -19,7 +19,7 @@ loaded. Bz2 compression is also supported with the bz2 extension loaded.
     <maintainer>
       <user>ssb</user>
       <role>helper</role>
-      <name>Stig Sæther Bakken</name>
+      <name>Stig Bakken</name>
       <email>stig@php.net</email>
     </maintainer>
   </maintainers>
