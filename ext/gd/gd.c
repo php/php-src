@@ -92,7 +92,7 @@ typedef FILE gdIOCtx;
 #define CTX_PUTC(c,fp) fputc(c, fp)
 #endif
 
-static void _php_image_output_wbmp(gdImagePtr im, gdIOCtx *fp);
+static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
 #ifdef THREAD_SAFE
 DWORD GDlibTls;
@@ -644,6 +644,7 @@ PHP_FUNCTION (imagecreatefromstring)
 }
 /* }}} */
 
+size_t php_fread_all(char **buf, int socket, FILE *fp, int issock);
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) 
 {
 	zval **file;
@@ -685,7 +686,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	if(issock && socketd) {
 #ifdef USE_GD_IOCTX
 		gdIOCtx* io_ctx;
-		int buff_size;
+		size_t buff_size;
 		char *buff,*buff_em;
 
 		buff_size = php_fread_all(&buff_em, socketd, fp, issock);
@@ -811,11 +812,11 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	char *fn = NULL;
 	FILE *fp;
 	int argc = ZEND_NUM_ARGS();
-	int output = 1, q = -1;
+	int q = -1, i;
 	GDLS_FETCH();
 
-	/* The quality parameter for Wbmp stands for the threshold
-	   So the q variable */
+	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
+	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 
 	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) 
 	{
@@ -846,14 +847,18 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 		
 		switch(image_type) {
+			case PHP_GDIMG_CONVERT_WBM:
+				if(q<0||q>255) {
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				}
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, fp, q);
 				break;
 			case PHP_GDIMG_TYPE_WBM:
-				if(q<0||q>255) {
-					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				for(i=0; i < im->colorsTotal; i++) {
+					if(im->red[i] == 0) break;
 				}
-				(*func_p)(im, q, fp);
+				(*func_p)(im, i, fp);
 				break;
 			default:
 				(*func_p)(im, fp);
@@ -873,12 +878,16 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		switch(image_type) {
+			case PHP_GDIMG_CONVERT_WBM:
+				if(q<0||q>255) {
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				}
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, tmp, q);
 				break;
 			case PHP_GDIMG_TYPE_WBM:
-				if(q<0||q>255) {
-					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				for(i=0; i < im->colorsTotal; i++) {
+					if(im->red[i] == 0) break;
 				}
 				(*func_p)(im, q, tmp);
 				break;
@@ -958,54 +967,20 @@ PHP_FUNCTION(imagejpeg)
 }
 /* }}} */
 
-/* {{{ proto int imagewbmp(int im [, string filename])
+/* {{{ proto int imagewbmp(int im [, string filename, [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
+#ifdef HAVE_GD_WBMP
 #ifdef USE_GD_IOCTX
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMPCtx);
 #else
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMP);
 #endif
-}
-/* }}} */
-
-/* {{{ _php_image_output_wbmp(gdImagePtr im, FILE *fp)
- */
-static void _php_image_output_wbmp(gdImagePtr im, gdIOCtx *fp)
-{
-	int x, y;
-	int c, p, width, height;
-
-	/* WBMP header, black and white, no compression */
-	CTX_PUTC(0,fp); CTX_PUTC(0,fp);
-		
-	/* Width and height of image */
-	c = 1; width = im->sx;
-	while(width & 0x7f << 7*c) c++;
-	while(c > 1) CTX_PUTC(0x80 | ((width >> 7*--c) & 0xff), fp);
-	CTX_PUTC(width & 0x7f,fp);
-	c = 1; height = im->sy;
-	while(height & 0x7f << 7*c) c++;
-	while(c > 1) CTX_PUTC(0x80 | ((height >> 7*--c) & 0xff), fp);
-	CTX_PUTC(height & 0x7f,fp);
-		
-	/* Actual image data */
-	for(y = 0; y < im->sy; y++) {
-		p = c = 0;
-		for(x = 0; x < im->sx; x++) {
-#if HAVE_GD_ANCIENT
-			if(im->pixels[x][y] == 0) c = c | (1 << (7-p));
-#else
-			if(im->pixels[y][x] == 0) c = c | (1 << (7-p));
-#endif
-			if(++p == 8) {
-				CTX_PUTC(c,fp);
-				p = c = 0;
-			}
-		}
-		if(p) CTX_PUTC(c,fp);
-	}
+#else /* HAVE_GD_WBMP */
+	php_error(E_WARNING, "ImageWBMP: No WBMP support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_WBMP */
 }
 /* }}} */
 
@@ -2690,7 +2665,7 @@ PHP_FUNCTION(imagepsbbox)
 PHP_FUNCTION(image2wbmp)
 {
 #ifdef HAVE_GD_WBMP
-	_php_image_output (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_bw_convert);
+	_php_image_output (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_CONVERT_WBM, "WBMP", _php_image_bw_convert);
 #else /* HAVE_GD_WBMP */
 	php_error(E_WARNING, "Image2Wbmp: No WBMP support in this PHP build");
 	RETURN_FALSE;
@@ -2738,7 +2713,8 @@ PHP_FUNCTION(png2wbmp)
 
 #ifdef HAVE_GD_WBMP
 /* It converts a gd Image to bw using a threshold value */
-static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) {
+static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshold) 
+{
 	gdImagePtr im_dest;
 	int white, black;
 	int color, color_org, median;
@@ -2776,10 +2752,13 @@ static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) 
 			gdImageSetPixel (im_dest, x, y, color);
 		}
 	}
-
+#ifdef USE_GD_IOCTX
+	gdImageWBMPCtx (im_dest, black, out);
+#else
 	gdImageWBMP (im_dest, black, out);
-}
+#endif
 
+}
 
 /* _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
@@ -2792,8 +2771,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	int dest_height = -1;
 	int dest_width = -1;
 	int org_height, org_width;
-	int output = 1;
-	int q = -1;
 	int white, black;
 	int color, color_org, median;
 	int int_threshold;
