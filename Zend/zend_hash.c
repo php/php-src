@@ -71,7 +71,7 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 }
 
 
-ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), void (*pDestructor) (void *pData),int persistent)
+ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), int (*pDestructor) (void *pData),int persistent)
 {
 	uint i;
 
@@ -720,6 +720,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 ZEND_API void zend_hash_destroy(HashTable *ht)
 {
 	Bucket *p, *q;
+	int delete_bucket;
 
 	p = ht->pListHead;
 	while (p != NULL) {
@@ -727,13 +728,19 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		p = p->pListNext;
 		if (!q->bIsPointer) {
 			if (ht->pDestructor) {
-				ht->pDestructor(q->pData);
+				delete_bucket = ht->pDestructor(q->pData);
+			} else {
+				delete_bucket = 1;
 			}
 			if (!q->pDataPtr && q->pData) {
 				pefree(q->pData,ht->persistent);
 			}
+		} else {
+			delete_bucket = 1;
 		}
-		pefree(q,ht->persistent);
+		if (delete_bucket) {
+			pefree(q,ht->persistent);
+		}
 	}
 	pefree(ht->arBuckets,ht->persistent);
 }

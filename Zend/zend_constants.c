@@ -22,12 +22,13 @@
 #include "zend_globals.h"
 
 
-void free_zend_constant(zend_constant *c)
+int free_zend_constant(zend_constant *c)
 {
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
 	free(c->name);
+	return 1;
 }
 
 
@@ -86,7 +87,7 @@ int zend_startup_constants(ELS_D)
 
 	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 
-	if (zend_hash_init(EG(zend_constants), 20, NULL, (void(*)(void *)) free_zend_constant, 1)==FAILURE) {
+	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
 		return FAILURE;
 	}
 

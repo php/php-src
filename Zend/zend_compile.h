@@ -350,9 +350,12 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
 ZEND_API void zend_open_file_dtor(void *f);
 END_EXTERN_C()
 
-ZEND_API void destroy_zend_function(zend_function *function);
-ZEND_API void destroy_zend_class(zend_class_entry *ce);
+ZEND_API int destroy_zend_function(zend_function *function);
+ZEND_API int destroy_zend_class(zend_class_entry *ce);
 void zend_class_add_ref(zend_class_entry *ce);
+
+#define ZEND_FUNCTION_DTOR (int (*)(void *)) destroy_zend_function
+#define ZEND_CLASS_DTOR (int (*)(void *)) destroy_zend_class
 
 zend_op *get_next_op(zend_op_array *op_array CLS_DC);
 int get_next_op_number(zend_op_array *op_array);

@@ -99,7 +99,7 @@ void init_op_array(zend_op_array *op_array, int initial_ops_size)
 }
 
 
-ZEND_API void destroy_zend_function(zend_function *function)
+ZEND_API int destroy_zend_function(zend_function *function)
 {
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:
@@ -109,13 +109,14 @@ ZEND_API void destroy_zend_function(zend_function *function)
 			/* do nothing */
 			break;
 	}
+	return 1;
 }
 
 
-ZEND_API void destroy_zend_class(zend_class_entry *ce)
+ZEND_API int destroy_zend_class(zend_class_entry *ce)
 {
 	if (--(*ce->refcount)>0) {
-		return;
+		return 1;
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
@@ -131,6 +132,7 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 			zend_hash_destroy(&ce->default_properties);
 			break;
 	}
+	return 1;
 }
 
 

@@ -42,8 +42,8 @@ enum list_entry_type {
 	LE_DB=1000
 };
 
-void list_entry_destructor(void *ptr);
-void plist_entry_destructor(void *ptr);
+int list_entry_destructor(void *ptr);
+int plist_entry_destructor(void *ptr);
 
 int clean_module_resource_destructors(list_destructors_entry *ld, int *module_number);
 int init_resource_list(ELS_D);
