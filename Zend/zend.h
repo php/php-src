@@ -210,10 +210,12 @@ typedef struct _zend_utility_values {
 #define IS_STRING	3
 #define IS_ARRAY	4
 #define IS_OBJECT	5
-#define IS_BC 		6 /* for parser internal use only */
-#define IS_BOOL		7
-#define IS_RESOURCE	8
-#define IS_CONSTANT	9
+#define IS_BOOL		6
+#define IS_RESOURCE	7
+#define IS_CONSTANT	8
+
+/* Special data type to temporarily mark large numbers */
+#define FLAG_IS_BC	9 /* for parser internal use only */
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY	(1<<0)
