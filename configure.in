@@ -543,16 +543,6 @@ else
   AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,0,[ ])
 fi
 
-PHP_ARG_ENABLE(url-fopen-wrapper,whether to enable the URL-aware fopen wrapper,
-[  --disable-url-fopen-wrapper 
-                          Disable the URL-aware fopen wrapper that allows
-                          accessing files via http or ftp.], yes)
-
-if test "$PHP_URL_FOPEN_WRAPPER" = "yes"; then
-  AC_DEFINE(PHP_URL_FOPEN, 1, [ ])
-else
-  AC_DEFINE(PHP_URL_FOPEN, 0, [ ])
-fi
 
 PHP_ARG_ENABLE(pic,whether to enable PIC for shared objects,
 [  --disable-pic           Disable PIC for shared objects], yes)

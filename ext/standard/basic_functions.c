@@ -62,6 +62,8 @@ int basic_globals_id;
 php_basic_globals basic_globals;
 #endif
 
+#include "php_fopen_wrappers.h"
+
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
@@ -669,6 +671,8 @@ static void basic_globals_dtor(BLS_D)
 
 PHP_MINIT_FUNCTION(basic)
 {
+	PLS_FETCH();
+
 #ifdef ZTS
 	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 #else
@@ -714,6 +718,18 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(assert)(INIT_FUNC_ARGS_PASSTHRU);
 
+	if(PG(allow_url_fopen)) {
+		if(FAILURE==php_register_url_wrapper("http",php_fopen_url_wrap_http)) {
+			return FAILURE;
+		} 
+		if(FAILURE==php_register_url_wrapper("ftp",php_fopen_url_wrap_ftp)) {
+			return  FAILURE;
+		}  
+		if(FAILURE==php_register_url_wrapper("php",php_fopen_url_wrap_ftp)) {
+			return  FAILURE;
+		}  
+	}
+	
 	return SUCCESS;
 }
 
@@ -735,6 +751,12 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
+	if(PG(allow_url_fopen)) {
+		php_unregister_url_wrapper("http");
+		php_unregister_url_wrapper("ftp");
+		php_unregister_url_wrapper("php");
+	}
 
 	return SUCCESS;	
 }
