@@ -192,7 +192,7 @@ BOOL WINAPI DllMain(HANDLE hModule,
    Read and verify the map file */
 PHP_FUNCTION(filepro)
 {
-	pval *dir;
+	zval **dir;
 	FILE *fp;
 	char workbuf[MAXPATHLEN];
 	char readbuf[256];
@@ -201,11 +201,11 @@ PHP_FUNCTION(filepro)
 	FP_FIELD *new_field, *tmp, *next;
 	FP_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dir) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &dir) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(dir);
+	convert_to_string_ex(dir);
 
 	/* free memory */
 	if (FP_GLOBAL(fp_database) != NULL) {
@@ -226,7 +226,7 @@ PHP_FUNCTION(filepro)
 	FP_GLOBAL(fp_fcount) = -1;
 	FP_GLOBAL(fp_keysize) = -1;
 	
-	snprintf(workbuf, sizeof(workbuf), "%s/map", Z_STRVAL_P(dir));
+	snprintf(workbuf, sizeof(workbuf), "%s/map", Z_STRVAL_PP(dir));
 
 	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
@@ -237,20 +237,18 @@ PHP_FUNCTION(filepro)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "%s(): Cannot open map: [%d] %s", get_active_function_name(TSRMLS_C),
-					errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open map: [%d] %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	if (!fgets(readbuf, sizeof(readbuf), fp)) {
 		fclose(fp);
-		php_error(E_WARNING, "%s(): Cannot read map: [%d] %s", get_active_function_name(TSRMLS_C),
-					errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot read map: [%d] %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	
 	/* Get the field count, assume the file is readable! */
 	if (strcmp(php_strtok_r(readbuf, ":", &strtok_buf), "map")) {
-		php_error(E_WARNING, "%s(): Map file corrupt or encrypted", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Map file corrupt or encrypted");
 		RETURN_FALSE;
 	}
 	FP_GLOBAL(fp_keysize) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
@@ -261,8 +259,7 @@ PHP_FUNCTION(filepro)
 	for (i = 0; i < FP_GLOBAL(fp_fcount); i++) {
 		if (!fgets(readbuf, sizeof(readbuf), fp)) {
 			fclose(fp);
-			php_error(E_WARNING, "%s(): Cannot read map: [%d] %s", get_active_function_name(TSRMLS_C),
-						errno, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot read map: [%d] %s", errno, strerror(errno));
 			RETURN_FALSE;
 		}
 		new_field = emalloc(sizeof(FP_FIELD));
@@ -285,7 +282,7 @@ PHP_FUNCTION(filepro)
 	}
 	fclose(fp);
 		
-	FP_GLOBAL(fp_database) = estrndup(Z_STRVAL_P(dir), Z_STRLEN_P(dir));
+	FP_GLOBAL(fp_database) = estrndup(Z_STRVAL_PP(dir), Z_STRLEN_PP(dir));
 
 	RETVAL_TRUE;
 }
@@ -316,8 +313,7 @@ PHP_FUNCTION(filepro_rowcount)
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
@@ -335,8 +331,7 @@ PHP_FUNCTION(filepro_rowcount)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "%s(): Cannot open key: [%d] %s", get_active_function_name(TSRMLS_C),
-					errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open key: [%d] %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	while (!feof(fp)) {
@@ -362,32 +357,29 @@ PHP_FUNCTION(filepro_rowcount)
    Gets the name of a field */
 PHP_FUNCTION(filepro_fieldname)
 {
-	pval *fno;
+	zval **fno;
 	FP_FIELD *lp;
 	int i;
 	FP_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fno);
+	convert_to_long_ex(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == Z_LVAL_P(fno)) {
+		if (i == Z_LVAL_PP(fno)) {
 			RETURN_STRING(lp->name, 1);
 		}
 	}
 
-	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
-				Z_LVAL_P(fno));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate field number %d.", Z_LVAL_PP(fno));
 
 	RETVAL_FALSE;
 }
@@ -403,31 +395,28 @@ PHP_FUNCTION(filepro_fieldname)
    Gets the type of a field */
 PHP_FUNCTION(filepro_fieldtype)
 {
-	pval *fno;
+	zval **fno;
 	FP_FIELD *lp;
 	int i;
 	FP_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fno);
+	convert_to_long_ex(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == Z_LVAL_P(fno)) {
+		if (i == Z_LVAL_PP(fno)) {
 			RETURN_STRING(lp->format, 1);
 		}
 	}
-	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
-				Z_LVAL_P(fno));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate field number %d.", Z_LVAL_PP(fno));
 	RETVAL_FALSE;
 }
 /* }}} */
@@ -442,31 +431,28 @@ PHP_FUNCTION(filepro_fieldtype)
    Gets the width of a field */
 PHP_FUNCTION(filepro_fieldwidth)
 {
-	pval *fno;
+	zval **fno;
 	FP_FIELD *lp;
 	int i;
 	FP_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fno);
+	convert_to_long_ex(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == Z_LVAL_P(fno)) {
+		if (i == Z_LVAL_PP(fno)) {
 			RETURN_LONG(lp->width);
 		}
 	}
-	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
-				Z_LVAL_P(fno));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate field number %d.", Z_LVAL_PP(fno));
 	RETVAL_FALSE;
 }
 /* }}} */
@@ -488,8 +474,7 @@ PHP_FUNCTION(filepro_fieldcount)
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
@@ -508,7 +493,7 @@ PHP_FUNCTION(filepro_fieldcount)
    Retrieves data from a filePro database */
 PHP_FUNCTION(filepro_retrieve)
 {
-	pval *rno, *fno;
+	zval **rno, **fno;
 	FP_FIELD *lp;
 	FILE *fp;
 	char workbuf[MAXPATHLEN];
@@ -517,24 +502,23 @@ PHP_FUNCTION(filepro_retrieve)
 	long offset;
 	FP_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &rno, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &rno, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php_error(E_WARNING,
-					"%s(): Must set database directory first!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Must set database directory first!");
 		RETURN_FALSE;
 	}
 	
-	convert_to_long(rno);
-	convert_to_long(fno);
+	convert_to_long_ex(rno);
+	convert_to_long_ex(fno);
 
-	fnum = Z_LVAL_P(fno);
-	rnum = Z_LVAL_P(rno);
+	fnum = Z_LVAL_PP(fno);
+	rnum = Z_LVAL_PP(rno);
     
 	if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
-		php_error(E_WARNING, "%s(): Parameters out of range", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameters out of range");
 		RETURN_FALSE;
 	}
     
@@ -543,7 +527,7 @@ PHP_FUNCTION(filepro_retrieve)
 		offset += lp->width;
 	}
 	if (!lp) {
-		php_error(E_WARNING, "%s(): Cannot locate field", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot locate field");
 		RETURN_FALSE;
 	}
     
@@ -559,8 +543,7 @@ PHP_FUNCTION(filepro_retrieve)
 	}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
-		php_error(E_WARNING, "%s(): Cannot open key: [%d] %s", get_active_function_name(TSRMLS_C),
-					errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open key: [%d] %s", errno, strerror(errno));
 		fclose(fp);
 		RETURN_FALSE;
 	}
@@ -568,8 +551,7 @@ PHP_FUNCTION(filepro_retrieve)
 	
 	readbuf = emalloc (lp->width+1);
 	if (fread(readbuf, lp->width, 1, fp) != 1) {
-        	php_error(E_WARNING, "%s(): Cannot read data: [%d] %s", get_active_function_name(TSRMLS_C),
-					errno, strerror(errno));
+        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot read data: [%d] %s", errno, strerror(errno));
 		efree(readbuf);
 		fclose(fp);
 		RETURN_FALSE;
