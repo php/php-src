@@ -2476,7 +2476,7 @@ _oci_close_session(oci_session *session)
 	
 	hashed_details = session->hashed_details;
 
-	if (! OCI(shutdown)) {
+	if (! OCI(shutdown) && !session->exclusive) {
 		zend_hash_del(OCI(user), hashed_details, strlen(hashed_details)+1);
 	}
 
