@@ -198,7 +198,7 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 
 	if (!offset) {
 		value->refcount++;
-		add_next_index_zval(intern->array, value);
+		zend_hash_next_index_insert(HASH_OF(intern->array), (void**)&value, sizeof(void*), NULL);
 		return;
 	}
 	switch(Z_TYPE_P(offset)) {
@@ -216,7 +216,7 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 			index = Z_LVAL_P(offset);
 		}
 		value->refcount++;
-		add_index_zval(intern->array, index, value);
+		zend_hash_index_update(HASH_OF(intern->array), index, (void**)&value, sizeof(void*), NULL);
 		return;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
