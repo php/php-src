@@ -951,6 +951,10 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	if (BG(sm_allowed_env_vars)) {
 		free(BG(sm_allowed_env_vars));
 	}
+	if (BG(url_adapt_state_ex).tags) {
+		zend_hash_destroy(BG(url_adapt_state_ex).tags);
+		free(BG(url_adapt_state_ex).tags);
+	}
 }
 
 
