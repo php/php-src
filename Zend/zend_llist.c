@@ -64,7 +64,7 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element)
 	zend_llist_element *current=l->head;
 
 	while (current) {
-		if (current->data == element) {
+		if (!memcmp(current->data, element, l->size)) {
 			if (current->prev) {
 				current->prev->next = current->next;
 			} else {

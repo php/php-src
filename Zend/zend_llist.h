@@ -34,6 +34,7 @@ typedef struct {
 	zend_llist_element *traverse_ptr;
 } zend_llist;
 
+BEGIN_EXTERN_C()
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *data), unsigned char persistent);
 ZEND_API void zend_llist_add_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element);
@@ -51,5 +52,6 @@ ZEND_API void *zend_llist_get_first(zend_llist *l);
 ZEND_API void *zend_llist_get_last(zend_llist *l);
 ZEND_API void *zend_llist_get_next(zend_llist *l);
 ZEND_API void *zend_llist_get_prev(zend_llist *l);
+END_EXTERN_C()
 
 #endif /* _ZEND_LLIST_H */
