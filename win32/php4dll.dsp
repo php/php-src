@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib libmysql.lib TSRM.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /nodefaultlib:"libcmtd" /out:"c:\php-fcgi\php4nts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug" /libpath:"..\Zend\Debug" /libpath:"..\..\bindlib_w32\Debug"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib TSRM.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /nodefaultlib:"libcmtd" /out:"c:\php-fcgi\php4nts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug" /libpath:"..\Zend\Debug" /libpath:"..\..\bindlib_w32\Debug"
 
 !ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
 
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib libmysql.lib tsrm.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php4nts.dll" /libpath:"..\Zend\Release" /libpath:"..\TSRM\Release_TS" /libpath:"..\..\bindlib_w32\Release"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib tsrm.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php4nts.dll" /libpath:"..\Zend\Release" /libpath:"..\TSRM\Release_TS" /libpath:"..\..\bindlib_w32\Release"
 
 !ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
 
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /out:"Release/php4nts.dll" /libpath:"TSRM\Release" /libpath:"Zend\Release" /libpath:"..\bindlib_w32\Release"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib tsrm.lib resolv.lib libmysql.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php4nts.dll" /libpath:"..\Zend\Release_inline" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib tsrm.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release\php4nts.dll" /libpath:"..\Zend\Release_inline" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release"
 
 !ENDIF 
 
@@ -520,10 +520,6 @@ SOURCE=..\ext\standard\php_fopen_wrapper.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\mysql\php_mysql.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
@@ -702,10 +698,6 @@ SOURCE=..\ext\standard\php_mail.h
 # Begin Source File
 
 SOURCE=..\ext\standard\php_metaphone.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mysql\php_mysql.h
 # End Source File
 # Begin Source File
 
