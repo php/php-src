@@ -138,15 +138,20 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		SKIP_TEXT(node);
 		
 		if (node->ns) {
+			if (node->parent->ns) {
+				if (!xmlStrcmp(node->ns->href, node->parent->ns->href)) {
+					goto next_iter;
+				}
+			}
+			
 			if (match_ns(sxe, node, name)) {
 				MAKE_STD_ZVAL(value);
 				_node_as_zval(sxe, node->parent, value);
 				APPEND_CUR_ELEMENT(counter, value);
-
 				goto next_iter;
 			}
 		}
-			
+
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
 
@@ -389,7 +394,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 	ulong            h;
 	int              namelen;
 
-	ALLOC_HASHTABLE_REL(rv);
+	ALLOC_HASHTABLE(rv);
 	zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
@@ -778,6 +783,8 @@ sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
+	FREE_HASHTABLE(sxe->zo.properties);
+
 	if (--sxe->document->refcount <= 0) {
 		xmlFreeDoc(sxe->document->ptr);
 	}
@@ -885,7 +892,7 @@ PHP_FUNCTION(simplexml_load_string)
 		RETURN_FALSE;
 	}
 	sxe->nsmap = xmlHashCreate(10);
-	
+		
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 }
