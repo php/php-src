@@ -590,7 +590,7 @@ ZEND_API inline int _array_init(zval *arg ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API inline int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC)
+ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC)
 {
 	zval *tmp;
 
@@ -608,20 +608,20 @@ ZEND_API inline int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND
 }
 
 
-ZEND_API inline int _object_init(zval *arg ZEND_FILE_LINE_DC)
+ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC)
 {
 	return _object_init_ex(arg, &zend_standard_class_def ZEND_FILE_LINE_CC);
 }
 
 
-ZEND_API inline int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
+ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
 {
 	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
 	return FAILURE;
 }
 
 
-ZEND_API inline int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n)
+ZEND_API int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n)
 {
 	zval *tmp;
 
@@ -631,7 +631,7 @@ ZEND_API inline int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n
 	return zend_hash_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_assoc_null_ex(zval *arg, char *key, uint key_len)
+ZEND_API int add_assoc_null_ex(zval *arg, char *key, uint key_len)
 {
 	zval *tmp;
 	
@@ -641,7 +641,7 @@ ZEND_API inline int add_assoc_null_ex(zval *arg, char *key, uint key_len)
 	return zend_hash_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b)
+ZEND_API int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b)
 {
 	zval *tmp;
 	
@@ -651,7 +651,7 @@ ZEND_API inline int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b)
 	return zend_hash_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r)
+ZEND_API int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r)
 {
 	zval *tmp;
 	
@@ -662,7 +662,7 @@ ZEND_API inline int add_assoc_resource_ex(zval *arg, char *key, uint key_len, in
 }
 
 
-ZEND_API inline int add_assoc_double_ex(zval *arg, char *key, uint key_len, double d)
+ZEND_API int add_assoc_double_ex(zval *arg, char *key, uint key_len, double d)
 {
 	zval *tmp;
 	
@@ -673,7 +673,7 @@ ZEND_API inline int add_assoc_double_ex(zval *arg, char *key, uint key_len, doub
 }
 
 
-ZEND_API inline int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
+ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
 {
 	zval *tmp;
 	
@@ -684,7 +684,7 @@ ZEND_API inline int add_assoc_string_ex(zval *arg, char *key, uint key_len, char
 }
 
 
-ZEND_API inline int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
+ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
 	
@@ -694,13 +694,13 @@ ZEND_API inline int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, cha
 	return zend_hash_update(Z_ARRVAL_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value)
 {
 	return zend_hash_update(Z_ARRVAL_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
 
 
-ZEND_API inline int add_index_long(zval *arg, uint index, long n)
+ZEND_API int add_index_long(zval *arg, uint index, long n)
 {
 	zval *tmp;
 
@@ -711,7 +711,7 @@ ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 }
 
 
-ZEND_API inline int add_index_null(zval *arg, uint index)
+ZEND_API int add_index_null(zval *arg, uint index)
 {
 	zval *tmp;
 
@@ -721,7 +721,7 @@ ZEND_API inline int add_index_null(zval *arg, uint index)
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
+ZEND_API int add_index_bool(zval *arg, uint index, int b)
 {
 	zval *tmp;
 	
@@ -732,7 +732,7 @@ ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
 }
 
 
-ZEND_API inline int add_index_resource(zval *arg, uint index, int r)
+ZEND_API int add_index_resource(zval *arg, uint index, int r)
 {
 	zval *tmp;
 	
@@ -743,7 +743,7 @@ ZEND_API inline int add_index_resource(zval *arg, uint index, int r)
 }
 
 
-ZEND_API inline int add_index_double(zval *arg, uint index, double d)
+ZEND_API int add_index_double(zval *arg, uint index, double d)
 {
 	zval *tmp;
 	
@@ -754,7 +754,7 @@ ZEND_API inline int add_index_double(zval *arg, uint index, double d)
 }
 
 
-ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int duplicate)
+ZEND_API int add_index_string(zval *arg, uint index, char *str, int duplicate)
 {
 	zval *tmp;
 	
@@ -765,7 +765,7 @@ ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int dupli
 }
 
 
-ZEND_API inline int add_index_stringl(zval *arg, uint index, char *str, uint length, int duplicate)
+ZEND_API int add_index_stringl(zval *arg, uint index, char *str, uint length, int duplicate)
 {
 	zval *tmp;
 	
@@ -776,13 +776,13 @@ ZEND_API inline int add_index_stringl(zval *arg, uint index, char *str, uint len
 }
 
 
-ZEND_API inline int add_index_zval(zval *arg, uint index, zval *value)
+ZEND_API int add_index_zval(zval *arg, uint index, zval *value)
 {
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &value, sizeof(zval *), NULL);
 }
 
 
-ZEND_API inline int add_next_index_long(zval *arg, long n)
+ZEND_API int add_next_index_long(zval *arg, long n)
 {
 	zval *tmp;
 	
@@ -793,7 +793,7 @@ ZEND_API inline int add_next_index_long(zval *arg, long n)
 }
 
 
-ZEND_API inline int add_next_index_null(zval *arg)
+ZEND_API int add_next_index_null(zval *arg)
 {
 	zval *tmp;
 	
@@ -804,7 +804,7 @@ ZEND_API inline int add_next_index_null(zval *arg)
 }
 
 
-ZEND_API inline int add_next_index_bool(zval *arg, int b)
+ZEND_API int add_next_index_bool(zval *arg, int b)
 {
 	zval *tmp;
 	
@@ -815,7 +815,7 @@ ZEND_API inline int add_next_index_bool(zval *arg, int b)
 }
 
 
-ZEND_API inline int add_next_index_resource(zval *arg, int r)
+ZEND_API int add_next_index_resource(zval *arg, int r)
 {
 	zval *tmp;
 	
@@ -826,7 +826,7 @@ ZEND_API inline int add_next_index_resource(zval *arg, int r)
 }
 
 
-ZEND_API inline int add_next_index_double(zval *arg, double d)
+ZEND_API int add_next_index_double(zval *arg, double d)
 {
 	zval *tmp;
 	
@@ -837,7 +837,7 @@ ZEND_API inline int add_next_index_double(zval *arg, double d)
 }
 
 
-ZEND_API inline int add_next_index_string(zval *arg, char *str, int duplicate)
+ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate)
 {
 	zval *tmp;
 
@@ -848,7 +848,7 @@ ZEND_API inline int add_next_index_string(zval *arg, char *str, int duplicate)
 }
 
 
-ZEND_API inline int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate)
+ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate)
 {
 	zval *tmp;
 
@@ -859,13 +859,13 @@ ZEND_API inline int add_next_index_stringl(zval *arg, char *str, uint length, in
 }
 
 
-ZEND_API inline int add_next_index_zval(zval *arg, zval *value)
+ZEND_API int add_next_index_zval(zval *arg, zval *value)
 {
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &value, sizeof(zval *), NULL);
 }
 
 
-ZEND_API inline int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate)
+ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -876,7 +876,7 @@ ZEND_API inline int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, 
 }
 
 
-ZEND_API inline int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate)
+ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -887,7 +887,7 @@ ZEND_API inline int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len,
 }
 
 
-ZEND_API inline int add_get_index_long(zval *arg, uint index, long l, void **dest)
+ZEND_API int add_get_index_long(zval *arg, uint index, long l, void **dest)
 {
 	zval *tmp;
 	
@@ -898,7 +898,7 @@ ZEND_API inline int add_get_index_long(zval *arg, uint index, long l, void **des
 }
 
 
-ZEND_API inline int add_get_index_double(zval *arg, uint index, double d, void **dest)
+ZEND_API int add_get_index_double(zval *arg, uint index, double d, void **dest)
 {
 	zval *tmp;
 	
@@ -909,7 +909,7 @@ ZEND_API inline int add_get_index_double(zval *arg, uint index, double d, void *
 }
 
 
-ZEND_API inline int add_get_index_string(zval *arg, uint index, char *str, void **dest, int duplicate)
+ZEND_API int add_get_index_string(zval *arg, uint index, char *str, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -920,7 +920,7 @@ ZEND_API inline int add_get_index_string(zval *arg, uint index, char *str, void 
 }
 
 
-ZEND_API inline int add_get_index_stringl(zval *arg, uint index, char *str, uint length, void **dest, int duplicate)
+ZEND_API int add_get_index_stringl(zval *arg, uint index, char *str, uint length, void **dest, int duplicate)
 {
 	zval *tmp;
 	
@@ -931,7 +931,7 @@ ZEND_API inline int add_get_index_stringl(zval *arg, uint index, char *str, uint
 }
 
 
-ZEND_API inline int add_property_long_ex(zval *arg, char *key, uint key_len, long n)
+ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n)
 {
 	zval *tmp;
 
@@ -941,7 +941,7 @@ ZEND_API inline int add_property_long_ex(zval *arg, char *key, uint key_len, lon
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_property_bool_ex(zval *arg, char *key, uint key_len, int b)
+ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b)
 {
 	zval *tmp;
 
@@ -951,7 +951,7 @@ ZEND_API inline int add_property_bool_ex(zval *arg, char *key, uint key_len, int
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_property_null_ex(zval *arg, char *key, uint key_len)
+ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len)
 {
 	zval *tmp;
 	
@@ -961,7 +961,7 @@ ZEND_API inline int add_property_null_ex(zval *arg, char *key, uint key_len)
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_property_resource_ex(zval *arg, char *key, uint key_len, long n)
+ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n)
 {
 	zval *tmp;
 	
@@ -972,7 +972,7 @@ ZEND_API inline int add_property_resource_ex(zval *arg, char *key, uint key_len,
 }
 
 
-ZEND_API inline int add_property_double_ex(zval *arg, char *key, uint key_len, double d)
+ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d)
 {
 	zval *tmp;
 	
@@ -983,7 +983,7 @@ ZEND_API inline int add_property_double_ex(zval *arg, char *key, uint key_len, d
 }
 
 
-ZEND_API inline int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
+ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
 {
 	zval *tmp;
 
@@ -993,7 +993,7 @@ ZEND_API inline int add_property_string_ex(zval *arg, char *key, uint key_len, c
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
+ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
 
@@ -1003,7 +1003,7 @@ ZEND_API inline int add_property_stringl_ex(zval *arg, char *key, uint key_len, 
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
-ZEND_API inline int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
+ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
 {
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
 }

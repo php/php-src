@@ -462,7 +462,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		default:
 			zval_dtor(op);
-			var_reset(op);
+			ZVAL_RESET(op);
 			break;
 	}
 	op->type = IS_STRING;
@@ -719,7 +719,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2)
 
 	if ((op2->type == IS_LONG && op2->value.lval == 0) || (op2->type == IS_DOUBLE && op2->value.dval == 0.0)) {
 		zend_error(E_WARNING, "Division by zero");
-		var_reset(result);
+		ZVAL_RESET(result);
 		return FAILURE;			/* division by zero */
 	}
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
@@ -758,7 +758,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2)
 	zendi_convert_to_long(op2, op2_copy, result);
 
 	if (op2->value.lval == 0) {
-		var_reset(result);
+		ZVAL_RESET(result);
 		return FAILURE;			/* modulus by zero */
 	}
 
@@ -1164,7 +1164,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 
-	var_reset(result);
+	ZVAL_RESET(result);
 	return FAILURE;
 }
 
@@ -1231,7 +1231,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			}
 			break;
 		default:
-			var_reset(result);
+			ZVAL_RESET(result);
 			return FAILURE;
 	}
 	return SUCCESS;

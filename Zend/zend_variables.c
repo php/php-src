@@ -31,19 +31,6 @@ ZEND_API char *empty_string = "";	/* in order to save emalloc() and efree() time
 									 * The macro STR_FREE() will not efree() it.
 									 */
 
-/* this function MUST set the value for the variable to an empty string */
-/* and empty strings must be evaluated as FALSE */
-ZEND_API inline void var_reset(zval *var)
-{
-#if 0
-	var->type = IS_STRING;
-	var->value.str.val = empty_string;
-	var->value.str.len = 0;
-#else
-	var->type = IS_BOOL;
-	var->value.lval = 0;
-#endif
-}
 
 ZEND_API inline void var_uninit(zval *var)
 {
