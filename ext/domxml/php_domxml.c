@@ -4176,81 +4176,6 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
-/* {{{ proto string domxml_xslt_dump_mem(object xslstylesheet, object xmldoc)
-   output XSLT result to memory */
-PHP_FUNCTION(domxml_xslt_dump_mem)
-{
-	zval *rv, *idxsl, *idxml;
-	xsltStylesheetPtr xsltstp;
-	xmlDocPtr xmldocp;
-	xmlDocPtr docp;
-	xmlChar *doc_txt_ptr;
-	int doc_txt_len;
-	int ret;
-
-	DOMXML_GET_THIS(idxsl);
-
-	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
-	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): underlying object missing",
-			  get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &idxml) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
-
-	ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, xmldocp, xsltstp);
-
-	if (ret) {
-		RETURN_FALSE;
-	}
-
-	RETURN_STRINGL(doc_txt_ptr, doc_txt_len, 1);
-}
-/* }}} */
-
-/* {{{ proto int domxml_xslt_dump_file(object xslstylesheet, object xmldoc, string filename[, int compression])
-   output XSLT result to File */
-PHP_FUNCTION(domxml_xslt_dump_file)
-{
-	zval *rv, *idxsl, *idxml;
-	xsltStylesheetPtr xsltstp;
-	xmlDocPtr xmldocp;
-	xmlDocPtr docp;
-	xmlChar *doc_txt_ptr;
-	char *filename;
-	int doc_txt_len, filename_len;
-	int ret, compression = 0;
-
-	DOMXML_GET_THIS(idxsl);
-
-	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
-	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): underlying object missing",
-			  get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &idxml, &filename, &filename_len, &compression) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
-
-	ret = xsltSaveResultToFilename(filename, xmldocp, xsltstp, compression);
-
-	if (ret) {
-		RETURN_FALSE;
-	}
-
-	RETURN_LONG(ret);
-}
-/* }}} */
-
 /* {{{ proto object domxml_parser([string buf[,string filename]])
    Creates new xmlparser */
 PHP_FUNCTION(domxml_parser)
@@ -5251,6 +5176,78 @@ PHP_FUNCTION(domxml_xslt_process)
 	}
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+}
+/* }}} */
+
+/* {{{ proto string domxml_xslt_dump_mem(object xslstylesheet, object xmldoc)
+   output XSLT result to memory */
+PHP_FUNCTION(domxml_xslt_dump_mem)
+{
+	zval *rv, *idxsl, *idxml;
+	xsltStylesheetPtr xsltstp;
+	xmlDocPtr xmldocp;
+	xmlChar *doc_txt_ptr;
+	int doc_txt_len;
+	int ret;
+
+	DOMXML_GET_THIS(idxsl);
+
+	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
+	if (!xsltstp) {
+		php_error(E_WARNING, "%s(): underlying object missing",
+			  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &idxml) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
+
+	ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, xmldocp, xsltstp);
+
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+}
+/* }}} */
+
+/* {{{ proto int domxml_xslt_dump_file(object xslstylesheet, object xmldoc, string filename[, int compression])
+   output XSLT result to File */
+PHP_FUNCTION(domxml_xslt_dump_file)
+{
+	zval *rv, *idxsl, *idxml;
+	xsltStylesheetPtr xsltstp;
+	xmlDocPtr xmldocp;
+	char *filename;
+	int filename_len;
+	int ret, compression = 0;
+
+	DOMXML_GET_THIS(idxsl);
+
+	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
+	if (!xsltstp) {
+		php_error(E_WARNING, "%s(): underlying object missing",
+			  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &idxml, &filename, &filename_len, &compression) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
+
+	ret = xsltSaveResultToFilename(filename, xmldocp, xsltstp, compression);
+
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
 }
 /* }}} */
 
