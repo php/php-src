@@ -302,6 +302,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	unsigned char is_absolute = 0;
 #ifndef TSRM_WIN32
 	char resolved_path[MAXPATHLEN];
+	char *new_path;
 #endif
 
 	if (path_length == 0) 
@@ -340,7 +341,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #if defined(TSRM_WIN32)
 	{
 		char *dummy = NULL;
-		char *new_path;
 		int new_path_length;
   
 		new_path_length = GetLongPathName(path, dummy, 0) + 1;
@@ -357,6 +357,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			path_length = new_path_length;
 		} else {
 			free(new_path);
+			new_path = NULL;
 		}
 	}
 #endif
@@ -463,7 +464,11 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 	
 	free(old_state);
-	
+#ifdef TSRM_WIN32
+	if (new_path) {
+		free(new_path);
+	}
+#endif
 	free(free_path);
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "virtual_file_ex() = %s\n",state->cwd);

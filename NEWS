@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Fixed problem preventing startup errors from being displayed. (Marcus)
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
+- Fixed bug #27338 (memory leak inside tsrm_virtual_cwd.c on win32). (Ilia)
 - Fixed bug #27287 (wddx segfaults during deserialization). (Moriyoshi)
 - Fixed bug #27263 (session extension crashes when unserializing referenced
   values / objects). (Moriyoshi)
