@@ -1695,7 +1695,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zend_hash_del_key_or_index(Z_ARRVAL_PP(stack), key, key_len, index, (key) ? HASH_DEL_KEY : HASH_DEL_INDEX);
 	
 	/* If we did a shift... re-index like it did before */
-	if(!off_the_end) {
+	if (!off_the_end) {
 		HANDLE_BLOCK_INTERRUPTIONS();
 		{
 			int k = 0;
@@ -1709,6 +1709,9 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 			zend_hash_rehash(Z_ARRVAL_PP(stack));
 		}
 		HANDLE_UNBLOCK_INTERRUPTIONS();
+	} else {
+		Z_ARRVAL_PP(stack)->nNextFreeElement--;
+		zend_hash_rehash(Z_ARRVAL_PP(stack));
 	}
 }
 /* }}} */
