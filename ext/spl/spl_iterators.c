@@ -48,6 +48,7 @@ zend_class_entry *spl_ce_OuterIterator;
 zend_class_entry *spl_ce_IteratorIterator;
 zend_class_entry *spl_ce_NoRewindIterator;
 zend_class_entry *spl_ce_InfiniteIterator;
+zend_class_entry *spl_ce_EmptyIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -1465,12 +1466,52 @@ SPL_METHOD(InfiniteIterator, next)
 			spl_dual_it_fetch(intern, 0 TSRMLS_CC);
 		}
 	}
-
 } /* }}} */
 
 static zend_function_entry spl_funcs_InfiniteIterator[] = {
 	SPL_ME(InfiniteIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(InfiniteIterator, next,             NULL, ZEND_ACC_PUBLIC)
+};
+
+/* {{{ proto EmptyIterator::rewind()
+   Does nothing  */
+SPL_METHOD(EmptyIterator, rewind)
+{
+} /* }}} */
+
+/* {{{ proto EmptyIterator::valid()
+   Return false */
+SPL_METHOD(EmptyIterator, valid)
+{
+	RETURN_FALSE;
+} /* }}} */
+
+/* {{{ proto EmptyIterator::key()
+   Throws exception */
+SPL_METHOD(EmptyIterator, key)
+{
+	zend_throw_exception(NULL, "Accessing the key of an EmptyIterator", 0 TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto EmptyIterator::current()
+   Throws exception */
+SPL_METHOD(EmptyIterator, current)
+{
+	zend_throw_exception(NULL, "Accessing the value of an EmptyIterator", 0 TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto EmptyIterator::next()
+   Does nothing */
+SPL_METHOD(EmptyIterator, next)
+{
+} /* }}} */
+
+static zend_function_entry spl_funcs_EmptyIterator[] = {
+	SPL_ME(EmptyIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, next,             NULL, ZEND_ACC_PUBLIC)
 };
 
 /* {{{ array iterator_to_array(IteratorAggregate it) 
@@ -1607,6 +1648,9 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_IMPLEMENTS(NoRewindIterator, OuterIterator);
 
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
+	
+	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, spl_funcs_EmptyIterator);
+	REGISTER_SPL_ITERATOR(EmptyIterator);
 
 	return SUCCESS;
 }

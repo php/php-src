@@ -59,7 +59,9 @@ void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * 
 	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* entries changed by initialize */
-	(*ppce)->create_object = obj_ctor;
+	if (obj_ctor) {
+		(*ppce)->create_object = obj_ctor;
+	}
 }
 /* }}} */
 

@@ -36,6 +36,7 @@ extern zend_class_entry *spl_ce_OuterIterator;
 extern zend_class_entry *spl_ce_IteratorIterator;
 extern zend_class_entry *spl_ce_NoRewindIterator;
 extern zend_class_entry *spl_ce_InfiniteIterator;
+extern zend_class_entry *spl_ce_EmptyIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 

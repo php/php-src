@@ -1,7 +1,7 @@
 <?php
 
 /** @file emptyiterator.inc
- * @ingroup Examples
+ * @ingroup SPL
  * @brief class EmptyIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   An empty Iterator
  * @author  Marcus Boerger
  * @version 1.0
