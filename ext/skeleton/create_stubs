@@ -114,21 +114,18 @@ BEGIN {
 				argnames[num_funcs,args_max] = arg_name
 
 				args_max++
-				spec_str = spec_str spec_map[arg_type]
 				if (optional) {
-					optionals[num_funcs,i] = optional
-					if (arg_type != "resource") {
-						useswitch[num_funcs] = 1
-					}
-				} else {
-						args_min++
-				}
-
-				if (x = gobble("\\[")) {
 					if (!spec_opt) {
 						spec_str = spec_str "|"
 						spec_opt = 1
 					}
+					optionals[num_funcs,i] = optional
+				} else {
+					args_min++
+				}
+				spec_str = spec_str spec_map[arg_type]
+
+				if (x = gobble("\\[")) {
 					optional++
 				}
 
@@ -180,13 +177,17 @@ END {
 			"     <funcprototype>\n" \
 			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
-		fetchargs = "\tif (zend_parse_parameters(ZEND_NUM_ARGS(), " specs[i] ", "
+		fetchargs = "\tif (zend_parse_parameters("
+		if (spec_opt) {
+			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
+			fetchargs = fetchargs "argc"
+		} else
+			fetchargs = fetchargs "ZEND_NUM_ARGS()"
+		fetchargs = fetchargs ", " specs[i]
 
 		for (j = 0; j < maxargs[i]; j++) {
 
-			if (j) {
-				fetchargs = fetchargs ", "
-			}
+			fetchargs = fetchargs ", "
 
 			fetchargs = fetchargs "&" argnames[i,j]
 			if (argtypes[i,j] == "string") {
