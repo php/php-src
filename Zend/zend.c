@@ -794,6 +794,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
+	zval *local_retval=NULL;
 
 	va_start(files, file_count);
 	for (i=0; i<file_count; i++) {
@@ -804,14 +805,12 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE TSRMLS_CC);
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
 		if (EG(active_op_array)) {
+			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
-			zval_ptr_dtor(EG(return_value_ptr_ptr));
-			if (retval) {
-				EG(return_value_ptr_ptr) = retval;
-			} else {
-				EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
+			if (!retval) {
+				zval_ptr_dtor(EG(return_value_ptr_ptr));
+				local_retval = NULL;
 			}
-			EG(global_return_value_ptr) = NULL;
 			destroy_op_array(EG(active_op_array));
 			efree(EG(active_op_array));
 		} else if (type==ZEND_REQUIRE) {

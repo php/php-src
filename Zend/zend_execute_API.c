@@ -121,8 +121,7 @@ void init_executor(TSRMLS_D)
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
-	EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
-	EG(global_return_value_ptr) = NULL;
+	EG(return_value_ptr_ptr) = NULL;
 
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
 	EG(symtable_cache_limit)=EG(symtable_cache)+SYMTABLE_CACHE_SIZE-1;
@@ -608,6 +607,7 @@ void execute_new_code(TSRMLS_D)
 {
     zend_op *opline, *end;
 	zend_op *ret_opline;
+	zval *local_retval=NULL;
 
 	if (!CG(interactive)
 		|| CG(active_op_array)->backpatch_count>0
@@ -641,9 +641,13 @@ void execute_new_code(TSRMLS_D)
         opline++;
     }
 
+	EG(return_value_ptr_ptr) = &local_retval;
 	EG(active_op_array) = CG(active_op_array);
 	zend_execute(CG(active_op_array) TSRMLS_CC);
-	zval_ptr_dtor(EG(return_value_ptr_ptr));
+	if (local_retval) {
+		zval_ptr_dtor(&local_retval);
+	}
+
 	CG(active_op_array)->last--;	/* get rid of that ZEND_RETURN */
 	CG(active_op_array)->start_op = CG(active_op_array)->opcodes+CG(active_op_array)->last;
 }
