@@ -32,10 +32,6 @@
 #include "ext/standard/info.h"
 
 
-#if !defined(HAVE_LIBMCRYPT22) && !defined(HAVE_LIBMCRYPT24)
-#error Upgrade you version of mcrypt to at least 2.2.7, preferrable 2.4.4
-#endif
-
 function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
