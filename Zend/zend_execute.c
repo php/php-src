@@ -791,7 +791,11 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				zval *new_zval = &EG(uninitialized_zval);
 
 				new_zval->refcount++;
-				zend_hash_next_index_insert(container->value.ht, &new_zval, sizeof(zval *), (void **) retval);
+				if (zend_hash_next_index_insert(container->value.ht, &new_zval, sizeof(zval *), (void **) retval) == FAILURE) {
+					zend_error(E_WARNING, "Cannot add element to the array as the nexxt element is already occupied");
+					*retval = &EG(uninitialized_zval_ptr);
+					new_zval->refcount--; 
+				}
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type TSRMLS_CC);
 			}
