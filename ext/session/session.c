@@ -271,7 +271,7 @@ int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSL
 PS_SERIALIZER_ENCODE_FUNC(php_binary)
 {
 	zval *buf;
-	char strbuf[MAX_STR + 1];
+	unsigned char strbuf[MAX_STR + 1];
 	php_serialize_data_t var_hash;
 	PS_ENCODE_VARS;
 
@@ -283,14 +283,14 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 
 	PS_ENCODE_LOOP(
 			if (key_length > PS_BIN_MAX) continue;
-			strbuf[0] = key_length;
+			strbuf[0] = (unsigned char) key_length;
 			memcpy(strbuf + 1, key, key_length);
 			
 			STR_CAT(buf, strbuf, key_length + 1);
 			php_var_serialize(buf, struc, &var_hash);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
-			strbuf[0] = key_length & PS_BIN_UNDEF;
+			strbuf[0] = (unsigned char) key_length & PS_BIN_UNDEF;
 			memcpy(strbuf + 1, key, key_length);
 			
 			STR_CAT(buf, strbuf, key_length + 1);
