@@ -100,10 +100,150 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
+/* Demo code. Enable only if you need this. */
+#define ENABLE_TEST_CLASS 0
+
+#if ENABLE_TEST_CLASS
 void test_class_startup(void);
 pval test_class_get_property(zend_property_reference *property_reference);
 int test_class_set_property(zend_property_reference *property_reference, pval *value);
 void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+
+pval test_class_get_property(zend_property_reference *property_reference)
+{
+	pval result;
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+	printf("Reading a property from a OverloadedTestClass object:\n");
+
+	for (element = property_reference->elements_list->head; element; element = element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+	
+		switch (Z_TYPE_P(overloaded_property)) {
+	
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+		}
+	
+		switch (Z_TYPE(overloaded_property->element)) {
+	
+			case IS_LONG:
+				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
+				break;
+
+			case IS_STRING:
+				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+
+	Z_STRVAL(result) = estrndup("testing", 7);
+	Z_STRLEN(result) = 7;
+	Z_TYPE(result) = IS_STRING;
+	return result;
+}
+
+int test_class_set_property(zend_property_reference *property_reference, pval * value)
+{
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+	printf("Writing to a property from a OverloadedTestClass object:\n");
+	printf("Writing '");
+	zend_print_variable(value);
+	printf("'\n");
+
+	for (element = property_reference->elements_list->head; element; element = element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+		
+		switch (Z_TYPE_P(overloaded_property)) {
+	
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+	
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+		}
+
+		switch (Z_TYPE(overloaded_property->element)) {
+
+			case IS_LONG:
+				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
+				break;
+	
+			case IS_STRING:
+				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+	return 0;
+}
+
+void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+{
+	zend_overloaded_element *overloaded_property;
+	zend_llist_element *element;
+
+	printf("Invoking a method on OverloadedTestClass object:\n");
+
+	for (element = property_reference->elements_list->head; element; element = element->next) {
+		overloaded_property = (zend_overloaded_element *) element->data;
+
+		switch (Z_TYPE_P(overloaded_property)) {
+	
+			case OE_IS_ARRAY:
+				printf("Array offset:  ");
+				break;
+	
+			case OE_IS_OBJECT:
+				printf("Object property:  ");
+				break;
+	
+			case OE_IS_METHOD:
+				printf("Overloaded method:  ");
+		}
+
+		switch (Z_TYPE(overloaded_property->element)) {
+
+			case IS_LONG:
+				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
+				break;
+	
+			case IS_STRING:
+				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
+				break;
+		}
+		pval_destructor(&overloaded_property->element);
+	}
+
+	printf("%d arguments\n", ZEND_NUM_ARGS());
+	RETVAL_STRING("testing", 1);
+}
+
+void test_class_startup(void)
+{
+	zend_class_entry test_class_entry;
+	TSRMLS_FETCH();
+
+	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry,
+								"OverloadedTestClass",
+								NULL, test_class_call_function,
+								test_class_get_property,
+								test_class_set_property);
+
+	zend_register_internal_class(&test_class_entry TSRMLS_CC);
+}
+#endif
 
 
 function_entry basic_functions[] = {
@@ -778,7 +918,10 @@ PHP_MINIT_FUNCTION(basic)
 	REGISTER_MATH_CONSTANT(M_SQRT2);
 	REGISTER_MATH_CONSTANT(M_SQRT1_2);
 
+#if ENABLE_TEST_CLASS
 	test_class_startup();
+#endif
+
 	REGISTER_INI_ENTRIES();
 
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
@@ -2027,144 +2170,6 @@ PHP_FUNCTION(highlight_string)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
-pval test_class_get_property(zend_property_reference *property_reference)
-{
-	pval result;
-	zend_overloaded_element *overloaded_property;
-	zend_llist_element *element;
-
-	printf("Reading a property from a OverloadedTestClass object:\n");
-
-	for (element = property_reference->elements_list->head; element; element = element->next) {
-		overloaded_property = (zend_overloaded_element *) element->data;
-	
-		switch (Z_TYPE_P(overloaded_property)) {
-	
-			case OE_IS_ARRAY:
-				printf("Array offset:  ");
-				break;
-
-			case OE_IS_OBJECT:
-				printf("Object property:  ");
-				break;
-		}
-	
-		switch (Z_TYPE(overloaded_property->element)) {
-	
-			case IS_LONG:
-				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
-				break;
-
-			case IS_STRING:
-				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
-				break;
-		}
-		pval_destructor(&overloaded_property->element);
-	}
-
-	Z_STRVAL(result) = estrndup("testing", 7);
-	Z_STRLEN(result) = 7;
-	Z_TYPE(result) = IS_STRING;
-	return result;
-}
-
-int test_class_set_property(zend_property_reference *property_reference, pval * value)
-{
-	zend_overloaded_element *overloaded_property;
-	zend_llist_element *element;
-
-	printf("Writing to a property from a OverloadedTestClass object:\n");
-	printf("Writing '");
-	zend_print_variable(value);
-	printf("'\n");
-
-	for (element = property_reference->elements_list->head; element; element = element->next) {
-		overloaded_property = (zend_overloaded_element *) element->data;
-		
-		switch (Z_TYPE_P(overloaded_property)) {
-	
-			case OE_IS_ARRAY:
-				printf("Array offset:  ");
-				break;
-	
-			case OE_IS_OBJECT:
-				printf("Object property:  ");
-				break;
-		}
-
-		switch (Z_TYPE(overloaded_property->element)) {
-
-			case IS_LONG:
-				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
-				break;
-	
-			case IS_STRING:
-				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
-				break;
-		}
-		pval_destructor(&overloaded_property->element);
-	}
-
-	return 0;
-}
-
-void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
-{
-	zend_overloaded_element *overloaded_property;
-	zend_llist_element *element;
-
-	printf("Invoking a method on OverloadedTestClass object:\n");
-
-	for (element = property_reference->elements_list->head; element; element = element->next) {
-		overloaded_property = (zend_overloaded_element *) element->data;
-
-		switch (Z_TYPE_P(overloaded_property)) {
-	
-			case OE_IS_ARRAY:
-				printf("Array offset:  ");
-				break;
-	
-			case OE_IS_OBJECT:
-				printf("Object property:  ");
-				break;
-	
-			case OE_IS_METHOD:
-				printf("Overloaded method:  ");
-		}
-
-		switch (Z_TYPE(overloaded_property->element)) {
-
-			case IS_LONG:
-				printf("%ld (numeric)\n", Z_LVAL(overloaded_property->element));
-				break;
-	
-			case IS_STRING:
-				printf("'%s'\n", Z_STRVAL(overloaded_property->element));
-				break;
-		}
-		pval_destructor(&overloaded_property->element);
-	}
-
-	printf("%d arguments\n", ZEND_NUM_ARGS());
-	RETVAL_STRING("testing", 1);
-}
-
-void test_class_startup(void)
-{
-	zend_class_entry test_class_entry;
-	TSRMLS_FETCH();
-
-	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry,
-								"OverloadedTestClass",
-								NULL, test_class_call_function,
-								test_class_get_property,
-								test_class_set_property);
-
-	zend_register_internal_class(&test_class_entry TSRMLS_CC);
-}
-
 
 /* {{{ proto string ini_get(string varname)
    Get a configuration option */
