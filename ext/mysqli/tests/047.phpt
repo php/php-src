@@ -29,7 +29,7 @@ mysqli_prepare_result
 --EXPECTF--
 array(2) {
   [0]=>
-  object(stdClass)#%d (9) {
+  object(stdClass)(9) {
     ["name"]=>
     string(3) "foo"
     ["orgname"]=>
@@ -50,7 +50,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object(stdClass)#%d (9) {
+  object(stdClass)(9) {
     ["name"]=>
     string(3) "bar"
     ["orgname"]=>

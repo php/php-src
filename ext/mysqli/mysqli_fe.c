@@ -86,7 +86,6 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_ping,									NULL)
 	PHP_FE(mysqli_prepare,								NULL)
 	PHP_FE(mysqli_prepare_result,						NULL)
-	PHP_FE(mysqli_profiler,								NULL)
 	PHP_FE(mysqli_query,								NULL)
 	PHP_FE(mysqli_read_query_result,					NULL)
 	PHP_FE(mysqli_real_connect,							NULL)

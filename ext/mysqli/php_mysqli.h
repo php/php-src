@@ -26,7 +26,6 @@
 #endif
 
 #include <mysql.h>
-#include "mysqli_profiler.h"
 
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
@@ -57,16 +56,6 @@ typedef struct _mysqli_object {
 	void *ptr;
 } mysqli_object; /* extends zend_object */
 
-#define MYSQLI_PR_MAIN		0
-#define MYSQLI_PR_MYSQL		1
-#define MYSQLI_PR_QUERY		2
-#define MYSQLI_PR_QUERY_RESULT	3
-#define MYSQLI_PR_STMT		4
-#define MYSQLI_PR_STMT_RESULT	5
-#define MYSQLI_PR_RESULT	6
-#define MYSQLI_PR_COMMAND	7
-
-
 #define phpext_mysqli_ptr &mysqli_module_entry
 
 #ifdef PHP_WIN32
@@ -89,65 +78,7 @@ extern function_entry mysqli_result_methods[];
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int flag);
 extern void php_clear_stmt_bind(STMT *stmt);
 
-zend_class_entry *mysqli_link_class_entry;
-zend_class_entry *mysqli_stmt_class_entry;
-zend_class_entry *mysqli_result_class_entry;
-
-zend_class_entry _mysqli_link_class_entry;
-zend_class_entry _mysqli_stmt_class_entry;
-zend_class_entry _mysqli_result_class_entry;
-
-PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
-
-#define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
-	INIT_CLASS_ENTRY(_##mysqli_entry,name,class_functions); \
-	_##mysqli_entry.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&_##mysqli_entry TSRMLS_CC); \
-} \
-
-#define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval, __ce)  \
-	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr;
-
-#define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
-	Z_TYPE_P(return_value) = IS_OBJECT; \
-	(return_value)->value.obj = mysqli_objects_new(__ce TSRMLS_CC); \
-	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value, __ce)
-
-#define MYSQLI_REGISTER_RESOURCE(__ptr, __ce) \
-{\
-	zval *object = getThis();\
-	if (!object) {\
-		object = return_value;\
-		Z_TYPE_P(object) = IS_OBJECT;\
-		(object)->value.obj = mysqli_objects_new(__ce TSRMLS_CC);\
-	}\
-	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object, __ce)\
-}
-
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __prptr, __prtype, __id, __name) \
-{ \
-	MYSQLI_RESOURCE *my_res; \
-	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
-  		RETURN_NULL();\
-  	}\
-	__ptr = (__type)my_res->ptr; \
-	__prptr = (__prtype)my_res->prinfo; \
-	if (!strcmp((char *)__name, "mysqli_stmt")) {\
-		if (!((STMT *)__ptr)->stmt->mysql) {\
-  			php_error(E_WARNING, "Statement isn't valid anymore");\
-			RETURN_NULL();\
-		}\
-	}\
-} 
-
-#define MYSQLI_CLEAR_RESOURCE(__id) \
-{ \
-	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-	efree(intern->ptr); \
-	intern->ptr = NULL; \
-}
+extern int le_mysqli_link, le_mysqli_result, le_mysqli_stmt;
 
 #define MYSQLI_RETURN_LONG_LONG(__val) \
 { \
@@ -158,6 +89,15 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 		sprintf(ret, "%llu", (__val));	\
 		RETURN_STRING(ret,1);		\
 	}					\
+}
+
+#define MYSQLI_FETCH_STMT(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type) \
+{ \
+	ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type); \
+	if (!rsrc->stmt->mysql) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connection closed. Statement resource invalid.");\
+		RETURN_FALSE;\
+	} \
 }
 
 #define MYSQLI_STORE_RESULT 	0
@@ -239,7 +179,6 @@ PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
 PHP_FUNCTION(mysqli_prepare_result);
-PHP_FUNCTION(mysqli_profiler);
 PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
 PHP_FUNCTION(mysqli_real_query);
@@ -278,7 +217,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char		*default_socket;
 	long		error_no;
 	char		*error_msg;
-	unsigned int	profiler;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 #ifdef ZTS

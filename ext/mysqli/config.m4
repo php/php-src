@@ -41,5 +41,5 @@ if test "$PHP_MYSQLI" != "no"; then
   ])
 
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(mysqli, mysqli.c mysqli_api.c mysqli_nonapi.c mysqli_fe.c mysqli_profiler.c mysqli_profiler_com.c, $ext_shared)
+  PHP_NEW_EXTENSION(mysqli, mysqli.c mysqli_api.c mysqli_nonapi.c mysqli_fe.c, $ext_shared)
 fi
