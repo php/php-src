@@ -10,7 +10,6 @@ require_once('skipif.inc');
 require_once('connection.inc');
 require_once('prepare.inc');
 
-require_once(dirname(__FILE__).'/../../pdo/tests/pdo.inc');
 require_once($PDO_TESTS . 'pdo_015.inc');
 
 ?>

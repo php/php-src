@@ -1,5 +1,5 @@
 --TEST--
-PDO_MySQ: PDOStatement::setFetchMode
+PDO_MySQL: PDOStatement::setFetchMode
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc'); ?>
