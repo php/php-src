@@ -57,6 +57,10 @@ output_handler		=		; You can redirect all of the output of your scripts to a fun
 							; will be transparently compressed for browsers that support gzip or
 							; deflate encoding.  Setting an output handler automatically turns on
 							; output buffering.
+zlib.output_compression = Off	; Transparent output compression using the zlib library
+								; Valid values for this option are 'off', 'on', or a specific buffer size
+								; to be used for compression (default is 4KB)
+
 implicit_flush		= Off	; Implicit flush tells PHP to tell the output layer to flush itself
 							; automatically after every output block.  This is equivalent to
 							; calling the PHP function flush() after each and every call to print()

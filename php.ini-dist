@@ -82,6 +82,11 @@ output_buffering = Off
 ; Setting an output handler automatically turns on output buffering.
 output_handler =
 
+; Transparent output compression using the zlib library
+; Valid values for this option are 'off', 'on', or a specific buffer size
+; to be used for compression (default is 4KB)
+zlib.output_compression = Off
+
 ; Implicit flush tells PHP to tell the output layer to flush itself
 ; automatically after every output block.  This is equivalent to calling the
 ; PHP function flush() after each and every call to print() or echo() and each
