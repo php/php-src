@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #29019 (Database not closing). (Marcus)
 - Fixed bug #29008 (array_combine() does not handle non-numeric/string keys).
   (Ilia)
+- Fixed bug #28999 (fixed behaviour of exec() to work as it did in 4.X). (Ilia)
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28868 (Internal filter registry not thread safe). (Sara)
 - Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)
