@@ -35,7 +35,7 @@
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
 #define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen
 #define PS_DESTROY_ARGS void **mod_data, const char *key
-#define PS_GC_ARGS void **mod_data, int maxlifetime
+#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels
 
 typedef struct ps_module_struct {
 	const char *name;

@@ -305,6 +305,7 @@ PS_GC_FUNC(mm)
 	time_t now;
 	ps_sd *sd, *next;
 	
+	*nrdels = 0;
 	ps_mm_debug("gc\n");
 	
 	mm_lock(data->mm, MM_LOCK_RW);
@@ -315,8 +316,10 @@ PS_GC_FUNC(mm)
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_mm_debug("looking at %s\n", sd->key);
-			if ((now - sd->ctime) > maxlifetime)
+			if ((now - sd->ctime) > maxlifetime) {
 				ps_sd_destroy(data, sd);
+				*nrdels++;
+			}
 		}
 
 	mm_unlock(data->mm);
