@@ -146,6 +146,11 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
 CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC);
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
+
+#if !defined(TSRM_WIN32)
+CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
+#endif
+
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
 #endif
@@ -195,6 +200,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_RMDIR(pathname) virtual_rmdir(pathname TSRMLS_CC)
 #define VCWD_OPENDIR(pathname) virtual_opendir(pathname TSRMLS_CC)
 #define VCWD_POPEN(command, type) virtual_popen(command, type TSRMLS_CC)
+#define VCWD_ACCESS(pathname, mode) virtual_access(pathname, mode TSRMLS_CC)
 #if HAVE_UTIME
 #define VCWD_UTIME(path, time) virtual_utime(path, time TSRMLS_CC)
 #endif
@@ -221,6 +227,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
+#define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)

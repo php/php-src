@@ -540,6 +540,24 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC)
 	return f;
 }
 
+#if !defined(TSRM_WIN32)
+CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC)
+{
+	cwd_state new_state;
+	int ret;
+	
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, pathname, NULL);
+
+	ret = access(new_state.cwd, mode);
+	
+	CWD_STATE_FREE(&new_state);
+	
+	return ret;
+}
+#endif
+
+
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC)
 {
