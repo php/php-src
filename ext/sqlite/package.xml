@@ -50,7 +50,11 @@
       <file role="doc" name="README"/>
       <file role="doc" name="TODO"/>
       <file role="doc" name="sqlite.php"/>
-      <file role="test" name="tests/001.phpt"/>
+      <file role="test" name="tests/sqlite_001.phpt"/>
+      <file role="test" name="tests/sqlite_002.phpt"/>
+      <file role="test" name="tests/sqlite_003.phpt"/>
+      <file role="test" name="tests/sqlite_004.phpt"/>
+      <file role="test" name="tests/blankdb.inc"/>
 
 	  <dir name="libsqlite">
 		<file role="doc" name="README"/>
