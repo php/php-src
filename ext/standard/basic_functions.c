@@ -2824,6 +2824,33 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
 			break;
 
+		case ZEND_INI_PARSER_POP_ENTRY:
+		{
+			zval *hash, **find_hash;
+
+			if (!arg2) {
+				/* bare string - nothing to do */
+				break;
+			}
+
+			if (zend_hash_find(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void **) &find_hash) == FAILURE) {
+				ALLOC_ZVAL(hash);
+				INIT_PZVAL(hash);
+				array_init(hash);
+
+				zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &hash, sizeof(zval *), NULL);
+			} else {
+				hash = *find_hash;
+			}
+
+			ALLOC_ZVAL(element);
+			*element = *arg2;
+			zval_copy_ctor(element);
+			INIT_PZVAL(element);
+			add_next_index_zval(hash, element);			
+		}
+		break;
+
 		case ZEND_INI_PARSER_SECTION:
 			break;
 	}
@@ -2831,44 +2858,26 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
-	zval *element;
 	TSRMLS_FETCH();
 
-	switch (callback_type) {
+	if (callback_type == ZEND_INI_PARSER_SECTION) {
+		MAKE_STD_ZVAL(BG(active_ini_file_section));
+		array_init(BG(active_ini_file_section));
+		zend_hash_update(	Z_ARRVAL_P(arr),
+							Z_STRVAL_P(arg1),
+							Z_STRLEN_P(arg1)+1,
+							&BG(active_ini_file_section),
+							sizeof(zval *), NULL);
+	} else if (arg2) {
+		zval *active_arr;
 
-		case ZEND_INI_PARSER_ENTRY:
-		{
-			zval *active_arr;
-
-			if (!arg2) {
-				/* bare string - nothing to do */
-				break;
-			}
-
-			if (BG(active_ini_file_section)) {
-				active_arr = BG(active_ini_file_section);
-			} else {
-				active_arr = arr;
-			}
-			ALLOC_ZVAL(element);
-			*element = *arg2;
-			zval_copy_ctor(element);
-			INIT_PZVAL(element);
-			zend_hash_update(Z_ARRVAL_P(active_arr), Z_STRVAL_P(arg1),
-							 Z_STRLEN_P(arg1)+1, &element,
-							 sizeof(zval *), NULL);
+		if (BG(active_ini_file_section)) {
+			active_arr = BG(active_ini_file_section);
+		} else {
+			active_arr = arr;
 		}
-		break;
 
-		case ZEND_INI_PARSER_SECTION:
-			MAKE_STD_ZVAL(BG(active_ini_file_section));
-			array_init(BG(active_ini_file_section));
-			zend_hash_update(	Z_ARRVAL_P(arr),
-								Z_STRVAL_P(arg1),
-								Z_STRLEN_P(arg1)+1,
-								&BG(active_ini_file_section),
-								sizeof(zval *), NULL);
-			break;
+		php_simple_ini_parser_cb(arg1, arg2, callback_type, active_arr);
 	}
 }
 
