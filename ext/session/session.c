@@ -407,7 +407,13 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
+	p = val;
+
+	while (p < endptr) {
+		q = p;
+		while (*q != PS_DELIMITER)
+			if (++q >= endptr) goto break_outer_loop;
+		
 		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
 			has_value = 0;
@@ -428,8 +434,11 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
+		
+		p = q;
 	}
-
+break_outer_loop:
+	
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
@@ -911,7 +920,7 @@ static void php_session_start(PSLS_D)
 		int nrdels = -1;
 
 		nrand = (int) (100.0*php_combined_lcg());
-		if (nrand <= PS(gc_probability)) {
+		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
 #if 0
 			if (nrdels != -1)
