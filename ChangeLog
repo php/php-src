@@ -1,3 +1,35 @@
+2004-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      String offset starts with 0, fix isset($str[$len])
+
+2004-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/standard/var.c:
+      MFH: Fixed leak when serializing protected & private properties.
+
+    * ext/standard/var.c:
+      Fixed leak when serializing protected & private properties.
+
+2004-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      MFH: Bugfix #29882 isset crashes on arrays
+
+    * ZendEngine2/zend_compile.c:
+      Bugfix #29882 isset crashes on arrays
+
+2004-08-29  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/config.m4
+      ext/mnogosearch/config.m4
+      ext/mnogosearch/config.m4:
+      - A fix for building of shared mnogosearch module
+
 2004-08-28  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
