@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? Jan 2004, Version 4.3.5
 - Fixed bug #26974 (rename() doesn't check the destination file against 
   safe_mode/open_basedir). (Ilia)
+- Fixed bug #26973 (*printf() '+' modifier broken). (Jani)
 - Fixed bug #26969 (--with-openssl=shared build fails). (Jani)
 - Fixed bug #26949 (rand(min,max) always returns min when ZTS enabled). (Jani)
 - Fixed bug #26937 (Warning in xml.c). (Jani)
