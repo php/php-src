@@ -1,3 +1,28 @@
+2003-10-16  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/PEAR/Remote.php:
+      - Fix RPC call without proxy (silence warnings&notices)
+        nota bene: the proxy codes should be cleaned, one day ;)
+
+2003-10-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/curl/.cvsignore:
+      - Fixed the real reason for build problems: dos eols
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      - Fixed ZTS build (Nuked extra TSRMLS_FETCH)
+
+    * (PHP_4_3)
+      win32/php4dllts.dsp:
+      - config.w32.h is in main/ not ext/standard..
+
+2003-10-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sybase/php_sybase_db.c:
+      Do not strip trailing spaces.
+
 2003-10-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c
