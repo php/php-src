@@ -7,8 +7,8 @@ General
 SOAP
 ----
 + SOAP versioning model
-- SOAP message must not contain a Document Type Declaration
-- SOAP message MUST NOT contain Processing Instructions
++ SOAP message must not contain a Document Type Declaration
+- SOAP message MUST NOT contain Processing Instructions <?xml-stylesheet ... ?> (XML_PI_NODE)
 - support for SOAP headers
   - actor attribute
   - mustUnderstend attribute
@@ -46,11 +46,11 @@ Encoding
 ? proper encoding of standard hexBinary type
 ? proper encoding of standard base64Binary type
 - full support for arrays
-  ? arrayType attribute
+  + arrayType attribute
   + offset attribute
   + position attribute
-  ? multidimensional arrays
-  ? arrays of arrays
+  + multidimensional arrays
+  + arrays of arrays
   - encoding of arrays with holes
 - full support for structures???  
 + references (id,href)

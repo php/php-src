@@ -25,12 +25,8 @@ static xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style);
 /* Null encode */
 static xmlNodePtr to_xml_null(encodeType type, zval *data, int style);
 
-/* Struct encode */
-static xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
-
 /* Array encode */
 static xmlNodePtr guess_array_map(encodeType type, zval *data, int style);
-static xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
 static xmlNodePtr to_xml_map(encodeType type, zval *data, int style);
 
 /* Datetime encode/decode */
@@ -658,7 +654,7 @@ zval *to_zval_object(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-static xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
+xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
 	HashTable *prop;
@@ -705,35 +701,44 @@ static xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 			smart_str_free(ns);
 			efree(ns);
 		}
-	} else if (Z_TYPE_P(data) == IS_OBJECT) {
+	} else {
 		xmlParam = xmlNewNode(NULL, "BOGUS");
 		FIND_ZVAL_NULL(data, xmlParam, style);
 
 		if (Z_TYPE_P(data) == IS_OBJECT) {
+			sdlTypePtr sdl_type = type.sdl_type;
+
 			prop = Z_OBJPROP_P(data);
 			i = zend_hash_num_elements(prop);
 			zend_hash_internal_pointer_reset(prop);
 
 			for (;i > 0;i--) {
 				xmlNodePtr property;
-				encodePtr enc;
+				encodePtr enc = NULL;
 				zval **zprop;
 				char *str_key;
 
 				zend_hash_get_current_key(prop, &str_key, NULL, FALSE);
 				zend_hash_get_current_data(prop, (void **)&zprop);
 
-				enc = get_conversion((*zprop)->type);
+				if (sdl_type && sdl_type->elements) {
+					sdlTypePtr *el_type;
+					if (zend_hash_find(sdl_type->elements, str_key, strlen(str_key) + 1, (void **)&el_type) == SUCCESS) {
+						enc = (*el_type)->encode;
+					}
+				}
+				if (enc == NULL) {
+					enc = get_conversion((*zprop)->type);
+				}
 				property = master_to_xml(enc, (*zprop), style);
 
 				xmlNodeSetName(property, str_key);
 				xmlAddChild(xmlParam, property);
 				zend_hash_move_forward(prop);
 			}
-		}
-
-		if (style == SOAP_ENCODED) {
-			set_ns_and_type(xmlParam, type);
+			if (style == SOAP_ENCODED) {
+				set_ns_and_type(xmlParam, type);
+			}
 		}
 	}
 	return xmlParam;
@@ -757,61 +762,6 @@ static xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 	}
 
 	return master_to_xml(enc, data, style);
-}
-
-static xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
-{
-	smart_str array_type_and_size = {0}, array_type = {0};
-	int i;
-	xmlNodePtr xmlParam;
-	TSRMLS_FETCH();
-
-	xmlParam = xmlNewNode(NULL,"BOGUS");
-
-	FIND_ZVAL_NULL(data, xmlParam, style);
-
-	if (Z_TYPE_P(data) == IS_ARRAY) {
-		i = zend_hash_num_elements(Z_ARRVAL_P(data));
-
-		/*FIXME: arrayType and "literal" encoding? */
-		if (i > 0 && style == SOAP_ENCODED) {
-			get_array_type(data, &array_type TSRMLS_CC);
-			smart_str_append(&array_type_and_size, &array_type);
-			smart_str_appendc(&array_type_and_size, '[');
-			smart_str_append_long(&array_type_and_size, i);
-			smart_str_appendc(&array_type_and_size, ']');
-			smart_str_0(&array_type_and_size);
-
-			xmlSetProp(xmlParam, "SOAP-ENC:arrayType", array_type_and_size.c);
-
-			smart_str_free(&array_type_and_size);
-			smart_str_free(&array_type);
-		}
-
-		zend_hash_internal_pointer_reset(data->value.ht);
-		for (;i > 0;i--) {
-			xmlNodePtr xparam;
-			zval **zdata;
-			encodePtr enc;
-			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
-
-			enc = get_conversion((*zdata)->type);
-			xparam = master_to_xml(enc, (*zdata), style);
-
-			if (style == SOAP_LITERAL) {
-				xmlNodeSetName(xparam, enc->details.type_str);
-			} else {
-				xmlNodeSetName(xparam, "val");
-			}
-
-			xmlAddChild(xmlParam, xparam);
-			zend_hash_move_forward(data->value.ht);
-		}
-		if (style == SOAP_ENCODED) {
-			set_ns_and_type(xmlParam, type);
-		}
-	}
-	return xmlParam;
 }
 
 static int calc_dimension(const char* str)
@@ -848,6 +798,244 @@ static int* get_position(int dimension, const char* str)
 	pos = emalloc(sizeof(int)*dimension);
 	get_position_ex(dimension, str, &pos);
 	return pos;
+}
+
+static void add_xml_array_elements(xmlNodePtr xmlParam,
+                                   sdlTypePtr type,
+                                   encodePtr enc,
+                                   int dimension ,
+                                   int* dims,
+                                   zval* data,
+                                   int style)
+{
+	int j;
+
+	if (Z_TYPE_P(data) == IS_ARRAY) {
+	 	zend_hash_internal_pointer_reset(data->value.ht);
+		for (j=0; j<dims[0]; j++) {
+ 			zval **zdata;
+ 			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
+ 			if (dimension == 1) {
+	 			xmlNodePtr xparam;
+ 				if (enc == NULL) {
+					TSRMLS_FETCH();
+ 					xparam = master_to_xml(get_conversion((*zdata)->type), (*zdata), style);
+ 				} else {
+ 					xparam = master_to_xml(enc, (*zdata), style);
+	 			}
+
+	 			if (type) {
+ 					xmlNodeSetName(xparam, type->name);
+ 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
+					xmlNodeSetName(xparam, enc->details.type_str);
+				} else {
+ 					xmlNodeSetName(xparam, "val");
+ 				}
+ 				xmlAddChild(xmlParam, xparam);
+ 			} else {
+ 			  add_xml_array_elements(xmlParam, type, enc, dimension-1, dims+1, *zdata, style);
+ 			}
+ 			zend_hash_move_forward(data->value.ht);
+ 		}
+ 	}
+}
+
+static inline int array_num_elements(HashTable* ht)
+{
+	if (ht->pListTail && ht->pListTail->nKeyLength == 0) {
+		return ht->pListTail->h-1;
+	}
+	return 0;
+}
+
+xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
+{
+	sdlTypePtr sdl_type = type.sdl_type;
+	smart_str array_type_and_size = {0}, array_type = {0};
+	int i;
+	xmlNodePtr xmlParam;
+	encodePtr enc = NULL;
+	int dimension = 1;
+	int* dims;
+//	int map;
+
+	TSRMLS_FETCH();
+
+	xmlParam = xmlNewNode(NULL,"BOGUS");
+
+	FIND_ZVAL_NULL(data, xmlParam, style);
+
+	if (Z_TYPE_P(data) == IS_ARRAY) {
+//		map = is_map(data);
+//		if (map) {
+			i = zend_hash_num_elements(Z_ARRVAL_P(data));
+//		} else {
+//			i = array_num_elements(Z_ARRVAL_P(data));
+//		}
+
+		/*FIXME: arrayType and "literal" encoding? */
+		if (style == SOAP_ENCODED) {
+			sdlAttributePtr *arrayType;
+			xmlAttrPtr *arrayTypeAttr;
+			sdlTypePtr elementType;
+
+			if (sdl_type &&
+			    sdl_type->attributes &&
+			    zend_hash_find(sdl_type->attributes, SOAP_ENC_NAMESPACE":arrayType",
+			      sizeof(SOAP_ENC_NAMESPACE":arrayType"),
+			      (void **)&arrayType) == SUCCESS &&
+			    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&arrayTypeAttr) == SUCCESS) {
+
+				char *ns = NULL, *value, *end;
+				xmlNsPtr myNs;
+				zval** el;
+
+				parse_namespace((*arrayTypeAttr)->children->content, &value, &ns);
+				myNs = xmlSearchNs((*arrayTypeAttr)->doc, (*arrayTypeAttr)->parent, ns);
+
+				end = strrchr(value,'[');
+				if (end) {
+					*end = '\0';
+					end++;
+					dimension = calc_dimension(end);
+				}
+				if (myNs != NULL) {
+					enc = get_encoder(SOAP_GLOBAL(sdl), myNs->href, value);
+
+					if (strcmp(myNs->href,XSD_NAMESPACE) == 0) {
+						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type_and_size, ':');
+					} else {
+						smart_str *prefix = encode_new_ns();
+						smart_str smart_ns = {0};
+
+						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
+						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
+						smart_str_0(&smart_ns);
+						xmlSetProp(xmlParam, smart_ns.c, myNs->href);
+						smart_str_free(&smart_ns);
+
+						smart_str_appends(&array_type_and_size, prefix->c);
+						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_free(prefix);
+						efree(prefix);
+					}
+				}
+
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
+				el = &data;
+				for (i = 1; i < dimension; i++) {
+					if (el != NULL && Z_TYPE_PP(el) == IS_ARRAY && Z_ARRVAL_PP(el)->pListHead) {
+						el = (zval**)Z_ARRVAL_PP(el)->pListHead->pData;
+						if (Z_TYPE_PP(el) == IS_ARRAY) {
+							dims[i] = zend_hash_num_elements(Z_ARRVAL_PP(el));
+						} else {
+						  dims[i] = 0;
+						}
+					}
+				}
+
+				smart_str_appends(&array_type_and_size, value);
+				smart_str_appendc(&array_type_and_size, '[');
+				smart_str_append_long(&array_type_and_size, dims[0]);
+				for (i=1; i<dimension; i++) {
+					smart_str_appendc(&array_type_and_size, ',');
+					smart_str_append_long(&array_type_and_size, dims[i]);
+				}
+				smart_str_appendc(&array_type_and_size, ']');
+				smart_str_0(&array_type_and_size);
+
+				efree(value);
+				if (ns) efree(ns);
+
+			} else if (sdl_type && sdl_type->elements &&
+			           zend_hash_num_elements(sdl_type->elements) == 1 &&
+			           (elementType = *(sdlTypePtr*)sdl_type->elements->pListHead->pData) != NULL &&
+			           elementType->encode && elementType->encode->details.type_str) {
+				char* ns = elementType->encode->details.ns;
+
+				if (ns) {
+					if (strcmp(ns,XSD_NAMESPACE) == 0) {
+						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type_and_size, ':');
+					} else {
+						smart_str *prefix = encode_new_ns();
+						smart_str smart_ns = {0};
+
+						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
+						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
+						smart_str_0(&smart_ns);
+						xmlSetProp(xmlParam, smart_ns.c, ns);
+						smart_str_free(&smart_ns);
+
+						smart_str_appends(&array_type_and_size, prefix->c);
+						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_free(prefix);
+						efree(prefix);
+					}
+				}
+				enc = elementType->encode;
+				smart_str_appends(&array_type_and_size, elementType->encode->details.type_str);
+				smart_str_free(&array_type);
+				smart_str_appendc(&array_type_and_size, '[');
+				smart_str_append_long(&array_type_and_size, i);
+				smart_str_appendc(&array_type_and_size, ']');
+				smart_str_0(&array_type_and_size);
+
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
+			} else {
+				get_array_type(data, &array_type TSRMLS_CC);
+				enc = get_encoder_ex(SOAP_GLOBAL(sdl), array_type.c);
+				smart_str_append(&array_type_and_size, &array_type);
+				smart_str_appendc(&array_type_and_size, '[');
+				smart_str_append_long(&array_type_and_size, i);
+				smart_str_appendc(&array_type_and_size, ']');
+				smart_str_0(&array_type_and_size);
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
+			}
+			xmlSetProp(xmlParam, "SOAP-ENC:arrayType", array_type_and_size.c);
+
+			smart_str_free(&array_type_and_size);
+			smart_str_free(&array_type);
+		} else {
+			dims = emalloc(sizeof(int)*dimension);
+			dims[0] = i;
+		}
+
+		add_xml_array_elements(xmlParam, sdl_type, enc, dimension, dims, data, style);
+		efree(dims);
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(xmlParam, type);
+		}
+/*
+		zend_hash_internal_pointer_reset(data->value.ht);
+		for (;i > 0;i--) {
+			xmlNodePtr xparam;
+			zval **zdata;
+			encodePtr enc;
+			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
+
+			enc = get_conversion((*zdata)->type);
+			xparam = master_to_xml(enc, (*zdata), style);
+
+			if (style == SOAP_LITERAL) {
+				xmlNodeSetName(xparam, enc->details.type_str);
+			} else {
+				xmlNodeSetName(xparam, "val");
+			}
+
+			xmlAddChild(xmlParam, xparam);
+			zend_hash_move_forward(data->value.ht);
+		}
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(xmlParam, type);
+		}
+*/
+	}
+	return xmlParam;
 }
 
 zval *to_zval_array(encodeType type, xmlNodePtr data)
@@ -1482,7 +1670,7 @@ void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 		zend_hash_move_forward(ht);
 	}
 
-	if (different) {
+	if (different || count == 0) {
 		smart_str_appendl(type, "xsd:anyType", 11);
 	} else {
 		encodePtr enc;
@@ -1492,7 +1680,7 @@ void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 
 		if (enc->details.ns != NULL) {
 			if (zend_hash_find(SOAP_GLOBAL(defEncNs), enc->details.ns, strlen(enc->details.ns) + 1, (void **)&prefix) == FAILURE) {
-				php_error(E_ERROR, "fix me");
+				php_error(E_ERROR, "Unknown namespace '%s'",enc->details.ns);
 			}
 
 			smart_str_appendl(type, prefix, strlen(prefix));
