@@ -137,28 +137,29 @@ if (isset($argc) && $argc > 1) {
 // Compile a list of all test files (*.phpt).
 $test_files = array();
 $exts_to_test = get_loaded_extensions();
+$exts_tested = count($exts_to_test);
+$exts_skipped = 0;
+$ignored_by_ext = 0;
 sort($exts_to_test);
-$extra_dirs = array('pear', 'tests');
+$test_dirs = array('tests', 'pear', 'ext');
 $cwd=getcwd();
 
-// First get list of test files in ext/ 
-foreach ($exts_to_test as $dir) {
-	find_files("{$cwd}/ext/{$dir}");
+foreach ($test_dirs as $dir) {
+	find_files("{$cwd}/{$dir}", $dir=='ext');
 }
 
-// Then the rest
-foreach ($extra_dirs as $dir) {
-	find_files("{$cwd}/{$dir}");
-}
-
-function find_files($dir)
+function find_files($dir,$is_ext_dir=false,$ignore=false)
 {
-	global $test_files;
+	global $test_files, $exts_to_test, $ignored_by_ext, $exts_skipped, $exts_tested;
 
 	$o = opendir($dir) or error("cannot open directory: $dir");
 	while (($name = readdir($o)) !== false) {
 		if (is_dir("{$dir}/{$name}") && !in_array($name, array('.', '..', 'CVS'))) {
-			find_files("{$dir}/{$name}");
+			$skip_ext = ($is_ext_dir && !in_array($name, $exts_to_test));
+			if ($skip_ext) {
+				$exts_skipped++;
+			}
+			find_files("{$dir}/{$name}", false, $ignore || $skip_ext);
 	    }
 	
 		// Cleanup any left-over tmp files from last run.
@@ -169,8 +170,12 @@ function find_files($dir)
 
 		// Otherwise we're only interested in *.phpt files.
 		if (substr($name, -5) == '.phpt') {
-			$testfile = realpath("{$dir}/{$name}");
-			$test_files[] = $testfile;
+			if ($ignore) {
+				$ignored_by_ext++;
+			} else {
+				$testfile = realpath("{$dir}/{$name}");
+				$test_files[] = $testfile;
+			}
 		}
 	}
 	closedir($o);
@@ -206,10 +211,13 @@ if (0 == count($test_results)) {
 }
 
 $n_total = count($test_results);
+$n_total += $ignored_by_ext;
+
 $sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
 foreach ($test_results as $v) {
     $sum_results[$v]++;
 }
+$sum_results['SKIPPED'] += $ignored_by_ext;
 $percent_results = array();
 while (list($v,$n) = each($sum_results)) {
     $percent_results[$v] = (100.0 * $n) / $n_total;
@@ -221,10 +229,14 @@ TIME END " . date('Y-m-d H:i:s', $end_time) . "
 =====================================================================
 TEST RESULT SUMMARY
 ---------------------------------------------------------------------
+Exts skipped    : " . sprintf("%4d",$exts_skipped) . "
+Exts tested     : " . sprintf("%4d",$exts_tested) . "
+---------------------------------------------------------------------
 Number of tests : " . sprintf("%4d",$n_total) . "
 Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
 Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
 Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
+---------------------------------------------------------------------
 Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
 ";
