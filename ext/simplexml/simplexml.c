@@ -799,6 +799,8 @@ static zend_object_handlers sxe_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	sxe_property_read,
 	sxe_property_write,
+	NULL,
+	NULL,
 	sxe_property_get_ptr,
 	sxe_property_get_ptr,
 	sxe_object_get,
