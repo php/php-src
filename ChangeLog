@@ -1,3 +1,70 @@
+2002-01-04  Jon Parise  <jon@csh.rit.edu>
+
+    * main/rfc1867.c: Nuke unused variable warning (end_arr).
+
+2002-01-04  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Made ldap_modify() an alias for ldap_mod_replace(). The two were identical.
+
+2002-01-04  jim winstead  <jimw@apache.org>
+
+    * ext/standard/tests/strings/wordwrap.phpt
+      ext/standard/string.c:
+    Fixed segfault in wordwrap() when wrapping to zero width and using
+    multi-character break or trying to force cut (bug #12768, now fails
+    and issues a warning because forcing a zero-width cut doesn't make
+    sense). Also converted to new paramater-passing API and avoid making
+    an extra copy of the return values.
+
+2002-01-04  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/dio/dio.c: Added the O_NOCTTY option, for terminal i/o.
+
+2002-01-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * configure.in: first PHP_EXTENSION_LIBS casualty :(
+
+2002-01-04  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/fastcgi.c:
+    Added log_message function to the FastCGI sapi, so you can see error
+    output from scripts
+
+2002-01-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ncurses/config.m4: ncurses is useless in webserver modules
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: more unquoted messages with kommas fixed
+
+    * ext/mcrypt/config.m4:
+    always quote messages with [...], *especialy* when using kommas in the text
+
+    * ext/domxml/php_domxml.c: proto fixes
+
+    * ext/pcntl/config.m4: use predefined function instead of hardcoded test
+
+    * ext/pcntl/pcntl.c
+      ext/odbc/velocis.c: proto fix
+
+    * CODING_STANDARDS: small clarification
+
+2002-01-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * genfiles: Remove #line's from var_unserializer.c
+
+2002-01-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/readline/config.m4: check for library existance before adding them
+
+    * acinclude.m4: two new check functions for use in config.m4 file
+
+2002-01-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mssql/.cvsignore: Update .cvsignore.
+
 2002-01-03  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/mssql/php_mssql.c:
