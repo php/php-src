@@ -1135,9 +1135,15 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	opline->opcode = op;
 	opline->result = *var;
 	opline->op1 = *offset;
-	if ((op == ZEND_RECV_INIT)) {
+	if (op == ZEND_RECV_INIT) {
+		if ((CG(active_class_entry) && CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)
+			|| CG(active_op_array)->fn_flags & ZEND_ACC_ABSTRACT) {
+			CG(active_op_array)->num_args--; /* invalidate the current arg_info entry */
+			zend_error(E_COMPILE_ERROR, "Abstract methods cannot have default values for arguments");
+		}
 		opline->op2 = *initialization;
 	} else {
+		CG(active_op_array)->required_num_args = CG(active_op_array)->num_args;
 		SET_UNUSED(opline->op2);
 	}
 	CG(active_op_array)->arg_info = erealloc(CG(active_op_array)->arg_info, sizeof(zend_arg_info)*(CG(active_op_array)->num_args));
@@ -1710,32 +1716,47 @@ static void do_inherit_method(zend_function *function)
 static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 {
 	zend_uint i;
+	zend_function *proto = fe->common.prototype;
 
-	if (!fe->common.prototype) {
+	if (!proto) {
 		return 1;
 	}
 
-	if (fe->common.num_args != fe->common.prototype->common.num_args
-		|| fe->common.pass_rest_by_reference != fe->common.prototype->common.pass_rest_by_reference) {
+	/* check number of arguments */
+	if (proto->common.num_args < fe->common.required_num_args
+		|| proto->common.num_args > fe->common.num_args) {
 		return 0;
 	}
 
-	if (fe->common.prototype->common.return_reference != ZEND_RETURN_REFERENCE_AGNOSTIC
-		&& fe->common.return_reference != fe->common.prototype->common.return_reference) {
+	if (proto->common.pass_rest_by_reference
+		&& !fe->common.pass_rest_by_reference) {
 		return 0;
 	}
 
-	for (i=0; i< fe->common.num_args; i++) {
-		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)) {
+	if (proto->common.return_reference != ZEND_RETURN_REFERENCE_AGNOSTIC
+		&& fe->common.return_reference != proto->common.return_reference) {
+		return 0;
+	}
+
+	for (i=0; i < proto->common.num_args; i++) {
+		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)) {
 			/* Only one has a type hint and the other one doesn't */
 			return 0;
 		}
 		if (fe->common.arg_info[i].class_name
-			&& strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
+			&& strcmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
 			return 0;
 		}
-		if (fe->common.arg_info[i].pass_by_reference != fe->common.prototype->common.arg_info[i].pass_by_reference) {
+		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
 			return 0;
+		}
+	}
+
+	if (proto->common.pass_rest_by_reference) {
+		for (i=proto->common.num_args; i < fe->common.num_args; i++) {
+			if (!fe->common.arg_info[i].pass_by_reference) {
+				return 0;
+			}
 		}
 	}
 	return 1;

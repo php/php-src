@@ -151,6 +151,7 @@ struct _zend_op_array {
 	zend_uint fn_flags;
 	union _zend_function *prototype;
 	zend_uint num_args;
+	zend_uint required_num_args;
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
 	unsigned char return_reference;
@@ -201,6 +202,7 @@ typedef struct _zend_internal_function {
 	zend_uint fn_flags;	
 	union _zend_function *prototype;
 	zend_uint num_args;
+	zend_uint required_num_args;
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
 	unsigned char return_reference;
@@ -221,6 +223,7 @@ typedef union _zend_function {
 		zend_uint fn_flags;
 		union _zend_function *prototype;
 		zend_uint num_args;
+		zend_uint required_num_args;
 		zend_arg_info *arg_info;
 		zend_bool pass_rest_by_reference;
 		unsigned char return_reference;
