@@ -1,0 +1,35 @@
+README file for pspell (spellchecker) module for PHP4
+-----------------------------------------------------
+
+The latest release of pspell is always available from
+
+  http://pspell.sourceforge.net/
+
+This module was developed and tested with aspell-.31.1 and pspell-.11.0.2,
+although slightly earlier (and hopefully later) versions of those libraries
+should work as well.
+
+General notes
+-------------
+
+Plese, note that somewhere around version .27.x (I believe) aspell stopped
+working with the aspell module for php. This is due to the fact that the
+author changed things around a bit, and suggested that people link to pspell
+in the future rather than to aspell. That's exactly what this module is for.
+It has the same basic functionality as aspell (and more features are being
+added). I did not want to modify existing aspell module, because it would
+break things for those who are using older aspell, or result in very ugly code.
+Rather, I wrote a new module - pspell.
+
+
+Building pspell on a Unix system
+--------------------------------
+
+In order to use pspell, you need to have *both* aspell and pspell libraries
+installed, and they have to be compatible with each other. Get the latest
+release of both at the URL given above.
+
+I expect the libraries to be in /usr/local (that's the default when you
+cofigure pspell and aspell with their 'configure' scripts woth no parameters).
+If that location is different, please specify it in --with-pspell=PATH, where
+PATH is the path you specified for pspell libraries.

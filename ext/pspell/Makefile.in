@@ -1,0 +1,5 @@
+
+LTLIBRARY_NAME    = libpspell.la
+LTLIBRARY_SOURCES = pspell.c
+
+include $(top_srcdir)/build/dynlib.mk
