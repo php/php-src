@@ -292,6 +292,9 @@ xml_destroy_parser(xml_parser *parser)
 		XML_ParserFree(parser->parser);
 	}
 	if (parser->ltags) {
+		int inx;
+		for (inx = 0; inx < parser->level; inx++)
+			efree(parser->ltags[ inx ]);
 		efree(parser->ltags);
 	}
 	if (parser->startElementHandler) {
