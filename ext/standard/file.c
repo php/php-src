@@ -111,6 +111,9 @@ static void _file_upload_dtor(char *file);
 /* sharing globals is *evil* */
 static int le_fopen,le_popen, le_socket, le_uploads; 
 
+static fd_set readfd;
+static int max_fd;
+
 /* }}} */
 /* {{{ tempnam */
 
@@ -241,6 +244,8 @@ function_entry file_functions[] = {
 #if (0 && defined(HAVE_SYS_TIME_H) && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
 	PHP_FE(set_socket_timeout,	NULL)
 #endif
+	PHP_FE(fd_set, NULL)
+	PHP_FE(select, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1661,9 +1666,70 @@ PHP_FUNCTION(fgetcsv) {
 
 /* }}} */
 
-/*<
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+PHP_FUNCTION(fd_set)
+{
+        pval **arg;
+        void *what;
+        int type, fd;
+
+        if(ARG_COUNT(ht) <= 0) {
+                php_error(E_WARNING, "fd_set: Must be passed at least one value" );
+                var_uninit(return_value);
+                return;
+        }
+        else if(ARG_COUNT(ht) == 1) {
+                if(getParametersEx(1, &arg) == FAILURE) {
+                        WRONG_PARAM_COUNT;
+                }
+        what = zend_fetch_resource(arg,-1,"Select",&type,3,le_fopen,le_socket,le_popen);
+        ZEND_VERIFY_RESOURCE(what);
+        if(type == le_socket) {
+                fd = *(int *)what;
+        } else {
+                fd = fileno((FILE *)what);
+        }
+        max_fd = fd;
+        FD_ZERO(&readfd);
+        FD_SET(max_fd, &readfd);
+        }
+        else {
+                pval ***args = (pval ***) emalloc(sizeof(pval **) * ARG_COUNT(ht));
+                pval **max, result;
+                int i;
+                if(getParametersArrayEx(ARG_COUNT(ht), args) == FAILURE) {
+                        efree(args);
+                        WRONG_PARAM_COUNT;
+                }
+                FD_ZERO(&readfd);
+                for(i = 0; i < ARG_COUNT(ht); i++) {
+                        what = zend_fetch_resource(*args,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+                        ZEND_VERIFY_RESOURCE(what);
+                        if(type == le_socket) {
+                                fd = *(int *)what;
+                        } else {
+                                fd = fileno((FILE *)what);
+                        }
+                FD_SET(fd, &readfd);
+                if(fd > max_fd) max_fd = fd;
+		}
+	}
+	RETURN_LONG(1);
+}
+
+PHP_FUNCTION(select)
+{
+	pval **timeout;
+	struct timeval tv;
+
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &timeout) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(timeout);
+
+	tv.tv_sec = (*timeout)->value.lval / 1000000;
+	tv.tv_usec = (*timeout)->value.lval % 1000000;
+
+	RETURN_LONG(select(max_fd + 1,&readfd,NULL,NULL,((*timeout)->value.lval <= 0) ? NULL : &tv));
+}
+
