@@ -49,13 +49,13 @@ fi
 PKG=$1 ; shift
 VER=$1 ; shift
 
-OLDPWD=`pwd`
+MY_OLDPWD=`pwd`
 
 # the destination .tar.gz file
-ARCHIVE=$OLDPWD/$PKG-$VER.tar.gz
+ARCHIVE=$MY_OLDPWD/$PKG-$VER.tar.gz
 
 # temporary directory used to check out files from CVS
-TMPDIR=$OLDPWD/cvstmp-$PKG-$VER
+TMPDIR=$MY_OLDPWD/cvstmp-$PKG-$VER
 
 # version part of the CVS release tag
 CVSVER=`echo $VER | sed -e 's/\./_/g'`
@@ -69,7 +69,6 @@ CVSMOD=`cat CVS/Repository | sed -e 's!^/[^/]*/!!'`
 ZENDMOD=`cat libzend/CVS/Repository | sed -e 's!^/[^/]*/!!'`
 # should become "TSRM"
 TSRMMOD=`cat TSRM/CVS/Repository | sed -e 's!^/[^/]*/!!'`
-
 
 if test ! -d $TMPDIR; then
     mkdir -p $TMPDIR || exit 2
@@ -86,11 +85,12 @@ cd $CVSMOD || exit 5
 # Check out Zend
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$ZENDMOD'...$ECHO_C"
 cvs -d $ZENDROOT -Q export -r $CVSTAG $ZENDMOD || exit 4
+echo ""
 
 # Check out TSRM
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$TSRMMOD'...$ECHO_C"
 cvs -d $ZENDROOT -Q export -r $CVSTAG $TSRMMOD || exit 4
-
+echo ""
 
 INC=""
 
@@ -109,10 +109,10 @@ done
 set -x
 ./buildconf
 cd libzend
-bison -p zend -v -d zend-parser.y -o zend-parser.c
+bison -p zend -d zend-parser.y -o zend-parser.c
 flex -Pzend -ozend-scanner.c -i zend-scanner.l
 cd ..
-bison -p cfg -v -d configuration-parser.y -o configuration-parser.c
+bison -p cfg -d configuration-parser.y -o configuration-parser.c
 flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.l
 
 #perl -i -p -e 's/\r\n/\n/' *.dsw *.dsp
@@ -121,7 +121,9 @@ set +x
 INC="$INC \
 configuration-scanner.c \
 configuration-parser.c configuration-parser.h \
+acconfig.h aclocal.m4 configure.in missing mkinstalldirs php_config.h.in \
 configure"
+
 
 mkdir $PKG-$VER || exit 6
 mv $INC $PKG-$VER || exit 7
@@ -131,7 +133,7 @@ tar czf $ARCHIVE $PKG-$VER || exit 8
 echo ""
 
 $ECHO_N "makedist: cleaning up...$ECHO_C"
-cd $OLDPWD
+cd $MY_OLDPWD
 rm -rf $TMPDIR || exit 9
 echo ""
 
