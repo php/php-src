@@ -100,6 +100,7 @@ void init_executor(CLS_D ELS_DC)
 #endif
 #endif
 	EG(return_value) = &EG(global_return_value);
+	var_reset(EG(return_value));
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
 	EG(symtable_cache_limit)=EG(symtable_cache)+SYMTABLE_CACHE_SIZE-1;
 	EG(no_extensions)=0;
@@ -120,6 +121,7 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
+	zval_dtor(EG(return_value));
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 	zend_stack_destroy(&EG(overloaded_objects_stack));
 			
