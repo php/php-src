@@ -361,10 +361,6 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 
 	result = OG(php_header_write)(str, str_length);
 
-	if (newstr) {
-		free(newstr);
-	}
-
 	if (OG(implicit_flush)) {
 		sapi_flush();
 	}
