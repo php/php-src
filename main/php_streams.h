@@ -254,7 +254,6 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 # define IGNORE_URL_WIN 0
 #endif
 
-int php_init_user_streams(TSRMLS_D);
 int php_init_stream_wrappers(TSRMLS_D);
 int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);

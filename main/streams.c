@@ -891,9 +891,7 @@ exit_success:
 int php_init_stream_wrappers(TSRMLS_D)
 {
 	if (PG(allow_url_fopen)) {
-		if (zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS)
-			return php_init_user_streams(TSRMLS_C);
-		return FAILURE;
+		return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
 	}
 	return SUCCESS;
 }

@@ -41,10 +41,20 @@ static void stream_wrapper_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(uwrap);
 }
 
-int php_init_user_streams(TSRMLS_D)
+
+PHP_MINIT_FUNCTION(user_streams)
 {
 	le_protocols = zend_register_list_destructors_ex(stream_wrapper_dtor, NULL, "stream factory", 0);
-	return le_protocols == FAILURE ? FAILURE : SUCCESS;
+	if (le_protocols == FAILURE)
+		return FAILURE;
+
+	REGISTER_LONG_CONSTANT("STREAM_USE_PATH", 			USE_PATH, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_IGNORE_URL", 		IGNORE_URL, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_ENFORCE_SAFE_MODE",	ENFORCE_SAFE_MODE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_REPORT_ERRORS", 		REPORT_ERRORS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_MUST_SEEK", 			STREAM_MUST_SEEK, CONST_CS|CONST_PERSISTENT);
+
+	return SUCCESS;
 }
 
 struct _php_userstream_data {

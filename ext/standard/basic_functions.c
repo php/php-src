@@ -1004,6 +1004,8 @@ PHP_MINIT_FUNCTION(basic)
 
 
 	if (PG(allow_url_fopen)) {
+		PHP_MINIT(user_streams) (INIT_FUNC_ARGS_PASSTHRU);
+
 		if (FAILURE == php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC))
 			return FAILURE;
 		if (FAILURE == php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC))
