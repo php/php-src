@@ -28,6 +28,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif
+
 #ifndef ZEND_WIN32
 #include <unistd.h>
 #endif
