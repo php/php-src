@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 28 Jun 2000, Version 4.0.1
+- Fixed a possible crash in the LDAP modify code. (Eric Kilfoil)
 - Fixed a bug in opendir(), which prevented readdir() from working properly if
   the $dir argument wasn't explicitly specified (Zeev)
 - Made --enable-discard-path work again. (Andi) 
