@@ -773,6 +773,7 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_HTTPGET:
 		case CURLOPT_HTTP_VERSION:
 		case CURLOPT_CRLF:
+		case CURLOPT_PORT:
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
