@@ -43,7 +43,7 @@
 #include "ext/spl/spl_functions.h"
 #endif
 
-#include "Zend/zend_default_classes.h"
+#include "zend_default_classes.h"
 
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
@@ -1693,7 +1693,7 @@ PHP_FUNCTION(sqlite_array_query)
 static void php_sqlite_fetch_string(struct php_sqlite_result *res, zend_bool decode_binary, zval *return_value TSRMLS_DC)
 {
 	const char **rowdata;
-	char *decoded = NULL;
+	char *decoded;
 	int decoded_len;
 	
 	/* check range of the row */
@@ -1723,6 +1723,9 @@ static void php_sqlite_fetch_string(struct php_sqlite_result *res, zend_bool dec
 			decoded = (char*)rowdata[0];
 			rowdata[0] = NULL;
 		}
+	} else {
+		decoded = NULL;
+		decoded_len = 0;
 	}
 
 	if (!res->buffered) {
