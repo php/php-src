@@ -633,7 +633,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		SG(request_info).path_translated = estrdup(getenv("SCRIPT_FILENAME"));
 #else
 		SG(request_info).path_translated = estrdup(getenv("PATH_TRANSLATED"));
-
 #endif
 	}
 	if (cgi || SG(request_info).path_translated) {
