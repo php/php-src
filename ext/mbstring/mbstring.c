@@ -648,9 +648,7 @@ PHP_INI_BEGIN()
 #endif /* ZEND_MULTIBYTE */
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
-#if !defined(COMPILE_DL_MBSTRING)
 	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0", PHP_INI_ALL, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
-#endif /* !defined(COMPILE_DL_MBSTRING) */
 PHP_INI_END()
 
 
