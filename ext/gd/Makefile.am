@@ -1,7 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
 SRC=gd.c gdcache.c gdttf.c
-INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LTLIBRARIES=@GD_STATIC@
 EXTRA_LTLIBRARIES=libphpext_gd.la gd.la
 libphpext_gd_la_SOURCES=$(SRC)

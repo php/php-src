@@ -1,5 +1,4 @@
 ## Process this file with automake to produce Makefile.in
-INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LTLIBRARIES=libphpext_standard.la
 libphpext_standard_la_SOURCES=\
 	base64.c basic_functions.c browscap.c crypt.c cyr_convert.c datetime.c \
