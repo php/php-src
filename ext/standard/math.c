@@ -25,6 +25,7 @@
 #include "phpmath.h"
 
 #include <math.h>
+#include <float.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -612,7 +613,7 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 		d = -d;
 	}
 	dec = MAX(0,dec);
-	tmpbuf = (char *) emalloc(32+dec);
+	tmpbuf = (char *) emalloc(1+DBL_MAX_10_EXP+1+dec+1);
 	
 	tmplen=sprintf(tmpbuf,"%.*f",dec,d);
 
