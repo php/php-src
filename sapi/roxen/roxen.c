@@ -473,7 +473,7 @@ static zend_module_entry php_roxen_module = {
 
 static int php_roxen_startup(sapi_module_struct *sapi_module)
 {
-  if(php_module_startup(sapi_module, &php_roxen_module) == FAILURE) {
+  if(php_module_startup(sapi_module, &php_roxen_module, 1) == FAILURE) {
     return FAILURE;
   } else {
     return SUCCESS;
