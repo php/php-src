@@ -56,6 +56,7 @@ PEAR Installer:
 * Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
 * Bug #249 installing from an url doesnt work
 * Bug #248 --force command does not work as expected
+* Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
 
     </notes>
     <provides type="class" name="OS_Guess" />
