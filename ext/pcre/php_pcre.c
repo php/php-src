@@ -774,7 +774,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 	zval		**regex_entry_ptr,
 				*regex_entry,
 				**replace_entry_ptr,
-				*replace_entry;
+				*replace_entry = NULL;
 	char		*replace_value = NULL,
 				*subject_value,
 				*result;
@@ -789,15 +789,20 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 		
 		zend_hash_internal_pointer_reset(regex->value.ht);
 
-		if (replace->type == IS_ARRAY)
+		if (replace->type == IS_ARRAY) {
 			zend_hash_internal_pointer_reset(replace->value.ht);
+			MAKE_STD_ZVAL(replace_entry);
+		}
 		else
 			/* Set replacement value to the passed one */
 			replace_value = replace->value.str.val;
-		
+
+		MAKE_STD_ZVAL(regex_entry);
+				
 		/* For each entry in the regex array, get the entry */
 		while (zend_hash_get_current_data(regex->value.ht, (void **)&regex_entry_ptr) == SUCCESS) {
-			regex_entry = *regex_entry_ptr;
+			*regex_entry = **regex_entry_ptr;
+			zval_copy_ctor(regex_entry);
 
 			/* Make sure we're dealing with strings. */	
 			convert_to_string(regex_entry);
@@ -806,7 +811,8 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 			if (replace->type == IS_ARRAY) {
 				/* Get current entry */
 				if (zend_hash_get_current_data(replace->value.ht, (void **)&replace_entry_ptr) == SUCCESS) {
-					replace_entry = *replace_entry_ptr;
+					*replace_entry = **replace_entry_ptr;
+					zval_copy_ctor(replace_entry);
 					
 					/* Make sure we're dealing with strings. */	
 					convert_to_string(replace_entry);
@@ -830,9 +836,15 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 				subject_value = result;
 			}
 			
+			if (replace->type == IS_ARRAY)
+				zval_dtor(replace_entry);
+			zval_dtor(regex_entry);
 			zend_hash_move_forward(regex->value.ht);
 		}
 
+		if (replace->type == IS_ARRAY)
+			efree(replace_entry);
+		efree(regex_entry);
 		return subject_value;
 	}
 	else {
@@ -857,6 +869,8 @@ PHP_FUNCTION(preg_replace)
 				   **subject_entry_ptr,
 					*subject_entry;
 	char			*result;
+	char			*string_key;
+	ulong			 num_key;
 	
 	/* Get function parameters and do error-checking. */
 	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &regex, &replace, &subject) == FAILURE) {
@@ -867,17 +881,37 @@ PHP_FUNCTION(preg_replace)
 	if ((*subject)->type == IS_ARRAY) {
 		array_init(return_value);
 		zend_hash_internal_pointer_reset((*subject)->value.ht);
-		
+
+		MAKE_STD_ZVAL(subject_entry);
+				
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data((*subject)->value.ht, (void **)&subject_entry_ptr) == SUCCESS) {
-			subject_entry = *subject_entry_ptr;
+			*subject_entry = **subject_entry_ptr;
+			zval_copy_ctor(subject_entry);
 			
 			if ((result = _php_replace_in_subject(*regex, *replace, subject_entry)) != NULL)
-				add_next_index_string(return_value, result, 0);
+			{
+				/* Add to return array */
+				switch(zend_hash_get_current_key((*subject)->value.ht, &string_key, &num_key))
+				{
+					case HASH_KEY_IS_STRING:
+						add_assoc_string(return_value, string_key, result, 0);
+						efree(string_key);
+						break;
+
+					case HASH_KEY_IS_LONG:
+						add_index_string(return_value, num_key, result, 0);
+						break;
+				}
+			}
 		
+			zval_dtor(subject_entry);
+			
 			zend_hash_move_forward((*subject)->value.ht);
 		}
+		
+		efree(subject_entry);
 	}
 	else {	/* if subject is not an array */
 		if ((result = _php_replace_in_subject(*regex, *replace, *subject)) != NULL) {
