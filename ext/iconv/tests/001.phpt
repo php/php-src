@@ -6,13 +6,13 @@ iconv test
 --GET--
 --FILE--
 <?php
-echo "iconv extension is available";
-$test = "Stig Sèª¥her Bakken";
-print "$test\n";
-printf("%s\n", iconv("iso-8859-1", "utf-8", $test));
+echo "iconv extension is available\n";
+$test = "æøå";
+printf("ISO-8859-1: %s\nUTF-8: %s\n",
+       $test, iconv("ISO-8859-1", "UTF-8", $test));
 
 ?>
 --EXPECT--
 iconv extension is available
-Stig Sèª¥her Bakken
-Stig Sï¾ƒï½¦ther Bakken
+ISO-8859-1: æøå
+UTF-8: Ã¦Ã¸Ã¥
