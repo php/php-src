@@ -1919,7 +1919,7 @@ SOURCE="..\php.ini-dist"
 # End Source File
 # Begin Source File
 
-SOURCE="..\php.ini-optimized"
+SOURCE="..\php.ini-recommended"
 # End Source File
 # Begin Source File
 
