@@ -1979,7 +1979,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 
 	/* Get the argument count and check it */	
 	argc = ZEND_NUM_ARGS();
-	if (argc < 2) {
+	if (argc < 1) {
 		WRONG_PARAM_COUNT;
 	}
 	
