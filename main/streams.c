@@ -1639,6 +1639,10 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 }
 /* }}} */
 
+#ifndef S_ISREG
+#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
+#endif
+
 /* {{{ php_stream_fopen */
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path, int options STREAMS_DC TSRMLS_DC)
 {
