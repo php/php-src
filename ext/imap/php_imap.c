@@ -182,6 +182,12 @@ ZEND_GET_MODULE(imap)
 /* True globals, no need for thread safety */
 static int le_imap;
 
+#define PHP_IMAP_CHECK_MSGNO(msgindex)	\
+	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");	\
+		RETURN_FALSE;	\
+	}	\
+
 /* {{{ mail_close_it
  */
 static void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -1529,11 +1535,8 @@ PHP_FUNCTION(imap_headerinfo)
 		convert_to_string_ex(defaulthost);
 	}
 	
-	if (!Z_LVAL_PP(msgno) || Z_LVAL_PP(msgno) < 1 || (unsigned) Z_LVAL_PP(msgno) > imap_le_struct->imap_stream->nmsgs) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
-		RETURN_FALSE;
-	}
-	
+	PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
+
 	if (mail_fetchstructure(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL)) {
 		cache = mail_elt(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
 	} else {
@@ -1779,10 +1782,7 @@ PHP_FUNCTION(imap_fetchstructure)
 	} else {
 		msgindex = Z_LVAL_PP(msgno);
 	}
-	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
-		RETURN_FALSE;
-	}
+	PHP_IMAP_CHECK_MSGNO(msgindex);
 
 	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
@@ -1816,6 +1816,8 @@ PHP_FUNCTION(imap_fetchbody)
 	if (myargc == 4) {
 		convert_to_long_ex(flags);
 	}
+ 
+ 	PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
  
 	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(flags) : NIL);
 
@@ -2512,10 +2514,7 @@ PHP_FUNCTION(imap_fetchheader)
 		msgindex = Z_LVAL_PP(msgno);
 	}
 
-	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
-		RETURN_FALSE;
-	}
+	PHP_IMAP_CHECK_MSGNO(msgindex);
 
 	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
 }
