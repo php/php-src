@@ -21,6 +21,14 @@ ob_start();
 var_dump($o);
 $y=ob_get_contents();
 ob_end_clean();
-echo ($x==$y) ? 'success':'failure'; ?>
+if ($x == $y) {
+    print "success";
+} else {
+    print "failure
+x=$x
+y=$y
+";
+}
+?>
 --EXPECT--
 success
