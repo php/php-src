@@ -1,3 +1,75 @@
+2002-06-17  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+2002-06-17  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: Fix.
+
+    * NEWS: *** empty log message ***
+
+    * ext/standard/reg.c: MFH
+
+    * ext/standard/reg.c: Applied fix for #17764.
+
+2002-06-17  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+    Dropped case insentive ext search in PEAR::loadExtension()
+
+    * pear/PEAR.php: Typo in the folding mark
+
+2002-06-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php:
+    * php-4.2.1-installer.exe for Windows is installed in c:\php by
+      default, but it has PHP_SYSCONFDIR set to c:\php4.  workaround.
+
+2002-06-17  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Dependency.php:
+    Use the new PEAR::loadExtension() in checkExtension() instead
+    of the "hack"
+
+    * pear/PEAR.php:
+    Added PEAR::loadExtension($ext) - OS independant PHP extension load
+
+
+    * pear/PEAR.php: trailing ws
+
+2002-06-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/formatted_print.c:
+    making printf/sprintf locale-aware without external dependencies
+
+    * ext/standard/string.c:
+    fixed return types for ucwords/ucfirst when passed an empty string
+
+2002-06-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * doh
+
+2002-06-17  Alan Knowles  <alan@akbkhome.com>
+
+    * pear/PEAR/Common.php: Fixing for the coding standard :)
+
+2002-06-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+    * add xmlrpc request to debug output (verbosity level 4+)
+
+2002-06-17  Alan Knowles  <alan@akbkhome.com>
+
+    * pear/PEAR/Common.php:
+    Added Dependancy check on XML - previously pear installer failed silently
+
+2002-06-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dbase/dbase.c:
+    - Made dbase_get_record() and dbase_get_record_with_names use same backend
+      function as they both do same thing, just the output is different.
+
+      Fixes also bug #17762 as side effect.
+
 2002-06-16  Stefan Esser  <s.esser@e-matters.de>
 
     * ext/standard/link.c: Fixed Bug #17790
