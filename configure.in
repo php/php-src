@@ -1243,7 +1243,7 @@ cat <<X
 X
   fi
 
-  if test "$MYSQL_MODULE_TYPE" = "builtin" && test "$PHP_SAPI" != "cgi" && test "$PHP_SAPI" != "cli" && test $php_multiple_shlib_versions_ok != "yes"; then
+  if test "$MYSQL_MODULE_TYPE" = "builtin" && test "$PHP_SAPI" != "cgi" && test "$PHP_SAPI" != "cli" && test "$php_multiple_shlib_versions_ok" != "yes"; then
 cat <<X
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
