@@ -361,7 +361,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
 asctime_r \
 chroot \
-crypt \
 ctime_r \
 cuserid \
 flock \
@@ -469,8 +468,8 @@ else
 fi
 
 PHP_ARG_WITH(layout,[layout of installed files],
-[ --with-layout=TYPE      Sets how installed files will be laid out.  Type is
-                         one of "PHP" (default) or "GNU"], PHP)
+[  --with-layout=TYPE      Sets how installed files will be laid out.  Type is
+                          one of "PHP" (default) or "GNU"], PHP)
 
 PHP_ARG_WITH(config-file-path,[path to configuration file],
 [  --with-config-file-path=PATH  
@@ -626,7 +625,10 @@ AC_CHECK_LIB(crypt, crypt, [
 divert(5)
 
 PHP_CONFIGURE_PART(Configuring extensions)
-	
+
+# zlib checks have to be here
+sinclude(./ext/zlib/zlib.m4)
+
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
