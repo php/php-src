@@ -29,6 +29,7 @@
 /* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
 #ifdef HAVE_LIBJPEG
 #include "gdhelpers.h"
+#undef HAVE_STDLIB_H
 
 /* 1.8.1: remove dependency on jinclude.h */
 #include "jpeglib.h"
