@@ -120,7 +120,7 @@ typedef struct {
 
 #ifdef ZTS
 #define FG(v) TSRMG(file_globals_id, php_file_globals *, v)
-extern int file_globals_id;
+extern PHPAPI int file_globals_id;
 #else
 #define FG(v) (file_globals.v)
 extern php_file_globals file_globals;
