@@ -278,36 +278,70 @@ EXEC SQL END DECLARE SECTION;
 	return(ifx_err_msg);
 }
 
+static void ifx_do_close(link)
+EXEC SQL BEGIN DECLARE SECTION;
+	PARAMETER char *link;
+EXEC SQL END DECLARE SECTION;
+{
+
+	EXEC SQL SET CONNECTION :link;
+                
+	if (ifx_check() >= 0) {
+		EXEC SQL DISCONNECT :link;
+
+		/* check if were in a transaction */
+		if (SQLCODE == -1800)   {
+			EXEC SQL SET CONNECTION :link;
+			EXEC SQL ROLLBACK WORK;
+			if (ifx_check() == 0)   {
+				/* DISCONNECT again, after rollback */
+				EXEC SQL DISCONNECT :link;
+				if (ifx_check() < 0)   {
+					IFXG(sv_sqlcode) = SQLCODE;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Disconnect link %s after Automatic Rollback fails (%s)", link, ifx_error(link));
+				}
+			}
+			if (ifx_check() < 0)   {
+				/* CLOSE database if rollback or disconnect fails */
+				EXEC SQL CLOSE DATABASE;
+				if (ifx_check() < 0)   {
+					IFXG(sv_sqlcode) = SQLCODE;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Close database fails %s (%s)", link, ifx_error(link));
+				}
+			}
+		}
+		else if (SQLCODE < 0)   {
+			IFXG(sv_sqlcode) = SQLCODE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Disconnect link %s fails (%s)", link, ifx_error(link));
+		}
+	}       
+	else   {
+		IFXG(sv_sqlcode) = SQLCODE;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Set connection %s fails (%s)", link, ifx_error(link));
+	}
+
+}
+
 static void _close_ifx_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
-EXEC SQL END DECLARE SECTION;
 
 	link=(char *)rsrc->ptr;
 
-	EXEC SQL SET CONNECTION :link;
-	if (ifx_check() >= 0) {
-		EXEC SQL close database;
-		EXEC SQL DISCONNECT CURRENT;
-	}
+	ifx_do_close(link);
+
 	efree(link);
 	IFXG(num_links)--;
 }
 
 static void _close_ifx_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
-EXEC SQL END DECLARE SECTION;
 
 	link = (char *)rsrc->ptr;
 
-	EXEC SQL SET CONNECTION :link;
-	if (ifx_check() >= 0) {
-		EXEC SQL close database;
-		EXEC SQL DISCONNECT CURRENT;
-	}
+	ifx_do_close(link);
+
 	free(link);
 	IFXG(num_persistent)--;
 	IFXG(num_links)--;
