@@ -137,7 +137,7 @@ PHP_FUNCTION(var_dump)
 }
 /* }}} */
 
-/* {{{ zval_debug_dump */
+/* {{{ debug_zval_dump */
 
 static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
@@ -151,11 +151,11 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	} else { /* string key */
 		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
 	}
-	php_zval_debug_dump(zv, level + 2 TSRMLS_CC);
+	php_debug_zval_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 
-void php_zval_debug_dump(zval **struc, int level TSRMLS_DC)
+void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
 
@@ -210,9 +210,9 @@ head_done:
 
 /* }}} */
 
-/* {{{ proto void zval_debug_dump(mixed var)
+/* {{{ proto void debug_zval_dump(mixed var)
    Dumps a string representation of an internal zend value to output. */
-PHP_FUNCTION(zval_debug_dump)
+PHP_FUNCTION(debug_zval_dump)
 {
 	zval ***args;
 	int argc;
@@ -227,7 +227,7 @@ PHP_FUNCTION(zval_debug_dump)
 	}
 	
 	for (i=0; i<argc; i++)
-		php_zval_debug_dump(args[i], 1 TSRMLS_CC);
+		php_debug_zval_dump(args[i], 1 TSRMLS_CC);
 	
 	efree(args);
 }
