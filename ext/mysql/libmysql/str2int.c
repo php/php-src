@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
   str2int(src, radix, lower, upper, &val)
   converts the string pointed to by src to an integer and stores it in

@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* This is the main include file that should included 'first' in every
    C file. */
@@ -7,17 +7,19 @@
 #ifndef _global_h
 #define _global_h
 
-#if defined(__WIN32__) || defined(WIN32)
-#include <config-win32.h>
+#if defined(_WIN32) || defined(_WIN64)
+#include <config-win.h>
 #else
 #include <my_config.h>
 #endif
-#if defined(__cplusplus) && defined(inline)
-#undef inline					/* fix configure problem */
+#if defined(__cplusplus)
+#if defined(inline)
+#undef inline				/* fix configure problem */
 #endif
+#endif /* _cplusplus */
 
 /* The client defines this to avoid all thread code */
-#if defined(UNDEF_THREADS_HACK) && !defined(THREAD_SAFE_CLIENT)
+#if defined(UNDEF_THREADS_HACK)
 #undef THREAD
 #undef HAVE_mit_thread
 #undef HAVE_LINUXTHREADS
@@ -33,9 +35,11 @@
 #ifndef __STDC_EXT__
 #define __STDC_EXT__ 1          /* To get large file support on hpux */
 #endif
-/* #define _GNU_SOURCE 1 */	/* Get define for strtok_r on Alpha-linux */
+#if defined(THREAD) && defined(HAVE_LINUXTHREADS) && defined(HAVE_PTHREAD_RWLOCK_RDLOCK)
+#define _GNU_SOURCE 1
+#endif
 
-#if defined(THREAD) && !defined(__WIN32__)
+#if defined(THREAD) && !defined(__WIN__)
 #define _POSIX_PTHREAD_SEMANTICS /* We want posix threads */
 /* was #if defined(HAVE_LINUXTHREADS) || defined(HAVE_DEC_THREADS) || defined(HPUX) */
 #if !defined(SCO)
@@ -71,10 +75,34 @@
 #undef HAVE_PWRITE
 #endif
 
+#ifdef UNDEF_HAVE_GETHOSTBYNAME_R		/* For OSF4.x */
+#undef HAVE_GETHOSTBYNAME_R
+#endif
+#ifdef UNDEF_HAVE_INITGROUPS			/* For AIX 4.3 */
+#undef HAVE_INITGROUPS
+#endif
+
 /* Fix a bug in gcc 2.8.0 on IRIX 6.2 */
 #if SIZEOF_LONG == 4 && defined(__LONG_MAX__)
 #undef __LONG_MAX__             /* Is a longlong value in gcc 2.8.0 ??? */
 #define __LONG_MAX__ 2147483647
+#endif
+
+/* egcs 1.1.2 has a problem with memcpy on Alpha */
+#if defined(__GNUC__) && defined(__alpha__) && ! (__GNUC__ > 2 || (__GNUC__ == 2 &&  __GNUC_MINOR__ >= 95))
+#define BAD_MEMCPY
+#endif
+
+/* In Linux-alpha we have atomic.h if we are using gcc */
+#if defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__alpha__) && (__GNUC__ > 2 || ( __GNUC__ == 2 &&  __GNUC_MINOR__ >= 95))
+#define HAVE_ATOMIC_ADD
+#define HAVE_ATOMIC_SUB
+#endif
+
+/* In Linux-ia64 including atomic.h will give us an error */
+#if defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__ia64__)
+#undef HAVE_ATOMIC_ADD
+#undef HAVE_ATOMIC_SUB
 #endif
 
 #if defined(_lint) && !defined(lint)
@@ -131,6 +159,10 @@
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+#ifdef HAVE_ATOMIC_ADD
+#define __SMP__
+#include <asm/atomic.h>
+#endif
 
 /* Go around some bugs in different OS and compilers */
 #if defined(_HPUX_SOURCE) && defined(HAVE_SYS_STREAM_H)
@@ -167,6 +199,7 @@
 #endif
 
 /* Define void to stop lint from generating "null effekt" comments */
+#ifndef DONT_DEFINE_VOID
 #ifdef _lint
 int	__void__;
 #define VOID(X)		(__void__ = (int) (X))
@@ -174,6 +207,7 @@ int	__void__;
 #undef VOID
 #define VOID(X)		(X)
 #endif
+#endif /* DONT_DEFINE_VOID */
 
 #if defined(_lint) || defined(FORCE_INIT_OF_VARS)
 #define LINT_INIT(var)	var=0			/* No uninitialize-warning */
@@ -242,6 +276,11 @@ typedef unsigned short ushort;
 #endif
 
 #include <dbug.h>
+#ifndef DBUG_OFF
+#define dbug_assert(A) assert(A)
+#else
+#define dbug_assert(A)
+#endif
 
 #define MIN_ARRAY_SIZE	0	/* Zero or One. Gcc allows zero*/
 #define ASCII_BITS_USED 8	/* Bit char used */
@@ -278,7 +317,7 @@ typedef int	(*qsort_cmp)(const void *,const void *);
 #define qsort_t RETQSORTTYPE	/* Broken GCC cant handle typedef !!!! */
 #endif
 #ifdef HAVE_mit_thread
-typedef int size_socket;	/* Type of last arg to accept */
+#define size_socket socklen_t	/* Type of last arg to accept */
 #else
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -359,7 +398,7 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define NO_PISAM		/* Not needed anymore */
 #define NO_MISAM		/* Not needed anymore */
 #define NO_HASH			/* Not needed anymore */
-#ifdef __WIN32__
+#ifdef __WIN__
 #define NO_DIR_LIBRARY		/* Not standar dir-library */
 #define USE_MY_STAT_STRUCT	/* For my_lib */
 #endif
@@ -381,7 +420,7 @@ extern void		init_my_atof(void);
 extern double		my_atof(const char*);
 #endif
 #undef remove		/* Crashes MySQL on SCO 5.0.0 */
-#ifndef __WIN32__
+#ifndef __WIN__
 #define closesocket(A)	close(A)
 #ifndef ulonglong2double
 #define ulonglong2double(A) ((double) (A))
@@ -401,7 +440,7 @@ extern double		my_atof(const char*);
 
 #ifdef HAVE_LINUXTHREADS
 /* #define pthread_sigmask(A,B,C) sigprocmask((A),(B),(C)) */
-#define sigset(A,B) signal((A),(B))
+/* #define sigset(A,B) signal((A),(B)) */
 #endif
 
 /* Remove some things that mit_thread break or doesn't support */
@@ -470,6 +509,8 @@ typedef long		my_ptrdiff_t;
 #define NEAR				/* Who needs segments ? */
 #define FAR				/* On a good machine */
 #define HUGE_PTR
+#endif
+#ifndef STDCALL
 #define STDCALL
 #endif
 
@@ -527,7 +568,9 @@ typedef long		longlong;
 #endif
 #undef  SIZEOF_OFF_T
 #define SIZEOF_OFF_T	    8
-#endif
+#else
+#define SYSTEM_SIZEOF_OFF_T SIZEOF_OFF_T
+#endif /* USE_RAID */
 
 #if SIZEOF_OFF_T > 4
 typedef ulonglong my_off_t;
@@ -535,7 +578,9 @@ typedef ulonglong my_off_t;
 typedef unsigned long my_off_t;
 #endif
 #define MY_FILEPOS_ERROR	(~(my_off_t) 0)
-/*typedef off_t os_off_t;*/
+#ifndef __WIN__
+typedef off_t os_off_t;
+#endif
 
 typedef uint8		int7;	/* Most effective integer 0 <= x <= 127 */
 typedef short		int15;	/* Most effective integer 0 <= x <= 32767 */
@@ -723,8 +768,8 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
                               ((byte*) &def_temp)[7]=(M)[0];\
 			      (V) = def_temp; }
 #else
-#define float4get(V,M)   memcpy((byte*) &V,(byte*) (M),sizeof(float))
-#define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
+#define float4get(V,M)   memcpy_fixed((byte*) &V,(byte*) (M),sizeof(float))
+#define float4store(V,M) memcpy_fixed((byte*) V,(byte*) (&M),sizeof(float))
 #define float8get(V,M)   doubleget((V),(M))
 #define float8store(V,M) doublestore((V),(M))
 #endif /* WORDS_BIGENDIAN */
@@ -775,12 +820,24 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
 #define shortstore(T,V) int2store(T,V)
 #define longstore(T,V)	int4store(T,V)
 #ifndef doubleget
-#define doubleget(V,M)	 memcpy((byte*) &V,(byte*) (M),sizeof(double))
-#define doublestore(T,V) memcpy((byte*) (T),(byte*) &V,sizeof(double))
+#define doubleget(V,M)	 memcpy_fixed((byte*) &V,(byte*) (M),sizeof(double))
+#define doublestore(T,V) memcpy_fixed((byte*) (T),(byte*) &V,sizeof(double))
 #endif
-#define longlongget(V,M) memcpy((byte*) &V,(byte*) (M),sizeof(ulonglong))
-#define longlongstore(T,V) memcpy((byte*) (T),(byte*) &V,sizeof(ulonglong))
+#define longlongget(V,M) memcpy_fixed((byte*) &V,(byte*) (M),sizeof(ulonglong))
+#define longlongstore(T,V) memcpy_fixed((byte*) (T),(byte*) &V,sizeof(ulonglong))
 
 #endif /* WORDS_BIGENDIAN */
+
+/* sprintf does not always return the number of bytes :- */
+#ifdef SPRINTF_RETURNS_INT
+#define my_sprintf(buff,args) sprintf args
+#else
+#ifdef SPRINTF_RETURNS_PTR
+#define my_sprintf(buff,args) ((int)(sprintf args - buff))
+#else
+#define my_sprintf(buff,args) sprintf args,strlen(buff)
+#endif
+#endif
+
 
 #endif /* _global_h */

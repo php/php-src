@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include "mysys_err.h"
@@ -30,6 +30,7 @@ const char * NEAR globerrs[GLOBERRS]=
   "%d files and %d streams is left open\n",
   "Disk is full writing '%s'. Waiting for someone to free space...",
   "Can't create directory '%s' (Errcode: %d)",
+  "Character set '%s' is not a compiled character set and is not specified in the '%s' file"
 };
 
 void init_glob_errs(void)
@@ -64,5 +65,6 @@ void init_glob_errs()
   EE(EE_OPEN_WARNING)	= "%d files and %d streams is left open\n";
   EE(EE_DISK_FULL)	= "Disk is full writing '%s'. Waiting for someone to free space...";
   EE(EE_CANT_MKDIR)	="Can't create directory '%s' (Errcode: %d)";
+  EE(EE_UNKNOWN_CHARSET)= "Character set is not a compiled character set and is not specified in the %s file";
 }
 #endif

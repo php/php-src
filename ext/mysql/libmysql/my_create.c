@@ -1,12 +1,12 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #define USES_TYPES
 #include "mysys_priv.h"
 #include <my_dir.h>
 #include "mysys_err.h"
 #include <errno.h>
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
 #include <share.h>
 #endif
 
@@ -34,7 +34,7 @@ File my_create(const char *FileName, int CreateFlags, int access_flags,
 #elif defined(VMS)
   fd = open((my_string) FileName, access_flags | O_CREAT, 0,
 	    "ctx=stm","ctx=bin");
-#elif defined(MSDOS) || defined(__WIN32__)
+#elif defined(MSDOS) || defined(__WIN__)
   if (access_flags & O_SHARE)
     fd = sopen((my_string) FileName, access_flags | O_CREAT | O_BINARY,
 	       SH_DENYNO, MY_S_IREAD | MY_S_IWRITE);
@@ -48,11 +48,15 @@ File my_create(const char *FileName, int CreateFlags, int access_flags,
   if (fd >= 0)
   {
     if ((int) fd >= MY_NFILE)
+    {
+      DBUG_PRINT("exit",("fd: %d",fd));
       DBUG_RETURN(fd);				/* safeguard */
+    }
     if ((my_file_info[fd].name = (char*) my_strdup(FileName,MyFlags)))
     {
       my_file_opened++;
       my_file_info[fd].type = FILE_BY_CREATE;
+      DBUG_PRINT("exit",("fd: %d",fd));
       DBUG_RETURN(fd);
     }
     VOID(my_close(fd,MyFlags));

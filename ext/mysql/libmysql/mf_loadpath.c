@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include <m_string.h>
@@ -16,7 +16,8 @@ my_string my_load_path(my_string to, const char *path,
 {
   char buff[FN_REFLEN];
   DBUG_ENTER("my_load_path");
-  DBUG_PRINT("enter",("path: %s  prefix: %d",path,own_path_prefix));
+  DBUG_PRINT("enter",("path: %s  prefix: %s",path,
+		      own_path_prefix ? own_path_prefix : ""));
 
   if ((path[0] == FN_HOMELIB && path[1] == FN_LIBCHAR) ||
       test_if_hard_path(path))

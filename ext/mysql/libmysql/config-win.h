@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /* Defines for Win32 to make it compatible for MySQL */
 
 #include <sys/locking.h>
@@ -7,14 +10,21 @@
 #include <io.h>
 #include <malloc.h>
 
-#ifdef __NT__
+#if defined(__NT__)
 #define	SYSTEM_TYPE	"NT"
+#elif defined(__WIN2000__)
+#define	SYSTEM_TYPE	"WIN2000"
 #else
 #define	SYSTEM_TYPE	"Win95/Win98"
 #endif
-#define MACHINE_TYPE	"i586"		/* Define to machine type name */
-#ifndef __WIN32__
-#define __WIN32__                       /* To make it easier in VC++ */
+
+#ifdef _WIN32
+#define MACHINE_TYPE	"i32"		/* Define to machine type name */
+#else
+#define MACHINE_TYPE	"i64"		/* Define to machine type name */
+#endif
+#ifndef __WIN__
+#define __WIN__                       /* To make it easier in VC++ */
 #endif
 
 /* File and lock constants */
@@ -61,7 +71,6 @@
 
 typedef unsigned short  ushort;
 typedef unsigned int    uint;
-typedef unsigned int size_t;
 typedef unsigned __int64 ulonglong;	/* Microsofts 64 bit types */
 typedef __int64	longlong;
 typedef int sigset_t;
@@ -70,6 +79,12 @@ typedef int sigset_t;
    Use my_off_t or os_off_t instead */
 typedef	long off_t;
 typedef __int64 os_off_t;
+#ifdef _WIN64
+typedef UINT_PTR rf_SetTimer;
+#else
+typedef unsigned int size_t;
+typedef uint rf_SetTimer;
+#endif
 
 #define Socket_defined
 #define my_socket SOCKET
@@ -98,6 +113,11 @@ typedef __int64 os_off_t;
 #define HAVE_NAMED_PIPE			/* We can only create pipes on NT */
 #endif
 
+/* Use all character sets in MySQL */
+#define USE_MB 1
+#define USE_MB_IDENT 1
+#define USE_STRCOLL 1
+ 
 /* Convert some simple functions to Posix */
 
 #define sigset(A,B) signal((A),(B))
@@ -117,6 +137,11 @@ inline double rint(double nr)
   return (((c-nr) >= (nr-f)) ? f :c);
 }
 
+#ifdef _WIN64
+#define ulonglong2double(A) ((double) (A))
+#define my_off_t2double(A)  ((double) (A))
+
+#else
 inline double ulonglong2double(ulonglong value)
 {
   longlong nr=(longlong) value;
@@ -124,11 +149,11 @@ inline double ulonglong2double(ulonglong value)
     return (double) nr;
   return (18446744073709551616.0 + (double) nr);
 }
-
 #define my_off_t2double(A) ulonglong2double(A)
+#endif /* _WIN64 */
 #else
 #define inline __inline
-#endif
+#endif /* __cplusplus */
 
 #if SIZEOF_OFF_T > 4
 #define lseek(A,B,C) _lseeki64((A),(longlong) (B),(C))
@@ -194,6 +219,7 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_MEMMOVE
 #define HAVE_GETCWD
 #define HAVE_TELL
+#define HAVE_TZNAME
 #define HAVE_PUTENV
 #define HAVE_SELECT
 #define HAVE_SETLOCALE
@@ -204,9 +230,12 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_RINT               /* defined in this file */
 #define NO_FCNTL_NONBLOCK       /* No FCNTL */
 #define HAVE_ALLOCA
-#define HAVE_STRPBRK
-#define HAVE_STRSTR
-/*#define HAVE_COMPRESS*/
+#define HAVE_COMPRESS
+
+#ifdef NOT_USED
+#define HAVE_SNPRINTF		/* Gave link error */
+#define _snprintf snprintf
+#endif
 
 #ifdef _MSC_VER
 #define HAVE_LDIV		/* The optimizer breaks in zortech for ldiv */
@@ -219,12 +248,15 @@ inline double ulonglong2double(ulonglong value)
 
 /* MYSQL OPTIONS */
 
+#ifdef _CUSTOMCONFIG_
+#include <custom_conf.h>
+#else
 #define	DEFAULT_MYSQL_HOME	"c:\\mysql"
 #define PACKAGE		 	"mysql"
-#define PROTOCOL_VERSION	10
 #define DEFAULT_BASEDIR		"C:\\"
-#define MY_CHARSET_CURRENT	MY_CHARSET_LATIN1
-#define MY_CHARSET		"isolatin1"
+#define SHAREDIR		"share"
+#define DEFAULT_CHARSET_HOME	"C:/mysql/"
+#endif
 
 /* File name handling */
 
@@ -240,6 +272,13 @@ inline double ulonglong2double(ulonglong value)
 /* The following is only used for statistics, so it should be good enough */
 #ifdef __NT__  /* This should also work on Win98 but .. */
 #define thread_safe_add(V,C,L) InterlockedExchangeAdd((long*) &(V),(C))
+#define thread_safe_sub(V,C,L) InterlockedExchangeAdd((long*) &(V),-(long) (C))
+#define statistic_add(V,C,L) thread_safe_add((V),(C),(L))
 #else
-#define thread_safe_add(V,C,L) InterlockedExchange((long*) &(V),(V)+(C))
+#define thread_safe_add(V,C,L) \
+	pthread_mutex_lock((L)); (V)+=(C); pthread_mutex_unlock((L));
+#define thread_safe_sub(V,C,L) \
+	pthread_mutex_lock((L)); (V)-=(C); pthread_mutex_unlock((L));
+#define statistic_add(V,C,L)     (V)+=(C)
 #endif
+#define statistic_increment(V,L) thread_safe_increment((V),(L))

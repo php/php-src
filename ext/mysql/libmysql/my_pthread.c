@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Functions to get threads more portable */
 
@@ -9,7 +9,7 @@
 #include <m_string.h>
 #include <thr_alarm.h>
 #include <assert.h>
-#if !defined(MSDOS) && !defined(__WIN32__)
+#if !defined(MSDOS) && !defined(__WIN__)
 #include <netdb.h>
 #endif
 
@@ -86,7 +86,7 @@ int my_pthread_create_detached=1;
 
 #if defined(HAVE_NONPOSIX_SIGWAIT) || defined(HAVE_DEC_3_2_THREADS)
 
-int my_sigwait(sigset_t *set,int *sig)
+int my_sigwait(const sigset_t *set,int *sig)
 {
   int signal=sigwait(set);
   if (signal < 0)
@@ -107,7 +107,7 @@ struct tm *localtime_r(const time_t *clock, struct tm *res)
   struct tm *tmp;
   pthread_mutex_lock(&LOCK_localtime_r);
   tmp=localtime(clock);
-  memcpy(res,tmp,sizeof(*tmp));
+  *res= *tmp;
   pthread_mutex_unlock(&LOCK_localtime_r);
   return res;
 }
@@ -131,7 +131,7 @@ struct tm *localtime_r(const time_t *clock, struct tm *res)
 ** Author: Gary Wisniewski <garyw@spidereye.com.au>, much modified by Monty
 ****************************************************************************/
 
-#if !defined(HAVE_SIGWAIT) && !defined(HAVE_mit_thread) && !defined(sigwait) && !defined(__WIN32__) && !defined(HAVE_rts_threads) && !defined(HAVE_NONPOSIX_SIGWAIT) && !defined(HAVE_DEC_3_2_THREADS)
+#if !defined(HAVE_SIGWAIT) && !defined(HAVE_mit_thread) && !defined(sigwait) && !defined(__WIN__) && !defined(HAVE_rts_threads) && !defined(HAVE_NONPOSIX_SIGWAIT) && !defined(HAVE_DEC_3_2_THREADS)
 
 #if !defined(DONT_USE_SIGSUSPEND)
 
@@ -151,7 +151,7 @@ void sigwait_setup(sigset_t *set)
 
   sact.sa_flags = 0;
   sact.sa_handler = px_handle_sig;
-  memcpy(&sact.sa_mask,set,sizeof(*set));	/* handler isn't thread_safe */
+  memcpy_fixed(&sact.sa_mask,set,sizeof(*set));	/* handler isn't thread_safe */
   sigemptyset(&unblock_mask);
   pthread_sigmask(SIG_UNBLOCK,(sigset_t*) 0,&rev_sigwait_set);
 
@@ -177,7 +177,7 @@ void sigwait_setup(sigset_t *set)
       }
     }
   }
-  memcpy(&sigwait_set,set,sizeof(*set));
+  memcpy_fixed(&sigwait_set,set,sizeof(*set));
   pthread_sigmask(SIG_BLOCK,(sigset_t*) set,(sigset_t*) 0);
   pthread_sigmask(SIG_UNBLOCK,&unblock_mask,(sigset_t*) 0);
 }
@@ -267,7 +267,7 @@ void *sigwait_thread(void *set_arg)
   struct sigaction sact;
   sact.sa_flags = 0;
   sact.sa_handler = sigwait_handle_sig;
-  memcpy(&sact.sa_mask,set,sizeof(*set));	/* handler isn't thread_safe */
+  memcpy_fixed(&sact.sa_mask,set,sizeof(*set));	/* handler isn't thread_safe */
   sigemptyset(&pending_set);
 
   for (i = 1; i <= sizeof(pending_set)*8; i++)
@@ -306,7 +306,7 @@ int sigwait(sigset_t *setp, int *sigp)
     pthread_cond_init(&COND_sigwait,NULL);
 
     pthread_attr_init(&thr_attr);
-    pthread_attr_setscope(&thr_attr,PTHREAD_SCOPE_SYSTEM);
+    pthread_attr_setscope(&thr_attr,PTHREAD_SCOPE_PROCESS);
     pthread_attr_setdetachstate(&thr_attr,PTHREAD_CREATE_DETACHED);
     pthread_attr_setstacksize(&thr_attr,8196);
     my_pthread_attr_setprio(&thr_attr,100);	/* Very high priority */

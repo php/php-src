@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* my_setwd() and my_getwd() works with intern_filenames !! */
 
@@ -9,7 +9,7 @@
 #ifdef HAVE_GETWD
 #include <sys/param.h>
 #endif
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
 #include <m_ctype.h>
 #include <dos.h>
 #include <direct.h>

@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*  File   : strcend.c
     Author : Michael Widenius:	ifdef MC68000
     Updated: 20 April 1984

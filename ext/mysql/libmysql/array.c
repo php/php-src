@@ -1,9 +1,9 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Handling of arrays that can grow dynamicly. */
 
-#if defined(WIN32) || defined(__WIN32__)
+#if defined(WIN32) || defined(__WIN__)
 #undef SAFEMALLOC				/* Problems with threads */
 #endif
 

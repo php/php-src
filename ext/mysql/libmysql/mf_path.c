@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include <m_string.h>
@@ -32,7 +32,7 @@ my_string my_path(my_string to, const char *progname,
     if (!test_if_hard_path(to))
     {
       if (!my_getwd(curr_dir,FN_REFLEN,MYF(0)))
-	bchange(to,0,curr_dir,strlen(curr_dir),strlen(to)+1);
+	bchange(to,0,curr_dir, (uint) strlen(curr_dir), (uint) strlen(to)+1);
     }
   }
   else
@@ -60,7 +60,7 @@ my_string my_path(my_string to, const char *progname,
 	/* test if file without filename is found in path */
 	/* Returns to if found and to has dirpart if found, else NullS */
 
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
 #define F_OK 0
 #define PATH_SEP ';'
 #define PROGRAM_EXTENSION ".exe"
@@ -93,7 +93,7 @@ static char *find_file_in_path(char *to, const char *name)
       }
     }
   }
-#ifdef __WIN32__
+#ifdef __WIN__
   to[0]=FN_CURLIB;
   strxmov(to+1,dir,name,ext,NullS);
   if (!access(to,F_OK))			/* Test in current dir */

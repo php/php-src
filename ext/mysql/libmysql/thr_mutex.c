@@ -1,18 +1,18 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* This makes a wrapper for mutex handling to make it easier to debug mutex */
 
 #include <global.h>
-#ifdef HAVE_LINUXTHREADS			/* Some extra safety */
-#define __USE_UNIX98
+#if defined(HAVE_LINUXTHREADS) && !defined (__USE_UNIX98)
+#define __USE_UNIX98			/* To get rw locks under Linux */
 #endif
 #include <m_string.h>
 #if defined(THREAD) && defined(SAFE_MUTEX)
-#undef SAFE_MUTEX		/* Avoid safe_mutex redefinitions */
+#undef SAFE_MUTEX			/* Avoid safe_mutex redefinitions */
 #include <my_pthread.h>
 
-
+#ifndef DO_NOT_REMOVE_THREAD_WRAPPERS
 /* Remove wrappers */
 #undef pthread_mutex_init
 #undef pthread_mutex_lock
@@ -23,15 +23,17 @@
 #ifdef HAVE_NONPOSIX_PTHREAD_MUTEX_INIT
 #define pthread_mutex_init(a,b) my_pthread_mutex_init((a),(b))
 #endif
+#endif /* DO_NOT_REMOVE_THREAD_WRAPPERS */
 
-int safe_mutex_init(safe_mutex_t *mp, const pthread_mutexattr_t *attr)
+int safe_mutex_init(safe_mutex_t *mp,
+		    const pthread_mutexattr_t *attr __attribute__((unused)))
 {
   bzero((char*) mp,sizeof(*mp));
 #ifdef HAVE_LINUXTHREADS			/* Some extra safety */
   {
     pthread_mutexattr_t tmp;
     pthread_mutexattr_init(&tmp);
-    pthread_mutexattr_settype(&tmp,PTHREAD_MUTEX_ERRORCHECK_NP);
+    pthread_mutexattr_setkind_np(&tmp,PTHREAD_MUTEX_ERRORCHECK_NP);
     pthread_mutex_init(&mp->global,&tmp);
     pthread_mutex_init(&mp->mutex, &tmp);
     pthread_mutexattr_destroy(&tmp);
@@ -183,16 +185,16 @@ int safe_cond_timedwait(pthread_cond_t *cond, safe_mutex_t *mp,
   return error;
 }
 
-int safe_mutex_destroy(safe_mutex_t *mp)
+int safe_mutex_destroy(safe_mutex_t *mp, const char *file, uint line)
 {
   if (mp->count != 0)
   {
-    fprintf(stderr,"safe_mutex: Trying to destroy a mutex that was locked at %s, line %d\n",
-	    mp->file,mp->line);
+    fprintf(stderr,"safe_mutex: Trying to destroy a mutex that was locked at %s, line %d at %s, line %d\n",
+	    mp->file,mp->line, file, line);
     abort();
   }
   pthread_mutex_destroy(&mp->global);
   return pthread_mutex_destroy(&mp->mutex);
 }
 
-#endif /* SAFE_MUTEX */
+#endif /* THREAD && SAFE_MUTEX */

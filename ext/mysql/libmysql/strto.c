@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
   strtol,strtoul,strtoll,strtoull
   convert string to long, unsigned long, long long or unsigned long long.

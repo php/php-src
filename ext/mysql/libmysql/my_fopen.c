@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include "my_static.h"
@@ -49,7 +49,8 @@ FILE *my_fopen(const char *FileName, int Flags, myf MyFlags)
     my_errno=errno;
   DBUG_PRINT("error",("Got error %d on open",my_errno));
   if (MyFlags & (MY_FFNF | MY_FAE | MY_WME))
-    my_error(Flags & O_RDONLY ? EE_FILENOTFOUND : EE_CANTCREATEFILE,
+    my_error((Flags & O_RDONLY) || (Flags == O_RDONLY ) ? EE_FILENOTFOUND :
+	     EE_CANTCREATEFILE,
 	     MYF(ME_BELL+ME_WAITTANG), FileName,my_errno);
   DBUG_RETURN((FILE*) 0);
 } /* my_fopen */

@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #ifndef _my_dir_h
 #define _my_dir_h
@@ -76,6 +76,7 @@ typedef struct st_my_dir	/* Struct returned from my_dir */
 extern MY_DIR *my_dir(const char *path,myf MyFlags);
 extern void my_dirend(MY_DIR *buffer);
 extern MY_STAT *my_stat(const char *path, MY_STAT *stat_area, myf my_flags);
+extern int my_fstat(int filenr, MY_STAT *stat_area, myf MyFlags);
 
 #endif /* MY_DIR_H */
 

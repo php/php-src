@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include "mysys_err.h"
@@ -39,6 +39,7 @@ int my_error(int nr,myf MyFlags, ...)
     if (tpos[0] != '%')
     {
       *endpos++= *tpos++;	/* Copy ordinary char */
+      olen++;
       continue;
     }
     if (*++tpos == '%')		/* test if %% */
@@ -66,8 +67,10 @@ int my_error(int nr,myf MyFlags, ...)
       {
 	register int iarg;
 	iarg = va_arg(ap, int);
-	plen= (uint) (int2str((long) iarg,endpos,*tpos == 'd'  ? -10 : 10)-
-		      endpos);
+	if (*tpos == 'd')
+	  plen= (uint) (int2str((long) iarg,endpos, -10) - endpos);
+	else
+	  plen= (uint) (int2str((long) (uint) iarg,endpos,10)- endpos);
 	if (olen + plen < ERRMSGSIZE+2) /* Replace parameter if possible */
 	{
 	  endpos+=plen;

@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #ifndef _mysys_err_h
 #define _mysys_err_h
@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define GLOB		0	/* Error maps */
-#define GLOBERRS	22	/* Max number of error messages in map's */
+#define GLOBERRS	23	/* Max number of error messages in map's */
 #define EE(X)	globerrs[ X ]	/* Defines to add error to right map */
 
 extern const char * NEAR globerrs[];	/* my_error_messages is here */
@@ -35,6 +35,7 @@ extern const char * NEAR globerrs[];	/* my_error_messages is here */
 #define EE_OPEN_WARNING		19
 #define EE_DISK_FULL		20
 #define EE_CANT_MKDIR		21
+#define EE_UNKNOWN_CHARSET	22
 
 #ifdef	__cplusplus
 }

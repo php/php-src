@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
   Code for handling dubble-linked lists in C
@@ -14,6 +14,8 @@
 
 LIST *list_add(LIST *root, LIST *element)
 {
+  DBUG_ENTER("list_add");
+  DBUG_PRINT("enter",("root: %lx  element: %lx", root, element));
   if (root)
   {
     if (root->prev)			/* If add in mid of list */
@@ -24,7 +26,7 @@ LIST *list_add(LIST *root, LIST *element)
   else
     element->prev=0;
   element->next=root;
-  return element;			/* New root */
+  DBUG_RETURN(element);			/* New root */
 }
 
 

@@ -1,5 +1,5 @@
-/* Copyright (C) 1996  TCX DataKonsult AB & Monty Program KB & Detron HB
-   For a more info consult the file COPYRIGHT distributed with this file */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* This is defines strtoll() if neaded */
 

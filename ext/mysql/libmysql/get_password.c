@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
 ** Ask for a password from tty
@@ -21,7 +21,7 @@
 #include <pwd.h>
 #endif /* HAVE_PWD_H */
 #else /* ! HAVE_GETPASS */
-#ifndef __WIN32__
+#ifndef __WIN__
 #include <sys/ioctl.h>
 #ifdef HAVE_TERMIOS_H				/* For tty-password */
 #include	<termios.h>
@@ -41,14 +41,14 @@
 #endif
 #else
 #include <conio.h>
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
 #endif /* HAVE_GETPASS */
 
 #ifdef HAVE_GETPASSPHRASE			/* For Solaris */
 #define getpass(A) getpassphrase(A)
 #endif
 
-#ifdef __WIN32__
+#ifdef __WIN__
 /* were just going to fake it here and get input from
    the keyboard */
 
@@ -88,7 +88,54 @@ char *get_tty_password(char *opt_message)
 
 #else
 
-static void get_password(char *to,uint length,int file_no,bool echo);
+
+#ifndef HAVE_GETPASS
+/*
+** Can't use fgets, because readline will get confused
+** length is max number of chars in to, not counting \0
+*  to will not include the eol characters.
+*/
+
+static void get_password(char *to,uint length,int fd,bool echo)
+{
+  char *pos=to,*end=to+length;
+
+  for (;;)
+  {
+    char tmp;
+    if (my_read(fd,&tmp,1,MYF(0)) != 1)
+      break;
+    if (tmp == '\b' || (int) tmp == 127)
+    {
+      if (pos != to)
+      {
+	if (echo)
+	{
+	  fputs("\b \b",stdout);
+	  fflush(stdout);
+	}
+	pos--;
+	continue;
+      }
+    }
+    if (tmp == '\n' || tmp == '\r' || tmp == 3)
+      break;
+    if (iscntrl(tmp) || pos == end)
+      continue;
+    if (echo)
+    {
+      fputc('*',stdout);
+      fflush(stdout);
+    }
+    *(pos++) = tmp;
+  }
+  while (pos != to && isspace(pos[-1]) == ' ')
+    pos--;					/* Allow dummy space at end */
+  *pos=0;
+  return;
+}
+#endif /* ! HAVE_GETPASS */
+
 
 char *get_tty_password(char *opt_message)
 {
@@ -148,52 +195,4 @@ char *get_tty_password(char *opt_message)
 
   DBUG_RETURN(my_strdup(buff,MYF(MY_FAE)));
 }
-
-#ifndef HAVE_GETPASS
-/*
-** Can't use fgets, because readline will get confused
-** length is max number of chars in to, not counting \0
-*  to will not include the eol characters.
-*/
-
-void get_password(char *to,uint length,int fd,bool echo)
-{
-  char *pos=to,*end=to+length;
-
-  for (;;)
-  {
-    char tmp;
-    if (my_read(fd,&tmp,1,MYF(0)) != 1)
-      break;
-    if (tmp == '\b' || (int) tmp == 127)
-    {
-      if (pos != to)
-      {
-	if (echo)
-	{
-	  fputs("\b \b",stdout);
-	  fflush(stdout);
-	}
-	pos--;
-	continue;
-      }
-    }
-    if (tmp == '\n' || tmp == '\r' || tmp == 3)
-      break;
-    if (iscntrl(tmp) || pos == end)
-      continue;
-    if (echo)
-    {
-      fputc('*',stdout);
-      fflush(stdout);
-    }
-    *(pos++) = tmp;
-  }
-  while (pos != to && isspace(pos[-1]) == ' ')
-    pos--;					/* Allow dummy space at end */
-  *pos=0;
-  return;
-}
-#endif /* ! HAVE_GETPASS */
-
-#endif /*__WIN32__*/
+#endif /*__WIN__*/
