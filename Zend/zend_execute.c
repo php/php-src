@@ -21,10 +21,6 @@
 #include <stdio.h>
 #include <signal.h>
 
-#if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
-# include <alloca.h>
-#endif
-
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -35,6 +31,9 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 
+#if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
+# include <alloca.h>
+#endif
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
