@@ -2,8 +2,18 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+<<<<<<< NEWS
+<<<<<<< NEWS
+- Added the ability for CURLOPT_POSTFIELDS to accept an array of HTTP post
+- Added the CURLOPT_HTTPHEADER option that allows for the posting of HTTP
+- Add the curl_error() and curl_errno() functions. (Sterling)
+- Changed ext/db not to be enabled by default (Jani)
+=======
+=======
 - Fixed building Apache SAPI module on SCO UnixWare (Sascha)
+>>>>>>> 1.448
 - Fixed writing empty session sets to shared memory (tcarroll@chc-chimes.com)
+>>>>>>> 1.447
 - Added support for BSD/OS make (Sascha)
 - Added improved URL rewriter (Sascha)
 - Fixed readdir_r() use on Solaris (Sascha)
