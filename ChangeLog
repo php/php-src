@@ -1,3 +1,76 @@
+2000-11-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sockets/sockets.c: Use socklen_t for getsockopt
+
+    * main/php_logos.c:
+    zend_hash_find() treats this argument as const, but fails to declare
+    the function properly.
+
+2000-11-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/info.c: - Added myself to the credits...
+
+2000-11-06  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Crypt/HCEMD5.php
+      pear/Makefile.in:
+    add a Crypt_HCEMD5 class. This implements the same algorithm as the perl
+    Crypt::HCE_MD5 package, and should be cross-compatible with it. It provides
+    a secret-key based encryption algorithm possibly suitable for those who
+    don't have mcrypt enabled.
+
+2000-11-06  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/TODO:
+    Noted that setting of multiple headers with the same name is fixed.
+
+    * sapi/caudium/caudium.c (php_caudium_set_header): Allow for multiple headers with the same name.
+
+    * ext/gd/gd.c:
+    (ImageCreateFromString) Added forgotten GDLS_FETCH() needed for ZTS.
+
+2000-11-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: Fix bug #7667.
+
+2000-11-06  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c: And now the right fix - should add it still
+
+    * ext/standard/var.c: Serialize as reference only if it's a true reference
+
+2000-11-06  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c: only beautifying
+
+    * ext/iisfunc/iisfunc.dsp: add libary path for TS Inline
+
+2000-11-06  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+    Fixed a bug in $argv and $argc not being properly defined in command-line mode
+
+2000-11-06  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+    I guess SG(request_info).argv0 and not !SG(request_info).argv0 was an intent, otherwise it doesn't make much sense.
+
+    * ext/standard/cyr_convert.c:
+    Add support to ukrainian characters (by serhiy@society.kiev.ua)
+
+2000-11-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/dl.c: Fixed windows build.
+
+2000-11-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/php_functions.c: Add apache_sub_req()
+
+2000-11-06  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sybase/php_sybase_db.c: Make sure these are initialized to NULL
+
 2000-11-05  John Donagher  <john@webmeta.com>
 
     * ext/standard/info.c: Bring phpcredits() up to date
