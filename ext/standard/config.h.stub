@@ -1,0 +1,2 @@
+/* Define if you have the crypt() function */
+#define HAVE_CRYPT 1

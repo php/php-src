@@ -1,0 +1,2 @@
+/* Define if you want the IMAP extension */
+#define HAVE_IMAP 0

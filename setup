@@ -266,18 +266,6 @@ define_option with-interbase 'InterBase support?' yesnodir \
 '     Whether to build PHP with InterBase support. More\n
       information about InterBase can be found at http://www.interbase.com/.'
 
-define_option with-ldap 'LDAP support?' yesnodir \
-    'no /usr/local/ldap LDAP base install' \
-'     Whether to build with LDAP (Lightweight Directory Access Protocol)\n
-     support.\n
-     More information about LDAP can be found in RFC1777 and RFC1778.'
-
-define_option with-imap 'IMAP support?' yesnodir \
-    'no /usr/local/imap IMAP base install' \
-'     Whether to build with IMAP (Internet Message Access Protocol)\n
-     support.\n
-     More information about LDAP can be found in RFC1777 and RFC1778.'
-
 define_option with-pdflib 'pdflib 0.6 support? ' yesnodir \
     'no /usr/local pdflib install' \
 '    Whether to use the pdflib support to write .pdf-files.\n
