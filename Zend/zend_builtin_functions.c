@@ -80,37 +80,8 @@ static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
 
-ZEND_API
-	ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+#include "zend_arg_defs.c"
 
-
-ZEND_API
-	ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
-
-ZEND_API
-	ZEND_BEGIN_ARG_INFO(third_arg_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
-
-
-ZEND_API
-	ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
-
-ZEND_API
-	ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
-	ZEND_END_ARG_INFO();
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
