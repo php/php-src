@@ -42,7 +42,7 @@
 #include "php_curl.h"
 
 static int  le_curl;
-#define le_curl_name "cURL handle";
+#define le_curl_name "cURL handle"
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc);
 
