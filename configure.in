@@ -6,10 +6,11 @@ divert(0)
 AC_INIT(main.c)
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  echo ""
-  echo "ERROR: --with-shared-apache is not supported."
-  echo "       Please read INSTALL.DSO for instructions on using APXS."
-  exit 1
+  AC_MSG_ERROR(--with-shared-apache is not supported. Please refer to the documentation for using APXS)
+fi
+
+if test -n "$with_apache" && test -n "$with_apxs"; then
+  AC_MSG_ERROR(--with-apache and --with-apxs cannot be used together)
 fi
 
 cwd=`pwd`
