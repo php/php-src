@@ -50,7 +50,6 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,  1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF,  1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromXbm,   [AC_DEFINE(HAVE_GD_XBM,  1, [ ])])
         AC_CHECK_LIB(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
