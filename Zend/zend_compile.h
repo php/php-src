@@ -374,7 +374,7 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);	
 ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
-ZEND_API int zend_execute_scripts(int type TSRMLS_DC, int file_count, ...);
+ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRMLS_DC);
 ZEND_API void destroy_op_array(zend_op_array *op_array);

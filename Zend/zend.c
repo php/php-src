@@ -788,7 +788,7 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 }
 
 
-ZEND_API int zend_execute_scripts(int type TSRMLS_DC, int file_count, ...)
+ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...)
 {
 	va_list files;
 	int i;
@@ -806,7 +806,11 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, int file_count, ...)
 		if (EG(active_op_array)) {
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			zval_ptr_dtor(EG(return_value_ptr_ptr));
-			EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
+			if (retval) {
+				EG(return_value_ptr_ptr) = retval;
+			} else {
+				EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
+			}
 			EG(global_return_value_ptr) = NULL;
 			destroy_op_array(EG(active_op_array));
 			efree(EG(active_op_array));
