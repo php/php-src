@@ -21,6 +21,7 @@
 #include "php.h"
 
 #if HAVE_YAZ
+#include "ext/standard/info.h"
 #include "php_yaz.h"
 
 #include <yaz/proto.h>
@@ -30,6 +31,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
+#include <yaz/yaz-version.h>
 
 #define MAX_ASSOC 100
 
@@ -626,9 +628,6 @@ static int send_present (Yaz_Association t)
 	
 	if (!t->resultSets->recordList)	  /* no records to retrieve at all .. */
 	{
-#if PHP_YAZ_DEBUG
-		php_log_err("No records to retrieve...");
-#endif
 		return 0;
 	}
 	
@@ -954,9 +953,6 @@ PHP_FUNCTION(yaz_search)
 	p = get_assoc (id);
 	if (!p)
 	{
-#if PHP_YAZ_DEBUG
-		php_log_err ("get_assoc failed");
-#endif
 		RETURN_FALSE;
 	}
 	convert_to_string_ex (type);
@@ -974,9 +970,6 @@ PHP_FUNCTION(yaz_search)
 		{
 			yaz_resultset_destroy(r);
 			p->resultSets = 0;
-#if PHP_YAZ_DEBUG
-			php_log_err ("bad rpn");
-#endif
 			RETURN_FALSE;
 		}
 	}
@@ -984,9 +977,6 @@ PHP_FUNCTION(yaz_search)
 	{
 		yaz_resultset_destroy(r);
 		p->resultSets = 0;
-#if PHP_YAZ_DEBUG
-		php_log_err ("bad query type");
-#endif
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1376,7 +1366,6 @@ static void retval_grs1 (zval *return_value, Z_GenericRecord *p)
 			level++;
 			grs[level] = e->content->u.subtree;
 			eno[level] = -1;
-		default:
 		}
 		zend_hash_next_index_insert (return_value->value.ht,
 									 (void *) &my_zval, sizeof(zval *), NULL);
@@ -1443,7 +1432,6 @@ PHP_FUNCTION(yaz_record)
 					case VAL_TEXT_XML:
 					case VAL_APPLICATION_XML:
 						break;
-					default:
 					}
 					RETVAL_STRINGL(buf, len, 1);
 				}
@@ -1552,9 +1540,6 @@ PHP_FUNCTION(yaz_range)
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
-#if PHP_YAZ_DEBUG
-	php_log_err ("PHP_MINIT_FUNCTION yaz");
-#endif
 	nmem_init();
 	order_associations = 1;
 	shared_associations = xmalloc (sizeof(*shared_associations) * MAX_ASSOC);
@@ -1567,9 +1552,6 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 {
 	int i;
 
-#if PHP_YAZ_DEBUG
-	php_log_err ("PHP_MSHUTDOWN_FUNCTION yaz");
-#endif
 	if (shared_associations)
 	{
 		for (i = 0; i<MAX_ASSOC; i++)
@@ -1583,17 +1565,16 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 
 PHP_MINFO_FUNCTION(yaz)
 {
-#if PHP_YAZ_DEBUG
-	php_log_err ("PHP_MINFO_FUNCTION yaz");
-#endif
+	php_info_print_table_start();
+	php_info_print_table_row(2, "YAZ Support", "enabled");
+	php_info_print_table_row(2, "YAZ Version", YAZ_VERSION);
+	php_info_print_table_end();
 }
 
 PHP_RSHUTDOWN_FUNCTION(yaz)
 {
 	int i;
-#if PHP_YAZ_DEBUG
-	php_log_err ("PHP_RSHUTDOWN yaz");
-#endif
+
 	if (shared_associations)
 	{
 		for (i = 0; i<MAX_ASSOC; i++)
@@ -1611,9 +1592,6 @@ PHP_RSHUTDOWN_FUNCTION(yaz)
 PHP_RINIT_FUNCTION(yaz)
 {
 	order_associations++;
-#if PHP_YAZ_DEBUG
-	php_log_err ("PHP_RINIT yaz");
-#endif
 	return SUCCESS;
 }
 
