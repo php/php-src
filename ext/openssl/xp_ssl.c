@@ -24,8 +24,11 @@
 #include "php_network.h"
 #include "php_openssl.h"
 #include <openssl/ssl.h>
+#include <openssl/x509.h>
 #include <openssl/err.h>
 
+int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
+SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
 
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
@@ -207,6 +210,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			sslsock->ssl_handle = NULL;
 		}
 		if (sslsock->s.socket != -1) {
+#ifdef PHP_WIN32
 			/* prevent more data from coming in */
 			shutdown(sslsock->s.socket, SHUT_RD);
 
@@ -226,6 +230,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 
 				n = select(sslsock->s.socket + 1, NULL, &wrfds, &efds, &timeout);
 			} while (n == -1 && php_socket_errno() == EINTR);
+#endif
 
 			closesocket(sslsock->s.socket);
 			sslsock->s.socket = -1;
@@ -246,6 +251,7 @@ static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb T
 {
 	return php_stream_socket_ops.stat(stream, ssb TSRMLS_CC);
 }
+
 
 static inline int php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
@@ -307,7 +313,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		return -1;
 	}
 
-	sslsock->ssl_handle = SSL_new(ctx);
+	sslsock->ssl_handle = php_SSL_new_from_context(ctx, stream TSRMLS_CC);
 	if (sslsock->ssl_handle == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create an SSL handle");
 		SSL_CTX_free(ctx);
@@ -335,29 +341,47 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 {
 	int n, retry = 1;
 
-	if (cparam->inputs.activate) {
+	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		if (sslsock->is_client) {
-			do {
+			SSL_set_connect_state(sslsock->ssl_handle);
+		} else {
+			SSL_set_accept_state(sslsock->ssl_handle);
+		}
+	
+		do {
+			if (sslsock->is_client) {
 				n = SSL_connect(sslsock->ssl_handle);
+			} else {
+				n = SSL_accept(sslsock->ssl_handle);
+			}
 
-				if (n <= 0) {
-					retry = handle_ssl_error(stream, n TSRMLS_CC);
-				} else {
-					break;
-				}
-			} while (retry);
+			if (n <= 0) {
+				retry = handle_ssl_error(stream, n TSRMLS_CC);
+			} else {
+				break;
+			}
+		} while (retry);
 
-			if (n == 1) {
+		if (n == 1) {
+			X509 *peer_cert;
+
+			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
+
+			if (FAILURE == php_openssl_apply_verification_policy(sslsock->ssl_handle, peer_cert, stream TSRMLS_CC)) {
+				SSL_shutdown(sslsock->ssl_handle);
+			} else {	
 				sslsock->ssl_active = 1;
 			}
-			
-			return n;
-			
-		} else {
-			
+
+			X509_free(peer_cert);
 		}
-	} else {
+
+		return n;
+
+	} else if (!cparam->inputs.activate && sslsock->ssl_active) {
 		/* deactivate - common for server/client */
+		SSL_shutdown(sslsock->ssl_handle);
+		sslsock->ssl_active = 0;
 	}
 	return -1;
 }
@@ -385,7 +409,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		clisockdata = pemalloc(sizeof(*clisockdata), stream->is_persistent);
 
 		if (clisockdata == NULL) {
-			close(clisock);
+			closesocket(clisock);
 			/* technically a fatal error */
 		} else {
 			/* copy underlying tcp fields */
@@ -410,6 +434,53 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 	php_stream_xport_param *xparam = (php_stream_xport_param *)ptrparam;
 
 	switch (option) {
+		case PHP_STREAM_OPTION_CHECK_LIVENESS:
+			{
+				fd_set rfds;
+				struct timeval tv = {0,0};
+				char buf;
+				int alive = 1;
+
+				if (sslsock->s.socket == -1) {
+					alive = 0;
+				} else {
+					FD_ZERO(&rfds);
+					FD_SET(sslsock->s.socket, &rfds);
+
+					if (select(sslsock->s.socket + 1, &rfds, NULL, NULL, &tv) > 0 && FD_ISSET(sslsock->s.socket, &rfds)) {
+						if (sslsock->ssl_active) {
+							int n;
+
+							do {
+								n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
+								if (n <= 0) {
+									int err = SSL_get_error(sslsock->ssl_handle, n);
+
+									if (err == SSL_ERROR_SYSCALL) {
+										alive = php_socket_errno() == EAGAIN;
+										break;
+									}
+
+									if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+										/* re-negotiate */
+										continue;
+									}
+
+									/* any other problem is a fatal error */
+									alive = 0;
+								}
+								/* either peek succeeded or there was an error; we
+								 * have set the alive flag appropriately */
+								break;
+							} while (1);
+						} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+							alive = 0;
+						}
+					}
+				}
+				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			
 		case PHP_STREAM_OPTION_CRYPTO_API:
 
 			switch(cparam->op) {
@@ -481,7 +552,13 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 				return FAILURE;
 			}
 			return SUCCESS;
+
 		case PHP_STREAM_AS_FD_FOR_SELECT:
+			if (ret) {
+				*ret = (void*)sslsock->s.socket;
+			}
+			return SUCCESS;
+
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (sslsock->ssl_active) {
