@@ -281,7 +281,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		}
 	}
 }
-/* }}} *
+/* }}} */
 
 /* {{{ proto void xslt_set_scheme_handlers(resource processor, array handlers)
    Set the scheme handlers for the XSLT processor */
