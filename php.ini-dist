@@ -101,7 +101,7 @@ output_buffering = Off
 ;       directive. Instead, explicitly set the output handler using ob_start().
 ;       Using this ini directive may cause problems unless you know what script 
 :       is doing.
-; Note: You cannot use both "mb_output_handler" with "ob_inconv_handler"
+; Note: You cannot use both "mb_output_handler" with "ob_iconv_handler"
 ;       and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
 ;output_handler =
 
