@@ -402,9 +402,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
 
-		if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+		if (strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
 			php_info_print_table_row(2, "Scan this dir for additional .ini files", PHP_CONFIG_FILE_SCAN_DIR);
-			if(php_ini_scanned_files) {
+			if (php_ini_scanned_files) {
 				php_info_print_table_row(2, "additional .ini files parsed", php_ini_scanned_files);
 			}
 		}
@@ -945,10 +945,13 @@ PHP_FUNCTION(php_uname)
 
 /* {{{ proto string php_ini_scanned_files(void)
    Return comma-separated string of .ini files parsed from the additional ini dir */
-PHP_FUNCTION(php_ini_scanned_files) {
-	if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
-		RETURN_STRING(php_ini_scanned_files,1);
-	} else RETURN_FALSE;
+PHP_FUNCTION(php_ini_scanned_files)
+{
+	if (strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+		RETURN_STRING(php_ini_scanned_files, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
