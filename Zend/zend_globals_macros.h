@@ -55,5 +55,11 @@ extern ZEND_API zend_executor_globals executor_globals;
 extern ZEND_API zend_alloc_globals alloc_globals;
 #endif
 
+
+/* For limited downwards source compatibility */
+#define CLS_FETCH()
+#define ELS_FETCH()
+#define ALS_FETCH()
+
 #endif /* ZEND_GLOBALS_MACROS_H */
 
