@@ -442,7 +442,7 @@ PHP_FUNCTION(imagecreatefrompng)
 	char *fn=NULL;
 	FILE *fp;
 	int issock=0, socketd=0;
-	GDLS_FETCH;
+	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -477,7 +477,6 @@ PHP_FUNCTION(imagepng)
 	char *fn=NULL;
 	FILE *fp;
 	int argc;
-	int ind_type;
 	int output=1;
 	GDLS_FETCH();
 
