@@ -135,6 +135,7 @@ PHP_FUNCTION(getrusage)
 	PHP_RUSAGE_PARA(ru_nsignals);
 	PHP_RUSAGE_PARA(ru_nvcsw);
 	PHP_RUSAGE_PARA(ru_nivcsw);
+	PHP_RUSAGE_PARA(ru_nswap);
 #endif /*_OSD_POSIX*/
 	PHP_RUSAGE_PARA(ru_utime.tv_usec);
 	PHP_RUSAGE_PARA(ru_utime.tv_sec);
