@@ -31,10 +31,9 @@
 #include "php3_var.h"
 
 /* }}} */
-/* {{{ php3api_var_dump 
-xmae*/
+/* {{{ php_var_dump */
 
-void php3api_var_dump(pval **struc, int level)
+void php_var_dump(pval **struc, int level)
 {
 	ulong index;
 	char *key;
@@ -96,7 +95,7 @@ void php3api_var_dump(pval **struc, int level)
 
 							d->type = IS_LONG;
 							d->value.lval = index;
-							php3api_var_dump(&d, level + 2);
+							php_var_dump(&d, level + 2);
 							efree(d);
 						}
 						break;
@@ -107,13 +106,13 @@ void php3api_var_dump(pval **struc, int level)
 							d->type = IS_STRING;
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
-							php3api_var_dump(&d, level + 2);
+							php_var_dump(&d, level + 2);
 							efree(key);
 							efree(d);
 						}
 						break;
 				}
-				php3api_var_dump(data, level + 2);
+				php_var_dump(data, level + 2);
 			}
 			i = sprintf(buf, "%*c}\n", level, ' ');
 			PHPWRITE(&buf[1], i - 1);
@@ -126,20 +125,32 @@ void php3api_var_dump(pval **struc, int level)
 }
 
 /* }}} */
-/* {{{ php3api_var_dump */
 
+
+/* {{{ php_var_dump */
 PHP_FUNCTION(var_dump)
 {
-	pval **struc;
-
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &struc) == FAILURE) {
+	zval ***args;
+	int argc;
+	int	i;
+	
+	argc = ARG_COUNT(ht);
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ARG_COUNT(ht) == 0 || getParametersArrayEx(argc, args) == FAILURE) {
+		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	php3api_var_dump(struc, 1);
+	
+	for (i=0; i<argc; i++)
+		php_var_dump(args[i], 1);
+	
+	efree(args);
 }
-
 /* }}} */
-/* {{{ php3api_var_dump */
+
+
+/* {{{ php_var_dump */
 
 
 #define STR_CAT(P,S,I) {\
@@ -156,9 +167,9 @@ PHP_FUNCTION(var_dump)
 }
 
 /* }}} */
-/* {{{ php3api_var_serialize */
+/* {{{ php_var_serialize */
 
-void php3api_var_serialize(pval *buf, pval **struc)
+void php_var_serialize(pval *buf, pval **struc)
 {
 	char s[256];
 	ulong slen;
@@ -228,7 +239,7 @@ void php3api_var_serialize(pval *buf, pval **struc)
 							d = emalloc(sizeof(pval));	
 							d->type = IS_LONG;
 							d->value.lval = index;
-							php3api_var_serialize(buf, &d);
+							php_var_serialize(buf, &d);
 							efree(d);
 							break;
 						case HASH_KEY_IS_STRING:
@@ -236,12 +247,12 @@ void php3api_var_serialize(pval *buf, pval **struc)
 							d->type = IS_STRING;
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
-							php3api_var_serialize(buf, &d);
+							php_var_serialize(buf, &d);
 							efree(key);
 							efree(d);
 							break;
 					}
-					php3api_var_serialize(buf, data);
+					php_var_serialize(buf, data);
 				}
 			}
 			STR_CAT(buf, "}", 1);
@@ -254,9 +265,9 @@ void php3api_var_serialize(pval *buf, pval **struc)
 }
 
 /* }}} */
-/* {{{ php3api_var_dump */
+/* {{{ php_var_dump */
 
-int php3api_var_unserialize(pval **rval, const char **p, const char *max)
+int php_var_unserialize(pval **rval, const char **p, const char *max)
 {
 	const char *q;
 	char *str;
@@ -405,12 +416,12 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				pval *key = emalloc(sizeof(pval));
 				pval *data = emalloc(sizeof(pval));
 				
-				if (!php3api_var_unserialize(&key, p, max)) {
+				if (!php_var_unserialize(&key, p, max)) {
 				    efree(key);
 					efree(data);
 					return 0;
 				}
-				if (!php3api_var_unserialize(&data, p, max)) {
+				if (!php_var_unserialize(&data, p, max)) {
 					pval_destructor(key);
 				    efree(key);
 					efree(data);
@@ -447,7 +458,7 @@ PHP_FUNCTION(serialize)
 	return_value->type = IS_STRING;
 	return_value->value.str.val = NULL;
 	return_value->value.str.len = 0;
-	php3api_var_serialize(return_value, struc);
+	php_var_serialize(return_value, struc);
 }
 
 /* }}} */
@@ -465,7 +476,7 @@ PHP_FUNCTION(unserialize)
 	if ((*buf)->type == IS_STRING) {
 		const char *p = (*buf)->value.str.val;
 
-		if (!php3api_var_unserialize(&return_value, &p, p + (*buf)->value.str.len)) {
+		if (!php_var_unserialize(&return_value, &p, p + (*buf)->value.str.len)) {
 			RETURN_FALSE;
 		}
 	} else {

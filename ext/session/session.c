@@ -153,7 +153,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 				== SUCCESS) {
 			snprintf(strbuf, MAX_STR, STD_FMT, key);
 			STR_CAT(buf, strbuf, strlen(strbuf));
-			php3api_var_serialize(buf, struc);
+			php_var_serialize(buf, struc);
 		} else {
 			snprintf(strbuf, MAX_STR, NOTFOUND_FMT, key);
 			STR_CAT(buf, strbuf, strlen(strbuf));
@@ -193,7 +193,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		if(has_value) {
 			current = (pval *) ecalloc(sizeof(pval), 1);
 
-			if(php3api_var_unserialize(&current, &q, endptr)) {
+			if(php_var_unserialize(&current, &q, endptr)) {
 				zend_hash_update(&EG(symbol_table), name, namelen + 1,
 						&current, sizeof(current), NULL);
 			} else {
