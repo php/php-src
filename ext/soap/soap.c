@@ -2005,7 +2005,11 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 			use = fnb->input.use;
 			if (style == SOAP_RPC) {
 				ns = xmlNewNs(body, fnb->input.ns, gen_ns->c);
-				method = xmlNewChild(body, ns, function->requestName , NULL);
+				if (function->requestName) {
+					method = xmlNewChild(body, ns, function->requestName, NULL);
+				} else {
+					method = xmlNewChild(body, ns, function->functionName, NULL);
+				}
 			}
 		}
 	} else {
@@ -2029,7 +2033,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 			use = SOAP_ENCODED;
 		}
 	}
-
+	
 	for (i = 0;i < arg_count;i++) {
 		xmlNodePtr param;
 		sdlParamPtr parameter = get_param(function, NULL, i, FALSE);
