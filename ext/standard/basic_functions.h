@@ -83,6 +83,8 @@ PHP_FUNCTION(set_include_path);
 PHP_FUNCTION(restore_include_path);
 
 PHP_FUNCTION(print_r);
+PHP_FUNCTION(fprintf);
+PHP_FUNCTION(vfprintf);
 
 PHP_FUNCTION(connection_aborted);
 PHP_FUNCTION(connection_status);
