@@ -782,37 +782,16 @@ char *php_std_date(time_t t)
    Returns true(1) if it is a valid date in gregorian calendar */
 PHP_FUNCTION(checkdate)
 {
-	pval **month, **day, **year;
-	int m, d, y, res=0;
-	
-	if (ZEND_NUM_ARGS() != 3 ||
-		zend_get_parameters_ex(3, &month, &day, &year) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long m, d, y;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &m, &d, &y) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	if(Z_TYPE_PP(year) == IS_STRING) {
-		res = is_numeric_string(Z_STRVAL_PP(year), Z_STRLEN_PP(year), NULL, NULL, 0);
-		if(res!=IS_LONG && res !=IS_DOUBLE) {
-			RETURN_FALSE;	
-		}
-	}
-	convert_to_long_ex(day);
-	convert_to_long_ex(month);
-	convert_to_long_ex(year);
-	y = Z_LVAL_PP(year);
-	m = Z_LVAL_PP(month);
-	d = Z_LVAL_PP(day);
-
-	if (y < 1 || y > 32767) {
+	if (y < 1 || y > 32767 || m < 1 || m > 12 || d < 1 || d > phpday_tab[isleap(y)][m - 1]) {
 		RETURN_FALSE;
 	}
-	if (m < 1 || m > 12) {
-		RETURN_FALSE;
-	}
-	if (d < 1 || d > phpday_tab[isleap(y)][m - 1]) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;				/* True : This month, day, year arguments are valid */
+	RETURN_TRUE;	/* True : This month, day, year arguments are valid */
 }
 /* }}} */
 
