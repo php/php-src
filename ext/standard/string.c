@@ -1924,30 +1924,25 @@ PHP_FUNCTION(substr_replace)
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
 					convert_to_string_ex(tmp_repl);
 					repl_len = Z_STRLEN_PP(tmp_repl);
-				}			
-				result_len = Z_STRLEN_PP(str) - l + repl_len;
-				result = ecalloc(result_len + 1, sizeof(char *));
-
-				memcpy(result, Z_STRVAL_PP(str), f);
-				if (repl_len) {
-					memcpy(&result[f], Z_STRVAL_PP(tmp_repl), repl_len);
 				}
 			} else {
 				repl_len = Z_STRLEN_PP(repl);
-				result_len = Z_STRLEN_PP(str) - l + repl_len;
-				result = ecalloc(result_len + 1, sizeof(char *));
-
-				memcpy(result, Z_STRVAL_PP(str), f);
-				memcpy(&result[f], Z_STRVAL_PP(repl), repl_len);
 			}
-			memcpy(&result[f + repl_len], Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+			result_len = Z_STRLEN_PP(str) - l + repl_len;
+			result = emalloc(result_len + 1);
+
+			memcpy(result, Z_STRVAL_PP(str), f);
+			if (repl_len) {
+				memcpy((result + f), (Z_TYPE_PP(repl) == IS_ARRAY ? Z_STRVAL_PP(tmp_repl) : Z_STRVAL_PP(repl)), repl_len);
+			}
+			memcpy((result + f + repl_len), Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+			result[result_len] = '\0';
 			RETURN_STRINGL(result, result_len, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented.");
 			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);	
 		}
 	} else { /* str is array of strings */
-		
 		array_init(return_value);
 
 		if (Z_TYPE_PP(from) == IS_ARRAY) {
@@ -1957,20 +1952,19 @@ PHP_FUNCTION(substr_replace)
 		if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(len), &pos_len);
 		}
-		
+
 		if (Z_TYPE_PP(repl) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(repl), &pos_repl);
 		}
-		
-		
+
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(str), &pos_str);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(str), (void **) &tmp_str, &pos_str) == SUCCESS) {
 			convert_to_string_ex(tmp_str);
-			
+
 			if (Z_TYPE_PP(from) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(from), (void **) &tmp_from, &pos_from)) {
 					convert_to_long_ex(tmp_from);
-					
+
 					f = Z_LVAL_PP(tmp_from);
 					if (f < 0) {
 						f = Z_STRLEN_PP(tmp_str) + f;
@@ -1983,7 +1977,7 @@ PHP_FUNCTION(substr_replace)
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(from), &pos_from);
 				} else {
 					f = 0;
-				}				
+				}
 			} else {
 				f = Z_LVAL_PP(from);
 				if (f < 0) {
@@ -1993,14 +1987,13 @@ PHP_FUNCTION(substr_replace)
 					}
 				} else if (f > Z_STRLEN_PP(tmp_str)) {
 					f = Z_STRLEN_PP(tmp_str);
-				}		
+				}
 			}
 
-			
 			if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(len), (void **) &tmp_len, &pos_len)) {
 					convert_to_long_ex(tmp_len);
-					
+
 					l = Z_LVAL_PP(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(len), &pos_len);
 				} else {
@@ -2011,52 +2004,49 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				l = Z_STRLEN_PP(tmp_str);
 			}
-			
+
 			if (l < 0) {
 				l = (Z_STRLEN_PP(tmp_str) - f) + l;
 				if (l < 0) {
 					l = 0;
 				}
-			}	
-
+			}
 
 			if ((f + l) > Z_STRLEN_PP(tmp_str)) {
 				l = Z_STRLEN_PP(tmp_str) - f;
 			}
-		
+
 			result_len = Z_STRLEN_PP(tmp_str) - l;
-			
+
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
 					convert_to_string_ex(tmp_repl);
 					result_len += Z_STRLEN_PP(tmp_repl);
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(repl), &pos_repl);	
-					result = ecalloc(result_len + 1, sizeof(char *));
+					result = emalloc(result_len + 1);
 
 					memcpy(result, Z_STRVAL_PP(tmp_str), f);
-					memcpy(&result[f], Z_STRVAL_PP(tmp_repl), Z_STRLEN_PP(tmp_repl));
-					memcpy(&result[f + Z_STRLEN_PP(tmp_repl)], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+					memcpy((result + f), Z_STRVAL_PP(tmp_repl), Z_STRLEN_PP(tmp_repl));
+					memcpy((result + f + Z_STRLEN_PP(tmp_repl)), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 				} else {
-					result = ecalloc(result_len + 1, sizeof(char *));
+					result = emalloc(result_len + 1);
 	
 					memcpy(result, Z_STRVAL_PP(tmp_str), f);
-					memcpy(&result[f], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+					memcpy((result + f), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 				}
-
 			} else {
 				result_len += Z_STRLEN_PP(repl);
 
-				result = ecalloc(result_len + 1, sizeof(char *));
-
+				result = emalloc(result_len + 1);
 
 				memcpy(result, Z_STRVAL_PP(tmp_str), f);
-				memcpy(&result[f], Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
-				memcpy(&result[f + Z_STRLEN_PP(repl)], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+				memcpy((result + f), Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
+				memcpy((result + f + Z_STRLEN_PP(repl)), Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
 			}
-			
 
+			result[result_len] = '\0';
 			add_next_index_stringl(return_value, result, result_len, 0);
-			
+
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(str), &pos_str);
 		} /*while*/
 	} /* if */
